@@ -10,18 +10,23 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
 )
 
-// LoadAddress load an hex string with 0x prefix to an go-ethereum Address object
+// LoadAddress load an hex string with 0x prefix to a go-ethereum Address object
 func LoadAddress(hex string, a *common.Address) error {
+	// Ensure address is a valid ethereum address
 	if !common.IsHexAddress(hex) {
 		return fmt.Errorf("Validation Error: %q is not a valid Ethereum address", hex)
 	}
+
+	// Set address value
 	*a = common.HexToAddress(hex)
+
 	return nil
 }
 
 // DumpAddress dump go-ethereum Address object to an hex string with 0x prefix
 func DumpAddress(a *common.Address, hex *string) {
 	if a != nil {
+		// Set string hex Value
 		*hex = a.Hex()
 	}
 }
@@ -32,13 +37,17 @@ func LoadQuantity(hex string, q *big.Int) error {
 	if err != nil {
 		return err
 	}
+
+	// Set quantity value
 	*q = *i
+
 	return nil
 }
 
 // DumpQuantity dump a big.Int to an hex string with 0x prefix
 func DumpQuantity(q *big.Int, hex *string) {
 	if q != nil {
+		// Set string hex Value
 		*hex = hexutil.EncodeBig(q)
 	}
 }
@@ -49,7 +58,10 @@ func LoadData(hex string, data *[]byte) error {
 	if err != nil {
 		return err
 	}
+
+	// Set data value
 	*data = b
+
 	return nil
 }
 
@@ -115,7 +127,7 @@ func LoadTransaction(pb *ethpb.Transaction, tx *types.Transaction) {
 	if pb == nil {
 		pb = &ethpb.Transaction{}
 	}
-	
+
 	if tx.TxData == nil {
 		var data types.TxData
 		tx.TxData = &data
