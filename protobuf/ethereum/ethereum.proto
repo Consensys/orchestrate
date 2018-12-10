@@ -5,22 +5,19 @@ package context.manager;
 option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/ethereum";
 
 // Transaction data
-message Data {
-    string to = 1; // DATA (20 Bytes) - The address of the receiver. null when it’s a contract creation transaction.
-    string value = 2; // QUANTITY - Integer of the value sent with this transaction.
-    string data = 3; // DATA (4 bytes) - Hash of the method signature followed by encoded parameters.
-    string nonce = 4; // QUANTITY - Integer of a nonce.
-    string gas = 5; // QUANTITY - Integer of the gas provided for the transaction execution. 
-    string gasPrice = 6; // QUANTITY - Integer of the gas price used for each paid gas.
-
-    string v = 7; // QUANTITY - ECDSA recovery id
-    string r = 8; // DATA (32 Bytes) - ECDSA signature r
-    string s = 9; // DATA (32 Bytes) - ECDSA signature s
+message TxData {
+    uint64 nonce = 1; // QUANTITY - Integer of a nonce.
+    string to = 2; // DATA (20 Bytes) - The address of the receiver. null when it’s a contract creation transaction.
+    string value = 3; // QUANTITY - Integer of the value sent with this transaction.
+    uint64 gas = 4; // QUANTITY - Integer of the gas provided for the transaction execution. 
+    string gasPrice = 5; // QUANTITY - Integer of the gas price used for each paid gas.
+    string data = 6; // DATA (4 bytes) - Hash of the method signature followed by encoded parameters.
 }
 
 // Transaction
 message Transaction {
-    Data data = 1;
+    TxData txData = 1;
+
     string raw = 2; // DATA - The signed, RLP encoded transaction.
     string hash = 3; // DATA (32 Bytes) - Hash of the transaction.
     string from = 4; // DATA (20 Bytes) - Address of transaction sender
