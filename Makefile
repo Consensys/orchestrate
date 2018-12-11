@@ -1,4 +1,4 @@
 .PHONY: all protobuf
 
 protobuf:
-	@sh scripts/generate.sh
+	@sh scripts/generate-proto.sh
