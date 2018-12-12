@@ -4,7 +4,7 @@ image: golang:latest
 cache:
   paths:
     - /apt-cache
-    - /go
+    - /root/go
 
 stages:
   - install
