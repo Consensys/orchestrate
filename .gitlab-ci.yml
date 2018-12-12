@@ -1,0 +1,30 @@
+# Use latest Golang image for new perks and shiny features
+image: golang:latest
+
+cache:
+  paths:
+    - /apt-cache
+    - /root/go
+
+stages:
+  - test
+
+before_script:
+  - echo "${HOME}/go"
+  - mkdir "${HOME}/go"; export GOPATH="${HOME}/go"
+  - export PATH="${GOPATH}/bin:${GOROOT}/bin:${PATH}"
+  - make tools
+
+test:
+  stage: test
+  coverage: /^total:.*\s(\d+.\d+)%/
+  script:
+    - make run-coverage
+
+test-lint:
+  stage: test
+  script:
+    - make fmt-check
+    - make misspell-check
+    - make race
+    - make lint

@@ -9,3 +9,10 @@ Features
 - [NEW] protobuffer ``ethereum.TxData`` & ``ethereum.Transaction``
 - [NEW] functions ``protobuf.LoadTransaction(pb *ethpb.Transaction, tx *types.Transaction)`` & ``protobuf.DumpTransaction(tx *types.Transaction, pb *ethpb.Transaction)`` to load/dump protobuffer to/from Core types
 - [NEW] function ``CraftPayload(method abi.Method, args ...interface{})`` that allows to craft a transaction payload from a method ABI and arguments
+
+Chore
+
+- [NEW] ``scripts/generate-proto.sh``
+- [NEW] ``Makefile``
+- [NEW] ``scripts/coverage.sh``
+- [NEW] ``gitlab-ci.yml``
