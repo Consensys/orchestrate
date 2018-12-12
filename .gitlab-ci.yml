@@ -4,7 +4,7 @@ image: golang:latest
 cache:
   paths:
     - /apt-cache
-    - /go/src/
+    - /go
 
 stages:
   - install
@@ -13,8 +13,6 @@ stages:
 install:
   stage: install
   script:
-    - mkdir "${HOME}/go"; export GOPATH="${HOME}/go"
-    - export PATH="${GOPATH}/bin:${GOROOT}/bin:${PATH}"
     - make tools
 
 test:
