@@ -10,6 +10,11 @@ stages:
   - install
   - test
 
+before_script:
+  - echo "${HOME}/go"
+  - mkdir "${HOME}/go"; export GOPATH="${HOME}/go"
+  - export PATH="${GOPATH}/bin:${GOROOT}/bin:${PATH}"
+
 install:
   stage: install
   script:
