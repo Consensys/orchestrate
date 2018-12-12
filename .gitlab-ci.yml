@@ -7,12 +7,15 @@ cache:
     - /go/src/
 
 stages:
+  - install
   - test
 
-before_script:
-  - mkdir "${HOME}/go"; export GOPATH="${HOME}/go"
-  - export PATH="${GOPATH}/bin:${GOROOT}/bin:${PATH}"
-  - make tools
+install:
+  stage: install
+  script:
+    - mkdir "${HOME}/go"; export GOPATH="${HOME}/go"
+    - export PATH="${GOPATH}/bin:${GOROOT}/bin:${PATH}"
+    - make tools
 
 test:
   stage: test
