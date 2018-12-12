@@ -12,7 +12,7 @@ test:
     - export PATH="${GOPATH}/bin:${GOROOT}/bin:${PATH}"
     - make tools
   script:
-    - make coverage
+    - make run-coverage
 
 test-lint:
   stage: test
@@ -24,4 +24,3 @@ test-lint:
     - make fmt-check
     - make misspell-check
     - make lint
-    - make coverage
