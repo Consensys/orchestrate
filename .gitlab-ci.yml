@@ -28,4 +28,5 @@ test-lint:
   script:
     - make fmt-check
     - make misspell-check
+    - make race
     - make lint
