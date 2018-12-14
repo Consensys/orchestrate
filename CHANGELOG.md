@@ -9,6 +9,9 @@ Features
 - [NEW] protobuffer ``ethereum.TxData`` & ``ethereum.Transaction``
 - [NEW] functions ``protobuf.LoadTransaction(pb *ethpb.Transaction, tx *types.Transaction)`` & ``protobuf.DumpTransaction(tx *types.Transaction, pb *ethpb.Transaction)`` to load/dump protobuffer to/from Core types
 - [NEW] function ``CraftPayload(method abi.Method, args ...interface{})`` that allows to craft a transaction payload from a method ABI and arguments
+- [NEW] type ``types.Trace`` to store & manipulate trace information
+- [NEW] functions ``protobuf.LoadTrace(pb *tracepb.Trace, t *types.Trace)`` & ``protobuf.DumpTrace(t *types.Trace, pb *tracepb.Trace)`` to load/dump protobuffer to/from Core types
+
 
 Chore
 
