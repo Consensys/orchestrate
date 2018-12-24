@@ -9,38 +9,33 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
-func bindArg(stringKind string, arg interface{}) (interface{}, error) {
+func bindArg(stringKind string, arg string) (interface{}, error) {
 	// In current version we assume every arguments to be strings
-	a, ok := arg.(string)
-	if !ok {
-		return nil, fmt.Errorf("bindArg: expected a string but got %T", arg)
-	}
-
 	switch {
 	case stringKind == "address":
-		if !common.IsHexAddress(a) {
-			return nil, fmt.Errorf("bindArg: %q is not a valid ethereum address", a)
+		if !common.IsHexAddress(arg) {
+			return nil, fmt.Errorf("bindArg: %q is not a valid ethereum address", arg)
 		}
-		return common.HexToAddress(a), nil
+		return common.HexToAddress(arg), nil
 
 	case stringKind == "bytes":
 		// We do not yet support bytesx (e.g. bytes1, bytes2...)
-		return hexutil.Decode(a)
+		return hexutil.Decode(arg)
 
 	case strings.HasPrefix(stringKind, "int") || strings.HasPrefix(stringKind, "uint"):
 		// In current version we bind all types of integers to *big.Int
 		// Meaning we do not yet support int8, int16, int32, int64, uint8, uin16, uint32, uint64
-		return hexutil.DecodeBig(a)
+		return hexutil.DecodeBig(arg)
 
 	case stringKind == "bool":
-		b, err := hexutil.DecodeBig(a)
+		b, err := hexutil.DecodeBig(arg)
 		if err != nil {
 			return nil, err
 		}
 		return b.Int64() > 0, nil
 
 	case strings.HasPrefix(stringKind, "string"):
-		return a, nil
+		return arg, nil
 
 	// In current version we only cover basic types
 	default:
@@ -49,7 +44,7 @@ func bindArg(stringKind string, arg interface{}) (interface{}, error) {
 }
 
 // bindArgs cast string arguments to expected go-ethereum type before crafting
-func bindArgs(method abi.Method, args ...interface{}) ([]interface{}, error) {
+func bindArgs(method *abi.Method, args []string) ([]interface{}, error) {
 	if method.Inputs.LengthNonIndexed() != len(args) {
 		return nil, fmt.Errorf("BindArgs: expected %v inputs but got %v", method.Inputs.LengthNonIndexed(), len(args))
 	}
@@ -65,8 +60,8 @@ func bindArgs(method abi.Method, args ...interface{}) ([]interface{}, error) {
 }
 
 // CraftPayload craft a transaction payload
-func CraftPayload(method abi.Method, args ...interface{}) ([]byte, error) {
-	boundArgs, err := bindArgs(method, args...)
+func CraftPayload(method *abi.Method, args []string) ([]byte, error) {
+	boundArgs, err := bindArgs(method, args)
 
 	if err != nil {
 		return nil, err
