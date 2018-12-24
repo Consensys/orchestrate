@@ -1,181 +1,131 @@
 package types
 
 import (
-	"math/big"
-
 	"github.com/ethereum/go-ethereum/common"
 )
 
-// Sender stores information concerning transaction sender
-type Sender struct {
-	UserID       string
-	PrivateKeyID string
-}
-
-// GetUserID return sender unique identifier
-func (sender *Sender) GetUserID() string {
-	return sender.UserID
-}
-
-// SetUserID set sender identifier
-func (sender *Sender) SetUserID(id string) {
-	sender.UserID = id
-}
-
-// GetPrivateKeyID return private key unique identifier
-func (sender *Sender) GetPrivateKeyID() string {
-	return sender.PrivateKeyID
-}
-
-// SetPrivateKeyID set private key identifier
-func (sender *Sender) SetPrivateKeyID(id string) {
-	sender.PrivateKeyID = id
-}
-
-// Chain stores information about a chain
+// Chain stores information about an Ethereum chain
 type Chain struct {
-	ID       string
+	// ID chain unique identifier
+	ID string
+	// EIP155 indicates whether chain supports EIP155
 	IsEIP155 bool
 }
 
-// GetID return chain unique identifier
-func (chain *Chain) GetID() string {
-	return chain.ID
+func newChain() Chain {
+	return Chain{}
 }
 
-// SetID set chain identifier
-func (chain *Chain) SetID(id string) {
-	chain.ID = id
+func (c *Chain) reset() {
+	c.ID = ""
+	c.IsEIP155 = false
 }
 
-// GetEIP155 indicates whether chain supports EIP155
-func (chain *Chain) GetEIP155() bool {
-	return chain.IsEIP155
-}
-
-// SetEIP155 set chain EIP155 indicator
-func (chain *Chain) SetEIP155(b bool) {
-	chain.IsEIP155 = b
-}
-
-// Receiver stores information about receiver of the transaction
-type Receiver struct {
-	ID      string
+// Account stores information about an Ethereum account
+type Account struct {
+	// ID account unique identifier
+	ID string
+	// Address of account
 	Address *common.Address
 }
 
-// GetID return receiver unique identifier
-func (r *Receiver) GetID() string {
-	return r.ID
+func newAccount() Account {
+	var a common.Address
+	return Account{Address: &a}
 }
 
-// SetID set receiver identifier
-func (r *Receiver) SetID(id string) {
-	r.ID = id
-}
-
-// GetAddress return receiver address
-func (r *Receiver) GetAddress() *common.Address {
-	return r.Address
-}
-
-// SetAddress set receiver address
-func (r *Receiver) SetAddress(a *common.Address) {
-	r.Address = a
+func (a *Account) reset() {
+	a.ID = ""
+	a.Address.SetBytes([]byte{})
 }
 
 // Call stores information about transaction call
 type Call struct {
+	// Method method unique identifier
 	MethodID string
-	Value    *big.Int
-	Args     []string
+	// Args arguments to send in the call
+	Args []string
 }
 
-// GetMethodID return call unique identifier
-func (c *Call) GetMethodID() string {
-	return c.MethodID
+func newCall() Call {
+	return Call{}
 }
 
-// SetMethodID set call method id
-func (c *Call) SetMethodID(id string) {
-	c.MethodID = id
-}
-
-// GetValue return call value
-func (c *Call) GetValue() *big.Int {
-	return c.Value
-}
-
-// SetValue set call value
-func (c *Call) SetValue(v *big.Int) {
-	c.Value = v
-}
-
-// GetArgs return call args
-func (c *Call) GetArgs() []string {
-	return c.Args
-}
-
-// SetArgs set call args
-func (c *Call) SetArgs(args []string) {
-	c.Args = args
+func (c *Call) reset() {
+	c.MethodID = ""
+	c.Args = c.Args[0:0]
 }
 
 // Trace stores contextual information about a transaction call
 type Trace struct {
-	Sender   *Sender
-	Chain    *Chain
-	Receiver *Receiver
-	Call     *Call
-	Tx       *Transaction
+	// Chain chain to execute TX on
+	chain *Chain
+	// Sender of the transaction
+	sender *Account
+	// Receiver of the transaction (usually a contract)
+	receiver *Account
+	// Call information about TX call
+	call *Call
+	// Tx Transaction being executed
+	tx *Tx
+	// Errors
+	Errors []*Error
 }
 
-// GetSender return Trace sender
-func (t *Trace) GetSender() *Sender {
-	return t.Sender
+// NewTrace creates a new trace
+func NewTrace() Trace {
+	var (
+		chain    = newChain()
+		sender   = newAccount()
+		receiver = newAccount()
+		call     = newCall()
+		tx       = NewTx()
+	)
+	return Trace{
+		chain:    &chain,
+		sender:   &sender,
+		receiver: &receiver,
+		call:     &call,
+		tx:       &tx,
+	}
+}
+
+// Chain returns trace chain
+func (t *Trace) Chain() *Chain {
+	return t.chain
+}
+
+// Sender returns trace sender
+func (t *Trace) Sender() *Account {
+	return t.sender
 }
 
 // SetSender set trace sender
-func (t *Trace) SetSender(s *Sender) {
-	t.Sender = s
+func (t *Trace) SetSender(s *Account) {
+	t.sender = s
 }
 
-// GetChain return Trace chain
-func (t *Trace) GetChain() *Chain {
-	return t.Chain
+// Receiver returns trace receiver
+func (t *Trace) Receiver() *Account {
+	return t.receiver
 }
 
-// SetChain set trace chain
-func (t *Trace) SetChain(c *Chain) {
-	t.Chain = c
+// Call returns trace call
+func (t *Trace) Call() *Call {
+	return t.call
 }
 
-// GetReceiver return Trace receiver
-func (t *Trace) GetReceiver() *Receiver {
-	return t.Receiver
+// Tx returns trace Tx
+func (t *Trace) Tx() *Tx {
+	return t.tx
 }
 
-// SetReceiver set trace receiver
-func (t *Trace) SetReceiver(r *Receiver) {
-	t.Receiver = r
-}
-
-// GetCall return Trace call
-func (t *Trace) GetCall() *Call {
-	return t.Call
-}
-
-// SetCall set trace call
-func (t *Trace) SetCall(c *Call) {
-	t.Call = c
-}
-
-// GetTx return Trace transaction
-func (t *Trace) GetTx() *Transaction {
-	return t.Tx
-}
-
-// SetTx set trace call
-func (t *Trace) SetTx(tx *Transaction) {
-	t.Tx = tx
+// Reset re-initiliaze all values stored in trace
+func (t *Trace) Reset() {
+	t.chain.reset()
+	t.sender.reset()
+	t.receiver.reset()
+	t.call.reset()
+	t.tx.reset()
+	t.Errors = t.Errors[0:0]
 }
