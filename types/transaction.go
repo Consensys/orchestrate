@@ -9,134 +9,138 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 )
 
-// TxData is an adapter from proto buffer to go-ethereum
-type TxData struct {
-	Nonce    uint64
-	To       *common.Address
-	Value    *big.Int
-	GasLimit uint64
-	GasPrice *big.Int
-	Data     []byte
+type txData struct {
+	nonce    uint64
+	to       *common.Address
+	value    *big.Int
+	gasLimit uint64
+	gasPrice *big.Int
+	data     []byte
 }
 
-// GetNonce return Tx Nonce
-func (txData *TxData) GetNonce() uint64 {
-	return txData.Nonce
+func newTxData() txData {
+	var (
+		a common.Address
+		v big.Int
+		p big.Int
+	)
+	return txData{to: &a, value: &v, gasPrice: &p}
 }
 
-// SetNonce set Tx Nonce
-func (txData *TxData) SetNonce(n uint64) {
-	txData.Nonce = n
+func (txData *txData) reset() {
+	txData.nonce = 0
+	txData.to.SetBytes([]byte{})
+	txData.value.SetUint64(0)
+	txData.gasLimit = 0
+	txData.gasPrice.SetUint64(0)
+	txData.data = txData.data[0:0]
 }
 
-// GetTo return Tx recipient
-func (txData *TxData) GetTo() *common.Address {
-	return txData.To
+// Tx stores information about the transaction
+type Tx struct {
+	txData *txData
+	raw    []byte
+	hash   *common.Hash
+}
+
+// NewTx creates a new transaction store
+func NewTx() Tx {
+	txData := newTxData()
+	var h common.Hash
+	return Tx{txData: &txData, hash: &h}
+}
+
+func (tx *Tx) reset() {
+	tx.txData.reset()
+	tx.raw = tx.raw[0:0]
+	tx.hash.SetBytes([]byte{})
+}
+
+// Nonce returns Tx nonce
+func (tx *Tx) Nonce() uint64 {
+	return tx.txData.nonce
+}
+
+// SetNonce set Tx nonce
+func (tx *Tx) SetNonce(n uint64) {
+	tx.txData.nonce = n
+}
+
+// To returns Tx recipient
+func (tx *Tx) To() *common.Address {
+	return tx.txData.to
 }
 
 // SetTo set Tx recipient
-func (txData *TxData) SetTo(a *common.Address) {
-	txData.To = a
+func (tx *Tx) SetTo(a *common.Address) {
+	tx.txData.to = a
 }
 
-// GetValue return Tx Value
-func (txData *TxData) GetValue() *big.Int {
-	return txData.Value
+// Value returns Tx value
+func (tx *Tx) Value() *big.Int {
+	return tx.txData.value
 }
 
-// SetValue set Tx Value
-func (txData *TxData) SetValue(v *big.Int) {
-	txData.Value = v
+// SetValue set Tx value
+func (tx *Tx) SetValue(b *big.Int) {
+	tx.txData.value = b
 }
 
-// GetGasLimit return Tx Gas Limit
-func (txData *TxData) GetGasLimit() uint64 {
-	return txData.GasLimit
+// GasLimit returns Tx gas limit
+func (tx *Tx) GasLimit() uint64 {
+	return tx.txData.gasLimit
 }
 
-// SetGasLimit set Tx Gas Limit
-func (txData *TxData) SetGasLimit(l uint64) {
-	txData.GasLimit = l
+// SetGasLimit set Tx gas limit
+func (tx *Tx) SetGasLimit(l uint64) {
+	tx.txData.gasLimit = l
 }
 
-// GetGasPrice return Tx Gas Price
-func (txData *TxData) GetGasPrice() *big.Int {
-	return txData.GasPrice
+// GasPrice returns Tx gas price
+func (tx *Tx) GasPrice() *big.Int {
+	return tx.txData.gasPrice
 }
 
-// SetGasPrice set Tx Gas Price
-func (txData *TxData) SetGasPrice(p *big.Int) {
-	txData.GasPrice = p
+// SetGasPrice set Tx gas price
+func (tx *Tx) SetGasPrice(b *big.Int) {
+	tx.txData.gasPrice = b
 }
 
-// GetData return Tx Data Input
-func (txData *TxData) GetData() []byte {
-	return txData.Data
+// Data returns Tx data
+func (tx *Tx) Data() []byte {
+	return tx.txData.data
 }
 
-// SetData set Tx Data Input
-func (txData *TxData) SetData(data []byte) {
-	txData.Data = data
+// SetData set Tx data
+func (tx *Tx) SetData(b []byte) {
+	tx.txData.data = b
 }
 
-// Transaction is an adapter from go-ethereum to protobuf
-type Transaction struct {
-	TxData *TxData
-	Raw    []byte
-	Hash   *common.Hash
-	From   *common.Address
+// Raw returns raw Tx
+func (tx *Tx) Raw() []byte {
+	return tx.raw
 }
 
-// GetTxData Get Tx Data
-func (tx *Transaction) GetTxData() *TxData {
-	return tx.TxData
+// SetRaw set raw Tx
+func (tx *Tx) SetRaw(b []byte) {
+	tx.raw = b
 }
 
-// SetTxData set Tx Data
-func (tx *Transaction) SetTxData(txData *TxData) {
-	tx.TxData = txData
+// Hash returns Tx hash
+func (tx *Tx) Hash() *common.Hash {
+	return tx.hash
 }
 
-// GetFrom return Tx sender
-func (tx *Transaction) GetFrom() *common.Address {
-	return tx.From
-}
-
-// SetFrom set Tx sender
-func (tx *Transaction) SetFrom(a *common.Address) {
-	tx.From = a
-}
-
-// GetRaw return Raw Tx
-func (tx *Transaction) GetRaw() []byte {
-	return tx.Raw
-}
-
-// SetRaw set Raw Tx
-func (tx *Transaction) SetRaw(raw []byte) {
-	tx.Raw = raw
-}
-
-// GetHash return Tx Hash
-func (tx *Transaction) GetHash() *common.Hash {
-	return tx.Hash
-}
-
-// SetHash set Tx Hash
-func (tx *Transaction) SetHash(hash *common.Hash) {
-	tx.Hash = hash
-}
-
-// Get returns a go-ethereum transaction
-func (tx *Transaction) Get() *types.Transaction {
-	txData := tx.GetTxData()
-	return types.NewTransaction(txData.Nonce, *txData.To, txData.Value, txData.GasLimit, txData.GasPrice, txData.Data)
+// SetHash set Tx hash
+func (tx *Tx) SetHash(h *common.Hash) {
+	tx.hash = h
 }
 
 // Sign signs transaction
-func (tx *Transaction) Sign(s types.Signer, prv *ecdsa.PrivateKey) error {
-	// Retrieve go ethereum tx
-	t := tx.Get()
+func (tx *Tx) Sign(s types.Signer, prv *ecdsa.PrivateKey) error {
+	// Create Go-Ethereum transaction object
+	txData := tx.txData
+	t := types.NewTransaction(txData.nonce, *txData.to, txData.value, txData.gasLimit, txData.gasPrice, txData.data)
 
 	// Sign Tx
 	t, err := types.SignTx(t, s, prv)
