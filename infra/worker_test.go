@@ -30,8 +30,8 @@ func (h *TestHandler) Handler(t *testing.T) HandlerFunc {
 	}
 }
 
-func newMessage(i uint64) *sarama.Message {
-	msg := &sarama.Message{}
+func newMessage(i uint64) *sarama.ConsumerMessage {
+	msg := &sarama.ConsumerMessage{}
 	msg.Value, _ = proto.Marshal(
 		&tracepb.Trace{
 			Transaction: &ethpb.Transaction{
@@ -59,7 +59,7 @@ func TestWorker(t *testing.T) {
 	w := NewWorker([]HandlerFunc{h.Handler(t)}, 100)
 
 	// Create a Sarama message channel
-	in := make(chan *sarama.Message)
+	in := make(chan *sarama.ConsumerMessage)
 
 	// Run worker
 	go w.Run(in)

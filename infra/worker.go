@@ -36,7 +36,7 @@ func NewWorker(handlers []HandlerFunc, slots uint) *Worker {
 }
 
 // Run Starts a worker to consume sarama messages
-func (w *Worker) Run(messages <-chan *sarama.Message) {
+func (w *Worker) Run(messages <-chan *sarama.ConsumerMessage) {
 	for {
 		msg, ok := <-messages
 		if !ok {
@@ -52,7 +52,7 @@ func (w *Worker) Run(messages <-chan *sarama.Message) {
 			w.slots <- struct{}{}
 
 			// Execute message handling in a dedicated goroutine
-			go func(msg *sarama.Message) {
+			go func(msg *sarama.ConsumerMessage) {
 				defer func() {
 					// Release a goroutine slot
 					<-w.slots
@@ -63,7 +63,7 @@ func (w *Worker) Run(messages <-chan *sarama.Message) {
 	}
 }
 
-func (w *Worker) handleMessage(msg *sarama.Message) {
+func (w *Worker) handleMessage(msg *sarama.ConsumerMessage) {
 	// Indicate that a new message is being handled
 	w.handling.Add(1)
 

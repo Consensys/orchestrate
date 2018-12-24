@@ -91,7 +91,7 @@ func TestNext(t *testing.T) {
 }
 
 func TestLoadMessage(t *testing.T) {
-	testMsg := &sarama.Message{}
+	testMsg := &sarama.ConsumerMessage{}
 	testMsg.Value, _ = proto.Marshal(
 		&tracepb.Trace{
 			Sender:   &tracepb.Account{Id: "abc", Address: "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"},
@@ -120,14 +120,14 @@ func TestLoadMessage(t *testing.T) {
 	}
 
 	ctx.Reset()
-	ctx.loadMessage(&sarama.Message{Value: []byte(`>>Error<<`)})
+	ctx.loadMessage(&sarama.ConsumerMessage{Value: []byte(`>>Error<<`)})
 
 	if len(ctx.T.Errors) != 1 {
 		t.Errorf("Context: expected 1 error but got %v", len(ctx.T.Errors))
 	}
 
 	ctx.Reset()
-	ctx.loadMessage(&sarama.Message{Value: []byte(`>>Error<<`)})
+	ctx.loadMessage(&sarama.ConsumerMessage{Value: []byte(`>>Error<<`)})
 
 	if len(ctx.T.Errors) != 1 {
 		t.Errorf("Context: expected 1 error but got %v", len(ctx.T.Errors))

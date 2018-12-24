@@ -16,7 +16,7 @@ type Context struct {
 	// T stores information about transaction lifecycle in high level types
 	T *types.Trace
 	// Sarama message that triggered Context execution
-	Msg *sarama.Message
+	Msg *sarama.ConsumerMessage
 	// Protobuffer
 	pb *tracepb.Trace
 
@@ -95,13 +95,13 @@ func (ctx *Context) Init(handlers []HandlerFunc) {
 }
 
 // Prepare re-initializes context, set handlers and loads sarama message
-func (ctx *Context) Prepare(handlers []HandlerFunc, msg *sarama.Message) {
+func (ctx *Context) Prepare(handlers []HandlerFunc, msg *sarama.ConsumerMessage) {
 	ctx.Init(handlers)
 	ctx.loadMessage(msg)
 }
 
 // LoadMessage unmarshal sarama message into protobuffer
-func (ctx *Context) loadMessage(msg *sarama.Message) {
+func (ctx *Context) loadMessage(msg *sarama.ConsumerMessage) {
 	ctx.Msg = msg
 	// Unmarshal Sarama message using protobuffer
 	err := proto.Unmarshal(ctx.Msg.Value, ctx.pb)
