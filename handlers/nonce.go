@@ -26,20 +26,26 @@ type SafeNonce struct {
 	mux   *sync.Mutex
 }
 
+// Lock acquire lock on SafeNonce
 func (n *SafeNonce) Lock() error {
 	n.mux.Lock()
 	return nil
 }
 
+// Unlock release lock on SafeNonce
 func (n *SafeNonce) Unlock() error {
 	n.mux.Unlock()
 	return nil
 }
 
+// Get retrieve nonce value
+// Warning: it does not acquire the lock
 func (n *SafeNonce) Get() (uint64, error) {
 	return n.value, nil
 }
 
+// Set sets nonce value
+// Warning: it does not acquire the lock
 func (n *SafeNonce) Set(v uint64) error {
 	n.value = v
 	return nil
