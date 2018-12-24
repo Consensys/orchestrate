@@ -161,11 +161,11 @@ func newTxPb(test TxTest) *ethpb.Transaction {
 func TestLoadDumpTx(t *testing.T) {
 	tx := types.NewTx()
 	// Load nil
-	LoadTx(nil, &tx)
-	testTxEquality(&tx, &nilTxTest, t)
+	LoadTx(nil, tx)
+	testTxEquality(tx, &nilTxTest, t)
 	pb := ethpb.Transaction{}
 
-	DumpTx(&tx, &pb)
+	DumpTx(tx, &pb)
 	testPbTxEquality(&pb, &nilTxTest, t)
 
 	// Load not nil
@@ -179,12 +179,12 @@ func TestLoadDumpTx(t *testing.T) {
 		hash:     "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210",
 		raw:      "0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80",
 	}
-	err := LoadTx(newTxPb(test), &tx)
+	err := LoadTx(newTxPb(test), tx)
 	if err != nil {
 		t.Errorf("LoadTx: expected successful load but got %v", err)
 	}
 	pb = ethpb.Transaction{}
 
-	DumpTx(&tx, &pb)
+	DumpTx(tx, &pb)
 	testPbTxEquality(&pb, &test, t)
 }

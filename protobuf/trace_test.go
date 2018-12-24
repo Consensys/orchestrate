@@ -142,10 +142,10 @@ func testPbTraceEquality(pb *tracepb.Trace, traceTest *TraceTest, t *testing.T) 
 
 func TestLoadDumpTrace(t *testing.T) {
 	trace := types.NewTrace()
-	LoadTrace(nil, &trace)
+	LoadTrace(nil, trace)
 
 	pb := tracepb.Trace{}
-	DumpTrace(&trace, &pb)
+	DumpTrace(trace, &pb)
 	traceTest := TraceTest{
 		AccountTest{"", EmptyAddress},
 		ChainTest{"", false},
@@ -173,9 +173,9 @@ func TestLoadDumpTrace(t *testing.T) {
 			},
 			Errors: []*tracepb.Error{&tracepb.Error{Type: 0, Message: "Error 0"}, &tracepb.Error{Type: 1, Message: "Error 1"}},
 		},
-		&trace,
+		trace,
 	)
-	DumpTrace(&trace, &pb)
+	DumpTrace(trace, &pb)
 	traceTest = TraceTest{
 		AccountTest{"abc", "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"},
 		ChainTest{"abc", true},
