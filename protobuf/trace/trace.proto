@@ -6,11 +6,10 @@ import "protobuf/ethereum/ethereum.proto";
 
 option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace";
 
-// Signer of the transaction
-message Sender {
-    string userId = 1; // Unique identifier of the user
-    string privateKeyId = 2; // Unique identifier of the receiver
-    string strategy = 3; // Signing strategy
+// Account representing an address
+message Account {
+    string id = 1; // Unique identifier of account
+    string address = 2; // Address of sender account
 }
 
 // Chain to send transacion to
@@ -19,28 +18,11 @@ message Chain {
     bool isEIP155 = 2; // Indicate if chain implements EIP155
 }
 
-// Receiver of transaction
-message Receiver {
-    string id = 1; // Unique identifier of the instance
-    string address = 2; // Address of the instance
-}
-
 // Method of call on the contract
 message Call {
     string methodId = 1; // Unique identifier of the method to call
-    string value = 2; // Value to feef in transaction call
-    repeated string args = 3; // Arguments to feed to transaction call
+    repeated string args = 2; // Arguments to feed to transaction call
 }
-
-// Input message
-// message Input {
-//     Sender sender = 1; // Sender of the transaction
-
-//     string value = 2; 
-//     Receiver receiver = 3; // Receiver of the transaction
-//     Call call = 4; // Method to call in case transaction triggers a contract
-    
-// }
 
 // Information about execution
 // message Execution {
@@ -58,19 +40,20 @@ message Call {
 //     repeated google.protobuf.Any extra = 5; // Extra information transmitted through trace
 // }
 
-// message Error {
-//     int32 code = 1; // TODO: switch to enum format
-//     string message = 2; 
-// }
+message Error {
+    uint64 type = 1; // TODO: switch to enum format
+    string message = 2; 
+}
 
 // message Policy {
 //     int32 errorCode = 1;
 // }
 
 message Trace {
-    Sender sender = 1;
+    Account sender = 1;
     Chain chain = 2;
-    Receiver receiver = 3;
+    Account receiver = 3;
     Call call = 4;
     Transaction transaction = 5;
+    repeated Error errors = 6;
 }
