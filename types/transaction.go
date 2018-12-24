@@ -18,13 +18,13 @@ type txData struct {
 	data     []byte
 }
 
-func newTxData() txData {
+func newTxData() *txData {
 	var (
 		a common.Address
 		v big.Int
 		p big.Int
 	)
-	return txData{to: &a, value: &v, gasPrice: &p}
+	return &txData{to: &a, value: &v, gasPrice: &p}
 }
 
 func (txData *txData) reset() {
@@ -44,10 +44,10 @@ type Tx struct {
 }
 
 // NewTx creates a new transaction store
-func NewTx() Tx {
+func NewTx() *Tx {
 	txData := newTxData()
 	var h common.Hash
-	return Tx{txData: &txData, hash: &h}
+	return &Tx{txData: txData, hash: &h}
 }
 
 func (tx *Tx) reset() {

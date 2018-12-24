@@ -12,8 +12,8 @@ type Chain struct {
 	IsEIP155 bool
 }
 
-func newChain() Chain {
-	return Chain{}
+func newChain() *Chain {
+	return &Chain{}
 }
 
 func (c *Chain) reset() {
@@ -29,9 +29,9 @@ type Account struct {
 	Address *common.Address
 }
 
-func newAccount() Account {
+func newAccount() *Account {
 	var a common.Address
-	return Account{Address: &a}
+	return &Account{Address: &a}
 }
 
 func (a *Account) reset() {
@@ -47,8 +47,8 @@ type Call struct {
 	Args []string
 }
 
-func newCall() Call {
-	return Call{}
+func newCall() *Call {
+	return &Call{}
 }
 
 func (c *Call) reset() {
@@ -73,20 +73,13 @@ type Trace struct {
 }
 
 // NewTrace creates a new trace
-func NewTrace() Trace {
-	var (
-		chain    = newChain()
-		sender   = newAccount()
-		receiver = newAccount()
-		call     = newCall()
-		tx       = NewTx()
-	)
-	return Trace{
-		chain:    &chain,
-		sender:   &sender,
-		receiver: &receiver,
-		call:     &call,
-		tx:       &tx,
+func NewTrace() *Trace {
+	return &Trace{
+		chain:    newChain(),
+		sender:   newAccount(),
+		receiver: newAccount(),
+		call:     newCall(),
+		tx:       NewTx(),
 	}
 }
 
@@ -98,11 +91,6 @@ func (t *Trace) Chain() *Chain {
 // Sender returns trace sender
 func (t *Trace) Sender() *Account {
 	return t.sender
-}
-
-// SetSender set trace sender
-func (t *Trace) SetSender(s *Account) {
-	t.sender = s
 }
 
 // Receiver returns trace receiver
