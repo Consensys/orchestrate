@@ -1,7 +1,7 @@
 package protobuf
 
 import (
-	"math/big"
+	"fmt"
 
 	"github.com/ethereum/go-ethereum/common"
 	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/ethereum"
@@ -9,149 +9,103 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
 )
 
-// LoadSender load a Sender protobuffer to a Sender object
-func LoadSender(pb *tracepb.Sender, sender *types.Sender) {
-	if pb == nil {
-		pb = &tracepb.Sender{}
-	}
+// LoadAccount load an Account protobuffer to a Account object
+func LoadAccount(pb *tracepb.Account, acc *types.Account) error {
+	acc.ID = pb.GetId()
+	a := common.HexToAddress(pb.GetAddress())
+	acc.Address = &a
 
-	sender.SetUserID(pb.GetUserId())
-	sender.SetPrivateKeyID(pb.GetPrivateKeyId())
+	return nil
 }
 
-// DumpSender dump Sender object to a protobuffer object
-func DumpSender(sender *types.Sender, pb *tracepb.Sender) {
-	pb.UserId = sender.GetUserID()
-	pb.PrivateKeyId = sender.GetPrivateKeyID()
+// DumpAccount dump an Account object to a protobuffer object
+func DumpAccount(acc *types.Account, pb *tracepb.Account) {
+	pb.Id = acc.ID
+	pb.Address = acc.Address.Hex()
 }
 
 // LoadChain load a Chain protobuffer to a Chain object
 func LoadChain(pb *tracepb.Chain, chain *types.Chain) {
-	if pb == nil {
-		pb = &tracepb.Chain{}
-	}
-
-	chain.SetID(pb.GetId())
-	chain.SetEIP155(pb.GetIsEIP155())
+	chain.ID = pb.GetId()
+	chain.IsEIP155 = pb.GetIsEIP155()
 }
 
 // DumpChain dump Chain object to a protobuffer Chain object
 func DumpChain(chain *types.Chain, pb *tracepb.Chain) {
-	pb.Id = chain.GetID()
-	pb.IsEIP155 = chain.GetEIP155()
-}
-
-// LoadReceiver load a Receiver protobuffer to a Receiver object
-func LoadReceiver(pb *tracepb.Receiver, r *types.Receiver) {
-	if pb == nil {
-		pb = &tracepb.Receiver{}
-	}
-
-	r.SetID(pb.GetId())
-
-	if r.Address == nil {
-		var a common.Address
-		r.Address = &a
-	}
-	LoadAddress(pb.Address, r.Address)
-}
-
-// DumpReceiver dump Receiver object to a protobuffer Receiver object
-func DumpReceiver(r *types.Receiver, pb *tracepb.Receiver) {
-	pb.Id = r.GetID()
-	DumpAddress(r.GetAddress(), &pb.Address)
+	pb.Id = chain.ID
+	pb.IsEIP155 = chain.IsEIP155
 }
 
 // LoadCall load a Call protobuffer to a Call object
 func LoadCall(pb *tracepb.Call, c *types.Call) {
-	if pb == nil {
-		pb = &tracepb.Call{}
-	}
-	c.SetMethodID(pb.GetMethodId())
-
-	if c.Value == nil {
-		var v big.Int
-		c.Value = &v
-	}
-	LoadQuantity(pb.GetValue(), c.Value)
-
-	c.SetArgs(pb.GetArgs())
-
+	c.MethodID = pb.GetMethodId()
+	c.Args = pb.GetArgs()
 }
 
 // DumpCall dump Call object to a protobuffer Call object
 func DumpCall(c *types.Call, pb *tracepb.Call) {
-	pb.MethodId = c.GetMethodID()
-	DumpQuantity(c.GetValue(), &pb.Value)
-	pb.Args = c.GetArgs()
+	pb.MethodId = c.MethodID
+	pb.Args = c.Args
+}
+
+// LoadError load an Error protobuffer to an Error object
+func LoadError(pb *tracepb.Error) *types.Error {
+	return &types.Error{
+		Err:  fmt.Errorf(pb.GetMessage()),
+		Type: pb.GetType(),
+	}
+}
+
+// DumpError dumpt Error object to protobuffer
+func DumpError(err *types.Error) *tracepb.Error {
+	return &tracepb.Error{
+		Message: err.Error(),
+		Type:    err.Type,
+	}
 }
 
 // LoadTrace load a Trace protobuffer to a Trace object
 func LoadTrace(pb *tracepb.Trace, t *types.Trace) {
-	if pb == nil {
-		pb = &tracepb.Trace{}
+	LoadAccount(pb.GetSender(), t.Sender())
+	LoadChain(pb.GetChain(), t.Chain())
+	LoadAccount(pb.GetReceiver(), t.Receiver())
+	LoadCall(pb.GetCall(), t.Call())
+	LoadTx(pb.GetTransaction(), t.Tx())
+	t.Errors = []*types.Error{}
+	for _, err := range pb.GetErrors() {
+		t.Errors = append(t.Errors, LoadError(err))
 	}
-
-	if t.Sender == nil {
-		var s types.Sender
-		t.Sender = &s
-	}
-	LoadSender(pb.Sender, t.Sender)
-
-	if t.Chain == nil {
-		var c types.Chain
-		t.Chain = &c
-	}
-	LoadChain(pb.Chain, t.Chain)
-
-	if t.Receiver == nil {
-		var r types.Receiver
-		t.Receiver = &r
-	}
-	LoadReceiver(pb.Receiver, t.Receiver)
-
-	if t.Call == nil {
-		var c types.Call
-		t.Call = &c
-	}
-	LoadCall(pb.Call, t.Call)
-
-	if t.Tx == nil {
-		var tx types.Transaction
-		t.Tx = &tx
-	}
-	LoadTransaction(pb.Transaction, t.Tx)
 }
 
 // DumpTrace dump Trace object to a transaction protobuffer
 func DumpTrace(t *types.Trace, pb *tracepb.Trace) {
 	if pb.Sender == nil {
-		var sender tracepb.Sender
-		pb.Sender = &sender
+		pb.Sender = &tracepb.Account{}
 	}
-	DumpSender(t.GetSender(), pb.Sender)
+	DumpAccount(t.Sender(), pb.Sender)
 
 	if pb.Chain == nil {
-		var chain tracepb.Chain
-		pb.Chain = &chain
+		pb.Chain = &tracepb.Chain{}
 	}
-	DumpChain(t.GetChain(), pb.Chain)
+	DumpChain(t.Chain(), pb.Chain)
 
 	if pb.Receiver == nil {
-		var r tracepb.Receiver
-		pb.Receiver = &r
+		pb.Receiver = &tracepb.Account{}
 	}
-	DumpReceiver(t.GetReceiver(), pb.Receiver)
+	DumpAccount(t.Receiver(), pb.Receiver)
 
 	if pb.Call == nil {
-		var c tracepb.Call
-		pb.Call = &c
+		pb.Call = &tracepb.Call{}
 	}
-	DumpCall(t.GetCall(), pb.Call)
+	DumpCall(t.Call(), pb.Call)
 
 	if pb.Transaction == nil {
-		var tx ethpb.Transaction
-		pb.Transaction = &tx
+		pb.Transaction = &ethpb.Transaction{}
 	}
-	DumpTransaction(t.GetTx(), pb.Transaction)
+	DumpTx(t.Tx(), pb.Transaction)
+
+	pb.Errors = []*tracepb.Error{}
+	for _, err := range t.Errors {
+		pb.Errors = append(pb.Errors, DumpError(err))
+	}
 }

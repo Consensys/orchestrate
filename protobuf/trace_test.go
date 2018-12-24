@@ -8,34 +8,34 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
 )
 
-type SenderTest struct {
-	userID       string
-	privateKeyID string
+type AccountTest struct {
+	id      string
+	address string
 }
 
-func testPbSenderEquality(pb *tracepb.Sender, senderTest *SenderTest, t *testing.T) {
-	if pb.GetUserId() != senderTest.userID {
-		t.Errorf("Expected UserId to be %q but got %q", senderTest.userID, pb.GetUserId())
+func testPbAccountEquality(pb *tracepb.Account, test *AccountTest, t *testing.T) {
+	if pb.GetId() != test.id {
+		t.Errorf("Expected UserId to be %q but got %q", test.id, pb.GetId())
 	}
 
-	if pb.GetPrivateKeyId() != senderTest.privateKeyID {
-		t.Errorf("Expected PrivateKeyId to be %q but got %q", senderTest.privateKeyID, pb.GetPrivateKeyId())
+	if pb.GetAddress() != test.address {
+		t.Errorf("Expected Address to be %q but got %q", test.address, pb.GetAddress())
 	}
 }
 
-func TestLoadDumpSender(t *testing.T) {
-	var sender types.Sender
-	LoadSender(nil, &sender)
+func TestLoadAccount(t *testing.T) {
+	acc := types.Account{}
+	LoadAccount(nil, &acc)
 
-	var pb tracepb.Sender
-	DumpSender(&sender, &pb)
-	senderTest := SenderTest{"", ""}
-	testPbSenderEquality(&pb, &senderTest, t)
+	pb := tracepb.Account{}
+	DumpAccount(&acc, &pb)
+	test := AccountTest{"", EmptyAddress}
+	testPbAccountEquality(&pb, &test, t)
 
-	LoadSender(&tracepb.Sender{UserId: "abc", PrivateKeyId: "def"}, &sender)
-	DumpSender(&sender, &pb)
-	senderTest = SenderTest{"abc", "def"}
-	testPbSenderEquality(&pb, &senderTest, t)
+	LoadAccount(&tracepb.Account{Id: "abc", Address: "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C"}, &acc)
+	DumpAccount(&acc, &pb)
+	test = AccountTest{"abc", "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C"}
+	testPbAccountEquality(&pb, &test, t)
 }
 
 type ChainTest struct {
@@ -68,49 +68,14 @@ func TestLoadDumpChain(t *testing.T) {
 	testPbChainEquality(&pb, &chainTest, t)
 }
 
-type ReceiverTest struct {
-	ID      string
-	address string
-}
-
-func testPbReceiverEquality(pb *tracepb.Receiver, receiverTest *ReceiverTest, t *testing.T) {
-	if pb.GetId() != receiverTest.ID {
-		t.Errorf("Expected ID to be %q but got %q", receiverTest.ID, pb.GetId())
-	}
-
-	if pb.GetAddress() != receiverTest.address {
-		t.Errorf("Expected IsEIP155 to be %v but got %v", receiverTest.address, pb.GetAddress())
-	}
-}
-
-func TestLoadDumpReceiver(t *testing.T) {
-	var receiver types.Receiver
-	LoadReceiver(nil, &receiver)
-
-	var pb tracepb.Receiver
-	DumpReceiver(&receiver, &pb)
-	receiverTest := ReceiverTest{"", EmptyAddress}
-	testPbReceiverEquality(&pb, &receiverTest, t)
-
-	LoadReceiver(&tracepb.Receiver{Id: "abc", Address: "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"}, &receiver)
-	DumpReceiver(&receiver, &pb)
-	receiverTest = ReceiverTest{"abc", "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"}
-	testPbReceiverEquality(&pb, &receiverTest, t)
-}
-
 type CallTest struct {
 	methodID string
-	value    string
 	args     []string
 }
 
 func testPbCallEquality(pb *tracepb.Call, callTest *CallTest, t *testing.T) {
 	if pb.GetMethodId() != callTest.methodID {
 		t.Errorf("Expected MethodID to be %q but got %q", callTest.methodID, pb.GetMethodId())
-	}
-
-	if pb.GetValue() != callTest.value {
-		t.Errorf("Expected Value to be %v but got %v", callTest.value, pb.GetValue())
 	}
 
 	for i, arg := range pb.GetArgs() {
@@ -126,85 +91,107 @@ func TestLoadDumpCall(t *testing.T) {
 
 	var pb tracepb.Call
 	DumpCall(&call, &pb)
-	callTest := CallTest{"", EmptyQuantity, []string{}}
+	callTest := CallTest{"", []string{}}
 	testPbCallEquality(&pb, &callTest, t)
 
-	LoadCall(&tracepb.Call{MethodId: "abc", Value: "0xabc", Args: []string{"0xfF778b716FC07D98839f48DdB88D8bE583BEB684", "0x1"}}, &call)
+	LoadCall(&tracepb.Call{MethodId: "abc", Args: []string{"0xfF778b716FC07D98839f48DdB88D8bE583BEB684", "0x1"}}, &call)
 	DumpCall(&call, &pb)
-	callTest = CallTest{"abc", "0xabc", []string{"0xfF778b716FC07D98839f48DdB88D8bE583BEB684", "0x1"}}
+	callTest = CallTest{"abc", []string{"0xfF778b716FC07D98839f48DdB88D8bE583BEB684", "0x1"}}
 	testPbCallEquality(&pb, &callTest, t)
+}
+
+type ErrorTest struct {
+	typ uint64
+	msg string
+}
+
+func testPbErrorEquality(pb *tracepb.Error, test *ErrorTest, t *testing.T) {
+	if pb.GetType() != test.typ {
+		t.Errorf("Expected Type to be %v but got %v", test.typ, pb.GetType())
+	}
+
+	if pb.GetMessage() != test.msg {
+		t.Errorf("Expected Message to be %q but got %q", test.msg, pb.GetMessage())
+	}
 }
 
 type TraceTest struct {
-	sender   SenderTest
+	sender   AccountTest
 	chain    ChainTest
-	receiver ReceiverTest
+	receiver AccountTest
 	call     CallTest
-	tx       TransactionTest
+	tx       TxTest
+	errors   []ErrorTest
 }
 
 func testPbTraceEquality(pb *tracepb.Trace, traceTest *TraceTest, t *testing.T) {
-	testPbSenderEquality(pb.GetSender(), &traceTest.sender, t)
+	testPbAccountEquality(pb.GetSender(), &traceTest.sender, t)
 	testPbChainEquality(pb.GetChain(), &traceTest.chain, t)
-	testPbReceiverEquality(pb.GetReceiver(), &traceTest.receiver, t)
+	testPbAccountEquality(pb.GetReceiver(), &traceTest.receiver, t)
 	testPbCallEquality(pb.GetCall(), &traceTest.call, t)
-	testPbTransactionEquality(pb.GetTransaction(), &traceTest.tx, t)
+	testPbTxEquality(pb.GetTransaction(), &traceTest.tx, t)
+
+	if len(pb.GetErrors()) != len(traceTest.errors) {
+		t.Errorf("Expected %v errors but got %v", len(traceTest.errors), len(pb.GetErrors()))
+	}
+
+	for i, err := range pb.GetErrors() {
+		testPbErrorEquality(err, &traceTest.errors[i], t)
+	}
 }
 
 func TestLoadDumpTrace(t *testing.T) {
-	var trace types.Trace
+	trace := types.NewTrace()
 	LoadTrace(nil, &trace)
 
-	var pb tracepb.Trace
+	pb := tracepb.Trace{}
 	DumpTrace(&trace, &pb)
 	traceTest := TraceTest{
-		SenderTest{"", ""},
+		AccountTest{"", EmptyAddress},
 		ChainTest{"", false},
-		ReceiverTest{"", EmptyAddress},
-		CallTest{"", EmptyQuantity, []string{}},
-		TransactionTest{
-			TxDataTest{0, EmptyAddress, EmptyQuantity, 0, EmptyQuantity, EmptyData},
+		AccountTest{"", EmptyAddress},
+		CallTest{"", []string{}},
+		TxTest{
+			0, EmptyAddress, EmptyQuantity, 0, EmptyQuantity, EmptyData,
 			EmptyData,
 			EmptyHash,
-			EmptyAddress,
 		},
+		[]ErrorTest{},
 	}
 	testPbTraceEquality(&pb, &traceTest, t)
 
 	LoadTrace(
 		&tracepb.Trace{
-			Sender:   &tracepb.Sender{UserId: "abc", PrivateKeyId: "def"},
+			Sender:   &tracepb.Account{Id: "abc", Address: "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"},
 			Chain:    &tracepb.Chain{Id: "abc", IsEIP155: true},
-			Receiver: &tracepb.Receiver{Id: "abc", Address: "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"},
-			Call:     &tracepb.Call{MethodId: "abc", Value: "0xabc", Args: []string{"0xfF778b716FC07D98839f48DdB88D8bE583BEB684", "0x1"}},
+			Receiver: &tracepb.Account{Id: "abc", Address: "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"},
+			Call:     &tracepb.Call{MethodId: "abc", Args: []string{"0xfF778b716FC07D98839f48DdB88D8bE583BEB684", "0x1"}},
 			Transaction: &ethpb.Transaction{
 				TxData: &ethpb.TxData{Nonce: 1, To: "0xfF778b716FC07D98839f48DdB88D8bE583BEB684", Value: "0x2386f26fc10000", Gas: 21136, GasPrice: "0xee6b2800", Data: "0xabcd"},
 				Raw:    "0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80",
 				Hash:   "0xbf0b3048242aff8287d1dd9de0d2d100cee25d4ea45b8afa28bdfc1e2a775afd",
-				From:   "0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff",
 			},
+			Errors: []*tracepb.Error{&tracepb.Error{Type: 0, Message: "Error 0"}, &tracepb.Error{Type: 1, Message: "Error 1"}},
 		},
 		&trace,
 	)
 	DumpTrace(&trace, &pb)
 	traceTest = TraceTest{
-		SenderTest{"abc", "def"},
+		AccountTest{"abc", "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"},
 		ChainTest{"abc", true},
-		ReceiverTest{"abc", "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"},
-		CallTest{"abc", "0xabc", []string{"0xfF778b716FC07D98839f48DdB88D8bE583BEB684", "0x1"}},
-		TransactionTest{
-			TxDataTest{
-				1,
-				"0xfF778b716FC07D98839f48DdB88D8bE583BEB684",
-				"0x2386f26fc10000",
-				21136,
-				"0xee6b2800",
-				"0xabcd",
-			},
+		AccountTest{"abc", "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"},
+		CallTest{"abc", []string{"0xfF778b716FC07D98839f48DdB88D8bE583BEB684", "0x1"}},
+		TxTest{
+			1,
+			"0xfF778b716FC07D98839f48DdB88D8bE583BEB684",
+			"0x2386f26fc10000",
+			21136,
+			"0xee6b2800",
+			"0xabcd",
 			"0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80",
 			"0xbf0b3048242aff8287d1dd9de0d2d100cee25d4ea45b8afa28bdfc1e2a775afd",
-			"0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff",
 		},
+		[]ErrorTest{{0, "Error 0"}, {1, "Error 1"}},
 	}
 	testPbTraceEquality(&pb, &traceTest, t)
 }
