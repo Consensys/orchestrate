@@ -1,9 +1,11 @@
-package types
+package infra
 
 import (
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf"
 	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
 )
 
 // HandlerFunc is base type for a function processing a Trace
@@ -12,7 +14,7 @@ type HandlerFunc func(ctx *Context)
 // Context allows us to transmit information through middlewares
 type Context struct {
 	// T stores information about transaction lifecycle in high level types
-	T *Trace
+	T *types.Trace
 	// Sarama message that triggered Context execution
 	Msg *sarama.Message
 	// Protobuffer
@@ -29,10 +31,10 @@ type Context struct {
 
 // NewContext creates a new context
 func NewContext() *Context {
-	t := NewTrace()
+	t := types.NewTrace()
 	return &Context{
 		pb:    &tracepb.Trace{},
-		T:     &t,
+		T:     t,
 		Keys:  make(map[string]interface{}),
 		index: -1,
 	}
@@ -58,16 +60,16 @@ func (ctx *Context) Next() {
 }
 
 // Error attaches an error to context.
-func (ctx *Context) Error(err error) *Error {
+func (ctx *Context) Error(err error) *types.Error {
 	if err == nil {
 		panic("err is nil")
 	}
 
-	e, ok := err.(*Error)
+	e, ok := err.(*types.Error)
 	if !ok {
-		e = &Error{
+		e = &types.Error{
 			Err:  err,
-			Type: ErrorTypeUnknown,
+			Type: types.ErrorTypeUnknown,
 		}
 	}
 	ctx.T.Errors = append(ctx.T.Errors, e)
@@ -81,7 +83,7 @@ func (ctx *Context) Abort() {
 }
 
 // AbortWithError calls `Abort()` and `Error()``
-func (ctx *Context) AbortWithError(err error) *Error {
+func (ctx *Context) AbortWithError(err error) *types.Error {
 	ctx.Abort()
 	return ctx.Error(err)
 }
@@ -101,13 +103,18 @@ func (ctx *Context) Prepare(handlers []HandlerFunc, msg *sarama.Message) {
 // LoadMessage unmarshal sarama message into protobuffer
 func (ctx *Context) loadMessage(msg *sarama.Message) {
 	ctx.Msg = msg
+	// Unmarshal Sarama message using protobuffer
 	err := proto.Unmarshal(ctx.Msg.Value, ctx.pb)
 	if err != nil {
 		// Indicate error for a possible middleware to recover it
-		e := &Error{
+		e := &types.Error{
 			Err:  err,
-			Type: ErrorTypeLoad,
+			Type: types.ErrorTypeLoad,
 		}
 		ctx.Error(e)
+		return
 	}
+
+	// Load Trace from protobuffer
+	protobuf.LoadTrace(ctx.pb, ctx.T)
 }
