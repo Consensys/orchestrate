@@ -5,16 +5,9 @@ import (
 	"sync"
 	"testing"
 	"time"
-
-	"github.com/Shopify/sarama"
-	"github.com/golang/protobuf/proto"
-	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/ethereum"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
 )
 
 type TestHandler struct {
-	traces  []*types.Trace
 	mux     *sync.Mutex
 	handled []*Context
 }
@@ -30,28 +23,8 @@ func (h *TestHandler) Handler(t *testing.T) HandlerFunc {
 	}
 }
 
-func newMessage(i uint64) *sarama.ConsumerMessage {
-	msg := &sarama.ConsumerMessage{}
-	msg.Value, _ = proto.Marshal(
-		&tracepb.Trace{
-			Transaction: &ethpb.Transaction{
-				TxData: &ethpb.TxData{
-					Nonce:    i,
-					To:       "0xfF778b716FC07D98839f48DdB88D8bE583BEB684",
-					Value:    "0x2386f26fc10000",
-					Gas:      21136,
-					GasPrice: "0xee6b2800",
-					Data:     "0xabcd",
-				},
-			},
-		},
-	)
-	return msg
-}
-
 func TestWorker(t *testing.T) {
 	h := TestHandler{
-		traces:  []*types.Trace{},
 		mux:     &sync.Mutex{},
 		handled: []*Context{},
 	}
@@ -59,7 +32,7 @@ func TestWorker(t *testing.T) {
 	w := NewWorker([]HandlerFunc{h.Handler(t)}, 100)
 
 	// Create a Sarama message channel
-	in := make(chan *sarama.ConsumerMessage)
+	in := make(chan interface{})
 
 	// Run worker
 	go w.Run(in)
@@ -67,7 +40,7 @@ func TestWorker(t *testing.T) {
 	// Feed sarama channel and then close it
 	rounds := 1000
 	for i := 1; i <= rounds; i++ {
-		in <- newMessage(uint64(i))
+		in <- "test"
 	}
 	close(in)
 

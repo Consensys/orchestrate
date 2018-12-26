@@ -1,9 +1,6 @@
 package infra
 
 import (
-	"github.com/Shopify/sarama"
-	"github.com/golang/protobuf/proto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf"
 	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
 )
@@ -15,10 +12,10 @@ type HandlerFunc func(ctx *Context)
 type Context struct {
 	// T stores information about transaction lifecycle in high level types
 	T *types.Trace
-	// Sarama message that triggered Context execution
-	Msg *sarama.ConsumerMessage
-	// Protobuffer
-	pb *tracepb.Trace
+	// Message that triggered Context execution (typically a sarama.ConsumerMessage)
+	Msg interface{}
+	// Protobuffer (we attach it to context as an optimization so we can reset it each we re-cycle a context)
+	Pb *tracepb.Trace
 
 	// Keys is a key/value pair
 	Keys map[string]interface{}
@@ -33,7 +30,7 @@ type Context struct {
 func NewContext() *Context {
 	t := types.NewTrace()
 	return &Context{
-		pb:    &tracepb.Trace{},
+		Pb:    &tracepb.Trace{},
 		T:     t,
 		Keys:  make(map[string]interface{}),
 		index: -1,
@@ -43,7 +40,7 @@ func NewContext() *Context {
 // Reset re-initialize context
 func (ctx *Context) Reset() {
 	ctx.Msg = nil
-	ctx.pb.Reset()
+	ctx.Pb.Reset()
 	ctx.T.Reset()
 	ctx.Keys = make(map[string]interface{})
 	ctx.handlers = nil
@@ -88,33 +85,9 @@ func (ctx *Context) AbortWithError(err error) *types.Error {
 	return ctx.Error(err)
 }
 
-// Init initialize a context
-func (ctx *Context) Init(handlers []HandlerFunc) {
+// Prepare re-initializes context, set handlers and set message
+func (ctx *Context) Prepare(handlers []HandlerFunc, msg interface{}) {
 	ctx.Reset()
 	ctx.handlers = handlers
-}
-
-// Prepare re-initializes context, set handlers and loads sarama message
-func (ctx *Context) Prepare(handlers []HandlerFunc, msg *sarama.ConsumerMessage) {
-	ctx.Init(handlers)
-	ctx.loadMessage(msg)
-}
-
-// LoadMessage unmarshal sarama message into protobuffer
-func (ctx *Context) loadMessage(msg *sarama.ConsumerMessage) {
 	ctx.Msg = msg
-	// Unmarshal Sarama message using protobuffer
-	err := proto.Unmarshal(ctx.Msg.Value, ctx.pb)
-	if err != nil {
-		// Indicate error for a possible middleware to recover it
-		e := &types.Error{
-			Err:  err,
-			Type: types.ErrorTypeLoad,
-		}
-		ctx.Error(e)
-		return
-	}
-
-	// Load Trace from protobuffer
-	protobuf.LoadTrace(ctx.pb, ctx.T)
 }
