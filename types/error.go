@@ -9,6 +9,9 @@ const (
 
 	// ErrorTypeDone is used when context Timeout or is Cancelled
 	ErrorTypeDone = 2
+
+	// ErrorTypeNonce when error occurs on nonce handler
+	ErrorTypeNonce = 8
 )
 
 // Error represents a error's specification.

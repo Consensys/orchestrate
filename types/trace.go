@@ -1,23 +1,25 @@
 package types
 
 import (
+	"math/big"
+
 	"github.com/ethereum/go-ethereum/common"
 )
 
 // Chain stores information about an Ethereum chain
 type Chain struct {
 	// ID chain unique identifier
-	ID string
+	ID *big.Int
 	// EIP155 indicates whether chain supports EIP155
 	IsEIP155 bool
 }
 
 func newChain() *Chain {
-	return &Chain{}
+	return &Chain{ID: big.NewInt(0)}
 }
 
 func (c *Chain) reset() {
-	c.ID = ""
+	c.ID.SetInt64(0)
 	c.IsEIP155 = false
 }
 

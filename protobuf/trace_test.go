@@ -1,6 +1,7 @@
 package protobuf
 
 import (
+	"math/big"
 	"testing"
 
 	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/ethereum"
@@ -54,17 +55,17 @@ func testPbChainEquality(pb *tracepb.Chain, chainTest *ChainTest, t *testing.T) 
 }
 
 func TestLoadDumpChain(t *testing.T) {
-	var chain types.Chain
+	chain := types.Chain{ID: big.NewInt(0)}
 	LoadChain(nil, &chain)
 
-	var pb tracepb.Chain
+	pb := tracepb.Chain{}
 	DumpChain(&chain, &pb)
-	chainTest := ChainTest{"", false}
+	chainTest := ChainTest{"0x0", false}
 	testPbChainEquality(&pb, &chainTest, t)
 
-	LoadChain(&tracepb.Chain{Id: "abc", IsEIP155: true}, &chain)
+	LoadChain(&tracepb.Chain{Id: "0xabc", IsEIP155: true}, &chain)
 	DumpChain(&chain, &pb)
-	chainTest = ChainTest{"abc", true}
+	chainTest = ChainTest{"0xabc", true}
 	testPbChainEquality(&pb, &chainTest, t)
 }
 
@@ -148,7 +149,7 @@ func TestLoadDumpTrace(t *testing.T) {
 	DumpTrace(trace, &pb)
 	traceTest := TraceTest{
 		AccountTest{"", EmptyAddress},
-		ChainTest{"", false},
+		ChainTest{"0x0", false},
 		AccountTest{"", EmptyAddress},
 		CallTest{"", []string{}},
 		TxTest{
@@ -163,7 +164,7 @@ func TestLoadDumpTrace(t *testing.T) {
 	LoadTrace(
 		&tracepb.Trace{
 			Sender:   &tracepb.Account{Id: "abc", Address: "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"},
-			Chain:    &tracepb.Chain{Id: "abc", IsEIP155: true},
+			Chain:    &tracepb.Chain{Id: "0x1afc", IsEIP155: true},
 			Receiver: &tracepb.Account{Id: "abc", Address: "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"},
 			Call:     &tracepb.Call{MethodId: "abc", Args: []string{"0xfF778b716FC07D98839f48DdB88D8bE583BEB684", "0x1"}},
 			Transaction: &ethpb.Transaction{
@@ -178,7 +179,7 @@ func TestLoadDumpTrace(t *testing.T) {
 	DumpTrace(trace, &pb)
 	traceTest = TraceTest{
 		AccountTest{"abc", "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"},
-		ChainTest{"abc", true},
+		ChainTest{"0x1afc", true},
 		AccountTest{"abc", "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"},
 		CallTest{"abc", []string{"0xfF778b716FC07D98839f48DdB88D8bE583BEB684", "0x1"}},
 		TxTest{

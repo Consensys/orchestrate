@@ -1,13 +1,16 @@
 package types
 
-import "testing"
+import (
+	"math/big"
+	"testing"
+)
 
 func TestTrace(t *testing.T) {
 	tr := NewTrace()
 
-	tr.Chain().ID = "abc"
-	if tr.Chain().ID != "abc" {
-		t.Errorf("Trace: Expected Chain ID %q but got %q", "abc", tr.Chain().ID)
+	tr.Chain().ID = big.NewInt(1024)
+	if tr.Chain().ID.Text(16) != "400" {
+		t.Errorf("Trace: Expected Chain ID %q but got %q", "1024", tr.Chain().ID.Text(400))
 	}
 
 	tr.Receiver().ID = "afg"
@@ -32,8 +35,8 @@ func TestTrace(t *testing.T) {
 
 	tr.Reset()
 
-	if tr.Chain().ID != "" {
-		t.Errorf("Trace: Expected Chain ID %q but got %q", "", tr.Chain().ID)
+	if tr.Chain().ID.Text(16) != "0" {
+		t.Errorf("Trace: Expected Chain ID %q but got %q", "0", tr.Chain().ID.Text(16))
 	}
 	if tr.Receiver().ID != "" {
 		t.Errorf("Trace: Expected Recveiver ID %q but got %q", "", tr.Receiver().ID)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/ethereum"
 	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
@@ -25,14 +26,19 @@ func DumpAccount(acc *types.Account, pb *tracepb.Account) {
 }
 
 // LoadChain load a Chain protobuffer to a Chain object
-func LoadChain(pb *tracepb.Chain, chain *types.Chain) {
-	chain.ID = pb.GetId()
+func LoadChain(pb *tracepb.Chain, chain *types.Chain) error {
+	v, err := hexutil.DecodeBig(pb.GetId())
+	if err != nil {
+		return err
+	}
+	chain.ID = v
 	chain.IsEIP155 = pb.GetIsEIP155()
+	return nil
 }
 
 // DumpChain dump Chain object to a protobuffer Chain object
 func DumpChain(chain *types.Chain, pb *tracepb.Chain) {
-	pb.Id = chain.ID
+	pb.Id = hexutil.EncodeBig(chain.ID)
 	pb.IsEIP155 = chain.IsEIP155
 }
 
