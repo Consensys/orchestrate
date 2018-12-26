@@ -3,11 +3,16 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"math/rand"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf"
+	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
 )
 
 var (
@@ -47,48 +52,84 @@ func (g *ErrorABIGetter) GetMethodByID(ID string) (*abi.Method, error) {
 	return nil, errGetABI
 }
 
+type TestCrafterMsg struct {
+	methodID string
+	Args     []string
+}
+
+func newCrafterTestMessage(i int) *TestCrafterMsg {
+	if i%2 == 0 {
+		// Valid args
+		return &TestCrafterMsg{"abcde", []string{"0xfF778b716FC07D98839f48DdB88D8bE583BEB684", "0x2386f26fc10000"}}
+	}
+	// invalid args
+	return &TestCrafterMsg{"abcde", []string{}}
+}
+
+func testCrafterLoader() infra.HandlerFunc {
+	return func(ctx *infra.Context) {
+		msg := ctx.Msg.(*TestCrafterMsg)
+		ctx.Pb.Call = &tracepb.Call{MethodId: msg.methodID, Args: msg.Args}
+
+		// Load Trace from protobuffer
+		protobuf.LoadTrace(ctx.Pb, ctx.T)
+	}
+}
+
+type testCrafterHandler struct {
+	mux     *sync.Mutex
+	handled []*infra.Context
+}
+
+func (h *testCrafterHandler) Handler(maxtime int, t *testing.T) infra.HandlerFunc {
+	return func(ctx *infra.Context) {
+		// We add some randomness in time execution
+		r := rand.Intn(maxtime)
+		time.Sleep(time.Duration(r) * time.Millisecond)
+		h.mux.Lock()
+		defer h.mux.Unlock()
+		h.handled = append(h.handled, ctx)
+	}
+}
+
 func TestCrafter(t *testing.T) {
 	// Valid craft
-	handler := Crafter(ERC20Getter)
-
-	// Create a context
-	ctx := infra.NewContext()
-	ctx.Init([]infra.HandlerFunc{handler})
-	ctx.T.Call().Args = []string{"0xfF778b716FC07D98839f48DdB88D8bE583BEB684", "0x2386f26fc10000"}
-
-	// Execute handler
-	ctx.Next()
-
-	if len(ctx.T.Errors) != 0 {
-		t.Errorf("Crafter: could not craft %v", ctx.T.Errors)
+	h := Crafter(ERC20Getter)
+	testH := &testCrafterHandler{
+		mux:     &sync.Mutex{},
+		handled: []*infra.Context{},
 	}
 
-	payload := "0xa9059cbb000000000000000000000000ff778b716fc07d98839f48ddb88d8be583beb684000000000000000000000000000000000000000000000000002386f26fc10000"
-	data := ctx.T.Tx().Data()
-	if hexutil.Encode(data) != payload {
-		t.Errorf("Crafter: expected payload %q but got %q", payload, hexutil.Encode(data))
+	w := infra.NewWorker([]infra.HandlerFunc{testCrafterLoader(), h, testH.Handler(50, t)}, 100)
+
+	// Create a input channel
+	in := make(chan interface{})
+
+	// Run worker
+	go w.Run(in)
+
+	// Feed sarama channel and then close it
+	rounds := 1000
+	for i := 1; i <= rounds; i++ {
+		in <- newCrafterTestMessage(i)
+	}
+	close(in)
+
+	// Wait for worker to be done
+	<-w.Done()
+
+	// We expected half of rounds to have aborted
+	if len(testH.handled) != rounds/2 {
+		t.Errorf("Crafter: expected %v rounds but got %v", rounds, len(testH.handled))
 	}
 
-	// Arguments missing
-	ctx.Init([]infra.HandlerFunc{handler})
-	ctx.T.Call().Args = []string{}
-
-	// Execute handler
-	ctx.Next()
-
-	if len(ctx.T.Errors) != 1 {
-		t.Errorf("Crafter: expected to produce error")
-	}
-
-	// ABI Getter return Error
-	handler = Crafter(&ErrorABIGetter{})
-	ctx.Init([]infra.HandlerFunc{handler})
-	ctx.T.Call().Args = []string{"0xfF778b716FC07D98839f48DdB88D8bE583BEB684", "0x2386f26fc10000"}
-
-	// Execute handler
-	ctx.Next()
-
-	if len(ctx.T.Errors) != 1 {
-		t.Errorf("Crafter: expected to produce error")
+	expected := "0xa9059cbb000000000000000000000000ff778b716fc07d98839f48ddb88d8be583beb684000000000000000000000000000000000000000000000000002386f26fc10000"
+	for _, ctx := range testH.handled {
+		if len(ctx.T.Errors) != 0 && hexutil.Encode(ctx.T.Tx().Data()) != "0x" {
+			t.Errorf("Crafter: expected no raw tx on error but got %q", hexutil.Encode(ctx.T.Tx().Data()))
+		}
+		if len(ctx.T.Errors) == 0 && hexutil.Encode(ctx.T.Tx().Data()) != expected {
+			t.Errorf("Crafter: expected raw %q but got %q", expected, hexutil.Encode(ctx.T.Tx().Data()))
+		}
 	}
 }
