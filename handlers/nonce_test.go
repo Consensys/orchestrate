@@ -28,11 +28,11 @@ type TestNonceMsg struct {
 	a       string
 }
 
-func newNonceMessage(i int) *TestNonceMsg {
+func newNonceTestMessage(i int) *TestNonceMsg {
 	return &TestNonceMsg{chains[i%2], senders[i%3]}
 }
 
-func testLoader() infra.HandlerFunc {
+func testNonceLoader() infra.HandlerFunc {
 	return func(ctx *infra.Context) {
 		msg := ctx.Msg.(*TestNonceMsg)
 		ctx.Pb.Chain = &tracepb.Chain{Id: msg.chainID}
@@ -57,7 +57,7 @@ func TestNonceHandler(t *testing.T) {
 	h := NonceHandler(m)
 
 	// Create new worker
-	w := infra.NewWorker([]infra.HandlerFunc{testLoader(), h, dummyTimeHandler(10)}, 100)
+	w := infra.NewWorker([]infra.HandlerFunc{testNonceLoader(), h, dummyTimeHandler(10)}, 100)
 
 	// Create a Sarama message channel
 	in := make(chan interface{})
@@ -68,7 +68,7 @@ func TestNonceHandler(t *testing.T) {
 	// Feed sarama channel and then close it
 	rounds := 1000
 	for i := 1; i <= rounds; i++ {
-		in <- newNonceMessage(i)
+		in <- newNonceTestMessage(i)
 	}
 	close(in)
 

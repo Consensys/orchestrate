@@ -32,16 +32,17 @@ func newLoaderMessage() *sarama.ConsumerMessage {
 	return msg
 }
 
-type testHandler struct {
+type testLoaderHandler struct {
 	mux     *sync.Mutex
 	handled []*infra.Context
 }
 
-func (h *testHandler) Handler(maxtime int, t *testing.T) infra.HandlerFunc {
+func (h *testLoaderHandler) Handler(maxtime int, t *testing.T) infra.HandlerFunc {
 	return func(ctx *infra.Context) {
 		// We add some randomness in time execution
 		r := rand.Intn(maxtime)
 		time.Sleep(time.Duration(r) * time.Millisecond)
+		t.Logf("%v", ctx.T.Tx())
 		h.mux.Lock()
 		defer h.mux.Unlock()
 		h.handled = append(h.handled, ctx)
@@ -49,7 +50,7 @@ func (h *testHandler) Handler(maxtime int, t *testing.T) infra.HandlerFunc {
 }
 
 func TestSaramaLoader(t *testing.T) {
-	testH := &testHandler{
+	testH := &testLoaderHandler{
 		mux:     &sync.Mutex{},
 		handled: []*infra.Context{},
 	}
@@ -73,7 +74,7 @@ func TestSaramaLoader(t *testing.T) {
 	// Wait for worker to be done
 	<-w.Done()
 
-	if len(testH.handled) != rounds  {
+	if len(testH.handled) != rounds {
 		t.Errorf("Loader: expected %v rounds but got %v", rounds, len(testH.handled))
 	}
 
