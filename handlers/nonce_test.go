@@ -32,7 +32,7 @@ func newNonceMessage(i int) *TestNonceMsg {
 	return &TestNonceMsg{chains[i%2], senders[i%3]}
 }
 
-func loader(t *testing.T) infra.HandlerFunc {
+func testLoader() infra.HandlerFunc {
 	return func(ctx *infra.Context) {
 		msg := ctx.Msg.(*TestNonceMsg)
 		ctx.Pb.Chain = &tracepb.Chain{Id: msg.chainID}
@@ -43,10 +43,10 @@ func loader(t *testing.T) infra.HandlerFunc {
 	}
 }
 
-func testHandler(t *testing.T) infra.HandlerFunc {
+func dummyTimeHandler(maxtime int) infra.HandlerFunc {
 	return func(ctx *infra.Context) {
 		// Simulate some io time
-		r := rand.Intn(10)
+		r := rand.Intn(maxtime)
 		time.Sleep(time.Duration(r) * time.Millisecond)
 	}
 }
@@ -56,7 +56,8 @@ func TestNonceHandler(t *testing.T) {
 	m := NewCacheNonce(newNonceTest, 4)
 	h := NonceHandler(m)
 
-	w := infra.NewWorker([]infra.HandlerFunc{loader(t), h, testHandler(t)}, 100)
+	// Create new worker
+	w := infra.NewWorker([]infra.HandlerFunc{testLoader(), h, dummyTimeHandler(10)}, 100)
 
 	// Create a Sarama message channel
 	in := make(chan interface{})
