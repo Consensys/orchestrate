@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"math/rand"
 	"testing"
+	"time"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf"
@@ -41,12 +43,20 @@ func loader(t *testing.T) infra.HandlerFunc {
 	}
 }
 
+func testHandler(t *testing.T) infra.HandlerFunc {
+	return func(ctx *infra.Context) {
+		// Simulate some io time
+		r := rand.Intn(10)
+		time.Sleep(time.Duration(r) * time.Millisecond)
+	}
+}
+
 func TestNonceHandler(t *testing.T) {
-	// Create handler
-	m := NewCacheNonce(newNonceTest, 40)
+	// Create handler with 4 stripes lock nonce cache handler
+	m := NewCacheNonce(newNonceTest, 4)
 	h := NonceHandler(m)
 
-	w := infra.NewWorker([]infra.HandlerFunc{loader(t), h}, 100)
+	w := infra.NewWorker([]infra.HandlerFunc{loader(t), h, testHandler(t)}, 100)
 
 	// Create a Sarama message channel
 	in := make(chan interface{})
