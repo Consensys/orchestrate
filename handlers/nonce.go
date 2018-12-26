@@ -1,38 +1,89 @@
 package handlers
 
 import (
+	"fmt"
+	"hash"
+	"hash/fnv"
+	"math/big"
 	"sync"
 
 	"github.com/ethereum/go-ethereum/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
 )
 
-// LockedNonce is an interface for a nonce object that can be manipulated safely
-type LockedNonce interface {
-	Unlock() error
+// NonceLocker is an interface for a nonce object that is locked
+// TODO: add possible errors in next interfaces
+type NonceLocker interface {
+	Lock() error
 	Get() (uint64, error)
 	Set(v uint64) error
+	Unlock() error
 }
 
-// NonceManager is an interface for managing nonces
+// NonceManager is an interface for managing nonce by key
 type NonceManager interface {
-	// Lock is expected to lock nonce modifications
-	Lock(chainID string, a common.Address) (LockedNonce, error)
+	// Return a locked nonce
+	Obtain(chainID *big.Int, a common.Address) (NonceLocker, error)
 }
 
-// SafeNonce provides a value an a lock to manipulate it
+// StripeMutex is an object that allows fine grained locking based on keys
+//
+// It ensures that if `key1 == key2` then lock associated with `key1` is the same as the one associated with `key2`
+// It holds a stable number of locks in memory that use can control
+//
+// It is inspired from Java lib Guava: https://github.com/google/guava/wiki/StripedExplained
+type StripeMutex struct {
+	stripes []*sync.Mutex
+	pool    *sync.Pool
+}
+
+// Lock acquire lock for a given key
+func (m *StripeMutex) Lock(key string) {
+	l, _ := m.getLock(key)
+	l.Lock()
+}
+
+// Unlock release lock for a given key
+func (m *StripeMutex) Unlock(key string) {
+	l, _ := m.getLock(key)
+	l.Unlock()
+}
+
+func (m *StripeMutex) getLock(key string) (*sync.Mutex, error) {
+	h := m.pool.Get().(hash.Hash64)
+	defer m.pool.Put(h)
+	h.Reset()
+	_, err := h.Write([]byte(key))
+	return m.stripes[h.Sum64()%uint64(len(m.stripes))], err
+}
+
+// NewStripeMutex creates a stripe mutext
+func NewStripeMutex(stripes uint) *StripeMutex {
+	m := &StripeMutex{
+		make([]*sync.Mutex, stripes),
+		&sync.Pool{New: func() interface{} { return fnv.New64() }},
+	}
+	for i := 0; i < len(m.stripes); i++ {
+		m.stripes[i] = &sync.Mutex{}
+	}
+
+	return m
+}
+
+// SafeNonce allow to manipulate nonce in a concurrent safe manner
 type SafeNonce struct {
-	value uint64
 	mux   *sync.Mutex
+	value uint64
 }
 
-// Lock acquire lock on SafeNonce
+// Lock acquire lock
 func (n *SafeNonce) Lock() error {
 	n.mux.Lock()
 	return nil
 }
 
-// Unlock release lock on SafeNonce
+// Unlock release lock
 func (n *SafeNonce) Unlock() error {
 	n.mux.Unlock()
 	return nil
@@ -51,109 +102,85 @@ func (n *SafeNonce) Set(v uint64) error {
 	return nil
 }
 
-// NewNonceFunc is a function to create new nonces
-type NewNonceFunc func(a common.Address) (*SafeNonce, error)
+// NewNonceFunc allows to initialize nonce value
+type NewNonceFunc func(key string) (uint64, error)
 
 // CacheNonce allows to store mutiple SafeNonce
 type CacheNonce struct {
-	mux    *sync.RWMutex
-	nonces map[string]*SafeNonce
+	mux    *StripeMutex
+	nonces *sync.Map
 
 	new NewNonceFunc
 }
 
-// Get returns a Nonce from cache (it creates it if not already existing)
-func (c *CacheNonce) Get(a common.Address) (*SafeNonce, error) {
-	// Acquire Read lock
-	c.mux.RLock()
-
-	n, ok := c.nonces[a.Hex()]
-	if ok {
-		// There is already an entry for pair Address
-		c.mux.RUnlock()
-		return n, nil
+// NewCacheNonce creates a new cache nonce
+func NewCacheNonce(new NewNonceFunc, stripes uint) *CacheNonce {
+	return &CacheNonce{
+		mux:    NewStripeMutex(stripes),
+		nonces: &sync.Map{},
+		new:    new,
 	}
-	// There was no entry for address we need to write it
-	c.mux.RUnlock()
+}
 
-	// Acquire Write lock
-	c.mux.Lock()
+func computeKey(chainID *big.Int, a common.Address) string {
+	return fmt.Sprintf("%v-%v", chainID.Text(16), a.Hex())
+}
 
-	// We ensure no entry has been written while acquiring lock
-	n, ok = c.nonces[a.Hex()]
-	if ok {
-		// Nothing has been written so we can proceed
-		c.mux.Unlock()
-		return n, nil
-	}
-
-	n, err := c.newNonce(a)
+// Obtain return a locked SafeNonce for given chain and address
+func (c *CacheNonce) Obtain(chainID *big.Int, a common.Address) (NonceLocker, error) {
+	key := computeKey(chainID, a)
+	mux, err := c.mux.getLock(key)
 	if err != nil {
 		return nil, err
 	}
-	c.mux.Unlock()
-	return n, nil
-}
+	// Lock key
+	mux.Lock()
+	defer mux.Unlock()
 
-func (c *CacheNonce) newNonce(a common.Address) (*SafeNonce, error) {
-	n, err := c.new(a)
-	if err != nil {
-		return nil, err
+	// Retrieve nonce from cache
+	n, ok := c.nonces.LoadOrStore(key, &SafeNonce{mux: mux, value: 0})
+	rv := n.(*SafeNonce)
+	if !ok {
+		// If nonce has just been created we compute its initial value
+		rv.value, err = c.new(key)
+		if err != nil {
+			return rv, err
+		}
 	}
-	c.nonces[a.Hex()] = n
-	return n, nil
-}
-
-// CacheNonceManager is a NonceManager that relies on internal cache
-// Can only handle one chain
-type CacheNonceManager struct {
-	c *CacheNonce
-}
-
-// NewCacheNonceManager creates a new manager
-func NewCacheNonceManager(new NewNonceFunc) *CacheNonceManager {
-	return &CacheNonceManager{
-		c: &CacheNonce{
-			&sync.RWMutex{},
-			make(map[string]*SafeNonce),
-			new,
-		},
-	}
-}
-
-// Lock return a SafeNonce locked
-func (m *CacheNonceManager) Lock(chainID string, a common.Address) (LockedNonce, error) {
-	n, err := m.c.Get(a)
-	if err != nil {
-		return nil, err
-	}
-	n.Lock()
-	return n, nil
+	return rv, nil
 }
 
 // NonceHandler creates and return an handler for nonce
 func NonceHandler(m NonceManager) infra.HandlerFunc {
 	return func(ctx *infra.Context) {
-		// Retrieve chainId and sender address
-		chainID, a := ctx.T.Chain().ID, *ctx.T.Sender().Address
+		// Retrieve chainID and sender address
+		chainID, a := ctx.T.Chain().ID, ctx.T.Sender().Address
 
-		// Lock nonce
-		n, err := m.Lock(chainID, a)
+		// Retrieve locked nonce from manager
+		n, err := m.Obtain(chainID, *a)
 		if err != nil {
-			// Deal with nonce error
+			e := &types.Error{
+				Err:  err,
+				Type: types.ErrorTypeNonce,
+			}
+			ctx.Error(e)
 			return
 		}
+		n.Lock()
 		defer n.Unlock()
 
-		// Set nonce
-		v, _ := n.Get()
+		// // Set Nonce value on Trace
+		v, err := n.Get()
 		ctx.T.Tx().SetNonce(v)
 
-		// Execute pending handlers
+		// Execute pending handlers (note that we do not release lock while executing pending handlers)
 		ctx.Next()
 
-		// Increment nonce
+		// Increment nonce in Manager
 		// TODO: we should ensure pending handlers have correctly executed before incrementing
-		n.Set(ctx.T.Tx().Nonce() + 1)
+		err = n.Set(v + 1)
+		if err != nil {
+			// TODO: handle error
+		}
 	}
 }
