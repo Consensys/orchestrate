@@ -100,7 +100,11 @@ func TestCrafter(t *testing.T) {
 		handled: []*infra.Context{},
 	}
 
-	w := infra.NewWorker([]infra.HandlerFunc{testCrafterLoader(), h, testH.Handler(50, t)}, 100)
+	// Create worker
+	w := infra.NewWorker(100)
+	w.Use(testCrafterLoader())
+	w.Use(h)
+	w.Use(testH.Handler(50, t))
 
 	// Create a input channel
 	in := make(chan interface{})

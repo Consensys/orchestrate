@@ -1,16 +1,18 @@
 package handlers
 
 import (
+	"math/big"
 	"math/rand"
 	"testing"
 	"time"
 
+	"github.com/ethereum/go-ethereum/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf"
 	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
 )
 
-func newNonceTest(key string) (uint64, error) {
+func newNonceTest(chainID *big.Int, a common.Address) (uint64, error) {
 	return 0, nil
 }
 
@@ -57,7 +59,10 @@ func TestNonceHandler(t *testing.T) {
 	h := NonceHandler(m)
 
 	// Create new worker
-	w := infra.NewWorker([]infra.HandlerFunc{testNonceLoader(), h, dummyTimeHandler(10)}, 100)
+	w := infra.NewWorker(100)
+	w.Use(testNonceLoader())
+	w.Use(h)
+	w.Use(dummyTimeHandler(10))
 
 	// Create a Sarama message channel
 	in := make(chan interface{})

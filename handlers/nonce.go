@@ -103,7 +103,7 @@ func (n *SafeNonce) Set(v uint64) error {
 }
 
 // NewNonceFunc allows to initialize nonce value
-type NewNonceFunc func(key string) (uint64, error)
+type NewNonceFunc func(chainID *big.Int, a common.Address) (uint64, error)
 
 // CacheNonce allows to store mutiple SafeNonce
 type CacheNonce struct {
@@ -142,7 +142,7 @@ func (c *CacheNonce) Obtain(chainID *big.Int, a common.Address) (NonceLocker, er
 	rv := n.(*SafeNonce)
 	if !ok {
 		// If nonce has just been created we compute its initial value
-		rv.value, err = c.new(key)
+		rv.value, err = c.new(chainID, a)
 		if err != nil {
 			return rv, err
 		}

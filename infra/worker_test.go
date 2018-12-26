@@ -29,7 +29,9 @@ func TestWorker(t *testing.T) {
 		handled: []*Context{},
 	}
 
-	w := NewWorker([]HandlerFunc{h.Handler(t)}, 100)
+	// Create new worker and register test handler
+	w := NewWorker(100)
+	w.Use(h.Handler(t))
 
 	// Create a Sarama message channel
 	in := make(chan interface{})

@@ -53,9 +53,11 @@ func TestMarker(t *testing.T) {
 	offset := NewSimpleSaramaOffsetMarker(&s)
 	h := Marker(offset)
 
-	w := infra.NewWorker([]infra.HandlerFunc{h}, 100)
+	// Create worker
+	w := infra.NewWorker(100)
+	w.Use(h)
 
-	// Create a Sarama message channel
+	// Create message channel
 	in := make(chan interface{})
 
 	// Run worker

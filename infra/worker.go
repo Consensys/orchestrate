@@ -17,17 +17,22 @@ type Worker struct {
 // NewWorker creates a new worker
 // Slots indicate a count of goroutine that worker can occupy to process messages
 // You must set `slots > 0`
-func NewWorker(handlers []HandlerFunc, slots uint) *Worker {
+func NewWorker(slots uint) *Worker {
 	if slots == 0 {
 		panic(fmt.Errorf("Worker requires at least 1 goroutine slots"))
 	}
 	return &Worker{
-		handlers: handlers,
+		handlers: []HandlerFunc{},
 		handling: &sync.WaitGroup{},
 		pool:     &sync.Pool{New: func() interface{} { return NewContext() }},
 		slots:    make(chan struct{}, slots),
 		done:     make(chan struct{}, 1),
 	}
+}
+
+// Use add a new handler
+func (w *Worker) Use(handler HandlerFunc) {
+	w.handlers = append(w.handlers, handler)
 }
 
 // Run Starts a worker to consume sarama messages
@@ -38,7 +43,7 @@ func (w *Worker) Run(messages chan interface{}) {
 			// Message channel has been close.
 			// We wait until all messages have been properly consumed
 			w.handling.Wait()
-			// We indicate that we have gracefully stop
+			// We indicate that we have gracefully stoped
 			w.done <- struct{}{}
 			// Exit loop
 			break

@@ -56,8 +56,11 @@ func TestSaramaLoader(t *testing.T) {
 	}
 	h := SaramaLoader()
 
-	w := infra.NewWorker([]infra.HandlerFunc{h, testH.Handler(50, t)}, 100)
-
+	// Create worker
+	w := infra.NewWorker(100)
+	w.Use(h)
+	w.Use(testH.Handler(50, t))
+	
 	// Create a input channel
 	in := make(chan interface{})
 
