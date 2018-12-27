@@ -19,6 +19,11 @@ type SimpleSender struct {
 	ec *infra.EthClient
 }
 
+// NewSimpleSender creates a new SimpleSender
+func NewSimpleSender(ec *infra.EthClient) *SimpleSender {
+	return &SimpleSender{ec}
+}
+
 // Send sends transaction
 func (s *SimpleSender) Send(chainID *big.Int, raw string) error {
 	return s.ec.SendRawTransaction(context.Background(), raw)
