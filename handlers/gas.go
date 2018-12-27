@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"math/big"
 	"sync"
 
@@ -28,6 +29,21 @@ func GasPricer(p GasPriceEstimator) infra.HandlerFunc {
 // GasEstimator is an interface to retrieve Gas Cost of a transaction
 type GasEstimator interface {
 	EstimateGas(chainID *big.Int, call ethereum.CallMsg) (uint64, error)
+}
+
+// SimpleGasManager implements methods to get information about Gas using an Ethereum client
+type SimpleGasManager struct {
+	ec *infra.EthClient
+}
+
+// SuggestGasPrice suggests a gas price
+func (m *SimpleGasManager) SuggestGasPrice(chainID *big.Int) (*big.Int, error) {
+	return m.ec.SuggestGasPrice(context.Background())
+}
+
+// EstimateGas suggests a gas limit
+func (m *SimpleGasManager) EstimateGas(chainID *big.Int, call ethereum.CallMsg) (uint64, error) {
+	return m.ec.EstimateGas(context.Background(), call)
 }
 
 // GasLimiter creates an handler that set Gas Limit
