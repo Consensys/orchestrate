@@ -55,24 +55,24 @@ func TestGas(t *testing.T) {
 	w := infra.NewWorker(100)
 	w.Use(TraceProtoLoader())
 
-	// Create and register gas limiter
+	// Create and register gas limit handler
 	l := GasLimiter(&DummyGasEstimator{})
 	w.Use(l)
 
-	// Create and register gas price
+	// Create and register gas price handler
 	p := GasPricer(&DummyGasPricer{})
 	w.Use(p)
 
 	mockH := NewMockHandler(50)
 	w.Use(mockH.Handler())
 
-	// Create a Sarama message channel
+	// Create input channel
 	in := make(chan interface{})
 
 	// Run worker
 	go w.Run(in)
 
-	// Feed sarama channel and then close it
+	// Feed input channel and then close it
 	rounds := 1000
 	for i := 1; i <= rounds; i++ {
 		in <- newNonceTestMessage(i)

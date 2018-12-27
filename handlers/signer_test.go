@@ -52,13 +52,13 @@ func TestSigner(t *testing.T) {
 	mockH := NewMockHandler(50)
 	w.Use(mockH.Handler())
 
-	// Create a Sarama message channel
+	// Create input channel
 	in := make(chan interface{})
 
 	// Run worker
 	go w.Run(in)
 
-	// Feed sarama channel and then close it
+	// Feed input channel and then close it
 	rounds := 1000
 	for i := 1; i <= rounds; i++ {
 		in <- newSignerTestMessage(i)

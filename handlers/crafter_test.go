@@ -66,20 +66,20 @@ func TestCrafter(t *testing.T) {
 	w := infra.NewWorker(100)
 	w.Use(TraceProtoLoader())
 
-	// Create and register crafter
+	// Create and register crafter handler
 	h := Crafter(ERC20Getter)
 	w.Use(h)
 
 	mockH := NewMockHandler(50)
 	w.Use(mockH.Handler())
 
-	// Create a input channel
+	// Create input channel
 	in := make(chan interface{})
 
 	// Run worker
 	go w.Run(in)
 
-	// Feed sarama channel and then close it
+	// Feed input channel and then close it
 	rounds := 1000
 	for i := 1; i <= rounds; i++ {
 		in <- newCrafterTestMessage(i)

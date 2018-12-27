@@ -7,7 +7,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
 )
 
-// OffsetMarker is an interface to mark offsets of message that have been consumed
+// OffsetMarker is an interface to mark that a context has been processed
+// Typically marking kafka offsets of message that have been consumed
 type OffsetMarker interface {
 	Mark(ctx *infra.Context)
 }

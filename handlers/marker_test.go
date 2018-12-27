@@ -62,13 +62,13 @@ func TestMarker(t *testing.T) {
 	h := Marker(offset)
 	w.Use(h)
 
-	// Create message channel
+	// Create input channel
 	in := make(chan interface{})
 
 	// Run worker
 	go w.Run(in)
 
-	// Feed sarama channel and then close it
+	// Feed input channel and then close it
 	rounds := 1000
 	for i := 1; i <= rounds; i++ {
 		in <- newMarkerMessage(int64(i))

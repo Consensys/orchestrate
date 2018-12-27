@@ -61,13 +61,13 @@ func TestNonceHandler(t *testing.T) {
 	w.Use(h)
 	w.Use(dummyTimeHandler(10))
 
-	// Create a Sarama message channel
+	// Create input channel
 	in := make(chan interface{})
 
 	// Run worker
 	go w.Run(in)
 
-	// Feed sarama channel and then close it
+	// Feed input channel and then close it
 	rounds := 1000
 	for i := 1; i <= rounds; i++ {
 		in <- newNonceTestMessage(i)
