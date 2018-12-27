@@ -1,12 +1,10 @@
 package handlers
 
 import (
-	"sync"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf"
 	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
 )
 
@@ -29,25 +27,11 @@ var testChains = []struct {
 	{"0xbf6e", false},
 }
 
-type TestSignerMsg struct {
-	chainID  string
-	IsEIP155 bool
-	a        string
-}
-
-func newSignerTestMessage(i int) *TestSignerMsg {
-	return &TestSignerMsg{testChains[i%3].ID, testChains[i%3].IsEIP155, testPKeys[i%4].a}
-}
-
-func testSignerLoader() infra.HandlerFunc {
-	return func(ctx *infra.Context) {
-		msg := ctx.Msg.(*TestSignerMsg)
-		ctx.Pb.Chain = &tracepb.Chain{Id: msg.chainID, IsEIP155: msg.IsEIP155}
-		ctx.Pb.Sender = &tracepb.Account{Address: msg.a}
-
-		// Load Trace from protobuffer
-		protobuf.LoadTrace(ctx.Pb, ctx.T)
-	}
+func newSignerTestMessage(i int) *tracepb.Trace {
+	var pb tracepb.Trace
+	pb.Chain = &tracepb.Chain{Id: testChains[i%3].ID, IsEIP155: testChains[i%3].IsEIP155}
+	pb.Sender = &tracepb.Account{Address: testPKeys[i%4].a}
+	return &pb
 }
 
 func TestSigner(t *testing.T) {
@@ -56,19 +40,17 @@ func TestSigner(t *testing.T) {
 		pKeys = append(pKeys, p.prv)
 	}
 	txSigner := NewStaticSigner(pKeys)
-	// Create signer handler
-	h := Signer(txSigner)
 
 	// Create new worker
 	w := infra.NewWorker(100)
-	w.Use(testSignerLoader())
+	w.Use(TraceProtoLoader())
+
+	// Create & register signer handler
+	h := Signer(txSigner)
 	w.Use(h)
 
-	testH := &testCrafterHandler{
-		mux:     &sync.Mutex{},
-		handled: []*infra.Context{},
-	}
-	w.Use(testH.Handler(50, t))
+	mockH := NewMockHandler(50)
+	w.Use(mockH.Handler())
 
 	// Create a Sarama message channel
 	in := make(chan interface{})
@@ -101,11 +83,11 @@ func TestSigner(t *testing.T) {
 		t.Errorf("Signer: Expected %v signers but got %v", len(testChains), len(signers))
 	}
 
-	if len(testH.handled) != rounds {
-		t.Errorf("Signer: expected %v rounds but got %v", rounds, len(testH.handled))
+	if len(mockH.handled) != rounds {
+		t.Errorf("Signer: expected %v rounds but got %v", rounds, len(mockH.handled))
 	}
 
-	for _, c := range testH.handled {
+	for _, c := range mockH.handled {
 		if len(c.T.Tx().Raw()) < 95 {
 			t.Errorf("Signer: Expected tx to be signed but got %q", hexutil.Encode(c.T.Tx().Raw()))
 		}

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"math/rand"
-	"sync"
 	"testing"
 	"time"
 
@@ -18,7 +17,7 @@ func init() {
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
-func newLoaderMessage() *sarama.ConsumerMessage {
+func newSaramaLoaderMessage() *sarama.ConsumerMessage {
 	msg := &sarama.ConsumerMessage{}
 	b := make([]rune, 5)
 	for i := range b {
@@ -32,35 +31,18 @@ func newLoaderMessage() *sarama.ConsumerMessage {
 	return msg
 }
 
-type testLoaderHandler struct {
-	mux     *sync.Mutex
-	handled []*infra.Context
-}
-
-func (h *testLoaderHandler) Handler(maxtime int, t *testing.T) infra.HandlerFunc {
-	return func(ctx *infra.Context) {
-		// We add some randomness in time execution
-		r := rand.Intn(maxtime)
-		time.Sleep(time.Duration(r) * time.Millisecond)
-		t.Logf("%v", ctx.T.Tx())
-		h.mux.Lock()
-		defer h.mux.Unlock()
-		h.handled = append(h.handled, ctx)
-	}
-}
-
 func TestSaramaLoader(t *testing.T) {
-	testH := &testLoaderHandler{
-		mux:     &sync.Mutex{},
-		handled: []*infra.Context{},
-	}
-	h := SaramaLoader()
-
 	// Create worker
 	w := infra.NewWorker(100)
+
+	// Create Sarama loader
+	h := SaramaLoader()
 	w.Use(h)
-	w.Use(testH.Handler(50, t))
-	
+
+	// Register mock handler
+	mockH := NewMockHandler(50)
+	w.Use(mockH.Handler())
+
 	// Create a input channel
 	in := make(chan interface{})
 
@@ -70,18 +52,18 @@ func TestSaramaLoader(t *testing.T) {
 	// Feed sarama channel and then close it
 	rounds := 1000
 	for i := 1; i <= rounds; i++ {
-		in <- newLoaderMessage()
+		in <- newSaramaLoaderMessage()
 	}
 	close(in)
 
 	// Wait for worker to be done
 	<-w.Done()
 
-	if len(testH.handled) != rounds {
-		t.Errorf("Loader: expected %v rounds but got %v", rounds, len(testH.handled))
+	if len(mockH.handled) != rounds {
+		t.Errorf("Loader: expected %v rounds but got %v", rounds, len(mockH.handled))
 	}
 
-	for _, ctx := range testH.handled {
+	for _, ctx := range mockH.handled {
 		if len(ctx.T.Sender().ID) != 5 {
 			t.Errorf("Loader: expected Sender ID to have lenght 5 but got %q", ctx.T.Sender().ID)
 		}

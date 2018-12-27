@@ -8,7 +8,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf"
 	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
 )
 
@@ -25,25 +24,23 @@ var (
 	}
 )
 
-type TestNonceMsg struct {
-	chainID string
-	a       string
+func newNonceTestMessage(i int) *tracepb.Trace {
+	var pb tracepb.Trace
+	pb.Chain = &tracepb.Chain{Id: chains[i%2]}
+	pb.Sender = &tracepb.Account{Address: senders[i%3]}
+	return &pb
 }
 
-func newNonceTestMessage(i int) *TestNonceMsg {
-	return &TestNonceMsg{chains[i%2], senders[i%3]}
-}
+// func testNonceLoader() infra.HandlerFunc {
+// 	return func(ctx *infra.Context) {
+// 		msg := ctx.Msg.(*TestNonceMsg)
+// 		ctx.Pb.Chain = &tracepb.Chain{Id: msg.chainID}
+// 		ctx.Pb.Sender = &tracepb.Account{Address: msg.a}
 
-func testNonceLoader() infra.HandlerFunc {
-	return func(ctx *infra.Context) {
-		msg := ctx.Msg.(*TestNonceMsg)
-		ctx.Pb.Chain = &tracepb.Chain{Id: msg.chainID}
-		ctx.Pb.Sender = &tracepb.Account{Address: msg.a}
-
-		// Load Trace from protobuffer
-		protobuf.LoadTrace(ctx.Pb, ctx.T)
-	}
-}
+// 		// Load Trace from protobuffer
+// 		protobuf.LoadTrace(ctx.Pb, ctx.T)
+// 	}
+// }
 
 func dummyTimeHandler(maxtime int) infra.HandlerFunc {
 	return func(ctx *infra.Context) {
@@ -60,7 +57,7 @@ func TestNonceHandler(t *testing.T) {
 
 	// Create new worker
 	w := infra.NewWorker(100)
-	w.Use(testNonceLoader())
+	w.Use(TraceProtoLoader())
 	w.Use(h)
 	w.Use(dummyTimeHandler(10))
 
