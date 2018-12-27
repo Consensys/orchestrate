@@ -64,7 +64,7 @@ func newCrafterTestMessage(i int) *tracepb.Trace {
 func TestCrafter(t *testing.T) {
 	// Create worker
 	w := infra.NewWorker(100)
-	w.Use(TraceProtoLoader())
+	w.Use(Loader(&TraceProtoUnmarshaller{}))
 
 	// Create and register crafter handler
 	h := Crafter(ERC20Getter)

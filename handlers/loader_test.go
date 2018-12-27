@@ -36,7 +36,7 @@ func TestSaramaLoader(t *testing.T) {
 	w := infra.NewWorker(100)
 
 	// Create Sarama loader
-	h := SaramaLoader()
+	h := Loader(&SaramaUnmarshaller{})
 	w.Use(h)
 
 	// Register mock handler

@@ -59,7 +59,7 @@ func checker(val []byte) error {
 func TestProducer(t *testing.T) {
 	// Create worker
 	w := infra.NewWorker(100)
-	w.Use(TraceProtoLoader())
+	w.Use(Loader(&TraceProtoUnmarshaller{}))
 
 	//Register mock (for time randomness)
 	w.Use(NewMockHandler(50).Handler())

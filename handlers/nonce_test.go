@@ -31,17 +31,6 @@ func newNonceTestMessage(i int) *tracepb.Trace {
 	return &pb
 }
 
-// func testNonceLoader() infra.HandlerFunc {
-// 	return func(ctx *infra.Context) {
-// 		msg := ctx.Msg.(*TestNonceMsg)
-// 		ctx.Pb.Chain = &tracepb.Chain{Id: msg.chainID}
-// 		ctx.Pb.Sender = &tracepb.Account{Address: msg.a}
-
-// 		// Load Trace from protobuffer
-// 		protobuf.LoadTrace(ctx.Pb, ctx.T)
-// 	}
-// }
-
 func dummyTimeHandler(maxtime int) infra.HandlerFunc {
 	return func(ctx *infra.Context) {
 		// Simulate some io time
@@ -57,9 +46,9 @@ func TestNonceHandler(t *testing.T) {
 
 	// Create new worker
 	w := infra.NewWorker(100)
-	w.Use(TraceProtoLoader())
+	w.Use(Loader(&TraceProtoUnmarshaller{}))
 	w.Use(h)
-	w.Use(dummyTimeHandler(10))
+	w.Use(NewMockHandler(10).Handler())
 
 	// Create input channel
 	in := make(chan interface{})

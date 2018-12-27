@@ -53,7 +53,7 @@ func (p *DummyGasPricer) SuggestGasPrice(chainID *big.Int) (*big.Int, error) {
 func TestGas(t *testing.T) {
 	// Create worker
 	w := infra.NewWorker(100)
-	w.Use(TraceProtoLoader())
+	w.Use(Loader(&TraceProtoUnmarshaller{}))
 
 	// Create and register gas limit handler
 	l := GasLimiter(&DummyGasEstimator{})
