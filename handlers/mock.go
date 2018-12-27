@@ -16,6 +16,7 @@ type MockHandler struct {
 	maxtime int
 }
 
+// NewMockHandler creates a new mock handler
 func NewMockHandler(maxtime int) *MockHandler {
 	return &MockHandler{
 		&sync.Mutex{},
