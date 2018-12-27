@@ -7,10 +7,10 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 )
 
-// EthClient embed a go-ethereum rpc client so we can define SendRawTransaction
+// EthClient embed a go-ethereum ethclient so we can implement SendRawTransaction
 type EthClient struct {
-	Eth *ethclient.Client
-	RPC *rpc.Client
+	*ethclient.Client
+	rpc *rpc.Client
 }
 
 // NewClient creates a client that uses the given RPC client.
@@ -35,5 +35,5 @@ func DialContext(ctx context.Context, rawurl string) (*EthClient, error) {
 
 // SendRawTransaction allows to send a raw transaction
 func (ec *EthClient) SendRawTransaction(ctx context.Context, raw string) error {
-	return ec.RPC.CallContext(ctx, nil, "eth_sendRawTransaction", raw)
+	return ec.rpc.CallContext(ctx, nil, "eth_sendRawTransaction", raw)
 }
