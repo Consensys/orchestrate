@@ -89,7 +89,7 @@ func (h *SaramaHandler) Setup(s sarama.ConsumerGroupSession) error {
 	h.w.Use(logger)
 
 	// Sarama message loader
-	h.w.Use(handlers.SaramaLoader())
+	h.w.Use(handlers.Loader(&handlers.SaramaUnmarshaller{}))
 
 	// Crafer
 	h.w.Use(handlers.Crafter(erc20Getter()))
