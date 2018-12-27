@@ -36,6 +36,11 @@ type SimpleGasManager struct {
 	ec *infra.EthClient
 }
 
+// NewSimpleGasManager creates a new SimpleGasManager
+func NewSimpleGasManager(ec *infra.EthClient) *SimpleGasManager {
+	return &SimpleGasManager{ec}
+}
+
 // SuggestGasPrice suggests a gas price
 func (m *SimpleGasManager) SuggestGasPrice(chainID *big.Int) (*big.Int, error) {
 	return m.ec.SuggestGasPrice(context.Background())
