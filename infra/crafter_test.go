@@ -3,6 +3,7 @@ package infra
 import (
 	"encoding/json"
 	"math/big"
+	"sync"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -132,7 +133,7 @@ func TestBindArgs(t *testing.T) {
 	}
 }
 
-func TestPayloadCraft(t *testing.T) {
+func TestPayloadCrafter(t *testing.T) {
 	c := PayloadCrafter{}
 	var (
 		_to     = "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"
@@ -168,5 +169,44 @@ func TestPayloadCraft(t *testing.T) {
 	if hexutil.Encode(data) != payload {
 		t.Errorf("Craft: expected payload %q but got %q", payload, hexutil.Encode(data))
 	}
+}
 
+var testCrafterData = []struct {
+	to    string
+	value string
+}{
+	{"0xfF778b716FC07D98839f48DdB88D8bE583BEB684", "0x2386f26fc10000"},
+	{},
+}
+
+func TestPayloadCrafterConcurrent(t *testing.T) {
+	c := PayloadCrafter{}
+	rounds := 1000
+	raws := make(chan []byte, rounds)
+	wg := &sync.WaitGroup{}
+	for i := 1; i <= rounds; i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			raw, err := c.Craft(ERC20TransferMethod, testCrafterData[i%2].to, testCrafterData[i%2].value)
+			// Test as been designed such as 1 out of 6 entry are valid for a credit
+			if err == nil {
+				raws <- raw
+			}
+		}(i)
+
+	}
+	wg.Wait()
+	close(raws)
+
+	if len(raws) != rounds/2 {
+		t.Errorf("PayloadCrafter: expected %v crafts but got %v", rounds/2, len(raws))
+	}
+
+	payload := "0xa9059cbb000000000000000000000000ff778b716fc07d98839f48ddb88d8be583beb684000000000000000000000000000000000000000000000000002386f26fc10000"
+	for data := range raws {
+		if hexutil.Encode(data) != payload {
+			t.Errorf("Craft: expected payload %q but got %q", payload, hexutil.Encode(data))
+		}
+	}
 }

@@ -1,49 +1,26 @@
 package handlers
 
 import (
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
 )
 
-// ABIGetter is an interface to retrieve ABIs
-type ABIGetter interface {
-	// Must return
-	GetMethodByID(ID string) (*abi.Method, error)
-}
-
-// DummyABIGetter always return the same ABI method (useful for testing purpose)
-type DummyABIGetter struct {
-	abi *abi.Method
-}
-
-// NewDummyABIGetter creates a new DummyABIgetter
-func NewDummyABIGetter(abi *abi.Method) *DummyABIGetter {
-	return &DummyABIGetter{abi}
-}
-
-// GetMethodByID return ABI
-func (g *DummyABIGetter) GetMethodByID(ID string) (*abi.Method, error) {
-	return g.abi, nil
-}
-
 // Crafter creates a crafter handler
-func Crafter(g ABIGetter) infra.HandlerFunc {
+func Crafter(r infra.ABIRegistry, c infra.Crafter) infra.HandlerFunc {
 	return func(ctx *infra.Context) {
 		// Retrieve method identifier from trace
-		methodID:= ctx.T.Call().MethodID
+		methodID := ctx.T.Call().MethodID
 
 		if methodID == "" || len(ctx.T.Tx().Data()) > 0 {
-			// Nothing to craft 
+			// Nothing to craft
 			return
 		}
 
 		// Retrieve  args from trace
 		args := ctx.T.Call().Args
-		
+
 		// Retrieve method ABI object
-		method, err := g.GetMethodByID(methodID)
+		method, err := r.GetMethodByID(methodID)
 		if err != nil {
 			e := types.Error{
 				Err:  err,
@@ -55,7 +32,7 @@ func Crafter(g ABIGetter) infra.HandlerFunc {
 		}
 
 		// Craft transaction payload
-		payload, err := ethereum.CraftPayload(method, args)
+		payload, err := c.Craft(method, args...)
 		if err != nil {
 			e := types.Error{
 				Err:  err,
