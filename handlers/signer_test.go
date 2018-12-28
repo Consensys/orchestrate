@@ -1,99 +1,101 @@
 package handlers
 
 import (
+	"fmt"
+	"math/big"
+	"sync"
 	"testing"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
 )
 
-var testPKeys = []struct {
-	prv string
-	a   string
-}{
-	{"5FBB50BFF6DFAD35C4A374C9237BA2F7EAED9C6868E0108CB259B62D68029B1A", "0xdbb881a51CD4023E4400CEF3ef73046743f08da3"},
-	{"86B021CCB810F26A30445B85F71E4C1596A11A97DDF9B9E348AC93D1DA6735BC", "0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff"},
-	{"DD614C3B343E1B6DBD1B2811D4F146CC90337DEEF96AB97C353578E871B19D5E", "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"},
-	{"425D92F63A836F890F1690B34B6A25C2971EF8D035CD8EA8592FD1069BD151C6", "0xffbBa394DEf3Ff1df0941c6429887107f58d4e9b"},
+type MockTxSigner struct {
+	t *testing.T
 }
 
-var testChains = []struct {
-	ID       string
-	IsEIP155 bool
-}{
-	{"0x1ae3", true},
-	{"0x3", true},
-	{"0xbf6e", false},
+func (s *MockTxSigner) Sign(chain *types.Chain, a common.Address, tx *ethtypes.Transaction) (raw []byte, hash *common.Hash, err error) {
+	if chain.ID.Text(10) == "0" {
+		return []byte(``), nil, fmt.Errorf("Could not sign")
+	}
+	h := common.HexToHash("0xabcdef")
+	return hexutil.MustDecode("0xabcdef"), &h, nil
 }
 
-func newSignerTestMessage(i int) *tracepb.Trace {
-	var pb tracepb.Trace
-	pb.Chain = &tracepb.Chain{Id: testChains[i%3].ID, IsEIP155: testChains[i%3].IsEIP155}
-	pb.Sender = &tracepb.Account{Address: testPKeys[i%4].a}
-	return &pb
+func makeSignerContext(i int) *infra.Context {
+	ctx := infra.NewContext()
+	ctx.Reset()
+	switch i % 4 {
+	case 0:
+		ctx.T.Chain().ID = big.NewInt(10)
+		ctx.T.Tx().SetRaw(hexutil.MustDecode("0xabde4f3a"))
+		h := common.HexToHash("0x12345678")
+		ctx.T.Tx().SetHash(&h)
+		ctx.Keys["errors"] = 0
+		ctx.Keys["raw"] = "0xabde4f3a"
+		ctx.Keys["hash"] = "0x0000000000000000000000000000000000000000000000000000000012345678"
+	case 1:
+		ctx.T.Chain().ID = big.NewInt(0)
+		ctx.T.Tx().SetRaw(hexutil.MustDecode("0xabde4f3a"))
+		h := common.HexToHash("0x12345678")
+		ctx.T.Tx().SetHash(&h)
+		ctx.Keys["errors"] = 0
+		ctx.Keys["raw"] = "0xabde4f3a"
+		ctx.Keys["hash"] = "0x0000000000000000000000000000000000000000000000000000000012345678"
+	case 2:
+		ctx.T.Chain().ID = big.NewInt(0)
+		ctx.T.Tx().SetRaw([]byte(``))
+		ctx.Keys["errors"] = 1
+		ctx.Keys["raw"] = "0x"
+		ctx.Keys["hash"] = "0x0000000000000000000000000000000000000000000000000000000000000000"
+	case 3:
+		ctx.T.Chain().ID = big.NewInt(10)
+		ctx.T.Tx().SetRaw([]byte(``))
+		ctx.Keys["errors"] = 0
+		ctx.Keys["raw"] = "0xabcdef"
+		ctx.Keys["hash"] = "0x0000000000000000000000000000000000000000000000000000000000abcdef"
+	}
+	return ctx
 }
 
 func TestSigner(t *testing.T) {
-	pKeys := []string{}
-	for _, p := range testPKeys {
-		pKeys = append(pKeys, p.prv)
+	s := MockTxSigner{t: t}
+	signer := Signer(&s)
+
+	rounds := 100
+	outs := make(chan *infra.Context, rounds)
+	wg := &sync.WaitGroup{}
+	for i := 0; i < rounds; i++ {
+		wg.Add(1)
+		ctx := makeSignerContext(i)
+		go func(ctx *infra.Context) {
+			defer wg.Done()
+			signer(ctx)
+			outs <- ctx
+		}(ctx)
 	}
-	txSigner := NewStaticSigner(pKeys)
+	wg.Wait()
+	close(outs)
 
-	// Create new worker
-	w := infra.NewWorker(100)
-	w.Use(Loader(&TraceProtoUnmarshaller{}))
-
-	// Create & register signer handler
-	h := Signer(txSigner)
-	w.Use(h)
-
-	mockH := NewMockHandler(50)
-	w.Use(mockH.Handler())
-
-	// Create input channel
-	in := make(chan interface{})
-
-	// Run worker
-	go w.Run(in)
-
-	// Feed input channel and then close it
-	rounds := 1000
-	for i := 1; i <= rounds; i++ {
-		in <- newSignerTestMessage(i)
-	}
-	close(in)
-
-	// Wait for worker to be done
-	<-w.Done()
-
-	// Run worker
-	go w.Run(in)
-
-	signers := []string{}
-	txSigner.signers.Range(
-		func(key, value interface{}) bool {
-			signers = append(signers, key.(string))
-			return true
-		},
-	)
-
-	if len(signers) != len(testChains) {
-		t.Errorf("Signer: Expected %v signers but got %v", len(testChains), len(signers))
+	if len(outs) != rounds {
+		t.Errorf("Signer: expected %v outs but got %v", rounds, len(outs))
 	}
 
-	if len(mockH.handled) != rounds {
-		t.Errorf("Signer: expected %v rounds but got %v", rounds, len(mockH.handled))
-	}
-
-	for _, c := range mockH.handled {
-		if len(c.T.Tx().Raw()) < 95 {
-			t.Errorf("Signer: Expected tx to be signed but got %q", hexutil.Encode(c.T.Tx().Raw()))
+	for out := range outs {
+		errCount, raw, hash := out.Keys["errors"].(int), out.Keys["raw"].(string), out.Keys["hash"].(string)
+		if len(out.T.Errors) != errCount {
+			t.Errorf("Signer: expected %v errors but got %v", errCount, out.T.Errors)
 		}
 
-		if c.T.Tx().Hash().Hex() == "0x0000000000000000000000000000000000000000000000000000000000000000" {
-			t.Errorf("Signer: Expected tx hash to be set")
+		if hexutil.Encode(out.T.Tx().Raw()) != raw {
+			t.Errorf("Signer: expected Raw %v but got %v", raw, hexutil.Encode(out.T.Tx().Raw()))
+		}
+
+		if out.T.Tx().Hash().Hex() != hash {
+			t.Errorf("Signer: expected hash %v but got %v", hash, out.T.Tx().Hash().Hex())
 		}
 	}
 }
