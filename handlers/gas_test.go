@@ -1,101 +1,133 @@
 package handlers
 
 import (
+	"fmt"
 	"math/big"
-	"math/rand"
+	"sync"
 	"testing"
-	"time"
 
 	"github.com/ethereum/go-ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
-	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/ethereum"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
 )
 
-type TestGasMsg struct {
-	chainID string
-	sender  string
-	to      string
-	value   string
-	data    string
+type MockGasEstimator struct {
+	t *testing.T
 }
 
-func newGasTestMessage() *tracepb.Trace {
-	var pb tracepb.Trace
-	pb.Chain = &tracepb.Chain{Id: "0x1"}
-	pb.Sender = &tracepb.Account{Address: "0xdbb881a51CD4023E4400CEF3ef73046743f08da3"}
-	pb.Transaction = &ethpb.Transaction{
-		TxData: &ethpb.TxData{
-			To:    "0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff",
-			Value: "0xa2bfe3",
-			Data:  "0xabcdef",
-		},
+func (e *MockGasEstimator) EstimateGas(chainID *big.Int, call ethereum.CallMsg) (uint64, error) {
+	if chainID.Text(10) == "0" {
+		return 0, fmt.Errorf("Could not estimate gas")
 	}
-	return &pb
-}
-
-type DummyGasEstimator struct{}
-
-func (e *DummyGasEstimator) EstimateGas(chainID *big.Int, call ethereum.CallMsg) (uint64, error) {
-	r := rand.Intn(50)
-	time.Sleep(time.Duration(r) * time.Millisecond)
 	return 18, nil
 }
 
-type DummyGasPricer struct{}
-
-func (p *DummyGasPricer) SuggestGasPrice(chainID *big.Int) (*big.Int, error) {
-	r := rand.Intn(50)
-	time.Sleep(time.Duration(r) * time.Millisecond)
-	return big.NewInt(123456789), nil
+func makeGasEstimatorContext(i int) *infra.Context {
+	ctx := infra.NewContext()
+	ctx.Reset()
+	switch i % 2 {
+	case 0:
+		ctx.T.Chain().ID = big.NewInt(0)
+		ctx.Keys["errors"] = 1
+		ctx.Keys["result"] = uint64(0)
+	case 1:
+		ctx.T.Chain().ID = big.NewInt(1)
+		ctx.Keys["errors"] = 0
+		ctx.Keys["result"] = uint64(18)
+	}
+	return ctx
 }
 
-func TestGas(t *testing.T) {
-	// Create worker
-	w := infra.NewWorker(100)
-	w.Use(Loader(&TraceProtoUnmarshaller{}))
+func TestGasEstimator(t *testing.T) {
+	me := MockGasEstimator{t: t}
+	estimator := GasEstimator(&me)
 
-	// Create and register gas limit handler
-	l := GasLimiter(&DummyGasEstimator{})
-	w.Use(l)
-
-	// Create and register gas price handler
-	p := GasPricer(&DummyGasPricer{})
-	w.Use(p)
-
-	mockH := NewMockHandler(50)
-	w.Use(mockH.Handler())
-
-	// Create input channel
-	in := make(chan interface{})
-
-	// Run worker
-	go w.Run(in)
-
-	// Feed input channel and then close it
-	rounds := 1000
-	for i := 1; i <= rounds; i++ {
-		in <- newNonceTestMessage(i)
+	rounds := 100
+	outs := make(chan *infra.Context, rounds)
+	wg := &sync.WaitGroup{}
+	for i := 0; i < rounds; i++ {
+		wg.Add(1)
+		ctx := makeGasEstimatorContext(i)
+		go func(ctx *infra.Context) {
+			defer wg.Done()
+			estimator(ctx)
+			outs <- ctx
+		}(ctx)
 	}
-	close(in)
-
-	// Wait for worker to be done
-	<-w.Done()
-
-	// Run worker
-	go w.Run(in)
-
-	if len(mockH.handled) != rounds {
-		t.Errorf("Gas: expected %v rounds but got %v", rounds, len(mockH.handled))
+	wg.Wait()
+	close(outs)
+	if len(outs) != rounds {
+		t.Errorf("GasEstimator: expected %v outs but got %v", rounds, len(outs))
 	}
 
-	for _, c := range mockH.handled {
-		if c.T.Tx().GasLimit() != 18 {
-			t.Errorf("Gas: Expected tx GasLimit to be 18 but got %v", c.T.Tx().GasLimit())
+	for out := range outs {
+		errCount, result := out.Keys["errors"].(int), out.Keys["result"].(uint64)
+		if len(out.T.Errors) != errCount {
+			t.Errorf("GasEstimator: expected %v errors but got %v", errCount, out.T.Errors)
 		}
 
-		if c.T.Tx().GasPrice().Text(10) != "123456789" {
-			t.Errorf("Gas: Expected tx GasPrice to be %q but got %q", "123456789", c.T.Tx().GasPrice().Text(10))
+		if out.T.Tx().GasLimit() != result {
+			t.Errorf("GasEstimator: expected gas limit %v but got %v", result, out.T.Tx().GasLimit())
+		}
+	}
+}
+
+type MockGasPricer struct {
+	t *testing.T
+}
+
+func (e *MockGasPricer) SuggestGasPrice(chainID *big.Int) (*big.Int, error) {
+	if chainID.Text(10) == "0" {
+		return big.NewInt(0), fmt.Errorf("Could not estimate gas")
+	}
+	return big.NewInt(10), nil
+}
+
+func makeGasPricerContext(i int) *infra.Context {
+	ctx := infra.NewContext()
+	ctx.Reset()
+	switch i % 2 {
+	case 0:
+		ctx.T.Chain().ID = big.NewInt(0)
+		ctx.Keys["errors"] = 1
+		ctx.Keys["result"] = int64(0)
+	case 1:
+		ctx.T.Chain().ID = big.NewInt(1)
+		ctx.Keys["errors"] = 0
+		ctx.Keys["result"] = int64(10)
+	}
+	return ctx
+}
+
+func TestGasPricer(t *testing.T) {
+	mp := MockGasPricer{t: t}
+	pricer := GasPricer(&mp)
+
+	rounds := 100
+	outs := make(chan *infra.Context, rounds)
+	wg := &sync.WaitGroup{}
+	for i := 0; i < rounds; i++ {
+		wg.Add(1)
+		ctx := makeGasPricerContext(i)
+		go func(ctx *infra.Context) {
+			defer wg.Done()
+			pricer(ctx)
+			outs <- ctx
+		}(ctx)
+	}
+	wg.Wait()
+	close(outs)
+	if len(outs) != rounds {
+		t.Errorf("GasEstimator: expected %v outs but got %v", rounds, len(outs))
+	}
+
+	for out := range outs {
+		errCount, result := out.Keys["errors"].(int), out.Keys["result"].(int64)
+		if len(out.T.Errors) != errCount {
+			t.Errorf("GasPricer: expected %v errors but got %v", errCount, out.T.Errors)
+		}
+
+		if out.T.Tx().GasPrice().Int64() != result {
+			t.Errorf("GasPricer: expected gas price %v but got %v", result, out.T.Tx().GasLimit())
 		}
 	}
 }
