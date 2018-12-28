@@ -1,84 +1,65 @@
 package handlers
 
 import (
-	"context"
-	"math/rand"
+	"fmt"
 	"sync"
 	"testing"
-	"time"
 
-	"github.com/Shopify/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
 )
 
-type mockConsumerGroupSession struct {
-	mux      *sync.Mutex
-	lastMark int64
+type MockOffsetMarker struct {
+	t *testing.T
 }
 
-func (s *mockConsumerGroupSession) Claims() map[string][]int32 { return make(map[string][]int32) }
-func (s *mockConsumerGroupSession) MemberID() string           { return "" }
-func (s *mockConsumerGroupSession) GenerationID() int32        { return 0 }
-
-func (s *mockConsumerGroupSession) MarkOffset(topic string, partition int32, offset int64, metadata string) {
-	// Simulate some io time
-	r := rand.Intn(100)
-	time.Sleep(time.Duration(r) * time.Millisecond)
-	s.mux.Lock()
-	defer s.mux.Unlock()
-	if offset > s.lastMark {
-		s.lastMark = offset
+func (o *MockOffsetMarker) Mark(msg interface{}) error {
+	if msg.(string) == "error" {
+		return fmt.Errorf("Could not mark")
 	}
+	return nil
 }
 
-func (s *mockConsumerGroupSession) ResetOffset(topic string, partition int32, offset int64, metadata string) {
-}
-
-func (s *mockConsumerGroupSession) MarkMessage(msg *sarama.ConsumerMessage, metadata string) {
-	s.MarkOffset(msg.Topic, msg.Partition, msg.Offset+1, metadata)
-}
-
-func (s *mockConsumerGroupSession) Context() context.Context {
-	return context.Background()
-}
-
-func newMarkerMessage(i int64) *sarama.ConsumerMessage {
-	msg := &sarama.ConsumerMessage{}
-	msg.Offset = i
-	return msg
+func makeMarkerContext(i int) *infra.Context {
+	ctx := infra.NewContext()
+	ctx.Reset()
+	switch i % 2 {
+	case 0:
+		ctx.Msg = "error"
+		ctx.Keys["errors"] = 1
+	case 1:
+		ctx.Msg = "valid"
+		ctx.Keys["errors"] = 0
+	}
+	return ctx
 }
 
 func TestMarker(t *testing.T) {
-	// Create worker
-	w := infra.NewWorker(100)
+	mo := MockOffsetMarker{t: t}
+	marker := Marker(&mo)
 
-	// Add mock handler (to simulate some randomness in time execution)
-	mockH := NewMockHandler(50)
-	w.Use(mockH.Handler())
-
-	// Create & register marker handler
-	s := mockConsumerGroupSession{&sync.Mutex{}, -1}
-	offset := NewSimpleSaramaOffsetMarker(&s)
-	h := Marker(offset)
-	w.Use(h)
-
-	// Create input channel
-	in := make(chan interface{})
-
-	// Run worker
-	go w.Run(in)
-
-	// Feed input channel and then close it
-	rounds := 1000
-	for i := 1; i <= rounds; i++ {
-		in <- newMarkerMessage(int64(i))
+	rounds := 10
+	outs := make(chan *infra.Context, rounds)
+	wg := &sync.WaitGroup{}
+	for i := 0; i < rounds; i++ {
+		wg.Add(1)
+		ctx := makeMarkerContext(i)
+		go func(ctx *infra.Context) {
+			defer wg.Done()
+			marker(ctx)
+			outs <- ctx
+		}(ctx)
 	}
-	close(in)
+	wg.Wait()
+	close(outs)
 
-	// Wait for worker to be done
-	<-w.Done()
+	if len(outs) != rounds {
+		t.Errorf("Marker: expected %v outs but got %v", rounds, len(outs))
+	}
 
-	if s.lastMark != int64(rounds)+1 {
-		t.Errorf("Marker: expected lastMark to be %v but got %v", rounds+1, s.lastMark)
+	for out := range outs {
+		errCount := out.Keys["errors"].(int)
+		if len(out.T.Errors) != errCount {
+			t.Errorf("Marker: expected %v errors but got %v", errCount, out.T.Errors)
+		}
 	}
 }
