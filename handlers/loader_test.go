@@ -1,71 +1,65 @@
 package handlers
 
 import (
-	"math/rand"
+	"fmt"
+	"sync"
 	"testing"
-	"time"
 
-	"github.com/Shopify/sarama"
-	"github.com/golang/protobuf/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
 	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
 )
 
-func init() {
-	rand.Seed(time.Now().UnixNano())
+type MockUnmarshaller struct {
+	t *testing.T
 }
 
-var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-func newSaramaLoaderMessage() *sarama.ConsumerMessage {
-	msg := &sarama.ConsumerMessage{}
-	b := make([]rune, 5)
-	for i := range b {
-		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+func (u *MockUnmarshaller) Unmarshal(msg interface{}, pb *tracepb.Trace) error {
+	if msg.(string) == "error" {
+		return fmt.Errorf("Could not unmarshall")
 	}
-	msg.Value, _ = proto.Marshal(
-		&tracepb.Trace{
-			Sender: &tracepb.Account{Id: string(b)},
-		},
-	)
-	return msg
+	return nil
 }
 
-func TestSaramaLoader(t *testing.T) {
-	// Create worker
-	w := infra.NewWorker(100)
-
-	// Create Sarama loader
-	h := Loader(&SaramaUnmarshaller{})
-	w.Use(h)
-
-	// Register mock handler
-	mockH := NewMockHandler(50)
-	w.Use(mockH.Handler())
-
-	// Create input channel
-	in := make(chan interface{})
-
-	// Run worker
-	go w.Run(in)
-
-	// Feed input channel and then close it
-	rounds := 1000
-	for i := 1; i <= rounds; i++ {
-		in <- newSaramaLoaderMessage()
+func makeLoaderContext(i int) *infra.Context {
+	ctx := infra.NewContext()
+	ctx.Reset()
+	switch i % 2 {
+	case 0:
+		ctx.Msg = "error"
+		ctx.Keys["errors"] = 1
+	case 1:
+		ctx.Msg = "valid"
+		ctx.Keys["errors"] = 0
 	}
-	close(in)
+	return ctx
+}
 
-	// Wait for worker to be done
-	<-w.Done()
+func TestLoader(t *testing.T) {
+	mu := MockUnmarshaller{t: t}
+	loader := Loader(&mu)
 
-	if len(mockH.handled) != rounds {
-		t.Errorf("Loader: expected %v rounds but got %v", rounds, len(mockH.handled))
+	rounds := 10
+	outs := make(chan *infra.Context, rounds)
+	wg := &sync.WaitGroup{}
+	for i := 0; i < rounds; i++ {
+		wg.Add(1)
+		ctx := makeLoaderContext(i)
+		go func(ctx *infra.Context) {
+			defer wg.Done()
+			loader(ctx)
+			outs <- ctx
+		}(ctx)
+	}
+	wg.Wait()
+	close(outs)
+	if len(outs) != rounds {
+		t.Errorf("Loader: expected %v outs but got %v", rounds, len(outs))
 	}
 
-	for _, ctx := range mockH.handled {
-		if len(ctx.T.Sender().ID) != 5 {
-			t.Errorf("Loader: expected Sender ID to have lenght 5 but got %q", ctx.T.Sender().ID)
+	for out := range outs {
+		errCount := out.Keys["errors"].(int)
+		if len(out.T.Errors) != errCount {
+			t.Errorf("Loader: expected %v errors but got %v", errCount, out.T.Errors)
 		}
 	}
 }
