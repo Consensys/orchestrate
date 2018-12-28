@@ -8,7 +8,6 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/ethereum/go-ethereum/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
 )
 
 // EthCrediter is an interface for crediting an account with ether
@@ -111,10 +110,4 @@ type SimpleCreditControllerConfig struct {
 	MaxBalance   *big.Int
 	CreditDelay  time.Duration
 	BlackList    map[string]struct{}
-}
-
-func txCost(tx *types.Tx) *big.Int {
-	// Compute ETH cost of the transaction (based on formula cost = gasLimit*gasPrice + value)
-	gas, cost := big.NewInt(0), big.NewInt(0)
-	return cost.Add(cost.Mul(tx.GasPrice(), gas.SetUint64(tx.GasLimit())), tx.Value())
 }
