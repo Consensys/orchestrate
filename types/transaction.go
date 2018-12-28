@@ -136,6 +136,12 @@ func (tx *Tx) SetHash(h *common.Hash) {
 	tx.hash = h
 }
 
+// Cost compute ETH cost of Tx (based on formula cost = gasLimit*gasPrice + value)
+func (tx *Tx) Cost() *big.Int {
+	gas, cost := big.NewInt(0), big.NewInt(0)
+	return cost.Add(cost.Mul(tx.GasPrice(), gas.SetUint64(tx.GasLimit())), tx.Value())
+}
+
 // Sign signs transaction
 func (tx *Tx) Sign(s types.Signer, prv *ecdsa.PrivateKey) error {
 	// Create Go-Ethereum transaction object

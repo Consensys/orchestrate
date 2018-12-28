@@ -103,3 +103,15 @@ func TestTxSign(t *testing.T) {
 		t.Errorf("Tx: expected set Hash to %q but got %q", hash.Hex(), tx.Hash().Hex())
 	}
 }
+
+func TestTxCost(t *testing.T) {
+	tx := NewTx()
+	tx.SetGasLimit(32)
+	tx.SetGasPrice(big.NewInt(32))
+
+	cost := tx.Cost()
+
+	if cost.Int64() != 1024 {
+		t.Errorf("txCost: expected %v but got %v", 1024, cost.Int64())
+	}
+}
