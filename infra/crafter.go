@@ -1,4 +1,4 @@
-package ethereum
+package infra
 
 import (
 	"fmt"
@@ -9,8 +9,15 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
+// Crafter takes a method abi and args to craft a transaction
+type Crafter interface {
+	Craft(method *abi.Method, args ...string) ([]byte, error)
+}
+
+// PayloadCrafter is a structure that can Craft payloads
+type PayloadCrafter struct{}
+
 func bindArg(stringKind string, arg string) (interface{}, error) {
-	// In current version we assume every arguments to be strings
 	switch {
 	case stringKind == "address":
 		if !common.IsHexAddress(arg) {
@@ -37,17 +44,18 @@ func bindArg(stringKind string, arg string) (interface{}, error) {
 	case strings.HasPrefix(stringKind, "string"):
 		return arg, nil
 
-	// In current version we only cover basic types
+	// In current version we only cover basic types (in particular we do not support arrays)
 	default:
 		return nil, nil
 	}
 }
 
-// bindArgs cast string arguments to expected go-ethereum type before crafting
-func bindArgs(method *abi.Method, args []string) ([]interface{}, error) {
+// bindArgs cast string arguments into expected go-ethereum types
+func bindArgs(method *abi.Method, args ...string) ([]interface{}, error) {
 	if method.Inputs.LengthNonIndexed() != len(args) {
-		return nil, fmt.Errorf("BindArgs: expected %v inputs but got %v", method.Inputs.LengthNonIndexed(), len(args))
+		return nil, fmt.Errorf("Expected %v inputs but got %v", method.Inputs.LengthNonIndexed(), len(args))
 	}
+
 	boundArgs := make([]interface{}, 0)
 	for i, arg := range method.Inputs.NonIndexed() {
 		boundArg, err := bindArg(arg.Type.String(), args[i])
@@ -59,16 +67,16 @@ func bindArgs(method *abi.Method, args []string) ([]interface{}, error) {
 	return boundArgs, nil
 }
 
-// CraftPayload craft a transaction payload
-func CraftPayload(method *abi.Method, args []string) ([]byte, error) {
-	boundArgs, err := bindArgs(method, args)
-
+// Craft craft a transaction payload
+func (c *PayloadCrafter) Craft(method *abi.Method, args ...string) ([]byte, error) {
+	// Cast arguments
+	boundArgs, err := bindArgs(method, args...)
 	if err != nil {
 		return nil, err
 	}
 
+	// Pack arguments
 	arguments, err := method.Inputs.Pack(boundArgs...)
-
 	if err != nil {
 		return nil, err
 	}
