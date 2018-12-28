@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"hash"
 	"hash/fnv"
@@ -149,6 +150,14 @@ func (c *CacheNonce) Obtain(chainID *big.Int, a common.Address) (NonceLocker, er
 	}
 	return rv, nil
 }
+
+// NewNonceEthClient returns a function to get nonce initial values from an Eth client
+func NewNonceEthClient(ec *infra.EthClient) NewNonceFunc {
+	return func(chainID *big.Int, a common.Address) (uint64, error) {
+		return ec.PendingNonceAt(context.Background(), a)
+	}
+}
+
 
 // NonceHandler creates and return an handler for nonce
 func NonceHandler(m NonceManager) infra.HandlerFunc {
