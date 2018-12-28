@@ -31,9 +31,17 @@ func (g *DummyABIGetter) GetMethodByID(ID string) (*abi.Method, error) {
 // Crafter creates a crafter handler
 func Crafter(g ABIGetter) infra.HandlerFunc {
 	return func(ctx *infra.Context) {
-		// Retrieve method identifier and args from trace
-		methodID, args := ctx.T.Call().MethodID, ctx.T.Call().Args
+		// Retrieve method identifier from trace
+		methodID:= ctx.T.Call().MethodID
 
+		if methodID == "" || len(ctx.T.Tx().Data()) > 0 {
+			// Nothing to craft 
+			return
+		}
+
+		// Retrieve  args from trace
+		args := ctx.T.Call().Args
+		
 		// Retrieve method ABI object
 		method, err := g.GetMethodByID(methodID)
 		if err != nil {
