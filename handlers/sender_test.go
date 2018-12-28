@@ -1,76 +1,76 @@
 package handlers
 
 import (
+	"fmt"
 	"math/big"
 	"sync"
 	"testing"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
-	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/ethereum"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
 )
 
-type DummyTxSender struct {
-	mux  *sync.Mutex
-	sent []string
+type MockTxSender struct {
+	t *testing.T
 }
 
-func (s *DummyTxSender) Send(chainID *big.Int, raw string) error {
-	s.mux.Lock()
-	s.sent = append(s.sent, raw)
-	s.mux.Unlock()
+func (s *MockTxSender) Send(chainID *big.Int, raw string) error {
+	if chainID.Text(10) == "0" {
+		return fmt.Errorf("Could not send")
+	}
 	return nil
 }
 
-var testRaw = "0xa9059cbb000000000000000000000000ff778b716fc07d98839f48ddb88d8be583beb684000000000000000000000000000000000000000000000000002386f26fc10000"
-
-func newSenderTestMessage() *tracepb.Trace {
-	var pb tracepb.Trace
-	pb.Transaction = &ethpb.Transaction{
-		Raw: testRaw,
+func makeSenderContext(i int) *infra.Context {
+	ctx := infra.NewContext()
+	ctx.Reset()
+	switch i % 4 {
+	case 0:
+		ctx.T.Chain().ID = big.NewInt(10)
+		ctx.T.Tx().SetRaw([]byte(`abde4f3a`))
+		ctx.Keys["errors"] = 0
+	case 1:
+		ctx.T.Chain().ID = big.NewInt(0)
+		ctx.T.Tx().SetRaw([]byte(`abde4f3a`))
+		ctx.Keys["errors"] = 1
+	case 2:
+		ctx.T.Chain().ID = big.NewInt(0)
+		ctx.T.Tx().SetRaw([]byte(``))
+		ctx.Keys["errors"] = 0
+	case 3:
+		ctx.T.Chain().ID = big.NewInt(10)
+		ctx.T.Tx().SetRaw([]byte(``))
+		ctx.Keys["errors"] = 0
 	}
-	return &pb
+	return ctx
 }
 
 func TestSender(t *testing.T) {
-	// Create worker
-	w := infra.NewWorker(100)
+	s := MockTxSender{t: t}
+	sender := Sender(&s)
 
-	// Create Sarama loader
-	h := Loader(&TraceProtoUnmarshaller{})
-	w.Use(h)
-
-	// Register mock handler
-	mockH := NewMockHandler(50)
-	w.Use(mockH.Handler())
-
-	// Register sender handler
-	sender := DummyTxSender{&sync.Mutex{}, []string{}}
-	w.Use(Sender(&sender))
-
-	// Create input channel
-	in := make(chan interface{})
-
-	// Run worker
-	go w.Run(in)
-
-	// Feed input channel and then close it
-	rounds := 1000
-	for i := 1; i <= rounds; i++ {
-		in <- newSenderTestMessage()
+	rounds := 100
+	outs := make(chan *infra.Context, rounds)
+	wg := &sync.WaitGroup{}
+	for i := 0; i < rounds; i++ {
+		wg.Add(1)
+		ctx := makeSenderContext(i)
+		go func(ctx *infra.Context) {
+			defer wg.Done()
+			sender(ctx)
+			outs <- ctx
+		}(ctx)
 	}
-	close(in)
+	wg.Wait()
+	close(outs)
 
-	// Wait for worker to be done
-	<-w.Done()
-
-	if len(mockH.handled) != rounds {
-		t.Errorf("Loader: expected %v rounds but got %v", rounds, len(mockH.handled))
+	if len(outs) != rounds {
+		t.Errorf("Marker: expected %v outs but got %v", rounds, len(outs))
 	}
 
-	for _, raw := range sender.sent {
-		if raw != testRaw {
-			t.Errorf("Loader: expected %q got %q", testRaw, raw)
+	for out := range outs {
+		errCount := out.Keys["errors"].(int)
+		if len(out.T.Errors) != errCount {
+			t.Errorf("Marker: expected %v errors but got %v", errCount, out.T.Errors)
 		}
 	}
 }
