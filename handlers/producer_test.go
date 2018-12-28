@@ -2,103 +2,65 @@ package handlers
 
 import (
 	"fmt"
+	"sync"
 	"testing"
 
-	"github.com/Shopify/sarama"
-	"github.com/Shopify/sarama/mocks"
-	"github.com/golang/protobuf/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf"
-	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/ethereum"
 	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
 )
 
-func testCtxToProducerMessage(ctx *infra.Context) *sarama.ProducerMessage {
-	msg := sarama.ProducerMessage{}
-	ctx.Pb.Reset()
-	protobuf.DumpTrace(ctx.T, ctx.Pb)
-	b, _ := proto.Marshal(ctx.Pb)
-	msg.Value = sarama.ByteEncoder(b)
-	return &msg
+type MockTraceProducer struct {
+	t *testing.T
 }
 
-func newProducerTestMessage() *tracepb.Trace {
-	var pb tracepb.Trace
-	pb.Chain = &tracepb.Chain{Id: "0x1", IsEIP155: true}
-	pb.Sender = &tracepb.Account{Id: "", Address: "0xdbb881a51CD4023E4400CEF3ef73046743f08da3"}
-	pb.Receiver = &tracepb.Account{Id: "toto", Address: "0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff"}
-	pb.Transaction = &ethpb.Transaction{
-		TxData: &ethpb.TxData{
-			Nonce: 10,
-			To:    "0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff",
-			Value: "0xa2bfe3",
-			Data:  "0xbabe",
-			GasPrice: "0x0",
-			Gas: 1234,
-		},
-		Raw: "0xbeef",
-		Hash: "0x0000000000000000000000000000000000000000000000000000000000000000",
-	}
-	pb.Call = &tracepb.Call{
-		MethodId: "abcde",
-		Args: []string{"0xfF778b716FC07D98839f48DdB88D8bE583BEB684", "0x2386f26fc10000"},
-	}
-	pb.Errors = []*tracepb.Error{}
-	return &pb
-}
-
-var expected, _ = proto.Marshal(newProducerTestMessage())
-
-func checker(val []byte) error {
-	if string(val) != string(expected) {
-		return fmt.Errorf("Expected %q but got %q", string(expected), string(val))
+func (p *MockTraceProducer) Produce(pb *tracepb.Trace) error {
+	if pb.GetChain().GetId() == "unknown" {
+		return fmt.Errorf("Could not produce")
 	}
 	return nil
 }
 
+func makeProducerContext(i int) *infra.Context {
+	ctx := infra.NewContext()
+	ctx.Reset()
+	switch i % 2 {
+	case 0:
+		ctx.Pb.Chain = &tracepb.Chain{Id: "unknown"}
+		ctx.Keys["errors"] = 1
+	case 1:
+		ctx.Pb.Chain = &tracepb.Chain{Id: "known"}
+		ctx.Keys["errors"] = 0
+	}
+	return ctx
+}
+
 func TestProducer(t *testing.T) {
-	// Create worker
-	w := infra.NewWorker(100)
-	w.Use(Loader(&TraceProtoUnmarshaller{}))
+	mp := MockTraceProducer{t: t}
+	producer := Producer(&mp)
 
-	//Register mock (for time randomness)
-	w.Use(NewMockHandler(50).Handler())
+	rounds := 100
+	outs := make(chan *infra.Context, rounds)
+	wg := &sync.WaitGroup{}
+	for i := 0; i < rounds; i++ {
+		wg.Add(1)
+		ctx := makeProducerContext(i)
+		go func(ctx *infra.Context) {
+			defer wg.Done()
+			producer(ctx)
+			outs <- ctx
+		}(ctx)
+	}
+	wg.Wait()
+	close(outs)
 
-	// Register producer
-	mp := mocks.NewSyncProducer(t, nil)
-	p := Producer(NewSaramaProducer(mp, testCtxToProducerMessage))
-	w.Use(p)
-
-	// Register mock (to track output)
-	mockH := NewMockHandler(1)
-	w.Use(mockH.Handler())
-
-	rounds := 1000
-	for i := 1; i <= rounds; i++ {
-		mp.ExpectSendMessageWithCheckerFunctionAndSucceed(checker)
+	if len(outs) != rounds {
+		t.Errorf("Marker: expected %v outs but got %v", rounds, len(outs))
 	}
 
-	// Create a Sarama message channel
-	in := make(chan interface{})
-
-	// Run worker
-	go w.Run(in)
-
-	// Feed channel channel and then close it
-
-	for i := 1; i <= rounds; i++ {
-		in <- newProducerTestMessage()
+	for out := range outs {
+		errCount := out.Keys["errors"].(int)
+		if len(out.T.Errors) != errCount {
+			t.Errorf("Marker: expected %v errors but got %v", errCount, out.T.Errors)
+		}
 	}
-	close(in)
-
-	// Wait for worker to be done
-	<-w.Done()
-
-	// Run worker
-	go w.Run(in)
-
-	if len(mockH.handled) != rounds {
-		t.Errorf("Gas: expected %v rounds but got %v", rounds, len(mockH.handled))
-	}
-
 }
