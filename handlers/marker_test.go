@@ -37,7 +37,7 @@ func TestMarker(t *testing.T) {
 	mo := MockOffsetMarker{t: t}
 	marker := Marker(&mo)
 
-	rounds := 10
+	rounds := 100
 	outs := make(chan *infra.Context, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
