@@ -3,6 +3,8 @@ package handlers
 import (
 	"fmt"
 	"math/big"
+	"sync"
+	"sync/atomic"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -10,7 +12,7 @@ import (
 )
 
 type MockEthCrediter struct {
-	count int
+	count int32
 	t     *testing.T
 }
 
@@ -18,7 +20,7 @@ func (c *MockEthCrediter) Credit(chainID *big.Int, a common.Address, value *big.
 	if chainID.Text(10) == "0" {
 		return fmt.Errorf("Could not credit")
 	}
-	c.count++
+	atomic.AddInt32(&c.count, 1)
 	return nil
 }
 
@@ -35,43 +37,51 @@ func (c *MockEthCreditController) ShouldCredit(chainID *big.Int, a common.Addres
 	return big.NewInt(100), true
 }
 
-func TestFaucet(t *testing.T) {
-	// Create Faucet handler
-	c := &MockEthCrediter{t: t}
-	faucet := Faucet(c, &MockEthCreditController{t: t})
-
+func makeFaucetContext(i int) *infra.Context {
 	ctx := infra.NewContext()
 	ctx.Reset()
-	ctx.T.Chain().ID = big.NewInt(0)
-	faucet(ctx)
-	if len(ctx.T.Errors) != 1 {
-		t.Errorf("Faucet 1: expected 1 error but got %v", ctx.T.Errors)
+	switch i % 4 {
+	case 0:
+		ctx.Keys["errors"] = 0
+	case 1:
+		ctx.T.Chain().ID = big.NewInt(0)
+		ctx.Keys["errors"] = 1
+	case 2:
+		ctx.T.Chain().ID = big.NewInt(0)
+		*ctx.T.Sender().Address = common.HexToAddress(blackAddress)
+		ctx.Keys["errors"] = 0
+	case 3:
+		ctx.T.Chain().ID = big.NewInt(1)
+		ctx.Keys["errors"] = 0
+	}
+	return ctx
+}
+
+func TestFaucet(t *testing.T) {
+	// Create Faucet handler
+	mc := &MockEthCrediter{t: t}
+	faucet := Faucet(mc, &MockEthCreditController{t: t})
+
+	rounds := 100
+	outs := make(chan *infra.Context, rounds)
+	wg := &sync.WaitGroup{}
+	for i := 0; i < rounds; i++ {
+		wg.Add(1)
+		ctx := makeFaucetContext(i)
+		go func(ctx *infra.Context) {
+			defer wg.Done()
+			faucet(ctx)
+			outs <- ctx
+		}(ctx)
+	}
+	wg.Wait()
+	close(outs)
+
+	if len(outs) != rounds {
+		t.Errorf("Faucet: expected %v outs but got %v", rounds, len(outs))
 	}
 
-	if c.count != 0 {
-		t.Errorf("Faucet 1: expected credit count to be 0 but got %v", c.count)
-	}
-
-	ctx = infra.NewContext()
-	ctx.Reset()
-	ctx.T.Chain().ID = big.NewInt(0)
-	*ctx.T.Sender().Address = common.HexToAddress(blackAddress)
-	faucet(ctx)
-	if len(ctx.T.Errors) != 0 {
-		t.Errorf("Faucet 2: expected 0 error but got %v", ctx.T.Errors)
-	}
-	if c.count != 0 {
-		t.Errorf("Faucet 2: expected credit count to be 0 but got %v", c.count)
-	}
-
-	ctx = infra.NewContext()
-	ctx.Reset()
-	ctx.T.Chain().ID = big.NewInt(1)
-	faucet(ctx)
-	if len(ctx.T.Errors) != 0 {
-		t.Errorf("Faucet 3: expected no error but got %v", ctx.T.Errors)
-	}
-	if c.count != 1 {
-		t.Errorf("Faucet 3: expected credit count to be 1 but got %v", c.count)
+	if mc.count != int32(rounds/4) {
+		t.Errorf("Faucet: expected credit count to be %v but got %v", rounds/4, mc.count)
 	}
 }
