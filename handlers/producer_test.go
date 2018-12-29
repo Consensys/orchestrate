@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"math/big"
 	"sync"
 	"testing"
 
@@ -14,7 +15,7 @@ type MockTraceProducer struct {
 }
 
 func (p *MockTraceProducer) Produce(pb *tracepb.Trace) error {
-	if pb.GetChain().GetId() == "unknown" {
+	if pb.GetChain().GetId() == "0x0" {
 		return fmt.Errorf("Could not produce")
 	}
 	return nil
@@ -25,10 +26,10 @@ func makeProducerContext(i int) *infra.Context {
 	ctx.Reset()
 	switch i % 2 {
 	case 0:
-		ctx.Pb.Chain = &tracepb.Chain{Id: "unknown"}
+		ctx.T.Chain().ID = big.NewInt(0)
 		ctx.Keys["errors"] = 1
 	case 1:
-		ctx.Pb.Chain = &tracepb.Chain{Id: "known"}
+		ctx.T.Chain().ID = big.NewInt(10)
 		ctx.Keys["errors"] = 0
 	}
 	return ctx

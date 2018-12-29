@@ -1,7 +1,6 @@
 package infra
 
 import (
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
 )
 
@@ -14,8 +13,6 @@ type Context struct {
 	T *types.Trace
 	// Message that triggered Context execution (typically a sarama.ConsumerMessage)
 	Msg interface{}
-	// Protobuffer (we attach it to context as an optimization so we can reset it each we re-cycle a context)
-	Pb *tracepb.Trace
 
 	// Keys is a key/value pair
 	Keys map[string]interface{}
@@ -30,7 +27,6 @@ type Context struct {
 func NewContext() *Context {
 	t := types.NewTrace()
 	return &Context{
-		Pb:    &tracepb.Trace{},
 		T:     t,
 		Keys:  make(map[string]interface{}),
 		index: -1,
@@ -40,7 +36,6 @@ func NewContext() *Context {
 // Reset re-initialize context
 func (ctx *Context) Reset() {
 	ctx.Msg = nil
-	ctx.Pb.Reset()
 	ctx.T.Reset()
 	ctx.Keys = make(map[string]interface{})
 	ctx.handlers = nil
