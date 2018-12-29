@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"sync"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -24,63 +25,75 @@ func (r *MockABIRegistry) GetMethodBySig(sig string) (*abi.Method, error) {
 
 type MockCrafter struct{}
 
-var payload = []byte(`0xa9059cbb000000000000000000000000ff778b716fc07d98839f48ddb88d8be583beb684000000000000000000000000000000000000000000000000002386f26fc10000`)
+var payload = "0xa9059cbb000000000000000000000000ff778b716fc07d98839f48ddb88d8be583beb684000000000000000000000000000000000000000000000000002386f26fc10000"
 
 func (c *MockCrafter) Craft(method *abi.Method, args ...string) ([]byte, error) {
 	if len(args) != 1 {
 		return []byte(``), fmt.Errorf("Could not craft")
 	}
-	return payload, nil
+	return hexutil.MustDecode(payload), nil
+}
+
+func makeCrafterContext(i int) *infra.Context {
+	ctx := infra.NewContext()
+	ctx.Reset()
+	switch i % 5 {
+	case 0:
+		ctx.Keys["errors"] = 0
+		ctx.Keys["result"] = "0x"
+	case 1:
+		ctx.T.Tx().SetData( hexutil.MustDecode("0xa9059cbb"))
+		ctx.Keys["errors"] = 0
+		ctx.Keys["result"] = "0xa9059cbb"
+	case 2:
+		ctx.T.Call().MethodID = "unknown"
+		ctx.T.Call().Args = []string{"test"}
+		ctx.Keys["errors"] = 1
+		ctx.Keys["result"] = "0x"
+	case 3:
+		ctx.T.Call().MethodID = "known"
+		ctx.T.Call().Args = []string{"test"}
+		ctx.Keys["errors"] = 0
+		ctx.Keys["result"] = payload
+	case 4:
+		ctx.T.Call().MethodID = "known"
+		ctx.Keys["errors"] = 1
+		ctx.Keys["result"] = "0x"
+	}
+	return ctx
 }
 
 func TestCrafter(t *testing.T) {
 	// Create crafter handler
-	c := Crafter(&MockABIRegistry{}, &MockCrafter{})
+	crafter := Crafter(&MockABIRegistry{}, &MockCrafter{})
 
-	ctx := infra.NewContext()
-	ctx.Reset()
-	c(ctx)
-	if len(ctx.T.Tx().Data()) != 0 {
-		t.Errorf("Crafter: expected data no be empty but got %q", hexutil.Encode(ctx.T.Tx().Data()))
+	rounds := 100
+	outs := make(chan *infra.Context, rounds)
+	wg := &sync.WaitGroup{}
+	for i := 0; i < rounds; i++ {
+		wg.Add(1)
+		ctx := makeCrafterContext(i)
+		go func(ctx *infra.Context) {
+			defer wg.Done()
+			crafter(ctx)
+			outs <- ctx
+		}(ctx)
 	}
+	wg.Wait()
+	close(outs)
 
-	ctx = infra.NewContext()
-	ctx.Reset()
-	ctx.T.Tx().SetData([]byte(`a9059cbb`))
-	c(ctx)
-	if len(ctx.T.Tx().Data()) != 8 {
-		t.Errorf("Crafter: expected data to be %q but got %q", "0xa9059cbb", hexutil.Encode(ctx.T.Tx().Data()))
-	}
-
-	ctx = infra.NewContext()
-	ctx.Reset()
-	ctx.T.Call().MethodID = "unknown"
-	ctx.T.Call().Args = []string{"test"}
-	c(ctx)
-	if len(ctx.T.Tx().Data()) != 0 {
-		t.Errorf("Crafter: expected data no be empty but got %q", hexutil.Encode(ctx.T.Tx().Data()))
-	}
-	if len(ctx.T.Errors) != 1 {
-		t.Errorf("Crafter: expected an error")
+	if len(outs) != rounds {
+		t.Errorf("Crafter: expected %v outs but got %v", rounds, len(outs))
 	}
 
-	ctx = infra.NewContext()
-	ctx.Reset()
-	ctx.T.Call().MethodID = "known"
-	ctx.T.Call().Args = []string{"test"}
-	c(ctx)
-	if hexutil.Encode(ctx.T.Tx().Data()) != hexutil.Encode(payload) {
-		t.Errorf("Crafter: expected data no be %v but got %q", hexutil.Encode(payload), hexutil.Encode(ctx.T.Tx().Data()))
-	}
+	for out := range outs {
+		errCount, result := out.Keys["errors"].(int), out.Keys["result"].(string)
+		if len(out.T.Errors) != errCount {
+			t.Errorf("Crafter: expected %v errors but got %v", errCount, out.T.Errors)
+		}
 
-	ctx = infra.NewContext()
-	ctx.Reset()
-	ctx.T.Call().MethodID = "known"
-	c(ctx)
-	if len(ctx.T.Tx().Data()) != 0 {
-		t.Errorf("Crafter: expected data no be empty but got %q", hexutil.Encode(ctx.T.Tx().Data()))
-	}
-	if len(ctx.T.Errors) != 1 {
-		t.Errorf("Crafter: expected an error")
+		if hexutil.Encode(out.T.Tx().Data()) != result {
+			t.Errorf("Crafter: expected Dara to be %v but got %v", result, hexutil.Encode(out.T.Tx().Data()))
+		}
 	}
 }
