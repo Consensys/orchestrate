@@ -55,5 +55,6 @@ message Trace {
     Account receiver = 3;
     Call call = 4;
     Transaction transaction = 5;
-    repeated Error errors = 6;
+    Receipt receipt = 6;
+    repeated Error errors = 7;
 }
