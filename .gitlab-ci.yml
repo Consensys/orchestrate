@@ -20,7 +20,7 @@ before_script:
   - ssh-add ~/.ssh/id_rsa
   #- git config --global user.email "deployer@core-stack.com"
   #- git config --global user.name "Deployer"
-  # - ssh-keyscan -H 'https://gitlab.com' >> ${HOME}/.ssh/known_hosts
+  - ssh-keyscan -H 'https://gitlab.com/' >> ~/.ssh/known_hosts
   - git clone git@gitlab.com:ConsenSys/client/fr/core-stack/infra/striped-mutex.git
   # - git config --global url."git@gitlab.com:".insteadOf "https://gitlab.com/" 
   - echo "${HOME}/go"
