@@ -17,8 +17,8 @@ before_script:
   - echo "$SSH_DEPLOY_CORE_STACK" | tr -d '\r' > ~/.ssh/id_rsa
   - cat ~/.ssh/id_rsa
   - chmod 700 ~/.ssh/id_rsa
-  - eval "$(ssh-agent -s)"
-  - ssh-add ~/.ssh/id_rsa
+  # - eval "$(ssh-agent -s)"
+  # - ssh-add ~/.ssh/id_rsa
   - git config --global user.email "deployer@core-stack.com"
   - git config --global user.name "Deployer"
   # - ssh-keyscan -H 'https://gitlab.com/' >> ~/.ssh/known_hosts
