@@ -10,6 +10,7 @@ stages:
   - test
 
 before_script:
+  - git config --global url."git@gitlab.com".insteadOf "https://gitlab.com"
   - echo "${HOME}/go"
   - mkdir "${HOME}/go"; export GOPATH="${HOME}/go"
   - export PATH="${GOPATH}/bin:${GOROOT}/bin:${PATH}"
