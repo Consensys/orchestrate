@@ -1,8 +1,4 @@
-package infra
-
-import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
-)
+package types
 
 // HandlerFunc is base type for a function processing a Trace
 type HandlerFunc func(ctx *Context)
@@ -10,7 +6,7 @@ type HandlerFunc func(ctx *Context)
 // Context allows us to transmit information through middlewares
 type Context struct {
 	// T stores information about transaction lifecycle in high level types
-	T *types.Trace
+	T *Trace
 	// Message that triggered Context execution (typically a sarama.ConsumerMessage)
 	Msg interface{}
 
@@ -25,7 +21,7 @@ type Context struct {
 
 // NewContext creates a new context
 func NewContext() *Context {
-	t := types.NewTrace()
+	t := NewTrace()
 	return &Context{
 		T:     t,
 		Keys:  make(map[string]interface{}),
@@ -52,16 +48,16 @@ func (ctx *Context) Next() {
 }
 
 // Error attaches an error to context.
-func (ctx *Context) Error(err error) *types.Error {
+func (ctx *Context) Error(err error) *Error {
 	if err == nil {
 		panic("err is nil")
 	}
 
-	e, ok := err.(*types.Error)
+	e, ok := err.(*Error)
 	if !ok {
-		e = &types.Error{
+		e = &Error{
 			Err:  err,
-			Type: types.ErrorTypeUnknown,
+			Type: ErrorTypeUnknown,
 		}
 	}
 	ctx.T.Errors = append(ctx.T.Errors, e)
@@ -75,7 +71,7 @@ func (ctx *Context) Abort() {
 }
 
 // AbortWithError calls `Abort()` and `Error()``
-func (ctx *Context) AbortWithError(err error) *types.Error {
+func (ctx *Context) AbortWithError(err error) *Error {
 	ctx.Abort()
 	return ctx.Error(err)
 }

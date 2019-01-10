@@ -6,16 +6,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
 )
 
-// TraceStore is used to store context
-type TraceStore interface {
-	// Store stores a trace
-	// No key is necessary as TraceStore should be able to deduce key from trace object
-	Store(t *types.Trace) error
-
-	// Load should retrieve a trace
-	Load(key interface{}) (*types.Trace, error)
-}
-
 // DummyStore does not store re-cycles new traces
 type DummyStore struct {
 	pool *sync.Pool

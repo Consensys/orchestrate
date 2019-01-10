@@ -7,7 +7,8 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core/services"
 )
 
 type MockNonceLocker struct {
@@ -54,7 +55,7 @@ type MockNonceManager struct {
 	counter uint
 }
 
-func (m *MockNonceManager) Obtain(chainID *big.Int, a common.Address) (infra.NonceLocker, error) {
+func (m *MockNonceManager) Obtain(chainID *big.Int, a common.Address) (services.NonceLocker, error) {
 	m.mux.Lock()
 	defer m.mux.Unlock()
 	if m.counter%6 == 1 {
@@ -71,8 +72,8 @@ func (m *MockNonceManager) Obtain(chainID *big.Int, a common.Address) (infra.Non
 	return n, nil
 }
 
-func makeNonceContext(i int) *infra.Context {
-	ctx := infra.NewContext()
+func makeNonceContext(i int) *types.Context {
+	ctx := types.NewContext()
 	ctx.Reset()
 	return ctx
 }
@@ -82,12 +83,12 @@ func TestNonce(t *testing.T) {
 	nonceH := NonceHandler(&m)
 
 	rounds := 100
-	outs := make(chan *infra.Context, rounds)
+	outs := make(chan *types.Context, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
 		ctx := makeNonceContext(i)
-		go func(ctx *infra.Context) {
+		go func(ctx *types.Context) {
 			defer wg.Done()
 			nonceH(ctx)
 			outs <- ctx

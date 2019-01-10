@@ -5,8 +5,8 @@ import (
 	"sync"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
 	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
 )
 
 type MockUnmarshaller struct {
@@ -20,8 +20,8 @@ func (u *MockUnmarshaller) Unmarshal(msg interface{}, pb *tracepb.Trace) error {
 	return nil
 }
 
-func makeLoaderContext(i int) *infra.Context {
-	ctx := infra.NewContext()
+func makeLoaderContext(i int) *types.Context {
+	ctx := types.NewContext()
 	ctx.Reset()
 	switch i % 2 {
 	case 0:
@@ -39,12 +39,12 @@ func TestLoader(t *testing.T) {
 	loader := Loader(&mu)
 
 	rounds := 10
-	outs := make(chan *infra.Context, rounds)
+	outs := make(chan *types.Context, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
 		ctx := makeLoaderContext(i)
-		go func(ctx *infra.Context) {
+		go func(ctx *types.Context) {
 			defer wg.Done()
 			loader(ctx)
 			outs <- ctx

@@ -7,12 +7,6 @@ import (
 	"github.com/Shopify/sarama"
 )
 
-// OffsetMarker is an interface to mark that a context has been processed
-// Typically marking kafka offsets of message that have been consumed
-type OffsetMarker interface {
-	Mark(msg interface{}) error
-}
-
 // SimpleSaramaOffsetMarker marks message each time it encounters a message with higher offset than the last one marked
 type SimpleSaramaOffsetMarker struct {
 	s sarama.ConsumerGroupSession

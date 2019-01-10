@@ -9,11 +9,6 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
-// Crafter takes a method abi and args to craft a transaction
-type Crafter interface {
-	Craft(method *abi.Method, args ...string) ([]byte, error)
-}
-
 // PayloadCrafter is a structure that can Craft payloads
 type PayloadCrafter struct{}
 

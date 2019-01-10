@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
 )
 
 type MockGasEstimator struct {
@@ -21,8 +21,8 @@ func (e *MockGasEstimator) EstimateGas(chainID *big.Int, call ethereum.CallMsg) 
 	return 18, nil
 }
 
-func makeGasEstimatorContext(i int) *infra.Context {
-	ctx := infra.NewContext()
+func makeGasEstimatorContext(i int) *types.Context {
+	ctx := types.NewContext()
 	ctx.Reset()
 	switch i % 2 {
 	case 0:
@@ -42,12 +42,12 @@ func TestGasEstimator(t *testing.T) {
 	estimator := GasEstimator(&me)
 
 	rounds := 100
-	outs := make(chan *infra.Context, rounds)
+	outs := make(chan *types.Context, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
 		ctx := makeGasEstimatorContext(i)
-		go func(ctx *infra.Context) {
+		go func(ctx *types.Context) {
 			defer wg.Done()
 			estimator(ctx)
 			outs <- ctx
@@ -82,8 +82,8 @@ func (e *MockGasPricer) SuggestGasPrice(chainID *big.Int) (*big.Int, error) {
 	return big.NewInt(10), nil
 }
 
-func makeGasPricerContext(i int) *infra.Context {
-	ctx := infra.NewContext()
+func makeGasPricerContext(i int) *types.Context {
+	ctx := types.NewContext()
 	ctx.Reset()
 	switch i % 2 {
 	case 0:
@@ -103,12 +103,12 @@ func TestGasPricer(t *testing.T) {
 	pricer := GasPricer(&mp)
 
 	rounds := 100
-	outs := make(chan *infra.Context, rounds)
+	outs := make(chan *types.Context, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
 		ctx := makeGasPricerContext(i)
-		go func(ctx *infra.Context) {
+		go func(ctx *types.Context) {
 			defer wg.Done()
 			pricer(ctx)
 			outs <- ctx

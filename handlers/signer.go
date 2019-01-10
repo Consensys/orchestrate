@@ -2,12 +2,13 @@ package handlers
 
 import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
 )
 
 // Signer creates a signer handler
-func Signer(s infra.TxSigner) infra.HandlerFunc {
-	return func(ctx *infra.Context) {
+func Signer(s services.TxSigner) types.HandlerFunc {
+	return func(ctx *types.Context) {
 		if len(ctx.T.Tx().Raw()) > 0 {
 			// Tx already signed
 			return

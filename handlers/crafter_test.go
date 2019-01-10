@@ -7,7 +7,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
 )
 
 type MockABIRegistry struct{}
@@ -34,15 +34,15 @@ func (c *MockCrafter) Craft(method *abi.Method, args ...string) ([]byte, error) 
 	return hexutil.MustDecode(payload), nil
 }
 
-func makeCrafterContext(i int) *infra.Context {
-	ctx := infra.NewContext()
+func makeCrafterContext(i int) *types.Context {
+	ctx := types.NewContext()
 	ctx.Reset()
 	switch i % 5 {
 	case 0:
 		ctx.Keys["errors"] = 0
 		ctx.Keys["result"] = "0x"
 	case 1:
-		ctx.T.Tx().SetData( hexutil.MustDecode("0xa9059cbb"))
+		ctx.T.Tx().SetData(hexutil.MustDecode("0xa9059cbb"))
 		ctx.Keys["errors"] = 0
 		ctx.Keys["result"] = "0xa9059cbb"
 	case 2:
@@ -68,12 +68,12 @@ func TestCrafter(t *testing.T) {
 	crafter := Crafter(&MockABIRegistry{}, &MockCrafter{})
 
 	rounds := 100
-	outs := make(chan *infra.Context, rounds)
+	outs := make(chan *types.Context, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
 		ctx := makeCrafterContext(i)
-		go func(ctx *infra.Context) {
+		go func(ctx *types.Context) {
 			defer wg.Done()
 			crafter(ctx)
 			outs <- ctx

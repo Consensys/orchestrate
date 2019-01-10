@@ -5,13 +5,13 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
 )
 
 // MockHandler is an handler used mainly for test
 type MockHandler struct {
 	mux     *sync.Mutex
-	handled []*infra.Context
+	handled []*types.Context
 
 	maxtime int
 }
@@ -20,14 +20,14 @@ type MockHandler struct {
 func NewMockHandler(maxtime int) *MockHandler {
 	return &MockHandler{
 		&sync.Mutex{},
-		[]*infra.Context{},
+		[]*types.Context{},
 		maxtime,
 	}
 }
 
 // Handler returns handler
-func (h *MockHandler) Handler() infra.HandlerFunc {
-	return func(ctx *infra.Context) {
+func (h *MockHandler) Handler() types.HandlerFunc {
+	return func(ctx *types.Context) {
 		// We add some randomness in time execution
 		r := rand.Intn(h.maxtime)
 		time.Sleep(time.Duration(r) * time.Millisecond)

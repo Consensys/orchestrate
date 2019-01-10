@@ -10,11 +10,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-// EthCrediter is an interface for crediting an account with ether
-type EthCrediter interface {
-	Credit(chainID *big.Int, a common.Address, value *big.Int) error
-}
-
 // MakeCreditMessageFunc is function expected to create Samara message corresponding to Eth Credit
 type MakeCreditMessageFunc func(chainID *big.Int, a common.Address, value *big.Int) *sarama.ProducerMessage
 
@@ -35,11 +30,6 @@ func (c *SaramaCrediter) Credit(chainID *big.Int, a common.Address, value *big.I
 	msg := c.makeCreditMsg(chainID, a, value)
 	_, _, err := c.p.SendMessage(msg)
 	return err
-}
-
-// EthCreditController is an interface to control if a credit should append
-type EthCreditController interface {
-	ShouldCredit(chainID *big.Int, a common.Address, value *big.Int) (*big.Int, bool)
 }
 
 // SimpleCreditController applies basic controls

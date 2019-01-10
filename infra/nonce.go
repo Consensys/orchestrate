@@ -9,21 +9,8 @@ import (
 	"sync"
 
 	"github.com/ethereum/go-ethereum/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core/services"
 )
-
-// NonceLocker allows to safely manipulate a nonce by locking/unlocking it
-type NonceLocker interface {
-	Lock() error
-	Get() (uint64, error)
-	Set(v uint64) error
-	Unlock() error
-}
-
-// NonceManager is an interface for fine grain management of nonce by key
-type NonceManager interface {
-	// Return a locked nonce
-	Obtain(chainID *big.Int, a common.Address) (NonceLocker, error)
-}
 
 // StripeMutex is an object that allows fine grained locking based on keys
 //
@@ -125,7 +112,7 @@ func computeKey(chainID *big.Int, a common.Address) string {
 }
 
 // Obtain return a locked SafeNonce for given chain and address
-func (c *CacheNonceManager) Obtain(chainID *big.Int, a common.Address) (NonceLocker, error) {
+func (c *CacheNonceManager) Obtain(chainID *big.Int, a common.Address) (services.NonceLocker, error) {
 	key := computeKey(chainID, a)
 	mux, err := c.mux.getLock(key)
 	if err != nil {

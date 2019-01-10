@@ -6,18 +6,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 )
 
-// ABIRegistry is an interface to manage ABIs
-// TODO: extend including
-//     - SetMethod() (ID string, err error)
-//     - Functions for event ABIs
-//     - Functions for contract ABIs
-type ABIRegistry interface {
-	// Retrieve method using unique identifier
-	GetMethodByID(ID string) (*abi.Method, error)
-	// Retrieve method using 4 bytes signature
-	GetMethodBySig(sig string) (*abi.Method, error)
-}
-
 // DummyABIRegistry always return the same ABI method (useful for testing purpose)
 type DummyABIRegistry struct {
 	method *abi.Method
