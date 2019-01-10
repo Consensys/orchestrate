@@ -13,6 +13,7 @@ before_script:
   # - eval $(ssh-agent -s)
   # - echo "$SSH_DEPLOY_CORE_STACK" | tr -d '\r' | ssh-add - > /dev/null
   - mkdir -p ~/.ssh
+  - echo "$SSH_DEPLOY_CORE_STACK"
   - echo "$SSH_DEPLOY_CORE_STACK" | tr -d '\r' > ~/.ssh/id_rsa
   - chmod 700 ~/.ssh/id_rsa
   - eval "$(ssh-agent -s)"
