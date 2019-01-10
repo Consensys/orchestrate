@@ -4,8 +4,8 @@ import (
 	"sync"
 
 	"github.com/ethereum/go-ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/services"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 // GasPricer creates an handler that set Gas Price

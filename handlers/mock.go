@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 // MockHandler is an handler used mainly for test

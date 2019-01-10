@@ -1,7 +1,7 @@
 package services
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 // TraceStore is used to store context

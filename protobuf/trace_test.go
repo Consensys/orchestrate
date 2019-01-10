@@ -4,9 +4,9 @@ import (
 	"math/big"
 	"testing"
 
-	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/ethereum"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
+	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/ethereum"
+	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 type AccountTest struct {

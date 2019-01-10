@@ -1,7 +1,7 @@
 package services
 
 import (
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
+	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
 )
 
 // OffsetMarker is an interface to mark that a context has been processed

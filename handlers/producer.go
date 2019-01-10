@@ -3,10 +3,10 @@ package handlers
 import (
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/services"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf"
+	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 // Producer creates a producer handler

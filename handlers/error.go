@@ -1,6 +1,6 @@
 package handlers
 
-import "gitlab.com/ConsenSys/client/fr/core-stack/core/types"
+import "gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 
 // ErrorHandler return an Handler for error handling
 func ErrorHandler() types.HandlerFunc {

@@ -5,8 +5,8 @@ import (
 	"sync"
 	"testing"
 
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
+	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 type MockUnmarshaller struct {

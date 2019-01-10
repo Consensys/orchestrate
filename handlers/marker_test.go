@@ -5,7 +5,7 @@ import (
 	"sync"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 type MockOffsetMarker struct {

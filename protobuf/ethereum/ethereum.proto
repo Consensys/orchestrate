@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package context.manager;
 
-option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/ethereum";
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/ethereum";
 
 // Transaction data
 message TxData {

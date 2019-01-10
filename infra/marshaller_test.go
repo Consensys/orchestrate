@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/Shopify/sarama"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
+	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
 )
 
 func TestTraceProtoMarshallerConcurrent(t *testing.T) {

@@ -2,7 +2,7 @@ package infra
 
 import (
 	"github.com/Shopify/sarama"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
+	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
 )
 
 // PbToProducerMessage is an interface for a function that creates sarama producer message from a protobuffer

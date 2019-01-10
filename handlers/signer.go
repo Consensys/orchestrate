@@ -2,8 +2,8 @@ package handlers
 
 import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/services"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 // Signer creates a signer handler

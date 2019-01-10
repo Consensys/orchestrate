@@ -5,9 +5,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/ethereum"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
+	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/ethereum"
+	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 // LoadAccount load an Account protobuffer to a Account object

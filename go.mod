@@ -1,4 +1,4 @@
-module gitlab.com/ConsenSys/client/fr/core-stack/core
+module gitlab.com/ConsenSys/client/fr/core-stack/core.git
 
 require (
 	github.com/DataDog/zstd v1.3.5 // indirect

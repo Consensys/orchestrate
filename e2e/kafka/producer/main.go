@@ -8,8 +8,8 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/ethereum"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
+	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/ethereum"
+	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
 )
 
 var (

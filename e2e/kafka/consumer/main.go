@@ -13,11 +13,11 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/golang/protobuf/proto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/handlers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/handlers"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/infra"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf"
+	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 var (

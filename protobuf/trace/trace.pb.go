@@ -6,7 +6,7 @@ package trace
 import (
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
-	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/ethereum"
+	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/ethereum"
 	math "math"
 )
 

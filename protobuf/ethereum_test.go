@@ -6,8 +6,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
+	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 const (

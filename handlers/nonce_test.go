@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
 )
 
 type MockNonceLocker struct {

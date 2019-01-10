@@ -3,7 +3,7 @@ package infra
 import (
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 // DummyStore does not store re-cycles new traces

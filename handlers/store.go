@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/services"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 // Store creates an handler that can store a trace
