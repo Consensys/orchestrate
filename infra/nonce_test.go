@@ -5,10 +5,12 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/striped-mutex.git"
 )
 
 func TestStripeMutexConcurrent(t *testing.T) {
-	mux := NewStripeMutex(10)
+	mux := stripedmutex.New(10)
 	counts := make([]int, 50)
 	rounds := 1000
 	wg := &sync.WaitGroup{}

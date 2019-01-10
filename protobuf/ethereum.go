@@ -5,8 +5,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 // LoadAddress load an hex string with 0x prefix to a go-ethereum Address object
@@ -76,4 +77,114 @@ func DumpTx(tx *types.Tx, pb *ethpb.Transaction) {
 
 	pb.Raw = hexutil.Encode(tx.Raw())
 	pb.Hash = tx.Hash().Hex()
+}
+
+// LoadLog load a Log protobuffer to a Log object
+func LoadLog(pb *ethpb.Log, l *ethtypes.Log) error {
+	if ok := common.IsHexAddress(pb.GetAddress()); !ok {
+		return fmt.Errorf("Invalid Address")
+	}
+
+	data, err := hexutil.Decode(pb.GetData())
+	if err != nil {
+		return err
+	}
+
+	l.Address.SetBytes(common.FromHex(pb.GetAddress()))
+
+	l.Topics = l.Topics[0:0]
+	for _, topic := range pb.GetTopics() {
+		l.Topics = append(l.Topics, common.HexToHash(topic))
+	}
+
+	l.Data = data
+	l.BlockNumber = pb.GetBlockNumber()
+	l.TxHash.SetBytes(common.FromHex(pb.GetTxHash()))
+	l.TxIndex = uint(pb.GetTxIndex())
+	l.BlockHash.SetBytes(common.FromHex(pb.GetBlockHash()))
+
+	l.Index = uint(pb.GetIndex())
+	l.Removed = pb.GetRemoved()
+
+	return nil
+}
+
+// DumpLog dump a Log object to protobuffer
+func DumpLog(l *ethtypes.Log, pb *ethpb.Log) {
+	pb.Address = l.Address.Hex()
+	pb.Topics = pb.Topics[0:0]
+	for _, topic := range l.Topics {
+		pb.Topics = append(pb.Topics, topic.Hex())
+	}
+	pb.Data = hexutil.Encode(l.Data)
+	pb.BlockNumber = l.BlockNumber
+	pb.TxHash = l.TxHash.Hex()
+	pb.TxIndex = uint64(l.TxIndex)
+	pb.BlockHash = l.BlockHash.Hex()
+	pb.Index = uint64(l.Index)
+	pb.Removed = l.Removed
+}
+
+// LoadReceipt load a Receipt protobuffer to a Receipt object
+func LoadReceipt(pb *ethpb.Receipt, r *ethtypes.Receipt) error {
+	s, err := hexutil.Decode(pb.GetPostState())
+	if err != nil {
+		return err
+	}
+
+	h, err := hexutil.Decode(pb.GetTxHash())
+	if err != nil {
+		return err
+	}
+
+	b, err := hexutil.Decode(pb.GetBloom())
+	if err != nil {
+		return err
+	}
+
+	if ok := common.IsHexAddress(pb.GetContractAddress()); !ok {
+		return fmt.Errorf("Invalid Address")
+	}
+
+	logs := []*ethtypes.Log{}
+	for _, log := range pb.GetLogs() {
+		var l ethtypes.Log
+		LoadLog(log, &l)
+		logs = append(logs, &l)
+	}
+
+	r.Logs = logs
+	r.ContractAddress.SetBytes(common.FromHex(pb.GetContractAddress()))
+	r.PostState = s
+	r.Status = pb.GetStatus()
+	r.TxHash.SetBytes(h)
+	r.Bloom.SetBytes(b)
+
+	r.GasUsed = pb.GetGasUsed()
+	r.CumulativeGasUsed = pb.GetCumulativeGasUsed()
+
+	return nil
+}
+
+// DumpReceipt dump a Receipt object into a protobuffer
+func DumpReceipt(r *ethtypes.Receipt, pb *ethpb.Receipt) error {
+	pb.ContractAddress = r.ContractAddress.Hex()
+	pb.Status = r.Status
+
+	pb.GasUsed = r.GasUsed
+	pb.CumulativeGasUsed = r.CumulativeGasUsed
+
+	pb.TxHash = r.TxHash.Hex()
+	pb.Bloom = common.ToHex(r.Bloom.Bytes())
+
+	pb.PostState = hexutil.Encode(r.PostState)
+
+	pb.Logs = pb.Logs[0:0]
+	for _, log := range r.Logs {
+		var pblog ethpb.Log
+		DumpLog(log, &pblog)
+		pb.Logs = append(pb.Logs, &pblog)
+	}
+
+	return nil
 }

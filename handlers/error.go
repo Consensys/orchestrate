@@ -1,10 +1,10 @@
 package handlers
 
-import "gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
+import "gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 
 // ErrorHandler return an Handler for error handling
-func ErrorHandler() infra.HandlerFunc {
-	return func(ctx *infra.Context) {
+func ErrorHandler() types.HandlerFunc {
+	return func(ctx *types.Context) {
 		// TODO: process errors before handling
 
 		ctx.Next()

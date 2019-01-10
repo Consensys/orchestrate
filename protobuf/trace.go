@@ -5,9 +5,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/ethereum"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
+	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/ethereum"
+	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 // LoadAccount load an Account protobuffer to a Account object
@@ -77,6 +77,7 @@ func LoadTrace(pb *tracepb.Trace, t *types.Trace) {
 	LoadAccount(pb.GetReceiver(), t.Receiver())
 	LoadCall(pb.GetCall(), t.Call())
 	LoadTx(pb.GetTransaction(), t.Tx())
+	LoadReceipt(pb.GetReceipt(), t.Receipt())
 	t.Errors = []*types.Error{}
 	for _, err := range pb.GetErrors() {
 		t.Errors = append(t.Errors, LoadError(err))
@@ -114,4 +115,10 @@ func DumpTrace(t *types.Trace, pb *tracepb.Trace) {
 	for _, err := range t.Errors {
 		pb.Errors = append(pb.Errors, DumpError(err))
 	}
+
+	if pb.Receipt == nil {
+		pb.Receipt = &ethpb.Receipt{}
+	}
+	DumpReceipt(t.Receipt(), pb.Receipt)
+
 }

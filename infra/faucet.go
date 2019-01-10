@@ -8,12 +8,8 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/ethereum/go-ethereum/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/striped-mutex.git"
 )
-
-// EthCrediter is an interface for crediting an account with ether
-type EthCrediter interface {
-	Credit(chainID *big.Int, a common.Address, value *big.Int) error
-}
 
 // MakeCreditMessageFunc is function expected to create Samara message corresponding to Eth Credit
 type MakeCreditMessageFunc func(chainID *big.Int, a common.Address, value *big.Int) *sarama.ProducerMessage
@@ -37,16 +33,11 @@ func (c *SaramaCrediter) Credit(chainID *big.Int, a common.Address, value *big.I
 	return err
 }
 
-// EthCreditController is an interface to control if a credit should append
-type EthCreditController interface {
-	ShouldCredit(chainID *big.Int, a common.Address, value *big.Int) (*big.Int, bool)
-}
-
 // SimpleCreditController applies basic controls
 type SimpleCreditController struct {
 	cfg *SimpleCreditControllerConfig
 
-	mux            *StripeMutex
+	mux            *stripedmutex.StripedMutex
 	lastAuthorized *sync.Map
 }
 
@@ -54,7 +45,7 @@ type SimpleCreditController struct {
 func NewSimpleCreditController(cfg *SimpleCreditControllerConfig, stripes uint) *SimpleCreditController {
 	return &SimpleCreditController{
 		cfg:            cfg,
-		mux:            NewStripeMutex(stripes),
+		mux:            stripedmutex.New(stripes),
 		lastAuthorized: &sync.Map{},
 	}
 }

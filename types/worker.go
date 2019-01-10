@@ -1,4 +1,4 @@
-package infra
+package types
 
 import (
 	"fmt"
@@ -60,6 +60,9 @@ func (w *Worker) Run(messages chan interface{}) {
 					<-w.slots
 				}()
 				w.handleMessage(msg)
+
+				// Indicate that message has been handled
+				w.handling.Done()
 			}(msg)
 		}
 	}
@@ -70,9 +73,6 @@ func (w *Worker) handleMessage(msg interface{}) {
 	ctx := w.pool.Get().(*Context)
 
 	defer func(ctx *Context) {
-		// Indicate that message has been handled
-		w.handling.Done()
-
 		// Re-cycle context object
 		w.pool.Put(ctx)
 	}(ctx)

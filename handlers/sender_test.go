@@ -6,7 +6,7 @@ import (
 	"sync"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 type MockTxSender struct {
@@ -20,8 +20,8 @@ func (s *MockTxSender) Send(chainID *big.Int, raw string) error {
 	return nil
 }
 
-func makeSenderContext(i int) *infra.Context {
-	ctx := infra.NewContext()
+func makeSenderContext(i int) *types.Context {
+	ctx := types.NewContext()
 	ctx.Reset()
 	switch i % 4 {
 	case 0:
@@ -49,12 +49,12 @@ func TestSender(t *testing.T) {
 	sender := Sender(&s)
 
 	rounds := 100
-	outs := make(chan *infra.Context, rounds)
+	outs := make(chan *types.Context, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
 		ctx := makeSenderContext(i)
-		go func(ctx *infra.Context) {
+		go func(ctx *types.Context) {
 			defer wg.Done()
 			sender(ctx)
 			outs <- ctx

@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 type MockEthCrediter struct {
@@ -37,8 +37,8 @@ func (c *MockEthCreditController) ShouldCredit(chainID *big.Int, a common.Addres
 	return big.NewInt(100), true
 }
 
-func makeFaucetContext(i int) *infra.Context {
-	ctx := infra.NewContext()
+func makeFaucetContext(i int) *types.Context {
+	ctx := types.NewContext()
 	ctx.Reset()
 	switch i % 4 {
 	case 0:
@@ -63,12 +63,12 @@ func TestFaucet(t *testing.T) {
 	faucet := Faucet(mc, &MockEthCreditController{t: t})
 
 	rounds := 100
-	outs := make(chan *infra.Context, rounds)
+	outs := make(chan *types.Context, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
 		ctx := makeFaucetContext(i)
-		go func(ctx *infra.Context) {
+		go func(ctx *types.Context) {
 			defer wg.Done()
 			faucet(ctx)
 			outs <- ctx

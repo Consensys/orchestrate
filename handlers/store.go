@@ -1,19 +1,13 @@
 package handlers
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
-// CtxStore is used to store context
-type CtxStore interface {
-	// Send should send raw transaction
-	Store(t *types.Trace) error
-}
-
 // Store creates an handler that can store a trace
-func Store(store CtxStore) infra.HandlerFunc {
-	return func(ctx *infra.Context) {
+func Store(store services.TraceStore) types.HandlerFunc {
+	return func(ctx *types.Context) {
 		err := store.Store(ctx.T)
 		if err != nil {
 			// TODO: handle error

@@ -10,14 +10,8 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/rlp"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
-
-// TxSigner is an interface to sign transaction
-type TxSigner interface {
-	// Sign signs a transaction
-	Sign(chain *types.Chain, a common.Address, tx *ethtypes.Transaction) (raw []byte, hash *common.Hash, err error)
-}
 
 // StaticSigner holds a pool of private keys in memory
 type StaticSigner struct {

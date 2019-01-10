@@ -8,8 +8,8 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/ethereum"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
+	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/ethereum"
+	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
 )
 
 var (
@@ -76,7 +76,7 @@ func main() {
 	config.Consumer.Return.Errors = true
 
 	// Create client
-	client, err := sarama.NewClient([]string{"localhost:9092"}, config)
+	client, err := sarama.NewClient(kafkaURL, config)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -95,7 +95,7 @@ func main() {
 
 	rounds := 10
 	for i := 0; i < rounds; i++ {
-		p.Input() <- newTokenCredit(i)
+		// p.Input() <- newTokenCredit(i)
 		p.Input() <- newMessage(i)
 	}
 }

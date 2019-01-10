@@ -1,12 +1,13 @@
 package handlers
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 // NonceHandler creates and return an handler for nonce
-func NonceHandler(m infra.NonceManager) infra.HandlerFunc {
-	return func(ctx *infra.Context) {
+func NonceHandler(m services.NonceManager) types.HandlerFunc {
+	return func(ctx *types.Context) {
 		// Retrieve chainID and sender address
 		chainID, a := ctx.T.Chain().ID, ctx.T.Sender().Address
 

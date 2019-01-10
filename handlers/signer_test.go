@@ -9,8 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 type MockTxSigner struct {
@@ -25,8 +24,8 @@ func (s *MockTxSigner) Sign(chain *types.Chain, a common.Address, tx *ethtypes.T
 	return hexutil.MustDecode("0xabcdef"), &h, nil
 }
 
-func makeSignerContext(i int) *infra.Context {
-	ctx := infra.NewContext()
+func makeSignerContext(i int) *types.Context {
+	ctx := types.NewContext()
 	ctx.Reset()
 	switch i % 4 {
 	case 0:
@@ -66,12 +65,12 @@ func TestSigner(t *testing.T) {
 	signer := Signer(&s)
 
 	rounds := 100
-	outs := make(chan *infra.Context, rounds)
+	outs := make(chan *types.Context, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
 		ctx := makeSignerContext(i)
-		go func(ctx *infra.Context) {
+		go func(ctx *types.Context) {
 			defer wg.Done()
 			signer(ctx)
 			outs <- ctx

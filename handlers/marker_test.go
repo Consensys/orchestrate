@@ -5,7 +5,7 @@ import (
 	"sync"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 type MockOffsetMarker struct {
@@ -19,8 +19,8 @@ func (o *MockOffsetMarker) Mark(msg interface{}) error {
 	return nil
 }
 
-func makeMarkerContext(i int) *infra.Context {
-	ctx := infra.NewContext()
+func makeMarkerContext(i int) *types.Context {
+	ctx := types.NewContext()
 	ctx.Reset()
 	switch i % 2 {
 	case 0:
@@ -38,12 +38,12 @@ func TestMarker(t *testing.T) {
 	marker := Marker(&mo)
 
 	rounds := 100
-	outs := make(chan *infra.Context, rounds)
+	outs := make(chan *types.Context, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
 		ctx := makeMarkerContext(i)
-		go func(ctx *infra.Context) {
+		go func(ctx *types.Context) {
 			defer wg.Done()
 			marker(ctx)
 			outs <- ctx

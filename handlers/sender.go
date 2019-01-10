@@ -2,12 +2,13 @@ package handlers
 
 import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/infra"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 // Sender creates a Sender handler
-func Sender(sender infra.TxSender) infra.HandlerFunc {
-	return func(ctx *infra.Context) {
+func Sender(sender infra.TxSender) types.HandlerFunc {
+	return func(ctx *types.Context) {
 		if len(ctx.T.Tx().Raw()) == 0 {
 			// Tx is not ready
 			// TODO: handle case

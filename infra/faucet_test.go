@@ -81,7 +81,7 @@ func TestSimpleCreditControllerConcurrent(t *testing.T) {
 		}(i)
 		if i%6 == 0 {
 			// Sleep to cooldown delay on controller
-			time.Sleep(10 * time.Millisecond)
+			time.Sleep(15 * time.Millisecond)
 		}
 	}
 	wg.Wait()

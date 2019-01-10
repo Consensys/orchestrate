@@ -5,13 +5,8 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
+	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
 )
-
-// Unmarshaller are responsible to unmarshal an input message to protobuf
-type Unmarshaller interface {
-	Unmarshal(msg interface{}, pb *tracepb.Trace) error
-}
 
 // TraceProtoUnmarshaller assumes that input message is a protobuf
 type TraceProtoUnmarshaller struct{}

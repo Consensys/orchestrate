@@ -5,13 +5,8 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
+	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
 )
-
-// Marshaller are responsible to marshal
-type Marshaller interface {
-	Marshal(pb *tracepb.Trace, msg interface{}) error
-}
 
 // TraceProtoMarshaller assumes that message is a protobuf
 type TraceProtoMarshaller struct{}

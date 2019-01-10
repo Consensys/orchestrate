@@ -13,11 +13,11 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/golang/protobuf/proto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/handlers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/handlers"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/infra"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf"
+	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 var (
@@ -93,7 +93,7 @@ func newSaramaSyncProducer(client sarama.Client) sarama.SyncProducer {
 
 // SaramaHandler is a sarama ConsumerGroupHandler
 type SaramaHandler struct {
-	w *infra.Worker
+	w *types.Worker
 }
 
 // NewSaramaHandler creates a new handler
@@ -101,7 +101,7 @@ func NewSaramaHandler() *SaramaHandler {
 	return &SaramaHandler{}
 }
 
-func logger(ctx *infra.Context) {
+func logger(ctx *types.Context) {
 	msg := ctx.Msg.(*sarama.ConsumerMessage)
 	fmt.Printf("Entry %v\n", msg.Offset)
 
@@ -153,7 +153,7 @@ func makeFaucetMessage(chainID *big.Int, a common.Address, value *big.Int) *sara
 // Setup configure handler
 func (h *SaramaHandler) Setup(s sarama.ConsumerGroupSession) error {
 	// Create worker
-	h.w = infra.NewWorker(50)
+	h.w = types.NewWorker(50)
 
 	// Fake logger
 	h.w.Use(logger)

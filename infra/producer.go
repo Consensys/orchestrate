@@ -2,13 +2,8 @@ package infra
 
 import (
 	"github.com/Shopify/sarama"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core/protobuf/trace"
+	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
 )
-
-// TraceProducer produces a trace in another service typically a Kafka queue
-type TraceProducer interface {
-	Produce(pb *tracepb.Trace) error
-}
 
 // PbToProducerMessage is an interface for a function that creates sarama producer message from a protobuffer
 type PbToProducerMessage func(pb *tracepb.Trace) *sarama.ProducerMessage

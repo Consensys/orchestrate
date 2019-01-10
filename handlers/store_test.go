@@ -6,8 +6,7 @@ import (
 	"sync"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/infra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 type MockStore struct {
@@ -25,8 +24,12 @@ func (s *MockStore) Store(t *types.Trace) error {
 	return nil
 }
 
-func MakeStoreContext(i int) *infra.Context {
-	ctx := infra.NewContext()
+func (s *MockStore) Load(key interface{}) (*types.Trace, error) {
+	return s.stored[0], nil
+}
+
+func MakeStoreContext(i int) *types.Context {
+	ctx := types.NewContext()
 	ctx.Reset()
 	switch i % 2 {
 	case 0:
@@ -44,12 +47,12 @@ func TestStore(t *testing.T) {
 	ms := MockStore{&sync.Mutex{}, []*types.Trace{}}
 	store := Store(&ms)
 	rounds := 100
-	outs := make(chan *infra.Context, rounds)
+	outs := make(chan *types.Context, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
 		ctx := MakeStoreContext(i)
-		go func(ctx *infra.Context) {
+		go func(ctx *types.Context) {
 			defer wg.Done()
 			store(ctx)
 			outs <- ctx
