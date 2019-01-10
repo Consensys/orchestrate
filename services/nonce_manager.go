@@ -19,3 +19,7 @@ type NonceManager interface {
 	// Return a NonceLocker
 	Obtain(chainID *big.Int, a common.Address) (NonceLocker, bool, error)
 }
+
+// NonceCalibrator is a function expected to return a calibrated nonce value
+// For example when we meet a pair chainID, address for the first time
+type NonceCalibrator func(chainID *big.Int, a common.Address) (uint64, error)
