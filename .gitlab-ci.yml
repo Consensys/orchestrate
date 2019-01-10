@@ -11,7 +11,6 @@ stages:
 
 before_script:
   - eval $(ssh-agent -s)
-  - mkdir -p ${HOME}/.ssh
   - echo "$SSH_DEPLOY_CORE_STACK" | tr -d '\r' | ssh-add - > /dev/null
   - mkdir -p ~/.ssh
   - chmod 700 ~/.ssh
