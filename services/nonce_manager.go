@@ -16,6 +16,6 @@ type NonceLocker interface {
 
 // NonceManager is an interface for fine grain management of nonce by key
 type NonceManager interface {
-	// Return a locked nonce
-	Obtain(chainID *big.Int, a common.Address) (NonceLocker, error)
+	// Return a NonceLocker
+	Obtain(chainID *big.Int, a common.Address) (NonceLocker, bool, error)
 }
