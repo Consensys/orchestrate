@@ -8,6 +8,7 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/ethereum/go-ethereum/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/striped-mutex.git"
 )
 
 // MakeCreditMessageFunc is function expected to create Samara message corresponding to Eth Credit
@@ -36,7 +37,7 @@ func (c *SaramaCrediter) Credit(chainID *big.Int, a common.Address, value *big.I
 type SimpleCreditController struct {
 	cfg *SimpleCreditControllerConfig
 
-	mux            *StripeMutex
+	mux            *stripedmutex.StripedMutex
 	lastAuthorized *sync.Map
 }
 
@@ -44,7 +45,7 @@ type SimpleCreditController struct {
 func NewSimpleCreditController(cfg *SimpleCreditControllerConfig, stripes uint) *SimpleCreditController {
 	return &SimpleCreditController{
 		cfg:            cfg,
-		mux:            NewStripeMutex(stripes),
+		mux:            stripedmutex.New(stripes),
 		lastAuthorized: &sync.Map{},
 	}
 }
