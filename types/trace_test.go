@@ -33,6 +33,11 @@ func TestTrace(t *testing.T) {
 		t.Errorf("Trace: Expected Nonce %v but got %v", 10, tr.Tx().Nonce())
 	}
 
+	tr.Receipt().Status = 1
+	if tr.Receipt().Status != 1 {
+		t.Errorf("Trace: Expected Status %v but got %v", 1, tr.Receipt().Status)
+	}
+
 	tr.Reset()
 
 	if tr.Chain().ID.Text(16) != "0" {
@@ -49,5 +54,9 @@ func TestTrace(t *testing.T) {
 	}
 	if tr.Tx().Nonce() != 0 {
 		t.Errorf("Trace: Expected Nonce %v but got %v", 0, tr.Tx().Nonce())
+	}
+
+	if tr.Receipt().Status != 0 {
+		t.Errorf("Trace: Expected Status %v but got %v", 0, tr.Receipt().Status)
 	}
 }
