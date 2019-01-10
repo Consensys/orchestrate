@@ -10,15 +10,18 @@ stages:
   - test
 
 before_script:
-  - eval $(ssh-agent -s)
-  - echo "$SSH_DEPLOY_CORE_STACK" | tr -d '\r' | ssh-add - > /dev/null
+  # - eval $(ssh-agent -s)
+  # - echo "$SSH_DEPLOY_CORE_STACK" | tr -d '\r' | ssh-add - > /dev/null
   - mkdir -p ~/.ssh
-  - chmod 700 ~/.ssh
-  - git config --global user.email "deployer@core-stack.com"
-  - git config --global user.name "Deployer"
-  - ssh-keyscan -H 'https://gitlab.com' >> ${HOME}/.ssh/known_hosts
-  # - git config --global url."git@gitlab.com:".insteadOf "https://gitlab.com/"
+  - echo "$SSH_DEPLOY_CORE_STACK" | tr -d '\r' > ~/.ssh/id_rsa
+  - chmod 700 ~/.ssh/id_rsa
+  - eval "$(ssh-agent -s)"
+  - ssh-add ~/.ssh/id_rsa
+  #- git config --global user.email "deployer@core-stack.com"
+  #- git config --global user.name "Deployer"
+  # - ssh-keyscan -H 'https://gitlab.com' >> ${HOME}/.ssh/known_hosts
   - git clone git@gitlab.com:ConsenSys/client/fr/core-stack/infra/striped-mutex.git
+  # - git config --global url."git@gitlab.com:".insteadOf "https://gitlab.com/" 
   - echo "${HOME}/go"
   - mkdir "${HOME}/go"; export GOPATH="${HOME}/go"
   - export PATH="${GOPATH}/bin:${GOROOT}/bin:${PATH}"
