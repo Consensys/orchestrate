@@ -11,7 +11,7 @@ stages:
 
 before_script:
   - eval $(ssh-agent -s)
-  - echo "$DEPLOY_SERVER_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+  - echo "$SSH_DEPLOY_CORE_STACK" | tr -d '\r' | ssh-add - > /dev/null
   - mkdir -p ~/.ssh
   - chmod 700 ~/.ssh
   # - ssh-keyscan -H 'https://gitlab.com' >> ${HOME}/.ssh/known_hosts
