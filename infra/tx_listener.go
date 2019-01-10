@@ -235,7 +235,7 @@ func (l *txListener) getReceipt(tx *types.Transaction) *receiptResponse {
 		err: make(chan error),
 		res: make(chan *types.Receipt),
 	}
-	// Retrieve receipt in a parralel goroutine
+	// Retrieve receipt in a parallel goroutine
 	go func() {
 		receipt, err := l.ec.TransactionReceipt(context.Background(), tx.Hash())
 		if err != nil {
