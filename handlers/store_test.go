@@ -25,6 +25,10 @@ func (s *MockStore) Store(t *types.Trace) error {
 	return nil
 }
 
+func (s *MockStore) Load(key interface{}) (*types.Trace, error) {
+	return s.stored[0], nil
+}
+
 func MakeStoreContext(i int) *infra.Context {
 	ctx := infra.NewContext()
 	ctx.Reset()
@@ -61,7 +65,7 @@ func TestStore(t *testing.T) {
 	if len(outs) != rounds {
 		t.Errorf("Store: expected %v outs but got %v", rounds, len(outs))
 	}
-
+	
 	if len(ms.stored) != rounds/2 {
 		t.Errorf("Store: expected %v stored but got %v", rounds/2, len(ms.stored))
 	}
