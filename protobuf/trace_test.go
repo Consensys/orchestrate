@@ -122,6 +122,7 @@ type TraceTest struct {
 	receiver AccountTest
 	call     CallTest
 	tx       TxTest
+	receipt  ReceiptTest
 	errors   []ErrorTest
 }
 
@@ -131,6 +132,7 @@ func testPbTraceEquality(pb *tracepb.Trace, traceTest *TraceTest, t *testing.T) 
 	testPbAccountEquality(pb.GetReceiver(), &traceTest.receiver, t)
 	testPbCallEquality(pb.GetCall(), &traceTest.call, t)
 	testPbTxEquality(pb.GetTransaction(), &traceTest.tx, t)
+	testPbReceiptEquality(pb.GetReceipt(), &traceTest.receipt, t)
 
 	if len(pb.GetErrors()) != len(traceTest.errors) {
 		t.Errorf("Expected %v errors but got %v", len(traceTest.errors), len(pb.GetErrors()))
@@ -157,6 +159,7 @@ func TestLoadDumpTrace(t *testing.T) {
 			EmptyData,
 			EmptyHash,
 		},
+		nilReceiptTest,
 		[]ErrorTest{},
 	}
 	testPbTraceEquality(&pb, &traceTest, t)
@@ -171,6 +174,16 @@ func TestLoadDumpTrace(t *testing.T) {
 				TxData: &ethpb.TxData{Nonce: 1, To: "0xfF778b716FC07D98839f48DdB88D8bE583BEB684", Value: "0x2386f26fc10000", Gas: 21136, GasPrice: "0xee6b2800", Data: "0xabcd"},
 				Raw:    "0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80",
 				Hash:   "0xbf0b3048242aff8287d1dd9de0d2d100cee25d4ea45b8afa28bdfc1e2a775afd",
+			},
+			Receipt: &ethpb.Receipt{
+				Logs:              []*ethpb.Log{},
+				ContractAddress:   "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C",
+				PostState:         "0xabcdef",
+				Status:            1,
+				TxHash:            "0xbf0b3048242aff8287d1dd9de0d2d100cee25d4ea45b8afa28bdfc1e2a775afd",
+				Bloom:             "0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80",
+				GasUsed:           13456,
+				CumulativeGasUsed: 19304777,
 			},
 			Errors: []*tracepb.Error{&tracepb.Error{Type: 0, Message: "Error 0"}, &tracepb.Error{Type: 1, Message: "Error 1"}},
 		},
@@ -191,6 +204,16 @@ func TestLoadDumpTrace(t *testing.T) {
 			"0xabcd",
 			"0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80",
 			"0xbf0b3048242aff8287d1dd9de0d2d100cee25d4ea45b8afa28bdfc1e2a775afd",
+		},
+		ReceiptTest{
+			[]LogTest{},
+			"0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C",
+			"0xabcdef",
+			1,
+			"0xbf0b3048242aff8287d1dd9de0d2d100cee25d4ea45b8afa28bdfc1e2a775afd",
+			"0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80",
+			13456,
+			19304777,
 		},
 		[]ErrorTest{{0, "Error 0"}, {1, "Error 1"}},
 	}
