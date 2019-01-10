@@ -11,7 +11,7 @@ stages:
 
 before_script:
   - git config --global url."git@gitlab.com:".insteadOf "https://gitlab.com/"
-  - cat ${HOME}/.gitconfig
+  - git clone https://gitlab.com/ConsenSys/client/fr/core-stack/infra/striped-mutex.git
   - echo "${HOME}/go"
   - mkdir "${HOME}/go"; export GOPATH="${HOME}/go"
   - export PATH="${GOPATH}/bin:${GOROOT}/bin:${PATH}"
