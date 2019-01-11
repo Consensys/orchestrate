@@ -1,7 +1,6 @@
 package infra
 
 import (
-	"context"
 	"math/big"
 	"sync"
 	"time"
@@ -87,12 +86,12 @@ func (c *SimpleCreditController) ShouldCredit(chainID *big.Int, a common.Address
 // BalanceAtFunc is a type for a function expected to return a balance
 type BalanceAtFunc func(chainID *big.Int, a common.Address) (*big.Int, error)
 
-// NewEthBalanceAt returns using an Ethereum Client
-func NewEthBalanceAt(ec *EthClient) BalanceAtFunc {
-	return func(chainID *big.Int, a common.Address) (*big.Int, error) {
-		return ec.BalanceAt(context.Background(), a, nil)
-	}
-}
+// // NewEthBalanceAt returns using an Ethereum Client
+// func NewEthBalanceAt(ec *EthClient) BalanceAtFunc {
+// 	return func(chainID *big.Int, a common.Address) (*big.Int, error) {
+// 		return ec.BalanceAt(context.Background(), a, nil)
+// 	}
+// }
 
 // SimpleCreditControllerConfig is a config
 type SimpleCreditControllerConfig struct {

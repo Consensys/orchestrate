@@ -1,7 +1,6 @@
 package infra
 
 import (
-	"context"
 	"fmt"
 	"math/big"
 	"sync"
@@ -42,23 +41,17 @@ func (n *SafeNonce) Set(v uint64) error {
 	return nil
 }
 
-// CalibrateNonceFunc allows to calibrate managed nonce
-type CalibrateNonceFunc func(chainID *big.Int, a common.Address) (uint64, error)
-
-// CacheNonceManager allows to manage nonce
-type CacheNonceManager struct {
+// StripedNonceManager allows to manage nonce based on a striped mutex
+type StripedNonceManager struct {
 	mux    *stripedmutex.StripedMutex
 	nonces *sync.Map
-
-	calibrate CalibrateNonceFunc
 }
 
-// NewCacheNonceManager creates a new cache nonce
-func NewCacheNonceManager(calibrate CalibrateNonceFunc, stripes uint) *CacheNonceManager {
-	return &CacheNonceManager{
-		mux:       stripedmutex.New(stripes),
-		nonces:    &sync.Map{},
-		calibrate: calibrate,
+// NewStripedNonceManager creates a new StripedNonceManager
+func NewStripedNonceManager(stripes uint) *StripedNonceManager {
+	return &StripedNonceManager{
+		mux:    stripedmutex.New(stripes),
+		nonces: &sync.Map{},
 	}
 }
 
@@ -67,11 +60,11 @@ func computeKey(chainID *big.Int, a common.Address) string {
 }
 
 // Obtain return a locked SafeNonce for given chain and address
-func (c *CacheNonceManager) Obtain(chainID *big.Int, a common.Address) (services.NonceLocker, error) {
+func (c *StripedNonceManager) Obtain(chainID *big.Int, a common.Address) (services.NonceLocker, bool, error) {
 	key := computeKey(chainID, a)
 	mux, err := c.mux.GetLock(key)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	// Lock key
 	mux.Lock()
@@ -80,19 +73,6 @@ func (c *CacheNonceManager) Obtain(chainID *big.Int, a common.Address) (services
 	// Retrieve nonce from cache
 	n, ok := c.nonces.LoadOrStore(key, &SafeNonce{mux: mux, value: 0})
 	rv := n.(*SafeNonce)
-	if !ok {
-		// If nonce has just been created we compute its initial value
-		rv.value, err = c.calibrate(chainID, a)
-		if err != nil {
-			return rv, err
-		}
-	}
-	return rv, nil
-}
 
-// NewEthClientNonceCalibrate returns a function to get nonce initial values from an Eth client
-func NewEthClientNonceCalibrate(ec *EthClient) CalibrateNonceFunc {
-	return func(chainID *big.Int, a common.Address) (uint64, error) {
-		return ec.PendingNonceAt(context.Background(), a)
-	}
+	return rv, ok, nil
 }
