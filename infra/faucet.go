@@ -11,6 +11,11 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/striped-mutex.git"
 )
 
+// EthCrediter is an interface for crediting an account with ether
+type EthCrediter interface {
+	Credit(chainID *big.Int, a common.Address, value *big.Int) error
+}
+
 // MakeCreditMessageFunc is function expected to create Samara message corresponding to Eth Credit
 type MakeCreditMessageFunc func(chainID *big.Int, a common.Address, value *big.Int) *sarama.ProducerMessage
 
@@ -69,7 +74,7 @@ func (c *SimpleCreditController) ShouldCredit(chainID *big.Int, a common.Address
 		return nil, false
 	}
 
-	key := computeKey(chainID, a)
+	key := computeKey(chainID, &a)
 	c.mux.Lock(key)
 	defer c.mux.Unlock(key)
 	lastAuthorized, _ := c.lastAuthorized.LoadOrStore(key, time.Time{})

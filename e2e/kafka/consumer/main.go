@@ -197,10 +197,8 @@ func (h *SaramaHandler) Setup(s sarama.ConsumerGroupSession) error {
 	// Nonce
 	h.w.Use(
 		handlers.NonceHandler(
-			infra.NewCacheNonceManager(
-				infra.NewEthClientNonceCalibrate(newEthClient(chainURL)),
-				40,
-			),
+			infra.NewRedisNonceManager(":6379"),
+			handlers.GetChainNonce(newEthClient(chainURL)),
 		),
 	)
 
