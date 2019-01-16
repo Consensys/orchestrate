@@ -23,6 +23,18 @@ services:
     networks:
       - kafka
 
+  redis:
+    image: redis
+    ports: 
+      - 6379:6379
+    networks:
+      - nonce
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+
 networks:
   kafka:
+    driver: bridge
+  nonce:
     driver: bridge
