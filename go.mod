@@ -1,4 +1,4 @@
-module boilerplate-worker
+module gitlab.com/ConsenSys/client/fr/core-stack/boilerplate-worker.git
 
 require (
 	github.com/client9/misspell v0.3.4 // indirect
