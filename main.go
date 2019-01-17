@@ -8,5 +8,5 @@ func main() {
 	var opts Config
 	LoadConfig(&opts)
 	ConfigureLogger(opts.Log)
-	log.Infof("Start worker...")
+	log.Info("Start worker...")
 }
