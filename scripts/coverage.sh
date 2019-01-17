@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Exit on error
-# set -e
-
 for package in $@; do
   go test -covermode=count -coverprofile=profile.out "${package}"
   if [ -f profile.out ]; then
@@ -15,4 +12,5 @@ done
 go tool cover -func=tmp.out
 go tool cover -html="tmp.out" -o coverage.html
 
+# Remove temporary file
 rm tmp.out
