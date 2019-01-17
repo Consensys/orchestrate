@@ -1,0 +1,39 @@
+# Use latest Golang image for new perks and shiny features
+image: golang:latest
+
+cache:
+  paths:
+    - /apt-cache
+    - /root/go
+
+stages:
+  - test
+
+before_script:
+  # Add deploy ssh key so we can import go packages from private GitLab repo
+  - mkdir -p ~/.ssh
+  - echo "$SSH_DEPLOY_CORE_STACK" | tr -d '\r' > ~/.ssh/id_rsa
+  - chmod 700 ~/.ssh/id_rsa
+  - ssh-keyscan -H gitlab.com >> ~/.ssh/known_hosts
+
+  # Change git config so we can import go packages from GitLab
+  - git config --global url."git@gitlab.com:".insteadOf "https://gitlab.com/"
+
+  # Set GOPATH
+  - mkdir "${HOME}/go"; export GOPATH="${HOME}/go"
+  - export PATH="${GOPATH}/bin:${GOROOT}/bin:${PATH}"
+  - make tools
+
+test:
+  stage: test
+  coverage: /^total:.*\s(\d+.\d+)%/
+  script:
+    - make run-coverage
+
+test-lint:
+  stage: test
+  script:
+    - make fmt-check
+    - make misspell-check
+    - make race
+    - make lint
