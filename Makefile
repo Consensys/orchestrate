@@ -29,7 +29,7 @@ misspell: ## Correct misspells
 	@misspell -w $(GOFILES)
 
 race: ## Run data race detector
-	go test -race -short ${PACKAGES}
+	@go test -race -short ${PACKAGES}
 
 tools: ## Install test tools
 	@go install golang.org/x/lint/golint
