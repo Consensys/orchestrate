@@ -11,12 +11,12 @@ import (
 //     - Functions for contract ABIs
 type ABIRegistry interface {
 	// Retrieve method using unique identifier
-	GetMethodByID(ID string) (*abi.Method, error)
+	GetMethodByID(ID string) (abi.Method, error)
 	// Retrieve method using 4 bytes signature
-	GetMethodBySig(sig string) (*abi.Method, error)
+	GetMethodBySig(sig string) (abi.Method, error)
 }
 
 // Crafter takes a method abi and args to craft a transaction
 type Crafter interface {
-	Craft(method *abi.Method, args ...string) ([]byte, error)
+	Craft(method abi.Method, args ...string) ([]byte, error)
 }

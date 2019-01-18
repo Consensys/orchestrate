@@ -6,12 +6,17 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-// EthCrediter is an interface for crediting an account with ether
-type EthCrediter interface {
-	Credit(chainID *big.Int, a common.Address, value *big.Int) error
+// FaucetRequest holds information for a faucet request
+type FaucetRequest struct {
+	chainID *big.Int
+	a       common.Address
+	value   *big.Int
 }
 
-// EthCreditController is an interface to control if a credit should append
-type EthCreditController interface {
-	ShouldCredit(chainID *big.Int, a common.Address, value *big.Int) (*big.Int, bool)
+// Faucet is an interface for crediting an account with ether
+type Faucet interface {
+	// Credit should credit an account based on its own set of security rules
+	// If credit is successful it should return amount credited and true
+	// Credit should respond synchronously (not wait for a credit transaction to be mined)
+	Credit(r *FaucetRequest) (*big.Int, bool, error)
 }

@@ -1,17 +1,19 @@
-package types
+package core
 
 import (
 	"fmt"
 	"sync"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 // Worker for consuming Sarama messages
 type Worker struct {
-	handlers []HandlerFunc   // Handlers to apply on each context
-	handling *sync.WaitGroup // WaitGroup to keep track of messages being consumed and gracefully stop
-	pool     *sync.Pool      // Pool used to re-cycle context
-	slots    chan struct{}   // Channel used to limit count of goroutine handling messages
-	done     chan struct{}   // Channel used to indicate runner has terminated
+	handlers []types.HandlerFunc // Handlers to apply on each context
+	handling *sync.WaitGroup     // WaitGroup to keep track of messages being consumed and gracefully stop
+	pool     *sync.Pool          // Pool used to re-cycle context
+	slots    chan struct{}       // Channel used to limit count of goroutine handling messages
+	done     chan struct{}       // Channel used to indicate runner has terminated
 }
 
 // NewWorker creates a new worker
@@ -22,16 +24,16 @@ func NewWorker(slots uint) *Worker {
 		panic(fmt.Errorf("Worker requires at least 1 goroutine slots"))
 	}
 	return &Worker{
-		handlers: []HandlerFunc{},
+		handlers: []types.HandlerFunc{},
 		handling: &sync.WaitGroup{},
-		pool:     &sync.Pool{New: func() interface{} { return NewContext() }},
+		pool:     &sync.Pool{New: func() interface{} { return types.NewContext() }},
 		slots:    make(chan struct{}, slots),
 		done:     make(chan struct{}, 1),
 	}
 }
 
 // Use add a new handler
-func (w *Worker) Use(handler HandlerFunc) {
+func (w *Worker) Use(handler types.HandlerFunc) {
 	w.handlers = append(w.handlers, handler)
 }
 
@@ -70,9 +72,9 @@ func (w *Worker) Run(messages chan interface{}) {
 
 func (w *Worker) handleMessage(msg interface{}) {
 	// Retrieve a re-cycled context
-	ctx := w.pool.Get().(*Context)
+	ctx := w.pool.Get().(*types.Context)
 
-	defer func(ctx *Context) {
+	defer func(ctx *types.Context) {
 		// Re-cycle context object
 		w.pool.Put(ctx)
 	}(ctx)
