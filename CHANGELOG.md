@@ -2,6 +2,8 @@
 
 ### Version 0.1.0
 
+*Released on January 18th 2019*
+
 Features
 
 - [NEW] type ``types.TxData`` to store & manipulate transaction content data
@@ -21,3 +23,11 @@ Chore
 - [NEW] ``Makefile``
 - [NEW] ``scripts/coverage.sh``
 - [NEW] ``gitlab-ci.yml``
+
+### Version 0.1.1
+
+*Released on January 18th 2019*
+
+Doc
+
+- [NEW] Document ``core.Worker`` in README.md
