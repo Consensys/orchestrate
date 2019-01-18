@@ -17,7 +17,7 @@ type Worker struct {
 }
 
 // NewWorker creates a new worker
-// Slots indicate a count of goroutine that worker can occupy to process messages
+// You indicate a count of goroutine that worker can occupy to process messages
 // You must set `slots > 0`
 func NewWorker(slots uint) *Worker {
 	if slots == 0 {
