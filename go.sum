@@ -61,6 +61,8 @@ gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.0.0-20190110210433-8778502
 gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.0.0-20190110210433-877850217b88/go.mod h1:URe38j6JrUEAY/sNcNBJyFPmCiTi77Jw/ohdUeeH0ew=
 gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.0 h1:5mzLfzcs8eqvv1hq48fqyHlLrzL+PI0TikggXP4yucg=
 gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.0/go.mod h1:iValIAHnErjlv5gSMZnN+8wG+lvJ2H4FnRV4xxAcuWo=
+gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.1 h1:hsO+SVxhezc6MSkH9iIACjAYaSmVZj4fiMYGGejpTYs=
+gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.1/go.mod h1:iValIAHnErjlv5gSMZnN+8wG+lvJ2H4FnRV4xxAcuWo=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/striped-mutex.git v0.1.4/go.mod h1:84qaDpDp/i+e46WyzMU0IzTNf4sORqU3QUDV8lpmLVE=
 golang.org/x/crypto v0.0.0-20170930174604-9419663f5a44 h1:9lP3x0pW80sDI6t1UMSLA4to18W7R7imwAI/sWS9S8Q=
 golang.org/x/crypto v0.0.0-20170930174604-9419663f5a44/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
