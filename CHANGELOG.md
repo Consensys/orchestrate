@@ -31,3 +31,15 @@ Chore
 Doc
 
 - [NEW] Document ``core.Worker`` in README.md
+
+### Version 0.1.2
+
+*Released on January 19th 2019*
+
+Doc
+
+- [NEW] Add paragraph about concurrency when using worker
+
+Chore
+
+- [NEW] Add examples
