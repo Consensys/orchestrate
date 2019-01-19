@@ -8,9 +8,9 @@ import (
 
 // FaucetRequest holds information for a faucet request
 type FaucetRequest struct {
-	chainID *big.Int
-	a       common.Address
-	value   *big.Int
+	ChainID *big.Int
+	Address common.Address
+	Value   *big.Int
 }
 
 // Faucet is an interface for crediting an account with ether
