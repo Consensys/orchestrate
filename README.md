@@ -2,25 +2,13 @@
 
 Core is the lower level package in Core-Stack, it implements building blocks that are shared in all core stack *infra* and *microservice*. In particular it implements
 
-
 - *types* which define all main types used in core-stack (such as ``types.Context`` which is the central object manipulated by all Core-Stack workers)
 - *services* which define *interfaces* for microservices to speak together
 - *protobuf* schemes 
 
-## Contents
-
-- [Core](#core)
-  - [Contents](#contents)
-  - [Installation](#installation)
-  - [Prerequisite](#prerequisite)
-  - [Worker](#worker)
-    - [Quick Start](#quick-start)
-    - [Handlers](#handlers)
-      - [Pipeline/Middleware](#pipelinemiddleware)
-
 ## Installation
 
-To install Core-Stack COre package, you need to install Go and set your Go workspace first.
+To install Core-Stack Core package, you need to install Go and set your Go workspace first.
 
 1. Download and install it:
 
@@ -37,12 +25,6 @@ import "gitlab.com/ConsenSys/client/fr/core-stack/core.git"
 ## Prerequisite
 
 Core-Stack requires Go 1.11
-
-
-
-Context-Manager is a go package part of ConsenSys France Core-Stack. Context-manager allows to manipulate a context that is transmitted between microservices in Core-Stack.
-
-It bases on proto-buffer protocol to serialize and deserialize message that can be transmitted from a microservice to another.
 
 ## Worker
 
@@ -108,16 +90,16 @@ Handler functions are the building blocks for workers, they match the interface
 type HandlerFunc func(ctx *Context)
 ```
 
-When creating a worker you must register a sequence of handlers by using ``worker.Use(handler)``. When running, worker will apply handlers sequence on every message feeded to the worker.
+When creating a worker you must register a sequence of handlers by using ``worker.Use(handler)``. When running, each time a new message is feeded to the worker, the worker generates a ``types.Context`` and apply handlers sequence on this context object.
 
 #### Pipeline/Middleware
 
 Handlers can be either 
 
 - *pipeline* meaning it proceed to its execution then closes
-- *middleware* meaning it proceeds to part of its execution, execution pending handlers then finishes execution
+- *middleware* meaning it proceeds to beginning of its own execution, then execute pending handlers then finishes own execution
 
-Middleware is a very common pattern that permit to maintain a scope open while executing unknown functions.
+Middleware is a common pattern that permit to maintain a scope of variables open while executing unknown functions.
 
 ```sh
 $ cat examples/pipeline-middleware/main.go
@@ -184,4 +166,75 @@ $ go run examples/pipeline-middleware/main.go
 * Middleware starts handling Message-2
 * Pipeline handling Message-2
 * Middleware finishes handling Message-2
+```
+
+#### Concurrency
+
+A worker can handle multiple message at once in parallel goroutines, therefore handler functions must manage there own resource in concurrenct safe manner. Note that while multiple contexts can be handled in parallel, a given context is never handled by more than one handler function at a time.
+
+```sh
+$ cat examples/concurrency/main.go
+```
+
+```go
+package main
+
+import (
+	"fmt"
+	"sync/atomic"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+)
+
+// ExampleHandler is an handler that increment counters
+type ExampleHandler struct {
+	safeCounter   uint32
+	unsafeCounter uint32
+}
+
+func (h *ExampleHandler) handleSafe(ctx *types.Context) {
+	// Increment counter using atomic
+	atomic.AddUint32(&h.safeCounter, 1)
+}
+
+func (h *ExampleHandler) handleUnsafe(ctx *types.Context) {
+	// Increment counter with no concurrent protection
+	h.unsafeCounter++
+}
+
+func main() {
+	// Instantiate a worker that can treat 1000 messages in parallelW
+	worker := core.NewWorker(1000)
+
+	// Register handler
+	h := ExampleHandler{0, 0}
+	worker.Use(h.handleSafe)
+	worker.Use(h.handleUnsafe)
+
+	// Start worker
+	in := make(chan interface{})
+	go func() { worker.Run(in) }()
+
+	// Feed 10000 to the worker
+	for i := 0; i < 10000; i++ {
+		in <- "Message"
+	}
+
+	// Close channel
+	close(in)
+	<-worker.Done()
+
+	// Print counters
+	fmt.Printf("* Safe counter: %v\n", h.safeCounter)
+	fmt.Printf("* Unsafe counter: %v\n", h.unsafeCounter)
+}
+```
+
+```sh
+# Run example (note that unsafe counter output is not deterministic)
+$ go run examples/concurrency/main.go
+
+* Safe counter: 10000
+* Unsafe counter: 9989
 ```
