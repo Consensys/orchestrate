@@ -14,7 +14,7 @@ type EventDecoder struct {
 	Inputs abi.Arguments
 }
 
-// FormatIndexed transforms a data to string
+// FormatIndexedEvent transforms a data to string
 func FormatIndexedEvent(datatype string, data string) (string, error) {
 	switch {
 	case datatype == "address":
@@ -24,7 +24,7 @@ func FormatIndexedEvent(datatype string, data string) (string, error) {
 	}
 }
 
-// FormatData transforms a data to string
+// FormatNonIndexEvent transforms a data to string
 func FormatNonIndexEvent(t abi.Type, data interface{}) (string, error) {
 
 	switch v := data.(type) {
