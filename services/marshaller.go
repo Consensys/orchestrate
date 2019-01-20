@@ -1,10 +1,11 @@
 package services
 
 import (
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
+	proto "github.com/golang/protobuf/proto"
 )
 
-// Marshaller are responsible to marshal a protobuffer trace into a message
+// Marshaller are responsible to marshal a protobuffer message to a higher level message format
 type Marshaller interface {
-	Marshal(pb *tracepb.Trace, msg interface{}) error
+	// Marshal a protobuffer message to a higher level message format
+	Marshal(pb *proto.Message, msg interface{}) error
 }

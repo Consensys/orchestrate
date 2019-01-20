@@ -1,10 +1,11 @@
 package services
 
 import (
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
+	proto "github.com/golang/protobuf/proto"
 )
 
-// Unmarshaller are responsible to unmarshal an input message to a protobuf
+// Unmarshaller are responsible to unmarshal high level input message into a protobuf message
 type Unmarshaller interface {
-	Unmarshal(msg interface{}, pb *tracepb.Trace) error
+	// Unmarshal high level input message into a protobuf message
+	Unmarshal(msg interface{}, pb *proto.Message) error
 }
