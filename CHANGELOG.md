@@ -5,3 +5,4 @@
 *Unreleased*
 
 - [FEAT] implement controllers ``BlackList``, ``CoolDown``, ``MaxBalance``
+- [FEAT] implement ``ControlledFaucet``
