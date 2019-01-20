@@ -43,10 +43,10 @@ func (w *Worker) Run(messages chan interface{}) {
 		msg, ok := <-messages
 		if !ok {
 			// Message channel has been close.
-			// We wait until all messages have been properly consumed
+			// We wait until all messages have been properly handled
 			w.handling.Wait()
-			// We indicate that we have gracefully stoped
-			w.done <- struct{}{}
+			// We notify that we have gracefully stoped
+			close(w.done)
 			// Exit loop
 			break
 		} else {
@@ -55,13 +55,13 @@ func (w *Worker) Run(messages chan interface{}) {
 
 			// Acquire a goroutine slot
 			w.slots <- struct{}{}
-			// Execute message handling in a dedicated goroutine
+
 			go func(msg interface{}) {
-				defer func() {
-					// Release a goroutine slot
-					<-w.slots
-				}()
+				// Handle message in a dedicated goroutine
 				w.handleMessage(msg)
+
+				// Release a goroutine slot
+				<-w.slots
 
 				// Indicate that message has been handled
 				w.handling.Done()
