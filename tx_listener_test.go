@@ -66,7 +66,7 @@ func TestBlockCursor(t *testing.T) {
 
 	// Create a cursor
 	cursor := &blockCursor{
-		ec: &mockEthClient{
+		c: &mockEthClient{
 			t:        t,
 			mux:      &sync.Mutex{},
 			index:    0,
@@ -114,7 +114,7 @@ func TestBlockConsumer(t *testing.T) {
 
 	// Create cursor & block consumer
 	cursor := &blockCursor{
-		ec:   ec,
+		c:    ec,
 		next: big.NewInt(0),
 	}
 	config := &TxListenerConfig{}
@@ -149,7 +149,7 @@ func TestBlockConsumerInterupted(t *testing.T) {
 
 	// Create cursor & block consumer
 	cursor := &blockCursor{
-		ec:   ec,
+		c:    ec,
 		next: big.NewInt(0),
 	}
 	config := &TxListenerConfig{}
@@ -195,6 +195,12 @@ func TestTxListener(t *testing.T) {
 	// Create txListener
 	l := NewTxListener(ec, config)
 
+	blocks := []*types.Block{}
+	for block := range l.Blocks() {
+		// Drain blocks
+		blocks = append(blocks, block)
+	}
+
 	receipts := []*types.Receipt{}
 	for receipt := range l.Receipts() {
 		receipts = append(receipts, receipt)
@@ -204,7 +210,7 @@ func TestTxListener(t *testing.T) {
 		t.Errorf("TxListener: expected %v receipts but got %v", 6, len(receipts))
 	}
 
-	// Ensure Receipts have processed in expected order
+	// Ensure Receipts have been processed in expected order
 	for i := 0; i < 6; i++ {
 		for j, tx := range block.Transactions() {
 			if tx.Hash().Hex() != receipts[len(block.Transactions())*i+j].TxHash.Hex() {
