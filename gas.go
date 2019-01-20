@@ -7,22 +7,22 @@ import (
 	"github.com/ethereum/go-ethereum"
 )
 
-// SimpleGasManager implements methods to get information about Gas using an Ethereum client
-type SimpleGasManager struct {
+// EthGasManager implements methods to get information about Gas by connecting to an Ethereum client
+type EthGasManager struct {
 	ec *EthClient
 }
 
-// NewSimpleGasManager creates a new SimpleGasManager
-func NewSimpleGasManager(ec *EthClient) *SimpleGasManager {
-	return &SimpleGasManager{ec}
+// NewEthGasManager creates a new EthGasManager
+func NewEthGasManager(ec *EthClient) *EthGasManager {
+	return &EthGasManager{ec}
 }
 
 // SuggestGasPrice suggests a gas price
-func (m *SimpleGasManager) SuggestGasPrice(chainID *big.Int) (*big.Int, error) {
+func (m *EthGasManager) SuggestGasPrice(chainID *big.Int) (*big.Int, error) {
 	return m.ec.SuggestGasPrice(context.Background())
 }
 
 // EstimateGas suggests a gas limit
-func (m *SimpleGasManager) EstimateGas(chainID *big.Int, call ethereum.CallMsg) (uint64, error) {
+func (m *EthGasManager) EstimateGas(chainID *big.Int, call ethereum.CallMsg) (uint64, error) {
 	return m.ec.EstimateGas(context.Background(), call)
 }
