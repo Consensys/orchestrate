@@ -36,3 +36,10 @@
 *Released on January 19th 2019*
 
 - [FIX] Make ``services.FaucetRequest`` attributes exportable
+
+### Version 0.1.4
+
+*Released on January 20th 2019*
+
+- [FIX] Clean closing mechnism of ``Worker``
+- [FIX] Make `services.Marshaller`/`services.Unmarshaller` agnostic from protobuf Trace
