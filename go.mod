@@ -5,6 +5,6 @@ require (
 	github.com/deckarep/golang-set v1.7.1 // indirect
 	github.com/ethereum/go-ethereum v1.8.21
 	github.com/rs/cors v1.6.0 // indirect
-	gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.3
+	gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.4
 	golang.org/x/net v0.0.0-20190110200230-915654e7eabc // indirect
 )
