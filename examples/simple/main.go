@@ -1,34 +1,3 @@
-# Faucet
-
-Faucet implement infrastructure elements to smoothly build a faucet.
-
-## Installation
-
-To install Core-Stack Core package, you need to install Go and set your Go workspace first.
-
-1. Download and install it:
-
-```sh
-$ go get -u gitlab.com/ConsenSys/client/fr/core-stack/core.git
-```
-
-2. Import it in your code:
-
-```go
-import "gitlab.com/ConsenSys/client/fr/core-stack/core.git"
-```
-
-## Prerequisite
-
-Core-Stack requires Go 1.11
-
-## Create a Faucet
-
-```sh
-$ cat examples/simple/main.go
-```
-
-```go
 package main
 
 import (
@@ -122,14 +91,3 @@ func main() {
 	)
 	fmt.Printf("* 4. Amount credited=%v (credited=%v)\n", amount, ok)	
 }
-```
-
-```sh
-# Run example
-$ go run examples/simple/main.go
-
-* 1. Amount credited=0 (credited=false)
-* 2. Amount credited=100000000000000000 (credited=true)
-* 3. Amount credited=0 (credited=false)
-* 4. Amount credited=0 (credited=false)
-```

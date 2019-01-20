@@ -6,3 +6,4 @@
 
 - [FEAT] implement controllers ``BlackList``, ``CoolDown``, ``MaxBalance``
 - [FEAT] implement ``ControlledFaucet``
+- [DOC] add ``examples``
