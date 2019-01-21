@@ -50,3 +50,9 @@
 
 - [FIX] Make `services.Marshaller`/`services.Unmarshaller` update protobuf interface
 - [FIX] Update NonceManager service (``Unlock`` method signature)
+
+### Version 0.1.6
+
+*Released on January 21th 2019*
+
+- [CHORE] tag verion following an error in tagging
