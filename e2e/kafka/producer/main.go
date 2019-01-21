@@ -39,7 +39,7 @@ func main() {}
 // 	b, _ := proto.Marshal(
 // 		&tracepb.Trace{
 // 			Sender: &tracepb.Account{Address: "0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff"},
-// 			Call:   &tracepb.Call{MethodId: "some-method", Args: []string{senders[i%len(senders)], "0x400"}},
+// 			Call:   &tracepb.Call{MethodId: "transfer@ERC20", Args: []string{senders[i%len(senders)], "0x400"}},
 // 			Transaction: &ethpb.Transaction{
 // 				TxData: &ethpb.TxData{
 // 					To: ERC20Address,
@@ -59,7 +59,7 @@ func main() {}
 // 	b, _ := proto.Marshal(
 // 		&tracepb.Trace{
 // 			Sender: &tracepb.Account{Address: senders[i%len(senders)]},
-// 			Call:   &tracepb.Call{MethodId: "some-method", Args: []string{"0x71a556C033cD4beB023eb2baa734d0e8304CA88a", "0x200"}},
+// 			Call:   &tracepb.Call{MethodId: "transfer@ERC20", Args: []string{"0x71a556C033cD4beB023eb2baa734d0e8304CA88a", "0x200"}},
 // 			Transaction: &ethpb.Transaction{
 // 				TxData: &ethpb.TxData{
 // 					To: ERC20Address,
