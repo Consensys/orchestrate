@@ -2,4 +2,7 @@ version: '3.7'
 
 services:
   worker:
-    build: .
+    build:
+      context: .
+      args:
+        SSH_KEY: ${SSH_KEY}
