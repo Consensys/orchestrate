@@ -18,5 +18,5 @@ type NonceManager interface {
 	Lock(chainID *big.Int, a *common.Address) (string, error)
 
 	// Unlock nonce
-	Unlock(chainID *big.Int, a *common.Address) (string, error)
+	Unlock(chainID *big.Int, a *common.Address, lockSig string) error
 }

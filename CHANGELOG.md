@@ -43,3 +43,9 @@
 
 - [FIX] Clean closing mechnism of ``Worker``
 - [FIX] Make `services.Marshaller`/`services.Unmarshaller` agnostic from protobuf Trace
+
+### Version 0.1.5
+
+*Released on January 21th 2019*
+
+- [FIX] Update NonceManager service (``Unlock`` method signature)
