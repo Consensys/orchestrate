@@ -31,32 +31,37 @@ func main() {}
 // 	faucetAddress = common.HexToAddress("0x7E654d251Da770A068413677967F6d3Ea2FeA9E4")
 // )
 
-// // ERC20TransferRegistry holds ERC20 ABI
-// var ERC20TransferRegistry = infra.NewDummyABIRegistry(
-// 	[]byte(`{
-// 		"constant": false,
-// 		"inputs": [
-// 			{
-// 				"name": "_to",
-// 				"type": "address"
-// 			},
-// 			{
-// 				"name": "_value",
-// 				"type": "uint256"
-// 			}
-// 		],
-// 		"name": "transfer",
-// 		"outputs": [
-// 			{
-// 				"name": "",
-// 				"type": "bool"
-// 			}
-// 		],
-// 		"payable": false,
-// 		"stateMutability": "nonpayable",
-// 		"type": "function"
-// 	}`),
-// )
+// func newTransferABIRegistry() *infra.ContractABIRegistry {
+// 	// ERC20TransferRegistry holds ERC20 ABI
+// 	ERC20TransferRegistry := infra.NewContractABIRegistry()
+// 	ERC20TransferRegistry.RegisterContract(
+// 		"ERC20",
+// 		[]byte(`[{
+// 			"constant": false,
+// 			"inputs": [
+// 				{
+// 					"name": "_to",
+// 					"type": "address"
+// 				},
+// 				{
+// 					"name": "_value",
+// 					"type": "uint256"
+// 				}
+// 			],
+// 			"name": "transfer",
+// 			"outputs": [
+// 				{
+// 					"name": "",
+// 					"type": "bool"
+// 				}
+// 			],
+// 			"payable": false,
+// 			"stateMutability": "nonpayable",
+// 			"type": "function"
+// 		}]`),
+// 	)
+// 	return ERC20TransferRegistry
+// }
 
 // func newEthClient(rawurl string) *infra.EthClient {
 // 	ec, err := infra.Dial(rawurl)
@@ -165,7 +170,8 @@ func main() {}
 
 // 	// Crafter
 // 	crafter := infra.PayloadCrafter{}
-// 	h.w.Use(handlers.Crafter(ERC20TransferRegistry, &crafter))
+// registry := newTransferABIRegistry()
+// h.w.Use(handlers.Crafter(registry, &crafter))
 
 // 	// Gas Price
 // 	h.w.Use(

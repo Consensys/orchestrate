@@ -5,15 +5,17 @@ import (
 )
 
 // ABIRegistry is an interface to manage ABIs
-// TODO: extend including
-//     - SetMethod() (ID string, err error)
-//     - Functions for event ABIs
-//     - Functions for contract ABIs
 type ABIRegistry interface {
 	// Retrieve method using unique identifier
 	GetMethodByID(ID string) (abi.Method, error)
 	// Retrieve method using 4 bytes signature
 	GetMethodBySig(sig string) (abi.Method, error)
+	// Retrieve event using unique identifier
+	GetEventByID(ID string) (abi.Event, error)
+	// Retrieve event using 4 bytes signature
+	GetEventBySig(sig string) (abi.Event, error)
+	// Register a new contract in the ABI
+	RegisterContract(name string, contractABI []byte) error
 }
 
 // Crafter takes a method abi and args to craft a transaction
