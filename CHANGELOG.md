@@ -56,3 +56,11 @@
 *Released on January 21th 2019*
 
 - [CHORE] tag verion following an error in tagging
+
+### Version 0.1.7
+
+*Released on January 21th 2019*
+
+- [FIX] update `services.Producer` interface
+- [FIX] update `services.Marshaller`/`services.Unmarshaller` interface
+  
