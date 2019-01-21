@@ -1,11 +1,9 @@
 package services
 
-import (
-	proto "github.com/golang/protobuf/proto"
-)
+import "gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 
 // Unmarshaller are responsible to unmarshal high level input message into a protobuf message
 type Unmarshaller interface {
 	// Unmarshal high level input message into a protobuf message
-	Unmarshal(msg interface{}, pb proto.Message) error
+	Unmarshal(msg interface{}, t *types.Trace) error
 }

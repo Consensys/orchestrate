@@ -1,11 +1,9 @@
 package services
 
-import (
-	proto "github.com/golang/protobuf/proto"
-)
+import "gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 
 // Marshaller are responsible to marshal a protobuffer message to a higher level message format
 type Marshaller interface {
 	// Marshal a protobuffer message to a higher level message format
-	Marshal(pb proto.Message, msg interface{}) error
+	Marshal(t *types.Trace, msg interface{}) error
 }
