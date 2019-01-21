@@ -2,6 +2,8 @@ package ethereum
 
 import (
 	"fmt"
+	"math/big"
+	"reflect"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
@@ -9,37 +11,39 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
-// EventDecoder ...
-type EventDecoder struct {
-	Inputs abi.Arguments
-}
+// FormatIndexedArg transforms a data to string
+func FormatIndexedArg(t abi.Type, arg common.Hash) (string, error) {
 
-// FormatIndexedEvent transforms a data to string
-func FormatIndexedEvent(eventtype string, event string) (string, error) {
 	switch {
-	case eventtype == "address":
-		return common.HexToAddress(event).Hex(), nil
+	case t.Type == reflect.TypeOf(&big.Int{}):
+		num := new(big.Int).SetBytes(arg[:])
+		return fmt.Sprintf("%v", num), nil
+	case t.Type == reflect.TypeOf(common.Address{}):
+		return common.HexToAddress(arg.Hex()).Hex(), nil
 	default:
-		return fmt.Sprintf("%v", event), nil
+		switch {
+		case t.T == abi.FixedBytesTy:
+			return fmt.Sprintf("%v", hexutil.Encode(arg[common.HashLength-t.Type.Size():])), nil
+		}
+		return fmt.Sprintf("%v", arg), nil
 	}
 }
 
-// FormatNonIndexEvent transforms a data to string
-func FormatNonIndexEvent(t abi.Type, event interface{}) (string, error) {
+// FormatNonIndexedArg transforms a data to string
+func FormatNonIndexedArg(t abi.Type, arg interface{}) (string, error) {
 
-	switch v := event.(type) {
+	// TODO: how to handle anyother bytes except 32
+	switch v := arg.(type) {
 	case common.Address:
 		return v.Hex(), nil
-	case [8]byte:
-	case [16]byte:
 	case [32]byte:
 		return hexutil.Encode(v[:]), nil
 	}
-	return fmt.Sprintf("%v", event), nil
+	return fmt.Sprintf("%v", arg), nil
 }
 
 // Decode event data to string
-func (event *EventDecoder) Decode(txLog *types.Log) (map[string]string, error) {
+func Decode(event *abi.Event, txLog *types.Log) (map[string]string, error) {
 	logMapping := make(map[string]string, len(event.Inputs))
 
 	unpackValues, err := event.Inputs.UnpackValues(txLog.Data)
@@ -47,15 +51,17 @@ func (event *EventDecoder) Decode(txLog *types.Log) (map[string]string, error) {
 		return nil, err
 	}
 
-	var topicIndex = 1
-	var unpackValuesIndex = 0
+	var (
+		topicIndex        = 1
+		unpackValuesIndex = 0
+	)
 	for _, arg := range event.Inputs {
 		var decoded string
 		if arg.Indexed {
-			decoded, _ = FormatIndexedEvent(fmt.Sprintf("%s", arg.Type), txLog.Topics[topicIndex].Hex())
+			decoded, _ = FormatIndexedArg(arg.Type, txLog.Topics[topicIndex])
 			topicIndex++
 		} else {
-			decoded, _ = FormatNonIndexEvent(arg.Type, unpackValues[unpackValuesIndex])
+			decoded, _ = FormatNonIndexedArg(arg.Type, unpackValues[unpackValuesIndex])
 			unpackValuesIndex++
 		}
 		logMapping[arg.Name] = decoded

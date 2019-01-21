@@ -2,6 +2,7 @@ package ethereum
 
 import (
 	"encoding/json"
+	"math/big"
 	"reflect"
 
 	"testing"
@@ -126,11 +127,7 @@ func newEvent(eventABI []byte) *abi.Event {
 func TestDecodeERC20ABI(t *testing.T) {
 	event := newEvent(ERC20ABI)
 
-	testEventDecoder := &EventDecoder{
-		Inputs: event.Inputs,
-	}
-
-	decoded, _ := testEventDecoder.Decode(testLogERC20ABI)
+	decoded, _ := Decode(event, testLogERC20ABI)
 
 	m := map[string]string{
 		"tokens": "30000000000000000000",
@@ -146,11 +143,7 @@ func TestDecodeERC20ABI(t *testing.T) {
 func TestDecodeLOGFILLABI(t *testing.T) {
 	event := newEvent(LOGFILLABI)
 
-	testEventDecoder := &EventDecoder{
-		Inputs: event.Inputs,
-	}
-
-	decoded, _ := testEventDecoder.Decode(testLogLOGFILLABI)
+	decoded, _ := Decode(event, testLogLOGFILLABI)
 
 	m := map[string]string{
 		"filledTakerTokenAmount": "6930282000000000000",
@@ -171,10 +164,132 @@ func TestDecodeLOGFILLABI(t *testing.T) {
 	}
 }
 
-// func TestFormatIndexedEvent(t *testing.T) {
+// TODO: Test with all types
+func TestFormatIndexedArg(t *testing.T) {
 
-// }
+	for i, test := range []struct {
+		argType        string
+		arg            common.Hash
+		expectedOutput string
+	}{
+		{
+			"address",
+			common.HexToHash("0x0000000000000000000000008dd688660ec0babd0b8a2f2de3232645f73cc5eb"),
+			"0x8dd688660ec0BaBD0B8a2f2DE3232645F73cC5eb",
+		},
+		{
+			"bytes32",
+			common.HexToHash("0xf08499c9e419ea8c08c4b991f88632593fb36baf4124c62758acb21898711088"),
+			"0xf08499c9e419ea8c08c4b991f88632593fb36baf4124c62758acb21898711088",
+		},
+		{
+			"uint256",
+			common.BigToHash(big.NewInt(1)),
+			"1",
+		},
+	} {
+		typeArg, _ := abi.NewType(test.argType)
+		output, _ := FormatIndexedArg(typeArg, test.arg)
 
-// func TestFormatNonIndexEvent(t *testing.T) {
+		if test.expectedOutput != output {
+			t.Errorf("TestFormatIndexedArg (input %d): expected %q but got %q", i, test.expectedOutput, output)
+		}
+	}
 
-// }
+}
+
+func TestFormatNonIndexedArg(t *testing.T) {
+
+	for i, test := range []struct {
+		arg            interface{}
+		expectedOutput string
+	}{
+		{
+			uint8(2),
+			"2",
+		},
+		{
+			[]uint8{1, 2},
+			"[1 2]",
+		},
+		{
+			uint16(2),
+			"2",
+		},
+		{
+			[]uint16{1, 2},
+			"[1 2]",
+		},
+		{
+			uint32(2),
+			"2",
+		},
+		{
+			[]uint32{1, 2},
+			"[1 2]",
+		},
+		{
+			uint64(2),
+			"2",
+		},
+		{
+			[]uint64{1, 2},
+			"[1 2]",
+		},
+		{
+			big.NewInt(2),
+			"2",
+		},
+		{
+			[]*big.Int{big.NewInt(1), big.NewInt(2)},
+			"[1 2]",
+		},
+		{
+			int8(-2),
+			"-2",
+		},
+		{
+			[]int8{-1, -2},
+			"[-1 -2]",
+		},
+		{
+			int16(-2),
+			"-2",
+		},
+		{
+			[]int16{-1, -2},
+			"[-1 -2]",
+		},
+		{
+			int32(-2),
+			"-2",
+		},
+		{
+			[]int32{-1, -2},
+			"[-1 -2]",
+		},
+		{
+			int64(-2),
+			"-2",
+		},
+		{
+			[]int64{-1, -2},
+			"[-1 -2]",
+		},
+		{
+			[32]byte{1},
+			"0x0100000000000000000000000000000000000000000000000000000000000000",
+		},
+		{
+			common.HexToAddress("01"),
+			"0x0000000000000000000000000000000000000001",
+		},
+	} {
+		output, _ := FormatNonIndexedArg(abi.Type{}, test.arg)
+
+		if test.expectedOutput != output {
+			t.Errorf("FormatNonIndexedArg (input %d): expected mapping %q but got %q", i, test.expectedOutput, output)
+		}
+	}
+
+}
