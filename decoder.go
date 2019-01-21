@@ -15,19 +15,19 @@ type EventDecoder struct {
 }
 
 // FormatIndexedEvent transforms a data to string
-func FormatIndexedEvent(datatype string, data string) (string, error) {
+func FormatIndexedEvent(eventtype string, event string) (string, error) {
 	switch {
-	case datatype == "address":
-		return common.HexToAddress(data).Hex(), nil
+	case eventtype == "address":
+		return common.HexToAddress(event).Hex(), nil
 	default:
-		return fmt.Sprintf("%v", data), nil
+		return fmt.Sprintf("%v", event), nil
 	}
 }
 
 // FormatNonIndexEvent transforms a data to string
-func FormatNonIndexEvent(t abi.Type, data interface{}) (string, error) {
+func FormatNonIndexEvent(t abi.Type, event interface{}) (string, error) {
 
-	switch v := data.(type) {
+	switch v := event.(type) {
 	case common.Address:
 		return v.Hex(), nil
 	case [8]byte:
@@ -35,7 +35,7 @@ func FormatNonIndexEvent(t abi.Type, data interface{}) (string, error) {
 	case [32]byte:
 		return hexutil.Encode(v[:]), nil
 	}
-	return fmt.Sprintf("%v", data), nil
+	return fmt.Sprintf("%v", event), nil
 }
 
 // Decode event data to string
