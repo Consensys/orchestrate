@@ -49,3 +49,4 @@
 *Released on January 21th 2019*
 
 - [FIX] Make `services.Marshaller`/`services.Unmarshaller` update protobuf interface
+- [FIX] Update NonceManager service (``Unlock`` method signature)
