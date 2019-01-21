@@ -3,9 +3,14 @@
 ############################
 FROM golang:1.11 as builder
 
-RUN useradd appuser
-
-RUN mkdir /app
+ARG SSH_KEY
+RUN useradd appuser && \
+    mkdir -p  ~/.ssh && \
+    echo "$SSH_KEY" | tr -d '\r' > ~/.ssh/id_rsa && \
+    chmod 700 ~/.ssh/id_rsa && \
+    ssh-keyscan -H gitlab.com >> ~/.ssh/known_hosts && \
+    git config --global url."git@gitlab.com:".insteadOf "https://gitlab.com/" && \
+    mkdir /app
 WORKDIR /app
 
 # Use go mod with go 1.11
