@@ -7,5 +7,5 @@ import (
 // Unmarshaller are responsible to unmarshal high level input message into a protobuf message
 type Unmarshaller interface {
 	// Unmarshal high level input message into a protobuf message
-	Unmarshal(msg interface{}, pb *proto.Message) error
+	Unmarshal(msg interface{}, pb proto.Message) error
 }
