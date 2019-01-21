@@ -1,6 +1,6 @@
 # Common
 
-Implementat common elements used through core stack such as handlers and infrastructures.
+Implements common elements used through core stack such as handlers and infrastructures.
 
 ## Installation
 
@@ -21,3 +21,4 @@ import "gitlab.com/ConsenSys/client/fr/core-stack/common.git"
 ## Prerequisite
 
 Core-Stack requires Go 1.11
+
