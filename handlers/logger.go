@@ -26,6 +26,6 @@ func LoggerHandler(ctx *types.Context) {
 	errors := ctx.T.Errors
 	if len(errors) > 0 {
 		// TODO: change to log
-		fmt.Printf("Error: %v\n")
+		fmt.Printf("Error: %v\n", errors)
 	}
 }

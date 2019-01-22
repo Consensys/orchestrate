@@ -27,7 +27,7 @@ while True:
 
     if retries >= NUMBER_OF_RETRIES:
         print()
-        sys.exit('ERROR: unable to connect to Kafka ✗')
+        sys.exit('ERROR: unable to connect to Kafka')
 
     print('Checking Kafka connection...')
 
@@ -40,7 +40,7 @@ while True:
 
     sleep(6)
 
-print('Connected to Kafka ✓')
+print('Connected to Kafka')
 
 ############
 # CONSUMER #
