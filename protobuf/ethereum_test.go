@@ -5,7 +5,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
@@ -198,6 +197,7 @@ type LogTest struct {
 	address     string
 	topics      []string
 	data        string
+	decodedData map[string]string
 	blockNumber uint64
 	txHash      string
 	txIndex     uint
@@ -210,6 +210,7 @@ var nilLogTest = LogTest{
 	EmptyAddress,
 	[]string{},
 	EmptyData,
+	make(map[string]string),
 	0,
 	EmptyHash,
 	0,
@@ -218,7 +219,7 @@ var nilLogTest = LogTest{
 	false,
 }
 
-func testLogEquality(log *ethtypes.Log, test *LogTest, t *testing.T) {
+func testLogEquality(log *types.Log, test *LogTest, t *testing.T) {
 	if log.Address.Hex() != test.address {
 		t.Errorf("Expected Address to be %q but got %q", test.address, log.Address.Hex())
 	}
@@ -270,7 +271,7 @@ func testPbLogEquality(pb *ethpb.Log, test *LogTest, t *testing.T) {
 
 	if len(pb.GetTopics()) != len(test.topics) {
 		t.Errorf("Expected topics count to be %q but got %q", len(test.topics), len(pb.GetTopics()))
-
+	} else {
 		for i, topic := range pb.GetTopics() {
 			if topic != test.topics[i] {
 				t.Errorf("Expected topics to be %q but got %q", test.topics[i], topic)
@@ -280,6 +281,16 @@ func testPbLogEquality(pb *ethpb.Log, test *LogTest, t *testing.T) {
 
 	if pb.GetData() != test.data {
 		t.Errorf("Expected Data to be %q but got %q", test.data, pb.GetData())
+	}
+
+	if len(pb.GetDecodedData()) != len(test.decodedData) {
+		t.Errorf("Expected encoded data count to be %q but got %q", len(test.decodedData), len(pb.GetDecodedData()))
+	} else {
+		for arg, value := range pb.GetDecodedData() {
+			if value != test.decodedData[arg] {
+				t.Errorf("Expected value for arg %q to be %q but got %q", arg, test.decodedData[arg], value)
+			}
+		}
 	}
 
 	if pb.GetBlockNumber() != test.blockNumber {
@@ -312,6 +323,7 @@ func newLogPb(test LogTest) *ethpb.Log {
 		Address:     test.address,
 		Topics:      test.topics,
 		Data:        test.data,
+		DecodedData: test.decodedData,
 		BlockNumber: test.blockNumber,
 		TxHash:      test.txHash,
 		TxIndex:     uint64(test.txIndex),
@@ -322,7 +334,7 @@ func newLogPb(test LogTest) *ethpb.Log {
 }
 
 func TestLoadDumpLog(t *testing.T) {
-	l := &ethtypes.Log{}
+	l := &types.Log{}
 
 	// Load nil
 	LoadLog(nil, l)
@@ -339,7 +351,11 @@ func TestLoadDumpLog(t *testing.T) {
 			"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
 			"0x00000000000000000000000080b2c9d7cbbf30a1b0fc8983c647d754c6525615",
 		},
-		data:        "0x000000000000000000000000000000000000000000000001a055690d9db80000",
+		data: "0x000000000000000000000000000000000000000000000001a055690d9db80000",
+		decodedData: map[string]string{
+			"value": "0x1a055690d9db80000",
+			"to":    "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C",
+		},
 		blockNumber: 2019236,
 		txHash:      "0x3b198bfd5d2907285af009e9ae84a0ecd63677110d89d7e030251acb87f6487e",
 		txIndex:     3,
@@ -378,7 +394,7 @@ var nilReceiptTest = ReceiptTest{
 	0,
 }
 
-func testReceiptEquality(r *ethtypes.Receipt, test *ReceiptTest, t *testing.T) {
+func testReceiptEquality(r *types.Receipt, test *ReceiptTest, t *testing.T) {
 	if len(r.Logs) != len(test.logs) {
 		t.Errorf("Expected logs count to be %q but got %q", len(test.logs), len(r.Logs))
 	}
@@ -472,7 +488,7 @@ func newPbReceipt(test ReceiptTest) *ethpb.Receipt {
 }
 
 func TestLoadDumpReceipt(t *testing.T) {
-	r := &ethtypes.Receipt{}
+	r := &types.Receipt{}
 
 	// Load nil
 	LoadReceipt(nil, r)
@@ -489,7 +505,11 @@ func TestLoadDumpReceipt(t *testing.T) {
 				"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
 				"0x00000000000000000000000080b2c9d7cbbf30a1b0fc8983c647d754c6525615",
 			},
-			data:        "0x000000000000000000000000000000000000000000000001a055690d9db80000",
+			data: "0x000000000000000000000000000000000000000000000001a055690d9db80000",
+			decodedData: map[string]string{
+				"value": "0x1a055690d9db80000",
+				"to":    "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C",
+			},
 			blockNumber: 2019236,
 			txHash:      "0x3b198bfd5d2907285af009e9ae84a0ecd63677110d89d7e030251acb87f6487e",
 			txIndex:     3,

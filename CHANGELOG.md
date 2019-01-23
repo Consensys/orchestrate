@@ -63,4 +63,9 @@
 
 - [FIX] update `services.Producer` interface
 - [FIX] update `services.Marshaller`/`services.Unmarshaller` interface
-  
+
+### Version 0.1.8
+
+*Unreleased*
+
+- [FIX] add `DecodedData` field to `types.Log`

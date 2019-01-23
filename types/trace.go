@@ -4,7 +4,6 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
 )
 
 // Chain stores information about an Ethereum chain
@@ -73,7 +72,7 @@ type Trace struct {
 	tx *Tx
 
 	// Tx receipt
-	receipt *types.Receipt
+	receipt *Receipt
 
 	// Errors
 	Errors []*Error
@@ -87,7 +86,7 @@ func NewTrace() *Trace {
 		receiver: newAccount(),
 		call:     newCall(),
 		tx:       NewTx(),
-		receipt:  types.NewReceipt([]byte{}, true, 0),
+		receipt:  newReceipt([]byte{}, true, 0),
 	}
 }
 
@@ -117,19 +116,8 @@ func (t *Trace) Tx() *Tx {
 }
 
 // Receipt returns Tx receipt
-func (t *Trace) Receipt() *types.Receipt {
+func (t *Trace) Receipt() *Receipt {
 	return t.receipt
-}
-
-func (t *Trace) resetReceipt() {
-	t.receipt.PostState = t.receipt.PostState[0:0]
-	t.receipt.Status = 0
-	t.receipt.CumulativeGasUsed = 0
-	t.receipt.Bloom.SetBytes([]byte{})
-	t.receipt.Logs = t.receipt.Logs[0:0]
-	t.receipt.TxHash.SetBytes([]byte{})
-	t.receipt.ContractAddress.SetBytes([]byte{})
-	t.receipt.GasUsed = 0
 }
 
 // Reset re-initiliaze all values stored in trace
@@ -139,8 +127,6 @@ func (t *Trace) Reset() {
 	t.receiver.reset()
 	t.call.reset()
 	t.tx.reset()
+	t.receipt.reset()
 	t.Errors = t.Errors[0:0]
-
-	// Reset receipt
-	t.resetReceipt()
 }

@@ -120,5 +120,4 @@ func DumpTrace(t *types.Trace, pb *tracepb.Trace) {
 		pb.Receipt = &ethpb.Receipt{}
 	}
 	DumpReceipt(t.Receipt(), pb.Receipt)
-
 }
