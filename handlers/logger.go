@@ -15,9 +15,6 @@ func LoggerHandler(ctx *types.Context) {
 
 	log.WithFields(log.Fields{
 		"Offset": msg.Offset,
-		"Sender": ctx.T.Sender().Address.Hex(),
-		"Raw":    hexutil.Encode(ctx.T.Tx().Raw()[:]),
-		"Hash":   ctx.T.Tx().Hash().Hex(),
 	}).Info("Logger [IN]")
 
 	ctx.Next()
