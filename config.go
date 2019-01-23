@@ -21,7 +21,7 @@ type AppConfig struct {
 	ConsumerGroup string `short:"c" long:"consumer-group" env:"CONSUMER_GROUP" default:"tx-signer-group"`
 }
 
-// ConnConfig conection configuration
+// ConnConfig connection configuration
 type ConnConfig struct {
 	Kafka struct {
 		URL  string
