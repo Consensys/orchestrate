@@ -79,67 +79,67 @@ func (r *ContractABIRegistry) getContractABI(contractName string) (*abi.ABI, err
 
 // GetMethodByID returns the abi for a given method of a contract
 // id should match the following pattern "<MethodName>@<ContracName>"
-func (r *ContractABIRegistry) GetMethodByID(id string) (*abi.Method, error) {
+func (r *ContractABIRegistry) GetMethodByID(id string) (abi.Method, error) {
 	method, contract, err := parseID(id)
 	if err != nil {
-		return nil, err
+		return abi.Method{}, err
 	}
 	contractABI, err := r.getContractABI(contract)
 	if err != nil {
-		return nil, err
+		return abi.Method{}, err
 	}
 	// TODO handle constructor
 	methodABI, exist := contractABI.Methods[method]
 	if !exist {
-		return nil, fmt.Errorf("Could not find method %v in contract %v ABI", method, contract)
+		return abi.Method{}, fmt.Errorf("Could not find method %v in contract %v ABI", method, contract)
 	}
-	return &methodABI, nil
+	return methodABI, nil
 }
 
 // GetEventByID returns the abi for a given event of a contract
 // id should match the following pattern "<EventName>@<ContracName>"
-func (r *ContractABIRegistry) GetEventByID(id string) (*abi.Event, error) {
+func (r *ContractABIRegistry) GetEventByID(id string) (abi.Event, error) {
 	event, contract, err := parseID(id)
 	if err != nil {
-		return nil, err
+		return abi.Event{}, err
 	}
 	contractABI, err := r.getContractABI(contract)
 	if err != nil {
-		return nil, err
+		return abi.Event{}, err
 	}
 	eventABI, exist := contractABI.Events[event]
 	if !exist {
-		return nil, fmt.Errorf("Could not find event %v in contract %v ABI", event, contract)
+		return abi.Event{}, fmt.Errorf("Could not find event %v in contract %v ABI", event, contract)
 	}
-	return &eventABI, nil
+	return eventABI, nil
 }
 
 // GetMethodBySig returns the method corresponding to input signature
 // The input signature should be in hex format (matching the regex patterns "0x[0-9a-f]{8}" or "[0-9a-f]{8}")
-func (r *ContractABIRegistry) GetMethodBySig(sig string) (*abi.Method, error) {
+func (r *ContractABIRegistry) GetMethodBySig(sig string) (abi.Method, error) {
 	s, err := cleanSig(sig, "method")
 	if err != nil {
-		return nil, err
+		return abi.Method{}, err
 	}
 	methodABI, exist := r.abiMethodBySig[s]
 	if !exist {
-		return nil, fmt.Errorf("Could not find method signature %v in the registry", sig)
+		return abi.Method{}, fmt.Errorf("Could not find method signature %v in the registry", sig)
 	}
-	return &methodABI, nil
+	return methodABI, nil
 }
 
 // GetEventBySig returns the event corresponding to input signature
 // The input signature should be in hex format (matching the regex patterns "0x[0-9a-f]{16}" or "[0-9a-f]{16}")
-func (r *ContractABIRegistry) GetEventBySig(sig string) (*abi.Event, error) {
+func (r *ContractABIRegistry) GetEventBySig(sig string) (abi.Event, error) {
 	s, err := cleanSig(sig, "event")
 	if err != nil {
-		return nil, err
+		return abi.Event{}, err
 	}
 	eventABI, exist := r.abiEventBySig[s]
 	if !exist {
-		return nil, fmt.Errorf("Could not find event signature %v in the registry", sig)
+		return abi.Event{}, fmt.Errorf("Could not find event signature %v in the registry", sig)
 	}
-	return &eventABI, nil
+	return eventABI, nil
 }
 
 // NewContractABIRegistry initialise a newly created ContractABIRegistry
