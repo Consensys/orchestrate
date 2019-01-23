@@ -27,14 +27,16 @@ message Log {
     string address = 1; // DATA (20 Bytes) - Address from which log originated.
     repeated string topics = 2; // Array of DATA (32 Bytes) - Array of 0 to 4 indexed log arguments 
     string data = 3; // DATA - Non-indexed arguments of the log. 
-    uint64 blockNumber = 4; // QUANTITY - Block number where this transaction was in.
-    string txHash = 5; // DATA (32 Bytes) - Hash of the transaction.
-    uint64 txIndex = 6; // QUANTITY - Integer of the transactions index position in the block.
-     
-    string blockHash = 7; // DATA (32 Bytes) - Hash of the block where this transaction was in.
-    uint64 index = 8; // QUANTITY - Integer of the log index position in the block.
+    map<string, string> decodedData = 4;
 
-    bool removed = 9; // Removed field is true if this log was reverted due to a chain reorganisation.
+    uint64 blockNumber = 5; // QUANTITY - Block number where this transaction was in.
+    string txHash = 6; // DATA (32 Bytes) - Hash of the transaction.
+    uint64 txIndex = 7; // QUANTITY - Integer of the transactions index position in the block.
+     
+    string blockHash = 8; // DATA (32 Bytes) - Hash of the block where this transaction was in.
+    uint64 index = 9; // QUANTITY - Integer of the log index position in the block.
+
+    bool removed = 10; // Removed field is true if this log was reverted due to a chain reorganisation.
 }
  
 // Transaction Receipt

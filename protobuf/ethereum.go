@@ -5,7 +5,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
@@ -80,7 +79,7 @@ func DumpTx(tx *types.Tx, pb *ethpb.Transaction) {
 }
 
 // LoadLog load a Log protobuffer to a Log object
-func LoadLog(pb *ethpb.Log, l *ethtypes.Log) error {
+func LoadLog(pb *ethpb.Log, l *types.Log) error {
 	if ok := common.IsHexAddress(pb.GetAddress()); !ok {
 		return fmt.Errorf("Invalid Address")
 	}
@@ -98,6 +97,7 @@ func LoadLog(pb *ethpb.Log, l *ethtypes.Log) error {
 	}
 
 	l.Data = data
+	l.DecodedData = pb.GetDecodedData()
 	l.BlockNumber = pb.GetBlockNumber()
 	l.TxHash.SetBytes(common.FromHex(pb.GetTxHash()))
 	l.TxIndex = uint(pb.GetTxIndex())
@@ -110,13 +110,14 @@ func LoadLog(pb *ethpb.Log, l *ethtypes.Log) error {
 }
 
 // DumpLog dump a Log object to protobuffer
-func DumpLog(l *ethtypes.Log, pb *ethpb.Log) {
+func DumpLog(l *types.Log, pb *ethpb.Log) {
 	pb.Address = l.Address.Hex()
 	pb.Topics = pb.Topics[0:0]
 	for _, topic := range l.Topics {
 		pb.Topics = append(pb.Topics, topic.Hex())
 	}
 	pb.Data = hexutil.Encode(l.Data)
+	pb.DecodedData = l.DecodedData
 	pb.BlockNumber = l.BlockNumber
 	pb.TxHash = l.TxHash.Hex()
 	pb.TxIndex = uint64(l.TxIndex)
@@ -126,7 +127,7 @@ func DumpLog(l *ethtypes.Log, pb *ethpb.Log) {
 }
 
 // LoadReceipt load a Receipt protobuffer to a Receipt object
-func LoadReceipt(pb *ethpb.Receipt, r *ethtypes.Receipt) error {
+func LoadReceipt(pb *ethpb.Receipt, r *types.Receipt) error {
 	s, err := hexutil.Decode(pb.GetPostState())
 	if err != nil {
 		return err
@@ -146,9 +147,9 @@ func LoadReceipt(pb *ethpb.Receipt, r *ethtypes.Receipt) error {
 		return fmt.Errorf("Invalid Address")
 	}
 
-	logs := []*ethtypes.Log{}
+	logs := []*types.Log{}
 	for _, log := range pb.GetLogs() {
-		var l ethtypes.Log
+		var l types.Log
 		LoadLog(log, &l)
 		logs = append(logs, &l)
 	}
@@ -167,7 +168,7 @@ func LoadReceipt(pb *ethpb.Receipt, r *ethtypes.Receipt) error {
 }
 
 // DumpReceipt dump a Receipt object into a protobuffer
-func DumpReceipt(r *ethtypes.Receipt, pb *ethpb.Receipt) error {
+func DumpReceipt(r *types.Receipt, pb *ethpb.Receipt) error {
 	pb.ContractAddress = r.ContractAddress.Hex()
 	pb.Status = r.Status
 
