@@ -66,6 +66,6 @@
 
 ### Version 0.1.8
 
-*Unreleased*
+*Released on January 23th 2019*
 
 - [FIX] add `DecodedData` field to `types.Log`
