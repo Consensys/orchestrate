@@ -55,7 +55,7 @@ func newEthClient(rawurl string) *infEth.EthClient {
 // Setup configure handler
 func (h *handler) Setup(s sarama.ConsumerGroupSession) error {
 	// Instantiate workers
-	h.w = core.NewWorker(50)
+	h.w = core.NewWorker(opts.App.WorkerSlots)
 
 	// Worker::logger
 	h.w.Use(hand.LoggerHandler)
@@ -125,7 +125,6 @@ func main() {
 	LoadConfig(&opts)
 	ConfigureLogger(opts.Log)
 	log.Info("Start worker...")
-	log.Info(opts.App.Vault.Accounts)
 
 	client := newSaramaClient([]string{opts.Conn.Kafka.URL})
 
