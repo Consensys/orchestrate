@@ -34,3 +34,8 @@ func (r *Receipt) reset() {
 	r.ContractAddress.SetBytes([]byte{})
 	r.GasUsed = 0
 }
+
+// SetDecodedData set DecodedData to log
+func (l *Log) SetDecodedData(m map[string]string) {
+	l.DecodedData = m
+}
