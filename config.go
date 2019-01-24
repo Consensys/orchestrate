@@ -14,19 +14,21 @@ type LoggerConfig struct {
 	Format string `long:"log-format" env:"LOG_FORMAT" default:"text" description:"Log formatter, one of text, json."`
 }
 
+// AppConfig application configuration
 type AppConfig struct {
 	InTopic       string `short:"i" long:"in-topic" env:"TOPIC_TX_NONCE" default:"topic-tx-nonce"`
 	OutTopic      string `short:"o" long:"out-topic" env:"TOPIC_TX_SENDER" default:"topic-tx-sender"`
 	ConsumerGroup string `short:"c" long:"consumer-group" env:"CONSUMER_GROUP" default:"tx-nonce-group"`
-	WorkerSlots uint `short:"w" long:"worker-slots" env:"WORKER" default:"50"`
+	WorkerSlots   uint   `short:"w" long:"worker-slots" env:"WORKER" default:"50"`
 }
 
+// ConnConfig connection configuration
 type ConnConfig struct {
 	Redis struct {
-		URL     string
-		Host    string `long:"redis-host" env:"REDIS_HOST" default:"localhost"`
-		Port    string `long:"redis-port" env:"REDIS_PORT" default:"6379"`
-		LockTimeout int `long:"redis-lock-timeout" env:"REDIS_LOCKTIMEOUT" default:"1500"`
+		URL         string
+		Host        string `long:"redis-host" env:"REDIS_HOST" default:"localhost"`
+		Port        string `long:"redis-port" env:"REDIS_PORT" default:"6379"`
+		LockTimeout int    `long:"redis-lock-timeout" env:"REDIS_LOCKTIMEOUT" default:"1500"`
 	}
 	Kafka struct {
 		URL  string
