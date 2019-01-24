@@ -4,25 +4,34 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum"
+	geth "github.com/ethereum/go-ethereum"
 )
 
-// EthGasManager implements methods to get information about Gas by connecting to an Ethereum client
-type EthGasManager struct {
-	ec *EthClient
+// GasManagerEthClient is a minimal Ethereum client interface required by a Gas Manager
+type GasManagerEthClient interface {
+	// Should provide a gas price for a given chain
+	SuggestGasPrice(ctx context.Context, chainID *big.Int) (*big.Int, error)
+
+	// Should provide a gas cost for a transaction on a given chain
+	EstimateGas(ctx context.Context, chainID *big.Int, call geth.CallMsg) (uint64, error)
 }
 
-// NewEthGasManager creates a new EthGasManager
-func NewEthGasManager(ec *EthClient) *EthGasManager {
-	return &EthGasManager{ec}
+// GasManager implements methods to get information about Gas by connecting to an Ethereum client
+type GasManager struct {
+	ec GasManagerEthClient
+}
+
+// NewGasManager creates a new GasManager
+func NewGasManager(ec GasManagerEthClient) *GasManager {
+	return &GasManager{ec}
 }
 
 // SuggestGasPrice suggests a gas price
-func (m *EthGasManager) SuggestGasPrice(chainID *big.Int) (*big.Int, error) {
-	return m.ec.SuggestGasPrice(context.Background())
+func (m *GasManager) SuggestGasPrice(chainID *big.Int) (*big.Int, error) {
+	return m.ec.SuggestGasPrice(context.Background(), chainID)
 }
 
 // EstimateGas suggests a gas limit
-func (m *EthGasManager) EstimateGas(chainID *big.Int, call ethereum.CallMsg) (uint64, error) {
-	return m.ec.EstimateGas(context.Background(), call)
+func (m *GasManager) EstimateGas(chainID *big.Int, call geth.CallMsg) (uint64, error) {
+	return m.ec.EstimateGas(context.Background(), chainID, call)
 }
