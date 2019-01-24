@@ -18,8 +18,6 @@ import (
 
 var opts Config
 
-const lockTimeout = 1500
-
 // TxNonceHandler is the handler used by the Sarama consumer of the tx-nonce worker
 type TxNonceHandler struct {
 	w              *core.Worker
@@ -43,7 +41,7 @@ func prepareMsg(t *types.Trace, msg *sarama.ProducerMessage) error {
 // Setup configure the handler
 func (h *TxNonceHandler) Setup(s sarama.ConsumerGroupSession) error {
 	// Instantiate workers
-	h.w = core.NewWorker(50)
+	h.w = core.NewWorker(opts.App.WorkerSlots)
 
 	// Worker::logger
 	h.w.Use(hand.LoggerHandler)
@@ -54,7 +52,7 @@ func (h *TxNonceHandler) Setup(s sarama.ConsumerGroupSession) error {
 	// Worker::nonce
 	h.w.Use(
 		hand.NonceHandler(
-			infRedis.NewNonceManager(opts.Conn.Redis.URL, lockTimeout),
+			infRedis.NewNonceManager(opts.Conn.Redis.URL, opts.Conn.Redis.LockTimeout),
 			hand.GetChainNonce(h.ethClient),
 		),
 	)
@@ -110,7 +108,7 @@ func main() {
 		return
 	}
 	defer client.Close()
-	fmt.Println("Client ready")
+	log.Info("Sarama client ready")
 
 	// Create sarama sync producer
 	p, err := sarama.NewSyncProducerFromClient(client)
@@ -118,7 +116,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("Producer ready")
+	log.Info("Producer ready")
 	defer p.Close()
 
 	// Create sarama consumer
