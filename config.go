@@ -33,7 +33,7 @@ type RedisConfig struct {
 
 // EthConfig is the configuration of application dealing with Ethereum
 type EthConfig struct {
-	URL string `short:"e" long:"eth-client" env:"ETH_CLIENT" default:"https://ropsten.infura.io/v3/81e039ce6c8a465180822b525e3644d7"`
+	URL string `short:"e" long:"eth-client" env:"ETH_CLIENT_URL" default:"https://ropsten.infura.io/v3/81e039ce6c8a465180822b525e3644d7"`
 }
 
 // Config worker configuration
