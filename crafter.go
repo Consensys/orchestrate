@@ -46,7 +46,7 @@ func bindArg(stringKind string, arg string) (interface{}, error) {
 }
 
 // bindArgs cast string arguments into expected go-ethereum types
-func bindArgs(method *abi.Method, args ...string) ([]interface{}, error) {
+func bindArgs(method abi.Method, args ...string) ([]interface{}, error) {
 	if method.Inputs.LengthNonIndexed() != len(args) {
 		return nil, fmt.Errorf("Expected %v inputs but got %v", method.Inputs.LengthNonIndexed(), len(args))
 	}
@@ -63,7 +63,7 @@ func bindArgs(method *abi.Method, args ...string) ([]interface{}, error) {
 }
 
 // Craft craft a transaction payload
-func (c *PayloadCrafter) Craft(method *abi.Method, args ...string) ([]byte, error) {
+func (c *PayloadCrafter) Craft(method abi.Method, args ...string) ([]byte, error) {
 	// Cast arguments
 	boundArgs, err := bindArgs(method, args...)
 	if err != nil {

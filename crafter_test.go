@@ -37,10 +37,10 @@ func TestBindArg(t *testing.T) {
 	}
 }
 
-func newMethod(methodABI []byte) *abi.Method {
+func newMethod(methodABI []byte) abi.Method {
 	var method abi.Method
 	json.Unmarshal(methodABI, &method)
-	return &method
+	return method
 }
 
 var ERC20TransferMethod = newMethod([]byte(`{
