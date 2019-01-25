@@ -12,8 +12,8 @@ import (
 var (
 	chainURL = "https://ropsten.infura.io/v3/81e039ce6c8a465180822b525e3644d7"
 	kafkaURL = []string{"localhost:9092"}
-	group    = "nonce-group"
-	inTopic  = "nonce-in"
+	group    = "tx-nonce-group"
+	inTopic  = "topic-tx-nonce"
 	senders  = []string{
 		"0x664895b5fE3ddf049d2Fb508cfA03923859763C6",
 		//"0xf5956Eb46b377Ae41b41BDa94e6270208d8202bb",

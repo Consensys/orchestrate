@@ -16,16 +16,15 @@ import (
 	hand "gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-nonce.git/handlers"
 )
 
-var opts Config
-
 // TxNonceHandler is the handler used by the Sarama consumer of the tx-nonce worker
 type TxNonceHandler struct {
 	w              *core.Worker
 	saramaProducer sarama.SyncProducer
 	ethClient      *infEth.EthClient
+	cfg            Config
 }
 
-func prepareMsg(t *types.Trace, msg *sarama.ProducerMessage) error {
+func (h *TxNonceHandler) prepareMsg(t *types.Trace, msg *sarama.ProducerMessage) error {
 	marshaller := infSarama.NewMarshaller()
 
 	err := marshaller.Marshal(t, msg)
@@ -34,14 +33,14 @@ func prepareMsg(t *types.Trace, msg *sarama.ProducerMessage) error {
 	}
 
 	// Set topic
-	msg.Topic = opts.App.OutTopic
+	msg.Topic = h.cfg.Kafka.OutTopic
 	return nil
 }
 
 // Setup configure the handler
 func (h *TxNonceHandler) Setup(s sarama.ConsumerGroupSession) error {
 	// Instantiate workers
-	h.w = core.NewWorker(opts.App.WorkerSlots)
+	h.w = core.NewWorker(h.cfg.App.WorkerSlots)
 
 	// Worker::logger
 	h.w.Use(hand.LoggerHandler)
@@ -52,7 +51,7 @@ func (h *TxNonceHandler) Setup(s sarama.ConsumerGroupSession) error {
 	// Worker::nonce
 	h.w.Use(
 		hand.NonceHandler(
-			infRedis.NewNonceManager(opts.Conn.Redis.URL, opts.Conn.Redis.LockTimeout),
+			infRedis.NewNonceManager(h.cfg.Redis.Address, h.cfg.Redis.LockTimeout),
 			hand.GetChainNonce(h.ethClient),
 		),
 	)
@@ -62,7 +61,7 @@ func (h *TxNonceHandler) Setup(s sarama.ConsumerGroupSession) error {
 		handCom.Producer(
 			infSarama.NewProducer(
 				h.saramaProducer,
-				prepareMsg,
+				h.prepareMsg,
 			),
 		),
 	)
@@ -91,18 +90,19 @@ func (h *TxNonceHandler) Cleanup(s sarama.ConsumerGroupSession) error {
 }
 
 func main() {
-	LoadConfig(&opts)
-	ConfigureLogger(opts.Log)
+	var cfg Config
+	LoadConfig(&cfg)
+	ConfigureLogger(cfg.Log)
 
 	// Init config
-	config := sarama.NewConfig()
-	config.Version = sarama.V1_0_0_0
-	config.Consumer.Return.Errors = true
-	config.Producer.Return.Errors = true
-	config.Producer.Return.Successes = true
+	sc := sarama.NewConfig()
+	sc.Version = sarama.V1_0_0_0
+	sc.Consumer.Return.Errors = true
+	sc.Producer.Return.Errors = true
+	sc.Producer.Return.Successes = true
 
 	// Create sarama client
-	client, err := sarama.NewClient([]string{opts.Conn.Kafka.URL}, config)
+	client, err := sarama.NewClient([]string{cfg.Kafka.Address}, sc)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -120,7 +120,7 @@ func main() {
 	defer p.Close()
 
 	// Create sarama consumer
-	g, err := sarama.NewConsumerGroupFromClient(opts.App.ConsumerGroup, client)
+	g, err := sarama.NewConsumerGroupFromClient(cfg.Kafka.ConsumerGroup, client)
 	if err != nil {
 		log.Error(err)
 		return
@@ -129,7 +129,7 @@ func main() {
 	defer func() { g.Close() }()
 
 	// Create an ethereum client connection
-	e, err := infEth.Dial(opts.Conn.ETHClient.URL)
+	e, err := infEth.Dial(cfg.Eth.URL)
 	if err != nil {
 		// TODO log with logger from worker
 		log.Errorf("Got error %v", err)
@@ -142,6 +142,6 @@ func main() {
 		}
 	}()
 
-	txNonceHandler := &TxNonceHandler{ethClient: e, saramaProducer: p}
-	g.Consume(context.Background(), []string{opts.App.InTopic}, txNonceHandler)
+	txNonceHandler := &TxNonceHandler{ethClient: e, saramaProducer: p, cfg: cfg}
+	g.Consume(context.Background(), []string{cfg.Kafka.InTopic}, txNonceHandler)
 }
