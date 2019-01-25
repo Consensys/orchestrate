@@ -2,7 +2,7 @@
 
 ### Version 0.1.0
 
-*Unreleased*
+*Released on January 25th 2019*
 
 - [FEAT] implement ``DummyABIRegistry``
 - [FEAT] implement ``PayloadCrafter``
