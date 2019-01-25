@@ -15,14 +15,14 @@ var (
 	group    = "group"
 	inTopic  = "topic-in"
 	senders  = []string{
-		"0x664895b5fE3ddf049d2Fb508cfA03923859763C6",
+		"0xd71400daD07d70C976D6AAFC241aF1EA183a7236",
 		//"0xf5956Eb46b377Ae41b41BDa94e6270208d8202bb",
 		//"0x93f7274c9059e601be4512F656B57b830e019E41",
 		//"0xbfc7137876d7Ac275019d70434B0f0779824a969",
 		//"0xA8d8DB1d8919665a18212374d623fc7C0dFDa410",
 	}
-	// ERC20Address of token contract to target
-	ERC20Address = "0x6AFE55b2b5CcA4920182a70c71e793A7Bf44a547"
+	// ERC1400Address of token contract to target
+	ERC1400Address = "0x8f371DAA8A5325f53b754A7017Ac3803382bc847"
 )
 
 func newMessage(i int) *sarama.ProducerMessage {
@@ -33,10 +33,10 @@ func newMessage(i int) *sarama.ProducerMessage {
 	b, _ := proto.Marshal(
 		&tracepb.Trace{
 			Sender: &tracepb.Account{Address: senders[i%len(senders)]},
-			Call:   &tracepb.Call{MethodId: "some-method", Args: []string{"0x71a556C033cD4beB023eb2baa734d0e8304CA88a", "0x200"}},
+			Call:   &tracepb.Call{MethodId: "setDocument@ERC1400", Args: []string{"0xabc", "0xabc", "0xabc"}},
 			Transaction: &ethpb.Transaction{
 				TxData: &ethpb.TxData{
-					To: ERC20Address,
+					To: ERC1400Address,
 				},
 			},
 		},

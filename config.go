@@ -13,15 +13,15 @@ type LoggerConfig struct {
 
 // KafkaConfig is the config part concerning kafka
 type KafkaConfig struct {
-	Address       string `short:"u" long:"kafka-url" env:"KAFKA_ADDRESS" default:"localhost:9092" description:"Kafka address <host>:<port>."`
-	TopicIn       string `short:"i" long:"in-topic" env:"KAFKA_TOPIC_IN" default:"topic-in"`
-	TopicOut      string `short:"o" long:"out-topic" env:"KAFKA_TOPIC_OUT" default:"topic-out"`
-	ConsumerGroup string `short:"c" long:"consumer-group" env:"KAFKA_CONSUMER_GROUP" default:"nonce-group"`
+	ConsumerGroup string `short:"c" long:"consumer-group" env:"KAFKA_CONSUMER_GROUP" default:"tx-crafter-group"`
+	InTopic       string `short:"i" long:"in-topic" env:"KAFKA_TOPIC_TX_CRAFT" default:"topic-tx-craft"`
+	OutTopic      string `short:"o" long:"out-topic" env:"KAFKA_TOPIC_TX_NONCE" default:"topic-tx-nonce"`
+	Address       string `long:"kafka-address" env:"KAFKA_ADDRESS" default:"localhost:9092"`
 }
 
 // EthConfig is the config part concerning the ethereum environment
 type EthConfig struct {
-	URL string `short:"e" long:"eth-client" env:"ETH_URL" default:"https://ropsten.infura.io/v3/81e039ce6c8a465180822b525e3644d7"`
+	URL string `short:"e" long:"eth-client" env:"ETH_CLIENT_URL" default:"https://ropsten.infura.io/v3/81e039ce6c8a465180822b525e3644d7"`
 }
 
 // FaucetConfig is the config part concerning the faucet environment variables

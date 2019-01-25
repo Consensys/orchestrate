@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"math/big"
 
 	"github.com/Shopify/sarama"
@@ -34,7 +33,7 @@ func (h *TxCrafter) prepareMsg(t *types.Trace, msg *sarama.ProducerMessage) erro
 	}
 
 	// Set topic
-	msg.Topic = h.cfg.Kafka.TopicOut
+	msg.Topic = h.cfg.Kafka.OutTopic
 	return nil
 }
 
@@ -46,6 +45,9 @@ func (h *TxCrafter) Setup(s sarama.ConsumerGroupSession) error {
 	// TODO : to be removed ?
 	// Worker::logger middleware which will log before and after the tx-crafter nonce action
 	h.w.Use(hand.Logger)
+
+	// Sarama marker
+	h.w.Use(handCom.Marker(infSarama.NewSimpleOffsetMarker(s)))
 
 	// Sarama message unmarshalling loader
 	h.w.Use(handCom.Loader(infSarama.NewUnmarshaller()))
@@ -61,7 +63,7 @@ func (h *TxCrafter) Setup(s sarama.ConsumerGroupSession) error {
 
 	// Faucet
 	faucetAddress := common.HexToAddress(h.cfg.Faucet.Address)
-	faucetTopicOut := h.cfg.Kafka.TopicIn
+	faucetTopicOut := h.cfg.Kafka.InTopic
 	faucet, err := inf.CreateFaucet(
 		h.cfg.Eth.URL,
 		faucetAddress,
@@ -78,9 +80,6 @@ func (h *TxCrafter) Setup(s sarama.ConsumerGroupSession) error {
 	// Sarama producer
 	msgProducer := infSarama.NewProducer(h.saramaProducer, h.prepareMsg)
 	h.w.Use(handCom.Producer(msgProducer))
-
-	// Sarama marker
-	h.w.Use(handCom.Marker(infSarama.NewSimpleOffsetMarker(s)))
 
 	return nil
 }
@@ -124,19 +123,19 @@ func main() {
 	// Create sarama client
 	client, err := sarama.NewClient([]string{cfg.Kafka.Address}, config)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 	defer client.Close()
-	fmt.Println("Client ready")
+	log.Println("Client ready")
 
 	// Create sarama sync producer
 	p, err := sarama.NewSyncProducerFromClient(client)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
-	fmt.Println("Producer ready")
+	log.Println("Producer ready")
 	defer p.Close()
 
 	// Create sarama consumer
@@ -145,7 +144,7 @@ func main() {
 		log.Error(err)
 		return
 	}
-	log.Info("Consumer Group ready")
+	log.Info("Consumer group ready")
 	defer func() { g.Close() }()
 
 	// Create an ethereum client connection
@@ -154,6 +153,7 @@ func main() {
 		log.Errorf("Got error %v", err)
 	}
 
-	txCrafter := &TxCrafter{ethClient: e, saramaProducer: p}
-	g.Consume(context.Background(), []string{cfg.Kafka.TopicIn}, txCrafter)
+	txCrafter := &TxCrafter{ethClient: e, saramaProducer: p, cfg: cfg}
+	err = g.Consume(context.Background(), []string{cfg.Kafka.InTopic}, txCrafter)
+	log.Error(err)
 }

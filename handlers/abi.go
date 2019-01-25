@@ -9,9 +9,9 @@ import (
 
 // NewERC1400ABIRegistry creates an ABI registry and register the ERC1400 abi in it
 func NewERC1400ABIRegistry() *infEth.ContractABIRegistry {
-	ERC20TransferRegistry := infEth.NewContractABIRegistry()
-	ERC20TransferRegistry.RegisterContract("ERC1400", erc1400)
-	return ERC20TransferRegistry
+	registry := infEth.NewContractABIRegistry()
+	registry.RegisterContract("ERC1400", erc1400)
+	return registry
 }
 
 var erc1400 = []byte(
