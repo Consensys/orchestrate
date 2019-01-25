@@ -12,9 +12,30 @@ type LoggerConfig struct {
 	Format string `long:"log-format" env:"LOG_FORMAT" default:"text" description:"Log formatter, one of text, json."`
 }
 
+// AppConfig application configuration
+type AppConfig struct {
+	WorkerSlots uint `short:"w" long:"worker-slots" env:"WORKER" default:"50"`
+}
+
+// KafkaConfig is the config part concerning kafka
+type KafkaConfig struct {
+	ConsumerGroup string `short:"c" long:"consumer-group" env:"CONSUMER_GROUP" default:"tx-signer-group"`
+	InTopic       string `short:"i" long:"in-topic" env:"KAFKA_TOPIC_TX_SIGNER" default:"topic-tx-signer"`
+	OutTopic      string `short:"o" long:"out-topic" env:"KAFKA_TOPIC_TX_SENDER" default:"topic-tx-sender"`
+	Address       string `long:"kafka-address" env:"KAFKA_ADDRESS" default:"localhost:9092"`
+}
+
+// EthConfig is the config part concerning the ethereum environment
+type EthConfig struct {
+	URL string `short:"e" long:"eth-client" env:"ETH_CLIENT_URL" default:"https://ropsten.infura.io/v3/81e039ce6c8a465180822b525e3644d7"`
+}
+
 // Config worker configuration
 type Config struct {
-	Log LoggerConfig
+	Log   LoggerConfig
+	App   AppConfig
+	Kafka KafkaConfig
+	Eth   EthConfig
 }
 
 // LoadConfig load configuration
