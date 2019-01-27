@@ -8,7 +8,7 @@ require (
 	github.com/sirupsen/logrus v1.3.0
 	gitlab.com/ConsenSys/client/fr/core-stack/common.git v0.1.0
 	gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.7
-	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.0.0-20190122095213-8d332321ae3d
+	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.2
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/redis.git v0.1.0
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.1.0
 )
