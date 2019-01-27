@@ -14,6 +14,6 @@
 
 ### Version 0.1.1
 
-*Unreleased*
+*Released on January 27th 2019*
 
 - [FIX] update crafter to support `bytes32`, `bytes16`, `bytes8`, `bytes1` ABI types
