@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"context" // "errors"
+	"context"
 	"fmt"
-	"github.com/ethereum/go-ethereum/common" // "gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
+	"github.com/ethereum/go-ethereum/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
-	"math/big" // "reflect"
+	"math/big"
 	"sync"
 	"sync/atomic"
 	"testing"
