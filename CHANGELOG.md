@@ -20,6 +20,6 @@
 
 ### Version 0.1.2
 
-*Unreleased*
+*Released on January 27th 2019*
 
  - [FEAT] implement ``PendingNonceAt`` and ``PendingBalanceAt`` on Multi Client
