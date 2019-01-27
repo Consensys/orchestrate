@@ -9,19 +9,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
-// GetNonceFunc is a function which given an eth address and a chain ID returns a nonce
-type GetNonceFunc func(chainID *big.Int, a *common.Address) (uint64, error)
-
-type ethClient interface {
-	PendingNonceAt(ctx context.Context, account common.Address) (uint64, error)
-}
-
-// GetChainNonce returns a function to get nonce initial values from an Eth client
-func GetChainNonce(ec ethClient) GetNonceFunc {
-	return func(chainID *big.Int, a *common.Address) (uint64, error) {
-		return ec.PendingNonceAt(context.Background(), *a)
-	}
-}
+// GetNonceFunc should return an effective nonce for calibration (usually retrieved from an EThereum)
+type GetNonceFunc func(ctx context.Context, chainID *big.Int, a common.Address) (uint64, error)
 
 // NonceHandler creates and return an handler for nonce
 func NonceHandler(nm services.NonceManager, getChainNonce GetNonceFunc) types.HandlerFunc {
@@ -35,18 +24,23 @@ func NonceHandler(nm services.NonceManager, getChainNonce GetNonceFunc) types.Ha
 			ctx.AbortWithError(err)
 			return
 		}
-		defer nm.Unlock(chainID, a, lockSig)
+		defer func() {
+			err := nm.Unlock(chainID, a, lockSig)
+			if err != nil {
+				ctx.Error(err)
+			}
+		}()
 
-		// Get the nonce from cache
+		// Retrieve nonce
 		nonce, inCache, err := nm.GetNonce(chainID, a)
 		if err != nil {
 			ctx.AbortWithError(err)
 			return
 		}
 
-		// If the nonce was not in the cache, get it from chain
-		if inCache == false {
-			nonce, err = getChainNonce(chainID, a)
+		// If nonce was not in cache, we calibrate it by reading nonce from chain
+		if !inCache {
+			nonce, err = getChainNonce(context.Background(), chainID, *a)
 			if err != nil {
 				ctx.AbortWithError(err)
 				return

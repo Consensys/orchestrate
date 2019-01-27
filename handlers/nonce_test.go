@@ -1,78 +1,118 @@
 package handlers
 
 import (
-	"context"
-	"errors"
-	"math/big"
-	"reflect"
-	"sync"
-	"testing"
-
-	"github.com/ethereum/go-ethereum/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
+	"context" // "errors"
+	"fmt"
+	"github.com/ethereum/go-ethereum/common" // "gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	"math/big" // "reflect"
+	"sync"
+	"sync/atomic"
+	"testing"
 )
 
-const chainNonce uint64 = 42
-
-func getChainNonce(withError bool) GetNonceFunc {
-	if withError == true {
-		return func(chainID *big.Int, a *common.Address) (uint64, error) {
-			return 0, errors.New("error")
-		}
-	}
-
-	return func(chainID *big.Int, a *common.Address) (uint64, error) {
-		return chainNonce, nil
-	}
+type MockNonceGetter struct {
+	counter uint64
 }
 
-func makeNonceContext() *types.Context {
-	ctx := types.NewContext()
-	ctx.Reset()
-	return ctx
+func (g *MockNonceGetter) GetNonce(ctx context.Context, chainID *big.Int, a common.Address) (uint64, error) {
+	atomic.AddUint64(&g.counter, 1)
+	if chainID.Uint64() == 0 {
+		// Simulate error on chain 0
+		return 0, fmt.Errorf("Unknwon chain")
+	}
+	return 42, nil
 }
 
 type MockNonceManager struct {
 	mux   *sync.Mutex
-	nonce uint64
+	nonce *sync.Map
 }
 
 func (nm *MockNonceManager) GetNonce(chainID *big.Int, a *common.Address) (uint64, bool, error) {
-	return nm.nonce, true, nil
+	if chainID.Uint64() == 1 {
+		// Simulate error
+		return 0, false, fmt.Errorf("Error retrieving nonce")
+	}
+
+	if a.Hex() == "0xfF778b716FC07D98839f48DdB88D8bE583BEB684" {
+		// Simulate unknown nonce
+		return 0, false, nil
+	}
+
+	return 53, true, nil
 }
 
-func (nm *MockNonceManager) SetNonce(chainID *big.Int, a *common.Address, newNonce uint64) error {
-	nm.nonce = newNonce
+func (nm *MockNonceManager) SetNonce(chainID *big.Int, a *common.Address, value uint64) error {
+	if chainID.Uint64() == 2 {
+		// Simulate error
+		return fmt.Errorf("Error setting nonce")
+	}
 	return nil
 }
 
 func (nm *MockNonceManager) Lock(chainID *big.Int, a *common.Address) (string, error) {
+	if chainID.Uint64() == 3 {
+		// Simulate error
+		return "", fmt.Errorf("Error locking nonce")
+	}
 	nm.mux.Lock()
 	return "random", nil
 }
 
 func (nm *MockNonceManager) Unlock(chainID *big.Int, a *common.Address, lockSig string) error {
 	nm.mux.Unlock()
+	if chainID.Uint64() == 4 {
+		// Simulate error
+		return fmt.Errorf("Error unlocking nonce")
+	}
 	return nil
+}
+
+func makeNonceContext(i int) *types.Context {
+	ctx := types.NewContext()
+	ctx.Reset()
+	ctx.T.Chain().ID = big.NewInt(int64(i % 7))
+	if i%7 == 0 || i%7 == 5 {
+		*ctx.T.Sender().Address = common.HexToAddress("0xfF778b716FC07D98839f48DdB88D8bE583BEB684")
+	} else {
+		*ctx.T.Sender().Address = common.HexToAddress("0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff")
+	}
+
+	switch i % 7 {
+	case 0, 1, 3:
+		ctx.Keys["errors"] = 1
+		ctx.Keys["result"] = uint64(0)
+	case 2, 4:
+		ctx.Keys["errors"] = 1
+		ctx.Keys["result"] = uint64(53)
+	case 5:
+		ctx.Keys["errors"] = 0
+		ctx.Keys["result"] = uint64(42)
+	case 6:
+		ctx.Keys["errors"] = 0
+		ctx.Keys["result"] = uint64(53)
+	}
+
+	return ctx
 }
 
 func TestNonceHandler(t *testing.T) {
 	nm := MockNonceManager{
-		mux:   &sync.Mutex{},
-		nonce: 0,
+		mux: &sync.Mutex{},
 	}
-	nonceH := NonceHandler(&nm, getChainNonce(false))
+	ng := MockNonceGetter{}
+	nh := NonceHandler(&nm, ng.GetNonce)
 
 	rounds := 100
 	outs := make(chan *types.Context, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
-		ctx := makeNonceContext()
+		ctx := makeNonceContext(i)
 		go func(ctx *types.Context) {
 			defer wg.Done()
-			nonceH(ctx)
+			nh(ctx)
 			outs <- ctx
 		}(ctx)
 	}
@@ -83,158 +123,13 @@ func TestNonceHandler(t *testing.T) {
 		t.Errorf("NonceHandler: expected %v outs but got %v", rounds, len(outs))
 	}
 
-	var n uint64
-	nonceSet := make(map[uint64]bool)
 	for ctx := range outs {
-		n = ctx.T.Tx().Nonce()
-		nonceSet[n] = true
-	}
-	for nonce := uint64(0); nonce < uint64(rounds); nonce++ {
-		if nonceSet[nonce] == false {
-			t.Errorf("NonceHandler: nonce %v is missing but should has been given", nonce)
+		if len(ctx.T.Errors) != ctx.Keys["errors"].(int) {
+
+			t.Errorf("Expected %v errors but got %v", ctx.Keys["errors"].(int), ctx.T.Errors)
 		}
-	}
-}
-
-type MockNonceManagerFromChain struct {
-	mux   *sync.Mutex
-	nonce uint64
-}
-
-func (nm *MockNonceManagerFromChain) GetNonce(chainID *big.Int, a *common.Address) (uint64, bool, error) {
-	return nm.nonce, false, nil
-}
-
-func (nm *MockNonceManagerFromChain) SetNonce(chainID *big.Int, a *common.Address, newNonce uint64) error {
-	nm.nonce = newNonce
-	return nil
-}
-
-func (nm *MockNonceManagerFromChain) Lock(chainID *big.Int, a *common.Address) (string, error) {
-	nm.mux.Lock()
-	return "random", nil
-}
-
-func (nm *MockNonceManagerFromChain) Unlock(chainID *big.Int, a *common.Address, lockSig string) error {
-	nm.mux.Unlock()
-	return nil
-}
-
-func TestNonceHandlerFromChain(t *testing.T) {
-	nm := MockNonceManagerFromChain{
-		mux:   &sync.Mutex{},
-		nonce: 0,
-	}
-	nonceH := NonceHandler(&nm, getChainNonce(false))
-	ctx := makeNonceContext()
-	nonceH(ctx)
-	if ctx.T.Tx().Nonce() != chainNonce {
-		t.Errorf("NonceHandler: nonce should have come from getNonceChain")
-	}
-}
-
-type MockNonceManagerGetNonceError struct{}
-
-func (nm *MockNonceManagerGetNonceError) GetNonce(chainID *big.Int, a *common.Address) (uint64, bool, error) {
-	return 0, true, errors.New("error")
-}
-func (nm *MockNonceManagerGetNonceError) SetNonce(chainID *big.Int, a *common.Address, newNonce uint64) error {
-	return nil
-}
-func (nm *MockNonceManagerGetNonceError) Lock(chainID *big.Int, a *common.Address) (string, error) {
-	return "random", nil
-}
-func (nm *MockNonceManagerGetNonceError) Unlock(chainID *big.Int, a *common.Address, lockSig string) error {
-	return nil
-}
-
-type MockNonceManagerSetNonceError struct{}
-
-func (nm *MockNonceManagerSetNonceError) GetNonce(chainID *big.Int, a *common.Address) (uint64, bool, error) {
-	return 0, true, nil
-}
-func (nm *MockNonceManagerSetNonceError) SetNonce(chainID *big.Int, a *common.Address, newNonce uint64) error {
-	return errors.New("error")
-}
-func (nm *MockNonceManagerSetNonceError) Lock(chainID *big.Int, a *common.Address) (string, error) {
-	return "random", nil
-}
-func (nm *MockNonceManagerSetNonceError) Unlock(chainID *big.Int, a *common.Address, lockSig string) error {
-	return nil
-}
-
-type MockNonceManagerLockError struct{}
-
-func (nm *MockNonceManagerLockError) GetNonce(chainID *big.Int, a *common.Address) (uint64, bool, error) {
-	return 0, true, nil
-}
-func (nm *MockNonceManagerLockError) SetNonce(chainID *big.Int, a *common.Address, newNonce uint64) error {
-	return nil
-}
-func (nm *MockNonceManagerLockError) Lock(chainID *big.Int, a *common.Address) (string, error) {
-	return "random", errors.New("error")
-}
-func (nm *MockNonceManagerLockError) Unlock(chainID *big.Int, a *common.Address, lockSig string) error {
-	return nil
-}
-
-type MockNonceManagerGetChainNonceError struct{}
-
-func (nm *MockNonceManagerGetChainNonceError) GetNonce(chainID *big.Int, a *common.Address) (uint64, bool, error) {
-	return 0, false, nil
-}
-func (nm *MockNonceManagerGetChainNonceError) SetNonce(chainID *big.Int, a *common.Address, newNonce uint64) error {
-	return nil
-}
-func (nm *MockNonceManagerGetChainNonceError) Lock(chainID *big.Int, a *common.Address) (string, error) {
-	return "random", nil
-}
-func (nm *MockNonceManagerGetChainNonceError) Unlock(chainID *big.Int, a *common.Address, lockSig string) error {
-	return nil
-}
-
-func TestNonceHandlerErrors(t *testing.T) {
-	nonceManagers := []services.NonceManager{
-		&MockNonceManagerGetNonceError{},
-		&MockNonceManagerSetNonceError{},
-		&MockNonceManagerLockError{},
-		&MockNonceManagerGetChainNonceError{},
-	}
-
-	for _, nm := range nonceManagers {
-		var nonceH types.HandlerFunc
-		if reflect.TypeOf(nm) == reflect.TypeOf(&MockNonceManagerGetChainNonceError{}) {
-			nonceH = NonceHandler(nm, getChainNonce(true))
-		} else {
-			nonceH = NonceHandler(nm, getChainNonce(false))
+		if ctx.T.Tx().Nonce() != ctx.Keys["result"].(uint64) {
+			t.Errorf("Expected Nonce to be %v but got %v", ctx.Keys["result"].(uint64), ctx.T.Tx().Nonce())
 		}
-
-		ctx := makeNonceContext()
-		nonceH(ctx)
-		if len(ctx.T.Errors) == 0 {
-			t.Errorf("NonceHandler: An error should have been added to context for %T", nm)
-		}
-	}
-}
-
-type ethClientMock struct{}
-
-const nonce uint64 = 12
-
-func (ec *ethClientMock) PendingNonceAt(ctx context.Context, account common.Address) (uint64, error) {
-	return nonce, nil
-}
-func TestGetChainNonce(t *testing.T) {
-	client := &ethClientMock{}
-
-	cid := big.NewInt(36)
-	a := common.HexToAddress("0xabcdabcdabcdabcdabcdabcd")
-	getNonceFunc := GetChainNonce(client)
-	n, err := getNonceFunc(cid, &a)
-	if err != nil {
-		t.Error("NonceHandler: error should have been nil")
-	}
-	if n != nonce {
-		t.Errorf("NonceHandler: should have returned %v, got %v instead", nonce, n)
 	}
 }
