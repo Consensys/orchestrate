@@ -103,6 +103,15 @@ func (mec *MultiEthClient) BalanceAt(ctx context.Context, chainID *big.Int, acco
 	return ec.BalanceAt(ctx, account, blockNumber)
 }
 
+// PendingBalanceAt returns the wei balance of the given account in the pending state.
+func (mec *MultiEthClient) PendingBalanceAt(ctx context.Context, chainID *big.Int, account common.Address) (*big.Int, error) {
+	ec, ok := mec.getClient(chainID)
+	if !ok {
+		return nil, fmt.Errorf("No client registered for %v", chainID)
+	}
+	return ec.PendingBalanceAt(ctx, account)
+}
+
 // NonceAt returns the account nonce of the given account.
 // The block number can be nil, in which case the nonce is taken from the latest known block.
 func (mec *MultiEthClient) NonceAt(ctx context.Context, chainID *big.Int, account common.Address, blockNumber *big.Int) (uint64, error) {
@@ -111,6 +120,16 @@ func (mec *MultiEthClient) NonceAt(ctx context.Context, chainID *big.Int, accoun
 		return 0, fmt.Errorf("No client registered for %v", chainID)
 	}
 	return ec.NonceAt(ctx, account, blockNumber)
+}
+
+// PendingNonceAt returns the account nonce of the given account in the pending state.
+// This is the nonce that should be used for the next transaction.
+func (mec *MultiEthClient) PendingNonceAt(ctx context.Context, chainID *big.Int, account common.Address) (uint64, error) {
+	ec, ok := mec.getClient(chainID)
+	if !ok {
+		return 0, fmt.Errorf("No client registered for %v", chainID)
+	}
+	return ec.PendingNonceAt(ctx, account)
 }
 
 // SuggestGasPrice retrieves the currently suggested gas price to allow a timely
