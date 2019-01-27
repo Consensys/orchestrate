@@ -1,11 +1,6 @@
 version: '3.6'
 
 services:
-  #worker-nonce:
-    #build: .
-    #networks:
-      #- nonce
-
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     environment:
