@@ -13,8 +13,10 @@ func LoggerHandler(ctx *types.Context) {
 	msg := ctx.Msg.(*sarama.ConsumerMessage)
 
 	log.WithFields(log.Fields{
-		"Offset": msg.Offset,
-		"Nonce":  ctx.T.Tx().Nonce(),
+		"Offset":  msg.Offset,
+		"ChainID": ctx.T.Chain().ID.Text(10),
+		"Address": ctx.T.Sender().Address.Hex(),
+		"Nonce":   ctx.T.Tx().Nonce(),
 	}).Info("Nonce [IN]")
 
 	ctx.Next()
