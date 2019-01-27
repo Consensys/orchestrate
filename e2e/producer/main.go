@@ -32,6 +32,7 @@ func newMessage(i int) *sarama.ProducerMessage {
 	}
 	b, _ := proto.Marshal(
 		&tracepb.Trace{
+			Chain:  &tracepb.Chain{Id: "0x3"},
 			Sender: &tracepb.Account{Address: senders[i%len(senders)]},
 			Call:   &tracepb.Call{MethodId: "some-method", Args: []string{"0x71a556C033cD4beB023eb2baa734d0e8304CA88a", "0x200"}},
 			Transaction: &ethpb.Transaction{
