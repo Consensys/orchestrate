@@ -2,12 +2,45 @@ package ethereum
 
 import (
 	"fmt"
+	"reflect"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
+
+var bytesTypes [33]reflect.Type
+
+func copyBytesSliceToArray(b []byte, size int) interface{} {
+	if size == 32 {
+		rv := [32]byte{}
+		copy(rv[:], b[0:size])
+		return rv
+	}
+
+	if size == 16 {
+		rv := [16]byte{}
+		copy(rv[:], b[0:size])
+		return rv
+	}
+
+	if size == 8 {
+		rv := [8]byte{}
+		copy(rv[:], b[0:size])
+		return rv
+	}
+
+	if size == 1 {
+		rv := [1]byte{}
+		copy(rv[:], b[0:size])
+		return rv
+	}
+
+	return nil
+}
 
 // PayloadCrafter is a structure that can Craft payloads
 type PayloadCrafter struct{}
@@ -20,9 +53,34 @@ func bindArg(stringKind string, arg string) (interface{}, error) {
 		}
 		return common.HexToAddress(arg), nil
 
-	case stringKind == "bytes":
-		// We do not yet support bytesx (e.g. bytes1, bytes2...)
-		return hexutil.Decode(arg)
+	case strings.HasPrefix(stringKind, "bytes"):
+		data, err := hexutil.Decode(arg)
+		if err != nil {
+			return data, err
+		}
+
+		parts := regexp.MustCompile(`bytes([0-9]*)`).FindStringSubmatch(stringKind)
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("Arg format %q not known", stringKind)
+		}
+
+		if parts[1] == "" {
+			return data, nil
+		}
+
+		size, err := strconv.Atoi(parts[1])
+		if err != nil {
+			return nil, fmt.Errorf("Arg format %q not known", stringKind)
+		}
+
+		data = common.LeftPadBytes(data, size)
+		b := copyBytesSliceToArray(data, size)
+
+		if b == nil {
+			return nil, fmt.Errorf("Arg format %q not known", stringKind)
+		}
+
+		return b, nil
 
 	case strings.HasPrefix(stringKind, "int") || strings.HasPrefix(stringKind, "uint"):
 		// In current version we bind all types of integers to *big.Int
@@ -41,7 +99,7 @@ func bindArg(stringKind string, arg string) (interface{}, error) {
 
 	// In current version we only cover basic types (in particular we do not support arrays)
 	default:
-		return nil, nil
+		return nil, fmt.Errorf("Arg format %q not known", stringKind)
 	}
 }
 

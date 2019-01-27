@@ -12,3 +12,8 @@
 - [FEAT] impement ``listener.TxListener``
 - [FEAT] implement ``ethclient.MultiEthClient``
 
+### Version 0.1.1
+
+*Unreleased*
+
+- [FIX] update crafter to support `bytes32`, `bytes16`, `bytes8`, `bytes1` ABI types

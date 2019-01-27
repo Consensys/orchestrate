@@ -14,7 +14,7 @@ import (
 func testBindArg(stringKind string, arg string, t *testing.T) interface{} {
 	boundArg, err := bindArg(stringKind, arg)
 	if err != nil {
-		t.Errorf("%q expected to be compatible with type %q", arg, stringKind)
+		t.Errorf("%q expected to be compatible with type %q but got error %v", arg, stringKind, err)
 	}
 	return boundArg
 }
@@ -31,9 +31,38 @@ func TestBindArg(t *testing.T) {
 		t.Errorf("Expect bind to %v but got %v", 1024, dec.Int64())
 	}
 
-	b := testBindArg("bool", "0x1", t).(bool)
-	if !b {
+	boolean := testBindArg("bool", "0x1", t).(bool)
+	if !boolean {
 		t.Errorf("Expect bind to %v but got %v", true, false)
+	}
+
+	byteSlice := testBindArg("bytes", "0xabcd", t).([]byte)
+	if hexutil.Encode(byteSlice) != "0xabcd" {
+		t.Errorf("Expect bind to %v but got %v", "0xabcd", hexutil.Encode(byteSlice))
+	}
+
+	byte1Array := testBindArg("bytes1", "0xa1b2c3d4e5f67890", t).([1]byte)
+	expected := "0xa1"
+	if hexutil.Encode(byte1Array[:]) != expected {
+		t.Errorf("Expect bind to %v but got %v", expected, hexutil.Encode(byte1Array[:]))
+	}
+
+	byte8Array := testBindArg("bytes8", "0xa1b2c3d4e5f67890", t).([8]byte)
+	expected = "0xa1b2c3d4e5f67890"
+	if hexutil.Encode(byte8Array[:]) != expected {
+		t.Errorf("Expect bind to %v but got %v", expected, hexutil.Encode(byte8Array[:]))
+	}
+
+	byte16Array := testBindArg("bytes16", "0xa1b2c3d4e5f67890", t).([16]byte)
+	expected = "0x0000000000000000a1b2c3d4e5f67890"
+	if hexutil.Encode(byte16Array[:]) != expected {
+		t.Errorf("Expect bind to %v but got %v", expected, hexutil.Encode(byte16Array[:]))
+	}
+
+	byte32Array := testBindArg("bytes32", "0xa1b2c3d4e5f67890", t).([32]byte)
+	expected = "0x000000000000000000000000000000000000000000000000a1b2c3d4e5f67890"
+	if hexutil.Encode(byte32Array[:]) != expected {
+		t.Errorf("Expect bind to %v but got %v", expected, hexutil.Encode(byte32Array[:]))
 	}
 }
 
@@ -93,6 +122,10 @@ var CustomMethod = newMethod([]byte(`{
 		{
 			"name": "_bytesB",
 			"type": "bytes"
+		},
+		{
+			"name": "_bytes16",
+			"type": "bytes16"
 		}
 	],
 	"name": "custom",
@@ -125,8 +158,9 @@ func TestBindArgs(t *testing.T) {
 		_uint17  = "0xdd9de0d2d100cee25d4ea45b8afa28bdfc1e2a775af"
 		_bool    = "0x1"
 		_bytesB  = "0xa1a45fabb381e6ab02448013f651fa0792c3fa05b38771f161cb8f7ebdbee973b5"
+		_bytes16 = "0xa1b2c3d4e5f67890"
 	)
-	_, err = bindArgs(CustomMethod, _address, _bytesA, _uint256, _uint17, _bool, _bytesB)
+	_, err = bindArgs(CustomMethod, _address, _bytesA, _uint256, _uint17, _bool, _bytesB, _bytes16)
 
 	if err != nil {
 		t.Errorf("Prepare Args: should prepare args")
@@ -136,9 +170,8 @@ func TestBindArgs(t *testing.T) {
 func TestPayloadCrafter(t *testing.T) {
 	c := PayloadCrafter{}
 	var (
-		_to     = "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"
-		_value  = "0x2386f26fc10000"
-		payload = "0xa9059cbb000000000000000000000000ff778b716fc07d98839f48ddb88d8be583beb684000000000000000000000000000000000000000000000000002386f26fc10000"
+		_to    = "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"
+		_value = "0x2386f26fc10000"
 	)
 	data, err := c.Craft(ERC20TransferMethod, _to, _value)
 
@@ -146,8 +179,9 @@ func TestPayloadCrafter(t *testing.T) {
 		t.Errorf("Craft: received error %q ", err)
 	}
 
-	if hexutil.Encode(data) != payload {
-		t.Errorf("Craft: expected payload %q but got %q", payload, hexutil.Encode(data))
+	expected := "0xa9059cbb000000000000000000000000ff778b716fc07d98839f48ddb88d8be583beb684000000000000000000000000000000000000000000000000002386f26fc10000"
+	if hexutil.Encode(data) != expected {
+		t.Errorf("Craft: expected payload %q but got %q", expected, hexutil.Encode(data))
 	}
 
 	var (
@@ -157,17 +191,18 @@ func TestPayloadCrafter(t *testing.T) {
 		_uint17  = "0xdd9de0d2d100cee25d4ea45b8afa28bdfc1e2a775af"
 		_bool    = "0x1"
 		_bytesB  = "0xa1a45fabb381e6ab02448013f651fa0792c3fa05b38771f161cb8f7ebdbee973b5"
+		_bytes16 = "0xa1b2c3d4e5f67890"
 	)
 
-	payload = "0xa8817683000000000000000000000000ff778b716fc07d98839f48ddb88d8be583beb68400000000000000000000000000000000000000000000000000000000000000c00000000000000000000000006009608a02a7a15fd6689d6dad560c44e9ab61ff000000000000000000000dd9de0d2d100cee25d4ea45b8afa28bdfc1e2a775af0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000072386f26fc10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000021a1a45fabb381e6ab02448013f651fa0792c3fa05b38771f161cb8f7ebdbee973b500000000000000000000000000000000000000000000000000000000000000"
-	data, err = c.Craft(CustomMethod, _address, _bytesA, _uint256, _uint17, _bool, _bytesB)
+	data, err = c.Craft(CustomMethod, _address, _bytesA, _uint256, _uint17, _bool, _bytesB, _bytes16)
 
 	if err != nil {
 		t.Errorf("Craft: received error %q ", err)
 	}
 
-	if hexutil.Encode(data) != payload {
-		t.Errorf("Craft: expected payload %q but got %q", payload, hexutil.Encode(data))
+	expected = "0x1db71ad9000000000000000000000000ff778b716fc07d98839f48ddb88d8be583beb68400000000000000000000000000000000000000000000000000000000000000e00000000000000000000000006009608a02a7a15fd6689d6dad560c44e9ab61ff000000000000000000000dd9de0d2d100cee25d4ea45b8afa28bdfc1e2a775af000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000001200000000000000000a1b2c3d4e5f678900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000072386f26fc10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000021a1a45fabb381e6ab02448013f651fa0792c3fa05b38771f161cb8f7ebdbee973b500000000000000000000000000000000000000000000000000000000000000"
+	if hexutil.Encode(data) != expected {
+		t.Errorf("Craft: expected payload %q but got %q", expected, hexutil.Encode(data))
 	}
 }
 
