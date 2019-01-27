@@ -69,3 +69,9 @@
 *Released on January 23th 2019*
 
 - [FIX] add `DecodedData` field to `types.Log`
+
+### Version 0.1.9
+
+*Released on Januarty 27th 2019*
+
+- [FEAT] implement method `SetDecodedData` on `types.Log`
