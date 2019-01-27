@@ -39,7 +39,7 @@ func prepareMsg(t *types.Trace, msg *sarama.ProducerMessage) error {
 	}
 
 	// Set topic
-	msg.Topic = opts.App.Kafka.OutTopic
+	msg.Topic = opts.Kafka.OutTopic
 	return nil
 }
 
@@ -76,7 +76,7 @@ func (h *handler) Setup(s sarama.ConsumerGroupSession) error {
 	h.w.Use(
 		commonHandlers.Producer(
 			infSarama.NewProducer(
-				newSaramaSyncProducer(newSaramaClient([]string{opts.Conn.Kafka.URL})),
+				newSaramaSyncProducer(newSaramaClient([]string{opts.Kafka.Address})),
 				prepareMsg,
 			),
 		),
@@ -126,10 +126,10 @@ func main() {
 	ConfigureLogger(opts.Log)
 	log.Info("Start worker...")
 
-	client := newSaramaClient([]string{opts.Conn.Kafka.URL})
+	client := newSaramaClient([]string{opts.Kafka.Address})
 
 	// Create consumer
-	g, err := sarama.NewConsumerGroupFromClient(opts.App.Kafka.ConsumerGroup, client)
+	g, err := sarama.NewConsumerGroupFromClient(opts.Kafka.ConsumerGroup, client)
 	if err != nil {
 		log.Error(err)
 		return
@@ -144,5 +144,5 @@ func main() {
 		}
 	}()
 
-	g.Consume(context.Background(), []string{opts.App.Kafka.InTopic}, &handler{})
+	g.Consume(context.Background(), []string{opts.Kafka.InTopic}, &handler{})
 }
