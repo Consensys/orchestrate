@@ -39,7 +39,7 @@ func (h *TxNonceHandler) prepareMsg(t *types.Trace, msg *sarama.ProducerMessage)
 // Setup configure the handler
 func (h *TxNonceHandler) Setup(s sarama.ConsumerGroupSession) error {
 	// Instantiate worker
-	h.w = core.NewWorker(h.cfg.App.WorkerSlots)
+	h.w = core.NewWorker(h.cfg.Worker.Slots)
 
 	// Hanlder::loader
 	h.w.Use(handCom.Loader(infSarama.NewUnmarshaller()))
@@ -104,7 +104,7 @@ func main() {
 	sc.Producer.Return.Successes = true
 
 	// Create sarama client
-	client, err := sarama.NewClient([]string{cfg.Kafka.Address}, sc)
+	client, err := sarama.NewClient(cfg.Kafka.Address, sc)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -131,7 +131,7 @@ func main() {
 	defer func() { g.Close() }()
 
 	// Create a Multi Ethereum Client connection
-	mec, err := ethclient.MutiDial([]string{cfg.Eth.URL})
+	mec, err := ethclient.MutiDial(cfg.Eth.URLs)
 	if err != nil {
 		// TODO log with logger from worker
 		log.Errorf("Got error %v", err)
@@ -145,8 +145,8 @@ func main() {
 	}()
 
 	g.Consume(
-		context.Background(), 
-		[]string{cfg.Kafka.InTopic}, 
+		context.Background(),
+		[]string{cfg.Kafka.InTopic},
 		&TxNonceHandler{mec: mec, saramaProducer: p, cfg: cfg},
 	)
 }
