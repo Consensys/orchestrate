@@ -2,7 +2,7 @@
 
 ### Version 0.1.0
 
-*Unreleased*
+*Released on January 29th 2019*
 
 - [FEAT] implement `handlers.NonceHandler`
 - [FEAT] implement `handlers.Logger`
