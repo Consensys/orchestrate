@@ -8,8 +8,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
-// LoggerHandler ...
-func LoggerHandler(ctx *types.Context) {
+// Logger ...
+func Logger(ctx *types.Context) {
 	msg := ctx.Msg.(*sarama.ConsumerMessage)
 
 	log.WithFields(log.Fields{

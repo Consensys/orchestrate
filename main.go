@@ -45,7 +45,7 @@ func (h *TxNonceHandler) Setup(s sarama.ConsumerGroupSession) error {
 	h.w.Use(handCom.Loader(infSarama.NewUnmarshaller()))
 
 	// Hanlder::logger
-	h.w.Use(hand.LoggerHandler)
+	h.w.Use(hand.Logger)
 
 	// Hanlder::marker
 	h.w.Use(handCom.Marker(infSarama.NewSimpleOffsetMarker(s)))
