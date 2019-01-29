@@ -41,16 +41,16 @@ func (h *TxNonceHandler) Setup(s sarama.ConsumerGroupSession) error {
 	// Instantiate worker
 	h.w = core.NewWorker(h.cfg.Worker.Slots)
 
-	// Hanlder::loader
+	// Handler::loader
 	h.w.Use(handCom.Loader(infSarama.NewUnmarshaller()))
 
-	// Hanlder::logger
+	// Handler::logger
 	h.w.Use(hand.Logger)
 
-	// Hanlder::marker
+	// Handler::marker
 	h.w.Use(handCom.Marker(infSarama.NewSimpleOffsetMarker(s)))
 
-	// Hanlder::nonce
+	// Handler::nonce
 	h.w.Use(
 		hand.NonceHandler(
 			infRedis.NewNonceManager(h.cfg.Redis.Address, h.cfg.Redis.LockTimeout),
@@ -58,7 +58,7 @@ func (h *TxNonceHandler) Setup(s sarama.ConsumerGroupSession) error {
 		),
 	)
 
-	// Hanlder::producer
+	// Handler::producer
 	h.w.Use(
 		handCom.Producer(
 			infSarama.NewProducer(
