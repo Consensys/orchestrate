@@ -1,6 +1,7 @@
 package faucet
 
 import (
+	"context"
 	"math/big"
 	"sync"
 	"time"
@@ -33,12 +34,12 @@ func (bl BlackList) IsBlackListed(key string) bool {
 
 // Control apply BlackList controller on a credit function
 func (bl *BlackList) Control(f CreditFunc) CreditFunc {
-	return func(r *services.FaucetRequest) (*big.Int, bool, error) {
+	return func(ctx context.Context, r *services.FaucetRequest) (*big.Int, bool, error) {
 		key := computeKey(r.ChainID, r.Address)
 		if bl.IsBlackListed(key) {
 			return big.NewInt(0), false, nil
 		}
-		return f(r)
+		return f(ctx, r)
 	}
 }
 
@@ -70,7 +71,7 @@ func (cd *CoolDown) IsCoolingDown(key string) bool {
 
 // Control apply CoolDosn controller on a credit function
 func (cd *CoolDown) Control(f CreditFunc) CreditFunc {
-	return func(r *services.FaucetRequest) (*big.Int, bool, error) {
+	return func(ctx context.Context, r *services.FaucetRequest) (*big.Int, bool, error) {
 		key := computeKey(r.ChainID, r.Address)
 		cd.mux.Lock(key)
 		defer cd.mux.Unlock(key)
@@ -81,7 +82,7 @@ func (cd *CoolDown) Control(f CreditFunc) CreditFunc {
 		}
 
 		// Credit
-		amount, ok, err := f(r)
+		amount, ok, err := f(ctx, r)
 
 		// If credit properly occured we update lastAuthorized date
 		if ok {
@@ -93,7 +94,7 @@ func (cd *CoolDown) Control(f CreditFunc) CreditFunc {
 }
 
 // BalanceAtFunc should return a balance
-type BalanceAtFunc func(chainID *big.Int, a common.Address) (*big.Int, error)
+type BalanceAtFunc func(ctx context.Context, chainID *big.Int, a common.Address) (*big.Int, error)
 
 // MaxBalance is a controller that ensures an address can not be credit above a given limit
 type MaxBalance struct {
@@ -111,8 +112,8 @@ func NewMaxBalance(max *big.Int, balanceAt BalanceAtFunc) *MaxBalance {
 
 // Control apply MaxBalance controller on a credit function
 func (mb *MaxBalance) Control(f CreditFunc) CreditFunc {
-	return func(r *services.FaucetRequest) (*big.Int, bool, error) {
-		balance, err := mb.balanceAt(r.ChainID, r.Address)
+	return func(ctx context.Context, r *services.FaucetRequest) (*big.Int, bool, error) {
+		balance, err := mb.balanceAt(ctx, r.ChainID, r.Address)
 
 		if err != nil {
 			return big.NewInt(0), false, err
@@ -124,6 +125,6 @@ func (mb *MaxBalance) Control(f CreditFunc) CreditFunc {
 		}
 
 		// Credit is valid
-		return f(r)
+		return f(ctx, r)
 	}
 }

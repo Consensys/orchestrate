@@ -1,6 +1,7 @@
 package faucet
 
 import (
+	"context"
 	"fmt"
 	"math/big"
 	"sync"
@@ -76,7 +77,7 @@ func TestBlackList(t *testing.T) {
 		wg.Add(1)
 		go func(test *testData) {
 			defer wg.Done()
-			amount, ok, err := credit(test.req)
+			amount, ok, err := credit(context.Background(), test.req)
 			test.resultAmount, test.resultOK, test.resultErr = amount, ok, err
 		}(test)
 	}
@@ -123,7 +124,7 @@ func TestCoolDown(t *testing.T) {
 		wg.Add(1)
 		go func(test *testData) {
 			defer wg.Done()
-			amount, ok, err := credit(test.req)
+			amount, ok, err := credit(context.Background(), test.req)
 			test.resultAmount, test.resultOK, test.resultErr = amount, ok, err
 		}(test)
 		switch i % 6 {
@@ -145,7 +146,7 @@ func TestCoolDown(t *testing.T) {
 
 var errTest = fmt.Errorf("Could not connect")
 
-func MockBalanceAt(chainID *big.Int, a common.Address) (*big.Int, error) {
+func MockBalanceAt(ctx context.Context, chainID *big.Int, a common.Address) (*big.Int, error) {
 	if chainID.Cmp(chains[2]) == 0 {
 		// Simulate error
 		return nil, errTest
@@ -194,7 +195,7 @@ func TestMaxBalance(t *testing.T) {
 		wg.Add(1)
 		go func(test *testData) {
 			defer wg.Done()
-			amount, ok, err := credit(test.req)
+			amount, ok, err := credit(context.Background(), test.req)
 			test.resultAmount, test.resultOK, test.resultErr = amount, ok, err
 		}(test)
 	}

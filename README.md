@@ -43,7 +43,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git"
 )
 
-func mockCredit(r *services.FaucetRequest) (*big.Int, bool, error) {
+func mockCredit(ctx context.Context, r *services.FaucetRequest) (*big.Int, bool, error) {
 	return r.Value, true, nil
 }
 
@@ -66,8 +66,8 @@ func createFaucet() *faucet.ControlledFaucet {
 	if err != nil {
 		panic(err)
 	}
-	balanceAt := func(chainID *big.Int, a common.Address) (*big.Int, error) {
-		return ec.BalanceAt(context.Background(), a, nil)
+	balanceAt := func(ctx context.Context, chainID *big.Int, a common.Address) (*big.Int, error) {
+		return ec.BalanceAt(ctx, a, nil)
 	}
 	mb := faucet.NewMaxBalance(
 		big.NewInt(200000000000000000), // MaxBalance authorized 0.2 ETH
@@ -84,6 +84,7 @@ func main() {
 	
 	// Credit a random ethereum address with a value of ETH over MaxBalance
 	amount, ok, _ := f.Credit(
+		context.Background(), 
 		&services.FaucetRequest{
 			ChainID: big.NewInt(3), 
 			Address: common.HexToAddress("0xd048EB6e9B7031f4fcfE264736A26b2A2268154B"),
@@ -94,6 +95,7 @@ func main() {
 
 	// Credit a random ethereum address
 	amount, ok, _  = f.Credit(
+		context.Background(), 
 		&services.FaucetRequest{
 			ChainID: big.NewInt(3), 
 			Address: common.HexToAddress("0xd048EB6e9B7031f4fcfE264736A26b2A2268154B"),
@@ -104,6 +106,7 @@ func main() {
 
 	// Credit address again (expected to fail due to CoolDown)
 	amount, ok, _ = f.Credit(
+		context.Background(), 
 		&services.FaucetRequest{
 			ChainID: big.NewInt(3), 
 			Address: common.HexToAddress("0xd048EB6e9B7031f4fcfE264736A26b2A2268154B"),
@@ -114,6 +117,7 @@ func main() {
 
 	// Credit black list address again (expected to fail due to BLackList)
 	amount, ok, _ =	f.Credit(
+		context.Background(), 
 		&services.FaucetRequest{
 			ChainID: big.NewInt(3), 
 			Address: common.HexToAddress("0x7E654d251Da770A068413677967F6d3Ea2FeA9E4"),

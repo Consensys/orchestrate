@@ -1,13 +1,14 @@
 package faucet
 
 import (
+	"context"
 	"math/big"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
 )
 
 // CreditFunc are functions expected to trigger an credit ether
-type CreditFunc func(r *services.FaucetRequest) (*big.Int, bool, error)
+type CreditFunc func(ctx context.Context, r *services.FaucetRequest) (*big.Int, bool, error)
 
 // ControlFunc are function expected to perform controls on a credit request
 type ControlFunc func(f CreditFunc) CreditFunc
@@ -36,6 +37,6 @@ func NewControlledFaucet(crediter CreditFunc, controls ...ControlFunc) *Controll
 }
 
 // Credit credit ethers
-func (f *ControlledFaucet) Credit(r *services.FaucetRequest) (*big.Int, bool, error) {
-	return f.credit(r)
+func (f *ControlledFaucet) Credit(ctx context.Context, r *services.FaucetRequest) (*big.Int, bool, error) {
+	return f.credit(ctx, r)
 }
