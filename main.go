@@ -5,81 +5,84 @@ import (
 	"math/big"
 
 	"github.com/Shopify/sarama"
-	"github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 	handCom "gitlab.com/ConsenSys/client/fr/core-stack/common.git/handlers"
-	core "gitlab.com/ConsenSys/client/fr/core-stack/core.git"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 	infEth "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
 	infSarama "gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git"
 	hand "gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-crafter.git/handlers"
-	inf "gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-crafter.git/infra"
+	infra "gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-crafter.git/infra"
 )
 
 // TxCrafter is the handler used by the Sarama consumer of the tx-craft worker
 type TxCrafter struct {
 	w              *core.Worker
 	saramaProducer sarama.SyncProducer
-	ethClient      *infEth.EthClient
+	mec            *ethclient.MultiEthClient
 	cfg            Config
-}
-
-func (h *TxCrafter) prepareMsg(t *types.Trace, msg *sarama.ProducerMessage) error {
-	marshaller := infSarama.NewMarshaller()
-
-	err := marshaller.Marshal(t, msg)
-	if err != nil {
-		return err
-	}
-
-	// Set topic
-	msg.Topic = h.cfg.Kafka.OutTopic
-	return nil
 }
 
 // Setup configure the handler
 func (h *TxCrafter) Setup(s sarama.ConsumerGroupSession) error {
-	// Instantiate workers
-	h.w = core.NewWorker(50)
+	// Instantiate worker
+	h.w = core.NewWorker(h.cfg.Worker.Slots)
 
-	// TODO : to be removed ?
-	// Worker::logger middleware which will log before and after the tx-crafter nonce action
-	h.w.Use(hand.Logger)
-
-	// Sarama marker
-	h.w.Use(handCom.Marker(infSarama.NewSimpleOffsetMarker(s)))
-
-	// Sarama message unmarshalling loader
+	// Handler::loader
 	h.w.Use(handCom.Loader(infSarama.NewUnmarshaller()))
 
-	// Crafter
-	crafter := infEth.PayloadCrafter{}
-	registry := hand.NewERC1400ABIRegistry()
-	h.w.Use(hand.Crafter(registry, &crafter))
+	// Handler::logger
+	h.w.Use(hand.Logger)
 
-	gasManager := infEth.NewSimpleGasManager(h.ethClient)
-	h.w.Use(hand.GasPricer(gasManager))    // Gas Price
-	h.w.Use(hand.GasEstimator(gasManager)) // Gas Limit
+	// Handler::marker
+	h.w.Use(handCom.Marker(infSarama.NewSimpleOffsetMarker(s)))
 
-	// Faucet
-	faucetAddress := common.HexToAddress(h.cfg.Faucet.Address)
-	faucetTopicOut := h.cfg.Kafka.InTopic
-	faucet, err := inf.CreateFaucet(
-		h.cfg.Eth.URL,
-		faucetAddress,
-		h.cfg.Faucet.BalanceMax,
-		h.saramaProducer,
-		faucetTopicOut,
-	)
+	// Handler::Faucet
+	crediter, err := infra.NewSaramaCrediter(h.cfg.Faucet, h.saramaProducer)
 	if err != nil {
 		return err
 	}
-	faucetAmount := big.NewInt(h.cfg.Faucet.Amount)
-	h.w.Use(hand.Faucet(faucet, faucetAmount))
+	faucet, err := infra.CreateFaucet(h.cfg.Faucet, h.mec.PendingBalanceAt, crediter.Credit)
+	if err != nil {
+		return err
+	}
+	creditAmount := big.NewInt(0)
+	creditAmount.SetString(h.cfg.Faucet.CreditAmount, 10)
+	h.w.Use(hand.Faucet(faucet, creditAmount))
 
-	// Sarama producer
-	msgProducer := infSarama.NewProducer(h.saramaProducer, h.prepareMsg)
-	h.w.Use(handCom.Producer(msgProducer))
+	// Handler::Crafter
+	crafter := infEth.PayloadCrafter{}
+	registry := infra.NewERC1400ABIRegistry()
+	h.w.Use(hand.Crafter(registry, &crafter))
+
+	// Handler:Gas
+	gasManager := infEth.NewGasManager(h.mec)
+	h.w.Use(hand.GasPricer(gasManager))    // Gas Price
+	h.w.Use(hand.GasEstimator(gasManager)) // Gas Limit
+
+	// Handler::Producer
+	marshaller := infSarama.NewMarshaller()
+
+	prepareMsg := func(t *types.Trace, msg *sarama.ProducerMessage) error {
+		err := marshaller.Marshal(t, msg)
+		if err != nil {
+			return err
+		}
+
+		// Set topic
+		msg.Topic = h.cfg.Kafka.OutTopic
+		return nil
+	}
+
+	h.w.Use(
+		handCom.Producer(
+			infSarama.NewProducer(
+				h.saramaProducer,
+				prepareMsg,
+			),
+		),
+	)
 
 	return nil
 }
@@ -121,7 +124,7 @@ func main() {
 	config.Producer.Return.Successes = true
 
 	// Create sarama client
-	client, err := sarama.NewClient([]string{cfg.Kafka.Address}, config)
+	client, err := sarama.NewClient(cfg.Kafka.Address, config)
 	if err != nil {
 		log.Println(err)
 		return
@@ -148,12 +151,12 @@ func main() {
 	defer func() { g.Close() }()
 
 	// Create an ethereum client connection
-	e, err := infEth.Dial(cfg.Eth.URL)
+	mec, err := ethclient.MutiDial(cfg.Eth.URLs)
 	if err != nil {
 		log.Errorf("Got error %v", err)
 	}
 
-	txCrafter := &TxCrafter{ethClient: e, saramaProducer: p, cfg: cfg}
+	txCrafter := &TxCrafter{mec: mec, saramaProducer: p, cfg: cfg}
 	err = g.Consume(context.Background(), []string{cfg.Kafka.InTopic}, txCrafter)
 	log.Error(err)
 }
