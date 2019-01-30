@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"math/big"
 	"sync"
@@ -17,7 +18,7 @@ type MockEthCrediter struct {
 	t     *testing.T
 }
 
-func (c *MockEthCrediter) Credit(r *services.FaucetRequest) (*big.Int, bool, error) {
+func (c *MockEthCrediter) Credit(ctx context.Context, r *services.FaucetRequest) (*big.Int, bool, error) {
 	if r.ChainID.Text(10) == "0" {
 		return big.NewInt(0), false, fmt.Errorf("Could not credit")
 	}
@@ -25,18 +26,7 @@ func (c *MockEthCrediter) Credit(r *services.FaucetRequest) (*big.Int, bool, err
 	return nil, false, nil
 }
 
-type MockEthCreditController struct {
-	t *testing.T
-}
-
-var blackAddress = "0xdbb881a51CD4023E4400CEF3ef73046743f08da3"
-
-func (c *MockEthCreditController) ShouldCredit(chainID *big.Int, a common.Address, value *big.Int) (*big.Int, bool) {
-	if a.Hex() == blackAddress {
-		return nil, false
-	}
-	return big.NewInt(100), true
-}
+var blackAddress = "0x664895b5fE3ddf049d2Fb508cfA03923859763C6"
 
 func makeFaucetContext(i int) *types.Context {
 	ctx := types.NewContext()

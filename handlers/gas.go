@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"sync"
 
 	"github.com/ethereum/go-ethereum"
@@ -11,7 +12,7 @@ import (
 // GasPricer creates an handler that set Gas Price
 func GasPricer(p services.GasPricer) types.HandlerFunc {
 	return func(ctx *types.Context) {
-		p, err := p.SuggestGasPrice(ctx.T.Chain().ID)
+		p, err := p.SuggestGasPrice(context.Background(), ctx.T.Chain().ID)
 		if err != nil {
 			// TODO: handle error
 			ctx.AbortWithError(err)
@@ -38,7 +39,7 @@ func GasEstimator(p services.GasEstimator) types.HandlerFunc {
 		call.Value = ctx.T.Tx().Value()
 		call.Data = ctx.T.Tx().Data()
 
-		g, err := p.EstimateGas(ctx.T.Chain().ID, call)
+		g, err := p.EstimateGas(context.Background(), ctx.T.Chain().ID, call)
 		if err != nil {
 			// TODO: handle error
 			ctx.AbortWithError(err)

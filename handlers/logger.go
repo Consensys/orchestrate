@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Shopify/sarama"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
@@ -13,16 +14,17 @@ func Logger(ctx *types.Context) {
 	msg := ctx.Msg.(*sarama.ConsumerMessage)
 
 	log.WithFields(log.Fields{
-		"Offset": msg.Offset,
-		"Nonce":  ctx.T.Tx().Nonce(),
-	}).Info("Nonce [IN]")
+		"Offset":  msg.Offset,
+		"ChainID": ctx.T.Chain().ID.Text(10),
+		"Address": ctx.T.Sender().Address.Hex(),
+	}).Info("Crafter [IN]\n")
 
 	ctx.Next()
 
 	log.WithFields(log.Fields{
 		"Offset": msg.Offset,
-		"Nonce":  ctx.T.Tx().Nonce(),
-	}).Info("Nonce [OUT]")
+	}).Infof("Crafter [OUT]\n Data: %v\nGasPrice: %v\nGas Limit: %v\nErrors: %v",
+		hexutil.Encode(ctx.T.Tx().Data()), hexutil.EncodeBig(ctx.T.Tx().GasPrice()), ctx.T.Tx().GasLimit(), ctx.T.Errors)
 
 	errors := ctx.T.Errors
 	if len(errors) > 0 {

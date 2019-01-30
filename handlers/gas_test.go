@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"math/big"
 	"sync"
@@ -14,7 +15,7 @@ type MockGasEstimator struct {
 	t *testing.T
 }
 
-func (e *MockGasEstimator) EstimateGas(chainID *big.Int, call ethereum.CallMsg) (uint64, error) {
+func (e *MockGasEstimator) EstimateGas(ctx context.Context, chainID *big.Int, call ethereum.CallMsg) (uint64, error) {
 	if chainID.Text(10) == "0" {
 		return 0, fmt.Errorf("Could not estimate gas")
 	}
@@ -75,7 +76,7 @@ type MockGasPricer struct {
 	t *testing.T
 }
 
-func (e *MockGasPricer) SuggestGasPrice(chainID *big.Int) (*big.Int, error) {
+func (e *MockGasPricer) SuggestGasPrice(ctx context.Context, chainID *big.Int) (*big.Int, error) {
 	if chainID.Text(10) == "0" {
 		return big.NewInt(0), fmt.Errorf("Could not estimate gas")
 	}
