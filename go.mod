@@ -9,9 +9,9 @@ require (
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/sirupsen/logrus v1.3.0
 	gitlab.com/ConsenSys/client/fr/core-stack/common.git v0.1.0
-	gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.7
-	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.0.0-20190123175109-8c1fdd0bb401
-	gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git v0.1.0
-	gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.1.0
+	gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.10
+	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.3
+	gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git v0.1.1
+	gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.1.1
 	golang.org/x/arch v0.0.0-20181203225421-5a4828bb7045 // indirect
 )
