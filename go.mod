@@ -7,8 +7,8 @@ require (
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/sirupsen/logrus v1.3.0
 	gitlab.com/ConsenSys/client/fr/core-stack/common.git v0.1.0
-	gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.7
-	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.2
+	gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.10
+	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.3
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/redis.git v0.1.0
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.1.0
 )

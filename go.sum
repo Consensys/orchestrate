@@ -134,6 +134,8 @@ gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.5 h1:xwbCqunF8xKnBS5qfXr
 gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.5/go.mod h1:iValIAHnErjlv5gSMZnN+8wG+lvJ2H4FnRV4xxAcuWo=
 gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.7 h1:Pua66iXeoSxUnHYoqhl5lmnlJ6t8IQdYRVBsFl6nfYY=
 gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.7/go.mod h1:iValIAHnErjlv5gSMZnN+8wG+lvJ2H4FnRV4xxAcuWo=
+gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.10 h1:vfiMdRtn7zHbZ/UIfKlxiXQR2iebCNPm5XouWUvN5Fg=
+gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.10/go.mod h1:iValIAHnErjlv5gSMZnN+8wG+lvJ2H4FnRV4xxAcuWo=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.0.0-20190120155728-4388a3e2fac7 h1:LZy4mi7uhpYgtMwi8R9tTlcBk7czOMAyvQgK0U15cvk=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.0.0-20190120155728-4388a3e2fac7/go.mod h1:gMnS2A4TAG3bhWJISXtmQfyFdYg9e2vRLB3/U+4B4wk=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.0.0-20190122095213-8d332321ae3d h1:eb/PdHE4sq2iNEMa3RqvedYeC77Uld3rmso/bhztyE4=
@@ -142,6 +144,8 @@ gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.1 h1:bdS+MCbeU
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.1/go.mod h1:uxrv4TsQTn3M2w0I8U7scU1jvaRqbGV/dfp6lGNrSYs=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.2 h1:l87NHUQTktyaeTazZUvI852lU1n+LpHQsGgHDFs8g30=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.2/go.mod h1:uxrv4TsQTn3M2w0I8U7scU1jvaRqbGV/dfp6lGNrSYs=
+gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.3 h1:1covPDgHpl6gY8OUNO6rKfflYYbXkP5PpCylt1JxPgw=
+gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.3/go.mod h1:rJywGkRdUlisqp9LXzYWAWiH0wJIx5OejsCSV5GdVwc=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/redis.git v0.1.0 h1:G5KG7a9mqCANDYeFIwHPTnN4XEowlPZb9O7jNXMJmik=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/redis.git v0.1.0/go.mod h1:3XA4zCRuoNcETkIrMK6H6EqO7JZ4AQKmxEgPRaTAXGY=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.0.0-20190110213023-c9f957ebac4c h1:QO4PzND9u4bSJ0SDDzihm5JSx+O/vxJyOArZ5/dvcUk=
