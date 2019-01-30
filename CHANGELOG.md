@@ -23,3 +23,9 @@
 *Released on January 27th 2019*
 
  - [FEAT] implement ``PendingNonceAt`` and ``PendingBalanceAt`` on Multi Client
+
+### Version 0.1.3
+
+*Released on January 30th 2019*
+
+ - [CHORE] update to core v0.1.10 and add golang context management

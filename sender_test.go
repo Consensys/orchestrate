@@ -19,7 +19,7 @@ func (ec *MockTxSenderEthClient) SendRawTransaction(ctx context.Context, chainID
 func TestTxSender(t *testing.T) {
 	ec := MockTxSenderEthClient{}
 	txs := NewTxSender(&ec)
-	txs.Send(big.NewInt(10), "0xabcde")
+	txs.Send(context.Background(), big.NewInt(10), "0xabcde")
 	if ec.srtxCount != 1 {
 		t.Errorf("Expected calls count to SendRawTransaction to be 1 but got %v", ec.srtxCount)
 	}

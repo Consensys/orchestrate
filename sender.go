@@ -21,6 +21,6 @@ func NewTxSender(ec TxSenderEthClient) *TxSender {
 }
 
 // Send sends transaction
-func (s *TxSender) Send(chainID *big.Int, raw string) error {
-	return s.ec.SendRawTransaction(context.Background(), chainID, raw)
+func (s *TxSender) Send(ctx context.Context, chainID *big.Int, raw string) error {
+	return s.ec.SendRawTransaction(ctx, chainID, raw)
 }

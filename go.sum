@@ -17,6 +17,8 @@ github.com/syndtr/goleveldb v0.0.0-20181128100959-b001fa50d6b2 h1:GnOzE5fEFN3b2z
 github.com/syndtr/goleveldb v0.0.0-20181128100959-b001fa50d6b2/go.mod h1:Z4AUp2Km+PwemOoO/VB5AOx9XSsIItzFjoJlOSiYmn0=
 gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.4 h1:Pd3mTdOKDMA1nWFfcxTWT9fxvaxySd47Nw/SCfPGsX4=
 gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.4/go.mod h1:iValIAHnErjlv5gSMZnN+8wG+lvJ2H4FnRV4xxAcuWo=
+gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.10 h1:vfiMdRtn7zHbZ/UIfKlxiXQR2iebCNPm5XouWUvN5Fg=
+gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.10/go.mod h1:iValIAHnErjlv5gSMZnN+8wG+lvJ2H4FnRV4xxAcuWo=
 golang.org/x/crypto v0.0.0-20190103213133-ff983b9c42bc h1:F5tKCVGp+MUAHhKp5MZtGqAlGX3+oCsiL1Q629FL90M=
 golang.org/x/crypto v0.0.0-20190103213133-ff983b9c42bc/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/net v0.0.0-20190110200230-915654e7eabc h1:Yx9JGxI1SBhVLFjpAkWMaO1TF+xyqtHLjZpvQboJGiM=

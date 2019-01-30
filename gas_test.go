@@ -28,12 +28,12 @@ func TestGasManager(t *testing.T) {
 	ec := MockGasManagerEthClient{}
 
 	gm := NewGasManager(&ec)
-	gm.SuggestGasPrice(big.NewInt(10))
+	gm.SuggestGasPrice(context.Background(), big.NewInt(10))
 	if ec.sgpCount != 1 {
 		t.Errorf("Expected calls count to SuggestGasPrice to be 1 but got %v", ec.sgpCount)
 	}
 
-	gm.EstimateGas(big.NewInt(10), geth.CallMsg{})
+	gm.EstimateGas(context.Background(), big.NewInt(10), geth.CallMsg{})
 	if ec.egCount != 1 {
 		t.Errorf("Expected calls count to EstimateGas to be 1 but got %v", ec.egCount)
 	}

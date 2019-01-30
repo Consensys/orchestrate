@@ -27,11 +27,11 @@ func NewGasManager(ec GasManagerEthClient) *GasManager {
 }
 
 // SuggestGasPrice suggests a gas price
-func (m *GasManager) SuggestGasPrice(chainID *big.Int) (*big.Int, error) {
-	return m.ec.SuggestGasPrice(context.Background(), chainID)
+func (m *GasManager) SuggestGasPrice(ctx context.Context, chainID *big.Int) (*big.Int, error) {
+	return m.ec.SuggestGasPrice(ctx, chainID)
 }
 
 // EstimateGas suggests a gas limit
-func (m *GasManager) EstimateGas(chainID *big.Int, call geth.CallMsg) (uint64, error) {
-	return m.ec.EstimateGas(context.Background(), chainID, call)
+func (m *GasManager) EstimateGas(ctx context.Context, chainID *big.Int, call geth.CallMsg) (uint64, error) {
+	return m.ec.EstimateGas(ctx, chainID, call)
 }
