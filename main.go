@@ -5,88 +5,70 @@ import (
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
-
-	commonHandlers "gitlab.com/ConsenSys/client/fr/core-stack/common.git/handlers"
-	core "gitlab.com/ConsenSys/client/fr/core-stack/core.git"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	handCom "gitlab.com/ConsenSys/client/fr/core-stack/common.git/handlers"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 	infEth "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
 	infSarama "gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git"
 	hand "gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-signer.git/handlers"
 )
 
-var opts Config
-
-type handler struct {
-	w *core.Worker
-}
-
-func newSaramaSyncProducer(client sarama.Client) sarama.SyncProducer {
-	// Create producer
-	p, err := sarama.NewSyncProducerFromClient(client)
-	if err != nil {
-		panic(err)
-	}
-	log.Info("Producer ready")
-	return p
-}
-
-func prepareMsg(t *types.Trace, msg *sarama.ProducerMessage) error {
-	marshaller := infSarama.NewMarshaller()
-
-	err := marshaller.Marshal(t, msg)
-	if err != nil {
-		return err
-	}
-
-	// Set topic
-	msg.Topic = opts.Kafka.OutTopic
-	return nil
-}
-
-func newEthClient(rawurl string) *infEth.EthClient {
-	ec, err := infEth.Dial(rawurl)
-	if err != nil {
-		panic(err)
-	}
-	log.Info("Connected to Ethereum client")
-	return ec
+// TxSignerHandler is the handler used by the Sarama consumer of the tx-signer worker
+type TxSignerHandler struct {
+	w              *core.Worker
+	saramaProducer sarama.SyncProducer
+	mec            *ethclient.MultiEthClient
+	cfg            Config
 }
 
 // Setup configure handler
-func (h *handler) Setup(s sarama.ConsumerGroupSession) error {
+func (h *TxSignerHandler) Setup(s sarama.ConsumerGroupSession) error {
 	// Instantiate workers
-	h.w = core.NewWorker(opts.App.WorkerSlots)
-
-	// Worker::logger
-	h.w.Use(hand.LoggerHandler)
+	h.w = core.NewWorker(h.cfg.Worker.Slots)
 
 	// Worker::unmarchaller
-	h.w.Use(commonHandlers.Loader(infSarama.NewUnmarshaller()))
+	h.w.Use(handCom.Loader(infSarama.NewUnmarshaller()))
+
+	// Worker::logger
+	h.w.Use(hand.Logger)
 
 	// Worker::marker
-	h.w.Use(commonHandlers.Marker(infSarama.NewSimpleOffsetMarker(s)))
+	h.w.Use(handCom.Marker(infSarama.NewSimpleOffsetMarker(s)))
 
 	// Worker::signer
-	txSigner := infEth.NewStaticSigner(opts.App.Vault.Accounts)
+	txSigner := infEth.NewStaticSigner(h.cfg.Vault.Accounts)
 	h.w.Use(
 		hand.Signer(txSigner),
 	)
 
-	// Worker::producer
+	// Handler::Producer
+	marshaller := infSarama.NewMarshaller()
+
+	prepareMsg := func(t *types.Trace, msg *sarama.ProducerMessage) error {
+		err := marshaller.Marshal(t, msg)
+		if err != nil {
+			return err
+		}
+
+		// Set topic
+		msg.Topic = h.cfg.Kafka.OutTopic
+		return nil
+	}
+
 	h.w.Use(
-		commonHandlers.Producer(
+		handCom.Producer(
 			infSarama.NewProducer(
-				newSaramaSyncProducer(newSaramaClient([]string{opts.Kafka.Address})),
+				h.saramaProducer,
 				prepareMsg,
 			),
 		),
 	)
-
 	return nil
 }
 
 // ConsumeClaim consume messages from queue
-func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, c sarama.ConsumerGroupClaim) error {
+func (h *TxSignerHandler) ConsumeClaim(s sarama.ConsumerGroupSession, c sarama.ConsumerGroupClaim) error {
 	in := make(chan interface{})
 	go func() {
 		// Pipe channels for interface compatibility
@@ -101,7 +83,7 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, c sarama.ConsumerG
 }
 
 // Cleanup cleans handler
-func (h *handler) Cleanup(s sarama.ConsumerGroupSession) error {
+func (h *TxSignerHandler) Cleanup(s sarama.ConsumerGroupSession) error {
 	return nil
 }
 
@@ -122,27 +104,55 @@ func newSaramaClient(kafkaURL []string) sarama.Client {
 }
 
 func main() {
-	LoadConfig(&opts)
-	ConfigureLogger(opts.Log)
+	// Load Config from env variables
+	var cfg Config
+	LoadConfig(&cfg)
+
+	// Configure the logger
+	ConfigureLogger(cfg.Log)
 	log.Info("Start worker...")
 
-	client := newSaramaClient([]string{opts.Kafka.Address})
+	// Init config
+	config := sarama.NewConfig()
+	config.Version = sarama.V1_0_0_0
+	config.Consumer.Return.Errors = true
+	config.Producer.Return.Errors = true
+	config.Producer.Return.Successes = true
 
-	// Create consumer
-	g, err := sarama.NewConsumerGroupFromClient(opts.Kafka.ConsumerGroup, client)
+	// Create sarama client
+	client, err := sarama.NewClient(cfg.Kafka.Address, config)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer client.Close()
+	log.Println("Client ready")
+
+	// Create sarama sync producer
+	p, err := sarama.NewSyncProducerFromClient(client)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	log.Println("Producer ready")
+	defer p.Close()
+
+	// Create sarama consumer
+	g, err := sarama.NewConsumerGroupFromClient(cfg.Kafka.ConsumerGroup, client)
 	if err != nil {
 		log.Error(err)
 		return
 	}
-	log.Info("Consumer Group ready")
+	log.Info("Consumer group ready")
 	defer func() { g.Close() }()
 
-	// Track errors
-	go func() {
-		for err := range g.Errors() {
-			log.Error("ERROR", err)
-		}
-	}()
+	// Create an ethereum client connection
+	mec, err := ethclient.MutiDial(cfg.Eth.URLs)
+	if err != nil {
+		log.Errorf("Got error %v", err)
+	}
 
-	g.Consume(context.Background(), []string{opts.Kafka.InTopic}, &handler{})
+	txCrafter := &TxSignerHandler{mec: mec, saramaProducer: p, cfg: cfg}
+	err = g.Consume(context.Background(), []string{cfg.Kafka.InTopic}, txCrafter)
+	log.Error(err)
 }
