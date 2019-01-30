@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Exit on error
+set -e
+
 echo "mode: count" >> tmp.out
 for package in $@; do
   go test -covermode=count -coverprofile profile.out "${package}"
