@@ -1,33 +1,24 @@
 package handlers
 
 import (
-	"fmt"
-
 	"github.com/Shopify/sarama"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
-// LoggerHandler ...
-func LoggerHandler(ctx *types.Context) {
+// Logger ...
+func Logger(ctx *types.Context) {
 	msg := ctx.Msg.(*sarama.ConsumerMessage)
 
 	log.WithFields(log.Fields{
 		"Offset": msg.Offset,
-	}).Info("Logger [IN]")
+		"Sender": ctx.T.Sender().Address.Hex(),
+	}).Info("Logger [IN]\n")
 
 	ctx.Next()
 
 	log.WithFields(log.Fields{
 		"Offset": msg.Offset,
-		"Raw":    hexutil.Encode(ctx.T.Tx().Raw()[:]),
-		"Hash":   ctx.T.Tx().Hash().Hex(),
-	}).Info("Logger [OUT]")
-
-	errors := ctx.T.Errors
-	if len(errors) > 0 {
-		// TODO: change to log
-		fmt.Printf("Error: %v\n", errors)
-	}
+	}).Infof("Logger [OUT]\nRaw: %v\nHash: %v\nErrors: %v\n", hexutil.Encode(ctx.T.Tx().Raw()), ctx.T.Tx().Hash().Hex(), ctx.T.Errors)
 }
