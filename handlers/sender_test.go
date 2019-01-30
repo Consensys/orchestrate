@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"math/big"
 	"sync"
@@ -13,7 +14,7 @@ type MockTxSender struct {
 	t *testing.T
 }
 
-func (s *MockTxSender) Send(chainID *big.Int, raw string) error {
+func (s *MockTxSender) Send(ctx context.Context, chainID *big.Int, raw string) error {
 	if chainID.Text(10) == "0" {
 		return fmt.Errorf("Could not send")
 	}
