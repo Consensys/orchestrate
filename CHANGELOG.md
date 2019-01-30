@@ -75,3 +75,9 @@
 *Released on Januarty 27th 2019*
 
 - [FEAT] implement method `SetDecodedData` on `types.Log`
+
+### Version 0.1.10
+
+*Released on Januarty 30th 2019*
+
+- [FEAT] add support for `context.Context` in most services
