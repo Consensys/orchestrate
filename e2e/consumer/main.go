@@ -8,8 +8,11 @@ import (
 	"github.com/Shopify/sarama"
 )
 
+var kafkaUrls = []string{"localhost:9092"}
+var inTopic = "topic-tx-nonce"
+
 func main() {
-	consumer, err := sarama.NewConsumer([]string{"localhost:9092"}, nil)
+	consumer, err := sarama.NewConsumer(kafkaUrls, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -20,7 +23,7 @@ func main() {
 		}
 	}()
 
-	partitionConsumer, err := consumer.ConsumePartition("topic-out", 0, sarama.OffsetNewest)
+	partitionConsumer, err := consumer.ConsumePartition(inTopic, 0, sarama.OffsetNewest)
 	if err != nil {
 		panic(err)
 	}

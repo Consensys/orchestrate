@@ -10,10 +10,8 @@ import (
 )
 
 var (
-	chainURL = "https://ropsten.infura.io/v3/81e039ce6c8a465180822b525e3644d7"
 	kafkaURL = []string{"localhost:9092"}
-	group    = "group"
-	inTopic  = "topic-in"
+	inTopic  = "topic-tx-crafter"
 	senders  = []string{
 		"0xd71400daD07d70C976D6AAFC241aF1EA183a7236",
 		//"0xf5956Eb46b377Ae41b41BDa94e6270208d8202bb",
@@ -32,8 +30,9 @@ func newMessage(i int) *sarama.ProducerMessage {
 	}
 	b, _ := proto.Marshal(
 		&tracepb.Trace{
+			Chain:  &tracepb.Chain{Id: "0x3"},
 			Sender: &tracepb.Account{Address: senders[i%len(senders)]},
-			Call:   &tracepb.Call{MethodId: "setDocument@ERC1400", Args: []string{"0xabc", "0xabc", "0xabc"}},
+			Call:   &tracepb.Call{MethodId: "setDocument@ERC1400", Args: []string{"0xabcd", "0xabcd", "0xabcd"}},
 			Transaction: &ethpb.Transaction{
 				TxData: &ethpb.TxData{
 					To: ERC1400Address,
