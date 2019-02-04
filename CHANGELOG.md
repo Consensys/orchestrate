@@ -29,3 +29,9 @@
 *Released on January 30th 2019*
 
  - [CHORE] update to core v0.1.10 and add golang context management
+
+### Version 0.1.4
+
+*Released on February 04th 2019*
+
+ - [FEAT] implement first version of ``Decode`` a log decoder to string service
