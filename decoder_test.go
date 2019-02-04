@@ -129,14 +129,14 @@ func TestDecodeERC20ABI(t *testing.T) {
 
 	decoded, _ := Decode(event, testLogERC20ABI)
 
-	m := map[string]string{
+	expected := map[string]string{
 		"tokens": "30000000000000000000",
 		"from":   "0xBA826fEc90CEFdf6706858E5FbaFcb27A290Fbe0",
 		"to":     "0x4aEE792A88eDDA29932254099b9d1e06D537883f",
 	}
-	eq := reflect.DeepEqual(m, decoded)
+	eq := reflect.DeepEqual(expected, decoded)
 	if !eq {
-		t.Errorf("Decode: expected mapping %q but got %q", m, decoded)
+		t.Errorf("Decode ERC20ABI: expected mapping %q but got %q", expected, decoded)
 	}
 }
 
@@ -160,7 +160,7 @@ func TestDecodeLOGFILLABI(t *testing.T) {
 	}
 	eq := reflect.DeepEqual(m, decoded)
 	if !eq {
-		t.Errorf("Decode: expected mapping %q but got %q", m, decoded)
+		t.Errorf("Decode LOGFILLABI: expected mapping %q but got %q", m, decoded)
 	}
 }
 
@@ -292,4 +292,77 @@ func TestFormatNonIndexedArg(t *testing.T) {
 		}
 	}
 
+}
+
+var ERC1400TRANSFERWITHDATAABI = []byte(`{
+	"anonymous": false,
+	"inputs": [
+		{
+			"indexed": true,
+			"name": "operator",
+			"type": "address"
+		},
+		{
+			"indexed": true,
+			"name": "from",
+			"type": "address"
+		},
+		{
+			"indexed": true,
+			"name": "to",
+			"type": "address"
+		},
+		{
+			"indexed": false,
+			"name": "value",
+			"type": "uint256"
+		},
+		{
+			"indexed": false,
+			"name": "data",
+			"type": "bytes"
+		},
+		{
+			"indexed": false,
+			"name": "operatorData",
+			"type": "bytes"
+		}
+	],
+	"name": "TransferWithData",
+	"type": "event"
+}`)
+
+var testLogTransferWithDataERC1400ABI = &types.Log{
+	Address:     common.HexToAddress("0xE41d2489571d322189246DaFA5ebDe1F4699F498"),
+	BlockHash:   common.HexToHash("0xea2460a53299f7201d82483d891b26365ff2f49cd9c5c0c7686fd75599fda5b2"),
+	BlockNumber: 6383829,
+	Data:        hexutil.MustDecode("0x0000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000061000000000000000000000000000000000000000000000000000000006f0c7f50cd4b7e4466b726279b1506bc89d8e74ab9268a255eeb1c78f163d51a83c7380d54a8b597ee26351c15c83f922fd6b37334970d3f832e5e11e36acbecb460ffdb01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
+	Index:       13,
+	TxIndex:     17,
+	TxHash:      common.HexToHash("0x7bec5494eddfba3680fb44053c822ffdc24fb5f6ab7e5e9179b897bfac4cf210"),
+	Topics: []common.Hash{
+		common.HexToHash("0xe8f0a47da72ca43153c7a5693a827aa8456f52633de9870a736e5605bff4af6d"),
+		common.HexToHash("0x000000000000000000000000d71400dad07d70c976d6aafc241af1ea183a7236"),
+		common.HexToHash("0x000000000000000000000000d71400dad07d70c976d6aafc241af1ea183a7236"),
+		common.HexToHash("0x000000000000000000000000b5747835141b46f7c472393b31f8f5a57f74a44f"),
+	},
+}
+
+func TestDecodeLOGTransferWithData(t *testing.T) {
+	event := newEvent(ERC1400TRANSFERWITHDATAABI)
+
+	decoded, _ := Decode(event, testLogTransferWithDataERC1400ABI)
+
+	expected := map[string]string{
+		"operator":     "0xd71400daD07d70C976D6AAFC241aF1EA183a7236",
+		"from":         "0xd71400daD07d70C976D6AAFC241aF1EA183a7236",
+		"to":           "0xb5747835141b46f7C472393B31F8F5A57F74A44f",
+		"value":        "3",
+		"data":         "0x000000000000000000000000000000000000000000000000000000006f0c7f50cd4b7e4466b726279b1506bc89d8e74ab9268a255eeb1c78f163d51a83c7380d54a8b597ee26351c15c83f922fd6b37334970d3f832e5e11e36acbecb460ffdb01",
+		"operatorData": "0x",
+	}
+	eq := reflect.DeepEqual(expected, decoded)
+	if !eq {
+		t.Errorf("Decode TransferWithDataERC1400ABI: expected mapping %q but got %q", expected, decoded)
+	}
 }
