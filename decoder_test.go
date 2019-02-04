@@ -201,91 +201,112 @@ func TestFormatIndexedArg(t *testing.T) {
 func TestFormatNonIndexedArg(t *testing.T) {
 
 	for i, test := range []struct {
+		argType        reflect.Type
 		arg            interface{}
 		expectedOutput string
 	}{
 		{
+			reflect.TypeOf(&big.Int{}),
 			uint8(2),
 			"2",
 		},
 		{
+			reflect.TypeOf(&big.Int{}),
 			[]uint8{1, 2},
 			"[1 2]",
 		},
 		{
+			reflect.TypeOf(&big.Int{}),
 			uint16(2),
 			"2",
 		},
 		{
+			reflect.TypeOf(&big.Int{}),
 			[]uint16{1, 2},
 			"[1 2]",
 		},
 		{
+			reflect.TypeOf(&big.Int{}),
 			uint32(2),
 			"2",
 		},
 		{
+			reflect.TypeOf(&big.Int{}),
 			[]uint32{1, 2},
 			"[1 2]",
 		},
 		{
+			reflect.TypeOf(&big.Int{}),
 			uint64(2),
 			"2",
 		},
 		{
+			reflect.TypeOf(&big.Int{}),
 			[]uint64{1, 2},
 			"[1 2]",
 		},
 		{
+			reflect.TypeOf(&big.Int{}),
 			big.NewInt(2),
 			"2",
 		},
 		{
+			reflect.TypeOf(&big.Int{}),
 			[]*big.Int{big.NewInt(1), big.NewInt(2)},
 			"[1 2]",
 		},
 		{
+			reflect.TypeOf(&big.Int{}),
 			int8(-2),
 			"-2",
 		},
 		{
+			reflect.TypeOf(&big.Int{}),
 			[]int8{-1, -2},
 			"[-1 -2]",
 		},
 		{
+			reflect.TypeOf(&big.Int{}),
 			int16(-2),
 			"-2",
 		},
 		{
+			reflect.TypeOf(&big.Int{}),
 			[]int16{-1, -2},
 			"[-1 -2]",
 		},
 		{
+			reflect.TypeOf(&big.Int{}),
 			int32(-2),
 			"-2",
 		},
 		{
+			reflect.TypeOf(&big.Int{}),
 			[]int32{-1, -2},
 			"[-1 -2]",
 		},
 		{
+			reflect.TypeOf(&big.Int{}),
 			int64(-2),
 			"-2",
 		},
 		{
+			reflect.TypeOf(&big.Int{}),
 			[]int64{-1, -2},
 			"[-1 -2]",
 		},
 		{
+			reflect.TypeOf(byte(0)),
 			[32]byte{1},
 			"0x0100000000000000000000000000000000000000000000000000000000000000",
 		},
 		{
+			reflect.TypeOf(common.Address{}),
 			common.HexToAddress("01"),
 			"0x0000000000000000000000000000000000000001",
 		},
 	} {
-		output, _ := FormatNonIndexedArg(abi.Type{}, test.arg)
+		output, _ := FormatNonIndexedArg(abi.Type{Type: test.argType}, test.arg)
 
 		if test.expectedOutput != output {
 			t.Errorf("FormatNonIndexedArg (input %d): expected mapping %q but got %q", i, test.expectedOutput, output)
@@ -365,4 +386,5 @@ func TestDecodeLOGTransferWithData(t *testing.T) {
 	if !eq {
 		t.Errorf("Decode TransferWithDataERC1400ABI: expected mapping %q but got %q", expected, decoded)
 	}
+	t.Errorf("e")
 }
