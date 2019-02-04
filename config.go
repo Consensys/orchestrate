@@ -19,9 +19,9 @@ type AppConfig struct {
 
 // KafkaConfig is the config part concerning kafka
 type KafkaConfig struct {
-	ConsumerGroup string `short:"c" long:"consumer-group" env:"CONSUMER_GROUP" default:"tx-signer-group"`
-	InTopic       string `short:"i" long:"in-topic" env:"KAFKA_TOPIC_TX_SIGNER" default:"topic-tx-signer"`
-	OutTopic      string `short:"o" long:"out-topic" env:"KAFKA_TOPIC_TX_SENDER" default:"topic-tx-sender"`
+	ConsumerGroup string `short:"c" long:"consumer-group" env:"CONSUMER_GROUP" default:"tx-decoder-group"`
+	InTopic       string `short:"i" long:"in-topic" env:"KAFKA_TOPIC_TX_DECODER" default:"topic-tx-decoder"`
+	OutTopic      string `short:"o" long:"out-topic" env:"KAFKA_TOPIC_TX_DECODED" default:"topic-tx-decoded"`
 	Address       string `long:"kafka-address" env:"KAFKA_ADDRESS" default:"localhost:9092"`
 }
 

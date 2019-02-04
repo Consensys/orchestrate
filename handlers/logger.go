@@ -18,10 +18,13 @@ func LoggerHandler(ctx *types.Context) {
 
 	ctx.Next()
 
-	log.WithFields(log.Fields{
-		"Offset": msg.Offset,
-		"Logs":   ctx.T.Receipt().Logs,
-	}).Info("Logger [OUT]")
+	for _, logData := range ctx.T.Receipt().Logs {
+		log.WithFields(log.Fields{
+			"Offset": msg.Offset,
+			"Log":   logData.DecodedData,
+		}).Info("Logger [OUT]")
+	}
+
 
 	errors := ctx.T.Errors
 	if len(errors) > 0 {

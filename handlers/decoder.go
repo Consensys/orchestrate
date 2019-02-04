@@ -7,8 +7,9 @@ import (
 	InfEth "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git"
 )
 
+// LogDecoder decode a single log
 func LogDecoder(ctx *types.Context, r services.ABIRegistry, log *types.Log, i int) {
-	event, err := r.GetEventByID(log.Topics[0].Hex())
+	event, err := r.GetEventBySig(log.Topics[0].Hex())
 	if err != nil {
 		e := types.Error{
 			Err:  err,
@@ -24,16 +25,12 @@ func LogDecoder(ctx *types.Context, r services.ABIRegistry, log *types.Log, i in
 
 }
 
-// Decoder creates a decode handler
+// TransactionDecoder creates a decode handler
 func TransactionDecoder(r services.ABIRegistry) types.HandlerFunc {
 	return func(ctx *types.Context) {
 
-		queue := make(chan map[string]string, len(ctx.T.Receipt().Logs))
-
 		for i, log := range ctx.T.Receipt().Logs {
-
 			go LogDecoder(ctx, r, log, i)
-
 		}
 
 		return
