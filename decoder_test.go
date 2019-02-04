@@ -386,5 +386,4 @@ func TestDecodeLOGTransferWithData(t *testing.T) {
 	if !eq {
 		t.Errorf("Decode TransferWithDataERC1400ABI: expected mapping %q but got %q", expected, decoded)
 	}
-	t.Errorf("e")
 }
