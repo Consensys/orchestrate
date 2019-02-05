@@ -31,15 +31,83 @@ func FormatIndexedArg(t abi.Type, arg common.Hash) (string, error) {
 
 // FormatNonIndexedArg transforms a data to string
 func FormatNonIndexedArg(t abi.Type, arg interface{}) (string, error) {
-
-	// TODO: how to handle anyother bytes except 32
-	switch v := arg.(type) {
-	case common.Address:
-		return v.Hex(), nil
-	case [32]byte:
-		return hexutil.Encode(v[:]), nil
+	switch {
+	case t.Type == reflect.TypeOf(&big.Int{}):
+		return fmt.Sprintf("%v", arg), nil
+	case t.Type == reflect.TypeOf(common.Address{}):
+		return arg.(common.Address).Hex(), nil
+	default:
+		switch v := arg.(type) {
+		case [1]byte:
+			return hexutil.Encode(v[:]), nil
+		case [2]byte:
+			return hexutil.Encode(v[:]), nil
+		case [3]byte:
+			return hexutil.Encode(v[:]), nil
+		case [4]byte:
+			return hexutil.Encode(v[:]), nil
+		case [5]byte:
+			return hexutil.Encode(v[:]), nil
+		case [6]byte:
+			return hexutil.Encode(v[:]), nil
+		case [7]byte:
+			return hexutil.Encode(v[:]), nil
+		case [8]byte:
+			return hexutil.Encode(v[:]), nil
+		case [9]byte:
+			return hexutil.Encode(v[:]), nil
+		case [10]byte:
+			return hexutil.Encode(v[:]), nil
+		case [11]byte:
+			return hexutil.Encode(v[:]), nil
+		case [12]byte:
+			return hexutil.Encode(v[:]), nil
+		case [13]byte:
+			return hexutil.Encode(v[:]), nil
+		case [14]byte:
+			return hexutil.Encode(v[:]), nil
+		case [15]byte:
+			return hexutil.Encode(v[:]), nil
+		case [16]byte:
+			return hexutil.Encode(v[:]), nil
+		case [17]byte:
+			return hexutil.Encode(v[:]), nil
+		case [18]byte:
+			return hexutil.Encode(v[:]), nil
+		case [19]byte:
+			return hexutil.Encode(v[:]), nil
+		case [20]byte:
+			return hexutil.Encode(v[:]), nil
+		case [21]byte:
+			return hexutil.Encode(v[:]), nil
+		case [22]byte:
+			return hexutil.Encode(v[:]), nil
+		case [23]byte:
+			return hexutil.Encode(v[:]), nil
+		case [24]byte:
+			return hexutil.Encode(v[:]), nil
+		case [25]byte:
+			return hexutil.Encode(v[:]), nil
+		case [26]byte:
+			return hexutil.Encode(v[:]), nil
+		case [27]byte:
+			return hexutil.Encode(v[:]), nil
+		case [28]byte:
+			return hexutil.Encode(v[:]), nil
+		case [29]byte:
+			return hexutil.Encode(v[:]), nil
+		case [30]byte:
+			return hexutil.Encode(v[:]), nil
+		case [31]byte:
+			return hexutil.Encode(v[:]), nil
+		case [32]byte:
+			return hexutil.Encode(v[:]), nil
+		case []byte:
+			return hexutil.Encode(v[:]), nil
+		}
+		return fmt.Sprintf("%v", arg), nil
 	}
-	return fmt.Sprintf("%v", arg), nil
+
 }
 
 // Decode event data to string
@@ -61,6 +129,7 @@ func Decode(event *abi.Event, txLog *types.Log) (map[string]string, error) {
 			decoded, _ = FormatIndexedArg(arg.Type, txLog.Topics[topicIndex])
 			topicIndex++
 		} else {
+
 			decoded, _ = FormatNonIndexedArg(arg.Type, unpackValues[unpackValuesIndex])
 			unpackValuesIndex++
 		}

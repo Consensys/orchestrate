@@ -32,6 +32,14 @@
 
 ### Version 0.1.4
 
+*Released on February 4th 2019*
+
+ - [FEAT] implement first version of ``Decode`` a log decoder to string service
+
+### Version 0.1.5
+
 *Released on February 5th 2019*
 
  - [FIX] add `SetPos` on tx-listener (but will be soon updated)
+
+
