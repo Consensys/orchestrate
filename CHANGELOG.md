@@ -29,3 +29,9 @@
 *Released on January 30th 2019*
 
  - [CHORE] update to core v0.1.10 and add golang context management
+
+### Version 0.1.4
+
+*Released on February 5th 2019*
+
+ - [FIX] add `SetPos` on tx-listener (but will be soon updated)

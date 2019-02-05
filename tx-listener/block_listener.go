@@ -1,6 +1,7 @@
 package listener
 
 import (
+	"math/big"
 	"sync"
 	"time"
 
@@ -19,6 +20,9 @@ type BlockListener interface {
 	// It is required to call this function before a consumer object passes
 	// out of scope, as it will otherwise leak memory.
 	Close()
+
+	// Set Listener position
+	Set(pos *big.Int)
 }
 
 type blockListener struct {
@@ -41,6 +45,10 @@ func newBlockListener(cur BlockCursor, conf *Config) *blockListener {
 		closed:    make(chan struct{}),
 		trigger:   make(chan struct{}, 1),
 	}
+}
+
+func (bl *blockListener) Set(pos *big.Int) {
+	bl.cur.Set(pos)
 }
 
 func (bl *blockListener) Blocks() <-chan *types.Block {

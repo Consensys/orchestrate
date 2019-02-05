@@ -29,6 +29,9 @@ type TxListener interface {
 	// Errors return a read channel of errors
 	Errors() <-chan error
 
+	// Set allows to set TxListener position
+	Set(block uint64, txIndex uint64)
+
 	// Close stops listener
 	Close()
 }
@@ -46,6 +49,7 @@ type txListener struct {
 	receipts chan *types.Receipt
 	errors   chan error
 	blocks   chan *types.Block
+	pos      uint64
 
 	bl        BlockListener
 	responses chan *receiptResponse
@@ -82,6 +86,12 @@ func NewTxListener(ec TxListenerEthClient, conf *Config) TxListener {
 	return l
 }
 
+// Warning: you should not call SetPos while consuming listener channels
+func (l *txListener) Set(block uint64, txIndex uint64) {
+	l.bl.Set(big.NewInt(int64(block)))
+	l.pos = txIndex
+}
+
 func (l *txListener) Blocks() <-chan *types.Block {
 	return l.blocks
 }
@@ -113,7 +123,7 @@ dispatchLoop:
 		}
 
 		// Retrieve transaction receipt for every transactions
-		for _, tx := range block.Transactions() {
+		for _, tx := range block.Transactions()[l.pos:] {
 			select {
 			case <-l.closed:
 				break dispatchLoop
@@ -122,6 +132,8 @@ dispatchLoop:
 				l.responses <- l.getReceipt(tx)
 			}
 		}
+		// Reinitialize position
+		l.pos = 0
 	}
 	close(l.responses)
 	close(l.blocks)
