@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.12
+
+*Released on February 6th 2019*
+
+- [FIX] generalize `TraceProducer` into `Producer` without requiring to be a Trace
+
 ### Version 0.1.11
 
 *Released on February 6th 2019*
