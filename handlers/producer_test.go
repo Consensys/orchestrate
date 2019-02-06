@@ -13,7 +13,8 @@ type MockTraceProducer struct {
 	t *testing.T
 }
 
-func (p *MockTraceProducer) Produce(t *types.Trace) error {
+func (p *MockTraceProducer) Produce(o interface{}) error {
+	t := o.(*types.Trace)
 	if t.Chain().ID.Text(10) == "0" {
 		return fmt.Errorf("Could not produce")
 	}
