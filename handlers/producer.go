@@ -6,7 +6,7 @@ import (
 )
 
 // Producer creates a producer handler
-func Producer(p services.TraceProducer) types.HandlerFunc {
+func Producer(p services.Producer) types.HandlerFunc {
 	return func(ctx *types.Context) {
 		// Produce trace protobuffer
 		err := p.Produce(ctx.T)
