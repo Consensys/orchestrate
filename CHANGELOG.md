@@ -2,19 +2,19 @@
 
 ### Version 0.1.11
 
-*Unreleased*
+*Released on February 6th 2019*
 
 - [FIX] add `BlockNumber`, `BlockHash`, & `TxIndex` in receipt
 
 ### Version 0.1.10
 
-*Released on Januarty 30th 2019*
+*Released on January 30th 2019*
 
 - [FEAT] add support for `context.Context` in most services
 
 ### Version 0.1.9
 
-*Released on Januarty 27th 2019*
+*Released on January 27th 2019*
 
 - [FEAT] implement method `SetDecodedData` on `types.Log`
 
