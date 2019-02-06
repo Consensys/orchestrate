@@ -18,5 +18,8 @@ gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.6 h1:J6K3LTZgxK4pxqPrSWS
 gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.6/go.mod h1:iValIAHnErjlv5gSMZnN+8wG+lvJ2H4FnRV4xxAcuWo=
 gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.7 h1:Pua66iXeoSxUnHYoqhl5lmnlJ6t8IQdYRVBsFl6nfYY=
 gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.7/go.mod h1:iValIAHnErjlv5gSMZnN+8wG+lvJ2H4FnRV4xxAcuWo=
+gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.10 h1:vfiMdRtn7zHbZ/UIfKlxiXQR2iebCNPm5XouWUvN5Fg=
+gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.12 h1:9dA7HNGNEzzUPoXdxbTszwGTom7UnhuesmIu0r92JBc=
+gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.12/go.mod h1:iValIAHnErjlv5gSMZnN+8wG+lvJ2H4FnRV4xxAcuWo=
 golang.org/x/crypto v0.0.0-20190103213133-ff983b9c42bc h1:F5tKCVGp+MUAHhKp5MZtGqAlGX3+oCsiL1Q629FL90M=
 golang.org/x/crypto v0.0.0-20190103213133-ff983b9c42bc/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
