@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.2
+
+*Unreleased*
+
+- [FEAT] add docker image build and push in gitlab CI
+
 ### Version 0.1.1
 
 *Released on January 30th 2019*
