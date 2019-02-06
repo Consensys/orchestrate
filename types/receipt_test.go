@@ -53,6 +53,7 @@ func TestResetReceipt(t *testing.T) {
 	r := newReceipt(root, failed, cumulativeGasUsed)
 	r.Bloom.SetBytes([]byte{1})
 	r.TxHash.SetBytes([]byte{1})
+	r.BlockHash.SetBytes([]byte{1})
 	r.ContractAddress.SetBytes([]byte{1})
 	r.Logs = []*Log{&Log{}}
 	r.GasUsed = 1
@@ -117,6 +118,7 @@ func TestSetDecodedData(t *testing.T) {
 	cumulativeGasUsed := uint64(0)
 
 	r := newReceipt(root, failed, cumulativeGasUsed)
+	r.BlockHash.SetBytes([]byte{})
 
 	r.Logs = []*Log{&Log{}}
 

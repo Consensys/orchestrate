@@ -133,7 +133,12 @@ func LoadReceipt(pb *ethpb.Receipt, r *types.Receipt) error {
 		return err
 	}
 
-	h, err := hexutil.Decode(pb.GetTxHash())
+	txHash, err := hexutil.Decode(pb.GetTxHash())
+	if err != nil {
+		return err
+	}
+
+	blockHash, err := hexutil.Decode(pb.GetBlockHash())
 	if err != nil {
 		return err
 	}
@@ -158,7 +163,10 @@ func LoadReceipt(pb *ethpb.Receipt, r *types.Receipt) error {
 	r.ContractAddress.SetBytes(common.FromHex(pb.GetContractAddress()))
 	r.PostState = s
 	r.Status = pb.GetStatus()
-	r.TxHash.SetBytes(h)
+	r.TxHash.SetBytes(txHash)
+	r.BlockHash.SetBytes(blockHash)
+	r.BlockNumber = pb.GetBlockNumber()
+	r.TxIndex = pb.GetTxIndex()
 	r.Bloom.SetBytes(b)
 
 	r.GasUsed = pb.GetGasUsed()
@@ -176,6 +184,10 @@ func DumpReceipt(r *types.Receipt, pb *ethpb.Receipt) error {
 	pb.CumulativeGasUsed = r.CumulativeGasUsed
 
 	pb.TxHash = r.TxHash.Hex()
+	pb.BlockHash = r.BlockHash.Hex()
+	pb.BlockNumber = r.BlockNumber
+	pb.TxIndex = r.TxIndex
+	
 	pb.Bloom = common.ToHex(r.Bloom.Bytes())
 
 	pb.PostState = hexutil.Encode(r.PostState)

@@ -381,6 +381,9 @@ type ReceiptTest struct {
 	bloom             string
 	gasUsed           uint64
 	cumulativeGasUsed uint64
+	blockHash         string
+	txIndex           uint64
+	blockNumber       uint64
 }
 
 var nilReceiptTest = ReceiptTest{
@@ -390,6 +393,9 @@ var nilReceiptTest = ReceiptTest{
 	0,
 	EmptyHash,
 	EmptyBloom,
+	0,
+	0,
+	EmptyHash,
 	0,
 	0,
 }
@@ -429,6 +435,18 @@ func testReceiptEquality(r *types.Receipt, test *ReceiptTest, t *testing.T) {
 
 	if r.CumulativeGasUsed != test.cumulativeGasUsed {
 		t.Errorf("Expected CumulativeGasUsed to be %v but got %v", test.cumulativeGasUsed, r.CumulativeGasUsed)
+	}
+
+	if r.BlockHash.Hex() != test.blockHash {
+		t.Errorf("Expected BlockcHash to be %v but got %v", test.blockHash, r.BlockHash.Hex())
+	}
+
+	if r.BlockNumber != test.blockNumber {
+		t.Errorf("Expected BlockNumber to be %v but got %v", test.blockNumber, r.BlockNumber)
+	}
+
+	if r.TxIndex != test.txIndex {
+		t.Errorf("Expected TxIndex to be %v but got %v", test.txIndex, r.TxIndex)
 	}
 }
 
@@ -480,6 +498,9 @@ func newPbReceipt(test ReceiptTest) *ethpb.Receipt {
 		Bloom:             test.bloom,
 		GasUsed:           test.gasUsed,
 		CumulativeGasUsed: test.cumulativeGasUsed,
+		TxIndex:           test.txIndex,
+		BlockNumber:       test.blockNumber,
+		BlockHash:         test.blockHash,
 	}
 	for _, log := range test.logs {
 		r.Logs = append(r.Logs, newLogPb(log))
@@ -523,11 +544,14 @@ func TestLoadDumpReceipt(t *testing.T) {
 		bloom:             "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001a055690d9db80000",
 		gasUsed:           156,
 		cumulativeGasUsed: 14567,
+		txIndex:     3,
+		blockNumber: 2019236,
+		blockHash: "0x656c34545f90a730a19008c0e7a7cd4fb3895064b48d6d69761bd5abad681056",
 	}
 
 	err := LoadReceipt(newPbReceipt(test), r)
 	if err != nil {
-		t.Errorf("LoadLog: expected successful load but got %v", err)
+		t.Errorf("LoadReceipt: expected successful load but got %v", err)
 	}
 	pb = ethpb.Receipt{}
 

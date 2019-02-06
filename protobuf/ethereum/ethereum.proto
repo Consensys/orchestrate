@@ -42,11 +42,10 @@ message Log {
 // Transaction Receipt
 message Receipt {
     string txHash = 1; // DATA (32 Bytes) - Hash of the transaction. TODO: maybe not necessary
-    // string blockHash = 2; // DATA (32 Bytes) - Hash of the block where this transaction was in.
-    // string blockNumber = 3; // QUANTITY - Block number where this transaction was in.
-    // string transactionIndex = 4; // QUANTITY - Integer of the transactions index position in the block.
+    string blockHash = 2; // DATA (32 Bytes) - Hash of the block where this transaction was in.
+    uint64 blockNumber = 3; // QUANTITY - Block number where this transaction was in.
+    uint64 TxIndex = 4; // QUANTITY - Integer of the transactions index position in the block.
     
-    // string from = 5; // DATA (20 Bytes) - The address of the sender.
     string contractAddress = 6; // DATA (20 Bytes) - The contract address created, if the transaction was a contract creation
     
     string postState = 7; // DATA (32 Bytes) - State root hash after executing transaction

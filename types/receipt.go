@@ -1,6 +1,7 @@
 package types
 
 import (
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
@@ -14,13 +15,17 @@ type Log struct {
 type Receipt struct {
 	types.Receipt
 	Logs []*Log
+
+	BlockHash   common.Hash
+	BlockNumber uint64
+	TxIndex     uint64
 }
 
 // NewReceipt creates a new receipt
 func newReceipt(root []byte, failed bool, cumulativeGasUsed uint64) *Receipt {
 	return &Receipt{
-		*types.NewReceipt(root, failed, cumulativeGasUsed),
-		make([]*Log, 0),
+		Receipt: *types.NewReceipt(root, failed, cumulativeGasUsed),
+		Logs:    make([]*Log, 0),
 	}
 }
 
@@ -33,6 +38,9 @@ func (r *Receipt) reset() {
 	r.TxHash.SetBytes([]byte{})
 	r.ContractAddress.SetBytes([]byte{})
 	r.GasUsed = 0
+	r.BlockHash.SetBytes([]byte{})
+	r.BlockNumber = 0
+	r.TxIndex = 0
 }
 
 // SetDecodedData set DecodedData to log

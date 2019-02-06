@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.11
+
+*Unreleased*
+
+- [FIX] add `BlockNumber`, `BlockHash`, & `TxIndex` in receipt
+
 ### Version 0.1.10
 
 *Released on Januarty 30th 2019*
