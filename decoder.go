@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/big"
 	"reflect"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
@@ -14,100 +15,81 @@ import (
 // FormatIndexedArg transforms a data to string
 func FormatIndexedArg(t abi.Type, arg common.Hash) (string, error) {
 
-	switch {
-	case t.Type == reflect.TypeOf(&big.Int{}):
+	switch t.T {
+	case abi.BoolTy, abi.StringTy:
+		return fmt.Sprintf("%v", arg), nil
+	case abi.IntTy, abi.UintTy:
 		num := new(big.Int).SetBytes(arg[:])
 		return fmt.Sprintf("%v", num), nil
-	case t.Type == reflect.TypeOf(common.Address{}):
+	case abi.AddressTy:
 		return common.HexToAddress(arg.Hex()).Hex(), nil
+	case abi.FixedBytesTy:
+		return fmt.Sprintf("%v", hexutil.Encode(arg[common.HashLength-t.Type.Size():])), nil
+	case abi.BytesTy, abi.ArrayTy, abi.TupleTy:
 	default:
-		switch {
-		case t.T == abi.FixedBytesTy:
-			return fmt.Sprintf("%v", hexutil.Encode(arg[common.HashLength-t.Type.Size():])), nil
-		}
 		return fmt.Sprintf("%v", arg), nil
 	}
+	return "", fmt.Errorf("unable to decode %v type", t.Kind)
+}
+
+// ArrayToByteSlice creates a new byte slice with the exact same size as value
+// and copies the bytes in value to the new slice.
+func ArrayToByteSlice(value reflect.Value) reflect.Value {
+	slice := reflect.MakeSlice(reflect.TypeOf([]byte{}), value.Len(), value.Len())
+	reflect.Copy(slice, value)
+	return slice
+}
+
+// FormatNonIndexedArrayArg transforms a data to string
+func FormatNonIndexedArrayArg(t abi.Type, arg interface{}) (string, error) {
+
+	var elementaryType byte
+	switch {
+	case strings.Contains(fmt.Sprintf("%s", t.Elem), "int"):
+		elementaryType = abi.IntTy
+	case strings.Contains(fmt.Sprintf("%s", t.Elem), "uint"):
+		elementaryType = abi.UintTy
+	case strings.Contains(fmt.Sprintf("%s", t.Elem), "bool"):
+		elementaryType = abi.BoolTy
+	case strings.Contains(fmt.Sprintf("%s", t.Elem), "address"):
+		elementaryType = abi.AddressTy
+	case strings.Contains(fmt.Sprintf("%s", t.Elem), "string"):
+		elementaryType = abi.StringTy
+	case fmt.Sprintf("%s", t.Elem) == "bytes":
+		elementaryType = abi.BytesTy
+	case strings.Contains(fmt.Sprintf("%s", t.Elem), "bytes"):
+		elementaryType = abi.FixedBytesTy
+	}
+
+	var arrayArgString []string
+	for i := 0; i < t.Size; i++ {
+		argString, _ := FormatNonIndexedArg(abi.Type{T: elementaryType}, reflect.ValueOf(arg).Index(i).Interface())
+		arrayArgString = append(arrayArgString, argString)
+	}
+
+	return "[" + strings.Join(arrayArgString, ",") + "]", nil
 }
 
 // FormatNonIndexedArg transforms a data to string
 func FormatNonIndexedArg(t abi.Type, arg interface{}) (string, error) {
-	switch {
-	case t.Type == reflect.TypeOf(&big.Int{}):
+
+	switch t.T {
+	case abi.IntTy, abi.UintTy, abi.BoolTy, abi.StringTy:
 		return fmt.Sprintf("%v", arg), nil
-	case t.Type == reflect.TypeOf(common.Address{}):
+	case abi.AddressTy:
 		return arg.(common.Address).Hex(), nil
+	case abi.FixedBytesTy:
+		slice := ArrayToByteSlice(reflect.ValueOf(arg))
+		return hexutil.Encode(slice.Bytes()), nil
+	case abi.BytesTy:
+		return hexutil.Encode(reflect.ValueOf(arg).Bytes()), nil
+	case abi.ArrayTy:
+		return FormatNonIndexedArrayArg(t, arg)
+	case abi.TupleTy:
 	default:
-		switch v := arg.(type) {
-		case [1]byte:
-			return hexutil.Encode(v[:]), nil
-		case [2]byte:
-			return hexutil.Encode(v[:]), nil
-		case [3]byte:
-			return hexutil.Encode(v[:]), nil
-		case [4]byte:
-			return hexutil.Encode(v[:]), nil
-		case [5]byte:
-			return hexutil.Encode(v[:]), nil
-		case [6]byte:
-			return hexutil.Encode(v[:]), nil
-		case [7]byte:
-			return hexutil.Encode(v[:]), nil
-		case [8]byte:
-			return hexutil.Encode(v[:]), nil
-		case [9]byte:
-			return hexutil.Encode(v[:]), nil
-		case [10]byte:
-			return hexutil.Encode(v[:]), nil
-		case [11]byte:
-			return hexutil.Encode(v[:]), nil
-		case [12]byte:
-			return hexutil.Encode(v[:]), nil
-		case [13]byte:
-			return hexutil.Encode(v[:]), nil
-		case [14]byte:
-			return hexutil.Encode(v[:]), nil
-		case [15]byte:
-			return hexutil.Encode(v[:]), nil
-		case [16]byte:
-			return hexutil.Encode(v[:]), nil
-		case [17]byte:
-			return hexutil.Encode(v[:]), nil
-		case [18]byte:
-			return hexutil.Encode(v[:]), nil
-		case [19]byte:
-			return hexutil.Encode(v[:]), nil
-		case [20]byte:
-			return hexutil.Encode(v[:]), nil
-		case [21]byte:
-			return hexutil.Encode(v[:]), nil
-		case [22]byte:
-			return hexutil.Encode(v[:]), nil
-		case [23]byte:
-			return hexutil.Encode(v[:]), nil
-		case [24]byte:
-			return hexutil.Encode(v[:]), nil
-		case [25]byte:
-			return hexutil.Encode(v[:]), nil
-		case [26]byte:
-			return hexutil.Encode(v[:]), nil
-		case [27]byte:
-			return hexutil.Encode(v[:]), nil
-		case [28]byte:
-			return hexutil.Encode(v[:]), nil
-		case [29]byte:
-			return hexutil.Encode(v[:]), nil
-		case [30]byte:
-			return hexutil.Encode(v[:]), nil
-		case [31]byte:
-			return hexutil.Encode(v[:]), nil
-		case [32]byte:
-			return hexutil.Encode(v[:]), nil
-		case []byte:
-			return hexutil.Encode(v[:]), nil
-		}
 		return fmt.Sprintf("%v", arg), nil
 	}
-
+	return "", fmt.Errorf("unable to decode %v type", t.Kind)
 }
 
 // Decode event data to string
