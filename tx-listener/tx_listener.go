@@ -2,20 +2,31 @@ package listener
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 	"sync"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
-// TxListenerEthClient is a minimal EthClient interface required by a TxListener
-type TxListenerEthClient interface {
-	// BlockByNumber retrieve a block by its number
-	BlockByNumber(ctx context.Context, number *big.Int) (*types.Block, error)
+// TxListenerReceipt encapsulates a receipt returned by the listener
+type TxListenerReceipt struct {
+	Receipt              *types.Receipt
+	ChainID              *big.Int
+	BlockNumber, TxIndex uint64
+}
 
-	// TransactionReceipt retrieve a transaction receipt given a transaction hash
-	TransactionReceipt(ctx context.Context, hash common.Hash) (*types.Receipt, error)
+// TxListenerError is what is provided to the user when an error occurs.
+// It wraps an error and includes chainID
+type TxListenerError struct {
+	ChainID *big.Int
+	Err     error
+}
+
+func (ce TxListenerError) Error() string {
+	return fmt.Sprintf("ethereum: error while listening chain %s: %s", hexutil.EncodeBig(ce.ChainID))
 }
 
 // TxListener is an interface to listen to a Ethereum blockchain activity

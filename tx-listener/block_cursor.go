@@ -5,15 +5,8 @@ import (
 	"math/big"
 	"sync"
 
-	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/core/types"
 )
-
-// TxListenerError is what is provided to the user when an error occurs.
-type TxListenerError struct {
-	ChainID *big.Int
-	Err     error
-}
 
 // Progress stores information about current cursor position listening to a chain
 type Progress struct {
@@ -28,18 +21,6 @@ type BlockCursor interface {
 	Set(blockNumber uint64)
 	Progress(ctx context.Context) *Progress
 	Close()
-}
-
-// TxListenerEthClient is a minimal EthClient interface required by a TxListener
-type TxListenerEthClient interface {
-	// BlockByNumber retrieve a block by its number
-	BlockByNumber(ctx context.Context, number *big.Int) (*types.Block, error)
-
-	// SyncProgress retrieves client current progress of the sync algorithm.
-	SyncProgress(ctx context.Context) (*ethereum.SyncProgress, error)
-
-	// NetworkID returns the network ID
-	NetworkID(ctx context.Context) (*big.Int, error)
 }
 
 type blockCursor struct {
