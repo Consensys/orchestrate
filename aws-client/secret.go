@@ -98,8 +98,28 @@ func (sec *Secret) GetValue() (*secretsmanager.GetSecretValueOutput, error) {
 	}
 
 	return res, nil	
+}
+
+// Update the secret value stored in the aws secret manager
+func (sec *Secret) Update() (*secretsmanager.PutSecretValueOutput, error) {
+
+	if sec.client == nil { return nil, fmt.Errorf("Client not set")}
+
+	input := secretsmanager.PutSecretValueInput{
+		ClientRequestToken: aws.String("Classic AWS_TOKEN"),
+		SecretId:           aws.String(sec.key),
+		SecretString:       aws.String(sec.value),
+	}
+
+	res, err := sec.client.PutSecretValue(&input)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil	
 
 }
+
 
 // Delete remove the key from the secret manager
 func (sec *Secret) Delete() (*secretsmanager.DeleteSecretOutput, error) {
