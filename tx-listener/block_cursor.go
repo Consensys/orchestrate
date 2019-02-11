@@ -312,7 +312,7 @@ func (bc *BlockCursor) fetchBlock(ctx context.Context, blockNumber int64) *Futur
 
 		// Block should be available
 		if block == nil {
-			bFuture.err <- ErrIncompleteResponse
+			bFuture.err <- BlockMissingError(blockNumber)
 			return
 		}
 
@@ -365,7 +365,7 @@ func (bc *BlockCursor) fetchReceipt(ctx context.Context, txHash common.Hash) *Fu
 		}
 
 		if receipt == nil {
-			future.err <- ErrIncompleteResponse
+			future.err <- ReceiptMissingError(txHash.Hex())
 			return
 		}
 
