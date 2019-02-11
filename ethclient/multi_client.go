@@ -28,8 +28,8 @@ func NewMultiClient(clients []*EthClient) *MultiEthClient {
 	return &MultiEthClient{ecRegistry}
 }
 
-// MutiDial connects a multi-client to the given URLs.
-func MutiDial(rawurls []string) (*MultiEthClient, error) {
+// MultiDial connects a multi-client to the given URLs.
+func MultiDial(rawurls []string) (*MultiEthClient, error) {
 	return MultiDialContext(context.Background(), rawurls)
 }
 
