@@ -49,7 +49,7 @@ func (ec *MockEthClient) BlockByNumber(ctx context.Context, chainID *big.Int, nu
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
-	case <-time.After(47 * time.Millisecond):
+	case <-time.After(7 * time.Millisecond):
 		ec.mux.RLock()
 		defer ec.mux.RUnlock()
 
