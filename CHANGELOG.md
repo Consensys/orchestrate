@@ -2,7 +2,7 @@
 
 ### Version 0.1.2
 
-*Unreleased*
+*Released on February 11th 2019*
 
 - [FEAT] add docker image build and push in gitlab CI
 
