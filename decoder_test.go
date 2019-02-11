@@ -281,6 +281,42 @@ func TestDecode(t *testing.T) {
 				"array": "[true,false,true]",
 			},
 		},
+		{
+			[]byte(`{"anonymous":false,"inputs":[{"indexed":false,"name":"array","type":"int256[3]"}],"name":"EventTest","type":"event"}`),
+			&types.Log{
+				Data: hexutil.MustDecode("0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000b000000000000000000000000000000000000000000000000000000000000006f"),
+				Topics: []common.Hash{
+					common.HexToHash("0x4e9f8c6a9ba6c36d9f69bdaeda487b34fcba584137b513dd615a59ded56c939a"),
+				},
+			},
+			map[string]string{
+				"array": "[1,11,111]",
+			},
+		},
+		{
+			[]byte(`{"anonymous":false,"inputs":[{"indexed":false,"name":"array","type":"int256[3]"}],"name":"EventTest","type":"event"}`),
+			&types.Log{
+				Data: hexutil.MustDecode("0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff91"),
+				Topics: []common.Hash{
+					common.HexToHash("0x4e9f8c6a9ba6c36d9f69bdaeda487b34fcba584137b513dd615a59ded56c939a"),
+				},
+			},
+			map[string]string{
+				"array": "[-1,-11,-111]",
+			},
+		},
+		{
+			[]byte(`{"anonymous":false,"inputs":[{"indexed":false,"name":"array","type":"uint256[3]"}],"name":"EventTest","type":"event"}`),
+			&types.Log{
+				Data: hexutil.MustDecode("0x0000000000000000000000000000000000000000000000000000000000000009000000000000000000000000000000000000000000000000000000000000006300000000000000000000000000000000000000000000000000000000000003e7"),
+				Topics: []common.Hash{
+					common.HexToHash("0x39cc9b81f311e9bdf9c08720512a61f27e13fd23c9f03938c704e02a6145c45d"),
+				},
+			},
+			map[string]string{
+				"array": "[9,99,999]",
+			},
+		},
 	}
 
 	for i, test := range testSet {
@@ -295,3 +331,4 @@ func TestDecode(t *testing.T) {
 
 	}
 }
+

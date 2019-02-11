@@ -45,18 +45,19 @@ func FormatNonIndexedArrayArg(t abi.Type, arg interface{}) (string, error) {
 
 	var elementaryType byte
 	switch {
-	case strings.Contains(fmt.Sprintf("%s", t.Elem), "int"):
-		elementaryType = abi.IntTy
 	case strings.Contains(fmt.Sprintf("%s", t.Elem), "uint"):
 		elementaryType = abi.UintTy
+	case strings.Contains(fmt.Sprintf("%s", t.Elem), "int"):
+		elementaryType = abi.IntTy
 	case strings.Contains(fmt.Sprintf("%s", t.Elem), "bool"):
 		elementaryType = abi.BoolTy
 	case strings.Contains(fmt.Sprintf("%s", t.Elem), "address"):
 		elementaryType = abi.AddressTy
-	case strings.Contains(fmt.Sprintf("%s", t.Elem), "string"):
-		elementaryType = abi.StringTy
-	case fmt.Sprintf("%s", t.Elem) == "bytes":
-		elementaryType = abi.BytesTy
+	// Case that should not be possible
+	// case strings.Contains(fmt.Sprintf("%s", t.Elem), "string"):
+	// 	elementaryType = abi.StringTy
+	// case fmt.Sprintf("%s", t.Elem) == "bytes":
+	// 	elementaryType = abi.BytesTy
 	case strings.Contains(fmt.Sprintf("%s", t.Elem), "bytes"):
 		elementaryType = abi.FixedBytesTy
 	}
