@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.10
+
+*Released on February 11th 2019*
+
+- [FEAT] Impleemnt method `Networks` on `MultiEthClient`
+
 ### Version 0.1.9
 
 *Released on February 11th 2019*

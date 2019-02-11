@@ -16,10 +16,10 @@ type MultiEthClient struct {
 }
 
 // NewMultiClient creates client that can connect to multiple chains
-func NewMultiClient(clients []*EthClient) *MultiEthClient {
+func NewMultiClient(ctx context.Context, clients []*EthClient) *MultiEthClient {
 	ecRegistry := make(map[string]*EthClient)
 	for _, ec := range clients {
-		chainID, err := ec.NetworkID(context.Background())
+		chainID, err := ec.NetworkID(ctx)
 		if err != nil {
 			panic(err)
 		}
@@ -43,7 +43,19 @@ func MultiDialContext(ctx context.Context, rawurls []string) (*MultiEthClient, e
 		}
 		clients = append(clients, c)
 	}
-	return NewMultiClient(clients), nil
+	return NewMultiClient(ctx, clients), nil
+}
+
+// Networks return networks ID multi client is connected to
+func (mec *MultiEthClient) Networks(ctx context.Context) []*big.Int {
+	networks := []*big.Int{}
+	for _, ec := range mec.ecRegistry {
+		chain, err := ec.NetworkID(ctx)
+		if err != nil {
+			networks = append(networks, chain)
+		}
+	}
+	return networks
 }
 
 // HeaderByHash returns the block header with the given hash.
