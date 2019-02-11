@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.7
+
+*Unreleased*
+
+- [FEAT] Implement `listener.TxListener` a multichain transaction listener
+
 ### Version 0.1.6
 
 *Released on February 11th 2019*
