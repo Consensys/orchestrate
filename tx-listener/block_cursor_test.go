@@ -49,7 +49,7 @@ func (ec *MockEthClient) BlockByNumber(ctx context.Context, chainID *big.Int, nu
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
-	case <-time.After(50 * time.Millisecond):
+	case <-time.After(47 * time.Millisecond):
 		ec.mux.RLock()
 		defer ec.mux.RUnlock()
 
@@ -75,7 +75,7 @@ func (ec *MockEthClient) SyncProgress(ctx context.Context, chainID *big.Int) (*e
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
-	case <-time.After(5 * time.Millisecond):
+	case <-time.After(2 * time.Millisecond):
 		ec.mux.RLock()
 		defer ec.mux.RUnlock()
 		return &ethereum.SyncProgress{
@@ -96,7 +96,7 @@ func (ec *MockEthClient) TransactionReceipt(ctx context.Context, chainID *big.In
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
-	case <-time.After(5 * time.Millisecond):
+	case <-time.After(2 * time.Millisecond):
 		ec.mux.RLock()
 		defer ec.mux.RUnlock()
 		for _, block := range ec.blocks[:ec.head+1] {
@@ -425,7 +425,7 @@ func TestBlockCursor(t *testing.T) {
 	}
 
 	// Sleep waiting for Cursor to start
-	time.Sleep(60 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 
 	next = bc.Next(context.Background())
 	if !next {

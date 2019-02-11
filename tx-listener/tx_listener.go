@@ -91,14 +91,14 @@ func (l *txListener) Listen(chainID *big.Int, blockNumber int64, txIndex int64, 
 	// Register new listener
 	err := l.addListener(listener)
 	if err != nil {
-		listener.Close()
+		close(listener.closed)
 		return nil, err
 	}
 
 	// Start listener in a separate goroutine
 	log.WithFields(log.Fields{
 		"Chain": chainID.Text(16),
-	}).Infof("Start listening from blockNumber=%v txIndex=%v", blockNumber, txIndex)
+	}).Infof("tx-listener: start listening from blockNumber=%v txIndex=%v", blockNumber, txIndex)
 
 	l.wait.Add(1)
 	go listener.feeder()
@@ -149,7 +149,7 @@ func (l *txListener) Progress(ctx context.Context) map[string]*Progress {
 func (l *txListener) Close() {
 	l.closeOnce.Do(func() {
 		// Close listener
-		log.Infof("Closing TxListener...")
+		log.Infof("tx-listener: closing...")
 
 		// Close every channel
 		l.mux.Lock()
@@ -166,7 +166,7 @@ func (l *txListener) Close() {
 		close(l.errors)
 
 		// Close listener
-		log.Infof("TxListener closed")
+		log.Infof("tx-listener: closed")
 	})
 }
 
@@ -250,7 +250,7 @@ func (l *singleChainListener) Close() {
 		// Close listener
 		log.WithFields(log.Fields{
 			"Chain": l.t.ChainID().Text(16),
-		}).Infof("Closing listener...")
+		}).Infof("tx-listener: closing...")
 		close(l.closed)
 	})
 }
@@ -258,7 +258,7 @@ func (l *singleChainListener) Close() {
 func (l *singleChainListener) feeder() {
 	log.WithFields(log.Fields{
 		"Chain": l.t.ChainID().Text(16),
-	}).Debugf("tx-listener: start listening loop")
+	}).Debugf("tx-listener: start loop")
 
 feedingLoop:
 	for {
@@ -305,14 +305,14 @@ feedingLoop:
 			} else {
 				log.WithFields(log.Fields{
 					"Chain": l.t.ChainID().Text(16),
-				}).Debugf("tx-listener: New block %v", l.cur.Current().Hash().Hex())
+				}).Debugf("tx-listener: new block %v", l.cur.Current().Hash().Hex())
 			}
 		}
 	}
 
 	log.WithFields(log.Fields{
 		"Chain": l.t.ChainID().Text(16),
-	}).Debugf("tx-listener: left listening loop")
+	}).Debugf("tx-listener: left loop")
 
 	// Close cursor if not nil
 	if l.cur != nil {
@@ -326,7 +326,7 @@ feedingLoop:
 
 	log.WithFields(log.Fields{
 		"Chain": l.t.ChainID().Text(16),
-	}).Infof("Listener closed...")
+	}).Infof("tx-listener: closed")
 
 	l.txlistener.wait.Done()
 }
