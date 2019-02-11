@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.8
+
+*Released on February 11th 2019*
+
+- [FEAT] Implement `BlockByNumber` on multichain client
+  
 ### Version 0.1.7
 
 *Released on February 11th 2019*

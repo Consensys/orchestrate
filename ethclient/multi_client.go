@@ -65,6 +65,16 @@ func (mec *MultiEthClient) HeaderByNumber(ctx context.Context, chainID *big.Int,
 	return ec.HeaderByNumber(ctx, number)
 }
 
+// BlockByNumber returns a block from the current canonical chain. If number is
+// nil, the latest known header is returned.
+func (mec *MultiEthClient) BlockByNumber(ctx context.Context, chainID *big.Int, number *big.Int) (*types.Block, error) {
+	ec, ok := mec.getClient(chainID)
+	if !ok {
+		return nil, fmt.Errorf("No client registered for %v", chainID)
+	}
+	return ec.BlockByNumber(ctx, number)
+}
+
 // TransactionByHash returns the transaction with the given hash.
 func (mec *MultiEthClient) TransactionByHash(ctx context.Context, chainID *big.Int, hash common.Hash) (tx *types.Transaction, isPending bool, err error) {
 	ec, ok := mec.getClient(chainID)
