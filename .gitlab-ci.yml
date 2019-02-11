@@ -1,13 +1,9 @@
-# Use latest Golang image for new perks and shiny features
-image: golang:latest
-
-cache:
-  paths:
-    - /apt-cache
-    - /root/go
-
 stages:
   - test
+  - build
+
+services:
+  - docker:dind
 
 before_script:
   # Add deploy ssh key so we can import go packages from private GitLab repo
@@ -25,15 +21,77 @@ before_script:
   - make tools
 
 test:
+  image: golang:latest
   stage: test
   coverage: /^total:.*\s(\d+.\d+)%/
   script:
     - make run-coverage
+  cache:
+    paths:
+      - /apt-cache
+      - /root/go
 
 test-lint:
+  image: golang:latest
   stage: test
   script:
     - make fmt-check
     - make misspell-check
     - make race
     - make lint
+  cache:
+    paths:
+      - /apt-cache
+      - /root/go
+
+build-on-branch:
+  image: docker:stable
+  stage: build
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+  script:
+    - export SSH_KEY=${SSH_DEPLOY_CORE_STACK}
+    # Build image following http://label-schema.org/rc1/ label convention convention
+    - docker build --build-arg SSH_KEY --label org.label-schema.build-date=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --label org.label-schema.name="${CI_PROJECT_NAME}" --label org.label-schema.version="dirty" --label org.label-schema.vcs-url="${CI_PROJECT_URL}" --label org.label-schema.vcs-ref="${CI_COMMIT_SHA:0:8}" --label org.label-schema.vendor="ConsenSys France" -t ${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG} .
+    # Push images
+    - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}
+  after_script:
+    - docker logout $CI_REGISTRY
+  only:
+    - /^dev[a-zA-Z0-9\/-]*$/
+    - /^feature/[a-zA-Z0-9\/-]*$/
+    - /^fix/[a-zA-Z0-9\/-]*$/
+
+build-on-master:
+  image: docker:stable
+  stage: build
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+  script:
+    - export SSH_KEY=${SSH_DEPLOY_CORE_STACK}
+    # Build image following http://label-schema.org/rc1/ label convention convention
+    - docker build --build-arg SSH_KEY --label org.label-schema.build-date=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --label org.label-schema.name="${CI_PROJECT_NAME}" --label org.label-schema.version="dirty" --label org.label-schema.vcs-url="${CI_PROJECT_URL}" --label org.label-schema.vcs-ref="${CI_COMMIT_SHA:0:8}" --label org.label-schema.vendor="ConsenSys France" -t ${CI_REGISTRY_IMAGE}:latest .
+    # Push images
+    - docker push ${CI_REGISTRY_IMAGE}:latest
+  after_script:
+    - docker logout $CI_REGISTRY
+  only:
+    - master
+
+
+build-on-tag:
+  image: docker:stable
+  stage: build
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+  script:
+    - export SSH_KEY=${SSH_DEPLOY_CORE_STACK}
+    # Build image following http://label-schema.org/rc1/ label convention convention
+    - docker build --build-arg SSH_KEY --label org.label-schema.build-date=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --label org.label-schema.name="${CI_PROJECT_NAME}" --label org.label-schema.version="${CI_COMMIT_TAG}" --label org.label-schema.vcs-url="${CI_PROJECT_URL}" --label org.label-schema.vcs-ref="${CI_COMMIT_SHA:0:8}" --label org.label-schema.vendor="ConsenSys France" -t ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG} .
+    # Push images
+    - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}
+  after_script:
+    - docker logout $CI_REGISTRY
+  only:
+    refs:
+      - tags
