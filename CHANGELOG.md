@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.1.11
+
+*Released on February 12th 2019*
+
+- [FIX] fix `ChainTracker` to use `HeaderByNumber` instead of `SyncProgress`
+
+
 ### Version 0.1.10
 
 *Released on February 11th 2019*

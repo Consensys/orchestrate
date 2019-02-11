@@ -50,8 +50,8 @@ func MultiDialContext(ctx context.Context, rawurls []string) (*MultiEthClient, e
 func (mec *MultiEthClient) Networks(ctx context.Context) []*big.Int {
 	networks := []*big.Int{}
 	for _, ec := range mec.ecRegistry {
-		chain, err := ec.NetworkID(ctx)
-		if err != nil {
+		chain, _ := ec.NetworkID(ctx)
+		if chain != nil {
 			networks = append(networks, chain)
 		}
 	}

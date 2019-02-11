@@ -4,7 +4,6 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 )
@@ -18,5 +17,5 @@ type EthClient interface {
 	TransactionReceipt(ctx context.Context, chainID *big.Int, txHash common.Hash) (*types.Receipt, error)
 
 	// SyncProgress retrieves client current progress of the sync algorithm.
-	SyncProgress(ctx context.Context, chainID *big.Int) (*ethereum.SyncProgress, error)
+	HeaderByNumber(ctx context.Context, chainID *big.Int, number *big.Int) (*types.Header, error)
 }

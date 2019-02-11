@@ -90,14 +90,14 @@ func (t *BaseTracker) ChainID() *big.Int {
 
 // HighestBlock returns highest mined block on the tracked chain
 func (t *BaseTracker) HighestBlock(ctx context.Context) (int64, error) {
-	progress, err := t.ec.SyncProgress(ctx, t.chainID)
+	header, err := t.ec.HeaderByNumber(ctx, t.chainID, nil)
 	if err != nil {
 		return 0, err
 	}
-	if progress.CurrentBlock <= t.depth {
+	if header.Number.Uint64() <= t.depth {
 		return 0, nil
 	}
-	return int64(progress.CurrentBlock - t.depth), nil
+	return int64(header.Number.Uint64() - t.depth), nil
 }
 
 // Future is an element used to start	 a task and retrieve its result later

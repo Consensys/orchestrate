@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
@@ -49,13 +48,20 @@ func (ec *MockEthClient) BlockByNumber(ctx context.Context, chainID *big.Int, nu
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
-	case <-time.After(7 * time.Millisecond):
+	case <-time.After(2 * time.Millisecond):
 		ec.mux.RLock()
 		defer ec.mux.RUnlock()
 
+		if number == nil {
+			number = big.NewInt(int64(ec.head))
+		}
+
 		if number.Uint64() <= ec.head {
 			block := ec.blocks[number.Uint64()]
-			return block.WithBody(block.Transactions(), block.Uncles()), nil
+			header := types.CopyHeader(block.Header())
+			header.Number = number
+			blck := types.NewBlockWithHeader(header)
+			return blck.WithBody(block.Transactions(), block.Uncles()), nil
 		}
 
 		if number.Uint64() > ec.head {
@@ -65,7 +71,7 @@ func (ec *MockEthClient) BlockByNumber(ctx context.Context, chainID *big.Int, nu
 	}
 }
 
-func (ec *MockEthClient) SyncProgress(ctx context.Context, chainID *big.Int) (*ethereum.SyncProgress, error) {
+func (ec *MockEthClient) HeaderByNumber(ctx context.Context, chainID *big.Int, number *big.Int) (*types.Header, error) {
 	_, ok := ctx.Value(MockKey("error")).(error)
 	if ok {
 		return nil, fmt.Errorf("MockEthClient: Error on SyncProgress")
@@ -78,11 +84,22 @@ func (ec *MockEthClient) SyncProgress(ctx context.Context, chainID *big.Int) (*e
 	case <-time.After(2 * time.Millisecond):
 		ec.mux.RLock()
 		defer ec.mux.RUnlock()
-		return &ethereum.SyncProgress{
-			CurrentBlock:  ec.head,
-			HighestBlock:  ec.head,
-			StartingBlock: 0,
-		}, nil
+		if number == nil {
+			number = big.NewInt(int64(ec.head))
+		}
+
+		if number.Uint64() <= ec.head {
+			block := ec.blocks[number.Uint64()]
+			header := types.CopyHeader(block.Header())
+			header.Number = number
+			return header, nil
+		}
+
+		if number.Uint64() > ec.head {
+			return nil, nil
+		}
+
+		return nil, fmt.Errorf("Error")
 	}
 }
 
@@ -132,19 +149,14 @@ func TestMockEthClient(t *testing.T) {
 		t.Errorf("MockEthClient #1: Got %v %v", b, err)
 	}
 
-	h, err := mec.SyncProgress(context.Background(), big.NewInt(1))
-	if h.CurrentBlock != 0 || err != nil {
-		t.Errorf("MockEthClient #1: Head at %v", h.CurrentBlock)
+	h, err := mec.HeaderByNumber(context.Background(), big.NewInt(1), big.NewInt(0))
+	if h.Number.Int64() != 0 || err != nil {
+		t.Errorf("MockEthClient #1: Head at %v", h.Number.Int64())
 	}
 
 	b, err = mec.BlockByNumber(context.Background(), big.NewInt(1), big.NewInt(1))
 	if b != nil || err != nil {
 		t.Errorf("MockEthClient #2: Got %v %v", b, err)
-	}
-
-	h, err = mec.SyncProgress(context.Background(), big.NewInt(1))
-	if h.CurrentBlock != 0 || err != nil {
-		t.Errorf("MockEthClient #2: Head at %v", h.CurrentBlock)
 	}
 
 	mec.mine()
@@ -154,9 +166,9 @@ func TestMockEthClient(t *testing.T) {
 		t.Errorf("MockEthClient #3: Got %v %v", b, err)
 	}
 
-	h, err = mec.SyncProgress(context.Background(), big.NewInt(1))
-	if h.CurrentBlock != 1 || err != nil {
-		t.Errorf("MockEthClient #3: Head at %v", h.CurrentBlock)
+	h, err = mec.HeaderByNumber(context.Background(), big.NewInt(1), nil)
+	if h.Number.Int64() != 1 || err != nil {
+		t.Errorf("MockEthClient #3: Head at %v", h.Number.Int64())
 	}
 
 	ctx := context.WithValue(context.Background(), MockKey("error"), fmt.Errorf("Error"))
