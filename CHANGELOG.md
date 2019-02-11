@@ -1,7 +1,7 @@
 # CHANGELOG
 
-### Version 0.0.1
+### Version 0.1.0
 
-*Released on February 11th 2019*
+*Unreleased*
 
 - [CORE] Implement build on CI (boilerplate merge)
