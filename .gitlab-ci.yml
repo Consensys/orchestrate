@@ -1,14 +1,9 @@
-# Use latest Golang image for new perks and shiny features
-image: golang:latest
-
-cache:
-  paths:
-    - /apt-cache
-    - /root/go
-
 stages:
   - test
   - build
+
+services:
+  - docker:dind
 
 before_script:
   # Add deploy ssh key so we can import go packages from private GitLab repo
@@ -26,18 +21,28 @@ before_script:
   - make tools
 
 test:
+  image: golang:latest
   stage: test
   coverage: /^total:.*\s(\d+.\d+)%/
   script:
     - make run-coverage
+  cache:
+    paths:
+      - /apt-cache
+      - /root/go
 
 test-lint:
+  image: golang:latest
   stage: test
   script:
     - make fmt-check
     - make misspell-check
     - make race
     - make lint
+  cache:
+    paths:
+      - /apt-cache
+      - /root/go
 
 build-on-branch:
   image: docker:stable
