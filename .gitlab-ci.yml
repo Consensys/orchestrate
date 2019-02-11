@@ -8,6 +8,7 @@ cache:
 
 stages:
   - test
+  - build
 
 before_script:
   # Add deploy ssh key so we can import go packages from private GitLab repo
