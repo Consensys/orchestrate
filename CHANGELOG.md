@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.9
+
+*Released on February 11th 2019*
+
+- [FIX] Fix typo in `MultiDial`
+  
 ### Version 0.1.8
 
 *Released on February 11th 2019*
