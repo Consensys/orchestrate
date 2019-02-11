@@ -324,9 +324,9 @@ feedingLoop:
 		l.txlistener.removeListener(l)
 	}
 
-	l.txlistener.wait.Done()
-
 	log.WithFields(log.Fields{
 		"Chain": l.t.ChainID().Text(16),
 	}).Infof("Listener closed...")
+
+	l.txlistener.wait.Done()
 }
