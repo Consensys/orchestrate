@@ -4,7 +4,7 @@
 
 *Released on February 11th 2019*
 
-- [FEAT] Implement `BlockByNumber` on multichain client
+- [FEAT] Implement `BlockByNumber` & `SyncProgress` on multichain client
   
 ### Version 0.1.7
 

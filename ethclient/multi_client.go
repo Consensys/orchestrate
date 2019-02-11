@@ -173,6 +173,15 @@ func (mec *MultiEthClient) SendRawTransaction(ctx context.Context, chainID *big.
 	return ec.SendRawTransaction(ctx, raw)
 }
 
+// SyncProgress retrieves client current progress of the sync algorithm.
+func (mec *MultiEthClient) SyncProgress(ctx context.Context, chainID *big.Int) (*ethereum.SyncProgress, error) {
+	ec, ok := mec.getClient(chainID)
+	if !ok {
+		return nil, fmt.Errorf("No client registered for %v", chainID)
+	}
+	return ec.SyncProgress(ctx)
+}
+
 func (mec *MultiEthClient) getClient(chainID *big.Int) (*EthClient, bool) {
 	ec, ok := mec.ecRegistry[chainIDToString(chainID)]
 	return ec, ok
