@@ -2,50 +2,380 @@ package listener
 
 import (
 	"context"
+	"fmt"
 	"math/big"
+	"sync"
+	"time"
 
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
-// BlockCursor allows to retrieve a new block
-type BlockCursor interface {
-	Next() (*types.Block, error)
-	Set(pos *big.Int)
+// TxListenerReceipt contains useful information about a receipt
+type TxListenerReceipt struct {
+	// Chain receipt has been read from
+	ChainID *big.Int
+
+	// Go-Ethereum receipt
+	types.Receipt
+
+	// Position of the receipt
+	BlockHash   common.Hash
+	BlockNumber int64
+	TxHash      common.Hash
+	TxIndex     uint64
 }
 
-type blockCursor struct {
-	c TxListenerEthClient
+// TxListenerBlock contains data about a block
+type TxListenerBlock struct {
+	// Chain block has been read from
+	ChainID *big.Int
 
-	next *big.Int
-	// TODO: add an history of blocks of configurable length
-	// (we could add some checks to ensure no re-org happened)
+	// Go-Ethereum block
+	types.Block
+
+	// Ordered receipts for every transaction in the block
+	receipts []*TxListenerReceipt
 }
 
-func newBlockCursor(c TxListenerEthClient) *blockCursor {
-	cursor := &blockCursor{
-		c:    c,
-		next: big.NewInt(0),
+// Copy creates a deep copy of a block to prevent side effects
+func (b *TxListenerBlock) Copy() *TxListenerBlock {
+	return &TxListenerBlock{
+		ChainID:  big.NewInt(0).Set(b.ChainID),
+		Block:    *b.WithBody(b.Transactions(), b.Uncles()),
+		receipts: make([]*TxListenerReceipt, len(b.receipts)),
 	}
-	return cursor
 }
 
-// Next returns next block mined if available
-func (bc *blockCursor) Next() (*types.Block, error) {
-	// Retrieve next block
-	block, err := bc.c.BlockByNumber(context.Background(), bc.next)
+// TxListenerError is what is provided to the user when an error occurs.
+// It wraps an error and includes the chain ID
+type TxListenerError struct {
+	// Network ID the error occurred on
+	ChainID *big.Int
+
+	// Error
+	Err error
+}
+
+func (e TxListenerError) Error() string {
+	return fmt.Sprintf("tx-listener: error while listening on chain %s: %s", hexutil.EncodeBig(e.ChainID), e.Err)
+}
+
+// TxListenerErrors is a type that wraps a batch of errors and implements the Error interface.
+type TxListenerErrors []*TxListenerErrors
+
+func (e TxListenerErrors) Error() string {
+	return fmt.Sprintf("tx-listener: %d errors while while listening", len(e))
+}
+
+// ChainTracker keep track of block chain highest mined block
+type ChainTracker interface {
+	ChainID() *big.Int
+	HighestBlock(ctx context.Context) (int64, error)
+}
+
+// BaseTracker is a basic chain tracker
+type BaseTracker struct {
+	ec EthClient
+
+	chainID *big.Int
+	depth   uint64
+}
+
+// ChainID returns ID of the tracked chain
+func (t *BaseTracker) ChainID() *big.Int {
+	return big.NewInt(0).Set(t.chainID)
+}
+
+// HighestBlock returns highest mined block on the tracked chain
+func (t *BaseTracker) HighestBlock(ctx context.Context) (int64, error) {
+	progress, err := t.ec.SyncProgress(ctx, t.chainID)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
-
-	// If we retrieved a block we increment cursor position
-	if block != nil {
-		bc.next = bc.next.Add(bc.next, big.NewInt(1))
+	if progress.CurrentBlock <= t.depth {
+		return 0, nil
 	}
-
-	return block, nil
+	return int64(progress.CurrentBlock - t.depth), nil
 }
 
-// Set position of cursor
-func (bc *blockCursor) Set(pos *big.Int) {
-	bc.next.Set(pos)
+// Future is an element used to start	 a task and retrieve its result later
+type Future struct {
+	res chan interface{}
+	err chan error
+}
+
+// Close future
+func (f *Future) Close() {
+	close(f.res)
+	close(f.err)
+}
+
+// Cursor is an interface for a cursor object reading from a chain
+type Cursor interface {
+	// ChainID returns the chain ID the cursor is applied on
+	ChainID() *big.Int
+
+	// Next is called to make the cursor move forward (if some resources is available)
+	// It returns true if the cursor move forward
+	Next(ctx context.Context) bool
+
+	// Current returns element the cursor is pointing on
+	Current() *TxListenerBlock
+
+	// Err returns a possible error met by the cursor when calling Next
+	Err() *TxListenerError
+
+	// Close cursor
+	Close()
+}
+
+// BlockCursor allows to retrieve new blocks
+type BlockCursor struct {
+	ec EthClient
+
+	// Allows to get information about chain
+	t ChainTracker
+
+	// Config
+	conf Config
+
+	// blockNumber stands last block that has been fetched
+	// currentHead stands for the most advanced known mined block (we use it as cache so we do not need to always fetch Eth client for last mined block)
+	blockNumber, currentHead int64
+
+	// CurrentBlock on the cursor
+	block *TxListenerBlock
+	err   *TxListenerError
+
+	// BlockCursor fetches blocks ahead of being consumed for performances matters
+	// blockFutures is a channel of block being
+	blockFutures chan *Future
+
+	// Closing utilies
+	closeOnce *sync.Once
+	closed    chan struct{}
+}
+
+// NewBlockCursorFromTracker creates a new block cursor using a tracker
+func NewBlockCursorFromTracker(ec EthClient, t ChainTracker, blockNumber int64, conf Config) *BlockCursor {
+	bc := newBlockCursorFromTracker(ec, t, blockNumber, conf)
+
+	// Start feeder in a separate goroutine
+	go bc.feeder()
+
+	return bc
+}
+
+func newBlockCursorFromTracker(ec EthClient, t ChainTracker, blockNumber int64, conf Config) *BlockCursor {
+	return &BlockCursor{
+		ec:           ec,
+		t:            t,
+		conf:         conf,
+		blockNumber:  blockNumber,
+		currentHead:  0,
+		blockFutures: make(chan *Future, conf.BlockCursor.Limit),
+		closed:       make(chan struct{}),
+		closeOnce:    &sync.Once{},
+	}
+}
+
+// NewBlockCursor creates a new block cursor for a given chain starting at a given blockNumber
+func NewBlockCursor(ec EthClient, chainID *big.Int, blockNumber int64, conf Config) *BlockCursor {
+	t := &BaseTracker{
+		ec:      ec,
+		chainID: chainID,
+		depth:   conf.BlockCursor.Tracker.Depth,
+	}
+
+	return NewBlockCursorFromTracker(ec, t, blockNumber, conf)
+}
+
+// ChainID returns ID of the chain the cursor is applied on
+func (bc *BlockCursor) ChainID() *big.Int {
+	return bc.t.ChainID()
+}
+
+// Next moves cursor to Next available block
+func (bc *BlockCursor) Next(ctx context.Context) bool {
+	// Re-initialize block
+	bc.block = nil
+
+	// In case a future block is available we treat it
+	if len(bc.blockFutures) > 0 {
+		future, ok := <-bc.blockFutures
+		if ok {
+			select {
+			case <-ctx.Done():
+				bc.err = &TxListenerError{bc.ChainID(), ctx.Err()}
+			case err := <-future.err:
+				bc.err = &TxListenerError{bc.ChainID(), err}
+			case res := <-future.res:
+				bc.block = res.(*TxListenerBlock)
+			}
+		}
+	}
+
+	return bc.block != nil
+}
+
+// Current return current block the cursor is pointing on
+func (bc *BlockCursor) Current() *TxListenerBlock {
+	return bc.block
+}
+
+// Err return an error encountered by cursor
+func (bc *BlockCursor) Err() *TxListenerError {
+	return bc.err
+}
+
+// Close cursor
+func (bc *BlockCursor) Close() {
+	bc.closeOnce.Do(func() {
+		close(bc.closed)
+	})
+}
+
+// feeder feeds the blockFutures channel
+// It manages the main cursor loop that fetch blocks & receipts from Eth client
+func (bc *BlockCursor) feeder() {
+	ctx, cancel := context.WithCancel(context.Background())
+feedingLoop:
+	for {
+		select {
+		case <-bc.closed:
+			// Cancel pending fetches and break loop
+			cancel()
+			break feedingLoop
+		default:
+			if bc.blockNumber == -1 {
+				// We start from highest block
+				head, _ := bc.t.HighestBlock(ctx)
+				bc.blockNumber = head
+				bc.currentHead = head
+			}
+
+			if bc.blockNumber <= bc.currentHead {
+				// We are behind chain head meaning we have at leasdt one block to fetch
+				bc.blockFutures <- bc.fetchBlock(ctx, bc.blockNumber)
+				bc.blockNumber++
+			} else {
+				// We are ahead of last known chain head, so we refresh it
+				head, err := bc.t.HighestBlock(ctx)
+				if head > bc.currentHead {
+					// Chain has moved forward (meaning new blocks have been mined and are ready to be fetched)
+					bc.currentHead = head
+				} else {
+					// We are still ahead or something went wrong
+					if err != nil {
+						// If we got an error while retrieving chain head we notify it in a future
+						bFuture := &Future{
+							res: make(chan interface{}),
+							err: make(chan error),
+						}
+
+						go func(err error) {
+							// Notify error and Close future
+							defer bFuture.Close()
+							bFuture.err <- err
+						}(err)
+
+						bc.blockFutures <- bFuture
+					}
+
+					// Chain has not move forward so we sleep before retrying (waiting for updates on the chain)
+					time.Sleep(bc.conf.BlockCursor.Backoff)
+				}
+			}
+		}
+	}
+	close(bc.blockFutures)
+}
+
+// fetchBlock fetch a block asynchronously
+func (bc *BlockCursor) fetchBlock(ctx context.Context, blockNumber int64) *Future {
+	bFuture := &Future{
+		res: make(chan interface{}),
+		err: make(chan error),
+	}
+
+	// Retrieve block in a separate goroutine
+	go func() {
+		defer bFuture.Close()
+
+		block, err := bc.ec.BlockByNumber(ctx, bc.ChainID(), big.NewInt(blockNumber))
+		if err != nil {
+			bFuture.err <- err
+			return
+		}
+
+		// Block should be available
+		if block == nil {
+			bFuture.err <- BlockMissingError(blockNumber)
+			return
+		}
+
+		bl := &TxListenerBlock{
+			ChainID:  bc.ChainID(),
+			Block:    *block,
+			receipts: []*TxListenerReceipt{},
+		}
+
+		// Retrieve receipts in separate go-routines
+		rFutures := []*Future{}
+		for _, tx := range bl.Block.Transactions() {
+			rFutures = append(rFutures, bc.fetchReceipt(ctx, tx.Hash()))
+		}
+
+		for i, rFuture := range rFutures {
+			select {
+			case err := <-rFuture.err:
+				bFuture.err <- err
+				return
+			case res := <-rFuture.res:
+				receipt := res.(*TxListenerReceipt)
+				receipt.TxIndex = uint64(i)
+				receipt.BlockHash = block.Hash()
+				receipt.BlockNumber = block.Number().Int64()
+				bl.receipts = append(bl.receipts, receipt)
+			}
+		}
+
+		// Return block in result
+		bFuture.res <- bl
+	}()
+
+	return bFuture
+}
+
+// fetchReceipt fetch a receipt asynchronously
+func (bc *BlockCursor) fetchReceipt(ctx context.Context, txHash common.Hash) *Future {
+	future := &Future{
+		res: make(chan interface{}),
+		err: make(chan error),
+	}
+
+	go func() {
+		defer future.Close()
+		receipt, err := bc.ec.TransactionReceipt(ctx, bc.ChainID(), txHash)
+		if err != nil {
+			future.err <- err
+			return
+		}
+
+		if receipt == nil {
+			future.err <- ReceiptMissingError(txHash.Hex())
+			return
+		}
+
+		r := &TxListenerReceipt{
+			ChainID: bc.ChainID(),
+			Receipt: *receipt,
+			TxHash:  txHash,
+		}
+		future.res <- r
+	}()
+
+	return future
 }

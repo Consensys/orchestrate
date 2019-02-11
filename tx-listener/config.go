@@ -6,30 +6,20 @@ import (
 
 // Config configuration of a TxListener
 type Config struct {
-	BlockListener struct {
+	BlockCursor struct {
 		// How long to wait after failing to retrieve a new mined block
 		Backoff time.Duration
 
-		// WARNING: Retries are not implemented yet (TODO)
-		Retry struct {
-			// The total number of times to retry retrieving Receipts from an Ethereum client
-			Max int
-			// How long to wait for the client to settle between retries
-			Backoff time.Duration
-		}
+		// Limit is a count of blocks that can be pre-fetched and buffered
+		Limit uint64
 
-		Return struct {
-			// If enabled, any errors that occurred while listening for blocks are returned on
-			// the Errors channel
-			// If set to True you must drain the Errors channel
-			Errors bool
+		Tracker struct {
+			// Depth under which a block is considered final
+			Depth uint64
 		}
 	}
 
 	TxListener struct {
-		// How many receipts can be retrieved in parallel goroutines
-		MaxReceiptCount uint
-
 		// WARNING: Retries are not implemented yet (TODO)
 		Retry struct {
 			// The total number of times to retry retrieving Receipts from an Ethereum client
@@ -52,14 +42,12 @@ type Config struct {
 }
 
 // NewConfig creates a new default config
-func NewConfig() *Config {
-	c := &Config{}
-	c.BlockListener.Backoff = time.Second
-	c.BlockListener.Retry.Max = 3
-	c.BlockListener.Retry.Backoff = 2 * time.Second
-	c.BlockListener.Return.Errors = false
+func NewConfig() Config {
+	c := Config{}
+	c.BlockCursor.Backoff = time.Second
+	c.BlockCursor.Limit = 20
+	c.BlockCursor.Tracker.Depth = 0
 
-	c.TxListener.MaxReceiptCount = 100
 	c.TxListener.Retry.Max = 3
 	c.TxListener.Retry.Backoff = 2 * time.Second
 	c.TxListener.Return.Blocks = false

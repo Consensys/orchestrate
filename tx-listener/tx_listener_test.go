@@ -2,102 +2,66 @@ package listener
 
 import (
 	"context"
-	"fmt"
 	"math/big"
 	"sync"
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 )
 
-type mockEthClient struct {
-	t                       *testing.T
-	index                   int
-	expected                []string
-	mux                     *sync.Mutex
-	callsBlockByNumber      []*big.Int
-	callsTransactionReceipt []common.Hash
-}
-
-var (
-	blockEnc = common.FromHex("0xf90600f90218a0e19f046955d37c5e23c2857cbeb602b72eeeb47b1539d604e88c16053480f41ea01dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d493479480cb31b335dd587d1cc49723837f448c3c2e4736a02a30b9f172a3c58dbbaa5e890243e9d94fe669f50cbf237c34d41e8a3c150807a01e16eb6a5be337178a8b41b2dbc8481af9b4deb09dc25fb3e399c698e56ef560a04416bfc7541f873da23002d8b26a55f73e1dbba48c1d0b46bf366d055549b021b901000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000085012590553683492c22837a12008302e248845c36859c99d883010900846765746888676f312e31312e34856c696e7578a0fff3f838abb411d1bfaa65a9a3d1e7c162d9e8293802c30a73ff0064d42af53f88ba5707f7725a3c0ef903e1f86b80843b9aca0082520894bdfeff9a1f4a1bdf483d680046344316019c58cf880de0a39a35d9b000801ba06693c6a8f27c38aa559ffd7952a3cc06330fa6f3b75f966f3b782acb5a12d629a04d74f460391f4e843134c524ca304d9d8b95fa4e72173e3e58316469a9d98ae6f86b80843b9aca0082520894bdfeff9a1f4a1bdf483d680046344316019c58cf880de0a39a35d9b000801ba0361a8dd7c6ba0583bd469fc2ad5e360ca185e66e0caa28329bffa41a26b128a9a02f7e0823a3e182dde15e9ef9e64da11ee55b2940f887221154b821c58f09cb80f86b80843b9aca0082520894bdfeff9a1f4a1bdf483d680046344316019c58cf880de0a39a35d9b000801ba08fd9cca3c8b509da67e138062d67325e6986a12620ecfb77ef1bc09578c218a5a00c407b0be555900c97afbe3f2022e5a49fdf84dbc25c7a906b5678550b5593f0f86b80843b9aca0082520894bdfeff9a1f4a1bdf483d680046344316019c58cf880de0a39a35d9b000801ca091d4b169b328e82a9ac6a36fa4703865e76b66f668cf86b35a39aded9586455ba00d173820d80ca8b0b4b103e820e51e2c145f753e168d615526653ca022478f9ef86f840128c364843b9aca00825208945cc31379a0a1d1a56c7a35cfcdeb96ca83c95277880de0b6b3a7640000801ca0bef5dfcccf430b07ce9b0d89ff31b7ee765586b376991cb39478a65f622c7753a03549afb66bfeb7e31bbfb31b8510ded604e559e0e0811c38a5e90e0841180809f86f840128c365843b9aca008252089455efceae4188f18e39c4cebd1d0a1502706aebd9880de0b6b3a7640000801ba006f4f786295bc218c187f2ee1cff23470745d6b4efc6188a28eebbea3136d447a05d95382232701baf7b4636f8b5a7b43d53d0e60d9f2953fc1b44e975a3be7d7cf86f840128c366843b9aca00825208949244af76c192ec3e525e97557da454ce1fcfe914880de0b6b3a7640000801ba0c24e71aff9952f667481eaf613e64fa6e5a1d566fbc843e41619d3a99ea7edcba05920f45a7d669b555373a7ee064b60479182961c6a15d056a9a64e55b635bdccf86b80843b9aca0082520894bdfeff9a1f4a1bdf483d680046344316019c58cf880de0a39a35d9b000801ba006da2cb18cfd311bb2b149ad85cd3ebf02c3db7178fc97e06db32c0743511c62a06aa9f9c752f3ee61d73cf435ce4a1481f46f8348b21b82ec5a571a36ce4022dbf86b80843b9aca0082520894bdfeff9a1f4a1bdf483d680046344316019c58cf880de0a39a35d9b000801ba08327c70c73d0fcad956f760204e41c026c623bea1e38c1ca00930bd63d0a2384a068c4aba127f09d765dec74299de6a741e89ab792f630e6f827ea17f43f055400c0")
-	block    types.Block
-	_        = rlp.DecodeBytes(blockEnc, &block)
-)
-
-func (ec *mockEthClient) BlockByNumber(ctx context.Context, number *big.Int) (*types.Block, error) {
-	ec.mux.Lock()
-	defer ec.mux.Unlock()
-	ec.callsBlockByNumber = append(ec.callsBlockByNumber, number)
-	defer func() { ec.index++ }()
-
-	if ec.index < len(ec.expected) {
-		if ec.expected[ec.index] == "mined" {
-			return &block, nil
-		}
-		if ec.expected[ec.index] == "pending" {
-			return nil, nil
-		}
-	}
-
-	return nil, fmt.Errorf("Block missing")
-}
-
-func (ec *mockEthClient) TransactionReceipt(ctx context.Context, hash common.Hash) (*types.Receipt, error) {
-	// Simulate some io time
-	time.Sleep(time.Duration(50) * time.Millisecond)
-	ec.mux.Lock()
-	defer ec.mux.Unlock()
-
-	ec.callsTransactionReceipt = append(ec.callsTransactionReceipt, hash)
-
-	if hash.Hex() == block.Transactions()[len(block.Transactions())-1].Hash().Hex() {
-		return nil, fmt.Errorf("Error retrieving receipt")
-	}
-
-	if block.Transaction(hash) != nil {
-		return &types.Receipt{
-			TxHash: hash,
-		}, nil
-	}
-
-	return nil, fmt.Errorf("Receipt missing")
-}
-
 func TestTxListener(t *testing.T) {
-	// Create mock client
-	ec := &mockEthClient{
-		t:        t,
-		mux:      &sync.Mutex{},
-		index:    0,
-		expected: []string{"mined", "mined", "pending", "pending", "mined", "pending", "mined", "mined", "pending", "mined"},
+	blocks := []*types.Block{}
+	for _, blockEnc := range blocksEnc {
+		var block types.Block
+		rlp.DecodeBytes(blockEnc, &block)
+		blocks = append(blocks, &block)
 	}
+	mec := NewMockEthClient(blocks)
 
+	// Initialize cursor
 	config := NewConfig()
-	config.BlockListener.Backoff = 50 * time.Millisecond
-	config.TxListener.MaxReceiptCount = 200
+	config.BlockCursor.Backoff = 100 * time.Millisecond
 	config.TxListener.Return.Blocks = false
 	config.TxListener.Return.Errors = false
 
-	// Create txListener
-	l := NewTxListener(ec, config)
+	l := NewTxListener(mec)
+	_, err := l.Listen(big.NewInt(1), 0, 0, config)
+	if err != nil {
+		t.Errorf("TxListener #1: expected no error but got %v", err)
+	}
 
-	blocks := []*types.Block{}
+	// Try to listen to the same chain again
+	_, err = l.Listen(big.NewInt(1), 0, 0, config)
+	if err == nil {
+		t.Errorf("TxListener #2: expected an error")
+	}
+
+	// Try to listen to another chain
+	_, err = l.Listen(big.NewInt(2), 1, 5, config)
+	if err != nil {
+		t.Errorf("TxListener #3: expected no error but got %v", err)
+	}
+
+	wait := &sync.WaitGroup{}
+	wait.Add(3)
+
+	blcks := []*TxListenerBlock{}
 	go func() {
 		for block := range l.Blocks() {
 			// Drain blocks
-			blocks = append(blocks, block)
+			blcks = append(blcks, block)
 		}
+		wait.Done()
 	}()
 
-	receipts := []*types.Receipt{}
+	receipts := []*TxListenerReceipt{}
 	go func() {
 		for receipt := range l.Receipts() {
 			receipts = append(receipts, receipt)
 		}
+		wait.Done()
 	}()
 
 	errors := []error{}
@@ -106,65 +70,116 @@ func TestTxListener(t *testing.T) {
 			// Drain blocks
 			errors = append(errors, err)
 		}
+		wait.Done()
 	}()
 
-	// Close after a long enough time all receipts have been proceed
-	time.Sleep(300 * time.Millisecond)
+	// Simulate 2 mined blocks mining
+	time.Sleep(50 * time.Millisecond)
+	mec.mine()
+
+	// Try to listen to another chain
+	_, err = l.Listen(big.NewInt(3), -1, 0, config)
+	if err != nil {
+		t.Errorf("TxListener #4: expected no error but got %v", err)
+	}
+
+	time.Sleep(180 * time.Millisecond)
+	mec.mine()
+
+	time.Sleep(10 * time.Millisecond)
+	mec.mine()
+
+	// Test methods while running
+	chains := l.Chains()
+	expected := 3
+	if len(chains) != expected {
+		t.Errorf("TxListener: expected %v chain but got %v", expected, len(chains))
+	}
+
+	progress := l.Progress(context.Background())
+	highest := 3
+	if progress["1"].HighestBlock != int64(highest) {
+		t.Errorf("TxListener: expected highest block to be %v but got %v", highest, progress["1"].HighestBlock)
+	}
+
+	// Close
 	l.Close()
+
+	// Try to listen on a close listener
+	_, err = l.Listen(big.NewInt(1), 0, 0, config)
+	if err == nil {
+		t.Errorf("TxListener #2: expected an error")
+	}
+
+	// Wait for drainers to complete
+	wait.Wait()
+
+	// Test methods after stoping
+	chains = l.Chains()
+	expected = 0
+	if len(chains) != expected {
+		t.Errorf("TxListener: expected %v chain but got %v", expected, len(chains))
+	}
 
 	if len(errors) != 0 {
 		t.Errorf("TxListener: expected %v errors but got %v", 0, len(errors))
 	}
 
-	if len(blocks) != 0 {
-		t.Errorf("TxListener: expected %v blocks but got %v", 0, len(blocks))
+	if len(blcks) != 0 {
+		t.Errorf("TxListener: expected %v blocks but got %v", 0, len(blcks))
 	}
 
-	if len(receipts) != (len(block.Transactions())-1)*6 {
-		t.Errorf("TxListener: expected %v receipts but got %v", (len(block.Transactions())-1)*6, len(receipts))
-	}
-
-	// Ensure Receipts have been processed in expected order
-	for i := 0; i < 6; i++ {
-		for j, tx := range block.Transactions()[0 : len(block.Transactions())-1] {
-			if tx.Hash().Hex() != receipts[(len(block.Transactions())-1)*i+j].TxHash.Hex() {
-				t.Errorf("TxListener: expected TxHash %v but got %v", tx.Hash().Hex(), receipts[len(block.Transactions())*i+j].TxHash.Hex())
-			}
-		}
+	expected = 31
+	if len(receipts) != expected {
+		t.Errorf("TxListener: expected %v receipts but got %v", expected, len(receipts))
 	}
 }
 
 func TestTxListenerWithReturns(t *testing.T) {
-	// Create mock client
-	ec := &mockEthClient{
-		t:        t,
-		mux:      &sync.Mutex{},
-		index:    0,
-		expected: []string{"mined", "mined", "pending", "pending", "mined", "pending", "mined", "mined", "pending", "mined"},
+	blocks := []*types.Block{}
+	for _, blockEnc := range blocksEnc {
+		var block types.Block
+		rlp.DecodeBytes(blockEnc, &block)
+		blocks = append(blocks, &block)
 	}
+	mec := NewMockEthClient(blocks)
 
-	// Create txListener
+	// Initialize cursor
 	config := NewConfig()
-	config.BlockListener.Backoff = 50 * time.Millisecond
-	config.TxListener.MaxReceiptCount = 200
+	config.BlockCursor.Backoff = 100 * time.Millisecond
 	config.TxListener.Return.Blocks = true
 	config.TxListener.Return.Errors = true
 
-	l := NewTxListener(ec, config)
+	l := NewTxListener(mec)
+	_, err := l.Listen(big.NewInt(1), -1, 0, config)
+	if err != nil {
+		t.Errorf("TxListener #1: expected no error but got %v", err)
+	}
 
-	blocks := []*types.Block{}
+	// Try to listen to another chain
+	_, err = l.Listen(big.NewInt(2), 1, 5, config)
+	if err != nil {
+		t.Errorf("TxListener #3: expected no error but got %v", err)
+	}
+
+	wait := &sync.WaitGroup{}
+	wait.Add(3)
+
+	blcks := []*TxListenerBlock{}
 	go func() {
 		for block := range l.Blocks() {
 			// Drain blocks
-			blocks = append(blocks, block)
+			blcks = append(blcks, block)
 		}
+		wait.Done()
 	}()
 
-	receipts := []*types.Receipt{}
+	receipts := []*TxListenerReceipt{}
 	go func() {
 		for receipt := range l.Receipts() {
 			receipts = append(receipts, receipt)
 		}
+		wait.Done()
 	}()
 
 	errors := []error{}
@@ -173,30 +188,63 @@ func TestTxListenerWithReturns(t *testing.T) {
 			// Drain blocks
 			errors = append(errors, err)
 		}
+		wait.Done()
 	}()
 
-	// Close after a long enough time all receipts have been proceed
-	time.Sleep(300 * time.Millisecond)
+	// Simulate mined blocks
+	time.Sleep(50 * time.Millisecond)
+	mec.mine()
+
+	// Try to listen to another chain
+	_, err = l.Listen(big.NewInt(3), -1, 0, config)
+	if err != nil {
+		t.Errorf("TxListener #4: expected no error but got %v", err)
+	}
+
+	// Simulate mined blocks
+	time.Sleep(180 * time.Millisecond)
+	mec.mine()
+
+	// Simulate mined blocks
+	time.Sleep(10 * time.Millisecond)
+	mec.mine()
+
+	// Test methods while running
+	chains := l.Chains()
+	expected := 3
+	if len(chains) != expected {
+		t.Errorf("TxListener: expected %v chain but got %v", expected, len(chains))
+	}
+
+	progress := l.Progress(context.Background())
+	highest := 3
+	if progress["1"].HighestBlock != int64(highest) {
+		t.Errorf("TxListener: expected highest block to be %v but got %v", highest, progress["1"].HighestBlock)
+	}
+
+	// Close
 	l.Close()
 
-	if len(errors) == 0 {
-		t.Errorf("TxListener: expected at least 1 error but got %v", len(errors))
+	// Try to listen on a close listener
+	_, err = l.Listen(big.NewInt(1), 0, 0, config)
+	if err == nil {
+		t.Errorf("TxListener #2: expected an error")
 	}
 
-	if len(blocks) != 6 {
-		t.Errorf("TxListener: expected %v blocks but got %v", 0, len(blocks))
+	// Wait for drainers to complete
+	wait.Wait()
+
+	if len(errors) != 0 {
+		t.Errorf("TxListener: expected %v errors but got %v", 0, len(errors))
 	}
 
-	if len(receipts) != (len(block.Transactions())-1)*6 {
-		t.Errorf("TxListener: expected %v receipts but got %v", len(block.Transactions())*6, len(receipts))
+	expected = 4
+	if len(blcks) != expected {
+		t.Errorf("TxListener: expected %v blocks but got %v", expected, len(blcks))
 	}
 
-	// Ensure Receipts have been processed in expected order
-	for i := 0; i < 6; i++ {
-		for j, tx := range block.Transactions()[0 : len(block.Transactions())-1] {
-			if tx.Hash().Hex() != receipts[(len(block.Transactions())-1)*i+j].TxHash.Hex() {
-				t.Errorf("TxListener: expected TxHash %v but got %v", tx.Hash().Hex(), receipts[len(block.Transactions())*i+j].TxHash.Hex())
-			}
-		}
+	expected = 31
+	if len(receipts) != expected {
+		t.Errorf("TxListener: expected %v receipts but got %v", expected, len(receipts))
 	}
 }
