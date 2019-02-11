@@ -1,4 +1,4 @@
-package secret
+package aws
 
 import (
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
@@ -25,17 +25,17 @@ func NewSecret() *Secret {
 	}
 }
 
-// Create creates a Secret from key and value
-func Create(key, value string) (*Secret, error) {
+// CreateSecret creates a Secret from key and value
+func CreateSecret(key, value string) (*Secret) {
 	return &Secret{
 		key: key,
 		value: value,
 		client: nil,
-	}, nil
+	}
 }
 
-// FromKey creates a secret from a key, it does not fetch the associated value.
-func FromKey(key string) (*Secret, error) {
+// SecretFromKey creates a secret from a key, it does not fetch the associated value.
+func SecretFromKey(key string) (*Secret, error) {
 	return &Secret{
 		key: key,
 		value: "",
@@ -83,9 +83,9 @@ func (sec *Secret) SaveNew() (*secretsmanager.CreateSecretOutput, error) {
 }
 
 // GetValue fetch the value from AWS SecretManager by key
-func (sec *Secret) GetValue() (*secretsmanager.GetSecretValueOutput, error) {
+func (sec *Secret) GetValue() (string, error) {
 
-	if sec.client == nil { return nil, fmt.Errorf("Client not set")}
+	if sec.client == nil { return "", fmt.Errorf("Client not set")}
 
 	input := secretsmanager.GetSecretValueInput{
 		SecretId:     aws.String(sec.key),
@@ -94,10 +94,12 @@ func (sec *Secret) GetValue() (*secretsmanager.GetSecretValueOutput, error) {
 
 	res, err := sec.client.GetSecretValue(&input)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return res, nil	
+	sec.value = *res.SecretString
+
+	return sec.value, nil
 }
 
 // Update the secret value stored in the aws secret manager
