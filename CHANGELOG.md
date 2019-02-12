@@ -4,6 +4,12 @@
 
 *Released on February 12th 2019*
 
+- [CHORE] Dependencies update to Core v0.1.12
+  
+### Version 0.1.11
+
+*Released on February 12th 2019*
+
 - [FIX] fix `ChainTracker` to use `HeaderByNumber` instead of `SyncProgress`
 
 

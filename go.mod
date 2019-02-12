@@ -6,6 +6,6 @@ require (
 	github.com/ethereum/go-ethereum v1.8.21
 	github.com/rs/cors v1.6.0 // indirect
 	github.com/sirupsen/logrus v1.3.0
-	gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.10
+	gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.12
 	golang.org/x/net v0.0.0-20190110200230-915654e7eabc // indirect
 )
