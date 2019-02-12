@@ -7,7 +7,7 @@ import (
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	handCom "gitlab.com/ConsenSys/client/fr/core-stack/common.git/handlers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git"
+	core "gitlab.com/ConsenSys/client/fr/core-stack/core.git"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 	infEth "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
@@ -53,7 +53,7 @@ func (h *TxCrafter) Setup(s sarama.ConsumerGroupSession) error {
 
 	// Handler::Crafter
 	crafter := infEth.PayloadCrafter{}
-	registry := infra.NewERC1400ABIRegistry()
+	registry := infra.LoadABIRegistry(h.cfg.App.ABIs)
 	h.w.Use(hand.Crafter(registry, &crafter))
 
 	// Handler:Gas
