@@ -5,3 +5,4 @@
 *Released on February 12th 2019*
 
 - [FEAT] Worker using a multi tx-listener
+- [CHORE] Implement build on CI (boilerplate merge)
