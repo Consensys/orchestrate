@@ -2,6 +2,7 @@
 
 ### Version 0.1.0
 
-*Unreleased*
+*Released on February 12th 2019*
 
-- [CORE] Implement build on CI (boilerplate merge)
+- [FEAT] Worker using a multi tx-listener
+- [CHORE] Implement build on CI (boilerplate merge)
