@@ -4,6 +4,7 @@
 
 *Released on February 13th 2019*
 
+- [FEAT] Listen multi topics depending on the chainIDs
 - [FEAT] Implement ability to pass ABIs by environment variable
 
 
