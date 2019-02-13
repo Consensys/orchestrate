@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"fmt"
-
 	"github.com/Shopify/sarama"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	log "github.com/sirupsen/logrus"
@@ -28,7 +26,6 @@ func Logger(ctx *types.Context) {
 
 	errors := ctx.T.Errors
 	if len(errors) > 0 {
-		// TODO: change to log
-		fmt.Printf("Error: %v\n", errors)
+		log.Errorf("Error: %v\n", errors)
 	}
 }
