@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.1.3
+
+*Released on February 13th 2019*
+
+- [FEAT] Implement ability to pass ABIs by environment variable
+
+
 ### Version 0.1.2
 
 *Released on February 11th 2019*

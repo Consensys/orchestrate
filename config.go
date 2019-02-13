@@ -19,15 +19,15 @@ type WorkerConfig struct {
 
 // KafkaConfig is the config part concerning kafka
 type KafkaConfig struct {
-	ConsumerGroup string `short:"c" long:"consumer-group" env:"CONSUMER_GROUP" default:"tx-decoder-group"`
-	InTopic       string `short:"i" long:"in-topic" env:"KAFKA_TOPIC_TX_DECODER" default:"topic-tx-decoder"`
-	OutTopic      string `short:"o" long:"out-topic" env:"KAFKA_TOPIC_TX_DECODED" default:"topic-tx-decoded"`
-	Address       string `long:"kafka-address" env:"KAFKA_ADDRESS" default:"localhost:9092"`
+	ConsumerGroup string   `short:"c" long:"consumer-group" env:"CONSUMER_GROUP" default:"tx-decoder-group"`
+	InTopic       string   `short:"i" long:"in-topic" env:"KAFKA_TOPIC_TX_DECODER" default:"topic-tx-decoder"`
+	OutTopic      string   `short:"o" long:"out-topic" env:"KAFKA_TOPIC_TX_DECODED" default:"topic-tx-decoded"`
+	Address       []string `long:"kafka-address" env:"KAFKA_ADDRESS" default:"localhost:9092"`
 }
 
 // EthConfig is the config part concerning the ethereum environment
 type EthConfig struct {
-	URL string `short:"e" long:"eth-client" env:"ETH_CLIENT_URL" default:"https://ropsten.infura.io/v3/81e039ce6c8a465180822b525e3644d7"`
+	URLs []string `short:"e" long:"eth-client" env:"ETH_CLIENT_URL" default:"https://ropsten.infura.io/v3/81e039ce6c8a465180822b525e3644d7"`
 }
 
 // AppConfig is the configuration of this worker
