@@ -66,6 +66,11 @@ func GetWallet(client *secretsmanager.SecretsManager, a *common.Address) (wal *W
 	return wal, nil
 }
 
+// GetPriv returns the private key of Wallet
+func (wal *Wallet) GetPriv() (*ecdsa.PrivateKey) {
+	return wal.priv
+}
+
 
 
 

@@ -2,15 +2,18 @@ package services
 
 import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/rlp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
-	//"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
 	"github.com/ethereum/go-ethereum/common"
 	aws "gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/aws"
+	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"fmt"
+	"math/big"
 )
 
 // TxSignatureSession holds all the logic allowing the signature of an ethereum transaction
-type TxSignatureSession struct { 
+type TxSignatureSession struct {
+	client *secretsmanager.SecretsManager
 	wallet *aws.Wallet
 	chain *types.Chain
 	tx *ethtypes.Transaction
@@ -19,9 +22,10 @@ type TxSignatureSession struct {
 }
 
 // MakeTxSignature create a new tx signature session from address
-func MakeTxSignature() *TxSignatureSession {
+func MakeTxSignature(client *secretsmanager.SecretsManager) *TxSignatureSession {
 
 	return &TxSignatureSession{
+		client: client,
 		wallet: nil,
 		chain: nil,
 		tx: nil,
@@ -33,7 +37,7 @@ func MakeTxSignature() *TxSignatureSession {
 // SetWallet sets the wallet to the provided address
 func (sess *TxSignatureSession) SetWallet(address *common.Address) error {
 
-	wallet, err := aws.GetWallet(address)
+	wallet, err := aws.GetWallet(sess.client, address)
 	if err != nil {
 		return fmt.Errorf("Could not retrieve private key for address : " + err.Error())
 	}
@@ -59,7 +63,7 @@ func (sess *TxSignatureSession) getSigner() (ethtypes.Signer, error) {
 
 	var signer ethtypes.Signer
 	if sess.chain == nil {
-		return fmt.Errorf("Chain has not been set")
+		return nil, fmt.Errorf("Chain has not been set")
 	}
 
 	if sess.chain.IsEIP155 {
@@ -71,29 +75,32 @@ func (sess *TxSignatureSession) getSigner() (ethtypes.Signer, error) {
 	} else {
 		signer = ethtypes.HomesteadSigner{}
 	}
-	return signer
+	return signer, nil
 }
 
 // Run : once all the element of the session have been set, 
 // it assigns the signed transaction and the txhash
-func (sess *TxSignatureSession) Run() error {
+func (sess *TxSignatureSession) Run() (err error) {
 
-	signer := sess.getSigner()
+	signer, err := sess.getSigner()
+	if err != nil {
+		return err
+	}
 
-	t, err := ethtypes.SignTx(tx, signer, sess.Wallet.priv)
+	t, err := ethtypes.SignTx(sess.tx, signer, sess.wallet.GetPriv())
 	if err != nil {
 		return err
 	}
 
 	// Set raw transaction
-	signedRaw, err = rlp.EncodeToBytes(t)
+	signedRaw, err := rlp.EncodeToBytes(t)
 	if err != nil {
-		// TODO: handle error
 		return err
 	}
 
+	txHash := t.Hash()
 	sess.signedRaw = signedRaw
-	sess.txHash = t.Hash()
+	sess.txHash = &txHash
 	return nil
 }
 
