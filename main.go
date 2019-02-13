@@ -9,7 +9,6 @@ import (
 	commonHandlers "gitlab.com/ConsenSys/client/fr/core-stack/common.git/handlers"
 	core "gitlab.com/ConsenSys/client/fr/core-stack/core.git"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
-	infEth "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git"
 	infSarama "gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git"
 	hand "gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-decoder.git/handlers"
 )
@@ -43,19 +42,10 @@ func prepareMsg(t *types.Trace, msg *sarama.ProducerMessage) error {
 	return nil
 }
 
-func newEthClient(rawurl string) *infEth.EthClient {
-	ec, err := infEth.Dial(rawurl)
-	if err != nil {
-		panic(err)
-	}
-	log.Info("Connected to Ethereum client")
-	return ec
-}
-
 // Setup configure handler
 func (h *handler) Setup(s sarama.ConsumerGroupSession) error {
 	// Instantiate workers
-	h.w = core.NewWorker(opts.App.WorkerSlots)
+	h.w = core.NewWorker(opts.Worker.Slots)
 
 	// Worker::logger
 	h.w.Use(hand.LoggerHandler)
@@ -66,8 +56,8 @@ func (h *handler) Setup(s sarama.ConsumerGroupSession) error {
 	// Worker::marker
 	h.w.Use(commonHandlers.Marker(infSarama.NewSimpleOffsetMarker(s)))
 
-	// Worker::signer
-	registry := hand.NewERC1400ABIRegistry()
+	// Worker::decoder
+	registry := hand.LoadABIRegistry(opts.App.ABIs)
 	h.w.Use(
 		hand.TransactionDecoder(registry),
 	)
