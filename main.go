@@ -154,12 +154,13 @@ func main() {
 		log.Errorf("Got error %v", err)
 	}
 
-	var multiCHainInTopics []string
+	// Listen to multi in-topics depending on the chainID listened by tx-listener
+	var multiChainInTopics []string
 	for k := range mec.Networks(context.Background()) {
-		multiCHainInTopics = append(multiCHainInTopics, cfg.Kafka.InTopic+"-"+strconv.Itoa(k))
+		multiChainInTopics = append(multiChainInTopics, cfg.Kafka.InTopic+"-"+strconv.Itoa(k))
 	}
 
 	txDecoder := &TxDecoder{mec: mec, saramaProducer: p, cfg: cfg}
-	g.Consume(context.Background(), multiCHainInTopics, txDecoder)
+	g.Consume(context.Background(), multiChainInTopics, txDecoder)
 	log.Error(err)
 }
