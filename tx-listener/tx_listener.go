@@ -68,17 +68,25 @@ type txListener struct {
 }
 
 func (l *txListener) Listen(chainID *big.Int, blockNumber int64, txIndex int64, conf Config) (ChainListener, error) {
+	// Set chain tracker
 	t := &BaseTracker{
 		ec:      l.ec,
 		chainID: chainID,
 		depth:   conf.BlockCursor.Tracker.Depth,
 	}
 
+	// Set cursor
+	if blockNumber == -1 {
+		// We start from highest block
+		blockNumber, _ = t.HighestBlock(context.Background())
+	}
 	cur := newBlockCursorFromTracker(l.ec, t, blockNumber, conf)
+
+	// Create listener
 	listener := &singleChainListener{
+		conf:        conf,
 		t:           t,
 		cur:         cur,
-		conf:        conf,
 		blocks:      l.blocks,
 		receipts:    l.receipts,
 		errors:      l.errors,
@@ -95,11 +103,7 @@ func (l *txListener) Listen(chainID *big.Int, blockNumber int64, txIndex int64, 
 		return nil, err
 	}
 
-	// Start listener in a separate goroutine
-	log.WithFields(log.Fields{
-		"Chain": chainID.Text(16),
-	}).Infof("tx-listener: start listening from blockNumber=%v txIndex=%v", blockNumber, txIndex)
-
+	// Start feeders in separate go routine
 	l.wait.Add(1)
 	go listener.feeder()
 	go cur.feeder()
@@ -195,6 +199,11 @@ func (l *txListener) removeListener(listener *singleChainListener) {
 
 	chainID := listener.ChainID().Text(16)
 	delete(l.chainListeners, chainID)
+
+	// If no listener remaining then close (in parallel go routine to avoid dead lock)
+	if len(l.chainListeners) == 0 {
+		go l.Close()
+	}
 }
 
 // Progress holds information about listener progress
@@ -250,16 +259,16 @@ func (l *singleChainListener) Close() {
 		// Close listener
 		log.WithFields(log.Fields{
 			"Chain": l.t.ChainID().Text(16),
-		}).Infof("tx-listener: closing...")
+		}).Infof("tx-listener: stop listening chain...")
 		close(l.closed)
 	})
 }
 
 func (l *singleChainListener) feeder() {
+	// Start listener in a separate goroutine
 	log.WithFields(log.Fields{
-		"Chain": l.t.ChainID().Text(16),
-	}).Debugf("tx-listener: start loop")
-
+		"Chain": l.ChainID().Text(16),
+	}).Infof("tx-listener: start listening from block=%v tx=%v", l.blockNumber, l.txIndex)
 feedingLoop:
 	for {
 		select {
@@ -267,10 +276,12 @@ feedingLoop:
 			break feedingLoop
 		default:
 			if l.cur.Current() != nil && l.txIndex < int64(len(l.cur.Current().receipts)) {
+				// We treat next receipt in current block and increment txIndex position
 				l.receipts <- l.cur.Current().receipts[l.txIndex]
 				atomic.AddInt64(&l.txIndex, 1)
+
 				if l.txIndex == int64(len(l.cur.Current().receipts)) {
-					// We have seen all receipts in current block so we prepare for next block
+					// We have seen all receipts in current block so we prepare position for next block
 					atomic.AddInt64(&l.blockNumber, 1)
 					atomic.StoreInt64(&l.txIndex, 0)
 				} else {
@@ -302,31 +313,22 @@ feedingLoop:
 			// We have a new block
 			if l.conf.TxListener.Return.Blocks {
 				l.blocks <- l.cur.Current().Copy()
-			} else {
-				log.WithFields(log.Fields{
-					"Chain": l.t.ChainID().Text(16),
-				}).Debugf("tx-listener: new block %v", l.cur.Current().Hash().Hex())
 			}
 		}
 	}
 
-	log.WithFields(log.Fields{
-		"Chain": l.t.ChainID().Text(16),
-	}).Debugf("tx-listener: left loop")
+	// Close cursor
+	l.cur.Close()
 
-	// Close cursor if not nil
-	if l.cur != nil {
-		l.cur.Close()
-	}
-
-	// We indicate that feeder has stoped
+	// We notify main txlistener that
 	if l.txlistener != nil {
 		l.txlistener.removeListener(l)
 	}
 
+	l.txlistener.wait.Done()
+	l.txlistener = nil
+
 	log.WithFields(log.Fields{
 		"Chain": l.t.ChainID().Text(16),
 	}).Infof("tx-listener: closed")
-
-	l.txlistener.wait.Done()
 }
