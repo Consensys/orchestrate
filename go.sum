@@ -6,6 +6,9 @@ github.com/allegro/bigcache v1.1.0 h1:MLuIKTjdxDc+qsG2rhjsYjsHQC5LUGjIWzutg7M+W6
 github.com/allegro/bigcache v1.1.0/go.mod h1:Cb/ax3seSYIx7SuZdm2G2xzfwmv3TPSk2ucNfQESPXM=
 github.com/aristanetworks/goarista v0.0.0-20190109022107-b3287ee62909 h1:JRpWPE0CdS0IEaPrIeTcOLS0V3Fsf7aE+aLvtRIX7LU=
 github.com/aristanetworks/goarista v0.0.0-20190109022107-b3287ee62909/go.mod h1:D/tb0zPVXnP7fmsLZjtdUhSsumbK/ij54UXjjVgMGxQ=
+github.com/aristanetworks/goarista v0.0.0-20190204200901-2166578f3448 h1:c7dHl/Dp2sznWCZm0FCiQEJEoxEbTAZV7Ccdojs7Bwo=
+github.com/aristanetworks/goarista v0.0.0-20190204200901-2166578f3448/go.mod h1:D/tb0zPVXnP7fmsLZjtdUhSsumbK/ij54UXjjVgMGxQ=
+github.com/cenkalti/backoff v2.1.1+incompatible/go.mod h1:90ReRw6GdpyfrHakVjL/QHaoyV4aDUVVkXQJJJ3NXXM=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/deckarep/golang-set v1.7.1 h1:SCQV0S6gTtp6itiFrTqI+pfmJ4LN85S1YzhDf9rTHJQ=
@@ -46,6 +49,8 @@ gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.12 h1:9dA7HNGNEzzUPoXdxb
 gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.12/go.mod h1:iValIAHnErjlv5gSMZnN+8wG+lvJ2H4FnRV4xxAcuWo=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.12 h1:5LgB0PqGlYCcZ6Z8od3Wao/FYgC8bNnvviSc296ut4k=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.12/go.mod h1:xqVBB6qma6G5UuPJaf5WpTnHnJNdrh9oMQQK9aW6Qy0=
+gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.13 h1:dZlhXVjvkpyUS3Xj43keABNK6qn/FpF/HjBg1ZTR6Uo=
+gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.13/go.mod h1:OoHHE9dBVri/i7ioisJOflOcPinYO1Emte7NPFqx130=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.1.3 h1:30VvS5uGNvqpw9A0MMiNPF73uwPjR1+i5Nw4Y33/5Mg=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.1.3/go.mod h1:CBCnCdBAnuCa0IHmr9ScZ5bR0GXlVoBgyq8g+hpB9uk=
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
@@ -53,5 +58,7 @@ golang.org/x/crypto v0.0.0-20190103213133-ff983b9c42bc h1:F5tKCVGp+MUAHhKp5MZtGq
 golang.org/x/crypto v0.0.0-20190103213133-ff983b9c42bc/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/net v0.0.0-20190110200230-915654e7eabc h1:Yx9JGxI1SBhVLFjpAkWMaO1TF+xyqtHLjZpvQboJGiM=
 golang.org/x/net v0.0.0-20190110200230-915654e7eabc/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
+golang.org/x/net v0.0.0-20190206173232-65e2d4e15006 h1:bfLnR+k0tq5Lqt6dflRLcZiz6UaXCMt3vhYJ1l4FQ80=
+golang.org/x/net v0.0.0-20190206173232-65e2d4e15006/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
 golang.org/x/sys v0.0.0-20180905080454-ebe1bf3edb33 h1:I6FyU15t786LL7oL/hn43zqTuEGr4PN7F4XJ1p4E3Y8=
 golang.org/x/sys v0.0.0-20180905080454-ebe1bf3edb33/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=

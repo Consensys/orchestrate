@@ -6,6 +6,6 @@ require (
 	github.com/sirupsen/logrus v1.3.0
 	gitlab.com/ConsenSys/client/fr/core-stack/common.git v0.1.1
 	gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.12
-	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.12
+	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.13
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.1.3
 )
