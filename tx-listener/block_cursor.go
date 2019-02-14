@@ -249,13 +249,6 @@ feedingLoop:
 			cancel()
 			break feedingLoop
 		default:
-			if bc.blockNumber == -1 {
-				// We start from highest block
-				head, _ := bc.t.HighestBlock(ctx)
-				bc.blockNumber = head
-				bc.currentHead = head
-			}
-
 			if bc.blockNumber <= bc.currentHead {
 				// We are behind chain head meaning we have at leasdt one block to fetch
 				bc.blockFutures <- bc.fetchBlock(ctx, bc.blockNumber)
