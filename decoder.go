@@ -43,28 +43,11 @@ func ArrayToByteSlice(value reflect.Value) reflect.Value {
 // FormatNonIndexedArrayArg transforms a data to string
 func FormatNonIndexedArrayArg(t abi.Type, arg interface{}) (string, error) {
 
-	var elementaryType byte
-	switch {
-	case strings.Contains(fmt.Sprintf("%s", t.Elem), "uint"):
-		elementaryType = abi.UintTy
-	case strings.Contains(fmt.Sprintf("%s", t.Elem), "int"):
-		elementaryType = abi.IntTy
-	case strings.Contains(fmt.Sprintf("%s", t.Elem), "bool"):
-		elementaryType = abi.BoolTy
-	case strings.Contains(fmt.Sprintf("%s", t.Elem), "address"):
-		elementaryType = abi.AddressTy
-	// Case that should not be possible
-	// case strings.Contains(fmt.Sprintf("%s", t.Elem), "string"):
-	// 	elementaryType = abi.StringTy
-	// case fmt.Sprintf("%s", t.Elem) == "bytes":
-	// 	elementaryType = abi.BytesTy
-	case strings.Contains(fmt.Sprintf("%s", t.Elem), "bytes"):
-		elementaryType = abi.FixedBytesTy
-	}
+	elemType, _ := abi.NewType(t.Elem.String(), nil)
 
 	var arrayArgString []string
 	for i := 0; i < t.Size; i++ {
-		argString, _ := FormatNonIndexedArg(abi.Type{T: elementaryType}, reflect.ValueOf(arg).Index(i).Interface())
+		argString, _ := FormatNonIndexedArg(elemType, reflect.ValueOf(arg).Index(i).Interface())
 		arrayArgString = append(arrayArgString, argString)
 	}
 
