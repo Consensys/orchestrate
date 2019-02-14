@@ -6,6 +6,18 @@ import (
 
 // Config configuration of a TxListener
 type Config struct {
+	EthClient struct {
+		Retry struct {
+			// We use an exponential backoff retry strategy when fetching from an Eth Client
+			// See https://github.com/cenkalti/backoff/blob/master/exponential.go
+			InitialInterval     time.Duration
+			RandomizationFactor float64
+			Multiplier          float64
+			MaxInterval         time.Duration
+			MaxElapsedTime      time.Duration
+		}
+	}
+
 	BlockCursor struct {
 		// How long to wait after failing to retrieve a new mined block
 		Backoff time.Duration
@@ -20,14 +32,6 @@ type Config struct {
 	}
 
 	TxListener struct {
-		// WARNING: Retries are not implemented yet (TODO)
-		Retry struct {
-			// The total number of times to retry retrieving Receipts from an Ethereum client
-			Max int
-			// How long to wait for the client to settle between retries
-			Backoff time.Duration
-		}
-
 		Return struct {
 			// If enabled, all mined blocks are returned on the Blocks channel
 			// If set to true you must drain the block channel
@@ -48,8 +52,11 @@ func NewConfig() Config {
 	c.BlockCursor.Limit = 20
 	c.BlockCursor.Tracker.Depth = 0
 
-	c.TxListener.Retry.Max = 3
-	c.TxListener.Retry.Backoff = 2 * time.Second
+	c.EthClient.Retry.InitialInterval = 500 * time.Millisecond
+	c.EthClient.Retry.RandomizationFactor = 0.5
+	c.EthClient.Retry.Multiplier = 1.5
+	c.EthClient.Retry.MaxInterval = 10 * time.Second
+	c.EthClient.Retry.MaxElapsedTime = 30 * time.Second
 	c.TxListener.Return.Blocks = false
 	c.TxListener.Return.Errors = false
 

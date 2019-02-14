@@ -2,6 +2,12 @@
 
 ### Version 0.1.11
 
+*Unreleased*
+
+- [FIX] Add retry backoff strategy on tx-listener when fetching client
+
+### Version 0.1.11
+
 *Released on February 12th 2019*
 
 - [CHORE] Dependencies update to Core v0.1.12
