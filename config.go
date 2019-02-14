@@ -21,7 +21,7 @@ type KafkaConfig struct {
 	Address       []string `short:"k" long:"kafka-address" env:"KAFKA_ADDRESS" default:"localhost:9092" description:"Address of Kafka server to connect to"`
 	InTopic       string   `short:"i" long:"in-topic" env:"KAFKA_TOPIC_TX_NONCE" default:"topic-tx-nonce" description:"Kafka topic to consume message from"`
 	OutTopic      string   `short:"o" long:"out-topic" env:"KAFKA_TOPIC_TX_SIGNER" default:"topic-tx-signer" description:"Kafka topic to send message after processing"`
-	ConsumerGroup string   `short:"g" long:"consumer-group" env:"KAFKA_NONCE_GROUP" default:"tx-nonce-group" description:"Kafka consumer group"`
+	ConsumerGroup string   `short:"g" long:"consumer-group" env:"KAFKA_GROUP_TX_NONCE" default:"tx-nonce-group" description:"Kafka consumer group"`
 }
 
 // RedisConfig is the configuration of application dealing with Redis
