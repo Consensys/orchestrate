@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.13
+
+*Released on February 14th 2019*
+
+- [DOC] add example
+  
 ### Version 0.1.12
 
 *Released on February 14th 2019*
