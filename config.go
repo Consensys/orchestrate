@@ -19,7 +19,7 @@ type WorkerConfig struct {
 
 // KafkaConfig is the config part concerning kafka
 type KafkaConfig struct {
-	ConsumerGroup string   `short:"c" long:"consumer-group" env:"CONSUMER_GROUP" default:"tx-decoder-group"`
+	ConsumerGroup string   `short:"c" long:"consumer-group" env:"KAFKA_GROUP_TX_DECODER" default:"tx-decoder-group"`
 	InTopic       string   `short:"i" long:"in-topic" env:"KAFKA_TOPIC_TX_DECODER" default:"topic-tx-decoder"`
 	OutTopic      string   `short:"o" long:"out-topic" env:"KAFKA_TOPIC_TX_DECODED" default:"topic-tx-decoded"`
 	Address       []string `long:"kafka-address" env:"KAFKA_ADDRESS" default:"localhost:9092"`
