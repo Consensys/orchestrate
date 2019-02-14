@@ -100,7 +100,7 @@ func (t *BaseTracker) HighestBlock(ctx context.Context) (int64, error) {
 	return int64(header.Number.Uint64() - t.depth), nil
 }
 
-// Future is an element used to start	 a task and retrieve its result later
+// Future is an element used to start a task and retrieve its result later
 type Future struct {
 	res chan interface{}
 	err chan error
