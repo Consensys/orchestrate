@@ -1,10 +1,12 @@
 # CHANGELOG
 
-### Version 0.1.11
+### Version 0.1.12
 
-*Unreleased*
+*Released on February 14th 2019*
 
 - [FIX] Add retry backoff strategy on tx-listener when fetching client
+- [FIX] Clean tx-listener logs
+- [FIX] Clean tx-listener closing mechanism
 
 ### Version 0.1.11
 
