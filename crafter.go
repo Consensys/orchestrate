@@ -3,9 +3,6 @@ package ethereum
 import (
 	"fmt"
 	"reflect"
-
-	// "regexp"
-	// "strconv"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
