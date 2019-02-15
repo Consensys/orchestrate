@@ -10,36 +10,6 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
-var bytesTypes [33]reflect.Type
-
-func copyBytesSliceToArray(b []byte, size int) interface{} {
-	if size == 32 {
-		rv := [32]byte{}
-		copy(rv[:], b[0:size])
-		return rv
-	}
-
-	if size == 16 {
-		rv := [16]byte{}
-		copy(rv[:], b[0:size])
-		return rv
-	}
-
-	if size == 8 {
-		rv := [8]byte{}
-		copy(rv[:], b[0:size])
-		return rv
-	}
-
-	if size == 1 {
-		rv := [1]byte{}
-		copy(rv[:], b[0:size])
-		return rv
-	}
-
-	return nil
-}
-
 // PayloadCrafter is a structure that can Craft payloads
 type PayloadCrafter struct{}
 
@@ -77,11 +47,14 @@ func bindArg(t abi.Type, arg string) (interface{}, error) {
 		return hexutil.DecodeBig(arg)
 
 	case abi.BoolTy:
-		b, err := hexutil.DecodeBig(arg)
-		if err != nil {
-			return nil, err
+		switch arg {
+		case "0x1", "true", "1":
+			return true, nil
+		case "0x0", "false", "0":
+			return false, nil
+		default:
+			return nil, fmt.Errorf("bindArg: %v is not a bool", arg)
 		}
-		return b.Int64() > 0, nil
 
 	case abi.StringTy:
 		return arg, nil
@@ -101,8 +74,8 @@ func bindArrayArg(t abi.Type, arg string) (interface{}, error) {
 
 	elemType, _ := abi.NewType(t.Elem.String(), nil)
 	slice := reflect.MakeSlice(reflect.SliceOf(elemType.Type), 0, 0)
-	arg = strings.TrimSuffix(strings.TrimPrefix(arg, "["), "]")
 
+	arg = strings.TrimSuffix(strings.TrimPrefix(arg, "["), "]")
 	argArray := strings.Split(arg, ",")
 
 	if len(argArray) != t.Size {
