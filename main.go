@@ -156,8 +156,8 @@ func main() {
 
 	// Listen to multi in-topics depending on the chainID listened by tx-listener
 	var multiChainInTopics []string
-	for k := range mec.Networks(context.Background()) {
-		multiChainInTopics = append(multiChainInTopics, cfg.Kafka.InTopic+"-"+strconv.Itoa(k))
+	for _, chainID := range mec.Networks(context.Background()) {
+		multiChainInTopics = append(multiChainInTopics, cfg.Kafka.InTopic+"-"+chainID.Text(16))
 	}
 
 	txDecoder := &TxDecoder{mec: mec, saramaProducer: p, cfg: cfg}
