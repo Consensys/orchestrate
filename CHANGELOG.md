@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.3
+
+*Released on February 15th 2019*
+
+- [FIX] change env variable in config (KAFKA_GROUP_TX_NONCE)
+
 ### Version 0.1.2
 
 *Released on February 11th 2019*
