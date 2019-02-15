@@ -6,13 +6,14 @@ import (
 	"time"
 
 	"github.com/Shopify/sarama"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/golang/protobuf/proto"
 	log "github.com/sirupsen/logrus"
 	handCom "gitlab.com/ConsenSys/client/fr/core-stack/common.git/handlers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git"
 	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
-	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener"
 	infSarama "gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-listener.git/handlers"
@@ -183,12 +184,6 @@ func main() {
 	}
 	log.Infof("Multi-Eth client ready")
 
-	txlistener, err := newTxListener(cfg, mec)
-	if err != nil {
-		log.Error("Got error", err)
-		return
-	}
-
 	// Create and Listener Handler
 	handler := TxListenerHandler{p: p, cfg: cfg}
 	handler.Setup()
@@ -206,37 +201,52 @@ func main() {
 	listenerCfg.TxListener.Return.Blocks = true
 	listenerCfg.TxListener.Return.Errors = true
 
+	txlistener := listener.NewTxListener(listener.NewEthClient(mec, listenerCfg))
+
 	// Start listening all chains
 	for _, chainID := range mec.Networks(context.Background()) {
-		// Retrieve last Offset for every chain
-		outTopic := chainTopic(cfg.Kafka.OutTopic, chainID)
-
-		lastRecord, err := getLastMessage(client, outTopic, 0)
-		if err != nil {
-			log.Error(err)
-			return
-		}
-
-		if lastRecord == nil {
-			log.WithFields(log.Fields{
-				"Chain": chainID.Text(16),
-			}).Infof("Listening for the first time")
-
-			txlistener.Listen(chainID, 0, 0, listenerCfg)
-		} else {
-			var pb tracepb.Trace
-			// Unmarshal record to protobuffer
-			err = proto.Unmarshal(lastRecord.Value, &pb)
+		var blockNumber, txIndex int64
+		// Determine starting position
+		if pos, ok := cfg.Listener.Start.Specific[hexutil.EncodeBig(chainID)]; ok {
+			blockNumber, txIndex, err = ParseStartingPosition(pos)
 			if err != nil {
 				log.Error(err)
 				return
 			}
-			log.WithFields(log.Fields{
-				"Chain": chainID.Text(16),
-			}).Infof("Last Receipt txHash=%v blockNumber=%v txIndex=%v", pb.Receipt.TxHash, pb.Receipt.BlockNumber, pb.Receipt.TxIndex)
-
-			txlistener.Listen(chainID, int64(pb.Receipt.BlockNumber), int64(pb.Receipt.TxIndex)+1, listenerCfg)
+		} else {
+			blockNumber, err = TranslateBlockNumber(cfg.Listener.Start.Default)
+			if err != nil {
+				log.Error(err)
+				return
+			}
 		}
+
+		if blockNumber == -2 {
+			// Retrieve last Offset for every chain
+			outTopic := chainTopic(cfg.Kafka.OutTopic, chainID)
+
+			lastRecord, err := getLastMessage(client, outTopic, 0)
+			if err != nil {
+				log.Error(err)
+				return
+			}
+
+			if lastRecord == nil {
+				blockNumber, txIndex = 0, 0
+			} else {
+				var pb tracepb.Trace
+				// Unmarshal record to protobuffer
+				err = proto.Unmarshal(lastRecord.Value, &pb)
+				if err != nil {
+					log.Error(err)
+					return
+				}
+				blockNumber, txIndex = int64(pb.Receipt.BlockNumber), int64(pb.Receipt.TxIndex)+1
+			}
+		}
+
+		// Start listening
+		txlistener.Listen(chainID, blockNumber, txIndex, listenerCfg)
 	}
 
 	// Start listening
