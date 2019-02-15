@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.3
+
+*Released on February 15th 2019*
+
+- [FIX] Change config env variable (KAFKA_GROUP_TX_CRAFTER)
+
 ### Version 0.1.2
 
 *Released on February 13th 2019*
