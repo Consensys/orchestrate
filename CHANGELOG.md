@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.14
+
+*Released on February 15th 2019*
+
+- [FEAT] add ability to craft transactions arrays as input
+  
 ### Version 0.1.13
 
 *Released on February 14th 2019*
