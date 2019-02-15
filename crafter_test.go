@@ -3,63 +3,80 @@ package ethereum
 import (
 	"encoding/json"
 	"math/big"
+
 	"sync"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
-func testBindArg(stringKind string, arg string, t *testing.T) interface{} {
-	boundArg, err := bindArg(stringKind, arg)
+func testBindArg(abiType abi.Type, arg string, t *testing.T) interface{} {
+	boundArg, err := bindArg(abiType, arg)
 	if err != nil {
-		t.Errorf("%q expected to be compatible with type %q but got error %v", arg, stringKind, err)
+		t.Errorf("%q expected to be compatible with type %s but got error %v", arg, abiType.String(), err)
 	}
 	return boundArg
 }
 
 func TestBindArg(t *testing.T) {
 	a := "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"
-	addr := testBindArg("address", a, t).(common.Address)
+	addrtype, _ := abi.NewType("address", nil)
+	addr := testBindArg(addrtype, a, t).(common.Address)
 	if addr.Hex() != a {
 		t.Errorf("Expect bind %q but got %q", a, addr.Hex())
 	}
 
-	dec := testBindArg("int", "0x400", t).(*big.Int)
+	dectype, _ := abi.NewType("int", nil)
+	dec := testBindArg(dectype, "0x400", t).(*big.Int)
 	if dec.Int64() != 1024 {
 		t.Errorf("Expect bind to %v but got %v", 1024, dec.Int64())
 	}
 
-	boolean := testBindArg("bool", "0x1", t).(bool)
+	booltype, _ := abi.NewType("bool", nil)
+	boolean := testBindArg(booltype, "0x1", t).(bool)
 	if !boolean {
 		t.Errorf("Expect bind to %v but got %v", true, false)
 	}
 
-	byteSlice := testBindArg("bytes", "0xabcd", t).([]byte)
+	bytestype, _ := abi.NewType("bytes", nil)
+	byteSlice := testBindArg(bytestype, "0xabcd", t).([]byte)
 	if hexutil.Encode(byteSlice) != "0xabcd" {
 		t.Errorf("Expect bind to %v but got %v", "0xabcd", hexutil.Encode(byteSlice))
 	}
 
-	byte1Array := testBindArg("bytes1", "0xa1b2c3d4e5f67890", t).([1]byte)
+	bytes1type, _ := abi.NewType("bytes1", nil)
+	byte1Array := testBindArg(bytes1type, "0xa1b2c3d4e5f67890", t).([1]byte)
 	expected := "0xa1"
 	if hexutil.Encode(byte1Array[:]) != expected {
 		t.Errorf("Expect bind to %v but got %v", expected, hexutil.Encode(byte1Array[:]))
 	}
 
-	byte8Array := testBindArg("bytes8", "0xa1b2c3d4e5f67890", t).([8]byte)
+	bytes8type, _ := abi.NewType("bytes8", nil)
+	byte8Array := testBindArg(bytes8type, "0xa1b2c3d4e5f67890", t).([8]byte)
 	expected = "0xa1b2c3d4e5f67890"
 	if hexutil.Encode(byte8Array[:]) != expected {
 		t.Errorf("Expect bind to %v but got %v", expected, hexutil.Encode(byte8Array[:]))
 	}
 
-	byte16Array := testBindArg("bytes16", "0xa1b2c3d4e5f67890", t).([16]byte)
+	bytes16type, _ := abi.NewType("bytes16", nil)
+	byte16Array := testBindArg(bytes16type, "0xa1b2c3d4e5f67890", t).([16]byte)
 	expected = "0x0000000000000000a1b2c3d4e5f67890"
 	if hexutil.Encode(byte16Array[:]) != expected {
 		t.Errorf("Expect bind to %v but got %v", expected, hexutil.Encode(byte16Array[:]))
 	}
 
-	byte32Array := testBindArg("bytes32", "0xa1b2c3d4e5f67890", t).([32]byte)
+	bytes17type, _ := abi.NewType("bytes17", nil)
+	byte17Array := testBindArg(bytes17type, "0xa1b2c3d4e5f67890", t).([17]byte)
+	expected = "0x000000000000000000a1b2c3d4e5f67890"
+	if hexutil.Encode(byte17Array[:]) != expected {
+		t.Errorf("Expect bind to %v but got %v", expected, hexutil.Encode(byte17Array[:]))
+	}
+
+	bytes32type, _ := abi.NewType("bytes32", nil)
+	byte32Array := testBindArg(bytes32type, "0xa1b2c3d4e5f67890", t).([32]byte)
 	expected = "0x000000000000000000000000000000000000000000000000a1b2c3d4e5f67890"
 	if hexutil.Encode(byte32Array[:]) != expected {
 		t.Errorf("Expect bind to %v but got %v", expected, hexutil.Encode(byte32Array[:]))
@@ -243,5 +260,43 @@ func TestPayloadCrafterConcurrent(t *testing.T) {
 		if hexutil.Encode(data) != payload {
 			t.Errorf("Craft: expected payload %q but got %q", payload, hexutil.Encode(data))
 		}
+	}
+}
+
+var ArrayInput = newMethod([]byte(`{"constant":false,"inputs":[{"name":"array","type":"uint256[3]"}],"name":"FunctionTest","outputs":[{"name":"","type":"bool"}],"payable":true,"stateMutability":"nonpayable","type":"function"}`))
+
+func TestPayloadCrafterArray(t *testing.T) {
+	c := PayloadCrafter{}
+	var (
+		_array = "[0x1,0x2,0x3]"
+	)
+	data, err := c.Craft(ArrayInput, _array)
+
+	if err != nil {
+		t.Errorf("Craft: received error %q ", err)
+	}
+
+	expected := "0x71cc037a000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003"
+	if hexutil.Encode(data) != expected {
+		t.Errorf("Craft: expected payload %q but got %q", expected, hexutil.Encode(data))
+	}
+}
+
+var ArrayAddressInput = newMethod([]byte(`{"constant":false,"inputs":[{"name":"array","type":"address[3]"}],"name":"FunctionTest","outputs":[{"name":"","type":"bool"}],"payable":true,"stateMutability":"nonpayable","type":"function"}`))
+
+func TestPayloadCrafterArrayAddress(t *testing.T) {
+	c := PayloadCrafter{}
+	var (
+		_array = "[0xca35b7d915458ef540ade6068dfe2f44e8fa733c,0x14723a09acff6d2a60dcdf7aa4aff308fddc160c,0x4b0897b0513fdc7c541b6d9d7e929c4e5364d2db]"
+	)
+	data, err := c.Craft(ArrayAddressInput, _array)
+
+	if err != nil {
+		t.Errorf("Craft: received error %q ", err)
+	}
+
+	expected := "0x620a6a89000000000000000000000000ca35b7d915458ef540ade6068dfe2f44e8fa733c00000000000000000000000014723a09acff6d2a60dcdf7aa4aff308fddc160c0000000000000000000000004b0897b0513fdc7c541b6d9d7e929c4e5364d2db"
+	if hexutil.Encode(data) != expected {
+		t.Errorf("Craft: expected payload %q but got %q", expected, hexutil.Encode(data))
 	}
 }
