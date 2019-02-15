@@ -1,6 +1,10 @@
 package main
 
 import (
+	"fmt"
+	"strconv"
+	"strings"
+
 	flags "github.com/jessevdk/go-flags"
 	log "github.com/sirupsen/logrus"
 )
@@ -35,7 +39,12 @@ type ListenerConfig struct {
 	}
 
 	Tracker struct {
-		Depth uint64 `long:"listener-tracker-depth" env:"LISTENER_TRACKER_DEPTH" default:"1" description:"Depth at which we consider a block final"`
+		Depth uint64 `long:"listener-tracker-depth" env:"LISTENER_TRACKER_DEPTH" default:"5" description:"Depth at which we consider a block final"`
+	}
+
+	Start struct {
+		Default  string            `long:"listener-start-default" env:"LISTENER_START_DEFAULT" default:"oldest" description:"Block position the listener should start listening from 'latest', 'oldest', 'genesis'"`
+		Specific map[string]string `long:"listener-start" env:"LISTENER_START" description:"Position listener should start listening from (format <chainID>:<blockNumber>-<txIndex> e.g. 0x2a:2348721-5)"`
 	}
 }
 
@@ -46,6 +55,45 @@ type Config struct {
 	Kafka    KafkaConfig
 	Eth      EthConfig
 	Listener ListenerConfig
+}
+
+// TranslateBlockNumber translate a starting block number into its integer value
+func TranslateBlockNumber(blockNumber string) (int64, error) {
+	switch blockNumber {
+	case "genesis":
+		return 0, nil
+	case "latest":
+		return -1, nil
+	case "oldest":
+		return -2, nil
+	default:
+		res, err := strconv.ParseInt(blockNumber, 10, 64)
+		if err != nil {
+			return 0, fmt.Errorf("%q is an invalid starting blockNumber expected 'latest', 'oldest', 'genesis' or an integer", blockNumber)
+		}
+		return res, nil
+	}
+}
+
+// ParseStartingPosition parse a starting position
+func ParseStartingPosition(specific string) (int64, int64, error) {
+	split := strings.Split(specific, "-")
+	if len(split) != 2 {
+		return 0, 0, fmt.Errorf("<%q is an invalid starting position (should match <blockNumber>-<txIndex>)", specific)
+	}
+
+	txIndex, err := strconv.ParseInt(split[1], 10, 64)
+	if err != nil {
+		return 0, 0, fmt.Errorf("<%q is an invalid starting position (should match <blockNumber>-<txIndex>)", specific)
+	}
+
+	blockNumber, err := TranslateBlockNumber(split[0])
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return blockNumber, txIndex, nil
+
 }
 
 // LoadConfig load configuration
