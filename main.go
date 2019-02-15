@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
