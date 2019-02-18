@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.1.6
+
+*Released on February 18th 2019*
+
+- [FIX] Clean logs and use logger in `ctx.Logger`
+
+
 ### Version 0.1.5
 
 *Released on February 15th 2019*
