@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.1.14
+
+*Released on February 18th 2019*
+
+- [FEAT] Add `Close` method on Worker
+- [FEAT] Add `logrus.Logger` on `Worker`
+
 ### Version 0.1.13
 
 *Released on February 18th 2019*
