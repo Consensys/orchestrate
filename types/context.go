@@ -30,7 +30,7 @@ type Context struct {
 	index int
 
 	// Logger
-	Logger Logger
+	Logger *log.Entry
 }
 
 // NewContext creates a new context
@@ -50,6 +50,7 @@ func (ctx *Context) Reset() {
 	ctx.Keys = make(map[string]interface{})
 	ctx.handlers = nil
 	ctx.index = -1
+	ctx.Logger = log.NewEntry(log.New())
 }
 
 // Next should be used in middleware
@@ -95,30 +96,4 @@ func (ctx *Context) Prepare(handlers []HandlerFunc, msg interface{}) {
 	ctx.Reset()
 	ctx.handlers = handlers
 	ctx.Msg = msg
-}
-
-// AddDefaultFields creates a new context
-func (l *Logger) AddDefaultFields(fields map[string]interface{}) *log.Entry {
-	for k, v := range fields {
-		l.DefaultFields[k] = v
-	}
-	return log.WithFields(l.DefaultFields)
-}
-
-// DelDefaultFields creates a new context
-func (l *Logger) DelDefaultFields(fields []string) *log.Entry {
-	for _, v := range fields {
-		delete(l.DefaultFields, v)
-	}
-	return log.WithFields(l.DefaultFields)
-}
-
-// WithFields creates a new context
-func (l *Logger) WithFields(fields map[string]interface{}) *log.Entry {
-	ctxFields := l.DefaultFields
-
-	for k, v := range fields {
-		ctxFields[k] = v
-	}
-	return log.WithFields(ctxFields)
 }
