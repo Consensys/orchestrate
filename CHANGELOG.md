@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.13
+
+*Released on February 18th 2019*
+
+- [FEAT] update `Context` sctruct with `Logger` as a logrus Entry to store recurrent log fields in ctx
+
 ### Version 0.1.12
 
 *Released on February 6th 2019*
