@@ -4,11 +4,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Logger ...
-type Logger struct {
-	DefaultFields map[string]interface{}
-}
-
 // HandlerFunc is base type for a function processing a Trace
 type HandlerFunc func(ctx *Context)
 
