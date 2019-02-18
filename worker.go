@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
@@ -15,6 +16,7 @@ type Worker struct {
 	slots       chan struct{}       // Channel used to limit count of goroutine handling messages
 	dying, done chan struct{}       // Channel used to indicate runner has terminated
 	closeOnce   *sync.Once
+	logger      *log.Logger
 }
 
 // NewWorker creates a new worker
@@ -24,6 +26,7 @@ func NewWorker(slots uint) *Worker {
 	if slots == 0 {
 		panic(fmt.Errorf("Worker requires at least 1 goroutine slots"))
 	}
+
 	return &Worker{
 		handlers:  []types.HandlerFunc{},
 		handling:  &sync.WaitGroup{},
@@ -32,6 +35,7 @@ func NewWorker(slots uint) *Worker {
 		dying:     make(chan struct{}),
 		done:      make(chan struct{}),
 		closeOnce: &sync.Once{},
+		logger:    log.StandardLogger(), // TODO: make possible to use non-standard logrus logger
 	}
 }
 
@@ -92,13 +96,11 @@ func (w *Worker) handleMessage(msg interface{}) {
 	// Retrieve a re-cycled context
 	ctx := w.pool.Get().(*types.Context)
 
-	defer func(ctx *types.Context) {
-		// Re-cycle context object
-		w.pool.Put(ctx)
-	}(ctx)
+	// Re-cycle context object
+	defer w.pool.Put(ctx)
 
 	// Prepare context
-	ctx.Prepare(w.handlers, msg)
+	ctx.Prepare(w.handlers, log.NewEntry(w.logger), msg)
 
 	// Handle context
 	ctx.Next()

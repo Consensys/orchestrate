@@ -45,7 +45,7 @@ func (ctx *Context) Reset() {
 	ctx.Keys = make(map[string]interface{})
 	ctx.handlers = nil
 	ctx.index = -1
-	ctx.Logger = log.NewEntry(log.New())
+	ctx.Logger = nil
 }
 
 // Next should be used in middleware
@@ -87,8 +87,9 @@ func (ctx *Context) AbortWithError(err error) *Error {
 }
 
 // Prepare re-initializes context, set handlers and set message
-func (ctx *Context) Prepare(handlers []HandlerFunc, msg interface{}) {
+func (ctx *Context) Prepare(handlers []HandlerFunc, logger *log.Entry, msg interface{}) {
 	ctx.Reset()
 	ctx.handlers = handlers
 	ctx.Msg = msg
+	ctx.Logger = logger
 }

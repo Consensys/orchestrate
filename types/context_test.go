@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var testKey = "test"
@@ -61,7 +63,7 @@ func TestNext(t *testing.T) {
 		mC   = newMiddleware("mC", t)
 	)
 	// Initialize context
-	ctx.Prepare([]HandlerFunc{hA, mA, hErr, mB, hB, a, hC, mC}, nil)
+	ctx.Prepare([]HandlerFunc{hA, mA, hErr, mB, hB, a, hC, mC}, nil, nil)
 	ctx.Keys[testKey] = []string{}
 
 	// Handle context
@@ -82,4 +84,13 @@ func TestNext(t *testing.T) {
 	if len(ctx.T.Errors) != 2 {
 		t.Errorf("Context: expected 2 errors but got %v", len(ctx.T.Errors))
 	}
+}
+
+func TestLogger(t *testing.T) {
+	logHandler := func(ctx *Context) { ctx.Logger.Info("Test") }
+
+	ctx := NewContext()
+	ctx.Prepare([]HandlerFunc{logHandler}, log.NewEntry(log.StandardLogger()), nil)
+
+	ctx.Next()
 }
