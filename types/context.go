@@ -6,7 +6,7 @@ import (
 
 // Logger ...
 type Logger struct {
-	Fields map[string]interface{}
+	DefaultFields map[string]interface{}
 }
 
 // HandlerFunc is base type for a function processing a Trace
@@ -97,25 +97,25 @@ func (ctx *Context) Prepare(handlers []HandlerFunc, msg interface{}) {
 	ctx.Msg = msg
 }
 
-// AddFields creates a new context
-func (l *Logger) AddFields(fields map[string]interface{}) *log.Entry {
+// AddDefaultFields creates a new context
+func (l *Logger) AddDefaultFields(fields map[string]interface{}) *log.Entry {
 	for k, v := range fields {
-		l.Fields[k] = v
+		l.DefaultFields[k] = v
 	}
-	return log.WithFields(l.Fields)
+	return log.WithFields(l.DefaultFields)
 }
 
-// DelFields creates a new context
-func (l *Logger) DelFields(fields []string) *log.Entry {
+// DelDefaultFields creates a new context
+func (l *Logger) DelDefaultFields(fields []string) *log.Entry {
 	for _, v := range fields {
-		delete(l.Fields, v)
+		delete(l.DefaultFields, v)
 	}
-	return log.WithFields(l.Fields)
+	return log.WithFields(l.DefaultFields)
 }
 
 // WithFields creates a new context
 func (l *Logger) WithFields(fields map[string]interface{}) *log.Entry {
-	ctxFields := l.Fields
+	ctxFields := l.DefaultFields
 
 	for k, v := range fields {
 		ctxFields[k] = v
