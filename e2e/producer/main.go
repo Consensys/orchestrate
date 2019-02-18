@@ -11,7 +11,7 @@ import (
 
 var (
 	kafkaURL = []string{"localhost:9092"}
-	topic    = "topic-tx-decoder-0"
+	topic    = "topic-tx-decoder-3"
 )
 
 func newMessage(i int) *sarama.ProducerMessage {
@@ -21,7 +21,7 @@ func newMessage(i int) *sarama.ProducerMessage {
 	}
 	b, _ := proto.Marshal(
 		&tracepb.Trace{
-			Chain: &tracepb.Chain{Id: "0x0"},
+			Chain: &tracepb.Chain{Id: "0x3"},
 			Receipt: &ethpb.Receipt{
 				TxHash:          "0xbf0b3048242aff8287d1dd9de0d2d100cee25d4ea45b8afa28bdfc1e2a775afd",
 				BlockHash:       "0x",
