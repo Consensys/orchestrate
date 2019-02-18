@@ -1,5 +1,10 @@
 package types
 
+// Logger ...
+type Logger struct {
+	Fields map[string]interface{}
+}
+
 // HandlerFunc is base type for a function processing a Trace
 type HandlerFunc func(ctx *Context)
 
@@ -7,6 +12,7 @@ type HandlerFunc func(ctx *Context)
 type Context struct {
 	// T stores information about transaction lifecycle in high level types
 	T *Trace
+
 	// Message that triggered Context execution (typically a sarama.ConsumerMessage)
 	Msg interface{}
 
@@ -15,8 +21,12 @@ type Context struct {
 
 	// Handlers to be executed on context
 	handlers []HandlerFunc
+
 	// Handler being executed
 	index int
+
+	// Logger
+	Logger Logger
 }
 
 // NewContext creates a new context
@@ -81,4 +91,30 @@ func (ctx *Context) Prepare(handlers []HandlerFunc, msg interface{}) {
 	ctx.Reset()
 	ctx.handlers = handlers
 	ctx.Msg = msg
+}
+
+// AddFields creates a new context
+func (l *Logger) AddFields(fields map[string]interface{}) map[string]interface{} {
+	for k, v := range fields {
+		l.Fields[k] = v
+	}
+	return l.Fields
+}
+
+// DelFields creates a new context
+func (l *Logger) DelFields(fields []string) map[string]interface{} {
+	for _, v := range fields {
+		delete(l.Fields, v)
+	}
+	return l.Fields
+}
+
+// WithFields creates a new context
+func (l *Logger) WithFields(fields map[string]interface{}) map[string]interface{} {
+	ctxFields := l.Fields
+
+	for k, v := range fields {
+		ctxFields[k] = v
+	}
+	return ctxFields
 }
