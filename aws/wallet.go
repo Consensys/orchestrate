@@ -52,6 +52,7 @@ func GetWallet(client *secretsmanager.SecretsManager, a *common.Address) (wal *W
 	
 	wal = EmptyWallet()
 	wal.sec, err = SecretFromKey(a.Hex())
+	wal.sec.SetClient(client)
 
 	_, err = wal.sec.GetValue()
 	if err != nil {
@@ -69,6 +70,11 @@ func GetWallet(client *secretsmanager.SecretsManager, a *common.Address) (wal *W
 // GetPriv returns the private key of Wallet
 func (wal *Wallet) GetPriv() (*ecdsa.PrivateKey) {
 	return wal.priv
+}
+
+//GetAddress returns the address of the wallet
+func (wal *Wallet) GetAddress() (*common.Address) {
+	return &wal.address
 }
 
 

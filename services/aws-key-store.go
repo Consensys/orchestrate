@@ -2,6 +2,7 @@ package services
 
 import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	aws "gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/aws"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 	//"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
 	"github.com/ethereum/go-ethereum/common"
@@ -66,4 +67,15 @@ func (s *AWSKeyStore) SignRawHash(
 ) (rsv []byte, err error) {
 
 	return []byte{}, fmt.Errorf("Not implemented yet")
+}
+
+// GenerateWallet returns an ethereum address, corresponding to a newly created wallet
+func (s* AWSKeyStore) GenerateWallet() (add *common.Address, err error) {
+
+	wal, err := aws.GenerateWallet(s.client)
+	if err != nil {
+		return nil, err
+	}
+
+	return wal.GetAddress(), nil
 }

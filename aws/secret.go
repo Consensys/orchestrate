@@ -67,7 +67,6 @@ func (sec *Secret) SaveNew() (*secretsmanager.CreateSecretOutput, error) {
 	if sec.client == nil { return nil, fmt.Errorf("Client not set")}
 
 	input := secretsmanager.CreateSecretInput{
-		ClientRequestToken: aws.String("Classic AWS_TOKEN"),
 		Description:        aws.String("Miscellaneous core-stack secret"),
 		Name:               aws.String(sec.key),
 		SecretString:       aws.String(sec.value),
@@ -89,7 +88,7 @@ func (sec *Secret) GetValue() (string, error) {
 
 	input := secretsmanager.GetSecretValueInput{
 		SecretId:     aws.String(sec.key),
-		VersionStage: aws.String("AWSPREVIOUS"),
+		VersionStage: aws.String("AWSCURRENT"),
 	}
 
 	res, err := sec.client.GetSecretValue(&input)
@@ -108,7 +107,6 @@ func (sec *Secret) Update() (*secretsmanager.PutSecretValueOutput, error) {
 	if sec.client == nil { return nil, fmt.Errorf("Client not set")}
 
 	input := secretsmanager.PutSecretValueInput{
-		ClientRequestToken: aws.String("Classic AWS_TOKEN"),
 		SecretId:           aws.String(sec.key),
 		SecretString:       aws.String(sec.value),
 	}
