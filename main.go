@@ -88,22 +88,6 @@ func (h *TxDecoder) Cleanup(s sarama.ConsumerGroupSession) error {
 	return nil
 }
 
-func newSaramaClient(kafkaURL []string) sarama.Client {
-	config := sarama.NewConfig()
-	config.Version = sarama.V1_0_0_0
-	config.Consumer.Return.Errors = true
-	config.Producer.Return.Errors = true
-	config.Producer.Return.Successes = true
-
-	// Create client
-	client, err := sarama.NewClient(kafkaURL, config)
-	if err != nil {
-		panic(err)
-	}
-	log.Info("Sarama client ready")
-	return client
-}
-
 func main() {
 	// Load Config from env variables
 	var cfg Config
@@ -111,7 +95,7 @@ func main() {
 
 	// Configure the logger
 	ConfigureLogger(cfg.Log)
-	log.Info("Start worker...")
+	log.Info("Initialize worker...")
 
 	// Init config
 	config := sarama.NewConfig()
@@ -123,43 +107,60 @@ func main() {
 	// Create sarama client
 	client, err := sarama.NewClient(cfg.Kafka.Address, config)
 	if err != nil {
-		log.Println(err)
+		log.Fatalf("Could not to start sarama client: %v", err)
 		return
 	}
+	var brokers = make(map[int32]string)
+	for _, v := range client.Brokers() {
+		brokers[v.ID()] = v.Addr()
+	}
+	log.WithFields(log.Fields{
+		"kafka.endpoint": cfg.Kafka.Address,
+		"kafka.brokers":  brokers,
+	}).Info("Kafka client ready")
 	defer client.Close()
-	log.Println("Client ready")
 
 	// Create sarama sync producer
 	p, err := sarama.NewSyncProducerFromClient(client)
 	if err != nil {
-		log.Println(err)
+		log.Fatalf("Could not start sarama producer: %v", err)
 		return
 	}
-	log.Println("Producer ready")
+	log.Info("Kafka producer ready")
 	defer p.Close()
 
 	// Create sarama consumer
 	g, err := sarama.NewConsumerGroupFromClient(cfg.Kafka.ConsumerGroup, client)
 	if err != nil {
-		log.Error(err)
+		log.Fatalf("Could not start sarama consumer group: %v", err)
 		return
 	}
-	log.Info("Consumer group ready")
+	coordinatorBroker, _ := client.Coordinator(cfg.Kafka.ConsumerGroup)
+	log.WithFields(log.Fields{
+		"kafka.consumergroup": cfg.Kafka.ConsumerGroup,
+		"kafka.coordinator":   coordinatorBroker.Addr(),
+	}).Info("Kafka consumer group ready")
 	defer func() { g.Close() }()
 
 	// Create an ethereum client connection
 	mec, err := ethclient.MultiDial(cfg.Eth.URLs)
 	if err != nil {
-		log.Errorf("Got error %v", err)
+		log.Fatalf("Could not to start ethereum client: %v", err)
 	}
+	chainIDs := mec.Networks(context.Background())
+	log.WithFields(log.Fields{
+		"ethclient.chainIDs": chainIDs,
+	}).Info("Ethereum multi-client ready")
 
 	// Listen to multi in-topics depending on the chainID listened by tx-listener
 	var multiChainInTopics []string
-	for _, chainID := range mec.Networks(context.Background()) {
-		multiChainInTopics = append(multiChainInTopics, cfg.Kafka.InTopic+"-"+chainID.Text(16))
+	for _, chainID := range chainIDs {
+		multiChainInTopics = append(multiChainInTopics, cfg.Kafka.InTopic+"-"+chainID.String())
 	}
 
 	txDecoder := &TxDecoder{mec: mec, saramaProducer: p, cfg: cfg}
+	log.WithFields(log.Fields{
+		"kafka.topics": multiChainInTopics,
+	}).Info("Starting worker")
 	g.Consume(context.Background(), multiChainInTopics, txDecoder)
-	log.Error(err)
 }

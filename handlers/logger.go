@@ -1,33 +1,35 @@
 package handlers
 
 import (
-	"fmt"
+	"time"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	infSarama "gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git"
 )
 
 // LoggerHandler ...
 func LoggerHandler(ctx *types.Context) {
+	start := time.Now()
 	msg := ctx.Msg.(*sarama.ConsumerMessage)
+	ctx.Logger = log.WithFields(infSarama.ConsumerMessageFields(msg))
 
-	log.WithFields(log.Fields{
-		"Offset": msg.Offset,
-	}).Info("Logger [IN]")
+	ctx.Logger.WithFields(log.Fields{
+		"start": start,
+	}).Debug("New message")
 
 	ctx.Next()
 
-	for _, logData := range ctx.T.Receipt().Logs {
-		log.WithFields(log.Fields{
-			"Offset": msg.Offset,
-			"Log":    logData.DecodedData,
-		}).Info("Logger [OUT]")
-	}
-
-	errors := ctx.T.Errors
-	if len(errors) > 0 {
-		// TODO: change to log
-		fmt.Printf("Error: %v\n", errors)
+	latency := time.Now().Sub(start)
+	if len(ctx.T.Errors) > 0 {
+		ctx.Logger.WithFields(log.Fields{
+			"latency": latency,
+			"errors":  ctx.T.Errors,
+		}).Error("Error processing message")
+	} else {
+		ctx.Logger.WithFields(log.Fields{
+			"latency": latency,
+		}).Debug("Message processed")
 	}
 }
