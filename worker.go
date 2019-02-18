@@ -9,11 +9,12 @@ import (
 
 // Worker for consuming Sarama messages
 type Worker struct {
-	handlers []types.HandlerFunc // Handlers to apply on each context
-	handling *sync.WaitGroup     // WaitGroup to keep track of messages being consumed and gracefully stop
-	pool     *sync.Pool          // Pool used to re-cycle context
-	slots    chan struct{}       // Channel used to limit count of goroutine handling messages
-	done     chan struct{}       // Channel used to indicate runner has terminated
+	handlers    []types.HandlerFunc // Handlers to apply on each context
+	handling    *sync.WaitGroup     // WaitGroup to keep track of messages being consumed and gracefully stop
+	pool        *sync.Pool          // Pool used to re-cycle context
+	slots       chan struct{}       // Channel used to limit count of goroutine handling messages
+	dying, done chan struct{}       // Channel used to indicate runner has terminated
+	closeOnce   *sync.Once
 }
 
 // NewWorker creates a new worker
@@ -24,11 +25,13 @@ func NewWorker(slots uint) *Worker {
 		panic(fmt.Errorf("Worker requires at least 1 goroutine slots"))
 	}
 	return &Worker{
-		handlers: []types.HandlerFunc{},
-		handling: &sync.WaitGroup{},
-		pool:     &sync.Pool{New: func() interface{} { return types.NewContext() }},
-		slots:    make(chan struct{}, slots),
-		done:     make(chan struct{}, 1),
+		handlers:  []types.HandlerFunc{},
+		handling:  &sync.WaitGroup{},
+		pool:      &sync.Pool{New: func() interface{} { return types.NewContext() }},
+		slots:     make(chan struct{}, slots),
+		dying:     make(chan struct{}),
+		done:      make(chan struct{}),
+		closeOnce: &sync.Once{},
 	}
 }
 
@@ -39,35 +42,50 @@ func (w *Worker) Use(handler types.HandlerFunc) {
 
 // Run Starts a worker to consume sarama messages
 func (w *Worker) Run(messages chan interface{}) {
+runningLoop:
 	for {
-		msg, ok := <-messages
-		if !ok {
-			// Message channel has been close.
+		select {
+		case msg, ok := <-messages:
+			if !ok {
+				// Message channel has been close so we also close
+				w.Close()
+			} else {
+				// Indicate that a new message is being handled
+				w.handling.Add(1)
+
+				// Acquire a goroutine slot
+				w.slots <- struct{}{}
+
+				go func(msg interface{}) {
+					// Handle message in a dedicated goroutine
+					w.handleMessage(msg)
+
+					// Release a goroutine slot
+					<-w.slots
+
+					// Indicate that message has been handled
+					w.handling.Done()
+				}(msg)
+			}
+		case <-w.dying:
 			// We wait until all messages have been properly handled
 			w.handling.Wait()
-			// We notify that we have gracefully stoped
-			close(w.done)
+
 			// Exit loop
-			break
-		} else {
-			// Indicate that a new message is being handled
-			w.handling.Add(1)
+			break runningLoop
 
-			// Acquire a goroutine slot
-			w.slots <- struct{}{}
-
-			go func(msg interface{}) {
-				// Handle message in a dedicated goroutine
-				w.handleMessage(msg)
-
-				// Release a goroutine slot
-				<-w.slots
-
-				// Indicate that message has been handled
-				w.handling.Done()
-			}(msg)
 		}
 	}
+
+	// We notify that we properly stopped
+	close(w.done)
+}
+
+// Close worker
+func (w *Worker) Close() {
+	w.closeOnce.Do(func() {
+		close(w.dying)
+	})
 }
 
 func (w *Worker) handleMessage(msg interface{}) {
