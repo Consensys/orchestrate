@@ -1,5 +1,9 @@
 package types
 
+import (
+	log "github.com/sirupsen/logrus"
+)
+
 // Logger ...
 type Logger struct {
 	Fields map[string]interface{}
@@ -94,27 +98,27 @@ func (ctx *Context) Prepare(handlers []HandlerFunc, msg interface{}) {
 }
 
 // AddFields creates a new context
-func (l *Logger) AddFields(fields map[string]interface{}) map[string]interface{} {
+func (l *Logger) AddFields(fields map[string]interface{}) *log.Entry {
 	for k, v := range fields {
 		l.Fields[k] = v
 	}
-	return l.Fields
+	return log.WithFields(l.Fields)
 }
 
 // DelFields creates a new context
-func (l *Logger) DelFields(fields []string) map[string]interface{} {
+func (l *Logger) DelFields(fields []string) *log.Entry {
 	for _, v := range fields {
 		delete(l.Fields, v)
 	}
-	return l.Fields
+	return log.WithFields(l.Fields)
 }
 
 // WithFields creates a new context
-func (l *Logger) WithFields(fields map[string]interface{}) map[string]interface{} {
+func (l *Logger) WithFields(fields map[string]interface{}) *log.Entry {
 	ctxFields := l.Fields
 
 	for k, v := range fields {
 		ctxFields[k] = v
 	}
-	return ctxFields
+	return log.WithFields(ctxFields)
 }
