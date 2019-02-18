@@ -14,7 +14,7 @@ type LoggerConfig struct {
 
 // WorkerConfig application configuration
 type WorkerConfig struct {
-	Slots uint `short:"w" long:"worker-slots" env:"WORKER" default:"50"`
+	Slots uint `short:"w" long:"worker-slots" env:"WORKER" default:"1"`
 }
 
 // KafkaConfig is the config part concerning kafka
