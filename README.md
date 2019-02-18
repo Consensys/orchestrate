@@ -22,7 +22,7 @@ import "gitlab.com/ConsenSys/client/fr/core-stack/common.git"
 
 Core-Stack requires Go 1.11
 
-## Worker
+## Cobra CLI
 
 ### Quick Start
 
