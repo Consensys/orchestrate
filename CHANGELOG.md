@@ -1,5 +1,19 @@
 # CHANGELOG
 
+### Version 0.1.5
+
+*Released on February 15th 2019*
+
+- [FIX] Correct chainID inserted in kafka topic to listen to
+
+
+### Version 0.1.4
+
+*Released on February 15th 2019*
+
+- [FIX] Change config env variable(KAFKA_GROUP_TX_DECODER)
+
+
 ### Version 0.1.3
 
 *Released on February 13th 2019*
