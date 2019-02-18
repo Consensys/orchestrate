@@ -147,13 +147,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("Could not to start ethereum client: %v", err)
 	}
+	chainIDs := mec.Networks(context.Background())
+	log.WithFields(log.Fields{
+		"ethclient.chainIDs": chainIDs,
+	}).Info("Ethereum multi-client ready")
 
 	// Listen to multi in-topics depending on the chainID listened by tx-listener
 	var multiChainInTopics []string
-	for _, chainID := range mec.Networks(context.Background()) {
-		log.WithFields(log.Fields{
-			"ethclient.chainID": chainID,
-		}).Info("Ethereum client ready")
+	for _, chainID := range chainIDs {
 		multiChainInTopics = append(multiChainInTopics, cfg.Kafka.InTopic+"-"+chainID.String())
 	}
 
