@@ -1,5 +1,9 @@
 package types
 
+import (
+	log "github.com/sirupsen/logrus"
+)
+
 // HandlerFunc is base type for a function processing a Trace
 type HandlerFunc func(ctx *Context)
 
@@ -7,6 +11,7 @@ type HandlerFunc func(ctx *Context)
 type Context struct {
 	// T stores information about transaction lifecycle in high level types
 	T *Trace
+
 	// Message that triggered Context execution (typically a sarama.ConsumerMessage)
 	Msg interface{}
 
@@ -15,8 +20,12 @@ type Context struct {
 
 	// Handlers to be executed on context
 	handlers []HandlerFunc
+
 	// Handler being executed
 	index int
+
+	// Logger
+	Logger *log.Entry
 }
 
 // NewContext creates a new context
@@ -36,6 +45,7 @@ func (ctx *Context) Reset() {
 	ctx.Keys = make(map[string]interface{})
 	ctx.handlers = nil
 	ctx.index = -1
+	ctx.Logger = log.NewEntry(log.New())
 }
 
 // Next should be used in middleware
