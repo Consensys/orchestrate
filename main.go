@@ -110,7 +110,6 @@ func main() {
 		log.Fatalf("Could not to start sarama client: %v", err)
 		return
 	}
-	defer client.Close()
 	var brokers = make(map[int32]string)
 	for _, v := range client.Brokers() {
 		brokers[v.ID()] = v.Addr()
@@ -119,6 +118,7 @@ func main() {
 		"kafka.endpoint": cfg.Kafka.Address,
 		"kafka.brokers":  brokers,
 	}).Info("Kafka client ready")
+	defer client.Close()
 
 	// Create sarama sync producer
 	p, err := sarama.NewSyncProducerFromClient(client)
