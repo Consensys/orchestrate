@@ -48,7 +48,7 @@ func EthClientURLs(f *pflag.FlagSet) {
 		"https://mainnet.infura.io/v3/bfc9d6e51fbc4d3db54bea58d1094f9c",
 	}
 	desc := fmt.Sprintf(`Ethereum client URLs.
-	Environment variable: %q`, envName)
+Environment variable: %q`, envName)
 	f.StringSlice(flagName, defaultValue, desc)
 	viper.BindPFlag(viperName, f.Lookup(flagName))
 	viper.BindEnv(viperName, envName)
