@@ -1,15 +1,13 @@
 package main
 
 import (
-	"fmt"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 // Define a handler method
 func handler(ctx *types.Context) {
-	fmt.Printf("* Handling %v\n", ctx.Msg.(string))
+	ctx.Logger.Infof("Handling %v\n", ctx.Msg.(string))
 }
 
 func main() {

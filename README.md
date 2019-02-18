@@ -38,15 +38,13 @@ $ cat examples/quick-start/main.go
 package main
 
 import (
-	"fmt"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
-// Define a handler method 
+// Define a handler method
 func handler(ctx *types.Context) {
-	fmt.Printf("* Handling %v\n", ctx.Msg.(string))
+	ctx.Logger.Infof("Handling %v\n", ctx.Msg.(string))
 }
 
 func main() {
@@ -77,9 +75,9 @@ func main() {
 # Run example
 $ go run examples/quick-start/main.go
 
-* Handling Message-1
-* Handling Message-2
-* Handling Message-3
+INFO[0000] Handling Message-1
+INFO[0000] Handling Message-2
+INFO[0000] Handling Message-3
 ```
 
 ### Handlers
@@ -109,27 +107,25 @@ $ cat examples/pipeline-middleware/main.go
 package main
 
 import (
-	"fmt"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 // Define a pipeline handler
 func pipeline(ctx *types.Context) {
-	fmt.Printf("* Pipeline handling %v\n", ctx.Msg.(string))
+	ctx.Logger.Infof("Pipeline handling %v\n", ctx.Msg.(string))
 }
 
 // Define a middleware handler
 func middleware(ctx *types.Context) {
 	// Start middleware execution
-	fmt.Printf("* Middleware starts handling %v\n", ctx.Msg.(string))
+	ctx.Logger.Infof("Middleware starts handling %v\n", ctx.Msg.(string))
 
 	// Trigger execution of pending handlers
 	ctx.Next()
 
 	// Executed after pending handlers have executed
-	fmt.Printf("* Middleware finishes handling %v\n", ctx.Msg.(string))
+	ctx.Logger.Infof("Middleware finishes handling %v\n", ctx.Msg.(string))
 }
 
 func main() {
@@ -160,12 +156,12 @@ func main() {
 # Run example
 $ go run examples/pipeline-middleware/main.go
 
-* Middleware starts handling Message-1
-* Pipeline handling Message-1
-* Middleware finishes handling Message-1
-* Middleware starts handling Message-2
-* Pipeline handling Message-2
-* Middleware finishes handling Message-2
+INFO[0000] * Middleware starts handling Message-1
+INFO[0000] * Pipeline handling Message-1
+INFO[0000] * Middleware finishes handling Message-1
+INFO[0000] * Middleware starts handling Message-2
+INFO[0000] * Pipeline handling Message-2
+INFO[0000] * Middleware finishes handling Message-2
 ```
 
 #### Concurrency
