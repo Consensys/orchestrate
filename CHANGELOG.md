@@ -1,5 +1,13 @@
 # CHANGELOG
 
+### Version 0.1.2
+
+*Released on February 19th 2019*
+
+- [FEAT] implement `SignalListener`
+- [FEAT] implement flag for `ethereum`, `http`, `kafka`, `logger`, `redis`, `worker`
+- [FEAT] clean config organisation based on `pflag`, `viper` & `cobra`
+
 ### Version 0.1.1
 
 *Released on February 6th 2019*
