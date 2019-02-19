@@ -8,5 +8,4 @@ require (
 	github.com/spf13/pflag v1.0.3
 	github.com/spf13/viper v1.3.1
 	gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.12
-	gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-crafter.git v0.1.2
 )
