@@ -1,13 +1,12 @@
 package cmd
 
 import (
-	"context"
-	"net/http"
 	"os"
 
 	"github.com/spf13/cobra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/boilerplate-worker.git/app"
 	"gitlab.com/ConsenSys/client/fr/core-stack/common.git/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/common.git/config"
 )
 
 func newRunCommand() *cobra.Command {
@@ -17,10 +16,11 @@ func newRunCommand() *cobra.Command {
 		Run:   run,
 	}
 
+	config.HTTPHostname(runCmd.Flags())
+
 	return runCmd
 }
 
-// ProcessSignals process signals
 func run(cmd *cobra.Command, args []string) {
 	// Create app
 	a := app.New()
@@ -29,13 +29,9 @@ func run(cmd *cobra.Command, args []string) {
 	sig := utils.NewSignalListener(func(signal os.Signal) { a.Close() })
 	defer sig.Close()
 
-	// Start server
-	go http.ListenAndServe(opts.HTTP.Hostname, prepareHTTPRouter(context.Background()))
-
-	// Start App
-	go a.Start()
+	// Run App
+	a.Run()
 
 	// Wait
 	<-a.Done()
-	os.Exit(0)
 }
