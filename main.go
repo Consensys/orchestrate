@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"math/big"
+	"os"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/boilerplate-worker.git/cmd"
 	handCom "gitlab.com/ConsenSys/client/fr/core-stack/common.git/handlers"
 	core "gitlab.com/ConsenSys/client/fr/core-stack/core.git"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
@@ -159,4 +161,10 @@ func main() {
 	txCrafter := &TxCrafter{mec: mec, saramaProducer: p, cfg: cfg}
 	err = g.Consume(context.Background(), []string{cfg.Kafka.InTopic}, txCrafter)
 	log.Error(err)
+	command := cmd.NewCommand()
+
+	if err := command.Execute(); err != nil {
+		log.Errorf("%v\n", err)
+		os.Exit(1)
+	}
 }
