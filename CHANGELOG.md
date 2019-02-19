@@ -4,6 +4,7 @@
 
 *Unreleased*
 
+- [FEAT] implement `SignalListener`
 - [FEAT] clean config organisation based on `pflag`, `viper` & `cobra`
 
 ### Version 0.1.1
