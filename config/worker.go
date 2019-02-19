@@ -55,7 +55,7 @@ var (
 	txDecodedTopicDefault = "topic-tx-decoded"
 )
 
-// Kafka topic environemnt variables
+// Kafka topic environment variables
 
 // TxCrafterInTopic register flag for kafka input topic on tx crafter
 func TxCrafterInTopic(f *pflag.FlagSet) {
