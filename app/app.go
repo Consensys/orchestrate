@@ -44,7 +44,7 @@ func (app *App) init() {
 // Run application
 func (app *App) Run() {
 	// Run main loop
-	log.Infof("boilerplate: starts running...")
+	log.Infof("starts running...")
 	go app.run()
 }
 
@@ -57,7 +57,7 @@ appLoop:
 	for {
 		select {
 		case t := <-ticker.C:
-			log.Infof("boilerplate: %v", t)
+			log.Infof("app: %v", t)
 		case <-app.dying:
 			break appLoop
 		}
@@ -87,7 +87,7 @@ func (app *App) Close() {
 		// Indicate that app is no more ready
 		app.ready.Store(false)
 		close(app.dying)
-		log.Infof("boilerplate: closing...")
+		log.Infof("app closing...")
 	})
 }
 

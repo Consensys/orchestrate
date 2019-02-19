@@ -53,7 +53,7 @@ func prepareHTTPRouter(app *App) *http.ServeMux {
 	// Add a simple readiness check that always fails.
 	health.AddReadinessCheck("readiness-check", func() error {
 		if !app.Ready() {
-			return fmt.Errorf("app not ready")
+			return fmt.Errorf("not ready")
 		}
 		return nil
 	})
