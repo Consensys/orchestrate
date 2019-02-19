@@ -21,12 +21,16 @@ type SignalListener struct {
 
 // NewSignalListener creates a new SignalListener
 func NewSignalListener(cb func(os.Signal)) *SignalListener {
-	return &SignalListener{
+	l := &SignalListener{
 		signals:   make(chan os.Signal, 3),
 		closed:    make(chan struct{}),
 		closeOnce: &sync.Once{},
 		cb:        cb,
 	}
+
+	go l.listen()
+
+	return l
 }
 
 // Close signal listener
@@ -37,7 +41,7 @@ func (l *SignalListener) Close() {
 }
 
 // Listen start Listening to signals
-func (l *SignalListener) Listen() {
+func (l *SignalListener) listen() {
 	// Redirect signals
 	signal.Notify(l.signals)
 signalLoop:
