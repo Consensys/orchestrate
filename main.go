@@ -1,16 +1,17 @@
 package main
 
 import (
-	"context"
-	"net/http"
+	"os"
 
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/boilerplate-worker.git/cmd"
 )
 
 func main() {
-	var opts Config
-	LoadConfig(&opts)
-	ConfigureLogger(opts.Log)
-	go http.ListenAndServe(opts.HTTP.Hostname, prepareHTTPRouter(context.Background()))
-	log.Info("Start worker...")
+	command := cmd.NewCommand()
+
+	if err := command.Execute(); err != nil {
+		log.Errorf("%v\n", err)
+		os.Exit(1)
+	}
 }

@@ -1,15 +1,46 @@
-package main
+package app
 
 import (
-	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/heptiolabs/healthcheck"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
-func prepareHTTPRouter(ctx context.Context) *http.ServeMux {
+// initServer creates server and attach it to application
+func initServer(app *App) {
+	// Create server
+	server := &http.Server{
+		Addr:    viper.GetString("http.hostname"),
+		Handler: prepareHTTPRouter(app),
+	}
+
+	// Attach server on application
+	app.server = server
+
+	// Start Server
+	go func() {
+		log.Infof("server listening on %v", server.Addr)
+		err := server.ListenAndServe()
+		if err != nil {
+			log.Errorf("server error: %v", err)
+			// We encounter an issue with the server so we stop the application
+			app.Close()
+		}
+	}()
+
+	// Wait for app to be done and then close all connexion
+	go func() {
+		<-app.Done()
+		server.Close()
+	}()
+}
+
+func prepareHTTPRouter(app *App) *http.ServeMux {
 	// Create a metrics-exposing Handler for the Prometheus registry
 	// The healthcheck related metrics will be prefixed with the provided namespace
 	health := healthcheck.NewMetricsHandler(prometheus.DefaultRegisterer, "health")
@@ -21,7 +52,9 @@ func prepareHTTPRouter(ctx context.Context) *http.ServeMux {
 
 	// Add a simple readiness check that always fails.
 	health.AddReadinessCheck("readiness-check", func() error {
-		// TODO: return error if running and can access external components.
+		if !app.Ready() {
+			return fmt.Errorf("not ready")
+		}
 		return nil
 	})
 
