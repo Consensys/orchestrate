@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"context"
+	"net/http"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -26,6 +28,9 @@ func run(cmd *cobra.Command, args []string) {
 	// Process signals
 	sig := utils.NewSignalListener(func(signal os.Signal) { a.Close() })
 	defer sig.Close()
+
+	// Start server
+	go http.ListenAndServe(opts.HTTP.Hostname, prepareHTTPRouter(context.Background()))
 
 	// Start App
 	go a.Start()

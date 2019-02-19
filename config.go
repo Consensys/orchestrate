@@ -12,9 +12,15 @@ type LoggerConfig struct {
 	Format string `long:"log-format" env:"LOG_FORMAT" default:"text" description:"Log formatter, one of text, json."`
 }
 
+// HTTPConfig configuration
+type HTTPConfig struct {
+	Hostname string `short:"h" long:"http-hostname" env:"HTTP_HOSTNAME" default:":8080" description:"Hostname to expose healthchecks and metrics."`
+}
+
 // Config worker configuration
 type Config struct {
-	Log LoggerConfig
+	Log  LoggerConfig
+	HTTP HTTPConfig
 }
 
 // LoadConfig load configuration
