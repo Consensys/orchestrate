@@ -1,12 +1,17 @@
 package main
 
 import (
-	log "github.com/sirupsen/logrus"
+	"fmt"
+	"os"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/boilerplate-worker.git/cmd"
 )
 
 func main() {
-	var opts Config
-	LoadConfig(&opts)
-	ConfigureLogger(opts.Log)
-	log.Info("Start worker...")
+	command := cmd.NewCommand()
+
+	if err := command.Execute(); err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
+	}
 }
