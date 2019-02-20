@@ -6,7 +6,7 @@ require (
 	github.com/golang/protobuf v1.2.0
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/sirupsen/logrus v1.3.0
-	gitlab.com/ConsenSys/client/fr/core-stack/common.git v0.1.1
+	gitlab.com/ConsenSys/client/fr/core-stack/common.git v0.1.3
 	gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.14
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.14
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.1.4

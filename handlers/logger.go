@@ -25,8 +25,7 @@ func LoggerHandler(ctx *types.Context) {
 	if len(ctx.T.Errors) > 0 {
 		ctx.Logger.WithFields(log.Fields{
 			"latency": latency,
-			"errors":  ctx.T.Errors,
-		}).Error("Error processing message")
+		}).Errorf("Error processing message %v", ctx.T.Errors)
 	} else {
 		ctx.Logger.WithFields(log.Fields{
 			"latency": latency,
