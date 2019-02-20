@@ -10,10 +10,14 @@ func Loader(u services.Unmarshaller) types.HandlerFunc {
 	return func(ctx *types.Context) {
 		// Unmarshal message
 		err := u.Unmarshal(ctx.Msg, ctx.T)
+
 		if err != nil {
 			// TODO: handle error
+			ctx.Logger.Errorf("error unmarshalling: %v", err)
 			ctx.AbortWithError(err)
 			return
 		}
+
+		ctx.Logger.Debugf("message unmarshalled: %v", ctx.T)
 	}
 }
