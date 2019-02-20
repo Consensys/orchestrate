@@ -1,11 +1,17 @@
 # CHANGELOG
 
+### Version 0.1.15
+
+*Released on February 20th 2019*
+
+- [FIX] Add checks in `Decode` to make sure that the number of Topics corresponds to arguments indexed in the abi
+
 ### Version 0.1.14
 
 *Released on February 15th 2019*
 
 - [FEAT] add ability to craft transactions arrays as input
-  
+
 ### Version 0.1.13
 
 *Released on February 14th 2019*
