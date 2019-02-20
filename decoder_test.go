@@ -244,9 +244,6 @@ func TestDecode(t *testing.T) {
 				Data: hexutil.MustDecode("0x00000000000000000000000000000000000000000000000000000000000000015a4f2c3ad66af173634e1cc1e389232788ec41756ec2821b9a231f996c4faad00000000000000000000000008f371daa8a5325f53b754a7017ac3803382bc8470000000000000000000000003404370fddb2b0e79f2571e170b112a66f974fb95265736572766564000000000000000000000000000000000000000000000000000000000000000000000000b5747835141b46f7c472393b31f8f5a57f74a44f000000000000000000000000b5747835141b46f7c472393b31f8f5a57f74a44f0000000000000000000000000000000000000000000000000000000000000005"),
 				Topics: []common.Hash{
 					common.HexToHash("0xd8589d63a2df3a19b774d092cc22aec68d0be6537da4f37a362fbba9f6296845"),
-					common.HexToHash("0x000000000000000000000000d71400dad07d70c976d6aafc241af1ea183a7236"),
-					common.HexToHash("0x000000000000000000000000d71400dad07d70c976d6aafc241af1ea183a7236"),
-					common.HexToHash("0x000000000000000000000000b5747835141b46f7c472393b31f8f5a57f74a44f"),
 				},
 			},
 			map[string]string{
@@ -320,11 +317,12 @@ func TestDecode(t *testing.T) {
 	for i, test := range testSet {
 		event := newEvent(test.abi)
 
-		decoded, _ := Decode(event, test.log)
+		decoded, err := Decode(event, test.log)
 
 		eq := reflect.DeepEqual(test.expectedOutput, decoded)
 		if !eq {
 			t.Errorf("Decode (%d/%d) %q: expected mapping %q but got %q", i+1, len(testSet), event.Name, test.expectedOutput, decoded)
+			t.Error(err)
 		}
 
 	}

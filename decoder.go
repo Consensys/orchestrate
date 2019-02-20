@@ -78,7 +78,10 @@ func FormatNonIndexedArg(t abi.Type, arg interface{}) (string, error) {
 
 // Decode event data to string
 func Decode(event *abi.Event, txLog *types.Log) (map[string]string, error) {
-	logMapping := make(map[string]string, len(event.Inputs))
+	expectedTopics := len(event.Inputs) - event.Inputs.LengthNonIndexed()
+	if expectedTopics != len(txLog.Topics)-1 {
+		return nil, fmt.Errorf("Error: Topics length does not match with abi event: expected %v but got %v", expectedTopics, len(txLog.Topics)-1)
+	}
 
 	unpackValues, err := event.Inputs.UnpackValues(txLog.Data)
 	if err != nil {
@@ -89,13 +92,15 @@ func Decode(event *abi.Event, txLog *types.Log) (map[string]string, error) {
 		topicIndex        = 1
 		unpackValuesIndex = 0
 	)
+	logMapping := make(map[string]string, len(event.Inputs))
+
 	for _, arg := range event.Inputs {
 		var decoded string
 		if arg.Indexed {
+			fmt.Println("txLog.Topics[topicIndex] - ", txLog.Topics[topicIndex])
 			decoded, _ = FormatIndexedArg(arg.Type, txLog.Topics[topicIndex])
 			topicIndex++
 		} else {
-
 			decoded, _ = FormatNonIndexedArg(arg.Type, unpackValues[unpackValuesIndex])
 			unpackValuesIndex++
 		}
