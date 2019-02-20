@@ -97,7 +97,6 @@ func Decode(event *abi.Event, txLog *types.Log) (map[string]string, error) {
 	for _, arg := range event.Inputs {
 		var decoded string
 		if arg.Indexed {
-			fmt.Println("txLog.Topics[topicIndex] - ", txLog.Topics[topicIndex])
 			decoded, _ = FormatIndexedArg(arg.Type, txLog.Topics[topicIndex])
 			topicIndex++
 		} else {
