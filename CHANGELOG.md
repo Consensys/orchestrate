@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.1.7
+
+*Released on February 20th 2019*
+
+- [FIX] Not decoding logs without Topics
+
+
 ### Version 0.1.6
 
 *Released on February 18th 2019*
