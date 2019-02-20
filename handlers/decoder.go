@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"fmt"
+
 	"github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
@@ -9,6 +11,11 @@ import (
 
 // LogDecoder decode a single log
 func LogDecoder(ctx *types.Context, r services.ABIRegistry, log *types.Log, i int) {
+	if len(log.Topics) == 0 {
+		ctx.Error(fmt.Errorf("Error finding the event signature in the transaction at Topics[0]"))
+		return
+	}
+
 	event, err := r.GetEventBySig(log.Topics[0].Hex())
 	if err != nil {
 		ctx.Error(err)
