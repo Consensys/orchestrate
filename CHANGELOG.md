@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.3
+
+*Released on February 20th 2019*
+
+- [FEAT] log unmarshall message and errors on  `Loader` 
+
 ### Version 0.1.2
 
 *Released on February 19th 2019*
