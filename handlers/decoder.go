@@ -12,7 +12,7 @@ import (
 // LogDecoder decode a single log
 func LogDecoder(ctx *types.Context, r services.ABIRegistry, log *types.Log, i int) {
 	if len(log.Topics) == 0 {
-		ctx.Error(fmt.Errorf("Error finding the event signature in the transaction at Topics[0]"))
+		ctx.Error(fmt.Errorf("Error finding the event signature at Topics[0]"))
 		return
 	}
 
