@@ -35,12 +35,12 @@ func CreateSecret(key, value string) (*Secret) {
 }
 
 // SecretFromKey creates a secret from a key, it does not fetch the associated value.
-func SecretFromKey(key string) (*Secret, error) {
+func SecretFromKey(key string) (*Secret) {
 	return &Secret{
 		key: key,
 		value: "",
 		client: nil,
-	}, nil
+	}
 }
 
 // SetKey setter of attribute key for Secret struct object
@@ -99,6 +99,7 @@ func (sec *Secret) GetValue() (string, error) {
 	sec.value = *res.SecretString
 
 	return sec.value, nil
+	
 }
 
 // Update the secret value stored in the aws secret manager
