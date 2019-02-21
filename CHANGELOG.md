@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.3
+
+*Released on February 21th 2019*
+
+- [FIX] fix flags `worker-out`
+
 ### Version 0.1.2
 
 *Released on February 19th 2019*

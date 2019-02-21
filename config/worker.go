@@ -64,7 +64,7 @@ func TxCrafterInTopic(f *pflag.FlagSet) {
 
 // TxCrafterOutTopic register flag for kafka output topic on tx crafter
 func TxCrafterOutTopic(f *pflag.FlagSet) {
-	WorkerInTopic(f, txCrafterTopicEnv, txCrafterTopicDefault)
+	WorkerOutTopic(f, txCrafterTopicEnv, txCrafterTopicDefault)
 }
 
 // TxNonceInTopic register flag for kafka input topic on tx nonce
@@ -74,7 +74,7 @@ func TxNonceInTopic(f *pflag.FlagSet) {
 
 // TxNonceOutTopic register flag for kafka output topic on tx nonce
 func TxNonceOutTopic(f *pflag.FlagSet) {
-	WorkerInTopic(f, txNonceTopicEnv, txNonceTopicDefault)
+	WorkerOutTopic(f, txNonceTopicEnv, txNonceTopicDefault)
 }
 
 // TxSignerInTopic register flag for kafka input topic on tx signer
@@ -84,7 +84,7 @@ func TxSignerInTopic(f *pflag.FlagSet) {
 
 // TxSignerOutTopic register flag for kafka output topic on tx signer
 func TxSignerOutTopic(f *pflag.FlagSet) {
-	WorkerInTopic(f, txSignerTopicEnv, txsignerTopicDefault)
+	WorkerOutTopic(f, txSignerTopicEnv, txsignerTopicDefault)
 }
 
 // TxSenderInTopic register flag for kafka input topic on tx sender
@@ -94,7 +94,7 @@ func TxSenderInTopic(f *pflag.FlagSet) {
 
 // TxSenderOutTopic register flag for kafka output topic on tx sender
 func TxSenderOutTopic(f *pflag.FlagSet) {
-	WorkerInTopic(f, txSenderTopicEnvVar, txSenderTopicDefault)
+	WorkerOutTopic(f, txSenderTopicEnvVar, txSenderTopicDefault)
 }
 
 // TxDecoderInTopic register flag for kafka input topic on tx decoder
@@ -104,7 +104,7 @@ func TxDecoderInTopic(f *pflag.FlagSet) {
 
 // TxDecoderOutTopic register flag for kafka output topic on tx decoder
 func TxDecoderOutTopic(f *pflag.FlagSet) {
-	WorkerInTopic(f, txDecoderTopicEnvVar, txDecoderTopicDefault)
+	WorkerOutTopic(f, txDecoderTopicEnvVar, txDecoderTopicDefault)
 }
 
 // TxDecodedInTopic register flag for kafka input topic on tx decoded
@@ -114,7 +114,7 @@ func TxDecodedInTopic(f *pflag.FlagSet) {
 
 // TxDecodedOutTopic register flag for kafka output topic on tx decoded
 func TxDecodedOutTopic(f *pflag.FlagSet) {
-	WorkerInTopic(f, txDecodedTopicEnvVar, txDecodedTopicDefault)
+	WorkerOutTopic(f, txDecodedTopicEnvVar, txDecodedTopicDefault)
 }
 
 var (
