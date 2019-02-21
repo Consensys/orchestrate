@@ -1,7 +1,9 @@
 package types
 
 import (
+	"fmt"
 	"math/big"
+	"reflect"
 
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -23,6 +25,18 @@ func (c *Chain) reset() {
 	c.IsEIP155 = false
 }
 
+// String chain
+func (c *Chain) String() map[string]interface{} {
+	chain := make(map[string]interface{})
+
+	chain["ID"] = fmt.Sprintf("%v", c.ID)
+	if c.IsEIP155 != false {
+		chain["IsEIP155"] = c.IsEIP155
+	}
+
+	return chain
+}
+
 // Account stores information about an Ethereum account
 type Account struct {
 	// ID account unique identifier
@@ -41,6 +55,20 @@ func (a *Account) reset() {
 	a.Address.SetBytes([]byte{})
 }
 
+// String account
+func (a *Account) String() map[string]interface{} {
+	account := make(map[string]interface{})
+
+	if a.ID != "" {
+		account["ID"] = a.ID
+	}
+	if !reflect.DeepEqual(a.Address, &common.Address{}) {
+		account["Address"] = a.Address.Hex()
+	}
+
+	return account
+}
+
 // Call stores information about transaction call
 type Call struct {
 	// Method method unique identifier
@@ -56,6 +84,19 @@ func newCall() *Call {
 func (c *Call) reset() {
 	c.MethodID = ""
 	c.Args = c.Args[0:0]
+}
+
+func (c *Call) String() map[string]interface{} {
+	call := make(map[string]interface{})
+
+	if c.MethodID != "" {
+		call["MethodID"] = c.MethodID
+	}
+	if len(c.Args) > 0 {
+		call["Args"] = c.Args
+	}
+
+	return call
 }
 
 // Trace stores contextual information about a transaction call
@@ -129,4 +170,30 @@ func (t *Trace) Reset() {
 	t.tx.reset()
 	t.receipt.reset()
 	t.Errors = t.Errors[0:0]
+}
+
+// String returns Trace mapping
+func (t *Trace) String() map[string]interface{} {
+	trace := make(map[string]interface{})
+
+	if !reflect.DeepEqual(t.Chain(), newChain()) {
+		trace["Chain"] = t.Chain().String()
+	}
+	if !reflect.DeepEqual(t.Sender(), newAccount()) {
+		trace["Sender"] = t.Sender().String()
+	}
+	if !reflect.DeepEqual(t.Receiver(), newAccount()) {
+		trace["Receiver"] = t.Receiver().String()
+	}
+	if !reflect.DeepEqual(t.Call(), newCall()) {
+		trace["Call"] = t.Call().String()
+	}
+	if !reflect.DeepEqual(t.Tx(), NewTx()) {
+		trace["Tx"] = t.Tx().String()
+	}
+	if !reflect.DeepEqual(t.Receipt(), newReceipt([]byte{}, true, 0)) {
+		trace["Receipt"] = t.Receipt().String()
+	}
+
+	return trace
 }

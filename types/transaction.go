@@ -1,10 +1,14 @@
 package types
 
 import (
+	"bytes"
 	"crypto/ecdsa"
+	"fmt"
 	"math/big"
+	"reflect"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 )
@@ -166,4 +170,39 @@ func (tx *Tx) Sign(s types.Signer, prv *ecdsa.PrivateKey) error {
 	tx.SetHash(&h)
 
 	return nil
+}
+
+// String tx
+func (tx *Tx) String() map[string]interface{} {
+	txstr := make(map[string]interface{})
+
+	if !reflect.DeepEqual(tx.txData, newTxData()) {
+		txData := make(map[string]interface{})
+		if !reflect.DeepEqual(tx.txData.nonce, uint64(0)) {
+			txData["Nonce"] = fmt.Sprintf("%v", tx.txData.nonce)
+		}
+		if !reflect.DeepEqual(tx.txData.to, &common.Address{}) {
+			txData["To"] = tx.txData.to.Hex()
+		}
+		if !reflect.DeepEqual(tx.txData.value, &big.Int{}) {
+			txData["Value"] = fmt.Sprintf("%v", tx.txData.value)
+		}
+		if !reflect.DeepEqual(tx.txData.gasLimit, uint64(0)) {
+			txData["GasLimit"] = fmt.Sprintf("%v", tx.txData.gasLimit)
+		}
+		if !reflect.DeepEqual(tx.txData.gasPrice, &big.Int{}) {
+			txData["GasPrice"] = fmt.Sprintf("%v", tx.txData.gasPrice)
+		}
+		if !bytes.Equal(tx.txData.data, []byte{}) {
+			txData["Data"] = hexutil.Encode(tx.txData.data[:])
+		}
+		txstr["txData"] = txData
+	}
+	if !bytes.Equal(tx.raw, []byte{}) {
+		txstr["raw"] = hexutil.Encode(tx.Raw()[:])
+	}
+	if !reflect.DeepEqual(tx.Hash(), &common.Hash{}) {
+		txstr["hash"] = tx.Hash().Hex()
+	}
+	return txstr
 }
