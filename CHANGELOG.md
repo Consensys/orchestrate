@@ -1,10 +1,16 @@
 # CHANGELOG
 
-### Version 0.1.3
+### Version 0.1.4
 
 *Released on February 21th 2019*
 
 - [FIX] fix flags `worker-out`
+
+### Version 0.1.3
+
+*Released on February 20th 2019*
+
+- [FEAT] log unmarshall message and errors on  `Loader` 
 
 ### Version 0.1.2
 

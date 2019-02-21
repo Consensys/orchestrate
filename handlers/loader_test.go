@@ -5,6 +5,8 @@ import (
 	"sync"
 	"testing"
 
+	log "github.com/sirupsen/logrus"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
@@ -22,6 +24,8 @@ func (u *MockUnmarshaller) Unmarshal(msg interface{}, t *types.Trace) error {
 func makeLoaderContext(i int) *types.Context {
 	ctx := types.NewContext()
 	ctx.Reset()
+	ctx.Prepare([]types.HandlerFunc{}, log.NewEntry(log.StandardLogger()), nil)
+
 	switch i % 2 {
 	case 0:
 		ctx.Msg = "error"
