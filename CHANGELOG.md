@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.5
+
+*Released on February 21th 2019*
+
+- [FEAT] Log readable trace after unmarshalling from `Loader` 
+
 ### Version 0.1.4
 
 *Released on February 21th 2019*
