@@ -5,17 +5,21 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/aws/aws-sdk-go/service/secretsmanager"
+	"fmt"
 )
 
 //KeyStore olds the methods of the interfaces KeyStore
 type KeyStore struct {
 	client *api.Client
+	secretsManager *secretsmanager.SecretsManager
 }
 
-//NewKeyStore construct a AWSKeyStore from 
-func NewKeyStore(client *api.Client) *KeyStore {
+//NewKeyStore construct a KeyStore from a client 
+func NewKeyStore(client *api.Client, secretsManager *secretsmanager.SecretsManager) *KeyStore {
 	return &KeyStore{
 		client: client,
+		secretsManager: secretsManager,
 	}
 }
 
@@ -48,7 +52,53 @@ func (s *KeyStore) SignTx(
 	return  sess.signedRaw, sess.txHash, nil
 }
 
-// Init fetched the root-token
-func Unseal() {
-	if 
+// Init the vault client
+func (s *KeyStore) Init(secretID string) (err error) {
+	err = Credentials.FetchFromAWS(s.secretsManager, secretID)
+	if err != nil {
+		return err
+	}
+
+	Credentials.AttachTo(s.client)
+	if err != nil {
+		return err
+	}
+
+	Credentials.Unseal(s.client)
+	if err != nil {
+		return err
+	}
+	
+	return nil
+}
+
+// SignMsg returns a signed message and its hash
+func (s *KeyStore) SignMsg(
+	a common.Address, 
+	msg string,
+	) (rsv []byte, hash *common.Hash, err error) {
+
+		return []byte{}, nil, fmt.Errorf("Not implemented yet")
+}
+
+// SignRawHash returns a signed raw hash
+func (s *KeyStore) SignRawHash(
+	a common.Address, 
+	hash []byte,
+) (rsv []byte, err error) {
+
+	return []byte{}, fmt.Errorf("Not implemented yet")
+}
+
+// GenerateWallet create and stores a new wallet in the vault
+func (s* KeyStore) GenerateWallet() (add *common.Address, err error) {
+
+	wal, err := GenerateWallet()
+	wal.Store(s.client)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return wal.GetAddress(), nil
 }

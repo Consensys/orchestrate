@@ -1,11 +1,10 @@
-package services
+package aws
 
 import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 	"github.com/ethereum/go-ethereum/common"
-	aws "gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/aws"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"fmt"
 	"math/big"
@@ -14,7 +13,7 @@ import (
 // TxSignatureSession holds all the logic allowing the signature of an ethereum transaction
 type TxSignatureSession struct {
 	client *secretsmanager.SecretsManager
-	wallet *aws.Wallet
+	wallet *Wallet
 	chain *types.Chain
 	tx *ethtypes.Transaction
 	signedRaw []byte
@@ -37,7 +36,7 @@ func MakeTxSignature(client *secretsmanager.SecretsManager) *TxSignatureSession 
 // SetWallet sets the wallet to the provided address
 func (sess *TxSignatureSession) SetWallet(address *common.Address) error {
 
-	wallet, err := aws.GetWallet(sess.client, address)
+	wallet, err := GetWallet(sess.client, address)
 	if err != nil {
 		return fmt.Errorf("Could not retrieve private key for address : " + err.Error())
 	}

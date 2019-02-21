@@ -7,8 +7,10 @@ import (
 	"math/big"
 )
 
+// SerializedAddress is a helper for address serialization
 type SerializedAddress string
 
+// ToGeth deserialize an hex encoded ethereum address
 func (a *SerializedAddress) ToGeth() (common.Address) {
 	return common.HexToAddress(string(*a))
 }
@@ -24,7 +26,7 @@ type SerializedTx struct {
 	Data string `json:"data" binding:"required"`
 }
 
-// ToGethTx converts the serialized tx to a geth tx
+// ToGeth converts the serialized tx to a geth tx
 func (t *SerializedTx) ToGeth() (g *ethtypes.Transaction) {
 	return ethtypes.NewTransaction(
 		t.getNonce(),

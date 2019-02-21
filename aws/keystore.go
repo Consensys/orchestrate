@@ -1,8 +1,7 @@
-package services
+package aws
 
 import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	aws "gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/aws"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 	//"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
 	"github.com/ethereum/go-ethereum/common"
@@ -10,25 +9,25 @@ import (
 	"fmt"
 )
 
-// AWSKeyStore implements the services.TxSigner interface
-type AWSKeyStore struct {
+// KeyStore implements the services.TxSigner interface
+type KeyStore struct {
 	client *secretsmanager.SecretsManager
 }
 
-//NewAWSKeyStore construct a AWSKeyStore from 
-func NewAWSKeyStore(client *secretsmanager.SecretsManager) *AWSKeyStore {
-	return &AWSKeyStore{
+//NewKeyStore construct a KeyStore from 
+func NewKeyStore(client *secretsmanager.SecretsManager) *KeyStore {
+	return &KeyStore{
 		client: client,
 	}
 }
 
 // Sign is the old methods of the keystore to sign a transaction it is perfectly equivalent to SignTx
-func (s *AWSKeyStore) Sign(chain *types.Chain, a common.Address, tx *ethtypes.Transaction) (raw []byte, hash *common.Hash, err error) {
+func (s *KeyStore) Sign(chain *types.Chain, a common.Address, tx *ethtypes.Transaction) (raw []byte, hash *common.Hash, err error) {
 	return s.SignTx(chain, a, tx)
 }
 
 // SignTx returns a signed transaction. It is perfectly equivalent to SignTx
-func (s *AWSKeyStore) SignTx(
+func (s *KeyStore) SignTx(
 	chain *types.Chain, 
 	a common.Address, 
 	tx *ethtypes.Transaction,
@@ -52,7 +51,7 @@ func (s *AWSKeyStore) SignTx(
 }
 
 // SignMsg returns a signed message and its hash
-func (s *AWSKeyStore) SignMsg(
+func (s *KeyStore) SignMsg(
 	a common.Address, 
 	msg string,
 	) (rsv []byte, hash *common.Hash, err error) {
@@ -61,7 +60,7 @@ func (s *AWSKeyStore) SignMsg(
 }
 
 // SignRawHash returns a signed raw hash
-func (s *AWSKeyStore) SignRawHash(
+func (s *KeyStore) SignRawHash(
 	a common.Address, 
 	hash []byte,
 ) (rsv []byte, err error) {
@@ -70,9 +69,9 @@ func (s *AWSKeyStore) SignRawHash(
 }
 
 // GenerateWallet returns an ethereum address, corresponding to a newly created wallet
-func (s* AWSKeyStore) GenerateWallet() (add *common.Address, err error) {
+func (s* KeyStore) GenerateWallet() (add *common.Address, err error) {
 
-	wal, err := aws.GenerateWallet(s.client)
+	wal, err := GenerateWallet(s.client)
 	if err != nil {
 		return nil, err
 	}

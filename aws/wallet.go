@@ -1,32 +1,33 @@
 package aws
 
 import (
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"crypto/ecdsa"
-	"github.com/ethereum/go-ethereum/crypto"
 	"encoding/hex"
 	"fmt"
+
+	"github.com/aws/aws-sdk-go/service/secretsmanager"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 // Wallet is a container for private keys
 type Wallet struct {
-	address common.Address
-	priv *ecdsa.PrivateKey
-	pub *ecdsa.PublicKey
+	address   common.Address
+	priv      *ecdsa.PrivateKey
+	pub       *ecdsa.PublicKey
 	secretStr string
-	sec *Secret
+	sec       *Secret
 }
 
 // EmptyWallet is the default constructor of Wallet
-func EmptyWallet() (*Wallet) {
+func EmptyWallet() *Wallet {
 	return &Wallet{}
 }
 
 // GenerateWallet returns a generated and saved wallet
 func GenerateWallet(client *secretsmanager.SecretsManager) (wal *Wallet, err error) {
 
-	wal = EmptyWallet() 
+	wal = EmptyWallet()
 	wal.priv, err = crypto.GenerateKey()
 	if err != nil {
 		return nil, err
@@ -49,9 +50,9 @@ func GenerateWallet(client *secretsmanager.SecretsManager) (wal *Wallet, err err
 
 // GetWallet construct a Wallet with the corresponding address
 func GetWallet(client *secretsmanager.SecretsManager, a *common.Address) (wal *Wallet, err error) {
-	
+
 	wal = EmptyWallet()
-	wal.sec, err = SecretFromKey(a.Hex())
+	wal.sec = SecretFromKey(a.Hex())
 	wal.sec.SetClient(client)
 
 	_, err = wal.sec.GetValue()
@@ -68,15 +69,11 @@ func GetWallet(client *secretsmanager.SecretsManager, a *common.Address) (wal *W
 }
 
 // GetPriv returns the private key of Wallet
-func (wal *Wallet) GetPriv() (*ecdsa.PrivateKey) {
+func (wal *Wallet) GetPriv() *ecdsa.PrivateKey {
 	return wal.priv
 }
 
 //GetAddress returns the address of the wallet
-func (wal *Wallet) GetAddress() (*common.Address) {
+func (wal *Wallet) GetAddress() *common.Address {
 	return &wal.address
 }
-
-
-
-
