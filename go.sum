@@ -48,6 +48,8 @@ github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljT
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
 gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.14 h1:xn6a/f3VUoB0L1mR32DCTlbfDaosmn9USTL2D5kX4+Q=
 gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.14/go.mod h1:CxegD25+IR5P/GVYrte4YhWxSuhfnNEjgjzWAjObCPo=
+gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.15 h1:ovKiXJTYWEq8zVD4M8IevI1iBeGmC/sPxX2HVsIYJRA=
+gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.15/go.mod h1:CxegD25+IR5P/GVYrte4YhWxSuhfnNEjgjzWAjObCPo=
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20190103213133-ff983b9c42bc h1:F5tKCVGp+MUAHhKp5MZtGqAlGX3+oCsiL1Q629FL90M=
