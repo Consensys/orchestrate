@@ -1,10 +1,16 @@
 # CHANGELOG
 
+### Version 0.1.16
+
+*Released on February 22th 2019*
+
+- [FIX] Add `debug` log messages in worker
+
 ### Version 0.1.15
 
 *Released on February 21th 2019*
 
-- [FEAT] Add `String` method every types on Trance
+- [FEAT] Add `String` method every types on Trace
 
 ### Version 0.1.14
 
