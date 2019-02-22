@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.15
+
+*Released on February 21th 2019*
+
+- [FEAT] Add `String` method every types on Trance
+
 ### Version 0.1.14
 
 *Released on February 18th 2019*
