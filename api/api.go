@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/services"
 )
 
 // SignTxRequestBody maps fields of a signTx request
