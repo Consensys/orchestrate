@@ -1,4 +1,4 @@
-module gitlab.com/ConsenSys/client/fr/core-stack/boilerplate-worker.git
+module gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git
 
 require (
 	github.com/client9/misspell v0.3.4 // indirect
