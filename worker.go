@@ -53,6 +53,10 @@ runningLoop:
 			if !ok {
 				// Message channel has been close so we also close
 				w.Close()
+
+				// Exit loop
+				log.Debugf("worker: exit running loop (input channel has been closed)")
+				break runningLoop
 			} else {
 				// Indicate that a new message is being handled
 				w.handling.Add(1)
@@ -72,22 +76,28 @@ runningLoop:
 				}(msg)
 			}
 		case <-w.dying:
-			// We wait until all messages have been properly handled
-			w.handling.Wait()
-
 			// Exit loop
+			log.Debugf("worker: exit running loop (worker closed)")
 			break runningLoop
-
 		}
 	}
 
+	// Close slots
+	close(w.slots)
+
+	// We wait until all messages have been properly handled
+	log.Debugf("worker: waiting for messages to be processed")
+	w.handling.Wait()
+
 	// We notify that we properly stopped
 	close(w.done)
+	log.Debugf("worker: stoped running")
 }
 
 // Close worker
 func (w *Worker) Close() {
 	w.closeOnce.Do(func() {
+		log.Debugf("worker: closing...")
 		close(w.dying)
 	})
 }
