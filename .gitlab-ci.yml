@@ -29,6 +29,11 @@ test:
   coverage: /^total:.*\s(\d+.\d+)%/
   script:
     - make run-coverage
+  cache:
+    paths:
+      - /apt-cache
+      - /root/go
+
 
 test-lint:
   stage: test
@@ -37,3 +42,7 @@ test-lint:
     - make misspell-check
     - make race
     - make lint
+  cache:
+    paths:
+      - /apt-cache
+      - /root/go

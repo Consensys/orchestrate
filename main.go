@@ -7,8 +7,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"github.com/gin-gonic/gin"
 	vaultApi "github.com/hashicorp/vault/api"
-	ginSwagger "github.com/swaggo/gin-swagger"
-	"github.com/swaggo/gin-swagger/swaggerFiles"
+	//ginSwagger "github.com/swaggo/gin-swagger"
+	//"github.com/swaggo/gin-swagger/swaggerFiles"
 	api "gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/api"
 	hashicorps "gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/hashicorps"
 )
@@ -40,8 +40,7 @@ func main() {
 	app := gin.Default()
 
 	// Attach the swagger handler
-	app.GET("/apidocs/", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
+	//app.GET("/apidocs/any*", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	app.GET("/generateWallet", generateWalletResource)
 	app.POST("/signTx", signTxResource)
 	app.Run(":" + port)
