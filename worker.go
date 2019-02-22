@@ -24,7 +24,7 @@ type Worker struct {
 // You must set `slots > 0`
 func NewWorker(slots uint) *Worker {
 	if slots == 0 {
-		panic(fmt.Errorf("Worker requires at least 1 goroutine slots"))
+		panic(fmt.Errorf("Worker requires at least 1 goroutine slot"))
 	}
 
 	return &Worker{
@@ -46,6 +46,7 @@ func (w *Worker) Use(handler types.HandlerFunc) {
 
 // Run Starts a worker to consume sarama messages
 func (w *Worker) Run(messages chan interface{}) {
+	w.logger.Debugf("worker: start main loop")
 runningLoop:
 	for {
 		select {
@@ -55,7 +56,6 @@ runningLoop:
 				w.Close()
 
 				// Exit loop
-				log.Debugf("worker: exit running loop (input channel has been closed)")
 				break runningLoop
 			} else {
 				// Indicate that a new message is being handled
@@ -77,27 +77,26 @@ runningLoop:
 			}
 		case <-w.dying:
 			// Exit loop
-			log.Debugf("worker: exit running loop (worker closed)")
 			break runningLoop
 		}
 	}
 
-	// Close slots
+	// Close slots channel
 	close(w.slots)
 
 	// We wait until all messages have been properly handled
-	log.Debugf("worker: waiting for messages to be processed")
+	w.logger.Debugf("worker: left main loop, wait for messages to be properly handled")
 	w.handling.Wait()
 
 	// We notify that we properly stopped
 	close(w.done)
-	log.Debugf("worker: stoped running")
+	w.logger.Debugf("worker: done")
 }
 
 // Close worker
 func (w *Worker) Close() {
 	w.closeOnce.Do(func() {
-		log.Debugf("worker: closing...")
+		w.logger.Debugf("worker: closing...")
 		close(w.dying)
 	})
 }
