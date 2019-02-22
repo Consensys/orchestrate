@@ -3,7 +3,7 @@ package handlers
 import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/services"
 )
 
 // HandlerSignature implements the interface TxSigner
