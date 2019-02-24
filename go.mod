@@ -5,10 +5,15 @@ require (
 	github.com/client9/misspell v0.3.4 // indirect
 	github.com/ethereum/go-ethereum v1.8.21
 	github.com/golang/protobuf v1.2.0
+	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40
 	github.com/jessevdk/go-flags v1.4.0
+	github.com/prometheus/client_golang v0.9.2
 	github.com/sirupsen/logrus v1.3.0
-	gitlab.com/ConsenSys/client/fr/core-stack/common.git v0.1.0
-	gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.10
+	github.com/spf13/cobra v0.0.3
+	github.com/spf13/pflag v1.0.3
+	github.com/spf13/viper v1.3.1
+	gitlab.com/ConsenSys/client/fr/core-stack/common.git v0.1.2
+	gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.12
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.3
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.1.1
 	golang.org/x/lint v0.0.0-20181217174547-8f45f776aaf1 // indirect

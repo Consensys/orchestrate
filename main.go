@@ -12,6 +12,10 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
 	infSarama "gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git"
 	hand "gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-signer.git/handlers"
+	"os"
+
+	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/boilerplate-worker.git/cmd"
 )
 
 // TxSignerHandler is the handler used by the Sarama consumer of the tx-signer worker
@@ -155,4 +159,10 @@ func main() {
 	txCrafter := &TxSignerHandler{mec: mec, saramaProducer: p, cfg: cfg}
 	err = g.Consume(context.Background(), []string{cfg.Kafka.InTopic}, txCrafter)
 	log.Error(err)
+	command := cmd.NewCommand()
+
+	if err := command.Execute(); err != nil {
+		log.Errorf("%v\n", err)
+		os.Exit(1)
+	}
 }
