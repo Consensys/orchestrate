@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.17
+
+*Released on February 24th 2019*
+
+- [FEAT] Implement `Errors` type
+
 ### Version 0.1.16
 
 *Released on February 22th 2019*
