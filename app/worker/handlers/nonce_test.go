@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
+	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
@@ -73,6 +74,7 @@ func (nm *MockNonceManager) Unlock(chainID *big.Int, a *common.Address, lockSig 
 func makeNonceContext(i int) *types.Context {
 	ctx := types.NewContext()
 	ctx.Reset()
+	ctx.Logger = log.NewEntry(log.StandardLogger())
 	ctx.T.Chain().ID = big.NewInt(int64(i % 7))
 	if i%7 == 0 || i%7 == 5 {
 		*ctx.T.Sender().Address = common.HexToAddress("0xfF778b716FC07D98839f48DdB88D8bE583BEB684")
