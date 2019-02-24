@@ -1,11 +1,19 @@
 # CHANGELOG
 
+### Version 0.1.6
+
+*Released on February 24th 2019*
+
+- [FEAT] implement flag `RedisLockTimeout`
+  
 ### Version 0.1.5
 
 *Released on February 21th 2019*
 
 - [FEAT] implement flag `RedisLockTimeout`
   
+- [FEAT] Log readable trace after unmarshalling from `Loader` 
+
 ### Version 0.1.4
 
 *Released on February 21th 2019*
