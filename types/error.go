@@ -28,7 +28,7 @@ func (msg Error) Error() string {
 }
 
 // Errors represent a set of error's specification.
-type Errors []Error
+type Errors []*Error
 
 // Error implements the error interface.
 func (err Errors) Error() string {

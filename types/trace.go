@@ -116,7 +116,7 @@ type Trace struct {
 	receipt *Receipt
 
 	// Errors
-	Errors []*Error
+	Errors Errors
 }
 
 // NewTrace creates a new trace
