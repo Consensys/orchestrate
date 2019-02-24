@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
+	"os"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
-
+	"gitlab.com/ConsenSys/client/fr/core-stack/boilerplate-worker.git/cmd"
 	commonHandlers "gitlab.com/ConsenSys/client/fr/core-stack/common.git/handlers"
 	core "gitlab.com/ConsenSys/client/fr/core-stack/core.git"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
@@ -163,4 +164,10 @@ func main() {
 		"kafka.topics": multiChainInTopics,
 	}).Info("Starting worker")
 	g.Consume(context.Background(), multiChainInTopics, txDecoder)
+	command := cmd.NewCommand()
+
+	if err := command.Execute(); err != nil {
+		log.Errorf("%v\n", err)
+		os.Exit(1)
+	}
 }
