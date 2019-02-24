@@ -32,3 +32,28 @@ func TestRedisAddress(t *testing.T) {
 		t.Errorf("RedisAddress #3: expected %q but got %q", expected, viper.GetString(name))
 	}
 }
+
+func TestRedisLockTimeout(t *testing.T) {
+	name := "redis.lock.timeout"
+	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
+	RedisLockTimeout(flgs)
+	expected := 1500
+	if viper.GetInt(name) != expected {
+		t.Errorf("RedisLockTimeout #1: expected %v but got %v", expected, viper.GetInt(name))
+	}
+
+	os.Setenv("REDIS_LOCKTIMEOUT", "2000")
+	expected = 2000
+	if viper.GetInt(name) != expected {
+		t.Errorf("RedisLockTimeout #2: expected %v but got %v", expected, viper.GetInt(name))
+	}
+
+	args := []string{
+		"--redis-lock-timeout=3000",
+	}
+	flgs.Parse(args)
+	expected = 3000
+	if viper.GetInt(name) != expected {
+		t.Errorf("RedisLockTimeout #3: expected %v but got %v", expected, viper.GetInt(name))
+	}
+}

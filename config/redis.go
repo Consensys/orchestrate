@@ -22,3 +22,19 @@ Environment variable: %q`, redisAddressEnv)
 	viper.BindPFlag(redisAddressViperKey, f.Lookup(redisAddressFlag))
 	viper.BindEnv(redisAddressViperKey, redisAddressEnv)
 }
+
+var (
+	redisLockTimeoutFlag     = "redis-lock-timeout"
+	redisLockTimeoutViperKey = "redis.lock.timeout"
+	redisLockTimeoutDefault  = 1500
+	redisLockTimeoutEnv      = "REDIS_LOCKTIMEOUT"
+)
+
+// RedisLockTimeout register a flag for Redis lock timeout
+func RedisLockTimeout(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Redis lock timeout.
+Environment variable: %q`, redisLockTimeoutEnv)
+	f.Int(redisLockTimeoutFlag, redisLockTimeoutDefault, desc)
+	viper.BindPFlag(redisLockTimeoutViperKey, f.Lookup(redisLockTimeoutFlag))
+	viper.BindEnv(redisLockTimeoutViperKey, redisLockTimeoutEnv)
+}
