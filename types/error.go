@@ -1,5 +1,7 @@
 package types
 
+import "fmt"
+
 const (
 	// ErrorTypeLoad is used when protobuffer loading fails
 	ErrorTypeLoad = 1
@@ -23,4 +25,12 @@ type Error struct {
 // Error implements the error interface.
 func (msg Error) Error() string {
 	return msg.Err.Error()
+}
+
+// Errors represent a set of error's specification.
+type Errors []Error
+
+// Error implements the error interface.
+func (err Errors) Error() string {
+	return fmt.Sprint(err)
 }
