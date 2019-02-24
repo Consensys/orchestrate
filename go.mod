@@ -14,5 +14,4 @@ require (
 	gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.18
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.13
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.1.4
-	gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-crafter.git v0.2.0
 )

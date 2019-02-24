@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.2.1
+
+*Released on February 24th 2019*
+
+- [CHORE] update dependencies
+
 ### Version 0.2.0
 
 *Released on February 24th 2019*
