@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/boilerplate-worker.git/cmd"
 	handCom "gitlab.com/ConsenSys/client/fr/core-stack/common.git/handlers"
 	core "gitlab.com/ConsenSys/client/fr/core-stack/core.git"
 	infEth "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git"
@@ -109,4 +111,10 @@ func main() {
 		[]string{cfg.Kafka.InTopic},
 		&TxSenderHandler{mec: mec, cfg: cfg},
 	)
+	command := cmd.NewCommand()
+
+	if err := command.Execute(); err != nil {
+		log.Errorf("%v\n", err)
+		os.Exit(1)
+	}
 }
