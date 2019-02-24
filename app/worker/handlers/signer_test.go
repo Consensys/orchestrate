@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
@@ -27,6 +28,7 @@ func (s *MockTxSigner) Sign(chain *types.Chain, a common.Address, tx *ethtypes.T
 func makeSignerContext(i int) *types.Context {
 	ctx := types.NewContext()
 	ctx.Reset()
+	ctx.Logger = log.NewEntry(log.StandardLogger())
 	switch i % 4 {
 	case 0:
 		ctx.T.Chain().ID = big.NewInt(10)
