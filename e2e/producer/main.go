@@ -69,7 +69,7 @@ func main() {
 	fmt.Println("Producer ready")
 	defer p.Close()
 
-	rounds := 10
+	rounds := 50
 	for i := 0; i < rounds; i++ {
 		p.Input() <- newMessage(i)
 	}
