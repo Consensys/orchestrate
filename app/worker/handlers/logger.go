@@ -1,24 +1,27 @@
 package handlers
 
 import (
+	"time"
+
 	"github.com/Shopify/sarama"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	infSarama "gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git"
 )
 
-// Logger ...
+// Logger to log context elements before and after the worker
 func Logger(ctx *types.Context) {
-	msg := ctx.Msg.(*sarama.ConsumerMessage)
 
-	log.WithFields(log.Fields{
-		"Offset": msg.Offset,
-		"Sender": ctx.T.Sender().Address.Hex(),
-	}).Info("Logger [IN]\n")
+	msg := ctx.Msg.(*sarama.ConsumerMessage)
+	ctx.Logger = log.WithFields(infSarama.ConsumerMessageFields(msg))
+
+	ctx.Logger.Debug("logger: new message")
+	start := time.Now()
 
 	ctx.Next()
 
-	log.WithFields(log.Fields{
-		"Offset": msg.Offset,
-	}).Infof("Logger [OUT]\nRaw: %v\nHash: %v\nErrors: %v\n", hexutil.Encode(ctx.T.Tx().Raw()), ctx.T.Tx().Hash().Hex(), ctx.T.Errors)
+	latency := time.Now().Sub(start)
+	ctx.Logger.WithFields(log.Fields{
+		"latency": latency,
+	}).WithError(ctx.T.Errors).Info("logger: message processed")
 }
