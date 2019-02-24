@@ -16,5 +16,4 @@ require (
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git v0.1.1
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/redis.git v0.1.0
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.1.4
-	gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-crafter.git v0.2.0 // indirect
 )
