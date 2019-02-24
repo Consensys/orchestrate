@@ -86,6 +86,31 @@ func TestNext(t *testing.T) {
 	}
 }
 
+func TestCtxError(t *testing.T) {
+	err := fmt.Errorf("Test Error")
+
+	ctx := NewContext()
+	ctx.Error(err)
+
+	expected := 1
+	if len(ctx.T.Errors) != expected {
+		t.Errorf("Expected %v errors but got %v", expected, len(ctx.T.Errors))
+	}
+
+	err = Error{fmt.Errorf("Test Error"), 5}
+	ctx.Error(err)
+
+	expected = 2
+	if len(ctx.T.Errors) != expected {
+		t.Errorf("Expected %v errors but got %v", expected, len(ctx.T.Errors))
+	}
+
+	expectedString := `2 errors: ["Test Error" "Test Error"]`
+	if ctx.T.Errors.Error() != expectedString {
+		t.Errorf("Expected %q but got %q", expectedString, ctx.T.Errors.Error())
+	}
+}
+
 func TestLogger(t *testing.T) {
 	logHandler := func(ctx *Context) { ctx.Logger.Info("Test") }
 

@@ -1,6 +1,8 @@
 package types
 
-import "fmt"
+import (
+	"fmt"
+)
 
 const (
 	// ErrorTypeLoad is used when protobuffer loading fails
@@ -32,5 +34,9 @@ type Errors []*Error
 
 // Error implements the error interface.
 func (err Errors) Error() string {
-	return fmt.Sprint(err)
+	errors := []string{}
+	for _, e := range err {
+		errors = append(errors, e.Error())
+	}
+	return fmt.Sprintf("%v errors: %q", len(err), errors)
 }
