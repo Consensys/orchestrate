@@ -4,44 +4,56 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
-	"time"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/spf13/viper"
 	faucet "gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git"
 )
 
-// CreateFaucet create a faucet able to send a message to a kafka queue to credit an account with ethers
-func CreateFaucet(conf FaucetConfig, balanceAt faucet.BalanceAtFunc, credit faucet.CreditFunc) (*faucet.ControlledFaucet, error) {
+func parseBlackList(blacklist []string) ([]*big.Int, []common.Address, error) {
 	// Set BlackList controller
 	var chains []*big.Int
 	var addresses []common.Address
-	for _, bl := range conf.BlackList {
+	for _, bl := range blacklist {
 		split := strings.Split(bl, "-")
 		chainID := big.NewInt(0)
 		chainID, ok := chainID.SetString(split[0], 10)
 		if !ok {
-			return nil, fmt.Errorf("Could not parse %v", bl)
+			return nil, nil, fmt.Errorf("Could not parse %v", bl)
 		}
 		chains = append(chains, chainID)
 		addresses = append(addresses, common.HexToAddress(split[1]))
 	}
-	bl := faucet.NewBlackList(chains, addresses)
+	return chains, addresses, nil
+}
 
-	// Set Cooldown controller that requires a 60 sec interval between credits
-	cdDuration, err := time.ParseDuration(conf.CoolDownTime)
+func parseBalance(s string) (*big.Int, error) {
+	balance := big.NewInt(0)
+	balance, ok := balance.SetString(s, 10)
+	if !ok {
+		return nil, fmt.Errorf("Could not parse max balance %q", s)
+	}
+	return balance, nil
+}
+
+// CreateFaucet create a faucet able to send a message to a kafka queue to credit an account with ethers
+func CreateFaucet(balanceAt faucet.BalanceAtFunc, credit faucet.CreditFunc) (*faucet.ControlledFaucet, error) {
+
+	chains, addresses, err := parseBlackList(viper.GetStringSlice("faucet.blacklist"))
 	if err != nil {
 		return nil, err
 	}
-	cd := faucet.NewCoolDown(cdDuration, 50)
+	bl := faucet.NewBlackList(chains, addresses)
+
+	// Set Cooldown controller that requires a 60 sec interval between credits
+	cd := faucet.NewCoolDown(viper.GetDuration("faucet.cooldown"), 50)
 
 	// Set MaxBalance controller
-	maxBalance := big.NewInt(0)
-	maxBalance, ok := maxBalance.SetString(conf.MaxBalance, 10)
-	if !ok {
-		if err != nil {
-			return nil, fmt.Errorf("Could not parse balance %q", conf.MaxBalance)
-		}
+	maxBalance, err := parseBalance(viper.GetString("faucet.max"))
+	if err != nil {
+		return nil, err
 	}
+
 	mb := faucet.NewMaxBalance(
 		maxBalance,
 		balanceAt,

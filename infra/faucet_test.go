@@ -4,9 +4,10 @@ import (
 	"context"
 	"math/big"
 	"testing"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	flags "github.com/jessevdk/go-flags"
+	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
 )
 
@@ -19,11 +20,13 @@ func MockBalanceAt(ctx context.Context, chainID *big.Int, a common.Address) (*bi
 }
 
 func TestFaucet(t *testing.T) {
-	// Set default configuration
-	opts := FaucetConfig{}
-	flags.ParseArgs(&opts, []string{})
+	// Set configuration for test
+	viper.Set("faucet.blacklist", []string{"3-0x7E654d251Da770A068413677967F6d3Ea2FeA9E4"})
+	viper.Set("faucet.addresses", []string{"3:0x7E654d251Da770A068413677967F6d3Ea2FeA9E4"})
+	viper.Set("faucet.cooldown", 60*time.Second)
+	viper.Set("faucet.max", "200000000000000000")
 
-	faucet, err := CreateFaucet(opts, MockBalanceAt, MockCrediter)
+	faucet, err := CreateFaucet(MockBalanceAt, MockCrediter)
 	if err != nil {
 		t.Errorf("Faucet should be created from default option")
 	}

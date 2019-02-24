@@ -2,10 +2,13 @@ package infra
 
 import (
 	"context"
+	"fmt"
 	"math/big"
+	"strings"
 
 	"github.com/Shopify/sarama"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 	infSarama "gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git"
@@ -13,25 +16,40 @@ import (
 
 // SaramaCrediter allows to credit by sending messages to a Kafka topic
 type SaramaCrediter struct {
-	conf      FaucetConfig
 	addresses map[string]common.Address
 
 	p sarama.SyncProducer
 	m *infSarama.Marshaller
 }
 
+func parseAddresses(addresses []string) (map[string]common.Address, error) {
+	m := make(map[string]common.Address)
+	for _, addr := range addresses {
+		split := strings.Split(addr, ":")
+		if len(split) != 2 {
+			return nil, fmt.Errorf("Could not parse faucet address %q (expected format %q)", addr, "<chainID>:<address>")
+		}
+
+		if !common.IsHexAddress(split[1]) {
+			return nil, fmt.Errorf("Invalid Ethereum address %q", split[1])
+		}
+
+		m[split[0]] = common.HexToAddress(split[1])
+	}
+	return m, nil
+}
+
 // NewSaramaCrediter creates a new SaramaCrediter
-func NewSaramaCrediter(conf FaucetConfig, p sarama.SyncProducer) (*SaramaCrediter, error) {
-	addresses := map[string]common.Address{}
-	for k, v := range conf.Addresses {
-		addresses[k] = common.HexToAddress(v)
+func NewSaramaCrediter(p sarama.SyncProducer) (*SaramaCrediter, error) {
+	addresses, err := parseAddresses(viper.GetStringSlice("faucet.addresses"))
+	if err != nil {
+		return nil, err
 	}
 
 	return &SaramaCrediter{
-		conf:      conf,
 		addresses: addresses,
 		p:         p,
-		m: infSarama.NewMarshaller(),
+		m:         infSarama.NewMarshaller(),
 	}, nil
 }
 
@@ -70,7 +88,7 @@ func (c *SaramaCrediter) PrepareFaucetMsg(r *services.FaucetRequest) (sarama.Pro
 	if err != nil {
 		return sarama.ProducerMessage{}, err
 	}
-	msg.Topic = c.conf.Topic
+	msg.Topic = viper.GetString("faucet.topic")
 
 	return msg, nil
 }

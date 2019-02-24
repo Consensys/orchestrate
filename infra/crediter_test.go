@@ -7,17 +7,13 @@ import (
 
 	"github.com/Shopify/sarama/mocks"
 	"github.com/ethereum/go-ethereum/common"
-	flags "github.com/jessevdk/go-flags"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
 )
 
 func TestCrediter(t *testing.T) {
 	mp := mocks.NewSyncProducer(t, nil)
 
-	// Set default configuration
-	opts := FaucetConfig{}
-	flags.ParseArgs(&opts, []string{})
-	p, err := NewSaramaCrediter(opts, mp)
+	p, err := NewSaramaCrediter(mp)
 
 	if err != nil {
 		t.Errorf("Expected to create crediter with default config but got %v", err)
