@@ -46,7 +46,7 @@ func (infra *Infra) Init() {
 	wait.Add(3)
 	go initSarama(infra, wait)
 	go initEthereum(infra, wait)
-	go initRedis(infra, wait)
+	go initNonce(infra, wait)
 	wait.Wait()
 }
 
