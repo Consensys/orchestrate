@@ -27,7 +27,7 @@ type App struct {
 
 // New creates a new application
 func New(ctx context.Context) *App {
-	// We set a cancellable context so we can possibly abort application form within the aplication
+	// We set a cancellable context so we can possibly abort application form within the application
 	ctx, cancel := context.WithCancel(ctx)
 	app := &App{
 		done:   make(chan struct{}),
