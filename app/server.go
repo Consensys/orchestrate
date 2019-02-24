@@ -24,12 +24,14 @@ func initServer(app *App) {
 
 	// Start Server
 	go func() {
-		log.Infof("server listening on %v", server.Addr)
+		log.Infof("server: start listening on %v", server.Addr)
 		err := server.ListenAndServe()
 		if err != nil {
-			log.Errorf("server error: %v", err)
+
+			log.WithError(err).Errorf("server: error while listening")
 			// We encounter an issue with the server so we stop the application
-			app.Close()
+			// We do not fatal to ensure app can properly close
+			app.cancel()
 		}
 	}()
 
@@ -53,7 +55,7 @@ func prepareHTTPRouter(app *App) *http.ServeMux {
 	// Add a simple readiness check that always fails.
 	health.AddReadinessCheck("readiness-check", func() error {
 		if !app.Ready() {
-			return fmt.Errorf("not ready")
+			return fmt.Errorf("App is not ready")
 		}
 		return nil
 	})
