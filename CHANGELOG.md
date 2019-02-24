@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.18
+
+*Released on February 24th 2019*
+
+- [FIX] fix `Errors.Error()`
+ 
 ### Version 0.1.17
 
 *Released on February 24th 2019*
