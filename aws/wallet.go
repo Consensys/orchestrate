@@ -1,5 +1,7 @@
 package aws
 
+// Deprecated as we are moving out of AWS to store the keys
+
 import (
 	"crypto/ecdsa"
 	"encoding/hex"

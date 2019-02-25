@@ -1,5 +1,7 @@
 package aws
 
+// Deprecated as we are moving out of AWS to store the keys
+
 import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
