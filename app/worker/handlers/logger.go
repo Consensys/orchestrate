@@ -9,26 +9,19 @@ import (
 	infSarama "gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git"
 )
 
-// Logger
+// Logger to log context elements before and after the worker
 func Logger(ctx *types.Context) {
-	start := time.Now()
+
 	msg := ctx.Msg.(*sarama.ConsumerMessage)
 	ctx.Logger = log.WithFields(infSarama.ConsumerMessageFields(msg))
 
-	ctx.Logger.WithFields(log.Fields{
-		"start": start,
-	}).Debug("New message")
+	ctx.Logger.Debug("logger: new message")
+	start := time.Now()
 
 	ctx.Next()
 
 	latency := time.Now().Sub(start)
-	if len(ctx.T.Errors) > 0 {
-		ctx.Logger.WithFields(log.Fields{
-			"latency": latency,
-		}).Errorf("Error processing message %v", ctx.T.Errors)
-	} else {
-		ctx.Logger.WithFields(log.Fields{
-			"latency": latency,
-		}).Debug("Message processed")
-	}
+	ctx.Logger.WithFields(log.Fields{
+		"latency": latency,
+	}).WithError(ctx.T.Errors).Info("logger: message processed")
 }
