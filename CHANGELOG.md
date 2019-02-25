@@ -1,5 +1,13 @@
 # CHANGELOG
 
+### Version 0.2.1
+
+*Released on February 25th 2019*
+
+- [FIX] Update core-stack packages
+- [FIX] Modify Dockerfile ENTRYPOINT compatible with app reorg
+
+
 ### Version 0.2.0
 
 *Released on February 25th 2019*
@@ -8,6 +16,7 @@
 - [FEAT] port app on `cobra` + `viper`
 - [FEAT] add handler for `signals`
 - [FIX] clean log messages
+
 
 ### Version 0.1.7
 
