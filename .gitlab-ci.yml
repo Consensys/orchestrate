@@ -10,10 +10,8 @@ stages:
   - test
   - build
 
-
 services:
   - docker:dind
-
 
 before_script:
   # Add deploy ssh key so we can import go packages from private GitLab repo
