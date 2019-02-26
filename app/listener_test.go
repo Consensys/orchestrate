@@ -19,7 +19,7 @@ func TestParseStartingPosition(t *testing.T) {
 	}
 
 	chain, position, err = ParseStartingPosition("3:latest-0")
-	if chain != "" || position.BlockNumber != 0 || position.TxIndex != 0 || err == nil {
+	if chain != "" || position != nil || err == nil {
 		t.Errorf("ParseStartingPosition #4: got %q %v %v %v", chain, position.BlockNumber, position.TxIndex, err)
 	}
 }
@@ -47,5 +47,4 @@ func TestParseStartingPositions(t *testing.T) {
 			}
 		}
 	}
-
 }
