@@ -39,4 +39,5 @@ LABEL org.label-schema.schema-version="1.0.0-rc1"
 # Use an unprivileged user.
 USER appuser
 EXPOSE 8080
-ENTRYPOINT ["/go/bin/main", "run"]
+ENTRYPOINT ["/go/bin/main"]
+CMD ["run"]
