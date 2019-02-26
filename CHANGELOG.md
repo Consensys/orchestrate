@@ -2,6 +2,8 @@
 
 ### Version 0.2.2
 
+*Released on February 26th 2019*
+
 - [FIX] Dockerfile compatible with v0.2
 
 
