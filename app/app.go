@@ -6,6 +6,7 @@ import (
 	"sync/atomic"
 
 	"github.com/Shopify/sarama"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-nonce.git/app/infra"
 )
@@ -69,11 +70,15 @@ func (app *App) Ready() bool {
 // Run application
 func (app *App) Run() {
 	// Start consumer group
-	app.saramaConsumerGroup.Consume(
+	err := app.saramaConsumerGroup.Consume(
 		app.ctx,
 		[]string{viper.GetString("worker.in")},
 		app.saramaHandler,
 	)
+
+	if err != nil {
+		log.WithError(err).Fatal("app: error consuming")
+	}
 
 	// We close infrastructure
 	app.infra.Close()

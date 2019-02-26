@@ -11,8 +11,8 @@ require (
 	github.com/spf13/pflag v1.0.3
 	github.com/spf13/viper v1.3.1
 	gitlab.com/ConsenSys/client/fr/core-stack/common.git v0.1.6
-	gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.18
-	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.13
+	gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.19
+	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.15
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git v0.1.1
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/redis.git v0.1.0
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.1.4

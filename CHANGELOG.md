@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### Version 0.2.2
+
+- [FIX] add error handling on `App.Run()`
+
 ### Version 0.2.1
 
 - [CHORE] update dependencies
