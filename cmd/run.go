@@ -1,12 +1,13 @@
 package cmd
 
 import (
+	"context"
 	"os"
 
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/boilerplate-worker.git/app"
-	"gitlab.com/ConsenSys/client/fr/core-stack/common.git/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/common.git/config"
+	"gitlab.com/ConsenSys/client/fr/core-stack/common.git/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-listener.git/app"
 )
 
 func newRunCommand() *cobra.Command {
@@ -16,22 +17,28 @@ func newRunCommand() *cobra.Command {
 		Run:   run,
 	}
 
+	// Register flags
+	app.InitFlags(runCmd.Flags())
 	config.HTTPHostname(runCmd.Flags())
+	config.EthClientURLs(runCmd.Flags())
+	config.KafkaAddresses(runCmd.Flags())
+	config.TxDecoderOutTopic(runCmd.Flags())
 
 	return runCmd
 }
 
 func run(cmd *cobra.Command, args []string) {
 	// Create app
-	a := app.New()
+	ctx, cancel := context.WithCancel(context.Background())
+	a := app.New(ctx)
 
 	// Process signals
-	sig := utils.NewSignalListener(func(signal os.Signal) { a.Close() })
+	sig := utils.NewSignalListener(func(signal os.Signal) { cancel() })
 	defer sig.Close()
 
 	// Run App
 	a.Run()
 
-	// Wait
+	// Wait for app to properly close
 	<-a.Done()
 }
