@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.19
+
+*Released on February 26th 2019*
+
+- [FIX] add logs on worker
+
 ### Version 0.1.18
 
 *Released on February 24th 2019*
