@@ -53,6 +53,7 @@ runningLoop:
 		case msg, ok := <-messages:
 			if !ok {
 				// Message channel has been close so we also close
+				w.logger.Debug("worker: input channel closed")
 				w.Close()
 
 				// Exit loop
@@ -65,6 +66,7 @@ runningLoop:
 				w.slots <- struct{}{}
 
 				go func(msg interface{}) {
+					w.logger.Trace("worker: handle msg")
 					// Handle message in a dedicated goroutine
 					w.handleMessage(msg)
 
@@ -73,10 +75,12 @@ runningLoop:
 
 					// Indicate that message has been handled
 					w.handling.Done()
+					w.logger.Trace("worker: msg handled")
 				}(msg)
 			}
 		case <-w.dying:
 			// Exit loop
+			w.logger.Debug("worker: dying")
 			break runningLoop
 		}
 	}
