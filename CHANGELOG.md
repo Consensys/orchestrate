@@ -1,5 +1,10 @@
 # CHANGELOG
 
+### Version 0.2.2
+
+- [FIX] Dockerfile compatible with v0.2
+
+
 ### Version 0.2.1
 
 - [CHORE] update dependencies
