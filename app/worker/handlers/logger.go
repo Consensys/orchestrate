@@ -24,13 +24,7 @@ func Logger(ctx *types.Context) {
 
 	latency := time.Now().Sub(start)
 
-	if len(ctx.T.Errors) != 0 {
-		ctx.Logger.WithFields(log.Fields{
-			"latency": latency,
-		}).Errorf("worker: Errors: %v", ctx.T.Errors)
-	} else {
-		ctx.Logger.WithFields(log.Fields{
-			"latency": latency,
-		}).Info("worker: message processed")
-	}
+	ctx.Logger.WithFields(log.Fields{
+		"latency": latency,
+	}).WithError(ctx.T.Errors).Info("worker: message processed")
 }
