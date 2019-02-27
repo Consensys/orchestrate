@@ -3,25 +3,34 @@ package handlers
 import (
 	"time"
 
-	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
-	infSarama "gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git"
 )
 
 // Logger to log context elements before and after the worker
 func Logger(ctx *types.Context) {
 
-	msg := ctx.Msg.(*sarama.ConsumerMessage)
-	ctx.Logger = log.WithFields(infSarama.ConsumerMessageFields(msg))
+	ctx.Logger = log.WithFields(log.Fields{
+		"eth.chain":       ctx.T.Chain().ID.Text(16),
+		"eth.blockNumber": ctx.T.Receipt().BlockNumber,
+		"eth.txIndex":     ctx.T.Receipt().TxIndex,
+		"eth.txHash":      ctx.T.Receipt().TxHash.Hex(),
+	})
 
-	ctx.Logger.Debug("logger: new message")
+	ctx.Logger.Debug("worker: new receipt")
 	start := time.Now()
 
 	ctx.Next()
 
 	latency := time.Now().Sub(start)
-	ctx.Logger.WithFields(log.Fields{
-		"latency": latency,
-	}).WithError(ctx.T.Errors).Info("logger: message processed")
+
+	if len(ctx.T.Errors) != 0 {
+		ctx.Logger.WithFields(log.Fields{
+			"latency": latency,
+		}).Errorf("worker: Errors: %v", ctx.T.Errors)
+	} else {
+		ctx.Logger.WithFields(log.Fields{
+			"latency": latency,
+		}).Info("worker: message processed")
+	}
 }
