@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.2.2
+
+*Released on February 27th 2019*
+
+- [FIX] Change Dockerfile to distinguish CMD from ENTRYPOINT
+
 ### Version 0.2.1
 
 *Released on February 25th 2019*
