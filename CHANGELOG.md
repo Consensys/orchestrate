@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.2.2
+
+*Released on February 27th 2019*
+
+- [FIX] Dockerfile compatible with v0.2.X
+
 ### Version 0.2.1
 
 *Released on February 24th 2019*
