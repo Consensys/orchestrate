@@ -10,6 +10,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
@@ -132,6 +133,7 @@ func makeNonceContext(chainID int64, address string) *types.Context {
 }
 
 func TestNonceHandler(t *testing.T) {
+	viper.Set("redis.nonce.expiration.time", "3")
 	nm := MockNonceManager{
 		mux: &sync.Mutex{},
 	}
