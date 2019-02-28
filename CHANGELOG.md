@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.20
+
+*Released on February 28th 2019*
+
+- [FEAT] NonceManager services updated (GetNonce now returns the last time the nonce was touched)
+
 ### Version 0.1.19
 
 *Released on February 26th 2019*
