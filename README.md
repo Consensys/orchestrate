@@ -1,7 +1,7 @@
 # Tx-Crafter
 
 Core-Stack is a blockchain **Transaction Orchestration** system that can operate multiple chains simultaneously.
-It provides robust and agnostic mechanisms for transaction crafting, nonce management, transaction signing, transaction receipt listening, transaction receipt decoding, faucet and more.
+It provides production ready and agnostic mechanisms for transaction crafting, nonce management, transaction signing, transaction receipt listening, transaction receipt decoding, faucet and more.
 
 Core-Stack is a **microservices architecture** composed of APIs & Workers. 
 Workers communicate following **publish-subscribe** pattern using *Apache Kafka* as message broker. 
@@ -30,7 +30,7 @@ Consumed messages should have
 - ```Chain``` entry set
 - ```Call``` entry set or Tx-Worker will consider the transaction as a basic Eth transaction with no payload.
 
-1. Crafting
+1. **Crafting**
 
 To craft transaction payload Tx-Worker inspects the ```Call``` entry of input protobuf message 
  
@@ -39,15 +39,15 @@ To craft transaction payload Tx-Worker inspects the ```Call``` entry of input pr
 
 By basing on the ```ID```, Tx-Worker requests method ABI from *ABI registry*, then it casts ```string``` arguments in the expected Solidity type to craft payload.
 
-2. Gas Price
+2. **Gas Price**
 
 Tx-Crafter interogates *Ethereum client* using the identifier in ```Chain``` by calling jsonRPC ```eth_gasPrice```
 
-3. Gas Cost
+3. **Gas Cost**
 
 Tx-Crafter interogates *Ethereum client* using the identifier in ```Chain``` by calling jsonRPC ```eth_estimateGas```
 
-4. Faucet
+4. **Faucet**
 
 It request a credit to *Faucet*
 
