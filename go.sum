@@ -100,6 +100,8 @@ gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.18 h1:bobCzxa2Dsu1Iu04Nl
 gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.18/go.mod h1:CxegD25+IR5P/GVYrte4YhWxSuhfnNEjgjzWAjObCPo=
 gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.19 h1:4ByjWK4eNZLh+YHQ78KxmcuEVbkLnVDohbqBWeVwwTE=
 gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.19/go.mod h1:CxegD25+IR5P/GVYrte4YhWxSuhfnNEjgjzWAjObCPo=
+gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.20 h1:CeHAVX6PCKAVC56MRz/xfsKvxlTS1JIOXsQWVv/T0fE=
+gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.20/go.mod h1:CxegD25+IR5P/GVYrte4YhWxSuhfnNEjgjzWAjObCPo=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.0.0-20190120155728-4388a3e2fac7/go.mod h1:gMnS2A4TAG3bhWJISXtmQfyFdYg9e2vRLB3/U+4B4wk=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.13 h1:dZlhXVjvkpyUS3Xj43keABNK6qn/FpF/HjBg1ZTR6Uo=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.13/go.mod h1:OoHHE9dBVri/i7ioisJOflOcPinYO1Emte7NPFqx130=
@@ -108,6 +110,8 @@ gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.15/go.mod h1:O
 gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git v0.1.1/go.mod h1:YEjkOdQ4tlqOaS0Y4te4DE1XqPqeYiGUdCR819kzGwk=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/redis.git v0.1.0 h1:G5KG7a9mqCANDYeFIwHPTnN4XEowlPZb9O7jNXMJmik=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/redis.git v0.1.0/go.mod h1:3XA4zCRuoNcETkIrMK6H6EqO7JZ4AQKmxEgPRaTAXGY=
+gitlab.com/ConsenSys/client/fr/core-stack/infra/redis.git v0.2.0 h1:4WuhM7WV6fPa3hkV/+nJyxqn3woKILqExCKyuVIEC9s=
+gitlab.com/ConsenSys/client/fr/core-stack/infra/redis.git v0.2.0/go.mod h1:3OXSWcFHCqusEl62kkXNClNrLBH1VdRrGnplys+RBkY=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.1.4 h1:0ssDOxlmVZ65w7Kuyg9FlmpstYdwce2rUFWAd1I8J9E=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.1.4/go.mod h1:BzGgnCmBaBMCA001eALSQ2oZTxiMDF45Bp4Ne9RDJLM=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/striped-mutex.git v0.1.5/go.mod h1:84qaDpDp/i+e46WyzMU0IzTNf4sORqU3QUDV8lpmLVE=
