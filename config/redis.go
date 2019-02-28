@@ -38,3 +38,19 @@ Environment variable: %q`, redisLockTimeoutEnv)
 	viper.BindPFlag(redisLockTimeoutViperKey, f.Lookup(redisLockTimeoutFlag))
 	viper.BindEnv(redisLockTimeoutViperKey, redisLockTimeoutEnv)
 }
+
+var (
+	redisNonceExpirationTimeFlag     = "redis-nonce-expiration-date"
+	redisNonceExpirationTimeViperKey = "redis.nonce.expiration.date"
+	redisNonceExpirationTimeDefault  = 3
+	redisNonceExpirationTimeEnv      = "REDIS_NONCE_EXPIRATION_DATE"
+)
+
+// RedisNonceExpirationTime register a flag for Redis nonce expiration time
+func RedisNonceExpirationTime(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Redis nonce expiration time (duration in s).
+Environment variable: %q`, redisNonceExpirationTimeEnv)
+	f.Int(redisNonceExpirationTimeFlag, redisNonceExpirationTimeDefault, desc)
+	viper.BindPFlag(redisNonceExpirationTimeViperKey, f.Lookup(redisNonceExpirationTimeFlag))
+	viper.BindEnv(redisNonceExpirationTimeViperKey, redisNonceExpirationTimeEnv)
+}

@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.7
+
+*Released on February 28th 2019*
+
+- [FEAT] implement flag `RedisNonceExpirationTime` in config
+
 ### Version 0.1.6
 
 *Released on February 24th 2019*
