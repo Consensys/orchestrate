@@ -40,10 +40,10 @@ Environment variable: %q`, redisLockTimeoutEnv)
 }
 
 var (
-	redisNonceExpirationTimeFlag     = "redis-nonce-expiration-date"
-	redisNonceExpirationTimeViperKey = "redis.nonce.expiration.date"
+	redisNonceExpirationTimeFlag     = "redis-nonce-expiration-time"
+	redisNonceExpirationTimeViperKey = "redis.nonce.expiration.time"
 	redisNonceExpirationTimeDefault  = 3
-	redisNonceExpirationTimeEnv      = "REDIS_NONCE_EXPIRATION_DATE"
+	redisNonceExpirationTimeEnv      = "REDIS_NONCE_EXPIRATION_TIME"
 )
 
 // RedisNonceExpirationTime register a flag for Redis nonce expiration time
