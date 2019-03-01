@@ -53,7 +53,7 @@ It request a credit to *Faucet*
 
 ## Technical Architecture
 
-[Core Architecture](/diagrams/Core-Stack Architecture.png)
+![alt core-stack-architecture](https://gitlab.com/ConsenSys/client/fr/core-stack/doc/blob/master/diagrams/Core_Stack_Architecture.png)
 
 ## Quick-Start
 
