@@ -4,7 +4,7 @@
 
 *Released on March 1st 2019*
 
-- [FEAT] add `Bridge` config
+- [FEAT] add `Bridge` config and Kafka Bridge group
 
 ### Version 0.1.7
 
