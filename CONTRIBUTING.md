@@ -97,10 +97,9 @@ $ go run e2e/producer/main.go
 
 ## Git Branching Strategy
 
-![alt git-branching-strategy](https://gitlab.com/ConsenSys/client/fr/core-stack/doc/blob/master/diagrams/Git_Branching_Strategy.png)
+![alt git-branching-strategy](https://gitlab.com/ConsenSys/client/fr/core-stack/doc/raw/master/diagrams/Git_Branching_Strategy.png)
 
 For more details about git branching strategy refer to [Git branching Strategy](https://gitlab.com/ConsenSys/client/fr/core-stack/doc/raw/master/diagrams/Git_Branching_Strategy.png)
-
 
 ## Build
 
