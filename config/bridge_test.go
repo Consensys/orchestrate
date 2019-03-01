@@ -65,11 +65,12 @@ func TestBridgeMethodSignature(t *testing.T) {
 
 	// Test default
 	expected := "RelayMessage(bytes,address,address)"
-	if expected == viper.GetString(name) {
+	if expected != viper.GetString(name) {
 		t.Errorf("BridgeMethodSignature #1: expected %v but got %v", expected, viper.GetString(name))
 	}
 
 	// Test environment variable
+	expected = "TestMethod(address,uint256)"
 	os.Setenv("BRIDGE_METHODSIGNATURE", expected)
 	if expected != viper.GetString(name) {
 		t.Errorf("BridgeMethodSignature #2: expect %v but got %v", expected, viper.GetString(name))
