@@ -148,6 +148,9 @@ var (
 
 	decoderGroupEnv     = "KAFKA_DECODER_GROUP"
 	decoderGroupDefault = "tx-decoder-group"
+
+	bridgeGroupEnv     = "KAFKA_BRIDGE_GROUP"
+	bridgeGroupDefault = "tx-bridge-group"
 )
 
 // WorkerCrafterGroup register flag for kafka crafter group
@@ -172,6 +175,11 @@ func WorkerSenderGroup(f *pflag.FlagSet) {
 
 // WorkerDecoderGroup register flag for kafka decoder group
 func WorkerDecoderGroup(f *pflag.FlagSet) {
+	WorkerConsumerGroup(f, decoderGroupEnv, decoderGroupDefault)
+}
+
+// WorkerBridgeGroup register flag for kafka decoder group
+func WorkerBridgeGroup(f *pflag.FlagSet) {
 	WorkerConsumerGroup(f, decoderGroupEnv, decoderGroupDefault)
 }
 
