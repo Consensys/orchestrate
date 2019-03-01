@@ -28,7 +28,7 @@ Tx-Crafter expect all consumed messages to respect [Core-Stack standard protobuf
 Consumed messages should have 
 
 - ```Chain``` entry set
-- ```Call``` entry set or Tx-Worker will consider the transaction as a basic Eth transaction with no payload.
+- ```Call``` entry set or Tx-Worker will consider the transaction as a basic Ethereum transaction with no payload.
 
 1. **Crafting**
 
@@ -50,6 +50,10 @@ Tx-Crafter interogates *Ethereum client* using the identifier in ```Chain``` by 
 4. **Faucet**
 
 It request a credit to *Faucet*
+
+## Technical Architecture
+
+[Core Architecture](/diagrams/Core-Stack Architecture.png)
 
 ## Quick-Start
 
