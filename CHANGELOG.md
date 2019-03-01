@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.8
+
+*Released on March 1st 2019*
+
+- [FEAT] add `Bridge` config
+
 ### Version 0.1.7
 
 *Released on February 28th 2019*
