@@ -116,4 +116,4 @@ It request a credit to *Faucet*
 
 ## Technical Architecture
 
-![alt core-stack-architecture](https://gitlab.com/ConsenSys/client/fr/core-stack/doc/blob/master/diagrams/Core_Stack_Architecture.png)
+![alt core-stack-architecture](https://gitlab.com/ConsenSys/client/fr/core-stack/doc/raw/master/diagrams/Core_Stack_Architecture.png)
