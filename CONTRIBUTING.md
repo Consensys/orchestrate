@@ -18,7 +18,9 @@ If you are developing for the first time on the project you might run into troub
 
 To avoid issues we recommend you setting an SSH Key on your GitLab account and then run locally
 
-- git config --global url."git@gitlab.com:".insteadOf "https://gitlab.com/"
+```sh
+$ git config --global url."git@gitlab.com:".insteadOf "https://gitlab.com/"
+```
 
 ### Installation
 
