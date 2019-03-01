@@ -10,8 +10,38 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
+
+var noErrorChainID = int64(0)
+var error1ChainID = int64(1)
+var error2ChainID = int64(2)
+var error3ChainID = int64(3)
+var error4ChainID = int64(4)
+var error5ChainID = int64(5)
+
+var chainIDs = []int64{
+	noErrorChainID,
+	error1ChainID,
+	error2ChainID,
+	error3ChainID,
+	error4ChainID,
+	error5ChainID,
+}
+
+var nonceInCacheAddress = "0x1234608A02a7A15fd6689D6DaD560C44E9ab61Ff"
+var nonceNotInCacheAddress = "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"
+var nonceTooOldAddress = "0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff"
+
+var addresses = []string{
+	nonceInCacheAddress,
+	nonceNotInCacheAddress,
+	nonceTooOldAddress,
+}
+
+var cacheNonce = uint64(53)
+var chainNonce = uint64(42)
 
 type MockNonceGetter struct {
 	counter uint64
@@ -19,11 +49,11 @@ type MockNonceGetter struct {
 
 func (g *MockNonceGetter) GetNonce(ctx context.Context, chainID *big.Int, a common.Address) (uint64, error) {
 	atomic.AddUint64(&g.counter, 1)
-	if chainID.Uint64() == 0 {
+	if chainID.Int64() == error1ChainID {
 		// Simulate error on chain 0
 		return 0, fmt.Errorf("Unknwon chain")
 	}
-	return 42, nil
+	return chainNonce, nil
 }
 
 type MockNonceManager struct {
@@ -31,22 +61,27 @@ type MockNonceManager struct {
 	nonce *sync.Map
 }
 
-func (nm *MockNonceManager) GetNonce(chainID *big.Int, a *common.Address) (uint64, bool, error) {
-	if chainID.Uint64() == 1 {
+func (nm *MockNonceManager) GetNonce(chainID *big.Int, a *common.Address) (uint64, int, error) {
+	if chainID.Int64() == error2ChainID {
 		// Simulate error
-		return 0, false, fmt.Errorf("Error retrieving nonce")
+		return 0, 0, fmt.Errorf("Error retrieving nonce")
 	}
 
-	if a.Hex() == "0xfF778b716FC07D98839f48DdB88D8bE583BEB684" {
+	if a.Hex() == nonceNotInCacheAddress {
 		// Simulate unknown nonce
-		return 0, false, nil
+		return 0, -1, nil
 	}
 
-	return 53, true, nil
+	if a.Hex() == nonceTooOldAddress {
+		// Simulate nonce that is too old
+		return 0, 1000, nil
+	}
+
+	return cacheNonce, 1, nil
 }
 
 func (nm *MockNonceManager) SetNonce(chainID *big.Int, a *common.Address, value uint64) error {
-	if chainID.Uint64() == 2 {
+	if chainID.Int64() == error3ChainID {
 		// Simulate error
 		return fmt.Errorf("Error setting nonce")
 	}
@@ -54,7 +89,7 @@ func (nm *MockNonceManager) SetNonce(chainID *big.Int, a *common.Address, value 
 }
 
 func (nm *MockNonceManager) Lock(chainID *big.Int, a *common.Address) (string, error) {
-	if chainID.Uint64() == 3 {
+	if chainID.Int64() == error4ChainID {
 		// Simulate error
 		return "", fmt.Errorf("Error locking nonce")
 	}
@@ -64,75 +99,79 @@ func (nm *MockNonceManager) Lock(chainID *big.Int, a *common.Address) (string, e
 
 func (nm *MockNonceManager) Unlock(chainID *big.Int, a *common.Address, lockSig string) error {
 	nm.mux.Unlock()
-	if chainID.Uint64() == 4 {
+	if chainID.Int64() == error5ChainID {
 		// Simulate error
 		return fmt.Errorf("Error unlocking nonce")
 	}
 	return nil
 }
 
-func makeNonceContext(i int) *types.Context {
+func makeNonceContext(chainID int64, address string) *types.Context {
 	ctx := types.NewContext()
 	ctx.Reset()
 	ctx.Logger = log.NewEntry(log.StandardLogger())
-	ctx.T.Chain().ID = big.NewInt(int64(i % 7))
-	if i%7 == 0 || i%7 == 5 {
-		*ctx.T.Sender().Address = common.HexToAddress("0xfF778b716FC07D98839f48DdB88D8bE583BEB684")
+	ctx.T.Chain().ID = big.NewInt(chainID)
+	*ctx.T.Sender().Address = common.HexToAddress(address)
+
+	if chainID == noErrorChainID {
+		ctx.Keys["expectedErrorCount"] = 0
+	} else if chainID == error1ChainID && address == nonceInCacheAddress {
+		// If nonce is in cache, there is no calibration
+		// Thus an error when getting nonce from chain is not seen
+		ctx.Keys["expectedErrorCount"] = 0
 	} else {
-		*ctx.T.Sender().Address = common.HexToAddress("0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff")
+		ctx.Keys["expectedErrorCount"] = 1
 	}
 
-	switch i % 7 {
-	case 0, 1, 3:
-		ctx.Keys["errors"] = 1
-		ctx.Keys["result"] = uint64(0)
-	case 2, 4:
-		ctx.Keys["errors"] = 1
-		ctx.Keys["result"] = uint64(53)
-	case 5:
-		ctx.Keys["errors"] = 0
-		ctx.Keys["result"] = uint64(42)
-	case 6:
-		ctx.Keys["errors"] = 0
-		ctx.Keys["result"] = uint64(53)
+	if address == nonceInCacheAddress {
+		ctx.Keys["expectedNonce"] = cacheNonce
+	} else {
+		ctx.Keys["expectedNonce"] = chainNonce
 	}
 
 	return ctx
 }
 
 func TestNonceHandler(t *testing.T) {
+	viper.Set("redis.nonce.expiration.time", "3")
 	nm := MockNonceManager{
 		mux: &sync.Mutex{},
 	}
 	ng := MockNonceGetter{}
 	nh := NonceHandler(&nm, ng.GetNonce)
 
-	rounds := 100
-	outs := make(chan *types.Context, rounds)
+	rounds := 10
+	outs := make(chan *types.Context, rounds*len(addresses)*len(chainIDs))
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
-		wg.Add(1)
-		ctx := makeNonceContext(i)
-		go func(ctx *types.Context) {
-			defer wg.Done()
-			nh(ctx)
-			outs <- ctx
-		}(ctx)
+		for _, a := range addresses {
+			for _, c := range chainIDs {
+				wg.Add(1)
+				ctx := makeNonceContext(c, a)
+				go func(ctx *types.Context) {
+					defer wg.Done()
+					nh(ctx)
+					outs <- ctx
+				}(ctx)
+			}
+		}
 	}
 	wg.Wait()
 	close(outs)
 
-	if len(outs) != rounds {
-		t.Errorf("NonceHandler: expected %v outs but got %v", rounds, len(outs))
+	if len(outs) != rounds*len(addresses)*len(chainIDs) {
+		t.Errorf("NonceHandler: expected %v outs but got %v", rounds*len(addresses)*len(chainIDs), len(outs))
 	}
 
 	for ctx := range outs {
-		if len(ctx.T.Errors) != ctx.Keys["errors"].(int) {
-
-			t.Errorf("Expected %v errors but got %v", ctx.Keys["errors"].(int), ctx.T.Errors)
-		}
-		if ctx.T.Tx().Nonce() != ctx.Keys["result"].(uint64) {
-			t.Errorf("Expected Nonce to be %v but got %v", ctx.Keys["result"].(uint64), ctx.T.Tx().Nonce())
+		if ctx.Keys["expectedErrorCount"].(int) > 0 {
+			if len(ctx.T.Errors) != ctx.Keys["expectedErrorCount"].(int) {
+				t.Errorf("Expected %v errors but got %v %v", ctx.Keys["expectedErrorCount"].(int), ctx.T.Errors, ctx.T.Sender().Address.Hex())
+			}
+		} else {
+			if ctx.T.Tx().Nonce() != ctx.Keys["expectedNonce"].(uint64) {
+				t.Errorf("Expected Nonce to be %v but got %v", ctx.Keys["expectedNonce"].(uint64), ctx.T.Tx().Nonce())
+			}
 		}
 	}
 }

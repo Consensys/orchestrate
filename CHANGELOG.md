@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.2.4
+
+*Released on March 1th 2019*
+
+- [FEAT] handle case when nonce is too old in cache
+
 ### Version 0.2.3
 
 *Released on February 26th 2019*
