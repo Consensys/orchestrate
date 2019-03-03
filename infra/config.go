@@ -30,7 +30,7 @@ func InitFlags(f *pflag.FlagSet) {
 
 // FaucetAddress register flag for Faucet address
 func FaucetAddress(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Faucet address for each chain (format <chainID>:<Address>)
+	desc := fmt.Sprintf(`Address of Faucet on each chain (format <chainID>:<Address>)
 Environment variable: %q`, faucetAddressEnv)
 	f.StringSlice(faucetAddressFlag, faucetAddressDefault, desc)
 	viper.BindPFlag(faucetAddressViperKey, f.Lookup(faucetAddressFlag))
@@ -62,7 +62,7 @@ var (
 
 // FaucetCooldown register flag for Faucet Cooldown
 func FaucetCooldown(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Cooldown time.
+	desc := fmt.Sprintf(`Faucet minimum to wait before crediting an address again
 Environment variable: %q`, faucetCooldownEnv)
 	f.Duration(faucetCooldownFlag, faucetCooldownDefault, desc)
 	viper.BindPFlag(faucetCooldownViperKey, f.Lookup(faucetCooldownFlag))
@@ -130,8 +130,8 @@ var (
 
 // ABIs register flag for ABIs
 func ABIs(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Smart Contract ABIs to register for crafting
-Environment variable: %q`, abiEnv)
+	desc := fmt.Sprintf(`Smart Contract ABIs to register for crafting (format %v)
+Environment variable: %q`, `(?P<contract_name>[a-zA-Z0-9]+):(?P<abi>\[.+\])`, abiEnv)
 	f.StringSlice(abiFlag, abiDefault, desc)
 	viper.BindPFlag(abiViperKey, f.Lookup(abiFlag))
 	viper.BindEnv(abiViperKey, abiEnv)
