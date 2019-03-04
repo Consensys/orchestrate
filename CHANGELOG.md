@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.9
+
+*Released on March 4st 2019*
+
+- [FIX] clean `Bridge` flags description 
+
 ### Version 0.1.8
 
 *Released on March 1st 2019*
