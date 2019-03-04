@@ -109,18 +109,18 @@ Consumed messages should have
 
 To craft transaction payload Tx-Worker inspects the ```Call``` entry of input protobuf message 
  
-- it expect the ```Call.ID``` to be a string formated as ```<method>@<contract_name>``` (e.g. in case of an ERC20 transfer: "transfer@ERC20") (Note: this will evolve to handle versioning of contracts) 
-- it expects the ```Call.Args``` entry to be ordered list of arguments in ```string``` format (e.g. in case of an ERC20 transfer: ["0x6009608a02a7a15fd6689d6dad560c44e9ab61ff", "0x34fde"] for *to* and *value* args)
+- it expects ```Call.ID``` to be a string formated as ```<method>@<contract_name>``` (e.g. in case of an ERC20 transfer: "transfer@ERC20") (Note: this will evolve to handle versioning of contracts) 
+- it expects ```Call.Args``` entry to be the ordered list of arguments to provide to the transaction call in ```string``` format (e.g. in case of an ERC20 transfer: ["0x6009608a02a7a15fd6689d6dad560c44e9ab61ff", "0x34fde"] for *to* and *value* args)
 
 By basing on the ```Call.ID```, Tx-Worker requests the required  ABI from the *ABI registry*, then it casts ```Call.Args``` arguments in the expected Solidity type and craft payload.
 
-2. **Gas Price**
+1. **Gas Price**
 
-Tx-Crafter interogates *Ethereum client*  by calling jsonRPC ```eth_gasPrice``` usingW input protobuf ```Chain.ID``` attribute
+Tx-Crafter interogates *Ethereum client*  by calling jsonRPC ```eth_gasPrice``` on chain ```Chain.ID```
 
-3. **Gas Cost**
+1. **Gas Cost**
 
-Tx-Crafter interogates *Ethereum client*  by calling jsonRPC ```eth_estimateGas``` using input protobuf ```Chain.ID``` attribute
+Tx-Crafter interogates *Ethereum client*  by calling jsonRPC ```eth_estimateGas``` on chain ```Chain.ID```
 
 4. **Faucet**
 
