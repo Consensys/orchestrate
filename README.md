@@ -21,40 +21,6 @@ Tx-Crafter is a Core-Stack worker responsible to
 
 It consumes message from *tx crafting* Kafka topic and publish to *tx nonce* topic.
 
-## High Level Architecture
-
-Tx-Crafter expect all consumed messages to respect [Core-Stack standard protobuf format](https://gitlab.com/ConsenSys/client/fr/core-stack/core/blob/master/protobuf)
-
-Consumed messages should have 
-
-- ```Chain``` attribute set with ```ID``` of the chain to send the transaction to
-- ```Call``` attribute set or Tx-Worker will consider the transaction as a basic Ethereum transaction with no payload and will skip crafting
-
-1. **Crafting**
-
-To craft transaction payload Tx-Worker inspects the ```Call``` entry of input protobuf message 
- 
-- it expect the ```Call.ID``` to be a string formated as ```<method>@<contract_name>``` (e.g. in case of an ERC20 transfer: "transfer@ERC20") (Note: this will evolve to handle versioning of contracts) 
-- it expects the ```Call.Args``` entry to be ordered list of arguments in ```string``` format (e.g. in case of an ERC20 transfer: ["0x6009608a02a7a15fd6689d6dad560c44e9ab61ff", "0x34fde"] for *to* and *value* args)
-
-By basing on the ```Call.ID```, Tx-Worker requests the required  ABI from the *ABI registry*, then it casts ```Call.Args``` arguments in the expected Solidity type and craft payload.
-
-2. **Gas Price**
-
-Tx-Crafter interogates *Ethereum client*  by calling jsonRPC ```eth_gasPrice``` usingW input protobuf ```Chain.ID``` attribute
-
-3. **Gas Cost**
-
-Tx-Crafter interogates *Ethereum client*  by calling jsonRPC ```eth_estimateGas``` using input protobuf ```Chain.ID``` attribute
-
-4. **Faucet**
-
-It request a credit to *Faucet*
-
-## Technical Architecture
-
-![alt core-stack-architecture](https://gitlab.com/ConsenSys/client/fr/core-stack/doc/blob/master/diagrams/Core_Stack_Architecture.png)
-
 ## Quick-Start
 
 ### Prerequisite
@@ -129,3 +95,37 @@ Global Flags:
       --log-level string    Log level (one of ["panic" "fatal" "error" "warn" "info" "debug" "trace"]).
                             Environment variable: "LOG_LEVEL" (default "debug")
 ```
+
+## High Level Architecture
+
+Tx-Crafter expect all consumed messages to respect [Core-Stack standard protobuf format](https://gitlab.com/ConsenSys/client/fr/core-stack/core/blob/master/protobuf)
+
+Consumed messages should have 
+
+- ```Chain``` attribute set with ```ID``` of the chain to send the transaction to
+- ```Call``` attribute set or Tx-Worker will consider the transaction as a basic Ethereum transaction with no payload and will skip crafting
+
+1. **Crafting**
+
+To craft transaction payload Tx-Worker inspects the ```Call``` entry of input protobuf message 
+ 
+- it expect the ```Call.ID``` to be a string formated as ```<method>@<contract_name>``` (e.g. in case of an ERC20 transfer: "transfer@ERC20") (Note: this will evolve to handle versioning of contracts) 
+- it expects the ```Call.Args``` entry to be ordered list of arguments in ```string``` format (e.g. in case of an ERC20 transfer: ["0x6009608a02a7a15fd6689d6dad560c44e9ab61ff", "0x34fde"] for *to* and *value* args)
+
+By basing on the ```Call.ID```, Tx-Worker requests the required  ABI from the *ABI registry*, then it casts ```Call.Args``` arguments in the expected Solidity type and craft payload.
+
+2. **Gas Price**
+
+Tx-Crafter interogates *Ethereum client*  by calling jsonRPC ```eth_gasPrice``` usingW input protobuf ```Chain.ID``` attribute
+
+3. **Gas Cost**
+
+Tx-Crafter interogates *Ethereum client*  by calling jsonRPC ```eth_estimateGas``` using input protobuf ```Chain.ID``` attribute
+
+4. **Faucet**
+
+It request a credit to *Faucet*
+
+## Technical Architecture
+
+![alt core-stack-architecture](https://gitlab.com/ConsenSys/client/fr/core-stack/doc/blob/master/diagrams/Core_Stack_Architecture.png)

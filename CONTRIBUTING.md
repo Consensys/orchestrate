@@ -18,7 +18,9 @@ If you are developing for the first time on the project you might run into troub
 
 To avoid issues we recommend you setting an SSH Key on your GitLab account and then run locally
 
-- git config --global url."git@gitlab.com:".insteadOf "https://gitlab.com/"
+```sh
+$ git config --global url."git@gitlab.com:".insteadOf "https://gitlab.com/"
+```
 
 ### Installation
 
@@ -95,10 +97,9 @@ $ go run e2e/producer/main.go
 
 ## Git Branching Strategy
 
-![alt git-branching-strategy](https://gitlab.com/ConsenSys/client/fr/core-stack/doc/blob/master/diagrams/Git_Branching_Strategy.png)
+![alt git-branching-strategy](https://gitlab.com/ConsenSys/client/fr/core-stack/doc/raw/master/diagrams/Git_Branching_Strategy.png)
 
-For more details about git branching strategy refer to [Git branching Strategy](https://gitlab.com/ConsenSys/client/fr/core-stack/doc/blob/master/doc/git_branching_strategy.md)
-
+For more details about git branching strategy refer to [Git branching Strategy](https://gitlab.com/ConsenSys/client/fr/core-stack/doc/raw/master/diagrams/Git_Branching_Strategy.png)
 
 ## Build
 
