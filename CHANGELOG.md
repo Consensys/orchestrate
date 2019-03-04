@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.2.3
+
+*Unreleased*
+
+- [DOC] Clean config flags description
+- [DOC] Complete ```README.md``` and ```CONTRIBUTING.md```
+
 ### Version 0.2.2
 
 *Released on February 27h 2019*
