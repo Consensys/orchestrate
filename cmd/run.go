@@ -8,6 +8,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/common.git/config"
 	"gitlab.com/ConsenSys/client/fr/core-stack/common.git/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-nonce.git/app"
+	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-nonce.git/app/infra"
 )
 
 func newRunCommand() *cobra.Command {
@@ -22,7 +23,7 @@ func newRunCommand() *cobra.Command {
 	config.EthClientURLs(runCmd.Flags())
 	config.RedisAddress(runCmd.Flags())
 	config.RedisLockTimeout(runCmd.Flags())
-	config.RedisNonceExpirationTime(runCmd.Flags())
+	infra.RedisNonceExpirationTime(runCmd.Flags())
 	config.KafkaAddresses(runCmd.Flags())
 	config.TxNonceInTopic(runCmd.Flags())
 	config.TxSignerOutTopic(runCmd.Flags())
