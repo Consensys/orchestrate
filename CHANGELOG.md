@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.10
+
+*Released on February 28th 2019*
+
+- [FEAT] remove flag `RedisNonceExpirationTime` in config (should be moved in worker directly)
+
 ### Version 0.1.9
 
 *Released on March 4st 2019*
