@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.2.5
+
+*Released on March 5th 2019*
+
+- [FIX] RedisNonceExpirationTime back in repository (instead of common)
+
 ### Version 0.2.4
 
 *Released on March 1th 2019*
