@@ -57,28 +57,3 @@ func TestRedisLockTimeout(t *testing.T) {
 		t.Errorf("RedisLockTimeout #3: expected %v but got %v", expected, viper.GetInt(name))
 	}
 }
-
-func TestRedisNonceExpirationTime(t *testing.T) {
-	name := "redis.nonce.expiration.time"
-	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	RedisNonceExpirationTime(flgs)
-	expected := 3
-	if viper.GetInt(name) != expected {
-		t.Errorf("RedisNonceExpirationTime #1: expected %v but got %v", expected, viper.GetInt(name))
-	}
-
-	os.Setenv("REDIS_NONCE_EXPIRATION_TIME", "42")
-	expected = 42
-	if viper.GetInt(name) != expected {
-		t.Errorf("RedisNonceExpirationTime #2: expected %v but got %v", expected, viper.GetInt(name))
-	}
-
-	args := []string{
-		"--redis-nonce-expiration-time=1234",
-	}
-	flgs.Parse(args)
-	expected = 1234
-	if viper.GetInt(name) != expected {
-		t.Errorf("RedisNonceExpirationTime #3: expected %v but got %v", expected, viper.GetInt(name))
-	}
-}
