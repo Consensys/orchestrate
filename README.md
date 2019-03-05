@@ -14,8 +14,8 @@ Core-Stack then manages the full lifecycle of the transaction from crafting the 
 
 Tx-Sender is a Core-Stack worker responsible to 
 
-#. Store Transaction Trace
-#. Send Transaction to Ethereum node
+- **Store Transaction Trace**
+- **Send Transaction to Ethereum node**
 
 It consumes message from *tx signer* Kafka topic.
 
