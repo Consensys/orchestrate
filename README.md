@@ -35,7 +35,7 @@ To quickly start the application
 1. Start Kafka broker
 
 ```sh
-$ docker-compose -f e2e/docker-compose.yml
+$ docker-compose -f e2e/docker-compose.yml up
 ```
 
 2. Start worker
@@ -114,11 +114,11 @@ To craft transaction payload Tx-Worker inspects the ```Call``` entry of input pr
 
 By basing on the ```Call.ID```, Tx-Worker requests the required  ABI from the *ABI registry*, then it casts ```Call.Args``` arguments in the expected Solidity type and craft payload.
 
-1. **Gas Price**
+2. **Gas Price**
 
 Tx-Crafter interogates *Ethereum client*  by calling jsonRPC ```eth_gasPrice``` on chain ```Chain.ID```
 
-1. **Gas Cost**
+3. **Gas Cost**
 
 Tx-Crafter interogates *Ethereum client*  by calling jsonRPC ```eth_estimateGas``` on chain ```Chain.ID```
 
