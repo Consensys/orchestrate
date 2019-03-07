@@ -100,7 +100,11 @@ Consumed messages should have
 
 To sign the transaction Tx-Signer inspects the ```Tx``` entry of input protobuf message 
 
-- it use a ```Signer``` (as for now a ```StaticSigner```) which should implement the [```TxSigner``` interface](https://gitlab.com/ConsenSys/client/fr/core-stack/core/blob/master/services/signer.go).
+- it uses a ```Signer``` (as for now a ```StaticSigner```) which should implement the [```TxSigner``` interface](https://gitlab.com/ConsenSys/client/fr/core-stack/core/blob/master/services/signer.go).
+- it updates the ```Tx``` attribute with the following fields:
+  - ```Raw```
+  - ```Hash```
+- it sends the signed transaction into ```tx-sender``` Kafka topic
 
 
 ## Technical Architecture
