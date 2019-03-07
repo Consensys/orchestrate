@@ -2,6 +2,12 @@
 
 :dolphin: Thanks for being interested in contributing to Core-Stack! People will :heart: you for that. :thumbsup:
 
+## Pull Request Process
+
+1. Update the ```README.md``` with details of changes to the interface, this includes new environment variables, exposed ports, useful file locations and container parameters.
+2. Update the ```CHANGELOG.md``` with any changes your pull request will do
+3. Increase the version numbers in ```CHANGELOG.md``` to the new version that this Pull Request would represent if needed. The used versioning scheme is [SemVer](http://semver.org/).
+
 ## Create dev environment
 
 ### Prerequisite
