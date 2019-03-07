@@ -90,6 +90,7 @@ This is why Tx-Decoder is loading the ```ABI``` of interest to deocde logs that 
 Once the event identified, the Tx-Decoder knows exactly the arguments to decode, i.e. their types and which of them are indexded/non-indexed, and could seamlessly decode the raw logs by the following:
 - First, it will unpack values from ```Log.Data``` that contains every non-indexed arguments of the event and will return a slice of abstract type interface{}.
 - Second, as the ```unpackValues``` and ```Log.Topics``` should be in the same order as the event arguments are ordered, the Tx-Decoder will loop through the expected event arguments and pick values from ```unpackValues``` for non-indexed argments and from ```Log.Topics``` for indexed arguments. For non-indexed values, the method in ```core-stack.infra.ethereum.FormatNonIndexedArg``` will transform interface{} into string, wheareas for indexed values the method in ```core-stack.infra.ethereum.FormatIndexedArg``` will transform Hash type into string.
+- Finally, every arguents strings are map and integrated in the Trace context ```ctx.T.Receipt.Logs[i].Decoded```
 
 Note: that the Tx-decoder is also decoding any kind of array and will return a string encapsulated into square brakets and delimited by a comma.
 
