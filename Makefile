@@ -7,6 +7,8 @@ run-coverage: ## Generate global code coverage report
 	echo $(PACKAGES)
 	@sh scripts/coverage.sh $(PACKAGES)
 
+tidy: fmt vet lint misspell mod-tidy
+
 coverage: run-coverage
 	@xdg-open coverage.html
 
@@ -30,6 +32,9 @@ misspell: ## Correct misspells
 
 race: ## Run data race detector
 	@go test -race -short ${PACKAGES}
+
+mod-tidy:
+	@go mod tidy
 
 tools: ## Install test tools
 	@GO111MODULE=off go get golang.org/x/lint/golint
