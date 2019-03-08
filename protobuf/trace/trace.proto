@@ -33,12 +33,12 @@ message Call {
 // }
 
 // Metadata attached to the trace
-// message Metadata {
-//     string id = 1; // ID of the trace
-//     int32 maxRetry = 2; // Max execution retries before considering
-//     string retryCount = 3; // 
-//     repeated google.protobuf.Any extra = 5; // Extra information transmitted through trace
-// }
+message Metadata {
+    string id = 1; // ID of the trace
+    // int32 maxRetry = 2; // Max execution retries before considering
+    // string retryCount = 3; // 
+    // repeated google.protobuf.Any extra = 5; // Extra information transmitted through trace
+}
 
 message Error {
     uint64 type = 1; // TODO: switch to enum format
@@ -57,4 +57,5 @@ message Trace {
     Transaction transaction = 5;
     Receipt receipt = 6;
     repeated Error errors = 7;
+    Metadata metadata = 8;
 }

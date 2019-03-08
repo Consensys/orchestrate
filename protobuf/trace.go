@@ -70,6 +70,16 @@ func DumpError(err *types.Error) *tracepb.Error {
 	}
 }
 
+// LoadMetadata load a Metadata protobuffer to a Metadata object
+func LoadMetadata(pb *tracepb.Metadata, c *types.Metadata) {
+	c.ID = pb.GetId()
+}
+
+// DumpMetadata dump Metadata object to a protobuffer Metadata object
+func DumpMetadata(c *types.Metadata, pb *tracepb.Metadata) {
+	pb.Id = c.ID
+}
+
 // LoadTrace load a Trace protobuffer to a Trace object
 func LoadTrace(pb *tracepb.Trace, t *types.Trace) {
 	LoadAccount(pb.GetSender(), t.Sender())
@@ -82,6 +92,8 @@ func LoadTrace(pb *tracepb.Trace, t *types.Trace) {
 	for _, err := range pb.GetErrors() {
 		t.Errors = append(t.Errors, LoadError(err))
 	}
+	LoadCall(pb.GetCall(), t.Call())
+	LoadMetadata(pb.GetMetadata(), t.Metadata())
 }
 
 // DumpTrace dump Trace object to a transaction protobuffer
@@ -120,4 +132,9 @@ func DumpTrace(t *types.Trace, pb *tracepb.Trace) {
 		pb.Receipt = &ethpb.Receipt{}
 	}
 	DumpReceipt(t.Receipt(), pb.Receipt)
+
+	if pb.Metadata == nil {
+		pb.Metadata = &tracepb.Metadata{}
+	}
+	DumpMetadata(t.Metadata(), pb.Metadata)
 }
