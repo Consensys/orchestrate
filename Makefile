@@ -32,8 +32,8 @@ race: ## Run data race detector
 	@go test -race -short ${PACKAGES}
 
 tools: ## Install test tools
-	@go install golang.org/x/lint/golint
-	@go install github.com/client9/misspell/cmd/misspell
+	@GO111MODULE=off go get golang.org/x/lint/golint
+	@GO111MODULE=off go get github.com/client9/misspell/cmd/misspell
 
 help: ## Display this help screen
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
