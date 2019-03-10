@@ -99,6 +99,30 @@ func (c *Call) String() map[string]interface{} {
 	return call
 }
 
+// Metadata stores information about transaction call
+type Metadata struct {
+	// Trace unique identifier
+	ID string
+}
+
+func newMetadata() *Metadata {
+	return &Metadata{}
+}
+
+func (m *Metadata) reset() {
+	m.ID = ""
+}
+
+func (m *Metadata) String() map[string]interface{} {
+	metadata := make(map[string]interface{})
+
+	if m.ID != "" {
+		metadata["ID"] = m.ID
+	}
+
+	return metadata
+}
+
 // Trace stores contextual information about a transaction call
 type Trace struct {
 	// Chain chain to execute TX on
@@ -117,6 +141,9 @@ type Trace struct {
 
 	// Errors
 	Errors Errors
+
+	// Metadata
+	metadata *Metadata
 }
 
 // NewTrace creates a new trace
@@ -128,6 +155,7 @@ func NewTrace() *Trace {
 		call:     newCall(),
 		tx:       NewTx(),
 		receipt:  newReceipt([]byte{}, true, 0),
+		metadata: newMetadata(),
 	}
 }
 
@@ -159,6 +187,11 @@ func (t *Trace) Tx() *Tx {
 // Receipt returns Tx receipt
 func (t *Trace) Receipt() *Receipt {
 	return t.receipt
+}
+
+// Metadata returns trace Metadata
+func (t *Trace) Metadata() *Metadata {
+	return t.metadata
 }
 
 // Reset re-initiliaze all values stored in trace
@@ -193,6 +226,9 @@ func (t *Trace) String() map[string]interface{} {
 	}
 	if !reflect.DeepEqual(t.Receipt(), newReceipt([]byte{}, true, 0)) {
 		trace["Receipt"] = t.Receipt().String()
+	}
+	if !reflect.DeepEqual(t.Metadata(), newMetadata()) {
+		trace["Metadata"] = t.Metadata().String()
 	}
 
 	return trace

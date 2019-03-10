@@ -101,6 +101,31 @@ func TestLoadDumpCall(t *testing.T) {
 	testPbCallEquality(&pb, &callTest, t)
 }
 
+type MetadataTest struct {
+	ID string
+}
+
+func testPbMetadataEquality(pb *tracepb.Metadata, metadataTest *MetadataTest, t *testing.T) {
+	if pb.GetId() != metadataTest.ID {
+		t.Errorf("Expected MethodID to be %q but got %q", metadataTest.ID, pb.GetId())
+	}
+}
+
+func TestLoadDumpMetadata(t *testing.T) {
+	var metadata types.Metadata
+	LoadMetadata(nil, &metadata)
+
+	var pb tracepb.Metadata
+	DumpMetadata(&metadata, &pb)
+	metadataTest := MetadataTest{""}
+	testPbMetadataEquality(&pb, &metadataTest, t)
+
+	LoadMetadata(&tracepb.Metadata{Id: "abc"}, &metadata)
+	DumpMetadata(&metadata, &pb)
+	metadataTest = MetadataTest{"abc"}
+	testPbMetadataEquality(&pb, &metadataTest, t)
+}
+
 type ErrorTest struct {
 	typ uint64
 	msg string
@@ -124,6 +149,7 @@ type TraceTest struct {
 	tx       TxTest
 	receipt  ReceiptTest
 	errors   []ErrorTest
+	metadata MetadataTest
 }
 
 func testPbTraceEquality(pb *tracepb.Trace, traceTest *TraceTest, t *testing.T) {
@@ -133,6 +159,7 @@ func testPbTraceEquality(pb *tracepb.Trace, traceTest *TraceTest, t *testing.T) 
 	testPbCallEquality(pb.GetCall(), &traceTest.call, t)
 	testPbTxEquality(pb.GetTransaction(), &traceTest.tx, t)
 	testPbReceiptEquality(pb.GetReceipt(), &traceTest.receipt, t)
+	testPbMetadataEquality(pb.GetMetadata(), &traceTest.metadata, t)
 
 	if len(pb.GetErrors()) != len(traceTest.errors) {
 		t.Errorf("Expected %v errors but got %v", len(traceTest.errors), len(pb.GetErrors()))
@@ -161,6 +188,7 @@ func TestLoadDumpTrace(t *testing.T) {
 		},
 		nilReceiptTest,
 		[]ErrorTest{},
+		MetadataTest{""},
 	}
 	testPbTraceEquality(&pb, &traceTest, t)
 
@@ -189,6 +217,7 @@ func TestLoadDumpTrace(t *testing.T) {
 				BlockHash:         "0x656c34545f90a730a19008c0e7a7cd4fb3895064b48d6d69761bd5abad681056",
 			},
 			Errors: []*tracepb.Error{&tracepb.Error{Type: 0, Message: "Error 0"}, &tracepb.Error{Type: 1, Message: "Error 1"}},
+			Metadata: &tracepb.Metadata{Id: "abc"},
 		},
 		trace,
 	)
@@ -222,6 +251,7 @@ func TestLoadDumpTrace(t *testing.T) {
 			3,
 		},
 		[]ErrorTest{{0, "Error 0"}, {1, "Error 1"}},
+		MetadataTest{"abc"},
 	}
 	testPbTraceEquality(&pb, &traceTest, t)
 }
