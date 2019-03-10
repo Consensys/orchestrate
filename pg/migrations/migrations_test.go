@@ -42,11 +42,11 @@ func (suite *ContextStoreTestSuite) SetupSuite() {
 		Password: "postgres",
 		Database: "test",
 	})
-	Collections.Run(suite.db, "init")
+	Run(suite.db, "init")
 }
 
 func (suite *ContextStoreTestSuite) SetupTest() {
-	oldVersion, newVersion, err := Collections.Run(suite.db, "up")
+	oldVersion, newVersion, err := Run(suite.db, "up")
 	if err != nil {
 		suite.T().Errorf("Migrate up: %v", err)
 	} else {
@@ -55,7 +55,7 @@ func (suite *ContextStoreTestSuite) SetupTest() {
 }
 
 func (suite *ContextStoreTestSuite) TearDownTest() {
-	oldVersion, newVersion, err := Collections.Run(suite.db, "reset")
+	oldVersion, newVersion, err := Run(suite.db, "reset")
 	if err != nil {
 		suite.T().Errorf("Migrate down: %v", err)
 	} else {
