@@ -2,7 +2,7 @@ package main
 
 import (
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/boilerplate-worker.git/cmd"
+	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/cmd"
 )
 
 func main() {
