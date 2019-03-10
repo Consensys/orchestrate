@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.21
+
+*Release on March 10th*
+
+- [FEAT] Add ```ID``` in trace matadata
+
 ### Version 0.1.20
 
 *Released on February 28th 2019*
