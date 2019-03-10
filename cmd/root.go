@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/pg"
 	"gitlab.com/ConsenSys/client/fr/core-stack/common.git/config"
 )
 
@@ -19,9 +20,13 @@ func NewCommand() *cobra.Command {
 	// Set Persistent flags
 	config.LogLevel(rootCmd.PersistentFlags())
 	config.LogFormat(rootCmd.PersistentFlags())
+	pg.DBFlags(rootCmd.PersistentFlags())
 
 	// Add Run command
 	rootCmd.AddCommand(newRunCommand())
+
+	// Add Migrate command
+	rootCmd.AddCommand(mewMigrateCmd())
 
 	return rootCmd
 }
