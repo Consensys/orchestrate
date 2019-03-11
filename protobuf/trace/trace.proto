@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package context.manager;
+
+import "protobuf/ethereum/ethereum.proto";
+
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace";
+
+// Account representing an address
+message Account {
+    string id = 1; // Unique identifier of account
+    string address = 2; // Address of sender account
+}
+
+// Chain to send transacion to
+message Chain {
+    string id = 1; // Chain ID
+    bool isEIP155 = 2; // Indicate if chain implements EIP155
+}
+
+// Method of call on the contract
+message Call {
+    string methodId = 1; // Unique identifier of the method to call
+    repeated string args = 2; // Arguments to feed to transaction call
+}
+
+// Information about execution
+// message Execution {
+//     string id = 1; // Unique ID of the execution
+//     Transaction transaction = 2; // Transaction generated during execution
+//     Receipt receipt = 3; // Receipt of the transaction after being mined
+//     Error error = 4; // Possible error encountered during execution
+// }
+
+// Metadata attached to the trace
+message Metadata {
+    string id = 1; // ID of the trace
+    // int32 maxRetry = 2; // Max execution retries before considering
+    // string retryCount = 3; // 
+    // repeated google.protobuf.Any extra = 5; // Extra information transmitted through trace
+}
+
+message Error {
+    uint64 type = 1; // TODO: switch to enum format
+    string message = 2; 
+}
+
+// message Policy {
+//     int32 errorCode = 1;
+// }
+
+message Trace {
+    Account sender = 1;
+    Chain chain = 2;
+    Account receiver = 3;
+    Call call = 4;
+    Transaction transaction = 5;
+    Receipt receipt = 6;
+    repeated Error errors = 7;
+    Metadata metadata = 8;
+}
