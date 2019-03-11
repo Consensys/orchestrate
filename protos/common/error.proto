@@ -6,6 +6,12 @@ package common;
 
 // Error
 message Error {
-    uint64 type = 1; // TODO: To Be Discussed: switch to enum format
-    string message = 2; 
+    // Error Code of the error
+    uint64 type = 1;
+    
+    // Error message
+    string message = 2;
+
+    // Extra information
+    map<string, string> keys = 3;
 }

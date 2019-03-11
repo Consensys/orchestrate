@@ -22,19 +22,33 @@ const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 // Ethereum Log
 type Log struct {
-	Address              string            `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-	Topics               []string          `protobuf:"bytes,2,rep,name=topics,proto3" json:"topics,omitempty"`
-	Data                 []byte            `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`
-	DecodedData          map[string]string `protobuf:"bytes,4,rep,name=decoded_data,json=decodedData,proto3" json:"decoded_data,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	BlockNumber          uint64            `protobuf:"varint,5,opt,name=block_number,json=blockNumber,proto3" json:"block_number,omitempty"`
-	TxHash               string            `protobuf:"bytes,6,opt,name=tx_hash,json=txHash,proto3" json:"tx_hash,omitempty"`
-	TxIndex              uint64            `protobuf:"varint,7,opt,name=tx_index,json=txIndex,proto3" json:"tx_index,omitempty"`
-	BlockHash            string            `protobuf:"bytes,8,opt,name=block_hash,json=blockHash,proto3" json:"block_hash,omitempty"`
-	Index                uint64            `protobuf:"varint,9,opt,name=index,proto3" json:"index,omitempty"`
-	Removed              bool              `protobuf:"varint,10,opt,name=removed,proto3" json:"removed,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
-	XXX_unrecognized     []byte            `json:"-"`
-	XXX_sizecache        int32             `json:"-"`
+	// DATA (20 Bytes) - Address from which log originated
+	// e.g 0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C
+	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	// Array of DATA (32 Bytes) - Array of 0 to 4 indexed log arguments
+	// e.g. 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
+	Topics []string `protobuf:"bytes,2,rep,name=topics,proto3" json:"topics,omitempty"`
+	// DATA - Non-indexed arguments of the log
+	Data []byte `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`
+	// Log decoded data
+	DecodedData map[string]string `protobuf:"bytes,4,rep,name=decoded_data,json=decodedData,proto3" json:"decoded_data,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	// QUANTITY - Block number where this transaction was in
+	BlockNumber uint64 `protobuf:"varint,5,opt,name=block_number,json=blockNumber,proto3" json:"block_number,omitempty"`
+	// DATA (32 Bytes) - Hash of the transaction.
+	// e.g. 0x3b198bfd5d2907285af009e9ae84a0ecd63677110d89d7e030251acb87f6487e
+	TxHash string `protobuf:"bytes,6,opt,name=tx_hash,json=txHash,proto3" json:"tx_hash,omitempty"`
+	// QUANTITY - Integer of the transactions index position in the block.
+	TxIndex uint64 `protobuf:"varint,7,opt,name=tx_index,json=txIndex,proto3" json:"tx_index,omitempty"`
+	// DATA (32 Bytes) - Hash of the block where this transaction was in.
+	// e.g. 0x656c34545f90a730a19008c0e7a7cd4fb3895064b48d6d69761bd5abad681056
+	BlockHash string `protobuf:"bytes,8,opt,name=block_hash,json=blockHash,proto3" json:"block_hash,omitempty"`
+	// QUANTITY - Integer of the log index position in the block
+	Index uint64 `protobuf:"varint,9,opt,name=index,proto3" json:"index,omitempty"`
+	// Removed field is true if this log was reverted due to a chain reorganisation.
+	Removed              bool     `protobuf:"varint,10,opt,name=removed,proto3" json:"removed,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *Log) Reset()         { *m = Log{} }
@@ -134,16 +148,31 @@ func (m *Log) GetRemoved() bool {
 
 // Transaction Receipt
 type Receipt struct {
-	TxHash               string   `protobuf:"bytes,1,opt,name=tx_hash,json=txHash,proto3" json:"tx_hash,omitempty"`
-	BlockHash            string   `protobuf:"bytes,2,opt,name=block_hash,json=blockHash,proto3" json:"block_hash,omitempty"`
-	BlockNumber          uint64   `protobuf:"varint,3,opt,name=block_number,json=blockNumber,proto3" json:"block_number,omitempty"`
-	TxIndex              uint64   `protobuf:"varint,4,opt,name=tx_index,json=txIndex,proto3" json:"tx_index,omitempty"`
-	ContractAddress      string   `protobuf:"bytes,6,opt,name=contract_address,json=contractAddress,proto3" json:"contract_address,omitempty"`
-	PostState            []byte   `protobuf:"bytes,7,opt,name=post_state,json=postState,proto3" json:"post_state,omitempty"`
-	Status               uint64   `protobuf:"varint,8,opt,name=status,proto3" json:"status,omitempty"`
-	Bloom                []byte   `protobuf:"bytes,10,opt,name=bloom,proto3" json:"bloom,omitempty"`
-	Logs                 []*Log   `protobuf:"bytes,11,rep,name=logs,proto3" json:"logs,omitempty"`
-	GasUsed              uint64   `protobuf:"varint,12,opt,name=gas_used,json=gasUsed,proto3" json:"gas_used,omitempty"`
+	// DATA (32 Bytes) - Hash of the transaction.
+	// e.g 0x3b198bfd5d2907285af009e9ae84a0ecd63677110d89d7e030251acb87f6487e
+	TxHash string `protobuf:"bytes,1,opt,name=tx_hash,json=txHash,proto3" json:"tx_hash,omitempty"`
+	// DATA (32 Bytes) - Hash of the block where this transaction was in.
+	// e.g. 0x656c34545f90a730a19008c0e7a7cd4fb3895064b48d6d69761bd5abad681056
+	BlockHash string `protobuf:"bytes,2,opt,name=block_hash,json=blockHash,proto3" json:"block_hash,omitempty"`
+	// QUANTITY - Block number where this transaction was in.
+	BlockNumber uint64 `protobuf:"varint,3,opt,name=block_number,json=blockNumber,proto3" json:"block_number,omitempty"`
+	// QUANTITY - Integer of the transactions index position in the block.
+	TxIndex uint64 `protobuf:"varint,4,opt,name=tx_index,json=txIndex,proto3" json:"tx_index,omitempty"`
+	// DATA (20 Bytes) - The contract address created, if the transaction was a contract creation
+	// e.g 0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C
+	ContractAddress string `protobuf:"bytes,6,opt,name=contract_address,json=contractAddress,proto3" json:"contract_address,omitempty"`
+	// DATA (32 Bytes) - State root hash after executing transaction
+	// e.g. 0x656c34545f90a730a19008c0e7a7cd4fb3895064b48d6d69761bd5abad681056
+	PostState []byte `protobuf:"bytes,7,opt,name=post_state,json=postState,proto3" json:"post_state,omitempty"`
+	// QUANTITY - 0 indicates transaction failure , 1 indicates transaction success.
+	Status uint64 `protobuf:"varint,8,opt,name=status,proto3" json:"status,omitempty"`
+	// DATA (256 Bytes) - Bloom filter of logs/events generated by contracts during transaction execution.
+	Bloom []byte `protobuf:"bytes,10,opt,name=bloom,proto3" json:"bloom,omitempty"`
+	// Array - Array of log objects, which this transaction generated.
+	Logs []*Log `protobuf:"bytes,11,rep,name=logs,proto3" json:"logs,omitempty"`
+	// QUANTITY - The amount of gas used by this specific transaction alone.
+	GasUsed uint64 `protobuf:"varint,12,opt,name=gas_used,json=gasUsed,proto3" json:"gas_used,omitempty"`
+	// QUANTITY - The total amount of gas used when this transaction was executed in the block.
 	CumulativeGasUsed    uint64   `protobuf:"varint,13,opt,name=cumulative_gas_used,json=cumulativeGasUsed,proto3" json:"cumulative_gas_used,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`

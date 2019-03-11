@@ -6,6 +6,9 @@ package common;
 
 // Call indicate a method to call a contract
 message Call {
-    string methodId = 1; // Unique identifier of the method to call
-    repeated string args = 2; // Arguments to feed to transaction call
+    // Unique identifier of the method to call
+    string methodId = 1; 
+
+    // Arguments to feed on transaction call
+    repeated string args = 2; 
 }

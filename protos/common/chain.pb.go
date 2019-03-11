@@ -22,7 +22,10 @@ const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 // Information about a Chain
 type Chain struct {
-	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Chain ID
+	// e.g. 0x1 for mainnet, 0x3 for Ropsten
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Indicate if chain implements EIP155 (TODO: should be removed)
 	IsEIP155             bool     `protobuf:"varint,2,opt,name=isEIP155,proto3" json:"isEIP155,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`

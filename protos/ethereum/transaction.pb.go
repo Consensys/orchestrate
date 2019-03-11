@@ -22,11 +22,21 @@ const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 // Transaction data
 type TxData struct {
-	Nonce                uint64   `protobuf:"varint,1,opt,name=nonce,proto3" json:"nonce,omitempty"`
-	To                   string   `protobuf:"bytes,2,opt,name=to,proto3" json:"to,omitempty"`
-	Value                string   `protobuf:"bytes,3,opt,name=value,proto3" json:"value,omitempty"`
-	Gas                  uint64   `protobuf:"varint,4,opt,name=gas,proto3" json:"gas,omitempty"`
-	GasPrice             string   `protobuf:"bytes,5,opt,name=gas_price,json=gasPrice,proto3" json:"gas_price,omitempty"`
+	// QUANTITY - Integer of a nonce.
+	Nonce uint64 `protobuf:"varint,1,opt,name=nonce,proto3" json:"nonce,omitempty"`
+	// DATA (20 Bytes) - The address of the receiver. null when it’s a contract creation transaction.
+	// e.g. 0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C
+	To string `protobuf:"bytes,2,opt,name=to,proto3" json:"to,omitempty"`
+	// QUANTITY - Integer of the value sent with this transaction.
+	// e.g 0xaf23
+	Value string `protobuf:"bytes,3,opt,name=value,proto3" json:"value,omitempty"`
+	// QUANTITY - Integer of the gas provided for the transaction execution.
+	Gas uint64 `protobuf:"varint,4,opt,name=gas,proto3" json:"gas,omitempty"`
+	// QUANTITY - Integer of the gas price used for each paid gas.
+	// e.g 0xaf23b
+	GasPrice string `protobuf:"bytes,5,opt,name=gas_price,json=gasPrice,proto3" json:"gas_price,omitempty"`
+	// DATA - Hash of the method signature (4 bytes) followed by encoded parameters.
+	// e.g 0xa9059cbb000000000000000000000000ff778b716fc07d98839f48ddb88d8be583beb684000000000000000000000000000000000000000000000000002386f26fc10000
 	Data                 string   `protobuf:"bytes,6,opt,name=data,proto3" json:"data,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -102,8 +112,11 @@ func (m *TxData) GetData() string {
 
 // Transaction
 type Transaction struct {
-	TxData               *TxData  `protobuf:"bytes,1,opt,name=tx_data,json=txData,proto3" json:"tx_data,omitempty"`
-	Raw                  string   `protobuf:"bytes,2,opt,name=raw,proto3" json:"raw,omitempty"`
+	TxData *TxData `protobuf:"bytes,1,opt,name=tx_data,json=txData,proto3" json:"tx_data,omitempty"`
+	// DATA - The signed, RLP encoded transaction
+	Raw string `protobuf:"bytes,2,opt,name=raw,proto3" json:"raw,omitempty"`
+	// DATA (32 Bytes) - Hash of the transaction.
+	// e.g. 0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210
 	Hash                 string   `protobuf:"bytes,3,opt,name=hash,proto3" json:"hash,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`

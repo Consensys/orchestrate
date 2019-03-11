@@ -14,14 +14,21 @@ package trace;
 
 // Metadata attached to the trace
 message Metadata {
-    string id = 1; // ID of the trace
+    // ID of the trace  in UUID RFC 4122, ISO/IEC 9834-8:2005 format 
+    // e.g a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
+    string id = 1;
+
+    // Extra information (optional)
+    map<string, string> extra = 2;
 }
 
+// Trace object storing contextual information about transaction execution
 message Trace {
     // Chain to send transaction to
     common.Chain chain = 1;
 
     // Ethereum transaction call information
+    // Sender for the transaction
     common.Account sender = 2;
     common.Account receiver = 3;
     common.Call call = 4;
@@ -31,7 +38,7 @@ message Trace {
     // Receipt
     ethereum.Receipt receipt = 6;
 
-    // Errors catched during transaction execution
+    // Errors cought during transaction execution
     repeated common.Error errors = 7;
 
     // Metadata of the trace

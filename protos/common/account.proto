@@ -6,6 +6,11 @@ package common;
 
 // Information about an account (wallet or contract)
 message Account {
-    string id = 1; // Unique identifier of account
-    string addr = 2; // Address of sender account
+    // ID of the trace  in UUID RFC 4122, ISO/IEC 9834-8:2005 format 
+    // e.g a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
+    string id = 1; 
+
+    // DATA (20 Bytes) - Ethereum Account Address
+    // e.g 0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C
+    string addr = 2;
 }

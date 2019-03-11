@@ -22,7 +22,9 @@ const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 // Call indicate a method to call a contract
 type Call struct {
-	MethodId             string   `protobuf:"bytes,1,opt,name=methodId,proto3" json:"methodId,omitempty"`
+	// Unique identifier of the method to call
+	MethodId string `protobuf:"bytes,1,opt,name=methodId,proto3" json:"methodId,omitempty"`
+	// Arguments to feed on transaction call
 	Args                 []string `protobuf:"bytes,2,rep,name=args,proto3" json:"args,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
