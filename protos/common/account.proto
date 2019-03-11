@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common";
+
+package common;
+
+// Information about an account (wallet or contract)
+message Account {
+    string id = 1; // Unique identifier of account
+    string addr = 2; // Address of sender account
+}

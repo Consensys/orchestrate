@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common";
+
+package common;
+
+// Error
+message Error {
+    uint64 type = 1; // TODO: To Be Discussed: switch to enum format
+    string message = 2; 
+}

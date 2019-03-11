@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum";
+
+package ethereum;
+
+// Transaction data
+message TxData {
+    uint64 nonce = 1; // QUANTITY - Integer of a nonce.
+    string to = 2; // DATA (20 Bytes) - The address of the receiver. null when it’s a contract creation transaction.
+    string value = 3; // QUANTITY - Integer of the value sent with this transaction.
+    uint64 gas = 4; // QUANTITY - Integer of the gas provided for the transaction execution. 
+    string gas_price = 5; // QUANTITY - Integer of the gas price used for each paid gas.
+    string data = 6; // DATA (4 bytes) - Hash of the method signature followed by encoded parameters.
+}
+
+// Transaction
+message Transaction {
+    TxData tx_data = 1;
+
+    string raw = 2; // DATA - The signed, RLP encoded transaction.
+    string hash = 3; // DATA (32 Bytes) - Hash of the transaction.
+}
