@@ -4,9 +4,9 @@ import (
 	"math/big"
 	"testing"
 
-	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/ethereum"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/types"
+	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protobuf/ethereum"
+	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protobuf/trace"
 )
 
 type AccountTest struct {
@@ -216,7 +216,7 @@ func TestLoadDumpTrace(t *testing.T) {
 				BlockNumber:       2019236,
 				BlockHash:         "0x656c34545f90a730a19008c0e7a7cd4fb3895064b48d6d69761bd5abad681056",
 			},
-			Errors: []*tracepb.Error{&tracepb.Error{Type: 0, Message: "Error 0"}, &tracepb.Error{Type: 1, Message: "Error 1"}},
+			Errors:   []*tracepb.Error{&tracepb.Error{Type: 0, Message: "Error 0"}, &tracepb.Error{Type: 1, Message: "Error 1"}},
 			Metadata: &tracepb.Metadata{Id: "abc"},
 		},
 		trace,

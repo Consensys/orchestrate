@@ -4,7 +4,7 @@ package context.manager;
 
 import "protobuf/ethereum/ethereum.proto";
 
-option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace";
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protobuf/trace";
 
 // Account representing an address
 message Account {

@@ -4,8 +4,8 @@ import (
 	"sync"
 	"testing"
 
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/types"
+	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protobuf/trace"
 )
 
 func newTrace() *types.Trace {

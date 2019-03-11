@@ -5,8 +5,8 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/types"
+	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protobuf/ethereum"
 )
 
 // LoadAddress load an hex string with 0x prefix to a go-ethereum Address object
@@ -187,7 +187,7 @@ func DumpReceipt(r *types.Receipt, pb *ethpb.Receipt) error {
 	pb.BlockHash = r.BlockHash.Hex()
 	pb.BlockNumber = r.BlockNumber
 	pb.TxIndex = r.TxIndex
-	
+
 	pb.Bloom = common.ToHex(r.Bloom.Bytes())
 
 	pb.PostState = hexutil.Encode(r.PostState)

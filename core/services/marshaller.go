@@ -1,6 +1,6 @@
 package services
 
-import "gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+import "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/types"
 
 // Marshaller are responsible to marshal a protobuffer message to a higher level message format
 type Marshaller interface {

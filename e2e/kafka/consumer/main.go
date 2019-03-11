@@ -15,11 +15,11 @@ func main() {}
 // 	"github.com/ethereum/go-ethereum/common"
 // 	"github.com/ethereum/go-ethereum/common/hexutil"
 // 	"github.com/golang/protobuf/proto"
-// 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/handlers"
-// 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/infra"
-// 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf"
-// 	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
-// 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+// 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/handlers"
+// 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/infra"
+// 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/protobuf"
+// 	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/protobuf/trace"
+// 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/types"
 // )
 
 // var (

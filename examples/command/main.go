@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/common.git/config"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/config"
 )
 
 var rootCmd = &cobra.Command{

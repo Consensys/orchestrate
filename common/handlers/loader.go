@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/types"
 )
 
 // Loader creates an handler loading input

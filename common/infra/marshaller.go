@@ -3,9 +3,9 @@ package infra
 import (
 	"fmt"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protobuf"
+	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protobuf/trace"
 )
 
 // TracePbMarshaller assumes that message is a trace protobuf
@@ -21,6 +21,6 @@ func (u *TracePbMarshaller) Marshal(t *types.Trace, msg interface{}) error {
 
 	// Dump trace into protobuffer
 	protobuf.DumpTrace(t, pb)
-	
+
 	return nil
 }

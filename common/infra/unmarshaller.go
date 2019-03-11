@@ -3,9 +3,9 @@ package infra
 import (
 	"fmt"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protobuf"
+	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protobuf/trace"
 )
 
 // TracePbUnmarshaller assumes that input message is a protobuf

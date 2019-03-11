@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"sync/atomic"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/types"
 )
 
 // ExampleHandler is an handler that increment counters
