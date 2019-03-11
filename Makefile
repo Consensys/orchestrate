@@ -1,7 +1,10 @@
 GOFILES := $(shell find . -name '*.go' | grep -v _test.go)
 PACKAGES ?= $(shell go list ./...)
 
-.PHONY: all run-coverage coverage fmt fmt-check vet lint misspell-check misspell race tools help
+.PHONY: all protobuf run-coverage coverage fmt fmt-check vet lint misspell-check misspell race tools help
+
+protobuf: ## Generate protobuf stubs
+	@sh scripts/generate-proto.sh
 
 run-coverage: ## Generate global code coverage report
 	@sh scripts/coverage.sh $(PACKAGES)
