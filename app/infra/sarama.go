@@ -69,6 +69,9 @@ func initProducer(infra *Infra, wait *sync.WaitGroup) {
 
 		// Set topic
 		msg.Topic = fmt.Sprintf("%v-%v", viper.GetString("worker.out"), t.Chain().ID.Text(16))
+		
+		// Set key
+		msg.Key = sarama.StringEncoder(t.Chain().ID.String())
 
 		return nil
 	}
