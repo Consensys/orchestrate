@@ -1,6 +1,7 @@
 package infra
 
 import (
+	"strings"
 	"sync"
 
 	"github.com/Shopify/sarama"
@@ -67,6 +68,9 @@ func initProducer(infra *Infra, wait *sync.WaitGroup) {
 
 		// Set topic
 		msg.Topic = viper.GetString("worker.out")
+
+		// Set key
+		msg.Key = sarama.StringEncoder(strings.Join([]string{t.Chain().ID.String(), t.Sender().Address.Hex()}, "-"))
 
 		return nil
 	}
