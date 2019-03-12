@@ -34,7 +34,7 @@ message Trace {
     common.Call call = 4;
     
     // Transaction
-    ethereum.Transaction transaction = 5;
+    ethereum.Transaction tx = 5;
     // Receipt
     ethereum.Receipt receipt = 6;
 
