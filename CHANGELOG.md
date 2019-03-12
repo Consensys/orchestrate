@@ -1,8 +1,8 @@
 # CHANGELOG
 
-### Version 0.2.0
+### Version 0.2.0-alpha
 
-*Unreleased*
+*Released on March 12th 2019*
 
 - [CHORE] Merge of ```core``` and ```common```
 - [FEAT] Extend protos and make it basic types
@@ -11,7 +11,7 @@
 
 ### Version 0.1.21
 
-*Release on March 10th*
+*Release on March 10th 2019*
 
 - [FEAT] Add ```ID``` in trace matadata
 - [FEAT] remove flag `RedisNonceExpirationTime` in config (should be moved in worker directly)
