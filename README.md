@@ -35,7 +35,6 @@ Core-Stack requires Go 1.11
 $ cat examples/tx-listener/main.go
 ```
 
-
 ```go
 package main
 
