@@ -186,7 +186,7 @@ func WorkerBridgeGroup(f *pflag.FlagSet) {
 var (
 	workerSlotsFlag     = "worker-slots"
 	workerSlotsViperKey = "worker.slots"
-	workerSlotsDefault  = uint(100)
+	workerSlotsDefault  = uint(20)
 	workerSlotsEnv      = "WORKER_SLOTS"
 )
 

@@ -87,7 +87,7 @@ func TestWorkerSlots(t *testing.T) {
 	name := "worker.slots"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	WorkerSlots(flgs)
-	expected := 100
+	expected := 20
 	if viper.GetInt(name) != expected {
 		t.Errorf("LogLevel #1: expected %q but got %q", expected, viper.GetString(name))
 	}
