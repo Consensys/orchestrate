@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.2.0-alpha.1
+
+*Released on March 12th 2019*
+
+- [FEAT] Proto for ```abi```
+- 
 ### Version 0.2.0-alpha
 
 *Released on March 12th 2019*
