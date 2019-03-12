@@ -5,17 +5,15 @@ import (
 	"sync"
 	"testing"
 	"time"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 type TestHandler struct {
 	mux     *sync.Mutex
-	handled []*types.Context
+	handled []*Context
 }
 
-func (h *TestHandler) Handler(t *testing.T) types.HandlerFunc {
-	return func(ctx *types.Context) {
+func (h *TestHandler) Handler(t *testing.T) HandlerFunc {
+	return func(ctx *Context) {
 		// We add some randomness in time execution
 		r := rand.Intn(100)
 		time.Sleep(time.Duration(r) * time.Millisecond)
@@ -28,7 +26,7 @@ func (h *TestHandler) Handler(t *testing.T) types.HandlerFunc {
 func TestWorker(t *testing.T) {
 	h := TestHandler{
 		mux:     &sync.Mutex{},
-		handled: []*types.Context{},
+		handled: []*Context{},
 	}
 
 	// Create new worker and register test handler
@@ -59,7 +57,7 @@ func TestWorker(t *testing.T) {
 func TestWorkerStopped(t *testing.T) {
 	h := TestHandler{
 		mux:     &sync.Mutex{},
-		handled: []*types.Context{},
+		handled: []*Context{},
 	}
 
 	// Create new worker and register test handler

@@ -5,16 +5,15 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 // Worker for consuming Sarama messages
 type Worker struct {
-	handlers    []types.HandlerFunc // Handlers to apply on each context
-	handling    *sync.WaitGroup     // WaitGroup to keep track of messages being consumed and gracefully stop
-	pool        *sync.Pool          // Pool used to re-cycle context
-	slots       chan struct{}       // Channel used to limit count of goroutine handling messages
-	dying, done chan struct{}       // Channel used to indicate runner has terminated
+	handlers    []HandlerFunc   // Handlers to apply on each context
+	handling    *sync.WaitGroup // WaitGroup to keep track of messages being consumed and gracefully stop
+	pool        *sync.Pool      // Pool used to re-cycle context
+	slots       chan struct{}   // Channel used to limit count of goroutine handling messages
+	dying, done chan struct{}   // Channel used to indicate runner has terminated
 	closeOnce   *sync.Once
 	logger      *log.Logger
 }
@@ -28,9 +27,9 @@ func NewWorker(slots uint) *Worker {
 	}
 
 	return &Worker{
-		handlers:  []types.HandlerFunc{},
+		handlers:  []HandlerFunc{},
 		handling:  &sync.WaitGroup{},
-		pool:      &sync.Pool{New: func() interface{} { return types.NewContext() }},
+		pool:      &sync.Pool{New: func() interface{} { return NewContext() }},
 		slots:     make(chan struct{}, slots),
 		dying:     make(chan struct{}),
 		done:      make(chan struct{}),
@@ -40,7 +39,7 @@ func NewWorker(slots uint) *Worker {
 }
 
 // Use add a new handler
-func (w *Worker) Use(handler types.HandlerFunc) {
+func (w *Worker) Use(handler HandlerFunc) {
 	w.handlers = append(w.handlers, handler)
 }
 
@@ -107,7 +106,7 @@ func (w *Worker) Close() {
 
 func (w *Worker) handleMessage(msg interface{}) {
 	// Retrieve a re-cycled context
-	ctx := w.pool.Get().(*types.Context)
+	ctx := w.pool.Get().(*Context)
 
 	// Re-cycle context object
 	defer w.pool.Put(ctx)
