@@ -4,10 +4,34 @@ option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/co
 
 package common;
 
-// Call indicate a method to call a contract
+// Method 
+message Method {
+    // Name of contract
+    // e.g. "ERC20"
+    string contract = 1;
+
+    // Contract version
+    // e.g v2.1.3
+    string version = 2;
+
+    // Name on contract
+    // e.g "transfer"
+    string name = 3;
+
+    // Deploy indicate if a deployment is requested
+    bool deploy = 4;
+
+    // ABI of the method (Optional)
+    bytes abi = 5;
+
+    // Contract bytecode (Optional)
+    bytes bytecode = 6;
+}
+
+// Call contains information for a contract call
 message Call {
-    // Unique identifier of the method to call
-    string methodId = 1; 
+    // Method to call
+    Method method = 1; 
 
     // Arguments to feed on transaction call
     repeated string args = 2; 
