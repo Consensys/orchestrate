@@ -58,10 +58,9 @@ signalLoop:
 func (l *SignalListener) processSignal(signal os.Signal) {
 	switch signal {
 	case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
-		log.Warnf("Signal %q intercepted", signal.String())
+		log.Warnf("signal: %q intercepted", signal.String())
 		l.cb(signal)
 	default:
-		log.Errorf("Unknown signal %q intercepted, exit now", signal.String())
-		os.Exit(1)
+		log.Fatalf("signal: unknown signal %q intercepted, exit now", signal.String())
 	}
 }
