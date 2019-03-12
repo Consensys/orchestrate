@@ -3,42 +3,44 @@ package common
 import (
 	"fmt"
 	"regexp"
+
+	abi "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/abi"
 )
 
 // Short returns a string representation of the method
-func (method *Method) Short() string {
-	if method.GetContract() == "" {
+func (c *Call) Short() string {
+	if c.GetMethod().GetName() == "" {
 		return ""
 	}
 
-	if method.GetTag() == "" {
-		return fmt.Sprintf("%v@%v", method.GetName(), method.GetContract())
-	}
-
-	return fmt.Sprintf("%v@%v[%v]", method.GetName(), method.GetContract(), method.GetTag())
+	return fmt.Sprintf("%v@%v", c.GetMethod().GetName(), c.GetContract().Short())
 }
 
 // IsDeploy indicate wether this method for contract deployment
-func (method *Method) IsDeploy() bool {
-	return method.Name == "constructor"
+func (c *Call) IsDeploy() bool {
+	return c.GetMethod().IsDeploy()
 }
 
-var methodRegexp = `(?P<name>[a-zA-Z]+)@(?P<contract>[a-zA-Z0-9]+)(\[(?P<tag>[0-9a-zA-Z-\.]+)\])?`
-var methodPattern = regexp.MustCompile(methodRegexp)
+var callRegexp = `^(?P<method>[a-zA-Z]+)@(?P<contract>.+)$`
+var callPattern = regexp.MustCompile(callRegexp)
 
-// FromShortMethod returns a Method object from a short String
-func FromShortMethod(s string) (*Method, error) {
-	parts := methodPattern.FindStringSubmatch(s)
+// FromShortCall returns a Call object from a short String
+func FromShortCall(s string) (*Call, error) {
+	parts := callPattern.FindStringSubmatch(s)
 
-	if len(parts) < 3 {
-		return nil, fmt.Errorf("%v is invalid short method (expected format %q)", s, methodRegexp)
+	if len(parts) != 3 {
+		return nil, fmt.Errorf("%v is invalid short method (expected format %q)", s, callRegexp)
 	}
 
-	name, contract, tag := parts[1], parts[2], parts[4]
+	contract, err := abi.FromShortContract(parts[2])
+	if err != nil {
+		return nil, err
+	}
 
-	return &Method{
-		Name:     name,
+	return &Call{
 		Contract: contract,
-		Tag:      tag,
+		Method: &abi.Method{
+			Name: parts[1],
+		},
 	}, nil
 }

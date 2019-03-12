@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/abi";
+
+package abi;
+
+// Contract holds contract information
+message Contract {
+    // Name of contract
+    // e.g. "ERC20"
+    string name = 1;
+
+    // Contract tag
+    // e.g "v2.1.3"
+    string tag = 2;
+
+    // Contract ABI (optional)
+    bytes abi = 3;
+
+    // Contract bytecode (optional)
+    bytes bytecode = 4;
+}
+
+// Method 
+message Method {
+    // Name of the method to call on contract
+    // e.g "transfer"
+    string name = 1;
+
+    // ABI of the method (Optional)
+    bytes abi = 2;
+}
