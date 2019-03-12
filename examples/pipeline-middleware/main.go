@@ -2,16 +2,15 @@ package main
 
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/types"
 )
 
 // Define a pipeline handler
-func pipeline(ctx *types.Context) {
+func pipeline(ctx *core.Context) {
 	ctx.Logger.Infof("Pipeline handling %v\n", ctx.Msg.(string))
 }
 
 // Define a middleware handler
-func middleware(ctx *types.Context) {
+func middleware(ctx *core.Context) {
 	// Start middleware execution
 	ctx.Logger.Infof("Middleware starts handling %v\n", ctx.Msg.(string))
 

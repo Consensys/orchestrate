@@ -5,7 +5,6 @@ import (
 	"sync/atomic"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/types"
 )
 
 // ExampleHandler is an handler that increment counters
@@ -14,12 +13,12 @@ type ExampleHandler struct {
 	unsafeCounter uint32
 }
 
-func (h *ExampleHandler) handleSafe(ctx *types.Context) {
+func (h *ExampleHandler) handleSafe(ctx *core.Context) {
 	// Increment counter using atomic
 	atomic.AddUint32(&h.safeCounter, 1)
 }
 
-func (h *ExampleHandler) handleUnsafe(ctx *types.Context) {
+func (h *ExampleHandler) handleUnsafe(ctx *core.Context) {
 	// Increment counter with no concurrent protection
 	h.unsafeCounter++
 }

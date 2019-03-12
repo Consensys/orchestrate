@@ -51,11 +51,10 @@ package main
 
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/types"
 )
 
 // Define a handler method
-func handler(ctx *types.Context) {
+func handler(ctx *core.Context) {
 	ctx.Logger.Infof("Handling %v\n", ctx.Msg.(string))
 }
 
@@ -120,16 +119,15 @@ package main
 
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/types"
 )
 
 // Define a pipeline handler
-func pipeline(ctx *types.Context) {
+func pipeline(ctx *core.Context) {
 	ctx.Logger.Infof("Pipeline handling %v\n", ctx.Msg.(string))
 }
 
 // Define a middleware handler
-func middleware(ctx *types.Context) {
+func middleware(ctx *core.Context) {
 	// Start middleware execution
 	ctx.Logger.Infof("Middleware starts handling %v\n", ctx.Msg.(string))
 
@@ -192,7 +190,6 @@ import (
 	"sync/atomic"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/types"
 )
 
 // ExampleHandler is an handler that increment counters
@@ -201,18 +198,18 @@ type ExampleHandler struct {
 	unsafeCounter uint32
 }
 
-func (h *ExampleHandler) handleSafe(ctx *types.Context) {
+func (h *ExampleHandler) handleSafe(ctx *core.Context) {
 	// Increment counter using atomic
 	atomic.AddUint32(&h.safeCounter, 1)
 }
 
-func (h *ExampleHandler) handleUnsafe(ctx *types.Context) {
+func (h *ExampleHandler) handleUnsafe(ctx *core.Context) {
 	// Increment counter with no concurrent protection
 	h.unsafeCounter++
 }
 
 func main() {
-	// Instantiate a worker that can treat 1000 messages in parallelW
+	// Instantiate worker (that can treat 1000 message in parallel)
 	worker := core.NewWorker(1000)
 
 	// Register handler
@@ -252,7 +249,7 @@ $ go run examples/concurrency/main.go
 ### Quick Start
 
 ```sh
-$ cat examples/command/main.go
+$ cat examples/cobra/main.go
 ```
 
 ```go

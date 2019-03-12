@@ -2,11 +2,10 @@ package main
 
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/types"
 )
 
 // Define a handler method
-func handler(ctx *types.Context) {
+func handler(ctx *core.Context) {
 	ctx.Logger.Infof("Handling %v\n", ctx.Msg.(string))
 }
 
