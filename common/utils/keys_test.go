@@ -15,17 +15,17 @@ func TestKafkaChainTopic(t *testing.T) {
 func TestChainAccountKey(t *testing.T) {
 	assert.Equal(
 		t,
-		"0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C@3",
+		"0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C@0x3",
 		ToChainAccountKey(big.NewInt(3), common.HexToAddress("0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C")),
 		"Key should match",
 	)
 
-	chainID, acc, err := FromChainAccountKey("0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C@3")
+	chainID, acc, err := FromChainAccountKey("0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C@0x3")
 
 	assert.Nil(t, err, "Should not error")
 	assert.Equal(t, int64(3), chainID.Int64(), "ChainID should be correct")
 	assert.Equal(t, "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C", acc.Hex(), "Account should be correct")
 
-	chainID, acc, err = FromChainAccountKey("0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C@g3")
+	chainID, acc, err = FromChainAccountKey("0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C@0xg3")
 	assert.NotNil(t, err, "Should error")
 }
