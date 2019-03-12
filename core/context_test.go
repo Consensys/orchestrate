@@ -1,4 +1,4 @@
-package types
+package core
 
 import (
 	"errors"
@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
+	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
 )
 
 var testKey = "test"
@@ -71,19 +73,9 @@ func TestNext(t *testing.T) {
 
 	res := ctx.Keys[testKey].([]string)
 	expected := []string{"hA", "mA-before", "err", "mB-before", "hB", "abort", "mB-after", "mA-after"}
-	if len(res) != len(expected) {
-		t.Errorf("Context: expected %v execution but got %v", len(expected), len(res))
-	}
 
-	for i, s := range expected {
-		if s != res[i] {
-			t.Errorf("Context: expected %q at %v but got %q", s, i, res[i])
-		}
-	}
-
-	if len(ctx.T.Errors) != 2 {
-		t.Errorf("Context: expected 2 errors but got %v", len(ctx.T.Errors))
-	}
+	assert.Equal(t, expected, res, "Call order on handlers should be correct")
+	assert.Len(t, ctx.T.Errors, 2, "Error count should be correct")
 }
 
 func TestCtxError(t *testing.T) {
@@ -92,23 +84,13 @@ func TestCtxError(t *testing.T) {
 	ctx := NewContext()
 	ctx.Error(err)
 
-	expected := 1
-	if len(ctx.T.Errors) != expected {
-		t.Errorf("Expected %v errors but got %v", expected, len(ctx.T.Errors))
-	}
+	assert.Len(t, ctx.T.Errors, 1, "Error count should be correct")
 
-	err = Error{fmt.Errorf("Test Error"), 5}
+	err = &common.Error{Message: "Test Error", Type: 5}
 	ctx.Error(err)
 
-	expected = 2
-	if len(ctx.T.Errors) != expected {
-		t.Errorf("Expected %v errors but got %v", expected, len(ctx.T.Errors))
-	}
-
-	expectedString := `2 errors: ["Test Error" "Test Error"]`
-	if ctx.T.Errors.Error() != expectedString {
-		t.Errorf("Expected %q but got %q", expectedString, ctx.T.Errors.Error())
-	}
+	assert.Len(t, ctx.T.Errors, 2, "Error count should be correct")
+	assert.Equal(t, `2 error(s): ["Error #0: Test Error" "Error #5: Test Error"]`, ctx.T.Error(), "Error message should be correct")
 }
 
 func TestLogger(t *testing.T) {

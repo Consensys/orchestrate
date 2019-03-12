@@ -1,9 +1,11 @@
 package services
 
-import "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/types"
+import (
+	trace "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
+)
 
-// Unmarshaller are responsible to unmarshal high level input message into a protobuf message
+// Unmarshaller are responsible to unmarshal input message into a trace
 type Unmarshaller interface {
-	// Unmarshal high level input message into a protobuf message
-	Unmarshal(msg interface{}, t *types.Trace) error
+	// Unmarshal high message into a trace
+	Unmarshal(msg interface{}, t *trace.Trace) error
 }

@@ -1,9 +1,11 @@
 package services
 
-import "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/types"
+import (
+	trace "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
+)
 
-// Marshaller are responsible to marshal a protobuffer message to a higher level message format
+// Marshaller are responsible to marshal trace object into specific formats (e.g a Sarama message)
 type Marshaller interface {
-	// Marshal a protobuffer message to a higher level message format
-	Marshal(t *types.Trace, msg interface{}) error
+	// Marshal a protobuffer message to specific format
+	Marshal(t *trace.Trace, msg interface{}) error
 }

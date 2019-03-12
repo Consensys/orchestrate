@@ -1,7 +1,9 @@
-package types
+package core
 
 import (
 	log "github.com/sirupsen/logrus"
+	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
+	trace "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
 )
 
 // HandlerFunc is base type for a function processing a Trace
@@ -10,7 +12,7 @@ type HandlerFunc func(ctx *Context)
 // Context allows us to transmit information through middlewares
 type Context struct {
 	// T stores information about transaction lifecycle in high level types
-	T *Trace
+	T *trace.Trace
 
 	// Message that triggered Context execution (typically a sarama.ConsumerMessage)
 	Msg interface{}
@@ -30,9 +32,8 @@ type Context struct {
 
 // NewContext creates a new context
 func NewContext() *Context {
-	t := NewTrace()
 	return &Context{
-		T:     t,
+		T:     &trace.Trace{},
 		Keys:  make(map[string]interface{}),
 		index: -1,
 	}
@@ -58,16 +59,15 @@ func (ctx *Context) Next() {
 }
 
 // Error attaches an error to context.
-func (ctx *Context) Error(err error) *Error {
+func (ctx *Context) Error(err error) *common.Error {
 	if err == nil {
 		panic("err is nil")
 	}
 
-	e, ok := err.(*Error)
+	e, ok := err.(*common.Error)
 	if !ok {
-		e = &Error{
-			Err:  err,
-			Type: ErrorTypeUnknown,
+		e = &common.Error{
+			Message: err.Error(),
 		}
 	}
 	ctx.T.Errors = append(ctx.T.Errors, e)
@@ -81,7 +81,7 @@ func (ctx *Context) Abort() {
 }
 
 // AbortWithError calls `Abort()` and `Error()``
-func (ctx *Context) AbortWithError(err error) *Error {
+func (ctx *Context) AbortWithError(err error) *common.Error {
 	ctx.Abort()
 	return ctx.Error(err)
 }
