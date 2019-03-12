@@ -43,28 +43,11 @@ func ArrayToByteSlice(value reflect.Value) reflect.Value {
 // FormatNonIndexedArrayArg transforms a data to string
 func FormatNonIndexedArrayArg(t abi.Type, arg interface{}) (string, error) {
 
-	var elementaryType byte
-	switch {
-	case strings.Contains(fmt.Sprintf("%s", t.Elem), "uint"):
-		elementaryType = abi.UintTy
-	case strings.Contains(fmt.Sprintf("%s", t.Elem), "int"):
-		elementaryType = abi.IntTy
-	case strings.Contains(fmt.Sprintf("%s", t.Elem), "bool"):
-		elementaryType = abi.BoolTy
-	case strings.Contains(fmt.Sprintf("%s", t.Elem), "address"):
-		elementaryType = abi.AddressTy
-	// Case that should not be possible
-	// case strings.Contains(fmt.Sprintf("%s", t.Elem), "string"):
-	// 	elementaryType = abi.StringTy
-	// case fmt.Sprintf("%s", t.Elem) == "bytes":
-	// 	elementaryType = abi.BytesTy
-	case strings.Contains(fmt.Sprintf("%s", t.Elem), "bytes"):
-		elementaryType = abi.FixedBytesTy
-	}
+	elemType, _ := abi.NewType(t.Elem.String(), nil)
 
 	var arrayArgString []string
 	for i := 0; i < t.Size; i++ {
-		argString, _ := FormatNonIndexedArg(abi.Type{T: elementaryType}, reflect.ValueOf(arg).Index(i).Interface())
+		argString, _ := FormatNonIndexedArg(elemType, reflect.ValueOf(arg).Index(i).Interface())
 		arrayArgString = append(arrayArgString, argString)
 	}
 
@@ -95,7 +78,10 @@ func FormatNonIndexedArg(t abi.Type, arg interface{}) (string, error) {
 
 // Decode event data to string
 func Decode(event *abi.Event, txLog *types.Log) (map[string]string, error) {
-	logMapping := make(map[string]string, len(event.Inputs))
+	expectedTopics := len(event.Inputs) - event.Inputs.LengthNonIndexed()
+	if expectedTopics != len(txLog.Topics)-1 {
+		return nil, fmt.Errorf("Error: Topics length does not match with abi event: expected %v but got %v", expectedTopics, len(txLog.Topics)-1)
+	}
 
 	unpackValues, err := event.Inputs.UnpackValues(txLog.Data)
 	if err != nil {
@@ -106,13 +92,14 @@ func Decode(event *abi.Event, txLog *types.Log) (map[string]string, error) {
 		topicIndex        = 1
 		unpackValuesIndex = 0
 	)
+	logMapping := make(map[string]string, len(event.Inputs))
+
 	for _, arg := range event.Inputs {
 		var decoded string
 		if arg.Indexed {
 			decoded, _ = FormatIndexedArg(arg.Type, txLog.Topics[topicIndex])
 			topicIndex++
 		} else {
-
 			decoded, _ = FormatNonIndexedArg(arg.Type, unpackValues[unpackValuesIndex])
 			unpackValuesIndex++
 		}
