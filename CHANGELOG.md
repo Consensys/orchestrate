@@ -1,5 +1,14 @@
 # CHANGELOG
 
+### Version 0.2.0
+
+*Unreleased*
+
+- [CHORE] Merge of ```core``` and ```common```
+- [FEAT] Extend protos and make it basic types
+- [FEAT] Implement utility ```Keys```
+- [FEAT] Implement ```config``` flags for databases
+
 ### Version 0.1.21
 
 *Release on March 10th*
