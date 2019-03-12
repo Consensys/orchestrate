@@ -10,7 +10,7 @@ import (
 var (
 	bridgeLinksFlag     = "bridge-links"
 	bridgeLinksViperKey = "bridge.links"
-	bridgeLinksEnv = "BRIDGE_LINKS"
+	bridgeLinksEnv      = "BRIDGE_LINKS"
 )
 
 // BridgeLinks lists bridges
@@ -26,7 +26,7 @@ var (
 	bridgeMethodSignatureFlag     = "bridge-methodsignature"
 	bridgeMethodSignatureViperKey = "bridge.methodsignature"
 	bridgeMethodSignatureDefault  = "RelayMessage(bytes,address,address)"
-	bridgeMethodSignatureEnv = "BRIDGE_METHODSIGNATURE"
+	bridgeMethodSignatureEnv      = "BRIDGE_METHODSIGNATURE"
 )
 
 // BridgeMethodSignature lists bridges
@@ -41,7 +41,7 @@ Environment variable: %q`, bridgeMethodSignatureEnv)
 var (
 	bridgeAuthorityFlag     = "bridge-authority"
 	bridgeAuthorityViperKey = "bridge.authority"
-	bridgeAuthorityEnv = "BRIDGE_AUTHORITY"
+	bridgeAuthorityEnv      = "BRIDGE_AUTHORITY"
 )
 
 // BridgeAuthority lists bridges
