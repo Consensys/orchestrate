@@ -3,9 +3,8 @@ package ethereum
 import (
 	"testing"
 
-	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
-
 	"github.com/stretchr/testify/assert"
+	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
 )
 
 func TestTrace(t *testing.T) {
