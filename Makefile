@@ -9,6 +9,8 @@ protobuf: ## Generate protobuf stubs
 run-coverage: ## Generate global code coverage report
 	@sh scripts/coverage.sh $(PACKAGES)
 
+tidy: fmt vet lint misspell mod-tidy ineffassign
+
 coverage: run-coverage
 	@xdg-open coverage.html
 
@@ -31,11 +33,18 @@ misspell: ## Correct misspells
 	@misspell -w $(GOFILES)
 
 race: ## Run data race detector
-	go test -race -short ${PACKAGES}
+	@go test -race -short ${PACKAGES}
+
+mod-tidy:
+	@go mod tidy
+
+ineffassign:
+	@ineffassign .
 
 tools: ## Install test tools
-	@go install golang.org/x/lint/golint
-	@go install github.com/client9/misspell/cmd/misspell
+	@GO111MODULE=off go get golang.org/x/lint/golint
+	@GO111MODULE=off go get github.com/client9/misspell/cmd/misspell
+	@GO111MODULE=off go get github.com/gordonklaus/ineffassign
 
 help: ## Display this help screen
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
