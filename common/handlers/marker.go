@@ -1,13 +1,13 @@
 package handlers
 
 import (
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/types"
 )
 
 // Marker creates an handler that mark offsets
-func Marker(offset services.OffsetMarker) types.HandlerFunc {
-	return func(ctx *types.Context) {
+func Marker(offset services.OffsetMarker) core.HandlerFunc {
+	return func(ctx *core.Context) {
 		// Marker is expected to be registered as one of the firt handlers so we are sure we alway mark messages
 		ctx.Next()
 

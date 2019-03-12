@@ -6,7 +6,10 @@ import (
 	"sync"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
+	trace "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core"
 )
 
 type MockTraceProducer struct {
@@ -14,22 +17,22 @@ type MockTraceProducer struct {
 }
 
 func (p *MockTraceProducer) Produce(o interface{}) error {
-	t := o.(*types.Trace)
-	if t.Chain().ID.Text(10) == "0" {
+	t := o.(*trace.Trace)
+	if t.Chain.ID().Text(10) == "0" {
 		return fmt.Errorf("Could not produce")
 	}
 	return nil
 }
 
-func makeProducerContext(i int) *types.Context {
-	ctx := types.NewContext()
+func makeProducerContext(i int) *core.Context {
+	ctx := core.NewContext()
 	ctx.Reset()
 	switch i % 2 {
 	case 0:
-		ctx.T.Chain().ID = big.NewInt(0)
+		ctx.T.Chain = (&common.Chain{}).SetID(big.NewInt(0))
 		ctx.Keys["errors"] = 1
 	case 1:
-		ctx.T.Chain().ID = big.NewInt(10)
+		ctx.T.Chain = (&common.Chain{}).SetID(big.NewInt(10))
 		ctx.Keys["errors"] = 0
 	}
 	return ctx
@@ -40,12 +43,12 @@ func TestProducer(t *testing.T) {
 	producer := Producer(&mp)
 
 	rounds := 100
-	outs := make(chan *types.Context, rounds)
+	outs := make(chan *core.Context, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
 		ctx := makeProducerContext(i)
-		go func(ctx *types.Context) {
+		go func(ctx *core.Context) {
 			defer wg.Done()
 			producer(ctx)
 			outs <- ctx

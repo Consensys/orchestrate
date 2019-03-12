@@ -7,24 +7,25 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core"
+	trace "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
 )
 
 type MockUnmarshaller struct {
 	t *testing.T
 }
 
-func (u *MockUnmarshaller) Unmarshal(msg interface{}, t *types.Trace) error {
+func (u *MockUnmarshaller) Unmarshal(msg interface{}, t *trace.Trace) error {
 	if msg.(string) == "error" {
 		return fmt.Errorf("Could not unmarshall")
 	}
 	return nil
 }
 
-func makeLoaderContext(i int) *types.Context {
-	ctx := types.NewContext()
+func makeLoaderContext(i int) *core.Context {
+	ctx := core.NewContext()
 	ctx.Reset()
-	ctx.Prepare([]types.HandlerFunc{}, log.NewEntry(log.StandardLogger()), nil)
+	ctx.Prepare([]core.HandlerFunc{}, log.NewEntry(log.StandardLogger()), nil)
 
 	switch i % 2 {
 	case 0:
@@ -42,12 +43,12 @@ func TestLoader(t *testing.T) {
 	loader := Loader(&mu)
 
 	rounds := 10
-	outs := make(chan *types.Context, rounds)
+	outs := make(chan *core.Context, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
 		ctx := makeLoaderContext(i)
-		go func(ctx *types.Context) {
+		go func(ctx *core.Context) {
 			defer wg.Done()
 			loader(ctx)
 			outs <- ctx

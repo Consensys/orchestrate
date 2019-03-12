@@ -4,26 +4,26 @@ import (
 	"sync"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/types"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protobuf/trace"
+	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
+	trace "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
 )
 
-func newTrace() *types.Trace {
-	t := types.NewTrace()
-	t.Sender().ID = "abcde"
-	return t
+func newTrace() *trace.Trace {
+	return &trace.Trace{
+		Sender: &common.Account{Id: "abcde"},
+	}
 }
 
 func TestTracePbMarshaller(t *testing.T) {
 	m := TracePbMarshaller{}
-	pbs := make([]*tracepb.Trace, 0)
+	pbs := make([]*trace.Trace, 0)
 	rounds := 1000
 
 	wg := &sync.WaitGroup{}
 	for i := 1; i < rounds; i++ {
-		pbs = append(pbs, &tracepb.Trace{})
+		pbs = append(pbs, &trace.Trace{})
 		wg.Add(1)
-		go func(pb *tracepb.Trace) {
+		go func(pb *trace.Trace) {
 			defer wg.Done()
 			m.Marshal(newTrace(), pb)
 		}(pbs[len(pbs)-1])
@@ -31,7 +31,7 @@ func TestTracePbMarshaller(t *testing.T) {
 	wg.Wait()
 
 	for _, pb := range pbs {
-		if pb.GetSender().GetId() != "abcde" {
+		if pb.Sender.Id != "abcde" {
 			t.Errorf("TracePbMarshaller: expected %q but got %q", "abcde", pb.GetSender().GetId())
 		}
 	}

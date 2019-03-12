@@ -1,13 +1,13 @@
 package handlers
 
 import (
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/types"
 )
 
 // Loader creates an handler loading input
-func Loader(u services.Unmarshaller) types.HandlerFunc {
-	return func(ctx *types.Context) {
+func Loader(u services.Unmarshaller) core.HandlerFunc {
+	return func(ctx *core.Context) {
 		// Unmarshal message
 		err := u.Unmarshal(ctx.Msg, ctx.T)
 
