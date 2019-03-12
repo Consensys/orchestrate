@@ -13,3 +13,9 @@ func (chain *Chain) ID() *big.Int {
 	}
 	return hexutil.MustDecodeBig(chain.Id)
 }
+
+// SetID set chain ID
+func (chain *Chain) SetID(id *big.Int) *Chain {
+	chain.Id = hexutil.EncodeBig(id)
+	return chain
+}
