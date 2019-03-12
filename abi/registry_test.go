@@ -88,6 +88,7 @@ func TestContractRegistryByID(t *testing.T) {
 
 	method := r.GetMethodByID
 	shouldMatch(method, "isMinter@ERC1400", "function isMinter(address account) constant returns(bool)", t)
+	shouldMatch(method, "constructor@ERC1400", "function () returns()", t)
 	shouldError(method, "isMinters@ERC1400", t)
 	shouldError(method, "is@Minters@ERC1400", t)
 	shouldError(method, "isMinter@ERC1401", t)
@@ -104,6 +105,7 @@ func TestContractRegistryByID(t *testing.T) {
 	r.RegisterContract(&abi.Contract{Name: "ERC1400", Tag: "v0.1.1", Abi: ERC1400, Bytecode: []byte{}})
 	method = r.GetMethodByID
 	shouldMatch(method, "isMinter@ERC1400[v0.1.1]", "function isMinter(address account) constant returns(bool)", t)
+	shouldMatch(method, "constructor@ERC1400[v0.1.1]", "function () returns()", t)
 	shouldError(method, "isMinters@ERC1400[v0.1.1]", t)
 	shouldError(method, "is@Minters@ERC1400[v0.1.1]", t)
 	shouldError(method, "isMinter@ERC1401[v0.1.1]", t)
