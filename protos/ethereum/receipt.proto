@@ -18,27 +18,28 @@ message Log {
     bytes data = 3;
 
     // Log decoded data
-    map<string, string> decoded_data = 4;
+    string event = 4;
+    map<string, string> decoded_data = 5;
 
     // QUANTITY - Block number where this transaction was in
-    uint64 block_number = 5; 
+    uint64 block_number = 6; 
 
     // DATA (32 Bytes) - Hash of the transaction.
     // e.g. 0x3b198bfd5d2907285af009e9ae84a0ecd63677110d89d7e030251acb87f6487e
-    string tx_hash = 6; 
+    string tx_hash = 7; 
 
     // QUANTITY - Integer of the transactions index position in the block.
-    uint64 tx_index = 7; 
+    uint64 tx_index = 8; 
 
     // DATA (32 Bytes) - Hash of the block where this transaction was in.
     // e.g. 0x656c34545f90a730a19008c0e7a7cd4fb3895064b48d6d69761bd5abad681056
-    string block_hash = 8; 
+    string block_hash = 9; 
 
     // QUANTITY - Integer of the log index position in the block
-    uint64 index = 9; 
+    uint64 index = 10; 
 
     // Removed field is true if this log was reverted due to a chain reorganisation.
-    bool removed = 10; 
+    bool removed = 11; 
 }
 
 // Transaction Receipt
