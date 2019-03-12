@@ -14,5 +14,5 @@ require (
 	gitlab.com/ConsenSys/client/fr/core-stack/common.git v0.1.10
 	gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.21
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.1.15
-	gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.1.4
+	gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.1.5
 )
