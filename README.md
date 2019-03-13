@@ -43,7 +43,7 @@ import (
 	"fmt"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener"
+	listener "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener"
 )
 
 func main() {
@@ -60,12 +60,12 @@ func main() {
 	}
 
 	// Create listener
-	listenerCfg := listener.NewConfig()
-	txlistener := listener.NewTxListener(listener.NewEthClient(mec, listenerCfg))
+	config := listener.NewConfig()
+	txlistener := listener.NewTxListener(listener.NewEthClient(mec), config)
 
 	// Start listening on every chain starting from last block
 	for _, chainID := range mec.Networks(context.Background()) {
-		txlistener.Listen(chainID, -1, 0, listenerCfg)
+		txlistener.Listen(chainID, -1, 0)
 	}
 
 	// Consume receipts
@@ -73,7 +73,6 @@ func main() {
 		fmt.Printf("* New receipt ChainID=%v BlockNumber=%v TxHash=%v\n", r.ChainID.Text(16), r.BlockNumber, r.TxHash.Hex())
 	}
 }
-
 ```
 
 ```sh

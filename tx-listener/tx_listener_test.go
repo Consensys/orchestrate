@@ -9,6 +9,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/spf13/viper"
 )
 
 func TestTxListener(t *testing.T) {
@@ -22,24 +23,26 @@ func TestTxListener(t *testing.T) {
 
 	// Initialize cursor
 	config := NewConfig()
-	config.BlockCursor.Backoff = 100 * time.Millisecond
 	config.TxListener.Return.Blocks = false
 	config.TxListener.Return.Errors = false
+	viper.Set("listener.block.backoff", 100*time.Millisecond)
+	viper.Set("listener.block.limit", 40)
+	viper.Set("listener.tracker.depth", 0)
 
-	l := NewTxListener(mec)
-	_, err := l.Listen(big.NewInt(1), 0, 0, config)
+	l := NewTxListener(mec, config)
+	_, err := l.Listen(big.NewInt(1), 0, 0)
 	if err != nil {
 		t.Errorf("TxListener #1: expected no error but got %v", err)
 	}
 
 	// Try to listen to the same chain again
-	_, err = l.Listen(big.NewInt(1), 0, 0, config)
+	_, err = l.Listen(big.NewInt(1), 0, 0)
 	if err == nil {
 		t.Errorf("TxListener #2: expected an error")
 	}
 
 	// Try to listen to another chain
-	_, err = l.Listen(big.NewInt(2), 1, 5, config)
+	_, err = l.Listen(big.NewInt(2), 1, 5)
 	if err != nil {
 		t.Errorf("TxListener #3: expected no error but got %v", err)
 	}
@@ -78,7 +81,7 @@ func TestTxListener(t *testing.T) {
 	mec.mine()
 
 	// Try to listen to another chain
-	_, err = l.Listen(big.NewInt(3), -1, 0, config)
+	_, err = l.Listen(big.NewInt(3), -1, 0)
 	if err != nil {
 		t.Errorf("TxListener #4: expected no error but got %v", err)
 	}
@@ -106,7 +109,7 @@ func TestTxListener(t *testing.T) {
 	l.Close()
 
 	// Try to listen on a close listener
-	_, err = l.Listen(big.NewInt(1), 0, 0, config)
+	_, err = l.Listen(big.NewInt(1), 0, 0)
 	if err == nil {
 		t.Errorf("TxListener #2: expected an error")
 	}
@@ -146,18 +149,20 @@ func TestTxListenerWithReturns(t *testing.T) {
 
 	// Initialize cursor
 	config := NewConfig()
-	config.BlockCursor.Backoff = 100 * time.Millisecond
 	config.TxListener.Return.Blocks = true
 	config.TxListener.Return.Errors = true
+	viper.Set("listener.block.backoff", 100*time.Millisecond)
+	viper.Set("listener.block.limit", 40)
+	viper.Set("listener.tracker.depth", 0)
 
-	l := NewTxListener(mec)
-	_, err := l.Listen(big.NewInt(1), -1, 0, config)
+	l := NewTxListener(mec, config)
+	_, err := l.Listen(big.NewInt(1), -1, 0)
 	if err != nil {
 		t.Errorf("TxListener #1: expected no error but got %v", err)
 	}
 
 	// Try to listen to another chain
-	_, err = l.Listen(big.NewInt(2), 1, 5, config)
+	_, err = l.Listen(big.NewInt(2), 1, 5)
 	if err != nil {
 		t.Errorf("TxListener #3: expected no error but got %v", err)
 	}
@@ -196,7 +201,7 @@ func TestTxListenerWithReturns(t *testing.T) {
 	mec.mine()
 
 	// Try to listen to another chain
-	_, err = l.Listen(big.NewInt(3), -1, 0, config)
+	_, err = l.Listen(big.NewInt(3), -1, 0)
 	if err != nil {
 		t.Errorf("TxListener #4: expected no error but got %v", err)
 	}
@@ -226,7 +231,7 @@ func TestTxListenerWithReturns(t *testing.T) {
 	l.Close()
 
 	// Try to listen on a close listener
-	_, err = l.Listen(big.NewInt(1), 0, 0, config)
+	_, err = l.Listen(big.NewInt(1), 0, 0)
 	if err == nil {
 		t.Errorf("TxListener #2: expected an error")
 	}

@@ -16,7 +16,7 @@ type TxListener interface {
 	// It will return an error if this TxListener is already listening
 	// on the given chain
 	// BlockNumber can be a blockNumber or -1 for latest block
-	Listen(chainID *big.Int, blockNumber int64, txIndex int64, conf Config) (ChainListener, error)
+	Listen(chainID *big.Int, blockNumber int64, txIndex int64) (ChainListener, error)
 
 	// Receipts returns a read channel of receipts that are returned by the TxListener
 	Receipts() <-chan *TxListenerReceipt
@@ -38,7 +38,7 @@ type TxListener interface {
 }
 
 // NewTxListener creates a new TxListener
-func NewTxListener(ec EthClient) TxListener {
+func NewTxListener(ec EthClient, conf Config) TxListener {
 	return &txListener{
 		ec:             ec,
 		mux:            &sync.RWMutex{},
@@ -49,6 +49,7 @@ func NewTxListener(ec EthClient) TxListener {
 		wait:           &sync.WaitGroup{},
 		closeOnce:      &sync.Once{},
 		closed:         false,
+		conf:           conf,
 	}
 }
 
@@ -65,26 +66,23 @@ type txListener struct {
 	wait      *sync.WaitGroup
 	closeOnce *sync.Once
 	closed    bool
+
+	conf Config
 }
 
-func (l *txListener) Listen(chainID *big.Int, blockNumber int64, txIndex int64, conf Config) (ChainListener, error) {
+func (l *txListener) Listen(chainID *big.Int, blockNumber int64, txIndex int64) (ChainListener, error) {
 	// Set chain tracker
-	t := &BaseTracker{
-		ec:      l.ec,
-		chainID: chainID,
-		depth:   conf.BlockCursor.Tracker.Depth,
-	}
+	t := NewBaseTracker(l.ec, chainID)
 
 	// Set cursor
 	if blockNumber == -1 {
 		// We start from highest block
 		blockNumber, _ = t.HighestBlock(context.Background())
 	}
-	cur := newBlockCursorFromTracker(l.ec, t, blockNumber, conf)
+	cur := newBlockCursorFromTracker(l.ec, t, blockNumber)
 
 	// Create listener
 	listener := &singleChainListener{
-		conf:        conf,
 		t:           t,
 		cur:         cur,
 		blocks:      l.blocks,
@@ -94,6 +92,7 @@ func (l *txListener) Listen(chainID *big.Int, blockNumber int64, txIndex int64, 
 		txIndex:     txIndex,
 		closeOnce:   &sync.Once{},
 		closed:      make(chan struct{}),
+		conf:        l.conf,
 	}
 
 	// Register new listener

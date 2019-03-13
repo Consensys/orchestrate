@@ -6,6 +6,7 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
 	listener "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core"
@@ -147,12 +148,13 @@ func main() {
 
 	// Initialize listener configuration
 	listenerCfg := listener.NewConfig()
-	listenerCfg.BlockCursor.Backoff = time.Second
-	listenerCfg.BlockCursor.Limit = 40
 	listenerCfg.TxListener.Return.Blocks = true
 	listenerCfg.TxListener.Return.Errors = true
 
-	txlistener := listener.NewTxListener(listener.NewEthClient(mec, listenerCfg))
+	viper.Set("blockcursor.backoff", time.Second)
+	viper.Set("blockcursor.limit", 40)
+
+	txlistener := listener.NewTxListener(listener.NewEthClient(mec), listenerCfg)
 
 	// Create and Listener Handler
 	handler := TxListenerHandler{}
@@ -161,7 +163,7 @@ func main() {
 
 	// Start listening all chains
 	for _, chainID := range mec.Networks(context.Background()) {
-		txlistener.Listen(chainID, -1, 0, listenerCfg)
+		txlistener.Listen(chainID, -1, 0)
 	}
 
 	// Start listening

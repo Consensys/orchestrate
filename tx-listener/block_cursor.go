@@ -10,6 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/spf13/viper"
 )
 
 // TxListenerReceipt contains useful information about a receipt
@@ -83,6 +84,15 @@ type BaseTracker struct {
 	depth   uint64
 }
 
+// NewBaseTracker creates a new base tracker
+func NewBaseTracker(ec EthClient, chainID *big.Int) *BaseTracker {
+	return &BaseTracker{
+		ec:      ec,
+		chainID: chainID,
+		depth:   uint64(viper.GetInt64("listener.tracker.depth")),
+	}
+}
+
 // ChainID returns ID of the tracked chain
 func (t *BaseTracker) ChainID() *big.Int {
 	return big.NewInt(0).Set(t.chainID)
@@ -134,9 +144,6 @@ type BlockCursor struct {
 	// Allows to get information about chain
 	t ChainTracker
 
-	// Config
-	conf Config
-
 	// blockNumber stands last block that has been fetched
 	// currentHead stands for the most advanced known mined block (we use it as cache so we do not need to always fetch Eth client for last mined block)
 	blockNumber, currentHead int64
@@ -155,8 +162,8 @@ type BlockCursor struct {
 }
 
 // NewBlockCursorFromTracker creates a new block cursor using a tracker
-func NewBlockCursorFromTracker(ec EthClient, t ChainTracker, blockNumber int64, conf Config) *BlockCursor {
-	bc := newBlockCursorFromTracker(ec, t, blockNumber, conf)
+func NewBlockCursorFromTracker(ec EthClient, t ChainTracker, blockNumber int64) *BlockCursor {
+	bc := newBlockCursorFromTracker(ec, t, blockNumber)
 
 	// Start feeder & dispatcher in separate goroutines
 	go bc.feeder()
@@ -165,30 +172,23 @@ func NewBlockCursorFromTracker(ec EthClient, t ChainTracker, blockNumber int64, 
 	return bc
 }
 
-func newBlockCursorFromTracker(ec EthClient, t ChainTracker, blockNumber int64, conf Config) *BlockCursor {
+func newBlockCursorFromTracker(ec EthClient, t ChainTracker, blockNumber int64) *BlockCursor {
 	return &BlockCursor{
 		ec:           ec,
 		t:            t,
-		conf:         conf,
 		blockNumber:  blockNumber,
 		currentHead:  0,
 		blocks:       make(chan *TxListenerBlock),
 		errors:       make(chan *TxListenerError),
-		blockFutures: make(chan *Future, conf.BlockCursor.Limit),
+		blockFutures: make(chan *Future, uint64(viper.GetInt64("listener.block.limit"))),
 		closed:       make(chan struct{}),
 		closeOnce:    &sync.Once{},
 	}
 }
 
 // NewBlockCursor creates a new block cursor for a given chain starting at a given blockNumber
-func NewBlockCursor(ec EthClient, chainID *big.Int, blockNumber int64, conf Config) *BlockCursor {
-	t := &BaseTracker{
-		ec:      ec,
-		chainID: chainID,
-		depth:   conf.BlockCursor.Tracker.Depth,
-	}
-
-	return NewBlockCursorFromTracker(ec, t, blockNumber, conf)
+func NewBlockCursor(ec EthClient, chainID *big.Int, blockNumber int64) *BlockCursor {
+	return NewBlockCursorFromTracker(ec, NewBaseTracker(ec, chainID), blockNumber)
 }
 
 // ChainID returns ID of the chain the cursor is applied on
@@ -269,7 +269,7 @@ feedingLoop:
 					}
 
 					// Chain has not move forward so we sleep before retrying (waiting for updates on the chain)
-					time.Sleep(bc.conf.BlockCursor.Backoff)
+					time.Sleep(viper.GetDuration("listener.block.backoff"))
 				}
 			}
 		}

@@ -10,6 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 // EthClient is a minimal Ethereum Client interface required by a TxListener
@@ -29,28 +30,26 @@ type TxListenerEthClient struct {
 	c EthClient
 
 	pool *sync.Pool
-	conf Config
 }
 
-func newBackOff(conf Config) backoff.BackOff {
+func newBackOff() backoff.BackOff {
 	return &backoff.ExponentialBackOff{
-		InitialInterval:     conf.EthClient.Retry.InitialInterval,
-		RandomizationFactor: conf.EthClient.Retry.RandomizationFactor,
-		Multiplier:          conf.EthClient.Retry.Multiplier,
-		MaxInterval:         conf.EthClient.Retry.MaxInterval,
-		MaxElapsedTime:      conf.EthClient.Retry.MaxElapsedTime,
+		InitialInterval:     viper.GetDuration("ethclient.retry.initinterval"),
+		RandomizationFactor: viper.GetFloat64("ethclient.retry.randomfactor"),
+		Multiplier:          viper.GetFloat64("ethclient.retry.multiplier"),
+		MaxInterval:         viper.GetDuration("ethclient.retry.maxinterval"),
+		MaxElapsedTime:      viper.GetDuration("ethclient.retry.maxelapsedtime"),
 		Clock:               backoff.SystemClock,
 	}
 }
 
 // NewEthClient creates an Ethereum client compatible with a TxListener
-func NewEthClient(ec EthClient, conf Config) EthClient {
+func NewEthClient(ec EthClient) EthClient {
 	return &TxListenerEthClient{
 		c: ec,
 		pool: &sync.Pool{
-			New: func() interface{} { return newBackOff(conf) },
+			New: func() interface{} { return newBackOff() },
 		},
-		conf: conf,
 	}
 }
 

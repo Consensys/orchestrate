@@ -245,8 +245,7 @@ func TestBlockCursorFetchReceipt(t *testing.T) {
 	}
 
 	// Initialize cursor
-	config := NewConfig()
-	bc := newBlockCursorFromTracker(mec, tracker, -1, config)
+	bc := newBlockCursorFromTracker(mec, tracker, -1)
 
 	future := bc.fetchReceipt(context.Background(), common.HexToHash("0x8305d6f07eaced88f5f8f52d5acceedb07568c6ca6c956bef461ed3d6e77686b"))
 
@@ -287,8 +286,7 @@ func TestBlockCursorFetchBlock(t *testing.T) {
 	}
 
 	// Initialize cursor
-	config := NewConfig()
-	bc := newBlockCursorFromTracker(mec, tracker, -1, config)
+	bc := newBlockCursorFromTracker(mec, tracker, -1)
 
 	future := bc.fetchBlock(context.Background(), 4)
 

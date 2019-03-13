@@ -1,5 +1,13 @@
 # CHANGELOG
 
+### Version 0.2.0-alpha
+
+*Released on March 13th 2019*
+
+- [FEAT] Update dependency to use ```pkg```
+- [FIX] Clean ```abi``` logics
+- [FIX] Stabilize ```tx-listener``` main loop to decrease CPU consumption
+
 ### Version 0.1.15
 
 *Released on February 20th 2019*
