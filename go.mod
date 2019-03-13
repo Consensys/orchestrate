@@ -11,6 +11,6 @@ require (
 	github.com/spf13/pflag v1.0.3
 	github.com/spf13/viper v1.3.1
 	github.com/stretchr/testify v1.2.2
-	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.2
+	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.3
 	golang.org/x/net v0.0.0-20190206173232-65e2d4e15006 // indirect
 )
