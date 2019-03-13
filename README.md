@@ -87,4 +87,3 @@ INFO[0002] tx-listener: start listening from block=7220203 tx=0  Chain=1
 * New receipt ChainID=4 BlockNumber=3869057 TxHash=0x2becf34f2dbeb2024b9692bc8fd0b97778b2e380e32ee3a8a7757f68139644b3
 * New receipt ChainID=4 BlockNumber=3869057 TxHash=0x93d089e31f60957ebe9f9697362812e970265df77954535d25f5c2c049da91c8
 ```
-
