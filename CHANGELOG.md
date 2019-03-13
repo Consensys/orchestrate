@@ -2,11 +2,12 @@
 
 ### Version 0.2.0-alpha
 
-*Released on March 13th 2019*
+*Released on March 14th 2019*
 
 - [FEAT] Update dependency to use ```pkg```
 - [FIX] Clean ```abi``` logics
 - [FIX] Stabilize ```tx-listener``` main loop to decrease CPU consumption
+- [FEAT] Add support for ```viper``` configuration
 
 ### Version 0.1.15
 
