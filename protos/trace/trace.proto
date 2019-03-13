@@ -7,10 +7,9 @@ import "protos/common/error.proto";
 import "protos/ethereum/transaction.proto";
 import "protos/ethereum/receipt.proto";
 
-option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protobuf/ethereum";
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protobuf/trace";
 
 package trace;
-
 
 // Metadata attached to the trace
 message Metadata {

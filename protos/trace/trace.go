@@ -1,4 +1,4 @@
-package ethereum
+package trace
 
 import (
 	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"

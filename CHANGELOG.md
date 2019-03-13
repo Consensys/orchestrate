@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.2.0-alpha.3
+
+*Released on March 13th 2019*
+
+- [FIX] fix `trace` package naming in `protos`
+
 ### Version 0.2.0-alpha.2
 
 *Released on March 13th 2019*

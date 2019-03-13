@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-import "protos/abi/contract.proto";
+import "protos/abi/abi.proto";
 
 option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common";
 
