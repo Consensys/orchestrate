@@ -72,8 +72,8 @@ func shouldError(f interface{}, input string, t *testing.T) {
 func TestRegisterContract(t *testing.T) {
 	r := NewStaticRegistry()
 	err := r.RegisterContract(&abi.Contract{Name: "ERC1400", Tag: "", Abi: []byte{}, Bytecode: []byte{}})
-	if err == nil {
-		t.Error("Should have returned an error because wrong ABI structure")
+	if err != nil {
+		t.Error("Should not error on empty ABI")
 	}
 
 	err = r.RegisterContract(&abi.Contract{Name: "ERC1400", Tag: "", Abi: ERC1400, Bytecode: []byte{}})

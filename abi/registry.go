@@ -64,7 +64,7 @@ func (r *StaticRegistry) getContract(name string) (*ethabi.ABI, error) {
 // id should match the following pattern "<MethodName>@<ContracName>"
 func (r *StaticRegistry) GetMethodByID(id string) (ethabi.Method, error) {
 	// Computing call ensure ID has been properly formated
-	call, err := common.FromShortCall(id)
+	call, err := common.StringToCall(id)
 	if err != nil {
 		return ethabi.Method{}, err
 	}
@@ -92,7 +92,7 @@ func (r *StaticRegistry) GetMethodByID(id string) (ethabi.Method, error) {
 // id should match the following pattern "<EventName>@<ContracName>"
 func (r *StaticRegistry) GetEventByID(id string) (ethabi.Event, error) {
 	// Computing call ensure ID has been properly formated
-	call, err := common.FromShortCall(id)
+	call, err := common.StringToCall(id)
 	if err != nil {
 		return ethabi.Event{}, err
 	}
@@ -151,30 +151,3 @@ func (r *StaticRegistry) GetEventBySig(topic string) (ethabi.Event, error) {
 	}
 	return event, nil
 }
-
-// var methodSigPattern = regexp.MustCompile(`^(0x)?[0-9a-fA-F]{8}$`)
-// var eventSigPattern = regexp.MustCompile(`^(0x)?[0-9a-fA-F]{64}$`)
-
-// func cleanSig(sig string, sigType string) (string, error) {
-
-// 	switch sigType {
-// 	case "method":
-// 		pattern =
-// 	case "event":
-// 		pattern = "^(0x)?[0-9a-fA-F]{64}$"
-// 	default:
-// 		return "", fmt.Errorf("Cannot use this sigType %v", sigType)
-// 	}
-// 	matched, err := regexp.MatchString(pattern, sig)
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	if !matched {
-// 		return "", fmt.Errorf("%v is not a valid %v signature, it should match the regex pattern \"%v\"", sig, sigType, pattern)
-// 	}
-// 	s := strings.ToLower(sig)
-// 	if s[:2] == "0x" {
-// 		return s, nil
-// 	}
-// 	return "0x" + s, nil
-// }
