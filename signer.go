@@ -3,14 +3,13 @@ package ethereum
 import (
 	"crypto/ecdsa"
 	"fmt"
-	"math/big"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/common"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/rlp"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
 )
 
 // StaticSigner holds a pool of private keys in memory
@@ -37,26 +36,24 @@ func NewStaticSigner(pKeys []string) *StaticSigner {
 }
 
 // MakeSigner creates a new signer
-func MakeSigner(c *types.Chain) ethtypes.Signer {
+func MakeSigner(c *common.Chain) ethtypes.Signer {
 	var signer ethtypes.Signer
 	if c.IsEIP155 {
 		// We copy chain ID to ensure pointer can be safely used elsewhere
-		id := new(big.Int)
-		id.Set(c.ID)
-		signer = ethtypes.NewEIP155Signer(id)
+		signer = ethtypes.NewEIP155Signer(c.ID())
 	} else {
 		signer = ethtypes.HomesteadSigner{}
 	}
 	return signer
 }
 
-func (s *StaticSigner) getSigner(c *types.Chain) ethtypes.Signer {
-	signer, _ := s.signers.LoadOrStore(c.ID.Text(16), MakeSigner(c))
+func (s *StaticSigner) getSigner(c *common.Chain) ethtypes.Signer {
+	signer, _ := s.signers.LoadOrStore(c.Id, MakeSigner(c))
 	return signer.(ethtypes.Signer)
 }
 
 // Sign sign transaction on context
-func (s *StaticSigner) Sign(chain *types.Chain, a common.Address, tx *ethtypes.Transaction) (raw []byte, hash *common.Hash, err error) {
+func (s *StaticSigner) Sign(chain *common.Chain, a ethcommon.Address, tx *ethtypes.Transaction) (raw []byte, hash *ethcommon.Hash, err error) {
 	signer := s.getSigner(chain)
 
 	prv, ok := s.pKeys[a.Hex()]

@@ -5,10 +5,10 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
 )
 
 var testPKeys = []struct {
@@ -30,15 +30,15 @@ var testChains = []struct {
 	{"0xbf6e", false},
 }
 
-func makeSignerInput(i int) (*types.Chain, common.Address, *ethtypes.Transaction) {
-	chain := &types.Chain{
-		ID:       hexutil.MustDecodeBig(testChains[i%len(testChains)].ID),
+func makeSignerInput(i int) (*common.Chain, ethcommon.Address, *ethtypes.Transaction) {
+	chain := &common.Chain{
+		Id:       testChains[i%len(testChains)].ID,
 		IsEIP155: testChains[i%len(testChains)].IsEIP155,
 	}
-	address := common.HexToAddress(testPKeys[i%len(testPKeys)].a)
+	address := ethcommon.HexToAddress(testPKeys[i%len(testPKeys)].a)
 	tx := ethtypes.NewTransaction(
 		10,
-		common.HexToAddress("0xfF778b716FC07D98839f48DdB88D8bE583BEB684"),
+		ethcommon.HexToAddress("0xfF778b716FC07D98839f48DdB88D8bE583BEB684"),
 		big.NewInt(1000),
 		100,
 		big.NewInt(1000),
