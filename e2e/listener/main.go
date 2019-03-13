@@ -6,28 +6,30 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener"
+	listener "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
 )
 
 // Logger to log context elements before and after the worker
-func Logger(ctx *types.Context) {
+func Logger(ctx *core.Context) {
 	log.WithFields(log.Fields{
-		"Chain":       ctx.T.Chain().ID.Text(16),
-		"BlockNumber": ctx.T.Receipt().BlockNumber,
-		"TxIndex":     ctx.T.Receipt().TxIndex,
-		"TxHash":      ctx.T.Receipt().TxHash.Hex(),
+		"Chain":       ctx.T.Chain.Id,
+		"BlockNumber": ctx.T.Receipt.BlockNumber,
+		"TxIndex":     ctx.T.Receipt.TxIndex,
+		"TxHash":      ctx.T.Receipt.TxHash,
 	}).Debug("tx-listener-worker: new receipt")
 
 	ctx.Next()
 
 	if len(ctx.T.Errors) != 0 {
 		log.WithFields(log.Fields{
-			"Chain":  ctx.T.Chain().ID.Text(16),
-			"TxHash": ctx.T.Receipt().TxHash.Hex(),
+			"Chain":  ctx.T.Chain.Id,
+			"TxHash": ctx.T.Receipt.TxHash,
 		}).Errorf("tx-listener-worker: Errors: %v", ctx.T.Errors)
 	}
 }
@@ -36,36 +38,26 @@ func Logger(ctx *types.Context) {
 type ReceiptUnmarshaller struct{}
 
 // Unmarshal message expected to be a trace protobuffer
-func (u *ReceiptUnmarshaller) Unmarshal(msg interface{}, t *types.Trace) error {
+func (u *ReceiptUnmarshaller) Unmarshal(msg interface{}, t *trace.Trace) error {
 	// Cast message into receipt
 	receipt, ok := msg.(*listener.TxListenerReceipt)
 	if !ok {
 		return fmt.Errorf("Message does not match expected format")
 	}
 
-	t.Chain().ID.Set(receipt.ChainID)
-
-	// Load trace receipt from protobuffer
-	t.Receipt().PostState = receipt.PostState
-	t.Receipt().Status = receipt.Status
-	t.Receipt().CumulativeGasUsed = receipt.CumulativeGasUsed
-	t.Receipt().Bloom.SetBytes(receipt.Bloom.Bytes())
-	for _, log := range receipt.Logs {
-		t.Receipt().Logs = append(t.Receipt().Logs, &types.Log{Log: *log, DecodedData: map[string]string{}})
-	}
-	t.Receipt().TxHash.SetBytes(receipt.TxHash.Bytes())
-	t.Receipt().ContractAddress.SetBytes(receipt.ContractAddress.Bytes())
-	t.Receipt().GasUsed = receipt.GasUsed
-	t.Receipt().BlockHash.SetBytes(receipt.BlockHash.Bytes())
-	t.Receipt().BlockNumber = uint64(receipt.BlockNumber)
-	t.Receipt().TxIndex = receipt.TxIndex
+	t.Chain = (&common.Chain{}).SetID(receipt.ChainID)
+	t.Receipt = ethereum.FromGethReceipt(&receipt.Receipt).
+		SetBlockHash(receipt.BlockHash).
+		SetBlockNumber(uint64(receipt.BlockNumber)).
+		SetTxHash(receipt.TxHash).
+		SetTxIndex(receipt.TxIndex)
 
 	return nil
 }
 
 // Loader creates an handler loading input
-func Loader(u services.Unmarshaller) types.HandlerFunc {
-	return func(ctx *types.Context) {
+func Loader(u services.Unmarshaller) core.HandlerFunc {
+	return func(ctx *core.Context) {
 		// Unmarshal message
 		err := u.Unmarshal(ctx.Msg, ctx.T)
 		if err != nil {
