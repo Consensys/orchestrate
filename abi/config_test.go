@@ -26,6 +26,7 @@ func TestABIs(t *testing.T) {
 		"ERC1400[v0.1.3]:[{\"constant\":true,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]",
 	}
 	assert.Equal(t, expected, viper.GetStringSlice(name), "Changing env var should change ABIs")
+	os.Unsetenv("ABI")
 
 	// Test flags
 	args := []string{
@@ -40,4 +41,14 @@ func TestABIs(t *testing.T) {
 		"MyContract[v2]:[ABI2]",
 	}
 	assert.Equal(t, expected, viper.GetStringSlice(name), "Changing flags should change ABIs")
+}
+
+func TestFromABIConfig(t *testing.T) {
+	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
+	ABIs(flgs)
+
+	contracts, err := FromABIConfig()
+
+	assert.Nil(t, err, "Should parse default properly")
+	assert.Len(t, contracts, 1, "Expected 1 contract")
 }

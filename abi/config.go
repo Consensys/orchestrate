@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/abi"
 )
 
 var (
@@ -16,11 +17,24 @@ var (
 	abiEnv = "ABI"
 )
 
-// ABIs register flag for ABIs
+// ABIs register flag for ABI
 func ABIs(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Smart Contract ABIs to register for crafting (format %v)
-Environment variable: %q`, `(?P<contract_name>[a-zA-Z0-9]+):(?P<abi>\[.+\])`, abiEnv)
+	desc := fmt.Sprintf(`Smart Contract ABIs to register for crafting (expected format %v)
+Environment variable: %q`, `<contract>:<abi>:<bytecode>`, abiEnv)
 	f.StringSlice(abiFlag, abiDefault, desc)
 	viper.BindPFlag(abiViperKey, f.Lookup(abiFlag))
 	viper.BindEnv(abiViperKey, abiEnv)
+}
+
+// FromABIConfig read viper config and return contracts
+func FromABIConfig() ([]*abi.Contract, error) {
+	contracts := []*abi.Contract{}
+	for _, ABI := range viper.GetStringSlice(abiViperKey) {
+		c, err := abi.StringToContract(ABI)
+		if err != nil {
+			return nil, err
+		}
+		contracts = append(contracts, c)
+	}
+	return contracts, nil
 }
