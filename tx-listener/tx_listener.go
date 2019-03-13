@@ -107,6 +107,7 @@ func (l *txListener) Listen(chainID *big.Int, blockNumber int64, txIndex int64, 
 	l.wait.Add(1)
 	go listener.feeder()
 	go cur.feeder()
+	go cur.dispatcher()
 
 	return listener, nil
 }
@@ -274,46 +275,49 @@ feedingLoop:
 		select {
 		case <-l.closed:
 			break feedingLoop
-		default:
-			if l.cur.Current() != nil && l.txIndex < int64(len(l.cur.Current().receipts)) {
-				// We treat next receipt in current block and increment txIndex position
-				l.receipts <- l.cur.Current().receipts[l.txIndex]
-				atomic.AddInt64(&l.txIndex, 1)
-
-				if l.txIndex == int64(len(l.cur.Current().receipts)) {
-					// We have seen all receipts in current block so we prepare position for next block
-					atomic.AddInt64(&l.blockNumber, 1)
-					atomic.StoreInt64(&l.txIndex, 0)
-				} else {
-					continue
-				}
-			}
-
-			// Try to retrieve next block
-			ok := l.cur.Next(context.Background())
+		case block, ok := <-l.cur.Blocks():
 			if !ok {
-				// No new block available
-				// Do we have an error?
-				if err := l.cur.Err(); err != nil {
-					// Send error
-					if l.conf.TxListener.Return.Errors {
-						l.errors <- err
-					} else {
-						log.WithFields(log.Fields{
-							"Chain": l.t.ChainID().Text(16),
-						}).Error(err.Error())
-					}
-					// We abort the listener
-					l.Close()
-					break feedingLoop
-				}
-				continue
+				// Block cursor loop has been closed
+				break feedingLoop
 			}
-
 			// We have a new block
 			if l.conf.TxListener.Return.Blocks {
-				l.blocks <- l.cur.Current().Copy()
+				l.blocks <- block.Copy()
 			}
+
+			// We treat every transaction
+			for l.txIndex < int64(len(block.receipts)) {
+				select {
+				case <-l.closed:
+					break feedingLoop
+				default:
+					l.receipts <- block.receipts[l.txIndex]
+					atomic.AddInt64(&l.txIndex, 1)
+				}
+			}
+
+			// We have seen all receipts in current block so we prepare position for next block
+			atomic.AddInt64(&l.blockNumber, 1)
+			atomic.StoreInt64(&l.txIndex, 0)
+
+		case err, ok := <-l.cur.Errors():
+			if !ok {
+				// Block cursor loop has been closed
+				break feedingLoop
+			}
+
+			// Send error
+			if l.conf.TxListener.Return.Errors {
+				l.errors <- err
+			} else {
+				log.WithError(err).WithFields(log.Fields{
+					"Chain": l.t.ChainID().Text(16),
+				}).Error("Failed to retrieve block")
+			}
+
+			// We got an error so abort the listener
+			l.Close()
+			break feedingLoop
 		}
 	}
 

@@ -106,7 +106,7 @@ func (ec *TxListenerEthClient) BlockByNumber(ctx context.Context, chainID *big.I
 		},
 		bckoff,
 		func(err error, duration time.Duration) {
-			log.WithFields(log.Fields{
+			log.WithError(err).WithFields(log.Fields{
 				"Chain":       chainID.Text(16),
 				"BlockNumber": number.Text(10),
 			}).Warnf("tx-listener: error retrieving block, retrying in %v...", duration)
@@ -140,7 +140,7 @@ func (ec *TxListenerEthClient) TransactionReceipt(ctx context.Context, chainID *
 		},
 		bckoff,
 		func(err error, duration time.Duration) {
-			log.WithFields(log.Fields{
+			log.WithError(err).WithFields(log.Fields{
 				"Chain":  chainID.Text(16),
 				"TxHash": txHash.Hex(),
 			}).Warnf("tx-listener: error retrieving receipt, retrying in %v...", duration)

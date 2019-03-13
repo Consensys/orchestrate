@@ -117,15 +117,11 @@ type Cursor interface {
 	// ChainID returns the chain ID the cursor is applied on
 	ChainID() *big.Int
 
-	// Next is called to make the cursor move forward (if some resources is available)
-	// It returns true if the cursor move forward
-	Next(ctx context.Context) bool
-
 	// Current returns element the cursor is pointing on
-	Current() *TxListenerBlock
+	Blocks() <-chan *TxListenerBlock
 
 	// Err returns a possible error met by the cursor when calling Next
-	Err() *TxListenerError
+	Errors() <-chan *TxListenerError
 
 	// Close cursor
 	Close()
@@ -146,8 +142,8 @@ type BlockCursor struct {
 	blockNumber, currentHead int64
 
 	// CurrentBlock on the cursor
-	block *TxListenerBlock
-	err   *TxListenerError
+	blocks chan *TxListenerBlock
+	errors chan *TxListenerError
 
 	// BlockCursor fetches blocks ahead of being consumed for performances matters
 	// blockFutures is a channel of block being
@@ -162,8 +158,9 @@ type BlockCursor struct {
 func NewBlockCursorFromTracker(ec EthClient, t ChainTracker, blockNumber int64, conf Config) *BlockCursor {
 	bc := newBlockCursorFromTracker(ec, t, blockNumber, conf)
 
-	// Start feeder in a separate goroutine
+	// Start feeder & dispatcher in separate goroutines
 	go bc.feeder()
+	go bc.dispatcher()
 
 	return bc
 }
@@ -175,6 +172,8 @@ func newBlockCursorFromTracker(ec EthClient, t ChainTracker, blockNumber int64, 
 		conf:         conf,
 		blockNumber:  blockNumber,
 		currentHead:  0,
+		blocks:       make(chan *TxListenerBlock),
+		errors:       make(chan *TxListenerError),
 		blockFutures: make(chan *Future, conf.BlockCursor.Limit),
 		closed:       make(chan struct{}),
 		closeOnce:    &sync.Once{},
@@ -198,36 +197,28 @@ func (bc *BlockCursor) ChainID() *big.Int {
 }
 
 // Next moves cursor to Next available block
-func (bc *BlockCursor) Next(ctx context.Context) bool {
-	// Re-initialize block
-	bc.block = nil
-
+func (bc *BlockCursor) dispatcher() {
 	// In case a future block is available we treat it
-	if len(bc.blockFutures) > 0 {
-		future, ok := <-bc.blockFutures
-		if ok {
-			select {
-			case <-ctx.Done():
-				bc.err = &TxListenerError{bc.ChainID(), ctx.Err()}
-			case err := <-future.err:
-				bc.err = &TxListenerError{bc.ChainID(), err}
-			case res := <-future.res:
-				bc.block = res.(*TxListenerBlock)
-			}
+	for future := range bc.blockFutures {
+		select {
+		case err := <-future.err:
+			bc.errors <- err.(*TxListenerError)
+		case res := <-future.res:
+			bc.blocks <- res.(*TxListenerBlock)
 		}
 	}
-
-	return bc.block != nil
+	close(bc.blocks)
+	close(bc.errors)
 }
 
-// Current return current block the cursor is pointing on
-func (bc *BlockCursor) Current() *TxListenerBlock {
-	return bc.block
+// Blocks return channel of blocks
+func (bc *BlockCursor) Blocks() <-chan *TxListenerBlock {
+	return bc.blocks
 }
 
-// Err return an error encountered by cursor
-func (bc *BlockCursor) Err() *TxListenerError {
-	return bc.err
+// Errors return channel of errors
+func (bc *BlockCursor) Errors() <-chan *TxListenerError {
+	return bc.errors
 }
 
 // Close cursor
