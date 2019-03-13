@@ -24,15 +24,15 @@ func (c *Call) IsDeploy() bool {
 var callRegexp = `^(?P<method>[a-zA-Z]+)@(?P<contract>.+)$`
 var callPattern = regexp.MustCompile(callRegexp)
 
-// FromShortCall returns a Call object from a short String
-func FromShortCall(s string) (*Call, error) {
+// StringToCall returns a Call object from a short String
+func StringToCall(s string) (*Call, error) {
 	parts := callPattern.FindStringSubmatch(s)
 
 	if len(parts) != 3 {
 		return nil, fmt.Errorf("%v is invalid short method (expected format %q)", s, callRegexp)
 	}
 
-	contract, err := abi.FromShortContract(parts[2])
+	contract, err := abi.StringToContract(parts[2])
 	if err != nil {
 		return nil, err
 	}
