@@ -7,7 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Worker for consuming Sarama messages
+// Worker for consuming messages
 type Worker struct {
 	handlers    []HandlerFunc   // Handlers to apply on each context
 	handling    *sync.WaitGroup // WaitGroup to keep track of messages being consumed and gracefully stop
@@ -43,7 +43,7 @@ func (w *Worker) Use(handler HandlerFunc) {
 	w.handlers = append(w.handlers, handler)
 }
 
-// Run Starts a worker to consume sarama messages
+// Run Starts a worker to consume messages
 func (w *Worker) Run(messages chan interface{}) {
 	w.logger.Debugf("worker: start main loop")
 runningLoop:
