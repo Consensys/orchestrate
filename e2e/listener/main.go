@@ -147,14 +147,14 @@ func main() {
 	log.Infof("Multi-Eth client ready")
 
 	// Initialize listener configuration
-	listenerCfg := listener.NewConfig()
-	listenerCfg.TxListener.Return.Blocks = true
-	listenerCfg.TxListener.Return.Errors = true
+	config := listener.NewConfig()
+	config.TxListener.Return.Blocks = true
+	config.TxListener.Return.Errors = true
 
 	viper.Set("blockcursor.backoff", time.Second)
 	viper.Set("blockcursor.limit", 40)
 
-	txlistener := listener.NewTxListener(listener.NewEthClient(mec), listenerCfg)
+	txlistener := listener.NewTxListener(mec, config)
 
 	// Create and Listener Handler
 	handler := TxListenerHandler{}

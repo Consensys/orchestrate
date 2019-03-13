@@ -40,7 +40,7 @@ type TxListener interface {
 // NewTxListener creates a new TxListener
 func NewTxListener(ec EthClient, conf Config) TxListener {
 	return &txListener{
-		ec:             ec,
+		ec:             newClient(ec, conf),
 		mux:            &sync.RWMutex{},
 		chainListeners: make(map[string]*singleChainListener),
 		blocks:         make(chan *TxListenerBlock),
@@ -72,14 +72,14 @@ type txListener struct {
 
 func (l *txListener) Listen(chainID *big.Int, blockNumber int64, txIndex int64) (ChainListener, error) {
 	// Set chain tracker
-	t := NewBaseTracker(l.ec, chainID)
+	t := NewBaseTracker(l.ec, chainID, l.conf)
 
 	// Set cursor
 	if blockNumber == -1 {
 		// We start from highest block
 		blockNumber, _ = t.HighestBlock(context.Background())
 	}
-	cur := newBlockCursorFromTracker(l.ec, t, blockNumber)
+	cur := newBlockCursorFromTracker(l.ec, t, blockNumber, l.conf)
 
 	// Create listener
 	listener := &singleChainListener{

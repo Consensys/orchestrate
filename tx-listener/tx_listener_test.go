@@ -21,13 +21,13 @@ func TestTxListener(t *testing.T) {
 	}
 	mec := NewMockEthClient(blocks)
 
-	// Initialize cursor
-	config := NewConfig()
-	config.TxListener.Return.Blocks = false
-	config.TxListener.Return.Errors = false
+	// Initialize Configuration
 	viper.Set("listener.block.backoff", 100*time.Millisecond)
 	viper.Set("listener.block.limit", 40)
 	viper.Set("listener.tracker.depth", 0)
+	config := NewConfig()
+	config.TxListener.Return.Blocks = false
+	config.TxListener.Return.Errors = false
 
 	l := NewTxListener(mec, config)
 	_, err := l.Listen(big.NewInt(1), 0, 0)
@@ -148,12 +148,12 @@ func TestTxListenerWithReturns(t *testing.T) {
 	mec := NewMockEthClient(blocks)
 
 	// Initialize cursor
-	config := NewConfig()
-	config.TxListener.Return.Blocks = true
-	config.TxListener.Return.Errors = true
 	viper.Set("listener.block.backoff", 100*time.Millisecond)
 	viper.Set("listener.block.limit", 40)
 	viper.Set("listener.tracker.depth", 0)
+	config := NewConfig()
+	config.TxListener.Return.Blocks = true
+	config.TxListener.Return.Errors = true
 
 	l := NewTxListener(mec, config)
 	_, err := l.Listen(big.NewInt(1), -1, 0)

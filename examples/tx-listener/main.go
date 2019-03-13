@@ -23,7 +23,7 @@ func main() {
 
 	// Create listener
 	config := listener.NewConfig()
-	txlistener := listener.NewTxListener(listener.NewEthClient(mec), config)
+	txlistener := listener.NewTxListener(mec, config)
 
 	// Start listening on every chain starting from last block
 	for _, chainID := range mec.Networks(context.Background()) {

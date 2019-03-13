@@ -10,7 +10,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
 
 // EthClient is a minimal Ethereum Client interface required by a TxListener
@@ -30,26 +29,28 @@ type TxListenerEthClient struct {
 	c EthClient
 
 	pool *sync.Pool
+	conf Config
 }
 
-func newBackOff() backoff.BackOff {
+func newBackOff(conf Config) backoff.BackOff {
 	return &backoff.ExponentialBackOff{
-		InitialInterval:     viper.GetDuration("ethclient.retry.initinterval"),
-		RandomizationFactor: viper.GetFloat64("ethclient.retry.randomfactor"),
-		Multiplier:          viper.GetFloat64("ethclient.retry.multiplier"),
-		MaxInterval:         viper.GetDuration("ethclient.retry.maxinterval"),
-		MaxElapsedTime:      viper.GetDuration("ethclient.retry.maxelapsedtime"),
+		InitialInterval:     conf.EthClient.Retry.InitialInterval,
+		RandomizationFactor: conf.EthClient.Retry.RandomizationFactor,
+		Multiplier:          conf.EthClient.Retry.Multiplier,
+		MaxInterval:         conf.EthClient.Retry.MaxInterval,
+		MaxElapsedTime:      conf.EthClient.Retry.MaxElapsedTime,
 		Clock:               backoff.SystemClock,
 	}
 }
 
-// NewEthClient creates an Ethereum client compatible with a TxListener
-func NewEthClient(ec EthClient) EthClient {
+// newClient creates an Ethereum client compatible with a TxListener
+func newClient(ec EthClient, conf Config) EthClient {
 	return &TxListenerEthClient{
 		c: ec,
 		pool: &sync.Pool{
-			New: func() interface{} { return newBackOff() },
+			New: func() interface{} { return newBackOff(conf) },
 		},
+		conf: conf,
 	}
 }
 
@@ -72,7 +73,7 @@ func (ec *TxListenerEthClient) HeaderByNumber(ctx context.Context, chainID *big.
 		},
 		bckoff,
 		func(err error, duration time.Duration) {
-			log.WithFields(log.Fields{
+			log.WithError(err).WithFields(log.Fields{
 				"Chain":       chainID.Text(16),
 				"BlockNumber": number.Text(10),
 			}).Warnf("tx-listener: error retrieving header, retrying in %v...", duration)
@@ -149,8 +150,6 @@ func (ec *TxListenerEthClient) TransactionReceipt(ctx context.Context, chainID *
 	if err != nil {
 		return nil, err
 	}
-
-	ec.pool.Put(bckoff)
 
 	return res, nil
 }

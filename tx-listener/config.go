@@ -33,11 +33,46 @@ type Config struct {
 			Errors bool
 		}
 	}
+
+	BlockCursor struct {
+		// How long to wait after failing to retrieve a new mined block
+		Backoff time.Duration
+
+		// Limit is a count of blocks that can be pre-fetched and buffered
+		Limit uint64
+
+		Tracker struct {
+			// Depth under which a block is considered final
+			Depth uint64
+		}
+	}
+
+	EthClient struct {
+		Retry struct {
+			// We use an exponential backoff retry strategy when fetching from an Eth Client
+			// See https://github.com/cenkalti/backoff/blob/master/exponential.go
+			InitialInterval     time.Duration
+			RandomizationFactor float64
+			Multiplier          float64
+			MaxInterval         time.Duration
+			MaxElapsedTime      time.Duration
+		}
+	}
 }
 
 // NewConfig creates a new default config
 func NewConfig() Config {
-	return Config{}
+	config := Config{}
+	config.BlockCursor.Backoff = viper.GetDuration("listener.block.backoff")
+	config.BlockCursor.Limit = uint64(viper.GetInt64("listener.block.Limit"))
+	config.BlockCursor.Tracker.Depth = uint64(viper.GetInt64("listener.tracker.depth"))
+	config.EthClient.Retry.InitialInterval = viper.GetDuration("ethclient.retry.initinterval")
+	config.EthClient.Retry.RandomizationFactor = viper.GetFloat64("ethclient.retry.randomfactor")
+	config.EthClient.Retry.Multiplier = viper.GetFloat64("ethclient.retry.multiplier")
+	config.EthClient.Retry.MaxInterval = viper.GetDuration("ethclient.retry.maxinterval")
+	config.EthClient.Retry.MaxElapsedTime = viper.GetDuration("ethclient.retry.maxelapsedtime")
+
+	return config
 }
 
 // InitFlags register flags for listener
