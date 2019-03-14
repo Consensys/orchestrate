@@ -5,6 +5,7 @@
 *Unreleased*
 
 - [FEAT] implement partitionning mechanism on worker
+- [FEAT] update worker configuration setup
 
 ### Version 0.2.0-alpha.3
 
