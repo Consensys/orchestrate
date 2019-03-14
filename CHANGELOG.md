@@ -2,7 +2,7 @@
 
 ### Version 0.2.0-alpha.4
 
-*Unreleased*
+*Released on March 14th 2019*
 
 - [FEAT] implement partitionning mechanism on worker
 - [FEAT] update worker configuration setup
