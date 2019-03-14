@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.2.0-alpha.4
+
+*Unreleased*
+
+- [FEAT] implement partitionning mechanism on worker
+- [FEAT] update worker configuration setup
+
 ### Version 0.2.0-alpha.3
 
 *Released on March 13th 2019*

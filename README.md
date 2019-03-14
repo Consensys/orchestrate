@@ -50,17 +50,17 @@ $ cat examples/quick-start/main.go
 package main
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
 // Define a handler method
-func handler(ctx *core.Context) {
+func handler(ctx *worker.Context) {
 	ctx.Logger.Infof("Handling %v\n", ctx.Msg.(string))
 }
 
 func main() {
-	// Instantiate worker (limited to 1 message processed at a time)
-	worker := core.NewWorker(1)
+	// Instantiate worker with default config
+	worker := worker.NewWorker(worker.Config{Slots: 1, Partitions: 1})
 
 	// Register handler
 	worker.Use(handler)
@@ -118,16 +118,16 @@ $ cat examples/pipeline-middleware/main.go
 package main
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
 // Define a pipeline handler
-func pipeline(ctx *core.Context) {
+func pipeline(ctx *worker.Context) {
 	ctx.Logger.Infof("Pipeline handling %v\n", ctx.Msg.(string))
 }
 
 // Define a middleware handler
-func middleware(ctx *core.Context) {
+func middleware(ctx *worker.Context) {
 	// Start middleware execution
 	ctx.Logger.Infof("Middleware starts handling %v\n", ctx.Msg.(string))
 
@@ -140,7 +140,7 @@ func middleware(ctx *core.Context) {
 
 func main() {
 	// Instantiate worker (limited to 1 message processed at a time)
-	worker := core.NewWorker(1)
+	worker := worker.NewWorker(worker.Config{Slots: 1, Partitions: 1})
 
 	// Register handlers
 	worker.Use(middleware)
@@ -176,7 +176,12 @@ INFO[0000] * Middleware finishes handling Message-2
 
 #### Concurrency
 
-A worker can handle multiple message at once in parallel goroutines, therefore handler functions must manage there own resource in concurrenct safe manner. Note that while multiple contexts can be handled in parallel, a given context is never handled by more than one handler function at a time.
+A worker can handle multiple message concurrently in parallel goroutines. When declaring an handler you can configure
+
+- ```slots``` which the maximum of messages that can be treated concurrently
+- ```partitions``` which correspond to partitions of message that should be treated sequentially based on a message partition key 
+
+Be careful that ```handler``` functions must manage there resources in concurrenct safe manner. Note that while multiple contexts can be handled in parallel, a given context is never handled by more than one handler function at a time.
 
 ```sh
 $ cat examples/concurrency/main.go
@@ -189,7 +194,7 @@ import (
 	"fmt"
 	"sync/atomic"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
 // ExampleHandler is an handler that increment counters
@@ -198,22 +203,23 @@ type ExampleHandler struct {
 	unsafeCounter uint32
 }
 
-func (h *ExampleHandler) handleSafe(ctx *core.Context) {
+func (h *ExampleHandler) handleSafe(ctx *worker.Context) {
 	// Increment counter using atomic
 	atomic.AddUint32(&h.safeCounter, 1)
 }
 
-func (h *ExampleHandler) handleUnsafe(ctx *core.Context) {
+func (h *ExampleHandler) handleUnsafe(ctx *worker.Context) {
 	// Increment counter with no concurrent protection
 	h.unsafeCounter++
 }
 
 func main() {
-	// Instantiate worker (that can treat 1000 message in parallel)
-	worker := core.NewWorker(1000)
+	// Instantiate worker that can treat 100 message concurrently in 100 distinct partitions
+	worker := worker.NewWorker(worker.Config{Slots: 100, Partitions: 100})
 
 	// Register handler
 	h := ExampleHandler{0, 0}
+	worker.Partitionner(func(msg interface{}) []byte { return []byte(msg.(string)) })
 	worker.Use(h.handleSafe)
 	worker.Use(h.handleUnsafe)
 
@@ -223,7 +229,7 @@ func main() {
 
 	// Feed 10000 to the worker
 	for i := 0; i < 10000; i++ {
-		in <- "Message"
+		in <- fmt.Sprintf("%v-%v", "Message", i)
 	}
 
 	// Close channel
@@ -241,7 +247,7 @@ func main() {
 $ go run examples/concurrency/main.go
 
 * Safe counter: 10000
-* Unsafe counter: 9989
+* Unsafe counter: 9994
 ```
 
 ## Cobra CLI

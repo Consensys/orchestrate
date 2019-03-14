@@ -1,17 +1,17 @@
 package main
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
 // Define a handler method
-func handler(ctx *core.Context) {
+func handler(ctx *worker.Context) {
 	ctx.Logger.Infof("Handling %v\n", ctx.Msg.(string))
 }
 
 func main() {
-	// Instantiate worker (limited to 1 message processed at a time)
-	worker := core.NewWorker(1)
+	// Instantiate worker with default config
+	worker := worker.NewWorker(worker.Config{Slots: 1, Partitions: 1})
 
 	// Register handler
 	worker.Use(handler)
