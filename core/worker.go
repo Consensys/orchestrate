@@ -63,7 +63,8 @@ func NewWorker(slots uint) *Worker {
 }
 
 // Partitionner register a function computing partition key on input messages
-// Messages having distinct partition will be treated in parallel
+// Messages having same partition key are treated sequentially
+// Messages from distinct partitions are treated in parallel
 func (w *Worker) Partitionner(key PartitionKeyFunc) {
 	w.key = key
 }
