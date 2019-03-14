@@ -110,6 +110,7 @@ github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljT
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
 gitlab.com/ConsenSys/client/fr/core-stack/common.git v0.1.10/go.mod h1:V8K6f3El2hUFvWQHHXTV+JfLzseJ0LNEuZU9dhlanxM=
 gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.18/go.mod h1:CxegD25+IR5P/GVYrte4YhWxSuhfnNEjgjzWAjObCPo=
+gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.21 h1:aQFbZcqDm9pPAYZqo7uRsiCqIFNBmo1lSCWXu0b3y7w=
 gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.21/go.mod h1:NrK29/hD1NWJTJykE5LuHo7Q8k71ek/0FHdAe2ZDf2g=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.2.0-alpha.1 h1:gNgbmH5dEEgwH6iE61F2f2dctqFMLACrFnEah9MyWz4=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.2.0-alpha.1/go.mod h1:47HFmCYEMZfQxN982o7qIfkCEk1nxRt77RnhzzbCRtw=
