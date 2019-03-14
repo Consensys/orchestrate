@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.2.0-alpha.5
+
+*Released on March 14th 2019*
+
+- [FIX] update `core.services.ABIRegistry.RegisterContract` interface to take proto `Contract` as input
+
 ### Version 0.2.0-alpha.4
 
 *Released on March 14th 2019*
