@@ -1,16 +1,16 @@
 package main
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
 // Define a pipeline handler
-func pipeline(ctx *core.Context) {
+func pipeline(ctx *worker.Context) {
 	ctx.Logger.Infof("Pipeline handling %v\n", ctx.Msg.(string))
 }
 
 // Define a middleware handler
-func middleware(ctx *core.Context) {
+func middleware(ctx *worker.Context) {
 	// Start middleware execution
 	ctx.Logger.Infof("Middleware starts handling %v\n", ctx.Msg.(string))
 
@@ -23,7 +23,7 @@ func middleware(ctx *core.Context) {
 
 func main() {
 	// Instantiate worker (limited to 1 message processed at a time)
-	worker := core.NewWorker(1)
+	worker := worker.NewWorker(worker.Config{Slots: 1, Partitions: 1})
 
 	// Register handlers
 	worker.Use(middleware)

@@ -1,4 +1,4 @@
-package core
+package worker
 
 import (
 	log "github.com/sirupsen/logrus"

@@ -6,10 +6,9 @@ import (
 	"sync"
 	"testing"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
 	trace "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core"
 )
 
 type MockTraceProducer struct {
@@ -24,8 +23,8 @@ func (p *MockTraceProducer) Produce(o interface{}) error {
 	return nil
 }
 
-func makeProducerContext(i int) *core.Context {
-	ctx := core.NewContext()
+func makeProducerContext(i int) *worker.Context {
+	ctx := worker.NewContext()
 	ctx.Reset()
 	switch i % 2 {
 	case 0:
@@ -43,12 +42,12 @@ func TestProducer(t *testing.T) {
 	producer := Producer(&mp)
 
 	rounds := 100
-	outs := make(chan *core.Context, rounds)
+	outs := make(chan *worker.Context, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
 		ctx := makeProducerContext(i)
-		go func(ctx *core.Context) {
+		go func(ctx *worker.Context) {
 			defer wg.Done()
 			producer(ctx)
 			outs <- ctx

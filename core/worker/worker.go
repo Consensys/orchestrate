@@ -1,7 +1,6 @@
-package core
+package worker
 
 import (
-	"fmt"
 	"hash"
 	"hash/fnv"
 
@@ -36,14 +35,12 @@ type Worker struct {
 // NewWorker creates a new worker
 // You indicate a count of goroutine that worker can occupy to process messages
 // You must set `slots > 0`
-func NewWorker(slots uint) *Worker {
-	if slots == 0 {
-		panic(fmt.Errorf("Worker requires at least 1 goroutine slot"))
-	}
+func NewWorker(conf Config) *Worker {
+	conf.Validate()
 
-	partitions := make([]chan interface{}, slots)
+	partitions := make([]chan interface{}, conf.Partitions)
 	for i := range partitions {
-		partitions[i] = make(chan interface{})
+		partitions[i] = make(chan interface{}, conf.Slots)
 	}
 
 	return &Worker{
@@ -54,7 +51,7 @@ func NewWorker(slots uint) *Worker {
 		ctxPool:    &sync.Pool{New: func() interface{} { return NewContext() }},
 		hashPool:   &sync.Pool{New: func() interface{} { return fnv.New64() }},
 		partitions: partitions,
-		slots:      make(chan struct{}, slots),
+		slots:      make(chan struct{}, conf.Slots),
 		dying:      make(chan struct{}),
 		done:       make(chan struct{}),
 		closeOnce:  &sync.Once{},

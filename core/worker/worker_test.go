@@ -1,4 +1,4 @@
-package core
+package worker
 
 import (
 	"math/rand"
@@ -30,7 +30,7 @@ func TestWorker(t *testing.T) {
 	}
 
 	// Create new worker and register test handler
-	w := NewWorker(100)
+	w := NewWorker(Config{Slots: 100, Partitions: 100})
 	w.Use(h.Handler(t))
 
 	// Create a Sarama message channel
@@ -61,7 +61,7 @@ func TestWorkerStopped(t *testing.T) {
 	}
 
 	// Create new worker and register test handler
-	w := NewWorker(100)
+	w := NewWorker(Config{Slots: 100, Partitions: 100})
 	w.Use(h.Handler(t))
 
 	// Create a Sarama message channel

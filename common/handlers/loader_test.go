@@ -7,7 +7,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 	trace "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
 )
 
@@ -22,10 +22,10 @@ func (u *MockUnmarshaller) Unmarshal(msg interface{}, t *trace.Trace) error {
 	return nil
 }
 
-func makeLoaderContext(i int) *core.Context {
-	ctx := core.NewContext()
+func makeLoaderContext(i int) *worker.Context {
+	ctx := worker.NewContext()
 	ctx.Reset()
-	ctx.Prepare([]core.HandlerFunc{}, log.NewEntry(log.StandardLogger()), nil)
+	ctx.Prepare([]worker.HandlerFunc{}, log.NewEntry(log.StandardLogger()), nil)
 
 	switch i % 2 {
 	case 0:
@@ -43,12 +43,12 @@ func TestLoader(t *testing.T) {
 	loader := Loader(&mu)
 
 	rounds := 10
-	outs := make(chan *core.Context, rounds)
+	outs := make(chan *worker.Context, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
 		ctx := makeLoaderContext(i)
-		go func(ctx *core.Context) {
+		go func(ctx *worker.Context) {
 			defer wg.Done()
 			loader(ctx)
 			outs <- ctx

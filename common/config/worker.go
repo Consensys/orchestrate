@@ -182,19 +182,3 @@ func WorkerDecoderGroup(f *pflag.FlagSet) {
 func WorkerBridgeGroup(f *pflag.FlagSet) {
 	WorkerConsumerGroup(f, decoderGroupEnv, decoderGroupDefault)
 }
-
-var (
-	workerSlotsFlag     = "worker-slots"
-	workerSlotsViperKey = "worker.slots"
-	workerSlotsDefault  = uint(20)
-	workerSlotsEnv      = "WORKER_SLOTS"
-)
-
-// WorkerSlots register flag for Kafka server addresses
-func WorkerSlots(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Maximum number of messages the worker can treat in parallel.
-Environment variable: %q`, workerSlotsEnv)
-	f.Uint(workerSlotsFlag, workerSlotsDefault, desc)
-	viper.BindPFlag(workerSlotsViperKey, f.Lookup(workerSlotsFlag))
-	viper.BindEnv(workerSlotsViperKey, workerSlotsEnv)
-}

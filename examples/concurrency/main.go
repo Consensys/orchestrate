@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync/atomic"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
 // ExampleHandler is an handler that increment counters
@@ -13,22 +13,23 @@ type ExampleHandler struct {
 	unsafeCounter uint32
 }
 
-func (h *ExampleHandler) handleSafe(ctx *core.Context) {
+func (h *ExampleHandler) handleSafe(ctx *worker.Context) {
 	// Increment counter using atomic
 	atomic.AddUint32(&h.safeCounter, 1)
 }
 
-func (h *ExampleHandler) handleUnsafe(ctx *core.Context) {
+func (h *ExampleHandler) handleUnsafe(ctx *worker.Context) {
 	// Increment counter with no concurrent protection
 	h.unsafeCounter++
 }
 
 func main() {
-	// Instantiate worker (that can treat 1000 message in parallel)
-	worker := core.NewWorker(1000)
+	// Instantiate worker that can treat 100 message concurrently in 100 distinct partitions
+	worker := worker.NewWorker(worker.Config{Slots: 100, Partitions: 100})
 
 	// Register handler
 	h := ExampleHandler{0, 0}
+	worker.Partitionner(func(msg interface{}) []byte { return []byte(msg.(string)) })
 	worker.Use(h.handleSafe)
 	worker.Use(h.handleUnsafe)
 
@@ -38,7 +39,7 @@ func main() {
 
 	// Feed 10000 to the worker
 	for i := 0; i < 10000; i++ {
-		in <- "Message"
+		in <- fmt.Sprintf("%v-%v", "Message", i)
 	}
 
 	// Close channel

@@ -82,28 +82,3 @@ func TestWorkerConsumerGroup(t *testing.T) {
 		t.Errorf("LogLevel #3: expected %q but got %q", expected, viper.GetString(name))
 	}
 }
-
-func TestWorkerSlots(t *testing.T) {
-	name := "worker.slots"
-	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	WorkerSlots(flgs)
-	expected := 20
-	if viper.GetInt(name) != expected {
-		t.Errorf("LogLevel #1: expected %q but got %q", expected, viper.GetString(name))
-	}
-
-	os.Setenv("WORKER_SLOTS", "125")
-	expected = 125
-	if viper.GetInt(name) != expected {
-		t.Errorf("LogLevel #2: expected %q but got %q", expected, viper.GetString(name))
-	}
-
-	args := []string{
-		"--worker-slots=150",
-	}
-	flgs.Parse(args)
-	expected = 150
-	if viper.GetInt(name) != expected {
-		t.Errorf("LogLevel #3: expected %q but got %q", expected, viper.GetString(name))
-	}
-}
