@@ -2,6 +2,7 @@ package services
 
 import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
+	abipb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/abi"
 )
 
 // ABIRegistry is an interface to manage ABIs
@@ -15,7 +16,7 @@ type ABIRegistry interface {
 	// Retrieve event using 4 bytes signature
 	GetEventBySig(sig string) (abi.Event, error)
 	// Register a new contract in the ABI
-	RegisterContract(name string, contractABI []byte) error
+	RegisterContract(contract *abipb.Contract) error
 }
 
 // Crafter takes a method abi and args to craft a transaction
