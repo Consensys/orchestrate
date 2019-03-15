@@ -1,23 +1,22 @@
 package keystore
 
 import (
-	"github.com/hashicorp/vault/api"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/aws/aws-sdk-go/service/secretsmanager"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/secretstore"
 	"fmt"
 )
 
 //BaseKeyStore olds the methods of the interfaces BaseKeyStore
 type BaseKeyStore struct {
-	SecretStore *SecretStore
+	SecretStore secretstore.SecretStore
 }
 
 //NewBaseKeyStore construct a BaseKeyStore from a client 
-func NewBaseKeyStore(secretStore *SecretStore) *BaseKeyStore {
+func NewBaseKeyStore(secretStore secretstore.SecretStore) *BaseKeyStore {
 	return &BaseKeyStore{
-		SecretStore: secretStore
+		SecretStore: secretStore,
 	}
 }
 
@@ -66,15 +65,16 @@ func (s *BaseKeyStore) SignRawHash(
 // GenerateWallet create and stores a new wallet in the vault
 func (s* BaseKeyStore) GenerateWallet() (add *common.Address, err error) {
 
-	wal, err := NewWallet(sess.secretStore).Generate()
+	wallet := NewWallet(s.SecretStore)
+	err = wallet.Generate()
 	if err != nil {
 		return nil, err
 	}
 
-	err = wal.Store()
+	err = wallet.Store()
 	if err != nil {
 		return nil, err
 	}
 
-	return wal.GetAddress(), nil
+	return wallet.GetAddress(), nil
 }

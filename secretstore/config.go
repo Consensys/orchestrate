@@ -50,8 +50,6 @@ func VaultConfigFromViper() *vault.Config {
 	return config
 }
 
-func VaultTokenFromViper() *vault.Config {
-	config := vault.DefaultConfig()
-	config.Address = viper.GetString("vault.uri")
-	return config
+func VaultTokenFromViper() string {
+	return viper.GetString("vault.token.name")
 }

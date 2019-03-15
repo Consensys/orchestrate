@@ -1,7 +1,7 @@
 package keystore
 
 import(
-	"github.com/hashicorp/vault/api"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/secretstore"
 	"github.com/ethereum/go-ethereum/common"
 	"crypto/ecdsa"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -13,34 +13,33 @@ import(
 type Wallet struct {
 	address common.Address
 	priv *ecdsa.PrivateKey
-	sec *SecretStore
+	sec secretstore.SecretStore
 }
 
 // NewWallet construct a wallet object
-func NewWallet(sec *SecretStore) *Wallet {
+func NewWallet(sec secretstore.SecretStore) *Wallet {
 	return &Wallet{
-		sec *SecretStore
+		sec: sec,
 	}
 }
 
 // GenerateWallet create a keypair
-func (wal *Wallet) Generate() (wal *Wallet, err error) {
+func (wal *Wallet) Generate() (err error) {
 
 	wal = &Wallet{}
 	
 	wal.priv, err = crypto.GenerateKey()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	pub := wal.priv.PublicKey
 	wal.address = crypto.PubkeyToAddress(pub)
-	return wal, nil
+	return nil
 }
 
 // Store saves the wallet in the vault
 func (wal *Wallet) Store() (err error) {
-
 	return wal.sec.Store(
 		wal.address.Hex(),
 		hex.EncodeToString(crypto.FromECDSA(wal.priv)),
@@ -49,23 +48,23 @@ func (wal *Wallet) Store() (err error) {
 }
 
 // GetWallet returns a wallet object from an address if its stored in the vault
-func (wal *Wallet) Load(a *common.Address) (wal *Wallet, err error) {
+func (wal *Wallet) Load(a *common.Address) (err error) {
 
 	wal = &Wallet{
-		address: *a
+		address: *a,
 	}
 
 	priv, err := wal.sec.Load(a.Hex())
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	wal.priv, err = crypto.HexToECDSA(priv)
 	if err != nil {
-		return nil, fmt.Errorf("Could not deserialize %v", wal.sec.value)
+		return fmt.Errorf("Could not deserialize %v...%v", priv[:5], priv[len(priv)-5:])
 	}
 
-	return wal, nil
+	return nil
 
 }
 

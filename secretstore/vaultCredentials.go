@@ -1,10 +1,7 @@
 package secretstore
 
-
 import (
 	"github.com/hashicorp/vault/api"
-	"github.com/aws/aws-sdk-go/service/secretsmanager"
-	aws "gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/aws"
 	"sync"
 	"encoding/json"
 	"fmt"
@@ -32,7 +29,7 @@ func (c *credentials) FetchFromAWS(
 ) (err error) {
 
 	once.Do(func() {
-		secret, err := aws.Load(name)
+		secret, err := ss.Load(name)
 		if err != nil {
 			return
 		}

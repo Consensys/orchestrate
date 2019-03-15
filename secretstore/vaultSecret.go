@@ -56,11 +56,11 @@ func (sec *VaultSecret) SetClient(client *api.Client) *VaultSecret {
 }
 
 // SaveNew stores a new Vaultsecret in the vault
-func (sec *VaultSecret) SaveNew() (res *api.VaultSecret, err error) {
+func (sec *VaultSecret) SaveNew() (err error) {
 
 	fetched, err := sec.GetValue()
 	if fetched != "" {
-		return nil, fmt.Errorf("This Vaultsecret already exists : " + sec.key)
+		return fmt.Errorf("This Vaultsecret already exists : " + sec.key)
 	}
 
 	return sec.Update()
@@ -87,16 +87,16 @@ func (sec *VaultSecret) GetValue() (string, error) {
 func (sec *VaultSecret) Update() (error) {
 
 	log := sec.client.Logical()
-	res, err := log.Write(
+	_, err := log.Write(
 		strings.Join([]string{"Vaultsecret", sec.key}, "/"),
 		map[string]interface{}{ "value": sec.value },
 	)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return res, nil
+	return nil
 }
 
 
@@ -104,15 +104,15 @@ func (sec *VaultSecret) Update() (error) {
 func (sec *VaultSecret) Delete() (error) {
 
 	log := sec.client.Logical()
-	res, err := log.Delete(
+	_, err := log.Delete(
 		strings.Join([]string{"Vaultsecret", sec.key}, "/"),
 	)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return res, nil	
+	return nil	
 } 
 
 // List retrieve all the keys availables in the Vaultsecret manager

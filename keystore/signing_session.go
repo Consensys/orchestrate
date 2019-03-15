@@ -2,17 +2,17 @@ package keystore
 
 import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/hashicorp/vault/api"
 	"github.com/ethereum/go-ethereum/rlp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 	"github.com/ethereum/go-ethereum/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/secretstore"
 	"fmt"
 	"math/big"
 )
 
 // TxSignatureSession holds all the logic allowing the signature of an ethereum transaction
 type TxSignatureSession struct {
-	secretStore *SecretStore
+	secretStore secretstore.SecretStore
 	wallet *Wallet
 	chain *types.Chain
 	tx *ethtypes.Transaction
@@ -21,7 +21,7 @@ type TxSignatureSession struct {
 }
 
 // MakeTxSignature create a new tx signature session from address
-func MakeTxSignature(secretStore *SecretStore) *TxSignatureSession {
+func MakeTxSignature(secretStore secretstore.SecretStore) *TxSignatureSession {
 
 	return &TxSignatureSession{
 		secretStore: secretStore,
@@ -31,7 +31,8 @@ func MakeTxSignature(secretStore *SecretStore) *TxSignatureSession {
 // SetWallet sets the wallet to the provided address
 func (sess *TxSignatureSession) SetWallet(address *common.Address) error {
 
-	wallet, err := NewWallet(sess.secretStore).Load(address)
+	wallet := NewWallet(sess.secretStore)
+	err := wallet.Load(address)
 	if err != nil {
 		return fmt.Errorf("Could not retrieve private key for address : " + err.Error())
 	}
