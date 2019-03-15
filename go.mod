@@ -13,7 +13,7 @@ require (
 	github.com/spf13/viper v1.3.1
 	gitlab.com/ConsenSys/client/fr/core-stack/common.git v0.1.10
 	gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.21
-	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.2.0-alpha.1
+	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.2.0-alpha.2
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.2.0-alpha
 	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.5
 )
