@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.2.0-alpha.2
+
+*Released on March 15th 2019*
+
+- [FIX] Keep common.hash as arg input of ```abi.FormatIndexedArg```
+
 ### Version 0.2.0-alpha.1
 
 *Released on March 14th 2019*
