@@ -5,8 +5,8 @@ import (
 	"sync"
 
 	"github.com/Shopify/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
 )
 
 // Infra infrastructure elements of the application

@@ -5,8 +5,9 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/common.git/config"
-	"gitlab.com/ConsenSys/client/fr/core-stack/common.git/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/config"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-sender.git/app"
 )
 
@@ -23,7 +24,7 @@ func newRunCommand() *cobra.Command {
 	config.KafkaAddresses(runCmd.Flags())
 	config.TxSenderInTopic(runCmd.Flags())
 	config.WorkerSenderGroup(runCmd.Flags())
-	config.WorkerSlots(runCmd.Flags())
+	worker.InitFlags(runCmd.Flags())
 
 	return runCmd
 }

@@ -6,7 +6,6 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	infEth "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
 )
 
@@ -23,8 +22,7 @@ func initEthereum(infra *Infra, wait *sync.WaitGroup) {
 
 	// Attach Ethereum client and sender
 	infra.Mec = mec
-	infra.TxSender = infEth.NewTxSender(mec)
-
+	infra.TxSender = mec
 	// Wait for app to be done and then close
 	go func() {
 		<-infra.ctx.Done()
