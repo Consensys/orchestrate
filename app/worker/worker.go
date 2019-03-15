@@ -2,16 +2,16 @@ package worker
 
 import (
 	commonHandlers "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/handlers"
-	coreWorker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
-	coreServices "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-decoder.git/app/infra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-decoder.git/app/worker/handlers"
 )
 
 // CreateWorker creates worker and attach it to application
-func CreateWorker(infra *infra.Infra, marker coreServices.OffsetMarker) *coreWorker.Worker {
+func CreateWorker(infra *infra.Infra, marker services.OffsetMarker) *worker.Worker {
 	// Instantiate worker
-	w := coreWorker.NewWorker(coreWorker.NewConfig())
+	w := worker.NewWorker(worker.NewConfig())
 
 	// Handler::loader
 	w.Use(commonHandlers.Loader(infra.Unmarshaller))
