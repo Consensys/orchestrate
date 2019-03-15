@@ -5,8 +5,9 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/common.git/config"
-	"gitlab.com/ConsenSys/client/fr/core-stack/common.git/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/config"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-signer.git/app"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-signer.git/app/infra"
 )
@@ -24,8 +25,8 @@ func newRunCommand() *cobra.Command {
 	config.TxSignerInTopic(runCmd.Flags())
 	config.TxSenderOutTopic(runCmd.Flags())
 	config.WorkerSignerGroup(runCmd.Flags())
-	config.WorkerSlots(runCmd.Flags())
 	infra.VaultAccounts(runCmd.Flags())
+	worker.InitFlags(runCmd.Flags())
 
 	return runCmd
 }
