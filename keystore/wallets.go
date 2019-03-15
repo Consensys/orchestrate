@@ -23,7 +23,7 @@ func NewWallet(sec secretstore.SecretStore) *Wallet {
 	}
 }
 
-// GenerateWallet create a keypair
+// Generate create a keypair and set the result in the wallet
 func (wal *Wallet) Generate() (err error) {
 
 	wal = &Wallet{}
@@ -47,7 +47,7 @@ func (wal *Wallet) Store() (err error) {
 
 }
 
-// GetWallet returns a wallet object from an address if its stored in the vault
+// Load returns set the wallets values by fetching in the secret store
 func (wal *Wallet) Load(a *common.Address) (err error) {
 
 	wal = &Wallet{

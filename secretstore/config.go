@@ -35,7 +35,7 @@ func VaultURI(f *pflag.FlagSet) {
 	viper.BindEnv(vaultURIViperKey, vaultURIEnv)
 }
 
-// VaultURI register a flag for vault server address
+// VaultTokenName register a flag for vault server address
 func VaultTokenName(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Hashicorp secret vault URI Environment variable: %q`, vaultTokenNameEnv)
 	f.String(vaultTokenNameFlag, vaultTokenNameDefault, desc)
@@ -44,12 +44,14 @@ func VaultTokenName(f *pflag.FlagSet) {
 	viper.BindEnv(vaultTokenNameViperKey, vaultTokenNameEnv)
 }
 
+// VaultConfigFromViper import vault configuration from viper
 func VaultConfigFromViper() *vault.Config {
 	config := vault.DefaultConfig()
 	config.Address = viper.GetString("vault.uri")
 	return config
 }
 
+// VaultTokenFromViper imports the vault token secret name on AWS
 func VaultTokenFromViper() string {
 	return viper.GetString("vault.token.name")
 }

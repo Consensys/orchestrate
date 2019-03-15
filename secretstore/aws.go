@@ -7,7 +7,7 @@ import (
 	"fmt"
 )
 
-// AWSSecretStore can manage secrets on AWS secret manager
+// AWS can manage secrets on AWS secret manager
 type AWS struct {
 	client *secretsmanager.SecretsManager
 	recoveryTimeInDays int
@@ -56,7 +56,7 @@ func (ss *AWS) Delete(key string) (err error) {
 	return nil	
 }
 
-// Lists returns a list of available secrets
+// List returns a list of available secrets
 func (ss *AWS) List() ([]string, error) {
 
 	if ss.client == nil {
