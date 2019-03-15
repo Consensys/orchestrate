@@ -3,11 +3,11 @@ package handlers
 import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/keystore"
 )
 
 // HandlerSignature implements the interface TxSigner
-func HandlerSignature(s services.KeyStore) types.HandlerFunc {
+func HandlerSignTx(s keystore.KeyStore) types.HandlerFunc {
 
 	return func(ctx *types.Context) {
 
@@ -35,6 +35,27 @@ func HandlerSignature(s services.KeyStore) types.HandlerFunc {
 
 		// Update trace information
 		ctx.T.Tx().SetRaw(raw)
+		ctx.T.Tx().SetHash(h)
+
+	}
+}
+
+// HandlerSignature implements the interface TxSigner
+func HandlerGenerateWallet(s keystore.KeyStore) types.HandlerFunc {
+
+	return func(ctx *types.Context) {
+
+		// Sign transaction
+		add, err := s.GenerateWallet(ctx.T.Chain(), *ctx.T.Sender().Address, t)
+
+		if err != nil {
+			// TODO: handle error
+			ctx.AbortWithError(err)
+			return
+		}
+
+		// Update trace information
+		ctx.T.Address().SetRaw(raw)
 		ctx.T.Tx().SetHash(h)
 
 	}

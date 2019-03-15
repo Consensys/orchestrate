@@ -9,20 +9,20 @@ import (
 	"fmt"
 )
 
-//BasicKeyStore olds the methods of the interfaces BasicKeyStore
-type BasicKeyStore struct {
+//BaseKeyStore olds the methods of the interfaces BaseKeyStore
+type BaseKeyStore struct {
 	SecretStore *SecretStore
 }
 
-//NewBasicKeyStore construct a BasicKeyStore from a client 
-func NewBasicKeyStore(secretStore *SecretStore) *BasicKeyStore {
-	return &BasicKeyStore{
+//NewBaseKeyStore construct a BaseKeyStore from a client 
+func NewBaseKeyStore(secretStore *SecretStore) *BaseKeyStore {
+	return &BaseKeyStore{
 		SecretStore: secretStore
 	}
 }
 
 // SignTx returns a signed transaction. It is perfectly equivalent to SignTx
-func (s *BasicKeyStore) SignTx(
+func (s *BaseKeyStore) SignTx(
 	chain *types.Chain, 
 	a common.Address, 
 	tx *ethtypes.Transaction,
@@ -46,7 +46,7 @@ func (s *BasicKeyStore) SignTx(
 }
 
 // SignMsg returns a signed message and its hash
-func (s *BasicKeyStore) SignMsg(
+func (s *BaseKeyStore) SignMsg(
 	a common.Address, 
 	msg string,
 	) (rsv []byte, hash *common.Hash, err error) {
@@ -55,7 +55,7 @@ func (s *BasicKeyStore) SignMsg(
 }
 
 // SignRawHash returns a signed raw hash
-func (s *BasicKeyStore) SignRawHash(
+func (s *BaseKeyStore) SignRawHash(
 	a common.Address, 
 	hash []byte,
 ) (rsv []byte, err error) {
@@ -64,7 +64,7 @@ func (s *BasicKeyStore) SignRawHash(
 }
 
 // GenerateWallet create and stores a new wallet in the vault
-func (s* BasicKeyStore) GenerateWallet() (add *common.Address, err error) {
+func (s* BaseKeyStore) GenerateWallet() (add *common.Address, err error) {
 
 	wal, err := NewWallet(sess.secretStore).Generate()
 	if err != nil {

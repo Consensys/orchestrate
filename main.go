@@ -6,32 +6,30 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
+
 	vaultApi "github.com/hashicorp/vault/api"
 	//ginSwagger "github.com/swaggo/gin-swagger"
 	//"github.com/swaggo/gin-swagger/swaggerFiles"
 	api "gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/api"
-	hashicorps "gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/hashicorps"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/secretStore"
 )
 
 // @title Swagger Example API
 // @version 1.0.1
 func main() {
 
-	vaultConfig := vaultApi.DefaultConfig()
-
-	hashicorpsClient, err := vaultApi.NewClient(vaultConfig)
-	if err != nil {
-		fmt.Printf(err.Error())
-	}
-
-	secretManager := secretsmanager.New(session.New())
-	keystore := hashicorps.NewKeyStore(hashicorpsClient, secretManager)
-
+	config := secretstore.NewConfig()
+	hashicorpsSS := secretStore.NewHashicorps(config)
+	awsSS = secretStore.NewAWS(7)
 	tokenName := os.Getenv("VAULT_TOKEN_NAME")
-	err = keystore.Init(tokenName)
+
+	err = hashicorpsSS.Init(awsSS, tokenName)
 	if err != nil {
 		fmt.Printf(err.Error())
 	}
+
+	keystore := key.NewBasicKeyStore(hashicorpsSS)
 
 	signTxResource := api.SignTxResourceFactory(keystore)
 	generateWalletResource := api.GenerateWalletResourceFactory(keystore)

@@ -1,4 +1,4 @@
-package services
+package keystore
 
 import (
 	"github.com/ethereum/go-ethereum/common"

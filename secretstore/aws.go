@@ -13,7 +13,7 @@ type AWS struct {
 }
 
 // NewAWS returns a default configured AWS secretstore
-func NewAws(recoveryTimeInDays) (*AWS) {
+func NewAWS(recoveryTimeInDays) (*AWS) {
 	return &AWS{
 		client: secretsmanager.New(session.New()),
 		recoveryTimeInDays: recoveryTimeInDays,

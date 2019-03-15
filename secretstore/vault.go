@@ -26,7 +26,7 @@ func NewHashicorps(config api.Config) (*Hashicorps) {
 	}
 }
 
-func (hash *Hashicorps) Init(credsStore *AWS, tokenName string) (*Hashicorps, error) {
+func (hash *Hashicorps) Init(credsStore *AWS, tokenName string) (error) {
 
 	err = hash.creds.FetchFromAWS(credsStore, tokenName)
 	if err != nil {
