@@ -44,7 +44,7 @@ func TestFormatIndexedArg(t *testing.T) {
 		},
 	} {
 		typeArg, _ := abi.NewType(test.argType, nil)
-		output, _ := FormatIndexedArg(typeArg, test.arg.Hex())
+		output, _ := FormatIndexedArg(typeArg, test.arg)
 
 		if test.expectedOutput != output {
 			t.Errorf("TestFormatIndexedArg (input %d): expected %q but got %q", i, test.expectedOutput, output)

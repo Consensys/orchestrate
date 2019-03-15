@@ -14,18 +14,18 @@ import (
 )
 
 // FormatIndexedArg transforms a data to string
-func FormatIndexedArg(t abi.Type, arg string) (string, error) {
+func FormatIndexedArg(t abi.Type, arg common.Hash) (string, error) {
 
 	switch t.T {
 	case abi.BoolTy, abi.StringTy:
 		return fmt.Sprintf("%v", arg), nil
 	case abi.IntTy, abi.UintTy:
-		num := new(big.Int).SetBytes(hexutil.MustDecode(arg)[:])
+		num := new(big.Int).SetBytes(arg[:])
 		return fmt.Sprintf("%v", num), nil
 	case abi.AddressTy:
-		return common.HexToAddress(arg).Hex(), nil
+		return common.HexToAddress(arg.Hex()).Hex(), nil
 	case abi.FixedBytesTy:
-		return fmt.Sprintf("%v", hexutil.Encode(hexutil.MustDecode(arg)[common.HashLength-t.Type.Size():])), nil
+		return fmt.Sprintf("%v", hexutil.Encode(arg[common.HashLength-t.Type.Size():])), nil
 	case abi.BytesTy, abi.ArrayTy, abi.TupleTy:
 		return "", fmt.Errorf("unable to decode %v type", t.Kind)
 	default:
@@ -98,7 +98,7 @@ func Decode(event *abi.Event, txLog *ethpb.Log) (map[string]string, error) {
 	for _, arg := range event.Inputs {
 		var decoded string
 		if arg.Indexed {
-			decoded, _ = FormatIndexedArg(arg.Type, txLog.Topics[topicIndex])
+			decoded, _ = FormatIndexedArg(arg.Type, common.HexToHash(txLog.Topics[topicIndex]))
 			topicIndex++
 		} else {
 			decoded, _ = FormatNonIndexedArg(arg.Type, unpackValues[unpackValuesIndex])
