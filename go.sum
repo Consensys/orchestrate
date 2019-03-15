@@ -114,6 +114,8 @@ gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.21 h1:aQFbZcqDm9pPAYZqo7
 gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.21/go.mod h1:NrK29/hD1NWJTJykE5LuHo7Q8k71ek/0FHdAe2ZDf2g=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.2.0-alpha.1 h1:gNgbmH5dEEgwH6iE61F2f2dctqFMLACrFnEah9MyWz4=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.2.0-alpha.1/go.mod h1:47HFmCYEMZfQxN982o7qIfkCEk1nxRt77RnhzzbCRtw=
+gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.2.0-alpha.2 h1:X8zR9jX0bnew85NtcJsxw0bzvF1RdvxfQDHYfD/vXzM=
+gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.2.0-alpha.2/go.mod h1:47HFmCYEMZfQxN982o7qIfkCEk1nxRt77RnhzzbCRtw=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.2.0-alpha h1:/Wp3r9JR3LhlDIxpOAolLlAADFl6OjyLN0kS2rmIohc=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.2.0-alpha/go.mod h1:/nRVV6mmQKNB3szUNsLoieSFh4dzaikFz4TSMH/ooS4=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.4/go.mod h1:CUWmUHHVyEIA2TLNhOj7wPBQqvhupVuYPYT3jS4FqU0=
