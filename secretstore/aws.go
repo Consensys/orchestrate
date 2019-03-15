@@ -7,7 +7,7 @@ import (
 )
 
 // AWSSecretStore can manage secrets on AWS secret manager
-type AWSecret struct {
+type AWS struct {
 	client *secretsmanager.SecretManager
 	recoveryTimeInDays int
 }

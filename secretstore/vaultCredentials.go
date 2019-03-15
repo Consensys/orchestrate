@@ -27,12 +27,12 @@ var Credentials credentials
 
 
 func (c *credentials) FetchFromAWS(
-	client *secretsmanager.SecretsManager,
+	ss *AWS,
 	name string,
 ) (err error) {
 
 	once.Do(func() {
-		secret, err := aws.SecretFromKey(name).SetClient(client).GetValue()
+		secret, err := aws.Load(name)
 		if err != nil {
 			return
 		}
