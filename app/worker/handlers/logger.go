@@ -1,16 +1,17 @@
 package handlers
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 	infSarama "gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
 // Logger to log context elements before and after the worker
-func Logger(ctx *types.Context) {
+func Logger(ctx *worker.Context) {
 
 	msg := ctx.Msg.(*sarama.ConsumerMessage)
 	ctx.Logger = log.WithFields(infSarama.ConsumerMessageFields(msg))
@@ -23,5 +24,5 @@ func Logger(ctx *types.Context) {
 	latency := time.Now().Sub(start)
 	ctx.Logger.WithFields(log.Fields{
 		"latency": latency,
-	}).WithError(ctx.T.Errors).Info("logger: message processed")
+	}).WithError(fmt.Errorf("%q", ctx.T.Errors)).Info("logger: message processed")
 }
