@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/config"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-decoder.git/app"
@@ -26,6 +27,7 @@ func newRunCommand() *cobra.Command {
 	config.TxDecoderInTopic(runCmd.Flags())
 	config.TxDecodedOutTopic(runCmd.Flags())
 	config.WorkerDecoderGroup(runCmd.Flags())
+	worker.InitFlags(runCmd.Flags())
 
 	return runCmd
 }
