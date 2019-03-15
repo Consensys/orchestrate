@@ -25,7 +25,7 @@ func CreateWorker(infra *infra.Infra, marker services.OffsetMarker) *core.Worker
 
 	// Handler::signer
 	w.Use(
-		handlers.Signer(infra.Signer),
+		handlers.Signer(infra.KeyStore),
 	)
 	// Handler::Producer
 	w.Use(handCom.Producer(infra.Producer))

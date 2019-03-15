@@ -17,12 +17,24 @@ type MockTxSigner struct {
 	t *testing.T
 }
 
-func (s *MockTxSigner) Sign(chain *types.Chain, a common.Address, tx *ethtypes.Transaction) (raw []byte, hash *common.Hash, err error) {
+func (s *MockTxSigner) SignTx(chain *types.Chain, a common.Address, tx *ethtypes.Transaction) (raw []byte, hash *common.Hash, err error) {
 	if chain.ID.Text(10) == "0" {
 		return []byte(``), nil, fmt.Errorf("Could not sign")
 	}
 	h := common.HexToHash("0xabcdef")
 	return hexutil.MustDecode("0xabcdef"), &h, nil
+}
+
+func (s *MockTxSigner) SignMsg(a common.Address, msg string) (rsv []byte, hash *common.Hash, err error) {
+	return []byte{}, nil, fmt.Errorf("SignMsg not implemented")
+}
+
+func (s *MockTxSigner) GenerateWallet() (add *common.Address, err error) {
+	return nil, fmt.Errorf("SignMsg not implemented")
+}
+
+func (s *MockTxSigner) SignRawHash(a common.Address, hash []byte) (rsv []byte, err error) {
+	return []byte{}, fmt.Errorf("SignMsg not implemented")
 }
 
 func makeSignerContext(i int) *types.Context {

@@ -4,12 +4,12 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/keystore"
 	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 )
 
 // Signer creates a signer handler
-func Signer(s services.TxSigner) types.HandlerFunc {
+func Signer(s keystore.KeyStore) types.HandlerFunc {
 	return func(ctx *types.Context) {
 		ctx.Logger = ctx.Logger.WithFields(log.Fields{
 			"chain.id":  ctx.T.Chain().ID.Text(16),
@@ -31,7 +31,7 @@ func Signer(s services.TxSigner) types.HandlerFunc {
 		)
 
 		// Sign transaction
-		raw, h, err := s.Sign(ctx.T.Chain(), *ctx.T.Sender().Address, t)
+		raw, h, err := s.SignTx(ctx.T.Chain(), *ctx.T.Sender().Address, t)
 
 		if err != nil {
 			// TODO: handle error
