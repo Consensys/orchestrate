@@ -6,55 +6,58 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
 )
 
 type MockTxSigner struct {
 	t *testing.T
 }
 
-func (s *MockTxSigner) Sign(chain *types.Chain, a common.Address, tx *ethtypes.Transaction) (raw []byte, hash *common.Hash, err error) {
-	if chain.ID.Text(10) == "0" {
+func (s *MockTxSigner) Sign(chain *common.Chain, a ethcommon.Address, tx *ethtypes.Transaction) (raw []byte, hash *ethcommon.Hash, err error) {
+	fmt.Println(chain.ID().String())
+	if chain.ID().String() == "0" {
 		return []byte(``), nil, fmt.Errorf("Could not sign")
 	}
-	h := common.HexToHash("0xabcdef")
+	h := ethcommon.HexToHash("0xabcdef")
 	return hexutil.MustDecode("0xabcdef"), &h, nil
 }
 
-func makeSignerContext(i int) *types.Context {
-	ctx := types.NewContext()
+func makeSignerContext(i int) *worker.Context {
+	ctx := worker.NewContext()
 	ctx.Reset()
 	ctx.Logger = log.NewEntry(log.StandardLogger())
+
 	switch i % 4 {
 	case 0:
-		ctx.T.Chain().ID = big.NewInt(10)
-		ctx.T.Tx().SetRaw(hexutil.MustDecode("0xabde4f3a"))
-		h := common.HexToHash("0x12345678")
-		ctx.T.Tx().SetHash(&h)
+		h := ethcommon.HexToHash("0x12345678")
+		ctx.T.Chain = (&common.Chain{}).SetID(big.NewInt(10))
+		ctx.T.Tx = (&ethereum.Transaction{}).SetRaw("0xabde4f3a").SetHash(h)
 		ctx.Keys["errors"] = 0
 		ctx.Keys["raw"] = "0xabde4f3a"
 		ctx.Keys["hash"] = "0x0000000000000000000000000000000000000000000000000000000012345678"
 	case 1:
-		ctx.T.Chain().ID = big.NewInt(0)
-		ctx.T.Tx().SetRaw(hexutil.MustDecode("0xabde4f3a"))
-		h := common.HexToHash("0x12345678")
-		ctx.T.Tx().SetHash(&h)
+		h := ethcommon.HexToHash("0x12345678")
+		ctx.T.Chain = (&common.Chain{}).SetID(big.NewInt(0))
+		ctx.T.Tx = (&ethereum.Transaction{}).SetRaw("0xabde4f3a").SetHash(h)
+
 		ctx.Keys["errors"] = 0
 		ctx.Keys["raw"] = "0xabde4f3a"
 		ctx.Keys["hash"] = "0x0000000000000000000000000000000000000000000000000000000012345678"
 	case 2:
-		ctx.T.Chain().ID = big.NewInt(0)
-		ctx.T.Tx().SetRaw([]byte(``))
+		ctx.T.Chain = (&common.Chain{}).SetID(big.NewInt(0))
+		ctx.T.Tx = (&ethereum.Transaction{}).SetRaw(``)
 		ctx.Keys["errors"] = 1
-		ctx.Keys["raw"] = "0x"
-		ctx.Keys["hash"] = "0x0000000000000000000000000000000000000000000000000000000000000000"
+		ctx.Keys["raw"] = ""
+		ctx.Keys["hash"] = ""
 	case 3:
-		ctx.T.Chain().ID = big.NewInt(10)
-		ctx.T.Tx().SetRaw([]byte(``))
+		ctx.T.Chain = (&common.Chain{}).SetID(big.NewInt(10))
+		ctx.T.Tx = (&ethereum.Transaction{}).SetRaw(``)
 		ctx.Keys["errors"] = 0
 		ctx.Keys["raw"] = "0xabcdef"
 		ctx.Keys["hash"] = "0x0000000000000000000000000000000000000000000000000000000000abcdef"
@@ -67,12 +70,12 @@ func TestSigner(t *testing.T) {
 	signer := Signer(&s)
 
 	rounds := 100
-	outs := make(chan *types.Context, rounds)
+	outs := make(chan *worker.Context, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
 		ctx := makeSignerContext(i)
-		go func(ctx *types.Context) {
+		go func(ctx *worker.Context) {
 			defer wg.Done()
 			signer(ctx)
 			outs <- ctx
@@ -91,12 +94,12 @@ func TestSigner(t *testing.T) {
 			t.Errorf("Signer: expected %v errors but got %v", errCount, out.T.Errors)
 		}
 
-		if hexutil.Encode(out.T.Tx().Raw()) != raw {
-			t.Errorf("Signer: expected Raw %v but got %v", raw, hexutil.Encode(out.T.Tx().Raw()))
+		if out.T.Tx.GetRaw() != raw {
+			t.Errorf("Signer: expected Raw %v but got %v", raw, out.T.Tx.GetRaw())
 		}
 
-		if out.T.Tx().Hash().Hex() != hash {
-			t.Errorf("Signer: expected hash %v but got %v", hash, out.T.Tx().Hash().Hex())
+		if out.T.Tx.GetHash() != hash {
+			t.Errorf("Signer: expected hash %v but got %v", hash, out.T.Tx.GetHash())
 		}
 	}
 }

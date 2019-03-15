@@ -12,8 +12,8 @@ import (
 func Signer(s services.TxSigner) worker.HandlerFunc {
 	return func(ctx *worker.Context) {
 		ctx.Logger = ctx.Logger.WithFields(log.Fields{
-			"chain.id":  ctx.T.Chain.Id,
-			"tx.sender": ctx.T.Sender.Addr,
+			"chain.id":  ctx.T.Chain.GetId(),
+			"tx.sender": ctx.T.Sender.GetAddr(),
 		})
 
 		if ctx.T.Tx.Raw != "" {
@@ -22,10 +22,10 @@ func Signer(s services.TxSigner) worker.HandlerFunc {
 		}
 
 		t := ethtypes.NewTransaction(
-			ctx.T.Tx.TxData.Nonce,
+			ctx.T.Tx.TxData.GetNonce(),
 			ctx.T.Tx.TxData.ToAddress(),
 			ctx.T.Tx.TxData.ValueBig(),
-			ctx.T.Tx.TxData.Gas,
+			ctx.T.Tx.TxData.GetGas(),
 			ctx.T.Tx.TxData.GasPriceBig(),
 			ctx.T.Tx.TxData.DataBytes(),
 		)
