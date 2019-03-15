@@ -69,7 +69,7 @@ func initProducer(infra *Infra, wait *sync.WaitGroup) {
 		msg.Topic = viper.GetString("worker.out")
 
 		// Set key
-		msg.Key = sarama.StringEncoder(t.Chain.Id)
+		msg.Key = sarama.StringEncoder(t.Chain.GetId())
 
 		return nil
 	}

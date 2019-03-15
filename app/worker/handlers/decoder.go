@@ -13,13 +13,13 @@ import (
 func Decoder(r services.ABIRegistry) coreWorker.HandlerFunc {
 	return func(ctx *coreWorker.Context) {
 		ctx.Logger = ctx.Logger.WithFields(log.Fields{
-			"chain.id": ctx.T.Chain.Id,
-			"tx.hash":  ctx.T.Receipt.TxHash,
+			"chain.id": ctx.T.Chain.GetId(),
+			"tx.hash":  ctx.T.Receipt.GetTxHash(),
 		})
 
 		// For each log in receipt
-		for _, l := range ctx.T.Receipt.Logs {
-			if len(l.Topics) == 0 {
+		for _, l := range ctx.T.Receipt.GetLogs() {
+			if len(l.GetTopics()) == 0 {
 				// This scenario is not supposed to append
 				err := fmt.Errorf("Invalid receipt (no topics in log)")
 				ctx.Logger.WithError(err).Errorf("decoder: invalid receipt")
