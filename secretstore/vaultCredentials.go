@@ -1,4 +1,5 @@
-package hashicorps
+package secretstore
+
 
 import (
 	"github.com/hashicorp/vault/api"
@@ -13,6 +14,8 @@ type credentials struct {
 	Keys []string 			`json:"keys"`
 	KeysBase64 []string 	`json:"keys_base_64"`
 	Token string 			`json:"root_token"`
+
+	retrieveSecretONce *sync.Once // TODO
 }
 
 
@@ -55,8 +58,6 @@ func (c *credentials) fromEncoded(value string) (err error) {
 func (c *credentials) AttachTo(client *api.Client) {
 	client.SetToken(c.Token)
 }
-
-var once2 sync.Once
 
 func (c *credentials) Unseal(client *api.Client) (err error) {
 

@@ -17,8 +17,12 @@ type Wallet struct {
 	address   common.Address
 	priv      *ecdsa.PrivateKey
 	pub       *ecdsa.PublicKey
-	secretStr string
-	sec       *Secret
+	secretStr string // TODO: remove
+	sec       *Secret // TODO: remove
+}
+
+type WalletManager struct {
+	secretMngr 
 }
 
 // EmptyWallet is the default constructor of Wallet
