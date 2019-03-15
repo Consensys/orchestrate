@@ -26,8 +26,19 @@ func NewHashicorps(config api.Config) (*Hashicorps) {
 	}
 }
 
-func (hash *Hashicorps) Init(credsStore *SecretStore, tokenName string) (*Hashicorps, error) {
-	return nil, fmt.Errorf("Not yet implemented")
+func (hash *Hashicorps) Init(credsStore *AWS, tokenName string) (*Hashicorps, error) {
+
+	err = hash.creds.FetchFromAWS(credsStore, tokenName)
+	if err != nil {
+		return err
+	}
+
+	hash.creds.AttachTo(s.client)
+
+	err = hash.creds.Unseal(s.client)
+	if err != nil {
+		return err
+	}
 }
 
 func (hash *Hashicorps) Store(key, value string) (err error) {
@@ -35,7 +46,6 @@ func (hash *Hashicorps) Store(key, value string) (err error) {
 	err := sec.Update()
 	return err
 }
-
 
 func (hash *Hashicorps) Load(key string) (value string, err error) {
 	sec := NewVaultSecret().SetKey(key).SetClient(hash.client)
@@ -48,11 +58,11 @@ func (hash *Hashicorps) Load(key string) (value string, err error) {
 
 func (hash *Hashicorps) Delete(key string) (err error) {
 	sec := NewVaultSecret().SetKey(key).SetClient(hash.client)
-	err := sec.Delete()
-	return err
+	return sec.Delete()
 }
 
 func (hash *Hashicorps) List() (keys []string, err error) {
 	sec := NewVaultSecret().SetClient(hash.client)
-	return sec.List()
+	keys, err = sec.List()
+	return keys, err
 }

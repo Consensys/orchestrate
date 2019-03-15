@@ -1,4 +1,4 @@
-package hashicorps
+package keystore
 
 import(
 	"github.com/hashicorp/vault/api"
@@ -13,13 +13,18 @@ import(
 type Wallet struct {
 	address common.Address
 	priv *ecdsa.PrivateKey
-	pub *ecdsa.PublicKey
-	secretStr string
-	sec *Secret
+	sec *SecretStore
+}
+
+// NewWallet construct a wallet object
+func NewWallet(sec *SecretStore) *Wallet {
+	return &Wallet{
+		sec *SecretStore
+	}
 }
 
 // GenerateWallet create a keypair
-func GenerateWallet() (wal *Wallet, err error) {
+func (wal *Wallet) Generate() (wal *Wallet, err error) {
 
 	wal = &Wallet{}
 	
@@ -34,33 +39,28 @@ func GenerateWallet() (wal *Wallet, err error) {
 }
 
 // Store saves the wallet in the vault
-func (wal *Wallet) Store(client *api.Client) (err error) {
+func (wal *Wallet) Store() (err error) {
 
-	wal.sec = NewSecret().
-		SetKey(wal.address.Hex()).
-		SetValue(hex.EncodeToString(crypto.FromECDSA(wal.priv))).
-		SetClient(client)
+	return wal.sec.Store(
+		wal.address.Hex(),
+		hex.EncodeToString(crypto.FromECDSA(wal.priv)),
+	)
 
-	_, err = wal.sec.SaveNew()
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 // GetWallet returns a wallet object from an address if its stored in the vault
-func GetWallet(client *api.Client, a *common.Address) (wal *Wallet, err error) {
+func (wal *Wallet) Load(a *common.Address) (wal *Wallet, err error) {
 
-	wal = &Wallet{}
-	wal.sec = SecretFromKey(a.Hex())
-	wal.sec.SetClient(client)
+	wal = &Wallet{
+		address: *a
+	}
 
-	_, err = wal.sec.GetValue()
+	priv, err := wal.sec.Load(a.Hex())
 	if err != nil {
 		return nil, err
 	}
 
-	wal.priv, err = crypto.HexToECDSA(wal.sec.value)
+	wal.priv, err = crypto.HexToECDSA(priv)
 	if err != nil {
 		return nil, fmt.Errorf("Could not deserialize %v", wal.sec.value)
 	}

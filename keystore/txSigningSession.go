@@ -1,4 +1,4 @@
-package hashicorps
+package keystore
 
 import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
@@ -12,7 +12,7 @@ import (
 
 // TxSignatureSession holds all the logic allowing the signature of an ethereum transaction
 type TxSignatureSession struct {
-	client *api.Client
+	secretStore *SecretStore
 	wallet *Wallet
 	chain *types.Chain
 	tx *ethtypes.Transaction
@@ -21,17 +21,17 @@ type TxSignatureSession struct {
 }
 
 // MakeTxSignature create a new tx signature session from address
-func MakeTxSignature(client *api.Client) *TxSignatureSession {
+func MakeTxSignature(secretStore *SecretStore) *TxSignatureSession {
 
 	return &TxSignatureSession{
-		client: client,
+		secretStore: secretStore,
 	}
 }
 
 // SetWallet sets the wallet to the provided address
 func (sess *TxSignatureSession) SetWallet(address *common.Address) error {
 
-	wallet, err := GetWallet(sess.client, address)
+	wallet, err := NewWallet(sess.secretStore).Load(address)
 	if err != nil {
 		return fmt.Errorf("Could not retrieve private key for address : " + err.Error())
 	}
