@@ -1,15 +1,15 @@
 package keystore
 
 import (
-	"github.com/ethereum/go-ethereum/common"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
 )
 
 // KeyStore is an interface implemented by module that are able to perform signature transactions
 type KeyStore interface {
-	SignTx(chain *types.Chain, a common.Address, tx *ethtypes.Transaction) (raw []byte, txHash *common.Hash, err error)
-	SignMsg(a common.Address, msg string) (rsv []byte, hash *common.Hash, err error) //TODO: do notforget to add prefix
-	SignRawHash(a common.Address, hash []byte) (rsv []byte, err error)
-	GenerateWallet() (add *common.Address, err error)
+	SignTx(chain *common.Chain, a ethcommon.Address, tx *ethtypes.Transaction) (raw []byte, txHash *ethcommon.Hash, err error)
+	SignMsg(a ethcommon.Address, msg string) (rsv []byte, hash *ethcommon.Hash, err error) //TODO: do notforget to add prefix
+	SignRawHash(a ethcommon.Address, hash []byte) (rsv []byte, err error)
+	GenerateWallet() (add *ethcommon.Address, err error)
 }

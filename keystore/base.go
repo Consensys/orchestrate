@@ -2,8 +2,8 @@ package keystore
 
 import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
-	"github.com/ethereum/go-ethereum/common"
+	ethcommon "github.com/ethereum/go-ethereum/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/secretstore"
 	"fmt"
 )
@@ -22,10 +22,10 @@ func NewBaseKeyStore(secretStore secretstore.SecretStore) *BaseKeyStore {
 
 // SignTx returns a signed transaction. It is perfectly equivalent to SignTx
 func (s *BaseKeyStore) SignTx(
-	chain *types.Chain, 
-	a common.Address, 
+	chain *common.Chain, 
+	a ethcommon.Address, 
 	tx *ethtypes.Transaction,
-	) (raw []byte, hash *common.Hash, err error) {
+	) (raw []byte, hash *ethcommon.Hash, err error) {
 
 	sess := MakeTxSignature(s.SecretStore)
 	err = sess.SetWallet(&a)
@@ -46,16 +46,16 @@ func (s *BaseKeyStore) SignTx(
 
 // SignMsg returns a signed message and its hash
 func (s *BaseKeyStore) SignMsg(
-	a common.Address, 
+	a ethcommon.Address, 
 	msg string,
-	) (rsv []byte, hash *common.Hash, err error) {
+	) (rsv []byte, hash *ethcommon.Hash, err error) {
 
 		return []byte{}, nil, fmt.Errorf("Not implemented yet")
 }
 
 // SignRawHash returns a signed raw hash
 func (s *BaseKeyStore) SignRawHash(
-	a common.Address, 
+	a ethcommon.Address, 
 	hash []byte,
 ) (rsv []byte, err error) {
 
@@ -63,7 +63,7 @@ func (s *BaseKeyStore) SignRawHash(
 }
 
 // GenerateWallet create and stores a new wallet in the vault
-func (s* BaseKeyStore) GenerateWallet() (add *common.Address, err error) {
+func (s* BaseKeyStore) GenerateWallet() (add *ethcommon.Address, err error) {
 
 	wallet := NewWallet(s.SecretStore)
 	err = wallet.Generate()

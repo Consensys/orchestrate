@@ -2,9 +2,9 @@ package keystore
 
 import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/rlp"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
-	"github.com/ethereum/go-ethereum/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/secretstore"
 	"fmt"
 	"math/big"
@@ -14,10 +14,10 @@ import (
 type TxSignatureSession struct {
 	secretStore secretstore.SecretStore
 	wallet *Wallet
-	chain *types.Chain
+	chain *common.Chain
 	tx *ethtypes.Transaction
 	signedRaw []byte
-	txHash *common.Hash
+	txHash *ethcommon.Hash
 }
 
 // MakeTxSignature create a new tx signature session from address
@@ -29,7 +29,7 @@ func MakeTxSignature(secretStore secretstore.SecretStore) *TxSignatureSession {
 }
 
 // SetWallet sets the wallet to the provided address
-func (sess *TxSignatureSession) SetWallet(address *common.Address) error {
+func (sess *TxSignatureSession) SetWallet(address *ethcommon.Address) error {
 
 	wallet := NewWallet(sess.secretStore)
 	err := wallet.Load(address)
@@ -42,7 +42,7 @@ func (sess *TxSignatureSession) SetWallet(address *common.Address) error {
 }
 
 // SetChain is a setter for the chain used in the signed process
-func (sess *TxSignatureSession) SetChain(chain *types.Chain) error {
+func (sess *TxSignatureSession) SetChain(chain *common.Chain) error {
 	sess.chain = chain
 	return nil
 }
@@ -64,7 +64,7 @@ func (sess *TxSignatureSession) getSigner() (ethtypes.Signer, error) {
 	if sess.chain.IsEIP155 {
 		// We copy chain ID to ensure pointer can be safely used elsewhere
 		id := new(big.Int)
-		id.Set(sess.chain.ID)
+		id.Set(sess.chain.ID())
 		signer = ethtypes.NewEIP155Signer(id)
 
 	} else {
