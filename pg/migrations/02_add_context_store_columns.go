@@ -15,16 +15,14 @@ ALTER TABLE traces
 	ADD COLUMN id serial PRIMARY KEY, 
 	ADD COLUMN chain_id varchar(66) NOT NULL, 
 	ADD COLUMN tx_hash char(66) NOT NULL, 
-	ADD COLUMN trace_id uuid NOT NULL, 
+	ADD CONSTRAINT uni_tx UNIQUE (chain_id, tx_hash),
+	ADD COLUMN trace_id uuid NOT NULL UNIQUE, 
 	ADD COLUMN status status default 'stored' NOT NULL, 
 	ADD COLUMN stored_at timestamptz default (now() at time zone 'utc') NOT NULL, 
 	ADD COLUMN error_at timestamptz, 
 	ADD COLUMN sent_at timestamptz, 
 	ADD COLUMN mined_at timestamptz, 
 	ADD COLUMN trace bytea NOT NULL;
-
-CREATE UNIQUE INDEX tx_idx ON traces (chain_id, tx_hash);
-CREATE UNIQUE INDEX trace_idx ON traces (trace_id);
 
 CREATE OR REPLACE FUNCTION status_updated() RETURNS TRIGGER AS 
 	$$
@@ -62,7 +60,6 @@ func dropColumnsOnTraceStore(db migrations.DB) error {
 	_, err := db.Exec(
 		`DROP TRIGGER status_trig ON traces;
 DROP FUNCTION status_updated();
-DROP INDEX tx_idx, trace_idx;
 
 ALTER TABLE traces 
 	DROP COLUMN id, 

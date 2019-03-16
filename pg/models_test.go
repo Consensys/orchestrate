@@ -117,9 +117,6 @@ func (suite *ModelsTestSuite) TestStore() {
 	assert.Equal(suite.T(), "stored", status, "Default status should be correct")
 	assert.True(suite.T(), time.Now().Sub(storedAt) < 5*time.Second, "Stored date should be close")
 
-	_, _, err = s.Store(context.Background(), tr)
-	assert.NotNil(suite.T(), err, "Unique constraint on TxHash should be violated")
-
 	tr = &trace.Trace{}
 	status, _, err = s.LoadByTxHash(context.Background(), "0x3", "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210", tr)
 	assert.Nil(suite.T(), err, "Should properly store trace")
@@ -127,8 +124,23 @@ func (suite *ModelsTestSuite) TestStore() {
 	assert.Equal(suite.T(), "0x3", tr.GetChain().GetId(), "ChainID should be correct")
 	assert.Equal(suite.T(), "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11", tr.GetMetadata().GetId(), "MetadataID should be correct")
 
-	err = s.SetStatus(context.Background(), tr.GetMetadata().GetId(), "pending")
+	err = s.SetStatus(context.Background(), "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11", "pending")
 	assert.Nil(suite.T(), err, "Setting status to %q", "pending")
+
+	// Stores an already existing
+	tr = &trace.Trace{
+		Chain:    &common.Chain{Id: "0x3"},
+		Metadata: &trace.Metadata{Id: "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11"},
+		Tx: &ethereum.Transaction{
+			TxData: txData,
+			Raw:    "0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80",
+			Hash:   "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210",
+		},
+	}
+
+	status, _, err = s.Store(context.Background(), tr)
+	assert.Nil(suite.T(), err, "Should update")
+	assert.Equal(suite.T(), "pending", status, "Status should be correct")
 
 	status, sentAt, err := s.GetStatus(context.Background(), "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11")
 	assert.Equal(suite.T(), "pending", status, "Status should be correct")
@@ -145,6 +157,6 @@ func (suite *ModelsTestSuite) TestStore() {
 	assert.Equal(suite.T(), "error", status, "Status should be correct")
 }
 
-func TestMigrations(t *testing.T) {
+func TestModels(t *testing.T) {
 	suite.Run(t, new(ModelsTestSuite))
 }

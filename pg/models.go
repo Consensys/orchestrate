@@ -31,8 +31,8 @@ type TraceStore interface {
 	SeStatus(ctx context.Context, traceID string, status string) error
 }
 
-// Trace represent elements in `traces` table
-type Trace struct {
+// TraceModel represent elements in `traces` table
+type TraceModel struct {
 	tableName struct{} `sql:"traces"`
 
 	// ID technical identifier
@@ -66,82 +66,66 @@ func (s *traceStore) Store(ctx context.Context, trace *trace.Trace) (status stri
 		return "", time.Time{}, err
 	}
 
-	t := &Trace{
+	model := &TraceModel{
 		ChainID: trace.GetChain().GetId(),
 		TxHash:  trace.GetTx().Hash,
 		TraceID: trace.GetMetadata().GetId(),
 		Trace:   bytes,
 	}
 
-	_, err = s.db.ModelContext(ctx, t).Returning("*").Insert()
+	_, err = s.db.ModelContext(ctx, model).
+		OnConflict("ON CONSTRAINT uni_tx DO UPDATE").
+		Set("trace = ?trace").
+		Returning("*").
+		Insert()
 	if err != nil {
 		return "", time.Time{}, err
 	}
 
-	return t.Status, last(t), nil
-}
-
-func last(t *Trace) time.Time {
-	switch t.Status {
-	case "stored":
-		return t.StoredAt
-	case "error":
-		return t.ErrorAt
-	case "pending":
-		return t.SentAt
-	case "mined":
-		return t.MinedAt
-	}
-	return time.Time{}
+	return model.Status, model.last(), nil
 }
 
 // LoadByTxHash context trace by transaction hash
 func (s *traceStore) LoadByTxHash(ctx context.Context, chainID string, txHash string, trace *trace.Trace) (status string, at time.Time, err error) {
-	t := &Trace{
-		TxHash:  txHash,
+	model := &TraceModel{
 		ChainID: chainID,
+		TxHash:  txHash,
 	}
-
-	err = s.db.ModelContext(ctx, t).Select()
-	if err != nil {
-		return "", time.Time{}, err
-	}
-
-	err = proto.UnmarshalMerge(t.Trace, trace)
-	if err != nil {
-		return "", time.Time{}, err
-	}
-
-	return t.Status, last(t), nil
+	return s.Load(ctx, model, trace)
 }
 
 // LoadByTraceID context trace by trace ID
 func (s *traceStore) LoadByTraceID(ctx context.Context, traceID string, trace *trace.Trace) (status string, at time.Time, err error) {
-	t := &Trace{
+	model := &TraceModel{
 		TraceID: traceID,
 	}
+	return s.Load(ctx, model, trace)
+}
 
-	err = s.db.ModelContext(ctx, t).Select()
+func (s *traceStore) Load(ctx context.Context, model *TraceModel, trace *trace.Trace) (status string, at time.Time, err error) {
+	err = s.db.ModelContext(ctx, model).Select()
 	if err != nil {
 		return "", time.Time{}, err
 	}
 
-	err = proto.UnmarshalMerge(t.Trace, trace)
+	err = proto.UnmarshalMerge(model.Trace, trace)
 	if err != nil {
 		return "", time.Time{}, err
 	}
 
-	return t.Status, last(t), nil
+	return model.Status, model.last(), nil
 }
 
 // SetStatus set a context status
 func (s *traceStore) SetStatus(ctx context.Context, traceID string, status string) error {
-	t := &Trace{
+	// Define model
+	model := &TraceModel{
 		TraceID: traceID,
 		Status:  status,
 	}
 
-	_, err := s.db.ModelContext(ctx, t).
+	// Update status value
+	_, err := s.db.ModelContext(ctx, model).
 		Set("status = ?status").
 		Where("trace_id = ?trace_id").
 		Update()
@@ -154,14 +138,28 @@ func (s *traceStore) SetStatus(ctx context.Context, traceID string, status strin
 
 // GetStatus return context status and time when status changed
 func (s *traceStore) GetStatus(ctx context.Context, traceID string) (status string, at time.Time, err error) {
-	t := &Trace{
+	model := &TraceModel{
 		TraceID: traceID,
 	}
 
-	err = s.db.ModelContext(ctx, t).Select()
+	err = s.db.ModelContext(ctx, model).Select()
 	if err != nil {
 		return "", time.Time{}, err
 	}
 
-	return t.Status, last(t), nil
+	return model.Status, model.last(), nil
+}
+
+func (model *TraceModel) last() time.Time {
+	switch model.Status {
+	case "stored":
+		return model.StoredAt
+	case "error":
+		return model.ErrorAt
+	case "pending":
+		return model.SentAt
+	case "mined":
+		return model.MinedAt
+	}
+	return time.Time{}
 }
