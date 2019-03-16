@@ -8,10 +8,12 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
+	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
 )
 
 var noErrorChainID = int64(0)
@@ -47,7 +49,7 @@ type MockNonceGetter struct {
 	counter uint64
 }
 
-func (g *MockNonceGetter) GetNonce(ctx context.Context, chainID *big.Int, a common.Address) (uint64, error) {
+func (g *MockNonceGetter) GetNonce(ctx context.Context, chainID *big.Int, a ethcommon.Address) (uint64, error) {
 	atomic.AddUint64(&g.counter, 1)
 	if chainID.Int64() == error1ChainID {
 		// Simulate error on chain 0
@@ -61,7 +63,7 @@ type MockNonceManager struct {
 	nonce *sync.Map
 }
 
-func (nm *MockNonceManager) GetNonce(chainID *big.Int, a *common.Address) (uint64, int, error) {
+func (nm *MockNonceManager) GetNonce(chainID *big.Int, a *ethcommon.Address) (uint64, int, error) {
 	if chainID.Int64() == error2ChainID {
 		// Simulate error
 		return 0, 0, fmt.Errorf("Error retrieving nonce")
@@ -80,7 +82,7 @@ func (nm *MockNonceManager) GetNonce(chainID *big.Int, a *common.Address) (uint6
 	return cacheNonce, 1, nil
 }
 
-func (nm *MockNonceManager) SetNonce(chainID *big.Int, a *common.Address, value uint64) error {
+func (nm *MockNonceManager) SetNonce(chainID *big.Int, a *ethcommon.Address, value uint64) error {
 	if chainID.Int64() == error3ChainID {
 		// Simulate error
 		return fmt.Errorf("Error setting nonce")
@@ -88,7 +90,7 @@ func (nm *MockNonceManager) SetNonce(chainID *big.Int, a *common.Address, value 
 	return nil
 }
 
-func (nm *MockNonceManager) Lock(chainID *big.Int, a *common.Address) (string, error) {
+func (nm *MockNonceManager) Lock(chainID *big.Int, a *ethcommon.Address) (string, error) {
 	if chainID.Int64() == error4ChainID {
 		// Simulate error
 		return "", fmt.Errorf("Error locking nonce")
@@ -97,7 +99,7 @@ func (nm *MockNonceManager) Lock(chainID *big.Int, a *common.Address) (string, e
 	return "random", nil
 }
 
-func (nm *MockNonceManager) Unlock(chainID *big.Int, a *common.Address, lockSig string) error {
+func (nm *MockNonceManager) Unlock(chainID *big.Int, a *ethcommon.Address, lockSig string) error {
 	nm.mux.Unlock()
 	if chainID.Int64() == error5ChainID {
 		// Simulate error
@@ -106,12 +108,13 @@ func (nm *MockNonceManager) Unlock(chainID *big.Int, a *common.Address, lockSig 
 	return nil
 }
 
-func makeNonceContext(chainID int64, address string) *types.Context {
-	ctx := types.NewContext()
+func makeNonceContext(chainID int64, address string) *worker.Context {
+	ctx := worker.NewContext()
 	ctx.Reset()
 	ctx.Logger = log.NewEntry(log.StandardLogger())
-	ctx.T.Chain().ID = big.NewInt(chainID)
-	*ctx.T.Sender().Address = common.HexToAddress(address)
+	ctx.T.Chain = (&common.Chain{}).SetID(big.NewInt(chainID))
+	ctx.T.Sender = &common.Account{Addr: address}
+	ctx.T.Tx = &ethpb.Transaction{TxData: &ethpb.TxData{}}
 
 	if chainID == noErrorChainID {
 		ctx.Keys["expectedErrorCount"] = 0
@@ -141,14 +144,14 @@ func TestNonceHandler(t *testing.T) {
 	nh := NonceHandler(&nm, ng.GetNonce)
 
 	rounds := 10
-	outs := make(chan *types.Context, rounds*len(addresses)*len(chainIDs))
+	outs := make(chan *worker.Context, rounds*len(addresses)*len(chainIDs))
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		for _, a := range addresses {
 			for _, c := range chainIDs {
 				wg.Add(1)
 				ctx := makeNonceContext(c, a)
-				go func(ctx *types.Context) {
+				go func(ctx *worker.Context) {
 					defer wg.Done()
 					nh(ctx)
 					outs <- ctx
@@ -166,11 +169,11 @@ func TestNonceHandler(t *testing.T) {
 	for ctx := range outs {
 		if ctx.Keys["expectedErrorCount"].(int) > 0 {
 			if len(ctx.T.Errors) != ctx.Keys["expectedErrorCount"].(int) {
-				t.Errorf("Expected %v errors but got %v %v", ctx.Keys["expectedErrorCount"].(int), ctx.T.Errors, ctx.T.Sender().Address.Hex())
+				t.Errorf("Expected %v errors but got %v %v", ctx.Keys["expectedErrorCount"].(int), ctx.T.Errors, ctx.T.Sender.Addr)
 			}
 		} else {
-			if ctx.T.Tx().Nonce() != ctx.Keys["expectedNonce"].(uint64) {
-				t.Errorf("Expected Nonce to be %v but got %v", ctx.Keys["expectedNonce"].(uint64), ctx.T.Tx().Nonce())
+			if ctx.T.Tx.TxData.GetNonce() != ctx.Keys["expectedNonce"].(uint64) {
+				t.Errorf("Expected Nonce to be %v but got %v", ctx.Keys["expectedNonce"].(uint64), ctx.T.Tx.TxData.GetNonce())
 			}
 		}
 	}
