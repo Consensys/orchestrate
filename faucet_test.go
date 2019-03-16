@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
 )
 
 type MockController struct {
