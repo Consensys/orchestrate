@@ -6,8 +6,9 @@ import (
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
 	infSarama "gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/utils"
+	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
 )
 
 func initSarama(infra *Infra, wait *sync.WaitGroup) {
@@ -67,6 +68,9 @@ func initProducer(infra *Infra, wait *sync.WaitGroup) {
 
 		// Set topic
 		msg.Topic = viper.GetString("worker.out")
+
+		// Set key
+		msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(t.Chain.ID(), t.Sender.Address()))
 
 		return nil
 	}
