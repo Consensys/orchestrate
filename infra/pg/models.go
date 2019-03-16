@@ -9,28 +9,6 @@ import (
 	trace "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
 )
 
-// TraceStore is an interface for context store
-type TraceStore interface {
-	// Store context trace
-	// For a trace with same TxHash that was already store, it updates the trace and return status
-	Store(ctx context.Context, trace *trace.Trace) (status string, at time.Time, err error)
-
-	// Load context trace by txHash
-	LoadByTxHash(ctx context.Context, chainID string, txHash string, trace *trace.Trace) (status string, at time.Time, err error)
-
-	// Load context trace by trace ID
-	LoadByTraceID(ctx context.Context, traceID string, trace *trace.Trace) (status string, at time.Time, err error)
-
-	// Load context traces that have been pending for at least a given duration
-	LoadPendingTraces(duration time.Duration) ([]*trace.Trace, error)
-
-	// GetStatus returns trace status
-	GeStatus(ctx context.Context, traceID string) (status string, at time.Time, err error)
-
-	// SetStatus set trace status
-	SeStatus(ctx context.Context, traceID string, status string) error
-}
-
 // TraceModel represent elements in `traces` table
 type TraceModel struct {
 	tableName struct{} `sql:"traces"`
@@ -54,13 +32,13 @@ type TraceModel struct {
 	MinedAt  time.Time
 }
 
-// traceStore is a context store based on PostgreSQL
-type traceStore struct {
+// TraceStore is a context store based on PostgreSQL
+type TraceStore struct {
 	db *pg.DB
 }
 
 // Store context trace
-func (s *traceStore) Store(ctx context.Context, trace *trace.Trace) (status string, at time.Time, err error) {
+func (s *TraceStore) Store(ctx context.Context, trace *trace.Trace) (status string, at time.Time, err error) {
 	bytes, err := proto.Marshal(trace)
 	if err != nil {
 		return "", time.Time{}, err
@@ -86,23 +64,23 @@ func (s *traceStore) Store(ctx context.Context, trace *trace.Trace) (status stri
 }
 
 // LoadByTxHash context trace by transaction hash
-func (s *traceStore) LoadByTxHash(ctx context.Context, chainID string, txHash string, trace *trace.Trace) (status string, at time.Time, err error) {
+func (s *TraceStore) LoadByTxHash(ctx context.Context, chainID string, txHash string, trace *trace.Trace) (status string, at time.Time, err error) {
 	model := &TraceModel{
 		ChainID: chainID,
 		TxHash:  txHash,
 	}
-	return s.Load(ctx, model, trace)
+	return s.load(ctx, model, trace)
 }
 
 // LoadByTraceID context trace by trace ID
-func (s *traceStore) LoadByTraceID(ctx context.Context, traceID string, trace *trace.Trace) (status string, at time.Time, err error) {
+func (s *TraceStore) LoadByTraceID(ctx context.Context, traceID string, trace *trace.Trace) (status string, at time.Time, err error) {
 	model := &TraceModel{
 		TraceID: traceID,
 	}
-	return s.Load(ctx, model, trace)
+	return s.load(ctx, model, trace)
 }
 
-func (s *traceStore) Load(ctx context.Context, model *TraceModel, trace *trace.Trace) (status string, at time.Time, err error) {
+func (s *TraceStore) load(ctx context.Context, model *TraceModel, trace *trace.Trace) (status string, at time.Time, err error) {
 	err = s.db.ModelContext(ctx, model).Select()
 	if err != nil {
 		return "", time.Time{}, err
@@ -117,7 +95,7 @@ func (s *traceStore) Load(ctx context.Context, model *TraceModel, trace *trace.T
 }
 
 // SetStatus set a context status
-func (s *traceStore) SetStatus(ctx context.Context, traceID string, status string) error {
+func (s *TraceStore) SetStatus(ctx context.Context, traceID string, status string) error {
 	// Define model
 	model := &TraceModel{
 		TraceID: traceID,
@@ -137,7 +115,7 @@ func (s *traceStore) SetStatus(ctx context.Context, traceID string, status strin
 }
 
 // GetStatus return context status and time when status changed
-func (s *traceStore) GetStatus(ctx context.Context, traceID string) (status string, at time.Time, err error) {
+func (s *TraceStore) GetStatus(ctx context.Context, traceID string) (status string, at time.Time, err error) {
 	model := &TraceModel{
 		TraceID: traceID,
 	}
@@ -148,6 +126,31 @@ func (s *traceStore) GetStatus(ctx context.Context, traceID string) (status stri
 	}
 
 	return model.Status, model.last(), nil
+}
+
+// LoadPendingTraces loads pending traces
+func (s *TraceStore) LoadPendingTraces(ctx context.Context, duration time.Duration) ([]*trace.Trace, error) {
+	models := []*TraceModel{}
+	err := s.db.ModelContext(ctx, &models).
+		Where("status = 'pending'").
+		Where("sent_at < ?", time.Now().Add(-duration)).
+		Select()
+
+	if err != nil {
+		return nil, err
+	}
+
+	traces := []*trace.Trace{}
+	for _, model := range models {
+		t := &trace.Trace{}
+		err := proto.Unmarshal(model.Trace, t)
+		if err != nil {
+			return nil, err
+		}
+		traces = append(traces, t)
+	}
+
+	return traces, nil
 }
 
 func (model *TraceModel) last() time.Time {
