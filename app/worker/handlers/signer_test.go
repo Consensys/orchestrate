@@ -19,13 +19,24 @@ type MockTxSigner struct {
 	t *testing.T
 }
 
-func (s *MockTxSigner) Sign(chain *common.Chain, a ethcommon.Address, tx *ethtypes.Transaction) (raw []byte, hash *ethcommon.Hash, err error) {
-	fmt.Println(chain.ID().String())
+func (s *MockTxSigner) SignTx(chain *common.Chain, a ethcommon.Address, tx *ethtypes.Transaction) (raw []byte, hash *ethcommon.Hash, err error) {
 	if chain.ID().String() == "0" {
 		return []byte(``), nil, fmt.Errorf("Could not sign")
 	}
 	h := ethcommon.HexToHash("0xabcdef")
 	return hexutil.MustDecode("0xabcdef"), &h, nil
+}
+
+func (s *MockTxSigner) SignMsg(a ethcommon.Address, msg string) (rsv []byte, hash *ethcommon.Hash, err error) {
+	return []byte{}, nil, fmt.Errorf("SignMsg not implemented")
+}
+
+func (s *MockTxSigner) GenerateWallet() (add *ethcommon.Address, err error) {
+	return nil, fmt.Errorf("SignMsg not implemented")
+}
+
+func (s *MockTxSigner) SignRawHash(a ethcommon.Address, hash []byte) (rsv []byte, err error) {
+	return []byte{}, fmt.Errorf("SignMsg not implemented")
 }
 
 func makeSignerContext(i int) *worker.Context {
@@ -67,7 +78,7 @@ func makeSignerContext(i int) *worker.Context {
 
 func TestSigner(t *testing.T) {
 	s := MockTxSigner{t: t}
-	signer := Signer(&s)
+	signer := Signer(s)
 
 	rounds := 100
 	outs := make(chan *worker.Context, rounds)

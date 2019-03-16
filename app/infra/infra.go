@@ -7,6 +7,9 @@ import (
 	"github.com/Shopify/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/keystore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/secretstore"
 )
 
 // Infra infrastructure elements of the application
@@ -16,7 +19,8 @@ type Infra struct {
 	Unmarshaller services.Unmarshaller
 	Producer     services.Producer
 
-	Signer services.TxSigner
+	KeyStore keystore.KeyStore
+	SecretStore secretstore.SecretStore
 
 	Mec *ethclient.MultiEthClient
 

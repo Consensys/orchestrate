@@ -6,7 +6,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	infEth "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git"
+	
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/keystore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/secretstore"
 )
 
 var (
@@ -38,6 +40,20 @@ Environment variable: %q`, vaultAccountEnv)
 
 func initSigner(infra *Infra) {
 	// h.cfg.Vault.Accounts
-	infra.Signer = infEth.NewStaticSigner(viper.GetStringSlice("vault.accounts"))
+
+	config := secretstore.VaultConfigFromViper()
+	hashicorpsSS, err := secretstore.NewHashicorps(config)
+
+	awsSS := secretstore.NewAWS(7)
+	tokenName := secretstore.VaultTokenFromViper()
+
+	err = hashicorpsSS.Init(awsSS, tokenName)
+	if err != nil {
+		fmt.Printf(err.Error())
+	}
+
+	infra.SecretStore = hashicorpsSS
+	infra.KeyStore = keystore.NewBaseKeyStore(hashicorpsSS)
+
 	log.Infof("infra-signer: ready")
 }
