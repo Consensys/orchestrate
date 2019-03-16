@@ -8,12 +8,12 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type ContextStoreTestSuite struct {
+type TraceStoreTestSuite struct {
 	suite.Suite
 	db *pg.DB
 }
 
-func (suite *ContextStoreTestSuite) SetupSuite() {
+func (suite *TraceStoreTestSuite) SetupSuite() {
 	// Create a test database
 	db := pg.Connect(&pg.Options{
 		Addr:     "127.0.0.1:5432",
@@ -45,7 +45,7 @@ func (suite *ContextStoreTestSuite) SetupSuite() {
 	Run(suite.db, "init")
 }
 
-func (suite *ContextStoreTestSuite) SetupTest() {
+func (suite *TraceStoreTestSuite) SetupTest() {
 	oldVersion, newVersion, err := Run(suite.db, "up")
 	if err != nil {
 		suite.T().Errorf("Migrate up: %v", err)
@@ -54,7 +54,7 @@ func (suite *ContextStoreTestSuite) SetupTest() {
 	}
 }
 
-func (suite *ContextStoreTestSuite) TearDownTest() {
+func (suite *TraceStoreTestSuite) TearDownTest() {
 	oldVersion, newVersion, err := Run(suite.db, "reset")
 	if err != nil {
 		suite.T().Errorf("Migrate down: %v", err)
@@ -63,7 +63,7 @@ func (suite *ContextStoreTestSuite) TearDownTest() {
 	}
 }
 
-func (suite *ContextStoreTestSuite) TearDownSuite() {
+func (suite *TraceStoreTestSuite) TearDownSuite() {
 	// Close connection to test database
 	suite.db.Close()
 
@@ -79,7 +79,7 @@ func (suite *ContextStoreTestSuite) TearDownSuite() {
 }
 
 type MigrationsTestSuite struct {
-	ContextStoreTestSuite
+	TraceStoreTestSuite
 }
 
 func (suite *MigrationsTestSuite) TestMigrationVersion() {
@@ -98,32 +98,32 @@ func (suite *MigrationsTestSuite) TestMigrationVersion() {
 	suite.Assert().Equal(expected, version, fmt.Sprintf("Migration should be on version=%v", expected))
 }
 
-func (suite *MigrationsTestSuite) TestCreateContextTable() {
+func (suite *MigrationsTestSuite) TestCreateTraceTable() {
 
 	n, err := suite.db.Model().
 		Table("pg_catalog.pg_tables").
-		Where("tablename = '?'", pg.Q("context")).
+		Where("tablename = '?'", pg.Q("traces")).
 		Count()
 
 	if err != nil {
 		suite.T().Errorf("Query failed: %v", err)
 	}
 
-	suite.Assert().Equal(1, n, "Context table should have been created")
+	suite.Assert().Equal(1, n, "Trace table should have been created")
 }
 
-func (suite *MigrationsTestSuite) TestAddContextStoreColumns() {
+func (suite *MigrationsTestSuite) TestAddTraceStoreColumns() {
 	n, err := suite.db.Model().
 		Table("information_schema.columns").
-		Where("table_name = '?'", pg.Q("context")).
+		Where("table_name = '?'", pg.Q("traces")).
 		Count()
 
 	if err != nil {
 		suite.T().Errorf("Query failed: %v", err)
 	}
 
-	expected := 8
-	suite.Assert().Equal(expected, n, fmt.Sprintf("Context table should have %v columns", expected))
+	expected := 10
+	suite.Assert().Equal(expected, n, fmt.Sprintf("Trace table should have %v columns", expected))
 }
 
 func TestMigrations(t *testing.T) {

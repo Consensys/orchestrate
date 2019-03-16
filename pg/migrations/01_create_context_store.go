@@ -6,10 +6,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var contextStoreTableName = "context"
+var contextStoreTableName = "traces"
 
 func createContextTable(db migrations.DB) error {
-	log.Debugf("Creating table %q...", "context")
+	log.Debugf("Creating table %q...", contextStoreTableName)
 	_, err := db.Exec(`CREATE TABLE ? ();`, pg.Q(contextStoreTableName))
 	if err != nil {
 		log.WithError(err).Errorf("Could not create table %q", contextStoreTableName)
