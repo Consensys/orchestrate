@@ -3,23 +3,23 @@ package handlers
 import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
+	coreWorker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
 // Crafter creates a crafter handler
-func Crafter(r services.ABIRegistry, c services.Crafter) types.HandlerFunc {
-	return func(ctx *types.Context) {
+func Crafter(r services.ABIRegistry, c services.Crafter) coreWorker.HandlerFunc {
+	return func(ctx *coreWorker.Context) {
 		// Retrieve method identifier from trace
-		methodID := ctx.T.Call().MethodID
+		methodID := ctx.T.Call.GetMethod().GetName()
 
-		if methodID == "" || len(ctx.T.Tx().Data()) > 0 {
+		if methodID == "" || ctx.T.Tx.TxData.GetData() != "" {
 			// Nothing to craft
 			return
 		}
 
 		// Retrieve  args from trace
-		args := ctx.T.Call().Args
+		args := ctx.T.Call.GetArgs()
 		ctx.Logger = ctx.Logger.WithFields(log.Fields{
 			"crafter.method": methodID,
 			"crafter.args":   args,
@@ -28,26 +28,26 @@ func Crafter(r services.ABIRegistry, c services.Crafter) types.HandlerFunc {
 		// Retrieve method ABI object
 		method, err := r.GetMethodByID(methodID)
 		if err != nil {
-			e := types.Error{
-				Err:  err,
-				Type: 0, // TODO: add an error type ErrorTypeABIGet
-			}
+			// e := commonpb.Error{
+			// 	Message:  err.Error(),
+			// 	Type: 0, // TODO: add an error type ErrorTypeABIGet
+			// }
 			// Abort execution
 			ctx.Logger.WithError(err).Errorf("crafter: could not retrieve method ABI")
-			ctx.AbortWithError(e)
+			ctx.AbortWithError(err)
 			return
 		}
 
 		// Craft transaction payload
 		payload, err := c.Craft(method, args...)
 		if err != nil {
-			e := types.Error{
-				Err:  err,
-				Type: 0, // TODO: add an error type ErrorTypeCraft
-			}
+			// e := commonpb.Error{
+			// 	Err:  err.Error(),
+			// 	Type: 0, // TODO: add an error type ErrorTypeCraft
+			// }
 			// Abort execution
 			ctx.Logger.WithError(err).Errorf("crafter: could not craft tx data payload")
-			ctx.AbortWithError(e)
+			ctx.AbortWithError(err)
 			return
 		}
 
@@ -56,7 +56,7 @@ func Crafter(r services.ABIRegistry, c services.Crafter) types.HandlerFunc {
 		})
 
 		// Update Trace
-		ctx.T.Tx().SetData(payload)
+		ctx.T.Tx.TxData.SetData(payload)
 
 		ctx.Logger.Debugf("crafter: tx data payload set")
 	}

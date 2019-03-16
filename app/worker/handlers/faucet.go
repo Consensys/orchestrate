@@ -5,16 +5,16 @@ import (
 	"math/big"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
+	coreWorker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
 // Faucet creates a Faucet handler
-func Faucet(faucet services.Faucet, creditAmount *big.Int) types.HandlerFunc {
-	return func(ctx *types.Context) {
+func Faucet(faucet services.Faucet, creditAmount *big.Int) coreWorker.HandlerFunc {
+	return func(ctx *coreWorker.Context) {
 		faucetRequest := &services.FaucetRequest{
-			ChainID: ctx.T.Chain().ID,
-			Address: *ctx.T.Sender().Address,
+			ChainID: ctx.T.Chain.ID(),
+			Address: ctx.T.Sender.Address(),
 			Value:   creditAmount,
 		}
 		amount, approved, err := faucet.Credit(context.Background(), faucetRequest)

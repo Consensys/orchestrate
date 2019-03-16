@@ -2,28 +2,28 @@ package worker
 
 import (
 	"math/big"
-
+	
 	"github.com/spf13/viper"
-	handCom "gitlab.com/ConsenSys/client/fr/core-stack/common.git/handlers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
+	commonHandlers "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/handlers"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-crafter.git/app/infra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-crafter.git/app/worker/handlers"
 )
 
 // CreateWorker creates worker and attach it to application
-func CreateWorker(infra *infra.Infra, marker services.OffsetMarker) *core.Worker {
+func CreateWorker(infra *infra.Infra, marker services.OffsetMarker) *worker.Worker {
 	// Instantiate worker
-	w := core.NewWorker(uint(viper.GetInt("worker.slots")))
+	w := worker.NewWorker(worker.NewConfig())
 
 	// Handler::loader
-	w.Use(handCom.Loader(infra.Unmarshaller))
+	w.Use(commonHandlers.Loader(infra.Unmarshaller))
 
 	// Handler::logger
 	w.Use(handlers.Logger)
 
 	// Handler::marker
-	w.Use(handCom.Marker(marker))
+	w.Use(commonHandlers.Marker(marker))
 
 	// Handler::Faucet
 	creditAmount := big.NewInt(0)
@@ -38,7 +38,7 @@ func CreateWorker(infra *infra.Infra, marker services.OffsetMarker) *core.Worker
 	w.Use(handlers.GasEstimator(infra.GasManager)) // Gas Limit
 
 	// Handler::Producer
-	w.Use(handCom.Producer(infra.Producer))
+	w.Use(commonHandlers.Producer(infra.Producer))
 
 	return w
 }

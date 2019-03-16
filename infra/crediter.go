@@ -9,8 +9,10 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
+	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
+	commonpb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
+	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
 	infSarama "gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git"
 )
 
@@ -76,11 +78,14 @@ func (c *SaramaCrediter) PrepareFaucetMsg(r *services.FaucetRequest) (sarama.Pro
 	faucetAddress := c.addresses[r.ChainID.Text(10)]
 
 	// Create Trace for Crediting message
-	faucetTrace := types.NewTrace()
-	faucetTrace.Chain().ID.Set(r.ChainID)
-	faucetTrace.Sender().Address = &faucetAddress
-	faucetTrace.Tx().SetValue(r.Value)
-	faucetTrace.Tx().SetTo(&r.Address)
+	faucetTrace := &tracepb.Trace{}
+
+	faucetTrace.Reset()
+	fmt.Println(faucetTrace.Chain)
+	faucetTrace.Chain = (&commonpb.Chain{}).SetID(r.ChainID)
+	faucetTrace.Sender = &commonpb.Account{Addr: faucetAddress.Hex()}
+	faucetTrace.Tx = &ethpb.Transaction{TxData: &ethpb.TxData{}}
+	faucetTrace.Tx.TxData.SetValue(r.Value).SetTo(r.Address)
 
 	// Create Producer message
 	var msg sarama.ProducerMessage
