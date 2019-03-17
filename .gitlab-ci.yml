@@ -26,6 +26,8 @@ test:
   coverage: /^total:.*\s(\d+.\d+)%/
   script:
     - make run-coverage
+  services:
+    - postgres:9.6-alpine
   cache:
     paths:
       - /apt-cache
