@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.2.0-alpha.6
+
+*Released on March 17th 2019*
+
+- [FEAT] Implement `grpc` protobuf interface for `context-store`
+
 ### Version 0.2.0-alpha.5
 
 *Released on March 14th 2019*
