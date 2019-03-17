@@ -12,6 +12,7 @@ import (
 	"github.com/go-pg/pg"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/infra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/infra/pg/migrations"
 	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
 	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
@@ -90,6 +91,12 @@ func (suite *ContextStoreTestSuite) TearDownSuite() {
 
 type ModelsTestSuite struct {
 	ContextStoreTestSuite
+}
+
+func (suite *ModelsTestSuite) TestInterface() {
+	var s interface{} = &TraceStore{db: suite.db}
+	_, ok := s.(infra.TraceStore)
+	assert.True(suite.T(), ok, "pg.TraceStore should implement TraceStore interface")
 }
 
 func (suite *ModelsTestSuite) TestTraceStore() {

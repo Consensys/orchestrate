@@ -23,8 +23,8 @@ type TraceStore interface {
 	LoadPendingTraces(ctx context.Context, duration time.Duration) ([]*trace.Trace, error)
 
 	// GetStatus returns trace status
-	GeStatus(ctx context.Context, traceID string) (status string, at time.Time, err error)
+	GetStatus(ctx context.Context, traceID string) (status string, at time.Time, err error)
 
 	// SetStatus set trace status
-	SeStatus(ctx context.Context, traceID string, status string) error
+	SetStatus(ctx context.Context, traceID string, status string) error
 }
