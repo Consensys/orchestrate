@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+import "protos/trace/trace.proto";
+import "protos/common/error.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/context-store";
+
+package contextstore;
+
+service Store {
+    // Store a trace
+    rpc Store(StoreRequest) returns (StoreResponse) {}
+    
+    // LoadByTxHash a trace by transaction hash
+	rpc LoadByTxHash(TxHashRequest) returns (StoreResponse) {}
+
+    // LoaLoadByTraceIDd a trace by Identifier
+	rpc LoadByTraceID(TraceIDRequest) returns (StoreResponse) {}
+
+    // GetStatus returns trace status
+    rpc GetStatus(TraceIDRequest) returns (StoreResponse) {}
+
+    // SetStatus set a trace status
+    rpc SetStatus(SetStatusRequest) returns (common.Error) {}
+    
+    // LoadPendingTraces load pending traces
+    rpc LoadPendingTraces(PendingTracesRequest) returns (PendingTracesResponse) {}
+}
+
+message StoreRequest{
+	trace.Trace trace = 1;
+}
+
+message StoreResponse{
+	// Status of trace element
+	string status = 1;
+
+	// Status of trace element
+    google.protobuf.Timestamp last_updated = 2;
+    
+    // Trace object
+    trace.Trace trace = 3;
+    
+    // Error
+    common.Error err = 4;
+}
+
+message TxHashRequest{
+    // Chain ID the transaction has been sent to
+    string chain_id = 1;
+
+    // Hash of the transaction
+    string tx_hash = 2;
+}
+
+message TraceIDRequest{
+    // Trace identifier
+    string trace_id = 1;
+}
+
+message SetStatusRequest {
+    // Trace identifier
+    string trace_id = 1;
+
+    // Status
+    string status = 2;
+}
+
+message PendingTracesRequest {
+    // Pending duration in nanoseconds
+    int64 duration = 1;
+}
+
+message PendingTracesResponse {
+    // Pending traces
+    repeated trace.Trace traces = 1;
+
+    // Error
+    common.Error err = 2;
+}
