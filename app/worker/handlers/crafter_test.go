@@ -17,7 +17,7 @@ import (
 type MockABIRegistry struct{}
 
 func (r *MockABIRegistry) GetMethodByID(ID string) (abi.Method, error) {
-	if ID == "unknown" {
+	if ID == "unknown@" {
 		return abi.Method{}, fmt.Errorf("Could not retrieve ABI")
 	}
 	return abi.Method{}, nil
@@ -121,7 +121,7 @@ func TestCrafter(t *testing.T) {
 		}
 
 		if out.T.Tx.TxData.GetData() != result {
-			t.Errorf("Crafter: expected Dara to be %v but got %v", result, out.T.Tx.TxData.GetData())
+			t.Errorf("Crafter: expected Data to be %v but got %v", result, out.T.Tx.TxData.GetData())
 		}
 	}
 }
