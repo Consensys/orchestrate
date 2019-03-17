@@ -78,7 +78,7 @@ func makeSignerContext(i int) *worker.Context {
 
 func TestSigner(t *testing.T) {
 	s := MockTxSigner{t: t}
-	signer := Signer(s)
+	signer := Signer(&s)
 
 	rounds := 100
 	outs := make(chan *worker.Context, rounds)
