@@ -5,7 +5,6 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/keystore"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
