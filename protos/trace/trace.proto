@@ -7,7 +7,7 @@ import "protos/common/error.proto";
 import "protos/ethereum/transaction.proto";
 import "protos/ethereum/receipt.proto";
 
-option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protobuf/trace";
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace";
 
 package trace;
 
