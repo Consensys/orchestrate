@@ -4,7 +4,6 @@ PACKAGES ?= $(shell go list ./...)
 .PHONY: all protobuf run-coverage coverage fmt fmt-check vet lint misspell-check misspell race tools help
 
 run-coverage: ## Generate global code coverage report
-	echo $(PACKAGES)
 	@sh scripts/coverage.sh $(PACKAGES)
 
 tidy: fmt vet lint misspell mod-tidy ineffassign
