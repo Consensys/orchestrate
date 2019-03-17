@@ -7,8 +7,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/pg/migrations"
-	"gitlab.com/ConsenSys/client/fr/core-stack/common.git/config"
+	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/infra/pg/migrations"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/config"
 )
 
 // mewMigrateCmd create migrate command
@@ -37,7 +37,7 @@ func mewMigrateCmd() *cobra.Command {
 		PersistentPostRun: func(cmd *cobra.Command, args []string) {
 			db.Close()
 		},
-	}	
+	}
 
 	// Register Init command
 	initCmd := &cobra.Command{
@@ -58,7 +58,7 @@ func mewMigrateCmd() *cobra.Command {
 	upCmd := &cobra.Command{
 		Use:   "up [target]",
 		Short: "Upgrade database",
-		Long: "Runs all available migrations or up to [target] if argument is provided",
+		Long:  "Runs all available migrations or up to [target] if argument is provided",
 		Run: func(cmd *cobra.Command, args []string) {
 			migrate(db, append([]string{"up"}, args...)...)
 		},
@@ -104,7 +104,7 @@ func mewMigrateCmd() *cobra.Command {
 	setVersionCmd := &cobra.Command{
 		Use:   "set-version",
 		Short: "Set database version",
-		Long: "Set database version without running migrations",
+		Long:  "Set database version without running migrations",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			version, _, err := migrations.Run(db, "set_version", args[0])

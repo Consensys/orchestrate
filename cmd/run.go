@@ -4,9 +4,9 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/boilerplate-worker.git/app"
-	"gitlab.com/ConsenSys/client/fr/core-stack/common.git/config"
-	"gitlab.com/ConsenSys/client/fr/core-stack/common.git/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/app"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/config"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/utils"
 )
 
 func newRunCommand() *cobra.Command {
