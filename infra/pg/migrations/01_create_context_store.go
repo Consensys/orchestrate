@@ -33,5 +33,5 @@ func dropContextTable(db migrations.DB) error {
 }
 
 func init() {
-	Collections.MustRegisterTx(createContextTable, dropContextTable)
+	Collection.MustRegisterTx(createContextTable, dropContextTable)
 }

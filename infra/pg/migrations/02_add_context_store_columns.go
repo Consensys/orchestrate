@@ -85,5 +85,5 @@ DROP TYPE status;`,
 }
 
 func init() {
-	Collections.MustRegisterTx(addColumnsOnTraceStore, dropColumnsOnTraceStore)
+	Collection.MustRegisterTx(addColumnsOnTraceStore, dropColumnsOnTraceStore)
 }
