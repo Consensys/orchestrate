@@ -29,7 +29,7 @@ test:
   services:
     - postgres:9.6-alpine
   variables:
-    - DB_HOST: "postgres"
+    DB_HOST: "postgres"
   cache:
     paths:
       - /apt-cache
