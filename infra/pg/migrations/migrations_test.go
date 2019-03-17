@@ -6,85 +6,33 @@ import (
 
 	"github.com/go-pg/pg"
 	"github.com/stretchr/testify/suite"
+	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/infra/testutils"
 )
 
-type TraceStoreTestSuite struct {
-	suite.Suite
-	db *pg.DB
-}
-
-func (suite *TraceStoreTestSuite) SetupSuite() {
-	// Create a test database
-	db := pg.Connect(&pg.Options{
-		Addr:     "127.0.0.1:5432",
-		User:     "postgres",
-		Password: "postgres",
-		Database: "postgres",
-	})
-
-	testTable := "test"
-	_, err := db.Exec(`DROP DATABASE IF EXISTS ?;`, pg.Q(testTable))
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = db.Exec(`CREATE DATABASE ?;`, pg.Q(testTable))
-	if err != nil {
-		panic(err)
-	}
-
-	db.Close()
-
-	// Create a connection to test database
-	suite.db = pg.Connect(&pg.Options{
-		Addr:     "127.0.0.1:5432",
-		User:     "postgres",
-		Password: "postgres",
-		Database: "test",
-	})
-	Run(suite.db, "init")
-}
-
-func (suite *TraceStoreTestSuite) SetupTest() {
-	oldVersion, newVersion, err := Run(suite.db, "up")
-	if err != nil {
-		suite.T().Errorf("Migrate up: %v", err)
-	} else {
-		suite.T().Logf("Migrated up from version=%v to version=%v", oldVersion, newVersion)
-	}
-}
-
-func (suite *TraceStoreTestSuite) TearDownTest() {
-	oldVersion, newVersion, err := Run(suite.db, "reset")
-	if err != nil {
-		suite.T().Errorf("Migrate down: %v", err)
-	} else {
-		suite.T().Logf("Migrated down from version=%v to version=%v", oldVersion, newVersion)
-	}
-}
-
-func (suite *TraceStoreTestSuite) TearDownSuite() {
-	// Close connection to test database
-	suite.db.Close()
-
-	// Drop test Database
-	db := pg.Connect(&pg.Options{
-		Addr:     "127.0.0.1:5432",
-		User:     "postgres",
-		Password: "postgres",
-		Database: "postgres",
-	})
-	db.Exec(`DROP DATABASE test;`)
-	db.Close()
-}
-
 type MigrationsTestSuite struct {
-	TraceStoreTestSuite
+	suite.Suite
+	pg *testutils.PGTestHelper
+}
+
+func (suite *MigrationsTestSuite) SetupSuite() {
+	suite.pg.InitTestDB(suite.T())
+}
+
+func (suite *MigrationsTestSuite) SetupTest() {
+	suite.pg.Upgrade(suite.T())
+}
+
+func (suite *MigrationsTestSuite) TearDownTest() {
+	suite.pg.Downgrade(suite.T())
+}
+
+func (suite *MigrationsTestSuite) TearDownSuite() {
+	suite.pg.DropTestDB(suite.T())
 }
 
 func (suite *MigrationsTestSuite) TestMigrationVersion() {
 	var version int64
-	_, err := suite.db.QueryOne(
+	_, err := suite.pg.DB.QueryOne(
 		pg.Scan(&version),
 		`SELECT version FROM ? ORDER BY id DESC LIMIT 1`,
 		pg.Q("gopg_migrations"),
@@ -100,7 +48,7 @@ func (suite *MigrationsTestSuite) TestMigrationVersion() {
 
 func (suite *MigrationsTestSuite) TestCreateTraceTable() {
 
-	n, err := suite.db.Model().
+	n, err := suite.pg.DB.Model().
 		Table("pg_catalog.pg_tables").
 		Where("tablename = '?'", pg.Q("traces")).
 		Count()
@@ -113,7 +61,7 @@ func (suite *MigrationsTestSuite) TestCreateTraceTable() {
 }
 
 func (suite *MigrationsTestSuite) TestAddTraceStoreColumns() {
-	n, err := suite.db.Model().
+	n, err := suite.pg.DB.Model().
 		Table("information_schema.columns").
 		Where("table_name = '?'", pg.Q("traces")).
 		Count()
@@ -127,5 +75,12 @@ func (suite *MigrationsTestSuite) TestAddTraceStoreColumns() {
 }
 
 func TestMigrations(t *testing.T) {
-	suite.Run(t, new(MigrationsTestSuite))
+	s := new(MigrationsTestSuite)
+	s.pg = testutils.NewPGTestHelper(&pg.Options{
+		Addr:     "127.0.0.1:5432",
+		User:     "postgres",
+		Password: "postgres",
+		Database: "postgres",
+	}, Collection)
+	suite.Run(t, s)
 }
