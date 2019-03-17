@@ -15,7 +15,7 @@ type ModelsTestSuite struct {
 
 func (suite *ModelsTestSuite) SetupSuite() {
 	suite.pg.InitTestDB(suite.T())
-	suite.Store = &TraceStore{db: suite.pg.DB}
+	suite.Store = NewTraceStore(suite.pg.DB)
 }
 
 func (suite *ModelsTestSuite) SetupTest() {

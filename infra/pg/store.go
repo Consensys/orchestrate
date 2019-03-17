@@ -37,6 +37,16 @@ type TraceStore struct {
 	db *pg.DB
 }
 
+// NewTraceStore creates a new trace store
+func NewTraceStore(db *pg.DB) *TraceStore {
+	return &TraceStore{db: db}
+}
+
+// NewTraceStoreFromPGOptions creates a new pg trace store
+func NewTraceStoreFromPGOptions(opts *pg.Options) *TraceStore {
+	return NewTraceStore(pg.Connect(opts))
+}
+
 // Store context trace
 func (s *TraceStore) Store(ctx context.Context, trace *trace.Trace) (status string, at time.Time, err error) {
 	bytes, err := proto.Marshal(trace)
