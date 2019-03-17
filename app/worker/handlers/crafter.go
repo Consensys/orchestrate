@@ -11,7 +11,7 @@ import (
 func Crafter(r services.ABIRegistry, c services.Crafter) coreWorker.HandlerFunc {
 	return func(ctx *coreWorker.Context) {
 		// Retrieve method identifier from trace
-		methodID := ctx.T.Call.GetMethod().GetName()
+		methodID := ctx.T.Call.Short()
 
 		if methodID == "" || ctx.T.Tx.TxData.GetData() != "" {
 			// Nothing to craft
