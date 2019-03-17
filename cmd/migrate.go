@@ -6,7 +6,7 @@ import (
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/infra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/infra/pg/migrations"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/config"
 )
@@ -23,13 +23,7 @@ func mewMigrateCmd() *cobra.Command {
 			config.ConfigureLogger()
 
 			// Set database connection
-			db = pg.Connect(&pg.Options{
-				Addr:     fmt.Sprintf("%v:%v", viper.GetString("db.host"), viper.GetString("db.port")),
-				User:     viper.GetString("db.user"),
-				Password: viper.GetString("db.password"),
-				Database: viper.GetString("db.database"),
-				PoolSize: viper.GetInt("db.poolsize"),
-			})
+			db = pg.Connect(infra.NewPGOptions())
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			migrate(db)

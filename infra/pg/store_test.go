@@ -3,7 +3,6 @@ package pg
 import (
 	"testing"
 
-	"github.com/go-pg/pg"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/infra/pg/migrations"
 	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/infra/testutils"
@@ -33,11 +32,6 @@ func (suite *ModelsTestSuite) TearDownSuite() {
 
 func TestModels(t *testing.T) {
 	s := new(ModelsTestSuite)
-	s.pg = testutils.NewPGTestHelper(&pg.Options{
-		Addr:     "127.0.0.1:5432",
-		User:     "postgres",
-		Password: "postgres",
-		Database: "postgres",
-	}, migrations.Collection)
+	s.pg = testutils.NewPGTestHelper(migrations.Collection)
 	suite.Run(t, s)
 }

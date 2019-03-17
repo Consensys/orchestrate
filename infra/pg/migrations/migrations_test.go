@@ -76,11 +76,6 @@ func (suite *MigrationsTestSuite) TestAddTraceStoreColumns() {
 
 func TestMigrations(t *testing.T) {
 	s := new(MigrationsTestSuite)
-	s.pg = testutils.NewPGTestHelper(&pg.Options{
-		Addr:     "127.0.0.1:5432",
-		User:     "postgres",
-		Password: "postgres",
-		Database: "postgres",
-	}, Collection)
+	s.pg = testutils.NewPGTestHelper(Collection)
 	suite.Run(t, s)
 }

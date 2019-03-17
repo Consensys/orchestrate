@@ -5,7 +5,23 @@ import (
 
 	"github.com/go-pg/migrations"
 	"github.com/go-pg/pg"
+	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/infra"
 )
+
+// TODO: all this script should be moved to pkg.git/common
+func init() {
+	viper.SetDefault("db.user", "postgres")
+	viper.BindEnv("db.user", "DB_USER")
+	viper.SetDefault("db.password", "postgres")
+	viper.BindEnv("db.password", "DB_PASSWORD")
+	viper.SetDefault("db.host", "127.0.0.1")
+	viper.BindEnv("db.host", "DB_HOST")
+	viper.SetDefault("db.port", 5432)
+	viper.BindEnv("db.port", "DB_PORT")
+	viper.SetDefault("db.database", "postgres")
+	viper.BindEnv("db.database", "DB_DATABASE")
+}
 
 // PGTestHelper is a suite for integration test of a postgresql database using go-pg
 // TODO: move this in pkg.git/common
@@ -16,9 +32,9 @@ type PGTestHelper struct {
 }
 
 // NewPGTestHelper creates a new PGTestHelper
-func NewPGTestHelper(opts *pg.Options, collection *migrations.Collection) *PGTestHelper {
+func NewPGTestHelper(collection *migrations.Collection) *PGTestHelper {
 	return &PGTestHelper{
-		Opts:       opts,
+		Opts:       infra.NewPGOptions(),
 		Collection: collection,
 	}
 }
