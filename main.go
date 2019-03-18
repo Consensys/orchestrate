@@ -3,8 +3,8 @@ package main
 import (
 	/*
 	"fmt"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/secretstore"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/keystore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/keystore"
 	*/
 )
 

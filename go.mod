@@ -1,4 +1,4 @@
-module gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git
+module gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git
 
 require (
 	github.com/client9/misspell v0.3.4 // indirect

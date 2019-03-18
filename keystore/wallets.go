@@ -1,7 +1,7 @@
 package keystore
 
 import(
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/secretstore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore"
 	"github.com/ethereum/go-ethereum/common"
 	"crypto/ecdsa"
 	"github.com/ethereum/go-ethereum/crypto"

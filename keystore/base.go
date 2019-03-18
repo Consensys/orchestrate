@@ -4,7 +4,7 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/secretstore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore"
 	"fmt"
 )
 
