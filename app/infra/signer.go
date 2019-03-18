@@ -7,8 +7,8 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/keystore"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/secretstore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/keystore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore"
 )
 
 var (

@@ -8,8 +8,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/keystore"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/aws-secret-manager.git/secretstore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/keystore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore"
 )
 
 // Infra infrastructure elements of the application
