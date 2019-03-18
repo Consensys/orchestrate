@@ -6,7 +6,7 @@ import (
 
 	"github.com/golang/protobuf/ptypes"
 	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/infra"
-	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
 	store "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/context-store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
 	"google.golang.org/grpc"
@@ -16,6 +16,11 @@ import (
 // StoreService is the service dealing with storing
 type StoreService struct {
 	store infra.TraceStore
+}
+
+// NewStoreService creates a StoreService
+func NewStoreService(store infra.TraceStore) *StoreService {
+	return &StoreService{store: store}
 }
 
 // Store store a trace
