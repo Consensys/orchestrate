@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.2.0-alpha.7
+
+*Released on March 18th 2019*
+
+- [FEAT] implement `config` flags for `jaeger`
+- [FIX] update flag declaration usng `viper.SetDefault`
+
 ### Version 0.2.0-alpha.6
 
 *Released on March 17th 2019*
