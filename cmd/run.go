@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"context"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/app"
@@ -17,6 +19,9 @@ func newRunCommand() *cobra.Command {
 	}
 
 	config.HTTPHostname(runCmd.Flags())
+	config.JaegerHost(runCmd.Flags())
+	config.JaegerPort(runCmd.Flags())
+	config.JaegerSampler(runCmd.Flags())
 
 	return runCmd
 }
@@ -26,10 +31,13 @@ func run(cmd *cobra.Command, args []string) {
 	a := app.New()
 
 	// Process signals
-	sig := utils.NewSignalListener(func(signal os.Signal) { a.Close() })
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	sig := utils.NewSignalListener(func(signal os.Signal) { a.Close(ctx) })
 	defer sig.Close()
 
-	// Run App
+	// Initialize  App
 	a.Run()
 
 	// Wait
