@@ -71,7 +71,7 @@ func (sec *VaultSecret) GetValue() (string, error) {
 
 	log := sec.client.Logical()
 	res, err := log.Read(
-		strings.Join([]string{"Vaultsecret", sec.key}, "/"),
+		strings.Join([]string{"secret/secret", sec.key}, "/"),
 	)
 
 	if err != nil {
@@ -88,7 +88,7 @@ func (sec *VaultSecret) Update() (error) {
 
 	log := sec.client.Logical()
 	_, err := log.Write(
-		strings.Join([]string{"Vaultsecret", sec.key}, "/"),
+		strings.Join([]string{"secret/secret", sec.key}, "/"),
 		map[string]interface{}{ "value": sec.value },
 	)
 
@@ -105,7 +105,7 @@ func (sec *VaultSecret) Delete() (error) {
 
 	log := sec.client.Logical()
 	_, err := log.Delete(
-		strings.Join([]string{"Vaultsecret", sec.key}, "/"),
+		strings.Join([]string{"secret/secret", sec.key}, "/"),
 	)
 
 	if err != nil {
@@ -119,18 +119,18 @@ func (sec *VaultSecret) Delete() (error) {
 func (sec *VaultSecret) List() ([]string, error) {
 
 	log := sec.client.Logical()
-	res, err := log.List("Vaultsecret")
-
+	res, err := log.List("secret/secret")
 	if err != nil {
 		return nil, err
 	}
 
-	list := make([]string, len(res.Data))
-	i := 0
-	for address := range res.Data {
-		list[i] = address
-		i++
+	if res == nil {
+		return []string{}, fmt.Errorf("List returned : %v", res) 
 	}
 
-	return list, nil	
+	for elem := range res.Data["keys"].([]interface{}) {
+		fmt.Printf("Keys is : %v", elem)
+	}
+
+	return []string{}, nil	
 } 

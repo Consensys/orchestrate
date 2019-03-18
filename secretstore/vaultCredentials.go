@@ -12,7 +12,7 @@ type credentials struct {
 	KeysBase64 []string 	`json:"keys_base_64"`
 	Token string 			`json:"root_token"`
 
-	retrieveSecretONce *sync.Once // TODO
+	retrieveSecretOnce *sync.Once // TODO
 }
 
 
@@ -37,6 +37,28 @@ func (c *credentials) FetchFromAWS(
 	})
 
 	return err
+}
+
+// FetchFromVaultInit runs a basic vault initialization and creates a credential object from there
+func (c *credentials) FetchFromVaultInit(client *api.Client) (err error) {
+
+	sys := client.Sys()
+
+	initRequest := &api.InitRequest{
+		SecretShares: 1,
+		SecretThreshold: 1,
+	}
+
+	initResponse, err := sys.Init(initRequest)
+	if err != nil {
+		return err
+	}
+
+	c.Keys = initResponse.Keys
+	c.KeysBase64 = initResponse.KeysB64
+	c.Token = initResponse.RootToken
+
+	return nil
 }
 
 func (c *credentials) fromEncoded(value string) (err error) {
@@ -67,6 +89,11 @@ func (c *credentials) Unseal(client *api.Client) (err error) {
 	
 	// Unseal is idemnpotent so no need to solve race conditions here
 	if status.Sealed {
+
+		if len(c.Keys) == 0 {
+			return fmt.Errorf("The UnsealKey has not been imported. \n If you are running in dev, Consider verifying if the credentials have been correctly passed")
+		}
+
 		status2, err := sys.Unseal(c.Keys[0])
 
 		if err != nil {
