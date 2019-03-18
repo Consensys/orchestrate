@@ -39,6 +39,25 @@ func (c *credentials) FetchFromAWS(
 	return err
 }
 
+func (c *credentials) SendToAWS(
+	ss *AWS,
+	name string,
+) (err error) {
+
+	encoded, err := c.encode()
+	if err != nil {
+		return err
+	}
+
+	err = ss.Store(name, encoded) 
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
 // FetchFromVaultInit runs a basic vault initialization and creates a credential object from there
 func (c *credentials) FetchFromVaultInit(client *api.Client) (err error) {
 
@@ -61,6 +80,8 @@ func (c *credentials) FetchFromVaultInit(client *api.Client) (err error) {
 	return nil
 }
 
+
+
 func (c *credentials) fromEncoded(value string) (err error) {
 
 	decoded := &credentials{}
@@ -72,6 +93,18 @@ func (c *credentials) fromEncoded(value string) (err error) {
 
 	*c = *decoded
 	return nil
+}
+
+func (c *credentials) encode() (encoded string, err error) {
+
+	res, err := json.Marshal(*c)
+	if err != nil {
+		return "", err
+	}
+
+	encoded = (string)(res)
+	return encoded, err
+
 }
 
 func (c *credentials) AttachTo(client *api.Client) {
