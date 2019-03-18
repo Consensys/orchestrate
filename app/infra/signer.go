@@ -38,22 +38,62 @@ Environment variable: %q`, vaultAccountEnv)
 	viper.BindEnv(vaultAccountViperKey, vaultAccountEnv)
 }
 
-func initSigner(infra *Infra) {
+func initSigner(infra *Infra) error {
 	// h.cfg.Vault.Accounts
 
 	config := secretstore.VaultConfigFromViper()
-	hashicorpsSS, err := secretstore.NewHashicorps(config)
-
-	awsSS := secretstore.NewAWS(7)
-	tokenName := secretstore.VaultTokenFromViper()
-
-	err = hashicorpsSS.Init(awsSS, tokenName)
+	hashi, err := secretstore.NewHashicorps(config)
 	if err != nil {
-		fmt.Printf(err.Error())
+		return err
 	}
 
-	infra.SecretStore = hashicorpsSS
-	infra.KeyStore = keystore.NewBaseKeyStore(hashicorpsSS)
+	if !ManualInit(hashi) {
+		err := AutoInit(hashi)
+		if err != nil {
+			return err
+		}
+	}
+
+	infra.SecretStore = hashi
+	infra.KeyStore = keystore.NewBaseKeyStore(hashi)
 
 	log.Infof("infra-signer: ready")
+	return nil
+}
+
+// ManualInit (UNSAFE) will Init the vault with the value directly passed 
+// Ignore if the token variable is not set
+func ManualInit(hash *secretstore.Hashicorps) bool {
+
+	token := secretstore.VaultTokenFromViper()
+	if token != "" {
+
+		hash.Client.SetToken(token)
+		unsealKey := secretstore.VaultUnsealKeyFromViper()
+		 
+		if unsealKey != "" {
+			hash.Unseal(unsealKey)
+		}
+
+		return true
+	}
+
+	return false
+}
+
+// AutoInit will try to Init the vault directly or FetchFromAws
+func AutoInit(hash *secretstore.Hashicorps) (error) {
+
+	tokenName := secretstore.VaultTokenFromViper()
+	awsSS := secretstore.NewAWS(7)
+	
+	err := hash.InitVault(awsSS, tokenName)
+	if err != nil {
+		err2 := hash.InitFromAWS(awsSS, tokenName)
+		if err2 != nil {
+			return fmt.Errorf("Got %v when trying to init the vault then when trying to fetch on AWS got %v", err.Error(), err2.Error())
+		}
+	}
+
+	return nil
 }
