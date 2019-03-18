@@ -19,6 +19,7 @@ func HTTPHostname(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Hostname to expose healthchecks and metrics.
 Environment variable: %q`, httpHostnameEnv)
 	f.String(httpHostnameFlag, httpHostnameDefault, desc)
+	viper.SetDefault(httpHostnameViperKey, httpHostnameDefault)
 	viper.BindPFlag(httpHostnameViperKey, f.Lookup(httpHostnameFlag))
 	viper.BindEnv(httpHostnameViperKey, httpHostnameEnv)
 }

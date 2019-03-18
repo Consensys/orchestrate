@@ -19,6 +19,7 @@ func RedisAddress(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Address of Redis server to connect to.
 Environment variable: %q`, redisAddressEnv)
 	f.String(redisAddressFlag, redisAddressDefault, desc)
+	viper.SetDefault(redisAddressViperKey, redisAddressDefault)
 	viper.BindPFlag(redisAddressViperKey, f.Lookup(redisAddressFlag))
 	viper.BindEnv(redisAddressViperKey, redisAddressEnv)
 }
@@ -35,6 +36,7 @@ func RedisLockTimeout(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Redis lock timeout.
 Environment variable: %q`, redisLockTimeoutEnv)
 	f.Int(redisLockTimeoutFlag, redisLockTimeoutDefault, desc)
+	viper.SetDefault(redisLockTimeoutViperKey, redisLockTimeoutDefault)
 	viper.BindPFlag(redisLockTimeoutViperKey, f.Lookup(redisLockTimeoutFlag))
 	viper.BindEnv(redisLockTimeoutViperKey, redisLockTimeoutEnv)
 }

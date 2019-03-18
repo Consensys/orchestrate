@@ -20,6 +20,7 @@ func LogLevel(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Log level (one of %q).
 Environment variable: %q`, []string{"panic", "fatal", "error", "warn", "info", "debug", "trace"}, logLevelEnv)
 	f.String(logLevelFlag, logLevelDefault, desc)
+	viper.SetDefault(logLevelViperKey, logLevelDefault)
 	viper.BindPFlag(logLevelViperKey, f.Lookup(logLevelFlag))
 	viper.BindEnv(logLevelViperKey, logLevelEnv)
 }
@@ -36,6 +37,7 @@ func LogFormat(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Log formatter (one of %q).
 Environment variable: %q`, []string{"text", "json"}, logFormatEnv)
 	f.String(logFormatFlag, logFormatDefault, desc)
+	viper.SetDefault(logFormatViperKey, logFormatDefault)
 	viper.BindPFlag(logFormatViperKey, f.Lookup(logFormatFlag))
 	viper.BindEnv(logFormatViperKey, logFormatEnv)
 }

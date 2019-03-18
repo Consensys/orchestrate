@@ -18,6 +18,7 @@ func BridgeLinks(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`List of bridges (format addr1@chainID1<>addr2@chainID2)
 Environment variable: %q`, bridgeLinksEnv)
 	f.StringSlice(bridgeLinksFlag, []string{}, desc)
+	viper.SetDefault(bridgeLinksViperKey, []string{})
 	viper.BindPFlag(bridgeLinksViperKey, f.Lookup(bridgeLinksFlag))
 	viper.BindEnv(bridgeLinksViperKey, bridgeLinksEnv)
 }
@@ -34,6 +35,7 @@ func BridgeMethodSignature(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Method signature to listen to when bridging (format methodName(typeParam1,typeParam2,...))
 Environment variable: %q`, bridgeMethodSignatureEnv)
 	f.String(bridgeMethodSignatureFlag, bridgeMethodSignatureDefault, desc)
+	viper.SetDefault(bridgeMethodSignatureViperKey, bridgeMethodSignatureDefault)
 	viper.BindPFlag(bridgeMethodSignatureViperKey, f.Lookup(bridgeMethodSignatureFlag))
 	viper.BindEnv(bridgeMethodSignatureViperKey, bridgeMethodSignatureEnv)
 }
@@ -49,6 +51,7 @@ func BridgeAuthority(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Address used to sign the transaction on the destination chain
 Environment variable: %q`, bridgeAuthorityEnv)
 	f.String(bridgeAuthorityFlag, "", desc)
+	viper.SetDefault(bridgeAuthorityViperKey, "")
 	viper.BindPFlag(bridgeAuthorityViperKey, f.Lookup(bridgeAuthorityFlag))
 	viper.BindEnv(bridgeAuthorityViperKey, bridgeAuthorityEnv)
 }

@@ -28,6 +28,7 @@ func DBUser(f *pflag.FlagSet, defaultUser string) {
 	desc := fmt.Sprintf(`Database User.
 Environment variable: %q`, dbUserEnv)
 	f.String(dbUserFlag, defaultUser, desc)
+	viper.SetDefault(dbUserViperKey, defaultUser)
 	viper.BindPFlag(dbUserViperKey, f.Lookup(dbUserFlag))
 	viper.BindEnv(dbUserViperKey, dbUserEnv)
 }
@@ -43,6 +44,7 @@ func DBPassword(f *pflag.FlagSet, defaultPassword string) {
 	desc := fmt.Sprintf(`Database User password
 Environment variable: %q`, dbPasswordEnv)
 	f.String(dbPasswordFlag, defaultPassword, desc)
+	viper.SetDefault(dbPasswordViperKey, defaultPassword)
 	viper.BindPFlag(dbPasswordViperKey, f.Lookup(dbPasswordFlag))
 	viper.BindEnv(dbPasswordViperKey, dbPasswordEnv)
 }
@@ -58,6 +60,7 @@ func DBDatabase(f *pflag.FlagSet, defaultDatabase string) {
 	desc := fmt.Sprintf(`Target Database name
 Environment variable: %q`, dbDatabaseEnv)
 	f.String(dbDatabaseFlag, defaultDatabase, desc)
+	viper.SetDefault(dbDatabaseViperKey, defaultDatabase)
 	viper.BindPFlag(dbDatabaseViperKey, f.Lookup(dbDatabaseFlag))
 	viper.BindEnv(dbDatabaseViperKey, dbDatabaseEnv)
 }
@@ -73,6 +76,7 @@ func DBHost(f *pflag.FlagSet, defaultHost string) {
 	desc := fmt.Sprintf(`Database host
 Environment variable: %q`, dbHostEnv)
 	f.String(dbHostFlag, defaultHost, desc)
+	viper.SetDefault(dbHostViperKey, defaultHost)
 	viper.BindPFlag(dbHostViperKey, f.Lookup(dbHostFlag))
 	viper.BindEnv(dbHostViperKey, dbHostEnv)
 }
@@ -88,6 +92,7 @@ func DBPort(f *pflag.FlagSet, defaultPort int) {
 	desc := fmt.Sprintf(`Database port
 Environment variable: %q`, dbPortEnv)
 	f.Int(dbPortFlag, defaultPort, desc)
+	viper.SetDefault(dbPortViperKey, defaultPort)
 	viper.BindPFlag(dbPortViperKey, f.Lookup(dbPortFlag))
 	viper.BindEnv(dbPortViperKey, dbPortEnv)
 }
@@ -104,6 +109,7 @@ func DBPoolSize(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Maximum number of connections on database
 Environment variable: %q`, dbPoolSizeEnv)
 	f.Int(dbPoolSizeFlag, dbPoolSizeDefault, desc)
+	viper.SetDefault(dbPoolSizeViperKey, dbPoolSizeDefault)
 	viper.BindPFlag(dbPoolSizeViperKey, f.Lookup(dbPoolSizeFlag))
 	viper.BindEnv(dbPoolSizeViperKey, dbPoolSizeEnv)
 }
