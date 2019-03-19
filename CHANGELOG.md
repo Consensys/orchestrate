@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.3.0
+
+*Released on March 20th 2019*
+
+- [CHORE] move to `pkg`
+- [FEAT] add connexion to `API-Context-Store` and store trace
+
 ### Version 0.2.2
 
 *Released on February 27th 2019*
