@@ -14,7 +14,7 @@ Core-Stack then manages the full lifecycle of the transaction from crafting the 
 
 Tx-Sender is a Core-Stack worker responsible to 
 
-- **Store Transaction Trace**
+- **Store Transaction Trace** by sending it to *API-Context-Store*
 - **Send Transaction to Ethereum node**
 
 It consumes message from *tx signer* Kafka topic.
@@ -45,19 +45,23 @@ Usage:
   app run [flags]
 
 Flags:
-      --eth-client strings      Ethereum client URLs.
-                                Environment variable: "ETH_CLIENT_URL" (default [https://ropsten.infura.io/v3/81e039ce6c8a465180822b525e3644d7,https://rinkeby.infura.io/v3/bfc9d6e51fbc4d3db54bea58d1094f9c,https://kovan.infura.io/v3/bfc9d6e51fbc4d3db54bea58d1094f9c,https://mainnet.infura.io/v3/bfc9d6e51fbc4d3db54bea58d1094f9c])
-  -h, --help                    help for run
-      --http-hostname string    Hostname to expose healthchecks and metrics.
-                                Environment variable: "HTTP_HOSTNAME" (default ":8080")
-      --kafka-address strings   Address of Kafka server to connect to.
-                                Environment variable: "KAFKA_ADDRESS" (default [localhost:9092])
-      --worker-group string     Kafka consumer group. 
-                                Environment variable: "KAFKA_SENDER_GROUP" (default "tx-sender-group")
-      --worker-in string        Kafka topic to consume message from.
-                                Environment variable: "KAFKA_TOPIC_TX_SENDER" (default "topic-tx-sender")
-      --worker-slots uint       Maximum number of messages the worker can treat in parallel.
-                                Environment variable: "WORKER_SLOTS" (default 100)
+      --eth-client strings         Ethereum client URLs.
+                                   Environment variable: "ETH_CLIENT_URL"
+      --grpc-store-target string   GRPC Context Store target (See https://github.com/grpc/grpc/blob/master/doc/naming.md)
+                                   Environment variable: "GRPC_STORE_TARGET"
+  -h, --help                       help for run
+      --http-hostname string       Hostname to expose healthchecks and metrics.
+                                   Environment variable: "HTTP_HOSTNAME" (default ":8080")
+      --kafka-address strings      Address of Kafka server to connect to.
+                                   Environment variable: "KAFKA_ADDRESS" (default [localhost:9092])
+      --worker-group string        Kafka consumer group.
+                                   Environment variable: "KAFKA_SENDER_GROUP" (default "tx-sender-group")
+      --worker-in string           Kafka topic to consume message from.
+                                   Environment variable: "KAFKA_TOPIC_TX_SENDER" (default "topic-tx-sender")
+      --worker-partitions uint     Number of partitions spawned by worker to treat messages in parallel.
+                                   Environment variable: "WORKER_PARTITIONS" (default 50)
+      --worker-slots uint          Maximum number of messages the worker can treat concurrently.
+                                   Environment variable: "WORKER_SLOTS" (default 20)
 
 Global Flags:
       --log-format string   Log formatter (one of ["text" "json"]).
