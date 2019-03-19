@@ -82,17 +82,25 @@ func ManualInit(hash *secretstore.Hashicorps) bool {
 }
 
 // AutoInit will try to Init the vault directly or FetchFromAws
-func AutoInit(hash *secretstore.Hashicorps) (error) {
+func AutoInit(hash *secretstore.Hashicorps) (err error) {
 
 	tokenName := secretstore.VaultTokenFromViper()
 	awsSS := secretstore.NewAWS(7)
-	
-	err := hash.InitVault(awsSS, tokenName)
+	err = hash.InitVault()
 	if err != nil {
-		err2 := hash.InitFromAWS(awsSS, tokenName)
-		if err2 != nil {
+
+		err = hash.InitFromAWS(awsSS, tokenName)
+		if err != nil {
 			return fmt.Errorf("Got %v when trying to init the vault then when trying to fetch on AWS got %v", err.Error(), err2.Error())
 		}
+
+	} else {
+
+		err = hash.SendToCredStore(awsSS, tokenName)
+		if err != nil {
+			return fmt.Errorf("Tried to send the credentials to AWS but failed : %v", err)
+		}
+
 	}
 
 	return nil
