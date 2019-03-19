@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/Shopify/sarama"
+	store "gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/infra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
 )
@@ -16,8 +17,8 @@ type Infra struct {
 	Unmarshaller services.Unmarshaller
 
 	TxSender services.TxSender
-
-	Mec *ethclient.MultiEthClient
+	Store    store.TraceStore
+	Mec      *ethclient.MultiEthClient
 
 	// TODO: we still have some coupling with Sarama (it should be removed)
 	SaramaClient sarama.Client
@@ -41,6 +42,7 @@ func NewInfra() *Infra {
 // Init intilialize infrastructure
 func (infra *Infra) Init() {
 	wait := &sync.WaitGroup{}
+	initStore(infra)
 	wait.Add(2)
 	go initSarama(infra, wait)
 	go initEthereum(infra, wait)
