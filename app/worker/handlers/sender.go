@@ -5,15 +5,14 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
 // Sender creates a Sender handler
-func Sender(sender services.TxSender) types.HandlerFunc {
-	return func(ctx *types.Context) {
-		if len(ctx.T.Tx().Raw()) == 0 {
+func Sender(sender services.TxSender) worker.HandlerFunc {
+	return func(ctx *worker.Context) {
+		if ctx.T.GetTx().GetRaw() == "" {
 			// Tx is not ready
 			// TODO: handle case
 			ctx.Abort()
@@ -21,11 +20,11 @@ func Sender(sender services.TxSender) types.HandlerFunc {
 		}
 
 		ctx.Logger = ctx.Logger.WithFields(log.Fields{
-			"chain.id": ctx.T.Chain().ID.Text(16),
-			"tx.raw": hexutil.Encode(ctx.T.Tx().Raw()),
+			"chain.id": ctx.T.GetChain().GetId(),
+			"tx.raw":   ctx.T.GetTx().GetRaw(),
 		})
 
-		err := sender.Send(context.Background(), ctx.T.Chain().ID, hexutil.Encode(ctx.T.Tx().Raw()))
+		err := sender.SendRawTransaction(context.Background(), ctx.T.GetChain().ID(), ctx.T.GetTx().GetRaw())
 		if err != nil {
 			// TODO: handle error
 			ctx.AbortWithError(err)
