@@ -97,3 +97,18 @@ func AutoInit(hash *secretstore.Hashicorps) (error) {
 
 	return nil
 }
+
+// WriteInitializedKey will add the keys in the vault
+func WriteInitializedKey(bks *keystore.BaseKeyStore) (err error) {
+
+	accounts := viper.GetStringSlice("vault.accounts")
+	for _, account := range accounts {
+		err = bks.ImportPrivateKey(account)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+
+}
