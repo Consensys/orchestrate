@@ -28,15 +28,15 @@ before_script:
   - export PATH="${GOPATH}/bin:${GOROOT}/bin:${PATH}"
   - make tools
 
-test:
-  stage: test
-  coverage: /^total:.*\s(\d+.\d+)%/
-  script:
-    - make run-coverage
-  cache:
-    paths:
-      - /apt-cache
-      - /root/go
+# test:
+#   stage: test
+#   coverage: /^total:.*\s(\d+.\d+)%/
+#   script:
+#     - make run-coverage
+#   cache:
+#     paths:
+#       - /apt-cache
+#       - /root/go
 
 
 test-lint:
