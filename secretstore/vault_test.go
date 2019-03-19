@@ -39,6 +39,11 @@ func TestSecretStore(t *testing.T) {
 		t.Errorf("Could not store the secret : %v", err.Error())
 	}
 
+	_, err = hashicorpsSS.List()
+	if err != nil {
+		t.Errorf("Could not lists the secrets : %v", err.Error())
+	}
+
 	retrievedValue, err := hashicorpsSS.Load(key)
 	if err != nil {
 		t.Errorf("Could not load the secret : %v", err.Error())

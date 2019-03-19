@@ -127,10 +127,12 @@ func (sec *VaultSecret) List() ([]string, error) {
 	if res == nil {
 		return []string{}, fmt.Errorf("List returned : %v", res) 
 	}
+	rawList := res.Data["keys"].([]interface{})
 
-	for elem := range res.Data["keys"].([]interface{}) {
-		fmt.Printf("Keys is : %v", elem)
+	list := make([]string, len(rawList))	
+	for i, elem := range rawList {
+		list[i] = fmt.Sprintf("%v", elem)
 	}
 
-	return []string{}, nil	
+	return list, nil	
 } 
