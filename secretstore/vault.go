@@ -32,17 +32,32 @@ func NewHashicorps(config *api.Config) (*Hashicorps, error) {
 }
 
 // InitVault fetches the new token and sets the values in AWS
-func (hash *Hashicorps) InitVault(credsStore *AWS, tokenName string) (err error) {
+func (hash *Hashicorps) InitVault() (err error) {
 
 	err = hash.creds.FetchFromVaultInit(hash.Client)
 	if err != nil {
 		return err
 	}
 
-	err = hash.creds.SendToAWS(credsStore, tokenName)
+	hash.SetToken(hash.creds.Token)
+
+	err = hash.Unseal(hash.creds.Keys[0])
+	if err != nil {
+		return err
+	}
 
 	return nil
+}
 
+// SendToCredStore stores the vault credentials in AWS
+func (hash *Hashicorps) SendToCredStore(credsStore *AWS, tokenName string) (err error) {
+
+	err = hash.creds.SendToAWS(credsStore, tokenName)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // InitFromAWS manages vault token auth and unsealing
@@ -64,9 +79,14 @@ func (hash *Hashicorps) InitFromAWS(credsStore *AWS, tokenName string) (err erro
 }
 
 // Unseal [UNSAFE] the vault 
-func (hash *Hashicorps) Unseal(unsealKey string) {
+func (hash *Hashicorps) Unseal(unsealKey string) (err error) {
 	sys := hash.Client.Sys()
 	sys.Unseal(unsealKey)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // SetToken [UNSAFE] authorize the client to access vault
