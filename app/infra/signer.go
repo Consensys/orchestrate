@@ -72,7 +72,7 @@ func ManualInit(hash *secretstore.Hashicorps) bool {
 		unsealKey := secretstore.VaultUnsealKeyFromViper()
 		 
 		if unsealKey != "" {
-			hash.Unseal(unsealKey)
+			err = hash.Unseal(unsealKey)
 		}
 
 		return true
@@ -91,7 +91,7 @@ func AutoInit(hash *secretstore.Hashicorps) (err error) {
 
 		err = hash.InitFromAWS(awsSS, tokenName)
 		if err != nil {
-			return fmt.Errorf("Got %v when trying to init the vault then when trying to fetch on AWS got %v", err.Error(), err2.Error())
+			return fmt.Errorf("Got %v when trying to init the vault then when trying to fetch on AWS got %v", err.Error())
 		}
 
 	} else {
