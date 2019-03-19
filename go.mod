@@ -16,8 +16,9 @@ require (
 	github.com/sirupsen/logrus v1.4.0
 	github.com/soheilhy/cmux v0.1.4
 	github.com/spf13/cobra v0.0.3
+	github.com/spf13/pflag v1.0.3
 	github.com/spf13/viper v1.3.2
-	github.com/stretchr/testify v1.3.0
+	github.com/stretchr/testify v1.2.2
 	github.com/uber/jaeger-client-go v2.15.0+incompatible
 	github.com/uber/jaeger-lib v1.5.0+incompatible
 	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.7
