@@ -15,6 +15,7 @@ type BaseKeyStore struct {
 
 //NewBaseKeyStore construct a BaseKeyStore from a client 
 func NewBaseKeyStore(secretStore secretstore.SecretStore) *BaseKeyStore {
+	
 	return &BaseKeyStore{
 		SecretStore: secretStore,
 	}
