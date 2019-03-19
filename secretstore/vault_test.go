@@ -23,13 +23,13 @@ func TestSecretStore(t *testing.T) {
 		t.Errorf("Error when instantiating the vault : %v", err.Error())
 	}
 
-	hashicorpsSS.creds.FetchFromVaultInit(hashicorpsSS.client)
+	hashicorpsSS.creds.FetchFromVaultInit(hashicorpsSS.Client)
 
-	err = hashicorpsSS.creds.Unseal(hashicorpsSS.client)
+	err = hashicorpsSS.creds.Unseal(hashicorpsSS.Client)
 	if err != nil {
 		t.Errorf("Error unsealing vault : %v (the UnsealKey sent was %v)", err.Error(), hashicorpsSS.creds.Keys)
 	}
-	hashicorpsSS.creds.AttachTo(hashicorpsSS.client)
+	hashicorpsSS.creds.AttachTo(hashicorpsSS.Client)
 
 	key := "secretName"
 	value := "secretValue"

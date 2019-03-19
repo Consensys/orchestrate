@@ -78,3 +78,21 @@ func (s* BaseKeyStore) GenerateWallet() (add *ethcommon.Address, err error) {
 
 	return wallet.GetAddress(), nil
 }
+
+// ImportPrivateKey adds a private key in the vault
+func (s* BaseKeyStore) ImportPrivateKey(priv string) (err error) {
+
+	wallet := NewWallet(s.SecretStore)
+	err = wallet.FromPrivateKey(priv)
+	if err != nil {
+		return err
+	}
+
+	err = wallet.Store()
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}

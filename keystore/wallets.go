@@ -25,14 +25,21 @@ func NewWallet(sec secretstore.SecretStore) *Wallet {
 
 // Generate create a keypair and set the result in the wallet
 func (wal *Wallet) Generate() (err error) {
-
-	wal = &Wallet{}
 	
 	wal.priv, err = crypto.GenerateKey()
 	if err != nil {
 		return err
 	}
 
+	pub := wal.priv.PublicKey
+	wal.address = crypto.PubkeyToAddress(pub)
+	return nil
+}
+
+// FromPrivateKey create a assign the wallet from a given private key
+func (wal *Wallet) FromPrivateKey(priv string) (err error) {
+	
+	wal.priv, err = crypto.HexToECDSA(priv)
 	pub := wal.priv.PublicKey
 	wal.address = crypto.PubkeyToAddress(pub)
 	return nil
