@@ -2,8 +2,8 @@ package worker
 
 import (
 	commonHandlers "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/handlers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-sender.git/app/infra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-sender.git/app/worker/handlers"
 )
@@ -23,7 +23,7 @@ func CreateWorker(infra *infra.Infra, marker services.OffsetMarker) *worker.Work
 	w.Use(commonHandlers.Marker(marker))
 
 	// Handler::Sender
-	w.Use(handlers.Sender(infra.TxSender))
+	w.Use(handlers.Sender(infra.TxSender, infra.Store))
 
 	return w
 }
