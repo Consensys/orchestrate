@@ -48,7 +48,7 @@ func (app *App) Run() {
 		}).Fatalf("Can not listen tcp connection")
 	}
 
-	// Create MUX dispatcher to properly dispatch GRPC traffic and HTTP trafic
+	// Create MUX dispatcher to properly dispatch GRPC traffic and HTTP traffic
 	tcpMux := cmux.New(l)
 	grpcL := tcpMux.MatchWithWriters(cmux.HTTP2MatchHeaderFieldPrefixSendSettings("content-type", "application/grpc"))
 	httpL := tcpMux.Match(cmux.HTTP1Fast())
