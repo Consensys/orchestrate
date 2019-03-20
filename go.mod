@@ -19,9 +19,11 @@ require (
 	github.com/spf13/pflag v1.0.3
 	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.2.2
+	github.com/uber-go/atomic v1.3.2 // indirect
 	github.com/uber/jaeger-client-go v2.15.0+incompatible
 	github.com/uber/jaeger-lib v1.5.0+incompatible
 	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.7
+	go.uber.org/atomic v1.3.2 // indirect
 	google.golang.org/genproto v0.0.0-20180831171423-11092d34479b // indirect
 	google.golang.org/grpc v1.19.0
 	mellium.im/sasl v0.2.1 // indirect
