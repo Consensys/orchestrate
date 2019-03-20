@@ -19,6 +19,9 @@ func CreateWorker(infra *infra.Infra) *worker.Worker {
 	// Handler::logger
 	w.Use(handlers.Logger)
 
+	// Handler::Sender
+	w.Use(handlers.TraceLoader(infra.Store))
+
 	// Handler::Producer
 	w.Use(handcommon.Producer(infra.Producer))
 
