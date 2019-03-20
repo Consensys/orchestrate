@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.1
+
+*Released on March 20th 2019*
+
+- [CHORE] clean dependencies
+
 ### Version 0.3.0
 
 *Released on March 20th 2019*
