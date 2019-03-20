@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.3
+
+*Released on March 20th 2019*
+
+- [FIX] add Partitioning key on worker
+
 ### Version 0.3.2
 
 *Released on March 20th 2019*
