@@ -16,4 +16,5 @@ require (
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.2.0-alpha.2
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.2.0-alpha
 	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.7
+	google.golang.org/grpc v1.19.0
 )
