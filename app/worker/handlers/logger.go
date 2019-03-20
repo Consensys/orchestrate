@@ -26,5 +26,5 @@ func Logger(ctx *worker.Context) {
 
 	ctx.Logger.WithFields(log.Fields{
 		"latency": latency,
-	}).WithError(fmt.Errorf("%v", ctx.T.Errors)).Info("worker: message processed")
+	}).WithError(fmt.Errorf("%v", ctx.T.Errors)).Info("worker: receipt processed")
 }
