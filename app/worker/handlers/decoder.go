@@ -5,13 +5,13 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
-	coreWorker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
-	abi "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/abi"
 )
 
 // Decoder creates a decode handler
-func Decoder(r services.ABIRegistry) coreWorker.HandlerFunc {
-	return func(ctx *coreWorker.Context) {
+func Decoder(r services.ABIRegistry) worker.HandlerFunc {
+	return func(ctx *worker.Context) {
 		ctx.Logger = ctx.Logger.WithFields(log.Fields{
 			"chain.id": ctx.T.Chain.GetId(),
 			"tx.hash":  ctx.T.Receipt.GetTxHash(),
