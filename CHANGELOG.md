@@ -2,9 +2,10 @@
 
 ### Version 0.3.0-alpha.1
 
-*Unreleased*
+*Released on March 20th 2019*
 
 - [FEAT] implement handler `TraceLoader`
+- [FEAT] implement infra `TraceStore`
 
 ### Version 0.2.0
 
