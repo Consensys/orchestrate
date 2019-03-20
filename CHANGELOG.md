@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.2
+
+*Released on March 20th 2019*
+
+- [FIX] clean logs
+ 
 ### Version 0.3.1
 
 *Released on March 20th 2019*
