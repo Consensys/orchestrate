@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/common.git/config"
-	"gitlab.com/ConsenSys/client/fr/core-stack/common.git/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/config"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-listener.git/app"
 )
 

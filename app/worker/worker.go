@@ -1,26 +1,26 @@
 package worker
 
 import (
-	handCom "gitlab.com/ConsenSys/client/fr/core-stack/common.git/handlers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git"
+	handcommon "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/handlers"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-listener.git/app/infra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-listener.git/app/worker/handlers"
-	infList "gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-listener.git/infra"
+	inflistener "gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-listener.git/infra"
 )
 
 // CreateWorker creates worker and attach it to application
-func CreateWorker(infra *infra.Infra) *core.Worker {
+func CreateWorker(infra *infra.Infra) *worker.Worker {
 	// Instantiate worker
-	w := core.NewWorker(1)
+	w := worker.NewWorker(worker.Config{Slots: 20, Partitions: 50})
 
 	// Handler::loader
-	w.Use(handCom.Loader(&infList.ReceiptUnmarshaller{}))
+	w.Use(handcommon.Loader(&inflistener.ReceiptUnmarshaller{}))
 
 	// Handler::logger
 	w.Use(handlers.Logger)
 
 	// Handler::Producer
-	w.Use(handCom.Producer(infra.Producer))
+	w.Use(handcommon.Producer(infra.Producer))
 
 	return w
 }

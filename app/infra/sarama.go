@@ -8,8 +8,8 @@ import (
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 	infSarama "gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git"
+	trace "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
 )
 
 func initSarama(infra *Infra, wait *sync.WaitGroup) {
@@ -61,14 +61,14 @@ func initProducer(infra *Infra, wait *sync.WaitGroup) {
 
 	// Initialize
 	marshaller := infSarama.NewMarshaller()
-	prepareMsg := func(t *types.Trace, msg *sarama.ProducerMessage) error {
+	prepareMsg := func(t *trace.Trace, msg *sarama.ProducerMessage) error {
 		err := marshaller.Marshal(t, msg)
 		if err != nil {
 			return err
 		}
 
 		// Set topic
-		msg.Topic = fmt.Sprintf("%v-%v", viper.GetString("worker.out"), t.Chain().ID.Text(16))
+		msg.Topic = fmt.Sprintf("%v-%v", viper.GetString("worker.out"), t.GetChain().GetId())
 
 		return nil
 	}
