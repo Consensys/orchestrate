@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.2
+
+*Released on March 20th 2019*
+
+- [TEST] deactivate race detector for `infra.pg`
+
 ### Version 0.1.1
 
 *Released on March 20th 2019*
