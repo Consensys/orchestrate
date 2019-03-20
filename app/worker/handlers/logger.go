@@ -10,7 +10,12 @@ import (
 
 // Logger to log context elements before and after the worker
 func Logger(ctx *worker.Context) {
+	ctx.Logger = ctx.Logger.WithFields(log.Fields{
+		"chain.id": ctx.T.GetChain().GetId(),
+		"tx.hash":  ctx.T.GetReceipt().GetTxHash(),
+	})
 	ctx.Logger.Debug("logger: new message")
+
 	start := time.Now()
 
 	ctx.Next()
