@@ -15,6 +15,7 @@ func Sender(sender services.TxSender, store infra.TraceStore) worker.HandlerFunc
 		if ctx.T.GetTx().GetRaw() == "" || ctx.T.GetTx().GetHash() == "" {
 			// Tx is not ready
 			// TODO: handle case
+			ctx.Logger.Warnf("sender: transaction not properly prepared")
 			ctx.Abort()
 			return
 		}
@@ -22,12 +23,14 @@ func Sender(sender services.TxSender, store infra.TraceStore) worker.HandlerFunc
 		ctx.Logger = ctx.Logger.WithFields(log.Fields{
 			"chain.id": ctx.T.GetChain().GetId(),
 			"tx.raw":   ctx.T.GetTx().GetRaw(),
+			"tx.hash":  ctx.T.GetTx().GetHash(),
 		})
 
 		// Store trace
 		status, _, err := store.Store(context.Background(), ctx.T)
 		if err != nil {
 			// Connexion to store is broken
+			ctx.Logger.WithError(err).Errorf("sender: could not send transaction")
 			ctx.AbortWithError(err)
 			return
 		}
@@ -35,6 +38,7 @@ func Sender(sender services.TxSender, store infra.TraceStore) worker.HandlerFunc
 		if status == "pending" {
 			// Tx has already been sent
 			// TODO: Still request Tx from chain to make sure we do not miss a message
+			ctx.Logger.Warnf("sender: transaction has already been sent")
 			ctx.Abort()
 			return
 		}
@@ -42,6 +46,7 @@ func Sender(sender services.TxSender, store infra.TraceStore) worker.HandlerFunc
 		err = sender.SendRawTransaction(context.Background(), ctx.T.GetChain().ID(), ctx.T.GetTx().GetRaw())
 		if err != nil {
 			ctx.Logger.WithError(err).Errorf("sender: could not send transaction")
+
 			// TODO: handle error
 			ctx.Error(err)
 
@@ -60,9 +65,9 @@ func Sender(sender services.TxSender, store infra.TraceStore) worker.HandlerFunc
 		err = store.SetStatus(context.Background(), ctx.T.GetMetadata().GetId(), "pending")
 		if err != nil {
 			// Connexion to store is broken
-			ctx.AbortWithError(err)
+			ctx.Error(err)
 			return
 		}
-		ctx.Logger.WithError(err).Errorf("sender: transaction sent")
+		ctx.Logger.Debugf("sender: transaction sent")
 	}
 }
