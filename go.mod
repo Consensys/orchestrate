@@ -10,7 +10,8 @@ require (
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/pflag v1.0.3
 	github.com/spf13/viper v1.3.2
-	gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git v0.1.0
+	github.com/stretchr/testify v1.2.2
+	gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git v0.1.3
 	gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.21
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.2.0-alpha.2
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.2.0-alpha
