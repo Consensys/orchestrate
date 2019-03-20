@@ -7,6 +7,18 @@
 - [FEAT] implement handler `TraceLoader`
 - [FEAT] implement infra `TraceStore`
 
+### Version 0.2.2
+
+*Released on February 27th 2019*
+
+- [FIX] Fix logger issue (remove sarama msg based logger)
+
+### Version 0.2.1
+
+*Released on February 26th 2019*
+
+- [FIX] Dockerfile compatible with v0.2
+
 ### Version 0.2.0
 
 *Released on February 26th 2019*

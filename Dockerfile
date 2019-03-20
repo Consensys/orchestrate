@@ -40,3 +40,4 @@ LABEL org.label-schema.schema-version="1.0.0-rc1"
 USER appuser
 EXPOSE 8080
 ENTRYPOINT ["/go/bin/main"]
+CMD ["run"]
