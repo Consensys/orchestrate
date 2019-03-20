@@ -1,8 +1,14 @@
 # CHANGELOG
 
+### Version 0.1.1
+
+*Released on March 20th 2019*
+
+- [STYLE] clean linting
+
 ### Version 0.1.0
 
-*Released on March 19 2019*
+*Released on March 19th 2019*
 
 - [FEAT] `infra` implementation of `pg`, `mock`, `grpc`
 - [FEAT] implement `testutils.PGTestHelper`, `testutils.TraceStoreTestSuite`
