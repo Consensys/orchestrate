@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	storegrpc "gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/infra/grpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/config"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
@@ -25,6 +26,7 @@ func newRunCommand() *cobra.Command {
 	config.KafkaAddresses(runCmd.Flags())
 	config.TxDecoderOutTopic(runCmd.Flags())
 	worker.InitFlags(runCmd.Flags())
+	storegrpc.StoreTarget(runCmd.Flags())
 
 	return runCmd
 }
