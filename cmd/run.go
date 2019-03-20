@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/config"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-listener.git/app"
 )
 
@@ -23,6 +24,7 @@ func newRunCommand() *cobra.Command {
 	config.EthClientURLs(runCmd.Flags())
 	config.KafkaAddresses(runCmd.Flags())
 	config.TxDecoderOutTopic(runCmd.Flags())
+	worker.InitFlags(runCmd.Flags())
 
 	return runCmd
 }

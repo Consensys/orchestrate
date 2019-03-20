@@ -11,7 +11,7 @@ import (
 // CreateWorker creates worker and attach it to application
 func CreateWorker(infra *infra.Infra) *worker.Worker {
 	// Instantiate worker
-	w := worker.NewWorker(worker.Config{Slots: 20, Partitions: 50})
+	w := worker.NewWorker(worker.NewConfig())
 
 	// Handler::loader
 	w.Use(handcommon.Loader(&inflistener.ReceiptUnmarshaller{}))
