@@ -40,6 +40,9 @@ type ListenerHandler struct {
 func (l *ListenerHandler) Setup() {
 	l.worker = worker.CreateWorker(l.app.infra)
 
+	// Add partitioning so chains can be treated in parallel
+	l.worker.Partitionner(func(msg interface{}) []byte { return msg.(*listener.TxListenerReceipt).ChainID.Bytes() })
+
 	// Pipe sarama message channel into worker
 	in := make(chan interface{})
 	go func() {
