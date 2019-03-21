@@ -1,14 +1,14 @@
 package infra
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	infSarama "gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git"
+	infsarama "gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/utils"
 	trace "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
 )
 
@@ -60,7 +60,7 @@ func initProducer(infra *Infra, wait *sync.WaitGroup) {
 	log.Debug("infra-sarama: producer ready")
 
 	// Initialize
-	marshaller := infSarama.NewMarshaller()
+	marshaller := infsarama.NewMarshaller()
 	prepareMsg := func(t *trace.Trace, msg *sarama.ProducerMessage) error {
 		err := marshaller.Marshal(t, msg)
 		if err != nil {
@@ -68,15 +68,15 @@ func initProducer(infra *Infra, wait *sync.WaitGroup) {
 		}
 
 		// Set key
-		msg.Topic = fmt.Sprintf("%v-%v", viper.GetString("worker.out"), t.GetChain().GetId())
-		msg.Key = sarama.StringEncoder(t.Chain().ID.String())
+		msg.Topic = utils.KafkaChainTopic(viper.GetString("worker.out"), t.GetChain().ID())
+		msg.Key = sarama.StringEncoder(t.GetChain().GetId())
 
 		return nil
 	}
 
 	// Attach producer
 	infra.SaramaProducer = p
-	infra.Producer = infSarama.NewProducer(
+	infra.Producer = infsarama.NewProducer(
 		p,
 		prepareMsg,
 	)
@@ -89,7 +89,7 @@ func initProducer(infra *Infra, wait *sync.WaitGroup) {
 }
 
 func initUnmarshaller(infra *Infra, wait *sync.WaitGroup) {
-	infra.Unmarshaller = infSarama.NewUnmarshaller()
+	infra.Unmarshaller = infsarama.NewUnmarshaller()
 }
 
 // GetLastRecord retrieve the last record that has been produced on a given topic/partition
