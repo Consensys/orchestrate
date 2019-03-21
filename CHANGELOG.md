@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.3.0-alpha.1
+
+*Released on March 20th 2019*
+
+- [FEAT] implement handler `TraceLoader`
+- [FEAT] implement infra `TraceStore`
+
 ### Version 0.2.2
 
 *Released on February 27th 2019*

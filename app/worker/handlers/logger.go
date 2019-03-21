@@ -1,20 +1,20 @@
 package handlers
 
 import (
+	"fmt"
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
 // Logger to log context elements before and after the worker
-func Logger(ctx *types.Context) {
+func Logger(ctx *worker.Context) {
 
-	ctx.Logger = log.WithFields(log.Fields{
-		"eth.chain":       ctx.T.Chain().ID.Text(16),
-		"eth.blockNumber": ctx.T.Receipt().BlockNumber,
-		"eth.txIndex":     ctx.T.Receipt().TxIndex,
-		"eth.txHash":      ctx.T.Receipt().TxHash.Hex(),
+	ctx.Logger = ctx.Logger.WithFields(log.Fields{
+		"chain.id":         ctx.T.GetChain().GetId(),
+		"receipt.tx.hash":  ctx.T.GetReceipt().GetTxHash(),
+		"receipt.tx.index": ctx.T.GetReceipt().GetTxIndex(),
 	})
 
 	ctx.Logger.Debug("worker: new receipt")
@@ -26,5 +26,5 @@ func Logger(ctx *types.Context) {
 
 	ctx.Logger.WithFields(log.Fields{
 		"latency": latency,
-	}).WithError(ctx.T.Errors).Info("worker: message processed")
+	}).WithError(fmt.Errorf("%v", ctx.T.Errors)).Info("worker: receipt processed")
 }
