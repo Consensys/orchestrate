@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.0-alpha.2
+
+*Released on March 21th 2019*
+
+- [FIX] clean keys & topics for produced messages in kafka
+
 ### Version 0.3.0-alpha.1
 
 *Released on March 20th 2019*
