@@ -2,7 +2,7 @@
 
 ### Version 0.3.0-alpha.1
 
-*Unreleased*
+*Released on March 22nd 2019*
 
 - [REFACTOR] Mobe to `pkg`
 - [FEAT] add `Partitioner` on worker
