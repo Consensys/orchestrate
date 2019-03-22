@@ -10,19 +10,21 @@ import (
 )
 
 func init() {
-	viper.SetDefault("vault.uri", "https://127.0.0.1:8200")
-	viper.SetDefault("vault.tokenName", "NO TOKEN NAME SPECIFIED")
+	viper.SetDefault(vaultURIViperKey, vaultURIDefault)
+	viper.BindEnv(vaultURIViperKey, vaultURIEnv)
+	viper.SetDefault(vaultTokenNameViperKey, vaultTokenNameEnv)
+	viper.BindEnv(vaultTokenNameViperKey, vaultTokenNameEnv)
 }
 
 var (
 	vaultURIFlag     = "vault-uri"
 	vaultURIViperKey = "vault.uri"
-	vaultURIDefault  = "https://127.0.0.1:8200"
+	vaultURIDefault  = "http://127.0.0.1:8200"
 	vaultURIEnv      = "VAULT_URI"
 
 	vaultTokenNameFlag     = "vault-token-name"
 	vaultTokenNameViperKey = "vault.token.name"
-	vaultTokenNameDefault  = "NO TOKEN NAME SPECIFIED"
+	vaultTokenNameDefault  = ""
 	vaultTokenNameEnv      = "VAULT_TOKEN_NAME"
 
 	vaultTokenFlag     = "vault-token"
@@ -76,7 +78,7 @@ func VaultTokenName(f *pflag.FlagSet) {
 // NewConfig icreates vault configuration from viper
 func NewConfig() *vault.Config {
 	config := vault.DefaultConfig()
-	config.Address = viper.GetString("vault.uri")
+	config.Address = viper.GetString(vaultURIViperKey)
 	return config
 }
 
