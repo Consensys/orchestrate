@@ -8,7 +8,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore"
 )
 
-func initSigner(infra *Infra) error {
+func initVault(infra *Infra) error {
 	// Create Vault Config
 	config := secretstore.NewConfig()
 	hashicorp, err := secretstore.NewHashicorps(config)
