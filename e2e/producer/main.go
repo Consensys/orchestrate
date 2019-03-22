@@ -5,8 +5,10 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/ethereum"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
 )
 
 var (
@@ -31,12 +33,15 @@ func newMessage(i int) *sarama.ProducerMessage {
 		Partition: -1,
 	}
 	b, _ := proto.Marshal(
-		&tracepb.Trace{
-			Chain:  &tracepb.Chain{Id: "0x3"},
-			Sender: &tracepb.Account{Address: senders[i%len(senders)]},
-			Call:   &tracepb.Call{MethodId: "some-method", Args: []string{"0x71a556C033cD4beB023eb2baa734d0e8304CA88a", "0x200"}},
-			Transaction: &ethpb.Transaction{
-				TxData: &ethpb.TxData{
+		&trace.Trace{
+			Chain:  &common.Chain{Id: "0x3"},
+			Sender: &common.Account{Addr: senders[i%len(senders)]},
+			Call: &common.Call{
+				Method: &abi.Method{Name: "some-method"},
+				Args:   []string{"0x71a556C033cD4beB023eb2baa734d0e8304CA88a", "0x200"},
+			},
+			Tx: &ethereum.Transaction{
+				TxData: &ethereum.TxData{
 					To: ERC20Address,
 				},
 			},
