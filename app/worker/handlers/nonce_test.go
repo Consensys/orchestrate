@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
-	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
 )
 
 var noErrorChainID = int64(0)
@@ -114,7 +114,7 @@ func makeNonceContext(chainID int64, address string) *worker.Context {
 	ctx.Logger = log.NewEntry(log.StandardLogger())
 	ctx.T.Chain = (&common.Chain{}).SetID(big.NewInt(chainID))
 	ctx.T.Sender = &common.Account{Addr: address}
-	ctx.T.Tx = &ethpb.Transaction{TxData: &ethpb.TxData{}}
+	ctx.T.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{}}
 
 	if chainID == noErrorChainID {
 		ctx.Keys["expectedErrorCount"] = 0
@@ -168,8 +168,8 @@ func TestNonceHandler(t *testing.T) {
 
 	for ctx := range outs {
 		if ctx.Keys["expectedErrorCount"].(int) > 0 {
-			if len(ctx.T.Errors) != ctx.Keys["expectedErrorCount"].(int) {
-				t.Errorf("Expected %v errors but got %v %v", ctx.Keys["expectedErrorCount"].(int), ctx.T.Errors, ctx.T.Sender.Addr)
+			if len(ctx.T.GetErrors()) != ctx.Keys["expectedErrorCount"].(int) {
+				t.Errorf("Expected %v errors but got %v %v", ctx.Keys["expectedErrorCount"].(int), ctx.T.GetErrors(), ctx.T.GetSender().Addr)
 			}
 		} else {
 			if ctx.T.Tx.TxData.GetNonce() != ctx.Keys["expectedNonce"].(uint64) {

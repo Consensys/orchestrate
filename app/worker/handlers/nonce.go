@@ -18,7 +18,7 @@ type GetNonceFunc func(ctx context.Context, chainID *big.Int, a common.Address) 
 func NonceHandler(nm services.NonceManager, getChainNonce GetNonceFunc) worker.HandlerFunc {
 	return func(ctx *worker.Context) {
 		// Retrieve chainID and sender address
-		chainID, a := ctx.T.Chain.ID(), ctx.T.Sender.Address()
+		chainID, a := ctx.T.GetChain().ID(), ctx.T.GetSender().Address()
 
 		ctx.Logger = ctx.Logger.WithFields(log.Fields{
 			"tx.sender": a.Hex(),
@@ -71,7 +71,7 @@ func NonceHandler(nm services.NonceManager, getChainNonce GetNonceFunc) worker.H
 		}
 
 		// Set Nonce value on Trace
-		ctx.T.Tx.TxData.SetNonce(nonce)
+		ctx.T.GetTx().GetTxData().SetNonce(nonce)
 		ctx.Logger = ctx.Logger.WithFields(log.Fields{
 			"tx.nonce": nonce,
 		})

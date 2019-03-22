@@ -6,7 +6,7 @@ import (
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
 	infSarama "gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/utils"
 )
@@ -60,7 +60,7 @@ func initProducer(infra *Infra, wait *sync.WaitGroup) {
 
 	// Initialize
 	marshaller := infSarama.NewMarshaller()
-	prepareMsg := func(t *tracepb.Trace, msg *sarama.ProducerMessage) error {
+	prepareMsg := func(t *trace.Trace, msg *sarama.ProducerMessage) error {
 		err := marshaller.Marshal(t, msg)
 		if err != nil {
 			return err
