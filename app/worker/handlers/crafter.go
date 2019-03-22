@@ -1,62 +1,83 @@
 package handlers
 
 import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
-	coreWorker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	coreworker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
 // Crafter creates a crafter handler
-func Crafter(r services.ABIRegistry, c services.Crafter) coreWorker.HandlerFunc {
-	return func(ctx *coreWorker.Context) {
+func Crafter(r services.ABIRegistry, c services.Crafter) coreworker.HandlerFunc {
+	return func(ctx *coreworker.Context) {
 		// Retrieve method identifier from trace
-		methodID := ctx.T.Call.Short()
-
-		if methodID == "" || ctx.T.Tx.TxData.GetData() != "" {
-			// Nothing to craft
+		if ctx.T.GetTx().GetTxData().GetData() != "" {
+			// Transaction has already been crafted
 			return
+		}
+
+		var method *abi.Method
+		if ABI := ctx.T.GetCall().GetMethod().GetAbi(); len(ABI) > 0 {
+			err := json.Unmarshal(ABI, method)
+			if err != nil {
+				ctx.AbortWithError(err)
+				return
+			}
+		}
+
+		if method == nil {
+			methodID := ctx.T.GetCall().Short()
+			if methodID == "" {
+				// Nothing to craft
+				return
+			}
+
+			m, err := r.GetMethodByID(methodID)
+			if err != nil {
+				ctx.Logger.WithError(err).Errorf("crafter: could not retrieve method ABI")
+				ctx.AbortWithError(err)
+				return
+			}
+			method = &m
+			ctx.Logger = ctx.Logger.WithFields(log.Fields{
+				"crafter.method": methodID,
+			})
 		}
 
 		// Retrieve  args from trace
-		args := ctx.T.Call.GetArgs()
+		args := ctx.T.GetCall().GetArgs()
 		ctx.Logger = ctx.Logger.WithFields(log.Fields{
-			"crafter.method": methodID,
-			"crafter.args":   args,
+			"crafter.args": args,
 		})
 
-		// Retrieve method ABI object
-		method, err := r.GetMethodByID(methodID)
-		if err != nil {
-			// e := commonpb.Error{
-			// 	Message:  err.Error(),
-			// 	Type: 0, // TODO: add an error type ErrorTypeABIGet
-			// }
-			// Abort execution
-			ctx.Logger.WithError(err).Errorf("crafter: could not retrieve method ABI")
-			ctx.AbortWithError(err)
-			return
+		// Craft transaction payload
+		payload, err := c.Craft(*method, args...)
+
+		if ctx.T.GetCall().GetMethod().GetName() == "constructor" {
+			// This is a deployment call
+			bytecode := ctx.T.GetCall().GetContract().GetBytecode()
+			if len(bytecode) == 0 {
+				ctx.Logger.WithError(fmt.Errorf("Invalid empty bytecode")).Errorf("crafter: could not craft tx data payload")
+			}
+			payload = append(bytecode, payload...)
 		}
 
-		// Craft transaction payload
-		payload, err := c.Craft(method, args...)
 		if err != nil {
-			// e := commonpb.Error{
-			// 	Err:  err.Error(),
-			// 	Type: 0, // TODO: add an error type ErrorTypeCraft
-			// }
-			// Abort execution
 			ctx.Logger.WithError(err).Errorf("crafter: could not craft tx data payload")
 			ctx.AbortWithError(err)
 			return
 		}
 
 		ctx.Logger = ctx.Logger.WithFields(log.Fields{
-			"tx.data":        hexutil.Encode(payload),
+			"tx.data": hexutil.Encode(payload),
 		})
 
 		// Update Trace
-		ctx.T.Tx.TxData.SetData(payload)
+		ctx.T.GetTx().GetTxData().SetData(payload)
 
 		ctx.Logger.Debugf("crafter: tx data payload set")
 	}
