@@ -1,0 +1,34 @@
+version: '3.7'
+
+services:
+  # keystore:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile-test
+  #     args:
+  #       SSH_KEY: ${SSH_KEY}
+  #   networks:
+  #     - backend
+  #   environment:
+  #     - VAULT_URI=http://vault:8200
+  #     - VAULT_TOKEN_NAME=test-token
+  #   entrypoint: bash -c "cd testing && go test" # tail -f /dev/null
+    
+  vault:
+    image: library/vault:0.10.3
+    tty: true
+    # networks:
+    #   - backend
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - ./vault/:/vault/config/:ro
+    ports:
+      - 8200:8200
+    environment: 
+      - VAULT_ADDR=http://127.0.0.1:8200
+    entrypoint: vault server -config=/vault/config/vault.json -log-level=trace
+
+# networks:
+#   backend:
+#     driver: bridge
