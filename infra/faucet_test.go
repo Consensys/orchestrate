@@ -8,7 +8,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
 )
 
 func MockCrediter(ctx context.Context, r *services.FaucetRequest) (*big.Int, bool, error) {

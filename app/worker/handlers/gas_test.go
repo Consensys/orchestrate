@@ -9,7 +9,9 @@ import (
 
 	"github.com/ethereum/go-ethereum"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
+	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
 type MockGasEstimator struct {
@@ -23,17 +25,20 @@ func (e *MockGasEstimator) EstimateGas(ctx context.Context, chainID *big.Int, ca
 	return 18, nil
 }
 
-func makeGasEstimatorContext(i int) *types.Context {
-	ctx := types.NewContext()
+func makeGasEstimatorContext(i int) *worker.Context {
+	ctx := worker.NewContext()
 	ctx.Reset()
 	ctx.Logger = log.NewEntry(log.StandardLogger())
+	ctx.T.Sender = &common.Account{}
+	ctx.T.Tx = &ethpb.Transaction{TxData: &ethpb.TxData{}}
+
 	switch i % 2 {
 	case 0:
-		ctx.T.Chain().ID = big.NewInt(0)
+		ctx.T.Chain = (&common.Chain{}).SetID(big.NewInt(0))
 		ctx.Keys["errors"] = 1
 		ctx.Keys["result"] = uint64(0)
 	case 1:
-		ctx.T.Chain().ID = big.NewInt(1)
+		ctx.T.Chain = (&common.Chain{}).SetID(big.NewInt(1))
 		ctx.Keys["errors"] = 0
 		ctx.Keys["result"] = uint64(18)
 	}
@@ -45,12 +50,12 @@ func TestGasEstimator(t *testing.T) {
 	estimator := GasEstimator(&me)
 
 	rounds := 100
-	outs := make(chan *types.Context, rounds)
+	outs := make(chan *worker.Context, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
 		ctx := makeGasEstimatorContext(i)
-		go func(ctx *types.Context) {
+		go func(ctx *worker.Context) {
 			defer wg.Done()
 			estimator(ctx)
 			outs <- ctx
@@ -68,8 +73,8 @@ func TestGasEstimator(t *testing.T) {
 			t.Errorf("GasEstimator: expected %v errors but got %v", errCount, out.T.Errors)
 		}
 
-		if out.T.Tx().GasLimit() != result {
-			t.Errorf("GasEstimator: expected gas limit %v but got %v", result, out.T.Tx().GasLimit())
+		if out.T.Tx.TxData.GetGas() != result {
+			t.Errorf("GasEstimator: expected gas limit %v but got %v", result, out.T.Tx.TxData.GetGas())
 		}
 	}
 }
@@ -85,19 +90,21 @@ func (e *MockGasPricer) SuggestGasPrice(ctx context.Context, chainID *big.Int) (
 	return big.NewInt(10), nil
 }
 
-func makeGasPricerContext(i int) *types.Context {
-	ctx := types.NewContext()
+func makeGasPricerContext(i int) *worker.Context {
+	ctx := worker.NewContext()
 	ctx.Reset()
 	ctx.Logger = log.NewEntry(log.StandardLogger())
+	ctx.T.Tx = &ethpb.Transaction{TxData: &ethpb.TxData{}}
+
 	switch i % 2 {
 	case 0:
-		ctx.T.Chain().ID = big.NewInt(0)
+		ctx.T.Chain = (&common.Chain{}).SetID(big.NewInt(0))
 		ctx.Keys["errors"] = 1
-		ctx.Keys["result"] = int64(0)
+		ctx.Keys["result"] = ""
 	case 1:
-		ctx.T.Chain().ID = big.NewInt(1)
+		ctx.T.Chain = (&common.Chain{}).SetID(big.NewInt(1))
 		ctx.Keys["errors"] = 0
-		ctx.Keys["result"] = int64(10)
+		ctx.Keys["result"] = "0xa"
 	}
 	return ctx
 }
@@ -107,12 +114,12 @@ func TestGasPricer(t *testing.T) {
 	pricer := GasPricer(&mp)
 
 	rounds := 100
-	outs := make(chan *types.Context, rounds)
+	outs := make(chan *worker.Context, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
 		ctx := makeGasPricerContext(i)
-		go func(ctx *types.Context) {
+		go func(ctx *worker.Context) {
 			defer wg.Done()
 			pricer(ctx)
 			outs <- ctx
@@ -125,13 +132,13 @@ func TestGasPricer(t *testing.T) {
 	}
 
 	for out := range outs {
-		errCount, result := out.Keys["errors"].(int), out.Keys["result"].(int64)
+		errCount, result := out.Keys["errors"].(int), out.Keys["result"]
 		if len(out.T.Errors) != errCount {
 			t.Errorf("GasPricer: expected %v errors but got %v", errCount, out.T.Errors)
 		}
 
-		if out.T.Tx().GasPrice().Int64() != result {
-			t.Errorf("GasPricer: expected gas price %v but got %v", result, out.T.Tx().GasLimit())
+		if out.T.Tx.TxData.GetGasPrice() != result {
+			t.Errorf("GasPricer: expected gas price %v but got %v", result, out.T.Tx.TxData.GetGasPrice())
 		}
 	}
 }

@@ -7,20 +7,20 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/ethereum/go-ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
 // GasPricer creates an handler that set Gas Price
-func GasPricer(p services.GasPricer) types.HandlerFunc {
-	return func(ctx *types.Context) {
-		p, err := p.SuggestGasPrice(context.Background(), ctx.T.Chain().ID)
+func GasPricer(p services.GasPricer) worker.HandlerFunc {
+	return func(ctx *worker.Context) {
+		p, err := p.SuggestGasPrice(context.Background(), ctx.T.Chain.ID())
 		if err != nil {
 			// TODO: handle error
 			ctx.Logger.WithError(err).Errorf("gas-pricer: could not suggest gas price")
 			ctx.AbortWithError(err)
 		} else {
-			ctx.T.Tx().SetGasPrice(p)
+			ctx.T.Tx.TxData.SetGasPrice(p)
 			// Enrich logger
 			ctx.Logger = ctx.Logger.WithFields(log.Fields{
 				"tx.gas.price": p.Text(10),
@@ -31,38 +31,39 @@ func GasPricer(p services.GasPricer) types.HandlerFunc {
 }
 
 // GasEstimator creates an handler that set Gas Limit
-func GasEstimator(p services.GasEstimator) types.HandlerFunc {
+func GasEstimator(p services.GasEstimator) worker.HandlerFunc {
 
 	pool := &sync.Pool{
 		New: func() interface{} { return ethereum.CallMsg{} },
 	}
 
-	return func(ctx *types.Context) {
+	return func(ctx *worker.Context) {
 		// Retrieve re-cycled CallMsg
 		call := pool.Get().(ethereum.CallMsg)
 		defer pool.Put(call)
 
+		To := ctx.T.Tx.GetTxData().ToAddress()
 		// Set CallMsg
-		call.From = *ctx.T.Sender().Address
-		call.To = ctx.T.Tx().To()
-		call.Value = ctx.T.Tx().Value()
-		call.Data = ctx.T.Tx().Data()
+		call.From = ctx.T.GetSender().Address()
+		call.To = &To
+		call.Value = ctx.T.GetTx().GetTxData().ValueBig()
+		call.Data = ctx.T.GetTx().GetTxData().DataBytes()
 
-		g, err := p.EstimateGas(context.Background(), ctx.T.Chain().ID, call)
+		g, err := p.EstimateGas(context.Background(), ctx.T.GetChain().ID(), call)
 		if err != nil {
 			// TODO: handle error
 			ctx.Logger.WithError(err).Errorf("gas-estimator: could not estimate gas limit")
 			ctx.AbortWithError(err)
 		} else {
 			// Set gas limit on context
-			ctx.T.Tx().SetGasLimit(g)
+			ctx.T.GetTx().GetTxData().SetGas(g)
 
 			// Enrich logger
 			ctx.Logger = ctx.Logger.WithFields(log.Fields{
-				"tx.gas.limit": g,
+				"tx.gas": g,
 			})
 			ctx.Logger.Debugf("gas-estimator: gas limit set")
 		}
-		
+
 	}
 }

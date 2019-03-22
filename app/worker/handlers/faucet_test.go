@@ -10,9 +10,9 @@ import (
 
 	log "github.com/sirupsen/logrus"	
 
-	"github.com/ethereum/go-ethereum/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	commonpb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
 )
 
 type MockEthCrediter struct {
@@ -30,22 +30,23 @@ func (c *MockEthCrediter) Credit(ctx context.Context, r *services.FaucetRequest)
 
 var blackAddress = "0x664895b5fE3ddf049d2Fb508cfA03923859763C6"
 
-func makeFaucetContext(i int) *types.Context {
-	ctx := types.NewContext()
+func makeFaucetContext(i int) *worker.Context {
+	ctx := worker.NewContext()
 	ctx.Reset()
 	ctx.Logger = log.NewEntry(log.StandardLogger())
 	switch i % 4 {
 	case 0:
+		ctx.T.Chain = &commonpb.Chain{}
 		ctx.Keys["errors"] = 0
 	case 1:
-		ctx.T.Chain().ID = big.NewInt(0)
+		ctx.T.Chain = (&commonpb.Chain{}).SetID(big.NewInt(0))
 		ctx.Keys["errors"] = 1
 	case 2:
-		ctx.T.Chain().ID = big.NewInt(0)
-		*ctx.T.Sender().Address = common.HexToAddress(blackAddress)
+		ctx.T.Chain = (&commonpb.Chain{}).SetID(big.NewInt(0))
+		ctx.T.Sender = &commonpb.Account{Addr: blackAddress}
 		ctx.Keys["errors"] = 0
 	case 3:
-		ctx.T.Chain().ID = big.NewInt(1)
+		ctx.T.Chain = (&commonpb.Chain{}).SetID(big.NewInt(1))
 		ctx.Keys["errors"] = 0
 	}
 	return ctx
@@ -57,12 +58,12 @@ func TestFaucet(t *testing.T) {
 	faucet := Faucet(mc, big.NewInt(1000))
 
 	rounds := 100
-	outs := make(chan *types.Context, rounds)
+	outs := make(chan *worker.Context, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
 		ctx := makeFaucetContext(i)
-		go func(ctx *types.Context) {
+		go func(ctx *worker.Context) {
 			defer wg.Done()
 			faucet(ctx)
 			outs <- ctx

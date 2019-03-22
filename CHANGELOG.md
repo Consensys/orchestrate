@@ -1,5 +1,13 @@
 # CHANGELOG
 
+### Version 0.3.0-alpha.1
+
+*Unreleased*
+
+- [REFACTOR] Mobe to `pkg`
+- [FEAT] add `Partitioner` on worker
+- [FEAT] add support to craft contract deployment transactions
+
 ### Version 0.2.3
 
 *Unreleased*
