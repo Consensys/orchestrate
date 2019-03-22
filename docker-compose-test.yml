@@ -12,7 +12,7 @@ services:
     environment:
       - VAULT_URI=http://vault:8200
       - VAULT_TOKEN_NAME=test-token
-    entrypoint: bash -c "cd keystore && go test"
+    entrypoint: bash -c "cd testing && go test" # tail -f /dev/null
     
   vault:
     image: library/vault:0.10.3
