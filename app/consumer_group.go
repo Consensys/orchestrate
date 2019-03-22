@@ -23,7 +23,9 @@ type handler struct {
 // Setup configure handler
 func (h *handler) Setup(s sarama.ConsumerGroupSession) error {
 	h.worker = worker.CreateWorker(h.app.infra, infSarama.NewSimpleOffsetMarker(s))
-
+	// Message partitioning to ensure sequentiality
+	h.worker.Partitionner(func(msg interface{}) []byte { return msg.(*sarama.ConsumerMessage).Key })
+	
 	// Pipe sarama message channel into worker
 	in := make(chan interface{})
 	go func() {
