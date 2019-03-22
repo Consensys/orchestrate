@@ -42,21 +42,21 @@ func GasEstimator(p services.GasEstimator) worker.HandlerFunc {
 		call := pool.Get().(ethereum.CallMsg)
 		defer pool.Put(call)
 
-		To := ctx.T.Tx.TxData.ToAddress()
+		To := ctx.T.Tx.GetTxData().ToAddress()
 		// Set CallMsg
-		call.From = ctx.T.Sender.Address()
+		call.From = ctx.T.GetSender().Address()
 		call.To = &To
-		call.Value = ctx.T.Tx.TxData.ValueBig()
-		call.Data = ctx.T.Tx.TxData.DataBytes()
+		call.Value = ctx.T.GetTx().GetTxData().ValueBig()
+		call.Data = ctx.T.GetTx().GetTxData().DataBytes()
 
-		g, err := p.EstimateGas(context.Background(), ctx.T.Chain.ID(), call)
+		g, err := p.EstimateGas(context.Background(), ctx.T.GetChain().ID(), call)
 		if err != nil {
 			// TODO: handle error
 			ctx.Logger.WithError(err).Errorf("gas-estimator: could not estimate gas limit")
 			ctx.AbortWithError(err)
 		} else {
 			// Set gas limit on context
-			ctx.T.Tx.TxData.SetGas(g)
+			ctx.T.GetTx().GetTxData().SetGas(g)
 
 			// Enrich logger
 			ctx.Logger = ctx.Logger.WithFields(log.Fields{

@@ -7,7 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	infSarama "gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git"
-	coreWorker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	coreworker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-crafter.git/app/worker"
 )
 
@@ -16,7 +16,7 @@ type handler struct {
 
 	cleanOnce *sync.Once
 	in        chan *sarama.ConsumerMessage
-	worker    *coreWorker.Worker
+	worker    *coreworker.Worker
 	logger    *log.Entry
 }
 

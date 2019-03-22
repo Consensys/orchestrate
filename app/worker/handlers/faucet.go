@@ -6,15 +6,15 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
-	coreWorker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	coreworker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
 // Faucet creates a Faucet handler
-func Faucet(faucet services.Faucet, creditAmount *big.Int) coreWorker.HandlerFunc {
-	return func(ctx *coreWorker.Context) {
+func Faucet(faucet services.Faucet, creditAmount *big.Int) coreworker.HandlerFunc {
+	return func(ctx *coreworker.Context) {
 		faucetRequest := &services.FaucetRequest{
-			ChainID: ctx.T.Chain.ID(),
-			Address: ctx.T.Sender.Address(),
+			ChainID: ctx.T.GetChain().ID(),
+			Address: ctx.T.GetSender().Address(),
 			Value:   creditAmount,
 		}
 		amount, approved, err := faucet.Credit(context.Background(), faucetRequest)
