@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.3.0
+
+*Released on March 22th 2019*
+
+- [REFACTOR] Update types and methods on pkg
+- [FEAT] add `Partitioner` on worker
+
 ### Version 0.2.5
 
 *Released on March 5th 2019*
