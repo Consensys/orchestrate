@@ -5,8 +5,9 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/ethereum"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/core.git/protobuf/trace"
+	commonpb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
+	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
+	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
 )
 
 var (
@@ -28,9 +29,9 @@ func newMessage(i int) *sarama.ProducerMessage {
 	}
 	b, _ := proto.Marshal(
 		&tracepb.Trace{
-			Chain:  &tracepb.Chain{Id: "0x3"},
-			Sender: &tracepb.Account{Address: senders[i%len(senders)]},
-			Transaction: &ethpb.Transaction{
+			Chain: &commonpb.Chain{Id: "0x3"},
+			Sender: &commonpb.Account{Addr: senders[i%len(senders)]},
+			Tx: &ethpb.Transaction{
 				TxData: &ethpb.TxData{
 					Nonce:    1,
 					To:       "0xfF778b716FC07D98839f48DdB88D8bE583BEB684",

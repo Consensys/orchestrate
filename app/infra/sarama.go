@@ -1,14 +1,14 @@
 package infra
 
 import (
-	"strings"
 	"sync"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
 	infSarama "gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/utils"
+	trace "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
 )
 
 func initSarama(infra *Infra, wait *sync.WaitGroup) {
@@ -60,7 +60,7 @@ func initProducer(infra *Infra, wait *sync.WaitGroup) {
 
 	// Initialize
 	marshaller := infSarama.NewMarshaller()
-	prepareMsg := func(t *types.Trace, msg *sarama.ProducerMessage) error {
+	prepareMsg := func(t *trace.Trace, msg *sarama.ProducerMessage) error {
 		err := marshaller.Marshal(t, msg)
 		if err != nil {
 			return err
@@ -70,7 +70,7 @@ func initProducer(infra *Infra, wait *sync.WaitGroup) {
 		msg.Topic = viper.GetString("worker.out")
 
 		// Set key
-		msg.Key = sarama.StringEncoder(strings.Join([]string{t.Chain().ID.String(), t.Sender().Address.Hex()}, "-"))
+		msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(t.GetChain().ID(), t.GetSender().Address()))
 
 		return nil
 	}
