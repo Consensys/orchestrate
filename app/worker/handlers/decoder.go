@@ -4,22 +4,22 @@ import (
 	"fmt"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/services"
-	"gitlab.com/ConsenSys/client/fr/core-stack/core.git/types"
-	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/abi"
 )
 
 // Decoder creates a decode handler
-func Decoder(r services.ABIRegistry) types.HandlerFunc {
-	return func(ctx *types.Context) {
+func Decoder(r services.ABIRegistry) worker.HandlerFunc {
+	return func(ctx *worker.Context) {
 		ctx.Logger = ctx.Logger.WithFields(log.Fields{
-			"chain.id": ctx.T.Chain().ID.Text(16),
-			"tx.hash":  ctx.T.Receipt().TxHash.Hex(),
+			"chain.id": ctx.T.Chain.GetId(),
+			"tx.hash":  ctx.T.Receipt.GetTxHash(),
 		})
 
 		// For each log in receipt
-		for _, l := range ctx.T.Receipt().Logs {
-			if len(l.Topics) == 0 {
+		for _, l := range ctx.T.Receipt.GetLogs() {
+			if len(l.GetTopics()) == 0 {
 				// This scenario is not supposed to append
 				err := fmt.Errorf("Invalid receipt (no topics in log)")
 				ctx.Logger.WithError(err).Errorf("decoder: invalid receipt")
@@ -28,7 +28,7 @@ func Decoder(r services.ABIRegistry) types.HandlerFunc {
 			}
 
 			// Retrieve event ABI from registry
-			event, err := r.GetEventBySig(l.Topics[0].Hex())
+			event, err := r.GetEventBySig(l.Topics[0])
 			if err != nil {
 				ctx.Logger.WithError(err).Errorf("decoder: could not retrieve event ABI")
 				ctx.AbortWithError(err)
@@ -36,7 +36,7 @@ func Decoder(r services.ABIRegistry) types.HandlerFunc {
 			}
 
 			// Decode log
-			mapping, err := ethereum.Decode(&event, &l.Log)
+			mapping, err := abi.Decode(&event, l)
 			if err != nil {
 				ctx.Logger.WithError(err).Errorf("decoder: could not decode log")
 				ctx.AbortWithError(err)
@@ -44,7 +44,7 @@ func Decoder(r services.ABIRegistry) types.HandlerFunc {
 			}
 
 			// Set decoded data on log
-			l.SetDecodedData(mapping)
+			l.DecodedData = mapping
 
 			ctx.Logger.WithFields(log.Fields{
 				"log": mapping,

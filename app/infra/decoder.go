@@ -7,7 +7,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	infEth "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/abi"
+	abipb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/abi"
+
 )
 
 func parseAbis(abis []string) (map[string]string, error) {
@@ -25,10 +27,13 @@ func parseAbis(abis []string) (map[string]string, error) {
 }
 
 // loadABIRegistry creates an ABI registry and register contracts passed in environment variable in it
-func loadABIRegistry(abis map[string]string) *infEth.ContractABIRegistry {
-	registry := infEth.NewContractABIRegistry()
+func loadABIRegistry(abis map[string]string) *abi.StaticRegistry {
+	registry := abi.NewStaticRegistry()
 	for k, v := range abis {
-		registry.RegisterContract(k, []byte(v))
+		registry.RegisterContract(&abipb.Contract{
+			Name: k, 
+			Abi: []byte(v),
+		})
 	}
 	return registry
 }
