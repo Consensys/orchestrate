@@ -1,14 +1,15 @@
 package secretstore
 
 import (
-	"github.com/hashicorp/vault/api"
 	"sync"
+
+	"github.com/hashicorp/vault/api"
 )
 
 // Hashicorps wraps a hashicorps client an manage the unsealing
 type Hashicorps struct {
-	Client *api.Client
-	creds *credentials
+	Client             *api.Client
+	creds              *credentials
 	retrieveSecretOnce *sync.Once
 }
 
@@ -27,13 +28,12 @@ func NewHashicorps(config *api.Config) (*Hashicorps, error) {
 	creds := &credentials{}
 	return &Hashicorps{
 		Client: client,
-		creds: creds,
+		creds:  creds,
 	}, nil
 }
 
 // InitVault fetches the new token and sets the values in AWS
 func (hash *Hashicorps) InitVault() (err error) {
-
 	err = hash.creds.FetchFromVaultInit(hash.Client)
 	if err != nil {
 		return err
@@ -78,7 +78,8 @@ func (hash *Hashicorps) InitFromAWS(credsStore *AWS, tokenName string) (err erro
 	return nil
 }
 
-// Unseal [UNSAFE] the vault 
+// Unseal the vault
+// Warning call Unseal is Unsafe
 func (hash *Hashicorps) Unseal(unsealKey string) (err error) {
 	sys := hash.Client.Sys()
 	sys.Unseal(unsealKey)
@@ -89,7 +90,8 @@ func (hash *Hashicorps) Unseal(unsealKey string) (err error) {
 	return nil
 }
 
-// SetToken [UNSAFE] authorize the client to access vault
+// SetToken authorize the client to access vault
+// Warning call SetToken is Unsafe
 func (hash *Hashicorps) SetToken(token string) {
 	hash.Client.SetToken(token)
 }

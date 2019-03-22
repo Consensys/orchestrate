@@ -1,8 +1,9 @@
 package secretstore
 
 import (
-	"github.com/spf13/cobra"
 	"testing"
+
+	"github.com/spf13/cobra"
 )
 
 //TestSecretStore must be run along with a vault container in development mode
@@ -12,12 +13,12 @@ func TestSecretStore(t *testing.T) {
 	runCmd := &cobra.Command{
 		Use:   "run",
 		Short: "Run application",
-		Run:   func(cmd *cobra.Command, args []string){},
+		Run:   func(cmd *cobra.Command, args []string) {},
 	}
 
 	VaultURI(runCmd.Flags())
 
-	config := VaultConfigFromViper()
+	config := NewConfig()
 	hashicorpsSS, err := NewHashicorps(config)
 	if err != nil {
 		t.Errorf("Error when instantiating the vault : %v", err.Error())
