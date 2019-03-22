@@ -1,8 +1,9 @@
 package keystore
 
 import (
-	"github.com/spf13/cobra"
 	"testing"
+
+	"github.com/spf13/cobra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore"
 )
 
@@ -13,12 +14,12 @@ func TestKeyStore(t *testing.T) {
 	runCmd := &cobra.Command{
 		Use:   "run",
 		Short: "Run application",
-		Run:   func(cmd *cobra.Command, args []string){},
+		Run:   func(cmd *cobra.Command, args []string) {},
 	}
 
 	secretstore.VaultURI(runCmd.Flags())
 
-	config := secretstore.VaultConfigFromViper()
+	config := secretstore.NewConfig()
 	hashicorpsSS, err := secretstore.NewHashicorps(config)
 	if err != nil {
 		t.Errorf("Error when instantiating the vault : %v", err.Error())
