@@ -7,9 +7,9 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-	commonpb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
-	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
 )
 
 var (
@@ -37,9 +37,9 @@ func newMessage(i int) *sarama.ProducerMessage {
 		Partition: -1,
 	}
 	b, _ := proto.Marshal(
-		&tracepb.Trace{
-			Chain: &commonpb.Chain{Id: chainID},
-			Receipt: &ethpb.Receipt{
+		&trace.Trace{
+			Chain: &common.Chain{Id: chainID},
+			Receipt: &ethereum.Receipt{
 				TxHash:          "0xbf0b3048242aff8287d1dd9de0d2d100cee25d4ea45b8afa28bdfc1e2a775afd",
 				BlockHash:       "0x",
 				BlockNumber:     uint64(0),
@@ -48,8 +48,8 @@ func newMessage(i int) *sarama.ProducerMessage {
 				PostState:       hexutil.MustDecode("0x3b198bfd5d2907285af009e9ae84a0ecd63677110d89d7e030251acb87f6487e"),
 				Status:          uint64(0),
 				Bloom:           hexutil.MustDecode("0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001a055690d9db80000"),
-				Logs: []*ethpb.Log{
-					&ethpb.Log{
+				Logs: []*ethereum.Log{
+					&ethereum.Log{
 						Address: "0x75d2917bD1E6C7c94d24dFd11C8EeAeFd3003C85",
 						Topics: []string{
 							"0xe8f0a47da72ca43153c7a5693a827aa8456f52633de9870a736e5605bff4af6d",
