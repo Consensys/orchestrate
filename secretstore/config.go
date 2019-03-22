@@ -38,6 +38,14 @@ var (
 	vaultUnsealKeyEnv      = "VAULT_UNSEAL_KEY"
 )
 
+// InitFlags register flags for hashicorp vault
+func InitFlags(f *pflag.FlagSet) {
+	VaultURI(f)
+	VaultToken(f)
+	VaultUnsealKey(f)
+	VaultTokenName(f)
+}
+
 // VaultURI register a flag for vault server address
 func VaultURI(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Hashicorp secret vault URI Environment variable: %q`, vaultURIEnv)

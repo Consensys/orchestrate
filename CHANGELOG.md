@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.2.1
+
+*Released on March 22nd 2019*
+
+- [FEAT] Implement `InitFlags` for Hashicorpt vault
+
 ### Version 0.2.0
 
 *Released on March 22nd 2019*
