@@ -152,6 +152,8 @@ gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git v0.1.8 h1:WkY42vvM
 gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git v0.1.8/go.mod h1:X/jYais6wqpu6ZXbJh94XzmtfhquPKJBZFanEk+Bgxs=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git v0.2.0 h1:6zwedJxMadvMHALePwS8AnZo/bDm0dafD7xW3KW09+Y=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git v0.2.0/go.mod h1:MHbOiKC74s1xVKJwBhXecp/1qUJYlPGF29hsRQXg3Zc=
+gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git v0.2.1 h1:LGqfgx0+/I4kLV96Hd/wf6nvra0MSf+bMgCEHons4Es=
+gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git v0.2.1/go.mod h1:MHbOiKC74s1xVKJwBhXecp/1qUJYlPGF29hsRQXg3Zc=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.2.0-alpha h1:/Wp3r9JR3LhlDIxpOAolLlAADFl6OjyLN0kS2rmIohc=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.2.0-alpha/go.mod h1:/nRVV6mmQKNB3szUNsLoieSFh4dzaikFz4TSMH/ooS4=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.4/go.mod h1:CUWmUHHVyEIA2TLNhOj7wPBQqvhupVuYPYT3jS4FqU0=
