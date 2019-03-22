@@ -7,8 +7,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/abi"
-	abipb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/abi"
+	ethAbi "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/abi"
 
 )
 
@@ -16,10 +16,10 @@ func parseAbis(abis []string) (map[string]string, error) {
 	reg := `(?P<contract_name>[a-zA-Z0-9]+):(?P<abi>\[.+\])`
 	pattern := regexp.MustCompile(reg)
 	m := make(map[string]string)
-	for _, abi := range abis {
-		match := pattern.FindStringSubmatch(abi)
+	for _, v := range abis {
+		match := pattern.FindStringSubmatch(v)
 		if len(match) != 3 {
-			return nil, fmt.Errorf("Could not parse abi (expected format %q): %v ", abi, reg)
+			return nil, fmt.Errorf("Could not parse abi (expected format %q): %v ", v, reg)
 		}
 		m[match[1]] = match[2]
 	}
@@ -27,10 +27,10 @@ func parseAbis(abis []string) (map[string]string, error) {
 }
 
 // loadABIRegistry creates an ABI registry and register contracts passed in environment variable in it
-func loadABIRegistry(abis map[string]string) *abi.StaticRegistry {
-	registry := abi.NewStaticRegistry()
+func loadABIRegistry(abis map[string]string) *ethAbi.StaticRegistry {
+	registry := ethAbi.NewStaticRegistry()
 	for k, v := range abis {
-		registry.RegisterContract(&abipb.Contract{
+		registry.RegisterContract(&abi.Contract{
 			Name: k, 
 			Abi: []byte(v),
 		})
