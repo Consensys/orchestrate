@@ -20,20 +20,20 @@ var (
 	vaultURIDefault  = "https://127.0.0.1:8200"
 	vaultURIEnv      = "VAULT_URI"
 
-	vaultTokenNameFlag = "vault-token-name"
+	vaultTokenNameFlag     = "vault-token-name"
 	vaultTokenNameViperKey = "vault.token.name"
-	vaultTokenNameDefault = "NO TOKEN NAME SPECIFIED"
-	vaultTokenNameEnv = "VAULT_TOKEN_NAME"
+	vaultTokenNameDefault  = "NO TOKEN NAME SPECIFIED"
+	vaultTokenNameEnv      = "VAULT_TOKEN_NAME"
 
-	vaultTokenFlag = "vault-token"
+	vaultTokenFlag     = "vault-token"
 	vaultTokenViperKey = "vault.token.value"
-	vaultTokenDefault = ""
-	vaultTokenEnv = "VAULT_TOKEN"
+	vaultTokenDefault  = ""
+	vaultTokenEnv      = "VAULT_TOKEN"
 
-	vaultUnsealKeyFlag = "vault-unseal-key"
+	vaultUnsealKeyFlag     = "vault-unseal-key"
 	vaultUnsealKeyViperKey = "vault.unseal.key"
-	vaultUnsealKeyDefault = ""
-	vaultUnsealKeyEnv = "VAULT_UNSEAL_KEY"
+	vaultUnsealKeyDefault  = ""
+	vaultUnsealKeyEnv      = "VAULT_UNSEAL_KEY"
 )
 
 // VaultURI register a flag for vault server address
@@ -73,24 +73,31 @@ func VaultTokenName(f *pflag.FlagSet) {
 	viper.BindEnv(vaultTokenNameViperKey, vaultTokenNameEnv)
 }
 
-// VaultConfigFromViper import vault configuration from viper
-func VaultConfigFromViper() *vault.Config {
+// NewConfig icreates vault configuration from viper
+func NewConfig() *vault.Config {
 	config := vault.DefaultConfig()
 	config.Address = viper.GetString("vault.uri")
 	return config
 }
 
-// VaultTokenNameFromViper imports the vault token secret name on AWS
-func VaultTokenNameFromViper() string {
-	return viper.GetString("vault.token.name")
-}
+// AutoInit will try to Init the vault directly or FetchFromAws
+func AutoInit(hashicorps *Hashicorps) (err error) {
+	tokenName := viper.GetString("vault.token.name")
+	awsSS := NewAWS(7)
+	err = hashicorps.InitVault()
+	if err != nil {
+		// Probably Vault is already unsealed so we retrieve credentials from AWS
+		err = hashicorps.InitFromAWS(awsSS, tokenName)
+		if err != nil {
+			return fmt.Errorf("Could not retrieve credentials from AWS: %v", err)
+		}
+	} else {
+		// Vault has been properly unsealed so we push credentials on AWS
+		err = hashicorps.SendToCredStore(awsSS, tokenName)
+		if err != nil {
+			return fmt.Errorf("Could not send credentials to AWS: %v", err)
+		}
 
-// VaultTokenFromViper imports the vault token from viper
-func VaultTokenFromViper() string {
-	return viper.GetString("vault.token.value")
-}
-
-// VaultUnsealKeyFromViper imports the vault unseal key from viper
-func VaultUnsealKeyFromViper() string {
-	return viper.GetString("vault.unseal.key")
+	}
+	return nil
 }
