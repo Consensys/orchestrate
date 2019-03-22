@@ -5,11 +5,12 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/keystore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/config"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-signer.git/app"
-	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-signer.git/app/infra"
 )
 
 func newRunCommand() *cobra.Command {
@@ -24,8 +25,9 @@ func newRunCommand() *cobra.Command {
 	config.KafkaAddresses(runCmd.Flags())
 	config.TxSignerInTopic(runCmd.Flags())
 	config.TxSenderOutTopic(runCmd.Flags())
+	secretstore.InitFlags(runCmd.Flags())
 	config.WorkerSignerGroup(runCmd.Flags())
-	infra.VaultAccounts(runCmd.Flags())
+	keystore.SecretPkeys(runCmd.Flags())
 	worker.InitFlags(runCmd.Flags())
 
 	return runCmd
