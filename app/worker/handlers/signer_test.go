@@ -19,11 +19,7 @@ type MockTxSigner struct {
 	t *testing.T
 }
 
-<<<<<<< HEAD
 func (s *MockTxSigner) SignTx(chain *common.Chain, a ethcommon.Address, tx *ethtypes.Transaction) (raw []byte, hash *ethcommon.Hash, err error) {
-=======
-func (s *MockTxSigner) Sign(chain *common.Chain, a ethcommon.Address, tx *ethtypes.Transaction) (raw []byte, hash *ethcommon.Hash, err error) {
->>>>>>> master
 	if chain.ID().String() == "0" {
 		return []byte(``), nil, fmt.Errorf("Could not sign")
 	}

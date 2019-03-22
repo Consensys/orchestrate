@@ -2,8 +2,8 @@ package worker
 
 import (
 	commonHandlers "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/handlers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-signer.git/app/infra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-signer.git/app/worker/handlers"
 )
@@ -23,9 +23,8 @@ func CreateWorker(infra *infra.Infra, marker services.OffsetMarker) *worker.Work
 	w.Use(commonHandlers.Marker(marker))
 
 	// Handler::signer
-	w.Use(
-		handlers.Signer(infra.KeyStore),
-	)
+	w.Use(handlers.Signer(infra.KeyStore))
+
 	// Handler::Producer
 	w.Use(commonHandlers.Producer(infra.Producer))
 
