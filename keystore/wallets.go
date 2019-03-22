@@ -57,9 +57,7 @@ func (wal *Wallet) Store() (err error) {
 // Load returns set the wallets values by fetching in the secret store
 func (wal *Wallet) Load(a *common.Address) (err error) {
 
-	wal = &Wallet{
-		address: *a,
-	}
+	wal.address = *a
 
 	priv, err := wal.sec.Load(a.Hex())
 	if err != nil {
