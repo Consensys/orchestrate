@@ -29,7 +29,7 @@ It consumes message from *tx signer* Kafka topic and publish to *tx sender* topi
 
 To quickly start the application
 
-1. Start Kafka broker
+1. Start e2e env
 
 ```sh
 $ docker-compose -f e2e/docker-compose.yml up
