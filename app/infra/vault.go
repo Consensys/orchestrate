@@ -26,10 +26,15 @@ func initVault(infra *Infra) error {
 
 	// Declare Secret Store and pre-register private keys
 	ks := keystore.NewBaseKeyStore(hashicorp)
-	ks.RegisterPkeys(viper.GetStringSlice("secret.pkeys"))
+	err = ks.RegisterPkeys(viper.GetStringSlice("secret.pkeys"))
+	if err != nil {
+		log.WithError(err).Fatalf("infra-vault: could not REGISTER PRIVATE KEYS")
+	}
 	infra.KeyStore = ks
 
-	log.Infof("infra-vault: ready")
+	// TODO: to be removed
+	list, _ := infra.SecretStore.List()
+	log.Infof("infra-vault: ready (%v)", list)
 
 	return nil
 }
