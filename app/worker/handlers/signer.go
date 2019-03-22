@@ -12,26 +12,27 @@ import (
 func Signer(s services.TxSigner) worker.HandlerFunc {
 	return func(ctx *worker.Context) {
 		ctx.Logger = ctx.Logger.WithFields(log.Fields{
-			"chain.id":  ctx.T.Chain.GetId(),
-			"tx.sender": ctx.T.Sender.GetAddr(),
+			"chain.id":  ctx.T.GetChain().GetId(),
+			"tx.sender": ctx.T.GetSender().GetAddr(),
 		})
 
-		if ctx.T.Tx.Raw != "" {
+		if ctx.T.GetTx().GetRaw() != "" {
 			// Tx already signed
 			return
 		}
 
+		// Create transaction
 		t := ethtypes.NewTransaction(
-			ctx.T.Tx.TxData.GetNonce(),
-			ctx.T.Tx.TxData.ToAddress(),
-			ctx.T.Tx.TxData.ValueBig(),
-			ctx.T.Tx.TxData.GetGas(),
-			ctx.T.Tx.TxData.GasPriceBig(),
-			ctx.T.Tx.TxData.DataBytes(),
+			ctx.T.GetTx().GetTxData().GetNonce(),
+			ctx.T.GetTx().GetTxData().ToAddress(),
+			ctx.T.GetTx().GetTxData().ValueBig(),
+			ctx.T.GetTx().GetTxData().GetGas(),
+			ctx.T.GetTx().GetTxData().GasPriceBig(),
+			ctx.T.GetTx().GetTxData().DataBytes(),
 		)
 
 		// Sign transaction
-		raw, h, err := s.Sign(ctx.T.Chain, ctx.T.Sender.Address(), t)
+		raw, h, err := s.Sign(ctx.T.GetChain(), ctx.T.GetSender().Address(), t)
 		EncodedRaw := hexutil.Encode(raw)
 
 		if err != nil {
