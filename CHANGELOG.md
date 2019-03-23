@@ -1,12 +1,19 @@
 # CHANGELOG
 
+### Version 0.3.0-alpha.1
+
+*Unreleased*
+
+- [REFACTOR] Mobe to `pkg`
+- [FEAT] add `Partitioner` on worker
+- [FEAT] add support to craft contract deployment transactions
+  
 ### Version 0.2.3
 
 *Unreleased*
 
 - [DOC] Complete ```README.md``` and ```CONTRIBUTING.md```
 - [FEAT] enable e2e tests adding ```docker-compose.yml``` to start Kafka locally and ```consumer``` to check that messages are published on ```tx-sender``` kafka topic
-
 
 ### Version 0.2.2
 
