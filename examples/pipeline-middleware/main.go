@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
@@ -22,8 +24,10 @@ func middleware(ctx *worker.Context) {
 }
 
 func main() {
-	// Instantiate worker (limited to 1 message processed at a time)
-	worker := worker.NewWorker(worker.Config{Slots: 1, Partitions: 1})
+	cfg := worker.NewConfig()
+	cfg.Slots = 1
+	cfg.Partitions = 1
+	worker := worker.NewWorker(context.Background(), cfg)
 
 	// Register handlers
 	worker.Use(middleware)

@@ -50,6 +50,8 @@ $ cat examples/quick-start/main.go
 package main
 
 import (
+	"context"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
@@ -59,8 +61,10 @@ func handler(ctx *worker.Context) {
 }
 
 func main() {
-	// Instantiate worker with default config
-	worker := worker.NewWorker(worker.Config{Slots: 1, Partitions: 1})
+	// Instantiate worker with 1 partition to treat messages
+	cfg := worker.NewConfig()
+	cfg.Partitions = 1
+	worker := worker.NewWorker(context.Background(), cfg)
 
 	// Register handler
 	worker.Use(handler)
@@ -118,6 +122,8 @@ $ cat examples/pipeline-middleware/main.go
 package main
 
 import (
+	"context"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
@@ -139,8 +145,10 @@ func middleware(ctx *worker.Context) {
 }
 
 func main() {
-	// Instantiate worker (limited to 1 message processed at a time)
-	worker := worker.NewWorker(worker.Config{Slots: 1, Partitions: 1})
+	cfg := worker.NewConfig()
+	cfg.Slots = 1
+	cfg.Partitions = 1
+	worker := worker.NewWorker(context.Background(), cfg)
 
 	// Register handlers
 	worker.Use(middleware)
@@ -191,6 +199,7 @@ $ cat examples/concurrency/main.go
 package main
 
 import (
+	"context"
 	"fmt"
 	"sync/atomic"
 
@@ -215,7 +224,10 @@ func (h *ExampleHandler) handleUnsafe(ctx *worker.Context) {
 
 func main() {
 	// Instantiate worker that can treat 100 message concurrently in 100 distinct partitions
-	worker := worker.NewWorker(worker.Config{Slots: 100, Partitions: 100})
+	cfg := worker.NewConfig()
+	cfg.Slots = 100
+	cfg.Partitions = 100
+	worker := worker.NewWorker(context.Background(), cfg)
 
 	// Register handler
 	h := ExampleHandler{0, 0}

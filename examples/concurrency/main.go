@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"sync/atomic"
 
@@ -25,7 +26,10 @@ func (h *ExampleHandler) handleUnsafe(ctx *worker.Context) {
 
 func main() {
 	// Instantiate worker that can treat 100 message concurrently in 100 distinct partitions
-	worker := worker.NewWorker(worker.Config{Slots: 100, Partitions: 100})
+	cfg := worker.NewConfig()
+	cfg.Slots = 100
+	cfg.Partitions = 100
+	worker := worker.NewWorker(context.Background(), cfg)
 
 	// Register handler
 	h := ExampleHandler{0, 0}
