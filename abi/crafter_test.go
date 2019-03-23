@@ -3,7 +3,6 @@ package abi
 import (
 	"encoding/json"
 	"math/big"
-
 	"sync"
 	"testing"
 
