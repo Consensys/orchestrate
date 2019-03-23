@@ -1,6 +1,8 @@
 package worker
 
 import (
+	"context"
+
 	log "github.com/sirupsen/logrus"
 	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
 	trace "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
@@ -11,6 +13,9 @@ type HandlerFunc func(ctx *Context)
 
 // Context allows us to transmit information through middlewares
 type Context struct {
+	// Go context
+	ctx context.Context
+
 	// T stores information about transaction lifecycle in high level types
 	T *trace.Trace
 
@@ -39,8 +44,14 @@ func NewContext() *Context {
 	}
 }
 
+// Context return go context
+func (ctx *Context) Context() context.Context {
+	return ctx.ctx
+}
+
 // Reset re-initialize context
 func (ctx *Context) Reset() {
+	ctx.ctx = nil
 	ctx.Msg = nil
 	ctx.T.Reset()
 	ctx.Keys = make(map[string]interface{})
@@ -86,10 +97,16 @@ func (ctx *Context) AbortWithError(err error) *common.Error {
 	return ctx.Error(err)
 }
 
-// Prepare re-initializes context, set handlers and set message
+// Prepare re-initializes context, set handlers, set logger and set message
 func (ctx *Context) Prepare(handlers []HandlerFunc, logger *log.Entry, msg interface{}) {
 	ctx.Reset()
 	ctx.handlers = handlers
 	ctx.Msg = msg
 	ctx.Logger = logger
+}
+
+// WithContext attach a go context on Context
+func WithContext(ctx context.Context, context *Context) *Context {
+	context.ctx = ctx
+	return context
 }

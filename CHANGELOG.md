@@ -2,6 +2,7 @@
 
 ### Version 0.2.0-alpha.8
 
+- [FEAT] Add go `Context` support in worker
 - [FEAT] Extend `protos` to support `Quorum` `privateFor` transactions
 - [FIX] Register config `viper` default & env variables on config `init()`
 

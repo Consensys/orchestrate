@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"context"
 	"math/rand"
 	"sync"
 	"testing"
@@ -30,7 +31,10 @@ func TestWorker(t *testing.T) {
 	}
 
 	// Create new worker and register test handler
-	w := NewWorker(Config{Slots: 100, Partitions: 100})
+	w := NewWorker(
+		context.Background(),
+		Config{Slots: 100, Partitions: 100, Timeout: 60 * time.Second},
+	)
 	w.Use(h.Handler(t))
 
 	// Create a Sarama message channel
@@ -61,7 +65,10 @@ func TestWorkerStopped(t *testing.T) {
 	}
 
 	// Create new worker and register test handler
-	w := NewWorker(Config{Slots: 100, Partitions: 100})
+	w := NewWorker(
+		context.Background(),
+		Config{Slots: 100, Partitions: 100, Timeout: 60 * time.Second},
+	)
 	w.Use(h.Handler(t))
 
 	// Create a Sarama message channel

@@ -3,6 +3,7 @@ package worker
 import (
 	"os"
 	"testing"
+	"time"
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -47,4 +48,24 @@ func TestPartitions(t *testing.T) {
 	flgs.Parse(args)
 	expected = 150
 	assert.Equal(t, expected, viper.GetInt(name), "From Flag")
+}
+
+func TestTimeout(t *testing.T) {
+	name := "worker.timeout"
+	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
+	Timeout(flgs)
+	expected := 60 * time.Second
+	assert.Equal(t, expected, viper.GetDuration(name), "Default")
+
+	os.Setenv("WORKER_TIMEOUT", "12s")
+	expected = 12 * time.Second
+	assert.Equal(t, expected, viper.GetDuration(name), "From Environment Variable")
+	os.Unsetenv("WORKER_TIMEOUT")
+
+	args := []string{
+		"--worker-timeout=100ms",
+	}
+	flgs.Parse(args)
+	expected = 100 * time.Millisecond
+	assert.Equal(t, expected, viper.GetDuration(name), "From Flag")
 }

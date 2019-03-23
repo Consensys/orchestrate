@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"context"
 	"hash"
 	"hash/fnv"
 
@@ -16,6 +17,10 @@ type PartitionKeyFunc func(message interface{}) []byte
 
 // Worker allows to consume messages on an input channel
 type Worker struct {
+	ctx context.Context
+
+	conf Config
+
 	handlers []HandlerFunc    // Handlers to apply on each context
 	key      PartitionKeyFunc // Function used to create key for dispatching
 
@@ -35,7 +40,10 @@ type Worker struct {
 // NewWorker creates a new worker
 // You indicate a count of goroutine that worker can occupy to process messages
 // You must set `slots > 0`
-func NewWorker(conf Config) *Worker {
+func NewWorker(ctx context.Context, conf Config) *Worker {
+	if ctx == nil {
+		panic("Worker cannot be created from a nil context")
+	}
 	conf.Validate()
 
 	partitions := make([]chan interface{}, conf.Partitions)
@@ -44,6 +52,8 @@ func NewWorker(conf Config) *Worker {
 	}
 
 	return &Worker{
+		ctx:      ctx,
+		conf:     conf,
 		handlers: []HandlerFunc{},
 		handling: &sync.WaitGroup{},
 		// By default key is randomly generated
@@ -182,8 +192,12 @@ func (w *Worker) handleMessage(msg interface{}) {
 	// Prepare context
 	ctx.Prepare(w.handlers, log.NewEntry(w.logger), msg)
 
+	// Create go context for message execution
+	c, cancel := context.WithTimeout(w.ctx, w.conf.Timeout)
+	defer cancel()
+
 	// Handle context
-	ctx.Next()
+	WithContext(c, ctx).Next()
 }
 
 // Done returns a channel indicating if worker is done running
