@@ -5,6 +5,9 @@
 *Unreleased*
 
 - [REFACTOR] Mobe to `pkg`
+- [FEAT] Use vaults as a secret store
+- [FEAT] Stores vault credentials in AWS
+- [DEV] Adds a vault container in E2E
 - [FEAT] add `Partitioner` on worker
 - [FEAT] add support to craft contract deployment transactions
   
