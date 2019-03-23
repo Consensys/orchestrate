@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"sync"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
@@ -12,20 +13,7 @@ import (
 
 // MultiEthClient is client that can connect to multiple Ethereum chains
 type MultiEthClient struct {
-	ecRegistry map[string]*EthClient
-}
-
-// NewMultiClient creates client that can connect to multiple chains
-func NewMultiClient(ctx context.Context, clients []*EthClient) *MultiEthClient {
-	ecRegistry := make(map[string]*EthClient)
-	for _, ec := range clients {
-		chainID, err := ec.NetworkID(ctx)
-		if err != nil {
-			panic(err)
-		}
-		ecRegistry[chainIDToString(chainID)] = ec
-	}
-	return &MultiEthClient{ecRegistry}
+	ecs map[string]*EthClient
 }
 
 // MultiDial connects a multi-client to the given URLs.
@@ -35,21 +23,45 @@ func MultiDial(rawurls []string) (*MultiEthClient, error) {
 
 // MultiDialContext connects a multi-client to the given URLs.
 func MultiDialContext(ctx context.Context, rawurls []string) (*MultiEthClient, error) {
-	clients := []*EthClient{}
+	errors := make(chan error, len(rawurls))
+	clients := make(chan *EthClient, len(rawurls))
+	wait := &sync.WaitGroup{}
 	for _, rawurl := range rawurls {
-		c, err := DialContext(ctx, rawurl)
-		if err != nil {
-			return nil, err
-		}
-		clients = append(clients, c)
+		wait.Add(1)
+		go func(rawurl string) {
+			defer wait.Done()
+			c, err := DialContext(ctx, rawurl)
+			if err != nil {
+				errors <- err
+			} else {
+				clients <- c
+			}
+		}(rawurl)
 	}
-	return NewMultiClient(ctx, clients), nil
+	wait.Wait()
+	close(clients)
+	close(errors)
+
+	if len(errors) > 1 {
+		return nil, <-errors
+	}
+
+	ecs := make(map[string]*EthClient)
+	for ec := range clients {
+		chainID, err := ec.NetworkID(ctx)
+		if err != nil {
+			panic(err)
+		}
+		ecs[chainIDToString(chainID)] = ec
+	}
+
+	return &MultiEthClient{ecs: ecs}, nil
 }
 
 // Networks return networks ID multi client is connected to
 func (mec *MultiEthClient) Networks(ctx context.Context) []*big.Int {
 	networks := []*big.Int{}
-	for _, ec := range mec.ecRegistry {
+	for _, ec := range mec.ecs {
 		chain, _ := ec.NetworkID(ctx)
 		if chain != nil {
 			networks = append(networks, chain)
@@ -195,7 +207,7 @@ func (mec *MultiEthClient) SyncProgress(ctx context.Context, chainID *big.Int) (
 }
 
 func (mec *MultiEthClient) getClient(chainID *big.Int) (*EthClient, bool) {
-	ec, ok := mec.ecRegistry[chainIDToString(chainID)]
+	ec, ok := mec.ecs[chainIDToString(chainID)]
 	return ec, ok
 }
 
