@@ -20,9 +20,26 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:32181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LOG4J_LOGGERS: kafka.controller=ERROR,kafka.foo.bar=ERROR
+      KAFKA_LOG4J_ROOT_LOGLEVEL: ERROR
+      KAFKA_TOOLS_LOG4J_LOGLEVEL: ERROR
     networks:
       - kafka
 
+  vault:
+    image: library/vault:0.10.3
+    tty: true
+    # networks:
+    #   - backend
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - ./vault/:/vault/config/:ro
+    ports:
+      - 8200:8200
+    environment: 
+      - VAULT_ADDR=http://127.0.0.1:8200
+    entrypoint: vault server -config=/vault/config/vault.json -log-level=trace
 
 networks:
   kafka:
