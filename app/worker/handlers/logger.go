@@ -12,7 +12,6 @@ import (
 
 // Logger to log context elements before and after the worker
 func Logger(ctx *worker.Context) {
-
 	msg := ctx.Msg.(*sarama.ConsumerMessage)
 	ctx.Logger = log.WithFields(infSarama.ConsumerMessageFields(msg))
 

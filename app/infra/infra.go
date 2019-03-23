@@ -5,8 +5,8 @@ import (
 	"sync"
 
 	"github.com/Shopify/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/keystore"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore"
@@ -19,7 +19,7 @@ type Infra struct {
 	Unmarshaller services.Unmarshaller
 	Producer     services.Producer
 
-	KeyStore keystore.KeyStore
+	KeyStore    keystore.KeyStore
 	SecretStore secretstore.SecretStore
 
 	Mec *ethclient.MultiEthClient
@@ -50,7 +50,7 @@ func (infra *Infra) Init() {
 	wait.Add(1)
 	go initSarama(infra, wait)
 	wait.Wait()
-	initSigner(infra)
+	initVault(infra)
 }
 
 // Close infra
