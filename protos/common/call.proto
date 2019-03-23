@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "protos/abi/abi.proto";
+import "protos/quorum/quorum.proto";
 
 option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common";
 
@@ -15,5 +16,8 @@ message Call {
     abi.Method method = 2; 
 
     // Arguments to feed on transaction call
-    repeated string args = 3; 
+    repeated string args = 3;
+
+    // If Quorum private for transaction
+    quorum.Quorum quorum = 4;
 }

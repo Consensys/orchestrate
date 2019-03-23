@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### Version 0.2.0-alpha.8
+
+- [FEAT] Extend `protos` to support `Quorum` `privateFor` transactions
+
 ### Version 0.2.0-alpha.7
 
 *Released on March 18th 2019*
