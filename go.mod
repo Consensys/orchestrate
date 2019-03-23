@@ -11,7 +11,7 @@ require (
 	github.com/spf13/pflag v1.0.3
 	github.com/spf13/viper v1.3.1
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.2.0-alpha.2
-	gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git v0.2.1
+	gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git v0.3.0-alpha.1
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.2.0-alpha
 	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.7
 )
