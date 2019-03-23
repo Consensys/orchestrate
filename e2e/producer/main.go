@@ -10,11 +10,26 @@ import (
 	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
 )
 
+/*
+	As the tag 0.3.0, the available public keys are:
+	[
+		0x93f7274c9059e601be4512F656B57b830e019E41 
+		0x7E654d251Da770A068413677967F6d3Ea2FeA9E4 
+		0xdbb881a51CD4023E4400CEF3ef73046743f08da3 
+		0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff 
+		0xA8d8DB1d8919665a18212374d623fc7C0dFDa410 
+		0xffbBa394DEf3Ff1df0941c6429887107f58d4e9b 
+		0x664895b5fE3ddf049d2Fb508cfA03923859763C6 
+		0xfF778b716FC07D98839f48DdB88D8bE583BEB684 
+		0xf5956Eb46b377Ae41b41BDa94e6270208d8202bb 
+		0xbfc7137876d7Ac275019d70434B0f0779824a969
+	]
+*/
 var (
 	kafkaURL = []string{"localhost:9092"}
 	topic    = "topic-tx-signer"
 	senders  = []string{
-		"0xd71400daD07d70C976D6AAFC241aF1EA183a7236",
+		"0xd71400daD07d70C976D6AAFC241aF1EA183a7236", // As of 0.3.0, this address is not stored by default
 		"0xf5956Eb46b377Ae41b41BDa94e6270208d8202bb",
 		"0x93f7274c9059e601be4512F656B57b830e019E41",
 		"0xbfc7137876d7Ac275019d70434B0f0779824a969",
