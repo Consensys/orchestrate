@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.3.0
+
+*Unreleased*
+
+- [FEAT] Make `MultiDial` dialing clients concurrently for faster start
+- [FIX] Clean `config`
+
 ### Version 0.2.0-alpha.2
 
 *Released on March 15th 2019*
