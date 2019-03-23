@@ -9,7 +9,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/types"
+
+	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
 )
 
 // FormatIndexedArg transforms a data to string
@@ -26,10 +27,10 @@ func FormatIndexedArg(t abi.Type, arg common.Hash) (string, error) {
 	case abi.FixedBytesTy:
 		return fmt.Sprintf("%v", hexutil.Encode(arg[common.HashLength-t.Type.Size():])), nil
 	case abi.BytesTy, abi.ArrayTy, abi.TupleTy:
+		return "", fmt.Errorf("unable to decode %v type", t.Kind)
 	default:
 		return fmt.Sprintf("%v", arg), nil
 	}
-	return "", fmt.Errorf("unable to decode %v type", t.Kind)
 }
 
 // ArrayToByteSlice creates a new byte slice with the exact same size as value
@@ -77,7 +78,7 @@ func FormatNonIndexedArg(t abi.Type, arg interface{}) (string, error) {
 }
 
 // Decode event data to string
-func Decode(event *abi.Event, txLog *types.Log) (map[string]string, error) {
+func Decode(event *abi.Event, txLog *ethpb.Log) (map[string]string, error) {
 	expectedTopics := len(event.Inputs) - event.Inputs.LengthNonIndexed()
 	if expectedTopics != len(txLog.Topics)-1 {
 		return nil, fmt.Errorf("Error: Topics length does not match with abi event: expected %v but got %v", expectedTopics, len(txLog.Topics)-1)
@@ -97,7 +98,7 @@ func Decode(event *abi.Event, txLog *types.Log) (map[string]string, error) {
 	for _, arg := range event.Inputs {
 		var decoded string
 		if arg.Indexed {
-			decoded, _ = FormatIndexedArg(arg.Type, txLog.Topics[topicIndex])
+			decoded, _ = FormatIndexedArg(arg.Type, common.HexToHash(txLog.Topics[topicIndex]))
 			topicIndex++
 		} else {
 			decoded, _ = FormatNonIndexedArg(arg.Type, unpackValues[unpackValuesIndex])

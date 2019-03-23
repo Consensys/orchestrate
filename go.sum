@@ -80,6 +80,8 @@ github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljT
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.3 h1:VW3b7l4TsTS3P4+RD+1VI5yNVtxQ4A3gHXwZMsBjf6g=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.3/go.mod h1:CUWmUHHVyEIA2TLNhOj7wPBQqvhupVuYPYT3jS4FqU0=
+gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.4 h1:/LUMBtsL9V76LYE6CFOJOtXdPqVv+w8i9tJgjwteYL0=
+gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.4/go.mod h1:CUWmUHHVyEIA2TLNhOj7wPBQqvhupVuYPYT3jS4FqU0=
 golang.org/x/crypto v0.0.0-20170930174604-9419663f5a44/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
