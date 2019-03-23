@@ -9,15 +9,15 @@ import (
 	"github.com/spf13/viper"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
 	listener "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
 )
 
 // Logger to log context elements before and after the worker
-func Logger(ctx *core.Context) {
+func Logger(ctx *worker.Context) {
 	log.WithFields(log.Fields{
 		"Chain":       ctx.T.Chain.Id,
 		"BlockNumber": ctx.T.Receipt.BlockNumber,
@@ -57,8 +57,8 @@ func (u *ReceiptUnmarshaller) Unmarshal(msg interface{}, t *trace.Trace) error {
 }
 
 // Loader creates an handler loading input
-func Loader(u services.Unmarshaller) core.HandlerFunc {
-	return func(ctx *core.Context) {
+func Loader(u services.Unmarshaller) worker.HandlerFunc {
+	return func(ctx *worker.Context) {
 		// Unmarshal message
 		err := u.Unmarshal(ctx.Msg, ctx.T)
 		if err != nil {
@@ -71,13 +71,15 @@ func Loader(u services.Unmarshaller) core.HandlerFunc {
 
 // TxListenerHandler is an handler consuming receipts
 type TxListenerHandler struct {
-	w *core.Worker
+	w *worker.Worker
 }
 
 // Setup configure the handler
 func (h *TxListenerHandler) Setup() error {
 	// Instantiate worker
-	h.w = core.NewWorker(1)
+	cfg := worker.NewConfig()
+	cfg.Partitions = 1
+	h.w = worker.NewWorker(context.Background(), cfg)
 
 	// Handler::loader
 	h.w.Use(Loader(&ReceiptUnmarshaller{}))
