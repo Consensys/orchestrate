@@ -7,6 +7,11 @@ import (
 	"github.com/spf13/viper"
 )
 
+func init() {
+	viper.BindEnv(httpHostnameViperKey, httpHostnameEnv)
+	viper.SetDefault(httpHostnameViperKey, httpHostnameDefault)
+}
+
 var (
 	httpHostnameFlag     = "http-hostname"
 	httpHostnameViperKey = "http.hostname"
@@ -19,7 +24,5 @@ func HTTPHostname(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Hostname to expose healthchecks and metrics.
 Environment variable: %q`, httpHostnameEnv)
 	f.String(httpHostnameFlag, httpHostnameDefault, desc)
-	viper.SetDefault(httpHostnameViperKey, httpHostnameDefault)
 	viper.BindPFlag(httpHostnameViperKey, f.Lookup(httpHostnameFlag))
-	viper.BindEnv(httpHostnameViperKey, httpHostnameEnv)
 }

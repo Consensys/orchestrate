@@ -8,8 +8,10 @@ import (
 )
 
 func init() {
-	viper.SetDefault("worker.slots", 20)
-	viper.SetDefault("worker.partitions", 50)
+	viper.SetDefault(workerSlotsViperKey, workerSlotsDefault)
+	viper.BindEnv(workerSlotsViperKey, workerSlotsEnv)
+	viper.SetDefault(workerPartitionsViperKey, workerPartitionsDefault)
+	viper.BindEnv(workerPartitionsViperKey, workerPartitionsEnv)
 }
 
 // Config is worker configuration
@@ -58,9 +60,7 @@ func Slots(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Maximum number of messages the worker can treat concurrently.
 Environment variable: %q`, workerSlotsEnv)
 	f.Uint(workerSlotsFlag, workerSlotsDefault, desc)
-	viper.SetDefault(workerSlotsViperKey, workerSlotsDefault)
 	viper.BindPFlag(workerSlotsViperKey, f.Lookup(workerSlotsFlag))
-	viper.BindEnv(workerSlotsViperKey, workerSlotsEnv)
 }
 
 var (
@@ -75,7 +75,5 @@ func Partitions(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Number of partitions spawned by worker to treat messages in parallel.
 Environment variable: %q`, workerPartitionsEnv)
 	f.Uint(workerPartitionsFlag, workerPartitionsDefault, desc)
-	viper.SetDefault(workerPartitionsViperKey, workerPartitionsDefault)
 	viper.BindPFlag(workerPartitionsViperKey, f.Lookup(workerPartitionsFlag))
-	viper.BindEnv(workerPartitionsViperKey, workerPartitionsEnv)
 }

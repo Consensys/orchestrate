@@ -3,6 +3,7 @@
 ### Version 0.2.0-alpha.8
 
 - [FEAT] Extend `protos` to support `Quorum` `privateFor` transactions
+- [FIX] Register config `viper` default & env variables on config `init()`
 
 ### Version 0.2.0-alpha.7
 

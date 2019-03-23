@@ -7,6 +7,11 @@ import (
 	"github.com/spf13/viper"
 )
 
+func init() {
+	viper.BindEnv(ethClientViperKey, ethClientEnv)
+	viper.SetDefault(ethClientViperKey, ethClientDefault)
+}
+
 var (
 	ethClientFlag     = "eth-client"
 	ethClientViperKey = "eth.clients"
@@ -19,7 +24,5 @@ func EthClientURLs(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Ethereum client URLs.
 Environment variable: %q`, ethClientEnv)
 	f.StringSlice(ethClientFlag, ethClientDefault, desc)
-	viper.SetDefault(ethClientViperKey, ethClientDefault)
 	viper.BindPFlag(ethClientViperKey, f.Lookup(ethClientFlag))
-	viper.BindEnv(ethClientViperKey, ethClientEnv)
 }

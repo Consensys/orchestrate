@@ -7,6 +7,13 @@ import (
 	"github.com/spf13/viper"
 )
 
+func init() {
+	viper.SetDefault(jaegerHostViperKey, jaegerHostDefault)
+	viper.BindEnv(jaegerHostViperKey, jaegerHostEnv)
+	viper.SetDefault(jaegerPortViperKey, jaegerPortDefault)
+	viper.BindEnv(jaegerPortViperKey, jaegerPortEnv)
+}
+
 var (
 	jaegerHostFlag     = "jaeger-host"
 	jaegerHostViperKey = "jaeger.host"
@@ -20,8 +27,6 @@ func JaegerHost(f *pflag.FlagSet) {
 Environment variable: %q`, jaegerHostEnv)
 	f.String(jaegerHostFlag, jaegerHostDefault, desc)
 	viper.BindPFlag(jaegerHostViperKey, f.Lookup(jaegerHostFlag))
-	viper.SetDefault(jaegerHostViperKey, jaegerHostDefault)
-	viper.BindEnv(jaegerHostViperKey, jaegerHostEnv)
 }
 
 var (
@@ -36,9 +41,7 @@ func JaegerPort(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Jaeger port
 Environment variable: %q`, jaegerPortEnv)
 	f.Int(jaegerPortFlag, jaegerPortDefault, desc)
-	viper.SetDefault(jaegerPortViperKey, jaegerPortDefault)
 	viper.BindPFlag(jaegerPortViperKey, f.Lookup(jaegerPortFlag))
-	viper.BindEnv(jaegerPortViperKey, jaegerPortEnv)
 }
 
 var (
