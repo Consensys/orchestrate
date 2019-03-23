@@ -2,6 +2,7 @@ module gitlab.com/ConsenSys/client/fr/core-stack/pkg.git
 
 require (
 	github.com/allegro/bigcache v1.2.0 // indirect
+	github.com/blang/semver v3.5.1+incompatible
 	github.com/btcsuite/btcd v0.0.0-20190213025234-306aecffea32 // indirect
 	github.com/ethereum/go-ethereum v1.8.21
 	github.com/go-stack/stack v1.8.0 // indirect
