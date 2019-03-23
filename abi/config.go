@@ -8,6 +8,11 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/abi"
 )
 
+func init() {
+	viper.BindEnv(abiViperKey, abiEnv)
+	viper.SetDefault(abiViperKey, abiDefault)
+}
+
 var (
 	abiFlag     = "abi"
 	abiViperKey = "abis"
@@ -23,7 +28,6 @@ func ABIs(f *pflag.FlagSet) {
 Environment variable: %q`, `<contract>:<abi>:<bytecode>`, abiEnv)
 	f.StringSlice(abiFlag, abiDefault, desc)
 	viper.BindPFlag(abiViperKey, f.Lookup(abiFlag))
-	viper.BindEnv(abiViperKey, abiEnv)
 }
 
 // FromABIConfig read viper config and return contracts
