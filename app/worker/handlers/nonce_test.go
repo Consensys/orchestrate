@@ -132,7 +132,7 @@ func makeNonceContext(chainID int64, address string) *worker.Context {
 		ctx.Keys["expectedNonce"] = chainNonce
 	}
 
-	return ctx
+	return worker.WithContext(context.Background(), ctx)
 }
 
 func TestNonceHandler(t *testing.T) {

@@ -51,7 +51,7 @@ func NonceHandler(nm services.NonceManager, getChainNonce GetNonceFunc) worker.H
 		// If nonce was not in cache, we calibrate it by reading nonce from chain
 		if idleTime == -1 {
 			ctx.Logger.Debugf("nonce: not in cache, get from chain")
-			nonce, err = getChainNonce(context.Background(), chainID, a)
+			nonce, err = getChainNonce(ctx.Context(), chainID, a)
 			if err != nil {
 				ctx.AbortWithError(err)
 				ctx.Logger.WithError(err).Errorf("nonce: could not get nonce from chain")
@@ -62,7 +62,7 @@ func NonceHandler(nm services.NonceManager, getChainNonce GetNonceFunc) worker.H
 		// If nonce is too old, we calibrate it by reading nonce from chain
 		if idleTime > viper.GetInt("redis.nonce.expiration.time") {
 			ctx.Logger.Debugf("nonce: cache too old, get from chain")
-			nonce, err = getChainNonce(context.Background(), chainID, a)
+			nonce, err = getChainNonce(ctx.Context(), chainID, a)
 			if err != nil {
 				ctx.AbortWithError(err)
 				ctx.Logger.WithError(err).Errorf("nonce: could not get nonce from chain")

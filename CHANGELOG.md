@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.1
+
+*Released on March 24th 2019*
+
+- [CHORE] Update to `pkg` `v0.3.0-alpha.8`
+  
 ### Version 0.3.0
 
 *Released on March 22th 2019*
