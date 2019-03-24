@@ -8,9 +8,11 @@ import (
 	"sync"
 	"testing"
 
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/infra/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
@@ -28,7 +30,21 @@ func (s *MockTxSender) SendRawTransaction(ctx context.Context, chainID *big.Int,
 	return nil
 }
 
-var letterRunes = []rune("abcdefgABCDEF0123456789")
+func (s *MockTxSender) SendTransaction(ctx context.Context, chainID *big.Int, args *ethclient.SendTxArgs) (ethcommon.Hash, error) {
+	if chainID.Text(10) == "0" {
+		return ethcommon.Hash{}, fmt.Errorf("Could not send")
+	}
+	return ethcommon.HexToHash("0x" + RandString(32)), nil
+}
+
+func (s *MockTxSender) SendRawPrivateTransaction(ctx context.Context, chainID *big.Int, raw string, args *ethclient.PrivateArgs) (ethcommon.Hash, error) {
+	if chainID.Text(10) == "0" {
+		return ethcommon.Hash{}, fmt.Errorf("Could not send")
+	}
+	return ethcommon.Hash{}, nil
+}
+
+var letterRunes = []rune("abcdef0123456789")
 
 func RandString(n int) string {
 	b := make([]rune, n)
@@ -42,9 +58,9 @@ func makeSenderContext(i int) *worker.Context {
 	ctx := worker.NewContext()
 	ctx.Reset()
 	ctx.Logger = log.NewEntry(log.StandardLogger())
-	switch i % 4 {
+	switch i % 3 {
 	case 0:
-		ctx.T.Chain = (&common.Chain{}).SetID(big.NewInt(10))
+		ctx.T.Chain = (&common.Chain{}).SetID(big.NewInt(8))
 		ctx.T.Tx = (&ethereum.Transaction{}).SetRaw("0xabde4f3a")
 		ctx.T.Metadata = (&trace.Metadata{Id: RandString(10)})
 		ctx.T.Tx.Hash = "0x" + RandString(32)
@@ -58,21 +74,13 @@ func makeSenderContext(i int) *worker.Context {
 		ctx.Keys["errors"] = 1
 		ctx.Keys["status"] = "error"
 	case 2:
-		ctx.T.Chain = (&common.Chain{}).SetID(big.NewInt(0))
-		ctx.T.Tx = (&ethereum.Transaction{}).SetRaw(``)
-		ctx.T.Tx.Hash = "0x" + RandString(32)
-		ctx.T.Metadata = (&trace.Metadata{Id: RandString(10)})
-		ctx.Keys["errors"] = 0
-		ctx.Keys["status"] = ""
-	case 3:
 		ctx.T.Chain = (&common.Chain{}).SetID(big.NewInt(10))
 		ctx.T.Tx = (&ethereum.Transaction{}).SetRaw(``)
-		ctx.T.Tx.Hash = "0x" + RandString(32)
 		ctx.T.Metadata = (&trace.Metadata{Id: RandString(10)})
 		ctx.Keys["errors"] = 0
-		ctx.Keys["status"] = ""
+		ctx.Keys["status"] = "pending"
 	}
-	return ctx
+	return worker.WithContext(context.Background(), ctx)
 }
 
 func TestSender(t *testing.T) {

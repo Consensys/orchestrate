@@ -23,6 +23,7 @@ func initEthereum(infra *Infra, wait *sync.WaitGroup) {
 	// Attach Ethereum client and sender
 	infra.Mec = mec
 	infra.TxSender = mec
+
 	// Wait for app to be done and then close
 	go func() {
 		<-infra.ctx.Done()

@@ -1,6 +1,8 @@
 package worker
 
 import (
+	"context"
+
 	"github.com/Shopify/sarama"
 
 	commonhandlers "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/handlers"
@@ -13,7 +15,7 @@ import (
 // CreateWorker creates worker and attach it to application
 func CreateWorker(infra *infra.Infra, marker services.OffsetMarker) *worker.Worker {
 	// Instantiate worker
-	w := worker.NewWorker(worker.NewConfig())
+	w := worker.NewWorker(context.Background(), worker.NewConfig())
 	w.Partitionner(func(msg interface{}) []byte { return msg.(*sarama.ConsumerMessage).Key })
 
 	// Handler::loader

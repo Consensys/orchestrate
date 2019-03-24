@@ -16,7 +16,7 @@ type Infra struct {
 
 	Unmarshaller services.Unmarshaller
 
-	TxSender services.TxSender
+	TxSender ethclient.TxSender
 	Store    store.TraceStore
 	Mec      *ethclient.MultiEthClient
 
