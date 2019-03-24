@@ -16,7 +16,6 @@ func main() {
 		"https://rinkeby.infura.io/v3/bfc9d6e51fbc4d3db54bea58d1094f9c",
 		"https://kovan.infura.io/v3/bfc9d6e51fbc4d3db54bea58d1094f9c",
 		"https://mainnet.infura.io/v3/bfc9d6e51fbc4d3db54bea58d1094f9c",
-		,
 	}
 	log.Infof("Connecting to EthClients: %v", ethURLs)
 	mec, err := ethclient.MultiDial(ethURLs)
