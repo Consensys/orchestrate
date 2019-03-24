@@ -17,7 +17,7 @@ func Signer(s keystore.KeyStore) worker.HandlerFunc {
 		})
 
 		if ctx.T.GetTx().GetRaw() != "" {
-			// Tx already signed
+			// Tx has already been signed
 			return
 		}
 
@@ -33,22 +33,22 @@ func Signer(s keystore.KeyStore) worker.HandlerFunc {
 
 		// Sign transaction
 		raw, h, err := s.SignTx(ctx.T.GetChain(), ctx.T.GetSender().Address(), t)
-		EncodedRaw := hexutil.Encode(raw)
-
 		if err != nil {
 			// TODO: handle error
-			ctx.Logger.WithError(err).Infof("signer: could not sign transaction")
-			ctx.AbortWithError(err)
+			ctx.Logger.WithError(err).Warnf("signer: could not sign transaction")
+			// We indicate that we got an error signing the transaction but we do not abort
+			ctx.Error(err)
 			return
 		}
 
 		// Update trace information
-		ctx.T.Tx.SetRaw(EncodedRaw)
+		enc := hexutil.Encode(raw)
+		ctx.T.Tx.SetRaw(enc)
 		ctx.T.Tx.SetHash(*h)
 		ctx.Logger = ctx.Logger.WithFields(log.Fields{
-			"tx.raw":  EncodedRaw,
+			"tx.raw":  enc,
 			"tx.hash": h.Hex(),
 		})
-		ctx.Logger.Debugf("signer: raw transaction set")
+		ctx.Logger.Debugf("signer: transaction signed")
 	}
 }
