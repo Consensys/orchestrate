@@ -2,7 +2,10 @@
 
 ### Version 0.3.0-alpha.3
 
+*Unreleased*
+
 - [CHORE] Upgrade to `pkg` `v0.3.0-alpha.8`
+- [FIX] Update trace status to `mined` after reconstituting context
 
 ### Version 0.3.0-alpha.2
 

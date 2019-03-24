@@ -52,9 +52,11 @@ func makeTraceLoaderContext(i int, store *mock.TraceStore) *worker.Context {
 		store.Store(context.Background(), tr)
 		ctx.Keys["uuid"] = uuid
 		ctx.Keys["errors"] = 0
+		ctx.Keys["status"] = "mined"
 	case 1:
 		ctx.Keys["uuid"] = ""
 		ctx.Keys["errors"] = 1
+		ctx.Keys["status"] = ""
 	}
 
 	return ctx
@@ -84,5 +86,7 @@ func TestTraceLoader(t *testing.T) {
 	for out := range outs {
 		assert.Len(t, out.T.Errors, out.Keys["errors"].(int), "Marker: expected correct errors count")
 		assert.Equal(t, out.Keys["uuid"].(string), out.T.GetMetadata().GetId(), "Trace metadata should be set")
+		status, _, _ := store.GetStatus(context.Background(), out.T.GetMetadata().GetId())
+		assert.Equal(t, out.Keys["status"].(string), status, "Trace metadata should be set")
 	}
 }

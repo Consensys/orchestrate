@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"context"
-
 	log "github.com/sirupsen/logrus"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/infra"
@@ -12,7 +10,7 @@ import (
 // TraceLoader creates and handler that load traces
 func TraceLoader(store infra.TraceStore) worker.HandlerFunc {
 	return func(ctx *worker.Context) {
-		_, _, err := store.LoadByTxHash(context.Background(), ctx.T.GetChain().GetId(), ctx.T.GetReceipt().GetTxHash(), ctx.T)
+		_, _, err := store.LoadByTxHash(ctx.Context(), ctx.T.GetChain().GetId(), ctx.T.GetReceipt().GetTxHash(), ctx.T)
 
 		if err != nil {
 			// We got an error, possibly due to timeout connexion to database or something else
@@ -25,6 +23,14 @@ func TraceLoader(store infra.TraceStore) worker.HandlerFunc {
 		ctx.Logger = ctx.Logger.WithFields(log.Fields{
 			"metadata.id": ctx.T.GetMetadata().GetId(),
 		})
+
+		// Transaction has been mined so we set status to `mined`
+		err = store.SetStatus(ctx.Context(), ctx.T.GetMetadata().GetId(), "mined")
+		if err != nil {
+			// Connexion to store is broken
+			ctx.Logger.WithError(err).Errorf("sender: trace store failed to set status")
+			ctx.Error(err)
+		}
 
 		ctx.Logger.Debugf("trace-loader: trace re-constituted")
 	}
