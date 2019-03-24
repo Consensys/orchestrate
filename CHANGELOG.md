@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.1
+
+*Released on March 24th 2019*
+
+- [FIX] Add support for go context
+
 ### Version 0.3.0
 
 *Released on March 24th 2019*

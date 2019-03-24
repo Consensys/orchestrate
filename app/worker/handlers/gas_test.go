@@ -9,9 +9,9 @@ import (
 
 	"github.com/ethereum/go-ethereum"
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
 	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
 type MockGasEstimator struct {
@@ -42,7 +42,7 @@ func makeGasEstimatorContext(i int) *worker.Context {
 		ctx.Keys["errors"] = 0
 		ctx.Keys["result"] = uint64(18)
 	}
-	return ctx
+	return worker.WithContext(context.Background(), ctx)
 }
 
 func TestGasEstimator(t *testing.T) {

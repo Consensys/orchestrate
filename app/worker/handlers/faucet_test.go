@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	log "github.com/sirupsen/logrus"	
+	log "github.com/sirupsen/logrus"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
@@ -49,7 +49,7 @@ func makeFaucetContext(i int) *worker.Context {
 		ctx.T.Chain = (&commonpb.Chain{}).SetID(big.NewInt(1))
 		ctx.Keys["errors"] = 0
 	}
-	return ctx
+	return worker.WithContext(context.Background(), ctx)
 }
 
 func TestFaucet(t *testing.T) {

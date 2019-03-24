@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"sync"
 
 	log "github.com/sirupsen/logrus"
@@ -14,7 +13,7 @@ import (
 // GasPricer creates an handler that set Gas Price
 func GasPricer(p services.GasPricer) worker.HandlerFunc {
 	return func(ctx *worker.Context) {
-		p, err := p.SuggestGasPrice(context.Background(), ctx.T.Chain.ID())
+		p, err := p.SuggestGasPrice(ctx.Context(), ctx.T.Chain.ID())
 		if err != nil {
 			// TODO: handle error
 			ctx.Logger.WithError(err).Errorf("gas-pricer: could not suggest gas price")
@@ -49,7 +48,7 @@ func GasEstimator(p services.GasEstimator) worker.HandlerFunc {
 		call.Value = ctx.T.GetTx().GetTxData().ValueBig()
 		call.Data = ctx.T.GetTx().GetTxData().DataBytes()
 
-		g, err := p.EstimateGas(context.Background(), ctx.T.GetChain().ID(), call)
+		g, err := p.EstimateGas(ctx.Context(), ctx.T.GetChain().ID(), call)
 		if err != nil {
 			// TODO: handle error
 			ctx.Logger.WithError(err).Errorf("gas-estimator: could not estimate gas limit")
