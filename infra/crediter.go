@@ -7,36 +7,36 @@ import (
 	"strings"
 
 	"github.com/Shopify/sarama"
-	"github.com/ethereum/go-ethereum/common"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
-	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
-	commonpb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
-	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
 	infSarama "gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
+	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
+	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
+	trace "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
 )
 
 // SaramaCrediter allows to credit by sending messages to a Kafka topic
 type SaramaCrediter struct {
-	addresses map[string]common.Address
+	addresses map[string]ethcommon.Address
 
 	p sarama.SyncProducer
 	m *infSarama.Marshaller
 }
 
-func parseAddresses(addresses []string) (map[string]common.Address, error) {
-	m := make(map[string]common.Address)
+func parseAddresses(addresses []string) (map[string]ethcommon.Address, error) {
+	m := make(map[string]ethcommon.Address)
 	for _, addr := range addresses {
 		split := strings.Split(addr, ":")
 		if len(split) != 2 {
 			return nil, fmt.Errorf("Could not parse faucet address %q (expected format %q)", addr, "<chainID>:<address>")
 		}
 
-		if !common.IsHexAddress(split[1]) {
+		if !ethcommon.IsHexAddress(split[1]) {
 			return nil, fmt.Errorf("Invalid Ethereum address %q", split[1])
 		}
 
-		m[split[0]] = common.HexToAddress(split[1])
+		m[split[0]] = ethcommon.HexToAddress(split[1])
 	}
 	return m, nil
 }
@@ -78,13 +78,13 @@ func (c *SaramaCrediter) PrepareFaucetMsg(r *services.FaucetRequest) (sarama.Pro
 	faucetAddress := c.addresses[r.ChainID.Text(10)]
 
 	// Create Trace for Crediting message
-	faucetTrace := &tracepb.Trace{}
+	faucetTrace := &trace.Trace{}
 
 	faucetTrace.Reset()
 	fmt.Println(faucetTrace.Chain)
-	faucetTrace.Chain = (&commonpb.Chain{}).SetID(r.ChainID)
-	faucetTrace.Sender = &commonpb.Account{Addr: faucetAddress.Hex()}
-	faucetTrace.Tx = &ethpb.Transaction{TxData: &ethpb.TxData{}}
+	faucetTrace.Chain = (&common.Chain{}).SetID(r.ChainID)
+	faucetTrace.Sender = &common.Account{Addr: faucetAddress.Hex()}
+	faucetTrace.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{}}
 	faucetTrace.Tx.TxData.SetValue(r.Value).SetTo(r.Address)
 
 	// Create Producer message
