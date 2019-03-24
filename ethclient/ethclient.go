@@ -38,15 +38,15 @@ func DialContext(ctx context.Context, rawurl string) (*EthClient, error) {
 	return NewClient(c), nil
 }
 
-// QuorumArgs are arguments to provide to a Quorum jsonRPC call
-type QuorumArgs struct {
+// PrivateArgs are arguments to provide to an Ethereum client supporting privacy client (such as Quorum) when sendng a transaction
+type PrivateArgs struct {
 	// Quorum Fields
 	PrivateFrom   string   `json:"privateFrom"`
 	PrivateFor    []string `json:"privateFor"`
 	PrivateTxType string   `json:"restriction"`
 }
 
-// SendTxArgs are arguments to provide to jsonRPC call eth_sendTransaction
+// SendTxArgs are arguments to provide to jsonRPC call `eth_sendTransaction`
 type SendTxArgs struct {
 	// From address in case of a non raw transaction
 	From ethcommon.Address `json:"from"`
@@ -63,13 +63,13 @@ type SendTxArgs struct {
 	Data  hexutil.Bytes `json:"data"`
 	Input hexutil.Bytes `json:"input"`
 
-	// Quorum Fields
-	QuorumArgs
+	// Private field
+	PrivateArgs
 }
 
-// Call2QuorumArgs creates QuorumArgs from a call object
-func Call2QuorumArgs(call *common.Call) *QuorumArgs {
-	var args QuorumArgs
+// Call2PrivateArgs creates PrivateArgs from a call object
+func Call2PrivateArgs(call *common.Call) *PrivateArgs {
+	var args PrivateArgs
 	args.PrivateFrom = call.GetQuorum().GetPrivateFrom()
 	args.PrivateFor = call.GetQuorum().GetPrivateFor()
 	args.PrivateTxType = call.GetQuorum().GetPrivateTxType()
@@ -79,14 +79,14 @@ func Call2QuorumArgs(call *common.Call) *QuorumArgs {
 // Trace2SendTxArgs creates SendTxArgs from a trace
 func Trace2SendTxArgs(tr *trace.Trace) *SendTxArgs {
 	args := SendTxArgs{
-		From:       tr.GetSender().Address(),
-		Gas:        hexutil.Uint64(tr.GetTx().GetTxData().GetGas()),
-		GasPrice:   (*hexutil.Big)(tr.GetTx().GetTxData().GasPriceBig()),
-		Value:      (*hexutil.Big)(tr.GetTx().GetTxData().ValueBig()),
-		Nonce:      hexutil.Uint64(tr.GetTx().GetTxData().GetNonce()),
-		Data:       hexutil.Bytes(tr.GetTx().GetTxData().DataBytes()),
-		Input:      hexutil.Bytes(tr.GetTx().GetTxData().DataBytes()),
-		QuorumArgs: *(Call2QuorumArgs(tr.GetCall())),
+		From:        tr.GetSender().Address(),
+		Gas:         hexutil.Uint64(tr.GetTx().GetTxData().GetGas()),
+		GasPrice:    (*hexutil.Big)(tr.GetTx().GetTxData().GasPriceBig()),
+		Value:       (*hexutil.Big)(tr.GetTx().GetTxData().ValueBig()),
+		Nonce:       hexutil.Uint64(tr.GetTx().GetTxData().GetNonce()),
+		Data:        hexutil.Bytes(tr.GetTx().GetTxData().DataBytes()),
+		Input:       hexutil.Bytes(tr.GetTx().GetTxData().DataBytes()),
+		PrivateArgs: *(Call2PrivateArgs(tr.GetCall())),
 	}
 
 	if tr.GetTx().GetTxData().GetTo() != "" {
@@ -102,8 +102,8 @@ func (ec *EthClient) SendRawTransaction(ctx context.Context, raw string) error {
 	return ec.rpc.CallContext(ctx, nil, "eth_sendRawTransaction", raw)
 }
 
-// SendPrivateTransactionQuorum send transaction to Quorum node
-func (ec *EthClient) SendPrivateTransactionQuorum(ctx context.Context, args *SendTxArgs) (txHash ethcommon.Hash, err error) {
+// SendTransaction send transaction to Ethereum node
+func (ec *EthClient) SendTransaction(ctx context.Context, args *SendTxArgs) (txHash ethcommon.Hash, err error) {
 	err = ec.rpc.CallContext(ctx, &txHash, "eth_sendTransaction", &args)
 	if err != nil {
 		return ethcommon.Hash{}, err
@@ -111,8 +111,8 @@ func (ec *EthClient) SendPrivateTransactionQuorum(ctx context.Context, args *Sen
 	return txHash, nil
 }
 
-// SendRawPrivateTransactionQuorum send a raw transaction to a Quorum node (only compatible if Quorum node uses Tessera)
+// SendRawPrivateTransaction send a raw transaction to a Ethreum node supporting privacy (e.g Quorum+Tessera node)
 // TODO: to be implemented
-func (ec *EthClient) SendRawPrivateTransactionQuorum(ctx context.Context, raw string, q *QuorumArgs) (ethcommon.Hash, error) {
+func (ec *EthClient) SendRawPrivateTransaction(ctx context.Context, raw string, q *PrivateArgs) (ethcommon.Hash, error) {
 	return ethcommon.Hash{}, fmt.Errorf("%q is not implemented yet", "SendRawPrivateTransactionQuorum")
 }

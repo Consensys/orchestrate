@@ -193,15 +193,6 @@ func (mec *MultiEthClient) EstimateGas(ctx context.Context, chainID *big.Int, ms
 	return ec.EstimateGas(ctx, msg)
 }
 
-// SendRawTransaction allows to send a raw transaction
-func (mec *MultiEthClient) SendRawTransaction(ctx context.Context, chainID *big.Int, raw string) error {
-	ec, err := mec.getClient(chainID)
-	if err != nil {
-		return err
-	}
-	return ec.SendRawTransaction(ctx, raw)
-}
-
 // SyncProgress retrieves client current progress of the sync algorithm.
 func (mec *MultiEthClient) SyncProgress(ctx context.Context, chainID *big.Int) (*ethereum.SyncProgress, error) {
 	ec, err := mec.getClient(chainID)
@@ -211,23 +202,45 @@ func (mec *MultiEthClient) SyncProgress(ctx context.Context, chainID *big.Int) (
 	return ec.SyncProgress(ctx)
 }
 
-// SendPrivateTransactionQuorum send transaction to Quorum node
-func (mec *MultiEthClient) SendPrivateTransactionQuorum(ctx context.Context, chainID *big.Int, args *SendTxArgs) (txHash common.Hash, err error) {
-	ec, err := mec.getClient(chainID)
-	if err != nil {
-		return common.Hash{}, err
-	}
-	return ec.SendPrivateTransactionQuorum(ctx, args)
+// TxSender is an interface for a transaction sender compatible with Ethereum nodes supporting privacy
+type TxSender interface {
+	// SendRawTransaction allows to send a raw transaction to an Ethereum node
+	SendRawTransaction(ctx context.Context, chainID *big.Int, raw string) error
+
+	// SendTransaction send a transaction to Ethereum node
+	// Should be compatible with Ethereum nodes supporting privacy (such as Quorum)
+	SendTransaction(ctx context.Context, chainID *big.Int, args *SendTxArgs) (txHash common.Hash, err error)
+
+	// SendRawPrivateTransaction send a raw transaction to a Ethereum node supporting privacy (e.g Quorum+Tessera node)
+	SendRawPrivateTransaction(ctx context.Context, chainID *big.Int, raw string, args *PrivateArgs) (common.Hash, error)
 }
 
-// SendRawPrivateTransactionQuorum send a raw transaction to a Quorum node (only compatible if Quorum node uses Tessera)
-// TODO: to be implemented
-func (mec *MultiEthClient) SendRawPrivateTransactionQuorum(ctx context.Context, chainID *big.Int, raw string, args *QuorumArgs) (common.Hash, error) {
+// SendRawTransaction allows to send a raw transaction
+func (mec *MultiEthClient) SendRawTransaction(ctx context.Context, chainID *big.Int, raw string) error {
+	ec, err := mec.getClient(chainID)
+	if err != nil {
+		return err
+	}
+	return ec.SendRawTransaction(ctx, raw)
+}
+
+// SendTransaction send a transaction to Ethereum node
+func (mec *MultiEthClient) SendTransaction(ctx context.Context, chainID *big.Int, args *SendTxArgs) (txHash common.Hash, err error) {
 	ec, err := mec.getClient(chainID)
 	if err != nil {
 		return common.Hash{}, err
 	}
-	return ec.SendRawPrivateTransactionQuorum(ctx, raw, args)
+	return ec.SendTransaction(ctx, args)
+}
+
+// SendRawPrivateTransaction send a raw transaction to a Ethereum node supporting privacy (e.g Quorum+Tessera node)
+// TODO: to be implemented
+func (mec *MultiEthClient) SendRawPrivateTransaction(ctx context.Context, chainID *big.Int, raw string, args *PrivateArgs) (common.Hash, error) {
+	ec, err := mec.getClient(chainID)
+	if err != nil {
+		return common.Hash{}, err
+	}
+	return ec.SendRawPrivateTransaction(ctx, raw, args)
 }
 
 func (mec *MultiEthClient) getClient(chainID *big.Int) (*EthClient, error) {
