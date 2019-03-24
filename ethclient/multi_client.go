@@ -72,9 +72,9 @@ func (mec *MultiEthClient) Networks(ctx context.Context) []*big.Int {
 
 // HeaderByHash returns the block header with the given hash.
 func (mec *MultiEthClient) HeaderByHash(ctx context.Context, chainID *big.Int, hash common.Hash) (*types.Header, error) {
-	ec, ok := mec.getClient(chainID)
-	if !ok {
-		return nil, fmt.Errorf("No client registered for %v", chainID)
+	ec, err := mec.getClient(chainID)
+	if err != nil {
+		return nil, err
 	}
 	return ec.HeaderByHash(ctx, hash)
 }
@@ -82,9 +82,9 @@ func (mec *MultiEthClient) HeaderByHash(ctx context.Context, chainID *big.Int, h
 // HeaderByNumber returns a block header from the current canonical chain. If number is
 // nil, the latest known header is returned.
 func (mec *MultiEthClient) HeaderByNumber(ctx context.Context, chainID *big.Int, number *big.Int) (*types.Header, error) {
-	ec, ok := mec.getClient(chainID)
-	if !ok {
-		return nil, fmt.Errorf("No client registered for %v", chainID)
+	ec, err := mec.getClient(chainID)
+	if err != nil {
+		return nil, err
 	}
 	return ec.HeaderByNumber(ctx, number)
 }
@@ -92,27 +92,27 @@ func (mec *MultiEthClient) HeaderByNumber(ctx context.Context, chainID *big.Int,
 // BlockByNumber returns a block from the current canonical chain. If number is
 // nil, the latest known header is returned.
 func (mec *MultiEthClient) BlockByNumber(ctx context.Context, chainID *big.Int, number *big.Int) (*types.Block, error) {
-	ec, ok := mec.getClient(chainID)
-	if !ok {
-		return nil, fmt.Errorf("No client registered for %v", chainID)
+	ec, err := mec.getClient(chainID)
+	if err != nil {
+		return nil, err
 	}
 	return ec.BlockByNumber(ctx, number)
 }
 
 // TransactionByHash returns the transaction with the given hash.
 func (mec *MultiEthClient) TransactionByHash(ctx context.Context, chainID *big.Int, hash common.Hash) (tx *types.Transaction, isPending bool, err error) {
-	ec, ok := mec.getClient(chainID)
-	if !ok {
-		return nil, false, fmt.Errorf("No client registered for %v", chainID)
+	ec, err := mec.getClient(chainID)
+	if err != nil {
+		return nil, false, err
 	}
 	return ec.TransactionByHash(ctx, hash)
 }
 
 // TransactionCount returns the total number of transactions in the given block
 func (mec *MultiEthClient) TransactionCount(ctx context.Context, chainID *big.Int, blockHash common.Hash) (uint, error) {
-	ec, ok := mec.getClient(chainID)
-	if !ok {
-		return 0, fmt.Errorf("No client registered for %v", chainID)
+	ec, err := mec.getClient(chainID)
+	if err != nil {
+		return 0, err
 	}
 	return ec.TransactionCount(ctx, blockHash)
 }
@@ -120,9 +120,9 @@ func (mec *MultiEthClient) TransactionCount(ctx context.Context, chainID *big.In
 // TransactionReceipt returns the receipt of a transaction by transaction hash.
 // Note that the receipt is not available for pending transactions.
 func (mec *MultiEthClient) TransactionReceipt(ctx context.Context, chainID *big.Int, txHash common.Hash) (*types.Receipt, error) {
-	ec, ok := mec.getClient(chainID)
-	if !ok {
-		return nil, fmt.Errorf("No client registered for %v", chainID)
+	ec, err := mec.getClient(chainID)
+	if err != nil {
+		return nil, err
 	}
 	return ec.TransactionReceipt(ctx, txHash)
 }
@@ -130,18 +130,18 @@ func (mec *MultiEthClient) TransactionReceipt(ctx context.Context, chainID *big.
 // BalanceAt returns the wei balance of the given account.
 // The block number can be nil, in which case the balance is taken from the latest known block.
 func (mec *MultiEthClient) BalanceAt(ctx context.Context, chainID *big.Int, account common.Address, blockNumber *big.Int) (*big.Int, error) {
-	ec, ok := mec.getClient(chainID)
-	if !ok {
-		return nil, fmt.Errorf("No client registered for %v", chainID)
+	ec, err := mec.getClient(chainID)
+	if err != nil {
+		return nil, err
 	}
 	return ec.BalanceAt(ctx, account, blockNumber)
 }
 
 // PendingBalanceAt returns the wei balance of the given account in the pending state.
 func (mec *MultiEthClient) PendingBalanceAt(ctx context.Context, chainID *big.Int, account common.Address) (*big.Int, error) {
-	ec, ok := mec.getClient(chainID)
-	if !ok {
-		return nil, fmt.Errorf("No client registered for %v", chainID)
+	ec, err := mec.getClient(chainID)
+	if err != nil {
+		return nil, err
 	}
 	return ec.PendingBalanceAt(ctx, account)
 }
@@ -149,9 +149,9 @@ func (mec *MultiEthClient) PendingBalanceAt(ctx context.Context, chainID *big.In
 // NonceAt returns the account nonce of the given account.
 // The block number can be nil, in which case the nonce is taken from the latest known block.
 func (mec *MultiEthClient) NonceAt(ctx context.Context, chainID *big.Int, account common.Address, blockNumber *big.Int) (uint64, error) {
-	ec, ok := mec.getClient(chainID)
-	if !ok {
-		return 0, fmt.Errorf("No client registered for %v", chainID)
+	ec, err := mec.getClient(chainID)
+	if err != nil {
+		return 0, err
 	}
 	return ec.NonceAt(ctx, account, blockNumber)
 }
@@ -159,9 +159,9 @@ func (mec *MultiEthClient) NonceAt(ctx context.Context, chainID *big.Int, accoun
 // PendingNonceAt returns the account nonce of the given account in the pending state.
 // This is the nonce that should be used for the next transaction.
 func (mec *MultiEthClient) PendingNonceAt(ctx context.Context, chainID *big.Int, account common.Address) (uint64, error) {
-	ec, ok := mec.getClient(chainID)
-	if !ok {
-		return 0, fmt.Errorf("No client registered for %v", chainID)
+	ec, err := mec.getClient(chainID)
+	if err != nil {
+		return 0, err
 	}
 	return ec.PendingNonceAt(ctx, account)
 }
@@ -169,9 +169,9 @@ func (mec *MultiEthClient) PendingNonceAt(ctx context.Context, chainID *big.Int,
 // SuggestGasPrice retrieves the currently suggested gas price to allow a timely
 // execution of a transaction.
 func (mec *MultiEthClient) SuggestGasPrice(ctx context.Context, chainID *big.Int) (*big.Int, error) {
-	ec, ok := mec.getClient(chainID)
-	if !ok {
-		return nil, fmt.Errorf("No client registered for %v", chainID)
+	ec, err := mec.getClient(chainID)
+	if err != nil {
+		return nil, err
 	}
 	return ec.SuggestGasPrice(ctx)
 }
@@ -181,36 +181,58 @@ func (mec *MultiEthClient) SuggestGasPrice(ctx context.Context, chainID *big.Int
 // the true gas limit requirement as other transactions may be added or removed by miners,
 // but it should provide a basis for setting a reasonable default.
 func (mec *MultiEthClient) EstimateGas(ctx context.Context, chainID *big.Int, msg ethereum.CallMsg) (uint64, error) {
-	ec, ok := mec.getClient(chainID)
-	if !ok {
-		return 0, fmt.Errorf("No client registered for %v", chainID)
+	ec, err := mec.getClient(chainID)
+	if err != nil {
+		return 0, err
 	}
 	return ec.EstimateGas(ctx, msg)
 }
 
 // SendRawTransaction allows to send a raw transaction
 func (mec *MultiEthClient) SendRawTransaction(ctx context.Context, chainID *big.Int, raw string) error {
-	ec, ok := mec.getClient(chainID)
-	if !ok {
-		return fmt.Errorf("No client registered for %v", chainID)
+	ec, err := mec.getClient(chainID)
+	if err != nil {
+		return err
 	}
 	return ec.SendRawTransaction(ctx, raw)
 }
 
 // SyncProgress retrieves client current progress of the sync algorithm.
 func (mec *MultiEthClient) SyncProgress(ctx context.Context, chainID *big.Int) (*ethereum.SyncProgress, error) {
-	ec, ok := mec.getClient(chainID)
-	if !ok {
-		return nil, fmt.Errorf("No client registered for %v", chainID)
+	ec, err := mec.getClient(chainID)
+	if err != nil {
+		return nil, err
 	}
 	return ec.SyncProgress(ctx)
 }
 
-func (mec *MultiEthClient) getClient(chainID *big.Int) (*EthClient, bool) {
+func (mec *MultiEthClient) getClient(chainID *big.Int) (*EthClient, error) {
 	ec, ok := mec.ecs[chainIDToString(chainID)]
-	return ec, ok
+	if !ok {
+		return nil, fmt.Errorf("No client registered for chain %q", chainID.Text(16))
+	}
+	return ec, nil
 }
 
 func chainIDToString(chainID *big.Int) string {
 	return chainID.Text(16)
+}
+
+// SendPrivateTransactionQuorum send transaction to Quorum node
+func (mec *MultiEthClient) SendPrivateTransactionQuorum(ctx context.Context, chainID *big.Int, args *SendTxArgs) (txHash common.Hash, err error) {
+	ec, err := mec.getClient(chainID)
+	if err != nil {
+		return common.Hash{}, err
+	}
+	return ec.SendPrivateTransactionQuorum(ctx, args)
+}
+
+// SendRawPrivateTransactionQuorum send a raw transaction to a Quorum node (only compatible if Quorum node uses Tessera)
+// TODO: to be implemented
+func (mec *MultiEthClient) SendRawPrivateTransactionQuorum(ctx context.Context, chainID *big.Int, args *SendTxArgs) (common.Hash, error) {
+	ec, err := mec.getClient(chainID)
+	if err != nil {
+		return common.Hash{}, err
+	}
+	return ec.SendRawPrivateTransactionQuorum(ctx, args)
 }
