@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.4
+
+*Released on March 20th 2019*
+
+- [FEAT] Make `tx-sender` compatible with `PrivateFor` transactions
+
 ### Version 0.3.3
 
 *Released on March 20th 2019*
