@@ -1,8 +1,15 @@
 # CHANGELOG
 
+### Version 0.3.0-alpha.2
+
+*Released on March 23rd 2019*
+
+- [CHORE] Update to `pkg` `v0.3.0-alpha.8`
+- [FEAT] Update signer behavior to process even if sender account is unknwon (so we support signing in Ethereum node)
+
 ### Version 0.3.0-alpha.1
 
-*Unreleased*
+*Released on March 23rd 2019*
 
 - [REFACTOR] Mobe to `pkg`
 - [FEAT] Use vaults as a secret store
