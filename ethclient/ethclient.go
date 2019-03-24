@@ -53,10 +53,10 @@ type SendTxArgs struct {
 
 	// Main transaction attributes
 	To       *ethcommon.Address `json:"to"`
-	Gas      hexutil.Uint64     `json:"gas"`
+	Gas      *hexutil.Uint64    `json:"gas"`
 	GasPrice *hexutil.Big       `json:"gasPrice"`
 	Value    *hexutil.Big       `json:"value"`
-	Nonce    hexutil.Uint64     `json:"nonce"`
+	Nonce    *hexutil.Uint64    `json:"nonce"`
 
 	// We accept "data" and "input" for backwards-compatibility reasons. "input" is the
 	// newer name and should be preferred
@@ -80,13 +80,19 @@ func Call2PrivateArgs(call *common.Call) *PrivateArgs {
 func Trace2SendTxArgs(tr *trace.Trace) *SendTxArgs {
 	args := SendTxArgs{
 		From:        tr.GetSender().Address(),
-		Gas:         hexutil.Uint64(tr.GetTx().GetTxData().GetGas()),
 		GasPrice:    (*hexutil.Big)(tr.GetTx().GetTxData().GasPriceBig()),
 		Value:       (*hexutil.Big)(tr.GetTx().GetTxData().ValueBig()),
-		Nonce:       hexutil.Uint64(tr.GetTx().GetTxData().GetNonce()),
 		Data:        hexutil.Bytes(tr.GetTx().GetTxData().DataBytes()),
 		Input:       hexutil.Bytes(tr.GetTx().GetTxData().DataBytes()),
 		PrivateArgs: *(Call2PrivateArgs(tr.GetCall())),
+	}
+
+	if gas := tr.GetTx().GetTxData().GetGas(); gas != 0 {
+		args.Gas = (*hexutil.Uint64)(&gas)
+	}
+
+	if nonce := tr.GetTx().GetTxData().GetNonce(); nonce != 0 {
+		args.Nonce = (*hexutil.Uint64)(&nonce)
 	}
 
 	if tr.GetTx().GetTxData().GetTo() != "" {
