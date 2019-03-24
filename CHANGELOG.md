@@ -2,7 +2,7 @@
 
 ### Version 0.3.0-alpha.3
 
-*Unreleased*
+*Released on March 24th 2019*
 
 - [CHORE] Upgrade to `pkg` `v0.3.0-alpha.8`
 - [FIX] Update trace status to `mined` after reconstituting context
