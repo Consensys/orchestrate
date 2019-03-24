@@ -1,6 +1,8 @@
 package worker
 
 import (
+	"context"
+
 	commonHandlers "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/handlers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
@@ -11,7 +13,7 @@ import (
 // CreateWorker creates worker and attach it to application
 func CreateWorker(infra *infra.Infra, marker services.OffsetMarker) *worker.Worker {
 	// Instantiate worker
-	w := worker.NewWorker(worker.NewConfig())
+	w := worker.NewWorker(context.Background(), worker.NewConfig())
 
 	// Handler::loader
 	w.Use(commonHandlers.Loader(infra.Unmarshaller))
