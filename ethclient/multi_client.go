@@ -11,7 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
-// MultiEthClient is client that can connect to multiple Ethereum chains
+// MultiEthClient is a client that can connect to multiple Ethereum chains
 type MultiEthClient struct {
 	ecs map[string]*EthClient
 }
@@ -23,8 +23,10 @@ func MultiDial(rawurls []string) (*MultiEthClient, error) {
 
 // MultiDialContext connects a multi-client to the given URLs.
 func MultiDialContext(ctx context.Context, rawurls []string) (*MultiEthClient, error) {
-	errors := make(chan error, len(rawurls))
-	clients := make(chan *EthClient, len(rawurls))
+	// Declare channels for client and errors so we can Dial clients concurrently
+	clients, errors := make(chan *EthClient, len(rawurls)), make(chan error, len(rawurls))
+
+	// Dial clients in multiple goroutine
 	wait := &sync.WaitGroup{}
 	for _, rawurl := range rawurls {
 		wait.Add(1)
@@ -38,21 +40,24 @@ func MultiDialContext(ctx context.Context, rawurls []string) (*MultiEthClient, e
 			}
 		}(rawurl)
 	}
+	// Wait for all clients to be ready and then close channel
 	wait.Wait()
 	close(clients)
 	close(errors)
 
+	// In case we fail to connect to a client we return an error
 	if len(errors) > 1 {
 		return nil, <-errors
 	}
 
+	// Prepare and return multi client
 	ecs := make(map[string]*EthClient)
 	for ec := range clients {
 		chainID, err := ec.NetworkID(ctx)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
-		ecs[chainIDToString(chainID)] = ec
+		ecs[ChainIDToString(chainID)] = ec
 	}
 
 	return &MultiEthClient{ecs: ecs}, nil
@@ -206,18 +211,6 @@ func (mec *MultiEthClient) SyncProgress(ctx context.Context, chainID *big.Int) (
 	return ec.SyncProgress(ctx)
 }
 
-func (mec *MultiEthClient) getClient(chainID *big.Int) (*EthClient, error) {
-	ec, ok := mec.ecs[chainIDToString(chainID)]
-	if !ok {
-		return nil, fmt.Errorf("No client registered for chain %q", chainID.Text(16))
-	}
-	return ec, nil
-}
-
-func chainIDToString(chainID *big.Int) string {
-	return chainID.Text(16)
-}
-
 // SendPrivateTransactionQuorum send transaction to Quorum node
 func (mec *MultiEthClient) SendPrivateTransactionQuorum(ctx context.Context, chainID *big.Int, args *SendTxArgs) (txHash common.Hash, err error) {
 	ec, err := mec.getClient(chainID)
@@ -229,10 +222,18 @@ func (mec *MultiEthClient) SendPrivateTransactionQuorum(ctx context.Context, cha
 
 // SendRawPrivateTransactionQuorum send a raw transaction to a Quorum node (only compatible if Quorum node uses Tessera)
 // TODO: to be implemented
-func (mec *MultiEthClient) SendRawPrivateTransactionQuorum(ctx context.Context, chainID *big.Int, args *SendTxArgs) (common.Hash, error) {
+func (mec *MultiEthClient) SendRawPrivateTransactionQuorum(ctx context.Context, chainID *big.Int, raw string, args *QuorumArgs) (common.Hash, error) {
 	ec, err := mec.getClient(chainID)
 	if err != nil {
 		return common.Hash{}, err
 	}
-	return ec.SendRawPrivateTransactionQuorum(ctx, args)
+	return ec.SendRawPrivateTransactionQuorum(ctx, raw, args)
+}
+
+func (mec *MultiEthClient) getClient(chainID *big.Int) (*EthClient, error) {
+	ec, ok := mec.ecs[ChainIDToString(chainID)]
+	if !ok {
+		return nil, fmt.Errorf("No client registered for chain %q", ChainIDToString(chainID))
+	}
+	return ec, nil
 }
