@@ -2,7 +2,7 @@
 
 ### Version 0.3.0
 
-*Unreleased*
+*Released on March 24th 2019*
 
 - [CHORE] Update to `pkg` `v0.3.0-alpha.8`
 
