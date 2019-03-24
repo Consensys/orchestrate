@@ -2,8 +2,10 @@
 
 ### Version 0.3.0
 
-*Unreleased*
+*Released on March 24th 2019*
 
+- [FEAT] Add support for `PrivateFor` transactions
+- [FEAT] Update `TxSender` interface
 - [FEAT] Make `MultiDial` dialing clients concurrently for faster start
 - [FIX] Clean `config`
 
