@@ -1,4 +1,4 @@
-package keystore
+package base
 
 import (
 	"fmt"
@@ -11,20 +11,20 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
 )
 
-//BaseKeyStore olds the methods of the interfaces BaseKeyStore
-type BaseKeyStore struct {
+// KeyStore olds the methods of the interfaces BaseKeyStore
+type KeyStore struct {
 	SecretStore secretstore.SecretStore
 }
 
-//NewBaseKeyStore construct a BaseKeyStore from a client
-func NewBaseKeyStore(secretStore secretstore.SecretStore) *BaseKeyStore {
-	return &BaseKeyStore{
+//NewKeyStore construct a BaseKeyStore from a client
+func NewKeyStore(secretStore secretstore.SecretStore) *KeyStore {
+	return &KeyStore{
 		SecretStore: secretStore,
 	}
 }
 
 // SignTx returns a signed transaction. It is perfectly equivalent to SignTx
-func (s *BaseKeyStore) SignTx(chain *common.Chain, a ethcommon.Address, tx *ethtypes.Transaction) (raw []byte, hash *ethcommon.Hash, err error) {
+func (s *KeyStore) SignTx(chain *common.Chain, a ethcommon.Address, tx *ethtypes.Transaction) (raw []byte, hash *ethcommon.Hash, err error) {
 	// Creates a new signing session
 	sess := session.MakeTxSignature(s.SecretStore)
 	err = sess.SetWallet(&a)
@@ -44,12 +44,12 @@ func (s *BaseKeyStore) SignTx(chain *common.Chain, a ethcommon.Address, tx *etht
 }
 
 // SignMsg returns a signed message and its hash
-func (s *BaseKeyStore) SignMsg(a ethcommon.Address, msg string) (rsv []byte, hash *ethcommon.Hash, err error) {
+func (s *KeyStore) SignMsg(a ethcommon.Address, msg string) (rsv []byte, hash *ethcommon.Hash, err error) {
 	return []byte{}, nil, fmt.Errorf("Not implemented yet")
 }
 
 // SignRawHash returns a signed raw hash
-func (s *BaseKeyStore) SignRawHash(
+func (s *KeyStore) SignRawHash(
 	a ethcommon.Address,
 	hash []byte,
 ) (rsv []byte, err error) {
@@ -58,7 +58,7 @@ func (s *BaseKeyStore) SignRawHash(
 }
 
 // GenerateWallet create and stores a new wallet in the vault
-func (s *BaseKeyStore) GenerateWallet() (add *ethcommon.Address, err error) {
+func (s *KeyStore) GenerateWallet() (add *ethcommon.Address, err error) {
 	wallet := wallet.NewWallet(s.SecretStore)
 	err = wallet.Generate()
 	if err != nil {
@@ -74,7 +74,7 @@ func (s *BaseKeyStore) GenerateWallet() (add *ethcommon.Address, err error) {
 }
 
 // ImportPrivateKey adds a private key in the vault
-func (s *BaseKeyStore) ImportPrivateKey(priv string) (err error) {
+func (s *KeyStore) ImportPrivateKey(priv string) (err error) {
 
 	wallet := wallet.NewWallet(s.SecretStore)
 	err = wallet.FromPrivateKey(priv)
@@ -91,7 +91,7 @@ func (s *BaseKeyStore) ImportPrivateKey(priv string) (err error) {
 }
 
 // RegisterPkeys allow to register private keys on key store
-func (s *BaseKeyStore) RegisterPkeys(pkeys []string) (err error) {
+func (s *KeyStore) RegisterPkeys(pkeys []string) (err error) {
 	for _, pkey := range pkeys {
 		err = s.ImportPrivateKey(pkey)
 		if err != nil {

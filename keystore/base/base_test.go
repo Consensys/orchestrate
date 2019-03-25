@@ -1,4 +1,4 @@
-package keystore
+package base
 
 import (
 	"testing"
@@ -20,7 +20,7 @@ func TestKeyStore(t *testing.T) {
 		t.Errorf("Error initializing the vault : %v", err.Error())
 	}
 
-	keystore := NewBaseKeyStore(hashicorpsSS)
+	keystore := NewKeyStore(hashicorpsSS)
 
 	_, err = keystore.GenerateWallet()
 	if err != nil {
