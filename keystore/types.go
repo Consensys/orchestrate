@@ -7,8 +7,8 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/keystore/base"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/keystore/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/hashicorp"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
 )
 
@@ -29,39 +29,38 @@ type KeyStore interface {
 
 // NewKeyStore create new Key Store
 func NewKeyStore() (KeyStore, error) {
+	var s *base.KeyStore
 	switch viper.GetString(secretStoreViperKey) {
 	case "test":
-		s := mock.NewKeyStore()
-		for _, pkey := range viper.GetStringSlice(secretPkeyViperKey) {
-			err := s.ImportPrivateKey(pkey)
-			if err != nil {
-				return nil, err
-			}
-		}
-		return s, nil
+		// Create Key Store from a Mock SecretStore
+		s = base.NewKeyStore(mock.NewSecretStore())
 	case "hashicorp":
+		// Create an hashicorp vault object
 		vault, err := hashicorp.NewHashicorps(hashicorp.NewConfig())
 		if err != nil {
 			return nil, err
 		}
 
-		// Initialize hashicorp Vault
+		// Initialize Vault
 		err = hashicorp.AutoInit(vault)
 		if err != nil {
 			return nil, err
 		}
 
-		s := base.NewKeyStore(vault)
-
-		for _, pkey := range viper.GetStringSlice(secretPkeyViperKey) {
-			err := s.ImportPrivateKey(pkey)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		return s, nil
+		// Create Key Store
+		s = base.NewKeyStore(vault)
 	default:
-		return nil, fmt.Errorf("Invalid Key Store %q", viper.GetString(secretStoreViperKey))
+		// Key Store type should be one of "test", "hashicorp"
+		return nil, fmt.Errorf("Invalid Store type %q", viper.GetString(secretStoreViperKey))
 	}
+
+	// Pre-Import Pkeys
+	for _, pkey := range viper.GetStringSlice(secretPkeyViperKey) {
+		err := s.ImportPrivateKey(pkey)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return s, nil
 }
