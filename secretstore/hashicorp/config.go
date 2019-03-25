@@ -121,6 +121,8 @@ func AutoInit(hashicorps *Hashicorps) (err error) {
 		log.WithFields(log.Fields{
 			"vault.token": hashicorps.creds.Token,
 		}).Warnf("hashicorp: !!!WARNING this message is meant for debugging purpose and should be removed ASAP!!!")
+
+		// Set token
 		hashicorps.SetToken(hashicorps.creds.Token)
 	} else {
 		// Vault has been properly unsealed so we push credentials on AWS
