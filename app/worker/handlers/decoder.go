@@ -45,6 +45,7 @@ func Decoder(r services.ABIRegistry) worker.HandlerFunc {
 
 			// Set decoded data on log
 			l.DecodedData = mapping
+			l.Event = l.Topics[0]
 
 			ctx.Logger.WithFields(log.Fields{
 				"log": mapping,
