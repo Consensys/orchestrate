@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.2
+
+*Released on March 25th 2019*
+
+- [FEAT] Add ```Event``` field with event name in proto message
+
 ### Version 0.3.1
 
 *Released on March 24th 2019*
