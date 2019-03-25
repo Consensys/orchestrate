@@ -2,11 +2,13 @@ package handlers
 
 import (
 	"fmt"
+	"strings"
 
+	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/abi"
 )
 
 // Decoder creates a decode handler
@@ -45,11 +47,20 @@ func Decoder(r services.ABIRegistry) worker.HandlerFunc {
 
 			// Set decoded data on log
 			l.DecodedData = mapping
-			l.Event = event.Name
+			l.Event = GetAbi(event)
 
 			ctx.Logger.WithFields(log.Fields{
 				"log": mapping,
 			}).Debug("decoder: log decoded")
 		}
 	}
+}
+
+// GetAbi creates a string ABI (format EventName(argType1, argType2)) from an event
+func GetAbi(e ethAbi.Event) string {
+	inputs := make([]string, len(e.Inputs))
+	for i, input := range e.Inputs {
+		inputs[i] = fmt.Sprintf("%v", input.Type)
+	}
+	return fmt.Sprintf("%v(%v)", e.Name, strings.Join(inputs, ","))
 }
