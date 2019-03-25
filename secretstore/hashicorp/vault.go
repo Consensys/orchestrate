@@ -103,11 +103,7 @@ func (hash *Hashicorps) Store(key, value string) (err error) {
 // Load reads in the vault
 func (hash *Hashicorps) Load(key string) (value string, ok bool, err error) {
 	sec := NewSecret(key, "").SetClient(hash.Client)
-	res, err := sec.GetValue()
-	if err != nil {
-		return "", false, err
-	}
-	return res, ok, nil
+	return sec.GetValue()
 }
 
 // Delete removes a path in the vault

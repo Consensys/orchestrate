@@ -51,7 +51,7 @@ func (s *Secret) SetClient(client *api.Client) *Secret {
 
 // SaveNew stores a new Secret in the vault
 func (s *Secret) SaveNew() (err error) {
-	fetched, err := s.GetValue()
+	fetched, _, err := s.GetValue()
 	if fetched != "" {
 		return fmt.Errorf("Secret %q already exists", s.key)
 	}
@@ -59,22 +59,22 @@ func (s *Secret) SaveNew() (err error) {
 }
 
 // GetValue fetch the value from AWS SecretManager by key
-func (s *Secret) GetValue() (string, error) {
+func (s *Secret) GetValue() (string, bool, error) {
 	// Read secret from Vault
 	logical := s.client.Logical()
 	res, err := logical.Read(fmt.Sprintf("secret/secret/%v", s.key))
 	if err != nil {
-		return "", err
+		return "", false, err
 	}
 
 	// When the secret is missing the client returns nil, nil.
 	// We catch it here
 	if res == nil {
-		return "", fmt.Errorf("No secret for key %q", s.key)
+		return "", false, nil
 	}
 	s.value = res.Data["value"].(string)
 
-	return s.value, nil
+	return s.value, true, nil
 }
 
 // Update the Secret value stored in the aws Secret manager
