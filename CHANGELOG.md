@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.4
+
+*Released on March 26th 2019*
+
+- [FIX] Disable `SQLAutodiscovery` for migrations to evoid `panic` when running migrations in docker container
+
 ### Version 0.1.3
 
 *Released on March 20th 2019*
