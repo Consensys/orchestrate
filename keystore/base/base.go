@@ -74,6 +74,7 @@ func (s *KeyStore) GenerateWallet() (add *ethcommon.Address, err error) {
 }
 
 // ImportPrivateKey adds a private key in the vault
+// TODO: this is Unsafe and should be removed soon
 func (s *KeyStore) ImportPrivateKey(priv string) (err error) {
 
 	wallet := wallet.NewWallet(s.SecretStore)
@@ -87,16 +88,5 @@ func (s *KeyStore) ImportPrivateKey(priv string) (err error) {
 		return err
 	}
 
-	return nil
-}
-
-// RegisterPkeys allow to register private keys on key store
-func (s *KeyStore) RegisterPkeys(pkeys []string) (err error) {
-	for _, pkey := range pkeys {
-		err = s.ImportPrivateKey(pkey)
-		if err != nil {
-			return err
-		}
-	}
 	return nil
 }
