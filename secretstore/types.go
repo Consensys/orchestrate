@@ -6,7 +6,7 @@ type SecretStore interface {
 	Store(key, value string) (err error)
 
 	// Load secret
-	Load(key string) (value string, err error)
+	Load(key string) (value string, ok bool, err error)
 
 	// Delete secret
 	Delete(key string) (err error)
