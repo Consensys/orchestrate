@@ -1,8 +1,8 @@
 # CHANGELOG
 
-### Version 0.3.0-alpha.1
+### Version 0.3.0-alpha.5
 
-*Unrelease*
+*Released on March 25th 2019*
 
 - [REFACTOR] Re-org script
 - [FEAT] Implement a `keystore.NewKeyStore`
