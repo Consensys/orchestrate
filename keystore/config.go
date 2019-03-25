@@ -21,9 +21,15 @@ var (
 	secretStoreEnv      = "SECRET_STORE"
 )
 
+// InitFlags initialize flags
+func InitFlags(f *pflag.FlagSet) {
+	SecretStore(f)
+	SecretPkeys(f)
+}
+
 // SecretStore register flag for Vault accounts
 func SecretStore(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Choose secret store type (one of %q %q)
+	desc := fmt.Sprintf(`Type of secret store for private keys (one of %q %q)
 Environment variable: %q`, "test", "hashicorp", secretStoreEnv)
 	f.String(secretStoreFlag, secretStoreDefault, desc)
 	viper.BindPFlag(secretStoreViperKey, f.Lookup(secretStoreFlag))
@@ -49,7 +55,7 @@ var (
 
 // SecretPkeys register flag for Vault accounts
 func SecretPkeys(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Private key to pre-register on key store
+	desc := fmt.Sprintf(`Private keys to pre-register in key store
 Environment variable: %q`, secretPkeyEnv)
 	f.StringSlice(secretPkeyFlag, secretPkeyDefault, desc)
 	viper.BindPFlag(secretPkeyViperKey, f.Lookup(secretPkeyFlag))
