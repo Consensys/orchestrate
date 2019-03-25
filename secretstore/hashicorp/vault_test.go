@@ -1,4 +1,4 @@
-package secretstore
+package hashicorp
 
 import (
 	"testing"
@@ -9,7 +9,6 @@ import (
 //TestSecretStore must be run along with a vault container in development mode
 //It will sequentially writes a secret, list all the secrets, get the secret then delete it.
 func TestSecretStore(t *testing.T) {
-
 	runCmd := &cobra.Command{
 		Use:   "run",
 		Short: "Run application",

@@ -7,6 +7,11 @@ import (
 	"github.com/spf13/viper"
 )
 
+func init() {
+	viper.SetDefault(secretPkeyViperKey, secretPkeyDefault)
+	viper.BindEnv(secretPkeyViperKey, secretPkeyEnv)
+}
+
 var (
 	secretPkeyFlag     = "secret-pkey"
 	secretPkeyViperKey = "secret.pkeys"
@@ -30,7 +35,5 @@ func SecretPkeys(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Private key to pre-register on key store
 Environment variable: %q`, secretPkeyEnv)
 	f.StringSlice(secretPkeyFlag, secretPkeyDefault, desc)
-	viper.SetDefault(secretPkeyViperKey, secretPkeyDefault)
 	viper.BindPFlag(secretPkeyViperKey, f.Lookup(secretPkeyFlag))
-	viper.BindEnv(secretPkeyViperKey, secretPkeyEnv)
 }

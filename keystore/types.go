@@ -8,8 +8,15 @@ import (
 
 // KeyStore is an interface implemented by module that are able to perform signature transactions
 type KeyStore interface {
+	// SignTx signs a transaction
 	SignTx(chain *common.Chain, a ethcommon.Address, tx *ethtypes.Transaction) (raw []byte, txHash *ethcommon.Hash, err error)
+
+	// SignMsg sign a message TODO: what is the EIP?
 	SignMsg(a ethcommon.Address, msg string) (rsv []byte, hash *ethcommon.Hash, err error) //TODO: do notforget to add prefix
+
+	// SignRawHash sign a bytes
 	SignRawHash(a ethcommon.Address, hash []byte) (rsv []byte, err error)
+
+	// GenerateWallet creates a wallet
 	GenerateWallet() (add *ethcommon.Address, err error)
 }

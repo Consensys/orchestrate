@@ -1,12 +1,12 @@
-package secretstore
+package hashicorp
 
 import (
 	"fmt"
 
+	vault "github.com/hashicorp/vault/api"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-
-	vault "github.com/hashicorp/vault/api"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/aws"
 )
 
 func init() {
@@ -14,6 +14,10 @@ func init() {
 	viper.BindEnv(vaultURIViperKey, vaultURIEnv)
 	viper.SetDefault(vaultTokenNameViperKey, vaultTokenNameEnv)
 	viper.BindEnv(vaultTokenNameViperKey, vaultTokenNameEnv)
+	viper.SetDefault(vaultTokenViperKey, vaultTokenEnv)
+	viper.BindEnv(vaultTokenViperKey, vaultTokenEnv)
+	viper.SetDefault(vaultUnsealKeyViperKey, vaultUnsealKeyEnv)
+	viper.BindEnv(vaultUnsealKeyViperKey, vaultUnsealKeyEnv)
 }
 
 var (
@@ -28,7 +32,7 @@ var (
 	vaultTokenNameEnv      = "VAULT_TOKEN_NAME"
 
 	vaultTokenFlag     = "vault-token"
-	vaultTokenViperKey = "vault.token.value"
+	vaultTokenViperKey = "vault.token"
 	vaultTokenDefault  = ""
 	vaultTokenEnv      = "VAULT_TOKEN"
 
@@ -48,39 +52,34 @@ func InitFlags(f *pflag.FlagSet) {
 
 // VaultURI register a flag for vault server address
 func VaultURI(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Hashicorp secret vault URI Environment variable: %q`, vaultURIEnv)
+	desc := fmt.Sprintf(`Hashicorp secret vault URI 
+Environment variable: %q`, vaultURIEnv)
 	f.String(vaultURIFlag, vaultURIDefault, desc)
-	viper.SetDefault(vaultURIViperKey, vaultURIDefault)
 	viper.BindPFlag(vaultURIViperKey, f.Lookup(vaultURIFlag))
-	viper.BindEnv(vaultURIViperKey, vaultURIEnv)
 }
 
 // VaultToken register a flag for vault server address
 func VaultToken(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Hashicorp secret vault Token Environment variable: %q`, vaultTokenEnv)
+	desc := fmt.Sprintf(`Hashicorp secret vault authentication token
+Environment variable: %q`, vaultTokenEnv)
 	f.String(vaultTokenFlag, vaultTokenDefault, desc)
-	viper.SetDefault(vaultTokenViperKey, vaultTokenDefault)
 	viper.BindPFlag(vaultTokenViperKey, f.Lookup(vaultTokenFlag))
-	viper.BindEnv(vaultTokenViperKey, vaultTokenEnv)
 }
 
 // VaultUnsealKey registers a flag for the value of the vault unseal key
 func VaultUnsealKey(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Hashicorp secret vault unseal key Environment variable: %q`, vaultTokenEnv)
+	desc := fmt.Sprintf(`Hashicorp vault unsealing key
+Environment variable: %q`, vaultTokenEnv)
 	f.String(vaultUnsealKeyFlag, vaultUnsealKeyDefault, desc)
-	viper.SetDefault(vaultUnsealKeyViperKey, vaultUnsealKeyDefault)
 	viper.BindPFlag(vaultUnsealKeyViperKey, f.Lookup(vaultUnsealKeyFlag))
-	viper.BindEnv(vaultUnsealKeyViperKey, vaultUnsealKeyEnv)
-
 }
 
 // VaultTokenName register a flag for vault server address
 func VaultTokenName(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Hashicorp secret vault URI Environment variable: %q`, vaultTokenNameEnv)
+	desc := fmt.Sprintf(`Hashicorp token name on AWS
+Environment variable: %q`, vaultTokenNameEnv)
 	f.String(vaultTokenNameFlag, vaultTokenNameDefault, desc)
-	viper.SetDefault(vaultTokenNameViperKey, vaultTokenNameDefault)
 	viper.BindPFlag(vaultTokenNameViperKey, f.Lookup(vaultURIFlag))
-	viper.BindEnv(vaultTokenNameViperKey, vaultTokenNameEnv)
 }
 
 // NewConfig icreates vault configuration from viper
@@ -92,8 +91,8 @@ func NewConfig() *vault.Config {
 
 // AutoInit will try to Init the vault directly or FetchFromAws
 func AutoInit(hashicorps *Hashicorps) (err error) {
-	tokenName := viper.GetString("vault.token.name")
-	awsSS := NewAWS(7)
+	tokenName := viper.GetString(vaultTokenNameViperKey)
+	awsSS := aws.NewAWS(7)
 	err = hashicorps.InitVault()
 	if err != nil {
 		// Probably Vault is already unsealed so we retrieve credentials from AWS
@@ -107,7 +106,6 @@ func AutoInit(hashicorps *Hashicorps) (err error) {
 		if err != nil {
 			return fmt.Errorf("Could not send credentials to AWS: %v", err)
 		}
-
 	}
 	return nil
 }
