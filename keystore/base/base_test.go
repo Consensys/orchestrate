@@ -58,12 +58,13 @@ type BaseKeyStoreTestSuite struct {
 
 func (suite *BaseKeyStoreTestSuite) SetupTest() {
 	suite.Store = NewKeyStore(mock.NewSecretStore())
-	for _, priv := range testPKeys {
-		suite.Store.ImportPrivateKey(priv.prv)
-	}
 }
 
 func (suite *BaseKeyStoreTestSuite) TestKeyStore() {
+	for _, priv := range testPKeys {
+		suite.Store.ImportPrivateKey(priv.prv)
+	}
+
 	// Feed input channel and then close it
 	rounds := 1000
 	wg := &sync.WaitGroup{}
@@ -83,6 +84,11 @@ func (suite *BaseKeyStoreTestSuite) TestKeyStore() {
 	for raw := range out {
 		assert.True(suite.T(), len(raw) > 95, "Expected transaction to be signed but got %q", hexutil.Encode(raw))
 	}
+}
+
+func (suite *BaseKeyStoreTestSuite) TestGenerateWallet() {
+	_, err := suite.Store.GenerateWallet()
+	assert.Nil(suite.T(), err, "Wallet should be generated")
 }
 
 func TestKeyStore(t *testing.T) {
