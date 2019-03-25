@@ -1,28 +1,29 @@
-package keystore
+package session
 
 import (
-	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	ethcommon "github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/rlp"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore"
 	"fmt"
 	"math/big"
+
+	ethcommon "github.com/ethereum/go-ethereum/common"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/rlp"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/keystore/wallet"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
 )
 
 // TxSignatureSession holds all the logic allowing the signature of an ethereum transaction
 type TxSignatureSession struct {
 	secretStore secretstore.SecretStore
-	wallet *Wallet
-	chain *common.Chain
-	tx *ethtypes.Transaction
-	signedRaw []byte
-	txHash *ethcommon.Hash
+	wallet      *wallet.Wallet
+	chain       *common.Chain
+	tx          *ethtypes.Transaction
+	Raw         []byte
+	Hash        *ethcommon.Hash
 }
 
 // MakeTxSignature create a new tx signature session from address
 func MakeTxSignature(secretStore secretstore.SecretStore) *TxSignatureSession {
-
 	return &TxSignatureSession{
 		secretStore: secretStore,
 	}
@@ -31,7 +32,7 @@ func MakeTxSignature(secretStore secretstore.SecretStore) *TxSignatureSession {
 // SetWallet sets the wallet to the provided address
 func (sess *TxSignatureSession) SetWallet(address *ethcommon.Address) error {
 
-	wallet := NewWallet(sess.secretStore)
+	wallet := wallet.NewWallet(sess.secretStore)
 	err := wallet.Load(address)
 	if err != nil {
 		return fmt.Errorf("Could not retrieve private key for address : " + err.Error())
@@ -73,16 +74,15 @@ func (sess *TxSignatureSession) getSigner() (ethtypes.Signer, error) {
 	return signer, nil
 }
 
-// Run : once all the element of the session have been set, 
+// Run : once all the element of the session have been set,
 // it assigns the signed transaction and the txhash
 func (sess *TxSignatureSession) Run() (err error) {
-
 	signer, err := sess.getSigner()
 	if err != nil {
 		return err
 	}
 
-	t, err := ethtypes.SignTx(sess.tx, signer, sess.wallet.GetPriv())
+	t, err := ethtypes.SignTx(sess.tx, signer, sess.wallet.Priv())
 	if err != nil {
 		return err
 	}
@@ -94,9 +94,7 @@ func (sess *TxSignatureSession) Run() (err error) {
 	}
 
 	txHash := t.Hash()
-	sess.signedRaw = signedRaw
-	sess.txHash = &txHash
+	sess.Raw = signedRaw
+	sess.Hash = &txHash
 	return nil
 }
-
-

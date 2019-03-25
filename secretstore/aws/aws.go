@@ -1,31 +1,30 @@
-package secretstore
+package aws
 
 import (
-	"github.com/aws/aws-sdk-go/service/secretsmanager"
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"fmt"
+	"github.com/aws/aws-sdk-go/service/secretsmanager"
 )
 
 // AWS can manage secrets on AWS secret manager
 type AWS struct {
-	client *secretsmanager.SecretsManager
+	client             *secretsmanager.SecretsManager
 	recoveryTimeInDays int
 }
 
 // NewAWS returns a default configured AWS secretstore
-func NewAWS(recoveryTimeInDays int) (*AWS) {
+func NewAWS(recoveryTimeInDays int) *AWS {
 	return &AWS{
-		client: secretsmanager.New(session.New()),
+		client:             secretsmanager.New(session.New()),
 		recoveryTimeInDays: recoveryTimeInDays,
 	}
 }
 
 // Store set the new string value in the AWS secrets manager
 func (ss *AWS) Store(key, value string) (err error) {
-
 	err = ss.create(key, value)
-
 	if err != nil {
 		err = ss.update(key, value)
 		if err != nil {
@@ -38,9 +37,8 @@ func (ss *AWS) Store(key, value string) (err error) {
 
 // Delete removes a secret from the secret store
 func (ss *AWS) Delete(key string) (err error) {
-
-	if ss.client == nil { 
-		return fmt.Errorf("Client not set") 
+	if ss.client == nil {
+		return fmt.Errorf("Client not set")
 	}
 
 	input := secretsmanager.DeleteSecretInput{
@@ -48,17 +46,16 @@ func (ss *AWS) Delete(key string) (err error) {
 		SecretId:             aws.String(key),
 	}
 
-	_, err = ss.client.DeleteSecret(&input); 
+	_, err = ss.client.DeleteSecret(&input)
 	if err != nil {
 		return err
 	}
 
-	return nil	
+	return nil
 }
 
 // List returns a list of available secrets
 func (ss *AWS) List() ([]string, error) {
-
 	if ss.client == nil {
 		return []string{}, fmt.Errorf("Client not set")
 	}
@@ -71,7 +68,7 @@ func (ss *AWS) List() ([]string, error) {
 	}
 
 	list := make([]string, len(res.SecretList))
-	for i := 0; i<len(res.SecretList); i++ {
+	for i := 0; i < len(res.SecretList); i++ {
 		list[i] = *res.SecretList[i].Name
 	}
 
@@ -80,8 +77,9 @@ func (ss *AWS) List() ([]string, error) {
 
 // Load the secret value from the secret manager of AWS
 func (ss *AWS) Load(key string) (string, error) {
-
-	if ss.client == nil { return "", fmt.Errorf("Client not set")}
+	if ss.client == nil {
+		return "", fmt.Errorf("Client not set")
+	}
 
 	input := secretsmanager.GetSecretValueInput{
 		SecretId:     aws.String(key),
@@ -97,15 +95,14 @@ func (ss *AWS) Load(key string) (string, error) {
 }
 
 func (ss *AWS) create(key, value string) (err error) {
-
-	if ss.client == nil { 
+	if ss.client == nil {
 		return fmt.Errorf("Client not set")
 	}
 
 	input := secretsmanager.CreateSecretInput{
-		Description:        aws.String("Miscellaneous core-stack secret"),
-		Name:               aws.String(key),
-		SecretString:       aws.String(value),
+		Description:  aws.String("Miscellaneous core-stack secret"),
+		Name:         aws.String(key),
+		SecretString: aws.String(value),
 	}
 
 	_, err = ss.client.CreateSecret(&input)
@@ -113,18 +110,17 @@ func (ss *AWS) create(key, value string) (err error) {
 		return err
 	}
 
-	return nil	
+	return nil
 }
 
 func (ss *AWS) update(key, value string) (err error) {
-
-	if ss.client == nil { 
+	if ss.client == nil {
 		return fmt.Errorf("Client not set")
 	}
 
 	input := secretsmanager.PutSecretValueInput{
-		SecretId:           aws.String(key),
-		SecretString:       aws.String(value),
+		SecretId:     aws.String(key),
+		SecretString: aws.String(value),
 	}
 
 	_, err = ss.client.PutSecretValue(&input)
@@ -132,6 +128,5 @@ func (ss *AWS) update(key, value string) (err error) {
 		return err
 	}
 
-	return nil	
-
+	return nil
 }

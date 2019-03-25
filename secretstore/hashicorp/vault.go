@@ -1,9 +1,10 @@
-package secretstore
+package hashicorp
 
 import (
 	"sync"
 
 	"github.com/hashicorp/vault/api"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/aws"
 )
 
 // Hashicorps wraps a hashicorps client an manage the unsealing
@@ -15,7 +16,6 @@ type Hashicorps struct {
 
 // NewHashicorps construct a new hashicorps vault given a configfile or nil
 func NewHashicorps(config *api.Config) (*Hashicorps, error) {
-
 	if config == nil {
 		config = api.DefaultConfig()
 	}
@@ -50,8 +50,7 @@ func (hash *Hashicorps) InitVault() (err error) {
 }
 
 // SendToCredStore stores the vault credentials in AWS
-func (hash *Hashicorps) SendToCredStore(credsStore *AWS, tokenName string) (err error) {
-
+func (hash *Hashicorps) SendToCredStore(credsStore *aws.AWS, tokenName string) (err error) {
 	err = hash.creds.SendToAWS(credsStore, tokenName)
 	if err != nil {
 		return err
@@ -61,8 +60,7 @@ func (hash *Hashicorps) SendToCredStore(credsStore *AWS, tokenName string) (err 
 }
 
 // InitFromAWS manages vault token auth and unsealing
-func (hash *Hashicorps) InitFromAWS(credsStore *AWS, tokenName string) (err error) {
-
+func (hash *Hashicorps) InitFromAWS(credsStore *aws.AWS, tokenName string) (err error) {
 	err = hash.creds.FetchFromAWS(credsStore, tokenName)
 	if err != nil {
 		return err
@@ -98,29 +96,25 @@ func (hash *Hashicorps) SetToken(token string) {
 
 // Store writes in the vault
 func (hash *Hashicorps) Store(key, value string) (err error) {
-	sec := NewVaultSecret().SetKey(key).SetValue(value).SetClient(hash.Client)
+	sec := NewSecret(key, value).SetClient(hash.Client)
 	return sec.Update()
 }
 
 // Load reads in the vault
-func (hash *Hashicorps) Load(key string) (value string, err error) {
-	sec := NewVaultSecret().SetKey(key).SetClient(hash.Client)
-	res, err := sec.GetValue()
-	if err != nil {
-		return "", err
-	}
-	return res, nil
+func (hash *Hashicorps) Load(key string) (value string, ok bool, err error) {
+	sec := NewSecret(key, "").SetClient(hash.Client)
+	return sec.GetValue()
 }
 
 // Delete removes a path in the vault
 func (hash *Hashicorps) Delete(key string) (err error) {
-	sec := NewVaultSecret().SetKey(key).SetClient(hash.Client)
+	sec := NewSecret(key, "").SetClient(hash.Client)
 	return sec.Delete()
 }
 
 // List returns the list of all secrets stored in the vault
 func (hash *Hashicorps) List() (keys []string, err error) {
-	sec := NewVaultSecret().SetClient(hash.Client)
+	sec := NewSecret("", "").SetClient(hash.Client)
 	keys, err = sec.List()
 	return keys, err
 }
