@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.3
+
+*Released on March 25th 2019*
+
+- [FIX] Update ```Event``` field with the event ABI
+
 ### Version 0.3.2
 
 *Released on March 25th 2019*
