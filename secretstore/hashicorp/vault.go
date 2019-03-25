@@ -51,7 +51,6 @@ func (hash *Hashicorps) InitVault() (err error) {
 
 // SendToCredStore stores the vault credentials in AWS
 func (hash *Hashicorps) SendToCredStore(credsStore *aws.AWS, tokenName string) (err error) {
-
 	err = hash.creds.SendToAWS(credsStore, tokenName)
 	if err != nil {
 		return err

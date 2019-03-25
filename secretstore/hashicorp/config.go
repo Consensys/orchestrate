@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	vault "github.com/hashicorp/vault/api"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/aws"
@@ -92,18 +93,45 @@ func NewConfig() *vault.Config {
 // AutoInit will try to Init the vault directly or FetchFromAws
 func AutoInit(hashicorps *Hashicorps) (err error) {
 	tokenName := viper.GetString(vaultTokenNameViperKey)
+	log.WithFields(log.Fields{
+		"aws.secret": tokenName,
+	}).Debugf("hashicorp: auto-initiliazing vault (credentials from AWS)")
+
+	// Create AWS object to retrieve Vault credentials
 	awsSS := aws.NewAWS(7)
+
+	// Initialize Vault
 	err = hashicorps.InitVault()
 	if err != nil {
+		log.WithError(err).Debugf("hashicorp: failed to init")
+
 		// Probably Vault is already unsealed so we retrieve credentials from AWS
-		err = hashicorps.InitFromAWS(awsSS, tokenName)
+		secret, err := awsSS.Load(tokenName)
 		if err != nil {
-			return fmt.Errorf("Could not retrieve credentials from AWS: %v", err)
+			log.WithError(err).Errorf("hashicorp: failed to load credentials from AWS")
+			return err
 		}
+
+		err = hashicorps.creds.fromEncoded(secret)
+		if err != nil {
+			log.WithError(err).Errorf("hashicorp: failed to decode credentials")
+			return err
+		}
+
+		log.WithFields(log.Fields{
+			"vault.token": hashicorps.creds.Token,
+		}).Warnf("hashicorp: !!!WARNING this message is meant for debugging purpose and should be removed ASAP!!!")
+		hashicorps.SetToken(hashicorps.creds.Token)
 	} else {
 		// Vault has been properly unsealed so we push credentials on AWS
-		err = hashicorps.SendToCredStore(awsSS, tokenName)
+		encoded, err := hashicorps.creds.encode()
 		if err != nil {
+			return err
+		}
+
+		err = awsSS.Store(tokenName, encoded)
+		if err != nil {
+			log.WithError(err).Errorf("hashicorp: failed to store credentials in AWS")
 			return fmt.Errorf("Could not send credentials to AWS: %v", err)
 		}
 	}

@@ -9,6 +9,7 @@ require (
 	github.com/hashicorp/go-sockaddr v1.0.2 // indirect
 	github.com/hashicorp/vault v0.10.3
 	github.com/jessevdk/go-flags v1.4.0
+	github.com/prometheus/common v0.2.0
 	github.com/ryanuber/go-glob v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.3.0
 	github.com/spf13/cobra v0.0.3
