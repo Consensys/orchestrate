@@ -61,9 +61,13 @@ func (w *Wallet) Store() (err error) {
 func (w *Wallet) Load(a *common.Address) (err error) {
 	w.address = *a
 
-	priv, err := w.sec.Load(a.Hex())
+	priv, ok, err := w.sec.Load(a.Hex())
 	if err != nil {
 		return err
+	}
+
+	if !ok {
+		return fmt.Errorf("No pkey stored for accound %q", a.Hex())
 	}
 
 	w.priv, err = crypto.HexToECDSA(priv)
