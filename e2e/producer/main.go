@@ -67,6 +67,9 @@ func newMessage(i int) *sarama.ProducerMessage {
 				GasUsed:           uint64(10000),
 				CumulativeGasUsed: uint64(10000),
 			},
+			Metadata: &trace.Metadata{
+				Id: "bc430299-4d34-4920-81be-b9fc5b6ef0f9",
+			},
 		},
 	)
 	msg.Value = sarama.ByteEncoder(b)
