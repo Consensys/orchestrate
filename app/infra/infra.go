@@ -7,7 +7,6 @@ import (
 	"github.com/Shopify/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/keystore"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
 )
 
@@ -18,8 +17,7 @@ type Infra struct {
 	Unmarshaller services.Unmarshaller
 	Producer     services.Producer
 
-	KeyStore    keystore.KeyStore
-	SecretStore secretstore.SecretStore
+	KeyStore keystore.KeyStore
 
 	Mec *ethclient.MultiEthClient
 

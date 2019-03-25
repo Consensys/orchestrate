@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.0-alpha.3
+
+*Released on March 25th 2019*
+
+- [CHORE] Update to `keystore` `v0.3.0-alpha.5`
+
 ### Version 0.3.0-alpha.2
 
 *Released on March 23rd 2019*
