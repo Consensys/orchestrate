@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.2.0
+
+*Unreleased*
+
+- [FEAT] Add method `SetAddress` on `Account` proto
+
 ### Version 0.2.0-alpha.8
 
 *Released on March 23th 2019*

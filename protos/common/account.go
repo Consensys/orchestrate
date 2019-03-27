@@ -18,3 +18,9 @@ func (acc *Account) Address() common.Address {
 
 	return common.HexToAddress(acc.GetAddr())
 }
+
+// SetAddress sets account address
+func (acc *Account) SetAddress(addr common.Address) *Account {
+	acc.Addr = addr.Hex()
+	return acc
+}
