@@ -34,6 +34,7 @@ $ docker-compose -f e2e/docker-compose.yml
 2. Migrate database
 
 ```sh
+$ go run . migrate init
 $ go run . migrate
 ```
 
