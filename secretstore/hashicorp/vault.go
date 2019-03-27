@@ -1,17 +1,12 @@
 package hashicorp
 
 import (
-	"sync"
-
 	"github.com/hashicorp/vault/api"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/aws"
 )
 
 // Hashicorps wraps a hashicorps client an manage the unsealing
 type Hashicorps struct {
 	Client             *api.Client
-	creds              *credentials
-	retrieveSecretOnce *sync.Once
 }
 
 // NewHashicorps construct a new hashicorps vault given a configfile or nil
@@ -25,73 +20,9 @@ func NewHashicorps(config *api.Config) (*Hashicorps, error) {
 		return nil, err
 	}
 
-	creds := &credentials{}
 	return &Hashicorps{
 		Client: client,
-		creds:  creds,
 	}, nil
-}
-
-// InitVault fetches the new token and sets the values in AWS
-func (hash *Hashicorps) InitVault() (err error) {
-	err = hash.creds.FetchFromVaultInit(hash.Client)
-	if err != nil {
-		return err
-	}
-
-	hash.SetToken(hash.creds.Token)
-
-	err = hash.Unseal(hash.creds.Keys[0])
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// SendToCredStore stores the vault credentials in AWS
-func (hash *Hashicorps) SendToCredStore(credsStore *aws.AWS, tokenName string) (err error) {
-	err = hash.creds.SendToAWS(credsStore, tokenName)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// InitFromAWS manages vault token auth and unsealing
-func (hash *Hashicorps) InitFromAWS(credsStore *aws.AWS, tokenName string) (err error) {
-	err = hash.creds.FetchFromAWS(credsStore, tokenName)
-	if err != nil {
-		return err
-	}
-
-	hash.creds.AttachTo(hash.Client)
-
-	err = hash.creds.Unseal(hash.Client)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// Unseal the vault
-// Warning call Unseal is Unsafe
-func (hash *Hashicorps) Unseal(unsealKey string) (err error) {
-	sys := hash.Client.Sys()
-	sys.Unseal(unsealKey)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// SetToken authorize the client to access vault
-// Warning call SetToken is Unsafe
-func (hash *Hashicorps) SetToken(token string) {
-	hash.Client.SetToken(token)
 }
 
 // Store writes in the vault

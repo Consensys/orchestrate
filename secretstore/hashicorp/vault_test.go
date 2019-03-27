@@ -17,10 +17,6 @@ func (suite *HashicorpKeyStoreTestSuite) SetupTest() {
 	if err != nil {
 		panic(err)
 	}
-	err = hashicorps.InitVault()
-	if err != nil {
-		panic(err)
-	}
 	suite.Store = hashicorps
 }
 

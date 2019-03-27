@@ -22,27 +22,6 @@ func NewSecret(key, value string) *Secret {
 	}
 }
 
-// NewSecretFromKey creates a Secret from a key, it does not fetch the associated value.
-func NewSecretFromKey(key string) *Secret {
-	return &Secret{
-		key:    key,
-		value:  "",
-		client: nil,
-	}
-}
-
-// SetKey setter of attribute key for Secret struct object
-func (s *Secret) SetKey(key string) *Secret {
-	s.key = key
-	return s
-}
-
-// SetValue setter of attribute value for Secret struct object
-func (s *Secret) SetValue(value string) *Secret {
-	s.value = value
-	return s
-}
-
 // SetClient setter of attribute client for Secret struct object
 func (s *Secret) SetClient(client *api.Client) *Secret {
 	s.client = client
