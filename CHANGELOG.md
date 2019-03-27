@@ -1,10 +1,11 @@
 # CHANGELOG
 
-### Version 0.2.0
+### Version 0.2.0-alpha.9
 
-*Unreleased*
+*Released on March 27th 2019*
 
 - [FEAT] Add method `SetAddress` on `Account` proto
+- [FEAT] Implement proper flags for Kafka tpics
 
 ### Version 0.2.0-alpha.8
 
