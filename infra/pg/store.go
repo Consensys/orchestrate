@@ -61,7 +61,7 @@ func (s *TraceStore) Store(ctx context.Context, trace *trace.Trace) (status stri
 		Trace:   bytes,
 	}
 
-	_, err = s.db.ModelContext(ctx, model).
+	_, err = s.db.ModelContext(ctx, model).		
 		OnConflict("ON CONSTRAINT uni_tx DO UPDATE").
 		Set("trace = ?trace").
 		Returning("*").
@@ -79,7 +79,22 @@ func (s *TraceStore) LoadByTxHash(ctx context.Context, chainID string, txHash st
 		ChainID: chainID,
 		TxHash:  txHash,
 	}
-	return s.load(ctx, model, trace)
+
+	err = s.db.ModelContext(ctx, model).
+		Where("chain_id = ?", model.ChainID).
+		Where("tx_hash = ?", model.TxHash).
+		Select()
+
+	if err != nil {
+		return "", time.Time{}, err
+	}
+
+	err = proto.UnmarshalMerge(model.Trace, trace)
+	if err != nil {
+		return "", time.Time{}, err
+	}
+
+	return model.Status, model.last(), nil
 }
 
 // LoadByTraceID context trace by trace ID
@@ -87,11 +102,11 @@ func (s *TraceStore) LoadByTraceID(ctx context.Context, traceID string, trace *t
 	model := &TraceModel{
 		TraceID: traceID,
 	}
-	return s.load(ctx, model, trace)
-}
 
-func (s *TraceStore) load(ctx context.Context, model *TraceModel, trace *trace.Trace) (status string, at time.Time, err error) {
-	err = s.db.ModelContext(ctx, model).Select()
+	err = s.db.ModelContext(ctx, model).
+		Where("trace_id = ?", model.ChainID).
+		Select()
+
 	if err != nil {
 		return "", time.Time{}, err
 	}

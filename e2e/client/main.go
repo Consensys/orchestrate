@@ -35,12 +35,12 @@ func main() {
 		SetData(hexutil.MustDecode("0xabcd"))
 
 	tr := &trace.Trace{
-		Chain:    &common.Chain{Id: "0x3"},
-		Metadata: &trace.Metadata{Id: "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11"},
+		Chain:    &common.Chain{Id: "0x6"},
+		Metadata: &trace.Metadata{Id: "6be0-bc19-900b-1ef8-bb6d-61b9-ad38-ba11"},
 		Tx: &ethereum.Transaction{
 			TxData: txData,
-			Raw:    "0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80",
-			Hash:   "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210",
+			Raw:    "0xf86c0184ee6b2800a2529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80",
+			Hash:   "0x6a0caf026cb1f012abe19e9e02c53f23713b0033d7a72e534136104b5447a210",
 		},
 	}
 
@@ -60,5 +60,20 @@ func main() {
 		"status": resp.Status,
 		"at":     timestamp,
 	}).Infof("Trace stored")
+
+	res, err:= client.LoadByTxHash(context.Background(), &store.TxHashRequest{
+		ChainId: tr.GetChain().GetId(),
+		TxHash: tr.GetTx().Hash,
+	})
+
+	log.Println(res.GetStatus())
+	log.Println(res.GetLastUpdated())
+	log.Println(res.GetTrace().GetChain())
+	log.Println(res.GetErr())
+	if err != nil {
+		log.WithError(err).Errorf("Could not load")
+	}
+
 	conn.Close()
 }
+

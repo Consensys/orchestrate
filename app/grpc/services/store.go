@@ -27,7 +27,7 @@ func NewStoreService(store infra.TraceStore) *StoreService {
 func (s StoreService) Store(ctx context.Context, req *store.StoreRequest) (*store.StoreResponse, error) {
 	status, last, err := s.store.Store(ctx, req.GetTrace())
 	if err != nil {
-		return nil, grpc.Errorf(codes.Internal, "Could not store %v %v", err, req)
+		return nil, grpc.Errorf(codes.Internal, "Could not store %v %v", err)
 	}
 
 	lastUpdated, err := ptypes.TimestampProto(last)
@@ -46,12 +46,12 @@ func (s StoreService) LoadByTxHash(ctx context.Context, req *store.TxHashRequest
 	tr := &trace.Trace{}
 	status, last, err := s.store.LoadByTxHash(ctx, req.GetChainId(), req.GetTxHash(), tr)
 	if err != nil {
-		return nil, grpc.Errorf(codes.Internal, "Could not store %v %v", err, req)
+		return nil, grpc.Errorf(codes.Internal, "Could not load by TxHash %v %v", err, req)
 	}
 
 	lastUpdated, err := ptypes.TimestampProto(last)
 	if err != nil {
-		return nil, grpc.Errorf(codes.Internal, "Could not store %v %v", err, req)
+		return nil, grpc.Errorf(codes.Internal, "Could not load by TxHash  %v %v", err, req)
 	}
 
 	return &store.StoreResponse{
@@ -66,12 +66,12 @@ func (s StoreService) LoadByTraceID(ctx context.Context, req *store.TraceIDReque
 	tr := &trace.Trace{}
 	status, last, err := s.store.LoadByTraceID(ctx, req.GetTraceId(), tr)
 	if err != nil {
-		return nil, grpc.Errorf(codes.Internal, "Could not store %v %v", err, req)
+		return nil, grpc.Errorf(codes.Internal, "Could not store load by TraceID %v %v", err, req)
 	}
 
 	lastUpdated, err := ptypes.TimestampProto(last)
 	if err != nil {
-		return nil, grpc.Errorf(codes.Internal, "Could not store %v %v", err, req)
+		return nil, grpc.Errorf(codes.Internal, "Could not store load by TraceID  %v %v", err, req)
 	}
 
 	return &store.StoreResponse{
