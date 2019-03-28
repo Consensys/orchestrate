@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"math/big"
 
 	log "github.com/sirupsen/logrus"
@@ -17,7 +16,7 @@ func Faucet(faucet services.Faucet, creditAmount *big.Int) coreworker.HandlerFun
 			Address: ctx.T.GetSender().Address(),
 			Value:   creditAmount,
 		}
-		amount, approved, err := faucet.Credit(context.Background(), faucetRequest)
+		amount, approved, err := faucet.Credit(ctx.Context(), faucetRequest)
 		if err != nil {
 			// TODO: handle error
 			ctx.Logger.WithError(err).Errorf("faucet: credit error")

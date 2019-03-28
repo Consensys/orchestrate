@@ -14,6 +14,8 @@ github.com/aristanetworks/goarista v0.0.0-20190204200901-2166578f3448/go.mod h1:
 github.com/armon/consul-api v0.0.0-20180202201655-eb2c6b5be1b6/go.mod h1:grANhF5doyWs3UAsr3K4I6qtAmlQcZDesFNEHPZAzj8=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973 h1:xJ4a3vCFaGF/jqvzLMYoU8P317H5OQ+Via4RmuPwCS0=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
+github.com/blang/semver v3.5.1+incompatible h1:cQNTCjp13qL8KC3Nbxr/y2Bqb63oX6wdnnjpJbkM4JQ=
+github.com/blang/semver v3.5.1+incompatible/go.mod h1:kRBLl5iJ+tD4TcOOxsy/0fnwebNt5EWlYSAyrTnjyyk=
 github.com/btcsuite/btcd v0.0.0-20190213025234-306aecffea32/go.mod h1:DrZx5ec/dmnfpw9KyYoQyYo7d0KEvTkk/5M/vbZjAr8=
 github.com/btcsuite/btclog v0.0.0-20170628155309-84c8d2346e9f/go.mod h1:TdznJufoqS23FtqVCzL0ZqgP5MqXbb4fg/WgDys70nA=
 github.com/btcsuite/btcutil v0.0.0-20190207003914-4c204d697803/go.mod h1:+5NJ2+qvTyV9exUAL/rxXi3DcLg2Ts+ymUAY5y4NvMg=
@@ -122,6 +124,8 @@ gitlab.com/ConsenSys/client/fr/core-stack/core.git v0.1.21/go.mod h1:NrK29/hD1NW
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.0.0-20190120155728-4388a3e2fac7/go.mod h1:gMnS2A4TAG3bhWJISXtmQfyFdYg9e2vRLB3/U+4B4wk=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.2.0-alpha.2 h1:X8zR9jX0bnew85NtcJsxw0bzvF1RdvxfQDHYfD/vXzM=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.2.0-alpha.2/go.mod h1:47HFmCYEMZfQxN982o7qIfkCEk1nxRt77RnhzzbCRtw=
+gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.3.0 h1:3BduwcDEMz3y0B8KnlcE6QSy7WxoGstMyY8nNT5eLaE=
+gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.3.0/go.mod h1:gdqOIL7HoEi+3+6vEDGvzAg0hmJ+xWhmRrCg7u5Q1dY=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git v0.2.0-alpha h1:+K+gS4MTeCMuMCxPTAkBJXwabXZFqwmOV8zLRa7STlI=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git v0.2.0-alpha/go.mod h1:YEjkOdQ4tlqOaS0Y4te4DE1XqPqeYiGUdCR819kzGwk=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.2.0-alpha h1:/Wp3r9JR3LhlDIxpOAolLlAADFl6OjyLN0kS2rmIohc=
@@ -133,6 +137,8 @@ gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.5 h1:qyjTtKyDV61g
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.5/go.mod h1:CUWmUHHVyEIA2TLNhOj7wPBQqvhupVuYPYT3jS4FqU0=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.7 h1:KI536GA6kxp8GuVb/mg5CoCRQa4rgmT/X7EVxXxHi20=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.7/go.mod h1:kn0SNDZwH517S2aeSQZl8CogQj1IM8oI9TqM6k0Il4c=
+gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.8 h1:xQDSeeg6puXfEV/utMXWTuFYwk9wieKxB6iBCxrDHvg=
+gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.8/go.mod h1:SqYvbuufPNbSk5jLLSEXknrw+hXnQnCLmAtODIF0L5o=
 golang.org/x/arch v0.0.0-20181203225421-5a4828bb7045/go.mod h1:cYlCBUl1MsqxdiKgmc4uh7TxZfWSFLOGSRR090WDxt8=
 golang.org/x/crypto v0.0.0-20170930174604-9419663f5a44/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
