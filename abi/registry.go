@@ -151,3 +151,13 @@ func (r *StaticRegistry) GetEventBySig(topic string) (ethabi.Event, error) {
 	}
 	return event, nil
 }
+
+// GetByteCode returns the bytecode of the contract
+func (r *StaticRegistry) GetByteCode(contractName string) ([]byte, error) {
+	res := r.bytecodes[contractName]
+	if res == nil {
+		return nil, fmt.Errorf("Could not find bytecode for contract %v", contractName)
+	}
+
+	return res, nil
+}
