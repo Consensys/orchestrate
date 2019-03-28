@@ -41,12 +41,6 @@ func NewKeyStore() (KeyStore, error) {
 			return nil, err
 		}
 
-		// Initialize Vault
-		err = hashicorp.AutoInit(vault)
-		if err != nil {
-			return nil, err
-		}
-
 		// Create Key Store
 		s = base.NewKeyStore(vault)
 	default:
