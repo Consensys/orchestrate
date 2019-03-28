@@ -104,7 +104,7 @@ func (s *TraceStore) LoadByTraceID(ctx context.Context, traceID string, trace *t
 	}
 
 	err = s.db.ModelContext(ctx, model).
-		Where("trace_id = ?", model.ChainID).
+		Where("trace_id = ?", model.TraceID).
 		Select()
 
 	if err != nil {
