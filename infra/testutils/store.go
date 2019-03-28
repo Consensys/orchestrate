@@ -135,7 +135,7 @@ func (suite *TraceStoreTestSuite) TestLoadPendingTraces() {
 	assert.Nil(suite.T(), err, "No error expected on LoadPendingTraces")
 	assert.Len(suite.T(), traces, 1, "Count of trace pending incorrect")
 
-	traces, err = suite.Store.LoadPendingTraces(context.Background(), 600*time.Millisecond)
+	traces, err = suite.Store.LoadPendingTraces(context.Background(), 700*time.Millisecond)
 	assert.Nil(suite.T(), err, "No error expected on LoadPendingTraces")
 	assert.Len(suite.T(), traces, 0, "Count of trace pending incorrect")
 }
