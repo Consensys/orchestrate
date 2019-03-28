@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.5
+
+*Released on March 28th 2019*
+
+- [FIX] Add Where conditions when querying via `LoadByTxHash` and `LoadByTraceID`
+
 ### Version 0.1.4
 
 *Released on March 26th 2019*
