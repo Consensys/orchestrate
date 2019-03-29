@@ -7,16 +7,16 @@ import (
 )
 
 // Address return Address
-func (acc *Account) Address() common.Address {
+func (acc *Account) Address() (common.Address, error) {
 	if acc.GetAddr() == "" {
-		return common.HexToAddress("")
+		return common.HexToAddress(""), nil
 	}
 
 	if !common.IsHexAddress(acc.GetAddr()) {
-		panic(fmt.Sprintf("%q is an invalid Ethereum address", acc.GetAddr()))
+		return common.HexToAddress(""), fmt.Errorf("%q is an invalid Ethereum address", acc.GetAddr())
 	}
 
-	return common.HexToAddress(acc.GetAddr())
+	return common.HexToAddress(acc.GetAddr()), nil
 }
 
 // SetAddress sets account address
