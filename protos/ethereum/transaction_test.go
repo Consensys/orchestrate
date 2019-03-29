@@ -30,7 +30,9 @@ const (
 func TestTxData(t *testing.T) {
 	// Test on empty TxData
 	var txData *TxData
-	assert.Equal(t, EmptyAddress, txData.ToAddress().Hex(), "Address should be empty")
+
+	to, _ := txData.ToAddress()
+	assert.Equal(t, EmptyAddress, to.Hex(), "Address should be empty")
 	assert.Equal(t, int64(0), txData.ValueBig().Int64(), "Value should be 0")
 	assert.Equal(t, int64(0), txData.GasPriceBig().Int64(), "Gas price should be 0")
 	assert.Equal(t, []byte{}, txData.DataBytes(), "Data should be empty")
@@ -45,8 +47,9 @@ func TestTxData(t *testing.T) {
 		SetGasPrice(big.NewInt(200000)).
 		SetData(hexutil.MustDecode("0xabcd"))
 
+	to, _ = txData.ToAddress()
 	assert.Equal(t, uint64(10), txData.Nonce, "Nonce should be set")
-	assert.Equal(t, "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C", txData.ToAddress().Hex(), "To Address should be set")
+	assert.Equal(t, "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C", to.Hex(), "To Address should be set")
 	assert.Equal(t, int64(100000), txData.ValueBig().Int64(), "Value should be set")
 	assert.Equal(t, int64(200000), txData.GasPriceBig().Int64(), "Gas price should be set")
 	assert.Equal(t, uint64(2000), txData.Gas, "Gas should be set")
