@@ -21,15 +21,27 @@ func Signer(s keystore.KeyStore) worker.HandlerFunc {
 			return
 		}
 
-		// Create transaction
-		t := ethtypes.NewTransaction(
-			ctx.T.GetTx().GetTxData().GetNonce(),
-			ctx.T.GetTx().GetTxData().ToAddress(),
-			ctx.T.GetTx().GetTxData().ValueBig(),
-			ctx.T.GetTx().GetTxData().GetGas(),
-			ctx.T.GetTx().GetTxData().GasPriceBig(),
-			ctx.T.GetTx().GetTxData().DataBytes(),
-		)
+		var t *ethtypes.Transaction
+		if ctx.T.GetCall().GetMethod().GetName() == "constructor" {
+			// Create contract deployment transaction
+			t = ethtypes.NewContractCreation(
+				ctx.T.GetTx().GetTxData().GetNonce(),
+				ctx.T.GetTx().GetTxData().ValueBig(),
+				ctx.T.GetTx().GetTxData().GetGas(),
+				ctx.T.GetTx().GetTxData().GasPriceBig(),
+				ctx.T.GetTx().GetTxData().DataBytes(),
+			)
+		} else {
+			// Create transaction
+			t = ethtypes.NewTransaction(
+				ctx.T.GetTx().GetTxData().GetNonce(),
+				ctx.T.GetTx().GetTxData().ToAddress(),
+				ctx.T.GetTx().GetTxData().ValueBig(),
+				ctx.T.GetTx().GetTxData().GetGas(),
+				ctx.T.GetTx().GetTxData().GasPriceBig(),
+				ctx.T.GetTx().GetTxData().DataBytes(),
+			)
+		}
 
 		// Sign transaction
 		raw, h, err := s.SignTx(ctx.T.GetChain(), ctx.T.GetSender().Address(), t)
