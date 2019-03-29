@@ -77,23 +77,26 @@ func (c *SaramaCrediter) PrepareFaucetMsg(r *services.FaucetRequest) (sarama.Pro
 	// Determine Address of the faucet for requested chain
 	faucetAddress := c.addresses[r.ChainID.Text(10)]
 
-	// Create Trace for Crediting message
-	faucetTrace := &trace.Trace{}
+	if (faucetAddress != ethcommon.Address{}) {
+		// Create Trace for Crediting message
+		faucetTrace := &trace.Trace{}
 
-	faucetTrace.Reset()
-	fmt.Println(faucetTrace.Chain)
-	faucetTrace.Chain = (&common.Chain{}).SetID(r.ChainID)
-	faucetTrace.Sender = &common.Account{Addr: faucetAddress.Hex()}
-	faucetTrace.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{}}
-	faucetTrace.Tx.TxData.SetValue(r.Value).SetTo(r.Address)
+		faucetTrace.Reset()
+		faucetTrace.Chain = (&common.Chain{}).SetID(r.ChainID)
+		faucetTrace.Sender = &common.Account{Addr: faucetAddress.Hex()}
+		faucetTrace.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{}}
+		faucetTrace.Tx.TxData.SetValue(r.Value).SetTo(r.Address)
 
-	// Create Producer message
-	var msg sarama.ProducerMessage
-	err := c.m.Marshal(faucetTrace, &msg)
-	if err != nil {
-		return sarama.ProducerMessage{}, err
+		// Create Producer message
+		var msg sarama.ProducerMessage
+		err := c.m.Marshal(faucetTrace, &msg)
+		if err != nil {
+			return sarama.ProducerMessage{}, err
+		}
+		msg.Topic = viper.GetString("faucet.topic")
+
+		return msg, nil
 	}
-	msg.Topic = viper.GetString("faucet.topic")
 
-	return msg, nil
+	return sarama.ProducerMessage{}, fmt.Errorf("crediter: No faucet address valaiable for ChainId %v", r.ChainID.Text(10))
 }
