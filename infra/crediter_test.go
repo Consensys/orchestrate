@@ -29,7 +29,7 @@ func TestCrediter(t *testing.T) {
 		},
 	)
 
-	if !ok || amount.Uint64() != 13 || err != nil {
-		t.Errorf("Expected valid credit but got %v %v %v", amount, ok, err)
+	if err == nil {
+		t.Errorf("Expected invalid credit but got %v %v %v", amount, ok, err)
 	}
 }
