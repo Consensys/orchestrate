@@ -17,6 +17,8 @@ type ABIRegistry interface {
 	GetEventBySig(sig string) (abi.Event, error)
 	// Register a new contract in the ABI
 	RegisterContract(contract *abipb.Contract) error
+	// Returns the new bytecode
+	GetBytecodeByID(id string) ([]byte, error)
 }
 
 // Crafter takes a method abi and args to craft a transaction
