@@ -15,14 +15,14 @@ func (txData *TxData) SetNonce(n uint64) *TxData {
 }
 
 // ToAddress return To in common.Address format
-func (txData *TxData) ToAddress() common.Address {
+func (txData *TxData) ToAddress() (common.Address, error) {
 	if txData.GetTo() == "" {
-		return common.HexToAddress("")
+		return common.HexToAddress(""), nil
 	}
 	if !common.IsHexAddress(txData.GetTo()) {
-		panic(fmt.Sprintf("%q is an invalid Ethereum address", txData.GetTo()))
+		return common.HexToAddress(""), fmt.Errorf("%q is an invalid Ethereum address", txData.GetTo())
 	}
-	return common.HexToAddress(txData.GetTo())
+	return common.HexToAddress(txData.GetTo()), nil
 }
 
 // SetTo set to address
