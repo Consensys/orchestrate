@@ -62,11 +62,14 @@ func bindArg(t abi.Type, arg string) (interface{}, error) {
 	case abi.ArrayTy:
 		return bindArrayArg(t, arg)
 
+	case abi.SliceTy:
+		return bindArrayArg(t, arg)
+
 	// TODO: handle tuple (struct in solidity)
 
 	// In current version we only cover basic types (in particular we do not support arrays)
 	default:
-		return nil, fmt.Errorf("Arg format %q not known", t.String())
+		return nil, fmt.Errorf("Arg format %v not known", t.T)
 	}
 }
 
@@ -78,7 +81,8 @@ func bindArrayArg(t abi.Type, arg string) (interface{}, error) {
 	arg = strings.TrimSuffix(strings.TrimPrefix(arg, "["), "]")
 	argArray := strings.Split(arg, ",")
 
-	if len(argArray) != t.Size {
+	// If t.Size == 0, then it is a dynamic array. We accept any length in this case.
+	if len(argArray) != t.Size && t.Size != 0 {
 		return nil, fmt.Errorf("Craft array error: %q is not well separated", argArray)
 	}
 	for _, v := range argArray {
