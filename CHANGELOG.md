@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.4
+
+*Released on March 29th 2019*
+
+- [FIX] No panic in `Crafter` if TraceT.Tx.TxData not defined
+
 ### Version 0.3.3
 
 *Released on March 29th 2019*
