@@ -13,6 +13,11 @@ import (
 // GasPricer creates an handler that set Gas Price
 func GasPricer(p services.GasPricer) worker.HandlerFunc {
 	return func(ctx *worker.Context) {
+
+		if ctx.T.GetTx().GetTxData().GetGasPrice() != "" {
+			ctx.Next()
+		}
+
 		p, err := p.SuggestGasPrice(ctx.Context(), ctx.T.Chain.ID())
 		if err != nil {
 			// TODO: handle error
@@ -37,6 +42,11 @@ func GasEstimator(p services.GasEstimator) worker.HandlerFunc {
 	}
 
 	return func(ctx *worker.Context) {
+
+		if ctx.T.GetTx().GetTxData().GetGas() != 0 {
+			ctx.Next()
+		}
+
 		// Retrieve re-cycled CallMsg
 		call := pool.Get().(ethereum.CallMsg)
 		defer pool.Put(call)
