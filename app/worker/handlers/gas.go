@@ -41,9 +41,10 @@ func GasEstimator(p services.GasEstimator) worker.HandlerFunc {
 		call := pool.Get().(ethereum.CallMsg)
 		defer pool.Put(call)
 
-		To := ctx.T.Tx.GetTxData().ToAddress()
+		To, _ := ctx.T.Tx.GetTxData().ToAddress()
+		From, _ := ctx.T.GetSender().Address()
 		// Set CallMsg
-		call.From = ctx.T.GetSender().Address()
+		call.From = From
 		call.To = &To
 		call.Value = ctx.T.GetTx().GetTxData().ValueBig()
 		call.Data = ctx.T.GetTx().GetTxData().DataBytes()

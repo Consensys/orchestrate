@@ -11,9 +11,10 @@ import (
 // Faucet creates a Faucet handler
 func Faucet(faucet services.Faucet, creditAmount *big.Int) coreworker.HandlerFunc {
 	return func(ctx *coreworker.Context) {
+		From, _ := ctx.T.GetSender().Address()
 		faucetRequest := &services.FaucetRequest{
 			ChainID: ctx.T.GetChain().ID(),
-			Address: ctx.T.GetSender().Address(),
+			Address: From,
 			Value:   creditAmount,
 		}
 		amount, approved, err := faucet.Credit(ctx.Context(), faucetRequest)

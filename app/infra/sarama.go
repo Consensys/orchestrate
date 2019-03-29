@@ -70,7 +70,8 @@ func initProducer(infra *Infra, wait *sync.WaitGroup) {
 		msg.Topic = viper.GetString("worker.out")
 
 		// Set key
-		msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(t.Chain.ID(), t.Sender.Address()))
+		Sender, _ := t.Sender.Address()
+		msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(t.Chain.ID(), Sender))
 
 		return nil
 	}
