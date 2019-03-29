@@ -9,6 +9,7 @@ import (
 	commonpb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
 	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
 	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 var (
@@ -30,15 +31,31 @@ func newMessage(i int) *sarama.ProducerMessage {
 		Topic:     inTopic,
 		Partition: -1,
 	}
+
+	var call *commonpb.Call
+
+	switch i % 2 {
+	case 0:
+		bytecode := hexutil.MustDecode(bytecodeHex)
+		call = &commonpb.Call{
+			Contract: &abipb.Contract{Name: "ERC1400", Bytecode: bytecode},
+			Method: &abipb.Method{Name: "constructor"},
+			Args:   []string{"0xabcd", "0xabcd", "0x10", "[0xcd626bc764e1d553e0d75a42f5c4156b91a63f23,0xcd626bc764e1d553e0d75a42f5c4156b91a63f23]", "0xcd626bc764e1d553e0d75a42f5c4156b91a63f23", "0xabcd"},
+		}
+
+	case 1:
+		call = &commonpb.Call{
+			Contract: &abipb.Contract{Name: "ERC1400"},
+			Method: &abipb.Method{Name: "setDocument"},
+			Args:   []string{"0xabcd", "0xabcd", "0xabcd"},
+		}
+	}
+
 	b, _ := proto.Marshal(
 		&tracepb.Trace{
 			Chain:  &commonpb.Chain{Id: "0x3"},
 			Sender: &commonpb.Account{Addr: senders[i%len(senders)]},
-			Call: &commonpb.Call{
-				Contract: &abipb.Contract{Name: "ERC1400"},
-				Method: &abipb.Method{Name: "setDocument"},
-				Args:   []string{"0xabcd", "0xabcd", "0xabcd"},
-			},
+			Call: call,
 			Tx: &ethpb.Transaction{
 				TxData: &ethpb.TxData{
 					To: ERC1400Address,
