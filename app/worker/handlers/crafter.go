@@ -59,7 +59,13 @@ func Crafter(r services.ABIRegistry, c services.Crafter) coreworker.HandlerFunc 
 
 		if ctx.T.GetCall().GetMethod().GetName() == "constructor" {
 			// This is a deployment call
-			bytecode := ctx.T.GetCall().GetContract().GetBytecode()
+			contractName := ctx.T.GetCall().GetContract().Short()
+			bytecode, err := r.GetBytecodeByID(
+				fmt.Sprintf("constructor@%v", contractName),
+			)
+			if err != nil {
+				ctx.Logger.WithError(err).Errorf("crafter: could not craft tx data payload")
+			}
 			if len(bytecode) == 0 {
 				ctx.Logger.WithError(fmt.Errorf("Invalid empty bytecode")).Errorf("crafter: could not craft tx data payload")
 			}

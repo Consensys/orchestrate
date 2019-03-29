@@ -9,7 +9,6 @@ import (
 	commonpb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
 	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
 	tracepb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 var (
@@ -36,9 +35,8 @@ func newMessage(i int) *sarama.ProducerMessage {
 
 	switch i % 2 {
 	case 0:
-		bytecode := hexutil.MustDecode(bytecodeHex)
 		call = &commonpb.Call{
-			Contract: &abipb.Contract{Name: "ERC1400", Bytecode: bytecode},
+			Contract: &abipb.Contract{Name: "ERC1400"},
 			Method: &abipb.Method{Name: "constructor"},
 			Args:   []string{"0xabcd", "0xabcd", "0x10", "[0xcd626bc764e1d553e0d75a42f5c4156b91a63f23,0xcd626bc764e1d553e0d75a42f5c4156b91a63f23]", "0xcd626bc764e1d553e0d75a42f5c4156b91a63f23", "0xabcd"},
 		}
@@ -92,7 +90,7 @@ func main() {
 	fmt.Println("Producer ready")
 	defer p.Close()
 
-	rounds := 50
+	rounds := 1
 	for i := 0; i < rounds; i++ {
 		p.Input() <- newMessage(i)
 	}
