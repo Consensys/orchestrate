@@ -12,8 +12,8 @@ func TestAccount(t *testing.T) {
 		Id:   "abcd",
 		Addr: "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C",
 	}
-
-	assert.Equal(t, "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C", acc.Address().Hex(), "Address should match")
+	address, _ := acc.Address()
+	assert.Equal(t, "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C", address.Hex(), "Address should match")
 
 	addr := common.HexToAddress("0xc99a171AA7365FA16E52e737c24CD78E4aA8c7F5")
 	acc = acc.SetAddress(addr)
