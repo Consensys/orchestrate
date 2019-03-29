@@ -10,6 +10,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
 	coreworker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/utils"
 )
 
 // Crafter creates a crafter handler
@@ -80,7 +81,7 @@ func Crafter(r services.ABIRegistry, c services.Crafter) coreworker.HandlerFunc 
 		}
 
 		ctx.Logger = ctx.Logger.WithFields(log.Fields{
-			"tx.data": hexutil.Encode(payload),
+			"tx.data": utils.ShortString(hexutil.Encode(payload), 10),
 		})
 
 		// Update Trace

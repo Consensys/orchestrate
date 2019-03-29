@@ -11,9 +11,9 @@ import (
 	"github.com/spf13/viper"
 	infSarama "gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
-	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
-	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
-	trace "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
 )
 
 // SaramaCrediter allows to credit by sending messages to a Kafka topic

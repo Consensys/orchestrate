@@ -14,7 +14,7 @@ import (
 func GasPricer(p services.GasPricer) worker.HandlerFunc {
 	return func(ctx *worker.Context) {
 
-		if ctx.T.GetTx().GetTxData().GetGasPrice() != "" {
+		if ctx.T.GetTx().GetTxData().GetGasPrice() == "" {
 			p, err := p.SuggestGasPrice(ctx.Context(), ctx.T.Chain.ID())
 			if err != nil {
 				// TODO: handle error
