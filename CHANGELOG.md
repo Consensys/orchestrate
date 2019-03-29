@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.4
+
+*Released on March 29th 2019*
+
+- [FEAT] Update ```ABIRegistry``` from ```pkg``` and ```infra/ethereum``` 
+
 ### Version 0.3.3
 
 *Released on March 25th 2019*
