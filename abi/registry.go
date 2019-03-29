@@ -152,12 +152,27 @@ func (r *StaticRegistry) GetEventBySig(topic string) (ethabi.Event, error) {
 	return event, nil
 }
 
-// GetByteCode returns the bytecode of the contract
-func (r *StaticRegistry) GetByteCode(contractName string) ([]byte, error) {
-	res := r.bytecodes[contractName]
-	if res == nil {
-		return nil, fmt.Errorf("Could not find bytecode for contract %v", contractName)
+// GetBytecodeByID returns the bytecode of the contract
+func (r *StaticRegistry) GetBytecodeByID(id string) (code []byte, err error) {
+	// Computing call ensure ID has been properly formated
+	call, err := common.StringToCall(id)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	res, err := r.getBytecode(call.GetContract().Short())
+	if err != nil {
+		return []byte{}, err
 	}
 
 	return res, nil
+}
+
+// getBytecode is a low-level getter for the bytecode
+func (r *StaticRegistry) getBytecode(name string) ([]byte, error) {
+	code, ok := r.bytecodes[name]
+	if !ok {
+		return nil, fmt.Errorf("Unknown contract %q", name)
+	}
+	return code, nil
 }
