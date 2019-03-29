@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.6
+
+*Released on March 29th 2019*
+
+- [FEAT] Ignore `GasPricer` and `GasEstimator` if gas and gas price are already filled in the Trace
+
 ### Version 0.3.5
 
 *Released on March 29th 2019*
