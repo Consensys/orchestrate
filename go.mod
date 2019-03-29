@@ -15,6 +15,6 @@ require (
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.3.0
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git v0.2.0-alpha
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.2.0-alpha
-	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.8
+	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.8+bytecode
 	golang.org/x/arch v0.0.0-20181203225421-5a4828bb7045 // indirect
 )
