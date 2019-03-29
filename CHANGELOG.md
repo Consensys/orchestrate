@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.1
+
+*Released on March 29th 2019*
+
+- [FEAT] Sign new contract creation transaction 
+
 ### Version 0.3.0-alpha.3
 
 *Released on March 25th 2019*
