@@ -1,5 +1,17 @@
 # CHANGELOG
 
+### Version 0.2.0-alpha.11
+
+*Released on March 29th 2019*
+
+- [FIX] Not panic when pass invalid address in `common.Account.Address()`
+
+### Version 0.2.0-alpha.10
+
+*Released on March 29th 2019*
+
+- [FEAT] Update `ABIRegistry` interface with `ABIRegistry.GetBytecodeByID`
+
 ### Version 0.2.0-alpha.9
 
 *Released on March 27th 2019*
