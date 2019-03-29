@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.2.0-alpha.12
+
+*Released on March 29th 2019*
+
+- [FEAT] Add `common.utils.ShortString` to shrink a string size and keep the tails
+
 ### Version 0.2.0-alpha.11
 
 *Released on March 29th 2019*
