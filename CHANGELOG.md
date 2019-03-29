@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.7
+
+*Released on March 30th 2019*
+
+- [FIX] Ignore `GasPricer` and `GasEstimator` by removing ctx.Next()
+
 ### Version 0.3.6
 
 *Released on March 29th 2019*
