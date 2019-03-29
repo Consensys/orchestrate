@@ -1,5 +1,17 @@
 # CHANGELOG
 
+### Version 0.3.3
+
+*Released on March 29th 2019*
+
+- [FEAT] No credit faucet transaction if faucet address not known
+
+### Version 0.3.2
+
+*Released on March 29th 2019*
+
+- [FEAT] Load bytecode from ABIRegistry for contract deployment
+
 ### Version 0.3.1
 
 *Released on March 24th 2019*
