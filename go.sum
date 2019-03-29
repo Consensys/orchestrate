@@ -121,6 +121,8 @@ gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.2.0-alpha.2 h1:X
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.2.0-alpha.2/go.mod h1:47HFmCYEMZfQxN982o7qIfkCEk1nxRt77RnhzzbCRtw=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.3.0 h1:3BduwcDEMz3y0B8KnlcE6QSy7WxoGstMyY8nNT5eLaE=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.3.0/go.mod h1:gdqOIL7HoEi+3+6vEDGvzAg0hmJ+xWhmRrCg7u5Q1dY=
+gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.3.1 h1:gNZ2c05RksZiAAGhWSYcNcjqYxUb4GPaU9jFsW814qM=
+gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.3.1/go.mod h1:Oh+Zs1S63X2/S+CupKWVtxQ2K1lcNAi2Yz1ZLFCrjN4=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.2.0-alpha h1:/Wp3r9JR3LhlDIxpOAolLlAADFl6OjyLN0kS2rmIohc=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.2.0-alpha/go.mod h1:/nRVV6mmQKNB3szUNsLoieSFh4dzaikFz4TSMH/ooS4=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.4/go.mod h1:CUWmUHHVyEIA2TLNhOj7wPBQqvhupVuYPYT3jS4FqU0=
@@ -130,6 +132,8 @@ gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.7 h1:KI536GA6kxp8
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.7/go.mod h1:kn0SNDZwH517S2aeSQZl8CogQj1IM8oI9TqM6k0Il4c=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.8 h1:xQDSeeg6puXfEV/utMXWTuFYwk9wieKxB6iBCxrDHvg=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.8/go.mod h1:SqYvbuufPNbSk5jLLSEXknrw+hXnQnCLmAtODIF0L5o=
+gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.10 h1:ne4unGjGeGSqX3ksiWaXNzJkUQ2EVTNXN0BbOYiE4Sc=
+gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.10/go.mod h1:SqYvbuufPNbSk5jLLSEXknrw+hXnQnCLmAtODIF0L5o=
 golang.org/x/crypto v0.0.0-20170930174604-9419663f5a44/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=

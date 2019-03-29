@@ -9,7 +9,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/config"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-decoder.git/app"
-	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-decoder.git/app/infra"
+	ethabi "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/abi"
+
 )
 
 func newRunCommand() *cobra.Command {
@@ -20,7 +21,7 @@ func newRunCommand() *cobra.Command {
 	}
 
 	// Register flags
-	infra.ABIs(runCmd.Flags())
+	ethabi.ABIs(runCmd.Flags())
 	config.HTTPHostname(runCmd.Flags())
 	config.EthClientURLs(runCmd.Flags())
 	config.KafkaAddresses(runCmd.Flags())
