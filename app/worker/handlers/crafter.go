@@ -9,6 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
 	coreworker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
 )
 
 // Crafter creates a crafter handler
@@ -69,7 +70,7 @@ func Crafter(r services.ABIRegistry, c services.Crafter) coreworker.HandlerFunc 
 			if len(bytecode) == 0 {
 				ctx.Logger.WithError(fmt.Errorf("Invalid empty bytecode")).Errorf("crafter: could not craft tx data payload")
 			}
-			payload = append(bytecode, payload...)
+			payload = append(bytecode, payload...)		
 		}
 
 		if err != nil {
@@ -83,6 +84,11 @@ func Crafter(r services.ABIRegistry, c services.Crafter) coreworker.HandlerFunc 
 		})
 
 		// Update Trace
+		if (ctx.T.GetTx() == nil) {
+			ctx.T.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{}}
+		} else if (ctx.T.GetTx().GetTxData() == nil) {
+			ctx.T.Tx.TxData = &ethereum.TxData{}
+		}
 		ctx.T.GetTx().GetTxData().SetData(payload)
 
 		ctx.Logger.Debugf("crafter: tx data payload set")
