@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.5
+
+*Released on March 29th 2019*
+
+- [FIX] No panic when receiving not well formated address
+
 ### Version 0.3.4
 
 *Released on March 29th 2019*
