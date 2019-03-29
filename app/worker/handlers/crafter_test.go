@@ -23,6 +23,13 @@ func (r *MockABIRegistry) GetMethodByID(ID string) (ethabi.Method, error) {
 	return ethabi.Method{}, nil
 }
 
+func (r *MockABIRegistry) GetBytecodeByID(ID string) ([]byte, error) {
+	if ID == "unknown@" {
+		return []byte{}, fmt.Errorf("Could not retrieve bytecode")
+	}
+	return []byte{246, 34}, nil
+}
+
 func (r *MockABIRegistry) GetMethodBySig(sig string) (ethabi.Method, error) {
 	return ethabi.Method{}, nil
 }
@@ -48,7 +55,7 @@ var payload = "0xa9059cbb000000000000000000000000ff778b716fc07d98839f48ddb88d8be
 
 func (c *MockCrafter) Craft(method ethabi.Method, args ...string) ([]byte, error) {
 	if len(args) != 1 {
-		return []byte(``), fmt.Errorf("Could not craft")
+		return []byte(``), fmt.Errorf("Could not craft expected args len to be 1")
 	}
 	return hexutil.MustDecode(payload), nil
 }
@@ -89,12 +96,12 @@ func makeCrafterContext(i int) *worker.Context {
 		ctx.Keys["result"] = ""
 	case 5:
 		ctx.T.Call = &common.Call{
-			Method:   &abi.Method{Name: "constructor"},
-			Args:     []string{"test"},
-			Contract: &abi.Contract{Bytecode: []byte{0xab, 0x2f}},
+			Contract: &abi.Contract{Name: "known"},
+			Method: &abi.Method{Name: "constructor"},
+			Args:   []string{"0xabcd"},
 		}
 		ctx.Keys["errors"] = 0
-		ctx.Keys["result"] = "0xab2fa9059cbb000000000000000000000000ff778b716fc07d98839f48ddb88d8be583beb684000000000000000000000000000000000000000000000000002386f26fc10000"
+		ctx.Keys["result"] = "0xf622a9059cbb000000000000000000000000ff778b716fc07d98839f48ddb88d8be583beb684000000000000000000000000000000000000000000000000002386f26fc10000"
 	}
 	return ctx
 }
