@@ -124,3 +124,20 @@ func (c *PayloadCrafter) Craft(method abi.Method, args ...string) ([]byte, error
 
 	return append(method.Id(), arguments...), nil
 }
+
+// CraftConstructor craft contract creation a transaction payload
+func (c *PayloadCrafter) CraftConstructor(method abi.Method, args ...string) ([]byte, error) {
+	// Cast arguments
+	boundArgs, err := bindArgs(method, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	// Pack arguments
+	arguments, err := method.Inputs.Pack(boundArgs...)
+	if err != nil {
+		return nil, err
+	}
+
+	return arguments, nil
+}
