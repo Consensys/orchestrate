@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.8
+
+*Released on March 31th 2019*
+
+- [FIX] Add `CraftConstructor` for crafting well data for contract creation
+
 ### Version 0.3.7
 
 *Released on March 30th 2019*
