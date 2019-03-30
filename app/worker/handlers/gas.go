@@ -28,6 +28,11 @@ func GasPricer(p services.GasPricer) worker.HandlerFunc {
 				})
 				ctx.Logger.Debugf("gas-pricer: gas price set")
 			}
+		} else {
+			// Enrich logger
+			ctx.Logger = ctx.Logger.WithFields(log.Fields{
+				"tx.gas.price": ctx.T.GetTx().GetTxData().GetGasPrice(),
+			})
 		}
 	}
 }
@@ -69,6 +74,11 @@ func GasEstimator(p services.GasEstimator) worker.HandlerFunc {
 				})
 				ctx.Logger.Debugf("gas-estimator: gas limit set")
 			}
+		} else {
+			// Enrich logger
+			ctx.Logger = ctx.Logger.WithFields(log.Fields{
+				"tx.gas": ctx.T.GetTx().GetTxData().GetGas(),
+			})	
 		}
 	}
 }
