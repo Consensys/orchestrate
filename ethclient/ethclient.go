@@ -78,8 +78,9 @@ func Call2PrivateArgs(call *common.Call) *PrivateArgs {
 
 // Trace2SendTxArgs creates SendTxArgs from a trace
 func Trace2SendTxArgs(tr *trace.Trace) *SendTxArgs {
+	From, _ := tr.GetSender().Address()
 	args := SendTxArgs{
-		From:        tr.GetSender().Address(),
+		From:        From,
 		GasPrice:    (*hexutil.Big)(tr.GetTx().GetTxData().GasPriceBig()),
 		Value:       (*hexutil.Big)(tr.GetTx().GetTxData().ValueBig()),
 		Data:        hexutil.Bytes(tr.GetTx().GetTxData().DataBytes()),
@@ -96,7 +97,7 @@ func Trace2SendTxArgs(tr *trace.Trace) *SendTxArgs {
 	}
 
 	if tr.GetTx().GetTxData().GetTo() != "" {
-		to := tr.GetTx().GetTxData().ToAddress()
+		to, _ := tr.GetTx().GetTxData().ToAddress()
 		args.To = &to
 	}
 
