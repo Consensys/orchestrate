@@ -60,6 +60,13 @@ func (c *MockCrafter) Craft(method ethabi.Method, args ...string) ([]byte, error
 	return hexutil.MustDecode(payload), nil
 }
 
+func (c *MockCrafter) CraftConstructor(method ethabi.Method, args ...string) ([]byte, error) {
+	if len(args) != 1 {
+		return []byte(``), fmt.Errorf("Could not craft expected args len to be 1")
+	}
+	return hexutil.MustDecode(payload), nil
+}
+
 func makeCrafterContext(i int) *worker.Context {
 	ctx := worker.NewContext()
 	ctx.Reset()

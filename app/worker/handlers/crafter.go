@@ -10,7 +10,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
 	coreworker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/utils"
+	// "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/utils"
 )
 
 // Crafter creates a crafter handler
@@ -55,11 +55,21 @@ func Crafter(r services.ABIRegistry, c services.Crafter) coreworker.HandlerFunc 
 		ctx.Logger = ctx.Logger.WithFields(log.Fields{
 			"crafter.args": args,
 		})
+		log.Debugf("method: %v", method.Sig())
+		log.Debugf("method: %v", method.String())
+		log.Debugf("method: %v", hexutil.Encode(method.Id()))
 
-		// Craft transaction payload
-		payload, err := c.Craft(*method, args...)
+		var (payload []byte; err error)
 
 		if ctx.T.GetCall().GetMethod().GetName() == "constructor" {
+			// Craft transaction payload
+			payload, err = c.CraftConstructor(*method, args...)
+			if err != nil {
+				ctx.Logger.WithError(err).Errorf("crafter: could not craft constructor tx data payload")
+				ctx.AbortWithError(err)
+				return
+			}
+
 			// This is a deployment call
 			contractName := ctx.T.GetCall().GetContract().Short()
 			bytecode, err := r.GetBytecodeByID(
@@ -71,23 +81,25 @@ func Crafter(r services.ABIRegistry, c services.Crafter) coreworker.HandlerFunc 
 			if len(bytecode) == 0 {
 				ctx.Logger.WithError(fmt.Errorf("Invalid empty bytecode")).Errorf("crafter: could not craft tx data payload")
 			}
-			payload = append(bytecode, payload...)		
-		}
-
-		if err != nil {
-			ctx.Logger.WithError(err).Errorf("crafter: could not craft tx data payload")
-			ctx.AbortWithError(err)
-			return
+			payload = append(bytecode, payload...)
+		} else {
+			// Craft transaction payload
+			payload, err = c.Craft(*method, args...)
+			if err != nil {
+				ctx.Logger.WithError(err).Errorf("crafter: could not craft tx data payload")
+				ctx.AbortWithError(err)
+				return
+			}
 		}
 
 		ctx.Logger = ctx.Logger.WithFields(log.Fields{
-			"tx.data": utils.ShortString(hexutil.Encode(payload), 10),
+			"tx.data": hexutil.Encode(payload),
 		})
 
 		// Update Trace
-		if (ctx.T.GetTx() == nil) {
+		if ctx.T.GetTx() == nil {
 			ctx.T.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{}}
-		} else if (ctx.T.GetTx().GetTxData() == nil) {
+		} else if ctx.T.GetTx().GetTxData() == nil {
 			ctx.T.Tx.TxData = &ethereum.TxData{}
 		}
 		ctx.T.GetTx().GetTxData().SetData(payload)
