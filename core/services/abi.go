@@ -24,4 +24,5 @@ type ABIRegistry interface {
 // Crafter takes a method abi and args to craft a transaction
 type Crafter interface {
 	Craft(method abi.Method, args ...string) ([]byte, error)
+	CraftConstructor(method abi.Method, args ...string) ([]byte, error)
 }
