@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.2.0-alpha.13
+
+*Released on March 30th 2019*
+
+- [FEAT] Add `CraftConstructor` in Crafter interface
+
 ### Version 0.2.0-alpha.12
 
 *Released on March 29th 2019*
