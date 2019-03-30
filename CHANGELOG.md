@@ -1,5 +1,17 @@
 # CHANGELOG
 
+### Version 0.3.2
+
+*Released on March 30th 2019*
+
+- [FEAT] Add `CraftConstructor` for crafting constructor arguments in contract creation
+
+### Version 0.3.1
+
+*Released on March 29th 2019*
+
+- [FEAT] Get bytecode for contract creation
+
 ### Version 0.3.0
 
 *Released on March 24th 2019*
