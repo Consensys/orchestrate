@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.0-alpha.2
+
+*Released on April 04th 2019*
+
+- [CHORE] Update pkg to v0.3.3 and improve block listening and cursor update
+
 ### Version 0.3.0-alpha.1
 
 *Released on March 20th 2019*
