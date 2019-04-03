@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.3
+
+*Released on April 04th 2019*
+
+- [FIX] Update ```HighestBlock``` to correctly move forward to the cursor
+
 ### Version 0.3.2
 
 *Released on March 30th 2019*
