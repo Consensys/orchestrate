@@ -12,9 +12,9 @@ import (
 func Logger(ctx *worker.Context) {
 
 	ctx.Logger = ctx.Logger.WithFields(log.Fields{
-		"chain.id":        ctx.T.GetChain().GetId(),
-		"receipt.txhash":  ctx.T.GetReceipt().GetTxHash(),
-		"receipt.txIndex": ctx.T.GetReceipt().GetTxIndex(),
+		"chain.id":         ctx.T.GetChain().GetId(),
+		"receipt.tx.hash":  ctx.T.GetReceipt().GetTxHash(),
+		"receipt.tx.index": ctx.T.GetReceipt().GetTxIndex(),
 	})
 
 	ctx.Logger.Debug("worker: new receipt")

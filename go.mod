@@ -5,6 +5,7 @@ require (
 	github.com/ethereum/go-ethereum v1.8.23
 	github.com/golang/protobuf v1.3.1
 	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40
+	github.com/jessevdk/go-flags v1.4.0 // indirect
 	github.com/prometheus/client_golang v0.9.2
 	github.com/sirupsen/logrus v1.4.0
 	github.com/spf13/cobra v0.0.3

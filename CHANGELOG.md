@@ -1,10 +1,23 @@
 # CHANGELOG
 
-### Version 0.3.0-alpha.2
+### Version 0.3.0-alpha.4
 
 *Released on April 04th 2019*
 
 - [CHORE] Update pkg to v0.3.3 and improve block listening and cursor update
+
+### Version 0.3.0-alpha.3
+
+*Released on March 24th 2019*
+
+- [CHORE] Upgrade to `pkg` `v0.3.0-alpha.8`
+- [FIX] Update trace status to `mined` after reconstituting context
+
+### Version 0.3.0-alpha.2
+
+*Released on March 21th 2019*
+
+- [FIX] clean keys & topics for produced messages in kafka
 
 ### Version 0.3.0-alpha.1
 
