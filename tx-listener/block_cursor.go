@@ -6,7 +6,7 @@ import (
 	"math/big"
 	"sync"
 	"time"
-
+	"github.com/sirupsen/logrus"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -106,7 +106,7 @@ func (t *BaseTracker) HighestBlock(ctx context.Context) (int64, error) {
 	if header.Number.Uint64() <= t.depth {
 		return 0, nil
 	}
-	return int64(header.Number.Uint64() - t.depth), nil
+	return int64(header.Number.Uint64() - t.depth + 1), nil
 }
 
 // Future is an element used to start a task and retrieve its result later
@@ -233,6 +233,7 @@ feedingLoop:
 			} else {
 				// We are ahead of last known chain head, so we refresh it
 				head, err := bc.t.HighestBlock(ctx)
+				logrus.Tracef("Highest block : %v", head)
 				if head > bc.currentHead {
 					// Chain has moved forward (meaning new blocks have been mined and are ready to be fetched)
 					bc.currentHead = head
@@ -270,6 +271,7 @@ func (bc *BlockCursor) fetchBlock(ctx context.Context, blockNumber int64) *Futur
 		err: make(chan error),
 	}
 
+	logrus.Tracef("Trying to fetch block : %v", blockNumber)
 	// Retrieve block in a separate goroutine
 	go func() {
 		defer bFuture.Close()
