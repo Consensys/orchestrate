@@ -306,7 +306,7 @@ func (bc *BlockCursor) fetchBlock(ctx context.Context, blockNumber int64) *Futur
 	}
 
 	log.WithFields(log.Fields{
-		"block-number": blockNumber,
+		"block.number": blockNumber,
 	}).Tracef("tx-listener: fetch block")
 	// Retrieve block in a separate goroutine
 	go func() {
@@ -314,7 +314,10 @@ func (bc *BlockCursor) fetchBlock(ctx context.Context, blockNumber int64) *Futur
 
 		block, err := bc.ec.BlockByNumber(ctx, bc.ChainID(), big.NewInt(blockNumber))
 		if err != nil {
-			bFuture.err <- err
+			bFuture.err <- &TxListenerError{
+				bc.ChainID(),
+				err,
+			}
 			return
 		}
 
@@ -342,7 +345,10 @@ func (bc *BlockCursor) fetchBlock(ctx context.Context, blockNumber int64) *Futur
 		for i, rFuture := range rFutures {
 			select {
 			case err := <-rFuture.err:
-				bFuture.err <- err
+				bFuture.err <- &TxListenerError{
+					bc.ChainID(),
+					err,
+				}
 				return
 			case res := <-rFuture.res:
 				receipt := res.(*TxListenerReceipt)
@@ -371,7 +377,10 @@ func (bc *BlockCursor) fetchReceipt(ctx context.Context, txHash common.Hash) *Fu
 		defer future.Close()
 		receipt, err := bc.ec.TransactionReceipt(ctx, bc.ChainID(), txHash)
 		if err != nil {
-			future.err <- err
+			future.err <- &TxListenerError{
+				bc.ChainID(),
+				err,
+			}
 			return
 		}
 
