@@ -276,7 +276,7 @@ feedingLoop:
 			break feedingLoop
 		case block, ok := <-l.cur.Blocks():
 			if !ok {
-				// Block cursor loop has been closed
+				// Block cursor block channel has been closed so we leave the loop
 				break feedingLoop
 			}
 			// We have a new block
@@ -301,7 +301,7 @@ feedingLoop:
 
 		case err, ok := <-l.cur.Errors():
 			if !ok {
-				// Block cursor loop has been closed
+				// Block cursor block channel has been closed so we leave the loop
 				break feedingLoop
 			}
 
@@ -314,7 +314,7 @@ feedingLoop:
 				}).Error("Failed to retrieve block")
 			}
 
-			// We got an error so abort the listener
+			// We got an error so we abort the listener
 			l.Close()
 			break feedingLoop
 		}
