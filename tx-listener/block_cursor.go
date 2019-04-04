@@ -6,10 +6,11 @@ import (
 	"math/big"
 	"sync"
 	"time"
-	"github.com/sirupsen/logrus"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/sirupsen/logrus"
 )
 
 // TxListenerReceipt contains useful information about a receipt
@@ -71,7 +72,10 @@ func (e TxListenerErrors) Error() string {
 
 // ChainTracker keep track of block chain highest mined block
 type ChainTracker interface {
+	// Return ID of the chain being tracked
 	ChainID() *big.Int
+
+	// Return block number of the highest final block in the canonical chain
 	HighestBlock(ctx context.Context) (int64, error)
 }
 
@@ -97,7 +101,7 @@ func (t *BaseTracker) ChainID() *big.Int {
 	return big.NewInt(0).Set(t.chainID)
 }
 
-// HighestBlock returns highest mined block on the tracked chain
+// HighestBlock returns highest mined & considered filnal block on the tracked chain
 func (t *BaseTracker) HighestBlock(ctx context.Context) (int64, error) {
 	header, err := t.ec.HeaderByNumber(ctx, t.chainID, nil)
 	if err != nil {
@@ -106,7 +110,7 @@ func (t *BaseTracker) HighestBlock(ctx context.Context) (int64, error) {
 	if header.Number.Uint64() <= t.depth {
 		return 0, nil
 	}
-	return int64(header.Number.Uint64() - t.depth + 1), nil
+	return int64(header.Number.Uint64() - t.depth), nil
 }
 
 // Future is an element used to start a task and retrieve its result later
@@ -227,20 +231,22 @@ feedingLoop:
 			break feedingLoop
 		default:
 			if bc.blockNumber <= bc.currentHead {
-				// We are behind chain head meaning we have at leasdt one block to fetch
+				// We are behind chain head meaning we have at least one block to fetch
 				bc.blockFutures <- bc.fetchBlock(ctx, bc.blockNumber)
+
+				// Increment block position
 				bc.blockNumber++
 			} else {
-				// We are ahead of last known chain head, so we refresh it
+				// We are ahead of last known final block, so we refresh it
 				head, err := bc.t.HighestBlock(ctx)
-				logrus.Tracef("Highest block : %v", head)
+				logrus.Tracef("tx-listener: highest block : %v", head)
 				if head > bc.currentHead {
-					// Chain has moved forward (meaning new blocks have been mined and are ready to be fetched)
+					// Chain has moved forward (meaning at least one new final block are ready to be fetched)
 					bc.currentHead = head
 				} else {
 					// We are still ahead or something went wrong
 					if err != nil {
-						// If we got an error while retrieving chain head we notify it in a future
+						// If we got an error while retrieving chain highest block we notify it in a future
 						bFuture := &Future{
 							res: make(chan interface{}),
 							err: make(chan error),
