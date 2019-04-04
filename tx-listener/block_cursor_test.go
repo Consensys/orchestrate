@@ -372,7 +372,7 @@ func TestBlockCursor(t *testing.T) {
 	// First block should have been retrieved almost instantaneously
 	block, err := getNextBlock(bc, 10*time.Millisecond)
 	if err != nil {
-		t.Errorf("Expected no error but got %v", err)
+		t.Errorf("Expected no error when getting block %v but got %v", 0, err)
 	} else {
 		if block.NumberU64() != 0 {
 			t.Errorf("Expected block %v", 0)
@@ -396,7 +396,7 @@ func TestBlockCursor(t *testing.T) {
 	// Block 1 should be available
 	block, err = getNextBlock(bc, 10*time.Millisecond)
 	if err != nil {
-		t.Errorf("Expected no error but got %v", err)
+		t.Errorf("Expected no error when getting block %v but got %v", 1, err)
 	} else {
 		if block.NumberU64() != 1 {
 			t.Errorf("Expected block %v", 1)
@@ -406,7 +406,7 @@ func TestBlockCursor(t *testing.T) {
 	// Block 2 should be available
 	block, err = getNextBlock(bc, time.Millisecond)
 	if err != nil {
-		t.Errorf("Expected no error but got %v", err)
+		t.Errorf("Expected no error when getting block %v but got %v", 2, err)
 	} else {
 		if block.NumberU64() != 2 {
 			t.Errorf("Expected block %v", 1)
