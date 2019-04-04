@@ -9,7 +9,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/spf13/viper"
 )
 
 func TestTxListener(t *testing.T) {
@@ -22,10 +21,10 @@ func TestTxListener(t *testing.T) {
 	mec := NewMockEthClient(blocks)
 
 	// Initialize Configuration
-	viper.Set("listener.block.backoff", 100*time.Millisecond)
-	viper.Set("listener.block.limit", 40)
-	viper.Set("listener.tracker.depth", 0)
 	config := NewConfig()
+	config.BlockCursor.Backoff = 100 * time.Millisecond
+	config.BlockCursor.Limit = uint64(40)
+	config.BlockCursor.Tracker.Depth = uint64(0)
 	config.TxListener.Return.Blocks = false
 	config.TxListener.Return.Errors = false
 
@@ -76,7 +75,7 @@ func TestTxListener(t *testing.T) {
 		wait.Done()
 	}()
 
-	// Simulate 2 mined blocks mining
+	// Simulate 2 mined blocks
 	time.Sleep(50 * time.Millisecond)
 	mec.mine()
 
@@ -92,7 +91,7 @@ func TestTxListener(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 	mec.mine()
 
-	// Test methods while running
+	// Test methods while running (to maybe detect some race conditions)
 	chains := l.Chains()
 	expected := 3
 	if len(chains) != expected {
@@ -105,7 +104,7 @@ func TestTxListener(t *testing.T) {
 		t.Errorf("TxListener: expected highest block to be %v but got %v", highest, progress["1"].HighestBlock)
 	}
 
-	// Close
+	// Close listener
 	l.Close()
 
 	// Try to listen on a close listener
@@ -148,10 +147,10 @@ func TestTxListenerWithReturns(t *testing.T) {
 	mec := NewMockEthClient(blocks)
 
 	// Initialize cursor
-	viper.Set("listener.block.backoff", 100*time.Millisecond)
-	viper.Set("listener.block.limit", 40)
-	viper.Set("listener.tracker.depth", 0)
 	config := NewConfig()
+	config.BlockCursor.Backoff = 100 * time.Millisecond
+	config.BlockCursor.Limit = uint64(40)
+	config.BlockCursor.Tracker.Depth = uint64(0)
 	config.TxListener.Return.Blocks = true
 	config.TxListener.Return.Errors = true
 

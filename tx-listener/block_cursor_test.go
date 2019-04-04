@@ -31,7 +31,7 @@ func (ec *MockEthClient) mine() {
 	ec.mux.Lock()
 	defer ec.mux.Unlock()
 
-	if int(ec.head) < len(ec.blocks) {
+	if int(ec.head)+1 < len(ec.blocks) {
 		ec.head++
 	}
 }
@@ -246,7 +246,7 @@ func TestBlockCursorFetchReceipt(t *testing.T) {
 
 	// Initialize cursor
 	config := NewConfig()
-	bc := newBlockCursorFromTracker(mec, tracker, -1, config)
+	bc := newBlockCursorFromTracker(mec, tracker, 0, config)
 
 	future := bc.fetchReceipt(context.Background(), common.HexToHash("0x8305d6f07eaced88f5f8f52d5acceedb07568c6ca6c956bef461ed3d6e77686b"))
 
@@ -288,7 +288,7 @@ func TestBlockCursorFetchBlock(t *testing.T) {
 
 	// Initialize cursor
 	config := NewConfig()
-	bc := newBlockCursorFromTracker(mec, tracker, -1, config)
+	bc := newBlockCursorFromTracker(mec, tracker, 0, config)
 
 	future := bc.fetchBlock(context.Background(), 4)
 
@@ -328,5 +328,88 @@ func TestBlockCursorFetchBlock(t *testing.T) {
 	err = <-future.err
 	if err == nil {
 		t.Errorf("GetBlock: got Err %v", err)
+	}
+}
+
+func getNextBlock(bc *BlockCursor, timeout time.Duration) (*TxListenerBlock, error) {
+	var block *TxListenerBlock
+	var err error
+
+	select {
+	case block = <-bc.Blocks():
+	case err = <-bc.Errors():
+	case <-time.After(timeout):
+		err = fmt.Errorf("Timeout")
+	}
+
+	return block, err
+}
+
+func TestBlockCursor(t *testing.T) {
+	blocks := []*types.Block{}
+	for _, blockEnc := range blocksEnc {
+		var block types.Block
+		rlp.DecodeBytes(blockEnc, &block)
+		blocks = append(blocks, &block)
+	}
+	mec := NewMockEthClient(blocks)
+
+	tracker := &BaseTracker{
+		ec:      mec,
+		chainID: big.NewInt(1),
+		depth:   0,
+	}
+
+	// Initialize cursor
+	config := NewConfig()
+	config.BlockCursor.Backoff = 100 * time.Millisecond
+	bc := newBlockCursorFromTracker(mec, tracker, 0, config)
+
+	// Start block cursor
+	go bc.feeder()
+	go bc.dispatcher()
+
+	// First block should have been retrieved almost instantaneously
+	block, err := getNextBlock(bc, 10*time.Millisecond)
+	if err != nil {
+		t.Errorf("Expected no error but got %v", err)
+	} else {
+		if block.NumberU64() != 0 {
+			t.Errorf("Expected block %v", 0)
+		}
+	}
+
+	// We simulate two mined blocks
+	mec.mine()
+	mec.mine()
+
+	// At this time cursor should be sleeping waiting for next block
+	// So we should timeout when retrieving next block
+	block, err = getNextBlock(bc, 70*time.Millisecond)
+	if err == nil || err.Error() != "Timeout" {
+		t.Errorf("Expected no new block but got %v", block)
+	}
+
+	// We sleep until cursor should re-activate and try to find new blocks
+	time.Sleep(30 * time.Millisecond)
+
+	// Block 1 should be available
+	block, err = getNextBlock(bc, 10*time.Millisecond)
+	if err != nil {
+		t.Errorf("Expected no error but got %v", err)
+	} else {
+		if block.NumberU64() != 1 {
+			t.Errorf("Expected block %v", 1)
+		}
+	}
+
+	// Block 2 should be available
+	block, err = getNextBlock(bc, time.Millisecond)
+	if err != nil {
+		t.Errorf("Expected no error but got %v", err)
+	} else {
+		if block.NumberU64() != 2 {
+			t.Errorf("Expected block %v", 1)
+		}
 	}
 }
