@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.4
+
+*Unreleased*
+
+- [FIX] Fix infinite recursivity error in `txlistener.BlockMissingError` and `txlistener.ReceiptMissingError`
+
 ### Version 0.3.3
 
 *Released on April 04th 2019*
