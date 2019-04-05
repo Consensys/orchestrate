@@ -8,15 +8,18 @@ import (
 	trace "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
 )
 
-// HandlerFunc is base type for a function processing a Trace
+// HandlerFunc is base type for an handler function processing a Context
 type HandlerFunc func(ctx *Context)
 
-// Context allows us to transmit information through middlewares
+// Context is the most important part of a worker.
+// It allows to pass variables between handlers
 type Context struct {
-	// Go context
+	// ctx is a go context that is attach to the worker Context
+	// It allows to carry deadlines, cancelation signals, etc. between handlers
+	// It is not recommended to do
 	ctx context.Context
 
-	// T stores information about transaction lifecycle in high level types
+	// T stores all information about transaction lifecycle
 	T *trace.Trace
 
 	// Message that triggered Context execution (typically a sarama.ConsumerMessage)
@@ -25,13 +28,13 @@ type Context struct {
 	// Keys is a key/value pair
 	Keys map[string]interface{}
 
-	// Handlers to be executed on context
+	// chain of handlers to be executed on context
 	handlers []HandlerFunc
 
-	// Handler being executed
+	// index of the handler being executed
 	index int
 
-	// Logger
+	// Logger logrus log entry for this context execution
 	Logger *log.Entry
 }
 
@@ -60,8 +63,8 @@ func (ctx *Context) Reset() {
 	ctx.Logger = nil
 }
 
-// Next should be used in middleware
-// It executes pending handlers
+// Next should be used only inside middleware.
+// It executes the pending handlers in the chain inside the calling handler
 func (ctx *Context) Next() {
 	ctx.index++
 	for s := len(ctx.handlers); ctx.index < s; ctx.index++ {
@@ -105,7 +108,7 @@ func (ctx *Context) Prepare(handlers []HandlerFunc, logger *log.Entry, msg inter
 	ctx.Logger = logger
 }
 
-// WithContext attach a go context on Context
+// WithContext attach a go context on worker Context
 func WithContext(ctx context.Context, context *Context) *Context {
 	context.ctx = ctx
 	return context
