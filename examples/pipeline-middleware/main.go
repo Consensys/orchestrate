@@ -1,8 +1,6 @@
 package main
 
 import (
-	"context"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
@@ -27,7 +25,7 @@ func main() {
 	cfg := worker.NewConfig()
 	cfg.Slots = 1
 	cfg.Partitions = 1
-	worker := worker.NewWorker(context.Background(), cfg)
+	worker := worker.NewWorker(cfg)
 
 	// Register handlers
 	worker.Use(middleware)

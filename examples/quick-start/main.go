@@ -1,8 +1,6 @@
 package main
 
 import (
-	"context"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
@@ -15,7 +13,7 @@ func main() {
 	// Instantiate worker with 1 partition to treat messages
 	cfg := worker.NewConfig()
 	cfg.Partitions = 1
-	worker := worker.NewWorker(context.Background(), cfg)
+	worker := worker.NewWorker(cfg)
 
 	// Register handler
 	worker.Use(handler)

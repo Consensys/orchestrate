@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"sync/atomic"
 
@@ -29,7 +28,7 @@ func main() {
 	cfg := worker.NewConfig()
 	cfg.Slots = 100
 	cfg.Partitions = 100
-	worker := worker.NewWorker(context.Background(), cfg)
+	worker := worker.NewWorker(cfg)
 
 	// Register handler
 	h := ExampleHandler{0, 0}
