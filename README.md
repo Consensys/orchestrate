@@ -50,57 +50,47 @@ $ cat examples/quick-start/main.go
 package main
 
 import (
-	"fmt"
-	"sync/atomic"
+	"context"
+	"sync"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
-// ExampleHandler is an handler that increment counters
-type ExampleHandler struct {
-	safeCounter   uint32
-	unsafeCounter uint32
-}
-
-func (h *ExampleHandler) handleSafe(ctx *worker.Context) {
-	// Increment counter using atomic
-	atomic.AddUint32(&h.safeCounter, 1)
-}
-
-func (h *ExampleHandler) handleUnsafe(ctx *worker.Context) {
-	// Increment counter with no concurrent protection
-	h.unsafeCounter++
+// Define a handler method
+func handler(ctx *worker.Context) {
+	ctx.Logger.Infof("Handling %v\n", ctx.Msg.(string))
 }
 
 func main() {
-	// Instantiate worker that can treat 100 message concurrently in 100 distinct partitions
+	// Instantiate worker
 	cfg := worker.NewConfig()
-	cfg.Slots = 100
-	cfg.Partitions = 100
-	worker := worker.NewWorker(cfg)
+	w := worker.NewWorker(cfg)
 
-	// Register handler
-	h := ExampleHandler{0, 0}
-	worker.Partitionner(func(msg interface{}) []byte { return []byte(msg.(string)) })
-	worker.Use(h.handleSafe)
-	worker.Use(h.handleUnsafe)
+	// Register an handler
+	w.Use(handler)
 
-	// Start worker
+	// Create an input channel of messages
 	in := make(chan interface{})
-	go func() { worker.Run(in) }()
 
-	// Feed 10000 to the worker
-	for i := 0; i < 10000; i++ {
-		in <- fmt.Sprintf("%v-%v", "Message", i)
-	}
+	// Run worker on input channel
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		w.Run(context.Background(), in)
+		wg.Done()
+	}()
 
-	// Close channel
+	// Feed channel
+	in <- "Message-1"
+	in <- "Message-2"
+	in <- "Message-3"
+
+	// Close channel & wait for worker to treat all messages
 	close(in)
-	<-worker.Done()
+	wg.Wait()
 
-	// Print counters
-	fmt.Printf("* Safe counter: %v\n", h.safeCounter)
-	fmt.Printf("* Unsafe counter: %v\n", h.unsafeCounter)
+	// CleanUp worker to avoid memory leak
+	w.CleanUp()
 }
 ```
 
@@ -121,16 +111,16 @@ Handler functions are the building blocks for workers, they match the interface
 type HandlerFunc func(ctx *Context)
 ```
 
-When creating a worker you must register a sequence of handlers by using ``worker.Use(handler)``. When running, each time a new message is feeded to the worker, the worker generates a ``types.Context`` and apply handlers sequence on this context object.
+When creating a worker you must register a chain of handlers by using ``worker.Use(handler)``. Once worker is running, each time a new message is feeded to the input channel, the worker generates a dedicated ``Context`` object and apply the chain of handlers on this context object.
 
 #### Pipeline/Middleware
 
 Handlers can be either 
 
-- *pipeline* meaning it proceed to its execution then closes
-- *middleware* meaning it proceeds to beginning of its own execution, then execute pending handlers then finishes own execution
+- *pipeline* meaning handlers execution is linear
+- *middleware* which has a 3 phases execution, it starts with its own execution then executes pending handlers and finally finish its own execution 
 
-Middleware is a common pattern that permit to maintain a scope of variables open while executing unknown functions.
+Middleware is a common pattern that allows to maintain a scope of variables open while executing unknown functions.
 
 ```sh
 $ cat examples/pipeline-middleware/main.go
@@ -140,6 +130,9 @@ $ cat examples/pipeline-middleware/main.go
 package main
 
 import (
+	"context"
+	"sync"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
@@ -162,27 +155,33 @@ func middleware(ctx *worker.Context) {
 
 func main() {
 	cfg := worker.NewConfig()
-	cfg.Slots = 1
-	cfg.Partitions = 1
-	worker := worker.NewWorker(cfg)
+	w := worker.NewWorker(cfg)
 
 	// Register handlers
-	worker.Use(middleware)
-	worker.Use(pipeline)
+	w.Use(middleware)
+	w.Use(pipeline)
 
 	// Create an input channel of messages
 	in := make(chan interface{})
 
 	// Run worker on input channel
-	go func() { worker.Run(in) }()
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		w.Run(context.Background(), in)
+		wg.Done()
+	}()
 
 	// Feed channel
 	in <- "Message-1"
 	in <- "Message-2"
 
-	// Close channel & wiat for worker to treat all messages
+	// Close channel & wait for worker to treat all messages
 	close(in)
-	<-worker.Done()
+	wg.Wait()
+
+	// CleanUp worker to avoid memory leak
+	w.CleanUp()
 }
 ```
 
@@ -202,10 +201,11 @@ INFO[0000] * Middleware finishes handling Message-2
 
 A worker can handle multiple message concurrently in parallel goroutines. When declaring an handler you can configure
 
-- ```slots``` which the maximum of messages that can be treated concurrently
-- ```partitions``` which correspond to partitions of message that should be treated sequentially based on a message partition key 
+- ```slots``` which is the maximum count of messages that can be treated concurrently
 
-Be careful that ```handler``` functions must manage there resources in concurrenct safe manner. Note that while multiple contexts can be handled in parallel, a given context is never handled by more than one handler function at a time.
+**WARNING** ```HandlerFunc``` **MUST** be concurrency safe. 
+
+Note that while multiple contexts can be handled in parallel, a given context is never handled by more than one ```HandlerFunc``` at a time.
 
 ```sh
 $ cat examples/concurrency/main.go
@@ -215,7 +215,9 @@ $ cat examples/concurrency/main.go
 package main
 
 import (
+	"context"
 	"fmt"
+	"sync"
 	"sync/atomic"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
@@ -238,30 +240,43 @@ func (h *ExampleHandler) handleUnsafe(ctx *worker.Context) {
 }
 
 func main() {
-	// Instantiate worker that can treat 100 message concurrently in 100 distinct partitions
+	// Instantiate worker that can treat 100 message concurrently
 	cfg := worker.NewConfig()
 	cfg.Slots = 100
-	cfg.Partitions = 100
-	worker := worker.NewWorker(cfg)
+	w := worker.NewWorker(cfg)
 
 	// Register handler
 	h := ExampleHandler{0, 0}
-	worker.Partitionner(func(msg interface{}) []byte { return []byte(msg.(string)) })
-	worker.Use(h.handleSafe)
-	worker.Use(h.handleUnsafe)
+	w.Use(h.handleSafe)
+	w.Use(h.handleUnsafe)
 
-	// Start worker
-	in := make(chan interface{})
-	go func() { worker.Run(in) }()
-
-	// Feed 10000 to the worker
-	for i := 0; i < 10000; i++ {
-		in <- fmt.Sprintf("%v-%v", "Message", i)
+	// Run worker on 100 distinct input channel
+	wg := &sync.WaitGroup{}
+	inputs := make([]chan interface{}, 0)
+	for i := 0; i < 100; i++ {
+		inputs = append(inputs, make(chan interface{}, 100))
+		wg.Add(1)
+		go func(in chan interface{}) {
+			w.Run(context.Background(), in)
+			wg.Done()
+		}(inputs[i])
 	}
 
-	// Close channel
-	close(in)
-	<-worker.Done()
+	// Feed 10000 to the worker
+	for i := 0; i < 100; i++ {
+		for j, in := range inputs {
+			in <- fmt.Sprintf("Message %v-%v", j, i)
+		}
+	}
+
+	// Close all channels & wait for worker to treat all messages
+	for _, in := range inputs {
+		close(in)
+	}
+	wg.Wait()
+
+	// CleanUp worker to avoid memory leak
+	w.CleanUp()
 
 	// Print counters
 	fmt.Printf("* Safe counter: %v\n", h.safeCounter)

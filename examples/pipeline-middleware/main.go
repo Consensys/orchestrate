@@ -1,6 +1,9 @@
 package main
 
 import (
+	"context"
+	"sync"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
 )
 
@@ -23,25 +26,31 @@ func middleware(ctx *worker.Context) {
 
 func main() {
 	cfg := worker.NewConfig()
-	cfg.Slots = 1
-	cfg.Partitions = 1
-	worker := worker.NewWorker(cfg)
+	w := worker.NewWorker(cfg)
 
 	// Register handlers
-	worker.Use(middleware)
-	worker.Use(pipeline)
+	w.Use(middleware)
+	w.Use(pipeline)
 
 	// Create an input channel of messages
 	in := make(chan interface{})
 
 	// Run worker on input channel
-	go func() { worker.Run(in) }()
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		w.Run(context.Background(), in)
+		wg.Done()
+	}()
 
 	// Feed channel
 	in <- "Message-1"
 	in <- "Message-2"
 
-	// Close channel & wiat for worker to treat all messages
+	// Close channel & wait for worker to treat all messages
 	close(in)
-	<-worker.Done()
+	wg.Wait()
+
+	// CleanUp worker to avoid memory leak
+	w.CleanUp()
 }

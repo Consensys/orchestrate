@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"sync"
 	"sync/atomic"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
@@ -24,30 +26,43 @@ func (h *ExampleHandler) handleUnsafe(ctx *worker.Context) {
 }
 
 func main() {
-	// Instantiate worker that can treat 100 message concurrently in 100 distinct partitions
+	// Instantiate worker that can treat 100 message concurrently
 	cfg := worker.NewConfig()
 	cfg.Slots = 100
-	cfg.Partitions = 100
-	worker := worker.NewWorker(cfg)
+	w := worker.NewWorker(cfg)
 
 	// Register handler
 	h := ExampleHandler{0, 0}
-	worker.Partitionner(func(msg interface{}) []byte { return []byte(msg.(string)) })
-	worker.Use(h.handleSafe)
-	worker.Use(h.handleUnsafe)
+	w.Use(h.handleSafe)
+	w.Use(h.handleUnsafe)
 
-	// Start worker
-	in := make(chan interface{})
-	go func() { worker.Run(in) }()
-
-	// Feed 10000 to the worker
-	for i := 0; i < 10000; i++ {
-		in <- fmt.Sprintf("%v-%v", "Message", i)
+	// Run worker on 100 distinct input channel
+	wg := &sync.WaitGroup{}
+	inputs := make([]chan interface{}, 0)
+	for i := 0; i < 100; i++ {
+		inputs = append(inputs, make(chan interface{}, 100))
+		wg.Add(1)
+		go func(in chan interface{}) {
+			w.Run(context.Background(), in)
+			wg.Done()
+		}(inputs[i])
 	}
 
-	// Close channel
-	close(in)
-	<-worker.Done()
+	// Feed 10000 to the worker
+	for i := 0; i < 100; i++ {
+		for j, in := range inputs {
+			in <- fmt.Sprintf("Message %v-%v", j, i)
+		}
+	}
+
+	// Close all channels & wait for worker to treat all messages
+	for _, in := range inputs {
+		close(in)
+	}
+	wg.Wait()
+
+	// CleanUp worker to avoid memory leak
+	w.CleanUp()
 
 	// Print counters
 	fmt.Printf("* Safe counter: %v\n", h.safeCounter)
