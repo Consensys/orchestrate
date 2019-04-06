@@ -1,5 +1,13 @@
 # CHANGELOG
 
+### Version 0.3.0
+
+*Unreleased*
+
+- [REFACTOR] Go context usage on `worker.Context`
+- [FEAT] Implement `worker.TimeoutHandler`
+- [FIX] Deactivate usage of `Timeout` in worker configuration
+
 ### Version 0.2.0-alpha.13
 
 *Released on March 30th 2019*
