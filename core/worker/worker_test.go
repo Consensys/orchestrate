@@ -34,7 +34,7 @@ func TestWorker(t *testing.T) {
 
 	// Create new worker and register test handler
 	w := NewWorker(
-		Config{Slots: 100, Partitions: 100, Timeout: 60 * time.Second},
+		Config{Slots: 100, Partitions: 100},
 	)
 	w.Use(h.Handler(t))
 
@@ -67,7 +67,7 @@ func TestWorkerStopped(t *testing.T) {
 
 	// Create new worker and register test handler
 	w := NewWorker(
-		Config{Slots: 100, Partitions: 100, Timeout: 60 * time.Second},
+		Config{Slots: 100, Partitions: 100},
 	)
 	w.Use(h.Handler(t))
 

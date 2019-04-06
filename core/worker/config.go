@@ -21,7 +21,6 @@ func init() {
 type Config struct {
 	Slots      int64
 	Partitions int64
-	Timeout    time.Duration
 }
 
 // Validate ensure configuration is valid
@@ -34,10 +33,6 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("At least one partition is required")
 	}
 
-	if c.Timeout == 0 {
-		return fmt.Errorf("Timeout must be positive")
-	}
-
 	return nil
 }
 
@@ -46,8 +41,6 @@ func NewConfig() Config {
 	config := Config{}
 	config.Slots = viper.GetInt64("worker.slots")
 	config.Partitions = viper.GetInt64("worker.partitions")
-	config.Timeout = viper.GetDuration("worker.timeout")
-
 	return config
 }
 
@@ -55,7 +48,6 @@ func NewConfig() Config {
 func InitFlags(f *pflag.FlagSet) {
 	Slots(f)
 	Partitions(f)
-	Timeout(f)
 }
 
 var (
@@ -97,7 +89,7 @@ var (
 
 // Timeout register flag for Kafka server addresses
 func Timeout(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Maw time to handle a message
+	desc := fmt.Sprintf(`Maximum time for a message to be handled a message
 Environment variable: %q`, workerTimeoutEnv)
 	f.Duration(workerTimeoutFlag, workerTimeoutDefault, desc)
 	viper.BindPFlag(workerTimeoutViperKey, f.Lookup(workerTimeoutFlag))
