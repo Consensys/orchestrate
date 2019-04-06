@@ -3,13 +3,9 @@ package worker
 import (
 	"context"
 	"fmt"
-	"hash"
-	"hash/fnv"
-	"time"
-
-	"math/rand"
-	"strconv"
 	"sync"
+	"sync/atomic"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -19,21 +15,23 @@ type PartitionKeyFunc func(message interface{}) []byte
 
 // Worker allows to consume messages on an input channel
 type Worker struct {
+	// Worker configuration object
 	conf Config
 
-	handlers []HandlerFunc    // Handlers to apply on each context
-	key      PartitionKeyFunc // Function used to create key for dispatching
+	// chain of handlers to be to be executed
+	handlers []HandlerFunc
 
-	handling *sync.WaitGroup // WaitGroup to keep track of messages being consumed and gracefully stop
-	ctxPool  *sync.Pool      // Pool used to re-cycle context
+	// running keeps track of the number of running loops
+	running   int64
+	cleanOnce *sync.Once
 
-	hashPool *sync.Pool
+	// ctxPool is a pool used to re-cycle context objects
+	ctxPool *sync.Pool
 
-	partitions  []chan interface{} // Partitions correspond to of message
-	slots       chan struct{}      // Channel used to limit count of goroutine handling messages
-	dying, done chan struct{}      // Channel used to indicate runner has terminated
-	closeOnce   *sync.Once
+	// slots is a channel used to limit the number of messages treated concurently by the worker
+	slots chan struct{}
 
+	// Worker logger
 	logger *log.Logger
 }
 
@@ -44,33 +42,16 @@ func NewWorker(conf Config) *Worker {
 	// Validate configuration
 	conf.Validate()
 
-	partitions := make([]chan interface{}, conf.Partitions)
-	for i := range partitions {
-		partitions[i] = make(chan interface{}, conf.Slots)
-	}
-
 	return &Worker{
-		conf:     conf,
-		handlers: []HandlerFunc{},
-		handling: &sync.WaitGroup{},
+		conf:      conf,
+		handlers:  []HandlerFunc{},
+		running:   0,
+		cleanOnce: &sync.Once{},
 		// By default key is randomly generated
-		key:        func(message interface{}) []byte { return []byte(strconv.Itoa(rand.Int())) },
-		ctxPool:    &sync.Pool{New: func() interface{} { return NewContext() }},
-		hashPool:   &sync.Pool{New: func() interface{} { return fnv.New64() }},
-		partitions: partitions,
-		slots:      make(chan struct{}, conf.Slots),
-		dying:      make(chan struct{}),
-		done:       make(chan struct{}),
-		closeOnce:  &sync.Once{},
-		logger:     log.StandardLogger(), // TODO: make possible to use non-standard logrus logger
+		ctxPool: &sync.Pool{New: func() interface{} { return NewContext() }},
+		slots:   make(chan struct{}, conf.Slots),
+		logger:  log.StandardLogger(), // TODO: make possible to use non-standard logrus logger
 	}
-}
-
-// Partitionner register a function computing partition key on input messages
-// Messages having same partition key are treated sequentially
-// Messages from distinct partitions are treated in parallel
-func (w *Worker) Partitionner(key PartitionKeyFunc) {
-	w.key = key
 }
 
 // Use add a new handler
@@ -78,104 +59,64 @@ func (w *Worker) Use(handler HandlerFunc) {
 	w.handlers = append(w.handlers, handler)
 }
 
-// dispatch send message to the corresponding partition
-func (w *Worker) dispatch(message interface{}) {
-	// Compute message partition key
-	h := w.hashPool.Get().(hash.Hash64)
-	defer w.hashPool.Put(h)
-	h.Reset()
-	_, err := h.Write(w.key(message))
-
-	if err != nil {
-		// Key must be computable for every message
-		w.logger.Fatalf("worker: could not compute key on message %v", message)
+// Run starts consuming messages from an input channel
+//
+// Run will gracefully interupt either if
+// - provided ctx is cancelled
+// - input channel is closed
+//
+// Once you have stopped consuming from an input channel, you should not start to consuming
+// from a new channel using Run() or it will panic (if you need to start consuming from a new channel you
+// should create a new worker)
+func (w *Worker) Run(ctx context.Context, input <-chan interface{}) {
+	// Context must be not nil
+	if ctx == nil {
+		panic("nil context")
 	}
 
-	// Dispatch message to the corresponding partition key
-	w.partitions[h.Sum64()%uint64(len(w.partitions))] <- message
-}
+	// Increment count of input channels being consumed
+	count := atomic.AddInt64(&w.running, 1)
+	w.logger.WithFields(log.Fields{
+		"inputs.count": count,
+	}).Debugf("worker: start running loop")
 
-func (w *Worker) dispatcher(messages chan interface{}) {
-	w.logger.Debugf("worker: start main loop")
-dispatcherLoop:
+runningLoop:
 	for {
 		select {
-		case <-w.dying:
-			// Exit loop
-			w.logger.Debug("worker: dying")
-			break dispatcherLoop
-		case msg, ok := <-messages:
+		case msg, ok := <-input:
 			if !ok {
-				// Message channel has been close so we also close
-				w.logger.Debug("worker: input channel closed")
-				w.Close()
-
-				// Exit loop
-				break dispatcherLoop
-			} else {
-				// Indicate that a new message is being handled
-				w.handling.Add(1)
-
-				// Acquire a goroutine slot
-				w.slots <- struct{}{}
-
-				// Dispatch message
-				w.dispatch(msg)
+				// Input channel has been close so we leave the loop
+				break runningLoop
 			}
+
+			// Acquire a message slot
+			w.slots <- struct{}{}
+
+			// Handle message
+			w.handleMessage(msg)
+
+			// Release a message slot
+			<-w.slots
+		case <-ctx.Done():
+			// Context has timeout or been cancelled so we leave the loop
+			break runningLoop
 		}
 	}
-	w.logger.Debugf("worker: left main loop")
 
-	// Close slots channel
-	close(w.slots)
-
-	// Close message channels
-	for _, channel := range w.partitions {
-		close(channel)
-	}
+	// Decrement count of input channels being consumed
+	count = atomic.AddInt64(&w.running, -1)
+	w.logger.WithFields(log.Fields{
+		"inputs.count": count,
+	}).Debugf("worker: left running loop")
 }
 
-// handler handles messages from a given parition
-func (w *Worker) handler(partition <-chan interface{}) {
-	for msg := range partition {
-		w.logger.Trace("worker: handle msg")
-
-		// Handle message
-		w.handleMessage(msg)
-
-		// Release a goroutine slot
-		<-w.slots
-
-		// Indicate that message has been handled
-		w.handling.Done()
-		w.logger.Trace("worker: msg handled")
-	}
-}
-
-// Run Starts a worker to consume messages
-func (w *Worker) Run(messages chan interface{}) {
-	// Start one handling goroutine per partition
-	for _, channel := range w.partitions {
-		go w.handler(channel)
-	}
-
-	// Start dispatching messages
-	w.dispatcher(messages)
-
-	// We wait until all messages have been properly handled
-	w.logger.Debugf("worker: wait for all messages to be properly handled")
-	w.handling.Wait()
-
-	// We notify that we properly stopped
-	close(w.done)
-	w.logger.Debugf("worker: done")
-}
-
-// Close worker
-func (w *Worker) Close() {
-	w.closeOnce.Do(func() {
-		w.logger.Debugf("worker: closing...")
-		close(w.dying)
+// CleanUp clean worker ressources
+//
+// After interupting execution of all Run() calls you should always call CleanUp
+// to avoid memory leak
+func (w *Worker) CleanUp() {
+	w.cleanOnce.Do(func() {
+		close(w.slots)
 	})
 }
 
@@ -189,13 +130,8 @@ func (w *Worker) handleMessage(msg interface{}) {
 	// Prepare context
 	c.Prepare(w.handlers, log.NewEntry(w.logger), msg)
 
-	// And calls Next to trigger execution
+	// Calls Next to trigger execution
 	c.Next()
-}
-
-// Done returns a channel indicating if worker is done running
-func (w *Worker) Done() <-chan struct{} {
-	return w.done
 }
 
 // TimeoutHandler returns a Handler that runs h with the given time limit

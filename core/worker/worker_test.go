@@ -1,6 +1,8 @@
 package worker
 
 import (
+	"context"
+	"fmt"
 	"math/rand"
 	"sync"
 	"testing"
@@ -33,30 +35,34 @@ func TestWorker(t *testing.T) {
 	}
 
 	// Create new worker and register test handler
-	w := NewWorker(
-		Config{Slots: 100, Partitions: 100},
-	)
+	w := NewWorker(Config{Slots: 100})
 	w.Use(h.Handler(t))
 
-	// Create a Sarama message channel
-	in := make(chan interface{})
-
-	// Run worker
-	go w.Run(in)
-
-	// Feed sarama channel and then close it
-	rounds := 1000
-	for i := 1; i <= rounds; i++ {
-		in <- "test"
+	// Create input channels and prefills it
+	ins := make([]chan interface{}, 0)
+	for i := 0; i < 50; i++ {
+		in := make(chan interface{}, 20)
+		for j := 0; j < 20; j++ {
+			in <- fmt.Sprintf("test-%v-%v", i, j)
+		}
+		close(in)
+		ins = append(ins, in)
 	}
-	close(in)
 
-	// Wait for worker to be done
-	<-w.Done()
-
-	if len(h.handled) != rounds {
-		t.Errorf("Worker: expected %v rounds but got %v", rounds, len(h.handled))
+	// Start consuming every input channel
+	wg := &sync.WaitGroup{}
+	for i := range ins {
+		wg.Add(1)
+		go func(in <-chan interface{}) {
+			w.Run(context.Background(), in)
+			wg.Done()
+		}(ins[i])
 	}
+
+	// Wait for worker to finish consuming
+	wg.Wait()
+
+	assert.Len(t, h.handled, 1000, "All messages should have been processed")
 }
 
 func TestWorkerStopped(t *testing.T) {
@@ -67,46 +73,50 @@ func TestWorkerStopped(t *testing.T) {
 
 	// Create new worker and register test handler
 	w := NewWorker(
-		Config{Slots: 100, Partitions: 100},
+		Config{Slots: 100},
 	)
 	w.Use(h.Handler(t))
 
-	// Create a Sarama message channel
-	in := make(chan interface{})
-
-	// Run worker
-	go w.Run(in)
-
-	// Feed sarama channel and then close it
-	rounds := 1000
-	go func() {
-		for i := 1; i <= rounds; i++ {
-			in <- "test"
-			time.Sleep(time.Millisecond)
+	// Create input channels and prefills it
+	ins := make([]chan interface{}, 0)
+	for i := 0; i < 50; i++ {
+		in := make(chan interface{}, 20)
+		for j := 0; j < 20; j++ {
+			in <- fmt.Sprintf("test-%v-%v", i, j)
 		}
 		close(in)
-	}()
-
-	// Sleep and close
-	time.Sleep(300 * time.Millisecond)
-	w.Close()
-
-	// Wait for worker to be done
-	<-w.Done()
-
-	if len(h.handled) > 500 {
-		t.Errorf("Worker: expected max %v rounds but got %v", 500, len(h.handled))
+		ins = append(ins, in)
 	}
 
-	msgCount := 0
-	for range in {
-		// We drain messages
-		msgCount++
+	// Start consuming every input channel
+	ctx, cancel := context.WithCancel(context.Background())
+	wg := &sync.WaitGroup{}
+	for i := range ins {
+		wg.Add(1)
+		go func(in <-chan interface{}) {
+			w.Run(ctx, in)
+			wg.Done()
+		}(ins[i])
 	}
 
-	if len(h.handled)+msgCount != rounds {
-		t.Errorf("Worker: expected all %v messages to have been consumed or drained but got consumed=%v drained=%v", rounds, len(h.handled), msgCount)
+	// Sleep for a short time and interupt
+	time.Sleep(100 * time.Millisecond)
+	cancel()
+
+	// Wait for worker to finish
+	wg.Wait()
+
+	assert.True(t, len(h.handled) < 500, "Expected at least half of the message not to have been consumed")
+
+	// We drain and count all messages that have not been consumed
+	count := 0
+	for i := range ins {
+		for range ins[i] {
+			count++
+		}
 	}
+
+	assert.Equal(t, 1000, len(h.handled)+count, "Expected all message to have either been consumed or still be in input channel")
 }
 
 func testSleepingHandler(ctx *Context) {
