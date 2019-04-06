@@ -14,11 +14,6 @@ type HandlerFunc func(ctx *Context)
 // Context is the most important part of a worker.
 // It allows to pass variables between handlers
 type Context struct {
-	// ctx is a go context that is attach to the worker Context
-	// It allows to carry deadlines, cancelation signals, etc. between handlers
-	// It is not recommended to do
-	ctx context.Context
-
 	// T stores all information about transaction lifecycle
 	T *trace.Trace
 
@@ -36,6 +31,18 @@ type Context struct {
 
 	// Logger logrus log entry for this context execution
 	Logger *log.Entry
+
+	// ctx is a go context that is attached to the worker Context
+	// It allows to carry deadlines, cancelation signals, etc. between handlers
+	//
+	// This approach is not recommended by go context documentation
+	// c.f. https://golang.org/pkg/context/#pkg-overview
+	//
+	// Still this recommandation against has been actively questionned
+	// (c.f https://github.com/golang/go/issues/22602)
+	// Also net/http has been following this implementation for the Request object
+	// (c.f. https://github.com/golang/go/blob/master/src/net/http/request.go#L107)
+	ctx context.Context
 }
 
 // NewContext creates a new context
@@ -47,33 +54,28 @@ func NewContext() *Context {
 	}
 }
 
-// Context return go context
-func (ctx *Context) Context() context.Context {
-	return ctx.ctx
-}
-
 // Reset re-initialize context
-func (ctx *Context) Reset() {
-	ctx.ctx = nil
-	ctx.Msg = nil
-	ctx.T.Reset()
-	ctx.Keys = make(map[string]interface{})
-	ctx.handlers = nil
-	ctx.index = -1
-	ctx.Logger = nil
+func (c *Context) Reset() {
+	c.ctx = nil
+	c.Msg = nil
+	c.T.Reset()
+	c.Keys = make(map[string]interface{})
+	c.handlers = nil
+	c.index = -1
+	c.Logger = nil
 }
 
 // Next should be used only inside middleware.
 // It executes the pending handlers in the chain inside the calling handler
-func (ctx *Context) Next() {
-	ctx.index++
-	for s := len(ctx.handlers); ctx.index < s; ctx.index++ {
-		ctx.handlers[ctx.index](ctx)
+func (c *Context) Next() {
+	c.index++
+	for s := len(c.handlers); c.index < s; c.index++ {
+		c.handlers[c.index](c)
 	}
 }
 
 // Error attaches an error to context.
-func (ctx *Context) Error(err error) *common.Error {
+func (c *Context) Error(err error) *common.Error {
 	if err == nil {
 		panic("err is nil")
 	}
@@ -84,32 +86,47 @@ func (ctx *Context) Error(err error) *common.Error {
 			Message: err.Error(),
 		}
 	}
-	ctx.T.Errors = append(ctx.T.Errors, e)
+	c.T.Errors = append(c.T.Errors, e)
 
 	return e
 }
 
 // Abort prevents pending handlers to be executed
-func (ctx *Context) Abort() {
-	ctx.index = len(ctx.handlers)
+func (c *Context) Abort() {
+	c.index = len(c.handlers)
 }
 
 // AbortWithError calls `Abort()` and `Error()``
-func (ctx *Context) AbortWithError(err error) *common.Error {
-	ctx.Abort()
-	return ctx.Error(err)
+func (c *Context) AbortWithError(err error) *common.Error {
+	c.Abort()
+	return c.Error(err)
 }
 
 // Prepare re-initializes context, set handlers, set logger and set message
-func (ctx *Context) Prepare(handlers []HandlerFunc, logger *log.Entry, msg interface{}) {
-	ctx.Reset()
-	ctx.handlers = handlers
-	ctx.Msg = msg
-	ctx.Logger = logger
+func (c *Context) Prepare(handlers []HandlerFunc, logger *log.Entry, msg interface{}) {
+	c.Reset()
+	c.handlers = handlers
+	c.Msg = msg
+	c.Logger = logger
 }
 
-// WithContext attach a go context on worker Context
-func WithContext(ctx context.Context, context *Context) *Context {
-	context.ctx = ctx
-	return context
+// Context returns the go context attached to the worker Context.
+// To change the context, use WithContext.
+//
+// The returned context is always non-nil; it defaults to the background context.
+func (c *Context) Context() context.Context {
+	if c.ctx != nil {
+		return c.ctx
+	}
+	return context.Background()
+}
+
+// WithContext attach a go context to a worker Context
+// The go context provided as argument must be non nil or WithContext will panic
+func (c *Context) WithContext(ctx context.Context) *Context {
+	if ctx == nil {
+		panic("nil context")
+	}
+	c.ctx = ctx
+	return c
 }

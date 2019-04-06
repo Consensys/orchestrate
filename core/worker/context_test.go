@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"testing"
@@ -95,9 +96,21 @@ func TestCtxError(t *testing.T) {
 
 func TestLogger(t *testing.T) {
 	logHandler := func(ctx *Context) { ctx.Logger.Info("Test") }
+	ctx := NewContext()
+	ctx.Prepare([]HandlerFunc{logHandler}, log.NewEntry(log.StandardLogger()), nil)
+	ctx.Next()
+}
 
+type testingKey string
+
+func TestWithContext(t *testing.T) {
+	logHandler := func(ctx *Context) { ctx.Logger.Info("Test") }
 	ctx := NewContext()
 	ctx.Prepare([]HandlerFunc{logHandler}, log.NewEntry(log.StandardLogger()), nil)
 
-	ctx.Next()
+	// Update go context attached to worker Context
+	ctx.WithContext(context.WithValue(context.Background(), testingKey("test-key"), "test-value"))
+
+	// Check if go-context has been properly attached
+	assert.Equal(t, "test-value", ctx.Context().Value(testingKey("test-key")).(string), "Go context should have been attached")
 }
