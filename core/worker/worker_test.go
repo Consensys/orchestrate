@@ -1,11 +1,13 @@
 package worker
 
 import (
-	"context"
 	"math/rand"
 	"sync"
 	"testing"
 	"time"
+
+	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 )
 
 type TestHandler struct {
@@ -32,7 +34,6 @@ func TestWorker(t *testing.T) {
 
 	// Create new worker and register test handler
 	w := NewWorker(
-		context.Background(),
 		Config{Slots: 100, Partitions: 100, Timeout: 60 * time.Second},
 	)
 	w.Use(h.Handler(t))
@@ -66,7 +67,6 @@ func TestWorkerStopped(t *testing.T) {
 
 	// Create new worker and register test handler
 	w := NewWorker(
-		context.Background(),
 		Config{Slots: 100, Partitions: 100, Timeout: 60 * time.Second},
 	)
 	w.Use(h.Handler(t))
@@ -106,5 +106,51 @@ func TestWorkerStopped(t *testing.T) {
 
 	if len(h.handled)+msgCount != rounds {
 		t.Errorf("Worker: expected all %v messages to have been consumed or drained but got consumed=%v drained=%v", rounds, len(h.handled), msgCount)
+	}
+}
+
+func testSleepingHandler(ctx *Context) {
+	time.Sleep(ctx.Keys["duration"].(time.Duration))
+}
+
+func makeTimeoutContext(i int) *Context {
+	ctx := NewContext()
+	ctx.Reset()
+	ctx.Prepare([]HandlerFunc{}, log.NewEntry(log.StandardLogger()), nil)
+
+	switch i % 2 {
+	case 0:
+		ctx.Keys["duration"] = 50 * time.Millisecond
+		ctx.Keys["errors"] = 0
+	case 1:
+		ctx.Keys["duration"] = 100 * time.Millisecond
+		ctx.Keys["errors"] = 1
+	}
+	return ctx
+}
+
+func TestTimeoutHandler(t *testing.T) {
+	timeoutHandler := TimeoutHandler(testSleepingHandler, 60*time.Millisecond, "Test timeout")
+
+	rounds := 100
+	outs := make(chan *Context, rounds)
+	wg := &sync.WaitGroup{}
+	for i := 0; i < rounds; i++ {
+		wg.Add(1)
+		ctx := makeTimeoutContext(i)
+		go func(ctx *Context) {
+			defer wg.Done()
+			timeoutHandler(ctx)
+			outs <- ctx
+		}(ctx)
+	}
+	wg.Wait()
+	close(outs)
+
+	assert.Len(t, outs, rounds, "Timeout: processed contexts count should be correct")
+
+	for out := range outs {
+		errCount := out.Keys["errors"].(int)
+		assert.Len(t, out.T.Errors, errCount, "Timeout: expected correct count of errors")
 	}
 }

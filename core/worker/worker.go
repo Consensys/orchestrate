@@ -2,8 +2,10 @@ package worker
 
 import (
 	"context"
+	"fmt"
 	"hash"
 	"hash/fnv"
+	"time"
 
 	"math/rand"
 	"strconv"
@@ -17,8 +19,6 @@ type PartitionKeyFunc func(message interface{}) []byte
 
 // Worker allows to consume messages on an input channel
 type Worker struct {
-	ctx context.Context
-
 	conf Config
 
 	handlers []HandlerFunc    // Handlers to apply on each context
@@ -40,10 +40,8 @@ type Worker struct {
 // NewWorker creates a new worker
 // You indicate a count of goroutine that worker can occupy to process messages
 // You must set `slots > 0`
-func NewWorker(ctx context.Context, conf Config) *Worker {
-	if ctx == nil {
-		panic("Worker cannot be created from a nil context")
-	}
+func NewWorker(conf Config) *Worker {
+	// Validate configuration
 	conf.Validate()
 
 	partitions := make([]chan interface{}, conf.Partitions)
@@ -52,7 +50,6 @@ func NewWorker(ctx context.Context, conf Config) *Worker {
 	}
 
 	return &Worker{
-		ctx:      ctx,
 		conf:     conf,
 		handlers: []HandlerFunc{},
 		handling: &sync.WaitGroup{},
@@ -184,23 +181,62 @@ func (w *Worker) Close() {
 
 func (w *Worker) handleMessage(msg interface{}) {
 	// Retrieve a re-cycled context
-	ctx := w.ctxPool.Get().(*Context)
+	c := w.ctxPool.Get().(*Context)
 
 	// Re-cycle context object
-	defer w.ctxPool.Put(ctx)
+	defer w.ctxPool.Put(c)
 
 	// Prepare context
-	ctx.Prepare(w.handlers, log.NewEntry(w.logger), msg)
+	c.Prepare(w.handlers, log.NewEntry(w.logger), msg)
 
-	// Create go context for message execution
-	c, cancel := context.WithTimeout(w.ctx, w.conf.Timeout)
-	defer cancel()
-
-	// Handle context
-	WithContext(c, ctx).Next()
+	// And calls Next to trigger execution
+	c.Next()
 }
 
 // Done returns a channel indicating if worker is done running
 func (w *Worker) Done() <-chan struct{} {
 	return w.done
+}
+
+// TimeoutHandler returns a Handler that runs h with the given time limit
+//
+// Be careful that if h is a middleware then timeout should cover full execution of the handler
+// including pending handlers
+func TimeoutHandler(h HandlerFunc, timeout time.Duration, msg string) HandlerFunc {
+	return func(ctx *Context) {
+		// Create timeout context
+		timeoutCtx, cancel := context.WithTimeout(ctx.Context(), timeout)
+		defer cancel() // We always cancel to avoid memort leak
+
+		// Attach time out context to worker context
+		ctx.WithContext(timeoutCtx)
+
+		// Prepare channels
+		done := make(chan struct{})
+		panicChan := make(chan interface{}, 1)
+		defer close(panicChan)
+
+		// Execute handler
+		go func() {
+			defer func() {
+				if p := recover(); p != nil {
+					panicChan <- p
+				}
+			}()
+			h(ctx)
+			close(done)
+		}()
+
+		// Wait for handler execution to complete or for a timeout or panic
+		select {
+		case <-done:
+			// Execution properly completed
+		case <-timeoutCtx.Done():
+			// Execution timed out
+			ctx.Error(fmt.Errorf(msg))
+		case p := <-panicChan:
+			// Execution panic so we forward
+			panic(p)
+		}
+	}
 }
