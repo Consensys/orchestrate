@@ -19,18 +19,13 @@ func init() {
 
 // Config is worker configuration
 type Config struct {
-	Slots      int64
-	Partitions int64
+	Slots int64
 }
 
 // Validate ensure configuration is valid
 func (c *Config) Validate() error {
 	if c.Slots <= 0 {
 		return fmt.Errorf("At least one worker slot is required")
-	}
-
-	if c.Partitions <= 0 {
-		return fmt.Errorf("At least one partition is required")
 	}
 
 	return nil
@@ -40,14 +35,12 @@ func (c *Config) Validate() error {
 func NewConfig() Config {
 	config := Config{}
 	config.Slots = viper.GetInt64("worker.slots")
-	config.Partitions = viper.GetInt64("worker.partitions")
 	return config
 }
 
 // InitFlags register flags for worker
 func InitFlags(f *pflag.FlagSet) {
 	Slots(f)
-	Partitions(f)
 }
 
 var (
@@ -73,6 +66,7 @@ var (
 )
 
 // Partitions register flag for Kafka server addresses
+// DEPRECATED
 func Partitions(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Number of partitions spawned by worker to treat messages in parallel.
 Environment variable: %q`, workerPartitionsEnv)
@@ -88,6 +82,7 @@ var (
 )
 
 // Timeout register flag for Kafka server addresses
+// DEPRECATED
 func Timeout(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Maximum time for a message to be handled a message
 Environment variable: %q`, workerTimeoutEnv)
