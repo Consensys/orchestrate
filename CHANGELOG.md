@@ -5,6 +5,7 @@
 *Unreleased*
 
 - [FEAT] Update `MultiEthClient` for dynamic Dial of Ethereum clients
+- [FEAT] Implement elements for *Dependy Injection* pattern for `MultiEthClient`
 
 ### Version 0.3.3
 
