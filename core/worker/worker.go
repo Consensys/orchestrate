@@ -38,8 +38,6 @@ type Worker struct {
 }
 
 // NewWorker creates a new worker
-// You indicate a count of goroutine that worker can occupy to process messages
-// You must set `slots > 0`
 func NewWorker(conf *Config) *Worker {
 	w := &Worker{
 		handlers:  []HandlerFunc{},
