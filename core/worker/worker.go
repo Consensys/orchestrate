@@ -90,12 +90,13 @@ func (w *Worker) Run(ctx context.Context, input <-chan interface{}) {
 		panic("nil context")
 	}
 
-	// Initialize slot
 	w.mux.Lock()
+	// Ensure config has been attached
 	if w.conf == nil {
-		panic("nil configuration (call SetConfig before running worker)")
+		panic("nil configuration (call SetConfig() before running worker)")
 	}
 
+	// Initialize slots channel
 	if w.slots == nil {
 		w.slots = make(chan struct{}, w.conf.Slots)
 	}
