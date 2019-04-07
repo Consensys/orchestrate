@@ -38,7 +38,7 @@ type Context struct {
 	// This approach is not recommended by go context documentation
 	// c.f. https://golang.org/pkg/context/#pkg-overview
 	//
-	// Still this recommandation against has been actively questionned
+	// Still this recommendation against has been actively questioned
 	// (c.f https://github.com/golang/go/issues/22602)
 	// Also net/http has been following this implementation for the Request object
 	// (c.f. https://github.com/golang/go/blob/master/src/net/http/request.go#L107)

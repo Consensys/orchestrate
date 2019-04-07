@@ -79,7 +79,7 @@ func (w *Worker) Use(handler HandlerFunc) {
 
 // Run starts consuming messages from an input channel
 //
-// Run will gracefully interupt either if
+// Run will gracefully interrupt either if
 // - provided ctx is cancelled
 // - input channel is closed
 //
