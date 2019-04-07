@@ -35,8 +35,8 @@ type Context struct {
 	// ctx is a go context that is attached to the worker Context
 	// It allows to carry deadlines, cancelation signals, etc. between handlers
 	//
-	// This approach is not recommended by go context documentation
-	// c.f. https://golang.org/pkg/context/#pkg-overview
+	// This implementation is not recommended by go context documentation
+	// (c.f. https://golang.org/pkg/context/#pkg-overview)
 	//
 	// Still this recommendation against has been actively questioned
 	// (c.f https://github.com/golang/go/issues/22602)
