@@ -15,7 +15,7 @@ func handler(ctx *worker.Context) {
 func main() {
 	// Instantiate worker
 	cfg := worker.NewConfig()
-	w := worker.NewWorker(cfg)
+	w := worker.NewWorker(&cfg)
 
 	// Register an handler
 	w.Use(handler)

@@ -64,7 +64,7 @@ func handler(ctx *worker.Context) {
 func main() {
 	// Instantiate worker
 	cfg := worker.NewConfig()
-	w := worker.NewWorker(cfg)
+	w := worker.NewWorker(&cfg)
 
 	// Register an handler
 	w.Use(handler)
@@ -155,7 +155,7 @@ func middleware(ctx *worker.Context) {
 
 func main() {
 	cfg := worker.NewConfig()
-	w := worker.NewWorker(cfg)
+	w := worker.NewWorker(&cfg)
 
 	// Register handlers
 	w.Use(middleware)
@@ -243,7 +243,7 @@ func main() {
 	// Instantiate worker that can treat 100 message concurrently
 	cfg := worker.NewConfig()
 	cfg.Slots = 100
-	w := worker.NewWorker(cfg)
+	w := worker.NewWorker(&cfg)
 
 	// Register handler
 	h := ExampleHandler{0, 0}

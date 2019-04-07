@@ -29,7 +29,7 @@ func main() {
 	// Instantiate worker that can treat 100 message concurrently
 	cfg := worker.NewConfig()
 	cfg.Slots = 100
-	w := worker.NewWorker(cfg)
+	w := worker.NewWorker(&cfg)
 
 	// Register handler
 	h := ExampleHandler{0, 0}

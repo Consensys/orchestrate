@@ -26,7 +26,7 @@ func middleware(ctx *worker.Context) {
 
 func main() {
 	cfg := worker.NewConfig()
-	w := worker.NewWorker(cfg)
+	w := worker.NewWorker(&cfg)
 
 	// Register handlers
 	w.Use(middleware)
