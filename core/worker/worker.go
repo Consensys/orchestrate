@@ -29,11 +29,12 @@ type Worker struct {
 	ctxPool *sync.Pool
 
 	// slots is a channel used to limit the number of messages treated concurently by the worker
-	mux   *sync.Mutex
 	slots chan struct{}
 
 	// Worker logger
 	logger *log.Logger
+
+	mux *sync.Mutex
 }
 
 // NewWorker creates a new worker
@@ -69,7 +70,9 @@ func (w *Worker) SetConfig(conf *Config) {
 
 // Use add a new handler
 func (w *Worker) Use(handler HandlerFunc) {
+	w.mux.Lock()
 	w.handlers = append(w.handlers, handler)
+	w.mux.Unlock()
 }
 
 // Run starts consuming messages from an input channel
