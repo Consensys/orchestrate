@@ -77,7 +77,7 @@ func (w *Worker) Run(ctx context.Context, input <-chan interface{}) {
 	// Increment count of input channels being consumed
 	count := atomic.AddInt64(&w.running, 1)
 	w.logger.WithFields(log.Fields{
-		"inputs.count": count,
+		"loops.count": count,
 	}).Debugf("worker: start running loop")
 
 runningLoop:
@@ -106,7 +106,7 @@ runningLoop:
 	// Decrement count of input channels being consumed
 	count = atomic.AddInt64(&w.running, -1)
 	w.logger.WithFields(log.Fields{
-		"inputs.count": count,
+		"loops.count": count,
 	}).Debugf("worker: left running loop")
 }
 
