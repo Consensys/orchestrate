@@ -41,13 +41,7 @@ type Worker struct {
 // You indicate a count of goroutine that worker can occupy to process messages
 // You must set `slots > 0`
 func NewWorker(conf *Config) *Worker {
-	if conf != nil {
-		// Validate configuration
-		conf.Validate()
-	}
-
-	return &Worker{
-		conf:      conf,
+	w := &Worker{
 		handlers:  []HandlerFunc{},
 		running:   0,
 		cleanOnce: &sync.Once{},
@@ -55,6 +49,12 @@ func NewWorker(conf *Config) *Worker {
 		mux:       &sync.Mutex{},
 		logger:    log.StandardLogger(), // TODO: make possible to use non-standard logrus logger
 	}
+
+	if conf != nil {
+		w.SetConfig(conf)
+	}
+
+	return w
 }
 
 // SetConfig set worker configuration
