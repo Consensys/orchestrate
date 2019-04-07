@@ -62,7 +62,11 @@ func (w *Worker) SetConfig(conf *Config) {
 	if conf == nil {
 		panic("nil configuration")
 	}
-	conf.Validate()
+
+	if err := conf.Validate(); err != nil {
+		panic(err)
+	}
+
 	w.mux.Lock()
 	w.conf = conf
 	w.mux.Unlock()
