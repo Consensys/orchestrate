@@ -7,6 +7,7 @@
 - [REFACTOR] Go context usage on `worker.Context`
 - [FEAT] Implement `worker.TimeoutHandler`
 - [FIX] Deactivate usage of `Timeout` in worker configuration
+- [FEAT] Implement *Depency Injection* pattern for `Worker`
 
 ### Version 0.2.0-alpha.13
 

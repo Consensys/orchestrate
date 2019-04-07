@@ -35,7 +35,7 @@ func TestWorker(t *testing.T) {
 	}
 
 	// Create new worker and register test handler
-	w := NewWorker(Config{Slots: 100})
+	w := NewWorker(&Config{Slots: 100})
 	w.Use(h.Handler(t))
 
 	// Create input channels and prefills it
@@ -72,9 +72,7 @@ func TestWorkerStopped(t *testing.T) {
 	}
 
 	// Create new worker and register test handler
-	w := NewWorker(
-		Config{Slots: 100},
-	)
+	w := NewWorker(&Config{Slots: 100})
 	w.Use(h.Handler(t))
 
 	// Create input channels and prefills it
