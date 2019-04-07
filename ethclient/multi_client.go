@@ -13,54 +13,66 @@ import (
 
 // MultiEthClient is a client that can connect to multiple Ethereum chains
 type MultiEthClient struct {
+	mux *sync.Mutex
 	ecs map[string]*EthClient
 }
 
-// MultiDial connects a multi-client to the given URLs.
-func MultiDial(rawurls []string) (*MultiEthClient, error) {
-	return MultiDialContext(context.Background(), rawurls)
+// NewMultiEthClient creates a new MultiEthClient
+func NewMultiEthClient() *MultiEthClient {
+	return &MultiEthClient{
+		mux: &sync.Mutex{},
+		ecs: make(map[string]*EthClient),
+	}
 }
 
-// MultiDialContext connects a multi-client to the given URLs.
-func MultiDialContext(ctx context.Context, rawurls []string) (*MultiEthClient, error) {
-	// Declare channels for client and errors so we can Dial clients concurrently
-	clients, errors := make(chan *EthClient, len(rawurls)), make(chan error, len(rawurls))
+// Dial an Ethereum client
+func (mec *MultiEthClient) Dial(ctx context.Context, rawurl string) error {
+	// Dial Ethereum client
+	ec, err := DialContext(ctx, rawurl)
+	if err != nil {
+		return err
+	}
 
-	// Dial clients in multiple goroutine
+	// Retrieve NetworkID
+	chainID, err := ec.NetworkID(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Register client
+	mec.mux.Lock()
+	mec.ecs[ChainIDToString(chainID)] = ec
+	mec.mux.Unlock()
+
+	return nil
+}
+
+// MultiDial connects to multiple Ethereum clients concurrently
+func (mec *MultiEthClient) MultiDial(ctx context.Context, rawurls []string) error {
+	// Dial clients concurrently
 	wait := &sync.WaitGroup{}
+	errors := make(chan error, len(rawurls))
 	for _, rawurl := range rawurls {
 		wait.Add(1)
 		go func(rawurl string) {
-			defer wait.Done()
-			c, err := DialContext(ctx, rawurl)
+			err := mec.Dial(ctx, rawurl)
 			if err != nil {
 				errors <- err
-			} else {
-				clients <- c
 			}
+			wait.Done()
 		}(rawurl)
 	}
-	// Wait for all clients to be ready and then close channel
+
+	// Wait for all clients to be ready
 	wait.Wait()
-	close(clients)
 	close(errors)
 
-	// In case we fail to connect to a client we return an error
-	if len(errors) > 1 {
-		return nil, <-errors
+	// In case we failed to connect to a client we return an error
+	for err := range errors {
+		return err
 	}
 
-	// Prepare and return multi client
-	ecs := make(map[string]*EthClient)
-	for ec := range clients {
-		chainID, err := ec.NetworkID(ctx)
-		if err != nil {
-			return nil, err
-		}
-		ecs[ChainIDToString(chainID)] = ec
-	}
-
-	return &MultiEthClient{ecs: ecs}, nil
+	return nil
 }
 
 // Networks return networks ID multi client is connected to
@@ -73,6 +85,21 @@ func (mec *MultiEthClient) Networks(ctx context.Context) []*big.Int {
 		}
 	}
 	return networks
+}
+
+// Close multiclient
+func (mec *MultiEthClient) Close() {
+	for _, ec := range mec.ecs {
+		ec.Close()
+	}
+}
+
+func (mec *MultiEthClient) getClient(chainID *big.Int) (*EthClient, error) {
+	ec, ok := mec.ecs[ChainIDToString(chainID)]
+	if !ok {
+		return nil, fmt.Errorf("No client registered for chain %q", ChainIDToString(chainID))
+	}
+	return ec, nil
 }
 
 // HeaderByHash returns the block header with the given hash.
@@ -241,12 +268,4 @@ func (mec *MultiEthClient) SendRawPrivateTransaction(ctx context.Context, chainI
 		return common.Hash{}, err
 	}
 	return ec.SendRawPrivateTransaction(ctx, raw, args)
-}
-
-func (mec *MultiEthClient) getClient(chainID *big.Int) (*EthClient, error) {
-	ec, ok := mec.ecs[ChainIDToString(chainID)]
-	if !ok {
-		return nil, fmt.Errorf("No client registered for chain %q", ChainIDToString(chainID))
-	}
-	return ec, nil
 }

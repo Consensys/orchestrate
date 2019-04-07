@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.0
+
+*Unreleased*
+
+- [FEAT] Update `MultiEthClient` for dynamic Dial of Ethereum clients
+
 ### Version 0.3.3
 
 *Released on April 04th 2019*

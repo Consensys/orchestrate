@@ -38,7 +38,7 @@ func DialContext(ctx context.Context, rawurl string) (*EthClient, error) {
 	return NewClient(c), nil
 }
 
-// PrivateArgs are arguments to provide to an Ethereum client supporting privacy client (such as Quorum) when sendng a transaction
+// PrivateArgs are transaction arguments to provide to an Ethereum client supporting privacy (such as Quorum)
 type PrivateArgs struct {
 	// Quorum Fields
 	PrivateFrom   string   `json:"privateFrom"`
