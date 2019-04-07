@@ -281,6 +281,7 @@ feedingLoop:
 			}
 			// We have a new block
 			if l.conf.TxListener.Return.Blocks {
+				// This will be blocking if user does not consumer from Blocks channel
 				l.blocks <- block.Copy()
 			}
 
