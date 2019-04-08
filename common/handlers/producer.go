@@ -7,11 +7,11 @@ import (
 
 // Producer creates a producer handler
 func Producer(p services.Producer) engine.HandlerFunc {
-	return func(ctx *engine.TxContext) {
+	return func(txctx *engine.TxContext) {
 		// Produce Envelope
-		err := p.Produce(ctx.Envelope)
+		err := p.Produce(txctx.Envelope)
 		if err != nil {
-			ctx.Error(err)
+			txctx.Error(err)
 		}
 	}
 }

@@ -10,9 +10,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// PartitionKeyFunc are functions returning a key for a message
-type PartitionKeyFunc func(message interface{}) []byte
-
 // Engine is an object that allows to consume go channels
 type Engine struct {
 	// Configuration object
@@ -25,10 +22,10 @@ type Engine struct {
 	running   int64
 	cleanOnce *sync.Once
 
-	// ctxPool is a pool used to re-cycle context objects
+	// ctxPool is a pool to re-cycle TxContext
 	ctxPool *sync.Pool
 
-	// slots is a channel used to limit the number of messages treated concurently by the Engine
+	// slots is a channel to limit the number of messages treated concurently by the Engine
 	slots chan struct{}
 
 	// Logger
@@ -158,16 +155,16 @@ func (e *Engine) CleanUp() {
 
 func (e *Engine) handleMessage(msg interface{}) {
 	// Retrieve a re-cycled context
-	c := e.ctxPool.Get().(*TxContext)
+	txctx := e.ctxPool.Get().(*TxContext)
 
 	// Re-cycle context object
-	defer e.ctxPool.Put(c)
+	defer e.ctxPool.Put(txctx)
 
 	// Prepare context
-	c.Prepare(e.handlers, log.NewEntry(e.logger), msg)
+	txctx.Prepare(e.handlers, log.NewEntry(e.logger), msg)
 
 	// Calls Next to trigger execution
-	c.Next()
+	txctx.Next()
 }
 
 // TimeoutHandler returns a Handler that runs h with the given time limit
@@ -175,13 +172,13 @@ func (e *Engine) handleMessage(msg interface{}) {
 // Be careful that if h is a middleware then timeout should cover full execution of the handler
 // including pending handlers
 func TimeoutHandler(h HandlerFunc, timeout time.Duration, msg string) HandlerFunc {
-	return func(ctx *TxContext) {
+	return func(txctx *TxContext) {
 		// Create timeout context
-		timeoutCtx, cancel := context.WithTimeout(ctx.Context(), timeout)
+		timeoutCtx, cancel := context.WithTimeout(txctx.Context(), timeout)
 		defer cancel() // We always cancel to avoid memort leak
 
 		// Attach time out context to TxContext
-		ctx.WithContext(timeoutCtx)
+		txctx.WithContext(timeoutCtx)
 
 		// Prepare channels
 		done := make(chan struct{})
@@ -195,7 +192,7 @@ func TimeoutHandler(h HandlerFunc, timeout time.Duration, msg string) HandlerFun
 					panicChan <- p
 				}
 			}()
-			h(ctx)
+			h(txctx)
 			close(done)
 		}()
 
@@ -205,7 +202,7 @@ func TimeoutHandler(h HandlerFunc, timeout time.Duration, msg string) HandlerFun
 			// Execution properly completed
 		case <-timeoutCtx.Done():
 			// Execution timed out
-			ctx.Error(fmt.Errorf(msg))
+			txctx.Error(fmt.Errorf(msg))
 		case p := <-panicChan:
 			// Execution panic so we forward
 			panic(p)

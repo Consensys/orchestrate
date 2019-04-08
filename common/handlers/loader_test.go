@@ -22,19 +22,19 @@ func (u *MockUnmarshaller) Unmarshal(msg interface{}, envelope *envelope.Envelop
 }
 
 func makeLoaderContext(i int) *engine.TxContext {
-	ctx := engine.NewTxContext()
-	ctx.Reset()
-	ctx.Prepare([]engine.HandlerFunc{}, log.NewEntry(log.StandardLogger()), nil)
+	txctx := engine.NewTxContext()
+	txctx.Reset()
+	txctx.Prepare([]engine.HandlerFunc{}, log.NewEntry(log.StandardLogger()), nil)
 
 	switch i % 2 {
 	case 0:
-		ctx.Msg = "error"
-		ctx.Keys["errors"] = 1
+		txctx.Msg = "error"
+		txctx.Keys["errors"] = 1
 	case 1:
-		ctx.Msg = "valid"
-		ctx.Keys["errors"] = 0
+		txctx.Msg = "valid"
+		txctx.Keys["errors"] = 0
 	}
-	return ctx
+	return txctx
 }
 
 func TestLoader(t *testing.T) {
@@ -46,12 +46,12 @@ func TestLoader(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
-		ctx := makeLoaderContext(i)
-		go func(ctx *engine.TxContext) {
+		txctx := makeLoaderContext(i)
+		go func(txctx *engine.TxContext) {
 			defer wg.Done()
-			loader(ctx)
-			outs <- ctx
-		}(ctx)
+			loader(txctx)
+			outs <- txctx
+		}(txctx)
 	}
 	wg.Wait()
 	close(outs)

@@ -8,20 +8,20 @@ import (
 )
 
 // Define a pipeline handler
-func pipeline(ctx *engine.TxContext) {
-	ctx.Logger.Infof("Pipeline handling %v\n", ctx.Msg.(string))
+func pipeline(txctx *engine.TxContext) {
+	txctx.Logger.Infof("Pipeline handling %v\n", txctx.Msg.(string))
 }
 
 // Define a middleware handler
-func middleware(ctx *engine.TxContext) {
+func middleware(txctx *engine.TxContext) {
 	// Start middleware execution
-	ctx.Logger.Infof("Middleware starts handling %v\n", ctx.Msg.(string))
+	txctx.Logger.Infof("Middleware starts handling %v\n", txctx.Msg.(string))
 
 	// Trigger execution of pending handlers
-	ctx.Next()
+	txctx.Next()
 
 	// Executed after pending handlers have executed
-	ctx.Logger.Infof("Middleware finishes handling %v\n", ctx.Msg.(string))
+	txctx.Logger.Infof("Middleware finishes handling %v\n", txctx.Msg.(string))
 }
 
 func main() {

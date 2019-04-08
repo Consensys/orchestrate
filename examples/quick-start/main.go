@@ -8,8 +8,8 @@ import (
 )
 
 // Define a handler method
-func handler(ctx *engine.TxContext) {
-	ctx.Logger.Infof("Handling %v\n", ctx.Msg.(string))
+func handler(txctx *engine.TxContext) {
+	txctx.Logger.Infof("Handling %v\n", txctx.Msg.(string))
 }
 
 func main() {

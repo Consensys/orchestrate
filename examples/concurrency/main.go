@@ -15,12 +15,12 @@ type ExampleHandler struct {
 	unsafeCounter uint32
 }
 
-func (h *ExampleHandler) handleSafe(ctx *engine.TxContext) {
+func (h *ExampleHandler) handleSafe(txctx *engine.TxContext) {
 	// Increment counter using atomic
 	atomic.AddUint32(&h.safeCounter, 1)
 }
 
-func (h *ExampleHandler) handleUnsafe(ctx *engine.TxContext) {
+func (h *ExampleHandler) handleUnsafe(txctx *engine.TxContext) {
 	// Increment counter with no concurrent protection
 	h.unsafeCounter++
 }

@@ -18,13 +18,13 @@ type TestHandler struct {
 }
 
 func (h *TestHandler) Handler(t *testing.T) HandlerFunc {
-	return func(ctx *TxContext) {
+	return func(txctx *TxContext) {
 		// We add some randomness in time execution
 		r := rand.Intn(100)
 		time.Sleep(time.Duration(r) * time.Millisecond)
 		h.mux.Lock()
 		defer h.mux.Unlock()
-		h.handled = append(h.handled, ctx)
+		h.handled = append(h.handled, txctx)
 	}
 }
 
@@ -117,24 +117,24 @@ func TestEngineStopped(t *testing.T) {
 	assert.Equal(t, 1000, len(h.handled)+count, "Expected all message to have either been consumed or still be in input channel")
 }
 
-func testSleepingHandler(ctx *TxContext) {
-	time.Sleep(ctx.Keys["duration"].(time.Duration))
+func testSleepingHandler(txctx *TxContext) {
+	time.Sleep(txctx.Keys["duration"].(time.Duration))
 }
 
 func makeTimeoutContext(i int) *TxContext {
-	ctx := NewTxContext()
-	ctx.Reset()
-	ctx.Prepare([]HandlerFunc{}, log.NewEntry(log.StandardLogger()), nil)
+	txctx := NewTxContext()
+	txctx.Reset()
+	txctx.Prepare([]HandlerFunc{}, log.NewEntry(log.StandardLogger()), nil)
 
 	switch i % 2 {
 	case 0:
-		ctx.Keys["duration"] = 50 * time.Millisecond
-		ctx.Keys["errors"] = 0
+		txctx.Keys["duration"] = 50 * time.Millisecond
+		txctx.Keys["errors"] = 0
 	case 1:
-		ctx.Keys["duration"] = 100 * time.Millisecond
-		ctx.Keys["errors"] = 1
+		txctx.Keys["duration"] = 100 * time.Millisecond
+		txctx.Keys["errors"] = 1
 	}
-	return ctx
+	return txctx
 }
 
 func TestTimeoutHandler(t *testing.T) {
@@ -145,12 +145,12 @@ func TestTimeoutHandler(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
-		ctx := makeTimeoutContext(i)
-		go func(ctx *TxContext) {
+		txctx := makeTimeoutContext(i)
+		go func(txctx *TxContext) {
 			defer wg.Done()
-			timeoutHandler(ctx)
-			outs <- ctx
-		}(ctx)
+			timeoutHandler(txctx)
+			outs <- txctx
+		}(txctx)
 	}
 	wg.Wait()
 	close(outs)

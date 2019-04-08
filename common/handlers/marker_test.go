@@ -20,17 +20,17 @@ func (o *MockOffsetMarker) Mark(msg interface{}) error {
 }
 
 func makeMarkerContext(i int) *engine.TxContext {
-	ctx := engine.NewTxContext()
-	ctx.Reset()
+	txctx := engine.NewTxContext()
+	txctx.Reset()
 	switch i % 2 {
 	case 0:
-		ctx.Msg = "error"
-		ctx.Keys["errors"] = 1
+		txctx.Msg = "error"
+		txctx.Keys["errors"] = 1
 	case 1:
-		ctx.Msg = "valid"
-		ctx.Keys["errors"] = 0
+		txctx.Msg = "valid"
+		txctx.Keys["errors"] = 0
 	}
-	return ctx
+	return txctx
 }
 
 func TestMarker(t *testing.T) {
@@ -42,12 +42,12 @@ func TestMarker(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
-		ctx := makeMarkerContext(i)
-		go func(ctx *engine.TxContext) {
+		txctx := makeMarkerContext(i)
+		go func(txctx *engine.TxContext) {
 			defer wg.Done()
-			marker(ctx)
-			outs <- ctx
-		}(ctx)
+			marker(txctx)
+			outs <- txctx
+		}(txctx)
 	}
 	wg.Wait()
 	close(outs)

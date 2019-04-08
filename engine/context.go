@@ -9,7 +9,7 @@ import (
 )
 
 // HandlerFunc is base type for an handler function processing a Context
-type HandlerFunc func(ctx *TxContext)
+type HandlerFunc func(txctx *TxContext)
 
 // TxContext is the most important part of an engine.
 // It allows to pass variables between handlers

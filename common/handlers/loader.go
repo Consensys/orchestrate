@@ -7,17 +7,17 @@ import (
 
 // Loader creates an handler loading input
 func Loader(u services.Unmarshaller) engine.HandlerFunc {
-	return func(ctx *engine.TxContext) {
+	return func(txctx *engine.TxContext) {
 		// Unmarshal message
-		err := u.Unmarshal(ctx.Msg, ctx.Envelope)
+		err := u.Unmarshal(txctx.Msg, txctx.Envelope)
 
 		if err != nil {
 			// TODO: handle error
-			ctx.Logger.Errorf("Error unmarshalling: %v", err)
-			ctx.AbortWithError(err)
+			txctx.Logger.Errorf("Error unmarshalling: %v", err)
+			txctx.AbortWithError(err)
 			return
 		}
 
-		ctx.Logger.Debugf("Message unmarshalled: %v", ctx.Envelope.String())
+		txctx.Logger.Debugf("Message unmarshalled: %v", txctx.Envelope.String())
 	}
 }

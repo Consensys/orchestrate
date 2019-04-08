@@ -24,17 +24,17 @@ func (p *MockProducer) Produce(o interface{}) error {
 }
 
 func makeProducerContext(i int) *engine.TxContext {
-	ctx := engine.NewTxContext()
-	ctx.Reset()
+	txctx := engine.NewTxContext()
+	txctx.Reset()
 	switch i % 2 {
 	case 0:
-		ctx.Envelope.Chain = (&common.Chain{}).SetID(big.NewInt(0))
-		ctx.Keys["errors"] = 1
+		txctx.Envelope.Chain = (&common.Chain{}).SetID(big.NewInt(0))
+		txctx.Keys["errors"] = 1
 	case 1:
-		ctx.Envelope.Chain = (&common.Chain{}).SetID(big.NewInt(10))
-		ctx.Keys["errors"] = 0
+		txctx.Envelope.Chain = (&common.Chain{}).SetID(big.NewInt(10))
+		txctx.Keys["errors"] = 0
 	}
-	return ctx
+	return txctx
 }
 
 func TestProducer(t *testing.T) {
@@ -46,12 +46,12 @@ func TestProducer(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
-		ctx := makeProducerContext(i)
-		go func(ctx *engine.TxContext) {
+		txctx := makeProducerContext(i)
+		go func(txctx *engine.TxContext) {
 			defer wg.Done()
-			producer(ctx)
-			outs <- ctx
-		}(ctx)
+			producer(txctx)
+			outs <- txctx
+		}(txctx)
 	}
 	wg.Wait()
 	close(outs)
