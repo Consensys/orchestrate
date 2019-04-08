@@ -138,7 +138,7 @@ func makeTimeoutContext(i int) *TxContext {
 }
 
 func TestTimeoutHandler(t *testing.T) {
-	timeoutHandler := TimeoutHandler(testSleepingHandler, 60*time.Millisecond, "Test timeout")
+	timeoutHandler := TimeoutHandler(testSleepingHandler, 80*time.Millisecond, "Test timeout")
 
 	rounds := 100
 	outs := make(chan *TxContext, rounds)
