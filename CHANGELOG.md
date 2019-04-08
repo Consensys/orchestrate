@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.1
+
+*Released on April 9th 2019*
+
+- [FEAT] Implement a `testutils` suite for `HandlerFunc`
+  
 ### Version 0.3.0
 
 *Released on April 8th 2019*
