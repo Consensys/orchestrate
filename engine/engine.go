@@ -95,7 +95,7 @@ func (e *Engine) Run(ctx context.Context, input <-chan interface{}) {
 	e.mux.Lock()
 	// Ensure config has been attached
 	if e.conf == nil {
-		panic("nil configuration (call SetConfig() before running worker)")
+		panic("nil configuration (call SetConfig() before running engine)")
 	}
 
 	// Initialize slots channel
@@ -108,7 +108,7 @@ func (e *Engine) Run(ctx context.Context, input <-chan interface{}) {
 	count := atomic.AddInt64(&e.running, 1)
 	e.logger.WithFields(log.Fields{
 		"loops.count": count,
-	}).Debugf("worker: start running loop")
+	}).Debugf("engine: start running loop")
 
 runningLoop:
 	for {
@@ -137,7 +137,7 @@ runningLoop:
 	count = atomic.AddInt64(&e.running, -1)
 	e.logger.WithFields(log.Fields{
 		"loops.count": count,
-	}).Debugf("worker: left running loop")
+	}).Debugf("engine: left running loop")
 }
 
 // CleanUp clean worker ressources

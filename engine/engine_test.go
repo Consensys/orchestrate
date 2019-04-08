@@ -54,7 +54,7 @@ func TestEngine(t *testing.T) {
 	for i := range ins {
 		wg.Add(1)
 		go func(in <-chan interface{}) {
-			w.Run(context.Background(), in)
+			e.Run(context.Background(), in)
 			wg.Done()
 		}(ins[i])
 	}
@@ -73,7 +73,7 @@ func TestEngineStopped(t *testing.T) {
 
 	// Create new Engine and register test handler
 	e := NewEngine(&Config{Slots: 100})
-	w.Use(h.Handler(t))
+	e.Use(h.Handler(t))
 
 	// Create input channels and prefills it
 	ins := make([]chan interface{}, 0)
@@ -92,7 +92,7 @@ func TestEngineStopped(t *testing.T) {
 	for i := range ins {
 		wg.Add(1)
 		go func(in <-chan interface{}) {
-			w.Run(ctx, in)
+			e.Run(ctx, in)
 			wg.Done()
 		}(ins[i])
 	}
