@@ -13,7 +13,7 @@ func handler(ctx *engine.TxContext) {
 }
 
 func main() {
-	// Instantiate worker
+	// Instantiate Engine
 	cfg := engine.NewConfig()
 	engine := engine.NewEngine(&cfg)
 
@@ -23,7 +23,7 @@ func main() {
 	// Create an input channel of messages
 	in := make(chan interface{})
 
-	// Run worker on input channel
+	// Run Engine on input channel
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
@@ -36,10 +36,10 @@ func main() {
 	in <- "Message-2"
 	in <- "Message-3"
 
-	// Close channel & wait for worker to treat all messages
+	// Close channel & wait for Engine to treat all messages
 	close(in)
 	wg.Wait()
 
-	// CleanUp worker to avoid memory leak
+	// CleanUp Engine to avoid memory leak
 	engine.CleanUp()
 }

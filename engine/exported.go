@@ -1,48 +1,48 @@
-package worker
+package engine
 
 import (
 	"context"
 )
 
 func init() {
-	w = NewWorker(nil)
+	e = NewEngine(nil)
 }
 
-var w *Worker
+var e *Engine
 
-// Init intilialize global worker
+// Init intilialize global Engine
 // Configuration is loaded from viper
 func Init() {
 	config := NewConfig()
-	w.SetConfig(&config)
+	e.SetConfig(&config)
 }
 
-// SetGlobalWorker set global worker
-func SetGlobalWorker(worker *Worker) {
-	w = worker
+// SetGlobalEngine set global engine
+func SetGlobalEngine(engine *Engine) {
+	e = engine
 }
 
-// GlobalWorker returns global worker
-func GlobalWorker() *Worker {
-	return w
+// GlobalEngine returns global engine
+func GlobalEngine() *Engine {
+	return e
 }
 
 // SetConfig set configuration
 func SetConfig(conf *Config) {
-	w.SetConfig(conf)
+	e.SetConfig(conf)
 }
 
 // Use register a new handler
 func Use(handler HandlerFunc) {
-	w.Use(handler)
+	e.Use(handler)
 }
 
 // Run starts consuming messages from an input channel
 func Run(ctx context.Context, input <-chan interface{}) {
-	w.Run(ctx, input)
+	e.Run(ctx, input)
 }
 
-// CleanUp clean worker ressources
+// CleanUp clean engine ressources
 func CleanUp() {
-	w.CleanUp()
+	e.CleanUp()
 }

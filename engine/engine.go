@@ -28,7 +28,7 @@ type Engine struct {
 	// ctxPool is a pool used to re-cycle context objects
 	ctxPool *sync.Pool
 
-	// slots is a channel used to limit the number of messages treated concurently by the worker
+	// slots is a channel used to limit the number of messages treated concurently by the Engine
 	slots chan struct{}
 
 	// Logger
@@ -55,7 +55,7 @@ func NewEngine(conf *Config) *Engine {
 	return e
 }
 
-// SetConfig set worker configuration
+// SetConfig set Engine configuration
 func (e *Engine) SetConfig(conf *Config) {
 	if conf == nil {
 		panic("nil configuration")
@@ -85,7 +85,7 @@ func (e *Engine) Use(handler HandlerFunc) {
 //
 // Once you have stopped consuming from an input channel, you should not start to consuming
 // from a new channel using Run() or it will panic (if you need to start consuming from a new channel you
-// should create a new worker)
+// should create a new Engine)
 func (e *Engine) Run(ctx context.Context, input <-chan interface{}) {
 	// Context must be not nil
 	if ctx == nil {
@@ -140,13 +140,13 @@ runningLoop:
 	}).Debugf("engine: left running loop")
 }
 
-// CleanUp clean worker ressources
+// CleanUp clean Engine ressources
 //
 // After completion of each Run() calls you should always call CleanUp
-// to avoid memory leak and be able to re-initialize worker
+// to avoid memory leak and be able to re-initialize Engine
 //
 // Do not call CleanUp() before every calls to Run() have properly finished
-// otherwise the worker will panic
+// otherwise the Engine will panic
 func (e *Engine) CleanUp() {
 	e.cleanOnce.Do(func() {
 		close(e.slots)

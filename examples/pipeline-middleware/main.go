@@ -35,7 +35,7 @@ func main() {
 	// Create an input channel of messages
 	in := make(chan interface{})
 
-	// Run worker on input channel
+	// Run Engine on input channel
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
@@ -47,10 +47,10 @@ func main() {
 	in <- "Message-1"
 	in <- "Message-2"
 
-	// Close channel & wait for worker to treat all messages
+	// Close channel & wait for Engine to treat all messages
 	close(in)
 	wg.Wait()
 
-	// CleanUp worker to avoid memory leak
+	// CleanUp Engine to avoid memory leak
 	engine.CleanUp()
 }
