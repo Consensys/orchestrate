@@ -4,6 +4,9 @@
 
 *Unreleased*
 
+- [REFACTOR] Update naming `worker.Context` to `enginer.TxContext`
+- [REFACTOR] Update naming `trace.Trace` to `envelope.Envelope`
+- [REFACTOR] Update naming `Worker` to `Engine`
 - [REFACTOR] Go context usage on `engine.Context`
 - [FEAT] Implement `engine.TimeoutHandler`
 - [FIX] Deactivate usage of `Timeout` in worker configuration
