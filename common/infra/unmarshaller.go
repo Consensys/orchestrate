@@ -4,21 +4,21 @@ import (
 	"fmt"
 
 	"github.com/gogo/protobuf/proto"
-	trace "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/envelope"
 )
 
-// TracePbUnmarshaller assumes that input message is a protobuf
-type TracePbUnmarshaller struct{}
+// EnvelopeUnmarshaller assumes that input message is a Envelope
+type EnvelopeUnmarshaller struct{}
 
-// Unmarshal message expected to be a trace protobuffer
-func (u *TracePbUnmarshaller) Unmarshal(msg interface{}, t *trace.Trace) error {
+// Unmarshal message expected to be a Envelope
+func (u *EnvelopeUnmarshaller) Unmarshal(msg interface{}, t *envelope.Envelope) error {
 	// Cast message into protobuffer
-	pb, ok := msg.(*trace.Trace)
+	pb, ok := msg.(*envelope.Envelope)
 	if !ok {
 		return fmt.Errorf("Message does not match expected format")
 	}
 
-	// Load trace from protobuffer
+	// Load Envelope from protobuffer
 	proto.Merge(t, pb)
 
 	return nil

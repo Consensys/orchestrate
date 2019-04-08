@@ -182,7 +182,7 @@ func WorkerBridgeGroup(f *pflag.FlagSet) {
 
 var (
 	workerInFlag     = "worker-in"
-	workerInViperKey = "worker.in"
+	workerInViperKey = "engine.in"
 )
 
 // WorkerInTopic register flag for kafka input topic
@@ -196,7 +196,7 @@ Environment variable: %q`, env)
 
 var (
 	workerOutFlag     = "worker-out"
-	workerOutViperKey = "worker.out"
+	workerOutViperKey = "engine.out"
 )
 
 // WorkerOutTopic register flag for kafka output topic
@@ -272,5 +272,5 @@ func TxDecodedOutTopic(f *pflag.FlagSet) {
 
 var (
 	workerGroupFlag     = "worker-group"
-	workerGroupViperKey = "worker.group"
+	workerGroupViperKey = "engine.group"
 )

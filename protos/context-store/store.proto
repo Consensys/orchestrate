@@ -34,13 +34,13 @@ message StoreRequest{
 }
 
 message StoreResponse{
-	// Status of trace element
+	// Status of Envelope
 	string status = 1;
 
-	// Status of trace element
+	// Last update date of envelope stored
     google.protobuf.Timestamp last_updated = 2;
     
-    // Trace object
+    // Envelope
     envelope.Envelope envelope = 3;
     
     // Error
@@ -61,7 +61,7 @@ message IDRequest{
 }
 
 message SetStatusRequest {
-    // Trace identifier
+    // Envelope identifier
     string id = 1;
 
     // Status
@@ -74,7 +74,7 @@ message LoadPendingRequest {
 }
 
 message LoadPendingResponse {
-    // Pending traces
+    // Pending envelopes
     repeated envelope.Envelope envelopes = 1;
 
     // Error

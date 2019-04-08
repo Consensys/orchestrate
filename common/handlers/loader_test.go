@@ -6,26 +6,25 @@ import (
 	"testing"
 
 	log "github.com/sirupsen/logrus"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
-	trace "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/envelope"
 )
 
 type MockUnmarshaller struct {
 	t *testing.T
 }
 
-func (u *MockUnmarshaller) Unmarshal(msg interface{}, t *trace.Trace) error {
+func (u *MockUnmarshaller) Unmarshal(msg interface{}, envelope *envelope.Envelope) error {
 	if msg.(string) == "error" {
 		return fmt.Errorf("Could not unmarshall")
 	}
 	return nil
 }
 
-func makeLoaderContext(i int) *worker.Context {
-	ctx := worker.NewContext()
+func makeLoaderContext(i int) *engine.TxContext {
+	ctx := engine.NewTxContext()
 	ctx.Reset()
-	ctx.Prepare([]worker.HandlerFunc{}, log.NewEntry(log.StandardLogger()), nil)
+	ctx.Prepare([]engine.HandlerFunc{}, log.NewEntry(log.StandardLogger()), nil)
 
 	switch i % 2 {
 	case 0:
@@ -43,12 +42,12 @@ func TestLoader(t *testing.T) {
 	loader := Loader(&mu)
 
 	rounds := 10
-	outs := make(chan *worker.Context, rounds)
+	outs := make(chan *engine.TxContext, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
 		ctx := makeLoaderContext(i)
-		go func(ctx *worker.Context) {
+		go func(ctx *engine.TxContext) {
 			defer wg.Done()
 			loader(ctx)
 			outs <- ctx
@@ -62,8 +61,8 @@ func TestLoader(t *testing.T) {
 
 	for out := range outs {
 		errCount := out.Keys["errors"].(int)
-		if len(out.T.Errors) != errCount {
-			t.Errorf("Loader: expected %v errors but got %v", errCount, out.T.Errors)
+		if len(out.Envelope.Errors) != errCount {
+			t.Errorf("Loader: expected %v errors but got %v", errCount, out.Envelope.Errors)
 		}
 	}
 }

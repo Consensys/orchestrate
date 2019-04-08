@@ -53,7 +53,7 @@ import (
 	"fmt"
 	"sync/atomic"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
 // ExampleHandler is an handler that increment counters
@@ -62,41 +62,41 @@ type ExampleHandler struct {
 	unsafeCounter uint32
 }
 
-func (h *ExampleHandler) handleSafe(ctx *worker.Context) {
+func (h *ExampleHandler) handleSafe(ctx *engine.TxContext) {
 	// Increment counter using atomic
 	atomic.AddUint32(&h.safeCounter, 1)
 }
 
-func (h *ExampleHandler) handleUnsafe(ctx *worker.Context) {
+func (h *ExampleHandler) handleUnsafe(ctx *engine.TxContext) {
 	// Increment counter with no concurrent protection
 	h.unsafeCounter++
 }
 
 func main() {
-	// Instantiate worker that can treat 100 message concurrently in 100 distinct partitions
-	cfg := worker.NewConfig()
+	// Instantiate engine that can treat 100 message concurrently in 100 distinct partitions
+	cfg := engine.NewConfig()
 	cfg.Slots = 100
 	cfg.Partitions = 100
-	worker := worker.NewWorker(cfg)
+	engine := engine.NewWorker(cfg)
 
 	// Register handler
 	h := ExampleHandler{0, 0}
-	worker.Partitionner(func(msg interface{}) []byte { return []byte(msg.(string)) })
-	worker.Use(h.handleSafe)
-	worker.Use(h.handleUnsafe)
+	engine.Partitionner(func(msg interface{}) []byte { return []byte(msg.(string)) })
+	engine.Use(h.handleSafe)
+	engine.Use(h.handleUnsafe)
 
-	// Start worker
+	// Start engine
 	in := make(chan interface{})
-	go func() { worker.Run(in) }()
+	go func() { engine.Run(in) }()
 
-	// Feed 10000 to the worker
+	// Feed 10000 to the engine
 	for i := 0; i < 10000; i++ {
 		in <- fmt.Sprintf("%v-%v", "Message", i)
 	}
 
 	// Close channel
 	close(in)
-	<-worker.Done()
+	<-engine.Done()
 
 	// Print counters
 	fmt.Printf("* Safe counter: %v\n", h.safeCounter)
@@ -115,13 +115,13 @@ INFO[0000] Handling Message-3
 
 ### Handlers
 
-Handler functions are the building blocks for workers, they match the interface
+Handler functions are the building blocks for engines, they match the interface
 
 ```go
 type HandlerFunc func(ctx *Context)
 ```
 
-When creating a worker you must register a sequence of handlers by using ``worker.Use(handler)``. When running, each time a new message is feeded to the worker, the worker generates a ``types.Context`` and apply handlers sequence on this context object.
+When creating a engine you must register a sequence of handlers by using ``engine.Use(handler)``. When running, each time a new message is feeded to the engine, the engine generates a ``types.Context`` and apply handlers sequence on this context object.
 
 #### Pipeline/Middleware
 
@@ -140,16 +140,16 @@ $ cat examples/pipeline-middleware/main.go
 package main
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
 // Define a pipeline handler
-func pipeline(ctx *worker.Context) {
+func pipeline(ctx *engine.TxContext) {
 	ctx.Logger.Infof("Pipeline handling %v\n", ctx.Msg.(string))
 }
 
 // Define a middleware handler
-func middleware(ctx *worker.Context) {
+func middleware(ctx *engine.TxContext) {
 	// Start middleware execution
 	ctx.Logger.Infof("Middleware starts handling %v\n", ctx.Msg.(string))
 
@@ -161,28 +161,28 @@ func middleware(ctx *worker.Context) {
 }
 
 func main() {
-	cfg := worker.NewConfig()
+	cfg := engine.NewConfig()
 	cfg.Slots = 1
 	cfg.Partitions = 1
-	worker := worker.NewWorker(cfg)
+	engine := engine.NewWorker(cfg)
 
 	// Register handlers
-	worker.Use(middleware)
-	worker.Use(pipeline)
+	engine.Use(middleware)
+	engine.Use(pipeline)
 
 	// Create an input channel of messages
 	in := make(chan interface{})
 
-	// Run worker on input channel
-	go func() { worker.Run(in) }()
+	// Run engine on input channel
+	go func() { engine.Run(in) }()
 
 	// Feed channel
 	in <- "Message-1"
 	in <- "Message-2"
 
-	// Close channel & wiat for worker to treat all messages
+	// Close channel & wiat for engine to treat all messages
 	close(in)
-	<-worker.Done()
+	<-engine.Done()
 }
 ```
 
@@ -200,7 +200,7 @@ INFO[0000] * Middleware finishes handling Message-2
 
 #### Concurrency
 
-A worker can handle multiple message concurrently in parallel goroutines. When declaring an handler you can configure
+A engine can handle multiple message concurrently in parallel goroutines. When declaring an handler you can configure
 
 - ```slots``` which the maximum of messages that can be treated concurrently
 - ```partitions``` which correspond to partitions of message that should be treated sequentially based on a message partition key 
@@ -218,7 +218,7 @@ import (
 	"fmt"
 	"sync/atomic"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
 // ExampleHandler is an handler that increment counters
@@ -227,41 +227,41 @@ type ExampleHandler struct {
 	unsafeCounter uint32
 }
 
-func (h *ExampleHandler) handleSafe(ctx *worker.Context) {
+func (h *ExampleHandler) handleSafe(ctx *engine.TxContext) {
 	// Increment counter using atomic
 	atomic.AddUint32(&h.safeCounter, 1)
 }
 
-func (h *ExampleHandler) handleUnsafe(ctx *worker.Context) {
+func (h *ExampleHandler) handleUnsafe(ctx *engine.TxContext) {
 	// Increment counter with no concurrent protection
 	h.unsafeCounter++
 }
 
 func main() {
-	// Instantiate worker that can treat 100 message concurrently in 100 distinct partitions
-	cfg := worker.NewConfig()
+	// Instantiate engine that can treat 100 message concurrently in 100 distinct partitions
+	cfg := engine.NewConfig()
 	cfg.Slots = 100
 	cfg.Partitions = 100
-	worker := worker.NewWorker(cfg)
+	engine := engine.NewWorker(cfg)
 
 	// Register handler
 	h := ExampleHandler{0, 0}
-	worker.Partitionner(func(msg interface{}) []byte { return []byte(msg.(string)) })
-	worker.Use(h.handleSafe)
-	worker.Use(h.handleUnsafe)
+	engine.Partitionner(func(msg interface{}) []byte { return []byte(msg.(string)) })
+	engine.Use(h.handleSafe)
+	engine.Use(h.handleUnsafe)
 
-	// Start worker
+	// Start engine
 	in := make(chan interface{})
-	go func() { worker.Run(in) }()
+	go func() { engine.Run(in) }()
 
-	// Feed 10000 to the worker
+	// Feed 10000 to the engine
 	for i := 0; i < 10000; i++ {
 		in <- fmt.Sprintf("%v-%v", "Message", i)
 	}
 
 	// Close channel
 	close(in)
-	<-worker.Done()
+	<-engine.Done()
 
 	// Print counters
 	fmt.Printf("* Safe counter: %v\n", h.safeCounter)
@@ -297,7 +297,7 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:              "worker",
+	Use:              "engine",
 	TraverseChildren: true,
 	Version:          "v0.1.0",
 }
@@ -340,7 +340,7 @@ $ go run examples/command/main.go help example
 An example command
 
 Usage:
-  worker example [OPTIONS] [flags]
+  engine example [OPTIONS] [flags]
 
 Flags:
       --eth-client strings   Ethereum client URLs.

@@ -1,4 +1,4 @@
-package worker
+package engine
 
 import (
 	"math/rand"
@@ -12,11 +12,11 @@ import (
 
 type TestHandler struct {
 	mux     *sync.Mutex
-	handled []*Context
+	handled []*TxContext
 }
 
 func (h *TestHandler) Handler(t *testing.T) HandlerFunc {
-	return func(ctx *Context) {
+	return func(ctx *TxContext) {
 		// We add some randomness in time execution
 		r := rand.Intn(100)
 		time.Sleep(time.Duration(r) * time.Millisecond)
@@ -26,23 +26,23 @@ func (h *TestHandler) Handler(t *testing.T) HandlerFunc {
 	}
 }
 
-func TestWorker(t *testing.T) {
+func TestEngine(t *testing.T) {
 	h := TestHandler{
 		mux:     &sync.Mutex{},
-		handled: []*Context{},
+		handled: []*TxContext{},
 	}
 
-	// Create new worker and register test handler
-	w := NewWorker(
+	// Create new Engine and register test handler
+	e := NewEngine(
 		Config{Slots: 100, Partitions: 100},
 	)
-	w.Use(h.Handler(t))
+	e.Use(h.Handler(t))
 
 	// Create a Sarama message channel
 	in := make(chan interface{})
 
-	// Run worker
-	go w.Run(in)
+	// Run Engine
+	go e.Run(in)
 
 	// Feed sarama channel and then close it
 	rounds := 1000
@@ -51,31 +51,31 @@ func TestWorker(t *testing.T) {
 	}
 	close(in)
 
-	// Wait for worker to be done
-	<-w.Done()
+	// Wait for Engine to be done
+	<-e.Done()
 
 	if len(h.handled) != rounds {
-		t.Errorf("Worker: expected %v rounds but got %v", rounds, len(h.handled))
+		t.Errorf("Engine: expected %v rounds but got %v", rounds, len(h.handled))
 	}
 }
 
-func TestWorkerStopped(t *testing.T) {
+func TestEngineStopped(t *testing.T) {
 	h := TestHandler{
 		mux:     &sync.Mutex{},
-		handled: []*Context{},
+		handled: []*TxContext{},
 	}
 
-	// Create new worker and register test handler
-	w := NewWorker(
+	// Create new Engine and register test handler
+	e := NewEngine(
 		Config{Slots: 100, Partitions: 100},
 	)
-	w.Use(h.Handler(t))
+	e.Use(h.Handler(t))
 
 	// Create a Sarama message channel
 	in := make(chan interface{})
 
-	// Run worker
-	go w.Run(in)
+	// Run Engine
+	go e.Run(in)
 
 	// Feed sarama channel and then close it
 	rounds := 1000
@@ -89,13 +89,13 @@ func TestWorkerStopped(t *testing.T) {
 
 	// Sleep and close
 	time.Sleep(300 * time.Millisecond)
-	w.Close()
+	e.Close()
 
-	// Wait for worker to be done
-	<-w.Done()
+	// Wait for Engine to be done
+	<-e.Done()
 
 	if len(h.handled) > 500 {
-		t.Errorf("Worker: expected max %v rounds but got %v", 500, len(h.handled))
+		t.Errorf("Engine: expected max %v rounds but got %v", 500, len(h.handled))
 	}
 
 	msgCount := 0
@@ -105,16 +105,16 @@ func TestWorkerStopped(t *testing.T) {
 	}
 
 	if len(h.handled)+msgCount != rounds {
-		t.Errorf("Worker: expected all %v messages to have been consumed or drained but got consumed=%v drained=%v", rounds, len(h.handled), msgCount)
+		t.Errorf("Engine: expected all %v messages to have been consumed or drained but got consumed=%v drained=%v", rounds, len(h.handled), msgCount)
 	}
 }
 
-func testSleepingHandler(ctx *Context) {
+func testSleepingHandler(ctx *TxContext) {
 	time.Sleep(ctx.Keys["duration"].(time.Duration))
 }
 
-func makeTimeoutContext(i int) *Context {
-	ctx := NewContext()
+func makeTimeoutContext(i int) *TxContext {
+	ctx := NewTxContext()
 	ctx.Reset()
 	ctx.Prepare([]HandlerFunc{}, log.NewEntry(log.StandardLogger()), nil)
 
@@ -133,12 +133,12 @@ func TestTimeoutHandler(t *testing.T) {
 	timeoutHandler := TimeoutHandler(testSleepingHandler, 60*time.Millisecond, "Test timeout")
 
 	rounds := 100
-	outs := make(chan *Context, rounds)
+	outs := make(chan *TxContext, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
 		ctx := makeTimeoutContext(i)
-		go func(ctx *Context) {
+		go func(ctx *TxContext) {
 			defer wg.Done()
 			timeoutHandler(ctx)
 			outs <- ctx
@@ -151,6 +151,6 @@ func TestTimeoutHandler(t *testing.T) {
 
 	for out := range outs {
 		errCount := out.Keys["errors"].(int)
-		assert.Len(t, out.T.Errors, errCount, "Timeout: expected correct count of errors")
+		assert.Len(t, out.Envelope.Errors, errCount, "Timeout: expected correct count of errors")
 	}
 }

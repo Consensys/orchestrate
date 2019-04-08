@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
-	trace "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/envelope"
 )
 
 func init() {
@@ -16,30 +16,30 @@ func init() {
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
-func newProtoMessage() *trace.Trace {
-	return &trace.Trace{
+func newProtoMessage() *envelope.Envelope {
+	return &envelope.Envelope{
 		Sender: &common.Account{Id: "abcde"},
 	}
 }
 
-func TestTracePbUnmarshaller(t *testing.T) {
-	u := TracePbUnmarshaller{}
-	traces := make([]*trace.Trace, 0)
+func TestEnvelopeUnmarshaller(t *testing.T) {
+	u := EnvelopeUnmarshaller{}
+	envelopes := make([]*envelope.Envelope, 0)
 	rounds := 1000
 	wg := &sync.WaitGroup{}
 	for i := 1; i < rounds; i++ {
-		traces = append(traces, &trace.Trace{})
+		envelopes = append(envelopes, &envelope.Envelope{})
 		wg.Add(1)
-		go func(t *trace.Trace) {
+		go func(t *envelope.Envelope) {
 			defer wg.Done()
 			u.Unmarshal(newProtoMessage(), t)
-		}(traces[len(traces)-1])
+		}(envelopes[len(envelopes)-1])
 	}
 	wg.Wait()
 
-	for _, tr := range traces {
+	for _, tr := range envelopes {
 		if tr.Sender.Id != "abcde" {
-			t.Errorf("TracePbUnmarshaller: expected %q but got %q", "abcde", tr.Sender.Id)
+			t.Errorf("EnvelopeUnmarshaller: expected %q but got %q", "abcde", tr.Sender.Id)
 		}
 	}
 }
