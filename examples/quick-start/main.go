@@ -2,36 +2,44 @@ package main
 
 import (
 	"context"
+	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
 // Define a handler method
-func handler(ctx *worker.Context) {
-	ctx.Logger.Infof("Handling %v\n", ctx.Msg.(string))
+func handler(txctx *engine.TxContext) {
+	txctx.Logger.Infof("Handling %v\n", txctx.Msg.(string))
 }
 
 func main() {
-	// Instantiate worker with 1 partition to treat messages
-	cfg := worker.NewConfig()
-	cfg.Partitions = 1
-	worker := worker.NewWorker(context.Background(), cfg)
+	// Instantiate Engine
+	cfg := engine.NewConfig()
+	engine := engine.NewEngine(&cfg)
 
-	// Register handler
-	worker.Use(handler)
+	// Register an handler
+	engine.Register(handler)
 
 	// Create an input channel of messages
 	in := make(chan interface{})
 
-	// Run worker on input channel
-	go func() { worker.Run(in) }()
+	// Run Engine on input channel
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		engine.Run(context.Background(), in)
+		wg.Done()
+	}()
 
 	// Feed channel
 	in <- "Message-1"
 	in <- "Message-2"
 	in <- "Message-3"
 
-	// Close channel & wiat for worker to treat all messages
+	// Close channel & wait for Engine to treat all messages
 	close(in)
-	<-worker.Done()
+	wg.Wait()
+
+	// CleanUp Engine to avoid memory leak
+	engine.CleanUp()
 }

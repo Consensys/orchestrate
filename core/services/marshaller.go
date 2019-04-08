@@ -1,11 +1,11 @@
 package services
 
 import (
-	trace "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/envelope"
 )
 
-// Marshaller are responsible to marshal trace object into specific formats (e.g a Sarama message)
+// Marshaller are responsible to marshal Envelope object into specific formats (e.g a Sarama message)
 type Marshaller interface {
 	// Marshal a protobuffer message to specific format
-	Marshal(t *trace.Trace, msg interface{}) error
+	Marshal(t *envelope.Envelope, msg interface{}) error
 }

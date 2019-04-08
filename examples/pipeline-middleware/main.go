@@ -2,48 +2,55 @@ package main
 
 import (
 	"context"
+	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
 // Define a pipeline handler
-func pipeline(ctx *worker.Context) {
-	ctx.Logger.Infof("Pipeline handling %v\n", ctx.Msg.(string))
+func pipeline(txctx *engine.TxContext) {
+	txctx.Logger.Infof("Pipeline handling %v\n", txctx.Msg.(string))
 }
 
 // Define a middleware handler
-func middleware(ctx *worker.Context) {
+func middleware(txctx *engine.TxContext) {
 	// Start middleware execution
-	ctx.Logger.Infof("Middleware starts handling %v\n", ctx.Msg.(string))
+	txctx.Logger.Infof("Middleware starts handling %v\n", txctx.Msg.(string))
 
 	// Trigger execution of pending handlers
-	ctx.Next()
+	txctx.Next()
 
 	// Executed after pending handlers have executed
-	ctx.Logger.Infof("Middleware finishes handling %v\n", ctx.Msg.(string))
+	txctx.Logger.Infof("Middleware finishes handling %v\n", txctx.Msg.(string))
 }
 
 func main() {
-	cfg := worker.NewConfig()
-	cfg.Slots = 1
-	cfg.Partitions = 1
-	worker := worker.NewWorker(context.Background(), cfg)
+	cfg := engine.NewConfig()
+	engine := engine.NewEngine(&cfg)
 
 	// Register handlers
-	worker.Use(middleware)
-	worker.Use(pipeline)
+	engine.Register(middleware)
+	engine.Register(pipeline)
 
 	// Create an input channel of messages
 	in := make(chan interface{})
 
-	// Run worker on input channel
-	go func() { worker.Run(in) }()
+	// Run Engine on input channel
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		engine.Run(context.Background(), in)
+		wg.Done()
+	}()
 
 	// Feed channel
 	in <- "Message-1"
 	in <- "Message-2"
 
-	// Close channel & wiat for worker to treat all messages
+	// Close channel & wait for Engine to treat all messages
 	close(in)
-	<-worker.Done()
+	wg.Wait()
+
+	// CleanUp Engine to avoid memory leak
+	engine.CleanUp()
 }

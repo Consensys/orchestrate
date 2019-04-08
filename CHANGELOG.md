@@ -1,5 +1,18 @@
 # CHANGELOG
 
+### Version 0.3.0
+
+*Unreleased*
+
+- [REFACTOR] Update naming `engine.Use()` to `engine.Register()`
+- [REFACTOR] Update naming `worker.Context` to `engine.TxContext`
+- [REFACTOR] Update naming `trace.Trace` to `envelope.Envelope`
+- [REFACTOR] Update naming `Worker` to `Engine`
+- [REFACTOR] Go context usage on `engine.Context`
+- [FEAT] Implement `engine.TimeoutHandler`
+- [FIX] Deactivate usage of `Timeout` in worker configuration
+- [FEAT] Implement *Depency Injection* pattern for `Worker`
+
 ### Version 0.2.0-alpha.13
 
 *Released on March 30th 2019*

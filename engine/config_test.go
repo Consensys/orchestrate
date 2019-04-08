@@ -1,4 +1,4 @@
-package worker
+package engine
 
 import (
 	"os"
@@ -11,7 +11,7 @@ import (
 )
 
 func TestSlots(t *testing.T) {
-	name := "worker.slots"
+	name := "engine.slots"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	Slots(flgs)
 	expected := 20
@@ -23,7 +23,7 @@ func TestSlots(t *testing.T) {
 	os.Unsetenv("WORKER_SLOTS")
 
 	args := []string{
-		"--worker-slots=150",
+		"--engine-slots=150",
 	}
 	flgs.Parse(args)
 	expected = 150
@@ -31,7 +31,7 @@ func TestSlots(t *testing.T) {
 }
 
 func TestPartitions(t *testing.T) {
-	name := "worker.partitions"
+	name := "engine.partitions"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	Partitions(flgs)
 	expected := 50
@@ -43,7 +43,7 @@ func TestPartitions(t *testing.T) {
 	os.Unsetenv("WORKER_PARTITIONS")
 
 	args := []string{
-		"--worker-partitions=150",
+		"--engine-partitions=150",
 	}
 	flgs.Parse(args)
 	expected = 150
@@ -51,7 +51,7 @@ func TestPartitions(t *testing.T) {
 }
 
 func TestTimeout(t *testing.T) {
-	name := "worker.timeout"
+	name := "engine.timeout"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	Timeout(flgs)
 	expected := 60 * time.Second
@@ -63,7 +63,7 @@ func TestTimeout(t *testing.T) {
 	os.Unsetenv("WORKER_TIMEOUT")
 
 	args := []string{
-		"--worker-timeout=100ms",
+		"--engine-timeout=100ms",
 	}
 	flgs.Parse(args)
 	expected = 100 * time.Millisecond

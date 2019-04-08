@@ -3,9 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"sync"
 	"sync/atomic"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
 // ExampleHandler is an handler that increment counters
@@ -14,41 +15,55 @@ type ExampleHandler struct {
 	unsafeCounter uint32
 }
 
-func (h *ExampleHandler) handleSafe(ctx *worker.Context) {
+func (h *ExampleHandler) handleSafe(txctx *engine.TxContext) {
 	// Increment counter using atomic
 	atomic.AddUint32(&h.safeCounter, 1)
 }
 
-func (h *ExampleHandler) handleUnsafe(ctx *worker.Context) {
+func (h *ExampleHandler) handleUnsafe(txctx *engine.TxContext) {
 	// Increment counter with no concurrent protection
 	h.unsafeCounter++
 }
 
 func main() {
-	// Instantiate worker that can treat 100 message concurrently in 100 distinct partitions
-	cfg := worker.NewConfig()
+	// Instantiate Engine that can treat 100 message concurrently
+	// Instantiate an Engine that can treat 100 message concurrently in 100 distinct partitions
+	cfg := engine.NewConfig()
 	cfg.Slots = 100
-	cfg.Partitions = 100
-	worker := worker.NewWorker(context.Background(), cfg)
+	engine := engine.NewEngine(&cfg)
 
 	// Register handler
 	h := ExampleHandler{0, 0}
-	worker.Partitionner(func(msg interface{}) []byte { return []byte(msg.(string)) })
-	worker.Use(h.handleSafe)
-	worker.Use(h.handleUnsafe)
+	engine.Register(h.handleSafe)
+	engine.Register(h.handleUnsafe)
 
-	// Start worker
-	in := make(chan interface{})
-	go func() { worker.Run(in) }()
-
-	// Feed 10000 to the worker
-	for i := 0; i < 10000; i++ {
-		in <- fmt.Sprintf("%v-%v", "Message", i)
+	// Run Engine on 100 distinct input channel
+	wg := &sync.WaitGroup{}
+	inputs := make([]chan interface{}, 0)
+	for i := 0; i < 100; i++ {
+		inputs = append(inputs, make(chan interface{}, 100))
+		wg.Add(1)
+		go func(in chan interface{}) {
+			engine.Run(context.Background(), in)
+			wg.Done()
+		}(inputs[i])
 	}
 
-	// Close channel
-	close(in)
-	<-worker.Done()
+	// Feed 10000 to the Engine
+	for i := 0; i < 100; i++ {
+		for j, in := range inputs {
+			in <- fmt.Sprintf("Message %v-%v", j, i)
+		}
+	}
+
+	// Close all channels & wait for Engine to treat all messages
+	for _, in := range inputs {
+		close(in)
+	}
+	wg.Wait()
+
+	// CleanUp Engine to avoid memory leak
+	engine.CleanUp()
 
 	// Print counters
 	fmt.Printf("* Safe counter: %v\n", h.safeCounter)

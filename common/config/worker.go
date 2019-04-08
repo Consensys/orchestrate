@@ -20,6 +20,8 @@ func init() {
 	viper.BindEnv(txSenderViperKey, txSenderTopicEnv)
 	viper.SetDefault(txDecoderViperKey, txDecoderTopicDefault)
 	viper.BindEnv(txDecoderViperKey, txDecoderTopicEnv)
+	viper.SetDefault(txDecodedViperKey, txDecodedTopicDefault)
+	viper.BindEnv(txDecodedViperKey, txDecodedTopicEnv)
 	viper.SetDefault(txRecoverViperKey, txRecoverTopicDefault)
 	viper.BindEnv(txRecoverViperKey, txRecoverTopicEnv)
 }
@@ -54,6 +56,11 @@ var (
 	txDecoderViperKey     = "kafka.topic.decoder"
 	txDecoderTopicEnv     = "KAFKA_TOPIC_TX_DECODER"
 	txDecoderTopicDefault = "topic-tx-decoder"
+
+	txDecodedFlag         = "topic-decoded"
+	txDecodedViperKey     = "kafka.topic.decoded"
+	txDecodedTopicEnv     = "KAFKA_TOPIC_TX_DECODED"
+	txDecodedTopicDefault = "topic-tx-decoded"
 
 	txRecoverFlag         = "topic-recover"
 	txRecoverViperKey     = "kafka.topic.recover"
@@ -262,12 +269,12 @@ func TxDecoderOutTopic(f *pflag.FlagSet) {
 
 // TxDecodedInTopic register flag for kafka input topic on tx decoded
 func TxDecodedInTopic(f *pflag.FlagSet) {
-	WorkerInTopic(f, txRecoverTopicEnv, txRecoverTopicDefault)
+	WorkerInTopic(f, txDecodedTopicEnv, txDecodedTopicDefault)
 }
 
 // TxDecodedOutTopic register flag for kafka output topic on tx decoded
 func TxDecodedOutTopic(f *pflag.FlagSet) {
-	WorkerOutTopic(f, txRecoverTopicEnv, txRecoverTopicDefault)
+	WorkerOutTopic(f, txDecodedTopicEnv, txDecodedTopicDefault)
 }
 
 var (

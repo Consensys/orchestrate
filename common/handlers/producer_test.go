@@ -6,52 +6,52 @@ import (
 	"sync"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
-	trace "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/envelope"
 )
 
-type MockTraceProducer struct {
+type MockProducer struct {
 	t *testing.T
 }
 
-func (p *MockTraceProducer) Produce(o interface{}) error {
-	t := o.(*trace.Trace)
-	if t.Chain.ID().Text(10) == "0" {
+func (p *MockProducer) Produce(o interface{}) error {
+	envelope := o.(*envelope.Envelope)
+	if envelope.Chain.ID().Text(10) == "0" {
 		return fmt.Errorf("Could not produce")
 	}
 	return nil
 }
 
-func makeProducerContext(i int) *worker.Context {
-	ctx := worker.NewContext()
-	ctx.Reset()
+func makeProducerContext(i int) *engine.TxContext {
+	txctx := engine.NewTxContext()
+	txctx.Reset()
 	switch i % 2 {
 	case 0:
-		ctx.T.Chain = (&common.Chain{}).SetID(big.NewInt(0))
-		ctx.Keys["errors"] = 1
+		txctx.Envelope.Chain = (&common.Chain{}).SetID(big.NewInt(0))
+		txctx.Keys["errors"] = 1
 	case 1:
-		ctx.T.Chain = (&common.Chain{}).SetID(big.NewInt(10))
-		ctx.Keys["errors"] = 0
+		txctx.Envelope.Chain = (&common.Chain{}).SetID(big.NewInt(10))
+		txctx.Keys["errors"] = 0
 	}
-	return ctx
+	return txctx
 }
 
 func TestProducer(t *testing.T) {
-	mp := MockTraceProducer{t: t}
+	mp := MockProducer{t: t}
 	producer := Producer(&mp)
 
 	rounds := 100
-	outs := make(chan *worker.Context, rounds)
+	outs := make(chan *engine.TxContext, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
-		ctx := makeProducerContext(i)
-		go func(ctx *worker.Context) {
+		txctx := makeProducerContext(i)
+		go func(txctx *engine.TxContext) {
 			defer wg.Done()
-			producer(ctx)
-			outs <- ctx
-		}(ctx)
+			producer(txctx)
+			outs <- txctx
+		}(txctx)
 	}
 	wg.Wait()
 	close(outs)
@@ -62,8 +62,8 @@ func TestProducer(t *testing.T) {
 
 	for out := range outs {
 		errCount := out.Keys["errors"].(int)
-		if len(out.T.Errors) != errCount {
-			t.Errorf("Marker: expected %v errors but got %v", errCount, out.T.Errors)
+		if len(out.Envelope.Errors) != errCount {
+			t.Errorf("Marker: expected %v errors but got %v", errCount, out.Envelope.Errors)
 		}
 	}
 }

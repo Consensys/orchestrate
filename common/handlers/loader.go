@@ -2,22 +2,22 @@ package handlers
 
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
 // Loader creates an handler loading input
-func Loader(u services.Unmarshaller) worker.HandlerFunc {
-	return func(ctx *worker.Context) {
+func Loader(u services.Unmarshaller) engine.HandlerFunc {
+	return func(txctx *engine.TxContext) {
 		// Unmarshal message
-		err := u.Unmarshal(ctx.Msg, ctx.T)
+		err := u.Unmarshal(txctx.Msg, txctx.Envelope)
 
 		if err != nil {
 			// TODO: handle error
-			ctx.Logger.Errorf("Error unmarshalling: %v", err)
-			ctx.AbortWithError(err)
+			txctx.Logger.Errorf("Error unmarshalling: %v", err)
+			txctx.AbortWithError(err)
 			return
 		}
 
-		ctx.Logger.Debugf("Message unmarshalled: %v", ctx.T.String())
+		txctx.Logger.Debugf("Message unmarshalled: %v", txctx.Envelope.String())
 	}
 }
