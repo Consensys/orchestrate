@@ -2,11 +2,13 @@ package handlers
 
 import (
 	"fmt"
-	"sync"
 	"testing"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/envelope"
 )
 
@@ -22,9 +24,8 @@ func (u *MockUnmarshaller) Unmarshal(msg interface{}, envelope *envelope.Envelop
 }
 
 func makeLoaderContext(i int) *engine.TxContext {
-	txctx := engine.NewTxContext()
-	txctx.Reset()
-	txctx.Prepare([]engine.HandlerFunc{}, log.NewEntry(log.StandardLogger()), nil)
+	// Initialize context
+	txctx := engine.NewTxContext().Prepare([]engine.HandlerFunc{}, log.NewEntry(log.StandardLogger()), nil)
 
 	switch i % 2 {
 	case 0:
@@ -34,35 +35,33 @@ func makeLoaderContext(i int) *engine.TxContext {
 		txctx.Msg = "valid"
 		txctx.Keys["errors"] = 0
 	}
+
 	return txctx
 }
 
-func TestLoader(t *testing.T) {
-	mu := MockUnmarshaller{t: t}
-	loader := Loader(&mu)
+type LoaderTestSuite struct {
+	testutils.HandlerTestSuite
+}
 
-	rounds := 10
-	outs := make(chan *engine.TxContext, rounds)
-	wg := &sync.WaitGroup{}
+func (suite *LoaderTestSuite) SetupSuite() {
+	suite.Handler = Loader(&MockUnmarshaller{t: suite.T()})
+}
+
+func (suite *LoaderTestSuite) TestLoader() {
+	rounds := 100
+	txctxs := []*engine.TxContext{}
 	for i := 0; i < rounds; i++ {
-		wg.Add(1)
-		txctx := makeLoaderContext(i)
-		go func(txctx *engine.TxContext) {
-			defer wg.Done()
-			loader(txctx)
-			outs <- txctx
-		}(txctx)
-	}
-	wg.Wait()
-	close(outs)
-	if len(outs) != rounds {
-		t.Errorf("Loader: expected %v outs but got %v", rounds, len(outs))
+		txctxs = append(txctxs, makeLoaderContext(i))
 	}
 
-	for out := range outs {
-		errCount := out.Keys["errors"].(int)
-		if len(out.Envelope.Errors) != errCount {
-			t.Errorf("Loader: expected %v errors but got %v", errCount, out.Envelope.Errors)
-		}
+	// Handle contexts
+	suite.Handle(txctxs)
+
+	for _, txctx := range txctxs {
+		assert.Len(suite.T(), txctx.Envelope.Errors, txctx.Keys["errors"].(int), "Expected right count of errors")
 	}
+}
+
+func TestLoader(t *testing.T) {
+	suite.Run(t, new(LoaderTestSuite))
 }
