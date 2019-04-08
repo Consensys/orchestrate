@@ -9,7 +9,7 @@ import (
 )
 
 func TestWorkerInTopic(t *testing.T) {
-	name := "engine.in"
+	name := "worker.in"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	WorkerInTopic(flgs, "TOPIC_IN", "test-in-topic")
 	expected := "test-in-topic"
@@ -34,7 +34,7 @@ func TestWorkerInTopic(t *testing.T) {
 }
 
 func TestWorkerOutTopic(t *testing.T) {
-	name := "engine.out"
+	name := "worker.out"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	WorkerOutTopic(flgs, "TOPIC_OUT", "test-out-topic")
 	expected := "test-out-topic"
@@ -59,7 +59,7 @@ func TestWorkerOutTopic(t *testing.T) {
 }
 
 func TestWorkerConsumerGroup(t *testing.T) {
-	name := "engine.group"
+	name := "worker.group"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	WorkerConsumerGroup(flgs, "CONSUMER_GROUP", "test-consumer-group")
 	expected := "test-consumer-group"
