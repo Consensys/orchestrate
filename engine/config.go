@@ -19,18 +19,13 @@ func init() {
 
 // Config is engine configuration
 type Config struct {
-	Slots      int64
-	Partitions int64
+	Slots int64
 }
 
 // Validate ensure configuration is valid
 func (c *Config) Validate() error {
 	if c.Slots <= 0 {
 		return fmt.Errorf("At least one engine slot is required")
-	}
-
-	if c.Partitions <= 0 {
-		return fmt.Errorf("At least one partition is required")
 	}
 
 	return nil
@@ -40,7 +35,6 @@ func (c *Config) Validate() error {
 func NewConfig() Config {
 	config := Config{}
 	config.Slots = viper.GetInt64("engine.slots")
-	config.Partitions = viper.GetInt64("engine.partitions")
 	return config
 }
 
