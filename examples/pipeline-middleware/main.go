@@ -29,8 +29,8 @@ func main() {
 	engine := engine.NewEngine(&cfg)
 
 	// Register handlers
-	engine.Use(middleware)
-	engine.Use(pipeline)
+	engine.Register(middleware)
+	engine.Register(pipeline)
 
 	// Create an input channel of messages
 	in := make(chan interface{})

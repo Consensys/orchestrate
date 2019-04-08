@@ -18,7 +18,7 @@ func main() {
 	engine := engine.NewEngine(&cfg)
 
 	// Register an handler
-	engine.Use(handler)
+	engine.Register(handler)
 
 	// Create an input channel of messages
 	in := make(chan interface{})

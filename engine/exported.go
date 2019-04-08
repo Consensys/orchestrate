@@ -34,7 +34,7 @@ func SetConfig(conf *Config) {
 
 // Use register a new handler
 func Use(handler HandlerFunc) {
-	e.Use(handler)
+	e.Register(handler)
 }
 
 // Run starts consuming messages from an input channel

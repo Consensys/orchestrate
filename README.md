@@ -67,7 +67,7 @@ func main() {
 	engine := engine.NewEngine(&cfg)
 
 	// Register an handler
-	engine.Use(handler)
+	engine.Register(handler)
 
 	// Create an input channel of messages
 	in := make(chan interface{})
@@ -111,7 +111,7 @@ Handler functions are the building blocks for engines, they match the interface
 type HandlerFunc func(txctx *engine.TxContext)
 ```
 
-When creating an engine you must register a chain of handlers by using ``engine.Use(handler)``. When running, each time a new message is feeded to the engine, the engine generates a ``engine.TxContext`` and apply handlers sequence on this context object.
+When creating an engine you must register a chain of handlers by using ``engine.Register(handler)``. When running, each time a new message is feeded to the engine, the engine generates a ``engine.TxContext`` and apply handlers sequence on this context object.
 
 #### Pipeline/Middleware
 
@@ -158,8 +158,8 @@ func main() {
 	engine := engine.NewEngine(&cfg)
 
 	// Register handlers
-	engine.Use(middleware)
-	engine.Use(pipeline)
+	engine.Register(middleware)
+	engine.Register(pipeline)
 
 	// Create an input channel of messages
 	in := make(chan interface{})
@@ -248,8 +248,8 @@ func main() {
 
 	// Register handler
 	h := ExampleHandler{0, 0}
-	engine.Use(h.handleSafe)
-	engine.Use(h.handleUnsafe)
+	engine.Register(h.handleSafe)
+	engine.Register(h.handleUnsafe)
 
 	// Run Engine on 100 distinct input channel
 	wg := &sync.WaitGroup{}

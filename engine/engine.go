@@ -70,8 +70,8 @@ func (e *Engine) SetConfig(conf *Config) {
 	e.mux.Unlock()
 }
 
-// Use add a new handler
-func (e *Engine) Use(handler HandlerFunc) {
+// Register register a new handler
+func (e *Engine) Register(handler HandlerFunc) {
 	e.mux.Lock()
 	e.handlers = append(e.handlers, handler)
 	e.mux.Unlock()

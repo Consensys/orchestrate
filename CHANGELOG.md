@@ -4,7 +4,8 @@
 
 *Unreleased*
 
-- [REFACTOR] Update naming `worker.Context` to `enginer.TxContext`
+- [REFACTOR] Update naming `engine.Use()` to `engine.Register()`
+- [REFACTOR] Update naming `worker.Context` to `engine.TxContext`
 - [REFACTOR] Update naming `trace.Trace` to `envelope.Envelope`
 - [REFACTOR] Update naming `Worker` to `Engine`
 - [REFACTOR] Go context usage on `engine.Context`

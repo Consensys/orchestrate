@@ -34,8 +34,8 @@ func main() {
 
 	// Register handler
 	h := ExampleHandler{0, 0}
-	engine.Use(h.handleSafe)
-	engine.Use(h.handleUnsafe)
+	engine.Register(h.handleSafe)
+	engine.Register(h.handleUnsafe)
 
 	// Run Engine on 100 distinct input channel
 	wg := &sync.WaitGroup{}

@@ -36,7 +36,7 @@ func TestEngine(t *testing.T) {
 
 	// Create new Engine and register test handler
 	e := NewEngine(&Config{Slots: 100})
-	e.Use(h.Handler(t))
+	e.Register(h.Handler(t))
 
 	// Create input channels and prefills it
 	ins := make([]chan interface{}, 0)
@@ -73,7 +73,7 @@ func TestEngineStopped(t *testing.T) {
 
 	// Create new Engine and register test handler
 	e := NewEngine(&Config{Slots: 100})
-	e.Use(h.Handler(t))
+	e.Register(h.Handler(t))
 
 	// Create input channels and prefills it
 	ins := make([]chan interface{}, 0)
