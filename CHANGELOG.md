@@ -4,8 +4,8 @@
 
 *Unreleased*
 
-- [REFACTOR] Go context usage on `worker.Context`
-- [FEAT] Implement `worker.TimeoutHandler`
+- [REFACTOR] Go context usage on `engine.Context`
+- [FEAT] Implement `engine.TimeoutHandler`
 - [FIX] Deactivate usage of `Timeout` in worker configuration
 - [FEAT] Implement *Depency Injection* pattern for `Worker`
 

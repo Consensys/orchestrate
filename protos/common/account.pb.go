@@ -22,7 +22,7 @@ const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 // Information about an account (wallet or contract)
 type Account struct {
-	// ID of the trace  in UUID RFC 4122, ISO/IEC 9834-8:2005 format
+	// ID of the account in UUID RFC 4122, ISO/IEC 9834-8:2005 format
 	// e.g a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// DATA (20 Bytes) - Ethereum Account Address

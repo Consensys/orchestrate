@@ -1,4 +1,4 @@
-package worker
+package engine
 
 import (
 	"context"
@@ -13,9 +13,9 @@ import (
 // PartitionKeyFunc are functions returning a key for a message
 type PartitionKeyFunc func(message interface{}) []byte
 
-// Worker allows to consume messages on an input channel
-type Worker struct {
-	// Worker configuration object
+// Engine is an object that allows to consume go channels
+type Engine struct {
+	// Configuration object
 	conf *Config
 
 	// chain of handlers to be to be executed
@@ -31,32 +31,32 @@ type Worker struct {
 	// slots is a channel used to limit the number of messages treated concurently by the worker
 	slots chan struct{}
 
-	// Worker logger
+	// Logger
 	logger *log.Logger
 
 	mux *sync.Mutex
 }
 
-// NewWorker creates a new worker
-func NewWorker(conf *Config) *Worker {
-	w := &Worker{
+// NewEngine creates a new Engine
+func NewEngine(conf *Config) *Engine {
+	e := &Engine{
 		handlers:  []HandlerFunc{},
 		running:   0,
 		cleanOnce: &sync.Once{},
-		ctxPool:   &sync.Pool{New: func() interface{} { return NewContext() }},
+		ctxPool:   &sync.Pool{New: func() interface{} { return NewTxContext() }},
 		mux:       &sync.Mutex{},
 		logger:    log.StandardLogger(), // TODO: make possible to use non-standard logrus logger
 	}
 
 	if conf != nil {
-		w.SetConfig(conf)
+		e.SetConfig(conf)
 	}
 
-	return w
+	return e
 }
 
 // SetConfig set worker configuration
-func (w *Worker) SetConfig(conf *Config) {
+func (e *Engine) SetConfig(conf *Config) {
 	if conf == nil {
 		panic("nil configuration")
 	}
@@ -65,16 +65,16 @@ func (w *Worker) SetConfig(conf *Config) {
 		panic(err)
 	}
 
-	w.mux.Lock()
-	w.conf = conf
-	w.mux.Unlock()
+	e.mux.Lock()
+	e.conf = conf
+	e.mux.Unlock()
 }
 
 // Use add a new handler
-func (w *Worker) Use(handler HandlerFunc) {
-	w.mux.Lock()
-	w.handlers = append(w.handlers, handler)
-	w.mux.Unlock()
+func (e *Engine) Use(handler HandlerFunc) {
+	e.mux.Lock()
+	e.handlers = append(e.handlers, handler)
+	e.mux.Unlock()
 }
 
 // Run starts consuming messages from an input channel
@@ -86,27 +86,27 @@ func (w *Worker) Use(handler HandlerFunc) {
 // Once you have stopped consuming from an input channel, you should not start to consuming
 // from a new channel using Run() or it will panic (if you need to start consuming from a new channel you
 // should create a new worker)
-func (w *Worker) Run(ctx context.Context, input <-chan interface{}) {
+func (e *Engine) Run(ctx context.Context, input <-chan interface{}) {
 	// Context must be not nil
 	if ctx == nil {
 		panic("nil context")
 	}
 
-	w.mux.Lock()
+	e.mux.Lock()
 	// Ensure config has been attached
-	if w.conf == nil {
+	if e.conf == nil {
 		panic("nil configuration (call SetConfig() before running worker)")
 	}
 
 	// Initialize slots channel
-	if w.slots == nil {
-		w.slots = make(chan struct{}, w.conf.Slots)
+	if e.slots == nil {
+		e.slots = make(chan struct{}, e.conf.Slots)
 	}
-	w.mux.Unlock()
+	e.mux.Unlock()
 
 	// Increment count of input channels being consumed
-	count := atomic.AddInt64(&w.running, 1)
-	w.logger.WithFields(log.Fields{
+	count := atomic.AddInt64(&e.running, 1)
+	e.logger.WithFields(log.Fields{
 		"loops.count": count,
 	}).Debugf("worker: start running loop")
 
@@ -120,13 +120,13 @@ runningLoop:
 			}
 
 			// Acquire a message slot
-			w.slots <- struct{}{}
+			e.slots <- struct{}{}
 
 			// Handle message
-			w.handleMessage(msg)
+			e.handleMessage(msg)
 
 			// Release a message slot
-			<-w.slots
+			<-e.slots
 		case <-ctx.Done():
 			// Context has timeout or been cancelled so we leave the loop
 			break runningLoop
@@ -134,8 +134,8 @@ runningLoop:
 	}
 
 	// Decrement count of input channels being consumed
-	count = atomic.AddInt64(&w.running, -1)
-	w.logger.WithFields(log.Fields{
+	count = atomic.AddInt64(&e.running, -1)
+	e.logger.WithFields(log.Fields{
 		"loops.count": count,
 	}).Debugf("worker: left running loop")
 }
@@ -147,24 +147,24 @@ runningLoop:
 //
 // Do not call CleanUp() before every calls to Run() have properly finished
 // otherwise the worker will panic
-func (w *Worker) CleanUp() {
-	w.cleanOnce.Do(func() {
-		close(w.slots)
-		w.mux.Lock()
-		w.slots = nil
-		w.mux.Unlock()
+func (e *Engine) CleanUp() {
+	e.cleanOnce.Do(func() {
+		close(e.slots)
+		e.mux.Lock()
+		e.slots = nil
+		e.mux.Unlock()
 	})
 }
 
-func (w *Worker) handleMessage(msg interface{}) {
+func (e *Engine) handleMessage(msg interface{}) {
 	// Retrieve a re-cycled context
-	c := w.ctxPool.Get().(*Context)
+	c := e.ctxPool.Get().(*TxContext)
 
 	// Re-cycle context object
-	defer w.ctxPool.Put(c)
+	defer e.ctxPool.Put(c)
 
 	// Prepare context
-	c.Prepare(w.handlers, log.NewEntry(w.logger), msg)
+	c.Prepare(e.handlers, log.NewEntry(e.logger), msg)
 
 	// Calls Next to trigger execution
 	c.Next()
@@ -175,12 +175,12 @@ func (w *Worker) handleMessage(msg interface{}) {
 // Be careful that if h is a middleware then timeout should cover full execution of the handler
 // including pending handlers
 func TimeoutHandler(h HandlerFunc, timeout time.Duration, msg string) HandlerFunc {
-	return func(ctx *Context) {
+	return func(ctx *TxContext) {
 		// Create timeout context
 		timeoutCtx, cancel := context.WithTimeout(ctx.Context(), timeout)
 		defer cancel() // We always cancel to avoid memort leak
 
-		// Attach time out context to worker context
+		// Attach time out context to TxContext
 		ctx.WithContext(timeoutCtx)
 
 		// Prepare channels

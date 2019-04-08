@@ -53,21 +53,21 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
 // Define a handler method
-func handler(ctx *worker.Context) {
+func handler(ctx *engine.TxContext) {
 	ctx.Logger.Infof("Handling %v\n", ctx.Msg.(string))
 }
 
 func main() {
 	// Instantiate worker
-	cfg := worker.NewConfig()
-	w := worker.NewWorker(&cfg)
+	cfg := engine.NewConfig()
+	engine := engine.NewEngine(&cfg)
 
 	// Register an handler
-	w.Use(handler)
+	engine.Use(handler)
 
 	// Create an input channel of messages
 	in := make(chan interface{})
@@ -76,7 +76,7 @@ func main() {
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
-		w.Run(context.Background(), in)
+		engine.Run(context.Background(), in)
 		wg.Done()
 	}()
 
@@ -90,7 +90,7 @@ func main() {
 	wg.Wait()
 
 	// CleanUp worker to avoid memory leak
-	w.CleanUp()
+	engine.CleanUp()
 }
 ```
 
@@ -105,13 +105,13 @@ INFO[0000] Handling Message-3
 
 ### Handlers
 
-Handler functions are the building blocks for workers, they match the interface
+Handler functions are the building blocks for engines, they match the interface
 
 ```go
-type HandlerFunc func(ctx *Context)
+type HandlerFunc func(txctx *engine.TxContext)
 ```
 
-When creating a worker you must register a chain of handlers by using ``worker.Use(handler)``. Once worker is running, each time a new message is feeded to the input channel, the worker generates a dedicated ``Context`` object and apply the chain of handlers on this context object.
+When creating an engine you must register a chain of handlers by using ``engine.Use(handler)``. When running, each time a new message is feeded to the engine, the engine generates a ``engine.TxContext`` and apply handlers sequence on this context object.
 
 #### Pipeline/Middleware
 
@@ -133,16 +133,16 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
 // Define a pipeline handler
-func pipeline(ctx *worker.Context) {
+func pipeline(ctx *engine.TxContext) {
 	ctx.Logger.Infof("Pipeline handling %v\n", ctx.Msg.(string))
 }
 
 // Define a middleware handler
-func middleware(ctx *worker.Context) {
+func middleware(ctx *engine.TxContext) {
 	// Start middleware execution
 	ctx.Logger.Infof("Middleware starts handling %v\n", ctx.Msg.(string))
 
@@ -154,12 +154,12 @@ func middleware(ctx *worker.Context) {
 }
 
 func main() {
-	cfg := worker.NewConfig()
-	w := worker.NewWorker(&cfg)
+	cfg := engine.NewConfig()
+	engine := engine.NewEngine(&cfg)
 
 	// Register handlers
-	w.Use(middleware)
-	w.Use(pipeline)
+	engine.Use(middleware)
+	engine.Use(pipeline)
 
 	// Create an input channel of messages
 	in := make(chan interface{})
@@ -168,7 +168,7 @@ func main() {
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
-		w.Run(context.Background(), in)
+		engine.Run(context.Background(), in)
 		wg.Done()
 	}()
 
@@ -181,7 +181,7 @@ func main() {
 	wg.Wait()
 
 	// CleanUp worker to avoid memory leak
-	w.CleanUp()
+	engine.CleanUp()
 }
 ```
 
@@ -199,7 +199,7 @@ INFO[0000] * Middleware finishes handling Message-2
 
 #### Concurrency
 
-A worker can handle multiple message concurrently in parallel goroutines. When declaring an handler you can configure
+A engine can handle multiple message concurrently in parallel goroutines. When declaring an handler you can configure
 
 - ```slots``` which is the maximum count of messages that can be treated concurrently
 
@@ -220,7 +220,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
 // ExampleHandler is an handler that increment counters
@@ -229,26 +229,27 @@ type ExampleHandler struct {
 	unsafeCounter uint32
 }
 
-func (h *ExampleHandler) handleSafe(ctx *worker.Context) {
+func (h *ExampleHandler) handleSafe(ctx *engine.TxContext) {
 	// Increment counter using atomic
 	atomic.AddUint32(&h.safeCounter, 1)
 }
 
-func (h *ExampleHandler) handleUnsafe(ctx *worker.Context) {
+func (h *ExampleHandler) handleUnsafe(ctx *engine.TxContext) {
 	// Increment counter with no concurrent protection
 	h.unsafeCounter++
 }
 
 func main() {
 	// Instantiate worker that can treat 100 message concurrently
-	cfg := worker.NewConfig()
+	// Instantiate an Engine that can treat 100 message concurrently in 100 distinct partitions
+	cfg := engine.NewConfig()
 	cfg.Slots = 100
-	w := worker.NewWorker(&cfg)
+	engine := engine.NewEngine(&cfg)
 
 	// Register handler
 	h := ExampleHandler{0, 0}
-	w.Use(h.handleSafe)
-	w.Use(h.handleUnsafe)
+	engine.Use(h.handleSafe)
+	engine.Use(h.handleUnsafe)
 
 	// Run worker on 100 distinct input channel
 	wg := &sync.WaitGroup{}
@@ -257,7 +258,7 @@ func main() {
 		inputs = append(inputs, make(chan interface{}, 100))
 		wg.Add(1)
 		go func(in chan interface{}) {
-			w.Run(context.Background(), in)
+			engine.Run(context.Background(), in)
 			wg.Done()
 		}(inputs[i])
 	}
@@ -276,7 +277,7 @@ func main() {
 	wg.Wait()
 
 	// CleanUp worker to avoid memory leak
-	w.CleanUp()
+	engine.CleanUp()
 
 	// Print counters
 	fmt.Printf("* Safe counter: %v\n", h.safeCounter)
@@ -312,7 +313,7 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:              "worker",
+	Use:              "engine",
 	TraverseChildren: true,
 	Version:          "v0.1.0",
 }
@@ -355,7 +356,7 @@ $ go run examples/command/main.go help example
 An example command
 
 Usage:
-  worker example [OPTIONS] [flags]
+  engine example [OPTIONS] [flags]
 
 Flags:
       --eth-client strings   Ethereum client URLs.

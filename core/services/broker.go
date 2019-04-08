@@ -6,7 +6,7 @@ type OffsetMarker interface {
 	Mark(msg interface{}) error
 }
 
-// Producer produces a trace in another service typically a Kafka queue
+// Producer produces object
 type Producer interface {
 	Produce(pb interface{}) error
 }

@@ -1,4 +1,4 @@
-package worker
+package engine
 
 import (
 	"context"
@@ -14,11 +14,11 @@ import (
 
 type TestHandler struct {
 	mux     *sync.Mutex
-	handled []*Context
+	handled []*TxContext
 }
 
 func (h *TestHandler) Handler(t *testing.T) HandlerFunc {
-	return func(ctx *Context) {
+	return func(ctx *TxContext) {
 		// We add some randomness in time execution
 		r := rand.Intn(100)
 		time.Sleep(time.Duration(r) * time.Millisecond)
@@ -28,15 +28,15 @@ func (h *TestHandler) Handler(t *testing.T) HandlerFunc {
 	}
 }
 
-func TestWorker(t *testing.T) {
+func TestEngine(t *testing.T) {
 	h := TestHandler{
 		mux:     &sync.Mutex{},
-		handled: []*Context{},
+		handled: []*TxContext{},
 	}
 
-	// Create new worker and register test handler
-	w := NewWorker(&Config{Slots: 100})
-	w.Use(h.Handler(t))
+	// Create new Engine and register test handler
+	e := NewEngine(&Config{Slots: 100})
+	e.Use(h.Handler(t))
 
 	// Create input channels and prefills it
 	ins := make([]chan interface{}, 0)
@@ -59,20 +59,20 @@ func TestWorker(t *testing.T) {
 		}(ins[i])
 	}
 
-	// Wait for worker to finish consuming
+	// Wait for engine to finish consuming
 	wg.Wait()
 
 	assert.Len(t, h.handled, 1000, "All messages should have been processed")
 }
 
-func TestWorkerStopped(t *testing.T) {
+func TestEngineStopped(t *testing.T) {
 	h := TestHandler{
 		mux:     &sync.Mutex{},
-		handled: []*Context{},
+		handled: []*TxContext{},
 	}
 
-	// Create new worker and register test handler
-	w := NewWorker(&Config{Slots: 100})
+	// Create new Engine and register test handler
+	e := NewEngine(&Config{Slots: 100})
 	w.Use(h.Handler(t))
 
 	// Create input channels and prefills it
@@ -101,7 +101,7 @@ func TestWorkerStopped(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 	cancel()
 
-	// Wait for worker to finish
+	// Wait for Engine to consume messages
 	wg.Wait()
 
 	assert.True(t, len(h.handled) < 500, "Expected at least half of the message not to have been consumed")
@@ -117,12 +117,12 @@ func TestWorkerStopped(t *testing.T) {
 	assert.Equal(t, 1000, len(h.handled)+count, "Expected all message to have either been consumed or still be in input channel")
 }
 
-func testSleepingHandler(ctx *Context) {
+func testSleepingHandler(ctx *TxContext) {
 	time.Sleep(ctx.Keys["duration"].(time.Duration))
 }
 
-func makeTimeoutContext(i int) *Context {
-	ctx := NewContext()
+func makeTimeoutContext(i int) *TxContext {
+	ctx := NewTxContext()
 	ctx.Reset()
 	ctx.Prepare([]HandlerFunc{}, log.NewEntry(log.StandardLogger()), nil)
 
@@ -141,12 +141,12 @@ func TestTimeoutHandler(t *testing.T) {
 	timeoutHandler := TimeoutHandler(testSleepingHandler, 60*time.Millisecond, "Test timeout")
 
 	rounds := 100
-	outs := make(chan *Context, rounds)
+	outs := make(chan *TxContext, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
 		ctx := makeTimeoutContext(i)
-		go func(ctx *Context) {
+		go func(ctx *TxContext) {
 			defer wg.Done()
 			timeoutHandler(ctx)
 			outs <- ctx
@@ -159,6 +159,6 @@ func TestTimeoutHandler(t *testing.T) {
 
 	for out := range outs {
 		errCount := out.Keys["errors"].(int)
-		assert.Len(t, out.T.Errors, errCount, "Timeout: expected correct count of errors")
+		assert.Len(t, out.Envelope.Errors, errCount, "Timeout: expected correct count of errors")
 	}
 }

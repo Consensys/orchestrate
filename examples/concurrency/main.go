@@ -6,7 +6,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
 // ExampleHandler is an handler that increment counters
@@ -15,26 +15,27 @@ type ExampleHandler struct {
 	unsafeCounter uint32
 }
 
-func (h *ExampleHandler) handleSafe(ctx *worker.Context) {
+func (h *ExampleHandler) handleSafe(ctx *engine.TxContext) {
 	// Increment counter using atomic
 	atomic.AddUint32(&h.safeCounter, 1)
 }
 
-func (h *ExampleHandler) handleUnsafe(ctx *worker.Context) {
+func (h *ExampleHandler) handleUnsafe(ctx *engine.TxContext) {
 	// Increment counter with no concurrent protection
 	h.unsafeCounter++
 }
 
 func main() {
 	// Instantiate worker that can treat 100 message concurrently
-	cfg := worker.NewConfig()
+	// Instantiate an Engine that can treat 100 message concurrently in 100 distinct partitions
+	cfg := engine.NewConfig()
 	cfg.Slots = 100
-	w := worker.NewWorker(&cfg)
+	engine := engine.NewEngine(&cfg)
 
 	// Register handler
 	h := ExampleHandler{0, 0}
-	w.Use(h.handleSafe)
-	w.Use(h.handleUnsafe)
+	engine.Use(h.handleSafe)
+	engine.Use(h.handleUnsafe)
 
 	// Run worker on 100 distinct input channel
 	wg := &sync.WaitGroup{}
@@ -43,7 +44,7 @@ func main() {
 		inputs = append(inputs, make(chan interface{}, 100))
 		wg.Add(1)
 		go func(in chan interface{}) {
-			w.Run(context.Background(), in)
+			engine.Run(context.Background(), in)
 			wg.Done()
 		}(inputs[i])
 	}
@@ -62,7 +63,7 @@ func main() {
 	wg.Wait()
 
 	// CleanUp worker to avoid memory leak
-	w.CleanUp()
+	engine.CleanUp()
 
 	// Print counters
 	fmt.Printf("* Safe counter: %v\n", h.safeCounter)

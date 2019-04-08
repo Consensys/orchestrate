@@ -4,35 +4,35 @@ import (
 	"sync"
 	"testing"
 
-	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
-	trace "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/envelope"
 )
 
-func newTrace() *trace.Trace {
-	return &trace.Trace{
+func newEnvelope() *envelope.Envelope {
+	return &envelope.Envelope{
 		Sender: &common.Account{Id: "abcde"},
 	}
 }
 
-func TestTracePbMarshaller(t *testing.T) {
-	m := TracePbMarshaller{}
-	pbs := make([]*trace.Trace, 0)
+func TestEnvelopeMarshaller(t *testing.T) {
+	m := EnvelopeMarshaller{}
+	pbs := make([]*envelope.Envelope, 0)
 	rounds := 1000
 
 	wg := &sync.WaitGroup{}
 	for i := 1; i < rounds; i++ {
-		pbs = append(pbs, &trace.Trace{})
+		pbs = append(pbs, &envelope.Envelope{})
 		wg.Add(1)
-		go func(pb *trace.Trace) {
+		go func(pb *envelope.Envelope) {
 			defer wg.Done()
-			m.Marshal(newTrace(), pb)
+			m.Marshal(newEnvelope(), pb)
 		}(pbs[len(pbs)-1])
 	}
 	wg.Wait()
 
 	for _, pb := range pbs {
 		if pb.Sender.Id != "abcde" {
-			t.Errorf("TracePbMarshaller: expected %q but got %q", "abcde", pb.GetSender().GetId())
+			t.Errorf("EnvelopeMarshaller: expected %q but got %q", "abcde", pb.GetSender().GetId())
 		}
 	}
 }

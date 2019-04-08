@@ -1,4 +1,4 @@
-package worker
+package engine
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 var testKey = "test"
 
 func newHandler(s string, t *testing.T) HandlerFunc {
-	return func(ctx *Context) {
+	return func(ctx *TxContext) {
 		t.Logf("At %v, index=%v", s, ctx.index)
 		ctx.Keys[testKey] = append(ctx.Keys[testKey].([]string), s)
 	}
@@ -23,7 +23,7 @@ func newHandler(s string, t *testing.T) HandlerFunc {
 var errTest = errors.New("Test Error")
 
 func newErrorHandler(s string, t *testing.T) HandlerFunc {
-	return func(ctx *Context) {
+	return func(ctx *TxContext) {
 		t.Logf("At %v, index=%v", s, ctx.index)
 		ctx.Keys[testKey] = append(ctx.Keys[testKey].([]string), s)
 		ctx.Error(errTest)
@@ -31,7 +31,7 @@ func newErrorHandler(s string, t *testing.T) HandlerFunc {
 }
 
 func newAborter(s string, t *testing.T) HandlerFunc {
-	return func(ctx *Context) {
+	return func(ctx *TxContext) {
 		t.Logf("At %v, index=%v", s, ctx.index)
 		ctx.Keys[testKey] = append(ctx.Keys[testKey].([]string), s)
 		ctx.AbortWithError(errTest)
@@ -39,7 +39,7 @@ func newAborter(s string, t *testing.T) HandlerFunc {
 }
 
 func newMiddleware(s string, t *testing.T) HandlerFunc {
-	return func(ctx *Context) {
+	return func(ctx *TxContext) {
 		sA := fmt.Sprintf("%v-before", s)
 		t.Logf("At %v, index=%v", s, ctx.index)
 		ctx.Keys[testKey] = append(ctx.Keys[testKey].([]string), sA)
@@ -53,7 +53,7 @@ func newMiddleware(s string, t *testing.T) HandlerFunc {
 }
 
 func TestNext(t *testing.T) {
-	ctx := NewContext()
+	ctx := NewTxContext()
 
 	var (
 		hA   = newHandler("hA", t)
@@ -76,27 +76,27 @@ func TestNext(t *testing.T) {
 	expected := []string{"hA", "mA-before", "err", "mB-before", "hB", "abort", "mB-after", "mA-after"}
 
 	assert.Equal(t, expected, res, "Call order on handlers should be correct")
-	assert.Len(t, ctx.T.Errors, 2, "Error count should be correct")
+	assert.Len(t, ctx.Envelope.Errors, 2, "Error count should be correct")
 }
 
 func TestCtxError(t *testing.T) {
 	err := fmt.Errorf("Test Error")
 
-	ctx := NewContext()
+	ctx := NewTxContext()
 	ctx.Error(err)
 
-	assert.Len(t, ctx.T.Errors, 1, "Error count should be correct")
+	assert.Len(t, ctx.Envelope.Errors, 1, "Error count should be correct")
 
 	err = &common.Error{Message: "Test Error", Type: 5}
 	ctx.Error(err)
 
-	assert.Len(t, ctx.T.Errors, 2, "Error count should be correct")
-	assert.Equal(t, `2 error(s): ["Error #0: Test Error" "Error #5: Test Error"]`, ctx.T.Error(), "Error message should be correct")
+	assert.Len(t, ctx.Envelope.Errors, 2, "Error count should be correct")
+	assert.Equal(t, `2 error(s): ["Error #0: Test Error" "Error #5: Test Error"]`, ctx.Envelope.Error(), "Error message should be correct")
 }
 
 func TestLogger(t *testing.T) {
-	logHandler := func(ctx *Context) { ctx.Logger.Info("Test") }
-	ctx := NewContext()
+	logHandler := func(ctx *TxContext) { ctx.Logger.Info("Test") }
+	ctx := NewTxContext()
 	ctx.Prepare([]HandlerFunc{logHandler}, log.NewEntry(log.StandardLogger()), nil)
 	ctx.Next()
 }
@@ -104,11 +104,11 @@ func TestLogger(t *testing.T) {
 type testingKey string
 
 func TestWithContext(t *testing.T) {
-	logHandler := func(ctx *Context) { ctx.Logger.Info("Test") }
-	ctx := NewContext()
+	logHandler := func(ctx *TxContext) { ctx.Logger.Info("Test") }
+	ctx := NewTxContext()
 	ctx.Prepare([]HandlerFunc{logHandler}, log.NewEntry(log.StandardLogger()), nil)
 
-	// Update go context attached to worker Context
+	// Update go context attached to TxContext
 	ctx.WithContext(context.WithValue(context.Background(), testingKey("test-key"), "test-value"))
 
 	// Check if go-context has been properly attached
