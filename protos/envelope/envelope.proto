@@ -7,9 +7,9 @@ import "protos/common/error.proto";
 import "protos/ethereum/transaction.proto";
 import "protos/ethereum/receipt.proto";
 
-option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace";
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/envelope";
 
-package trace;
+package envelope;
 
 // Metadata attached to the trace
 message Metadata {
@@ -21,8 +21,8 @@ message Metadata {
     map<string, string> extra = 2;
 }
 
-// Trace object storing contextual information about transaction execution
-message Trace {
+// Envelope stores contextual information about a transaction execution
+message Envelope {
     // Chain to send transaction to
     common.Chain chain = 1;
 
@@ -40,6 +40,6 @@ message Trace {
     // Errors cought during transaction execution
     repeated common.Error errors = 7;
 
-    // Metadata of the trace
+    // Metadata of the envelope
     Metadata metadata = 8;
 }
