@@ -103,11 +103,13 @@ func (txctx *TxContext) AbortWithError(err error) *common.Error {
 }
 
 // Prepare re-initializes TxContext, set handlers, set logger and set message
-func (txctx *TxContext) Prepare(handlers []HandlerFunc, logger *log.Entry, msg interface{}) {
+func (txctx *TxContext) Prepare(handlers []HandlerFunc, logger *log.Entry, msg interface{}) *TxContext {
 	txctx.Reset()
 	txctx.handlers = handlers
 	txctx.Msg = msg
 	txctx.Logger = logger
+
+	return txctx
 }
 
 // Context returns the go context attached to TxContext.

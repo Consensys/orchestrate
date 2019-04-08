@@ -160,11 +160,12 @@ func (e *Engine) handleMessage(msg interface{}) {
 	// Re-cycle context object
 	defer e.ctxPool.Put(txctx)
 
-	// Prepare context
-	txctx.Prepare(e.handlers, log.NewEntry(e.logger), msg)
-
-	// Calls Next to trigger execution
-	txctx.Next()
+	// Prepare context & calls Next to trigger execution
+	txctx.Prepare(
+		e.handlers,
+		log.NewEntry(e.logger),
+		msg,
+	).Next()
 }
 
 // TimeoutHandler returns a Handler that runs h with the given time limit
