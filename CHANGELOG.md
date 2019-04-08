@@ -2,7 +2,7 @@
 
 ### Version 0.3.0
 
-*Unreleased*
+*Released on April 8th 2019*
 
 - [REFACTOR] Update naming `engine.Use()` to `engine.Register()`
 - [REFACTOR] Update naming `worker.Context` to `engine.TxContext`
