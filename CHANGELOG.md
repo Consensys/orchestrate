@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.2
+
+*Released on April 9th 2019*
+
+- [FIX] Rename `exported.Use` to `exported.Register`
+
 ### Version 0.3.1
 
 *Released on April 9th 2019*
