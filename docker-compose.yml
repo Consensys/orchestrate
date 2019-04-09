@@ -5,4 +5,5 @@ services:
     build:
       context: .
       args:
-        SSH_KEY: ${SSH_KEY}
+        GITLAB_USER: ${GITLAB_USER}
+        GITLAB_TOKEN: ${GITLAB_TOKEN}
