@@ -32,8 +32,8 @@ func SetConfig(conf *Config) {
 	e.SetConfig(conf)
 }
 
-// Use register a new handler
-func Use(handler HandlerFunc) {
+// Register register a new handler
+func Register(handler HandlerFunc) {
 	e.Register(handler)
 }
 
