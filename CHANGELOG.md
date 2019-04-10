@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.3
+
+*Released on April 10th 2019*
+
+- [FIX] Make `engine.handleMessage` use a `context.Context`
+
 ### Version 0.3.2
 
 *Released on April 9th 2019*

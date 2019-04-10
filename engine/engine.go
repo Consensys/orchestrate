@@ -120,7 +120,7 @@ runningLoop:
 			e.slots <- struct{}{}
 
 			// Handle message
-			e.handleMessage(msg)
+			e.handleMessage(ctx, msg)
 
 			// Release a message slot
 			<-e.slots
@@ -153,7 +153,7 @@ func (e *Engine) CleanUp() {
 	})
 }
 
-func (e *Engine) handleMessage(msg interface{}) {
+func (e *Engine) handleMessage(ctx context.Context, msg interface{}) {
 	// Retrieve a re-cycled context
 	txctx := e.ctxPool.Get().(*TxContext)
 
@@ -161,11 +161,14 @@ func (e *Engine) handleMessage(msg interface{}) {
 	defer e.ctxPool.Put(txctx)
 
 	// Prepare context & calls Next to trigger execution
-	txctx.Prepare(
-		e.handlers,
-		log.NewEntry(e.logger),
-		msg,
-	).Next()
+	txctx.
+		Prepare(
+			e.handlers,
+			log.NewEntry(e.logger),
+			msg,
+		).
+		WithContext(ctx).
+		Next()
 }
 
 // TimeoutHandler returns a Handler that runs h with the given time limit
