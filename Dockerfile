@@ -14,6 +14,8 @@ WORKDIR /app
 
 # Use go mod with go 1.11
 ENV GO111MODULE=on
+ENV GOPATH=/.go
+COPY .go $GOPATH
 COPY go.mod go.sum ./
 RUN go mod download
 

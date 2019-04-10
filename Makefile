@@ -1,4 +1,4 @@
-GOFILES := $(shell find . -name '*.go' | grep -v _test.go)
+GOFILES := $(shell find . -name '*.go' | egrep -v "^\./\.go" | grep -v _test.go)
 PACKAGES ?= $(shell go list ./...)
 
 .PHONY: all protobuf run-coverage coverage fmt fmt-check vet lint misspell-check misspell race tools help
