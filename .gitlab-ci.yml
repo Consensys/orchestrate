@@ -18,7 +18,7 @@ before_script:
 
   # Set GOPATH
   - mkdir -p ${GOPATH}
-  - export PATH="${PATH}:${GOPATH}/bin:${GOROOT}/bin:${PATH}"
+  - export PATH="${PATH}:${GOPATH}/bin:${GOROOT}/bin"
   - make tools
 
 cache-update:
@@ -32,7 +32,6 @@ cache-update:
       - ${GOPATH}
   only:
     - master
-    - feat/enable-cache
 
 test:
   image: golang:latest
