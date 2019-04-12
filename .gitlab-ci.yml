@@ -105,7 +105,7 @@ build-on-master:
       --label org.label-schema.vcs-url="${CI_PROJECT_URL}"
       --label org.label-schema.vcs-ref="${CI_COMMIT_SHA:0:8}"
       --label org.label-schema.vendor="ConsenSys France"
-      -t ${CI_REGISTRY_IMAGE}:latest -t {CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA} .
+      -t ${CI_REGISTRY_IMAGE}:latest -t ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA} .
     # Push images
     - docker push ${CI_REGISTRY_IMAGE}:latest
     - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}
