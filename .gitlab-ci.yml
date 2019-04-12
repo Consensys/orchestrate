@@ -43,6 +43,8 @@ test:
     policy: pull
     paths:
       - ${GOPATH}
+  except:
+      - tags
 
 test-lint:
   image: golang:latest
@@ -56,6 +58,8 @@ test-lint:
     policy: pull
     paths:
       - ${GOPATH}
+  except:
+      - tags
 
 build-on-branch:
   image: docker:stable
