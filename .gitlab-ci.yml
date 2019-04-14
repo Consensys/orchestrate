@@ -22,7 +22,7 @@ before_script:
   - make tools
 
 cache-update:
-  image: golang:latest
+  image: golang:1.12
   stage: cache-update
   script:
     - go mod download -json
@@ -34,7 +34,7 @@ cache-update:
     - master
 
 test:
-  image: golang:latest
+  image: golang:1.12
   stage: test
   coverage: /^total:.*\s(\d+.\d+)%/
   script:
@@ -47,7 +47,7 @@ test:
       - tags
 
 test-lint:
-  image: golang:latest
+  image: golang:1.12
   stage: test
   script:
     - make fmt-check

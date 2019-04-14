@@ -1,7 +1,7 @@
 ############################
 # STEP 1 build executable binary
 ############################
-FROM golang:1.11 as builder
+FROM golang:1.12 as builder
 
 ARG GITLAB_USER
 ARG GITLAB_TOKEN
