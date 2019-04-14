@@ -5,7 +5,7 @@ stages:
   - build
 
 variables:
-  GOPATH: ${CI_PROJECT_DIR}/.go
+  GOPATH: ${CI_PROJECT_DIR}/.gocache
 #  CI_DEBUG_TRACE: "true"
 
 services:

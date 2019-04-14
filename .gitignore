@@ -16,4 +16,4 @@ coverage.html
 .env
 
 # Go packages and sources:
-.go
+.gocache
