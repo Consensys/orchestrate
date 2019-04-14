@@ -37,4 +37,5 @@ COPY --from=builder /bin/main /go/bin/main
 # Use an unprivileged user.
 USER appuser
 EXPOSE 8080
-ENTRYPOINT ["/go/bin/main", "run"]
+ENTRYPOINT ["/go/bin/main"]
+CMD ["run"]
