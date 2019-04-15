@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.11
+
+*Released on April 15th 2019*
+
+- [FIX] Send faucet transaction with correct `TxData.Value`
+
 ### Version 0.3.10
 
 *Released on April 15th 2019*
