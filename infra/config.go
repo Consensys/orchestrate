@@ -73,7 +73,7 @@ var (
 	faucetBlacklistFlag     = "faucet-blacklist"
 	faucetBlacklistViperKey = "faucet.blacklist"
 	faucetBlacklistDefault  = []string{
-		"3-0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
+		"0x7E654d251Da770A068413677967F6d3Ea2FeA9E4@3",
 	}
 	faucetBlacklistEnv = "FAUCET_BLACKLIST"
 )

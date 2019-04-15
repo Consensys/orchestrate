@@ -21,8 +21,8 @@ func MockBalanceAt(ctx context.Context, chainID *big.Int, a common.Address) (*bi
 
 func TestFaucet(t *testing.T) {
 	// Set configuration for test
-	viper.Set("faucet.blacklist", []string{"3-0x7E654d251Da770A068413677967F6d3Ea2FeA9E4"})
-	viper.Set("faucet.addresses", []string{"3:0x7E654d251Da770A068413677967F6d3Ea2FeA9E4"})
+	viper.Set("faucet.blacklist", []string{"0x7E654d251Da770A068413677967F6d3Ea2FeA9E4@3"})
+	viper.Set("faucet.addresses", []string{"0x7E654d251Da770A068413677967F6d3Ea2FeA9E4@3"})
 	viper.Set("faucet.cooldown", 60*time.Second)
 	viper.Set("faucet.max", "200000000000000000")
 

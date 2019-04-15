@@ -15,14 +15,14 @@ func parseBlackList(blacklist []string) ([]*big.Int, []common.Address, error) {
 	var chains []*big.Int
 	var addresses []common.Address
 	for _, bl := range blacklist {
-		split := strings.Split(bl, "-")
+		split := strings.Split(bl, "@")
 		chainID := big.NewInt(0)
-		chainID, ok := chainID.SetString(split[0], 10)
+		chainID, ok := chainID.SetString(split[1], 10)
 		if !ok {
 			return nil, nil, fmt.Errorf("Could not parse %v", bl)
 		}
 		chains = append(chains, chainID)
-		addresses = append(addresses, common.HexToAddress(split[1]))
+		addresses = append(addresses, common.HexToAddress(split[0]))
 	}
 	return chains, addresses, nil
 }
