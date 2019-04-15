@@ -7,7 +7,9 @@ import (
 	"strings"
 
 	"github.com/Shopify/sarama"
+	log "github.com/sirupsen/logrus"
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	uuid "github.com/satori/go.uuid"
 	"github.com/spf13/viper"
 	infSarama "gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git"
@@ -28,16 +30,20 @@ type SaramaCrediter struct {
 func parseAddresses(addresses []string) (map[string]ethcommon.Address, error) {
 	m := make(map[string]ethcommon.Address)
 	for _, addr := range addresses {
-		split := strings.Split(addr, ":")
+		split := strings.Split(addr, "@")
 		if len(split) != 2 {
-			return nil, fmt.Errorf("Could not parse faucet address %q (expected format %q)", addr, "<chainID>:<address>")
+			return nil, fmt.Errorf("Could not parse faucet address %q (expected format %q)", addr, "<address>@<chainID>")
 		}
 
-		if !ethcommon.IsHexAddress(split[1]) {
-			return nil, fmt.Errorf("Invalid Ethereum address %q", split[1])
+		if !ethcommon.IsHexAddress(split[0]) {
+			return nil, fmt.Errorf("Invalid Ethereum address %q", split[0])
 		}
 
-		m[split[0]] = ethcommon.HexToAddress(split[1])
+		chain, ok := new(big.Int).SetString(split[1], 10)
+		if !ok {
+			log.Fatal("Could not cast chain ID to big.Int")
+		}
+		m[hexutil.EncodeBig(chain)] = ethcommon.HexToAddress(split[0])
 	}
 	return m, nil
 }
@@ -76,13 +82,13 @@ func (c *SaramaCrediter) Credit(ctx context.Context, r *services.FaucetRequest) 
 // PrepareFaucetMsg creates a credit message to send to a specific topic
 func (c *SaramaCrediter) PrepareFaucetMsg(r *services.FaucetRequest) (sarama.ProducerMessage, error) {
 	// Determine Address of the faucet for requested chain
-	faucetAddress := c.addresses[r.ChainID.String()]
+	faucetAddress := c.addresses[hexutil.EncodeBig(r.ChainID)]
 
 	if (faucetAddress != ethcommon.Address{}) {
 		// Create Trace for Crediting message
 		faucetTrace := &trace.Trace{
 			Metadata: &trace.Metadata{Id: uuid.NewV4().String()},
-			Chain:    &common.Chain{Id: r.ChainID.String()},
+			Chain:    &common.Chain{Id: hexutil.EncodeBig(r.ChainID)},
 			Sender:   &common.Account{Addr: faucetAddress.String()},
 			Tx: &ethereum.Transaction{TxData: &ethereum.TxData{
 				To:    r.Address.String(),
@@ -101,5 +107,5 @@ func (c *SaramaCrediter) PrepareFaucetMsg(r *services.FaucetRequest) (sarama.Pro
 		return msg, nil
 	}
 
-	return sarama.ProducerMessage{}, fmt.Errorf("crediter: No faucet address valaiable for ChainId %v", r.ChainID.Text(10))
+	return sarama.ProducerMessage{}, fmt.Errorf("crediter: No faucet address available for ChainId %v", hexutil.EncodeBig(r.ChainID))
 }

@@ -12,7 +12,7 @@ var (
 	faucetAddressFlag     = "faucet-address"
 	faucetAddressViperKey = "faucet.addresses"
 	faucetAddressDefault  = []string{
-		"3:0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
+		"0x7E654d251Da770A068413677967F6d3Ea2FeA9E4@3",
 	}
 	faucetAddressEnv = "FAUCET_ADDRESS"
 )
@@ -30,7 +30,7 @@ func InitFlags(f *pflag.FlagSet) {
 
 // FaucetAddress register flag for Faucet address
 func FaucetAddress(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Address of Faucet on each chain (format <chainID>:<Address>)
+	desc := fmt.Sprintf(`Address of Faucet on each chain (format <Address>@<chainID>)
 Environment variable: %q`, faucetAddressEnv)
 	f.StringSlice(faucetAddressFlag, faucetAddressDefault, desc)
 	viper.BindPFlag(faucetAddressViperKey, f.Lookup(faucetAddressFlag))
