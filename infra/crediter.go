@@ -92,7 +92,7 @@ func (c *SaramaCrediter) PrepareFaucetMsg(r *services.FaucetRequest) (sarama.Pro
 			Sender:   &common.Account{Addr: faucetAddress.String()},
 			Tx: &ethereum.Transaction{TxData: &ethereum.TxData{
 				To:    r.Address.String(),
-				Value: r.Value.String(),
+				Value: hexutil.EncodeBig(r.Value),
 			}},
 		}
 
