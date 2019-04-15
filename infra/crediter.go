@@ -8,6 +8,7 @@ import (
 
 	"github.com/Shopify/sarama"
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	uuid "github.com/satori/go.uuid"
 	"github.com/spf13/viper"
 	infSarama "gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
@@ -75,17 +76,19 @@ func (c *SaramaCrediter) Credit(ctx context.Context, r *services.FaucetRequest) 
 // PrepareFaucetMsg creates a credit message to send to a specific topic
 func (c *SaramaCrediter) PrepareFaucetMsg(r *services.FaucetRequest) (sarama.ProducerMessage, error) {
 	// Determine Address of the faucet for requested chain
-	faucetAddress := c.addresses[r.ChainID.Text(10)]
+	faucetAddress := c.addresses[r.ChainID.String()]
 
 	if (faucetAddress != ethcommon.Address{}) {
 		// Create Trace for Crediting message
-		faucetTrace := &trace.Trace{}
-
-		faucetTrace.Reset()
-		faucetTrace.Chain = (&common.Chain{}).SetID(r.ChainID)
-		faucetTrace.Sender = &common.Account{Addr: faucetAddress.Hex()}
-		faucetTrace.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{}}
-		faucetTrace.Tx.TxData.SetValue(r.Value).SetTo(r.Address)
+		faucetTrace := &trace.Trace{
+			Metadata: &trace.Metadata{Id: uuid.NewV4().String()},
+			Chain:    &common.Chain{Id: r.ChainID.String()},
+			Sender:   &common.Account{Addr: faucetAddress.String()},
+			Tx: &ethereum.Transaction{TxData: &ethereum.TxData{
+				To:    r.Address.String(),
+				Value: r.Value.String(),
+			}},
+		}
 
 		// Create Producer message
 		var msg sarama.ProducerMessage
