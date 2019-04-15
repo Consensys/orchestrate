@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.3.10
+
+*Released on April 15th 2019*
+
+- [FEAT] Change Faucet environment to `<address>@<chainId>`
+- [FIX] Send faucet transaction with correct chainId
+
 ### Version 0.3.9
 
 *Released on April 15th 2019*
