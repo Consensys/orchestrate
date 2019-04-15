@@ -41,7 +41,9 @@ func (s *Secret) SaveNew() (err error) {
 func (s *Secret) GetValue() (string, bool, error) {
 	// Read secret from Vault
 	logical := s.client.Logical()
-	res, err := logical.Read(fmt.Sprintf("secret/secret/%v", s.key))
+	res, err := logical.Read(
+		fmt.Sprintf("%v/%v", GetSecretPath(), s.key),
+	)
 	if err != nil {
 		return "", false, err
 	}
@@ -61,7 +63,7 @@ func (s *Secret) Update() error {
 	// Load secret to Vault
 	logical := s.client.Logical()
 	_, err := logical.Write(
-		fmt.Sprintf("secret/secret/%v", s.key),
+		fmt.Sprintf("%v/%v", GetSecretPath(), s.key),
 		map[string]interface{}{"value": s.value},
 	)
 	if err != nil {
@@ -75,7 +77,9 @@ func (s *Secret) Update() error {
 func (s *Secret) Delete() error {
 	// Delete secret in Vault
 	logical := s.client.Logical()
-	_, err := logical.Delete(fmt.Sprintf("secret/secret/%v", s.key))
+	_, err := logical.Delete(
+		fmt.Sprintf("%v/%v", GetSecretPath(), s.key),
+	)
 	if err != nil {
 		return err
 	}
@@ -84,9 +88,20 @@ func (s *Secret) Delete() error {
 }
 
 // List retrieve all the keys availables in the Secret manager
-func (s *Secret) List() ([]string, error) {
+func (s *Secret) List(subPath string) ([]string, error) {
+
 	logical := s.client.Logical()
-	res, err := logical.List("secret/secret")
+	fullPath := GetSecretPath()
+
+	if subPath != "" && subPath[0] == '/' {
+		subPath = subPath[1:]
+	}
+
+	if subPath != "" {
+		fullPath = fmt.Sprintf("%v/%v", fullPath, subPath)
+	}
+
+	res, err := logical.List(fullPath)
 	if err != nil {
 		return nil, err
 	}

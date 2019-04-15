@@ -51,8 +51,9 @@ func (w *Wallet) FromPrivateKey(priv string) error {
 
 // Store saves wallet information to secret store
 func (w *Wallet) Store() (err error) {
+	pathStr := fmt.Sprintf("%v/%v", "private_keys", w.address.Hex())
 	return w.sec.Store(
-		w.address.Hex(),
+		pathStr,
 		hex.EncodeToString(crypto.FromECDSA(w.priv)),
 	)
 }
@@ -61,7 +62,8 @@ func (w *Wallet) Store() (err error) {
 func (w *Wallet) Load(a *common.Address) (err error) {
 	w.address = *a
 
-	priv, ok, err := w.sec.Load(a.Hex())
+	pathStr := fmt.Sprintf("%v/%v", "private_keys", a.Hex())
+	priv, ok, err := w.sec.Load(pathStr)
 	if err != nil {
 		return err
 	}

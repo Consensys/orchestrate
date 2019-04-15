@@ -46,6 +46,6 @@ func (hash *Hashicorps) Delete(key string) (err error) {
 // List returns the list of all secrets stored in the vault
 func (hash *Hashicorps) List() (keys []string, err error) {
 	sec := NewSecret("", "").SetClient(hash.Client)
-	keys, err = sec.List()
+	keys, err = sec.List("")
 	return keys, err
 }
