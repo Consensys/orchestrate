@@ -6,11 +6,6 @@
 
 - [FEAT] Update `MultiEthClient` for dynamic Dial of Ethereum clients
 - [FEAT] Implement elements for *Dependy Injection* pattern for `MultiEthClient`
-
-### Version 0.3.4
-
-*Unreleased*
-
 - [FIX] Fix infinite recursivity error in `txlistener.BlockMissingError` and `txlistener.ReceiptMissingError`
 - [REFACTOR] Update `txlistener.BlockCursor` main loop to use `time.Ticker` and `trigger`
 - [TEST] Enhance tests for `txlistener.BlockCursor`
