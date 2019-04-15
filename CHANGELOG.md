@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.9
+
+*Released on April 15th 2019*
+
+- [FIX] Generate Metadata Id when crediting value
+
 ### Version 0.3.8
 
 *Released on March 31th 2019*
