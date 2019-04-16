@@ -12,6 +12,7 @@ type Hashicorps struct {
 // NewHashicorps construct a new hashicorps vault given a configfile or nil
 func NewHashicorps(config *api.Config) (*Hashicorps, error) {
 	if config == nil {
+		// This will read the environments variable
 		config = api.DefaultConfig()
 	}
 
