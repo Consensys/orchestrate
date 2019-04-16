@@ -2,6 +2,7 @@ package hashicorp
 
 import (
 	"fmt"
+	"os"
 
 	vault "github.com/hashicorp/vault/api"
 	"github.com/spf13/pflag"
@@ -9,34 +10,43 @@ import (
 )
 
 func init() {
-	viper.SetDefault(vaultURIViperKey, vaultURIDefault)
-	viper.BindEnv(vaultURIViperKey, vaultURIEnv)
+	fmt.Printf("Vault_token: %v \n", os.Getenv("VAULT_TOKEN"))
+	viper.SetDefault(vaultSecretPathViperKey, vaultSecretPathDefault)
+	viper.BindEnv(vaultSecretPathViperKey, vaultSecretPathEnv)
 }
 
-var (
-	vaultURIFlag     		= "vault-uri"
-	vaultURIViperKey 		= "vault.uri"
-	vaultURIDefault  		= "http://127.0.0.1:8200"
-	vaultURIEnv      		= "VAULT_URI"
+/*
+	The following variables are directly made available to vault
 
+	Defined in https://github.com/hashicorp/vault/blob/master/api/client.go#L42
+
+	const EnvRateLimit 				= "VAULT_RATE_LIMIT"
+	const EnvVaultAddress 			= "VAULT_ADDR"
+	const EnvVaultAgentAddr 		= "VAULT_AGENT_ADDR"
+	const EnvVaultCACert 			= "VAULT_CACERT"
+	const EnvVaultCAPath 			= "VAULT_CAPATH"
+	const EnvVaultClientCert 		= "VAULT_CLIENT_CERT"
+	const EnvVaultClientKey 		= "VAULT_CLIENT_KEY"
+	const EnvVaultClientTimeout 	= "VAULT_CLIENT_TIMEOUT"
+	const EnvVaultMFA 				= "VAULT_MFA"
+	const EnvVaultMaxRetries 		= "VAULT_MAX_RETRIES"
+	const EnvVaultNamespace 		= "VAULT_NAMESPACE"
+	const EnvVaultSkipVerify 		= "VAULT_SKIP_VERIFY"
+	const EnvVaultTLSServerName 	= "VAULT_TLS_SERVER_NAME"
+	const EnvVaultToken 			= "VAULT_TOKEN"
+	const EnvVaultWrapTTL 			= "VAULT_WRAP_TTL"
+*/
+
+var (
 	vaultSecretPathFlag		= "vault-secret-path"
 	vaultSecretPathViperKey	= "vault.secret.path"
-	vaultSecretPathDefault	= "/secret/orchestra"
+	vaultSecretPathDefault	= "/secret"
 	vaultSecretPathEnv 		= "VAULT_SECRET_PATH"
 )
 
 // InitFlags register flags for hashicorp vault
 func InitFlags(f *pflag.FlagSet) {
-	VaultURI(f)
 	VaultSecretPath(f)
-}
-
-// VaultURI register a flag for vault server address
-func VaultURI(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Hashicorp secret vault URI 
-Environment variable: %q`, vaultURIEnv)
-	f.String(vaultURIFlag, vaultURIDefault, desc)
-	viper.BindPFlag(vaultURIViperKey, f.Lookup(vaultURIFlag))
 }
 
 // VaultSecretPath registers a flag for the path used by vault secret engine
@@ -50,7 +60,6 @@ Environment variable: %q`, vaultSecretPathEnv)
 // NewConfig creates vault configuration from viper
 func NewConfig() *vault.Config {
 	config := vault.DefaultConfig()
-	config.Address = viper.GetString(vaultURIViperKey)
 	return config
 }
 
@@ -58,5 +67,3 @@ func NewConfig() *vault.Config {
 func GetSecretPath() string {
 	return viper.GetString(vaultSecretPathViperKey)
 }
-
-
