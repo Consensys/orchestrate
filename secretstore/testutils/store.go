@@ -15,26 +15,26 @@ type SecretStoreTestSuite struct {
 // TestSecretStore test SecretStore
 func (suite *SecretStoreTestSuite) TestSecretStore() {
 	err := suite.Store.Store("test-key", "test-value")
-	assert.Nil(suite.T(), err, "Secret should have been stored")
+	assert.Nilf(suite.T(), err, "Secret should have been stored, got %q", err)
 
 	value, ok, err := suite.Store.Load("test-key")
-	assert.Nil(suite.T(), err, "Secret should have been loaded")
+	assert.Nilf(suite.T(), err, "Secret should have been loaded, got %q", err)
 	assert.True(suite.T(), ok, "Secret should be availaible")
 	assert.Equal(suite.T(), "test-value", value, "Secret value should be correct")
 
 	value, ok, err = suite.Store.Load("test-unknown-key")
-	assert.Nil(suite.T(), err, "Secret should have been loaded")
+	assert.Nilf(suite.T(), err, "Secret should have been loaded, got %q", err)
 	assert.False(suite.T(), ok, "Secret should not be availaible")
 
 	list, err := suite.Store.List()
-	assert.Nil(suite.T(), err, "List should be retrieved properly")
+	assert.Nilf(suite.T(), err, "List should be retrieved properly, got %q", err)
 	assert.Equal(suite.T(), []string{"test-key"}, list, "Secret list should be correct")
 
 	err = suite.Store.Delete("test-key")
-	assert.Nil(suite.T(), err, "Delete should have appened properly")
+	assert.Nilf(suite.T(), err, "Delete should have appened properly, got %q", err)
 
 	list, err = suite.Store.List()
-	assert.Nil(suite.T(), err, "List should be retrieved properly")
+	assert.Nilf(suite.T(), err, "List should be retrieved properly, got %q", err)
 	assert.Equal(suite.T(), []string{}, list, "Secret list should be correct")
 
 }
