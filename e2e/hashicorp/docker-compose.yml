@@ -1,0 +1,14 @@
+version: '3.7'
+
+services:
+    
+  vault:
+    image: library/vault:1.1.1
+    tty: true
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - ./config.hcl:/vault/config.hcl:ro
+    ports:
+      - 8200:8200
+    entrypoint: vault server -config=/vault/config.hcl
