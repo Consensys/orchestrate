@@ -2,7 +2,7 @@
 
 ### Version 0.4.0
 
-*Unreleased*
+*Released on April 17th 2019*
 
 - [FEAT] Update `MultiEthClient` for dynamic Dial of Ethereum clients
 - [FEAT] Implement elements for *Dependy Injection* pattern for `MultiEthClient`
