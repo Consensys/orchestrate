@@ -8,7 +8,7 @@ source init-vault.sh
 
 # Run the tests passing the variables to the go command
 VAULT_TOKEN=${VAULT_TOKEN} VAULT_ADDR=${VAULT_ADDR} \
-    go test ../../../secretstore/hashicorp
+    go test ../../../...
 
 # Cleanly shut down the vault container
 docker-compose -f ../docker-compose.yml down

@@ -36,7 +36,7 @@ func NewKeyStore() (KeyStore, error) {
 		s = base.NewKeyStore(mock.NewSecretStore())
 	case "hashicorp":
 		// Create an hashicorp vault object
-		vault, err := hashicorp.NewHashicorps(hashicorp.NewConfig())
+		vault, err := hashicorp.NewHashiCorp(hashicorp.NewConfig())
 		if err != nil {
 			return nil, err
 		}

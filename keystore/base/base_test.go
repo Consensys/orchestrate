@@ -100,7 +100,7 @@ func TestKeyStore(t *testing.T) {
 //It will sequentially writes a secret, list all the secrets, get the secret then delete it.
 // func TestKeyStore(t *testing.T) {
 // 	config := hashicorp.NewConfig()
-// 	hashicorpsSS, err := hashicorp.NewHashicorps(config)
+// 	hashicorpsSS, err := hashicorp.NewHashiCorp(config)
 // 	if err != nil {
 // 		t.Errorf("Error when instantiating the vault : %v", err.Error())
 // 	}

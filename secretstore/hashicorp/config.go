@@ -3,16 +3,18 @@ package hashicorp
 import (
 	"fmt"
 	"os"
-
+	log "github.com/sirupsen/logrus"
 	vault "github.com/hashicorp/vault/api"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
 
 func init() {
-	fmt.Printf("Vault_token: %v \n", os.Getenv("VAULT_TOKEN"))
 	viper.SetDefault(vaultSecretPathViperKey, vaultSecretPathDefault)
 	viper.BindEnv(vaultSecretPathViperKey, vaultSecretPathEnv)
+
+	log.Infof("Using vault_address: %v \n", os.Getenv("VAULT_ADDR"))
+	log.Infof("Using vault_agent_address: %v \n", os.Getenv("VAULT_AGENT_ADDR"))
 }
 
 /*
