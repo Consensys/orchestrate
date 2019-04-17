@@ -131,22 +131,17 @@ func (h *TxListenerHandler) Cleanup() error {
 }
 
 func main() {
-	// Create an ethereum client connection
 	log.SetFormatter(&log.TextFormatter{})
 	log.SetLevel(log.DebugLevel)
-	ethURLs := []string{
+	viper.Set("eth.clients", []string{
 		"https://ropsten.infura.io/v3/81e039ce6c8a465180822b525e3644d7",
 		"https://rinkeby.infura.io/v3/bfc9d6e51fbc4d3db54bea58d1094f9c",
 		"https://kovan.infura.io/v3/bfc9d6e51fbc4d3db54bea58d1094f9c",
 		"https://mainnet.infura.io/v3/bfc9d6e51fbc4d3db54bea58d1094f9c",
-	}
-	log.Infof("Connecting to EthClients: %v", ethURLs)
-	mec, err := ethclient.MultiDial(ethURLs)
-	if err != nil {
-		log.Error(err)
-		return
-	}
-	log.Infof("Multi-Eth client ready")
+	})
+
+	// Initialize Multi-Client
+	ethclient.Init(context.Background())
 
 	// Initialize listener configuration
 	config := listener.NewConfig()
@@ -156,7 +151,7 @@ func main() {
 	viper.Set("blockcursor.backoff", time.Second)
 	viper.Set("blockcursor.limit", 40)
 
-	txlistener := listener.NewTxListener(mec, config)
+	txlistener := listener.NewTxListener(ethclient.MultiClient(), config)
 
 	// Create and Listener Handler
 	handler := TxListenerHandler{}
@@ -164,7 +159,7 @@ func main() {
 	log.Infof("Worker ready")
 
 	// Start listening all chains
-	for _, chainID := range mec.Networks(context.Background()) {
+	for _, chainID := range ethclient.MultiClient().Networks(context.Background()) {
 		txlistener.Listen(chainID, -1, 0)
 	}
 

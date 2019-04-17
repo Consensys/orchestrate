@@ -54,7 +54,7 @@ func TestTrackerDepth(t *testing.T) {
 	name := "listener.tracker.depth"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	TrackerDepth(flgs)
-	expected := int64(5)
+	expected := int64(0)
 	assert.Equal(t, expected, viper.GetInt64(name), "Default")
 
 	os.Setenv("LISTENER_TRACKER_DEPTH", "45")
