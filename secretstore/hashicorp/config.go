@@ -38,10 +38,10 @@ func init() {
 */
 
 var (
-	vaultSecretPathFlag		= "vault-secret-path"
-	vaultSecretPathViperKey	= "vault.secret.path"
-	vaultSecretPathDefault	= "/secret"
-	vaultSecretPathEnv 		= "VAULT_SECRET_PATH"
+	vaultSecretPathFlag				= "vault-secret-path"
+	vaultSecretPathViperKey			= "vault.secret.path"
+	vaultSecretPathDefault			= "/secret"
+	vaultSecretPathEnv 				= "VAULT_SECRET_PATH"
 )
 
 // InitFlags register flags for hashicorp vault
