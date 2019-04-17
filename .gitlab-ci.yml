@@ -31,6 +31,7 @@ services:
 
 before_script:
   # Add deploy ssh key so we can import go packages from private GitLab repo
+  - apk add ssh
   - mkdir -p ~/.ssh
   - echo "$SSH_DEPLOY_CORE_STACK" | tr -d '\r' > ~/.ssh/id_rsa
   - chmod 700 ~/.ssh/id_rsa
@@ -58,7 +59,6 @@ test:
     paths:
       - /apt-cache
       - /root/go
-
 
 test-lint:
   stage: test
