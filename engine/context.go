@@ -4,8 +4,8 @@ import (
 	"context"
 
 	log "github.com/sirupsen/logrus"
-	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/envelope"
+	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 )
 
 // HandlerFunc is base type for an handler function processing a Context
