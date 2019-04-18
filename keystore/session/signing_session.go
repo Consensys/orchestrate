@@ -9,7 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/keystore/wallet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 )
 
 // TxSignatureSession holds all the logic allowing the signature of an ethereum transaction

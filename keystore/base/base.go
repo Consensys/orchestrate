@@ -8,7 +8,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/keystore/session"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/keystore/wallet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 )
 
 // KeyStore olds the methods of the interfaces BaseKeyStore

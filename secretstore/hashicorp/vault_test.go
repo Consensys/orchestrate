@@ -12,7 +12,7 @@ type HashicorpKeyStoreTestSuite struct {
 }
 
 func (suite *HashicorpKeyStoreTestSuite) SetupTest() {
-	config := NewConfig()
+	config := NewConfig()	
 	hashicorps, err := NewHashiCorp(config)
 	if err != nil {
 		panic(err)

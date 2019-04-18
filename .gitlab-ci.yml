@@ -54,7 +54,12 @@ test:
   stage: test
   coverage: /^total:.*\s(\d+.\d+)%/
   script:
-    - cd ./e2e/hashicorp/scripts && bash run-test.sh; cd ../../..
+    - export SSH_KEY=${SSH_DEPLOY_CORE_STACK}
+    - cd e2e/hashicorp
+    - docker-compose down || echo "Docker missing skipping"
+    - docker-compose up --build --force-recreate -d
+    - docker exec hashicorp_key-store_1 bash -c "go mod download && cd e2e/hashicorp/scripts && bash run-test.sh"
+    - exit $?
   cache:
     paths:
       - /apt-cache
@@ -63,10 +68,8 @@ test:
 test-lint:
   stage: test
   script:
-    - make fmt-check
-    - make misspell-check
     - make lint
-    # - make race
+    - make race
   cache:
     paths:
       - /apt-cache

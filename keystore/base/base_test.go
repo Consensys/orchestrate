@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 )
 
 var testPKeys = []struct {
@@ -28,9 +28,9 @@ var testChains = []struct {
 	ID       string
 	IsEIP155 bool
 }{
-	{"0x1ae3", true},
-	{"0x3", true},
-	{"0xbf6e", false},
+	{"10", true},
+	{"3", true},
+	{"13", false},
 }
 
 func makeSignerInput(i int) (*common.Chain, ethcommon.Address, *ethtypes.Transaction) {

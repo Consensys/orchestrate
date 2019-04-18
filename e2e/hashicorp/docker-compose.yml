@@ -9,6 +9,19 @@ services:
       - IPC_LOCK
     volumes:
       - ./config.hcl:/vault/config.hcl:ro
-    ports:
-      - 8200:8200
     entrypoint: vault server -config=/vault/config.hcl
+
+  key-store:
+    environment:
+      VAULT_ADDR: http://vault:8200
+    build: 
+      dockerfile: e2e/Dockerfile
+      context: ../..
+      args:
+        - SSH_KEY=${SSH_KEY}
+    volumes:
+      - ../..:/app
+    working_dir: /app
+    #entrypoint: bash -c "go mod download && cd e2e/hashicorp/scripts && bash run-test.sh"
+    entrypoint: tail -f /dev/null
+

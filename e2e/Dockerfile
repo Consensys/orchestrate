@@ -1,7 +1,7 @@
 FROM ubuntu:16.04
 
 RUN apt-get update -y && \
-    apt-get install -y software-properties-common && \
+    apt-get install -y software-properties-common jq curl && \
     add-apt-repository ppa:longsleep/golang-backports && \
     apt-get update -y && \
     apt-get install -y golang-1.11 ssh git make
@@ -14,7 +14,6 @@ RUN mkdir -p  ~/.ssh && \
     git config --global url."git@gitlab.com:".insteadOf "https://gitlab.com/" && \
     mkdir /app
 WORKDIR /app
-
 
 COPY . /app
 

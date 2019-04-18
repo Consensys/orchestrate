@@ -1,5 +1,5 @@
 # Set the VAULT_ADDRESS
-export VAULT_ADDR=http://127.0.0.1:8200
+export VAULT_ADDR=http://vault:8200
 
 # INIT the vault
 curl --request POST --data '{"secret_shares": 1, "secret_threshold": 1}' ${VAULT_ADDR}/v1/sys/init > init.json
