@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.1
+
+*Released on April 18th 2019*
+
+- [FEAT] Implement dependency injection
+
 ### Version 0.4.0
 
 *Released on April 17th 2019*
