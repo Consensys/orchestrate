@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.4
+
+*Unreleased*
+
+- [FEAT] Implement handler `Logger`
+
 ### Version 0.3.3
 
 *Released on April 10th 2019*
