@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.0
+
+*Unreleased*
+
+- [REFACTOR] Major reorganisation 
+
 ### Version 0.3.4
 
 *Released on April 18th 2019*

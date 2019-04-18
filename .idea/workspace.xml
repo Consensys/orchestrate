@@ -2,91 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bba3b98a-b4d0-4ae9-ae3e-7173bed457ac" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/encoding/encoding.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/encoding/sarama/decode.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/encoding/sarama/decode_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/encoding/sarama/encode.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/encoding/sarama/encode_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/config/bridge_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/common/config/bridge_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/config/database.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/postgres/config.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/config/database_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/postgres/config_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/config/ethereum.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/config/ethereum_test.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/config/http.go" beforeDir="false" afterPath="$PROJECT_DIR$/http/config.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/config/http_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/http/config_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/config/jaeger_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/common/config/jaeger_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/config/logger.go" beforeDir="false" afterPath="$PROJECT_DIR$/logger/config.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/config/logger_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/logger/config_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/config/redis.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/redis/config.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/config/redis_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/redis/config_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/config/worker.go" beforeDir="false" afterPath="$PROJECT_DIR$/broker/config.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/config/worker_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/broker/config_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/services/abi.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/abi.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/services/faucet.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/faucet.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/services/gas_estimator.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/gas_estimator.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/services/gas_pricer.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/gas_pricer.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/services/nonce_manager.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/nonce_manager.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/services/produce.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/produce.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/services/sender.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/sender.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/context.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/context.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/context_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/context_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/marker.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/marker_test.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/producer.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/producer_test.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/cobra/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/cobra/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/loader/domain/marshaller.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/loader/domain/unmarshaller.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/loader/loader.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/loader/loader_test.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/abi/abi.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/abi/abi.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/abi/abi.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/abi/abi.pb.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/abi/abi.proto" beforeDir="false" afterPath="$PROJECT_DIR$/types/abi/abi.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/abi/abi_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/abi/abi_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/common/account.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/common/account.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/common/account.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/common/account.pb.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/common/account.proto" beforeDir="false" afterPath="$PROJECT_DIR$/types/common/account.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/common/account_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/common/account_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/common/call.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/common/call.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/common/call.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/common/call.pb.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/common/call.proto" beforeDir="false" afterPath="$PROJECT_DIR$/types/common/call.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/common/call_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/common/call_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/common/chain.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/common/chain.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/common/chain.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/common/chain.pb.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/common/chain.proto" beforeDir="false" afterPath="$PROJECT_DIR$/types/common/chain.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/common/chain_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/common/chain_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/common/error.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/common/error.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/common/error.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/common/error.pb.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/common/error.proto" beforeDir="false" afterPath="$PROJECT_DIR$/types/common/error.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/common/error_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/common/error_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/context-store/store.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/context-store/store.pb.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/context-store/store.proto" beforeDir="false" afterPath="$PROJECT_DIR$/types/context-store/store.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/envelope/envelope.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/envelope/envelope.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/envelope/envelope.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/envelope/envelope.pb.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/envelope/envelope.proto" beforeDir="false" afterPath="$PROJECT_DIR$/types/envelope/envelope.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/envelope/envelope_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/envelope/envelope_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/ethereum/receipt.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/ethereum/receipt.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/ethereum/receipt.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/ethereum/receipt.pb.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/ethereum/receipt.proto" beforeDir="false" afterPath="$PROJECT_DIR$/types/ethereum/receipt.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/ethereum/receipt_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/ethereum/receipt_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/ethereum/transaction.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/ethereum/transaction.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/ethereum/transaction.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/ethereum/transaction.pb.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/ethereum/transaction.proto" beforeDir="false" afterPath="$PROJECT_DIR$/types/ethereum/transaction.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/ethereum/transaction_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/ethereum/transaction_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/quorum/quorum.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/quorum/quorum.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/quorum/quorum.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/quorum/quorum.pb.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/quorum/quorum.proto" beforeDir="false" afterPath="$PROJECT_DIR$/types/quorum/quorum.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/protos/quorum/quorum_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/quorum/quorum_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/serializer/marshaller.go" beforeDir="false" afterPath="$PROJECT_DIR$/encoding/proto/encode.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/serializer/marshaller_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/encoding/proto/encode_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/serializer/unmarshaller.go" beforeDir="false" afterPath="$PROJECT_DIR$/encoding/proto/decode.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/serializer/unmarshaller_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/encoding/proto/decode_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/keys_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/utils/keys_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/strings_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/utils/strings_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHANGELOG.md" beforeDir="false" afterPath="$PROJECT_DIR$/CHANGELOG.md" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -96,7 +12,7 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/encoding/sarama/decode_test.go">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="195">
@@ -104,6 +20,27 @@
               <folding>
                 <element signature="e#16#179#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/encoding/sarama/encode_test.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-946">
+              <caret line="12" column="61" selection-start-line="12" selection-start-column="54" selection-end-line="12" selection-end-column="61" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/CHANGELOG.md">
+          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+            <state split_layout="SPLIT">
+              <first_editor relative-caret-position="90">
+                <caret line="6" column="34" lean-forward="true" selection-start-line="6" selection-start-column="34" selection-end-line="6" selection-end-column="34" />
+              </first_editor>
+              <second_editor />
             </state>
           </provider>
         </entry>
@@ -119,7 +56,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>messages</find>
       <find>NewTracer</find>
       <find>GetMethodBySig</find>
       <find>handlers</find>
@@ -149,6 +85,7 @@
       <find>pkg.git/protos</find>
       <find>pkg.W</find>
       <find>&quot;gitlab.com/ConsenSys/client/fr/core-stack/pkg.git&quot;</find>
+      <find>/protos/</find>
     </findStrings>
     <replaceStrings>
       <replace>Type</replace>
@@ -161,6 +98,7 @@
       <replace>txcxt</replace>
       <replace>txcxt.</replace>
       <replace>pkg.git/types</replace>
+      <replace>/types/</replace>
     </replaceStrings>
   </component>
   <component name="GOROOT" path="/usr/local/Cellar/go/1.12.1/libexec" />
@@ -219,6 +157,8 @@
         <option value="$PROJECT_DIR$/utils/strings_test.go" />
         <option value="$PROJECT_DIR$/database/redis/config_test.go" />
         <option value="$PROJECT_DIR$/database/postgres/config_test.go" />
+        <option value="$PROJECT_DIR$/encoding/sarama/encode_test.go" />
+        <option value="$PROJECT_DIR$/CHANGELOG.md" />
       </list>
     </option>
   </component>
@@ -400,7 +340,7 @@
     <frame x="0" y="23" width="1680" height="949" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.21916972" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.21916972" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="DB Browser" order="2" />
       <window_info id="Favorites" order="3" side_tool="true" />
@@ -415,7 +355,7 @@
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="DB Execution Console" order="9" />
       <window_info anchor="bottom" id="Database Changes" order="10" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="11" visible="true" weight="0.35239208" />
+      <window_info anchor="bottom" id="Terminal" order="11" visible="true" weight="0.35239208" />
       <window_info anchor="bottom" id="Event Log" order="12" side_tool="true" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -431,18 +371,6 @@
     <integration-enabled>true</integration-enabled>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/engine/exported.go">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/engine/engine.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#16#110#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/services/nonce_manager.go">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -755,6 +683,23 @@
           <folding>
             <element signature="e#16#179#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/encoding/sarama/encode_test.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-946">
+          <caret line="12" column="61" selection-start-line="12" selection-start-column="54" selection-end-line="12" selection-end-column="61" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CHANGELOG.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="90">
+            <caret line="6" column="34" lean-forward="true" selection-start-line="6" selection-start-column="34" selection-end-line="6" selection-end-column="34" />
+          </first_editor>
+          <second_editor />
         </state>
       </provider>
     </entry>
