@@ -1,12 +1,12 @@
-package handlers
+package loader
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/loader/domain"
 )
 
 // Loader creates an handler loading input
-func Loader(u services.Unmarshaller) engine.HandlerFunc {
+func Loader(u domain.Unmarshaller) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		// Unmarshal message
 		err := u.Unmarshal(txctx.Msg, txctx.Envelope)

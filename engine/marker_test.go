@@ -1,11 +1,9 @@
-package handlers
+package engine
 
 import (
 	"fmt"
 	"sync"
 	"testing"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
 type MockOffsetMarker struct {
@@ -19,8 +17,8 @@ func (o *MockOffsetMarker) Mark(msg interface{}) error {
 	return nil
 }
 
-func makeMarkerContext(i int) *engine.TxContext {
-	txctx := engine.NewTxContext()
+func makeMarkerContext(i int) *TxContext {
+	txctx := NewTxContext()
 	txctx.Reset()
 	switch i % 2 {
 	case 0:
@@ -38,12 +36,12 @@ func TestMarker(t *testing.T) {
 	marker := Marker(&mo)
 
 	rounds := 100
-	outs := make(chan *engine.TxContext, rounds)
+	outs := make(chan *TxContext, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
 		txctx := makeMarkerContext(i)
-		go func(txctx *engine.TxContext) {
+		go func(txctx *TxContext) {
 			defer wg.Done()
 			marker(txctx)
 			outs <- txctx

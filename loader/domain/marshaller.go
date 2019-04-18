@@ -1,4 +1,4 @@
-package services
+package domain
 
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/envelope"

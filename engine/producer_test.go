@@ -1,12 +1,12 @@
-package handlers
+package engine
 
 import (
 	"fmt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
 	"math/big"
 	"sync"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/envelope"
 )
@@ -23,8 +23,8 @@ func (p *MockProducer) Produce(o interface{}) error {
 	return nil
 }
 
-func makeProducerContext(i int) *engine.TxContext {
-	txctx := engine.NewTxContext()
+func makeProducerContext(i int) *TxContext {
+	txctx := NewTxContext()
 	txctx.Reset()
 	switch i % 2 {
 	case 0:
@@ -39,15 +39,15 @@ func makeProducerContext(i int) *engine.TxContext {
 
 func TestProducer(t *testing.T) {
 	mp := MockProducer{t: t}
-	producer := Producer(&mp)
+	producer := services.Producer(&mp)
 
 	rounds := 100
-	outs := make(chan *engine.TxContext, rounds)
+	outs := make(chan *TxContext, rounds)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
 		txctx := makeProducerContext(i)
-		go func(txctx *engine.TxContext) {
+		go func(txctx *TxContext) {
 			defer wg.Done()
 			producer(txctx)
 			outs <- txctx
