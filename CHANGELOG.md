@@ -5,6 +5,7 @@
 *Unreleased*
 
 - [REFACTOR] Major reorganisation 
+- [FEAT] Implement  `opentracing`
 
 ### Version 0.3.4
 
