@@ -2,7 +2,7 @@
 
 ### Version 0.3.4
 
-*Unreleased*
+*Released on April 18th 2019*
 
 - [FEAT] Implement handler `Logger`
 
