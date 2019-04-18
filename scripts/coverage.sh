@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Exit on error
-set -e
+set -Eeu
 
 echo "mode: count" > tmp.out
 for package in $@; do
