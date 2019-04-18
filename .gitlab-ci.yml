@@ -50,8 +50,6 @@ test-lint:
   image: golang:1.12
   stage: test
   script:
-    - make fmt-check
-    - make misspell-check
     - make race
     - make lint
   cache:

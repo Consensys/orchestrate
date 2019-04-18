@@ -33,7 +33,7 @@ func initServer(app *App) {
 		}
 	}()
 
-	// Wait for app to be done and then close all connexion
+	// Wait for app to be done and then close all connection
 	go func() {
 		<-app.Done()
 		server.Close()
