@@ -1,5 +1,6 @@
 GOFILES := $(shell find . -name '*.go' | egrep -v "^\./\.go" | grep -v _test.go)
 PACKAGES ?= $(shell go list ./...)
+BOILERPLATE_REPOSITORY=git@gitlab.com:ConsenSys/client/fr/core-stack/boilerplate-worker.git
 
 .PHONY: all protobuf run-coverage coverage fmt fmt-check vet lint misspell-check misspell race tools help
 
@@ -48,6 +49,6 @@ help: ## Display this help screen
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 merge-boilerplate:
-	@git remote add boilerplate git@gitlab.com:ConsenSys/client/fr/core-stack/boilerplate-worker.git || true
+	@git remote add boilerplate $(BOILERPLATE_REPOSITORY) || true
 	@git fetch boilerplate master
 	@git merge boilerplate/master
