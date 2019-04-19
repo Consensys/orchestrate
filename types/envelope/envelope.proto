@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+import "protos/common/account.proto";
+import "protos/common/call.proto";
+import "protos/common/chain.proto";
+import "protos/common/error.proto";
+import "protos/ethereum/transaction.proto";
+import "protos/ethereum/receipt.proto";
+
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope";
+
+package envelope;
+
+// Metadata attached to an Envelope
+message Metadata {
+    // ID of the Envelope in UUID RFC 4122, ISO/IEC 9834-8:2005 format 
+    // e.g a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
+    string id = 1;
+
+    // Extra information (optional)
+    map<string, string> extra = 2;
+}
+
+// Envelope stores contextual information about a transaction execution
+message Envelope {
+    // Chain to send transaction to
+    common.Chain chain = 1;
+
+    // Ethereum transaction call information
+    // Sender for the transaction
+    common.Account sender = 2;
+    common.Account receiver = 3;
+    common.Call call = 4;
+    
+    // Transaction
+    ethereum.Transaction tx = 5;
+    // Receipt
+    ethereum.Receipt receipt = 6;
+
+    // Errors cought during transaction execution
+    repeated common.Error errors = 7;
+
+    // Metadata of the envelope
+    Metadata metadata = 8;
+}

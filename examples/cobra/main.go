@@ -2,10 +2,9 @@ package main
 
 import (
 	"fmt"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/config"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/logger"
 )
 
 var rootCmd = &cobra.Command{
@@ -20,15 +19,13 @@ var cmdExample = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Log-Level:", viper.GetString("log.level"))
 		fmt.Println("Log-Format:", viper.GetString("log.format"))
-		fmt.Println("Eth-Clients:", viper.GetStringSlice("eth.clients"))
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(cmdExample)
-	config.LogLevel(cmdExample.Flags())
-	config.LogFormat(cmdExample.Flags())
-	config.EthClientURLs(cmdExample.Flags())
+	logger.LogLevel(cmdExample.Flags())
+	logger.LogFormat(cmdExample.Flags())
 }
 
 func main() {

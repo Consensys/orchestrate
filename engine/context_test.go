@@ -8,7 +8,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
+	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 )
 
 var testKey = "test"
