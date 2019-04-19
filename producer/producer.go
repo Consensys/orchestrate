@@ -36,10 +36,11 @@ func Producer(p sarama.SyncProducer, prepareMsg PrepareMsg) engine.HandlerFunc {
 			return
 		}
 
-		txctx.Logger.WithFields(log.Fields{
+		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"kafka.out.partition": partition,
 			"kafka.out.offset":    offset,
 			"kafka.out.topic":     msg.Topic,
-		}).Tracef("producer: message produced")
+		})
+		txctx.Logger.Tracef("producer: message produced")
 	}
 }
