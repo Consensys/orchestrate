@@ -11,6 +11,7 @@ require (
 	github.com/golang/protobuf v1.3.0
 	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/julien-marchand/healthcheck v0.0.0-20190214110401-cdd18ef429ac
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/pkg/errors v0.8.1 // indirect
