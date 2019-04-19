@@ -6,6 +6,7 @@
 
 - [REFACTOR] Major reorganisation 
 - [FEAT] Implement  `opentracing`
+- [REFACTOR] Port `infra/sarama` to `pkg`
 
 ### Version 0.3.4
 
