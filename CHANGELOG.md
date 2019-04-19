@@ -2,7 +2,7 @@
 
 ### Version 0.4.0
 
-*Unreleased*
+*Released on April 19th 2019*
 
 - [REFACTOR] Major reorganisation 
 - [FEAT] Implement  `opentracing`
