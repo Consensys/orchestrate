@@ -2,6 +2,7 @@ package opentracing
 
 import (
 	"errors"
+
 	"github.com/opentracing/opentracing-go"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 
@@ -18,7 +19,6 @@ var (
 // is found in the TxContext and in the go Context, it will be used as the parent of the resulting span.
 func TxSpanFromBroker(tracer opentracing.Tracer, operationName string, opts ...opentracing.StartSpanOption) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-
 		// find Span in TxContext.Envelope metadata
 		if spanContext, err := tracer.Extract(opentracing.TextMap, txctx.Envelope.Carrier()); err == nil {
 			opts = append(opts, opentracing.ChildOf(spanContext))
@@ -36,7 +36,7 @@ func TxSpanFromBroker(tracer opentracing.Tracer, operationName string, opts ...o
 
 		txctx.Next()
 
-		if value, ok := txctx.Keys["operationName"].(string); ok {
+		if value, ok := txctx.Get("operationName").(string); ok {
 			span.SetOperationName(value)
 			txctx.WithContext(opentracing.ContextWithSpan(txctx.Context(), span))
 		}

@@ -118,7 +118,7 @@ func TestEngineStopped(t *testing.T) {
 }
 
 func testSleepingHandler(txctx *TxContext) {
-	time.Sleep(txctx.Keys["duration"].(time.Duration))
+	time.Sleep(txctx.Get("duration").(time.Duration))
 }
 
 func makeTimeoutContext(i int) *TxContext {
@@ -128,11 +128,11 @@ func makeTimeoutContext(i int) *TxContext {
 
 	switch i % 2 {
 	case 0:
-		txctx.Keys["duration"] = 50 * time.Millisecond
-		txctx.Keys["errors"] = 0
+		txctx.Set("duration", 50*time.Millisecond)
+		txctx.Set("errors", 0)
 	case 1:
-		txctx.Keys["duration"] = 100 * time.Millisecond
-		txctx.Keys["errors"] = 1
+		txctx.Set("duration", 100*time.Millisecond)
+		txctx.Set("errors", 1)
 	}
 	return txctx
 }
@@ -158,7 +158,7 @@ func TestTimeoutHandler(t *testing.T) {
 	assert.Len(t, outs, rounds, "Timeout: processed contexts count should be correct")
 
 	for out := range outs {
-		errCount := out.Keys["errors"].(int)
+		errCount := out.Get("errors").(int)
 		assert.Len(t, out.Envelope.Errors, errCount, "Timeout: expected correct count of errors")
 	}
 }

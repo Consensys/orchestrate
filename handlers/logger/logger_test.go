@@ -12,7 +12,7 @@ import (
 
 func makeLoggerContext(i int) *engine.TxContext {
 	txctx := engine.NewTxContext().Prepare([]engine.HandlerFunc{}, log.NewEntry(log.StandardLogger()), nil)
-	txctx.Keys["errors"] = 0
+	txctx.Set("errors", 0)
 	return txctx
 }
 
@@ -35,7 +35,7 @@ func (suite *LoggerTestSuite) TestLogger() {
 	suite.Handle(txctxs)
 
 	for _, txctx := range txctxs {
-		assert.Len(suite.T(), txctx.Envelope.Errors, txctx.Keys["errors"].(int), "Expected right count of errors")
+		assert.Len(suite.T(), txctx.Envelope.Errors, txctx.Get("errors").(int), "Expected right count of errors")
 	}
 }
 

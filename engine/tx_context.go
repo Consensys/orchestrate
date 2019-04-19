@@ -17,10 +17,6 @@ type TxContext struct {
 	// Message that triggered TxContext execution (typically a sarama.ConsumerMessage)
 	Msg interface{}
 
-	// Keys is a key/value pair
-	// TODO: Remove for go context
-	Keys map[string]interface{}
-
 	// chain of handlers to be executed on TxContext
 	handlers []HandlerFunc
 
@@ -47,7 +43,6 @@ type TxContext struct {
 func NewTxContext() *TxContext {
 	return &TxContext{
 		Envelope: &envelope.Envelope{},
-		Keys:     make(map[string]interface{}),
 		index:    -1,
 	}
 }
@@ -57,7 +52,6 @@ func (txctx *TxContext) Reset() {
 	txctx.ctx = nil
 	txctx.Msg = nil
 	txctx.Envelope.Reset()
-	txctx.Keys = make(map[string]interface{})
 	txctx.handlers = nil
 	txctx.index = -1
 	txctx.Logger = nil
@@ -108,6 +102,18 @@ func (txctx *TxContext) Prepare(handlers []HandlerFunc, logger *log.Entry, msg i
 	txctx.Logger = logger
 
 	return txctx
+}
+
+type txCtxKey string
+
+// Set is used to store a new key/value pair exclusively for this context
+func (txctx *TxContext) Set(key string, value interface{}) {
+	txctx.WithContext(context.WithValue(txctx.Context(), txCtxKey(key), value))
+}
+
+// Get returns the value for the given key
+func (txctx *TxContext) Get(key string) interface{} {
+	return txctx.Context().Value(txCtxKey(key))
 }
 
 // Context returns the go context attached to TxContext.

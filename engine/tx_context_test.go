@@ -16,7 +16,7 @@ var testKey = "test"
 func newHandler(s string, t *testing.T) HandlerFunc {
 	return func(txctx *TxContext) {
 		t.Logf("At %v, index=%v", s, txctx.index)
-		txctx.Keys[testKey] = append(txctx.Keys[testKey].([]string), s)
+		txctx.Set(testKey, append(txctx.Get(testKey).([]string), s))
 	}
 }
 
@@ -25,7 +25,7 @@ var errTest = errors.New("Test Error")
 func newErrorHandler(s string, t *testing.T) HandlerFunc {
 	return func(txctx *TxContext) {
 		t.Logf("At %v, index=%v", s, txctx.index)
-		txctx.Keys[testKey] = append(txctx.Keys[testKey].([]string), s)
+		txctx.Set(testKey, append(txctx.Get(testKey).([]string), s))
 		txctx.Error(errTest)
 	}
 }
@@ -33,7 +33,7 @@ func newErrorHandler(s string, t *testing.T) HandlerFunc {
 func newAborter(s string, t *testing.T) HandlerFunc {
 	return func(txctx *TxContext) {
 		t.Logf("At %v, index=%v", s, txctx.index)
-		txctx.Keys[testKey] = append(txctx.Keys[testKey].([]string), s)
+		txctx.Set(testKey, append(txctx.Get(testKey).([]string), s))
 		txctx.AbortWithError(errTest)
 	}
 }
@@ -42,13 +42,13 @@ func newMiddleware(s string, t *testing.T) HandlerFunc {
 	return func(txctx *TxContext) {
 		sA := fmt.Sprintf("%v-before", s)
 		t.Logf("At %v, index=%v", s, txctx.index)
-		txctx.Keys[testKey] = append(txctx.Keys[testKey].([]string), sA)
+		txctx.Set(testKey, append(txctx.Get(testKey).([]string), sA))
 
 		txctx.Next()
 
 		sB := fmt.Sprintf("%v-after", s)
 		t.Logf("At %v, index=%v", s, txctx.index)
-		txctx.Keys[testKey] = append(txctx.Keys[testKey].([]string), sB)
+		txctx.Set(testKey, append(txctx.Get(testKey).([]string), sB))
 	}
 }
 
@@ -67,12 +67,12 @@ func TestNext(t *testing.T) {
 	)
 	// Initialize context
 	txctx.Prepare([]HandlerFunc{hA, mA, hErr, mB, hB, a, hC, mC}, nil, nil)
-	txctx.Keys[testKey] = []string{}
+	txctx.Set(testKey, []string{})
 
 	// Handle context
 	txctx.Next()
 
-	res := txctx.Keys[testKey].([]string)
+	res := txctx.Get(testKey).([]string)
 	expected := []string{"hA", "mA-before", "err", "mB-before", "hB", "abort", "mB-after", "mA-after"}
 
 	assert.Equal(t, expected, res, "Call order on handlers should be correct")

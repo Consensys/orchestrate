@@ -28,7 +28,7 @@ func makeTracerContext(i int) *engine.TxContext {
 	default:
 		return txctx
 	case 1:
-		txctx.Keys["operationName"] = "I love Crafting"
+		txctx.Set("operationName", "I love Crafting")
 		return txctx
 	case 2:
 		mockSpan := MockTracer.StartSpan(OpenTracingRootName)
