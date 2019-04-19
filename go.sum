@@ -113,6 +113,7 @@ github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljT
 github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c/go.mod h1:lB8K/P019DLNhemzwFU4jHLhdvlE6uDZjXFejJXr49I=
 github.com/xdg/stringprep v1.0.0/go.mod h1:Jhud4/sHMO4oL310DaZAKk9ZaJ08SJfe+sJh0HrGL1Y=
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
+gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.3.0 h1:TKHMLHu3nlWBS+gmTSJzUxGWTLc/U7CMvx3gENr8ry4=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.3.0/go.mod h1:9BqU2O8Tv3jT66UENzPs7pnN5QIOf5Kvd91Bil03N0U=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.3.3/go.mod h1:SqYvbuufPNbSk5jLLSEXknrw+hXnQnCLmAtODIF0L5o=
 go.uber.org/atomic v1.3.2/go.mod h1:gD2HeocX3+yG+ygLZcrzQJaqmWj9AIm7n08wl/qW/PE=
