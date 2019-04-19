@@ -13,4 +13,3 @@ type Unmarshaller interface {
 	// Unmarshal high message into a Envelope
 	Unmarshal(msg interface{}, t *envelope.Envelope) error
 }
-

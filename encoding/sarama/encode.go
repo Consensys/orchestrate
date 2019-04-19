@@ -34,4 +34,3 @@ func (m *Marshaller) Marshal(e *envelope.Envelope, msg interface{}) error {
 
 	return nil
 }
-

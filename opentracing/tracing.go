@@ -14,7 +14,6 @@ var (
 	GenericOperationName = "Transaction Operation"
 )
 
-
 // TxSpanFromBroker create a new span with the given operation name and options. If a span
 // is found in the TxContext and in the go Context, it will be used as the parent of the resulting span.
 func TxSpanFromBroker(tracer opentracing.Tracer, operationName string, opts ...opentracing.StartSpanOption) engine.HandlerFunc {
