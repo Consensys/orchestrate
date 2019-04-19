@@ -6,20 +6,19 @@ import (
 	"regexp"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 // KafkaChainTopic computes Kafka topic identified by chain
 func KafkaChainTopic(topic string, chainID *big.Int) string {
-	return fmt.Sprintf("%v-%v", topic, chainID.Text(16))
+	return fmt.Sprintf("%v-%v", topic, chainID.Text(10))
 }
 
-var chainAccountKeyPatternRegexp = `(?P<account>0[xX][0-9a-fA-F]{40})@(?P<chain>0[xX][0-9a-fA-F]+)`
+var chainAccountKeyPatternRegexp = `(?P<account>0[xX][0-9a-fA-F]{40})@(?P<chain>[0-9]+)`
 var chainAccountKeyPattern = regexp.MustCompile(chainAccountKeyPatternRegexp)
 
 // ToChainAccountKey computes a key from a chain identifier and an account
 func ToChainAccountKey(chainID *big.Int, acc common.Address) string {
-	return fmt.Sprintf("%v@%v", acc.Hex(), hexutil.EncodeBig(chainID))
+	return fmt.Sprintf("%v@%v", acc.Hex(), chainID.Text(10))
 }
 
 // FromChainAccountKey computes a chain identifier and account from a key
@@ -29,9 +28,9 @@ func FromChainAccountKey(key string) (chainID *big.Int, acc common.Address, err 
 		return nil, common.HexToAddress(""), fmt.Errorf("Key %q is invalid (expects format %q)", key, chainAccountKeyPatternRegexp)
 	}
 
-	chain, err := hexutil.DecodeBig(parts[2])
-	if err != nil {
-		return nil, common.HexToAddress(""), fmt.Errorf("ChainID %q is an invalid hexadecimal", parts[2])
+	chain, ok := big.NewInt(0).SetString(parts[2], 10)
+	if !ok {
+		return nil, common.HexToAddress(""), fmt.Errorf("%q is an invalid chain ID (decimal format expected)", parts[2])
 	}
 
 	return chain, common.HexToAddress(parts[1]), nil

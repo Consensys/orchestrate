@@ -7,6 +7,7 @@
 - [REFACTOR] Major reorganisation 
 - [FEAT] Implement  `opentracing`
 - [REFACTOR] Port `infra/sarama` to `pkg`
+- [REFACTOR] Update ChainID manipulation in base 10 decimal format
 
 ### Version 0.3.4
 

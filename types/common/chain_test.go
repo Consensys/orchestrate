@@ -8,7 +8,7 @@ import (
 
 func TestChain(t *testing.T) {
 	chain := &Chain{
-		Id:       "0x2a",
+		Id:       "42",
 		IsEIP155: true,
 	}
 
