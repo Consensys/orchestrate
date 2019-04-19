@@ -10,6 +10,9 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// HandlerFunc is base type for an handler function processing a Context
+type HandlerFunc func(txctx *TxContext)
+
 // Engine is an object that allows to consume go channels
 type Engine struct {
 	// Configuration object

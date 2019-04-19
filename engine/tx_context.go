@@ -8,9 +8,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 )
 
-// HandlerFunc is base type for an handler function processing a Context
-type HandlerFunc func(txctx *TxContext)
-
 // TxContext is the most important part of an engine.
 // It allows to pass variables between handlers
 type TxContext struct {
@@ -21,6 +18,7 @@ type TxContext struct {
 	Msg interface{}
 
 	// Keys is a key/value pair
+	// TODO: Remove for go context
 	Keys map[string]interface{}
 
 	// chain of handlers to be executed on TxContext
