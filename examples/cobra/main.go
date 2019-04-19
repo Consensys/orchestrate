@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/logger"
 )
 
 var rootCmd = &cobra.Command{
