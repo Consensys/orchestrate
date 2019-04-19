@@ -2,6 +2,7 @@ package proto
 
 import (
 	"fmt"
+
 	"github.com/golang/protobuf/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 )
@@ -10,7 +11,7 @@ import (
 type EnvelopeUnmarshaller struct{}
 
 // Unmarshal message expected to be a Envelope
-func (u *EnvelopeUnmarshaller) Unmarshal(msg interface{}, t *envelope.Envelope) error {
+func (u *EnvelopeUnmarshaller) Unmarshal(msg interface{}, e *envelope.Envelope) error {
 	// Cast message into protobuffer
 	pb, ok := msg.(*envelope.Envelope)
 	if !ok {
@@ -18,7 +19,7 @@ func (u *EnvelopeUnmarshaller) Unmarshal(msg interface{}, t *envelope.Envelope) 
 	}
 
 	// Load Envelope from protobuffer
-	proto.Merge(t, pb)
+	proto.Merge(e, pb)
 
 	return nil
 
