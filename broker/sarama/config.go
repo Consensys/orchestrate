@@ -1,4 +1,4 @@
-package broker
+package sarama
 
 import (
 	"fmt"
@@ -8,6 +8,8 @@ import (
 )
 
 func init() {
+	viper.SetDefault(kafkaAddressViperKey, kafkaAddressDefault)
+	viper.BindEnv(kafkaAddressViperKey, kafkaAddressEnv)
 	viper.SetDefault(txCrafterViperKey, txCrafterTopicDefault)
 	viper.BindEnv(txCrafterViperKey, txCrafterTopicEnv)
 	viper.SetDefault(txNonceViperKey, txNonceTopicDefault)
@@ -24,6 +26,33 @@ func init() {
 	viper.BindEnv(txDecodedViperKey, txDecodedTopicEnv)
 	viper.SetDefault(txRecoverViperKey, txRecoverTopicDefault)
 	viper.BindEnv(txRecoverViperKey, txRecoverTopicEnv)
+	viper.SetDefault(crafterGroupViperKey, crafterGroupDefault)
+	viper.BindEnv(crafterGroupViperKey, crafterGroupEnv)
+	viper.SetDefault(nonceGroupViperKey, nonceGroupDefault)
+	viper.BindEnv(nonceGroupViperKey, nonceGroupEnv)
+	viper.SetDefault(signerGroupViperKey, signerGroupDefault)
+	viper.BindEnv(signerGroupViperKey, signerGroupEnv)
+	viper.SetDefault(senderGroupViperKey, senderGroupDefault)
+	viper.BindEnv(senderGroupViperKey, senderGroupEnv)
+	viper.SetDefault(decoderGroupViperKey, decoderGroupDefault)
+	viper.BindEnv(decoderGroupViperKey, decoderGroupEnv)
+	viper.SetDefault(bridgeGroupViperKey, bridgeGroupDefault)
+	viper.BindEnv(bridgeGroupViperKey, bridgeGroupEnv)
+}
+
+var (
+	kafkaAddressFlag     = "kafka-address"
+	kafkaAddressViperKey = "kafka.addresses"
+	kafkaAddressDefault  = []string{"localhost:9092"}
+	kafkaAddressEnv      = "KAFKA_ADDRESS"
+)
+
+// KafkaAddresses register flag for Kafka server addresses
+func KafkaAddresses(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Address of Kafka server to connect to.
+Environment variable: %q`, kafkaAddressEnv)
+	f.StringSlice(kafkaAddressFlag, kafkaAddressDefault, desc)
+	viper.BindPFlag(kafkaAddressViperKey, f.Lookup(kafkaAddressFlag))
 }
 
 var (
@@ -68,7 +97,7 @@ var (
 	txRecoverTopicDefault = "topic-tx-recover"
 )
 
-// TODO: implement test for all flags
+// TODO: implement test for all Topics flags & Goup flags
 
 // KafkaTopicTxCrafter register flag for Kafka topic
 func KafkaTopicTxCrafter(f *pflag.FlagSet) {
@@ -126,158 +155,73 @@ Environment variable: %q`, txRecoverViperKey)
 	viper.BindPFlag(txRecoverViperKey, f.Lookup(txRecoverFlag))
 }
 
-// WorkerConsumerGroup register flag for kafka consumer group
-func WorkerConsumerGroup(f *pflag.FlagSet, env string, defaultValue string) {
-	desc := fmt.Sprintf(
-		`Kafka consumer group. 
-Environment variable: %q`, env)
-	f.String(workerGroupFlag, defaultValue, desc)
-	viper.BindPFlag(workerGroupViperKey, f.Lookup(workerGroupFlag))
-	viper.BindEnv(workerGroupViperKey, env)
-}
-
 // Kafka Consumer group environment variables
 var (
-	crafterGroupEnv     = "KAFKA_CRAFTER_GROUP"
-	crafterGroupDefault = "tx-crafter-group"
+	crafterGroupFlag     = "group-crafter"
+	crafterGroupViperKey = "kafka.group.crafter"
+	crafterGroupEnv      = "KAFKA_GROUP_CRAFTER"
+	crafterGroupDefault  = "group-crafter"
 
-	nonceGroupEnv     = "KAFKA_NONCE_GROUP"
-	nonceGroupDefault = "tx-nonce-group"
+	nonceGroupFlag     = "group-nonce"
+	nonceGroupViperKey = "kafka.group.nonce"
+	nonceGroupEnv      = "KAFKA_GROUP_NONCE"
+	nonceGroupDefault  = "group-nonce"
 
-	signerGroupEnv     = "KAFKA_SIGNER_GROUP"
-	signerGroupDefault = "tx-signer-group"
+	signerGroupFlag     = "group-signer"
+	signerGroupViperKey = "kafka.group.signer"
+	signerGroupEnv      = "KAFKA_GROUP_SIGNER"
+	signerGroupDefault  = "group-signer"
 
-	senderGroupEnv     = "KAFKA_SENDER_GROUP"
-	senderGroupDefault = "tx-sender-group"
+	senderGroupFlag     = "group-sender"
+	senderGroupViperKey = "kafka.group.sender"
+	senderGroupEnv      = "KAFKA_GROUP_SENDER"
+	senderGroupDefault  = "group-sender"
 
-	decoderGroupEnv     = "KAFKA_DECODER_GROUP"
-	decoderGroupDefault = "tx-decoder-group"
+	decoderGroupFlag     = "group-decoder"
+	decoderGroupViperKey = "kafka.group.decoder"
+	decoderGroupEnv      = "KAFKA_GROUP_DECODER"
+	decoderGroupDefault  = "group-decoder"
 
-	bridgeGroupEnv     = "KAFKA_BRIDGE_GROUP"
-	bridgeGroupDefault = "tx-bridge-group"
+	bridgeGroupFlag     = "group-bridge"
+	bridgeGroupViperKey = "kafka.group.bridge"
+	bridgeGroupEnv      = "KAFKA_GROUP_BRIDGE"
+	bridgeGroupDefault  = "tx-group-bridge"
 )
 
-// WorkerCrafterGroup register flag for kafka crafter group
-func WorkerCrafterGroup(f *pflag.FlagSet) {
-	WorkerConsumerGroup(f, crafterGroupEnv, crafterGroupDefault)
-}
-
-// WorkerNonceGroup register flag for kafka nonce group
-func WorkerNonceGroup(f *pflag.FlagSet) {
-	WorkerConsumerGroup(f, nonceGroupEnv, nonceGroupDefault)
-}
-
-// WorkerSignerGroup register flag for kafka signer group
-func WorkerSignerGroup(f *pflag.FlagSet) {
-	WorkerConsumerGroup(f, signerGroupEnv, signerGroupDefault)
-}
-
-// WorkerSenderGroup register flag for kafka sender group
-func WorkerSenderGroup(f *pflag.FlagSet) {
-	WorkerConsumerGroup(f, senderGroupEnv, senderGroupDefault)
-}
-
-// WorkerDecoderGroup register flag for kafka decoder group
-func WorkerDecoderGroup(f *pflag.FlagSet) {
-	WorkerConsumerGroup(f, decoderGroupEnv, decoderGroupDefault)
-}
-
-// WorkerBridgeGroup register flag for kafka decoder group
-func WorkerBridgeGroup(f *pflag.FlagSet) {
-	WorkerConsumerGroup(f, decoderGroupEnv, decoderGroupDefault)
-}
-
-var (
-	workerInFlag     = "worker-in"
-	workerInViperKey = "worker.in"
-)
-
-// WorkerInTopic register flag for kafka input topic
-func WorkerInTopic(f *pflag.FlagSet, env string, defaultValue string) {
-	desc := fmt.Sprintf(`Kafka topic to consume message from.
+// consumerGroup register flag for a kafka consumer group
+func consumerGroup(f *pflag.FlagSet, flag string, key string, env string, defaultValue string) {
+	desc := fmt.Sprintf(`Kafka consumer group name
 Environment variable: %q`, env)
-	f.String(workerInFlag, defaultValue, desc)
-	viper.BindPFlag(workerInViperKey, f.Lookup(workerInFlag))
-	viper.BindEnv(workerInViperKey, env)
+	f.String(flag, defaultValue, desc)
+	viper.BindPFlag(key, f.Lookup(flag))
 }
 
-var (
-	workerOutFlag     = "worker-out"
-	workerOutViperKey = "worker.out"
-)
-
-// WorkerOutTopic register flag for kafka output topic
-func WorkerOutTopic(f *pflag.FlagSet, env string, defaultValue string) {
-	desc := fmt.Sprintf(`Kafka topic to send message to after processing.
-Environment variable: %q`, env)
-	f.String(workerOutFlag, defaultValue, desc)
-	viper.BindPFlag(workerOutViperKey, f.Lookup(workerOutFlag))
-	viper.BindEnv(workerOutViperKey, env)
+// CrafterGroup register flag for kafka crafter group
+func CrafterGroup(f *pflag.FlagSet) {
+	consumerGroup(f, crafterGroupFlag, crafterGroupViperKey, crafterGroupEnv, crafterGroupDefault)
 }
 
-// Kafka topic environment variables
-
-// TxCrafterInTopic register flag for kafka input topic on tx crafter
-func TxCrafterInTopic(f *pflag.FlagSet) {
-	WorkerInTopic(f, txCrafterTopicEnv, txCrafterTopicDefault)
+// NonceGroup register flag for kafka nonce group
+func NonceGroup(f *pflag.FlagSet) {
+	consumerGroup(f, nonceGroupFlag, nonceGroupViperKey, nonceGroupEnv, nonceGroupDefault)
 }
 
-// TxCrafterOutTopic register flag for kafka output topic on tx crafter
-func TxCrafterOutTopic(f *pflag.FlagSet) {
-	WorkerOutTopic(f, txCrafterTopicEnv, txCrafterTopicDefault)
+// SignerGroup register flag for kafka signer group
+func SignerGroup(f *pflag.FlagSet) {
+	consumerGroup(f, signerGroupFlag, signerGroupViperKey, signerGroupEnv, signerGroupDefault)
 }
 
-// TxNonceInTopic register flag for kafka input topic on tx nonce
-func TxNonceInTopic(f *pflag.FlagSet) {
-	WorkerInTopic(f, txNonceTopicEnv, txNonceTopicDefault)
+// SenderGroup register flag for kafka sender group
+func SenderGroup(f *pflag.FlagSet) {
+	consumerGroup(f, senderGroupFlag, senderGroupViperKey, senderGroupEnv, senderGroupDefault)
 }
 
-// TxNonceOutTopic register flag for kafka output topic on tx nonce
-func TxNonceOutTopic(f *pflag.FlagSet) {
-	WorkerOutTopic(f, txNonceTopicEnv, txNonceTopicDefault)
+// DecoderGroup register flag for kafka decoder group
+func DecoderGroup(f *pflag.FlagSet) {
+	consumerGroup(f, decoderGroupFlag, decoderGroupViperKey, decoderGroupEnv, decoderGroupDefault)
 }
 
-// TxSignerInTopic register flag for kafka input topic on tx signer
-func TxSignerInTopic(f *pflag.FlagSet) {
-	WorkerInTopic(f, txSignerTopicEnv, txSignerTopicDefault)
+// BridgeGroup register flag for kafka decoder group
+func BridgeGroup(f *pflag.FlagSet) {
+	consumerGroup(f, bridgeGroupFlag, bridgeGroupViperKey, bridgeGroupEnv, bridgeGroupDefault)
 }
-
-// TxSignerOutTopic register flag for kafka output topic on tx signer
-func TxSignerOutTopic(f *pflag.FlagSet) {
-	WorkerOutTopic(f, txSignerTopicEnv, txSignerTopicDefault)
-}
-
-// TxSenderInTopic register flag for kafka input topic on tx sender
-func TxSenderInTopic(f *pflag.FlagSet) {
-	WorkerInTopic(f, txSenderTopicEnv, txSenderTopicDefault)
-}
-
-// TxSenderOutTopic register flag for kafka output topic on tx sender
-func TxSenderOutTopic(f *pflag.FlagSet) {
-	WorkerOutTopic(f, txSenderTopicEnv, txSenderTopicDefault)
-}
-
-// TxDecoderInTopic register flag for kafka input topic on tx decoder
-func TxDecoderInTopic(f *pflag.FlagSet) {
-	WorkerInTopic(f, txDecoderTopicEnv, txDecoderTopicDefault)
-}
-
-// TxDecoderOutTopic register flag for kafka output topic on tx decoder
-func TxDecoderOutTopic(f *pflag.FlagSet) {
-	WorkerOutTopic(f, txDecoderTopicEnv, txDecoderTopicDefault)
-}
-
-// TxDecodedInTopic register flag for kafka input topic on tx decoded
-func TxDecodedInTopic(f *pflag.FlagSet) {
-	WorkerInTopic(f, txDecodedTopicEnv, txDecodedTopicDefault)
-}
-
-// TxDecodedOutTopic register flag for kafka output topic on tx decoded
-func TxDecodedOutTopic(f *pflag.FlagSet) {
-	WorkerOutTopic(f, txDecodedTopicEnv, txDecodedTopicDefault)
-}
-
-var (
-	workerGroupFlag     = "worker-group"
-	workerGroupViperKey = "worker.group"
-)
