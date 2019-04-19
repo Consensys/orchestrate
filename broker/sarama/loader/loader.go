@@ -32,5 +32,5 @@ func Loader(txctx *engine.TxContext) {
 		"kafka.in.partition": msg.Partition,
 	})
 
-	txctx.Logger.Debugf("Message loaded:%v", txctx.Envelope.String())
+	txctx.Logger.Tracef("Message loaded: %v", txctx.Envelope.String())
 }
