@@ -8,10 +8,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-func TestRedisAddress(t *testing.T) {
+func TestAddress(t *testing.T) {
 	name := "redis.address"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	RedisAddress(flgs)
+	Address(flgs)
 	expected := "localhost:6379"
 	if viper.GetString(name) != expected {
 		t.Errorf("RedisAddress #1: expected %q but got %q", expected, viper.GetString(name))
@@ -33,10 +33,10 @@ func TestRedisAddress(t *testing.T) {
 	}
 }
 
-func TestRedisLockTimeout(t *testing.T) {
+func TestLockTimeout(t *testing.T) {
 	name := "redis.lock.timeout"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	RedisLockTimeout(flgs)
+	LockTimeout(flgs)
 	expected := 1500
 	if viper.GetInt(name) != expected {
 		t.Errorf("RedisLockTimeout #1: expected %v but got %v", expected, viper.GetInt(name))

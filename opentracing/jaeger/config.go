@@ -1,8 +1,8 @@
 package jaeger
 
-
 import (
 	"fmt"
+
 	"github.com/uber/jaeger-client-go/config"
 
 	"github.com/spf13/pflag"
@@ -10,23 +10,23 @@ import (
 )
 
 func init() {
-	viper.SetDefault(jaegerHostViperKey, jaegerHostDefault)
-	viper.BindEnv(jaegerHostViperKey, jaegerHostEnv)
-	viper.SetDefault(jaegerPortViperKey, jaegerPortDefault)
-	viper.BindEnv(jaegerPortViperKey, jaegerPortEnv)
-
-	viper.SetDefault(jaegerSamplerParamViperKey, jaegerSamplerParamDefault)
-	viper.BindEnv(jaegerSamplerParamViperKey, jaegerSamplerParamEnv)
-	viper.SetDefault(jaegerSamplerTypeViperKey, jaegerSamplerTypeDefault)
-	viper.BindEnv(jaegerSamplerTypeViperKey, jaegerSamplerTypeEnv)
-	viper.SetDefault(jaegerServiceNameViperKey, jaegerServiceNameDefault)
-	viper.BindEnv(jaegerServiceNameViperKey, jaegerServiceNameEnv)
-	viper.SetDefault(jaegerDisabledViperKey, jaegerDisabledDefault)
-	viper.BindEnv(jaegerDisabledViperKey, jaegerDisabledEnv)
-	viper.SetDefault(jaegerLogSpansViperKey, jaegerLogSpansDefault)
-	viper.BindEnv(jaegerLogSpansViperKey, jaegerLogSpansEnv)
+	viper.SetDefault(hostViperKey, hostDefault)
+	viper.BindEnv(hostViperKey, hostEnv)
+	viper.SetDefault(portViperKey, portDefault)
+	viper.BindEnv(portViperKey, portEnv)
+	viper.SetDefault(samplerParamViperKey, samplerParamDefault)
+	viper.BindEnv(samplerParamViperKey, samplerParamEnv)
+	viper.SetDefault(samplerTypeViperKey, samplerTypeDefault)
+	viper.BindEnv(samplerTypeViperKey, samplerTypeEnv)
+	viper.SetDefault(serviceNameViperKey, serviceNameDefault)
+	viper.BindEnv(serviceNameViperKey, serviceNameEnv)
+	viper.SetDefault(disabledViperKey, disabledDefault)
+	viper.BindEnv(disabledViperKey, disabledEnv)
+	viper.SetDefault(logSpansViperKey, logSpansDefault)
+	viper.BindEnv(logSpansViperKey, logSpansEnv)
 }
 
+// NewConfig create new Jaeger configuration
 func NewConfig() *config.Configuration {
 	return &config.Configuration{
 		ServiceName: viper.GetString("jaeger.service.name"),
@@ -43,82 +43,82 @@ func NewConfig() *config.Configuration {
 }
 
 var (
-	jaegerHostFlag     = "jaeger-host"
-	jaegerHostViperKey = "jaeger.host"
-	jaegerHostDefault  = "jaeger"
-	jaegerHostEnv      = "JAEGER_HOST"
+	hostFlag     = "jaeger-host"
+	hostViperKey = "jaeger.host"
+	hostDefault  = "jaeger"
+	hostEnv      = "JAEGER_HOST"
 )
 
-// JaegerHost register a flag for Jaeger host
-func JaegerHost(f *pflag.FlagSet) {
+// Host register a flag for Jaeger host
+func Host(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Jaeger host.
-Environment variable: %q`, jaegerHostEnv)
-	f.String(jaegerHostFlag, jaegerHostDefault, desc)
-	viper.BindPFlag(jaegerHostViperKey, f.Lookup(jaegerHostFlag))
+Environment variable: %q`, hostEnv)
+	f.String(hostFlag, hostDefault, desc)
+	viper.BindPFlag(hostViperKey, f.Lookup(hostFlag))
 }
 
 var (
-	jaegerPortFlag     = "jaeger-port"
-	jaegerPortViperKey = "jaeger.port"
-	jaegerPortDefault  = 6831
-	jaegerPortEnv      = "JAEGER_PORT"
+	portFlag     = "jaeger-port"
+	portViperKey = "jaeger.port"
+	portDefault  = 6831
+	portEnv      = "JAEGER_PORT"
 )
 
-// JaegerPort register a flag for Jaeger port
-func JaegerPort(f *pflag.FlagSet) {
+// Port register a flag for Jaeger port
+func Port(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Jaeger port
-Environment variable: %q`, jaegerPortEnv)
-	f.Int(jaegerPortFlag, jaegerPortDefault, desc)
-	viper.BindPFlag(jaegerPortViperKey, f.Lookup(jaegerPortFlag))
+Environment variable: %q`, portEnv)
+	f.Int(portFlag, portDefault, desc)
+	viper.BindPFlag(portViperKey, f.Lookup(portFlag))
 }
 
 // TODO : adding all binding Flag and to trigger Jaegger
 var (
-	jaegerServiceNameViperKey = "jaeger.service.name"
-	jaegerServiceNameDefault  = "jaeger"
-	jaegerServiceNameEnv      = "JAEGER_SERVICE_NAME"
+	serviceNameViperKey = "jaeger.service.name"
+	serviceNameDefault  = "jaeger"
+	serviceNameEnv      = "JAEGER_SERVICE_NAME"
 )
 
 // TODO : adding all binding Flag and to trigger Jaegger
 var (
-	jaegerDisabledViperKey = "jaeger.disabled"
-	jaegerDisabledDefault  = true
-	jaegerDisabledEnv      = "JAEGER_DISABLED"
+	disabledViperKey = "jaeger.disabled"
+	disabledDefault  = true
+	disabledEnv      = "JAEGER_DISABLED"
 )
 
 // TODO : adding all binding Flag and to trigger Jaegger
 var (
-	jaegerLogSpansViperKey = "jaeger.reporter.logspans"
-	jaegerLogSpansDefault  = true
-	jaegerLogSpansEnv      = "JAEGER_REPORTER_LOGSPANS"
+	logSpansViperKey = "jaeger.reporter.logspans"
+	logSpansDefault  = true
+	logSpansEnv      = "JAEGER_REPORTER_LOGSPANS"
 )
 
 var (
-	jaegerSamplerParamFlag     = "jaeger-sampler-param"
-	jaegerSamplerParamViperKey = "jaeger.sampler.param"
-	jaegerSamplerParamDefault  = 1
-	jaegerSamplerParamEnv      = "JAEGER_SAMPLER_PARAM"
+	samplerParamFlag     = "jaeger-sampler-param"
+	samplerParamViperKey = "jaeger.sampler.param"
+	samplerParamDefault  = 1
+	samplerParamEnv      = "JAEGER_SAMPLER_PARAM"
 )
 
-// JaegerSampler register a flag for jaeger
-func JaegerSamplerParam(f *pflag.FlagSet) {
+// SamplerParam register a flag for jaeger
+func SamplerParam(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Jaeger sampler
-Environment variable: %q`, jaegerSamplerParamEnv)
-	f.Int(jaegerSamplerParamFlag, jaegerSamplerParamDefault, desc)
-	viper.BindPFlag(jaegerSamplerParamViperKey, f.Lookup(jaegerSamplerParamFlag))
+Environment variable: %q`, samplerParamEnv)
+	f.Int(samplerParamFlag, samplerParamDefault, desc)
+	viper.BindPFlag(samplerParamViperKey, f.Lookup(samplerParamFlag))
 }
 
 var (
-	jaegerSamplerTypeFlag     = "jaeger-sampler-type"
-	jaegerSamplerTypeViperKey = "jaeger.sampler.type"
-	jaegerSamplerTypeDefault  = "const"
-	jaegerSamplerTypeEnv      = "JAEGER_SAMPLER_TYPE"
+	samplerTypeFlag     = "jaeger-sampler-type"
+	samplerTypeViperKey = "jaeger.sampler.type"
+	samplerTypeDefault  = "const"
+	samplerTypeEnv      = "JAEGER_SAMPLER_TYPE"
 )
 
-// JaegerSampler register a flag for jaeger
-func JaegerSamplerType(f *pflag.FlagSet) {
+// SamplerType register a flag for jaeger
+func SamplerType(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Jaeger sampler
-Environment variable: %q`, jaegerSamplerTypeEnv)
-	f.String(jaegerSamplerTypeFlag, jaegerSamplerTypeDefault, desc)
-	viper.BindPFlag(jaegerSamplerTypeViperKey, f.Lookup(jaegerSamplerTypeFlag))
+Environment variable: %q`, samplerTypeEnv)
+	f.String(samplerTypeFlag, samplerTypeDefault, desc)
+	viper.BindPFlag(samplerTypeViperKey, f.Lookup(samplerTypeFlag))
 }

@@ -8,10 +8,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-func TestHTTPHostname(t *testing.T) {
+func TestHostname(t *testing.T) {
 	name := "http.hostname"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	HTTPHostname(flgs)
+	Hostname(flgs)
 	expected := ":8080"
 	if viper.GetString(name) != expected {
 		t.Errorf("HTTPHostname #1: expected %q but got %q", expected, viper.GetString(name))

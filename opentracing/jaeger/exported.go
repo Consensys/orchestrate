@@ -7,6 +7,7 @@ import (
 	"github.com/opentracing/opentracing-go"
 )
 
+// InitTracer initialize tracer
 func InitTracer() (opentracing.Tracer, io.Closer) {
 	cfg := NewConfig()
 	tracer, closer, err := cfg.NewTracer()

@@ -45,7 +45,7 @@ Environment variable: %q`, []string{"text", "json"}, logFormatEnv)
 	viper.BindPFlag(logFormatViperKey, f.Lookup(logFormatFlag))
 }
 
-// ConfigureLogger configure logger
+// InitLogger Initialize logrus Logger
 func InitLogger() {
 	switch viper.GetString(logFormatViperKey) {
 	case "json":

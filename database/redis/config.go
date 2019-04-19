@@ -8,38 +8,38 @@ import (
 )
 
 func init() {
-	viper.SetDefault(redisAddressViperKey, redisAddressDefault)
-	viper.BindEnv(redisAddressViperKey, redisAddressEnv)
-	viper.SetDefault(redisLockTimeoutViperKey, redisLockTimeoutDefault)
-	viper.BindEnv(redisLockTimeoutViperKey, redisLockTimeoutEnv)
+	viper.SetDefault(addressViperKey, addressDefault)
+	viper.BindEnv(addressViperKey, addressEnv)
+	viper.SetDefault(lockTimeoutViperKey, lockTimeoutDefault)
+	viper.BindEnv(lockTimeoutViperKey, lockTimeoutEnv)
 }
 
 var (
-	redisAddressFlag     = "redis-address"
-	redisAddressViperKey = "redis.address"
-	redisAddressDefault  = "localhost:6379"
-	redisAddressEnv      = "REDIS_ADDRESS"
+	addressFlag     = "redis-address"
+	addressViperKey = "redis.address"
+	addressDefault  = "localhost:6379"
+	addressEnv      = "REDIS_ADDRESS"
 )
 
-// RedisAddress register a flag for Redis server address
-func RedisAddress(f *pflag.FlagSet) {
+// Address register a flag for Redis server address
+func Address(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Address of Redis server to connect to.
-Environment variable: %q`, redisAddressEnv)
-	f.String(redisAddressFlag, redisAddressDefault, desc)
-	viper.BindPFlag(redisAddressViperKey, f.Lookup(redisAddressFlag))
+Environment variable: %q`, addressEnv)
+	f.String(addressFlag, addressDefault, desc)
+	viper.BindPFlag(addressViperKey, f.Lookup(addressFlag))
 }
 
 var (
-	redisLockTimeoutFlag     = "redis-lock-timeout"
-	redisLockTimeoutViperKey = "redis.lock.timeout"
-	redisLockTimeoutDefault  = 1500
-	redisLockTimeoutEnv      = "REDIS_LOCKTIMEOUT"
+	lockTimeoutFlag     = "redis-lock-timeout"
+	lockTimeoutViperKey = "redis.lock.timeout"
+	lockTimeoutDefault  = 1500
+	lockTimeoutEnv      = "REDIS_LOCKTIMEOUT"
 )
 
-// RedisLockTimeout register a flag for Redis lock timeout
-func RedisLockTimeout(f *pflag.FlagSet) {
+// LockTimeout register a flag for Redis lock timeout
+func LockTimeout(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Redis lock timeout.
-Environment variable: %q`, redisLockTimeoutEnv)
-	f.Int(redisLockTimeoutFlag, redisLockTimeoutDefault, desc)
-	viper.BindPFlag(redisLockTimeoutViperKey, f.Lookup(redisLockTimeoutFlag))
+Environment variable: %q`, lockTimeoutEnv)
+	f.Int(lockTimeoutFlag, lockTimeoutDefault, desc)
+	viper.BindPFlag(lockTimeoutViperKey, f.Lookup(lockTimeoutFlag))
 }

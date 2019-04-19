@@ -8,21 +8,21 @@ import (
 )
 
 func init() {
-	viper.BindEnv(httpHostnameViperKey, httpHostnameEnv)
-	viper.SetDefault(httpHostnameViperKey, httpHostnameDefault)
+	viper.BindEnv(hostnameViperKey, hostnameEnv)
+	viper.SetDefault(hostnameViperKey, hostnameDefault)
 }
 
 var (
-	httpHostnameFlag     = "http-hostname"
-	httpHostnameViperKey = "http.hostname"
-	httpHostnameDefault  = ":8080"
-	httpHostnameEnv      = "HTTP_HOSTNAME"
+	hostnameFlag     = "http-hostname"
+	hostnameViperKey = "http.hostname"
+	hostnameDefault  = ":8080"
+	hostnameEnv      = "HTTP_HOSTNAME"
 )
 
-// HTTPHostname register a flag for Redis server address
-func HTTPHostname(f *pflag.FlagSet) {
+// Hostname register a flag for Redis server address
+func Hostname(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Hostname to expose healthchecks and metrics.
-Environment variable: %q`, httpHostnameEnv)
-	f.String(httpHostnameFlag, httpHostnameDefault, desc)
-	viper.BindPFlag(httpHostnameViperKey, f.Lookup(httpHostnameFlag))
+Environment variable: %q`, hostnameEnv)
+	f.String(hostnameFlag, hostnameDefault, desc)
+	viper.BindPFlag(hostnameViperKey, f.Lookup(hostnameFlag))
 }
