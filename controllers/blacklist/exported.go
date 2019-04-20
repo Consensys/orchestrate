@@ -53,7 +53,9 @@ func GlobalController() *Controller {
 
 // SetGlobalController sets global blacklist controller
 func SetGlobalController(controller *Controller) {
-	ctrl = controller
+	initOnce.Do(func() {
+		ctrl = controller
+	})
 }
 
 // Control allows to control a CreditFunc with global Blacklist

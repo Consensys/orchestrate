@@ -17,7 +17,7 @@ var (
 // Init initializes Faucet
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
-		switch viper.GetString("faucet") {
+		switch viper.GetString("faucet.type") {
 		case "sarama":
 			// Initialize Sarama Faucet
 			sarama.Init(ctx)
@@ -41,5 +41,7 @@ func GlobalFaucet() Faucet {
 
 // SetGlobalFaucet sets global Sarama Faucet
 func SetGlobalFaucet(faucet Faucet) {
-	fct = faucet
+	initOnce.Do(func() {
+		fct = faucet
+	})
 }

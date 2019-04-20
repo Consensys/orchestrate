@@ -64,7 +64,9 @@ func Init(ctx context.Context) {
 
 // SetControl sets global controller
 func SetControl(control ControlFunc) {
-	ctrl = control
+	initOnce.Do(func() {
+		ctrl = control
+	})
 }
 
 // Control controls a credit function with global controller

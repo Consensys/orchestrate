@@ -33,5 +33,7 @@ func GlobalFaucet() *Faucet {
 
 // SetGlobalFaucet sets global Sarama Faucet
 func SetGlobalFaucet(faucet *Faucet) {
-	fct = faucet
+	initOnce.Do(func() {
+		fct = faucet
+	})
 }
