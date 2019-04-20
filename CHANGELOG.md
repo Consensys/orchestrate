@@ -6,6 +6,7 @@
 
 - [REFACTOR] Update to `pkg` `v0.4.0`
 - [REFACTOR] Rename `MultiEthClient` to `MultiClient`
+- [REFACTOR] Re-org `abi`
 
 ### Version 0.4.1
 
