@@ -34,7 +34,7 @@ func TestCoolDown(t *testing.T) {
 
 	// Prepare test data
 	rounds := 600
-	tests := make([]*testutils.TestCreditData, 0)
+	tests := make([]*testutils.TestRequest, 0)
 	for i := 0; i < rounds; i++ {
 		var expectedAmount *big.Int
 		if i%6 < 3 {
@@ -44,7 +44,7 @@ func TestCoolDown(t *testing.T) {
 		}
 		tests = append(
 			tests,
-			&testutils.TestCreditData{
+			&testutils.TestRequest{
 				Req: &types.Request{
 					ChainID:     chains[i%3],
 					Beneficiary: addresses[i%3],
@@ -61,7 +61,7 @@ func TestCoolDown(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	for i, test := range tests {
 		wg.Add(1)
-		go func(test *testutils.TestCreditData) {
+		go func(test *testutils.TestRequest) {
 			defer wg.Done()
 			test.ResultAmount, test.ResultOK, test.ResultErr = credit(context.Background(), test.Req)
 		}(test)
@@ -78,6 +78,6 @@ func TestCoolDown(t *testing.T) {
 
 	// Ensure results are correct
 	for _, test := range tests {
-		testutils.AssertCreditData(t, test)
+		testutils.AssertRequest(t, test)
 	}
 }

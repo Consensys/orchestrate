@@ -44,7 +44,7 @@ func TestMaxBalance(t *testing.T) {
 
 	// Prepare test data
 	rounds := 600
-	tests := make([]*testutils.TestCreditData, 0)
+	tests := make([]*testutils.TestRequest, 0)
 	for i := 0; i < rounds; i++ {
 		var expectedAmount *big.Int
 		var expectedErr error
@@ -60,7 +60,7 @@ func TestMaxBalance(t *testing.T) {
 
 		tests = append(
 			tests,
-			&testutils.TestCreditData{
+			&testutils.TestRequest{
 				Req: &types.Request{
 					ChainID: chains[i%3],
 					Amount:  values[i%3],
@@ -76,7 +76,7 @@ func TestMaxBalance(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	for _, test := range tests {
 		wg.Add(1)
-		go func(test *testutils.TestCreditData) {
+		go func(test *testutils.TestRequest) {
 			defer wg.Done()
 			amount, ok, err := credit(context.Background(), test.Req)
 			test.ResultAmount, test.ResultOK, test.ResultErr = amount, ok, err
@@ -86,6 +86,6 @@ func TestMaxBalance(t *testing.T) {
 
 	// Ensure results are correct
 	for _, test := range tests {
-		testutils.AssertCreditData(t, test)
+		testutils.AssertRequest(t, test)
 	}
 }

@@ -32,7 +32,7 @@ func TestBlackList(t *testing.T) {
 
 	// Prepare test data
 	rounds := 600
-	tests := make([]*testutils.TestCreditData, 0)
+	tests := make([]*testutils.TestRequest, 0)
 	for i := 0; i < rounds; i++ {
 		var expectedAmount *big.Int
 		if i%2 == 0 {
@@ -42,7 +42,7 @@ func TestBlackList(t *testing.T) {
 		}
 		tests = append(
 			tests,
-			&testutils.TestCreditData{
+			&testutils.TestRequest{
 				Req: &types.Request{
 					ChainID:     chains[i%3],
 					Beneficiary: addresses[(i+i%2)%3],
@@ -59,7 +59,7 @@ func TestBlackList(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	for _, test := range tests {
 		wg.Add(1)
-		go func(test *testutils.TestCreditData) {
+		go func(test *testutils.TestRequest) {
 			defer wg.Done()
 			amount, ok, err := credit(context.Background(), test.Req)
 			test.ResultAmount, test.ResultOK, test.ResultErr = amount, ok, err
@@ -69,6 +69,6 @@ func TestBlackList(t *testing.T) {
 
 	// Ensure results are correct
 	for _, test := range tests {
-		testutils.AssertCreditData(t, test)
+		testutils.AssertRequest(t, test)
 	}
 }
