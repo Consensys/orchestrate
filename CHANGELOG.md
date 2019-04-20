@@ -4,6 +4,12 @@
 
 *Released on April 20th 2019*
 
+- [CHORE] Update to Geth `1.18.26`
+
+### Version 0.4.2
+
+*Released on April 20th 2019*
+
 - [REFACTOR] Update to `pkg` `v0.4.0`
 - [REFACTOR] Rename `MultiEthClient` to `MultiClient`
 - [REFACTOR] Re-org `abi`
