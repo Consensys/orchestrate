@@ -2,6 +2,7 @@ package sarama
 
 import (
 	"context"
+	"sync"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
@@ -9,10 +10,13 @@ import (
 )
 
 var (
-	config   *sarama.Config
-	client   sarama.Client
-	producer sarama.SyncProducer
-	group    sarama.ConsumerGroup
+	config                *sarama.Config
+	client                sarama.Client
+	initClientOnce        = &sync.Once{}
+	producer              sarama.SyncProducer
+	initProducerOnce      = &sync.Once{}
+	group                 sarama.ConsumerGroup
+	initConsumerGroupOnce = &sync.Once{}
 )
 
 // InitConfig initialize global Sarama configuration
@@ -39,31 +43,37 @@ func SetConfig(cfg *sarama.Config) {
 // InitClient initilialize Sarama Client
 // It bases on viper configuration to get Kafka address
 func InitClient(ctx context.Context) {
-	// We need a config no create client
-	if config == nil {
-		InitConfig()
-	}
+	initClientOnce.Do(func() {
+		if client != nil {
+			return
+		}
 
-	// Create sarama client
-	var err error
-	client, err = sarama.NewClient(viper.GetStringSlice(kafkaAddressViperKey), config)
-	if err != nil {
-		log.WithError(err).Fatalf("sarama: could not to start client")
-		return
-	}
+		// We need a config no create client
+		if config == nil {
+			InitConfig()
+		}
 
-	// Retrieve and log connected brokers
-	var brokers = make(map[int32]string)
-	for _, v := range client.Brokers() {
-		brokers[v.ID()] = v.Addr()
-	}
-	log.Infof("sarama: client ready (connected to brokers: %v)", brokers)
+		// Create sarama client
+		var err error
+		client, err = sarama.NewClient(viper.GetStringSlice(kafkaAddressViperKey), config)
+		if err != nil {
+			log.WithError(err).Fatalf("sarama: could not to start client")
+			return
+		}
 
-	// Close when context is cancelled
-	go func() {
-		<-ctx.Done()
-		client.Close()
-	}()
+		// Retrieve and log connected brokers
+		var brokers = make(map[int32]string)
+		for _, v := range client.Brokers() {
+			brokers[v.ID()] = v.Addr()
+		}
+		log.Infof("sarama: client ready (connected to brokers: %v)", brokers)
+
+		// Close when context is cancelled
+		go func() {
+			<-ctx.Done()
+			client.Close()
+		}()
+	})
 }
 
 // Client returns Sarama global client
@@ -78,24 +88,28 @@ func SetClient(c sarama.Client) {
 
 // InitSyncProducer initialize Sarama SyncProducer
 func InitSyncProducer(ctx context.Context) {
-	// We need a client no create SyncProcucer
-	if client == nil {
+	initProducerOnce.Do(func() {
+		if producer != nil {
+			return
+		}
+
+		// Initialize client
 		InitClient(ctx)
-	}
 
-	// Create sarama sync producer
-	var err error
-	producer, err = sarama.NewSyncProducerFromClient(client)
-	if err != nil {
-		log.WithError(err).Fatalf("sarama: could not create producer")
-	}
-	log.Infof("sarama: producer ready")
+		// Create sarama sync producer
+		var err error
+		producer, err = sarama.NewSyncProducerFromClient(client)
+		if err != nil {
+			log.WithError(err).Fatalf("sarama: could not create producer")
+		}
+		log.Infof("sarama: producer ready")
 
-	// Close when context is cancelled
-	go func() {
-		<-ctx.Done()
-		producer.Close()
-	}()
+		// Close when context is cancelled
+		go func() {
+			<-ctx.Done()
+			producer.Close()
+		}()
+	})
 }
 
 // SyncProducer returns Sarama global SyncProducer
@@ -110,26 +124,30 @@ func SetSyncProducer(p sarama.SyncProducer) {
 
 // InitConsumerGroup initialize consumer group
 func InitConsumerGroup(ctx context.Context) {
-	// We need a client no create ConsumerGroup
-	if client == nil {
+	initConsumerGroupOnce.Do(func() {
+		if group != nil {
+			return
+		}
+
+		// Initialize Client
 		InitClient(ctx)
-	}
 
-	// Create group
-	var err error
-	group, err = sarama.NewConsumerGroupFromClient(viper.GetString("worker.group"), client)
-	if err != nil {
-		log.WithError(err).Fatalf("sarama: could not create consumer group")
-	}
-	log.WithFields(log.Fields{
-		"group": viper.GetString("worker.group"),
-	}).Infof("sarama: consumer group ready")
+		// Create group
+		var err error
+		group, err = sarama.NewConsumerGroupFromClient(viper.GetString(kafkaGroupViperKey), client)
+		if err != nil {
+			log.WithError(err).Fatalf("sarama: could not create consumer group")
+		}
+		log.WithFields(log.Fields{
+			"group": viper.GetString(kafkaGroupViperKey),
+		}).Infof("sarama: consumer group ready")
 
-	// Close when context is cancelled
-	go func() {
-		<-ctx.Done()
-		group.Close()
-	}()
+		// Close when context is cancelled
+		go func() {
+			<-ctx.Done()
+			group.Close()
+		}()
+	})
 }
 
 // ConsumerGroup returns Sarama global ConsumerGroup

@@ -26,18 +26,8 @@ func init() {
 	viper.BindEnv(txDecodedViperKey, txDecodedTopicEnv)
 	viper.SetDefault(txRecoverViperKey, txRecoverTopicDefault)
 	viper.BindEnv(txRecoverViperKey, txRecoverTopicEnv)
-	viper.SetDefault(crafterGroupViperKey, crafterGroupDefault)
-	viper.BindEnv(crafterGroupViperKey, crafterGroupEnv)
-	viper.SetDefault(nonceGroupViperKey, nonceGroupDefault)
-	viper.BindEnv(nonceGroupViperKey, nonceGroupEnv)
-	viper.SetDefault(signerGroupViperKey, signerGroupDefault)
-	viper.BindEnv(signerGroupViperKey, signerGroupEnv)
-	viper.SetDefault(senderGroupViperKey, senderGroupDefault)
-	viper.BindEnv(senderGroupViperKey, senderGroupEnv)
-	viper.SetDefault(decoderGroupViperKey, decoderGroupDefault)
-	viper.BindEnv(decoderGroupViperKey, decoderGroupEnv)
-	viper.SetDefault(bridgeGroupViperKey, bridgeGroupDefault)
-	viper.BindEnv(bridgeGroupViperKey, bridgeGroupEnv)
+	viper.SetDefault(kafkaGroupViperKey, kafkaGroupDefault)
+	viper.BindEnv(kafkaGroupViperKey, kafkaGroupEnv)
 }
 
 var (
@@ -53,6 +43,21 @@ func KafkaAddresses(f *pflag.FlagSet) {
 Environment variable: %q`, kafkaAddressEnv)
 	f.StringSlice(kafkaAddressFlag, kafkaAddressDefault, desc)
 	viper.BindPFlag(kafkaAddressViperKey, f.Lookup(kafkaAddressFlag))
+}
+
+var (
+	kafkaGroupFlag     = "kafka-group"
+	kafkaGroupViperKey = "kafka.group"
+	kafkaGroupDefault  = "group-e2e"
+	kafkaGroupEnv      = "KAFKA_GROUP"
+)
+
+// KafkaGroup register flag for Kafka server addresses
+func KafkaGroup(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Address of Kafka server to connect to.
+Environment variable: %q`, kafkaGroupEnv)
+	f.String(kafkaGroupFlag, kafkaGroupDefault, desc)
+	viper.BindPFlag(kafkaGroupViperKey, f.Lookup(kafkaGroupEnv))
 }
 
 var (
