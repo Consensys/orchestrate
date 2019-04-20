@@ -20,9 +20,3 @@ type Registry interface {
 	// Returns the new bytecode
 	GetBytecodeByID(id string) ([]byte, error)
 }
-
-// Crafter takes a method abi and args to craft a transaction
-type Crafter interface {
-	Craft(method ethabi.Method, args ...string) ([]byte, error)
-	CraftConstructor(method ethabi.Method, args ...string) ([]byte, error)
-}

@@ -1,4 +1,4 @@
-package abi
+package static
 
 import (
 	"fmt"
@@ -10,8 +10,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 )
 
-// StaticRegistry stores contract ABI and bytecode in memory
-type StaticRegistry struct {
+// Registry stores contract ABI and bytecode in memory
+type Registry struct {
 	abis      map[string]*ethabi.ABI
 	bytecodes map[string][]byte
 
@@ -19,9 +19,9 @@ type StaticRegistry struct {
 	abiEventBySig  map[string]ethabi.Event
 }
 
-// NewStaticRegistry initialise a newly created ContractABIRegistry
-func NewStaticRegistry() *StaticRegistry {
-	return &StaticRegistry{
+// NewRegistry creates a New Registry
+func NewRegistry() *Registry {
+	return &Registry{
 		abis:           make(map[string]*ethabi.ABI),
 		bytecodes:      make(map[string][]byte),
 		abiMethodBySig: make(map[string]ethabi.Method),
@@ -30,7 +30,7 @@ func NewStaticRegistry() *StaticRegistry {
 }
 
 // RegisterContract allow to add a contract and its corresponding ABI to the registry
-func (r *StaticRegistry) RegisterContract(contract *abi.Contract) error {
+func (r *Registry) RegisterContract(contract *abi.Contract) error {
 	abi, err := contract.ToABI()
 	if err != nil {
 		return err
@@ -52,7 +52,7 @@ func (r *StaticRegistry) RegisterContract(contract *abi.Contract) error {
 	return nil
 }
 
-func (r *StaticRegistry) getContract(name string) (*ethabi.ABI, error) {
+func (r *Registry) getContract(name string) (*ethabi.ABI, error) {
 	abi, ok := r.abis[name]
 	if !ok {
 		return nil, fmt.Errorf("Unknown contract %q", name)
@@ -62,7 +62,7 @@ func (r *StaticRegistry) getContract(name string) (*ethabi.ABI, error) {
 
 // GetMethodByID returns the abi for a given method of a contract
 // id should match the following pattern "<MethodName>@<ContracName>"
-func (r *StaticRegistry) GetMethodByID(id string) (ethabi.Method, error) {
+func (r *Registry) GetMethodByID(id string) (ethabi.Method, error) {
 	// Computing call ensure ID has been properly formated
 	call, err := common.StringToCall(id)
 	if err != nil {
@@ -90,7 +90,7 @@ func (r *StaticRegistry) GetMethodByID(id string) (ethabi.Method, error) {
 
 // GetEventByID returns the abi for a given event of a contract
 // id should match the following pattern "<EventName>@<ContracName>"
-func (r *StaticRegistry) GetEventByID(id string) (ethabi.Event, error) {
+func (r *Registry) GetEventByID(id string) (ethabi.Event, error) {
 	// Computing call ensure ID has been properly formated
 	call, err := common.StringToCall(id)
 	if err != nil {
@@ -116,7 +116,7 @@ func has0xPrefix(input string) bool {
 
 // GetMethodBySig returns the method corresponding to input signature
 // The input signature should be in hex format (matching the regex patterns "0x[0-9a-f]{8}" or "[0-9a-f]{8}")
-func (r *StaticRegistry) GetMethodBySig(sig string) (ethabi.Method, error) {
+func (r *Registry) GetMethodBySig(sig string) (ethabi.Method, error) {
 	if !has0xPrefix(sig) {
 		sig = fmt.Sprintf("0x%v", sig)
 	}
@@ -135,7 +135,7 @@ func (r *StaticRegistry) GetMethodBySig(sig string) (ethabi.Method, error) {
 
 // GetEventBySig returns the event corresponding to input signature
 // The input signature should be in hex format (matching the regex patterns "0x[0-9a-f]{16}" or "[0-9a-f]{16}")
-func (r *StaticRegistry) GetEventBySig(topic string) (ethabi.Event, error) {
+func (r *Registry) GetEventBySig(topic string) (ethabi.Event, error) {
 	if !has0xPrefix(topic) {
 		topic = fmt.Sprintf("0x%v", topic)
 	}
@@ -153,7 +153,7 @@ func (r *StaticRegistry) GetEventBySig(topic string) (ethabi.Event, error) {
 }
 
 // GetBytecodeByID returns the bytecode of the contract
-func (r *StaticRegistry) GetBytecodeByID(id string) (code []byte, err error) {
+func (r *Registry) GetBytecodeByID(id string) (code []byte, err error) {
 	// Computing call ensure ID has been properly formated
 	call, err := common.StringToCall(id)
 	if err != nil {
@@ -169,7 +169,7 @@ func (r *StaticRegistry) GetBytecodeByID(id string) (code []byte, err error) {
 }
 
 // getBytecode is a low-level getter for the bytecode
-func (r *StaticRegistry) getBytecode(name string) ([]byte, error) {
+func (r *Registry) getBytecode(name string) ([]byte, error) {
 	code, ok := r.bytecodes[name]
 	if !ok {
 		return nil, fmt.Errorf("Unknown contract %q", name)

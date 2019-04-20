@@ -8,9 +8,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestInitRegistry(t *testing.T) {
+func TestInit(t *testing.T) {
 	viper.Set("abis", "ERC20[v0.1.3]:[{\"constant\":true,\"inputs\":[],\"name\":\"myFunction\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]")
-	InitRegistry()
+	Init()
 
 	m, err := GlobalRegistry().GetMethodByID("myFunction@ERC20[v0.1.3]")
 	assert.NotNil(t, m, "Method should be available")

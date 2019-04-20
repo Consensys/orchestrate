@@ -15,7 +15,6 @@ import (
 
 // FormatIndexedArg transforms a data to string
 func FormatIndexedArg(t abi.Type, arg common.Hash) (string, error) {
-
 	switch t.T {
 	case abi.BoolTy, abi.StringTy:
 		return fmt.Sprintf("%v", arg), nil
@@ -57,7 +56,6 @@ func FormatNonIndexedArrayArg(t abi.Type, arg interface{}) (string, error) {
 
 // FormatNonIndexedArg transforms a data to string
 func FormatNonIndexedArg(t abi.Type, arg interface{}) (string, error) {
-
 	switch t.T {
 	case abi.IntTy, abi.UintTy, abi.BoolTy, abi.StringTy:
 		return fmt.Sprintf("%v", arg), nil

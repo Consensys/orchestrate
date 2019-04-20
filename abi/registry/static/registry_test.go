@@ -1,4 +1,4 @@
-package abi
+package static
 
 import (
 	"testing"
@@ -70,7 +70,7 @@ func shouldError(f interface{}, input string, t *testing.T) {
 }
 
 func TestRegisterContract(t *testing.T) {
-	r := NewStaticRegistry()
+	r := NewRegistry()
 	err := r.RegisterContract(&abi.Contract{Name: "ERC1400", Tag: "", Abi: []byte{}, Bytecode: []byte{}})
 	if err != nil {
 		t.Error("Should not error on empty ABI")
@@ -83,7 +83,7 @@ func TestRegisterContract(t *testing.T) {
 }
 
 func TestContractRegistryByID(t *testing.T) {
-	r := NewStaticRegistry()
+	r := NewRegistry()
 	r.RegisterContract(&abi.Contract{Name: "ERC1400", Tag: "", Abi: ERC1400, Bytecode: []byte{}})
 
 	method := r.GetMethodByID
@@ -101,7 +101,7 @@ func TestContractRegistryByID(t *testing.T) {
 	shouldError(event, "MinterAdded@ERC1401", t)
 	shouldError(event, "MinterAdded@ERC1401", t)
 
-	r = NewStaticRegistry()
+	r = NewRegistry()
 	r.RegisterContract(&abi.Contract{Name: "ERC1400", Tag: "v0.1.1", Abi: ERC1400, Bytecode: []byte{}})
 	method = r.GetMethodByID
 	shouldMatch(method, "isMinter@ERC1400[v0.1.1]", "function isMinter(address account) constant returns(bool)", t)
@@ -120,7 +120,7 @@ func TestContractRegistryByID(t *testing.T) {
 }
 
 func TestContractRegistryBySig(t *testing.T) {
-	r := NewStaticRegistry()
+	r := NewRegistry()
 	r.RegisterContract(&abi.Contract{Name: "ERC1400", Tag: "", Abi: ERC1400, Bytecode: []byte{}})
 
 	method := r.GetMethodBySig

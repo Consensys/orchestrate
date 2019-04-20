@@ -5,48 +5,53 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/common"
+	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
+
+// Crafter takes a method abi and args to craft a transaction
+type Crafter interface {
+	CraftCall(method ethabi.Method, args ...string) ([]byte, error)
+	CraftConstructor(method ethabi.Method, args ...string) ([]byte, error)
+}
 
 // PayloadCrafter is a structure that can Craft payloads
 type PayloadCrafter struct{}
 
-func bindArg(t abi.Type, arg string) (interface{}, error) {
-
+func bindArg(t ethabi.Type, arg string) (interface{}, error) {
 	switch t.T {
-	case abi.AddressTy:
-		if !common.IsHexAddress(arg) {
+	case ethabi.AddressTy:
+		if !ethcommon.IsHexAddress(arg) {
 			return nil, fmt.Errorf("bindArg: %q is not a valid ethereum address", arg)
 		}
-		return common.HexToAddress(arg), nil
+		return ethcommon.HexToAddress(arg), nil
 
-	case abi.FixedBytesTy:
+	case ethabi.FixedBytesTy:
 		data, err := hexutil.Decode(arg)
 		if err != nil {
 			return data, err
 		}
 		array := reflect.New(t.Type).Elem()
 
-		data = common.LeftPadBytes(data, t.Size)
+		data = ethcommon.LeftPadBytes(data, t.Size)
 		reflect.Copy(array, reflect.ValueOf(data[0:t.Size]))
 
 		return array.Interface(), nil
 
-	case abi.BytesTy:
+	case ethabi.BytesTy:
 		data, err := hexutil.Decode(arg)
 		if err != nil {
 			return data, err
 		}
 		return data, nil
 
-	case abi.IntTy, abi.UintTy:
+	case ethabi.IntTy, ethabi.UintTy:
 		// In current version we bind all types of integers to *big.Int
 		// Meaning we do not yet support int8, int16, int32, int64, uint8, uin16, uint32, uint64
 		return hexutil.DecodeBig(arg)
 
-	case abi.BoolTy:
+	case ethabi.BoolTy:
 		switch arg {
 		case "0x1", "true", "1":
 			return true, nil
@@ -56,26 +61,24 @@ func bindArg(t abi.Type, arg string) (interface{}, error) {
 			return nil, fmt.Errorf("bindArg: %v is not a bool", arg)
 		}
 
-	case abi.StringTy:
+	case ethabi.StringTy:
 		return arg, nil
 
-	case abi.ArrayTy:
+	case ethabi.ArrayTy:
 		return bindArrayArg(t, arg)
 
-	case abi.SliceTy:
+	case ethabi.SliceTy:
 		return bindArrayArg(t, arg)
 
 	// TODO: handle tuple (struct in solidity)
 
-	// In current version we only cover basic types (in particular we do not support arrays)
 	default:
 		return nil, fmt.Errorf("Arg format %v not known", t.T)
 	}
 }
 
-func bindArrayArg(t abi.Type, arg string) (interface{}, error) {
-
-	elemType, _ := abi.NewType(t.Elem.String(), nil)
+func bindArrayArg(t ethabi.Type, arg string) (interface{}, error) {
+	elemType, _ := ethabi.NewType(t.Elem.String(), nil)
 	slice := reflect.MakeSlice(reflect.SliceOf(elemType.Type), 0, 0)
 
 	arg = strings.TrimSuffix(strings.TrimPrefix(arg, "["), "]")
@@ -96,7 +99,7 @@ func bindArrayArg(t abi.Type, arg string) (interface{}, error) {
 }
 
 // bindArgs cast string arguments into expected go-ethereum types
-func bindArgs(method abi.Method, args ...string) ([]interface{}, error) {
+func bindArgs(method ethabi.Method, args ...string) ([]interface{}, error) {
 	if method.Inputs.LengthNonIndexed() != len(args) {
 		return nil, fmt.Errorf("Expected %v inputs but got %v", method.Inputs.LengthNonIndexed(), len(args))
 	}
@@ -112,25 +115,8 @@ func bindArgs(method abi.Method, args ...string) ([]interface{}, error) {
 	return boundArgs, nil
 }
 
-// Craft craft a transaction payload
-func (c *PayloadCrafter) Craft(method abi.Method, args ...string) ([]byte, error) {
-	// Cast arguments
-	boundArgs, err := bindArgs(method, args...)
-	if err != nil {
-		return nil, err
-	}
-
-	// Pack arguments
-	arguments, err := method.Inputs.Pack(boundArgs...)
-	if err != nil {
-		return nil, err
-	}
-
-	return append(method.Id(), arguments...), nil
-}
-
-// CraftConstructor craft contract creation a transaction payload
-func (c *PayloadCrafter) CraftConstructor(method abi.Method, args ...string) ([]byte, error) {
+// Pack automatically cast string args into correct Solidity type and pack arguments
+func (c *PayloadCrafter) Pack(method ethabi.Method, args ...string) ([]byte, error) {
 	// Cast arguments
 	boundArgs, err := bindArgs(method, args...)
 	if err != nil {
@@ -144,4 +130,20 @@ func (c *PayloadCrafter) CraftConstructor(method abi.Method, args ...string) ([]
 	}
 
 	return arguments, nil
+}
+
+// CraftCall craft a transaction call payload
+func (c *PayloadCrafter) CraftCall(method ethabi.Method, args ...string) ([]byte, error) {
+	// Craft arguments
+	arguments, err := c.Pack(method, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	return append(method.Id(), arguments...), nil
+}
+
+// CraftConstructor craft contract creation a transaction payload
+func (c *PayloadCrafter) CraftConstructor(method ethabi.Method, args ...string) ([]byte, error) {
+	return c.Pack(method, args...)
 }

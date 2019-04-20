@@ -188,7 +188,7 @@ func TestPayloadCrafter(t *testing.T) {
 		_to    = "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"
 		_value = "0x2386f26fc10000"
 	)
-	data, err := c.Craft(ERC20TransferMethod, _to, _value)
+	data, err := c.CraftCall(ERC20TransferMethod, _to, _value)
 
 	if err != nil {
 		t.Errorf("Craft: received error %q ", err)
@@ -209,7 +209,7 @@ func TestPayloadCrafter(t *testing.T) {
 		_bytes16 = "0xa1b2c3d4e5f67890"
 	)
 
-	data, err = c.Craft(CustomMethod, _address, _bytesA, _uint256, _uint17, _bool, _bytesB, _bytes16)
+	data, err = c.CraftCall(CustomMethod, _address, _bytesA, _uint256, _uint17, _bool, _bytesB, _bytes16)
 
 	if err != nil {
 		t.Errorf("Craft: received error %q ", err)
@@ -238,7 +238,7 @@ func TestPayloadCrafterConcurrent(t *testing.T) {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
-			raw, err := c.Craft(ERC20TransferMethod, testCrafterData[i%2].to, testCrafterData[i%2].value)
+			raw, err := c.CraftCall(ERC20TransferMethod, testCrafterData[i%2].to, testCrafterData[i%2].value)
 			// Test as been designed such as 1 out of 6 entry are valid for a credit
 			if err == nil {
 				raws <- raw
@@ -268,7 +268,7 @@ func TestPayloadCrafterArray(t *testing.T) {
 	var (
 		_array = "[0x1,0x2,0x3]"
 	)
-	data, err := c.Craft(ArrayInput, _array)
+	data, err := c.CraftCall(ArrayInput, _array)
 
 	if err != nil {
 		t.Errorf("Craft: received error %q ", err)
@@ -287,7 +287,7 @@ func TestPayloadCrafterArrayAddress(t *testing.T) {
 	var (
 		_array = "[0xca35b7d915458ef540ade6068dfe2f44e8fa733c,0x14723a09acff6d2a60dcdf7aa4aff308fddc160c,0x4b0897b0513fdc7c541b6d9d7e929c4e5364d2db]"
 	)
-	data, err := c.Craft(ArrayAddressInput, _array)
+	data, err := c.CraftCall(ArrayAddressInput, _array)
 
 	if err != nil {
 		t.Errorf("Craft: received error %q ", err)
