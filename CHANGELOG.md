@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.4.1
+
+*Unreleased*
+
+- [FIX] Update `http.App` interface
+- [FIX] Update *Dependency Injection* pattern in broker
+
 ### Version 0.4.0
 
 *Released on April 19th 2019*
