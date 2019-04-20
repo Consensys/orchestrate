@@ -7,6 +7,7 @@
 - [REFACTOR] Update to `pkg` `v0.4.0`
 - [REFACTOR] Rename `MultiEthClient` to `MultiClient`
 - [REFACTOR] Re-org `abi`
+- [FEAT] Update `crafter.CraftConstructor`
 
 ### Version 0.4.1
 

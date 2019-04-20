@@ -12,8 +12,11 @@ import (
 
 // Crafter takes a method abi and args to craft a transaction
 type Crafter interface {
+	// CraftCall craft a call Transaction
 	CraftCall(method ethabi.Method, args ...string) ([]byte, error)
-	CraftConstructor(method ethabi.Method, args ...string) ([]byte, error)
+
+	// CraftConstructor craft a Contract Deployment Transaction
+	CraftConstructor(bytecode []byte, method ethabi.Method, args ...string) ([]byte, error)
 }
 
 // PayloadCrafter is a structure that can Craft payloads
@@ -134,7 +137,7 @@ func (c *PayloadCrafter) Pack(method ethabi.Method, args ...string) ([]byte, err
 
 // CraftCall craft a transaction call payload
 func (c *PayloadCrafter) CraftCall(method ethabi.Method, args ...string) ([]byte, error) {
-	// Craft arguments
+	// Pack arguments
 	arguments, err := c.Pack(method, args...)
 	if err != nil {
 		return nil, err
@@ -144,6 +147,16 @@ func (c *PayloadCrafter) CraftCall(method ethabi.Method, args ...string) ([]byte
 }
 
 // CraftConstructor craft contract creation a transaction payload
-func (c *PayloadCrafter) CraftConstructor(method ethabi.Method, args ...string) ([]byte, error) {
-	return c.Pack(method, args...)
+func (c *PayloadCrafter) CraftConstructor(bytecode []byte, method ethabi.Method, args ...string) ([]byte, error) {
+	if len(bytecode) == 0 {
+		return nil, fmt.Errorf("Invalid empty bytecode")
+	}
+
+	// Pack arguments
+	arguments, err := c.Pack(method, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	return append(bytecode, arguments...), nil
 }
