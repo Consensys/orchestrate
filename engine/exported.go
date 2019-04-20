@@ -2,19 +2,24 @@ package engine
 
 import (
 	"context"
+	"sync"
 )
 
-func init() {
-	e = NewEngine(nil)
-}
-
-var e *Engine
+var (
+	e        *Engine
+	initOnce = &sync.Once{}
+)
 
 // Init intilialize global Engine
 // Configuration is loaded from viper
 func Init() {
-	config := NewConfig()
-	e.SetConfig(&config)
+	initOnce.Do(func() {
+		if e != nil {
+			return
+		}
+		config := NewConfig()
+		e.SetConfig(&config)
+	})
 }
 
 // SetGlobalEngine set global engine
