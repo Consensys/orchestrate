@@ -21,6 +21,10 @@ var (
 // Init intiliaze global controller
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
+		// Initialize Faucet
+		faucet.Init(ctx)
+
+		// Initialize Controllers
 		wg := &sync.WaitGroup{}
 		wg.Add(5)
 		go func() {
@@ -54,7 +58,7 @@ func Init(ctx context.Context) {
 			maxbalance.Control,
 		)
 
-		log.Info("faucet: controllers ready")
+		log.Info("faucet: ready")
 	})
 }
 
