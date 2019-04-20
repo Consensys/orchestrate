@@ -37,7 +37,7 @@ func (ctrl *Controller) IsBlackListed(chainID *big.Int, address ethcommon.Addres
 // Control apply BlackList controller on a credit function
 func (ctrl *Controller) Control(credit faucet.CreditFunc) faucet.CreditFunc {
 	return func(ctx context.Context, r *faucet.Request) (*big.Int, bool, error) {
-		if ctrl.IsBlackListed(r.ChainID, r.Address) {
+		if ctrl.IsBlackListed(r.ChainID, r.Beneficiary) {
 			return big.NewInt(0), false, nil
 		}
 		return credit(ctx, r)

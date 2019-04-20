@@ -50,7 +50,7 @@ func TestMaxBalance(t *testing.T) {
 		var expectedErr error
 		switch i % 3 {
 		case 0:
-			expectedAmount = big.NewInt(10)
+			expectedAmount = big.NewInt(9)
 		case 1:
 			expectedAmount = big.NewInt(0)
 		case 2:
@@ -63,7 +63,7 @@ func TestMaxBalance(t *testing.T) {
 			&testutils.TestCreditData{
 				Req: &faucet.Request{
 					ChainID: chains[i%3],
-					Value:   values[i%3],
+					Amount:  values[i%3],
 				},
 				ExpectedOK:     i%3 == 0,
 				ExpectedAmount: expectedAmount,

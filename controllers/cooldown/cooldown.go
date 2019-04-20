@@ -58,11 +58,11 @@ func (ctrl *Controller) Authorized(chainID *big.Int, a ethcommon.Address) {
 // Control apply CoolDown controller on a credit function
 func (ctrl *Controller) Control(credit faucet.CreditFunc) faucet.CreditFunc {
 	return func(ctx context.Context, r *faucet.Request) (*big.Int, bool, error) {
-		ctrl.lock(r.ChainID, r.Address)
-		defer ctrl.unlock(r.ChainID, r.Address)
+		ctrl.lock(r.ChainID, r.Beneficiary)
+		defer ctrl.unlock(r.ChainID, r.Beneficiary)
 
 		// If still cooling down we invalid credit
-		if ctrl.IsCoolingDown(r.ChainID, r.Address) {
+		if ctrl.IsCoolingDown(r.ChainID, r.Beneficiary) {
 			return big.NewInt(0), false, nil
 		}
 
@@ -71,7 +71,7 @@ func (ctrl *Controller) Control(credit faucet.CreditFunc) faucet.CreditFunc {
 
 		// If credit occured we update
 		if ok {
-			ctrl.Authorized(r.ChainID, r.Address)
+			ctrl.Authorized(r.ChainID, r.Beneficiary)
 		}
 
 		return amount, ok, err

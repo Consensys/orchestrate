@@ -27,13 +27,13 @@ func NewController(conf *Config) *Controller {
 func (ctrl *Controller) Control(credit faucet.CreditFunc) faucet.CreditFunc {
 	return func(ctx context.Context, r *faucet.Request) (*big.Int, bool, error) {
 		// Retrieve account balance
-		balance, err := ctrl.conf.BalanceAt(ctx, r.ChainID, r.Address, nil)
+		balance, err := ctrl.conf.BalanceAt(ctx, r.ChainID, r.Beneficiary, nil)
 		if err != nil {
 			return big.NewInt(0), false, err
 		}
 
 		// Ensure MaxBalance is repected
-		if balance.Add(balance, r.Value).Cmp(ctrl.conf.MaxBalance) >= 0 {
+		if balance.Add(balance, r.Amount).Cmp(ctrl.conf.MaxBalance) >= 0 {
 			// Do not credit if final balance would be superior to max authorized
 			return big.NewInt(0), false, nil
 		}

@@ -44,8 +44,9 @@ func TestBlackList(t *testing.T) {
 			tests,
 			&testutils.TestCreditData{
 				Req: &faucet.Request{
-					ChainID: chains[i%3],
-					Address: addresses[(i+i%2)%3],
+					ChainID:     chains[i%3],
+					Beneficiary: addresses[(i+i%2)%3],
+					Amount:      big.NewInt(10),
 				},
 				ExpectedOK:     i%2 == 1,
 				ExpectedAmount: expectedAmount,

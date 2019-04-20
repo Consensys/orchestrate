@@ -46,8 +46,9 @@ func TestCoolDown(t *testing.T) {
 			tests,
 			&testutils.TestCreditData{
 				Req: &faucet.Request{
-					ChainID: chains[i%3],
-					Address: addresses[i%3],
+					ChainID:     chains[i%3],
+					Beneficiary: addresses[i%3],
+					Amount:      big.NewInt(10),
 				},
 				ExpectedOK:     i%6 < 3,
 				ExpectedAmount: expectedAmount,
@@ -62,8 +63,7 @@ func TestCoolDown(t *testing.T) {
 		wg.Add(1)
 		go func(test *testutils.TestCreditData) {
 			defer wg.Done()
-			amount, ok, err := credit(context.Background(), test.Req)
-			test.ResultAmount, test.ResultOK, test.ResultErr = amount, ok, err
+			test.ResultAmount, test.ResultOK, test.ResultErr = credit(context.Background(), test.Req)
 		}(test)
 		switch i % 6 {
 		case 2:
