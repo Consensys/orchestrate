@@ -8,10 +8,10 @@ import (
 )
 
 func init() {
-	mec = NewMultiEthClient()
+	mec = NewMultiClient()
 }
 
-var mec *MultiEthClient
+var mec *MultiClient
 
 // Init initialize Dials chains
 //
@@ -35,7 +35,12 @@ func Init(ctx context.Context) {
 
 }
 
-// GlobalMultiClient returns global MultiEthClient
-func GlobalMultiClient() *MultiEthClient {
+// GlobalMultiClient returns global MultiClient
+func GlobalMultiClient() *MultiClient {
 	return mec
+}
+
+// SetGlobalMultiClient sets global MultiClient
+func SetGlobalMultiClient(mclient *MultiClient) {
+	mec = mclient
 }

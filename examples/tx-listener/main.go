@@ -23,10 +23,10 @@ func main() {
 
 	// Create listener
 	config := listener.NewConfig()
-	txlistener := listener.NewTxListener(ethclient.MultiClient(), config)
+	txlistener := listener.NewTxListener(ethclient.GlobalMultiClient(), config)
 
 	// Start listening on every chain starting from last block
-	for _, chainID := range ethclient.MultiClient().Networks(context.Background()) {
+	for _, chainID := range ethclient.GlobalMultiClient().Networks(context.Background()) {
 		txlistener.Listen(chainID, -1, 0)
 	}
 

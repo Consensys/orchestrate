@@ -22,7 +22,7 @@ func main() {
 	ethclient.Init(context.Background())
 
 	// Retrieve last block on every client
-	mec := ethclient.MultiClient()
+	mec := ethclient.GlobalMultiClient()
 	for _, chain := range mec.Networks(context.Background()) {
 		header, err := mec.HeaderByNumber(context.Background(), chain, nil)
 		if err != nil {

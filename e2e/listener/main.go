@@ -150,7 +150,7 @@ func main() {
 	viper.Set("blockcursor.backoff", time.Second)
 	viper.Set("blockcursor.limit", 40)
 
-	txlistener := listener.NewTxListener(ethclient.MultiClient(), config)
+	txlistener := listener.NewTxListener(ethclient.GlobalMultiClient(), config)
 
 	// Create and Listener Handler
 	handler := TxListenerHandler{}
@@ -158,7 +158,7 @@ func main() {
 	log.Infof("Engine ready")
 
 	// Start listening all chains
-	for _, chainID := range ethclient.MultiClient().Networks(context.Background()) {
+	for _, chainID := range ethclient.GlobalMultiClient().Networks(context.Background()) {
 		txlistener.Listen(chainID, -1, 0)
 	}
 
