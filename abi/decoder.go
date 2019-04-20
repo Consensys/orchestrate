@@ -10,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
-	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
+	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
 
 // FormatIndexedArg transforms a data to string

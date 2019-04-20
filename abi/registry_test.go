@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
 )
 
 var ERC1400 = []byte(

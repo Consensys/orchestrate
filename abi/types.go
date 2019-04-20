@@ -2,7 +2,7 @@ package abi
 
 import (
 	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
 )
 
 // Registry is an interface to manage ABIs

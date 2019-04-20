@@ -8,8 +8,8 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 )
 
 // EthClient embed a go-ethereum ethclient so we can implement SendRawTransaction
@@ -76,28 +76,28 @@ func Call2PrivateArgs(call *common.Call) *PrivateArgs {
 	return &args
 }
 
-// Trace2SendTxArgs creates SendTxArgs from a trace
-func Trace2SendTxArgs(tr *trace.Trace) *SendTxArgs {
-	From, _ := tr.GetSender().Address()
+// Envelope2SendTxArgs creates SendTxArgs from an Envelope
+func Envelope2SendTxArgs(e *envelope.Envelope) *SendTxArgs {
+	From, _ := e.GetSender().Address()
 	args := SendTxArgs{
 		From:        From,
-		GasPrice:    (*hexutil.Big)(tr.GetTx().GetTxData().GasPriceBig()),
-		Value:       (*hexutil.Big)(tr.GetTx().GetTxData().ValueBig()),
-		Data:        hexutil.Bytes(tr.GetTx().GetTxData().DataBytes()),
-		Input:       hexutil.Bytes(tr.GetTx().GetTxData().DataBytes()),
-		PrivateArgs: *(Call2PrivateArgs(tr.GetCall())),
+		GasPrice:    (*hexutil.Big)(e.GetTx().GetTxData().GasPriceBig()),
+		Value:       (*hexutil.Big)(e.GetTx().GetTxData().ValueBig()),
+		Data:        hexutil.Bytes(e.GetTx().GetTxData().DataBytes()),
+		Input:       hexutil.Bytes(e.GetTx().GetTxData().DataBytes()),
+		PrivateArgs: *(Call2PrivateArgs(e.GetCall())),
 	}
 
-	if gas := tr.GetTx().GetTxData().GetGas(); gas != 0 {
+	if gas := e.GetTx().GetTxData().GetGas(); gas != 0 {
 		args.Gas = (*hexutil.Uint64)(&gas)
 	}
 
-	if nonce := tr.GetTx().GetTxData().GetNonce(); nonce != 0 {
+	if nonce := e.GetTx().GetTxData().GetNonce(); nonce != 0 {
 		args.Nonce = (*hexutil.Uint64)(&nonce)
 	}
 
-	if tr.GetTx().GetTxData().GetTo() != "" {
-		to, _ := tr.GetTx().GetTxData().ToAddress()
+	if e.GetTx().GetTxData().GetTo() != "" {
+		to, _ := e.GetTx().GetTxData().ToAddress()
 		args.To = &to
 	}
 

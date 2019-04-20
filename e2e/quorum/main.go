@@ -8,9 +8,9 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
 
 // This script has been implemented as part of ABC2D hackathon
@@ -72,8 +72,8 @@ func main() {
 	chain, err := ec.NetworkID(context.Background())
 	log.Infof("Connected to chain: %v", chain.Text(16))
 
-	// Create a trace for PrivateFor including Cargill & Admin nodes
-	tr := &trace.Trace{
+	// Create a Envelope for PrivateFor including Cargill & Admin nodes
+	tr := &envelope.Envelope{
 		Sender: &common.Account{
 			Addr: "0x22460fa1b318897934fF1bb3dfeA19Ed9B218dB4",
 		},
@@ -99,7 +99,7 @@ func main() {
 	}
 
 	// Prepare arguments and send trasaction
-	args := ethclient.Trace2SendTxArgs(tr)
+	args := ethclient.Envelope2SendTxArgs(tr)
 	txHash, err := ec.SendTransaction(context.Background(), args)
 	if err != nil {
 		log.WithError(err).Errorf("Could not send Quorum private for transaction")

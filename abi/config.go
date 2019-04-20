@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
 )
 
 func init() {

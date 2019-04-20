@@ -9,45 +9,45 @@ import (
 	"github.com/spf13/viper"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
 	listener "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
 
 // Logger to log context elements before and after the worker
-func Logger(ctx *worker.Context) {
+func Logger(txctx *engine.TxContext) {
 	log.WithFields(log.Fields{
-		"Chain":       ctx.T.Chain.Id,
-		"BlockNumber": ctx.T.Receipt.BlockNumber,
-		"TxIndex":     ctx.T.Receipt.TxIndex,
-		"TxHash":      ctx.T.Receipt.TxHash,
-	}).Debug("tx-listener-worker: new receipt")
+		"Chain":       txctx.Envelope.Chain.Id,
+		"BlockNumber": txctx.Envelope.Receipt.BlockNumber,
+		"TxIndex":     txctx.Envelope.Receipt.TxIndex,
+		"TxHash":      txctx.Envelope.Receipt.TxHash,
+	}).Debug("tx-listener: new receipt")
 
-	ctx.Next()
+	txctx.Next()
 
-	if len(ctx.T.Errors) != 0 {
+	if len(txctx.Envelope.Errors) != 0 {
 		log.WithFields(log.Fields{
-			"Chain":  ctx.T.Chain.Id,
-			"TxHash": ctx.T.Receipt.TxHash,
-		}).Errorf("tx-listener-worker: Errors: %v", ctx.T.Errors)
+			"Chain":  txctx.Envelope.Chain.Id,
+			"TxHash": txctx.Envelope.Receipt.TxHash,
+		}).Errorf("tx-listener: Errors: %v", txctx.Envelope.Errors)
 	}
 }
 
 // ReceiptUnmarshaller assumes that input message is a go-ethereum receipt
 type ReceiptUnmarshaller struct{}
 
-// Unmarshal message expected to be a trace protobuffer
-func (u *ReceiptUnmarshaller) Unmarshal(msg interface{}, t *trace.Trace) error {
+// Unmarshal message expected to be a Envelope protobuffer
+func (u *ReceiptUnmarshaller) Unmarshal(msg interface{}, e *envelope.Envelope) error {
 	// Cast message into receipt
 	receipt, ok := msg.(*listener.TxListenerReceipt)
 	if !ok {
 		return fmt.Errorf("Message does not match expected format")
 	}
 
-	t.Chain = (&common.Chain{}).SetID(receipt.ChainID)
-	t.Receipt = ethereum.FromGethReceipt(&receipt.Receipt).
+	e.Chain = (&common.Chain{}).SetID(receipt.ChainID)
+	e.Receipt = ethereum.FromGethReceipt(&receipt.Receipt).
 		SetBlockHash(receipt.BlockHash).
 		SetBlockNumber(uint64(receipt.BlockNumber)).
 		SetTxHash(receipt.TxHash).
@@ -57,13 +57,13 @@ func (u *ReceiptUnmarshaller) Unmarshal(msg interface{}, t *trace.Trace) error {
 }
 
 // Loader creates an handler loading input
-func Loader(u services.Unmarshaller) worker.HandlerFunc {
-	return func(ctx *worker.Context) {
+func Loader(u encoding.Unmarshaller) engine.HandlerFunc {
+	return func(txctx *engine.TxContext) {
 		// Unmarshal message
-		err := u.Unmarshal(ctx.Msg, ctx.T)
+		err := u.Unmarshal(txctx.Msg, txctx.Envelope)
 		if err != nil {
 			// TODO: handle error
-			ctx.AbortWithError(err)
+			txctx.AbortWithError(err)
 			return
 		}
 	}
@@ -71,21 +71,20 @@ func Loader(u services.Unmarshaller) worker.HandlerFunc {
 
 // TxListenerHandler is an handler consuming receipts
 type TxListenerHandler struct {
-	w *worker.Worker
+	engine *engine.Engine
 }
 
 // Setup configure the handler
 func (h *TxListenerHandler) Setup() error {
-	// Instantiate worker
-	cfg := worker.NewConfig()
-	cfg.Partitions = 1
-	h.w = worker.NewWorker(context.Background(), cfg)
+	// Instantiate engine
+	cfg := engine.NewConfig()
+	h.engine = engine.NewEngine(&cfg)
 
 	// Handler::loader
-	h.w.Use(Loader(&ReceiptUnmarshaller{}))
+	h.engine.Register(Loader(&ReceiptUnmarshaller{}))
 
 	// Handler::logger
-	h.w.Use(Logger)
+	h.engine.Register(Logger)
 
 	return nil
 }
@@ -96,7 +95,7 @@ func (h *TxListenerHandler) Listen(l listener.TxListener) error {
 		for err := range l.Errors() {
 			log.WithFields(log.Fields{
 				"Chain": err.ChainID.Text(16),
-			}).Errorf("tx-listener-worker: error %v", err)
+			}).Errorf("tx-listener: error %v", err)
 		}
 	}()
 
@@ -106,7 +105,7 @@ func (h *TxListenerHandler) Listen(l listener.TxListener) error {
 				"BlockHash":   block.Header().Hash().Hex(),
 				"BlockNumber": block.Header().Number,
 				"Chain":       block.ChainID.Text(16),
-			}).Debugf("tx-listener-worker: new block")
+			}).Debugf("tx-listener: new block")
 		}
 	}()
 
@@ -116,11 +115,11 @@ func (h *TxListenerHandler) Listen(l listener.TxListener) error {
 		for msg := range l.Receipts() {
 			in <- msg
 		}
-		log.Info("Worker channel closed...")
+		log.Info("Engine channel closed...")
 		close(in)
 	}()
-	log.Info("Start worker...")
-	h.w.Run(in)
+	log.Info("Start engine...")
+	h.engine.Run(context.Background(), in)
 
 	return nil
 }
@@ -156,7 +155,7 @@ func main() {
 	// Create and Listener Handler
 	handler := TxListenerHandler{}
 	handler.Setup()
-	log.Infof("Worker ready")
+	log.Infof("Engine ready")
 
 	// Start listening all chains
 	for _, chainID := range ethclient.MultiClient().Networks(context.Background()) {

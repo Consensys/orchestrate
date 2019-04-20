@@ -35,7 +35,7 @@ func Init(ctx context.Context) {
 
 }
 
-// MultiClient returns default MultiEthClient
-func MultiClient() *MultiEthClient {
+// GlobalMultiClient returns global MultiEthClient
+func GlobalMultiClient() *MultiEthClient {
 	return mec
 }
