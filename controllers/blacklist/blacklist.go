@@ -28,7 +28,8 @@ func (ctrl *Controller) BlackList(chainID *big.Int, address ethcommon.Address) {
 }
 
 // IsBlackListed indicates if a user is black listed
-func (ctrl *Controller) IsBlackListed(key string) bool {
+func (ctrl *Controller) IsBlackListed(chainID *big.Int, address ethcommon.Address) bool {
+	key := utils.ToChainAccountKey(chainID, address)
 	_, ok := ctrl.blacklist.Load(key)
 	return ok
 }
@@ -36,8 +37,7 @@ func (ctrl *Controller) IsBlackListed(key string) bool {
 // Control apply BlackList controller on a credit function
 func (ctrl *Controller) Control(credit faucet.CreditFunc) faucet.CreditFunc {
 	return func(ctx context.Context, r *faucet.Request) (*big.Int, bool, error) {
-		key := utils.ToChainAccountKey(r.ChainID, r.Address)
-		if ctrl.IsBlackListed(key) {
+		if ctrl.IsBlackListed(r.ChainID, r.Address) {
 			return big.NewInt(0), false, nil
 		}
 		return credit(ctx, r)

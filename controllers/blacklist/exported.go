@@ -37,9 +37,7 @@ func Init(ctx context.Context) {
 			}
 			ctrl.BlackList(chainID, addr)
 		}
-		logger.WithFields(log.Fields{
-			"controller.length": len(blacklist),
-		}).Info("faucet: controller ready")
+		logger.Info("faucet: controller ready")
 	})
 }
 
