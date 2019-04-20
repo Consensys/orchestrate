@@ -5,8 +5,10 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/controllers/amount"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/controllers/blacklist"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/controllers/cooldown"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/controllers/creditor"
 	maxbalance "gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/controllers/max-balance"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/faucet"
 )
@@ -20,7 +22,7 @@ var (
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
 		wg := &sync.WaitGroup{}
-		wg.Add(3)
+		wg.Add(5)
 		go func() {
 			maxbalance.Init(ctx)
 			wg.Done()
@@ -33,10 +35,24 @@ func Init(ctx context.Context) {
 			cooldown.Init(ctx)
 			wg.Done()
 		}()
+		go func() {
+			amount.Init(ctx)
+			wg.Done()
+		}()
+		go func() {
+			creditor.Init(ctx)
+			wg.Done()
+		}()
 		wg.Wait()
 
 		// Combine controls
-		ctrl = CombineControls(blacklist.Control, cooldown.Control, maxbalance.Control)
+		ctrl = CombineControls(
+			creditor.Control,
+			blacklist.Control,
+			cooldown.Control,
+			amount.Control,
+			maxbalance.Control,
+		)
 
 		log.Info("faucet: controllers ready")
 	})
