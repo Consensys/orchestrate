@@ -51,8 +51,8 @@ func GlobalController() *Controller {
 	return ctrl
 }
 
-// SetGlbalController sets global blacklist controller
-func SetGlbalController(controller *Controller) {
+// SetGlobalController sets global blacklist controller
+func SetGlobalController(controller *Controller) {
 	ctrl = controller
 }
 
