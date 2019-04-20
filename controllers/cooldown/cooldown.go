@@ -8,6 +8,7 @@ import (
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/faucet"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/types"
 	stripedmutex "gitlab.com/ConsenSys/client/fr/core-stack/infra/striped-mutex.git"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 )
@@ -57,7 +58,7 @@ func (ctrl *Controller) Authorized(chainID *big.Int, a ethcommon.Address) {
 
 // Control apply CoolDown controller on a credit function
 func (ctrl *Controller) Control(credit faucet.CreditFunc) faucet.CreditFunc {
-	return func(ctx context.Context, r *faucet.Request) (*big.Int, bool, error) {
+	return func(ctx context.Context, r *types.Request) (*big.Int, bool, error) {
 		ctrl.lock(r.ChainID, r.Beneficiary)
 		defer ctrl.unlock(r.ChainID, r.Beneficiary)
 

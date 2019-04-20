@@ -7,6 +7,7 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/faucet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/faucet/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/types"
 )
 
 type MockController struct {
@@ -14,7 +15,7 @@ type MockController struct {
 }
 
 func (c *MockController) Control1(f faucet.CreditFunc) faucet.CreditFunc {
-	return func(ctx context.Context, r *faucet.Request) (*big.Int, bool, error) {
+	return func(ctx context.Context, r *types.Request) (*big.Int, bool, error) {
 		c.controls = append(c.controls, "1")
 		// Simulate a valid control
 		return f(ctx, r)
@@ -22,7 +23,7 @@ func (c *MockController) Control1(f faucet.CreditFunc) faucet.CreditFunc {
 }
 
 func (c *MockController) Control2(f faucet.CreditFunc) faucet.CreditFunc {
-	return func(ctx context.Context, r *faucet.Request) (*big.Int, bool, error) {
+	return func(ctx context.Context, r *types.Request) (*big.Int, bool, error) {
 		c.controls = append(c.controls, "2")
 		// Simulate an invalid control
 		return big.NewInt(0), false, nil
@@ -30,7 +31,7 @@ func (c *MockController) Control2(f faucet.CreditFunc) faucet.CreditFunc {
 }
 
 func (c *MockController) Control3(f faucet.CreditFunc) faucet.CreditFunc {
-	return func(ctx context.Context, r *faucet.Request) (*big.Int, bool, error) {
+	return func(ctx context.Context, r *types.Request) (*big.Int, bool, error) {
 		c.controls = append(c.controls, "3")
 		// Simulate a valid control
 		return f(ctx, r)
@@ -40,7 +41,7 @@ func (c *MockController) Control3(f faucet.CreditFunc) faucet.CreditFunc {
 func TestCombineControls(t *testing.T) {
 	c := MockController{make([]string, 0)}
 	crediter := CombineControls(c.Control1, c.Control2, c.Control3)(mock.Credit)
-	amount, ok, _ := crediter(context.Background(), &faucet.Request{})
+	amount, ok, _ := crediter(context.Background(), &types.Request{})
 
 	if amount.Cmp(big.NewInt(0)) != 0 {
 		t.Errorf("Expected amount to be 0 but got %v", amount)
@@ -62,7 +63,7 @@ func TestCombineControls(t *testing.T) {
 func TestControlledFaucet(t *testing.T) {
 	c := MockController{make([]string, 0)}
 	f := NewControlledFaucet(&mock.Faucet{}, c.Control1, c.Control2, c.Control3)
-	amount, ok, _ := f.Credit(context.Background(), &faucet.Request{})
+	amount, ok, _ := f.Credit(context.Background(), &types.Request{})
 
 	if amount.Cmp(big.NewInt(0)) != 0 {
 		t.Errorf("Expected amount to be nil but got %v", amount)

@@ -8,9 +8,9 @@ import (
 	"time"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/faucet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/faucet/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/faucet/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/types/testutils"
 )
 
 var (
@@ -45,7 +45,7 @@ func TestCoolDown(t *testing.T) {
 		tests = append(
 			tests,
 			&testutils.TestCreditData{
-				Req: &faucet.Request{
+				Req: &types.Request{
 					ChainID:     chains[i%3],
 					Beneficiary: addresses[i%3],
 					Amount:      big.NewInt(10),

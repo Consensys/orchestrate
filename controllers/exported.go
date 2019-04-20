@@ -64,6 +64,6 @@ func SetControl(control ControlFunc) {
 }
 
 // Control controls a credit function with global controller
-func Control(credit faucet.CreditFunc) faucet.CreditFunc {
-	return ctrl(credit)
+func Control(f faucet.Faucet) faucet.Faucet {
+	return NewControlledFaucet(f, ctrl)
 }

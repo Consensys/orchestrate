@@ -6,6 +6,7 @@ import (
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/faucet"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/types"
 )
 
 // BalanceAtFunc should return a balance
@@ -25,7 +26,7 @@ func NewController(conf *Config) *Controller {
 
 // Control apply MaxBalance controller on a credit function
 func (ctrl *Controller) Control(credit faucet.CreditFunc) faucet.CreditFunc {
-	return func(ctx context.Context, r *faucet.Request) (*big.Int, bool, error) {
+	return func(ctx context.Context, r *types.Request) (*big.Int, bool, error) {
 		// Retrieve account balance
 		balance, err := ctrl.conf.BalanceAt(ctx, r.ChainID, r.Beneficiary, nil)
 		if err != nil {

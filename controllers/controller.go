@@ -5,6 +5,7 @@ import (
 	"math/big"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/faucet"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/types"
 )
 
 // ControlFunc are function expected to perform controls on a credit request
@@ -33,6 +34,6 @@ func NewControlledFaucet(f faucet.Faucet, controls ...ControlFunc) *ControlledFa
 }
 
 // Credit credit
-func (f *ControlledFaucet) Credit(ctx context.Context, r *faucet.Request) (*big.Int, bool, error) {
+func (f *ControlledFaucet) Credit(ctx context.Context, r *types.Request) (*big.Int, bool, error) {
 	return f.credit(ctx, r)
 }
