@@ -10,5 +10,4 @@ import (
 func TestInit(t *testing.T) {
 	Init(context.Background())
 	assert.NotNil(t, ctrl, "Control should have been set")
-	t.Error("PIou")
 }
