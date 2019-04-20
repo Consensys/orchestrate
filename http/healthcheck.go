@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/julien-marchand/healthcheck"
@@ -11,7 +10,7 @@ import (
 
 // App interface
 type App interface {
-	Ready() bool
+	Ready() error
 }
 
 // HealthCheck register HTTP handlers for application healthcheck
@@ -28,10 +27,7 @@ func HealthCheck(app App, mux *http.ServeMux) *http.ServeMux {
 
 	// Add a simple readiness check that always fails.
 	health.AddReadinessCheck("readiness-check", func() error {
-		if !app.Ready() {
-			return fmt.Errorf("App is not ready")
-		}
-		return nil
+		return app.Ready()
 	})
 
 	// Expose prometheus metrics on /metrics
