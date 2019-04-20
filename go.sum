@@ -1,6 +1,9 @@
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
+github.com/DataDog/zstd v1.3.5 h1:DtpNbljikUepEPD16hD4LvIcmhnhdLTiW/5pHgbmp14=
 github.com/DataDog/zstd v1.3.5/go.mod h1:1jcaCB/ufaK+sKp1NBhlGmpz41jOoPQ35bpF36t7BBo=
+github.com/Shopify/sarama v1.20.1/go.mod h1:FVkBWblsNy7DGZRfXLU0O9RCGt5g3g3yEuWXgklEdEo=
+github.com/Shopify/sarama v1.22.0 h1:rtiODsvY4jW6nUV6n3K+0gx/8WlAwVt+Ixt6RIvpYyo=
 github.com/Shopify/sarama v1.22.0/go.mod h1:lm3THZ8reqBDBQKQyb5HB3sY1lKp3grEbQ81aWSgPp4=
 github.com/Shopify/toxiproxy v2.1.4+incompatible/go.mod h1:OXgGpZ6Cli1/URJOF1DMxUHB2q5Ap20/P/eIdh4G0pI=
 github.com/aead/siphash v1.0.1/go.mod h1:Nywa3cDsYNNK3gaciGTWPwHt0wlpNV15vwmswBAUSII=
@@ -37,8 +40,11 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/deckarep/golang-set v1.7.1 h1:SCQV0S6gTtp6itiFrTqI+pfmJ4LN85S1YzhDf9rTHJQ=
 github.com/deckarep/golang-set v1.7.1/go.mod h1:93vsz/8Wt4joVM7c2AVqh+YRMiUSc14yDtF28KmMOgQ=
+github.com/eapache/go-resiliency v1.1.0 h1:1NtRmCAqadE2FN4ZcN6g90TP3uk8cg9rn9eNK2197aU=
 github.com/eapache/go-resiliency v1.1.0/go.mod h1:kFI+JgMyC7bLPUVY133qvEBtVayf5mFgVsvEsIPBvNs=
+github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 h1:YEetp8/yCZMuEPMUDHG0CW/brkkEp8mzqk2+ODEitlw=
 github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21/go.mod h1:+020luEh2TKB4/GOp8oxxtq0Daoen/Cii55CzbTV6DU=
+github.com/eapache/queue v1.1.0 h1:YOEu7KNc61ntiQlcEeUIoDTJ2o8mQznoNvUhiigpIqc=
 github.com/eapache/queue v1.1.0/go.mod h1:6eCeP0CKFpHLu8blIFXhExK/dRa7WDZfr6jVFPTqq+I=
 github.com/ethereum/go-ethereum v1.8.21 h1:ofzsxFj+zKhj1k3uVa8/MJCCptqKEh/6DXq4LwdUM4E=
 github.com/ethereum/go-ethereum v1.8.21/go.mod h1:PwpWDrCLZrV+tfrhqqF6kPknbISMHaJv9Ln3kPCZLwY=
@@ -84,6 +90,7 @@ github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFSt
 github.com/pelletier/go-toml v1.2.0 h1:T5zMGML61Wp+FlcbWjRDT7yAxhJNAiPPLOFECq181zc=
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=
 github.com/pierrec/lz4 v0.0.0-20190327172049-315a67e90e41/go.mod h1:3/3N9NVKO0jef7pBehbT1qWhCMrIgbYNnFAZCqQ5LRc=
+github.com/pierrec/lz4 v2.0.5+incompatible h1:2xWsjqPFWcplujydGg4WmhC/6fZqK42wMM8aXeqhl0I=
 github.com/pierrec/lz4 v2.0.5+incompatible/go.mod h1:pdkljMzZIN41W+lC3N2tnIh5sFi+IEE17M5jbnwPHcY=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/profile v1.2.1/go.mod h1:hJw3o1OdXxsrSjjVksARp5W95eeEaEfptyVZyv6JUPA=
@@ -93,6 +100,7 @@ github.com/prometheus/client_golang v0.9.2/go.mod h1:OsXs2jCmiKlQ1lTBmv21f2mNfw4
 github.com/prometheus/client_model v0.0.0-20180712105110-5c3871d89910/go.mod h1:MbSGuTsp3dbXC40dX6PRTWyKYBIrTGTE9sqQNg2J8bo=
 github.com/prometheus/common v0.0.0-20181126121408-4724e9255275/go.mod h1:daVV7qP5qjZbuso7PdcryaAu0sAZbrN9i7WWcTMWvro=
 github.com/prometheus/procfs v0.0.0-20181204211112-1dc9a6cbc91a/go.mod h1:c3At6R/oaqEKCNdg8wHV1ftS6bRYblBhIjjI8uT2IGk=
+github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a h1:9ZKAASQSHhDYGoxY8uLVpewe1GDZ2vu2Tr/vTdVAkFQ=
 github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
 github.com/rs/cors v1.6.0 h1:G9tHG9lebljV9mfp9SNPDL36nCDxmo3zTlAf1YgvzmI=
 github.com/rs/cors v1.6.0/go.mod h1:gFx+x8UowdsKA9AchylcLynDq+nNFfI8FkUZdN/jGCU=
@@ -136,9 +144,12 @@ gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.4.1 h1:CK58sPQQz
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.4.1/go.mod h1:aRdnNLBPjEifBDmODixG+KvJlgKNAYlISH88jl3hypA=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.4.3 h1:9MKwb/lvtwsY2QSevOLFLlNHd4Z/IbqUQw2Kx/2PSl0=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.4.3/go.mod h1:xoLrBUeYLYPVfCHNr42fwbopFLFob+ol9q8s/BGaN/8=
+gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.3.0 h1:TKHMLHu3nlWBS+gmTSJzUxGWTLc/U7CMvx3gENr8ry4=
+gitlab.com/ConsenSys/client/fr/core-stack/infra/sarama.git v0.3.0/go.mod h1:9BqU2O8Tv3jT66UENzPs7pnN5QIOf5Kvd91Bil03N0U=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/striped-mutex.git v0.1.5 h1:cUZghC+St5TeE5+Uy7zQw+awB1nI2Vna9IwmgSDT+JE=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/striped-mutex.git v0.1.5/go.mod h1:84qaDpDp/i+e46WyzMU0IzTNf4sORqU3QUDV8lpmLVE=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.2.0-alpha.13/go.mod h1:SqYvbuufPNbSk5jLLSEXknrw+hXnQnCLmAtODIF0L5o=
+gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.3.3/go.mod h1:SqYvbuufPNbSk5jLLSEXknrw+hXnQnCLmAtODIF0L5o=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.0 h1:Cwy7hGRr1xFvGPNI2BVTR7bY389ls/GYFjJ9mGUaPB8=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.0/go.mod h1:FUtLot31O4Dk9NK5KHY+VeWmhKYxJAwWF46MRm9PkUI=
 go.uber.org/atomic v1.3.2/go.mod h1:gD2HeocX3+yG+ygLZcrzQJaqmWj9AIm7n08wl/qW/PE=
