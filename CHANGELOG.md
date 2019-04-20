@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.4.2
+
+*Unreleased*
+
+- [REFACTOR] Update to `pkg` `v0.4.0`
+- [REFACTOR] Rename `MultiEthClient` to `MultiClient`
+
 ### Version 0.4.1
 
 *Released on April 18th 2019*
