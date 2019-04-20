@@ -16,13 +16,19 @@ var (
 // Init initializes Faucet
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
+		if fct != nil {
+			return
+		}
+
 		// Initialize Producer
 		broker.InitSyncProducer(ctx)
 
 		// Control Faucet
 		fct = NewFaucet(broker.SyncProducer())
 
-		log.Info("faucet: ready")
+		log.WithFields(log.Fields{
+			"type": "sarama",
+		}).Info("faucet: ready")
 	})
 }
 
@@ -33,7 +39,5 @@ func GlobalFaucet() *Faucet {
 
 // SetGlobalFaucet sets global Sarama Faucet
 func SetGlobalFaucet(faucet *Faucet) {
-	initOnce.Do(func() {
-		fct = faucet
-	})
+	fct = faucet
 }

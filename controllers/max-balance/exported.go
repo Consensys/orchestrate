@@ -20,6 +20,10 @@ var (
 // Init initialize BlackList Controller
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
+		if ctrl != nil {
+			return
+		}
+
 		// Set config if not yet set
 		if config == nil {
 			InitConfig(ctx)
@@ -29,8 +33,8 @@ func Init(ctx context.Context) {
 		ctrl = NewController(config)
 
 		log.WithFields(log.Fields{
-			"controller":     "max-balance",
-			"controller.max": ctrl.conf.MaxBalance.Text(10),
+			"controller": "max-balance",
+			"max":        ctrl.conf.MaxBalance.Text(10),
 		}).Info("faucet: controller ready")
 	})
 }
@@ -68,9 +72,7 @@ func GlobalController() *Controller {
 
 // SetGlobalController sets global blacklist controller
 func SetGlobalController(controller *Controller) {
-	initOnce.Do(func() {
-		ctrl = controller
-	})
+	ctrl = controller
 }
 
 // Control allows to control a CreditFunc with global MaxBalance

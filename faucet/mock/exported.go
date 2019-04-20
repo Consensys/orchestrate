@@ -3,6 +3,8 @@ package mock
 import (
 	"context"
 	"sync"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -13,8 +15,16 @@ var (
 // Init initializes Faucet
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
+		if fct != nil {
+			return
+		}
+
 		// Initialize Faucet
 		fct = NewFaucet()
+
+		log.WithFields(log.Fields{
+			"type": "mock",
+		}).Info("faucet: ready")
 	})
 }
 
@@ -25,7 +35,5 @@ func GlobalFaucet() *Faucet {
 
 // SetGlobalFaucet sets global Sarama Faucet
 func SetGlobalFaucet(faucet *Faucet) {
-	initOnce.Do(func() {
-		fct = faucet
-	})
+	fct = faucet
 }

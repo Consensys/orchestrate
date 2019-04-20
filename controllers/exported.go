@@ -4,7 +4,6 @@ import (
 	"context"
 	"sync"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/controllers/amount"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/controllers/blacklist"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/controllers/cooldown"
@@ -21,12 +20,21 @@ var (
 // Init intiliaze global controller
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
-		// Initialize Faucet
-		faucet.Init(ctx)
+		if ctrl != nil {
+			return
+		}
 
 		// Initialize Controllers
 		wg := &sync.WaitGroup{}
-		wg.Add(5)
+		wg.Add(6)
+
+		// Initialize Faucet
+		go func() {
+			faucet.Init(ctx)
+			wg.Done()
+		}()
+
+		// Initialize Controllers
 		go func() {
 			maxbalance.Init(ctx)
 			wg.Done()
@@ -58,15 +66,19 @@ func Init(ctx context.Context) {
 			maxbalance.Control,
 		)
 
-		log.Info("faucet: ready")
+		// Update global faucet
+		faucet.SetGlobalFaucet(NewControlledFaucet(faucet.GlobalFaucet(), ctrl))
 	})
 }
 
 // SetControl sets global controller
 func SetControl(control ControlFunc) {
-	initOnce.Do(func() {
-		ctrl = control
-	})
+	// Initialize Faucet
+	faucet.Init(context.Background())
+	ctrl = control
+
+	// Update global faucet
+	faucet.SetGlobalFaucet(NewControlledFaucet(faucet.GlobalFaucet(), ctrl))
 }
 
 // Control controls a credit function with global controller

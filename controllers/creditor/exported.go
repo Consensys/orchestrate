@@ -18,12 +18,16 @@ var (
 // Init initialize BlackList Controller
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
+		if ctrl != nil {
+			return
+		}
+
 		// Initialize controller
 		ctrl = NewController()
 
 		// Enrich logger
 		logger := log.WithFields(log.Fields{
-			"controller": "blacklist",
+			"controller": "creditor",
 		})
 
 		// Set creditors
@@ -46,9 +50,7 @@ func GlobalController() *Controller {
 
 // SetGlobalController sets global blacklist controller
 func SetGlobalController(controller *Controller) {
-	initOnce.Do(func() {
-		ctrl = controller
-	})
+	ctrl = controller
 }
 
 // Control allows to control a CreditFunc with global CoolDown
