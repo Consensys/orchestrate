@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.3
+
+*Released on April 20th 2019*
+
+- [FIX] Update dependency injection pattern
+
 ### Version 0.4.2
 
 *Released on April 20th 2019*
