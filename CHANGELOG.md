@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.3.0
+
+*Unreleased*
+
+- [CHORE] Update to `pkg` `v0.4.x`
+- [REFACTOR] Major re-org of code
+
 ### Version 0.2.0-alpha
 
 *March 16th 2019*
