@@ -2,7 +2,7 @@
 
 ### Version 0.4.4
 
-*Unreleased*
+*Released on April 21th 2019*
 
 - [CHORE] Update to `pkg` `v0.4.1`
 
