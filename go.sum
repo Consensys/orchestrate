@@ -117,6 +117,8 @@ github.com/xdg/stringprep v1.0.0/go.mod h1:Jhud4/sHMO4oL310DaZAKk9ZaJ08SJfe+sJh0
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.0 h1:Cwy7hGRr1xFvGPNI2BVTR7bY389ls/GYFjJ9mGUaPB8=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.0/go.mod h1:FUtLot31O4Dk9NK5KHY+VeWmhKYxJAwWF46MRm9PkUI=
+gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.1 h1:c5bZEvV14Hpb1nqfvx8cjbtZPSlEbD7RY0DxUAccAjs=
+gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.1/go.mod h1:FUtLot31O4Dk9NK5KHY+VeWmhKYxJAwWF46MRm9PkUI=
 go.uber.org/atomic v1.3.2/go.mod h1:gD2HeocX3+yG+ygLZcrzQJaqmWj9AIm7n08wl/qW/PE=
 golang.org/x/crypto v0.0.0-20170930174604-9419663f5a44/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
