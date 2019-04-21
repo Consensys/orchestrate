@@ -12,13 +12,13 @@ var (
 
 // Init intilialize global Engine
 // Configuration is loaded from viper
-func Init() {
+func Init(ctx context.Context) {
 	initOnce.Do(func() {
 		if e != nil {
 			return
 		}
-		config := NewConfig()
-		e.SetConfig(&config)
+		conf := NewConfig()
+		e = NewEngine(&conf)
 	})
 }
 

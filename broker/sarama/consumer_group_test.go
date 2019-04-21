@@ -39,7 +39,7 @@ func (h *CounterHandler) Handle(txctx *engine.TxContext) {
 }
 
 func TestConsumerGroupHandler(t *testing.T) {
-	engine.Init()
+	engine.Init(context.Background())
 
 	handler := CounterHandler{}
 	engine.Register(handler.Handle)

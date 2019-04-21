@@ -13,15 +13,15 @@ var (
 	initOnce = &sync.Once{}
 )
 
-// InitServer initialize global HTTP server
-func InitServer(ctx context.Context) {
+// Init initialize global HTTP server
+func Init(ctx context.Context) {
 	initOnce.Do(func() {
 		if server != nil {
 			return
 		}
 
 		// Initialize server
-		server := &http.Server{}
+		server = &http.Server{}
 		server.Addr = viper.GetString(hostnameViperKey)
 	})
 }
