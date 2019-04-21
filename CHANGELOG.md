@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.4
+
+*Unreleased*
+
+- [CHORE] Update to `pkg` `v0.4.1`
+
 ### Version 0.4.3
 
 *Released on April 20th 2019*
