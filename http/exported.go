@@ -3,20 +3,27 @@ package http
 import (
 	"context"
 	"net/http"
+	"sync"
 
 	"github.com/spf13/viper"
 )
 
-func init() {
-	server = &http.Server{}
-}
-
-var server *http.Server
+var (
+	server   *http.Server
+	initOnce = &sync.Once{}
+)
 
 // InitServer initialize global HTTP server
 func InitServer(ctx context.Context) {
-	// Set server Address
-	server.Addr = viper.GetString("http.hostname")
+	initOnce.Do(func() {
+		if server != nil {
+			return
+		}
+
+		// Initialize server
+		server := &http.Server{}
+		server.Addr = viper.GetString(hostnameViperKey)
+	})
 }
 
 // GlobalServer return global HTTP server
