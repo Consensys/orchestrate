@@ -1,4 +1,4 @@
-package abi
+package registry
 
 import (
 	ethabi "github.com/ethereum/go-ethereum/accounts/abi"

@@ -1,4 +1,4 @@
-package abi
+package registry
 
 import (
 	"sync"
@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	registry Registry
+	rgstr    Registry
 	initOnce = &sync.Once{}
 )
 
@@ -16,7 +16,7 @@ var (
 func Init() {
 	initOnce.Do(func() {
 		// Create registry
-		registry = static.NewRegistry()
+		rgstr = static.NewRegistry()
 
 		// Read ABIs from ABI viper configuration
 		contracts, err := FromABIConfig()
@@ -26,17 +26,17 @@ func Init() {
 
 		// Register contracts
 		for _, contract := range contracts {
-			registry.RegisterContract(contract)
+			rgstr.RegisterContract(contract)
 		}
 	})
 }
 
 // SetGlobalRegistry sets global ABI registry
 func SetGlobalRegistry(r Registry) {
-	registry = r
+	rgstr = r
 }
 
 // GlobalRegistry returns global ABI registry
 func GlobalRegistry() Registry {
-	return registry
+	return rgstr
 }

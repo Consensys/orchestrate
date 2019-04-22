@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.5
+
+*Released on April 22th 2019*
+
+- [REFACTOR] Rename `abi` packages
+
 ### Version 0.4.4
 
 *Released on April 21th 2019*

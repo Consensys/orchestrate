@@ -1,4 +1,4 @@
-package abi
+package crafter
 
 import (
 	"fmt"
