@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestLogLevel(t *testing.T) {
@@ -27,7 +28,9 @@ func TestLogLevel(t *testing.T) {
 	args := []string{
 		"--log-level=text",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err, "No error expected")
+
 	expected = "text"
 	if viper.GetString(name) != expected {
 		t.Errorf("LogLevel #3: expected %q but got %q", expected, viper.GetString(name))
@@ -52,7 +55,9 @@ func TestLogFormat(t *testing.T) {
 	args := []string{
 		"--log-format=xml",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err, "No error expected")
+
 	expected = "xml"
 	if viper.GetString(name) != expected {
 		t.Errorf("LogFormat #3: expected %q but got %q", expected, viper.GetString(name))

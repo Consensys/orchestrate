@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHostname(t *testing.T) {
@@ -26,7 +27,9 @@ func TestHostname(t *testing.T) {
 	args := []string{
 		"--http-hostname=127.0.0.1:3000",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err, "No error expected")
+
 	expected = "127.0.0.1:3000"
 	if viper.GetString(name) != expected {
 		t.Errorf("HTTPHostname #3: expected %q but got %q", expected, viper.GetString(name))

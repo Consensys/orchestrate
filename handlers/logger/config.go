@@ -10,9 +10,9 @@ import (
 
 func init() {
 	viper.SetDefault(logLevelViperKey, logLevelDefault)
-	viper.BindEnv(logLevelViperKey, logLevelEnv)
+	_ = viper.BindEnv(logLevelViperKey, logLevelEnv)
 	viper.SetDefault(logFormatViperKey, logFormatDefault)
-	viper.BindEnv(logFormatViperKey, logFormatEnv)
+	_ = viper.BindEnv(logFormatViperKey, logFormatEnv)
 }
 
 var (
@@ -27,7 +27,7 @@ func LogLevel(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Log level (one of %q).
 Environment variable: %q`, []string{"panic", "fatal", "error", "warn", "info", "debug", "trace"}, logLevelEnv)
 	f.String(logLevelFlag, logLevelDefault, desc)
-	viper.BindPFlag(logLevelViperKey, f.Lookup(logLevelFlag))
+	_ = viper.BindPFlag(logLevelViperKey, f.Lookup(logLevelFlag))
 }
 
 var (
@@ -42,7 +42,7 @@ func LogFormat(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Log formatter (one of %q).
 Environment variable: %q`, []string{"text", "json"}, logFormatEnv)
 	f.String(logFormatFlag, logFormatDefault, desc)
-	viper.BindPFlag(logFormatViperKey, f.Lookup(logFormatFlag))
+	_ = viper.BindPFlag(logFormatViperKey, f.Lookup(logFormatFlag))
 }
 
 // InitLogger Initialize logrus Logger

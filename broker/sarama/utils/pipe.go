@@ -10,7 +10,7 @@ import (
 //
 // Pipe will stop forwarding messages either
 // - sarama channel is closed
-// - ctx has been cancelled
+// - ctx has been canceled
 func Pipe(ctx context.Context, saramaChan <-chan *sarama.ConsumerMessage) <-chan interface{} {
 	interfaceChan := make(chan interface{})
 

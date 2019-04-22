@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAddress(t *testing.T) {
@@ -26,7 +27,9 @@ func TestAddress(t *testing.T) {
 	args := []string{
 		"--redis-address=127.0.0.1:6379",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err, "No error expected")
+
 	expected = "127.0.0.1:6379"
 	if viper.GetString(name) != expected {
 		t.Errorf("RedisAddress #3: expected %q but got %q", expected, viper.GetString(name))
@@ -51,7 +54,9 @@ func TestLockTimeout(t *testing.T) {
 	args := []string{
 		"--redis-lock-timeout=3000",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err, "No error expected")
+
 	expected = 3000
 	if viper.GetInt(name) != expected {
 		t.Errorf("RedisLockTimeout #3: expected %v but got %v", expected, viper.GetInt(name))

@@ -25,7 +25,7 @@ func TestUnmarshaller(t *testing.T) {
 		wg.Add(1)
 		go func(e *envelope.Envelope) {
 			defer wg.Done()
-			u.Unmarshal(newConsumerMessage(), e)
+			_ = u.Unmarshal(newConsumerMessage(), e)
 		}(envelopes[len(envelopes)-1])
 	}
 	wg.Wait()

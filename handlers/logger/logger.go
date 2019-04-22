@@ -21,7 +21,7 @@ func Logger(txctx *engine.TxContext) {
 
 	txctx.Logger.
 		WithFields(log.Fields{
-			"latency": time.Now().Sub(start),
+			"latency": time.Since(start),
 		}).
 		WithError(fmt.Errorf("%q", txctx.Envelope.GetErrors())).
 		Info("logger: message processed")

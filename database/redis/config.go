@@ -9,9 +9,9 @@ import (
 
 func init() {
 	viper.SetDefault(addressViperKey, addressDefault)
-	viper.BindEnv(addressViperKey, addressEnv)
+	_ = viper.BindEnv(addressViperKey, addressEnv)
 	viper.SetDefault(lockTimeoutViperKey, lockTimeoutDefault)
-	viper.BindEnv(lockTimeoutViperKey, lockTimeoutEnv)
+	_ = viper.BindEnv(lockTimeoutViperKey, lockTimeoutEnv)
 }
 
 var (
@@ -26,7 +26,7 @@ func Address(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Address of Redis server to connect to.
 Environment variable: %q`, addressEnv)
 	f.String(addressFlag, addressDefault, desc)
-	viper.BindPFlag(addressViperKey, f.Lookup(addressFlag))
+	_ = viper.BindPFlag(addressViperKey, f.Lookup(addressFlag))
 }
 
 var (
@@ -41,5 +41,5 @@ func LockTimeout(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Redis lock timeout.
 Environment variable: %q`, lockTimeoutEnv)
 	f.Int(lockTimeoutFlag, lockTimeoutDefault, desc)
-	viper.BindPFlag(lockTimeoutViperKey, f.Lookup(lockTimeoutFlag))
+	_ = viper.BindPFlag(lockTimeoutViperKey, f.Lookup(lockTimeoutFlag))
 }

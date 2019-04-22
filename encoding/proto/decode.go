@@ -7,19 +7,19 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 )
 
-// EnvelopeUnmarshaller assumes that input message is a Envelope
-type EnvelopeUnmarshaller struct{}
+// Unmarshaller assumes that input message is a Envelope
+type Unmarshaller struct{}
 
 // Unmarshal message expected to be a Envelope
-func (u *EnvelopeUnmarshaller) Unmarshal(msg interface{}, e *envelope.Envelope) error {
+func (u *Unmarshaller) Unmarshal(msg interface{}, pb proto.Message) error {
 	// Cast message into protobuffer
-	pb, ok := msg.(*envelope.Envelope)
+	e, ok := msg.(*envelope.Envelope)
 	if !ok {
-		return fmt.Errorf("Message does not match expected format")
+		return fmt.Errorf("message does not match expected format")
 	}
 
 	// Load Envelope from protobuffer
-	proto.Merge(e, pb)
+	proto.Merge(pb, e)
 
 	return nil
 

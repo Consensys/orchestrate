@@ -10,7 +10,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine/testutils"
 )
 
-func makeLoggerContext(i int) *engine.TxContext {
+func makeLoggerContext() *engine.TxContext {
 	txctx := engine.NewTxContext().Prepare([]engine.HandlerFunc{}, log.NewEntry(log.StandardLogger()), nil)
 	txctx.Set("errors", 0)
 	return txctx
@@ -20,22 +20,22 @@ type LoggerTestSuite struct {
 	testutils.HandlerTestSuite
 }
 
-func (suite *LoggerTestSuite) SetupSuite() {
-	suite.Handler = Logger
+func (s *LoggerTestSuite) SetupSuite() {
+	s.Handler = Logger
 }
 
-func (suite *LoggerTestSuite) TestLogger() {
+func (s *LoggerTestSuite) TestLogger() {
 	rounds := 100
 	txctxs := []*engine.TxContext{}
 	for i := 0; i < rounds; i++ {
-		txctxs = append(txctxs, makeLoggerContext(i))
+		txctxs = append(txctxs, makeLoggerContext())
 	}
 
 	// Handle contexts
-	suite.Handle(txctxs)
+	s.Handle(txctxs)
 
 	for _, txctx := range txctxs {
-		assert.Len(suite.T(), txctx.Envelope.Errors, txctx.Get("errors").(int), "Expected right count of errors")
+		assert.Len(s.T(), txctx.Envelope.Errors, txctx.Get("errors").(int), "Expected right count of errors")
 	}
 }
 

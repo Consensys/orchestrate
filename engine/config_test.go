@@ -25,7 +25,9 @@ func TestSlots(t *testing.T) {
 	args := []string{
 		"--engine-slots=150",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err, "No error expected")
+
 	expected = 150
 	assert.Equal(t, expected, viper.GetInt(name), "From Flag")
 }
@@ -45,7 +47,9 @@ func TestPartitions(t *testing.T) {
 	args := []string{
 		"--engine-partitions=150",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err, "No error expected")
+
 	expected = 150
 	assert.Equal(t, expected, viper.GetInt(name), "From Flag")
 }
@@ -65,7 +69,9 @@ func TestTimeout(t *testing.T) {
 	args := []string{
 		"--engine-timeout=100ms",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err, "No error expected")
+
 	expected = 100 * time.Millisecond
 	assert.Equal(t, expected, viper.GetDuration(name), "From Flag")
 }

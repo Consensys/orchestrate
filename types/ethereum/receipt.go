@@ -19,8 +19,8 @@ func FromGethReceipt(receipt *types.Receipt) *Receipt {
 		Status:            receipt.Status,
 		Bloom:             receipt.Bloom.Bytes(),
 		Logs:              logs,
-		GasUsed:           uint64(receipt.GasUsed),
-		CumulativeGasUsed: uint64(receipt.CumulativeGasUsed),
+		GasUsed:           receipt.GasUsed,
+		CumulativeGasUsed: receipt.CumulativeGasUsed,
 	}
 }
 

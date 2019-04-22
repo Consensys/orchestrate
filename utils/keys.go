@@ -25,7 +25,7 @@ func ToChainAccountKey(chainID *big.Int, acc common.Address) string {
 func FromChainAccountKey(key string) (chainID *big.Int, acc common.Address, err error) {
 	parts := chainAccountKeyPattern.FindStringSubmatch(key)
 	if len(parts) != 3 {
-		return nil, common.HexToAddress(""), fmt.Errorf("Key %q is invalid (expects format %q)", key, chainAccountKeyPatternRegexp)
+		return nil, common.HexToAddress(""), fmt.Errorf("key %q is invalid (expects format %q)", key, chainAccountKeyPatternRegexp)
 	}
 
 	chain, ok := big.NewInt(0).SetString(parts[2], 10)

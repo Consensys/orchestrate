@@ -15,13 +15,13 @@ type HandlerTestSuite struct {
 }
 
 // Handle execute handler concurrently on every input TxContext
-func (suite *HandlerTestSuite) Handle(txctxs []*engine.TxContext) {
+func (s *HandlerTestSuite) Handle(txctxs []*engine.TxContext) {
 	// Execute handler on every TxContext concurrently
 	wg := &sync.WaitGroup{}
 	for _, txctx := range txctxs {
 		wg.Add(1)
 		go func(txctx *engine.TxContext) {
-			suite.Handler(txctx)
+			s.Handler(txctx)
 			wg.Done()
 		}(txctx)
 	}

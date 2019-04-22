@@ -11,19 +11,19 @@ import (
 
 func init() {
 	viper.SetDefault(hostViperKey, hostDefault)
-	viper.BindEnv(hostViperKey, hostEnv)
+	_ = viper.BindEnv(hostViperKey, hostEnv)
 	viper.SetDefault(portViperKey, portDefault)
-	viper.BindEnv(portViperKey, portEnv)
+	_ = viper.BindEnv(portViperKey, portEnv)
 	viper.SetDefault(samplerParamViperKey, samplerParamDefault)
-	viper.BindEnv(samplerParamViperKey, samplerParamEnv)
+	_ = viper.BindEnv(samplerParamViperKey, samplerParamEnv)
 	viper.SetDefault(samplerTypeViperKey, samplerTypeDefault)
-	viper.BindEnv(samplerTypeViperKey, samplerTypeEnv)
+	_ = viper.BindEnv(samplerTypeViperKey, samplerTypeEnv)
 	viper.SetDefault(serviceNameViperKey, serviceNameDefault)
-	viper.BindEnv(serviceNameViperKey, serviceNameEnv)
+	_ = viper.BindEnv(serviceNameViperKey, serviceNameEnv)
 	viper.SetDefault(disabledViperKey, disabledDefault)
-	viper.BindEnv(disabledViperKey, disabledEnv)
+	_ = viper.BindEnv(disabledViperKey, disabledEnv)
 	viper.SetDefault(logSpansViperKey, logSpansDefault)
-	viper.BindEnv(logSpansViperKey, logSpansEnv)
+	_ = viper.BindEnv(logSpansViperKey, logSpansEnv)
 }
 
 // NewConfig create new Jaeger configuration
@@ -54,7 +54,7 @@ func Host(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Jaeger host.
 Environment variable: %q`, hostEnv)
 	f.String(hostFlag, hostDefault, desc)
-	viper.BindPFlag(hostViperKey, f.Lookup(hostFlag))
+	_ = viper.BindPFlag(hostViperKey, f.Lookup(hostFlag))
 }
 
 var (
@@ -69,7 +69,7 @@ func Port(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Jaeger port
 Environment variable: %q`, portEnv)
 	f.Int(portFlag, portDefault, desc)
-	viper.BindPFlag(portViperKey, f.Lookup(portFlag))
+	_ = viper.BindPFlag(portViperKey, f.Lookup(portFlag))
 }
 
 // TODO : adding all binding Flag and to trigger Jaegger
@@ -105,7 +105,7 @@ func SamplerParam(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Jaeger sampler
 Environment variable: %q`, samplerParamEnv)
 	f.Int(samplerParamFlag, samplerParamDefault, desc)
-	viper.BindPFlag(samplerParamViperKey, f.Lookup(samplerParamFlag))
+	_ = viper.BindPFlag(samplerParamViperKey, f.Lookup(samplerParamFlag))
 }
 
 var (
@@ -120,5 +120,5 @@ func SamplerType(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Jaeger sampler
 Environment variable: %q`, samplerTypeEnv)
 	f.String(samplerTypeFlag, samplerTypeDefault, desc)
-	viper.BindPFlag(samplerTypeViperKey, f.Lookup(samplerTypeFlag))
+	_ = viper.BindPFlag(samplerTypeViperKey, f.Lookup(samplerTypeFlag))
 }

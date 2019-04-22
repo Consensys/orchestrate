@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Exit on error
-set -e
+set -Eeu
 
-echo "mode: count" >> tmp.out
+echo "mode: count" > tmp.out
 for package in $@; do
   go test -covermode=count -coverprofile profile.out "${package}"
   if [ -f profile.out ]; then

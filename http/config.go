@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	viper.BindEnv(hostnameViperKey, hostnameEnv)
+	_ = viper.BindEnv(hostnameViperKey, hostnameEnv)
 	viper.SetDefault(hostnameViperKey, hostnameDefault)
 }
 
@@ -24,5 +24,5 @@ func Hostname(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Hostname to expose healthchecks and metrics.
 Environment variable: %q`, hostnameEnv)
 	f.String(hostnameFlag, hostnameDefault, desc)
-	viper.BindPFlag(hostnameViperKey, f.Lookup(hostnameFlag))
+	_ = viper.BindPFlag(hostnameViperKey, f.Lookup(hostnameFlag))
 }

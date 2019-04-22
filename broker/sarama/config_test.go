@@ -30,7 +30,8 @@ func TestKafkaAddresses(t *testing.T) {
 		"--kafka-address=127.0.0.1:9091",
 		"--kafka-address=127.0.0.2:9091",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err, "No error expected")
 
 	expected = []string{
 		"127.0.0.1:9091",

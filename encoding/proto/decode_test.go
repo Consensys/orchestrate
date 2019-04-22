@@ -14,16 +14,14 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
 func newProtoMessage() *envelope.Envelope {
 	return &envelope.Envelope{
-		Sender: &common.Account{Id: "abcde"},
+		Sender: &common.Account{Id: "abcd"},
 	}
 }
 
-func TestEnvelopeUnmarshaller(t *testing.T) {
-	u := EnvelopeUnmarshaller{}
+func TestUnmarshaller(t *testing.T) {
+	u := Unmarshaller{}
 	envelopes := make([]*envelope.Envelope, 0)
 	rounds := 1000
 	wg := &sync.WaitGroup{}
@@ -32,14 +30,14 @@ func TestEnvelopeUnmarshaller(t *testing.T) {
 		wg.Add(1)
 		go func(t *envelope.Envelope) {
 			defer wg.Done()
-			u.Unmarshal(newProtoMessage(), t)
+			_ = u.Unmarshal(newProtoMessage(), t)
 		}(envelopes[len(envelopes)-1])
 	}
 	wg.Wait()
 
 	for _, tr := range envelopes {
-		if tr.Sender.Id != "abcde" {
-			t.Errorf("EnvelopeUnmarshaller: expected %q but got %q", "abcde", tr.Sender.Id)
+		if tr.Sender.Id != "abcd" {
+			t.Errorf("EnvelopeUnmarshaller: expected %q but got %q", "abcd", tr.Sender.Id)
 		}
 	}
 }

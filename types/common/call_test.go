@@ -28,9 +28,9 @@ func TestFromShortCall(t *testing.T) {
 	assert.Equal(t, "v1.0.1", c.GetContract().GetTag(), "Tag should be correct")
 	assert.Equal(t, true, c.GetMethod().IsDeploy(), "Deploy should be correct")
 
-	c, err = StringToCall("transfer")
+	_, err = StringToCall("transfer")
 	assert.NotNil(t, err, "No error expected")
 
-	c, err = StringToCall("transfer@ERC20[v1;0;1]")
+	_, err = StringToCall("transfer@ERC20[v1;0;1]")
 	assert.NotNil(t, err, "No error expected")
 }

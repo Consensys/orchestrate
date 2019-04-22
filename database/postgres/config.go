@@ -8,12 +8,12 @@ import (
 )
 
 func init() {
-	viper.BindEnv(dbUserViperKey, dbUserEnv)
-	viper.BindEnv(dbPasswordViperKey, dbPasswordEnv)
-	viper.BindEnv(dbDatabaseViperKey, dbDatabaseEnv)
-	viper.BindEnv(dbHostViperKey, dbHostEnv)
-	viper.BindEnv(dbPortViperKey, dbPortEnv)
-	viper.BindEnv(dbPoolSizeViperKey, dbPoolSizeEnv)
+	_ = viper.BindEnv(dbUserViperKey, dbUserEnv)
+	_ = viper.BindEnv(dbPasswordViperKey, dbPasswordEnv)
+	_ = viper.BindEnv(dbDatabaseViperKey, dbDatabaseEnv)
+	_ = viper.BindEnv(dbHostViperKey, dbHostEnv)
+	_ = viper.BindEnv(dbPortViperKey, dbPortEnv)
+	_ = viper.BindEnv(dbPoolSizeViperKey, dbPoolSizeEnv)
 }
 
 // PGFlags register flags for Postgres database
@@ -37,7 +37,7 @@ func DBUser(f *pflag.FlagSet, defaultUser string) {
 	desc := fmt.Sprintf(`Database User.
 Environment variable: %q`, dbUserEnv)
 	f.String(dbUserFlag, defaultUser, desc)
-	viper.BindPFlag(dbUserViperKey, f.Lookup(dbUserFlag))
+	_ = viper.BindPFlag(dbUserViperKey, f.Lookup(dbUserFlag))
 	viper.SetDefault(dbUserViperKey, defaultUser)
 }
 
@@ -53,7 +53,7 @@ func DBPassword(f *pflag.FlagSet, defaultPassword string) {
 Environment variable: %q`, dbPasswordEnv)
 	f.String(dbPasswordFlag, defaultPassword, desc)
 	viper.SetDefault(dbPasswordViperKey, defaultPassword)
-	viper.BindPFlag(dbPasswordViperKey, f.Lookup(dbPasswordFlag))
+	_ = viper.BindPFlag(dbPasswordViperKey, f.Lookup(dbPasswordFlag))
 }
 
 var (
@@ -68,7 +68,7 @@ func DBDatabase(f *pflag.FlagSet, defaultDatabase string) {
 Environment variable: %q`, dbDatabaseEnv)
 	f.String(dbDatabaseFlag, defaultDatabase, desc)
 	viper.SetDefault(dbDatabaseViperKey, defaultDatabase)
-	viper.BindPFlag(dbDatabaseViperKey, f.Lookup(dbDatabaseFlag))
+	_ = viper.BindPFlag(dbDatabaseViperKey, f.Lookup(dbDatabaseFlag))
 }
 
 var (
@@ -83,7 +83,7 @@ func DBHost(f *pflag.FlagSet, defaultHost string) {
 Environment variable: %q`, dbHostEnv)
 	f.String(dbHostFlag, defaultHost, desc)
 	viper.SetDefault(dbHostViperKey, defaultHost)
-	viper.BindPFlag(dbHostViperKey, f.Lookup(dbHostFlag))
+	_ = viper.BindPFlag(dbHostViperKey, f.Lookup(dbHostFlag))
 }
 
 var (
@@ -98,7 +98,7 @@ func DBPort(f *pflag.FlagSet, defaultPort int) {
 Environment variable: %q`, dbPortEnv)
 	f.Int(dbPortFlag, defaultPort, desc)
 	viper.SetDefault(dbPortViperKey, defaultPort)
-	viper.BindPFlag(dbPortViperKey, f.Lookup(dbPortFlag))
+	_ = viper.BindPFlag(dbPortViperKey, f.Lookup(dbPortFlag))
 }
 
 var (
@@ -114,5 +114,5 @@ func DBPoolSize(f *pflag.FlagSet) {
 Environment variable: %q`, dbPoolSizeEnv)
 	f.Int(dbPoolSizeFlag, dbPoolSizeDefault, desc)
 	viper.SetDefault(dbPoolSizeViperKey, dbPoolSizeDefault)
-	viper.BindPFlag(dbPoolSizeViperKey, f.Lookup(dbPoolSizeFlag))
+	_ = viper.BindPFlag(dbPoolSizeViperKey, f.Lookup(dbPoolSizeFlag))
 }

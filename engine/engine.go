@@ -38,8 +38,8 @@ type Engine struct {
 }
 
 // NewEngine creates a new Engine
-func NewEngine(conf *Config) *Engine {
-	e := &Engine{
+func NewEngine(conf *Config) (e *Engine) {
+	e = &Engine{
 		handlers:  []HandlerFunc{},
 		running:   0,
 		cleanOnce: &sync.Once{},
@@ -52,7 +52,7 @@ func NewEngine(conf *Config) *Engine {
 		e.SetConfig(conf)
 	}
 
-	return e
+	return
 }
 
 // SetConfig set Engine configuration
@@ -80,7 +80,7 @@ func (e *Engine) Register(handler HandlerFunc) {
 // Run starts consuming messages from an input channel
 //
 // Run will gracefully interrupt either if
-// - provided ctx is cancelled
+// - provided ctx is canceled
 // - input channel is closed
 //
 // Once you have stopped consuming from an input channel, you should not start to consuming
@@ -128,7 +128,7 @@ runningLoop:
 			// Release a message slot
 			<-e.slots
 		case <-ctx.Done():
-			// Context has timeout or been cancelled so we leave the loop
+			// Context has timeout or been canceled so we leave the loop
 			break runningLoop
 		}
 	}
@@ -209,7 +209,7 @@ func TimeoutHandler(h HandlerFunc, timeout time.Duration, msg string) HandlerFun
 			// Execution properly completed
 		case <-timeoutCtx.Done():
 			// Execution timed out
-			txctx.Error(fmt.Errorf(msg))
+			_ = txctx.Error(fmt.Errorf(msg))
 		case p := <-panicChan:
 			// Execution panic so we forward
 			panic(p)

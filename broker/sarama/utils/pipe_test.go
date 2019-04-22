@@ -12,11 +12,9 @@ import (
 
 type TestPipeSuite struct {
 	suite.Suite
-
-	in chan *sarama.ConsumerMessage
 }
 
-func (suite *TestPipeSuite) TestPipe() {
+func (s *TestPipeSuite) TestPipe() {
 	in := make(chan *sarama.ConsumerMessage)
 
 	// Initialize pipe
@@ -28,7 +26,7 @@ func (suite *TestPipeSuite) TestPipe() {
 
 	for i := 0; i < rounds; i++ {
 		msg := <-piped
-		assert.Equal(suite.T(), []byte{byte(i)}, msg.(*sarama.ConsumerMessage).Key, "Message should have correct Key")
+		assert.Equal(s.T(), []byte{byte(i)}, msg.(*sarama.ConsumerMessage).Key, "Message should have correct Key")
 	}
 }
 
@@ -38,7 +36,7 @@ func feed(in chan<- *sarama.ConsumerMessage, rounds int) {
 	}
 }
 
-func (suite *TestPipeSuite) TestPipeInterupted() {
+func (s *TestPipeSuite) TestPipeInterupted() {
 	in := make(chan *sarama.ConsumerMessage)
 	// Initialize pipe with a cancellable context
 	ctx, cancel := context.WithCancel(context.Background())
@@ -57,8 +55,8 @@ func (suite *TestPipeSuite) TestPipeInterupted() {
 		count++
 	}
 
-	assert.True(suite.T(), count > 0, "At least one message should have been processed")
-	assert.True(suite.T(), count < rounds, "All message should not have been processed")
+	assert.True(s.T(), count > 0, "At least one message should have been processed")
+	assert.True(s.T(), count < rounds, "All message should not have been processed")
 }
 
 func TestPipe(t *testing.T) {

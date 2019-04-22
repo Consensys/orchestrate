@@ -15,14 +15,14 @@ import (
 )
 
 var (
-	s = mock.NewConsumerGroupSession(context.Background(), "test-group", make(map[string][]int32))
-	c = mock.NewConsumerGroupClaim("test-topic", 0, 0)
+	session = mock.NewConsumerGroupSession(context.Background(), "test-group", make(map[string][]int32))
+	c       = mock.NewConsumerGroupClaim("test-topic", 0, 0)
 )
 
 func makeMarkerContext(i int) *engine.TxContext {
 	// Initialize context
 	txctx := engine.NewTxContext().Prepare([]engine.HandlerFunc{}, log.NewEntry(log.StandardLogger()), nil)
-	ctx := broker.WithConsumerGroupSessionAndClaim(context.Background(), s, c)
+	ctx := broker.WithConsumerGroupSessionAndClaim(context.Background(), session, c)
 	txctx.WithContext(ctx)
 
 	txctx.Msg = &sarama.ConsumerMessage{
@@ -38,11 +38,11 @@ type MarkerTestSuite struct {
 	testutils.HandlerTestSuite
 }
 
-func (suite *MarkerTestSuite) SetupSuite() {
-	suite.Handler = Marker
+func (s *MarkerTestSuite) SetupSuite() {
+	s.Handler = Marker
 }
 
-func (suite *MarkerTestSuite) TestMarker() {
+func (s *MarkerTestSuite) TestMarker() {
 	rounds := 100
 	txctxs := []*engine.TxContext{}
 	for i := 0; i < rounds; i++ {
@@ -50,9 +50,9 @@ func (suite *MarkerTestSuite) TestMarker() {
 	}
 
 	// Handle contexts
-	suite.Handle(txctxs)
+	s.Handle(txctxs)
 
-	assert.Equal(suite.T(), int64(rounds), s.LastMarkedOffset("test-topic", 0).Offset, "Expected message to have been marked")
+	assert.Equal(s.T(), int64(rounds), session.LastMarkedOffset("test-topic", 0).Offset, "Expected message to have been marked")
 }
 
 func TestLoader(t *testing.T) {

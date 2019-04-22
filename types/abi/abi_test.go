@@ -51,6 +51,6 @@ func TestFromStringd(t *testing.T) {
 	assert.Len(t, gethABI.Methods, 1, "Method has been registered")
 	assert.Equal(t, "testMethod", gethABI.Methods["testMethod"].Name, "method name should match")
 
-	c, err = StringToContract("ERC20[v0.1.2;alpha]")
+	_, err = StringToContract("ERC20[v0.1.2;alpha]")
 	assert.NotNil(t, err, "Expected error")
 }

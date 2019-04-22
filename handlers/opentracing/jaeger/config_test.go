@@ -24,7 +24,9 @@ func TestHost(t *testing.T) {
 	args := []string{
 		"--jaeger-host=flag-jaeger",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err, "No error expected")
+
 	expected = "flag-jaeger"
 	assert.Equal(t, expected, viper.GetString(name), "From Flag")
 }
@@ -44,7 +46,9 @@ func TestPort(t *testing.T) {
 	args := []string{
 		"--jaeger-port=5779",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err, "No error expected")
+
 	expected = 5779
 	assert.Equal(t, expected, viper.GetInt(name), "From Flag")
 }
@@ -64,7 +68,9 @@ func TestSamplerParam(t *testing.T) {
 	args := []string{
 		"--jaeger-sampler-param=0",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err, "No error expected")
+
 	expected = 0
 	assert.Equal(t, expected, viper.GetInt(name), "From Flag")
 }

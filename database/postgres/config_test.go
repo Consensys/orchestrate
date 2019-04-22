@@ -9,12 +9,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const DEFAULT = "default"
+
 func TestDBUser(t *testing.T) {
 	name := "db.user"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	DBUser(flgs, "default")
+	DBUser(flgs, DEFAULT)
 
-	expected := "default"
+	expected := DEFAULT
 	assert.Equal(t, expected, viper.GetString(name), "Default db user should be %q but got %q", expected, viper.GetString(name))
 
 	os.Setenv("DB_USER", "env-user")
@@ -24,7 +26,8 @@ func TestDBUser(t *testing.T) {
 	args := []string{
 		"--db-user=flag-user",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err, "No error expected")
 
 	expected = "flag-user"
 	assert.Equal(t, expected, viper.GetString(name), "After setting flag db user should be %q but got %q", expected, viper.GetString(name))
@@ -33,9 +36,9 @@ func TestDBUser(t *testing.T) {
 func TestDBPassword(t *testing.T) {
 	name := "db.password"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	DBPassword(flgs, "default")
+	DBPassword(flgs, DEFAULT)
 
-	expected := "default"
+	expected := DEFAULT
 	assert.Equal(t, expected, viper.GetString(name), "Default db password should be %q but got %q", expected, viper.GetString(name))
 
 	os.Setenv("DB_PASSWORD", "env-password")
@@ -45,7 +48,8 @@ func TestDBPassword(t *testing.T) {
 	args := []string{
 		"--db-password=flag-password",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err, "No error expected")
 
 	expected = "flag-password"
 	assert.Equal(t, expected, viper.GetString(name), "After setting flag db password should be %q but got %q", expected, viper.GetString(name))
@@ -54,9 +58,9 @@ func TestDBPassword(t *testing.T) {
 func TestDBDatabase(t *testing.T) {
 	name := "db.database"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	DBDatabase(flgs, "default")
+	DBDatabase(flgs, DEFAULT)
 
-	expected := "default"
+	expected := DEFAULT
 	assert.Equal(t, expected, viper.GetString(name), "Default db database should be %q but got %q", expected, viper.GetString(name))
 
 	os.Setenv("DB_DATABASE", "env-database")
@@ -66,7 +70,8 @@ func TestDBDatabase(t *testing.T) {
 	args := []string{
 		"--db-database=flag-database",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err, "No error expected")
 
 	expected = "flag-database"
 	assert.Equal(t, expected, viper.GetString(name), "After setting flag db database should be %q but got %q", expected, viper.GetString(name))
@@ -87,7 +92,8 @@ func TestDBHost(t *testing.T) {
 	args := []string{
 		"--db-host=localhost",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err, "No error expected")
 
 	expected = "localhost"
 	assert.Equal(t, expected, viper.GetString(name), "After setting flag db host should be %q but got %q", expected, viper.GetString(name))
@@ -108,7 +114,8 @@ func TestDBPort(t *testing.T) {
 	args := []string{
 		"--db-port=5442",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err, "No error expected")
 
 	expected = 5442
 	assert.Equal(t, expected, viper.GetInt(name), "After setting flag db port should be %v but got %v", expected, viper.GetInt(name))

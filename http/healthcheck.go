@@ -26,9 +26,7 @@ func HealthCheck(app App, mux *http.ServeMux) *http.ServeMux {
 	})
 
 	// Add a simple readiness check that always fails.
-	health.AddReadinessCheck("readiness-check", func() error {
-		return app.Ready()
-	})
+	health.AddReadinessCheck("readiness-check", app.Ready)
 
 	// Expose prometheus metrics on /metrics
 	mux.Handle("/metrics", promhttp.HandlerFor(prometheus.DefaultGatherer, promhttp.HandlerOpts{}))

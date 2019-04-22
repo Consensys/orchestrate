@@ -16,7 +16,7 @@ import (
 func TestContext(t *testing.T) {
 	ctx := WithConsumerGroupSessionAndClaim(
 		context.Background(),
-		mock.NewConsumerGroupSession(nil, "test-group", make(map[string][]int32)),
+		mock.NewConsumerGroupSession(context.TODO(), "test-group", make(map[string][]int32)),
 		mock.NewConsumerGroupClaim("topic-test", 1, 0),
 	)
 
@@ -64,7 +64,12 @@ func TestConsumerGroupHandler(t *testing.T) {
 	// Create consumer group
 	cg := mock.NewConsumerGroup("test-group", msgs)
 	ctx, cancel := context.WithCancel(context.Background())
-	go cg.Consume(ctx, []string{"test-topic-1", "test-topic-2"}, cgHandler)
+
+	var err error
+	go func() {
+		err = cg.Consume(ctx, []string{"test-topic-1", "test-topic-2"}, cgHandler)
+	}()
+	assert.Nil(t, err, "No error expected")
 
 	time.Sleep(100 * time.Millisecond)
 	cancel()

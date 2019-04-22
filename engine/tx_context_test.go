@@ -20,13 +20,13 @@ func newHandler(s string, t *testing.T) HandlerFunc {
 	}
 }
 
-var errTest = errors.New("Test Error")
+var errTest = errors.New("test Error")
 
 func newErrorHandler(s string, t *testing.T) HandlerFunc {
 	return func(txctx *TxContext) {
 		t.Logf("At %v, index=%v", s, txctx.index)
 		txctx.Set(testKey, append(txctx.Get(testKey).([]string), s))
-		txctx.Error(errTest)
+		_ = txctx.Error(errTest)
 	}
 }
 
@@ -34,7 +34,7 @@ func newAborter(s string, t *testing.T) HandlerFunc {
 	return func(txctx *TxContext) {
 		t.Logf("At %v, index=%v", s, txctx.index)
 		txctx.Set(testKey, append(txctx.Get(testKey).([]string), s))
-		txctx.AbortWithError(errTest)
+		_ = txctx.AbortWithError(errTest)
 	}
 }
 
@@ -80,18 +80,18 @@ func TestNext(t *testing.T) {
 }
 
 func TestCtxError(t *testing.T) {
-	err := fmt.Errorf("Test Error")
+	err := fmt.Errorf("test Error")
 
 	txctx := NewTxContext()
-	txctx.Error(err)
+	_ = txctx.Error(err)
 
 	assert.Len(t, txctx.Envelope.Errors, 1, "Error count should be correct")
 
-	err = &common.Error{Message: "Test Error", Type: 5}
-	txctx.Error(err)
+	err = &common.Error{Message: "test Error", Type: 5}
+	_ = txctx.Error(err)
 
 	assert.Len(t, txctx.Envelope.Errors, 2, "Error count should be correct")
-	assert.Equal(t, `2 error(s): ["Error #0: Test Error" "Error #5: Test Error"]`, txctx.Envelope.Error(), "Error message should be correct")
+	assert.Equal(t, `2 error(s): ["Error #0: test Error" "Error #5: test Error"]`, txctx.Envelope.Error(), "Error message should be correct")
 }
 
 func TestLogger(t *testing.T) {

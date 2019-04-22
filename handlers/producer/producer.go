@@ -23,7 +23,7 @@ func Producer(p sarama.SyncProducer, prepareMsg PrepareMsg) engine.HandlerFunc {
 		msg := &sarama.ProducerMessage{}
 		err := prepareMsg(txctx, msg)
 		if err != nil {
-			txctx.AbortWithError(err)
+			_ = txctx.AbortWithError(err)
 			txctx.Logger.WithError(err).Errorf("producer: could not prepare message")
 			return
 		}
@@ -31,7 +31,7 @@ func Producer(p sarama.SyncProducer, prepareMsg PrepareMsg) engine.HandlerFunc {
 		// Send message
 		partition, offset, err := p.SendMessage(msg)
 		if err != nil {
-			txctx.AbortWithError(err)
+			_ = txctx.AbortWithError(err)
 			txctx.Logger.WithError(err).Errorf("producer: could not produce message")
 			return
 		}

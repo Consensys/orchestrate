@@ -46,7 +46,10 @@ func (g *ConsumerGroup) Consume(ctx context.Context, topics []string, handler sa
 	s := NewConsumerGroupSession(ctx, g.group, claims)
 
 	// Call SetUp hook
-	handler.Setup(s)
+	err := handler.Setup(s)
+	if err != nil {
+		return err
+	}
 
 	wg := &sync.WaitGroup{}
 	for topic, partitions := range s.Claims() {
@@ -63,7 +66,7 @@ func (g *ConsumerGroup) Consume(ctx context.Context, topics []string, handler sa
 			wg.Add(1)
 			go func(c *ConsumerGroupClaim) {
 				// ConsumeClaim in dedicated go routine
-				handler.ConsumeClaim(s, c)
+				_ = handler.ConsumeClaim(s, c)
 				wg.Done()
 			}(c)
 		}
@@ -71,7 +74,11 @@ func (g *ConsumerGroup) Consume(ctx context.Context, topics []string, handler sa
 	wg.Wait()
 
 	// Call CleanUp loop
-	handler.Cleanup(s)
+	err = handler.Cleanup(s)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

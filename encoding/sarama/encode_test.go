@@ -68,7 +68,7 @@ var expected, _ = proto.Marshal(testEnvelope)
 func newEnvelope() *envelope.Envelope {
 	// Create Envelope
 	e := &envelope.Envelope{}
-	proto.Unmarshal(expected, e)
+	_ = proto.Unmarshal(expected, e)
 
 	return e
 }
@@ -84,7 +84,7 @@ func TestMarshaller(t *testing.T) {
 		wg.Add(1)
 		go func(msg *sarama.ProducerMessage) {
 			defer wg.Done()
-			m.Marshal(newEnvelope(), msg)
+			_ = m.Marshal(newEnvelope(), msg)
 		}(message)
 	}
 	wg.Wait()
@@ -99,4 +99,3 @@ func TestMarshaller(t *testing.T) {
 		}
 	}
 }
-

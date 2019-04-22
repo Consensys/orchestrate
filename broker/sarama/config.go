@@ -9,25 +9,25 @@ import (
 
 func init() {
 	viper.SetDefault(kafkaAddressViperKey, kafkaAddressDefault)
-	viper.BindEnv(kafkaAddressViperKey, kafkaAddressEnv)
+	_ = viper.BindEnv(kafkaAddressViperKey, kafkaAddressEnv)
 	viper.SetDefault(txCrafterViperKey, txCrafterTopicDefault)
-	viper.BindEnv(txCrafterViperKey, txCrafterTopicEnv)
+	_ = viper.BindEnv(txCrafterViperKey, txCrafterTopicEnv)
 	viper.SetDefault(txNonceViperKey, txNonceTopicDefault)
-	viper.BindEnv(txNonceViperKey, txNonceTopicEnv)
+	_ = viper.BindEnv(txNonceViperKey, txNonceTopicEnv)
 	viper.SetDefault(generateWalletViperKey, generateWalletDefault)
-	viper.BindEnv(generateWalletViperKey, generateWalletTopicEnv)
+	_ = viper.BindEnv(generateWalletViperKey, generateWalletTopicEnv)
 	viper.SetDefault(txSignerViperKey, txSignerTopicDefault)
-	viper.BindEnv(txSignerViperKey, txSignerTopicEnv)
+	_ = viper.BindEnv(txSignerViperKey, txSignerTopicEnv)
 	viper.SetDefault(txSenderViperKey, txSenderTopicDefault)
-	viper.BindEnv(txSenderViperKey, txSenderTopicEnv)
+	_ = viper.BindEnv(txSenderViperKey, txSenderTopicEnv)
 	viper.SetDefault(txDecoderViperKey, txDecoderTopicDefault)
-	viper.BindEnv(txDecoderViperKey, txDecoderTopicEnv)
+	_ = viper.BindEnv(txDecoderViperKey, txDecoderTopicEnv)
 	viper.SetDefault(txDecodedViperKey, txDecodedTopicDefault)
-	viper.BindEnv(txDecodedViperKey, txDecodedTopicEnv)
+	_ = viper.BindEnv(txDecodedViperKey, txDecodedTopicEnv)
 	viper.SetDefault(txRecoverViperKey, txRecoverTopicDefault)
-	viper.BindEnv(txRecoverViperKey, txRecoverTopicEnv)
+	_ = viper.BindEnv(txRecoverViperKey, txRecoverTopicEnv)
 	viper.SetDefault(kafkaGroupViperKey, kafkaGroupDefault)
-	viper.BindEnv(kafkaGroupViperKey, kafkaGroupEnv)
+	_ = viper.BindEnv(kafkaGroupViperKey, kafkaGroupEnv)
 }
 
 var (
@@ -42,7 +42,7 @@ func KafkaAddresses(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Address of Kafka server to connect to.
 Environment variable: %q`, kafkaAddressEnv)
 	f.StringSlice(kafkaAddressFlag, kafkaAddressDefault, desc)
-	viper.BindPFlag(kafkaAddressViperKey, f.Lookup(kafkaAddressFlag))
+	_ = viper.BindPFlag(kafkaAddressViperKey, f.Lookup(kafkaAddressFlag))
 }
 
 var (
@@ -57,7 +57,7 @@ func KafkaGroup(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Address of Kafka server to connect to.
 Environment variable: %q`, kafkaGroupEnv)
 	f.String(kafkaGroupFlag, kafkaGroupDefault, desc)
-	viper.BindPFlag(kafkaGroupViperKey, f.Lookup(kafkaGroupEnv))
+	_ = viper.BindPFlag(kafkaGroupViperKey, f.Lookup(kafkaGroupEnv))
 }
 
 var (
@@ -109,7 +109,7 @@ func KafkaTopicTxCrafter(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Kafka topic for messages waiting to have transaction payload crafted
 Environment variable: %q`, txCrafterTopicEnv)
 	f.String(txCrafterFlag, txCrafterTopicDefault, desc)
-	viper.BindPFlag(txCrafterViperKey, f.Lookup(txCrafterFlag))
+	_ = viper.BindPFlag(txCrafterViperKey, f.Lookup(txCrafterFlag))
 }
 
 // KafkaTopicTxNonce register flag for Kafka topic
@@ -117,7 +117,7 @@ func KafkaTopicTxNonce(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Kafka topic for messages waiting to have transaction nonce set
 Environment variable: %q`, txNonceViperKey)
 	f.String(txNonceFlag, txNonceTopicDefault, desc)
-	viper.BindPFlag(txNonceViperKey, f.Lookup(txNonceFlag))
+	_ = viper.BindPFlag(txNonceViperKey, f.Lookup(txNonceFlag))
 }
 
 // KafkaTopicTxSigner register flag for Kafka topic
@@ -125,7 +125,7 @@ func KafkaTopicTxSigner(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Kafka topic for messages waiting to have transaction signed
 Environment variable: %q`, txSignerViperKey)
 	f.String(txSignerFlag, txSignerTopicDefault, desc)
-	viper.BindPFlag(txSignerViperKey, f.Lookup(txSignerFlag))
+	_ = viper.BindPFlag(txSignerViperKey, f.Lookup(txSignerFlag))
 }
 
 // KafkaTopicWalletGenerator register flag for Kafka topic
@@ -133,7 +133,7 @@ func KafkaTopicWalletGenerator(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Kafka topic for messages waiting to generate a new wallet
 Environment variable: %q`, generateWalletViperKey)
 	f.String(generateWalletFlag, generateWalletDefault, desc)
-	viper.BindPFlag(generateWalletViperKey, f.Lookup(generateWalletFlag))
+	_ = viper.BindPFlag(generateWalletViperKey, f.Lookup(generateWalletFlag))
 }
 
 // KafkaTopicTxSender register flag for Kafka topic
@@ -141,7 +141,7 @@ func KafkaTopicTxSender(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Kafka topic for messages waiting to have transaction sent
 Environment variable: %q`, txSenderViperKey)
 	f.String(txSenderFlag, txSenderTopicDefault, desc)
-	viper.BindPFlag(txSenderViperKey, f.Lookup(txSenderFlag))
+	_ = viper.BindPFlag(txSenderViperKey, f.Lookup(txSenderFlag))
 }
 
 // KafkaTopicTxDecoder register flag for Kafka topic
@@ -149,7 +149,7 @@ func KafkaTopicTxDecoder(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Kafka topic for messages waiting to have receipt decoded
 Environment variable: %q`, txDecoderViperKey)
 	f.String(txDecoderFlag, txDecoderTopicDefault, desc)
-	viper.BindPFlag(txDecoderViperKey, f.Lookup(txDecoderFlag))
+	_ = viper.BindPFlag(txDecoderViperKey, f.Lookup(txDecoderFlag))
 }
 
 // KafkaTopicTxRecover register flag for Kafka topic
@@ -157,7 +157,15 @@ func KafkaTopicTxRecover(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Kafka topic for messages waiting to have transaction recovered
 Environment variable: %q`, txRecoverViperKey)
 	f.String(txRecoverFlag, txRecoverTopicDefault, desc)
-	viper.BindPFlag(txRecoverViperKey, f.Lookup(txRecoverFlag))
+	_ = viper.BindPFlag(txRecoverViperKey, f.Lookup(txRecoverFlag))
+}
+
+// KafkaTopicTxDecoded register flag for Kafka topic
+func KafkaTopicTxDecoded(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Kafka topic for messages which receipt has been decoded
+Environment variable: %q`, txDecodedViperKey)
+	f.String(txDecodedFlag, txDecodedTopicDefault, desc)
+	_ = viper.BindPFlag(txDecodedViperKey, f.Lookup(txDecodedFlag))
 }
 
 // Kafka Consumer group environment variables
@@ -194,11 +202,11 @@ var (
 )
 
 // consumerGroup register flag for a kafka consumer group
-func consumerGroup(f *pflag.FlagSet, flag string, key string, env string, defaultValue string) {
+func consumerGroup(f *pflag.FlagSet, flag, key, env, defaultValue string) {
 	desc := fmt.Sprintf(`Kafka consumer group name
 Environment variable: %q`, env)
 	f.String(flag, defaultValue, desc)
-	viper.BindPFlag(key, f.Lookup(flag))
+	_ = viper.BindPFlag(key, f.Lookup(flag))
 }
 
 // CrafterGroup register flag for kafka crafter group

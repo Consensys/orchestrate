@@ -47,20 +47,20 @@ func (l *SignalListener) listen() {
 signalLoop:
 	for {
 		select {
-		case signal := <-l.signals:
-			l.processSignal(signal)
+		case sig := <-l.signals:
+			l.processSignal(sig)
 		case <-l.closed:
 			break signalLoop
 		}
 	}
 }
 
-func (l *SignalListener) processSignal(signal os.Signal) {
-	switch signal {
+func (l *SignalListener) processSignal(sig os.Signal) {
+	switch sig {
 	case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
-		log.Warnf("signal: %q intercepted", signal.String())
-		l.cb(signal)
+		log.Warnf("signal: %q intercepted", sig.String())
+		l.cb(sig)
 	default:
-		log.Fatalf("signal: unknown signal %q intercepted, exit now", signal.String())
+		log.Fatalf("signal: unknown signal %q intercepted, exit now", sig.String())
 	}
 }

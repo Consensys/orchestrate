@@ -68,7 +68,7 @@ func InitClient(ctx context.Context) {
 		}
 		log.Infof("sarama: client ready (connected to brokers: %v)", brokers)
 
-		// Close when context is cancelled
+		// Close when context is canceled
 		go func() {
 			<-ctx.Done()
 			client.Close()
@@ -104,7 +104,7 @@ func InitSyncProducer(ctx context.Context) {
 		}
 		log.Infof("sarama: producer ready")
 
-		// Close when context is cancelled
+		// Close when context is canceled
 		go func() {
 			<-ctx.Done()
 			producer.Close()
@@ -142,7 +142,7 @@ func InitConsumerGroup(ctx context.Context) {
 			"group": viper.GetString(kafkaGroupViperKey),
 		}).Infof("sarama: consumer group ready")
 
-		// Close when context is cancelled
+		// Close when context is canceled
 		go func() {
 			<-ctx.Done()
 			group.Close()

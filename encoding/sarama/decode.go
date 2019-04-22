@@ -1,10 +1,8 @@
 package sarama
 
 import (
-	"fmt"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 )
 
 // Unmarshaller unmarshals Sarama consumer message to an Envelope
@@ -15,16 +13,10 @@ func NewUnmarshaller() *Unmarshaller {
 	return &Unmarshaller{}
 }
 
-// Unmarshal message
-func (u *Unmarshaller) Unmarshal(msg interface{}, e *envelope.Envelope) error {
-	// Cast message into a sarama.ConsumerMessage
-	cast, ok := msg.(*sarama.ConsumerMessage)
-	if !ok {
-		return fmt.Errorf("Expected a sarama.ConsumerMessage")
-	}
-
+// Unmarshal message assumed to be a sarama.ConsumerMessage into a proto
+func (u *Unmarshaller) Unmarshal(msg *sarama.ConsumerMessage, pb proto.Message) error {
 	// Unmarshal Sarama message to Envelope
-	err := proto.Unmarshal(cast.Value, e)
+	err := proto.Unmarshal(msg.Value, pb)
 	if err != nil {
 		return err
 	}

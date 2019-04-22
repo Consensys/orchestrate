@@ -10,11 +10,11 @@ import (
 
 func init() {
 	viper.SetDefault(engineSlotsViperKey, engineSlotsDefault)
-	viper.BindEnv(engineSlotsViperKey, engineSlotsEnv)
+	_ = viper.BindEnv(engineSlotsViperKey, engineSlotsEnv)
 	viper.SetDefault(enginePartitionsViperKey, enginePartitionsDefault)
-	viper.BindEnv(enginePartitionsViperKey, enginePartitionsEnv)
+	_ = viper.BindEnv(enginePartitionsViperKey, enginePartitionsEnv)
 	viper.SetDefault(engineTimeoutViperKey, engineTimeoutDefault)
-	viper.BindEnv(engineTimeoutViperKey, engineTimeoutEnv)
+	_ = viper.BindEnv(engineTimeoutViperKey, engineTimeoutEnv)
 }
 
 // Config is engine configuration
@@ -25,7 +25,7 @@ type Config struct {
 // Validate ensure configuration is valid
 func (c *Config) Validate() error {
 	if c.Slots <= 0 {
-		return fmt.Errorf("At least one engine slot is required")
+		return fmt.Errorf("at least one engine slot is required")
 	}
 
 	return nil
@@ -56,7 +56,7 @@ func Slots(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Maximum number of messages the engine can treat concurrently.
 Environment variable: %q`, engineSlotsEnv)
 	f.Uint(engineSlotsFlag, engineSlotsDefault, desc)
-	viper.BindPFlag(engineSlotsViperKey, f.Lookup(engineSlotsFlag))
+	_ = viper.BindPFlag(engineSlotsViperKey, f.Lookup(engineSlotsFlag))
 }
 
 var (
@@ -71,7 +71,7 @@ func Partitions(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Number of partitions spawned by engine to treat messages in parallel.
 Environment variable: %q`, enginePartitionsEnv)
 	f.Uint(enginePartitionsFlag, enginePartitionsDefault, desc)
-	viper.BindPFlag(enginePartitionsViperKey, f.Lookup(enginePartitionsFlag))
+	_ = viper.BindPFlag(enginePartitionsViperKey, f.Lookup(enginePartitionsFlag))
 }
 
 var (
@@ -86,5 +86,5 @@ func Timeout(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Maximum time for a message to be handled a message
 Environment variable: %q`, engineTimeoutEnv)
 	f.Duration(engineTimeoutFlag, engineTimeoutDefault, desc)
-	viper.BindPFlag(engineTimeoutViperKey, f.Lookup(engineTimeoutFlag))
+	_ = viper.BindPFlag(engineTimeoutViperKey, f.Lookup(engineTimeoutFlag))
 }

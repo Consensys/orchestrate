@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBridgeLinks(t *testing.T) {
@@ -40,7 +41,8 @@ func TestBridgeLinks(t *testing.T) {
 		"--bridge-links=addr0@chainID0<>addr0@chainID0",
 		"--bridge-links=addr1@chainID1<>add1@chainID1,addr2@chainID2<>addr2@chainID2",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err, "No error expected")
 
 	expected = []string{
 		"addr0@chainID0<>addr0@chainID0",
@@ -80,7 +82,9 @@ func TestBridgeMethodSignature(t *testing.T) {
 	args := []string{
 		"--bridge-methodsignature=TestMethod(address,uint256)",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err, "No error expected")
+
 	if expected != viper.GetString(name) {
 		t.Errorf("BridgeMethodSignature #3: expect %v but got %v", expected, viper.GetString(name))
 	}
@@ -108,7 +112,9 @@ func TestBridgeAuthority(t *testing.T) {
 	args := []string{
 		"--bridge-authority=0xTestAddress",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err, "No error expected")
+
 	if expected != viper.GetString(name) {
 		t.Errorf("BridgeAuthority #3: expect %v but got %v", expected, viper.GetString(name))
 	}

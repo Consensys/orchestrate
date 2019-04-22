@@ -34,7 +34,7 @@ func StringToContract(s string) (*Contract, error) {
 	parts := contractPattern.FindStringSubmatch(s)
 
 	if len(parts) != 8 {
-		return nil, fmt.Errorf("String format invalid (expected format %q): %q", contractRegexp, s)
+		return nil, fmt.Errorf("string format invalid (expected format %q): %q", contractRegexp, s)
 	}
 
 	c := &Contract{
@@ -48,7 +48,7 @@ func StringToContract(s string) (*Contract, error) {
 	}
 	bytecode, err := hexutil.Decode(parts[7])
 	if err != nil {
-		return nil, fmt.Errorf("Contract %q bytecode is invalid", c.Short())
+		return nil, fmt.Errorf("contract %q bytecode is invalid", c.Short())
 	}
 	c.Bytecode = bytecode
 
@@ -56,7 +56,7 @@ func StringToContract(s string) (*Contract, error) {
 	c.Abi = []byte(parts[5])
 	_, err = c.ToABI()
 	if err != nil {
-		return nil, fmt.Errorf("Contract %q ABI is invalid", c.Short())
+		return nil, fmt.Errorf("contract %q ABI is invalid", c.Short())
 	}
 
 	return c, nil
@@ -64,16 +64,16 @@ func StringToContract(s string) (*Contract, error) {
 
 // ToABI returns a Geth ABI object built from a contract ABI
 func (c *Contract) ToABI() (*abi.ABI, error) {
-	abi := &abi.ABI{}
+	a := &abi.ABI{}
 
 	if len(c.Abi) > 0 {
-		err := abi.UnmarshalJSON(c.Abi)
+		err := a.UnmarshalJSON(c.Abi)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return abi, nil
+	return a, nil
 }
 
 // IsDeploy indicate wether the method refers to a deployment
