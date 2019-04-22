@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.2
+
+*Release on April 22th 2019*
+
+- [FIX] Update `Chain.SetID` method
+
 ### Version 0.4.1
 
 *Released on April 21th 2019*
