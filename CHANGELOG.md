@@ -2,7 +2,7 @@
 
 ### Version 0.3.0
 
-*Unreleased*
+*Released on 22th April 2019*
 
 - [CHORE] Update to `pkg` `v0.4.x`
 - [REFACTOR] Major re-org of code
