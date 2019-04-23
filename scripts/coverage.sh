@@ -13,7 +13,7 @@ for package in $@; do
 done
 
 # Ignore generated files
-cat tmp.out | grep -v ".pb.go" > cover.out
+cat tmp.out | grep -v ".pb.go" --exclude-dir=examples --exclude-dir=e2e > cover.out
 
 # Generate coverage report in html formart
 go tool cover -func=cover.out
