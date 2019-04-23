@@ -17,7 +17,7 @@ linters-settings:
   dupl:
     threshold: 100
   goconst:
-    min-len: 2
+    min-len: 5
     min-occurrences: 2
   depguard:
     list-type: blacklist
