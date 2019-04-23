@@ -9,13 +9,15 @@ import (
 
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestTxListener(t *testing.T) {
 	blocks := []*types.Block{}
 	for _, blockEnc := range blocksEnc {
 		var block types.Block
-		rlp.DecodeBytes(blockEnc, &block)
+		err := rlp.DecodeBytes(blockEnc, &block)
+		assert.Nil(t, err)
 		blocks = append(blocks, &block)
 	}
 	mec := NewMockEthClient(blocks)
@@ -141,7 +143,8 @@ func TestTxListenerWithReturns(t *testing.T) {
 	blocks := []*types.Block{}
 	for _, blockEnc := range blocksEnc {
 		var block types.Block
-		rlp.DecodeBytes(blockEnc, &block)
+		err := rlp.DecodeBytes(blockEnc, &block)
+		assert.Nil(t, err)
 		blocks = append(blocks, &block)
 	}
 	mec := NewMockEthClient(blocks)

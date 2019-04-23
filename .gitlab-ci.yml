@@ -1,40 +1,137 @@
-# Use latest Golang image for new perks and shiny features
-image: golang:latest
-
-cache:
-  paths:
-    - /apt-cache
-    - /root/go
-
+---
 stages:
+  - cache-update
   - test
+  - build
+
+variables:
+  GOPATH: ${CI_PROJECT_DIR}/.gocache
+#  CI_DEBUG_TRACE: "true"
+
+services:
+  - docker:dind
 
 before_script:
-  # Add deploy ssh key so we can import go packages from private GitLab repo
-  - mkdir -p ~/.ssh
-  - echo "$SSH_DEPLOY_CORE_STACK" | tr -d '\r' > ~/.ssh/id_rsa
-  - chmod 700 ~/.ssh/id_rsa
-  - ssh-keyscan -H gitlab.com >> ~/.ssh/known_hosts
-
   # Change git config so we can import go packages from GitLab
-  - git config --global url."git@gitlab.com:".insteadOf "https://gitlab.com/"
+  - git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/".insteadOf "git@gitlab.com:"
+  - git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/".insteadOf "https://gitlab.com/"
 
   # Set GOPATH
-  - echo "${HOME}/go"
-  - mkdir "${HOME}/go"; export GOPATH="${HOME}/go"
-  - export PATH="${GOPATH}/bin:${GOROOT}/bin:${PATH}"
+  - mkdir -p ${GOPATH}
+  - export PATH="${PATH}:${GOPATH}/bin:${GOROOT}/bin"
   - make tools
 
+cache-update:
+  image: golang:1.12
+  stage: cache-update
+  script:
+    - go mod download -json
+  cache:
+    policy: push
+    paths:
+      - ${GOPATH}
+  only:
+    - master
+
 test:
+  image: golang:1.12
   stage: test
   coverage: /^total:.*\s(\d+.\d+)%/
   script:
     - make run-coverage
+  cache:
+    policy: pull
+    paths:
+      - ${GOPATH}
+  except:
+      - tags
 
 test-lint:
+  image: golang:1.12
   stage: test
   script:
-    - make fmt-check
-    - make misspell-check
     - make race
     - make lint
+  cache:
+    policy: pull
+    paths:
+      - ${GOPATH}
+  except:
+      - tags
+
+build-on-branch:
+  image: docker:stable
+  stage: build
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+  script:
+    # Build image following http://label-schema.org/rc1/ label convention convention
+    - docker build
+      --build-arg GITLAB_USER=gitlab-ci-token
+      --build-arg GITLAB_TOKEN=$CI_JOB_TOKEN
+      --label org.label-schema.schema-version="1.0.0-rc1"
+      --label org.label-schema.build-date=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
+      --label org.label-schema.name="${CI_PROJECT_NAME}"
+      --label org.label-schema.version="dirty"
+      --label org.label-schema.vcs-url="${CI_PROJECT_URL}"
+      --label org.label-schema.vcs-ref="${CI_COMMIT_SHA:0:8}"
+      --label org.label-schema.vendor="ConsenSys France"
+      -t ${CI_REGISTRY_IMAGE}/${CI_COMMIT_REF_SLUG}:${CI_COMMIT_SHORT_SHA} .
+    # Push images
+    - docker push ${CI_REGISTRY_IMAGE}/${CI_COMMIT_REF_SLUG}:${CI_COMMIT_SHORT_SHA}
+  after_script:
+    - docker logout $CI_REGISTRY
+  only:
+    - /^dev[a-zA-Z0-9\/-]*$/
+    - /^feature/[a-zA-Z0-9\/-]*$/
+    - /^fix/[a-zA-Z0-9\/-]*$/
+  cache:
+    policy: pull
+    paths:
+      - ${GOPATH}
+
+build-on-master:
+  image: docker:stable
+  stage: build
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+  script:
+    # Build image following http://label-schema.org/rc1/ label convention convention
+    - docker build
+      --build-arg GITLAB_USER=gitlab-ci-token
+      --build-arg GITLAB_TOKEN=$CI_JOB_TOKEN
+      --label org.label-schema.schema-version="1.0.0-rc1"
+      --label org.label-schema.build-date=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
+      --label org.label-schema.name="${CI_PROJECT_NAME}"
+      --label org.label-schema.version="dirty"
+      --label org.label-schema.vcs-url="${CI_PROJECT_URL}"
+      --label org.label-schema.vcs-ref="${CI_COMMIT_SHA:0:8}"
+      --label org.label-schema.vendor="ConsenSys France"
+      -t ${CI_REGISTRY_IMAGE}:latest -t ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA} .
+    # Push images
+    - docker push ${CI_REGISTRY_IMAGE}:latest
+    - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}
+  after_script:
+    - docker logout $CI_REGISTRY
+  only:
+    - master
+  cache:
+    policy: pull
+    paths:
+      - ${GOPATH}
+
+build-on-tag:
+  image: docker:stable
+  stage: build
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+  script:
+    # `tag` doesnt build a new image, just applies tag existing commit on master
+    - docker pull ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}
+    - docker tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}
+    - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}
+  after_script:
+    - docker logout $CI_REGISTRY
+  only:
+    refs:
+      - tags

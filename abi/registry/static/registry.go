@@ -31,13 +31,13 @@ func NewRegistry() *Registry {
 
 // RegisterContract allow to add a contract and its corresponding ABI to the registry
 func (r *Registry) RegisterContract(contract *abi.Contract) error {
-	abi, err := contract.ToABI()
+	contractAbi, err := contract.ToABI()
 	if err != nil {
 		return err
 	}
 
 	// Register ABI and bytecode
-	r.abis[contract.Short()] = abi
+	r.abis[contract.Short()] = contractAbi
 	r.bytecodes[contract.Short()] = contract.Bytecode
 
 	// TODO differentiate registering vs updating
@@ -53,11 +53,11 @@ func (r *Registry) RegisterContract(contract *abi.Contract) error {
 }
 
 func (r *Registry) getContract(name string) (*ethabi.ABI, error) {
-	abi, ok := r.abis[name]
+	contractAbi, ok := r.abis[name]
 	if !ok {
-		return nil, fmt.Errorf("Unknown contract %q", name)
+		return nil, fmt.Errorf("unknown contract %q", name)
 	}
-	return abi, nil
+	return contractAbi, nil
 }
 
 // GetMethodByID returns the abi for a given method of a contract
@@ -70,19 +70,19 @@ func (r *Registry) GetMethodByID(id string) (ethabi.Method, error) {
 	}
 
 	// Retrieve contract ABI from registry
-	abi, err := r.getContract(call.GetContract().Short())
+	contractAbi, err := r.getContract(call.GetContract().Short())
 	if err != nil {
 		return ethabi.Method{}, err
 	}
 
 	// If call is a deployment we return constructor
 	if call.IsDeploy() {
-		return abi.Constructor, nil
+		return contractAbi.Constructor, nil
 	}
 
-	method, ok := abi.Methods[call.GetMethod().GetName()]
+	method, ok := contractAbi.Methods[call.GetMethod().GetName()]
 	if !ok {
-		return ethabi.Method{}, fmt.Errorf("Contract %q has no method %q", call.GetContract().Short(), call.GetMethod().GetName())
+		return ethabi.Method{}, fmt.Errorf("contract %q has no method %q", call.GetContract().Short(), call.GetMethod().GetName())
 	}
 
 	return method, nil
@@ -97,14 +97,14 @@ func (r *Registry) GetEventByID(id string) (ethabi.Event, error) {
 		return ethabi.Event{}, err
 	}
 
-	abi, err := r.getContract(call.GetContract().Short())
+	contractAbi, err := r.getContract(call.GetContract().Short())
 	if err != nil {
 		return ethabi.Event{}, err
 	}
 
-	event, exist := abi.Events[call.GetMethod().GetName()]
+	event, exist := contractAbi.Events[call.GetMethod().GetName()]
 	if !exist {
-		return ethabi.Event{}, fmt.Errorf("Contract %q has no event %q", call.GetContract().Short(), call.GetMethod().GetName())
+		return ethabi.Event{}, fmt.Errorf("contract %q has no event %q", call.GetContract().Short(), call.GetMethod().GetName())
 	}
 
 	return event, nil
@@ -128,7 +128,7 @@ func (r *Registry) GetMethodBySig(sig string) (ethabi.Method, error) {
 
 	method, ok := r.abiMethodBySig[hexutil.Encode(bytesig)]
 	if !ok {
-		return ethabi.Method{}, fmt.Errorf("No method with signature %v", sig)
+		return ethabi.Method{}, fmt.Errorf("no method with signature %v", sig)
 	}
 	return method, nil
 }
@@ -147,7 +147,7 @@ func (r *Registry) GetEventBySig(topic string) (ethabi.Event, error) {
 
 	event, exist := r.abiEventBySig[ethcommon.BytesToHash(bytetopic).Hex()]
 	if !exist {
-		return ethabi.Event{}, fmt.Errorf("No event with topic %v", topic)
+		return ethabi.Event{}, fmt.Errorf("no event with topic %v", topic)
 	}
 	return event, nil
 }
@@ -172,7 +172,7 @@ func (r *Registry) GetBytecodeByID(id string) (code []byte, err error) {
 func (r *Registry) getBytecode(name string) ([]byte, error) {
 	code, ok := r.bytecodes[name]
 	if !ok {
-		return nil, fmt.Errorf("Unknown contract %q", name)
+		return nil, fmt.Errorf("unknown contract %q", name)
 	}
 	return code, nil
 }

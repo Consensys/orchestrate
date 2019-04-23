@@ -10,11 +10,11 @@ import (
 
 func init() {
 	viper.SetDefault(blockBackoffViperKey, blockBackoffDefault)
-	viper.BindEnv(blockBackoffViperKey, blockBackoffEnv)
+	_ = viper.BindEnv(blockBackoffViperKey, blockBackoffEnv)
 	viper.SetDefault(blockLimitViperKey, blockLimitDefault)
-	viper.BindEnv(blockLimitViperKey, blockLimitEnv)
+	_ = viper.BindEnv(blockLimitViperKey, blockLimitEnv)
 	viper.SetDefault(trackerDepthViperKey, trackerDepthDefault)
-	viper.BindEnv(trackerDepthViperKey, trackerDepthEnv)
+	_ = viper.BindEnv(trackerDepthViperKey, trackerDepthEnv)
 	viper.SetDefault("ethclient.retry.initinterval", 500*time.Millisecond)
 	viper.SetDefault("ethclient.retry.randomfactor", 0.5)
 	viper.SetDefault("ethclient.retry.multiplier", 1.5)
@@ -97,7 +97,7 @@ func BlockBackoff(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Backoff time to wait before retrying after failing to find a mined block
 Environment variable: %q`, blockBackoffEnv)
 	f.Duration(blockBackoffFlag, blockBackoffDefault, desc)
-	viper.BindPFlag(blockBackoffViperKey, f.Lookup(blockBackoffFlag))
+	_ = viper.BindPFlag(blockBackoffViperKey, f.Lookup(blockBackoffFlag))
 }
 
 var (
@@ -112,7 +112,7 @@ func BlockLimit(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Limit number of block that can be prefetched while listening
 Environment variable: %q`, blockLimitEnv)
 	f.Int64(blockLimitFlag, blockLimitDefault, desc)
-	viper.BindPFlag(blockLimitViperKey, f.Lookup(blockLimitFlag))
+	_ = viper.BindPFlag(blockLimitViperKey, f.Lookup(blockLimitFlag))
 }
 
 var (
@@ -127,5 +127,5 @@ func TrackerDepth(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Depth at which we consider a block final (to avoid falling into a re-org)
 Environment variable: %q`, trackerDepthEnv)
 	f.Int64(trackerDepthFlag, trackerDepthDefault, desc)
-	viper.BindPFlag(trackerDepthViperKey, f.Lookup(trackerDepthFlag))
+	_ = viper.BindPFlag(trackerDepthViperKey, f.Lookup(trackerDepthFlag))
 }

@@ -14,7 +14,7 @@ import (
 
 func newEvent(eventABI []byte) *ethabi.Event {
 	var event ethabi.Event
-	json.Unmarshal(eventABI, &event)
+	_ = json.Unmarshal(eventABI, &event)
 	return &event
 }
 
@@ -43,7 +43,7 @@ func TestFormatIndexedArg(t *testing.T) {
 		},
 	} {
 		typeArg, _ := ethabi.NewType(test.argType, nil)
-		output, _ := FormatIndexedArg(typeArg, test.arg)
+		output, _ := FormatIndexedArg(&typeArg, test.arg)
 
 		if test.expectedOutput != output {
 			t.Errorf("TestFormatIndexedArg (input %d): expected %q but got %q", i, test.expectedOutput, output)
@@ -161,7 +161,7 @@ func TestFormatNonIndexedArg(t *testing.T) {
 			"0x0000000000000000000000000000000000000001",
 		},
 	} {
-		output, _ := FormatNonIndexedArg(test.argType, test.arg)
+		output, _ := FormatNonIndexedArg(&test.argType, test.arg)
 
 		if test.expectedOutput != output {
 			t.Errorf("FormatNonIndexedArg (input %d): expected mapping %q but got %q", i, test.expectedOutput, output)

@@ -43,7 +43,7 @@ func (u *ReceiptUnmarshaller) Unmarshal(msg interface{}, e *envelope.Envelope) e
 	// Cast message into receipt
 	receipt, ok := msg.(*listener.TxListenerReceipt)
 	if !ok {
-		return fmt.Errorf("Message does not match expected format")
+		return fmt.Errorf("message does not match expected format")
 	}
 
 	e.Chain = (&common.Chain{}).SetID(receipt.ChainID)
@@ -63,7 +63,7 @@ func Loader(u encoding.Unmarshaller) engine.HandlerFunc {
 		err := u.Unmarshal(txctx.Msg, txctx.Envelope)
 		if err != nil {
 			// TODO: handle error
-			txctx.AbortWithError(err)
+			_ = txctx.AbortWithError(err)
 			return
 		}
 	}
@@ -75,7 +75,7 @@ type TxListenerHandler struct {
 }
 
 // Setup configure the handler
-func (h *TxListenerHandler) Setup() error {
+func (h *TxListenerHandler) Setup() {
 	// Instantiate engine
 	cfg := engine.NewConfig()
 	h.engine = engine.NewEngine(&cfg)
@@ -85,12 +85,10 @@ func (h *TxListenerHandler) Setup() error {
 
 	// Handler::logger
 	h.engine.Register(Logger)
-
-	return nil
 }
 
 // Listen start listening to receipts from listener
-func (h *TxListenerHandler) Listen(l listener.TxListener) error {
+func (h *TxListenerHandler) Listen(l listener.TxListener) {
 	go func() {
 		for err := range l.Errors() {
 			log.WithFields(log.Fields{
@@ -120,8 +118,6 @@ func (h *TxListenerHandler) Listen(l listener.TxListener) error {
 	}()
 	log.Info("Start engine...")
 	h.engine.Run(context.Background(), in)
-
-	return nil
 }
 
 // Cleanup cleans handler
@@ -159,7 +155,7 @@ func main() {
 
 	// Start listening all chains
 	for _, chainID := range ethclient.GlobalMultiClient().Networks(context.Background()) {
-		txlistener.Listen(chainID, -1, 0)
+		_, _ = txlistener.Listen(chainID, -1, 0)
 	}
 
 	// Start listening

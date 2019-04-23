@@ -269,23 +269,20 @@ feedingLoop:
 
 					// We trigger
 					bc.trig()
-				} else {
-					// We are still ahead or something went wrong
-					if err != nil {
-						// If we got an error while retrieving chain highest final block we notify it in a future
-						bFuture := &Future{
-							res: make(chan interface{}),
-							err: make(chan error),
-						}
-
-						go func(err error) {
-							// Notify error and Close future
-							defer bFuture.Close()
-							bFuture.err <- err
-						}(err)
-
-						bc.blockFutures <- bFuture
+				} else if err != nil {
+					// If we got an error while retrieving chain highest final block we notify it in a future
+					bFuture := &Future{
+						res: make(chan interface{}),
+						err: make(chan error),
 					}
+
+					go func(err error) {
+						// Notify error and Close future
+						defer bFuture.Close()
+						bFuture.err <- err
+					}(err)
+
+					bc.blockFutures <- bFuture
 				}
 			}
 		case <-bc.ticker.C:

@@ -33,7 +33,8 @@ func TestABIs(t *testing.T) {
 		"--abi=MyContract[v1]:[ABI1]",
 		"--abi=MyContract[v2]:[ABI2]",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err)
 
 	t.Logf("Flags: %v", len(viper.GetStringSlice(name)))
 	expected = []string{

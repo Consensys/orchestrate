@@ -20,7 +20,7 @@ var (
 // Init initialize Dials chains
 //
 // Ethereum clients URLs to Dial are read from viper configuration
-// Cancelling input Context will stop multiclient
+// Canceling input Context will stop multiclient
 // If an error occurs during initialization, it will panic
 func Init(ctx context.Context) {
 	initOnce.Do(func() {

@@ -56,7 +56,7 @@ func newClient(ec EthClient, conf Config) EthClient {
 
 // HeaderByNumber returns a block from the current canonical chain. If number is
 // nil, the latest known header is returned.
-func (ec *TxListenerEthClient) HeaderByNumber(ctx context.Context, chainID *big.Int, number *big.Int) (*types.Header, error) {
+func (ec *TxListenerEthClient) HeaderByNumber(ctx context.Context, chainID, number *big.Int) (*types.Header, error) {
 	var res *types.Header
 	// Try retrieving header with backoff strategy
 	bckoff := backoff.WithContext(ec.pool.Get().(backoff.BackOff), ctx)
@@ -89,7 +89,7 @@ func (ec *TxListenerEthClient) HeaderByNumber(ctx context.Context, chainID *big.
 
 // BlockByNumber returns a block from the current canonical chain. If number is
 // nil, the latest known header is returned.
-func (ec *TxListenerEthClient) BlockByNumber(ctx context.Context, chainID *big.Int, number *big.Int) (*types.Block, error) {
+func (ec *TxListenerEthClient) BlockByNumber(ctx context.Context, chainID, number *big.Int) (*types.Block, error) {
 	var res *types.Block
 	// Try retrieving block with backoff strategy
 	bckoff := backoff.WithContext(ec.pool.Get().(backoff.BackOff), ctx)

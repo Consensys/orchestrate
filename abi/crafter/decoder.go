@@ -14,7 +14,7 @@ import (
 )
 
 // FormatIndexedArg transforms a data to string
-func FormatIndexedArg(t abi.Type, arg common.Hash) (string, error) {
+func FormatIndexedArg(t *abi.Type, arg common.Hash) (string, error) {
 	switch t.T {
 	case abi.BoolTy, abi.StringTy:
 		return fmt.Sprintf("%v", arg), nil
@@ -41,13 +41,13 @@ func ArrayToByteSlice(value reflect.Value) reflect.Value {
 }
 
 // FormatNonIndexedArrayArg transforms a data to string
-func FormatNonIndexedArrayArg(t abi.Type, arg interface{}) (string, error) {
+func FormatNonIndexedArrayArg(t *abi.Type, arg interface{}) (string, error) {
 
 	elemType, _ := abi.NewType(t.Elem.String(), nil)
 
 	var arrayArgString []string
 	for i := 0; i < t.Size; i++ {
-		argString, _ := FormatNonIndexedArg(elemType, reflect.ValueOf(arg).Index(i).Interface())
+		argString, _ := FormatNonIndexedArg(&elemType, reflect.ValueOf(arg).Index(i).Interface())
 		arrayArgString = append(arrayArgString, argString)
 	}
 
@@ -55,7 +55,7 @@ func FormatNonIndexedArrayArg(t abi.Type, arg interface{}) (string, error) {
 }
 
 // FormatNonIndexedArg transforms a data to string
-func FormatNonIndexedArg(t abi.Type, arg interface{}) (string, error) {
+func FormatNonIndexedArg(t *abi.Type, arg interface{}) (string, error) {
 	switch t.T {
 	case abi.IntTy, abi.UintTy, abi.BoolTy, abi.StringTy:
 		return fmt.Sprintf("%v", arg), nil
@@ -79,7 +79,7 @@ func FormatNonIndexedArg(t abi.Type, arg interface{}) (string, error) {
 func Decode(event *abi.Event, txLog *ethpb.Log) (map[string]string, error) {
 	expectedTopics := len(event.Inputs) - event.Inputs.LengthNonIndexed()
 	if expectedTopics != len(txLog.Topics)-1 {
-		return nil, fmt.Errorf("Error: Topics length does not match with abi event: expected %v but got %v", expectedTopics, len(txLog.Topics)-1)
+		return nil, fmt.Errorf("error: Topics length does not match with abi event: expected %v but got %v", expectedTopics, len(txLog.Topics)-1)
 	}
 
 	unpackValues, err := event.Inputs.UnpackValues(txLog.Data)
@@ -93,16 +93,16 @@ func Decode(event *abi.Event, txLog *ethpb.Log) (map[string]string, error) {
 	)
 	logMapping := make(map[string]string, len(event.Inputs))
 
-	for _, arg := range event.Inputs {
+	for i := range event.Inputs {
 		var decoded string
-		if arg.Indexed {
-			decoded, _ = FormatIndexedArg(arg.Type, common.HexToHash(txLog.Topics[topicIndex]))
+		if event.Inputs[i].Indexed {
+			decoded, _ = FormatIndexedArg(&event.Inputs[i].Type, common.HexToHash(txLog.Topics[topicIndex]))
 			topicIndex++
 		} else {
-			decoded, _ = FormatNonIndexedArg(arg.Type, unpackValues[unpackValuesIndex])
+			decoded, _ = FormatNonIndexedArg(&event.Inputs[i].Type, unpackValues[unpackValuesIndex])
 			unpackValuesIndex++
 		}
-		logMapping[arg.Name] = decoded
+		logMapping[event.Inputs[i].Name] = decoded
 	}
 
 	return logMapping, nil

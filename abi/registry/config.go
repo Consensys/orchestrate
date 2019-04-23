@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	viper.BindEnv(abiViperKey, abiEnv)
+	_ = viper.BindEnv(abiViperKey, abiEnv)
 	viper.SetDefault(abiViperKey, abiDefault)
 }
 
@@ -27,7 +27,7 @@ func ABIs(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Smart Contract ABIs to register for crafting (expected format %v)
 Environment variable: %q`, `<contract>:<abi>:<bytecode>`, abiEnv)
 	f.StringSlice(abiFlag, abiDefault, desc)
-	viper.BindPFlag(abiViperKey, f.Lookup(abiFlag))
+	_ = viper.BindPFlag(abiViperKey, f.Lookup(abiFlag))
 }
 
 // FromABIConfig read viper config and return contracts
