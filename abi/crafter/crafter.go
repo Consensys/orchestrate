@@ -22,7 +22,7 @@ type Crafter interface {
 // PayloadCrafter is a structure that can Craft payloads
 type PayloadCrafter struct{}
 
-func bindArg(t ethabi.Type, arg string) (interface{}, error) {
+func bindArg(t *ethabi.Type, arg string) (interface{}, error) {
 	switch t.T {
 	case ethabi.AddressTy:
 		if !ethcommon.IsHexAddress(arg) {
@@ -76,11 +76,11 @@ func bindArg(t ethabi.Type, arg string) (interface{}, error) {
 	// TODO: handle tuple (struct in solidity)
 
 	default:
-		return nil, fmt.Errorf("Arg format %v not known", t.T)
+		return nil, fmt.Errorf("arg format %v not known", t.T)
 	}
 }
 
-func bindArrayArg(t ethabi.Type, arg string) (interface{}, error) {
+func bindArrayArg(t *ethabi.Type, arg string) (interface{}, error) {
 	elemType, _ := ethabi.NewType(t.Elem.String(), nil)
 	slice := reflect.MakeSlice(reflect.SliceOf(elemType.Type), 0, 0)
 
@@ -89,12 +89,12 @@ func bindArrayArg(t ethabi.Type, arg string) (interface{}, error) {
 
 	// If t.Size == 0, then it is a dynamic array. We accept any length in this case.
 	if len(argArray) != t.Size && t.Size != 0 {
-		return nil, fmt.Errorf("Craft array error: %q is not well separated", argArray)
+		return nil, fmt.Errorf("craft array error: %q is not well separated", argArray)
 	}
 	for _, v := range argArray {
-		typedArg, err := bindArg(elemType, v)
+		typedArg, err := bindArg(&elemType, v)
 		if err != nil {
-			return nil, fmt.Errorf("Craft array error: %v", err)
+			return nil, fmt.Errorf("craft array error: %v", err)
 		}
 		slice = reflect.Append(slice, reflect.ValueOf(typedArg))
 	}
@@ -104,12 +104,12 @@ func bindArrayArg(t ethabi.Type, arg string) (interface{}, error) {
 // bindArgs cast string arguments into expected go-ethereum types
 func bindArgs(method ethabi.Method, args ...string) ([]interface{}, error) {
 	if method.Inputs.LengthNonIndexed() != len(args) {
-		return nil, fmt.Errorf("Expected %v inputs but got %v", method.Inputs.LengthNonIndexed(), len(args))
+		return nil, fmt.Errorf("expected %v inputs but got %v", method.Inputs.LengthNonIndexed(), len(args))
 	}
 
 	boundArgs := make([]interface{}, 0)
-	for i, arg := range method.Inputs.NonIndexed() {
-		boundArg, err := bindArg(arg.Type, args[i])
+	for i := range method.Inputs.NonIndexed() {
+		boundArg, err := bindArg(&method.Inputs.NonIndexed()[i].Type, args[i])
 		if err != nil {
 			return nil, err
 		}
@@ -149,7 +149,7 @@ func (c *PayloadCrafter) CraftCall(method ethabi.Method, args ...string) ([]byte
 // CraftConstructor craft contract creation a transaction payload
 func (c *PayloadCrafter) CraftConstructor(bytecode []byte, method ethabi.Method, args ...string) ([]byte, error) {
 	if len(bytecode) == 0 {
-		return nil, fmt.Errorf("Invalid empty bytecode")
+		return nil, fmt.Errorf("invalid empty bytecode")
 	}
 
 	// Pack arguments
@@ -159,4 +159,27 @@ func (c *PayloadCrafter) CraftConstructor(bytecode []byte, method ethabi.Method,
 	}
 
 	return append(bytecode, arguments...), nil
+}
+
+// SignatureToMethod create a method from a method signature string
+func SignatureToMethod(methodSig string) (*ethabi.Method, error) {
+	splt := strings.Split(methodSig, "(")
+	if len(splt) != 2 || splt[0] == "" || len(splt[1]) <= 1 {
+		return nil, fmt.Errorf("invalid method signature format")
+	}
+	inputArgs := strings.Split(splt[1][:len(splt[1])-1], ",")
+
+	method := &ethabi.Method{
+		Name:  splt[0],
+		Const: false,
+	}
+	for _, arg := range inputArgs {
+		inputType, err := ethabi.NewType(arg, nil)
+		if err != nil {
+			return nil, fmt.Errorf("invalid method signature format, cannot cast type: %v", err)
+		}
+		method.Inputs = append(method.Inputs, ethabi.Argument{Type: inputType})
+	}
+
+	return method, nil
 }
