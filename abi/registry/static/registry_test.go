@@ -44,10 +44,10 @@ var ERC1400 = []byte(
 func shouldMatch(f interface{}, input, expect string, t *testing.T) {
 	var s string
 	switch f := f.(type) {
-	case func(string) (ethabi.Method, error):
+	case func(string) (*ethabi.Method, error):
 		method, _ := f(input)
 		s = method.String()
-	case func(string) (ethabi.Event, error):
+	case func(string) (*ethabi.Event, error):
 		event, _ := f(input)
 		s = event.String()
 	}
@@ -59,9 +59,9 @@ func shouldMatch(f interface{}, input, expect string, t *testing.T) {
 func shouldError(f interface{}, input string, t *testing.T) {
 	var err error
 	switch f := f.(type) {
-	case func(string) (ethabi.Method, error):
+	case func(string) (*ethabi.Method, error):
 		_, err = f(input)
-	case func(string) (ethabi.Event, error):
+	case func(string) (*ethabi.Event, error):
 		_, err = f(input)
 	}
 
