@@ -26,7 +26,11 @@ func Init() {
 
 		// Register contracts
 		for _, contract := range contracts {
-			rgstr.RegisterContract(contract)
+			err = rgstr.RegisterContract(contract)
+
+			if err != nil {
+				log.WithError(err).Fatalf("abi: could not register ABI")
+			}
 		}
 	})
 }

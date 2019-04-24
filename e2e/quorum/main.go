@@ -70,6 +70,9 @@ func main() {
 		log.WithError(err).Fatalf("Could not connect to client")
 	}
 	chain, err := ec.NetworkID(context.Background())
+	if err != nil {
+		log.WithError(err).Fatalf("Could not retrieve network id")
+	}
 	log.Infof("Connected to chain: %v", chain.Text(16))
 
 	// Create a Envelope for PrivateFor including Cargill & Admin nodes
@@ -108,7 +111,6 @@ func main() {
 	log.Infof("TxHash: %v", txHash.Hex())
 
 	// Wait for receipt
-miningLoop:
 	for {
 		receipt, err := ec.TransactionReceipt(context.Background(), txHash)
 		if receipt == nil {
@@ -121,6 +123,6 @@ miningLoop:
 			log.WithError(err).Errorf("Could not parse receipt")
 		}
 		log.Infof("Transaction mined receipt: %q", string(r))
-		break miningLoop
+		break
 	}
 }

@@ -70,7 +70,7 @@ type txListener struct {
 	conf Config
 }
 
-func (l *txListener) Listen(chainID *big.Int, blockNumber int64, txIndex int64) (ChainListener, error) {
+func (l *txListener) Listen(chainID *big.Int, blockNumber, txIndex int64) (ChainListener, error) {
 	// Set chain tracker
 	t := NewBaseTracker(l.ec, chainID, l.conf)
 
@@ -179,13 +179,13 @@ func (l *txListener) addListener(listener *singleChainListener) error {
 	defer l.mux.Unlock()
 
 	if l.closed {
-		return fmt.Errorf("Listener has been closed")
+		return fmt.Errorf("listener has been closed")
 	}
 
 	chainID := listener.ChainID().Text(16)
 	_, ok := l.chainListeners[chainID]
 	if ok {
-		return fmt.Errorf("Chain %q is already being listened", chainID)
+		return fmt.Errorf("chain %q is already being listened", chainID)
 	}
 	listener.txlistener = l
 	l.chainListeners[chainID] = listener
@@ -228,7 +228,6 @@ type singleChainListener struct {
 
 	conf Config
 
-	mux                  *sync.RWMutex
 	blockNumber, txIndex int64
 
 	blocks   chan<- *TxListenerBlock

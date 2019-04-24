@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
 )
 
@@ -40,13 +41,13 @@ var ERC1400 = []byte(
     "type": "function"
 	}]`)
 
-func shouldMatch(f interface{}, input string, expect string, t *testing.T) {
+func shouldMatch(f interface{}, input, expect string, t *testing.T) {
 	var s string
 	switch f := f.(type) {
-	case func(string) (ethabi.Method, error):
+	case func(string) (*ethabi.Method, error):
 		method, _ := f(input)
 		s = method.String()
-	case func(string) (ethabi.Event, error):
+	case func(string) (*ethabi.Event, error):
 		event, _ := f(input)
 		s = event.String()
 	}
@@ -58,9 +59,9 @@ func shouldMatch(f interface{}, input string, expect string, t *testing.T) {
 func shouldError(f interface{}, input string, t *testing.T) {
 	var err error
 	switch f := f.(type) {
-	case func(string) (ethabi.Method, error):
+	case func(string) (*ethabi.Method, error):
 		_, err = f(input)
-	case func(string) (ethabi.Event, error):
+	case func(string) (*ethabi.Event, error):
 		_, err = f(input)
 	}
 
@@ -84,7 +85,8 @@ func TestRegisterContract(t *testing.T) {
 
 func TestContractRegistryByID(t *testing.T) {
 	r := NewRegistry()
-	r.RegisterContract(&abi.Contract{Name: "ERC1400", Tag: "", Abi: ERC1400, Bytecode: []byte{}})
+	err := r.RegisterContract(&abi.Contract{Name: "ERC1400", Tag: "", Abi: ERC1400, Bytecode: []byte{}})
+	assert.Nil(t, err)
 
 	method := r.GetMethodByID
 	shouldMatch(method, "isMinter@ERC1400", "function isMinter(address account) constant returns(bool)", t)
@@ -102,7 +104,9 @@ func TestContractRegistryByID(t *testing.T) {
 	shouldError(event, "MinterAdded@ERC1401", t)
 
 	r = NewRegistry()
-	r.RegisterContract(&abi.Contract{Name: "ERC1400", Tag: "v0.1.1", Abi: ERC1400, Bytecode: []byte{}})
+	err = r.RegisterContract(&abi.Contract{Name: "ERC1400", Tag: "v0.1.1", Abi: ERC1400, Bytecode: []byte{}})
+	assert.Nil(t, err)
+
 	method = r.GetMethodByID
 	shouldMatch(method, "isMinter@ERC1400[v0.1.1]", "function isMinter(address account) constant returns(bool)", t)
 	shouldMatch(method, "constructor@ERC1400[v0.1.1]", "function () returns()", t)
@@ -121,7 +125,8 @@ func TestContractRegistryByID(t *testing.T) {
 
 func TestContractRegistryBySig(t *testing.T) {
 	r := NewRegistry()
-	r.RegisterContract(&abi.Contract{Name: "ERC1400", Tag: "", Abi: ERC1400, Bytecode: []byte{}})
+	err := r.RegisterContract(&abi.Contract{Name: "ERC1400", Tag: "", Abi: ERC1400, Bytecode: []byte{}})
+	assert.Nil(t, err)
 
 	method := r.GetMethodBySig
 	shouldMatch(method, "0xaa271e1a", "function isMinter(address account) constant returns(bool)", t)

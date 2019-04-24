@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestEthClientURLs(t *testing.T) {
@@ -44,7 +45,8 @@ func TestEthClientURLs(t *testing.T) {
 		"--eth-client=http://localhost:6546",
 		"--eth-client=http://localhost:7546,http://localhost:8646",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err)
 
 	expected = []string{
 		"http://localhost:6546",

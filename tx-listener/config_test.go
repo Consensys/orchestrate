@@ -25,7 +25,9 @@ func TestBlockBackoff(t *testing.T) {
 	args := []string{
 		"--listener-block-backoff=36s",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err)
+
 	expected = 36 * time.Second
 	assert.Equal(t, expected, viper.GetDuration(name), "From Flag")
 }
@@ -45,7 +47,10 @@ func TestBlockLimit(t *testing.T) {
 	args := []string{
 		"--listener-block-limit=60",
 	}
-	flgs.Parse(args)
+
+	err := flgs.Parse(args)
+	assert.Nil(t, err)
+
 	expected = int64(60)
 	assert.Equal(t, expected, viper.GetInt64(name), "From Flag")
 }
@@ -65,7 +70,9 @@ func TestTrackerDepth(t *testing.T) {
 	args := []string{
 		"--listener-tracker-depth=60",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err)
+
 	expected = int64(60)
 	assert.Equal(t, expected, viper.GetInt64(name), "From Flag")
 }

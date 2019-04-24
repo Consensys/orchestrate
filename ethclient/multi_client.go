@@ -6,7 +6,7 @@ import (
 	"math/big"
 	"sync"
 
-	"github.com/ethereum/go-ethereum"
+	eth "github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 )
@@ -97,7 +97,7 @@ func (mec *MultiClient) Close() {
 func (mec *MultiClient) getClient(chainID *big.Int) (*EthClient, error) {
 	ec, ok := mec.ecs[ChainIDToString(chainID)]
 	if !ok {
-		return nil, fmt.Errorf("No client registered for chain %q", ChainIDToString(chainID))
+		return nil, fmt.Errorf("no client registered for chain %q", ChainIDToString(chainID))
 	}
 	return ec, nil
 }
@@ -113,7 +113,7 @@ func (mec *MultiClient) HeaderByHash(ctx context.Context, chainID *big.Int, hash
 
 // HeaderByNumber returns a block header from the current canonical chain. If number is
 // nil, the latest known header is returned.
-func (mec *MultiClient) HeaderByNumber(ctx context.Context, chainID *big.Int, number *big.Int) (*types.Header, error) {
+func (mec *MultiClient) HeaderByNumber(ctx context.Context, chainID, number *big.Int) (*types.Header, error) {
 	ec, err := mec.getClient(chainID)
 	if err != nil {
 		return nil, err
@@ -123,7 +123,7 @@ func (mec *MultiClient) HeaderByNumber(ctx context.Context, chainID *big.Int, nu
 
 // BlockByNumber returns a block from the current canonical chain. If number is
 // nil, the latest known header is returned.
-func (mec *MultiClient) BlockByNumber(ctx context.Context, chainID *big.Int, number *big.Int) (*types.Block, error) {
+func (mec *MultiClient) BlockByNumber(ctx context.Context, chainID, number *big.Int) (*types.Block, error) {
 	ec, err := mec.getClient(chainID)
 	if err != nil {
 		return nil, err
@@ -212,16 +212,16 @@ func (mec *MultiClient) SuggestGasPrice(ctx context.Context, chainID *big.Int) (
 // the current pending state of the backend blockchain. There is no guarantee that this is
 // the true gas limit requirement as other transactions may be added or removed by miners,
 // but it should provide a basis for setting a reasonable default.
-func (mec *MultiClient) EstimateGas(ctx context.Context, chainID *big.Int, msg ethereum.CallMsg) (uint64, error) {
+func (mec *MultiClient) EstimateGas(ctx context.Context, chainID *big.Int, msg *eth.CallMsg) (uint64, error) {
 	ec, err := mec.getClient(chainID)
 	if err != nil {
 		return 0, err
 	}
-	return ec.EstimateGas(ctx, msg)
+	return ec.EstimateGas(ctx, *msg)
 }
 
 // SyncProgress retrieves client current progress of the sync algorithm.
-func (mec *MultiClient) SyncProgress(ctx context.Context, chainID *big.Int) (*ethereum.SyncProgress, error) {
+func (mec *MultiClient) SyncProgress(ctx context.Context, chainID *big.Int) (*eth.SyncProgress, error) {
 	ec, err := mec.getClient(chainID)
 	if err != nil {
 		return nil, err

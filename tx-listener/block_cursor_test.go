@@ -11,6 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/stretchr/testify/assert"
 )
 
 type MockEthClient struct {
@@ -38,10 +39,10 @@ func (ec *MockEthClient) mine() {
 
 type MockKey string
 
-func (ec *MockEthClient) BlockByNumber(ctx context.Context, chainID *big.Int, number *big.Int) (*types.Block, error) {
+func (ec *MockEthClient) BlockByNumber(ctx context.Context, chainID, number *big.Int) (*types.Block, error) {
 	_, ok := ctx.Value(MockKey("error")).(error)
 	if ok {
-		return nil, fmt.Errorf("MockEthClient: Error on BlockByNumber")
+		return nil, fmt.Errorf("mockEthClient: Error on BlockByNumber")
 	}
 
 	// Simulate io time
@@ -67,14 +68,14 @@ func (ec *MockEthClient) BlockByNumber(ctx context.Context, chainID *big.Int, nu
 		if number.Uint64() > ec.head {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("Error")
+		return nil, fmt.Errorf("error")
 	}
 }
 
-func (ec *MockEthClient) HeaderByNumber(ctx context.Context, chainID *big.Int, number *big.Int) (*types.Header, error) {
+func (ec *MockEthClient) HeaderByNumber(ctx context.Context, chainID, number *big.Int) (*types.Header, error) {
 	_, ok := ctx.Value(MockKey("error")).(error)
 	if ok {
-		return nil, fmt.Errorf("MockEthClient: Error on SyncProgress")
+		return nil, fmt.Errorf("mockEthClient: Error on SyncProgress")
 	}
 
 	// Simulate io time
@@ -99,14 +100,14 @@ func (ec *MockEthClient) HeaderByNumber(ctx context.Context, chainID *big.Int, n
 			return nil, nil
 		}
 
-		return nil, fmt.Errorf("Error")
+		return nil, fmt.Errorf("error")
 	}
 }
 
 func (ec *MockEthClient) TransactionReceipt(ctx context.Context, chainID *big.Int, txHash common.Hash) (*types.Receipt, error) {
 	_, ok := ctx.Value(MockKey("error")).(error)
 	if ok {
-		return nil, fmt.Errorf("MockEthClient: Error on TransactionReceipt")
+		return nil, fmt.Errorf("mockEthClient: Error on TransactionReceipt")
 	}
 
 	// Simulate io time
@@ -139,7 +140,9 @@ func TestMockEthClient(t *testing.T) {
 	blocks := []*types.Block{}
 	for _, blockEnc := range blocksEnc {
 		var block types.Block
-		rlp.DecodeBytes(blockEnc, &block)
+		err := rlp.DecodeBytes(blockEnc, &block)
+		assert.Nil(t, err)
+
 		blocks = append(blocks, &block)
 	}
 	mec := NewMockEthClient(blocks)
@@ -171,7 +174,7 @@ func TestMockEthClient(t *testing.T) {
 		t.Errorf("MockEthClient #3: Head at %v", h.Number.Int64())
 	}
 
-	ctx := context.WithValue(context.Background(), MockKey("error"), fmt.Errorf("Error"))
+	ctx := context.WithValue(context.Background(), MockKey("error"), fmt.Errorf("error"))
 	b, err = mec.BlockByNumber(ctx, big.NewInt(1), big.NewInt(1))
 	if b != nil || err == nil {
 		t.Errorf("MockEthClient #4: Got %v %v", b, err)
@@ -182,7 +185,9 @@ func TestBaseTracker(t *testing.T) {
 	blocks := []*types.Block{}
 	for _, blockEnc := range blocksEnc {
 		var block types.Block
-		rlp.DecodeBytes(blockEnc, &block)
+		err := rlp.DecodeBytes(blockEnc, &block)
+		assert.Nil(t, err)
+
 		blocks = append(blocks, &block)
 	}
 	mec := NewMockEthClient(blocks)
@@ -222,7 +227,7 @@ func TestBaseTracker(t *testing.T) {
 		t.Errorf("BaseTracker #3: Head at %v", head)
 	}
 
-	ctx := context.WithValue(context.Background(), MockKey("error"), fmt.Errorf("Error"))
+	ctx := context.WithValue(context.Background(), MockKey("error"), fmt.Errorf("error"))
 	_, err := tracker.HighestBlock(ctx)
 	if err == nil {
 		t.Errorf("BaseTracker #4: Expected an error")
@@ -233,7 +238,9 @@ func TestBlockCursorFetchReceipt(t *testing.T) {
 	blocks := []*types.Block{}
 	for _, blockEnc := range blocksEnc {
 		var block types.Block
-		rlp.DecodeBytes(blockEnc, &block)
+		err := rlp.DecodeBytes(blockEnc, &block)
+		assert.Nil(t, err)
+
 		blocks = append(blocks, &block)
 	}
 	mec := NewMockEthClient(blocks)
@@ -256,14 +263,14 @@ func TestBlockCursorFetchReceipt(t *testing.T) {
 	}
 
 	// Force error
-	ctx := context.WithValue(context.Background(), MockKey("error"), fmt.Errorf("Error"))
+	ctx := context.WithValue(context.Background(), MockKey("error"), fmt.Errorf("error"))
 	future = bc.fetchReceipt(ctx, common.HexToHash("0x8305d6f07eaced88f5f8f52d5acceedb07568c6ca6c956bef461ed3d6e77686b"))
 	err := <-future.err
 	if err == nil {
 		t.Errorf("GetReceipt: got Err %v", err)
 	}
 
-	// Error on unknwon receipt
+	// Error on unknown receipt
 	future = bc.fetchReceipt(context.Background(), common.HexToHash("0xbabebeef"))
 	err = <-future.err
 	if err == nil {
@@ -275,7 +282,9 @@ func TestBlockCursorFetchBlock(t *testing.T) {
 	blocks := []*types.Block{}
 	for _, blockEnc := range blocksEnc {
 		var block types.Block
-		rlp.DecodeBytes(blockEnc, &block)
+		err := rlp.DecodeBytes(blockEnc, &block)
+		assert.Nil(t, err)
+
 		blocks = append(blocks, &block)
 	}
 	mec := NewMockEthClient(blocks)
@@ -322,7 +331,7 @@ func TestBlockCursorFetchBlock(t *testing.T) {
 	}
 
 	// Force error
-	ctx := context.WithValue(context.Background(), MockKey("error"), fmt.Errorf("Error"))
+	ctx := context.WithValue(context.Background(), MockKey("error"), fmt.Errorf("error"))
 	future = bc.fetchBlock(ctx, 0)
 
 	err = <-future.err
@@ -339,7 +348,7 @@ func getNextBlock(bc *BlockCursor, timeout time.Duration) (*TxListenerBlock, err
 	case block = <-bc.Blocks():
 	case err = <-bc.Errors():
 	case <-time.After(timeout):
-		err = fmt.Errorf("Timeout")
+		err = fmt.Errorf("timeout")
 	}
 
 	return block, err
@@ -349,7 +358,9 @@ func TestBlockCursor(t *testing.T) {
 	blocks := []*types.Block{}
 	for _, blockEnc := range blocksEnc {
 		var block types.Block
-		rlp.DecodeBytes(blockEnc, &block)
+		err := rlp.DecodeBytes(blockEnc, &block)
+		assert.Nil(t, err)
+
 		blocks = append(blocks, &block)
 	}
 	mec := NewMockEthClient(blocks)
@@ -373,10 +384,8 @@ func TestBlockCursor(t *testing.T) {
 	block, err := getNextBlock(bc, 10*time.Millisecond)
 	if err != nil {
 		t.Errorf("Expected no error when getting block %v but got %v", 0, err)
-	} else {
-		if block.NumberU64() != 0 {
-			t.Errorf("Expected block %v", 0)
-		}
+	} else if block.NumberU64() != 0 {
+		t.Errorf("Expected block %v", 0)
 	}
 
 	// We simulate two mined blocks
@@ -386,7 +395,7 @@ func TestBlockCursor(t *testing.T) {
 	// At this time cursor should be sleeping waiting for next block
 	// So we should timeout when retrieving next block
 	block, err = getNextBlock(bc, 70*time.Millisecond)
-	if err == nil || err.Error() != "Timeout" {
+	if err == nil || err.Error() != "timeout" {
 		t.Errorf("Expected no new block but got %v", block)
 	}
 
@@ -397,19 +406,15 @@ func TestBlockCursor(t *testing.T) {
 	block, err = getNextBlock(bc, 10*time.Millisecond)
 	if err != nil {
 		t.Errorf("Expected no error when getting block %v but got %v", 1, err)
-	} else {
-		if block.NumberU64() != 1 {
-			t.Errorf("Expected block %v", 1)
-		}
+	} else if block.NumberU64() != 1 {
+		t.Errorf("Expected block %v", 1)
 	}
 
 	// Block 2 should be available
 	block, err = getNextBlock(bc, time.Millisecond)
 	if err != nil {
 		t.Errorf("Expected no error when getting block %v but got %v", 2, err)
-	} else {
-		if block.NumberU64() != 2 {
-			t.Errorf("Expected block %v", 1)
-		}
+	} else if block.NumberU64() != 2 {
+		t.Errorf("Expected block %v", 1)
 	}
 }

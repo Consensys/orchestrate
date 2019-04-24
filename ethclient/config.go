@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	viper.BindEnv(urlViperKey, urlEnv)
+	_ = viper.BindEnv(urlViperKey, urlEnv)
 	viper.SetDefault(urlViperKey, urlDefault)
 }
 
@@ -24,5 +24,5 @@ func URLs(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Ethereum client url
 Environment variable: %q`, urlEnv)
 	f.StringSlice(urlFlag, urlDefault, desc)
-	viper.BindPFlag(urlViperKey, f.Lookup(urlFlag))
+	_ = viper.BindPFlag(urlViperKey, f.Lookup(urlFlag))
 }
