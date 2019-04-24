@@ -165,7 +165,7 @@ func (c *PayloadCrafter) CraftConstructor(bytecode []byte, method ethabi.Method,
 func SignatureToMethod(methodSig string) (*ethabi.Method, error) {
 	splt := strings.Split(methodSig, "(")
 	if len(splt) != 2 || splt[0] == "" || len(splt[1]) <= 1 {
-		return nil, fmt.Errorf("invalid method signature format")
+		return nil, fmt.Errorf("invalid method signature %q, expected Function(type1,type2,...)", methodSig)
 	}
 	inputArgs := strings.Split(splt[1][:len(splt[1])-1], ",")
 
