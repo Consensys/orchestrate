@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### Version 0.4.7
+
+- [FIX] Update `MultiClient.EstimateGas` interface
+
 ### Version 0.4.6
 
 - [CHORE] Update to `pkg` `v0.4.3`

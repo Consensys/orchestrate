@@ -212,12 +212,12 @@ func (mec *MultiClient) SuggestGasPrice(ctx context.Context, chainID *big.Int) (
 // the current pending state of the backend blockchain. There is no guarantee that this is
 // the true gas limit requirement as other transactions may be added or removed by miners,
 // but it should provide a basis for setting a reasonable default.
-func (mec *MultiClient) EstimateGas(ctx context.Context, chainID *big.Int, msg *eth.CallMsg) (uint64, error) {
+func (mec *MultiClient) EstimateGas(ctx context.Context, chainID *big.Int, msg eth.CallMsg) (uint64, error) {
 	ec, err := mec.getClient(chainID)
 	if err != nil {
 		return 0, err
 	}
-	return ec.EstimateGas(ctx, *msg)
+	return ec.EstimateGas(ctx, msg)
 }
 
 // SyncProgress retrieves client current progress of the sync algorithm.
