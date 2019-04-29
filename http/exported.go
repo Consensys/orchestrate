@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"sync"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -35,6 +36,21 @@ func Init(ctx context.Context) {
 // Enhance allows to register new handlers on Global Server ServeMux
 func Enhance(enhancer ServeMuxEnhancer) {
 	enhancer(mux)
+}
+
+// ListenAndServe starts global server
+func ListenAndServe() error {
+	log.WithFields(log.Fields{
+		"host": server.Addr,
+	}).Infof("http: server start listening")
+
+	err := server.ListenAndServe()
+	if err != nil {
+		log.WithError(err).Errorf("http: error while listening")
+		return err
+	}
+
+	return nil
 }
 
 // GlobalServer return global HTTP server
