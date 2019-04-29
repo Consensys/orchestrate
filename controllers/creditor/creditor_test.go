@@ -64,3 +64,23 @@ func TestCreditor(t *testing.T) {
 		testutils.AssertRequest(t, test)
 	}
 }
+
+func TestCreditorNoCreditor(t *testing.T) {
+	// Create Controller and set creditors
+	ctrl := NewController()
+	credit := ctrl.Control(mock.Credit)
+
+	test := &testutils.TestRequest{
+		Req: &types.Request{
+			ChainID:     chains[0],
+			Beneficiary: addresses[0],
+			Amount:      big.NewInt(10),
+		},
+		ExpectedOK:     false,
+		ExpectedAmount: big.NewInt(0),
+		ExpectedErr:    nil,
+	}
+	test.ResultAmount, test.ResultOK, test.ResultErr = credit(context.Background(), test.Req)
+
+	testutils.AssertRequest(t, test)
+}

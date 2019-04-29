@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.1
+
+*Released on 29th April 2019*
+
+- [FIX] Fix controller creditor
+
 ### Version 0.3.0
 
 *Released on 22th April 2019*

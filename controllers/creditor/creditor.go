@@ -30,6 +30,9 @@ func (ctrl *Controller) SetCreditor(chainID *big.Int, address ethcommon.Address)
 // Creditor returns creditor for a given chain
 func (ctrl *Controller) Creditor(chainID *big.Int) (ethcommon.Address, bool) {
 	addr, ok := ctrl.creditors.Load(chainID.Text(16))
+	if !ok {
+		return ethcommon.Address{}, false
+	}
 	return addr.(ethcommon.Address), ok
 }
 
