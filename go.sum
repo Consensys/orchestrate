@@ -123,6 +123,8 @@ github.com/xdg/stringprep v1.0.0/go.mod h1:Jhud4/sHMO4oL310DaZAKk9ZaJ08SJfe+sJh0
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.4.6 h1:pFjynj0dgvFchLY6du3koB6WE7B3oTD0VwkE+yE8vns=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.4.6/go.mod h1:gCMBi2OxqKyawfOzjY9ExVSMPxnZjyMXF7cPoVyEhc4=
+gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.4.7 h1:/HcyHSYln1IeEVH/GTBy8b7LPMlGb382TM9CAX2yoeQ=
+gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.4.7/go.mod h1:Lzde8WdX2iwCK1G+1SSDy8qYaJCF+18pF1kpqQwwJZw=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/striped-mutex.git v0.1.5 h1:cUZghC+St5TeE5+Uy7zQw+awB1nI2Vna9IwmgSDT+JE=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/striped-mutex.git v0.1.5/go.mod h1:84qaDpDp/i+e46WyzMU0IzTNf4sORqU3QUDV8lpmLVE=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.1/go.mod h1:FUtLot31O4Dk9NK5KHY+VeWmhKYxJAwWF46MRm9PkUI=
