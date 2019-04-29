@@ -5,6 +5,7 @@
 *Unreleased*
 
 - [FIX] Remove necessity to delcare `encoding` marshallers
+- [FIX] Remove deprecated `engine` flags
 
 ### Version 0.4.2
 

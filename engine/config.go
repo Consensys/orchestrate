@@ -2,7 +2,6 @@ package engine
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -11,10 +10,6 @@ import (
 func init() {
 	viper.SetDefault(engineSlotsViperKey, engineSlotsDefault)
 	_ = viper.BindEnv(engineSlotsViperKey, engineSlotsEnv)
-	viper.SetDefault(enginePartitionsViperKey, enginePartitionsDefault)
-	_ = viper.BindEnv(enginePartitionsViperKey, enginePartitionsEnv)
-	viper.SetDefault(engineTimeoutViperKey, engineTimeoutDefault)
-	_ = viper.BindEnv(engineTimeoutViperKey, engineTimeoutEnv)
 }
 
 // Config is engine configuration
@@ -41,7 +36,6 @@ func NewConfig() Config {
 // InitFlags register flags for engine
 func InitFlags(f *pflag.FlagSet) {
 	Slots(f)
-	Partitions(f)
 }
 
 var (
@@ -57,34 +51,4 @@ func Slots(f *pflag.FlagSet) {
 Environment variable: %q`, engineSlotsEnv)
 	f.Uint(engineSlotsFlag, engineSlotsDefault, desc)
 	_ = viper.BindPFlag(engineSlotsViperKey, f.Lookup(engineSlotsFlag))
-}
-
-var (
-	enginePartitionsFlag     = "engine-partitions"
-	enginePartitionsViperKey = "engine.partitions"
-	enginePartitionsDefault  = uint(50)
-	enginePartitionsEnv      = "WORKER_PARTITIONS"
-)
-
-// Partitions register flag for Kafka server addresses
-func Partitions(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Number of partitions spawned by engine to treat messages in parallel.
-Environment variable: %q`, enginePartitionsEnv)
-	f.Uint(enginePartitionsFlag, enginePartitionsDefault, desc)
-	_ = viper.BindPFlag(enginePartitionsViperKey, f.Lookup(enginePartitionsFlag))
-}
-
-var (
-	engineTimeoutFlag     = "engine-timeout"
-	engineTimeoutViperKey = "engine.timeout"
-	engineTimeoutDefault  = 60 * time.Second
-	engineTimeoutEnv      = "WORKER_TIMEOUT"
-)
-
-// Timeout register flag for Kafka server addresses
-func Timeout(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Maximum time for a message to be handled a message
-Environment variable: %q`, engineTimeoutEnv)
-	f.Duration(engineTimeoutFlag, engineTimeoutDefault, desc)
-	_ = viper.BindPFlag(engineTimeoutViperKey, f.Lookup(engineTimeoutFlag))
 }
