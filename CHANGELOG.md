@@ -6,6 +6,7 @@
 
 - [FIX] Remove necessity to delcare `encoding` marshallers
 - [FIX] Remove deprecated `engine` flags
+- [REFACTOR] Update http org
 
 ### Version 0.4.2
 
