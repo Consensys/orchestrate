@@ -159,3 +159,16 @@ func GlobalConsumerGroup() sarama.ConsumerGroup {
 func SetGlobalConsumerGroup(g sarama.ConsumerGroup) {
 	group = g
 }
+
+// Consume start consuming using global ConsumerGroup
+func Consume(ctx context.Context, topics []string, handler sarama.ConsumerGroupHandler) {
+consumeLoop:
+	for {
+		select {
+		case <-ctx.Done():
+			break consumeLoop
+		default:
+			group.Consume(ctx, topics, handler)
+		}
+	}
+}
