@@ -19,6 +19,15 @@ func main() {
 			Topic: "topic-e2e",
 			Key:   sarama.StringEncoder(string(i)),
 		}
-		broker.GlobalSyncProducer().SendMessage(msg)
+
+		partition, offset, err := broker.GlobalSyncProducer().SendMessage(msg)
+		if err != nil {
+			log.WithError(err).Errorf("Could not send message")
+			return
+		}
+		log.WithFields(log.Fields{
+			"partition": partition,
+			"offset":    offset,
+		}).Info("Message sent")
 	}
 }

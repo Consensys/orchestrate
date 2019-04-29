@@ -47,7 +47,7 @@ func main() {
 	utils.NewSignalListener(func(s os.Signal) { cancel() })
 
 	// Start consuming
-	broker.Consume(
+	_ = broker.Consume(
 		ctx,
 		[]string{"topic-e2e"},
 		groupHandler,
