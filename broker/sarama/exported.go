@@ -30,13 +30,13 @@ func InitConfig() {
 	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
 }
 
-// Config returns Sarama global configuration
-func Config() *sarama.Config {
+// GlobalConfig returns Sarama global configuration
+func GlobalConfig() *sarama.Config {
 	return config
 }
 
-// SetConfig sets Sarama global configuration
-func SetConfig(cfg *sarama.Config) {
+// SetGlobalConfig sets Sarama global configuration
+func SetGlobalConfig(cfg *sarama.Config) {
 	config = cfg
 }
 
@@ -76,13 +76,13 @@ func InitClient(ctx context.Context) {
 	})
 }
 
-// Client returns Sarama global client
-func Client() sarama.Client {
+// GlobalClient returns Sarama global client
+func GlobalClient() sarama.Client {
 	return client
 }
 
-// SetClient sets Sarama global client
-func SetClient(c sarama.Client) {
+// SetGlobalClient sets Sarama global client
+func SetGlobalClient(c sarama.Client) {
 	client = c
 }
 
@@ -112,13 +112,13 @@ func InitSyncProducer(ctx context.Context) {
 	})
 }
 
-// SyncProducer returns Sarama global SyncProducer
-func SyncProducer() sarama.SyncProducer {
+// GlobalSyncProducer returns Sarama global SyncProducer
+func GlobalSyncProducer() sarama.SyncProducer {
 	return producer
 }
 
-// SetSyncProducer sets Sarama global SyncProducer
-func SetSyncProducer(p sarama.SyncProducer) {
+// SetGlobalSyncProducer sets Sarama global SyncProducer
+func SetGlobalSyncProducer(p sarama.SyncProducer) {
 	producer = p
 }
 
@@ -150,12 +150,12 @@ func InitConsumerGroup(ctx context.Context) {
 	})
 }
 
-// ConsumerGroup returns Sarama global ConsumerGroup
-func ConsumerGroup() sarama.ConsumerGroup {
+// GlobalConsumerGroup returns Sarama global ConsumerGroup
+func GlobalConsumerGroup() sarama.ConsumerGroup {
 	return group
 }
 
-// SetConsumerGroup sets Sarama global ConsumerGroup
-func SetConsumerGroup(g sarama.ConsumerGroup) {
+// SetGlobalConsumerGroup sets Sarama global ConsumerGroup
+func SetGlobalConsumerGroup(g sarama.ConsumerGroup) {
 	group = g
 }
