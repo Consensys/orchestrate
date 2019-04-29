@@ -39,7 +39,7 @@ func Init(ctx context.Context) {
 			ctrl.SetCreditor(chainID, addr)
 		}
 
-		log.Info("faucet: controller ready")
+		logger.Info("faucet: controller ready")
 	})
 }
 
