@@ -6,7 +6,9 @@
 
 - [FIX] Remove necessity to delcare `encoding` marshallers
 - [FIX] Remove deprecated `engine` flags
-- [REFACTOR] Update http org
+- [REFACTOR] Update `http` organisation
+- [FEAT] Implement `http.ListenAndServe`
+- [FEAT] Implement `sarama.Consume`
 
 ### Version 0.4.2
 
