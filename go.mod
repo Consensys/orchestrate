@@ -10,6 +10,6 @@ require (
 	github.com/spf13/pflag v1.0.3
 	github.com/spf13/viper v1.3.1
 	github.com/stretchr/testify v1.3.0
-	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.1
+	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.3
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 )

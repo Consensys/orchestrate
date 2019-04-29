@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/viper"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
 	listener "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
@@ -35,11 +34,8 @@ func Logger(txctx *engine.TxContext) {
 	}
 }
 
-// ReceiptUnmarshaller assumes that input message is a go-ethereum receipt
-type ReceiptUnmarshaller struct{}
-
 // Unmarshal message expected to be a Envelope protobuffer
-func (u *ReceiptUnmarshaller) Unmarshal(msg interface{}, e *envelope.Envelope) error {
+func Unmarshal(msg interface{}, e *envelope.Envelope) error {
 	// Cast message into receipt
 	receipt, ok := msg.(*listener.TxListenerReceipt)
 	if !ok {
@@ -57,15 +53,13 @@ func (u *ReceiptUnmarshaller) Unmarshal(msg interface{}, e *envelope.Envelope) e
 }
 
 // Loader creates an handler loading input
-func Loader(u encoding.Unmarshaller) engine.HandlerFunc {
-	return func(txctx *engine.TxContext) {
-		// Unmarshal message
-		err := u.Unmarshal(txctx.Msg, txctx.Envelope)
-		if err != nil {
-			// TODO: handle error
-			_ = txctx.AbortWithError(err)
-			return
-		}
+func Loader(txctx *engine.TxContext) {
+	// Unmarshal message
+	err := Unmarshal(txctx.Msg, txctx.Envelope)
+	if err != nil {
+		// TODO: handle error
+		_ = txctx.AbortWithError(err)
+		return
 	}
 }
 
@@ -81,7 +75,7 @@ func (h *TxListenerHandler) Setup() {
 	h.engine = engine.NewEngine(&cfg)
 
 	// Handler::loader
-	h.engine.Register(Loader(&ReceiptUnmarshaller{}))
+	h.engine.Register(Loader)
 
 	// Handler::logger
 	h.engine.Register(Logger)
