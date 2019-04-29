@@ -9,12 +9,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
-func init() {
-	unmarshaller = encoding.NewUnmarshaller()
-}
-
-var unmarshaller *encoding.Unmarshaller
-
 // Loader is a Middleware enginer.HandlerFunc that Load sarama.ConsumerGroup messages
 func Loader(txctx *engine.TxContext) {
 	// Cast message into sarama.ConsumerMessage
@@ -25,7 +19,7 @@ func Loader(txctx *engine.TxContext) {
 		return
 	}
 
-	err := unmarshaller.Unmarshal(msg, txctx.Envelope)
+	err := encoding.Unmarshal(msg, txctx.Envelope)
 	if err != nil {
 		// TODO: handle error
 		txctx.Logger.WithError(err).Errorf("loader: error unmarshalling")

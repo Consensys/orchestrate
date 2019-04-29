@@ -3,15 +3,8 @@ package producer
 import (
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
-	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
-
-func init() {
-	marshaller = encoding.NewMarshaller()
-}
-
-var marshaller *encoding.Marshaller
 
 // PrepareMsg function should prepare a sarama.ProducerMessage from a TxContext
 type PrepareMsg func(*engine.TxContext, *sarama.ProducerMessage) error
@@ -19,6 +12,8 @@ type PrepareMsg func(*engine.TxContext, *sarama.ProducerMessage) error
 // Producer creates a producer handler
 func Producer(p sarama.SyncProducer, prepareMsg PrepareMsg) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
+		txctx.Next()
+
 		// Prepare Message
 		msg := &sarama.ProducerMessage{}
 		err := prepareMsg(txctx, msg)
