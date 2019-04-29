@@ -10,7 +10,7 @@ import (
 )
 
 func TestInit(t *testing.T) {
-	broker.SetSyncProducer(mocks.NewSyncProducer(t, nil))
+	broker.SetGlobalSyncProducer(mocks.NewSyncProducer(t, nil))
 	Init(context.Background())
 	assert.NotNil(t, fct, "Faucet should have been set")
 }

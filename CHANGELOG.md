@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.3.2
+
+*Released on 30th April 2019*
+
+- [CHORE] Update to `pkg` `v0.4.3`
+
 ### Version 0.3.1
 
 *Released on 29th April 2019*

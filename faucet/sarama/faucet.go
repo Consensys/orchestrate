@@ -18,14 +18,12 @@ import (
 // Faucet allows to credit by sending messages to a Kafka topic
 type Faucet struct {
 	p sarama.SyncProducer
-	m *encoding.Marshaller
 }
 
 // NewFaucet creates a New Faucet that can send message to a Kafka Topic
 func NewFaucet(p sarama.SyncProducer) *Faucet {
 	return &Faucet{
 		p: p,
-		m: encoding.NewMarshaller(),
 	}
 }
 
@@ -40,7 +38,7 @@ func (f *Faucet) prepareMsg(r *types.Request, msg *sarama.ProducerMessage) error
 	}
 
 	// Unmarshal envelope
-	err := f.m.Marshal(e, msg)
+	err := encoding.Marshal(e, msg)
 	if err != nil {
 		return err
 	}

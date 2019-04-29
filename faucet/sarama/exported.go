@@ -24,7 +24,7 @@ func Init(ctx context.Context) {
 		broker.InitSyncProducer(ctx)
 
 		// Control Faucet
-		fct = NewFaucet(broker.SyncProducer())
+		fct = NewFaucet(broker.GlobalSyncProducer())
 
 		log.WithFields(log.Fields{
 			"type": "sarama",
