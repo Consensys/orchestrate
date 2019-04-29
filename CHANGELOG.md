@@ -9,6 +9,7 @@
 - [REFACTOR] Update `http` organisation
 - [FEAT] Implement `http.ListenAndServe`
 - [FEAT] Implement `sarama.Consume`
+- [TEST] Implement `e2e` test for Broker `sarama`
 
 ### Version 0.4.2
 
