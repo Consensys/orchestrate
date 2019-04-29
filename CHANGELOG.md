@@ -2,9 +2,13 @@
 
 ### Version 0.4.7
 
+*Released on April 22th 2019*
+
 - [FIX] Update `MultiClient.EstimateGas` interface
 
 ### Version 0.4.6
+
+*Unreleased*
 
 - [CHORE] Update to `pkg` `v0.4.3`
 
