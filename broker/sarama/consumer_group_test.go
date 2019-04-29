@@ -39,12 +39,13 @@ func (h *CounterHandler) Handle(txctx *engine.TxContext) {
 }
 
 func TestConsumerGroupHandler(t *testing.T) {
-	engine.Init(context.Background())
+	conf := engine.NewConfig()
+	e := engine.NewEngine(&conf)
 
-	handler := CounterHandler{}
-	engine.Register(handler.Handle)
+	counter := CounterHandler{}
+	e.Register(counter.Handle)
 
-	cgHandler := NewEngineConsumerGroupHandler(engine.GlobalEngine())
+	cgHandler := NewEngineConsumerGroupHandler(e)
 
 	msgs := make(map[string]map[int32][]*sarama.ConsumerMessage)
 	for _, topic := range []string{"test-topic-1", "test-topic-2"} {
@@ -74,5 +75,5 @@ func TestConsumerGroupHandler(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 	cancel()
 
-	assert.Equal(t, int32(60), handler.counter, "Count of processed message should be correct")
+	assert.Equal(t, int32(60), counter.counter, "Count of processed message should be correct")
 }
