@@ -2,7 +2,7 @@
 
 ### Version 0.4.3
 
-*Unreleased*
+*Released on April 30th 2019*
 
 - [FIX] Remove necessity to delcare `encoding` marshallers
 - [FIX] Remove deprecated `engine` flags
