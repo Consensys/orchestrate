@@ -15,7 +15,6 @@ func newEnvelope() *envelope.Envelope {
 }
 
 func TestEnvelopeMarshaller(t *testing.T) {
-	m := Marshaller{}
 	pbs := make([]*envelope.Envelope, 0)
 	rounds := 1000
 
@@ -25,7 +24,7 @@ func TestEnvelopeMarshaller(t *testing.T) {
 		wg.Add(1)
 		go func(pb *envelope.Envelope) {
 			defer wg.Done()
-			_ = m.Marshal(newEnvelope(), pb)
+			_ = Marshal(newEnvelope(), pb)
 		}(pbs[len(pbs)-1])
 	}
 	wg.Wait()

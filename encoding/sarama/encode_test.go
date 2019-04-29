@@ -74,7 +74,6 @@ func newEnvelope() *envelope.Envelope {
 }
 
 func TestMarshaller(t *testing.T) {
-	m := NewMarshaller()
 	messages := make([]*sarama.ProducerMessage, 0)
 	rounds := 1
 	wg := &sync.WaitGroup{}
@@ -84,7 +83,7 @@ func TestMarshaller(t *testing.T) {
 		wg.Add(1)
 		go func(msg *sarama.ProducerMessage) {
 			defer wg.Done()
-			_ = m.Marshal(newEnvelope(), msg)
+			_ = Marshal(newEnvelope(), msg)
 		}(message)
 	}
 	wg.Wait()

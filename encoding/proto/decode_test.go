@@ -21,7 +21,6 @@ func newProtoMessage() *envelope.Envelope {
 }
 
 func TestUnmarshaller(t *testing.T) {
-	u := Unmarshaller{}
 	envelopes := make([]*envelope.Envelope, 0)
 	rounds := 1000
 	wg := &sync.WaitGroup{}
@@ -30,7 +29,7 @@ func TestUnmarshaller(t *testing.T) {
 		wg.Add(1)
 		go func(t *envelope.Envelope) {
 			defer wg.Done()
-			_ = u.Unmarshal(newProtoMessage(), t)
+			_ = Unmarshal(newProtoMessage(), t)
 		}(envelopes[len(envelopes)-1])
 	}
 	wg.Wait()

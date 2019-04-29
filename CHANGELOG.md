@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.3
+
+*Unreleased*
+
+- [FIX] Remove necessity to delcare `encoding` marshallers
+
 ### Version 0.4.2
 
 *Release on April 22th 2019*

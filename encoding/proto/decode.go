@@ -7,11 +7,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 )
 
-// Unmarshaller assumes that input message is a Envelope
-type Unmarshaller struct{}
-
 // Unmarshal message expected to be a Envelope
-func (u *Unmarshaller) Unmarshal(msg interface{}, pb proto.Message) error {
+func Unmarshal(msg interface{}, pb proto.Message) error {
 	// Cast message into protobuffer
 	e, ok := msg.(*envelope.Envelope)
 	if !ok {

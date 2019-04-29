@@ -16,7 +16,6 @@ func newConsumerMessage() *sarama.ConsumerMessage {
 }
 
 func TestUnmarshaller(t *testing.T) {
-	u := NewUnmarshaller()
 	envelopes := make([]*envelope.Envelope, 0)
 	rounds := 1000
 	wg := &sync.WaitGroup{}
@@ -25,7 +24,7 @@ func TestUnmarshaller(t *testing.T) {
 		wg.Add(1)
 		go func(e *envelope.Envelope) {
 			defer wg.Done()
-			_ = u.Unmarshal(newConsumerMessage(), e)
+			_ = Unmarshal(newConsumerMessage(), e)
 		}(envelopes[len(envelopes)-1])
 	}
 	wg.Wait()
