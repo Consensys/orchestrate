@@ -6,6 +6,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/boilerplate-worker.git/app"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing/jaeger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 )
 
@@ -15,6 +17,12 @@ func newRunCommand() *cobra.Command {
 		Short: "Run application",
 		Run:   run,
 	}
+
+	// Register Opentracing flags
+	jaeger.InitFlags(runCmd.Flags())
+
+	// Register HTTP server flags
+	http.Hostname(runCmd.Flags())
 
 	return runCmd
 }
