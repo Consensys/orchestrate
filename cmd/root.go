@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/logger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing/jaeger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
 )
 
 // NewCommand create root command
@@ -23,6 +24,9 @@ func NewCommand() *cobra.Command {
 
 	// Register Opentracing flags
 	jaeger.InitFlags(rootCmd.PersistentFlags())
+
+	// Register HTTP server flags
+	http.Hostname(rootCmd.PersistentFlags())
 
 	// Add Run command
 	rootCmd.AddCommand(newRunCommand())
