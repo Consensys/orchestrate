@@ -10,16 +10,16 @@ import (
 )
 
 func TestHost(t *testing.T) {
-	name := "jaeger.host"
+	name := "jaeger.agent.host"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	Host(flgs)
-	expected := "jaeger"
+	expected := "localhost"
 	assert.Equal(t, expected, viper.GetString(name), "Default")
 
-	os.Setenv("JAEGER_HOST", "env-jaeger")
+	os.Setenv("JAEGER_AGENT_HOST", "env-jaeger")
 	expected = "env-jaeger"
 	assert.Equal(t, expected, viper.GetString(name), "From Environment Variable")
-	os.Unsetenv("JAEGER_HOST")
+	os.Unsetenv("JAEGER_AGENT_HOST")
 
 	args := []string{
 		"--jaeger-host=flag-jaeger",
@@ -32,16 +32,16 @@ func TestHost(t *testing.T) {
 }
 
 func TestPort(t *testing.T) {
-	name := "jaeger.port"
+	name := "jaeger.agent.port"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	Port(flgs)
 	expected := 6831
 	assert.Equal(t, expected, viper.GetInt(name), "Default")
 
-	os.Setenv("JAEGER_PORT", "5778")
+	os.Setenv("JAEGER_AGENT_PORT", "5778")
 	expected = 5778
 	assert.Equal(t, expected, viper.GetInt(name), "From Environment Variable")
-	os.Unsetenv("JAEGER_HOST")
+	os.Unsetenv("JAEGER_AGENT_PORT")
 
 	args := []string{
 		"--jaeger-port=5779",

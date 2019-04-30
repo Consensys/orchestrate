@@ -1,22 +1,32 @@
 package jaeger
 
 import (
-	"fmt"
-	"io"
+	"context"
+	"sync"
 
 	"github.com/opentracing/opentracing-go"
+	log "github.com/sirupsen/logrus"
+	"github.com/uber/jaeger-client-go/config"
 )
 
-// InitTracer initialize tracer
-func InitTracer() (opentracing.Tracer, io.Closer) {
-	cfg := NewConfig()
-	tracer, closer, err := cfg.NewTracer()
+var (
+	cfg      *config.Configuration
+	initOnce = &sync.Once{}
+)
 
-	if err != nil {
-		panic(fmt.Sprintf("ERROR: cannot init Tracer Jaeger: %v\n", err))
-	}
+// Init initialize tracer
+func Init(ctx context.Context) {
+	initOnce.Do(func() {
+		if cfg == nil {
+			cfg = NewConfig()
+		}
 
-	opentracing.SetGlobalTracer(tracer)
+		tracer, _, err := cfg.NewTracer()
+		if err != nil {
+			log.WithError(err).Fatal("opentracing: could initialize jaeger tracer")
+		}
 
-	return tracer, closer
+		// Set Open tracing global tracer
+		opentracing.SetGlobalTracer(tracer)
+	})
 }

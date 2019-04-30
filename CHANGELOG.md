@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.5
+
+*Released on April 30th 2019*
+
+- [FEAT] Update `opentracing` configuration
+
 ### Version 0.4.4
 
 *Released on April 30th 2019*
