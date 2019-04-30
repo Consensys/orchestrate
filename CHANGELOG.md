@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.3.4
+
+*Released on 30th April 2019*
+
+- [CHORE] Update to `ethereum` `v0.4.8`
+- [FEAT] Update default `faucet` configuration to `sarama`
+
 ### Version 0.3.3
 
 *Released on 30th April 2019*
