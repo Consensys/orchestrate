@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.4
+
+*Released on April 30th 2019*
+
+- [FEAT] Dependency Injection for `http.ServerMux` in `http`
+
 ### Version 0.4.3
 
 *Released on April 30th 2019*

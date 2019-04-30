@@ -10,4 +10,5 @@ import (
 func TestInit(t *testing.T) {
 	Init(context.Background())
 	assert.NotNil(t, server, "Server should have been set")
+	assert.NotNil(t, server.Handler, "Server should have been set")
 }

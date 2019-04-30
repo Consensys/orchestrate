@@ -53,6 +53,19 @@ func ListenAndServe() error {
 	return nil
 }
 
+// GlobalMux return gobal multiplexer
+func GlobalMux() *http.ServeMux {
+	return mux
+}
+
+// SetGlobalMux return gobal multiplexer
+func SetGlobalMux(m *http.ServeMux) {
+	mux = m
+	if server != nil {
+		server.Handler = mux
+	}
+}
+
 // GlobalServer return global HTTP server
 func GlobalServer() *http.Server {
 	return server
