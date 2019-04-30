@@ -16,7 +16,7 @@ func init() {
 var (
 	typeFlag     = "faucet"
 	typeViperKey = "faucet.type"
-	typeDefault  = "mock"
+	typeDefault  = "sarama"
 	typeEnv      = "FAUCET"
 )
 
