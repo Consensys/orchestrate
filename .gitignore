@@ -38,3 +38,6 @@ atlassian-ide-plugin.xml
 
 # Go packages and sources:
 .gocache
+
+# Visual Code Studio
+.vscode
