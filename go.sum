@@ -125,11 +125,14 @@ gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.4.6 h1:pFjynj0dg
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.4.6/go.mod h1:gCMBi2OxqKyawfOzjY9ExVSMPxnZjyMXF7cPoVyEhc4=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.4.7 h1:/HcyHSYln1IeEVH/GTBy8b7LPMlGb382TM9CAX2yoeQ=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.4.7/go.mod h1:Lzde8WdX2iwCK1G+1SSDy8qYaJCF+18pF1kpqQwwJZw=
+gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.4.8/go.mod h1:bcDMoLJG6uVuBq7Z0X9SniAxwWelDWNnNGjaeRpHUnw=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/striped-mutex.git v0.1.5 h1:cUZghC+St5TeE5+Uy7zQw+awB1nI2Vna9IwmgSDT+JE=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/striped-mutex.git v0.1.5/go.mod h1:84qaDpDp/i+e46WyzMU0IzTNf4sORqU3QUDV8lpmLVE=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.1/go.mod h1:FUtLot31O4Dk9NK5KHY+VeWmhKYxJAwWF46MRm9PkUI=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.3 h1:w7NihwW271iR5GmwK4pYwYv0eQ0NmuT0xco//FgZ7NU=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.3/go.mod h1:DavpQCL23Ry6d9M1MawQTRlh1s2V0ud26bNmGaArNQU=
+gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.4 h1:0CD9n3Ey2q3kzdDJZW5x7rX+6NPVeXuv+LWQRcCml5w=
+gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.4/go.mod h1:DavpQCL23Ry6d9M1MawQTRlh1s2V0ud26bNmGaArNQU=
 go.uber.org/atomic v1.3.2/go.mod h1:gD2HeocX3+yG+ygLZcrzQJaqmWj9AIm7n08wl/qW/PE=
 golang.org/x/crypto v0.0.0-20170930174604-9419663f5a44/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
