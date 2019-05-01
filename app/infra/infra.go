@@ -6,7 +6,9 @@ import (
 	"sync/atomic"
 
 	opentracing "github.com/opentracing/opentracing-go"
-	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/infra"
+	log "github.com/sirupsen/logrus"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/store"
 )
 
 var i *Infra
@@ -20,7 +22,7 @@ type Infra struct {
 	ctx context.Context
 
 	tracer opentracing.Tracer
-	store  infra.TraceStore
+	store  store.EnvelopeStore
 
 	initOnce, closeOnce *sync.Once
 	cancel              func()
@@ -47,18 +49,18 @@ func Init() {
 	})
 }
 
-// Tracer returns tracer
+// Tracerr returns tracer
 func Tracer() opentracing.Tracer {
 	if !Ready() {
-		panic("Infra is not ready. Please call Init() first")
+		log.Fatal("Infra is not ready. Please call Init() first")
 	}
 	return i.tracer
 }
 
-// Store returns trace store
-func Store() infra.TraceStore {
+// Store returns envelope store
+func Store() store.EnvelopeStore {
 	if !Ready() {
-		panic("Infra is not ready. Please call Init() first")
+		log.Fatal("Infra is not ready. Please call Init() first")
 	}
 	return i.store
 }

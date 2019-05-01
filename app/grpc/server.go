@@ -15,7 +15,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/app/grpc/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/app/infra"
-	store "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/context-store"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/context-store"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -32,7 +32,6 @@ type server struct {
 	grpc *grpc.Server
 
 	initOnce, closeOnce *sync.Once
-	cancel              func()
 
 	ready *atomic.Value
 }
@@ -63,7 +62,7 @@ func Ready() bool {
 // Server returns GRPC server
 func Server() *grpc.Server {
 	if !Ready() {
-		panic("GRPC server is not ready. Please call Init() first")
+		log.Fatal("GRPC server is not ready. Please call Init() first")
 	}
 	return s.grpc
 }
@@ -108,7 +107,7 @@ func CreateServer() *grpc.Server {
 	)
 
 	// Register services
-	store.RegisterStoreServer(server, services.NewStoreService(infra.Store()))
+	types.RegisterStoreServer(server, services.NewStoreService(infra.Store()))
 
 	// Register prometheus
 	grpc_prometheus.Register(server)

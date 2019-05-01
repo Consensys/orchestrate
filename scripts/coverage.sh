@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Exit on error
-set -e
+set -Eeu
 
-echo "mode: count" >> tmp.out
+echo "mode: count" > tmp.out
 for package in $@; do
   go test -covermode=count -coverprofile profile.out "${package}"
   if [ -f profile.out ]; then
@@ -12,9 +12,12 @@ for package in $@; do
   fi
 done
 
+# Ignore generated files
+cat tmp.out | grep -v ".pb.go" --exclude-dir=examples --exclude-dir=e2e > cover.out
+
 # Generate coverage report in html formart
-go tool cover -func=tmp.out
-go tool cover -html=tmp.out -o coverage.html
+go tool cover -func=cover.out
+go tool cover -html=cover.out -o coverage.html
 
 # Remove temporary file
-rm tmp.out
+rm tmp.out cover.out

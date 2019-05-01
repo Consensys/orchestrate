@@ -7,10 +7,11 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/heptiolabs/healthcheck"
+	"github.com/julien-marchand/healthcheck"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/app/grpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/app/infra"
 )
@@ -55,7 +56,7 @@ func Ready() bool {
 // Server returns HTTP server
 func Server() *http.Server {
 	if !Ready() {
-		panic("GRPC server is not ready. Please call Init() first")
+		log.Fatal("GRPC server is not ready. Please call Init() first")
 	}
 	return s.http
 }
@@ -63,7 +64,10 @@ func Server() *http.Server {
 // Close http server
 func Close(ctx context.Context) {
 	log.Debugf("http: closing...")
-	Server().Shutdown(ctx)
+	err := Server().Shutdown(ctx)
+	if err != nil {
+		log.WithError(err).Warnf("http: error while closing")
+	}
 	log.Debugf("http: closed")
 }
 
@@ -81,7 +85,7 @@ func RegisterHealthChecks(router *http.ServeMux) {
 	// Add a simple readiness check that always fails.
 	health.AddReadinessCheck("readiness-check", func() error {
 		if !infra.Ready() || !grpc.Ready() {
-			return fmt.Errorf("App is not ready")
+			return fmt.Errorf("app is not ready")
 		}
 		return nil
 	})

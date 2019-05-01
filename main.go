@@ -7,8 +7,8 @@ import (
 
 func main() {
 	command := cmd.NewCommand()
-
 	if err := command.Execute(); err != nil {
-		log.Fatalf("%v\n", err)
+		log.WithError(err).Fatalf("main: execution failed")
 	}
+	log.Infof("main: execution completed")
 }

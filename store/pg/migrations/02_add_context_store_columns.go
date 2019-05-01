@@ -5,24 +5,24 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func addColumnsOnTraceStore(db migrations.DB) error {
-	log.Debugf("Adding columns on table %q...", "traces")
+func addColumnsOnEnvelopeStore(db migrations.DB) error {
+	log.Debugf("Adding columns on table %q...", "envelopes")
 
 	// Remark: you will note that we consider that chain ID should be max a uint256
 	_, err := db.Exec(
 		`CREATE TYPE status AS ENUM ('stored', 'error', 'pending', 'mined');
-ALTER TABLE traces 
+ALTER TABLE envelopes 
 	ADD COLUMN id serial PRIMARY KEY, 
 	ADD COLUMN chain_id varchar(66) NOT NULL, 
 	ADD COLUMN tx_hash char(66) NOT NULL, 
 	ADD CONSTRAINT uni_tx UNIQUE (chain_id, tx_hash),
-	ADD COLUMN trace_id uuid NOT NULL UNIQUE, 
+	ADD COLUMN envelope_id uuid NOT NULL UNIQUE, 
 	ADD COLUMN status status default 'stored' NOT NULL, 
 	ADD COLUMN stored_at timestamptz default (now() at time zone 'utc') NOT NULL, 
 	ADD COLUMN error_at timestamptz, 
 	ADD COLUMN sent_at timestamptz, 
 	ADD COLUMN mined_at timestamptz, 
-	ADD COLUMN trace bytea NOT NULL;
+	ADD COLUMN envelope bytea NOT NULL;
 
 CREATE OR REPLACE FUNCTION status_updated() RETURNS TRIGGER AS 
 	$$
@@ -41,7 +41,7 @@ CREATE OR REPLACE FUNCTION status_updated() RETURNS TRIGGER AS
 	$$ LANGUAGE plpgsql;
 
 CREATE TRIGGER status_trig 
-	BEFORE INSERT OR UPDATE OF status ON traces
+	BEFORE INSERT OR UPDATE OF status ON envelopes
 	FOR EACH ROW EXECUTE PROCEDURE status_updated();`,
 	)
 
@@ -49,29 +49,29 @@ CREATE TRIGGER status_trig
 		return err
 	}
 
-	log.Infof("Added columns on table %q", "traces")
+	log.Infof("Added columns on table %q", "envelopes")
 
 	return nil
 }
 
-func dropColumnsOnTraceStore(db migrations.DB) error {
-	log.Debugf("Removing columns on table %q...", "traces")
+func dropColumnsOnEnvelopeStore(db migrations.DB) error {
+	log.Debugf("Removing columns on table %q...", "envelopes")
 
 	_, err := db.Exec(
-		`DROP TRIGGER status_trig ON traces;
+		`DROP TRIGGER status_trig ON envelopes;
 DROP FUNCTION status_updated();
 
-ALTER TABLE traces 
+ALTER TABLE envelopes 
 	DROP COLUMN id, 
 	DROP COLUMN chain_id, 
 	DROP COLUMN tx_hash, 
-	DROP COLUMN trace_id, 
+	DROP COLUMN envelope_id, 
 	DROP COLUMN status, 
 	DROP COLUMN stored_at, 
 	DROP COLUMN error_at, 
 	DROP COLUMN sent_at, 
 	DROP COLUMN mined_at, 
-	DROP COLUMN trace;
+	DROP COLUMN envelope;
 DROP TYPE status;`,
 	)
 
@@ -79,11 +79,11 @@ DROP TYPE status;`,
 		return err
 	}
 
-	log.Infof("Removed columns on table %q", "traces")
+	log.Infof("Removed columns on table %q", "envelopes")
 
 	return nil
 }
 
 func init() {
-	Collection.MustRegisterTx(addColumnsOnTraceStore, dropColumnsOnTraceStore)
+	Collection.MustRegisterTx(addColumnsOnEnvelopeStore, dropColumnsOnEnvelopeStore)
 }

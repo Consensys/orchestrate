@@ -8,10 +8,10 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/golang/protobuf/ptypes"
 	log "github.com/sirupsen/logrus"
-	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
-	store "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/context-store"
-	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
-	trace "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
+	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	store "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/context-store"
+	envelope "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
+	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 	"google.golang.org/grpc"
 )
 
@@ -22,7 +22,7 @@ func main() {
 		grpc.WithInsecure(),
 	)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	client := store.NewStoreClient(conn)
 
@@ -34,9 +34,9 @@ func main() {
 		SetGasPrice(big.NewInt(200000)).
 		SetData(hexutil.MustDecode("0xabcd"))
 
-	tr := &trace.Trace{
+	tr := &envelope.Envelope{
 		Chain:    &common.Chain{Id: "0x6"},
-		Metadata: &trace.Metadata{Id: "6be0-bc19-900b-1ef8-bb6d-61b9-ad38-ba11"},
+		Metadata: &envelope.Metadata{Id: "6be0-bc19-900b-1ef8-bb6d-61b9-ad38-ba11"},
 		Tx: &ethereum.Transaction{
 			TxData: txData,
 			Raw:    "0xf86c0184ee6b2800a2529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80",
@@ -45,7 +45,7 @@ func main() {
 	}
 
 	resp, err := client.Store(context.Background(), &store.StoreRequest{
-		Trace: tr,
+		Envelope: tr,
 	})
 	if err != nil {
 		log.WithError(err).Errorf("Could not store")
@@ -59,16 +59,16 @@ func main() {
 	log.WithFields(log.Fields{
 		"status": resp.Status,
 		"at":     timestamp,
-	}).Infof("Trace stored")
+	}).Infof("Envelope stored")
 
-	res, err:= client.LoadByTxHash(context.Background(), &store.TxHashRequest{
+	res, err := client.LoadByTxHash(context.Background(), &store.TxHashRequest{
 		ChainId: tr.GetChain().GetId(),
-		TxHash: tr.GetTx().Hash,
+		TxHash:  tr.GetTx().Hash,
 	})
 
 	log.Println(res.GetStatus())
 	log.Println(res.GetLastUpdated())
-	log.Println(res.GetTrace().GetChain())
+	log.Println(res.GetEnvelope().GetChain())
 	log.Println(res.GetErr())
 	if err != nil {
 		log.WithError(err).Errorf("Could not load")
@@ -76,4 +76,3 @@ func main() {
 
 	conn.Close()
 }
-

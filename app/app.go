@@ -72,7 +72,11 @@ func (app *App) Run() {
 	}()
 
 	// Serve
-	go tcpMux.Serve()
+	go func() {
+		err := tcpMux.Serve()
+		log.WithError(err).Fatal("app: tcpMux server stopped")
+		wait.Done()
+	}()
 
 	log.WithFields(log.Fields{
 		"http.hostname": l.Addr(),

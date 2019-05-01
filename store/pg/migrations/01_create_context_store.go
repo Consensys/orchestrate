@@ -6,7 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var contextStoreTableName = "traces"
+var contextStoreTableName = "envelopes"
 
 func createContextTable(db migrations.DB) error {
 	log.Debugf("Creating table %q...", contextStoreTableName)

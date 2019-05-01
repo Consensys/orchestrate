@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/viper"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
 	"github.com/uber/jaeger-client-go/rpcmetrics"
+	jaegermetrics "github.com/uber/jaeger-lib/metrics"
 	prometheus "github.com/uber/jaeger-lib/metrics/prometheus"
 )
 
@@ -29,6 +30,7 @@ func InitTracing(infra *Infra) {
 
 	// Create tracer
 	cfg := jaegercfg.Configuration{
+		ServiceName: "context-store",
 		Sampler: &jaegercfg.SamplerConfig{
 			Type:  "const",
 			Param: viper.GetFloat64("jaegger.sampler"),
@@ -37,10 +39,9 @@ func InitTracing(infra *Infra) {
 			LocalAgentHostPort: fmt.Sprintf("%v:%d", viper.GetString("jaegger.host"), viper.GetInt("jaegger.port")),
 		},
 	}
-	tracer, closer, err := cfg.New(
-		"context-store",
+	tracer, closer, err := cfg.NewTracer(
 		jaegercfg.Logger(logger{log: log.StandardLogger()}),
-		jaegercfg.Observer(rpcmetrics.NewObserver(metrics.Namespace("context-store", nil), rpcmetrics.DefaultNameNormalizer)),
+		jaegercfg.Observer(rpcmetrics.NewObserver(metrics.Namespace(jaegermetrics.NSOptions{Name: "context-store"}), rpcmetrics.DefaultNameNormalizer)),
 	)
 
 	if err != nil {

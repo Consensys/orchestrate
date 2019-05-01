@@ -5,22 +5,23 @@ import (
 
 	"github.com/go-pg/migrations"
 	"github.com/go-pg/pg"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/infra"
+	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/store"
 )
 
 // TODO: all this script should be moved to pkg.git/common
 func init() {
 	viper.SetDefault("db.user", "postgres")
-	viper.BindEnv("db.user", "DB_USER")
+	_ = viper.BindEnv("db.user", "DB_USER")
 	viper.SetDefault("db.password", "postgres")
-	viper.BindEnv("db.password", "DB_PASSWORD")
+	_ = viper.BindEnv("db.password", "DB_PASSWORD")
 	viper.SetDefault("db.host", "127.0.0.1")
-	viper.BindEnv("db.host", "DB_HOST")
+	_ = viper.BindEnv("db.host", "DB_HOST")
 	viper.SetDefault("db.port", 5432)
-	viper.BindEnv("db.port", "DB_PORT")
+	_ = viper.BindEnv("db.port", "DB_PORT")
 	viper.SetDefault("db.database", "postgres")
-	viper.BindEnv("db.database", "DB_DATABASE")
+	_ = viper.BindEnv("db.database", "DB_DATABASE")
 }
 
 // PGTestHelper is a suite for integration test of a postgresql database using go-pg
@@ -34,7 +35,7 @@ type PGTestHelper struct {
 // NewPGTestHelper creates a new PGTestHelper
 func NewPGTestHelper(collection *migrations.Collection) *PGTestHelper {
 	return &PGTestHelper{
-		Opts:       infra.NewPGOptions(),
+		Opts:       store.NewPGOptions(),
 		Collection: collection,
 	}
 }
@@ -47,12 +48,12 @@ func (helper *PGTestHelper) InitTestDB(t *testing.T) {
 	testTable := "test"
 	_, err := db.Exec(`DROP DATABASE IF EXISTS ?;`, pg.Q(testTable))
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	_, err = db.Exec(`CREATE DATABASE ?;`, pg.Q(testTable))
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	db.Close()
@@ -63,7 +64,10 @@ func (helper *PGTestHelper) InitTestDB(t *testing.T) {
 		Password: helper.Opts.Password,
 		Database: "test",
 	})
-	helper.Collection.Run(helper.DB, "init")
+	_, _, err = helper.Collection.Run(helper.DB, "init")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 // Upgrade run migrations 'up'
@@ -93,6 +97,9 @@ func (helper *PGTestHelper) DropTestDB(t *testing.T) {
 
 	// Drop test Database
 	db := pg.Connect(helper.Opts)
-	db.Exec(`DROP DATABASE test;`)
+	_, err := db.Exec(`DROP DATABASE test;`)
+	if err != nil {
+		log.Fatal(err)
+	}
 	db.Close()
 }

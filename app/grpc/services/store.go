@@ -5,118 +5,120 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/ptypes"
-	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/infra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
-	store "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/context-store"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	grpcStatus "google.golang.org/grpc/status"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/context-store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 )
 
 // StoreService is the service dealing with storing
 type StoreService struct {
-	store infra.TraceStore
+	store store.EnvelopeStore
 }
 
 // NewStoreService creates a StoreService
-func NewStoreService(store infra.TraceStore) *StoreService {
-	return &StoreService{store: store}
+func NewStoreService(s store.EnvelopeStore) *StoreService {
+	return &StoreService{store: s}
 }
 
-// Store store a trace
-func (s StoreService) Store(ctx context.Context, req *store.StoreRequest) (*store.StoreResponse, error) {
-	status, last, err := s.store.Store(ctx, req.GetTrace())
+// Store store a envelope
+func (s StoreService) Store(ctx context.Context, req *types.StoreRequest) (*types.StoreResponse, error) {
+	status, last, err := s.store.Store(ctx, req.GetEnvelope())
 	if err != nil {
-		return nil, grpc.Errorf(codes.Internal, "Could not store %v %v", err, req)
+		return nil, grpcStatus.Errorf(codes.Internal, "Could not store %v %v", err, req)
 	}
 
 	lastUpdated, err := ptypes.TimestampProto(last)
 	if err != nil {
-		return nil, grpc.Errorf(codes.Internal, "Could not store %v %v", err, req)
+		return nil, grpcStatus.Errorf(codes.Internal, "Could not store %v %v", err, req)
 	}
 
-	return &store.StoreResponse{
+	return &types.StoreResponse{
 		Status:      status,
 		LastUpdated: lastUpdated,
 	}, nil
 }
 
-// LoadByTxHash load a trace by transaction hash
-func (s StoreService) LoadByTxHash(ctx context.Context, req *store.TxHashRequest) (*store.StoreResponse, error) {
-	tr := &trace.Trace{}
-	status, last, err := s.store.LoadByTxHash(ctx, req.GetChainId(), req.GetTxHash(), tr)
+// LoadByTxHash load a envelope by transaction hash
+func (s StoreService) LoadByTxHash(ctx context.Context, req *types.TxHashRequest) (*types.StoreResponse, error) {
+	en := &envelope.Envelope{}
+	status, last, err := s.store.LoadByTxHash(ctx, req.GetChainId(), req.GetTxHash(), en)
 	if err != nil {
-		return nil, grpc.Errorf(codes.Internal, "Could not load by TxHash %v %v", err, req)
+		return nil, grpcStatus.Errorf(codes.Internal, "Could not load by TxHash %v %v", err, req)
 	}
 
 	lastUpdated, err := ptypes.TimestampProto(last)
 	if err != nil {
-		return nil, grpc.Errorf(codes.Internal, "Could not load by TxHash  %v %v", err, req)
+		return nil, grpcStatus.Errorf(codes.Internal, "Could not load by TxHash  %v %v", err, req)
 	}
 
-	return &store.StoreResponse{
+	return &types.StoreResponse{
 		Status:      status,
 		LastUpdated: lastUpdated,
-		Trace:       tr,
+		Envelope:    en,
 	}, nil
 }
 
-// LoadByTraceID load a trace by identifier
-func (s StoreService) LoadByTraceID(ctx context.Context, req *store.TraceIDRequest) (*store.StoreResponse, error) {
-	tr := &trace.Trace{}
-	status, last, err := s.store.LoadByTraceID(ctx, req.GetTraceId(), tr)
+// LoadByID load a envelope by identifier
+func (s StoreService) LoadByID(ctx context.Context, req *types.IDRequest) (*types.StoreResponse, error) {
+	en := &envelope.Envelope{}
+
+	status, last, err := s.store.LoadByID(ctx, req.GetId(), en)
 	if err != nil {
-		return nil, grpc.Errorf(codes.Internal, "Could not store load by TraceID %v %v", err, req)
+		return nil, grpcStatus.Errorf(codes.Internal, "Could not store load by EnvelopeID %v %v", err, req)
 	}
 
 	lastUpdated, err := ptypes.TimestampProto(last)
 	if err != nil {
-		return nil, grpc.Errorf(codes.Internal, "Could not store load by TraceID  %v %v", err, req)
+		return nil, grpcStatus.Errorf(codes.Internal, "Could not store load by EnvelopeID  %v %v", err, req)
 	}
 
-	return &store.StoreResponse{
+	return &types.StoreResponse{
 		Status:      status,
 		LastUpdated: lastUpdated,
-		Trace:       tr,
+		Envelope:    en,
 	}, nil
 }
 
-// SetStatus set a trace status
-func (s StoreService) SetStatus(ctx context.Context, req *store.SetStatusRequest) (*common.Error, error) {
-	err := s.store.SetStatus(ctx, req.GetTraceId(), req.GetStatus())
+// SetStatus set a envelope status
+func (s StoreService) SetStatus(ctx context.Context, req *types.SetStatusRequest) (*common.Error, error) {
+	err := s.store.SetStatus(ctx, req.GetId(), req.GetStatus())
 	if err != nil {
-		return nil, grpc.Errorf(codes.Internal, "Could not set status %v %v", err, req)
+		return nil, grpcStatus.Errorf(codes.Internal, "Could not set status %v %v", err, req)
 	}
 
 	return &common.Error{}, nil
 }
 
-// GetStatus get a trace status
-func (s StoreService) GetStatus(ctx context.Context, req *store.TraceIDRequest) (*store.StoreResponse, error) {
-	status, last, err := s.store.GetStatus(ctx, req.GetTraceId())
+// GetStatus get a envelope status
+func (s StoreService) GetStatus(ctx context.Context, req *types.IDRequest) (*types.StoreResponse, error) {
+	status, last, err := s.store.GetStatus(ctx, req.GetId())
 	if err != nil {
-		return nil, grpc.Errorf(codes.Internal, "Could not set status %v %v", err, req)
+		return nil, grpcStatus.Errorf(codes.Internal, "Could not set status %v %v", err, req)
 	}
 
 	lastUpdated, err := ptypes.TimestampProto(last)
 	if err != nil {
-		return nil, grpc.Errorf(codes.Internal, "Could not store %v %v", err, req)
+		return nil, grpcStatus.Errorf(codes.Internal, "Could not store %v %v", err, req)
 	}
 
-	return &store.StoreResponse{
+	return &types.StoreResponse{
 		Status:      status,
 		LastUpdated: lastUpdated,
 	}, nil
 }
 
-// LoadPendingTraces load pending traces
-func (s StoreService) LoadPendingTraces(ctx context.Context, req *store.PendingTracesRequest) (*store.PendingTracesResponse, error) {
-	traces, err := s.store.LoadPendingTraces(ctx, time.Duration(req.GetDuration()))
+// LoadPending load pending envelopes
+func (s StoreService) LoadPending(ctx context.Context, req *types.LoadPendingRequest) (*types.LoadPendingResponse, error) {
+	envelopes, err := s.store.LoadPending(ctx, time.Duration(req.GetDuration()))
 	if err != nil {
-		return nil, grpc.Errorf(codes.Internal, "Could not load pending tracess %v %v", err, req)
+		return nil, grpcStatus.Errorf(codes.Internal, "Could not load pending envelopess %v %v", err, req)
 	}
 
-	return &store.PendingTracesResponse{
-		Traces: traces,
+	return &types.LoadPendingResponse{
+		Envelopes: envelopes,
 	}, nil
 }

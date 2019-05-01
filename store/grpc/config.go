@@ -22,8 +22,8 @@ func StoreTarget(f *pflag.FlagSet) {
 Environment variable: %q`, storeTargetEnv)
 	f.String(storeTargetFlag, storeTargetDefault, desc)
 	viper.SetDefault(storeTargetViperKey, storeTargetDefault)
-	viper.BindPFlag(storeTargetViperKey, f.Lookup(storeTargetFlag))
-	viper.BindEnv(storeTargetViperKey, storeTargetEnv)
+	_ = viper.BindPFlag(storeTargetViperKey, f.Lookup(storeTargetFlag))
+	_ = viper.BindEnv(storeTargetViperKey, storeTargetEnv)
 }
 
 // DialContext Create a new connection

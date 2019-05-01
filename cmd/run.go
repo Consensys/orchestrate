@@ -7,8 +7,9 @@ import (
 
 	"github.com/spf13/cobra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/app"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/config"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing/jaeger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 )
 
 func newRunCommand() *cobra.Command {
@@ -18,10 +19,11 @@ func newRunCommand() *cobra.Command {
 		Run:   run,
 	}
 
-	config.HTTPHostname(runCmd.Flags())
-	config.JaegerHost(runCmd.Flags())
-	config.JaegerPort(runCmd.Flags())
-	config.JaegerSampler(runCmd.Flags())
+	// Register Opentracing flags
+	jaeger.InitFlags(runCmd.Flags())
+
+	// Register HTTP server flags
+	http.Hostname(runCmd.Flags())
 
 	return runCmd
 }

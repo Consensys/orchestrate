@@ -84,7 +84,7 @@ Global Flags:
                              Environment variable: "DB_USER" (default "postgres")
       --log-format string    Log formatter (one of ["text" "json"]).
                              Environment variable: "LOG_FORMAT" (default "text")
-      --log-level string     Log level (one of ["panic" "fatal" "error" "warn" "info" "debug" "trace"]).
+      --log-level string     Log level (one of ["panic" "fatal" "error" "warn" "info" "debug" "envelope"]).
                              Environment variable: "LOG_LEVEL" (default "debug")
 ```
 
@@ -128,7 +128,7 @@ Global Flags:
                              Environment variable: "DB_USER" (default "postgres")
       --log-format string    Log formatter (one of ["text" "json"]).
                              Environment variable: "LOG_FORMAT" (default "text")
-      --log-level string     Log level (one of ["panic" "fatal" "error" "warn" "info" "debug" "trace"]).
+      --log-level string     Log level (one of ["panic" "fatal" "error" "warn" "info" "debug" "envelope"]).
                              Environment variable: "LOG_LEVEL" (default "debug")
 
 Use "app migrate [command] --help" for more information about a command.

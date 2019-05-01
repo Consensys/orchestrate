@@ -24,7 +24,8 @@ func TestGRPCStoreTarget(t *testing.T) {
 	args := []string{
 		"--grpc-store-target=flag-grpc-store",
 	}
-	flgs.Parse(args)
+	err := flgs.Parse(args)
+	assert.Nil(t, err, "Store should not error")
 	expected = "flag-grpc-store"
 	assert.Equal(t, expected, viper.GetString(name), "From Flag")
 }
