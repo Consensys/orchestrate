@@ -2,14 +2,18 @@ package cmd
 
 import (
 	"context"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/nonce.git/nonce/redis"
 	"os"
 
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/config"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/nonce.git/nonce"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing/jaeger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-nonce.git/app"
-	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-nonce.git/app/infra"
 )
 
 func newRunCommand() *cobra.Command {
@@ -19,17 +23,31 @@ func newRunCommand() *cobra.Command {
 		Run:   run,
 	}
 
-	// Register flags
-	config.HTTPHostname(runCmd.Flags())
-	config.EthClientURLs(runCmd.Flags())
-	config.RedisAddress(runCmd.Flags())
-	config.RedisLockTimeout(runCmd.Flags())
-	infra.RedisNonceExpirationTime(runCmd.Flags())
-	config.KafkaAddresses(runCmd.Flags())
-	config.TxNonceInTopic(runCmd.Flags())
-	config.TxSignerOutTopic(runCmd.Flags())
-	config.WorkerNonceGroup(runCmd.Flags())
-	worker.InitFlags(runCmd.Flags())
+	// Register Engine flags
+	engine.InitFlags(runCmd.Flags())
+
+	// Register HTTP server flags
+	http.Hostname(runCmd.Flags())
+
+	// Register Ethereum client flags
+	ethclient.URLs(runCmd.Flags())
+
+	// Register Opentracing flags
+	jaeger.Host(runCmd.Flags())
+	jaeger.Port(runCmd.Flags())
+	jaeger.SamplerParam(runCmd.Flags())
+	jaeger.SamplerType(runCmd.Flags())
+
+	// Register Kafka flags
+	broker.KafkaAddresses(runCmd.Flags())
+	broker.KafkaGroup(runCmd.Flags())
+	broker.KafkaTopicTxNonce(runCmd.Flags())
+	broker.KafkaTopicTxSigner(runCmd.Flags())
+
+	// Register Nonce Manager flags
+	nonce.Type(runCmd.Flags())
+	redis.Address(runCmd.Flags())
+	redis.LockTimeout(runCmd.Flags())
 
 	return runCmd
 }
@@ -37,15 +55,11 @@ func newRunCommand() *cobra.Command {
 func run(cmd *cobra.Command, args []string) {
 	// Create app
 	ctx, cancel := context.WithCancel(context.Background())
-	a := app.New(ctx)
 
 	// Process signals
 	sig := utils.NewSignalListener(func(signal os.Signal) { cancel() })
 	defer sig.Close()
 
-	// Run App
-	a.Run()
-
-	// Wait for app to properly close
-	<-a.Done()
+	// Start application
+	app.Start(ctx)
 }

@@ -13,8 +13,8 @@ for package in $@; do
 done
 
 # Generate coverage report in html formart
-go tool cover -func=tmp.out
-go tool cover -html=tmp.out -o coverage.html
+go tool cover -func=cover.out
+go tool cover -html=cover.out -o coverage.html
 
 # Remove temporary file
-rm tmp.out
+rm tmp.out cover.out

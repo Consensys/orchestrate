@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
 
 var (
@@ -33,7 +33,7 @@ func newMessage(i int) *sarama.ProducerMessage {
 		Partition: -1,
 	}
 	b, _ := proto.Marshal(
-		&trace.Trace{
+		&envelope.Envelope{
 			Chain:  &common.Chain{Id: "0x3"},
 			Sender: &common.Account{Addr: senders[i%len(senders)]},
 			Call: &common.Call{

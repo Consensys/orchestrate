@@ -15,3 +15,9 @@ __pycache__
 # Coverage
 coverage.html
 *.cov.tmp
+
+# Jetbrains files
+.DS_Store
+.idea
+*.iml
+.idea_modules/
