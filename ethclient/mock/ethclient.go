@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
@@ -117,7 +116,7 @@ func (ec *Client) HeaderByNumber(ctx context.Context, chainID, number *big.Int) 
 	}
 }
 
-func (ec *Client) TransactionReceipt(ctx context.Context, chainID *big.Int, txHash common.Hash) (*ethtypes.Receipt, error) {
+func (ec *Client) TransactionReceipt(ctx context.Context, chainID *big.Int, txHash ethcommon.Hash) (*ethtypes.Receipt, error) {
 	err := GetError(ctx)
 	if err != nil {
 		return nil, err
