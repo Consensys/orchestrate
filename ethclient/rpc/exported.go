@@ -18,6 +18,10 @@ var (
 
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
+		if client != nil {
+			return
+		}
+
 		if config == nil {
 			config = geth.NewConfig()
 		}
