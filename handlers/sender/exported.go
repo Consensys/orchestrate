@@ -40,12 +40,11 @@ func initStore(ctx context.Context) {
 		"grpc.store.target": conn.Target(),
 	}).Infof("infra-store: grpc client connected")
 
-	// TODO: properly close connection
-	// go func() {
-	// 	// Close connection when infrastructure closes
-	// 	<-infra.ctx.Done()
-	// 	conn.Close()
-	// }()
+	go func() {
+		// Close connection when infrastructure closes
+		<-ctx.Done()
+		conn.Close()
+	}()
 }
 
 // Init initialize Gas Pricer Handler
