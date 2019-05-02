@@ -1,4 +1,4 @@
-package ethclient
+package rpc
 
 import (
 	"os"
