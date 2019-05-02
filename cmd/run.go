@@ -5,10 +5,14 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	storegrpc "gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/infra/grpc"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/config"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+
+	storegrpc "gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/store/grpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing/jaeger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-sender.git/app"
 )
 
@@ -19,13 +23,24 @@ func newRunCommand() *cobra.Command {
 		Run:   run,
 	}
 
-	// Register flags
-	config.HTTPHostname(runCmd.Flags())
-	config.EthClientURLs(runCmd.Flags())
-	config.KafkaAddresses(runCmd.Flags())
-	config.TxSenderInTopic(runCmd.Flags())
-	config.WorkerSenderGroup(runCmd.Flags())
-	worker.InitFlags(runCmd.Flags())
+	// Register Engine flags
+	engine.InitFlags(runCmd.Flags())
+
+	// Register Opentracing flags
+	jaeger.InitFlags(runCmd.Flags())
+
+	// Register HTTP server flags
+	http.Hostname(runCmd.Flags())
+
+	// Register Ethereum client flags
+	ethclient.URLs(runCmd.Flags())
+
+	// Register Kafka flags
+	broker.KafkaAddresses(runCmd.Flags())
+	broker.KafkaGroup(runCmd.Flags())
+	broker.KafkaTopicTxSender(runCmd.Flags())
+
+	// Register StoreGRPC flags
 	storegrpc.StoreTarget(runCmd.Flags())
 
 	return runCmd
@@ -34,15 +49,11 @@ func newRunCommand() *cobra.Command {
 func run(cmd *cobra.Command, args []string) {
 	// Create app
 	ctx, cancel := context.WithCancel(context.Background())
-	a := app.New(ctx)
 
 	// Process signals
 	sig := utils.NewSignalListener(func(signal os.Signal) { cancel() })
 	defer sig.Close()
 
-	// Run App
-	a.Run()
-
-	// Wait for app to properly close
-	<-a.Done()
+	// Start application
+	app.Start(ctx)
 }
