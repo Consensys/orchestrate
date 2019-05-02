@@ -21,3 +21,25 @@ coverage.html
 .idea
 *.iml
 .idea_modules/
+
+# CMake
+cmake-build-*/
+
+# File-based project format
+*.iws
+*.ipr
+
+# mpeltonen/sbt-idea plugin
+.idea_modules/
+
+# JIRA plugin
+atlassian-ide-plugin.xml
+
+# Environment file
+.env
+
+# Go packages and sources:
+.gocache
+
+# Visual Code Studio
+.vscode

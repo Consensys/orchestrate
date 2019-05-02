@@ -1,20 +1,21 @@
 ############################
 # STEP 1 build executable binary
 ############################
-FROM golang:1.11 as builder
+FROM golang:1.12 as builder
 
-ARG SSH_KEY
-RUN useradd appuser && \
-    mkdir -p  ~/.ssh && \
-    echo "$SSH_KEY" | tr -d '\r' > ~/.ssh/id_rsa && \
-    chmod 700 ~/.ssh/id_rsa && \
-    ssh-keyscan -H gitlab.com >> ~/.ssh/known_hosts && \
-    git config --global url."git@gitlab.com:".insteadOf "https://gitlab.com/" && \
+ARG GITLAB_USER
+ARG GITLAB_TOKEN
+
+RUN git config --global --add url."https://${GITLAB_USER}:${GITLAB_TOKEN}@gitlab.com/".insteadOf "git@gitlab.com:" && \
+    git config --global --add url."https://${GITLAB_USER}:${GITLAB_TOKEN}@gitlab.com/".insteadOf "https://gitlab.com/" && \
+    useradd appuser && \
     mkdir /app
 WORKDIR /app
 
 # Use go mod with go 1.11
 ENV GO111MODULE=on
+ENV GOPATH=/.gocache
+COPY .gocache $GOPATH
 COPY go.mod go.sum ./
 RUN go mod download
 
@@ -32,9 +33,6 @@ COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /etc/passwd /etc/passwd
 
 COPY --from=builder /bin/main /go/bin/main
-
-# Label image
-LABEL org.label-schema.schema-version="1.0.0-rc1"
 
 # Use an unprivileged user.
 USER appuser
