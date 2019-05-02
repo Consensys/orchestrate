@@ -29,7 +29,7 @@ type RetryConfig struct {
 // NewRetryConfig creates a New Configuration for an Ex
 func NewRetryConfig() *RetryConfig {
 	config := &RetryConfig{}
-	config.InitialInterval = viper.GetDuration("ethclient.initinterval")
+	config.InitialInterval = viper.GetDuration("ethclient.retry.initinterval")
 	config.RandomizationFactor = viper.GetFloat64("ethclient.retry.randomfactor")
 	config.Multiplier = viper.GetFloat64("ethclient.retry.multiplier")
 	config.MaxInterval = viper.GetDuration("ethclient.retry.maxinterval")

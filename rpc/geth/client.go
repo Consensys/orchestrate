@@ -2,10 +2,12 @@ package geth
 
 import (
 	"context"
+	"encoding/json"
 	"sync"
 	"time"
 
 	backoff "github.com/cenkalti/backoff"
+	eth "github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/rpc"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/logger"
@@ -84,7 +86,19 @@ func (c *Client) CallContext(ctx context.Context, result interface{}, method str
 
 	return backoff.RetryNotify(
 		func() error {
-			return c.rpc.CallContext(ctx, result, method, args...)
+			var raw json.RawMessage
+			err := c.rpc.CallContext(ctx, &raw, method, args...)
+			if err != nil {
+				return err
+			} else if len(raw) == 0 {
+				return eth.NotFound
+			}
+
+			if err := json.Unmarshal(raw, &result); err != nil {
+				return err
+			}
+
+			return nil
 		},
 		bckoff,
 		func(err error, duration time.Duration) {
