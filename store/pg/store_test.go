@@ -2,38 +2,38 @@
 
 package pg
 
-// import (
-// "testing"
+import (
+	"testing"
 
-// "github.com/stretchr/testify/suite"
-// "gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/store/pg/migrations"
-// "gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/store/testutils"
-// )
+	"github.com/stretchr/testify/suite"
+	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/store/pg/migrations"
+	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/store/testutils"
+)
 
-// type ModelsTestSuite struct {
-// 	testutils.EnvelopeStoreTestSuite
-// 	pg *testutils.PGTestHelper
-// }
+type ModelsTestSuite struct {
+	testutils.EnvelopeStoreTestSuite
+	pg *testutils.PGTestHelper
+}
 
-// func (s *ModelsTestSuite) SetupSuite() {
-// 	s.pg.InitTestDB(s.T())
-// 	s.Store = NewEnvelopeStore(s.pg.DB)
-// }
+func (s *ModelsTestSuite) SetupSuite() {
+	s.pg.InitTestDB(s.T())
+	s.Store = NewEnvelopeStore(s.pg.DB)
+}
 
-// func (s *ModelsTestSuite) SetupTest() {
-// 	s.pg.Upgrade(s.T())
-// }
+func (s *ModelsTestSuite) SetupTest() {
+	s.pg.Upgrade(s.T())
+}
 
-// func (s *ModelsTestSuite) TearDownTest() {
-// 	s.pg.Downgrade(s.T())
-// }
+func (s *ModelsTestSuite) TearDownTest() {
+	s.pg.Downgrade(s.T())
+}
 
-// func (s *ModelsTestSuite) TearDownSuite() {
-// 	s.pg.DropTestDB(s.T())
-// }
+func (s *ModelsTestSuite) TearDownSuite() {
+	s.pg.DropTestDB(s.T())
+}
 
-// func TestModels(t *testing.T) {
-// 	s := new(ModelsTestSuite)
-// 	s.pg = testutils.NewPGTestHelper(migrations.Collection)
-// 	suite.Run(t, s)
-// }
+func TestModels(t *testing.T) {
+	s := new(ModelsTestSuite)
+	s.pg = testutils.NewPGTestHelper(migrations.Collection)
+	suite.Run(t, s)
+}

@@ -28,7 +28,7 @@ To quickly start the application
 1. Start e2e environment
 
 ```sh
-$ docker-compose -f e2e/docker-compose.yml
+$ docker-compose -f e2e/docker-compose.yml up
 ```
 
 2. Migrate database

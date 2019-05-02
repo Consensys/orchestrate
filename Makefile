@@ -8,7 +8,10 @@ BOILERPLATE_REPOSITORY=git@gitlab.com:ConsenSys/client/fr/core-stack/boilerplate
 run-coverage: ## Generate global code coverage report
 	@sh scripts/coverage.sh $(PACKAGES)
 
-coverage: run-coverage ## Generate and open coverage report
+coverage: 
+	@docker-compose -f e2e/docker-compose.yml up -d
+	@sh scripts/coverage.sh $(PACKAGES)
+	@docker-compose -f e2e/docker-compose.yml down
 	@xdg-open coverage.html
 
 race: ## Run data race detector
