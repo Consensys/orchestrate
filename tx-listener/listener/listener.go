@@ -8,9 +8,12 @@ import (
 	"sync/atomic"
 
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
+	cursor "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener/block-cursor/base"
+	tiptracker "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener/tip-tracker/base"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/types"
 )
 
-// TxListener is main inferface
 type TxListener interface {
 	// Listen creates a ChainListener on the the given CHain network
 	// It will return an error if this TxListener is already listening
@@ -19,33 +22,50 @@ type TxListener interface {
 	Listen(chainID *big.Int, blockNumber int64, txIndex int64) (ChainListener, error)
 
 	// Receipts returns a read channel of receipts that are returned by the TxListener
-	Receipts() <-chan *TxListenerReceipt
+	Receipts() <-chan *types.TxListenerReceipt
 
 	// Receipts returns a read channel of blocks that are returned by the TxListener
-	Blocks() <-chan *TxListenerBlock
+	Blocks() <-chan *types.TxListenerBlock
 
 	// Receipts returns a read channel of errors that are returned by the TxListener
-	Errors() <-chan *TxListenerError
+	Errors() <-chan *types.TxListenerError
 
 	// Chains return a list of chains that are currently listen
 	Chains() []*big.Int
 
 	// Progress returns progress of TxListener
-	Progress(ctx context.Context) map[string]*Progress
+	Progress(ctx context.Context) map[string]*types.Progress
 
 	// Close TxListener
 	Close()
 }
 
-// NewTxListener creates a new TxListener
-func NewTxListener(ec EthClient, conf Config) TxListener {
-	return &txListener{
-		ec:             newClient(ec, conf),
+type listener struct {
+	ec ethclient.ChainLedgerReader
+
+	mux            *sync.RWMutex
+	chainListeners map[string]*singleChainListener
+
+	blocks   chan *types.TxListenerBlock
+	receipts chan *types.TxListenerReceipt
+	errors   chan *types.TxListenerError
+
+	wait      *sync.WaitGroup
+	closeOnce *sync.Once
+	closed    bool
+
+	conf *Config
+}
+
+// NewListener creates a new Listener
+func NewListener(ec ethclient.ChainLedgerReader, conf *Config) TxListener {
+	return &listener{
+		ec:             ec,
 		mux:            &sync.RWMutex{},
 		chainListeners: make(map[string]*singleChainListener),
-		blocks:         make(chan *TxListenerBlock),
-		receipts:       make(chan *TxListenerReceipt),
-		errors:         make(chan *TxListenerError),
+		blocks:         make(chan *types.TxListenerBlock),
+		receipts:       make(chan *types.TxListenerReceipt),
+		errors:         make(chan *types.TxListenerError),
 		wait:           &sync.WaitGroup{},
 		closeOnce:      &sync.Once{},
 		closed:         false,
@@ -53,37 +73,20 @@ func NewTxListener(ec EthClient, conf Config) TxListener {
 	}
 }
 
-type txListener struct {
-	ec EthClient
-
-	mux            *sync.RWMutex
-	chainListeners map[string]*singleChainListener
-
-	blocks   chan *TxListenerBlock
-	receipts chan *TxListenerReceipt
-	errors   chan *TxListenerError
-
-	wait      *sync.WaitGroup
-	closeOnce *sync.Once
-	closed    bool
-
-	conf Config
-}
-
-func (l *txListener) Listen(chainID *big.Int, blockNumber, txIndex int64) (ChainListener, error) {
+func (l *listener) Listen(chainID *big.Int, blockNumber, txIndex int64) (ChainListener, error) {
 	// Set chain tracker
-	t := NewBaseTracker(l.ec, chainID, l.conf)
+	tracker := tiptracker.NewTracker(l.ec, chainID, &l.conf.TipTracker)
 
 	// Set cursor
 	if blockNumber == -1 {
 		// We start from highest block
-		blockNumber, _ = t.HighestBlock(context.Background())
+		blockNumber, _ = tracker.HighestBlock(context.Background())
 	}
-	cur := newBlockCursorFromTracker(l.ec, t, blockNumber, l.conf)
+	cur := cursor.NewBlockCursorFromTracker(l.ec, tracker, blockNumber, l.conf.BlockCursor)
 
 	// Create listener
 	listener := &singleChainListener{
-		t:           t,
+		t:           tracker,
 		cur:         cur,
 		blocks:      l.blocks,
 		receipts:    l.receipts,
@@ -105,29 +108,28 @@ func (l *txListener) Listen(chainID *big.Int, blockNumber, txIndex int64) (Chain
 	// Start feeders in separate go routine
 	l.wait.Add(1)
 	go listener.feeder()
-	go cur.feeder()
-	go cur.dispatcher()
+	cur.Start()
 
 	return listener, nil
 }
 
 // Receipt return a channel of receipts
-func (l *txListener) Receipts() <-chan *TxListenerReceipt {
+func (l *listener) Receipts() <-chan *types.TxListenerReceipt {
 	return l.receipts
 }
 
 // Receipt return a channel of receipts
-func (l *txListener) Blocks() <-chan *TxListenerBlock {
+func (l *listener) Blocks() <-chan *types.TxListenerBlock {
 	return l.blocks
 }
 
 // Receipt return a channel of receipts
-func (l *txListener) Errors() <-chan *TxListenerError {
+func (l *listener) Errors() <-chan *types.TxListenerError {
 	return l.errors
 }
 
 // Chains returns Network IDs that are currently listened
-func (l *txListener) Chains() []*big.Int {
+func (l *listener) Chains() []*big.Int {
 	l.mux.RLock()
 	defer l.mux.RUnlock()
 	chains := []*big.Int{}
@@ -138,8 +140,8 @@ func (l *txListener) Chains() []*big.Int {
 }
 
 // Progress return progress for every chains
-func (l *txListener) Progress(ctx context.Context) map[string]*Progress {
-	progress := make(map[string]*Progress)
+func (l *listener) Progress(ctx context.Context) map[string]*types.Progress {
+	progress := make(map[string]*types.Progress)
 	l.mux.RLock()
 	defer l.mux.RUnlock()
 	for chainID, listener := range l.chainListeners {
@@ -150,7 +152,7 @@ func (l *txListener) Progress(ctx context.Context) map[string]*Progress {
 }
 
 // Close all listeners
-func (l *txListener) Close() {
+func (l *listener) Close() {
 	l.closeOnce.Do(func() {
 		// Close listener
 		log.Infof("tx-listener: closing...")
@@ -174,7 +176,7 @@ func (l *txListener) Close() {
 	})
 }
 
-func (l *txListener) addListener(listener *singleChainListener) error {
+func (l *listener) addListener(listener *singleChainListener) error {
 	l.mux.Lock()
 	defer l.mux.Unlock()
 
@@ -193,7 +195,7 @@ func (l *txListener) addListener(listener *singleChainListener) error {
 	return nil
 }
 
-func (l *txListener) removeListener(listener *singleChainListener) {
+func (l *listener) removeListener(listener *singleChainListener) {
 	l.mux.Lock()
 	defer l.mux.Unlock()
 
@@ -206,33 +208,26 @@ func (l *txListener) removeListener(listener *singleChainListener) {
 	}
 }
 
-// Progress holds information about listener progress
-type Progress struct {
-	CurrentBlock int64 // Current block number where the listener is
-	TxIndex      int64 // Current txIndex where the listener is
-	HighestBlock int64 // Highest alleged block number in the chain
-}
-
 // ChainListener is a listener that listens for a given chain
 type ChainListener interface {
 	ChainID() *big.Int
-	Progress(ctx context.Context) (*Progress, error)
+	Progress(ctx context.Context) (*types.Progress, error)
 	Close()
 }
 
 // singleChainListener listen to all transactions emitted from a chain
 type singleChainListener struct {
-	txlistener *txListener
-	t          ChainTracker
-	cur        Cursor
+	txlistener *listener
+	t          *tiptracker.Tracker
+	cur        *cursor.BlockCursor
 
-	conf Config
+	conf *Config
 
 	blockNumber, txIndex int64
 
-	blocks   chan<- *TxListenerBlock
-	receipts chan<- *TxListenerReceipt
-	errors   chan<- *TxListenerError
+	blocks   chan<- *types.TxListenerBlock
+	receipts chan<- *types.TxListenerReceipt
+	errors   chan<- *types.TxListenerError
 
 	// Closing utilies
 	closeOnce *sync.Once
@@ -245,12 +240,20 @@ func (l *singleChainListener) ChainID() *big.Int {
 }
 
 // Progress returns current listener progress
-func (l *singleChainListener) Progress(ctx context.Context) (*Progress, error) {
+func (l *singleChainListener) Progress(ctx context.Context) (*types.Progress, error) {
 	head, err := l.t.HighestBlock(ctx)
 	if err != nil {
-		return &Progress{atomic.LoadInt64(&l.blockNumber), atomic.LoadInt64(&l.txIndex), -1}, err
+		return &types.Progress{
+			CurrentBlock: atomic.LoadInt64(&l.blockNumber),
+			TxIndex:      atomic.LoadInt64(&l.txIndex),
+			HighestBlock: -1,
+		}, err
 	}
-	return &Progress{atomic.LoadInt64(&l.blockNumber), atomic.LoadInt64(&l.txIndex), head}, nil
+	return &types.Progress{
+		CurrentBlock: atomic.LoadInt64(&l.blockNumber),
+		TxIndex:      atomic.LoadInt64(&l.txIndex),
+		HighestBlock: head,
+	}, nil
 }
 
 func (l *singleChainListener) Close() {
@@ -280,17 +283,17 @@ feedingLoop:
 			}
 			// We have a new block
 			if l.conf.TxListener.Return.Blocks {
-				// This will be blocking if user does not consumer from Blocks channel
+				// This will be blocking until user consume from Blocks channel
 				l.blocks <- block.Copy()
 			}
 
 			// We treat every transaction
-			for l.txIndex < int64(len(block.receipts)) {
+			for l.txIndex < int64(len(block.Receipts)) {
 				select {
 				case <-l.closed:
 					break feedingLoop
 				default:
-					l.receipts <- block.receipts[l.txIndex]
+					l.receipts <- block.Receipts[l.txIndex]
 					atomic.AddInt64(&l.txIndex, 1)
 				}
 			}
@@ -323,7 +326,7 @@ feedingLoop:
 	// Close cursor
 	l.cur.Close()
 
-	// We notify main txlistener that
+	// We notify main txlistener that we closed
 	if l.txlistener != nil {
 		l.txlistener.removeListener(l)
 	}
