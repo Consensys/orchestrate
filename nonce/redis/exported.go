@@ -25,7 +25,7 @@ func Init() {
 		nc = NewNonce(pool, viper.GetInt(lockTimeoutViperKey))
 
 		log.WithFields(log.Fields{
-			"type": "mock",
+			"type": "redis",
 		}).Info("nonce: ready")
 	})
 }
