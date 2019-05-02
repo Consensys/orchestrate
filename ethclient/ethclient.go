@@ -13,7 +13,7 @@ import (
 // TransactionSender is a service for sending transaction to a blockchain
 type TransactionSender interface {
 	// SendTransaction injects a signed transaction into the pending pool for execution.
-	SendTransaction(ctx context.Context, chainID *big.Int, args *types.SendTxArgs) error
+	SendTransaction(ctx context.Context, chainID *big.Int, args *types.SendTxArgs) (ethcommon.Hash, error)
 
 	// SendRawTransaction allows to send a raw transaction
 	SendRawTransaction(ctx context.Context, chainID *big.Int, raw string) error
@@ -25,54 +25,54 @@ type TransactionSender interface {
 // ChainLedgerReader is a service to access a blockchain ledger information
 type ChainLedgerReader interface {
 	// BlockByHash returns the given full block.
-	BlockByHash(ctx context.Context, chainID *big.Int, hash *ethcommon.Hash) (*ethtypes.Block, error)
+	BlockByHash(ctx context.Context, chainID *big.Int, hash ethcommon.Hash) (*ethtypes.Block, error)
 
 	// BlockByNumber returns a block from the current canonical chain
 	BlockByNumber(ctx context.Context, chainID *big.Int, number *big.Int) (*ethtypes.Block, error)
 
 	// HeaderByHash returns the block header with the given hash.
-	HeaderByHash(ctx context.Context, chainID *big.Int, hash *ethcommon.Hash) (*ethtypes.Header, error)
+	HeaderByHash(ctx context.Context, chainID *big.Int, hash ethcommon.Hash) (*ethtypes.Header, error)
 
 	// HeaderByNumber returns a block header from the current canonical chain. If number is
 	// nil, the latest known header is returned.
 	HeaderByNumber(ctx context.Context, chainID *big.Int, number *big.Int) (*ethtypes.Header, error)
 
 	// TransactionByHash returns the transaction with the given hash.
-	TransactionByHash(ctx context.Context, chainID *big.Int, hash *ethcommon.Hash) (tx *ethtypes.Transaction, isPending bool, err error)
+	TransactionByHash(ctx context.Context, chainID *big.Int, hash ethcommon.Hash) (tx *ethtypes.Transaction, isPending bool, err error)
 
 	// TransactionReceipt returns the receipt of a transaction by transaction hash.
-	TransactionReceipt(ctx context.Context, chainID *big.Int, txHash *ethcommon.Hash) (*ethtypes.Receipt, error)
+	TransactionReceipt(ctx context.Context, chainID *big.Int, txHash ethcommon.Hash) (*ethtypes.Receipt, error)
 }
 
 // ChainStateReader is a service to access a blockchain state information
 type ChainStateReader interface {
 	// BalanceAt returns wei balance of the given account.
 	// The block number can be nil, in which case the balance is taken from the latest known block.
-	BalanceAt(ctx context.Context, chainID *big.Int, account *ethcommon.Address, blockNumber *big.Int) (*big.Int, error)
+	BalanceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, blockNumber *big.Int) (*big.Int, error)
 
 	// StorageAt returns value of key in the contract storage of the given account.
 	// The block number can be nil, in which case the value is taken from the latest known block.
-	StorageAt(ctx context.Context, chainID *big.Int, account *ethcommon.Address, key *ethcommon.Hash, blockNumber *big.Int) ([]byte, error)
+	StorageAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, key ethcommon.Hash, blockNumber *big.Int) ([]byte, error)
 
 	// CodeAt returns contract code of the given account.
 	// The block number can be nil, in which case the code is taken from the latest known block.
-	CodeAt(ctx context.Context, chainID *big.Int, account *ethcommon.Address, blockNumber *big.Int) ([]byte, error)
+	CodeAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, blockNumber *big.Int) ([]byte, error)
 
 	// NonceAt returns account nonce of the given account.
 	// The block number can be nil, in which case the nonce is taken from the latest known block.
-	NonceAt(ctx context.Context, chainID *big.Int, account *ethcommon.Address, blockNumber *big.Int) (uint64, error)
+	NonceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, blockNumber *big.Int) (uint64, error)
 
 	// PendingBalanceAt returns wei balance of the given account in the pending state.
-	PendingBalanceAt(ctx context.Context, chainID *big.Int, account *ethcommon.Address) (*big.Int, error)
+	PendingBalanceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address) (*big.Int, error)
 
 	// PendingStorageAt returns value of key in the contract storage of the given account in the pending state.
-	PendingStorageAt(ctx context.Context, chainID *big.Int, account *ethcommon.Address, key *ethcommon.Hash) ([]byte, error)
+	PendingStorageAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, key ethcommon.Hash) ([]byte, error)
 
 	// PendingCodeAt returns contract code of the given account in the pending state.
-	PendingCodeAt(ctx context.Context, chainID *big.Int, account *ethcommon.Address) ([]byte, error)
+	PendingCodeAt(ctx context.Context, chainID *big.Int, account ethcommon.Address) ([]byte, error)
 
 	// PendingNonceAt returns account nonce of the given account in the pending state.
-	PendingNonceAt(ctx context.Context, chainID *big.Int, account *ethcommon.Address) (uint64, error)
+	PendingNonceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address) (uint64, error)
 }
 
 // ContractCaller is a service to perform contract calls
@@ -82,7 +82,7 @@ type ContractCaller interface {
 
 	// PendingCallContract executes a message call transaction using the EVM.
 	// The state seen by the contract call is the pending state.
-	PendingCallContract(ctx context.Context, msg *eth.CallMsg) ([]byte, error)
+	PendingCallContract(ctx context.Context, chainID *big.Int, msg *eth.CallMsg) ([]byte, error)
 }
 
 // GasEstimator is a service that can provide transaction gas price estimation
