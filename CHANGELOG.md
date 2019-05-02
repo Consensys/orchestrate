@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.4.9
+
+*Unreleased*
+
+- [FEAT] Update client so all routes are covered with retry bakoff
+- [REFACTOR] Major refactor of tx-listener
+
 ### Version 0.4.8
 
 *Unreleased*

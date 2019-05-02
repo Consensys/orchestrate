@@ -2,124 +2,113 @@ package ethclient
 
 import (
 	"context"
-	"fmt"
+	"math/big"
 
+	eth "github.com/ethereum/go-ethereum"
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/rpc"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/types"
 )
 
-// EthClient embed a go-ethereum ethclient so we can implement SendRawTransaction
-type EthClient struct {
-	*ethclient.Client
-	rpc *rpc.Client
+// TransactionSender is a service for sending transaction to a blockchain
+type TransactionSender interface {
+	// SendTransaction injects a signed transaction into the pending pool for execution.
+	SendTransaction(ctx context.Context, chainID *big.Int, args *types.SendTxArgs) (ethcommon.Hash, error)
+
+	// SendRawTransaction allows to send a raw transaction
+	SendRawTransaction(ctx context.Context, chainID *big.Int, raw string) error
+
+	// SendRawPrivateTransaction send a raw transaction to a Ethreum node supporting privacy (e.g Quorum+Tessera node)
+	SendRawPrivateTransaction(ctx context.Context, chainID *big.Int, raw string, args *types.PrivateArgs) (ethcommon.Hash, error)
 }
 
-// NewClient creates a client that uses the given RPC client.
-func NewClient(c *rpc.Client) *EthClient {
-	ec := ethclient.NewClient(c)
-	return &EthClient{ec, c}
+// ChainLedgerReader is a service to access a blockchain ledger information
+type ChainLedgerReader interface {
+	// BlockByHash returns the given full block.
+	BlockByHash(ctx context.Context, chainID *big.Int, hash ethcommon.Hash) (*ethtypes.Block, error)
+
+	// BlockByNumber returns a block from the current canonical chain
+	BlockByNumber(ctx context.Context, chainID *big.Int, number *big.Int) (*ethtypes.Block, error)
+
+	// HeaderByHash returns the block header with the given hash.
+	HeaderByHash(ctx context.Context, chainID *big.Int, hash ethcommon.Hash) (*ethtypes.Header, error)
+
+	// HeaderByNumber returns a block header from the current canonical chain. If number is
+	// nil, the latest known header is returned.
+	HeaderByNumber(ctx context.Context, chainID *big.Int, number *big.Int) (*ethtypes.Header, error)
+
+	// TransactionByHash returns the transaction with the given hash.
+	TransactionByHash(ctx context.Context, chainID *big.Int, hash ethcommon.Hash) (tx *ethtypes.Transaction, isPending bool, err error)
+
+	// TransactionReceipt returns the receipt of a transaction by transaction hash.
+	TransactionReceipt(ctx context.Context, chainID *big.Int, txHash ethcommon.Hash) (*ethtypes.Receipt, error)
 }
 
-// Dial connects a client to the given URL.
-func Dial(rawurl string) (*EthClient, error) {
-	return DialContext(context.Background(), rawurl)
+// ChainStateReader is a service to access a blockchain state information
+type ChainStateReader interface {
+	// BalanceAt returns wei balance of the given account.
+	// The block number can be nil, in which case the balance is taken from the latest known block.
+	BalanceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, blockNumber *big.Int) (*big.Int, error)
+
+	// StorageAt returns value of key in the contract storage of the given account.
+	// The block number can be nil, in which case the value is taken from the latest known block.
+	StorageAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, key ethcommon.Hash, blockNumber *big.Int) ([]byte, error)
+
+	// CodeAt returns contract code of the given account.
+	// The block number can be nil, in which case the code is taken from the latest known block.
+	CodeAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, blockNumber *big.Int) ([]byte, error)
+
+	// NonceAt returns account nonce of the given account.
+	// The block number can be nil, in which case the nonce is taken from the latest known block.
+	NonceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, blockNumber *big.Int) (uint64, error)
+
+	// PendingBalanceAt returns wei balance of the given account in the pending state.
+	PendingBalanceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address) (*big.Int, error)
+
+	// PendingStorageAt returns value of key in the contract storage of the given account in the pending state.
+	PendingStorageAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, key ethcommon.Hash) ([]byte, error)
+
+	// PendingCodeAt returns contract code of the given account in the pending state.
+	PendingCodeAt(ctx context.Context, chainID *big.Int, account ethcommon.Address) ([]byte, error)
+
+	// PendingNonceAt returns account nonce of the given account in the pending state.
+	PendingNonceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address) (uint64, error)
 }
 
-// DialContext connects a client to the given URL.
-func DialContext(ctx context.Context, rawurl string) (*EthClient, error) {
-	c, err := rpc.DialContext(ctx, rawurl)
-	if err != nil {
-		return nil, err
-	}
-	return NewClient(c), nil
+// ContractCaller is a service to perform contract calls
+type ContractCaller interface {
+	// CallContract executes a message call transaction, which is directly executed in the VM
+	CallContract(ctx context.Context, chainID *big.Int, msg *eth.CallMsg, blockNumber *big.Int) ([]byte, error)
+
+	// PendingCallContract executes a message call transaction using the EVM.
+	// The state seen by the contract call is the pending state.
+	PendingCallContract(ctx context.Context, chainID *big.Int, msg *eth.CallMsg) ([]byte, error)
 }
 
-// PrivateArgs are transaction arguments to provide to an Ethereum client supporting privacy (such as Quorum)
-type PrivateArgs struct {
-	// Quorum Fields
-	PrivateFrom   string   `json:"privateFrom"`
-	PrivateFor    []string `json:"privateFor"`
-	PrivateTxType string   `json:"restriction"`
+// GasEstimator is a service that can provide transaction gas price estimation
+type GasEstimator interface {
+	// EstimateGas tries to estimate the gas needed to execute a specific transaction
+	EstimateGas(ctx context.Context, chainID *big.Int, msg *eth.CallMsg) (uint64, error)
 }
 
-// SendTxArgs are arguments to provide to jsonRPC call `eth_sendTransaction`
-type SendTxArgs struct {
-	// From address in case of a non raw transaction
-	From ethcommon.Address `json:"from"`
-
-	// Main transaction attributes
-	To       *ethcommon.Address `json:"to"`
-	Gas      *hexutil.Uint64    `json:"gas"`
-	GasPrice *hexutil.Big       `json:"gasPrice"`
-	Value    *hexutil.Big       `json:"value"`
-	Nonce    *hexutil.Uint64    `json:"nonce"`
-
-	// We accept "data" and "input" for backwards-compatibility reasons. "input" is the
-	// newer name and should be preferred
-	Data  hexutil.Bytes `json:"data"`
-	Input hexutil.Bytes `json:"input"`
-
-	// Private field
-	PrivateArgs
+// GasPricer is service that
+type GasPricer interface {
+	// SuggestGasPrice retrieves the currently suggested gas price
+	SuggestGasPrice(ctx context.Context, chainID *big.Int) (*big.Int, error)
 }
 
-// Call2PrivateArgs creates PrivateArgs from a call object
-func Call2PrivateArgs(call *common.Call) *PrivateArgs {
-	var args PrivateArgs
-	args.PrivateFrom = call.GetQuorum().GetPrivateFrom()
-	args.PrivateFor = call.GetQuorum().GetPrivateFor()
-	args.PrivateTxType = call.GetQuorum().GetPrivateTxType()
-	return &args
+// ChainSyncReader is a service to access to the node's current sync status
+type ChainSyncReader interface {
+	Networks(ctx context.Context) []*big.Int
+	SyncProgress(ctx context.Context, chainID *big.Int) (*eth.SyncProgress, error)
 }
 
-// Envelope2SendTxArgs creates SendTxArgs from an Envelope
-func Envelope2SendTxArgs(e *envelope.Envelope) *SendTxArgs {
-	From, _ := e.GetSender().Address()
-	args := SendTxArgs{
-		From:        From,
-		GasPrice:    (*hexutil.Big)(e.GetTx().GetTxData().GasPriceBig()),
-		Value:       (*hexutil.Big)(e.GetTx().GetTxData().ValueBig()),
-		Data:        hexutil.Bytes(e.GetTx().GetTxData().DataBytes()),
-		Input:       hexutil.Bytes(e.GetTx().GetTxData().DataBytes()),
-		PrivateArgs: *(Call2PrivateArgs(e.GetCall())),
-	}
-
-	if gas := e.GetTx().GetTxData().GetGas(); gas != 0 {
-		args.Gas = (*hexutil.Uint64)(&gas)
-	}
-
-	if nonce := e.GetTx().GetTxData().GetNonce(); nonce != 0 {
-		args.Nonce = (*hexutil.Uint64)(&nonce)
-	}
-
-	if e.GetTx().GetTxData().GetTo() != "" {
-		to, _ := e.GetTx().GetTxData().ToAddress()
-		args.To = &to
-	}
-
-	return &args
-}
-
-// SendRawTransaction allows to send a raw transaction
-func (ec *EthClient) SendRawTransaction(ctx context.Context, raw string) error {
-	return ec.rpc.CallContext(ctx, nil, "eth_sendRawTransaction", raw)
-}
-
-// SendTransaction send transaction to Ethereum node
-func (ec *EthClient) SendTransaction(ctx context.Context, args *SendTxArgs) (txHash ethcommon.Hash, err error) {
-	err = ec.rpc.CallContext(ctx, &txHash, "eth_sendTransaction", &args)
-	if err != nil {
-		return ethcommon.Hash{}, err
-	}
-	return txHash, nil
-}
-
-// SendRawPrivateTransaction send a raw transaction to a Ethreum node supporting privacy (e.g Quorum+Tessera node)
-// TODO: to be implemented
-func (ec *EthClient) SendRawPrivateTransaction(ctx context.Context, raw string, q *PrivateArgs) (ethcommon.Hash, error) {
-	return ethcommon.Hash{}, fmt.Errorf("%q is not implemented yet", "SendRawPrivateTransactionQuorum")
+type Client interface {
+	TransactionSender
+	ChainLedgerReader
+	ChainStateReader
+	ContractCaller
+	GasEstimator
+	GasPricer
+	ChainSyncReader
 }

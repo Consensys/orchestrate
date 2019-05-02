@@ -8,7 +8,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
-	listener "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener/listener"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
@@ -37,7 +38,7 @@ func Logger(txctx *engine.TxContext) {
 // Unmarshal message expected to be a Envelope protobuffer
 func Unmarshal(msg interface{}, e *envelope.Envelope) error {
 	// Cast message into receipt
-	receipt, ok := msg.(*listener.TxListenerReceipt)
+	receipt, ok := msg.(*types.TxListenerReceipt)
 	if !ok {
 		return fmt.Errorf("message does not match expected format")
 	}
@@ -122,36 +123,32 @@ func (h *TxListenerHandler) Cleanup() error {
 func main() {
 	log.SetFormatter(&log.TextFormatter{})
 	log.SetLevel(log.DebugLevel)
+
+	// Initialize client
 	viper.Set("eth.clients", []string{
 		"https://ropsten.infura.io/v3/81e039ce6c8a465180822b525e3644d7",
 		"https://rinkeby.infura.io/v3/bfc9d6e51fbc4d3db54bea58d1094f9c",
 		"https://kovan.infura.io/v3/bfc9d6e51fbc4d3db54bea58d1094f9c",
 		"https://mainnet.infura.io/v3/bfc9d6e51fbc4d3db54bea58d1094f9c",
 	})
-
-	// Initialize Multi-Client
 	ethclient.Init(context.Background())
 
 	// Initialize listener configuration
+	viper.Set("blockcursor.backoff", time.Second)
+	viper.Set("blockcursor.limit", 40)
 	config := listener.NewConfig()
 	config.TxListener.Return.Blocks = true
 	config.TxListener.Return.Errors = true
 
-	viper.Set("blockcursor.backoff", time.Second)
-	viper.Set("blockcursor.limit", 40)
-
-	txlistener := listener.NewTxListener(ethclient.GlobalMultiClient(), config)
+	// Initialize listener
+	listener.SetGlobalConfig(config)
+	listener.Init(context.Background())
 
 	// Create and Listener Handler
 	handler := TxListenerHandler{}
 	handler.Setup()
 	log.Infof("Engine ready")
 
-	// Start listening all chains
-	for _, chainID := range ethclient.GlobalMultiClient().Networks(context.Background()) {
-		_, _ = txlistener.Listen(chainID, -1, 0)
-	}
-
 	// Start listening
-	handler.Listen(txlistener)
+	handler.Listen(listener.GlobalListener())
 }

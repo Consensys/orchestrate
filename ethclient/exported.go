@@ -4,48 +4,32 @@ import (
 	"context"
 	"sync"
 
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient/rpc"
 )
-
-func init() {
-	mec = NewMultiClient()
-}
 
 var (
-	mec      *MultiClient
-	initOnce = sync.Once{}
+	client   Client
+	initOnce = &sync.Once{}
 )
 
-// Init initialize Dials chains
-//
-// Ethereum clients URLs to Dial are read from viper configuration
-// Canceling input Context will stop multiclient
-// If an error occurs during initialization, it will panic
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
-		// Dial Ethereum client (URLs found in viper configuration)
-		err := mec.MultiDial(ctx, viper.GetStringSlice(urlViperKey))
-		if err != nil {
-			log.WithError(err).Fatalf("ethereum: could not dial multi-client")
+		if client != nil {
+			return
 		}
-		chainIDs := mec.Networks(ctx)
-		log.Infof("ethereum: multi-client ready (connected to chains: %v)", chainIDs)
 
-		// Wait for context to be done and then close
-		go func() {
-			<-ctx.Done()
-			mec.Close()
-		}()
+		rpc.Init(ctx)
+
+		client = rpc.GlobalClient()
 	})
 }
 
-// GlobalMultiClient returns global MultiClient
-func GlobalMultiClient() *MultiClient {
-	return mec
+// GlobalClient returns global Client
+func GlobalClient() Client {
+	return client
 }
 
-// SetGlobalMultiClient sets global MultiClient
-func SetGlobalMultiClient(mclient *MultiClient) {
-	mec = mclient
+// SetGlobalClient sets global Client
+func SetGlobalClient(ec Client) {
+	client = ec
 }
