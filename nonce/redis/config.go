@@ -11,6 +11,8 @@ func init() {
 	_ = viper.BindEnv(addressViperKey, addressEnv)
 	viper.SetDefault(lockTimeoutViperKey, lockTimeoutDefault)
 	_ = viper.BindEnv(lockTimeoutViperKey, lockTimeoutEnv)
+	viper.SetDefault(redisNonceExpirationTimeViperKey, redisNonceExpirationTimeDefault)
+	_ = viper.BindEnv(redisNonceExpirationTimeViperKey, redisNonceExpirationTimeEnv)
 }
 
 var (
@@ -41,4 +43,19 @@ func LockTimeout(f *pflag.FlagSet) {
 Environment variable: %q`, lockTimeoutEnv)
 	f.Int(lockTimeoutFlag, lockTimeoutDefault, desc)
 	_ = viper.BindPFlag(lockTimeoutViperKey, f.Lookup(lockTimeoutFlag))
+}
+
+
+var (
+	redisNonceExpirationTimeFlag     = "redis-nonce-expiration-time"
+	redisNonceExpirationTimeViperKey = "redis.nonce.expiration.time"
+	redisNonceExpirationTimeDefault  = 3
+	redisNonceExpirationTimeEnv      = "REDIS_NONCE_EXPIRATION_TIME"
+)
+
+func RedisNonceExpirationTime(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Redis nonce expiration time (duration in s).
+Environment variable: %q`, redisNonceExpirationTimeEnv)
+	f.Int(redisNonceExpirationTimeFlag, redisNonceExpirationTimeDefault, desc)
+	_ = viper.BindPFlag(redisNonceExpirationTimeViperKey, f.Lookup(redisNonceExpirationTimeFlag))
 }
