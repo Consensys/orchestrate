@@ -48,6 +48,8 @@ func newRunCommand() *cobra.Command {
 	nonce.Type(runCmd.Flags())
 	redis.Address(runCmd.Flags())
 	redis.LockTimeout(runCmd.Flags())
+	redis.RedisNonceExpirationTime(runCmd.Flags())
+
 
 	return runCmd
 }

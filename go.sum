@@ -164,11 +164,10 @@ github.com/yuin/gopher-lua v0.0.0-20190206043414-8bfc7677f583 h1:SZPG5w7Qxq7bMcM
 github.com/yuin/gopher-lua v0.0.0-20190206043414-8bfc7677f583/go.mod h1:gqRgreBUhTSL0GeU64rtZ3Uq3wtjOa/TB2YfrtkCbVQ=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.4.8 h1:/xglvukAwi1T9jN0vhbAge5dbVkyUnO7mVLGfHBASY4=
 gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.4.8/go.mod h1:bcDMoLJG6uVuBq7Z0X9SniAxwWelDWNnNGjaeRpHUnw=
-gitlab.com/ConsenSys/client/fr/core-stack/infra/nonce.git v0.1.0 h1:b6/I3a1FGHXTsPQ5Z5dAGVcsmkO2fhvIXEx+jsfYuZE=
-gitlab.com/ConsenSys/client/fr/core-stack/infra/nonce.git v0.1.0/go.mod h1:S4SHgXrPU6uXwufaO9tzYr4uE1nmqio5KtO65n+YBRs=
+gitlab.com/ConsenSys/client/fr/core-stack/infra/nonce.git v0.1.2 h1:Dh9uR900YKTeSdcpaofVEz6mphYJ+WKUiuJKecKqQxg=
+gitlab.com/ConsenSys/client/fr/core-stack/infra/nonce.git v0.1.2/go.mod h1:S4SHgXrPU6uXwufaO9tzYr4uE1nmqio5KtO65n+YBRs=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.4 h1:0CD9n3Ey2q3kzdDJZW5x7rX+6NPVeXuv+LWQRcCml5w=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.4/go.mod h1:DavpQCL23Ry6d9M1MawQTRlh1s2V0ud26bNmGaArNQU=
-gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.5 h1:Rpq3Txy9tYUyO7G0kCJoKtYYph8qH622RMsQd7lfqUs=
 go.uber.org/atomic v1.3.2 h1:2Oa65PReHzfn29GpvgsYwloV9AVFHPDk8tYxt2c2tr4=
 go.uber.org/atomic v1.3.2/go.mod h1:gD2HeocX3+yG+ygLZcrzQJaqmWj9AIm7n08wl/qW/PE=
 golang.org/x/crypto v0.0.0-20170930174604-9419663f5a44/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
