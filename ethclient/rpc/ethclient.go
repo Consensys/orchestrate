@@ -75,27 +75,14 @@ func (ec *Client) getRPC(chainID *big.Int) (rpc.Client, error) {
 	return c, nil
 }
 
-type rpcTransaction struct {
-	tx *ethtypes.Transaction
-	txExtraInfo
-}
-
 type txExtraInfo struct {
 	BlockNumber *string            `json:"blockNumber,omitempty"`
 	BlockHash   *ethcommon.Hash    `json:"blockHash,omitempty"`
 	From        *ethcommon.Address `json:"from,omitempty"`
 }
 
-func (tx *rpcTransaction) UnmarshalJSON(msg []byte) error {
-	if err := json.Unmarshal(msg, &tx.tx); err != nil {
-		return err
-	}
-	return json.Unmarshal(msg, &tx.txExtraInfo)
-}
-
 type Body struct {
 	Transactions []*ethtypes.Transaction `json:"transactions"`
-	// Uncles       []*ethtypes.Header      `json:"uncles"`
 }
 
 func blockFromRaw(raw json.RawMessage) (*ethtypes.Block, error) {
@@ -244,6 +231,28 @@ func toBlockNumArg(number *big.Int) string {
 		return "latest"
 	}
 	return hexutil.EncodeBig(number)
+}
+
+// Networks return networks ID multi client is connected to
+func (ec *Client) Networks(ctx context.Context) []*big.Int {
+	networks := []*big.Int{}
+	for _, c := range ec.rpcs {
+		// Retrieve network version
+		var version string
+		if err := c.CallContext(ctx, &version, "net_version"); err != nil {
+			continue
+		}
+
+		chain, ok := big.NewInt(0).SetString(version, 10)
+		if !ok {
+			continue
+		}
+
+		if chain != nil {
+			networks = append(networks, chain)
+		}
+	}
+	return networks
 }
 
 type Progress struct {
