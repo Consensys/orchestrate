@@ -1,0 +1,45 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+__pycache__
+
+# Test binary, build with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Coverage
+coverage.html
+*.cov.tmp
+
+# Jetbrains files
+.DS_Store
+.idea
+*.iml
+.idea_modules/
+
+# CMake
+cmake-build-*/
+
+# File-based project format
+*.iws
+*.ipr
+
+# mpeltonen/sbt-idea plugin
+.idea_modules/
+
+# JIRA plugin
+atlassian-ide-plugin.xml
+
+# Environment file
+.env
+
+# Go packages and sources:
+.gocache
+
+# Visual Code Studio
+.vscode
