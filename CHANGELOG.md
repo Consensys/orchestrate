@@ -2,7 +2,7 @@
 
 ### Version 0.4.9
 
-*Unreleased*
+*Released on May 2nd 2019*
 
 - [FEAT] Update client so all routes are covered with retry bakoff
 - [REFACTOR] Major refactor of tx-listener
