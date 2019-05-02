@@ -30,6 +30,6 @@ func GlobalClient() Client {
 }
 
 // SetGlobalClient sets global Client
-func SetGlobalMultiClient(ec Client) {
+func SetGlobalClient(ec Client) {
 	client = ec
 }
