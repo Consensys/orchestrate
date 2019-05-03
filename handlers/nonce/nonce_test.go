@@ -43,14 +43,14 @@ var cacheNonce = uint64(53)
 var chainNonce = uint64(42)
 
 type MockNonce struct {
-	mux   *sync.Mutex
+	mux *sync.Mutex
 }
 
 type MockNonceGetter struct {
 	counter uint64
 }
 
-func (nm *MockNonce) Get(chainID *big.Int, a *ethcommon.Address) (cacheNonce uint64,status int, err error) {
+func (nm *MockNonce) Get(chainID *big.Int, a *ethcommon.Address) (cacheNonce uint64, status int, err error) {
 	if chainID.Int64() == error2ChainID {
 		// Simulate error
 		return 0, 0, fmt.Errorf(" Error retrieving nonce")
@@ -126,7 +126,6 @@ func makeNonceContext(chainID int64, address string) *engine.TxContext {
 		ctx.Set("expectedErrorCount", 0)
 	}
 
-
 	switch address {
 	case nonceInCacheAddress:
 		ctx.Set("expectedNonce", cacheNonce)
@@ -136,7 +135,6 @@ func makeNonceContext(chainID int64, address string) *engine.TxContext {
 
 	return ctx
 }
-
 
 func TestNonceHandler(t *testing.T) {
 	viper.Set("redis.nonce.expiration.time", "3")
