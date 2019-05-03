@@ -42,15 +42,24 @@ var addresses = []string{
 var cacheNonce = uint64(53)
 var chainNonce = uint64(42)
 
-type MockNonce struct {
-	mux *sync.Mutex
-}
-
 type MockNonceGetter struct {
 	counter uint64
 }
 
-func (nm *MockNonce) Get(chainID *big.Int, a *ethcommon.Address) (cacheNonce uint64, status int, err error) {
+func (g *MockNonceGetter) Get(ctx context.Context, chainID *big.Int, a ethcommon.Address) (uint64, error) {
+	atomic.AddUint64(&g.counter, 1)
+	if chainID.Int64() == error1ChainID {
+		// Simulate error on chain 0
+		return 0, fmt.Errorf(" Unknwon chain")
+	}
+	return chainNonce, nil
+}
+
+type MockNonce struct {
+	mux   *sync.Mutex
+}
+
+func (nm *MockNonce) Get(chainID *big.Int, a *ethcommon.Address) (uint64, int, error) {
 	if chainID.Int64() == error2ChainID {
 		// Simulate error
 		return 0, 0, fmt.Errorf(" Error retrieving nonce")
@@ -93,15 +102,6 @@ func (nm *MockNonce) Unlock(chainID *big.Int, a *ethcommon.Address, lockSig stri
 		return fmt.Errorf(" Error unlocking nonce")
 	}
 	return nil
-}
-
-func (g *MockNonceGetter) Get(ctx context.Context, chainID *big.Int, a ethcommon.Address) (uint64, error) {
-	atomic.AddUint64(&g.counter, 1)
-	if chainID.Int64() == error1ChainID {
-		// Simulate error on chain 0
-		return 0, fmt.Errorf(" Unknwon chain")
-	}
-	return chainNonce, nil
 }
 
 // TODO : implement tests
