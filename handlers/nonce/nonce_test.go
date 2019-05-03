@@ -56,10 +56,10 @@ func (g *MockNonceGetter) Get(ctx context.Context, chainID *big.Int, a ethcommon
 }
 
 type MockNonce struct {
-	mux   *sync.Mutex
+	mux *sync.Mutex
 }
 
-func (nm *MockNonce) Get(chainID *big.Int, a *ethcommon.Address) (uint64, int, error) {
+func (nm *MockNonce) Get(chainID *big.Int, a *ethcommon.Address) (c uint64, s int, e error) {
 	if chainID.Int64() == error2ChainID {
 		// Simulate error
 		return 0, 0, fmt.Errorf(" Error retrieving nonce")
