@@ -1,5 +1,13 @@
 # CHANGELOG
 
+### Version 0.2.1
+
+- [TEST] Add postgres service to run tests
+
+### Version 0.2.0
+
+- [REFACTOR] Refactor worker with new pkg version, linting & ci
+
 ### Version 0.1.5
 
 *Released on March 28th 2019*
