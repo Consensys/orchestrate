@@ -4,7 +4,7 @@ BOILERPLATE_REPOSITORY=git@gitlab.com:ConsenSys/client/fr/core-stack/boilerplate
 
 .PHONY: all run-coverage coverage fmt fmt-check vet lint misspell-check misspell race tools help
 
-# Linters
+# Testing
 run-coverage: ## Generate global code coverage report
 	echo $(PACKAGES)
 	@sh scripts/coverage.sh $(PACKAGES)

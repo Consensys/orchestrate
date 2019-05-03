@@ -12,7 +12,7 @@ RUN git config --global --add url."https://${GITLAB_USER}:${GITLAB_TOKEN}@gitlab
     mkdir /app
 WORKDIR /app
 
-# Use go mod with go 1.11
+# Use go mod with go 1.12
 ENV GO111MODULE=on
 ENV GOPATH=/.gocache
 COPY .gocache $GOPATH
