@@ -1,7 +1,19 @@
 package nonce
 
-
-/*
+import (
+	"context"
+	"fmt"
+	ethcommon "github.com/ethereum/go-ethereum/common"
+	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
+	"math/big"
+	"sync"
+	"sync/atomic"
+	"testing"
+)
 var noErrorChainID = int64(0)
 var error1ChainID = int64(1)
 var error2ChainID = int64(2)
@@ -167,4 +179,3 @@ func TestNonceHandler(t *testing.T) {
 		}
 	}
 }
- */
