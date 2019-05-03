@@ -11,4 +11,5 @@ require (
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.4.8
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/nonce.git v0.1.2
 	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.4
+	golang.org/x/tools v0.0.0-20190503030157-5cec639030af // indirect
 )

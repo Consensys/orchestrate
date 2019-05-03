@@ -2,26 +2,24 @@ package main
 
 import (
 	"fmt"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
 
 var (
-	chainURL = "https://ropsten.infura.io/v3/81e039ce6c8a465180822b525e3644d7"
-	kafkaURL = []string{"localhost:9092"}
-	group    = "tx-nonce-group"
 	inTopic  = "topic-tx-nonce"
+	kafkaURL = []string{"localhost:9092"}
 	senders  = []string{
 		"0x664895b5fE3ddf049d2Fb508cfA03923859763C6",
-		//"0xf5956Eb46b377Ae41b41BDa94e6270208d8202bb",
-		//"0x93f7274c9059e601be4512F656B57b830e019E41",
-		//"0xbfc7137876d7Ac275019d70434B0f0779824a969",
-		//"0xA8d8DB1d8919665a18212374d623fc7C0dFDa410",
+		// "0xf5956Eb46b377Ae41b41BDa94e6270208d8202bb",
+		// "0x93f7274c9059e601be4512F656B57b830e019E41",
+		// "0xbfc7137876d7Ac275019d70434B0f0779824a969",
+		// "0xA8d8DB1d8919665a18212374d623fc7C0dFDa410",
 	}
 	// ERC20Address of token contract to target
 	ERC20Address = "0x6AFE55b2b5CcA4920182a70c71e793A7Bf44a547"

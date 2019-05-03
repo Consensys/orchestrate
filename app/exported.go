@@ -2,19 +2,19 @@ package app
 
 import (
 	"context"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/loader"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/logger"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/offset"
-	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-nonce.git/handlers/nonce"
-	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-nonce.git/handlers/producer"
 	"sync"
 
 	"github.com/spf13/viper"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/loader"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/offset"
 	server "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http/healthcheck"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-nonce.git/handlers"
+	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-nonce.git/handlers/nonce"
+	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-nonce.git/handlers/producer"
 )
 
 var (
@@ -38,7 +38,7 @@ func startServer(ctx context.Context) {
 	server.Enhance(healthcheck.HealthCheck(app))
 
 	// Start Listening
-	server.ListenAndServe()
+	_ = server.ListenAndServe()
 }
 
 func initComponents(ctx context.Context) {
@@ -94,7 +94,8 @@ func registerHandlers() {
 // Start starts application
 func Start(ctx context.Context) {
 	startOnce.Do(func() {
-		ctx, cancel := context.WithCancel(ctx)
+
+		cancelCtx, cancel := context.WithCancel(ctx)
 		go func() {
 			// Start Server
 			startServer(ctx)
@@ -102,7 +103,7 @@ func Start(ctx context.Context) {
 		}()
 
 		// Initialize all components of the server
-		initComponents(ctx)
+		initComponents(cancelCtx)
 
 		// Register all Handlers
 		registerHandlers()
@@ -112,7 +113,7 @@ func Start(ctx context.Context) {
 		app.ready.Store(true)
 
 		// Start consuming on topic tx-nonce
-		broker.Consume(
+		_ = broker.Consume(
 			ctx,
 			[]string{
 				viper.GetString("kafka.topic.nonce"),

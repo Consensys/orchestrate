@@ -2,6 +2,7 @@ package main
 
 import (
 	log "github.com/sirupsen/logrus"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-nonce.git/cmd"
 )
 

@@ -2,11 +2,11 @@ package nonce
 
 import (
 	"context"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/nonce.git/nonce"
 	"sync"
 
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/nonce.git/nonce"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
@@ -28,8 +28,8 @@ func Init(ctx context.Context) {
 		// Initialize the eth client
 		ethclient.Init(ctx)
 
-		// Create Handler
-		handler = NonceHandler(nonce.GlobalNonce(), ethclient.GlobalMultiClient().PendingNonceAt)
+		// Create Nonce Handler
+		handler = Handler(nonce.GlobalNonce(), ethclient.GlobalMultiClient().PendingNonceAt)
 
 		log.Infof("logger: handler ready")
 	})

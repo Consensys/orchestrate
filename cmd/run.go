@@ -2,17 +2,18 @@ package cmd
 
 import (
 	"context"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/nonce.git/nonce/redis"
 	"os"
 
 	"github.com/spf13/cobra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/nonce.git/nonce"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/nonce.git/nonce/redis"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-nonce.git/app"
 )
 
@@ -49,7 +50,6 @@ func newRunCommand() *cobra.Command {
 	redis.Address(runCmd.Flags())
 	redis.LockTimeout(runCmd.Flags())
 	redis.RedisNonceExpirationTime(runCmd.Flags())
-
 
 	return runCmd
 }
