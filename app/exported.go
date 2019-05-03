@@ -40,7 +40,7 @@ func startServer(ctx context.Context) {
 	_ = server.ListenAndServe()
 }
 
-func initConsumerGroup(ctx context.Context) {
+func initComponents(ctx context.Context) {
 	wg := sync.WaitGroup{}
 
 	// Initialize Engine
@@ -66,6 +66,10 @@ func initConsumerGroup(ctx context.Context) {
 
 	// Wait for engine and handlers to be ready
 	wg.Wait()
+}
+
+func registerHandlers() {
+	wg := sync.WaitGroup{}
 
 	// Register handlers on engine
 	wg.Add(1)
@@ -75,7 +79,7 @@ func initConsumerGroup(ctx context.Context) {
 		engine.Register(loader.Loader)
 		engine.Register(offset.Marker)
 
-		// Specific handlers tk Tx-Crafter worker
+		// Specific handlers tk Sender worker
 		engine.Register(sender.GlobalHandler())
 		wg.Done()
 	}()
@@ -95,14 +99,17 @@ func Start(ctx context.Context) {
 			cancel()
 		}()
 
-		// Initialize ConsumerGroup
-		initConsumerGroup(cancelCtx)
+		// Initialize all components of the server
+		initComponents(cancelCtx)
+
+		// Register all Handlers
+		registerHandlers()
 
 		// Indicate that application is ready
 		// TODO: we need to update so ready can append when Consume has finished to Setup
 		app.ready.Store(true)
 
-		// Start consuming on topic tx-crafter
+		// Start consuming on topic tx-sender
 		_ = broker.Consume(
 			cancelCtx,
 			[]string{

@@ -9,7 +9,6 @@ require (
 	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.3.0
 	gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git v0.2.0
-	gitlab.com/ConsenSys/client/fr/core-stack/boilerplate-worker.git v0.1.1 // indirect
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.4.8
 	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.5
 	google.golang.org/grpc v1.20.1

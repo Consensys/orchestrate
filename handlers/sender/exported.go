@@ -47,7 +47,7 @@ func initStore(ctx context.Context) {
 	}()
 }
 
-// Init initialize Gas Pricer Handler
+// Init initialize Sender Handler
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
 		if handler != nil {
@@ -67,12 +67,12 @@ func Init(ctx context.Context) {
 	})
 }
 
-// SetGlobalHandler sets global Gas Pricer Handler
+// SetGlobalHandler sets global Sender Handler
 func SetGlobalHandler(h engine.HandlerFunc) {
 	handler = h
 }
 
-// GlobalHandler returns global Gas Pricer handler
+// GlobalHandler returns global Sender handler
 func GlobalHandler() engine.HandlerFunc {
 	return handler
 }
