@@ -1,18 +1,7 @@
 package nonce
 
-import (
-	"context"
-	"fmt"
-	ethcommon "github.com/ethereum/go-ethereum/common"
-	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
-	"math/big"
-	"sync"
-	"sync/atomic"
-)
 
+/*
 var noErrorChainID = int64(0)
 var error1ChainID = int64(1)
 var error2ChainID = int64(2)
@@ -133,7 +122,7 @@ func makeNonceContext(chainID int64, address string) *engine.TxContext {
 	return ctx
 }
 
-/*
+
 func TestNonceHandler(t *testing.T) {
 	viper.Set("redis.nonce.expiration.time", "3")
 	viper.Set("redis.nonce.expiration.time", "3")
