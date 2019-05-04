@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.6
+
+*Released on Mai 4th 2019*
+
+- [FEAT] adding exported for `opentracing` handler
+
 ### Version 0.4.5
 
 *Released on April 30th 2019*
