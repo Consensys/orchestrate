@@ -8,13 +8,13 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/keystore/wallet"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 )
 
 // TxSignatureSession holds all the logic allowing the signature of an ethereum transaction
 type TxSignatureSession struct {
-	secretStore secretstore.SecretStore
+	secretStore services.SecretStore
 	wallet      *wallet.Wallet
 	chain       *common.Chain
 	tx          *ethtypes.Transaction
@@ -23,7 +23,7 @@ type TxSignatureSession struct {
 }
 
 // MakeTxSignature create a new tx signature session from address
-func MakeTxSignature(secretStore secretstore.SecretStore) *TxSignatureSession {
+func MakeTxSignature(secretStore services.SecretStore) *TxSignatureSession {
 	return &TxSignatureSession{
 		secretStore: secretStore,
 	}

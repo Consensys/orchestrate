@@ -1,4 +1,4 @@
-package secretstore
+package services
 
 // SecretStore is an interface implemented by helpers that store and retrive secrets
 type SecretStore interface {

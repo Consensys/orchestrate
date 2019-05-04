@@ -3,18 +3,18 @@ package testutils
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/services"
 )
 
 // SecretStoreTestSuite is a test suit for TraceStore
 type SecretStoreTestSuite struct {
 	suite.Suite
-	Store secretstore.SecretStore
+	Store services.SecretStore
 }
 
 // TestSecretStore test SecretStore
 func (suite *SecretStoreTestSuite) TestSecretStore() {
-	
+
 	err := suite.Store.Store("test-key", "test-value")
 	assert.Nilf(suite.T(), err, "Secret should have been stored, got %q", err)
 

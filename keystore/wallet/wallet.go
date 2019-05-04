@@ -7,7 +7,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/services"
 )
 
 // Wallet is a container
@@ -15,11 +15,11 @@ type Wallet struct {
 	address common.Address
 	priv    *ecdsa.PrivateKey
 
-	sec secretstore.SecretStore
+	sec services.SecretStore
 }
 
 // NewWallet construct a wallet object
-func NewWallet(sec secretstore.SecretStore) *Wallet {
+func NewWallet(sec services.SecretStore) *Wallet {
 	return &Wallet{
 		sec: sec,
 	}

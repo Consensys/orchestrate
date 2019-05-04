@@ -7,8 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/keystore/base"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/hashicorp"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore"
 )
 
 var (
@@ -23,28 +22,15 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		switch viper.GetString(secretStoreViperKey) {
-		case "test":
-			// Create Key Store from a Mock SecretStore
-			mock.Init(ctx)
-			keyStore = base.NewKeyStore(mock.GlobalStore())
-
-		case "hashicorp":
-			// Create an hashicorp vault object
-			hashicorp.Init(ctx)
-			keyStore = base.NewKeyStore(hashicorp.GlobalStore())
-
-		default:
-			// Key Store type should be one of "test", "hashicorp"
-			log.Fatalf("Key Store: Invalid Store type %q", viper.GetString(secretStoreViperKey))
-		}
-
+		secretstore.Init(ctx)
+		keyStore = base.NewKeyStore(secretstore.GlobalSecretStore())
+		
 		err := ImportPrivateKey(keyStore)
 		if err != nil {
 			log.Fatalf("Key Store: Cannot import private keys, got error: %q", err)
 		}
 
-		log.Infof("Key Store: %q ready", viper.GetString(secretStoreViperKey))
+		log.Info("Key Store: ready")
 	})
 }
 

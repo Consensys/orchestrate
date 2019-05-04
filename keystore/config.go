@@ -10,29 +10,11 @@ import (
 func init() {
 	viper.SetDefault(secretPkeyViperKey, secretPkeyDefault)
 	viper.BindEnv(secretPkeyViperKey, secretPkeyEnv)
-	viper.SetDefault(secretStoreViperKey, secretStoreDefault)
-	viper.BindEnv(secretStoreViperKey, secretStoreEnv)
 }
-
-var (
-	secretStoreFlag     = "secret-store"
-	secretStoreViperKey = "secret.store"
-	secretStoreDefault  = "test"
-	secretStoreEnv      = "SECRET_STORE"
-)
 
 // InitFlags initialize flags
 func InitFlags(f *pflag.FlagSet) {
-	SecretStore(f)
 	SecretPkeys(f)
-}
-
-// SecretStore register flag for Vault accounts
-func SecretStore(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Type of secret store for private keys (one of %q %q)
-Environment variable: %q`, "test", "hashicorp", secretStoreEnv)
-	f.String(secretStoreFlag, secretStoreDefault, desc)
-	viper.BindPFlag(secretStoreViperKey, f.Lookup(secretStoreFlag))
 }
 
 var (

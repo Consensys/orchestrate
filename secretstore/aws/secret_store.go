@@ -74,9 +74,9 @@ func (s *SecretStore) List() ([]string, error) {
 }
 
 // Load the secret value from the secret manager of AWS
-func (s *SecretStore) Load(key string) (string, error) {
+func (s *SecretStore) Load(key string) (string, bool, error) {
 	if s.client == nil {
-		return "", fmt.Errorf("Client not set")
+		return "", false, fmt.Errorf("Client not set")
 	}
 
 	input := secretsmanager.GetSecretValueInput{
@@ -86,10 +86,10 @@ func (s *SecretStore) Load(key string) (string, error) {
 
 	res, err := s.client.GetSecretValue(&input)
 	if err != nil {
-		return "", err
+		return "", false, err
 	}
 
-	return *res.SecretString, nil
+	return *res.SecretString, true, nil
 }
 
 func (s *SecretStore) create(key, value string) (err error) {

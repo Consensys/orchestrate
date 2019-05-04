@@ -7,17 +7,17 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/keystore/session"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/keystore/wallet"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 )
 
 // KeyStore olds the methods of the interfaces BaseKeyStore
 type KeyStore struct {
-	SecretStore secretstore.SecretStore
+	SecretStore services.SecretStore
 }
 
 //NewKeyStore construct a BaseKeyStore from a client
-func NewKeyStore(secretStore secretstore.SecretStore) *KeyStore {
+func NewKeyStore(secretStore services.SecretStore) *KeyStore {
 	return &KeyStore{
 		SecretStore: secretStore,
 	}
