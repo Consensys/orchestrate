@@ -16,6 +16,8 @@ variables:
   # When using dind, it's wise to use the overlayfs driver for
   # improved performance.
   DOCKER_DRIVER: overlay2
+    GOPATH: ${CI_PROJECT_DIR}/.gocache
+
 
 cache:
   paths:
@@ -23,6 +25,7 @@ cache:
     - /root/go
 
 stages:
+  - cache-update
   - test
   - build
 
@@ -34,7 +37,6 @@ before_script:
   - apk add --update bash openssh git make go grep curl jq
   - apk add --update musl-dev python2-dev libffi-dev openssl-dev 
   - mkdir -p ~/.ssh
-  - echo "$SSH_DEPLOY_CORE_STACK" | tr -d '\r' > ~/.ssh/id_rsa
   - chmod 700 ~/.ssh/id_rsa
   - ssh-keyscan -H gitlab.com >> ~/.ssh/known_hosts
 
@@ -50,6 +52,18 @@ before_script:
   # Install docker-compose
   - apk add --no-cache py-pip
   - pip install docker-compose
+
+cache-update:
+  image: golang:1.12
+  stage: cache-update
+  script:
+    - go mod download -json
+  cache:
+    policy: push
+    paths:
+      - ${GOPATH}
+  only:
+    - master
 
 test:
   stage: test
@@ -67,14 +81,17 @@ test:
       - /root/go
 
 test-lint:
+  image: golang:1.12
   stage: test
   script:
-    - make lint
     - make race
-  # cache:
-  #   paths:
-  #     - /apt-cache
-  #     - /root/go
+    - make lint
+  cache:
+    policy: pull
+    paths:
+      - ${GOPATH}
+  except:
+      - tags
 
 build-on-branch:
   image: docker:stable
