@@ -23,8 +23,11 @@ func Init(ctx context.Context) {
 
 		tracer, _, err := cfg.NewTracer()
 		if err != nil {
-			log.WithError(err).Fatal("opentracing: could initialize jaeger tracer")
+			log.WithError(err).Fatal("open-tracing: could initialize jaeger tracer")
 		}
+
+		log.Infof("jager: agent ready for open-tracing (connected with tracer: %v)", tracer)
+
 
 		// Set Open tracing global tracer
 		opentracing.SetGlobalTracer(tracer)

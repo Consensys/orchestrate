@@ -34,7 +34,7 @@ func Init(ctx context.Context) {
 		// Create Handler
 		handler = TxSpanFromBroker(opentracing.GlobalTracer(), operationName)
 
-		log.Infof("logger: handler ready")
+		log.Infof("logger: open-tracing handler ready")
 	})
 }
 
