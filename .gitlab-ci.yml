@@ -99,7 +99,7 @@ test-lint:
     - export PATH="${PATH}:${GOPATH}/bin:${GOROOT}/bin"
     - make tools
   script:
-    - make race
+    # - make race
     - make lint
   cache:
     policy: pull
