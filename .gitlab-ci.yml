@@ -37,6 +37,7 @@ before_script:
   - apk add --update bash openssh git make go grep curl jq
   - apk add --update musl-dev python2-dev libffi-dev openssl-dev 
   - mkdir -p ~/.ssh
+  - echo "$SSH_DEPLOY_CORE_STACK" | tr -d '\r' > ~/.ssh/id_rsa
   - chmod 700 ~/.ssh/id_rsa
   - ssh-keyscan -H gitlab.com >> ~/.ssh/known_hosts
 
