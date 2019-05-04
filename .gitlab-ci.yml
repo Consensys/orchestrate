@@ -18,7 +18,6 @@ variables:
   DOCKER_DRIVER: overlay2
   GOPATH: ${CI_PROJECT_DIR}/.gocache
 
-
 cache:
   paths:
     - /apt-cache
@@ -42,8 +41,7 @@ before_script:
   - ssh-keyscan -H gitlab.com >> ~/.ssh/known_hosts
 
   # Change git config so we can import go packages from GitLab
-  - git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/".insteadOf "git@gitlab.com:"
-  - git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/".insteadOf "https://gitlab.com/"
+  - git config --global url."git@gitlab.com:".insteadOf "https://gitlab.com/"
 
   # Set GOPATH
   - mkdir "${HOME}/go"; export GOPATH="${HOME}/go"
@@ -57,6 +55,14 @@ before_script:
 cache-update:
   image: golang:1.12
   stage: cache-update
+  before_script:
+    # Change git config so we can import go packages from GitLab
+    - git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/".insteadOf "git@gitlab.com:"
+    - git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/".insteadOf "https://gitlab.com/"
+    # Set GOPATH
+    - mkdir -p ${GOPATH}
+    - export PATH="${PATH}:${GOPATH}/bin:${GOROOT}/bin"
+    - make tools
   script:
     - go mod download -json
   cache:
@@ -84,6 +90,14 @@ test:
 test-lint:
   image: golang:1.12
   stage: test
+  before_script:
+    # Change git config so we can import go packages from GitLab
+    - git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/".insteadOf "git@gitlab.com:"
+    - git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/".insteadOf "https://gitlab.com/"
+    # Set GOPATH
+    - mkdir -p ${GOPATH}
+    - export PATH="${PATH}:${GOPATH}/bin:${GOROOT}/bin"
+    - make tools
   script:
     - make race
     - make lint
