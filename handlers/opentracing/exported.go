@@ -26,8 +26,13 @@ func Init(ctx context.Context) {
 		// Initialize Controlled Faucet
 		jaeger.Init(ctx)
 
+		operationName := "GenericService"
+		if ctx.Value("service-name") != nil {
+			operationName = ctx.Value("service-name").(string)
+		}
+
 		// Create Handler
-		handler = TxSpanFromBroker(opentracing.GlobalTracer(), ctx.Value("service-name").(string))
+		handler = TxSpanFromBroker(opentracing.GlobalTracer(), operationName)
 
 		log.Infof("logger: handler ready")
 	})
