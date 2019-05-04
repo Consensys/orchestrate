@@ -69,12 +69,12 @@ func (w *Wallet) Load(a *common.Address) (err error) {
 	}
 
 	if !ok {
-		return fmt.Errorf("No pkey stored for account %q", a.Hex())
+		return fmt.Errorf("no pkey stored for account %q", a.Hex())
 	}
 
 	w.priv, err = crypto.HexToECDSA(priv)
 	if err != nil {
-		return fmt.Errorf("Could not deserialize %v...%v", priv[:5], priv[len(priv)-5:])
+		return fmt.Errorf("could not deserialize %v...%v", priv[:5], priv[len(priv)-5:])
 	}
 
 	return nil

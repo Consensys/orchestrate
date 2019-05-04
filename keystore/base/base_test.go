@@ -56,13 +56,15 @@ type BaseKeyStoreTestSuite struct {
 	Store *KeyStore
 }
 
-func (suite *BaseKeyStoreTestSuite) SetupTest() {
-	suite.Store = NewKeyStore(mock.NewSecretStore())
+func (s *BaseKeyStoreTestSuite) SetupTest() {
+	s.Store = NewKeyStore(mock.NewSecretStore())
 }
 
-func (suite *BaseKeyStoreTestSuite) TestKeyStore() {
+// TestKeyStore is a test suit for KeyStore
+func (s *BaseKeyStoreTestSuite) TestKeyStore() {
 	for _, priv := range testPKeys {
-		suite.Store.ImportPrivateKey(priv.prv)
+		err := s.Store.ImportPrivateKey(priv.prv)
+		assert.Nil(s.T(), err)
 	}
 
 	// Feed input channel and then close it
@@ -73,47 +75,25 @@ func (suite *BaseKeyStoreTestSuite) TestKeyStore() {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
-			raw, _, _ := suite.Store.SignTx(makeSignerInput(i))
+			raw, _, _ := s.Store.SignTx(makeSignerInput(i))
 			out <- raw
 		}(i)
 	}
 	wg.Wait()
 	close(out)
 
-	assert.Len(suite.T(), out, rounds, "Count of signatures should be correct")
+	assert.Len(s.T(), out, rounds, "Count of signatures should be correct")
 	for raw := range out {
-		assert.True(suite.T(), len(raw) > 95, "Expected transaction to be signed but got %q", hexutil.Encode(raw))
+		assert.True(s.T(), len(raw) > 95, "Expected transaction to be signed but got %q", hexutil.Encode(raw))
 	}
 }
 
-func (suite *BaseKeyStoreTestSuite) TestGenerateWallet() {
-	_, err := suite.Store.GenerateWallet()
-	assert.Nil(suite.T(), err, "Wallet should be generated")
+func (s *BaseKeyStoreTestSuite) TestGenerateWallet() {
+	_, err := s.Store.GenerateWallet()
+	assert.Nil(s.T(), err, "Wallet should be generated")
 }
 
 func TestKeyStore(t *testing.T) {
 	s := new(BaseKeyStoreTestSuite)
 	suite.Run(t, s)
 }
-
-//TestSecretStore must be run along with a vault container in development mode
-//It will sequentially writes a secret, list all the secrets, get the secret then delete it.
-// func TestKeyStore(t *testing.T) {
-// 	config := hashicorp.NewConfig()
-// 	hashicorpsSS, err := hashicorp.NewHashiCorp(config)
-// 	if err != nil {
-// 		t.Errorf("Error when instantiating the vault : %v", err.Error())
-// 	}
-
-// 	err = hashicorpsSS.InitVault()
-// 	if err != nil {
-// 		t.Errorf("Error initializing the vault : %v", err.Error())
-// 	}
-
-// 	keystore := NewKeyStore(hashicorpsSS)
-
-// 	_, err = keystore.GenerateWallet()
-// 	if err != nil {
-// 		t.Errorf("Error while generating a new wallet : %v", err.Error())
-// 	}
-// }

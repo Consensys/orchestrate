@@ -6,15 +6,15 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/aws"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/hashicorp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/aws"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/services"
 )
 
 var (
-	secretStore	services.SecretStore
-	initOnce 	= &sync.Once{}
+	secretStore services.SecretStore
+	initOnce    = &sync.Once{}
 )
 
 // Init initializes a Secret Store

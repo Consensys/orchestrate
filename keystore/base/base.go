@@ -16,7 +16,7 @@ type KeyStore struct {
 	SecretStore services.SecretStore
 }
 
-//NewKeyStore construct a BaseKeyStore from a client
+// NewKeyStore construct a BaseKeyStore from a client
 func NewKeyStore(secretStore services.SecretStore) *KeyStore {
 	return &KeyStore{
 		SecretStore: secretStore,
@@ -31,8 +31,14 @@ func (s *KeyStore) SignTx(chain *common.Chain, a ethcommon.Address, tx *ethtypes
 	if err != nil {
 		return []byte{}, nil, err
 	}
-	sess.SetChain(chain)
-	sess.SetTx(tx)
+	err = sess.SetChain(chain)
+	if err != nil {
+		return []byte{}, nil, err
+	}
+	err = sess.SetTx(tx)
+	if err != nil {
+		return []byte{}, nil, err
+	}
 
 	// Run signing session
 	err = sess.Run()
@@ -45,7 +51,7 @@ func (s *KeyStore) SignTx(chain *common.Chain, a ethcommon.Address, tx *ethtypes
 
 // SignMsg returns a signed message and its hash
 func (s *KeyStore) SignMsg(a ethcommon.Address, msg string) (rsv []byte, hash *ethcommon.Hash, err error) {
-	return []byte{}, nil, fmt.Errorf("Not implemented yet")
+	return []byte{}, nil, fmt.Errorf("not implemented yet")
 }
 
 // SignRawHash returns a signed raw hash
@@ -54,36 +60,36 @@ func (s *KeyStore) SignRawHash(
 	hash []byte,
 ) (rsv []byte, err error) {
 
-	return []byte{}, fmt.Errorf("Not implemented yet")
+	return []byte{}, fmt.Errorf("not implemented yet")
 }
 
 // GenerateWallet create and stores a new wallet in the vault
 func (s *KeyStore) GenerateWallet() (add *ethcommon.Address, err error) {
-	wallet := wallet.NewWallet(s.SecretStore)
-	err = wallet.Generate()
+	w := wallet.NewWallet(s.SecretStore)
+	err = w.Generate()
 	if err != nil {
 		return nil, err
 	}
 
-	err = wallet.Store()
+	err = w.Store()
 	if err != nil {
 		return nil, err
 	}
 
-	return wallet.Address(), nil
+	return w.Address(), nil
 }
 
 // ImportPrivateKey adds a private key in the vault
 // TODO: this is Unsafe and should be removed soon
 func (s *KeyStore) ImportPrivateKey(priv string) (err error) {
 
-	wallet := wallet.NewWallet(s.SecretStore)
-	err = wallet.FromPrivateKey(priv)
+	w := wallet.NewWallet(s.SecretStore)
+	err = w.FromPrivateKey(priv)
 	if err != nil {
 		return err
 	}
 
-	err = wallet.Store()
+	err = w.Store()
 	if err != nil {
 		return err
 	}

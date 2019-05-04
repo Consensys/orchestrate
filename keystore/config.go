@@ -9,7 +9,7 @@ import (
 
 func init() {
 	viper.SetDefault(secretPkeyViperKey, secretPkeyDefault)
-	viper.BindEnv(secretPkeyViperKey, secretPkeyEnv)
+	_ = viper.BindEnv(secretPkeyViperKey, secretPkeyEnv)
 }
 
 // InitFlags initialize flags
@@ -40,5 +40,5 @@ func SecretPkeys(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Private keys to pre-register in key store
 Environment variable: %q`, secretPkeyEnv)
 	f.StringSlice(secretPkeyFlag, secretPkeyDefault, desc)
-	viper.BindPFlag(secretPkeyViperKey, f.Lookup(secretPkeyFlag))
+	_ = viper.BindPFlag(secretPkeyViperKey, f.Lookup(secretPkeyFlag))
 }

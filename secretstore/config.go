@@ -9,7 +9,7 @@ import (
 
 func init() {
 	viper.SetDefault(secretStoreViperKey, secretStoreDefault)
-	viper.BindEnv(secretStoreViperKey, secretStoreEnv)
+	_ = viper.BindEnv(secretStoreViperKey, secretStoreEnv)
 }
 
 var (
@@ -21,13 +21,13 @@ var (
 
 // InitFlags initialize flags
 func InitFlags(f *pflag.FlagSet) {
-	SecretStoreFlag(f)
+	SecFlag(f)
 }
 
-// SecretStoreFlag register flag for Vault accounts
-func SecretStoreFlag(f *pflag.FlagSet) {
+// SecFlag register flag for Vault accounts
+func SecFlag(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Type of secret store for private keys (one of %q %q)
 Environment variable: %q`, "test", "hashicorp", secretStoreEnv)
 	f.String(secretStoreFlag, secretStoreDefault, desc)
-	viper.BindPFlag(secretStoreViperKey, f.Lookup(secretStoreFlag))
+	_ = viper.BindPFlag(secretStoreViperKey, f.Lookup(secretStoreFlag))
 }

@@ -32,13 +32,16 @@ func (s *Secret) SetClient(client *api.Client) *Secret {
 func (s *Secret) SaveNew() (err error) {
 	fetched, _, err := s.GetValue()
 	if fetched != "" {
-		return fmt.Errorf("Secret %q already exists", s.key)
+		return fmt.Errorf("secret %q already exists", s.key)
+	}
+	if err != nil {
+		return err
 	}
 	return s.Update()
 }
 
 // GetValue fetch the value from AWS SecretManager by key
-func (s *Secret) GetValue() (string, bool, error) {
+func (s *Secret) GetValue() (value string, ok bool, err error) {
 	// Read secret from Vault
 	logical := s.client.Logical()
 	res, err := logical.Read(

@@ -1,6 +1,6 @@
 package services
 
-// SecretStore is an interface implemented by helpers that store and retrive secrets
+// SecretStore is an interface implemented by helpers that store and retrieve secrets
 type SecretStore interface {
 	// Store secret
 	Store(key, value string) (err error)

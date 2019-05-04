@@ -11,13 +11,13 @@ type HashicorpKeyStoreTestSuite struct {
 	testutils.SecretStoreTestSuite
 }
 
-func (suite *HashicorpKeyStoreTestSuite) SetupTest() {
-	config := NewConfig()	
+func (s *HashicorpKeyStoreTestSuite) SetupTest() {
+	config := NewConfig()
 	hashicorps, err := NewHashiCorp(config)
 	if err != nil {
 		panic(err)
 	}
-	suite.Store = hashicorps
+	s.Store = hashicorps
 }
 
 func TestMock(t *testing.T) {

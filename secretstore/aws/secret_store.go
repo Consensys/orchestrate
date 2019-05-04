@@ -15,8 +15,9 @@ type SecretStore struct {
 
 // NewSecretStore returns a default configured AWS secretstore
 func NewSecretStore() *SecretStore {
+	secretStoreSession, _ := session.NewSession()
 	return &SecretStore{
-		client: secretsmanager.New(session.New()),
+		client: secretsmanager.New(secretStoreSession),
 	}
 }
 
@@ -36,7 +37,7 @@ func (s *SecretStore) Store(key, value string) (err error) {
 // Delete removes a secret from the secret store
 func (s *SecretStore) Delete(key string) (err error) {
 	if s.client == nil {
-		return fmt.Errorf("Client not set")
+		return fmt.Errorf("client not set")
 	}
 
 	input := secretsmanager.DeleteSecretInput{
@@ -55,7 +56,7 @@ func (s *SecretStore) Delete(key string) (err error) {
 // List returns a list of available secrets
 func (s *SecretStore) List() ([]string, error) {
 	if s.client == nil {
-		return []string{}, fmt.Errorf("Client not set")
+		return []string{}, fmt.Errorf("client not set")
 	}
 
 	input := secretsmanager.ListSecretsInput{}
@@ -74,9 +75,9 @@ func (s *SecretStore) List() ([]string, error) {
 }
 
 // Load the secret value from the secret manager of AWS
-func (s *SecretStore) Load(key string) (string, bool, error) {
+func (s *SecretStore) Load(key string) (value string, ok bool, err error) {
 	if s.client == nil {
-		return "", false, fmt.Errorf("Client not set")
+		return "", false, fmt.Errorf("client not set")
 	}
 
 	input := secretsmanager.GetSecretValueInput{
@@ -94,7 +95,7 @@ func (s *SecretStore) Load(key string) (string, bool, error) {
 
 func (s *SecretStore) create(key, value string) (err error) {
 	if s.client == nil {
-		return fmt.Errorf("Client not set")
+		return fmt.Errorf("client not set")
 	}
 
 	input := secretsmanager.CreateSecretInput{
@@ -113,7 +114,7 @@ func (s *SecretStore) create(key, value string) (err error) {
 
 func (s *SecretStore) update(key, value string) (err error) {
 	if s.client == nil {
-		return fmt.Errorf("Client not set")
+		return fmt.Errorf("client not set")
 	}
 
 	input := secretsmanager.PutSecretValueInput{

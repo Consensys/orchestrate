@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	keyStore  KeyStore
+	keyStore KeyStore
 	initOnce = &sync.Once{}
 )
 
@@ -24,7 +24,7 @@ func Init(ctx context.Context) {
 
 		secretstore.Init(ctx)
 		keyStore = base.NewKeyStore(secretstore.GlobalSecretStore())
-		
+
 		err := ImportPrivateKey(keyStore)
 		if err != nil {
 			log.Fatalf("Key Store: Cannot import private keys, got error: %q", err)

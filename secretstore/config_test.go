@@ -12,7 +12,7 @@ import (
 func TestSecretStore(t *testing.T) {
 	name := "secret.store"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	SecretStoreFlag(flgs)
+	SecFlag(flgs)
 	expected := "test"
 	assert.Equal(t, expected, viper.GetString(name), "Default")
 
@@ -24,7 +24,7 @@ func TestSecretStore(t *testing.T) {
 	args := []string{
 		"--secret-store=flag-store",
 	}
-	flgs.Parse(args)
+	_ = flgs.Parse(args)
 	expected = "flag-store"
 	assert.Equal(t, expected, viper.GetString(name), "From Flag")
 }

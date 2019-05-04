@@ -32,13 +32,13 @@ func MakeTxSignature(secretStore services.SecretStore) *TxSignatureSession {
 // SetWallet sets the wallet to the provided address
 func (sess *TxSignatureSession) SetWallet(address *ethcommon.Address) error {
 
-	wallet := wallet.NewWallet(sess.secretStore)
-	err := wallet.Load(address)
+	w := wallet.NewWallet(sess.secretStore)
+	err := w.Load(address)
 	if err != nil {
 		return fmt.Errorf("Could not retrieve private key for address : " + err.Error())
 	}
 
-	sess.wallet = wallet
+	sess.wallet = w
 	return nil
 }
 
@@ -59,7 +59,7 @@ func (sess *TxSignatureSession) getSigner() (ethtypes.Signer, error) {
 
 	var signer ethtypes.Signer
 	if sess.chain == nil {
-		return nil, fmt.Errorf("Chain has not been set")
+		return nil, fmt.Errorf("chain has not been set")
 	}
 
 	if sess.chain.IsEIP155 {

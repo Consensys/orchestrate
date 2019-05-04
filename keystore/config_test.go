@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
+
 func TestSecretPkeys(t *testing.T) {
 	name := "secret.pkeys"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
@@ -37,7 +38,7 @@ func TestSecretPkeys(t *testing.T) {
 	args := []string{
 		"--secret-pkey=86B021CCB810F26A30445B85F71E4C1596A11A97DDF9B9E348AC93D1DA6735BC",
 	}
-	flgs.Parse(args)
+	_ = flgs.Parse(args)
 	expected = []string{
 		"86B021CCB810F26A30445B85F71E4C1596A11A97DDF9B9E348AC93D1DA6735BC",
 	}
