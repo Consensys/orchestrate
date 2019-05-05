@@ -13,25 +13,31 @@ import (
 
 // Client is a Mock client
 type Client struct {
-	blocks []*ethtypes.Block
+	blocks map[string][]*ethtypes.Block
 
 	mux  *sync.RWMutex
-	head uint64
+	head map[string]uint64
 }
 
-func NewClient(blocks []*ethtypes.Block) *Client {
+// NewClient creates a new mock client
+func NewClient(blocks map[string][]*ethtypes.Block) *Client {
+	head := make(map[string]uint64)
+	for chain := range blocks {
+		head[chain] = 0
+	}
 	return &Client{
 		blocks: blocks,
 		mux:    &sync.RWMutex{},
+		head:   head,
 	}
 }
 
-func (ec *Client) Mine() {
+func (ec *Client) Mine(chainID *big.Int) {
 	ec.mux.Lock()
 	defer ec.mux.Unlock()
 
-	if int(ec.head)+1 < len(ec.blocks) {
-		ec.head++
+	if int(ec.head[chainID.Text(10)])+1 < len(ec.blocks[chainID.Text(10)]) {
+		ec.head[chainID.Text(10)]++
 	}
 }
 
@@ -66,18 +72,18 @@ func (ec *Client) BlockByNumber(ctx context.Context, chainID, number *big.Int) (
 		defer ec.mux.RUnlock()
 
 		if number == nil {
-			number = big.NewInt(int64(ec.head))
+			number = big.NewInt(int64(ec.head[chainID.Text(10)]))
 		}
 
-		if number.Uint64() <= ec.head {
-			block := ec.blocks[number.Uint64()]
+		if number.Uint64() <= ec.head[chainID.Text(10)] {
+			block := ec.blocks[chainID.Text(10)][number.Uint64()]
 			header := ethtypes.CopyHeader(block.Header())
 			header.Number = number
 			blck := ethtypes.NewBlockWithHeader(header)
 			return blck.WithBody(block.Transactions(), block.Uncles()), nil
 		}
 
-		if number.Uint64() > ec.head {
+		if number.Uint64() > ec.head[chainID.Text(10)] {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("error")
@@ -98,17 +104,17 @@ func (ec *Client) HeaderByNumber(ctx context.Context, chainID, number *big.Int) 
 		ec.mux.RLock()
 		defer ec.mux.RUnlock()
 		if number == nil {
-			number = big.NewInt(int64(ec.head))
+			number = big.NewInt(int64(ec.head[chainID.Text(10)]))
 		}
 
-		if number.Uint64() <= ec.head {
-			block := ec.blocks[number.Uint64()]
+		if number.Uint64() <= ec.head[chainID.Text(10)] {
+			block := ec.blocks[chainID.Text(10)][number.Uint64()]
 			header := ethtypes.CopyHeader(block.Header())
 			header.Number = number
 			return header, nil
 		}
 
-		if number.Uint64() > ec.head {
+		if number.Uint64() > ec.head[chainID.Text(10)] {
 			return nil, nil
 		}
 
@@ -129,7 +135,7 @@ func (ec *Client) TransactionReceipt(ctx context.Context, chainID *big.Int, txHa
 	case <-time.After(2 * time.Millisecond):
 		ec.mux.RLock()
 		defer ec.mux.RUnlock()
-		for _, block := range ec.blocks[:ec.head+1] {
+		for _, block := range ec.blocks[chainID.Text(10)][:ec.head[chainID.Text(10)]+1] {
 			if block.Transaction(txHash) != nil {
 				return &ethtypes.Receipt{
 					TxHash: txHash,

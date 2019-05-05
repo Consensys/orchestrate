@@ -21,13 +21,14 @@ var blocksEnc = [][]byte{
 }
 
 func TestMockEthClient(t *testing.T) {
-	blocks := []*ethtypes.Block{}
+	blocks := make(map[string][]*ethtypes.Block)
+	blocks["1"] = []*ethtypes.Block{}
 	for _, blockEnc := range blocksEnc {
 		var block ethtypes.Block
 		err := rlp.DecodeBytes(blockEnc, &block)
 		assert.Nil(t, err)
 
-		blocks = append(blocks, &block)
+		blocks["1"] = append(blocks["1"], &block)
 	}
 	mec := NewClient(blocks)
 
@@ -46,7 +47,7 @@ func TestMockEthClient(t *testing.T) {
 		t.Errorf("MockEthClient #2: Got %v %v", b, err)
 	}
 
-	mec.Mine()
+	mec.Mine(big.NewInt(1))
 
 	b, err = mec.BlockByNumber(context.Background(), big.NewInt(1), big.NewInt(1))
 	if b == nil || err != nil {
