@@ -1,19 +1,20 @@
-package decoder
+package abi
 
 import (
 	"encoding/json"
+	"fmt"
 	"math/big"
 	"reflect"
 	"testing"
 
-	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
-	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
 
-func newEvent(eventABI []byte) *ethabi.Event {
-	var event ethabi.Event
+func newEvent(eventABI []byte) *abi.Event {
+	var event abi.Event
 	_ = json.Unmarshal(eventABI, &event)
 	return &event
 }
@@ -23,26 +24,26 @@ func TestFormatIndexedArg(t *testing.T) {
 
 	for i, test := range []struct {
 		argType        string
-		arg            ethcommon.Hash
+		arg            common.Hash
 		expectedOutput string
 	}{
 		{
 			"address",
-			ethcommon.HexToHash("0x0000000000000000000000008dd688660ec0babd0b8a2f2de3232645f73cc5eb"),
+			common.HexToHash("0x0000000000000000000000008dd688660ec0babd0b8a2f2de3232645f73cc5eb"),
 			"0x8dd688660ec0BaBD0B8a2f2DE3232645F73cC5eb",
 		},
 		{
 			"bytes32",
-			ethcommon.HexToHash("0xf08499c9e419ea8c08c4b991f88632593fb36baf4124c62758acb21898711088"),
+			common.HexToHash("0xf08499c9e419ea8c08c4b991f88632593fb36baf4124c62758acb21898711088"),
 			"0xf08499c9e419ea8c08c4b991f88632593fb36baf4124c62758acb21898711088",
 		},
 		{
 			"uint256",
-			ethcommon.BigToHash(big.NewInt(1)),
+			common.BigToHash(big.NewInt(1)),
 			"1",
 		},
 	} {
-		typeArg, _ := ethabi.NewType(test.argType, nil)
+		typeArg, _ := abi.NewType(test.argType, nil)
 		output, _ := FormatIndexedArg(&typeArg, test.arg)
 
 		if test.expectedOutput != output {
@@ -56,108 +57,108 @@ func TestFormatIndexedArg(t *testing.T) {
 func TestFormatNonIndexedArg(t *testing.T) {
 
 	for i, test := range []struct {
-		argType        ethabi.Type
+		argType        abi.Type
 		arg            interface{}
 		expectedOutput string
 	}{
 		{
-			ethabi.Type{Type: reflect.TypeOf(&big.Int{}), T: ethabi.IntTy},
+			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
 			uint8(2),
 			"2",
 		},
 		{
-			ethabi.Type{Type: reflect.TypeOf(&big.Int{}), T: ethabi.IntTy},
+			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
 			[]uint8{1, 2},
 			"[1 2]",
 		},
 		{
-			ethabi.Type{Type: reflect.TypeOf(&big.Int{}), T: ethabi.IntTy},
+			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
 			uint16(2),
 			"2",
 		},
 		{
-			ethabi.Type{Type: reflect.TypeOf(&big.Int{}), T: ethabi.IntTy},
+			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
 			[]uint16{1, 2},
 			"[1 2]",
 		},
 		{
-			ethabi.Type{Type: reflect.TypeOf(&big.Int{}), T: ethabi.IntTy},
+			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
 			uint32(2),
 			"2",
 		},
 		{
-			ethabi.Type{Type: reflect.TypeOf(&big.Int{}), T: ethabi.IntTy},
+			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
 			[]uint32{1, 2},
 			"[1 2]",
 		},
 		{
-			ethabi.Type{Type: reflect.TypeOf(&big.Int{}), T: ethabi.IntTy},
+			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
 			uint64(2),
 			"2",
 		},
 		{
-			ethabi.Type{Type: reflect.TypeOf(&big.Int{}), T: ethabi.IntTy},
+			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
 			[]uint64{1, 2},
 			"[1 2]",
 		},
 		{
-			ethabi.Type{Type: reflect.TypeOf(&big.Int{}), T: ethabi.IntTy},
+			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
 			big.NewInt(2),
 			"2",
 		},
 		{
-			ethabi.Type{Type: reflect.TypeOf(&big.Int{}), T: ethabi.IntTy},
+			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
 			[]*big.Int{big.NewInt(1), big.NewInt(2)},
 			"[1 2]",
 		},
 		{
-			ethabi.Type{Type: reflect.TypeOf(&big.Int{}), T: ethabi.IntTy},
+			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
 			int8(-2),
 			"-2",
 		},
 		{
-			ethabi.Type{Type: reflect.TypeOf(&big.Int{}), T: ethabi.IntTy},
+			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
 			[]int8{-1, -2},
 			"[-1 -2]",
 		},
 		{
-			ethabi.Type{Type: reflect.TypeOf(&big.Int{}), T: ethabi.IntTy},
+			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
 			int16(-2),
 			"-2",
 		},
 		{
-			ethabi.Type{Type: reflect.TypeOf(&big.Int{}), T: ethabi.IntTy},
+			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
 			[]int16{-1, -2},
 			"[-1 -2]",
 		},
 		{
-			ethabi.Type{Type: reflect.TypeOf(&big.Int{}), T: ethabi.IntTy},
+			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
 			int32(-2),
 			"-2",
 		},
 		{
-			ethabi.Type{Type: reflect.TypeOf(&big.Int{}), T: ethabi.IntTy},
+			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
 			[]int32{-1, -2},
 			"[-1 -2]",
 		},
 		{
-			ethabi.Type{Type: reflect.TypeOf(&big.Int{}), T: ethabi.IntTy},
+			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
 			int64(-2),
 			"-2",
 		},
 		{
-			ethabi.Type{Type: reflect.TypeOf(&big.Int{}), T: ethabi.IntTy},
+			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
 			[]int64{-1, -2},
 			"[-1 -2]",
 		},
 		{
-			ethabi.Type{Type: reflect.TypeOf(byte(0)), T: ethabi.FixedBytesTy},
+			abi.Type{Type: reflect.TypeOf(byte(0)), T: abi.FixedBytesTy},
 			[32]byte{1},
 			"0x0100000000000000000000000000000000000000000000000000000000000000",
 		},
 		{
-			ethabi.Type{Type: reflect.TypeOf(ethcommon.Address{}), T: ethabi.AddressTy},
-			ethcommon.HexToAddress("01"),
+			abi.Type{Type: reflect.TypeOf(common.Address{}), T: abi.AddressTy},
+			common.HexToAddress("01"),
 			"0x0000000000000000000000000000000000000001",
 		},
 	} {
@@ -176,6 +177,7 @@ func TestDecode(t *testing.T) {
 		abi            []byte
 		log            *ethereum.Log
 		expectedOutput map[string]string
+		expectedError  error
 	}{
 		{
 			[]byte(`{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"tokens","type":"uint256"}],"name":"Transfer","type":"event"}`),
@@ -192,6 +194,7 @@ func TestDecode(t *testing.T) {
 				"from":   "0xBA826fEc90CEFdf6706858E5FbaFcb27A290Fbe0",
 				"to":     "0x4aEE792A88eDDA29932254099b9d1e06D537883f",
 			},
+			nil,
 		},
 		{
 			[]byte(`{"anonymous":false,"inputs":[{"indexed":true,"name":"maker","type":"address"},{"indexed":false,"name":"taker","type":"address"},{"indexed":true,"name":"feeRecipient","type":"address"},{"indexed":false,"name":"makerToken","type":"address"},{"indexed":false,"name":"takerToken","type":"address"},{"indexed":false,"name":"filledMakerTokenAmount","type":"uint256"},{"indexed":false,"name":"filledTakerTokenAmount","type":"uint256"},{"indexed":false,"name":"paidMakerFee","type":"uint256"},{"indexed":false,"name":"paidTakerFee","type":"uint256"},{"indexed":true,"name":"tokens","type":"bytes32"},{"indexed":false,"name":"orderHash","type":"bytes32"}],"name":"LogFill","type":"event"}`),
@@ -217,6 +220,7 @@ func TestDecode(t *testing.T) {
 				"maker":                  "0x8dd688660ec0BaBD0B8a2f2DE3232645F73cC5eb",
 				"taker":                  "0xe269E891A2Ec8585a378882fFA531141205e92E9",
 			},
+			nil,
 		},
 		{
 			[]byte(`{"anonymous":false,"inputs":[{"indexed":true,"name":"operator","type":"address"},{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"},{"indexed":false,"name":"data","type":"bytes"},{"indexed":false,"name":"operatorData","type":"bytes"}],"name":"TransferWithData","type":"event"}`),
@@ -237,6 +241,7 @@ func TestDecode(t *testing.T) {
 				"data":         "0x000000000000000000000000000000000000000000000000000000006f0c7f50cd4b7e4466b726279b1506bc89d8e74ab9268a255eeb1c78f163d51a83c7380d54a8b597ee26351c15c83f922fd6b37334970d3f832e5e11e36acbecb460ffdb01",
 				"operatorData": "0x",
 			},
+			nil,
 		},
 		{
 			[]byte(`{"anonymous":false,"inputs":[{"indexed":false,"name":"index_origin","type":"uint256"},{"indexed":false,"name":"transfer_id","type":"bytes32"},{"indexed":false,"name":"parameters","type":"bytes32[6]"}],"name":"PendingTransfer","type":"event"}`),
@@ -249,8 +254,9 @@ func TestDecode(t *testing.T) {
 			map[string]string{
 				"index_origin": "1",
 				"transfer_id":  "0x5a4f2c3ad66af173634e1cc1e389232788ec41756ec2821b9a231f996c4faad0",
-				"parameters":   "[0x0000000000000000000000008f371daa8a5325f53b754a7017ac3803382bc847,0x0000000000000000000000003404370fddb2b0e79f2571e170b112a66f974fb9,0x5265736572766564000000000000000000000000000000000000000000000000,0x000000000000000000000000b5747835141b46f7c472393b31f8f5a57f74a44f,0x000000000000000000000000b5747835141b46f7c472393b31f8f5a57f74a44f,0x0000000000000000000000000000000000000000000000000000000000000005]",
+				"parameters":   "[\"0x0000000000000000000000008f371daa8a5325f53b754a7017ac3803382bc847\",\"0x0000000000000000000000003404370fddb2b0e79f2571e170b112a66f974fb9\",\"0x5265736572766564000000000000000000000000000000000000000000000000\",\"0x000000000000000000000000b5747835141b46f7c472393b31f8f5a57f74a44f\",\"0x000000000000000000000000b5747835141b46f7c472393b31f8f5a57f74a44f\",\"0x0000000000000000000000000000000000000000000000000000000000000005\"]",
 			},
+			nil,
 		},
 		{
 			[]byte(`{"anonymous":false,"inputs":[{"indexed":false,"name":"array","type":"address[2]"}],"name":"EventTest","type":"event"}`),
@@ -261,8 +267,26 @@ func TestDecode(t *testing.T) {
 				},
 			},
 			map[string]string{
-				"array": "[0x0000000000000000000000000000000000000000,0x0000000000000000000000000000000000000001]",
+				"array": "[\"0x0000000000000000000000000000000000000000\",\"0x0000000000000000000000000000000000000001\"]",
 			},
+			nil,
+		},
+		{
+			[]byte(`{"anonymous":false,"inputs":[{"indexed":false,"name":"eventType","type":"string"},{"indexed":false,"name":"nomId","type":"uint256"},{"indexed":false,"name":"shipQty","type":"uint256"},{"indexed":false,"name":"shipper","type":"address"},{"indexed":false,"name":"participants","type":"address[]"}],"name":"ShipperIdentified","type":"event"}`),
+			&ethereum.Log{
+				Data: hexutil.MustDecode("0x00000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000003e9000000000000000000000000000000000000000000000000000000000000000000000000000000000000000079ff9389f9a574917a0f14f752590dbbb5f0f01700000000000000000000000000000000000000000000000000000000000000e000000000000000000000000000000000000000000000000000000000000000124e6f6d696e6174696f6e52656a6563746564000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000566d44fb1442d206439f23e09885ee365bb1e43f"),
+				Topics: []string{
+					"0xfe5678ff8df37e23934e6875e6f96885f66eb0185376749e5e0c0e9a91d2f181",
+				},
+			},
+			map[string]string{
+				"eventType":    "NominationRejected",
+				"nomId":        "1001",
+				"shipQty":      "0",
+				"shipper":      "0x79fF9389F9a574917a0f14F752590DBbB5f0F017",
+				"participants": "[\"0x0000000000000000000000000000000000000000\",\"0x566D44FB1442d206439F23E09885Ee365Bb1E43f\"]",
+			},
+			nil,
 		},
 		{
 			[]byte(`{"anonymous":false,"inputs":[{"indexed":false,"name":"array","type":"bool[3]"}],"name":"EventTest","type":"event"}`),
@@ -273,8 +297,9 @@ func TestDecode(t *testing.T) {
 				},
 			},
 			map[string]string{
-				"array": "[true,false,true]",
+				"array": "[\"true\",\"false\",\"true\"]",
 			},
+			nil,
 		},
 		{
 			[]byte(`{"anonymous":false,"inputs":[{"indexed":false,"name":"array","type":"int256[3]"}],"name":"EventTest","type":"event"}`),
@@ -285,8 +310,9 @@ func TestDecode(t *testing.T) {
 				},
 			},
 			map[string]string{
-				"array": "[1,11,111]",
+				"array": "[\"1\",\"11\",\"111\"]",
 			},
+			nil,
 		},
 		{
 			[]byte(`{"anonymous":false,"inputs":[{"indexed":false,"name":"array","type":"int256[3]"}],"name":"EventTest","type":"event"}`),
@@ -297,8 +323,9 @@ func TestDecode(t *testing.T) {
 				},
 			},
 			map[string]string{
-				"array": "[-1,-11,-111]",
+				"array": "[\"-1\",\"-11\",\"-111\"]",
 			},
+			nil,
 		},
 		{
 			[]byte(`{"anonymous":false,"inputs":[{"indexed":false,"name":"array","type":"uint256[3]"}],"name":"EventTest","type":"event"}`),
@@ -309,20 +336,115 @@ func TestDecode(t *testing.T) {
 				},
 			},
 			map[string]string{
-				"array": "[9,99,999]",
+				"array": "[\"9\",\"99\",\"999\"]",
 			},
+			nil,
+		},
+		{
+			[]byte(`{"anonymous":false,"inputs":[{"indexed":false,"name":"array","type":"uint256[3][]"}],"name":"EventTest","type":"event"}`),
+			&ethereum.Log{
+				Data: hexutil.MustDecode("0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000b000000000000000000000000000000000000000000000000000000000000006f0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000001600000000000000000000000000000000000000000000000000000000000000de00000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000021000000000000000000000000000000000000000000000000000000000000014d"),
+				Topics: []string{
+					"0x85dfc0f9608903e59d1fc7374a0697adb9fcbc35e25888ede73ed16380ac6dbd",
+				},
+			},
+			map[string]string{
+				"array": "[\"[\\\"1\\\",\\\"11\\\",\\\"111\\\"]\",\"[\\\"2\\\",\\\"22\\\",\\\"222\\\"]\",\"[\\\"3\\\",\\\"33\\\",\\\"333\\\"]\"]",
+			},
+			nil,
+		},
+		{
+			[]byte(`{"anonymous":false,"inputs":[{"indexed":false,"name":"array","type":"bool[2][2][2]"}],"name":"EventTest","type":"event"}`),
+			&ethereum.Log{
+				Data: hexutil.MustDecode("0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
+				Topics: []string{
+					"0xa18b22ca18dff5c2b530dcda530785cb179fd62c5b113971ca9014a86d716832",
+				},
+			},
+			map[string]string{
+				"array": "[\"[\\\"[\\\\\\\"true\\\\\\\",\\\\\\\"false\\\\\\\"]\\\",\\\"[\\\\\\\"false\\\\\\\",\\\\\\\"false\\\\\\\"]\\\"]\",\"[\\\"[\\\\\\\"false\\\\\\\",\\\\\\\"false\\\\\\\"]\\\",\\\"[\\\\\\\"false\\\\\\\",\\\\\\\"false\\\\\\\"]\\\"]\"]",
+			},
+			nil,
+		},
+		{
+			[]byte(`{"anonymous":false,"inputs":[{"indexed":false,"name":"array","type":"bool[2][2][]"}],"name":"EventTest","type":"event"}`),
+			&ethereum.Log{
+				Data: hexutil.MustDecode("0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000"),
+				Topics: []string{
+					"0xd5382ec33a47d9fd2a8bc6b79938a702d96b8d9caf99455323318181d9069162",
+				},
+			},
+			map[string]string{
+				"array": "[\"[\\\"[\\\\\\\"true\\\\\\\",\\\\\\\"false\\\\\\\"]\\\",\\\"[\\\\\\\"true\\\\\\\",\\\\\\\"false\\\\\\\"]\\\"]\",\"[\\\"[\\\\\\\"false\\\\\\\",\\\\\\\"false\\\\\\\"]\\\",\\\"[\\\\\\\"false\\\\\\\",\\\\\\\"false\\\\\\\"]\\\"]\",\"[\\\"[\\\\\\\"true\\\\\\\",\\\\\\\"false\\\\\\\"]\\\",\\\"[\\\\\\\"true\\\\\\\",\\\\\\\"false\\\\\\\"]\\\"]\"]",
+			},
+			nil,
+		},
+		{
+			[]byte(`{"type":"event","name":"tuple","inputs":[{"indexed":false,"name":"t","type":"tuple","components":[{"type":"int256","name":"a"},{"type":"int256","name":"b"}]}]}`),
+			&ethereum.Log{
+				Data: hexutil.MustDecode("0x0000000000000000000000000000000000000000000000000000000000000001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
+				Topics: []string{
+					"0xc270a86bd76188052175715b1997fa46780b24c6892bbd0f6ff98066f83543a4",
+				},
+			},
+			map[string]string{
+				"t": "{\"A\":\"1\",\"B\":\"-1\"}",
+			},
+			nil,
+		},
+		{
+			[]byte(`{"type":"event","name":"tuple","inputs":[
+				{"type":"tuple","name":"s","components":[{"type":"uint256","name":"a"},{"type":"uint256[]","name":"b"},{"type":"tuple[]","name":"c","components":[{"name":"x","type":"uint256"},{"name":"y","type":"uint256"}]}]},
+				{"type":"tuple","name":"t","components":[{"name":"x","type":"uint256"},{"name":"y","type":"uint256"}]},
+				{"type":"uint256","name":"a"}
+			]}`),
+			&ethereum.Log{
+				Data: hexutil.MustDecode("0x00000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001"),
+				Topics: []string{
+					"0xc270a86bd76188052175715b1997fa46780b24c6892bbd0f6ff98066f83543a4",
+				},
+			},
+			map[string]string{
+				"s": "{\"A\":\"1\",\"B\":\"[\\\"1\\\",\\\"2\\\"]\",\"C\":\"[\\\"{\\\\\\\"X\\\\\\\":\\\\\\\"1\\\\\\\",\\\\\\\"Y\\\\\\\":\\\\\\\"2\\\\\\\"}\\\",\\\"{\\\\\\\"X\\\\\\\":\\\\\\\"2\\\\\\\",\\\\\\\"Y\\\\\\\":\\\\\\\"1\\\\\\\"}\\\"]\"}",
+				"t": "{\"X\":\"0\",\"Y\":\"1\"}",
+				"a": "1",
+			},
+			nil,
+		},
+		{
+			[]byte(`{"anonymous":false,"inputs":[{"indexed":false,"name":"array","type":"uint256[3]"}],"name":"EventTest","type":"event"}`),
+			&ethereum.Log{
+				Data: hexutil.MustDecode("0x0000000000000000000000000000000000000000000000000000000000000009000000000000000000000000000000000000000000000000000000000000006300000000000000000000000000000000000000000000000000000000000003e7"),
+				Topics: []string{
+					"0x39cc9b81f311e9bdf9c08720512a61f27e13fd23c9f03938c704e02a6145c45d",
+					"0x39cc9b81f311e9bdf9c08720512a61f27e13fd23c9f03938c704e02a6145c45d",
+				},
+			},
+			nil,
+			fmt.Errorf("decoder error: too many topics"),
+		},
+		{
+			[]byte(`{"anonymous":false,"inputs":[{"indexed":false,"name":"array","type":"bool"}],"name":"EventTest","type":"event"}`),
+			&ethereum.Log{
+				Data: hexutil.MustDecode("0x0000000000000001000000000000000000000000000000000000000000000009000000000000000000000000000000000000000000000000000000000000006300000000000000000000000000000000000000000000000000000000000003e7"),
+				Topics: []string{
+					"0x39cc9b81f311e9bdf9c08720512a61f27e13fd23c9f03938c704e02a6145c45d",
+				},
+			},
+			nil,
+			fmt.Errorf("decoder error: cannot UnpackValues correctly"),
 		},
 	}
 
 	for i, test := range testSet {
 		event := newEvent(test.abi)
-
 		decoded, err := Decode(event, test.log)
-
+		if err != nil && test.expectedError == nil {
+			t.Errorf("Decode: Expecting the following error %v but got %v", test.expectedError, err)
+		}
 		eq := reflect.DeepEqual(test.expectedOutput, decoded)
 		if !eq {
 			t.Errorf("Decode (%d/%d) %q: expected mapping %q but got %q", i+1, len(testSet), event.Name, test.expectedOutput, decoded)
-			t.Error(err)
 		}
 
 	}
