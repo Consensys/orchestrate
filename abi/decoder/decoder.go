@@ -1,4 +1,4 @@
-package crafter
+package decoder
 
 import (
 	"fmt"
@@ -9,9 +9,14 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-
-	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
+
+// Crafter takes a method abi and args to craft a transaction
+type Decoder interface {
+	// Decode decodes an abi event
+	Decode(event *abi.Event, txLog *ethereum.Log) (map[string]string, error)
+}
 
 // FormatIndexedArg transforms a data to string
 func FormatIndexedArg(t *abi.Type, arg common.Hash) (string, error) {
@@ -76,7 +81,7 @@ func FormatNonIndexedArg(t *abi.Type, arg interface{}) (string, error) {
 }
 
 // Decode event data to string
-func Decode(event *abi.Event, txLog *ethpb.Log) (map[string]string, error) {
+func Decode(event *abi.Event, txLog *ethereum.Log) (map[string]string, error) {
 	expectedTopics := len(event.Inputs) - event.Inputs.LengthNonIndexed()
 	if expectedTopics != len(txLog.Topics)-1 {
 		return nil, fmt.Errorf("error: Topics length does not match with abi event: expected %v but got %v", expectedTopics, len(txLog.Topics)-1)

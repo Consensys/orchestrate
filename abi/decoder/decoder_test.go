@@ -1,4 +1,4 @@
-package crafter
+package decoder
 
 import (
 	"encoding/json"
