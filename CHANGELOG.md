@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.4.10
+
+*Released on May 5th 2019*
+
+- [FEAT] Decoder: able to decode slices and structs
+- [REFACTOR] Extract decoder from crafter package
+
 ### Version 0.4.9
 
 *Unreleased*
