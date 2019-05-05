@@ -7,9 +7,9 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/protos/trace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
 
 var (
@@ -29,7 +29,7 @@ func newMessage(i int) *sarama.ProducerMessage {
 		topic = "topic-tx-decoder-4"
 		chainID = "0x4"
 	case 3:
-		topic = "topic-tx-decoder-2a"
+		topic = "topic-tx-decoder-42"
 		chainID = "0x2a"
 	}
 	msg := &sarama.ProducerMessage{
@@ -37,7 +37,7 @@ func newMessage(i int) *sarama.ProducerMessage {
 		Partition: -1,
 	}
 	b, _ := proto.Marshal(
-		&trace.Trace{
+		&envelope.Envelope{
 			Chain: &common.Chain{Id: chainID},
 			Receipt: &ethereum.Receipt{
 				TxHash:          "0xbf0b3048242aff8287d1dd9de0d2d100cee25d4ea45b8afa28bdfc1e2a775afd",
@@ -67,7 +67,7 @@ func newMessage(i int) *sarama.ProducerMessage {
 				GasUsed:           uint64(10000),
 				CumulativeGasUsed: uint64(10000),
 			},
-			Metadata: &trace.Metadata{
+			Metadata: &envelope.Metadata{
 				Id: "bc430299-4d34-4920-81be-b9fc5b6ef0f9",
 			},
 		},

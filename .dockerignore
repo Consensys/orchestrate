@@ -12,3 +12,6 @@ LICENSE
 Makefile
 NOTICE
 README.md
+
+# Environment file
+.env
