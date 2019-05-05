@@ -1,4 +1,4 @@
-package abi
+package decoder
 
 import (
 	"encoding/json"
@@ -12,7 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
-	ethpb "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
 
 // FormatIndexedArg transforms a data to string
@@ -151,7 +151,7 @@ func FormatNonIndexedArg(t *abi.Type, arg interface{}) (string, error) {
 }
 
 // Decode event data to string
-func Decode(event *abi.Event, txLog *ethpb.Log) (map[string]string, error) {
+func Decode(event *abi.Event, txLog *ethereum.Log) (map[string]string, error) {
 	expectedTopics := len(event.Inputs) - event.Inputs.LengthNonIndexed()
 	if expectedTopics != len(txLog.Topics)-1 {
 		return nil, fmt.Errorf("decoder error: Topics length does not match with abi event: expected %v but got %v", expectedTopics, len(txLog.Topics)-1)
