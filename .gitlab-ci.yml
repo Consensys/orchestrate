@@ -38,6 +38,8 @@ test:
   stage: test
   coverage: /^total:.*\s(\d+.\d+)%/
   script:
+    - apk add --update bash openssh git make go grep curl jq
+    - apk add --update musl-dev python2-dev libffi-dev openssl-dev
     - apk add --no-cache py-pip
     - pip install docker-compose
     - export GITLAB_USER=gitlab-ci-token
