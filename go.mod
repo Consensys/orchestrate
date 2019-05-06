@@ -2,14 +2,13 @@ module gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-sender.git
 
 require (
 	github.com/Shopify/sarama v1.22.0
-	github.com/ethereum/go-ethereum v1.8.26
+	github.com/ethereum/go-ethereum v1.8.27
 	github.com/golang/protobuf v1.3.1
 	github.com/sirupsen/logrus v1.4.0
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.3.0
-	gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git v0.2.0
+	gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git v0.3.0
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.4.8
-	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.5
-	google.golang.org/grpc v1.20.1
+	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.8
 )
