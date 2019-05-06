@@ -28,7 +28,6 @@ func Init(ctx context.Context) {
 
 		log.Infof("jager: agent ready for open-tracing (connected with tracer: %v)", tracer)
 
-
 		// Set Open tracing global tracer
 		opentracing.SetGlobalTracer(tracer)
 	})
