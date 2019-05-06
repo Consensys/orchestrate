@@ -6,12 +6,12 @@ RUN apt-get update -y && \
     apt-get update -y && \
     apt-get install -y golang-1.11 ssh git make
 
-ARG SSH_KEY
-RUN mkdir -p  ~/.ssh && \
-    echo "$SSH_KEY" | tr -d '\r' > ~/.ssh/id_rsa && \
-    chmod 700 ~/.ssh/id_rsa && \
-    ssh-keyscan -H gitlab.com >> ~/.ssh/known_hosts && \
-    git config --global url."git@gitlab.com:".insteadOf "https://gitlab.com/" && \
+ARG GITLAB_USER
+ARG GITLAB_TOKEN
+
+RUN git config --global --add url."https://${GITLAB_USER}:${GITLAB_TOKEN}@gitlab.com/".insteadOf "git@gitlab.com:" && \
+    git config --global --add url."https://${GITLAB_USER}:${GITLAB_TOKEN}@gitlab.com/".insteadOf "https://gitlab.com/" && \
+    useradd appuser && \
     mkdir /app
 WORKDIR /app
 
