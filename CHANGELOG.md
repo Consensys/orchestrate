@@ -1,10 +1,16 @@
 # CHANGELOG
 
+### Version 0.4.8
+
+*Released on May 6th 2019*
+
+- [FEAT] Add function returning pg.NewOptions from config 
+
 ### Version 0.4.6
 
-*Released on Mai 4th 2019*
+*Released on May 4th 2019*
 
-- [FEAT] adding exported for `opentracing` handler
+- [FEAT] Add exported for `opentracing` handler
 
 ### Version 0.4.5
 
