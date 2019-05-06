@@ -1,10 +1,20 @@
 # CHANGELOG
 
+### Version 0.3.0
+
+*Released on May 6th 2019*
+
+- [REFACTOR] Adopt to new pattern, migrate to pkg v0.4.x
+
 ### Version 0.2.1
+
+*Released on May 2nd 2019*
 
 - [TEST] Add postgres service to run tests
 
 ### Version 0.2.0
+
+*Released on May 1st 2019*
 
 - [REFACTOR] Refactor worker with new pkg version, linting & ci
 
