@@ -2,7 +2,7 @@ module gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git
 
 require (
 	github.com/aws/aws-sdk-go v1.19.0
-	github.com/ethereum/go-ethereum v1.8.26
+	github.com/ethereum/go-ethereum v1.8.27
 	github.com/gogo/protobuf v1.2.1 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.1
 	github.com/hashicorp/go-retryablehttp v0.5.2
@@ -19,7 +19,7 @@ require (
 	github.com/spf13/viper v1.3.1
 	github.com/stretchr/testify v1.3.0
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.4.8
-	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.4
+	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.7
 	golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4
 )
