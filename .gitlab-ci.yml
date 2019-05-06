@@ -122,10 +122,10 @@ test-lint:
   script:
     # - make race
     - make lint
-  cache:
-    policy: pull
-    paths:
-      - ${GOPATH}
+  # cache:
+  #   policy: pull
+  #   paths:
+  #     - ${GOPATH}
   except:
       - tags
 
