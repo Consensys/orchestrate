@@ -11,16 +11,6 @@ variables:
 services:
   - docker:dind
 
-before_script:
-  # Change git config so we can import go packages from GitLab
-  - git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/".insteadOf "git@gitlab.com:"
-  - git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/".insteadOf "https://gitlab.com/"
-
-  # Set GOPATH
-  - mkdir -p ${GOPATH}
-  - export PATH="${PATH}:${GOPATH}/bin:${GOROOT}/bin"
-  - make tools
-
 cache-update:
   image: golang:1.12
   stage: cache-update
@@ -39,6 +29,9 @@ test:
   coverage: /^total:.*\s(\d+.\d+)%/
   script:
     - apk add --update bash openssh git make go grep curl jq
+    # Change git config so we can import go packages from GitLab
+    - git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/".insteadOf "git@gitlab.com:"
+    - git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/".insteadOf "https://gitlab.com/"
     - apk add --update musl-dev python2-dev libffi-dev openssl-dev
     - apk add --no-cache py-pip
     - pip install docker-compose
@@ -56,6 +49,13 @@ test-lint:
   image: golang:1.12
   stage: test
   script:
+    # Change git config so we can import go packages from GitLab
+    - git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/".insteadOf "git@gitlab.com:"
+    - git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/".insteadOf "https://gitlab.com/"
+    # Set GOPATH
+    - mkdir -p ${GOPATH}
+    - export PATH="${PATH}:${GOPATH}/bin:${GOROOT}/bin"
+    - make tools
     - make lint
   cache:
     policy: pull
