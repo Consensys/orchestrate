@@ -9,6 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/store"
+	pgStore "gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/store/pg"
 )
 
 var i *Infra
@@ -22,7 +23,6 @@ type Infra struct {
 	ctx context.Context
 
 	tracer opentracing.Tracer
-	store  store.EnvelopeStore
 
 	initOnce, closeOnce *sync.Once
 	cancel              func()
@@ -44,7 +44,7 @@ func Init() {
 	i.initOnce.Do(func() {
 		i.ctx, i.cancel = context.WithCancel(context.Background())
 		InitTracing(i)
-		InitStore(i)
+		pgStore.Init()
 		i.ready.Store(true)
 	})
 }
@@ -62,7 +62,7 @@ func Store() store.EnvelopeStore {
 	if !Ready() {
 		log.Fatal("Infra is not ready. Please call Init() first")
 	}
-	return i.store
+	return pgStore.GlobalEnvelopeStore()
 }
 
 // Ready indicate if infra is ready

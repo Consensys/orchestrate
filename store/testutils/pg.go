@@ -7,7 +7,7 @@ import (
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/database/postgres"
 )
 
 // TODO: all this script should be moved to pkg.git/common
@@ -35,7 +35,7 @@ type PGTestHelper struct {
 // NewPGTestHelper creates a new PGTestHelper
 func NewPGTestHelper(collection *migrations.Collection) *PGTestHelper {
 	return &PGTestHelper{
-		Opts:       store.NewPGOptions(),
+		Opts:       postgres.NewOptions(),
 		Collection: collection,
 	}
 }

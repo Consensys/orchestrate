@@ -6,8 +6,8 @@ import (
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/store/pg/migrations"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/database/postgres"
 )
 
 // mewMigrateCmd create migrate command
@@ -19,7 +19,7 @@ func mewMigrateCmd() *cobra.Command {
 		Short: "Migrate database",
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			// Set database connection
-			db = pg.Connect(store.NewPGOptions())
+			db = pg.Connect(postgres.NewOptions())
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			migrate(db)

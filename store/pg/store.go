@@ -131,6 +131,7 @@ func (s *EnvelopeStore) SetStatus(ctx context.Context, envelopeID, status string
 	_, err := s.db.ModelContext(ctx, model).
 		Set("status = ?status").
 		Where("envelope_id = ?envelope_id").
+		Returning("*").
 		Update()
 	if err != nil {
 		return err

@@ -42,6 +42,16 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore() {
 		},
 	}
 
+	// Read / write before storing
+	_, _, err := s.Store.LoadByTxHash(context.Background(), "0x3", "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210", tr)
+	assert.NotNil(s.T(), err, "Should error on find envelope by hash")
+	_, _, err = s.Store.LoadByID(context.Background(), "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11", tr)
+	assert.NotNil(s.T(), err, "Should error on find envelope by ID")
+	err = s.Store.SetStatus(context.Background(), "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11", "pending")
+	assert.NotNil(s.T(), err, "Should error on setStatus")
+	_, _, err = s.Store.GetStatus(context.Background(), "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11")
+	assert.NotNil(s.T(), err, "Should error on setStatus")
+
 	// Store Envelope
 	status, storedAt, err := s.Store.Store(context.Background(), tr)
 	assert.Nil(s.T(), err, "Should properly store envelope")
@@ -49,7 +59,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore() {
 	assert.True(s.T(), time.Since(storedAt) < 5*time.Second, "Stored date should be close")
 
 	// Load Envelope
-	tr = &envelope.Envelope{}
+	assert.Equal(s.T(), "stored", status, "Status should be correct")
 	status, _, err = s.Store.LoadByTxHash(context.Background(), "0x3", "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210", tr)
 	assert.Nil(s.T(), err, "Should properly store envelope")
 	assert.Equal(s.T(), "stored", status, "Status should be correct")
@@ -57,6 +67,12 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore() {
 	assert.Equal(s.T(), "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11", tr.GetMetadata().GetId(), "MetadataID should be correct")
 
 	// Set Status
+	err = s.Store.SetStatus(context.Background(), "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11", "stored")
+	assert.Nil(s.T(), err, "Setting status to %q", "stored")
+	err = s.Store.SetStatus(context.Background(), "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11", "error")
+	assert.Nil(s.T(), err, "Setting status to %q", "error")
+	err = s.Store.SetStatus(context.Background(), "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11", "mined")
+	assert.Nil(s.T(), err, "Setting status to %q", "mined")
 	err = s.Store.SetStatus(context.Background(), "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11", "pending")
 	assert.Nil(s.T(), err, "Setting status to %q", "pending")
 
@@ -76,6 +92,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore() {
 		},
 	}
 
+	// Store Envelope
 	status, _, err = s.Store.Store(context.Background(), tr)
 	assert.Nil(s.T(), err, "Should update")
 	assert.Equal(s.T(), "pending", status, "Status should be correct")
