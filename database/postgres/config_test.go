@@ -1,9 +1,11 @@
 package postgres
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
+	"github.com/go-pg/pg"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
@@ -119,4 +121,15 @@ func TestDBPort(t *testing.T) {
 
 	expected = 5442
 	assert.Equal(t, expected, viper.GetInt(name), "After setting flag db port should be %v but got %v", expected, viper.GetInt(name))
+}
+
+func TestNewOptions(t *testing.T) {
+	opts := NewOptions()
+	assert.Equal(t, opts, &pg.Options{
+		Addr:     fmt.Sprintf("%v:%v", viper.GetString("db.host"), viper.GetString("db.port")),
+		User:     viper.GetString("db.user"),
+		Password: viper.GetString("db.password"),
+		Database: viper.GetString("db.database"),
+		PoolSize: viper.GetInt("db.poolsize"),
+	})
 }

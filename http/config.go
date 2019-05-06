@@ -21,7 +21,7 @@ var (
 
 // Hostname register a flag for Redis server address
 func Hostname(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Hostname to expose healthchecks and metrics.
+	desc := fmt.Sprintf(`Hostname to expose HTTP server
 Environment variable: %q`, hostnameEnv)
 	f.String(hostnameFlag, hostnameDefault, desc)
 	_ = viper.BindPFlag(hostnameViperKey, f.Lookup(hostnameFlag))

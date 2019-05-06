@@ -3,6 +3,7 @@ package postgres
 import (
 	"fmt"
 
+	"github.com/go-pg/pg"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
@@ -115,4 +116,15 @@ Environment variable: %q`, dbPoolSizeEnv)
 	f.Int(dbPoolSizeFlag, dbPoolSizeDefault, desc)
 	viper.SetDefault(dbPoolSizeViperKey, dbPoolSizeDefault)
 	_ = viper.BindPFlag(dbPoolSizeViperKey, f.Lookup(dbPoolSizeFlag))
+}
+
+// NewOptions creates new postgres options
+func NewOptions() *pg.Options {
+	return &pg.Options{
+		Addr:     fmt.Sprintf("%v:%v", viper.GetString("db.host"), viper.GetString("db.port")),
+		User:     viper.GetString("db.user"),
+		Password: viper.GetString("db.password"),
+		Database: viper.GetString("db.database"),
+		PoolSize: viper.GetInt("db.poolsize"),
+	}
 }

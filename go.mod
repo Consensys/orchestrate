@@ -8,9 +8,11 @@ require (
 	github.com/btcsuite/btcd v0.0.0-20190418232430-6867ff32788a // indirect
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
 	github.com/ethereum/go-ethereum v1.8.21
+	github.com/go-pg/pg v8.0.4+incompatible
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/protobuf v1.3.0
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
 	github.com/julien-marchand/healthcheck v0.0.0-20190214110401-cdd18ef429ac
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
@@ -28,4 +30,5 @@ require (
 	github.com/uber/jaeger-lib v2.0.0+incompatible // indirect
 	go.uber.org/atomic v1.3.2 // indirect
 	google.golang.org/grpc v1.20.1
+	mellium.im/sasl v0.2.1 // indirect
 )
