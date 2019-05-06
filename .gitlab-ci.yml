@@ -34,15 +34,19 @@ cache-update:
     - master
 
 test:
-  image: golang:1.12
+  image: docker:latest
   stage: test
   coverage: /^total:.*\s(\d+.\d+)%/
   script:
-    - make run-coverage
-  cache:
-    policy: pull
-    paths:
-      - ${GOPATH}
+    - apk add --no-cache py-pip
+    - pip install docker-compose
+    - export GITLAB_USER=gitlab-ci-token
+    - export GITLAB_TOKEN=$CI_JOB_TOKEN
+    - cd e2e/hashicorp
+    - docker-compose down || echo "Docker missing skipping"
+    - docker-compose up --build --force-recreate -d
+    - docker exec hashicorp_key-store_1 bash -c "go mod download && cd e2e/hashicorp/scripts && bash run-test.sh"
+    - exit $?
   except:
       - tags
 
@@ -50,7 +54,6 @@ test-lint:
   image: golang:1.12
   stage: test
   script:
-    - make race
     - make lint
   cache:
     policy: pull
@@ -85,10 +88,10 @@ build-on-branch:
     - /^dev[a-zA-Z0-9\/-]*$/
     - /^feature/[a-zA-Z0-9\/-]*$/
     - /^fix/[a-zA-Z0-9\/-]*$/
-  # cache:
-  #   policy: pull
-  #   paths:
-  #     - ${GOPATH}
+  cache:
+    policy: pull
+    paths:
+      - ${GOPATH}
 
 build-on-master:
   image: docker:stable
