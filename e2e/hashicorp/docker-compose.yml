@@ -18,10 +18,10 @@ services:
       dockerfile: e2e/Dockerfile
       context: ../..
       args:
-        - SSH_KEY=${SSH_KEY}
+        - GITLAB_USER=${GITLAB_USER}
+        - GITLAB_TOKEN=${CI_JOB_TOKEN}
     volumes:
       - ../..:/app
     working_dir: /app
-    #entrypoint: bash -c "go mod download && cd e2e/hashicorp/scripts && bash run-test.sh"
     entrypoint: tail -f /dev/null
 
