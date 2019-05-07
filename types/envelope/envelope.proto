@@ -1,11 +1,11 @@
 syntax = "proto3";
 
-import "protos/common/account.proto";
-import "protos/common/call.proto";
-import "protos/common/chain.proto";
-import "protos/common/error.proto";
-import "protos/ethereum/transaction.proto";
-import "protos/ethereum/receipt.proto";
+import "types/common/account.proto";
+import "types/common/call.proto";
+import "types/common/chain.proto";
+import "types/common/error.proto";
+import "types/ethereum/transaction.proto";
+import "types/ethereum/receipt.proto";
 
 option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope";
 

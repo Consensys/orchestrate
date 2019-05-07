@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-import "protos/envelope/envelope.proto";
-import "protos/common/error.proto";
-import "google/protobuf/timestamp.protos";
+import "types/envelope/envelope.proto";
+import "types/common/error.proto";
+import "google/protobuf/timestamp.proto";
 
 option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/context-store";
 
