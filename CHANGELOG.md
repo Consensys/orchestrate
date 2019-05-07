@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.4.0
+
+*Released on May 7th 2019*
+
+- [REFACTOR] Re-org script
+- [FEAT] Add Hashicorp vault secret store 
+
 ### Version 0.3.0-alpha.5
 
 *Released on March 25th 2019*
