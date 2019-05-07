@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.11
+
+*Released on May 7th 2019*
+
+- [FIX] Fix method parsing when method is Method()
+
 ### Version 0.4.10
 
 *Released on May 5th 2019*
