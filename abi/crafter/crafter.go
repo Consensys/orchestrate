@@ -164,21 +164,25 @@ func (c *PayloadCrafter) CraftConstructor(bytecode []byte, method ethabi.Method,
 // SignatureToMethod create a method from a method signature string
 func SignatureToMethod(methodSig string) (*ethabi.Method, error) {
 	splt := strings.Split(methodSig, "(")
-	if len(splt) != 2 || splt[0] == "" || len(splt[1]) <= 1 {
+	if len(splt) != 2 || splt[0] == "" || splt[1] == "" { // || splt[1][len(splt[1])-1:] != ")" {
 		return nil, fmt.Errorf("invalid method signature %q, expected Function(type1,type2,...)", methodSig)
 	}
-	inputArgs := strings.Split(splt[1][:len(splt[1])-1], ",")
 
 	method := &ethabi.Method{
-		Name:  splt[0],
-		Const: false,
+		Name:   splt[0],
+		Const:  false,
+		Inputs: ethabi.Arguments{},
 	}
-	for _, arg := range inputArgs {
-		inputType, err := ethabi.NewType(arg, nil)
-		if err != nil {
-			return nil, fmt.Errorf("invalid method signature format, cannot cast type: %v", err)
+
+	inputArgs := splt[1][:len(splt[1])-1]
+	if inputArgs != "" {
+		for _, arg := range strings.Split(inputArgs, ",") {
+			inputType, err := ethabi.NewType(arg, nil)
+			if err != nil {
+				return nil, fmt.Errorf("invalid method signature format, cannot cast type: %v", err)
+			}
+			method.Inputs = append(method.Inputs, ethabi.Argument{Type: inputType})
 		}
-		method.Inputs = append(method.Inputs, ethabi.Argument{Type: inputType})
 	}
 
 	return method, nil

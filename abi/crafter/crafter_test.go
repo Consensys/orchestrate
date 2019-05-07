@@ -202,6 +202,12 @@ func newMethod(methodABI []byte) abi.Method {
 }
 
 func TestSignatureToMethod(t *testing.T) {
+	var EmptyMethod = newMethod([]byte(`{
+		"inputs": [
+		],
+		"name": "empty"
+	}`))
+
 	var ERC20TransferMethod = newMethod([]byte(`{
 		"inputs": [
 			{
@@ -227,12 +233,13 @@ func TestSignatureToMethod(t *testing.T) {
 		{sig: "()Malformed", result: nil, err: errors.New("")},
 		{sig: "Malformed(,)", result: nil, err: errors.New("")},
 		{sig: "Malformed(address,uint)", result: nil, err: errors.New("")},
+		{sig: "empty()", result: &EmptyMethod, err: nil},
 		{sig: "transfer(address,uint256)", result: &ERC20TransferMethod, err: nil},
 	}
 
 	for _, test := range tests {
 		result, err := SignatureToMethod(test.sig)
-		assert.IsType(t, test.err, err)
+		assert.IsType(t, test.err, err, test.sig, result, err)
 		assert.Equal(t, test.result, result)
 	}
 }
