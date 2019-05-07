@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.9
+
+*Released on May 7th 2019*
+
+- [FEAT] Add MultiProducer handler
+
 ### Version 0.4.8
 
 *Released on May 6th 2019*
