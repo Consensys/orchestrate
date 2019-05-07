@@ -6,15 +6,19 @@ sleep 2
 # Unseal vault and the propers environment variables
 source init-vault.sh
 
-# Download packages
-echo "go download"
+# # Go to Makefile
 cd ../../..
-go mod download
 
-echo "go test"
+echo "make race"
 # Run the tests passing the variables to the go command
 VAULT_TOKEN=${VAULT_TOKEN} VAULT_ADDR=${VAULT_ADDR} \
-    go test ./...
+    make race
+
+echo "run-coverage"
+# Run the tests passing the variables to the go command
+VAULT_TOKEN=${VAULT_TOKEN} VAULT_ADDR=${VAULT_ADDR} \
+    make run-coverage
+
 
 # Cleanly shut down the vault container
 #docker-compose -f ../docker-compose.yml down

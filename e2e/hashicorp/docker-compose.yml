@@ -15,13 +15,9 @@ services:
     environment:
       VAULT_ADDR: http://vault:8200
     build: 
-      dockerfile: e2e/Dockerfile
-      context: ../..
+      context: .
       args:
         - GITLAB_USER=${GITLAB_USER}
         - GITLAB_TOKEN=${CI_JOB_TOKEN}
     volumes:
       - ../..:/app
-    working_dir: /app
-    entrypoint: tail -f /dev/null
-
