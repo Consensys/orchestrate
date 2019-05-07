@@ -44,7 +44,7 @@ func newMessage(i int) *sarama.ProducerMessage {
 	}
 	b, _ := proto.Marshal(
 		&envelope.Envelope{
-			Chain:  &common.Chain{Id: "0x3"},
+			Chain:  &common.Chain{Id: "3"},
 			Sender: &common.Account{Addr: senders[i%len(senders)]},
 			Tx: &ethereum.Transaction{
 				TxData: &ethereum.TxData{

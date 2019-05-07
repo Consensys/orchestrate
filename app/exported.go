@@ -70,7 +70,6 @@ func initComponents(ctx context.Context) {
 	wg.Wait()
 }
 
-
 func registerHandlers() {
 	wg := sync.WaitGroup{}
 
@@ -91,7 +90,6 @@ func registerHandlers() {
 	// Wait for ConsumerGroup & Engine to be ready
 	wg.Wait()
 }
-
 
 // Start starts application
 func Start(ctx context.Context) {
