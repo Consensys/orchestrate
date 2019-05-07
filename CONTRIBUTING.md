@@ -2,12 +2,6 @@
 
 :dolphin: Thanks for being interested in contributing to Core-Stack! People will :heart: you for that. :thumbsup:
 
-## Pull Request Process
-
-1. Update the ```README.md``` with details of changes to the interface, this includes new environment variables, exposed ports, useful file locations and container parameters.
-2. Update the ```CHANGELOG.md``` with any changes your pull request will do
-3. Increase the version numbers in ```CHANGELOG.md``` to the new version that this Pull Request would represent if needed. The used versioning scheme is [SemVer](http://semver.org/).
-
 ## Create dev environment
 
 ### Prerequisite
@@ -84,6 +78,7 @@ $ go run e2e/producer/main.go
 │   ├── consumer/                   # define a consumer listening on worker output kafka topic
 │   ├── producer/                   # define a producer producing on worker input kafka topic
 │   └── docker-compose.yml          # docker-compose file to start a local Kafka
+├── infra/                          # infrastructure elements (this will be soon moved in an other repo)
 ├── scripts/                        # facility scripts for dev & CI/CD
 ├── .dockerignore                   # list files to be ignored when building docker image
 ├── .gitignore                      # list untracked files by git
@@ -108,13 +103,11 @@ For more details about git branching strategy refer to [Git branching Strategy](
 
 ## Build
 
-To be able to build a project which uses private repositories:
+To be able to build a project which uses private repositories
+
 ```bash
 # Run this command
-export SSH_KEY=`cat ~/.ssh/id_rsa`
-
-# Or add is to your .bashrc
-echo 'export SSH_KEY=`cat ~/.ssh/id_rsa`' >> ~/.bashrc
+echo 'GITLAB_USER=\nGITLAB_TOKEN=\n' > .env
 ```
 
-*Note: if your private repository ssh key is not id_rsa, replace it in the above command.*
+Then fill the .env file with your Gitlab username and an acces token with read_repository scope (User > Settings > Access Tokens).

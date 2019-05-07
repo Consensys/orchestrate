@@ -6,10 +6,12 @@ import (
 
 	"github.com/spf13/cobra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/keystore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/hashicorp"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/config"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-signer.git/app"
 )
 
@@ -20,17 +22,22 @@ func newRunCommand() *cobra.Command {
 		Run:   run,
 	}
 
-	// Register flags
-	config.HTTPHostname(runCmd.Flags())
-	config.KafkaAddresses(runCmd.Flags())
-	config.TxSignerInTopic(runCmd.Flags())
-	config.TxSenderOutTopic(runCmd.Flags())
-	config.WorkerSignerGroup(runCmd.Flags())
-	worker.InitFlags(runCmd.Flags())
+	// Register Engine flags
+	engine.InitFlags(runCmd.Flags())
 
-	// Register flags for secrets
+	// Register HTTP server flags
+	http.Hostname(runCmd.Flags())
+
+	// Register KeyStore flags
 	hashicorp.InitFlags(runCmd.Flags())
 	keystore.InitFlags(runCmd.Flags())
+	secretstore.InitFlags(runCmd.Flags())
+
+	// Register Kafka flags
+	broker.KafkaAddresses(runCmd.Flags())
+	broker.KafkaGroup(runCmd.Flags())
+	broker.KafkaTopicTxSigner(runCmd.Flags())
+	broker.KafkaTopicTxSender(runCmd.Flags())
 
 	return runCmd
 }
@@ -38,15 +45,11 @@ func newRunCommand() *cobra.Command {
 func run(cmd *cobra.Command, args []string) {
 	// Create app
 	ctx, cancel := context.WithCancel(context.Background())
-	a := app.New(ctx)
 
 	// Process signals
 	sig := utils.NewSignalListener(func(signal os.Signal) { cancel() })
 	defer sig.Close()
 
-	// Run App
-	a.Run()
-
-	// Wait for app to properly close
-	<-a.Done()
+	// Start application
+	app.Start(ctx)
 }

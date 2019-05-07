@@ -18,8 +18,8 @@ func main() {
 	}
 
 	defer func() {
-		if err := consumer.Close(); err != nil {
-			log.Fatalln(err)
+		if e := consumer.Close(); err != nil {
+			log.Fatalln(e)
 		}
 	}()
 
