@@ -15,6 +15,12 @@ cache-update:
   image: golang:1.12
   stage: cache-update
   script:
+    # Change git config so we can import go packages from GitLab
+    - git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/".insteadOf "git@gitlab.com:"
+    - git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/".insteadOf "https://gitlab.com/"
+    # Set GOPATH
+    - mkdir -p ${GOPATH}
+    - export PATH="${PATH}:${GOPATH}/bin:${GOROOT}/bin"
     - go mod download -json
   cache:
     policy: push
