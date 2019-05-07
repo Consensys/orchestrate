@@ -46,7 +46,7 @@ test:
   except:
       - tags
 
-test-lint:
+lint:
   image: golang:1.12
   stage: test
   script:
