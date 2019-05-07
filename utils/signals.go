@@ -61,6 +61,6 @@ func (l *SignalListener) processSignal(sig os.Signal) {
 		log.Warnf("signal: %q intercepted", sig.String())
 		l.cb(sig)
 	default:
-		log.Fatalf("signal: unknown signal %q intercepted, exit now", sig.String())
+		log.Warnf("signal: unknown signal %q intercepted, exit now", sig.String())
 	}
 }
