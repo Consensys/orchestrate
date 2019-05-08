@@ -21,16 +21,16 @@ func newMessage(i int) *sarama.ProducerMessage {
 	switch i % 4 {
 	case 0:
 		topic = "topic-tx-decoder-1"
-		chainID = "0x1"
+		chainID = "1"
 	case 1:
 		topic = "topic-tx-decoder-3"
-		chainID = "0x3"
+		chainID = "3"
 	case 2:
 		topic = "topic-tx-decoder-4"
-		chainID = "0x4"
+		chainID = "4"
 	case 3:
 		topic = "topic-tx-decoder-42"
-		chainID = "0x2a"
+		chainID = "42"
 	}
 	msg := &sarama.ProducerMessage{
 		Topic:     topic,
