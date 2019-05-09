@@ -197,7 +197,7 @@ func TestBlockCursor(t *testing.T) {
 	}
 
 	// Block 2 should be available
-	block, err = getNextBlock(bc, time.Millisecond)
+	block, err = getNextBlock(bc, 10*time.Millisecond)
 	if err != nil {
 		t.Errorf("Expected no error when getting block %v but got %v", 2, err)
 	} else if block.NumberU64() != 2 {
