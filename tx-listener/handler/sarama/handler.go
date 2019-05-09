@@ -61,12 +61,11 @@ func (h *Handler) GetInitialPosition(chain *big.Int) (blockNumber, txIndex int64
 	}
 
 	// Parse last record into envelope
-	var e *envelope.Envelope
+	e := &envelope.Envelope{}
 	err = proto.Unmarshal(lastRecord.Value, e)
 	if err != nil {
-		return 0, 0, err
+		return -1, 0, err
 	}
-
 	return int64(e.GetReceipt().GetBlockNumber()), int64(e.GetReceipt().GetTxIndex() + 1), nil
 }
 
