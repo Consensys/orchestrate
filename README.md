@@ -41,29 +41,61 @@ package main
 import (
 	"context"
 	"fmt"
+	"math/big"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
+	handler "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener/handler/base"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener/listener"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
+// Handler is a engine HandlerFunc
+func Handler(txctx *engine.TxContext) {
+	// Cast message into sarama.ConsumerMessage
+	r, ok := txctx.Msg.(*types.TxListenerReceipt)
+	if !ok {
+		panic("loader: expected a types.TxListenerReceipt")
+	}
+
+	fmt.Printf("* New receipt ChainID=%v BlockNumber=%v Txindex=%v TxHash=%v\n", r.ChainID.Text(10), r.BlockNumber, r.TxIndex, r.TxHash.Hex())
+}
+
 func main() {
-	// Initialize client
+	// Set log configuration
+	log.SetFormatter(&log.TextFormatter{})
+	log.SetLevel(log.DebugLevel)
+
+	// Initialize Listener
 	viper.Set("eth.clients", []string{
 		"https://ropsten.infura.io/v3/81e039ce6c8a465180822b525e3644d7",
-		"https://rinkeby.infura.io/v3/bfc9d6e51fbc4d3db54bea58d1094f9c",
-		"https://kovan.infura.io/v3/bfc9d6e51fbc4d3db54bea58d1094f9c",
 		"https://mainnet.infura.io/v3/bfc9d6e51fbc4d3db54bea58d1094f9c",
 	})
-	ethclient.Init(context.Background())
 
 	// Initialize listener
 	listener.Init(context.Background())
 
-	// Consume receipts
-	for r := range listener.GlobalListener().Receipts() {
-		fmt.Printf("* New receipt ChainID=%v BlockNumber=%v TxHash=%v\n", r.ChainID.Text(10), r.BlockNumber, r.TxHash.Hex())
+	// Initialize engine and register handlers
+	engine.Init(context.Background())
+	engine.Register(Handler)
+
+	// Create handler
+	conf, err := handler.NewConfig()
+	if err != nil {
+		log.WithError(err).Fatalf("listener: could not create config")
 	}
+	h := handler.NewHandler(engine.GlobalEngine(), conf)
+
+	// Start listening
+	_ = listener.Listen(
+		context.Background(),
+		[]*big.Int{
+			big.NewInt(1),
+			big.NewInt(3),
+		},
+		h,
+	)
 }
 ```
 
@@ -71,11 +103,18 @@ func main() {
 # Run example
 $ go run examples/quick-start/main.go
 
-INFO[0002] tx-listener: start listening from block=5018648 tx=0  Chain=3
-INFO[0002] tx-listener: start listening from block=3869057 tx=0  Chain=4
-INFO[0002] tx-listener: start listening from block=10361214 tx=0  Chain=2a
-INFO[0002] tx-listener: start listening from block=7220203 tx=0  Chain=1
-* New receipt ChainID=4 BlockNumber=3869057 TxHash=0xeccc4b6d97b98030d6c0a829c18307b3875bd9ece17a514e733b432b2f37ebdb
-* New receipt ChainID=4 BlockNumber=3869057 TxHash=0x2becf34f2dbeb2024b9692bc8fd0b97778b2e380e32ee3a8a7757f68139644b3
-* New receipt ChainID=4 BlockNumber=3869057 TxHash=0x93d089e31f60957ebe9f9697362812e970265df77954535d25f5c2c049da91c8
+INFO[0001] ethereum: multi-client ready                  chains="[3 1]"
+INFO[0001] tx-listener: ready to listen to chains        chains="[1 3]"
+INFO[0002] tx-listener: start listening                  chain.id=3 start.block=5562232 start.tx-index=0
+DEBU[0002] engine: start running loop                    loops.count=1
+DEBU[0002] listener: start loop                          chain.id=3 start.block=5562232 start.tx-index=0
+INFO[0002] tx-listener: start listening                  chain.id=1 start.block=7725464 start.tx-index=0
+DEBU[0002] listener: start loop                          chain=1 start.block=7725464 start.tx-index=0
+DEBU[0002] engine: start running loop                    loops.count=2
+* New receipt ChainID=3 BlockNumber=5562232 Txindex=0 TxHash=0x8a2747cabca2917d0f8f5a18b53cc75091abd5995aaa3d9b4b6d5c6c82438d2c
+* New receipt ChainID=3 BlockNumber=5562232 Txindex=1 TxHash=0x7a3393f49d6f51ec9117eb62624ed9ceda29b5879940627d874f0462fa2c6d05
+* New receipt ChainID=3 BlockNumber=5562232 Txindex=2 TxHash=0xfbc889ad20a13299cd665b72daa68ec123f9bb2a940f4fb37a86a2bc35678207
+* New receipt ChainID=3 BlockNumber=5562232 Txindex=3 TxHash=0x0bdc18d7cc0447f8d17a498408a90f4fdcd0a66ec57a6efc74bed1355af0ee33
+* New receipt ChainID=3 BlockNumber=5562232 Txindex=4 TxHash=0x91188e789bdbfa81047681e168c475d91b5baa6abdf4679dbe9ee26c2d5a3255
+* New receipt ChainID=3 BlockNumber=5562232 Txindex=5 TxHash=0x65fcae4e6344ad2fd3ab1c3f181d7c6bdb3c4ca7770811a3c2e5a88d81a57031
 ```
