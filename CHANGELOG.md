@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.10
+
+*Released on May 9th 2019*
+
+- [FIX] Fix config flags naming & description
+
 ### Version 0.4.9
 
 *Released on May 7th 2019*
