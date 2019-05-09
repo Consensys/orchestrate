@@ -28,4 +28,5 @@ func TestParsePosition(t *testing.T) {
 	chain, position, err = ParsePosition("0x3:latest-0")
 	assert.Equal(t, "", chain, "#4: Correct chain ID expected")
 	assert.NotNil(t, err, "#4: Error expected")
+	assert.Nil(t, position, "#4: Expected nil position")
 }

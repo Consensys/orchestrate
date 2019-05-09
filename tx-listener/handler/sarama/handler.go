@@ -68,7 +68,7 @@ func (h *Handler) GetInitialPosition(chain *big.Int) (blockNumber, txIndex int64
 		return 0, 0, err
 	}
 
-	return int64(e.Receipt.BlockNumber), int64(e.Receipt.TxIndex + 1), nil
+	return int64(e.GetReceipt().GetBlockNumber()), int64(e.GetReceipt().GetTxIndex() + 1), nil
 }
 
 func (h *Handler) getLastRecord(topic string, partition int32) (*sarama.Record, error) {
