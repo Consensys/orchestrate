@@ -18,6 +18,10 @@ import (
 )
 
 func init() {
+
+	viper.SetDefault(vaultKVVersionViperKey, vaultKVVersionDefault)
+	_ = viper.BindEnv(vaultKVVersionViperKey, vaultKVVersionEnv)
+
 	viper.SetDefault(vaultSecretPathViperKey, vaultSecretPathDefault)
 	_ = viper.BindEnv(vaultSecretPathViperKey, vaultSecretPathEnv)
 
@@ -58,62 +62,67 @@ func init() {
 }
 
 var (
-	vaultSecretPathEnv    = "VAULT_SECRET_PATH"
-	vaultRateLimitEnv     = "VAULT_RATE_LIMIT"
-	vaultBurstLimitEnv    = "VAULT_BURST_LIMIT"
-	vaultAddressEnv       = "VAULT_ADDR"
-	vaultCACertEnv        = "VAULT_CACERT"
-	vaultCAPathEnv        = "VAULT_CAPATH"
-	vaultClientCertEnv    = "VAULT_CLIENT_CERT"
-	vaultClientKeyEnv     = "VAULT_CLIENT_KEY"
-	vaultClientTimeoutEnv = "VAULT_CLIENT_TIMEOUT"
-	vaultMaxRetriesEnv    = "VAULT_MAX_RETRIES"
-	vaultSkipVerifyEnv    = "VAULT_SKIP_VERIFY"
-	vaultTLSServerNameEnv = "VAULT_TLS_SERVER_NAME"
+	vaultKVVersionEnv	  		= "VAULT_KV_VERSION"		
+	vaultSecretPathEnv    		= "VAULT_SECRET_PATH"
+	vaultRateLimitEnv     		= "VAULT_RATE_LIMIT"
+	vaultBurstLimitEnv    		= "VAULT_BURST_LIMIT"
+	vaultAddressEnv       		= "VAULT_ADDR"
+	vaultCACertEnv        		= "VAULT_CACERT"
+	vaultCAPathEnv        		= "VAULT_CAPATH"
+	vaultClientCertEnv    		= "VAULT_CLIENT_CERT"
+	vaultClientKeyEnv     		= "VAULT_CLIENT_KEY"
+	vaultClientTimeoutEnv 		= "VAULT_CLIENT_TIMEOUT"
+	vaultMaxRetriesEnv    		= "VAULT_MAX_RETRIES"
+	vaultSkipVerifyEnv    		= "VAULT_SKIP_VERIFY"
+	vaultTLSServerNameEnv		= "VAULT_TLS_SERVER_NAME"
 
-	vaultSecretPathFlag    = "vault-secret-path"
-	vaultRateLimitFlag     = "vault-rate-limit"
-	vaultBurstLimitFlag    = "vault-burst-limit"
-	vaultAddressFlag       = "vault-addr"
-	vaultCACertFlag        = "vault-cacert"
-	vaultCAPathFlag        = "vault-capath"
-	vaultClientCertFlag    = "vault-client-cert"
-	vaultClientKeyFlag     = "vault-client-key"
-	vaultClientTimeoutFlag = "vault-client-timeout"
-	vaultMaxRetriesFlag    = "vault-max-retries"
-	vaultSkipVerifyFlag    = "vault-skip-verify"
-	vaultTLSServerNameFlag = "vault-tls-server-name"
+	vaultKVVersionFlag	   		= "vault-kv-version"
+	vaultSecretPathFlag    		= "vault-secret-path"
+	vaultRateLimitFlag     		= "vault-rate-limit"
+	vaultBurstLimitFlag    		= "vault-burst-limit"
+	vaultAddressFlag       		= "vault-addr"
+	vaultCACertFlag        		= "vault-cacert"
+	vaultCAPathFlag        		= "vault-capath"
+	vaultClientCertFlag    		= "vault-client-cert"
+	vaultClientKeyFlag     		= "vault-client-key"
+	vaultClientTimeoutFlag 		= "vault-client-timeout"
+	vaultMaxRetriesFlag    		= "vault-max-retries"
+	vaultSkipVerifyFlag    		= "vault-skip-verify"
+	vaultTLSServerNameFlag 		= "vault-tls-server-name"
 
-	vaultSecretPathViperKey    = "vault.secret.path"
-	vaultRateLimitViperKey     = "vault.rate.limit"
-	vaultBurstLimitViperKey    = "vault.burst.limit"
-	vaultAddressViperKey       = "vault.addr"
-	vaultCACertViperKey        = "vault.cacert"
-	vaultCAPathViperKey        = "vault.capath"
-	vaultClientCertViperKey    = "vault.client.cert"
-	vaultClientKeyViperKey     = "vault.client.key"
-	vaultClientTimeoutViperKey = "vault.client.timeout"
-	vaultMaxRetriesViperKey    = "vault.max.retries"
-	vaultSkipVerifyViperKey    = "vault.skip.verify"
-	vaultTLSServerNameViperKey = "vault.tls.server.name"
+	vaultKVVersionViperKey 		= "vault.kv.version"
+	vaultSecretPathViperKey    	= "vault.secret.path"
+	vaultRateLimitViperKey     	= "vault.rate.limit"
+	vaultBurstLimitViperKey    	= "vault.burst.limit"
+	vaultAddressViperKey       	= "vault.addr"
+	vaultCACertViperKey        	= "vault.cacert"
+	vaultCAPathViperKey        	= "vault.capath"
+	vaultClientCertViperKey    	= "vault.client.cert"
+	vaultClientKeyViperKey     	= "vault.client.key"
+	vaultClientTimeoutViperKey 	= "vault.client.timeout"
+	vaultMaxRetriesViperKey    	= "vault.max.retries"
+	vaultSkipVerifyViperKey    	= "vault.skip.verify"
+	vaultTLSServerNameViperKey 	= "vault.tls.server.name"
 
 	// No need to redefine the default here
-	vaultSecretPathDefault    = "/secret"
-	vaultRateLimitDefault     float64
-	vaultBurstLimitDefault    int
-	vaultAddressDefault       = "https://127.0.0.1:8200"
-	vaultCACertDefault        string
-	vaultCAPathDefault        string
-	vaultClientCertDefault    string
-	vaultClientKeyDefault     string
-	vaultClientTimeoutDefault = time.Second * 60
-	vaultMaxRetriesDefault    int
-	vaultSkipVerifyDefault    bool
-	vaultTLSServerNameDefault string
+	vaultKVVersionDefault 		= "v2" // Could be "v2"
+	vaultSecretPathDefault    	= "default"
+	vaultRateLimitDefault     	float64
+	vaultBurstLimitDefault    	int
+	vaultAddressDefault       	= "https://127.0.0.1:8200"
+	vaultCACertDefault        	string
+	vaultCAPathDefault        	string
+	vaultClientCertDefault    	string
+	vaultClientKeyDefault     	string
+	vaultClientTimeoutDefault 	= time.Second * 60
+	vaultMaxRetriesDefault    	int
+	vaultSkipVerifyDefault    	bool
+	vaultTLSServerNameDefault 	string
 )
 
 // InitFlags register flags for hashicorp vault
 func InitFlags(f *pflag.FlagSet) {
+	VaultKVVersion(f)
 	VaultSecretPath(f)
 	VaultRateLimit(f)
 	VaultBurstLimit(f)
@@ -126,6 +135,15 @@ func InitFlags(f *pflag.FlagSet) {
 	VaultMaxRetries(f)
 	VaultSkipVerify(f)
 	VaultTLSServerName(f)
+}
+
+// VaultKVVersion registers a flag for the kv version being used
+func VaultKVVersion(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Determine which version of the kv secret engine we will be using
+Can be "v1" or "v2".
+Environment variable: %q `, vaultKVVersionEnv)
+	f.String(vaultKVVersionFlag, vaultSecretPathDefault, desc)
+	_ = viper.BindPFlag(vaultKVVersionViperKey, f.Lookup(vaultKVVersionFlag))
 }
 
 // VaultSecretPath registers a flag for the path used by vault secret engine
@@ -289,4 +307,9 @@ func NewConfig() *vault.Config {
 // GetSecretPath returns the secret path set in deployment by vault
 func GetSecretPath() string {
 	return viper.GetString(vaultSecretPathViperKey)
+}
+
+// GetKVVersion returns the secret path set in deployment by vault
+func GetKVVersion() string {
+	return viper.GetString(vaultKVVersionViperKey)
 }

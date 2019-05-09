@@ -10,7 +10,7 @@ export VAULT_TOKEN=$(cat init.json | jq .root_token | tr -d '"')
 
 # Enable secret engine
 curl --header "X-Vault-Token: ${VAULT_TOKEN}" --request POST \
-     --data '{"type": "kv", "config": {"force_no_cache": true} }' \
+     --data '{"type": "kv-v2", "config": {"force_no_cache": true} }' \
     ${VAULT_ADDR}/v1/sys/mounts/secret
 
 rm init.json

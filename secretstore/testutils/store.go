@@ -38,4 +38,9 @@ func (s *SecretStoreTestSuite) TestSecretStore() {
 	assert.Nilf(s.T(), err, "List should be retrieved properly, got %q", err)
 	assert.Equal(s.T(), []string{}, list, "Secret list should be correct")
 
+	value, ok, err = s.Store.Load("test-key")
+	assert.Nilf(s.T(), err, "Load should not return an error, got %q", err)
+	assert.Falsef(s.T(), ok, "Secret should not have been found")
+	assert.Equal(s.T(), "", value, "Secret list should be correct")
+
 }

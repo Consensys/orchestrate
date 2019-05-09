@@ -28,25 +28,29 @@ func NewHashiCorp(config *api.Config) (*HashiCorp, error) {
 
 // Store writes in the vault
 func (hash *HashiCorp) Store(key, value string) (err error) {
-	sec := NewSecret(key, value).SetClient(hash.Client)
+	sec := NewSecret(key, value)
+	sec.SetClient(hash.Client)
 	return sec.Update()
 }
 
 // Load reads in the vault
 func (hash *HashiCorp) Load(key string) (value string, ok bool, err error) {
-	sec := NewSecret(key, "").SetClient(hash.Client)
+	sec := NewSecret(key, "")
+	sec.SetClient(hash.Client)
 	return sec.GetValue()
 }
 
 // Delete removes a path in the vault
 func (hash *HashiCorp) Delete(key string) (err error) {
-	sec := NewSecret(key, "").SetClient(hash.Client)
+	sec := NewSecret(key, "")
+	sec.SetClient(hash.Client)
 	return sec.Delete()
 }
 
 // List returns the list of all secrets stored in the vault
 func (hash *HashiCorp) List() (keys []string, err error) {
-	sec := NewSecret("", "").SetClient(hash.Client)
+	sec := NewSecret("", "")
+	sec.SetClient(hash.Client)
 	keys, err = sec.List("")
 	return keys, err
 }
