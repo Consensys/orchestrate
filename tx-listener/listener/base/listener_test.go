@@ -3,6 +3,7 @@ package base
 import (
 	"context"
 	"math/big"
+	"sync"
 	"testing"
 	"time"
 
@@ -52,8 +53,11 @@ func TestTxListener(t *testing.T) {
 
 	// Start listener
 	ctx, cancel := context.WithCancel(context.Background())
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
 	go func() {
 		_ = l.Listen(ctx, []*big.Int{big.NewInt(1), big.NewInt(2)}, h)
+		wg.Done()
 	}()
 
 	// Simulate a mined block on chain 1
@@ -67,9 +71,9 @@ func TestTxListener(t *testing.T) {
 	ec.Mine(big.NewInt(1))
 
 	// Sleep before Cancel listening context
-	time.Sleep(500 * time.Millisecond)
-	cancel()
 	time.Sleep(100 * time.Millisecond)
+	cancel()
+	wg.Wait()
 
 	// Test assertions
 	assert.Equal(t, int32(1), h.SetupCalls, "Expect correct call count to Setup")
@@ -118,8 +122,11 @@ func TestTxListenerWithReturns(t *testing.T) {
 
 	// Start listener
 	ctx, cancel := context.WithCancel(context.Background())
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
 	go func() {
 		_ = l.Listen(ctx, []*big.Int{big.NewInt(1), big.NewInt(2)}, h)
+		wg.Done()
 	}()
 
 	// Simulate a mined block on chain 1
@@ -133,9 +140,9 @@ func TestTxListenerWithReturns(t *testing.T) {
 	ec.Mine(big.NewInt(1))
 
 	// Sleep before Cancel listening context
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 	cancel()
-	time.Sleep(100 * time.Millisecond)
+	wg.Wait()
 
 	// Test assertions
 	assert.Equal(t, int32(1), h.SetupCalls, "Expect correct call count to Setup")
