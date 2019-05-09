@@ -16,7 +16,6 @@ import (
 )
 
 // Handler implements TxListenerHandler interface
-// (c.f https://godoc.org/github.com/Shopify/sarama#ConsumerGroupHandler)
 //
 // It uses a pkg Engine to listen to chains messages
 type Handler struct {
