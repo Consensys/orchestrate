@@ -100,23 +100,33 @@ func NewTxListenerSession(ctx context.Context, l *TxListener, chains []*big.Int,
 
 	// Start listening each chain in separate goroutines
 	wg := &sync.WaitGroup{}
+	errors := make(chan error, len(chains))
 	for _, chain := range chains {
 		wg.Add(1)
 		go func(chain *big.Int) {
 			defer wg.Done()
 			// Cancel session as soon as a first chain listener goroutine exits
 			defer cancel()
-			_ = sess.listen(chain)
+			errors <- sess.listen(chain)
 		}(chain)
 	}
 
-	// Wait for go routines to complete
-	wg.Wait()
+	done := make(chan struct{})
+	go func() {
+		wg.Wait()
+		close(done)
+	}()
 
-	// Call CleanUp hook
-	err = h.Cleanup(sess)
-	if err != nil {
+	select {
+	case err := <-errors:
+		// Wait for go routines to complete
+		wg.Wait()
 		return nil, err
+	case <-done:
+		err = h.Cleanup(sess)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return sess, nil
