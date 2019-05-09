@@ -42,7 +42,7 @@ var (
 	engineSlotsFlag     = "engine-slots"
 	engineSlotsViperKey = "engine.slots"
 	engineSlotsDefault  = uint(20)
-	engineSlotsEnv      = "WORKER_SLOTS"
+	engineSlotsEnv      = "ENGINE_SLOTS"
 )
 
 // Slots register flag for Kafka server addresses

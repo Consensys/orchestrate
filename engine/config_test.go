@@ -16,10 +16,10 @@ func TestSlots(t *testing.T) {
 	expected := 20
 	assert.Equal(t, expected, viper.GetInt(name), "Default")
 
-	os.Setenv("WORKER_SLOTS", "125")
+	os.Setenv("ENGINE_SLOTS", "125")
 	expected = 125
 	assert.Equal(t, expected, viper.GetInt(name), "From Environment Variable")
-	os.Unsetenv("WORKER_SLOTS")
+	os.Unsetenv("ENGINE_SLOTS")
 
 	args := []string{
 		"--engine-slots=150",
