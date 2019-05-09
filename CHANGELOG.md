@@ -2,7 +2,7 @@
 
 ### Version 0.4.12
 
-*Unreleased*
+*Released on May 9th 2019*
 
 - [FIX] Make `mock.Client` support multiple chains
 - [FEAT] Add methods to `mock.Client` 
