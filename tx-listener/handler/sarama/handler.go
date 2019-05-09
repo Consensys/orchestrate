@@ -36,14 +36,17 @@ func NewHandler(e *engine.Engine, client sarama.Client, producer sarama.SyncProd
 }
 
 func (h *Handler) GetInitialPosition(chain *big.Int) (blockNumber, txIndex int64, err error) {
-	// GetInitialPosition return initial position
 	position, ok := h.Conf.Start.Positions[chain.Text(10)]
 	if !ok {
-		return h.Conf.Start.Default.BlockNumber, h.Conf.Start.Default.TxIndex, nil
+		blockNumber = h.Conf.Start.Default.BlockNumber
+		txIndex = h.Conf.Start.Default.TxIndex
+	} else {
+		blockNumber = position.BlockNumber
+		txIndex = position.TxIndex
 	}
 
-	if position.BlockNumber != -2 {
-		return position.BlockNumber, position.TxIndex, nil
+	if blockNumber >= -1 {
+		return blockNumber, txIndex, nil
 	}
 
 	// BlockNumber == -2 means we should start listening from position of last produce message

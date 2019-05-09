@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.13
+
+*Released on May 9th 2019*
+
+- [FIX] Update `sarama.Handler.GetInitialPosition()`
+
 ### Version 0.4.12
 
 *Released on May 9th 2019*

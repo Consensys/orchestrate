@@ -7,10 +7,12 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	handler "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener/handler/base"
+	handlercfg "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener/handler/base"
+	handler "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener/handler/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener/listener"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener/listener/base"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/types"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/logger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
@@ -69,12 +71,15 @@ func main() {
 	engine.Register(Loader)
 	engine.Register(logger.Logger)
 
+	// Init Producer
+	broker.InitSyncProducer(context.Background())
+
 	// Create handler
-	conf, err := handler.NewConfig()
+	conf, err := handlercfg.NewConfig()
 	if err != nil {
 		log.WithError(err).Fatalf("listener: could not create config")
 	}
-	h := handler.NewHandler(engine.GlobalEngine(), conf)
+	h := handler.NewHandler(engine.GlobalEngine(), broker.GlobalClient(), broker.GlobalSyncProducer(), conf)
 
 	// Start listening
 	_ = listener.Listen(
