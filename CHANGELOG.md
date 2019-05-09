@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.14
+
+*Released on May 9th 2019*
+
+- [FIX] Fix `sarama.Handler.GetInitialPosition()` when no message was produce
+
 ### Version 0.4.13
 
 *Released on May 9th 2019*
