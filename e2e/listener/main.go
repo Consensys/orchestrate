@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"os"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
@@ -114,9 +115,14 @@ func main() {
 	}
 	h := handler.NewHandler(engine.GlobalEngine(), broker.GlobalClient(), broker.GlobalSyncProducer(), conf)
 
+	ctx, cancel := context.WithCancel(context.Background())
+	// Process signals
+	sig := utils.NewSignalListener(func(signal os.Signal) { cancel() })
+	defer sig.Close()
+
 	// Start listening
 	err = listener.Listen(
-		context.Background(),
+		ctx,
 		[]*big.Int{
 			// big.NewInt(1),
 			big.NewInt(3),

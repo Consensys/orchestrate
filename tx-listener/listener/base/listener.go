@@ -121,11 +121,11 @@ func NewTxListenerSession(ctx context.Context, l *TxListener, chains []*big.Int,
 	case err := <-errors:
 		// Wait for go routines to complete
 		wg.Wait()
-		return nil, err
+		return sess, err
 	case <-done:
 		err = h.Cleanup(sess)
 		if err != nil {
-			return nil, err
+			return sess, err
 		}
 	}
 

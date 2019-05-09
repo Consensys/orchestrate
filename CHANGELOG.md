@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.15
+
+*Released on May 9th 2019*
+
+- [FIX] Fix `listener.TxListener` to avoid panic on graceful close
+
 ### Version 0.4.14
 
 *Released on May 9th 2019*
