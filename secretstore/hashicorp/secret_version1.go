@@ -66,7 +66,7 @@ func (s *SecretKV1) Update() error {
 	logical := s.client.Logical()
 	_, err := logical.Write(
 		fmt.Sprintf("%v/%v", GetSecretPath(), s.key),
-		map[string]interface{}{ "value": s.value },
+		map[string]interface{}{"value": s.value},
 	)
 	if err != nil {
 		return err
