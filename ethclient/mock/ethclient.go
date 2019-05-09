@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	eth "github.com/ethereum/go-ethereum"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
@@ -55,6 +56,18 @@ func GetError(ctx context.Context) error {
 		return nil
 	}
 	return err
+}
+
+func (ec *Client) Networks(ctx context.Context) []*big.Int {
+	chains := []*big.Int{}
+	for chain := range ec.blocks {
+		c, ok := big.NewInt(0).SetString(chain, 10)
+		if !ok {
+			panic("invalid chain id")
+		}
+		chains = append(chains, c)
+	}
+	return chains
 }
 
 func (ec *Client) BlockByNumber(ctx context.Context, chainID, number *big.Int) (*ethtypes.Block, error) {
@@ -144,6 +157,10 @@ func (ec *Client) TransactionReceipt(ctx context.Context, chainID *big.Int, txHa
 		}
 		return nil, nil
 	}
+}
+
+func (ec *Client) SyncProgress(ctx context.Context, chainID *big.Int) (*eth.SyncProgress, error) {
+	return nil, fmt.Errorf("not implemented error")
 }
 
 func (ec *Client) TransactionByHash(ctx context.Context, chainID *big.Int, hash ethcommon.Hash) (tx *ethtypes.Transaction, isPending bool, err error) {
