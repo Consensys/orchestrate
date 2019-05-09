@@ -1,4 +1,4 @@
-package listener
+package base
 
 import (
 	"github.com/spf13/pflag"
@@ -28,10 +28,14 @@ type Config struct {
 
 // NewConfig creates a new default config
 func NewConfig() *Config {
-	return &Config{
+	config := &Config{
 		BlockCursor: *(cursor.NewConfig()),
 		TipTracker:  *(tiptracker.NewConfig()),
 	}
+	config.TxListener.Return.Blocks = false
+	config.TxListener.Return.Errors = false
+
+	return config
 }
 
 // InitFlags register flags for listener

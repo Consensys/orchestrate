@@ -9,7 +9,6 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/stretchr/testify/assert"
 	mockclient "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient/mock"
 )
 
@@ -22,14 +21,17 @@ var blocksEnc = [][]byte{
 }
 
 func TestBaseTracker(t *testing.T) {
-	blocks := []*ethtypes.Block{}
-	for _, blockEnc := range blocksEnc {
-		var block ethtypes.Block
-		err := rlp.DecodeBytes(blockEnc, &block)
-		assert.Nil(t, err)
-
-		blocks = append(blocks, &block)
+	blocks := make(map[string][]*ethtypes.Block)
+	for _, chain := range []string{"1"} {
+		blocks[chain] = []*ethtypes.Block{}
+		for _, blockEnc := range blocksEnc {
+			var block ethtypes.Block
+			_ = rlp.DecodeBytes(blockEnc, &block)
+			blocks[chain] = append(blocks[chain], &block)
+		}
 	}
+
+	// Create mock client
 	ec := mockclient.NewClient(blocks)
 
 	conf := &Config{Depth: 2}
@@ -48,9 +50,9 @@ func TestBaseTracker(t *testing.T) {
 		t.Errorf("BaseTracker #1: Head at %v", head)
 	}
 
-	ec.Mine()
-	ec.Mine()
-	ec.Mine()
+	ec.Mine(big.NewInt(1))
+	ec.Mine(big.NewInt(1))
+	ec.Mine(big.NewInt(1))
 
 	head, _ = tracker.HighestBlock(context.Background())
 	if head != 1 {

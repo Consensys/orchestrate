@@ -2,14 +2,17 @@ package listener
 
 import (
 	"context"
+	"math/big"
 	"sync"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener/handler"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener/listener/base"
 )
 
 var (
 	l        TxListener
-	conf     *Config
+	conf     *base.Config
 	initOnce = &sync.Once{}
 )
 
@@ -24,19 +27,19 @@ func Init(ctx context.Context) {
 
 		// Initialize Listener
 		if conf == nil {
-			conf = NewConfig()
+			conf = base.NewConfig()
 		}
 
-		l = NewListener(ethclient.GlobalClient(), conf)
+		l = base.NewTxListener(ethclient.GlobalClient(), conf)
 
-		// Start listening all chains
-		for _, chainID := range ethclient.GlobalClient().Networks(context.Background()) {
-			_, _ = l.Listen(chainID, -1, 0)
-		}
+		go func() {
+			<-ctx.Done()
+			l.Close()
+		}()
 	})
 }
 
-func SetGlobalConfig(cfg *Config) {
+func SetGlobalConfig(cfg *base.Config) {
 	conf = cfg
 }
 
@@ -48,4 +51,9 @@ func GlobalListener() TxListener {
 // SetGlobalListener sets global Listener
 func SetGlobalListener(listener TxListener) {
 	l = listener
+}
+
+// Listen start listening
+func Listen(ctx context.Context, chains []*big.Int, h handler.TxListenerHandler) error {
+	return l.Listen(ctx, chains, h)
 }

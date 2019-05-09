@@ -189,6 +189,7 @@ func (bc *BlockCursor) fetchBlock(ctx context.Context, blockNumber int64) *types
 					"chain.id": bc.ChainID().Text(10),
 				}),
 		)
+
 		block, err := bc.ec.BlockByNumber(logCtx, bc.ChainID(), big.NewInt(blockNumber))
 		if err != nil {
 			bFuture.Err() <- &types.TxListenerError{
@@ -247,6 +248,9 @@ func (bc *BlockCursor) fetchBlock(ctx context.Context, blockNumber int64) *types
 func (bc *BlockCursor) fetchReceipt(ctx context.Context, txHash common.Hash) *types.Future {
 	future := types.NewFuture()
 
+	log.WithFields(log.Fields{
+		"tx.hash": txHash.Hex(),
+	}).Tracef("tx-listener: fetch receipt")
 	go func() {
 		defer future.Close()
 		logCtx := logger.WithLogEntry(

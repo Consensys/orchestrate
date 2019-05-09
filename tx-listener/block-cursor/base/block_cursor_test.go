@@ -10,7 +10,6 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/stretchr/testify/assert"
 	mockclient "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient/mock"
 	tiptracker "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener/tip-tracker/base"
 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/types"
@@ -25,14 +24,17 @@ var blocksEnc = [][]byte{
 }
 
 func TestBlockCursorFetchReceipt(t *testing.T) {
-	blocks := []*ethtypes.Block{}
-	for _, blockEnc := range blocksEnc {
-		var block ethtypes.Block
-		err := rlp.DecodeBytes(blockEnc, &block)
-		assert.Nil(t, err)
-
-		blocks = append(blocks, &block)
+	blocks := make(map[string][]*ethtypes.Block)
+	for _, chain := range []string{"1"} {
+		blocks[chain] = []*ethtypes.Block{}
+		for _, blockEnc := range blocksEnc {
+			var block ethtypes.Block
+			_ = rlp.DecodeBytes(blockEnc, &block)
+			blocks[chain] = append(blocks[chain], &block)
+		}
 	}
+
+	// Create mock client
 	ec := mockclient.NewClient(blocks)
 
 	conf := &tiptracker.Config{Depth: 0}
@@ -66,14 +68,16 @@ func TestBlockCursorFetchReceipt(t *testing.T) {
 }
 
 func TestBlockCursorFetchBlock(t *testing.T) {
-	blocks := []*ethtypes.Block{}
-	for _, blockEnc := range blocksEnc {
-		var block ethtypes.Block
-		err := rlp.DecodeBytes(blockEnc, &block)
-		assert.Nil(t, err)
-
-		blocks = append(blocks, &block)
+	blocks := make(map[string][]*ethtypes.Block)
+	for _, chain := range []string{"1"} {
+		blocks[chain] = []*ethtypes.Block{}
+		for _, blockEnc := range blocksEnc {
+			var block ethtypes.Block
+			_ = rlp.DecodeBytes(blockEnc, &block)
+			blocks[chain] = append(blocks[chain], &block)
+		}
 	}
+
 	ec := mockclient.NewClient(blocks)
 
 	conf := &tiptracker.Config{Depth: 0}
@@ -139,14 +143,16 @@ func getNextBlock(bc *BlockCursor, timeout time.Duration) (*types.TxListenerBloc
 }
 
 func TestBlockCursor(t *testing.T) {
-	blocks := []*ethtypes.Block{}
-	for _, blockEnc := range blocksEnc {
-		var block ethtypes.Block
-		err := rlp.DecodeBytes(blockEnc, &block)
-		assert.Nil(t, err)
-
-		blocks = append(blocks, &block)
+	blocks := make(map[string][]*ethtypes.Block)
+	for _, chain := range []string{"1"} {
+		blocks[chain] = []*ethtypes.Block{}
+		for _, blockEnc := range blocksEnc {
+			var block ethtypes.Block
+			_ = rlp.DecodeBytes(blockEnc, &block)
+			blocks[chain] = append(blocks[chain], &block)
+		}
 	}
+
 	ec := mockclient.NewClient(blocks)
 
 	conf := &tiptracker.Config{Depth: 0}
@@ -158,8 +164,7 @@ func TestBlockCursor(t *testing.T) {
 	bc := NewBlockCursorFromTracker(ec, tracker, 0, *config)
 
 	// Start block cursor
-	go bc.feeder()
-	go bc.dispatcher()
+	bc.Start()
 
 	// First block should have been retrieved almost instantaneously
 	block, err := getNextBlock(bc, 10*time.Millisecond)
@@ -170,8 +175,8 @@ func TestBlockCursor(t *testing.T) {
 	}
 
 	// We simulate two mined blocks
-	ec.Mine()
-	ec.Mine()
+	ec.Mine(big.NewInt(1))
+	ec.Mine(big.NewInt(1))
 
 	// At this time cursor should be sleeping waiting for next block
 	// So we should timeout when retrieving next block

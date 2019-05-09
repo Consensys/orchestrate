@@ -1,9 +1,8 @@
-package listener
+package base
 
 import (
 	"context"
 	"math/big"
-	"sync"
 	"testing"
 	"time"
 
@@ -11,8 +10,8 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/stretchr/testify/assert"
-	mockclient "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/types"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient/mock"
+	handler "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener/handler/mock"
 )
 
 // TODO: update with disctinct blocks
@@ -24,15 +23,21 @@ var blocksEnc = [][]byte{
 }
 
 func TestTxListener(t *testing.T) {
-	blocks := []*ethtypes.Block{}
-	for _, blockEnc := range blocksEnc {
-		var block ethtypes.Block
-		err := rlp.DecodeBytes(blockEnc, &block)
-		assert.Nil(t, err)
-
-		blocks = append(blocks, &block)
+	blocks := make(map[string][]*ethtypes.Block)
+	for _, chain := range []string{"1", "2"} {
+		blocks[chain] = []*ethtypes.Block{}
+		for _, blockEnc := range blocksEnc {
+			var block ethtypes.Block
+			_ = rlp.DecodeBytes(blockEnc, &block)
+			blocks[chain] = append(blocks[chain], &block)
+		}
 	}
-	ec := mockclient.NewClient(blocks)
+
+	// Create Mock client
+	ec := ethclient.NewClient(blocks)
+
+	// Create New Mock clientd
+	h := handler.NewHandler()
 
 	// Initialize Configuration
 	config := NewConfig()
@@ -42,125 +47,63 @@ func TestTxListener(t *testing.T) {
 	config.TxListener.Return.Blocks = false
 	config.TxListener.Return.Errors = false
 
-	l := NewListener(ec, config)
-	_, err := l.Listen(big.NewInt(1), 0, 0)
-	if err != nil {
-		t.Errorf("TxListener #1: expected no error but got %v", err)
-	}
+	// Create Listener
+	l := NewTxListener(ec, config)
 
-	// Try to listen to the same chain again
-	_, err = l.Listen(big.NewInt(1), 0, 0)
-	if err == nil {
-		t.Errorf("TxListener #2: expected an error")
-	}
-
-	// Try to listen to another chain
-	_, err = l.Listen(big.NewInt(2), 1, 5)
-	if err != nil {
-		t.Errorf("TxListener #3: expected no error but got %v", err)
-	}
-
-	wait := &sync.WaitGroup{}
-	wait.Add(3)
-
-	blcks := []*types.TxListenerBlock{}
+	// Start listener
+	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
-		for block := range l.Blocks() {
-			// Drain blocks
-			blcks = append(blcks, block)
-		}
-		wait.Done()
+		_ = l.Listen(ctx, []*big.Int{big.NewInt(1), big.NewInt(2)}, h)
 	}()
 
-	receipts := []*types.TxListenerReceipt{}
-	go func() {
-		for receipt := range l.Receipts() {
-			receipts = append(receipts, receipt)
-		}
-		wait.Done()
-	}()
-
-	errors := []error{}
-	go func() {
-		for err := range l.Errors() {
-			// Drain blocks
-			errors = append(errors, err)
-		}
-		wait.Done()
-	}()
-
-	// Simulate 2 mined blocks
+	// Simulate a mined block on chain 1
 	time.Sleep(50 * time.Millisecond)
-	ec.Mine()
-
-	// Try to listen to another chain
-	_, err = l.Listen(big.NewInt(3), -1, 0)
-	if err != nil {
-		t.Errorf("TxListener #4: expected no error but got %v", err)
-	}
+	ec.Mine(big.NewInt(1))
 
 	time.Sleep(180 * time.Millisecond)
-	ec.Mine()
+	ec.Mine(big.NewInt(1))
 
 	time.Sleep(10 * time.Millisecond)
-	ec.Mine()
+	ec.Mine(big.NewInt(1))
 
-	// Test methods while running (to maybe detect some race conditions)
-	chains := l.Chains()
-	expected := 3
-	if len(chains) != expected {
-		t.Errorf("TxListener: expected %v chain but got %v", expected, len(chains))
-	}
+	// Sleep before Cancel listening context
+	time.Sleep(500 * time.Millisecond)
+	cancel()
+	time.Sleep(100 * time.Millisecond)
 
-	progress := l.Progress(context.Background())
-	highest := 3
-	if progress["1"].HighestBlock != int64(highest) {
-		t.Errorf("TxListener: expected highest block to be %v but got %v", highest, progress["1"].HighestBlock)
-	}
+	// Test assertions
+	assert.Equal(t, int32(1), h.SetupCalls, "Expect correct call count to Setup")
+	assert.Equal(t, int32(1), h.CleanupCalls, "Expect correct call count to CleanUp")
 
-	// Close listener
-	l.Close()
+	assert.Equal(t, int32(36), h.Receipts["1"], "Expect correct count of receipts treated on chain %q", "1")
+	assert.Equal(t, int32(0), h.Blocks["1"], "Expect correct count of blocks treated on chain %q", "1")
+	assert.Equal(t, int32(0), h.Errors["1"], "Expect correct count of errors treated on chain %q", "1")
+	assert.Equal(t, int32(1), h.GetInitialPositionCalls["1"], "Expect correct call count to GetInitialPosition on chain %q", "1")
+	assert.Equal(t, int32(1), h.ListenCalls["1"], "Expect correct call count to Listen treated on chain %q", "1")
 
-	// Try to listen on a close listener
-	_, err = l.Listen(big.NewInt(1), 0, 0)
-	if err == nil {
-		t.Errorf("TxListener #2: expected an error")
-	}
-
-	// Wait for drainers to complete
-	wait.Wait()
-
-	// Test methods after stoping
-	chains = l.Chains()
-	expected = 0
-	if len(chains) != expected {
-		t.Errorf("TxListener: expected %v chain but got %v", expected, len(chains))
-	}
-
-	if len(errors) != 0 {
-		t.Errorf("TxListener: expected %v errors but got %v", 0, len(errors))
-	}
-
-	if len(blcks) != 0 {
-		t.Errorf("TxListener: expected %v blocks but got %v", 0, len(blcks))
-	}
-
-	expected = 31
-	if len(receipts) != expected {
-		t.Errorf("TxListener: expected %v receipts but got %v", expected, len(receipts))
-	}
+	assert.Equal(t, int32(9), h.Receipts["2"], "Expect correct count of receipts treated on chain %q", "2")
+	assert.Equal(t, int32(0), h.Blocks["2"], "Expect correct count of blocks treated on chain %q", "2")
+	assert.Equal(t, int32(0), h.Errors["2"], "Expect correct count of errors treated on chain %q", "2")
+	assert.Equal(t, int32(1), h.GetInitialPositionCalls["2"], "Expect correct call count to  GetInitialPosition on chain %q", "2")
+	assert.Equal(t, int32(1), h.ListenCalls["2"], "Expect correct call count to Listen on chain %q", "2")
 }
 
 func TestTxListenerWithReturns(t *testing.T) {
-	blocks := []*ethtypes.Block{}
-	for _, blockEnc := range blocksEnc {
-		var block ethtypes.Block
-		err := rlp.DecodeBytes(blockEnc, &block)
-		assert.Nil(t, err)
-
-		blocks = append(blocks, &block)
+	blocks := make(map[string][]*ethtypes.Block)
+	for _, chain := range []string{"1", "2"} {
+		blocks[chain] = []*ethtypes.Block{}
+		for _, blockEnc := range blocksEnc {
+			var block ethtypes.Block
+			_ = rlp.DecodeBytes(blockEnc, &block)
+			blocks[chain] = append(blocks[chain], &block)
+		}
 	}
-	ec := mockclient.NewClient(blocks)
+
+	// Create Mock client
+	ec := ethclient.NewClient(blocks)
+
+	// Create New Mock clientd
+	h := handler.NewHandler()
 
 	// Initialize Configuration
 	config := NewConfig()
@@ -170,102 +113,43 @@ func TestTxListenerWithReturns(t *testing.T) {
 	config.TxListener.Return.Blocks = true
 	config.TxListener.Return.Errors = true
 
-	l := NewListener(ec, config)
+	// Create Listener
+	l := NewTxListener(ec, config)
 
-	_, err := l.Listen(big.NewInt(1), -1, 0)
-	if err != nil {
-		t.Errorf("TxListener #1: expected no error but got %v", err)
-	}
-
-	// Try to listen to another chain
-	_, err = l.Listen(big.NewInt(2), 1, 5)
-	if err != nil {
-		t.Errorf("TxListener #3: expected no error but got %v", err)
-	}
-
-	wait := &sync.WaitGroup{}
-	wait.Add(3)
-
-	blcks := []*types.TxListenerBlock{}
+	// Start listener
+	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
-		for block := range l.Blocks() {
-			// Drain blocks
-			blcks = append(blcks, block)
-		}
-		wait.Done()
+		_ = l.Listen(ctx, []*big.Int{big.NewInt(1), big.NewInt(2)}, h)
 	}()
 
-	receipts := []*types.TxListenerReceipt{}
-	go func() {
-		for receipt := range l.Receipts() {
-			receipts = append(receipts, receipt)
-		}
-		wait.Done()
-	}()
-
-	errors := []error{}
-	go func() {
-		for err := range l.Errors() {
-			// Drain blocks
-			errors = append(errors, err)
-		}
-		wait.Done()
-	}()
-
-	// Simulate mined blocks
+	// Simulate a mined block on chain 1
 	time.Sleep(50 * time.Millisecond)
-	ec.Mine()
+	ec.Mine(big.NewInt(1))
 
-	// Try to listen to another chain
-	_, err = l.Listen(big.NewInt(3), -1, 0)
-	if err != nil {
-		t.Errorf("TxListener #4: expected no error but got %v", err)
-	}
-
-	// Simulate mined blocks
 	time.Sleep(180 * time.Millisecond)
-	ec.Mine()
+	ec.Mine(big.NewInt(1))
 
-	// Simulate mined blocks
 	time.Sleep(10 * time.Millisecond)
-	ec.Mine()
+	ec.Mine(big.NewInt(1))
 
-	// Test methods while running
-	chains := l.Chains()
-	expected := 3
-	if len(chains) != expected {
-		t.Errorf("TxListener: expected %v chain but got %v", expected, len(chains))
-	}
+	// Sleep before Cancel listening context
+	time.Sleep(500 * time.Millisecond)
+	cancel()
+	time.Sleep(100 * time.Millisecond)
 
-	progress := l.Progress(context.Background())
-	highest := 3
-	if progress["1"].HighestBlock != int64(highest) {
-		t.Errorf("TxListener: expected highest block to be %v but got %v", highest, progress["1"].HighestBlock)
-	}
+	// Test assertions
+	assert.Equal(t, int32(1), h.SetupCalls, "Expect correct call count to Setup")
+	assert.Equal(t, int32(1), h.CleanupCalls, "Expect correct call count to CleanUp")
 
-	// Close
-	l.Close()
+	assert.Equal(t, int32(36), h.Receipts["1"], "Expect correct count of receipts treated on chain %q", "1")
+	assert.Equal(t, int32(4), h.Blocks["1"], "Expect correct count of blocks treated on chain %q", "1")
+	assert.Equal(t, int32(0), h.Errors["1"], "Expect correct count of errors treated on chain %q", "1")
+	assert.Equal(t, int32(1), h.GetInitialPositionCalls["1"], "Expect correct call count to GetInitialPosition on chain %q", "1")
+	assert.Equal(t, int32(1), h.ListenCalls["1"], "Expect correct call count to Listen treated on chain %q", "1")
 
-	// Try to listen on a close listener
-	_, err = l.Listen(big.NewInt(1), 0, 0)
-	if err == nil {
-		t.Errorf("TxListener #2: expected an error")
-	}
-
-	// Wait for drainers to complete
-	wait.Wait()
-
-	if len(errors) != 0 {
-		t.Errorf("TxListener: expected %v errors but got %v", 0, len(errors))
-	}
-
-	expected = 4
-	if len(blcks) != expected {
-		t.Errorf("TxListener: expected %v blocks but got %v", expected, len(blcks))
-	}
-
-	expected = 31
-	if len(receipts) != expected {
-		t.Errorf("TxListener: expected %v receipts but got %v", expected, len(receipts))
-	}
+	assert.Equal(t, int32(9), h.Receipts["2"], "Expect correct count of receipts treated on chain %q", "2")
+	assert.Equal(t, int32(1), h.Blocks["2"], "Expect correct count of blocks treated on chain %q", "2")
+	assert.Equal(t, int32(0), h.Errors["2"], "Expect correct count of errors treated on chain %q", "2")
+	assert.Equal(t, int32(1), h.GetInitialPositionCalls["2"], "Expect correct call count to  GetInitialPosition on chain %q", "2")
+	assert.Equal(t, int32(1), h.ListenCalls["2"], "Expect correct call count to Listen on chain %q", "2")
 }
