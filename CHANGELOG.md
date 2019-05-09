@@ -1,5 +1,13 @@
 # CHANGELOG
 
+### Version 0.4.10
+
+*Unreleased*
+
+- [FIX] Make `mock.Client` support multiple chains
+- [FEAT] Add methods to `mock.Client` 
+- [REFACTOR] Major re-org of `tx-listener`
+
 ### Version 0.4.9
 
 *Released on May 2nd 2019*
