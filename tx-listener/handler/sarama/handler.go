@@ -55,11 +55,7 @@ func (h *Handler) GetInitialPosition(chain *big.Int) (blockNumber, txIndex int64
 
 	// Retrieve last record
 	lastRecord, err := h.getLastRecord(outTopic, 0)
-	if err != nil {
-		return 0, 0, err
-	}
-
-	if lastRecord == nil {
+	if err != nil || lastRecord == nil {
 		// If we have never produced then we start from latest
 		return -1, 0, nil
 	}
