@@ -1,12 +1,25 @@
 # CHANGELOG
 
-### Version 0.4.10
+### Version 0.4.12
 
 *Unreleased*
 
 - [FIX] Make `mock.Client` support multiple chains
 - [FEAT] Add methods to `mock.Client` 
 - [REFACTOR] Major re-org of `tx-listener`
+
+### Version 0.4.11
+
+*Released on May 7th 2019*
+
+- [FIX] Fix method parsing when method is Method()
+
+### Version 0.4.10
+
+*Released on May 5th 2019*
+
+- [FEAT] Decoder: able to decode slices and structs
+- [REFACTOR] Extract decoder from crafter package
 
 ### Version 0.4.9
 
