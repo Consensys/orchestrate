@@ -123,7 +123,7 @@ Environment variable: %q`, txNonceViperKey)
 // KafkaTopicTxSigner register flag for Kafka topic
 func KafkaTopicTxSigner(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Kafka topic for messages waiting to have transaction signed
-Environment variable: %q`, txSignerViperKey)
+Environment variable: %q`, txSignerTopicEnv)
 	f.String(txSignerFlag, txSignerTopicDefault, desc)
 	_ = viper.BindPFlag(txSignerViperKey, f.Lookup(txSignerFlag))
 }
@@ -131,7 +131,7 @@ Environment variable: %q`, txSignerViperKey)
 // KafkaTopicWalletGenerator register flag for Kafka topic
 func KafkaTopicWalletGenerator(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Kafka topic for messages waiting to generate a new wallet
-Environment variable: %q`, generateWalletViperKey)
+Environment variable: %q`, generateWalletTopicEnv)
 	f.String(generateWalletFlag, generateWalletDefault, desc)
 	_ = viper.BindPFlag(generateWalletViperKey, f.Lookup(generateWalletFlag))
 }
@@ -139,7 +139,7 @@ Environment variable: %q`, generateWalletViperKey)
 // KafkaTopicTxSender register flag for Kafka topic
 func KafkaTopicTxSender(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Kafka topic for messages waiting to have transaction sent
-Environment variable: %q`, txSenderViperKey)
+Environment variable: %q`, txSenderTopicEnv)
 	f.String(txSenderFlag, txSenderTopicDefault, desc)
 	_ = viper.BindPFlag(txSenderViperKey, f.Lookup(txSenderFlag))
 }
@@ -147,7 +147,7 @@ Environment variable: %q`, txSenderViperKey)
 // KafkaTopicTxDecoder register flag for Kafka topic
 func KafkaTopicTxDecoder(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Kafka topic for messages waiting to have receipt decoded
-Environment variable: %q`, txDecoderViperKey)
+Environment variable: %q`, txDecoderTopicEnv)
 	f.String(txDecoderFlag, txDecoderTopicDefault, desc)
 	_ = viper.BindPFlag(txDecoderViperKey, f.Lookup(txDecoderFlag))
 }
@@ -155,7 +155,7 @@ Environment variable: %q`, txDecoderViperKey)
 // KafkaTopicTxRecover register flag for Kafka topic
 func KafkaTopicTxRecover(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Kafka topic for messages waiting to have transaction recovered
-Environment variable: %q`, txRecoverViperKey)
+Environment variable: %q`, txRecoverTopicEnv)
 	f.String(txRecoverFlag, txRecoverTopicDefault, desc)
 	_ = viper.BindPFlag(txRecoverViperKey, f.Lookup(txRecoverFlag))
 }
@@ -163,7 +163,7 @@ Environment variable: %q`, txRecoverViperKey)
 // KafkaTopicTxDecoded register flag for Kafka topic
 func KafkaTopicTxDecoded(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Kafka topic for messages which receipt has been decoded
-Environment variable: %q`, txDecodedViperKey)
+Environment variable: %q`, txDecodedTopicEnv)
 	f.String(txDecodedFlag, txDecodedTopicDefault, desc)
 	_ = viper.BindPFlag(txDecodedViperKey, f.Lookup(txDecodedFlag))
 }
