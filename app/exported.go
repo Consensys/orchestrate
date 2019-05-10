@@ -126,6 +126,8 @@ func Start(ctx context.Context) {
 			topics,
 			broker.NewEngineConsumerGroupHandler(engine.GlobalEngine()),
 		)
-		log.WithError(err).Error("worker: error on consumer")
+		if err != nil {
+			log.WithError(err).Error("worker: error on consumer")
+		}
 	})
 }
