@@ -10,6 +10,6 @@ require (
 	github.com/stretchr/testify v1.3.0
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.4.8
 	gitlab.com/ConsenSys/client/fr/core-stack/infra/nonce.git v0.1.2
-	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.4
-	golang.org/x/tools v0.0.0-20190503030157-5cec639030af // indirect
+	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.10
+	golang.org/x/sync v0.0.0-20190423024810-112230192c58 // indirect
 )

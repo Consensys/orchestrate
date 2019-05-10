@@ -16,7 +16,7 @@ func Init(ctx context.Context) {
 	// Initialize Jaeger tracer
 	wg.Add(1)
 	go func() {
-		jaeger.InitTracer()
+		jaeger.Init(ctx)
 		wg.Done()
 	}()
 

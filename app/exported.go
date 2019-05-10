@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
@@ -113,12 +114,15 @@ func Start(ctx context.Context) {
 		app.ready.Store(true)
 
 		// Start consuming on topic tx-nonce
-		_ = broker.Consume(
+		err := broker.Consume(
 			ctx,
 			[]string{
 				viper.GetString("kafka.topic.nonce"),
 			},
 			broker.NewEngineConsumerGroupHandler(engine.GlobalEngine()),
 		)
+		if err != nil {
+			log.WithError(err).Error("worker: error on consumer")
+		}
 	})
 }
