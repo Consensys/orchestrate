@@ -2,9 +2,9 @@
 
 ### Version 0.4.0
 
-*Unreleased*
+*Released on May 10th 2019*
 
-- [REFACTOR] Integration with the refactored `pkg` v0.4.4
+- [REFACTOR] Integration with the refactored `pkg` v0.4.10
 - [REFACTOR] Major re-org
 
 ### Version 0.3.1
