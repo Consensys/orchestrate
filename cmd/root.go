@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/config"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/logger"
 )
 
 // NewCommand create root command
@@ -12,13 +12,13 @@ func NewCommand() *cobra.Command {
 		TraverseChildren: true,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			// This is executed before each run (included on children command run)
-			config.ConfigureLogger()
+			logger.InitLogger()
 		},
 	}
 
 	// Set Persistent flags
-	config.LogLevel(rootCmd.PersistentFlags())
-	config.LogFormat(rootCmd.PersistentFlags())
+	logger.LogLevel(rootCmd.PersistentFlags())
+	logger.LogFormat(rootCmd.PersistentFlags())
 
 	// Add Run command
 	rootCmd.AddCommand(newRunCommand())

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"log"
 	"os"
 	"os/signal"
 
 	"github.com/Shopify/sarama"
+	log "github.com/sirupsen/logrus"
 )
 
 var kafkaUrls = []string{"localhost:9092"}
@@ -18,8 +18,8 @@ func main() {
 	}
 
 	defer func() {
-		if err := consumer.Close(); err != nil {
-			log.Fatalln(err)
+		if err = consumer.Close(); err != nil {
+			log.WithError(err).Fatal("e2e: could not close consumer")
 		}
 	}()
 
@@ -30,7 +30,7 @@ func main() {
 
 	defer func() {
 		if err := partitionConsumer.Close(); err != nil {
-			log.Fatalln(err)
+			log.Fatal(err)
 		}
 	}()
 
@@ -43,7 +43,9 @@ ConsumerLoop:
 	for {
 		select {
 		case msg := <-partitionConsumer.Messages():
-			log.Printf("Consumed message offset %d\n", msg.Offset)
+			log.WithFields(log.Fields{
+				"offset": msg.Offset,
+			}).Infof("Consumed message offset")
 			consumed++
 		case <-signals:
 			break ConsumerLoop

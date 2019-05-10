@@ -1,5 +1,14 @@
 # CHANGELOG
 
+### Version 0.4.0
+
+*Unreleased*
+
+- [REFACTOR] Major re-org
+- [REFACTOR] Update boilerplate
+- [FIX] Clean linting errors
+- [FEAT] Adding first version of Open-Tracing
+
 ### Version 0.3.11
 
 *Released on April 15th 2019*

@@ -107,10 +107,7 @@ To be able to build a project which uses private repositories
 
 ```bash
 # Run this command
-export SSH_KEY=`cat ~/.ssh/id_rsa`
-
-# Or add is to your .bashrc
-echo 'export SSH_KEY=`cat ~/.ssh/id_rsa`' >> ~/.bashrc
+echo 'GITLAB_USER=\nGITLAB_TOKEN=\n' > .env
 ```
 
-*Note: if your private repository ssh key is not id_rsa, replace it in the above command.*
+Then fill the .env file with your Gitlab username and an acces token with read_repository scope (User > Settings > Access Tokens).

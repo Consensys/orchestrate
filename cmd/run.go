@@ -5,11 +5,20 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/worker"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/config"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/abi/registry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/controllers/amount"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/controllers/blacklist"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/controllers/cooldown"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/controllers/creditor"
+	maxbalance "gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/controllers/max-balance"
+	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/faucet"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing/jaeger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-crafter.git/app"
-	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-crafter.git/infra"
 )
 
 func newRunCommand() *cobra.Command {
@@ -19,15 +28,34 @@ func newRunCommand() *cobra.Command {
 		Run:   run,
 	}
 
-	// Register flags
-	infra.InitFlags(runCmd.Flags())
-	config.HTTPHostname(runCmd.Flags())
-	config.EthClientURLs(runCmd.Flags())
-	config.KafkaAddresses(runCmd.Flags())
-	config.TxCrafterInTopic(runCmd.Flags())
-	config.TxNonceOutTopic(runCmd.Flags())
-	config.WorkerCrafterGroup(runCmd.Flags())
-	worker.InitFlags(runCmd.Flags())
+	// Register Engine flags
+	engine.InitFlags(runCmd.Flags())
+
+	// Register HTTP server flags
+	http.Hostname(runCmd.Flags())
+
+	// Register Ethereum client flags
+	ethclient.URLs(runCmd.Flags())
+
+	// Register Faucet flags
+	faucet.Type(runCmd.Flags())
+	amount.FaucetAmount(runCmd.Flags())
+	blacklist.FaucetBlacklist(runCmd.Flags())
+	cooldown.FaucetCooldown(runCmd.Flags())
+	creditor.FaucetAddress(runCmd.Flags())
+	maxbalance.FaucetMaxBalance(runCmd.Flags())
+
+	// Register Crafter flags
+	registry.ABIs(runCmd.Flags())
+
+	// Register Opentracing flags
+	jaeger.InitFlags(runCmd.Flags())
+
+	// Register Kafka flags
+	broker.KafkaAddresses(runCmd.Flags())
+	broker.KafkaGroup(runCmd.Flags())
+	broker.KafkaTopicTxCrafter(runCmd.Flags())
+	broker.KafkaTopicTxNonce(runCmd.Flags())
 
 	return runCmd
 }
@@ -35,15 +63,11 @@ func newRunCommand() *cobra.Command {
 func run(cmd *cobra.Command, args []string) {
 	// Create app
 	ctx, cancel := context.WithCancel(context.Background())
-	a := app.New(ctx)
 
 	// Process signals
 	sig := utils.NewSignalListener(func(signal os.Signal) { cancel() })
 	defer sig.Close()
 
-	// Run App
-	a.Run()
-
-	// Wait for app to properly close
-	<-a.Done()
+	// Start application
+	app.Start(ctx)
 }
