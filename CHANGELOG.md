@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.1
+
+*Released on May 10th 2019*
+
+- [FIX] Remove first version of Open-Tracing
+
 ### Version 0.4.0
 
 *Released on May 10th 2019*
