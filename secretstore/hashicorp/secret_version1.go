@@ -39,7 +39,7 @@ func (s *SecretKV1) SaveNew() (err error) {
 	return s.Update()
 }
 
-// GetValue fetch the value from AWS SecretManager by key
+// GetValue fetch the value from vault by key
 func (s *SecretKV1) GetValue() (value string, ok bool, err error) {
 	// Read secret from Vault
 	logical := s.client.Logical()
@@ -60,7 +60,7 @@ func (s *SecretKV1) GetValue() (value string, ok bool, err error) {
 	return s.value, true, nil
 }
 
-// Update the Secret value stored in the aws Secret manager
+// Update the Secret value stored in the vault
 func (s *SecretKV1) Update() error {
 	// Load secret to Vault
 	logical := s.client.Logical()
@@ -75,7 +75,7 @@ func (s *SecretKV1) Update() error {
 	return nil
 }
 
-// Delete remove the key from the Secret manager
+// Delete remove the key from the vault
 func (s *SecretKV1) Delete() error {
 	// Delete secret in Vault
 	logical := s.client.Logical()
@@ -89,7 +89,7 @@ func (s *SecretKV1) Delete() error {
 	return nil
 }
 
-// List retrieve all the keys availables in the Secret manager
+// List retrieve all the keys availables in the vault
 func (s *SecretKV1) List(subPath string) ([]string, error) {
 
 	logical := s.client.Logical()
