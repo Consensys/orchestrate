@@ -237,6 +237,8 @@ gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.7 h1:sGEC4GFy6uIbs44ueLuu
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.7/go.mod h1:DavpQCL23Ry6d9M1MawQTRlh1s2V0ud26bNmGaArNQU=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.8 h1:LasKY0md+ogucdK7V9ZBDQG7eaS4evOVUlJYowx404Y=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.8/go.mod h1:zdQBk7TfXaZF51Qv9/dHqWWSwP0O8q9uFKUJkWkxvOk=
+gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.10 h1:g3QOW+BEV4w+9RmWQZDMSePgYhtpIspkMnWUS9lXxXo=
+gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.10/go.mod h1:zdQBk7TfXaZF51Qv9/dHqWWSwP0O8q9uFKUJkWkxvOk=
 go.uber.org/atomic v1.3.2 h1:2Oa65PReHzfn29GpvgsYwloV9AVFHPDk8tYxt2c2tr4=
 go.uber.org/atomic v1.3.2/go.mod h1:gD2HeocX3+yG+ygLZcrzQJaqmWj9AIm7n08wl/qW/PE=
 golang.org/x/crypto v0.0.0-20170930174604-9419663f5a44/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
