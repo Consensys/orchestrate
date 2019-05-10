@@ -2,7 +2,7 @@
 
 ### Version 0.4.0
 
-*Unreleased*
+*Released on May 10th 2019*
 
 - [REFACTOR] Major refactor
 
