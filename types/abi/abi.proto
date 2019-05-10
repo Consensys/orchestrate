@@ -23,9 +23,9 @@ message Contract {
 
 // Method 
 message Method {
-    // Name of the method to call on contract
-    // e.g "transfer"
-    string name = 1;
+    // Signature of the method to call on contract
+    // e.g "transfer(address,uint256)"
+    string signature = 1;
 
     // ABI of the method (Optional)
     bytes abi = 2;

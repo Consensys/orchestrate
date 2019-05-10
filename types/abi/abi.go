@@ -3,6 +3,7 @@ package abi
 import (
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -76,7 +77,12 @@ func (c *Contract) ToABI() (*abi.ABI, error) {
 	return a, nil
 }
 
-// IsDeploy indicate wether the method refers to a deployment
-func (m *Method) IsDeploy() bool {
+// IsConstructor indicate whether the method refers to a deployment
+func (m *Method) IsConstructor() bool {
 	return m.GetName() == "constructor"
+}
+
+// Short returns a short string representation of contract information
+func (m *Method) GetName() string {
+	return strings.Split(m.GetSignature(), "(")[0]
 }

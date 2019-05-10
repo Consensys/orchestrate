@@ -37,7 +37,7 @@ var testEnvelope = &envelope.Envelope{
 			Name: "ERC20",
 		},
 		Method: &abi.Method{
-			Name: "transfer",
+			Signature: "transfer(address,uint256)",
 		},
 		Args: []string{"0xfF778b716FC07D98839f48DdB88D8bE583BEB684", "0x2386f26fc10000"},
 	},

@@ -7,17 +7,14 @@ option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/com
 
 package common;
 
-// Call contains information for a contract call
+// Call contains information for a method call
 message Call {
-    // Contract to call method on
-    abi.Contract contract = 1;
-
     // Method to call
-    abi.Method method = 2; 
+    abi.Method method = 1; 
 
     // Arguments to feed on transaction call
-    repeated string args = 3;
+    repeated string args = 2;
 
     // If Quorum private for transaction
-    quorum.Quorum quorum = 4;
+    quorum.Quorum quorum = 3;
 }
