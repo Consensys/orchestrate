@@ -29,7 +29,7 @@ func TestLogLevel(t *testing.T) {
 		"--log-level=text",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err, "No error expected")
+	assert.NoError(t, err, "No error expected")
 
 	expected = "text"
 	if viper.GetString(name) != expected {
@@ -56,7 +56,7 @@ func TestLogFormat(t *testing.T) {
 		"--log-format=xml",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err, "No error expected")
+	assert.NoError(t, err, "No error expected")
 
 	expected = "xml"
 	if viper.GetString(name) != expected {

@@ -25,7 +25,7 @@ func TestSlots(t *testing.T) {
 		"--engine-slots=150",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err, "No error expected")
+	assert.NoError(t, err, "No error expected")
 
 	expected = 150
 	assert.Equal(t, expected, viper.GetInt(name), "From Flag")

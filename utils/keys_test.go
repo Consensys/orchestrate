@@ -22,10 +22,10 @@ func TestChainAccountKey(t *testing.T) {
 
 	chainID, acc, err := FromChainAccountKey("0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C@3")
 
-	assert.Nil(t, err, "Should not error")
+	assert.NoError(t, err, "Should not error")
 	assert.Equal(t, int64(3), chainID.Int64(), "ChainID should be correct")
 	assert.Equal(t, "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C", acc.Hex(), "Account should be correct")
 
 	_, _, err = FromChainAccountKey("0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C@a3")
-	assert.NotNil(t, err, "Should error")
+	assert.Error(t, err, "Should error")
 }

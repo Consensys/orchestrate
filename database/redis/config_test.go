@@ -28,7 +28,7 @@ func TestAddress(t *testing.T) {
 		"--redis-address=127.0.0.1:6379",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err, "No error expected")
+	assert.NoError(t, err, "No error expected")
 
 	expected = "127.0.0.1:6379"
 	if viper.GetString(name) != expected {
@@ -55,7 +55,7 @@ func TestLockTimeout(t *testing.T) {
 		"--redis-lock-timeout=3000",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err, "No error expected")
+	assert.NoError(t, err, "No error expected")
 
 	expected = 3000
 	if viper.GetInt(name) != expected {

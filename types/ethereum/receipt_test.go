@@ -32,7 +32,7 @@ func TestLog(t *testing.T) {
 	assert.Equal(t, "0x3b198bfd5d2907285af009e9ae84a0ecd63677110d89d7e030251acb87f6487e", log.TxHash, "TxHash should match")
 	assert.Equal(t, uint64(3), log.TxIndex, "TxIndex should match")
 	assert.Equal(t, "0x656c34545f90a730a19008c0e7a7cd4fb3895064b48d6d69761bd5abad681056", log.BlockHash, "BlockHash should match")
-	assert.Equal(t, true, log.Removed, "Removed should match")
+	assert.True(t, log.Removed, "Removed should match")
 
 	assert.Equal(t, gethLog.Topics, log.TopicsHash(), "TopicsHash should match")
 }

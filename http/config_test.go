@@ -28,7 +28,7 @@ func TestHostname(t *testing.T) {
 		"--http-hostname=127.0.0.1:3000",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err, "No error expected")
+	assert.NoError(t, err, "No error expected")
 
 	expected = "127.0.0.1:3000"
 	if viper.GetString(name) != expected {

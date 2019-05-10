@@ -29,7 +29,7 @@ func TestDBUser(t *testing.T) {
 		"--db-user=flag-user",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err, "No error expected")
+	assert.NoError(t, err, "No error expected")
 
 	expected = "flag-user"
 	assert.Equal(t, expected, viper.GetString(name), "After setting flag db user should be %q but got %q", expected, viper.GetString(name))
@@ -51,7 +51,7 @@ func TestDBPassword(t *testing.T) {
 		"--db-password=flag-password",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err, "No error expected")
+	assert.NoError(t, err, "No error expected")
 
 	expected = "flag-password"
 	assert.Equal(t, expected, viper.GetString(name), "After setting flag db password should be %q but got %q", expected, viper.GetString(name))
@@ -73,7 +73,7 @@ func TestDBDatabase(t *testing.T) {
 		"--db-database=flag-database",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err, "No error expected")
+	assert.NoError(t, err, "No error expected")
 
 	expected = "flag-database"
 	assert.Equal(t, expected, viper.GetString(name), "After setting flag db database should be %q but got %q", expected, viper.GetString(name))
@@ -95,7 +95,7 @@ func TestDBHost(t *testing.T) {
 		"--db-host=localhost",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err, "No error expected")
+	assert.NoError(t, err, "No error expected")
 
 	expected = "localhost"
 	assert.Equal(t, expected, viper.GetString(name), "After setting flag db host should be %q but got %q", expected, viper.GetString(name))
@@ -117,7 +117,7 @@ func TestDBPort(t *testing.T) {
 		"--db-port=5442",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err, "No error expected")
+	assert.NoError(t, err, "No error expected")
 
 	expected = 5442
 	assert.Equal(t, expected, viper.GetInt(name), "After setting flag db port should be %v but got %v", expected, viper.GetInt(name))
