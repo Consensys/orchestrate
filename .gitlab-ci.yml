@@ -6,6 +6,8 @@ stages:
 
 variables:
   GOPATH: ${CI_PROJECT_DIR}/.gocache
+  ARTIFACT_DOWNLOAD_ATTEMPTS: 5
+  RESTORE_CACHE_ATTEMPTS: 5
 #  CI_DEBUG_TRACE: "true"
 
 services:
