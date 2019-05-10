@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.0
+
+*Unreleased*
+
+- [REFACTOR] Major refactor
+
 ### Version 0.3.0-alpha.4
 
 *Released on April 04th 2019*
