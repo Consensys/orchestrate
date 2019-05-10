@@ -19,6 +19,9 @@ import (
 
 func init() {
 
+	viper.SetDefault(vaultMountPointViperKey, vaultMountPointDefault)
+	_ = viper.BindEnv(vaultMountPointViperKey, vaultMountPointEnv)
+
 	viper.SetDefault(vaultKVVersionViperKey, vaultKVVersionDefault)
 	_ = viper.BindEnv(vaultKVVersionViperKey, vaultKVVersionEnv)
 
@@ -62,6 +65,8 @@ func init() {
 }
 
 var (
+
+	vaultMountPointEnv	  = "VAULT_MOUNT_POINT"
 	vaultKVVersionEnv     = "VAULT_KV_VERSION"
 	vaultSecretPathEnv    = "VAULT_SECRET_PATH"
 	vaultRateLimitEnv     = "VAULT_RATE_LIMIT"
@@ -76,6 +81,7 @@ var (
 	vaultSkipVerifyEnv    = "VAULT_SKIP_VERIFY"
 	vaultTLSServerNameEnv = "VAULT_TLS_SERVER_NAME"
 
+	vaultMountPointFlag	   = "vault-mount-point"
 	vaultKVVersionFlag     = "vault-kv-version"
 	vaultSecretPathFlag    = "vault-secret-path"
 	vaultRateLimitFlag     = "vault-rate-limit"
@@ -90,6 +96,7 @@ var (
 	vaultSkipVerifyFlag    = "vault-skip-verify"
 	vaultTLSServerNameFlag = "vault-tls-server-name"
 
+	vaultMountPointViperKey	   = "vault.mount.point"
 	vaultKVVersionViperKey     = "vault.kv.version"
 	vaultSecretPathViperKey    = "vault.secret.path"
 	vaultRateLimitViperKey     = "vault.rate.limit"
@@ -105,7 +112,8 @@ var (
 	vaultTLSServerNameViperKey = "vault.tls.server.name"
 
 	// No need to redefine the default here
-	vaultKVVersionDefault     = "v2" // Could be "v2"
+	vaultMountPointDefault	  = "secret"
+	vaultKVVersionDefault     = "v2" // Could be "v1"
 	vaultSecretPathDefault    = "default"
 	vaultRateLimitDefault     float64
 	vaultBurstLimitDefault    int
@@ -122,6 +130,7 @@ var (
 
 // InitFlags register flags for hashicorp vault
 func InitFlags(f *pflag.FlagSet) {
+	VaultMountPoint(f)
 	VaultKVVersion(f)
 	VaultSecretPath(f)
 	VaultRateLimit(f)
@@ -137,12 +146,20 @@ func InitFlags(f *pflag.FlagSet) {
 	VaultTLSServerName(f)
 }
 
+// VaultMountPoint registers a flag for the kv version being used
+func VaultMountPoint(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Specifies the mount point used.
+Environment variable: %q `, vaultMountPointEnv)
+	f.String(vaultMountPointFlag, vaultMountPointDefault, desc)
+	_ = viper.BindPFlag(vaultMountPointViperKey, f.Lookup(vaultMountPointFlag))
+}
+
 // VaultKVVersion registers a flag for the kv version being used
 func VaultKVVersion(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Determine which version of the kv secret engine we will be using
 Can be "v1" or "v2".
 Environment variable: %q `, vaultKVVersionEnv)
-	f.String(vaultKVVersionFlag, vaultSecretPathDefault, desc)
+	f.String(vaultKVVersionFlag, vaultKVVersionDefault, desc)
 	_ = viper.BindPFlag(vaultKVVersionViperKey, f.Lookup(vaultKVVersionFlag))
 }
 
@@ -312,4 +329,9 @@ func GetSecretPath() string {
 // GetKVVersion returns the secret path set in deployment by vault
 func GetKVVersion() string {
 	return viper.GetString(vaultKVVersionViperKey)
+}
+
+// GetMountPoint returns the secret path set in deployment by vault
+func GetMountPoint() string {
+	return viper.GetString(vaultMountPointViperKey)
 }

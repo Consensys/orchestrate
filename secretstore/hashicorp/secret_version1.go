@@ -44,7 +44,7 @@ func (s *SecretKV1) GetValue() (value string, ok bool, err error) {
 	// Read secret from Vault
 	logical := s.client.Logical()
 	res, err := logical.Read(
-		fmt.Sprintf("%v/%v", GetSecretPath(), s.key),
+		fmt.Sprintf("%v/%v/%v", GetMountPoint(), GetSecretPath(), s.key),
 	)
 	if err != nil {
 		return "", false, err
@@ -65,7 +65,7 @@ func (s *SecretKV1) Update() error {
 	// Load secret to Vault
 	logical := s.client.Logical()
 	_, err := logical.Write(
-		fmt.Sprintf("%v/%v", GetSecretPath(), s.key),
+		fmt.Sprintf("%v/%v/%v", GetMountPoint(), GetSecretPath(), s.key),
 		map[string]interface{}{"value": s.value},
 	)
 	if err != nil {
@@ -80,7 +80,7 @@ func (s *SecretKV1) Delete() error {
 	// Delete secret in Vault
 	logical := s.client.Logical()
 	_, err := logical.Delete(
-		fmt.Sprintf("%v/%v", GetSecretPath(), s.key),
+		fmt.Sprintf("%v/%v/%v", GetMountPoint(), GetSecretPath(), s.key),
 	)
 	if err != nil {
 		return err
@@ -93,7 +93,7 @@ func (s *SecretKV1) Delete() error {
 func (s *SecretKV1) List(subPath string) ([]string, error) {
 
 	logical := s.client.Logical()
-	fullPath := GetSecretPath()
+	fullPath := fmt.Sprintf("%v/%v", GetMountPoint(), GetSecretPath())
 
 	if subPath != "" && subPath[0] == '/' {
 		subPath = subPath[1:]
