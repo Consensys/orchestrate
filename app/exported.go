@@ -8,6 +8,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/logger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/offset"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
@@ -113,12 +114,15 @@ func Start(ctx context.Context) {
 		app.ready.Store(true)
 
 		// Start consuming on topic tx-signer
-		_ = broker.Consume(
+		err := broker.Consume(
 			cancelCtx,
 			[]string{
 				viper.GetString("kafka.topic.signer"),
 			},
 			broker.NewEngineConsumerGroupHandler(engine.GlobalEngine()),
 		)
+		if err != nil {
+			log.WithError(err).Error("worker: error on consumer")
+		}
 	})
 }
