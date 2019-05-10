@@ -65,8 +65,7 @@ func init() {
 }
 
 var (
-
-	vaultMountPointEnv	  = "VAULT_MOUNT_POINT"
+	vaultMountPointEnv    = "VAULT_MOUNT_POINT"
 	vaultKVVersionEnv     = "VAULT_KV_VERSION"
 	vaultSecretPathEnv    = "VAULT_SECRET_PATH"
 	vaultRateLimitEnv     = "VAULT_RATE_LIMIT"
@@ -81,7 +80,7 @@ var (
 	vaultSkipVerifyEnv    = "VAULT_SKIP_VERIFY"
 	vaultTLSServerNameEnv = "VAULT_TLS_SERVER_NAME"
 
-	vaultMountPointFlag	   = "vault-mount-point"
+	vaultMountPointFlag    = "vault-mount-point"
 	vaultKVVersionFlag     = "vault-kv-version"
 	vaultSecretPathFlag    = "vault-secret-path"
 	vaultRateLimitFlag     = "vault-rate-limit"
@@ -96,7 +95,7 @@ var (
 	vaultSkipVerifyFlag    = "vault-skip-verify"
 	vaultTLSServerNameFlag = "vault-tls-server-name"
 
-	vaultMountPointViperKey	   = "vault.mount.point"
+	vaultMountPointViperKey    = "vault.mount.point"
 	vaultKVVersionViperKey     = "vault.kv.version"
 	vaultSecretPathViperKey    = "vault.secret.path"
 	vaultRateLimitViperKey     = "vault.rate.limit"
@@ -112,7 +111,7 @@ var (
 	vaultTLSServerNameViperKey = "vault.tls.server.name"
 
 	// No need to redefine the default here
-	vaultMountPointDefault	  = "secret"
+	vaultMountPointDefault    = "secret"
 	vaultKVVersionDefault     = "v2" // Could be "v1"
 	vaultSecretPathDefault    = "default"
 	vaultRateLimitDefault     float64
