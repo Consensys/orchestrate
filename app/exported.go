@@ -4,8 +4,6 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing"
-
 	"github.com/spf13/viper"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
@@ -81,7 +79,6 @@ func initConsumerGroup(ctx context.Context) {
 		engine.Register(loader.Loader)
 		engine.Register(offset.Marker)
 		engine.Register(producer.GlobalHandler())
-		engine.Register(opentracing.GlobalHandler())
 
 		// Specific handlers tk Tx-Crafter worker
 		engine.Register(faucet.GlobalHandler())

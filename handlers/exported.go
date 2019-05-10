@@ -4,7 +4,6 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-crafter.git/handlers/crafter"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-crafter.git/handlers/faucet"
 	gasestimator "gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-crafter.git/handlers/gas-estimator"
@@ -15,13 +14,6 @@ import (
 // Init inialize handlers
 func Init(ctx context.Context) {
 	wg := sync.WaitGroup{}
-
-	// Initialize Jaeger tracer
-	wg.Add(1)
-	go func() {
-		jaeger.Init(ctx)
-		wg.Done()
-	}()
 
 	// Initialize crafter
 	wg.Add(1)
