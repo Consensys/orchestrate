@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.4.0
+
+*Released on May 10th 2019*
+
+- [REFACTOR] Integration with the refactored pkg v0.4.10
+- [REFACTOR] Major re-org
+
 ### Version 0.3.4
 
 *Released on March 29th 2019*
