@@ -113,7 +113,7 @@ func Start(ctx context.Context) {
 		// Initialize Topics list by chain
 		topics := []string{}
 		for _, chainID := range rpc.GlobalClient().Networks(context.Background()) {
-			topics = append(topics, fmt.Sprintf("%v-%v", viper.GetString("kafka.topic.decoder"), chainID.Text(16)))
+			topics = append(topics, fmt.Sprintf("%v-%v", viper.GetString("kafka.topic.decoder"), chainID.String()))
 		}
 
 		// Indicate that application is ready
