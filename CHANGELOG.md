@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.1
+
+*Released on May 11rd 2019*
+
+- [FIX] Correct initialization of the gRPC client in the `Sender` handler
+
 ### Version 0.4.0
 
 *Released on May 3rd 2019*
