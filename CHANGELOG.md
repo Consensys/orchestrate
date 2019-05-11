@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.1
+
+*Released on May 11th 2019*
+
+- [FIX] Use base 10 numbers in topics names to be conusmes, instead of hex numbers.
+
 ### Version 0.4.0
 
 *Released on May 10th 2019*
