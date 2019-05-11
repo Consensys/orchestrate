@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"io/ioutil"
 
 	"github.com/hashicorp/go-cleanhttp"
 	retryablehttp "github.com/hashicorp/go-retryablehttp"
@@ -18,6 +19,9 @@ import (
 )
 
 func init() {
+
+	viper.SetDefault(vaultTokenFilePathViperKey, vaultTokenFilePathDefault)
+	_ = viper.BindEnv(vaultTokenFilePathViperKey, vaultTokenFilePathEnv)
 
 	viper.SetDefault(vaultMountPointViperKey, vaultMountPointDefault)
 	_ = viper.BindEnv(vaultMountPointViperKey, vaultMountPointEnv)
@@ -65,6 +69,7 @@ func init() {
 }
 
 var (
+	vaultTokenFilePathEnv = "VAULT_TOKEN_FILEPATH"
 	vaultMountPointEnv    = "VAULT_MOUNT_POINT"
 	vaultKVVersionEnv     = "VAULT_KV_VERSION"
 	vaultSecretPathEnv    = "VAULT_SECRET_PATH"
@@ -80,6 +85,7 @@ var (
 	vaultSkipVerifyEnv    = "VAULT_SKIP_VERIFY"
 	vaultTLSServerNameEnv = "VAULT_TLS_SERVER_NAME"
 
+	vaultTokenFilePathFlag = "vault-token-filepath"
 	vaultMountPointFlag    = "vault-mount-point"
 	vaultKVVersionFlag     = "vault-kv-version"
 	vaultSecretPathFlag    = "vault-secret-path"
@@ -95,6 +101,7 @@ var (
 	vaultSkipVerifyFlag    = "vault-skip-verify"
 	vaultTLSServerNameFlag = "vault-tls-server-name"
 
+	vaultTokenFilePathViperKey = "vault.token.filepath"
 	vaultMountPointViperKey    = "vault.mount.point"
 	vaultKVVersionViperKey     = "vault.kv.version"
 	vaultSecretPathViperKey    = "vault.secret.path"
@@ -111,6 +118,7 @@ var (
 	vaultTLSServerNameViperKey = "vault.tls.server.name"
 
 	// No need to redefine the default here
+	vaultTokenFilePathDefault = "/auth/vault/token"
 	vaultMountPointDefault    = "secret"
 	vaultKVVersionDefault     = "v2" // Could be "v1"
 	vaultSecretPathDefault    = "default"
@@ -129,6 +137,7 @@ var (
 
 // InitFlags register flags for hashicorp vault
 func InitFlags(f *pflag.FlagSet) {
+	VaultTokenFilePath(f)
 	VaultMountPoint(f)
 	VaultKVVersion(f)
 	VaultSecretPath(f)
@@ -143,6 +152,15 @@ func InitFlags(f *pflag.FlagSet) {
 	VaultMaxRetries(f)
 	VaultSkipVerify(f)
 	VaultTLSServerName(f)
+}
+
+// VaultTokenFilePath registers a flag for the kv version being used
+func VaultTokenFilePath(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Specifies the token file path.
+Parameter ignored if the token has been passed by VAULT_TOKEN
+Environment variable: %q `, vaultTokenFilePathEnv)
+	f.String(vaultTokenFilePathFlag, vaultTokenFilePathDefault, desc)
+	_ = viper.BindPFlag(vaultTokenFilePathViperKey, f.Lookup(vaultTokenFilePathFlag))
 }
 
 // VaultMountPoint registers a flag for the kv version being used
@@ -333,4 +351,18 @@ func GetKVVersion() string {
 // GetMountPoint returns the secret path set in deployment by vault
 func GetMountPoint() string {
 	return viper.GetString(vaultMountPointViperKey)
+}
+
+// ReadVaultToken return a string if the token has been found
+func WithVaultToken(client *vault.Client) error {
+	filePath := viper.GetString(vaultTokenFilePathViperKey)
+
+	encoded, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		log.Warningf("Token file path would not be found : %v", err.Error())
+		return err
+	}
+
+	client.SetToken(string(encoded))
+	return nil
 }
