@@ -34,8 +34,8 @@ func TestMaxBalance(t *testing.T) {
 		BalanceAt:  MockBalanceAt,
 		MaxBalance: big.NewInt(20),
 	}
-	ctrl := NewController(conf)
-	credit := ctrl.Control(mock.Credit)
+	c := NewController(conf)
+	credit := c.Control(mock.Credit)
 
 	// Prepare test data
 	rounds := 600
