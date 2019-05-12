@@ -1,21 +1,23 @@
 package nonce
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/nonce.git/nonce/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/nonce.git/nonce/redis"
+	"context"
 	"sync"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/nonce.git/nonce/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/nonce.git/nonce/redis"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 var (
-	nc      Nonce
+	nc       Nonce
 	initOnce = &sync.Once{}
 )
 
 // Init initializes Nonce
-func Init() {
+func Init(ctx context.Context) {
 	initOnce.Do(func() {
 		if nc != nil {
 			return
@@ -30,7 +32,7 @@ func Init() {
 			nc = redis.GlobalNonce()
 		case "mock":
 			// Initialize Mock Nonce
-			mock.Init()
+			mock.Init(ctx)
 
 			// Set Nonce
 			nc = mock.GlobalNonce()

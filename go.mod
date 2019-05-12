@@ -1,4 +1,4 @@
-module gitlab.com/ConsenSys/client/fr/core-stack/infra/nonce.git
+module gitlab.com/ConsenSys/client/fr/core-stack/service/nonce.git
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect

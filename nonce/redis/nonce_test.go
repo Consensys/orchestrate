@@ -211,7 +211,7 @@ func TestWaitLockRelease(t *testing.T) {
 
 	// Test the normal case
 	start := time.Now()
-	c.Send("PUBLISH", redisChannel, "del")
+	_ = c.Send("PUBLISH", redisChannel, "del")
 	err := waitLockRelease(cid, &a, c, timeout)
 	if err != nil {
 		t.Fatalf("Got error %v", err)
@@ -224,7 +224,7 @@ func TestWaitLockRelease(t *testing.T) {
 	// Test the timeout case
 	wrongKey := "wrongKey"
 	start = time.Now()
-	c.Send("PUBLISH", redisChannel, wrongKey)
+	_ = c.Send("PUBLISH", redisChannel, wrongKey)
 	err = waitLockRelease(cid, &a, c, timeout)
 	if err != nil {
 		t.Fatalf("Got error %v", err)

@@ -8,8 +8,8 @@ package main
 
 // 	"github.com/ethereum/go-ethereum/common"
 // 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
-// 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git"
-// 	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git"
+// 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git"
+// 	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git"
 // )
 
 // func mockCredit(ctx context.Context, r *services.FaucetRequest) (*big.Int, bool, error) {

@@ -1,18 +1,19 @@
 package mock
 
 import (
+	"context"
 	"sync"
 
 	log "github.com/sirupsen/logrus"
 )
 
 var (
-	nc      *Nonce
+	nc       *Nonce
 	initOnce = &sync.Once{}
 )
 
 // Init initializes Faucet
-func Init() {
+func Init(ctx context.Context) {
 	initOnce.Do(func() {
 		if nc != nil {
 			return

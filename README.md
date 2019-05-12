@@ -40,8 +40,8 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/core/services"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/nonce.git"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/nonce.git"
 )
 
 // TODO
