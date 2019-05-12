@@ -5,15 +5,14 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/nonce.git/nonce"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/nonce.git/nonce/redis"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
-
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/rpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/nonce.git/nonce"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/nonce.git/nonce/redis"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-nonce.git/app"
 )
 
@@ -49,7 +48,7 @@ func newRunCommand() *cobra.Command {
 	nonce.Type(runCmd.Flags())
 	redis.Address(runCmd.Flags())
 	redis.LockTimeout(runCmd.Flags())
-	redis.RedisNonceExpirationTime(runCmd.Flags())
+	redis.ExpirationTime(runCmd.Flags())
 
 	return runCmd
 }

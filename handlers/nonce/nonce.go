@@ -7,9 +7,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/nonce.git/nonce"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/nonce.git/nonce"
 )
 
 // GetNonceFunc should return an effective nonce for calibration (usually retrieved from an EThereum)
