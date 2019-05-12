@@ -2,7 +2,7 @@
 
 ### Version 0.4.1
 
-*Released on May 7th 2019*
+*Released on May 12th 2019*
 
 - [REFACTOR] Follow repo re-org
 
