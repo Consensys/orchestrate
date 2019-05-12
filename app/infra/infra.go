@@ -8,8 +8,8 @@ import (
 	opentracing "github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/store"
-	pgStore "gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/store/pg"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store"
+	pgStore "gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store/pg"
 )
 
 var i *Infra

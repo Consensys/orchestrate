@@ -1,4 +1,4 @@
-module gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git
+module gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git
 
 require (
 	github.com/ethereum/go-ethereum v1.8.27
@@ -19,7 +19,7 @@ require (
 	github.com/stretchr/testify v1.3.0
 	github.com/uber/jaeger-client-go v2.16.0+incompatible
 	github.com/uber/jaeger-lib v2.0.0+incompatible
-	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.8
+	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.9
 	google.golang.org/genproto v0.0.0-20180831171423-11092d34479b // indirect
 	google.golang.org/grpc v1.20.1
 )

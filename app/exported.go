@@ -8,9 +8,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/soheilhy/cmux"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/app/grpc"
-	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/app/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/app/infra"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/app/grpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/app/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/app/infra"
 )
 
 var (

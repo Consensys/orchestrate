@@ -12,8 +12,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/app/grpc"
-	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/app/infra"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/app/grpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/app/infra"
 )
 
 // Variable use as HTTP server singleton for injection pattern

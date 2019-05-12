@@ -10,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/store/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	store "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/context-store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
