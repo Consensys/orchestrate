@@ -8,7 +8,7 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/faucet"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/faucet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 )
 

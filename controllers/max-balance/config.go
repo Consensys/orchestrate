@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	viper.BindEnv(faucetMaxViperKey, faucetMaxEnv)
+	_ = viper.BindEnv(faucetMaxViperKey, faucetMaxEnv)
 	viper.SetDefault(faucetMaxViperKey, faucetMaxDefault)
 }
 
@@ -25,7 +25,7 @@ func FaucetMaxBalance(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Max balance (Wei in decimal format)
 Environment variable: %q`, faucetMaxEnv)
 	f.String(faucetMaxFlag, faucetMaxDefault, desc)
-	viper.BindPFlag(faucetMaxViperKey, f.Lookup(faucetMaxFlag))
+	_ = viper.BindPFlag(faucetMaxViperKey, f.Lookup(faucetMaxFlag))
 }
 
 // Config holds MaxBalance Controller configuration

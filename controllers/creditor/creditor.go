@@ -6,8 +6,8 @@ import (
 	"sync"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/faucet"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/faucet"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types"
 )
 
 // Controller is a controller that holds a list of account that should not be credited

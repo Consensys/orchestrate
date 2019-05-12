@@ -4,7 +4,7 @@ import (
 	"context"
 	"math/big"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types"
 )
 
 // Credit is a Mock crediting function

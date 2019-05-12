@@ -8,18 +8,13 @@ import (
 	"testing"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/faucet/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/types/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/faucet/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types/testutils"
 )
 
 var (
-	chains    = []*big.Int{big.NewInt(10), big.NewInt(2345), big.NewInt(1)}
-	addresses = []ethcommon.Address{
-		ethcommon.HexToAddress("0xab"),
-		ethcommon.HexToAddress("0xcd"),
-		ethcommon.HexToAddress("0xef"),
-	}
+	chains = []*big.Int{big.NewInt(10), big.NewInt(2345), big.NewInt(1)}
 	values = []*big.Int{big.NewInt(9), big.NewInt(11), big.NewInt(10)}
 )
 

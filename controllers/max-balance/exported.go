@@ -7,8 +7,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/faucet"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/faucet"
 )
 
 var (
@@ -51,7 +51,7 @@ func InitConfig(ctx context.Context) {
 
 	config = &Config{
 		MaxBalance: max,
-		BalanceAt:  ethclient.GlobalMultiClient().BalanceAt,
+		BalanceAt:  ethclient.GlobalClient().BalanceAt,
 	}
 }
 

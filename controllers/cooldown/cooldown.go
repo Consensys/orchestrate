@@ -7,9 +7,9 @@ import (
 	"time"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/faucet"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/types"
-	stripedmutex "gitlab.com/ConsenSys/client/fr/core-stack/infra/striped-mutex.git"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/faucet"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types"
+	stripedmutex "gitlab.com/ConsenSys/client/fr/core-stack/striped-mutex.git"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 )
 

@@ -5,9 +5,9 @@ import (
 	"math/big"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/faucet"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/faucet/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/faucet"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/faucet/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types"
 )
 
 type MockController struct {

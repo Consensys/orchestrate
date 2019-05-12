@@ -4,12 +4,12 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/controllers/amount"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/controllers/blacklist"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/controllers/cooldown"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/controllers/creditor"
-	maxbalance "gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/controllers/max-balance"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/faucet"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/controllers/amount"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/controllers/blacklist"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/controllers/cooldown"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/controllers/creditor"
+	maxbalance "gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/controllers/max-balance"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/faucet"
 )
 
 var (

@@ -8,9 +8,9 @@ import (
 	"time"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/faucet/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/faucet.git/types/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/faucet/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types/testutils"
 )
 
 var (

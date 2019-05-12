@@ -9,8 +9,8 @@ import (
 )
 
 func init() {
-	viper.BindEnv(typeViperKey, typeEnv)
 	viper.SetDefault(typeViperKey, typeDefault)
+	_ = viper.BindEnv(typeViperKey, typeEnv)
 }
 
 var (
@@ -25,7 +25,7 @@ func Type(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Type of Faucet (one of %q)
 Environment variable: %q`, []string{"mock", "sarama"}, typeEnv)
 	f.String(typeFlag, typeDefault, desc)
-	viper.BindPFlag(typeViperKey, f.Lookup(typeFlag))
+	_ = viper.BindPFlag(typeViperKey, f.Lookup(typeFlag))
 }
 
 // Config is Cooldown configuration object
