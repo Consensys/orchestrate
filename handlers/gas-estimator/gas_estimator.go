@@ -6,8 +6,8 @@ import (
 	"github.com/ethereum/go-ethereum"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
 )
 
 // EnvelopeToCallMsg enrich an ethereum.CallMsg with Envelope information
@@ -20,7 +20,7 @@ func EnvelopeToCallMsg(e *envelope.Envelope, call *ethereum.CallMsg) {
 }
 
 // Estimator creates an handler that set Gas Limit
-func Estimator(p services.GasEstimator) engine.HandlerFunc {
+func Estimator(p ethclient.GasEstimator) engine.HandlerFunc {
 	pool := &sync.Pool{
 		New: func() interface{} { return &ethereum.CallMsg{} },
 	}
@@ -34,7 +34,7 @@ func Estimator(p services.GasEstimator) engine.HandlerFunc {
 
 			// Estimate gas
 			EnvelopeToCallMsg(txctx.Envelope, call)
-			g, err := p.EstimateGas(txctx.Context(), txctx.Envelope.GetChain().ID(), *call)
+			g, err := p.EstimateGas(txctx.Context(), txctx.Envelope.GetChain().ID(), call)
 			if err != nil {
 				// TODO: handle error
 				txctx.Logger.WithError(err).Errorf("gas-estimator: could not estimate gas limit")

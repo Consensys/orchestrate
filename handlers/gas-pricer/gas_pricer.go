@@ -4,11 +4,11 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
 )
 
 // Pricer creates an handler that set Gas Price
-func Pricer(p services.GasPricer) engine.HandlerFunc {
+func Pricer(p ethclient.GasPricer) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		if txctx.Envelope.GetTx().GetTxData().GetGasPrice() == "" {
 			// Request a gas price suggestion

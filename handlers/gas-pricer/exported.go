@@ -5,8 +5,8 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
 )
 
 var (
@@ -25,7 +25,7 @@ func Init(ctx context.Context) {
 		ethclient.Init(ctx)
 
 		// Create Handler
-		handler = Pricer(ethclient.GlobalMultiClient())
+		handler = Pricer(ethclient.GlobalClient())
 
 		log.Infof("gas-pricer: handler ready")
 	})

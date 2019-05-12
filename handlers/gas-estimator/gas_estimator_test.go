@@ -20,7 +20,7 @@ type MockGasEstimator struct {
 	t *testing.T
 }
 
-func (e *MockGasEstimator) EstimateGas(ctx context.Context, chainID *big.Int, call eth.CallMsg) (uint64, error) { // nolint:gocritic
+func (e *MockGasEstimator) EstimateGas(ctx context.Context, chainID *big.Int, call *eth.CallMsg) (uint64, error) { // nolint:gocritic
 	if chainID.Text(10) == "0" {
 		return 0, fmt.Errorf("could not estimate gas")
 	}

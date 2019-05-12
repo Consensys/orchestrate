@@ -5,8 +5,8 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
 )
 
 var (
@@ -25,7 +25,7 @@ func Init(ctx context.Context) {
 		ethclient.Init(ctx)
 
 		// Create Handler
-		handler = Estimator(ethclient.GlobalMultiClient())
+		handler = Estimator(ethclient.GlobalClient())
 
 		log.Infof("gas-estimator: handler ready")
 	})
