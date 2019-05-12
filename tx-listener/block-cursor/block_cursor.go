@@ -3,7 +3,7 @@ package blockcursor
 import (
 	"math/big"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
 )
 
 // Cursor is an interface for a cursor object reading from a chain

@@ -11,9 +11,9 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/rpc"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/rpc/geth"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/rpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/rpc/geth"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
 )
 
 // Client is a connector to Ethereum blockchains that uses Geth rpc client

@@ -10,9 +10,9 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
-	mockclient "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient/mock"
-	tiptracker "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener/tip-tracker/base"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/types"
+	mockclient "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/mock"
+	tiptracker "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/tip-tracker/base"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
 )
 
 // TODO: update with disctinct blocks

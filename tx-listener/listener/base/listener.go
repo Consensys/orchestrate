@@ -8,11 +8,11 @@ import (
 	"sync/atomic"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
-	cursor "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener/block-cursor/base"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener/handler"
-	tiptracker "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener/tip-tracker/base"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
+	cursor "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/block-cursor/base"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/handler"
+	tiptracker "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/tip-tracker/base"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
 )
 
 // Client interface for a TxListener
@@ -50,15 +50,10 @@ func (l *TxListener) Listen(ctx context.Context, chains []*big.Int, h handler.Tx
 	}
 
 	// Start new listener session
-	sess, err := NewTxListenerSession(ctx, l, chains, h)
-	if err != nil {
-		return err
-	}
+	sess := NewTxListenerSession(ctx, l, chains, h)
 
-	// Wait for session exit signal
-	<-sess.ctx.Done()
-
-	return nil
+	// Start session
+	return sess.run()
 }
 
 // Close all listeners
@@ -76,60 +71,60 @@ type TxListenerSession struct {
 
 	listener *TxListener
 
-	h handler.TxListenerHandler
-
+	h      handler.TxListenerHandler
+	cancel func()
 	chains []*big.Int
 }
 
-func NewTxListenerSession(ctx context.Context, l *TxListener, chains []*big.Int, h handler.TxListenerHandler) (*TxListenerSession, error) {
+func NewTxListenerSession(ctx context.Context, l *TxListener, chains []*big.Int, h handler.TxListenerHandler) *TxListenerSession {
 	cancelCtx, cancel := context.WithCancel(ctx)
-	defer cancel()
 
-	sess := &TxListenerSession{
+	return &TxListenerSession{
 		ctx:      cancelCtx,
+		cancel:   cancel,
 		listener: l,
 		h:        h,
 		chains:   chains,
 	}
+}
 
+func (s *TxListenerSession) run() error {
 	// Call handler Setup Hook
-	err := h.Setup(sess)
+	err := s.h.Setup(s)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Start listening each chain in separate goroutines
 	wg := &sync.WaitGroup{}
-	errors := make(chan error, len(chains))
-	for _, chain := range chains {
+	errors := make(chan error, len(s.chains))
+	defer close(errors)
+	for _, chain := range s.chains {
 		wg.Add(1)
 		go func(chain *big.Int) {
 			defer wg.Done()
 			// Cancel session as soon as a first chain listener goroutine exits
-			defer cancel()
-			errors <- sess.listen(chain)
+			defer s.cancel()
+			errors <- s.listen(chain)
 		}(chain)
 	}
 
-	done := make(chan struct{})
-	go func() {
-		wg.Wait()
-		close(done)
-	}()
+	// Wait for all listening go routines to complete
+	wg.Wait()
 
-	select {
-	case err := <-errors:
-		// Wait for go routines to complete
-		wg.Wait()
-		return sess, err
-	case <-done:
-		err = h.Cleanup(sess)
-		if err != nil {
-			return sess, err
-		}
+	// Clean
+	err = s.h.Cleanup(s)
+	if err != nil {
+		return err
 	}
 
-	return sess, nil
+	select {
+	case e := <-errors:
+		err = e
+	default:
+	}
+
+	return err
 }
 
 func (s *TxListenerSession) Chains() []*big.Int {

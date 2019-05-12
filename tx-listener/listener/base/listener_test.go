@@ -11,8 +11,8 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/stretchr/testify/assert"
-	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient/mock"
-	handler "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener/handler/mock"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/mock"
+	handler "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/handler/mock"
 )
 
 // TODO: update with disctinct blocks

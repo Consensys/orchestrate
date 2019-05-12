@@ -1,4 +1,4 @@
-module gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git
+module gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git
 
 require (
 	github.com/Shopify/sarama v1.22.0

@@ -5,9 +5,9 @@ import (
 	"math/big"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener/handler"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener/listener/base"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/handler"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/listener/base"
 )
 
 var (

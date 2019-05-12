@@ -7,8 +7,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/types"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"

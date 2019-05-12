@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.16
+
+*Released on May 12th 2019*
+
+- [REFACTOR] Following repo re-org
+
 ### Version 0.4.15
 
 *Released on May 9th 2019*

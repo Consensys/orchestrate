@@ -10,7 +10,7 @@ import (
 	eth "github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/rpc"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/logger"
 )
 
 // Client is a wrapper around Geth rpc client supporint Backoff retry strategy
