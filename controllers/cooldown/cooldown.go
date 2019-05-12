@@ -7,10 +7,10 @@ import (
 	"time"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/faucet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types"
 	stripedmutex "gitlab.com/ConsenSys/client/fr/core-stack/striped-mutex.git"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 )
 
 // Controller that forces a minimum time interval between 2 credits
@@ -34,10 +34,7 @@ func NewController(conf *Config) *Controller {
 func (ctrl *Controller) IsCoolingDown(chainID *big.Int, a ethcommon.Address) bool {
 	key := utils.ToChainAccountKey(chainID, a)
 	lastAuthorized, _ := ctrl.lastAuthorized.LoadOrStore(key, time.Time{})
-	if time.Now().Sub(lastAuthorized.(time.Time)) < ctrl.conf.Delay {
-		return true
-	}
-	return false
+	return time.Since(lastAuthorized.(time.Time)) < ctrl.conf.Delay
 }
 
 func (ctrl *Controller) lock(chainID *big.Int, a ethcommon.Address) {
@@ -70,7 +67,7 @@ func (ctrl *Controller) Control(credit faucet.CreditFunc) faucet.CreditFunc {
 		// Credit
 		amount, ok, err := credit(ctx, r)
 
-		// If credit occured we update
+		// If credit occurred we update
 		if ok {
 			ctrl.Authorized(r.ChainID, r.Beneficiary)
 		}

@@ -9,8 +9,8 @@ import (
 )
 
 func init() {
-	viper.BindEnv(faucetAmountViperKey, faucetAmountEnv)
 	viper.SetDefault(faucetAmountViperKey, faucetAmountDefault)
+	_ = viper.BindEnv(faucetAmountViperKey, faucetAmountEnv)
 }
 
 var (
@@ -25,7 +25,7 @@ func FaucetAmount(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Amount to credit when calling Faucet (Wei in decimal format)
 Environment variable: %q`, faucetAmountEnv)
 	f.String(faucetAmountFlag, faucetAmountDefault, desc)
-	viper.BindPFlag(faucetAmountViperKey, f.Lookup(faucetAmountFlag))
+	_ = viper.BindPFlag(faucetAmountViperKey, f.Lookup(faucetAmountFlag))
 }
 
 // Config for fixed amount controller

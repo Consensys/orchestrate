@@ -10,13 +10,10 @@ import (
 
 // TestRequest useful data to test CreditFunc
 type TestRequest struct {
-	Req            *types.Request
-	ResultAmount   *big.Int
-	ResultOK       bool
-	ResultErr      error
-	ExpectedAmount *big.Int
-	ExpectedOK     bool
-	ExpectedErr    error
+	Req                          *types.Request
+	ResultAmount, ExpectedAmount *big.Int
+	ResultOK, ExpectedOK         bool
+	ResultErr, ExpectedErr       error
 }
 
 // AssertRequest make sure that a TestRequest is matching expected result

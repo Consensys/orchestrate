@@ -18,7 +18,7 @@ var (
 	values = []*big.Int{big.NewInt(9), big.NewInt(11), big.NewInt(10)}
 )
 
-var errTest = fmt.Errorf("Could not connect")
+var errTest = fmt.Errorf("could not connect")
 
 func MockBalanceAt(ctx context.Context, chainID *big.Int, a ethcommon.Address, blocknumber *big.Int) (*big.Int, error) {
 	if chainID.Cmp(chains[2]) == 0 {

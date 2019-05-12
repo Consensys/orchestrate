@@ -8,7 +8,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types"
 )
 
-// Controller is a Controller that set the Amount to be transfered
+// Controller is a Controller that set the Amount to be transferred
 type Controller struct {
 	conf *Config
 }

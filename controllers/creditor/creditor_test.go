@@ -23,11 +23,11 @@ var (
 
 func TestCreditor(t *testing.T) {
 	// Create Controller and set creditors
-	ctrl := NewController()
+	cntrl := NewController()
 	for i := range chains {
-		ctrl.SetCreditor(chains[i], addresses[i])
+		cntrl.SetCreditor(chains[i], addresses[i])
 	}
-	credit := ctrl.Control(mock.Credit)
+	credit := cntrl.Control(mock.Credit)
 
 	// Prepare test data
 	rounds := 600
@@ -67,8 +67,8 @@ func TestCreditor(t *testing.T) {
 
 func TestCreditorNoCreditor(t *testing.T) {
 	// Create Controller and set creditors
-	ctrl := NewController()
-	credit := ctrl.Control(mock.Credit)
+	cntrl := NewController()
+	credit := cntrl.Control(mock.Credit)
 
 	test := &testutils.TestRequest{
 		Req: &types.Request{

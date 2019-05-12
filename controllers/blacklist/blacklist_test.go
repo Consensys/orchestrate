@@ -19,16 +19,15 @@ var (
 		ethcommon.HexToAddress("0xcd"),
 		ethcommon.HexToAddress("0xef"),
 	}
-	values = []*big.Int{big.NewInt(9), big.NewInt(11), big.NewInt(10)}
 )
 
 func TestBlackList(t *testing.T) {
 	// Create Controller and blacklist addresses
-	ctrl := NewController()
+	cntrl := NewController()
 	for i := range chains {
-		ctrl.BlackList(chains[i], addresses[i])
+		cntrl.BlackList(chains[i], addresses[i])
 	}
-	credit := ctrl.Control(mock.Credit)
+	credit := cntrl.Control(mock.Credit)
 
 	// Prepare test data
 	rounds := 600

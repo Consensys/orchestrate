@@ -8,8 +8,8 @@ import (
 )
 
 func init() {
-	viper.BindEnv(creditorAddressViperKey, creditorAddressEnv)
 	viper.SetDefault(creditorAddressViperKey, creditorAddressDefault)
+	_ = viper.BindEnv(creditorAddressViperKey, creditorAddressEnv)
 }
 
 var (
@@ -24,5 +24,5 @@ func FaucetAddress(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Address of Faucet on each chain (format <chainID>:<Address>)
 Environment variable: %q`, creditorAddressEnv)
 	f.StringSlice(creditorAddressFlag, creditorAddressDefault, desc)
-	viper.BindPFlag(creditorAddressViperKey, f.Lookup(creditorAddressFlag))
+	_ = viper.BindPFlag(creditorAddressViperKey, f.Lookup(creditorAddressFlag))
 }

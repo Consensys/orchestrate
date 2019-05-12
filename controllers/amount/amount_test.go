@@ -26,8 +26,8 @@ func TestCreditor(t *testing.T) {
 	conf := &Config{
 		Amount: big.NewInt(10),
 	}
-	ctrl := NewController(conf)
-	credit := ctrl.Control(mock.Credit)
+	cntrl := NewController(conf)
+	credit := cntrl.Control(mock.Credit)
 
 	// Prepare test data
 	rounds := 600

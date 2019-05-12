@@ -20,17 +20,16 @@ var (
 		ethcommon.HexToAddress("0xcd"),
 		ethcommon.HexToAddress("0xef"),
 	}
-	values = []*big.Int{big.NewInt(9), big.NewInt(11), big.NewInt(10)}
 )
 
 func TestCoolDown(t *testing.T) {
 	// Create CoolDown controlled credit
 	conf := &Config{
-		Delay:   time.Duration(10 * time.Millisecond),
+		Delay:   10 * time.Millisecond,
 		Stripes: 2,
 	}
-	ctrl := NewController(conf)
-	credit := ctrl.Control(mock.Credit)
+	cntrl := NewController(conf)
+	credit := cntrl.Control(mock.Credit)
 
 	// Prepare test data
 	rounds := 600
