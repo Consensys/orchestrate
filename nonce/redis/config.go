@@ -2,6 +2,7 @@ package redis
 
 import (
 	"fmt"
+
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
@@ -11,8 +12,8 @@ func init() {
 	_ = viper.BindEnv(addressViperKey, addressEnv)
 	viper.SetDefault(lockTimeoutViperKey, lockTimeoutDefault)
 	_ = viper.BindEnv(lockTimeoutViperKey, lockTimeoutEnv)
-	viper.SetDefault(redisNonceExpirationTimeViperKey, redisNonceExpirationTimeDefault)
-	_ = viper.BindEnv(redisNonceExpirationTimeViperKey, redisNonceExpirationTimeEnv)
+	viper.SetDefault(expirationTimeViperKey, expirationTimeDefault)
+	_ = viper.BindEnv(expirationTimeViperKey, expirationTimeEnv)
 }
 
 var (
@@ -45,17 +46,17 @@ Environment variable: %q`, lockTimeoutEnv)
 	_ = viper.BindPFlag(lockTimeoutViperKey, f.Lookup(lockTimeoutFlag))
 }
 
-
 var (
-	redisNonceExpirationTimeFlag     = "redis-nonce-expiration-time"
-	redisNonceExpirationTimeViperKey = "redis.nonce.expiration.time"
-	redisNonceExpirationTimeDefault  = 3
-	redisNonceExpirationTimeEnv      = "REDIS_NONCE_EXPIRATION_TIME"
+	expirationTimeFlag     = "redis-nonce-expiration-time"
+	expirationTimeViperKey = "redis.nonce.expiration.time"
+	expirationTimeDefault  = 3
+	expirationTimeEnv      = "REDIS_NONCE_EXPIRATION_TIME"
 )
 
-func RedisNonceExpirationTime(f *pflag.FlagSet) {
+// ExpirationTime register expriration time flag
+func ExpirationTime(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Redis nonce expiration time (duration in s).
-Environment variable: %q`, redisNonceExpirationTimeEnv)
-	f.Int(redisNonceExpirationTimeFlag, redisNonceExpirationTimeDefault, desc)
-	_ = viper.BindPFlag(redisNonceExpirationTimeViperKey, f.Lookup(redisNonceExpirationTimeFlag))
+Environment variable: %q`, expirationTimeEnv)
+	f.Int(expirationTimeFlag, expirationTimeDefault, desc)
+	_ = viper.BindPFlag(expirationTimeViperKey, f.Lookup(expirationTimeFlag))
 }

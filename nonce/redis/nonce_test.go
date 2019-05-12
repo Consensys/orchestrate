@@ -17,7 +17,7 @@ import (
 var chainNonce = uint64(42)
 var defaultTimeout = 500
 
-func nMock() (*Nonce, string, func()) {
+func nMock() (nonce *Nonce, addr string, clean func()) {
 	s, err := miniredis.Run()
 	if err != nil {
 		panic(err)

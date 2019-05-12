@@ -1,14 +1,14 @@
 package redis
 
 import (
-	"github.com/spf13/viper"
 	"sync"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 var (
-	nc      *Nonce
+	nc       *Nonce
 	initOnce = &sync.Once{}
 )
 

@@ -58,7 +58,7 @@ func toDuration(t int) time.Duration {
 // Get returns the value of the nonce from the cache if it exists and returns the last time
 // the nonce was gotten or set (idleTime)
 // If the nonce does not exist in the cache, the function returns -1 as idleTime
-func (nm *Nonce) Get(chainID *big.Int, a *common.Address) (uint64, int, error) {
+func (nm *Nonce) Get(chainID *big.Int, a *common.Address) (nonce uint64, ok int, err error) {
 	idleTime, err := nm.getIdleTime(chainID, a)
 	if err != nil {
 		return 0, 0, err
@@ -179,5 +179,5 @@ func (nm *Nonce) Unlock(chainID *big.Int, a *common.Address, lockSig string) err
 		}
 		return nil
 	}
-	return errors.New("Lock based on another locking signature, did not unlock the lock")
+	return errors.New("lock based on another locking signature, did not unlock the lock")
 }
