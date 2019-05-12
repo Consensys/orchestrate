@@ -6,10 +6,10 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
-	txlconfig "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener/handler/base"
-	txlhandler "gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener/handler/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/tx-listener/listener"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
+	txlconfig "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/handler/base"
+	txlhandler "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/handler/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/listener"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/logger"

@@ -6,7 +6,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	grpcstore "gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/store/grpc"
+	grpcstore "gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store/grpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 

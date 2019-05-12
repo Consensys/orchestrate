@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
