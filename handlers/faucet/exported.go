@@ -5,9 +5,9 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/controllers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/faucet"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
 var (
