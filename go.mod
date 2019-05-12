@@ -9,6 +9,7 @@ require (
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.3.0
-	gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git v0.4.0
 	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.10
+	gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git v0.4.1
+	google.golang.org/appengine v1.4.0 // indirect
 )

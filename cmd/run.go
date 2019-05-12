@@ -5,9 +5,9 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/keystore"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/hashicorp"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/keystore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/secretstore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/secretstore/hashicorp"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
