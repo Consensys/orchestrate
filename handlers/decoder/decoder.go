@@ -6,8 +6,8 @@ import (
 
 	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/abi/decoder"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/abi/registry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/decoder"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
