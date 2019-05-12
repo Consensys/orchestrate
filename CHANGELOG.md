@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.17
+
+*Released on May 12th 2019*
+
+- [FIX] Bug on linter to make files compatible to 'goimports'-ed
+
 ### Version 0.4.16
 
 *Released on May 12th 2019*
