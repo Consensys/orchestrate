@@ -6,8 +6,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	grpcstore "gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store/grpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	grpcstore "gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store/grpc"
 )
 
 var (

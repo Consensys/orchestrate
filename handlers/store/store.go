@@ -3,8 +3,8 @@ package store
 import (
 	log "github.com/sirupsen/logrus"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store"
 )
 
 // EnvelopeLoader creates and handler that load traces
