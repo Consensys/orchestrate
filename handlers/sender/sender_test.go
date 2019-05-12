@@ -11,12 +11,12 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git/store/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
 )
 
 type MockTxSender struct {
@@ -30,14 +30,14 @@ func (s *MockTxSender) SendRawTransaction(ctx context.Context, chainID *big.Int,
 	return nil
 }
 
-func (s *MockTxSender) SendTransaction(ctx context.Context, chainID *big.Int, args *ethclient.SendTxArgs) (ethcommon.Hash, error) {
+func (s *MockTxSender) SendTransaction(ctx context.Context, chainID *big.Int, args *types.SendTxArgs) (ethcommon.Hash, error) {
 	if chainID.Text(10) == "0" {
 		return ethcommon.Hash{}, fmt.Errorf("could not send")
 	}
 	return ethcommon.HexToHash("0x" + RandString(32)), nil
 }
 
-func (s *MockTxSender) SendRawPrivateTransaction(ctx context.Context, chainID *big.Int, raw string, args *ethclient.PrivateArgs) (ethcommon.Hash, error) {
+func (s *MockTxSender) SendRawPrivateTransaction(ctx context.Context, chainID *big.Int, raw string, args *types.PrivateArgs) (ethcommon.Hash, error) {
 	if chainID.Text(10) == "0" {
 		return ethcommon.Hash{}, fmt.Errorf("could not send")
 	}

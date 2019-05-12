@@ -8,7 +8,7 @@ require (
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.3.0
-	gitlab.com/ConsenSys/client/fr/core-stack/api/context-store.git v0.3.0
-	gitlab.com/ConsenSys/client/fr/core-stack/infra/ethereum.git v0.4.8
-	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.8
+	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.10
+	gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git v0.3.1
+	gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.4.16
 )

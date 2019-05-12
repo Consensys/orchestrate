@@ -1,8 +1,14 @@
 # CHANGELOG
 
+### Version 0.4.2
+
+*Released on May 12th 2019*
+
+- [REFACTOR] Follow repos re-org
+
 ### Version 0.4.1
 
-*Released on May 11rd 2019*
+*Released on May 11th 2019*
 
 - [FIX] Correct initialization of the gRPC client in the `Sender` handler
 
