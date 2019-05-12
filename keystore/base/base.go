@@ -5,10 +5,10 @@ import (
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/keystore/session"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/keystore/wallet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/secretstore/services"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 )
 
 // KeyStore olds the methods of the interfaces BaseKeyStore
