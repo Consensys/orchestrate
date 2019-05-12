@@ -45,6 +45,10 @@ test:
     - docker-compose up --build --force-recreate -d
     - docker exec hashicorp_key-store_1 bash -c "go mod download && cd e2e/hashicorp/scripts && bash run-test.sh"
     - exit $?
+  cache:
+    policy: pull
+    paths:
+      - ${GOPATH}
   except:
       - tags
 

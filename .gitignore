@@ -14,3 +14,30 @@
 # Coverage
 coverage.html
 *.cov.tmp
+
+# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
+.DS_Store
+.idea
+*.iml
+
+# CMake
+cmake-build-*/
+
+# File-based project format
+*.iws
+*.ipr
+
+# mpeltonen/sbt-idea plugin
+.idea_modules/
+
+# JIRA plugin
+atlassian-ide-plugin.xml
+
+# Environment file
+.env
+
+# Go packages and sources:
+.gocache
+
+# Visual Code Studio
+.vscode
