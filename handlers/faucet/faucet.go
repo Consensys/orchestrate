@@ -2,9 +2,9 @@ package faucet
 
 import (
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/faucet"
 	faucettypes "gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
 // Faucet creates a Faucet handler

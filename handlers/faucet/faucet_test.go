@@ -9,10 +9,10 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	faucettypes "gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	faucettypes "gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types"
 )
 
 type MockFaucet struct {
