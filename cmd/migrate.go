@@ -6,8 +6,8 @@ import (
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store/pg/migrations"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/database/postgres"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store/pg/migrations"
 )
 
 // mewMigrateCmd create migrate command
