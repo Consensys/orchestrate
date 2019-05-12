@@ -10,11 +10,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
-	handlercfg "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/handler/base"
-	handler "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/handler/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/listener"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/listener/base"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
@@ -23,6 +18,11 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
+	handlercfg "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/handler/base"
+	handler "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/handler/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/listener"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/listener/base"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
 )
 
 // Loader is a Middleware enginer.HandlerFunc that Load sarama.ConsumerGroup messages

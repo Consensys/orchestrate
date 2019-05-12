@@ -8,11 +8,11 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/gogo/protobuf/proto"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/handler/base"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/handler/base"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
 )
 
 // Handler implements TxListenerHandler interface

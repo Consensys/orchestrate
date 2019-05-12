@@ -6,9 +6,9 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/handler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
 // Handler implements TxListenerHandler interface
