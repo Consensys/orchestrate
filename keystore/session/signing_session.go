@@ -7,8 +7,8 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/keystore/wallet"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/keystore/wallet"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/secretstore/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 )
 
