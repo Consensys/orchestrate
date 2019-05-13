@@ -5,6 +5,7 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/keystore"
 )
 
@@ -75,7 +76,7 @@ func Signer(s keystore.KeyStore) engine.HandlerFunc {
 		txctx.Envelope.Tx.SetRaw(enc)
 		txctx.Envelope.Tx.SetHash(*h)
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"tx.raw":  enc,
+			"tx.raw":  utils.ShortString(enc, 10),
 			"tx.hash": h.Hex(),
 		})
 		txctx.Logger.Debugf("signer: transaction signed")
