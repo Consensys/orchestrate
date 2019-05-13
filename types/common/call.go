@@ -20,7 +20,7 @@ func (c *Call) IsConstructor() bool {
 // SignatureToCall returns a Call object from a short String
 func SignatureToCall(s string) (*Call, error) {
 	if !utils.IsValidSignature(s) {
-		return nil, fmt.Errorf("invalid signature format, expecting ")
+		return nil, fmt.Errorf("invalid signature format, expecting func(type1,type2) got %v", s)
 	}
 
 	return &Call{
