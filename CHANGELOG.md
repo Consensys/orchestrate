@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.2
+
+*Released on May 13th 2019*
+
+- [FIX] Bug that panics when `Envelope.TxData` is missing
+
 ### Version 0.4.1
 
 *Released on May 12th 2019*
