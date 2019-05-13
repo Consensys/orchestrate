@@ -42,9 +42,12 @@ func TestGetAndUpdateNonceCache(t *testing.T) {
 	mockRedisConn.Command("OBJECT", "IDLETIME", computeKey(cid, &a)).Expect(nil).Expect(int64(1000))
 	mockRedisConn.Command("SET", computeKey(cid, &a), uint64(nonceBefore+1)).Expect("OK")
 	mockRedisConn.Command("GET", computeKey(cid, &a)).Expect(int64(nonceBefore + 1))
-	mockRedisPool := redis.NewPool(func() (redis.Conn, error) {
-		return mockRedisConn, nil
-	}, 10)
+	mockRedisPool := &redis.Pool{
+		Dial: func() (redis.Conn, error) {
+			return mockRedisConn, nil
+		},
+		MaxIdle: 10,
+	}
 	mockWaitLockRelease := func(chainID *big.Int, a *common.Address, c redis.Conn, timeout time.Duration) error { return nil }
 	n := Nonce{pool: mockRedisPool, waitLockRelease: mockWaitLockRelease}
 
@@ -86,9 +89,12 @@ func TestGetAndUpdateNonceCache(t *testing.T) {
 		mockRedisConn.Command("GET", computeKey(cid, &a)).ExpectError(errors.New("error"))
 		mockRedisConn.Command("DEL", computeLockName(cid, &a)).ExpectError(errors.New("error"))
 		mockRedisConn.Command("OBJECT", "IDLETIME", computeKey(cid, &a)).Expect(int64(1)).ExpectError(errors.New("error"))
-		mockRedisPool := redis.NewPool(func() (redis.Conn, error) {
-			return mockRedisConn, nil
-		}, 10)
+		mockRedisPool := &redis.Pool{
+			Dial: func() (redis.Conn, error) {
+				return mockRedisConn, nil
+			},
+			MaxIdle: 10,
+		}
 		mockWaitLockRelease := func(chainID *big.Int, a *common.Address, c redis.Conn, timeout time.Duration) error { return nil }
 		n := Nonce{pool: mockRedisPool, waitLockRelease: mockWaitLockRelease}
 
@@ -120,9 +126,12 @@ func TestGetAndUpdateNonceCache(t *testing.T) {
 		cid := big.NewInt(36)
 		a := common.HexToAddress("0xabcdabcdabcdabcdabcdabcd")
 		mockRedisConn := redigomock.NewConn()
-		mockRedisPool := redis.NewPool(func() (redis.Conn, error) {
-			return mockRedisConn, nil
-		}, 10)
+		mockRedisPool := &redis.Pool{
+			Dial: func() (redis.Conn, error) {
+				return mockRedisConn, nil
+			},
+			MaxIdle: 10,
+		}
 
 		mockWaitLockRelease := func(chainID *big.Int, a *common.Address, c redis.Conn, timeout time.Duration) error { return nil }
 		n := Nonce{pool: mockRedisPool, waitLockRelease: mockWaitLockRelease}
@@ -141,9 +150,12 @@ func TestGetLock(t *testing.T) {
 	mockRedisConn.Command("SET", computeLockName(cid, &a), redigomock.NewAnyData(), "NX", "PX", redigomock.NewAnyData()).Expect("KO").Expect("OK")
 	mockRedisConn.GenericCommand("UNSUBSCRIBE").Expect(nil)
 	mockRedisConn.GenericCommand("ECHO").Expect(nil)
-	mockRedisPool := redis.NewPool(func() (redis.Conn, error) {
-		return mockRedisConn, nil
-	}, 10)
+	mockRedisPool := &redis.Pool{
+		Dial: func() (redis.Conn, error) {
+			return mockRedisConn, nil
+		},
+		MaxIdle: 10,
+	}
 	mockWaitLockRelease := func(chainID *big.Int, a *common.Address, c redis.Conn, timeout time.Duration) error { return nil }
 	n := Nonce{pool: mockRedisPool, waitLockRelease: mockWaitLockRelease}
 
