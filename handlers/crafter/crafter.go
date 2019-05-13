@@ -9,6 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/crafter"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry"
 )
@@ -94,7 +95,7 @@ func Crafter(r registry.Registry, c crafter.Crafter) engine.HandlerFunc {
 		}
 
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"tx.data": hexutil.Encode(payload),
+			"tx.data": utils.ShortString(hexutil.Encode(payload), 10),
 		})
 
 		// Attach transaction payload to Envelope
