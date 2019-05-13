@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.3
+
+*Released on May 13th 2019*
+
+- [FIX] Shrink `txctx.raw` data length in logger for debuging
+
 ### Version 0.4.2
 
 *Released on May 12th 2019*
