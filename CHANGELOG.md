@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.5.0
+
+*Released on May 9th 2019*
+
+- [FEAT] Change call method format from func@contract to func(type1,type2)
+
 ### Version 0.4.10
 
 *Released on May 9th 2019*
