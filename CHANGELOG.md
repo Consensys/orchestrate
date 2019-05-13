@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.4.4
+
+*Released on May 13th 2019*
+
+- [FEAT] Shrink data field in logger for debuging
+- [FIX] Add log when exiting consumer loop
+
 ### Version 0.4.3
 
 *Released on May 12th 2019*
