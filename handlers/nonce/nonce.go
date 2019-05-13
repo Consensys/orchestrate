@@ -8,6 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/nonce.git/nonce"
 )
 
@@ -78,7 +79,12 @@ func Handler(nc nonce.Nonce, getChainNonce GetNonceFunc) engine.HandlerFunc {
 			}
 		}
 
-		// Set Nonce value on Trace
+		// Set Nonce value on Envelope
+		if txctx.Envelope.GetTx() == nil {
+			txctx.Envelope.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{}}
+		} else if txctx.Envelope.GetTx().GetTxData() == nil {
+			txctx.Envelope.Tx.TxData = &ethereum.TxData{}
+		}
 		txctx.Envelope.GetTx().GetTxData().SetNonce(n)
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"tx.nonce": n,
