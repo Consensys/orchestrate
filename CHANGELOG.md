@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.5
+
+*Unreleased*
+
+- [FIX] Make `method.id` readable in logs
+
 ### Version 0.4.4
 
 *Released on May 13th 2019*
