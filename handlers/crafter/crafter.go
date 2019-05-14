@@ -57,7 +57,7 @@ func Crafter(r registry.Registry, c crafter.Crafter) engine.HandlerFunc {
 		log.WithFields(log.Fields{
 			"method.sig":    method.Sig(),
 			"method.string": method.String(),
-			"method.id":     method.Id(),
+			"method.id":     hexutil.Encode(method.Id()),
 		}).Debugf("crafter: method call")
 
 		var (
