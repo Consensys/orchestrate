@@ -1,12 +1,26 @@
 package static
 
 import (
+	"errors"
 	"testing"
 
-	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
 )
+
+type sigTest struct {
+	contract string
+	sig      string
+	result   string
+	err      error
+}
+
+type selectorTest struct {
+	selector string
+	result   string
+	err      error
+}
 
 var ERC1400 = []byte(
 	`[{
@@ -39,108 +53,124 @@ var ERC1400 = []byte(
     "payable": false,
     "stateMutability": "view",
     "type": "function"
-	}]`)
+    }]`)
 
-func shouldMatch(f interface{}, input, expect string, t *testing.T) {
-	var s string
-	switch f := f.(type) {
-	case func(string) (*ethabi.Method, error):
-		method, _ := f(input)
-		s = method.String()
-	case func(string) (*ethabi.Event, error):
-		event, _ := f(input)
-		s = event.String()
-	}
-	if s != expect {
-		t.Errorf("%v: wrong abi returned, expected %v, got %v", input, expect, s)
-	}
-}
-
-func shouldError(f interface{}, input string, t *testing.T) {
-	var err error
-	switch f := f.(type) {
-	case func(string) (*ethabi.Method, error):
-		_, err = f(input)
-	case func(string) (*ethabi.Event, error):
-		_, err = f(input)
-	}
-
-	if err == nil {
-		t.Errorf("%v id tag should have returned an error", input)
-	}
-}
+var ERC1400Contract = &abi.Contract{Name: "ERC1400", Tag: "", Abi: ERC1400, Bytecode: []byte{}}
 
 func TestRegisterContract(t *testing.T) {
 	r := NewRegistry()
 	err := r.RegisterContract(&abi.Contract{Name: "ERC1400", Tag: "", Abi: []byte{}, Bytecode: []byte{}})
-	if err != nil {
-		t.Error("Should not error on empty ABI")
-	}
+	assert.NoError(t, err, "Should not error on empty ABI")
 
-	err = r.RegisterContract(&abi.Contract{Name: "ERC1400", Tag: "", Abi: ERC1400, Bytecode: []byte{}})
-	if err != nil {
-		t.Errorf("Got error %v when registering contract", err)
-	}
-}
-
-func TestContractRegistryByID(t *testing.T) {
-	r := NewRegistry()
-	err := r.RegisterContract(&abi.Contract{Name: "ERC1400", Tag: "", Abi: ERC1400, Bytecode: []byte{}})
-	assert.Nil(t, err)
-
-	method := r.GetMethodByID
-	shouldMatch(method, "isMinter@ERC1400", "function isMinter(address account) constant returns(bool)", t)
-	shouldMatch(method, "constructor@ERC1400", "function () returns()", t)
-	shouldError(method, "isMinters@ERC1400", t)
-	shouldError(method, "is@Minters@ERC1400", t)
-	shouldError(method, "isMinter@ERC1401", t)
-	shouldError(method, "isMinters@ERC1401", t)
-
-	event := r.GetEventByID
-	shouldMatch(event, "MinterAdded@ERC1400", "event MinterAdded(address indexed account)", t)
-	shouldError(event, "MinterAdd@ERC1400", t)
-	shouldError(event, "is@MinterAdded@ERC1400", t)
-	shouldError(event, "MinterAdded@ERC1401", t)
-	shouldError(event, "MinterAdded@ERC1401", t)
-
-	r = NewRegistry()
-	err = r.RegisterContract(&abi.Contract{Name: "ERC1400", Tag: "v0.1.1", Abi: ERC1400, Bytecode: []byte{}})
-	assert.Nil(t, err)
-
-	method = r.GetMethodByID
-	shouldMatch(method, "isMinter@ERC1400[v0.1.1]", "function isMinter(address account) constant returns(bool)", t)
-	shouldMatch(method, "constructor@ERC1400[v0.1.1]", "function () returns()", t)
-	shouldError(method, "isMinters@ERC1400[v0.1.1]", t)
-	shouldError(method, "is@Minters@ERC1400[v0.1.1]", t)
-	shouldError(method, "isMinter@ERC1401[v0.1.1]", t)
-	shouldError(method, "isMinters@ERC1401[v0.1.1]", t)
-
-	event = r.GetEventByID
-	shouldMatch(event, "MinterAdded@ERC1400[v0.1.1]", "event MinterAdded(address indexed account)", t)
-	shouldError(event, "MinterAdd@ERC1400[v0.1.1]", t)
-	shouldError(event, "is@MinterAdded@ERC1400[v0.1.1]", t)
-	shouldError(event, "MinterAdded@ERC1401[v0.1.1]", t)
-	shouldError(event, "MinterAdded@ERC1401[v0.1.1]", t)
+	err = r.RegisterContract(ERC1400Contract)
+	assert.NoError(t, err, "Got error %v when registering contract")
 }
 
 func TestContractRegistryBySig(t *testing.T) {
 	r := NewRegistry()
-	err := r.RegisterContract(&abi.Contract{Name: "ERC1400", Tag: "", Abi: ERC1400, Bytecode: []byte{}})
-	assert.Nil(t, err)
+	err := r.RegisterContract(ERC1400Contract)
+	assert.NoError(t, err)
 
-	method := r.GetMethodBySig
-	shouldMatch(method, "0xaa271e1a", "function isMinter(address account) constant returns(bool)", t)
-	shouldMatch(method, "aa271e1a", "function isMinter(address account) constant returns(bool)", t)
-	shouldError(method, "0xaa271e1ab", t)
-	shouldError(method, "0xaa271e1b", t)
-	shouldError(method, "wrong", t)
+	tests := []sigTest{
+		{contract: "ERC1400", sig: "isMinter(address)", result: "function isMinter(address account) constant returns(bool)", err: nil},
+		{contract: "ERC1400", sig: "constructor()", result: "function () returns()", err: nil},
+		{contract: "ERC1400", sig: "isMinters(address)", result: "", err: errors.New("")},
+		{contract: "ERC1400", sig: "is()Minters()", result: "", err: errors.New("")},
+		{contract: "ERC1401", sig: "isMinter(address)", result: "", err: errors.New("")},
+		{contract: "ERC1401", sig: "isMinters(address)", result: "", err: errors.New("")},
+	}
+	for _, test := range tests {
+		result, resErr := r.GetMethodBySig(test.contract, test.sig)
+		assert.IsType(t, test.err, resErr)
+		if resErr == nil {
+			assert.Equal(t, test.result, result.String())
+		}
+	}
 
-	event := r.GetEventBySig
+	tests = []sigTest{
+		{contract: "ERC1400", sig: "MinterAdded(address)", result: "event MinterAdded(address indexed account)", err: nil},
+		{contract: "ERC1400", sig: "MinterAdd(address)", result: "", err: errors.New("")},
+		{contract: "ERC1400", sig: "is()MinterAdded", result: "", err: errors.New("")},
+		{contract: "ERC1401", sig: "MinterAdded(address)", result: "", err: errors.New("")},
+	}
+	for _, test := range tests {
+		result, resErr := r.GetEventBySig(test.contract, test.sig)
+		assert.IsType(t, test.err, resErr)
+		if resErr == nil {
+			assert.Equal(t, test.result, result.String())
+		}
+	}
+
+	r = NewRegistry()
+	err = r.RegisterContract(&abi.Contract{Name: "ERC1400", Tag: "v0.1.1", Abi: ERC1400, Bytecode: []byte{}})
+	assert.NoError(t, err)
+
+	tests = []sigTest{
+		{contract: "ERC1400[v0.1.1]", sig: "isMinter(address)", result: "function isMinter(address account) constant returns(bool)", err: nil},
+		{contract: "ERC1400[v0.1.1]", sig: "constructor()", result: "function () returns()", err: nil},
+		{contract: "ERC1400[v0.1.1]", sig: "isMinters()", result: "", err: errors.New("")},
+		{contract: "ERC1400[v0.1.1]", sig: "is()Minters()", result: "", err: errors.New("")},
+		{contract: "ERC1401[v0.1.1]", sig: "isMinter())", result: "", err: errors.New("")},
+		{contract: "ERC1401[v0.1.1]", sig: "isMinters())", result: "", err: errors.New("")},
+	}
+	for _, test := range tests {
+		result, resErr := r.GetMethodBySig(test.contract, test.sig)
+		assert.IsType(t, test.err, resErr)
+		if resErr == nil {
+			assert.Equal(t, test.result, result.String())
+		}
+	}
+
+	tests = []sigTest{
+		{contract: "ERC1400[v0.1.1]", sig: "MinterAdded(address)", result: "event MinterAdded(address indexed account)", err: nil},
+		{contract: "ERC1400[v0.1.1]", sig: "MinterAdd(address)", result: "", err: errors.New("")},
+		{contract: "ERC1400[v0.1.1]", sig: "is()MinterAdded", result: "", err: errors.New("")},
+		{contract: "ERC1401[v0.1.1]", sig: "MinterAdded(address)", result: "", err: errors.New("")},
+	}
+	for _, test := range tests {
+		result, resErr := r.GetEventBySig(test.contract, test.sig)
+		assert.IsType(t, test.err, resErr)
+		if resErr == nil {
+			assert.Equal(t, test.result, result.String())
+		}
+	}
+}
+
+func TestContractRegistryBySelector(t *testing.T) {
+	r := NewRegistry()
+	err := r.RegisterContract(ERC1400Contract)
+	assert.NoError(t, err)
+
+	tests := []selectorTest{
+		{selector: "0xaa271e1a", result: "function isMinter(address account) constant returns(bool)", err: nil},
+		{selector: "aa271e1a", result: "function isMinter(address account) constant returns(bool)", err: nil},
+		{selector: "0xaa271e1ab", result: "", err: hexutil.ErrSyntax},
+		{selector: "0xaa271e1b", result: "", err: errors.New("")},
+		{selector: "wrong", result: "", err: hexutil.ErrSyntax},
+	}
+	for _, test := range tests {
+		result, resErr := r.GetMethodBySelector(test.selector)
+		assert.IsType(t, test.err, resErr)
+		if resErr == nil {
+			assert.Equal(t, test.result, result.String())
+		}
+	}
+
 	sig := "6ae172837ea30b801fbfcdd4108aa1d5bf8ff775444fd70256b44e6bf3dfc3f6"
 	sig0x := "0x" + sig
-	shouldMatch(event, sig, "event MinterAdded(address indexed account)", t)
-	shouldMatch(event, sig0x, "event MinterAdded(address indexed account)", t)
-	shouldError(event, "6ae172837ea30b801fbfcdd4108aa1d5bf8ff775444fd70256b44e6bf3dfc3f", t)
-	shouldError(event, sig[:63]+"a", t)
-	shouldError(event, "wrong", t)
+
+	tests = []selectorTest{
+		{selector: sig, result: "event MinterAdded(address indexed account)", err: nil},
+		{selector: sig0x, result: "event MinterAdded(address indexed account)", err: nil},
+		{selector: sig[:63], result: "", err: hexutil.ErrSyntax},
+		{selector: sig[:63] + "a", result: "", err: errors.New("")},
+		{selector: "wrong", result: "", err: hexutil.ErrSyntax},
+	}
+	for _, test := range tests {
+		result, resErr := r.GetEventBySelector(test.selector)
+		assert.IsType(t, test.err, resErr)
+		if resErr == nil {
+			assert.Equal(t, test.result, result.String())
+		}
+	}
 }

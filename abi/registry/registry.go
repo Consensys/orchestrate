@@ -7,16 +7,19 @@ import (
 
 // Registry is an interface to manage ABIs
 type Registry interface {
-	// Retrieve method using unique identifier
-	GetMethodByID(ID string) (*ethabi.Method, error)
-	// Retrieve method using 4 bytes signature
-	GetMethodBySig(sig string) (*ethabi.Method, error)
-	// Retrieve event using unique identifier
-	GetEventByID(ID string) (*ethabi.Event, error)
-	// Retrieve event using 4 bytes signature
-	GetEventBySig(sig string) (*ethabi.Event, error)
 	// Register a new contract in the ABI
 	RegisterContract(contract *abi.Contract) error
+
+	// Retrieve method using 4 bytes unique selector
+	GetMethodBySelector(selector string) (*ethabi.Method, error)
+	// Retrieve method using signature
+	GetMethodBySig(contract, signature string) (*ethabi.Method, error)
+
+	// Retrieve event using 4 bytes unique selector
+	GetEventBySelector(selector string) (*ethabi.Event, error)
+	// Retrieve event using signature
+	GetEventBySig(contract, signature string) (*ethabi.Event, error)
+
 	// Returns the new bytecode
 	GetBytecodeByID(id string) ([]byte, error)
 }

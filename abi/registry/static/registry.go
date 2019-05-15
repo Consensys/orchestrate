@@ -15,17 +15,17 @@ type Registry struct {
 	abis      map[string]*ethabi.ABI
 	bytecodes map[string][]byte
 
-	abiMethodBySig map[string]ethabi.Method
-	abiEventBySig  map[string]ethabi.Event
+	abiMethods map[string]ethabi.Method
+	abiEvents  map[string]ethabi.Event
 }
 
 // NewRegistry creates a New Registry
 func NewRegistry() *Registry {
 	return &Registry{
-		abis:           make(map[string]*ethabi.ABI),
-		bytecodes:      make(map[string][]byte),
-		abiMethodBySig: make(map[string]ethabi.Method),
-		abiEventBySig:  make(map[string]ethabi.Event),
+		abis:       make(map[string]*ethabi.ABI),
+		bytecodes:  make(map[string][]byte),
+		abiMethods: make(map[string]ethabi.Method),
+		abiEvents:  make(map[string]ethabi.Event),
 	}
 }
 
@@ -42,11 +42,11 @@ func (r *Registry) RegisterContract(contract *abi.Contract) error {
 
 	// TODO differentiate registering vs updating
 	for _, method := range r.abis[contract.Short()].Methods {
-		r.abiMethodBySig[hexutil.Encode(method.Id())] = method
+		r.abiMethods[hexutil.Encode(method.Id())] = method
 	}
 
 	for _, event := range r.abis[contract.Short()].Events {
-		r.abiEventBySig[event.Id().Hex()] = event
+		r.abiEvents[event.Id().Hex()] = event
 	}
 
 	return nil
@@ -60,53 +60,53 @@ func (r *Registry) getContract(name string) (*ethabi.ABI, error) {
 	return contractAbi, nil
 }
 
-// GetMethodByID returns the abi for a given method of a contract
-// id should match the following pattern "<MethodName>@<ContracName>"
-func (r *Registry) GetMethodByID(id string) (*ethabi.Method, error) {
-	// Computing call ensure ID has been properly formated
-	call, err := common.StringToCall(id)
+// GetMethodBySig returns the abi for a given method of a contract
+// sig should match the following pattern "func(type1,type2)"
+func (r *Registry) GetMethodBySig(contract, sig string) (*ethabi.Method, error) {
+	// Computing call ensure sig has been properly formated
+	call, err := common.SignatureToCall(sig)
 	if err != nil {
-		return &ethabi.Method{}, err
+		return nil, err
 	}
 
 	// Retrieve contract ABI from registry
-	contractAbi, err := r.getContract(call.GetContract().Short())
+	contractAbi, err := r.getContract(contract)
 	if err != nil {
-		return &ethabi.Method{}, err
+		return nil, err
 	}
 
 	// If call is a deployment we return constructor
-	if call.IsDeploy() {
+	if call.IsConstructor() {
 		return &contractAbi.Constructor, nil
 	}
 
 	method, ok := contractAbi.Methods[call.GetMethod().GetName()]
 	if !ok {
-		return &ethabi.Method{}, fmt.Errorf("contract %q has no method %q", call.GetContract().Short(), call.GetMethod().GetName())
+		return nil, fmt.Errorf("contract %q has no method %q", contract, call.GetMethod().GetName())
 	}
 
 	return &method, nil
 }
 
-// GetEventByID returns the abi for a given event of a contract
-// id should match the following pattern "<EventName>@<ContracName>"
-func (r *Registry) GetEventByID(id string) (*ethabi.Event, error) {
-	// Computing call ensure ID has been properly formated
-	call, err := common.StringToCall(id)
+// GetEventBySig returns the abi for a given event of a contract
+// sig should match the following pattern "<EventName>@<ContracName>"
+func (r *Registry) GetEventBySig(contract, sig string) (*ethabi.Event, error) {
+	// Computing call ensure sig has been properly formated
+	call, err := common.SignatureToCall(sig)
 	if err != nil {
-		return &ethabi.Event{}, err
+		return nil, err
 	}
 
-	contractAbi, err := r.getContract(call.GetContract().Short())
+	contractAbi, err := r.getContract(contract)
 	if err != nil {
-		return &ethabi.Event{}, err
+		return nil, err
 	}
 
 	event := &ethabi.Event{}
 	var ok bool
 	*event, ok = contractAbi.Events[call.GetMethod().GetName()]
 	if !ok {
-		return &ethabi.Event{}, fmt.Errorf("contract %q has no event %q", call.GetContract().Short(), call.GetMethod().GetName())
+		return nil, fmt.Errorf("contract %q has no event %q", call.GetContract().Short(), call.GetMethod().GetName())
 	}
 
 	return event, nil
@@ -116,28 +116,28 @@ func has0xPrefix(input string) bool {
 	return len(input) >= 2 && input[0] == '0' && (input[1] == 'x' || input[1] == 'X')
 }
 
-// GetMethodBySig returns the method corresponding to input signature
+// GetMethodBySelector returns the method corresponding to input signature
 // The input signature should be in hex format (matching the regex patterns "0x[0-9a-f]{8}" or "[0-9a-f]{8}")
-func (r *Registry) GetMethodBySig(sig string) (*ethabi.Method, error) {
+func (r *Registry) GetMethodBySelector(sig string) (*ethabi.Method, error) {
 	if !has0xPrefix(sig) {
 		sig = fmt.Sprintf("0x%v", sig)
 	}
 
 	bytesig, err := hexutil.Decode(sig)
 	if err != nil {
-		return &ethabi.Method{}, err
+		return nil, err
 	}
 
-	method, ok := r.abiMethodBySig[hexutil.Encode(bytesig)]
+	method, ok := r.abiMethods[hexutil.Encode(bytesig)]
 	if !ok {
-		return &ethabi.Method{}, fmt.Errorf("no method with signature %v", sig)
+		return nil, fmt.Errorf("no method with signature %v", sig)
 	}
 	return &method, nil
 }
 
-// GetEventBySig returns the event corresponding to input signature
+// GetEventBySelector returns the event corresponding to input signature
 // The input signature should be in hex format (matching the regex patterns "0x[0-9a-f]{16}" or "[0-9a-f]{16}")
-func (r *Registry) GetEventBySig(topic string) (*ethabi.Event, error) {
+func (r *Registry) GetEventBySelector(topic string) (*ethabi.Event, error) {
 	if !has0xPrefix(topic) {
 		topic = fmt.Sprintf("0x%v", topic)
 	}
@@ -147,7 +147,7 @@ func (r *Registry) GetEventBySig(topic string) (*ethabi.Event, error) {
 		return &ethabi.Event{}, err
 	}
 
-	event, ok := r.abiEventBySig[ethcommon.BytesToHash(bytetopic).Hex()]
+	event, ok := r.abiEvents[ethcommon.BytesToHash(bytetopic).Hex()]
 	if !ok {
 		return &ethabi.Event{}, fmt.Errorf("no event with topic %v", topic)
 	}
@@ -157,7 +157,7 @@ func (r *Registry) GetEventBySig(topic string) (*ethabi.Event, error) {
 // GetBytecodeByID returns the bytecode of the contract
 func (r *Registry) GetBytecodeByID(id string) (code []byte, err error) {
 	// Computing call ensure ID has been properly formated
-	call, err := common.StringToCall(id)
+	call, err := common.SignatureToCall(id)
 	if err != nil {
 		return []byte{}, err
 	}
