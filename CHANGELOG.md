@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.5.0
+
+*Released on May 16th 2019*
+
+- [FEAT] Update interfaces to query methods and events in the `abi.registry`
+- [FEAT] Add ERC20 ABI as default in the `abi.registry`
+
 ### Version 0.4.17
 
 *Released on May 12th 2019*
