@@ -51,5 +51,5 @@ func TestFromABIConfig(t *testing.T) {
 	contracts, err := FromABIConfig()
 
 	assert.Nil(t, err, "Should parse default properly")
-	assert.Len(t, contracts, 1, "Expected 1 contract")
+	assert.Len(t, contracts, 2, "Expected 2 contract")
 }
