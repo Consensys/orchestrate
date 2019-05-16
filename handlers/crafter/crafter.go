@@ -31,17 +31,18 @@ func Crafter(r registry.Registry, c crafter.Crafter) engine.HandlerFunc {
 				_ = txctx.AbortWithError(err)
 				return
 			}
-		} else if methodID := txctx.Envelope.GetCall().Short(); methodID != "" {
-			// Retrieve ABI from ABI registry
-			m, err := r.GetMethodByID(methodID)
+		} else if methodSig := txctx.Envelope.GetCall().GetMethod().GetSignature(); methodSig != "" {
+			// Generate method ABI from signature
+			m, err := crafter.SignatureToMethod(methodSig)
+
 			if err != nil {
-				txctx.Logger.WithError(err).Errorf("crafter: could not retrieve method ABI")
+				txctx.Logger.WithError(err).Errorf("crafter: could not generate method ABI from signature")
 				_ = txctx.AbortWithError(err)
 				return
 			}
 			method = m
 			txctx.Logger = txctx.Logger.WithFields(log.Fields{
-				"crafter.method": methodID,
+				"crafter.method": methodSig,
 			})
 		} else {
 			// Nothing to craft
@@ -65,7 +66,7 @@ func Crafter(r registry.Registry, c crafter.Crafter) engine.HandlerFunc {
 			payload  []byte
 			err      error
 		)
-		if txctx.Envelope.GetCall().GetMethod().GetName() == "constructor" {
+		if txctx.Envelope.GetCall().GetMethod().IsConstructor() {
 			// Transaction to be crafted is a Contract deployment
 			// Retrieve Bytecode from registry
 			bytecode, err = r.GetBytecodeByID(

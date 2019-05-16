@@ -38,14 +38,13 @@ func NewMessage(i int) *sarama.ProducerMessage {
 	case "constructor":
 		call = &common.Call{
 			Contract: &abi.Contract{Name: "ERC1400"},
-			Method:   &abi.Method{Name: "constructor"},
+			Method:   &abi.Method{Signature: "constructor(uint256,uint256,uint256,address[],address,uint256)"},
 			Args:     []string{"0xabcd", "0xabcd", "0x10", "[0xcd626bc764e1d553e0d75a42f5c4156b91a63f23,0xcd626bc764e1d553e0d75a42f5c4156b91a63f23]", "0xcd626bc764e1d553e0d75a42f5c4156b91a63f23", "0xabcd"},
 		}
-
 	case "call":
 		call = &common.Call{
 			Contract: &abi.Contract{Name: "ERC1400"},
-			Method:   &abi.Method{Name: "setDocument"},
+			Method:   &abi.Method{Signature: "setDocument(uint256,uint256,uint256)"},
 			Args:     []string{"0xabcd", "0xabcd", "0xabcd"},
 		}
 	}
