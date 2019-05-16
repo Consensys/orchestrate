@@ -89,7 +89,7 @@ func (r *Registry) GetMethodBySig(contract, sig string) (*ethabi.Method, error) 
 }
 
 // GetEventBySig returns the abi for a given event of a contract
-// sig should match the following pattern "<EventName>@<ContracName>"
+// sig should match the following pattern "event(type1,type2)"
 func (r *Registry) GetEventBySig(contract, sig string) (*ethabi.Event, error) {
 	// Computing call ensure sig has been properly formated
 	call, err := common.SignatureToCall(sig)
@@ -118,38 +118,38 @@ func has0xPrefix(input string) bool {
 
 // GetMethodBySelector returns the method corresponding to input signature
 // The input signature should be in hex format (matching the regex patterns "0x[0-9a-f]{8}" or "[0-9a-f]{8}")
-func (r *Registry) GetMethodBySelector(sig string) (*ethabi.Method, error) {
-	if !has0xPrefix(sig) {
-		sig = fmt.Sprintf("0x%v", sig)
+func (r *Registry) GetMethodBySelector(selector string) (*ethabi.Method, error) {
+	if !has0xPrefix(selector) {
+		selector = fmt.Sprintf("0x%v", selector)
 	}
 
-	bytesig, err := hexutil.Decode(sig)
+	bytesig, err := hexutil.Decode(selector)
 	if err != nil {
 		return nil, err
 	}
 
 	method, ok := r.abiMethods[hexutil.Encode(bytesig)]
 	if !ok {
-		return nil, fmt.Errorf("no method with signature %v", sig)
+		return nil, fmt.Errorf("no method with signature %v", selector)
 	}
 	return &method, nil
 }
 
 // GetEventBySelector returns the event corresponding to input signature
 // The input signature should be in hex format (matching the regex patterns "0x[0-9a-f]{16}" or "[0-9a-f]{16}")
-func (r *Registry) GetEventBySelector(topic string) (*ethabi.Event, error) {
-	if !has0xPrefix(topic) {
-		topic = fmt.Sprintf("0x%v", topic)
+func (r *Registry) GetEventBySelector(selector string) (*ethabi.Event, error) {
+	if !has0xPrefix(selector) {
+		selector = fmt.Sprintf("0x%v", selector)
 	}
 
-	bytetopic, err := hexutil.Decode(topic)
+	byteselector, err := hexutil.Decode(selector)
 	if err != nil {
 		return &ethabi.Event{}, err
 	}
 
-	event, ok := r.abiEvents[ethcommon.BytesToHash(bytetopic).Hex()]
+	event, ok := r.abiEvents[ethcommon.BytesToHash(byteselector).Hex()]
 	if !ok {
-		return &ethabi.Event{}, fmt.Errorf("no event with topic %v", topic)
+		return &ethabi.Event{}, fmt.Errorf("no event with topic %v", selector)
 	}
 	return &event, nil
 }
