@@ -24,3 +24,12 @@ func (acc *Account) SetAddress(addr common.Address) *Account {
 	acc.Addr = addr.Hex()
 	return acc
 }
+
+// Short returns a string representation of the account instance
+func (instance *AccountInstance) Short() (string, error) {
+	addr, err := instance.GetAccount().Address()
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%v@%v", addr.String(), instance.GetChain().GetId()), nil
+}
