@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.5.2
+
+*Released on May 17th 2019*
+
+- [FEAT] Add AccountInstance type
+- [FEAT] Add deployedBytecode in contract type
+
 ### Version 0.5.1
 
 *Released on May 17th 2019*
