@@ -6,23 +6,23 @@ package abi;
 
 // Contract holds contract information
 message Contract {
+    // Registry of contract
+    // e.g. "registry.consensys.net/corestack"
+    string registry = 1;
+
     // Name of contract
     // e.g. "ERC20"
-    string name = 1;
+    string name = 2;
 
     // Contract tag
     // e.g "v2.1.3"
-    string tag = 2;
+    string tag = 3;
 
     // Contract ABI (optional)
-    bytes abi = 3;
+    bytes abi = 4;
 
     // Contract deployment bytecode (optional)
-    bytes bytecode = 4;
-
-    // Registry of contract
-    // e.g. "registry.consensys.net/corestack"
-    string registry  = 5;
+    bytes bytecode = 5;
 
     // Contract deployed bytecode (optional)
     bytes deployedBytecode = 6;
