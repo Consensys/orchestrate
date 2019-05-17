@@ -17,12 +17,15 @@ message Contract {
     // Contract ABI (optional)
     bytes abi = 3;
 
-    // Contract bytecode (optional)
+    // Contract deployment bytecode (optional)
     bytes bytecode = 4;
 
     // Registry of contract
     // e.g. "registry.consensys.net/corestack"
     string registry  = 5;
+
+    // Contract deployed bytecode (optional)
+    bytes deployedBytecode = 6;
 }
 
 // Method 
