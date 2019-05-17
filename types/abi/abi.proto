@@ -19,6 +19,10 @@ message Contract {
 
     // Contract bytecode (optional)
     bytes bytecode = 4;
+
+    // Registry of contract
+    // e.g. "registry.consensys.net/corestack"
+    string registry  = 5;
 }
 
 // Method 
