@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.5.1
+
+*Released on May 17th 2019*
+
+- [FIX] Update proto by reinserting `abi.Contract` in `common.Call`
+
 ### Version 0.5.0
 
 *Released on May 9th 2019*
