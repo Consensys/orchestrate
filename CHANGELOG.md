@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.3
+
+*Released on May 20th 2019*
+
+- [FEAT] Update `pkg` with new types
+
 ### Version 0.4.2
 
 *Released on May 13th 2019*
