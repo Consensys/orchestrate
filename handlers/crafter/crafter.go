@@ -2,7 +2,6 @@ package crafter
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -69,9 +68,7 @@ func Crafter(r registry.Registry, c crafter.Crafter) engine.HandlerFunc {
 		if txctx.Envelope.GetCall().GetMethod().IsConstructor() {
 			// Transaction to be crafted is a Contract deployment
 			// Retrieve Bytecode from registry
-			bytecode, err = r.GetBytecodeByID(
-				fmt.Sprintf("constructor@%v", txctx.Envelope.GetCall().GetContract().Short()),
-			)
+			bytecode, err = r.GetBytecodeByID(txctx.Envelope.GetCall().GetContract().Short())
 			if err != nil {
 				txctx.Logger.WithError(err).Errorf("crafter: could not retrieve contract bytecode")
 				_ = txctx.AbortWithError(err)
