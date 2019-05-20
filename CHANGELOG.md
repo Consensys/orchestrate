@@ -2,9 +2,11 @@
 
 ### Version 0.4.5
 
-*Unreleased*
+*Released on May 20th 2019*
 
 - [FIX] Make `method.id` readable in logs
+- [FEAT] Update `pkg` and protos
+
 
 ### Version 0.4.4
 
