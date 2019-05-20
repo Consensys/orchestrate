@@ -35,7 +35,7 @@ func main() {
 		SetData(hexutil.MustDecode("0xabcd"))
 
 	tr := &envelope.Envelope{
-		Chain:    &common.Chain{Id: "0x6"},
+		Chain:    &common.Chain{Id: "888"},
 		Metadata: &envelope.Metadata{Id: "6be0-bc19-900b-1ef8-bb6d-61b9-ad38-ba11"},
 		Tx: &ethereum.Transaction{
 			TxData: txData,

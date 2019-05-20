@@ -33,7 +33,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore() {
 		SetData(hexutil.MustDecode("0xabcd"))
 
 	tr := &envelope.Envelope{
-		Chain:    &common.Chain{Id: "0x3"},
+		Chain:    &common.Chain{Id: "888"},
 		Metadata: &envelope.Metadata{Id: "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11"},
 		Tx: &ethereum.Transaction{
 			TxData: txData,
@@ -43,7 +43,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore() {
 	}
 
 	// Read / write before storing
-	_, _, err := s.Store.LoadByTxHash(context.Background(), "0x3", "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210", tr)
+	_, _, err := s.Store.LoadByTxHash(context.Background(), "888", "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210", tr)
 	assert.NotNil(s.T(), err, "Should error on find envelope by hash")
 	_, _, err = s.Store.LoadByID(context.Background(), "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11", tr)
 	assert.NotNil(s.T(), err, "Should error on find envelope by ID")
@@ -60,10 +60,10 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore() {
 
 	// Load Envelope
 	assert.Equal(s.T(), "stored", status, "Status should be correct")
-	status, _, err = s.Store.LoadByTxHash(context.Background(), "0x3", "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210", tr)
+	status, _, err = s.Store.LoadByTxHash(context.Background(), "888", "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210", tr)
 	assert.Nil(s.T(), err, "Should properly store envelope")
 	assert.Equal(s.T(), "stored", status, "Status should be correct")
-	assert.Equal(s.T(), "0x3", tr.GetChain().GetId(), "ChainID should be correct")
+	assert.Equal(s.T(), "888", tr.GetChain().GetId(), "ChainID should be correct")
 	assert.Equal(s.T(), "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11", tr.GetMetadata().GetId(), "MetadataID should be correct")
 
 	// Set Status
@@ -83,7 +83,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore() {
 
 	// Stores an already existing
 	tr = &envelope.Envelope{
-		Chain:    &common.Chain{Id: "0x3"},
+		Chain:    &common.Chain{Id: "888"},
 		Metadata: &envelope.Metadata{Id: "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11"},
 		Tx: &ethereum.Transaction{
 			TxData: txData,
@@ -122,7 +122,7 @@ func (s *EnvelopeStoreTestSuite) TestLoadPending() {
 		SetGasPrice(big.NewInt(200000)).
 		SetData(hexutil.MustDecode("0xabcd"))
 
-	for i, chain := range []string{"0x1", "0x2", "0x3", "0xa2", "0x42", "0xab"} {
+	for i, chain := range []string{"1", "2", "3", "12", "42", "888"} {
 		tr := &envelope.Envelope{
 			Chain:    &common.Chain{Id: chain},
 			Metadata: &envelope.Metadata{Id: fmt.Sprintf("a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a1%v", i)},

@@ -38,7 +38,7 @@ func (s *StoreServiceTestSuite) TestLoadByTxHash() {
 	assert.Nil(s.T(), err, "should not error")
 
 	req := &store.TxHashRequest{
-		ChainId: "0x3",
+		ChainId: "888",
 		TxHash:  "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210",
 	}
 	resp, err := s.store.LoadByTxHash(context.Background(), req)
@@ -130,7 +130,7 @@ func testEnvelope() *envelope.Envelope {
 		SetData(hexutil.MustDecode("0xabcd"))
 
 	return &envelope.Envelope{
-		Chain:    &common.Chain{Id: "0x3"},
+		Chain:    &common.Chain{Id: "888"},
 		Metadata: &envelope.Metadata{Id: "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11"},
 		Tx: &ethereum.Transaction{
 			TxData: txData,
