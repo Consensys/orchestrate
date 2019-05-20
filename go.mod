@@ -8,6 +8,6 @@ require (
 	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.3.0
 	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.5.2
-	gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.5.0
+	gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.5.1
 	gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git v0.3.5
 )

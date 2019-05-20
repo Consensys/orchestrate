@@ -158,6 +158,8 @@ gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.4.16 h1:vxMWC2
 gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.4.16/go.mod h1:u1hwBlsdT5OButB2Z4iFxU4U8Ph9894ccgXWVO7U7XA=
 gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.5.0 h1:bxrFsunv7QzGWc7MuhWT+sAc8tXvIgK7zIvKzfM9Uf8=
 gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.5.0/go.mod h1:81hcUgcTzKurhMyCsb1JQAG6NAs1bb1lPDwdCPgGc7k=
+gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.5.1 h1:KYozLpcGYSlbBvlojNLLO9bi6UqO22UB+E9iAtEYYz8=
+gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.5.1/go.mod h1:81hcUgcTzKurhMyCsb1JQAG6NAs1bb1lPDwdCPgGc7k=
 gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git v0.3.5 h1:mUe3TfQ+XkB0snpR5FAjN30nDImMThMxsBiTbUmXOjE=
 gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git v0.3.5/go.mod h1:91W80TrMQZkSrZsPehqykhyTlgamxCURJ3WqWrx4j6U=
 gitlab.com/ConsenSys/client/fr/core-stack/striped-mutex.git v0.1.6 h1:FoAfvFSTrBX1RDgMBrCy9TlMeIfftj3bqjdNwQS9jDA=
