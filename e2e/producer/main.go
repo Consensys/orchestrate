@@ -35,7 +35,7 @@ func newMessage(i int) *sarama.ProducerMessage {
 			Chain:  &common.Chain{Id: "888"},
 			Sender: &common.Account{Addr: senders[i%len(senders)]},
 			Call: &common.Call{
-				Method: &abi.Method{Name: "some-method"},
+				Method: &abi.Method{Signature: "some-method"},
 				Args:   []string{"0x71a556C033cD4beB023eb2baa734d0e8304CA88a", "0x200"},
 			},
 			Tx: &ethereum.Transaction{
