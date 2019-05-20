@@ -152,6 +152,8 @@ gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.9 h1:QH9Gb7ZXS/rsUxiE26Uc
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.9/go.mod h1:zdQBk7TfXaZF51Qv9/dHqWWSwP0O8q9uFKUJkWkxvOk=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.5.0 h1:yL5GMxfghBAQSN+mkfdPtBV157MGhjKYnsbmAPreckM=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.5.0/go.mod h1:zdQBk7TfXaZF51Qv9/dHqWWSwP0O8q9uFKUJkWkxvOk=
+gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.5.2 h1:JMRJVi2PvacJRzY4eNryAGW00/FKJvvmnHJ5LcWkzi8=
+gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.5.2/go.mod h1:zdQBk7TfXaZF51Qv9/dHqWWSwP0O8q9uFKUJkWkxvOk=
 gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.4.16 h1:vxMWC2/zplTSn0uViNMHeTIaYCt1V1sUqYwm+aGpoHQ=
 gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.4.16/go.mod h1:u1hwBlsdT5OButB2Z4iFxU4U8Ph9894ccgXWVO7U7XA=
 gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.5.0 h1:bxrFsunv7QzGWc7MuhWT+sAc8tXvIgK7zIvKzfM9Uf8=
