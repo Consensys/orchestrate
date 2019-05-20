@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.5.1
+
+*Released on May 20th 2019*
+
+- [FIX] Update `abi.registry.GetBytecodeByID` without useless signature
+
 ### Version 0.5.0
 
 *Released on May 16th 2019*
