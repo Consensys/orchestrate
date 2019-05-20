@@ -30,7 +30,7 @@ func Decoder(r registry.Registry) engine.HandlerFunc {
 			}
 
 			// Retrieve event ABI from registry
-			event, err := r.GetEventBySig(l.Topics[0])
+			event, err := r.GetEventBySelector(l.Topics[0])
 			if err != nil {
 				txctx.Logger.WithError(err).Errorf("decoder: could not retrieve event ABI")
 				_ = txctx.AbortWithError(err)
