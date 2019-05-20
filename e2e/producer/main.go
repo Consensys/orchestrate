@@ -32,7 +32,7 @@ func newMessage(i int) *sarama.ProducerMessage {
 	}
 	b, _ := proto.Marshal(
 		&envelope.Envelope{
-			Chain:  &common.Chain{Id: "3"},
+			Chain:  &common.Chain{Id: "888"},
 			Sender: &common.Account{Addr: senders[i%len(senders)]},
 			Call: &common.Call{
 				Method: &abi.Method{Name: "some-method"},
