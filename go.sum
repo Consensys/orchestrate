@@ -153,8 +153,13 @@ github.com/yuin/gopher-lua v0.0.0-20190206043414-8bfc7677f583/go.mod h1:gqRgreBU
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.9/go.mod h1:zdQBk7TfXaZF51Qv9/dHqWWSwP0O8q9uFKUJkWkxvOk=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.10 h1:g3QOW+BEV4w+9RmWQZDMSePgYhtpIspkMnWUS9lXxXo=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.4.10/go.mod h1:zdQBk7TfXaZF51Qv9/dHqWWSwP0O8q9uFKUJkWkxvOk=
+gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.5.0/go.mod h1:zdQBk7TfXaZF51Qv9/dHqWWSwP0O8q9uFKUJkWkxvOk=
+gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.5.2 h1:JMRJVi2PvacJRzY4eNryAGW00/FKJvvmnHJ5LcWkzi8=
+gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.5.2/go.mod h1:zdQBk7TfXaZF51Qv9/dHqWWSwP0O8q9uFKUJkWkxvOk=
 gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.4.16 h1:vxMWC2/zplTSn0uViNMHeTIaYCt1V1sUqYwm+aGpoHQ=
 gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.4.16/go.mod h1:u1hwBlsdT5OButB2Z4iFxU4U8Ph9894ccgXWVO7U7XA=
+gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.5.0 h1:bxrFsunv7QzGWc7MuhWT+sAc8tXvIgK7zIvKzfM9Uf8=
+gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.5.0/go.mod h1:81hcUgcTzKurhMyCsb1JQAG6NAs1bb1lPDwdCPgGc7k=
 gitlab.com/ConsenSys/client/fr/core-stack/service/nonce.git v0.1.3 h1:3OoYwbisUyrJGQDnGpwHs1nLovkxzxVtOhma53m27Bg=
 gitlab.com/ConsenSys/client/fr/core-stack/service/nonce.git v0.1.3/go.mod h1:TQyURw9FntWkToYU2eQLj4Gg2CvvVnyAE4LhhS9ztq4=
 go.uber.org/atomic v1.3.2/go.mod h1:gD2HeocX3+yG+ygLZcrzQJaqmWj9AIm7n08wl/qW/PE=
