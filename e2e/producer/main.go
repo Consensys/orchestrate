@@ -50,7 +50,7 @@ func NewMessage(i int) *sarama.ProducerMessage {
 	}
 
 	e := &envelope.Envelope{
-		Chain:  &common.Chain{Id: "42"},
+		Chain:  &common.Chain{Id: "888"},
 		Sender: &common.Account{Addr: senders[i%len(senders)]},
 		Call:   call,
 		Tx: &ethereum.Transaction{
