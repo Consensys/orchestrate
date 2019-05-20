@@ -155,14 +155,10 @@ func (r *Registry) GetEventBySelector(selector string) (*ethabi.Event, error) {
 }
 
 // GetBytecodeByID returns the bytecode of the contract
-func (r *Registry) GetBytecodeByID(id string) (code []byte, err error) {
-	// Computing call ensure ID has been properly formated
-	call, err := common.SignatureToCall(id)
-	if err != nil {
-		return []byte{}, err
-	}
+// contract input should match the following pattern "ContractName[Tag]"
+func (r *Registry) GetBytecodeByID(contract string) (code []byte, err error) {
 
-	res, err := r.getBytecode(call.GetContract().Short())
+	res, err := r.getBytecode(contract)
 	if err != nil {
 		return []byte{}, err
 	}
