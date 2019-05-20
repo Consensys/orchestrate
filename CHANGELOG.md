@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.4
+
+*Released on May 20th 2019*
+
+- [FEAT] Update `pkg` and protos types
+
 ### Version 0.4.3
 
 *Released on May 12th 2019*
