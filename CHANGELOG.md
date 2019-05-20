@@ -1,12 +1,17 @@
 # CHANGELOG
 
+### Version 0.4.6
+
+*Released on May 20th 2019*
+
+- [FIX] Update `crafter` handler to get bytecode with a constructor
+
 ### Version 0.4.5
 
 *Released on May 20th 2019*
 
 - [FIX] Make `method.id` readable in logs
 - [FEAT] Update `pkg` and protos
-
 
 ### Version 0.4.4
 
