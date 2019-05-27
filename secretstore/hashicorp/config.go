@@ -3,11 +3,11 @@ package hashicorp
 import (
 	"crypto/tls"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
-	"time"
-	"io/ioutil"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/go-cleanhttp"
 	retryablehttp "github.com/hashicorp/go-retryablehttp"
@@ -117,7 +117,7 @@ var (
 	vaultTLSServerNameViperKey = "vault.tls.server.name"
 
 	// No need to redefine the default here
-	vaultTokenFilePathDefault = "/auth/vault/token"
+	vaultTokenFilePathDefault = "/vault/token/.vault-token"
 	vaultMountPointDefault    = "secret"
 	vaultKVVersionDefault     = "v2" // Could be "v1"
 	vaultSecretPathDefault    = "default"
@@ -360,13 +360,10 @@ func WithVaultToken(client *vault.Client) error {
 		return err
 	}
 	os.Remove(filePath) // Immediately delete the file after it was read
-	
+
 	decoded := strings.TrimSuffix(string(encoded), "\n") // Remove the newline if it exists
-	encoded = []byte{} // Overwrite the token value without waiting for gc
-	
-	decoded = strings.TrimSuffix(decoded, "\r") // This one is for windows compatibility
+	decoded = strings.TrimSuffix(decoded, "\r")          // This one is for windows compatibility
 	client.SetToken(decoded)
-	decoded = "" // Overwrite the token value without waiting for gc
-	
+
 	return nil
 }

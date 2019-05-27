@@ -1,28 +1,29 @@
 package hashicorp
 
 import (
+	"encoding/json"
 	"fmt"
 	"sync"
 	"time"
-	"encoding/json"
+
 	"github.com/hashicorp/vault/api"
 	log "github.com/sirupsen/logrus"
 )
 
-var(
+var (
 	// VaultTokenTTL indicate the tokenTTL in seconds
 	VaultTokenTTL int
 	// RtlTimeRetry : Time between each retry of token renewal
-	RtlTimeRetry = 2 		// TODO: Set it in config
+	RtlTimeRetry = 2 // TODO: Set it in config
 	// RtlMaxNumberRetry : Max number of retry for token renewal
-	RtlMaxNumberRetry = 3	// TODO: Set it in config
+	RtlMaxNumberRetry = 3 // TODO: Set it in config
 )
 
 // HashiCorp wraps a hashicorps client an manage the unsealing
 type HashiCorp struct {
-	mut     sync.Mutex
-	rtl		*RenewTokenLoop 
-	Client  *api.Client
+	mut    sync.Mutex
+	rtl    *RenewTokenLoop
+	Client *api.Client
 }
 
 // NewHashiCorp construct a new hashicorps vault given a configfile or nil
@@ -47,9 +48,9 @@ func NewHashiCorp(config *api.Config) (*HashiCorp, error) {
 	hash.manageToken()
 	return hash, nil
 }
- 
+
 func (hash *HashiCorp) manageToken() {
-	
+
 	secret, err := hash.Client.Auth().Token().LookupSelf()
 	if err != nil {
 		log.Fatalf("Initial token lookup failed : %v", err)
@@ -72,9 +73,9 @@ func (hash *HashiCorp) manageToken() {
 	)
 
 	hash.rtl = &RenewTokenLoop{
-		ticker : 	ticker,
-		Quit : 		make(chan bool, 1),
-		Hash :		hash,
+		ticker: ticker,
+		Quit:   make(chan bool, 1),
+		Hash:   hash,
 	}
 
 	err = hash.rtl.Refresh()
@@ -90,7 +91,7 @@ func (hash *HashiCorp) manageToken() {
 func (hash *HashiCorp) Store(key, value string) (err error) {
 	sec := NewSecret(key, value)
 	sec.SetClient(hash.Client)
-	
+
 	hash.mut.Lock()
 	defer hash.mut.Unlock()
 	return sec.Update()
@@ -100,7 +101,7 @@ func (hash *HashiCorp) Store(key, value string) (err error) {
 func (hash *HashiCorp) Load(key string) (value string, ok bool, err error) {
 	sec := NewSecret(key, "")
 	sec.SetClient(hash.Client)
-	
+
 	hash.mut.Lock()
 	defer hash.mut.Unlock()
 	return sec.GetValue()
@@ -110,7 +111,7 @@ func (hash *HashiCorp) Load(key string) (value string, ok bool, err error) {
 func (hash *HashiCorp) Delete(key string) (err error) {
 	sec := NewSecret(key, "")
 	sec.SetClient(hash.Client)
-	
+
 	hash.mut.Lock()
 	defer hash.mut.Unlock()
 	return sec.Delete()
@@ -120,7 +121,7 @@ func (hash *HashiCorp) Delete(key string) (err error) {
 func (hash *HashiCorp) List() (keys []string, err error) {
 	sec := NewSecret("", "")
 	sec.SetClient(hash.Client)
-	
+
 	hash.mut.Lock()
 	defer hash.mut.Unlock()
 	return sec.List("")
@@ -128,38 +129,38 @@ func (hash *HashiCorp) List() (keys []string, err error) {
 
 // RenewTokenLoop handle the token renewal of the application
 type RenewTokenLoop struct {
-	ticker 		*time.Ticker
-	Quit		chan bool
-	Hash 		*HashiCorp
+	ticker *time.Ticker
+	Quit   chan bool
+	Hash   *HashiCorp
 }
 
 // Refresh the token
 func (loop *RenewTokenLoop) Refresh() error {
 	retry := 0
-		for {
-			// Regularly try renewing the token
-			newTokenSecret, err := loop.
-				Hash.Client.Auth().Token().RenewSelf(0)
+	for {
+		// Regularly try renewing the token
+		newTokenSecret, err := loop.
+			Hash.Client.Auth().Token().RenewSelf(0)
 
-			if err == nil {
-				loop.Hash.mut.Lock()
-				loop.Hash.Client.SetToken(
-					newTokenSecret.Auth.ClientToken,
-				)
-				loop.Hash.mut.Unlock()
-				log.Infof("Successfully refreshed token")
-				return nil
-			}
-
-			retry++
-			if retry < RtlMaxNumberRetry {
-				// Max number number of retry reached : gracefull shutdown
-				log.Error("Gracefull shutdown of the vault, the token could not be renewed")
-				return fmt.Errorf("Token refrest failed, we got over the max_retry : %v", err.Error())
-			}
-
-			time.Sleep(time.Duration(RtlTimeRetry) * time.Second)
+		if err == nil {
+			loop.Hash.mut.Lock()
+			loop.Hash.Client.SetToken(
+				newTokenSecret.Auth.ClientToken,
+			)
+			loop.Hash.mut.Unlock()
+			log.Infof("Successfully refreshed token")
+			return nil
 		}
+
+		retry++
+		if retry < RtlMaxNumberRetry {
+			// Max number number of retry reached : graceful shutdown
+			log.Error("Graceful shutdown of the vault, the token could not be renewed")
+			return fmt.Errorf("token refresh failed, we got over the max_retry : %v ", err.Error())
+		}
+
+		time.Sleep(time.Duration(RtlTimeRetry) * time.Second)
+	}
 }
 
 // Run contains the token regeneration routine
@@ -172,18 +173,18 @@ func (loop *RenewTokenLoop) Run() {
 			if err != nil {
 				loop.Quit <- true
 			}
-	
-		// TODO: Be able to gracefull shutdown every other services in the infra
+
+		// TODO: Be able to graceful shutdown every other services in the infra
 		case <-loop.Quit:
 			// The token parameter is ignored
 			_ = loop.
 				Hash.Client.Auth().Token().RevokeSelf("this parameter is ignored")
-			// Erase the local value of the token	
+			// Erase the local value of the token
 			loop.Hash.Client.SetToken("")
 			// Wait 5 seconds for the ongoing requests to return
 			time.Sleep(time.Duration(5) * time.Second)
 			// Crash the app
-			log.Fatal("Gracefull shutdown of the vault, the token has been revoked")
+			log.Fatal("Graceful shutdown of the vault, the token has been revoked")
 		}
 	}
 
