@@ -51,7 +51,7 @@ func (hash *HashiCorp) manageToken() {
 	
 	secret, err := hash.Client.Auth().Token().LookupSelf()
 	if err != nil {
-		log.Fatal("Initial token refresh failed")
+		log.Fatalf("Initial token lookup failed : %v", err)
 	}
 
 	VaultTokenTTL = secret.Auth.LeaseDuration
@@ -73,7 +73,7 @@ func (hash *HashiCorp) manageToken() {
 
 	err = hash.rtl.Refresh()
 	if err != nil {
-		log.Fatal("")
+		log.Fatalf("Initial token refresh failed : %v", err)
 	}
 
 	go hash.rtl.Run()
@@ -141,7 +141,7 @@ func (loop *RenewTokenLoop) Refresh() error {
 					newTokenSecret.Auth.ClientToken,
 				)
 				loop.Hash.mut.Unlock()
-				log.Debug("Successfully refreshed token")
+				log.Infof("Successfully refreshed token")
 				return nil
 			}
 

@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 	"io/ioutil"
+	"strings"
 
 	"github.com/hashicorp/go-cleanhttp"
 	retryablehttp "github.com/hashicorp/go-retryablehttp"
@@ -64,8 +65,6 @@ func init() {
 
 	viper.SetDefault(vaultTLSServerNameViperKey, vaultTLSServerNameDefault)
 	_ = viper.BindEnv(vaultTLSServerNameViperKey, vaultTLSServerNameEnv)
-
-	log.Infof("Using vault_address: %v \n", os.Getenv("VAULT_ADDR"))
 }
 
 var (
@@ -316,9 +315,7 @@ func NewConfig() *vault.Config {
 	rateLimit := viper.GetFloat64(vaultRateLimitViperKey)
 	burstLimit := viper.GetInt(vaultBurstLimitViperKey)
 	config.Limiter = rate.NewLimiter(rate.Limit(rateLimit), burstLimit)
-
 	config.MaxRetries = viper.GetInt(vaultMaxRetriesViperKey)
-
 	config.Timeout = viper.GetDuration(vaultClientTimeoutViperKey)
 
 	// Ensure redirects are not automatically followed
@@ -359,12 +356,17 @@ func WithVaultToken(client *vault.Client) error {
 
 	encoded, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		log.Warningf("Token file path would not be found : %v", err.Error())
+		log.Warningf("Token file path could not be found : %v", err.Error())
 		return err
 	}
 	os.Remove(filePath) // Immediately delete the file after it was read
 	
-	client.SetToken(string(encoded))
+	decoded := strings.TrimSuffix(string(encoded), "\n") // Remove the newline if it exists
 	encoded = []byte{} // Overwrite the token value without waiting for gc
+	
+	decoded = strings.TrimSuffix(decoded, "\r") // This one is for windows compatibility
+	client.SetToken(decoded)
+	decoded = "" // Overwrite the token value without waiting for gc
+	
 	return nil
 }
