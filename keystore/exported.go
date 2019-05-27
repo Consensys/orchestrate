@@ -6,8 +6,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/keystore/base"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/keystore/base"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/secretstore"
 )
 
 var (

@@ -7,7 +7,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/secretstore/services"
 )
 
 // Wallet is a container

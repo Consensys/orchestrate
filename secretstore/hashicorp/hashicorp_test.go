@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/secretstore/testutils"
 )
 
 type HashicorpKeyStoreTestSuite struct {

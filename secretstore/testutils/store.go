@@ -3,7 +3,7 @@ package testutils
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/secretstore/services"
 )
 
 // SecretStoreTestSuite is a test suit for TraceStore

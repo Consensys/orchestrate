@@ -6,10 +6,10 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/aws"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/hashicorp"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/infra/key-store.git/secretstore/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/secretstore/aws"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/secretstore/hashicorp"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/secretstore/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/secretstore/services"
 )
 
 var (
