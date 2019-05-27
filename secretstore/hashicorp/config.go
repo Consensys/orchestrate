@@ -353,7 +353,7 @@ func GetMountPoint() string {
 	return viper.GetString(vaultMountPointViperKey)
 }
 
-// ReadVaultToken return a string if the token has been found
+// WithVaultToken set the initial client token
 func WithVaultToken(client *vault.Client) error {
 	filePath := viper.GetString(vaultTokenFilePathViperKey)
 
@@ -362,7 +362,9 @@ func WithVaultToken(client *vault.Client) error {
 		log.Warningf("Token file path would not be found : %v", err.Error())
 		return err
 	}
-
+	os.Remove(filePath) // Immediately delete the file after it was read
+	
 	client.SetToken(string(encoded))
+	encoded = []byte{} // Overwrite the token value without waiting for gc
 	return nil
 }
