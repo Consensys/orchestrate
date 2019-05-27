@@ -6,8 +6,8 @@ curl --header "X-Vault-Token: ${ROOT_TOKEN}" \
 
 token=$(cat token.json | jq .auth | jq .client_token | tr -d '"')
 
-mkdir -p /auth/vault 
-touch /auth/vault/token
-echo $token > /auth/vault/token
+mkdir -p /vault/token 
+touch /vault/token/.vault-token
+echo $token > /vault/token/.vault-token
 
 rm token.json
