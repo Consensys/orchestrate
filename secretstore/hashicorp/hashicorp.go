@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 	"time"
+	"encoding/json"
 	"github.com/hashicorp/vault/api"
 	log "github.com/sirupsen/logrus"
 )
@@ -54,7 +55,12 @@ func (hash *HashiCorp) manageToken() {
 		log.Fatalf("Initial token lookup failed : %v", err)
 	}
 
-	VaultTokenTTL = secret.Auth.LeaseDuration
+	vaultTTL64, err := secret.Data["ttl"].(json.Number).Int64()
+	if err != nil {
+		log.Fatalf("Could not read vault ttl : %v", err)
+	}
+	VaultTokenTTL = int(vaultTTL64)
+
 	ticker := time.NewTicker(
 		time.Duration(
 			int(

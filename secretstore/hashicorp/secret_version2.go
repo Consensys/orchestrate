@@ -107,8 +107,6 @@ func (s *SecretKV2) List(subPath string) ([]string, error) {
 		fullPath = fmt.Sprintf("%v/%v", fullPath, subPath)
 	}
 
-	println(fullPath)
-
 	res, err := logical.List(fullPath)
 	if err != nil {
 		return nil, err

@@ -9,12 +9,16 @@ source init-vault.sh
 # # Go to Makefile
 cd ../../..
 
+
 echo "make race"
+source e2e/hashicorp/scripts/token.sh
 # Run the tests passing the variables to the go command
 VAULT_TOKEN=${VAULT_TOKEN} VAULT_ADDR=${VAULT_ADDR} \
     make race
 
+
 echo "run-coverage"
+source e2e/hashicorp/scripts/token.sh
 # Run the tests passing the variables to the go command
 VAULT_TOKEN=${VAULT_TOKEN} VAULT_ADDR=${VAULT_ADDR} \
     make run-coverage
