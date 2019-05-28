@@ -10,6 +10,6 @@ require (
 	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.3.0
 	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.5.2
-	gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git v0.4.1
+	gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git v0.4.3
 	google.golang.org/appengine v1.4.0 // indirect
 )
