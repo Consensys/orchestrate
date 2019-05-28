@@ -10,15 +10,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var (
-	// VaultTokenTTL indicate the tokenTTL in seconds
-	VaultTokenTTL int
-	// RtlTimeRetry : Time between each retry of token renewal
-	RtlTimeRetry = 2 // TODO: Set it in config
-	// RtlMaxNumberRetry : Max number of retry for token renewal
-	RtlMaxNumberRetry = 3 // TODO: Set it in config
-)
-
 // HashiCorp wraps a hashicorps client an manage the unsealing
 type HashiCorp struct {
 	mut    sync.Mutex
@@ -60,13 +51,13 @@ func (hash *HashiCorp) manageToken() {
 	if err != nil {
 		log.Fatalf("Could not read vault ttl : %v", err)
 	}
-	VaultTokenTTL = int(vaultTTL64)
+	vaultTokenTTL := int(vaultTTL64)
 
 	ticker := time.NewTicker(
 		time.Duration(
 			int(
 				float64(
-					VaultTokenTTL*(10^9),
+					vaultTokenTTL*(10^9),
 				) * 0.75, // We wait 75% of the TTL to refresh
 			),
 		),
@@ -76,6 +67,9 @@ func (hash *HashiCorp) manageToken() {
 		ticker: ticker,
 		Quit:   make(chan bool, 1),
 		Hash:   hash,
+
+		RtlTimeRetry:      2,
+		RtlMaxNumberRetry: 3,
 	}
 
 	err = hash.rtl.Refresh()
@@ -132,6 +126,9 @@ type RenewTokenLoop struct {
 	ticker *time.Ticker
 	Quit   chan bool
 	Hash   *HashiCorp
+
+	RtlTimeRetry      int // RtlTimeRetry : Time between each retry of token renewal
+	RtlMaxNumberRetry int // RtlMaxNumberRetry : Max number of retry for token renewal
 }
 
 // Refresh the token
@@ -153,13 +150,13 @@ func (loop *RenewTokenLoop) Refresh() error {
 		}
 
 		retry++
-		if retry < RtlMaxNumberRetry {
+		if retry < loop.RtlMaxNumberRetry {
 			// Max number number of retry reached : graceful shutdown
 			log.Error("Graceful shutdown of the vault, the token could not be renewed")
 			return fmt.Errorf("token refresh failed, we got over the max_retry : %v ", err.Error())
 		}
 
-		time.Sleep(time.Duration(RtlTimeRetry) * time.Second)
+		time.Sleep(time.Duration(loop.RtlTimeRetry) * time.Second)
 	}
 }
 
