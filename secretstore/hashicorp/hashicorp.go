@@ -30,7 +30,7 @@ func NewHashiCorp(config *api.Config) (*HashiCorp, error) {
 		return nil, err
 	}
 
-	_ = WithVaultToken(client)
+	_ = WithVaultToken(client) // If the token was not found. The error is ignored
 
 	hash := &HashiCorp{
 		Client: client,
