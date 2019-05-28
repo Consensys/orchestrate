@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.5.3
+
+*Released on May 28th 2019*
+
+- [FEAT] Add config option to pass deployedBytecode in contract
+
 ### Version 0.5.2
 
 *Released on May 17th 2019*
