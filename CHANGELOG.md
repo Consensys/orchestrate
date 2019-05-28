@@ -1,5 +1,13 @@
 # CHANGELOG
 
+### Version 0.4.3
+
+*Released on May 28th 2019*
+
+- [FEAT] Support for vault kv2
+- [FEAT] Support for token refreshment
+- [FEAT] Support for passing token through file 
+
 ### Version 0.4.2
 
 *Released on May 12th 2019*
