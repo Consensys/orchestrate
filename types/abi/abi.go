@@ -27,34 +27,44 @@ func (c *Contract) Long() string {
 	return fmt.Sprintf("%v:%v:%v", c.Short(), string(c.Abi), string(c.Bytecode))
 }
 
-var contractRegexp = `^(?P<contract>[a-zA-Z0-9]+)(\[(?P<tag>[0-9a-zA-Z-.]+)\])?(:(?P<abi>\[.+\]))?(:(?P<bytecode>0[xX][a-fA-F0-9]+))?$`
+var contractRegexp = `^(?P<contract>[a-zA-Z0-9]+)(?:\[(?P<tag>[0-9a-zA-Z-.]+)\])?(?::(?P<abi>\[.+\]))?(?::(?P<bytecode>0[xX][a-fA-F0-9]+))?(?::(?P<deployedBytecode>0[xX][a-fA-F0-9]+))?$`
 var contractPattern = regexp.MustCompile(contractRegexp)
 
 // StringToContract computes a Contract from is short representation
 func StringToContract(s string) (*Contract, error) {
 	parts := contractPattern.FindStringSubmatch(s)
 
-	if len(parts) != 8 {
+	if len(parts) != 6 {
 		return nil, fmt.Errorf("string format invalid (expected format %q): %q", contractRegexp, s)
 	}
 
 	c := &Contract{
 		Name: parts[1],
-		Tag:  parts[3],
+		Tag:  parts[2],
 	}
 
 	// Make sure bytecode is valid and set bytecode
-	if parts[7] == "" {
-		parts[7] = "0x"
+	if parts[4] == "" {
+		parts[4] = "0x"
 	}
-	bytecode, err := hexutil.Decode(parts[7])
+	bytecode, err := hexutil.Decode(parts[4])
 	if err != nil {
 		return nil, fmt.Errorf("contract %q bytecode is invalid", c.Short())
 	}
 	c.Bytecode = bytecode
 
+	// Make sure deployedBytecode is valid and set deployedBytecode
+	if parts[5] == "" {
+		parts[5] = "0x"
+	}
+	deployedBytecode, err := hexutil.Decode(parts[5])
+	if err != nil {
+		return nil, fmt.Errorf("contract %q deployedBytecode is invalid", c.Short())
+	}
+	c.DeployedBytecode = deployedBytecode
+
 	// Set ABI and make sure it is valid
-	c.Abi = []byte(parts[5])
+	c.Abi = []byte(parts[3])
 	_, err = c.ToABI()
 	if err != nil {
 		return nil, fmt.Errorf("contract %q ABI is invalid", c.Short())
