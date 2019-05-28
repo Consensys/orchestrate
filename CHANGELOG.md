@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.5
+
+*Released on May 28th 2019*
+
+- [FEAT] Update `tx-signer` to support vault kv2
+
 ### Version 0.4.4
 
 *Released on May 20th 2019*
