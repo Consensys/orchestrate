@@ -145,7 +145,7 @@ func (loop *RenewTokenLoop) Refresh() error {
 				newTokenSecret.Auth.ClientToken,
 			)
 			loop.Hash.mut.Unlock()
-			log.Infof("Successfully refreshed token")
+			log.Debugf("Successfully refreshed token")
 			return nil
 		}
 
