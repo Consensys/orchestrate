@@ -17,12 +17,15 @@ import (
 	server "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http/healthcheck"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/rpc"
+	cucumberService "gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/cucumber"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/handlers"
+	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/handlers/cucumber"
 )
 
 var (
-	app       *App
-	startOnce = &sync.Once{}
+	app         *App
+	readyToTest chan bool
+	startOnce   = &sync.Once{}
 )
 
 func init() {
@@ -54,13 +57,6 @@ func initComponents(ctx context.Context) {
 		wg.Done()
 	}()
 
-	// Initialize Handlers
-	wg.Add(1)
-	go func() {
-		handlers.Init(ctx)
-		wg.Done()
-	}()
-
 	// Initialize ConsumerGroup
 	wg.Add(1)
 	go func() {
@@ -73,10 +69,24 @@ func initComponents(ctx context.Context) {
 		wg.Done()
 	}()
 
+	// Initialize Handlers
+	wg.Add(1)
+	go func() {
+		handlers.Init(ctx)
+		wg.Done()
+	}()
+
 	// Initialize Ethereum client
 	wg.Add(1)
 	go func() {
 		rpc.Init(ctx)
+		wg.Done()
+	}()
+
+	// Initialize cucumberService registry
+	wg.Add(1)
+	go func() {
+		cucumberService.Init(ctx)
 		wg.Done()
 	}()
 
@@ -94,6 +104,7 @@ func registerHandlers() {
 		engine.Register(logger.Logger)
 		engine.Register(loader.Loader)
 		engine.Register(offset.Marker)
+		engine.Register(cucumber.GlobalHandler())
 		wg.Done()
 	}()
 
@@ -121,9 +132,6 @@ func Start(ctx context.Context) {
 		// Indicate that application is ready
 		app.ready.Store(true)
 
-		// Send Transactions
-		SendTx()
-
 		// // Start consuming on every topics
 		// // Initialize Topics list by chain
 		topics := []string{
@@ -137,14 +145,44 @@ func Start(ctx context.Context) {
 			topics = append(topics, fmt.Sprintf("%v-%v", viper.GetString("kafka.topic.decoder"), chainID.String()))
 		}
 
+		readyToTest = make(chan bool, 1)
+
+		go func() {
+			if <-readyToTest {
+				cucumberService.Run(cancel, cucumberService.GlobalOptions())
+			}
+		}()
+
+		cg := &EmbeddingConsumerGroupHandler{
+			engine: broker.NewEngineConsumerGroupHandler(engine.GlobalEngine()),
+		}
+
 		log.Debugf("worker: start consuming on %q", topics)
 		err := broker.Consume(
 			cancelCtx,
 			topics,
-			broker.NewEngineConsumerGroupHandler(engine.GlobalEngine()),
+			cg,
 		)
 		if err != nil {
 			log.WithError(err).Error("worker: error on consumer")
 		}
+
 	})
+}
+
+type EmbeddingConsumerGroupHandler struct {
+	engine *broker.EngineConsumerGroupHandler
+}
+
+func (h *EmbeddingConsumerGroupHandler) Setup(s sarama.ConsumerGroupSession) error {
+	readyToTest <- true
+	return h.engine.Setup(s)
+}
+
+func (h *EmbeddingConsumerGroupHandler) ConsumeClaim(s sarama.ConsumerGroupSession, c sarama.ConsumerGroupClaim) error {
+	return h.engine.ConsumeClaim(s, c)
+}
+
+func (h *EmbeddingConsumerGroupHandler) Cleanup(s sarama.ConsumerGroupSession) error {
+	return h.engine.Cleanup(s)
 }

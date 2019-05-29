@@ -1,12 +1,12 @@
-package producer
+package cucumber
 
 import (
 	"context"
 	"sync"
 
 	log "github.com/sirupsen/logrus"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/cucumber/chanregistry"
 )
 
 var (
@@ -21,22 +21,21 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		// Initialize Sync Producer
-		broker.InitSyncProducer(ctx)
+		// Initialize Channel registry
+		chanregistry.Init(ctx)
 
-		// Create Handler
-		handler = Producer(broker.GlobalSyncProducer())
+		handler = Cucumber(chanregistry.GlobalChanRegistry())
 
-		log.Infof("producer: handler ready")
+		log.Infof("cucumber: handler ready")
 	})
 }
 
-// SetGlobalHandler sets global Gas Pricer Handler
+// SetGlobalHandler sets global Cucumber Handler
 func SetGlobalHandler(h engine.HandlerFunc) {
 	handler = h
 }
 
-// GlobalHandler returns global Gas Pricer handler
+// GlobalHandler returns global Cucumber handler
 func GlobalHandler() engine.HandlerFunc {
 	return handler
 }

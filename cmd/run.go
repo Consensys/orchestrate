@@ -10,7 +10,9 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
+	storegrpc "gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store/grpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/app"
+	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/cucumber"
 )
 
 func newRunCommand() *cobra.Command {
@@ -38,6 +40,12 @@ func newRunCommand() *cobra.Command {
 	broker.KafkaTopicTxSender(runCmd.Flags())
 	broker.KafkaTopicTxDecoder(runCmd.Flags())
 	broker.KafkaTopicTxDecoded(runCmd.Flags())
+
+	// Register Cucumber flags
+	cucumber.InitFlags(runCmd.Flags())
+
+	// Register StoreGRPC flags
+	storegrpc.StoreTarget(runCmd.Flags())
 
 	return runCmd
 }

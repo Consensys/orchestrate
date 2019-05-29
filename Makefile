@@ -41,3 +41,8 @@ merge-boilerplate:
 	@git remote add boilerplate $(BOILERPLATE_REPOSITORY) || true
 	@git fetch boilerplate master
 	@git merge boilerplate/master
+
+reports:
+	docker-compose -f report/docker-compose.yml up
+	@xdg-open ./report/output/report.html
+
