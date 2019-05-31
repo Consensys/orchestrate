@@ -51,7 +51,12 @@ func (hash *HashiCorp) manageToken() {
 	if err != nil {
 		log.Fatalf("Could not read vault ttl : %v", err)
 	}
+
 	vaultTokenTTL := int(vaultTTL64)
+	if vaultTokenTTL < 1 {
+		// case where the tokenTTL is infinite
+		return
+	}
 
 	ticker := time.NewTicker(
 		time.Duration(
@@ -64,6 +69,7 @@ func (hash *HashiCorp) manageToken() {
 	)
 
 	hash.rtl = &RenewTokenLoop{
+		TTL: 	vaultTokenTTL,
 		ticker: ticker,
 		Quit:   make(chan bool, 1),
 		Hash:   hash,
@@ -123,6 +129,7 @@ func (hash *HashiCorp) List() (keys []string, err error) {
 
 // RenewTokenLoop handle the token renewal of the application
 type RenewTokenLoop struct {
+	TTL		int
 	ticker *time.Ticker
 	Quit   chan bool
 	Hash   *HashiCorp
@@ -145,7 +152,7 @@ func (loop *RenewTokenLoop) Refresh() error {
 				newTokenSecret.Auth.ClientToken,
 			)
 			loop.Hash.mut.Unlock()
-			log.Debugf("Successfully refreshed token")
+			log.Debugf("Successfully refreshed token, TokenTTL is %v", loop.TTL)
 			return nil
 		}
 
