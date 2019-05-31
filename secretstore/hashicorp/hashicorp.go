@@ -58,15 +58,17 @@ func (hash *HashiCorp) manageToken() {
 		return
 	}
 
-	ticker := time.NewTicker(
-		time.Duration(
-			int(
-				float64(
-					vaultTokenTTL*(10^9),
-				) * 0.75, // We wait 75% of the TTL to refresh
-			),
-		),
-	)
+	log.Debugf("Vault TTL: %v", vaultTokenTTL)
+	log.Debugf("64: %v", vaultTTL64)
+
+	timeToWait := time.Duration(
+		int(float64(
+			vaultTokenTTL,
+		)*0.75), // We wait 75% of the TTL to refresh
+	) * time.Second
+
+	ticker := time.NewTicker(timeToWait)
+	log.Debugf("time to wait: %v", timeToWait)
 
 	hash.rtl = &RenewTokenLoop{
 		TTL:    vaultTokenTTL,
@@ -82,9 +84,9 @@ func (hash *HashiCorp) manageToken() {
 	if err != nil {
 		log.Fatalf("Initial token refresh failed : %v", err)
 	}
-
+	/*
 	go hash.rtl.Run()
-
+	*/
 }
 
 // Store writes in the vault
