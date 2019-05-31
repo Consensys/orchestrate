@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.4
+
+*Released on May 31th 2019*
+
+- [FIX] Fix the case where the app is provided an infinite TTL token
+
 ### Version 0.4.3
 
 *Released on May 28th 2019*
