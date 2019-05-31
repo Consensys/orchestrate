@@ -84,9 +84,6 @@ func (hash *HashiCorp) manageToken() {
 	if err != nil {
 		log.Fatalf("Initial token refresh failed : %v", err)
 	}
-	/*
-	go hash.rtl.Run()
-	*/
 }
 
 // Store writes in the vault
