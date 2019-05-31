@@ -69,7 +69,7 @@ func (hash *HashiCorp) manageToken() {
 	)
 
 	hash.rtl = &RenewTokenLoop{
-		TTL: 	vaultTokenTTL,
+		TTL:    vaultTokenTTL,
 		ticker: ticker,
 		Quit:   make(chan bool, 1),
 		Hash:   hash,
@@ -129,7 +129,7 @@ func (hash *HashiCorp) List() (keys []string, err error) {
 
 // RenewTokenLoop handle the token renewal of the application
 type RenewTokenLoop struct {
-	TTL		int
+	TTL    int
 	ticker *time.Ticker
 	Quit   chan bool
 	Hash   *HashiCorp
