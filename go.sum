@@ -210,6 +210,7 @@ gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.5.2 h1:JMRJVi2PvacJRzY4eNry
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.5.2/go.mod h1:zdQBk7TfXaZF51Qv9/dHqWWSwP0O8q9uFKUJkWkxvOk=
 gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git v0.4.3 h1:hgD0xYoDvs5OucTlcI7mn6iFXP5OxtH3kqLA32UXgpI=
 gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git v0.4.3/go.mod h1:sji5gOmqsOfoKB0jrPJgee0shI0heS5Q6b1NM6SMI7c=
+gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git v0.4.4/go.mod h1:sji5gOmqsOfoKB0jrPJgee0shI0heS5Q6b1NM6SMI7c=
 go.uber.org/atomic v1.3.2/go.mod h1:gD2HeocX3+yG+ygLZcrzQJaqmWj9AIm7n08wl/qW/PE=
 golang.org/x/crypto v0.0.0-20170930174604-9419663f5a44/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
