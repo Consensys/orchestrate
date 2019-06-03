@@ -1,22 +1,27 @@
 package registry
 
 import (
+	"context"
 	"sync"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/static"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
 )
 
 var (
-	rgstr    Registry
+	registry Registry
 	initOnce = &sync.Once{}
 )
 
 // Init initialize ABI Registry
-func Init() {
+func Init(ctx context.Context) {
 	initOnce.Do(func() {
+		// Initialize Ethereum client
+		ethclient.Init(ctx)
+
 		// Create registry
-		rgstr = static.NewRegistry()
+		registry = static.NewRegistry(ethclient.GlobalClient())
 
 		// Read ABIs from ABI viper configuration
 		contracts, err := FromABIConfig()
@@ -26,7 +31,7 @@ func Init() {
 
 		// Register contracts
 		for _, contract := range contracts {
-			err = rgstr.RegisterContract(contract)
+			err = registry.RegisterContract(contract)
 
 			if err != nil {
 				log.WithError(err).Fatalf("abi: could not register ABI")
@@ -37,10 +42,10 @@ func Init() {
 
 // SetGlobalRegistry sets global ABI registry
 func SetGlobalRegistry(r Registry) {
-	rgstr = r
+	registry = r
 }
 
 // GlobalRegistry returns global ABI registry
 func GlobalRegistry() Registry {
-	return rgstr
+	return registry
 }

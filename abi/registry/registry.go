@@ -1,25 +1,29 @@
 package registry
 
 import (
-	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
+	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
+	ethCommon "github.com/ethereum/go-ethereum/common"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 )
 
 // Registry is an interface to manage ABIs
 type Registry interface {
 	// Register a new contract in the ABI
 	RegisterContract(contract *abi.Contract) error
+	// Retrieve contract ABI
+	GetContractABI(contract *abi.Contract) ([]byte, error)
+	// Returns the bytecode
+	GetContractBytecode(contract *abi.Contract) ([]byte, error)
+	// Returns the deployed bytecode
+	GetContractDeployedBytecode(contract *abi.Contract) ([]byte, error)
 
 	// Retrieve method using 4 bytes unique selector
-	GetMethodBySelector(selector string) (*ethabi.Method, error)
-	// Retrieve method using signature
-	GetMethodBySig(contract, signature string) (*ethabi.Method, error)
-
+	GetMethodsBySelector(selector [4]byte, contract common.AccountInstance) (*ethAbi.Method, []*ethAbi.Method, error)
 	// Retrieve event using 4 bytes unique selector
-	GetEventBySelector(selector string) (*ethabi.Event, error)
-	// Retrieve event using signature
-	GetEventBySig(contract, signature string) (*ethabi.Event, error)
+	GetEventsBySelector(selector ethCommon.Hash, contract common.AccountInstance, indexedInputCount uint) (*ethAbi.Event, []*ethAbi.Event, error)
 
-	// Returns the new bytecode
-	GetBytecodeByID(id string) ([]byte, error)
+	// Request an update of the codehash of the contract address
+	RequestAddressUpdate(contract common.AccountInstance) error
 }

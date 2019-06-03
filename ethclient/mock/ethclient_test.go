@@ -6,10 +6,11 @@ import (
 	"math/big"
 	"testing"
 
-	ethcommon "github.com/ethereum/go-ethereum/common"
-	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/stretchr/testify/assert"
+
+	ethcommon "github.com/ethereum/go-ethereum/common"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
 
 // TODO: update with disctinct blocks
@@ -26,42 +27,44 @@ func TestMockEthClient(t *testing.T) {
 	for _, blockEnc := range blocksEnc {
 		var block ethtypes.Block
 		err := rlp.DecodeBytes(blockEnc, &block)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 
 		blocks["1"] = append(blocks["1"], &block)
 	}
 	mec := NewClient(blocks)
 
 	b, err := mec.BlockByNumber(context.Background(), big.NewInt(1), big.NewInt(0))
-	if b == nil || err != nil {
-		t.Errorf("MockEthClient #1: Got %v %v", b, err)
-	}
+	assert.NoError(t, err, "Should not error")
+	assert.NotNil(t, "MockEthClient #1: Got %v", b)
 
 	h, err := mec.HeaderByNumber(context.Background(), big.NewInt(1), big.NewInt(0))
-	if h.Number.Int64() != 0 || err != nil {
-		t.Errorf("MockEthClient #1: Head at %v", h.Number.Int64())
-	}
+	assert.NoError(t, err, "Should not error")
+	assert.Equal(t, int64(0), h.Number.Int64(), "MockEthClient #1: Head at %v", h.Number.Int64())
 
 	b, err = mec.BlockByNumber(context.Background(), big.NewInt(1), big.NewInt(1))
-	if b != nil || err != nil {
-		t.Errorf("MockEthClient #2: Got %v %v", b, err)
-	}
+	assert.NoError(t, err, "Should not error")
+	assert.Nil(t, b, "MockEthClient #2: Got %v", b)
+
+	code, err := mec.CodeAt(context.Background(), big.NewInt(1), ethcommon.Address{}, big.NewInt(1))
+	assert.NoError(t, err, "Should not error")
+	assert.Nil(t, nil, code, "MockEthClient #3: Head at %v", h.Number.Int64())
 
 	mec.Mine(big.NewInt(1))
 
 	b, err = mec.BlockByNumber(context.Background(), big.NewInt(1), big.NewInt(1))
-	if b == nil || err != nil {
-		t.Errorf("MockEthClient #3: Got %v %v", b, err)
-	}
+	assert.NoError(t, err, "Should not error")
+	assert.NotNil(t, b, "MockEthClient #3: Got %v", b)
+
+	code, err = mec.CodeAt(context.Background(), big.NewInt(1), ethcommon.Address{}, big.NewInt(1))
+	assert.NoError(t, err, "Should not error")
+	assert.Equal(t, []byte{1, 2, 3}, code, "MockEthClient #3: Head at %v", h.Number.Int64())
 
 	h, err = mec.HeaderByNumber(context.Background(), big.NewInt(1), nil)
-	if h.Number.Int64() != 1 || err != nil {
-		t.Errorf("MockEthClient #3: Head at %v", h.Number.Int64())
-	}
+	assert.NoError(t, err, "Should not error")
+	assert.Equal(t, int64(1), h.Number.Int64(), "MockEthClient #3: Head at %v", h.Number.Int64())
 
 	ctx := WithError(context.Background(), fmt.Errorf("error"))
 	b, err = mec.BlockByNumber(ctx, big.NewInt(1), big.NewInt(1))
-	if b != nil || err == nil {
-		t.Errorf("MockEthClient #4: Got %v %v", b, err)
-	}
+	assert.Error(t, err, "Should error")
+	assert.Nil(t, b, "MockEthClient #4: Got %v", b)
 }

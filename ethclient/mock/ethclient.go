@@ -159,6 +159,35 @@ func (ec *Client) TransactionReceipt(ctx context.Context, chainID *big.Int, txHa
 	}
 }
 
+func (ec *Client) CodeAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, blockNumber *big.Int) ([]byte, error) {
+	err := GetError(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Simulate io time
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case <-time.After(2 * time.Millisecond):
+		ec.mux.RLock()
+		defer ec.mux.RUnlock()
+
+		if blockNumber == nil {
+			blockNumber = big.NewInt(int64(ec.head[chainID.Text(10)]))
+		}
+
+		if blockNumber.Uint64() <= ec.head[chainID.Text(10)] {
+			return []byte{1, 2, 3}, nil
+		}
+
+		if blockNumber.Uint64() > ec.head[chainID.Text(10)] {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("error")
+	}
+}
+
 func (ec *Client) SyncProgress(ctx context.Context, chainID *big.Int) (*eth.SyncProgress, error) {
 	return nil, fmt.Errorf("not implemented error")
 }
@@ -173,4 +202,32 @@ func (ec *Client) BlockByHash(ctx context.Context, chainID *big.Int, hash ethcom
 
 func (ec *Client) HeaderByHash(ctx context.Context, chainID *big.Int, hash ethcommon.Hash) (*ethtypes.Header, error) {
 	return nil, fmt.Errorf("not implemented error")
+}
+
+func (ec *Client) BalanceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, blockNumber *big.Int) (*big.Int, error) {
+	return nil, fmt.Errorf("not implemented error")
+}
+
+func (ec *Client) StorageAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, key ethcommon.Hash, blockNumber *big.Int) ([]byte, error) {
+	return nil, fmt.Errorf("not implemented error")
+}
+
+func (ec *Client) NonceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, blockNumber *big.Int) (uint64, error) {
+	return 0, fmt.Errorf("not implemented error")
+}
+
+func (ec *Client) PendingBalanceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address) (*big.Int, error) {
+	return nil, fmt.Errorf("not implemented error")
+}
+
+func (ec *Client) PendingStorageAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, key ethcommon.Hash) ([]byte, error) {
+	return nil, fmt.Errorf("not implemented error")
+}
+
+func (ec *Client) PendingCodeAt(ctx context.Context, chainID *big.Int, account ethcommon.Address) ([]byte, error) {
+	return nil, fmt.Errorf("not implemented error")
+}
+
+func (ec *Client) PendingNonceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address) (uint64, error) {
+	return 0, fmt.Errorf("not implemented error")
 }

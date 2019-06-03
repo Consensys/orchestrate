@@ -1,176 +1,256 @@
 package static
 
 import (
+	"context"
 	"fmt"
+	"reflect"
 
-	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
-	ethcommon "github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
+	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
+	ethCommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
 )
 
 // Registry stores contract ABI and bytecode in memory
 type Registry struct {
-	abis      map[string]*ethabi.ABI
-	bytecodes map[string][]byte
+	ethClient ethclient.ChainStateReader
+	// Contract registry/name#tag to bytecode hash
+	contractHash map[string]ethCommon.Hash
+	// Bytecode hash to ABI, bytecode and deployed bytecode
+	contracts map[ethCommon.Hash]*abi.Contract
 
-	abiMethods map[string]ethabi.Method
-	abiEvents  map[string]ethabi.Event
+	// Address to Codehash (deployed bytecode hash) map
+	addressCodehash map[string]map[ethCommon.Address]ethCommon.Hash
+
+	// Codehash to Selector to ABIs
+	methods map[ethCommon.Hash]map[[4]byte][]*ethAbi.Method
+	events  map[ethCommon.Hash]map[ethCommon.Hash]map[uint][]*ethAbi.Event
 }
 
+var defaultCodehash = ethCommon.Hash{}
+
 // NewRegistry creates a New Registry
-func NewRegistry() *Registry {
-	return &Registry{
-		abis:       make(map[string]*ethabi.ABI),
-		bytecodes:  make(map[string][]byte),
-		abiMethods: make(map[string]ethabi.Method),
-		abiEvents:  make(map[string]ethabi.Event),
+func NewRegistry(client ethclient.ChainStateReader) *Registry {
+	r := &Registry{
+		ethClient:       client,
+		contractHash:    make(map[string]ethCommon.Hash),
+		contracts:       make(map[ethCommon.Hash]*abi.Contract),
+		addressCodehash: make(map[string]map[ethCommon.Address]ethCommon.Hash),
+		methods:         make(map[ethCommon.Hash]map[[4]byte][]*ethAbi.Method),
+		events:          make(map[ethCommon.Hash]map[ethCommon.Hash]map[uint][]*ethAbi.Event),
 	}
+	r.methods[defaultCodehash] = make(map[[4]byte][]*ethAbi.Method)
+	r.events[defaultCodehash] = make(map[ethCommon.Hash]map[uint][]*ethAbi.Event)
+	return r
 }
 
 // RegisterContract allow to add a contract and its corresponding ABI to the registry
 func (r *Registry) RegisterContract(contract *abi.Contract) error {
+	if contract.Bytecode != nil {
+		bytecodeHash := crypto.Keccak256Hash(contract.Bytecode)
+		r.contractHash[contract.Short()] = bytecodeHash
+
+		r.contracts[bytecodeHash] = &abi.Contract{
+			Abi:              contract.Abi,
+			Bytecode:         contract.Bytecode,
+			DeployedBytecode: contract.DeployedBytecode,
+		}
+	}
+
+	codeHash := crypto.Keccak256Hash(contract.DeployedBytecode)
 	contractAbi, err := contract.ToABI()
 	if err != nil {
-		return err
+		return fmt.Errorf("registry: could not register contract, wrong ABI format %v", err)
 	}
 
-	// Register ABI and bytecode
-	r.abis[contract.Short()] = contractAbi
-	r.bytecodes[contract.Short()] = contract.Bytecode
+	for _, method := range contractAbi.Methods {
+		var id [4]byte
+		copy(id[:], method.Id())
+		if contract.DeployedBytecode != nil {
+			// Init map
+			if r.methods[codeHash] == nil {
+				r.methods[codeHash] = make(map[[4]byte][]*ethAbi.Method)
+			}
 
-	// TODO differentiate registering vs updating
-	for _, method := range r.abis[contract.Short()].Methods {
-		r.abiMethods[hexutil.Encode(method.Id())] = method
+			r.methods[codeHash][id] = []*ethAbi.Method{&method}
+		}
+
+		// Register in default methods if not present
+		found := false
+		for _, m := range r.methods[defaultCodehash][id] {
+			if reflect.DeepEqual(m, &method) {
+				found = true
+			}
+		}
+		if !found {
+			r.methods[defaultCodehash][id] = append(r.methods[defaultCodehash][id], &method)
+		}
 	}
 
-	for _, event := range r.abis[contract.Short()].Events {
-		r.abiEvents[event.Id().Hex()] = event
+	for _, event := range contractAbi.Events {
+		indexedCount := getIndexedCount(event)
+
+		if contract.DeployedBytecode != nil {
+			// Init map
+			if r.events[codeHash] == nil {
+				r.events[codeHash] = make(map[ethCommon.Hash]map[uint][]*ethAbi.Event)
+			}
+			// Init map
+			if r.events[codeHash][event.Id()] == nil {
+				r.events[codeHash][event.Id()] = make(map[uint][]*ethAbi.Event)
+			}
+
+			r.events[codeHash][event.Id()][indexedCount] = []*ethAbi.Event{&event}
+		}
+
+		// Init map
+		if r.events[defaultCodehash][event.Id()] == nil {
+			r.events[defaultCodehash][event.Id()] = make(map[uint][]*ethAbi.Event)
+		}
+		// Register in default events if not present
+		found := false
+		for _, e := range r.events[defaultCodehash][event.Id()][indexedCount] {
+			if reflect.DeepEqual(e, &event) {
+				found = true
+			}
+		}
+		if !found {
+			r.events[defaultCodehash][event.Id()][indexedCount] = append(
+				r.events[defaultCodehash][event.Id()][indexedCount],
+				&event,
+			)
+		}
 	}
 
 	return nil
 }
 
-func (r *Registry) getContract(name string) (*ethabi.ABI, error) {
-	contractAbi, ok := r.abis[name]
+// Retrieve contract ABI
+func (r *Registry) GetContractABI(contract *abi.Contract) ([]byte, error) {
+	bytecodeHash := r.contractHash[contract.Short()]
+	c, ok := r.contracts[bytecodeHash]
 	if !ok {
-		return nil, fmt.Errorf("unknown contract %q", name)
+		return nil, fmt.Errorf("registry: could not find contract")
 	}
-	return contractAbi, nil
+	return c.Abi, nil
 }
 
-// GetMethodBySig returns the abi for a given method of a contract
-// sig should match the following pattern "func(type1,type2)"
-func (r *Registry) GetMethodBySig(contract, sig string) (*ethabi.Method, error) {
-	// Computing call ensure sig has been properly formated
-	call, err := common.SignatureToCall(sig)
-	if err != nil {
-		return nil, err
-	}
-
-	// Retrieve contract ABI from registry
-	contractAbi, err := r.getContract(contract)
-	if err != nil {
-		return nil, err
-	}
-
-	// If call is a deployment we return constructor
-	if call.IsConstructor() {
-		return &contractAbi.Constructor, nil
-	}
-
-	method, ok := contractAbi.Methods[call.GetMethod().GetName()]
+// Returns the bytecode
+func (r *Registry) GetContractBytecode(contract *abi.Contract) ([]byte, error) {
+	bytecodeHash := r.contractHash[contract.Short()]
+	c, ok := r.contracts[bytecodeHash]
 	if !ok {
-		return nil, fmt.Errorf("contract %q has no method %q", contract, call.GetMethod().GetName())
+		return nil, fmt.Errorf("registry: could not find contract")
 	}
-
-	return &method, nil
+	return c.Bytecode, nil
 }
 
-// GetEventBySig returns the abi for a given event of a contract
-// sig should match the following pattern "event(type1,type2)"
-func (r *Registry) GetEventBySig(contract, sig string) (*ethabi.Event, error) {
-	// Computing call ensure sig has been properly formated
-	call, err := common.SignatureToCall(sig)
-	if err != nil {
-		return nil, err
-	}
-
-	contractAbi, err := r.getContract(contract)
-	if err != nil {
-		return nil, err
-	}
-
-	event := &ethabi.Event{}
-	var ok bool
-	*event, ok = contractAbi.Events[call.GetMethod().GetName()]
+// Returns the deployed bytecode
+func (r *Registry) GetContractDeployedBytecode(contract *abi.Contract) ([]byte, error) {
+	bytecodeHash := r.contractHash[contract.Short()]
+	c, ok := r.contracts[bytecodeHash]
 	if !ok {
-		return nil, fmt.Errorf("contract %q has no event %q", call.GetContract().Short(), call.GetMethod().GetName())
+		return nil, fmt.Errorf("registry: could not find contract")
 	}
-
-	return event, nil
+	return c.DeployedBytecode, nil
 }
 
-func has0xPrefix(input string) bool {
-	return len(input) >= 2 && input[0] == '0' && (input[1] == 'x' || input[1] == 'X')
+// getIndexedCount returns the count of indexed inputs in the event
+func getIndexedCount(event ethAbi.Event) uint {
+	var indexedInputCount uint
+	for i := range event.Inputs {
+		if event.Inputs[i].Indexed {
+			indexedInputCount++
+		}
+	}
+	return indexedInputCount
 }
 
-// GetMethodBySelector returns the method corresponding to input signature
-// The input signature should be in hex format (matching the regex patterns "0x[0-9a-f]{8}" or "[0-9a-f]{8}")
-func (r *Registry) GetMethodBySelector(selector string) (*ethabi.Method, error) {
-	if !has0xPrefix(selector) {
-		selector = fmt.Sprintf("0x%v", selector)
-	}
-
-	bytesig, err := hexutil.Decode(selector)
-	if err != nil {
-		return nil, err
-	}
-
-	method, ok := r.abiMethods[hexutil.Encode(bytesig)]
+// Get the codehash of a contract instance
+func (r *Registry) getCodehash(contract common.AccountInstance) (ethCommon.Hash, error) {
+	codehashToAddressMap, ok := r.addressCodehash[contract.GetChain().String()]
 	if !ok {
-		return nil, fmt.Errorf("no method with signature %v", selector)
+		return ethCommon.Hash{}, fmt.Errorf("registry: could not find contract: bad chainid")
 	}
-	return &method, nil
-}
-
-// GetEventBySelector returns the event corresponding to input signature
-// The input signature should be in hex format (matching the regex patterns "0x[0-9a-f]{16}" or "[0-9a-f]{16}")
-func (r *Registry) GetEventBySelector(selector string) (*ethabi.Event, error) {
-	if !has0xPrefix(selector) {
-		selector = fmt.Sprintf("0x%v", selector)
-	}
-
-	byteselector, err := hexutil.Decode(selector)
+	address, err := contract.GetAccount().Address()
 	if err != nil {
-		return &ethabi.Event{}, err
+		return ethCommon.Hash{}, fmt.Errorf("registry: could not find contract: %v", err)
 	}
-
-	event, ok := r.abiEvents[ethcommon.BytesToHash(byteselector).Hex()]
+	codehash, ok := codehashToAddressMap[address]
 	if !ok {
-		return &ethabi.Event{}, fmt.Errorf("no event with topic %v", selector)
+		return ethCommon.Hash{}, fmt.Errorf("registry: could not find contract: bad address")
 	}
-	return &event, nil
+	return codehash, nil
 }
 
-// GetBytecodeByID returns the bytecode of the contract
-// contract input should match the following pattern "ContractName[Tag]"
-func (r *Registry) GetBytecodeByID(contract string) (code []byte, err error) {
+// Retrieve method using 4 bytes unique selector and the address of the contract
+func (r *Registry) GetMethodsBySelector(selector [4]byte, contract common.AccountInstance) (method *ethAbi.Method, defaultMethods []*ethAbi.Method, err error) {
+	// Search in specific method storage
+	contractCodehash, err := r.getCodehash(contract)
+	if err == nil {
+		contractMethods, ok := r.methods[contractCodehash][selector]
+		if ok && len(contractMethods) == 1 {
+			return contractMethods[0], nil, nil
+		}
+	}
 
-	res, err := r.getBytecode(contract)
+	// Search in default methods
+	defaultMethods, ok := r.methods[defaultCodehash][selector]
+	if ok {
+		return nil, defaultMethods, nil
+	}
+
+	return nil, nil, fmt.Errorf("registry: could not find corresponding method ABIs")
+}
+
+// Retrieve event using 4 bytes unique selector
+func (r *Registry) GetEventsBySelector(selector ethCommon.Hash, contract common.AccountInstance, indexedInputCount uint) (event *ethAbi.Event, defaultEvents []*ethAbi.Event, err error) {
+	// Search in specific event storage
+	contractCodehash, err := r.getCodehash(contract)
+	if err == nil {
+		contractEvents, ok := r.events[contractCodehash][selector]
+		if ok {
+			matchingContractEvents, ok := contractEvents[indexedInputCount]
+			if ok && len(matchingContractEvents) == 1 {
+				return matchingContractEvents[0], nil, nil
+			}
+		}
+	}
+
+	// Search in default events
+	if defaultEvents, ok := r.events[defaultCodehash][selector][indexedInputCount]; ok {
+		return nil, defaultEvents, nil
+	}
+
+	return nil, nil, fmt.Errorf("registry: no event match found, no default and can't find contract: %v", err)
+}
+
+// Request an update of the codehash of the contract address
+func (r *Registry) RequestAddressUpdate(contract common.AccountInstance) error {
+	addr, err := contract.GetAccount().Address()
 	if err != nil {
-		return []byte{}, err
+		return fmt.Errorf("registry: could not update address: address invalid: %v", err)
 	}
 
-	return res, nil
-}
-
-// getBytecode is a low-level getter for the bytecode
-func (r *Registry) getBytecode(name string) ([]byte, error) {
-	code, ok := r.bytecodes[name]
-	if !ok {
-		return nil, fmt.Errorf("unknown contract %q", name)
+	// Codehash already stored for this contract instance
+	if _, ok := r.addressCodehash[contract.GetChain().String()][addr]; ok {
+		return nil
 	}
-	return code, nil
+
+	// Codehash not stored, trying to retrieve it from chain
+	code, err := r.ethClient.CodeAt(context.Background(), contract.GetChain().ID(), addr, nil)
+	if err != nil {
+		return fmt.Errorf("registry: could not update address: client error: %v", err)
+	}
+	codehash := crypto.Keccak256Hash(code)
+	chain := contract.GetChain().String()
+	if r.addressCodehash[chain] == nil {
+		r.addressCodehash[chain] = make(map[ethCommon.Address]ethCommon.Hash)
+	}
+	r.addressCodehash[chain][addr] = codehash
+
+	return nil
 }
