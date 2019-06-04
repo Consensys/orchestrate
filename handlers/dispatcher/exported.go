@@ -1,4 +1,4 @@
-package cucumber
+package dispatcher
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/cucumber/chanregistry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/services/chanregistry"
 )
 
 var (
@@ -14,7 +14,7 @@ var (
 	initOnce = &sync.Once{}
 )
 
-// Init initialize Gas Pricer Handler
+// Init initialize Dispatcher Handler
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
 		if handler != nil {
@@ -24,9 +24,9 @@ func Init(ctx context.Context) {
 		// Initialize Channel registry
 		chanregistry.Init(ctx)
 
-		handler = Cucumber(chanregistry.GlobalChanRegistry())
+		handler = Dispacher(chanregistry.GlobalChanRegistry())
 
-		log.Infof("cucumber: handler ready")
+		log.Infof("dispatcher: handler ready")
 	})
 }
 

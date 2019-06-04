@@ -99,7 +99,7 @@ func EnvelopeCrafter(m map[string]string) *envelope.Envelope {
 					},
 				}
 			}
-		case "method":
+		case "methodSignature":
 			if e.GetCall() != nil {
 				if e.GetCall().GetMethod() != nil {
 					e.GetCall().GetMethod().Signature = v
@@ -115,10 +115,10 @@ func EnvelopeCrafter(m map[string]string) *envelope.Envelope {
 			}
 		case "args":
 			if e.GetCall() != nil {
-				e.GetCall().Args = strings.Split(v, ":")
+				e.GetCall().Args = strings.Split(v, ",")
 			} else {
 				e.Call = &common.Call{
-					Args: strings.Split(v, ":"),
+					Args: strings.Split(v, ","),
 				}
 			}
 		case "to":

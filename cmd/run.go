@@ -12,7 +12,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	storegrpc "gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store/grpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/app"
-	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/cucumber"
+	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/services/cucumber"
 )
 
 func newRunCommand() *cobra.Command {

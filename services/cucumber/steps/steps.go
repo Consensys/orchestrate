@@ -11,14 +11,13 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
-
-	// grpcStore "gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store/grpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/rpc"
-	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/cucumber/chanregistry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/services/chanregistry"
 )
 
 type ScenarioContext struct {
-	ScenarioID string
+	Name        string
+	ScenarioID  string
 
 	// Topics -> chan *envelope.Envelope
 	EnvelopesChan map[string]chan *envelope.Envelope
@@ -29,11 +28,27 @@ type ScenarioContext struct {
 	ChainIDs []*big.Int
 
 	Value map[string]interface{}
+
+	Logger *log.Entry
 }
 
-func (sc *ScenarioContext) initScenarioContext(interface{}) {
+func (sc *ScenarioContext) initScenarioContext(s interface{}) {
+
+	sc.Logger = log.NewEntry(log.StandardLogger())
+
+	var scenarioName string
+	switch t := s.(type) {
+	case *gherkin.Scenario:
+		scenarioName = t.Name
+	case *gherkin.ScenarioOutline:
+		scenarioName = t.Name
+	}
 
 	sc.ScenarioID = uuid.NewV4().String()
+
+	sc.Logger = sc.Logger.WithFields(log.Fields{
+		"Sceneario": scenarioName,
+	})
 
 	chainIDs := rpc.GlobalClient().Networks(context.Background())
 	topics := []string{
@@ -49,10 +64,11 @@ func (sc *ScenarioContext) initScenarioContext(interface{}) {
 
 	sc.EnvelopesChan = make(map[string]chan *envelope.Envelope)
 	sc.Envelopes = make(map[string]*envelope.Envelope)
+	sc.Value = make(map[string]interface{})
 
 	r := chanregistry.GlobalChanRegistry()
-	for _, v := range topics {
-		sc.EnvelopesChan[v] = r.NewEnvelopeChan(sc.ScenarioID, v)
+	for _, topic := range topics {
+		sc.EnvelopesChan[topic] = r.NewEnvelopeChan(sc.ScenarioID, topic)
 	}
 
 	sc.ChainIDs = chainIDs
@@ -65,7 +81,12 @@ func (sc *ScenarioContext) iHaveTheFollowingEnvelope(rawEnvelopes *gherkin.DataT
 	for i := 1; i < len(rawEnvelopes.Rows); i++ {
 		mapEnvelope := make(map[string]string)
 		for j, cell := range head {
-			mapEnvelope[cell.Value] = rawEnvelopes.Rows[i].Cells[j].Value
+			// Replace "to" contract alias to address
+			if cell.Value == "to" {
+				mapEnvelope[cell.Value] = sc.Value[rawEnvelopes.Rows[i].Cells[j].Value].(string)
+			} else {
+				mapEnvelope[cell.Value] = rawEnvelopes.Rows[i].Cells[j].Value
+			}
 		}
 
 		if mapEnvelope["metadataID"] == "" {
@@ -77,10 +98,7 @@ func (sc *ScenarioContext) iHaveTheFollowingEnvelope(rawEnvelopes *gherkin.DataT
 		sc.Envelopes[mapEnvelope["metadataID"]] = e
 	}
 
-	log.WithFields(log.Fields{
-		"ScenarioID": sc.ScenarioID,
-		"Step":       "iHaveTheFollowingEnvelope",
-	}).Info("cucumber: step check")
+	sc.Logger.Info("cucumber: step check")
 
 	return nil
 }
@@ -94,23 +112,32 @@ func (sc *ScenarioContext) iSendTheseEnvelopeToCoreStack() error {
 		}
 	}
 
-	e, err := ChanTimeout(sc.EnvelopesChan[viper.GetString("kafka.topic.crafter")], 10, len(sc.Envelopes))
+	sc.Logger.Info("cucumber: step check")
+
+	return nil
+}
+
+
+func (sc *ScenarioContext) coreStackShouldReceiveThem() error {
+
+	topic := viper.GetString("kafka.topic.crafter")
+	e, err := ChanTimeout(sc.EnvelopesChan[topic], 10, len(sc.Envelopes))
 	if err != nil {
 		return err
 	}
 
-	log.WithFields(log.Fields{
-		"ScenarioID":       sc.ScenarioID,
+	sc.Logger.WithFields(log.Fields{
 		"EnvelopeReceived": len(e),
-		"msg.Topic":        viper.GetString("kafka.topic.crafter"),
-		"Step":             "iSendTheseEnvelopeToCoreStack",
+		"msg.Topic":        topic,
 	}).Info("cucumber: step check")
 
 	return nil
 }
 
 func (sc *ScenarioContext) theTxcrafterShouldSetTheData() error {
-	e, err := ChanTimeout(sc.EnvelopesChan[viper.GetString("kafka.topic.nonce")], 10, len(sc.Envelopes))
+
+	topic := viper.GetString("kafka.topic.nonce")
+	e, err := ChanTimeout(sc.EnvelopesChan[topic], 10, len(sc.Envelopes))
 	if err != nil {
 		return err
 	}
@@ -121,21 +148,22 @@ func (sc *ScenarioContext) theTxcrafterShouldSetTheData() error {
 		}
 	}
 
-	log.WithFields(log.Fields{
-		"ScenarioID":       sc.ScenarioID,
+	sc.Logger.WithFields(log.Fields{
 		"EnvelopeReceived": len(e),
-		"msg.Topic":        viper.GetString("kafka.topic.nonce"),
-		"Step":             "theTxcrafterShouldSetTheData",
+		"msg.Topic":        topic,
 	}).Info("cucumber: step check")
 
 	return nil
 }
 
 func (sc *ScenarioContext) theTxnonceShouldSetTheNonce() error {
-	e, err := ChanTimeout(sc.EnvelopesChan[viper.GetString("kafka.topic.signer")], 10, len(sc.Envelopes))
+
+	topic := viper.GetString("kafka.topic.signer")
+	e, err := ChanTimeout(sc.EnvelopesChan[topic], 10, len(sc.Envelopes))
 	if err != nil {
 		return err
 	}
+
 	nonces := make(map[uint64]bool, len(sc.Envelopes))
 	for _, v := range e {
 		if nonces[v.GetTx().GetTxData().GetNonce()] {
@@ -144,18 +172,18 @@ func (sc *ScenarioContext) theTxnonceShouldSetTheNonce() error {
 		nonces[v.GetTx().GetTxData().GetNonce()] = true
 	}
 
-	log.WithFields(log.Fields{
-		"ScenarioID":       sc.ScenarioID,
+	sc.Logger.WithFields(log.Fields{
 		"EnvelopeReceived": len(e),
-		"msg.Topic":        viper.GetString("kafka.topic.signer"),
-		"Step":             "theTxnonceShouldSetTheNonce",
+		"msg.Topic":        topic,
 	}).Info("cucumber: step check")
 
 	return nil
 }
 
 func (sc *ScenarioContext) theTxsignerShouldSign() error {
-	e, err := ChanTimeout(sc.EnvelopesChan[viper.GetString("kafka.topic.sender")], 10, len(sc.Envelopes))
+
+	topic := viper.GetString("kafka.topic.sender")
+	e, err := ChanTimeout(sc.EnvelopesChan[topic], 10, len(sc.Envelopes))
 	if err != nil {
 		return err
 	}
@@ -166,11 +194,9 @@ func (sc *ScenarioContext) theTxsignerShouldSign() error {
 		}
 	}
 
-	log.WithFields(log.Fields{
-		"ScenarioID":       sc.ScenarioID,
+	sc.Logger.WithFields(log.Fields{
 		"EnvelopeReceived": len(e),
-		"msg.Topic":        viper.GetString("kafka.topic.sender"),
-		"Step":             "theTxsignerShouldSign",
+		"msg.Topic":        topic,
 	}).Info("cucumber: step check")
 
 	return nil
@@ -183,7 +209,7 @@ func (sc *ScenarioContext) theTxsenderShouldSendTheTx() error {
 	// 	status, _, err := grpcStore.GlobalEnvelopeStore().GetStatus(context.Background(), v.GetMetadata().GetId())
 	// 	log.Infof("Status: %s", status)
 	// 	if err != nil {
-	// 		return fmt.Errorf("transaction not stored")
+	// 		return err
 	// 	}
 	// }
 
@@ -191,48 +217,92 @@ func (sc *ScenarioContext) theTxsenderShouldSendTheTx() error {
 }
 
 func (sc *ScenarioContext) theTxlistenerShouldCatchTheTx() error {
-	e, err := ChanTimeout(sc.EnvelopesChan[fmt.Sprintf("%v-%v", viper.GetString("kafka.topic.decoder"), sc.ChainIDs[0].String())], 10, len(sc.Envelopes))
-	if err != nil {
-		return err
-	}
 
-	for _, v := range e {
-		if v.GetReceipt().GetContractAddress() == "" {
-			return fmt.Errorf("tx-listener could not catch the tx")
+	for _, chain := range sc.ChainIDs {
+		topic := fmt.Sprintf("%v-%v", viper.GetString("kafka.topic.decoder"), chain.String())
+		e, err := ChanTimeout(sc.EnvelopesChan[topic], 10, len(sc.Envelopes))
+		if err != nil {
+			return err
 		}
+	
+		for _, v := range e {
+			if v.GetReceipt().GetContractAddress() == "" {
+				return fmt.Errorf("tx-listener could not catch the tx")
+			}
+		}
+
+		sc.Logger.WithFields(log.Fields{
+			"EnvelopeReceived": len(e),
+			"msg.Topic":        topic,
+		}).Info("cucumber: step check")
 	}
 
-	log.WithFields(log.Fields{
-		"ScenarioID":       sc.ScenarioID,
-		"EnvelopeReceived": len(e),
-		"msg.Topic":        fmt.Sprintf("%v-%v", viper.GetString("kafka.topic.decoder"), sc.ChainIDs[0].String()),
-		"Step":             "theTxlistenerShouldCatchTheTx",
-	}).Info("cucumber: step check")
+
+
 
 	return nil
 }
 
 func (sc *ScenarioContext) theTxdecoderShouldDecode() error {
-	e, err := ChanTimeout(sc.EnvelopesChan[viper.GetString("kafka.topic.decoded")], 10, len(sc.Envelopes))
+
+	topic := sc.EnvelopesChan[viper.GetString("kafka.topic.decoded")]
+	e, err := ChanTimeout(topic, 10, len(sc.Envelopes))
 	if err != nil {
 		return err
 	}
 
 	for _, v := range e {
-		if v.GetReceipt().GetContractAddress() == "" {
-			return fmt.Errorf("tx-listener could not catch the tx")
+		for _, log := range v.GetReceipt().GetLogs() {
+			if len(log.GetTopics()) > 0 {
+				if len(log.GetDecodedData()) == 0 {
+					return fmt.Errorf("tx-decoder could not decode the transaction")
+				}
+			}
 		}
 	}
 
-	log.WithFields(log.Fields{
-		"ScenarioID":       sc.ScenarioID,
+	sc.Logger.WithFields(log.Fields{
 		"EnvelopeReceived": len(e),
-		// "Metadata":   e.GetMetadata().GetId(),
-		"msg.Topic": viper.GetString("kafka.topic.decoded"),
-		"Step":      "theTxdecoderShouldDecode",
+		"msg.Topic": topic,
 	}).Info("cucumber: step check")
 
 	return nil
+}
+
+
+func (sc *ScenarioContext) beforeStep(s *gherkin.Step) {
+
+	sc.Logger = sc.Logger.WithFields(log.Fields{
+		"Step": s.Text,
+	})
+}
+
+func (sc *ScenarioContext) iShouldCatchTheirContractAddresses() error {
+
+	topic := sc.EnvelopesChan[viper.GetString("kafka.topic.decoded")]
+	e, err := ChanTimeout(topic, 10, len(sc.Envelopes))
+	if err != nil {
+		return err
+	}
+
+	if sc.Value == nil {
+		sc.Value = make(map[string]interface{})
+	}
+	
+	for _, v := range e {
+		if v.GetReceipt().GetContractAddress() == "" {
+			return fmt.Errorf("Could not deploy contract")
+		}
+		sc.Value[v.GetMetadata().GetExtra()["Alias"]] = v.GetReceipt().GetContractAddress()
+	}
+	
+	sc.Logger.WithFields(log.Fields{
+		"EnvelopeReceived": len(e),
+		"msg.Topic":        topic,
+	}).Info("cucumber: step check")
+
+	return nil
+
 }
 
 func FeatureContext(s *godog.Suite) {
@@ -240,13 +310,16 @@ func FeatureContext(s *godog.Suite) {
 	sc := &ScenarioContext{}
 
 	s.BeforeScenario(sc.initScenarioContext)
+	s.BeforeStep(sc.beforeStep)
 
 	s.Step(`^I have the following envelope:$`, sc.iHaveTheFollowingEnvelope)
-	s.Step(`^I send these envelope to CoreStack$`, sc.iSendTheseEnvelopeToCoreStack)
+	s.Step(`^I send these envelopes to CoreStack$`, sc.iSendTheseEnvelopeToCoreStack)
+	s.Step(`^CoreStack should receive them$`, sc.coreStackShouldReceiveThem)
 	s.Step(`^the tx-crafter should set the data$`, sc.theTxcrafterShouldSetTheData)
 	s.Step(`^the tx-nonce should set the nonce$`, sc.theTxnonceShouldSetTheNonce)
 	s.Step(`^the tx-signer should sign$`, sc.theTxsignerShouldSign)
 	s.Step(`^the tx-sender should send the tx$`, sc.theTxsenderShouldSendTheTx)
 	s.Step(`^the tx-listener should catch the tx$`, sc.theTxlistenerShouldCatchTheTx)
 	s.Step(`^the tx-decoder should decode$`, sc.theTxdecoderShouldDecode)
+	s.Step(`^I should catch their contract addresses$`, sc.iShouldCatchTheirContractAddresses)
 }

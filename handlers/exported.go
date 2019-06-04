@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/handlers/cucumber"
+	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/handlers/dispatcher"
 )
 
 // Init inialize handlers
@@ -14,7 +14,7 @@ func Init(ctx context.Context) {
 	// Initialize Producer
 	wg.Add(1)
 	go func() {
-		cucumber.Init(ctx)
+		dispatcher.Init(ctx)
 		wg.Done()
 	}()
 

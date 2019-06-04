@@ -33,6 +33,7 @@ tidy: mod-tidy lint-fix
 tools: ## Install test tools
 	@GO111MODULE=off go get -u github.com/client9/misspell/cmd/misspell
 	@GO111MODULE=off go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
+	@GO111MODULE=off go get -u github.com/DATA-DOG/godog/cmd/godog
 
 help: ## Display this help screen
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -45,4 +46,3 @@ merge-boilerplate:
 reports:
 	docker-compose -f report/docker-compose.yml up
 	@xdg-open ./report/output/report.html
-

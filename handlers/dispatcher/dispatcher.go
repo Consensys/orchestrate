@@ -1,4 +1,4 @@
-package cucumber
+package dispatcher
 
 import (
 	"fmt"
@@ -6,11 +6,11 @@ import (
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/cucumber/chanregistry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/services/chanregistry"
 )
 
-// Cucumber
-func Cucumber(c *chanregistry.ChanRegistry) engine.HandlerFunc {
+// Dispacher is dispatching envelopes to registered channels
+func Dispacher(c *chanregistry.ChanRegistry) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 
 		txctx.Next()

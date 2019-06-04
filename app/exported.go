@@ -17,9 +17,9 @@ import (
 	server "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http/healthcheck"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/rpc"
-	cucumberService "gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/cucumber"
+	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/services/cucumber"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/handlers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/handlers/cucumber"
+	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/handlers/dispatcher"
 )
 
 var (
@@ -61,9 +61,9 @@ func initComponents(ctx context.Context) {
 	wg.Add(1)
 	go func() {
 		// Want to consume from the oldest offset
-		broker.InitConfig()
-		config := broker.GlobalConfig()
-		config.Consumer.Offsets.Initial = sarama.OffsetOldest
+		// broker.InitConfig()
+		// config := broker.GlobalConfig()
+		// config.Consumer.Offsets.Initial = sarama.OffsetOldest
 
 		broker.InitConsumerGroup(ctx)
 		wg.Done()
@@ -83,10 +83,10 @@ func initComponents(ctx context.Context) {
 		wg.Done()
 	}()
 
-	// Initialize cucumberService registry
+	// Initialize cucumber registry
 	wg.Add(1)
 	go func() {
-		cucumberService.Init(ctx)
+		cucumber.Init(ctx)
 		wg.Done()
 	}()
 
@@ -104,7 +104,7 @@ func registerHandlers() {
 		engine.Register(logger.Logger)
 		engine.Register(loader.Loader)
 		engine.Register(offset.Marker)
-		engine.Register(cucumber.GlobalHandler())
+		engine.Register(dispatcher.GlobalHandler())
 		wg.Done()
 	}()
 
@@ -149,7 +149,7 @@ func Start(ctx context.Context) {
 
 		go func() {
 			if <-readyToTest {
-				cucumberService.Run(cancel, cucumberService.GlobalOptions())
+				cucumber.Run(cancel, cucumber.GlobalOptions())
 			}
 		}()
 

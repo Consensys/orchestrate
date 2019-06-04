@@ -46,5 +46,6 @@ func (c *ChanRegistry) GetEnvelopeChan(testID, topic string) chan *envelope.Enve
 
 func (c *ChanRegistry) CloseEnvelopeChan(testID, topic string) error {
 	close(c.EnvelopeChan[testID][topic])
+	delete(c.EnvelopeChan[testID], topic)
 	return nil
 }

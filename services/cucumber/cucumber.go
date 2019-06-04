@@ -5,13 +5,11 @@ import (
 	"os"
 
 	"github.com/DATA-DOG/godog"
-	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/cucumber/steps"
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/services/cucumber/steps"
 )
 
 func Run(cancel context.CancelFunc, opt *godog.Options) {
-
-	log.Info("cucumber: feature tests start")
 
 	status := godog.RunWithOptions("tests", func(s *godog.Suite) {
 		steps.FeatureContext(s)
@@ -29,5 +27,6 @@ func Run(cancel context.CancelFunc, opt *godog.Options) {
 		os.Exit(status)
 	}
 
+	log.Info("cucumber: feature tests succeded")
 	cancel()
 }
