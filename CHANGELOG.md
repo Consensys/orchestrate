@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.5.2
+
+*Released on June 4th 2019*
+
+- [FEAT] Replace abi registry with contract registry
+
 ### Version 0.5.1
 
 *Released on May 20th 2019*
