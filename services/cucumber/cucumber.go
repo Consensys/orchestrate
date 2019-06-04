@@ -27,6 +27,6 @@ func Run(cancel context.CancelFunc, opt *godog.Options) {
 		os.Exit(status)
 	}
 
-	log.Info("cucumber: feature tests succeded")
+	log.Info("cucumber: feature tests succeeded")
 	cancel()
 }

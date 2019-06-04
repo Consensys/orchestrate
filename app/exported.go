@@ -17,9 +17,9 @@ import (
 	server "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http/healthcheck"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/rpc"
-	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/services/cucumber"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/handlers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/handlers/dispatcher"
+	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/services/cucumber"
 )
 
 var (

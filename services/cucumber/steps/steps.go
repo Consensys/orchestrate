@@ -16,8 +16,8 @@ import (
 )
 
 type ScenarioContext struct {
-	Name        string
-	ScenarioID  string
+	Name       string
+	ScenarioID string
 
 	// Topics -> chan *envelope.Envelope
 	EnvelopesChan map[string]chan *envelope.Envelope
@@ -117,7 +117,6 @@ func (sc *ScenarioContext) iSendTheseEnvelopeToCoreStack() error {
 	return nil
 }
 
-
 func (sc *ScenarioContext) coreStackShouldReceiveThem() error {
 
 	topic := viper.GetString("kafka.topic.crafter")
@@ -205,14 +204,6 @@ func (sc *ScenarioContext) theTxsignerShouldSign() error {
 func (sc *ScenarioContext) theTxsenderShouldSendTheTx() error {
 	// TODO call API envelope store
 
-	// for _, v := range sc.Envelopes {
-	// 	status, _, err := grpcStore.GlobalEnvelopeStore().GetStatus(context.Background(), v.GetMetadata().GetId())
-	// 	log.Infof("Status: %s", status)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
-
 	return nil
 }
 
@@ -224,7 +215,7 @@ func (sc *ScenarioContext) theTxlistenerShouldCatchTheTx() error {
 		if err != nil {
 			return err
 		}
-	
+
 		for _, v := range e {
 			if v.GetReceipt().GetContractAddress() == "" {
 				return fmt.Errorf("tx-listener could not catch the tx")
@@ -236,9 +227,6 @@ func (sc *ScenarioContext) theTxlistenerShouldCatchTheTx() error {
 			"msg.Topic":        topic,
 		}).Info("cucumber: step check")
 	}
-
-
-
 
 	return nil
 }
@@ -263,12 +251,11 @@ func (sc *ScenarioContext) theTxdecoderShouldDecode() error {
 
 	sc.Logger.WithFields(log.Fields{
 		"EnvelopeReceived": len(e),
-		"msg.Topic": topic,
+		"msg.Topic":        topic,
 	}).Info("cucumber: step check")
 
 	return nil
 }
-
 
 func (sc *ScenarioContext) beforeStep(s *gherkin.Step) {
 
@@ -288,14 +275,14 @@ func (sc *ScenarioContext) iShouldCatchTheirContractAddresses() error {
 	if sc.Value == nil {
 		sc.Value = make(map[string]interface{})
 	}
-	
+
 	for _, v := range e {
 		if v.GetReceipt().GetContractAddress() == "" {
-			return fmt.Errorf("Could not deploy contract")
+			return fmt.Errorf("could not deploy contract")
 		}
 		sc.Value[v.GetMetadata().GetExtra()["Alias"]] = v.GetReceipt().GetContractAddress()
 	}
-	
+
 	sc.Logger.WithFields(log.Fields{
 		"EnvelopeReceived": len(e),
 		"msg.Topic":        topic,

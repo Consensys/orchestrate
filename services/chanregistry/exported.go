@@ -10,7 +10,6 @@ var (
 	initOnce = &sync.Once{}
 )
 
-
 // Init initialize EnvelopeRegistry
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
@@ -23,7 +22,6 @@ func Init(ctx context.Context) {
 
 	})
 }
-
 
 // GlobalHandler returns global EnvelopeRegistry
 func GlobalChanRegistry() *ChanRegistry {
