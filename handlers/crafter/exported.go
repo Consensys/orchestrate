@@ -26,7 +26,7 @@ func Init(ctx context.Context) {
 		crafter.Init()
 
 		// Initialize Registry
-		registry.Init()
+		registry.Init(ctx)
 
 		// Create Handler
 		handler = Crafter(registry.GlobalRegistry(), crafter.GlobalCrafter())

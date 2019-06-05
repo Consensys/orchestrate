@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
+	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
+	ethCommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -18,38 +19,34 @@ import (
 
 type MockABIRegistry struct{}
 
-var unknown = "unknown()"
-
-func (r *MockABIRegistry) GetMethodBySig(contract, sig string) (*ethabi.Method, error) {
-	if sig == unknown {
-		return nil, fmt.Errorf("could not retrieve ABI")
-	}
-	return &ethabi.Method{}, nil
+func (r *MockABIRegistry) RegisterContract(contract *abi.Contract) error {
+	return nil
 }
 
-func (r *MockABIRegistry) GetBytecodeByID(id string) ([]byte, error) {
-	if id == "unknown" {
+func (r *MockABIRegistry) GetContractABI(contract *abi.Contract) ([]byte, error) {
+	return []byte{}, nil
+}
+
+func (r *MockABIRegistry) GetContractBytecode(contract *abi.Contract) ([]byte, error) {
+	if contract.Name == "unknown" {
 		return []byte{}, fmt.Errorf("could not retrieve bytecode")
 	}
 	return []byte{246, 34}, nil
 }
 
-func (r *MockABIRegistry) GetMethodBySelector(selector string) (*ethabi.Method, error) {
-	return &ethabi.Method{}, nil
+func (r *MockABIRegistry) GetContractDeployedBytecode(contract *abi.Contract) ([]byte, error) {
+	return []byte{}, nil
 }
 
-func (r *MockABIRegistry) GetEventBySig(contract, sig string) (*ethabi.Event, error) {
-	if sig == "unknown()" {
-		return nil, fmt.Errorf("could not retrieve ABI")
-	}
-	return &ethabi.Event{}, nil
+func (r *MockABIRegistry) GetMethodsBySelector(selector [4]byte, contract common.AccountInstance) (method *ethAbi.Method, methods []*ethAbi.Method, e error) {
+	return &ethAbi.Method{}, make([]*ethAbi.Method, 0), nil
 }
 
-func (r *MockABIRegistry) GetEventBySelector(selector string) (*ethabi.Event, error) {
-	return &ethabi.Event{}, nil
+func (r *MockABIRegistry) GetEventsBySelector(selector ethCommon.Hash, contract common.AccountInstance, indexedInputCount uint) (event *ethAbi.Event, events []*ethAbi.Event, e error) {
+	return &ethAbi.Event{}, make([]*ethAbi.Event, 0), nil
 }
 
-func (r *MockABIRegistry) RegisterContract(contract *abi.Contract) error {
+func (r *MockABIRegistry) RequestAddressUpdate(contract common.AccountInstance) error {
 	return nil
 }
 
@@ -60,14 +57,14 @@ var (
 	constructorPayload = "0xf622a9059cbb000000000000000000000000ff778b716fc07d98839f48ddb88d8be583beb684000000000000000000000000000000000000000000000000002386f26fc10000"
 )
 
-func (c *MockCrafter) CraftCall(method ethabi.Method, args ...string) ([]byte, error) {
+func (c *MockCrafter) CraftCall(method ethAbi.Method, args ...string) ([]byte, error) {
 	if len(args) != 1 {
 		return []byte(``), fmt.Errorf("could not craft call expected args len to be 1")
 	}
 	return hexutil.MustDecode(callPayload), nil
 }
 
-func (c *MockCrafter) CraftConstructor(bytecode []byte, method ethabi.Method, args ...string) ([]byte, error) {
+func (c *MockCrafter) CraftConstructor(bytecode []byte, method ethAbi.Method, args ...string) ([]byte, error) {
 	if len(args) != 1 {
 		return []byte(``), fmt.Errorf("could not craft constructor expected args len to be 1")
 	}
@@ -103,8 +100,9 @@ func makeCrafterContext(i int) *engine.TxContext {
 		ctx.Set("result", "")
 	case 4:
 		ctx.Envelope.Call = &common.Call{
-			Method: &abi.Method{Signature: "constructor()"},
-			Args:   []string{"0xabcd"},
+			Contract: &abi.Contract{Name: "known"},
+			Method:   &abi.Method{Signature: "constructor()"},
+			Args:     []string{"0xabcd"},
 		}
 		ctx.Set("errors", 0)
 		ctx.Set("result", constructorPayload)

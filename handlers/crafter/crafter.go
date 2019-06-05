@@ -68,7 +68,7 @@ func Crafter(r registry.Registry, c crafter.Crafter) engine.HandlerFunc {
 		if txctx.Envelope.GetCall().GetMethod().IsConstructor() {
 			// Transaction to be crafted is a Contract deployment
 			// Retrieve Bytecode from registry
-			bytecode, err = r.GetBytecodeByID(txctx.Envelope.GetCall().GetContract().Short())
+			bytecode, err = r.GetContractBytecode(txctx.Envelope.GetCall().GetContract())
 			if err != nil {
 				txctx.Logger.WithError(err).Errorf("crafter: could not retrieve contract bytecode")
 				_ = txctx.AbortWithError(err)
