@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"os"
 	"sync"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/loader"
@@ -165,6 +166,7 @@ func Start(ctx context.Context) {
 		)
 		if err != nil {
 			log.WithError(err).Error("worker: error on consumer")
+			os.Exit(1)
 		}
 
 	})
