@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.4.7
+
+*Released on June 20th 2019*
+
+- [FIX] Update tests to the new version of `Registry` interface
+- [CHORE] Update `ethereum` package
+  
 ### Version 0.4.6
 
 *Released on May 20th 2019*
