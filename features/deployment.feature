@@ -4,8 +4,8 @@ Feature: deploy an ERC20 contract
 
   Scenario: Create an instance of ERC20
     Given I have the following envelope:
-      | chainId | from                                       | contractName | methodSignature        | gas     |
-      | 888     | 0x7E654d251Da770A068413677967F6d3Ea2FeA9E4 | SimpleToken        | constructor() | 2000000 |
+      | chainId | from                                       | contractName       | methodSignature | gas     |
+      | 888     | 0x7E654d251Da770A068413677967F6d3Ea2FeA9E4 | SimpleToken        | constructor()   | 2000000 |
     When I send these envelopes to CoreStack
     Then CoreStack should receive them
     Then the tx-crafter should set the data
