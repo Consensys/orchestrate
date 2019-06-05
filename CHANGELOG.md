@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.5.3
+
+*Released on June 5th 2019*
+
+- [FIX] Replace `ERC20` by `SimpleToken`
+
 ### Version 0.5.2
 
 *Released on June 4th 2019*
