@@ -131,7 +131,7 @@ func Tags(f *pflag.FlagSet) {
 var (
 	cucumberFormatFlag     = "cucumber-format"
 	cucumberFormatViperKey = "cucumber.format"
-	cucumberFormatDefault  = "progress"
+	cucumberFormatDefault  = "cucumber"
 	cucumberFormatEnv      = "CUCUMBER_FORMAT"
 )
 
@@ -145,7 +145,7 @@ func Format(f *pflag.FlagSet) {
 var (
 	cucumberConcurrencyFlag     = "cucumber-concurrency"
 	cucumberConcurrencyViperKey = "cucumber.concurrency"
-	cucumberConcurrencyDefault  = 2
+	cucumberConcurrencyDefault  = 1
 	cucumberConcurrencyEnv      = "CUCUMBER_CONCURRENCY"
 )
 
