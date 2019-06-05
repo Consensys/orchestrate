@@ -18,6 +18,14 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
 
+func GetChainCounts(envelopes map[string]*envelope.Envelope) map[string]uint {
+	chains := make(map[string]uint)
+	for _, v := range envelopes {
+		chains[v.GetChain().GetId()]++
+	}
+	return chains
+}
+
 func ChanTimeout(c chan *envelope.Envelope, seconds int64, expectedItems int) ([]*envelope.Envelope, error) {
 	ch := make([]*envelope.Envelope, expectedItems)
 	for i := 0; i < expectedItems; i++ {

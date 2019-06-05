@@ -22,7 +22,7 @@ type ScenarioContext struct {
 	// Topics -> chan *envelope.Envelope
 	EnvelopesChan map[string]chan *envelope.Envelope
 
-	// MetadataId -> *envelope.Envelope
+	// MetadataId -> *envelope.Envelope (keep envelopes to be processed and checked)
 	Envelopes map[string]*envelope.Envelope
 
 	ChainIDs []*big.Int
@@ -108,6 +108,7 @@ func (sc *ScenarioContext) iSendTheseEnvelopeToCoreStack() error {
 	for _, e := range sc.Envelopes {
 		err := SendEnvelope(e)
 		if err != nil {
+			sc.Logger.Errorf("cucumber: step failed got error %q", err)
 			return err
 		}
 	}
@@ -122,6 +123,7 @@ func (sc *ScenarioContext) coreStackShouldReceiveThem() error {
 	topic := viper.GetString("kafka.topic.crafter")
 	e, err := ChanTimeout(sc.EnvelopesChan[topic], 10, len(sc.Envelopes))
 	if err != nil {
+		sc.Logger.Errorf("cucumber: step failed got error %q", err)
 		return err
 	}
 
@@ -138,12 +140,15 @@ func (sc *ScenarioContext) theTxcrafterShouldSetTheData() error {
 	topic := viper.GetString("kafka.topic.nonce")
 	e, err := ChanTimeout(sc.EnvelopesChan[topic], 10, len(sc.Envelopes))
 	if err != nil {
+		sc.Logger.Errorf("cucumber: step failed got error %q", err)
 		return err
 	}
 
 	for _, v := range e {
 		if v.GetTx().GetTxData().GetData() == "" {
-			return fmt.Errorf("tx-crafter could not craft transaction")
+			err := fmt.Errorf("tx-crafter could not craft transaction")
+			sc.Logger.Errorf("cucumber: step failed got error %q", err)
+			return err
 		}
 	}
 
@@ -160,13 +165,16 @@ func (sc *ScenarioContext) theTxnonceShouldSetTheNonce() error {
 	topic := viper.GetString("kafka.topic.signer")
 	e, err := ChanTimeout(sc.EnvelopesChan[topic], 10, len(sc.Envelopes))
 	if err != nil {
+		sc.Logger.Errorf("cucumber: step failed got error %q", err)
 		return err
 	}
 
 	nonces := make(map[uint64]bool, len(sc.Envelopes))
 	for _, v := range e {
 		if nonces[v.GetTx().GetTxData().GetNonce()] {
-			return fmt.Errorf("tx-nonce set 2 times the same nonce")
+			err := fmt.Errorf("tx-nonce set 2 times the same nonce")
+			sc.Logger.Errorf("cucumber: step failed got error %q", err)
+			return err
 		}
 		nonces[v.GetTx().GetTxData().GetNonce()] = true
 	}
@@ -184,12 +192,15 @@ func (sc *ScenarioContext) theTxsignerShouldSign() error {
 	topic := viper.GetString("kafka.topic.sender")
 	e, err := ChanTimeout(sc.EnvelopesChan[topic], 10, len(sc.Envelopes))
 	if err != nil {
+		sc.Logger.Errorf("cucumber: step failed got error %q", err)
 		return err
 	}
 
 	for _, v := range e {
 		if v.GetTx().GetRaw() == "" {
-			return fmt.Errorf("tx-signer could not sign")
+			err := fmt.Errorf("tx-signer could not sign")
+			sc.Logger.Errorf("cucumber: step failed got error %q", err)
+			return err
 		}
 	}
 
@@ -209,16 +220,20 @@ func (sc *ScenarioContext) theTxsenderShouldSendTheTx() error {
 
 func (sc *ScenarioContext) theTxlistenerShouldCatchTheTx() error {
 
-	for _, chain := range sc.ChainIDs {
-		topic := fmt.Sprintf("%v-%v", viper.GetString("kafka.topic.decoder"), chain.String())
-		e, err := ChanTimeout(sc.EnvelopesChan[topic], 10, len(sc.Envelopes))
+	for chain, count := range GetChainCounts(sc.Envelopes) {
+
+		topic := fmt.Sprintf("%v-%v", viper.GetString("kafka.topic.decoder"), chain)
+		e, err := ChanTimeout(sc.EnvelopesChan[topic], 10, int(count))
 		if err != nil {
+			sc.Logger.Errorf("cucumber: step failed got error %q", err)
 			return err
 		}
 
 		for _, v := range e {
-			if v.GetReceipt().GetContractAddress() == "" {
-				return fmt.Errorf("tx-listener could not catch the tx")
+			if v.GetReceipt().GetBlockHash() == "" {
+				err := fmt.Errorf("tx-listener could not catch the tx")
+				sc.Logger.Errorf("cucumber: step failed got error %q", err)
+				return err
 			}
 		}
 
@@ -236,6 +251,8 @@ func (sc *ScenarioContext) theTxdecoderShouldDecode() error {
 	topic := sc.EnvelopesChan[viper.GetString("kafka.topic.decoded")]
 	e, err := ChanTimeout(topic, 10, len(sc.Envelopes))
 	if err != nil {
+		err := fmt.Errorf("tx-listener could not catch the tx")
+		sc.Logger.Errorf("cucumber: step failed got error %q", err)
 		return err
 	}
 
@@ -243,7 +260,9 @@ func (sc *ScenarioContext) theTxdecoderShouldDecode() error {
 		for _, log := range v.GetReceipt().GetLogs() {
 			if len(log.GetTopics()) > 0 {
 				if len(log.GetDecodedData()) == 0 {
-					return fmt.Errorf("tx-decoder could not decode the transaction")
+					err := fmt.Errorf("tx-decoder could not decode the transaction")
+					sc.Logger.Errorf("cucumber: step failed got error %q", err)
+					return err
 				}
 			}
 		}
@@ -269,11 +288,20 @@ func (sc *ScenarioContext) iShouldCatchTheirContractAddresses() error {
 	topic := sc.EnvelopesChan[viper.GetString("kafka.topic.decoded")]
 	e, err := ChanTimeout(topic, 10, len(sc.Envelopes))
 	if err != nil {
+		sc.Logger.Errorf("cucumber: step failed got error %q", err)
 		return err
 	}
 
-	if sc.Value == nil {
-		sc.Value = make(map[string]interface{})
+	// Consume unused envelopes stuck in chan
+	topics := []string{
+		viper.GetString("kafka.topic.crafter"),
+		viper.GetString("kafka.topic.nonce"),
+		viper.GetString("kafka.topic.signer"),
+		viper.GetString("kafka.topic.sender"),
+		fmt.Sprintf("%v-%v", viper.GetString("kafka.topic.decoder"), "888"),
+	}
+	for _, topic := range topics {
+		_, _ = ChanTimeout(sc.EnvelopesChan[topic], 10, len(e))
 	}
 
 	for _, v := range e {
@@ -281,6 +309,9 @@ func (sc *ScenarioContext) iShouldCatchTheirContractAddresses() error {
 			return fmt.Errorf("could not deploy contract")
 		}
 		sc.Value[v.GetMetadata().GetExtra()["Alias"]] = v.GetReceipt().GetContractAddress()
+
+		// Envelope processed - remove from scenario context
+		delete(sc.Envelopes, v.GetMetadata().GetId())
 	}
 
 	sc.Logger.WithFields(log.Fields{
