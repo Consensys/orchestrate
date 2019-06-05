@@ -2,7 +2,7 @@
 
 ### Version 0.4.7
 
-*Released on June 20th 2019*
+*Released on June 5th 2019*
 
 - [FIX] Update tests to the new version of `Registry` interface
 - [CHORE] Update `ethereum` package
