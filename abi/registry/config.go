@@ -13,7 +13,6 @@ func init() {
 	viper.SetDefault(abiViperKey, abiDefault)
 }
 
-
 // SimpleToken has been compiled and optimized with openzepplin example (https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/examples/SimpleToken.sol)
 var (
 	abiFlag     = "abi"
