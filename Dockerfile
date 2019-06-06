@@ -34,6 +34,8 @@ COPY --from=builder /etc/passwd /etc/passwd
 
 COPY --from=builder /bin/main /go/bin/main
 
+COPY --from=builder /app/features /features
+
 # Use an unprivileged user.
 USER appuser
 EXPOSE 8080
