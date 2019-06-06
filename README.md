@@ -69,6 +69,8 @@ Flags:
       --cucumber-tags string           Various filters for scenarios parsed from feature files : "CUCUMBER_TAGS"
       --engine-slots uint              Maximum number of messages the engine can treat concurrently.
                                        Environment variable: "ENGINE_SLOTS" (default 20)
+      --eth-client strings             Ethereum client url
+                                       Environment variable: "ETH_CLIENT_URL"
       --grpc-store-target string       GRPC Context Store target (See https://github.com/grpc/grpc/blob/master/doc/naming.md)
                                        Environment variable: "GRPC_STORE_TARGET"
   -h, --help                           help for run
@@ -115,8 +117,7 @@ Global Flags:
       --log-format string   Log formatter (one of ["text" "json"]).
                             Environment variable: "LOG_FORMAT" (default "text")
       --log-level string    Log level (one of ["panic" "fatal" "error" "warn" "info" "debug" "trace"]).
-                            Environment variable: "LOG_LEVEL" (default "debug")
-```
+                            Environment variable: "LOG_LEVEL" (default "debug")```
 
 ## Scenario
 
