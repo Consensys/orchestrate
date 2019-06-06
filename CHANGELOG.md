@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.2
+
+*Released on June 06th 2019*
+
+- [FIX] Update Dockerfile to parse features files
+
 ### Version 0.1.1
 
 *Released on June 05th 2019*
