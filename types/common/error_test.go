@@ -12,5 +12,5 @@ func TestError(t *testing.T) {
 		Message: "Test Error",
 	}
 
-	assert.Equal(t, "Error #18: Test Error", err.Error(), "Error message shoudl be valid")
+	assert.Equal(t, "Error #18: Test Error", err.Error(), "Error message should be valid")
 }
