@@ -2,7 +2,7 @@ GOFILES := $(shell find . -name '*.go' | egrep -v "^\./\.go" | grep -v _test.go)
 PACKAGES ?= $(shell go list ./...)
 BOILERPLATE_REPOSITORY=git@gitlab.com:ConsenSys/client/fr/core-stack/boilerplate-worker.git
 
-.PHONY: all run-coverage coverage fmt fmt-check vet lint misspell-check misspell race tools help
+.PHONY: all run-coverage coverage fmt fmt-check vet lint misspell-check misspell race tools help report
 
 # Testing
 run-coverage: ## Generate global code coverage report
@@ -43,6 +43,6 @@ merge-boilerplate:
 	@git fetch boilerplate master
 	@git merge boilerplate/master
 
-reports:
-	docker-compose -f report/docker-compose.yml up
+report:
+	@docker-compose -f ./report/docker-compose.yml up
 	@xdg-open ./report/output/report.html
