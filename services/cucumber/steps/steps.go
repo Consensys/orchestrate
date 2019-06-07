@@ -172,7 +172,7 @@ func (sc *ScenarioContext) theTxnonceShouldSetTheNonce() error {
 	nonces := make(map[uint64]bool, len(sc.Envelopes))
 	for _, v := range e {
 		if nonces[v.GetTx().GetTxData().GetNonce()] {
-			err := fmt.Errorf("tx-nonce set 2 times the same nonce")
+			err := fmt.Errorf("tx-nonce set 2 times the same nonce: %d", v.GetTx().GetTxData().GetNonce())
 			sc.Logger.Errorf("cucumber: step failed got error %q", err)
 			return err
 		}
