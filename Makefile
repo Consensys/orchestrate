@@ -45,4 +45,4 @@ merge-boilerplate:
 
 report:
 	@docker-compose -f ./report/docker-compose.yml up
-	@xdg-open ./report/output/report.html
+	@python -mwebbrowser ./report/output/report.html
