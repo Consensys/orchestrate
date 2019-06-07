@@ -131,7 +131,7 @@ func Tags(f *pflag.FlagSet) {
 var (
 	cucumberFormatFlag     = "cucumber-format"
 	cucumberFormatViperKey = "cucumber.format"
-	cucumberFormatDefault  = "cucumber"
+	cucumberFormatDefault  = "pretty"
 	cucumberFormatEnv      = "CUCUMBER_FORMAT"
 )
 
@@ -173,7 +173,7 @@ func Paths(f *pflag.FlagSet) {
 var (
 	cucumberOutputPathFlag     = "cucumber-outputpath"
 	cucumberOutputPathViperKey = "cucumber.outputpath"
-	cucumberOutputPathDefault  = "report/output/report.json"
+	cucumberOutputPathDefault  = ""
 	cucumberOutputPathEnv      = "CUCUMBER_OUTPUTPATH"
 )
 
