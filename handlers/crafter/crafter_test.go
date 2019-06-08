@@ -19,6 +19,8 @@ import (
 
 type MockABIRegistry struct{}
 
+const testsNum = 11
+
 func (r *MockABIRegistry) RegisterContract(contract *abi.Contract) error {
 	return nil
 }
@@ -77,7 +79,7 @@ func makeCrafterContext(i int) *engine.TxContext {
 	ctx.Logger = log.NewEntry(log.StandardLogger())
 	ctx.Envelope.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{}}
 
-	switch i % 5 {
+	switch i {
 	case 0:
 		ctx.Set("errors", 0)
 		ctx.Set("result", "")
@@ -106,6 +108,66 @@ func makeCrafterContext(i int) *engine.TxContext {
 		}
 		ctx.Set("errors", 0)
 		ctx.Set("result", constructorPayload)
+	case 5:
+		ctx.Envelope.Call = &common.Call{
+			Contract: &abi.Contract{Name: "known"},
+			// Invalid ABI
+			Method: &abi.Method{
+				Signature: "constructor()",
+				Abi:       []byte{1, 2, 3},
+			},
+			Args: []string{"0xabcd"},
+		}
+		ctx.Set("errors", 1)
+		ctx.Set("result", "")
+	case 6:
+		ctx.Envelope.Call = &common.Call{
+			Contract: &abi.Contract{Name: "known"},
+			// Invalid method signature
+			Method: &abi.Method{Signature: "constructor)"},
+			Args:   []string{"0xabcd"},
+		}
+		ctx.Set("errors", 1)
+		ctx.Set("result", "")
+	case 7:
+		ctx.Envelope.Call = &common.Call{
+			Contract: &abi.Contract{Name: "unknown"},
+			Method:   &abi.Method{Signature: "constructor()"},
+			// Invalid contract name
+			Args: []string{"0xabcd"},
+		}
+		ctx.Set("errors", 1)
+		ctx.Set("result", "")
+	case 8:
+		ctx.Envelope.Call = &common.Call{
+			Contract: &abi.Contract{Name: "known"},
+			Method:   &abi.Method{Signature: "constructor()"},
+			// Invalid number of arguments for a constructor
+			Args: []string{"0xabcd", "123"},
+		}
+		ctx.Set("errors", 1)
+		ctx.Set("result", "")
+	case 9:
+		ctx.Envelope.Call = &common.Call{
+			Contract: &abi.Contract{Name: "known"},
+			Method:   &abi.Method{Signature: "constructor()"},
+			Args:     []string{"0xabcd"},
+		}
+		ctx.Envelope.Tx = nil
+		ctx.Set("errors", 0)
+		ctx.Set("result", constructorPayload)
+	case 10:
+		ctx.Envelope.Call = &common.Call{
+			Contract: &abi.Contract{Name: "known"},
+			Method:   &abi.Method{Signature: "constructor()"},
+			Args:     []string{"0xabcd"},
+		}
+		ctx.Envelope.Tx = &ethereum.Transaction{TxData: nil}
+		ctx.Set("errors", 0)
+		ctx.Set("result", constructorPayload)
+
+	default:
+		panic(fmt.Sprintf("No test case with number %d", i))
 	}
 	return ctx
 }
@@ -119,7 +181,7 @@ func (s *CrafterTestSuite) SetupSuite() {
 }
 
 func (s *CrafterTestSuite) TestCrafter() {
-	rounds := 5
+	rounds := testsNum
 	txctxs := []*engine.TxContext{}
 	for i := 0; i < rounds; i++ {
 		txctxs = append(txctxs, makeCrafterContext(i))
