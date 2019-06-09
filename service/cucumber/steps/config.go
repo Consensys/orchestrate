@@ -29,7 +29,8 @@ var (
 
 // Timeout register flag for Timeout Option
 func Timeout(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Duration for waiting envelopes to be processed by a step method before timeout : %q`, cucumberTimeoutEnv)
+	desc := fmt.Sprintf(`Duration for waiting envelopes to be processed by a step method before timeout
+Environment variable: %q`, cucumberTimeoutEnv)
 	f.Int(cucumberTimeoutFlag, cucumberTimeoutDefault, desc)
 	_ = viper.BindPFlag(cucumberTimeoutViperKey, f.Lookup(cucumberTimeoutFlag))
 }
@@ -43,7 +44,8 @@ var (
 
 // MiningTimeout register flag for MiningTimeout Option
 func MiningTimeout(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Duration for waiting envelopes to be processed by a blockchain before timeout : %q`, cucumberMiningTimeoutEnv)
+	desc := fmt.Sprintf(`Duration for waiting envelopes to be processed by a blockchain before timeout
+Environment variable: %q`, cucumberMiningTimeoutEnv)
 	f.Int(cucumberMiningTimeoutFlag, cucumberMiningTimeoutDefault, desc)
 	_ = viper.BindPFlag(cucumberMiningTimeoutViperKey, f.Lookup(cucumberMiningTimeoutFlag))
 }
