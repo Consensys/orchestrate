@@ -8,8 +8,8 @@ import (
 	"github.com/DATA-DOG/godog"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/services/chanregistry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/services/cucumber/steps"
+	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/service/chanregistry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/service/cucumber/steps"
 )
 
 var (
