@@ -47,8 +47,8 @@ func (c *CompositeHandler) Registers(handler HandlerFunc, matcher MatcherFunc) {
 	)
 }
 
-// BuildFirstMatchFunc returns a handler executing the first handler to match the context 
-func (c *CompositeHandler) BuildFirstMatchFunc() HandlerFunc {
+// FirstMatchFunc returns a handler executing the first handler to match the context 
+func (c *CompositeHandler) FirstMatchFunc() HandlerFunc {
 	return func(txctx *TxContext) {
 		for _, matchable := range c.matchableHandlers {
 			if matchable.Matcher(txctx) {
@@ -59,8 +59,8 @@ func (c *CompositeHandler) BuildFirstMatchFunc() HandlerFunc {
 	}
 }
 
-// BuildAllMatchSeqFunc returns a handler executing all the matches in a sequential way
-func (c *CompositeHandler) BuildAllMatchSeqFunc() HandlerFunc {
+// AllMatchSeqFunc returns a handler executing all the matches in a sequential way
+func (c *CompositeHandler) AllMatchSeqFunc() HandlerFunc {
 	return func(txctx *TxContext) {
 		for _, matchable := range c.matchableHandlers {
 			if matchable.Matcher(txctx) {
@@ -70,8 +70,8 @@ func (c *CompositeHandler) BuildAllMatchSeqFunc() HandlerFunc {
 	}
 }
 
-// BuildAllMatchParallelFunc returns a handler executing all the matches in a sequential way
-func (c *CompositeHandler) BuildAllMatchParallelFunc() HandlerFunc {
+// AllMatchParallelFunc returns a handler executing all the matches in a sequential way
+func (c *CompositeHandler) AllMatchParallelFunc() HandlerFunc {
 	return func(txctx *TxContext) {
 		matched := []func(){}
 
