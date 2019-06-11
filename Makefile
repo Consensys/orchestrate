@@ -1,6 +1,15 @@
 GOFILES := $(shell find . -name '*.go' | egrep -v "^\./\.go" | grep -v _test.go)
 PACKAGES ?= $(shell go list ./...)
 
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+	OPEN = xdg-open
+endif
+ifeq ($(UNAME_S),Darwin)
+	OPEN = open
+endif
+
+
 GRPC_GATEWAY=github.com/grpc-ecosystem/grpc-gateway
 
 .PHONY: all run-coverage coverage fmt fmt-check vet lint misspell-check misspell race tools help
@@ -10,7 +19,7 @@ run-coverage: ## Generate global code coverage report
 	@sh scripts/coverage.sh $(PACKAGES)
 
 coverage: run-coverage ## Generate and open coverage report
-	@xdg-open coverage.html
+	$(OPEN) coverage.html
 
 race: ## Run data race detector
 	@go test -race -short ${PACKAGES}
