@@ -69,8 +69,8 @@ func TestConsumerGroupHandler(t *testing.T) {
 	var err error
 	go func() {
 		err = cg.Consume(ctx, []string{"test-topic-1", "test-topic-2"}, cgHandler)
+		assert.NoError(t, err, "No error expected")
 	}()
-	assert.NoError(t, err, "No error expected")
 
 	time.Sleep(100 * time.Millisecond)
 	cancel()

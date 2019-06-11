@@ -1,29 +1,153 @@
 package sarama
 
-// TODO: remove comments once we can connect to a Kafka broker in CI
+import (
+	"context"
+	"sync"
+	"testing"
+	"time"
 
-// import (
-// 	"context"
-// 	"testing"
+	"github.com/Shopify/sarama"
+	"github.com/Shopify/sarama/mocks"
+	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+)
 
-// 	"github.com/spf13/viper"
-// 	"github.com/stretchr/testify/assert"
-// )
+type ExportedTestSuite struct {
+	suite.Suite
+}
 
-// func TestInitClient(t *testing.T) {
-// 	viper.Set(kafkaAddressViperKey, []string{
-// 		"localhost:9092",
-// 	})
-// 	InitClient(context.Background())
-// 	assert.NotNil(t, client, "Client should have been set")
-// }
+func (s *ExportedTestSuite) SetupTest() {
+	SetGlobalConfig(nil)
+	SetGlobalClient(nil)
+	SetGlobalSyncProducer(nil)
+	SetGlobalConsumerGroup(nil)
+	initClientOnce = &sync.Once{}
+	initProducerOnce = &sync.Once{}
+	initConsumerGroupOnce = &sync.Once{}
+}
 
-// func TestInitSyncProducer(t *testing.T) {
-// 	InitSyncProducer(context.Background())
-// 	assert.NotNil(t, producer, "Producer should have been set")
-// }
+func TestExampleTestSuite(t *testing.T) {
+	suite.Run(t, new(ExportedTestSuite))
+}
 
-// func TestInitConsumerGroup(t *testing.T) {
-// 	InitConsumerGroup(context.Background())
-// 	assert.NotNil(t, group, "ConsumerGroup should have been set")
-// }
+func (s *ExportedTestSuite) TestInitConfig() {
+	InitConfig()
+	assert.NotNil(s.T(), GlobalConfig(), "Config should have been set")
+}
+
+func (s *ExportedTestSuite) TestInitClient() {
+
+	seedBroker := sarama.NewMockBroker(s.T(), 1)
+	seedBroker.Returns(new(sarama.MetadataResponse))
+
+	config := sarama.NewConfig()
+	SetGlobalConfig(config)
+
+	viper.Set(kafkaAddressViperKey, []string{
+		seedBroker.Addr(),
+	})
+	InitClient(context.Background())
+	assert.NotNil(s.T(), GlobalClient(), "Client should have been set")
+}
+
+func (s *ExportedTestSuite) TestInitSyncProducer() {
+
+	seedBroker := sarama.NewMockBroker(s.T(), 1)
+	seedBroker.Returns(new(sarama.MetadataResponse))
+
+	config := sarama.NewConfig()
+	config.Producer.Return.Successes = true
+	SetGlobalConfig(config)
+
+	viper.Set(kafkaAddressViperKey, []string{
+		seedBroker.Addr(),
+	})
+	InitClient(context.Background())
+
+	InitSyncProducer(context.Background())
+
+	assert.NotNil(s.T(), GlobalSyncProducer(), "Producer should have been set")
+}
+
+func (s *ExportedTestSuite) TestSetSyncProducer() {
+
+	producer := &mocks.SyncProducer{}
+
+	SetGlobalSyncProducer(producer)
+	InitSyncProducer(context.Background())
+
+	assert.NotNil(s.T(), GlobalSyncProducer(), "Producer should have been set")
+}
+
+func (s *ExportedTestSuite) TestSetConsumerGroup() {
+
+	msgs := make(map[string]map[int32][]*sarama.ConsumerMessage)
+	cg := mock.NewConsumerGroup("test-group", msgs)
+
+	SetGlobalConsumerGroup(cg)
+
+	InitConsumerGroup(context.Background())
+	assert.NotNil(s.T(), GlobalConsumerGroup(), "ConsumerGroup should have been set")
+}
+
+func TestConsume(t *testing.T) {
+	conf := engine.NewConfig()
+	e := engine.NewEngine(&conf)
+
+	counter := CounterHandler{}
+	e.Register(counter.Handle)
+
+	cgHandler := NewEngineConsumerGroupHandler(e)
+
+	// Init messages in topics
+	topics := []string{"test-topic-1", "test-topic-2"}
+	msgs, count := MockConsumerMessages(topics, 3, 10)
+
+	// Create consumer group
+	cg := mock.NewConsumerGroup("test-group", msgs)
+	SetGlobalConsumerGroup(cg)
+	ctx, cancel := context.WithCancel(context.Background())
+
+	// Run Consumer
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	var err error
+	go func() {
+		err = Consume(ctx, topics, cgHandler)
+		wg.Done()
+	}()
+	time.Sleep(100 * time.Millisecond)
+	cancel()
+
+	wg.Wait()
+
+	assert.NoError(t, err, "No error expected")
+
+	assert.Equal(t, int32(count), counter.counter, "Count of processed message should be correct")
+}
+
+// MockConsumerMessages Creates "nbTopics" topics, "nbPartition" partitions, and "nbMessageByParition" messages by partition
+func MockConsumerMessages(topics []string, nbPartition, nbMessageByParition int) (msgs map[string]map[int32][]*sarama.ConsumerMessage, counter int) {
+
+	m := make(map[string]map[int32][]*sarama.ConsumerMessage)
+	count := 0
+
+	for _, topic := range topics {
+		m[topic] = make(map[int32][]*sarama.ConsumerMessage)
+		for partition := range make([]int32, nbPartition) {
+			m[topic][int32(partition)] = []*sarama.ConsumerMessage{}
+			for i := range make([]int, nbMessageByParition) {
+				m[topic][int32(partition)] = append(m[topic][int32(partition)], &sarama.ConsumerMessage{
+					Topic:     topic,
+					Partition: int32(partition),
+					Offset:    int64(i),
+				})
+				count++
+			}
+		}
+	}
+	return m, count
+}
