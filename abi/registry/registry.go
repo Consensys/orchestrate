@@ -21,8 +21,8 @@ type Registry interface {
 
 	// Retrieve method using 4 bytes unique selector
 	GetMethodsBySelector(selector [4]byte, contract common.AccountInstance) (*ethAbi.Method, []*ethAbi.Method, error)
-	// Retrieve event using 4 bytes unique selector
-	GetEventsBySelector(selector ethCommon.Hash, contract common.AccountInstance, indexedInputCount uint) (*ethAbi.Event, []*ethAbi.Event, error)
+	// Retrieve event using its signature hash
+	GetEventsBySigHash(sigHash ethCommon.Hash, contract common.AccountInstance, indexedInputCount uint) (*ethAbi.Event, []*ethAbi.Event, error)
 
 	// Request an update of the codehash of the contract address
 	RequestAddressUpdate(contract common.AccountInstance) error

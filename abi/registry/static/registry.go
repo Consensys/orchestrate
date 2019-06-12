@@ -25,9 +25,11 @@ type Registry struct {
 	// Address to Codehash (deployed bytecode hash) map
 	addressCodehash map[string]map[ethCommon.Address]ethCommon.Hash
 
-	// Codehash to Selector to ABIs
+	// Codehash to Selector to method ABIs
 	methods map[ethCommon.Hash]map[[4]byte][]*ethAbi.Method
-	events  map[ethCommon.Hash]map[ethCommon.Hash]map[uint][]*ethAbi.Event
+
+	// Codehash to SigHash to event ABIs
+	events map[ethCommon.Hash]map[ethCommon.Hash]map[uint][]*ethAbi.Event
 }
 
 var defaultCodehash = ethCommon.Hash{}
@@ -206,12 +208,12 @@ func (r *Registry) GetMethodsBySelector(selector [4]byte, contract common.Accoun
 	return nil, nil, fmt.Errorf("registry: could not find corresponding method ABIs")
 }
 
-// Retrieve event using 4 bytes unique selector
-func (r *Registry) GetEventsBySelector(selector ethCommon.Hash, contract common.AccountInstance, indexedInputCount uint) (event *ethAbi.Event, defaultEvents []*ethAbi.Event, err error) {
+// Retrieve event using 4 bytes unique signature hash
+func (r *Registry) GetEventsBySigHash(sigHash ethCommon.Hash, contract common.AccountInstance, indexedInputCount uint) (event *ethAbi.Event, defaultEvents []*ethAbi.Event, err error) {
 	// Search in specific event storage
 	contractCodehash, err := r.getCodehash(contract)
 	if err == nil {
-		contractEvents, ok := r.events[contractCodehash][selector]
+		contractEvents, ok := r.events[contractCodehash][sigHash]
 		if ok {
 			matchingContractEvents, ok := contractEvents[indexedInputCount]
 			if ok && len(matchingContractEvents) == 1 {
@@ -221,7 +223,7 @@ func (r *Registry) GetEventsBySelector(selector ethCommon.Hash, contract common.
 	}
 
 	// Search in default events
-	if defaultEvents, ok := r.events[defaultCodehash][selector][indexedInputCount]; ok {
+	if defaultEvents, ok := r.events[defaultCodehash][sigHash][indexedInputCount]; ok {
 		return nil, defaultEvents, nil
 	}
 

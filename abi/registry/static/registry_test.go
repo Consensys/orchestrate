@@ -160,14 +160,14 @@ func TestContractRegistryBySig(t *testing.T) {
 	expectedMethod := ERC20ABI.Methods["isMinter"]
 	assert.Equal(t, []*ethAbi.Method{&expectedMethod}, defaultMethod)
 
-	// Get EventBySelector wrong indexed count
-	event, defaultEvent, err := r.GetEventsBySelector(crypto.Keccak256Hash(eventSig), ContractInstance, 0)
+	// Get EventsBySigHash wrong indexed count
+	event, defaultEvent, err := r.GetEventsBySigHash(crypto.Keccak256Hash(eventSig), ContractInstance, 0)
 	assert.Error(t, err)
 	assert.Nil(t, event)
 	assert.Nil(t, defaultEvent)
 
-	// Get EventBySelector
-	event, defaultEvent, err = r.GetEventsBySelector(crypto.Keccak256Hash(eventSig), ContractInstance, 1)
+	// Get EventsBySigHash
+	event, defaultEvent, err = r.GetEventsBySigHash(crypto.Keccak256Hash(eventSig), ContractInstance, 1)
 	assert.NoError(t, err)
 	expectedEvent := ERC20ABI.Events["MinterAdded"]
 	expectedEventBis := ERC20ABIBis.Events["MinterAdded"]
@@ -184,8 +184,8 @@ func TestContractRegistryBySig(t *testing.T) {
 	assert.Equal(t, &expectedMethod, method)
 	assert.Nil(t, defaultMethod)
 
-	// Get EventBySelector
-	event, defaultEvent, err = r.GetEventsBySelector(crypto.Keccak256Hash(eventSig), ContractInstance, 1)
+	// Get EventsBySigHash
+	event, defaultEvent, err = r.GetEventsBySigHash(crypto.Keccak256Hash(eventSig), ContractInstance, 1)
 	assert.NoError(t, err)
 	assert.Equal(t, &expectedEvent, event)
 	assert.Nil(t, defaultEvent)
