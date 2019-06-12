@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.5.4
+
+*Released on June 12th 2019*
+
+- [CHORE] Registry: rename event selector to event sigHash
+
 ### Version 0.5.3
 
 *Released on June 5th 2019*
