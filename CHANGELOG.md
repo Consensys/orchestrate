@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.5.5
+
+*Released on June 12th 2019*
+
+- [FIX] Ethclient: add missing methods in the mock
+  
 ### Version 0.5.4
 
 *Released on June 12th 2019*
