@@ -1,7 +1,6 @@
 package steps
 
 import (
-	// "reflect"
 	"testing"
 
 	"github.com/Shopify/sarama"

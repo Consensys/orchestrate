@@ -117,8 +117,7 @@ func (s *ScenarioTestSuite) TestISendTheseEnvelopeToCoreStack() {
 		Chain: &common.Chain{Id: "888"},
 	}
 
-	var err error
-	err = s.Scenario.iSendTheseEnvelopeToCoreStack()
+	err := s.Scenario.iSendTheseEnvelopeToCoreStack()
 	assert.NoError(s.T(), err, "Should not get an error")
 	err = s.Scenario.iSendTheseEnvelopeToCoreStack()
 	assert.Error(s.T(), err, "Should get an error")

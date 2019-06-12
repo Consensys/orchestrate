@@ -7,7 +7,6 @@ import (
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store/grpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
-
 )
 
 // Init inialize handlers
