@@ -76,13 +76,6 @@ func initComponents(ctx context.Context) {
 		wg.Done()
 	}()
 
-	// Initialize Ethereum client
-	wg.Add(1)
-	go func() {
-		rpc.Init(ctx)
-		wg.Done()
-	}()
-
 	// Initialize cucumber registry
 	wg.Add(1)
 	go func() {
