@@ -10,6 +10,7 @@ import (
 	eth "github.com/ethereum/go-ethereum"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
 )
 
 // Client is a Mock client
@@ -230,4 +231,32 @@ func (ec *Client) PendingCodeAt(ctx context.Context, chainID *big.Int, account e
 
 func (ec *Client) PendingNonceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address) (uint64, error) {
 	return 0, fmt.Errorf("not implemented error")
+}
+
+func (ec *Client) CallContract(ctx context.Context, chainID *big.Int, msg *eth.CallMsg, blockNumber *big.Int) ([]byte, error) {
+	return nil, fmt.Errorf("not implemented error")
+}
+
+func (ec *Client) PendingCallContract(ctx context.Context, chainID *big.Int, msg *eth.CallMsg) ([]byte, error) {
+	return nil, fmt.Errorf("not implemented error")
+}
+
+func (ec *Client) SuggestGasPrice(ctx context.Context, chainID *big.Int) (*big.Int, error) {
+	return nil, fmt.Errorf("not implemented error")
+}
+
+func (ec *Client) EstimateGas(ctx context.Context, chainID *big.Int, msg *eth.CallMsg) (uint64, error) {
+	return 0, fmt.Errorf("not implemented error")
+}
+
+func (ec *Client) SendRawPrivateTransaction(ctx context.Context, chainID *big.Int, raw string, args *types.PrivateArgs) (ethcommon.Hash, error) {
+	return [ethcommon.HashLength]byte{}, fmt.Errorf("not implemented error")
+}
+
+func (ec *Client) SendRawTransaction(ctx context.Context, chainID *big.Int, raw string) error {
+	return fmt.Errorf("not implemented error")
+}
+
+func (ec *Client) SendTransaction(ctx context.Context, chainID *big.Int, args *types.SendTxArgs) (ethcommon.Hash, error) {
+	return [ethcommon.HashLength]byte{}, fmt.Errorf("not implemented error")
 }
