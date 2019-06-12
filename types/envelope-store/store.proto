@@ -4,29 +4,29 @@ import "types/envelope/envelope.proto";
 import "types/common/error.proto";
 import "google/protobuf/timestamp.proto";
 
-option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/context-store";
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope-store";
 
-package contextstore;
+package envelopestore;
 
 // Store is a GRPC service responsible to store Envelopes
 service Store {
     // Store an envelope
-    rpc Store(StoreRequest) returns (StoreResponse) {}
+    rpc Store(StoreRequest) returns (StoreResponse);
     
     // LoadByTxHash load an envelope by transaction hash
-	rpc LoadByTxHash(TxHashRequest) returns (StoreResponse) {}
+	rpc LoadByTxHash(TxHashRequest) returns (StoreResponse);
 
     // LoadByID load an envelope by identifier
-	rpc LoadByID(IDRequest) returns (StoreResponse) {}
+	rpc LoadByID(IDRequest) returns (StoreResponse);
 
     // GetStatus returns envelope status
-    rpc GetStatus(IDRequest) returns (StoreResponse) {}
+    rpc GetStatus(IDRequest) returns (StoreResponse);
 
     // SetStatus set an envelope status
-    rpc SetStatus(SetStatusRequest) returns (common.Error) {}
+    rpc SetStatus(SetStatusRequest) returns (common.Error);
     
     // LoadPending load envelopes of pending transactions
-    rpc LoadPending(LoadPendingRequest) returns (LoadPendingResponse) {}
+    rpc LoadPending(LoadPendingRequest) returns (LoadPendingResponse);
 }
 
 message StoreRequest{
