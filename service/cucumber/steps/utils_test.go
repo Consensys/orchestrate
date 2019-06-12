@@ -1,10 +1,13 @@
 package steps
 
 import (
-	"reflect"
+	// "reflect"
 	"testing"
 
+	"github.com/Shopify/sarama"
+	"github.com/Shopify/sarama/mocks"
 	"github.com/stretchr/testify/assert"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 )
@@ -25,10 +28,7 @@ func TestGetChainCounts(t *testing.T) {
 	counts := GetChainCounts(envelopes)
 	expected := map[string]uint{"777": 1, "888": 2}
 
-	eq := reflect.DeepEqual(counts, expected)
-	if !eq {
-		t.Errorf("utils: error on counting")
-	}
+	assert.Equal(t, counts, expected, "Should be equal")
 }
 
 func TestChanTimeout(t *testing.T) {
@@ -46,4 +46,21 @@ func TestChanTimeout(t *testing.T) {
 	e, err = ChanTimeout(testChan, 1, 1)
 	assert.NoError(t, err, "Should not get an error")
 	assert.Equal(t, testEnvelope.GetChain().GetId(), e[0].GetChain().GetId(), "Should be the same envelope")
+}
+
+func TestSendEnvelope(t *testing.T) {
+
+	producer := mocks.NewSyncProducer(t, nil)
+	producer.ExpectSendMessageAndSucceed()
+	producer.ExpectSendMessageAndFail(sarama.ErrOutOfBrokers)
+	broker.SetGlobalSyncProducer(producer)
+
+	e := &envelope.Envelope{
+		Chain: &common.Chain{Id: "888"},
+	}
+
+	err := SendEnvelope(e)
+	assert.NoError(t, err, "Should not get an error")
+	err = SendEnvelope(e)
+	assert.Error(t, err, "Should get an error")
 }

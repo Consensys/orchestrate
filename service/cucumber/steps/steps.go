@@ -10,7 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/rpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/service/chanregistry"
 )
 
@@ -46,7 +46,7 @@ func (sc *ScenarioContext) initScenarioContext(s interface{}) {
 		"Sceneario": scenarioName,
 	})
 
-	chainIDs := rpc.GlobalClient().Networks(context.Background())
+	chainIDs := ethclient.GlobalClient().Networks(context.Background())
 	topics := []string{
 		viper.GetString("kafka.topic.crafter"),
 		viper.GetString("kafka.topic.nonce"),
@@ -112,7 +112,7 @@ func (sc *ScenarioContext) iSendTheseEnvelopeToCoreStack() error {
 	return nil
 }
 
-func (sc *ScenarioContext) coreStackShouldReceiveThem() error {
+func (sc *ScenarioContext) coreStackShouldReceiveEnvelopes() error {
 
 	topic := viper.GetString("kafka.topic.crafter")
 	e, err := ChanTimeout(sc.EnvelopesChan[topic], viper.GetInt64("cucumber.steps.timeout"), len(sc.Envelopes))
@@ -163,14 +163,17 @@ func (sc *ScenarioContext) theTxnonceShouldSetTheNonce() error {
 		return err
 	}
 
-	nonces := make(map[uint64]bool, len(sc.Envelopes))
+	nonces := make(map[string]map[uint64]bool)
 	for _, v := range e {
-		if nonces[v.GetTx().GetTxData().GetNonce()] {
+		if nonces[v.GetSender().GetAddr()] == nil {
+			nonces[v.GetSender().GetAddr()] = make(map[uint64]bool)
+		}
+		if nonces[v.GetSender().GetAddr()][v.GetTx().GetTxData().GetNonce()] {
 			err := fmt.Errorf("tx-nonce set 2 times the same nonce: %d", v.GetTx().GetTxData().GetNonce())
 			sc.Logger.Errorf("cucumber: step failed with error %q", err)
 			return err
 		}
-		nonces[v.GetTx().GetTxData().GetNonce()] = true
+		nonces[v.GetSender().GetAddr()][v.GetTx().GetTxData().GetNonce()] = true
 	}
 
 	sc.Logger.WithFields(log.Fields{
@@ -224,7 +227,7 @@ func (sc *ScenarioContext) theTxlistenerShouldCatchTheTx() error {
 		}
 
 		for _, v := range e {
-			if v.GetReceipt().GetBlockHash() == "" {
+			if v.GetReceipt().GetTxHash() == "" {
 				err := fmt.Errorf("tx-listener could not catch the tx")
 				sc.Logger.Errorf("cucumber: step failed with error %q", err)
 				return err
@@ -280,7 +283,7 @@ func (sc *ScenarioContext) beforeStep(s *gherkin.Step) {
 func (sc *ScenarioContext) iShouldCatchTheirContractAddresses() error {
 
 	topic := sc.EnvelopesChan[viper.GetString("kafka.topic.decoded")]
-	e, err := ChanTimeout(topic, 10, len(sc.Envelopes))
+	e, err := ChanTimeout(topic, viper.GetInt64("cucumber.steps.timeout"), len(sc.Envelopes))
 	if err != nil {
 		sc.Logger.Errorf("cucumber: step failed with error %q", err)
 		return err
@@ -292,10 +295,12 @@ func (sc *ScenarioContext) iShouldCatchTheirContractAddresses() error {
 		viper.GetString("kafka.topic.nonce"),
 		viper.GetString("kafka.topic.signer"),
 		viper.GetString("kafka.topic.sender"),
-		fmt.Sprintf("%v-%v", viper.GetString("kafka.topic.decoder"), "888"),
 	}
 	for _, topic := range topics {
-		_, _ = ChanTimeout(sc.EnvelopesChan[topic], 10, len(e))
+		_, _ = ChanTimeout(sc.EnvelopesChan[topic], viper.GetInt64("cucumber.steps.timeout"), len(e))
+	}
+	for chain, count := range GetChainCounts(sc.Envelopes) {
+		_, _ = ChanTimeout(sc.EnvelopesChan[fmt.Sprintf("%v-%v", viper.GetString("kafka.topic.decoder"), chain)], viper.GetInt64("cucumber.steps.timeout"), int(count))
 	}
 
 	for _, v := range e {
@@ -314,7 +319,6 @@ func (sc *ScenarioContext) iShouldCatchTheirContractAddresses() error {
 	}).Info("cucumber: step check")
 
 	return nil
-
 }
 
 func FeatureContext(s *godog.Suite) {
@@ -326,7 +330,7 @@ func FeatureContext(s *godog.Suite) {
 
 	s.Step(`^I have the following envelope:$`, sc.iHaveTheFollowingEnvelope)
 	s.Step(`^I send these envelopes to CoreStack$`, sc.iSendTheseEnvelopeToCoreStack)
-	s.Step(`^CoreStack should receive them$`, sc.coreStackShouldReceiveThem)
+	s.Step(`^CoreStack should receive envelopes$`, sc.coreStackShouldReceiveEnvelopes)
 	s.Step(`^the tx-crafter should set the data$`, sc.theTxcrafterShouldSetTheData)
 	s.Step(`^the tx-nonce should set the nonce$`, sc.theTxnonceShouldSetTheNonce)
 	s.Step(`^the tx-signer should sign$`, sc.theTxsignerShouldSign)
