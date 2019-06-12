@@ -31,9 +31,9 @@ type CounterHandler struct {
 
 func (h *CounterHandler) Handle(txctx *engine.TxContext) {
 	txctx.Logger.WithFields(log.Fields{
-		"topic":     txctx.Msg.(*sarama.ConsumerMessage).Topic,
-		"offset":    txctx.Msg.(*sarama.ConsumerMessage).Offset,
-		"partition": txctx.Msg.(*sarama.ConsumerMessage).Partition,
+		"topic":     txctx.Msg.(*Msg).Topic,
+		"offset":    txctx.Msg.(*Msg).Offset,
+		"partition": txctx.Msg.(*Msg).Partition,
 	}).Infof("Handling message")
 	atomic.AddInt32(&h.counter, 1)
 }

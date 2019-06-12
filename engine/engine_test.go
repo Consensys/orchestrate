@@ -17,6 +17,12 @@ type TestHandler struct {
 	handled []*TxContext
 }
 
+// StringMsg is a dummy engine.StringMsg implementation
+type StringMsg string
+
+// Entrypoint is a dummy implementation of the method "Entrypoint of the dummy engine"
+func (s StringMsg) Entrypoint() string { return "" }
+
 func (h *TestHandler) Handler(t *testing.T) HandlerFunc {
 	return func(txctx *TxContext) {
 		// We add some randomness in time execution
@@ -39,11 +45,12 @@ func TestEngine(t *testing.T) {
 	eng.Register(h.Handler(t))
 
 	// Create input channels and prefills it
-	ins := make([]chan interface{}, 0)
+	ins := make([]chan Msg, 0)
 	for i := 0; i < 50; i++ {
-		in := make(chan interface{}, 20)
+		in := make(chan Msg, 20)
 		for j := 0; j < 20; j++ {
-			in <- fmt.Sprintf("test-%v-%v", i, j)
+			s := StringMsg(fmt.Sprintf("test-%v-%v", i, j))
+			in <- &s
 		}
 		close(in)
 		ins = append(ins, in)
@@ -53,7 +60,7 @@ func TestEngine(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	for i := range ins {
 		wg.Add(1)
-		go func(in <-chan interface{}) {
+		go func(in <-chan Msg) {
 			eng.Run(context.Background(), in)
 			wg.Done()
 		}(ins[i])
@@ -76,11 +83,11 @@ func TestEngineStopped(t *testing.T) {
 	eng.Register(h.Handler(t))
 
 	// Create input channels and prefills it
-	ins := make([]chan interface{}, 0)
+	ins := make([]chan Msg, 0)
 	for i := 0; i < 50; i++ {
-		in := make(chan interface{}, 20)
+		in := make(chan Msg, 20)
 		for j := 0; j < 20; j++ {
-			in <- fmt.Sprintf("test-%v-%v", i, j)
+			in <- StringMsg(fmt.Sprintf("test-%v-%v", i, j))
 		}
 		close(in)
 		ins = append(ins, in)
@@ -91,7 +98,7 @@ func TestEngineStopped(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	for i := range ins {
 		wg.Add(1)
-		go func(in <-chan interface{}) {
+		go func(in <-chan Msg) {
 			eng.Run(ctx, in)
 			wg.Done()
 		}(ins[i])

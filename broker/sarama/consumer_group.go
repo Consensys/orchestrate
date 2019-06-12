@@ -5,9 +5,14 @@ import (
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
+
+// Msg is a wrapper struct for sarama.ConsumerMessage that implements engine.Msg
+type Msg sarama.ConsumerMessage
+
+// Entrypoint returns the kafka topic of the message
+func (m *Msg) Entrypoint() string { return m.Topic }
 
 type consumerGroupCtxKeyType string
 
@@ -74,7 +79,7 @@ func (h *EngineConsumerGroupHandler) ConsumeClaim(s sarama.ConsumerGroupSession,
 
 	// Attach ConsumerGroupSession to context
 	ctx := WithConsumerGroupSessionAndClaim(s.Context(), s, c)
-	h.engine.Run(ctx, utils.Pipe(ctx, c.Messages()))
+	h.engine.Run(ctx, Pipe(ctx, c.Messages()))
 
 	logger.Infof("sarama: stoped consuming claim")
 

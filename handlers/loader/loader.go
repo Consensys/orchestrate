@@ -3,8 +3,8 @@ package loader
 import (
 	"fmt"
 
-	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
@@ -12,7 +12,7 @@ import (
 // Loader is a Middleware enginer.HandlerFunc that Load sarama.ConsumerGroup messages
 func Loader(txctx *engine.TxContext) {
 	// Cast message into sarama.ConsumerMessage
-	msg, ok := txctx.Msg.(*sarama.ConsumerMessage)
+	msg, ok := txctx.Msg.(*broker.Msg)
 	if !ok {
 		txctx.Logger.Errorf("loader: expected a sarama.ConsumerMessage")
 		_ = txctx.AbortWithError(fmt.Errorf("invalid input message format"))
