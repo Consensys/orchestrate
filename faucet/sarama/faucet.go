@@ -8,7 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
@@ -30,8 +30,8 @@ func NewFaucet(p sarama.SyncProducer) *Faucet {
 func (f *Faucet) prepareMsg(r *types.Request, msg *sarama.ProducerMessage) error {
 	// Create Trace for Crediting message
 	e := &envelope.Envelope{
-		Chain:  (&common.Chain{}).SetID(r.ChainID),
-		Sender: &common.Account{Addr: r.Creditor.Hex()},
+		Chain: (&chain.Chain{}).SetID(r.ChainID),
+		From:  ethereum.HexToAccount(r.Creditor.Hex()),
 		Tx: &ethereum.Transaction{
 			TxData: (&ethereum.TxData{}).SetValue(r.Amount).SetTo(r.Beneficiary),
 		},
