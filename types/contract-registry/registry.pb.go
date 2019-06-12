@@ -6,11 +6,12 @@ package contract_registry
 import (
 	context "context"
 	fmt "fmt"
+	math "math"
+
 	proto "github.com/golang/protobuf/proto"
 	abi "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
 	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	grpc "google.golang.org/grpc"
-	math "math"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

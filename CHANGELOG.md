@@ -1,5 +1,15 @@
 # CHANGELOG
 
+### Version 0.5.4
+
+*Released on June 12th 2019*
+
+- [FEAT] Add protobuf for contract-registry
+- [FEAT] Adds "InParallel" function that allows to run several functions in parallel and wait until they are finished
+- [FIX] Fix signal error message
+- [CHORE] Install "protoc-gen-go" when running "make setup-proto"
+- [CHORE] Improve "coverage" command so it could be run on Mac
+
 ### Version 0.5.3
 
 *Released on May 28th 2019*
