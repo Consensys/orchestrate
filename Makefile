@@ -52,8 +52,7 @@ help: ## Display this help screen
 
 setup-proto: ## Install protobuf utilities
     # Install protoc-gen-go
-	@GO111MODULE=off go get -d -u github.com/golang/protobuf/protoc-gen-go
-	@GO111MODULE=off go install github.com/golang/protobuf/protoc-gen-go
+	@GO111MODULE=off go get -u github.com/golang/protobuf/protoc-gen-go
 
 	@GO111MODULE=off go get -u github.com/stevvooe/protobuild
 	@GO111MODULE=off go get -d $(GRPC_GATEWAY)/...
