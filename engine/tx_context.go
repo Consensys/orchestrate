@@ -15,7 +15,7 @@ type TxContext struct {
 	Envelope *envelope.Envelope
 
 	// Message that triggered TxContext execution (typically a sarama.ConsumerMessage)
-	Msg interface{}
+	Msg Msg
 
 	// chain of handlers to be executed on TxContext
 	handlers []HandlerFunc
@@ -95,7 +95,7 @@ func (txctx *TxContext) AbortWithError(err error) *common.Error {
 }
 
 // Prepare re-initializes TxContext, set handlers, set logger and set message
-func (txctx *TxContext) Prepare(handlers []HandlerFunc, logger *log.Entry, msg interface{}) *TxContext {
+func (txctx *TxContext) Prepare(handlers []HandlerFunc, logger *log.Entry, msg Msg) *TxContext {
 	txctx.Reset()
 	txctx.handlers = handlers
 	txctx.Msg = msg
@@ -135,4 +135,10 @@ func (txctx *TxContext) WithContext(ctx context.Context) *TxContext {
 	}
 	txctx.ctx = ctx
 	return txctx
+}
+
+// Msg is an abstract interface supported by any kind of message handled by the engine
+type Msg interface {
+	// Entrypoint returns an indication on where the message comes from
+	Entrypoint() string
 }

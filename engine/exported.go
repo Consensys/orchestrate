@@ -43,7 +43,7 @@ func Register(handler HandlerFunc) {
 }
 
 // Run starts consuming messages from an input channel
-func Run(ctx context.Context, input <-chan interface{}) {
+func Run(ctx context.Context, input <-chan Msg) {
 	e.Run(ctx, input)
 }
 

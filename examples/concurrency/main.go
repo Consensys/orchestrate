@@ -7,6 +7,7 @@ import (
 	"sync/atomic"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/examples"
 )
 
 // ExampleHandler is an handler that increment counters
@@ -30,21 +31,21 @@ func main() {
 	// Instantiate an Engine that can treat 100 message concurrently in 100 distinct partitions
 	cfg := engine.NewConfig()
 	cfg.Slots = 100
-	engine := engine.NewEngine(&cfg)
+	eng := engine.NewEngine(&cfg)
 
 	// Register handler
 	h := ExampleHandler{0, 0}
-	engine.Register(h.handleSafe)
-	engine.Register(h.handleUnsafe)
+	eng.Register(h.handleSafe)
+	eng.Register(h.handleUnsafe)
 
 	// Run Engine on 100 distinct input channel
 	wg := &sync.WaitGroup{}
-	inputs := make([]chan interface{}, 0)
+	inputs := make([]chan engine.Msg, 0)
 	for i := 0; i < 100; i++ {
-		inputs = append(inputs, make(chan interface{}, 100))
+		inputs = append(inputs, make(chan engine.Msg, 100))
 		wg.Add(1)
-		go func(in chan interface{}) {
-			engine.Run(context.Background(), in)
+		go func(in chan engine.Msg) {
+			eng.Run(context.Background(), in)
 			wg.Done()
 		}(inputs[i])
 	}
@@ -52,7 +53,7 @@ func main() {
 	// Feed 10000 to the Engine
 	for i := 0; i < 100; i++ {
 		for j, in := range inputs {
-			in <- fmt.Sprintf("Message %v-%v", j, i)
+			in <- examples.Msg(fmt.Sprintf("Message %v-%v", j, i))
 		}
 	}
 

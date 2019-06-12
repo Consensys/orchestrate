@@ -1,9 +1,11 @@
-package utils
+package sarama
 
 import (
 	"context"
 
 	"github.com/Shopify/sarama"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
 // Pipe take a channel of sarama.ConsumerMessage and pipes it into a channel of interface{}
@@ -11,8 +13,8 @@ import (
 // Pipe will stop forwarding messages either
 // - sarama channel is closed
 // - ctx has been canceled
-func Pipe(ctx context.Context, saramaChan <-chan *sarama.ConsumerMessage) <-chan interface{} {
-	interfaceChan := make(chan interface{})
+func Pipe(ctx context.Context, saramaChan <-chan *sarama.ConsumerMessage) <-chan engine.Msg {
+	msgChan := make(chan engine.Msg)
 
 	// Start a goroutine that pipe messages
 	go func() {
@@ -24,14 +26,14 @@ func Pipe(ctx context.Context, saramaChan <-chan *sarama.ConsumerMessage) <-chan
 					// Sarama channel has been closed so we exit loop
 					break pipeLoop
 				}
-				interfaceChan <- msg
+				msgChan <- (*Msg)(msg)
 			case <-ctx.Done():
 				// Context has been cancel so we exit loop
 				break pipeLoop
 			}
 		}
-		close(interfaceChan)
+		close(msgChan)
 	}()
 
-	return interfaceChan
+	return msgChan
 }
