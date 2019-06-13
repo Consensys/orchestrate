@@ -7,7 +7,7 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/keystore/wallet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/secretstore/services"
 )
@@ -16,7 +16,7 @@ import (
 type TxSignatureSession struct {
 	secretStore services.SecretStore
 	wallet      *wallet.Wallet
-	chain       *common.Chain
+	chain       *chain.Chain
 	tx          *ethtypes.Transaction
 	Raw         []byte
 	Hash        *ethcommon.Hash
@@ -43,8 +43,8 @@ func (sess *TxSignatureSession) SetWallet(address *ethcommon.Address) error {
 }
 
 // SetChain is a setter for the chain used in the signed process
-func (sess *TxSignatureSession) SetChain(chain *common.Chain) error {
-	sess.chain = chain
+func (sess *TxSignatureSession) SetChain(netChain *chain.Chain) error {
+	sess.chain = netChain
 	return nil
 }
 
@@ -62,15 +62,10 @@ func (sess *TxSignatureSession) getSigner() (ethtypes.Signer, error) {
 		return nil, fmt.Errorf("chain has not been set")
 	}
 
-	if sess.chain.IsEIP155 {
-		// We copy chain ID to ensure pointer can be safely used elsewhere
-		id := new(big.Int)
-		id.Set(sess.chain.ID())
-		signer = ethtypes.NewEIP155Signer(id)
-
-	} else {
-		signer = ethtypes.HomesteadSigner{}
-	}
+	// We copy chain ID to ensure pointer can be safely used elsewhere
+	id := new(big.Int)
+	id.Set(sess.chain.ID())
+	signer = ethtypes.NewEIP155Signer(id)
 	return signer, nil
 }
 

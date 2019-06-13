@@ -10,7 +10,7 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/secretstore/mock"
 )
 
@@ -24,19 +24,15 @@ var testPKeys = []struct {
 	{"425D92F63A836F890F1690B34B6A25C2971EF8D035CD8EA8592FD1069BD151C6", "0xffbBa394DEf3Ff1df0941c6429887107f58d4e9b"},
 }
 
-var testChains = []struct {
-	ID       string
-	IsEIP155 bool
-}{
-	{"10", true},
-	{"3", true},
-	{"13", false},
+var testChainsIds = []int64{
+	10,
+	3,
+	13,
 }
 
-func makeSignerInput(i int) (*common.Chain, ethcommon.Address, *ethtypes.Transaction) {
-	chain := &common.Chain{
-		Id:       testChains[i%len(testChains)].ID,
-		IsEIP155: testChains[i%len(testChains)].IsEIP155,
+func makeSignerInput(i int) (*chain.Chain, ethcommon.Address, *ethtypes.Transaction) {
+	netChain := &chain.Chain{
+		Id: big.NewInt(testChainsIds[i%len(testChainsIds)]).Bytes(),
 	}
 	address := ethcommon.HexToAddress(testPKeys[i%len(testPKeys)].a)
 	tx := ethtypes.NewTransaction(
@@ -47,7 +43,7 @@ func makeSignerInput(i int) (*common.Chain, ethcommon.Address, *ethtypes.Transac
 		big.NewInt(1000),
 		hexutil.MustDecode("0xa2bcdef3"),
 	)
-	return chain, address, tx
+	return netChain, address, tx
 }
 
 // BaseKeyStoreTestSuite is a test suit for TraceStore

@@ -5,7 +5,7 @@ import (
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/keystore/session"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/keystore/wallet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/secretstore/services"
@@ -24,14 +24,14 @@ func NewKeyStore(secretStore services.SecretStore) *KeyStore {
 }
 
 // SignTx returns a signed transaction. It is perfectly equivalent to SignTx
-func (s *KeyStore) SignTx(chain *common.Chain, a ethcommon.Address, tx *ethtypes.Transaction) (raw []byte, hash *ethcommon.Hash, err error) {
+func (s *KeyStore) SignTx(netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction) (raw []byte, hash *ethcommon.Hash, err error) {
 	// Creates a new signing session
 	sess := session.MakeTxSignature(s.SecretStore)
 	err = sess.SetWallet(&a)
 	if err != nil {
 		return []byte{}, nil, err
 	}
-	err = sess.SetChain(chain)
+	err = sess.SetChain(netChain)
 	if err != nil {
 		return []byte{}, nil, err
 	}
