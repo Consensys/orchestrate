@@ -56,18 +56,30 @@ Usage:
   app run [flags]
 
 Flags:
-      --cucumber-concurrency int           Concurrency rate, not all formatters accepts this : "CUCUMBER_CONCURRENCY" (default 1)
-      --cucumber-format string             The formatter name : "CUCUMBER_FORMAT" (default "pretty")
-      --cucumber-nocolors                  Forces ansi color stripping : "CUCUMBER_NOCOLORS"
-      --cucumber-outputpath string         Where it should print the cucumber output (only works with cucumber format): "CUCUMBER_OUTPUTPATH"
-      --cucumber-paths strings             All feature file paths : "CUCUMBER_PATHS" (default [features])
-      --cucumber-randomize int             Seed to randomize feature tests. The default value of -1 means to have a random seed. 0 means do not randomize : "CUCUMBER_RANDOMIZE" (default -1)
-      --cucumber-showstepdefinitions       Print step definitions found and exit : "CUCUMBER_SHOWSTEPDEFINITION"
-      --cucumber-steps-miningtimeout int   Duration for waiting envelopes to be processed by a blockchain before timeout : "CUCUMBER_STEPS_MININGTIMEOUT" (default 10)
-      --cucumber-steps-timeout int         Duration for waiting envelopes to be processed by a step method before timeout : "CUCUMBER_STEPS_TIMEOUT" (default 5)
-      --cucumber-stoponfailure             Stops on the first failure : "CUCUMBER_STOPONFAILURE"
-      --cucumber-strict                    Fail suite when there are pending or undefined steps : "CUCUMBER_STRICT"
-      --cucumber-tags string               Various filters for scenarios parsed from feature files : "CUCUMBER_TAGS"
+      --cucumber-concurrency int           Concurrency rate, not all formatters accepts this
+                                           Environment variable: "CUCUMBER_CONCURRENCY" (default 1)
+      --cucumber-format string             The formatter name
+                                           Environment variable: "CUCUMBER_FORMAT" (default "pretty")
+      --cucumber-nocolors                  Forces ansi color stripping
+                                           Environment variable: "CUCUMBER_NOCOLORS"
+      --cucumber-outputpath string         Where it should print the cucumber output (only works with cucumber format)
+                                           Environment variable: "CUCUMBER_OUTPUTPATH"
+      --cucumber-paths strings             All feature file paths
+                                           Environment variable: "CUCUMBER_PATHS" (default [features])
+      --cucumber-randomize int             Seed to randomize feature tests. The default value of -1 means to have a random seed. 0 means do not randomize
+                                           Environment variable: "CUCUMBER_RANDOMIZE" (default -1)
+      --cucumber-showstepdefinitions       Print step definitions found and exit
+                                           Environment variable: "CUCUMBER_SHOWSTEPDEFINITION"
+      --cucumber-steps-miningtimeout int   Duration for waiting envelopes to be processed by a blockchain before timeout
+                                           Environment variable: "CUCUMBER_STEPS_MININGTIMEOUT" (default 10)
+      --cucumber-steps-timeout int         Duration for waiting envelopes to be processed by a step method before timeout
+                                           Environment variable: "CUCUMBER_STEPS_TIMEOUT" (default 5)
+      --cucumber-stoponfailure             Stops on the first failure
+                                           Environment variable: "CUCUMBER_STOPONFAILURE"
+      --cucumber-strict                    Fail suite when there are pending or undefined steps
+                                           Environment variable: "CUCUMBER_STRICT"
+      --cucumber-tags string               Various filters for scenarios parsed from feature files
+                                           Environment variable: "CUCUMBER_TAGS"
       --engine-slots uint                  Maximum number of messages the engine can treat concurrently.
                                            Environment variable: "ENGINE_SLOTS" (default 20)
       --eth-client strings                 Ethereum client url
@@ -123,6 +135,58 @@ Global Flags:
 
 ## Feature tests
 
-This worker is implementing cucumber Behavior-Driven Development framework with [Godog](https://cucumber.io/docs/installation/golang/). You could find Gerkin files in the `features` folder.
+This worker is implementing cucumber Behavior-Driven Development framework with [Godog](https://cucumber.io/docs/installation/golang/). You could find Gerkin files in the `features` folder and their implementations in `service/cucumber/steps/steps.go`
 
-WIP
+### Important scenario steps
+
+Most of the standard steps are located in `features/deployment.feature` and `features/transaction.feature` which includes the following:
+
+```
+    Given I have the following envelope:
+      | Alias       | chainId | from                                       | contractName | methodSignature | gas     |
+      | SimpleToken | 888     | 0x7E654d251Da770A068413677967F6d3Ea2FeA9E4 | SimpleToken  | constructor()   | 2000000 |
+```
+This step is parsing a table into envelopes and stored in the `Scenario Context`. The labels are as close as the SDK, except `Alias` where it provides a name to a contract to be deployed. The mapping of labels could be found in `service/cucumber/steps/utils.go`
+
+
+```    
+    When I send these envelopes to CoreStack
+```
+This step will send to CoreStack every Envelopes in the `Scenario Context`.
+
+
+```
+    Then CoreStack should receive envelopes
+```
+This step will listen the entry topic of CoreStack, i.e. `topic-tx-crafter` and checks that the number of envelope sent corresponds to the number of envelopes received.
+
+```
+    Then the tx-crafter should set the data
+```
+This step will listen the out topic of the tx-crafter, i.e.`topic-tx-nonce`, and checks that envelopes are enriched with `TxData.Data`
+
+```
+    Then the tx-nonce should set the nonce
+```
+This step will listen the out topic of the tx-nonce, i.e.`topic-tx-signer`, and checks that envelopes are enriched with `TxData.Nonce` and make sure that nonce is well incremented for a specific account.
+
+```
+    Then the tx-signer should sign
+```
+This step will listen the out topic of the tx-signer, i.e.`topic-tx-sender`, and checks that envelopes are enriched with `TxData.Nonce` and make sure that nonce is well incremented for a specific account.
+
+```
+    Then the tx-sender should send the tx
+```
+Not implemented yet.
+
+```
+    Then the tx-listener should catch the tx
+```
+This step will listen the out topic of the tx-listener, i.e.`topic-tx-decoder`, and checks that envelopes are enriched with a `Receipt.TxHash`.
+
+
+```
+    Then the tx-decoder should decode
+```
+This step will listen the out topic of the tx-decoder, i.e.`topic-tx-decoded`, and checks that envelopes are enriched with a `Receipt.Logs.GetDecodedData` if applicable.
