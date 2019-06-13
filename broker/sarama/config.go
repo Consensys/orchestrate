@@ -135,7 +135,7 @@ Environment variable: %q`, txSignerTopicEnv)
 
 // KafkaTopicWalletGenerator register flag for Kafka topic
 func KafkaTopicWalletGenerator(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Kafka topic for messages waiting to generate a new wallet
+	desc := fmt.Sprintf(`Kafka topic for generating new wallets
 Environment variable: %q`, walletGeneratorTopicEnv)
 	f.String(walletGeneratorFlag, walletGeneratorDefault, desc)
 	_ = viper.BindPFlag(walletGeneratorViperKey, f.Lookup(walletGeneratorFlag))
@@ -143,7 +143,7 @@ Environment variable: %q`, walletGeneratorTopicEnv)
 
 // KafkaTopicWalletGenerated register flag for Kafka topic
 func KafkaTopicWalletGenerated(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Kafka topic for messages waiting to generate a new wallet
+	desc := fmt.Sprintf(`Kafka topic for newly generated wallets
 Environment variable: %q`, walletGeneratedTopicEnv)
 	f.String(walletGeneratedFlag, walletGeneratedDefault, desc)
 	_ = viper.BindPFlag(walletGeneratedViperKey, f.Lookup(walletGeneratedFlag))
