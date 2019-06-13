@@ -202,6 +202,7 @@ func (s *ScenarioTestSuite) TestTheTxnonceShouldSetTheNonce() {
 	addr := []string{"test1", "test2"}
 	for i := range make([]int, 10) {
 		s.Scenario.Envelopes[fmt.Sprintf("%s-%d", "test", i)] = &envelope.Envelope{
+			Chain: &common.Chain{Id: "888"},
 			Sender: &common.Account{
 				Addr: addr[i%len(addr)],
 			},

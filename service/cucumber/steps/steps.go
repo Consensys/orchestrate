@@ -163,17 +163,24 @@ func (sc *ScenarioContext) theTxnonceShouldSetTheNonce() error {
 		return err
 	}
 
-	nonces := make(map[string]map[uint64]bool)
+	nonces := make(map[string]map[string]map[uint64]bool)
 	for _, v := range e {
-		if nonces[v.GetSender().GetAddr()] == nil {
-			nonces[v.GetSender().GetAddr()] = make(map[uint64]bool)
+		chain := v.GetChain().GetId()
+		addr := v.GetSender().GetAddr()
+		nonce := v.GetTx().GetTxData().GetNonce()
+
+		if nonces[chain] == nil {
+			nonces[chain] = make(map[string]map[uint64]bool)
 		}
-		if nonces[v.GetSender().GetAddr()][v.GetTx().GetTxData().GetNonce()] {
+		if nonces[chain][addr] == nil {
+			nonces[chain][addr] = make(map[uint64]bool)
+		}
+		if nonces[chain][addr][nonce] {
 			err := fmt.Errorf("tx-nonce set 2 times the same nonce: %d", v.GetTx().GetTxData().GetNonce())
 			sc.Logger.Errorf("cucumber: step failed with error %q", err)
 			return err
 		}
-		nonces[v.GetSender().GetAddr()][v.GetTx().GetTxData().GetNonce()] = true
+		nonces[chain][addr][nonce] = true
 	}
 
 	sc.Logger.WithFields(log.Fields{
