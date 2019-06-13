@@ -9,8 +9,8 @@ import (
 	grpcStatus "google.golang.org/grpc/status"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/context-store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope-store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store"
 )
 

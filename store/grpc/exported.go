@@ -6,7 +6,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/context-store"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope-store"
 	"google.golang.org/grpc"
 )
 

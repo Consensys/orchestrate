@@ -9,8 +9,8 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	log "github.com/sirupsen/logrus"
 	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
-	store "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/context-store"
 	envelope "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
+	store "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope-store"
 	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 	"google.golang.org/grpc"
 )

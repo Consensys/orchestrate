@@ -30,7 +30,7 @@ func InitTracing(infra *Infra) {
 
 	// Create tracer
 	cfg := jaegercfg.Configuration{
-		ServiceName: "context-store",
+		ServiceName: "envelope-store",
 		Sampler: &jaegercfg.SamplerConfig{
 			Type:  "const",
 			Param: viper.GetFloat64("jaegger.sampler"),
@@ -41,7 +41,7 @@ func InitTracing(infra *Infra) {
 	}
 	tracer, closer, err := cfg.NewTracer(
 		jaegercfg.Logger(logger{log: log.StandardLogger()}),
-		jaegercfg.Observer(rpcmetrics.NewObserver(metrics.Namespace(jaegermetrics.NSOptions{Name: "context-store"}), rpcmetrics.DefaultNameNormalizer)),
+		jaegercfg.Observer(rpcmetrics.NewObserver(metrics.Namespace(jaegermetrics.NSOptions{Name: "envelope-store"}), rpcmetrics.DefaultNameNormalizer)),
 	)
 
 	if err != nil {

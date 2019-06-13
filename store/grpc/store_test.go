@@ -7,7 +7,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/suite"
-	store "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/context-store"
+	store "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope-store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/app/grpc/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store/testutils"

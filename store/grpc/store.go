@@ -6,8 +6,8 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
-	store "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/context-store"
 	envelope "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
+	store "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope-store"
 )
 
 // EnvelopeStore store envelopes through

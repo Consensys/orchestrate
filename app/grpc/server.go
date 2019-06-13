@@ -13,7 +13,7 @@ import (
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	log "github.com/sirupsen/logrus"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/context-store"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope-store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/app/grpc/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/app/infra"
 	"google.golang.org/grpc"
