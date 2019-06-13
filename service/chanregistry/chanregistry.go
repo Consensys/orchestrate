@@ -4,7 +4,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 )
 
-// ChanRegistry
+// ChanRegistry keeps channel for each scenarios and topics
 type ChanRegistry interface {
 	NewEnvelopeChan(scenarioID, topic string) chan *envelope.Envelope
 	GetEnvelopeChan(scenarioID, topic string) chan *envelope.Envelope
