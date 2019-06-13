@@ -14,8 +14,8 @@ func init() {
 	_ = viper.BindEnv(txCrafterViperKey, txCrafterTopicEnv)
 	viper.SetDefault(txNonceViperKey, txNonceTopicDefault)
 	_ = viper.BindEnv(txNonceViperKey, txNonceTopicEnv)
-	viper.SetDefault(generateWalletViperKey, generateWalletDefault)
-	_ = viper.BindEnv(generateWalletViperKey, generateWalletTopicEnv)
+	viper.SetDefault(walletGeneratorViperKey, walletGeneratorDefault)
+	_ = viper.BindEnv(walletGeneratorViperKey, walletGeneratorTopicEnv)
 	viper.SetDefault(txSignerViperKey, txSignerTopicDefault)
 	_ = viper.BindEnv(txSignerViperKey, txSignerTopicEnv)
 	viper.SetDefault(txSenderViperKey, txSenderTopicDefault)
@@ -71,10 +71,10 @@ var (
 	txNonceTopicEnv     = "KAFKA_TOPIC_TX_NONCE"
 	txNonceTopicDefault = "topic-tx-nonce"
 
-	generateWalletFlag     = "topic-wallet-generator"
-	generateWalletViperKey = "kafka.topic.wallet.generator"
-	generateWalletTopicEnv = "KAFKA_TOPIC_WALLET_GENERATOR"
-	generateWalletDefault  = "topic-wallet-generator"
+	walletGeneratorFlag     = "topic-wallet-generator"
+	walletGeneratorViperKey = "kafka.topic.wallet.generator"
+	walletGeneratorTopicEnv = "KAFKA_TOPIC_WALLET_GENERATOR"
+	walletGeneratorDefault  = "topic-wallet-generator"
 
 	walletGeneratedFlag     = "topic-wallet-generated"
 	walletGeneratedViperKey = "kafka.topic.wallet.generated"
@@ -136,9 +136,9 @@ Environment variable: %q`, txSignerTopicEnv)
 // KafkaTopicWalletGenerator register flag for Kafka topic
 func KafkaTopicWalletGenerator(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Kafka topic for messages waiting to generate a new wallet
-Environment variable: %q`, generateWalletTopicEnv)
-	f.String(generateWalletFlag, generateWalletDefault, desc)
-	_ = viper.BindPFlag(generateWalletViperKey, f.Lookup(generateWalletFlag))
+Environment variable: %q`, walletGeneratorTopicEnv)
+	f.String(walletGeneratorFlag, walletGeneratorDefault, desc)
+	_ = viper.BindPFlag(walletGeneratorViperKey, f.Lookup(walletGeneratorFlag))
 }
 
 // KafkaTopicWalletGenerated register flag for Kafka topic
