@@ -2,6 +2,7 @@ package steps
 
 import (
 	"fmt"
+	"sync"
 	"testing"
 
 	"github.com/DATA-DOG/godog"
@@ -188,6 +189,7 @@ func (s *ScenarioTestSuite) TestTheTxcrafterShouldSetTheData() {
 	go func() {
 		mockChan <- unexpectedEnvelope
 	}()
+
 	err = s.Scenario.theTxcrafterShouldSetTheData()
 	assert.Error(s.T(), err, "Should not get an error")
 }
@@ -213,14 +215,20 @@ func (s *ScenarioTestSuite) TestTheTxnonceShouldSetTheNonce() {
 
 	var err error
 
+	// Test the well functioning of the step with expected envelopes
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		err = s.Scenario.theTxnonceShouldSetTheNonce()
+		wg.Done()
+	}()
+
 	for _, e := range s.Scenario.Envelopes {
 		go func(e *envelope.Envelope) {
 			mockChan <- e
 		}(e)
 	}
-
-	// Test the well functioning of the step with expected envelopes
-	err = s.Scenario.theTxnonceShouldSetTheNonce()
+	wg.Wait()
 	assert.NoError(s.T(), err, "Should not get an error")
 
 	// Test for not receiving envelopes before timeout
@@ -247,12 +255,19 @@ func (s *ScenarioTestSuite) TestTheTxnonceShouldSetTheNonce() {
 		},
 	}
 
+	wg = sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		err = s.Scenario.theTxnonceShouldSetTheNonce()
+		wg.Done()
+	}()
+
 	for _, e := range s.Scenario.Envelopes {
 		go func(e *envelope.Envelope) {
 			mockChan <- e
 		}(e)
 	}
-	err = s.Scenario.theTxnonceShouldSetTheNonce()
+	wg.Wait()
 	assert.Error(s.T(), err, "Should not get an error")
 }
 
@@ -317,39 +332,22 @@ func (s *ScenarioTestSuite) TestTheTxlistenerShouldCatchTheTx() {
 
 	var err error
 
+	// Test the well functioning of the step with expected envelopes
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		err = s.Scenario.theTxlistenerShouldCatchTheTx()
+		wg.Done()
+	}()
+
 	for _, e := range s.Scenario.Envelopes {
 		go func(e *envelope.Envelope) {
 			topic := fmt.Sprintf("%v-%v", viper.GetString("kafka.topic.decoder"), e.GetChain().GetId())
 			s.Scenario.EnvelopesChan[topic] <- e
 		}(e)
 	}
-
-	// Test the well functioning of the step with expected envelopes
-	err = s.Scenario.theTxlistenerShouldCatchTheTx()
+	wg.Wait()
 	assert.NoError(s.T(), err, "Should not get an error")
-
-	// Test for not receiving envelopes before timeout
-	err = s.Scenario.theTxlistenerShouldCatchTheTx()
-	assert.Error(s.T(), err, "Should get an error")
-
-	// Test step with unexpected envelopes
-	unexpectedEnvelope := &envelope.Envelope{
-		Chain: &common.Chain{Id: "888"},
-		Tx: &ethereum.Transaction{
-			TxData: &ethereum.TxData{
-				Gas: uint64(10),
-			},
-		},
-	}
-
-	for _, e := range s.Scenario.Envelopes {
-		go func(e *envelope.Envelope) {
-			topic := fmt.Sprintf("%v-%v", viper.GetString("kafka.topic.decoder"), e.GetChain().GetId())
-			s.Scenario.EnvelopesChan[topic] <- unexpectedEnvelope
-		}(e)
-	}
-	err = s.Scenario.theTxlistenerShouldCatchTheTx()
-	assert.Error(s.T(), err, "Should not get an error")
 }
 
 func (s *ScenarioTestSuite) TestTheTxdecoderShouldDecode() {
