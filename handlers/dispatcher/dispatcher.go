@@ -35,7 +35,7 @@ func Dispacher(c chanregistry.ChanRegistry) engine.HandlerFunc {
 					"MetadataID": txctx.Envelope.GetMetadata().GetId(),
 					"msg.Topic":  msg.Topic,
 				}).
-				Error("cucumber: received unknown envelope")
+				Error("dispacher: received unknown envelope")
 			_ = txctx.AbortWithError(fmt.Errorf("no ScenarioID found, envelope not dispatched"))
 		}
 

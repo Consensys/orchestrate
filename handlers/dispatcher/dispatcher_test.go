@@ -38,10 +38,13 @@ func makeCrafterContext(i int) *engine.TxContext {
 
 	switch i {
 	case 0:
+		// Input an empty envelope which return error
 		ctx.Envelope.Metadata = &envelope.Metadata{}
 		ctx.Set("errors", 1)
+		ctx.Set("expectedErrorMessage", "message:\"invalid input message format\" ")
 		ctx.Set("result", "")
 	case 1:
+		// Input a standard envelope with an extra data with ScenarioID
 		ctx.Msg = &sarama.ConsumerMessage{
 			Topic: "testTopic",
 		}
@@ -51,12 +54,14 @@ func makeCrafterContext(i int) *engine.TxContext {
 		ctx.Set("errors", 0)
 		ctx.Set("result", "")
 	case 2:
+		// Input an envelope without ScenarioID in extra data
 		extra := make(map[string]string)
 		ctx.Msg = &sarama.ConsumerMessage{
 			Topic: "testTopic",
 		}
 		ctx.Envelope.Metadata = &envelope.Metadata{Id: "test", Extra: extra}
 		ctx.Set("errors", 1)
+		ctx.Set("expectedErrorMessage", "message:\"no ScenarioID found, envelope not dispatched\" ")
 		ctx.Set("result", "")
 	}
 
@@ -77,14 +82,13 @@ func (s *DispacherTestSuite) SetupSuite() {
 }
 
 func (s *DispacherTestSuite) TestDispatcher() {
-	rounds := testsNum
 	txctxs := []*engine.TxContext{}
-	for i := 0; i < rounds; i++ {
+	for i := 0; i < testsNum; i++ {
 		txctxs = append(txctxs, makeCrafterContext(i))
 	}
 
 	go func() {
-		for i := 0; i < rounds; i++ {
+		for i := 0; i < testsNum; i++ {
 			<-s.MockChan
 		}
 	}()
@@ -94,6 +98,10 @@ func (s *DispacherTestSuite) TestDispatcher() {
 
 	for _, txctx := range txctxs {
 		assert.Len(s.T(), txctx.Envelope.Errors, txctx.Get("errors").(int), "Expected right count of errors", txctx.Envelope.Call)
+		if len(txctx.Envelope.Errors) == 1 {
+			assert.Equal(s.T(), txctx.Get("expectedErrorMessage").(string), txctx.Envelope.Errors[0].String(), "Expected the right error message")
+
+		}
 	}
 }
 
