@@ -61,7 +61,7 @@ func makeCrafterContext(i int) *engine.TxContext {
 		}
 		ctx.Envelope.Metadata = &envelope.Metadata{Id: "test", Extra: extra}
 		ctx.Set("errors", 1)
-		ctx.Set("expectedErrorMessage", "message:\"no ScenarioID found, envelope not dispatched\" ")
+		ctx.Set("expectedErrorMessage", "message:\"scenarioID unknown, envelope not dispatched\" ")
 		ctx.Set("result", "")
 	}
 

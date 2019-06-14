@@ -38,6 +38,6 @@ func Dispacher(c chanregistry.ChanRegistry) engine.HandlerFunc {
 				"msg.Topic":  msg.Topic,
 			}).
 			Error("dispacher: received unknown envelope")
-		_ = txctx.AbortWithError(fmt.Errorf("ScenarioID unknown, envelope not dispatched"))
+		_ = txctx.AbortWithError(fmt.Errorf("scenarioID unknown, envelope not dispatched"))
 	}
 }
