@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.5.5
+
+*Released on June 13th 2019*
+
+- [FEAT] Switch the txContext.Msg from `interface{}` to a dedicated interface `engine.Msg` and implements it in `broker.sarama.Msg`
+
 ### Version 0.5.4
 
 *Released on June 12th 2019*
