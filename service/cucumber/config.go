@@ -53,7 +53,8 @@ var (
 
 // ShowStepDefinitions register flag for Godog ShowStepDefinitions Option
 func ShowStepDefinitions(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Print step definitions found and exit : %q`, cucumberShowStepDefinitionsEnv)
+	desc := fmt.Sprintf(`Print step definitions found and exit
+Environment variable: %q`, cucumberShowStepDefinitionsEnv)
 	f.Bool(cucumberShowStepDefinitionsFlag, cucumberShowStepDefinitionsDefault, desc)
 	_ = viper.BindPFlag(cucumberShowStepDefinitionsViperKey, f.Lookup(cucumberShowStepDefinitionsFlag))
 }
@@ -67,7 +68,8 @@ var (
 
 // Randomize register flag for randomize feature tests
 func Randomize(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Seed to randomize feature tests. The default value of -1 means to have a random seed. 0 means do not randomize : %q`, cucumberRandomizeEnv)
+	desc := fmt.Sprintf(`Seed to randomize feature tests. The default value of -1 means to have a random seed. 0 means do not randomize
+Environment variable: %q`, cucumberRandomizeEnv)
 	f.Int(cucumberRandomizeFlag, cucumberRandomizeDefault, desc)
 	_ = viper.BindPFlag(cucumberRandomizeViperKey, f.Lookup(cucumberRandomizeFlag))
 }
@@ -81,7 +83,8 @@ var (
 
 // StopOnFailure register flag for Godog StopOnFailure Option
 func StopOnFailure(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Stops on the first failure : %q`, cucumberStopOnFailureEnv)
+	desc := fmt.Sprintf(`Stops on the first failure
+Environment variable: %q`, cucumberStopOnFailureEnv)
 	f.Bool(cucumberStopOnFailureFlag, cucumberStopOnFailureDefault, desc)
 	_ = viper.BindPFlag(cucumberStopOnFailureViperKey, f.Lookup(cucumberStopOnFailureFlag))
 }
@@ -95,7 +98,8 @@ var (
 
 // Strict register flag for Godog Strict Option
 func Strict(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Fail suite when there are pending or undefined steps : %q`, cucumberStrictEnv)
+	desc := fmt.Sprintf(`Fail suite when there are pending or undefined steps
+Environment variable: %q`, cucumberStrictEnv)
 	f.Bool(cucumberStrictFlag, cucumberStrictDefault, desc)
 	_ = viper.BindPFlag(cucumberStrictViperKey, f.Lookup(cucumberStrictFlag))
 }
@@ -109,7 +113,8 @@ var (
 
 // NoColors register flag for Godog NoColors Option
 func NoColors(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Forces ansi color stripping : %q`, cucumberNoColorsEnv)
+	desc := fmt.Sprintf(`Forces ansi color stripping
+Environment variable: %q`, cucumberNoColorsEnv)
 	f.Bool(cucumberNoColorsFlag, cucumberNoColorsDefault, desc)
 	_ = viper.BindPFlag(cucumberNoColorsViperKey, f.Lookup(cucumberNoColorsFlag))
 }
@@ -123,7 +128,8 @@ var (
 
 // Tags register flag for Godog Tags Option
 func Tags(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Various filters for scenarios parsed from feature files : %q`, cucumberTagsEnv)
+	desc := fmt.Sprintf(`Various filters for scenarios parsed from feature files
+Environment variable: %q`, cucumberTagsEnv)
 	f.String(cucumberTagsFlag, cucumberTagsDefault, desc)
 	_ = viper.BindPFlag(cucumberTagsViperKey, f.Lookup(cucumberTagsFlag))
 }
@@ -137,7 +143,8 @@ var (
 
 // Format register flag for Godog Format Option
 func Format(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`The formatter name : %q`, cucumberFormatEnv)
+	desc := fmt.Sprintf(`The formatter name
+Environment variable: %q`, cucumberFormatEnv)
 	f.String(cucumberFormatFlag, cucumberFormatDefault, desc)
 	_ = viper.BindPFlag(cucumberFormatViperKey, f.Lookup(cucumberFormatFlag))
 }
@@ -151,7 +158,8 @@ var (
 
 // Concurrency register flag for Godog Concurrency Option
 func Concurrency(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Concurrency rate, not all formatters accepts this : %q`, cucumberConcurrencyEnv)
+	desc := fmt.Sprintf(`Concurrency rate, not all formatters accepts this
+Environment variable: %q`, cucumberConcurrencyEnv)
 	f.Int(cucumberConcurrencyFlag, cucumberConcurrencyDefault, desc)
 	_ = viper.BindPFlag(cucumberConcurrencyViperKey, f.Lookup(cucumberConcurrencyFlag))
 }
@@ -165,7 +173,8 @@ var (
 
 // Paths register flag for Godog Paths Option
 func Paths(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`All feature file paths : %q`, cucumberPathsEnv)
+	desc := fmt.Sprintf(`All feature file paths
+Environment variable: %q`, cucumberPathsEnv)
 	f.StringSlice(cucumberPathsFlag, cucumberPathsDefault, desc)
 	_ = viper.BindPFlag(cucumberPathsViperKey, f.Lookup(cucumberPathsFlag))
 }
@@ -179,7 +188,8 @@ var (
 
 // OutputPath register flag for Godog OutputPath Option
 func OutputPath(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Where it should print the cucumber output (only works with cucumber format): %q`, cucumberOutputPathEnv)
+	desc := fmt.Sprintf(`Where it should print the cucumber output (only works with cucumber format)
+Environment variable: %q`, cucumberOutputPathEnv)
 	f.String(cucumberOutputPathFlag, cucumberOutputPathDefault, desc)
 	_ = viper.BindPFlag(cucumberOutputPathViperKey, f.Lookup(cucumberOutputPathFlag))
 }
