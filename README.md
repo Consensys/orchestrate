@@ -40,7 +40,7 @@ Note: you must have the `ETH_CLIENT_URL` environment variable set
 2. Once the test is completed, you can generate reports
 
 ```sh
-$ make reports
+$ make report
 ```
 
 The HTML report could be visualized in `report/output/report.html`
