@@ -12,11 +12,11 @@ import (
 
 // EnvelopeToCallMsg enrich an ethereum.CallMsg with Envelope information
 func EnvelopeToCallMsg(e *envelope.Envelope, call *ethereum.CallMsg) {
-	to, _ := e.GetTx().GetTxData().ToAddress()
+	to := e.GetTx().GetTxData().Receiver()
 	call.To = &to
-	call.From, _ = e.GetSender().Address()
-	call.Value = e.GetTx().GetTxData().ValueBig()
-	call.Data = e.GetTx().GetTxData().DataBytes()
+	call.From = e.Sender()
+	call.Value = e.GetTx().GetTxData().GetValueBig()
+	call.Data = e.GetTx().GetTxData().GetDataBytes()
 }
 
 // Estimator creates an handler that set Gas Limit

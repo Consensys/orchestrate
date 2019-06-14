@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
 
@@ -34,13 +34,13 @@ func makeGasPricerContext(i int) *engine.TxContext {
 
 	switch i % 2 {
 	case 0:
-		ctx.Envelope.Chain = (&common.Chain{}).SetID(big.NewInt(0))
+		ctx.Envelope.Chain = (&chain.Chain{}).SetID(big.NewInt(0))
 		ctx.Set("errors", 1)
-		ctx.Set("result", "")
+		ctx.Set("result", big.NewInt(0))
 	case 1:
-		ctx.Envelope.Chain = (&common.Chain{}).SetID(big.NewInt(1))
+		ctx.Envelope.Chain = (&chain.Chain{}).SetID(big.NewInt(1))
 		ctx.Set("errors", 0)
-		ctx.Set("result", "0xa")
+		ctx.Set("result", big.NewInt(10))
 	}
 	return ctx
 }
@@ -65,7 +65,7 @@ func (s *PricerTestSuite) TestEstimator() {
 
 	for _, txctx := range txctxs {
 		assert.Len(s.T(), txctx.Envelope.Errors, txctx.Get("errors").(int), "Expected right count of errors")
-		assert.Equal(s.T(), txctx.Get("result").(string), txctx.Envelope.GetTx().GetTxData().GetGasPrice(), "Expected correct Gas price")
+		assert.Equal(s.T(), txctx.Get("result").(*big.Int), txctx.Envelope.GetTx().GetTxData().GetGasPrice().Value(), "Expected correct Gas price")
 	}
 }
 

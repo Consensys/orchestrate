@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 	faucettypes "gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types"
 )
 
@@ -32,10 +32,10 @@ func makeFaucetContext(i int) *engine.TxContext {
 	txctx.Logger = log.NewEntry(log.StandardLogger())
 	switch i % 2 {
 	case 0:
-		txctx.Envelope.Chain = &common.Chain{}
+		txctx.Envelope.Chain = chain.CreateChainInt(0)
 		txctx.Set("errors", 1)
 	case 1:
-		txctx.Envelope.Chain = (&common.Chain{}).SetID(big.NewInt(1))
+		txctx.Envelope.Chain = chain.CreateChainInt(10)
 		txctx.Set("errors", 0)
 	}
 	return txctx

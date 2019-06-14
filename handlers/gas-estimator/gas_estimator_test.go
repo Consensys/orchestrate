@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
 
@@ -31,16 +31,16 @@ func makeGasEstimatorContext(i int) *engine.TxContext {
 	txctx := engine.NewTxContext()
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
-	txctx.Envelope.Sender = &common.Account{}
+	txctx.Envelope.From = &ethereum.Account{}
 	txctx.Envelope.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{}}
 
 	switch i % 2 {
 	case 0:
-		txctx.Envelope.Chain = (&common.Chain{}).SetID(big.NewInt(0))
+		txctx.Envelope.Chain = (&chain.Chain{}).SetID(big.NewInt(0))
 		txctx.Set("errors", 1)
 		txctx.Set("result", uint64(0))
 	case 1:
-		txctx.Envelope.Chain = (&common.Chain{}).SetID(big.NewInt(1))
+		txctx.Envelope.Chain = (&chain.Chain{}).SetID(big.NewInt(1))
 		txctx.Set("errors", 0)
 		txctx.Set("result", uint64(18))
 	}

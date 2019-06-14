@@ -16,7 +16,7 @@ import (
 // Crafter creates a crafter handler
 func Crafter(r registry.Registry, c crafter.Crafter) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		if txctx.Envelope.GetTx().GetTxData().GetData() != "" {
+		if txctx.Envelope.GetTx().GetTxData().GetData() != nil {
 			// If transaction has already been crafted there is nothing to do
 			return
 		}
@@ -50,14 +50,14 @@ func Crafter(r registry.Registry, c crafter.Crafter) engine.HandlerFunc {
 
 func getMethodAbi(txctx *engine.TxContext) (*abi.Method, error) {
 	var method *abi.Method
-	if ABI := txctx.Envelope.GetCall().GetMethod().GetAbi(); len(ABI) > 0 {
+	if ABI := txctx.Envelope.GetArgs().GetCall().GetMethod().GetAbi(); len(ABI) > 0 {
 		// ABI was provided in the Envelope
 		err := json.Unmarshal(ABI, method)
 		if err != nil {
 			_ = txctx.AbortWithError(err)
 			return nil, err
 		}
-	} else if methodSig := txctx.Envelope.GetCall().GetMethod().GetSignature(); methodSig != "" {
+	} else if methodSig := txctx.Envelope.GetArgs().GetCall().GetMethod().GetSignature(); methodSig != "" {
 		// Generate method ABI from signature
 		m, err := crafter.SignatureToMethod(methodSig)
 
@@ -77,7 +77,7 @@ func getMethodAbi(txctx *engine.TxContext) (*abi.Method, error) {
 }
 
 func createTxPayload(txctx *engine.TxContext, methodAbi *abi.Method, r registry.Registry, c crafter.Crafter) ([]byte, error) {
-	if txctx.Envelope.GetCall().GetMethod().IsConstructor() {
+	if txctx.Envelope.GetArgs().GetCall().GetMethod().IsConstructor() {
 		return createContractDeploymentPayload(txctx, methodAbi, r, c)
 	}
 
@@ -91,7 +91,7 @@ func createContractDeploymentPayload(txctx *engine.TxContext, methodAbi *abi.Met
 		err      error
 	)
 	// Transaction to be crafted is a Contract deployment
-	bytecode, err = r.GetContractBytecode(txctx.Envelope.GetCall().GetContract())
+	bytecode, err = r.GetContractBytecode(txctx.Envelope.GetArgs().GetCall().GetContract())
 	if err != nil {
 		txctx.Logger.WithError(err).Errorf("crafter: could not retrieve contract bytecode")
 		_ = txctx.AbortWithError(err)
@@ -120,7 +120,7 @@ func createTxCallPayload(txctx *engine.TxContext, methodAbi *abi.Method, c craft
 }
 
 func getTxArgs(txctx *engine.TxContext) []string {
-	args := txctx.Envelope.GetCall().GetArgs()
+	args := txctx.Envelope.GetArgs().GetCall().GetArgs()
 	txctx.Logger = txctx.Logger.WithFields(log.Fields{
 		"crafter.args": args,
 	})

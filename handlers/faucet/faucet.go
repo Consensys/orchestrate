@@ -11,13 +11,13 @@ import (
 func Faucet(fct faucet.Faucet) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		// Beneficiary
-		beneficiary, _ := txctx.Envelope.GetSender().Address()
+		beneficiary := txctx.Envelope.Sender()
 
 		// Create Faucet request
 		req := &faucettypes.Request{
 			ChainID:     txctx.Envelope.GetChain().ID(),
 			Beneficiary: beneficiary,
-			Amount:      txctx.Envelope.GetTx().GetTxData().ValueBig(),
+			Amount:      txctx.Envelope.GetTx().GetTxData().GetValueBig(),
 		}
 
 		// Credit
@@ -26,15 +26,17 @@ func Faucet(fct faucet.Faucet) engine.HandlerFunc {
 			// TODO: handle error
 			txctx.Logger.WithError(err).Errorf("faucet: credit error")
 			_ = txctx.Error(err)
-		} else {
-			if !approved {
-				txctx.Logger.Debugf("faucet: credit not approved")
-			} else {
-				txctx.Logger = txctx.Logger.WithFields(log.Fields{
-					"faucet.amount": amount.Text(10),
-				})
-				txctx.Logger.Debugf("faucet: credit approved")
-			}
+			return
 		}
+
+		if !approved {
+			txctx.Logger.Debugf("faucet: credit not approved")
+			return
+		}
+
+		txctx.Logger = txctx.Logger.WithFields(log.Fields{
+			"faucet.amount": amount.Text(10),
+		})
+		txctx.Logger.Debugf("faucet: credit approved")
 	}
 }

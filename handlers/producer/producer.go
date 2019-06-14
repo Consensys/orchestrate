@@ -21,7 +21,7 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 	msg.Topic = viper.GetString("kafka.topic.nonce")
 
 	// Set key
-	Sender, _ := txctx.Envelope.GetSender().Address()
+	Sender := txctx.Envelope.Sender()
 	msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(txctx.Envelope.GetChain().ID(), Sender))
 
 	return nil

@@ -9,7 +9,8 @@ import (
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/args"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
@@ -28,7 +29,7 @@ var (
 
 // NewMessage creates a New Sarama producer message
 func NewMessage(i int) *sarama.ProducerMessage {
-	var call *common.Call
+	var call *args.Call
 	msgs := []string{
 		// "constructor",
 		"call",
@@ -36,26 +37,36 @@ func NewMessage(i int) *sarama.ProducerMessage {
 
 	switch msgs[i%len(msgs)] {
 	case "constructor":
-		call = &common.Call{
-			Contract: &abi.Contract{Name: "ERC1400"},
-			Method:   &abi.Method{Signature: "constructor(uint256,uint256,uint256,address[],address,uint256)"},
-			Args:     []string{"0xabcd", "0xabcd", "0x10", "[0xcd626bc764e1d553e0d75a42f5c4156b91a63f23,0xcd626bc764e1d553e0d75a42f5c4156b91a63f23]", "0xcd626bc764e1d553e0d75a42f5c4156b91a63f23", "0xabcd"},
+		call = &args.Call{
+			Contract: &abi.Contract{
+				Id: &abi.ContractId{
+					Name: "ERC1400",
+				},
+			},
+			Method: &abi.Method{Signature: "constructor(uint256,uint256,uint256,address[],address,uint256)"},
+			Args:   []string{"0xabcd", "0xabcd", "0x10", "[0xcd626bc764e1d553e0d75a42f5c4156b91a63f23,0xcd626bc764e1d553e0d75a42f5c4156b91a63f23]", "0xcd626bc764e1d553e0d75a42f5c4156b91a63f23", "0xabcd"},
 		}
 	case "call":
-		call = &common.Call{
-			Contract: &abi.Contract{Name: "ERC1400"},
-			Method:   &abi.Method{Signature: "setDocument(uint256,uint256,uint256)"},
-			Args:     []string{"0xabcd", "0xabcd", "0xabcd"},
+		call = &args.Call{
+			Contract: &abi.Contract{
+				Id: &abi.ContractId{
+					Name: "ERC1400",
+				},
+			},
+			Method: &abi.Method{Signature: "setDocument(uint256,uint256,uint256)"},
+			Args:   []string{"0xabcd", "0xabcd", "0xabcd"},
 		}
 	}
 
 	e := &envelope.Envelope{
-		Chain:  &common.Chain{Id: "888"},
-		Sender: &common.Account{Addr: senders[i%len(senders)]},
-		Call:   call,
+		Chain: chain.CreateChainInt(888),
+		From:  ethereum.HexToAccount(senders[i]),
+		Args: &envelope.Args{
+			Call: call,
+		},
 		Tx: &ethereum.Transaction{
 			TxData: &ethereum.TxData{
-				To: ERC1400Address,
+				To: ethereum.HexToAccount(ERC1400Address),
 			},
 		},
 	}
