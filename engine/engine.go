@@ -152,8 +152,8 @@ func (e *Engine) CleanUp() {
 		e.mux.Lock()
 		if e.slots != nil {
 			close(e.slots)
+			e.slots = nil
 		}
-		e.slots = nil
 		e.mux.Unlock()
 	})
 }
