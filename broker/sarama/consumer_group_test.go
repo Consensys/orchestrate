@@ -31,7 +31,7 @@ type CounterHandler struct {
 
 func (h *CounterHandler) Handle(txctx *engine.TxContext) {
 	txctx.Logger.WithFields(log.Fields{
-		"topic":     txctx.Msg.(*Msg).Topic,
+		"topic":     txctx.Msg.Entrypoint(),
 		"offset":    txctx.Msg.(*Msg).Offset,
 		"partition": txctx.Msg.(*Msg).Partition,
 	}).Infof("Handling message")
