@@ -89,7 +89,8 @@ func (s *DispacherTestSuite) TestDispatcher() {
 
 	go func() {
 		for i := 0; i < testsNum; i++ {
-			<-s.MockChan
+			envelopeDispatched := <-s.MockChan
+			assert.NotNil(s.T(), envelopeDispatched.GetMetadata().GetExtra()["ScenarioID"], "Envelope should have a ScenarioID")
 		}
 	}()
 

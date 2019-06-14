@@ -28,17 +28,16 @@ func Dispacher(c chanregistry.ChanRegistry) engine.HandlerFunc {
 			envelopeChan := c.GetEnvelopeChan(extra["ScenarioID"], msg.Topic)
 			if envelopeChan != nil {
 				envelopeChan <- txctx.Envelope
+				return
 			}
-		} else {
-			txctx.Logger.
-				WithFields(log.Fields{
-					"MetadataID": txctx.Envelope.GetMetadata().GetId(),
-					"msg.Topic":  msg.Topic,
-				}).
-				Error("dispacher: received unknown envelope")
-			_ = txctx.AbortWithError(fmt.Errorf("no ScenarioID found, envelope not dispatched"))
 		}
 
+		txctx.Logger.
+			WithFields(log.Fields{
+				"MetadataID": txctx.Envelope.GetMetadata().GetId(),
+				"msg.Topic":  msg.Topic,
+			}).
+			Error("dispacher: received unknown envelope")
+		_ = txctx.AbortWithError(fmt.Errorf("no ScenarioID found, envelope not dispatched"))
 	}
-
 }
