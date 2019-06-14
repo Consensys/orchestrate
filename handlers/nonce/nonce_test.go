@@ -50,7 +50,7 @@ func (g *MockNonceGetter) Get(ctx context.Context, chainID *big.Int, a ethcommon
 	atomic.AddUint64(&g.counter, 1)
 	if chainID.Int64() == error1ChainID {
 		// Simulate error on chain 0
-		return 0, fmt.Errorf(" Unknwon chain")
+		return 0, fmt.Errorf("unknown chain")
 	}
 	return chainNonce, nil
 }
