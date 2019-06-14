@@ -149,7 +149,9 @@ runningLoop:
 // otherwise the Engine will panic
 func (e *Engine) CleanUp() {
 	e.cleanOnce.Do(func() {
-		close(e.slots)
+		if e.slots != nil {
+			close(e.slots)
+		}
 		e.mux.Lock()
 		e.slots = nil
 		e.mux.Unlock()
