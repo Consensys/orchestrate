@@ -36,6 +36,8 @@ lint:
 
 tidy: mod-tidy lint-fix
 
+gocache:
+	mkdir .gocache
 
 # Tools
 tools: ## Install test tools
