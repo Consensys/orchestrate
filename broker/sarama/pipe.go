@@ -8,7 +8,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
-// Pipe take a channel of sarama.ConsumerMessage and pipes it into a channel of interface{}
+// Pipe take a channel of sarama.ConsumerMessage and pipes it into a channel of engine.Msg
 //
 // Pipe will stop forwarding messages either
 // - sarama channel is closed
