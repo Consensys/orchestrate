@@ -6,7 +6,7 @@
 
 - [FEAT] Add tests and clean code
 - [FEAT] Add stardard steps, utils as the `EnvelopeCrafter`
-- 
+  
 ### Version 0.1.2
 
 *Released on June 06th 2019*
