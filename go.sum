@@ -160,6 +160,8 @@ gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.5.2 h1:JMRJVi2PvacJRzY4eNry
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.5.2/go.mod h1:zdQBk7TfXaZF51Qv9/dHqWWSwP0O8q9uFKUJkWkxvOk=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.5.4 h1:8zuGvMIgAIS3q6KnHaXC/4PElc9SMdFo6rGTxeN6ygQ=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.5.4/go.mod h1:Bd91X32CdtsjlxZagk+3TBwFIK+gxbUYP0x1hLLfRPk=
+gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.5.5 h1:N8FAPVK1TVA1cwBW4IybAdzMsw6sK5GsJPQgci20BSU=
+gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.5.5/go.mod h1:Bd91X32CdtsjlxZagk+3TBwFIK+gxbUYP0x1hLLfRPk=
 go.uber.org/atomic v1.3.2 h1:2Oa65PReHzfn29GpvgsYwloV9AVFHPDk8tYxt2c2tr4=
 go.uber.org/atomic v1.3.2/go.mod h1:gD2HeocX3+yG+ygLZcrzQJaqmWj9AIm7n08wl/qW/PE=
 go.uber.org/atomic v1.4.0/go.mod h1:gD2HeocX3+yG+ygLZcrzQJaqmWj9AIm7n08wl/qW/PE=
