@@ -7,7 +7,7 @@ Feature: deploy an ERC20 contract
       | chainId | from                                       | contractName       | methodSignature | gas     |
       | 888     | 0x7E654d251Da770A068413677967F6d3Ea2FeA9E4 | SimpleToken        | constructor()   | 2000000 |
     When I send these envelopes to CoreStack
-    Then CoreStack should receive them
+    Then CoreStack should receive envelopes
     Then the tx-crafter should set the data
     Then the tx-nonce should set the nonce
     Then the tx-signer should sign

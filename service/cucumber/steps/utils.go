@@ -18,6 +18,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
 
+// GetChainCounts returns a mapping that counts the number of tx per chain
 func GetChainCounts(envelopes map[string]*envelope.Envelope) map[string]uint {
 	chains := make(map[string]uint)
 	for _, v := range envelopes {
@@ -26,19 +27,21 @@ func GetChainCounts(envelopes map[string]*envelope.Envelope) map[string]uint {
 	return chains
 }
 
+// ChanTimeout constrains channel to receive message or to timeout
 func ChanTimeout(c chan *envelope.Envelope, seconds int64, expectedItems int) ([]*envelope.Envelope, error) {
-	ch := make([]*envelope.Envelope, expectedItems)
+	envelopesChan := make([]*envelope.Envelope, expectedItems)
 	for i := 0; i < expectedItems; i++ {
 		select {
 		case msg := <-c:
-			ch[i] = msg
+			envelopesChan[i] = msg
 		case <-time.After(time.Duration(seconds) * time.Second):
-			return nil, fmt.Errorf("error not receiving msg")
+			return nil, fmt.Errorf("timeout: not receiving msg after %d seconds", seconds)
 		}
 	}
-	return ch, nil
+	return envelopesChan, nil
 }
 
+// SendEnvelope sends an envelope to kafka
 func SendEnvelope(e *envelope.Envelope) error {
 
 	p := broker.GlobalSyncProducer()
@@ -61,6 +64,7 @@ func SendEnvelope(e *envelope.Envelope) error {
 	return nil
 }
 
+// EnvelopeCrafter crafts a envelope from a string mapping
 func EnvelopeCrafter(m map[string]string) *envelope.Envelope {
 
 	e := &envelope.Envelope{}

@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"fmt"
-	"os"
 	"sync"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/loader"
@@ -20,7 +19,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/handlers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/handlers/dispatcher"
-	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/services/cucumber"
+	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/service/cucumber"
 )
 
 var (
@@ -77,13 +76,6 @@ func initComponents(ctx context.Context) {
 		wg.Done()
 	}()
 
-	// Initialize Ethereum client
-	wg.Add(1)
-	go func() {
-		rpc.Init(ctx)
-		wg.Done()
-	}()
-
 	// Initialize cucumber registry
 	wg.Add(1)
 	go func() {
@@ -133,8 +125,8 @@ func Start(ctx context.Context) {
 		// Indicate that application is ready
 		app.ready.Store(true)
 
-		// // Start consuming on every topics
-		// // Initialize Topics list by chain
+		// Start consuming on every topics
+		// Initialize Topics list by chain
 		topics := []string{
 			viper.GetString("kafka.topic.crafter"),
 			viper.GetString("kafka.topic.nonce"),
@@ -149,9 +141,8 @@ func Start(ctx context.Context) {
 		readyToTest = make(chan bool, 1)
 
 		go func() {
-			if <-readyToTest {
-				cucumber.Run(cancel, cucumber.GlobalOptions())
-			}
+			<-readyToTest
+			cucumber.Run(cancel, cucumber.GlobalOptions())
 		}()
 
 		cg := &EmbeddingConsumerGroupHandler{
@@ -165,8 +156,7 @@ func Start(ctx context.Context) {
 			cg,
 		)
 		if err != nil {
-			log.WithError(err).Error("worker: error on consumer")
-			os.Exit(1)
+			log.WithError(err).Fatal("worker: error on consumer")
 		}
 
 	})
@@ -177,8 +167,9 @@ type EmbeddingConsumerGroupHandler struct {
 }
 
 func (h *EmbeddingConsumerGroupHandler) Setup(s sarama.ConsumerGroupSession) error {
+	err := h.engine.Setup(s)
 	readyToTest <- true
-	return h.engine.Setup(s)
+	return err
 }
 
 func (h *EmbeddingConsumerGroupHandler) ConsumeClaim(s sarama.ConsumerGroupSession, c sarama.ConsumerGroupClaim) error {
