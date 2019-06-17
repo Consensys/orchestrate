@@ -3,9 +3,10 @@ package main
 import (
 	"fmt"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
+
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
@@ -44,16 +45,16 @@ func newMessage(i int) *sarama.ProducerMessage {
 	}
 	b, _ := proto.Marshal(
 		&envelope.Envelope{
-			Chain:  &common.Chain{Id: "3"},
-			Sender: &common.Account{Addr: senders[i%len(senders)]},
+			Chain: chain.CreateChainInt(3),
+			From:  ethereum.HexToAccount(senders[i%len(senders)]),
 			Tx: &ethereum.Transaction{
 				TxData: &ethereum.TxData{
 					Nonce:    1,
-					To:       "0xfF778b716FC07D98839f48DdB88D8bE583BEB684",
-					Value:    "0x2386f26fc10000",
+					To:       ethereum.HexToAccount("0xfF778b716FC07D98839f48DdB88D8bE583BEB684"),
+					Value:    ethereum.HexToQuantity("0x2386f26fc10000"),
 					Gas:      21136,
-					GasPrice: "0xee6b2800",
-					Data:     "0xabcd",
+					GasPrice: ethereum.HexToQuantity("0xee6b2800"),
+					Data:     ethereum.HexToData("0xabcd"),
 				},
 			},
 		},
