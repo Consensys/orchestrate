@@ -6,11 +6,12 @@ import (
 	"math/big"
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
+
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store"
@@ -33,12 +34,12 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore() {
 		SetData(hexutil.MustDecode("0xabcd"))
 
 	tr := &envelope.Envelope{
-		Chain:    &common.Chain{Id: "888"},
+		Chain:    chain.CreateChainInt(888),
 		Metadata: &envelope.Metadata{Id: "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11"},
 		Tx: &ethereum.Transaction{
 			TxData: txData,
-			Raw:    "0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80",
-			Hash:   "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210",
+			Raw:    ethereum.HexToData("0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80"),
+			Hash:   ethereum.HexToHash("0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210"),
 		},
 	}
 
@@ -63,7 +64,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore() {
 	status, _, err = s.Store.LoadByTxHash(context.Background(), "888", "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210", tr)
 	assert.Nil(s.T(), err, "Should properly store envelope")
 	assert.Equal(s.T(), "stored", status, "Status should be correct")
-	assert.Equal(s.T(), "888", tr.GetChain().GetId(), "ChainID should be correct")
+	assert.Equal(s.T(), "888", tr.GetChain().ID().String(), "ChainID should be correct")
 	assert.Equal(s.T(), "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11", tr.GetMetadata().GetId(), "MetadataID should be correct")
 
 	// Set Status
@@ -83,12 +84,12 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore() {
 
 	// Stores an already existing
 	tr = &envelope.Envelope{
-		Chain:    &common.Chain{Id: "888"},
+		Chain:    chain.CreateChainInt(888),
 		Metadata: &envelope.Metadata{Id: "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11"},
 		Tx: &ethereum.Transaction{
 			TxData: txData,
-			Raw:    "0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80",
-			Hash:   "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210",
+			Raw:    ethereum.HexToData("0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80"),
+			Hash:   ethereum.HexToHash("0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210"),
 		},
 	}
 
@@ -122,14 +123,14 @@ func (s *EnvelopeStoreTestSuite) TestLoadPending() {
 		SetGasPrice(big.NewInt(200000)).
 		SetData(hexutil.MustDecode("0xabcd"))
 
-	for i, chain := range []string{"1", "2", "3", "12", "42", "888"} {
+	for i, chainID := range []int64{1, 2, 3, 12, 42, 888} {
 		tr := &envelope.Envelope{
-			Chain:    &common.Chain{Id: chain},
+			Chain:    chain.CreateChainInt(chainID),
 			Metadata: &envelope.Metadata{Id: fmt.Sprintf("a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a1%v", i)},
 			Tx: &ethereum.Transaction{
 				TxData: txData,
-				Raw:    "0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80",
-				Hash:   "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210",
+				Raw:    ethereum.HexToData("0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80"),
+				Hash:   ethereum.HexToHash("0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210"),
 			},
 		}
 

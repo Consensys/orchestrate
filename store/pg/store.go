@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-pg/pg"
 	"github.com/golang/protobuf/proto"
-	envelope "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 )
 
 // EnvelopeModel represent elements in `envelopes` table
@@ -55,8 +55,8 @@ func (s *EnvelopeStore) Store(ctx context.Context, e *envelope.Envelope) (status
 	}
 
 	model := &EnvelopeModel{
-		ChainID:    e.GetChain().GetId(),
-		TxHash:     e.GetTx().Hash,
+		ChainID:    e.GetChain().ID().String(),
+		TxHash:     e.GetTx().GetHash().Hex(),
 		EnvelopeID: e.GetMetadata().GetId(),
 		Envelope:   bytes,
 	}

@@ -42,7 +42,7 @@ func (s *EnvelopeStore) Store(ctx context.Context, e *envelope.Envelope) (status
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	k := key(e.GetChain().GetId(), e.GetTx().GetHash())
+	k := key(e.GetChain().ID().String(), e.GetTx().GetHash().Hex())
 	entry, ok := s.byTxHash[k]
 	if ok {
 		entry.envelope = e
