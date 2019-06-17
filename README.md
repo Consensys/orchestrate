@@ -56,9 +56,13 @@ Usage:
   app run [flags]
 
 Flags:
+      --cucumber-chainid-primary int       ChainID corresponding to the alias "primary" in the scenario features
+                                           Environment variable: "CUCUMBER_CHAINID_PRIMARY"
+      --cucumber-chainid-secondary int     ChainID corresponding to the alias "secondary" in the scenario features
+                                           Environment variable: "CUCUMBER_CHAINID_SECONDARY"
       --cucumber-concurrency int           Concurrency rate, not all formatters accepts this
                                            Environment variable: "CUCUMBER_CONCURRENCY" (default 1)
-      --cucumber-format string             The formatter name
+      --cucumber-format string             The formatter name (events|junit|pretty|cucumber)
                                            Environment variable: "CUCUMBER_FORMAT" (default "pretty")
       --cucumber-nocolors                  Forces ansi color stripping
                                            Environment variable: "CUCUMBER_NOCOLORS"
@@ -82,8 +86,6 @@ Flags:
                                            Environment variable: "CUCUMBER_TAGS"
       --engine-slots uint                  Maximum number of messages the engine can treat concurrently.
                                            Environment variable: "ENGINE_SLOTS" (default 20)
-      --eth-client strings                 Ethereum client url
-                                           Environment variable: "ETH_CLIENT_URL"
       --grpc-store-target string           GRPC Context Store target (See https://github.com/grpc/grpc/blob/master/doc/naming.md)
                                            Environment variable: "GRPC_STORE_TARGET"
   -h, --help                               help for run
@@ -143,10 +145,10 @@ Most of the standard steps are located in `features/deployment.feature` and `fea
 
 ```
     Given I have the following envelope:
-      | Alias       | chainId | from                                       | contractName | methodSignature | gas     |
-      | SimpleToken | 888     | 0x7E654d251Da770A068413677967F6d3Ea2FeA9E4 | SimpleToken  | constructor()   | 2000000 |
+      | AliasContract | AliasChainId | from                                       | contractName | methodSignature | gas     |
+      | SimpleToken   | primary      | 0x7E654d251Da770A068413677967F6d3Ea2FeA9E4 | SimpleToken  | constructor()   | 2000000 |
 ```
-This step is parsing a table into envelopes and stored in the `Scenario Context`. The labels are as close as the SDK, except `Alias` where it provides a name to a contract to be deployed. The mapping of labels could be found in `service/cucumber/steps/utils.go`
+This step is parsing a table into envelopes and stored in the `Scenario Context`. The labels are as close as the SDK, except `Aliases` where they provide a name to a contract to be deployed for `AliasContract` and a name for a specific chainID for `AliasChainId`. The mapping of labels could be found in `service/cucumber/steps/utils.go`. Moreover, the e2e test is able to work is a CoreStack connected up to 2 chains simultaneously, which corresponds to the current most advanced feature possible with a bridge. Instead of passing hard-coded chains to our scenarios, we call these 2 chains `primary` and `secondary` and you can pass their values through the `CUCUMBER_CHAINID_PRIMARY` and `CUCUMBER_CHAINID_SECONDARY` environment variable.
 
 
 ```    

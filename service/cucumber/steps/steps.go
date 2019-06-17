@@ -1,7 +1,6 @@
 package steps
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/DATA-DOG/godog"
@@ -10,7 +9,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/service/chanregistry"
 )
 
@@ -23,7 +21,7 @@ type ScenarioContext struct {
 	// MetadataId -> *envelope.Envelope (keep envelopes to be processed and checked)
 	Envelopes map[string]*envelope.Envelope
 
-	// Used to keep contract address for example
+	// Used to keep alias of contract addresses for example
 	Value map[string]interface{}
 
 	Logger *log.Entry
@@ -46,7 +44,6 @@ func (sc *ScenarioContext) initScenarioContext(s interface{}) {
 		"Sceneario": scenarioName,
 	})
 
-	chainIDs := ethclient.GlobalClient().Networks(context.Background())
 	topics := []string{
 		viper.GetString("kafka.topic.crafter"),
 		viper.GetString("kafka.topic.nonce"),
@@ -54,9 +51,13 @@ func (sc *ScenarioContext) initScenarioContext(s interface{}) {
 		viper.GetString("kafka.topic.sender"),
 		viper.GetString("kafka.topic.decoded"),
 	}
-	for _, chainID := range chainIDs {
-		topics = append(topics, fmt.Sprintf("%v-%v", viper.GetString("kafka.topic.decoder"), chainID.String()))
+	if primary := viper.GetInt("cucumber.chainid.primary"); primary > 0 {
+		topics = append(topics, fmt.Sprintf("%v-%d", viper.GetString("kafka.topic.decoder"), primary))
 	}
+	if secondary := viper.GetInt("cucumber.chainid.secondary"); secondary > 0 {
+		topics = append(topics, fmt.Sprintf("%v-%d", viper.GetString("kafka.topic.decoder"), secondary))
+	}
+
 	sc.EnvelopesChan = make(map[string]chan *envelope.Envelope)
 	sc.Envelopes = make(map[string]*envelope.Envelope)
 	sc.Value = make(map[string]interface{})
@@ -74,12 +75,15 @@ func (sc *ScenarioContext) iHaveTheFollowingEnvelope(rawEnvelopes *gherkin.DataT
 	for i := 1; i < len(rawEnvelopes.Rows); i++ {
 		mapEnvelope := make(map[string]string)
 		for j, cell := range head {
-
-			// Replace "toAlias" by contract address
-			if cell.Value == "toAlias" {
-				mapEnvelope[cell.Value] = sc.Value[rawEnvelopes.Rows[i].Cells[j].Value].(string)
-			} else {
+			// Replace "Aliases"
+			switch {
+			case cell.Value == "AliasTo":
+				mapEnvelope["to"] = sc.Value[rawEnvelopes.Rows[i].Cells[j].Value].(string)
+			case cell.Value == "AliasChainId":
+				mapEnvelope["chainId"] = viper.GetString(fmt.Sprintf("cucumber.chainid.%s", rawEnvelopes.Rows[i].Cells[j].Value))
+			default:
 				mapEnvelope[cell.Value] = rawEnvelopes.Rows[i].Cells[j].Value
+
 			}
 		}
 
@@ -314,7 +318,7 @@ func (sc *ScenarioContext) iShouldCatchTheirContractAddresses() error {
 		if v.GetReceipt().GetContractAddress() == "" {
 			return fmt.Errorf("could not deploy contract")
 		}
-		sc.Value[v.GetMetadata().GetExtra()["Alias"]] = v.GetReceipt().GetContractAddress()
+		sc.Value[v.GetMetadata().GetExtra()["AliasContractInstance"]] = v.GetReceipt().GetContractAddress()
 
 		// Envelope processed - remove from scenario context
 		delete(sc.Envelopes, v.GetMetadata().GetId())

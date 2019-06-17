@@ -9,7 +9,6 @@ import (
 	"github.com/DATA-DOG/godog/gherkin"
 	"github.com/Shopify/sarama"
 	"github.com/Shopify/sarama/mocks"
-	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
@@ -18,8 +17,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/service/chanregistry"
 )
 
@@ -49,10 +46,6 @@ func (s *ScenarioTestSuite) SetupTest() {
 }
 
 func (s *ScenarioTestSuite) TestInitScenarioContext() {
-	blocks := make(map[string][]*ethtypes.Block)
-	mec := mock.NewClient(blocks)
-	ethclient.SetGlobalClient(mec)
-
 	c := chanregistry.NewChanRegistry()
 	chanregistry.SetGlobalChanRegistry(c)
 
@@ -84,7 +77,7 @@ func (s *ScenarioTestSuite) TestIHaveTheFollowingEnvelope() {
 						Value: "from",
 					},
 					&gherkin.TableCell{
-						Value: "toAlias",
+						Value: "AliasTo",
 					},
 				},
 			},

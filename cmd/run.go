@@ -10,8 +10,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
-	storegrpc "gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store/grpc"
-	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/app"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/service/cucumber"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/service/cucumber/steps"
@@ -26,9 +24,6 @@ func newRunCommand() *cobra.Command {
 
 	// Register Engine flags
 	engine.InitFlags(runCmd.Flags())
-
-	// Register Ethereum client flags
-	ethclient.URLs(runCmd.Flags())
 
 	// Register Opentracing flags
 	jaeger.InitFlags(runCmd.Flags())
@@ -49,9 +44,6 @@ func newRunCommand() *cobra.Command {
 	// Register Cucumber flags
 	cucumber.InitFlags(runCmd.Flags())
 	steps.InitFlags(runCmd.Flags())
-
-	// Register StoreGRPC flags
-	storegrpc.StoreTarget(runCmd.Flags())
 
 	return runCmd
 }

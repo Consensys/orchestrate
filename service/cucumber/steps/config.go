@@ -12,12 +12,18 @@ func init() {
 	_ = viper.BindEnv(cucumberTimeoutViperKey, cucumberTimeoutEnv)
 	viper.SetDefault(cucumberMiningTimeoutViperKey, cucumberMiningTimeoutDefault)
 	_ = viper.BindEnv(cucumberMiningTimeoutViperKey, cucumberMiningTimeoutEnv)
+	viper.SetDefault(cucumberChainIDPrimaryViperKey, cucumberChainIDPrimaryDefault)
+	_ = viper.BindEnv(cucumberChainIDPrimaryViperKey, cucumberChainIDPrimaryEnv)
+	viper.SetDefault(cucumberChainIDSecondaryViperKey, cucumberChainIDSecondaryDefault)
+	_ = viper.BindEnv(cucumberChainIDSecondaryViperKey, cucumberChainIDSecondaryEnv)
 }
 
 // InitFlags register Step flags
 func InitFlags(f *pflag.FlagSet) {
 	Timeout(f)
 	MiningTimeout(f)
+	ChainIDPrimary(f)
+	ChainIDSecondary(f)
 }
 
 var (
@@ -48,4 +54,34 @@ func MiningTimeout(f *pflag.FlagSet) {
 Environment variable: %q`, cucumberMiningTimeoutEnv)
 	f.Int(cucumberMiningTimeoutFlag, cucumberMiningTimeoutDefault, desc)
 	_ = viper.BindPFlag(cucumberMiningTimeoutViperKey, f.Lookup(cucumberMiningTimeoutFlag))
+}
+
+var (
+	cucumberChainIDPrimaryFlag     = "cucumber-chainid-primary"
+	cucumberChainIDPrimaryViperKey = "cucumber.chainid.primary"
+	cucumberChainIDPrimaryDefault  = 0
+	cucumberChainIDPrimaryEnv      = "CUCUMBER_CHAINID_PRIMARY"
+)
+
+// ChainIDPrimary register flag for ChainIDPrimary Option
+func ChainIDPrimary(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`ChainID corresponding to the alias "primary" in the scenario features
+Environment variable: %q`, cucumberChainIDPrimaryEnv)
+	f.Int(cucumberChainIDPrimaryFlag, cucumberChainIDPrimaryDefault, desc)
+	_ = viper.BindPFlag(cucumberChainIDPrimaryViperKey, f.Lookup(cucumberChainIDPrimaryFlag))
+}
+
+var (
+	cucumberChainIDSecondaryFlag     = "cucumber-chainid-secondary"
+	cucumberChainIDSecondaryViperKey = "cucumber.chainid.secondary"
+	cucumberChainIDSecondaryDefault  = 0
+	cucumberChainIDSecondaryEnv      = "CUCUMBER_CHAINID_SECONDARY"
+)
+
+// ChainIDSecondary register flag for ChainIDSecondary Option
+func ChainIDSecondary(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`ChainID corresponding to the alias "secondary" in the scenario features
+Environment variable: %q`, cucumberChainIDSecondaryEnv)
+	f.Int(cucumberChainIDSecondaryFlag, cucumberChainIDSecondaryDefault, desc)
+	_ = viper.BindPFlag(cucumberChainIDSecondaryViperKey, f.Lookup(cucumberChainIDSecondaryFlag))
 }

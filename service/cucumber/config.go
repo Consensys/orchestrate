@@ -143,7 +143,7 @@ var (
 
 // Format register flag for Godog Format Option
 func Format(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`The formatter name
+	desc := fmt.Sprintf(`The formatter name (events|junit|pretty|cucumber)
 Environment variable: %q`, cucumberFormatEnv)
 	f.String(cucumberFormatFlag, cucumberFormatDefault, desc)
 	_ = viper.BindPFlag(cucumberFormatViperKey, f.Lookup(cucumberFormatFlag))

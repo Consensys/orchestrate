@@ -98,7 +98,7 @@ func (s *DispacherTestSuite) TestDispatcher() {
 	s.Handle(txctxs)
 
 	for _, txctx := range txctxs {
-		assert.Len(s.T(), txctx.Envelope.Errors, txctx.Get("errors").(int), "Expected right count of errors", txctx.Envelope.Call)
+		assert.Len(s.T(), txctx.Envelope.Errors, txctx.Get("errors").(int), "Expected right count of errors", txctx.Envelope.Errors)
 		if len(txctx.Envelope.Errors) == 1 {
 			assert.Equal(s.T(), txctx.Get("expectedErrorMessage").(string), txctx.Envelope.Errors[0].String(), "Expected the right error message")
 

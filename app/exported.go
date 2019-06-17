@@ -16,7 +16,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	server "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http/healthcheck"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/handlers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/handlers/dispatcher"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/service/cucumber"
@@ -60,11 +59,6 @@ func initComponents(ctx context.Context) {
 	// Initialize ConsumerGroup
 	wg.Add(1)
 	go func() {
-		// Want to consume from the oldest offset
-		// broker.InitConfig()
-		// config := broker.GlobalConfig()
-		// config.Consumer.Offsets.Initial = sarama.OffsetOldest
-
 		broker.InitConsumerGroup(ctx)
 		wg.Done()
 	}()
@@ -134,8 +128,11 @@ func Start(ctx context.Context) {
 			viper.GetString("kafka.topic.sender"),
 			viper.GetString("kafka.topic.decoded"),
 		}
-		for _, chainID := range rpc.GlobalClient().Networks(context.Background()) {
-			topics = append(topics, fmt.Sprintf("%v-%v", viper.GetString("kafka.topic.decoder"), chainID.String()))
+		if primary := viper.GetInt("cucumber.chainid.primary"); primary > 0 {
+			topics = append(topics, fmt.Sprintf("%v-%d", viper.GetString("kafka.topic.decoder"), primary))
+		}
+		if secondary := viper.GetInt("cucumber.chainid.secondary"); secondary > 0 {
+			topics = append(topics, fmt.Sprintf("%v-%d", viper.GetString("kafka.topic.decoder"), secondary))
 		}
 
 		readyToTest = make(chan bool, 1)
