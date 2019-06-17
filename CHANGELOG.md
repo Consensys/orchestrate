@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.5.6
+
+*Released on June 13th 2019*
+
+- [FIX] Safely close channel if it is nil in engine
+
 ### Version 0.5.5
 
 *Released on June 13th 2019*
