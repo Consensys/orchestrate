@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.1.4
+
+*Released on June 17th 2019*
+
+- [FIX] Add `AliaisChainID` to run scenario tests in any chains
+- [FIX] Remove `ethclient`
+  
 ### Version 0.1.3
 
 *Released on June 12th 2019*
