@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.5
+
+*Released on June 17th 2019*
+
+- [FIX] Update `pkg` version to `v0.5.6`
+- 
 ### Version 0.1.4
 
 *Released on June 17th 2019*
