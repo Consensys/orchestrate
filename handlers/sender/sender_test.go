@@ -12,7 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store/mock"
@@ -60,22 +60,26 @@ func makeSenderContext(i int) *engine.TxContext {
 	txctx.Logger = log.NewEntry(log.StandardLogger())
 	switch i % 3 {
 	case 0:
-		txctx.Envelope.Chain = (&common.Chain{}).SetID(big.NewInt(8))
-		txctx.Envelope.Tx = (&ethereum.Transaction{}).SetRaw("0xabde4f3a")
+		txctx.Envelope.Chain = chain.CreateChainInt(8)
+		txctx.Envelope.Tx = &ethereum.Transaction{
+			Raw: ethereum.HexToData("0xabde4f3a"),
+		}
 		txctx.Envelope.Metadata = (&envelope.Metadata{Id: RandString(10)})
-		txctx.Envelope.Tx.Hash = "0x" + RandString(32)
+		txctx.Envelope.Tx.Hash = ethereum.HexToHash("0x" + RandString(64))
 		txctx.Set("errors", 0)
 		txctx.Set("status", "pending")
 	case 1:
-		txctx.Envelope.Chain = (&common.Chain{}).SetID(big.NewInt(0))
-		txctx.Envelope.Tx = (&ethereum.Transaction{}).SetRaw("0xabde4f3a")
-		txctx.Envelope.Tx.Hash = "0x" + RandString(32)
+		txctx.Envelope.Chain = chain.CreateChainInt(0)
+		txctx.Envelope.Tx = &ethereum.Transaction{
+			Raw: ethereum.HexToData("0xabde4f3a"),
+		}
+		txctx.Envelope.Tx.Hash = ethereum.HexToHash("0x" + RandString(64))
 		txctx.Envelope.Metadata = (&envelope.Metadata{Id: RandString(10)})
 		txctx.Set("errors", 1)
 		txctx.Set("status", "error")
 	case 2:
-		txctx.Envelope.Chain = (&common.Chain{}).SetID(big.NewInt(10))
-		txctx.Envelope.Tx = (&ethereum.Transaction{}).SetRaw(``)
+		txctx.Envelope.Chain = chain.CreateChainInt(10)
+		txctx.Envelope.Tx = &ethereum.Transaction{}
 		txctx.Envelope.Metadata = (&envelope.Metadata{Id: RandString(10)})
 		txctx.Set("errors", 0)
 		txctx.Set("status", "pending")

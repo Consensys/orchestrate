@@ -3,7 +3,6 @@ package sender
 import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	contextStore "gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
@@ -16,7 +15,7 @@ func Sender(sender ethclient.TransactionSender, store contextStore.EnvelopeStore
 			"chain.id": txctx.Envelope.GetChain().GetId(),
 		})
 
-		if txctx.Envelope.GetTx().GetRaw() == "" || txctx.Envelope.GetTx().GetHash() == "" {
+		if txctx.Envelope.GetTx().GetRaw().GetRaw() == nil || txctx.Envelope.GetTx().GetHash().GetRaw() == nil {
 			// Transaction has not been signed externally
 			// Send the transaction
 			args := types.Envelope2SendTxArgs(txctx.Envelope)
@@ -59,7 +58,7 @@ func Sender(sender ethclient.TransactionSender, store contextStore.EnvelopeStore
 		}
 
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"tx.raw":  utils.ShortString(txctx.Envelope.GetTx().GetRaw(), 10),
+			"tx.raw":  txctx.Envelope.GetTx().GetRaw().Hex(),
 			"tx.hash": txctx.Envelope.GetTx().GetHash(),
 		})
 
@@ -81,7 +80,7 @@ func Sender(sender ethclient.TransactionSender, store contextStore.EnvelopeStore
 		}
 
 		// Send raw transaction
-		err = sender.SendRawTransaction(txctx.Context(), txctx.Envelope.GetChain().ID(), txctx.Envelope.GetTx().GetRaw())
+		err = sender.SendRawTransaction(txctx.Context(), txctx.Envelope.GetChain().ID(), txctx.Envelope.GetTx().GetRaw().Hex())
 		if err != nil {
 			txctx.Logger.WithError(err).Errorf("sender: could not send transaction")
 
