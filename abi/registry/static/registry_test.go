@@ -1,14 +1,18 @@
 package static
 
 import (
+	"math/big"
 	"testing"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 
 	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/mock"
 )
 
@@ -91,15 +95,31 @@ var ERC20bis = []byte(
 var methodSig = []byte("isMinter(address)")
 var eventSig = []byte("MinterAdded(address,address)")
 
-var ERC20Contract = &abi.Contract{Name: "ERC20", Tag: "v1.0.0", Abi: ERC20, Bytecode: []byte{1, 2}, DeployedBytecode: []byte{1, 2, 3}}
-var ERC20ContractBis = &abi.Contract{Name: "ERC20", Tag: "v1.0.1", Abi: ERC20bis, Bytecode: []byte{1, 3}, DeployedBytecode: []byte{1, 2, 4}}
+var ERC20Contract = &abi.Contract{
+	Id: &abi.ContractId{
+		Name: "ERC20",
+		Tag:  "v1.0.0",
+	},
+	Abi:              ERC20,
+	Bytecode:         []byte{1, 2},
+	DeployedBytecode: []byte{1, 2, 3},
+}
+var ERC20ContractBis = &abi.Contract{
+	Id: &abi.ContractId{
+		Name: "ERC20",
+		Tag:  "v1.0.1",
+	},
+	Abi:              ERC20bis,
+	Bytecode:         []byte{1, 3},
+	DeployedBytecode: []byte{1, 2, 4},
+}
 
 var ERC20ABI, _ = ERC20Contract.ToABI()
 var ERC20ABIBis, _ = ERC20ContractBis.ToABI()
 
 var ContractInstance = common.AccountInstance{
-	Chain:   &common.Chain{Id: "3"},
-	Account: &common.Account{Addr: "0xBA826fEc90CEFdf6706858E5FbaFcb27A290Fbe0"},
+	Chain:   &chain.Chain{Id: big.NewInt(3).Bytes()},
+	Account: ethereum.HexToAccount("0xBA826fEc90CEFdf6706858E5FbaFcb27A290Fbe0"),
 }
 
 func TestRegisterContract(t *testing.T) {
@@ -107,7 +127,13 @@ func TestRegisterContract(t *testing.T) {
 	mec := mock.NewClient(blocks)
 
 	r := NewRegistry(mec)
-	err := r.RegisterContract(&abi.Contract{Name: "ERC20", Tag: "v1.0.0", Abi: []byte{}})
+	err := r.RegisterContract(&abi.Contract{
+		Id: &abi.ContractId{
+			Name: "ERC20",
+			Tag:  "v1.0.0",
+		},
+		Abi: []byte{},
+	})
 	assert.NoError(t, err, "Should not error on empty things")
 
 	err = r.RegisterContract(ERC20Contract)
@@ -128,27 +154,57 @@ func TestContractRegistryBySig(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Get ABI
-	result, err := r.GetContractABI(&abi.Contract{Name: "ERC20", Tag: "v1.0.0"})
+	result, err := r.GetContractABI(&abi.Contract{
+		Id: &abi.ContractId{
+			Name: "ERC20",
+			Tag:  "v1.0.0",
+		},
+	})
 	assert.NoError(t, err)
 	assert.Equal(t, ERC20Contract.Abi, result)
-	result, err = r.GetContractABI(&abi.Contract{Name: "ERC20", Tag: "covfefe"})
-	assert.Error(t, err, "Should error when unknow contract")
+	result, err = r.GetContractABI(&abi.Contract{
+		Id: &abi.ContractId{
+			Name: "ERC20",
+			Tag:  "covfefe",
+		},
+	})
+	assert.Error(t, err, "Should error when unknown contract")
 	assert.Nil(t, result)
 
 	// Get Bytecode
-	result, err = r.GetContractBytecode(&abi.Contract{Name: "ERC20", Tag: "v1.0.0"})
+	result, err = r.GetContractBytecode(&abi.Contract{
+		Id: &abi.ContractId{
+			Name: "ERC20",
+			Tag:  "v1.0.0",
+		},
+	})
 	assert.NoError(t, err)
 	assert.Equal(t, ERC20Contract.Bytecode, result)
-	result, err = r.GetContractBytecode(&abi.Contract{Name: "ERC20", Tag: "covfefe"})
-	assert.Error(t, err, "Should error when unknow contract")
+	result, err = r.GetContractBytecode(&abi.Contract{
+		Id: &abi.ContractId{
+			Name: "ERC20",
+			Tag:  "covfefe",
+		},
+	})
+	assert.Error(t, err, "Should error when unknown contract")
 	assert.Nil(t, result)
 
 	// Get DeployedBytecode
-	result, err = r.GetContractDeployedBytecode(&abi.Contract{Name: "ERC20", Tag: "v1.0.0"})
+	result, err = r.GetContractDeployedBytecode(&abi.Contract{
+		Id: &abi.ContractId{
+			Name: "ERC20",
+			Tag:  "v1.0.0",
+		},
+	})
 	assert.NoError(t, err)
 	assert.Equal(t, ERC20Contract.DeployedBytecode, result)
-	result, err = r.GetContractDeployedBytecode(&abi.Contract{Name: "ERC20", Tag: "covfefe"})
-	assert.Error(t, err, "Should error when unknow contract")
+	result, err = r.GetContractDeployedBytecode(&abi.Contract{
+		Id: &abi.ContractId{
+			Name: "ERC20",
+			Tag:  "covfefe",
+		},
+	})
+	assert.Error(t, err, "Should error when unknown contract")
 	assert.Nil(t, result)
 
 	// Get MethodBySelector on default

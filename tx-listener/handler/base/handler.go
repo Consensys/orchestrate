@@ -143,8 +143,8 @@ func (h *Handler) Cleanup(session handler.TxListenerSession) error {
 // Pipe will stop forwarding messages either
 // - receipt channel is closed
 // - ctx has been canceled
-func Pipe(ctx context.Context, receiptChan <-chan *types.TxListenerReceipt) <-chan interface{} {
-	interfaceChan := make(chan interface{})
+func Pipe(ctx context.Context, receiptChan <-chan *types.TxListenerReceipt) <-chan engine.Msg {
+	interfaceChan := make(chan engine.Msg)
 
 	// Start a goroutine that pipe messages
 	go func() {

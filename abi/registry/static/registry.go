@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"reflect"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+
 	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
 	ethCommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
 )
 
@@ -173,14 +174,11 @@ func getIndexedCount(event ethAbi.Event) uint {
 
 // Get the codehash of a contract instance
 func (r *Registry) getCodehash(contract common.AccountInstance) (ethCommon.Hash, error) {
-	codehashToAddressMap, ok := r.addressCodehash[contract.GetChain().String()]
+	codehashToAddressMap, ok := r.addressCodehash[contract.GetChain().ID().String()]
 	if !ok {
 		return ethCommon.Hash{}, fmt.Errorf("registry: could not find contract: bad chainid")
 	}
-	address, err := contract.GetAccount().Address()
-	if err != nil {
-		return ethCommon.Hash{}, fmt.Errorf("registry: could not find contract: %v", err)
-	}
+	address := contract.GetAccount().Address()
 	codehash, ok := codehashToAddressMap[address]
 	if !ok {
 		return ethCommon.Hash{}, fmt.Errorf("registry: could not find contract: bad address")
@@ -232,27 +230,25 @@ func (r *Registry) GetEventsBySigHash(sigHash ethCommon.Hash, contract common.Ac
 
 // Request an update of the codehash of the contract address
 func (r *Registry) RequestAddressUpdate(contract common.AccountInstance) error {
-	addr, err := contract.GetAccount().Address()
-	if err != nil {
-		return fmt.Errorf("registry: could not update address: address invalid: %v", err)
-	}
+	addr := contract.GetAccount().Address()
 
+	chainID := contract.GetChain().ID()
 	// Codehash already stored for this contract instance
-	if _, ok := r.addressCodehash[contract.GetChain().String()][addr]; ok {
+	if _, ok := r.addressCodehash[chainID.String()][addr]; ok {
 		return nil
 	}
 
 	// Codehash not stored, trying to retrieve it from chain
-	code, err := r.ethClient.CodeAt(context.Background(), contract.GetChain().ID(), addr, nil)
+	code, err := r.ethClient.CodeAt(context.Background(), chainID, addr, nil)
 	if err != nil {
 		return fmt.Errorf("registry: could not update address: client error: %v", err)
 	}
 	codehash := crypto.Keccak256Hash(code)
-	chain := contract.GetChain().String()
-	if r.addressCodehash[chain] == nil {
-		r.addressCodehash[chain] = make(map[ethCommon.Address]ethCommon.Hash)
+	chainStr := chainID.String()
+	if r.addressCodehash[chainStr] == nil {
+		r.addressCodehash[chainStr] = make(map[ethCommon.Address]ethCommon.Hash)
 	}
-	r.addressCodehash[chain][addr] = codehash
+	r.addressCodehash[chainStr][addr] = codehash
 
 	return nil
 }

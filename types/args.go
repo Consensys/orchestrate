@@ -5,7 +5,6 @@ import (
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 )
 
@@ -18,12 +17,12 @@ type PrivateArgs struct {
 }
 
 // Call2PrivateArgs creates PrivateArgs from a call object
-func Call2PrivateArgs(call *common.Call) *PrivateArgs {
-	var args PrivateArgs
-	args.PrivateFrom = call.GetQuorum().GetPrivateFrom()
-	args.PrivateFor = call.GetQuorum().GetPrivateFor()
-	args.PrivateTxType = call.GetQuorum().GetPrivateTxType()
-	return &args
+func Call2PrivateArgs(args *envelope.Args) *PrivateArgs {
+	var privateArgs PrivateArgs
+	privateArgs.PrivateFrom = args.GetPrivate().GetPrivateFrom()
+	privateArgs.PrivateFor = args.GetPrivate().GetPrivateFor()
+	privateArgs.PrivateTxType = args.GetPrivate().GetPrivateTxType()
+	return &privateArgs
 }
 
 // SendTxArgs are arguments to provide to jsonRPC call `eth_sendTransaction`
@@ -49,14 +48,14 @@ type SendTxArgs struct {
 
 // Envelope2SendTxArgs creates SendTxArgs from an Envelope
 func Envelope2SendTxArgs(e *envelope.Envelope) *SendTxArgs {
-	From, _ := e.GetSender().Address()
+	from := e.GetFrom().Address()
 	args := SendTxArgs{
-		From:        From,
-		GasPrice:    (*hexutil.Big)(e.GetTx().GetTxData().GasPriceBig()),
-		Value:       (*hexutil.Big)(e.GetTx().GetTxData().ValueBig()),
-		Data:        hexutil.Bytes(e.GetTx().GetTxData().DataBytes()),
-		Input:       hexutil.Bytes(e.GetTx().GetTxData().DataBytes()),
-		PrivateArgs: *(Call2PrivateArgs(e.GetCall())),
+		From:        from,
+		GasPrice:    (*hexutil.Big)(e.GetTx().GetTxData().GetGasPriceBig()),
+		Value:       (*hexutil.Big)(e.GetTx().GetTxData().GetValueBig()),
+		Data:        hexutil.Bytes(e.GetTx().GetTxData().GetDataBytes()),
+		Input:       hexutil.Bytes(e.GetTx().GetTxData().GetDataBytes()),
+		PrivateArgs: *(Call2PrivateArgs(e.GetArgs())),
 	}
 
 	if gas := e.GetTx().GetTxData().GetGas(); gas != 0 {
@@ -67,8 +66,8 @@ func Envelope2SendTxArgs(e *envelope.Envelope) *SendTxArgs {
 		args.Nonce = (*hexutil.Uint64)(&nonce)
 	}
 
-	if e.GetTx().GetTxData().GetTo() != "" {
-		to, _ := e.GetTx().GetTxData().ToAddress()
+	if e.GetTx().GetTxData().GetTo() != nil {
+		to := e.GetTx().GetTxData().GetTo().Address()
 		args.To = &to
 	}
 

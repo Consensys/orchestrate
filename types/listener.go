@@ -24,6 +24,8 @@ type TxListenerReceipt struct {
 	TxIndex     uint64
 }
 
+func (m *TxListenerReceipt) Entrypoint() string { return "" }
+
 // TxListenerBlock contains data about a block
 type TxListenerBlock struct {
 	// Chain block has been read from

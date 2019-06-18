@@ -15,7 +15,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/logger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/producer"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	handlercfg "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/handler/base"
@@ -40,7 +40,7 @@ func Loader(txctx *engine.TxContext) {
 		SetBlockHash(receipt.BlockHash).
 		SetBlockNumber(uint64(receipt.BlockNumber)).
 		SetTxIndex(receipt.TxIndex)
-	txctx.Envelope.Chain = (&common.Chain{}).SetID(receipt.ChainID)
+	txctx.Envelope.Chain = (&chain.Chain{}).SetID(receipt.ChainID)
 
 	// Enrich Logger
 	txctx.Logger = txctx.Logger.WithFields(log.Fields{

@@ -173,7 +173,7 @@ func Decode(event *abi.Event, txLog *ethereum.Log) (map[string]string, error) {
 		input := event.Inputs[i]
 
 		if input.Indexed {
-			decoded, err = FormatIndexedArg(&input.Type, common.HexToHash(txLog.Topics[topicIndex]))
+			decoded, err = FormatIndexedArg(&input.Type, txLog.Topics[topicIndex].Hash())
 			topicIndex++
 		} else {
 			decoded, err = FormatNonIndexedArg(&input.Type, unpackValues[unpackValuesIndex])

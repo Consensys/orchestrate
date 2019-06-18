@@ -3,9 +3,9 @@ package registry
 import (
 	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
 	ethCommon "github.com/ethereum/go-ethereum/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 )
 
 // Registry is an interface to manage ABIs
