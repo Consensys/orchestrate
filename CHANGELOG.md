@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.1.6
+
+*Released on June 18th 2019*
+
+- [FIX] Update `CUCUMBER_CHAINID_PRIMARY` and `CUCUMBER_CHAINID_SECONDARY` to string
+- [FEAT] Increase the timeout by steps to 60 seconds by default
+- 
 ### Version 0.1.5
 
 *Released on June 17th 2019*
