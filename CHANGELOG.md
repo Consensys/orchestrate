@@ -2,10 +2,9 @@
 
 ### Version 0.5.7
 
-*Unreleased*
+*Released on June 18th 2019*
 
-- [FEAT] Implement `sequence` object to hold handlers sequence on `TxContext`
-- [FEAT] Implement `CombineHandlers`
+- [FEAT] Implement composite handlers pattern including function `engine.CombineHandlers`
 
 ### Version 0.5.6
 
