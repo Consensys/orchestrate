@@ -4,13 +4,13 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 )
 
-func newConsumerMessage() *sarama.ConsumerMessage {
-	msg := sarama.ConsumerMessage{}
+func newConsumerMessage() *sarama.Msg {
+	msg := sarama.Msg{}
 	msg.Value, _ = proto.Marshal(testEnvelope)
 	return &msg
 }

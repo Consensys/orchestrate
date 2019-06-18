@@ -8,14 +8,18 @@ import (
 )
 
 func init() {
+
+	// Kafka general parameters
 	viper.SetDefault(kafkaAddressViperKey, kafkaAddressDefault)
 	_ = viper.BindEnv(kafkaAddressViperKey, kafkaAddressEnv)
+	viper.SetDefault(kafkaGroupViperKey, kafkaGroupDefault)
+	_ = viper.BindEnv(kafkaGroupViperKey, kafkaGroupEnv)
+
+	// Kafka topics for the tx workflow
 	viper.SetDefault(txCrafterViperKey, txCrafterTopicDefault)
 	_ = viper.BindEnv(txCrafterViperKey, txCrafterTopicEnv)
 	viper.SetDefault(txNonceViperKey, txNonceTopicDefault)
 	_ = viper.BindEnv(txNonceViperKey, txNonceTopicEnv)
-	viper.SetDefault(generateWalletViperKey, generateWalletDefault)
-	_ = viper.BindEnv(generateWalletViperKey, generateWalletTopicEnv)
 	viper.SetDefault(txSignerViperKey, txSignerTopicDefault)
 	_ = viper.BindEnv(txSignerViperKey, txSignerTopicEnv)
 	viper.SetDefault(txSenderViperKey, txSenderTopicDefault)
@@ -26,8 +30,32 @@ func init() {
 	_ = viper.BindEnv(txDecodedViperKey, txDecodedTopicEnv)
 	viper.SetDefault(txRecoverViperKey, txRecoverTopicDefault)
 	_ = viper.BindEnv(txRecoverViperKey, txRecoverTopicEnv)
-	viper.SetDefault(kafkaGroupViperKey, kafkaGroupDefault)
-	_ = viper.BindEnv(kafkaGroupViperKey, kafkaGroupEnv)
+
+	// Kafka topics for the wallet generation workflow
+	viper.SetDefault(walletGeneratorViperKey, walletGeneratorDefault)
+	_ = viper.BindEnv(walletGeneratorViperKey, walletGeneratorTopicEnv)
+	viper.SetDefault(walletGeneratedViperKey, walletGeneratedDefault)
+	_ = viper.BindEnv(walletGeneratedViperKey, walletGeneratedTopicEnv)
+
+	// Kafka consumer groups for tx workflow
+	viper.SetDefault(crafterGroupViperKey, crafterGroupDefault)
+	_ = viper.BindEnv(crafterGroupViperKey, crafterGroupEnv)
+	viper.SetDefault(nonceGroupViperKey, nonceGroupDefault)
+	_ = viper.BindEnv(nonceGroupViperKey, nonceGroupEnv)
+	viper.SetDefault(signerGroupViperKey, signerGroupDefault)
+	_ = viper.BindEnv(signerGroupViperKey, signerGroupEnv)
+	viper.SetDefault(senderGroupViperKey, senderGroupDefault)
+	_ = viper.BindEnv(senderGroupViperKey, senderGroupEnv)
+	viper.SetDefault(decoderGroupViperKey, decoderGroupDefault)
+	_ = viper.BindEnv(decoderGroupViperKey, decoderGroupEnv)
+	viper.SetDefault(bridgeGroupViperKey, bridgeGroupDefault)
+	_ = viper.BindEnv(bridgeGroupViperKey, bridgeGroupEnv)
+
+	// Kafka consumer group for wallet generation workflow
+	viper.SetDefault(walletGeneratorGroupViperKey, walletGeneratorGroupDefault)
+	_ = viper.BindEnv(walletGeneratorGroupViperKey, walletGeneratorGroupEnv)
+	viper.SetDefault(walletGeneratedGroupViperKey, walletGeneratedGroupDefault)
+	_ = viper.BindEnv(walletGeneratedGroupViperKey, walletGeneratedGroupEnv)
 }
 
 var (
@@ -71,11 +99,6 @@ var (
 	txNonceTopicEnv     = "KAFKA_TOPIC_TX_NONCE"
 	txNonceTopicDefault = "topic-tx-nonce"
 
-	generateWalletFlag     = "topic-wallet"
-	generateWalletViperKey = "kafka.topic.wallet.generator"
-	generateWalletTopicEnv = "KAFKA_TOPIC_WALLET_GENERATOR"
-	generateWalletDefault  = "topic-wallet-generator"
-
 	txSignerFlag         = "topic-signer"
 	txSignerViperKey     = "kafka.topic.signer"
 	txSignerTopicEnv     = "KAFKA_TOPIC_TX_SIGNER"
@@ -100,6 +123,16 @@ var (
 	txRecoverViperKey     = "kafka.topic.recover"
 	txRecoverTopicEnv     = "KAFKA_TOPIC_TX_RECOVER"
 	txRecoverTopicDefault = "topic-tx-recover"
+
+	walletGeneratorFlag     = "topic-wallet-generator"
+	walletGeneratorViperKey = "kafka.topic.wallet.generator"
+	walletGeneratorTopicEnv = "KAFKA_TOPIC_WALLET_GENERATOR"
+	walletGeneratorDefault  = "topic-wallet-generator"
+
+	walletGeneratedFlag     = "topic-wallet-generated"
+	walletGeneratedViperKey = "kafka.topic.wallet.generated"
+	walletGeneratedTopicEnv = "KAFKA_TOPIC_WALLET_GENERATED"
+	walletGeneratedDefault  = "topic-wallet-generated"
 )
 
 // TODO: implement test for all Topics flags & Goup flags
@@ -126,14 +159,6 @@ func KafkaTopicTxSigner(f *pflag.FlagSet) {
 Environment variable: %q`, txSignerTopicEnv)
 	f.String(txSignerFlag, txSignerTopicDefault, desc)
 	_ = viper.BindPFlag(txSignerViperKey, f.Lookup(txSignerFlag))
-}
-
-// KafkaTopicWalletGenerator register flag for Kafka topic
-func KafkaTopicWalletGenerator(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Kafka topic for messages waiting to generate a new wallet
-Environment variable: %q`, generateWalletTopicEnv)
-	f.String(generateWalletFlag, generateWalletDefault, desc)
-	_ = viper.BindPFlag(generateWalletViperKey, f.Lookup(generateWalletFlag))
 }
 
 // KafkaTopicTxSender register flag for Kafka topic
@@ -168,6 +193,22 @@ Environment variable: %q`, txDecodedTopicEnv)
 	_ = viper.BindPFlag(txDecodedViperKey, f.Lookup(txDecodedFlag))
 }
 
+// KafkaTopicWalletGenerator register flag for Kafka topic
+func KafkaTopicWalletGenerator(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Kafka topic for generating new wallets
+Environment variable: %q`, walletGeneratorTopicEnv)
+	f.String(walletGeneratorFlag, walletGeneratorDefault, desc)
+	_ = viper.BindPFlag(walletGeneratorViperKey, f.Lookup(walletGeneratorFlag))
+}
+
+// KafkaTopicWalletGenerated register flag for Kafka topic
+func KafkaTopicWalletGenerated(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Kafka topic for newly generated wallets
+Environment variable: %q`, walletGeneratedTopicEnv)
+	f.String(walletGeneratedFlag, walletGeneratedDefault, desc)
+	_ = viper.BindPFlag(walletGeneratedViperKey, f.Lookup(walletGeneratedFlag))
+}
+
 // Kafka Consumer group environment variables
 var (
 	crafterGroupFlag     = "group-crafter"
@@ -198,7 +239,17 @@ var (
 	bridgeGroupFlag     = "group-bridge"
 	bridgeGroupViperKey = "kafka.group.bridge"
 	bridgeGroupEnv      = "KAFKA_GROUP_BRIDGE"
-	bridgeGroupDefault  = "tx-group-bridge"
+	bridgeGroupDefault  = "group-bridge"
+
+	walletGeneratorGroupFlag     = "group-wallet-generator"
+	walletGeneratorGroupViperKey = "kafka.group.wallet.generator"
+	walletGeneratorGroupEnv      = "KAFKA_GROUP_WALLET_GENERATOR"
+	walletGeneratorGroupDefault  = "group-wallet-generator"
+
+	walletGeneratedGroupFlag     = "group-wallet-generated"
+	walletGeneratedGroupViperKey = "kafka.group.wallet.generated"
+	walletGeneratedGroupEnv      = "KAFKA_GROUP_WALLET_GENERATed"
+	walletGeneratedGroupDefault  = "group-wallet-generated"
 )
 
 // consumerGroup register flag for a kafka consumer group
@@ -237,4 +288,14 @@ func DecoderGroup(f *pflag.FlagSet) {
 // BridgeGroup register flag for kafka decoder group
 func BridgeGroup(f *pflag.FlagSet) {
 	consumerGroup(f, bridgeGroupFlag, bridgeGroupViperKey, bridgeGroupEnv, bridgeGroupDefault)
+}
+
+// WalletGeneratorGroup register flag for kafka decoder group
+func WalletGeneratorGroup(f *pflag.FlagSet) {
+	consumerGroup(f, walletGeneratorGroupFlag, walletGeneratorGroupViperKey, walletGeneratorGroupEnv, walletGeneratorGroupDefault)
+}
+
+// WalletGeneratedGroup register flag for kafka decoder group
+func WalletGeneratedGroup(f *pflag.FlagSet) {
+	consumerGroup(f, walletGeneratedGroupFlag, walletGeneratedGroupViperKey, walletGeneratedGroupEnv, walletGeneratedGroupDefault)
 }

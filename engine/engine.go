@@ -86,7 +86,7 @@ func (e *Engine) Register(handler HandlerFunc) {
 // Once you have stopped consuming from an input channel, you should not start to consuming
 // from a new channel using Run() or it will panic (if you need to start consuming from a new channel you
 // should create a new Engine)
-func (e *Engine) Run(ctx context.Context, input <-chan interface{}) {
+func (e *Engine) Run(ctx context.Context, input <-chan Msg) {
 	// Context must be not nil
 	if ctx == nil {
 		panic("nil context")
@@ -149,14 +149,16 @@ runningLoop:
 // otherwise the Engine will panic
 func (e *Engine) CleanUp() {
 	e.cleanOnce.Do(func() {
-		close(e.slots)
 		e.mux.Lock()
-		e.slots = nil
+		if e.slots != nil {
+			close(e.slots)
+			e.slots = nil
+		}
 		e.mux.Unlock()
 	})
 }
 
-func (e *Engine) handleMessage(ctx context.Context, msg interface{}) {
+func (e *Engine) handleMessage(ctx context.Context, msg Msg) {
 	// Retrieve a re-cycled context
 	txctx := e.ctxPool.Get().(*TxContext)
 

@@ -5,7 +5,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
@@ -17,8 +16,8 @@ import (
 // Define a handler method
 func handler(txctx *engine.TxContext) {
 	txctx.Logger.WithFields(log.Fields{
-		"offset":    txctx.Msg.(*sarama.ConsumerMessage).Offset,
-		"partition": txctx.Msg.(*sarama.ConsumerMessage).Partition,
+		"offset":    txctx.Msg.(*broker.Msg).Offset,
+		"partition": txctx.Msg.(*broker.Msg).Partition,
 	}).Infof("Handling message")
 
 	// Simulate latency

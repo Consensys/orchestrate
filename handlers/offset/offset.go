@@ -15,10 +15,10 @@ func Marker(txctx *engine.TxContext) {
 	s, _ := broker.GetConsumerGroupSessionAndClaim(txctx.Context())
 	if s != nil {
 		// Cast message
-		msg, ok := txctx.Msg.(*sarama.ConsumerMessage)
+		msg, ok := txctx.Msg.(*broker.Msg)
 		if !ok {
 			return
 		}
-		s.MarkMessage(msg, "")
+		s.MarkMessage((*sarama.ConsumerMessage)(msg), "")
 	}
 }

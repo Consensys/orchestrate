@@ -1,5 +1,27 @@
 # CHANGELOG
 
+### Version 0.5.6
+
+*Released on June 13th 2019*
+
+- [FIX] Safely close channel if it is nil in engine
+
+### Version 0.5.5
+
+*Released on June 13th 2019*
+
+- [FEAT] Switch the txContext.Msg from `interface{}` to a dedicated interface `engine.Msg` and implements it in `broker.sarama.Msg`
+
+### Version 0.5.4
+
+*Released on June 12th 2019*
+
+- [FEAT] Add protobuf for contract-registry
+- [FEAT] Adds "InParallel" function that allows to run several functions in parallel and wait until they are finished
+- [FIX] Fix signal error message
+- [CHORE] Install "protoc-gen-go" when running "make setup-proto"
+- [CHORE] Improve "coverage" command so it could be run on Mac
+
 ### Version 0.5.3
 
 *Released on May 28th 2019*
