@@ -136,30 +136,34 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
+func aborter(txctx *engine.TxContext) {
+	txctx.Logger.Infof("Aborting %v\n", txctx.Msg.(string))
+	txctx.AbortWithError()
+}
+
 // Define a pipeline handler
-func pipeline(ctx *engine.TxContext) {
-	ctx.Logger.Infof("Pipeline handling %v\n", ctx.Msg.(string))
+func pipeline(txctx *engine.TxContext) {
+	txctx.Logger.Infof("Pipeline handling %v\n", txctx.Msg.(string))
 }
 
 // Define a middleware handler
-func middleware(ctx *engine.TxContext) {
+func middleware(txctx *engine.TxContext) {
 	// Start middleware execution
-	ctx.Logger.Infof("Middleware starts handling %v\n", ctx.Msg.(string))
+	txctx.Logger.Infof("Middleware starts handling %v\n", txctx.Msg.(string))
 
 	// Trigger execution of pending handlers
-	ctx.Next()
+	txctx.Next()
 
 	// Executed after pending handlers have executed
-	ctx.Logger.Infof("Middleware finishes handling %v\n", ctx.Msg.(string))
+	txctx.Logger.Infof("Middleware finishes handling %v\n", txctx.Msg.(string))
 }
 
 func main() {
-	cfg := engine.NewConfig()
-	engine := engine.NewEngine(&cfg)
-
 	// Register handlers
+	engine.Init(context.Background())
 	engine.Register(middleware)
 	engine.Register(pipeline)
+	engine.Register(aborter)
 
 	// Create an input channel of messages
 	in := make(chan interface{})
@@ -195,6 +199,129 @@ INFO[0000] * Middleware finishes handling Message-1
 INFO[0000] * Middleware starts handling Message-2
 INFO[0000] * Pipeline handling Message-2
 INFO[0000] * Middleware finishes handling Message-2
+```
+
+### Composite handlers
+
+It is possible to compose handlers together in order to create more complex handlers. 
+
+`CombineHandlers(handlers ...HandlerFunc)` function is here for this purpose.
+
+```sh
+$ cat examples/composite-handlers/main.go
+```
+
+```go
+package main
+
+import (
+	"context"
+	"sync"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/examples"
+)
+
+func aborter(txctx *engine.TxContext) {
+	txctx.Logger.Infof("Aborting %v\n", txctx.Msg.(examples.Msg))
+	txctx.Abort()
+}
+
+// Define a pipeline handler
+func pipeline(name string) engine.HandlerFunc {
+	return func(txctx *engine.TxContext) {
+		txctx.Logger.Infof("Pipeline-%v handling %v\n", name, txctx.Msg.(examples.Msg))
+	}
+}
+
+// Define a middleware handler
+func middleware(name string) engine.HandlerFunc {
+	return func(txctx *engine.TxContext) {
+		// Start middleware execution
+		txctx.Logger.Infof("Middleware-%v starts handling %v\n", name, txctx.Msg.(examples.Msg))
+
+		// Trigger execution of pending handlers
+		txctx.Next()
+
+		// Executed after pending handlers have executed
+		txctx.Logger.Infof("Middleware-%v finishes handling %v\n", name, txctx.Msg.(examples.Msg))
+	}
+}
+
+func main() {
+	// Register handlers
+	engine.Init(context.Background())
+
+	// Declare individual handlers
+	pipepline1 := pipeline("1")
+	pipepline2 := pipeline("2")
+	pipepline3 := pipeline("3")
+	pipepline4 := pipeline("4")
+	middleware1 := middleware("1")
+	middleware2 := middleware("2")
+	middleware3 := middleware("3")
+
+	// Declare 2 composite handlers
+	left := engine.CombineHandlers(middleware2, pipepline2)
+	right := engine.CombineHandlers(middleware3, aborter, pipepline3)
+
+	// Declare a forked handler
+	fork := func(txctx *engine.TxContext) {
+		switch txctx.Msg.Entrypoint() {
+		case "left":
+			left(txctx)
+		case "right":
+			right(txctx)
+		}
+	}
+
+	// Declare overall composite handler
+	handler := engine.CombineHandlers(pipepline1, middleware1, fork, pipepline4)
+
+	// Register composite handler
+	engine.Register(handler)
+
+	// Create an input channel of messages
+	in := make(chan engine.Msg)
+
+	// Run myEngine on input channel
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		engine.Run(context.Background(), in)
+		wg.Done()
+	}()
+
+	// Feed channel
+	in <- examples.Msg("left")
+	in <- examples.Msg("right")
+
+	// Close channel & wait for myEngine to treat all messages
+	close(in)
+	wg.Wait()
+
+	// CleanUp Engine to avoid memory leak
+	engine.CleanUp()
+}
+```
+
+```sh
+# Run example (note that handlers sequence is not the same when applying left message or right message)
+$ go run examples/composite-handlers/main.go
+
+INFO[0000] Pipeline-1 handling left
+INFO[0000] Middleware-1 starts handling left
+INFO[0000] Middleware-2 starts handling left
+INFO[0000] Pipeline-2 handling left
+INFO[0000] Middleware-2 finishes handling left
+INFO[0000] Pipeline-4 handling left
+INFO[0000] Middleware-1 finishes handling left
+INFO[0000] Pipeline-1 handling right
+INFO[0000] Middleware-1 starts handling right
+INFO[0000] Middleware-3 starts handling right
+INFO[0000] Aborting right
+INFO[0000] Middleware-3 finishes handling right
+INFO[0000] Middleware-1 finishes handling right
 ```
 
 #### Concurrency

@@ -168,12 +168,11 @@ func (e *Engine) handleMessage(ctx context.Context, msg Msg) {
 	// Prepare context & calls Next to trigger execution
 	txctx.
 		Prepare(
-			e.handlers,
 			log.NewEntry(e.logger),
 			msg,
 		).
 		WithContext(ctx).
-		Next()
+		applyHandlers(e.handlers...)
 }
 
 // TimeoutHandler returns a Handler that runs h with the given time limit

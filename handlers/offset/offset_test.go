@@ -21,7 +21,7 @@ var (
 
 func makeMarkerContext(i int) *engine.TxContext {
 	// Initialize context
-	txctx := engine.NewTxContext().Prepare([]engine.HandlerFunc{}, log.NewEntry(log.StandardLogger()), nil)
+	txctx := engine.NewTxContext().Prepare(log.NewEntry(log.StandardLogger()), nil)
 	ctx := broker.WithConsumerGroupSessionAndClaim(context.Background(), session, c)
 	txctx.WithContext(ctx)
 
