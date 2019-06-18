@@ -56,83 +56,81 @@ Usage:
   app run [flags]
 
 Flags:
-      --cucumber-chainid-primary int       ChainID corresponding to the alias "primary" in the scenario features
-                                           Environment variable: "CUCUMBER_CHAINID_PRIMARY"
-      --cucumber-chainid-secondary int     ChainID corresponding to the alias "secondary" in the scenario features
-                                           Environment variable: "CUCUMBER_CHAINID_SECONDARY"
-      --cucumber-concurrency int           Concurrency rate, not all formatters accepts this
-                                           Environment variable: "CUCUMBER_CONCURRENCY" (default 1)
-      --cucumber-format string             The formatter name (events|junit|pretty|cucumber)
-                                           Environment variable: "CUCUMBER_FORMAT" (default "pretty")
-      --cucumber-nocolors                  Forces ansi color stripping
-                                           Environment variable: "CUCUMBER_NOCOLORS"
-      --cucumber-outputpath string         Where it should print the cucumber output (only works with cucumber format)
-                                           Environment variable: "CUCUMBER_OUTPUTPATH"
-      --cucumber-paths strings             All feature file paths
-                                           Environment variable: "CUCUMBER_PATHS" (default [features])
-      --cucumber-randomize int             Seed to randomize feature tests. The default value of -1 means to have a random seed. 0 means do not randomize
-                                           Environment variable: "CUCUMBER_RANDOMIZE" (default -1)
-      --cucumber-showstepdefinitions       Print step definitions found and exit
-                                           Environment variable: "CUCUMBER_SHOWSTEPDEFINITION"
-      --cucumber-steps-miningtimeout int   Duration for waiting envelopes to be processed by a blockchain before timeout
-                                           Environment variable: "CUCUMBER_STEPS_MININGTIMEOUT" (default 10)
-      --cucumber-steps-timeout int         Duration for waiting envelopes to be processed by a step method before timeout
-                                           Environment variable: "CUCUMBER_STEPS_TIMEOUT" (default 5)
-      --cucumber-stoponfailure             Stops on the first failure
-                                           Environment variable: "CUCUMBER_STOPONFAILURE"
-      --cucumber-strict                    Fail suite when there are pending or undefined steps
-                                           Environment variable: "CUCUMBER_STRICT"
-      --cucumber-tags string               Various filters for scenarios parsed from feature files
-                                           Environment variable: "CUCUMBER_TAGS"
-      --engine-slots uint                  Maximum number of messages the engine can treat concurrently.
-                                           Environment variable: "ENGINE_SLOTS" (default 20)
-      --grpc-store-target string           GRPC Context Store target (See https://github.com/grpc/grpc/blob/master/doc/naming.md)
-                                           Environment variable: "GRPC_STORE_TARGET"
-  -h, --help                               help for run
-      --http-hostname string               Hostname to expose HTTP server
-                                           Environment variable: "HTTP_HOSTNAME" (default ":8080")
-      --jaeger-disabled                    Disable Jaeger reporting
-                                           Environment variable: "JAEGER_DISABLED"
-      --jaeger-endpoint string             Jaeger collector endpoint to send spans to
-                                           Environment variable: "JAEGER_ENDPOINT"
-      --jaeger-host string                 Jaeger host.
-                                           Environment variable: "JAEGER_AGENT_HOST" (default "localhost")
-      --jaeger-password string             Jaeger collector password
-                                           Environment variable: "JAEGER_PASSWORD"
-      --jaeger-port int                    Jaeger port
-                                           Environment variable: "JAEGER_AGENT_PORT" (default 6831)
-      --jaeger-rpc-metrics                 Enable Jaeger RPC metrics
-                                           Environment variable: "JAEGER_RPC_METRICS"
-      --jaeger-sampler-param int           Jaeger sampler
-                                           Environment variable: "JAEGER_SAMPLER_PARAM" (default 1)
-      --jaeger-sampler-type string         Jaeger sampler
-                                           Environment variable: "JAEGER_SAMPLER_TYPE" (default "const")
-      --jaeger-service string              Jaeger ServiceName to use on the tracer
-                                           Environment variable: "JAEGER_SERVICE_NAME" (default "jaeger")
-      --jaeger-user string                 Jaeger collector User
-                                           Environment variable: "JAEGER_USER"
-      --kafka-address strings              Address of Kafka server to connect to.
-                                           Environment variable: "KAFKA_ADDRESS" (default [localhost:9092])
-      --kafka-group string                 Address of Kafka server to connect to.
-                                           Environment variable: "KAFKA_GROUP" (default "group-e2e")
-      --topic-crafter string               Kafka topic for messages waiting to have transaction payload crafted
-                                           Environment variable: "KAFKA_TOPIC_TX_CRAFTER" (default "topic-tx-crafter")
-      --topic-decoded string               Kafka topic for messages which receipt has been decoded
-                                           Environment variable: "KAFKA_TOPIC_TX_DECODED" (default "topic-tx-decoded")
-      --topic-decoder string               Kafka topic for messages waiting to have receipt decoded
-                                           Environment variable: "KAFKA_TOPIC_TX_DECODER" (default "topic-tx-decoder")
-      --topic-nonce string                 Kafka topic for messages waiting to have transaction nonce set
-                                           Environment variable: "kafka.topic.nonce" (default "topic-tx-nonce")
-      --topic-sender string                Kafka topic for messages waiting to have transaction sent
-                                           Environment variable: "KAFKA_TOPIC_TX_SENDER" (default "topic-tx-sender")
-      --topic-signer string                Kafka topic for messages waiting to have transaction signed
-                                           Environment variable: "KAFKA_TOPIC_TX_SIGNER" (default "topic-tx-signer")
+      --cucumber-chainid-primary string     ChainID corresponding to the alias "primary" in the scenario features
+                                            Environment variable: "CUCUMBER_CHAINID_PRIMARY"
+      --cucumber-chainid-secondary string   ChainID corresponding to the alias "secondary" in the scenario features
+                                            Environment variable: "CUCUMBER_CHAINID_SECONDARY"
+      --cucumber-concurrency int            Concurrency rate, not all formatters accepts this
+                                            Environment variable: "CUCUMBER_CONCURRENCY" (default 1)
+      --cucumber-format string              The formatter name (events|junit|pretty|cucumber)
+                                            Environment variable: "CUCUMBER_FORMAT" (default "pretty")
+      --cucumber-nocolors                   Forces ansi color stripping
+                                            Environment variable: "CUCUMBER_NOCOLORS"
+      --cucumber-outputpath string          Where it should print the cucumber output (only works with cucumber format)
+                                            Environment variable: "CUCUMBER_OUTPUTPATH"
+      --cucumber-paths strings              All feature file paths
+                                            Environment variable: "CUCUMBER_PATHS" (default [features])
+      --cucumber-randomize int              Seed to randomize feature tests. The default value of -1 means to have a random seed. 0 means do not randomize
+                                            Environment variable: "CUCUMBER_RANDOMIZE" (default -1)
+      --cucumber-showstepdefinitions        Print step definitions found and exit
+                                            Environment variable: "CUCUMBER_SHOWSTEPDEFINITION"
+      --cucumber-steps-miningtimeout int    Duration for waiting envelopes to be processed by a blockchain before timeout
+                                            Environment variable: "CUCUMBER_STEPS_MININGTIMEOUT" (default 60)
+      --cucumber-steps-timeout int          Duration for waiting envelopes to be processed by a step method before timeout
+                                            Environment variable: "CUCUMBER_STEPS_TIMEOUT" (default 60)
+      --cucumber-stoponfailure              Stops on the first failure
+                                            Environment variable: "CUCUMBER_STOPONFAILURE"
+      --cucumber-strict                     Fail suite when there are pending or undefined steps
+                                            Environment variable: "CUCUMBER_STRICT"
+      --cucumber-tags string                Various filters for scenarios parsed from feature files
+                                            Environment variable: "CUCUMBER_TAGS"
+      --engine-slots uint                   Maximum number of messages the engine can treat concurrently.
+                                            Environment variable: "ENGINE_SLOTS" (default 20)
+  -h, --help                                help for run
+      --http-hostname string                Hostname to expose HTTP server
+                                            Environment variable: "HTTP_HOSTNAME" (default ":8080")
+      --jaeger-disabled                     Disable Jaeger reporting
+                                            Environment variable: "JAEGER_DISABLED"
+      --jaeger-endpoint string              Jaeger collector endpoint to send spans to
+                                            Environment variable: "JAEGER_ENDPOINT"
+      --jaeger-host string                  Jaeger host.
+                                            Environment variable: "JAEGER_AGENT_HOST" (default "localhost")
+      --jaeger-password string              Jaeger collector password
+                                            Environment variable: "JAEGER_PASSWORD"
+      --jaeger-port int                     Jaeger port
+                                            Environment variable: "JAEGER_AGENT_PORT" (default 6831)
+      --jaeger-rpc-metrics                  Enable Jaeger RPC metrics
+                                            Environment variable: "JAEGER_RPC_METRICS"
+      --jaeger-sampler-param int            Jaeger sampler
+                                            Environment variable: "JAEGER_SAMPLER_PARAM" (default 1)
+      --jaeger-sampler-type string          Jaeger sampler
+                                            Environment variable: "JAEGER_SAMPLER_TYPE" (default "const")
+      --jaeger-service string               Jaeger ServiceName to use on the tracer
+                                            Environment variable: "JAEGER_SERVICE_NAME" (default "jaeger")
+      --jaeger-user string                  Jaeger collector User
+                                            Environment variable: "JAEGER_USER"
+      --kafka-address strings               Address of Kafka server to connect to.
+                                            Environment variable: "KAFKA_ADDRESS" (default [localhost:9092])
+      --kafka-group string                  Address of Kafka server to connect to.
+                                            Environment variable: "KAFKA_GROUP" (default "group-e2e")
+      --topic-crafter string                Kafka topic for messages waiting to have transaction payload crafted
+                                            Environment variable: "KAFKA_TOPIC_TX_CRAFTER" (default "topic-tx-crafter")
+      --topic-decoded string                Kafka topic for messages which receipt has been decoded
+                                            Environment variable: "KAFKA_TOPIC_TX_DECODED" (default "topic-tx-decoded")
+      --topic-decoder string                Kafka topic for messages waiting to have receipt decoded
+                                            Environment variable: "KAFKA_TOPIC_TX_DECODER" (default "topic-tx-decoder")
+      --topic-nonce string                  Kafka topic for messages waiting to have transaction nonce set
+                                            Environment variable: "kafka.topic.nonce" (default "topic-tx-nonce")
+      --topic-sender string                 Kafka topic for messages waiting to have transaction sent
+                                            Environment variable: "KAFKA_TOPIC_TX_SENDER" (default "topic-tx-sender")
+      --topic-signer string                 Kafka topic for messages waiting to have transaction signed
+                                            Environment variable: "KAFKA_TOPIC_TX_SIGNER" (default "topic-tx-signer")
 
 Global Flags:
       --log-format string   Log formatter (one of ["text" "json"]).
                             Environment variable: "LOG_FORMAT" (default "text")
       --log-level string    Log level (one of ["panic" "fatal" "error" "warn" "info" "debug" "trace"]).
-                            Environment variable: "LOG_LEVEL" (default "debug")
+                            Environment variable: "LOG_LEVEL" (default "debug")```
 ```
 
 ## Feature tests

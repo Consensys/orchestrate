@@ -29,7 +29,7 @@ func InitFlags(f *pflag.FlagSet) {
 var (
 	cucumberTimeoutFlag     = "cucumber-steps-timeout"
 	cucumberTimeoutViperKey = "cucumber.steps.timeout"
-	cucumberTimeoutDefault  = 5
+	cucumberTimeoutDefault  = 60
 	cucumberTimeoutEnv      = "CUCUMBER_STEPS_TIMEOUT"
 )
 
@@ -44,7 +44,7 @@ Environment variable: %q`, cucumberTimeoutEnv)
 var (
 	cucumberMiningTimeoutFlag     = "cucumber-steps-miningtimeout"
 	cucumberMiningTimeoutViperKey = "cucumber.steps.miningtimeout"
-	cucumberMiningTimeoutDefault  = 10
+	cucumberMiningTimeoutDefault  = 60
 	cucumberMiningTimeoutEnv      = "CUCUMBER_STEPS_MININGTIMEOUT"
 )
 
@@ -59,7 +59,7 @@ Environment variable: %q`, cucumberMiningTimeoutEnv)
 var (
 	cucumberChainIDPrimaryFlag     = "cucumber-chainid-primary"
 	cucumberChainIDPrimaryViperKey = "cucumber.chainid.primary"
-	cucumberChainIDPrimaryDefault  = 0
+	cucumberChainIDPrimaryDefault  = ""
 	cucumberChainIDPrimaryEnv      = "CUCUMBER_CHAINID_PRIMARY"
 )
 
@@ -67,14 +67,14 @@ var (
 func ChainIDPrimary(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`ChainID corresponding to the alias "primary" in the scenario features
 Environment variable: %q`, cucumberChainIDPrimaryEnv)
-	f.Int(cucumberChainIDPrimaryFlag, cucumberChainIDPrimaryDefault, desc)
+	f.String(cucumberChainIDPrimaryFlag, cucumberChainIDPrimaryDefault, desc)
 	_ = viper.BindPFlag(cucumberChainIDPrimaryViperKey, f.Lookup(cucumberChainIDPrimaryFlag))
 }
 
 var (
 	cucumberChainIDSecondaryFlag     = "cucumber-chainid-secondary"
 	cucumberChainIDSecondaryViperKey = "cucumber.chainid.secondary"
-	cucumberChainIDSecondaryDefault  = 0
+	cucumberChainIDSecondaryDefault  = ""
 	cucumberChainIDSecondaryEnv      = "CUCUMBER_CHAINID_SECONDARY"
 )
 
@@ -82,6 +82,6 @@ var (
 func ChainIDSecondary(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`ChainID corresponding to the alias "secondary" in the scenario features
 Environment variable: %q`, cucumberChainIDSecondaryEnv)
-	f.Int(cucumberChainIDSecondaryFlag, cucumberChainIDSecondaryDefault, desc)
+	f.String(cucumberChainIDSecondaryFlag, cucumberChainIDSecondaryDefault, desc)
 	_ = viper.BindPFlag(cucumberChainIDSecondaryViperKey, f.Lookup(cucumberChainIDSecondaryFlag))
 }

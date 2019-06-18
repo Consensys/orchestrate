@@ -51,11 +51,11 @@ func (sc *ScenarioContext) initScenarioContext(s interface{}) {
 		viper.GetString("kafka.topic.sender"),
 		viper.GetString("kafka.topic.decoded"),
 	}
-	if primary := viper.GetInt("cucumber.chainid.primary"); primary > 0 {
-		topics = append(topics, fmt.Sprintf("%v-%d", viper.GetString("kafka.topic.decoder"), primary))
+	if primary := viper.GetString("cucumber.chainid.primary"); primary != "" {
+		topics = append(topics, fmt.Sprintf("%s-%s", viper.GetString("kafka.topic.decoder"), primary))
 	}
-	if secondary := viper.GetInt("cucumber.chainid.secondary"); secondary > 0 {
-		topics = append(topics, fmt.Sprintf("%v-%d", viper.GetString("kafka.topic.decoder"), secondary))
+	if secondary := viper.GetString("cucumber.chainid.secondary"); secondary != "" {
+		topics = append(topics, fmt.Sprintf("%s-%s", viper.GetString("kafka.topic.decoder"), secondary))
 	}
 
 	sc.EnvelopesChan = make(map[string]chan *envelope.Envelope)
