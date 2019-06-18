@@ -13,67 +13,62 @@ import (
 
 var testKey = "test"
 
-func newHandler(s string, t *testing.T) HandlerFunc {
+func newPipeline(s string) HandlerFunc {
 	return func(txctx *TxContext) {
-		t.Logf("At %v, index=%v", s, txctx.index)
 		txctx.Set(testKey, append(txctx.Get(testKey).([]string), s))
 	}
 }
 
 var errTest = errors.New("test Error")
 
-func newErrorHandler(s string, t *testing.T) HandlerFunc {
+func newErrorHandler(s string) HandlerFunc {
 	return func(txctx *TxContext) {
-		t.Logf("At %v, index=%v", s, txctx.index)
 		txctx.Set(testKey, append(txctx.Get(testKey).([]string), s))
 		_ = txctx.Error(errTest)
 	}
 }
 
-func newAborter(s string, t *testing.T) HandlerFunc {
+func newAborter() HandlerFunc {
 	return func(txctx *TxContext) {
-		t.Logf("At %v, index=%v", s, txctx.index)
-		txctx.Set(testKey, append(txctx.Get(testKey).([]string), s))
+		txctx.Set(testKey, append(txctx.Get(testKey).([]string), "abort"))
 		_ = txctx.AbortWithError(errTest)
 	}
 }
 
-func newMiddleware(s string, t *testing.T) HandlerFunc {
+func newMiddleware(s string) HandlerFunc {
 	return func(txctx *TxContext) {
 		sA := fmt.Sprintf("%v-before", s)
-		t.Logf("At %v, index=%v", s, txctx.index)
 		txctx.Set(testKey, append(txctx.Get(testKey).([]string), sA))
 
 		txctx.Next()
 
 		sB := fmt.Sprintf("%v-after", s)
-		t.Logf("At %v, index=%v", s, txctx.index)
 		txctx.Set(testKey, append(txctx.Get(testKey).([]string), sB))
 	}
 }
 
-func TestNext(t *testing.T) {
+func TestApplyHandlers(t *testing.T) {
 	txctx := NewTxContext()
 
 	var (
-		hA   = newHandler("hA", t)
-		mA   = newMiddleware("mA", t)
-		hErr = newErrorHandler("err", t)
-		mB   = newMiddleware("mB", t)
-		hB   = newHandler("hB", t)
-		a    = newAborter("abort", t)
-		hC   = newHandler("hC", t)
-		mC   = newMiddleware("mC", t)
+		pA   = newPipeline("pA")
+		mA   = newMiddleware("mA")
+		hErr = newErrorHandler("err")
+		mB   = newMiddleware("mB")
+		pB   = newPipeline("pB")
+		a    = newAborter()
+		pC   = newPipeline("pC")
+		mC   = newMiddleware("mC")
 	)
 	// Initialize context
-	txctx.Prepare([]HandlerFunc{hA, mA, hErr, mB, hB, a, hC, mC}, nil, nil)
+	txctx.Prepare(nil, nil)
 	txctx.Set(testKey, []string{})
 
 	// Handle context
-	txctx.Next()
+	txctx.applyHandlers([]HandlerFunc{pA, mA, hErr, mB, pB, a, pC, mC}...)
 
 	res := txctx.Get(testKey).([]string)
-	expected := []string{"hA", "mA-before", "err", "mB-before", "hB", "abort", "mB-after", "mA-after"}
+	expected := []string{"pA", "mA-before", "err", "mB-before", "pB", "abort", "mB-after", "mA-after"}
 
 	assert.Equal(t, expected, res, "Call order on handlers should be correct")
 	assert.Len(t, txctx.Envelope.Errors, 2, "Error count should be correct")
@@ -97,20 +92,125 @@ func TestCtxError(t *testing.T) {
 func TestLogger(t *testing.T) {
 	logHandler := func(txctx *TxContext) { txctx.Logger.Info("Test") }
 	txctx := NewTxContext()
-	txctx.Prepare([]HandlerFunc{logHandler}, log.NewEntry(log.StandardLogger()), nil)
-	txctx.Next()
+	txctx.Prepare(log.NewEntry(log.StandardLogger()), nil)
+	txctx.applyHandlers(logHandler)
 }
 
 type testingKey string
 
 func TestWithContext(t *testing.T) {
-	logHandler := func(txctx *TxContext) { txctx.Logger.Info("Test") }
 	txctx := NewTxContext()
-	txctx.Prepare([]HandlerFunc{logHandler}, log.NewEntry(log.StandardLogger()), nil)
+	txctx.Prepare(log.NewEntry(log.StandardLogger()), nil)
 
 	// Update go context attached to TxContext
 	txctx.WithContext(context.WithValue(context.Background(), testingKey("test-key"), "test-value"))
 
 	// Check if go-context has been properly attached
 	assert.Equal(t, "test-value", txctx.Context().Value(testingKey("test-key")).(string), "Go context should have been attached")
+}
+
+func TestCombineHandlers(t *testing.T) {
+	var (
+		pA   = newPipeline("pA")
+		mA   = newMiddleware("mA")
+		hErr = newErrorHandler("err")
+		mB   = newMiddleware("mB")
+		pB   = newPipeline("pB")
+		a    = newAborter()
+		pC   = newPipeline("pC")
+		mC   = newMiddleware("mC")
+	)
+
+	// Create combined handler
+	combinedHandler := CombineHandlers([]HandlerFunc{pA, mA, hErr, mB, pB, a, pC, mC}...)
+
+	// Initialize context and apply combinedHandler
+	txctx := NewTxContext()
+	txctx.Prepare(nil, nil)
+	txctx.Set(testKey, []string{})
+	txctx.applyHandlers(combinedHandler)
+
+	res := txctx.Get(testKey).([]string)
+	expected := []string{"pA", "mA-before", "err", "mB-before", "pB", "abort", "mB-after", "mA-after"}
+
+	assert.Equal(t, expected, res, "Call order on handlers should be correct")
+	assert.Len(t, txctx.Envelope.Errors, 2, "Error count should be correct")
+}
+
+func TestCombineHandlersNested(t *testing.T) {
+	var (
+		pA   = newPipeline("pA")
+		mA   = newMiddleware("mA")
+		hErr = newErrorHandler("err")
+		mB   = newMiddleware("mB")
+		pB   = newPipeline("pB")
+		a    = newAborter()
+		pC   = newPipeline("pC")
+		mC   = newMiddleware("mC")
+	)
+
+	// Create combined handler
+	combinedHandler := CombineHandlers([]HandlerFunc{pA, mA, hErr, mB, pB, a, pC, mC}...)
+
+	// Initialize context and apply combinedHandler
+	txctx := NewTxContext()
+	txctx.Prepare(nil, nil)
+	txctx.Set(testKey, []string{})
+	txctx.applyHandlers(combinedHandler)
+
+	res := txctx.Get(testKey).([]string)
+	expected := []string{"pA", "mA-before", "err", "mB-before", "pB", "abort", "mB-after", "mA-after"}
+
+	assert.Equal(t, expected, res, "Call order on handlers should be correct")
+	assert.Len(t, txctx.Envelope.Errors, 2, "Error count should be correct")
+}
+
+func TestForkedHandler(t *testing.T) {
+	var (
+		pA = newPipeline("pA")
+		pB = newPipeline("pB")
+		pC = newPipeline("pC")
+		pD = newPipeline("pD")
+		pE = newPipeline("pE")
+		mA = newMiddleware("mA")
+		mB = newMiddleware("mB")
+		mC = newMiddleware("mC")
+		a  = newAborter()
+	)
+
+	// Create combined handler
+	handler1 := CombineHandlers([]HandlerFunc{mB, pB}...)
+	handler2 := CombineHandlers([]HandlerFunc{pC, mC, a, pD}...)
+
+	// Declare a fork
+	forkedHandler := func(txctx *TxContext) {
+		switch txctx.Get("fork").(string) {
+		case "1":
+			handler1(txctx)
+		case "2":
+			handler2(txctx)
+		}
+	}
+
+	// Initialize context and test on fork 1
+	txctx := NewTxContext()
+	txctx.Prepare(nil, nil)
+	txctx.Set(testKey, []string{})
+	txctx.Set("fork", "1")
+	txctx.applyHandlers(mA, pA, forkedHandler, pE)
+	res := txctx.Get(testKey).([]string)
+	expected := []string{"mA-before", "pA", "mB-before", "pB", "mB-after", "pE", "mA-after"}
+
+	assert.Equal(t, expected, res, "Called handlers on fork 1 should be correctly ordered")
+
+	// Initialize context and test on fork 2
+	txctx = NewTxContext()
+	txctx.Prepare(nil, nil)
+	txctx.Set(testKey, []string{})
+	txctx.Set("fork", "2")
+	txctx.applyHandlers(mA, pA, forkedHandler, pE)
+	res = txctx.Get(testKey).([]string)
+	expected = []string{"mA-before", "pA", "pC", "mC-before", "abort", "mC-after", "mA-after"}
+
+	assert.Equal(t, expected, res, "Called handlers on fork 2 should be correctly ordered")
 }

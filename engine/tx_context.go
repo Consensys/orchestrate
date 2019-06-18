@@ -2,6 +2,7 @@ package engine
 
 import (
 	"context"
+	"sync"
 
 	log "github.com/sirupsen/logrus"
 	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
@@ -17,11 +18,8 @@ type TxContext struct {
 	// Message that triggered TxContext execution (typically a sarama.ConsumerMessage)
 	Msg Msg
 
-	// chain of handlers to be executed on TxContext
-	handlers []HandlerFunc
-
-	// index of the handler being executed
-	index int
+	// Array of sequences of handlers to execute on a given context
+	stack []*sequence
 
 	// Logger logrus log entry for this TxContext execution
 	Logger *log.Entry
@@ -43,7 +41,6 @@ type TxContext struct {
 func NewTxContext() *TxContext {
 	return &TxContext{
 		Envelope: &envelope.Envelope{},
-		index:    -1,
 	}
 }
 
@@ -52,17 +49,15 @@ func (txctx *TxContext) Reset() {
 	txctx.ctx = nil
 	txctx.Msg = nil
 	txctx.Envelope.Reset()
-	txctx.handlers = nil
-	txctx.index = -1
+	txctx.stack = nil
 	txctx.Logger = nil
 }
 
 // Next should be used only inside middleware
 // It executes the pending handlers in the chain inside the calling handler
 func (txctx *TxContext) Next() {
-	txctx.index++
-	for s := len(txctx.handlers); txctx.index < s; txctx.index++ {
-		txctx.handlers[txctx.index](txctx)
+	if len(txctx.stack) > 0 {
+		txctx.stack[len(txctx.stack)-1].next()
 	}
 }
 
@@ -85,7 +80,9 @@ func (txctx *TxContext) Error(err error) *common.Error {
 
 // Abort prevents pending handlers to be executed
 func (txctx *TxContext) Abort() {
-	txctx.index = len(txctx.handlers)
+	for s := len(txctx.stack) - 1; s >= 0; s-- {
+		txctx.stack[s].abort()
+	}
 }
 
 // AbortWithError calls `Abort()` and `Error()``
@@ -95,12 +92,10 @@ func (txctx *TxContext) AbortWithError(err error) *common.Error {
 }
 
 // Prepare re-initializes TxContext, set handlers, set logger and set message
-func (txctx *TxContext) Prepare(handlers []HandlerFunc, logger *log.Entry, msg Msg) *TxContext {
+func (txctx *TxContext) Prepare(logger *log.Entry, msg Msg) *TxContext {
 	txctx.Reset()
-	txctx.handlers = handlers
 	txctx.Msg = msg
 	txctx.Logger = logger
-
 	return txctx
 }
 
@@ -135,6 +130,59 @@ func (txctx *TxContext) WithContext(ctx context.Context) *TxContext {
 	}
 	txctx.ctx = ctx
 	return txctx
+}
+
+func (txctx *TxContext) applyHandlers(handlers ...HandlerFunc) {
+	// Recycle sequence
+	seq := seqPool.Get().(*sequence)
+	defer seqPool.Put(seq)
+
+	// Initialize sequence
+	seq.index = -1
+	seq.handlers = handlers
+	seq.txctx = txctx
+
+	// Attach the sequence to the TxContext
+	txctx.stack = append(txctx.stack, seq)
+
+	// Execute sequence
+	seq.next()
+
+	// Once executed remove the sequence
+	txctx.stack = txctx.stack[:len(txctx.stack)-1]
+}
+
+type sequence struct {
+	// chain of handlers to be executed in the sequence
+	handlers []HandlerFunc
+
+	// index of the handler being executed
+	index int
+
+	// context the sequence is attached to
+	txctx *TxContext
+}
+
+// sequences are pooled to relieve presure on garbage collector
+var seqPool = sync.Pool{
+	New: func() interface{} { return &sequence{index: -1} },
+}
+
+func (seq *sequence) next() {
+	seq.index++
+	for s := len(seq.handlers); seq.index < s; seq.index++ {
+		seq.handlers[seq.index](seq.txctx)
+	}
+}
+
+func (seq *sequence) abort() {
+	seq.index = len(seq.handlers)
+}
+
+func CombineHandlers(handlers ...HandlerFunc) HandlerFunc {
+	return func(txctx *TxContext) {
+		txctx.applyHandlers(handlers...)
+	}
 }
 
 // Msg is an abstract interface supported by any kind of message handled by the engine

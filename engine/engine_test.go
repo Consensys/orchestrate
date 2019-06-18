@@ -131,7 +131,7 @@ func testSleepingHandler(txctx *TxContext) {
 func makeTimeoutContext(i int) *TxContext {
 	txctx := NewTxContext()
 	txctx.Reset()
-	txctx.Prepare([]HandlerFunc{}, log.NewEntry(log.StandardLogger()), nil)
+	txctx.Prepare(log.NewEntry(log.StandardLogger()), nil)
 
 	switch i % 2 {
 	case 0:

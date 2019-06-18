@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.5.7
+
+*Unreleased*
+
+- [FEAT] Implement `sequence` object to hold handlers sequence on `TxContext`
+- [FEAT] Implement `CombineHandlers`
+
 ### Version 0.5.6
 
 *Released on June 13th 2019*

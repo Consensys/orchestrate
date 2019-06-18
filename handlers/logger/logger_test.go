@@ -11,7 +11,7 @@ import (
 )
 
 func makeLoggerContext() *engine.TxContext {
-	txctx := engine.NewTxContext().Prepare([]engine.HandlerFunc{}, log.NewEntry(log.StandardLogger()), nil)
+	txctx := engine.NewTxContext().Prepare(log.NewEntry(log.StandardLogger()), nil)
 	txctx.Set("errors", 0)
 	return txctx
 }

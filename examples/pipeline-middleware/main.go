@@ -8,6 +8,11 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/examples"
 )
 
+func aborter(txctx *engine.TxContext) {
+	txctx.Logger.Infof("Aborting %v\n", txctx.Msg.(examples.Msg))
+	txctx.Abort()
+}
+
 // Define a pipeline handler
 func pipeline(txctx *engine.TxContext) {
 	txctx.Logger.Infof("Pipeline handling %v\n", txctx.Msg.(examples.Msg))
@@ -26,12 +31,11 @@ func middleware(txctx *engine.TxContext) {
 }
 
 func main() {
-	cfg := engine.NewConfig()
-	myEngine := engine.NewEngine(&cfg)
-
 	// Register handlers
-	myEngine.Register(middleware)
-	myEngine.Register(pipeline)
+	engine.Init(context.Background())
+	engine.Register(middleware)
+	engine.Register(pipeline)
+	engine.Register(aborter)
 
 	// Create an input channel of messages
 	in := make(chan engine.Msg)
@@ -40,7 +44,7 @@ func main() {
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
-		myEngine.Run(context.Background(), in)
+		engine.Run(context.Background(), in)
 		wg.Done()
 	}()
 
