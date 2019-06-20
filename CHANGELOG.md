@@ -1,10 +1,16 @@
 # CHANGELOG
 
+### Version 0.6.1
+
+*Released on June 20th 2019*
+
+- [FIX] Changes type of `Call.args` to an array of strings
+
 ### Version 0.6.0
 
 *Released on June 20th 2019*
 
-- [FEAT] Breaking changes Protocol Buffer messages definitions
+- [FEAT] Breaking changes in Protocol Buffer messages definitions
 * Extracts `ContractId` message from `Contract`
 * Creates `Event` message
 * Adds `Private` messages instead of `Quorum`
