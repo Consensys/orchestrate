@@ -5,10 +5,11 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/boilerplate-worker.git/app"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/contract-registry.git/app"
 )
 
 func newRunCommand() *cobra.Command {
@@ -28,13 +29,10 @@ func newRunCommand() *cobra.Command {
 }
 
 func run(cmd *cobra.Command, args []string) {
-	// Create app
-	ctx, cancel := context.WithCancel(context.Background())
-
 	// Process signals
-	sig := utils.NewSignalListener(func(signal os.Signal) { cancel() })
+	sig := utils.NewSignalListener(func(signal os.Signal) { app.Close(context.Background()) })
 	defer sig.Close()
 
 	// Start application
-	app.Start(ctx)
+	app.Start(context.Background())
 }

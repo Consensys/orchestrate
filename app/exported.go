@@ -2,12 +2,16 @@ package app
 
 import (
 	"context"
+	"net"
 	"sync"
-	"time"
 
 	log "github.com/sirupsen/logrus"
-	server "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http/healthcheck"
+	"github.com/soheilhy/cmux"
+	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/contract-registry.git/app/grpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/contract-registry.git/app/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/contract-registry.git/app/infra"
 )
 
 var (
@@ -20,43 +24,83 @@ func init() {
 	app = NewApp()
 }
 
-func startServer(ctx context.Context) {
-	// Initialize server
-	server.Init(ctx)
+// Init application
+func initComponents() {
 
-	// Register Healthcheck
-	server.Enhance(healthcheck.HealthCheck(app))
+	// Initialize the infra before even initializing the servers
+	infra.Init()
 
-	// Start Listening
-	_ = server.ListenAndServe()
+	common.InParallel(
+		func() { grpc.Init() },
+		func() { http.Init() },
+	)
 }
 
 // Start starts application
 func Start(ctx context.Context) {
 	startOnce.Do(func() {
+		// Init
+		initComponents()
 
-		cancelCtx, cancel := context.WithCancel(ctx)
+		// Create tcp listener
+		l, err := net.Listen("tcp", viper.GetString("http.hostname"))
+		if err != nil {
+			log.WithError(err).WithFields(log.Fields{
+				"http.hostname": viper.GetString("http.hostname"),
+			}).Fatalf("Can not listen tcp connection")
+		}
+
+		// Create MUX dispatcher to properly dispatch GRPC traffic and HTTP traffic
+		tcpMux := cmux.New(l)
+		grpcL := tcpMux.MatchWithWriters(cmux.HTTP2MatchHeaderFieldPrefixSendSettings("content-type", "application/grpc"))
+		httpL := tcpMux.Match(cmux.HTTP1Fast())
+
+		// Start serving
+		wait := &sync.WaitGroup{}
+		wait.Add(3)
+
+		// Start GRPC server
 		go func() {
-			// Start Server
-			startServer(ctx)
-			cancel()
+			err := grpc.Server().Serve(grpcL)
+			log.WithError(err).Info("app: grpc server stopped")
+			wait.Done()
 		}()
+
+		// Start HTTP Server
+		go func() {
+			err := http.Server().Serve(httpL)
+			log.WithError(err).Info("app: http server stopped")
+			wait.Done()
+		}()
+
+		// Serve
+		go func() {
+			err := tcpMux.Serve()
+			log.WithError(err).Info("app: tcpMux server stopped")
+			wait.Done()
+		}()
+
+		log.WithFields(log.Fields{
+			"http.hostname": l.Addr(),
+		}).Infof("app: ready to receive connections")
 
 		// Indicate that application is ready
 		// TODO: we need to update so ready can append when Consume has finished to Setup
 		app.ready.Store(true)
 
-		// Code below is an example for the unique purpose of illustrating this boilerplate
-		ticker := time.NewTicker(time.Second)
-	runningLoop:
-		for {
-			select {
-			case <-cancelCtx.Done():
-				log.Info("Leaving Loop")
-				break runningLoop
-			case <-ticker.C:
-				log.Info("Ticking")
-			}
-		}
+		// Wait for server to properly close
+		wait.Wait()
+
+		// Close infra
+		infra.Close()
+
+		log.Infof("app: gracefully closed")
 	})
+}
+
+// Close gracefully stops the application
+func Close(ctx context.Context) {
+	log.Warn("app: closing...")
+	go grpc.Close(ctx)
+	go http.Close(ctx)
 }
