@@ -4,13 +4,16 @@ import (
 	"sync"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
 
 func newEnvelope() *envelope.Envelope {
 	return &envelope.Envelope{
-		Sender: &common.Account{Id: "abcde"},
+		From: &ethereum.Account{
+			Raw: hexutil.MustDecode("0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C"),
+		},
 	}
 }
 
@@ -30,8 +33,8 @@ func TestEnvelopeMarshaller(t *testing.T) {
 	wg.Wait()
 
 	for _, pb := range pbs {
-		if pb.Sender.Id != "abcde" {
-			t.Errorf("EnvelopeMarshaller: expected %q but got %q", "abcde", pb.GetSender().GetId())
+		if pb.GetFrom().Hex() != "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C" {
+			t.Errorf("EnvelopeMarshaller: expected %q but got %q", "abcde", pb.GetFrom().Hex())
 		}
 	}
 }

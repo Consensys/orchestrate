@@ -8,7 +8,7 @@ import (
 
 func TestError(t *testing.T) {
 	err := &Error{
-		Type:    uint64(18),
+		Code:    uint64(18),
 		Message: "Test Error",
 	}
 

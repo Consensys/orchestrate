@@ -6,8 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
 
 func init() {
@@ -16,7 +17,9 @@ func init() {
 
 func newProtoMessage() *envelope.Envelope {
 	return &envelope.Envelope{
-		Sender: &common.Account{Id: "abcd"},
+		From: &ethereum.Account{
+			Raw: hexutil.MustDecode("0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C"),
+		},
 	}
 }
 
@@ -35,8 +38,8 @@ func TestUnmarshaller(t *testing.T) {
 	wg.Wait()
 
 	for _, tr := range envelopes {
-		if tr.Sender.Id != "abcd" {
-			t.Errorf("EnvelopeUnmarshaller: expected %q but got %q", "abcd", tr.Sender.Id)
+		if tr.GetFrom().Hex() != newProtoMessage().GetFrom().Hex() {
+			t.Errorf("EnvelopeUnmarshaller: expected %q but got %q", "abcd", tr.GetFrom().Hex())
 		}
 	}
 }

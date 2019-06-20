@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain";
+
+package chain;
+
+// Information about a Chain
+message Protocol {
+    // Name of the protocol (e.g. `pantheon`, `quorum`, etc.)
+    string name = 1;
+
+    // Version tag of the protocol
+    string tag = 2;
+
+    // Extra information (optional)
+    map<string, string> extra = 3;
+}
+

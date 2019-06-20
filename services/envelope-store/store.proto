@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+import "types/envelope/envelope.proto";
+import "types/chain/chain.proto";
+import "types/common/error.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope-store";
+
+package envelopestore;
+
+// Store is a service responsible to store Envelopes
+service Store {
+    // Store an envelope
+    rpc Store(StoreRequest) returns (StoreResponse) {}
+    
+    // LoadByTxHash load an envelope by transaction hash
+	rpc LoadByTxHash(TxHashRequest) returns (StoreResponse) {}
+
+    // LoadByID load an envelope by identifier
+	rpc LoadByID(IDRequest) returns (StoreResponse) {}
+
+    // GetStatus returns envelope status
+    rpc GetStatus(IDRequest) returns (StoreResponse) {}
+
+    // SetStatus set an envelope status
+    rpc SetStatus(SetStatusRequest) returns (common.Error) {}
+    
+    // LoadPending load envelopes of pending transactions
+    rpc LoadPending(LoadPendingRequest) returns (LoadPendingResponse) {}
+}
+
+message StoreRequest{
+	envelope.Envelope envelope = 1;
+}
+
+message StoreResponse{
+	// Status of Envelope
+	string status = 1;
+
+	// Last update date of envelope stored
+    google.protobuf.Timestamp last_updated = 2;
+    
+    // Envelope
+    envelope.Envelope envelope = 3;
+    
+    // Error
+    common.Error err = 4;
+}
+
+message TxHashRequest{
+    // Chain ID the transaction has been sent to
+    chain.Chain chain_id = 1;
+
+    // Hash of the transaction
+    string tx_hash = 2;
+}
+
+message IDRequest{
+    // Envelope identifier
+    string id = 1;
+}
+
+message SetStatusRequest {
+    // Envelope identifier
+    string id = 1;
+
+    // Status
+    string status = 2;
+}
+
+message LoadPendingRequest {
+    // Pending duration in nanoseconds
+    int64 duration = 1;
+}
+
+message LoadPendingResponse {
+    // Pending envelopes
+    repeated envelope.Envelope envelopes = 1;
+
+    // Error
+    common.Error err = 2;
+}

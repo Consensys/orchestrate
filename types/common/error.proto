@@ -6,12 +6,12 @@ package common;
 
 // Error
 message Error {
-    // Error Code of the error
-    uint64 type = 1;
-    
     // Error message
-    string message = 2;
+    string message = 1;
+
+    // Error Code of the error
+    uint64 code = 2;
 
     // Extra information
-    map<string, string> keys = 3;
+    map<string, string> extra = 3;
 }

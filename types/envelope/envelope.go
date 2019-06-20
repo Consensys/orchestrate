@@ -1,13 +1,19 @@
 package envelope
 
 import (
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/opentracing/opentracing-go"
-	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 )
 
 // Error returns string representation of errors encountered by envelope
 func (e *Envelope) Error() string {
 	return common.Errors(e.Errors).Error()
+}
+
+// Sender returns sender of the transaction
+func (e *Envelope) Sender() ethcommon.Address {
+	return e.GetFrom().Address()
 }
 
 // Carrier returns an OpenTracing carrier based on envelope Metadata

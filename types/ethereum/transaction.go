@@ -1,11 +1,9 @@
 package ethereum
 
 import (
-	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 // SetNonce set nonce
@@ -15,34 +13,33 @@ func (txData *TxData) SetNonce(n uint64) *TxData {
 }
 
 // ToAddress return To in common.Address format
-func (txData *TxData) ToAddress() (common.Address, error) {
-	if txData.GetTo() == "" {
-		return common.HexToAddress(""), nil
-	}
-	if !common.IsHexAddress(txData.GetTo()) {
-		return common.HexToAddress(""), fmt.Errorf("%q is an invalid Ethereum address", txData.GetTo())
-	}
-	return common.HexToAddress(txData.GetTo()), nil
+func (txData *TxData) Receiver() ethcommon.Address {
+	return txData.GetTo().Address()
 }
 
 // SetTo set to address
-func (txData *TxData) SetTo(a common.Address) *TxData {
-	txData.To = a.Hex()
-	return txData
-}
-
-// ValueBig return value in big Int format
-func (txData *TxData) ValueBig() *big.Int {
-	if txData.GetValue() == "" {
-		return big.NewInt(0)
+func (txData *TxData) SetTo(a ethcommon.Address) *TxData {
+	if txData.To != nil {
+		txData.To.Raw = a.Bytes()
+	} else {
+		txData.To = &Account{Raw: a.Bytes()}
 	}
-	return hexutil.MustDecodeBig(txData.GetValue())
+	return txData
 }
 
 // SetValue set value
 func (txData *TxData) SetValue(v *big.Int) *TxData {
-	txData.Value = hexutil.EncodeBig(v)
+	if txData.Value != nil {
+		txData.Value.Raw = v.Bytes()
+	} else {
+		txData.Value = &Quantity{Raw: v.Bytes()}
+	}
 	return txData
+}
+
+// GetValueBig returns value of a transaction as a Big integer value
+func (txData *TxData) GetValueBig() *big.Int {
+	return txData.GetValue().Value()
 }
 
 // SetGas set gas limit value
@@ -51,51 +48,62 @@ func (txData *TxData) SetGas(l uint64) *TxData {
 	return txData
 }
 
-// GasPriceBig return gas price in big.Int format
-func (txData *TxData) GasPriceBig() *big.Int {
-	if txData.GetGasPrice() == "" {
-		return big.NewInt(0)
-	}
-	return hexutil.MustDecodeBig(txData.GetGasPrice())
-}
-
 // SetGasPrice set Gas price
 func (txData *TxData) SetGasPrice(p *big.Int) *TxData {
-	txData.GasPrice = hexutil.EncodeBig(p)
+	if txData.GasPrice != nil {
+		txData.GasPrice.Raw = p.Bytes()
+	} else {
+		txData.GasPrice = &Quantity{Raw: p.Bytes()}
+	}
 	return txData
 }
 
-// DataBytes return data in byte slice format
-func (txData *TxData) DataBytes() []byte {
-	if txData.GetData() == "" {
-		return []byte{}
-	}
-	return hexutil.MustDecode(txData.GetData())
+// GetGasPriceBig returns gas price in a transaction as a Big integer value
+func (txData *TxData) GetGasPriceBig() *big.Int {
+	return txData.GetGasPrice().Value()
 }
 
 // SetData set Data
 func (txData *TxData) SetData(d []byte) *TxData {
-	txData.Data = hexutil.Encode(d)
+	if txData.Data != nil {
+		txData.Data.Raw = d
+	} else {
+		txData.Data = &Data{Raw: d}
+	}
 	return txData
 }
 
+// GetDataBytes set Data
+func (txData *TxData) GetDataBytes() []byte {
+	return txData.GetData().GetRaw()
+}
+
 // SetRaw sets raw transaction
-func (tx *Transaction) SetRaw(r string) *Transaction {
-	tx.Raw = r
+func (tx *Transaction) SetRaw(r []byte) *Transaction {
+	if tx.Raw != nil {
+		tx.Raw.Raw = r
+	} else {
+		tx.Raw = &Data{Raw: r}
+	}
 	return tx
 }
 
 // TxHash return transaction hash
-func (tx *Transaction) TxHash() common.Hash {
-	if tx.GetHash() == "" {
-		return common.Hash([32]byte{})
+func (tx *Transaction) TxHash() ethcommon.Hash {
+	if tx.GetHash() == nil {
+		return ethcommon.Hash([32]byte{})
 	}
-	return common.HexToHash(tx.GetHash())
+	return tx.GetHash().Hash()
 }
 
 // SetHash sets transaction hash
-func (tx *Transaction) SetHash(h common.Hash) *Transaction {
-	tx.Hash = h.Hex()
+func (tx *Transaction) SetHash(h ethcommon.Hash) *Transaction {
+	if tx.Hash != nil {
+		tx.Hash.Raw = h.Bytes()
+	} else {
+		tx.Hash = &Hash{Raw: h.Bytes()}
+	}
+
 	return tx
 }
 

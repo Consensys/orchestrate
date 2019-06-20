@@ -4,8 +4,7 @@ option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi
 
 package abi;
 
-// Contract holds contract information
-message Contract {
+message ContractId {
     // Registry of contract
     // e.g. "registry.consensys.net/corestack"
     string registry = 1;
@@ -17,23 +16,46 @@ message Contract {
     // Contract tag
     // e.g "v2.1.3"
     string tag = 3;
+}
+
+// Contract holds contract information
+message Contract {
+
+    // A set of fields that identify a contract on a particular chain
+    ContractId id = 1;
 
     // Contract ABI (optional)
-    bytes abi = 4;
+    bytes abi = 2;
 
     // Contract deployment bytecode (optional)
-    bytes bytecode = 5;
+    bytes bytecode = 3;
+
+    // Methods of the contract
+    repeated Method methods = 4;
+
+    // Event of the contract
+    repeated Event events = 5;
 
     // Contract deployed bytecode (optional)
     bytes deployedBytecode = 6;
 }
 
-// Method 
+// Method
 message Method {
     // Signature of the method to call on contract
     // e.g "transfer(address,uint256)"
     string signature = 1;
 
     // ABI of the method (Optional)
+    bytes abi = 2;
+}
+
+// Event
+message Event {
+    // Name of the event to call on contract
+    // e.g "Transfer(address, address, uint256)"
+    string signature = 1;
+
+     // ABI of the method (Optional)
     bytes abi = 2;
 }

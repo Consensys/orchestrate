@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 import "types/abi/abi.proto";
-import "types/common/account.proto";
+import "types/common/account_instance.proto";
 
 option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/contract-registry";
 

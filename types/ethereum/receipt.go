@@ -2,78 +2,78 @@ package ethereum
 
 import (
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
 
 // FromGethReceipt creates a receipt from a Geth Receipt
-func FromGethReceipt(receipt *types.Receipt) *Receipt {
+func FromGethReceipt(r *ethtypes.Receipt) *Receipt {
 	logs := []*Log{}
-	for _, log := range receipt.Logs {
+	for _, log := range r.Logs {
 		logs = append(logs, FromGethLog(log))
 	}
 
 	return &Receipt{
-		TxHash:            receipt.TxHash.Hex(),
-		ContractAddress:   receipt.ContractAddress.Hex(),
-		PostState:         receipt.PostState,
-		Status:            receipt.Status,
-		Bloom:             receipt.Bloom.Bytes(),
+		TxHash:            &Hash{Raw: r.TxHash.Bytes()},
+		ContractAddress:   &Account{Raw: r.ContractAddress.Bytes()},
+		PostState:         r.PostState,
+		Status:            r.Status,
+		Bloom:             r.Bloom.Bytes(),
 		Logs:              logs,
-		GasUsed:           receipt.GasUsed,
-		CumulativeGasUsed: receipt.CumulativeGasUsed,
+		GasUsed:           r.GasUsed,
+		CumulativeGasUsed: r.CumulativeGasUsed,
 	}
 }
 
 // SetBlockNumber set block hash
-func (receipt *Receipt) SetBlockNumber(number uint64) *Receipt {
-	receipt.BlockNumber = number
-	return receipt
+func (r *Receipt) SetBlockNumber(number uint64) *Receipt {
+	r.BlockNumber = number
+	return r
 }
 
 // SetBlockHash set block hash
-func (receipt *Receipt) SetBlockHash(h common.Hash) *Receipt {
-	receipt.BlockHash = h.Hex()
-	return receipt
+func (r *Receipt) SetBlockHash(h common.Hash) *Receipt {
+	if r.GetBlockHash() != nil {
+		r.GetBlockHash().Raw = h.Bytes()
+	} else {
+		r.BlockHash = &Hash{Raw: h.Bytes()}
+	}
+
+	return r
 }
 
 // SetTxHash set transaction hash
-func (receipt *Receipt) SetTxHash(h common.Hash) *Receipt {
-	receipt.TxHash = h.Hex()
-	return receipt
+func (r *Receipt) SetTxHash(h common.Hash) *Receipt {
+	if r.GetTxHash() != nil {
+		r.GetTxHash().Raw = h.Bytes()
+	} else {
+		r.TxHash = &Hash{Raw: h.Bytes()}
+	}
+	return r
 }
 
 // SetTxIndex set transaction index
-func (receipt *Receipt) SetTxIndex(idx uint64) *Receipt {
-	receipt.TxIndex = idx
-	return receipt
-}
-
-// TopicsHash return topics in hash format
-func (log *Log) TopicsHash() []common.Hash {
-	topics := []common.Hash{}
-	for _, topic := range log.GetTopics() {
-		topics = append(topics, common.HexToHash(topic))
-	}
-	return topics
+func (r *Receipt) SetTxIndex(idx uint64) *Receipt {
+	r.TxIndex = idx
+	return r
 }
 
 // FromGethLog creates a new log from a Geth log
-func FromGethLog(log *types.Log) *Log {
+func FromGethLog(log *ethtypes.Log) *Log {
 	// Format topics
-	topics := []string{}
+	topics := []*Hash{}
 	for _, topic := range log.Topics {
-		topics = append(topics, topic.Hex())
+		topics = append(topics, &Hash{Raw: topic.Bytes()})
 	}
 
 	return &Log{
-		Address:     log.Address.Hex(),
+		Address:     &Account{Raw: log.Address.Bytes()},
 		Topics:      topics,
 		Data:        log.Data,
 		DecodedData: make(map[string]string),
 		BlockNumber: log.BlockNumber,
-		TxHash:      log.TxHash.Hex(),
+		TxHash:      &Hash{Raw: log.TxHash.Bytes()},
 		TxIndex:     uint64(log.TxIndex),
-		BlockHash:   log.BlockHash.Hex(),
+		BlockHash:   &Hash{Raw: log.BlockHash.Bytes()},
 		Index:       uint64(log.Index),
 		Removed:     log.Removed,
 	}

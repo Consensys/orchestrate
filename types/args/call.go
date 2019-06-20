@@ -1,9 +1,9 @@
-package common
+package args
 
 import (
 	"fmt"
 
-	abi "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 )
 

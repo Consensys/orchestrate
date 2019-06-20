@@ -4,7 +4,7 @@ import "fmt"
 
 // Error (implement error interface)
 func (err *Error) Error() string {
-	return fmt.Sprintf("Error #%v: %v", err.Type, err.Message)
+	return fmt.Sprintf("Error #%v: %v", err.Code, err.Message)
 }
 
 // Errors represent a set of error's specification

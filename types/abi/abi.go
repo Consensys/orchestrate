@@ -9,6 +9,22 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
+func (c *Contract) GetName() string {
+	return c.GetId().GetName()
+}
+
+func (c *Contract) SetName(name string) {
+	c.Id.Name = name
+}
+
+func (c *Contract) GetTag() string {
+	return c.GetId().GetTag()
+}
+
+func (c *Contract) SetTag(tag string) {
+	c.Id.Tag = tag
+}
+
 // Short returns a short string representation of contract information
 func (c *Contract) Short() string {
 	if c.GetName() == "" {
@@ -39,8 +55,10 @@ func StringToContract(s string) (*Contract, error) {
 	}
 
 	c := &Contract{
-		Name: parts[1],
-		Tag:  parts[2],
+		Id: &ContractId{
+			Name: parts[1],
+			Tag:  parts[2],
+		},
 	}
 
 	// Make sure bytecode is valid and set bytecode
