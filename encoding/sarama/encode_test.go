@@ -46,9 +46,9 @@ var testEnvelope = &envelope.Envelope{
 			Method: &abi.Method{
 				Signature: "transfer(address,uint256)",
 			},
-			Args: []*ethereum.Data{
-				ethereum.HexToData("0xfF778b716FC07D98839f48DdB88D8bE583BEB684"),
-				ethereum.HexToData("0x2386f26fc10000"),
+			Args: []string{
+				"0xfF778b716FC07D98839f48DdB88D8bE583BEB684",
+				"0x2386f26fc10000",
 			},
 		},
 		Private: &args.Private{},

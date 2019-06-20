@@ -16,5 +16,5 @@ message Call {
     abi.Method method = 2;
 
     // Arguments to feed on transaction call
-    repeated ethereum.Data args = 3;
+    repeated string args = 3;
 }
