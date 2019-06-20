@@ -1,5 +1,20 @@
 # CHANGELOG
 
+### Version 0.6.0
+
+*Released on June 20th 2019*
+
+- [FEAT] Breaking changes Protocol Buffer messages definitions
+* Extracts `ContractId` message from `Contract`
+* Creates `Event` message
+* Adds `Private` messages instead of `Quorum`
+* Removes `isEIP155` field from `Chain` message
+* Adds `Protocol` message
+* `Chain` message is moved to the `chain` package
+* Adds `Args` message that contains `args.Call` and `args.Private`
+* Adds the following common messages: `Account`, `Quality`, `Data`, `Hash`
+* Adds helper methods to works with new types
+
 ### Version 0.5.7
 
 *Released on June 18th 2019*
