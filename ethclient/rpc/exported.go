@@ -27,15 +27,20 @@ func Init(ctx context.Context) {
 		}
 
 		client = NewClient(config)
+		rpcUrls := viper.GetStringSlice(urlViperKey)
+		log.Infof("Connecting to %d RPC URLs", len(rpcUrls))
+
 		chains := []string{}
 		for _, url := range viper.GetStringSlice(urlViperKey) {
 			chainID, err := client.Dial(ctx, url)
 			if err != nil {
 				log.WithError(err).WithFields(log.Fields{
 					"eth-client": url,
+					"error":      err,
 				}).Fatalf("ethereum: could not dial client")
 			}
-			chains = append(chains, chainID.Text(10))
+			log.Infof("Chain id for RPC URL %s is  %s", url, chainID.String())
+			chains = append(chains, chainID.String())
 		}
 
 		log.WithFields(log.Fields{

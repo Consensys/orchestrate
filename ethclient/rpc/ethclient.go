@@ -11,6 +11,7 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/rpc/geth"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
@@ -26,6 +27,7 @@ type Client struct {
 
 // NewClient creates a new MultiClient
 func NewClient(conf *geth.Config) *Client {
+	log.Infof("Creating a client configuration: %+v", config)
 	return &Client{
 		mux:  &sync.Mutex{},
 		rpcs: make(map[string]rpc.Client),
@@ -35,6 +37,7 @@ func NewClient(conf *geth.Config) *Client {
 
 // Dial an Ethereum client
 func (ec *Client) Dial(ctx context.Context, rawurl string) (*big.Int, error) {
+	log.Infof("Connecting to Ethereum network: %s", rawurl)
 	// Dial using an rpc client
 	c, err := geth.DialContext(ctx, rawurl, ec.conf)
 	if err != nil {
@@ -52,6 +55,7 @@ func (ec *Client) Dial(ctx context.Context, rawurl string) (*big.Int, error) {
 		return nil, fmt.Errorf("invalid net_version result %q", version)
 	}
 
+	log.Infof("Connected to Ethereum network: %s", rawurl)
 	// Register client
 	ec.mux.Lock()
 	ec.rpcs[chainID.Text(10)] = c
@@ -62,12 +66,14 @@ func (ec *Client) Dial(ctx context.Context, rawurl string) (*big.Int, error) {
 
 // Close client and all underlying Geth RPC client
 func (ec *Client) Close() {
+	log.Infof("Closing RPC clients. Number of clients %d", len(ec.rpcs))
 	for _, c := range ec.rpcs {
 		go c.Close()
 	}
 }
 
 func (ec *Client) getRPC(chainID *big.Int) (rpc.Client, error) {
+	log.Infof("Getting RPC connection for chain: %s", chainID.Text(10))
 	c, ok := ec.rpcs[chainID.Text(10)]
 	if !ok {
 		return nil, fmt.Errorf("no RPC connection registered for chain %q", chainID.Text(10))
