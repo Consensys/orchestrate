@@ -86,11 +86,13 @@ func main() {
 
 	rounds := 1
 	for i := 0; i < rounds; i++ {
-		partition, offset, err := broker.GlobalSyncProducer().SendMessage(NewMessage(i))
+		msg := NewMessage(i)
+		partition, offset, err := broker.GlobalSyncProducer().SendMessage(msg)
 		if err != nil {
 			log.WithError(err).Error("e2e: could not send message")
 		}
 		log.WithFields(log.Fields{
+			"topic":     msg.Topic,
 			"partition": partition,
 			"offset":    offset,
 		}).Info("e2e: message sent")
