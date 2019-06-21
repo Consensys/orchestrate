@@ -23,6 +23,17 @@ services:
     networks:
       - kafka
 
+  ganache:
+    image: trufflesuite/ganache-cli:v6.4.3
+    command: --db /db -d -p ${GANACHE_PORT-8545} -l ${GANACHE_GASLIMIT-0xfffffffffff} -i ${GANACHE_NETWORKID-888} ${GANACHE_ACCOUNTS} -b ${GANACHE_BLOCKTIME-4}
+    ports:
+      - ${GANACHE_PORT-8545}:8545
+    volumes:
+      - chain-data:/db
+
+volumes:
+  chain-data:
+    driver: local
 
 networks:
   kafka:
