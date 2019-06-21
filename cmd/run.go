@@ -38,6 +38,8 @@ func newRunCommand() *cobra.Command {
 	broker.KafkaGroup(runCmd.Flags())
 	broker.KafkaTopicTxSigner(runCmd.Flags())
 	broker.KafkaTopicTxSender(runCmd.Flags())
+	broker.KafkaTopicWalletGenerator(runCmd.Flags())
+	broker.KafkaTopicWalletGenerated(runCmd.Flags())
 
 	return runCmd
 }

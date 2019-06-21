@@ -27,9 +27,10 @@ import (
 	]
 */
 var (
-	kafkaURL = []string{"localhost:9092"}
-	topic    = "topic-tx-signer"
-	senders  = []string{
+	kafkaURL    = []string{"localhost:9092"}
+	topicSigner = "topic-tx-signer"
+	topicWallet = "topic-wallet-generator"
+	senders     = []string{
 		"0xd71400daD07d70C976D6AAFC241aF1EA183a7236", // As of 0.3.0, this address is not stored by default
 		"0xf5956Eb46b377Ae41b41BDa94e6270208d8202bb",
 		"0x93f7274c9059e601be4512F656B57b830e019E41",
@@ -38,9 +39,9 @@ var (
 	}
 )
 
-func newMessage(i int) *sarama.ProducerMessage {
+func newTxMessage(i int) *sarama.ProducerMessage {
 	msg := &sarama.ProducerMessage{
-		Topic:     topic,
+		Topic:     topicSigner,
 		Partition: -1,
 	}
 	b, _ := proto.Marshal(
@@ -57,6 +58,20 @@ func newMessage(i int) *sarama.ProducerMessage {
 					Data:     ethereum.HexToData("0xabcd"),
 				},
 			},
+		},
+	)
+	msg.Value = sarama.ByteEncoder(b)
+	return msg
+}
+
+func newWalletMessage() *sarama.ProducerMessage {
+	msg := &sarama.ProducerMessage{
+		Topic:     topicWallet,
+		Partition: -1,
+	}
+	b, _ := proto.Marshal(
+		&envelope.Envelope{
+			Chain: &chain.Chain{Id: []byte{3}},
 		},
 	)
 	msg.Value = sarama.ByteEncoder(b)
@@ -90,6 +105,9 @@ func main() {
 
 	rounds := 10
 	for i := 0; i < rounds; i++ {
-		p.Input() <- newMessage(i)
+		p.Input() <- newWalletMessage()
+	}
+	for i := 0; i < rounds; i++ {
+		p.Input() <- newTxMessage(i)
 	}
 }

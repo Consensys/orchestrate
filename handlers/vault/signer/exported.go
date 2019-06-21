@@ -5,6 +5,8 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/keystore"
 )
@@ -21,11 +23,18 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		// Initialize Ethereum client
-		keystore.Init(ctx)
+		common.InParallel(
+			// Initialize keystore
+			func() { keystore.Init(ctx) },
+			// Initialize Sync Producer
+			func() { broker.InitSyncProducer(ctx) },
+		)
 
 		// Create Handler
-		handler = Signer(keystore.GlobalKeyStore())
+		handler = engine.CombineHandlers(
+			Signer(keystore.GlobalKeyStore()),
+			Producer(broker.GlobalSyncProducer()),
+		)
 
 		log.Infof("signer: handler ready")
 	})

@@ -11,12 +11,11 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	server "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http/healthcheck"
-	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-signer.git/handlers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-signer.git/handlers/producer"
-	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-signer.git/handlers/signer"
+	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-signer.git/handlers/vault"
 )
 
 var (
@@ -44,31 +43,11 @@ func startServer(ctx context.Context) {
 }
 
 func initComponents(ctx context.Context) {
-	wg := sync.WaitGroup{}
-
-	// Initialize Engine
-	wg.Add(1)
-	go func() {
-		engine.Init(ctx)
-		wg.Done()
-	}()
-
-	// Initialize Handlers
-	wg.Add(1)
-	go func() {
-		handlers.Init(ctx)
-		wg.Done()
-	}()
-
-	// Initialize ConsumerGroup
-	wg.Add(1)
-	go func() {
-		broker.InitConsumerGroup(ctx)
-		wg.Done()
-	}()
-
-	// Wait for engine and handlers to be ready
-	wg.Wait()
+	common.InParallel(
+		func() { engine.Init(ctx) },
+		func() { vault.Init(ctx) },
+		func() { broker.InitConsumerGroup(ctx) },
+	)
 }
 
 func registerHandlers() {
@@ -81,10 +60,7 @@ func registerHandlers() {
 		engine.Register(logger.Logger)
 		engine.Register(loader.Loader)
 		engine.Register(offset.Marker)
-		engine.Register(producer.GlobalHandler())
-
-		// Specific handlers tk Sender worker
-		engine.Register(signer.GlobalHandler())
+		engine.Register(vault.GlobalHandler())
 		wg.Done()
 	}()
 
@@ -118,6 +94,7 @@ func Start(ctx context.Context) {
 			cancelCtx,
 			[]string{
 				viper.GetString("kafka.topic.signer"),
+				viper.GetString("kafka.topic.wallet.generator"),
 			},
 			broker.NewEngineConsumerGroupHandler(engine.GlobalEngine()),
 		)
