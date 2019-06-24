@@ -1,5 +1,12 @@
 # CHANGELOG
 
+
+### Version 0.6.1
+
+*Released on June 24th 2019*
+
+- [FIX] Updated package to use new messages types from `pkg@v.0.6.1`
+
 ### Version 0.6.0
 
 *Released on June 20th 2019*
