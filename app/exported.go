@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
@@ -46,51 +48,34 @@ func startServer(ctx context.Context) {
 }
 
 func initConsumerGroup(ctx context.Context) {
-	wg := sync.WaitGroup{}
+	common.InParallel(
+		// Initialize Engine
+		func() {
+			engine.Init(ctx)
+		},
+		// Initialize Handlers
+		func() {
+			handlers.Init(ctx)
+		},
+		// Initialize ConsumerGroup
+		func() {
+			broker.InitConsumerGroup(ctx)
+		},
+		// Register handlers on engine
+		func() {
+			// Generic handlers on every worker
+			engine.Register(logger.Logger)
+			engine.Register(loader.Loader)
+			engine.Register(offset.Marker)
+			engine.Register(producer.GlobalHandler())
 
-	// Initialize Engine
-	wg.Add(1)
-	go func() {
-		engine.Init(ctx)
-		wg.Done()
-	}()
-
-	// Initialize Handlers
-	wg.Add(1)
-	go func() {
-		handlers.Init(ctx)
-		wg.Done()
-	}()
-
-	// Initialize ConsumerGroup
-	wg.Add(1)
-	go func() {
-		broker.InitConsumerGroup(ctx)
-		wg.Done()
-	}()
-
-	// Wait for engine and handlers to be ready
-	wg.Wait()
-
-	// Register handlers on engine
-	wg.Add(1)
-	go func() {
-		// Generic handlers on every worker
-		engine.Register(logger.Logger)
-		engine.Register(loader.Loader)
-		engine.Register(offset.Marker)
-		engine.Register(producer.GlobalHandler())
-
-		// Specific handlers tk Tx-Crafter worker
-		engine.Register(faucet.GlobalHandler())
-		engine.Register(crafter.GlobalHandler())
-		engine.Register(gaspricer.GlobalHandler())
-		engine.Register(gasestimator.GlobalHandler())
-		wg.Done()
-	}()
-
-	// Wait for ConsumerGroup & Engine to be ready
-	wg.Wait()
+			// Specific handlers tk Tx-Crafter worker
+			engine.Register(faucet.GlobalHandler())
+			engine.Register(crafter.GlobalHandler())
+			engine.Register(gaspricer.GlobalHandler())
+			engine.Register(gasestimator.GlobalHandler())
+		},
+	)
 }
 
 // Start starts application

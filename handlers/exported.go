@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"context"
-	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-crafter.git/handlers/crafter"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-crafter.git/handlers/faucet"
 	gasestimator "gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-crafter.git/handlers/gas-estimator"
@@ -13,43 +13,30 @@ import (
 
 // Init inialize handlers
 func Init(ctx context.Context) {
-	wg := sync.WaitGroup{}
+	common.InParallel(
+		// Initialize crafter
+		func() {
+			crafter.Init(ctx)
+		},
 
-	// Initialize crafter
-	wg.Add(1)
-	go func() {
-		crafter.Init(ctx)
-		wg.Done()
-	}()
+		// Initialize faucet
+		func() {
+			faucet.Init(ctx)
+		},
 
-	// Initialize faucet
-	wg.Add(1)
-	go func() {
-		faucet.Init(ctx)
-		wg.Done()
-	}()
+		// Initialize Gas Estimator
+		func() {
+			gasestimator.Init(ctx)
+		},
 
-	// Initialize Gas Estimator
-	wg.Add(1)
-	go func() {
-		gasestimator.Init(ctx)
-		wg.Done()
-	}()
+		// Initialize Gas Pricer
+		func() {
+			gaspricer.Init(ctx)
+		},
 
-	// Initialize Gas Pricer
-	wg.Add(1)
-	go func() {
-		gaspricer.Init(ctx)
-		wg.Done()
-	}()
-
-	// Initialize Producer
-	wg.Add(1)
-	go func() {
-		producer.Init(ctx)
-		wg.Done()
-	}()
-
-	// Wait for all handlers to be ready
-	wg.Wait()
+		// Initialize Producer
+		func() {
+			producer.Init(ctx)
+		},
+	)
 }
