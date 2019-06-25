@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"context"
-	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-listener.git/handlers/producer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-listener.git/handlers/store"
@@ -11,29 +11,18 @@ import (
 
 // Init inialize handlers
 func Init(ctx context.Context) {
-	wg := sync.WaitGroup{}
-
-	// Initialize Jaeger tracer
-	wg.Add(1)
-	go func() {
-		jaeger.Init(ctx)
-		wg.Done()
-	}()
-
-	// Initialize sender tracer
-	wg.Add(1)
-	go func() {
-		store.Init(ctx)
-		wg.Done()
-	}()
-
-	// Initialize sender tracer
-	wg.Add(1)
-	go func() {
-		producer.Init(ctx)
-		wg.Done()
-	}()
-
-	// Wait for all handlers to be ready
-	wg.Wait()
+	common.InParallel(
+		// Initialize Jaeger tracer
+		func() {
+			jaeger.Init(ctx)
+		},
+		// Initialize sender tracer
+		func() {
+			store.Init(ctx)
+		},
+		// Initialize sender tracer
+		func() {
+			producer.Init(ctx)
+		},
+	)
 }

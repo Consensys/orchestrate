@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common"
+
 	log "github.com/sirupsen/logrus"
 
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
@@ -43,59 +45,30 @@ func startServer(ctx context.Context) {
 }
 
 func initComponents(ctx context.Context) {
-	wg := sync.WaitGroup{}
-
-	// Initialize Engine
-	wg.Add(1)
-	go func() {
-		engine.Init(ctx)
-		wg.Done()
-	}()
-
-	// Initialize Handlers
-	wg.Add(1)
-	go func() {
-		handlers.Init(ctx)
-		wg.Done()
-	}()
-
-	// Initialize Kafka Producer
-	wg.Add(1)
-	go func() {
-		broker.InitSyncProducer(ctx)
-		wg.Done()
-	}()
-
-	// Initialize Listener
-	wg.Add(1)
-	go func() {
-		listener.Init(ctx)
-		wg.Done()
-	}()
-
-	// Wait for engine and handlers to be ready
-	wg.Wait()
+	common.InParallel(
+		func() {
+			engine.Init(ctx)
+		},
+		func() {
+			handlers.Init(ctx)
+		},
+		func() {
+			broker.InitSyncProducer(ctx)
+		},
+		func() {
+			listener.Init(ctx)
+		},
+	)
 }
 
 func registerHandlers() {
-	wg := sync.WaitGroup{}
+	// Generic handlers on every worker
+	engine.Register(logger.Logger)
 
-	// Register handlers on engine
-	wg.Add(1)
-	go func() {
-		// Generic handlers on every worker
-		engine.Register(logger.Logger)
-
-		// Specific handlers to tx-listener
-		engine.Register(producer.GlobalHandler())
-		engine.Register(loader.Loader)
-		engine.Register(store.GlobalHandler())
-
-		wg.Done()
-	}()
-
-	// Wait for ConsumerGroup & Engine to be ready
-	wg.Wait()
+	// Specific handlers to tx-listener
+	engine.Register(producer.GlobalHandler())
+	engine.Register(loader.Loader)
+	engine.Register(store.GlobalHandler())
 }
 
 // Start starts application
@@ -127,6 +100,9 @@ func Start(ctx context.Context) {
 
 		// Start Listening
 		chains := ethclient.GlobalClient().Networks(cancelCtx)
-		_ = listener.Listen(cancelCtx, chains, h)
+		err = listener.Listen(cancelCtx, chains, h)
+		if err != nil {
+			log.WithError(err).Error("exiting loop with error")
+		}
 	})
 }

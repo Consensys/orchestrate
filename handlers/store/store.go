@@ -10,7 +10,7 @@ import (
 // EnvelopeLoader creates and handler that load traces
 func EnvelopeLoader(s store.EnvelopeStore) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		_, _, err := s.LoadByTxHash(txctx.Context(), txctx.Envelope.GetChain().GetId(), txctx.Envelope.GetReceipt().GetTxHash(), txctx.Envelope)
+		_, _, err := s.LoadByTxHash(txctx.Context(), txctx.Envelope.GetChain().ID().String(), txctx.Envelope.GetReceipt().GetTxHash().Hex(), txctx.Envelope)
 
 		if err != nil {
 			// We got an error, possibly due to timeout Connection to database or something else
