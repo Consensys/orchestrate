@@ -6,7 +6,8 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/args"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
@@ -32,15 +33,17 @@ func newMessage(i int) *sarama.ProducerMessage {
 	}
 	b, _ := proto.Marshal(
 		&envelope.Envelope{
-			Chain:  &common.Chain{Id: "888"},
-			Sender: &common.Account{Addr: senders[i%len(senders)]},
-			Call: &common.Call{
-				Method: &abi.Method{Signature: "some-method"},
-				Args:   []string{"0x71a556C033cD4beB023eb2baa734d0e8304CA88a", "0x200"},
+			Chain: chain.CreateChainInt(888),
+			From:  ethereum.HexToAccount(senders[i%len(senders)]),
+			Args: &envelope.Args{
+				Call: &args.Call{
+					Method: &abi.Method{Signature: "some-method"},
+					Args:   []string{"0x71a556C033cD4beB023eb2baa734d0e8304CA88a", "0x200"},
+				},
 			},
 			Tx: &ethereum.Transaction{
 				TxData: &ethereum.TxData{
-					To: ERC20Address,
+					To: ethereum.HexToAccount(ERC20Address),
 				},
 			},
 		},
@@ -53,7 +56,8 @@ func main() {
 	// Init config, specify appropriate version
 	config := sarama.NewConfig()
 	config.Version = sarama.V1_0_0_0
-	config.Consumer.Return.Errors = true
+	config.Producer.Return.Successes = true
+	config.Producer.Return.Errors = true
 
 	// Create client
 
@@ -62,7 +66,13 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	defer func() { client.Close() }()
+	defer func() {
+		fmt.Println("Closing a client")
+		e := client.Close()
+		if e != nil {
+			fmt.Println("Error while closing a client")
+		}
+	}()
 	fmt.Println("Client ready")
 
 	// Create producer
@@ -72,10 +82,25 @@ func main() {
 		return
 	}
 	fmt.Println("Producer ready")
-	defer p.Close()
+	defer func() {
+		fmt.Println("Closing a producer")
+		e := p.Close()
+		if e != nil {
+			fmt.Println("Error while closing a producer: ", e)
+		}
+	}()
 
 	rounds := 10
 	for i := 0; i < rounds; i++ {
 		p.Input() <- newMessage(i)
+	}
+
+	for i := 0; i < rounds; i++ {
+		select {
+		case success := <-p.Successes():
+			fmt.Println("Success", success)
+		case err := <-p.Errors():
+			fmt.Println("Error", err)
+		}
 	}
 }

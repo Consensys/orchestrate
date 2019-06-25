@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/viper"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
 
@@ -109,8 +109,8 @@ func makeNonceContext(chainID int64, address string) *engine.TxContext {
 	ctx := engine.NewTxContext()
 	ctx.Reset()
 	ctx.Logger = log.NewEntry(log.StandardLogger())
-	ctx.Envelope.Chain = (&common.Chain{}).SetID(big.NewInt(chainID))
-	ctx.Envelope.Sender = &common.Account{Addr: address}
+	ctx.Envelope.Chain = chain.CreateChainInt(chainID)
+	ctx.Envelope.From = ethereum.HexToAccount(address)
 	ctx.Envelope.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{}}
 
 	switch chainID {
@@ -171,7 +171,7 @@ func TestNonceHandler(t *testing.T) {
 	for ctx := range outs {
 		if ctx.Get("expectedErrorCount").(int) > 0 {
 			if len(ctx.Envelope.GetErrors()) != ctx.Get("expectedErrorCount").(int) {
-				t.Errorf("Expected %v errors but got %v %v", ctx.Get("expectedErrorCount").(int), ctx.Envelope.GetErrors(), ctx.Envelope.GetSender().Addr)
+				t.Errorf("Expected %v errors but got %v %v", ctx.Get("expectedErrorCount").(int), ctx.Envelope.GetErrors(), ctx.Envelope.GetFrom().Address())
 			}
 		} else {
 			if ctx.Envelope.Tx.TxData.GetNonce() != ctx.Get("expectedNonce").(uint64) {

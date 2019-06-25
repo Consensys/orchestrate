@@ -21,13 +21,7 @@ func Handler(nc nonce.Nonce, getChainNonce GetNonceFunc) engine.HandlerFunc {
 		// Retrieve chainID and sender address
 		chainID := txctx.Envelope.GetChain().ID()
 
-		a, err := txctx.Envelope.GetSender().Address()
-
-		if err != nil {
-			txctx.Logger.WithError(err).Errorf("nonce: could not acquire address from sender")
-			_ = txctx.AbortWithError(err)
-			return
-		}
+		a := txctx.Envelope.GetFrom().Address()
 
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"tx.sender": a.Hex(),
