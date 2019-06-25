@@ -23,6 +23,8 @@ var (
 	startOnce = &sync.Once{}
 )
 
+var l = createLogger("worker")
+
 func init() {
 	// Create app
 	app = NewApp()
@@ -51,21 +53,11 @@ func initComponents(ctx context.Context) {
 }
 
 func registerHandlers() {
-	wg := sync.WaitGroup{}
-
-	// Register handlers on engine
-	wg.Add(1)
-	go func() {
-		// Generic handlers on every worker
-		engine.Register(logger.Logger)
-		engine.Register(loader.Loader)
-		engine.Register(offset.Marker)
-		engine.Register(vault.GlobalHandler())
-		wg.Done()
-	}()
-
-	// Wait for ConsumerGroup & Engine to be ready
-	wg.Wait()
+	// Generic handlers on every worker
+	engine.Register(logger.Logger)
+	engine.Register(loader.Loader)
+	engine.Register(offset.Marker)
+	engine.Register(vault.GlobalHandler())
 }
 
 // Start starts application
@@ -89,17 +81,28 @@ func Start(ctx context.Context) {
 		// TODO: we need to update so ready can append when Consume has finished to Setup
 		app.ready.Store(true)
 
+		topics := []string{
+			viper.GetString("kafka.topic.signer"),
+			viper.GetString("kafka.topic.wallet.generator"),
+		}
+		l.WithFields(log.Fields{
+			"topics": topics,
+		}).Info("connecting")
+		log.WithFields(log.Fields{
+			"topics": topics,
+		}).Info("connecting")
 		// Start consuming on topic tx-signer
 		err := broker.Consume(
 			cancelCtx,
-			[]string{
-				viper.GetString("kafka.topic.signer"),
-				viper.GetString("kafka.topic.wallet.generator"),
-			},
+			topics,
 			broker.NewEngineConsumerGroupHandler(engine.GlobalEngine()),
 		)
 		if err != nil {
-			log.WithError(err).Error("worker: error on consumer")
+			l.WithError(err).Error("error on consumer")
 		}
 	})
+}
+
+func createLogger(name string) *log.Entry {
+	return log.WithField("name", name)
 }
