@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
@@ -42,51 +44,32 @@ func startServer(ctx context.Context) {
 }
 
 func initComponents(ctx context.Context) {
-	wg := sync.WaitGroup{}
+	common.InParallel(
+		// Initialize Engine
+		func() {
+			engine.Init(ctx)
+		},
 
-	// Initialize Engine
-	wg.Add(1)
-	go func() {
-		engine.Init(ctx)
-		wg.Done()
-	}()
+		// Initialize Handlers
+		func() {
+			handlers.Init(ctx)
+		},
 
-	// Initialize Handlers
-	wg.Add(1)
-	go func() {
-		handlers.Init(ctx)
-		wg.Done()
-	}()
-
-	// Initialize ConsumerGroup
-	wg.Add(1)
-	go func() {
-		broker.InitConsumerGroup(ctx)
-		wg.Done()
-	}()
-
-	// Wait for engine and handlers to be ready
-	wg.Wait()
+		// Initialize ConsumerGroup
+		func() {
+			broker.InitConsumerGroup(ctx)
+		},
+	)
 }
 
 func registerHandlers() {
-	wg := sync.WaitGroup{}
+	// Generic handlers on every worker
+	engine.Register(logger.Logger)
+	engine.Register(loader.Loader)
+	engine.Register(offset.Marker)
 
-	// Register handlers on engine
-	wg.Add(1)
-	go func() {
-		// Generic handlers on every worker
-		engine.Register(logger.Logger)
-		engine.Register(loader.Loader)
-		engine.Register(offset.Marker)
-
-		// Specific handlers tk Sender worker
-		engine.Register(sender.GlobalHandler())
-		wg.Done()
-	}()
-
-	// Wait for ConsumerGroup & Engine to be ready
-	wg.Wait()
+	// Specific handlers tk Sender worker
+	engine.Register(sender.GlobalHandler())
 }
 
 // Start starts application
