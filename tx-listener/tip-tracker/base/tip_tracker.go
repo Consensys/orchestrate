@@ -19,6 +19,8 @@ type Tracker struct {
 
 // NewTracker creates a new base tracker
 func NewTracker(ec ethclient.ChainLedgerReader, chainID *big.Int, conf *Config) *Tracker {
+	log.Infof("Creating new tracker %s", chainID.String())
+
 	return &Tracker{
 		ec:      ec,
 		chainID: chainID,
@@ -49,5 +51,6 @@ func (t *Tracker) HighestBlock(ctx context.Context) (int64, error) {
 		return 0, nil
 	}
 
+	log.Infof("Highest block for chain %s is %s", t.chainID.String(), header.Number.String())
 	return int64(header.Number.Uint64() - t.conf.Depth), nil
 }

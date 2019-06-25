@@ -48,12 +48,11 @@ func (h *Handler) GetInitialPosition(chain *big.Int) (blockNumber, txIndex int64
 		return blockNumber, txIndex, nil
 	}
 
-	// BlockNumber == -2 means we should start listening from position of last produce message
-	// Compute output topic
-	outTopic := utils.KafkaChainTopic(viper.GetString("kafka.topic.decoder"), chain)
+	// BlockNumber == -2 means we should start listening from position of the last produced message
+	decoderTopic := utils.KafkaChainTopic(viper.GetString("kafka.topic.decoder"), chain)
 
 	// Retrieve last record
-	lastRecord, err := h.getLastRecord(outTopic, 0)
+	lastRecord, err := h.getLastRecord(decoderTopic, 0)
 	if err != nil || lastRecord == nil {
 		// If we have never produced then we start from latest
 		return -1, 0, nil

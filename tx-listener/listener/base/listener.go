@@ -77,6 +77,7 @@ type TxListenerSession struct {
 }
 
 func NewTxListenerSession(ctx context.Context, l *TxListener, chains []*big.Int, h handler.TxListenerHandler) *TxListenerSession {
+	log.Info("tx-listener: creating new listener session: ", chains)
 	cancelCtx, cancel := context.WithCancel(ctx)
 
 	return &TxListenerSession{
@@ -142,19 +143,27 @@ func (s *TxListenerSession) listen(chain *big.Int) error {
 
 	tracker := tiptracker.NewTracker(s.listener.ec, chain, &s.listener.conf.TipTracker)
 
+	log.Infof("tx-listener: getting initial position in chain %s", chain.String())
 	// Retrieve initial position
 	blockNumber, txIndex, err := s.h.GetInitialPosition(chain)
 	if err != nil {
+		log.WithError(err).Errorf("tx-listener: failed to get initial position in chain %s", chain.String())
 		return err
 	}
 
 	if blockNumber == -1 {
-		blockNumber, _ = tracker.HighestBlock(context.Background())
+		log.Infof("tx-listener: getting highest block number")
+		blockNumber, err = tracker.HighestBlock(context.Background())
+		if err != nil {
+			log.WithError(err).Errorf("tx-listener: failed to get highest block number")
+			return err
+		}
 		// Force tx index to 0
 		txIndex = 0
 	}
 
 	// Create cursor
+	log.Infof("tx-listener: creating cursor from tracker")
 	cur := cursor.NewBlockCursorFromTracker(s.listener.ec, tracker, blockNumber, s.listener.conf.BlockCursor)
 
 	listener := &ChainListener{
@@ -237,19 +246,21 @@ func (l *ChainListener) listen() error {
 	l.logger.WithFields(log.Fields{
 		"start.block":    l.blockNumber,
 		"start.tx-index": l.txIndex,
-	}).Debug("listener: start loop")
+	}).Debug("tx-listener: start loop")
 feedingLoop:
 	for {
 		select {
 		case <-l.ctx.Done():
+			log.Warnf("tx-listener: loop for chain %s is over", l.ChainID().String())
 			break feedingLoop
 		case block, ok := <-l.cur.Blocks():
 			if !ok {
-				// Block cursor block channel has been closed so we leave the loop
+				log.Warnf("tx-listener: Block cursor block channel has been closed. Closing blocks listener loop for chain: %s", l.ChainID().String())
 				break feedingLoop
 			}
 			// We have a new block
 			if l.listener.conf.TxListener.Return.Blocks {
+				log.Debugf("tx-listener: get a new block for chain: %s", l.ChainID().String())
 				// This will be blocking until user consume from Blocks channel
 				l.blocks <- block.Copy()
 			}
@@ -271,7 +282,7 @@ feedingLoop:
 
 		case err, ok := <-l.cur.Errors():
 			if !ok {
-				// Cursor error channel has been closed so we leave the loop
+				log.Warnf("tx-listener: block cursor block channel has been closed. Closing blocks listener loop for chain: %s", l.ChainID().String())
 				break feedingLoop
 			}
 
@@ -281,12 +292,12 @@ feedingLoop:
 			} else {
 				log.WithError(err).WithFields(log.Fields{
 					"chain": l.t.ChainID().Text(10),
-				}).Error("listener: failed to retrieve block")
+				}).Error("tx-listener: failed to retrieve block")
 			}
 			return err
 		}
 	}
-	l.logger.Debugf("listener: left loop")
+	l.logger.Debug("tx-listener: left loop")
 
 	// Close channels
 	close(l.receipts)

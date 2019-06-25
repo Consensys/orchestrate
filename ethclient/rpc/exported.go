@@ -39,7 +39,7 @@ func Init(ctx context.Context) {
 					"error":      err,
 				}).Fatalf("ethereum: could not dial client")
 			}
-			log.Infof("Chain id for RPC URL %s is  %s", url, chainID.String())
+			log.Infof("Created client for chain id %s for RPC URL %s", chainID.String(), url)
 			chains = append(chains, chainID.String())
 		}
 
