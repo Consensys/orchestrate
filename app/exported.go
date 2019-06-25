@@ -116,6 +116,8 @@ func Start(ctx context.Context) {
 			topics = append(topics, fmt.Sprintf("%v-%v", viper.GetString("kafka.topic.decoder"), chainID.String()))
 		}
 
+		log.Infof("Connecting to the following Kafka topics %v", topics)
+
 		// Indicate that application is ready
 		// TODO: we need to update so ready can append when Consume has finished to Setup
 		app.ready.Store(true)
@@ -127,7 +129,7 @@ func Start(ctx context.Context) {
 			broker.NewEngineConsumerGroupHandler(engine.GlobalEngine()),
 		)
 		if err != nil {
-			log.WithError(err).Error("worker: error on consumer")
+			log.WithError(err).Error("worker: failed to consume messages")
 		}
 	})
 }

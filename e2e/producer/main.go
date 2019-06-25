@@ -3,11 +3,12 @@ package main
 import (
 	"fmt"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
+
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
@@ -17,20 +18,21 @@ var (
 )
 
 func newMessage(i int) *sarama.ProducerMessage {
-	var topic, chainID string
+	var topic string
+	var chainID int64
 	switch i % 4 {
 	case 0:
 		topic = "topic-tx-decoder-1"
-		chainID = "1"
+		chainID = 1
 	case 1:
 		topic = "topic-tx-decoder-3"
-		chainID = "3"
+		chainID = 3
 	case 2:
 		topic = "topic-tx-decoder-4"
-		chainID = "4"
+		chainID = 4
 	case 3:
 		topic = "topic-tx-decoder-42"
-		chainID = "42"
+		chainID = 42
 	}
 	msg := &sarama.ProducerMessage{
 		Topic:     topic,
@@ -38,30 +40,30 @@ func newMessage(i int) *sarama.ProducerMessage {
 	}
 	b, _ := proto.Marshal(
 		&envelope.Envelope{
-			Chain: &common.Chain{Id: chainID},
+			Chain: chain.CreateChainInt(chainID),
 			Receipt: &ethereum.Receipt{
-				TxHash:          "0xbf0b3048242aff8287d1dd9de0d2d100cee25d4ea45b8afa28bdfc1e2a775afd",
-				BlockHash:       "0x",
+				TxHash:          ethereum.HexToHash("0xbf0b3048242aff8287d1dd9de0d2d100cee25d4ea45b8afa28bdfc1e2a775afd"),
+				BlockHash:       nil,
 				BlockNumber:     uint64(0),
 				TxIndex:         uint64(0),
-				ContractAddress: "0x75d2917bD1E6C7c94d24dFd11C8EeAeFd3003C85",
+				ContractAddress: ethereum.HexToAccount("0x75d2917bD1E6C7c94d24dFd11C8EeAeFd3003C85"),
 				PostState:       hexutil.MustDecode("0x3b198bfd5d2907285af009e9ae84a0ecd63677110d89d7e030251acb87f6487e"),
 				Status:          uint64(0),
 				Bloom:           hexutil.MustDecode("0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001a055690d9db80000"),
 				Logs: []*ethereum.Log{
 					&ethereum.Log{
-						Address: "0x75d2917bD1E6C7c94d24dFd11C8EeAeFd3003C85",
-						Topics: []string{
-							"0xe8f0a47da72ca43153c7a5693a827aa8456f52633de9870a736e5605bff4af6d",
-							"0x000000000000000000000000d71400dad07d70c976d6aafc241af1ea183a7236",
-							"0x000000000000000000000000d71400dad07d70c976d6aafc241af1ea183a7236",
-							"0x000000000000000000000000b5747835141b46f7c472393b31f8f5a57f74a44f",
+						Address: ethereum.HexToAccount("0x75d2917bD1E6C7c94d24dFd11C8EeAeFd3003C85"),
+						Topics: []*ethereum.Hash{
+							ethereum.HexToHash("0xe8f0a47da72ca43153c7a5693a827aa8456f52633de9870a736e5605bff4af6d"),
+							ethereum.HexToHash("0x000000000000000000000000d71400dad07d70c976d6aafc241af1ea183a7236"),
+							ethereum.HexToHash("0x000000000000000000000000d71400dad07d70c976d6aafc241af1ea183a7236"),
+							ethereum.HexToHash("0x000000000000000000000000b5747835141b46f7c472393b31f8f5a57f74a44f"),
 						},
 						Data:        hexutil.MustDecode("0x0000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000061000000000000000000000000000000000000000000000000000000006f0c7f50cd4b7e4466b726279b1506bc89d8e74ab9268a255eeb1c78f163d51a83c7380d54a8b597ee26351c15c83f922fd6b37334970d3f832e5e11e36acbecb460ffdb01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
 						BlockNumber: uint64(10),
-						TxHash:      "0xbf0b3048242aff8287d1dd9de0d2d100cee25d4ea45b8afa28bdfc1e2a775afd",
+						TxHash:      ethereum.HexToHash("0xbf0b3048242aff8287d1dd9de0d2d100cee25d4ea45b8afa28bdfc1e2a775afd"),
 						TxIndex:     uint64(10),
-						BlockHash:   "0xea2460a53299f7201d82483d891b26365ff2f49cd9c5c0c7686fd75599fda5b2",
+						BlockHash:   ethereum.HexToHash("0xea2460a53299f7201d82483d891b26365ff2f49cd9c5c0c7686fd75599fda5b2"),
 					},
 				},
 				GasUsed:           uint64(10000),
@@ -80,16 +82,24 @@ func main() {
 	// Init config, specify appropriate version
 	config := sarama.NewConfig()
 	config.Version = sarama.V1_0_0_0
-	config.Consumer.Return.Errors = true
+	config.Producer.Return.Errors = true
+	config.Producer.Return.Successes = true
 
 	// Create client
 
+	fmt.Println("Connecting to Kafka: ", kafkaURL)
 	client, err := sarama.NewClient(kafkaURL, config)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	defer func() { client.Close() }()
+	defer func() {
+		fmt.Println("Closing a client")
+		e := client.Close()
+		if e != nil {
+			fmt.Println("Error while closing a client")
+		}
+	}()
 	fmt.Println("Client ready")
 
 	// Create producer
@@ -99,10 +109,26 @@ func main() {
 		return
 	}
 	fmt.Println("Producer ready")
-	defer p.Close()
+	defer func() {
+		fmt.Println("Closing a producer")
+		e := p.Close()
+		if e != nil {
+			fmt.Println("Error while closing a producer: ", e)
+		}
+	}()
 
 	rounds := 10
 	for i := 0; i < rounds; i++ {
 		p.Input() <- newMessage(i)
 	}
+
+	for i := 0; i < rounds; i++ {
+		select {
+		case success := <-p.Successes():
+			fmt.Println("Success: ", success.Topic, success.Key)
+		case err := <-p.Errors():
+			fmt.Println("Error", err)
+		}
+	}
+
 }

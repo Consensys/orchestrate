@@ -22,7 +22,7 @@ func Init(ctx context.Context) {
 		}
 
 		// Initialize Registry
-		registry.Init()
+		registry.Init(ctx)
 
 		// Create Handler
 		handler = Decoder(registry.GlobalRegistry())

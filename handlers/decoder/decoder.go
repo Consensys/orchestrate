@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"strings"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+
 	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
+	ethCommon "github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/decoder"
@@ -30,15 +33,40 @@ func Decoder(r registry.Registry) engine.HandlerFunc {
 			}
 
 			// Retrieve event ABI from registry
-			event, err := r.GetEventBySelector(l.Topics[0])
+			event, defaultEvents, err := r.GetEventsBySigHash(
+				ethCommon.BytesToHash(l.Topics[0].GetRaw()),
+				common.AccountInstance{
+					Chain:   txctx.Envelope.GetChain(),
+					Account: nil,
+				},
+				uint(len(l.Topics)-1),
+			)
 			if err != nil {
 				txctx.Logger.WithError(err).Errorf("decoder: could not retrieve event ABI")
 				_ = txctx.AbortWithError(err)
 				return
 			}
 
+			if event == nil && len(defaultEvents) == 0 {
+				txctx.Logger.Errorf("decoder: failed to load event ABI")
+				_ = txctx.AbortWithError(err)
+				return
+			}
+
+			var mapping map[string]string
+			if event != nil {
+				mapping, err = decoder.Decode(event, l)
+			} else {
+				for _, potentialEvent := range defaultEvents {
+					mapping, err = decoder.Decode(potentialEvent, l)
+					if err == nil {
+						event = potentialEvent
+						break
+					}
+				}
+			}
+
 			// Decode log
-			mapping, err := decoder.Decode(event, l)
 			if err != nil {
 				txctx.Logger.WithError(err).Errorf("decoder: could not decode log")
 				_ = txctx.AbortWithError(err)

@@ -32,6 +32,40 @@ You can start the application with default configuration by running
 $ docker-compose up
 ```
 
+### Run e2e tests:
+
+1. Set "ETH_CLIENT_URL"
+
+```bash
+export ETH_CLIENT_URL="https://ropsten.infura.io/v3/81e039ce6c8a465180822b525e3644d7 https://rinkeby.infura.io/v3/bfc9d6e51fbc4d3db54bea58d1094f9c https://kovan.infura.io/v3/bfc9d6e51fbc4d3db54bea58d1094f9c https://mainnet.infura.io/v3/bfc9d6e51fbc4d3db54bea58d1094f9c"
+```
+
+2. Run Kafka and Zookeeper
+
+```bash
+docker-compose -f e2e/docker-compose.yml up
+```
+
+3. Create Kafka topics 
+
+```bash
+bash e2e/initTestTopics.sh 
+```
+
+This script will fetch topic ids using Ethereum JSON RPC and create necessary topics
+
+4. Run worker
+
+```bash
+go run . run
+```
+
+5. Run producer
+
+```bash
+ go run e2e/producer/main.go
+```
+
 ### Configure application
 
 Application can be configured through flags or environment variables, you can run the ```help run``` command line
