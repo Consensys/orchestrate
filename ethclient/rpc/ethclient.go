@@ -73,7 +73,6 @@ func (ec *Client) Close() {
 }
 
 func (ec *Client) getRPC(chainID *big.Int) (rpc.Client, error) {
-	log.Infof("Getting RPC connection for chain: %s", chainID.Text(10))
 	c, ok := ec.rpcs[chainID.Text(10)]
 	if !ok {
 		return nil, fmt.Errorf("no RPC connection registered for chain %q", chainID.Text(10))
@@ -515,6 +514,11 @@ func (ec *Client) SendTransaction(ctx context.Context, chainID *big.Int, args *t
 	if err != nil {
 		return ethcommon.Hash{}, err
 	}
+
+	log.WithFields(log.Fields{
+		"nonce": args.Nonce.String(),
+		"from":  args.From.Hex(),
+	}).Info("sending a transaction")
 
 	err = c.CallContext(ctx, &txHash, "eth_sendTransaction", &args)
 	if err != nil {

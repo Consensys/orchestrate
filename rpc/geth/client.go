@@ -87,14 +87,18 @@ func (c *Client) CallContext(ctx context.Context, result interface{}, method str
 	return backoff.RetryNotify(
 		func() error {
 			var raw json.RawMessage
+			log.Debugf("calling method %s(%+v)", method, args)
 			err := c.rpc.CallContext(ctx, &raw, method, args...)
 			if err != nil {
+				log.Debugf("failed to call %s(%+v)", method, args)
 				return err
 			} else if len(raw) == 0 {
+				log.Debugf("%s(%+v) returned empty result", method, args)
 				return eth.NotFound
 			}
 
 			if err := json.Unmarshal(raw, &result); err != nil {
+				log.Debugf("failed to parse the result of call %s(%+v)", method, args)
 				return err
 			}
 
