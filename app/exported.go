@@ -24,6 +24,8 @@ var (
 	startOnce = &sync.Once{}
 )
 
+var l = createLogger("worker")
+
 func init() {
 	// Create app
 	app = NewApp()
@@ -93,16 +95,24 @@ func Start(ctx context.Context) {
 		// TODO: we need to update so ready can append when Consume has finished to Setup
 		app.ready.Store(true)
 
+		topics := []string{
+			viper.GetString("kafka.topic.sender"),
+		}
+		l.WithFields(log.Fields{
+			"topics": topics,
+		}).Info("connecting")
 		// Start consuming on topic tx-sender
 		err := broker.Consume(
 			cancelCtx,
-			[]string{
-				viper.GetString("kafka.topic.sender"),
-			},
+			topics,
 			broker.NewEngineConsumerGroupHandler(engine.GlobalEngine()),
 		)
 		if err != nil {
-			log.WithError(err).Error("worker: error on consumer")
+			l.WithError(err).Error("error on consumer")
 		}
 	})
+}
+
+func createLogger(name string) *log.Entry {
+	return log.WithField("name", name)
 }

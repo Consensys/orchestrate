@@ -62,6 +62,11 @@ func Sender(sender ethclient.TransactionSender, store contextStore.EnvelopeStore
 			"tx.hash": txctx.Envelope.GetTx().GetHash(),
 		})
 
+		log.WithFields(log.Fields{
+			"nonce": txctx.Envelope.GetTx().GetTxData().GetNonce(),
+			"from":  txctx.Envelope.GetFrom().Hex(),
+		}).Info("processing transaction")
+
 		// Store trace
 		status, _, err := store.Store(txctx.Context(), txctx.Envelope)
 		if err != nil {

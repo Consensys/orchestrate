@@ -46,7 +46,7 @@ func newMessage() *sarama.ProducerMessage {
 					Data:     ethereum.HexToData("0xabcd"),
 				},
 				Raw:  ethereum.HexToData("0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80"),
-				Hash: ethereum.HexToHash("0x" + RandString(32)),
+				Hash: ethereum.HexToHash("0x" + RandString(64)),
 			},
 			Metadata: &envelope.Metadata{
 				Id: RandString(32),
@@ -61,7 +61,8 @@ func main() {
 	// Init config, specify appropriate version
 	config := sarama.NewConfig()
 	config.Version = sarama.V1_0_0_0
-	config.Consumer.Return.Errors = true
+	config.Producer.Return.Successes = true
+	config.Producer.Return.Errors = true
 
 	// Create client
 	client, err := sarama.NewClient(kafkaURL, config)
@@ -69,7 +70,13 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	defer func() { client.Close() }()
+	defer func() {
+		fmt.Println("Closing a client")
+		e := client.Close()
+		if e != nil {
+			fmt.Println("Error while closing a client")
+		}
+	}()
 	fmt.Println("Client ready")
 
 	// Create producer
@@ -79,10 +86,25 @@ func main() {
 		return
 	}
 	fmt.Println("Producer ready")
-	defer p.Close()
+	defer func() {
+		fmt.Println("Closing a producer")
+		e := p.Close()
+		if e != nil {
+			fmt.Println("Error while closing a producer: ", e)
+		}
+	}()
 
 	rounds := 10
 	for i := 0; i < rounds; i++ {
 		p.Input() <- newMessage()
+	}
+
+	for i := 0; i < rounds; i++ {
+		select {
+		case success := <-p.Successes():
+			fmt.Println("Success", success)
+		case err := <-p.Errors():
+			fmt.Println("Error", err)
+		}
 	}
 }
