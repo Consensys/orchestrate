@@ -5,20 +5,24 @@ import (
 	"sync"
 	"testing"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
+
 	"github.com/DATA-DOG/godog"
 	"github.com/DATA-DOG/godog/gherkin"
 	"github.com/Shopify/sarama"
 	"github.com/Shopify/sarama/mocks"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/service/chanregistry"
 )
+
+var testAddress = ethcommon.HexToAddress("0x00").Hex()
 
 func TestFeatureContext(t *testing.T) {
 	s := &godog.Suite{}
@@ -39,7 +43,7 @@ func (s *ScenarioTestSuite) SetupTest() {
 	s.Scenario.EnvelopesChan = make(map[string]chan *envelope.Envelope)
 	s.Scenario.Envelopes = make(map[string]*envelope.Envelope)
 	s.Scenario.Value = make(map[string]interface{})
-	s.Scenario.Value["test"] = "test"
+	s.Scenario.Value[testAddress] = testAddress
 
 	viper.Set("cucumber.steps.timeout", 1)
 	viper.Set("cucumber.steps.miningtimeout", 1)
@@ -90,7 +94,7 @@ func (s *ScenarioTestSuite) TestIHaveTheFollowingEnvelope() {
 						Value: "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
 					},
 					&gherkin.TableCell{
-						Value: "test",
+						Value: testAddress,
 					},
 				},
 			},
@@ -108,7 +112,7 @@ func (s *ScenarioTestSuite) TestISendTheseEnvelopeToCoreStack() {
 	broker.SetGlobalSyncProducer(producer)
 
 	s.Scenario.Envelopes["test"] = &envelope.Envelope{
-		Chain: &common.Chain{Id: "888"},
+		Chain: chain.CreateChainInt(888),
 	}
 
 	err := s.Scenario.iSendTheseEnvelopeToCoreStack()
@@ -123,7 +127,7 @@ func (s *ScenarioTestSuite) TestCoreStackShouldReceiveEnvelopes() {
 	s.Scenario.EnvelopesChan[viper.GetString("kafka.topic.crafter")] = mockChan
 
 	testEnvelope := &envelope.Envelope{
-		Chain: &common.Chain{Id: "888"},
+		Chain: chain.CreateChainInt(888),
 	}
 	s.Scenario.Envelopes["test"] = testEnvelope
 
@@ -150,7 +154,7 @@ func (s *ScenarioTestSuite) TestTheTxcrafterShouldSetTheData() {
 	testEnvelope := &envelope.Envelope{
 		Tx: &ethereum.Transaction{
 			TxData: &ethereum.TxData{
-				Data: "test",
+				Data: ethereum.HexToData("0x00"),
 			},
 		},
 	}
@@ -192,13 +196,14 @@ func (s *ScenarioTestSuite) TestTheTxnonceShouldSetTheNonce() {
 	mockChan := make(chan *envelope.Envelope)
 	s.Scenario.EnvelopesChan[viper.GetString("kafka.topic.signer")] = mockChan
 
-	addr := []string{"test1", "test2"}
+	addr := [][]byte{
+		ethcommon.HexToAddress("0x00").Bytes(),
+		ethcommon.HexToAddress("0x01").Bytes(),
+	}
 	for i := range make([]int, 10) {
 		s.Scenario.Envelopes[fmt.Sprintf("%s-%d", "test", i)] = &envelope.Envelope{
-			Chain: &common.Chain{Id: "888"},
-			Sender: &common.Account{
-				Addr: addr[i%len(addr)],
-			},
+			Chain: chain.CreateChainInt(888),
+			From:  ethereum.NewAccount(addr[i%len(addr)]),
 			Tx: &ethereum.Transaction{
 				TxData: &ethereum.TxData{
 					Nonce: uint64(i),
@@ -232,7 +237,7 @@ func (s *ScenarioTestSuite) TestTheTxnonceShouldSetTheNonce() {
 	// Test step with unexpected envelopes
 	s.Scenario.Envelopes = map[string]*envelope.Envelope{
 		"unexpected1": &envelope.Envelope{
-			Sender: &common.Account{Addr: "test"},
+			From: ethereum.NewAccount(addr[0]),
 			Tx: &ethereum.Transaction{
 				TxData: &ethereum.TxData{
 					Nonce: 10,
@@ -240,7 +245,7 @@ func (s *ScenarioTestSuite) TestTheTxnonceShouldSetTheNonce() {
 			},
 		},
 		"unexpected2": &envelope.Envelope{
-			Sender: &common.Account{Addr: "test"},
+			From: ethereum.NewAccount(addr[0]),
 			Tx: &ethereum.Transaction{
 				TxData: &ethereum.TxData{
 					Nonce: 10,
@@ -272,7 +277,7 @@ func (s *ScenarioTestSuite) TestTheTxsignerShouldSign() {
 
 	testEnvelope := &envelope.Envelope{
 		Tx: &ethereum.Transaction{
-			Raw: "test",
+			Raw: ethereum.HexToData("0x00"),
 		},
 	}
 	s.Scenario.Envelopes["test"] = testEnvelope
@@ -308,7 +313,7 @@ func (s *ScenarioTestSuite) TestTheTxsignerShouldSign() {
 
 func (s *ScenarioTestSuite) TestTheTxlistenerShouldCatchTheTx() {
 
-	chainIds := []string{"1", "2"}
+	chainIds := []int64{1, 2}
 
 	for _, v := range chainIds {
 		topic := fmt.Sprintf("%v-%v", viper.GetString("kafka.topic.decoder"), v)
@@ -317,9 +322,9 @@ func (s *ScenarioTestSuite) TestTheTxlistenerShouldCatchTheTx() {
 
 	for i := range make([]int, 10) {
 		s.Scenario.Envelopes[fmt.Sprintf("%s-%d", "test", i)] = &envelope.Envelope{
-			Chain: &common.Chain{Id: chainIds[i%len(chainIds)]},
+			Chain: chain.CreateChainInt(chainIds[i%len(chainIds)]),
 			Receipt: &ethereum.Receipt{
-				TxHash: "test",
+				TxHash: ethereum.CreateHash(ethcommon.HexToAddress("0x00").Bytes()),
 			},
 		}
 	}
@@ -353,10 +358,13 @@ func (s *ScenarioTestSuite) TestTheTxdecoderShouldDecode() {
 	decoded["test"] = "test"
 	testEnvelope := &envelope.Envelope{
 		Receipt: &ethereum.Receipt{
-			TxHash: "test",
+			TxHash: ethereum.CreateHash(ethcommon.HexToAddress("0x00").Bytes()),
 			Logs: []*ethereum.Log{
 				&ethereum.Log{
-					Topics:      []string{"test", "test"},
+					Topics: []*ethereum.Hash{
+						ethereum.CreateHash(ethcommon.HexToAddress("0x00").Bytes()),
+						ethereum.CreateHash(ethcommon.HexToAddress("0x01").Bytes()),
+					},
 					DecodedData: decoded,
 				},
 			},
@@ -380,10 +388,13 @@ func (s *ScenarioTestSuite) TestTheTxdecoderShouldDecode() {
 	// Test step with unexpected envelopes
 	unexpectedEnvelope := &envelope.Envelope{
 		Receipt: &ethereum.Receipt{
-			TxHash: "test",
+			TxHash: ethereum.CreateHash(ethcommon.HexToAddress("0x00").Bytes()),
 			Logs: []*ethereum.Log{
 				&ethereum.Log{
-					Topics:      []string{"test", "test"},
+					Topics: []*ethereum.Hash{
+						ethereum.CreateHash(ethcommon.HexToAddress("0x00").Bytes()),
+						ethereum.CreateHash(ethcommon.HexToAddress("0x01").Bytes()),
+					},
 					DecodedData: make(map[string]string),
 				},
 			},

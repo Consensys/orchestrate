@@ -3,24 +3,25 @@ package steps
 import (
 	"testing"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
+
 	"github.com/Shopify/sarama"
 	"github.com/Shopify/sarama/mocks"
 	"github.com/stretchr/testify/assert"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 )
 
 func TestGetChainCounts(t *testing.T) {
 	envelopes := map[string]*envelope.Envelope{
 		"1": &envelope.Envelope{
-			Chain: &common.Chain{Id: "888"},
+			Chain: chain.CreateChainInt(888),
 		},
 		"2": &envelope.Envelope{
-			Chain: &common.Chain{Id: "777"},
+			Chain: chain.CreateChainInt(777),
 		},
 		"3": &envelope.Envelope{
-			Chain: &common.Chain{Id: "888"},
+			Chain: chain.CreateChainInt(888),
 		},
 	}
 
@@ -38,7 +39,7 @@ func TestChanTimeout(t *testing.T) {
 	assert.Nil(t, e, "Should get an nil envelope slice")
 	assert.Error(t, err, "Should get an error for not having received an envelope")
 
-	testEnvelope := &envelope.Envelope{Chain: &common.Chain{Id: "888"}}
+	testEnvelope := &envelope.Envelope{Chain: chain.CreateChainInt(888)}
 	go func() {
 		testChan <- testEnvelope
 	}()
@@ -55,7 +56,7 @@ func TestSendEnvelope(t *testing.T) {
 	broker.SetGlobalSyncProducer(producer)
 
 	e := &envelope.Envelope{
-		Chain: &common.Chain{Id: "888"},
+		Chain: chain.CreateChainInt(888),
 	}
 
 	err := SendEnvelope(e)

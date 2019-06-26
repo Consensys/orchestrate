@@ -6,14 +6,15 @@ import (
 	"strings"
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/args"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
+
 	"github.com/Shopify/sarama"
-	ethCommon "github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
@@ -22,7 +23,7 @@ import (
 func GetChainCounts(envelopes map[string]*envelope.Envelope) map[string]uint {
 	chains := make(map[string]uint)
 	for _, v := range envelopes {
-		chains[v.GetChain().GetId()]++
+		chains[v.GetChain().ID().String()]++
 	}
 	return chains
 }
@@ -72,84 +73,73 @@ func EnvelopeCrafter(m map[string]string) *envelope.Envelope {
 	for k, v := range m {
 		switch k {
 		case "chainId":
-			if e.GetChain() != nil {
-				e.GetChain().Id = v
-			} else {
-				e.Chain = &common.Chain{Id: v}
+			chainID, err := strconv.Atoi(v)
+			if err != nil {
+				panic("Failed to parse chain id")
 			}
+			e.Chain = chain.CreateChainInt(int64(chainID))
 		case "from":
-			if e.GetSender() != nil {
-				e.GetSender().Addr = v
-			} else {
-				e.Sender = &common.Account{Addr: v}
-			}
+			e.From = ethereum.HexToAccount(v)
 		case "contractName":
-			if e.GetCall() != nil {
-				if e.GetCall().GetContract() != nil {
-					e.GetCall().GetContract().Name = v
-				} else {
-					e.GetCall().Contract = &abi.Contract{Name: v}
-				}
-			} else {
-				e.Call = &common.Call{
-					Contract: &abi.Contract{
-						Name: v,
-					},
-				}
+			if e.GetArgs() == nil {
+				e.Args = &envelope.Args{}
 			}
+			if e.GetArgs().GetCall() == nil {
+				e.Args.Call = &args.Call{}
+			}
+			if e.GetArgs().GetCall().GetContract() == nil {
+				e.Args.Call.Contract = &abi.Contract{}
+			}
+			if e.GetArgs().GetCall().GetContract().GetId() == nil {
+				e.Args.Call.Contract.Id = &abi.ContractId{}
+			}
+
+			e.GetArgs().GetCall().GetContract().GetId().Name = v
 		case "contractTag":
-			if e.GetCall() != nil {
-				if e.GetCall().GetContract() != nil {
-					e.GetCall().GetContract().Tag = v
-				} else {
-					e.GetCall().Contract = &abi.Contract{Tag: v}
-				}
-			} else {
-				e.Call = &common.Call{
-					Contract: &abi.Contract{
-						Tag: v,
-					},
-				}
+			if e.GetArgs() == nil {
+				e.Args = &envelope.Args{}
 			}
+			if e.GetArgs().GetCall() == nil {
+				e.Args.Call = &args.Call{}
+			}
+			if e.GetArgs().GetCall().GetContract() == nil {
+				e.Args.Call.Contract = &abi.Contract{}
+			}
+			if e.GetArgs().GetCall().GetContract().GetId() == nil {
+				e.Args.Call.Contract.Id = &abi.ContractId{}
+			}
+
+			e.GetArgs().GetCall().GetContract().GetId().Tag = v
 		case "methodSignature":
-			if e.GetCall() != nil {
-				if e.GetCall().GetMethod() != nil {
-					e.GetCall().GetMethod().Signature = v
-				} else {
-					e.GetCall().Method = &abi.Method{Signature: v}
-				}
-			} else {
-				e.Call = &common.Call{
-					Method: &abi.Method{
-						Signature: v,
-					},
-				}
+			if e.GetArgs() == nil {
+				e.Args = &envelope.Args{}
 			}
+			if e.GetArgs().GetCall() == nil {
+				e.Args.Call = &args.Call{}
+			}
+			if e.GetArgs().GetCall().GetMethod() == nil {
+				e.Args.Call.Method = &abi.Method{}
+			}
+
+			e.GetArgs().GetCall().GetMethod().Signature = v
 		case "args":
-			if e.GetCall() != nil {
-				e.GetCall().Args = strings.Split(v, ",")
-			} else {
-				e.Call = &common.Call{
-					Args: strings.Split(v, ","),
-				}
+			if e.GetArgs() == nil {
+				e.Args = &envelope.Args{}
 			}
+			if e.GetArgs().GetCall() == nil {
+				e.Args.Call = &args.Call{}
+			}
+
+			e.GetArgs().GetCall().Args = strings.Split(v, ",")
 		case "to":
-			if e.GetTx() != nil {
-				if e.GetTx().GetTxData() != nil {
-					// Todo replace interface instead of Address
-					e.GetTx().GetTxData().SetTo(ethCommon.HexToAddress(v))
-				} else {
-					e.GetTx().TxData = &ethereum.TxData{
-						To: v,
-					}
-				}
-			} else {
-				e.Tx = &ethereum.Transaction{
-					TxData: &ethereum.TxData{
-						To: v,
-					},
-				}
+			if e.GetTx() == nil {
+				e.Tx = &ethereum.Transaction{}
 			}
+			if e.GetTx().GetTxData() == nil {
+				e.Tx.TxData = &ethereum.TxData{}
+			}
+
+			e.GetTx().GetTxData().To = ethereum.HexToAccount(v)
 		case "gas":
 			gas, _ := strconv.ParseUint(v, 10, 32)
 			if e.GetTx() != nil {
@@ -168,37 +158,31 @@ func EnvelopeCrafter(m map[string]string) *envelope.Envelope {
 				}
 			}
 		case "gasPrice":
-			if e.GetTx() != nil {
-				if e.GetTx().GetTxData() != nil {
-					e.GetTx().GetTxData().GasPrice = v
-				} else {
-					e.GetTx().TxData = &ethereum.TxData{
-						GasPrice: v,
-					}
-				}
-			} else {
-				e.Tx = &ethereum.Transaction{
-					TxData: &ethereum.TxData{
-						GasPrice: v,
-					},
-				}
+			gasPrice, err := strconv.Atoi(v)
+			if err != nil {
+				panic("Failed to parse gas price")
 			}
+			if e.GetTx() == nil {
+				e.Tx = &ethereum.Transaction{}
+			}
+			if e.GetTx().GetTxData() == nil {
+				e.Tx.TxData = &ethereum.TxData{}
+			}
+
+			e.GetTx().GetTxData().GasPrice = ethereum.IntToQuantity(int64(gasPrice))
 		case "value":
-			if e.GetTx() != nil {
-				if e.GetTx().GetTxData() != nil {
-					e.GetTx().GetTxData().Value = v
-				} else {
-					e.GetTx().TxData = &ethereum.TxData{
-						Value: v,
-					}
-				}
-			} else {
-				e.Tx = &ethereum.Transaction{
-					TxData: &ethereum.TxData{
-						Value: v,
-					},
-				}
+			value, err := strconv.Atoi(v)
+			if err != nil {
+				panic("Failed to parse value")
 			}
+			if e.GetTx() == nil {
+				e.Tx = &ethereum.Transaction{}
+			}
+			if e.GetTx().GetTxData() == nil {
+				e.Tx.TxData = &ethereum.TxData{}
+			}
+
+			e.GetTx().GetTxData().Value = ethereum.IntToQuantity(int64(value))
 		case "metadataID":
 			if e.GetMetadata() != nil {
 				e.GetMetadata().Id = v

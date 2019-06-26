@@ -3,6 +3,8 @@ package steps
 import (
 	"fmt"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
+
 	"github.com/DATA-DOG/godog"
 	"github.com/DATA-DOG/godog/gherkin"
 	uuid "github.com/satori/go.uuid"
@@ -78,7 +80,7 @@ func (sc *ScenarioContext) iHaveTheFollowingEnvelope(rawEnvelopes *gherkin.DataT
 			// Replace "Aliases"
 			switch {
 			case cell.Value == "AliasTo":
-				mapEnvelope["to"] = sc.Value[rawEnvelopes.Rows[i].Cells[j].Value].(string)
+				mapEnvelope["to"] = sc.Value[rawEnvelopes.Rows[i].Cells[j].Value].(*ethereum.Account).Hex()
 			case cell.Value == "AliasChainId":
 				mapEnvelope["chainId"] = viper.GetString(fmt.Sprintf("cucumber.chainid.%s", rawEnvelopes.Rows[i].Cells[j].Value))
 			default:
@@ -143,7 +145,7 @@ func (sc *ScenarioContext) theTxcrafterShouldSetTheData() error {
 	}
 
 	for _, v := range e {
-		if v.GetTx().GetTxData().GetData() == "" {
+		if v.GetTx().GetTxData().GetData() == nil {
 			err := fmt.Errorf("tx-crafter could not craft transaction")
 			sc.Logger.Errorf("cucumber: step failed with error %q", err)
 			return err
@@ -169,8 +171,8 @@ func (sc *ScenarioContext) theTxnonceShouldSetTheNonce() error {
 
 	nonces := make(map[string]map[string]map[uint64]bool)
 	for _, v := range e {
-		chain := v.GetChain().GetId()
-		addr := v.GetSender().GetAddr()
+		chain := v.GetChain().ID().String()
+		addr := v.GetFrom().Address().Hex()
 		nonce := v.GetTx().GetTxData().GetNonce()
 
 		if nonces[chain] == nil {
@@ -205,7 +207,7 @@ func (sc *ScenarioContext) theTxsignerShouldSign() error {
 	}
 
 	for _, v := range e {
-		if v.GetTx().GetRaw() == "" {
+		if v.GetTx().GetRaw() == nil {
 			err := fmt.Errorf("tx-signer could not sign")
 			sc.Logger.Errorf("cucumber: step failed with error %q", err)
 			return err
@@ -238,7 +240,7 @@ func (sc *ScenarioContext) theTxlistenerShouldCatchTheTx() error {
 		}
 
 		for _, v := range e {
-			if v.GetReceipt().GetTxHash() == "" {
+			if v.GetReceipt().GetTxHash() == nil {
 				err := fmt.Errorf("tx-listener could not catch the tx")
 				sc.Logger.Errorf("cucumber: step failed with error %q", err)
 				return err
@@ -315,7 +317,7 @@ func (sc *ScenarioContext) iShouldCatchTheirContractAddresses() error {
 	}
 
 	for _, v := range e {
-		if v.GetReceipt().GetContractAddress() == "" {
+		if v.GetReceipt().GetContractAddress() == nil {
 			return fmt.Errorf("could not deploy contract")
 		}
 		sc.Value[v.GetMetadata().GetExtra()["AliasContractInstance"]] = v.GetReceipt().GetContractAddress()
