@@ -32,10 +32,6 @@ lint:
 	@misspell -error $(GOFILES)
 	@golangci-lint run
 
-lint-ci:
-	@misspell -error $(GOFILES)
-	@GOGC=20 golangci-lint -v run
-
 tidy: mod-tidy lint-fix protobuf
 
 # Tools
