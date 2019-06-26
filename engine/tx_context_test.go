@@ -82,11 +82,11 @@ func TestCtxError(t *testing.T) {
 
 	assert.Len(t, txctx.Envelope.Errors, 1, "Error count should be correct")
 
-	err = &common.Error{Message: "test Error", Code: 5}
+	err = common.NewError("test Error").SetCode(5)
 	_ = txctx.Error(err)
 
-	assert.Len(t, txctx.Envelope.Errors, 2, "Error count should be correct")
-	assert.Equal(t, `2 error(s): ["Error #0: test Error" "Error #5: test Error"]`, txctx.Envelope.Error(), "Error message should be correct")
+	assert.Len(t, txctx.Envelope.GetErrors(), 2, "Error count should be correct")
+	assert.Equal(t, `["test Error" "test Error"]`, txctx.Envelope.Error(), "Error message should be correct")
 }
 
 func TestLogger(t *testing.T) {

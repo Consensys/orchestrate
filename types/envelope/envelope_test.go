@@ -17,5 +17,5 @@ func TestEnvelope(t *testing.T) {
 			&common.Error{Code: 0, Message: "Unknown error"},
 		},
 	}
-	assert.Equal(t, `2 error(s): ["Error #1: Timeout error" "Error #0: Unknown error"]`, envelope.Error(), "Error message should be correct")
+	assert.Equal(t, `["Timeout error" "Unknown error"]`, envelope.Error(), "Error message should be correct")
 }

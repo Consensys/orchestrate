@@ -7,10 +7,12 @@ import (
 )
 
 func TestError(t *testing.T) {
-	err := &Error{
-		Code:    uint64(18),
-		Message: "Test Error",
-	}
 
-	assert.Equal(t, "Error #18: Test Error", err.Error(), "Error message should be valid")
+	err := NewError("Test Error").
+		SetCode(uint64(18)).
+		SetComponent("test-component")
+
+	assert.Equal(t, "Test Error", err.Error(), "Error message should be valid")
+	assert.Equal(t, uint64(18), err.GetCode(), "Codee should be valid")
+	assert.Equal(t, "test-component", err.GetComponent(), "Component should be valid")
 }

@@ -1,14 +1,18 @@
 package envelope
 
 import (
+	fmt "fmt"
+
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/opentracing/opentracing-go"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 )
 
 // Error returns string representation of errors encountered by envelope
 func (e *Envelope) Error() string {
-	return common.Errors(e.Errors).Error()
+	if len(e.GetErrors()) == 0 {
+		return ""
+	}
+	return fmt.Sprintf("%q", e.GetErrors())
 }
 
 // Sender returns sender of the transaction

@@ -1,24 +1,22 @@
 package common
 
-import "fmt"
+func NewError(msg string) *Error {
+	return &Error{
+		Message: msg,
+	}
+}
 
 // Error (implement error interface)
 func (err *Error) Error() string {
-	return fmt.Sprintf("Error #%v: %v", err.Code, err.Message)
+	return err.GetMessage()
 }
 
-// Errors represent a set of error's specification
-type Errors []*Error
+func (err *Error) SetComponent(name string) *Error {
+	err.Component = name
+	return err
+}
 
-// Error implements the error interface.
-func (err Errors) Error() string {
-	if len(err) == 0 {
-		return ""
-	}
-
-	errors := []string{}
-	for _, e := range err {
-		errors = append(errors, e.Error())
-	}
-	return fmt.Sprintf("%v error(s): %q", len(err), errors)
+func (err *Error) SetCode(code uint64) *Error {
+	err.Code = code
+	return err
 }

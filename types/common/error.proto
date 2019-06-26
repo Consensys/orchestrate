@@ -12,6 +12,9 @@ message Error {
     // Error Code of the error
     uint64 code = 2;
 
+    // Component 
+    string component = 3;
+
     // Extra information
-    map<string, string> extra = 3;
+    map<string, string> extra = 4;
 }
