@@ -2,7 +2,7 @@
 
 ### Version 0.5.0
 
-*Released on May 20th 2019*
+*Released on June 27th 2019*
 
 - [FEAT] Update `pkg` and protos types
 
