@@ -66,13 +66,7 @@ func (txctx *TxContext) Error(err error) *common.Error {
 	if err == nil {
 		panic("err is nil")
 	}
-
-	e, ok := err.(*common.Error)
-	if !ok {
-		e = &common.Error{
-			Message: err.Error(),
-		}
-	}
+	e := common.FromError(err)
 	txctx.Envelope.Errors = append(txctx.Envelope.Errors, e)
 
 	return e
