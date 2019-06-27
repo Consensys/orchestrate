@@ -58,11 +58,11 @@ func NewEngine(conf *Config) (e *Engine) {
 // SetConfig set Engine configuration
 func (e *Engine) SetConfig(conf *Config) {
 	if conf == nil {
-		panic("nil configuration")
+		log.Fatal("nil configuration passed to engine")
 	}
 
 	if err := conf.Validate(); err != nil {
-		panic(err)
+		log.WithError(err).Fatal("cannot validate engine configuration")
 	}
 
 	e.mux.Lock()
