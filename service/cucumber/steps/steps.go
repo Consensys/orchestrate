@@ -83,12 +83,12 @@ func (sc *ScenarioContext) iHaveTheFollowingEnvelope(rawEnvelopes *gherkin.DataT
 			case cell.Value == "AliasTo":
 				val := sc.Value[rawEnvelopes.Rows[i].Cells[j].Value]
 				switch v := val.(type) {
-				default:
-					panic(fmt.Errorf("unexpected type %T", v))
 				case string:
 					mapEnvelope["to"] = val.(string)
 				case *ethereum.Account:
 					mapEnvelope["to"] = val.(*ethereum.Account).Hex()
+				default:
+					return fmt.Errorf("unexpected type %T", v)
 				}
 			case cell.Value == "AliasChainId":
 				mapEnvelope["chainId"] = viper.GetString(fmt.Sprintf("cucumber.chainid.%s", rawEnvelopes.Rows[i].Cells[j].Value))

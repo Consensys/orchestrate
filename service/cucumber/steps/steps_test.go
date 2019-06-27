@@ -2,9 +2,11 @@ package steps
 
 import (
 	"fmt"
-	"github.com/Shopify/sarama"
 	"sync"
 	"testing"
+
+	"github.com/Shopify/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 
@@ -332,20 +334,19 @@ func (s *ScenarioTestSuite) TestTheTxlistenerShouldCatchTheTx() {
 	var err error
 
 	// Test the well functioning of the step with expected envelopes
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
-		err = s.Scenario.theTxlistenerShouldCatchTheTx()
-		wg.Done()
-	}()
-
-	for _, e := range s.Scenario.Envelopes {
-		go func(e *envelope.Envelope) {
-			topic := fmt.Sprintf("%v-%v", viper.GetString("kafka.topic.decoder"), e.GetChain().ID().Int64())
-			s.Scenario.EnvelopesChan[topic] <- e
-		}(e)
-	}
-	wg.Wait()
+	common.InParallel(
+		func() {
+			err = s.Scenario.theTxlistenerShouldCatchTheTx()
+		},
+		func() {
+			for _, e := range s.Scenario.Envelopes {
+				go func(e *envelope.Envelope) {
+					topic := fmt.Sprintf("%v-%v", viper.GetString("kafka.topic.decoder"), e.GetChain().ID().Int64())
+					s.Scenario.EnvelopesChan[topic] <- e
+				}(e)
+			}
+		},
+	)
 	assert.NoError(s.T(), err, "Should not get an error")
 }
 
