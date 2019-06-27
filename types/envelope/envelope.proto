@@ -2,12 +2,12 @@ syntax = "proto3";
 
 import "types/chain/chain.proto";
 import "types/chain/protocol.proto";
-import "types/common/error.proto";
 import "types/ethereum/base.proto";
 import "types/ethereum/transaction.proto";
 import "types/ethereum/receipt.proto";
 import "types/args/private.proto";
 import "types/args/call.proto";
+import "types/error/error.proto";
 
 option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope";
 
@@ -52,7 +52,7 @@ message Envelope {
     ethereum.Receipt receipt = 5;
 
     // Errors encountered while orchestrating the transaction
-    repeated common.Error errors = 6;
+    repeated error.Error errors = 6;
 
     // Arguments provided by user
     Args args = 7;

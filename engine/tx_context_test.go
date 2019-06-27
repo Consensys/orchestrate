@@ -8,7 +8,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	err "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
 )
 
 var testKey = "test"
@@ -75,15 +75,15 @@ func TestApplyHandlers(t *testing.T) {
 }
 
 func TestCtxError(t *testing.T) {
-	err := fmt.Errorf("test Error")
+	e := fmt.Errorf("test Error")
 
 	txctx := NewTxContext()
-	_ = txctx.Error(err)
+	_ = txctx.Error(e)
 
 	assert.Len(t, txctx.Envelope.Errors, 1, "Error count should be correct")
 
-	err = common.NewError("test Error").SetCode(5)
-	_ = txctx.Error(err)
+	e = err.NewError("test Error").SetCode(5)
+	_ = txctx.Error(e)
 
 	assert.Len(t, txctx.Envelope.GetErrors(), 2, "Error count should be correct")
 	assert.Equal(t, `["test Error" "test Error"]`, txctx.Envelope.Error(), "Error message should be correct")

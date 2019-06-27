@@ -1,4 +1,4 @@
-package common
+package error
 
 // NewError creates a new error
 func NewError(msg string) *Error {
@@ -24,7 +24,7 @@ func (err *Error) SetCode(code uint64) *Error {
 	return err
 }
 
-// FromError return an internal error from any error
+// FromError cast an error tinto an Error
 //
 // if `err` is already an internal error then it is returned
 func FromError(err error) *Error {

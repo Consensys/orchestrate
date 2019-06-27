@@ -2,7 +2,7 @@ syntax = "proto3";
 
 import "types/envelope/envelope.proto";
 import "types/chain/chain.proto";
-import "types/common/error.proto";
+import "types/error/error.proto";
 import "google/protobuf/timestamp.proto";
 
 option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope-store";
@@ -24,7 +24,7 @@ service Store {
     rpc GetStatus(IDRequest) returns (StoreResponse) {}
 
     // SetStatus set an envelope status
-    rpc SetStatus(SetStatusRequest) returns (common.Error) {}
+    rpc SetStatus(SetStatusRequest) returns (error.Error) {}
     
     // LoadPending load envelopes of pending transactions
     rpc LoadPending(LoadPendingRequest) returns (LoadPendingResponse) {}
@@ -45,7 +45,7 @@ message StoreResponse{
     envelope.Envelope envelope = 3;
     
     // Error
-    common.Error err = 4;
+    error.Error err = 4;
 }
 
 message TxHashRequest{
@@ -79,5 +79,5 @@ message LoadPendingResponse {
     repeated envelope.Envelope envelopes = 1;
 
     // Error
-    common.Error err = 2;
+    error.Error err = 2;
 }

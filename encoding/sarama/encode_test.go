@@ -10,8 +10,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/args"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
+	err "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
 
@@ -66,9 +66,9 @@ var testEnvelope = &envelope.Envelope{
 		BlockNumber:       1234,
 		TxIndex:           1,
 	},
-	Errors: []*common.Error{
-		&common.Error{Code: 0, Message: "Error 0"},
-		&common.Error{Code: 1, Message: "Error 1"},
+	Errors: []*err.Error{
+		&err.Error{Code: 0, Message: "Error 0"},
+		&err.Error{Code: 1, Message: "Error 1"},
 	},
 	Metadata: &envelope.Metadata{
 		Id: "test",
@@ -101,8 +101,8 @@ func TestMarshaller(t *testing.T) {
 	wg.Wait()
 
 	for _, msg := range messages {
-		b, err := msg.Value.Encode()
-		if err != nil {
+		b, e := msg.Value.Encode()
+		if e != nil {
 			t.Errorf("SaramaMarshaller: expected valid value")
 		}
 		if string(b) != string(expected) {

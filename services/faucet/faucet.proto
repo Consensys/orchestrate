@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-import "types/common/error.proto";
+import "types/error/error.proto";
 import "types/ethereum/base.proto";
 import "types/chain/chain.proto";
 
@@ -37,5 +37,5 @@ message CreditResponse {
 
     // Error when crediting
     // In most cases it indicates the reason why a credit has not been granted
-    common.Error error = 3;
+    error.Error error = 3;
 }

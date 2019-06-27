@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	err "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
 )
 
 func TestEnvelope(t *testing.T) {
@@ -12,9 +12,9 @@ func TestEnvelope(t *testing.T) {
 	assert.Equal(t, "", envelope.Error(), "Error message should be correct")
 
 	envelope = &Envelope{
-		Errors: []*common.Error{
-			&common.Error{Code: 1, Message: "Timeout error"},
-			&common.Error{Code: 0, Message: "Unknown error"},
+		Errors: []*err.Error{
+			&err.Error{Code: 1, Message: "Timeout error"},
+			&err.Error{Code: 0, Message: "Unknown error"},
 		},
 	}
 	assert.Equal(t, `["Timeout error" "Unknown error"]`, envelope.Error(), "Error message should be correct")
