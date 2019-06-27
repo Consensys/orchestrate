@@ -11,14 +11,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const DEFAULT = "default"
-
 func TestDBUser(t *testing.T) {
 	name := "db.user"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	DBUser(flgs, DEFAULT)
+	DBUser(flgs)
 
-	expected := DEFAULT
+	expected := "postgres" //nolint:goconst
 	assert.Equal(t, expected, viper.GetString(name), "Default db user should be %q but got %q", expected, viper.GetString(name))
 
 	os.Setenv("DB_USER", "env-user")
@@ -38,9 +36,9 @@ func TestDBUser(t *testing.T) {
 func TestDBPassword(t *testing.T) {
 	name := "db.password"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	DBPassword(flgs, DEFAULT)
+	DBPassword(flgs)
 
-	expected := DEFAULT
+	expected := "postgres"
 	assert.Equal(t, expected, viper.GetString(name), "Default db password should be %q but got %q", expected, viper.GetString(name))
 
 	os.Setenv("DB_PASSWORD", "env-password")
@@ -60,9 +58,9 @@ func TestDBPassword(t *testing.T) {
 func TestDBDatabase(t *testing.T) {
 	name := "db.database"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	DBDatabase(flgs, DEFAULT)
+	DBDatabase(flgs)
 
-	expected := DEFAULT
+	expected := "postgres"
 	assert.Equal(t, expected, viper.GetString(name), "Default db database should be %q but got %q", expected, viper.GetString(name))
 
 	os.Setenv("DB_DATABASE", "env-database")
@@ -82,7 +80,7 @@ func TestDBDatabase(t *testing.T) {
 func TestDBHost(t *testing.T) {
 	name := "db.host"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	DBHost(flgs, "127.0.0.1")
+	DBHost(flgs)
 
 	expected := "127.0.0.1"
 	assert.Equal(t, expected, viper.GetString(name), "Default db host should be %q but got %q", expected, viper.GetString(name))
@@ -104,7 +102,7 @@ func TestDBHost(t *testing.T) {
 func TestDBPort(t *testing.T) {
 	name := "db.port"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	DBPort(flgs, 5432)
+	DBPort(flgs)
 
 	expected := 5432
 	assert.Equal(t, expected, viper.GetInt(name), "Default db port should be %v but got %v", expected, viper.GetInt(name))

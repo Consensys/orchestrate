@@ -8,8 +8,8 @@ import (
 )
 
 func init() {
-	_ = viper.BindEnv(hostnameViperKey, hostnameEnv)
 	viper.SetDefault(hostnameViperKey, hostnameDefault)
+	_ = viper.BindEnv(hostnameViperKey, hostnameEnv)
 }
 
 var (
