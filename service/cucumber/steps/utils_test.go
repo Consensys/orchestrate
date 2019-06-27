@@ -35,7 +35,7 @@ func TestChanTimeout(t *testing.T) {
 
 	testChan := make(chan *envelope.Envelope)
 
-	e, err := ChanTimeout(testChan, 1, 1)
+	e, err := ReadChanWithTimeout(testChan, 1, 1)
 	assert.Nil(t, e, "Should get an nil envelope slice")
 	assert.Error(t, err, "Should get an error for not having received an envelope")
 
@@ -43,7 +43,7 @@ func TestChanTimeout(t *testing.T) {
 	go func() {
 		testChan <- testEnvelope
 	}()
-	e, err = ChanTimeout(testChan, 1, 1)
+	e, err = ReadChanWithTimeout(testChan, 1, 1)
 	assert.NoError(t, err, "Should not get an error")
 	assert.Equal(t, testEnvelope.GetChain().GetId(), e[0].GetChain().GetId(), "Should be the same envelope")
 }

@@ -2,6 +2,7 @@ package steps
 
 import (
 	"fmt"
+	"github.com/Shopify/sarama"
 	"sync"
 	"testing"
 
@@ -9,7 +10,6 @@ import (
 
 	"github.com/DATA-DOG/godog"
 	"github.com/DATA-DOG/godog/gherkin"
-	"github.com/Shopify/sarama"
 	"github.com/Shopify/sarama/mocks"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
@@ -341,7 +341,7 @@ func (s *ScenarioTestSuite) TestTheTxlistenerShouldCatchTheTx() {
 
 	for _, e := range s.Scenario.Envelopes {
 		go func(e *envelope.Envelope) {
-			topic := fmt.Sprintf("%v-%v", viper.GetString("kafka.topic.decoder"), e.GetChain().GetId())
+			topic := fmt.Sprintf("%v-%v", viper.GetString("kafka.topic.decoder"), e.GetChain().ID().Int64())
 			s.Scenario.EnvelopesChan[topic] <- e
 		}(e)
 	}

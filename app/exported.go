@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/loader"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/logger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/offset"
@@ -47,56 +49,32 @@ func startServer(ctx context.Context) {
 }
 
 func initComponents(ctx context.Context) {
-	wg := sync.WaitGroup{}
-
-	// Initialize Engine
-	wg.Add(1)
-	go func() {
-		engine.Init(ctx)
-		wg.Done()
-	}()
-
-	// Initialize ConsumerGroup
-	wg.Add(1)
-	go func() {
-		broker.InitConsumerGroup(ctx)
-		wg.Done()
-	}()
-
-	// Initialize Handlers
-	wg.Add(1)
-	go func() {
-		handlers.Init(ctx)
-		wg.Done()
-	}()
-
-	// Initialize cucumber registry
-	wg.Add(1)
-	go func() {
-		cucumber.Init(ctx)
-		wg.Done()
-	}()
-
-	// Wait for engine and handlers to be ready
-	wg.Wait()
+	common.InParallel(
+		// Initialize Engine
+		func() {
+			engine.Init(ctx)
+		},
+		// Initialize ConsumerGroup
+		func() {
+			broker.InitConsumerGroup(ctx)
+		},
+		// Initialize Handlers
+		func() {
+			handlers.Init(ctx)
+		},
+		// Initialize cucumber registry
+		func() {
+			cucumber.Init(ctx)
+		},
+	)
 }
 
 func registerHandlers() {
-	wg := sync.WaitGroup{}
-
-	// Register handlers on engine
-	wg.Add(1)
-	go func() {
-		// Generic handlers on every worker
-		engine.Register(logger.Logger)
-		engine.Register(loader.Loader)
-		engine.Register(offset.Marker)
-		engine.Register(dispatcher.GlobalHandler())
-		wg.Done()
-	}()
-
-	// Wait for ConsumerGroup & Engine to be ready
-	wg.Wait()
+	// Generic handlers on every worker
+	engine.Register(logger.Logger)
+	engine.Register(loader.Loader)
+	engine.Register(offset.Marker)
+	engine.Register(dispatcher.GlobalHandler())
 }
 
 // Start starts application

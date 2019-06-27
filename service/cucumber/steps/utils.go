@@ -28,8 +28,8 @@ func GetChainCounts(envelopes map[string]*envelope.Envelope) map[string]uint {
 	return chains
 }
 
-// ChanTimeout constrains channel to receive message or to timeout
-func ChanTimeout(c chan *envelope.Envelope, seconds int64, expectedItems int) ([]*envelope.Envelope, error) {
+// ReadChanWithTimeout constrains channel to receive message or to timeout
+func ReadChanWithTimeout(c chan *envelope.Envelope, seconds int64, expectedItems int) ([]*envelope.Envelope, error) {
 	envelopesChan := make([]*envelope.Envelope, expectedItems)
 	for i := 0; i < expectedItems; i++ {
 		select {

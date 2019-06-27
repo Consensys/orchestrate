@@ -41,7 +41,7 @@ func newRunCommand() *cobra.Command {
 	broker.KafkaTopicTxDecoder(runCmd.Flags())
 	broker.KafkaTopicTxDecoded(runCmd.Flags())
 
-	// Register Cucumber flags
+	// Register Cucumber flag
 	cucumber.InitFlags(runCmd.Flags())
 	steps.InitFlags(runCmd.Flags())
 
