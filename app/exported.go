@@ -64,18 +64,16 @@ func initConsumerGroup(ctx context.Context) {
 		func() {
 			rpc.Init(ctx)
 		},
-		// Wait for ConsumerGroup & Engine to be ready
-		func() {
-			// Generic handlers on every worker
-			engine.Register(logger.Logger)
-			engine.Register(loader.Loader)
-			engine.Register(offset.Marker)
-			engine.Register(producer.GlobalHandler())
-
-			// Specific handlers of Tx-Decoder worker
-			engine.Register(decoder.GlobalHandler())
-		},
 	)
+
+	// Generic handlers on every worker
+	engine.Register(logger.Logger)
+	engine.Register(loader.Loader)
+	engine.Register(offset.Marker)
+	engine.Register(producer.GlobalHandler())
+
+	// Specific handlers of Tx-Decoder worker
+	engine.Register(decoder.GlobalHandler())
 }
 
 // Start starts application
