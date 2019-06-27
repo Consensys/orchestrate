@@ -5,7 +5,7 @@ import (
 	errors "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 )
 
-// Unmarshal message expected to be a Envelope
+// Unmarshal parses the protocol buffer representation in `buf` and places the decoded result in `pb`
 func Unmarshal(buf []byte, pb proto.Message) error {
 	// Cast message into protobuffer
 	e := proto.Unmarshal(buf, pb)

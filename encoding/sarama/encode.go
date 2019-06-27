@@ -2,15 +2,17 @@ package sarama
 
 import (
 	"github.com/Shopify/sarama"
-	"github.com/golang/protobuf/proto"
+	protobuf "github.com/golang/protobuf/proto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/proto"
+	errors "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 )
 
-// Marshal a proto into a message assume to be a sarama.ProducerMessage
-func Marshal(pb proto.Message, msg *sarama.ProducerMessage) error {
+// Marshal a proto into a e a sarama.ProducerMessage
+func Marshal(pb protobuf.Message, msg *sarama.ProducerMessage) error {
 	// Marshal protobuffer into byte
 	b, err := proto.Marshal(pb)
 	if err != nil {
-		return err
+		return errors.EncodingError(err).SetComponent(component)
 	}
 
 	// Set message value

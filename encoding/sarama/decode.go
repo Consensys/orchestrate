@@ -1,17 +1,18 @@
 package sarama
 
 import (
-	"github.com/golang/protobuf/proto"
+	protobuf "github.com/golang/protobuf/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/proto"
+	errors "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 )
 
-// Unmarshal message assumed to be a sarama.ConsumerMessage into a proto
-func Unmarshal(msg *sarama.Msg, pb proto.Message) error {
+// Unmarshal a sarama message into a protobuffer
+func Unmarshal(msg *sarama.Msg, pb protobuf.Message) error {
 	// Unmarshal Sarama message to Envelope
 	err := proto.Unmarshal(msg.Value, pb)
 	if err != nil {
-		return err
+		return errors.EncodingError(err).SetComponent(component)
 	}
-
 	return nil
 }

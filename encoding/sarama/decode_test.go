@@ -5,8 +5,11 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
+	err "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
 
 func newConsumerMessage() *sarama.Msg {
@@ -35,4 +38,16 @@ func TestUnmarshaller(t *testing.T) {
 		}
 	}
 
+}
+
+func TestUnmarshallerError(t *testing.T) {
+	msg := &sarama.Msg{
+		Value: []byte{0xab, 0x10},
+	}
+	pb := &ethereum.TxData{}
+	e, ok := Unmarshal(msg, pb).(*err.Error)
+	assert.NotNil(t, e, "Unmarshal should error")
+	assert.True(t, ok, "Error should be internal format")
+	assert.Equal(t, e.GetCode(), []byte{0x10, 0x00}, "Error code should be correct")
+	assert.Equal(t, e.GetComponent(), "encoding.sarama", "Error code should be correct")
 }
