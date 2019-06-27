@@ -82,7 +82,7 @@ func TestCtxError(t *testing.T) {
 
 	assert.Len(t, txctx.Envelope.Errors, 1, "Error count should be correct")
 
-	e = err.NewError("test Error").SetCode(5)
+	e = err.NewError("test Error").SetCode([]byte{0x5})
 	_ = txctx.Error(e)
 
 	assert.Len(t, txctx.Envelope.GetErrors(), 2, "Error count should be correct")

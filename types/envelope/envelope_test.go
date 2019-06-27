@@ -13,8 +13,8 @@ func TestEnvelope(t *testing.T) {
 
 	envelope = &Envelope{
 		Errors: []*err.Error{
-			&err.Error{Code: 1, Message: "Timeout error"},
-			&err.Error{Code: 0, Message: "Unknown error"},
+			&err.Error{Code: []byte{0x1}, Message: "Timeout error"},
+			&err.Error{Code: []byte{0x0}, Message: "Unknown error"},
 		},
 	}
 	assert.Equal(t, `["Timeout error" "Unknown error"]`, envelope.Error(), "Error message should be correct")

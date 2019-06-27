@@ -19,7 +19,7 @@ func (err *Error) SetComponent(name string) *Error {
 }
 
 // SetCode sets error code
-func (err *Error) SetCode(code uint64) *Error {
+func (err *Error) SetCode(code []byte) *Error {
 	err.Code = code
 	return err
 }

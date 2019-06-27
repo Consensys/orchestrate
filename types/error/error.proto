@@ -10,7 +10,7 @@ message Error {
     string message = 1;
 
     // Error Code of the error
-    uint64 code = 2;
+    bytes code = 2;
 
     // Component 
     string component = 3;
