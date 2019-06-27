@@ -1,22 +1,15 @@
 package proto
 
 import (
-	"fmt"
-
 	"github.com/golang/protobuf/proto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
+	errors "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 )
 
 // Marshal a proto into a message assumed to be an Envelope
-func Marshal(pb proto.Message, msg interface{}) error {
-	// Cast message into Envelope
-	e, ok := msg.(*envelope.Envelope)
-	if !ok {
-		return fmt.Errorf("message does not match expected format")
+func Marshal(pb proto.Message) ([]byte, error) {
+	buf, e := proto.Marshal(pb)
+	if e != nil {
+		return nil, errors.EncodingError(e).SetComponent(component)
 	}
-
-	// Merge msg into Envelope
-	proto.Merge(e, pb)
-
-	return nil
+	return buf, nil
 }
