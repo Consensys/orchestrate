@@ -5,6 +5,9 @@ import (
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+
+	errors "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
+	err "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
 )
 
 func init() {
@@ -17,13 +20,16 @@ type Config struct {
 	Slots int64
 }
 
-// Validate ensure configuration is valid
-func (c *Config) Validate() error {
+func (c *Config) validate() error {
 	if c.Slots <= 0 {
 		return fmt.Errorf("at least one engine slot is required")
 	}
-
 	return nil
+}
+
+// Validate ensure configuration is valid
+func (c *Config) Validate() *err.Error {
+	return errors.ConfigError(c.validate()).SetComponent(component)
 }
 
 // NewConfig create new engine configuration

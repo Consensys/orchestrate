@@ -6,8 +6,9 @@ import (
 )
 
 var (
-	e        *Engine
-	initOnce = &sync.Once{}
+	component = "engine"
+	e         *Engine
+	initOnce  = &sync.Once{}
 )
 
 // Init intilialize global Engine
