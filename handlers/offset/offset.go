@@ -17,7 +17,7 @@ func Marker(txctx *engine.TxContext) {
 		// Cast message
 		msg, ok := txctx.Msg.(*broker.Msg)
 		if !ok {
-			return
+			txctx.Logger.Fatalf("marker: expected a sarama.ConsumerMessage")
 		}
 		s.MarkMessage((*sarama.ConsumerMessage)(msg), "")
 	}
