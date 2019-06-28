@@ -14,13 +14,17 @@ func (err *Error) Error() string {
 
 // SetComponent set component
 func (err *Error) SetComponent(name string) *Error {
-	err.Component = name
+	if err != nil {
+		err.Component = name
+	}
 	return err
 }
 
 // SetCode sets error code
 func (err *Error) SetCode(code []byte) *Error {
-	err.Code = code
+	if err != nil {
+		err.Code = code
+	}
 	return err
 }
 
@@ -28,9 +32,14 @@ func (err *Error) SetCode(code []byte) *Error {
 //
 // if `err` is already an internal error then it is returned
 func FromError(err error) *Error {
+	if err == nil {
+		return nil
+	}
+
 	e, ok := err.(*Error)
 	if !ok {
 		return NewError(err.Error())
 	}
+
 	return e
 }
