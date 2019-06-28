@@ -1,8 +1,6 @@
 package loader
 
 import (
-	"fmt"
-
 	log "github.com/sirupsen/logrus"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/sarama"
@@ -14,9 +12,7 @@ func Loader(txctx *engine.TxContext) {
 	// Cast message into sarama.ConsumerMessage
 	msg, ok := txctx.Msg.(*broker.Msg)
 	if !ok {
-		txctx.Logger.Errorf("loader: expected a sarama.ConsumerMessage")
-		_ = txctx.AbortWithError(fmt.Errorf("invalid input message format"))
-		return
+		txctx.Logger.Fatalf("loader: expected a sarama.ConsumerMessage")
 	}
 
 	err := encoding.Unmarshal(msg, txctx.Envelope)
