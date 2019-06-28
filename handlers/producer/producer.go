@@ -19,17 +19,15 @@ func Producer(p sarama.SyncProducer, prepareMsg PrepareMsg) engine.HandlerFunc {
 		msg := &sarama.ProducerMessage{}
 		err := prepareMsg(txctx, msg)
 		if err != nil {
-			_ = txctx.AbortWithError(err)
-			txctx.Logger.WithError(err).Errorf("producer: could not prepare message")
-			return
+			txctx.Logger.WithError(err).Fatalf("producer: could not prepare message")
 		}
 
 		// Send message
 		partition, offset, err := p.SendMessage(msg)
 		if err != nil {
+			// TODO: failing to send a message means kafka is down and we should define the strategy
 			_ = txctx.AbortWithError(err)
-			txctx.Logger.WithError(err).Errorf("producer: could not produce message")
-			return
+			txctx.Logger.WithError(err).Fatalf("producer: could not produce message")
 		}
 
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
