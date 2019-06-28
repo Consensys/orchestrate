@@ -29,7 +29,6 @@ func TestUnmarshal(t *testing.T) {
 			e, ok := e.(*err.Error)
 			assert.NotNil(t, e, "Unmarshal should error")
 			assert.True(t, ok, "Error should be internal format")
-			assert.Equal(t, []byte{0x10, 0x00}, e.GetCode(), "Error code should be correct")
 			assert.Equal(t, "encoding.json", e.GetComponent(), "Error code should be correct")
 			assert.Equal(t, test.errMsg, e.GetMessage(), "Error message should be correct")
 		}

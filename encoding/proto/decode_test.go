@@ -49,6 +49,5 @@ func TestUnmarshalError(t *testing.T) {
 	e, ok := Unmarshal([]byte{0xab, 0x00}, pb).(*err.Error)
 	assert.NotNil(t, e, "Unmarshal should error")
 	assert.True(t, ok, "Error should be internal format")
-	assert.Equal(t, e.GetCode(), []byte{0x10, 0x00}, "Error code should be correct")
 	assert.Equal(t, e.GetComponent(), "encoding.proto", "Error code should be correct")
 }

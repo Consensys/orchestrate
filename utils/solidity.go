@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	errors "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 )
 
 const nameRegex = "[a-zA-Z_][a-zA-Z0-9_]*"
@@ -37,7 +39,7 @@ func ParseSignature(sig string) (name, args string, err error) {
 	parts := signaturePattern.FindStringSubmatch(sig)
 
 	if len(parts) != 3 {
-		return "", "", fmt.Errorf("invalid: signature format, expecting: fctName(address,uint256) received: %v %v", sig, parts)
+		return "", "", errors.InvalidSigError(sig)
 	}
 	return parts[1], parts[2], nil
 }
