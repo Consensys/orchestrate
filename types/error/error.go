@@ -1,7 +1,11 @@
 package error
 
-// NewError creates a new error
-func NewError(msg string) *Error {
+import (
+	"fmt"
+)
+
+// New returns an error with given message
+func New(msg string) *Error {
 	return &Error{
 		Message: msg,
 	}
@@ -20,6 +24,16 @@ func (err *Error) SetComponent(name string) *Error {
 	return err
 }
 
+// ExtendComponent extend the component
+func (err *Error) ExtendComponent(name string) *Error {
+	if err.GetComponent() == "" {
+		_ = err.SetComponent(name)
+	} else {
+		err.Component = fmt.Sprintf("%v.%v", name, err.Component)
+	}
+	return err
+}
+
 // SetCode sets error code
 func (err *Error) SetCode(code []byte) *Error {
 	if err != nil {
@@ -28,9 +42,14 @@ func (err *Error) SetCode(code []byte) *Error {
 	return err
 }
 
-// FromError cast an error tinto an Error
+// Errorf creates an error according to a format specifier
+func Errorf(format string, a ...interface{}) *Error {
+	return New(fmt.Sprintf(format, a...))
+}
+
+// FromError cast a golang error into an Error pointer
 //
-// if `err` is already an internal error then it is returned
+// if `err` is an internal error then it is returned
 func FromError(err error) *Error {
 	if err == nil {
 		return nil
@@ -38,7 +57,7 @@ func FromError(err error) *Error {
 
 	e, ok := err.(*Error)
 	if !ok {
-		return NewError(err.Error())
+		return New(err.Error())
 	}
 
 	return e
