@@ -46,8 +46,7 @@ func TestUnmarshaller(t *testing.T) {
 
 func TestUnmarshalError(t *testing.T) {
 	pb := &ethereum.TxData{}
-	e, ok := Unmarshal([]byte{0xab, 0x00}, pb).(*err.Error)
+	e := err.FromError(Unmarshal([]byte{0xab, 0x00}, pb))
 	assert.NotNil(t, e, "Unmarshal should error")
-	assert.True(t, ok, "Error should be internal format")
 	assert.Equal(t, e.GetComponent(), "encoding.proto", "Error code should be correct")
 }

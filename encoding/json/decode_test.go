@@ -22,13 +22,11 @@ var unmarshalTests = []unmarshalTest{
 func TestUnmarshal(t *testing.T) {
 	for _, test := range unmarshalTests {
 		in := []byte(test.in)
-		e := Unmarshal(in, test.ptr)
+		e := err.FromError(Unmarshal(in, test.ptr))
 		if test.errMsg == "" {
 			assert.Nil(t, e, "Unmarshal should not error")
 		} else {
-			e, ok := e.(*err.Error)
 			assert.NotNil(t, e, "Unmarshal should error")
-			assert.True(t, ok, "Error should be internal format")
 			assert.Equal(t, "encoding.json", e.GetComponent(), "Error code should be correct")
 			assert.Equal(t, test.errMsg, e.GetMessage(), "Error message should be correct")
 		}
