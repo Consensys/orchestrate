@@ -34,6 +34,11 @@ func (err *Error) ExtendComponent(name string) *Error {
 	return err
 }
 
+// Hex returns error code in HEX reprensatation
+func (err *Error) Hex() string {
+	return fmt.Sprintf("%05X", err.GetCode())
+}
+
 // SetCode sets error code
 func (err *Error) SetCode(code uint64) *Error {
 	if err != nil {
