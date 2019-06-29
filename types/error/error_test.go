@@ -9,11 +9,11 @@ import (
 
 func TestError(t *testing.T) {
 	err := New("Test Error").
-		SetCode([]byte{0xab}).
+		SetCode(1234).
 		SetComponent("test-component")
 
 	assert.Equal(t, "Test Error", err.Error(), "Error message should be valid")
-	assert.Equal(t, []byte{0xab}, err.GetCode(), "Codee should be valid")
+	assert.Equal(t, uint64(1234), err.GetCode(), "Codee should be valid")
 	assert.Equal(t, "test-component", err.GetComponent(), "Component should be valid")
 }
 

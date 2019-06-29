@@ -35,7 +35,7 @@ func (err *Error) ExtendComponent(name string) *Error {
 }
 
 // SetCode sets error code
-func (err *Error) SetCode(code []byte) *Error {
+func (err *Error) SetCode(code uint64) *Error {
 	if err != nil {
 		err.Code = code
 	}
