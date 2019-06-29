@@ -48,3 +48,12 @@ func InvalidSigError(sig string) *err.Error {
 	return err.NewError(fmt.Sprintf("%q is an invalid Solidity method signature (example of valid signature: fctName(address,uint256))", sig)).
 		SetCode(invalidSigErrCode)
 }
+
+// Format Error (code 032XX)
+var invalidFormatErrCode = []byte{0x32, 0x00}
+
+// InvalidFormatError is raised when a data does not match an expected format
+func InvalidFormatError(msg string) *err.Error {
+	return err.NewError(msg).
+		SetCode(invalidFormatErrCode)
+}

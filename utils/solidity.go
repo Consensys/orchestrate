@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	errors "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
+	err "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
 )
 
 const nameRegex = "[a-zA-Z_][a-zA-Z0-9_]*"
@@ -35,11 +36,11 @@ func init() {
 }
 
 // ParseSignature returns name and arguments string of a signature
-func ParseSignature(sig string) (name, args string, err error) {
+func ParseSignature(sig string) (name, args string, e *err.Error) {
 	parts := signaturePattern.FindStringSubmatch(sig)
 
 	if len(parts) != 3 {
-		return "", "", errors.InvalidSigError(sig)
+		return "", "", errors.InvalidSigError(sig).SetComponent(component)
 	}
 	return parts[1], parts[2], nil
 }

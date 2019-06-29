@@ -26,3 +26,7 @@ func TestSolidityError(t *testing.T) {
 func TestInvalidSigError(t *testing.T) {
 	assert.Equal(t, []byte{0x31, 0x01}, InvalidSigError("test").GetCode(), "InvalidSigError code should be correct")
 }
+
+func TestInvalidFormatError(t *testing.T) {
+	assert.Equal(t, []byte{0x32, 0x00}, InvalidFormatError("test").GetCode(), "InvalidFormatError code should be correct")
+}
