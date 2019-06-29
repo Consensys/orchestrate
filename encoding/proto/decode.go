@@ -10,7 +10,7 @@ func Unmarshal(buf []byte, pb proto.Message) error {
 	// Cast message into protobuffer
 	err := proto.Unmarshal(buf, pb)
 	if err != nil {
-		return errors.EncodingError(err).SetComponent(component)
+		return errors.EncodingError(err.Error()).SetComponent(component)
 	}
 
 	return nil

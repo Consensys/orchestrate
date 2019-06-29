@@ -10,7 +10,7 @@ import (
 func Marshal(v interface{}) ([]byte, error) {
 	b, err := json.Marshal(v)
 	if err != nil {
-		return nil, errors.EncodingError(err).SetComponent(component)
+		return nil, errors.EncodingError(err.Error()).SetComponent(component)
 	}
 	return b, nil
 }

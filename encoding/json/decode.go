@@ -10,7 +10,7 @@ import (
 func Unmarshal(data []byte, v interface{}) error {
 	err := json.Unmarshal(data, v)
 	if err != nil {
-		return errors.EncodingError(err).SetComponent(component)
+		return errors.EncodingError(err.Error()).SetComponent(component)
 	}
 	return nil
 }

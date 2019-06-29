@@ -12,7 +12,7 @@ func Unmarshal(msg *sarama.Msg, pb protobuf.Message) error {
 	// Unmarshal Sarama message to Envelope
 	err := proto.Unmarshal(msg.Value, pb)
 	if err != nil {
-		return errors.EncodingError(err).SetComponent(component)
+		return errors.EncodingError(err.Error()).SetComponent(component)
 	}
 	return nil
 }

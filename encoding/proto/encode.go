@@ -9,7 +9,7 @@ import (
 func Marshal(pb proto.Message) ([]byte, error) {
 	buf, err := proto.Marshal(pb)
 	if err != nil {
-		return nil, errors.EncodingError(err).SetComponent(component)
+		return nil, errors.EncodingError(err.Error()).SetComponent(component)
 	}
 	return buf, nil
 }

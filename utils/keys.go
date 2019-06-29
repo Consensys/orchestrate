@@ -7,7 +7,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	errors "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
-	err "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
 )
 
 // KafkaChainTopic computes Kafka topic identified by chain
@@ -24,15 +23,15 @@ func ToChainAccountKey(chainID *big.Int, acc common.Address) string {
 }
 
 // FromChainAccountKey computes a chain identifier and account from a key
-func FromChainAccountKey(key string) (chainID *big.Int, acc common.Address, e *err.Error) {
+func FromChainAccountKey(key string) (chainID *big.Int, acc common.Address, err error) {
 	parts := chainAccountKeyPattern.FindStringSubmatch(key)
 	if len(parts) != 3 {
-		return nil, common.HexToAddress(""), errors.InvalidFormatError(fmt.Sprintf("invalid key %q (expected format %q)", key, chainAccountKeyPatternRegexp))
+		return nil, common.HexToAddress(""), errors.InvalidFormatErrorf("invalid key %q (expected format %q)", key, chainAccountKeyPatternRegexp)
 	}
 
 	chain, ok := big.NewInt(0).SetString(parts[2], 10)
 	if !ok {
-		return nil, common.HexToAddress(""), errors.InvalidFormatError(fmt.Sprintf("invalid key %q (expected format %q)", key, chainAccountKeyPatternRegexp))
+		return nil, common.HexToAddress(""), errors.InvalidFormatErrorf("invalid key %q (expected format %q)", key, chainAccountKeyPatternRegexp)
 	}
 
 	return chain, common.HexToAddress(parts[1]), nil

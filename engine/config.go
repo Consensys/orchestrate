@@ -7,7 +7,6 @@ import (
 	"github.com/spf13/viper"
 
 	errors "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
-	err "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
 )
 
 func init() {
@@ -28,8 +27,11 @@ func (c *Config) validate() error {
 }
 
 // Validate ensure configuration is valid
-func (c *Config) Validate() *err.Error {
-	return errors.ConfigError(c.validate()).SetComponent(component)
+func (c *Config) Validate() error {
+	if err := c.validate(); err != nil {
+		return errors.ConfigError(err.Error()).SetComponent(component)
+	}
+	return nil
 }
 
 // NewConfig create new engine configuration

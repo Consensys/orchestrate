@@ -12,7 +12,7 @@ func Marshal(pb protobuf.Message, msg *sarama.ProducerMessage) error {
 	// Marshal protobuffer into byte
 	b, err := proto.Marshal(pb)
 	if err != nil {
-		return errors.EncodingError(err).SetComponent(component)
+		return errors.EncodingError(err.Error()).SetComponent(component)
 	}
 
 	// Set message value
