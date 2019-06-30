@@ -3,7 +3,6 @@ syntax = "proto3";
 import "types/common/error.proto";
 import "types/ethereum/base.proto";
 import "types/chain/chain.proto";
-import "google/protobuf/timestamp.proto";
 
 option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/faucet";
 

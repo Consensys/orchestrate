@@ -10,8 +10,6 @@ import (
 	abi "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
 	common "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	grpc "google.golang.org/grpc"
-	codes "google.golang.org/grpc/codes"
-	status "google.golang.org/grpc/status"
 	math "math"
 )
 
@@ -706,32 +704,6 @@ type RegistryServer interface {
 	GetEventsBySigHash(context.Context, *GetEventsBySigHashRequest) (*GetEventsBySigHashResponse, error)
 	// Request an update of the codehash of the contract address
 	RequestAddressUpdate(context.Context, *AddressUpdateRequest) (*AddressUpdateResponse, error)
-}
-
-// UnimplementedRegistryServer can be embedded to have forward compatible implementations.
-type UnimplementedRegistryServer struct {
-}
-
-func (*UnimplementedRegistryServer) RegisterContract(ctx context.Context, req *RegisterContractRequest) (*RegisterContractResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RegisterContract not implemented")
-}
-func (*UnimplementedRegistryServer) GetContractABI(ctx context.Context, req *GetContractRequest) (*GetContractABIResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetContractABI not implemented")
-}
-func (*UnimplementedRegistryServer) GetContractBytecode(ctx context.Context, req *GetContractRequest) (*GetContractBytecodeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetContractBytecode not implemented")
-}
-func (*UnimplementedRegistryServer) GetContractDeployedBytecode(ctx context.Context, req *GetContractRequest) (*GetContractDeployedBytecodeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetContractDeployedBytecode not implemented")
-}
-func (*UnimplementedRegistryServer) GetMethodsBySelector(ctx context.Context, req *GetMethodsBySelectorRequest) (*GetMethodsBySelectorResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetMethodsBySelector not implemented")
-}
-func (*UnimplementedRegistryServer) GetEventsBySigHash(ctx context.Context, req *GetEventsBySigHashRequest) (*GetEventsBySigHashResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetEventsBySigHash not implemented")
-}
-func (*UnimplementedRegistryServer) RequestAddressUpdate(ctx context.Context, req *AddressUpdateRequest) (*AddressUpdateResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RequestAddressUpdate not implemented")
 }
 
 func RegisterRegistryServer(s *grpc.Server, srv RegistryServer) {
