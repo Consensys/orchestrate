@@ -22,6 +22,19 @@ func ConnectionError(msg string) *err.Error {
 	return err.New(msg).SetCode(connectionErrCode)
 }
 
+// IsConnectionError indicate whether an error is a connection error
+func IsConnectionError(e *err.Error) bool {
+	return is(e.GetCode(), connectionErrCode)
+}
+
+// Kafaka connection errors are raised when failing to connect to Kafka
+var kafkaConnectionErrCode = connectionErrCode + 1<<8
+
+// ConnectionError is raised when failing to connect to Kafka
+func KafkaConnectionError(msg string) *err.Error {
+	return err.New(msg).SetCode(kafkaConnectionErrCode)
+}
+
 // Data Errors (hex code 42XXX)
 
 // Data Errors are raised when a provided data does not match expected format

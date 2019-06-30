@@ -10,6 +10,7 @@ import (
 )
 
 var (
+	component             = "broker.sarama"
 	config                *sarama.Config
 	client                sarama.Client
 	initClientOnce        = &sync.Once{}
@@ -55,10 +56,9 @@ func InitClient(ctx context.Context) {
 
 		// Create sarama client
 		var err error
-		client, err = sarama.NewClient(viper.GetStringSlice(kafkaAddressViperKey), config)
+		client, err = NewClient(viper.GetStringSlice(kafkaAddressViperKey), config)
 		if err != nil {
 			log.WithError(err).Fatalf("sarama: could not to start client")
-			return
 		}
 
 		// Retrieve and log connected brokers
@@ -98,7 +98,7 @@ func InitSyncProducer(ctx context.Context) {
 
 		// Create sarama sync producer
 		var err error
-		producer, err = sarama.NewSyncProducerFromClient(client)
+		producer, err = NewSyncProducerFromClient(client)
 		if err != nil {
 			log.WithError(err).Fatalf("sarama: could not create producer")
 		}
@@ -134,7 +134,7 @@ func InitConsumerGroup(ctx context.Context) {
 
 		// Create group
 		var err error
-		group, err = sarama.NewConsumerGroupFromClient(viper.GetString(kafkaGroupViperKey), client)
+		group, err = NewConsumerGroupFromClient(viper.GetString(kafkaGroupViperKey), client)
 		if err != nil {
 			log.WithError(err).Fatalf("sarama: could not create consumer group")
 		}
