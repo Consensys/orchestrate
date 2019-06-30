@@ -13,7 +13,7 @@ func New(msg string) *Error {
 
 // Error (implement error interface)
 func (err *Error) Error() string {
-	return err.GetMessage()
+	return fmt.Sprintf("%v@%v: %v", err.Hex(), err.GetComponent(), err.GetMessage())
 }
 
 // SetComponent set component
