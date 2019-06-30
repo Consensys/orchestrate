@@ -252,8 +252,8 @@ var (
 	walletGeneratedGroupDefault  = "group-wallet-generated"
 )
 
-// consumerGroup register flag for a kafka consumer group
-func consumerGroup(f *pflag.FlagSet, flag, key, env, defaultValue string) {
+// consumerGroupFlag register flag for a kafka consumer group
+func consumerGroupFlag(f *pflag.FlagSet, flag, key, env, defaultValue string) {
 	desc := fmt.Sprintf(`Kafka consumer group name
 Environment variable: %q`, env)
 	f.String(flag, defaultValue, desc)
@@ -262,40 +262,40 @@ Environment variable: %q`, env)
 
 // CrafterGroup register flag for kafka crafter group
 func CrafterGroup(f *pflag.FlagSet) {
-	consumerGroup(f, crafterGroupFlag, crafterGroupViperKey, crafterGroupEnv, crafterGroupDefault)
+	consumerGroupFlag(f, crafterGroupFlag, crafterGroupViperKey, crafterGroupEnv, crafterGroupDefault)
 }
 
 // NonceGroup register flag for kafka nonce group
 func NonceGroup(f *pflag.FlagSet) {
-	consumerGroup(f, nonceGroupFlag, nonceGroupViperKey, nonceGroupEnv, nonceGroupDefault)
+	consumerGroupFlag(f, nonceGroupFlag, nonceGroupViperKey, nonceGroupEnv, nonceGroupDefault)
 }
 
 // SignerGroup register flag for kafka signer group
 func SignerGroup(f *pflag.FlagSet) {
-	consumerGroup(f, signerGroupFlag, signerGroupViperKey, signerGroupEnv, signerGroupDefault)
+	consumerGroupFlag(f, signerGroupFlag, signerGroupViperKey, signerGroupEnv, signerGroupDefault)
 }
 
 // SenderGroup register flag for kafka sender group
 func SenderGroup(f *pflag.FlagSet) {
-	consumerGroup(f, senderGroupFlag, senderGroupViperKey, senderGroupEnv, senderGroupDefault)
+	consumerGroupFlag(f, senderGroupFlag, senderGroupViperKey, senderGroupEnv, senderGroupDefault)
 }
 
 // DecoderGroup register flag for kafka decoder group
 func DecoderGroup(f *pflag.FlagSet) {
-	consumerGroup(f, decoderGroupFlag, decoderGroupViperKey, decoderGroupEnv, decoderGroupDefault)
+	consumerGroupFlag(f, decoderGroupFlag, decoderGroupViperKey, decoderGroupEnv, decoderGroupDefault)
 }
 
 // BridgeGroup register flag for kafka decoder group
 func BridgeGroup(f *pflag.FlagSet) {
-	consumerGroup(f, bridgeGroupFlag, bridgeGroupViperKey, bridgeGroupEnv, bridgeGroupDefault)
+	consumerGroupFlag(f, bridgeGroupFlag, bridgeGroupViperKey, bridgeGroupEnv, bridgeGroupDefault)
 }
 
 // WalletGeneratorGroup register flag for kafka decoder group
 func WalletGeneratorGroup(f *pflag.FlagSet) {
-	consumerGroup(f, walletGeneratorGroupFlag, walletGeneratorGroupViperKey, walletGeneratorGroupEnv, walletGeneratorGroupDefault)
+	consumerGroupFlag(f, walletGeneratorGroupFlag, walletGeneratorGroupViperKey, walletGeneratorGroupEnv, walletGeneratorGroupDefault)
 }
 
 // WalletGeneratedGroup register flag for kafka decoder group
 func WalletGeneratedGroup(f *pflag.FlagSet) {
-	consumerGroup(f, walletGeneratedGroupFlag, walletGeneratedGroupViperKey, walletGeneratedGroupEnv, walletGeneratedGroupDefault)
+	consumerGroupFlag(f, walletGeneratedGroupFlag, walletGeneratedGroupViperKey, walletGeneratedGroupEnv, walletGeneratedGroupDefault)
 }

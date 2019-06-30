@@ -7,6 +7,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
+var component = "handlers.loader"
+
 // Loader is a Middleware enginer.HandlerFunc that Load sarama.ConsumerGroup messages
 func Loader(txctx *engine.TxContext) {
 	// Cast message into sarama.ConsumerMessage
@@ -17,9 +19,8 @@ func Loader(txctx *engine.TxContext) {
 
 	err := encoding.Unmarshal(msg, txctx.Envelope)
 	if err != nil {
-		// TODO: handle error
+		_ = txctx.AbortWithError(err).ExtendComponent(component)
 		txctx.Logger.WithError(err).Errorf("loader: error unmarshalling")
-		_ = txctx.AbortWithError(err)
 		return
 	}
 

@@ -7,6 +7,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 )
 
+var component = "handlers.producer"
+
 // PrepareMsg function should prepare a sarama.ProducerMessage from a TxContext
 type PrepareMsg func(*engine.TxContext, *sarama.ProducerMessage) error
 
@@ -25,9 +27,9 @@ func Producer(p sarama.SyncProducer, prepareMsg PrepareMsg) engine.HandlerFunc {
 		// Send message
 		partition, offset, err := p.SendMessage(msg)
 		if err != nil {
-			// TODO: failing to send a message means kafka is down and we should define the strategy
-			_ = txctx.AbortWithError(err)
-			txctx.Logger.WithError(err).Fatalf("producer: could not produce message")
+			e := txctx.AbortWithError(err).ExtendComponent(component)
+			txctx.Logger.WithError(e).Errorf("producer: could not produce message")
+			return
 		}
 
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
@@ -35,6 +37,7 @@ func Producer(p sarama.SyncProducer, prepareMsg PrepareMsg) engine.HandlerFunc {
 			"kafka.out.offset":    offset,
 			"kafka.out.topic":     msg.Topic,
 		})
+
 		txctx.Logger.Tracef("producer: message produced")
 	}
 }
