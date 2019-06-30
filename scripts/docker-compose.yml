@@ -1,0 +1,15 @@
+version: '3.7'
+
+services:
+  protoc:
+    build:
+      context: .
+      args:
+        PROTOC_TAG: '3.8.0'
+        PROTOC_GEN_GO_TAG: 'v1.3.1'
+        PROTOC_GEN_GRPC_GATEWAY_TAG: 'v1.9.3'
+        PROTOC_GEN_SWAGGER_TAG: 'v1.9.3'
+    command: sh scripts/generate-proto.sh
+    volumes:
+      - ../:/src
+
