@@ -27,10 +27,10 @@ func IsConnectionError(e *err.Error) bool {
 	return is(e.GetCode(), connectionErrCode)
 }
 
-// Kafaka connection errors are raised when failing to connect to Kafka
+// Kafka connection errors are raised when failing to connect to Kafka
 var kafkaConnectionErrCode = connectionErrCode + 1<<8
 
-// ConnectionError is raised when failing to connect to Kafka
+// KafkaConnectionError is raised when failing to connect to Kafka
 func KafkaConnectionError(msg string) *err.Error {
 	return err.New(msg).SetCode(kafkaConnectionErrCode)
 }
