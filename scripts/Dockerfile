@@ -2,8 +2,7 @@ FROM golang:1.12
 
 ARG PROTOC_TAG
 ARG PROTOC_GEN_GO_TAG
-ARG PROTOC_GEN_GRPC_GATEWAY_TAG
-ARG PROTOC_GEN_SWAGGER_TAG
+ARG GRPC_GATEWAY_TAG
 
 RUN apt-get update && apt-get install unzip
 
@@ -20,7 +19,7 @@ WORKDIR /
 RUN rm -rf protoc
 
 RUN GO111MODULE=on go get github.com/golang/protobuf/protoc-gen-go@${PROTOC_GEN_GO_TAG} \
-       github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway@${PROTOC_GEN_GRPC_GATEWAY_TAG} \
-       github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger@${PROTOC_GEN_SWAGGER_TAG}
+       github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway@${GRPC_GATEWAY_TAG} \
+       github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger@${GRPC_GATEWAY_TAG}
 
 WORKDIR /src

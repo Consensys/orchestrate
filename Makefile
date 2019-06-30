@@ -9,9 +9,6 @@ ifeq ($(UNAME_S),Darwin)
 	OPEN = open
 endif
 
-
-GRPC_GATEWAY=github.com/grpc-ecosystem/grpc-gateway
-
 .PHONY: all run-coverage coverage fmt fmt-check vet lint misspell-check misspell race tools help
 
 # Linters
