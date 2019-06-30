@@ -38,6 +38,8 @@ lint:
 
 tidy: mod-tidy lint-fix
 
+gocache: ## Create gocache folder for building image locally
+	mkdir .gocache
 
 # Tools
 tools: ## Install test tools
