@@ -21,8 +21,15 @@ func TestConnectionError(t *testing.T) {
 func TestKafkaConnectionError(t *testing.T) {
 	e := KafkaConnectionError("test")
 	assert.Equal(t, uint64(33024), e.GetCode(), "KafkaConnectionError code should be correct")
-	assert.True(t, IsConnectionError(e), "KafkaConnectionError should be a data error")
+	assert.True(t, IsConnectionError(e), "KafkaConnectionError should be a connection error")
 	assert.Equal(t, "08100", e.Hex(), "KafkaConnectionError Hex reprensation should be correct")
+}
+
+func TestHTTPConnectionError(t *testing.T) {
+	e := HTTPConnectionError("test")
+	assert.Equal(t, uint64(33280), e.GetCode(), "HTTPConnectionError code should be correct")
+	assert.True(t, IsConnectionError(e), "HTTPConnectionError should be a connection error")
+	assert.Equal(t, "08200", e.Hex(), "HTTPConnectionError Hex reprensation should be correct")
 }
 
 func TestConfigError(t *testing.T) {

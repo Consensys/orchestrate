@@ -7,12 +7,14 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	errors "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 )
 
 var (
-	mux      *http.ServeMux
-	server   *http.Server
-	initOnce = &sync.Once{}
+	component = "http"
+	mux       *http.ServeMux
+	server    *http.Server
+	initOnce  = &sync.Once{}
 )
 
 func init() {
@@ -46,8 +48,9 @@ func ListenAndServe() error {
 
 	err := server.ListenAndServe()
 	if err != nil {
-		log.WithError(err).Errorf("http: error while listening")
-		return err
+		e := errors.HTTPConnectionError(err.Error()).SetComponent(component)
+		log.WithError(e).Errorf("http: error while listening")
+		return e
 	}
 
 	return nil

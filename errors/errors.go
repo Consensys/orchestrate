@@ -35,6 +35,14 @@ func KafkaConnectionError(msg string) *err.Error {
 	return err.New(msg).SetCode(kafkaConnectionErrCode)
 }
 
+// Kafaka connection errors are raised when failing to connect to Kafka
+var httpConnectionErrCode = connectionErrCode + 2<<8
+
+// HTTPConnectionError is raised when failing to connect over http
+func HTTPConnectionError(msg string) *err.Error {
+	return err.New(msg).SetCode(httpConnectionErrCode)
+}
+
 // Data Errors (hex code 42XXX)
 
 // Data Errors are raised when a provided data does not match expected format
