@@ -10,5 +10,5 @@ require (
 	github.com/stretchr/testify v1.3.0
 	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.6.1
 	gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git v0.4.0
-	gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.6.1
+	gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.6.2
 )
