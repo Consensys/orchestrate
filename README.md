@@ -510,12 +510,12 @@ Error codes are `uint64` that maps to five hex character code
 | 01XXX |          |    01000   | warning                      | Raised to indicate a warning             |
 | 08XXX |          |    08000   | connection_exception         | Failed to connect to an external service |
 | 08XXX |   081XX  |    08100   | kafka_connection_exception   | Failed to connect to Kafka               |
-| 08XXX |   082XX  |    08200   | http_connection _exception   | HTTP connection failure                  |
+| 08XXX |   082XX  |    08200   | http_connection _exception   | Failed to connect to an HTTP service     |
 | 0AXXX |          |    0A000   | feature_not_supported        | Feature is not supported                 |
 | 42XXX |          |    42000   | invalid_data                 | Failed to process data                   |
 | 42XXX |   421XX  |    42100   | invalid_encoding             | Failed to decode a message               |
 | 42XXX |   422XX  |    42200   | invalid_solidity_data        | Failed to process Solidity related data  |
-| 42XXX |   422XX  |    42201   | invalid_method_sig           | Invalid Solidity method signature        |
+| 42XXX |   422XX  |    42201   | invalid_method_signature     | Invalid Solidity method signature        |
 | 42XXX |   422XX  |    42202   | invalid_arg_count            | Invalid args count provided              |
 | 42XXX |   422XX  |    42203   | invalid_arg                  | Invalid arg provided                     |
 | 42XXX |   423XX  |    42300   | invalid_format               | Data does not match expected format      |
