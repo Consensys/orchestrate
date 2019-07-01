@@ -54,24 +54,3 @@ func (err *Error) SetCode(code uint64) *Error {
 	}
 	return err
 }
-
-// Errorf creates an error according to a format specifier
-func Errorf(format string, a ...interface{}) *Error {
-	return New(fmt.Sprintf(format, a...))
-}
-
-// FromError cast a golang error into an Error pointer
-//
-// if `err` is an internal error then it is returned
-func FromError(err error) *Error {
-	if err == nil {
-		return nil
-	}
-
-	e, ok := err.(*Error)
-	if !ok {
-		return New(err.Error())
-	}
-
-	return e
-}

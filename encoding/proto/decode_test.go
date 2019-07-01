@@ -9,8 +9,8 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
-	err "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
 
@@ -46,7 +46,7 @@ func TestUnmarshaller(t *testing.T) {
 
 func TestUnmarshalError(t *testing.T) {
 	pb := &ethereum.TxData{}
-	e := err.FromError(Unmarshal([]byte{0xab, 0x00}, pb))
-	assert.NotNil(t, e, "Unmarshal should error")
-	assert.Equal(t, e.GetComponent(), "encoding.proto", "Error code should be correct")
+	err := errors.FromError(Unmarshal([]byte{0xab, 0x00}, pb))
+	assert.NotNil(t, err, "Unmarshal should error")
+	assert.Equal(t, err.GetComponent(), "encoding.proto", "Error code should be correct")
 }

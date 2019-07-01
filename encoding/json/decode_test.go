@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	err "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 )
 
 type unmarshalTest struct {
@@ -22,13 +22,13 @@ var unmarshalTests = []unmarshalTest{
 func TestUnmarshal(t *testing.T) {
 	for _, test := range unmarshalTests {
 		in := []byte(test.in)
-		e := err.FromError(Unmarshal(in, test.ptr))
+		err := errors.FromError(Unmarshal(in, test.ptr))
 		if test.errMsg == "" {
-			assert.Nil(t, e, "Unmarshal should not error")
+			assert.Nil(t, err, "Unmarshal should not error")
 		} else {
-			assert.NotNil(t, e, "Unmarshal should error")
-			assert.Equal(t, "encoding.json", e.GetComponent(), "Error code should be correct")
-			assert.Equal(t, test.errMsg, e.GetMessage(), "Error message should be correct")
+			assert.NotNil(t, err, "Unmarshal should error")
+			assert.Equal(t, "encoding.json", err.GetComponent(), "Error code should be correct")
+			assert.Equal(t, test.errMsg, err.GetMessage(), "Error message should be correct")
 		}
 	}
 }

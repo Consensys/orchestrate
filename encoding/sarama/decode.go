@@ -4,7 +4,7 @@ import (
 	protobuf "github.com/golang/protobuf/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/proto"
-	errors "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 )
 
 // Unmarshal a sarama message into a protobuffer

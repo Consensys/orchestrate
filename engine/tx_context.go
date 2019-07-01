@@ -5,8 +5,9 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
-	err "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
+	ierror "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
 )
 
 // TxContext is the most important part of an engine.
@@ -62,15 +63,14 @@ func (txctx *TxContext) Next() {
 }
 
 // Error attaches an error to TxContext
-func (txctx *TxContext) Error(e error) *err.Error {
-	if e == nil {
+func (txctx *TxContext) Error(err error) *ierror.Error {
+	if err == nil {
 		panic("err is nil")
 	}
 
-	rv := err.FromError(e)
-	txctx.Envelope.Errors = append(txctx.Envelope.Errors, rv)
+	txctx.Envelope.Errors = append(txctx.Envelope.Errors, errors.FromError(err))
 
-	return rv
+	return txctx.Envelope.Errors[len(txctx.Envelope.Errors)-1]
 }
 
 // Abort prevents pending handlers to be executed
@@ -81,9 +81,9 @@ func (txctx *TxContext) Abort() {
 }
 
 // AbortWithError calls `Abort()` and `Error()``
-func (txctx *TxContext) AbortWithError(e error) *err.Error {
+func (txctx *TxContext) AbortWithError(err error) *ierror.Error {
 	txctx.Abort()
-	return txctx.Error(e)
+	return txctx.Error(err)
 }
 
 // Prepare re-initializes TxContext, set handlers, set logger and set message

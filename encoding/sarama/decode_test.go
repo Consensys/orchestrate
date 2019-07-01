@@ -7,8 +7,8 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
-	err "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
 
@@ -45,7 +45,7 @@ func TestUnmarshallerError(t *testing.T) {
 		Value: []byte{0xab, 0x10},
 	}
 	pb := &ethereum.TxData{}
-	e := err.FromError(Unmarshal(msg, pb))
-	assert.NotNil(t, e, "Unmarshal should error")
-	assert.Equal(t, e.GetComponent(), "encoding.sarama", "Error code should be correct")
+	err := errors.FromError(Unmarshal(msg, pb))
+	assert.NotNil(t, err, "Unmarshal should error")
+	assert.Equal(t, err.GetComponent(), "encoding.sarama", "Error code should be correct")
 }

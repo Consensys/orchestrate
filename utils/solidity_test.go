@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	err "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
+	ierror "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
 )
 
 func TestGetSignature(t *testing.T) {
@@ -24,14 +24,14 @@ func TestGetSignature(t *testing.T) {
 		t.Log(k)
 		assert.Equal(t, !test.err, IsValidSignature(test.sig))
 
-		name, args, e := ParseSignature(test.sig)
+		name, args, err := ParseSignature(test.sig)
 		assert.Equal(t, test.name, name)
 		assert.Equal(t, test.args, args)
-		assert.Equal(t, test.err, e != nil, e)
-		if e != nil {
-			ie, ok := e.(*err.Error)
+		assert.Equal(t, test.err, err != nil, err)
+		if err != nil {
+			ierr, ok := err.(*ierror.Error)
 			assert.True(t, ok, "Error should cast to internal error")
-			assert.Equal(t, "utils", ie.GetComponent(), "Error component should be valid")
+			assert.Equal(t, "utils", ierr.GetComponent(), "Error component should be valid")
 		}
 	}
 }

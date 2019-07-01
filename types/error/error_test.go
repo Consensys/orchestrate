@@ -20,20 +20,6 @@ func TestError(t *testing.T) {
 	assert.Equal(t, "004D2@test-component: 3 message test", err.Error(), "Error string should be correct")
 }
 
-func TestErrorf(t *testing.T) {
-	err := Errorf("Test %q", "msg")
-	assert.Equal(t, "Test \"msg\"", err.GetMessage(), "Error message should be valid")
-}
-
-func TestFromError(t *testing.T) {
-	assert.Nil(t, FromError(nil), "From nil error should be nil")
-	e := FromError(fmt.Errorf("test"))
-	assert.Equal(t, "test", e.GetMessage(), "Error message should be correct")
-
-	e2 := FromError(e)
-	assert.Equal(t, e, e2, "Should behave as flat pass on internal errors")
-}
-
 func TestExtendComponent(t *testing.T) {
 	e := New("test").ExtendComponent("foo")
 	assert.Equal(t, "foo", e.GetComponent(), "Should set component correctly")

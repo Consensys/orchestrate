@@ -48,9 +48,9 @@ func ListenAndServe() error {
 
 	err := server.ListenAndServe()
 	if err != nil {
-		e := errors.HTTPConnectionError(err.Error()).SetComponent(component)
-		log.WithError(e).Errorf("http: error while listening")
-		return e
+		ierr := errors.HTTPConnectionError(err.Error()).SetComponent(component)
+		log.WithError(ierr).Errorf("http: error while listening")
+		return ierr
 	}
 
 	return nil

@@ -4,7 +4,7 @@ import (
 	"github.com/Shopify/sarama"
 	protobuf "github.com/golang/protobuf/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/proto"
-	errors "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 )
 
 // Marshal a proto into a e a sarama.ProducerMessage

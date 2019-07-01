@@ -119,9 +119,9 @@ func TestStorageError(t *testing.T) {
 
 func TestNoDataFoundError(t *testing.T) {
 	e := NoDataFoundError("test")
-	assert.Equal(t, uint64(897026), e.GetCode(), "NoDataFoundError code should be correct")
+	assert.Equal(t, uint64(897536), e.GetCode(), "NoDataFoundError code should be correct")
 	assert.True(t, IsStorageError(e), "NoDataFoundError should be a data error")
-	assert.Equal(t, "DB002", e.Hex(), "Hex reprensation should be correct")
+	assert.Equal(t, "DB200", e.Hex(), "Hex reprensation should be correct")
 }
 
 func TestIs(t *testing.T) {
