@@ -16,6 +16,14 @@ func (err *Error) Error() string {
 	return fmt.Sprintf("%v@%v: %v", err.Hex(), err.GetComponent(), err.GetMessage())
 }
 
+// SetMessage sets error message
+func (err *Error) SetMessage(format string, a ...interface{}) *Error {
+	if err != nil {
+		err.Message = fmt.Sprintf(format, a...)
+	}
+	return err
+}
+
 // SetComponent set component
 func (err *Error) SetComponent(name string) *Error {
 	if err != nil {

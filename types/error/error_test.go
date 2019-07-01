@@ -15,6 +15,9 @@ func TestError(t *testing.T) {
 	assert.Equal(t, "004D2@test-component: Test Error", err.Error(), "Error string should be correct")
 	assert.Equal(t, uint64(1234), err.GetCode(), "Error code should be valid")
 	assert.Equal(t, "test-component", err.GetComponent(), "Component should be valid")
+
+	_ = err.SetMessage("%v %v", 3, fmt.Errorf("message test"))
+	assert.Equal(t, "004D2@test-component: 3 message test", err.Error(), "Error string should be correct")
 }
 
 func TestErrorf(t *testing.T) {
