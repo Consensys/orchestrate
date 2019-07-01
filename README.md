@@ -519,4 +519,6 @@ Error codes are `uint64` that maps to five hex character code
 | 42XXX |   422XX  |    42202   | invalid_arg_count            | Invalid args count provided              |
 | 42XXX |   422XX  |    42203   | invalid_arg                  | Invalid arg provided                     |
 | 42XXX |   423XX  |    42300   | invalid_format               | Data does not match expected format      |
+| DBXXX |          |    DB000   | storage_exception            | Failed accessing stored data             |
+| DBXXX |          |    DB002   | no_data_found                | No data stored for given parameters      |
 | F0XXX |          |    F0000   | invalid_config               | Invalid configuration                    |

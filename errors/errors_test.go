@@ -95,6 +95,19 @@ func TestInvalidFormatError(t *testing.T) {
 	assert.Equal(t, "42300", e.Hex(), "Hex reprensation should be correct")
 }
 
+func TestStorageError(t *testing.T) {
+	e := StorageError("test")
+	assert.Equal(t, uint64(897024), e.GetCode(), "StorageError code should be correct")
+	assert.Equal(t, "DB000", e.Hex(), "Hex reprensation should be correct")
+}
+
+func TestNoDataFoundError(t *testing.T) {
+	e := NoDataFoundError("test")
+	assert.Equal(t, uint64(897026), e.GetCode(), "NoDataFoundError code should be correct")
+	assert.True(t, IsStorageError(e), "NoDataFoundError should be a data error")
+	assert.Equal(t, "DB002", e.Hex(), "Hex reprensation should be correct")
+}
+
 func TestIs(t *testing.T) {
 	assert.True(t, is(271120, dataErrCode), "Hex 42310 should be a data error")
 	assert.False(t, is(dataErrCode, solidityErrCode), "Data error should not be a solidity error")

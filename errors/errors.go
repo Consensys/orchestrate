@@ -120,6 +120,33 @@ func InvalidFormatError(format string, a ...interface{}) *err.Error {
 	return err.Errorf(format, a...).SetCode(invalidFormatErrCode)
 }
 
+// Storage Error (hex cde DBXXX)
+
+// Storage errors are raised when an error is encountered while accessing stored data
+var storageErrCode uint64 = 13<<16 + 11<<12
+
+// StorageError is raised when an error is encountered while accessing stored data
+func StorageError(format string, a ...interface{}) *err.Error {
+	return err.Errorf(format, a...).SetCode(storageErrCode)
+}
+
+// IsStorageError indicate whether an error is a storage error
+func IsStorageError(e *err.Error) bool {
+	return is(e.GetCode(), storageErrCode)
+}
+
+var noDataFoundErrCode = storageErrCode + 2
+
+// NoDataFoundError is raised when accessing a missing data
+func NoDataFoundError(format string, a ...interface{}) *err.Error {
+	return err.Errorf(format, a...).SetCode(noDataFoundErrCode)
+}
+
+// is returns wether code belongs to base family
+func is(code, base uint64) bool {
+	return (base^code)&(255<<12+15<<8&base) == 0
+}
+
 // Configuration errors (hex code F0XXX)
 //
 // Configuration errors are raised when an error is encountered while loading configuration format
@@ -128,9 +155,4 @@ var configErrCode uint64 = 15 << 16
 // ConfigError is raised when an error is encountered while loading configuration (code 01000)
 func ConfigError(format string, a ...interface{}) *err.Error {
 	return err.Errorf(format, a...).SetCode(configErrCode)
-}
-
-// is returns wether code belongs to base family
-func is(code, base uint64) bool {
-	return (base^code)&(255<<12+15<<8&base) == 0
 }
