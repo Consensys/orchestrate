@@ -167,8 +167,8 @@ gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.6.1 h1:hUpUA6bnXB4MK9I/Gzer
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.6.1/go.mod h1:Bd91X32CdtsjlxZagk+3TBwFIK+gxbUYP0x1hLLfRPk=
 gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git v0.4.1 h1:OfXgFzMpt9Kl9P0A/+f6CpDXcCJ3poIeeOBzpOb7Oco=
 gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git v0.4.1/go.mod h1:8PyqwS7CETm/gzZdsDDmsLQhq9d0+9lZ5LC1aMz3JRk=
-gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.6.1 h1:yUZwn1x5GNq4PlXZVH/LJ55evt9cIdPt2LIAXPv2azQ=
-gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.6.1/go.mod h1:IYRRWzFTMfF3gmyqhsXSoyJPbmsC63KK9BjfLAoDMe8=
+gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.6.2 h1:R9tts1gsxgqG3gI7w478zlu+vGDneqUPUGTo7YyVu00=
+gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.6.2/go.mod h1:IYRRWzFTMfF3gmyqhsXSoyJPbmsC63KK9BjfLAoDMe8=
 go.uber.org/atomic v1.4.0 h1:cxzIVoETapQEqDhQu3QfnvXAV4AlzcvUCxkVUFw3+EU=
 go.uber.org/atomic v1.4.0/go.mod h1:gD2HeocX3+yG+ygLZcrzQJaqmWj9AIm7n08wl/qW/PE=
 golang.org/x/crypto v0.0.0-20170930174604-9419663f5a44/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
