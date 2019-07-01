@@ -1,11 +1,12 @@
 package args
 
 import (
-	"fmt"
-
+	errors "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 )
+
+var component = "types.args"
 
 // Short returns a string representation of the method
 func (c *Call) Short() string {
@@ -18,14 +19,14 @@ func (c *Call) IsConstructor() bool {
 }
 
 // SignatureToCall returns a Call object from a short String
-func SignatureToCall(s string) (*Call, error) {
-	if !utils.IsValidSignature(s) {
-		return nil, fmt.Errorf("invalid signature format, expecting func(type1,type2) got %v", s)
+func SignatureToCall(sig string) (*Call, error) {
+	if !utils.IsValidSignature(sig) {
+		return nil, errors.InvalidSigError(sig).SetComponent(component)
 	}
 
 	return &Call{
 		Method: &abi.Method{
-			Signature: s,
+			Signature: sig,
 		},
 	}, nil
 }

@@ -7,7 +7,10 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	errors "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 )
+
+var component = "types.abi"
 
 func (c *Contract) GetName() string {
 	return c.GetId().GetName()
@@ -51,7 +54,7 @@ func StringToContract(s string) (*Contract, error) {
 	parts := contractPattern.FindStringSubmatch(s)
 
 	if len(parts) != 6 {
-		return nil, fmt.Errorf("string format invalid (expected format %q): %q", contractRegexp, s)
+		return nil, errors.InvalidFormatError("invalid contract (expected format %q) %q", contractRegexp, s).SetComponent(component)
 	}
 
 	c := &Contract{
@@ -67,7 +70,7 @@ func StringToContract(s string) (*Contract, error) {
 	}
 	bytecode, err := hexutil.Decode(parts[4])
 	if err != nil {
-		return nil, fmt.Errorf("contract %q bytecode is invalid", c.Short())
+		return nil, errors.InvalidFormatError("invalid contract bytecode on %q", c.Short()).SetComponent(component)
 	}
 	c.Bytecode = bytecode
 
@@ -77,7 +80,7 @@ func StringToContract(s string) (*Contract, error) {
 	}
 	deployedBytecode, err := hexutil.Decode(parts[5])
 	if err != nil {
-		return nil, fmt.Errorf("contract %q deployedBytecode is invalid", c.Short())
+		return nil, errors.InvalidFormatError("invalid contract deployed bytecode on %q", c.Short()).SetComponent(component)
 	}
 	c.DeployedBytecode = deployedBytecode
 
@@ -85,7 +88,7 @@ func StringToContract(s string) (*Contract, error) {
 	c.Abi = []byte(parts[3])
 	_, err = c.ToABI()
 	if err != nil {
-		return nil, fmt.Errorf("contract %q ABI is invalid", c.Short())
+		return nil, errors.InvalidFormatError("invalid contract ABI on %q", c.Short()).SetComponent(component)
 	}
 
 	return c, nil
@@ -98,7 +101,7 @@ func (c *Contract) ToABI() (*abi.ABI, error) {
 	if len(c.Abi) > 0 {
 		err := a.UnmarshalJSON(c.Abi)
 		if err != nil {
-			return nil, err
+			return nil, errors.EncodingError(err.Error()).SetComponent(component)
 		}
 	}
 

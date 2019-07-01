@@ -19,7 +19,7 @@ func TestContract(t *testing.T) {
 	assert.Equal(t, "ERC1400[v1.0.1]", c.Short(), "Short should be correct")
 }
 
-func TestFromStringd(t *testing.T) {
+func TestFromString(t *testing.T) {
 	c, err := StringToContract("ERC20")
 	assert.NoError(t, err, "No error expected")
 	assert.Equal(t, "ERC20", c.GetName(), "Contract should be correct")
