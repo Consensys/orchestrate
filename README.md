@@ -505,15 +505,17 @@ Internal errors are built on top of protobuf and hold
 
 Error codes are `uint64` that maps to five hex character code
 
-| Class | Subclass | Error Code | Condition              | Comment                                  |
-|-------|----------|------------|------------------------|------------------------------------------|
-| 01XXX |          |    01000   | warning                | Raised to indicate a warning             |
-| 08XXX |          |    08000   | connection_error       | Failed to connect to an external service |
-| 08XXX |   081XX  |    08100   | kafka_connection_error | Failed to connect to Kafka               |
-| 08XXX |   082XX  |    08200   | http_connection_error  | HTTP connection failure                  |
-| 42XXX |          |    42000   | data_error             | Failed to process data                   |
-| 42XXX |   421XX  |    42100   | encoding_error         | Failed to decode a message               |
-| 42XXX |   422XX  |    42200   | solidity_error         | Failed to process Solidity related data  |
-| 42XXX |   422XX  |    42201   | invalid_sig_error      | Solidity method signature is invalid     |
-| 42XXX |   423XX  |    42300   | invalid_format_error   | Data does not match expected format      |
-| F0XXX |          |    F0000   | config_error           | Invalid configuration                    |
+| Class | Subclass | Error Code | Condition                    | Comment                                  |
+|-------|----------|------------|------------------------------|------------------------------------------|
+| 01XXX |          |    01000   | warning                      | Raised to indicate a warning             |
+| 08XXX |          |    08000   | connection_error             | Failed to connect to an external service |
+| 08XXX |   081XX  |    08100   | kafka_connection_error       | Failed to connect to Kafka               |
+| 08XXX |   082XX  |    08200   | http_connection_error        | HTTP connection failure                  |
+| 42XXX |          |    42000   | data_error                   | Failed to process data                   |
+| 42XXX |   421XX  |    42100   | encoding_error               | Failed to decode a message               |
+| 42XXX |   422XX  |    42200   | solidity_error               | Failed to process Solidity related data  |
+| 42XXX |   422XX  |    42201   | invalid_sig_error            | Invalid Solidity method signature        |
+| 42XXX |   422XX  |    42202   | invalid_arg_count_error      | Invalid args count provided              |
+| 42XXX |   422XX  |    42203   | invalid_arg_error            | Invalid arg provided                     |
+| 42XXX |   423XX  |    42300   | invalid_format_error         | Data does not match expected format      |
+| F0XXX |          |    F0000   | config_error                 | Invalid configuration                    |
