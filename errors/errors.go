@@ -43,6 +43,14 @@ func HTTPConnectionError(format string, a ...interface{}) *err.Error {
 	return err.Errorf(format, a...).SetCode(httpConnectionErrCode)
 }
 
+// Feature Not Supported Errors (hex code 0AXXX)
+var featureNotSupportedErrCode uint64 = 10 << 12
+
+// FeatureNotSupportedError is raised when using a feature which is not implemented
+func FeatureNotSupportedError(format string, a ...interface{}) *err.Error {
+	return err.Errorf(format, a...).SetCode(featureNotSupportedErrCode)
+}
+
 // Data Errors (hex code 42XXX)
 
 // Data Errors are raised when a provided data does not match expected format

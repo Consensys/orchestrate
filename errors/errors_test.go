@@ -38,6 +38,12 @@ func TestConfigError(t *testing.T) {
 	assert.Equal(t, "F0000", e.Hex(), "Hex reprensation should be correct")
 }
 
+func TestFeatureNotSupportedError(t *testing.T) {
+	e := FeatureNotSupportedError("test")
+	assert.Equal(t, uint64(40960), e.GetCode(), "FeatureNotSupportedError code should be correct")
+	assert.Equal(t, "0A000", e.Hex(), "Hex reprensation should be correct")
+}
+
 func TestDataError(t *testing.T) {
 	e := DataError("test")
 	assert.Equal(t, uint64(270336), e.GetCode(), "DataError code should be correct")
