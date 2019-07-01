@@ -1,5 +1,10 @@
 # CHANGELOG
 
+### Version 0.6.2
+
+*Released on July 1th 2019*
+
+- [FIX] Added more logging
 
 ### Version 0.6.1
 
