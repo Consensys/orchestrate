@@ -97,11 +97,11 @@ func InvalidSigError(sig string) *err.Error {
 }
 
 // Invalid Arg Error (hex code 42202)
-var invalidArgCountErrCode = solidityErrCode + 2
+var invalidArgsCountErrCode = solidityErrCode + 2
 
-// InvalidArgCountError is raised when invalid arguments count is provided to craft a transaction
-func InvalidArgCountError(format string, a ...interface{}) *err.Error {
-	return err.Errorf(format, a...).SetCode(invalidArgCountErrCode)
+// InvalidArgsCountError is raised when invalid arguments count is provided to craft a transaction
+func InvalidArgsCountError(format string, a ...interface{}) *err.Error {
+	return err.Errorf(format, a...).SetCode(invalidArgsCountErrCode)
 }
 
 // Invalid Arg Error (hex code 42203)
@@ -110,6 +110,22 @@ var invalidArgErrCode = solidityErrCode + 3
 // InvalidArgError is raised when invalid argument is provided to craft a transaction
 func InvalidArgError(format string, a ...interface{}) *err.Error {
 	return err.Errorf(format, a...).SetCode(invalidArgErrCode)
+}
+
+// Invalid topic Error (hex code 42204)
+var invalidTopicsCountErrCode = solidityErrCode + 4
+
+// InvalidTopicsCountError is raised when topics count is in receipt
+func InvalidTopicsCountError(format string, a ...interface{}) *err.Error {
+	return err.Errorf(format, a...).SetCode(invalidTopicsCountErrCode)
+}
+
+// Invalid EventData Error (hex code 42205)
+var invalidEventDataErrCode = solidityErrCode + 5
+
+// InvalidEventDataError is raised when event data is invalid
+func InvalidEventDataError(format string, a ...interface{}) *err.Error {
+	return err.Errorf(format, a...).SetCode(invalidEventDataErrCode)
 }
 
 // Format Error (hex code 423XX)

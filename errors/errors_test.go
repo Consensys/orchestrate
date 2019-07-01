@@ -72,11 +72,11 @@ func TestInvalidSigError(t *testing.T) {
 	assert.Equal(t, "42201", e.Hex(), "Hex reprensation should be correct")
 }
 
-func TestInvalidArgCountError(t *testing.T) {
-	e := InvalidArgCountError("test")
-	assert.Equal(t, uint64(270850), e.GetCode(), "InvalidArgCountError code should be correct")
-	assert.True(t, IsDataError(e), "InvalidArgCountError should be a data error")
-	assert.True(t, IsSolidityError(e), "InvalidArgCountError should be a data error")
+func TestInvalidInvalidArgsCountError(t *testing.T) {
+	e := InvalidArgsCountError("test")
+	assert.Equal(t, uint64(270850), e.GetCode(), "InvalidArgsCountError code should be correct")
+	assert.True(t, IsDataError(e), "InvalidArgsCountError should be a data error")
+	assert.True(t, IsSolidityError(e), "InvalidArgsCountError should be a data error")
 	assert.Equal(t, "42202", e.Hex(), "Hex reprensation should be correct")
 }
 
@@ -86,6 +86,22 @@ func TestInvalidArgError(t *testing.T) {
 	assert.True(t, IsDataError(e), "InvalidArgCode should be a data error")
 	assert.True(t, IsSolidityError(e), "InvalidArgCode should be a data error")
 	assert.Equal(t, "42203", e.Hex(), "Hex reprensation should be correct")
+}
+
+func TestInvalidTopicsCountError(t *testing.T) {
+	e := InvalidTopicsCountError("test")
+	assert.Equal(t, uint64(270852), e.GetCode(), "InvalidTopicsCountError code should be correct")
+	assert.True(t, IsDataError(e), "InvalidTopicsCountError should be a data error")
+	assert.True(t, IsSolidityError(e), "InvalidTopicsCountError should be a data error")
+	assert.Equal(t, "42204", e.Hex(), "Hex reprensation should be correct")
+}
+
+func TestInvalidEventDataError(t *testing.T) {
+	e := InvalidEventDataError("test")
+	assert.Equal(t, uint64(270853), e.GetCode(), "InvalidEventDataError code should be correct")
+	assert.True(t, IsDataError(e), "InvalidEventDataError should be a data error")
+	assert.True(t, IsSolidityError(e), "InvalidEventDataError should be a data error")
+	assert.Equal(t, "42205", e.Hex(), "Hex reprensation should be correct")
 }
 
 func TestInvalidFormatError(t *testing.T) {

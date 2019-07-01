@@ -516,8 +516,10 @@ Error codes are `uint64` that maps to five hex character code
 | 42XXX |   421XX  |    42100   | invalid_encoding             | Failed to decode a message               |
 | 42XXX |   422XX  |    42200   | invalid_solidity_data        | Failed to process Solidity related data  |
 | 42XXX |   422XX  |    42201   | invalid_method_signature     | Invalid Solidity method signature        |
-| 42XXX |   422XX  |    42202   | invalid_arg_count            | Invalid args count provided              |
+| 42XXX |   422XX  |    42202   | invalid_args_count           | Invalid args count provided              |
 | 42XXX |   422XX  |    42203   | invalid_arg                  | Invalid arg provided                     |
+| 42XXX |   422XX  |    42204   | invalid_topics_count         | Invalid topics count in event log        |
+| 42XXX |   422XX  |    42205   | invalid_event_data           | Invalid data in event log                |
 | 42XXX |   423XX  |    42300   | invalid_format               | Data does not match expected format      |
 | DBXXX |          |    DB000   | storage_exception            | Failed accessing stored data             |
 | DBXXX |          |    DB002   | no_data_found                | No data stored for given parameters      |
