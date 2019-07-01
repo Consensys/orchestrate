@@ -66,15 +66,27 @@ func TestInvalidSigError(t *testing.T) {
 	assert.Equal(t, "42201", e.Hex(), "Hex reprensation should be correct")
 }
 
+func TestInvalidArgCountError(t *testing.T) {
+	e := InvalidArgCountError("test")
+	assert.Equal(t, uint64(270850), e.GetCode(), "InvalidArgCountError code should be correct")
+	assert.True(t, IsDataError(e), "InvalidArgCountError should be a data error")
+	assert.True(t, IsSolidityError(e), "InvalidArgCountError should be a data error")
+	assert.Equal(t, "42202", e.Hex(), "Hex reprensation should be correct")
+}
+
+func TestInvalidArgError(t *testing.T) {
+	e := InvalidArgError("test")
+	assert.Equal(t, uint64(270851), e.GetCode(), "InvalidArgCode code should be correct")
+	assert.True(t, IsDataError(e), "InvalidArgCode should be a data error")
+	assert.True(t, IsSolidityError(e), "InvalidArgCode should be a data error")
+	assert.Equal(t, "42203", e.Hex(), "Hex reprensation should be correct")
+}
+
 func TestInvalidFormatError(t *testing.T) {
 	e := InvalidFormatError("test")
 	assert.Equal(t, uint64(271104), e.GetCode(), "InvalidFormatError code should be correct")
 	assert.True(t, IsDataError(e), "InvalidFormatError should be a data error")
 	assert.Equal(t, "42300", e.Hex(), "Hex reprensation should be correct")
-}
-
-func TestInvalidFormatErrorf(t *testing.T) {
-	assert.Equal(t, uint64(271104), InvalidFormatErrorf("test %q", "value").GetCode(), "InvalidFormatErrorf code should be correct")
 }
 
 func TestIs(t *testing.T) {

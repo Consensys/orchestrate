@@ -8,8 +8,8 @@ import (
 var warningCode uint64 = 1 << 12
 
 // Warning are raised to indicate
-func Warning(msg string) *err.Error {
-	return err.New(msg).SetCode(warningCode)
+func Warning(format string, a ...interface{}) *err.Error {
+	return err.Errorf(format, a...).SetCode(warningCode)
 }
 
 // Connection errors (hex code 08XXX)
@@ -18,8 +18,8 @@ func Warning(msg string) *err.Error {
 var connectionErrCode uint64 = 8 << 12
 
 // ConnectionError is raised when failing to connect to an external service
-func ConnectionError(msg string) *err.Error {
-	return err.New(msg).SetCode(connectionErrCode)
+func ConnectionError(format string, a ...interface{}) *err.Error {
+	return err.Errorf(format, a...).SetCode(connectionErrCode)
 }
 
 // IsConnectionError indicate whether an error is a connection error
@@ -31,16 +31,16 @@ func IsConnectionError(e *err.Error) bool {
 var kafkaConnectionErrCode = connectionErrCode + 1<<8
 
 // KafkaConnectionError is raised when failing to connect to Kafka
-func KafkaConnectionError(msg string) *err.Error {
-	return err.New(msg).SetCode(kafkaConnectionErrCode)
+func KafkaConnectionError(format string, a ...interface{}) *err.Error {
+	return err.Errorf(format, a...).SetCode(kafkaConnectionErrCode)
 }
 
 // Kafaka connection errors are raised when failing to connect to Kafka
 var httpConnectionErrCode = connectionErrCode + 2<<8
 
 // HTTPConnectionError is raised when failing to connect over http
-func HTTPConnectionError(msg string) *err.Error {
-	return err.New(msg).SetCode(httpConnectionErrCode)
+func HTTPConnectionError(format string, a ...interface{}) *err.Error {
+	return err.Errorf(format, a...).SetCode(httpConnectionErrCode)
 }
 
 // Data Errors (hex code 42XXX)
@@ -49,8 +49,8 @@ func HTTPConnectionError(msg string) *err.Error {
 var dataErrCode uint64 = 4<<16 + 2<<12
 
 // DataError is raised when a provided data does not match expected format  (code 03000)
-func DataError(msg string) *err.Error {
-	return err.New(msg).SetCode(dataErrCode)
+func DataError(format string, a ...interface{}) *err.Error {
+	return err.Errorf(format, a...).SetCode(dataErrCode)
 }
 
 // IsDataError indicate whether an error is a data error
@@ -62,16 +62,16 @@ func IsDataError(e *err.Error) bool {
 var encodingErrCode = dataErrCode + 1<<8
 
 // EncodingError are raised when failing to decode a message
-func EncodingError(msg string) *err.Error {
-	return err.New(msg).SetCode(encodingErrCode)
+func EncodingError(format string, a ...interface{}) *err.Error {
+	return err.Errorf(format, a...).SetCode(encodingErrCode)
 }
 
 // Solidity Errors (hex code 422XX)
 var solidityErrCode = dataErrCode + 2<<8
 
 // SolidityError is raised when a data related in transaction crafing is incorrect
-func SolidityError(msg string) *err.Error {
-	return err.New(msg).SetCode(solidityErrCode)
+func SolidityError(format string, a ...interface{}) *err.Error {
+	return err.Errorf(format, a...).SetCode(solidityErrCode)
 }
 
 // IsSolidityError indicate whether an error is a Solidity error
@@ -88,19 +88,28 @@ func InvalidSigError(sig string) *err.Error {
 		SetCode(invalidSigErrCode)
 }
 
+// Invalid Arg Error (hex code 42202)
+var invalidArgCountErrCode = solidityErrCode + 2
+
+// InvalidArgCountError is raised when invalid arguments count is provided to craft a transaction
+func InvalidArgCountError(format string, a ...interface{}) *err.Error {
+	return err.Errorf(format, a...).SetCode(invalidArgCountErrCode)
+}
+
+// Invalid Arg Error (hex code 42203)
+var invalidArgErrCode = solidityErrCode + 3
+
+// InvalidArgError is raised when invalid argument is provided to craft a transaction
+func InvalidArgError(format string, a ...interface{}) *err.Error {
+	return err.Errorf(format, a...).SetCode(invalidArgErrCode)
+}
+
 // Format Error (hex code 423XX)
 var invalidFormatErrCode = dataErrCode + 3<<8
 
 // InvalidFormatError is raised when a data does not match an expected format
-func InvalidFormatError(msg string) *err.Error {
-	return err.New(msg).
-		SetCode(invalidFormatErrCode)
-}
-
-// InvalidFormatErrorf is raised when a data does not match an expected format
-func InvalidFormatErrorf(format string, a ...interface{}) *err.Error {
-	return err.Errorf(format, a...).
-		SetCode(invalidFormatErrCode)
+func InvalidFormatError(format string, a ...interface{}) *err.Error {
+	return err.Errorf(format, a...).SetCode(invalidFormatErrCode)
 }
 
 // Configuration errors (hex code F0XXX)
@@ -109,8 +118,8 @@ func InvalidFormatErrorf(format string, a ...interface{}) *err.Error {
 var configErrCode uint64 = 15 << 16
 
 // ConfigError is raised when an error is encountered while loading configuration (code 01000)
-func ConfigError(msg string) *err.Error {
-	return err.New(msg).SetCode(configErrCode)
+func ConfigError(format string, a ...interface{}) *err.Error {
+	return err.Errorf(format, a...).SetCode(configErrCode)
 }
 
 // is returns wether code belongs to base family
