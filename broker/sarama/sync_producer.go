@@ -5,6 +5,10 @@ import (
 	errors "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 )
 
+type syncProducer struct {
+	p sarama.SyncProducer
+}
+
 // NewSyncProducerFromClient creates a new sarama.SyncProducer using the given client
 func NewSyncProducerFromClient(client sarama.Client) (sarama.SyncProducer, error) {
 	p, err := sarama.NewSyncProducerFromClient(client)
@@ -12,10 +16,6 @@ func NewSyncProducerFromClient(client sarama.Client) (sarama.SyncProducer, error
 		return nil, errors.KafkaConnectionError(err.Error()).SetComponent(component)
 	}
 	return &syncProducer{p: p}, nil
-}
-
-type syncProducer struct {
-	p sarama.SyncProducer
 }
 
 // SendMessage produces a given message

@@ -16,5 +16,5 @@ func NewClient(addrs []string, conf *sarama.Config) (sarama.Client, error) {
 		return nil, errors.KafkaConnectionError(err.Error()).SetComponent(component)
 	}
 
-	return client, err
+	return client, nil
 }
