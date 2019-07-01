@@ -35,12 +35,20 @@ func KafkaConnectionError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(format, a...).SetCode(kafkaConnectionErrCode)
 }
 
-// Kafaka connection errors are raised when failing to connect to Kafka
+// HTTP connection errors are raised when failing to connect over HTTP
 var httpConnectionErrCode = connectionErrCode + 2<<8
 
 // HTTPConnectionError is raised when failing to connect over http
 func HTTPConnectionError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(format, a...).SetCode(httpConnectionErrCode)
+}
+
+// Ethereum connection errors are raised when failing to connect to Ethereum client jsonRPC API
+var ethConnectionErrCode = connectionErrCode + 3<<8
+
+// EthConnectionError is raised when failing to connect to Ethereum client jsonRPC API
+func EthConnectionError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(format, a...).SetCode(ethConnectionErrCode)
 }
 
 // Feature Not Supported Errors (hex code 0AXXX)

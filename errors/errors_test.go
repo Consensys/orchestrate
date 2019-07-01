@@ -32,6 +32,13 @@ func TestHTTPConnectionError(t *testing.T) {
 	assert.Equal(t, "08200", e.Hex(), "HTTPConnectionError Hex reprensation should be correct")
 }
 
+func TestEthConnectionError(t *testing.T) {
+	e := EthConnectionError("test")
+	assert.Equal(t, uint64(33536), e.GetCode(), "EthConnectionError code should be correct")
+	assert.True(t, IsConnectionError(e), "EthConnectionError should be a connection error")
+	assert.Equal(t, "08300", e.Hex(), "EthConnectionError Hex reprensation should be correct")
+}
+
 func TestConfigError(t *testing.T) {
 	e := ConfigError("test")
 	assert.Equal(t, uint64(983040), e.GetCode(), "ConfigError code should be correct")
