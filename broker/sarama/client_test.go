@@ -10,7 +10,7 @@ import (
 )
 
 func TestNewClient(t *testing.T) {
-	_, e := NewClient([]string{"unkown"}, sarama.NewConfig())
+	_, e := NewClient([]string{"unknown"}, sarama.NewConfig())
 	assert.NotNil(t, e, "Client should error")
 	ie, ok := e.(*err.Error)
 	assert.True(t, ok, "Error should cast to internal error")
