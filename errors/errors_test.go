@@ -12,6 +12,13 @@ func TestWarning(t *testing.T) {
 	assert.Equal(t, "01000", e.Hex(), "Hex reprensation should be correct")
 }
 
+func TestRetryWarning(t *testing.T) {
+	e := RetryWarning("test")
+	assert.Equal(t, uint64(4352), e.GetCode(), "RetryWarning code should be correct")
+	assert.True(t, IsWarning(e), "RetryWarning should be a connection error")
+	assert.Equal(t, "01100", e.Hex(), "RetryWarning Hex reprensation should be correct")
+}
+
 func TestConnectionError(t *testing.T) {
 	e := ConnectionError("test")
 	assert.Equal(t, uint64(32768), e.GetCode(), "ConnectionError code should be correct")

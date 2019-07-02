@@ -12,6 +12,19 @@ func Warning(format string, a ...interface{}) *ierror.Error {
 	return Errorf(format, a...).SetCode(warningCode)
 }
 
+// IsWarning indicate whether an error is a warning
+func IsWarning(err error) bool {
+	return is(FromError(err).GetCode(), warningCode)
+}
+
+// Warning retry (hex code 01100)
+var retryWarningCode = warningCode + 1<<8
+
+// RetryWarning are raised when failing to connect to a service and retrying
+func RetryWarning(format string, a ...interface{}) *ierror.Error {
+	return Errorf(format, a...).SetCode(retryWarningCode)
+}
+
 // Connection errors (hex code 08XXX)
 //
 // Connection errors are raised when failing to connect to an external service

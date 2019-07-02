@@ -508,6 +508,7 @@ Error codes are `uint64` that maps to five hex character code
 | Class | Subclass | Error Code | Condition                     | Comment                                  |
 |-------|----------|------------|-------------------------------|------------------------------------------|
 | 01XXX |          |    01000   | warning                       | Raised to indicate a warning             |
+| 01XXX |   01100  |    01100   | warning_retry                 | Error occured system retryies            |
 | 08XXX |          |    08000   | connection_exception          | Failed connecting to an external service |
 | 08XXX |   081XX  |    08100   | kafka_connection_exception    | Failed connecting to Kafka               |
 | 08XXX |   082XX  |    08200   | http_connection _exception    | Failed connecting to an HTTP service     |
