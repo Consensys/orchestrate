@@ -103,6 +103,10 @@ type ChainSyncReader interface {
 	SyncProgress(ctx context.Context, chainID *big.Int) (*eth.SyncProgress, error)
 }
 
+type ClientDetector interface {
+	GetClientType(ctx context.Context, chainID *big.Int) types.ClientType
+}
+
 type Client interface {
 	TransactionSender
 	ChainLedgerReader

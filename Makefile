@@ -35,11 +35,14 @@ lint:
 
 tidy: mod-tidy lint-fix
 
+generate-mocks:
+	mockgen -destination=mocks/mock_client.go -package=mocks gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/rpc Client
 
 # Tools
 tools: ## Install test tools
 	@GO111MODULE=off go get -u github.com/client9/misspell/cmd/misspell
 	@GO111MODULE=off go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
+	@GO111MODULE=off go get -u github.com/golang/mock/gomock
 
 help: ## Display this help screen
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

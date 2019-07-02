@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"math/big"
 	"sync"
 
@@ -525,6 +526,21 @@ func (ec *Client) SendTransaction(ctx context.Context, chainID *big.Int, args *t
 		return ethcommon.Hash{}, err
 	}
 	return txHash, nil
+}
+
+func (ec *Client) GetClientType(ctx context.Context, chainID *big.Int) (types.ClientType, error) {
+	c, err := ec.getRPC(chainID)
+	if err != nil {
+		return types.UnknownClient, err
+	}
+	var clientVersion string
+
+	err = c.CallContext(ctx, &clientVersion, "web3_clientVersion")
+	if err != nil {
+		return types.UnknownClient, err
+	}
+
+	return ClientTypeParser(clientVersion), nil
 }
 
 // SendRawPrivateTransaction send a raw transaction to a Ethreum node supporting privacy (e.g Quorum+Tessera node)
