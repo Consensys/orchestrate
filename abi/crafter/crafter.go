@@ -1,6 +1,7 @@
 package crafter
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
@@ -67,25 +68,29 @@ func bindArg(t *ethabi.Type, arg string) (interface{}, error) {
 	case ethabi.StringTy:
 		return arg, nil
 
-	case ethabi.ArrayTy:
+	case ethabi.ArrayTy, ethabi.SliceTy:
 		return bindArrayArg(t, arg)
 
-	case ethabi.SliceTy:
-		return bindArrayArg(t, arg)
-
-	// TODO: handle tuple (struct in solidity)
+	case ethabi.TupleTy:
+		return nil, fmt.Errorf("tuple is not yet supported")
 
 	default:
 		return nil, fmt.Errorf("arg format %v not known", t.T)
 	}
+
 }
 
 func bindArrayArg(t *ethabi.Type, arg string) (interface{}, error) {
+	fmt.Println(t.Elem.String())
+
 	elemType, _ := ethabi.NewType(t.Elem.String(), nil)
 	slice := reflect.MakeSlice(reflect.SliceOf(elemType.Type), 0, 0)
 
-	arg = strings.TrimSuffix(strings.TrimPrefix(arg, "["), "]")
-	argArray := strings.Split(arg, ",")
+	var argArray []string
+	err := json.Unmarshal([]byte(arg), &argArray)
+	if err != nil {
+		return nil, fmt.Errorf("crafter: could not unmarshall array for %q", argArray)
+	}
 
 	// If t.Size == 0, then it is a dynamic array. We accept any length in this case.
 	if len(argArray) != t.Size && t.Size != 0 {

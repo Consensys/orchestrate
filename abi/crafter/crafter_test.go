@@ -171,7 +171,7 @@ func TestPayloadCrafterArray(t *testing.T) {
 
 	c := PayloadCrafter{}
 	var (
-		_array = "[0x1,0x2,0x3]"
+		_array = "[\"0x1\",\"0x2\",\"0x3\"]"
 	)
 	data, err := c.CraftCall(*ArrayInput, _array)
 	assert.Nil(t, err, "Craft: received error")
@@ -186,12 +186,27 @@ func TestPayloadCrafterArrayAddress(t *testing.T) {
 
 	c := PayloadCrafter{}
 	var (
-		_array = "[0xca35b7d915458ef540ade6068dfe2f44e8fa733c,0x14723a09acff6d2a60dcdf7aa4aff308fddc160c,0x4b0897b0513fdc7c541b6d9d7e929c4e5364d2db]"
+		_array = "[\"0xca35b7d915458ef540ade6068dfe2f44e8fa733c\",\"0x14723a09acff6d2a60dcdf7aa4aff308fddc160c\",\"0x4b0897b0513fdc7c541b6d9d7e929c4e5364d2db\"]"
 	)
 	data, err := c.CraftCall(*ArrayAddressInput, _array)
 	assert.Nil(t, err, "Craft: received error")
 
-	expected := "0x620a6a89000000000000000000000000ca35b7d915458ef540ade6068dfe2f44e8fa733c00000000000000000000000014723a09acff6d2a60dcdf7aa4aff308fddc160c0000000000000000000000004b0897b0513fdc7c541b6d9d7e929c4e5364d2db"
+	var expected = "0x620a6a89000000000000000000000000ca35b7d915458ef540ade6068dfe2f44e8fa733c00000000000000000000000014723a09acff6d2a60dcdf7aa4aff308fddc160c0000000000000000000000004b0897b0513fdc7c541b6d9d7e929c4e5364d2db"
+	assert.Equal(t, hexutil.Encode(data), expected, "Craft: expected equal payload")
+}
+
+func TestPayloadCrafterSliceAddress(t *testing.T) {
+	ArrayAddressInput, err := SignatureToMethod("FunctionTest(address[])")
+	assert.Nil(t, err, "Parse method signature: received error")
+
+	c := PayloadCrafter{}
+	var (
+		_array = "[\"0xca35b7d915458ef540ade6068dfe2f44e8fa733c\",\"0x14723a09acff6d2a60dcdf7aa4aff308fddc160c\",\"0x4b0897b0513fdc7c541b6d9d7e929c4e5364d2db\"]"
+	)
+	data, err := c.CraftCall(*ArrayAddressInput, _array)
+	assert.Nil(t, err, "Craft: received error")
+
+	var expected = "0x8f2df58300000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000003000000000000000000000000ca35b7d915458ef540ade6068dfe2f44e8fa733c00000000000000000000000014723a09acff6d2a60dcdf7aa4aff308fddc160c0000000000000000000000004b0897b0513fdc7c541b6d9d7e929c4e5364d2db"
 	assert.Equal(t, hexutil.Encode(data), expected, "Craft: expected equal payload")
 }
 
