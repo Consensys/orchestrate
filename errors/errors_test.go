@@ -138,6 +138,13 @@ func TestNoDataFoundError(t *testing.T) {
 	assert.Equal(t, "DB200", e.Hex(), "Hex reprensation should be correct")
 }
 
+func TestDataCorruptedError(t *testing.T) {
+	e := DataCorruptedError("test")
+	assert.Equal(t, uint64(897792), e.GetCode(), "DataCorruptedError code should be correct")
+	assert.True(t, IsStorageError(e), "DataCorruptedError should be a data error")
+	assert.Equal(t, "DB300", e.Hex(), "Hex reprensation should be correct")
+}
+
 func TestIs(t *testing.T) {
 	assert.True(t, is(271120, dataErrCode), "Hex 42310 should be a data error")
 	assert.False(t, is(dataErrCode, solidityErrCode), "Data error should not be a solidity error")

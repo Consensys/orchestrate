@@ -524,5 +524,6 @@ Error codes are `uint64` that maps to five hex character code
 | 42XXX |   422XX  |    42205   | invalid_event_data            | Invalid data in event log                |
 | 42XXX |   423XX  |    42300   | invalid_format                | Data does not match expected format      |
 | DBXXX |          |    DB000   | storage_exception             | Failed accessing stored data             |
-| DBXXX |          |    DB002   | no_data_found                 | No data stored for given parameters      |
+| DBXXX |   DB200  |    DB200   | no_data_found                 | No data stored for given parameters      |
+| DBXXX |   DB300  |    DB300   | data_corrupted                | Data is corrupted                        |
 | F0XXX |          |    F0000   | invalid_config                | Invalid configuration                    |

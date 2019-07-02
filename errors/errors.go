@@ -185,6 +185,14 @@ func IsNoDataFoundError(err error) bool {
 	return is(FromError(err).GetCode(), noDataFoundErrCode)
 }
 
+// Data corrupted (hex code DB3XX)
+var dataCorruptedErrCode = storageErrCode + 3<<8
+
+// DataCorruptedError is raised loading a corrupted data
+func DataCorruptedError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(format, a...).SetCode(dataCorruptedErrCode)
+}
+
 // Configuration errors (hex code F0XXX)
 //
 // Configuration errors are raised when an error is encountered while loading configuration format
