@@ -6,13 +6,20 @@ package chain;
 
 // Information about a Chain
 message Protocol {
-    // Name of the protocol (e.g. `pantheon`, `quorum`, etc.)
-    string name = 1;
+    // Type of a protocol that should be used
+    ProtocolType type = 1;
 
     // Version tag of the protocol
     string tag = 2;
 
     // Extra information (optional)
     map<string, string> extra = 3;
+}
+
+enum ProtocolType {
+    UNKNOWN = 0;
+    GETH = 1;
+    QUORUM = 2;
+    PANTHEON = 3;
 }
 

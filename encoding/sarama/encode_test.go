@@ -22,7 +22,7 @@ var testEnvelope = &envelope.Envelope{
 	Chain: &chain.Chain{
 		Id: []byte{0x1},
 	},
-	Protocol: &chain.Protocol{Name: "pantheon"},
+	Protocol: &chain.Protocol{Type: chain.ProtocolType_PANTHEON},
 	From:     &ethereum.Account{Raw: hexutil.MustDecode("0xdbb881a51CD4023E4400CEF3ef73046743f08da3")},
 	Tx: &ethereum.Transaction{
 		TxData: &ethereum.TxData{
