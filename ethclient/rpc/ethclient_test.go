@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"testing"
 
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/mocks"
@@ -28,6 +29,41 @@ func setupTest(t *testing.T) {
 	mockRPCClient = mocks.NewMockClient(ctrl)
 }
 
+func TestSendRawPrivateTransaction(t *testing.T) {
+	setupTest(t)
+	defer ctrl.Finish()
+
+	setMockClient(mockRPCClient)
+	mockRPCClient.
+		EXPECT().
+		CallContext(ctx, gomock.Any(), "eea_sendRawTransaction", "0x0102038430783031c5843078303283616263").
+		Return(nil).
+		SetArg(1, "0x1234").
+		Times(1)
+
+	hash, err := gethClient.SendRawPrivateTransaction(ctx, big.NewInt(int64(chainID)), []byte{1, 2, 3}, &types.PrivateArgs{
+		PrivateFrom:   "0x01",
+		PrivateFor:    []string{"0x02"},
+		PrivateTxType: "abc",
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, ethcommon.HexToHash("0x1234"), hash)
+}
+
+func TestReturnErrorIfCannotGetRPCWhenSendingRawPrivateTransaction(t *testing.T) {
+	setupTest(t)
+	defer ctrl.Finish()
+
+	hash, err := gethClient.SendRawPrivateTransaction(ctx, big.NewInt(int64(chainID)), []byte{1, 2, 3}, &types.PrivateArgs{
+		PrivateFrom:   "0x01",
+		PrivateFor:    []string{"0x02"},
+		PrivateTxType: "abc",
+	})
+
+	assert.EqualError(t, err, "no RPC connection registered for chain \"888\"")
+	assert.Equal(t, ethcommon.HexToHash("0x0"), hash)
+}
+
 func TestDetectClientVersion(t *testing.T) {
 	setupTest(t)
 	defer ctrl.Finish()
@@ -38,7 +74,7 @@ func TestDetectClientVersion(t *testing.T) {
 		CallContext(ctx, gomock.Any(), "web3_clientVersion").
 		Return(nil).
 		SetArg(1, "pantheon/1.1.1").
-		AnyTimes()
+		Times(1)
 
 	clientType, err := gethClient.GetClientType(ctx, big.NewInt(int64(chainID)))
 	assert.NoError(t, err)
@@ -54,14 +90,14 @@ func TestReturnErrorIfClientVersionMethodFails(t *testing.T) {
 		EXPECT().
 		CallContext(ctx, gomock.Any(), "web3_clientVersion").
 		Return(errTest).
-		AnyTimes()
+		Times(1)
 
 	clientType, err := gethClient.GetClientType(ctx, big.NewInt(int64(chainID)))
 	assert.EqualError(t, err, errTest.Error())
 	assert.Equal(t, types.UnknownClient, clientType)
 }
 
-func TestReturnErrorIfCannotGetRPC(t *testing.T) {
+func TestReturnErrorIfCannotGetRPCWhenDetectingClient(t *testing.T) {
 	setupTest(t)
 	defer ctrl.Finish()
 

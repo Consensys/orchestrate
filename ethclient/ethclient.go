@@ -19,7 +19,7 @@ type TransactionSender interface {
 	SendRawTransaction(ctx context.Context, chainID *big.Int, raw string) error
 
 	// SendRawPrivateTransaction send a raw transaction to a Ethreum node supporting privacy (e.g Quorum+Tessera node)
-	SendRawPrivateTransaction(ctx context.Context, chainID *big.Int, raw string, args *types.PrivateArgs) (ethcommon.Hash, error)
+	SendRawPrivateTransaction(ctx context.Context, chainID *big.Int, raw []byte, args *types.PrivateArgs) (ethcommon.Hash, error)
 }
 
 // ChainLedgerReader is a service to access a blockchain ledger information

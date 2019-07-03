@@ -1,9 +1,13 @@
 package rpc
 
 import (
+	bytes "bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+
+	"github.com/ethereum/go-ethereum/rlp"
 
 	"math/big"
 	"sync"
@@ -17,6 +21,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/rpc/geth"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
 )
+
+var nilHash = ethcommon.HexToHash("0x00")
 
 // Client is a connector to Ethereum blockchains that uses Geth rpc client
 type Client struct {
@@ -509,7 +515,7 @@ func (ec *Client) SendRawTransaction(ctx context.Context, chainID *big.Int, raw 
 	return c.CallContext(ctx, nil, "eth_sendRawTransaction", raw)
 }
 
-// SendTransaction send transaction to Ethereum node
+// SendTransaction send transaction to an Ethereum node
 func (ec *Client) SendTransaction(ctx context.Context, chainID *big.Int, args *types.SendTxArgs) (txHash ethcommon.Hash, err error) {
 	c, err := ec.getRPC(chainID)
 	if err != nil {
@@ -544,7 +550,34 @@ func (ec *Client) GetClientType(ctx context.Context, chainID *big.Int) (types.Cl
 }
 
 // SendRawPrivateTransaction send a raw transaction to a Ethreum node supporting privacy (e.g Quorum+Tessera node)
-// TODO: to be implemented
-func (ec *Client) SendRawPrivateTransaction(ctx context.Context, chainID *big.Int, raw string, args *types.PrivateArgs) (ethcommon.Hash, error) {
-	return ethcommon.Hash{}, fmt.Errorf("%q is not implemented yet", "SendRawPrivateTransactionQuorum")
+func (ec *Client) SendRawPrivateTransaction(ctx context.Context, chainID *big.Int, raw []byte, args *types.PrivateArgs) (ethcommon.Hash, error) {
+	c, err := ec.getRPC(chainID)
+	if err != nil {
+		return nilHash, err
+	}
+
+	var buf bytes.Buffer
+	buf.Write(raw)
+	err2 := rlpEncode(&buf, args.PrivateFrom, args.PrivateFor, args.PrivateTxType)
+	if err2 != nil {
+		return nilHash, err
+	}
+
+	rawTx := hexutil.Encode(buf.Bytes())
+	var hash string
+	// TODO: Call a different method if using Quorum
+	err3 := c.CallContext(ctx, &hash, "eea_sendRawTransaction", rawTx)
+
+	return ethcommon.HexToHash(hash), err3
+}
+
+func rlpEncode(buf io.Writer, args ...interface{}) error {
+	for pos, arg := range args {
+		err := rlp.Encode(buf, arg)
+		if err != nil {
+			return fmt.Errorf("failed to encode argument number %d: %s", pos, err.Error())
+		}
+	}
+
+	return nil
 }
