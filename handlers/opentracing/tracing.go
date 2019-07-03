@@ -23,6 +23,9 @@ func TxSpanFromBroker(tracer opentracing.Tracer, operationName string) engine.Ha
 		// opts is a list of StartSpanOptions to setup the Span on creation
 		opts := make([]opentracing.StartSpanOption, 0)
 
+		// Prevent updating global operationName variable
+		_operationName := operationName
+
 		// startTime will be used to setup the Start Time of the span when created
 		startTime := time.Now()
 
@@ -31,7 +34,7 @@ func TxSpanFromBroker(tracer opentracing.Tracer, operationName string) engine.Ha
 		// find Span in TxContext.Envelope metadata, this section has been moved after the txctx.Next()
 		// to be as generalistic as possible
 		if spanContext, err := tracer.Extract(opentracing.TextMap, txctx.Envelope.Carrier()); err == nil {
-			opts = append(opts, opentracing.ChildOf(spanContext))
+			opts = append(opts, opentracing.FollowsFrom(spanContext))
 			log.Debugf("Spancontext in Enveloppe: %v", spanContext)
 		} else {
 			log.Debugf("No span found during span Extraction: %v", err)
@@ -39,7 +42,7 @@ func TxSpanFromBroker(tracer opentracing.Tracer, operationName string) engine.Ha
 
 		// find span context in opentracing library
 		if spanParent := opentracing.SpanFromContext(txctx.Context()); spanParent != nil {
-			opts = append(opts, opentracing.ChildOf(spanParent.Context()))
+			opts = append(opts, opentracing.FollowsFrom(spanParent.Context()))
 			log.Debugf("Spanparent in Enveloppe: %v", spanParent)
 		} else {
 			log.Debugf("No span found during span Extraction from context: %v", spanParent)
@@ -47,17 +50,18 @@ func TxSpanFromBroker(tracer opentracing.Tracer, operationName string) engine.Ha
 		
 		// Update span operationName if it has been created by the other middelwares
 		if value, ok := txctx.Get("operationName").(string); ok {
-			operationName = value
+			_operationName = value
 		}
 
 		// Add in StartSpanOptions the starting time previously set 
 		opts = append(opts, opentracing.StartTime(startTime))
 
-		span := tracer.StartSpan(operationName, opts...)
+		span := tracer.StartSpan(_operationName, opts...)
 		defer span.Finish()
-
-		// TODO: why using a different tracer between Extract and Inject
-		if err := span.Tracer().Inject(span.Context(), opentracing.TextMap, txctx.Envelope.Carrier()); err != nil {
+		
+		txctx.WithContext(opentracing.ContextWithSpan(txctx.Context(), span))
+		
+		if err := tracer.Inject(span.Context(), opentracing.TextMap, txctx.Envelope.Carrier()); err != nil {
 			log.Errorf("Error during span Injection %v", err)
 		}
 	}
