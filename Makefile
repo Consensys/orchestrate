@@ -2,6 +2,14 @@ GOFILES := $(shell find . -name '*.go' | egrep -v "^\./\.go" | grep -v _test.go)
 PACKAGES ?= $(shell go list ./...)
 BOILERPLATE_REPOSITORY=git@gitlab.com:ConsenSys/client/fr/core-stack/boilerplate-worker.git
 
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+	OPEN = xdg-open
+endif
+ifeq ($(UNAME_S),Darwin)
+	OPEN = open
+endif
+
 .PHONY: all run-coverage coverage fmt fmt-check vet lint misspell-check misspell race tools help
 
 # Testing
@@ -9,7 +17,7 @@ run-coverage: ## Generate global code coverage report
 	@sh scripts/coverage.sh $(PACKAGES)
 
 coverage: run-coverage ## Generate and open coverage report
-	@xdg-open coverage.html
+	$(OPEN) coverage.html
 
 race: ## Run data race detector
 	@go test -race -short ${PACKAGES}
