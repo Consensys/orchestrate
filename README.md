@@ -1,8 +1,9 @@
 # Tx-Nonce
 
-Tx-Nonce is a Core-Stack worker responsible to set transaction nonce.
-- consumes messages from an **Apache Kafka** Topic
-- uses **Redis** as a distributed cache for nonce values.
+Tx-Nonce is a CoreStack worker responsible for setting transaction nonce.
+
+- Consumes messages from an **Apache Kafka** Topic;
+- Uses **Redis** as a distributed cache for nonce values.
 
 ## Running e2e tests
 
