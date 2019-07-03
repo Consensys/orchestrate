@@ -1,8 +1,8 @@
 package opentracing
 
 import (
-	"time"
 	"errors"
+	"time"
 
 	"github.com/opentracing/opentracing-go"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
@@ -35,7 +35,7 @@ func TxSpanFromBroker(tracer opentracing.Tracer, operationName string) engine.Ha
 		// to be as generalistic as possible
 		if spanContext, err := tracer.Extract(opentracing.TextMap, txctx.Envelope.Carrier()); err == nil {
 			opts = append(opts, opentracing.FollowsFrom(spanContext))
-			log.Debugf("Spancontext in Enveloppe: %v", spanContext)
+			log.Debugf("Spancontext in Envelope: %v", spanContext)
 		} else {
 			log.Debugf("No span found during span Extraction: %v", err)
 		}
@@ -43,24 +43,24 @@ func TxSpanFromBroker(tracer opentracing.Tracer, operationName string) engine.Ha
 		// find span context in opentracing library
 		if spanParent := opentracing.SpanFromContext(txctx.Context()); spanParent != nil {
 			opts = append(opts, opentracing.FollowsFrom(spanParent.Context()))
-			log.Debugf("Spanparent in Enveloppe: %v", spanParent)
+			log.Debugf("Spanparent in Envelope: %v", spanParent)
 		} else {
 			log.Debugf("No span found during span Extraction from context: %v", spanParent)
 		}
-		
+
 		// Update span operationName if it has been created by the other middelwares
 		if value, ok := txctx.Get("operationName").(string); ok {
 			_operationName = value
 		}
 
-		// Add in StartSpanOptions the starting time previously set 
+		// Add in StartSpanOptions the starting time previously set
 		opts = append(opts, opentracing.StartTime(startTime))
 
 		span := tracer.StartSpan(_operationName, opts...)
 		defer span.Finish()
-		
+
 		txctx.WithContext(opentracing.ContextWithSpan(txctx.Context(), span))
-		
+
 		if err := tracer.Inject(span.Context(), opentracing.TextMap, txctx.Envelope.Carrier()); err != nil {
 			log.Errorf("Error during span Injection %v", err)
 		}

@@ -25,7 +25,7 @@ func makeTracerContext(i int) *engine.TxContext {
 
 	txctx.Reset()
 	switch i % Mod {
-	
+
 	default:
 		// There is no previous span and operation Name is not changed
 		return txctx
@@ -36,7 +36,7 @@ func makeTracerContext(i int) *engine.TxContext {
 	case 2:
 		// There is a previous span in the txctx context
 		// The handler should create a Child span of the previously existing one
-		mockSpan := MockTracer.StartSpan(OpenTracingRootName, )
+		mockSpan := MockTracer.StartSpan(OpenTracingRootName)
 		txctx.WithContext(opentracing.ContextWithSpan(txctx.Context(), mockSpan))
 		return txctx
 	case 3:
