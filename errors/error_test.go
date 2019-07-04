@@ -16,6 +16,7 @@ func TestFromError(t *testing.T) {
 	assert.Nil(t, FromError(nil), "From nil error should be nil")
 	e := FromError(fmt.Errorf("test"))
 	assert.Equal(t, "test", e.GetMessage(), "Error message should be correct")
+	assert.Equal(t, "FF000", e.Hex(), "Hex code should be correct")
 
 	e2 := FromError(e)
 	assert.Equal(t, e, e2, "Should behave as flat pass on internal errors")

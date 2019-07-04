@@ -26,7 +26,7 @@ func FromError(err error) *ierror.Error {
 
 	ierr, ok := err.(*ierror.Error)
 	if !ok {
-		return ierror.New(err.Error())
+		return InternalError(err.Error())
 	}
 
 	return ierr
