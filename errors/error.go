@@ -8,8 +8,7 @@ import (
 
 // Errorf creates an error according to a format specifier
 func Errorf(format string, a ...interface{}) *ierror.Error {
-	err := ierror.New(fmt.Sprintf(format, a...))
-
+	err := InternalError(fmt.Sprintf(format, a...))
 	return err
 }
 
@@ -23,7 +22,7 @@ func FromError(err error) *ierror.Error {
 
 	ierr, ok := err.(*ierror.Error)
 	if !ok {
-		return InternalError(err.Error())
+		return Errorf(err.Error())
 	}
 
 	return ierr
