@@ -549,6 +549,19 @@ func (ec *Client) GetClientType(ctx context.Context, chainID *big.Int) (types.Cl
 	return ClientTypeParser(clientVersion), nil
 }
 
+func (ec *Client) SendQuorumRawPrivateTransaction(ctx context.Context, chainID *big.Int, signedTxHash []byte, args *types.PrivateArgs) (ethcommon.Hash, error) {
+	c, err := ec.getRPC(chainID)
+	if err != nil {
+		return nilHash, err
+	}
+
+	raxTxHashHex := hexutil.Encode(signedTxHash)
+	var hash string
+	err3 := c.CallContext(ctx, &hash, "eth_sendRawPrivateTransaction", raxTxHashHex, args.PrivateFor)
+
+	return ethcommon.HexToHash(hash), err3
+}
+
 // SendRawPrivateTransaction send a raw transaction to a Ethreum node supporting privacy (e.g Quorum+Tessera node)
 func (ec *Client) SendRawPrivateTransaction(ctx context.Context, chainID *big.Int, raw []byte, args *types.PrivateArgs) (ethcommon.Hash, error) {
 	c, err := ec.getRPC(chainID)
@@ -565,7 +578,6 @@ func (ec *Client) SendRawPrivateTransaction(ctx context.Context, chainID *big.In
 
 	rawTx := hexutil.Encode(buf.Bytes())
 	var hash string
-	// TODO: Call a different method if using Quorum
 	err3 := c.CallContext(ctx, &hash, "eea_sendRawTransaction", rawTx)
 
 	return ethcommon.HexToHash(hash), err3

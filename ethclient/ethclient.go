@@ -18,7 +18,11 @@ type TransactionSender interface {
 	// SendRawTransaction allows to send a raw transaction
 	SendRawTransaction(ctx context.Context, chainID *big.Int, raw string) error
 
-	// SendRawPrivateTransaction send a raw transaction to a Ethreum node supporting privacy (e.g Quorum+Tessera node)
+	// SendQuorumRawPrivateTransaction sends a raw signed transaction to a Quorum node
+	// signedTxHash - is a hash returned by Quorum and then signed by a client
+	SendQuorumRawPrivateTransaction(ctx context.Context, chainID *big.Int, signedTxHash []byte, args *types.PrivateArgs) (ethcommon.Hash, error)
+
+	// SendRawPrivateTransaction send a raw transaction to a Ethreum node supporting privacy with EEA privacy extensions
 	SendRawPrivateTransaction(ctx context.Context, chainID *big.Int, raw []byte, args *types.PrivateArgs) (ethcommon.Hash, error)
 }
 

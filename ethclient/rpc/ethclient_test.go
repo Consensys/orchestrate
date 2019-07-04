@@ -17,7 +17,15 @@ import (
 
 const chainID = 888
 
+var chainIDBigInt = big.NewInt(int64(chainID))
+
 var errTest = errors.New("test error")
+var privateArgs = &types.PrivateArgs{
+	PrivateFrom:   "0x01",
+	PrivateFor:    []string{"0x02"},
+	PrivateTxType: "abc",
+}
+
 var ctx, _ = context.WithCancel(context.Background())
 var gethClient *Client
 var ctrl *gomock.Controller
@@ -27,6 +35,33 @@ func setupTest(t *testing.T) {
 	ctrl = gomock.NewController(t)
 	gethClient = NewClient(&geth.Config{})
 	mockRPCClient = mocks.NewMockClient(ctrl)
+}
+
+func TestQuorumRawPrivateTransaction(t *testing.T) {
+	setupTest(t)
+	defer ctrl.Finish()
+
+	setMockClient(mockRPCClient)
+	mockRPCClient.
+		EXPECT().
+		CallContext(ctx, gomock.Any(), "eth_sendRawPrivateTransaction", "0x010203", []string{"0x02"}).
+		Return(nil).
+		SetArg(1, "0x1234").
+		Times(1)
+
+	hash, err := gethClient.SendQuorumRawPrivateTransaction(ctx, chainIDBigInt, []byte{1, 2, 3}, privateArgs)
+	assert.NoError(t, err)
+	assert.Equal(t, ethcommon.HexToHash("0x1234"), hash)
+}
+
+func TestReturnErrorIfCannotGetRPCWhenSendingQuorumPrivateTransaction(t *testing.T) {
+	setupTest(t)
+	defer ctrl.Finish()
+
+	hash, err := gethClient.SendQuorumRawPrivateTransaction(ctx, chainIDBigInt, []byte{1, 2, 3}, privateArgs)
+
+	assert.EqualError(t, err, "no RPC connection registered for chain \"888\"")
+	assert.Equal(t, ethcommon.HexToHash("0x0"), hash)
 }
 
 func TestSendRawPrivateTransaction(t *testing.T) {
@@ -41,11 +76,7 @@ func TestSendRawPrivateTransaction(t *testing.T) {
 		SetArg(1, "0x1234").
 		Times(1)
 
-	hash, err := gethClient.SendRawPrivateTransaction(ctx, big.NewInt(int64(chainID)), []byte{1, 2, 3}, &types.PrivateArgs{
-		PrivateFrom:   "0x01",
-		PrivateFor:    []string{"0x02"},
-		PrivateTxType: "abc",
-	})
+	hash, err := gethClient.SendRawPrivateTransaction(ctx, chainIDBigInt, []byte{1, 2, 3}, privateArgs)
 	assert.NoError(t, err)
 	assert.Equal(t, ethcommon.HexToHash("0x1234"), hash)
 }
@@ -54,11 +85,7 @@ func TestReturnErrorIfCannotGetRPCWhenSendingRawPrivateTransaction(t *testing.T)
 	setupTest(t)
 	defer ctrl.Finish()
 
-	hash, err := gethClient.SendRawPrivateTransaction(ctx, big.NewInt(int64(chainID)), []byte{1, 2, 3}, &types.PrivateArgs{
-		PrivateFrom:   "0x01",
-		PrivateFor:    []string{"0x02"},
-		PrivateTxType: "abc",
-	})
+	hash, err := gethClient.SendRawPrivateTransaction(ctx, chainIDBigInt, []byte{1, 2, 3}, privateArgs)
 
 	assert.EqualError(t, err, "no RPC connection registered for chain \"888\"")
 	assert.Equal(t, ethcommon.HexToHash("0x0"), hash)
@@ -76,7 +103,7 @@ func TestDetectClientVersion(t *testing.T) {
 		SetArg(1, "pantheon/1.1.1").
 		Times(1)
 
-	clientType, err := gethClient.GetClientType(ctx, big.NewInt(int64(chainID)))
+	clientType, err := gethClient.GetClientType(ctx, chainIDBigInt)
 	assert.NoError(t, err)
 	assert.Equal(t, types.PantheonClient, clientType)
 }
@@ -92,7 +119,7 @@ func TestReturnErrorIfClientVersionMethodFails(t *testing.T) {
 		Return(errTest).
 		Times(1)
 
-	clientType, err := gethClient.GetClientType(ctx, big.NewInt(int64(chainID)))
+	clientType, err := gethClient.GetClientType(ctx, chainIDBigInt)
 	assert.EqualError(t, err, errTest.Error())
 	assert.Equal(t, types.UnknownClient, clientType)
 }
@@ -101,7 +128,7 @@ func TestReturnErrorIfCannotGetRPCWhenDetectingClient(t *testing.T) {
 	setupTest(t)
 	defer ctrl.Finish()
 
-	clientType, err := gethClient.GetClientType(ctx, big.NewInt(int64(chainID)))
+	clientType, err := gethClient.GetClientType(ctx, chainIDBigInt)
 
 	assert.EqualError(t, err, "no RPC connection registered for chain \"888\"")
 	assert.Equal(t, types.UnknownClient, clientType)
