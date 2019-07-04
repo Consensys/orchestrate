@@ -9,19 +9,12 @@ import (
 
 var component = "handlers.loader"
 
-// Loader is a Middleware enginer.HandlerFunc that Load sarama.ConsumerGroup messages
+// Loader is an handler that Load sarama.ConsumerGroup messages
 func Loader(txctx *engine.TxContext) {
 	// Cast message into sarama.ConsumerMessage
 	msg, ok := txctx.Msg.(*broker.Msg)
 	if !ok {
 		txctx.Logger.Fatalf("loader: expected a sarama.ConsumerMessage")
-	}
-
-	err := encoding.Unmarshal(msg, txctx.Envelope)
-	if err != nil {
-		e := txctx.AbortWithError(err).ExtendComponent(component)
-		txctx.Logger.WithError(e).Errorf("loader: error unmarshalling")
-		return
 	}
 
 	// Enrich Logger
@@ -30,6 +23,13 @@ func Loader(txctx *engine.TxContext) {
 		"kafka.in.offset":    msg.Offset,
 		"kafka.in.partition": msg.Partition,
 	})
+
+	err := encoding.Unmarshal(msg, txctx.Envelope)
+	if err != nil {
+		e := txctx.AbortWithError(err).ExtendComponent(component)
+		txctx.Logger.WithError(e).Errorf("loader: error unmarshalling")
+		return
+	}
 
 	txctx.Logger.Tracef("loader: message loaded: %v", txctx.Envelope.String())
 }
