@@ -198,17 +198,17 @@ func IsConstraintViolatedError(err error) bool {
 	return is(FromError(err).GetCode(), constraintViolatedErrCode)
 }
 
-// No data found error (hex code DB2XX)
-var noDataFoundErrCode = storageErrCode + 2<<8
+// Not found error (hex code DB2XX)
+var notFoundErrCode = storageErrCode + 2<<8
 
 // NoDataFoundError is raised when accessing a missing data
-func NoDataFoundError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(noDataFoundErrCode)
+func NotFoundError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(format, a...).SetCode(notFoundErrCode)
 }
 
-// IsNoDataFoundError indicate whether an error is a no data found error
-func IsNoDataFoundError(err error) bool {
-	return is(FromError(err).GetCode(), noDataFoundErrCode)
+// IsNotFoundError indicate whether an error is a no data found error
+func IsNotFoundError(err error) bool {
+	return is(FromError(err).GetCode(), notFoundErrCode)
 }
 
 // Data corrupted (hex code DB3XX)

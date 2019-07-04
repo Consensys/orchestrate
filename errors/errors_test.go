@@ -146,10 +146,11 @@ func TestConstraintViolatedError(t *testing.T) {
 	assert.Equal(t, "DB100", e.Hex(), "Hex reprensation should be correct")
 }
 
-func TestNoDataFoundError(t *testing.T) {
-	e := NoDataFoundError("test")
-	assert.Equal(t, uint64(897536), e.GetCode(), "NoDataFoundError code should be correct")
-	assert.True(t, IsStorageError(e), "NoDataFoundError should be a data error")
+func TestNotFoundError(t *testing.T) {
+	e := NotFoundError("test")
+	assert.Equal(t, uint64(897536), e.GetCode(), "NotFoundError code should be correct")
+	assert.True(t, IsStorageError(e), "NotFoundError should be a data error")
+	assert.True(t, IsNotFoundError(e), "DataCorruptedError should be a data error")
 	assert.Equal(t, "DB200", e.Hex(), "Hex reprensation should be correct")
 }
 
