@@ -70,16 +70,6 @@ func TestQuorumRawPrivateTransactionWhenRPCCallFails(t *testing.T) {
 	assert.Equal(t, ethcommon.HexToHash("0x0"), hash)
 }
 
-func TestReturnErrorIfCannotGetRPCWhenSendingQuorumPrivateTransaction(t *testing.T) {
-	setupTest(t)
-	defer ctrl.Finish()
-
-	hash, err := gethClient.SendQuorumRawPrivateTransaction(ctx, chainIDBigInt, []byte{1, 2, 3}, privateArgs)
-
-	assert.EqualError(t, err, "no RPC connection registered for chain \"888\"")
-	assert.Equal(t, ethcommon.HexToHash("0x0"), hash)
-}
-
 func TestSendRawPrivateTransaction(t *testing.T) {
 	setupTest(t)
 	defer ctrl.Finish()
@@ -121,39 +111,6 @@ func TestReturnErrorIfCannotGetRPC(t *testing.T) {
 
 	assert.EqualError(t, err, "no RPC connection registered for chain \"888\"")
 	assert.Equal(t, ethcommon.HexToHash("0x0"), hash)
-}
-
-func TestDetectClientVersion(t *testing.T) {
-	setupTest(t)
-	defer ctrl.Finish()
-
-	setMockClient(mockRPCClient)
-	mockRPCClient.
-		EXPECT().
-		CallContext(ctx, gomock.Any(), "web3_clientVersion").
-		Return(nil).
-		SetArg(1, "pantheon/1.1.1").
-		Times(1)
-
-	clientType, err := gethClient.GetClientType(ctx, chainIDBigInt)
-	assert.NoError(t, err)
-	assert.Equal(t, types.PantheonClient, clientType)
-}
-
-func TestReturnErrorIfClientVersionMethodFails(t *testing.T) {
-	setupTest(t)
-	defer ctrl.Finish()
-
-	setMockClient(mockRPCClient)
-	mockRPCClient.
-		EXPECT().
-		CallContext(ctx, gomock.Any(), "web3_clientVersion").
-		Return(errTest).
-		Times(1)
-
-	clientType, err := gethClient.GetClientType(ctx, chainIDBigInt)
-	assert.EqualError(t, err, errTest.Error())
-	assert.Equal(t, types.UnknownClient, clientType)
 }
 
 func setMockClient(mockClient *mocks.MockClient) {

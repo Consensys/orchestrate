@@ -10,7 +10,7 @@ type NullClient struct {
 	chainID *big.Int
 }
 
-func CreateNullCleint(chainID *big.Int) *NullClient {
+func CreateNullClient(chainID *big.Int) *NullClient {
 	return &NullClient{
 		chainID: chainID,
 	}

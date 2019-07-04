@@ -1,7 +1,7 @@
 package rpc
 
 import (
-	bytes "bytes"
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -85,7 +85,7 @@ func (ec *Client) getRPC(chainID *big.Int) rpc.Client {
 		return c
 	}
 
-	nullClient := geth.CreateNullCleint(chainID)
+	nullClient := geth.CreateNullClient(chainID)
 	ec.rpcs[chainID.String()] = nullClient
 	return nullClient
 }
@@ -474,28 +474,16 @@ func (ec *Client) SendTransaction(ctx context.Context, chainID *big.Int, args *t
 	return txHash, nil
 }
 
-func (ec *Client) GetClientType(ctx context.Context, chainID *big.Int) (types.ClientType, error) {
-	c := ec.getRPC(chainID)
-
-	var clientVersion string
-	err := c.CallContext(ctx, &clientVersion, "web3_clientVersion")
-	if err != nil {
-		return types.UnknownClient, err
-	}
-
-	return ClientTypeParser(clientVersion), nil
-}
-
 func (ec *Client) SendQuorumRawPrivateTransaction(ctx context.Context, chainID *big.Int, signedTxHash []byte, args *types.PrivateArgs) (ethcommon.Hash, error) {
 	c := ec.getRPC(chainID)
 
-	raxTxHashHex := hexutil.Encode(signedTxHash)
+	rawTxHashHex := hexutil.Encode(signedTxHash)
 	var hash string
-	err := c.CallContext(ctx, &hash, "eth_sendRawPrivateTransaction", raxTxHashHex, args.PrivateFor)
+	err := c.CallContext(ctx, &hash, "eth_sendRawPrivateTransaction", rawTxHashHex, args.PrivateFor)
 	return ethcommon.HexToHash(hash), err
 }
 
-// SendRawPrivateTransaction send a raw transaction to a Ethreum node supporting privacy (e.g Quorum+Tessera node)
+// SendRawPrivateTransaction send a raw transaction to a Ethereum node supporting privacy (e.g Quorum+Tessera node)
 func (ec *Client) SendRawPrivateTransaction(ctx context.Context, chainID *big.Int, raw []byte, args *types.PrivateArgs) (ethcommon.Hash, error) {
 	c := ec.getRPC(chainID)
 
