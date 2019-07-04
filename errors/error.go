@@ -6,9 +6,6 @@ import (
 	ierror "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
 )
 
-// MaxStackDepth maximum number of stackframes on error
-var MaxStackDepth = 50
-
 // Errorf creates an error according to a format specifier
 func Errorf(format string, a ...interface{}) *ierror.Error {
 	err := ierror.New(fmt.Sprintf(format, a...))
