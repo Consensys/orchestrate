@@ -494,7 +494,7 @@ Flags:
 
 ## Errors
 
-Internal errors are built on top of protobuf and hold
+Internal errors are built on top of protobuf and contain
 
 - `string` **message** describing the error
 - `uint64` **error code** that maps to a five hex character code (e.g. `F000A`)
@@ -505,28 +505,28 @@ Internal errors are built on top of protobuf and hold
 
 Error codes are `uint64` that maps to five hex character code
 
-| Class | Subclass | Error Code | Condition                     | Comment                                  |
-|-------|----------|------------|-------------------------------|------------------------------------------|
-| 01XXX |          |    01000   | warning                       | Raised to indicate a warning             |
-| 01XXX |   011XX  |    01100   | retry_warning                 | Error occured system retryies            |
-| 01XXX |   012XX  |    01200   | faucet_warning                | Faucet credit has been denied            |
-| 08XXX |          |    08000   | connection_exception          | Failed connecting to an external service |
-| 08XXX |   081XX  |    08100   | kafka_connection_exception    | Failed connecting to Kafka               |
-| 08XXX |   082XX  |    08200   | http_connection _exception    | Failed connecting to an HTTP service     |
-| 08XXX |   083XX  |    08300   | ethereum_connection_exception | Failed connecting Ethereum jsonRPC API   |
-| 0AXXX |          |    0A000   | feature_not_supported         | Feature is not supported                 |
-| 42XXX |          |    42000   | invalid_data                  | Failed to process data                   |
-| 42XXX |   421XX  |    42100   | invalid_encoding              | Failed to decode a message               |
-| 42XXX |   422XX  |    42200   | invalid_solidity_data         | Failed to process Solidity related data  |
-| 42XXX |   422XX  |    42201   | invalid_method_signature      | Invalid Solidity method signature        |
-| 42XXX |   422XX  |    42202   | invalid_args_count            | Invalid args count provided              |
-| 42XXX |   422XX  |    42203   | invalid_arg                   | Invalid arg provided                     |
-| 42XXX |   422XX  |    42204   | invalid_topics_count          | Invalid topics count in event log        |
-| 42XXX |   422XX  |    42205   | invalid_event_data            | Invalid data in event log                |
-| 42XXX |   423XX  |    42300   | invalid_format                | Data does not match expected format      |
-| DBXXX |          |    DB000   | storage_exception             | Failed accessing stored data             |
-| DBXXX |   DB1XX  |    DB100   | constraint_violated           | Data constraint violated                 |
-| DBXXX |   DB2XX  |    DB200   | no_data_found                 | No data stored for given parameters      |
-| DBXXX |   DB3XX  |    DB300   | data_corrupted                | Data is corrupted                        |
-| F0XXX |          |    F0000   | invalid_config                | Invalid configuration                    |
-| FFXXX |          |    FF000   | internal_error                | Internal error                           |
+| Class | Subclass | Error Code | Condition                     | Comment                                   |
+|-------|----------|------------|-------------------------------|-------------------------------------------|
+| 01XXX |          |    01000   | warning                       | Raised to indicate a warning              |
+| 01XXX |   011XX  |    01100   | retry_warning                 | Error occured system retries              |
+| 01XXX |   012XX  |    01200   | faucet_warning                | Faucet credit has been denied             |
+| 08XXX |          |    08000   | connection_exception          | Failed connecting to an external service  |
+| 08XXX |   081XX  |    08100   | kafka_connection_exception    | Failed connecting to Kafka                |
+| 08XXX |   082XX  |    08200   | http_connection_exception     | Failed connecting to an HTTP service      |
+| 08XXX |   083XX  |    08300   | ethereum_connection_exception | Failed connecting to Ethereum jsonRPC API |
+| 0AXXX |          |    0A000   | feature_not_supported         | Feature is not supported                  |
+| 42XXX |          |    42000   | invalid_data                  | Failed to process data                    |
+| 42XXX |   421XX  |    42100   | invalid_encoding              | Failed to decode a message                |
+| 42XXX |   422XX  |    42200   | invalid_solidity_data         | Failed to process Solidity related data   |
+| 42XXX |   422XX  |    42201   | invalid_method_signature      | Invalid Solidity method signature         |
+| 42XXX |   422XX  |    42202   | invalid_args_count            | Invalid args count provided               |
+| 42XXX |   422XX  |    42203   | invalid_arg                   | Invalid arg provided                      |
+| 42XXX |   422XX  |    42204   | invalid_topics_count          | Invalid topics count in event log         |
+| 42XXX |   422XX  |    42205   | invalid_event_data            | Invalid data in event log                 |
+| 42XXX |   423XX  |    42300   | invalid_format                | Data does not match expected format       |
+| DBXXX |          |    DB000   | storage_exception             | Failed accessing stored data              |
+| DBXXX |   DB1XX  |    DB100   | constraint_violated           | Data constraint violated                  |
+| DBXXX |   DB2XX  |    DB200   | not_found                     | No data found for given parameters        |
+| DBXXX |   DB3XX  |    DB300   | data_corrupted                | Data is corrupted                         |
+| F0XXX |          |    F0000   | invalid_config                | Invalid configuration                     |
+| FFXXX |          |    FF000   | internal_error                | Internal error                            |
