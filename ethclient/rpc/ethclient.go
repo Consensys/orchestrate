@@ -550,37 +550,42 @@ func (ec *Client) GetClientType(ctx context.Context, chainID *big.Int) (types.Cl
 }
 
 func (ec *Client) SendQuorumRawPrivateTransaction(ctx context.Context, chainID *big.Int, signedTxHash []byte, args *types.PrivateArgs) (ethcommon.Hash, error) {
-	c, err := ec.getRPC(chainID)
-	if err != nil {
-		return nilHash, err
-	}
+	v, err := ec.withRPC(chainID, nilHash, func(c rpc.Client) (interface{}, error) {
+		raxTxHashHex := hexutil.Encode(signedTxHash)
+		var hash string
+		err := c.CallContext(ctx, &hash, "eth_sendRawPrivateTransaction", raxTxHashHex, args.PrivateFor)
+		return ethcommon.HexToHash(hash), err
+	})
 
-	raxTxHashHex := hexutil.Encode(signedTxHash)
-	var hash string
-	err3 := c.CallContext(ctx, &hash, "eth_sendRawPrivateTransaction", raxTxHashHex, args.PrivateFor)
-
-	return ethcommon.HexToHash(hash), err3
+	return v.(ethcommon.Hash), err
 }
 
 // SendRawPrivateTransaction send a raw transaction to a Ethreum node supporting privacy (e.g Quorum+Tessera node)
 func (ec *Client) SendRawPrivateTransaction(ctx context.Context, chainID *big.Int, raw []byte, args *types.PrivateArgs) (ethcommon.Hash, error) {
+	v, err := ec.withRPC(chainID, nilHash, func(c rpc.Client) (interface{}, error) {
+		var buf bytes.Buffer
+		buf.Write(raw)
+		err := rlpEncode(&buf, args.PrivateFrom, args.PrivateFor, args.PrivateTxType)
+		if err != nil {
+			return nilHash, err
+		}
+
+		rawTx := hexutil.Encode(buf.Bytes())
+		var hash string
+		err2 := c.CallContext(ctx, &hash, "eea_sendRawTransaction", rawTx)
+
+		return ethcommon.HexToHash(hash), err2
+	})
+	return v.(ethcommon.Hash), err
+}
+
+func (ec *Client) withRPC(chainID *big.Int, defaulValue interface{}, f func(rpc.Client) (interface{}, error)) (interface{}, error) {
 	c, err := ec.getRPC(chainID)
 	if err != nil {
-		return nilHash, err
+		return defaulValue, err
 	}
 
-	var buf bytes.Buffer
-	buf.Write(raw)
-	err2 := rlpEncode(&buf, args.PrivateFrom, args.PrivateFor, args.PrivateTxType)
-	if err2 != nil {
-		return nilHash, err
-	}
-
-	rawTx := hexutil.Encode(buf.Bytes())
-	var hash string
-	err3 := c.CallContext(ctx, &hash, "eea_sendRawTransaction", rawTx)
-
-	return ethcommon.HexToHash(hash), err3
+	return f(c)
 }
 
 func rlpEncode(buf io.Writer, args ...interface{}) error {
