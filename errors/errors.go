@@ -5,7 +5,7 @@ import (
 )
 
 // Warning  (hex code 01XXX)
-var warningCode uint64 = 1 << 12
+const warningCode uint64 = 1 << 12
 
 // Warning are raised to indicate
 func Warning(format string, a ...interface{}) *ierror.Error {
@@ -14,11 +14,11 @@ func Warning(format string, a ...interface{}) *ierror.Error {
 
 // IsWarning indicate whether an error is a warning
 func IsWarning(err error) bool {
-	return is(FromError(err).GetCode(), warningCode)
+	return isErrorClass(FromError(err).GetCode(), warningCode)
 }
 
 // Warning retry (hex code 01100)
-var retryWarningCode = warningCode + 1<<8
+const retryWarningCode = warningCode + 1<<8
 
 // RetryWarning are raised when failing to connect to a service and retrying
 func RetryWarning(format string, a ...interface{}) *ierror.Error {
@@ -26,7 +26,7 @@ func RetryWarning(format string, a ...interface{}) *ierror.Error {
 }
 
 // Faucet warning (hex code 01200)
-var faucetWarningCode = warningCode + 2<<8
+const faucetWarningCode = warningCode + 2<<8
 
 // FaucetWarning are raised when a faucet credit has been denied
 func FaucetWarning(format string, a ...interface{}) *ierror.Error {
@@ -35,13 +35,13 @@ func FaucetWarning(format string, a ...interface{}) *ierror.Error {
 
 // IsFaucetWarning indicate whether an error is a faucet warning
 func IsFaucetWarning(err error) bool {
-	return is(FromError(err).GetCode(), faucetWarningCode)
+	return isErrorClass(FromError(err).GetCode(), faucetWarningCode)
 }
 
 // Connection errors (hex code 08XXX)
 //
 // Connection errors are raised when failing to connect to an external service
-var connectionErrCode uint64 = 8 << 12
+const connectionErrCode uint64 = 8 << 12
 
 // ConnectionError is raised when failing to connect to an external service
 func ConnectionError(format string, a ...interface{}) *ierror.Error {
@@ -50,11 +50,11 @@ func ConnectionError(format string, a ...interface{}) *ierror.Error {
 
 // IsConnectionError indicate whether an error is a connection error
 func IsConnectionError(err error) bool {
-	return is(FromError(err).GetCode(), connectionErrCode)
+	return isErrorClass(FromError(err).GetCode(), connectionErrCode)
 }
 
 // Kafka connection errors are raised when failing to connect to Kafka
-var kafkaConnectionErrCode = connectionErrCode + 1<<8
+const kafkaConnectionErrCode = connectionErrCode + 1<<8
 
 // KafkaConnectionError is raised when failing to connect to Kafka
 func KafkaConnectionError(format string, a ...interface{}) *ierror.Error {
@@ -62,7 +62,7 @@ func KafkaConnectionError(format string, a ...interface{}) *ierror.Error {
 }
 
 // HTTP connection errors are raised when failing to connect over HTTP
-var httpConnectionErrCode = connectionErrCode + 2<<8
+const httpConnectionErrCode = connectionErrCode + 2<<8
 
 // HTTPConnectionError is raised when failing to connect over http
 func HTTPConnectionError(format string, a ...interface{}) *ierror.Error {
@@ -70,7 +70,7 @@ func HTTPConnectionError(format string, a ...interface{}) *ierror.Error {
 }
 
 // Ethereum connection errors are raised when failing to connect to Ethereum client jsonRPC API
-var ethConnectionErrCode = connectionErrCode + 3<<8
+const ethConnectionErrCode = connectionErrCode + 3<<8
 
 // EthConnectionError is raised when failing to connect to Ethereum client jsonRPC API
 func EthConnectionError(format string, a ...interface{}) *ierror.Error {
@@ -78,7 +78,7 @@ func EthConnectionError(format string, a ...interface{}) *ierror.Error {
 }
 
 // Feature Not Supported Errors (hex code 0AXXX)
-var featureNotSupportedErrCode uint64 = 10 << 12
+const featureNotSupportedErrCode uint64 = 10 << 12
 
 // FeatureNotSupportedError is raised when using a feature which is not implemented
 func FeatureNotSupportedError(format string, a ...interface{}) *ierror.Error {
@@ -88,7 +88,7 @@ func FeatureNotSupportedError(format string, a ...interface{}) *ierror.Error {
 // Data Errors (hex code 42XXX)
 
 // Data Errors are raised when a provided data does not match expected format
-var dataErrCode uint64 = 4<<16 + 2<<12
+const dataErrCode uint64 = 4<<16 + 2<<12
 
 // DataError is raised when a provided data does not match expected format  (code 03000)
 func DataError(format string, a ...interface{}) *ierror.Error {
@@ -97,11 +97,11 @@ func DataError(format string, a ...interface{}) *ierror.Error {
 
 // IsDataError indicate whether an error is a data error
 func IsDataError(err error) bool {
-	return is(FromError(err).GetCode(), dataErrCode)
+	return isErrorClass(FromError(err).GetCode(), dataErrCode)
 }
 
 // Encoding errors (hex code 421XX)
-var encodingErrCode = dataErrCode + 1<<8
+const encodingErrCode = dataErrCode + 1<<8
 
 // EncodingError are raised when failing to decode a message
 func EncodingError(format string, a ...interface{}) *ierror.Error {
@@ -109,7 +109,7 @@ func EncodingError(format string, a ...interface{}) *ierror.Error {
 }
 
 // Solidity Errors (hex code 422XX)
-var solidityErrCode = dataErrCode + 2<<8
+const solidityErrCode = dataErrCode + 2<<8
 
 // SolidityError is raised when a data related in transaction crafing is incorrect
 func SolidityError(format string, a ...interface{}) *ierror.Error {
@@ -118,11 +118,11 @@ func SolidityError(format string, a ...interface{}) *ierror.Error {
 
 // IsSolidityError indicate whether an error is a Solidity error
 func IsSolidityError(err error) bool {
-	return is(FromError(err).GetCode(), solidityErrCode)
+	return isErrorClass(FromError(err).GetCode(), solidityErrCode)
 }
 
 // Invalid Signature Error (hex code 42201)
-var invalidSigErrCode = solidityErrCode + 1
+const invalidSigErrCode = solidityErrCode + 1
 
 // InvalidSigError is raised when a solidity method signature is invalid
 func InvalidSigError(sig string) *ierror.Error {
@@ -131,7 +131,7 @@ func InvalidSigError(sig string) *ierror.Error {
 }
 
 // Invalid Arg Error (hex code 42202)
-var invalidArgsCountErrCode = solidityErrCode + 2
+const invalidArgsCountErrCode = solidityErrCode + 2
 
 // InvalidArgsCountError is raised when invalid arguments count is provided to craft a transaction
 func InvalidArgsCountError(format string, a ...interface{}) *ierror.Error {
@@ -139,7 +139,7 @@ func InvalidArgsCountError(format string, a ...interface{}) *ierror.Error {
 }
 
 // Invalid Arg Error (hex code 42203)
-var invalidArgErrCode = solidityErrCode + 3
+const invalidArgErrCode = solidityErrCode + 3
 
 // InvalidArgError is raised when invalid argument is provided to craft a transaction
 func InvalidArgError(format string, a ...interface{}) *ierror.Error {
@@ -147,7 +147,7 @@ func InvalidArgError(format string, a ...interface{}) *ierror.Error {
 }
 
 // Invalid topic Error (hex code 42204)
-var invalidTopicsCountErrCode = solidityErrCode + 4
+const invalidTopicsCountErrCode = solidityErrCode + 4
 
 // InvalidTopicsCountError is raised when topics count is in receipt
 func InvalidTopicsCountError(format string, a ...interface{}) *ierror.Error {
@@ -155,7 +155,7 @@ func InvalidTopicsCountError(format string, a ...interface{}) *ierror.Error {
 }
 
 // Invalid EventData Error (hex code 42205)
-var invalidEventDataErrCode = solidityErrCode + 5
+const invalidEventDataErrCode = solidityErrCode + 5
 
 // InvalidEventDataError is raised when event data is invalid
 func InvalidEventDataError(format string, a ...interface{}) *ierror.Error {
@@ -163,7 +163,7 @@ func InvalidEventDataError(format string, a ...interface{}) *ierror.Error {
 }
 
 // Format Error (hex code 423XX)
-var invalidFormatErrCode = dataErrCode + 3<<8
+const invalidFormatErrCode = dataErrCode + 3<<8
 
 // InvalidFormatError is raised when a data does not match an expected format
 func InvalidFormatError(format string, a ...interface{}) *ierror.Error {
@@ -173,7 +173,7 @@ func InvalidFormatError(format string, a ...interface{}) *ierror.Error {
 // Storage Error (hex code DBXXX)
 
 // Storage errors are raised when an error is encountered while accessing stored data
-var storageErrCode uint64 = 13<<16 + 11<<12
+const storageErrCode uint64 = 13<<16 + 11<<12
 
 // StorageError is raised when an error is encountered while accessing stored data
 func StorageError(format string, a ...interface{}) *ierror.Error {
@@ -182,11 +182,11 @@ func StorageError(format string, a ...interface{}) *ierror.Error {
 
 // IsStorageError indicate whether an error is a storage error
 func IsStorageError(err error) bool {
-	return is(FromError(err).GetCode(), storageErrCode)
+	return isErrorClass(FromError(err).GetCode(), storageErrCode)
 }
 
 // Data constratin violated error (hex code DB1XX)
-var constraintViolatedErrCode = storageErrCode + 1<<8
+const constraintViolatedErrCode = storageErrCode + 1<<8
 
 // ConstraintViolatedError is raised when a data constraint has been violated
 func ConstraintViolatedError(format string, a ...interface{}) *ierror.Error {
@@ -195,11 +195,11 @@ func ConstraintViolatedError(format string, a ...interface{}) *ierror.Error {
 
 // IsConstraintViolatedError indicate whether an error is a constraint violated error
 func IsConstraintViolatedError(err error) bool {
-	return is(FromError(err).GetCode(), constraintViolatedErrCode)
+	return isErrorClass(FromError(err).GetCode(), constraintViolatedErrCode)
 }
 
 // Not found error (hex code DB2XX)
-var notFoundErrCode = storageErrCode + 2<<8
+const notFoundErrCode = storageErrCode + 2<<8
 
 // NoDataFoundError is raised when accessing a missing data
 func NotFoundError(format string, a ...interface{}) *ierror.Error {
@@ -208,11 +208,11 @@ func NotFoundError(format string, a ...interface{}) *ierror.Error {
 
 // IsNotFoundError indicate whether an error is a no data found error
 func IsNotFoundError(err error) bool {
-	return is(FromError(err).GetCode(), notFoundErrCode)
+	return isErrorClass(FromError(err).GetCode(), notFoundErrCode)
 }
 
 // Data corrupted (hex code DB3XX)
-var dataCorruptedErrCode = storageErrCode + 3<<8
+const dataCorruptedErrCode = storageErrCode + 3<<8
 
 // DataCorruptedError is raised loading a corrupted data
 func DataCorruptedError(format string, a ...interface{}) *ierror.Error {
@@ -222,7 +222,7 @@ func DataCorruptedError(format string, a ...interface{}) *ierror.Error {
 // Configuration errors (hex code F0XXX)
 //
 // Configuration errors are raised when an error is encountered while loading configuration format
-var configErrCode uint64 = 15 << 16
+const configErrCode uint64 = 15 << 16
 
 // ConfigError is raised when an error is encountered while loading configuration (code 01000)
 func ConfigError(format string, a ...interface{}) *ierror.Error {
@@ -232,14 +232,9 @@ func ConfigError(format string, a ...interface{}) *ierror.Error {
 // Internal errors (hex code FFXXX)
 //
 // Configuration errors are raised when an error is encountered while loading configuration format
-var internalErrCode uint64 = 15<<16 + 15<<12
+const internalErrCode uint64 = 15<<16 + 15<<12
 
 // InternalError is raised when an error that is not expected to be outputes is encountered
 func InternalError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(format, a...).SetCode(internalErrCode)
-}
-
-// is returns wether code belongs to base family
-func is(code, base uint64) bool {
-	return (base^code)&(255<<12+15<<8&base) == 0
 }

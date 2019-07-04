@@ -28,3 +28,8 @@ func FromError(err error) *ierror.Error {
 
 	return ierr
 }
+
+// isErrorClass returns whether code belongs to a base error class
+func isErrorClass(code, base uint64) bool {
+	return (base^code)&(255<<12+15<<8&base) == 0
+}

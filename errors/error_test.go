@@ -21,3 +21,11 @@ func TestFromError(t *testing.T) {
 	e2 := FromError(e)
 	assert.Equal(t, e, e2, "Should behave as flat pass on internal errors")
 }
+
+func TestIsErrorClass(t *testing.T) {
+	assert.True(t, isErrorClass(271120, dataErrCode), "Hex 42310 should be a data error")
+	assert.False(t, isErrorClass(dataErrCode, solidityErrCode), "Data error should not be a solidity error")
+	assert.False(t, isErrorClass(dataErrCode, 0), "Hex 00000 should not be a data error")
+	assert.False(t, isErrorClass(0, dataErrCode), "Hex 00000 should not be a data error")
+	assert.False(t, isErrorClass(275216, dataErrCode), "Hex 43310 should not be a data error")
+}
