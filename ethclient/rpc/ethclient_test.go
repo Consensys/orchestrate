@@ -54,6 +54,22 @@ func TestQuorumRawPrivateTransaction(t *testing.T) {
 	assert.Equal(t, ethcommon.HexToHash("0x1234"), hash)
 }
 
+func TestQuorumRawPrivateTransactionWhenRPCCallFails(t *testing.T) {
+	setupTest(t)
+	defer ctrl.Finish()
+
+	setMockClient(mockRPCClient)
+	mockRPCClient.
+		EXPECT().
+		CallContext(ctx, gomock.Any(), "eth_sendRawPrivateTransaction", "0x010203", []string{"0x02"}).
+		Return(errTest).
+		Times(1)
+
+	hash, err := gethClient.SendQuorumRawPrivateTransaction(ctx, chainIDBigInt, []byte{1, 2, 3}, privateArgs)
+	assert.Error(t, err, errTest.Error())
+	assert.Equal(t, ethcommon.HexToHash("0x0"), hash)
+}
+
 func TestReturnErrorIfCannotGetRPCWhenSendingQuorumPrivateTransaction(t *testing.T) {
 	setupTest(t)
 	defer ctrl.Finish()
@@ -79,6 +95,22 @@ func TestSendRawPrivateTransaction(t *testing.T) {
 	hash, err := gethClient.SendRawPrivateTransaction(ctx, chainIDBigInt, []byte{1, 2, 3}, privateArgs)
 	assert.NoError(t, err)
 	assert.Equal(t, ethcommon.HexToHash("0x1234"), hash)
+}
+
+func TestSendRawPrivateTransactionWhenRPCCallFails(t *testing.T) {
+	setupTest(t)
+	defer ctrl.Finish()
+
+	setMockClient(mockRPCClient)
+	mockRPCClient.
+		EXPECT().
+		CallContext(ctx, gomock.Any(), "eea_sendRawTransaction", "0x0102038430783031c5843078303283616263").
+		Return(errTest).
+		Times(1)
+
+	hash, err := gethClient.SendRawPrivateTransaction(ctx, chainIDBigInt, []byte{1, 2, 3}, privateArgs)
+	assert.Error(t, err, errTest.Error())
+	assert.Equal(t, ethcommon.HexToHash("0x0"), hash)
 }
 
 func TestReturnErrorIfCannotGetRPCWhenSendingRawPrivateTransaction(t *testing.T) {
