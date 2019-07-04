@@ -25,6 +25,19 @@ func RetryWarning(format string, a ...interface{}) *ierror.Error {
 	return Errorf(format, a...).SetCode(retryWarningCode)
 }
 
+// Faucet warning (hex code 01200)
+var faucetWarningCode = warningCode + 2<<8
+
+// FaucetWarning are raised when a faucet credit has been denied
+func FaucetWarning(format string, a ...interface{}) *ierror.Error {
+	return Errorf(format, a...).SetCode(faucetWarningCode)
+}
+
+// IsFaucetWarning indicate whether an error is a faucet warning
+func IsFaucetWarning(err error) bool {
+	return is(FromError(err).GetCode(), faucetWarningCode)
+}
+
 // Connection errors (hex code 08XXX)
 //
 // Connection errors are raised when failing to connect to an external service

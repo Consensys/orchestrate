@@ -19,6 +19,14 @@ func TestRetryWarning(t *testing.T) {
 	assert.Equal(t, "01100", e.Hex(), "RetryWarning Hex reprensation should be correct")
 }
 
+func TestFaucetWarning(t *testing.T) {
+	e := FaucetWarning("test")
+	assert.Equal(t, uint64(4608), e.GetCode(), "FaucetWarning code should be correct")
+	assert.True(t, IsWarning(e), "FaucetWarning should be a connection error")
+	assert.True(t, IsFaucetWarning(e), "FaucetWarning should be a connection error")
+	assert.Equal(t, "01200", e.Hex(), "FaucetWarning Hex reprensation should be correct")
+}
+
 func TestConnectionError(t *testing.T) {
 	e := ConnectionError("test")
 	assert.Equal(t, uint64(32768), e.GetCode(), "ConnectionError code should be correct")
