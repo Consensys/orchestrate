@@ -113,7 +113,7 @@ func TestSendRawPrivateTransactionWhenRPCCallFails(t *testing.T) {
 	assert.Equal(t, ethcommon.HexToHash("0x0"), hash)
 }
 
-func TestReturnErrorIfCannotGetRPCWhenSendingRawPrivateTransaction(t *testing.T) {
+func TestReturnErrorIfCannotGetRPC(t *testing.T) {
 	setupTest(t)
 	defer ctrl.Finish()
 
@@ -153,16 +153,6 @@ func TestReturnErrorIfClientVersionMethodFails(t *testing.T) {
 
 	clientType, err := gethClient.GetClientType(ctx, chainIDBigInt)
 	assert.EqualError(t, err, errTest.Error())
-	assert.Equal(t, types.UnknownClient, clientType)
-}
-
-func TestReturnErrorIfCannotGetRPCWhenDetectingClient(t *testing.T) {
-	setupTest(t)
-	defer ctrl.Finish()
-
-	clientType, err := gethClient.GetClientType(ctx, chainIDBigInt)
-
-	assert.EqualError(t, err, "no RPC connection registered for chain \"888\"")
 	assert.Equal(t, types.UnknownClient, clientType)
 }
 

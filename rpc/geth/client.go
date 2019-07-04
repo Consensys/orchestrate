@@ -13,7 +13,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/logger"
 )
 
-// Client is a wrapper around Geth rpc client supporint Backoff retry strategy
+// Client is a wrapper around Geth rpc client supporting Backoff retry strategy
 type Client struct {
 	rpc *rpc.Client
 

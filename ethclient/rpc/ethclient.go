@@ -79,12 +79,15 @@ func (ec *Client) Close() {
 	}
 }
 
-func (ec *Client) getRPC(chainID *big.Int) (rpc.Client, error) {
+func (ec *Client) getRPC(chainID *big.Int) rpc.Client {
 	c, ok := ec.rpcs[chainID.Text(10)]
-	if !ok {
-		return nil, fmt.Errorf("no RPC connection registered for chain %q", chainID.Text(10))
+	if ok {
+		return c
 	}
-	return c, nil
+
+	nullClient := geth.CreateNullCleint(chainID)
+	ec.rpcs[chainID.String()] = nullClient
+	return nullClient
 }
 
 type txExtraInfo struct {
@@ -115,14 +118,11 @@ func blockFromRaw(raw json.RawMessage) (*ethtypes.Block, error) {
 
 // BlockByHash returns the given full block.
 func (ec *Client) BlockByHash(ctx context.Context, chainID *big.Int, hash ethcommon.Hash) (*ethtypes.Block, error) {
-	c, err := ec.getRPC(chainID)
-	if err != nil {
-		return nil, err
-	}
+	c := ec.getRPC(chainID)
 
 	// Perform RPC call
 	var raw json.RawMessage
-	err = c.CallContext(ctx, &raw, "eth_getBlockByHash", hash, true)
+	err := c.CallContext(ctx, &raw, "eth_getBlockByHash", hash, true)
 	if err != nil {
 		return nil, err
 	} else if len(raw) == 0 {
@@ -138,14 +138,11 @@ func (ec *Client) BlockByHash(ctx context.Context, chainID *big.Int, hash ethcom
 // Note that loading full blocks requires two requests. Use HeaderByNumber
 // if you don't need all transactions or uncle headers.
 func (ec *Client) BlockByNumber(ctx context.Context, chainID, number *big.Int) (*ethtypes.Block, error) {
-	c, err := ec.getRPC(chainID)
-	if err != nil {
-		return nil, err
-	}
+	c := ec.getRPC(chainID)
 
 	// Perform RPC call
 	var raw json.RawMessage
-	err = c.CallContext(ctx, &raw, "eth_getBlockByNumber", toBlockNumArg(number), true)
+	err := c.CallContext(ctx, &raw, "eth_getBlockByNumber", toBlockNumArg(number), true)
 	if err != nil {
 		return nil, err
 	} else if len(raw) == 0 {
@@ -157,13 +154,10 @@ func (ec *Client) BlockByNumber(ctx context.Context, chainID, number *big.Int) (
 
 // HeaderByHash returns the block header with the given hash.
 func (ec *Client) HeaderByHash(ctx context.Context, chainID *big.Int, hash ethcommon.Hash) (*ethtypes.Header, error) {
-	c, err := ec.getRPC(chainID)
-	if err != nil {
-		return nil, err
-	}
+	c := ec.getRPC(chainID)
 
 	var head *ethtypes.Header
-	err = c.CallContext(ctx, &head, "eth_getBlockByHash", hash, false)
+	err := c.CallContext(ctx, &head, "eth_getBlockByHash", hash, false)
 	if err == nil && head == nil {
 		return nil, eth.NotFound
 	}
@@ -174,13 +168,10 @@ func (ec *Client) HeaderByHash(ctx context.Context, chainID *big.Int, hash ethco
 // HeaderByNumber returns a block header from the current canonical chain. If number is
 // nil, the latest known header is returned.
 func (ec *Client) HeaderByNumber(ctx context.Context, chainID, number *big.Int) (*ethtypes.Header, error) {
-	c, err := ec.getRPC(chainID)
-	if err != nil {
-		return nil, err
-	}
+	c := ec.getRPC(chainID)
 
 	var head *ethtypes.Header
-	err = c.CallContext(ctx, &head, "eth_getBlockByNumber", toBlockNumArg(number), false)
+	err := c.CallContext(ctx, &head, "eth_getBlockByNumber", toBlockNumArg(number), false)
 	if err == nil && head == nil {
 		return nil, eth.NotFound
 	}
@@ -190,10 +181,7 @@ func (ec *Client) HeaderByNumber(ctx context.Context, chainID, number *big.Int) 
 
 // TransactionByHash returns the transaction with the given hash.
 func (ec *Client) TransactionByHash(ctx context.Context, chainID *big.Int, hash ethcommon.Hash) (tx *ethtypes.Transaction, isPending bool, err error) {
-	c, err := ec.getRPC(chainID)
-	if err != nil {
-		return nil, false, err
-	}
+	c := ec.getRPC(chainID)
 
 	var raw json.RawMessage
 	err = c.CallContext(ctx, &raw, "eth_getTransactionByHash", hash)
@@ -223,13 +211,10 @@ func (ec *Client) TransactionByHash(ctx context.Context, chainID *big.Int, hash 
 // TransactionReceipt returns the receipt of a transaction by transaction hash.
 // Note that the receipt is not available for pending transactions.
 func (ec *Client) TransactionReceipt(ctx context.Context, chainID *big.Int, txHash ethcommon.Hash) (*ethtypes.Receipt, error) {
-	c, err := ec.getRPC(chainID)
-	if err != nil {
-		return nil, err
-	}
+	c := ec.getRPC(chainID)
 
 	var r *ethtypes.Receipt
-	err = c.CallContext(ctx, &r, "eth_getTransactionReceipt", txHash)
+	err := c.CallContext(ctx, &r, "eth_getTransactionReceipt", txHash)
 	if err == nil {
 		if r == nil {
 			return nil, eth.NotFound
@@ -278,10 +263,7 @@ type Progress struct {
 // SyncProgress retrieves the current progress of the sync algorithm. If there's
 // no sync currently running, it returns nil.
 func (ec *Client) SyncProgress(ctx context.Context, chainID *big.Int) (*eth.SyncProgress, error) {
-	c, err := ec.getRPC(chainID)
-	if err != nil {
-		return nil, err
-	}
+	c := ec.getRPC(chainID)
 
 	var raw json.RawMessage
 	if err := c.CallContext(ctx, &raw, "eth_syncing"); err != nil {
@@ -312,52 +294,40 @@ func (ec *Client) SyncProgress(ctx context.Context, chainID *big.Int) (*eth.Sync
 // BalanceAt returns the wei balance of the given account.
 // The block number can be nil, in which case the balance is taken from the latest known block.
 func (ec *Client) BalanceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, blockNumber *big.Int) (*big.Int, error) {
-	c, err := ec.getRPC(chainID)
-	if err != nil {
-		return nil, err
-	}
+	c := ec.getRPC(chainID)
 
 	var result hexutil.Big
-	err = c.CallContext(ctx, &result, "eth_getBalance", account, toBlockNumArg(blockNumber))
+	err := c.CallContext(ctx, &result, "eth_getBalance", account, toBlockNumArg(blockNumber))
 	return (*big.Int)(&result), err
 }
 
 // StorageAt returns the value of key in the contract storage of the given account.
 // The block number can be nil, in which case the value is taken from the latest known block.
 func (ec *Client) StorageAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, key ethcommon.Hash, blockNumber *big.Int) ([]byte, error) {
-	c, err := ec.getRPC(chainID)
-	if err != nil {
-		return nil, err
-	}
+	c := ec.getRPC(chainID)
 
 	var result hexutil.Bytes
-	err = c.CallContext(ctx, &result, "eth_getStorageAt", account, key, toBlockNumArg(blockNumber))
+	err := c.CallContext(ctx, &result, "eth_getStorageAt", account, key, toBlockNumArg(blockNumber))
 	return result, err
 }
 
 // CodeAt returns the contract code of the given account.
 // The block number can be nil, in which case the code is taken from the latest known block.
 func (ec *Client) CodeAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, blockNumber *big.Int) ([]byte, error) {
-	c, err := ec.getRPC(chainID)
-	if err != nil {
-		return nil, err
-	}
+	c := ec.getRPC(chainID)
 
 	var result hexutil.Bytes
-	err = c.CallContext(ctx, &result, "eth_getCode", account, toBlockNumArg(blockNumber))
+	err := c.CallContext(ctx, &result, "eth_getCode", account, toBlockNumArg(blockNumber))
 	return result, err
 }
 
 // NonceAt returns the account nonce of the given account.
 // The block number can be nil, in which case the nonce is taken from the latest known block.
 func (ec *Client) NonceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, blockNumber *big.Int) (uint64, error) {
-	c, err := ec.getRPC(chainID)
-	if err != nil {
-		return 0, err
-	}
+	c := ec.getRPC(chainID)
 
 	var result hexutil.Uint64
-	err = c.CallContext(ctx, &result, "eth_getTransactionCount", account, toBlockNumArg(blockNumber))
+	err := c.CallContext(ctx, &result, "eth_getTransactionCount", account, toBlockNumArg(blockNumber))
 	return uint64(result), err
 }
 
@@ -365,50 +335,38 @@ func (ec *Client) NonceAt(ctx context.Context, chainID *big.Int, account ethcomm
 
 // PendingBalanceAt returns the wei balance of the given account in the pending state.
 func (ec *Client) PendingBalanceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address) (*big.Int, error) {
-	c, err := ec.getRPC(chainID)
-	if err != nil {
-		return nil, err
-	}
+	c := ec.getRPC(chainID)
 
 	var result hexutil.Big
-	err = c.CallContext(ctx, &result, "eth_getBalance", account, "pending")
+	err := c.CallContext(ctx, &result, "eth_getBalance", account, "pending")
 	return (*big.Int)(&result), err
 }
 
 // PendingStorageAt returns the value of key in the contract storage of the given account in the pending state.
 func (ec *Client) PendingStorageAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, key ethcommon.Hash) ([]byte, error) {
-	c, err := ec.getRPC(chainID)
-	if err != nil {
-		return nil, err
-	}
+	c := ec.getRPC(chainID)
 
 	var result hexutil.Bytes
-	err = c.CallContext(ctx, &result, "eth_getStorageAt", account, key, "pending")
+	err := c.CallContext(ctx, &result, "eth_getStorageAt", account, key, "pending")
 	return result, err
 }
 
 // PendingCodeAt returns the contract code of the given account in the pending state.
 func (ec *Client) PendingCodeAt(ctx context.Context, chainID *big.Int, account ethcommon.Address) ([]byte, error) {
-	c, err := ec.getRPC(chainID)
-	if err != nil {
-		return nil, err
-	}
+	c := ec.getRPC(chainID)
 
 	var result hexutil.Bytes
-	err = c.CallContext(ctx, &result, "eth_getCode", account, "pending")
+	err := c.CallContext(ctx, &result, "eth_getCode", account, "pending")
 	return result, err
 }
 
 // PendingNonceAt returns the account nonce of the given account in the pending state.
 // This is the nonce that should be used for the next transaction.
 func (ec *Client) PendingNonceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address) (uint64, error) {
-	c, err := ec.getRPC(chainID)
-	if err != nil {
-		return 0, err
-	}
+	c := ec.getRPC(chainID)
 
 	var result hexutil.Uint64
-	err = c.CallContext(ctx, &result, "eth_getTransactionCount", account, "pending")
+	err := c.CallContext(ctx, &result, "eth_getTransactionCount", account, "pending")
 	return uint64(result), err
 }
 
@@ -421,13 +379,10 @@ func (ec *Client) PendingNonceAt(ctx context.Context, chainID *big.Int, account 
 // case the code is taken from the latest known block. Note that state from very old
 // blocks might not be available.
 func (ec *Client) CallContract(ctx context.Context, chainID *big.Int, msg *eth.CallMsg, blockNumber *big.Int) ([]byte, error) {
-	c, err := ec.getRPC(chainID)
-	if err != nil {
-		return nil, err
-	}
+	c := ec.getRPC(chainID)
 
 	var hex hexutil.Bytes
-	err = c.CallContext(ctx, &hex, "eth_call", toCallArg(msg), toBlockNumArg(blockNumber))
+	err := c.CallContext(ctx, &hex, "eth_call", toCallArg(msg), toBlockNumArg(blockNumber))
 	if err != nil {
 		return nil, err
 	}
@@ -437,13 +392,10 @@ func (ec *Client) CallContract(ctx context.Context, chainID *big.Int, msg *eth.C
 // PendingCallContract executes a message call transaction using the EVM.
 // The state seen by the contract call is the pending state.
 func (ec *Client) PendingCallContract(ctx context.Context, chainID *big.Int, msg *eth.CallMsg) ([]byte, error) {
-	c, err := ec.getRPC(chainID)
-	if err != nil {
-		return nil, err
-	}
+	c := ec.getRPC(chainID)
 
 	var hex hexutil.Bytes
-	err = c.CallContext(ctx, &hex, "eth_call", toCallArg(msg), "pending")
+	err := c.CallContext(ctx, &hex, "eth_call", toCallArg(msg), "pending")
 	if err != nil {
 		return nil, err
 	}
@@ -453,13 +405,10 @@ func (ec *Client) PendingCallContract(ctx context.Context, chainID *big.Int, msg
 // SuggestGasPrice retrieves the currently suggested gas price to allow a timely
 // execution of a transaction.
 func (ec *Client) SuggestGasPrice(ctx context.Context, chainID *big.Int) (*big.Int, error) {
-	c, err := ec.getRPC(chainID)
-	if err != nil {
-		return nil, err
-	}
+	c := ec.getRPC(chainID)
 
 	var hex hexutil.Big
-	err = c.CallContext(ctx, &hex, "eth_gasPrice")
+	err := c.CallContext(ctx, &hex, "eth_gasPrice")
 	if err != nil {
 		return nil, err
 	}
@@ -472,13 +421,10 @@ func (ec *Client) SuggestGasPrice(ctx context.Context, chainID *big.Int) (*big.I
 // the true gas limit requirement as other transactions may be added or removed by miners,
 // but it should provide a basis for setting a reasonable default.
 func (ec *Client) EstimateGas(ctx context.Context, chainID *big.Int, msg *eth.CallMsg) (uint64, error) {
-	c, err := ec.getRPC(chainID)
-	if err != nil {
-		return 0, err
-	}
+	c := ec.getRPC(chainID)
 
 	var hex hexutil.Uint64
-	err = c.CallContext(ctx, &hex, "eth_estimateGas", toCallArg(msg))
+	err := c.CallContext(ctx, &hex, "eth_estimateGas", toCallArg(msg))
 	if err != nil {
 		return 0, err
 	}
@@ -507,20 +453,14 @@ func toCallArg(msg *eth.CallMsg) interface{} {
 
 // SendRawTransaction allows to send a raw transaction
 func (ec *Client) SendRawTransaction(ctx context.Context, chainID *big.Int, raw string) error {
-	c, err := ec.getRPC(chainID)
-	if err != nil {
-		return err
-	}
+	c := ec.getRPC(chainID)
 
 	return c.CallContext(ctx, nil, "eth_sendRawTransaction", raw)
 }
 
 // SendTransaction send transaction to an Ethereum node
 func (ec *Client) SendTransaction(ctx context.Context, chainID *big.Int, args *types.SendTxArgs) (txHash ethcommon.Hash, err error) {
-	c, err := ec.getRPC(chainID)
-	if err != nil {
-		return ethcommon.Hash{}, err
-	}
+	c := ec.getRPC(chainID)
 
 	log.WithFields(log.Fields{
 		"nonce": args.Nonce.String(),
@@ -535,13 +475,10 @@ func (ec *Client) SendTransaction(ctx context.Context, chainID *big.Int, args *t
 }
 
 func (ec *Client) GetClientType(ctx context.Context, chainID *big.Int) (types.ClientType, error) {
-	c, err := ec.getRPC(chainID)
-	if err != nil {
-		return types.UnknownClient, err
-	}
-	var clientVersion string
+	c := ec.getRPC(chainID)
 
-	err = c.CallContext(ctx, &clientVersion, "web3_clientVersion")
+	var clientVersion string
+	err := c.CallContext(ctx, &clientVersion, "web3_clientVersion")
 	if err != nil {
 		return types.UnknownClient, err
 	}
@@ -550,42 +487,30 @@ func (ec *Client) GetClientType(ctx context.Context, chainID *big.Int) (types.Cl
 }
 
 func (ec *Client) SendQuorumRawPrivateTransaction(ctx context.Context, chainID *big.Int, signedTxHash []byte, args *types.PrivateArgs) (ethcommon.Hash, error) {
-	v, err := ec.withRPC(chainID, nilHash, func(c rpc.Client) (interface{}, error) {
-		raxTxHashHex := hexutil.Encode(signedTxHash)
-		var hash string
-		err := c.CallContext(ctx, &hash, "eth_sendRawPrivateTransaction", raxTxHashHex, args.PrivateFor)
-		return ethcommon.HexToHash(hash), err
-	})
+	c := ec.getRPC(chainID)
 
-	return v.(ethcommon.Hash), err
+	raxTxHashHex := hexutil.Encode(signedTxHash)
+	var hash string
+	err := c.CallContext(ctx, &hash, "eth_sendRawPrivateTransaction", raxTxHashHex, args.PrivateFor)
+	return ethcommon.HexToHash(hash), err
 }
 
 // SendRawPrivateTransaction send a raw transaction to a Ethreum node supporting privacy (e.g Quorum+Tessera node)
 func (ec *Client) SendRawPrivateTransaction(ctx context.Context, chainID *big.Int, raw []byte, args *types.PrivateArgs) (ethcommon.Hash, error) {
-	v, err := ec.withRPC(chainID, nilHash, func(c rpc.Client) (interface{}, error) {
-		var buf bytes.Buffer
-		buf.Write(raw)
-		err := rlpEncode(&buf, args.PrivateFrom, args.PrivateFor, args.PrivateTxType)
-		if err != nil {
-			return nilHash, err
-		}
+	c := ec.getRPC(chainID)
 
-		rawTx := hexutil.Encode(buf.Bytes())
-		var hash string
-		err2 := c.CallContext(ctx, &hash, "eea_sendRawTransaction", rawTx)
-
-		return ethcommon.HexToHash(hash), err2
-	})
-	return v.(ethcommon.Hash), err
-}
-
-func (ec *Client) withRPC(chainID *big.Int, defaulValue interface{}, f func(rpc.Client) (interface{}, error)) (interface{}, error) {
-	c, err := ec.getRPC(chainID)
+	var buf bytes.Buffer
+	buf.Write(raw)
+	err := rlpEncode(&buf, args.PrivateFrom, args.PrivateFor, args.PrivateTxType)
 	if err != nil {
-		return defaulValue, err
+		return nilHash, err
 	}
 
-	return f(c)
+	rawTx := hexutil.Encode(buf.Bytes())
+	var hash string
+	err = c.CallContext(ctx, &hash, "eea_sendRawTransaction", rawTx)
+
+	return ethcommon.HexToHash(hash), err
 }
 
 func rlpEncode(buf io.Writer, args ...interface{}) error {
