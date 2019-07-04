@@ -19,8 +19,8 @@ func Loader(txctx *engine.TxContext) {
 
 	err := encoding.Unmarshal(msg, txctx.Envelope)
 	if err != nil {
-		_ = txctx.AbortWithError(err).ExtendComponent(component)
-		txctx.Logger.WithError(err).Errorf("loader: error unmarshalling")
+		e := txctx.AbortWithError(err).ExtendComponent(component)
+		txctx.Logger.WithError(e).Errorf("loader: error unmarshalling")
 		return
 	}
 
