@@ -58,7 +58,7 @@ func makeSenderContext(i int) *engine.TxContext {
 	txctx := engine.NewTxContext()
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
-	switch i % 4 {
+	switch i % 3 {
 	case 0:
 		txctx.Envelope.Chain = chain.CreateChainInt(8)
 		txctx.Envelope.Tx = &ethereum.Transaction{
@@ -83,20 +83,6 @@ func makeSenderContext(i int) *engine.TxContext {
 		txctx.Envelope.Metadata = (&envelope.Metadata{Id: RandString(10)})
 		txctx.Set("errors", 0)
 		txctx.Set("status", "pending")
-	case 3:
-		// Cannot send a transaction
-		txctx.Envelope.Chain = chain.CreateChainInt(0)
-		txctx.Envelope.Tx = &ethereum.Transaction{}
-		txctx.Envelope.Metadata = (&envelope.Metadata{Id: RandString(10)})
-		txctx.Set("errors", 1)
-		txctx.Set("status", "")
-	case 4:
-		// Cannot send a transaction
-		txctx.Envelope.Chain = chain.CreateChainInt(0)
-		txctx.Envelope.Tx = &ethereum.Transaction{}
-		txctx.Envelope.Metadata = (&envelope.Metadata{Id: RandString(10)})
-		txctx.Set("errors", 1)
-		txctx.Set("status", "")
 	}
 	return txctx
 }
