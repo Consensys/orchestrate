@@ -10,6 +10,7 @@ import (
 func TestErrorf(t *testing.T) {
 	err := Errorf("Test %q", "msg")
 	assert.Equal(t, "Test \"msg\"", err.GetMessage(), "Error message should be valid")
+	assert.Equal(t, "FF000", err.Hex(), "Hex code should be correct")
 }
 
 func TestFromError(t *testing.T) {

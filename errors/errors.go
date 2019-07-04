@@ -234,7 +234,7 @@ func ConfigError(format string, a ...interface{}) *ierror.Error {
 // Configuration errors are raised when an error is encountered while loading configuration format
 const internalErrCode uint64 = 15<<16 + 15<<12
 
-// InternalError is raised when an error that is not expected to be outputes is encountered
+// InternalError is raised when an unknown exception is met
 func InternalError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(internalErrCode)
+	return Errorf(format, a...)
 }
