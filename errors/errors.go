@@ -203,6 +203,16 @@ func ConfigError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(format, a...).SetCode(configErrCode)
 }
 
+// Internal errors (hex code FFXXX)
+//
+// Configuration errors are raised when an error is encountered while loading configuration format
+var internalErrCode uint64 = 15<<16 + 15<<12
+
+// InternalError is raised when an error that is not expected to be outputes is encountered
+func InternalError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(format, a...).SetCode(internalErrCode)
+}
+
 // is returns wether code belongs to base family
 func is(code, base uint64) bool {
 	return (base^code)&(255<<12+15<<8&base) == 0

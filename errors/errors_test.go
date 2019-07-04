@@ -145,6 +145,12 @@ func TestDataCorruptedError(t *testing.T) {
 	assert.Equal(t, "DB300", e.Hex(), "Hex reprensation should be correct")
 }
 
+func TestInternalError(t *testing.T) {
+	e := InternalError("test")
+	assert.Equal(t, uint64(1044480), e.GetCode(), "InternalError code should be correct")
+	assert.Equal(t, "FF000", e.Hex(), "Hex reprensation should be correct")
+}
+
 func TestIs(t *testing.T) {
 	assert.True(t, is(271120, dataErrCode), "Hex 42310 should be a data error")
 	assert.False(t, is(dataErrCode, solidityErrCode), "Data error should not be a solidity error")
