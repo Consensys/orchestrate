@@ -185,6 +185,19 @@ func IsStorageError(err error) bool {
 	return is(FromError(err).GetCode(), storageErrCode)
 }
 
+// Data constratin violated error (hex code DB1XX)
+var constraintViolatedErrCode = storageErrCode + 1<<8
+
+// ConstraintViolatedError is raised when a data constraint has been violated
+func ConstraintViolatedError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(format, a...).SetCode(constraintViolatedErrCode)
+}
+
+// IsConstraintViolatedError indicate whether an error is a constraint violated error
+func IsConstraintViolatedError(err error) bool {
+	return is(FromError(err).GetCode(), constraintViolatedErrCode)
+}
+
 // No data found error (hex code DB2XX)
 var noDataFoundErrCode = storageErrCode + 2<<8
 

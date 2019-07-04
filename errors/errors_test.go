@@ -139,6 +139,13 @@ func TestStorageError(t *testing.T) {
 	assert.Equal(t, "DB000", e.Hex(), "Hex reprensation should be correct")
 }
 
+func TestConstraintViolatedError(t *testing.T) {
+	e := ConstraintViolatedError("test")
+	assert.Equal(t, uint64(897280), e.GetCode(), "ConstraintViolatedError code should be correct")
+	assert.True(t, IsStorageError(e), "ConstraintViolatedError should be a data error")
+	assert.Equal(t, "DB100", e.Hex(), "Hex reprensation should be correct")
+}
+
 func TestNoDataFoundError(t *testing.T) {
 	e := NoDataFoundError("test")
 	assert.Equal(t, uint64(897536), e.GetCode(), "NoDataFoundError code should be correct")

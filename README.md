@@ -525,7 +525,8 @@ Error codes are `uint64` that maps to five hex character code
 | 42XXX |   422XX  |    42205   | invalid_event_data            | Invalid data in event log                |
 | 42XXX |   423XX  |    42300   | invalid_format                | Data does not match expected format      |
 | DBXXX |          |    DB000   | storage_exception             | Failed accessing stored data             |
-| DBXXX |   DB200  |    DB200   | no_data_found                 | No data stored for given parameters      |
-| DBXXX |   DB300  |    DB300   | data_corrupted                | Data is corrupted                        |
+| DBXXX |   DB1XX  |    DB100   | constraint_violated           | Data constraint violated                 |
+| DBXXX |   DB2XX  |    DB200   | no_data_found                 | No data stored for given parameters      |
+| DBXXX |   DB3XX  |    DB300   | data_corrupted                | Data is corrupted                        |
 | F0XXX |          |    F0000   | invalid_config                | Invalid configuration                    |
 | FFXXX |          |    FF000   | internal_error                | Internal error                           |
