@@ -7,8 +7,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
-var component = "handlers.loader"
-
 // Loader is an handler that Load sarama.ConsumerGroup messages
 func Loader(txctx *engine.TxContext) {
 	// Cast message into sarama.ConsumerMessage

@@ -7,8 +7,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 )
 
-var component = "handlers.producer"
-
 // PrepareMsg function should prepare a sarama.ProducerMessage from a TxContext
 type PrepareMsg func(*engine.TxContext, *sarama.ProducerMessage) error
 
