@@ -31,11 +31,11 @@ func FromError(err error) *ierror.Error {
 
 // isErrorClass returns whether code belongs to a base error class
 //
-// While codes are uint64 for performance purposes they should be seen as 5 nibble codes encoded on 20 bits
+// While codes are uint64 for performance purposes they should be seen as 5 nibbles hexadecimal codes
 //
-// For code to be of class base
+// For `code` to be of class `base`
 //  - 2 first nibbles must be identical (e.g. DB300 belongs to class DB000 but DB300 doesn't belong to 9F000)
-//  - if base 3rd nibble is non zero then 3rd nibble must be identical (e.g. DB201 belongs to DB200 but DB300 doesn't belong to DB200)
+//  - if `base` 3rd nibble is non zero then 3rd nibbles must be identical (e.g. DB201 belongs to DB200 but DB300 doesn't belong to DB200)
 func isErrorClass(code, base uint64) bool {
 	// Error codes have a 5 hex reprensentation (<=> 20 bits representation)
 	//  - (code^base)&255<<12 compute difference between 2 first nibbles (bits 13 to 20)
