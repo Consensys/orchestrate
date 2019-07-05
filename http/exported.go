@@ -10,11 +10,12 @@ import (
 	errors "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 )
 
+const component = "http"
+
 var (
-	component = "http"
-	mux       *http.ServeMux
-	server    *http.Server
-	initOnce  = &sync.Once{}
+	mux      *http.ServeMux
+	server   *http.Server
+	initOnce = &sync.Once{}
 )
 
 func init() {

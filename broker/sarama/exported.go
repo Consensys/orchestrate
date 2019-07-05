@@ -9,8 +9,9 @@ import (
 	"github.com/spf13/viper"
 )
 
+const component = "broker.sarama"
+
 var (
-	component             = "broker.sarama"
 	config                *sarama.Config
 	client                sarama.Client
 	initClientOnce        = &sync.Once{}

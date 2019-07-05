@@ -1,3 +1,3 @@
 package utils
 
-var component = "utils"
+const component = "utils"

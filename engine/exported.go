@@ -5,10 +5,11 @@ import (
 	"sync"
 )
 
+const component = "engine"
+
 var (
-	component = "engine"
-	e         *Engine
-	initOnce  = &sync.Once{}
+	e        *Engine
+	initOnce = &sync.Once{}
 )
 
 // Init intilialize global Engine

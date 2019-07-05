@@ -1,3 +1,3 @@
 package sarama
 
-var component = "encoding.sarama"
+const component = "encoding.sarama"

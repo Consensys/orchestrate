@@ -1,3 +1,3 @@
 package proto
 
-var component = "encoding.proto"
+const component = "encoding.proto"

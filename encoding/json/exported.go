@@ -1,3 +1,3 @@
 package json
 
-var component = "encoding.json"
+const component = "encoding.json"
