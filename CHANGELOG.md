@@ -1,11 +1,18 @@
 # CHANGELOG
 
+### Version 0.6.3
+
+*Released on July 5th 2019*
+
+- [FEAT] Add `ethclient.rpc.GetClientType` method that detects a type of an Ethereum client
+- [FIX] Update crafting of Slice/Array: expects JSON array format in string
+
 ### Version 0.6.2
 
 *Released on July 1th 2019*
 
 - [FIX] Added more logging
-
+  
 ### Version 0.6.1
 
 *Released on June 24th 2019*
