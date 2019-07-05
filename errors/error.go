@@ -29,9 +29,12 @@ func FromError(err error) *ierror.Error {
 	return ierr
 }
 
-// isErrorClass returns whether code belongs to a base error class
+// isErrorClass returns whether code belongs to a base error class/subclass
 //
-// While codes are uint64 for performance purposes they should be seen as 5 nibbles hexadecimal codes
+// While codes are uint64 for performance purposes they should be interpreted as 5 nibbles hexadecimal codes
+// (e.g. `4096` <=> `01000` and `989956` <=> `F1B04`)
+//
+// Class corresponds to 2 first nibble and subclass to 3rd nibble
 //
 // For `code` to be of class `base`
 //  - 2 first nibbles must be identical (e.g. DB300 belongs to class DB000 but DB300 doesn't belong to 9F000)
