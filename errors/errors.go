@@ -99,7 +99,7 @@ func FeatureNotSupportedError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(format, a...).SetCode(featureNotSupported)
 }
 
-// DataError is raised when a provided data does not match expected format  (code 03000)
+// DataError is raised when a provided data does not match expected format
 func DataError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(format, a...).SetCode(data)
 }
@@ -190,7 +190,7 @@ func DataCorruptedError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(format, a...).SetCode(dataCorrupted)
 }
 
-// ConfigError is raised when an error is encountered while loading configuration (code 01000)
+// ConfigError is raised when an error is encountered while loading configuration
 func ConfigError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(format, a...).SetCode(config)
 }
