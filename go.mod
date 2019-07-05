@@ -8,7 +8,6 @@ require (
 	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.3.0
 	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.6.1
-	gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.6.0
+	gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.6.3
 	gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git v0.4.0
-	golang.org/x/sync v0.0.0-20190423024810-112230192c58 // indirect
 )
