@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.6.4
+
+*Released on July 5th 2019*
+
+- [FIX] Add methods to send signed private transactions
+- [FIX] Removes `ethclient.rpc.GetClientType` method
+
 ### Version 0.6.3
 
 *Released on July 5th 2019*
