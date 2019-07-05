@@ -497,7 +497,7 @@ Flags:
 Internal errors are built on top of protobuf and contain
 
 - `string` **message** describing the error
-- `uint64` **error code** that maps to a five hex character code (e.g. `F000A`)
+- `uint64` **error code** that should be seen as five nibbles hex code (e.g. `F000A`)
 - `string` **component** indicating in system the error has been raised
 - `map<string, string>` **extra** holding extra information to diagnose the error
 
