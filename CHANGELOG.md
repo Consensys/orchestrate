@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.5.1
+
+*Released on July 5th 2019*
+
+- [FIX] Wallet - Remove key partition producer generating wallet
+- [FIX] Wallet - Avoid panic when generating wallet with an empty envelope
+  
 ### Version 0.5.0
 
 *Released on June 27th 2019*
