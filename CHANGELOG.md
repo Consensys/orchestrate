@@ -1,5 +1,13 @@
 # CHANGELOG
 
+### Version 0.6.2
+
+*Released on July 5th 2019*
+
+- [FEAT] Generate proto stub with Docker
+- [FEAT] Add protocol type
+- [FEAT] Update CI with retry
+  
 ### Version 0.6.1
 
 *Released on June 20th 2019*
