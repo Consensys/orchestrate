@@ -10,7 +10,7 @@ import (
 //
 // By default Errorf return an internal error with code `FF000`
 func Errorf(format string, a ...interface{}) *ierror.Error {
-	return ierror.New(fmt.Sprintf(format, a...)).SetCode(internalErrCode)
+	return ierror.New(fmt.Sprintf(format, a...)).SetCode(internal)
 }
 
 // FromError cast a golang error into an internal Error

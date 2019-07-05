@@ -24,9 +24,9 @@ func TestFromError(t *testing.T) {
 }
 
 func TestIsErrorClass(t *testing.T) {
-	assert.True(t, isErrorClass(271120, dataErrCode), "Hex 42310 should be a data error")
-	assert.False(t, isErrorClass(dataErrCode, solidityErrCode), "Data error should not be a solidity error")
-	assert.False(t, isErrorClass(dataErrCode, 0), "Hex 00000 should not be a data error")
-	assert.False(t, isErrorClass(0, dataErrCode), "Hex 00000 should not be a data error")
-	assert.False(t, isErrorClass(275216, dataErrCode), "Hex 43310 should not be a data error")
+	assert.True(t, isErrorClass(271120, 270336), "A 42310 should be a 42000")
+	assert.False(t, isErrorClass(270336, 270848), "A 42310 should not be a 42200")
+	assert.False(t, isErrorClass(270336, 0), "A 42000 should not be a 00000")
+	assert.False(t, isErrorClass(0, 270336), "A 00000 should not be a 42000")
+	assert.False(t, isErrorClass(275216, 270336), "A 43310 should not be a 42000")
 }

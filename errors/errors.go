@@ -4,235 +4,196 @@ import (
 	ierror "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
 )
 
-// Warning  (hex code 01XXX)
-const warningCode uint64 = 1 << 12
+// Error codes are uint64 for perfomances purposes but should be seen as 5 nibbles hex codes
+const (
+	// Warnings (class 01XXX)
+	warning       = 1 << 12
+	retryWarning  = warning + 1<<8 // Retries (subclass 011XXX)
+	faucetWarning = warning + 2<<8 // Faucet credit denied (subclass 012XXX)
+
+	// Connnection Errors (class 08XXX)
+	connection      = 8 << 12
+	kafkaConnection = connection + 1<<8 // Kafka connection error (subclass 081XXX)
+	httpConnection  = connection + 2<<8 // HTTP connection error (subclass 081XXX)
+	ethConnection   = connection + 3<<8 // Ethereum connection error (subclass 081XXX)
+
+	// Feature Not Supported Errors (class 0AXXX)
+	featureNotSupported = 10 << 12
+
+	// Data Errors (class 42XXX)
+	data               = 4<<16 + 2<<12
+	encoding           = data + 1<<8  // Invilad encoding (subclass 421XX)
+	solidity           = data + 2<<8  // Solidity Errors (subclass 422XX)
+	invalidSig         = solidity + 1 // Invalid method/event signature (code 42201)
+	invalidArgsCount   = solidity + 2 // Invalid arguments count (code 42202)
+	invalidArg         = solidity + 3 // Invalid argument format (code 42203)
+	invalidTopicsCount = solidity + 4 // Invalid count of topics in receipt (code 42204)
+	invalidLog         = solidity + 5 // Invalid event log (code 42205)
+	invalidFormat      = data + 3<<8  // Invalid format (subclass 423XX)
+
+	// Storage Error (class DBXXX)
+	storage            = 13<<16 + 11<<12
+	constraintViolated = storage + 1<<8 // Storage constraint violated (subclass DB1XX)
+	notFound           = storage + 2<<8 // Not found (subclass DB2XX)
+	dataCorrupted      = storage + 3<<8 // Data corrupted (subclass DB3XX)
+
+	// Configuration errors (class F0XXX)
+	config = 15 << 16
+
+	// Internal errors (class FFXXX)
+	internal = 15<<16 + 15<<12
+)
 
 // Warning are raised to indicate
 func Warning(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(warningCode)
+	return Errorf(format, a...).SetCode(warning)
 }
 
 // IsWarning indicate whether an error is a warning
 func IsWarning(err error) bool {
-	return isErrorClass(FromError(err).GetCode(), warningCode)
+	return isErrorClass(FromError(err).GetCode(), warning)
 }
-
-// Warning retry (hex code 01100)
-const retryWarningCode = warningCode + 1<<8
 
 // RetryWarning are raised when failing to connect to a service and retrying
 func RetryWarning(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(retryWarningCode)
+	return Errorf(format, a...).SetCode(retryWarning)
 }
-
-// Faucet warning (hex code 01200)
-const faucetWarningCode = warningCode + 2<<8
 
 // FaucetWarning are raised when a faucet credit has been denied
 func FaucetWarning(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(faucetWarningCode)
+	return Errorf(format, a...).SetCode(faucetWarning)
 }
 
 // IsFaucetWarning indicate whether an error is a faucet warning
 func IsFaucetWarning(err error) bool {
-	return isErrorClass(FromError(err).GetCode(), faucetWarningCode)
+	return isErrorClass(FromError(err).GetCode(), faucetWarning)
 }
-
-// Connection errors (hex code 08XXX)
-//
-// Connection errors are raised when failing to connect to an external service
-const connectionErrCode uint64 = 8 << 12
 
 // ConnectionError is raised when failing to connect to an external service
 func ConnectionError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(connectionErrCode)
+	return Errorf(format, a...).SetCode(connection)
 }
 
 // IsConnectionError indicate whether an error is a connection error
 func IsConnectionError(err error) bool {
-	return isErrorClass(FromError(err).GetCode(), connectionErrCode)
+	return isErrorClass(FromError(err).GetCode(), connection)
 }
-
-// Kafka connection errors are raised when failing to connect to Kafka
-const kafkaConnectionErrCode = connectionErrCode + 1<<8
 
 // KafkaConnectionError is raised when failing to connect to Kafka
 func KafkaConnectionError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(kafkaConnectionErrCode)
+	return Errorf(format, a...).SetCode(kafkaConnection)
 }
-
-// HTTP connection errors are raised when failing to connect over HTTP
-const httpConnectionErrCode = connectionErrCode + 2<<8
 
 // HTTPConnectionError is raised when failing to connect over http
 func HTTPConnectionError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(httpConnectionErrCode)
+	return Errorf(format, a...).SetCode(httpConnection)
 }
-
-// Ethereum connection errors are raised when failing to connect to Ethereum client jsonRPC API
-const ethConnectionErrCode = connectionErrCode + 3<<8
 
 // EthConnectionError is raised when failing to connect to Ethereum client jsonRPC API
 func EthConnectionError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(ethConnectionErrCode)
+	return Errorf(format, a...).SetCode(ethConnection)
 }
-
-// Feature Not Supported Errors (hex code 0AXXX)
-const featureNotSupportedErrCode uint64 = 10 << 12
 
 // FeatureNotSupportedError is raised when using a feature which is not implemented
 func FeatureNotSupportedError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(featureNotSupportedErrCode)
+	return Errorf(format, a...).SetCode(featureNotSupported)
 }
-
-// Data Errors (hex code 42XXX)
-
-// Data Errors are raised when a provided data does not match expected format
-const dataErrCode uint64 = 4<<16 + 2<<12
 
 // DataError is raised when a provided data does not match expected format  (code 03000)
 func DataError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(dataErrCode)
+	return Errorf(format, a...).SetCode(data)
 }
 
 // IsDataError indicate whether an error is a data error
 func IsDataError(err error) bool {
-	return isErrorClass(FromError(err).GetCode(), dataErrCode)
+	return isErrorClass(FromError(err).GetCode(), data)
 }
-
-// Encoding errors (hex code 421XX)
-const encodingErrCode = dataErrCode + 1<<8
 
 // EncodingError are raised when failing to decode a message
 func EncodingError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(encodingErrCode)
+	return Errorf(format, a...).SetCode(encoding)
 }
-
-// Solidity Errors (hex code 422XX)
-const solidityErrCode = dataErrCode + 2<<8
 
 // SolidityError is raised when a data related in transaction crafing is incorrect
 func SolidityError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(solidityErrCode)
+	return Errorf(format, a...).SetCode(solidity)
 }
 
 // IsSolidityError indicate whether an error is a Solidity error
 func IsSolidityError(err error) bool {
-	return isErrorClass(FromError(err).GetCode(), solidityErrCode)
+	return isErrorClass(FromError(err).GetCode(), solidity)
 }
-
-// Invalid Signature Error (hex code 42201)
-const invalidSigErrCode = solidityErrCode + 1
 
 // InvalidSigError is raised when a solidity method signature is invalid
 func InvalidSigError(sig string) *ierror.Error {
 	return Errorf("%q is an invalid Solidity method signature (example of valid signature: transfer(address,uint256))", sig).
-		SetCode(invalidSigErrCode)
+		SetCode(invalidSig)
 }
-
-// Invalid Arg Error (hex code 42202)
-const invalidArgsCountErrCode = solidityErrCode + 2
 
 // InvalidArgsCountError is raised when invalid arguments count is provided to craft a transaction
 func InvalidArgsCountError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(invalidArgsCountErrCode)
+	return Errorf(format, a...).SetCode(invalidArgsCount)
 }
-
-// Invalid Arg Error (hex code 42203)
-const invalidArgErrCode = solidityErrCode + 3
 
 // InvalidArgError is raised when invalid argument is provided to craft a transaction
 func InvalidArgError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(invalidArgErrCode)
+	return Errorf(format, a...).SetCode(invalidArg)
 }
-
-// Invalid topic Error (hex code 42204)
-const invalidTopicsCountErrCode = solidityErrCode + 4
 
 // InvalidTopicsCountError is raised when topics count is in receipt
 func InvalidTopicsCountError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(invalidTopicsCountErrCode)
+	return Errorf(format, a...).SetCode(invalidTopicsCount)
 }
-
-// Invalid EventData Error (hex code 42205)
-const invalidEventDataErrCode = solidityErrCode + 5
 
 // InvalidEventDataError is raised when event data is invalid
 func InvalidEventDataError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(invalidEventDataErrCode)
+	return Errorf(format, a...).SetCode(invalidLog)
 }
-
-// Format Error (hex code 423XX)
-const invalidFormatErrCode = dataErrCode + 3<<8
 
 // InvalidFormatError is raised when a data does not match an expected format
 func InvalidFormatError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(invalidFormatErrCode)
+	return Errorf(format, a...).SetCode(invalidFormat)
 }
-
-// Storage Error (hex code DBXXX)
-
-// Storage errors are raised when an error is encountered while accessing stored data
-const storageErrCode uint64 = 13<<16 + 11<<12
 
 // StorageError is raised when an error is encountered while accessing stored data
 func StorageError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(storageErrCode)
+	return Errorf(format, a...).SetCode(storage)
 }
 
 // IsStorageError indicate whether an error is a storage error
 func IsStorageError(err error) bool {
-	return isErrorClass(FromError(err).GetCode(), storageErrCode)
+	return isErrorClass(FromError(err).GetCode(), storage)
 }
-
-// Data constratin violated error (hex code DB1XX)
-const constraintViolatedErrCode = storageErrCode + 1<<8
 
 // ConstraintViolatedError is raised when a data constraint has been violated
 func ConstraintViolatedError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(constraintViolatedErrCode)
+	return Errorf(format, a...).SetCode(constraintViolated)
 }
 
 // IsConstraintViolatedError indicate whether an error is a constraint violated error
 func IsConstraintViolatedError(err error) bool {
-	return isErrorClass(FromError(err).GetCode(), constraintViolatedErrCode)
+	return isErrorClass(FromError(err).GetCode(), constraintViolated)
 }
-
-// Not found error (hex code DB2XX)
-const notFoundErrCode = storageErrCode + 2<<8
 
 // NoDataFoundError is raised when accessing a missing data
 func NotFoundError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(notFoundErrCode)
+	return Errorf(format, a...).SetCode(notFound)
 }
 
 // IsNotFoundError indicate whether an error is a no data found error
 func IsNotFoundError(err error) bool {
-	return isErrorClass(FromError(err).GetCode(), notFoundErrCode)
+	return isErrorClass(FromError(err).GetCode(), notFound)
 }
-
-// Data corrupted (hex code DB3XX)
-const dataCorruptedErrCode = storageErrCode + 3<<8
 
 // DataCorruptedError is raised loading a corrupted data
 func DataCorruptedError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(dataCorruptedErrCode)
+	return Errorf(format, a...).SetCode(dataCorrupted)
 }
-
-// Configuration errors (hex code F0XXX)
-//
-// Configuration errors are raised when an error is encountered while loading configuration format
-const configErrCode uint64 = 15 << 16
 
 // ConfigError is raised when an error is encountered while loading configuration (code 01000)
 func ConfigError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(configErrCode)
+	return Errorf(format, a...).SetCode(config)
 }
-
-// Internal errors (hex code FFXXX)
-//
-// Configuration errors are raised when an error is encountered while loading configuration format
-const internalErrCode uint64 = 15<<16 + 15<<12
 
 // InternalError is raised when an unknown exception is met
 func InternalError(format string, a ...interface{}) *ierror.Error {
