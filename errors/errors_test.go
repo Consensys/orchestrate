@@ -6,8 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestWarning(t *testing.T) {
-	e := Warning("test")
+func TestWarningf(t *testing.T) {
+	e := Warningf("test")
 	assert.Equal(t, uint64(4096), e.GetCode(), "Warning code should be correct")
 	assert.Equal(t, "01000", e.Hex(), "Hex reprensation should be correct")
 }
