@@ -26,6 +26,11 @@ const (
 	// Feature Not Supported Errors (class 0AXXX)
 	featureNotSupported = 10 << 12
 
+	// Invalid State (class 24XXX)
+	invalidState       = 2<<16 + 4<<12
+	failedPrecondition = invalidState + 1<<8 // System not in required state (subclass 241XX)
+	conflicted         = invalidState + 2<<8 // Conflict with current system state (subclass 242XX)
+
 	// Data Errors (class 42XXX)
 	data               = 4<<16 + 2<<12
 	outOfRange         = data + 1     // Out of range (code 42001)
@@ -49,7 +54,8 @@ const (
 	// Storage Error (class DBXXX)
 	storage            = 13<<16 + 11<<12
 	constraintViolated = storage + 1<<8 // Storage constraint violated (subclass DB1XX)
-	notFound           = storage + 2<<8 // Not found (subclass DB2XX)
+
+	notFound = storage + 2<<8 // Not found (subclass DB2XX)
 
 	// Configuration errors (class F0XXX)
 	config = 15 << 16
@@ -137,6 +143,32 @@ func PermissionDeniedError(format string, a ...interface{}) *ierror.Error {
 // FeatureNotSupportedError is raised when using a feature which is not implemented
 func FeatureNotSupportedError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(format, a...).SetCode(featureNotSupported)
+}
+
+// InvalidStateError is raised when system state blocks operation execution
+func InvalidStateError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(format, a...).SetCode(invalidState)
+}
+
+// AuthenticationError indicate whether an error is an invalid state error
+func IsInvalidStateError(err error) bool {
+	return isErrorClass(FromError(err).GetCode(), invalidState)
+}
+
+// FailedPreconditionError is raised when operation was rejected because
+// the system is not in a state required for the operation's execution
+//
+// Client should not retry until the system state has been explicitly fixed
+func FailedPreconditionError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(format, a...).SetCode(failedPrecondition)
+}
+
+// ConflictedError is raised when operation could not be completed due to a
+// conflict with the current state of the target resource
+//
+// User might be able to resolve the conflict and resubmit operation
+func ConflictedError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(format, a...).SetCode(conflicted)
 }
 
 // DataError is raised when a provided data does not match expected format

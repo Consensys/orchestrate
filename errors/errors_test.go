@@ -86,6 +86,26 @@ func TestFeatureNotSupportedError(t *testing.T) {
 	assert.Equal(t, "0A000", e.Hex(), "Hex reprensation should be correct")
 }
 
+func TestInvalidStateError(t *testing.T) {
+	e := InvalidStateError("test")
+	assert.Equal(t, uint64(147456), e.GetCode(), "InvalidStateError code should be correct")
+	assert.Equal(t, "24000", e.Hex(), "Hex reprensation should be correct")
+}
+
+func TestFailedPreconditionError(t *testing.T) {
+	e := FailedPreconditionError("test")
+	assert.Equal(t, uint64(147712), e.GetCode(), "FailedPreconditionError code should be correct")
+	assert.True(t, IsInvalidStateError(e), "FailedPreconditionError should be InvalidStateError")
+	assert.Equal(t, "24100", e.Hex(), "FailedPreconditionError Hex reprensation should be correct")
+}
+
+func TestConflictedError(t *testing.T) {
+	e := ConflictedError("test")
+	assert.Equal(t, uint64(147968), e.GetCode(), "ConflictedError code should be correct")
+	assert.True(t, IsInvalidStateError(e), "ConflictedError should be InvalidStateError")
+	assert.Equal(t, "24200", e.Hex(), "ConflictedError Hex reprensation should be correct")
+}
+
 func TestDataError(t *testing.T) {
 	e := DataError("test")
 	assert.Equal(t, uint64(270336), e.GetCode(), "DataError code should be correct")
