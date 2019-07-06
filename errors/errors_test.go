@@ -54,6 +54,26 @@ func TestEthConnectionError(t *testing.T) {
 	assert.Equal(t, "08300", e.Hex(), "EthConnectionError Hex reprensation should be correct")
 }
 
+func TestInvalidAuthenticationError(t *testing.T) {
+	e := InvalidAuthenticationError("test")
+	assert.Equal(t, uint64(36864), e.GetCode(), "InvalidAuthenticationError code should be correct")
+	assert.Equal(t, "09000", e.Hex(), "Hex reprensation should be correct")
+}
+
+func TestUnauthenticatedError(t *testing.T) {
+	e := UnauthenticatedError("test")
+	assert.Equal(t, uint64(36865), e.GetCode(), "UnauthenticatedError code should be correct")
+	assert.True(t, IsInvalidAuthenticationError(e), "UnauthenticatedError should be a connection error")
+	assert.Equal(t, "09001", e.Hex(), "UnauthenticatedError Hex reprensation should be correct")
+}
+
+func TestPermissionDeniedError(t *testing.T) {
+	e := PermissionDeniedError("test")
+	assert.Equal(t, uint64(36866), e.GetCode(), "PermissionDeniedError code should be correct")
+	assert.True(t, IsInvalidAuthenticationError(e), "PermissionDeniedError should be a connection error")
+	assert.Equal(t, "09002", e.Hex(), "PermissionDeniedError Hex reprensation should be correct")
+}
+
 func TestConfigError(t *testing.T) {
 	e := ConfigError("test")
 	assert.Equal(t, uint64(983040), e.GetCode(), "ConfigError code should be correct")
@@ -72,6 +92,12 @@ func TestDataError(t *testing.T) {
 	assert.Equal(t, "42000", e.Hex(), "Hex reprensation should be correct")
 }
 
+func TestOutOfRange(t *testing.T) {
+	e := OutOfRangeError("test")
+	assert.Equal(t, uint64(270337), e.GetCode(), "OutOfRangeError code should be correct")
+	assert.Equal(t, "42001", e.Hex(), "Hex reprensation should be correct")
+}
+
 func TestEncodingError(t *testing.T) {
 	e := EncodingError("test")
 	assert.Equal(t, uint64(270592), e.GetCode(), "EncodingError code should be correct")
@@ -86,10 +112,10 @@ func TestSolidityError(t *testing.T) {
 	assert.Equal(t, "42200", e.Hex(), "Hex reprensation should be correct")
 }
 
-func TestInvalidSigError(t *testing.T) {
-	e := InvalidSigError("test")
-	assert.Equal(t, uint64(270849), e.GetCode(), "InvalidSigError code should be correct")
-	assert.True(t, IsDataError(e), "InvalidSigError should be a data error")
+func TestInvalidSignatureError(t *testing.T) {
+	e := InvalidSignatureError("test")
+	assert.Equal(t, uint64(270849), e.GetCode(), "InvalidSignatureError code should be correct")
+	assert.True(t, IsDataError(e), "InvalidSignatureError should be a data error")
 	assert.True(t, IsSolidityError(e), "IsSolidityError should be a data error")
 	assert.Equal(t, "42201", e.Hex(), "Hex reprensation should be correct")
 }
@@ -131,6 +157,12 @@ func TestInvalidFormatError(t *testing.T) {
 	assert.Equal(t, uint64(271104), e.GetCode(), "InvalidFormatError code should be correct")
 	assert.True(t, IsDataError(e), "InvalidFormatError should be a data error")
 	assert.Equal(t, "42300", e.Hex(), "Hex reprensation should be correct")
+}
+
+func TestInsuficientResourcesError(t *testing.T) {
+	e := InsuficientResourcesError("test")
+	assert.Equal(t, uint64(339968), e.GetCode(), "InsuficientResourcesError code should be correct")
+	assert.Equal(t, "53000", e.Hex(), "Hex reprensation should be correct")
 }
 
 func TestStorageError(t *testing.T) {

@@ -8,28 +8,38 @@ import (
 const (
 	// Warnings (class 01XXX)
 	warning       = 1 << 12
-	retryWarning  = warning + 1<<8 // Retries (subclass 011XXX)
-	faucetWarning = warning + 2<<8 // Faucet credit denied (subclass 012XXX)
+	retryWarning  = warning + 1<<8 // Retries (subclass 011XX)
+	faucetWarning = warning + 2<<8 // Faucet credit denied (subclass 012XX)
 
 	// Connnection Errors (class 08XXX)
 	connection      = 8 << 12
-	kafkaConnection = connection + 1<<8 // Kafka connection error (subclass 081XXX)
-	httpConnection  = connection + 2<<8 // HTTP connection error (subclass 081XXX)
-	ethConnection   = connection + 3<<8 // Ethereum connection error (subclass 081XXX)
+	kafkaConnection = connection + 1<<8 // Kafka connection error (subclass 081XX)
+	httpConnection  = connection + 2<<8 // HTTP connection error (subclass 082XX)
+	ethConnection   = connection + 3<<8 // Ethereum connection error (subclass 083XX)
+	grpcConnection  = connection + 4<<8 // GRPC connection error (subclass 084XX)
+
+	// Authentication Errors (class 09XXX)
+	invalidAuthentication = 9 << 12
+	unauthenticated       = invalidAuthentication + 1 // Invalid request credentials (code 09001)
+	permissionDenied      = invalidAuthentication + 2 // no permission to execute operation (code 09002)
 
 	// Feature Not Supported Errors (class 0AXXX)
 	featureNotSupported = 10 << 12
 
 	// Data Errors (class 42XXX)
 	data               = 4<<16 + 2<<12
-	encoding           = data + 1<<8  // Invilad encoding (subclass 421XX)
+	outOfRange         = data + 1     // Out of range (code 42001)
+	encoding           = data + 1<<8  // Invalid encoding (subclass 421XX)
 	solidity           = data + 2<<8  // Solidity Errors (subclass 422XX)
-	invalidSig         = solidity + 1 // Invalid method/event signature (code 42201)
+	invalidSignature   = solidity + 1 // Invalid method/event signature (code 42201)
 	invalidArgsCount   = solidity + 2 // Invalid arguments count (code 42202)
 	invalidArg         = solidity + 3 // Invalid argument format (code 42203)
 	invalidTopicsCount = solidity + 4 // Invalid count of topics in receipt (code 42204)
 	invalidLog         = solidity + 5 // Invalid event log (code 42205)
 	invalidFormat      = data + 3<<8  // Invalid format (subclass 423XX)
+
+	// Insuficient resources (class 53XXX)
+	insufficientResources = 5<<16 + 3<<12
 
 	// Storage Error (class DBXXX)
 	storage            = 13<<16 + 11<<12
@@ -94,6 +104,31 @@ func EthConnectionError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(format, a...).SetCode(ethConnection)
 }
 
+// GRPCConnectionError is raised when failing to connect to a GRPC server
+func GRPCConnectionError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(format, a...).SetCode(grpcConnection)
+}
+
+// InvalidAuthenticationError is raised when access to an operation has been denied
+func InvalidAuthenticationError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(format, a...).SetCode(invalidAuthentication)
+}
+
+// AuthenticationError indicate whether an error is an authentication error
+func IsInvalidAuthenticationError(err error) bool {
+	return isErrorClass(FromError(err).GetCode(), invalidAuthentication)
+}
+
+// UnauthenticatedError is raised when authentication credentials are invalid
+func UnauthenticatedError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(format, a...).SetCode(unauthenticated)
+}
+
+// PermissionDeniedError is raised when authentication credentials are invalid
+func PermissionDeniedError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(format, a...).SetCode(permissionDenied)
+}
+
 // FeatureNotSupportedError is raised when using a feature which is not implemented
 func FeatureNotSupportedError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(format, a...).SetCode(featureNotSupported)
@@ -107,6 +142,11 @@ func DataError(format string, a ...interface{}) *ierror.Error {
 // IsDataError indicate whether an error is a data error
 func IsDataError(err error) bool {
 	return isErrorClass(FromError(err).GetCode(), data)
+}
+
+// OutOfRangeError are raised when an operation was attempted past the valid range
+func OutOfRangeError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(format, a...).SetCode(outOfRange)
 }
 
 // EncodingError are raised when failing to decode a message
@@ -124,10 +164,10 @@ func IsSolidityError(err error) bool {
 	return isErrorClass(FromError(err).GetCode(), solidity)
 }
 
-// InvalidSigError is raised when a solidity method signature is invalid
-func InvalidSigError(sig string) *ierror.Error {
+// InvalidSignatureError is raised when a solidity method signature is invalid
+func InvalidSignatureError(sig string) *ierror.Error {
 	return Errorf("%q is an invalid Solidity method signature (example of valid signature: transfer(address,uint256))", sig).
-		SetCode(invalidSig)
+		SetCode(invalidSignature)
 }
 
 // InvalidArgsCountError is raised when invalid arguments count is provided to craft a transaction
@@ -153,6 +193,11 @@ func InvalidEventDataError(format string, a ...interface{}) *ierror.Error {
 // InvalidFormatError is raised when a data does not match an expected format
 func InvalidFormatError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(format, a...).SetCode(invalidFormat)
+}
+
+// InsuficientResourcesError is raised when a system can not handle more operations
+func InsuficientResourcesError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(format, a...).SetCode(insufficientResources)
 }
 
 // StorageError is raised when an error is encountered while accessing stored data
