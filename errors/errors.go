@@ -41,6 +41,11 @@ const (
 	// Insuficient resources (class 53XXX)
 	insufficientResources = 5<<16 + 3<<12
 
+	// Operation intervention error (class 57XXX)
+	operatorIntervention = 5<<16 + 7<<12 //
+	canceled             = operatorIntervention + 1
+	deadlineExceeded     = operatorIntervention + 2
+
 	// Storage Error (class DBXXX)
 	storage            = 13<<16 + 11<<12
 	constraintViolated = storage + 1<<8 // Storage constraint violated (subclass DB1XX)
@@ -198,6 +203,26 @@ func InvalidFormatError(format string, a ...interface{}) *ierror.Error {
 // InsuficientResourcesError is raised when a system can not handle more operations
 func InsuficientResourcesError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(format, a...).SetCode(insufficientResources)
+}
+
+// OperatorInterventionError is raised when an error resulted from an operator interfering with the system
+func OperatorInterventionError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(format, a...).SetCode(operatorIntervention)
+}
+
+// IsOperatorInterventionError indicate whether an error is a operator intervention error
+func IsOperatorInterventionError(err error) bool {
+	return isErrorClass(FromError(err).GetCode(), operatorIntervention)
+}
+
+// CancelledError is raised when canceling an operation
+func CancelledError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(format, a...).SetCode(canceled)
+}
+
+// DeadlineExceededError is raised when deadline expired before operation could complete
+func DeadlineExceededError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(format, a...).SetCode(deadlineExceeded)
 }
 
 // StorageError is raised when an error is encountered while accessing stored data

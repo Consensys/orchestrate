@@ -529,6 +529,8 @@ Error codes are `uint64` that maps to five hex character code
 | 42XXX |   422XX  |    42205   | invalid_event_data            | Invalid data in event log                 |
 | 42XXX |   423XX  |    42300   | invalid_format                | Data does not match expected format       |
 | 53XXX |          |    53000   | insuficient_resources         | System can not handle more operations     |
+| 57XXX |          |    57000   | operator_intervention         | Operator interfered with operation        |
+| 57XXX |          |    57001   | operation_canceled            | Operation canceled (typically by caller)  |
 | DBXXX |          |    DB000   | storage_exception             | Failed accessing stored data              |
 | DBXXX |   DB1XX  |    DB100   | constraint_violated           | Data constraint violated                  |
 | DBXXX |   DB2XX  |    DB200   | not_found                     | No data found for given parameters        |

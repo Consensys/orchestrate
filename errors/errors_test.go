@@ -165,6 +165,26 @@ func TestInsuficientResourcesError(t *testing.T) {
 	assert.Equal(t, "53000", e.Hex(), "Hex reprensation should be correct")
 }
 
+func TestOperatorInterventionError(t *testing.T) {
+	e := OperatorInterventionError("test")
+	assert.Equal(t, uint64(356352), e.GetCode(), "OperatorInterventionError code should be correct")
+	assert.Equal(t, "57000", e.Hex(), "Hex reprensation should be correct")
+}
+
+func TestCancelledError(t *testing.T) {
+	e := CancelledError("test")
+	assert.Equal(t, uint64(356353), e.GetCode(), "CancelledError code should be correct")
+	assert.True(t, IsOperatorInterventionError(e), "CancelledError should be a OperatorInterventionError")
+	assert.Equal(t, "57001", e.Hex(), "Hex reprensation should be correct")
+}
+
+func TestDeadlineExceededError(t *testing.T) {
+	e := DeadlineExceededError("test")
+	assert.Equal(t, uint64(356354), e.GetCode(), "DeadlineExceededError code should be correct")
+	assert.True(t, IsOperatorInterventionError(e), "DeadlineExceededError should be a OperatorInterventionError")
+	assert.Equal(t, "57002", e.Hex(), "Hex reprensation should be correct")
+}
+
 func TestStorageError(t *testing.T) {
 	e := StorageError("test")
 	assert.Equal(t, uint64(897024), e.GetCode(), "StorageError code should be correct")
