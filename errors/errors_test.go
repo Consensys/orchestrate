@@ -206,15 +206,15 @@ func TestNotFoundError(t *testing.T) {
 	assert.Equal(t, "DB200", e.Hex(), "Hex reprensation should be correct")
 }
 
-func TestDataCorruptedError(t *testing.T) {
-	e := DataCorruptedError("test")
-	assert.Equal(t, uint64(897792), e.GetCode(), "DataCorruptedError code should be correct")
-	assert.True(t, IsStorageError(e), "DataCorruptedError should be a data error")
-	assert.Equal(t, "DB300", e.Hex(), "Hex reprensation should be correct")
-}
-
 func TestInternalError(t *testing.T) {
 	e := InternalError("test")
 	assert.Equal(t, uint64(1044480), e.GetCode(), "InternalError code should be correct")
 	assert.Equal(t, "FF000", e.Hex(), "Hex reprensation should be correct")
+}
+
+func TestDataCorruptedError(t *testing.T) {
+	e := DataCorruptedError("test")
+	assert.Equal(t, uint64(1044736), e.GetCode(), "DataCorruptedError code should be correct")
+	assert.True(t, IsInternalError(e), "DataCorruptedError should be an InternalError")
+	assert.Equal(t, "FF100", e.Hex(), "Hex reprensation should be correct")
 }

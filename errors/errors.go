@@ -50,13 +50,13 @@ const (
 	storage            = 13<<16 + 11<<12
 	constraintViolated = storage + 1<<8 // Storage constraint violated (subclass DB1XX)
 	notFound           = storage + 2<<8 // Not found (subclass DB2XX)
-	dataCorrupted      = storage + 3<<8 // Data corrupted (subclass DB3XX)
 
 	// Configuration errors (class F0XXX)
 	config = 15 << 16
 
 	// Internal errors (class FFXXX)
-	internal = 15<<16 + 15<<12
+	internal      = 15<<16 + 15<<12
+	dataCorrupted = internal + 1<<8 // Data corrupted (subclass FF1XX)
 )
 
 // Warning are raised to indicate
@@ -268,4 +268,9 @@ func ConfigError(format string, a ...interface{}) *ierror.Error {
 // InternalError is raised when an unknown exception is met
 func InternalError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(format, a...)
+}
+
+// IsInternalError indicate whether an error is an internal error
+func IsInternalError(err error) bool {
+	return isErrorClass(FromError(err).GetCode(), internal)
 }

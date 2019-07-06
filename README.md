@@ -534,6 +534,6 @@ Error codes are `uint64` that maps to five hex character code
 | DBXXX |          |    DB000   | storage_exception             | Failed accessing stored data              |
 | DBXXX |   DB1XX  |    DB100   | constraint_violated           | Data constraint violated                  |
 | DBXXX |   DB2XX  |    DB200   | not_found                     | No data found for given parameters        |
-| DBXXX |   DB3XX  |    DB300   | data_corrupted                | Data is corrupted                         |
 | F0XXX |          |    F0000   | invalid_config                | Invalid configuration                     |
 | FFXXX |          |    FF000   | internal_error                | Internal error                            |
+| FFXXX |   FF1XX  |    FF100   | data_corrupted                | Data is corrupted                         |
