@@ -39,7 +39,7 @@ func ParseSignature(sig string) (name, args string, err error) {
 	parts := signaturePattern.FindStringSubmatch(sig)
 
 	if len(parts) != 3 {
-		return "", "", errors.InvalidSigError(sig).SetComponent(component)
+		return "", "", errors.InvalidSignatureError(sig).SetComponent(component)
 	}
 	return parts[1], parts[2], nil
 }

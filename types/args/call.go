@@ -21,7 +21,7 @@ func (c *Call) IsConstructor() bool {
 // SignatureToCall returns a Call object from a short String
 func SignatureToCall(sig string) (*Call, error) {
 	if !utils.IsValidSignature(sig) {
-		return nil, errors.InvalidSigError(sig).SetComponent(component)
+		return nil, errors.InvalidSignatureError(sig).SetComponent(component)
 	}
 
 	return &Call{
