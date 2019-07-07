@@ -8,7 +8,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	err "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
+	ierror "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
 )
 
 var testKey = "test"
@@ -82,7 +82,7 @@ func TestCtxError(t *testing.T) {
 
 	assert.Len(t, txctx.Envelope.Errors, 1, "Error count should be correct")
 
-	e = err.New("test Error").SetCode(5).ExtendComponent("foo")
+	e = ierror.New(5, "test Error").ExtendComponent("foo")
 	_ = txctx.Error(e)
 
 	assert.Len(t, txctx.Envelope.GetErrors(), 2, "Error count should be correct")

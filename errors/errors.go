@@ -66,7 +66,7 @@ const (
 
 // Warningf are raised to indicate a warning
 func Warningf(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(Warning)
+	return Errorf(Warning, format, a...)
 }
 
 // IsWarning indicate whether an error is a Warning
@@ -76,12 +76,12 @@ func IsWarning(err error) bool {
 
 // RetryWarning are raised when failing to connect to a service and retrying
 func RetryWarning(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(Retry)
+	return Errorf(Retry, format, a...)
 }
 
 // FaucetWarning are raised when a faucet credit has been denied
 func FaucetWarning(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(Faucet)
+	return Errorf(Faucet, format, a...)
 }
 
 // IsFaucetWarning indicate whether an error is a faucet Warning
@@ -91,7 +91,7 @@ func IsFaucetWarning(err error) bool {
 
 // ConnectionError is raised when failing to connect to an external service
 func ConnectionError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(Connection)
+	return Errorf(Connection, format, a...)
 }
 
 // IsConnectionError indicate whether an error is a Connection error
@@ -101,27 +101,27 @@ func IsConnectionError(err error) bool {
 
 // KafkaConnectionError is raised when failing to connect to Kafka
 func KafkaConnectionError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(KafkaConnection)
+	return Errorf(KafkaConnection, format, a...)
 }
 
 // HTTPConnectionError is raised when failing to connect over http
 func HTTPConnectionError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(HTTPConnection)
+	return Errorf(HTTPConnection, format, a...)
 }
 
 // EthConnectionError is raised when failing to connect to Ethereum client jsonRPC API
 func EthConnectionError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(EthConnection)
+	return Errorf(EthConnection, format, a...)
 }
 
 // GRPCConnectionError is raised when failing to connect to a GRPC server
 func GRPCConnectionError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(GRPCConnection)
+	return Errorf(GRPCConnection, format, a...)
 }
 
 // InvalidAuthenticationError is raised when access to an operation has been denied
 func InvalidAuthenticationError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(InvalidAuthentication)
+	return Errorf(InvalidAuthentication, format, a...)
 }
 
 // AuthenticationError indicate whether an error is an authentication error
@@ -131,17 +131,17 @@ func IsInvalidAuthenticationError(err error) bool {
 
 // UnauthenticatedError is raised when authentication credentials are invalid
 func UnauthenticatedError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(Unauthenticated)
+	return Errorf(Unauthenticated, format, a...)
 }
 
 // PermissionDeniedError is raised when authentication credentials are invalid
 func PermissionDeniedError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(PermissionDenied)
+	return Errorf(PermissionDenied, format, a...)
 }
 
 // FeatureNotSupportedError is raised when using a feature which is not implemented
 func FeatureNotSupportedError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(FeatureNotSupported)
+	return Errorf(FeatureNotSupported, format, a...)
 }
 
 // IsFeatureNotSupportedError indicate whether an error is a feature not supported error
@@ -151,7 +151,7 @@ func IsFeatureNotSupportedError(err error) bool {
 
 // InvalidStateError is raised when system state blocks operation execution
 func InvalidStateError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(InvalidState)
+	return Errorf(InvalidState, format, a...)
 }
 
 // AuthenticationError indicate whether an error is an invalid state error
@@ -164,7 +164,7 @@ func IsInvalidStateError(err error) bool {
 //
 // Client should not retry until the system state has been explicitly fixed
 func FailedPreconditionError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(FailedPrecondition)
+	return Errorf(FailedPrecondition, format, a...)
 }
 
 // IsFailedPreconditionError indicate whether an error is an failed precondition error
@@ -177,7 +177,7 @@ func IsFailedPreconditionError(err error) bool {
 //
 // User might be able to resolve the conflict and resubmit operation
 func ConflictedError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(Conflicted)
+	return Errorf(Conflicted, format, a...)
 }
 
 // IsConflictedError indicate whether an error is an conflicted error
@@ -187,7 +187,7 @@ func IsConflictedError(err error) bool {
 
 // DataError is raised when a provided Data does not match expected format
 func DataError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(Data)
+	return Errorf(Data, format, a...)
 }
 
 // IsDataError indicate whether an error is a Data error
@@ -197,17 +197,17 @@ func IsDataError(err error) bool {
 
 // OutOfRangeError are raised when an operation was attempted past the valid range
 func OutOfRangeError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(OutOfRange)
+	return Errorf(OutOfRange, format, a...)
 }
 
 // EncodingError are raised when failing to decode a message
 func EncodingError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(Encoding)
+	return Errorf(Encoding, format, a...)
 }
 
 // SolidityError is raised when a Data related in transaction crafing is incorrect
 func SolidityError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(Solidity)
+	return Errorf(Solidity, format, a...)
 }
 
 // IsSolidityError indicate whether an error is a Solidity error
@@ -217,38 +217,37 @@ func IsSolidityError(err error) bool {
 
 // InvalidSignatureError is raised when a Solidity method signature is invalid
 func InvalidSignatureError(sig string) *ierror.Error {
-	return Errorf("%q is an invalid Solidity method signature (example of valid signature: transfer(address,uint256))", sig).
-		SetCode(InvalidSignature)
+	return Errorf(InvalidSignature, "%q is an invalid Solidity method signature (example of valid signature: transfer(address,uint256))", sig)
 }
 
 // InvalidArgsCountError is raised when invalid arguments count is provided to craft a transaction
 func InvalidArgsCountError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(InvalidArgsCount)
+	return Errorf(InvalidArgsCount, format, a...)
 }
 
 // InvalidArgError is raised when invalid argument is provided to craft a transaction
 func InvalidArgError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(InvalidArg)
+	return Errorf(InvalidArg, format, a...)
 }
 
 // InvalidTopicsCountError is raised when topics count is in receipt
 func InvalidTopicsCountError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(InvalidTopicsCount)
+	return Errorf(InvalidTopicsCount, format, a...)
 }
 
 // InvalidEventDataError is raised when event Data is invalid
 func InvalidEventDataError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(InvalidLog)
+	return Errorf(InvalidLog, format, a...)
 }
 
 // InvalidFormatError is raised when a Data does not match an expected format
 func InvalidFormatError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(InvalidFormat)
+	return Errorf(InvalidFormat, format, a...)
 }
 
 // InsuficientResourcesError is raised when a system can not handle more operations
 func InsuficientResourcesError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(InsufficientResources)
+	return Errorf(InsufficientResources, format, a...)
 }
 
 // IsInsufficientResourcesError indicate whether an error is an insuficient resources error
@@ -258,7 +257,7 @@ func IsInsufficientResourcesError(err error) bool {
 
 // OperatorInterventionError is raised when an error resulted from an operator interfering with the system
 func OperatorInterventionError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(OperatorIntervention)
+	return Errorf(OperatorIntervention, format, a...)
 }
 
 // IsOperatorInterventionError indicate whether an error is a operator intervention error
@@ -268,17 +267,17 @@ func IsOperatorInterventionError(err error) bool {
 
 // CancelledError is raised when canceling an operation
 func CancelledError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(Canceled)
+	return Errorf(Canceled, format, a...)
 }
 
 // DeadlineExceededError is raised when deadline expired before operation could complete
 func DeadlineExceededError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(DeadlineExceeded)
+	return Errorf(DeadlineExceeded, format, a...)
 }
 
 // StorageError is raised when an error is encountered while accessing stored Data
 func StorageError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(Storage)
+	return Errorf(Storage, format, a...)
 }
 
 // IsStorageError indicate whether an error is a Storage error
@@ -288,7 +287,7 @@ func IsStorageError(err error) bool {
 
 // ConstraintViolatedError is raised when a Data constraint has been violated
 func ConstraintViolatedError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(ConstraintViolated)
+	return Errorf(ConstraintViolated, format, a...)
 }
 
 // IsConstraintViolatedError indicate whether an error is a constraint violated error
@@ -298,7 +297,7 @@ func IsConstraintViolatedError(err error) bool {
 
 // NoDataFoundError is raised when accessing a missing Data
 func NotFoundError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(NotFound)
+	return Errorf(NotFound, format, a...)
 }
 
 // IsNotFoundError indicate whether an error is a no Data found error
@@ -308,12 +307,12 @@ func IsNotFoundError(err error) bool {
 
 // ConfigError is raised when an error is encountered while loading configuration
 func ConfigError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(Config)
+	return Errorf(Config, format, a...)
 }
 
 // InternalError is raised when an unknown exception is met
 func InternalError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...)
+	return Errorf(Internal, format, a...)
 }
 
 // IsInternalError indicate whether an error is an Internal error
@@ -323,7 +322,7 @@ func IsInternalError(err error) bool {
 
 // DataCorruptedError is raised loading a corrupted Data
 func DataCorruptedError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(format, a...).SetCode(DataCorrupted)
+	return Errorf(DataCorrupted, format, a...)
 }
 
 // IsDataCorruptedError indicate whether an error is a data corrupted error

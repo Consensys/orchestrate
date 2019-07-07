@@ -5,8 +5,9 @@ import (
 )
 
 // New returns an error with given message
-func New(msg string) *Error {
+func New(code uint64, msg string) *Error {
 	return &Error{
+		Code:    code,
 		Message: msg,
 	}
 }

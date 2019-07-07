@@ -8,9 +8,7 @@ import (
 )
 
 func TestError(t *testing.T) {
-	err := New("Test Error").
-		SetCode(1234).
-		SetComponent("test-component")
+	err := New(1234, "Test Error").SetComponent("test-component")
 
 	assert.Equal(t, "004D2@test-component: Test Error", err.Error(), "Error string should be correct")
 	assert.Equal(t, uint64(1234), err.GetCode(), "Error code should be valid")
@@ -21,7 +19,7 @@ func TestError(t *testing.T) {
 }
 
 func TestExtendComponent(t *testing.T) {
-	e := New("test").ExtendComponent("foo")
+	e := New(0, "test").ExtendComponent("foo")
 	assert.Equal(t, "foo", e.GetComponent(), "Should set component correctly")
 
 	e = e.ExtendComponent("bar")

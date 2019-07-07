@@ -7,10 +7,8 @@ import (
 )
 
 // Errorf creates an error according to a format specifier
-//
-// By default Errorf return an internal error with code `FF000`
-func Errorf(format string, a ...interface{}) *ierror.Error {
-	return ierror.New(fmt.Sprintf(format, a...)).SetCode(Internal)
+func Errorf(code uint64, format string, a ...interface{}) *ierror.Error {
+	return ierror.New(code, fmt.Sprintf(format, a...))
 }
 
 // FromError cast a golang error into an internal Error
@@ -23,7 +21,7 @@ func FromError(err error) *ierror.Error {
 
 	ierr, ok := err.(*ierror.Error)
 	if !ok {
-		return Errorf(err.Error())
+		return Errorf(Internal, err.Error())
 	}
 
 	return ierr
