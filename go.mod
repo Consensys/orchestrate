@@ -11,6 +11,7 @@ require (
 	github.com/go-pg/pg v8.0.4+incompatible
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/protobuf v1.3.0
+	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jinzhu/inflection v0.0.0-20190603042836-f5c5f50e6090 // indirect
 	github.com/julien-marchand/healthcheck v0.1.0
