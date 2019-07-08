@@ -1,18 +1,16 @@
 package jaeger
+import (
 
-// TODO: uncomment when working in CI
+	"context"
+	"testing"
 
-// import (
-// 	"context"
-// 	"testing"
+	"github.com/opentracing/opentracing-go"
+	"github.com/stretchr/testify/assert"
+	"github.com/uber/jaeger-client-go"
+)
 
-// 	"github.com/opentracing/opentracing-go"
-// 	"github.com/stretchr/testify/assert"
-// 	"github.com/uber/jaeger-client-go"
-// )
-
-// func TestInit(t *testing.T) {
-// 	Init(context.Background())
-// 	_, ok := opentracing.GlobalTracer().(*jaeger.Tracer)
-// 	assert.True(t, ok, "Jaeger Tracer should have been set")
-// }
+func TestInit(t *testing.T) {
+	Init(context.Background())
+	_, ok := opentracing.GlobalTracer().(*jaeger.Tracer)
+	assert.True(t, ok, "Jaeger Tracer should have been set")
+}

@@ -88,7 +88,7 @@ func (s *TracerTestSuite) TestTxSpanFromBroker() {
 		txctxSlice = append(txctxSlice, makeTracerContext(i))
 	}
 
-	log.Infof("txctxSlice: %v", txctxSlice)
+	log.Infof("TestTxSpanFromBroker: txctxSlice: %v", txctxSlice)
 
 	// Handle contexts
 	s.Handle(txctxSlice)
@@ -96,24 +96,24 @@ func (s *TracerTestSuite) TestTxSpanFromBroker() {
 		span := opentracing.SpanFromContext(txctxSlice[i].Context())
 		spanContext, _ := MockTracer.Extract(opentracing.TextMap, txctxSlice[i].Envelope.Carrier())
 
-		log.Debugf("span: %v", span)
-		log.Debugf("spanContext: %v", spanContext)
+		txctxSlice[i].Logger.Debugf("TestTxSpanFromBroker: span: %v", span)
+		txctxSlice[i].Logger.Debugf("TestTxSpanFromBroker: spanContext: %v", spanContext)
 
 		switch i % Mod {
 		default:
-			assert.Equal(s.T(), GenericOperationName, span.(*mocktracer.MockSpan).OperationName, "Expected right operationName")
+			assert.Equal(s.T(), OpenTracingName, span.(*mocktracer.MockSpan).OperationName, "Expected right operationName")
 		case 1:
 			assert.Equal(s.T(), "I love Crafting", span.(*mocktracer.MockSpan).OperationName, "Expected right operationName")
 		case 2:
-			assert.Equal(s.T(), GenericOperationName, span.(*mocktracer.MockSpan).OperationName, "Expected right operationName")
+			assert.Equal(s.T(), OpenTracingName, span.(*mocktracer.MockSpan).OperationName, "Expected right operationName")
 			assert.Equal(s.T(), 44, span.(*mocktracer.MockSpan).ParentID, "Expected right ParentID from txctx.Context")
 			assert.Equal(s.T(), 43, spanContext.(mocktracer.MockSpanContext).TraceID, "Expected right TraceID from txctx.Envelope.Metadata")
 		case 3:
-			assert.Equal(s.T(), GenericOperationName, span.(*mocktracer.MockSpan).OperationName, "Expected right operationName")
+			assert.Equal(s.T(), OpenTracingName, span.(*mocktracer.MockSpan).OperationName, "Expected right operationName")
 			assert.Equal(s.T(), 11, span.(*mocktracer.MockSpan).ParentID, "Expected right operationName")
 			assert.Equal(s.T(), 10, spanContext.(mocktracer.MockSpanContext).TraceID, "Expected right TraceID from txctx.Envelope.Metadata")
 		case 4:
-			assert.Equal(s.T(), GenericOperationName, span.(*mocktracer.MockSpan).OperationName, "Expected right operationName")
+			assert.Equal(s.T(), OpenTracingName, span.(*mocktracer.MockSpan).OperationName, "Expected right operationName")
 			assert.Equal(s.T(), 11, span.(*mocktracer.MockSpan).ParentID, "Expected right operationName")
 			assert.Equal(s.T(), 10, spanContext.(mocktracer.MockSpanContext).TraceID, "Expected right TraceID from txctx.Envelope.Metadata")
 		}

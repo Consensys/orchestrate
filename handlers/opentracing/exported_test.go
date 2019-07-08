@@ -11,3 +11,7 @@ func TestInit(t *testing.T) {
 	Init(context.Background())
 	assert.NotNil(t, handler, "Global handler should have been set")
 }
+
+// Test le SetHandler
+
+// Tesy le GetHAndler
