@@ -60,14 +60,14 @@ func (s *ScenarioTestSuite) TestInitScenarioContext() {
 	s.Scenario.initScenarioContext(scenario)
 
 	assert.NotEmpty(s.T(), s.Scenario.ScenarioID, "Should not be empty")
-	assert.Len(s.T(), s.Scenario.EnvelopesChan, 5, "Should not be empty")
+	assert.Len(s.T(), s.Scenario.EnvelopesChan, 7, "Should not be empty")
 
 	scenarioOutline := &gherkin.ScenarioOutline{}
 	scenarioOutline.Name = "test"
 	s.Scenario.initScenarioContext(scenarioOutline)
 
 	assert.NotEmpty(s.T(), s.Scenario.ScenarioID, "Should not be empty")
-	assert.Len(s.T(), s.Scenario.EnvelopesChan, 5, "Should not be empty")
+	assert.Len(s.T(), s.Scenario.EnvelopesChan, 7, "Should not be empty")
 }
 
 func (s *ScenarioTestSuite) TestIHaveTheFollowingEnvelope() {
@@ -123,6 +123,21 @@ func (s *ScenarioTestSuite) TestISendTheseEnvelopeToCoreStack() {
 	assert.Error(s.T(), err, "Should get an error")
 }
 
+func (s *ScenarioTestSuite) TestISendTheseEnvelopeInWalletGenerator() {
+
+	producer := mocks.NewSyncProducer(s.T(), nil)
+	producer.ExpectSendMessageAndSucceed()
+	producer.ExpectSendMessageAndFail(sarama.ErrOutOfBrokers)
+	broker.SetGlobalSyncProducer(producer)
+
+	s.Scenario.Envelopes["test"] = &envelope.Envelope{}
+
+	err := s.Scenario.iSendTheseEnvelopeInWalletGenerator()
+	assert.NoError(s.T(), err, "Should not get an error")
+	err = s.Scenario.iSendTheseEnvelopeInWalletGenerator()
+	assert.Error(s.T(), err, "Should get an error")
+}
+
 func (s *ScenarioTestSuite) TestCoreStackShouldReceiveEnvelopes() {
 
 	mockChan := make(chan *envelope.Envelope)
@@ -145,6 +160,29 @@ func (s *ScenarioTestSuite) TestCoreStackShouldReceiveEnvelopes() {
 
 	// Test for not receiving envelopes before timeout
 	err = s.Scenario.coreStackShouldReceiveEnvelopes()
+	assert.Error(s.T(), err, "Should get an error")
+}
+
+func (s *ScenarioTestSuite) TestWalletGeneratorShouldReceiveThem() {
+
+	mockChan := make(chan *envelope.Envelope)
+	s.Scenario.EnvelopesChan[viper.GetString("kafka.topic.wallet.generator")] = mockChan
+
+	testEnvelope := &envelope.Envelope{}
+	s.Scenario.Envelopes["test"] = testEnvelope
+
+	var err error
+
+	go func() {
+		mockChan <- testEnvelope
+	}()
+
+	// Testing the well functioning of the step
+	err = s.Scenario.walletGeneratorShouldReceiveThem()
+	assert.NoError(s.T(), err, "Should not get an error")
+
+	// Test for not receiving envelopes before timeout
+	err = s.Scenario.walletGeneratorShouldReceiveThem()
 	assert.Error(s.T(), err, "Should get an error")
 }
 
@@ -190,6 +228,47 @@ func (s *ScenarioTestSuite) TestTheTxcrafterShouldSetTheData() {
 	}()
 
 	err = s.Scenario.theTxcrafterShouldSetTheData()
+	assert.Error(s.T(), err, "Should not get an error")
+}
+
+func (s *ScenarioTestSuite) TestTheTxSignerShouldSetFrom() {
+
+	mockChan := make(chan *envelope.Envelope)
+	s.Scenario.EnvelopesChan[viper.GetString("kafka.topic.wallet.generated")] = mockChan
+
+	testEnvelope := &envelope.Envelope{
+		From: ethereum.HexToAccount("0x7E654d251Da770A068413677967F6d3Ea2FeA9E4"),
+	}
+	s.Scenario.Envelopes["test"] = testEnvelope
+
+	var err error
+
+	go func() {
+		mockChan <- testEnvelope
+	}()
+
+	// Test the well functioning of the step with expected envelopes
+	err = s.Scenario.theTxSignerShouldSetFrom()
+	assert.NoError(s.T(), err, "Should not get an error")
+
+	// Test for not receiving envelopes before timeout
+	err = s.Scenario.theTxSignerShouldSetFrom()
+	assert.Error(s.T(), err, "Should get an error")
+
+	// Test step with unexpected envelopes
+	unexpectedEnvelope := &envelope.Envelope{
+		Tx: &ethereum.Transaction{
+			TxData: &ethereum.TxData{
+				Gas: uint64(10),
+			},
+		},
+	}
+
+	go func() {
+		mockChan <- unexpectedEnvelope
+	}()
+
+	err = s.Scenario.theTxSignerShouldSetFrom()
 	assert.Error(s.T(), err, "Should not get an error")
 }
 

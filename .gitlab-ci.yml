@@ -8,7 +8,7 @@ variables:
   GOPATH: ${CI_PROJECT_DIR}/.gocache
   ARTIFACT_DOWNLOAD_ATTEMPTS: 5
   RESTORE_CACHE_ATTEMPTS: 5
-#  CI_DEBUG_TRACE: "true"
+  # CI_DEBUG_TRACE: "true"
 
 services:
   - docker:dind
@@ -65,6 +65,7 @@ build-on-branch:
   image: docker:stable
   stage: build
   before_script:
+    - mkdir -p ${GOPATH}
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
     # Build image following http://label-schema.org/rc1/ label convention convention
@@ -96,6 +97,7 @@ build-on-master:
   image: docker:stable
   stage: build
   before_script:
+    - mkdir -p ${GOPATH}
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
     # Build image following http://label-schema.org/rc1/ label convention convention

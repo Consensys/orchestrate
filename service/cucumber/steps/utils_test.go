@@ -59,8 +59,8 @@ func TestSendEnvelope(t *testing.T) {
 		Chain: chain.CreateChainInt(888),
 	}
 
-	err := SendEnvelope(e)
+	err := SendEnvelope(e, "topic-tx-crafter")
 	assert.NoError(t, err, "Should not get an error")
-	err = SendEnvelope(e)
+	err = SendEnvelope(e, "topic-tx-crafter")
 	assert.Error(t, err, "Should get an error")
 }

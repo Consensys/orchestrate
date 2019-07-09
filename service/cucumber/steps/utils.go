@@ -11,7 +11,7 @@ import (
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
+
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
@@ -42,13 +42,13 @@ func ReadChanWithTimeout(c chan *envelope.Envelope, seconds int64, expectedItems
 	return envelopesChan, nil
 }
 
-// SendEnvelope sends an envelope to kafka
-func SendEnvelope(e *envelope.Envelope) error {
+// SendEnvelope sends the inputs Envelope to the provided kafka topic
+func SendEnvelope(e *envelope.Envelope, topic string) error {
 
 	p := broker.GlobalSyncProducer()
 
 	msg := &sarama.ProducerMessage{
-		Topic: viper.GetString("kafka.topic.crafter"),
+		Topic: topic,
 	}
 
 	_ = encoding.Marshal(e, msg)

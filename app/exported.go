@@ -105,6 +105,8 @@ func Start(ctx context.Context) {
 			viper.GetString("kafka.topic.signer"),
 			viper.GetString("kafka.topic.sender"),
 			viper.GetString("kafka.topic.decoded"),
+			viper.GetString("kafka.topic.wallet.generator"),
+			viper.GetString("kafka.topic.wallet.generated"),
 		}
 		if primary := viper.GetString("cucumber.chainid.primary"); primary != "" {
 			topics = append(topics, fmt.Sprintf("%s-%s", viper.GetString("kafka.topic.decoder"), primary))

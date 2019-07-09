@@ -1,6 +1,5 @@
 package steps
 
-import "C"
 import (
 	"fmt"
 
@@ -15,6 +14,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/service/chanregistry"
 )
 
+// ScenarioContext is container for scenario context data
 type ScenarioContext struct {
 	ScenarioID string
 
@@ -53,6 +53,8 @@ func (sc *ScenarioContext) initScenarioContext(s interface{}) {
 		viper.GetString("kafka.topic.signer"),
 		viper.GetString("kafka.topic.sender"),
 		viper.GetString("kafka.topic.decoded"),
+		viper.GetString("kafka.topic.wallet.generator"),
+		viper.GetString("kafka.topic.wallet.generated"),
 	}
 	if primary := viper.GetString("cucumber.chainid.primary"); primary != "" {
 		topics = append(topics, fmt.Sprintf("%s-%s", viper.GetString("kafka.topic.decoder"), primary))
@@ -114,9 +116,26 @@ func (sc *ScenarioContext) iHaveTheFollowingEnvelope(rawEnvelopes *gherkin.DataT
 
 func (sc *ScenarioContext) iSendTheseEnvelopeToCoreStack() error {
 
+	topic := viper.GetString("kafka.topic.crafter")
+	for _, e := range sc.Envelopes {
+		err := SendEnvelope(e, topic)
+		if err != nil {
+			sc.Logger.Errorf("cucumber: step failed got error %q", err)
+			return err
+		}
+	}
+
+	sc.Logger.Info("cucumber: step check")
+
+	return nil
+}
+
+func (sc *ScenarioContext) iSendTheseEnvelopeInWalletGenerator() error {
+
+	topic := viper.GetString("kafka.topic.wallet.generator")
 	for _, e := range sc.Envelopes {
 		sc.Logger.Infof("cucumber: sending envelope %+v", e)
-		err := SendEnvelope(e)
+		err := SendEnvelope(e, topic)
 		if err != nil {
 			sc.Logger.Errorf("cucumber: sending envelopes to CoreStack failed with error %q", err)
 			return err
@@ -145,6 +164,23 @@ func (sc *ScenarioContext) coreStackShouldReceiveEnvelopes() error {
 	return nil
 }
 
+func (sc *ScenarioContext) walletGeneratorShouldReceiveThem() error {
+
+	topic := viper.GetString("kafka.topic.wallet.generator")
+	e, err := ReadChanWithTimeout(sc.EnvelopesChan[topic], 10, len(sc.Envelopes))
+	if err != nil {
+		sc.Logger.Errorf("cucumber: step failed got error %q", err)
+		return err
+	}
+
+	sc.Logger.WithFields(log.Fields{
+		"EnvelopeReceived": len(e),
+		"msg.Topic":        topic,
+	}).Info("cucumber: step check")
+
+	return nil
+}
+
 func (sc *ScenarioContext) theTxcrafterShouldSetTheData() error {
 
 	topic := viper.GetString("kafka.topic.nonce")
@@ -158,6 +194,31 @@ func (sc *ScenarioContext) theTxcrafterShouldSetTheData() error {
 		if v.GetTx().GetTxData().GetData() == nil {
 			err := fmt.Errorf("tx-crafter could not craft transaction")
 			sc.Logger.Errorf("cucumber: step failed with error %q", err)
+			return err
+		}
+	}
+
+	sc.Logger.WithFields(log.Fields{
+		"EnvelopeReceived": len(e),
+		"msg.Topic":        topic,
+	}).Info("cucumber: step check")
+
+	return nil
+}
+
+func (sc *ScenarioContext) theTxSignerShouldSetFrom() error {
+
+	topic := viper.GetString("kafka.topic.wallet.generated")
+	e, err := ReadChanWithTimeout(sc.EnvelopesChan[topic], 10, len(sc.Envelopes))
+	if err != nil {
+		sc.Logger.Errorf("cucumber: step failed got error %q", err)
+		return err
+	}
+
+	for _, v := range e {
+		if v.GetFrom() == nil {
+			err := fmt.Errorf("tx-signer could not generate the wallet")
+			sc.Logger.Errorf("cucumber: step failed got error %q", err)
 			return err
 		}
 	}
@@ -344,6 +405,7 @@ func (sc *ScenarioContext) iShouldCatchTheirContractAddresses() error {
 	return nil
 }
 
+// FeatureContext is a initializer for cucumber scenario methods
 func FeatureContext(s *godog.Suite) {
 
 	sc := &ScenarioContext{}
@@ -361,4 +423,7 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^the tx-listener should catch the tx$`, sc.theTxlistenerShouldCatchTheTx)
 	s.Step(`^the tx-decoder should decode$`, sc.theTxdecoderShouldDecode)
 	s.Step(`^I should catch their contract addresses$`, sc.iShouldCatchTheirContractAddresses)
+	s.Step(`^I send these envelope in WalletGenerator$`, sc.iSendTheseEnvelopeInWalletGenerator)
+	s.Step(`^WalletGenerator should receive them$`, sc.walletGeneratorShouldReceiveThem)
+	s.Step(`^the tx-signer should set the data$`, sc.theTxSignerShouldSetFrom)
 }
