@@ -23,7 +23,6 @@ func makeTracerContext(i int) *engine.TxContext {
 	// Initialize context
 	txctx := engine.NewTxContext().Prepare(log.NewEntry(log.StandardLogger()), nil)
 
-	txctx.Reset()
 	switch i % Mod {
 
 	default:
@@ -83,7 +82,7 @@ func (s *TracerTestSuite) SetupSuite() {
 func (s *TracerTestSuite) TestTxSpanFromBroker() {
 
 	rounds := 5
-	var txctxSlice []*engine.TxContext
+	txctxSlice := []*engine.TxContext{}
 	for i := 0; i < rounds; i++ {
 		txctxSlice = append(txctxSlice, makeTracerContext(i))
 	}

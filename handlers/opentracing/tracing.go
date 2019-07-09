@@ -10,7 +10,7 @@ import (
 
 // Errors which may occur at operation time.
 var (
-	ErrSpanNotFound      = errors.New("span was not found in context")
+	ErrSpanNotFound = errors.New("span was not found in context")
 )
 
 // TxSpanFromBroker create a new span with the given operation name and options. If a span

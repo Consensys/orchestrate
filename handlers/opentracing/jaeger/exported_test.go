@@ -1,6 +1,6 @@
 package jaeger
-import (
 
+import (
 	"context"
 	"testing"
 

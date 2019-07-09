@@ -38,12 +38,12 @@ func Init(ctx context.Context) {
 	})
 }
 
-// SetGlobalHandler sets global Faucet Handler
+// SetGlobalHandler sets global Opentracing Handler
 func SetGlobalHandler(h engine.HandlerFunc) {
 	handler = h
 }
 
-// GlobalHandler returns global Faucet handler
+// GlobalHandler returns global Opentracing handler
 func GlobalHandler() engine.HandlerFunc {
 	return handler
 }
