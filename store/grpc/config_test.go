@@ -10,22 +10,22 @@ import (
 )
 
 func TestGRPCStoreTarget(t *testing.T) {
-	name := "grpc.store.target"
+	name := "grpc.target.envelope.store"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	StoreTarget(flgs)
+	EnvelopeStoreGRPCTarget(flgs)
 	expected := ""
 	assert.Equal(t, expected, viper.GetString(name), "Default")
 
-	os.Setenv("GRPC_STORE_TARGET", "env-grpc-store")
+	os.Setenv("GRPC_TARGET_ENVELOPE_STORE", "env-grpc-store")
 	expected = "env-grpc-store"
 	assert.Equal(t, expected, viper.GetString(name), "From Environment Variable")
-	os.Unsetenv("GRPC_STORE_TARGET")
+	os.Unsetenv("GRPC_TARGET_ENVELOPE_STORE")
 
 	args := []string{
-		"--grpc-store-target=flag-grpc-store",
+		"--grpc-target-envelope-store=flag-grpc-store",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err, "Store should not error")
+	assert.Nil(t, err, "Parse Store flags should not error")
 	expected = "flag-grpc-store"
 	assert.Equal(t, expected, viper.GetString(name), "From Flag")
 }

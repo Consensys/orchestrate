@@ -10,23 +10,23 @@ import (
 )
 
 var (
-	storeTargetFlag     = "grpc-store-target"
-	storeTargetViperKey = "grpc.store.target"
-	storeTargetDefault  = ""
-	storeTargetEnv      = "GRPC_STORE_TARGET"
+	grpcTargetEnvelopeStoreFlag     = "grpc-target-envelope-store"
+	grpcTargetEnvelopeStoreViperKey = "grpc.target.envelope.store"
+	grpcTargetEnvelopeStoreDefault  = ""
+	grpcTargetEnvelopeStoreEnv      = "GRPC_TARGET_ENVELOPE_STORE"
 )
 
-// StoreTarget register flag for Ethereum client URLs
-func StoreTarget(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`GRPC Context Store target (See https://github.com/grpc/grpc/blob/master/doc/naming.md)
-Environment variable: %q`, storeTargetEnv)
-	f.String(storeTargetFlag, storeTargetDefault, desc)
-	viper.SetDefault(storeTargetViperKey, storeTargetDefault)
-	_ = viper.BindPFlag(storeTargetViperKey, f.Lookup(storeTargetFlag))
-	_ = viper.BindEnv(storeTargetViperKey, storeTargetEnv)
+// EnvelopeStoreGRPCTarget register flag for Ethereum client URLs
+func EnvelopeStoreGRPCTarget(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`GRPC target Envelope Store (See https://github.com/grpc/grpc/blob/master/doc/naming.md)
+Environment variable: %q`, grpcTargetEnvelopeStoreEnv)
+	f.String(grpcTargetEnvelopeStoreFlag, grpcTargetEnvelopeStoreDefault, desc)
+	viper.SetDefault(grpcTargetEnvelopeStoreViperKey, grpcTargetEnvelopeStoreDefault)
+	_ = viper.BindPFlag(grpcTargetEnvelopeStoreViperKey, f.Lookup(grpcTargetEnvelopeStoreFlag))
+	_ = viper.BindEnv(grpcTargetEnvelopeStoreViperKey, grpcTargetEnvelopeStoreEnv)
 }
 
 // DialContext Create a new connection
 func DialContext(ctx context.Context) (*grpc.ClientConn, error) {
-	return grpc.DialContext(ctx, viper.GetString(storeTargetViperKey))
+	return grpc.DialContext(ctx, viper.GetString(grpcTargetEnvelopeStoreViperKey))
 }
