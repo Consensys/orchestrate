@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.6.3
+
+*Released on July 10th 2019*
+
+- [FEAT] Update opentracing handler
+- [TEST] update tests for opentracing
+
 ### Version 0.6.2
 
 *Released on July 5th 2019*
