@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.6.5
+
+*Released on July 10th 2019*
+
+- [FEAT] Add max elapsed time configuration option for ethclient calls & increase default values
+
 ### Version 0.6.4
 
 *Released on July 5th 2019*
