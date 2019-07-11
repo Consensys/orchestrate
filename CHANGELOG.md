@@ -1,11 +1,26 @@
 # CHANGELOG
 
-### Version 0.6.2
+### Version 0.6.4
 
 *Unreleased*
 
 - [FEAT] Error management
 
+### Version 0.6.3
+
+*Released on July 10th 2019*
+
+- [FEAT] Update opentracing handler
+- [TEST] update tests for opentracing
+
+### Version 0.6.2
+
+*Released on July 5th 2019*
+
+- [FEAT] Generate proto stub with Docker
+- [FEAT] Add protocol type
+- [FEAT] Update CI with retry
+  
 ### Version 0.6.1
 
 *Released on June 20th 2019*

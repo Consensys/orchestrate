@@ -6,26 +6,23 @@ import (
 )
 
 var (
-	component        = "types.chain"
-	pantheonProtocol = "pantheon"
-	quorumProtocol   = "quorum"
-	tesseraVersion   = semver.MustParse("2.2.0")
+	tesseraVersion = semver.MustParse("2.2.0")
 )
 
 // IsPantheon indicates wether if protocol is Pantheon
 func (p *Protocol) IsPantheon() bool {
-	return p.Name == pantheonProtocol
+	return p.GetType() == ProtocolType_PANTHEON
 }
 
 // IsQuorum indicates wether if protocol is Quorum
 func (p *Protocol) IsQuorum() bool {
-	return p.Name == quorumProtocol
+	return p.GetType() == ProtocolType_QUORUM
 }
 
 func (p *Protocol) Version() (*semver.Version, error) {
 	ver, err := semver.Make(p.Tag)
 	if err != nil {
-		return nil, errors.InvalidFormatError("invalid semver %q (%v)", p.Tag, err).SetComponent(component)
+		return nil, errors.InvalidFormatError("invalid semver %q (%v)", p.Tag, err)
 	}
 	return &ver, nil
 }

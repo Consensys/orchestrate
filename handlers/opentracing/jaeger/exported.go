@@ -2,6 +2,7 @@ package jaeger
 
 import (
 	"context"
+	"reflect"
 	"sync"
 
 	"github.com/opentracing/opentracing-go"
@@ -26,7 +27,11 @@ func Init(ctx context.Context) {
 			log.WithError(err).Fatal("open-tracing: could initialize jaeger tracer")
 		}
 
-		log.Infof("jager: agent ready for open-tracing (connected with tracer: %v)", tracer)
+		// Log tracer identifying values
+		log.WithFields(log.Fields{
+			"service.name": reflect.ValueOf(tracer).Elem().FieldByName("serviceName"),
+			"service.tags": reflect.ValueOf(tracer).Elem().FieldByName("tags"),
+		}).Infof("jaeger: tracer agent ready")
 
 		// Set Open tracing global tracer
 		opentracing.SetGlobalTracer(tracer)

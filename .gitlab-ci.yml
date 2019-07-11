@@ -6,6 +6,8 @@ stages:
 
 variables:
   GOPATH: ${CI_PROJECT_DIR}/.gocache
+  ARTIFACT_DOWNLOAD_ATTEMPTS: 5
+  RESTORE_CACHE_ATTEMPTS: 5
 #  CI_DEBUG_TRACE: "true"
 
 services:
@@ -46,12 +48,12 @@ test:
   except:
       - tags
 
-test-lint:
+lint:
   image: golang:1.12
   stage: test
   script:
     - make race
-    - make lint-ci
+    - make lint
   cache:
     policy: pull
     paths:

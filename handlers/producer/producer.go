@@ -1,6 +1,8 @@
 package producer
 
 import (
+	"fmt"
+
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
@@ -45,7 +47,20 @@ func MultiProducer(p sarama.SyncProducer, prepareMsg PrepareMsg) engine.HandlerF
 	return func(txctx *engine.TxContext) {
 		txctx.Next()
 
-		envelopes := txctx.Get("envelopes").([]*envelope.Envelope)
+		// Pass through the handler if no envelopes to send
+		if txctx.Get("envelopes") == nil {
+			return
+		}
+
+		// Test if able to cast txctx into []*envelope.Envelope
+		envelopes, ok := txctx.Get("envelopes").([]*envelope.Envelope)
+		if !ok {
+			err := fmt.Errorf("not able to cast envelopes %q", envelopes)
+			_ = txctx.AbortWithError(err)
+			txctx.Logger.WithError(err).Errorf("multiProducer: could not produce messages")
+			return
+		}
+
 		for _, e := range envelopes {
 			// Prepare Message
 			subTxctx := &engine.TxContext{

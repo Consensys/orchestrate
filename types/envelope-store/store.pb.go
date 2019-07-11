@@ -6,14 +6,13 @@ package envelope_store
 import (
 	context "context"
 	fmt "fmt"
+	math "math"
+
 	proto "github.com/golang/protobuf/proto"
 	timestamp "github.com/golang/protobuf/ptypes/timestamp"
 	envelope "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	error1 "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
 	grpc "google.golang.org/grpc"
-	codes "google.golang.org/grpc/codes"
-	status "google.golang.org/grpc/status"
-	math "math"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -510,29 +509,6 @@ type StoreServer interface {
 	SetStatus(context.Context, *SetStatusRequest) (*error1.Error, error)
 	// LoadPending load envelopes of pending transactions
 	LoadPending(context.Context, *LoadPendingRequest) (*LoadPendingResponse, error)
-}
-
-// UnimplementedStoreServer can be embedded to have forward compatible implementations.
-type UnimplementedStoreServer struct {
-}
-
-func (*UnimplementedStoreServer) Store(ctx context.Context, req *StoreRequest) (*StoreResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Store not implemented")
-}
-func (*UnimplementedStoreServer) LoadByTxHash(ctx context.Context, req *TxHashRequest) (*StoreResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LoadByTxHash not implemented")
-}
-func (*UnimplementedStoreServer) LoadByID(ctx context.Context, req *IDRequest) (*StoreResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LoadByID not implemented")
-}
-func (*UnimplementedStoreServer) GetStatus(ctx context.Context, req *IDRequest) (*StoreResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetStatus not implemented")
-}
-func (*UnimplementedStoreServer) SetStatus(ctx context.Context, req *SetStatusRequest) (*error1.Error, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetStatus not implemented")
-}
-func (*UnimplementedStoreServer) LoadPending(ctx context.Context, req *LoadPendingRequest) (*LoadPendingResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LoadPending not implemented")
 }
 
 func RegisterStoreServer(s *grpc.Server, srv StoreServer) {

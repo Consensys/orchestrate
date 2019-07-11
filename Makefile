@@ -9,9 +9,6 @@ ifeq ($(UNAME_S),Darwin)
 	OPEN = open
 endif
 
-
-GRPC_GATEWAY=github.com/grpc-ecosystem/grpc-gateway
-
 .PHONY: all run-coverage coverage fmt fmt-check vet lint misspell-check misspell race tools help
 
 # Linters
@@ -35,12 +32,7 @@ lint:
 	@misspell -error $(GOFILES)
 	@golangci-lint run
 
-lint-ci:
-	@misspell -error $(GOFILES)
-	@GOGC=20 golangci-lint -v run
-
 tidy: mod-tidy lint-fix protobuf
-
 
 # Tools
 tools: ## Install test tools
@@ -50,14 +42,5 @@ tools: ## Install test tools
 help: ## Display this help screen
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-setup-proto: ## Install protobuf utilities
-    # Install protoc-gen-go
-	@GO111MODULE=off go get -u github.com/golang/protobuf/protoc-gen-go
-
-	@GO111MODULE=off go get -u github.com/stevvooe/protobuild
-	@GO111MODULE=off go get -d $(GRPC_GATEWAY)/...
-	@cd $(GOPATH)/src/$(GRPC_GATEWAY)/protoc-gen-grpc-gateway && go install
-	@cd $(GOPATH)/src/$(GRPC_GATEWAY)/protoc-gen-swagger && go install
-
 protobuf: ## Generate protobuf stubs
-	@sh scripts/generate-proto.sh
+	@docker-compose -f scripts/docker-compose.yml up
