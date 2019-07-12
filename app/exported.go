@@ -13,6 +13,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/loader"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/logger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/offset"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing"
 	server "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http/healthcheck"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-crafter.git/handlers"
@@ -68,6 +69,7 @@ func initConsumerGroup(ctx context.Context) {
 	engine.Register(loader.Loader)
 	engine.Register(offset.Marker)
 	engine.Register(producer.GlobalHandler())
+	engine.Register(opentracing.GlobalHandler())
 
 	// Specific handlers tk Tx-Crafter worker
 	engine.Register(faucet.GlobalHandler())
