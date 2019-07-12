@@ -1,11 +1,18 @@
 # CHANGELOG
 
+### Version 0.5.3
+
+*Unreleased*
+
+- [FEAT] Update `ethereum` to v0.6.5 for crafting Array and Slices
+- [FEAT] Add opentracing handler
+
 ### Version 0.5.2
 
 *Released on July 5nd 2019*
 
 - [FEAT] Update `ethereum` to v0.6.3 for crafting Array and Slices
-- 
+  
 ### Version 0.5.1
 
 *Released on July 2nd 2019*
