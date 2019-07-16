@@ -6,13 +6,12 @@ package envelope_store
 import (
 	context "context"
 	fmt "fmt"
-	math "math"
-
 	proto "github.com/golang/protobuf/proto"
 	timestamp "github.com/golang/protobuf/ptypes/timestamp"
 	envelope "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	error1 "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
 	grpc "google.golang.org/grpc"
+	math "math"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

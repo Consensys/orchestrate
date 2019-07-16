@@ -9,17 +9,14 @@ message Protocol {
     // Type of a protocol that should be used
     ProtocolType type = 1;
 
-    // Version tag of the protocol
-    string tag = 2;
-
     // Extra information (optional)
     map<string, string> extra = 3;
 }
 
 enum ProtocolType {
-    UNKNOWN = 0;
-    GETH = 1;
-    QUORUM = 2;
-    PANTHEON = 3;
+    ETHEREUM_CONSTANTINOPLE = 0;
+    QUORUM_CONSTELLATION = 1;
+    QUORUM_TESSERA = 2;
+    PANTHEON_ORION = 3;
 }
 
