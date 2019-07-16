@@ -17,6 +17,7 @@ const (
 	HTTPConnection         = Connection + 2<<8 // HTTP Connection error (subclass 082XX)
 	EthConnection          = Connection + 3<<8 // Ethereum Connection error (subclass 083XX)
 	GRPCConnection         = Connection + 4<<8 // GRPC Connection error (subclass 084XX)
+	RedisConnection        = Connection + 5<<8 // Redis Connection error (subclass 085XX)
 
 	// Authentication Errors (class 09XXX)
 	InvalidAuthentication uint64 = 9 << 12
@@ -42,6 +43,7 @@ const (
 	InvalidTopicsCount        = Solidity + 4 // Invalid count of topics in receipt (code 42204)
 	InvalidLog                = Solidity + 5 // Invalid event log (code 42205)
 	InvalidFormat             = Data + 3<<8  // Invalid format (subclass 423XX)
+	InvalidParameter          = Data + 4<<8  // Invalid parameter provided (subclass 424XX)
 
 	// Insuficient resources (class 53XXX)
 	InsufficientResources uint64 = 5<<16 + 3<<12
@@ -51,10 +53,14 @@ const (
 	Canceled                    = OperatorIntervention + 1
 	DeadlineExceeded            = OperatorIntervention + 2
 
+	// Cryptographic operation error (class C0XXX)
+	CryptoOperation uint64 = 12 << 16
+
 	// Storage Error (class DBXXX)
 	Storage            uint64 = 13<<16 + 11<<12
-	ConstraintViolated        = Storage + 1<<8 // Storage constraint violated (subclass DB1XX)
-	NotFound                  = Storage + 2<<8 // Not found (subclass DB2XX)
+	ConstraintViolated        = Storage + 1<<8         // Storage constraint violated (subclass DB1XX)
+	AlreadyExists             = ConstraintViolated + 1 // A resource with same index already exists (code DB101)
+	NotFound                  = Storage + 2<<8         // Not found (subclass DB2XX)
 
 	// Configuration errors (class F0XXX)
 	Config uint64 = 15 << 16
@@ -117,6 +123,11 @@ func EthConnectionError(format string, a ...interface{}) *ierror.Error {
 // GRPCConnectionError is raised when failing to connect to a GRPC server
 func GRPCConnectionError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(GRPCConnection, format, a...)
+}
+
+// RedisConnectionError is raised when failing to connect to Redis
+func RedisConnectionError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(RedisConnection, format, a...)
 }
 
 // InvalidAuthenticationError is raised when access to an operation has been denied
@@ -245,6 +256,16 @@ func InvalidFormatError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(InvalidFormat, format, a...)
 }
 
+// InvalidParameterError is raised when a provided parameter invalid
+func InvalidParameterError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(InvalidParameter, format, a...)
+}
+
+// IsInvalidParameterError indicate whether an error is an invalid parameter error
+func IsInvalidParameterError(err error) bool {
+	return isErrorClass(FromError(err).GetCode(), InvalidParameter)
+}
+
 // InsuficientResourcesError is raised when a system can not handle more operations
 func InsuficientResourcesError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(InsufficientResources, format, a...)
@@ -275,6 +296,16 @@ func DeadlineExceededError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(DeadlineExceeded, format, a...)
 }
 
+// CryptoOperationError is raised when failing a cryptographic operation
+func CryptoOperationError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(CryptoOperation, format, a...)
+}
+
+// IsCryptoOperationError indicate whether an error is a cryptographic operation error
+func IsCryptoOperationError(err error) bool {
+	return isErrorClass(FromError(err).GetCode(), CryptoOperation)
+}
+
 // StorageError is raised when an error is encountered while accessing stored Data
 func StorageError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(Storage, format, a...)
@@ -293,6 +324,11 @@ func ConstraintViolatedError(format string, a ...interface{}) *ierror.Error {
 // IsConstraintViolatedError indicate whether an error is a constraint violated error
 func IsConstraintViolatedError(err error) bool {
 	return isErrorClass(FromError(err).GetCode(), ConstraintViolated)
+}
+
+// AlreadyExistsError is raised when a Data constraint has been violated
+func AlreadyExistsError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(AlreadyExists, format, a...)
 }
 
 // NoDataFoundError is raised when accessing a missing Data

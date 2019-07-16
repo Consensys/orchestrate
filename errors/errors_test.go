@@ -54,6 +54,20 @@ func TestEthConnectionError(t *testing.T) {
 	assert.Equal(t, "08300", e.Hex(), "EthConnectionError Hex reprensation should be correct")
 }
 
+func TestGRPCConnectionError(t *testing.T) {
+	e := GRPCConnectionError("test")
+	assert.Equal(t, uint64(33792), e.GetCode(), "GRPCConnectionError code should be correct")
+	assert.True(t, IsConnectionError(e), "GRPCConnectionError should be a connection error")
+	assert.Equal(t, "08400", e.Hex(), "GRPCConnectionError Hex reprensation should be correct")
+}
+
+func TestRedisConnectionError(t *testing.T) {
+	e := RedisConnectionError("test")
+	assert.Equal(t, uint64(34048), e.GetCode(), "RedisConnectionError code should be correct")
+	assert.True(t, IsConnectionError(e), "RedisConnectionError should be a connection error")
+	assert.Equal(t, "08500", e.Hex(), "RedisConnectionError Hex reprensation should be correct")
+}
+
 func TestInvalidAuthenticationError(t *testing.T) {
 	e := InvalidAuthenticationError("test")
 	assert.Equal(t, uint64(36864), e.GetCode(), "InvalidAuthenticationError code should be correct")
@@ -179,6 +193,14 @@ func TestInvalidFormatError(t *testing.T) {
 	assert.Equal(t, "42300", e.Hex(), "Hex reprensation should be correct")
 }
 
+func TestInvalidParameterError(t *testing.T) {
+	e := InvalidParameterError("test")
+	assert.Equal(t, uint64(271360), e.GetCode(), "InvalidParameterError code should be correct")
+	assert.True(t, IsDataError(e), "InvalidParameterError should be a data error")
+	assert.True(t, IsInvalidParameterError(e), "InvalidParameterError should be a InvalidParameterError")
+	assert.Equal(t, "42400", e.Hex(), "Hex reprensation should be correct")
+}
+
 func TestInsuficientResourcesError(t *testing.T) {
 	e := InsuficientResourcesError("test")
 	assert.Equal(t, uint64(339968), e.GetCode(), "InsuficientResourcesError code should be correct")
@@ -205,6 +227,13 @@ func TestDeadlineExceededError(t *testing.T) {
 	assert.Equal(t, "57002", e.Hex(), "Hex reprensation should be correct")
 }
 
+func TestCryptoOperationError(t *testing.T) {
+	e := CryptoOperationError("test")
+	assert.Equal(t, uint64(786432), e.GetCode(), "CryptoOperationError code should be correct")
+	assert.True(t, IsCryptoOperationError(e), "CryptoOperationError should be a CryptoOperationError")
+	assert.Equal(t, "C0000", e.Hex(), "Hex reprensation should be correct")
+}
+
 func TestStorageError(t *testing.T) {
 	e := StorageError("test")
 	assert.Equal(t, uint64(897024), e.GetCode(), "StorageError code should be correct")
@@ -214,8 +243,16 @@ func TestStorageError(t *testing.T) {
 func TestConstraintViolatedError(t *testing.T) {
 	e := ConstraintViolatedError("test")
 	assert.Equal(t, uint64(897280), e.GetCode(), "ConstraintViolatedError code should be correct")
-	assert.True(t, IsStorageError(e), "ConstraintViolatedError should be a data error")
+	assert.True(t, IsStorageError(e), "ConstraintViolatedError should be a StorageError")
 	assert.Equal(t, "DB100", e.Hex(), "Hex reprensation should be correct")
+}
+
+func TestAlreadyExistsError(t *testing.T) {
+	e := AlreadyExistsError("test")
+	assert.Equal(t, uint64(897281), e.GetCode(), "AlreadyExistsError code should be correct")
+	assert.True(t, IsStorageError(e), "AlreadyExistsError should be StorageError")
+	assert.True(t, IsConstraintViolatedError(e), "AlreadyExistsError should be a ConstraintViolatedError")
+	assert.Equal(t, "DB101", e.Hex(), "Hex reprensation should be correct")
 }
 
 func TestNotFoundError(t *testing.T) {

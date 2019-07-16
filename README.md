@@ -514,6 +514,8 @@ Error codes are `uint64` that maps to five hex character code
 | 08XXX |   081XX  |    08100   | kafka_connection_exception    | Failed connecting to Kafka                 |
 | 08XXX |   082XX  |    08200   | http_connection_exception     | Failed connecting to an HTTP service       |
 | 08XXX |   083XX  |    08300   | ethereum_connection_exception | Failed connecting to Ethereum jsonRPC API  |
+| 08XXX |   084XX  |    08400   | grpc_connection_exception     | Failed connecting to a GRPC API            |
+| 08XXX |   085XX  |    08500   | redis_connection_exception    | Failed connecting to Redis                 |
 | 09XXX |          |    09000   | authentication_exception      | Unauthorized                               |
 | 09XXX |          |    09001   | unauthenticated               | Invalid credentials                        |
 | 09XXX |          |    09002   | permission_denied             | Operation not permitted                    |
@@ -531,11 +533,14 @@ Error codes are `uint64` that maps to five hex character code
 | 42XXX |   422XX  |    42204   | invalid_topics_count          | Invalid topics count in event log          |
 | 42XXX |   422XX  |    42205   | invalid_event_data            | Invalid data in event log                  |
 | 42XXX |   423XX  |    42300   | invalid_format                | Data does not match expected format        |
+| 42XXX |   424XX  |    42400   | invalid_parameter             | Invalid parameter provided                 |
 | 53XXX |          |    53000   | insuficient_resources         | System can not handle more operations      |
 | 57XXX |          |    57000   | operator_intervention         | Operator interfered with operation         |
 | 57XXX |          |    57001   | operation_canceled            | Operation canceled (typically by caller)   |
+| C0XXX |          |    C0000   | crypto_operation_exception    | Failed a cryptographical operation         |
 | DBXXX |          |    DB000   | storage_exception             | Failed accessing stored data               |
 | DBXXX |   DB1XX  |    DB100   | constraint_violated           | Data constraint violated                   |
+| DBXXX |   DB1XX  |    DB101   | already_exists                | Resource with same index already existed   |
 | DBXXX |   DB2XX  |    DB200   | not_found                     | No data found for given parameters         |
 | F0XXX |          |    F0000   | invalid_config                | Invalid configuration                      |
 | FFXXX |          |    FF000   | internal_error                | Internal error                             |
