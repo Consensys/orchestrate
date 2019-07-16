@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.7.0
+
+*Released on July 16th 2019*
+
+- [FEAT] Error management
+- [FIX] Replaces protocol name field in the `Envelop` message with an enum
+
 ### Version 0.6.4
 
 *Unreleased*
