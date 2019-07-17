@@ -4,7 +4,7 @@
 
 *Unreleased*
 
-- [FEAT] Update `ethereum` to v0.6.5 for crafting Array and Slices
+- [FEAT] Update `ethereum` to v0.6.5
 - [FEAT] Add opentracing handler
 
 ### Version 0.5.2
