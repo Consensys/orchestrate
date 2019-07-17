@@ -52,7 +52,7 @@ go run e2e/consumer/main.go
 3. Run worker
 
 ```bash
-go run . run  --eth-client HTTP://127.0.0.1:8545 --jaeger-service TX-CRAFTER
+go run . run  --eth-client http://localhost:8545 --jaeger-service TX-CRAFTER
 ```
 
 4. Run producer that will write messages 

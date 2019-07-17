@@ -4,7 +4,8 @@
 
 *Unreleased*
 
-- [FEAT] Update `ethereum` to v0.6.5
+- [FEAT] Update `ethereum` to v0.6.6
+- [FEAT] Update `pkg` to v0.7.0
 - [FEAT] Add opentracing handler
 
 ### Version 0.5.2
