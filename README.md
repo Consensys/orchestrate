@@ -22,7 +22,7 @@ It consumes messages from *tx crafting* Kafka topic and publishs to *tx nonce* t
 
 To quickly start the application
 
-1. Start Kafka broker
+1. Start Kafka broker, ganache and jaeger
 
 ```sh
 $ docker-compose -f e2e/docker-compose.yml up
@@ -52,7 +52,7 @@ go run e2e/consumer/main.go
 3. Run worker
 
 ```bash
-go run . run  --eth-client HTTP://127.0.0.1:8545
+go run . run  --eth-client HTTP://127.0.0.1:8545 --jaeger-service TX-CRAFTER
 ```
 
 4. Run producer that will write messages 
