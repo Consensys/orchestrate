@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	backoff "github.com/cenkalti/backoff"
+	"github.com/cenkalti/backoff"
 	eth "github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/rpc"
 	log "github.com/sirupsen/logrus"

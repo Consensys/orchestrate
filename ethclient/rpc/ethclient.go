@@ -1,14 +1,9 @@
 package rpc
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-
-	"github.com/ethereum/go-ethereum/rlp"
-
 	"math/big"
 	"sync"
 
@@ -21,8 +16,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/rpc/geth"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
 )
-
-var nilHash = ethcommon.HexToHash("0x00")
 
 // Client is a connector to Ethereum blockchains that uses Geth rpc client
 type Client struct {
@@ -474,40 +467,26 @@ func (ec *Client) SendTransaction(ctx context.Context, chainID *big.Int, args *t
 	return txHash, nil
 }
 
-func (ec *Client) SendQuorumRawPrivateTransaction(ctx context.Context, chainID *big.Int, signedTxHash []byte, args *types.PrivateArgs) (ethcommon.Hash, error) {
+func (ec *Client) SendQuorumRawPrivateTransaction(ctx context.Context, chainID *big.Int, signedTxHash []byte, privateFor []string) (ethcommon.Hash, error) {
 	c := ec.getRPC(chainID)
 
 	rawTxHashHex := hexutil.Encode(signedTxHash)
+	privateForParam := map[string]interface{}{
+		"privateFor": privateFor,
+	}
 	var hash string
-	err := c.CallContext(ctx, &hash, "eth_sendRawPrivateTransaction", rawTxHashHex, args.PrivateFor)
+	err := c.CallContext(ctx, &hash, "eth_sendRawPrivateTransaction", rawTxHashHex, privateForParam)
 	return ethcommon.HexToHash(hash), err
 }
 
-// SendRawPrivateTransaction send a raw transaction to a Ethereum node supporting privacy (e.g Quorum+Tessera node)
+// SendRawPrivateTransaction send a raw transaction to an Ethereum node supporting EEA extension
 func (ec *Client) SendRawPrivateTransaction(ctx context.Context, chainID *big.Int, raw []byte, args *types.PrivateArgs) (ethcommon.Hash, error) {
 	c := ec.getRPC(chainID)
 
-	var buf bytes.Buffer
-	buf.Write(raw)
-	err := rlpEncode(&buf, args.PrivateFrom, args.PrivateFor, args.PrivateTxType)
-	if err != nil {
-		return nilHash, err
-	}
-
-	rawTx := hexutil.Encode(buf.Bytes())
 	var hash string
-	err = c.CallContext(ctx, &hash, "eea_sendRawTransaction", rawTx)
+	// Send a raw signed transactions using EEA extension method
+	// Method documentation here: https://docs.pantheon.pegasys.tech/en/latest/Reference/Pantheon-API-Methods/#eea_sendrawtransaction
+	err := c.CallContext(ctx, &hash, "eea_sendRawTransaction", hexutil.Encode(raw))
 
 	return ethcommon.HexToHash(hash), err
-}
-
-func rlpEncode(buf io.Writer, args ...interface{}) error {
-	for pos, arg := range args {
-		err := rlp.Encode(buf, arg)
-		if err != nil {
-			return fmt.Errorf("failed to encode argument number %d: %s", pos, err.Error())
-		}
-	}
-
-	return nil
 }

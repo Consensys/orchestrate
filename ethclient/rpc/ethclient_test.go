@@ -26,6 +26,10 @@ var privateArgs = &types.PrivateArgs{
 	PrivateTxType: "abc",
 }
 
+var expectedPrivateForArg = map[string]interface{}{
+	"privateFor": privateArgs.PrivateFor,
+}
+
 var ctx, _ = context.WithCancel(context.Background())
 var gethClient *Client
 var ctrl *gomock.Controller
@@ -44,12 +48,12 @@ func TestQuorumRawPrivateTransaction(t *testing.T) {
 	setMockClient(mockRPCClient)
 	mockRPCClient.
 		EXPECT().
-		CallContext(ctx, gomock.Any(), "eth_sendRawPrivateTransaction", "0x010203", []string{"0x02"}).
+		CallContext(ctx, gomock.Any(), "eth_sendRawPrivateTransaction", "0x010203", expectedPrivateForArg).
 		Return(nil).
 		SetArg(1, "0x1234").
 		Times(1)
 
-	hash, err := gethClient.SendQuorumRawPrivateTransaction(ctx, chainIDBigInt, []byte{1, 2, 3}, privateArgs)
+	hash, err := gethClient.SendQuorumRawPrivateTransaction(ctx, chainIDBigInt, []byte{1, 2, 3}, privateArgs.PrivateFor)
 	assert.NoError(t, err)
 	assert.Equal(t, ethcommon.HexToHash("0x1234"), hash)
 }
@@ -61,11 +65,11 @@ func TestQuorumRawPrivateTransactionWhenRPCCallFails(t *testing.T) {
 	setMockClient(mockRPCClient)
 	mockRPCClient.
 		EXPECT().
-		CallContext(ctx, gomock.Any(), "eth_sendRawPrivateTransaction", "0x010203", []string{"0x02"}).
+		CallContext(ctx, gomock.Any(), "eth_sendRawPrivateTransaction", "0x010203", expectedPrivateForArg).
 		Return(errTest).
 		Times(1)
 
-	hash, err := gethClient.SendQuorumRawPrivateTransaction(ctx, chainIDBigInt, []byte{1, 2, 3}, privateArgs)
+	hash, err := gethClient.SendQuorumRawPrivateTransaction(ctx, chainIDBigInt, []byte{1, 2, 3}, privateArgs.PrivateFor)
 	assert.Error(t, err, errTest.Error())
 	assert.Equal(t, ethcommon.HexToHash("0x0"), hash)
 }
@@ -77,7 +81,7 @@ func TestSendRawPrivateTransaction(t *testing.T) {
 	setMockClient(mockRPCClient)
 	mockRPCClient.
 		EXPECT().
-		CallContext(ctx, gomock.Any(), "eea_sendRawTransaction", "0x0102038430783031c5843078303283616263").
+		CallContext(ctx, gomock.Any(), "eea_sendRawTransaction", "0x010203").
 		Return(nil).
 		SetArg(1, "0x1234").
 		Times(1)
@@ -94,7 +98,7 @@ func TestSendRawPrivateTransactionWhenRPCCallFails(t *testing.T) {
 	setMockClient(mockRPCClient)
 	mockRPCClient.
 		EXPECT().
-		CallContext(ctx, gomock.Any(), "eea_sendRawTransaction", "0x0102038430783031c5843078303283616263").
+		CallContext(ctx, gomock.Any(), "eea_sendRawTransaction", "0x010203").
 		Return(errTest).
 		Times(1)
 

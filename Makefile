@@ -36,7 +36,11 @@ lint:
 tidy: mod-tidy lint-fix
 
 generate-mocks:
-	mockgen -destination=mocks/mock_client.go -package=mocks gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/rpc Client
+	mockgen -destination=mocks/mock_client.go -package=mocks \
+	gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/rpc Client
+
+	mockgen -destination=mocks/mock_enclave_endpoint.go -package=mocks \
+	gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tessera EnclaveEndpoint
 
 # Tools
 tools: ## Install test tools
