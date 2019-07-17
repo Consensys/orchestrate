@@ -8,8 +8,7 @@ require (
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.3.0
-	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.6.1
-	gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.6.0
+	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.7.0
+	gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.6.6
 	gitlab.com/ConsenSys/client/fr/core-stack/service/nonce.git v0.1.3
-	golang.org/x/sync v0.0.0-20190423024810-112230192c58 // indirect
 )
