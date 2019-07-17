@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.6.6
+
+*Released on July 17th 2019*
+
+- [FIX] Update RPC client to allow to send private transactions using Tessera/Orion
+
 ### Version 0.6.5
 
 *Released on July 10th 2019*
