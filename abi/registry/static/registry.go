@@ -2,59 +2,59 @@ package static
 
 import (
 	"context"
-	"fmt"
 	"reflect"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
-
-	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
-	ethCommon "github.com/ethereum/go-ethereum/common"
+	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
 )
 
 // Registry stores contract ABI and bytecode in memory
 type Registry struct {
-	ethClient ethclient.ChainStateReader
+	ec ethclient.ChainStateReader
 	// Contract registry/name#tag to bytecode hash
-	contractHash map[string]ethCommon.Hash
+	contractHashes map[string]ethcommon.Hash
+
 	// Bytecode hash to ABI, bytecode and deployed bytecode
-	contracts map[ethCommon.Hash]*abi.Contract
+	contracts map[ethcommon.Hash]*abi.Contract
 
 	// Address to Codehash (deployed bytecode hash) map
-	addressCodehash map[string]map[ethCommon.Address]ethCommon.Hash
+	codehashes map[string]map[ethcommon.Address]ethcommon.Hash
 
 	// Codehash to Selector to method ABIs
-	methods map[ethCommon.Hash]map[[4]byte][]*ethAbi.Method
+	methods map[ethcommon.Hash]map[[4]byte][]*ethabi.Method
 
 	// Codehash to SigHash to event ABIs
-	events map[ethCommon.Hash]map[ethCommon.Hash]map[uint][]*ethAbi.Event
+	events map[ethcommon.Hash]map[ethcommon.Hash]map[uint][]*ethabi.Event
 }
 
-var defaultCodehash = ethCommon.Hash{}
+var defaultCodehash = ethcommon.Hash{}
 
-// NewRegistry creates a New Registry
+// NewRegistry creates a Registry
 func NewRegistry(client ethclient.ChainStateReader) *Registry {
 	r := &Registry{
-		ethClient:       client,
-		contractHash:    make(map[string]ethCommon.Hash),
-		contracts:       make(map[ethCommon.Hash]*abi.Contract),
-		addressCodehash: make(map[string]map[ethCommon.Address]ethCommon.Hash),
-		methods:         make(map[ethCommon.Hash]map[[4]byte][]*ethAbi.Method),
-		events:          make(map[ethCommon.Hash]map[ethCommon.Hash]map[uint][]*ethAbi.Event),
+		ec:             client,
+		contractHashes: make(map[string]ethcommon.Hash),
+		contracts:      make(map[ethcommon.Hash]*abi.Contract),
+		codehashes:     make(map[string]map[ethcommon.Address]ethcommon.Hash),
+		methods:        make(map[ethcommon.Hash]map[[4]byte][]*ethabi.Method),
+		events:         make(map[ethcommon.Hash]map[ethcommon.Hash]map[uint][]*ethabi.Event),
 	}
-	r.methods[defaultCodehash] = make(map[[4]byte][]*ethAbi.Method)
-	r.events[defaultCodehash] = make(map[ethCommon.Hash]map[uint][]*ethAbi.Event)
+	r.methods[defaultCodehash] = make(map[[4]byte][]*ethabi.Method)
+	r.events[defaultCodehash] = make(map[ethcommon.Hash]map[uint][]*ethabi.Event)
 	return r
 }
 
-// RegisterContract allow to add a contract and its corresponding ABI to the registry
+// RegisterContract register a contract including ABI, bytecode and deployed bytecode
 func (r *Registry) RegisterContract(contract *abi.Contract) error {
 	if contract.Bytecode != nil {
 		bytecodeHash := crypto.Keccak256Hash(contract.Bytecode)
-		r.contractHash[contract.Short()] = bytecodeHash
+		r.contractHashes[contract.Short()] = bytecodeHash
 
 		r.contracts[bytecodeHash] = &abi.Contract{
 			Abi:              contract.Abi,
@@ -66,7 +66,7 @@ func (r *Registry) RegisterContract(contract *abi.Contract) error {
 	codeHash := crypto.Keccak256Hash(contract.DeployedBytecode)
 	contractAbi, err := contract.ToABI()
 	if err != nil {
-		return fmt.Errorf("registry: could not register contract, wrong ABI format %v", err)
+		return errors.FromError(err).ExtendComponent(component)
 	}
 
 	for _, method := range contractAbi.Methods {
@@ -75,10 +75,10 @@ func (r *Registry) RegisterContract(contract *abi.Contract) error {
 		if contract.DeployedBytecode != nil {
 			// Init map
 			if r.methods[codeHash] == nil {
-				r.methods[codeHash] = make(map[[4]byte][]*ethAbi.Method)
+				r.methods[codeHash] = make(map[[4]byte][]*ethabi.Method)
 			}
 
-			r.methods[codeHash][id] = []*ethAbi.Method{&method}
+			r.methods[codeHash][id] = []*ethabi.Method{&method}
 		}
 
 		// Register in default methods if not present
@@ -99,19 +99,19 @@ func (r *Registry) RegisterContract(contract *abi.Contract) error {
 		if contract.DeployedBytecode != nil {
 			// Init map
 			if r.events[codeHash] == nil {
-				r.events[codeHash] = make(map[ethCommon.Hash]map[uint][]*ethAbi.Event)
+				r.events[codeHash] = make(map[ethcommon.Hash]map[uint][]*ethabi.Event)
 			}
 			// Init map
 			if r.events[codeHash][event.Id()] == nil {
-				r.events[codeHash][event.Id()] = make(map[uint][]*ethAbi.Event)
+				r.events[codeHash][event.Id()] = make(map[uint][]*ethabi.Event)
 			}
 
-			r.events[codeHash][event.Id()][indexedCount] = []*ethAbi.Event{&event}
+			r.events[codeHash][event.Id()][indexedCount] = []*ethabi.Event{&event}
 		}
 
 		// Init map
 		if r.events[defaultCodehash][event.Id()] == nil {
-			r.events[defaultCodehash][event.Id()] = make(map[uint][]*ethAbi.Event)
+			r.events[defaultCodehash][event.Id()] = make(map[uint][]*ethabi.Event)
 		}
 		// Register in default events if not present
 		found := false
@@ -131,38 +131,40 @@ func (r *Registry) RegisterContract(contract *abi.Contract) error {
 	return nil
 }
 
-// Retrieve contract ABI
+func (r *Registry) getContract(c *abi.Contract) (contract *abi.Contract, ok bool) {
+	contract, ok = r.contracts[r.contractHashes[c.Short()]]
+	return
+}
+
+// GetContractABI loads contract ABI
 func (r *Registry) GetContractABI(contract *abi.Contract) ([]byte, error) {
-	bytecodeHash := r.contractHash[contract.Short()]
-	c, ok := r.contracts[bytecodeHash]
+	c, ok := r.getContract(contract)
 	if !ok {
-		return nil, fmt.Errorf("registry: could not find contract")
+		return nil, errors.NotFoundError("contract ABI not found").SetComponent(component)
 	}
 	return c.Abi, nil
 }
 
-// Returns the bytecode
+// GetContractBytecode loads contract bytecode
 func (r *Registry) GetContractBytecode(contract *abi.Contract) ([]byte, error) {
-	bytecodeHash := r.contractHash[contract.Short()]
-	c, ok := r.contracts[bytecodeHash]
+	c, ok := r.getContract(contract)
 	if !ok {
-		return nil, fmt.Errorf("registry: could not find contract")
+		return nil, errors.NotFoundError("contract bytecode not found").SetComponent(component)
 	}
 	return c.Bytecode, nil
 }
 
-// Returns the deployed bytecode
+// GetContractDeployedBytecode loads contract deployed bytecode
 func (r *Registry) GetContractDeployedBytecode(contract *abi.Contract) ([]byte, error) {
-	bytecodeHash := r.contractHash[contract.Short()]
-	c, ok := r.contracts[bytecodeHash]
+	c, ok := r.getContract(contract)
 	if !ok {
-		return nil, fmt.Errorf("registry: could not find contract")
+		return nil, errors.NotFoundError("contract deployed bytecode not found").SetComponent(component)
 	}
 	return c.DeployedBytecode, nil
 }
 
 // getIndexedCount returns the count of indexed inputs in the event
-func getIndexedCount(event ethAbi.Event) uint {
+func getIndexedCount(event ethabi.Event) uint {
 	var indexedInputCount uint
 	for i := range event.Inputs {
 		if event.Inputs[i].Indexed {
@@ -172,28 +174,31 @@ func getIndexedCount(event ethAbi.Event) uint {
 	return indexedInputCount
 }
 
-// Get the codehash of a contract instance
-func (r *Registry) getCodehash(contract common.AccountInstance) (ethCommon.Hash, error) {
-	codehashToAddressMap, ok := r.addressCodehash[contract.GetChain().ID().String()]
-	if !ok {
-		return ethCommon.Hash{}, fmt.Errorf("registry: could not find contract: bad chainid")
+// getCodehash retrieve codehash of a contract instance
+func (r *Registry) getCodehash(contract common.AccountInstance) (ethcommon.Hash, error) {
+	codehashes, ok := r.codehashes[contract.GetChain().ID().String()]
+	if ok {
+		codehash, ok := codehashes[contract.GetAccount().Address()]
+		if ok {
+			return codehash, nil
+		}
 	}
-	address := contract.GetAccount().Address()
-	codehash, ok := codehashToAddressMap[address]
-	if !ok {
-		return ethCommon.Hash{}, fmt.Errorf("registry: could not find contract: bad address")
-	}
-	return codehash, nil
+
+	instance, _ := contract.Short()
+	return ethcommon.Hash{},
+		errors.NotFoundError(
+			"contract instance %q not registered", instance,
+		).SetComponent(component)
 }
 
-// Retrieve method using 4 bytes unique selector and the address of the contract
-func (r *Registry) GetMethodsBySelector(selector [4]byte, contract common.AccountInstance) (method *ethAbi.Method, defaultMethods []*ethAbi.Method, err error) {
+// GetMethodsBySelector load method using 4 bytes unique selector and the address of the contract
+func (r *Registry) GetMethodsBySelector(selector [4]byte, contract common.AccountInstance) (method *ethabi.Method, defaultMethods []*ethabi.Method, e error) {
 	// Search in specific method storage
-	contractCodehash, err := r.getCodehash(contract)
+	codehash, err := r.getCodehash(contract)
 	if err == nil {
-		contractMethods, ok := r.methods[contractCodehash][selector]
-		if ok && len(contractMethods) == 1 {
-			return contractMethods[0], nil, nil
+		methods, ok := r.methods[codehash][selector]
+		if ok && len(methods) == 1 {
+			return methods[0], nil, nil
 		}
 	}
 
@@ -203,52 +208,52 @@ func (r *Registry) GetMethodsBySelector(selector [4]byte, contract common.Accoun
 		return nil, defaultMethods, nil
 	}
 
-	return nil, nil, fmt.Errorf("registry: could not find corresponding method ABIs")
+	return nil, nil, errors.NotFoundError("method not found").SetComponent(component)
 }
 
-// Retrieve event using 4 bytes unique signature hash
-func (r *Registry) GetEventsBySigHash(sigHash ethCommon.Hash, contract common.AccountInstance, indexedInputCount uint) (event *ethAbi.Event, defaultEvents []*ethAbi.Event, err error) {
+// GetEventsBySigHash load event using event signature hash
+func (r *Registry) GetEventsBySigHash(sig ethcommon.Hash, contract common.AccountInstance, indexedInputCount uint) (event *ethabi.Event, defaultEvents []*ethabi.Event, e error) {
 	// Search in specific event storage
-	contractCodehash, err := r.getCodehash(contract)
+	codehash, err := r.getCodehash(contract)
 	if err == nil {
-		contractEvents, ok := r.events[contractCodehash][sigHash]
+		events, ok := r.events[codehash][sig]
 		if ok {
-			matchingContractEvents, ok := contractEvents[indexedInputCount]
-			if ok && len(matchingContractEvents) == 1 {
-				return matchingContractEvents[0], nil, nil
+			matchingEvents, ok := events[indexedInputCount]
+			if ok && len(matchingEvents) == 1 {
+				return matchingEvents[0], nil, nil
 			}
 		}
 	}
 
 	// Search in default events
-	if defaultEvents, ok := r.events[defaultCodehash][sigHash][indexedInputCount]; ok {
+	if defaultEvents, ok := r.events[defaultCodehash][sig][indexedInputCount]; ok {
 		return nil, defaultEvents, nil
 	}
 
-	return nil, nil, fmt.Errorf("registry: no event match found, no default and can't find contract: %v", err)
+	return nil, nil, errors.NotFoundError("events not found").SetComponent(component)
 }
 
 // Request an update of the codehash of the contract address
 func (r *Registry) RequestAddressUpdate(contract common.AccountInstance) error {
-	addr := contract.GetAccount().Address()
+	chainID, addr := contract.GetChain().ID(), contract.GetAccount().Address()
 
-	chainID := contract.GetChain().ID()
 	// Codehash already stored for this contract instance
-	if _, ok := r.addressCodehash[chainID.String()][addr]; ok {
+	if _, ok := r.codehashes[chainID.String()][addr]; ok {
 		return nil
 	}
 
 	// Codehash not stored, trying to retrieve it from chain
-	code, err := r.ethClient.CodeAt(context.Background(), chainID, addr, nil)
+	code, err := r.ec.CodeAt(context.Background(), chainID, addr, nil)
 	if err != nil {
-		return fmt.Errorf("registry: could not update address: client error: %v", err)
+		return errors.FromError(err).ExtendComponent(component)
 	}
-	codehash := crypto.Keccak256Hash(code)
+
 	chainStr := chainID.String()
-	if r.addressCodehash[chainStr] == nil {
-		r.addressCodehash[chainStr] = make(map[ethCommon.Address]ethCommon.Hash)
+	if _, ok := r.codehashes[chainStr]; !ok {
+		r.codehashes[chainStr] = make(map[ethcommon.Address]ethcommon.Hash)
 	}
-	r.addressCodehash[chainStr][addr] = codehash
+
+	r.codehashes[chainStr][addr] = crypto.Keccak256Hash(code)
 
 	return nil
 }

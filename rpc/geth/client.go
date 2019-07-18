@@ -7,9 +7,10 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff"
-	eth "github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/rpc"
 	log "github.com/sirupsen/logrus"
+	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/json"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/logger"
 )
 
@@ -59,7 +60,7 @@ func NewBackOff(conf *Config) backoff.BackOff {
 func DialContext(ctx context.Context, rawurl string, conf *Config) (*Client, error) {
 	c, err := rpc.DialContext(ctx, rawurl)
 	if err != nil {
-		return nil, err
+		return nil, errors.EthConnectionError(err.Error()).SetComponent(component)
 	}
 	return &Client{
 		rpc:  c,
@@ -91,15 +92,15 @@ func (c *Client) CallContext(ctx context.Context, result interface{}, method str
 			err := c.rpc.CallContext(ctx, &raw, method, args...)
 			if err != nil {
 				log.Debugf("failed to call %s(%+v)", method, args)
-				return err
+				return errors.EthConnectionError(err.Error()).SetComponent(component)
 			} else if len(raw) == 0 {
 				log.Debugf("%s(%+v) returned empty result", method, args)
-				return eth.NotFound
+				return errors.NotFoundError("not found").SetComponent(component)
 			}
 
-			if err := json.Unmarshal(raw, &result); err != nil {
+			if err := encoding.Unmarshal(raw, &result); err != nil {
 				log.Debugf("failed to parse the result of call %s(%+v)", method, args)
-				return err
+				return errors.FromError(err).ExtendComponent(component)
 			}
 
 			return nil
@@ -107,7 +108,7 @@ func (c *Client) CallContext(ctx context.Context, result interface{}, method str
 		bckoff,
 		func(err error, duration time.Duration) {
 			logger.GetLogEntry(ctx).
-				WithError(err).
+				WithError(errors.RetryWarning("JSON-RPC connection failed (%v)", err).SetComponent(component)).
 				WithFields(log.Fields{
 					"method": method,
 				}).Warnf("eth-client: error on JSON-RPC call, retrying in %v...", duration)

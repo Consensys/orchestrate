@@ -8,6 +8,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/logger"
 	tiptracker "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/tip-tracker"
@@ -194,7 +195,7 @@ func (bc *BlockCursor) fetchBlock(ctx context.Context, blockNumber int64) *types
 		if err != nil {
 			bFuture.Err() <- &types.TxListenerError{
 				ChainID: bc.ChainID(),
-				Err:     err,
+				Err:     errors.FromError(err).ExtendComponent(component),
 			}
 			return
 		}
@@ -203,7 +204,7 @@ func (bc *BlockCursor) fetchBlock(ctx context.Context, blockNumber int64) *types
 		if block == nil {
 			bFuture.Err() <- &types.TxListenerError{
 				ChainID: bc.ChainID(),
-				Err:     &types.BlockMissingError{Number: blockNumber},
+				Err:     errors.NotFoundError("block %v missing", blockNumber).ExtendComponent(component),
 			}
 			return
 		}
@@ -225,7 +226,7 @@ func (bc *BlockCursor) fetchBlock(ctx context.Context, blockNumber int64) *types
 			case err := <-rFuture.Err():
 				bFuture.Err() <- &types.TxListenerError{
 					ChainID: bc.ChainID(),
-					Err:     err,
+					Err:     errors.FromError(err).ExtendComponent(component),
 				}
 				return
 			case res := <-rFuture.Result():
@@ -264,7 +265,7 @@ func (bc *BlockCursor) fetchReceipt(ctx context.Context, txHash common.Hash) *ty
 		if err != nil {
 			future.Err() <- &types.TxListenerError{
 				ChainID: bc.ChainID(),
-				Err:     err,
+				Err:     errors.FromError(err).ExtendComponent(component),
 			}
 			return
 		}
@@ -272,7 +273,7 @@ func (bc *BlockCursor) fetchReceipt(ctx context.Context, txHash common.Hash) *ty
 		if receipt == nil {
 			future.Err() <- &types.TxListenerError{
 				ChainID: bc.ChainID(),
-				Err:     &types.ReceiptMissingError{Hash: txHash.Hex()},
+				Err:     errors.NotFoundError("receipt %q missing", txHash.Hex()).ExtendComponent(component),
 			}
 			return
 		}

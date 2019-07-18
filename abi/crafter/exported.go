@@ -4,6 +4,8 @@ import (
 	"sync"
 )
 
+const component = "abi.crafter"
+
 var (
 	crafter  Crafter
 	initOnce = &sync.Once{}

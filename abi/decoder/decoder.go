@@ -1,7 +1,6 @@
 package decoder
 
 import (
-	"encoding/json"
 	"fmt"
 	"math/big"
 	"reflect"
@@ -12,12 +11,13 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
+	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/json"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
 
 // FormatIndexedArg transforms a data to string
 func FormatIndexedArg(t *abi.Type, arg common.Hash) (string, error) {
-
 	switch t.T {
 	case abi.BoolTy, abi.StringTy:
 		return fmt.Sprintf("%v", arg), nil
@@ -29,7 +29,7 @@ func FormatIndexedArg(t *abi.Type, arg common.Hash) (string, error) {
 	case abi.FixedBytesTy:
 		return fmt.Sprintf("%v", hexutil.Encode(arg[common.HashLength-t.Type.Size():])), nil
 	case abi.BytesTy, abi.ArrayTy, abi.TupleTy:
-		return "", fmt.Errorf("unable to decode %v type", t.Kind)
+		return "", errors.FeatureNotSupportedError("not supported go-ethereum type %q", t.Kind).SetComponent(component)
 	default:
 		return fmt.Sprintf("%v", arg), nil
 	}
@@ -45,7 +45,6 @@ func ArrayToByteSlice(value reflect.Value) reflect.Value {
 
 // GetElemType returns the underlying element type of an array or slice
 func GetElemType(t *abi.Type) (abi.Type, error) {
-
 	switch strings.Count(t.Elem.String(), "(") {
 	case 0:
 		// Not a struct - able to return the correct type
@@ -66,7 +65,7 @@ func GetElemType(t *abi.Type) (abi.Type, error) {
 		return abi.NewType("tuple", tupleArgs)
 	}
 
-	return abi.Type{}, fmt.Errorf("decoder: cannot get Elem type of %v", t)
+	return abi.Type{}, errors.FeatureNotSupportedError("no go-ethereum type for %v", t).SetComponent(component)
 }
 
 // FormatNonIndexedArrayArg transforms a data to string
@@ -80,9 +79,9 @@ func FormatNonIndexedArrayArg(t *abi.Type, arg interface{}) (string, error) {
 		arrayArgString = append(arrayArgString, argString)
 	}
 
-	jsonArgs, err := json.Marshal(arrayArgString)
+	jsonArgs, err := encoding.Marshal(arrayArgString)
 	if err != nil {
-		return "", err
+		return "", errors.FromError(err).ExtendComponent(component)
 	}
 	return string(jsonArgs), nil
 }
@@ -99,9 +98,9 @@ func FormatNonIndexedSliceArg(t *abi.Type, arg interface{}) (string, error) {
 		sliceArgString = append(sliceArgString, argString)
 	}
 
-	jsonArgs, err := json.Marshal(sliceArgString)
+	jsonArgs, err := encoding.Marshal(sliceArgString)
 	if err != nil {
-		return "", err
+		return "", errors.FromError(err).ExtendComponent(component)
 	}
 
 	return string(jsonArgs), nil
@@ -109,7 +108,6 @@ func FormatNonIndexedSliceArg(t *abi.Type, arg interface{}) (string, error) {
 
 // FormatNonIndexedTupleArg transforms a struct data to string
 func FormatNonIndexedTupleArg(t *abi.Type, arg interface{}) (string, error) {
-
 	val := reflect.ValueOf(arg)
 
 	tuple := make(map[string]string, len(t.TupleElems))
@@ -118,9 +116,9 @@ func FormatNonIndexedTupleArg(t *abi.Type, arg interface{}) (string, error) {
 		decoded, _ = FormatNonIndexedArg(elemeType, val.Field(i).Interface())
 		tuple[abi.ToCamelCase(t.TupleRawNames[i])] = decoded
 	}
-	jsonArgs, err := json.Marshal(tuple)
+	jsonArgs, err := encoding.Marshal(tuple)
 	if err != nil {
-		return "", err
+		return "", errors.FromError(err).ExtendComponent(component)
 	}
 
 	return string(jsonArgs), nil
@@ -128,7 +126,6 @@ func FormatNonIndexedTupleArg(t *abi.Type, arg interface{}) (string, error) {
 
 // FormatNonIndexedArg transforms a data to string
 func FormatNonIndexedArg(t *abi.Type, arg interface{}) (string, error) {
-
 	switch t.T {
 	case abi.IntTy, abi.UintTy, abi.BoolTy, abi.StringTy:
 		return fmt.Sprintf("%v", arg), nil
@@ -146,7 +143,7 @@ func FormatNonIndexedArg(t *abi.Type, arg interface{}) (string, error) {
 	case abi.TupleTy:
 		return FormatNonIndexedTupleArg(t, arg)
 	default:
-		return "", fmt.Errorf("unable to decode %v type", t.Kind)
+		return "", errors.FeatureNotSupportedError("not supported go-ethereum type %q", t.Kind).SetComponent(component)
 	}
 }
 
@@ -154,12 +151,17 @@ func FormatNonIndexedArg(t *abi.Type, arg interface{}) (string, error) {
 func Decode(event *abi.Event, txLog *ethereum.Log) (map[string]string, error) {
 	expectedTopics := len(event.Inputs) - event.Inputs.LengthNonIndexed()
 	if expectedTopics != len(txLog.Topics)-1 {
-		return nil, fmt.Errorf("decoder error: Topics length does not match with abi event: expected %v but got %v", expectedTopics, len(txLog.Topics)-1)
+		return nil, errors.InvalidTopicsCountError(
+			"invalid topics count (expected %v but got %v)",
+			expectedTopics, len(txLog.Topics)-1,
+		).SetComponent(component)
 	}
 
 	unpackValues, err := event.Inputs.UnpackValues(txLog.Data)
 	if err != nil {
-		return nil, err
+		return nil, errors.InvalidEventDataError(
+			"invalid event data %v", txLog.Data,
+		).SetComponent(component)
 	}
 
 	var (

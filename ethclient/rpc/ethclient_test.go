@@ -2,7 +2,7 @@ package rpc
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"math/big"
 	"strconv"
 	"testing"
@@ -10,6 +10,7 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/rpc/geth"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
@@ -19,7 +20,7 @@ const chainID = 888
 
 var chainIDBigInt = big.NewInt(int64(chainID))
 
-var errTest = errors.New("test error")
+var errTest = fmt.Errorf("test error")
 var privateArgs = &types.PrivateArgs{
 	PrivateFrom:   "0x01",
 	PrivateFor:    []string{"0x02"},
@@ -112,8 +113,9 @@ func TestReturnErrorIfCannotGetRPC(t *testing.T) {
 	defer ctrl.Finish()
 
 	hash, err := gethClient.SendRawPrivateTransaction(ctx, chainIDBigInt, []byte{1, 2, 3}, privateArgs)
-
-	assert.EqualError(t, err, "no RPC connection registered for chain \"888\"")
+	e := errors.FromError(err)
+	assert.Equal(t, "no RPC connection registered for chain \"888\"", e.GetMessage(), "Error message should be correct")
+	assert.Equal(t, "08300", e.Hex(), "Error hex code should be correct")
 	assert.Equal(t, ethcommon.HexToHash("0x0"), hash)
 }
 

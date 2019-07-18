@@ -6,12 +6,14 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 
-	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
+	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
+	ierror "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/mock"
 )
@@ -168,7 +170,11 @@ func TestContractRegistryBySig(t *testing.T) {
 			Tag:  "covfefe",
 		},
 	})
-	assert.Error(t, err, "Should error when unknown contract")
+	assert.Error(t, err, "GetContractABI should error when unknown contract")
+	ierr, ok := err.(*ierror.Error)
+	assert.True(t, ok, "GetContractABI error should cast to internal error")
+	assert.Equal(t, "abi.registry.static", ierr.GetComponent(), "GetContractABI error component should be correct")
+	assert.True(t, errors.IsStorageError(ierr), "GetContractABI error should be a storage error")
 	assert.Nil(t, result)
 
 	// Get Bytecode
@@ -186,7 +192,11 @@ func TestContractRegistryBySig(t *testing.T) {
 			Tag:  "covfefe",
 		},
 	})
-	assert.Error(t, err, "Should error when unknown contract")
+	assert.Error(t, err, "GetContractBytecode should error when unknown contract")
+	ierr, ok = err.(*ierror.Error)
+	assert.True(t, ok, "GetContractBytecode error should cast to internal error")
+	assert.Equal(t, "abi.registry.static", ierr.GetComponent(), "GetContractBytecode error component should be correct")
+	assert.True(t, errors.IsStorageError(ierr), "GetContractBytecode error should be a storage error")
 	assert.Nil(t, result)
 
 	// Get DeployedBytecode
@@ -205,6 +215,10 @@ func TestContractRegistryBySig(t *testing.T) {
 		},
 	})
 	assert.Error(t, err, "Should error when unknown contract")
+	ierr, ok = err.(*ierror.Error)
+	assert.True(t, ok, "GetContractDeployedBytecode should cast to internal error")
+	assert.Equal(t, "abi.registry.static", ierr.GetComponent(), "GetContractDeployedBytecode error component should be correct")
+	assert.True(t, errors.IsStorageError(ierr), "GetContractDeployedBytecode error should be a storage error")
 	assert.Nil(t, result)
 
 	// Get MethodBySelector on default
@@ -214,11 +228,16 @@ func TestContractRegistryBySig(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Nil(t, method)
 	expectedMethod := ERC20ABI.Methods["isMinter"]
-	assert.Equal(t, []*ethAbi.Method{&expectedMethod}, defaultMethod)
+	assert.Equal(t, []*ethabi.Method{&expectedMethod}, defaultMethod)
 
 	// Get EventsBySigHash wrong indexed count
 	event, defaultEvent, err := r.GetEventsBySigHash(crypto.Keccak256Hash(eventSig), ContractInstance, 0)
 	assert.Error(t, err)
+	ierr, ok = err.(*ierror.Error)
+	assert.True(t, ok, "GetEventsBySigHash error should cast to internal error")
+	assert.Equal(t, "abi.registry.static", ierr.GetComponent(), "GetEventsBySigHash error component should be correct")
+	assert.True(t, errors.IsStorageError(ierr), "GetEventsBySigHash error should be a storage error")
+	assert.Nil(t, result)
 	assert.Nil(t, event)
 	assert.Nil(t, defaultEvent)
 
@@ -228,7 +247,7 @@ func TestContractRegistryBySig(t *testing.T) {
 	expectedEvent := ERC20ABI.Events["MinterAdded"]
 	expectedEventBis := ERC20ABIBis.Events["MinterAdded"]
 	assert.Nil(t, event)
-	assert.Equal(t, []*ethAbi.Event{&expectedEvent, &expectedEventBis}, defaultEvent)
+	assert.Equal(t, []*ethabi.Event{&expectedEvent, &expectedEventBis}, defaultEvent)
 
 	// Update smart-contract address
 	err = r.RequestAddressUpdate(ContractInstance)

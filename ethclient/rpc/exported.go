@@ -10,6 +10,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/rpc/geth"
 )
 
+const component = "ethclient.rpc"
+
 var (
 	client   *Client
 	config   *geth.Config

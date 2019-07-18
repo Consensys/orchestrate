@@ -5,6 +5,7 @@ import (
 	"math/big"
 
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/logger"
 )
@@ -44,7 +45,7 @@ func (t *Tracker) HighestBlock(ctx context.Context) (int64, error) {
 	)
 	header, err := t.ec.HeaderByNumber(logCtx, t.chainID, nil)
 	if err != nil {
-		return 0, err
+		return 0, errors.FromError(err).ExtendComponent(component)
 	}
 
 	if header.Number.Uint64() <= t.conf.Depth {

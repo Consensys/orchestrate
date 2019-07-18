@@ -2,12 +2,12 @@ package base
 
 import (
 	"context"
-	"fmt"
 	"math/big"
 	"sync"
 	"sync/atomic"
 
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
 	cursor "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/block-cursor/base"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/handler"
@@ -45,7 +45,7 @@ func NewTxListener(ec Client, conf *Config) *TxListener {
 func (l *TxListener) Listen(ctx context.Context, chains []*big.Int, h handler.TxListenerHandler) error {
 	select {
 	case <-l.closed:
-		return fmt.Errorf("listener closed")
+		return errors.InternalError("listener closed").SetComponent(component)
 	default:
 	}
 
@@ -98,15 +98,15 @@ func (s *TxListenerSession) run() error {
 
 	// Start listening each chain in separate goroutines
 	wg := &sync.WaitGroup{}
-	errors := make(chan error, len(s.chains))
-	defer close(errors)
+	errs := make(chan error, len(s.chains))
+	defer close(errs)
 	for _, chain := range s.chains {
 		wg.Add(1)
 		go func(chain *big.Int) {
 			defer wg.Done()
 			// Cancel session as soon as a first chain listener goroutine exits
 			defer s.cancel()
-			errors <- s.listen(chain)
+			errs <- s.listen(chain)
 		}(chain)
 	}
 
@@ -120,7 +120,7 @@ func (s *TxListenerSession) run() error {
 	}
 
 	select {
-	case e := <-errors:
+	case e := <-errs:
 		err = e
 	default:
 	}
@@ -141,22 +141,25 @@ func (s *TxListenerSession) listen(chain *big.Int) error {
 	default:
 	}
 
-	tracker := tiptracker.NewTracker(s.listener.ec, chain, &s.listener.conf.TipTracker)
-
 	log.Infof("tx-listener: getting initial position in chain %s", chain.String())
 	// Retrieve initial position
 	blockNumber, txIndex, err := s.h.GetInitialPosition(chain)
 	if err != nil {
-		log.WithError(err).Errorf("tx-listener: failed to get initial position in chain %s", chain.String())
-		return err
+		ierr := errors.FromError(err).ExtendComponent(component)
+		log.WithError(ierr).Errorf("tx-listener: failed to get initial position in chain %s", chain.String())
+		return ierr
 	}
+
+	// Create tip-tracker
+	tracker := tiptracker.NewTracker(s.listener.ec, chain, &s.listener.conf.TipTracker)
 
 	if blockNumber == -1 {
 		log.Infof("tx-listener: getting highest block number")
 		blockNumber, err = tracker.HighestBlock(context.Background())
 		if err != nil {
-			log.WithError(err).Errorf("tx-listener: failed to get highest block number")
-			return err
+			ierr := errors.FromError(err).ExtendComponent(component)
+			log.WithError(ierr).Errorf("tx-listener: failed to get highest block number")
+			return ierr
 		}
 		// Force tx index to 0
 		txIndex = 0
