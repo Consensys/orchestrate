@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.7.1
+
+*Released on July 18th 2019*
+
+- [CLEAN] Removed envelopeStore setStatus error
+- [CHORE] Moved registry from types to services
+
 ### Version 0.7.0
 
 *Released on July 16th 2019*
