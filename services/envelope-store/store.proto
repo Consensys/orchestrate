@@ -12,29 +12,29 @@ package envelopestore;
 // Store is a service responsible to store Envelopes
 service Store {
     // Store an envelope
-    rpc Store(StoreRequest) returns (StoreResponse) {}
-    
+    rpc Store (StoreRequest) returns (StoreResponse);
+
     // LoadByTxHash load an envelope by transaction hash
-	rpc LoadByTxHash(TxHashRequest) returns (StoreResponse) {}
+    rpc LoadByTxHash (TxHashRequest) returns (StoreResponse);
 
     // LoadByID load an envelope by identifier
-	rpc LoadByID(IDRequest) returns (StoreResponse) {}
+    rpc LoadByID (IDRequest) returns (StoreResponse);
 
     // GetStatus returns envelope status
-    rpc GetStatus(IDRequest) returns (StoreResponse) {}
+    rpc GetStatus (IDRequest) returns (StoreResponse);
 
     // SetStatus set an envelope status
-    rpc SetStatus(SetStatusRequest) returns (error.Error) {}
-    
+    rpc SetStatus (SetStatusRequest) returns (SetStatusResponse);
+
     // LoadPending load envelopes of pending transactions
-    rpc LoadPending(LoadPendingRequest) returns (LoadPendingResponse) {}
+    rpc LoadPending (LoadPendingRequest) returns (LoadPendingResponse);
 }
 
-message StoreRequest{
+message StoreRequest {
 	envelope.Envelope envelope = 1;
 }
 
-message StoreResponse{
+message StoreResponse {
 	// Status of Envelope
 	string status = 1;
 
@@ -48,7 +48,7 @@ message StoreResponse{
     error.Error err = 4;
 }
 
-message TxHashRequest{
+message TxHashRequest {
     // Chain ID the transaction has been sent to
     chain.Chain chain_id = 1;
 
@@ -56,7 +56,7 @@ message TxHashRequest{
     string tx_hash = 2;
 }
 
-message IDRequest{
+message IDRequest {
     // Envelope identifier
     string id = 1;
 }
@@ -67,6 +67,9 @@ message SetStatusRequest {
 
     // Status
     string status = 2;
+}
+
+message SetStatusResponse {
 }
 
 message LoadPendingRequest {
