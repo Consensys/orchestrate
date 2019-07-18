@@ -9,8 +9,9 @@ import (
 )
 
 var (
-	fct      *Faucet
-	initOnce = &sync.Once{}
+	component = "faucet.sarama"
+	fct       *Faucet
+	initOnce  = &sync.Once{}
 )
 
 // Init initializes Faucet

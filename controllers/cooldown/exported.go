@@ -9,9 +9,10 @@ import (
 )
 
 var (
-	ctrl     *Controller
-	config   *Config
-	initOnce = &sync.Once{}
+	component = "controller.cooldown"
+	ctrl      *Controller
+	config    *Config
+	initOnce  = &sync.Once{}
 )
 
 // Init initialize BlackList Controller

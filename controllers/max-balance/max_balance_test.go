@@ -2,12 +2,13 @@ package maxbalance
 
 import (
 	"context"
-	"fmt"
 	"math/big"
 	"sync"
 	"testing"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/stretchr/testify/assert"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/faucet/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types/testutils"
@@ -18,12 +19,10 @@ var (
 	values = []*big.Int{big.NewInt(9), big.NewInt(11), big.NewInt(10)}
 )
 
-var errTest = fmt.Errorf("could not connect")
-
 func MockBalanceAt(ctx context.Context, chainID *big.Int, a ethcommon.Address, blocknumber *big.Int) (*big.Int, error) {
 	if chainID.Cmp(chains[2]) == 0 {
 		// Simulate error
-		return nil, errTest
+		return nil, errors.ConnectionError("balanceAtError")
 	}
 	return big.NewInt(10), nil
 }
@@ -42,15 +41,16 @@ func TestMaxBalance(t *testing.T) {
 	tests := make([]*testutils.TestRequest, 0)
 	for i := 0; i < rounds; i++ {
 		var expectedAmount *big.Int
-		var expectedErr error
+		var expectedErr bool
 		switch i % 3 {
 		case 0:
 			expectedAmount = big.NewInt(9)
 		case 1:
 			expectedAmount = big.NewInt(0)
+			expectedErr = true
 		case 2:
 			expectedAmount = big.NewInt(0)
-			expectedErr = errTest
+			expectedErr = true
 		}
 
 		tests = append(
@@ -82,5 +82,9 @@ func TestMaxBalance(t *testing.T) {
 	// Ensure results are correct
 	for _, test := range tests {
 		testutils.AssertRequest(t, test)
+		if test.ResultErr != nil {
+			assert.True(t, errors.IsFaucetWarning(test.ResultErr) || errors.IsConnectionError(test.ResultErr), "%v should be a faucet warning", test.ResultErr)
+			assert.Equal(t, "controller.max-balance", errors.FromError(test.ResultErr).GetComponent(), "Error component should be correct")
+		}
 	}
 }

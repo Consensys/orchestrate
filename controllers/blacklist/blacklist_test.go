@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/stretchr/testify/assert"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/faucet/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types/testutils"
@@ -34,10 +36,13 @@ func TestBlackList(t *testing.T) {
 	tests := make([]*testutils.TestRequest, 0)
 	for i := 0; i < rounds; i++ {
 		var expectedAmount *big.Int
+		var expectErr bool
 		if i%2 == 0 {
 			expectedAmount = big.NewInt(0)
+			expectErr = true
 		} else {
 			expectedAmount = big.NewInt(10)
+			expectErr = false
 		}
 		tests = append(
 			tests,
@@ -49,7 +54,7 @@ func TestBlackList(t *testing.T) {
 				},
 				ExpectedOK:     i%2 == 1,
 				ExpectedAmount: expectedAmount,
-				ExpectedErr:    nil,
+				ExpectedErr:    expectErr,
 			},
 		)
 	}
@@ -69,5 +74,9 @@ func TestBlackList(t *testing.T) {
 	// Ensure results are correct
 	for _, test := range tests {
 		testutils.AssertRequest(t, test)
+		if test.ResultErr != nil {
+			assert.True(t, errors.IsFaucetWarning(test.ResultErr), "%v should be a faucet warning", test.ResultErr)
+			assert.Equal(t, "controller.blacklist", errors.FromError(test.ResultErr).GetComponent(), "Error component should be correct")
+		}
 	}
 }

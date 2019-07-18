@@ -13,8 +13,9 @@ import (
 )
 
 var (
-	ctrl     *Controller
-	initOnce = &sync.Once{}
+	component = "controller.blacklist"
+	ctrl      *Controller
+	initOnce  = &sync.Once{}
 )
 
 // Init initialize BlackList Controller

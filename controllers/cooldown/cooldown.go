@@ -7,6 +7,7 @@ import (
 	"time"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/faucet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types"
@@ -61,7 +62,7 @@ func (ctrl *Controller) Control(credit faucet.CreditFunc) faucet.CreditFunc {
 
 		// If still cooling down we invalid credit
 		if ctrl.IsCoolingDown(r.ChainID, r.Beneficiary) {
-			return big.NewInt(0), false, nil
+			return big.NewInt(0), false, errors.FaucetWarning("faucet cooling down").ExtendComponent(component)
 		}
 
 		// Credit

@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/faucet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types"
@@ -39,7 +40,7 @@ func (ctrl *Controller) IsBlackListed(chainID *big.Int, address ethcommon.Addres
 func (ctrl *Controller) Control(credit faucet.CreditFunc) faucet.CreditFunc {
 	return func(ctx context.Context, r *types.Request) (*big.Int, bool, error) {
 		if ctrl.IsBlackListed(r.ChainID, r.Beneficiary) {
-			return big.NewInt(0), false, nil
+			return big.NewInt(0), false, errors.FaucetWarning("account blacklisted").ExtendComponent(component)
 		}
 		return credit(ctx, r)
 	}

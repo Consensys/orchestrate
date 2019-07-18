@@ -43,7 +43,7 @@ func TestCreditor(t *testing.T) {
 				},
 				ExpectedOK:     true,
 				ExpectedAmount: big.NewInt(10),
-				ExpectedErr:    nil,
+				ExpectedErr:    false,
 			},
 		)
 	}

@@ -43,7 +43,7 @@ func TestCreditor(t *testing.T) {
 				},
 				ExpectedOK:     !(i%6 == 0 || i%6 == 1),
 				ExpectedAmount: big.NewInt(0),
-				ExpectedErr:    nil,
+				ExpectedErr:    false,
 			},
 		)
 	}
@@ -78,7 +78,7 @@ func TestCreditorNoCreditor(t *testing.T) {
 		},
 		ExpectedOK:     false,
 		ExpectedAmount: big.NewInt(0),
-		ExpectedErr:    nil,
+		ExpectedErr:    false,
 	}
 	test.ResultAmount, test.ResultOK, test.ResultErr = credit(context.Background(), test.Req)
 

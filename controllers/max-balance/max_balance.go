@@ -5,6 +5,7 @@ import (
 	"math/big"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/faucet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types"
 )
@@ -30,13 +31,13 @@ func (ctrl *Controller) Control(credit faucet.CreditFunc) faucet.CreditFunc {
 		// Retrieve account balance
 		balance, err := ctrl.conf.BalanceAt(ctx, r.ChainID, r.Beneficiary, nil)
 		if err != nil {
-			return big.NewInt(0), false, err
+			return big.NewInt(0), false, errors.FromError(err).ExtendComponent(component)
 		}
 
 		// Ensure MaxBalance is repected
 		if balance.Add(balance, r.Amount).Cmp(ctrl.conf.MaxBalance) >= 0 {
 			// Do not credit if final balance would be superior to max authorized
-			return big.NewInt(0), false, nil
+			return big.NewInt(0), false, errors.FaucetWarning("account balance too high").ExtendComponent(component)
 		}
 
 		return credit(ctx, r)

@@ -12,9 +12,10 @@ import (
 )
 
 var (
-	ctrl     *Controller
-	config   *Config
-	initOnce = sync.Once{}
+	component = "controller.max-balance"
+	ctrl      *Controller
+	config    *Config
+	initOnce  = sync.Once{}
 )
 
 // Init initialize BlackList Controller

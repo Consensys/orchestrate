@@ -33,7 +33,7 @@ func TestFaucet(t *testing.T) {
 				Req:            r,
 				ExpectedOK:     true,
 				ExpectedAmount: big.NewInt(20),
-				ExpectedErr:    nil,
+				ExpectedErr:    false,
 			},
 		)
 

@@ -8,6 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
@@ -56,13 +57,13 @@ func (f *Faucet) Credit(ctx context.Context, r *types.Request) (*big.Int, bool, 
 	msg := &sarama.ProducerMessage{}
 	err := f.prepareMsg(r, msg)
 	if err != nil {
-		return big.NewInt(0), false, err
+		return big.NewInt(0), false, errors.FromError(err).ExtendComponent(component)
 	}
 
 	// Send message
 	partition, offset, err := f.p.SendMessage(msg)
 	if err != nil {
-		return big.NewInt(0), false, err
+		return big.NewInt(0), false, errors.FromError(err).ExtendComponent(component)
 	}
 
 	log.WithFields(log.Fields{

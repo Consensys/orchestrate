@@ -8,6 +8,8 @@ import (
 	"time"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/stretchr/testify/assert"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/faucet/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types/testutils"
@@ -36,10 +38,13 @@ func TestCoolDown(t *testing.T) {
 	tests := make([]*testutils.TestRequest, 0)
 	for i := 0; i < rounds; i++ {
 		var expectedAmount *big.Int
+		var expectedErr bool
 		if i%6 < 3 {
 			expectedAmount = big.NewInt(10)
+			expectedErr = false
 		} else {
 			expectedAmount = big.NewInt(0)
+			expectedErr = true
 		}
 		tests = append(
 			tests,
@@ -51,7 +56,7 @@ func TestCoolDown(t *testing.T) {
 				},
 				ExpectedOK:     i%6 < 3,
 				ExpectedAmount: expectedAmount,
-				ExpectedErr:    nil,
+				ExpectedErr:    expectedErr,
 			},
 		)
 	}
@@ -78,5 +83,9 @@ func TestCoolDown(t *testing.T) {
 	// Ensure results are correct
 	for _, test := range tests {
 		testutils.AssertRequest(t, test)
+		if test.ResultErr != nil {
+			assert.True(t, errors.IsFaucetWarning(test.ResultErr), "%v should be a faucet warning", test.ResultErr)
+			assert.Equal(t, "controller.cooldown", errors.FromError(test.ResultErr).GetComponent(), "Error component should be correct")
+		}
 	}
 }
