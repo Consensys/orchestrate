@@ -5,7 +5,8 @@ import (
 	"time"
 
 	"github.com/go-pg/pg"
-	"github.com/golang/protobuf/proto"
+	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/proto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 )
 
@@ -49,9 +50,9 @@ func NewEnvelopeStoreFromPGOptions(opts *pg.Options) *EnvelopeStore {
 
 // Store context envelope
 func (s *EnvelopeStore) Store(ctx context.Context, e *envelope.Envelope) (status string, at time.Time, err error) {
-	bytes, err := proto.Marshal(e)
+	bytes, err := encoding.Marshal(e)
 	if err != nil {
-		return "", time.Time{}, err
+		return "", time.Time{}, errors.FromError(err).SetComponent(component)
 	}
 
 	model := &EnvelopeModel{
@@ -67,13 +68,13 @@ func (s *EnvelopeStore) Store(ctx context.Context, e *envelope.Envelope) (status
 		Returning("*").
 		Insert()
 	if err != nil {
-		return "", time.Time{}, err
+		return "", time.Time{}, errors.ConstraintViolatedError("envelope already stored").ExtendComponent(component)
 	}
 
 	return model.Status, model.last(), nil
 }
 
-// LoadByTxHash context envelope by transaction hash
+// LoadByTxHash load envelope by transaction hash
 func (s *EnvelopeStore) LoadByTxHash(ctx context.Context, chainID, txHash string, e *envelope.Envelope) (status string, at time.Time, err error) { //nolint:interfacer
 	model := &EnvelopeModel{
 		ChainID: chainID,
@@ -86,12 +87,12 @@ func (s *EnvelopeStore) LoadByTxHash(ctx context.Context, chainID, txHash string
 		Select()
 
 	if err != nil {
-		return "", time.Time{}, err
+		return "", time.Time{}, errors.NotFoundError("envelope not found").ExtendComponent(component)
 	}
 
-	err = proto.UnmarshalMerge(model.Envelope, e)
+	err = encoding.UnmarshalMerge(model.Envelope, e)
 	if err != nil {
-		return "", time.Time{}, err
+		return "", time.Time{}, errors.FromError(err).ExtendComponent(component)
 	}
 
 	return model.Status, model.last(), nil
@@ -108,12 +109,12 @@ func (s *EnvelopeStore) LoadByID(ctx context.Context, envelopeID string, e *enve
 		Select()
 
 	if err != nil {
-		return "", time.Time{}, err
+		return "", time.Time{}, errors.NotFoundError("envelope not found").ExtendComponent(component)
 	}
 
-	err = proto.UnmarshalMerge(model.Envelope, e)
+	err = encoding.UnmarshalMerge(model.Envelope, e)
 	if err != nil {
-		return "", time.Time{}, err
+		return "", time.Time{}, errors.FromError(err).ExtendComponent(component)
 	}
 
 	return model.Status, model.last(), nil
@@ -134,7 +135,7 @@ func (s *EnvelopeStore) SetStatus(ctx context.Context, envelopeID, status string
 		Returning("*").
 		Update()
 	if err != nil {
-		return err
+		return errors.NotFoundError("envelope not found").ExtendComponent(component)
 	}
 
 	return nil
@@ -148,7 +149,7 @@ func (s *EnvelopeStore) GetStatus(ctx context.Context, envelopeID string) (statu
 
 	err = s.db.ModelContext(ctx, model).Select()
 	if err != nil {
-		return "", time.Time{}, err
+		return "", time.Time{}, errors.NotFoundError("envelope not found").ExtendComponent(component)
 	}
 
 	return model.Status, model.last(), nil
@@ -163,15 +164,15 @@ func (s *EnvelopeStore) LoadPending(ctx context.Context, duration time.Duration)
 		Select()
 
 	if err != nil {
-		return nil, err
+		return nil, errors.NotFoundError("envelope not found").ExtendComponent(component)
 	}
 
 	envelopes := []*envelope.Envelope{}
 	for _, model := range models {
 		t := &envelope.Envelope{}
-		err := proto.Unmarshal(model.Envelope, t)
+		err := encoding.Unmarshal(model.Envelope, t)
 		if err != nil {
-			return nil, err
+			return nil, errors.FromError(err).ExtendComponent(component)
 		}
 		envelopes = append(envelopes, t)
 	}

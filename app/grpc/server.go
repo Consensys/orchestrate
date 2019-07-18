@@ -13,6 +13,7 @@ import (
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	log "github.com/sirupsen/logrus"
+	grpcerror "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/grpc/error"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope-store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/app/grpc/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/app/infra"
@@ -96,6 +97,7 @@ func CreateServer() *grpc.Server {
 			grpc_logrus.StreamServerInterceptor(logEntry),
 			grpc_prometheus.StreamServerInterceptor,
 			grpc_recovery.StreamServerInterceptor(grpc_recovery.WithRecoveryHandler(panicHandler)),
+			grpcerror.StreamServerInterceptor(),
 		)),
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
@@ -103,6 +105,7 @@ func CreateServer() *grpc.Server {
 			grpc_logrus.UnaryServerInterceptor(logEntry),
 			grpc_prometheus.UnaryServerInterceptor,
 			grpc_recovery.UnaryServerInterceptor(grpc_recovery.WithRecoveryHandler(panicHandler)),
+			grpcerror.UnaryServerInterceptor(),
 		)),
 	)
 

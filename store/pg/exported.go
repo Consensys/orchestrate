@@ -8,6 +8,7 @@ import (
 )
 
 var (
+	component     = "envelope-store.pg"
 	envelopeStore *EnvelopeStore
 	initOnce      = &sync.Once{}
 )

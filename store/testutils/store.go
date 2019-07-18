@@ -12,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store"
@@ -46,12 +47,27 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore() {
 	// Read / write before storing
 	_, _, err := s.Store.LoadByTxHash(context.Background(), "888", "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210", tr)
 	assert.NotNil(s.T(), err, "Should error on find envelope by hash")
+	assert.True(s.T(), errors.IsNotFoundError(err), "Data should be not found")
+	e := errors.FromError(err)
+	assert.Contains(s.T(), e.GetComponent(), "envelope-store", "Component should be correct")
+
 	_, _, err = s.Store.LoadByID(context.Background(), "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11", tr)
 	assert.NotNil(s.T(), err, "Should error on find envelope by ID")
+	assert.True(s.T(), errors.IsNotFoundError(err), "LoadByID Data should be not found")
+	e = errors.FromError(err)
+	assert.Contains(s.T(), e.GetComponent(), "envelope-store", "LoadByID Component should be correct")
+
 	err = s.Store.SetStatus(context.Background(), "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11", "pending")
 	assert.NotNil(s.T(), err, "Should error on setStatus")
+	assert.True(s.T(), errors.IsNotFoundError(err), "SetStatus Data should be not found")
+	e = errors.FromError(err)
+	assert.Contains(s.T(), e.GetComponent(), "envelope-store", "SetStatus Component should be correct")
+
 	_, _, err = s.Store.GetStatus(context.Background(), "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11")
 	assert.NotNil(s.T(), err, "Should error on setStatus")
+	assert.True(s.T(), errors.IsNotFoundError(err), "GetStatus Data should be not found")
+	e = errors.FromError(err)
+	assert.Contains(s.T(), e.GetComponent(), "envelope-store", "GetStatus Component should be correct")
 
 	// Store Envelope
 	status, storedAt, err := s.Store.Store(context.Background(), tr)

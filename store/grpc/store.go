@@ -6,7 +6,8 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
-	envelope "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	store "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope-store"
 )
 
@@ -24,12 +25,12 @@ func NewEnvelopeStore(client store.StoreClient) *EnvelopeStore {
 func (s *EnvelopeStore) Store(ctx context.Context, e *envelope.Envelope) (status string, at time.Time, err error) {
 	resp, err := s.client.Store(ctx, &store.StoreRequest{Envelope: e})
 	if err != nil {
-		return "", time.Time{}, err
+		return "", time.Time{}, errors.FromError(err).ExtendComponent(component)
 	}
 
 	at, err = ptypes.Timestamp(resp.LastUpdated)
 	if err != nil {
-		return "", time.Time{}, err
+		return "", time.Time{}, errors.InvalidFormatError(err.Error()).ExtendComponent(component)
 	}
 
 	proto.Merge(e, resp.Envelope)
@@ -41,12 +42,12 @@ func (s *EnvelopeStore) Store(ctx context.Context, e *envelope.Envelope) (status
 func (s *EnvelopeStore) LoadByTxHash(ctx context.Context, chainID, txHash string, e *envelope.Envelope) (status string, at time.Time, err error) {
 	resp, err := s.client.LoadByTxHash(ctx, &store.TxHashRequest{ChainId: chainID, TxHash: txHash})
 	if err != nil {
-		return "", time.Time{}, err
+		return "", time.Time{}, errors.FromError(err).ExtendComponent(component)
 	}
 
 	at, err = ptypes.Timestamp(resp.LastUpdated)
 	if err != nil {
-		return "", time.Time{}, err
+		return "", time.Time{}, errors.InvalidFormatError(err.Error()).ExtendComponent(component)
 	}
 
 	proto.Merge(e, resp.Envelope)
@@ -58,12 +59,12 @@ func (s *EnvelopeStore) LoadByTxHash(ctx context.Context, chainID, txHash string
 func (s *EnvelopeStore) LoadByID(ctx context.Context, envelopeID string, e *envelope.Envelope) (status string, at time.Time, err error) {
 	resp, err := s.client.LoadByID(ctx, &store.IDRequest{Id: envelopeID})
 	if err != nil {
-		return "", time.Time{}, err
+		return "", time.Time{}, errors.FromError(err).ExtendComponent(component)
 	}
 
 	at, err = ptypes.Timestamp(resp.LastUpdated)
 	if err != nil {
-		return "", time.Time{}, err
+		return "", time.Time{}, errors.InvalidFormatError(err.Error()).ExtendComponent(component)
 	}
 
 	return resp.Status, at, nil
@@ -73,7 +74,7 @@ func (s *EnvelopeStore) LoadByID(ctx context.Context, envelopeID string, e *enve
 func (s *EnvelopeStore) SetStatus(ctx context.Context, envelopeID, status string) error {
 	_, err := s.client.SetStatus(ctx, &store.SetStatusRequest{Id: envelopeID, Status: status})
 	if err != nil {
-		return err
+		return errors.FromError(err).ExtendComponent(component)
 	}
 
 	return nil
@@ -83,12 +84,12 @@ func (s *EnvelopeStore) SetStatus(ctx context.Context, envelopeID, status string
 func (s *EnvelopeStore) GetStatus(ctx context.Context, envelopeID string) (status string, at time.Time, err error) {
 	resp, err := s.client.GetStatus(ctx, &store.IDRequest{Id: envelopeID})
 	if err != nil {
-		return "", time.Time{}, err
+		return "", time.Time{}, errors.FromError(err).ExtendComponent(component)
 	}
 
 	at, err = ptypes.Timestamp(resp.LastUpdated)
 	if err != nil {
-		return "", time.Time{}, err
+		return "", time.Time{}, errors.InvalidFormatError(err.Error()).ExtendComponent(component)
 	}
 
 	return resp.Status, at, nil
@@ -97,9 +98,8 @@ func (s *EnvelopeStore) GetStatus(ctx context.Context, envelopeID string) (statu
 // LoadPending loads pending envelopes
 func (s *EnvelopeStore) LoadPending(ctx context.Context, duration time.Duration) ([]*envelope.Envelope, error) {
 	resp, err := s.client.LoadPending(ctx, &store.LoadPendingRequest{Duration: duration.Nanoseconds()})
-
 	if err != nil {
-		return nil, err
+		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
 	return resp.Envelopes, nil

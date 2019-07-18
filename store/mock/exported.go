@@ -6,6 +6,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const component = "envelope-store.mock"
+
 var (
 	envelopeStore *EnvelopeStore
 	initOnce      = &sync.Once{}

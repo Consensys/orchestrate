@@ -7,7 +7,8 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
-	envelope "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 )
 
 const (
@@ -67,7 +68,7 @@ func (s *EnvelopeStore) LoadByTxHash(ctx context.Context, chainID, txHash string
 
 	entry, ok := s.byTxHash[key(chainID, txHash)]
 	if !ok {
-		return "", time.Time{}, fmt.Errorf("no envelope for chain %q txHash %q", chainID, txHash)
+		return "", time.Time{}, errors.NotFoundError("no envelope for chain %q txHash %q", chainID, txHash).SetComponent(component)
 	}
 	proto.Merge(e, entry.envelope)
 
@@ -81,7 +82,7 @@ func (s *EnvelopeStore) LoadByID(ctx context.Context, envelopeID string, e *enve
 
 	entry, ok := s.byID[envelopeID]
 	if !ok {
-		return "", time.Time{}, fmt.Errorf("no envelope for ID %q", envelopeID)
+		return "", time.Time{}, errors.NotFoundError("no envelope for ID %q", envelopeID).SetComponent(component)
 	}
 	proto.Merge(e, entry.envelope)
 
@@ -95,7 +96,7 @@ func (s *EnvelopeStore) SetStatus(ctx context.Context, envelopeID, status string
 
 	entry, ok := s.byID[envelopeID]
 	if !ok {
-		return fmt.Errorf("no envelope for ID %q", envelopeID)
+		return errors.NotFoundError("no envelope for ID %q", envelopeID).SetComponent(component)
 	}
 
 	entry.Status = status
@@ -120,7 +121,7 @@ func (s *EnvelopeStore) GetStatus(ctx context.Context, envelopeID string) (statu
 
 	entry, ok := s.byID[envelopeID]
 	if !ok {
-		return "", time.Time{}, fmt.Errorf("no envelope for ID %q", envelopeID)
+		return "", time.Time{}, errors.NotFoundError("no envelope for ID %q", envelopeID).SetComponent(component)
 	}
 
 	return entry.Status, entry.last(), nil

@@ -7,6 +7,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/suite"
+	grpcerror "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/grpc/error"
 	store "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope-store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/app/grpc/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store/mock"
@@ -22,7 +23,10 @@ type EnvelopeStoreTestSuite struct {
 }
 
 func (s *EnvelopeStoreTestSuite) SetupTest() {
-	s.server = grpc.NewServer()
+	s.server = grpc.NewServer(
+		grpc.StreamInterceptor(grpcerror.StreamServerInterceptor()),
+		grpc.UnaryInterceptor(grpcerror.UnaryServerInterceptor()),
+	)
 	store.RegisterStoreServer(s.server, services.NewStoreService(mock.NewEnvelopeStore()))
 
 	lis := bufconn.Listen(1024 * 1024)
@@ -38,6 +42,8 @@ func (s *EnvelopeStoreTestSuite) SetupTest() {
 		"bufnet",
 		grpc.WithContextDialer(func(context.Context, string) (net.Conn, error) { return lis.Dial() }),
 		grpc.WithInsecure(),
+		grpc.WithUnaryInterceptor(grpcerror.UnaryClientInterceptor()),
+		grpc.WithStreamInterceptor(grpcerror.StreamClientInterceptor()),
 	)
 
 	if err != nil {

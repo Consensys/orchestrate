@@ -6,9 +6,12 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	grpcerror "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/grpc/error"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope-store"
 	"google.golang.org/grpc"
 )
+
+const component = "envelope-store.grpc"
 
 var (
 	envelopeStore *EnvelopeStore
@@ -22,6 +25,8 @@ func initStore(ctx context.Context) {
 		ctx,
 		viper.GetString("grpc.store.target"),
 		grpc.WithInsecure(),
+		grpc.WithUnaryInterceptor(grpcerror.UnaryClientInterceptor()),
+		grpc.WithStreamInterceptor(grpcerror.StreamClientInterceptor()),
 	)
 
 	if err != nil {
