@@ -2,13 +2,16 @@ package grpc
 
 import (
 	"context"
+	"math/big"
 	"time"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
+	store "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/envelope-store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
-	store "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope-store"
 )
 
 // EnvelopeStore store envelopes through
@@ -16,7 +19,7 @@ type EnvelopeStore struct {
 	client store.StoreClient
 }
 
-// NewEnvelopeStore crate a enw envelope store on GRPC
+// NewEnvelopeStore create a new envelope store on GRPC
 func NewEnvelopeStore(client store.StoreClient) *EnvelopeStore {
 	return &EnvelopeStore{client: client}
 }
@@ -40,7 +43,12 @@ func (s *EnvelopeStore) Store(ctx context.Context, e *envelope.Envelope) (status
 
 // LoadByTxHash load envelope by TxHash
 func (s *EnvelopeStore) LoadByTxHash(ctx context.Context, chainID, txHash string, e *envelope.Envelope) (status string, at time.Time, err error) {
-	resp, err := s.client.LoadByTxHash(ctx, &store.TxHashRequest{ChainId: chainID, TxHash: txHash})
+	bigChainID, ok := new(big.Int).SetString(chainID, 10)
+	if !ok {
+		panic("Cannot cast string to chain")
+	}
+
+	resp, err := s.client.LoadByTxHash(ctx, &store.TxHashRequest{ChainId: chain.CreateChainBigInt(bigChainID), TxHash: txHash})
 	if err != nil {
 		return "", time.Time{}, errors.FromError(err).ExtendComponent(component)
 	}

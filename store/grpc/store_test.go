@@ -8,7 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/suite"
 	grpcerror "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/grpc/error"
-	store "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope-store"
+	store "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/envelope-store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/app/grpc/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store/testutils"

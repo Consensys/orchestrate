@@ -7,7 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	grpcerror "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/grpc/error"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope-store"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/envelope-store"
 	"google.golang.org/grpc"
 )
 
@@ -42,7 +42,7 @@ func initStore(ctx context.Context) {
 	go func() {
 		// Close connection when infrastructure closes
 		<-ctx.Done()
-		conn.Close()
+		_ = conn.Close()
 	}()
 }
 

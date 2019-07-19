@@ -6,9 +6,8 @@ import (
 
 	"github.com/golang/protobuf/ptypes"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/envelope-store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope-store"
-	ierror "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store"
 )
 
@@ -43,7 +42,7 @@ func (s StoreService) Store(ctx context.Context, req *types.StoreRequest) (*type
 // LoadByTxHash load a envelope by transaction hash
 func (s StoreService) LoadByTxHash(ctx context.Context, req *types.TxHashRequest) (*types.StoreResponse, error) {
 	en := &envelope.Envelope{}
-	status, last, err := s.store.LoadByTxHash(ctx, req.GetChainId(), req.GetTxHash(), en)
+	status, last, err := s.store.LoadByTxHash(ctx, req.GetChainId().ID().String(), req.GetTxHash(), en)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -82,13 +81,13 @@ func (s StoreService) LoadByID(ctx context.Context, req *types.IDRequest) (*type
 }
 
 // SetStatus set a envelope status
-func (s StoreService) SetStatus(ctx context.Context, req *types.SetStatusRequest) (*ierror.Error, error) {
+func (s StoreService) SetStatus(ctx context.Context, req *types.SetStatusRequest) (*types.SetStatusResponse, error) {
 	err := s.store.SetStatus(ctx, req.GetId(), req.GetStatus())
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	return &ierror.Error{}, nil
+	return &types.SetStatusResponse{}, nil
 }
 
 // GetStatus get a envelope status

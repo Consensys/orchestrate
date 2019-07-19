@@ -12,8 +12,8 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	store "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/envelope-store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
-	store "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope-store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store/mock"
 )
@@ -39,7 +39,7 @@ func (s *StoreServiceTestSuite) TestLoadByTxHash() {
 	assert.Nil(s.T(), err, "should not error")
 
 	req := &store.TxHashRequest{
-		ChainId: "888",
+		ChainId: chain.CreateChainInt(888),
 		TxHash:  "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210",
 	}
 	resp, err := s.store.LoadByTxHash(context.Background(), req)

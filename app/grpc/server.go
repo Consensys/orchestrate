@@ -14,7 +14,7 @@ import (
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	log "github.com/sirupsen/logrus"
 	grpcerror "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/grpc/error"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope-store"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/envelope-store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/app/grpc/services"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/app/infra"
 	"google.golang.org/grpc"

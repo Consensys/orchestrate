@@ -4,16 +4,16 @@ import (
 	"context"
 	"math/big"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
-
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/golang/protobuf/ptypes"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
-	store "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope-store"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 	"google.golang.org/grpc"
+
+	store "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/envelope-store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
 
 func main() {
@@ -62,8 +62,8 @@ func main() {
 		"at":     timestamp,
 	}).Infof("Envelope stored")
 
-	res, err := client.LoadByTxHash(context.Background(), &store.TxHashRequest{
-		ChainId: tr.GetChain().ID().String(),
+	res, _ := client.LoadByTxHash(context.Background(), &store.TxHashRequest{
+		ChainId: tr.GetChain(),
 		TxHash:  tr.GetTx().GetHash().Hex(),
 	})
 
