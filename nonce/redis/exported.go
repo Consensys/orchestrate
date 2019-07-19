@@ -7,6 +7,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+const component = "nonce.redis"
+
 var (
 	nc       *Nonce
 	initOnce = &sync.Once{}

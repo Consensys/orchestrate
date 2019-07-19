@@ -52,5 +52,4 @@ func GlobalNonce() Nonce {
 // SetGlobalNonce sets global Sarama Nonce
 func SetGlobalNonce(nonce Nonce) {
 	nc = nonce
-	log.Debug("nonce: set")
 }

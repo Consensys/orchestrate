@@ -1,7 +1,7 @@
 package redis
 
 import (
-	"errors"
+	"fmt"
 	"math/big"
 	"math/rand"
 	"strconv"
@@ -12,6 +12,9 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gomodule/redigo/redis"
 	"github.com/rafaeljusto/redigomock"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 )
 
 var chainNonce = uint64(42)
@@ -53,42 +56,34 @@ func TestGetAndUpdateNonceCache(t *testing.T) {
 
 	t.Run("Nonce not in cache", func(t *testing.T) {
 		_, idleTime, err := n.Get(cid, &a)
-		if err != nil {
-			t.Fatalf("Got error %v", err.Error())
-		}
-		if idleTime != -1 {
-			t.Fatalf("Nonce is not supposed to be in cache")
-		}
+
+		require.NotNil(t, err, "Get should error")
+		e := errors.FromError(err)
+		assert.True(t, errors.IsNotFoundError(err), "Error code should be correct")
+		assert.Equal(t, "nonce.redis", e.GetComponent(), "Error component should be correct")
+		assert.Equal(t, 0, idleTime, "Nonce should not be in cache")
 	})
 
 	t.Run("Nonce from cache", func(t *testing.T) {
 		nonce := uint64(nonceBefore)
 		err := n.Set(cid, &a, nonce+1)
-		if err != nil {
-			t.Fatalf("Got error %v", err.Error())
-		}
+		require.Nil(t, err, "Set should not error")
+
 		nonce, idleTime, err := n.Get(cid, &a)
-		if err != nil {
-			t.Fatalf("Got error %v", err.Error())
-		}
-		if idleTime == -1 {
-			t.Fatalf("Nonce is supposed to be in cache")
-		}
-		if nonce != chainNonce+1 {
-			t.Fatalf("Expected nonce %v, got %v", chainNonce+1, nonce)
-		}
+		require.Nil(t, err, "Get should not error")
+		assert.NotEqual(t, -1, idleTime, "Nonce should be in cache")
+		assert.Equal(t, nonce, chainNonce+1, "Nonce should have been updated")
 	})
 
 	t.Run("Test error handling", func(t *testing.T) {
 		cid := big.NewInt(36)
 		a := common.HexToAddress("0xabcdabcdabcdabcdabcdabcd")
-		mockError := "error"
 		mockRedisConn := redigomock.NewConn()
-		mockRedisConn.Command("SET").ExpectError(errors.New(mockError))
-		mockRedisConn.Command("GET", computeLockName(cid, &a)).Expect("lock-name").ExpectError(errors.New("error"))
-		mockRedisConn.Command("GET", computeKey(cid, &a)).ExpectError(errors.New("error"))
-		mockRedisConn.Command("DEL", computeLockName(cid, &a)).ExpectError(errors.New("error"))
-		mockRedisConn.Command("OBJECT", "IDLETIME", computeKey(cid, &a)).Expect(int64(1)).ExpectError(errors.New("error"))
+		mockRedisConn.Command("SET").ExpectError(fmt.Errorf("test-error"))
+		mockRedisConn.Command("GET", computeLockName(cid, &a)).Expect("lock-name").ExpectError(fmt.Errorf("test-error"))
+		mockRedisConn.Command("GET", computeKey(cid, &a)).ExpectError(fmt.Errorf("test-error"))
+		mockRedisConn.Command("DEL", computeLockName(cid, &a)).ExpectError(fmt.Errorf("test-error"))
+		mockRedisConn.Command("OBJECT", "IDLETIME", computeKey(cid, &a)).Expect(int64(1)).ExpectError(fmt.Errorf("test-error"))
 		mockRedisPool := &redis.Pool{
 			Dial: func() (redis.Conn, error) {
 				return mockRedisConn, nil
@@ -99,9 +94,9 @@ func TestGetAndUpdateNonceCache(t *testing.T) {
 		n := Nonce{pool: mockRedisPool, waitLockRelease: mockWaitLockRelease}
 
 		testError := func(err error) {
-			if err == nil || err.Error() != mockError {
-				t.Errorf("Mock error should have been raised, got %v", err)
-			}
+			e := errors.FromError(err)
+			assert.Equal(t, "nonce.redis", e.GetComponent(), "Component should be correct")
+			assert.Equal(t, "test-error", e.GetMessage(), "test-error")
 		}
 
 		// First EXISTS response
@@ -187,9 +182,10 @@ func TestReleaseLock(t *testing.T) {
 
 	// Trying to release the lock with the wrong lockSig
 	err = n.Unlock(cid, &a, "wrongLockSig")
-	if err == nil {
-		t.Fatal("Should have returned an error")
-	}
+	require.NotNil(t, err, "Release should have error on unlocking wrong lock")
+	e := errors.FromError(err)
+	assert.Equal(t, "nonce.redis", e.GetComponent(), "Component should be correct")
+	assert.True(t, errors.IsInternalError(err), "Error should be from correct class")
 
 	err = n.Unlock(cid, &a, lockSig)
 	if err != nil {

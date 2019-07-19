@@ -1,7 +1,6 @@
 package redis
 
 import (
-	"errors"
 	"fmt"
 	"math/big"
 	"math/rand"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gomodule/redigo/redis"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 )
 
 // WaitLockReleaseFunc tells what to do when waiting for the lock to be released
@@ -22,13 +22,34 @@ type Nonce struct {
 	waitLockRelease WaitLockReleaseFunc // Add waitLockRelease as struct item instead of method for editing purpose in testing
 }
 
+// Conn is a wrapper around a redis.Conn that handles internal errors
+type Conn struct {
+	redis.Conn
+}
+
+func Dial(network, address string, options ...redis.DialOption) (redis.Conn, error) {
+	conn, err := redis.Dial(network, address, options...)
+	if err != nil {
+		return conn, errors.ConnectionError(err.Error())
+	}
+	return Conn{conn}, nil
+}
+
+func (conn Conn) Do(commandName string, args ...interface{}) (interface{}, error) {
+	reply, err := conn.Conn.Do(commandName, args...)
+	if err != nil {
+		return reply, errors.ConnectionError(err.Error())
+	}
+	return reply, nil
+}
+
 // Creates a new redis pool
 func NewPool(port string) *redis.Pool {
 	return &redis.Pool{
 		// TODO Fine tune those parameters or make them accessible in config file
 		MaxIdle:     10000,
 		IdleTimeout: 240 * time.Second,
-		Dial:        func() (redis.Conn, error) { return redis.Dial("tcp", port) },
+		Dial:        func() (redis.Conn, error) { return Dial("tcp", port) },
 	}
 }
 
@@ -74,14 +95,17 @@ func (nm *Nonce) Get(chainID *big.Int, a *common.Address) (nonce uint64, ok int,
 func (nm *Nonce) getIdleTime(chainID *big.Int, a *common.Address) (int, error) {
 	conn := nm.pool.Get()
 	defer conn.Close()
-	nonceKey := computeKey(chainID, a)
-	idleTime, err := redis.Int(conn.Do("OBJECT", "IDLETIME", nonceKey))
+
+	reply, err := conn.Do("OBJECT", "IDLETIME", computeKey(chainID, a))
 	if err != nil {
-		if err.Error() == redis.ErrNil.Error() {
-			return -1, nil
-		}
-		return 0, err
+		return 0, errors.FromError(err).SetComponent(component)
 	}
+
+	idleTime, err := redis.Int(reply, nil)
+	if err != nil {
+		return 0, FromRedisError(err).SetComponent(component)
+	}
+
 	return idleTime, nil
 }
 
@@ -89,10 +113,15 @@ func (nm *Nonce) getIdleTime(chainID *big.Int, a *common.Address) (int, error) {
 func (nm *Nonce) getCache(chainID *big.Int, a *common.Address) (uint64, error) {
 	conn := nm.pool.Get()
 	defer conn.Close()
-	nonceKey := computeKey(chainID, a)
-	r, err := redis.Uint64(conn.Do("GET", nonceKey))
+
+	reply, err := conn.Do("GET", computeKey(chainID, a))
 	if err != nil {
-		return 0, err
+		return 0, errors.FromError(err).SetComponent(component)
+	}
+
+	r, err := redis.Uint64(reply, nil)
+	if err != nil {
+		return 0, FromRedisError(err).SetComponent(component).SetComponent(component)
 	}
 	return r, nil
 }
@@ -101,10 +130,9 @@ func (nm *Nonce) getCache(chainID *big.Int, a *common.Address) (uint64, error) {
 func (nm *Nonce) Set(chainID *big.Int, a *common.Address, newNonce uint64) error {
 	conn := nm.pool.Get()
 	defer conn.Close()
-	nonceKey := computeKey(chainID, a)
-	_, err := conn.Do("SET", nonceKey, newNonce)
+	_, err := conn.Do("SET", computeKey(chainID, a), newNonce)
 	if err != nil {
-		return err
+		return errors.FromError(err).SetComponent(component)
 	}
 	return nil
 }
@@ -117,9 +145,8 @@ func (nm *Nonce) Lock(chainID *big.Int, a *common.Address) (string, error) {
 	defer conn.Close()
 	// TODO fix a good value for timeout after tests
 	hasLock, err := conn.Do("SET", computeLockName(chainID, a), lockSig, "NX", "PX", strconv.Itoa(nm.timeout))
-
 	if err != nil {
-		return "", err
+		return "", errors.FromError(err).SetComponent(component)
 	}
 
 	if hasLock != "OK" {
@@ -136,10 +163,12 @@ func (nm *Nonce) Lock(chainID *big.Int, a *common.Address) (string, error) {
 // wait for a signal saying that the lock has been released or for timeout
 func waitLockRelease(chainID *big.Int, a *common.Address, c redis.Conn, timeout time.Duration) error {
 	psc := redis.PubSubConn{Conn: c}
+
 	err := psc.PSubscribe("__keyspace@*__:" + computeLockName(chainID, a))
 	if err != nil {
-		return err
+		return errors.ConnectionError(err.Error()).SetComponent(component)
 	}
+
 loop:
 	for start := time.Now(); time.Since(start) < timeout; {
 		switch n := psc.ReceiveWithTimeout(timeout).(type) {
@@ -158,10 +187,12 @@ func (nm *Nonce) Unlock(chainID *big.Int, a *common.Address, lockSig string) err
 	conn := nm.pool.Get()
 	defer conn.Close()
 	lockName := computeLockName(chainID, a)
+
 	raw, err := conn.Do("GET", lockName)
 	if err != nil {
-		return err
+		return errors.FromError(err).SetComponent(component)
 	}
+
 	var value string
 	switch raw := raw.(type) {
 	case nil:
@@ -172,12 +203,14 @@ func (nm *Nonce) Unlock(chainID *big.Int, a *common.Address, lockSig string) err
 	case string:
 		value = raw
 	}
+
 	if value == lockSig {
 		_, err := conn.Do("DEL", lockName)
 		if err != nil {
-			return err
+			return errors.FromError(err).SetComponent(component)
 		}
 		return nil
 	}
-	return errors.New("lock based on another locking signature, did not unlock the lock")
+
+	return errors.InternalError("lock keys do not match lock signature").SetComponent(component)
 }
