@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.3
+
+*Released on July 19th 2019*
+
+- [FIX] Bump `pkg` version to `0.7.1`
+
 ### Version 0.4.2
 
 *Released on July 19th 2019*
