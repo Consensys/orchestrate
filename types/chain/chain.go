@@ -1,8 +1,19 @@
 package chain
 
 import (
+	"log"
 	"math/big"
 )
+
+// CreateChainString creates a new chain id from an string value
+func CreateChainString(chainID string) *Chain {
+	id := new(big.Int)
+	id, ok := id.SetString(chainID, 10)
+	if !ok {
+		log.Fatalf("Cannot cast string to big.Int: %v", chainID)
+	}
+	return CreateChainBigInt(id)
+}
 
 // CreateChainInt creates a new chain id from an integer value
 func CreateChainInt(chainID int64) *Chain {
