@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.7.2
+
+*Released on July 19th 2019*
+
+- [FIX] Added "IsSigned" method
+
 ### Version 0.7.1
 
 *Released on July 18th 2019*
