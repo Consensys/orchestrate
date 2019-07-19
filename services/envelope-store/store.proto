@@ -43,9 +43,6 @@ message StoreResponse {
     
     // Envelope
     envelope.Envelope envelope = 3;
-    
-    // Error
-    error.Error err = 4;
 }
 
 message TxHashRequest {
@@ -80,7 +77,4 @@ message LoadPendingRequest {
 message LoadPendingResponse {
     // Pending envelopes
     repeated envelope.Envelope envelopes = 1;
-
-    // Error
-    error.Error err = 2;
 }
