@@ -42,7 +42,7 @@ func newRunCommand() *cobra.Command {
 	broker.KafkaTopicTxDecoder(runCmd.Flags())
 
 	// Register StoreGRPC flags
-	storegrpc.StoreTarget(runCmd.Flags())
+	storegrpc.EnvelopeStoreGRPCTarget(runCmd.Flags())
 
 	// Listener flags
 	listener.InitFlags(runCmd.Flags())
