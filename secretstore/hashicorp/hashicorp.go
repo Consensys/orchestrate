@@ -2,12 +2,12 @@ package hashicorp
 
 import (
 	"encoding/json"
-	"fmt"
 	"sync"
 	"time"
 
 	"github.com/hashicorp/vault/api"
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 )
 
 // HashiCorp wraps a hashicorps client an manage the unsealing
@@ -19,15 +19,17 @@ type HashiCorp struct {
 
 // NewHashiCorp construct a new hashicorps vault given a configfile or nil
 func NewHashiCorp(config *api.Config) (*HashiCorp, error) {
-
 	if config == nil {
 		// This will read the environments variable
 		config = api.DefaultConfig()
+		if config.Error != nil {
+			return nil, errors.ConfigError(config.Error.Error()).SetComponent(component)
+		}
 	}
 
 	client, err := api.NewClient(config)
 	if err != nil {
-		return nil, err
+		return nil, errors.ConnectionError(config.Error.Error()).SetComponent(component)
 	}
 
 	_ = WithVaultToken(client) // If the token was not found. The error is ignored
@@ -41,7 +43,6 @@ func NewHashiCorp(config *api.Config) (*HashiCorp, error) {
 }
 
 func (hash *HashiCorp) manageToken() {
-
 	secret, err := hash.Client.Auth().Token().LookupSelf()
 	if err != nil {
 		log.Fatalf("Initial token lookup failed : %v", err)
@@ -87,13 +88,19 @@ func (hash *HashiCorp) manageToken() {
 }
 
 // Store writes in the vault
-func (hash *HashiCorp) Store(key, value string) (err error) {
+func (hash *HashiCorp) Store(key, value string) error {
 	sec := NewSecret(key, value)
 	sec.SetClient(hash.Client)
 
 	hash.mut.Lock()
 	defer hash.mut.Unlock()
-	return sec.Update()
+
+	err := sec.Update()
+	if err != nil {
+		return errors.FromError(err).ExtendComponent(component)
+	}
+
+	return nil
 }
 
 // Load reads in the vault
@@ -103,17 +110,28 @@ func (hash *HashiCorp) Load(key string) (value string, ok bool, err error) {
 
 	hash.mut.Lock()
 	defer hash.mut.Unlock()
-	return sec.GetValue()
+
+	v, ok, err := sec.GetValue()
+	if err != nil {
+		return "", false, errors.FromError(err).ExtendComponent(component)
+	}
+
+	return v, ok, nil
 }
 
 // Delete removes a path in the vault
-func (hash *HashiCorp) Delete(key string) (err error) {
+func (hash *HashiCorp) Delete(key string) error {
 	sec := NewSecret(key, "")
 	sec.SetClient(hash.Client)
 
 	hash.mut.Lock()
 	defer hash.mut.Unlock()
-	return sec.Delete()
+	err := sec.Delete()
+	if err != nil {
+		return errors.FromError(err).ExtendComponent(component)
+	}
+
+	return nil
 }
 
 // List returns the list of all secrets stored in the vault
@@ -123,7 +141,12 @@ func (hash *HashiCorp) List() (keys []string, err error) {
 
 	hash.mut.Lock()
 	defer hash.mut.Unlock()
-	return sec.List("")
+
+	keys, err = sec.List("")
+	if err != nil {
+		return keys, errors.FromError(err).ExtendComponent(component)
+	}
+	return keys, nil
 }
 
 // RenewTokenLoop handle the token renewal of the application
@@ -159,7 +182,7 @@ func (loop *RenewTokenLoop) Refresh() error {
 		if retry < loop.RtlMaxNumberRetry {
 			// Max number number of retry reached : graceful shutdown
 			log.Error("Graceful shutdown of the vault, the token could not be renewed")
-			return fmt.Errorf("token refresh failed, we got over the max_retry : %v ", err.Error())
+			return errors.InternalError("token refresh failed (%v)", err).SetComponent(component)
 		}
 
 		time.Sleep(time.Duration(loop.RtlTimeRetry) * time.Second)

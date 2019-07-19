@@ -23,3 +23,16 @@ type KeyStore interface {
 	// ImportPrivateKey creates a wallet
 	ImportPrivateKey(priv string) (err error)
 }
+
+// ImportPrivateKey create new Key Store
+func ImportPrivateKey(k KeyStore, pkeys []string) error {
+	// Pre-Import Pkeys
+	for _, pkey := range pkeys {
+		err := k.ImportPrivateKey(pkey)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

@@ -1,12 +1,12 @@
 package session
 
 import (
-	"fmt"
 	"math/big"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/keystore/wallet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/secretstore/services"
@@ -35,7 +35,7 @@ func (sess *TxSignatureSession) SetWallet(address *ethcommon.Address) error {
 	w := wallet.NewWallet(sess.secretStore)
 	err := w.Load(address)
 	if err != nil {
-		return fmt.Errorf("Could not retrieve private key for address : " + err.Error())
+		return errors.FromError(err).ExtendComponent(component)
 	}
 
 	sess.wallet = w
@@ -56,16 +56,14 @@ func (sess *TxSignatureSession) SetTx(tx *ethtypes.Transaction) error {
 
 // getSigner is internal function that returns an object used during the process
 func (sess *TxSignatureSession) getSigner() (ethtypes.Signer, error) {
-
 	var signer ethtypes.Signer
 	if sess.chain == nil {
-		return nil, fmt.Errorf("chain has not been set")
+		return nil, errors.FailedPreconditionError("chain not set").ExtendComponent(component)
 	}
 
 	// We copy chain ID to ensure pointer can be safely used elsewhere
-	id := new(big.Int)
-	id.Set(sess.chain.ID())
-	signer = ethtypes.NewEIP155Signer(id)
+	signer = ethtypes.NewEIP155Signer(new(big.Int).Set(sess.chain.ID()))
+
 	return signer, nil
 }
 
@@ -79,17 +77,17 @@ func (sess *TxSignatureSession) Run() (err error) {
 
 	t, err := ethtypes.SignTx(sess.tx, signer, sess.wallet.Priv())
 	if err != nil {
-		return err
+		return errors.CryptoOperationError(err.Error()).SetComponent(component)
 	}
 
 	// Set raw transaction
 	signedRaw, err := rlp.EncodeToBytes(t)
 	if err != nil {
-		return err
+		return errors.InternalError(err.Error()).SetComponent(component)
 	}
 
 	txHash := t.Hash()
-	sess.Raw = signedRaw
-	sess.Hash = &txHash
+	sess.Raw, sess.Hash = signedRaw, &txHash
+
 	return nil
 }

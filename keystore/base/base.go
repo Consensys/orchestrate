@@ -1,10 +1,9 @@
 package base
 
 import (
-	"fmt"
-
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/keystore/session"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/keystore/wallet"
@@ -29,21 +28,23 @@ func (s *KeyStore) SignTx(netChain *chain.Chain, a ethcommon.Address, tx *ethtyp
 	sess := session.MakeTxSignature(s.SecretStore)
 	err = sess.SetWallet(&a)
 	if err != nil {
-		return []byte{}, nil, err
+		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
 	}
+
 	err = sess.SetChain(netChain)
 	if err != nil {
-		return []byte{}, nil, err
+		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
 	}
+
 	err = sess.SetTx(tx)
 	if err != nil {
-		return []byte{}, nil, err
+		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
 	}
 
 	// Run signing session
 	err = sess.Run()
 	if err != nil {
-		return []byte{}, nil, err
+		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
 	}
 
 	return sess.Raw, sess.Hash, nil
@@ -51,7 +52,7 @@ func (s *KeyStore) SignTx(netChain *chain.Chain, a ethcommon.Address, tx *ethtyp
 
 // SignMsg returns a signed message and its hash
 func (s *KeyStore) SignMsg(a ethcommon.Address, msg string) (rsv []byte, hash *ethcommon.Hash, err error) {
-	return []byte{}, nil, fmt.Errorf("not implemented yet")
+	return []byte{}, nil, errors.FeatureNotSupportedError("SignMsg not implemented yet").SetComponent(component)
 }
 
 // SignRawHash returns a signed raw hash
@@ -60,7 +61,7 @@ func (s *KeyStore) SignRawHash(
 	hash []byte,
 ) (rsv []byte, err error) {
 
-	return []byte{}, fmt.Errorf("not implemented yet")
+	return []byte{}, errors.FeatureNotSupportedError("SignRawHash not implemented yet").SetComponent(component)
 }
 
 // GenerateWallet create and stores a new wallet in the vault
@@ -68,12 +69,12 @@ func (s *KeyStore) GenerateWallet() (add *ethcommon.Address, err error) {
 	w := wallet.NewWallet(s.SecretStore)
 	err = w.Generate()
 	if err != nil {
-		return nil, err
+		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
 	err = w.Store()
 	if err != nil {
-		return nil, err
+		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
 	return w.Address(), nil
@@ -86,12 +87,12 @@ func (s *KeyStore) ImportPrivateKey(priv string) (err error) {
 	w := wallet.NewWallet(s.SecretStore)
 	err = w.FromPrivateKey(priv)
 	if err != nil {
-		return err
+		return errors.FromError(err).ExtendComponent(component)
 	}
 
 	err = w.Store()
 	if err != nil {
-		return err
+		return errors.FromError(err).ExtendComponent(component)
 	}
 
 	return nil

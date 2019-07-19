@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/vault/api"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 )
 
 // SecretKV2 contains a key/value secret
@@ -31,10 +32,10 @@ func (s *SecretKV2) SetClient(client *api.Client) {
 func (s *SecretKV2) SaveNew() (err error) {
 	fetched, _, err := s.GetValue()
 	if fetched != "" {
-		return fmt.Errorf("secret %q already exists", s.key)
+		return errors.AlreadyExistsError("secret %q already exists", s.key).SetComponent(component)
 	}
 	if err != nil {
-		return err
+		return errors.ConnectionError(err.Error()).SetComponent(component)
 	}
 	return s.Update()
 }
@@ -47,7 +48,7 @@ func (s *SecretKV2) GetValue() (value string, ok bool, err error) {
 		fmt.Sprintf("%v/data/%v/%v", GetMountPoint(), GetSecretPath(), s.key),
 	)
 	if err != nil {
-		return "", false, err
+		return "", false, errors.ConnectionError(err.Error()).SetComponent(component)
 	}
 
 	// When the secret does not exist the client returns nil, nil.
@@ -73,7 +74,7 @@ func (s *SecretKV2) Update() error {
 	)
 
 	if err != nil {
-		return err
+		return errors.ConnectionError(err.Error()).SetComponent(component)
 	}
 
 	return nil
@@ -87,7 +88,7 @@ func (s *SecretKV2) Delete() error {
 		fmt.Sprintf("%v/metadata/%v/%v", GetMountPoint(), GetSecretPath(), s.key),
 	)
 	if err != nil {
-		return err
+		return errors.ConnectionError(err.Error()).SetComponent(component)
 	}
 
 	return nil
@@ -109,7 +110,7 @@ func (s *SecretKV2) List(subPath string) ([]string, error) {
 
 	res, err := logical.List(fullPath)
 	if err != nil {
-		return nil, err
+		return nil, errors.ConnectionError(err.Error()).SetComponent(component)
 	}
 
 	if res == nil {

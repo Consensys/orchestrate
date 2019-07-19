@@ -5,6 +5,8 @@ import (
 	"sync"
 )
 
+const component = "secret-store.aws"
+
 var (
 	store    *SecretStore
 	initOnce = &sync.Once{}

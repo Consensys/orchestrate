@@ -1,11 +1,10 @@
 package aws
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 )
 
 // SecretStore can manage secrets on AWS secret manager
@@ -37,7 +36,7 @@ func (s *SecretStore) Store(key, value string) (err error) {
 // Delete removes a secret from the secret store
 func (s *SecretStore) Delete(key string) (err error) {
 	if s.client == nil {
-		return fmt.Errorf("client not set")
+		return errors.InternalError("client not set").SetComponent(component)
 	}
 
 	input := secretsmanager.DeleteSecretInput{
@@ -47,7 +46,7 @@ func (s *SecretStore) Delete(key string) (err error) {
 
 	_, err = s.client.DeleteSecret(&input)
 	if err != nil {
-		return err
+		return FromAWSError(err).SetComponent(component)
 	}
 
 	return nil
@@ -56,14 +55,14 @@ func (s *SecretStore) Delete(key string) (err error) {
 // List returns a list of available secrets
 func (s *SecretStore) List() ([]string, error) {
 	if s.client == nil {
-		return []string{}, fmt.Errorf("client not set")
+		return []string{}, errors.InternalError("client not set").SetComponent(component)
 	}
 
 	input := secretsmanager.ListSecretsInput{}
 
 	res, err := s.client.ListSecrets(&input)
 	if err != nil {
-		return []string{}, err
+		return []string{}, FromAWSError(err).SetComponent(component)
 	}
 
 	list := make([]string, len(res.SecretList))
@@ -77,7 +76,7 @@ func (s *SecretStore) List() ([]string, error) {
 // Load the secret value from the secret manager of AWS
 func (s *SecretStore) Load(key string) (value string, ok bool, err error) {
 	if s.client == nil {
-		return "", false, fmt.Errorf("client not set")
+		return "", false, errors.InternalError("client not set").SetComponent(component)
 	}
 
 	input := secretsmanager.GetSecretValueInput{
@@ -87,7 +86,7 @@ func (s *SecretStore) Load(key string) (value string, ok bool, err error) {
 
 	res, err := s.client.GetSecretValue(&input)
 	if err != nil {
-		return "", false, err
+		return "", false, FromAWSError(err).SetComponent(component)
 	}
 
 	return *res.SecretString, true, nil
@@ -95,7 +94,7 @@ func (s *SecretStore) Load(key string) (value string, ok bool, err error) {
 
 func (s *SecretStore) create(key, value string) (err error) {
 	if s.client == nil {
-		return fmt.Errorf("client not set")
+		return errors.InternalError("client not set").SetComponent(component)
 	}
 
 	input := secretsmanager.CreateSecretInput{
@@ -106,7 +105,7 @@ func (s *SecretStore) create(key, value string) (err error) {
 
 	_, err = s.client.CreateSecret(&input)
 	if err != nil {
-		return err
+		return FromAWSError(err).SetComponent(component)
 	}
 
 	return nil
@@ -114,7 +113,7 @@ func (s *SecretStore) create(key, value string) (err error) {
 
 func (s *SecretStore) update(key, value string) (err error) {
 	if s.client == nil {
-		return fmt.Errorf("client not set")
+		return errors.InternalError("client not set").SetComponent(component)
 	}
 
 	input := secretsmanager.PutSecretValueInput{
@@ -124,7 +123,7 @@ func (s *SecretStore) update(key, value string) (err error) {
 
 	_, err = s.client.PutSecretValue(&input)
 	if err != nil {
-		return err
+		return FromAWSError(err).SetComponent(component)
 	}
 
 	return nil

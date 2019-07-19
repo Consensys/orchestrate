@@ -25,7 +25,7 @@ func Init(ctx context.Context) {
 		secretstore.Init(ctx)
 		keyStore = base.NewKeyStore(secretstore.GlobalSecretStore())
 
-		err := ImportPrivateKey(keyStore)
+		err := ImportPrivateKey(keyStore, viper.GetStringSlice(secretPkeyViperKey))
 		if err != nil {
 			log.Fatalf("Key Store: Cannot import private keys, got error: %q", err)
 		}
@@ -42,18 +42,4 @@ func SetGlobalKeyStore(k KeyStore) {
 // GlobalKeyStore returns global Key Store
 func GlobalKeyStore() KeyStore {
 	return keyStore
-}
-
-// ImportPrivateKey create new Key Store
-func ImportPrivateKey(k KeyStore) error {
-
-	// Pre-Import Pkeys
-	for _, pkey := range viper.GetStringSlice(secretPkeyViperKey) {
-		err := k.ImportPrivateKey(pkey)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
 }

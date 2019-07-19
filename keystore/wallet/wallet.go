@@ -3,10 +3,10 @@ package wallet
 import (
 	"crypto/ecdsa"
 	"encoding/hex"
-	"fmt"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/secretstore/services"
 )
 
@@ -29,7 +29,7 @@ func NewWallet(sec services.SecretStore) *Wallet {
 func (w *Wallet) Generate() error {
 	prv, err := crypto.GenerateKey()
 	if err != nil {
-		return err
+		return errors.InternalError(err.Error()).SetComponent(component)
 	}
 	w.priv = prv
 	pub := prv.PublicKey
@@ -41,7 +41,7 @@ func (w *Wallet) Generate() error {
 func (w *Wallet) FromPrivateKey(priv string) error {
 	prv, err := crypto.HexToECDSA(priv)
 	if err != nil {
-		return err
+		return errors.InvalidFormatError("invalid hex private key %v...%v", priv[:5], priv[len(priv)-5:]).SetComponent(component)
 	}
 	w.priv = prv
 	pub := w.priv.PublicKey
@@ -50,31 +50,32 @@ func (w *Wallet) FromPrivateKey(priv string) error {
 }
 
 // Store saves wallet information to secret store
-func (w *Wallet) Store() (err error) {
-	pathStr := w.address.Hex()
-	return w.sec.Store(
-		pathStr,
+func (w *Wallet) Store() error {
+	if err := w.sec.Store(
+		w.address.Hex(),
 		hex.EncodeToString(crypto.FromECDSA(w.priv)),
-	)
+	); err != nil {
+		return errors.FromError(err).ExtendComponent(component)
+	}
+
+	return nil
 }
 
 // Load wallets values by fetching wallet secret store
 func (w *Wallet) Load(a *common.Address) (err error) {
 	w.address = *a
-
-	pathStr := a.Hex()
-	priv, ok, err := w.sec.Load(pathStr)
+	priv, ok, err := w.sec.Load(a.Hex())
 	if err != nil {
-		return err
+		return errors.FromError(err).ExtendComponent(component)
 	}
 
 	if !ok {
-		return fmt.Errorf("no pkey stored for account %q", a.Hex())
+		return errors.NotFoundError("no key for account %q", a.Hex())
 	}
 
 	w.priv, err = crypto.HexToECDSA(priv)
 	if err != nil {
-		return fmt.Errorf("could not deserialize %v...%v", priv[:5], priv[len(priv)-5:])
+		return errors.InvalidFormatError("invalid hex private key %v...%v", priv[:5], priv[len(priv)-5:]).SetComponent(component)
 	}
 
 	return nil

@@ -7,6 +7,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const component = "secretstore.hashicorp"
+
 var (
 	store    *HashiCorp
 	initOnce = &sync.Once{}
