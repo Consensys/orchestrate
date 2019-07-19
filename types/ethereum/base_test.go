@@ -93,7 +93,7 @@ func TestQuantity(t *testing.T) {
 }
 
 func TestData(t *testing.T) {
-	d := CreateData([]byte{1})
+	d := NewData([]byte{1})
 	assert.Equal(t, d.Hex(), "0x01", "value should match")
 
 	d.SetRaw([]byte{2})

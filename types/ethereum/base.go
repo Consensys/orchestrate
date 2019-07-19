@@ -65,13 +65,6 @@ func HexToHash(hashHex string) *Hash {
 	return NewHash(hexutil.MustDecode(hashHex))
 }
 
-// CreateHash creates an instance of Hash message from a byte array
-func CreateHash(raw []byte) *Hash {
-	return &Hash{
-		Raw: raw,
-	}
-}
-
 // Hash return Hash in Geth types
 func (h *Hash) Hash() ethcommon.Hash {
 	return ethcommon.BytesToHash(h.GetRaw())
@@ -96,16 +89,16 @@ func (h *Hash) Hex() string {
 
 // IntToQuantity creates an instance of Quantity message from a number
 func IntToQuantity(value int64) *Quantity {
-	return CreateQuantity(big.NewInt(value).Bytes())
+	return NewQuantity(big.NewInt(value).Bytes())
 }
 
 // HexToQuantity creates an instance of Quantity message from a string
 func HexToQuantity(hex string) *Quantity {
-	return CreateQuantity(hexutil.MustDecode(hex))
+	return NewQuantity(hexutil.MustDecode(hex))
 }
 
-// CreateQuantity creates an instance of Quantity message from an array of bytes
-func CreateQuantity(raw []byte) *Quantity {
+// NewQuantity creates an instance of Quantity message from an array of bytes
+func NewQuantity(raw []byte) *Quantity {
 	return &Quantity{
 		Raw: raw,
 	}
@@ -129,8 +122,8 @@ func (q *Quantity) Value() *big.Int {
 	return big.NewInt(0).SetBytes(q.GetRaw())
 }
 
-// CreateData create an instance of Data message
-func CreateData(raw []byte) *Data {
+// NewData create an instance of Data message
+func NewData(raw []byte) *Data {
 	return &Data{
 		Raw: raw,
 	}

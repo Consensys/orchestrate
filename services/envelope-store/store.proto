@@ -2,7 +2,6 @@ syntax = "proto3";
 
 import "types/envelope/envelope.proto";
 import "types/chain/chain.proto";
-import "types/error/error.proto";
 import "google/protobuf/timestamp.proto";
 
 option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope-store";
