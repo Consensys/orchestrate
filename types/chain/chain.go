@@ -4,24 +4,24 @@ import (
 	"math/big"
 )
 
-// CreateChainString creates a new chain id from an string value
-func CreateChainString(chainID string) *Chain {
+// FromString creates a new chain id from an string value
+func FromString(chainID string) *Chain {
 	id, ok := new(big.Int).SetString(chainID, 10)
 	if !ok {
 		panic("Cannot parse string to chain")
 	}
-	return CreateChainBigInt(id)
+	return FromBigInt(id)
 }
 
-// CreateChainInt creates a new chain id from an integer value
-func CreateChainInt(chainID int64) *Chain {
+// FromInt creates a new chain id from an integer value
+func FromInt(chainID int64) *Chain {
 	return &Chain{
 		Id: big.NewInt(chainID).Bytes(),
 	}
 }
 
-// CreateChainBigInt create a new chain id from a big integer value
-func CreateChainBigInt(chainID *big.Int) *Chain {
+// FromBigInt create a new chain id from a big integer value
+func FromBigInt(chainID *big.Int) *Chain {
 	return &Chain{
 		Id: chainID.Bytes(),
 	}

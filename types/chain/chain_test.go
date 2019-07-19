@@ -8,15 +8,15 @@ import (
 )
 
 func TestCreateChainInt(t *testing.T) {
-	chain := CreateChainInt(42)
+	chain := FromInt(42)
 	assert.Equal(t, int64(42), chain.ID().Int64(), "#1: Chain ID should match")
 
-	chain = CreateChainInt(1)
+	chain = FromInt(1)
 	assert.Equal(t, int64(1), chain.ID().Int64(), "#2: Chain ID should match")
 }
 
 func TestCreateChainBigInt(t *testing.T) {
-	chain := CreateChainBigInt(big.NewInt(54))
+	chain := FromBigInt(big.NewInt(54))
 	assert.Equal(t, int64(54), chain.ID().Int64(), "#3: Chain ID should match")
 
 	chain.SetID(big.NewInt(54))
@@ -24,8 +24,8 @@ func TestCreateChainBigInt(t *testing.T) {
 }
 
 func TestCreateChainString(t *testing.T) {
-	chain := CreateChainString("54")
+	chain := FromString("54")
 	assert.Equal(t, int64(54), chain.ID().Int64(), "#5: Chain ID should match")
 
-	assert.Panics(t, func() { CreateChainString("boom") }, "#6: Chain ID shouldn't parse")
+	assert.Panics(t, func() { FromString("boom") }, "#6: Chain ID shouldn't parse")
 }
