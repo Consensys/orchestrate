@@ -107,6 +107,14 @@ func (tx *Transaction) SetHash(h ethcommon.Hash) *Transaction {
 	return tx
 }
 
+// IsSigned returns true if transaction is signed, false otherwise
+func (tx *Transaction) IsSigned() bool {
+	if tx == nil {
+		return false
+	}
+	return tx.GetRaw().GetRaw() != nil && tx.GetHash().GetRaw() != nil
+}
+
 // NewTx creates a new transaction
 func NewTx() *Transaction {
 	return &Transaction{

@@ -4,7 +4,6 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.3.3 // indirect
 	github.com/Shopify/sarama v1.22.0
 	github.com/allegro/bigcache v1.2.0 // indirect
-	github.com/blang/semver v3.5.1+incompatible
 	github.com/btcsuite/btcd v0.0.0-20190605094302-a0d1e3e36d50 // indirect
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
 	github.com/ethereum/go-ethereum v1.8.27
