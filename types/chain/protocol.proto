@@ -19,4 +19,3 @@ enum ProtocolType {
     QUORUM_TESSERA = 2;
     PANTHEON_ORION = 3;
 }
-
