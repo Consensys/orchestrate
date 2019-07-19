@@ -70,4 +70,20 @@ func TestTransaction(t *testing.T) {
 		tx.GetTxData().GetNonce(),
 		"Nonce should be set",
 	)
+	assert.Truef(t,
+		tx.IsSigned(),
+		"Transaction is signed",
+	)
+}
+
+func TestTransactionWithoutRawDataAndHashAreUnsigned(t *testing.T) {
+	var tx *Transaction
+	assert.Equal(t, EmptyHash, tx.TxHash().Hex(), "Hash should be empty")
+
+	tx = NewTx()
+
+	assert.Falsef(t,
+		tx.IsSigned(),
+		"Transaction is unsigned",
+	)
 }
