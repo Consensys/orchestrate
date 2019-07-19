@@ -17,13 +17,15 @@ func TestCreateChainInt(t *testing.T) {
 
 func TestCreateChainBigInt(t *testing.T) {
 	chain := CreateChainBigInt(big.NewInt(54))
-	assert.Equal(t, int64(54), chain.ID().Int64(), "#4: Chain ID should match")
+	assert.Equal(t, int64(54), chain.ID().Int64(), "#3: Chain ID should match")
 
 	chain.SetID(big.NewInt(54))
-	assert.Equal(t, []byte{0x36}, chain.Id, "#3: Chain ID should have be correct")
+	assert.Equal(t, []byte{0x36}, chain.Id, "#4: Chain ID should have be correct")
 }
 
 func TestCreateChainString(t *testing.T) {
 	chain := CreateChainString("54")
-	assert.Equal(t, int64(54), chain.ID().Int64(), "#4: Chain ID should match")
+	assert.Equal(t, int64(54), chain.ID().Int64(), "#5: Chain ID should match")
+
+	assert.Panics(t, func() { CreateChainString("boom") }, "#6: Chain ID shouldn't parse")
 }
