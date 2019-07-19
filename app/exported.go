@@ -15,6 +15,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	server "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http/healthcheck"
+	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-signer.git/handlers"
+	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-signer.git/handlers/producer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-signer.git/handlers/vault"
 )
 
@@ -46,9 +48,18 @@ func startServer(ctx context.Context) {
 
 func initComponents(ctx context.Context) {
 	common.InParallel(
-		func() { engine.Init(ctx) },
-		func() { vault.Init(ctx) },
-		func() { broker.InitConsumerGroup(ctx) },
+		// Initialize Engine
+		func() {
+			engine.Init(ctx)
+		},
+		// Initialize Handlers
+		func() {
+			handlers.Init(ctx)
+		},
+		// Initialize ConsumerGroup
+		func() {
+			broker.InitConsumerGroup(ctx)
+		},
 	)
 }
 
@@ -57,6 +68,9 @@ func registerHandlers() {
 	engine.Register(logger.Logger)
 	engine.Register(loader.Loader)
 	engine.Register(offset.Marker)
+	engine.Register(producer.GlobalHandler())
+
+	// Specific handlers for Signer worker
 	engine.Register(vault.GlobalHandler())
 }
 

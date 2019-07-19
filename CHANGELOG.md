@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.5.2
+
+*Unreleased*
+
+- [FEAT] Use one main producer instead of composite
+
 ### Version 0.5.1
 
 *Released on July 5th 2019*

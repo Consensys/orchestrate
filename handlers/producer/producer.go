@@ -1,4 +1,4 @@
-package generator
+package producer
 
 import (
 	"github.com/Shopify/sarama"
@@ -6,6 +6,7 @@ import (
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/producer"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 )
 
 // PrepareMsg prepare message to produce from TxContexts
@@ -16,7 +17,25 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 		return err
 	}
 
-	msg.Topic = viper.GetString("kafka.topic.wallet.generated")
+	switch txctx.Msg.Entrypoint() {
+	case viper.GetString("kafka.topic.signer"):
+		// Set Topic at sender by default
+		msg.Topic = viper.GetString("kafka.topic.sender")
+
+		// Set key for Kafka partitions
+		Sender := txctx.Envelope.GetFrom().Address()
+		msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(txctx.Envelope.GetChain().ID(), Sender))
+
+		return nil
+	case viper.GetString("kafka.topic.wallet.generator"):
+		msg.Topic = viper.GetString("kafka.topic.wallet.generated")
+
+		// Set key for Kafka partitions
+		msg.Key = sarama.StringEncoder(txctx.Envelope.GetFrom().Address().Hex())
+
+		return nil
+	}
+
 	return nil
 }
 

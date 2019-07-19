@@ -17,6 +17,9 @@ race: ## Run data race detector
 mod-tidy: 
 	@go mod tidy
 
+sum-tidy:
+	@rm go.sum
+
 lint-fix:
 	@misspell -w $(GOFILES)
 	@golangci-lint run --fix
@@ -25,7 +28,7 @@ lint:
 	@misspell -error $(GOFILES)
 	@golangci-lint run
 
-tidy: mod-tidy lint-fix
+tidy: mod-tidy sum-tidy lint-fix
 
 gocache: ## Create gocache folder for building image locally
 	mkdir .gocache

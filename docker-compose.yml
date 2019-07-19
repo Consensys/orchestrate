@@ -1,9 +1,0 @@
-version: '3.7'
-
-services:
-  worker:
-    build:
-      context: .
-      args:
-        GITLAB_USER: ${GITLAB_USER}
-        GITLAB_TOKEN: ${GITLAB_TOKEN}
