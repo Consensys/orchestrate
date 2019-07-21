@@ -13,6 +13,7 @@ import (
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing"
 	server "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http/healthcheck"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-signer.git/handlers"
@@ -69,6 +70,7 @@ func registerHandlers() {
 	engine.Register(loader.Loader)
 	engine.Register(offset.Marker)
 	engine.Register(producer.GlobalHandler())
+	engine.Register(opentracing.GlobalHandler())
 
 	// Specific handlers for Signer worker
 	engine.Register(vault.GlobalHandler())

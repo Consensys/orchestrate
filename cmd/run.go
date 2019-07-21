@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/keystore"
@@ -27,6 +28,9 @@ func newRunCommand() *cobra.Command {
 
 	// Register HTTP server flags
 	http.Hostname(runCmd.Flags())
+
+	// Register Opentracing flags
+	jaeger.InitFlags(runCmd.Flags())
 
 	// Register KeyStore flags
 	hashicorp.InitFlags(runCmd.Flags())

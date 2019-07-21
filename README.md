@@ -48,7 +48,7 @@ go run e2e/consumer/main.go
 3. Run worker
 
 ```bash
-go run . run
+go run . run --jaeger-service TX-SIGNER
 ```
 
 4. Run producer that will write messages 

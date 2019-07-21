@@ -4,6 +4,8 @@
 
 *Unreleased*
 
+- [FEAT] Update `pkg` to v0.6.3
+- [FEAT] Add opentracing handler
 - [FEAT] Use one main producer instead of composite
 
 ### Version 0.5.1
