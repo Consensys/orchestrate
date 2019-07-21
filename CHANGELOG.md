@@ -2,7 +2,7 @@
 
 ### Version 0.5.2
 
-*Unreleased*
+*Released on July 21th 2019*
 
 - [FEAT] Update `pkg` to v0.6.3
 - [FEAT] Add opentracing handler
