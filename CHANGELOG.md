@@ -2,7 +2,7 @@
 
 ### Version 0.5.2
 
-*Unreleased*
+*Released on July 21st 2019*
 
 - [FEAT] Update `ethereum` to v0.6.6
 - [FEAT] Update `pkg` to v0.7.0
