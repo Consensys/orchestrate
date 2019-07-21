@@ -2,8 +2,9 @@
 
 ### Version 0.5.1
 
-*Unreleased*
+*Released on July 21st 2019*
 
+- [FEAT] Update `pkg` to v0.7.0
 - [FEAT] Update `ethereum` to v0.6.5
 - [FEAT] Add opentracing handler
 
