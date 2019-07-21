@@ -33,10 +33,7 @@ func newRunCommand() *cobra.Command {
 	ethclient.URLs(runCmd.Flags())
 
 	// Register Opentracing flags
-	jaeger.Host(runCmd.Flags())
-	jaeger.Port(runCmd.Flags())
-	jaeger.SamplerParam(runCmd.Flags())
-	jaeger.SamplerType(runCmd.Flags())
+	jaeger.InitFlags(runCmd.Flags())
 
 	// Register Kafka flags
 	broker.KafkaAddresses(runCmd.Flags())

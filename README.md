@@ -16,7 +16,7 @@ docker-compose -f e2e/docker-compose.yml up
 2. Run worker
 
 ```bash
-REDIS_ADDRESS=localhost:6379 REDIS_LOCKTIMEOUT=1500 ETH_CLIENT_URL=http://localhost:8545 go run . run
+REDIS_ADDRESS=localhost:6379 REDIS_LOCKTIMEOUT=1500 ETH_CLIENT_URL=http://localhost:8545 go run . run --jaeger-service TX-NONCE
 ```
 
 3. Run producer that will write messages 

@@ -7,7 +7,7 @@ services:
       ZOOKEEPER_CLIENT_PORT: 32181
       ZOOKEEPER_TICK_TIME: 2000
     networks:
-      - kafka
+      - tx-nonce
 
   kafka:
     image: confluentinc/cp-kafka:latest
@@ -21,14 +21,14 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     networks:
-      - kafka
+      - tx-nonce
 
   redis:
     image: redis
     ports: 
       - 6379:6379
     networks:
-      - nonce
+      - tx-nonce
     command: redis-server /usr/local/etc/redis/redis.conf
     volumes:
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
@@ -40,6 +40,23 @@ services:
       - ${GANACHE_PORT-8545}:8545
     volumes:
       - chain-data:/db
+    networks:
+      - tx-nonce
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.8
+    environment:
+      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+    ports:
+      - 5775:5775/udp
+      - 6831:6831/udp
+      - 6832:6832/udp
+      - 5778:5778
+      - 16686:16686
+      - 14268:14268
+      - 9411:9411
+    networks:
+      - tx-nonce
 
 volumes:
   chain-data:
@@ -47,7 +64,5 @@ volumes:
 
 
 networks:
-  kafka:
-    driver: bridge
-  nonce:
+  tx-nonce:
     driver: bridge
