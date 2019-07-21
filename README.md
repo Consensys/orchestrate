@@ -45,7 +45,7 @@ This script will fetch topic ids using Ethereum JSON RPC and create necessary to
 **4. Run worker**
 
 ```bash
-go run . run
+go run . run --jaeger-service TX-DECODER
 ```
 
 **5. Run producer**

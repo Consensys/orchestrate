@@ -12,6 +12,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-decoder.git/app"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing/jaeger"
 )
 
 func newRunCommand() *cobra.Command {
@@ -32,6 +33,9 @@ func newRunCommand() *cobra.Command {
 
 	// Register Decoder flags
 	registry.ABIs(runCmd.Flags())
+
+	// Register Opentracing flags
+	jaeger.InitFlags(runCmd.Flags())
 
 	// Register Kafka flags
 	broker.KafkaAddresses(runCmd.Flags())
