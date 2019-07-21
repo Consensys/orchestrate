@@ -1,5 +1,13 @@
 # CHANGELOG
 
+### Version 0.5.2
+
+*Unreleased*
+
+- [FEAT] Update `ethereum` to v0.6.6
+- [FEAT] Update `pkg` to v0.7.0
+- [FEAT] Add opentracing handler
+
 ### Version 0.5.1
 
 *Released on July 2nd 2019*

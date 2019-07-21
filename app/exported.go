@@ -13,6 +13,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/loader"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/logger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/offset"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing"
 	server "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http/healthcheck"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-sender.git/handlers"
@@ -48,19 +49,13 @@ func startServer(ctx context.Context) {
 func initComponents(ctx context.Context) {
 	common.InParallel(
 		// Initialize Engine
-		func() {
-			engine.Init(ctx)
-		},
+		func() { engine.Init(ctx) },
 
 		// Initialize Handlers
-		func() {
-			handlers.Init(ctx)
-		},
+		func() { handlers.Init(ctx) },
 
 		// Initialize ConsumerGroup
-		func() {
-			broker.InitConsumerGroup(ctx)
-		},
+		func() { broker.InitConsumerGroup(ctx) },
 	)
 }
 
@@ -69,6 +64,7 @@ func registerHandlers() {
 	engine.Register(logger.Logger)
 	engine.Register(loader.Loader)
 	engine.Register(offset.Marker)
+	engine.Register(opentracing.GlobalHandler())
 
 	// Specific handlers tk Sender worker
 	engine.Register(sender.GlobalHandler())

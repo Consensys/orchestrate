@@ -37,7 +37,14 @@ func (s *MockTxSender) SendTransaction(ctx context.Context, chainID *big.Int, ar
 	return ethcommon.HexToHash("0x" + RandString(32)), nil
 }
 
-func (s *MockTxSender) SendRawPrivateTransaction(ctx context.Context, chainID *big.Int, raw string, args *types.PrivateArgs) (ethcommon.Hash, error) {
+func (s *MockTxSender) SendRawPrivateTransaction(ctx context.Context, chainID *big.Int, raw []byte, args *types.PrivateArgs) (ethcommon.Hash, error) {
+	if chainID.Text(10) == "0" {
+		return ethcommon.Hash{}, fmt.Errorf("could not send")
+	}
+	return ethcommon.Hash{}, nil
+}
+
+func (s *MockTxSender) SendQuorumRawPrivateTransaction(ctx context.Context, chainID *big.Int, signedTxHash []byte, privateFor []string) (ethcommon.Hash, error) {
 	if chainID.Text(10) == "0" {
 		return ethcommon.Hash{}, fmt.Errorf("could not send")
 	}

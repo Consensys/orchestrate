@@ -26,14 +26,14 @@ func newRunCommand() *cobra.Command {
 	// Register Engine flags
 	engine.InitFlags(runCmd.Flags())
 
-	// Register Opentracing flags
-	jaeger.InitFlags(runCmd.Flags())
-
 	// Register HTTP server flags
 	http.Hostname(runCmd.Flags())
 
 	// Register Ethereum client flags
 	ethclient.URLs(runCmd.Flags())
+
+	// Register Opentracing flags
+	jaeger.InitFlags(runCmd.Flags())
 
 	// Register Kafka flags
 	broker.KafkaAddresses(runCmd.Flags())

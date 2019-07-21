@@ -45,6 +45,7 @@ func newMessage() *sarama.ProducerMessage {
 					GasPrice: ethereum.HexToQuantity("0xee6b2800"),
 					Data:     ethereum.HexToData("0xabcd"),
 				},
+				// TODO: fix the tx hash. At the moment it sends a trasaction with nonce = 1 which failed when sent to a network (e.g. ganache)
 				Raw:  ethereum.HexToData("0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80"),
 				Hash: ethereum.HexToHash("0x" + RandString(64)),
 			},
@@ -94,7 +95,7 @@ func main() {
 		}
 	}()
 
-	rounds := 10
+	rounds := 1
 	for i := 0; i < rounds; i++ {
 		p.Input() <- newMessage()
 	}

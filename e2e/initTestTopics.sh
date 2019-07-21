@@ -6,12 +6,6 @@ set -Eeu
 echo "Creating topics if not exist..."
 
 TOPICS=(tx-sender)
-TX_DECODER=tx-decoder
-
-for ENDPOINT in ${ETH_CLIENT_URL-http://localhost:8545}
-do
-    TOPICS+=($TX_DECODER-$(curl -H "Content-Type: application/json" -X POST --data '{"jsonrpc":"2.0","method":"net_version","params":[],"id":1}' $ENDPOINT | jq .result | jq tonumber))
-done
 
 for NAME in ${TOPICS[@]}
 do
