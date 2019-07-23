@@ -74,6 +74,23 @@ var ERC20bis = []byte(
         "name": "MinterAdded",
         "type": "event"
       },
+	  {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "name": "account2",
+            "type": "address"
+          }
+        ],
+        "name": "MinterAddedBis",
+        "type": "event"
+      },
       {
         "constant": true,
         "inputs": [

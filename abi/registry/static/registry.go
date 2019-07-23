@@ -69,7 +69,8 @@ func (r *Registry) RegisterContract(contract *abi.Contract) error {
 		return errors.FromError(err).ExtendComponent(component)
 	}
 
-	for _, method := range contractAbi.Methods {
+	for _, m := range contractAbi.Methods {
+		method := m
 		var id [4]byte
 		copy(id[:], method.Id())
 		if contract.DeployedBytecode != nil {
@@ -84,7 +85,7 @@ func (r *Registry) RegisterContract(contract *abi.Contract) error {
 		// Register in default methods if not present
 		found := false
 		for _, m := range r.methods[defaultCodehash][id] {
-			if reflect.DeepEqual(m, &method) {
+			if reflect.DeepEqual(*m, method) {
 				found = true
 			}
 		}
@@ -93,7 +94,8 @@ func (r *Registry) RegisterContract(contract *abi.Contract) error {
 		}
 	}
 
-	for _, event := range contractAbi.Events {
+	for _, e := range contractAbi.Events {
+		event := e
 		indexedCount := getIndexedCount(event)
 
 		if contract.DeployedBytecode != nil {
@@ -116,7 +118,7 @@ func (r *Registry) RegisterContract(contract *abi.Contract) error {
 		// Register in default events if not present
 		found := false
 		for _, e := range r.events[defaultCodehash][event.Id()][indexedCount] {
-			if reflect.DeepEqual(e, &event) {
+			if reflect.DeepEqual(*e, event) {
 				found = true
 			}
 		}
