@@ -2,7 +2,7 @@
 
 ### Version 0.6.10
 
-*Unreleased*
+*Released on July 23th 2019*
 
 - [FIX] Fix error returns on `EthClient`
 
