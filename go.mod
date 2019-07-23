@@ -12,7 +12,9 @@ require (
 	github.com/spf13/viper v1.3.1
 	github.com/stretchr/testify v1.3.0
 	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.7.0
-	golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3
+	gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.6.8
+	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
+	golang.org/x/net v0.0.0-20190628185345-da137c7871d7
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 )

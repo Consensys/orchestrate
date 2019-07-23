@@ -1,6 +1,8 @@
 package base
 
 import (
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
+
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
@@ -30,19 +32,51 @@ func (s *KeyStore) SignTx(netChain *chain.Chain, a ethcommon.Address, tx *ethtyp
 	if err != nil {
 		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
 	}
-
-	err = sess.SetChain(netChain)
-	if err != nil {
-		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
-	}
-
-	err = sess.SetTx(tx)
-	if err != nil {
-		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
-	}
+	sess.SetChain(netChain)
+	sess.SetTx(tx)
 
 	// Run signing session
 	err = sess.Run()
+	if err != nil {
+		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	return sess.Raw, sess.Hash, nil
+}
+
+// SignPrivateOrionTx signs a private transaction
+func (s *KeyStore) SignPrivateOrionTx(netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction, privateArgs *types.PrivateArgs) (raw []byte, txHash *ethcommon.Hash, err error) {
+	// Creates a new signing session
+	sess := session.MakeTxSignature(s.SecretStore)
+	err = sess.SetWallet(&a)
+	if err != nil {
+		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
+	}
+	sess.SetChain(netChain)
+	sess.SetTx(tx)
+	sess.SetPrivateArgs(privateArgs)
+
+	// Run signing session
+	err = sess.SignPrivateOrionTransaction()
+	if err != nil {
+		return []byte{}, nil, err
+	}
+
+	return sess.Raw, sess.Hash, nil
+}
+
+// SignPrivateTesseraTx signs a private transaction using Tessera
+func (s *KeyStore) SignPrivateTesseraTx(netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction) (raw []byte, txHash *ethcommon.Hash, err error) {
+	// Creates a new signing session
+	sess := session.MakeTxSignature(s.SecretStore)
+	err = sess.SetWallet(&a)
+	if err != nil {
+		return []byte{}, nil, err
+	}
+	sess.SetTx(tx)
+
+	// Run signing session
+	err = sess.SignPrivateTesseraTransaction()
 	if err != nil {
 		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
 	}
