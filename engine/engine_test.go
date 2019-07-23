@@ -22,6 +22,9 @@ type StringMsg string
 
 // Entrypoint is a dummy implementation of the method "Entrypoint of the dummy engine"
 func (s StringMsg) Entrypoint() string { return "" }
+func (s StringMsg) Header() Header     { return nil }
+func (s StringMsg) Key() []byte        { return nil }
+func (s StringMsg) Value() []byte      { return nil }
 
 func (h *TestHandler) Handler(t *testing.T) HandlerFunc {
 	return func(txctx *TxContext) {

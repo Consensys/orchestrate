@@ -16,8 +16,8 @@ type TxContext struct {
 	// Envelope stores all information about transaction lifecycle
 	Envelope *envelope.Envelope
 
-	// Message that triggered TxContext execution (typically a sarama.ConsumerMessage)
-	Msg Msg
+	// Input message
+	In Msg
 
 	// Array of sequences of handlers to execute on a given context
 	stack []*sequence
@@ -48,7 +48,7 @@ func NewTxContext() *TxContext {
 // Reset re-initialize TxContext
 func (txctx *TxContext) Reset() {
 	txctx.ctx = nil
-	txctx.Msg = nil
+	txctx.In = nil
 	txctx.Envelope.Reset()
 	txctx.stack = nil
 	txctx.Logger = nil
@@ -89,7 +89,7 @@ func (txctx *TxContext) AbortWithError(err error) *ierror.Error {
 // Prepare re-initializes TxContext, set handlers, set logger and set message
 func (txctx *TxContext) Prepare(logger *log.Entry, msg Msg) *TxContext {
 	txctx.Reset()
-	txctx.Msg = msg
+	txctx.In = msg
 	txctx.Logger = logger
 	return txctx
 }
@@ -174,14 +174,9 @@ func (seq *sequence) abort() {
 	seq.index = len(seq.handlers)
 }
 
+// CombineHandlers returns a composite of several handlers
 func CombineHandlers(handlers ...HandlerFunc) HandlerFunc {
 	return func(txctx *TxContext) {
 		txctx.applyHandlers(handlers...)
 	}
-}
-
-// Msg is an abstract interface supported by any kind of message handled by the engine
-type Msg interface {
-	// Entrypoint returns an indication on where the message comes from
-	Entrypoint() string
 }

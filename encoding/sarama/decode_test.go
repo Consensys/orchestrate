@@ -4,17 +4,18 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
 
-func newConsumerMessage() *sarama.Msg {
-	msg := sarama.Msg{}
-	msg.Value, _ = proto.Marshal(testEnvelope)
+func newConsumerMessage() *broker.Msg {
+	msg := broker.Msg{}
+	msg.ConsumerMessage.Value, _ = proto.Marshal(testEnvelope)
 	return &msg
 }
 
@@ -41,8 +42,8 @@ func TestUnmarshaller(t *testing.T) {
 }
 
 func TestUnmarshallerError(t *testing.T) {
-	msg := &sarama.Msg{
-		Value: []byte{0xab, 0x10},
+	msg := &broker.Msg{
+		ConsumerMessage: sarama.ConsumerMessage{Value: []byte{0xab, 0x10}},
 	}
 	pb := &ethereum.TxData{}
 	err := errors.FromError(Unmarshal(msg, pb))

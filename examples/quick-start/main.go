@@ -10,7 +10,7 @@ import (
 
 // Define a handler method
 func handler(txctx *engine.TxContext) {
-	txctx.Logger.Infof("Handling %v\n", txctx.Msg.(examples.Msg))
+	txctx.Logger.Infof("Handling %v\n", txctx.In.(examples.Msg))
 }
 
 func main() {

@@ -16,8 +16,8 @@ import (
 // Define a handler method
 func handler(txctx *engine.TxContext) {
 	txctx.Logger.WithFields(log.Fields{
-		"offset":    txctx.Msg.(*broker.Msg).Offset,
-		"partition": txctx.Msg.(*broker.Msg).Partition,
+		"offset":    txctx.In.(*broker.Msg).Offset,
+		"partition": txctx.In.(*broker.Msg).Partition,
 	}).Infof("Handling message")
 
 	// Simulate latency

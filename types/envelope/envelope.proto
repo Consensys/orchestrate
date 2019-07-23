@@ -23,13 +23,16 @@ message Metadata {
     map<string, string> extra = 2;
 }
 
-// Args provided when requesting transaction orchestration
+// Args are provided when requesting an execution
 message Args {
     // Arguments to craft transaction
     args.Call call = 1;
 
     // Private arguments
     args.Private private = 2;
+
+    // Arbitry data provided by user
+    ethereum.Data data = 3;
 }
 
 // Envelope wraps all information contextual to the transaction orchestrated

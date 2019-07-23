@@ -8,12 +8,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
-// Msg is a wrapper struct for sarama.ConsumerMessage that implements engine.Msg
-type Msg sarama.ConsumerMessage
-
-// Entrypoint returns the kafka topic of the message
-func (m *Msg) Entrypoint() string { return m.Topic }
-
 type consumerGroupCtxKeyType string
 
 const sessionCtxKey consumerGroupCtxKeyType = "session"

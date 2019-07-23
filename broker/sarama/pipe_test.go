@@ -26,7 +26,7 @@ func (s *TestPipeSuite) TestPipe() {
 
 	for i := 0; i < rounds; i++ {
 		msg := <-piped
-		assert.Equal(s.T(), []byte{byte(i)}, msg.(*Msg).Key, "Message should have correct Key")
+		assert.Equal(s.T(), []byte{byte(i)}, msg.(*Msg).Key(), "Message should have correct Key")
 	}
 }
 

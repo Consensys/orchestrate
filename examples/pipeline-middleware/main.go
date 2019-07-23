@@ -9,25 +9,25 @@ import (
 )
 
 func aborter(txctx *engine.TxContext) {
-	txctx.Logger.Infof("Aborting %v\n", txctx.Msg.(examples.Msg))
+	txctx.Logger.Infof("Aborting %v\n", txctx.In.(examples.Msg))
 	txctx.Abort()
 }
 
 // Define a pipeline handler
 func pipeline(txctx *engine.TxContext) {
-	txctx.Logger.Infof("Pipeline handling %v\n", txctx.Msg.(examples.Msg))
+	txctx.Logger.Infof("Pipeline handling %v\n", txctx.In.(examples.Msg))
 }
 
 // Define a middleware handler
 func middleware(txctx *engine.TxContext) {
 	// Start middleware execution
-	txctx.Logger.Infof("Middleware starts handling %v\n", txctx.Msg.(examples.Msg))
+	txctx.Logger.Infof("Middleware starts handling %v\n", txctx.In.(examples.Msg))
 
 	// Trigger execution of pending handlers
 	txctx.Next()
 
 	// Executed after pending handlers have executed
-	txctx.Logger.Infof("Middleware finishes handling %v\n", txctx.Msg.(examples.Msg))
+	txctx.Logger.Infof("Middleware finishes handling %v\n", txctx.In.(examples.Msg))
 }
 
 func main() {
