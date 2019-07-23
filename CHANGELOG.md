@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.5.2
+
+*Released on July 23th 2019*
+
+- [FIX] Update `ethereum` to v0.6.9 to fix event decoding issue
+
 ### Version 0.5.1
 
 *Released on July 21th 2019*
