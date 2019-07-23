@@ -23,7 +23,7 @@ func initStore(ctx context.Context) {
 	// Init grpc store
 	conn, err := grpc.DialContext(
 		ctx,
-		viper.GetString("grpc.store.target"),
+		viper.GetString(grpcTargetEnvelopeStoreViperKey),
 		grpc.WithInsecure(),
 		grpc.WithUnaryInterceptor(grpcerror.UnaryClientInterceptor()),
 		grpc.WithStreamInterceptor(grpcerror.StreamClientInterceptor()),
@@ -36,7 +36,7 @@ func initStore(ctx context.Context) {
 	// Set store
 	envelopeStore = NewEnvelopeStore(types.NewStoreClient(conn))
 	log.WithFields(log.Fields{
-		"grpc.store.target": conn.Target(),
+		grpcTargetEnvelopeStoreViperKey: conn.Target(),
 	}).Infof("infra-store: grpc client connected")
 
 	go func() {
