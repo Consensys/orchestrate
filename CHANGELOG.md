@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.6.9
+
+*Released on July 23th 2019*
+
+- [FIX] Copy event to avoid pointer conflict
+
 ### Version 0.6.8
 
 *Released on July 18th 2019*
