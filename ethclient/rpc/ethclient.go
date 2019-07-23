@@ -139,11 +139,15 @@ func (ec *Client) BlockByNumber(ctx context.Context, chainID, number *big.Int) (
 func (ec *Client) HeaderByHash(ctx context.Context, chainID *big.Int, hash ethcommon.Hash) (*ethtypes.Header, error) {
 	var head *ethtypes.Header
 	err := ec.getRPC(chainID).CallContext(ctx, &head, "eth_getBlockByHash", hash, false)
-	if err == nil && head == nil {
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	if head == nil {
 		return nil, errors.NotFoundError("not found").SetComponent(component)
 	}
 
-	return head, errors.FromError(err).ExtendComponent(component)
+	return head, nil
 }
 
 // HeaderByNumber returns a block header from the current canonical chain. If number is
@@ -151,11 +155,15 @@ func (ec *Client) HeaderByHash(ctx context.Context, chainID *big.Int, hash ethco
 func (ec *Client) HeaderByNumber(ctx context.Context, chainID, number *big.Int) (*ethtypes.Header, error) {
 	var head *ethtypes.Header
 	err := ec.getRPC(chainID).CallContext(ctx, &head, "eth_getBlockByNumber", toBlockNumArg(number), false)
-	if err == nil && head == nil {
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	if head == nil {
 		return nil, errors.NotFoundError("not found").SetComponent(component)
 	}
 
-	return head, errors.FromError(err).ExtendComponent(component)
+	return head, nil
 }
 
 // TransactionByHash returns the transaction with the given hash.
@@ -187,12 +195,15 @@ func (ec *Client) TransactionByHash(ctx context.Context, chainID *big.Int, hash 
 func (ec *Client) TransactionReceipt(ctx context.Context, chainID *big.Int, txHash ethcommon.Hash) (*ethtypes.Receipt, error) {
 	var r *ethtypes.Receipt
 	err := ec.getRPC(chainID).CallContext(ctx, &r, "eth_getTransactionReceipt", txHash)
-	if err == nil {
-		if r == nil {
-			return nil, errors.NotFoundError("not found").SetComponent(component)
-		}
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
 	}
-	return r, errors.FromError(err).ExtendComponent(component)
+
+	if r == nil {
+		return nil, errors.NotFoundError("not found").SetComponent(component)
+	}
+
+	return r, nil
 }
 
 func toBlockNumArg(number *big.Int) string {
@@ -242,7 +253,7 @@ func (ec *Client) SyncProgress(ctx context.Context, chainID *big.Int) (*eth.Sync
 	// Handle the possible response types
 	var syncing bool
 	if err := encoding.Unmarshal(raw, &syncing); err == nil {
-		return nil, errors.FromError(err).ExtendComponent(component) // Not syncing (always false)
+		return nil, nil
 	}
 
 	var progress *Progress

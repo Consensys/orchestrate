@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.6.10
+
+*Unreleased*
+
+- [FIX] Fix error returns on `EthClient`
+
 ### Version 0.6.9
 
 *Released on July 23th 2019*
