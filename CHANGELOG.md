@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.4.4
+
+*Released on July 23th 2019*
+
+- [FIX] Init store client configuration with correct viperKey
+- [CHORE] Rollback to v18 of docker images to fix breaking CI
+
 ### Version 0.4.3
 
 *Released on July 19th 2019*
@@ -98,4 +105,3 @@
 - [FEAT] implement `testutils.PGTestHelper`, `testutils.EnvelopeStoreTestSuite`
 - [FEAT] implement `app`
 - [FEAT] implement `cmd`
-  
