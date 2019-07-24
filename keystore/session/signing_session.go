@@ -100,10 +100,10 @@ func (sess *TxSignatureSession) Run() (err error) {
 	return nil
 }
 
-// SignPrivateOrionTransaction : once all the element of the session have been set,
+// SignPrivateEEATransaction : once all the element of the session have been set,
 // it assigns the signed transaction and the txhash
 // Calculates a transaction hash for sending private transactions for EEA extension
-func (sess *TxSignatureSession) SignPrivateOrionTransaction() (err error) {
+func (sess *TxSignatureSession) SignPrivateEEATransaction() (err error) {
 	// Should sign using the EIP155 signer
 	signer, err := sess.getSigner()
 	if err != nil {

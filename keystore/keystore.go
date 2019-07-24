@@ -12,8 +12,8 @@ type KeyStore interface {
 	// SignTx signs a transaction
 	SignTx(chain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction) (raw []byte, txHash *ethcommon.Hash, err error)
 
-	// SignPrivateTx signs a private transaction
-	SignPrivateTx(chain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction, privateArgs *types.PrivateArgs) (raw []byte, txHash *ethcommon.Hash, err error)
+	// SignPrivateEEATx signs a private transaction
+	SignPrivateEEATx(chain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction, privateArgs *types.PrivateArgs) (raw []byte, txHash *ethcommon.Hash, err error)
 
 	// SignPrivateTesseraTx signs a private transaction for Tessera transactions manager
 	// Before calling this method, "data" field in the transaction should be replaced with the result
