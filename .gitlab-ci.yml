@@ -9,7 +9,7 @@ variables:
 #  CI_DEBUG_TRACE: "true"
 
 services:
-  - docker:dind
+  - docker:18-dind
 
 cache-update:
   image: golang:1.12
@@ -30,7 +30,7 @@ cache-update:
     - master
 
 test:
-  image: docker:latest
+  image: docker:18
   stage: test
   coverage: /^total:.*\s(\d+.\d+)%/
   script:
