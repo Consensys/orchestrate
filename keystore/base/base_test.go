@@ -123,7 +123,7 @@ func TestPrivateTxSigning(t *testing.T) {
 		PrivateTxType: "restricted",
 	}
 
-	bytes, _, err := store.SignPrivateOrionTx(chain.CreateChainInt(int64(chainID)), ethcommon.HexToAddress("0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73"), tx, privateArgs)
+	bytes, _, err := store.SignPrivateTx(chain.CreateChainInt(int64(chainID)), ethcommon.HexToAddress("0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73"), tx, privateArgs)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, hexutil.Encode(bytes))
 }

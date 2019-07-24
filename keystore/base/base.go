@@ -45,7 +45,7 @@ func (s *KeyStore) SignTx(netChain *chain.Chain, a ethcommon.Address, tx *ethtyp
 }
 
 // SignPrivateOrionTx signs a private transaction
-func (s *KeyStore) SignPrivateOrionTx(netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction, privateArgs *types.PrivateArgs) (raw []byte, txHash *ethcommon.Hash, err error) {
+func (s *KeyStore) SignPrivateTx(netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction, privateArgs *types.PrivateArgs) (raw []byte, txHash *ethcommon.Hash, err error) {
 	// Creates a new signing session
 	sess := session.MakeTxSignature(s.SecretStore)
 	err = sess.SetWallet(&a)
