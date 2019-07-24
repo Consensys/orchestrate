@@ -182,12 +182,15 @@ func (sess *TxSignatureSession) SignPrivateTesseraTransaction() (err error) {
 		return err
 	}
 
-	// TODO: This does not match a hash returned by Tessera
-	// Tessera transactions should be deterministic and we should be able to generate them locally
+	txHash := hashTesseraTx(t, sess)
+	sess.Raw = signedRaw
+	sess.Hash = &txHash
+	return nil
+}
 
+func hashTesseraTx(t *ethtypes.Transaction, sess *TxSignatureSession) ethcommon.Hash {
 	v, r, s := t.RawSignatureValues()
 	privateV := calculatePrivateV(v)
-
 	txHash := rlpHash([]interface{}{
 		sess.tx.Nonce(),
 		sess.tx.GasPrice(),
@@ -199,12 +202,10 @@ func (sess *TxSignatureSession) SignPrivateTesseraTransaction() (err error) {
 		r,
 		s,
 	})
-
-	sess.Raw = signedRaw
-	sess.Hash = &txHash
-	return nil
+	return txHash
 }
 
+// Tessera replaces the "V" value with 37 or 38 if it was 27 or 28 respectively
 func calculatePrivateV(v *big.Int) *big.Int {
 	if v.Int64() == 27 {
 		return big.NewInt(37)
