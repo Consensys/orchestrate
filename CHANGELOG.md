@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.5.2
+
+*Released on July 25th 2019*
+
+- [FEAT] Private transactions signing
+
 ### Version 0.5.1
 
 *Released on July 19th 2019*
