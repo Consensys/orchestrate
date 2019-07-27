@@ -41,7 +41,7 @@ func makeCrafterContext(i int) *engine.TxContext {
 		// Input an empty envelope which return error
 		ctx.Envelope.Metadata = &envelope.Metadata{}
 		ctx.Set("errors", 1)
-		ctx.Set("expectedErrorMessage", "message:\"invalid input message format\" ")
+		ctx.Set("expectedErrorMessage", "message:\"invalid input message format\" code:1044480 ")
 		ctx.Set("result", "")
 	case 1:
 		// Input a standard envelope with an extra data with ScenarioID
@@ -61,7 +61,7 @@ func makeCrafterContext(i int) *engine.TxContext {
 		}
 		ctx.Envelope.Metadata = &envelope.Metadata{Id: "test", Extra: extra}
 		ctx.Set("errors", 1)
-		ctx.Set("expectedErrorMessage", "message:\"scenarioID unknown, envelope not dispatched\" ")
+		ctx.Set("expectedErrorMessage", "message:\"scenarioID unknown, envelope not dispatched\" code:1044480 ")
 		ctx.Set("result", "")
 	}
 
