@@ -26,21 +26,21 @@ func Sender(sender ethclient.TransactionSender, store contextStore.EnvelopeStore
 				return
 			}
 
-			// Set transaction Hash on trace
+			// Set transaction Hash on envelope
 			txctx.Envelope.GetTx().SetHash(txHash)
 			txctx.Logger = txctx.Logger.WithFields(log.Fields{
 				"tx.hash": txctx.Envelope.GetTx().GetHash(),
 			})
 			txctx.Logger.Debugf("sender: transaction sent")
 
-			// Store trace
-			// We can not store trace before sending transaction because we do not know the transaction hash
+			// Store envelope
+			// We can not store envelope before sending transaction because we do not know the transaction hash
 			// This is an issue for overall consistency of the system before/after transaction is mined
 			txctx.Logger.Infof("%v %v %v", txctx.Envelope.Chain.Id, txctx.Envelope.Tx.Hash, txctx.Envelope.Metadata.Id)
 			_, _, err = store.Store(txctx.Context(), txctx.Envelope)
 			if err != nil {
 				// Connection to store is broken
-				txctx.Logger.WithError(err).Errorf("sender: trace store failed to store trace")
+				txctx.Logger.WithError(err).Errorf("sender: envelope store failed to store envelope")
 				_ = txctx.AbortWithError(err)
 				return
 			}
@@ -49,7 +49,7 @@ func Sender(sender ethclient.TransactionSender, store contextStore.EnvelopeStore
 			err = store.SetStatus(txctx.Context(), txctx.Envelope.GetMetadata().GetId(), "pending")
 			if err != nil {
 				// Connection to store is broken
-				txctx.Logger.WithError(err).Errorf("sender: piou trace store failed to set status")
+				txctx.Logger.WithError(err).Errorf("sender: envelope store failed to set status")
 				_ = txctx.Error(err)
 				return
 			}
@@ -67,11 +67,11 @@ func Sender(sender ethclient.TransactionSender, store contextStore.EnvelopeStore
 			"from":  txctx.Envelope.GetFrom().Hex(),
 		}).Info("processing transaction")
 
-		// Store trace
+		// Store envelope
 		status, _, err := store.Store(txctx.Context(), txctx.Envelope)
 		if err != nil {
 			// Connection to store is broken
-			txctx.Logger.WithError(err).Errorf("sender: trace store failed to store trace")
+			txctx.Logger.WithError(err).Errorf("sender: envelope store failed to store envelope")
 			_ = txctx.AbortWithError(err)
 			return
 		}
@@ -96,7 +96,7 @@ func Sender(sender ethclient.TransactionSender, store contextStore.EnvelopeStore
 			storeErr := store.SetStatus(txctx.Context(), txctx.Envelope.GetMetadata().GetId(), "error")
 			if storeErr != nil {
 				// Connection to store is broken
-				txctx.Logger.WithError(storeErr).Errorf("sender: trace store failed to set status")
+				txctx.Logger.WithError(storeErr).Errorf("sender: envelope store failed to set status")
 				_ = txctx.Error(storeErr)
 			}
 			txctx.Abort()
@@ -108,7 +108,7 @@ func Sender(sender ethclient.TransactionSender, store contextStore.EnvelopeStore
 		err = store.SetStatus(txctx.Context(), txctx.Envelope.GetMetadata().GetId(), "pending")
 		if err != nil {
 			// Connection to store is broken
-			txctx.Logger.WithError(err).Errorf("sender: trace store failed to set status")
+			txctx.Logger.WithError(err).Errorf("sender: envelope store failed to set status")
 			_ = txctx.Error(err)
 			return
 		}

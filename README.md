@@ -4,7 +4,7 @@
 
 Tx-Sender is a CoreStack worker responsible for:
 
-- **Store Transaction Trace** by sending it to *API-Context-Store*;
+- **Store Transaction Envelope** by sending it to *API-Context-Store*;
 - **Send Transaction to Ethereum node**.
 
 It consumes messages from *tx signer* Kafka topic.
@@ -39,7 +39,7 @@ docker-compose -f e2e/docker-compose.yml up
 3. Run worker
 
 ```bash
-go run . run --jaeger-service TX-SENDER --http-hostname :8081 --grpc-store-target :8080 --eth-client http://localhost:8545
+go run . run --jaeger-service TX-SENDER --http-hostname :8081 --grpc-target-envelope-store :8080 --eth-client http://localhost:8545
 ```
 
 3. Run producer that will write messages 

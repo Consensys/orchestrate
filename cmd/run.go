@@ -41,7 +41,7 @@ func newRunCommand() *cobra.Command {
 	broker.KafkaTopicTxSender(runCmd.Flags())
 
 	// Register StoreGRPC flags
-	storegrpc.StoreTarget(runCmd.Flags())
+	storegrpc.EnvelopeStoreGRPCTarget(runCmd.Flags())
 
 	return runCmd
 }

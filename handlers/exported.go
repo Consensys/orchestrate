@@ -19,7 +19,7 @@ func Init(ctx context.Context) {
 			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString("jaeger.service.name"))
 			opentracing.Init(ctxWithValue)
 		},
-		// Initialize sender tracer
+		// Initialize sender
 		func() { sender.Init(ctx) },
 	)
 }

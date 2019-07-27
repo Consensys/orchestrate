@@ -11,7 +11,7 @@ variables:
 #  CI_DEBUG_TRACE: "true"
 
 services:
-  - docker:dind
+  - docker:18-dind
 
 before_script:
   # Change git config so we can import go packages from GitLab
@@ -62,7 +62,7 @@ lint:
       - tags
 
 build-on-branch:
-  image: docker:stable
+  image: docker:18
   stage: build
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
@@ -96,7 +96,7 @@ build-on-branch:
       - ${GOPATH}
 
 build-on-master:
-  image: docker:stable
+  image: docker:18
   stage: build
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
@@ -126,7 +126,7 @@ build-on-master:
       - ${GOPATH}
 
 build-on-tag:
-  image: docker:stable
+  image: docker:18
   stage: build
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
