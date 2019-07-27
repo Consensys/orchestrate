@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.5.3
+
+*Released on July 27st 2019*
+
+- [FEAT] Update `pkg` to v0.7.1
+- [FEAT] Update `envelope-store`'s interfaces to v0.4.4
+
 ### Version 0.5.2
 
 *Released on July 21st 2019*
