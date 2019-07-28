@@ -3,6 +3,7 @@ package sender
 import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	contextStore "gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
@@ -58,8 +59,8 @@ func Sender(sender ethclient.TransactionSender, store contextStore.EnvelopeStore
 		}
 
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"tx.raw":  txctx.Envelope.GetTx().GetRaw().Hex(),
-			"tx.hash": txctx.Envelope.GetTx().GetHash(),
+			"tx.raw":  utils.ShortString(txctx.Envelope.GetTx().GetRaw().Hex(), 30),
+			"tx.hash": txctx.Envelope.GetTx().GetHash().Hex(),
 		})
 
 		log.WithFields(log.Fields{
