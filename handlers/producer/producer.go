@@ -24,21 +24,25 @@ func Producer(p sarama.SyncProducer, prepareMsg PrepareMsg) engine.HandlerFunc {
 			txctx.Logger.WithError(err).Fatalf("producer: could not prepare message")
 		}
 
-		// Send message
-		partition, offset, err := p.SendMessage(msg)
-		if err != nil {
-			e := txctx.AbortWithError(err).ExtendComponent(component)
-			txctx.Logger.WithError(e).Errorf("producer: could not produce message")
-			return
+		if msg.Topic != "" {
+			// Send message
+			partition, offset, err := p.SendMessage(msg)
+			if err != nil {
+				e := txctx.AbortWithError(err).ExtendComponent(component)
+				txctx.Logger.WithError(e).Errorf("producer: could not produce message")
+				return
+			}
+
+			txctx.Logger = txctx.Logger.WithFields(log.Fields{
+				"kafka.out.partition": partition,
+				"kafka.out.offset":    offset,
+				"kafka.out.topic":     msg.Topic,
+			})
+
+			txctx.Logger.Tracef("producer: message produced")
+		} else {
+			txctx.Logger.Tracef("producer: no message produced")
 		}
-
-		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"kafka.out.partition": partition,
-			"kafka.out.offset":    offset,
-			"kafka.out.topic":     msg.Topic,
-		})
-
-		txctx.Logger.Tracef("producer: message produced")
 	}
 }
 
