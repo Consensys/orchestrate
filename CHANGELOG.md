@@ -1,5 +1,14 @@
 # CHANGELOG
 
+### Version 0.5.2
+
+*Released on July 29nd 2019*
+
+- [FEAT] Update `pkg` to v0.7.1
+- [FEAT] Update `service/envelope-store` to v0.4.4
+- [FEAT] Update `service/ethereum` to v0.6.10
+- [FEAT] Add Jaeger handler
+
 ### Version 0.5.1
 
 *Released on July 2nd 2019*
