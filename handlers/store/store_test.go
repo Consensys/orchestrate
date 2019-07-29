@@ -41,7 +41,7 @@ func makeContext(i int, store *mock.EnvelopeStore) *engine.TxContext {
 
 	switch i % 2 {
 	case 0:
-		// Prestore a trace
+		// Prestore an envelope
 		e := &envelope.Envelope{}
 		e.Chain = chain.CreateChainInt(10)
 		e.Tx = (&ethereum.Transaction{

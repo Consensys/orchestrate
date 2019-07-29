@@ -11,6 +11,7 @@ import (
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing"
 	server "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http/healthcheck"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
@@ -68,6 +69,7 @@ func registerHandlers() {
 	// Specific handlers to tx-listener
 	engine.Register(producer.GlobalHandler())
 	engine.Register(loader.Loader)
+	engine.Register(opentracing.GlobalHandler())
 	engine.Register(store.GlobalHandler())
 }
 

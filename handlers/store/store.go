@@ -7,7 +7,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store"
 )
 
-// EnvelopeLoader creates and handler that load traces
+// EnvelopeLoader creates and handler that load envelopes
 func EnvelopeLoader(s store.EnvelopeStore) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		_, _, err := s.LoadByTxHash(txctx.Context(), txctx.Envelope.GetChain().ID().String(), txctx.Envelope.GetReceipt().GetTxHash().Hex(), txctx.Envelope)
@@ -16,7 +16,7 @@ func EnvelopeLoader(s store.EnvelopeStore) engine.HandlerFunc {
 			// We got an error, possibly due to timeout Connection to database or something else
 			// TODO: what should we do in case of error?
 			_ = txctx.Error(err)
-			txctx.Logger.WithError(err).Debugf("envelope-loader: no trace stored")
+			txctx.Logger.WithError(err).Debugf("envelope-loader: no envelopes stored")
 			return
 		}
 
@@ -28,7 +28,7 @@ func EnvelopeLoader(s store.EnvelopeStore) engine.HandlerFunc {
 		err = s.SetStatus(txctx.Context(), txctx.Envelope.GetMetadata().GetId(), "mined")
 		if err != nil {
 			// Connection to store is broken
-			txctx.Logger.WithError(err).Errorf("envelope-loader: trace store failed to set status")
+			txctx.Logger.WithError(err).Errorf("envelope-loader: envelope store failed to set status")
 			_ = txctx.Error(err)
 		}
 
