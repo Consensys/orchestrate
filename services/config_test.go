@@ -9,10 +9,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestType(t *testing.T) {
+func TestStoreType(t *testing.T) {
 	name := "envelope-store.type"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	Type(flgs)
+	StoreType(flgs)
 
 	expected := "pg"
 	assert.Equal(t, expected, viper.GetString(name), "Default")
