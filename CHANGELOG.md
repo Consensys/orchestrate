@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.5.0
+
+*Unreleased*
+
+- [REFACTOR] Refactor following better packaging of GRPC resources
+
 ### Version 0.4.4
 
 *Released on July 23th 2019*
