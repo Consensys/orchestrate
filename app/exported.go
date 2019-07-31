@@ -2,15 +2,15 @@ package app
 
 import (
 	"context"
-	"net"
 	"sync"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/soheilhy/cmux"
-	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/app/grpc"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/app/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/app/infra"
+	grpcserver "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/grpc/server"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http/healthcheck"
+	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/envelope-store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/services"
+	"google.golang.org/grpc"
 )
 
 var (
@@ -23,78 +23,38 @@ func init() {
 	app = NewApp()
 }
 
-// Init application
-func initComponents() {
-	infra.Init()
-	grpc.Init()
-	http.Init()
-}
-
 // Run application
 func Start(ctx context.Context) {
 	startOnce.Do(func() {
-		// Init
-		initComponents()
+		// Initialize GRPC Server service
+		services.Init(ctx)
 
-		// Create tcp listener
-		l, err := net.Listen("tcp", viper.GetString("http.hostname"))
-		if err != nil {
-			log.WithError(err).WithFields(log.Fields{
-				"http.hostname": viper.GetString("http.hostname"),
-			}).Fatalf("Can not listen tcp connection")
-		}
+		// Initialize GRPC server
+		grpcserver.AddEnhancers(
+			func(s *grpc.Server) *grpc.Server {
+				evlpstore.RegisterStoreServer(s, services.GlobalEnvelopeStoreServer())
+				return s
+			},
+		)
+		grpcserver.Init(ctx)
 
-		// Create MUX dispatcher to properly dispatch GRPC traffic and HTTP traffic
-		tcpMux := cmux.New(l)
-		grpcL := tcpMux.MatchWithWriters(cmux.HTTP2MatchHeaderFieldPrefixSendSettings("content-type", "application/grpc"))
-		httpL := tcpMux.Match(cmux.HTTP1Fast())
-
-		// Start serving
-		wait := &sync.WaitGroup{}
-		wait.Add(3)
-
-		// Start GRPC server
-		go func() {
-			err := grpc.Server().Serve(grpcL)
-			log.WithError(err).Info("app: grpc server stopped")
-			wait.Done()
-		}()
-
-		// Start HTTP Server
-		go func() {
-			err := http.Server().Serve(httpL)
-			log.WithError(err).Info("app: http server stopped")
-			wait.Done()
-		}()
-
-		// Serve
-		go func() {
-			err := tcpMux.Serve()
-			log.WithError(err).Info("app: tcpMux server stopped")
-			wait.Done()
-		}()
-
-		log.WithFields(log.Fields{
-			"http.hostname": l.Addr(),
-		}).Infof("app: ready to receive connections")
+		// Initialize HTTP server for healthchecks
+		http.Init(ctx)
+		http.Enhance(healthcheck.HealthCheck(app))
 
 		// Indicate that application is ready
-		// TODO: we need to update so ready can append when Consume has finished to Setup
 		app.ready.Store(true)
 
-		// Wait for server to properly close
-		wait.Wait()
-
-		// Close infra
-		infra.Close()
-
-		log.Infof("app: gracefully closed")
+		// Start listening
+		err := grpcserver.ListenAndServe()
+		if err != nil {
+			log.WithError(err).Error("main: error listening")
+		}
 	})
 }
 
 // Close gracefully stops the application
 func Close(ctx context.Context) {
 	log.Warn("app: closing...")
-	go grpc.Close(ctx)
-	go http.Close(ctx)
+	grpcserver.GracefulStop(ctx)
 }
