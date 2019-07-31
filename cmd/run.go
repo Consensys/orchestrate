@@ -5,10 +5,11 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/tracing/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/app"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/services"
 )
 
 func newRunCommand() *cobra.Command {
@@ -23,6 +24,9 @@ func newRunCommand() *cobra.Command {
 
 	// Register HTTP server flags
 	http.Hostname(runCmd.Flags())
+
+	// EnvelopeStore flag
+	services.StoreType(runCmd.Flags())
 
 	return runCmd
 }
