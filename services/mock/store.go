@@ -3,13 +3,13 @@ package mock
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/envelope-store"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 )
 
 const (
@@ -22,16 +22,16 @@ const (
 // EnvelopeStore is a mock in memory version of a envelope store
 type EnvelopeStore struct {
 	mux      *sync.Mutex
-	byID     map[string]*Entry
-	byTxHash map[string]*Entry
+	byID     map[string]*EnvelopeModel
+	byTxHash map[string]*EnvelopeModel
 }
 
 // NewEnvelopeStore creates a new mock envelope store
 func NewEnvelopeStore() *EnvelopeStore {
 	return &EnvelopeStore{
 		mux:      &sync.Mutex{},
-		byID:     make(map[string]*Entry),
-		byTxHash: make(map[string]*Entry),
+		byID:     make(map[string]*EnvelopeModel),
+		byTxHash: make(map[string]*EnvelopeModel),
 	}
 }
 
@@ -44,119 +44,80 @@ func (s *EnvelopeStore) Store(ctx context.Context, req *evlpstore.StoreRequest) 
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	resp := &evlpstore.StoreResponse{}
-
-	e := req.GetEnvelope()
-	k := key(e.GetChain().ID().String(), e.GetTx().GetHash().Hex())
-	entry, ok := s.byTxHash[k]
-	if ok {
-		// Prepare response with already stored envelope
-		resp.Envelope = entry.envelope
-
-		// Update envelope
-		entry.envelope = e
-	} else {
-		// Create entry
-		entry = &Entry{
-			envelope: e,
-			Status:   STORED,
-			StoredAt: time.Now(),
-		}
-
-		// Store entry
-		s.byID[e.GetMetadata().GetId()] = entry
-		s.byTxHash[k] = entry
+	// Prepare new model to be inserted
+	model := &EnvelopeModel{
+		envelope: req.GetEnvelope(),
+		Status:   STORED,
+		StoredAt: time.Now(),
 	}
 
-	// Set response attributes
-	timestamp, err := ptypes.TimestampProto(entry.last())
-	if err != nil {
-		panic(err)
-	}
-	resp.LastUpdated = timestamp
-	resp.Status = entry.Status
+	// Store model
+	s.byID[req.GetEnvelope().GetMetadata().GetId()] = model
 
-	return resp, nil
+	k := key(req.GetEnvelope().GetChain().ID().String(), req.GetEnvelope().GetTx().GetHash().Hex())
+	s.byTxHash[k] = model
+
+	return model.ToStoreResponse()
 }
 
 // LoadByTxHash context envelope by transaction hash
-func (s *EnvelopeStore) LoadByTxHash(ctx context.Context, req *evlpstore.TxHashRequest) (*evlpstore.StoreResponse, error) {
+func (s *EnvelopeStore) LoadByTxHash(ctx context.Context, req *evlpstore.LoadByTxHashRequest) (*evlpstore.StoreResponse, error) {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	entry, ok := s.byTxHash[key(req.GetChainId().ID().String(), req.GetTxHash())]
+	model, ok := s.byTxHash[key(req.GetChain().ID().String(), req.GetTxHash().Hex())]
 	if !ok {
 		return &evlpstore.StoreResponse{},
-			errors.NotFoundError("no envelope for chain %q txHash %q", req.GetChainId().ID().String(), req.GetTxHash()).
+			errors.NotFoundError("no envelope for chain %q txHash %q", req.GetChain().ID().String(), req.GetTxHash().Hex()).
 				SetComponent(component)
 	}
 
-	timestamp, err := ptypes.TimestampProto(entry.last())
-	if err != nil {
-		panic(err)
-	}
-
-	return &evlpstore.StoreResponse{
-		Envelope:    entry.envelope,
-		Status:      entry.Status,
-		LastUpdated: timestamp,
-	}, nil
+	return model.ToStoreResponse()
 }
 
 // LoadByID context envelope by envelope ID
-func (s *EnvelopeStore) LoadByID(ctx context.Context, req *evlpstore.IDRequest) (*evlpstore.StoreResponse, error) {
+func (s *EnvelopeStore) LoadByID(ctx context.Context, req *evlpstore.LoadByIDRequest) (*evlpstore.StoreResponse, error) {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	entry, ok := s.byID[req.GetId()]
+	model, ok := s.byID[req.GetId()]
 	if !ok {
 		return &evlpstore.StoreResponse{},
 			errors.NotFoundError("no envelope for ID %q", req.GetId()).
 				SetComponent(component)
 	}
 
-	timestamp, err := ptypes.TimestampProto(entry.last())
-	if err != nil {
-		panic(err)
-	}
-
-	return &evlpstore.StoreResponse{
-		Envelope:    entry.envelope,
-		Status:      entry.Status,
-		LastUpdated: timestamp,
-	}, nil
+	return model.ToStoreResponse()
 }
 
 // SetStatus set a context status
-func (s *EnvelopeStore) SetStatus(ctx context.Context, req *evlpstore.SetStatusRequest) (*evlpstore.SetStatusResponse, error) {
+func (s *EnvelopeStore) SetStatus(ctx context.Context, req *evlpstore.SetStatusRequest) (*evlpstore.StatusResponse, error) {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	entry, ok := s.byID[req.GetId()]
+	model, ok := s.byID[req.GetId()]
 	if !ok {
-		return &evlpstore.SetStatusResponse{},
+		return &evlpstore.StatusResponse{},
 			errors.NotFoundError("no envelope for ID %q", req.GetId()).
 				SetComponent(component)
 	}
 
-	entry.Status = req.GetStatus()
-	switch entry.Status {
-	case STORED:
-		entry.StoredAt = time.Now()
-	case ERROR:
-		entry.ErrorAt = time.Now()
-	case PENDING:
-		entry.SentAt = time.Now()
-	case MINED:
-		entry.MinedAt = time.Now()
+	// Set status
+	model.Status = strings.ToLower(req.GetStatus().String())
+
+	// Update time
+	switch req.GetStatus() {
+	case evlpstore.Status_STORED:
+		model.StoredAt = time.Now()
+	case evlpstore.Status_ERROR:
+		model.ErrorAt = time.Now()
+	case evlpstore.Status_PENDING:
+		model.SentAt = time.Now()
+	case evlpstore.Status_MINED:
+		model.MinedAt = time.Now()
 	}
 
-	return &evlpstore.SetStatusResponse{}, nil
-}
-
-// GetStatus return context status and time when status changed
-func (s *EnvelopeStore) GetStatus(ctx context.Context, req *evlpstore.IDRequest) (*evlpstore.StoreResponse, error) {
-	return s.LoadByID(ctx, req)
+	return model.ToStatusResponse()
 }
 
 // LoadPending loads pending envelopes
@@ -164,41 +125,18 @@ func (s *EnvelopeStore) LoadPending(ctx context.Context, req *evlpstore.LoadPend
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	envelopes := []*envelope.Envelope{}
-	for _, entry := range s.byTxHash {
-		if entry.Status == PENDING && time.Now().Add(-time.Duration(req.GetDuration())).Sub(entry.SentAt) > 0 {
-			envelopes = append(envelopes, entry.envelope)
+	resps := []*evlpstore.StoreResponse{}
+	for _, model := range s.byID {
+		if model.Status == "pending" && time.Now().Add(-utils.PDurationToDuration(req.GetDuration())).Sub(model.SentAt) > 0 {
+			resp, err := model.ToStoreResponse()
+			if err != nil {
+				return &evlpstore.LoadPendingResponse{}, errors.FromError(err).ExtendComponent(component)
+			}
+			resps = append(resps, resp)
 		}
 	}
 
 	return &evlpstore.LoadPendingResponse{
-		Envelopes: envelopes,
+		Responses: resps,
 	}, nil
-}
-
-// Entry is a entry into mock envelope Store
-type Entry struct {
-	// envelope
-	envelope *envelope.Envelope
-
-	// Status
-	Status   string
-	StoredAt time.Time
-	ErrorAt  time.Time
-	SentAt   time.Time
-	MinedAt  time.Time
-}
-
-func (entry *Entry) last() time.Time {
-	switch entry.Status {
-	case "stored":
-		return entry.StoredAt
-	case "error":
-		return entry.ErrorAt
-	case "pending":
-		return entry.SentAt
-	case "mined":
-		return entry.MinedAt
-	}
-	return time.Time{}
 }
