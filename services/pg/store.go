@@ -2,38 +2,15 @@ package pg
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/go-pg/pg"
-	"github.com/golang/protobuf/ptypes"
-	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/proto"
+	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/envelope-store"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 )
-
-// EnvelopeModel represent elements in `envelopes` table
-type EnvelopeModel struct {
-	tableName struct{} `sql:"envelopes"` //nolint:unused,structcheck
-
-	// ID technical identifier
-	ID int32
-
-	// Context Identifier
-	ChainID    string
-	TxHash     string
-	EnvelopeID string
-
-	// Envelope
-	Envelope []byte
-
-	// Status
-	Status   string
-	StoredAt time.Time
-	ErrorAt  time.Time
-	SentAt   time.Time
-	MinedAt  time.Time
-}
 
 // EnvelopeStore is a context store based on PostgreSQL
 type EnvelopeStore struct {
@@ -50,60 +27,36 @@ func NewEnvelopeStoreFromPGOptions(opts *pg.Options) *EnvelopeStore {
 	return NewEnvelopeStore(pg.Connect(opts))
 }
 
-func ToStoreResponse(model *EnvelopeModel) (*evlpstore.StoreResponse, error) {
-	// Prepare response
-	timestamp, err := ptypes.TimestampProto(model.last())
-	if err != nil {
-		panic(err)
-	}
-
-	resp := &evlpstore.StoreResponse{
-		Envelope:    &envelope.Envelope{},
-		LastUpdated: timestamp,
-		Status:      model.Status,
-	}
-
-	err = encoding.Unmarshal(model.Envelope, resp.GetEnvelope())
-	if err != nil {
-		return resp, errors.FromError(err).SetComponent(component)
-	}
-
-	return resp, err
-}
-
 // Store context envelope
 func (s *EnvelopeStore) Store(ctx context.Context, req *evlpstore.StoreRequest) (*evlpstore.StoreResponse, error) {
-	e := req.GetEnvelope()
-	bytes, err := encoding.Marshal(e)
+	// create model from envelope
+	model, err := FromEnvelope(req.GetEnvelope())
 	if err != nil {
 		return &evlpstore.StoreResponse{}, errors.FromError(err).SetComponent(component)
 	}
 
 	// Execute ORM query
 	// If unicity contraint is broken then it update the former value
-	model := &EnvelopeModel{
-		ChainID:    e.GetChain().ID().String(),
-		TxHash:     e.GetTx().GetHash().Hex(),
-		EnvelopeID: e.GetMetadata().GetId(),
-		Envelope:   bytes,
-	}
 	_, err = s.db.ModelContext(ctx, model).
-		OnConflict("ON CONSTRAINT uni_tx DO UPDATE").
+		OnConflict("ON CONSTRAINT envelopes_envelope_id_key DO UPDATE").
 		Set("envelope = ?envelope").
+		Set("chain_id = ?chain_id").
+		Set("tx_hash = ?tx_hash").
 		Returning("*").
 		Insert()
 	if err != nil {
+		log.WithError(err).Error("Could not store")
 		return &evlpstore.StoreResponse{}, errors.ConstraintViolatedError("envelope already stored").ExtendComponent(component)
 	}
 
-	return ToStoreResponse(model)
+	return model.ToStoreResponse()
 }
 
 // LoadByTxHash load envelope by transaction hash
-func (s *EnvelopeStore) LoadByTxHash(ctx context.Context, req *evlpstore.TxHashRequest) (*evlpstore.StoreResponse, error) { //nolint:interfacer
+func (s *EnvelopeStore) LoadByTxHash(ctx context.Context, req *evlpstore.LoadByTxHashRequest) (*evlpstore.StoreResponse, error) { //nolint:interfacer
 	model := &EnvelopeModel{
-		ChainID: req.GetChainId().ID().String(),
-		TxHash:  req.GetTxHash(),
+		ChainID: req.GetChain().ID().String(),
+		TxHash:  req.GetTxHash().Hex(),
 	}
 
 	err := s.db.ModelContext(ctx, model).
@@ -114,11 +67,11 @@ func (s *EnvelopeStore) LoadByTxHash(ctx context.Context, req *evlpstore.TxHashR
 		return &evlpstore.StoreResponse{}, errors.NotFoundError("envelope not found").ExtendComponent(component)
 	}
 
-	return ToStoreResponse(model)
+	return model.ToStoreResponse()
 }
 
 // LoadByID context envelope by envelope ID
-func (s *EnvelopeStore) LoadByID(ctx context.Context, req *evlpstore.IDRequest) (*evlpstore.StoreResponse, error) { //nolint:interfacer
+func (s *EnvelopeStore) LoadByID(ctx context.Context, req *evlpstore.LoadByIDRequest) (*evlpstore.StoreResponse, error) { //nolint:interfacer
 	model := &EnvelopeModel{
 		EnvelopeID: req.GetId(),
 	}
@@ -130,15 +83,15 @@ func (s *EnvelopeStore) LoadByID(ctx context.Context, req *evlpstore.IDRequest) 
 		return &evlpstore.StoreResponse{}, errors.NotFoundError("envelope not found").ExtendComponent(component)
 	}
 
-	return ToStoreResponse(model)
+	return model.ToStoreResponse()
 }
 
 // SetStatus set a context status
-func (s *EnvelopeStore) SetStatus(ctx context.Context, req *evlpstore.SetStatusRequest) (*evlpstore.SetStatusResponse, error) {
+func (s *EnvelopeStore) SetStatus(ctx context.Context, req *evlpstore.SetStatusRequest) (*evlpstore.StatusResponse, error) {
 	// Define model
 	model := &EnvelopeModel{
 		EnvelopeID: req.GetId(),
-		Status:     req.GetStatus(),
+		Status:     strings.ToLower(req.GetStatus().String()),
 	}
 
 	// Update status value
@@ -148,54 +101,34 @@ func (s *EnvelopeStore) SetStatus(ctx context.Context, req *evlpstore.SetStatusR
 		Returning("*").
 		Update()
 	if err != nil {
-		return &evlpstore.SetStatusResponse{}, errors.NotFoundError("envelope not found").ExtendComponent(component)
+		return &evlpstore.StatusResponse{}, errors.NotFoundError("envelope not found").ExtendComponent(component)
 	}
 
-	return &evlpstore.SetStatusResponse{}, nil
-}
-
-// GetStatus return context status and time when status changed
-func (s *EnvelopeStore) GetStatus(ctx context.Context, req *evlpstore.IDRequest) (*evlpstore.StoreResponse, error) {
-	return s.LoadByID(ctx, req)
+	return model.ToStatusResponse()
 }
 
 // LoadPending loads pending envelopes
 func (s *EnvelopeStore) LoadPending(ctx context.Context, req *evlpstore.LoadPendingRequest) (*evlpstore.LoadPendingResponse, error) {
 	models := []*EnvelopeModel{}
+
 	err := s.db.ModelContext(ctx, &models).
 		Where("status = 'pending'").
-		Where("sent_at < ?", time.Now().Add(-time.Duration(req.GetDuration()))).
+		Where("sent_at < ?", time.Now().Add(-time.Duration(utils.PDurationToDuration(req.GetDuration())))).
 		Select()
-
 	if err != nil {
 		return nil, errors.NotFoundError("envelope not found").ExtendComponent(component)
 	}
 
-	envelopes := []*envelope.Envelope{}
+	resps := []*evlpstore.StoreResponse{}
 	for _, model := range models {
-		t := &envelope.Envelope{}
-		err := encoding.Unmarshal(model.Envelope, t)
+		resp, err := model.ToStoreResponse()
 		if err != nil {
-			return nil, errors.FromError(err).ExtendComponent(component)
+			return &evlpstore.LoadPendingResponse{}, errors.FromError(err).ExtendComponent(component)
 		}
-		envelopes = append(envelopes, t)
+		resps = append(resps, resp)
 	}
 
 	return &evlpstore.LoadPendingResponse{
-		Envelopes: envelopes,
+		Responses: resps,
 	}, nil
-}
-
-func (model *EnvelopeModel) last() time.Time {
-	switch model.Status {
-	case "stored":
-		return model.StoredAt
-	case "error":
-		return model.ErrorAt
-	case "pending":
-		return model.SentAt
-	case "mined":
-		return model.MinedAt
-	}
-	return time.Time{}
 }

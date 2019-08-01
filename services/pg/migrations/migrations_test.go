@@ -44,7 +44,7 @@ func (s *MigrationsTestSuite) TestMigrationVersion() {
 		s.T().Errorf("Error querying version: %v", err)
 	}
 
-	expected := int64(2)
+	expected := int64(3)
 	s.Assert().Equal(expected, version, fmt.Sprintf("Migration should be on version=%v", expected))
 }
 
