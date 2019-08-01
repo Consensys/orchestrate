@@ -113,7 +113,7 @@ func (s *EnvelopeStore) LoadPending(ctx context.Context, req *evlpstore.LoadPend
 
 	err := s.db.ModelContext(ctx, &models).
 		Where("status = 'pending'").
-		Where("sent_at < ?", time.Now().Add(-time.Duration(utils.PDurationToDuration(req.GetDuration())))).
+		Where("sent_at < ?", time.Now().Add(-utils.PDurationToDuration(req.GetDuration()))).
 		Select()
 	if err != nil {
 		return nil, errors.NotFoundError("envelope not found").ExtendComponent(component)
