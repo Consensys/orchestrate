@@ -32,7 +32,7 @@ func Start(ctx context.Context) {
 		// Initialize GRPC server
 		grpcserver.AddEnhancers(
 			func(s *grpc.Server) *grpc.Server {
-				evlpstore.RegisterStoreServer(s, services.GlobalEnvelopeStoreServer())
+				evlpstore.RegisterEnvelopeStoreServer(s, services.GlobalEnvelopeStoreServer())
 				return s
 			},
 		)

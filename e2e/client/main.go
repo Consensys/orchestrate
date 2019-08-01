@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 
-	"github.com/golang/protobuf/ptypes"
 	log "github.com/sirupsen/logrus"
 
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/envelope-store"
@@ -35,27 +34,22 @@ func main() {
 		log.WithError(err).Errorf("Could not store")
 	}
 
-	timestamp, err := ptypes.Timestamp(resp.GetLastUpdated())
-	if err != nil {
-		log.WithError(err).Errorf("Could not retrieve timestamp")
-	}
-
 	log.WithFields(log.Fields{
-		"status": resp.GetStatus(),
-		"at":     timestamp,
+		"status": resp.GetStatusInfo().GetStatus().String(),
+		"at":     resp.GetStatusInfo().StoredAtTime(),
 	}).Infof("Envelope stored")
 
 	res, err := client.GlobalEnvelopeStoreClient().LoadByTxHash(
 		context.Background(),
-		&evlpstore.TxHashRequest{
-			ChainId: evlp.GetChain(),
-			TxHash:  evlp.GetTx().GetHash().Hex(),
+		&evlpstore.LoadByTxHashRequest{
+			Chain:  evlp.GetChain(),
+			TxHash: evlp.GetTx().GetHash(),
 		})
 	if err != nil {
 		log.WithError(err).Errorf("Could not load envelope")
 	}
 	log.WithFields(log.Fields{
-		"status":   res.GetStatus(),
+		"status":   res.GetStatusInfo().GetStatus().String(),
 		"chain.id": res.GetEnvelope().GetChain().ID().String(),
 	}).Infof("Envelope loaded")
 }
