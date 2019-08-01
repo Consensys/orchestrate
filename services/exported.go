@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	store    evlpstore.StoreServer
+	store    evlpstore.EnvelopeStoreServer
 	initOnce = &sync.Once{}
 )
 
@@ -43,11 +43,11 @@ func Init(ctx context.Context) {
 	})
 }
 
-func GlobalEnvelopeStoreServer() evlpstore.StoreServer {
+func GlobalEnvelopeStoreServer() evlpstore.EnvelopeStoreServer {
 	return store
 }
 
 // SetGlobalEnvelopeStoreServer sets EnvelopeStoreServer
-func SetGlobalEnvelopeStoreServer(s evlpstore.StoreServer) {
+func SetGlobalEnvelopeStoreServer(s evlpstore.EnvelopeStoreServer) {
 	store = s
 }
