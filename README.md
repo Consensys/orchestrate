@@ -49,3 +49,45 @@ go run . run --jaeger-service TX-SENDER --http-hostname :8081 --grpc-target-enve
 ```bash
  go run e2e/producer/main.go
 ```
+
+
+
+```sh
+$ docker-compose up
+```
+
+## High Level Architecture
+
+Tx-Sender expects all consumed messages to respect a specific CoreStack protobuf format.
+
+Consumed messages should have:
+
+- ```Chain``` entry set;
+- ```Tx``` entry set with the ```Raw``` fields.
+
+### Tx-sender can handle two types of transactions:
+
+**1. Standard case: Send signed transaction**
+
+***1.1 Store Transaction Envelope***
+
+Once the Tx-sender worker unmarshall a message from Kafka, the transaction envelope is stored in the *Envelope-Store* with the status `pending`.
+
+***1.2 Send Transaction***
+
+It sends the data located in ```Tx.Raw``` into the ```ETH_CLIENT_URL``` corresponding to the `chainId` located in the envelope.
+
+***1.3 Update Transaction status in the envelope-store***
+
+In the *Envelope-Store*, the transaction status is updated to `pending`.
+
+***2. Quorum case (using `sendTransaction`): Send unsigned transactions to Quorum***
+
+***2.1 Send Transaction***
+
+Once the tx-sender worker unmarshall a message from Kafka, it sends an unsigned transaction to the Quorum node (```ETH_CLIENT_URL```) and retrieves the `txHash`.
+
+***2.2 Store Transaction Envelope***
+
+The envelope is stored in the *Envelope-Store* with the status `pending`.
+
