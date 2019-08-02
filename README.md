@@ -53,3 +53,27 @@ go run . run --jaeger-service TX-DECODER
 ```bash
  go run e2e/producer/main.go
 ```
+## High Level Architecture
+
+Tx-Decoder expects all consumed messages to respect a specific CoreStack protobuf format.
+
+Consumed messages should have:
+
+- ```Chain``` entry set;
+- ```Receipt``` entry set with TxHash, Topics and Data fields.
+
+**1. Find Event in ABI**
+
+To decode the raw logs from the blockchain it requires to know the ABI of the event as the arguments are packed in ```Log.Data``` and ```Log.Topics``` without knowing the type expected.
+
+This is why Tx-Decoder is loading the ```ABI``` of interest to decode logs that could be identified in ```Log.Topics[0]```, correspondig to the signature of the event.
+ 
+**2. Decoding**
+
+Once the event is identified, the Tx-Decoder knows exactly the arguments to decode, i.e. their types and which of them are indexded/non-indexed, and could seamlessly decode the raw logs by the following:
+
+- First, it will unpack values from ```Log.Data``` that contains every non-indexed arguments of the event and will return a slice of abstract type `interface{}`.
+- Second, as the ```unpackValues``` and ```Log.Topics``` should be in the same order as the event arguments are ordered, the Tx-Decoder will loop through the expected event arguments and pick values from ```unpackValues``` for non-indexed argments and from ```Log.Topics``` for indexed arguments. For non-indexed values, the method in ```core-stack.infra.ethereum.FormatNonIndexedArg``` will transform `interface{}` into string, wheareas for indexed values the method in ```core-stack.infra.ethereum.FormatIndexedArg``` will transform Hash type into string.
+- Finally, every arguents strings are mapped and integrated in the Trace context ```ctx.T.Receipt.Logs[i].Decoded```
+
+***Note**: that the Tx-decoder is also decoding any kind of array and will return a string encapsulated into square brakets and delimited by a comma.*
