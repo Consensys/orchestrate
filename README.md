@@ -52,4 +52,12 @@ go run . run --http-hostname ':8081' --grpc-store-target localhost:8080
 ```
 
 It will start a worker on port `8081` and it will connect to the envelope store running on port `8080`.
+## High Level Architecture
 
+**1. Catch transaction Receipts**
+
+Tx-Listener listen to chains and retrieve transactions receipts as they are mined.
+
+**2. Load Transaction Envelope**
+
+Each time it sees a new receipt, Tx-Listener interrogates *API-Context-Store* in order to possibly retrieve an `Envelope` associated to the transaction and reconstitute it.
