@@ -10,8 +10,9 @@ import (
 )
 
 var (
-	handler  engine.HandlerFunc
-	initOnce = &sync.Once{}
+	component = "handler.gas-estimator"
+	handler   engine.HandlerFunc
+	initOnce  = &sync.Once{}
 )
 
 // Init initialize Gas Estimator Handler

@@ -11,8 +11,9 @@ import (
 )
 
 var (
-	handler  engine.HandlerFunc
-	initOnce = &sync.Once{}
+	component = "handler.faucet"
+	handler   engine.HandlerFunc
+	initOnce  = &sync.Once{}
 )
 
 // Init initialize Crafter Handler

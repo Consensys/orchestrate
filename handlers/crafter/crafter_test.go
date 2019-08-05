@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/args"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
@@ -34,7 +35,7 @@ func (r *MockABIRegistry) GetContractABI(contract *abi.Contract) ([]byte, error)
 
 func (r *MockABIRegistry) GetContractBytecode(contract *abi.Contract) ([]byte, error) {
 	if contract.GetId().Name == "unknown" {
-		return []byte{}, fmt.Errorf("could not retrieve bytecode")
+		return []byte{}, errors.NotFoundError("could not retrieve bytecode").SetComponent("mock")
 	}
 	return []byte{246, 34}, nil
 }
@@ -64,14 +65,14 @@ var (
 
 func (c *MockCrafter) CraftCall(method ethAbi.Method, methodArgs ...string) ([]byte, error) {
 	if len(methodArgs) != 1 {
-		return []byte(``), fmt.Errorf("could not craft call expected args len to be 1")
+		return []byte(``), errors.InvalidArgsCountError("could not craft call expected args len to be 1").SetComponent("mock")
 	}
 	return hexutil.MustDecode(callPayload), nil
 }
 
 func (c *MockCrafter) CraftConstructor(bytecBTWode []byte, method ethAbi.Method, methodArgs ...string) ([]byte, error) {
 	if len(methodArgs) != 1 {
-		return []byte(``), fmt.Errorf("could not craft constructor expected args len to be 1")
+		return []byte(``), errors.InvalidArgsCountError("could not craft call expected args len to be 1").SetComponent("mock")
 	}
 	return hexutil.MustDecode(constructorPayload), nil
 }
@@ -108,6 +109,7 @@ func makeCrafterContext(i int) *engine.TxContext {
 			},
 		}
 		ctx.Set("errors", 1)
+		ctx.Set("error.code", errors.InvalidArgsCountError("").GetCode())
 		ctx.Set("result", "0x")
 	case 4:
 		ctx.Envelope.Args = &envelope.Args{
@@ -142,10 +144,10 @@ func makeCrafterContext(i int) *engine.TxContext {
 			},
 		}
 		ctx.Set("errors", 1)
+		ctx.Set("error.code", errors.EncodingError("").GetCode())
 		ctx.Set("result", "0x")
 	case 6:
 		ctx.Envelope.Args = &envelope.Args{
-
 			Call: &args.Call{
 				Contract: &abi.Contract{
 					Id: &abi.ContractId{
@@ -158,6 +160,7 @@ func makeCrafterContext(i int) *engine.TxContext {
 			},
 		}
 		ctx.Set("errors", 1)
+		ctx.Set("error.code", errors.InvalidSignatureError("").GetCode())
 		ctx.Set("result", "0x")
 	case 7:
 		ctx.Envelope.Args = &envelope.Args{
@@ -174,6 +177,7 @@ func makeCrafterContext(i int) *engine.TxContext {
 			},
 		}
 		ctx.Set("errors", 1)
+		ctx.Set("error.code", errors.NotFoundError("").GetCode())
 		ctx.Set("result", "0x")
 	case 8:
 		ctx.Envelope.Args = &envelope.Args{
@@ -190,6 +194,7 @@ func makeCrafterContext(i int) *engine.TxContext {
 			},
 		}
 		ctx.Set("errors", 1)
+		ctx.Set("error.code", errors.InvalidArgsCountError("").GetCode())
 		ctx.Set("result", "0x")
 	case 9:
 		ctx.Envelope.Args = &envelope.Args{
@@ -249,6 +254,9 @@ func (s *CrafterTestSuite) TestCrafter() {
 
 	for _, txctx := range txctxs {
 		assert.Len(s.T(), txctx.Envelope.Errors, txctx.Get("errors").(int), "Expected right count of errors", txctx.Envelope.Args)
+		for _, err := range txctx.Envelope.Errors {
+			assert.Equal(s.T(), txctx.Get("error.code").(uint64), err.GetCode(), "Error code be correct")
+		}
 		assert.Equal(s.T(), txctx.Get("result").(string), txctx.Envelope.Tx.TxData.GetData().Hex(), "Expected correct payload", txctx.Envelope.Args)
 	}
 }

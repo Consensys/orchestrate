@@ -10,8 +10,9 @@ import (
 )
 
 var (
-	handler  engine.HandlerFunc
-	initOnce = &sync.Once{}
+	component = "handler.gas-pricer"
+	handler   engine.HandlerFunc
+	initOnce  = &sync.Once{}
 )
 
 // Init initialize Gas Pricer Handler

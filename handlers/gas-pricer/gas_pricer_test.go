@@ -2,7 +2,6 @@ package gaspricer
 
 import (
 	"context"
-	"fmt"
 	"math/big"
 	"testing"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
@@ -21,7 +21,7 @@ type MockGasPricer struct {
 
 func (e *MockGasPricer) SuggestGasPrice(ctx context.Context, chainID *big.Int) (*big.Int, error) {
 	if chainID.Text(10) == "0" {
-		return big.NewInt(0), fmt.Errorf("could not estimate gas")
+		return big.NewInt(0), errors.ConnectionError("could not estimate gas")
 	}
 	return big.NewInt(10), nil
 }
@@ -65,6 +65,10 @@ func (s *PricerTestSuite) TestEstimator() {
 
 	for _, txctx := range txctxs {
 		assert.Len(s.T(), txctx.Envelope.Errors, txctx.Get("errors").(int), "Expected right count of errors")
+		for _, err := range txctx.Envelope.Errors {
+			assert.Equal(s.T(), "handler.gas-pricer", err.GetComponent(), "Error should  component should have been set")
+			assert.True(s.T(), errors.IsConnectionError(err), "Error should  be correct")
+		}
 		assert.Equal(s.T(), txctx.Get("result").(*big.Int), txctx.Envelope.GetTx().GetTxData().GetGasPrice().Value(), "Expected correct Gas price")
 	}
 }

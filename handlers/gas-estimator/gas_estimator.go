@@ -36,24 +36,24 @@ func Estimator(p ethclient.GasEstimator) engine.HandlerFunc {
 			EnvelopeToCallMsg(txctx.Envelope, call)
 			g, err := p.EstimateGas(txctx.Context(), txctx.Envelope.GetChain().ID(), call)
 			if err != nil {
-				// TODO: handle error
-				txctx.Logger.WithError(err).Errorf("gas-estimator: could not estimate gas limit")
-				_ = txctx.AbortWithError(err)
-			} else {
-				// Set gas limit on context
-				txctx.Envelope.GetTx().GetTxData().SetGas(g)
-
-				// Enrich logger
-				txctx.Logger = txctx.Logger.WithFields(log.Fields{
-					"tx.gas": g,
-				})
-				txctx.Logger.Debugf("gas-estimator: gas limit set")
+				e := txctx.AbortWithError(err).ExtendComponent(component)
+				txctx.Logger.WithError(e).Errorf("gas-estimator: could not estimate gas limit")
+				return
 			}
-		} else {
+
+			// Set gas limit on context
+			txctx.Envelope.GetTx().GetTxData().SetGas(g)
+
 			// Enrich logger
 			txctx.Logger = txctx.Logger.WithFields(log.Fields{
-				"tx.gas": txctx.Envelope.GetTx().GetTxData().GetGas(),
+				"tx.gas": g,
 			})
+			txctx.Logger.Debugf("gas-estimator: gas limit set")
 		}
+
+		// Enrich logger
+		txctx.Logger = txctx.Logger.WithFields(log.Fields{
+			"tx.gas": txctx.Envelope.GetTx().GetTxData().GetGas(),
+		})
 	}
 }

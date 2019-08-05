@@ -10,28 +10,25 @@ import (
 // Pricer creates a handler that set a Gas Price
 func Pricer(p ethclient.GasPricer) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		if txctx.Envelope.GetTx().GetTxData().GetGasPrice() != nil {
-			// Gas price has already been set
-			txctx.Logger = txctx.Logger.WithFields(log.Fields{
-				"tx.gas.price": txctx.Envelope.GetTx().GetTxData().GetGasPrice(),
-			})
+		if txctx.Envelope.GetTx().GetTxData().GetGasPrice() == nil {
+			// Request a gas price suggestion
+			p, err := p.SuggestGasPrice(txctx.Context(), txctx.Envelope.Chain.ID())
+			if err != nil {
+				e := txctx.AbortWithError(err).ExtendComponent(component)
+				txctx.Logger.WithError(e).Errorf("gas-pricer: could not suggest gas price")
+				return
+			}
+
+			// Set gas price
+			txctx.Envelope.Tx.TxData.SetGasPrice(p)
+			txctx.Logger.Debugf("gas-pricer: gas price set")
+
 			return
 		}
 
-		// Request a gas price suggestion
-		p, err := p.SuggestGasPrice(txctx.Context(), txctx.Envelope.Chain.ID())
-		if err != nil {
-			// TODO: handle error
-			txctx.Logger.WithError(err).Errorf("gas-pricer: could not suggest gas price")
-			_ = txctx.AbortWithError(err)
-			return
-		}
-
-		txctx.Envelope.Tx.TxData.SetGasPrice(p)
 		// Enrich logger
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"tx.gas.price": p.Text(10),
+			"tx.gas.price": txctx.Envelope.GetTx().GetTxData().GetGasPrice(),
 		})
-		txctx.Logger.Debugf("gas-pricer: gas price set")
 	}
 }

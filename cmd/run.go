@@ -56,6 +56,7 @@ func newRunCommand() *cobra.Command {
 	broker.KafkaGroup(runCmd.Flags())
 	broker.KafkaTopicTxCrafter(runCmd.Flags())
 	broker.KafkaTopicTxNonce(runCmd.Flags())
+	broker.KafkaTopicTxRecover(runCmd.Flags())
 
 	return runCmd
 }

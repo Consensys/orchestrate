@@ -2,7 +2,6 @@ package faucet
 
 import (
 	"context"
-	"fmt"
 	"math/big"
 	"testing"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 	faucettypes "gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types"
 )
@@ -21,7 +21,7 @@ type MockFaucet struct {
 
 func (f *MockFaucet) Credit(ctx context.Context, r *faucettypes.Request) (*big.Int, bool, error) {
 	if r.ChainID.Text(10) == "0" {
-		return big.NewInt(0), false, fmt.Errorf("could not credit")
+		return big.NewInt(0), false, errors.FaucetWarning("could not credit").SetComponent("mock")
 	}
 	return r.Amount, true, nil
 }
@@ -61,6 +61,10 @@ func (s *FaucetTestSuite) TestFaucet() {
 
 	for _, txctx := range txctxs {
 		assert.Len(s.T(), txctx.Envelope.Errors, txctx.Get("errors").(int), "Expected right count of errors")
+		for _, err := range txctx.Envelope.Errors {
+			assert.Equal(s.T(), "handler.faucet.mock", err.GetComponent(), "Error should  component should have been set")
+			assert.True(s.T(), errors.IsFaucetWarning(err), "Error should  be correct")
+		}
 	}
 }
 

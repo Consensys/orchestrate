@@ -1,11 +1,10 @@
 package crafter
 
 import (
-	"encoding/json"
-
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	log "github.com/sirupsen/logrus"
+	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
@@ -52,19 +51,19 @@ func getMethodAbi(txctx *engine.TxContext) (*abi.Method, error) {
 	var method *abi.Method
 	if ABI := txctx.Envelope.GetArgs().GetCall().GetMethod().GetAbi(); len(ABI) > 0 {
 		// ABI was provided in the Envelope
-		err := json.Unmarshal(ABI, method)
+		err := encoding.Unmarshal(ABI, method)
 		if err != nil {
-			_ = txctx.AbortWithError(err)
+			e := txctx.AbortWithError(err).ExtendComponent(component)
+			txctx.Logger.WithError(e).Errorf("crafter: invalid ABI provided")
 			return nil, err
 		}
 	} else if methodSig := txctx.Envelope.GetArgs().GetCall().GetMethod().GetSignature(); methodSig != "" {
 		// Generate method ABI from signature
 		m, err := crafter.SignatureToMethod(methodSig)
-
 		if err != nil {
-			txctx.Logger.WithError(err).Errorf("crafter: could not generate method ABI from signature")
-			_ = txctx.AbortWithError(err)
-			return nil, err
+			e := txctx.AbortWithError(err).ExtendComponent(component)
+			txctx.Logger.WithError(e).Errorf("crafter: could not generate method ABI from signature")
+			return nil, e
 		}
 		method = m
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
@@ -93,16 +92,16 @@ func createContractDeploymentPayload(txctx *engine.TxContext, methodAbi *abi.Met
 	// Transaction to be crafted is a Contract deployment
 	bytecode, err = r.GetContractBytecode(txctx.Envelope.GetArgs().GetCall().GetContract())
 	if err != nil {
-		txctx.Logger.WithError(err).Errorf("crafter: could not retrieve contract bytecode")
-		_ = txctx.AbortWithError(err)
-		return nil, err
+		e := txctx.AbortWithError(err).ExtendComponent(component)
+		txctx.Logger.WithError(e).Errorf("crafter: could not retrieve contract bytecode")
+		return nil, e
 	}
 
 	payload, err = c.CraftConstructor(bytecode, *methodAbi, getTxArgs(txctx)...)
 	if err != nil {
-		txctx.Logger.WithError(err).Errorf("crafter: could not craft tx payload")
-		_ = txctx.AbortWithError(err)
-		return nil, err
+		e := txctx.AbortWithError(err).ExtendComponent(component)
+		txctx.Logger.WithError(e).Errorf("crafter: could not craft tx payload")
+		return nil, e
 	}
 
 	return payload, nil
@@ -111,9 +110,9 @@ func createContractDeploymentPayload(txctx *engine.TxContext, methodAbi *abi.Met
 func createTxCallPayload(txctx *engine.TxContext, methodAbi *abi.Method, c crafter.Crafter) ([]byte, error) {
 	var payload, err = c.CraftCall(*methodAbi, getTxArgs(txctx)...)
 	if err != nil {
-		txctx.Logger.WithError(err).Errorf("crafter: could not craft tx payload")
-		_ = txctx.AbortWithError(err)
-		return nil, err
+		e := txctx.AbortWithError(err).ExtendComponent(component)
+		txctx.Logger.WithError(e).Errorf("crafter: could not craft tx payload")
+		return nil, e
 	}
 
 	return payload, nil

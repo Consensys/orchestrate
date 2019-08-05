@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/viper"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/producer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 )
@@ -19,6 +20,14 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 
 	// Set Topic to Nonce topic
 	msg.Topic = viper.GetString("kafka.topic.nonce")
+
+	// If an error occurred then we redirect to recovery
+	for _, err := range txctx.Envelope.GetErrors() {
+		if !errors.IsWarning(err) {
+			msg.Topic = viper.GetString("kafka.topic.recover")
+			break
+		}
+	}
 
 	// Set key
 	Sender := txctx.Envelope.Sender()

@@ -2,7 +2,6 @@ package gasestimator
 
 import (
 	"context"
-	"fmt"
 	"math/big"
 	"testing"
 
@@ -12,6 +11,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
@@ -22,7 +22,7 @@ type MockGasEstimator struct {
 
 func (e *MockGasEstimator) EstimateGas(ctx context.Context, chainID *big.Int, call *eth.CallMsg) (uint64, error) { // nolint:gocritic
 	if chainID.Text(10) == "0" {
-		return 0, fmt.Errorf("could not estimate gas")
+		return 0, errors.ConnectionError("could not estimate gas").SetComponent("mock")
 	}
 	return 18, nil
 }
@@ -67,6 +67,10 @@ func (s *EstimatorTestSuite) TestEstimator() {
 
 	for _, txctx := range txctxs {
 		assert.Len(s.T(), txctx.Envelope.Errors, txctx.Get("errors").(int), "Expected right count of errors")
+		for _, err := range txctx.Envelope.Errors {
+			assert.Equal(s.T(), "handler.gas-estimator.mock", err.GetComponent(), "Error  component should have been set")
+			assert.True(s.T(), errors.IsConnectionError(err), "Error should  be correct")
+		}
 		assert.Equal(s.T(), txctx.Get("result").(uint64), txctx.Envelope.GetTx().GetTxData().GetGas(), "Expected correct payload")
 	}
 }

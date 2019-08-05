@@ -23,9 +23,8 @@ func Faucet(fct faucet.Faucet) engine.HandlerFunc {
 		// Credit
 		amount, approved, err := fct.Credit(txctx.Context(), req)
 		if err != nil {
-			// TODO: handle error
-			txctx.Logger.WithError(err).Errorf("faucet: credit error")
-			_ = txctx.Error(err)
+			e := txctx.Error(err).ExtendComponent(component)
+			txctx.Logger.WithError(e).Errorf("faucet: credit error")
 			return
 		}
 
