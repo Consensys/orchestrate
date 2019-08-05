@@ -93,3 +93,28 @@ func TestConsumerGroup(t *testing.T) {
 	BridgeGroup(flgs)
 	assert.Equal(t, "group-bridge", viper.GetString("kafka.group.bridge"), "From default")
 }
+
+func TestInitKafkaSASLFlags(t *testing.T) {
+
+	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
+
+	InitKafkaSASLFlags(flgs)
+	assert.Equal(t, false, viper.GetBool("kafka.sasl.enable"), "From default")
+	assert.Equal(t, "", viper.GetString("kafka.sasl.mechanism"), "From default")
+	assert.Equal(t, true, viper.GetBool("kafka.sasl.handshake"), "From default")
+	assert.Equal(t, "", viper.GetString("kafka.sasl.user"), "From default")
+	assert.Equal(t, "", viper.GetString("kafka.sasl.password"), "From default")
+	assert.Equal(t, "", viper.GetString("kafka.sasl.scramauthzid"), "From default")
+}
+
+func TestInitKafkaTLSFlags(t *testing.T) {
+
+	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
+
+	InitKafkaSASLTLSFlags(flgs)
+	assert.Equal(t, false, viper.GetBool("kafka.tls.enable"), "From default")
+	assert.Equal(t, false, viper.GetBool("kafka.tls.insecureSkipVerify"), "From default")
+	assert.Equal(t, "", viper.GetString("kafka.tls.clientCertfilepath"), "From default")
+	assert.Equal(t, "", viper.GetString("kafka.tls.clientkeyfilepath"), "From default")
+	assert.Equal(t, "", viper.GetString("kafka.tls.cacertfilepath"), "From default")
+}

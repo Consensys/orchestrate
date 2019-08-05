@@ -34,8 +34,39 @@ func TestExampleTestSuite(t *testing.T) {
 }
 
 func (s *ExportedTestSuite) TestInitConfig() {
+	viper.Set(kafkaTLSEnableViperKey, true)
+	viper.Set(kafkaTLSClientCertFilePathViperKey, "testdata/example-cert.pem")
+	viper.Set(kafkaTLSClientKeyFilePathViperKey, "testdata/example-key.pem")
+	viper.Set(kafkaTLSCACertFilePathViperKey, "testdata/example-ca-cert.pem")
+
 	InitConfig()
 	assert.NotNil(s.T(), GlobalConfig(), "Config should have been set")
+}
+
+func (s *ExportedTestSuite) TestNewTLSConfig() {
+
+	tlsConfig, err := NewTLSConfig(
+		"testdata/example-cert.pem",
+		"testdata/example-key.pem",
+		"testdata/example-ca-cert.pem",
+	)
+	assert.NoError(s.T(), err, "TLS should be instantiated without error")
+	assert.NotNil(s.T(), tlsConfig, "TLS should be instantiated without error")
+
+	_, err = NewTLSConfig(
+		"testdata/example-cert-error.pem",
+		"testdata/example-key.pem",
+		"testdata/example-ca-cert.pem",
+	)
+	assert.Error(s.T(), err, "TLS should not be instantiated with a wrong file path")
+
+	_, err = NewTLSConfig(
+		"testdata/example-cert.pem",
+		"testdata/example-key.pem",
+		"testdata/example-ca-cert-error.pem",
+	)
+	assert.Error(s.T(), err, "TLS should not be instantiated with a wrong file path")
+
 }
 
 func (s *ExportedTestSuite) TestInitClient() {

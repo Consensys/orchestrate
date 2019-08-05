@@ -2,7 +2,11 @@ package sarama
 
 import (
 	"context"
+	"io/ioutil"
 	"sync"
+
+	"crypto/tls"
+	"crypto/x509"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
@@ -21,6 +25,33 @@ var (
 	initConsumerGroupOnce = &sync.Once{}
 )
 
+// NewTLSConfig inspired by https://medium.com/processone/using-tls-authentication-for-your-go-kafka-client-3c5841f2a625
+func NewTLSConfig(clientCertFilePath, clientKeyFilePath, caCertFilePath string) (*tls.Config, error) {
+	tlsConfig := tls.Config{}
+
+	// Load client cert
+	cert, err := tls.LoadX509KeyPair(clientCertFilePath, clientKeyFilePath)
+	if err != nil {
+		return &tls.Config{}, err
+	}
+	tlsConfig.Certificates = []tls.Certificate{cert}
+
+	// Load CA cert
+	caCert, err := ioutil.ReadFile(caCertFilePath)
+	if err != nil {
+		return &tls.Config{}, err
+	}
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+	tlsConfig.RootCAs = caCertPool
+
+	tlsConfig.BuildNameToCertificate()
+
+	tlsConfig.InsecureSkipVerify = viper.GetBool(kafkaTLSInsecureSkipVerifyViperKey)
+
+	return &tlsConfig, err
+}
+
 // InitConfig initialize global Sarama configuration
 func InitConfig() {
 	// Init config
@@ -30,6 +61,27 @@ func InitConfig() {
 	config.Producer.Return.Errors = true
 	config.Producer.Return.Successes = true
 	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+
+	config.Net.SASL.Enable = viper.GetBool(kafkaSASLEnableViperKey)
+	config.Net.SASL.Mechanism = sarama.SASLMechanism(viper.GetString(kafkaSASLMechanismViperKey))
+	config.Net.SASL.Handshake = viper.GetBool(kafkaSASLHandshakeViperKey)
+	config.Net.SASL.User = viper.GetString(kafkaSASLUserViperKey)
+	config.Net.SASL.Password = viper.GetString(kafkaSASLPasswordViperKey)
+	config.Net.SASL.SCRAMAuthzID = viper.GetString(kafkaSASLSCRAMAuthzIDViperKey)
+
+	config.Net.TLS.Enable = viper.GetBool(kafkaTLSEnableViperKey)
+	if config.Net.TLS.Enable {
+		tlsConfig, err := NewTLSConfig(
+			viper.GetString(kafkaTLSClientCertFilePathViperKey),
+			viper.GetString(kafkaTLSClientKeyFilePathViperKey),
+			viper.GetString(kafkaTLSCACertFilePathViperKey),
+		)
+		// Fatal if get error from NewTLSConfig
+		if err != nil {
+			log.Fatalf("sarama: cannot init TLS configuration for Kafka - got error: %q)", err)
+		}
+		config.Net.TLS.Config = tlsConfig
+	}
 }
 
 // GlobalConfig returns Sarama global configuration

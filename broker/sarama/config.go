@@ -56,6 +56,32 @@ func init() {
 	_ = viper.BindEnv(walletGeneratorGroupViperKey, walletGeneratorGroupEnv)
 	viper.SetDefault(walletGeneratedGroupViperKey, walletGeneratedGroupDefault)
 	_ = viper.BindEnv(walletGeneratedGroupViperKey, walletGeneratedGroupEnv)
+
+	// Kafka SASL
+	viper.SetDefault(kafkaSASLEnableViperKey, kafkaSASLEnableDefault)
+	_ = viper.BindEnv(kafkaSASLEnableViperKey, kafkaSASLEnableEnv)
+	viper.SetDefault(kafkaSASLMechanismViperKey, kafkaSASLMechanismDefault)
+	_ = viper.BindEnv(kafkaSASLMechanismViperKey, kafkaSASLMechanismEnv)
+	viper.SetDefault(kafkaSASLHandshakeViperKey, kafkaSASLHandshakeDefault)
+	_ = viper.BindEnv(kafkaSASLHandshakeViperKey, kafkaSASLHandshakeEnv)
+	viper.SetDefault(kafkaSASLUserViperKey, kafkaSASLUserDefault)
+	_ = viper.BindEnv(kafkaSASLUserViperKey, kafkaSASLUserEnv)
+	viper.SetDefault(kafkaSASLPasswordViperKey, kafkaSASLPasswordDefault)
+	_ = viper.BindEnv(kafkaSASLPasswordViperKey, kafkaSASLPasswordEnv)
+	viper.SetDefault(kafkaSASLSCRAMAuthzIDViperKey, kafkaSASLSCRAMAuthzIDDefault)
+	_ = viper.BindEnv(kafkaSASLSCRAMAuthzIDViperKey, kafkaSASLSCRAMAuthzIDEnv)
+
+	// Kafka TLS
+	viper.SetDefault(kafkaTLSEnableViperKey, kafkaTLSEnableDefault)
+	_ = viper.BindEnv(kafkaTLSEnableViperKey, kafkaTLSEnableEnv)
+	viper.SetDefault(kafkaTLSInsecureSkipVerifyViperKey, kafkaTLSInsecureSkipVerifyDefault)
+	_ = viper.BindEnv(kafkaTLSInsecureSkipVerifyViperKey, kafkaTLSInsecureSkipVerifyEnv)
+	viper.SetDefault(kafkaTLSClientCertFilePathViperKey, kafkaTLSClientCertFilePathDefault)
+	_ = viper.BindEnv(kafkaTLSClientCertFilePathViperKey, kafkaTLSClientCertFilePathEnv)
+	viper.SetDefault(kafkaTLSClientKeyFilePathViperKey, kafkaTLSClientKeyFilePathDefault)
+	_ = viper.BindEnv(kafkaTLSClientKeyFilePathViperKey, kafkaTLSClientKeyFilePathEnv)
+	viper.SetDefault(kafkaTLSCACertFilePathViperKey, kafkaTLSCACertFilePathDefault)
+	_ = viper.BindEnv(kafkaTLSCACertFilePathViperKey, kafkaTLSCACertFilePathEnv)
 }
 
 var (
@@ -298,4 +324,199 @@ func WalletGeneratorGroup(f *pflag.FlagSet) {
 // WalletGeneratedGroup register flag for kafka decoder group
 func WalletGeneratedGroup(f *pflag.FlagSet) {
 	consumerGroupFlag(f, walletGeneratedGroupFlag, walletGeneratedGroupViperKey, walletGeneratedGroupEnv, walletGeneratedGroupDefault)
+}
+
+// InitKafkaSASLFlags register flags for SASL authentification
+func InitKafkaSASLFlags(f *pflag.FlagSet) {
+	KafkaSASLEnable(f)
+	KafkaSASLMechanism(f)
+	KafkaSASLHandshake(f)
+	KafkaSASLUser(f)
+	KafkaSASLPassword(f)
+	KafkaSASLSCRAMAuthzID(f)
+}
+
+// Kafka SASL Enable environment variables
+var (
+	kafkaSASLEnableFlag     = "kafka-sasl-enable"
+	kafkaSASLEnableViperKey = "kafka.sasl.enable"
+	kafkaSASLEnableEnv      = "KAFKA_SASL_ENABLE"
+	kafkaSASLEnableDefault  = false
+)
+
+// KafkaSASLEnable register flag
+func KafkaSASLEnable(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Whether or not to use SASL authentication when connecting to the broker
+Environment variable: %q`, kafkaSASLEnableEnv)
+	f.Bool(kafkaSASLEnableFlag, kafkaSASLEnableDefault, desc)
+	_ = viper.BindPFlag(kafkaSASLEnableViperKey, f.Lookup(kafkaSASLEnableFlag))
+}
+
+// Kafka SASL mechanism environment variables
+var (
+	kafkaSASLMechanismFlag     = "kafka-sasl-mechanism"
+	kafkaSASLMechanismViperKey = "kafka.sasl.mechanism"
+	kafkaSASLMechanismEnv      = "KAFKA_SASL_MECHANISM"
+	kafkaSASLMechanismDefault  string
+)
+
+// KafkaSASLMechanism register flag
+func KafkaSASLMechanism(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`SASLMechanism is the name of the enabled SASL mechanism. Possible values: OAUTHBEARER, PLAIN (defaults to PLAIN).
+Environment variable: %q`, kafkaSASLMechanismEnv)
+	f.String(kafkaSASLMechanismFlag, kafkaSASLMechanismDefault, desc)
+	_ = viper.BindPFlag(kafkaSASLMechanismViperKey, f.Lookup(kafkaSASLMechanismFlag))
+}
+
+// Kafka SASL Handshake environment variables
+var (
+	kafkaSASLHandshakeFlag     = "kafka-sasl-handshake"
+	kafkaSASLHandshakeViperKey = "kafka.sasl.handshake"
+	kafkaSASLHandshakeEnv      = "KAFKA_SASL_HANDSHAKE"
+	kafkaSASLHandshakeDefault  = true
+)
+
+// KafkaSASLHandshake register flag
+func KafkaSASLHandshake(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Whether or not to send the Kafka SASL handshake first if enabled (defaults to true). You should only set this to false if you're using a non-Kafka SASL proxy.
+Environment variable: %q`, kafkaSASLHandshakeEnv)
+	f.Bool(kafkaSASLHandshakeFlag, kafkaSASLHandshakeDefault, desc)
+	_ = viper.BindPFlag(kafkaSASLHandshakeViperKey, f.Lookup(kafkaSASLHandshakeFlag))
+}
+
+// Kafka SASL User environment variables
+var (
+	kafkaSASLUserFlag     = "kafka-sasl-user"
+	kafkaSASLUserViperKey = "kafka.sasl.user"
+	kafkaSASLUserEnv      = "KAFKA_SASL_USER"
+	kafkaSASLUserDefault  string
+)
+
+// KafkaSASLUser register flag
+func KafkaSASLUser(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Username for SASL/PLAIN or SASL/SCRAM authentication.
+Environment variable: %q`, kafkaSASLUserEnv)
+	f.String(kafkaSASLUserFlag, kafkaSASLUserDefault, desc)
+	_ = viper.BindPFlag(kafkaSASLUserViperKey, f.Lookup(kafkaSASLUserFlag))
+}
+
+// Kafka SASL Password environment variables
+var (
+	kafkaSASLPasswordFlag     = "kafka-sasl-password"
+	kafkaSASLPasswordViperKey = "kafka.sasl.password"
+	kafkaSASLPasswordEnv      = "KAFKA_SASL_PASSWORD"
+	kafkaSASLPasswordDefault  string
+)
+
+// KafkaSASLPassword register flag
+func KafkaSASLPassword(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Password for SASL/PLAIN or SASL/SCRAM authentication.
+Environment variable: %q`, kafkaSASLPasswordEnv)
+	f.String(kafkaSASLPasswordFlag, kafkaSASLPasswordDefault, desc)
+	_ = viper.BindPFlag(kafkaSASLPasswordViperKey, f.Lookup(kafkaSASLPasswordFlag))
+}
+
+// Kafka SASL SCRAMAuthzID environment variables
+var (
+	kafkaSASLSCRAMAuthzIDFlag     = "kafka-sasl-scramauthzid"
+	kafkaSASLSCRAMAuthzIDViperKey = "kafka.sasl.scramauthzid"
+	kafkaSASLSCRAMAuthzIDEnv      = "KAFKA_SASL_SCRAMAUTHZID"
+	kafkaSASLSCRAMAuthzIDDefault  string
+)
+
+// KafkaSASLSCRAMAuthzID register flag
+func KafkaSASLSCRAMAuthzID(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Authz id used for SASL/SCRAM authentication
+Environment variable: %q`, kafkaSASLSCRAMAuthzIDEnv)
+	f.String(kafkaSASLSCRAMAuthzIDFlag, kafkaSASLSCRAMAuthzIDDefault, desc)
+	_ = viper.BindPFlag(kafkaSASLSCRAMAuthzIDViperKey, f.Lookup(kafkaSASLSCRAMAuthzIDFlag))
+}
+
+// InitKafkaSASLTLSFlags register flags for SASL and SSL
+func InitKafkaSASLTLSFlags(f *pflag.FlagSet) {
+	KafkaTLSEnable(f)
+	KafkaTLSInsecureSkipVerify(f)
+	KafkaTLSClientCertFilePath(f)
+	KafkaTLSClientKeyFilePath(f)
+	KafkaTLSCaCertFilePath(f)
+}
+
+// Kafka TLS Enable environment variables
+var (
+	kafkaTLSEnableFlag     = "kafka-tls-enable"
+	kafkaTLSEnableViperKey = "kafka.tls.enable"
+	kafkaTLSEnableEnv      = "KAFKA_TLS_ENABLE"
+	kafkaTLSEnableDefault  = false
+)
+
+// KafkaTLSEnable register flag
+func KafkaTLSEnable(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Whether or not to use TLS when connecting to the broker (defaults to false).
+Environment variable: %q`, kafkaTLSEnableEnv)
+	f.Bool(kafkaTLSEnableFlag, kafkaTLSEnableDefault, desc)
+	_ = viper.BindPFlag(kafkaTLSEnableViperKey, f.Lookup(kafkaTLSEnableFlag))
+}
+
+// Kafka TLS InsecureSkipVerify environment variables
+var (
+	kafkaTLSInsecureSkipVerifyFlag     = "kafka-tls-insecureSkipVerify"
+	kafkaTLSInsecureSkipVerifyViperKey = "kafka.tls.insecureSkipVerify"
+	kafkaTLSInsecureSkipVerifyEnv      = "KAFKA_TLS_INSECURESKIPVERIFY"
+	kafkaTLSInsecureSkipVerifyDefault  = false
+)
+
+// KafkaTLSInsecureSkipVerify register flag
+func KafkaTLSInsecureSkipVerify(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Controls whether a client verifies the server's certificate chain and host name. If InsecureSkipVerify is true, TLS accepts any certificate presented by the server and any host name in that certificate. In this mode, TLS is susceptible to man-in-the-middle attacks. This should be used only for testing.
+Environment variable: %q`, kafkaTLSInsecureSkipVerifyEnv)
+	f.Bool(kafkaTLSInsecureSkipVerifyFlag, kafkaTLSInsecureSkipVerifyDefault, desc)
+	_ = viper.BindPFlag(kafkaTLSInsecureSkipVerifyViperKey, f.Lookup(kafkaTLSInsecureSkipVerifyFlag))
+}
+
+// Kafka TLS ClientCertFilePath environment variables
+var (
+	kafkaTLSClientCertFilePathFlag     = "kafka-tls-clientcertfilepath"
+	kafkaTLSClientCertFilePathViperKey = "kafka.tls.clientCertfilepath"
+	kafkaTLSClientCertFilePathEnv      = "KAFKA_TLS_CLIENTCERTFILEPATH"
+	kafkaTLSClientCertFilePathDefault  string
+)
+
+// KafkaTLSClientCertFilePath register flag
+func KafkaTLSClientCertFilePath(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Client Cert File Path.
+Environment variable: %q`, kafkaTLSClientCertFilePathEnv)
+	f.String(kafkaTLSClientCertFilePathFlag, kafkaTLSClientCertFilePathDefault, desc)
+	_ = viper.BindPFlag(kafkaTLSClientCertFilePathViperKey, f.Lookup(kafkaTLSClientCertFilePathFlag))
+}
+
+// Kafka TLS ClientKeyFilePath environment variables
+var (
+	kafkaTLSClientKeyFilePathFlag     = "kafka-tls-clientkeyfilepath"
+	kafkaTLSClientKeyFilePathViperKey = "kafka.tls.clientkeyfilepath"
+	kafkaTLSClientKeyFilePathEnv      = "KAFKA_TLS_CLIENTKEYFILEPATH"
+	kafkaTLSClientKeyFilePathDefault  string
+)
+
+// KafkaTLSClientKeyFilePath register flag
+func KafkaTLSClientKeyFilePath(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Client key file Path.
+Environment variable: %q`, kafkaTLSClientKeyFilePathEnv)
+	f.String(kafkaTLSClientKeyFilePathFlag, kafkaTLSClientKeyFilePathDefault, desc)
+	_ = viper.BindPFlag(kafkaTLSClientKeyFilePathViperKey, f.Lookup(kafkaTLSClientKeyFilePathFlag))
+}
+
+// Kafka TLS CACertFilePath environment variables
+var (
+	kafkaTLSCACertFilePathFlag     = "kafka-tls-cacertfilepath"
+	kafkaTLSCACertFilePathViperKey = "kafka.tls.cacertfilepath"
+	kafkaTLSCACertFilePathEnv      = "KAFKA_TLS_CACERTFILEPATH"
+	kafkaTLSCACertFilePathDefault  string
+)
+
+// KafkaTLSCaCertFilePath register flag
+func KafkaTLSCaCertFilePath(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`CA cert file Path.
+Environment variable: %q`, kafkaTLSCACertFilePathEnv)
+	f.String(kafkaTLSCACertFilePathFlag, kafkaTLSCACertFilePathDefault, desc)
+	_ = viper.BindPFlag(kafkaTLSCACertFilePathViperKey, f.Lookup(kafkaTLSCACertFilePathFlag))
 }
