@@ -10,7 +10,7 @@ import (
 // Loader is an handler that Load sarama.ConsumerGroup messages
 func Loader(txctx *engine.TxContext) {
 	// Cast message into sarama.ConsumerMessage
-	msg, ok := txctx.Msg.(*broker.Msg)
+	msg, ok := txctx.In.(*broker.Msg)
 	if !ok {
 		txctx.Logger.Fatalf("loader: expected a sarama.ConsumerMessage")
 	}

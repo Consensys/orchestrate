@@ -137,25 +137,25 @@ import (
 )
 
 func aborter(txctx *engine.TxContext) {
-	txctx.Logger.Infof("Aborting %v\n", txctx.Msg.(string))
+	txctx.Logger.Infof("Aborting %v\n", txctx.In.(string))
 	txctx.AbortWithError()
 }
 
 // Define a pipeline handler
 func pipeline(txctx *engine.TxContext) {
-	txctx.Logger.Infof("Pipeline handling %v\n", txctx.Msg.(string))
+	txctx.Logger.Infof("Pipeline handling %v\n", txctx.In.(string))
 }
 
 // Define a middleware handler
 func middleware(txctx *engine.TxContext) {
 	// Start middleware execution
-	txctx.Logger.Infof("Middleware starts handling %v\n", txctx.Msg.(string))
+	txctx.Logger.Infof("Middleware starts handling %v\n", txctx.In.(string))
 
 	// Trigger execution of pending handlers
 	txctx.Next()
 
 	// Executed after pending handlers have executed
-	txctx.Logger.Infof("Middleware finishes handling %v\n", txctx.Msg.(string))
+	txctx.Logger.Infof("Middleware finishes handling %v\n", txctx.In.(string))
 }
 
 func main() {
@@ -223,14 +223,14 @@ import (
 )
 
 func aborter(txctx *engine.TxContext) {
-	txctx.Logger.Infof("Aborting %v\n", txctx.Msg.(examples.Msg))
+	txctx.Logger.Infof("Aborting %v\n", txctx.In.(examples.Msg))
 	txctx.Abort()
 }
 
 // Define a pipeline handler
 func pipeline(name string) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		txctx.Logger.Infof("Pipeline-%v handling %v\n", name, txctx.Msg.(examples.Msg))
+		txctx.Logger.Infof("Pipeline-%v handling %v\n", name, txctx.In.(examples.Msg))
 	}
 }
 
@@ -238,13 +238,13 @@ func pipeline(name string) engine.HandlerFunc {
 func middleware(name string) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		// Start middleware execution
-		txctx.Logger.Infof("Middleware-%v starts handling %v\n", name, txctx.Msg.(examples.Msg))
+		txctx.Logger.Infof("Middleware-%v starts handling %v\n", name, txctx.In.(examples.Msg))
 
 		// Trigger execution of pending handlers
 		txctx.Next()
 
 		// Executed after pending handlers have executed
-		txctx.Logger.Infof("Middleware-%v finishes handling %v\n", name, txctx.Msg.(examples.Msg))
+		txctx.Logger.Infof("Middleware-%v finishes handling %v\n", name, txctx.In.(examples.Msg))
 	}
 }
 
@@ -267,7 +267,7 @@ func main() {
 
 	// Declare a forked handler
 	fork := func(txctx *engine.TxContext) {
-		switch txctx.Msg.Entrypoint() {
+		switch txctx.In.Entrypoint() {
 		case "left":
 			left(txctx)
 		case "right":

@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.7.3
+
+*Unreleased*
+
+- [FIX] Enable handler producer to possibly not send messages
+ 
 ### Version 0.7.2
 
 *Released on July 19th 2019*

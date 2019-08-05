@@ -26,7 +26,7 @@ func Pipe(ctx context.Context, saramaChan <-chan *sarama.ConsumerMessage) <-chan
 					// Sarama channel has been closed so we exit loop
 					break pipeLoop
 				}
-				msgChan <- (*Msg)(msg)
+				msgChan <- &Msg{*msg}
 			case <-ctx.Done():
 				// Context has been cancel so we exit loop
 				break pipeLoop

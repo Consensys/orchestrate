@@ -25,11 +25,13 @@ func makeMarkerContext(i int) *engine.TxContext {
 	ctx := broker.WithConsumerGroupSessionAndClaim(context.Background(), session, c)
 	txctx.WithContext(ctx)
 
-	txctx.Msg = (*broker.Msg)(&sarama.ConsumerMessage{
-		Topic:     "test-topic",
-		Partition: 0,
-		Offset:    int64(i),
-	})
+	txctx.In = &broker.Msg{
+		ConsumerMessage: sarama.ConsumerMessage{
+			Topic:     "test-topic",
+			Partition: 0,
+			Offset:    int64(i),
+		},
+	}
 
 	return txctx
 }

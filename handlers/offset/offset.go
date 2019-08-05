@@ -1,7 +1,6 @@
 package offset
 
 import (
-	"github.com/Shopify/sarama"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
@@ -15,10 +14,10 @@ func Marker(txctx *engine.TxContext) {
 	s, _ := broker.GetConsumerGroupSessionAndClaim(txctx.Context())
 	if s != nil {
 		// Cast message
-		msg, ok := txctx.Msg.(*broker.Msg)
+		msg, ok := txctx.In.(*broker.Msg)
 		if !ok {
 			txctx.Logger.Fatalf("marker: expected a sarama.ConsumerMessage")
 		}
-		s.MarkMessage((*sarama.ConsumerMessage)(msg), "")
+		s.MarkMessage(&msg.ConsumerMessage, "")
 	}
 }
