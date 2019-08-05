@@ -77,6 +77,6 @@ func TestErrorToStatus(t *testing.T) {
 	testErrorToStatus(t, errors.NotFoundError("test"), codes.NotFound)
 	testErrorToStatus(t, errors.ConstraintViolatedError("test"), codes.AlreadyExists)
 	testErrorToStatus(t, errors.DataCorruptedError("test"), codes.DataLoss)
-	testErrorToStatus(t, errors.Errorf(errors.Internal, "test"), codes.Unknown)
-	testErrorToStatus(t, fmt.Errorf("test"), codes.Unknown)
+	testErrorToStatus(t, errors.Errorf(errors.Internal, "test"), codes.Internal)
+	testErrorToStatus(t, fmt.Errorf("test"), codes.Internal)
 }

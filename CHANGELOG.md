@@ -5,6 +5,7 @@
 *Unreleased*
 
 - [FIX] Enable handler producer to possibly not send messages
+- [FEAT] Implement GRPC client/server resources
  
 ### Version 0.7.2
 

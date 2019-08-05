@@ -143,6 +143,9 @@ func ErrorToStatus(err error) (s *status.Status) {
 	case errors.IsDataCorruptedError(e):
 		s, _ = status.New(codes.DataLoss, e.GetMessage()).WithDetails(e)
 
+	// Internal error
+	case errors.IsInternalError(e):
+		s, _ = status.New(codes.Internal, e.GetMessage()).WithDetails(e)
 	}
 
 	if s == nil {

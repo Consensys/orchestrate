@@ -7,11 +7,14 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
-	"github.com/uber/jaeger-client-go/config"
+	jaegercfg "github.com/uber/jaeger-client-go/config"
+	"github.com/uber/jaeger-client-go/rpcmetrics"
+	jaegermetrics "github.com/uber/jaeger-lib/metrics"
+	prometheus "github.com/uber/jaeger-lib/metrics/prometheus"
 )
 
 var (
-	cfg      *config.Configuration
+	cfg      *jaegercfg.Configuration
 	initOnce = &sync.Once{}
 )
 
@@ -22,7 +25,11 @@ func Init(ctx context.Context) {
 			cfg = NewConfig()
 		}
 
-		tracer, _, err := cfg.NewTracer()
+		metrics := prometheus.New()
+		tracer, _, err := cfg.NewTracer(
+			jaegercfg.Logger(logger{entry: log.StandardLogger().WithFields(log.Fields{"system": "opentracing.jaeger"})}),
+			jaegercfg.Observer(rpcmetrics.NewObserver(metrics.Namespace(jaegermetrics.NSOptions{Name: cfg.ServiceName}), rpcmetrics.DefaultNameNormalizer)),
+		)
 		if err != nil {
 			log.WithError(err).Fatal("open-tracing: could initialize jaeger tracer")
 		}
