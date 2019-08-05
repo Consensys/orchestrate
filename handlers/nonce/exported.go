@@ -10,6 +10,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/nonce.git/nonce"
 )
 
+const component = "handler.nonce"
+
 var (
 	handler  engine.HandlerFunc
 	initOnce = &sync.Once{}

@@ -40,6 +40,7 @@ func newRunCommand() *cobra.Command {
 	broker.KafkaGroup(runCmd.Flags())
 	broker.KafkaTopicTxNonce(runCmd.Flags())
 	broker.KafkaTopicTxSigner(runCmd.Flags())
+	broker.KafkaTopicTxRecover(runCmd.Flags())
 
 	// Register Nonce Manager flags
 	nonce.Type(runCmd.Flags())

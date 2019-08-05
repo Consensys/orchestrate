@@ -31,23 +31,24 @@ func Handler(nc nonce.Nonce, getChainNonce GetNonceFunc) engine.HandlerFunc {
 		// Get the lock for chainID and sender address
 		lockSig, err := nc.Lock(chainID, &a)
 		if err != nil {
-			txctx.Logger.WithError(err).Errorf("nonce: could not acquire nonce lock")
-			_ = txctx.AbortWithError(err)
+			e := txctx.AbortWithError(err).ExtendComponent(component)
+			txctx.Logger.WithError(e).Errorf("nonce: could not acquire nonce lock")
 			return
 		}
 		defer func() {
-			er := nc.Unlock(chainID, &a, lockSig)
-			if er != nil {
-				txctx.Logger.WithError(err).Errorf("nonce: could not release nonce lock")
-				_ = txctx.Error(er)
+			err = nc.Unlock(chainID, &a, lockSig)
+			if err != nil {
+				e := txctx.AbortWithError(err).ExtendComponent(component)
+				txctx.Logger.WithError(e).Warnf("nonce: could not release nonce lock")
+				return
 			}
 		}()
 
 		// Retrieve nonce
 		n, idleTime, err := nc.Get(chainID, &a)
 		if err != nil {
-			txctx.Logger.WithError(err).Errorf("nonce: could not get nonce from cache")
-			_ = txctx.AbortWithError(err)
+			e := txctx.AbortWithError(err).ExtendComponent(component)
+			txctx.Logger.WithError(e).Errorf("nonce: could not get nonce from cache")
 			return
 		}
 
@@ -56,8 +57,8 @@ func Handler(nc nonce.Nonce, getChainNonce GetNonceFunc) engine.HandlerFunc {
 			txctx.Logger.Debugf("nonce: not in cache, get from chain")
 			n, err = getChainNonce(txctx.Context(), chainID, a)
 			if err != nil {
-				txctx.Logger.WithError(err).Errorf("nonce: could not get nonce from chain")
-				_ = txctx.AbortWithError(err)
+				e := txctx.AbortWithError(err).ExtendComponent(component)
+				txctx.Logger.WithError(e).Errorf("nonce: could not get nonce from chain")
 				return
 			}
 		}
@@ -67,8 +68,8 @@ func Handler(nc nonce.Nonce, getChainNonce GetNonceFunc) engine.HandlerFunc {
 			txctx.Logger.Debugf("nonce: cache too old, get from chain")
 			n, err = getChainNonce(txctx.Context(), chainID, a)
 			if err != nil {
-				txctx.Logger.WithError(err).Errorf("nonce: could not get nonce from chain")
-				_ = txctx.AbortWithError(err)
+				e := txctx.AbortWithError(err).ExtendComponent(component)
+				txctx.Logger.WithError(e).Errorf("nonce: could not get nonce from chain")
 				return
 			}
 		}
@@ -93,8 +94,8 @@ func Handler(nc nonce.Nonce, getChainNonce GetNonceFunc) engine.HandlerFunc {
 		err = nc.Set(chainID, &a, n+1)
 		if err != nil {
 			// TODO: handle error
-			txctx.Logger.WithError(err).Errorf("nonce: could not set nonce on cache")
-			_ = txctx.AbortWithError(err)
+			e := txctx.AbortWithError(err).ExtendComponent(component)
+			txctx.Logger.WithError(e).Errorf("nonce: could not set nonce on cache")
 			return
 		}
 	}
