@@ -146,6 +146,8 @@ github.com/xdg/stringprep v1.0.0/go.mod h1:Jhud4/sHMO4oL310DaZAKk9ZaJ08SJfe+sJh0
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.7.1 h1:Jj+8o9xVq2CCQlLNQSR1So71NVcYXL8fa5hUnMdV7ps=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.7.1/go.mod h1:pfo9/UoStD0/MSdusPgTUCPWr/9kxgE4mVZaYR9d6KE=
+gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.7.2-0.20190805151447-8b8de579467d h1:u7RJHR6MA+8wPmzguDxIdlo3iu4rqwQ8Jk3NFjFF6ro=
+gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.7.2-0.20190805151447-8b8de579467d/go.mod h1:BGfgsJKTTY53VkBxGJUYlx0kfLx99qK+ljwn8sLpCmk=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.7.2 h1:VhvW4oqzbs4gzgZ+pO60b/sOYYe8axnzEXM2aocCW6U=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.7.3-0.20190731065314-488f9471541d h1:qetW89a+Aa2UtR0zx1OArmBH9xiQumSpbY1ZZWie14E=
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.7.3-0.20190731065314-488f9471541d/go.mod h1:BGfgsJKTTY53VkBxGJUYlx0kfLx99qK+ljwn8sLpCmk=
