@@ -1,4 +1,4 @@
-package signer
+package tessera
 
 import (
 	"context"
@@ -7,9 +7,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-signer.git/handlers/vault/signer/eea"
-	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-signer.git/handlers/vault/signer/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-signer.git/handlers/vault/signer/tessera"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tessera"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/keystore"
 )
 
 var (
@@ -25,20 +24,19 @@ func Init(ctx context.Context) {
 		}
 
 		common.InParallel(
-			// Initialize EEA signer
-			func() { eea.Init(ctx) },
-			// Initialize Tessea Signer
+			// Initialize keystore
+			func() { keystore.Init(ctx) },
+			// Initialize Tessera
 			func() { tessera.Init(ctx) },
-			// Initialize Public Ethereum Signer
-			func() { ethereum.Init(ctx) },
 		)
 
 		// Create Handler
-		handler = engine.CombineHandlers(
-			TxSigner(eea.GlobalHandler(), ethereum.GlobalHandler(), tessera.GlobalHandler()),
+		handler = Signer(
+			keystore.GlobalKeyStore(),
+			tessera.GlobalClient(),
 		)
 
-		log.Infof("signer: handler ready")
+		log.Infof("tessera signer: handler ready")
 	})
 }
 
