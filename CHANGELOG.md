@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.6
+
+*Released on August 7th 2019*
+
+- [FIX] Do not return an error if nonce is missing in cache
+
 ### Version 0.1.5
 
 *Released on July 19th 2019*
