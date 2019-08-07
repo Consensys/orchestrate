@@ -1,11 +1,12 @@
 # CHANGELOG
 
-### Version 0.7.3
+### Version 0.8.0
 
-*Unreleased*
+*Released on August 7th 2019*
 
 - [FIX] Enable handler producer to possibly not send messages
 - [FEAT] Implement GRPC client/server resources
+- [FEAT] Add Kafka SASL and SSL configuration
  
 ### Version 0.7.2
 
