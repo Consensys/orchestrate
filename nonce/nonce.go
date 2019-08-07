@@ -9,7 +9,7 @@ import (
 // NonceManager allows to safely manipulate a nonce by locking/unlocking it
 type Nonce interface {
 	// Get read nonce value (does not acquire lock), it should indicate if nonce was available or not
-	Get(chainID *big.Int, a *common.Address) (uint64, int, error)
+	Get(chainID *big.Int, a *common.Address) (nonce uint64, inCache bool, err error)
 
 	// Set read nonce value (does not acquire lock), it should indicate if nonce was available or not
 	Set(chainID *big.Int, a *common.Address, v uint64) error

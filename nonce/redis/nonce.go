@@ -79,16 +79,16 @@ func toDuration(t int) time.Duration {
 // Get returns the value of the nonce from the cache if it exists and returns the last time
 // the nonce was gotten or set (idleTime)
 // If the nonce does not exist in the cache, the function returns -1 as idleTime
-func (nm *Nonce) Get(chainID *big.Int, a *common.Address) (nonce uint64, ok int, err error) {
+func (nm *Nonce) Get(chainID *big.Int, a *common.Address) (nonce uint64, inCache bool, err error) {
 	idleTime, err := nm.getIdleTime(chainID, a)
 	if err != nil {
-		return 0, 0, err
+		return 0, false, err
 	}
 	if idleTime != -1 {
 		nonce, err := nm.getCache(chainID, a)
-		return nonce, idleTime, err
+		return nonce, true, err
 	}
-	return 0, idleTime, nil // idleTime == -1, meaning the nonce is not in the cache
+	return 0, false, nil // idleTime == -1, meaning the nonce is not in the cache
 }
 
 // Tells if the nonce is already in the cache or not
@@ -99,6 +99,10 @@ func (nm *Nonce) getIdleTime(chainID *big.Int, a *common.Address) (int, error) {
 	reply, err := conn.Do("OBJECT", "IDLETIME", computeKey(chainID, a))
 	if err != nil {
 		return 0, errors.FromError(err).SetComponent(component)
+	}
+
+	if reply == nil {
+		return -1, nil
 	}
 
 	idleTime, err := redis.Int(reply, nil)
@@ -121,7 +125,7 @@ func (nm *Nonce) getCache(chainID *big.Int, a *common.Address) (uint64, error) {
 
 	r, err := redis.Uint64(reply, nil)
 	if err != nil {
-		return 0, FromRedisError(err).SetComponent(component).SetComponent(component)
+		return 0, FromRedisError(err).SetComponent(component)
 	}
 	return r, nil
 }

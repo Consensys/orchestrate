@@ -55,13 +55,10 @@ func TestGetAndUpdateNonceCache(t *testing.T) {
 	n := Nonce{pool: mockRedisPool, waitLockRelease: mockWaitLockRelease}
 
 	t.Run("Nonce not in cache", func(t *testing.T) {
-		_, idleTime, err := n.Get(cid, &a)
+		_, inCache, err := n.Get(cid, &a)
 
-		require.NotNil(t, err, "Get should error")
-		e := errors.FromError(err)
-		assert.True(t, errors.IsNotFoundError(err), "Error code should be correct")
-		assert.Equal(t, "nonce.redis", e.GetComponent(), "Error component should be correct")
-		assert.Equal(t, 0, idleTime, "Nonce should not be in cache")
+		assert.NoError(t, err, "Error should be nil")
+		assert.False(t, inCache, "Nonce should not be in cache")
 	})
 
 	t.Run("Nonce from cache", func(t *testing.T) {
@@ -69,9 +66,9 @@ func TestGetAndUpdateNonceCache(t *testing.T) {
 		err := n.Set(cid, &a, nonce+1)
 		require.Nil(t, err, "Set should not error")
 
-		nonce, idleTime, err := n.Get(cid, &a)
+		nonce, inCache, err := n.Get(cid, &a)
 		require.Nil(t, err, "Get should not error")
-		assert.NotEqual(t, -1, idleTime, "Nonce should be in cache")
+		assert.True(t, inCache, "Nonce should be in cache")
 		assert.Equal(t, nonce, chainNonce+1, "Nonce should have been updated")
 	})
 
