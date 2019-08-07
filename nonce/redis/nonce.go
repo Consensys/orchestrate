@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/spf13/viper"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gomodule/redigo/redis"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
@@ -76,65 +78,33 @@ func toDuration(t int) time.Duration {
 	return time.Duration(t) * time.Millisecond
 }
 
-// Get returns the value of the nonce from the cache if it exists and returns the last time
-// the nonce was gotten or set (idleTime)
-// If the nonce does not exist in the cache, the function returns -1 as idleTime
+// Get returns the value of the nonce from the cache if it exists
 func (nm *Nonce) Get(chainID *big.Int, a *common.Address) (nonce uint64, inCache bool, err error) {
-	idleTime, err := nm.getIdleTime(chainID, a)
-	if err != nil {
-		return 0, false, err
-	}
-	if idleTime != -1 {
-		nonce, err := nm.getCache(chainID, a)
-		return nonce, true, err
-	}
-	return 0, false, nil // idleTime == -1, meaning the nonce is not in the cache
-}
-
-// Tells if the nonce is already in the cache or not
-func (nm *Nonce) getIdleTime(chainID *big.Int, a *common.Address) (int, error) {
-	conn := nm.pool.Get()
-	defer conn.Close()
-
-	reply, err := conn.Do("OBJECT", "IDLETIME", computeKey(chainID, a))
-	if err != nil {
-		return 0, errors.FromError(err).SetComponent(component)
-	}
-
-	if reply == nil {
-		return -1, nil
-	}
-
-	idleTime, err := redis.Int(reply, nil)
-	if err != nil {
-		return 0, FromRedisError(err).SetComponent(component)
-	}
-
-	return idleTime, nil
-}
-
-// Get the nonce from redis
-func (nm *Nonce) getCache(chainID *big.Int, a *common.Address) (uint64, error) {
 	conn := nm.pool.Get()
 	defer conn.Close()
 
 	reply, err := conn.Do("GET", computeKey(chainID, a))
 	if err != nil {
-		return 0, errors.FromError(err).SetComponent(component)
+		return 0, false, errors.FromError(err).SetComponent(component)
+	}
+
+	if reply == nil {
+		return 0, false, nil
 	}
 
 	r, err := redis.Uint64(reply, nil)
 	if err != nil {
-		return 0, FromRedisError(err).SetComponent(component)
+		return 0, true, FromRedisError(err).SetComponent(component)
 	}
-	return r, nil
+	return r, true, nil
 }
 
 // Set updates the nonce in the cache with a new value
 func (nm *Nonce) Set(chainID *big.Int, a *common.Address, newNonce uint64) error {
 	conn := nm.pool.Get()
+	expirationTime := viper.GetInt("redis.nonce.expiration.time")
 	defer conn.Close()
-	_, err := conn.Do("SET", computeKey(chainID, a), newNonce)
+	_, err := conn.Do("SETX", computeKey(chainID, a), expirationTime, newNonce)
 	if err != nil {
 		return errors.FromError(err).SetComponent(component)
 	}

@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/spf13/viper"
+
 	"github.com/alicebob/miniredis"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gomodule/redigo/redis"
@@ -38,13 +40,18 @@ func nMock() (nonce *Nonce, addr string, clean func()) {
 func TestGetAndUpdateNonceCache(t *testing.T) {
 	cid := big.NewInt(36)
 	a := common.HexToAddress("0xabcdabcdabcdabcdabcdabcd")
+	// We don't have nonce for this address in cache
+	noNonceAddress := common.HexToAddress("0xabcd")
+	expirationTime := viper.GetInt("redis.nonce.expiration.time")
 	nonceBefore := 42
 
 	mockRedisConn := redigomock.NewConn()
 	mockRedisConn.Clear()
-	mockRedisConn.Command("OBJECT", "IDLETIME", computeKey(cid, &a)).Expect(nil).Expect(int64(1000))
-	mockRedisConn.Command("SET", computeKey(cid, &a), uint64(nonceBefore+1)).Expect("OK")
+	mockRedisConn.Command("SETX", computeKey(cid, &a), expirationTime, uint64(nonceBefore+1)).Expect("OK")
 	mockRedisConn.Command("GET", computeKey(cid, &a)).Expect(int64(nonceBefore + 1))
+
+	mockRedisConn.Command("GET", computeKey(cid, &noNonceAddress)).Expect(nil)
+
 	mockRedisPool := &redis.Pool{
 		Dial: func() (redis.Conn, error) {
 			return mockRedisConn, nil
@@ -55,10 +62,11 @@ func TestGetAndUpdateNonceCache(t *testing.T) {
 	n := Nonce{pool: mockRedisPool, waitLockRelease: mockWaitLockRelease}
 
 	t.Run("Nonce not in cache", func(t *testing.T) {
-		_, inCache, err := n.Get(cid, &a)
+		nonce, inCache, err := n.Get(cid, &noNonceAddress)
 
 		assert.NoError(t, err, "Error should be nil")
 		assert.False(t, inCache, "Nonce should not be in cache")
+		assert.Equal(t, uint64(0), nonce, "Nonce should not be in cache")
 	})
 
 	t.Run("Nonce from cache", func(t *testing.T) {
@@ -77,10 +85,10 @@ func TestGetAndUpdateNonceCache(t *testing.T) {
 		a := common.HexToAddress("0xabcdabcdabcdabcdabcdabcd")
 		mockRedisConn := redigomock.NewConn()
 		mockRedisConn.Command("SET").ExpectError(fmt.Errorf("test-error"))
+		mockRedisConn.Command("SETX").ExpectError(fmt.Errorf("test-error"))
 		mockRedisConn.Command("GET", computeLockName(cid, &a)).Expect("lock-name").ExpectError(fmt.Errorf("test-error"))
 		mockRedisConn.Command("GET", computeKey(cid, &a)).ExpectError(fmt.Errorf("test-error"))
 		mockRedisConn.Command("DEL", computeLockName(cid, &a)).ExpectError(fmt.Errorf("test-error"))
-		mockRedisConn.Command("OBJECT", "IDLETIME", computeKey(cid, &a)).Expect(int64(1)).ExpectError(fmt.Errorf("test-error"))
 		mockRedisPool := &redis.Pool{
 			Dial: func() (redis.Conn, error) {
 				return mockRedisConn, nil
