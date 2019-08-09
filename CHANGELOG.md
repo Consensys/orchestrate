@@ -1,5 +1,10 @@
 # CHANGELOG
 
+### Version 0.5.3
+
+- [FEAT] Update to `pkg` v0.8.0
+- [FEAT] Error management
+
 ### Version 0.5.2
 
 *Released on July 29nd 2019*
