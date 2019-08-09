@@ -35,7 +35,7 @@ func newMessage() *sarama.ProducerMessage {
 	}
 	b, _ := proto.Marshal(
 		&envelope.Envelope{
-			Chain: chain.CreateChainInt(888),
+			Chain: chain.FromInt(888),
 			Tx: &ethereum.Transaction{
 				TxData: &ethereum.TxData{
 					Nonce:    1,

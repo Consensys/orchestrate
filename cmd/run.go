@@ -8,10 +8,10 @@ import (
 
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/tracing/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
-	storegrpc "gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store/grpc"
+	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/client"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-sender.git/app"
 )
@@ -41,7 +41,7 @@ func newRunCommand() *cobra.Command {
 	broker.KafkaTopicTxSender(runCmd.Flags())
 
 	// Register StoreGRPC flags
-	storegrpc.EnvelopeStoreGRPCTarget(runCmd.Flags())
+	storeclient.EnvelopeStoreGRPCTarget(runCmd.Flags())
 
 	return runCmd
 }

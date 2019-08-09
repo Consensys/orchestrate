@@ -7,7 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	grpcStore "gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store/grpc"
+	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
 )
 
@@ -24,13 +24,13 @@ func Init(ctx context.Context) {
 		}
 
 		// Initialize Context store
-		grpcStore.Init(ctx)
+		storeclient.Init(ctx)
 
 		// Initialize Ethereum client
 		ethclient.Init(ctx)
 
 		// Create Handler
-		handler = Sender(ethclient.GlobalClient(), grpcStore.GlobalEnvelopeStore())
+		handler = Sender(ethclient.GlobalClient(), storeclient.GlobalEnvelopeStoreClient())
 
 		log.Infof("sender: handler ready")
 	})

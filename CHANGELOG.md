@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.5.4
+
+*Unreleased*
+
+- [FEAT] Update `EnvelopeStore` version
+
 ### Version 0.5.3
 
 *Released on July 27st 2019*

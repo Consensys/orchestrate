@@ -4,18 +4,19 @@ import (
 	"errors"
 	"fmt"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
-
 	"github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	contextStore "gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
+
+	// evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/services"
+	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/envelope-store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
 )
 
 // Sender creates a Sender handler
-func Sender(sender ethclient.TransactionSender, store contextStore.EnvelopeStore) engine.HandlerFunc {
+func Sender(sender ethclient.TransactionSender, store evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"chain.id": txctx.Envelope.GetChain().GetId(),
@@ -34,7 +35,7 @@ func isPublicTx(txctx *engine.TxContext) bool {
 	return txctx.Envelope.GetArgs().GetPrivate() == nil
 }
 
-func processPublicTx(txctx *engine.TxContext, sender ethclient.TransactionSender, store contextStore.EnvelopeStore) {
+func processPublicTx(txctx *engine.TxContext, sender ethclient.TransactionSender, store evlpstore.EnvelopeStoreClient) {
 	if !txctx.Envelope.GetTx().IsSigned() {
 		processTxWithNonDeterministicHash(txctx, store, func() (common.Hash, error) {
 			return sendPublicUnsignedTx(txctx, sender)
@@ -47,7 +48,7 @@ func processPublicTx(txctx *engine.TxContext, sender ethclient.TransactionSender
 	})
 }
 
-func processPrivateTx(txctx *engine.TxContext, sender ethclient.TransactionSender, store contextStore.EnvelopeStore) {
+func processPrivateTx(txctx *engine.TxContext, sender ethclient.TransactionSender, store evlpstore.EnvelopeStoreClient) {
 
 	protocol := txctx.Envelope.GetProtocol()
 	switch {
@@ -101,7 +102,7 @@ func sendRawQuorumPrivateTx(txctx *engine.TxContext, sender ethclient.Transactio
 	return err
 }
 
-func processTxWithNonDeterministicHash(txctx *engine.TxContext, store contextStore.EnvelopeStore, sendTx func() (common.Hash, error)) {
+func processTxWithNonDeterministicHash(txctx *engine.TxContext, store evlpstore.EnvelopeStoreClient, sendTx func() (common.Hash, error)) {
 	txHash, err := sendTx()
 	if err != nil {
 		txctx.Logger.WithError(err).Errorf("sender: could not send transaction")
@@ -120,7 +121,9 @@ func processTxWithNonDeterministicHash(txctx *engine.TxContext, store contextSto
 	// We can not store envelope before sending transaction because we do not know the transaction hash
 	// This is an issue for overall consistency of the system before/after transaction is mined
 	txctx.Logger.Infof("%v %v %v", txctx.Envelope.Chain.Id, txctx.Envelope.Tx.Hash, txctx.Envelope.Metadata.Id)
-	_, _, err = store.Store(txctx.Context(), txctx.Envelope)
+	_, err = store.Store(txctx.Context(), &evlpstore.StoreRequest{
+		Envelope: txctx.Envelope,
+	})
 	if err != nil {
 		// Connection to store is broken
 		txctx.Logger.WithError(err).Errorf("sender: envelope store failed to store envelope")
@@ -129,7 +132,10 @@ func processTxWithNonDeterministicHash(txctx *engine.TxContext, store contextSto
 	}
 
 	// Transaction has been properly sent so we set status to `pending`
-	err = store.SetStatus(txctx.Context(), txctx.Envelope.GetMetadata().GetId(), "pending")
+	_, err = store.SetStatus(txctx.Context(), &evlpstore.SetStatusRequest{
+		Id:     txctx.Envelope.GetMetadata().GetId(),
+		Status: evlpstore.Status_PENDING,
+	})
 	if err != nil {
 		// Connection to store is broken
 		txctx.Logger.WithError(err).Errorf("sender: envelope store failed to set status")
@@ -145,7 +151,7 @@ func sendPublicUnsignedTx(txctx *engine.TxContext, sender ethclient.TransactionS
 	return txHash, err
 }
 
-func processTxWithDeterministicHash(txctx *engine.TxContext, store contextStore.EnvelopeStore, sendTx func() error) {
+func processTxWithDeterministicHash(txctx *engine.TxContext, store evlpstore.EnvelopeStoreClient, sendTx func() error) {
 	txctx.Logger = txctx.Logger.WithFields(log.Fields{
 		"tx.raw":  utils.ShortString(txctx.Envelope.GetTx().GetRaw().Hex(), 30),
 		"tx.hash": txctx.Envelope.GetTx().GetHash(),
@@ -157,7 +163,11 @@ func processTxWithDeterministicHash(txctx *engine.TxContext, store contextStore.
 	}).Info("processing transaction")
 
 	// Store envelope
-	status, _, err := store.Store(txctx.Context(), txctx.Envelope)
+	resp, err := store.Store(
+		txctx.Context(),
+		&evlpstore.StoreRequest{
+			Envelope: txctx.Envelope,
+		})
 	if err != nil {
 		// Connection to store is broken
 		txctx.Logger.WithError(err).Errorf("sender: envelope store failed to store envelope")
@@ -165,7 +175,7 @@ func processTxWithDeterministicHash(txctx *engine.TxContext, store contextStore.
 		return
 	}
 
-	if status == "pending" {
+	if resp.GetStatusInfo().GetStatus() == evlpstore.Status_PENDING {
 		// Tx has already been sent
 		// TODO: Request TxHash from chain to make sure we do not miss a message
 		txctx.Logger.Warnf("sender: transaction has already been sent")
@@ -181,7 +191,12 @@ func processTxWithDeterministicHash(txctx *engine.TxContext, store contextStore.
 		_ = txctx.Error(err)
 
 		// We update status in storage
-		storeErr := store.SetStatus(txctx.Context(), txctx.Envelope.GetMetadata().GetId(), "error")
+		_, storeErr := store.SetStatus(
+			txctx.Context(),
+			&evlpstore.SetStatusRequest{
+				Id:     txctx.Envelope.GetMetadata().GetId(),
+				Status: evlpstore.Status_ERROR,
+			})
 		if storeErr != nil {
 			// Connection to store is broken
 			txctx.Logger.WithError(storeErr).Errorf("sender: envelope store failed to set envelope")
@@ -193,7 +208,12 @@ func processTxWithDeterministicHash(txctx *engine.TxContext, store contextStore.
 	txctx.Logger.Debugf("sender: raw transaction sent")
 
 	// Transaction has been properly sent so we set status to `pending`
-	err = store.SetStatus(txctx.Context(), txctx.Envelope.GetMetadata().GetId(), "pending")
+	_, err = store.SetStatus(
+		txctx.Context(),
+		&evlpstore.SetStatusRequest{
+			Id:     txctx.Envelope.GetMetadata().GetId(),
+			Status: evlpstore.Status_PENDING,
+		})
 	if err != nil {
 		// Connection to store is broken
 		txctx.Logger.WithError(err).Errorf("sender: envelope store failed to set status")
