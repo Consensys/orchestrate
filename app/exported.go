@@ -48,13 +48,16 @@ func Start(ctx context.Context) {
 		// Start listening
 		err := grpcserver.ListenAndServe()
 		if err != nil {
-			log.WithError(err).Error("main: error listening")
+			log.WithError(err).Error("app: error listening")
 		}
 	})
 }
 
 // Close gracefully stops the application
 func Close(ctx context.Context) {
-	log.Warn("app: closing...")
-	grpcserver.GracefulStop(ctx)
+	log.Warn("app: stopping...")
+	err := grpcserver.GracefulStop(ctx)
+	if err != nil {
+		log.WithError(err).Error("app: error stopping application")
+	}
 }
