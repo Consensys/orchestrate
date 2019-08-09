@@ -20,8 +20,8 @@ func EnvelopeLoader(s evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
 		if err != nil {
 			// We got an error, possibly due to timeout Connection to database or something else
 			// TODO: what should we do in case of error?
-			_ = txctx.Error(err)
-			txctx.Logger.WithError(err).Debugf("envelope-loader: no envelopes stored")
+			e := txctx.Error(err).ExtendComponent(component)
+			txctx.Logger.WithError(e).Debugf("envelope-loader: no envelopes stored")
 			return
 		}
 
@@ -42,8 +42,8 @@ func EnvelopeLoader(s evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
 		)
 		if err != nil {
 			// Connection to store is broken
-			txctx.Logger.WithError(err).Errorf("envelope-loader: envelope store failed to set status")
-			_ = txctx.Error(err)
+			e := txctx.Error(err).ExtendComponent(component)
+			txctx.Logger.WithError(e).Errorf("envelope-loader: envelope store failed to set status")
 		}
 
 		txctx.Logger.Debugf("envelope-loader: envelope re-constituted")

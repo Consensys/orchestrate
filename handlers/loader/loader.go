@@ -1,12 +1,11 @@
 package loader
 
 import (
-	"fmt"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
 )
@@ -16,8 +15,8 @@ func Loader(txctx *engine.TxContext) {
 	// Cast message into sarama.ConsumerMessage
 	receipt, ok := txctx.In.(*types.TxListenerReceipt)
 	if !ok {
-		txctx.Logger.Errorf("loader: expected a types.TxListenerReceipt")
-		_ = txctx.AbortWithError(fmt.Errorf("invalid input message format"))
+		_ = txctx.AbortWithError(errors.InternalError("invalid input message format")).
+			SetComponent(component)
 		return
 	}
 
