@@ -12,8 +12,9 @@ import (
 )
 
 var (
-	handler  engine.HandlerFunc
-	initOnce = &sync.Once{}
+	component = "handler.sender"
+	handler   engine.HandlerFunc
+	initOnce  = &sync.Once{}
 )
 
 // Init initialize Sender Handler

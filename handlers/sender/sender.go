@@ -1,16 +1,12 @@
 package sender
 
 import (
-	"errors"
-	"fmt"
-
 	"github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
-
-	// evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/envelope-store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
 )
@@ -53,7 +49,8 @@ func processPrivateTx(txctx *engine.TxContext, sender ethclient.TransactionSende
 	protocol := txctx.Envelope.GetProtocol()
 	switch {
 	case protocol == nil:
-		err := errors.New("protocol should be specified to send a private transaction")
+		err := errors.InvalidFormatError("protocol should be specified to send a private transaction").
+			SetComponent(component)
 		txctx.Logger.WithError(err).Errorf("sender: could not send private transaction")
 		_ = txctx.AbortWithError(err)
 
@@ -70,7 +67,8 @@ func processPrivateTx(txctx *engine.TxContext, sender ethclient.TransactionSende
 	// It is not Tessera, but it can be Quorum with Constellation
 	case protocol.IsConstellation():
 		if txctx.Envelope.GetTx().IsSigned() {
-			err := errors.New("transactions executed with Constellation should be unsigned")
+			err := errors.InvalidFormatError("transactions executed with Constellation should be unsigned").
+				SetComponent(component)
 			txctx.Logger.WithError(err).Errorf("sender: could not send private transaction")
 			_ = txctx.AbortWithError(err)
 		}
@@ -78,7 +76,8 @@ func processPrivateTx(txctx *engine.TxContext, sender ethclient.TransactionSende
 			return sendPublicUnsignedTx(txctx, sender)
 		})
 	default:
-		err := fmt.Errorf("cannot process a private transaction with protocol %s", protocol.String())
+		err := errors.DataError("cannot process a private transaction with protocol %s", protocol.String()).
+			SetComponent(component)
 		txctx.Logger.WithError(err).Errorf("sender: could not send private transaction")
 		_ = txctx.AbortWithError(err)
 	}
@@ -87,17 +86,22 @@ func processPrivateTx(txctx *engine.TxContext, sender ethclient.TransactionSende
 func sendRawPrivateTx(txctx *engine.TxContext, sender ethclient.TransactionSender) (common.Hash, error) {
 	txctx.Logger.Infof("sender: sending raw private transaction")
 	privateArgs := types.Call2PrivateArgs(txctx.Envelope.GetArgs())
-	return sender.SendRawPrivateTransaction(txctx.Context(), txctx.Envelope.GetChain().ID(), txctx.Envelope.GetTx().GetRaw().GetRaw(), privateArgs)
+	hash, err := sender.SendRawPrivateTransaction(txctx.Context(), txctx.Envelope.GetChain().ID(), txctx.Envelope.GetTx().GetRaw().GetRaw(), privateArgs)
+	if err != nil {
+		return hash, errors.FromError(err).ExtendComponent(component)
+	}
+	return hash, nil
 }
 
 func sendRawQuorumPrivateTx(txctx *engine.TxContext, sender ethclient.TransactionSender) error {
 	txctx.Logger.Infof("sender: sending raw Quorum private transaction")
 	privateArgs := types.Call2PrivateArgs(txctx.Envelope.GetArgs())
 	hash, err := sender.SendQuorumRawPrivateTransaction(txctx.Context(), txctx.Envelope.GetChain().ID(), txctx.Envelope.GetTx().GetRaw().GetRaw(), privateArgs.PrivateFor)
-
-	if err == nil {
-		txctx.Logger.Infof("sender: result transaction hash is %s", hash.Hex())
+	if err != nil {
+		return errors.FromError(err).ExtendComponent(component)
 	}
+
+	txctx.Logger.Infof("sender: result transaction hash is %s", hash.Hex())
 
 	return err
 }
@@ -126,8 +130,8 @@ func processTxWithNonDeterministicHash(txctx *engine.TxContext, store evlpstore.
 	})
 	if err != nil {
 		// Connection to store is broken
-		txctx.Logger.WithError(err).Errorf("sender: envelope store failed to store envelope")
-		_ = txctx.AbortWithError(err)
+		e := txctx.AbortWithError(err).ExtendComponent(component)
+		txctx.Logger.WithError(e).Errorf("sender: envelope store failed to store envelope")
 		return
 	}
 
@@ -138,8 +142,8 @@ func processTxWithNonDeterministicHash(txctx *engine.TxContext, store evlpstore.
 	})
 	if err != nil {
 		// Connection to store is broken
-		txctx.Logger.WithError(err).Errorf("sender: envelope store failed to set status")
-		_ = txctx.Error(err)
+		e := errors.FromError(err).ExtendComponent(component)
+		txctx.Logger.WithError(e).Warnf("sender: envelope store failed to set status")
 		return
 	}
 }
@@ -148,7 +152,10 @@ func sendPublicUnsignedTx(txctx *engine.TxContext, sender ethclient.TransactionS
 	txctx.Logger.Infof("sender: sending public unsigned transaction")
 	args := types.Envelope2SendTxArgs(txctx.Envelope)
 	txHash, err := sender.SendTransaction(txctx.Context(), txctx.Envelope.GetChain().ID(), args)
-	return txHash, err
+	if err != nil {
+		return txHash, errors.FromError(err).ExtendComponent(component)
+	}
+	return txHash, nil
 }
 
 func processTxWithDeterministicHash(txctx *engine.TxContext, store evlpstore.EnvelopeStoreClient, sendTx func() error) {
@@ -170,8 +177,8 @@ func processTxWithDeterministicHash(txctx *engine.TxContext, store evlpstore.Env
 		})
 	if err != nil {
 		// Connection to store is broken
-		txctx.Logger.WithError(err).Errorf("sender: envelope store failed to store envelope")
-		_ = txctx.AbortWithError(err)
+		e := txctx.AbortWithError(err).ExtendComponent(component)
+		txctx.Logger.WithError(e).Errorf("sender: envelope store failed to store envelope")
 		return
 	}
 
@@ -185,10 +192,8 @@ func processTxWithDeterministicHash(txctx *engine.TxContext, store evlpstore.Env
 
 	err = sendTx()
 	if err != nil {
-		txctx.Logger.WithError(err).Errorf("sender: could not send transaction")
-
-		// TODO: handle error
-		_ = txctx.Error(err)
+		e := txctx.AbortWithError(err).ExtendComponent(component)
+		txctx.Logger.WithError(e).Errorf("sender: could not send transaction")
 
 		// We update status in storage
 		_, storeErr := store.SetStatus(
@@ -199,10 +204,9 @@ func processTxWithDeterministicHash(txctx *engine.TxContext, store evlpstore.Env
 			})
 		if storeErr != nil {
 			// Connection to store is broken
-			txctx.Logger.WithError(storeErr).Errorf("sender: envelope store failed to set envelope")
-			_ = txctx.Error(storeErr)
+			e := errors.FromError(storeErr).ExtendComponent(component)
+			txctx.Logger.WithError(e).Errorf("sender: envelope store failed to set envelope")
 		}
-		txctx.Abort()
 		return
 	}
 	txctx.Logger.Debugf("sender: raw transaction sent")
@@ -216,8 +220,8 @@ func processTxWithDeterministicHash(txctx *engine.TxContext, store evlpstore.Env
 		})
 	if err != nil {
 		// Connection to store is broken
-		txctx.Logger.WithError(err).Errorf("sender: envelope store failed to set status")
-		_ = txctx.Error(err)
+		e := errors.FromError(err).ExtendComponent(component)
+		txctx.Logger.WithError(e).Errorf("sender: envelope store failed to set status")
 		return
 	}
 }

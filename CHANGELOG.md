@@ -4,6 +4,7 @@
 
 *Unreleased*
 
+- [FEAT] Error management
 - [FEAT] Update `EnvelopeStore` version
 
 ### Version 0.5.3

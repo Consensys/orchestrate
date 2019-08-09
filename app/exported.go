@@ -17,6 +17,7 @@ import (
 	server "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http/healthcheck"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-sender.git/handlers"
+	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-sender.git/handlers/producer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-sender.git/handlers/sender"
 )
 
@@ -64,6 +65,7 @@ func registerHandlers() {
 	engine.Register(logger.Logger)
 	engine.Register(loader.Loader)
 	engine.Register(offset.Marker)
+	engine.Register(producer.GlobalHandler())
 	engine.Register(opentracing.GlobalHandler())
 
 	// Specific handlers tk Sender worker
