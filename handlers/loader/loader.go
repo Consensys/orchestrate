@@ -14,7 +14,7 @@ import (
 // Loader is a Middleware enginer.HandlerFunc that Load sarama.ConsumerGroup messages
 func Loader(txctx *engine.TxContext) {
 	// Cast message into sarama.ConsumerMessage
-	receipt, ok := txctx.Msg.(*types.TxListenerReceipt)
+	receipt, ok := txctx.In.(*types.TxListenerReceipt)
 	if !ok {
 		txctx.Logger.Errorf("loader: expected a types.TxListenerReceipt")
 		_ = txctx.AbortWithError(fmt.Errorf("invalid input message format"))

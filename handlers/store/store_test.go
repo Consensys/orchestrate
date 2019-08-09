@@ -5,16 +5,16 @@ import (
 	"math/rand"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine/testutils"
+	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/envelope-store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store/mock"
+	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/client/mock"
 )
 
 var letterRunes = []rune("abcdef0123456789")
@@ -27,14 +27,14 @@ func RandString(n int) string {
 	return string(b)
 }
 
-func makeContext(i int, store *mock.EnvelopeStore) *engine.TxContext {
+func makeContext(i int, store *clientmock.EnvelopeStoreClient) *engine.TxContext {
 	// Initialize context
 	txctx := engine.NewTxContext().Prepare(log.NewEntry(log.StandardLogger()), nil)
 
 	hash, uuid := ethereum.HexToHash("0x"+RandString(64)), RandString(32)
 
 	// Prepare context
-	txctx.Envelope.Chain = chain.CreateChainInt(10)
+	txctx.Envelope.Chain = chain.FromInt(10)
 	txctx.Envelope.Receipt = &ethereum.Receipt{
 		TxHash: hash,
 	}
@@ -42,17 +42,23 @@ func makeContext(i int, store *mock.EnvelopeStore) *engine.TxContext {
 	switch i % 2 {
 	case 0:
 		// Prestore an envelope
-		e := &envelope.Envelope{}
-		e.Chain = chain.CreateChainInt(10)
-		e.Tx = (&ethereum.Transaction{
-			Hash: hash,
-			Raw:  ethereum.HexToData("0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80"),
-		})
-		e.Metadata = &envelope.Metadata{Id: uuid}
-		_, _, _ = store.Store(context.Background(), e)
+		evlp := &envelope.Envelope{
+			Chain: chain.FromInt(10),
+			Tx: &ethereum.Transaction{
+				Hash: hash,
+				Raw:  ethereum.HexToData("0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80"),
+			},
+			Metadata: &envelope.Metadata{Id: uuid},
+		}
+		_, _ = store.Store(
+			context.Background(),
+			&evlpstore.StoreRequest{
+				Envelope: evlp,
+			},
+		)
 		txctx.Set("uuid", uuid)
 		txctx.Set("errors", 0)
-		txctx.Set("status", "mined")
+		txctx.Set("status", "MINED")
 	case 1:
 		txctx.Set("uuid", "")
 		txctx.Set("errors", 1)
@@ -63,16 +69,16 @@ func makeContext(i int, store *mock.EnvelopeStore) *engine.TxContext {
 
 type StoreTestSuite struct {
 	testutils.HandlerTestSuite
-	store *mock.EnvelopeStore
+	store *clientmock.EnvelopeStoreClient
 }
 
 func (s *StoreTestSuite) SetupSuite() {
-	s.store = mock.NewEnvelopeStore()
+	s.store = clientmock.New()
 	s.Handler = EnvelopeLoader(s.store)
 }
 
 func (s *StoreTestSuite) TestStore() {
-	rounds := 100
+	rounds := 2
 	txctxs := []*engine.TxContext{}
 	for i := 0; i < rounds; i++ {
 		txctxs = append(txctxs, makeContext(i, s.store))
@@ -84,8 +90,16 @@ func (s *StoreTestSuite) TestStore() {
 	for _, out := range txctxs {
 		assert.Len(s.T(), out.Envelope.Errors, out.Get("errors").(int), "Expected correct errors count")
 		assert.Equal(s.T(), out.Get("uuid").(string), out.Envelope.GetMetadata().GetId(), "Metadata should be set")
-		status, _, _ := s.store.GetStatus(context.Background(), out.Envelope.GetMetadata().GetId())
-		assert.Equal(s.T(), out.Get("status").(string), status, "Envelope should have expected status")
+		if len(out.Envelope.Errors) == 0 {
+			resp, _ := s.store.LoadByID(
+				context.Background(),
+				&evlpstore.LoadByIDRequest{
+					Id: out.Envelope.GetMetadata().GetId(),
+				},
+			)
+			assert.Equal(s.T(), out.Get("status").(string), resp.GetStatusInfo().GetStatus().String(), "Envelope should have expected status")
+		}
+
 	}
 
 }

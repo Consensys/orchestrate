@@ -7,7 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	grpcstore "gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/store/grpc"
+	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/client"
 )
 
 var (
@@ -22,11 +22,11 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		// Initialize Context store
-		grpcstore.Init(ctx)
+		// Initialize Envelope store client
+		storeclient.Init(ctx)
 
 		// Create Handler
-		handler = EnvelopeLoader(grpcstore.GlobalEnvelopeStore())
+		handler = EnvelopeLoader(storeclient.GlobalEnvelopeStoreClient())
 
 		log.Infof("envelope-store: handler ready")
 	})
