@@ -19,7 +19,7 @@ require (
 	github.com/stretchr/testify v1.3.0
 	github.com/uber/jaeger-client-go v2.16.0+incompatible
 	github.com/uber/jaeger-lib v2.0.0+incompatible
-	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.7.2-0.20190805151447-8b8de579467d
+	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.8.0
 	google.golang.org/genproto v0.0.0-20180831171423-11092d34479b // indirect
 	google.golang.org/grpc v1.20.1
 )
