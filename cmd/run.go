@@ -7,8 +7,8 @@ import (
 	"github.com/spf13/cobra"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/tracing/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/rpc"
@@ -42,6 +42,7 @@ func newRunCommand() *cobra.Command {
 	broker.KafkaGroup(runCmd.Flags())
 	broker.KafkaTopicTxDecoded(runCmd.Flags())
 	broker.KafkaTopicTxDecoder(runCmd.Flags())
+	broker.InitKafkaSASLTLSFlags(runCmd.Flags())
 
 	return runCmd
 }

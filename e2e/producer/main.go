@@ -40,7 +40,7 @@ func newMessage(i int) *sarama.ProducerMessage {
 	}
 	b, _ := proto.Marshal(
 		&envelope.Envelope{
-			Chain: chain.CreateChainInt(chainID),
+			Chain: chain.FromInt(chainID),
 			Receipt: &ethereum.Receipt{
 				TxHash:          ethereum.HexToHash("0xbf0b3048242aff8287d1dd9de0d2d100cee25d4ea45b8afa28bdfc1e2a775afd"),
 				BlockHash:       nil,
