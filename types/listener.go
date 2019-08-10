@@ -7,6 +7,7 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
 // TxListenerReceipt contains useful information about a receipt
@@ -24,7 +25,18 @@ type TxListenerReceipt struct {
 	TxIndex     uint64
 }
 
-func (m *TxListenerReceipt) Entrypoint() string { return "" }
+// make TxListenerReceipt match engine.Msg interface
+func (m *TxListenerReceipt) Entrypoint() string    { return "" }
+func (m *TxListenerReceipt) Header() engine.Header { return &header{} }
+func (m *TxListenerReceipt) Value() []byte         { return []byte{} }
+func (m *TxListenerReceipt) Key() []byte           { return []byte{} }
+
+type header struct{}
+
+func (h *header) Add(key, value string) {}
+func (h *header) Del(key string)        {}
+func (h *header) Get(key string) string { return "" }
+func (h *header) Set(key, value string) {}
 
 // TxListenerBlock contains data about a block
 type TxListenerBlock struct {

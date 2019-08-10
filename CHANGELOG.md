@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.6.11
+
+*Unreleased*
+
+- [FIX] Update to `pkg` v0.8.0
+
 ### Version 0.6.10
 
 *Released on July 23th 2019*

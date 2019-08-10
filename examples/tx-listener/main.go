@@ -7,16 +7,16 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	handler "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/handler/base"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/listener"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
 // Handler is a engine HandlerFunc
 func Handler(txctx *engine.TxContext) {
 	// Cast message into sarama.ConsumerMessage
-	r, ok := txctx.Msg.(*types.TxListenerReceipt)
+	r, ok := txctx.In.(*types.TxListenerReceipt)
 	if !ok {
 		panic("loader: expected a types.TxListenerReceipt")
 	}
