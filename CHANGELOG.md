@@ -2,7 +2,7 @@
 
 ### Version 0.5.0
 
-*Unreleased*
+*Released on August 10th 2019*
 
 - [REFACTOR] Refactor following better packaging of GRPC resources
 
