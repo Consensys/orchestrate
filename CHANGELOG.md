@@ -2,7 +2,7 @@
 
 ### Version 0.6.11
 
-*Unreleased*
+*Released on August 10th 2019*
 
 - [FIX] Update to `pkg` v0.8.0
 
