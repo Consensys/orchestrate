@@ -10,6 +10,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/keystore"
 )
 
+const component = "handler.signer.ethereum"
+
 var (
 	handler  engine.HandlerFunc
 	initOnce = &sync.Once{}

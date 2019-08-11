@@ -47,7 +47,10 @@ func newRunCommand() *cobra.Command {
 	broker.KafkaTopicTxSender(runCmd.Flags())
 	broker.KafkaTopicWalletGenerator(runCmd.Flags())
 	broker.KafkaTopicWalletGenerated(runCmd.Flags())
+	broker.KafkaTopicTxRecover(runCmd.Flags())
 	broker.InitKafkaSASLTLSFlags(runCmd.Flags())
+
+	// Register tessera endpoint
 	tesseraEndpoints(runCmd.Flags())
 
 	return runCmd

@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/viper"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/producer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 )
@@ -21,6 +22,14 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 	case viper.GetString("kafka.topic.signer"):
 		// Set Topic at sender by default
 		msg.Topic = viper.GetString("kafka.topic.sender")
+
+		// If an error occurred then we redirect to recovery
+		for _, err := range txctx.Envelope.GetErrors() {
+			if !errors.IsWarning(err) {
+				msg.Topic = viper.GetString("kafka.topic.recover")
+				break
+			}
+		}
 
 		// Set key for Kafka partitions
 		Sender := txctx.Envelope.GetFrom().Address()
@@ -39,7 +48,7 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 	return nil
 }
 
-// Producer creates a producer handler
+// Producer creates a producer handler### Version 0.5.2
 func Producer(p sarama.SyncProducer) engine.HandlerFunc {
 	return producer.Producer(p, PrepareMsg)
 }

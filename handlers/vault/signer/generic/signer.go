@@ -32,10 +32,8 @@ func GenerateSignerHandler(signerFunc TransactionSignerFunc, backend keystore.Ke
 		sender := txctx.Envelope.GetFrom().Address()
 		raw, h, err := signerFunc(backend, txctx, sender, t)
 		if err != nil {
-			// TODO: handle error
 			txctx.Logger.WithError(err).Warnf(errorMsg)
-			// We indicate that we got an error signing the transaction but we do not abort
-			_ = txctx.Error(err)
+			_ = txctx.AbortWithError(err)
 			return
 		}
 

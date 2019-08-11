@@ -17,8 +17,8 @@ func WalletGenerator(s keystore.KeyStore) engine.HandlerFunc {
 
 		add, err := s.GenerateWallet()
 		if err != nil {
-			txctx.Logger.WithError(err).Warnf("keygen: could not generate key %v", err)
-			_ = txctx.Error(err)
+			e := txctx.AbortWithError(err)
+			txctx.Logger.WithError(e).Errorf("keygen: could not generate wallet")
 		}
 
 		if txctx.Envelope.GetFrom() != nil {

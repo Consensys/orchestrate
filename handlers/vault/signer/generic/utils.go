@@ -5,7 +5,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 )
 
-// Probably make sense to move it in pkg. So that we can reuse it in tx-sender.
+// TODO: should be moved to pkg. Should be a method on Envelope.GetTransaction() *ethtypes.Transaction
 
 // TransactionFromTxContext extract a transaction from a transaction context
 func TransactionFromTxContext(txctx *engine.TxContext) *ethtypes.Transaction {

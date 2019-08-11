@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.5.3
+
+*Unreleased*
+
+- [FEAT] Error management
+
 ### Version 0.5.2
 
 *Released on July 21th 2019*
