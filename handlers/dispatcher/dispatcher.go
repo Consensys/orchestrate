@@ -14,7 +14,7 @@ func Dispacher(c chanregistry.ChanRegistry) engine.HandlerFunc {
 
 		txctx.Next()
 
-		msg := txctx.Msg
+		msg := txctx.In
 		if msg == nil {
 			txctx.Logger.Error("dispacher: received invalid message")
 			_ = txctx.AbortWithError(fmt.Errorf("invalid input message format"))

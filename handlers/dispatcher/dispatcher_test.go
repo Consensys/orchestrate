@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -45,8 +46,10 @@ func makeCrafterContext(i int) *engine.TxContext {
 		ctx.Set("result", "")
 	case 1:
 		// Input a standard envelope with an extra data with ScenarioID
-		ctx.Msg = &broker.Msg{
-			Topic: "testTopic",
+		ctx.In = &broker.Msg{
+			ConsumerMessage: sarama.ConsumerMessage{
+				Topic: "testTopic",
+			},
 		}
 		extra := make(map[string]string)
 		extra["ScenarioID"] = "test"
@@ -56,8 +59,10 @@ func makeCrafterContext(i int) *engine.TxContext {
 	case 2:
 		// Input an envelope without ScenarioID in extra data
 		extra := make(map[string]string)
-		ctx.Msg = &broker.Msg{
-			Topic: "testTopic",
+		ctx.In = &broker.Msg{
+			ConsumerMessage: sarama.ConsumerMessage{
+				Topic: "testTopic",
+			},
 		}
 		ctx.Envelope.Metadata = &envelope.Metadata{Id: "test", Extra: extra}
 		ctx.Set("errors", 1)

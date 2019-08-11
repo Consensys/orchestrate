@@ -77,7 +77,7 @@ func EnvelopeCrafter(m map[string]string) *envelope.Envelope {
 			if err != nil {
 				panic("Failed to parse chain id")
 			}
-			e.Chain = chain.CreateChainInt(int64(chainID))
+			e.Chain = chain.FromInt(int64(chainID))
 		case "from":
 			e.From = ethereum.HexToAccount(v)
 		case "contractName":

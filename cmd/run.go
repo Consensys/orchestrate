@@ -7,7 +7,6 @@ import (
 	"github.com/spf13/cobra"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/app"
@@ -25,9 +24,6 @@ func newRunCommand() *cobra.Command {
 	// Register Engine flags
 	engine.InitFlags(runCmd.Flags())
 
-	// Register Opentracing flags
-	jaeger.InitFlags(runCmd.Flags())
-
 	// Register HTTP server flags
 	http.Hostname(runCmd.Flags())
 
@@ -42,6 +38,7 @@ func newRunCommand() *cobra.Command {
 	broker.KafkaTopicTxDecoded(runCmd.Flags())
 	broker.KafkaTopicWalletGenerator(runCmd.Flags())
 	broker.KafkaTopicWalletGenerated(runCmd.Flags())
+	broker.InitKafkaSASLTLSFlags(runCmd.Flags())
 
 	// Register Cucumber flag
 	cucumber.InitFlags(runCmd.Flags())

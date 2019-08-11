@@ -114,7 +114,7 @@ func (s *ScenarioTestSuite) TestISendTheseEnvelopeToCoreStack() {
 	broker.SetGlobalSyncProducer(producer)
 
 	s.Scenario.Envelopes["test"] = &envelope.Envelope{
-		Chain: chain.CreateChainInt(888),
+		Chain: chain.FromInt(888),
 	}
 
 	err := s.Scenario.iSendTheseEnvelopeToCoreStack()
@@ -144,7 +144,7 @@ func (s *ScenarioTestSuite) TestCoreStackShouldReceiveEnvelopes() {
 	s.Scenario.EnvelopesChan[viper.GetString("kafka.topic.crafter")] = mockChan
 
 	testEnvelope := &envelope.Envelope{
-		Chain: chain.CreateChainInt(888),
+		Chain: chain.FromInt(888),
 	}
 	s.Scenario.Envelopes["test"] = testEnvelope
 
@@ -283,7 +283,7 @@ func (s *ScenarioTestSuite) TestTheTxnonceShouldSetTheNonce() {
 	}
 	for i := range make([]int, 10) {
 		s.Scenario.Envelopes[fmt.Sprintf("%s-%d", "test", i)] = &envelope.Envelope{
-			Chain: chain.CreateChainInt(888),
+			Chain: chain.FromInt(888),
 			From:  ethereum.NewAccount(addr[i%len(addr)]),
 			Tx: &ethereum.Transaction{
 				TxData: &ethereum.TxData{
@@ -403,9 +403,9 @@ func (s *ScenarioTestSuite) TestTheTxlistenerShouldCatchTheTx() {
 
 	for i := range make([]int, 10) {
 		s.Scenario.Envelopes[fmt.Sprintf("%s-%d", "test", i)] = &envelope.Envelope{
-			Chain: chain.CreateChainInt(chainIds[i%len(chainIds)]),
+			Chain: chain.FromInt(chainIds[i%len(chainIds)]),
 			Receipt: &ethereum.Receipt{
-				TxHash: ethereum.CreateHash(ethcommon.HexToAddress("0x00").Bytes()),
+				TxHash: ethereum.HexToHash("0x23e4210f0f39b6c69573a6b6ae7b767c0a6d41dc0e7f0644e2c7ed9f3a7f7146"),
 			},
 		}
 	}
@@ -438,12 +438,12 @@ func (s *ScenarioTestSuite) TestTheTxdecoderShouldDecode() {
 	decoded["test"] = "test"
 	testEnvelope := &envelope.Envelope{
 		Receipt: &ethereum.Receipt{
-			TxHash: ethereum.CreateHash(ethcommon.HexToAddress("0x00").Bytes()),
+			TxHash: ethereum.HexToHash("0x23e4210f0f39b6c69573a6b6ae7b767c0a6d41dc0e7f0644e2c7ed9f3a7f7146"),
 			Logs: []*ethereum.Log{
 				&ethereum.Log{
 					Topics: []*ethereum.Hash{
-						ethereum.CreateHash(ethcommon.HexToAddress("0x00").Bytes()),
-						ethereum.CreateHash(ethcommon.HexToAddress("0x01").Bytes()),
+						ethereum.HexToHash("0x23e4210f0f39b6c69573a6b6ae7b767c0a6d41dc0e7f0644e2c7ed9f3a7f7146"),
+						ethereum.HexToHash("0x23e4210f0f39b6c69573a6b6ae7b767c0a6d41dc0e7f0644e2c7ed9f3a7f7146"),
 					},
 					DecodedData: decoded,
 				},
@@ -468,12 +468,12 @@ func (s *ScenarioTestSuite) TestTheTxdecoderShouldDecode() {
 	// Test step with unexpected envelopes
 	unexpectedEnvelope := &envelope.Envelope{
 		Receipt: &ethereum.Receipt{
-			TxHash: ethereum.CreateHash(ethcommon.HexToAddress("0x00").Bytes()),
+			TxHash: ethereum.HexToHash("0x23e4210f0f39b6c69573a6b6ae7b767c0a6d41dc0e7f0644e2c7ed9f3a7f7146"),
 			Logs: []*ethereum.Log{
 				&ethereum.Log{
 					Topics: []*ethereum.Hash{
-						ethereum.CreateHash(ethcommon.HexToAddress("0x00").Bytes()),
-						ethereum.CreateHash(ethcommon.HexToAddress("0x01").Bytes()),
+						ethereum.HexToHash("0x23e4210f0f39b6c69573a6b6ae7b767c0a6d41dc0e7f0644e2c7ed9f3a7f7146"),
+						ethereum.HexToHash("0x23e4210f0f39b6c69573a6b6ae7b767c0a6d41dc0e7f0644e2c7ed9f3a7f7146"),
 					},
 					DecodedData: make(map[string]string),
 				},

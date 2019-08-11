@@ -15,13 +15,13 @@ import (
 func TestGetChainCounts(t *testing.T) {
 	envelopes := map[string]*envelope.Envelope{
 		"1": &envelope.Envelope{
-			Chain: chain.CreateChainInt(888),
+			Chain: chain.FromInt(888),
 		},
 		"2": &envelope.Envelope{
-			Chain: chain.CreateChainInt(777),
+			Chain: chain.FromInt(777),
 		},
 		"3": &envelope.Envelope{
-			Chain: chain.CreateChainInt(888),
+			Chain: chain.FromInt(888),
 		},
 	}
 
@@ -39,7 +39,7 @@ func TestChanTimeout(t *testing.T) {
 	assert.Nil(t, e, "Should get an nil envelope slice")
 	assert.Error(t, err, "Should get an error for not having received an envelope")
 
-	testEnvelope := &envelope.Envelope{Chain: chain.CreateChainInt(888)}
+	testEnvelope := &envelope.Envelope{Chain: chain.FromInt(888)}
 	go func() {
 		testChan <- testEnvelope
 	}()
@@ -56,7 +56,7 @@ func TestSendEnvelope(t *testing.T) {
 	broker.SetGlobalSyncProducer(producer)
 
 	e := &envelope.Envelope{
-		Chain: chain.CreateChainInt(888),
+		Chain: chain.FromInt(888),
 	}
 
 	err := SendEnvelope(e, "topic-tx-crafter")
