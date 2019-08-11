@@ -40,6 +40,7 @@ func newRunCommand() *cobra.Command {
 	broker.KafkaGroup(runCmd.Flags())
 	broker.KafkaTopicTxSender(runCmd.Flags())
 	broker.KafkaTopicTxRecover(runCmd.Flags())
+	broker.InitKafkaSASLTLSFlags(runCmd.Flags())
 
 	// Register StoreGRPC flags
 	storeclient.EnvelopeStoreGRPCTarget(runCmd.Flags())
