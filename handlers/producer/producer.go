@@ -17,7 +17,7 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 		return err
 	}
 
-	switch txctx.Msg.Entrypoint() {
+	switch txctx.In.Entrypoint() {
 	case viper.GetString("kafka.topic.signer"):
 		// Set Topic at sender by default
 		msg.Topic = viper.GetString("kafka.topic.sender")

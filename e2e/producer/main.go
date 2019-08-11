@@ -46,7 +46,7 @@ func newTxMessage(i int) *sarama.ProducerMessage {
 	}
 	b, _ := proto.Marshal(
 		&envelope.Envelope{
-			Chain: chain.CreateChainInt(3),
+			Chain: chain.FromInt(3),
 			From:  ethereum.HexToAccount(senders[i%len(senders)]),
 			Tx: &ethereum.Transaction{
 				TxData: &ethereum.TxData{

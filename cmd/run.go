@@ -10,8 +10,8 @@ import (
 	"github.com/spf13/viper"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/tracing/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/keystore"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/secretstore"
@@ -47,6 +47,7 @@ func newRunCommand() *cobra.Command {
 	broker.KafkaTopicTxSender(runCmd.Flags())
 	broker.KafkaTopicWalletGenerator(runCmd.Flags())
 	broker.KafkaTopicWalletGenerated(runCmd.Flags())
+	broker.InitKafkaSASLTLSFlags(runCmd.Flags())
 	tesseraEndpoints(runCmd.Flags())
 
 	return runCmd

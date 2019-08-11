@@ -11,7 +11,7 @@ import (
 // or generate a new key depending on the input entrypoint.
 func Vault(signer, generator engine.HandlerFunc) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		switch txctx.Msg.Entrypoint() {
+		switch txctx.In.Entrypoint() {
 		case viper.GetString("kafka.topic.signer"):
 			signer(txctx)
 		case viper.GetString("kafka.topic.wallet.generator"):
