@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.6.0
+
+*Released on August 11th 2019*
+
+- [FEAT] Update `pkg` to v0.8.0
+- [FEAT] Sarama - Kafka connection with TLS/SASL 
+
 ### Version 0.5.2
 
 *Released on July 23th 2019*
