@@ -59,7 +59,7 @@ func NewMessage(i int) *sarama.ProducerMessage {
 	}
 
 	e := &envelope.Envelope{
-		Chain: chain.CreateChainInt(888),
+		Chain: chain.FromInt(888),
 		From:  ethereum.HexToAccount(senders[i]),
 		Args: &envelope.Args{
 			Call: call,

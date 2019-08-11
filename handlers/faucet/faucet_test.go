@@ -32,10 +32,10 @@ func makeFaucetContext(i int) *engine.TxContext {
 	txctx.Logger = log.NewEntry(log.StandardLogger())
 	switch i % 2 {
 	case 0:
-		txctx.Envelope.Chain = chain.CreateChainInt(0)
+		txctx.Envelope.Chain = chain.FromInt(0)
 		txctx.Set("errors", 1)
 	case 1:
-		txctx.Envelope.Chain = chain.CreateChainInt(10)
+		txctx.Envelope.Chain = chain.FromInt(10)
 		txctx.Set("errors", 0)
 	}
 	return txctx
