@@ -33,7 +33,7 @@ func newMessage(i int) *sarama.ProducerMessage {
 	}
 	b, _ := proto.Marshal(
 		&envelope.Envelope{
-			Chain: chain.CreateChainInt(888),
+			Chain: chain.FromInt(888),
 			From:  ethereum.HexToAccount(senders[i%len(senders)]),
 			Args: &envelope.Args{
 				Call: &args.Call{

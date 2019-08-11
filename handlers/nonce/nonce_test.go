@@ -109,7 +109,7 @@ func makeNonceContext(chainID int64, address string) *engine.TxContext {
 	ctx := engine.NewTxContext()
 	ctx.Reset()
 	ctx.Logger = log.NewEntry(log.StandardLogger())
-	ctx.Envelope.Chain = chain.CreateChainInt(chainID)
+	ctx.Envelope.Chain = chain.FromInt(chainID)
 	ctx.Envelope.From = ethereum.HexToAccount(address)
 	ctx.Envelope.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{}}
 
