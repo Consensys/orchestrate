@@ -2,7 +2,7 @@
 
 ### Version 0.6.0
 
-*Unreleased*
+*Released on August 11th 2019*
 
 - [FEAT] Error management
 - [FEAT] Update `pkg` to v0.8.0
