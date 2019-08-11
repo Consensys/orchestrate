@@ -2,6 +2,8 @@
 
 ### Version 0.6.0
 
+*Released on August 11th 2019*
+
 - [FEAT] Update to `pkg` v0.8.0
 - [FEAT] Error management
 - [FEAT] Sarama - Kafka connection with TLS/SASL 
