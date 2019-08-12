@@ -6,7 +6,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/nonce.git/nonce"
@@ -45,7 +44,7 @@ func Handler(nc nonce.Nonce, getChainNonce GetNonceFunc) engine.HandlerFunc {
 		}()
 
 		// Retrieve nonce
-		n, idleTime, err := nc.Get(chainID, &a)
+		n, inCache, err := nc.Get(chainID, &a)
 		if err != nil {
 			e := txctx.AbortWithError(err).ExtendComponent(component)
 			txctx.Logger.WithError(e).Errorf("nonce: could not get nonce from cache")
@@ -53,19 +52,8 @@ func Handler(nc nonce.Nonce, getChainNonce GetNonceFunc) engine.HandlerFunc {
 		}
 
 		// If nonce was not in cache, we calibrate it by reading nonce from chain
-		if idleTime == -1 {
+		if !inCache {
 			txctx.Logger.Debugf("nonce: not in cache, get from chain")
-			n, err = getChainNonce(txctx.Context(), chainID, a)
-			if err != nil {
-				e := txctx.AbortWithError(err).ExtendComponent(component)
-				txctx.Logger.WithError(e).Errorf("nonce: could not get nonce from chain")
-				return
-			}
-		}
-
-		// If nonce is too old, we calibrate it by reading nonce from chain
-		if idleTime > viper.GetInt("redis.nonce.expiration.time") {
-			txctx.Logger.Debugf("nonce: cache too old, get from chain")
 			n, err = getChainNonce(txctx.Context(), chainID, a)
 			if err != nil {
 				e := txctx.AbortWithError(err).ExtendComponent(component)

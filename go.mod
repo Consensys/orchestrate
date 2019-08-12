@@ -10,5 +10,5 @@ require (
 	github.com/stretchr/testify v1.3.0
 	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.8.0
 	gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.6.8
-	gitlab.com/ConsenSys/client/fr/core-stack/service/nonce.git v0.1.5
+	gitlab.com/ConsenSys/client/fr/core-stack/service/nonce.git v0.1.8
 )

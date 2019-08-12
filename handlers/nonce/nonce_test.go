@@ -33,11 +33,9 @@ var chainIDs = []int64{
 }
 var nonceInCacheAddress = "0x1234608A02a7A15fd6689D6DaD560C44E9ab61Ff"
 var nonceNotInCacheAddress = "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"
-var nonceTooOldAddress = "0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff"
 var addresses = []string{
 	nonceInCacheAddress,
 	nonceNotInCacheAddress,
-	nonceTooOldAddress,
 }
 var cacheNonce = uint64(53)
 var chainNonce = uint64(42)
@@ -59,23 +57,18 @@ type MockNonce struct {
 	mux *sync.Mutex
 }
 
-func (nm *MockNonce) Get(chainID *big.Int, a *ethcommon.Address) (c uint64, s int, e error) {
+func (nm *MockNonce) Get(chainID *big.Int, a *ethcommon.Address) (c uint64, inCache bool, e error) {
 	if chainID.Int64() == error2ChainID {
 		// Simulate error
-		return 0, 0, fmt.Errorf(" Error retrieving nonce")
+		return 0, false, fmt.Errorf(" Error retrieving nonce")
 	}
 
 	if a.Hex() == nonceNotInCacheAddress {
 		// Simulate unknown nonce
-		return 0, -1, nil
+		return 0, false, nil
 	}
 
-	if a.Hex() == nonceTooOldAddress {
-		// Simulate nonce that is too old
-		return 0, 1000, nil
-	}
-
-	return cacheNonce, 1, nil
+	return cacheNonce, true, nil
 }
 
 func (nm *MockNonce) Set(chainID *big.Int, a *ethcommon.Address, value uint64) error {
