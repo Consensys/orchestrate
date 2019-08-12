@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.6.1
+
+*Released on August 12th 2019*
+
+- [FIX] Correctly handle nonce when it is not yet in Redis cache
+
 ### Version 0.6.0
 
 *Released on August 11th 2019*
