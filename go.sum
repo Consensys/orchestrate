@@ -151,9 +151,11 @@ gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.8.0 h1:8hCL3Ae7BXfchTt2IOfH
 gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.8.0/go.mod h1:BGfgsJKTTY53VkBxGJUYlx0kfLx99qK+ljwn8sLpCmk=
 gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git v0.4.5-0.20190809202455-3aaf0fa9d957 h1:Pdl0nA2oKJdIizB8/HGPQqMzPCOn1KoT/lIxvQisUNQ=
 gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git v0.4.5-0.20190809202455-3aaf0fa9d957/go.mod h1:WJrb0J4amaHNjO+MH46vdqtsTq17INb3E5ygW9GU+Yg=
+gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git v0.5.0 h1:kwznv+nOMChOS7MSekHDOAsof5tE7uJFII2NE4m+myg=
 gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git v0.5.0/go.mod h1:z1pnfd1D3u9Vy99Z0xlId3hb4wqJYE+6Fl26phw6q7Y=
 gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.6.11-0.20190805185048-47ea5edd9648 h1:EkhqVmincO6s3KOuHES2uMGnkxuWoNl5WZK92CEjKZE=
 gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.6.11-0.20190805185048-47ea5edd9648/go.mod h1:rUXU+fg/co5e3lYgG01Qh0MdTV+rN3Y8IJ7GSpgciDw=
+gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.6.11 h1:rgEjbCInB/BYDpmQ5xk5icNsEKSwFxa+xqc7GHiVCic=
 gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.6.11/go.mod h1:33kDDYsCInOAcCXK2MMTqjH0kt7kmxojULfMD3IkpTM=
 go.uber.org/atomic v1.4.0/go.mod h1:gD2HeocX3+yG+ygLZcrzQJaqmWj9AIm7n08wl/qW/PE=
 golang.org/x/crypto v0.0.0-20170930174604-9419663f5a44/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=

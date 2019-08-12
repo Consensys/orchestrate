@@ -26,7 +26,9 @@ func EnvelopeLoader(s evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
 		}
 
 		// Set context envelope
+		receipt := txctx.Envelope.Receipt
 		txctx.Envelope = resp.GetEnvelope()
+		txctx.Envelope.Receipt = receipt
 
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"metadata.id": txctx.Envelope.GetMetadata().GetId(),
