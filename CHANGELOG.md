@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.7
+
+*Released on August 7th 2019*
+
+- [FIX] Use TTL feature to automatically refresh cached nonce value
+
 ### Version 0.1.6
 
 *Released on August 7th 2019*
