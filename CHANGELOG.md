@@ -2,6 +2,12 @@
 
 ### Version 0.6.0
 
+*Released on August 12th 2019*
+
+- [FIX] Merging the envelope from store and receipt
+
+### Version 0.6.0
+
 *Released on August 11th 2019*
 
 - [FEAT] Update to `pkg` v0.8.0
