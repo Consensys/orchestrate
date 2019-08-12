@@ -1,6 +1,6 @@
 # CHANGELOG
 
-### Version 0.6.0
+### Version 0.6.1
 
 *Released on August 12th 2019*
 
