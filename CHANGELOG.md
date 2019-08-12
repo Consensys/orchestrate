@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.6.1
+
+*Released on August 12th 2019*
+
+- [FIX] Add init producer handler
+
 ### Version 0.6.0
 
 *Released on August 11th 2019*
