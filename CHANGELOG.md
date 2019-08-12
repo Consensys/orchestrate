@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.1.8
+
+*Released on August 7th 2019*
+
+- [FIX] Use correct Redis command to set nonce value
+
 ### Version 0.1.7
 
 *Released on August 7th 2019*

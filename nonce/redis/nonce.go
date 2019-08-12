@@ -104,7 +104,7 @@ func (nm *Nonce) Set(chainID *big.Int, a *common.Address, newNonce uint64) error
 	conn := nm.pool.Get()
 	expirationTime := viper.GetInt("redis.nonce.expiration.time")
 	defer conn.Close()
-	_, err := conn.Do("SETX", computeKey(chainID, a), expirationTime, newNonce)
+	_, err := conn.Do("SETEX", computeKey(chainID, a), expirationTime, newNonce)
 	if err != nil {
 		return errors.FromError(err).SetComponent(component)
 	}

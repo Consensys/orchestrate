@@ -47,7 +47,7 @@ func TestGetAndUpdateNonceCache(t *testing.T) {
 
 	mockRedisConn := redigomock.NewConn()
 	mockRedisConn.Clear()
-	mockRedisConn.Command("SETX", computeKey(cid, &a), expirationTime, uint64(nonceBefore+1)).Expect("OK")
+	mockRedisConn.Command("SETEX", computeKey(cid, &a), expirationTime, uint64(nonceBefore+1)).Expect("OK")
 	mockRedisConn.Command("GET", computeKey(cid, &a)).Expect(int64(nonceBefore + 1))
 
 	mockRedisConn.Command("GET", computeKey(cid, &noNonceAddress)).Expect(nil)
@@ -85,7 +85,7 @@ func TestGetAndUpdateNonceCache(t *testing.T) {
 		a := common.HexToAddress("0xabcdabcdabcdabcdabcdabcd")
 		mockRedisConn := redigomock.NewConn()
 		mockRedisConn.Command("SET").ExpectError(fmt.Errorf("test-error"))
-		mockRedisConn.Command("SETX").ExpectError(fmt.Errorf("test-error"))
+		mockRedisConn.Command("SETEX").ExpectError(fmt.Errorf("test-error"))
 		mockRedisConn.Command("GET", computeLockName(cid, &a)).Expect("lock-name").ExpectError(fmt.Errorf("test-error"))
 		mockRedisConn.Command("GET", computeKey(cid, &a)).ExpectError(fmt.Errorf("test-error"))
 		mockRedisConn.Command("DEL", computeLockName(cid, &a)).ExpectError(fmt.Errorf("test-error"))
