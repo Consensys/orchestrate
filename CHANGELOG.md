@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.6.12
+
+*Released on August 20th 2019*
+
+- [FIX] Move tessera config here from tx-signer
+
 ### Version 0.6.11
 
 *Released on August 10th 2019*
