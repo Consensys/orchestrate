@@ -1,7 +1,7 @@
 module gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-decoder.git
 
 require (
-	github.com/Shopify/sarama v1.22.0
+	github.com/Shopify/sarama v1.22.1
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/ethereum/go-ethereum v1.8.27
 	github.com/golang/protobuf v1.3.0
