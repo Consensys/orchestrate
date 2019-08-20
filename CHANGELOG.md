@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.6.1
+
+*Released on August 20th 2019*
+
+- [FIX] Move tessera config to ethereum
+
 ### Version 0.6.0
 
 *Released on August 11th 2019*
