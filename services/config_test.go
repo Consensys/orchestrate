@@ -10,17 +10,16 @@ import (
 )
 
 func TestStoreType(t *testing.T) {
-	name := "envelope-store.type"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	StoreType(flgs)
 
 	expected := "pg"
-	assert.Equal(t, expected, viper.GetString(name), "Default")
+	assert.Equal(t, expected, viper.GetString(typeViperKey), "Default")
 
-	os.Setenv("ENVELOPE_STORE", "env-store")
 	expected = "env-store"
-	assert.Equal(t, expected, viper.GetString(name), "From Environment Variable")
-	os.Unsetenv("ENVELOPE_STORE")
+	_ = os.Setenv(typeEnv, expected)
+	assert.Equal(t, expected, viper.GetString(typeViperKey), "From Environment Variable")
+	_ = os.Unsetenv(typeEnv)
 
 	args := []string{
 		"--envelope-store=flag-store",
@@ -29,5 +28,5 @@ func TestStoreType(t *testing.T) {
 	assert.NoError(t, err, "No error expected")
 
 	expected = "flag-store"
-	assert.Equal(t, expected, viper.GetString(name), "From flag")
+	assert.Equal(t, expected, viper.GetString(typeViperKey), "From flag")
 }

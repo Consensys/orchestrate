@@ -21,7 +21,7 @@ var (
 
 // StoreType register flag for the Envelope Store to select
 func StoreType(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Type of Faucet (one of %q)
+	desc := fmt.Sprintf(`Type of Envelope Store (one of %q)
 Environment variable: %q`, []string{"mock", "pg"}, typeEnv)
 	f.String(typeFlag, typeDefault, desc)
 	_ = viper.BindPFlag(typeViperKey, f.Lookup(typeFlag))
