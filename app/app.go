@@ -6,7 +6,6 @@ import (
 )
 
 // App is an application structure that expose Ready method
-// TODO: App pattern is a v0.1 that is functional and should be used until we mature the overall Wire pattern
 type App struct {
 	ready   *atomic.Value
 	closing chan struct{}

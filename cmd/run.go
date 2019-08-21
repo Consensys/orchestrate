@@ -6,10 +6,12 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/tracing/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/contract-registry.git/app"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/rpc"
 )
 
 func newRunCommand() *cobra.Command {
@@ -19,11 +21,18 @@ func newRunCommand() *cobra.Command {
 		Run:   run,
 	}
 
-	// Register Opentracing flags
+	// Register OpenTracing flags
 	jaeger.InitFlags(runCmd.Flags())
 
 	// Register HTTP server flags
 	http.Hostname(runCmd.Flags())
+
+	// EthClient flag
+	ethclient.URLs(runCmd.Flags())
+
+	// ContractRegistry flag
+	registry.ContractRegistryType(runCmd.Flags())
+	registry.ABIs(runCmd.Flags())
 
 	return runCmd
 }
