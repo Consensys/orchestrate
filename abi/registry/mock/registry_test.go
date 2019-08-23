@@ -1,18 +1,21 @@
-package static
+package mock
 
 import (
+	"encoding/json"
+	"github.com/ethereum/go-ethereum/crypto"
 	"math/big"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
-
 	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/net/context"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	ierror "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/mock"
@@ -146,19 +149,28 @@ func TestRegisterContract(t *testing.T) {
 	mec := mock.NewClient(blocks)
 
 	r := NewRegistry(mec)
-	err := r.RegisterContract(&abi.Contract{
-		Id: &abi.ContractId{
-			Name: "ERC20",
-			Tag:  "v1.0.0",
+	_, err := r.RegisterContract(
+		context.Background(),
+		&svc.RegisterContractRequest{
+			Contract: &abi.Contract{
+				Id: &abi.ContractId{
+					Name: "ERC20",
+					Tag:  "v1.0.0",
+				},
+				Abi: []byte{},
+			},
 		},
-		Abi: []byte{},
-	})
+	)
 	assert.NoError(t, err, "Should not error on empty things")
 
-	err = r.RegisterContract(ERC20Contract)
+	_, err = r.RegisterContract(context.Background(),
+		&svc.RegisterContractRequest{Contract: ERC20Contract},
+	)
 	assert.NoError(t, err, "Should register contract properly")
 
-	err = r.RegisterContract(ERC20Contract)
+	_, err = r.RegisterContract(context.Background(),
+		&svc.RegisterContractRequest{Contract: ERC20Contract},
+	)
 	assert.NoError(t, err, "Should register contract properly twice")
 }
 
@@ -167,118 +179,163 @@ func TestContractRegistryBySig(t *testing.T) {
 	mec := mock.NewClient(blocks)
 
 	r := NewRegistry(mec)
-	err := r.RegisterContract(ERC20Contract)
+	_, err := r.RegisterContract(context.Background(),
+		&svc.RegisterContractRequest{Contract: ERC20Contract},
+	)
 	assert.NoError(t, err)
-	err = r.RegisterContract(ERC20ContractBis)
+	_, err = r.RegisterContract(context.Background(),
+		&svc.RegisterContractRequest{Contract: ERC20ContractBis},
+	)
 	assert.NoError(t, err)
 
 	// Get ABI
-	result, err := r.GetContractABI(&abi.Contract{
-		Id: &abi.ContractId{
-			Name: "ERC20",
-			Tag:  "v1.0.0",
-		},
-	})
+	abiResp, err := r.GetContractABI(context.Background(),
+		&svc.GetContractRequest{
+			Contract: &abi.Contract{
+				Id: &abi.ContractId{
+					Name: "ERC20",
+					Tag:  "v1.0.0",
+				},
+			},
+		})
 	assert.NoError(t, err)
-	assert.Equal(t, ERC20Contract.Abi, result)
-	result, err = r.GetContractABI(&abi.Contract{
-		Id: &abi.ContractId{
-			Name: "ERC20",
-			Tag:  "covfefe",
-		},
-	})
+	assert.Equal(t, ERC20Contract.Abi, abiResp.GetAbi())
+
+	abiResp, err = r.GetContractABI(context.Background(),
+		&svc.GetContractRequest{
+			Contract: &abi.Contract{
+				Id: &abi.ContractId{
+					Name: "ERC20",
+					Tag:  "covfefe",
+				},
+			},
+		})
 	assert.Error(t, err, "GetContractABI should error when unknown contract")
 	ierr, ok := err.(*ierror.Error)
 	assert.True(t, ok, "GetContractABI error should cast to internal error")
-	assert.Equal(t, "abi.registry.static", ierr.GetComponent(), "GetContractABI error component should be correct")
+	assert.Equal(t, "contract-registry.mock", ierr.GetComponent(), "GetContractABI error component should be correct")
 	assert.True(t, errors.IsStorageError(ierr), "GetContractABI error should be a storage error")
-	assert.Nil(t, result)
+	assert.Nil(t, abiResp)
 
 	// Get Bytecode
-	result, err = r.GetContractBytecode(&abi.Contract{
-		Id: &abi.ContractId{
-			Name: "ERC20",
-			Tag:  "v1.0.0",
-		},
-	})
+	bytecodeResp, err := r.GetContractBytecode(context.Background(),
+		&svc.GetContractRequest{
+			Contract: &abi.Contract{
+				Id: &abi.ContractId{
+					Name: "ERC20",
+					Tag:  "v1.0.0",
+				},
+			},
+		})
 	assert.NoError(t, err)
-	assert.Equal(t, ERC20Contract.Bytecode, result)
-	result, err = r.GetContractBytecode(&abi.Contract{
-		Id: &abi.ContractId{
-			Name: "ERC20",
-			Tag:  "covfefe",
-		},
-	})
+	assert.Equal(t, ERC20Contract.Bytecode, bytecodeResp.GetBytecode())
+	bytecodeResp, err = r.GetContractBytecode(context.Background(),
+		&svc.GetContractRequest{
+			Contract: &abi.Contract{
+				Id: &abi.ContractId{
+					Name: "ERC20",
+					Tag:  "covfefe",
+				},
+			},
+		})
 	assert.Error(t, err, "GetContractBytecode should error when unknown contract")
 	ierr, ok = err.(*ierror.Error)
 	assert.True(t, ok, "GetContractBytecode error should cast to internal error")
-	assert.Equal(t, "abi.registry.static", ierr.GetComponent(), "GetContractBytecode error component should be correct")
+	assert.Equal(t, "contract-registry.mock", ierr.GetComponent(), "GetContractBytecode error component should be correct")
 	assert.True(t, errors.IsStorageError(ierr), "GetContractBytecode error should be a storage error")
-	assert.Nil(t, result)
+	assert.Nil(t, bytecodeResp)
 
 	// Get DeployedBytecode
-	result, err = r.GetContractDeployedBytecode(&abi.Contract{
-		Id: &abi.ContractId{
-			Name: "ERC20",
-			Tag:  "v1.0.0",
-		},
-	})
+	deployedBytecodeResp, err := r.GetContractDeployedBytecode(context.Background(),
+		&svc.GetContractRequest{
+			Contract: &abi.Contract{
+				Id: &abi.ContractId{
+					Name: "ERC20",
+					Tag:  "v1.0.0",
+				},
+			},
+		})
 	assert.NoError(t, err)
-	assert.Equal(t, ERC20Contract.DeployedBytecode, result)
-	result, err = r.GetContractDeployedBytecode(&abi.Contract{
-		Id: &abi.ContractId{
-			Name: "ERC20",
-			Tag:  "covfefe",
-		},
-	})
+	assert.Equal(t, ERC20Contract.DeployedBytecode, deployedBytecodeResp.GetDeployedBytecode())
+	deployedBytecodeResp, err = r.GetContractDeployedBytecode(context.Background(),
+		&svc.GetContractRequest{
+			Contract: &abi.Contract{
+				Id: &abi.ContractId{
+					Name: "ERC20",
+					Tag:  "covfefe",
+				},
+			},
+		})
 	assert.Error(t, err, "Should error when unknown contract")
 	ierr, ok = err.(*ierror.Error)
 	assert.True(t, ok, "GetContractDeployedBytecode should cast to internal error")
-	assert.Equal(t, "abi.registry.static", ierr.GetComponent(), "GetContractDeployedBytecode error component should be correct")
+	assert.Equal(t, "contract-registry.mock", ierr.GetComponent(), "GetContractDeployedBytecode error component should be correct")
 	assert.True(t, errors.IsStorageError(ierr), "GetContractDeployedBytecode error should be a storage error")
-	assert.Nil(t, result)
+	assert.Nil(t, deployedBytecodeResp)
 
 	// Get MethodBySelector on default
-	var sel [4]byte
-	copy(sel[:], crypto.Keccak256(methodSig)[:4])
-	method, defaultMethod, err := r.GetMethodsBySelector(sel, common.AccountInstance{})
+	methodResp, err := r.GetMethodsBySelector(context.Background(),
+		&svc.GetMethodsBySelectorRequest{
+			Selector:        crypto.Keccak256(methodSig)[:4],
+			AccountInstance: &common.AccountInstance{},
+		})
 	assert.NoError(t, err)
-	assert.Nil(t, method)
+	assert.Nil(t, methodResp.GetMethod())
 	expectedMethod := ERC20ABI.Methods["isMinter"]
-	assert.Equal(t, []*ethabi.Method{&expectedMethod}, defaultMethod)
+	assert.Equal(t, []*ethabi.Method{&expectedMethod}, methodResp.GetDefaultMethods())
 
 	// Get EventsBySigHash wrong indexed count
-	event, defaultEvent, err := r.GetEventsBySigHash(crypto.Keccak256Hash(eventSig), ContractInstance, 0)
+	eventResp, err := r.GetEventsBySigHash(context.Background(),
+		&svc.GetEventsBySigHashRequest{
+			SigHash:           crypto.Keccak256Hash(eventSig).Bytes(),
+			AccountInstance:   &ContractInstance,
+			IndexedInputCount: 0})
 	assert.Error(t, err)
 	ierr, ok = err.(*ierror.Error)
 	assert.True(t, ok, "GetEventsBySigHash error should cast to internal error")
-	assert.Equal(t, "abi.registry.static", ierr.GetComponent(), "GetEventsBySigHash error component should be correct")
+	assert.Equal(t, "contract-registry.mock", ierr.GetComponent(), "GetEventsBySigHash error component should be correct")
 	assert.True(t, errors.IsStorageError(ierr), "GetEventsBySigHash error should be a storage error")
-	assert.Nil(t, result)
-	assert.Nil(t, event)
-	assert.Nil(t, defaultEvent)
+	assert.Nil(t, eventResp.GetEvent())
+	assert.Nil(t, eventResp.GetDefaultEvents())
 
 	// Get EventsBySigHash
-	event, defaultEvent, err = r.GetEventsBySigHash(crypto.Keccak256Hash(eventSig), ContractInstance, 1)
+	eventResp, err = r.GetEventsBySigHash(context.Background(),
+		&svc.GetEventsBySigHashRequest{
+			SigHash:           crypto.Keccak256Hash(eventSig).Bytes(),
+			AccountInstance:   &ContractInstance,
+			IndexedInputCount: 1})
 	assert.NoError(t, err)
 	expectedEvent := ERC20ABI.Events["MinterAdded"]
 	expectedEventBis := ERC20ABIBis.Events["MinterAdded"]
-	assert.Nil(t, event)
-	assert.Equal(t, []*ethabi.Event{&expectedEvent, &expectedEventBis}, defaultEvent)
+	assert.Nil(t, eventResp.GetEvent())
+	assert.Equal(t, []*ethabi.Event{&expectedEvent, &expectedEventBis}, eventResp.GetDefaultEvents())
 
 	// Update smart-contract address
-	err = r.RequestAddressUpdate(ContractInstance)
+	_, err = r.RequestAddressUpdate(context.Background(),
+		&svc.AddressUpdateRequest{AccountInstance: &ContractInstance})
 	assert.NoError(t, err)
 
 	// Get MethodBySelector
-	method, defaultMethod, err = r.GetMethodsBySelector(sel, ContractInstance)
+	methodResp, err = r.GetMethodsBySelector(context.Background(),
+		&svc.GetMethodsBySelectorRequest{
+			Selector:        crypto.Keccak256(methodSig)[:4],
+			AccountInstance: &ContractInstance})
 	assert.NoError(t, err)
-	assert.Equal(t, &expectedMethod, method)
-	assert.Nil(t, defaultMethod)
+
+	var method ethabi.Method
+	err = json.Unmarshal(methodResp.GetMethod(), &method)
+	assert.NoError(t, err)
+	assert.Equal(t, &expectedMethod, &method)
+	assert.Nil(t, methodResp.GetDefaultMethods())
 
 	// Get EventsBySigHash
-	event, defaultEvent, err = r.GetEventsBySigHash(crypto.Keccak256Hash(eventSig), ContractInstance, 1)
+	eventResp, err = r.GetEventsBySigHash(
+		context.Background(),
+		&svc.GetEventsBySigHashRequest{
+			SigHash:           crypto.Keccak256Hash(eventSig).Bytes(),
+			AccountInstance:   &ContractInstance,
+			IndexedInputCount: 1})
 	assert.NoError(t, err)
-	assert.Equal(t, &expectedEvent, event)
-	assert.Nil(t, defaultEvent)
+	assert.Equal(t, &expectedEvent, eventResp.GetEvent())
+	assert.Nil(t, eventResp.GetDefaultEvents())
 }

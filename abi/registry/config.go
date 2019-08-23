@@ -9,11 +9,28 @@ import (
 )
 
 func init() {
+	_ = viper.BindEnv(typeViperKey, typeEnv)
+	viper.SetDefault(typeViperKey, typeDefault)
 	_ = viper.BindEnv(abiViperKey, abiEnv)
 	viper.SetDefault(abiViperKey, abiDefault)
 }
 
-// SimpleToken has been compiled and optimized with openzepplin example (https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/examples/SimpleToken.sol)
+var (
+	typeFlag     = "contract-registry"
+	typeViperKey = "contract-registry.type"
+	typeDefault  = "mock"
+	typeEnv      = "CONTRACT_REGISTRY"
+)
+
+// RegistryType register flag for the Contract Registry to select
+func RegistryType(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Type of Contract Registry (one of %q)
+Environment variable: %q`, []string{"mock"}, typeEnv)
+	f.String(typeFlag, typeDefault, desc)
+	_ = viper.BindPFlag(typeViperKey, f.Lookup(typeFlag))
+}
+
+// SimpleToken has been compiled and optimized with OpenZeppelin example (https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/examples/SimpleToken.sol)
 var (
 	abiFlag     = "abi"
 	abiViperKey = "abis"
