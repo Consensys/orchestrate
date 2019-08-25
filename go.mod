@@ -2,7 +2,7 @@ module gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git
 
 require (
 	github.com/DATA-DOG/godog v0.7.13
-	github.com/Shopify/sarama v1.22.0
+	github.com/Shopify/sarama v1.22.1
 	github.com/ethereum/go-ethereum v1.8.27
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.4.0

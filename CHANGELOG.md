@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.1
+
+*Unreleased*
+
+- [FIX] Update `sarama` to v1.22.1 to auto-create topics when start to consuming 
+
 ### Version 0.4.0
 
 *Released on August 11th 2019*
