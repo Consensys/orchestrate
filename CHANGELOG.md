@@ -2,7 +2,7 @@
 
 ### Version 0.4.1
 
-*Unreleased*
+*Released on August 25th 2019*
 
 - [FIX] Update `sarama` to v1.22.1 to auto-create topics when start to consuming 
 
