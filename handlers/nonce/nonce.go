@@ -23,8 +23,9 @@ func Handler(nc nonce.Nonce, getChainNonce GetNonceFunc) engine.HandlerFunc {
 		a := txctx.Envelope.GetFrom().Address()
 
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"tx.sender": a.Hex(),
-			"chain.id":  chainID,
+			"tx.sender":   a.Hex(),
+			"chain.id":    chainID.String(),
+			"metadata.id": txctx.Envelope.GetMetadata().GetId(),
 		})
 
 		// Get the lock for chainID and sender address
