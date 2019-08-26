@@ -1,8 +1,14 @@
 # CHANGELOG
 
+### Version 0.6.2
+
+*Unreleased*
+
+- [FIX] Clean logs
+
 ### Version 0.6.1
 
-*Ongoing*
+*Released on August 20th 2019*
 
 - [FIX] Update `sarama` to v1.22.1 to auto-create topics when start to consuming 
 
