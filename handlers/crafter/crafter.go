@@ -15,6 +15,10 @@ import (
 // Crafter creates a crafter handler
 func Crafter(r registry.Registry, c crafter.Crafter) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
+		txctx.Logger = txctx.Logger.WithFields(log.Fields{
+			"metadata.id": txctx.Envelope.GetMetadata().GetId(),
+		})
+
 		if txctx.Envelope.GetTx().GetTxData().GetData() != nil {
 			// If transaction has already been crafted there is nothing to do
 			return
@@ -26,7 +30,7 @@ func Crafter(r registry.Registry, c crafter.Crafter) engine.HandlerFunc {
 			return
 		}
 
-		log.WithFields(log.Fields{
+		txctx.Logger.WithFields(log.Fields{
 			"method.sig":    methodAbi.Sig(),
 			"method.string": methodAbi.String(),
 			"method.id":     hexutil.Encode(methodAbi.Id()),
