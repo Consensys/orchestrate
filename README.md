@@ -8,6 +8,33 @@ Tx-Signer is a CoreStack worker responsible for:
 
 It consumes messages from *tx signer* Kafka topic and publishs to *tx sender* topic.
 
+## High Level Architecture
+
+Tx-Signer expects all consumed messages to respect a specific CoreStack protobuf format.
+
+Consumed messages should have:
+
+- ```Chain``` attribute set with ```id``` of the chain to send the transaction to;
+- ```From``` attribute set with an ```raw```;
+- ```Tx``` attribute set with the following fields set up:
+  - ```Nonce```
+  - ```To```
+  - ```Value```
+  - ```GasLimit```
+  - ```GasPrice```
+  - ```Data```
+
+## Signing Account configuration
+
+In order to sign transactions using a different private key, a user needs to setup an environment variable call SECRET_PKEY.
+
+Multiple values can be set for SECRETE_PKEY, for example:
+
+`SECRET_PKEY="<PRIVATE KEY #1> <PRIVATE KEY #2> <PRIVATE KEY #...> <PRIVATE KEY #n>"`
+
+***Note**: How to storage keys its covered on the storage section.
+
+
 ## Quick-Start
 
 ### Prerequisites
