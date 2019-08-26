@@ -15,7 +15,8 @@ import (
 func Sender(sender ethclient.TransactionSender, store evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"chain.id": txctx.Envelope.GetChain().GetId(),
+			"chain.id":    txctx.Envelope.GetChain().ID().String(),
+			"metadata.id": txctx.Envelope.GetMetadata().GetId(),
 		})
 
 		if isPublicTx(txctx) {
@@ -117,14 +118,14 @@ func processTxWithNonDeterministicHash(txctx *engine.TxContext, store evlpstore.
 	// Set transaction Hash on envelope
 	txctx.Envelope.GetTx().SetHash(txHash)
 	txctx.Logger = txctx.Logger.WithFields(log.Fields{
-		"tx.hash": txctx.Envelope.GetTx().GetHash(),
+		"tx.hash": txctx.Envelope.GetTx().GetHash().Hex(),
 	})
 	txctx.Logger.Debugf("sender: transaction sent")
 
 	// Store envelope
 	// We can not store envelope before sending transaction because we do not know the transaction hash
 	// This is an issue for overall consistency of the system before/after transaction is mined
-	txctx.Logger.Infof("%v %v %v", txctx.Envelope.Chain.Id, txctx.Envelope.Tx.Hash, txctx.Envelope.Metadata.Id)
+	txctx.Logger.Infof("sender: store envelope %v %v %v", txctx.Envelope.GetChain().String(), txctx.Envelope.GetTx().GetHash().Hex(), txctx.Envelope.GetMetadata().GetId())
 	_, err = store.Store(txctx.Context(), &evlpstore.StoreRequest{
 		Envelope: txctx.Envelope,
 	})
@@ -161,7 +162,7 @@ func sendPublicUnsignedTx(txctx *engine.TxContext, sender ethclient.TransactionS
 func processTxWithDeterministicHash(txctx *engine.TxContext, store evlpstore.EnvelopeStoreClient, sendTx func() error) {
 	txctx.Logger = txctx.Logger.WithFields(log.Fields{
 		"tx.raw":  utils.ShortString(txctx.Envelope.GetTx().GetRaw().Hex(), 30),
-		"tx.hash": txctx.Envelope.GetTx().GetHash(),
+		"tx.hash": txctx.Envelope.GetTx().GetHash().Hex(),
 	})
 
 	log.WithFields(log.Fields{
