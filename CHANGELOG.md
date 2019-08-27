@@ -2,9 +2,9 @@
 
 ### Version 0.6.2
 
-*Unreleased*
+*Released on August 27th 2019*
 
-- [FIX] Clean logs
+- [FIX] Clean logs and add metadata id field
 
 ### Version 0.6.1
 
