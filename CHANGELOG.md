@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.2
+
+*Unreleased*
+
+- [FEAT] Add a new scenario to test deployment of private transactions with Quorum
+
 ### Version 0.4.1
 
 *Released on August 25th 2019*

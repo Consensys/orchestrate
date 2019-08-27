@@ -406,6 +406,7 @@ func (s *ScenarioTestSuite) TestTheTxlistenerShouldCatchTheTx() {
 			Chain: chain.FromInt(chainIds[i%len(chainIds)]),
 			Receipt: &ethereum.Receipt{
 				TxHash: ethereum.HexToHash("0x23e4210f0f39b6c69573a6b6ae7b767c0a6d41dc0e7f0644e2c7ed9f3a7f7146"),
+				Status: uint64(1),
 			},
 		}
 	}

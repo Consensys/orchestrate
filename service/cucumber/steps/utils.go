@@ -189,6 +189,40 @@ func EnvelopeCrafter(m map[string]string) *envelope.Envelope {
 			} else {
 				e.Metadata = &envelope.Metadata{Id: v}
 			}
+		case "privateFrom":
+			if e.GetArgs() == nil {
+				e.Args = &envelope.Args{}
+			}
+			if e.GetArgs().GetPrivate() == nil {
+				e.GetArgs().Private = &args.Private{}
+			}
+			e.GetArgs().GetPrivate().PrivateFrom = v
+		case "privateFor":
+			if e.GetArgs() == nil {
+				e.Args = &envelope.Args{}
+			}
+			if e.GetArgs().GetPrivate() == nil {
+				e.GetArgs().Private = &args.Private{}
+			}
+			e.GetArgs().GetPrivate().PrivateFor = strings.Split(v, ",")
+		case "privateTxType":
+			if e.GetArgs() == nil {
+				e.Args = &envelope.Args{}
+			}
+			if e.GetArgs().GetPrivate() == nil {
+				e.GetArgs().Private = &args.Private{}
+			}
+			e.GetArgs().GetPrivate().PrivateTxType = v
+		case "protocol":
+			protocolValue, err := strconv.Atoi(v)
+			if err != nil {
+				panic("Failed to parse value")
+			}
+			e.Protocol = &chain.Protocol{
+				Type: chain.ProtocolType(
+					int64(protocolValue),
+				),
+			}
 		default:
 			if e.GetMetadata() != nil {
 				if e.GetMetadata().GetExtra() != nil {
