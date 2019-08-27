@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.6.2
+
+*Released on August 27th 2019*
+
+- [FIX] Clean logs and add metadata id
+
 ### Version 0.6.1
 
 *Released on August 12th 2019*
