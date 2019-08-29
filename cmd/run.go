@@ -13,6 +13,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-decoder.git/app"
+	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-decoder.git/handlers/producer"
 )
 
 func newRunCommand() *cobra.Command {
@@ -43,6 +44,9 @@ func newRunCommand() *cobra.Command {
 	broker.KafkaTopicTxDecoded(runCmd.Flags())
 	broker.KafkaTopicTxDecoder(runCmd.Flags())
 	broker.InitKafkaSASLTLSFlags(runCmd.Flags())
+
+	// Registers local flags for handler producer
+	producer.InitFlags(runCmd.Flags())
 
 	return runCmd
 }
