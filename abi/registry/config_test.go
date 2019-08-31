@@ -11,7 +11,7 @@ import (
 
 func TestStoreType(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	RegistryType(flgs)
+	ContractRegistryType(flgs)
 
 	expected := "mock"
 	assert.Equal(t, expected, viper.GetString(typeViperKey), "Default")
@@ -41,21 +41,23 @@ func TestABIs(t *testing.T) {
 	assert.Equal(t, expected, viper.GetStringSlice(name), "Default config should match")
 
 	// Test environment variable
-	os.Setenv("ABI", "ERC20[v0.1.3]:[{\"constant\":true,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}] ERC1400[v0.1.3]:[{\"constant\":true,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]")
+	err := os.Setenv("ABI", "ERC20[v0.1.3]:[{\"constant\":true,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}] ERC1400[v0.1.3]:[{\"constant\":true,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]")
+	assert.NoError(t, err)
 
 	expected = []string{
 		"ERC20[v0.1.3]:[{\"constant\":true,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]",
 		"ERC1400[v0.1.3]:[{\"constant\":true,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]",
 	}
 	assert.Equal(t, expected, viper.GetStringSlice(name), "Changing env var should change ABIs")
-	os.Unsetenv("ABI")
+	err = os.Unsetenv("ABI")
+	assert.NoError(t, err)
 
 	// Test flags
 	args := []string{
 		"--abi=MyContract[v1]:[ABI1]",
 		"--abi=MyContract[v2]:[ABI2]",
 	}
-	err := flgs.Parse(args)
+	err = flgs.Parse(args)
 	assert.Nil(t, err)
 
 	t.Logf("Flags: %v", len(viper.GetStringSlice(name)))

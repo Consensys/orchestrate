@@ -23,7 +23,7 @@ var (
 )
 
 // RegistryType register flag for the Contract Registry to select
-func RegistryType(f *pflag.FlagSet) {
+func ContractRegistryType(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Type of Contract Registry (one of %q)
 Environment variable: %q`, []string{"mock"}, typeEnv)
 	f.String(typeFlag, typeDefault, desc)

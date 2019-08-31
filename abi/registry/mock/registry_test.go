@@ -1,16 +1,14 @@
 package mock
 
 import (
-	"encoding/json"
-	"github.com/ethereum/go-ethereum/crypto"
 	"math/big"
 	"testing"
 
-	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
-	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/context"
 
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
@@ -136,8 +134,8 @@ var ERC20ContractBis = &abi.Contract{
 	DeployedBytecode: []byte{1, 2, 4},
 }
 
-var ERC20ABI, _ = ERC20Contract.ToABI()
-var ERC20ABIBis, _ = ERC20ContractBis.ToABI()
+var methodJSONs, eventJSONs, _ = parseRawJSON(ERC20Contract.Abi)
+var _, eventJSONsBis, _ = parseRawJSON(ERC20ContractBis.Abi)
 
 var ContractInstance = common.AccountInstance{
 	Chain:   &chain.Chain{Id: big.NewInt(3).Bytes()},
@@ -281,8 +279,7 @@ func TestContractRegistryBySig(t *testing.T) {
 		})
 	assert.NoError(t, err)
 	assert.Nil(t, methodResp.GetMethod())
-	expectedMethod := ERC20ABI.Methods["isMinter"]
-	assert.Equal(t, []*ethabi.Method{&expectedMethod}, methodResp.GetDefaultMethods())
+	assert.Equal(t, [][]byte{methodJSONs["isMinter"]}, methodResp.GetDefaultMethods())
 
 	// Get EventsBySigHash wrong indexed count
 	eventResp, err := r.GetEventsBySigHash(context.Background(),
@@ -305,10 +302,8 @@ func TestContractRegistryBySig(t *testing.T) {
 			AccountInstance:   &ContractInstance,
 			IndexedInputCount: 1})
 	assert.NoError(t, err)
-	expectedEvent := ERC20ABI.Events["MinterAdded"]
-	expectedEventBis := ERC20ABIBis.Events["MinterAdded"]
 	assert.Nil(t, eventResp.GetEvent())
-	assert.Equal(t, []*ethabi.Event{&expectedEvent, &expectedEventBis}, eventResp.GetDefaultEvents())
+	assert.Equal(t, [][]byte{eventJSONs["MinterAdded"], eventJSONsBis["MinterAdded"]}, eventResp.GetDefaultEvents())
 
 	// Update smart-contract address
 	_, err = r.RequestAddressUpdate(context.Background(),
@@ -321,11 +316,7 @@ func TestContractRegistryBySig(t *testing.T) {
 			Selector:        crypto.Keccak256(methodSig)[:4],
 			AccountInstance: &ContractInstance})
 	assert.NoError(t, err)
-
-	var method ethabi.Method
-	err = json.Unmarshal(methodResp.GetMethod(), &method)
-	assert.NoError(t, err)
-	assert.Equal(t, &expectedMethod, &method)
+	assert.Equal(t, methodJSONs["isMinter"], methodResp.GetMethod())
 	assert.Nil(t, methodResp.GetDefaultMethods())
 
 	// Get EventsBySigHash
@@ -336,6 +327,6 @@ func TestContractRegistryBySig(t *testing.T) {
 			AccountInstance:   &ContractInstance,
 			IndexedInputCount: 1})
 	assert.NoError(t, err)
-	assert.Equal(t, &expectedEvent, eventResp.GetEvent())
+	assert.Equal(t, eventJSONs["MinterAdded"], eventResp.GetEvent())
 	assert.Nil(t, eventResp.GetDefaultEvents())
 }
