@@ -23,10 +23,10 @@ type EnvelopeModel struct {
 	MinedAt  time.Time
 }
 
-// StatusInfo returns a proto formated StatusInfo object from a model
+// StatusInfo returns a proto formatted StatusInfo object from a model
 func (model *EnvelopeModel) StatusInfo() *evlpstore.StatusInfo {
 	return &evlpstore.StatusInfo{
-		Status:   model.StatusFormated(),
+		Status:   model.StatusFormatted(),
 		StoredAt: utils.TimeToPTimestamp(model.StoredAt),
 		SentAt:   utils.TimeToPTimestamp(model.SentAt),
 		MinedAt:  utils.TimeToPTimestamp(model.MinedAt),
@@ -34,8 +34,8 @@ func (model *EnvelopeModel) StatusInfo() *evlpstore.StatusInfo {
 	}
 }
 
-// StatusFormated returns a proto Status enum
-func (model *EnvelopeModel) StatusFormated() evlpstore.Status {
+// StatusFormatted returns a proto Status enum
+func (model *EnvelopeModel) StatusFormatted() evlpstore.Status {
 	status, ok := evlpstore.Status_value[strings.ToUpper(model.Status)]
 	if !ok {
 		panic(fmt.Sprintf("invalid status %q", model.Status))

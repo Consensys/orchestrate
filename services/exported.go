@@ -1,14 +1,13 @@
 package services
 
 import (
-	"context"
 	"sync"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/envelope-store"
-	mock "gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/services/mock"
-	pg "gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/services/pg"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/services/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/services/pg"
 )
 
 var (
@@ -16,7 +15,7 @@ var (
 	initOnce = &sync.Once{}
 )
 
-func Init(ctx context.Context) {
+func Init() {
 	initOnce.Do(func() {
 		if store != nil {
 			return
@@ -25,13 +24,13 @@ func Init(ctx context.Context) {
 		switch viper.GetString(typeViperKey) {
 		case "pg":
 			// Initialize Sarama Faucet
-			pg.Init(ctx)
+			pg.Init()
 
 			// Set Faucet
 			store = pg.GlobalEnvelopeStore()
 		case "mock":
 			// Initialize Mock Faucet
-			mock.Init(ctx)
+			mock.Init()
 
 			// Set Faucet
 			store = mock.GlobalEnvelopeStore()

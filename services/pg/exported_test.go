@@ -1,14 +1,13 @@
 package pg
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestInit(t *testing.T) {
-	Init(context.Background())
+	Init()
 	assert.NotNil(t, GlobalEnvelopeStore(), "Global should have been set")
 
 	var envelopeStore *EnvelopeStore

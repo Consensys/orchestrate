@@ -27,7 +27,7 @@ func init() {
 func Start(ctx context.Context) {
 	startOnce.Do(func() {
 		// Initialize GRPC Server service
-		services.Init(ctx)
+		services.Init()
 
 		// Initialize GRPC server
 		grpcserver.AddEnhancers(

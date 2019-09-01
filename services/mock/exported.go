@@ -1,7 +1,6 @@
 package mock
 
 import (
-	"context"
 	"sync"
 
 	log "github.com/sirupsen/logrus"
@@ -14,14 +13,14 @@ var (
 	initOnce = &sync.Once{}
 )
 
-// Init initialize Sender Handler
-func Init(ctx context.Context) {
+// Init initialize mock envelope store
+func Init() {
 	initOnce.Do(func() {
 		if store != nil {
 			return
 		}
 
-		// Initialize Grpc store
+		// Initialize gRPC store
 		store = NewEnvelopeStore()
 
 		log.Infof("envelope-store.mock: store ready")
