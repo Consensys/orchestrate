@@ -33,19 +33,19 @@ func Init(ctx context.Context) {
 		)
 		if err != nil {
 			e := errors.FromError(err).ExtendComponent(component)
-			log.WithError(e).Fatalf("envelope-store.client: failed to dial grpc server")
+			log.WithError(e).Fatalf("%s: failed to dial grpc server", component)
 		}
 
 		client = evlpstore.NewEnvelopeStoreClient(conn)
 
 		log.WithFields(log.Fields{
 			"grpc.target": viper.GetString(grpcTargetEnvelopeStoreViperKey),
-		}).Infof("envelope-store.client: client ready")
+		}).Infof("%s: client ready", component)
 	})
 }
 
 func Close() {
-	conn.Close()
+	_ = conn.Close()
 }
 
 func GlobalEnvelopeStoreClient() evlpstore.EnvelopeStoreClient {
@@ -53,6 +53,6 @@ func GlobalEnvelopeStoreClient() evlpstore.EnvelopeStoreClient {
 }
 
 // SetGlobalConfig sets Sarama global configuration
-func SetGlobalEnvelopeStoreCient(c evlpstore.EnvelopeStoreClient) {
+func SetGlobalEnvelopeStoreClient(c evlpstore.EnvelopeStoreClient) {
 	client = c
 }
