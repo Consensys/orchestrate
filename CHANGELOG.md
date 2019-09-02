@@ -1,10 +1,18 @@
 # CHANGELOG
 
+### Version 0.7.0
+
+*Released on September 2nd 2019*
+
+- [FEAT] Refactoring of the contract-registry to remove interfaces complexity
+- [FEAT] Change ABI registry stored objects to JSON byte
+- [FEAT] Add Contract Registry gRPC client & server capabilities
+
 ### Version 0.6.12
 
 *Released on August 20th 2019*
 
-- [FIX] Move tessera config here from tx-signer
+- [FIX] Move Tessera config here from tx-signer
 
 ### Version 0.6.11
 
