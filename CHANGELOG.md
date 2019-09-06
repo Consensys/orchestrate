@@ -1,5 +1,13 @@
 # CHANGELOG
 
+### Version 0.9.0
+
+*Released on September 6th 2019*
+
+- [FEAT] Add ContractId.short() method
+- [FEAT] Add GetCatalog, GetTags, DeleteArtifact & DeregisterContract method in the contract-registry
+- [FEAT] Change AddressUpdate(account) to SetAccountCodeHash(account,codehash)
+
 ### Version 0.8.0
 
 *Released on August 7th 2019*
