@@ -7,10 +7,23 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	errors "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 )
 
 var component = "types.abi"
+
+// Short returns a short string representation of contractId information
+func (c *ContractId) Short() string {
+	if c.GetName() == "" {
+		return ""
+	}
+
+	if c.GetTag() == "" {
+		return c.GetName()
+	}
+
+	return fmt.Sprintf("%v[%v]", c.GetName(), c.GetTag())
+}
 
 func (c *Contract) GetName() string {
 	return c.GetId().GetName()
@@ -30,15 +43,7 @@ func (c *Contract) SetTag(tag string) {
 
 // Short returns a short string representation of contract information
 func (c *Contract) Short() string {
-	if c.GetName() == "" {
-		return ""
-	}
-
-	if c.GetTag() == "" {
-		return c.GetName()
-	}
-
-	return fmt.Sprintf("%v[%v]", c.GetName(), c.GetTag())
+	return c.GetId().Short()
 }
 
 // Long return a long string representation of contract information

@@ -10,32 +10,63 @@ package contractregistry;
 // Registry is a GRPC service responsible for registering Contracts
 service Registry {
     // Register a contract
-    rpc RegisterContract(RegisterContractRequest) returns (RegisterContractResponse);
+    rpc RegisterContract (RegisterContractRequest) returns (RegisterContractResponse);
+    // DeregisterContract remove the name + tag association to a contract artifact (abi, bytecode, deployedBytecode). Artifacts are not deleted.
+    rpc DeregisterContract (DeregisterContractRequest) returns (DeregisterContractResponse);
+    // DeleteArtifact delete a contract artifact (abi, bytecode, deployedBytecode).
+    rpc DeleteArtifact (DeleteArtifactRequest) returns (DeleteArtifactResponse);
+    // Retrieve contract
+    rpc GetContract (GetContractRequest) returns (GetContractResponse);
     // Retrieve contract ABI
     rpc GetContractABI (GetContractRequest) returns (GetContractABIResponse);
     // Returns the bytecode
     rpc GetContractBytecode (GetContractRequest) returns (GetContractBytecodeResponse);
     // Returns the deployed bytecode
     rpc GetContractDeployedBytecode (GetContractRequest) returns (GetContractDeployedBytecodeResponse);
+    // Returns a list of all registered contracts
+    rpc GetCatalog (GetCatalogRequest) returns (GetCatalogResponse);
+    // Returns a list of all tags associated to a contract
+    rpc GetTags (GetTagsRequest) returns (GetTagsResponse);
 
     // Retrieve methods using 4 bytes unique selector
     rpc GetMethodsBySelector (GetMethodsBySelectorRequest) returns (GetMethodsBySelectorResponse);
     // Retrieve events using hash of signature
     rpc GetEventsBySigHash (GetEventsBySigHashRequest) returns (GetEventsBySigHashResponse);
 
-    // Request an update of the codehash of the contract address
-    rpc RequestAddressUpdate(AddressUpdateRequest) returns (AddressUpdateResponse);
+    // Set the codeHash of the given account
+    rpc SetAccountCodeHash (SetAccountCodeHashRequest) returns (SetAccountCodeHashResponse);
 }
 
+// Register
 message RegisterContractRequest {
     // Contract to register
     abi.Contract contract = 1;
 }
-
 message RegisterContractResponse {
 }
 
+
+message DeregisterContractRequest {
+    // Contract to register
+    abi.ContractId contractId = 1;
+}
+message DeregisterContractResponse {
+}
+
+
+message DeleteArtifactRequest {
+    // Hash of the bytecode pointing to an artifact to delete
+    bytes bytecodeHash = 1;
+}
+message DeleteArtifactResponse {
+}
+
+// Getters
 message GetContractRequest {
+    abi.ContractId contractId = 1;
+}
+
+message GetContractResponse {
     abi.Contract contract = 1;
 }
 
@@ -51,13 +82,31 @@ message GetContractDeployedBytecodeResponse {
     bytes deployedBytecode = 1;
 }
 
+
+message GetCatalogRequest {
+}
+message GetCatalogResponse {
+    repeated string names = 1;
+}
+
+
+message GetTagsRequest {
+    // Name is used to filter contractIds based on their contract name, empty to list all contract names & tags.
+    string name = 1;
+}
+message GetTagsResponse {
+    repeated string tags = 1;
+}
+
+
 message GetMethodsBySelectorRequest {
     // Method selector
     bytes selector = 1;
-    
+
     // Chain & Address of the contract
     common.AccountInstance accountInstance = 2;
 }
+
 
 message GetMethodsBySelectorResponse {
     // Contains the ABI of the exact method if the deployed contract has a known bytecode
@@ -65,7 +114,6 @@ message GetMethodsBySelectorResponse {
     // Contains the ABIs of the potential methods(s) if the deployed contract is not known 
     repeated bytes defaultMethods = 2;
 }
-
 message GetEventsBySigHashRequest {
     // Event signature hash (aka: topic[0])
     bytes sigHash = 1;
@@ -76,7 +124,6 @@ message GetEventsBySigHashRequest {
     // Count of indexed inputs in event abi
     uint32 indexedInputCount = 3;
 }
-
 message GetEventsBySigHashResponse {
     // Contains the ABI of the exact event if the deployed contract has a known bytecode
     bytes event = 1;
@@ -84,10 +131,12 @@ message GetEventsBySigHashResponse {
     repeated bytes defaultEvents = 2;
 }
 
-message AddressUpdateRequest {
+// Update
+message SetAccountCodeHashRequest {
     // Chain & address of the account to update
     common.AccountInstance accountInstance = 1;
-}
 
-message AddressUpdateResponse {
+    bytes codeHash = 2;
+}
+message SetAccountCodeHashResponse {
 }

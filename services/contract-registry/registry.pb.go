@@ -24,6 +24,7 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
+// Register
 type RegisterContractRequest struct {
 	// Contract to register
 	Contract             *abi.Contract `protobuf:"bytes,1,opt,name=contract,proto3" json:"contract,omitempty"`
@@ -95,18 +96,161 @@ func (m *RegisterContractResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_RegisterContractResponse proto.InternalMessageInfo
 
+type DeregisterContractRequest struct {
+	// Contract to register
+	ContractId           *abi.ContractId `protobuf:"bytes,1,opt,name=contractId,proto3" json:"contractId,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
+}
+
+func (m *DeregisterContractRequest) Reset()         { *m = DeregisterContractRequest{} }
+func (m *DeregisterContractRequest) String() string { return proto.CompactTextString(m) }
+func (*DeregisterContractRequest) ProtoMessage()    {}
+func (*DeregisterContractRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1ea5265e5e3df400, []int{2}
+}
+
+func (m *DeregisterContractRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeregisterContractRequest.Unmarshal(m, b)
+}
+func (m *DeregisterContractRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeregisterContractRequest.Marshal(b, m, deterministic)
+}
+func (m *DeregisterContractRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeregisterContractRequest.Merge(m, src)
+}
+func (m *DeregisterContractRequest) XXX_Size() int {
+	return xxx_messageInfo_DeregisterContractRequest.Size(m)
+}
+func (m *DeregisterContractRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeregisterContractRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeregisterContractRequest proto.InternalMessageInfo
+
+func (m *DeregisterContractRequest) GetContractId() *abi.ContractId {
+	if m != nil {
+		return m.ContractId
+	}
+	return nil
+}
+
+type DeregisterContractResponse struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DeregisterContractResponse) Reset()         { *m = DeregisterContractResponse{} }
+func (m *DeregisterContractResponse) String() string { return proto.CompactTextString(m) }
+func (*DeregisterContractResponse) ProtoMessage()    {}
+func (*DeregisterContractResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1ea5265e5e3df400, []int{3}
+}
+
+func (m *DeregisterContractResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeregisterContractResponse.Unmarshal(m, b)
+}
+func (m *DeregisterContractResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeregisterContractResponse.Marshal(b, m, deterministic)
+}
+func (m *DeregisterContractResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeregisterContractResponse.Merge(m, src)
+}
+func (m *DeregisterContractResponse) XXX_Size() int {
+	return xxx_messageInfo_DeregisterContractResponse.Size(m)
+}
+func (m *DeregisterContractResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeregisterContractResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeregisterContractResponse proto.InternalMessageInfo
+
+type DeleteArtifactRequest struct {
+	// Hash of the bytecode pointing to an artifact to delete
+	BytecodeHash         []byte   `protobuf:"bytes,1,opt,name=bytecodeHash,proto3" json:"bytecodeHash,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DeleteArtifactRequest) Reset()         { *m = DeleteArtifactRequest{} }
+func (m *DeleteArtifactRequest) String() string { return proto.CompactTextString(m) }
+func (*DeleteArtifactRequest) ProtoMessage()    {}
+func (*DeleteArtifactRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1ea5265e5e3df400, []int{4}
+}
+
+func (m *DeleteArtifactRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteArtifactRequest.Unmarshal(m, b)
+}
+func (m *DeleteArtifactRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteArtifactRequest.Marshal(b, m, deterministic)
+}
+func (m *DeleteArtifactRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteArtifactRequest.Merge(m, src)
+}
+func (m *DeleteArtifactRequest) XXX_Size() int {
+	return xxx_messageInfo_DeleteArtifactRequest.Size(m)
+}
+func (m *DeleteArtifactRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteArtifactRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteArtifactRequest proto.InternalMessageInfo
+
+func (m *DeleteArtifactRequest) GetBytecodeHash() []byte {
+	if m != nil {
+		return m.BytecodeHash
+	}
+	return nil
+}
+
+type DeleteArtifactResponse struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DeleteArtifactResponse) Reset()         { *m = DeleteArtifactResponse{} }
+func (m *DeleteArtifactResponse) String() string { return proto.CompactTextString(m) }
+func (*DeleteArtifactResponse) ProtoMessage()    {}
+func (*DeleteArtifactResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1ea5265e5e3df400, []int{5}
+}
+
+func (m *DeleteArtifactResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteArtifactResponse.Unmarshal(m, b)
+}
+func (m *DeleteArtifactResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteArtifactResponse.Marshal(b, m, deterministic)
+}
+func (m *DeleteArtifactResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteArtifactResponse.Merge(m, src)
+}
+func (m *DeleteArtifactResponse) XXX_Size() int {
+	return xxx_messageInfo_DeleteArtifactResponse.Size(m)
+}
+func (m *DeleteArtifactResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteArtifactResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteArtifactResponse proto.InternalMessageInfo
+
+// Getters
 type GetContractRequest struct {
-	Contract             *abi.Contract `protobuf:"bytes,1,opt,name=contract,proto3" json:"contract,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
-	XXX_unrecognized     []byte        `json:"-"`
-	XXX_sizecache        int32         `json:"-"`
+	ContractId           *abi.ContractId `protobuf:"bytes,1,opt,name=contractId,proto3" json:"contractId,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
 }
 
 func (m *GetContractRequest) Reset()         { *m = GetContractRequest{} }
 func (m *GetContractRequest) String() string { return proto.CompactTextString(m) }
 func (*GetContractRequest) ProtoMessage()    {}
 func (*GetContractRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1ea5265e5e3df400, []int{2}
+	return fileDescriptor_1ea5265e5e3df400, []int{6}
 }
 
 func (m *GetContractRequest) XXX_Unmarshal(b []byte) error {
@@ -127,7 +271,46 @@ func (m *GetContractRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetContractRequest proto.InternalMessageInfo
 
-func (m *GetContractRequest) GetContract() *abi.Contract {
+func (m *GetContractRequest) GetContractId() *abi.ContractId {
+	if m != nil {
+		return m.ContractId
+	}
+	return nil
+}
+
+type GetContractResponse struct {
+	Contract             *abi.Contract `protobuf:"bytes,1,opt,name=contract,proto3" json:"contract,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
+	XXX_unrecognized     []byte        `json:"-"`
+	XXX_sizecache        int32         `json:"-"`
+}
+
+func (m *GetContractResponse) Reset()         { *m = GetContractResponse{} }
+func (m *GetContractResponse) String() string { return proto.CompactTextString(m) }
+func (*GetContractResponse) ProtoMessage()    {}
+func (*GetContractResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1ea5265e5e3df400, []int{7}
+}
+
+func (m *GetContractResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetContractResponse.Unmarshal(m, b)
+}
+func (m *GetContractResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetContractResponse.Marshal(b, m, deterministic)
+}
+func (m *GetContractResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetContractResponse.Merge(m, src)
+}
+func (m *GetContractResponse) XXX_Size() int {
+	return xxx_messageInfo_GetContractResponse.Size(m)
+}
+func (m *GetContractResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetContractResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetContractResponse proto.InternalMessageInfo
+
+func (m *GetContractResponse) GetContract() *abi.Contract {
 	if m != nil {
 		return m.Contract
 	}
@@ -145,7 +328,7 @@ func (m *GetContractABIResponse) Reset()         { *m = GetContractABIResponse{}
 func (m *GetContractABIResponse) String() string { return proto.CompactTextString(m) }
 func (*GetContractABIResponse) ProtoMessage()    {}
 func (*GetContractABIResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1ea5265e5e3df400, []int{3}
+	return fileDescriptor_1ea5265e5e3df400, []int{8}
 }
 
 func (m *GetContractABIResponse) XXX_Unmarshal(b []byte) error {
@@ -184,7 +367,7 @@ func (m *GetContractBytecodeResponse) Reset()         { *m = GetContractBytecode
 func (m *GetContractBytecodeResponse) String() string { return proto.CompactTextString(m) }
 func (*GetContractBytecodeResponse) ProtoMessage()    {}
 func (*GetContractBytecodeResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1ea5265e5e3df400, []int{4}
+	return fileDescriptor_1ea5265e5e3df400, []int{9}
 }
 
 func (m *GetContractBytecodeResponse) XXX_Unmarshal(b []byte) error {
@@ -223,7 +406,7 @@ func (m *GetContractDeployedBytecodeResponse) Reset()         { *m = GetContract
 func (m *GetContractDeployedBytecodeResponse) String() string { return proto.CompactTextString(m) }
 func (*GetContractDeployedBytecodeResponse) ProtoMessage()    {}
 func (*GetContractDeployedBytecodeResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1ea5265e5e3df400, []int{5}
+	return fileDescriptor_1ea5265e5e3df400, []int{10}
 }
 
 func (m *GetContractDeployedBytecodeResponse) XXX_Unmarshal(b []byte) error {
@@ -251,6 +434,155 @@ func (m *GetContractDeployedBytecodeResponse) GetDeployedBytecode() []byte {
 	return nil
 }
 
+type GetCatalogRequest struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetCatalogRequest) Reset()         { *m = GetCatalogRequest{} }
+func (m *GetCatalogRequest) String() string { return proto.CompactTextString(m) }
+func (*GetCatalogRequest) ProtoMessage()    {}
+func (*GetCatalogRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1ea5265e5e3df400, []int{11}
+}
+
+func (m *GetCatalogRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetCatalogRequest.Unmarshal(m, b)
+}
+func (m *GetCatalogRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetCatalogRequest.Marshal(b, m, deterministic)
+}
+func (m *GetCatalogRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetCatalogRequest.Merge(m, src)
+}
+func (m *GetCatalogRequest) XXX_Size() int {
+	return xxx_messageInfo_GetCatalogRequest.Size(m)
+}
+func (m *GetCatalogRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetCatalogRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetCatalogRequest proto.InternalMessageInfo
+
+type GetCatalogResponse struct {
+	ContractIds          []*abi.ContractId `protobuf:"bytes,1,rep,name=contractIds,proto3" json:"contractIds,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
+	XXX_unrecognized     []byte            `json:"-"`
+	XXX_sizecache        int32             `json:"-"`
+}
+
+func (m *GetCatalogResponse) Reset()         { *m = GetCatalogResponse{} }
+func (m *GetCatalogResponse) String() string { return proto.CompactTextString(m) }
+func (*GetCatalogResponse) ProtoMessage()    {}
+func (*GetCatalogResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1ea5265e5e3df400, []int{12}
+}
+
+func (m *GetCatalogResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetCatalogResponse.Unmarshal(m, b)
+}
+func (m *GetCatalogResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetCatalogResponse.Marshal(b, m, deterministic)
+}
+func (m *GetCatalogResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetCatalogResponse.Merge(m, src)
+}
+func (m *GetCatalogResponse) XXX_Size() int {
+	return xxx_messageInfo_GetCatalogResponse.Size(m)
+}
+func (m *GetCatalogResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetCatalogResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetCatalogResponse proto.InternalMessageInfo
+
+func (m *GetCatalogResponse) GetContractIds() []*abi.ContractId {
+	if m != nil {
+		return m.ContractIds
+	}
+	return nil
+}
+
+type GetTagsRequest struct {
+	// Name is used to filter contractIds based on their contract name, empty to list all contract names & tags.
+	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetTagsRequest) Reset()         { *m = GetTagsRequest{} }
+func (m *GetTagsRequest) String() string { return proto.CompactTextString(m) }
+func (*GetTagsRequest) ProtoMessage()    {}
+func (*GetTagsRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1ea5265e5e3df400, []int{13}
+}
+
+func (m *GetTagsRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetTagsRequest.Unmarshal(m, b)
+}
+func (m *GetTagsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetTagsRequest.Marshal(b, m, deterministic)
+}
+func (m *GetTagsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetTagsRequest.Merge(m, src)
+}
+func (m *GetTagsRequest) XXX_Size() int {
+	return xxx_messageInfo_GetTagsRequest.Size(m)
+}
+func (m *GetTagsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetTagsRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetTagsRequest proto.InternalMessageInfo
+
+func (m *GetTagsRequest) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+type GetTagsResponse struct {
+	ContractIds          []*abi.ContractId `protobuf:"bytes,1,rep,name=contractIds,proto3" json:"contractIds,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
+	XXX_unrecognized     []byte            `json:"-"`
+	XXX_sizecache        int32             `json:"-"`
+}
+
+func (m *GetTagsResponse) Reset()         { *m = GetTagsResponse{} }
+func (m *GetTagsResponse) String() string { return proto.CompactTextString(m) }
+func (*GetTagsResponse) ProtoMessage()    {}
+func (*GetTagsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1ea5265e5e3df400, []int{14}
+}
+
+func (m *GetTagsResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetTagsResponse.Unmarshal(m, b)
+}
+func (m *GetTagsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetTagsResponse.Marshal(b, m, deterministic)
+}
+func (m *GetTagsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetTagsResponse.Merge(m, src)
+}
+func (m *GetTagsResponse) XXX_Size() int {
+	return xxx_messageInfo_GetTagsResponse.Size(m)
+}
+func (m *GetTagsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetTagsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetTagsResponse proto.InternalMessageInfo
+
+func (m *GetTagsResponse) GetContractIds() []*abi.ContractId {
+	if m != nil {
+		return m.ContractIds
+	}
+	return nil
+}
+
 type GetMethodsBySelectorRequest struct {
 	// Method selector
 	Selector []byte `protobuf:"bytes,1,opt,name=selector,proto3" json:"selector,omitempty"`
@@ -265,7 +597,7 @@ func (m *GetMethodsBySelectorRequest) Reset()         { *m = GetMethodsBySelecto
 func (m *GetMethodsBySelectorRequest) String() string { return proto.CompactTextString(m) }
 func (*GetMethodsBySelectorRequest) ProtoMessage()    {}
 func (*GetMethodsBySelectorRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1ea5265e5e3df400, []int{6}
+	return fileDescriptor_1ea5265e5e3df400, []int{15}
 }
 
 func (m *GetMethodsBySelectorRequest) XXX_Unmarshal(b []byte) error {
@@ -314,7 +646,7 @@ func (m *GetMethodsBySelectorResponse) Reset()         { *m = GetMethodsBySelect
 func (m *GetMethodsBySelectorResponse) String() string { return proto.CompactTextString(m) }
 func (*GetMethodsBySelectorResponse) ProtoMessage()    {}
 func (*GetMethodsBySelectorResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1ea5265e5e3df400, []int{7}
+	return fileDescriptor_1ea5265e5e3df400, []int{16}
 }
 
 func (m *GetMethodsBySelectorResponse) XXX_Unmarshal(b []byte) error {
@@ -365,7 +697,7 @@ func (m *GetEventsBySigHashRequest) Reset()         { *m = GetEventsBySigHashReq
 func (m *GetEventsBySigHashRequest) String() string { return proto.CompactTextString(m) }
 func (*GetEventsBySigHashRequest) ProtoMessage()    {}
 func (*GetEventsBySigHashRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1ea5265e5e3df400, []int{8}
+	return fileDescriptor_1ea5265e5e3df400, []int{17}
 }
 
 func (m *GetEventsBySigHashRequest) XXX_Unmarshal(b []byte) error {
@@ -421,7 +753,7 @@ func (m *GetEventsBySigHashResponse) Reset()         { *m = GetEventsBySigHashRe
 func (m *GetEventsBySigHashResponse) String() string { return proto.CompactTextString(m) }
 func (*GetEventsBySigHashResponse) ProtoMessage()    {}
 func (*GetEventsBySigHashResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1ea5265e5e3df400, []int{9}
+	return fileDescriptor_1ea5265e5e3df400, []int{18}
 }
 
 func (m *GetEventsBySigHashResponse) XXX_Unmarshal(b []byte) error {
@@ -456,90 +788,108 @@ func (m *GetEventsBySigHashResponse) GetDefaultEvents() [][]byte {
 	return nil
 }
 
-type AddressUpdateRequest struct {
+// Update
+type SetAccountCodeHashRequest struct {
 	// Chain & address of the account to update
 	AccountInstance      *common.AccountInstance `protobuf:"bytes,1,opt,name=accountInstance,proto3" json:"accountInstance,omitempty"`
+	CodeHash             []byte                  `protobuf:"bytes,2,opt,name=codeHash,proto3" json:"codeHash,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                `json:"-"`
 	XXX_unrecognized     []byte                  `json:"-"`
 	XXX_sizecache        int32                   `json:"-"`
 }
 
-func (m *AddressUpdateRequest) Reset()         { *m = AddressUpdateRequest{} }
-func (m *AddressUpdateRequest) String() string { return proto.CompactTextString(m) }
-func (*AddressUpdateRequest) ProtoMessage()    {}
-func (*AddressUpdateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1ea5265e5e3df400, []int{10}
+func (m *SetAccountCodeHashRequest) Reset()         { *m = SetAccountCodeHashRequest{} }
+func (m *SetAccountCodeHashRequest) String() string { return proto.CompactTextString(m) }
+func (*SetAccountCodeHashRequest) ProtoMessage()    {}
+func (*SetAccountCodeHashRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1ea5265e5e3df400, []int{19}
 }
 
-func (m *AddressUpdateRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_AddressUpdateRequest.Unmarshal(m, b)
+func (m *SetAccountCodeHashRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SetAccountCodeHashRequest.Unmarshal(m, b)
 }
-func (m *AddressUpdateRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_AddressUpdateRequest.Marshal(b, m, deterministic)
+func (m *SetAccountCodeHashRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SetAccountCodeHashRequest.Marshal(b, m, deterministic)
 }
-func (m *AddressUpdateRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AddressUpdateRequest.Merge(m, src)
+func (m *SetAccountCodeHashRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SetAccountCodeHashRequest.Merge(m, src)
 }
-func (m *AddressUpdateRequest) XXX_Size() int {
-	return xxx_messageInfo_AddressUpdateRequest.Size(m)
+func (m *SetAccountCodeHashRequest) XXX_Size() int {
+	return xxx_messageInfo_SetAccountCodeHashRequest.Size(m)
 }
-func (m *AddressUpdateRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_AddressUpdateRequest.DiscardUnknown(m)
+func (m *SetAccountCodeHashRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_SetAccountCodeHashRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_AddressUpdateRequest proto.InternalMessageInfo
+var xxx_messageInfo_SetAccountCodeHashRequest proto.InternalMessageInfo
 
-func (m *AddressUpdateRequest) GetAccountInstance() *common.AccountInstance {
+func (m *SetAccountCodeHashRequest) GetAccountInstance() *common.AccountInstance {
 	if m != nil {
 		return m.AccountInstance
 	}
 	return nil
 }
 
-type AddressUpdateResponse struct {
+func (m *SetAccountCodeHashRequest) GetCodeHash() []byte {
+	if m != nil {
+		return m.CodeHash
+	}
+	return nil
+}
+
+type SetAccountCodeHashResponse struct {
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *AddressUpdateResponse) Reset()         { *m = AddressUpdateResponse{} }
-func (m *AddressUpdateResponse) String() string { return proto.CompactTextString(m) }
-func (*AddressUpdateResponse) ProtoMessage()    {}
-func (*AddressUpdateResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1ea5265e5e3df400, []int{11}
+func (m *SetAccountCodeHashResponse) Reset()         { *m = SetAccountCodeHashResponse{} }
+func (m *SetAccountCodeHashResponse) String() string { return proto.CompactTextString(m) }
+func (*SetAccountCodeHashResponse) ProtoMessage()    {}
+func (*SetAccountCodeHashResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1ea5265e5e3df400, []int{20}
 }
 
-func (m *AddressUpdateResponse) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_AddressUpdateResponse.Unmarshal(m, b)
+func (m *SetAccountCodeHashResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SetAccountCodeHashResponse.Unmarshal(m, b)
 }
-func (m *AddressUpdateResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_AddressUpdateResponse.Marshal(b, m, deterministic)
+func (m *SetAccountCodeHashResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SetAccountCodeHashResponse.Marshal(b, m, deterministic)
 }
-func (m *AddressUpdateResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AddressUpdateResponse.Merge(m, src)
+func (m *SetAccountCodeHashResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SetAccountCodeHashResponse.Merge(m, src)
 }
-func (m *AddressUpdateResponse) XXX_Size() int {
-	return xxx_messageInfo_AddressUpdateResponse.Size(m)
+func (m *SetAccountCodeHashResponse) XXX_Size() int {
+	return xxx_messageInfo_SetAccountCodeHashResponse.Size(m)
 }
-func (m *AddressUpdateResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_AddressUpdateResponse.DiscardUnknown(m)
+func (m *SetAccountCodeHashResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_SetAccountCodeHashResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_AddressUpdateResponse proto.InternalMessageInfo
+var xxx_messageInfo_SetAccountCodeHashResponse proto.InternalMessageInfo
 
 func init() {
 	proto.RegisterType((*RegisterContractRequest)(nil), "contractregistry.RegisterContractRequest")
 	proto.RegisterType((*RegisterContractResponse)(nil), "contractregistry.RegisterContractResponse")
+	proto.RegisterType((*DeregisterContractRequest)(nil), "contractregistry.DeregisterContractRequest")
+	proto.RegisterType((*DeregisterContractResponse)(nil), "contractregistry.DeregisterContractResponse")
+	proto.RegisterType((*DeleteArtifactRequest)(nil), "contractregistry.DeleteArtifactRequest")
+	proto.RegisterType((*DeleteArtifactResponse)(nil), "contractregistry.DeleteArtifactResponse")
 	proto.RegisterType((*GetContractRequest)(nil), "contractregistry.GetContractRequest")
+	proto.RegisterType((*GetContractResponse)(nil), "contractregistry.GetContractResponse")
 	proto.RegisterType((*GetContractABIResponse)(nil), "contractregistry.GetContractABIResponse")
 	proto.RegisterType((*GetContractBytecodeResponse)(nil), "contractregistry.GetContractBytecodeResponse")
 	proto.RegisterType((*GetContractDeployedBytecodeResponse)(nil), "contractregistry.GetContractDeployedBytecodeResponse")
+	proto.RegisterType((*GetCatalogRequest)(nil), "contractregistry.GetCatalogRequest")
+	proto.RegisterType((*GetCatalogResponse)(nil), "contractregistry.GetCatalogResponse")
+	proto.RegisterType((*GetTagsRequest)(nil), "contractregistry.GetTagsRequest")
+	proto.RegisterType((*GetTagsResponse)(nil), "contractregistry.GetTagsResponse")
 	proto.RegisterType((*GetMethodsBySelectorRequest)(nil), "contractregistry.GetMethodsBySelectorRequest")
 	proto.RegisterType((*GetMethodsBySelectorResponse)(nil), "contractregistry.GetMethodsBySelectorResponse")
 	proto.RegisterType((*GetEventsBySigHashRequest)(nil), "contractregistry.GetEventsBySigHashRequest")
 	proto.RegisterType((*GetEventsBySigHashResponse)(nil), "contractregistry.GetEventsBySigHashResponse")
-	proto.RegisterType((*AddressUpdateRequest)(nil), "contractregistry.AddressUpdateRequest")
-	proto.RegisterType((*AddressUpdateResponse)(nil), "contractregistry.AddressUpdateResponse")
+	proto.RegisterType((*SetAccountCodeHashRequest)(nil), "contractregistry.SetAccountCodeHashRequest")
+	proto.RegisterType((*SetAccountCodeHashResponse)(nil), "contractregistry.SetAccountCodeHashResponse")
 }
 
 func init() {
@@ -547,47 +897,60 @@ func init() {
 }
 
 var fileDescriptor_1ea5265e5e3df400 = []byte{
-	// 626 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x55, 0xcf, 0x6e, 0xd3, 0x4e,
-	0x10, 0x56, 0x5a, 0xfd, 0xfa, 0x8b, 0x86, 0xa6, 0x84, 0x6d, 0x68, 0x8c, 0xe1, 0x10, 0xb9, 0x55,
-	0x49, 0x42, 0x63, 0x4b, 0x45, 0x1c, 0x38, 0xa1, 0x24, 0x45, 0x25, 0x42, 0x1c, 0x70, 0x85, 0x04,
-	0x1c, 0x00, 0x67, 0x3d, 0x75, 0x4d, 0x13, 0xaf, 0xf1, 0x6e, 0x2a, 0x8c, 0x78, 0x08, 0x9e, 0x82,
-	0xe7, 0x44, 0xb6, 0x77, 0xa3, 0xc4, 0x76, 0x42, 0x10, 0x1c, 0x22, 0x79, 0x67, 0xbe, 0xf9, 0xe6,
-	0xcf, 0xe6, 0x9b, 0x85, 0x0e, 0xc7, 0xe8, 0xc6, 0xa7, 0xc8, 0x2d, 0xca, 0x02, 0x11, 0x39, 0x54,
-	0xf4, 0x22, 0xf4, 0x7c, 0x2e, 0xa2, 0xd8, 0x52, 0x1f, 0x66, 0x18, 0x31, 0xc1, 0x48, 0x5d, 0x21,
-	0x94, 0x5d, 0xdf, 0x17, 0x71, 0x88, 0xdc, 0x72, 0xc6, 0x7e, 0xf2, 0xcb, 0x60, 0xfa, 0x61, 0x66,
-	0xa4, 0x6c, 0x3a, 0x65, 0x81, 0xe5, 0x50, 0xca, 0x66, 0x81, 0xf8, 0xe8, 0x07, 0x5c, 0x38, 0x01,
-	0xc5, 0x0c, 0x64, 0x9c, 0x41, 0xd3, 0x4e, 0x59, 0x30, 0x1a, 0x4a, 0x56, 0x1b, 0xbf, 0xcc, 0x90,
-	0x0b, 0xd2, 0x81, 0xaa, 0x4a, 0xa4, 0x55, 0x5a, 0x95, 0xf6, 0xad, 0xd3, 0x9a, 0x99, 0xb0, 0xcf,
-	0x71, 0x73, 0xb7, 0xa1, 0x83, 0x56, 0x64, 0xe1, 0x21, 0x0b, 0x38, 0x1a, 0xcf, 0x80, 0x9c, 0xa3,
-	0xf8, 0x0b, 0xf2, 0x2e, 0x1c, 0x2c, 0x10, 0xf4, 0x07, 0x23, 0x45, 0x4d, 0xea, 0xb0, 0xed, 0x8c,
-	0xfd, 0x34, 0x7e, 0xd7, 0x4e, 0x3e, 0x8d, 0xa7, 0x70, 0x7f, 0x01, 0x3b, 0x88, 0x05, 0x52, 0xe6,
-	0xe2, 0x3c, 0x40, 0x87, 0xea, 0x58, 0xda, 0x64, 0xd4, 0xfc, 0x6c, 0xbc, 0x86, 0xc3, 0x85, 0xd0,
-	0x33, 0x0c, 0x27, 0x2c, 0x46, 0xb7, 0x40, 0xd1, 0x85, 0xba, 0x9b, 0xf3, 0x49, 0xaa, 0x82, 0xdd,
-	0xf8, 0x9e, 0x56, 0xf3, 0x0a, 0xc5, 0x15, 0x73, 0xf9, 0x20, 0xbe, 0xc0, 0x09, 0x52, 0xc1, 0x22,
-	0x35, 0x03, 0x1d, 0xaa, 0x5c, 0x9a, 0x54, 0x35, 0xea, 0x4c, 0xfa, 0x70, 0x5b, 0xde, 0xd8, 0x48,
-	0x5e, 0x98, 0xb6, 0x95, 0x8e, 0xa9, 0x69, 0x66, 0x17, 0x6a, 0xf6, 0x97, 0xdd, 0x76, 0x1e, 0x6f,
-	0x7c, 0x80, 0x07, 0xe5, 0xd9, 0x65, 0x27, 0x07, 0xb0, 0x33, 0x4d, 0x9d, 0x32, 0xb9, 0x3c, 0x91,
-	0x63, 0xd8, 0x73, 0xf1, 0xd2, 0x99, 0x4d, 0x54, 0xac, 0xb6, 0xd5, 0xda, 0x6e, 0xef, 0xda, 0x39,
-	0xab, 0xf1, 0xb3, 0x02, 0xf7, 0xce, 0x51, 0x3c, 0xbf, 0xc1, 0x40, 0x24, 0xfc, 0xbe, 0xf7, 0xc2,
-	0xe1, 0x57, 0xaa, 0x39, 0x0d, 0xfe, 0xe7, 0x99, 0x45, 0xd2, 0xab, 0xe3, 0x3f, 0x68, 0x8d, 0x9c,
-	0xc0, 0x1d, 0x3f, 0x70, 0xf1, 0x2b, 0xba, 0xa3, 0x20, 0x9c, 0x89, 0x61, 0xe2, 0xd4, 0xb6, 0x5b,
-	0x95, 0x76, 0xcd, 0x2e, 0x3a, 0x8c, 0xb7, 0xa0, 0x97, 0xd5, 0x29, 0xc7, 0xd0, 0x80, 0xff, 0x30,
-	0x71, 0xc9, 0x32, 0xb3, 0x03, 0x39, 0x82, 0x9a, 0x6c, 0x37, 0x8b, 0x93, 0x33, 0x58, 0x36, 0x1a,
-	0xef, 0xa0, 0xd1, 0x77, 0xdd, 0x08, 0x39, 0x7f, 0x13, 0xba, 0x8e, 0x40, 0xd5, 0x7c, 0x49, 0x8b,
-	0x95, 0x3f, 0xbc, 0xbd, 0x26, 0xdc, 0xcd, 0x51, 0x67, 0xf5, 0x9e, 0xfe, 0xd8, 0x81, 0xaa, 0x2d,
-	0x85, 0x4f, 0x7c, 0xa8, 0xe7, 0x85, 0x47, 0x3a, 0x66, 0x7e, 0x3f, 0x98, 0x2b, 0x24, 0xae, 0x77,
-	0x37, 0x81, 0xca, 0x39, 0x7d, 0x82, 0xbd, 0x65, 0x19, 0x92, 0xa3, 0x62, 0x74, 0x51, 0xe9, 0x7a,
-	0x7b, 0x2d, 0x6a, 0x51, 0xce, 0x9f, 0x61, 0xbf, 0x44, 0xbc, 0x1b, 0xa6, 0xe9, 0xad, 0x45, 0x15,
-	0x64, 0xfc, 0x6d, 0x69, 0x51, 0xe4, 0xd5, 0xbe, 0x61, 0xce, 0x27, 0x6b, 0x51, 0x2b, 0x57, 0xc8,
-	0x0c, 0x1a, 0x65, 0xc2, 0x24, 0xe5, 0x2d, 0xac, 0x5a, 0x1f, 0xba, 0xb9, 0x29, 0x5c, 0xa6, 0x65,
-	0xe9, 0x22, 0xce, 0xc9, 0x80, 0x3c, 0x2a, 0x65, 0x29, 0x17, 0xb5, 0x7e, 0xb2, 0x19, 0x58, 0x26,
-	0xf4, 0xa0, 0x21, 0x03, 0x97, 0xfe, 0xc9, 0xe4, 0xb8, 0xc8, 0x52, 0xa6, 0x22, 0xfd, 0xe1, 0x6f,
-	0x71, 0x59, 0xa2, 0xc1, 0xcb, 0xf7, 0x23, 0xcf, 0x17, 0x13, 0x67, 0x9c, 0xa8, 0xcb, 0x1a, 0x26,
-	0xb6, 0xe0, 0x22, 0xe6, 0x16, 0x9d, 0xf8, 0x18, 0x08, 0xeb, 0x32, 0xb2, 0x28, 0x8b, 0xb0, 0xc7,
-	0x85, 0x43, 0xaf, 0xad, 0xf0, 0xda, 0x33, 0x3d, 0x5f, 0x58, 0xea, 0x75, 0xcc, 0x3d, 0xb6, 0xe3,
-	0x9d, 0xf4, 0x61, 0x7c, 0xfc, 0x2b, 0x00, 0x00, 0xff, 0xff, 0x1f, 0x25, 0xf4, 0xc2, 0x91, 0x07,
-	0x00, 0x00,
+	// 839 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x56, 0x5b, 0x6f, 0xe3, 0x44,
+	0x14, 0x56, 0x1a, 0xd8, 0xcd, 0x9e, 0xde, 0xb2, 0xd3, 0xa5, 0xeb, 0x0e, 0x7d, 0x08, 0xd3, 0x00,
+	0x69, 0xd9, 0xda, 0x62, 0x11, 0x0f, 0x88, 0x17, 0x72, 0x59, 0x85, 0x88, 0x8b, 0x84, 0x8b, 0x04,
+	0xea, 0x03, 0xe0, 0xd8, 0xd3, 0xd4, 0x34, 0xb1, 0x83, 0x67, 0x52, 0x91, 0x8a, 0xdf, 0xc3, 0x1f,
+	0xe4, 0x0f, 0x20, 0xdb, 0x67, 0x52, 0x5f, 0xc6, 0x69, 0x0a, 0xfb, 0x10, 0xc9, 0x73, 0xe6, 0x3b,
+	0xdf, 0x37, 0xe7, 0x38, 0xf3, 0x1d, 0xc3, 0xa9, 0xe0, 0xd1, 0xad, 0xef, 0x72, 0x61, 0xb9, 0x61,
+	0x20, 0x23, 0xc7, 0x95, 0xe7, 0x11, 0x9f, 0xf8, 0x42, 0x46, 0x4b, 0x4b, 0x3d, 0x98, 0xf3, 0x28,
+	0x94, 0x21, 0x69, 0x2a, 0x84, 0x8a, 0xd3, 0x03, 0xb9, 0x9c, 0x73, 0x61, 0x39, 0x63, 0x3f, 0xfe,
+	0xa5, 0x30, 0x7a, 0x92, 0x06, 0xdd, 0x70, 0x36, 0x0b, 0x03, 0xcb, 0x71, 0xdd, 0x70, 0x11, 0xc8,
+	0x5f, 0xfd, 0x40, 0x48, 0x27, 0x70, 0x79, 0x0a, 0x62, 0x03, 0x78, 0x69, 0x27, 0x2c, 0x3c, 0xea,
+	0x23, 0xab, 0xcd, 0xff, 0x58, 0x70, 0x21, 0xc9, 0x29, 0x34, 0x94, 0x90, 0x51, 0x6b, 0xd5, 0x3a,
+	0xdb, 0xaf, 0x77, 0xcd, 0x98, 0x7d, 0x85, 0x5b, 0x6d, 0x33, 0x0a, 0x46, 0x99, 0x45, 0xcc, 0xc3,
+	0x40, 0x70, 0xf6, 0x2d, 0x1c, 0x0d, 0x78, 0x54, 0xa1, 0x61, 0x01, 0x28, 0x92, 0x91, 0x87, 0x2a,
+	0xfb, 0x39, 0x95, 0x91, 0x67, 0x67, 0x20, 0xec, 0x18, 0xa8, 0x8e, 0x0d, 0xb5, 0xbe, 0x84, 0xf7,
+	0x06, 0x7c, 0xca, 0x25, 0xef, 0x46, 0xd2, 0xbf, 0xca, 0xe8, 0x30, 0xd8, 0x19, 0x2f, 0x25, 0x77,
+	0x43, 0x8f, 0x7f, 0xed, 0x88, 0xeb, 0x44, 0x69, 0xc7, 0xce, 0xc5, 0x98, 0x01, 0x87, 0xc5, 0x64,
+	0xa4, 0x7d, 0x03, 0x64, 0xc8, 0xe5, 0xff, 0x3e, 0xfb, 0x57, 0x70, 0x90, 0xa3, 0x49, 0xd9, 0x1f,
+	0xd3, 0xe7, 0x33, 0x38, 0xcc, 0x30, 0x74, 0x7b, 0xa3, 0x15, 0x49, 0x13, 0xea, 0xce, 0xd8, 0xc7,
+	0xba, 0xe2, 0x47, 0xf6, 0x05, 0xbc, 0x9f, 0xc1, 0xf6, 0xb0, 0xd2, 0x55, 0x02, 0x85, 0x86, 0xaa,
+	0x1e, 0xb3, 0x56, 0x6b, 0xf6, 0x03, 0x9c, 0x64, 0x52, 0x07, 0x7c, 0x3e, 0x0d, 0x97, 0xdc, 0x2b,
+	0x51, 0x9c, 0x41, 0xd3, 0x2b, 0xec, 0x21, 0x55, 0x29, 0xce, 0x0e, 0xe0, 0x79, 0x4c, 0xe9, 0x48,
+	0x67, 0x1a, 0x4e, 0xb0, 0x83, 0x6c, 0x98, 0xf6, 0x55, 0x05, 0x91, 0xf6, 0x53, 0xd8, 0xbe, 0x6f,
+	0x9a, 0x30, 0x6a, 0xad, 0xba, 0xae, 0xb1, 0x59, 0x0c, 0x6b, 0xc3, 0xde, 0x90, 0xcb, 0x1f, 0x9d,
+	0x89, 0x50, 0x2f, 0x87, 0xc0, 0x3b, 0x81, 0x33, 0x4b, 0xcf, 0xf3, 0xcc, 0x4e, 0x9e, 0xd9, 0x00,
+	0xf6, 0x57, 0xa8, 0xff, 0xae, 0xf5, 0x57, 0xd2, 0xd7, 0xef, 0xb8, 0xbc, 0x0e, 0x3d, 0xd1, 0x5b,
+	0x5e, 0xf0, 0x29, 0x77, 0x65, 0x18, 0x29, 0x61, 0x0a, 0x0d, 0x81, 0x21, 0xd5, 0x57, 0xb5, 0x26,
+	0x5d, 0xd8, 0xc7, 0x6b, 0x38, 0xc2, 0x5b, 0x68, 0x6c, 0x25, 0x2f, 0xfc, 0xa5, 0x99, 0xde, 0x52,
+	0xb3, 0x9b, 0xdf, 0xb6, 0x8b, 0x78, 0xf6, 0x0b, 0x1c, 0xeb, 0xd5, 0xb1, 0xa0, 0x43, 0x78, 0x32,
+	0x4b, 0x36, 0x51, 0x1c, 0x57, 0xe4, 0x23, 0xd8, 0xf3, 0xf8, 0x95, 0xb3, 0x98, 0xaa, 0x5c, 0x63,
+	0xab, 0x55, 0xef, 0xec, 0xd8, 0x85, 0x28, 0xfb, 0xbb, 0x06, 0x47, 0x43, 0x2e, 0xdf, 0xdc, 0xf2,
+	0x40, 0xc6, 0xfc, 0xfe, 0x24, 0xbe, 0x1b, 0xaa, 0x38, 0x03, 0x9e, 0x8a, 0x34, 0x82, 0xf4, 0x6a,
+	0xf9, 0x16, 0x4a, 0x23, 0xaf, 0xe0, 0xb9, 0x1f, 0x78, 0xfc, 0x4f, 0xee, 0x8d, 0x82, 0xf9, 0x42,
+	0xf6, 0xe3, 0x4d, 0xa3, 0xde, 0xaa, 0x75, 0x76, 0xed, 0xf2, 0x06, 0xfb, 0x19, 0xa8, 0xee, 0x9c,
+	0xd8, 0x86, 0x17, 0xf0, 0x2e, 0x8f, 0xb7, 0xf0, 0x98, 0xe9, 0x82, 0xb4, 0x61, 0x17, 0xcb, 0x4d,
+	0xf3, 0xb0, 0x07, 0xf9, 0x20, 0xbb, 0x83, 0xa3, 0x0b, 0x2e, 0xf1, 0xb8, 0x7d, 0x74, 0x07, 0xd5,
+	0x01, 0x4d, 0x9d, 0xb5, 0x47, 0xd6, 0x49, 0xe3, 0xfb, 0x8e, 0x3e, 0xb4, 0x95, 0xfe, 0x43, 0x56,
+	0x1e, 0x74, 0x0c, 0x54, 0xa7, 0x9d, 0x56, 0xf5, 0xfa, 0x9f, 0x67, 0xd0, 0xb0, 0xd1, 0xf3, 0x89,
+	0x0f, 0xcd, 0xa2, 0xe7, 0x92, 0x53, 0xb3, 0x38, 0x1a, 0xcc, 0x0a, 0x77, 0xa7, 0x67, 0x9b, 0x40,
+	0xb1, 0x9b, 0x21, 0x90, 0xb2, 0xe9, 0x92, 0x4f, 0xca, 0x0c, 0x95, 0x46, 0x4f, 0x5f, 0x6d, 0x06,
+	0x46, 0x41, 0x17, 0xf6, 0xf2, 0x56, 0x4c, 0x3e, 0xd6, 0xe5, 0x6b, 0x9c, 0x9e, 0x76, 0x1e, 0x06,
+	0xa2, 0xc8, 0x25, 0x6c, 0x67, 0x5c, 0x8e, 0xb4, 0xcb, 0x89, 0x65, 0xd3, 0xa7, 0x1f, 0x3e, 0x80,
+	0x42, 0xee, 0xdf, 0x12, 0x43, 0xca, 0x18, 0xf5, 0x86, 0xf4, 0x9d, 0xb5, 0xa8, 0xac, 0xe1, 0xff,
+	0x9e, 0x1b, 0x26, 0xca, 0x67, 0x37, 0x94, 0x39, 0x5f, 0x8b, 0x2a, 0x19, 0xfd, 0x5d, 0x6e, 0x94,
+	0x14, 0xe7, 0xc1, 0x86, 0x9a, 0x9f, 0xaf, 0x45, 0x55, 0x0e, 0x99, 0x9f, 0x00, 0xee, 0x67, 0x04,
+	0x39, 0xd1, 0x93, 0xe4, 0xc6, 0x0a, 0x6d, 0xaf, 0x07, 0x21, 0xf1, 0xf7, 0xf0, 0x14, 0xa7, 0x01,
+	0x69, 0x69, 0x13, 0x32, 0xe3, 0x84, 0x7e, 0xb0, 0x06, 0x81, 0x7c, 0x0b, 0x78, 0xa1, 0x73, 0x66,
+	0xa2, 0xef, 0x75, 0xd5, 0xfc, 0xa0, 0xe6, 0xa6, 0xf0, 0xfb, 0xbb, 0x59, 0xf6, 0x41, 0xdd, 0xdd,
+	0xac, 0x74, 0x75, 0xdd, 0xdd, 0x5c, 0x63, 0xad, 0x21, 0x90, 0xb2, 0x45, 0xe9, 0x04, 0x2b, 0x4d,
+	0x54, 0x27, 0x58, 0xed, 0x7a, 0xbd, 0x6f, 0x2e, 0x47, 0x13, 0x5f, 0x4e, 0x9d, 0x71, 0xec, 0xb0,
+	0x56, 0x3f, 0x8e, 0x05, 0x17, 0x4b, 0x61, 0xb9, 0x53, 0x9f, 0x07, 0xd2, 0xba, 0x8a, 0x2c, 0x37,
+	0x8c, 0xf8, 0xb9, 0x90, 0x8e, 0x7b, 0x63, 0xcd, 0x6f, 0x26, 0xe6, 0xc4, 0x97, 0x96, 0xfa, 0xf6,
+	0x2d, 0x7c, 0x4a, 0x8f, 0x9f, 0x24, 0x9f, 0xbd, 0x9f, 0xfd, 0x1b, 0x00, 0x00, 0xff, 0xff, 0x24,
+	0xd6, 0x0c, 0x41, 0x6f, 0x0b, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -604,18 +967,28 @@ const _ = grpc.SupportPackageIsVersion4
 type RegistryClient interface {
 	// Register a contract
 	RegisterContract(ctx context.Context, in *RegisterContractRequest, opts ...grpc.CallOption) (*RegisterContractResponse, error)
+	// DeregisterContract remove the name + tag association to a contract artifact (abi, bytecode, deployedBytecode). Artifacts are not deleted.
+	DeregisterContract(ctx context.Context, in *DeregisterContractRequest, opts ...grpc.CallOption) (*DeregisterContractResponse, error)
+	// DeleteArtifact delete a contract artifact (abi, bytecode, deployedBytecode).
+	DeleteArtifact(ctx context.Context, in *DeleteArtifactRequest, opts ...grpc.CallOption) (*DeleteArtifactResponse, error)
+	// Retrieve contract
+	GetContract(ctx context.Context, in *GetContractRequest, opts ...grpc.CallOption) (*GetContractResponse, error)
 	// Retrieve contract ABI
 	GetContractABI(ctx context.Context, in *GetContractRequest, opts ...grpc.CallOption) (*GetContractABIResponse, error)
 	// Returns the bytecode
 	GetContractBytecode(ctx context.Context, in *GetContractRequest, opts ...grpc.CallOption) (*GetContractBytecodeResponse, error)
 	// Returns the deployed bytecode
 	GetContractDeployedBytecode(ctx context.Context, in *GetContractRequest, opts ...grpc.CallOption) (*GetContractDeployedBytecodeResponse, error)
+	// Returns a list of all registered contracts
+	GetCatalog(ctx context.Context, in *GetCatalogRequest, opts ...grpc.CallOption) (*GetCatalogResponse, error)
+	// Returns a list of all tags associated to a contract
+	GetTags(ctx context.Context, in *GetTagsRequest, opts ...grpc.CallOption) (*GetTagsResponse, error)
 	// Retrieve methods using 4 bytes unique selector
 	GetMethodsBySelector(ctx context.Context, in *GetMethodsBySelectorRequest, opts ...grpc.CallOption) (*GetMethodsBySelectorResponse, error)
 	// Retrieve events using hash of signature
 	GetEventsBySigHash(ctx context.Context, in *GetEventsBySigHashRequest, opts ...grpc.CallOption) (*GetEventsBySigHashResponse, error)
-	// Request an update of the codehash of the contract address
-	RequestAddressUpdate(ctx context.Context, in *AddressUpdateRequest, opts ...grpc.CallOption) (*AddressUpdateResponse, error)
+	// Set the codeHash of the given account
+	SetAccountCodeHash(ctx context.Context, in *SetAccountCodeHashRequest, opts ...grpc.CallOption) (*SetAccountCodeHashResponse, error)
 }
 
 type registryClient struct {
@@ -629,6 +1002,33 @@ func NewRegistryClient(cc *grpc.ClientConn) RegistryClient {
 func (c *registryClient) RegisterContract(ctx context.Context, in *RegisterContractRequest, opts ...grpc.CallOption) (*RegisterContractResponse, error) {
 	out := new(RegisterContractResponse)
 	err := c.cc.Invoke(ctx, "/contractregistry.Registry/RegisterContract", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *registryClient) DeregisterContract(ctx context.Context, in *DeregisterContractRequest, opts ...grpc.CallOption) (*DeregisterContractResponse, error) {
+	out := new(DeregisterContractResponse)
+	err := c.cc.Invoke(ctx, "/contractregistry.Registry/DeregisterContract", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *registryClient) DeleteArtifact(ctx context.Context, in *DeleteArtifactRequest, opts ...grpc.CallOption) (*DeleteArtifactResponse, error) {
+	out := new(DeleteArtifactResponse)
+	err := c.cc.Invoke(ctx, "/contractregistry.Registry/DeleteArtifact", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *registryClient) GetContract(ctx context.Context, in *GetContractRequest, opts ...grpc.CallOption) (*GetContractResponse, error) {
+	out := new(GetContractResponse)
+	err := c.cc.Invoke(ctx, "/contractregistry.Registry/GetContract", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -662,6 +1062,24 @@ func (c *registryClient) GetContractDeployedBytecode(ctx context.Context, in *Ge
 	return out, nil
 }
 
+func (c *registryClient) GetCatalog(ctx context.Context, in *GetCatalogRequest, opts ...grpc.CallOption) (*GetCatalogResponse, error) {
+	out := new(GetCatalogResponse)
+	err := c.cc.Invoke(ctx, "/contractregistry.Registry/GetCatalog", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *registryClient) GetTags(ctx context.Context, in *GetTagsRequest, opts ...grpc.CallOption) (*GetTagsResponse, error) {
+	out := new(GetTagsResponse)
+	err := c.cc.Invoke(ctx, "/contractregistry.Registry/GetTags", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *registryClient) GetMethodsBySelector(ctx context.Context, in *GetMethodsBySelectorRequest, opts ...grpc.CallOption) (*GetMethodsBySelectorResponse, error) {
 	out := new(GetMethodsBySelectorResponse)
 	err := c.cc.Invoke(ctx, "/contractregistry.Registry/GetMethodsBySelector", in, out, opts...)
@@ -680,9 +1098,9 @@ func (c *registryClient) GetEventsBySigHash(ctx context.Context, in *GetEventsBy
 	return out, nil
 }
 
-func (c *registryClient) RequestAddressUpdate(ctx context.Context, in *AddressUpdateRequest, opts ...grpc.CallOption) (*AddressUpdateResponse, error) {
-	out := new(AddressUpdateResponse)
-	err := c.cc.Invoke(ctx, "/contractregistry.Registry/RequestAddressUpdate", in, out, opts...)
+func (c *registryClient) SetAccountCodeHash(ctx context.Context, in *SetAccountCodeHashRequest, opts ...grpc.CallOption) (*SetAccountCodeHashResponse, error) {
+	out := new(SetAccountCodeHashResponse)
+	err := c.cc.Invoke(ctx, "/contractregistry.Registry/SetAccountCodeHash", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -693,18 +1111,28 @@ func (c *registryClient) RequestAddressUpdate(ctx context.Context, in *AddressUp
 type RegistryServer interface {
 	// Register a contract
 	RegisterContract(context.Context, *RegisterContractRequest) (*RegisterContractResponse, error)
+	// DeregisterContract remove the name + tag association to a contract artifact (abi, bytecode, deployedBytecode). Artifacts are not deleted.
+	DeregisterContract(context.Context, *DeregisterContractRequest) (*DeregisterContractResponse, error)
+	// DeleteArtifact delete a contract artifact (abi, bytecode, deployedBytecode).
+	DeleteArtifact(context.Context, *DeleteArtifactRequest) (*DeleteArtifactResponse, error)
+	// Retrieve contract
+	GetContract(context.Context, *GetContractRequest) (*GetContractResponse, error)
 	// Retrieve contract ABI
 	GetContractABI(context.Context, *GetContractRequest) (*GetContractABIResponse, error)
 	// Returns the bytecode
 	GetContractBytecode(context.Context, *GetContractRequest) (*GetContractBytecodeResponse, error)
 	// Returns the deployed bytecode
 	GetContractDeployedBytecode(context.Context, *GetContractRequest) (*GetContractDeployedBytecodeResponse, error)
+	// Returns a list of all registered contracts
+	GetCatalog(context.Context, *GetCatalogRequest) (*GetCatalogResponse, error)
+	// Returns a list of all tags associated to a contract
+	GetTags(context.Context, *GetTagsRequest) (*GetTagsResponse, error)
 	// Retrieve methods using 4 bytes unique selector
 	GetMethodsBySelector(context.Context, *GetMethodsBySelectorRequest) (*GetMethodsBySelectorResponse, error)
 	// Retrieve events using hash of signature
 	GetEventsBySigHash(context.Context, *GetEventsBySigHashRequest) (*GetEventsBySigHashResponse, error)
-	// Request an update of the codehash of the contract address
-	RequestAddressUpdate(context.Context, *AddressUpdateRequest) (*AddressUpdateResponse, error)
+	// Set the codeHash of the given account
+	SetAccountCodeHash(context.Context, *SetAccountCodeHashRequest) (*SetAccountCodeHashResponse, error)
 }
 
 func RegisterRegistryServer(s *grpc.Server, srv RegistryServer) {
@@ -725,6 +1153,60 @@ func _Registry_RegisterContract_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RegistryServer).RegisterContract(ctx, req.(*RegisterContractRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Registry_DeregisterContract_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeregisterContractRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RegistryServer).DeregisterContract(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/contractregistry.Registry/DeregisterContract",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RegistryServer).DeregisterContract(ctx, req.(*DeregisterContractRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Registry_DeleteArtifact_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteArtifactRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RegistryServer).DeleteArtifact(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/contractregistry.Registry/DeleteArtifact",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RegistryServer).DeleteArtifact(ctx, req.(*DeleteArtifactRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Registry_GetContract_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetContractRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RegistryServer).GetContract(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/contractregistry.Registry/GetContract",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RegistryServer).GetContract(ctx, req.(*GetContractRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -783,6 +1265,42 @@ func _Registry_GetContractDeployedBytecode_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Registry_GetCatalog_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCatalogRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RegistryServer).GetCatalog(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/contractregistry.Registry/GetCatalog",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RegistryServer).GetCatalog(ctx, req.(*GetCatalogRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Registry_GetTags_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTagsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RegistryServer).GetTags(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/contractregistry.Registry/GetTags",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RegistryServer).GetTags(ctx, req.(*GetTagsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Registry_GetMethodsBySelector_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetMethodsBySelectorRequest)
 	if err := dec(in); err != nil {
@@ -819,20 +1337,20 @@ func _Registry_GetEventsBySigHash_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Registry_RequestAddressUpdate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddressUpdateRequest)
+func _Registry_SetAccountCodeHash_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetAccountCodeHashRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RegistryServer).RequestAddressUpdate(ctx, in)
+		return srv.(RegistryServer).SetAccountCodeHash(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/contractregistry.Registry/RequestAddressUpdate",
+		FullMethod: "/contractregistry.Registry/SetAccountCodeHash",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RegistryServer).RequestAddressUpdate(ctx, req.(*AddressUpdateRequest))
+		return srv.(RegistryServer).SetAccountCodeHash(ctx, req.(*SetAccountCodeHashRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -844,6 +1362,18 @@ var _Registry_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RegisterContract",
 			Handler:    _Registry_RegisterContract_Handler,
+		},
+		{
+			MethodName: "DeregisterContract",
+			Handler:    _Registry_DeregisterContract_Handler,
+		},
+		{
+			MethodName: "DeleteArtifact",
+			Handler:    _Registry_DeleteArtifact_Handler,
+		},
+		{
+			MethodName: "GetContract",
+			Handler:    _Registry_GetContract_Handler,
 		},
 		{
 			MethodName: "GetContractABI",
@@ -858,6 +1388,14 @@ var _Registry_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Registry_GetContractDeployedBytecode_Handler,
 		},
 		{
+			MethodName: "GetCatalog",
+			Handler:    _Registry_GetCatalog_Handler,
+		},
+		{
+			MethodName: "GetTags",
+			Handler:    _Registry_GetTags_Handler,
+		},
+		{
 			MethodName: "GetMethodsBySelector",
 			Handler:    _Registry_GetMethodsBySelector_Handler,
 		},
@@ -866,8 +1404,8 @@ var _Registry_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Registry_GetEventsBySigHash_Handler,
 		},
 		{
-			MethodName: "RequestAddressUpdate",
-			Handler:    _Registry_RequestAddressUpdate_Handler,
+			MethodName: "SetAccountCodeHash",
+			Handler:    _Registry_SetAccountCodeHash_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
