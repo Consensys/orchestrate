@@ -8,6 +8,8 @@ require (
 	github.com/ethereum/go-ethereum v1.8.27
 	github.com/gogo/protobuf v1.2.1
 	github.com/golang/mock v1.3.1
+	github.com/golang/protobuf v1.3.0
+	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/rs/cors v1.6.0 // indirect
 	github.com/sirupsen/logrus v1.3.0
