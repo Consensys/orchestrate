@@ -1,19 +1,19 @@
 package redis
 
 import (
-	"reflect"
 	"context"
-	"github.com/golang/protobuf/proto"
+	"reflect"
 
-	"github.com/ethereum/go-ethereum/crypto"
-	remote	"github.com/gomodule/redigo/redis"
-	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
+	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/golang/protobuf/proto"
+	remote "github.com/gomodule/redigo/redis"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
-	svc "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/utils"
 )
 
@@ -27,15 +27,15 @@ type ContractRegistry struct {
 }
 
 // Conn is a wrapper around a remote.Conn that handles internal errors
-type Conn struct { remote.Conn }
+type Conn struct{ remote.Conn }
 
-// Dial returns a connexion to redis
+// Dial returns a connection to redis
 func Dial(network, address string, options ...remote.DialOption) (remote.Conn, error) {
 	conn, err := remote.Dial(network, address, options...)
 	if err != nil {
 		return conn, errors.ConnectionError(err.Error())
 	}
-	return Conn{ conn }, nil
+	return Conn{conn}, nil
 }
 
 // Do sends a commands to the remote Redis instance
@@ -56,19 +56,25 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 
 	if contract.Bytecode != nil {
 		bytecodeHash := crypto.Keccak256Hash(contract.Bytecode)
-		conn.Do("SET", contract.Short(), bytecodeHash)
+		_, err := conn.Do("SET", contract.Short(), bytecodeHash)
+		if err != nil {
+			return nil, errors.FromError(err).ExtendComponent(component)
+		}
 
-		marshalledContract, _ := proto.Marshal(&abi.Contract {
+		marshalledContract, _ := proto.Marshal(&abi.Contract{
 			Abi:              contract.Abi,
 			Bytecode:         contract.Bytecode,
 			DeployedBytecode: contract.DeployedBytecode,
 		})
 
-		conn.Do("SET", bytecodeHash, marshalledContract)
+		_, err = conn.Do("SET", bytecodeHash, marshalledContract)
+		if err != nil {
+			return nil, errors.FromError(err).ExtendComponent(component)
+		}
 	}
 
 	if len(contract.Abi) != 0 {
-		// Preformat the keys and values that we are going to 
+		// Preformat the keys and values that we are going to
 		codeHash := crypto.Keccak256Hash(contract.DeployedBytecode)
 		contractAbi, err := contract.ToABI()
 		if err != nil {
@@ -82,20 +88,20 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 
 		for _, method := range contractAbi.Methods {
 
-			sel:= utils.SigHashToSelector(method.Id())
+			sel := utils.SigHashToSelector(method.Id())
 
 			if contract.DeployedBytecode != nil {
 				// Registers the methods list
 				_, err = conn.Do("RPUSH", methodKey(codeHash[:], sel), [][]byte{methodJSONs[method.Name]})
 				if err != nil {
 					return nil, errors.FromError(err).ExtendComponent(component)
-				}	
-			} 
+				}
+			}
 
 			found := false
-			
-			// Attemps to find the registered method
-			reply, err := conn.Do("LRANGE", methodKey(defaultCodehash[:], sel), 0 , -1)
+
+			// Attempts to find the registered method
+			reply, err := conn.Do("LRANGE", methodKey(defaultCodehash[:], sel), 0, -1)
 			if err != nil {
 				return nil, errors.FromError(err).ExtendComponent(component)
 			}
@@ -106,11 +112,10 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 					return nil, errors.FromError(err).ExtendComponent(component)
 				}
 
-				searchMethodLoop:
 				for _, registeredMethod := range replySlice {
 					if reflect.DeepEqual(registeredMethod, methodJSONs[method.Name]) {
 						found = true
-						break searchMethodLoop
+						break
 					}
 				}
 			}
@@ -137,9 +142,9 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 			}
 
 			found := false
-			
-			// Attemps to find the registered event
-			reply, err := conn.Do("LRANGE", eventKey(defaultCodehash[:], eventID[:], indexedCount), 0 , -1)
+
+			// Attempts to find the registered event
+			reply, err := conn.Do("LRANGE", eventKey(defaultCodehash[:], eventID[:], indexedCount), 0, -1)
 			if err != nil {
 				return nil, errors.FromError(err).ExtendComponent(component)
 			}
@@ -150,11 +155,10 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 					return nil, errors.FromError(err).ExtendComponent(component)
 				}
 
-				searchEventLoop:
 				for _, registeredEvent := range replySlice {
 					if reflect.DeepEqual(registeredEvent, eventJSONs[event.Name]) {
 						found = true
-						break searchEventLoop
+						break
 					}
 				}
 			}
@@ -168,16 +172,16 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 			}
 		}
 	}
-	
+
 	return &svc.RegisterContractResponse{}, nil
 }
 
 // GetContract looks up an *abi.Contract object stored in Redis
 func (r *ContractRegistry) GetContract(contractName string) (*abi.Contract, error) {
-	
+
 	conn := r.pool.Get()
 	defer conn.Close()
-	
+
 	reply, err := conn.Do("GET", contractName)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
@@ -218,7 +222,7 @@ func (r *ContractRegistry) GetContract(contractName string) (*abi.Contract, erro
 // GetContractABI retrieve contract ABI
 func (r *ContractRegistry) GetContractABI(ctx context.Context, req *svc.GetContractRequest) (*svc.GetContractABIResponse, error) {
 
-	contract, err := r.GetContract(req.GetContract().Short())
+	contract, err := r.GetContract(req.GetContractId().Short())
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -231,12 +235,12 @@ func (r *ContractRegistry) GetContractABI(ctx context.Context, req *svc.GetContr
 // GetContractBytecode returns the bytecode
 func (r *ContractRegistry) GetContractBytecode(ctx context.Context, req *svc.GetContractRequest) (*svc.GetContractBytecodeResponse, error) {
 
-	contract, err := r.GetContract(req.GetContract().Short())
+	contract, err := r.GetContract(req.GetContractId().Short())
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	return &svc.GetContractBytecodeResponse {
+	return &svc.GetContractBytecodeResponse{
 		Bytecode: contract.Bytecode,
 	}, nil
 }
@@ -244,19 +248,19 @@ func (r *ContractRegistry) GetContractBytecode(ctx context.Context, req *svc.Get
 // GetContractDeployedBytecode returns the deployed bytecode
 func (r *ContractRegistry) GetContractDeployedBytecode(ctx context.Context, req *svc.GetContractRequest) (*svc.GetContractDeployedBytecodeResponse, error) {
 
-	contract, err := r.GetContract(req.GetContract().Short())
+	contract, err := r.GetContract(req.GetContractId().Short())
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	return &svc.GetContractDeployedBytecodeResponse {
+	return &svc.GetContractDeployedBytecodeResponse{
 		DeployedBytecode: contract.DeployedBytecode,
 	}, nil
 }
 
 // getCodehash retrieve codehash of a contract instance
 func (r *ContractRegistry) getCodehash(contract common.AccountInstance) (ethcommon.Hash, error) {
-	
+
 	contractName, err := contract.Short()
 	if err != nil {
 		return ethcommon.Hash{}, errors.FromError(err).ExtendComponent(component)
@@ -265,7 +269,7 @@ func (r *ContractRegistry) getCodehash(contract common.AccountInstance) (ethcomm
 	conn := r.pool.Get()
 	defer conn.Close()
 
-	reply, err := conn.Do("GET", 
+	reply, err := conn.Do("GET",
 		codeHashKey(contract.GetChain().String(), contract.GetAccount().GetRaw()))
 
 	if err != nil {
@@ -309,7 +313,10 @@ func (r *ContractRegistry) GetEventsBySigHash(context.Context, *svc.GetEventsByS
 }
 
 // RequestAddressUpdate request an update of the codehash of the contract address
-func (r *ContractRegistry) RequestAddressUpdate(context.Context, *svc.AddressUpdateRequest) (*svc.AddressUpdateResponse, error)
+func (r *ContractRegistry) SetAccountCodeHash(context.Context, *svc.SetAccountCodeHashRequest) (*svc.SetAccountCodeHashResponse, error) {
+	// TODO
+	return nil, nil
+}
 
 // getIndexedCount returns the count of indexed inputs in the event
 func getIndexedCount(event ethabi.Event) uint {

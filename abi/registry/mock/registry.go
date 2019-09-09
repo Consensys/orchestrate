@@ -14,17 +14,16 @@ import (
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/utils"
 )
 
 // ContractRegistry stores contract ABI and bytecode in memory
 type ContractRegistry struct {
-	ec ethclient.ChainStateReader
 	// Contract registry/name#tag to bytecode hash
 	contractHashes map[string]ethcommon.Hash
 
-	// Bytecode hash to ABI, bytecode and deployed bytecode
-	contracts map[ethcommon.Hash]*abi.Contract
+	// Bytecode hash to artifacts (ABI, bytecode and deployed bytecode)
+	artifacts map[ethcommon.Hash]*artifact
 
 	// Address to Codehash (deployed bytecode hash) map
 	codehashes map[string]map[ethcommon.Address]ethcommon.Hash
@@ -36,14 +35,19 @@ type ContractRegistry struct {
 	events map[ethcommon.Hash]map[ethcommon.Hash]map[uint][][]byte
 }
 
+type artifact struct {
+	Abi              []byte `protobuf:"bytes,2,opt,name=abi,proto3" json:"abi,omitempty"`
+	Bytecode         []byte `protobuf:"bytes,3,opt,name=bytecode,proto3" json:"bytecode,omitempty"`
+	DeployedBytecode []byte `protobuf:"bytes,6,opt,name=deployedBytecode,proto3" json:"deployedBytecode,omitempty"`
+}
+
 var defaultCodehash = ethcommon.Hash{}
 
 // NewRegistry creates a ContractRegistry
-func NewRegistry(client ethclient.ChainStateReader) *ContractRegistry {
+func NewRegistry() *ContractRegistry {
 	r := &ContractRegistry{
-		ec:             client,
 		contractHashes: make(map[string]ethcommon.Hash),
-		contracts:      make(map[ethcommon.Hash]*abi.Contract),
+		artifacts:      make(map[ethcommon.Hash]*artifact),
 		codehashes:     make(map[string]map[ethcommon.Address]ethcommon.Hash),
 		methods:        make(map[ethcommon.Hash]map[[4]byte][][]byte),
 		events:         make(map[ethcommon.Hash]map[ethcommon.Hash]map[uint][][]byte),
@@ -61,7 +65,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 		bytecodeHash := crypto.Keccak256Hash(contract.Bytecode)
 		r.contractHashes[contract.Short()] = bytecodeHash
 
-		r.contracts[bytecodeHash] = &abi.Contract{
+		r.artifacts[bytecodeHash] = &artifact{
 			Abi:              contract.Abi,
 			Bytecode:         contract.Bytecode,
 			DeployedBytecode: contract.DeployedBytecode,
@@ -82,7 +86,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 		for _, m := range contractAbi.Methods {
 			// Register methods for this bytecode
 			method := m
-			sel := bytesToByte4(method.Id())
+			sel := utils.SigHashToSelector(method.Id())
 			if contract.DeployedBytecode != nil {
 				// Init map
 				if r.methods[codeHash] == nil {
@@ -148,9 +152,16 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 	return &svc.RegisterContractResponse{}, nil
 }
 
-func bytesToByte4(data []byte) (res [4]byte) {
-	copy(res[:], data)
-	return res
+// DeregisterContract remove the name + tag association to a contract artifact (abi, bytecode, deployedBytecode). Artifacts are not deleted.
+func (r *ContractRegistry) DeregisterContract(ctx context.Context, req *svc.DeregisterContractRequest) (*svc.DeregisterContractResponse, error) {
+	delete(r.contractHashes, req.GetContractId().Short())
+	return &svc.DeregisterContractResponse{}, nil
+}
+
+// DeregisterContract remove the name + tag association to a contract artifact (abi, bytecode, deployedBytecode). Artifacts are not deleted.
+func (r *ContractRegistry) DeleteArtifact(ctx context.Context, req *svc.DeleteArtifactRequest) (*svc.DeleteArtifactResponse, error) {
+	delete(r.artifacts, ethcommon.BytesToHash(req.GetBytecodeHash()))
+	return &svc.DeleteArtifactResponse{}, nil
 }
 
 func parseRawJSON(data []byte) (methods, events map[string][]byte, err error) {
@@ -202,41 +213,66 @@ func parseRawJSON(data []byte) (methods, events map[string][]byte, err error) {
 	return methods, events, nil
 }
 
-func (r *ContractRegistry) getContract(c *abi.Contract) (contract *abi.Contract, ok bool) {
-	contract, ok = r.contracts[r.contractHashes[c.Short()]]
-	return
+func (r *ContractRegistry) getArtifact(id *abi.ContractId) (a *artifact, ok bool) {
+	a, ok = r.artifacts[r.contractHashes[id.Short()]]
+	return a, ok
+}
+
+func (r *ContractRegistry) getContract(id *abi.ContractId) (c *abi.Contract, ok bool) {
+	a, ok := r.artifacts[r.contractHashes[id.Short()]]
+	if !ok {
+		return nil, ok
+	}
+
+	return &abi.Contract{
+		Id:               id,
+		Abi:              a.Abi,
+		Bytecode:         a.Bytecode,
+		DeployedBytecode: a.DeployedBytecode,
+	}, ok
+}
+
+// GetContractABI loads a contract
+func (r *ContractRegistry) GetContract(ctx context.Context, req *svc.GetContractRequest) (*svc.GetContractResponse, error) {
+	c, ok := r.getContract(req.GetContractId())
+	if !ok {
+		return nil, errors.NotFoundError("contract not found").SetComponent(component)
+	}
+	return &svc.GetContractResponse{
+		Contract: c,
+	}, nil
 }
 
 // GetContractABI loads contract ABI
 func (r *ContractRegistry) GetContractABI(ctx context.Context, req *svc.GetContractRequest) (*svc.GetContractABIResponse, error) {
-	c, ok := r.getContract(req.GetContract())
+	a, ok := r.getArtifact(req.GetContractId())
 	if !ok {
 		return nil, errors.NotFoundError("contract ABI not found").SetComponent(component)
 	}
 	return &svc.GetContractABIResponse{
-		Abi: c.Abi,
+		Abi: a.Abi,
 	}, nil
 }
 
 // GetContractBytecode loads contract bytecode
 func (r *ContractRegistry) GetContractBytecode(ctx context.Context, req *svc.GetContractRequest) (*svc.GetContractBytecodeResponse, error) {
-	c, ok := r.getContract(req.GetContract())
+	a, ok := r.getArtifact(req.GetContractId())
 	if !ok {
 		return nil, errors.NotFoundError("contract bytecode not found").SetComponent(component)
 	}
 	return &svc.GetContractBytecodeResponse{
-		Bytecode: c.Bytecode,
+		Bytecode: a.Bytecode,
 	}, nil
 }
 
 // GetContractDeployedBytecode loads contract deployed bytecode
 func (r *ContractRegistry) GetContractDeployedBytecode(ctx context.Context, req *svc.GetContractRequest) (*svc.GetContractDeployedBytecodeResponse, error) {
-	c, ok := r.getContract(req.GetContract())
+	a, ok := r.getArtifact(req.GetContractId())
 	if !ok {
 		return nil, errors.NotFoundError("contract deployed bytecode not found").SetComponent(component)
 	}
 	return &svc.GetContractDeployedBytecodeResponse{
-		DeployedBytecode: c.DeployedBytecode,
+		DeployedBytecode: a.DeployedBytecode,
 	}, nil
 }
 
@@ -270,7 +306,7 @@ func (r *ContractRegistry) getCodehash(contract common.AccountInstance) (ethcomm
 
 // GetMethodsBySelector load method using 4 bytes unique selector and the address of the contract
 func (r *ContractRegistry) GetMethodsBySelector(ctx context.Context, req *svc.GetMethodsBySelectorRequest) (*svc.GetMethodsBySelectorResponse, error) {
-	sel := bytesToByte4(req.GetSelector())
+	sel := utils.SigHashToSelector(req.GetSelector())
 
 	// Search in specific method storage
 	codehash, err := r.getCodehash(*req.GetAccountInstance())
@@ -327,19 +363,25 @@ func (r *ContractRegistry) GetEventsBySigHash(ctx context.Context, req *svc.GetE
 	return nil, errors.NotFoundError("events not found").SetComponent(component)
 }
 
+// Returns a list of all registered contracts. Name is used to filter contractIds based on their contract name, empty to list all contract names & tags.
+func (r *ContractRegistry) GetCatalog(ctx context.Context, req *svc.GetCatalogRequest) (*svc.GetCatalogResponse, error) {
+	// TODO
+	return nil, nil
+}
+
+// Returns a list of all registered contracts. Name is used to filter contractIds based on their contract name, empty to list all contract names & tags.
+func (r *ContractRegistry) GetTags(ctx context.Context, req *svc.GetTagsRequest) (*svc.GetTagsResponse, error) {
+	// TODO
+	return nil, nil
+}
+
 // Request an update of the codehash of the contract address
-func (r *ContractRegistry) RequestAddressUpdate(ctx context.Context, req *svc.AddressUpdateRequest) (*svc.AddressUpdateResponse, error) {
+func (r *ContractRegistry) SetAccountCodeHash(ctx context.Context, req *svc.SetAccountCodeHashRequest) (*svc.SetAccountCodeHashResponse, error) {
 	chainID, addr := req.GetAccountInstance().GetChain(), req.GetAccountInstance().GetAccount().Address()
 
 	// Codehash already stored for this contract instance
 	if _, ok := r.codehashes[chainID.String()][addr]; ok {
-		return &svc.AddressUpdateResponse{}, nil
-	}
-
-	// Codehash not stored, trying to retrieve it from chain
-	code, err := r.ec.CodeAt(context.Background(), chainID.ID(), addr, nil)
-	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return &svc.SetAccountCodeHashResponse{}, nil
 	}
 
 	chainStr := chainID.String()
@@ -347,7 +389,7 @@ func (r *ContractRegistry) RequestAddressUpdate(ctx context.Context, req *svc.Ad
 		r.codehashes[chainStr] = make(map[ethcommon.Address]ethcommon.Hash)
 	}
 
-	r.codehashes[chainStr][addr] = crypto.Keccak256Hash(code)
+	r.codehashes[chainStr][addr] = ethcommon.BytesToHash(req.GetCodeHash())
 
-	return &svc.AddressUpdateResponse{}, nil
+	return &svc.SetAccountCodeHashResponse{}, nil
 }

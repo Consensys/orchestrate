@@ -4,8 +4,6 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
 )
 
 const component = "contract-registry.mock"
@@ -23,7 +21,7 @@ func Init() {
 		}
 
 		// Initialize gRPC registry
-		registry = NewRegistry(ethclient.GlobalClient())
+		registry = NewRegistry()
 
 		log.Infof("%q: store ready", component)
 	})
