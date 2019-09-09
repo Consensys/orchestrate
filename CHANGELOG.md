@@ -2,7 +2,7 @@
 
 ### Version 0.2.0
 
-*Unreleased*
+*Released on September 9th 2019*
 
 - [REFACTOR] Refactor NonceManager to allow to keep track of nonce that are sent to chain
 
