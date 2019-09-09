@@ -19,7 +19,7 @@ import (
 
 const component = "redis-registry"
 
-var defaultCodehash = ethcommon.Hash{}
+var defaultCodeHash = ethcommon.Hash{}
 
 // ContractRegistry is a Redis based implementation of the interface pkg.git/services/contract-registry.RegistryServer
 type ContractRegistry struct {
@@ -95,7 +95,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 			found := false
 			
 			// Attemps to find the registered method
-			reply, err := conn.Do("LRANGE", methodKey(defaultCodehash[:], sel), 0 , -1)
+			reply, err := conn.Do("LRANGE", methodKey(defaultCodeHash[:], sel), 0 , -1)
 			if err != nil {
 				return nil, errors.FromError(err).ExtendComponent(component)
 			}
@@ -117,7 +117,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 
 			// If not found, register it
 			if !found {
-				_, err := conn.Do("RPUSH", methodKey(defaultCodehash[:], sel), [][]byte{methodJSONs[method.Name]})
+				_, err := conn.Do("RPUSH", methodKey(defaultCodeHash[:], sel), [][]byte{methodJSONs[method.Name]})
 				if err != nil {
 					return nil, errors.FromError(err).ExtendComponent(component)
 				}
@@ -139,7 +139,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 			found := false
 			
 			// Attemps to find the registered event
-			reply, err := conn.Do("LRANGE", eventKey(defaultCodehash[:], eventID[:], indexedCount), 0 , -1)
+			reply, err := conn.Do("LRANGE", eventKey(defaultCodeHash[:], eventID[:], indexedCount), 0 , -1)
 			if err != nil {
 				return nil, errors.FromError(err).ExtendComponent(component)
 			}
@@ -161,7 +161,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 
 			// If not found, register it
 			if !found {
-				_, err := conn.Do("RPUSH", eventKey(defaultCodehash[:], eventID[:], indexedCount), [][]byte{eventJSONs[event.Name]})
+				_, err := conn.Do("RPUSH", eventKey(defaultCodeHash[:], eventID[:], indexedCount), [][]byte{eventJSONs[event.Name]})
 				if err != nil {
 					return nil, errors.FromError(err).ExtendComponent(component)
 				}
@@ -255,12 +255,7 @@ func (r *ContractRegistry) GetContractDeployedBytecode(ctx context.Context, req 
 }
 
 // getCodehash retrieve codehash of a contract instance
-func (r *ContractRegistry) getCodehash(contract common.AccountInstance) (ethcommon.Hash, error) {
-	
-	contractName, err := contract.Short()
-	if err != nil {
-		return ethcommon.Hash{}, errors.FromError(err).ExtendComponent(component)
-	}
+func (r *ContractRegistry) getCodehash(contract common.AccountInstance) (ethcommon.Hash, bool, error) {
 
 	conn := r.pool.Get()
 	defer conn.Close()
@@ -269,47 +264,122 @@ func (r *ContractRegistry) getCodehash(contract common.AccountInstance) (ethcomm
 		codeHashKey(contract.GetChain().String(), contract.GetAccount().GetRaw()))
 
 	if err != nil {
-		return ethcommon.Hash{}, errors.FromError(err).ExtendComponent(component)
+		return ethcommon.Hash{}, false, errors.FromError(err).ExtendComponent(component)
 	}
 
 	if reply == nil {
-		return ethcommon.Hash{}, errors.NotFoundError(
-			"No CodeHash found for %q", contractName,
-		).SetComponent(component)
+		return ethcommon.Hash{}, false, nil
 	}
 
 	codeHash, err := remote.Bytes(reply, nil)
 	if err != nil {
-		return ethcommon.Hash{}, errors.FromError(err).ExtendComponent(component)
+		return ethcommon.Hash{}, false, errors.FromError(err).ExtendComponent(component)
 	}
 
-	return ethcommon.BytesToHash(codeHash), nil
+	return ethcommon.BytesToHash(codeHash), true, nil
 }
 
 // GetMethodsBySelector retrieve methods using 4 bytes unique selector
 func (r *ContractRegistry) GetMethodsBySelector(ctx context.Context, req *svc.GetMethodsBySelectorRequest) (*svc.GetMethodsBySelectorResponse, error) {
 
-	// conn := r.pool.Get()
-	// defer conn.Close()
+	conn := r.pool.Get()
+	defer conn.Close()
 
-	// selector := utils.SigHashToSelector(req.GetSelector())
+	var selector [4]byte
+	copy(selector[:], req.GetSelector())
 
-	// codehash, err := r.getCodehash(*req.GetAccountInstance())
-	// if err == nil {
-	// 	reply, err := conn.Do("LRANGE", eventKey(codeHash[:], selector[:], indexedCount), 0 , -1)
-	// }
+	codeHashToLookup, codeHashFound, err := r.getCodehash(*req.GetAccountInstance())
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
 
+	// Case where the connexion to redis is codeHashFound, but the hash is not found
+	if !codeHashFound {
+		// Use the defaultCodeHash instead, and try to look at the default registry
+		codeHashToLookup = defaultCodeHash
+	}
+	
+	// TODO: Handle the indexedCount thing
+	reply, err := conn.Do("LINDEX", methodKey(codeHashToLookup[:], selector), 0)
+	
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+	
+	if reply == nil {
+		return nil, errors.NotFoundError("method not found").SetComponent(component)	
 	return nil, errors.NotFoundError("method not found").SetComponent(component)
+		return nil, errors.NotFoundError("method not found").SetComponent(component)	
+	}
 
+	methodJSONs, err := remote.ByteSlices(reply, nil)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	response := &svc.GetMethodsBySelectorResponse{}
+
+	switch {
+	case codeHashFound:
+		response.Method = methodJSONs[0]
+	default:
+		response.DefaultMethods = methodJSONs
+	}
+
+	return response, nil
 }
 
 // GetEventsBySigHash retrieve events using hash of signature
-func (r *ContractRegistry) GetEventsBySigHash(context.Context, *svc.GetEventsBySigHashRequest) (*svc.GetEventsBySigHashResponse, error) {
-	return nil, errors.NotFoundError("method not found").SetComponent(component)
+func (r *ContractRegistry) GetEventsBySigHash(ctx context.Context, req *svc.GetEventsBySigHashRequest) (*svc.GetEventsBySigHashResponse, error) {
+	conn := r.pool.Get()
+	defer conn.Close()
+
+	selector := utils.SigHashToSelector(req.GetSigHash())
+	indexedCount := req.GetIndexedInputCount()
+
+	codeHashToLookup, codeHashFound, err := r.getCodehash(*req.GetAccountInstance())
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	// Case where the connexion to redis is codeHashFound, but the hash is not found
+	if !codeHashFound {
+		// Use the defaultCodeHash instead, and try to look at the default registry
+		codeHashToLookup = defaultCodeHash
+	}
+	
+	// TODO: Handle the indexedCount thing
+	reply, err := conn.Do("LINDEX", eventKey(codeHashToLookup[:], selector[:], uint(indexedCount)), 0)
+	
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+	
+	if reply == nil {
+		return nil, errors.NotFoundError("event not found").SetComponent(component)	
+	}
+
+	eventJSONs, err := remote.ByteSlices(reply, nil)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	response := &svc.GetEventsBySigHashResponse{}
+
+	switch {
+	case codeHashFound:
+		response.Event = eventJSONs[0]
+	default:
+		response.DefaultEvents = eventJSONs
+	}
+
+	return response, nil
 }
 
 // RequestAddressUpdate request an update of the codehash of the contract address
-func (r *ContractRegistry) RequestAddressUpdate(context.Context, *svc.AddressUpdateRequest) (*svc.AddressUpdateResponse, error)
+func (r *ContractRegistry) RequestAddressUpdate(context.Context, *svc.AddressUpdateRequest) (*svc.AddressUpdateResponse, error) {
+	return nil, errors.NotFoundError("method not found").SetComponent(component)
+}
 
 // getIndexedCount returns the count of indexed inputs in the event
 func getIndexedCount(event ethabi.Event) uint {
