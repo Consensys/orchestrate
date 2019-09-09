@@ -2,189 +2,142 @@ package redis
 
 import (
 	"fmt"
-	"math/big"
-	"math/rand"
-	"strconv"
-	"time"
 
-	"github.com/spf13/viper"
-
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/gomodule/redigo/redis"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 )
 
-// WaitLockReleaseFunc tells what to do when waiting for the lock to be released
-type WaitLockReleaseFunc func(chainID *big.Int, a *common.Address, c redis.Conn, timeout time.Duration) error
-
-// Nonce allows to manage nonce thanks to a redis base
-type Nonce struct {
-	pool            *redis.Pool
-	timeout         int                 // Timeout in millisecond for lock
-	waitLockRelease WaitLockReleaseFunc // Add waitLockRelease as struct item instead of method for editing purpose in testing
+// NonceManager manages nonce using an underlying redis cache
+type NonceManager struct {
+	pool *redis.Pool
 }
 
-// Conn is a wrapper around a redis.Conn that handles internal errors
-type Conn struct {
-	redis.Conn
-}
-
-func Dial(network, address string, options ...redis.DialOption) (redis.Conn, error) {
-	conn, err := redis.Dial(network, address, options...)
-	if err != nil {
-		return conn, errors.ConnectionError(err.Error())
-	}
-	return Conn{conn}, nil
-}
-
-func (conn Conn) Do(commandName string, args ...interface{}) (interface{}, error) {
-	reply, err := conn.Conn.Do(commandName, args...)
-	if err != nil {
-		return reply, errors.ConnectionError(err.Error())
-	}
-	return reply, nil
-}
-
-// Creates a new redis pool
-func NewPool(port string) *redis.Pool {
-	return &redis.Pool{
-		// TODO Fine tune those parameters or make them accessible in config file
-		MaxIdle:     10000,
-		IdleTimeout: 240 * time.Second,
-		Dial:        func() (redis.Conn, error) { return Dial("tcp", port) },
+// NewNonceManager creates a new NonceManager using an underlying redis cache
+func NewNonceManager(pool *redis.Pool) *NonceManager {
+	return &NonceManager{
+		pool: pool,
 	}
 }
 
-// NewNonce creates a new nonce cache based on redis
-func NewNonce(pool *redis.Pool, lockTimeout int) *Nonce {
-	return &Nonce{
-		pool:            pool,
-		waitLockRelease: waitLockRelease,
-		timeout:         lockTimeout,
-	}
+const lastAttributedSuf = "last-attributed"
+
+// GetLastAttributed loads last attributed nonce from state
+func (nm *NonceManager) GetLastAttributed(key string) (nonce uint64, ok bool, err error) {
+	return nm.loadUint64(computeKey(key, lastAttributedSuf))
 }
 
-// Computes a unique id for a combination of chainID + ethereum address
-func computeKey(chainID *big.Int, a *common.Address) string {
-	return fmt.Sprintf("%v-%v", chainID.Text(16), a.Hex())
+// SetLastAttributed set last attributed nonce
+func (nm *NonceManager) SetLastAttributed(key string, value uint64) error {
+	return nm.set(computeKey(key, lastAttributedSuf), value)
 }
 
-// Computes a name for the redis lock given a chainID and an ethereum address
-func computeLockName(chainID *big.Int, a *common.Address) string {
-	return "lock-" + computeKey(chainID, a)
+// IncrLastAttributed increment last arributed nonce
+func (nm *NonceManager) IncrLastAttributed(key string) error {
+	return nm.incr(computeKey(key, lastAttributedSuf))
 }
 
-func toDuration(t int) time.Duration {
-	return time.Duration(t) * time.Millisecond
+const lastSentSuf = "last-sent"
+
+// GetLastSent loads last sent nonce from state
+func (nm *NonceManager) GetLastSent(key string) (nonce uint64, ok bool, err error) {
+	return nm.loadUint64(computeKey(key, lastSentSuf))
 }
 
-// Get returns the value of the nonce from the cache if it exists
-func (nm *Nonce) Get(chainID *big.Int, a *common.Address) (nonce uint64, inCache bool, err error) {
+// SetLastSent set last set nonce
+func (nm *NonceManager) SetLastSent(key string, value uint64) error {
+	return nm.set(computeKey(key, lastSentSuf), value)
+}
+
+// IncrLastSent increment last sent nonce
+func (nm *NonceManager) IncrLastSent(key string) error {
+	return nm.incr(computeKey(key, lastSentSuf))
+}
+
+const recoveringSuf = "recovering"
+
+// IsRecovering indicates whether NonceManager is in recovery mode
+func (nm *NonceManager) IsRecovering(key string) (bool, error) {
+	recovering, ok, err := nm.loadBool(computeKey(key, recoveringSuf))
+	return recovering && ok, err
+}
+
+// SetRecovering set recovery status
+func (nm *NonceManager) SetRecovering(key string, status bool) error {
+	return nm.set(computeKey(key, recoveringSuf), status)
+}
+
+func (nm *NonceManager) load(key string) (value interface{}, ok bool, err error) {
 	conn := nm.pool.Get()
 	defer conn.Close()
 
-	reply, err := conn.Do("GET", computeKey(chainID, a))
+	reply, err := conn.Do("GET", key)
 	if err != nil {
-		return 0, false, errors.FromError(err).SetComponent(component)
+		return reply, false, errors.FromError(err).SetComponent(component)
 	}
 
 	if reply == nil {
-		return 0, false, nil
+		return nil, false, nil
 	}
 
-	r, err := redis.Uint64(reply, nil)
-	if err != nil {
-		return 0, true, FromRedisError(err).SetComponent(component)
-	}
-	return r, true, nil
+	return reply, true, nil
 }
 
-// Set updates the nonce in the cache with a new value
-func (nm *Nonce) Set(chainID *big.Int, a *common.Address, newNonce uint64) error {
-	conn := nm.pool.Get()
-	expirationTime := viper.GetInt("redis.nonce.expiration.time")
-	defer conn.Close()
-	_, err := conn.Do("SETEX", computeKey(chainID, a), expirationTime, newNonce)
-	if err != nil {
-		return errors.FromError(err).SetComponent(component)
+func (nm *NonceManager) loadUint64(key string) (value uint64, ok bool, err error) {
+	// Load value
+	reply, ok, err := nm.load(key)
+	if err != nil || !ok {
+		return 0, false, err
 	}
-	return nil
+
+	// Format reply to Uint64
+	value, err = redis.Uint64(reply, nil)
+	if err != nil {
+		return 0, false, FromRedisError(err).SetComponent(component)
+	}
+
+	return value, true, nil
 }
 
-// Lock acquire a lock for a givne chainID and an ethereum address
-func (nm *Nonce) Lock(chainID *big.Int, a *common.Address) (string, error) {
-	randomIntValue := rand.Int()
-	lockSig := strconv.Itoa(randomIntValue)
-	conn := nm.pool.Get()
-	defer conn.Close()
-	// TODO fix a good value for timeout after tests
-	hasLock, err := conn.Do("SET", computeLockName(chainID, a), lockSig, "NX", "PX", strconv.Itoa(nm.timeout))
-	if err != nil {
-		return "", errors.FromError(err).SetComponent(component)
+func (nm *NonceManager) loadBool(key string) (value, ok bool, err error) {
+	// Load value
+	reply, ok, err := nm.load(key)
+	if err != nil || !ok {
+		return false, false, err
 	}
 
-	if hasLock != "OK" {
-		err := nm.waitLockRelease(chainID, a, conn, toDuration(nm.timeout))
-		conn.Close()
-		if err != nil {
-			return "", err
-		}
-		return nm.Lock(chainID, a)
+	// Format reply to Uint64
+	value, err = redis.Bool(reply, nil)
+	if err != nil {
+		return false, false, FromRedisError(err).SetComponent(component)
 	}
-	return lockSig, nil
+
+	return value, true, nil
 }
 
-// wait for a signal saying that the lock has been released or for timeout
-func waitLockRelease(chainID *big.Int, a *common.Address, c redis.Conn, timeout time.Duration) error {
-	psc := redis.PubSubConn{Conn: c}
-
-	err := psc.PSubscribe("__keyspace@*__:" + computeLockName(chainID, a))
-	if err != nil {
-		return errors.ConnectionError(err.Error()).SetComponent(component)
-	}
-
-loop:
-	for start := time.Now(); time.Since(start) < timeout; {
-		switch n := psc.ReceiveWithTimeout(timeout).(type) {
-		case redis.Message:
-			if string(n.Data) == "del" {
-				break loop
-			}
-		default:
-		}
-	}
-	return nil
-}
-
-// Unlock releases a previously acquired lock
-func (nm *Nonce) Unlock(chainID *big.Int, a *common.Address, lockSig string) error {
+func (nm *NonceManager) set(key string, value interface{}) error {
 	conn := nm.pool.Get()
 	defer conn.Close()
-	lockName := computeLockName(chainID, a)
 
-	raw, err := conn.Do("GET", lockName)
+	_, err := conn.Do("SET", key, value)
 	if err != nil {
 		return errors.FromError(err).SetComponent(component)
 	}
 
-	var value string
-	switch raw := raw.(type) {
-	case nil:
-		// The lock does not exist anymore because of timeout
-		return nil
-	case []byte:
-		value = string(raw)
-	case string:
-		value = raw
+	return nil
+}
+
+func (nm *NonceManager) incr(key string) error {
+	conn := nm.pool.Get()
+	defer conn.Close()
+
+	_, err := conn.Do("INCR", key)
+	if err != nil {
+		return errors.FromError(err).SetComponent(component)
 	}
 
-	if value == lockSig {
-		_, err := conn.Do("DEL", lockName)
-		if err != nil {
-			return errors.FromError(err).SetComponent(component)
-		}
-		return nil
-	}
+	return nil
+}
 
-	return errors.InternalError("lock keys do not match lock signature").SetComponent(component)
+func computeKey(key, suffix string) string {
+	return fmt.Sprintf("%v-%v", key, suffix)
 }

@@ -23,7 +23,7 @@ var (
 // Type register flag for Nonce Cooldown
 func Type(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Type of Nonce (one of %q)
-Environment variable: %q`, []string{"mock", "sarama"}, typeEnv)
+Environment variable: %q`, []string{"mock", "redis"}, typeEnv)
 	f.String(typeFlag, typeDefault, desc)
 	_ = viper.BindPFlag(typeViperKey, f.Lookup(typeFlag))
 }

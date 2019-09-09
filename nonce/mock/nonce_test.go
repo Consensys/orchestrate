@@ -1,26 +1,17 @@
-package redis
+package mock
 
 import (
+	"fmt"
+	"sync"
 	"testing"
 
-	"github.com/alicebob/miniredis"
 	"github.com/stretchr/testify/assert"
 )
 
-func NewRedisMock() *miniredis.Miniredis {
-	mredis, err := miniredis.Run()
-	if err != nil {
-		panic(err)
-	}
-	return mredis
-}
-
 var testKey = "test-key"
 
-func TestNonceManager(t *testing.T) {
-	mredis := NewRedisMock()
-	nm = NewNonceManager(NewPool(mredis.Addr()))
-
+func TestNonceNonceAttributor(t *testing.T) {
+	nm = NewNonceManager()
 	n, ok, err := nm.GetLastAttributed(testKey)
 	assert.Nil(t, err, "When manager is empty: GetLastAttributed should not error")
 	assert.False(t, ok, "When manager is empty: GetLastAttributed should not find nonce")
@@ -41,10 +32,33 @@ func TestNonceManager(t *testing.T) {
 	assert.Equal(t, uint64(11), n, "When last attributed has been incremented: GetLastAttributed should returned incremented nonce")
 }
 
-func TestNonceNonceSender(t *testing.T) {
-	mredis := NewRedisMock()
-	nm = NewNonceManager(NewPool(mredis.Addr()))
+func TestNonceManagerMultiGoRoutine(t *testing.T) {
+	nm = NewNonceManager()
+	wait := &sync.WaitGroup{}
+	for i := 0; i < 10; i++ {
+		// As required by NonceManager each goroutine will be Incrementing nonces
+		// on a dedicated key
+		key := fmt.Sprintf("test-key-%v", i)
+		_ = nm.SetLastAttributed(key, 0)
+		wait.Add(1)
+		go func(key string) {
+			for j := 0; j < 100; j++ {
+				_ = nm.IncrLastAttributed(key)
+			}
+			wait.Done()
+		}(key)
+	}
 
+	wait.Wait()
+	for i := 0; i < 10; i++ {
+		n, _, _ := nm.GetLastAttributed(fmt.Sprintf("test-key-%v", i))
+		assert.Equal(t, uint64(100), n, "Final nonce for %q should be correct", i)
+	}
+}
+
+func TestNonceNonceSender(t *testing.T) {
+	nm = NewNonceManager()
+	testKey := "test-key"
 	n, ok, err := nm.GetLastSent(testKey)
 	assert.Nil(t, err, "When manager is empty: GetLastSent should not error")
 	assert.False(t, ok, "When manager is empty: GetLastSent should not find nonce")

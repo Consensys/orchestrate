@@ -9,5 +9,5 @@ import (
 
 func TestInit(t *testing.T) {
 	Init(context.Background())
-	assert.NotNil(t, nc, "Nonce should have been set")
+	assert.NotNil(t, nm, "Nonce should have been set")
 }

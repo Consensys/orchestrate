@@ -1,39 +1,137 @@
 package mock
 
 import (
-	"math/big"
+	"fmt"
+	"sync"
 
-	ethcommon "github.com/ethereum/go-ethereum/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 )
 
-var (
-	lockSig = "mokcLockId"
-)
-
-// Nonce is a mock Nonce
-type Nonce struct{}
-
-// NewNonce creates a new mock faucet
-func NewNonce() *Nonce {
-	return &Nonce{}
+// NonceManager is a NonceManager that works with in memory cache
+//
+// Important note:
+// NonceManager makes the assumption that disctinct goroutines access
+// nonces for non overlapping set of keys (so there is never competitive access
+// to a nonce for a given key)
+// Accessing the same key from 2 different goroutines could result
+// in discrepencies in nonce updates
+type NonceManager struct {
+	cache *sync.Map
 }
 
-// Get read nonce value (does not acquire lock), it should indicate if nonce was available or not
-func (nm *Nonce) Get(chainID *big.Int, a *ethcommon.Address) (nonce uint64, inCache bool, err error) {
-	return 0, false, nil // idleTime == -1, meaning the nonce is not in the cache
+// NewNonceManager creates a new mock NonceManager
+func NewNonceManager() *NonceManager {
+	return &NonceManager{
+		cache: &sync.Map{},
+	}
 }
 
-// Set read nonce value (does not acquire lock), it should indicate if nonce was available or not
-func (nm *Nonce) Set(chainID *big.Int, a *ethcommon.Address, v uint64) error {
+const lastAttributedSuf = "last-attributed"
+
+// GetLastAttributed loads last attributed nonce from state
+func (nm *NonceManager) GetLastAttributed(key string) (nonce uint64, ok bool, err error) {
+	return nm.loadUint64(computeKey(key, lastAttributedSuf))
+}
+
+// SetLastAttributed set last attributed nonce
+func (nm *NonceManager) SetLastAttributed(key string, value uint64) error {
+	nm.set(computeKey(key, lastAttributedSuf), value)
 	return nil
 }
 
-// Lock nonce
-func (nm *Nonce) Lock(chainID *big.Int, a *ethcommon.Address) (string, error) {
-	return lockSig, nil
+// IncrLastAttributed increment last arributed nonce
+//
+// Important note:
+// Incrementation does not append atomically so you should
+// make sure that IncrLastAttributed is never called by 2 distinct
+// goroutines for the same key
+func (nm *NonceManager) IncrLastAttributed(key string) (err error) {
+	return nm.incrUint64(computeKey(key, lastAttributedSuf))
 }
 
-// Unlock nonce
-func (nm *Nonce) Unlock(chainID *big.Int, a *ethcommon.Address, lockSig string) error {
+const lastSentSuf = "last-sent"
+
+// GetLastSent loads last sent nonce from state
+func (nm *NonceManager) GetLastSent(key string) (nonce uint64, ok bool, err error) {
+	return nm.loadUint64(computeKey(key, lastSentSuf))
+}
+
+// SetLastSent set last sent nonce
+func (nm *NonceManager) SetLastSent(key string, value uint64) error {
+	nm.set(computeKey(key, lastSentSuf), value)
 	return nil
+}
+
+// IncrLastSent increment last sent nonce
+//
+// Important note:
+// Incrementation does not append atomically so you should
+// make sure that IncrLastSent is never called by 2 distinct
+// goroutines for the same key
+func (nm *NonceManager) IncrLastSent(key string) (err error) {
+	return nm.incrUint64(computeKey(key, lastSentSuf))
+}
+
+const recoveringSuf = "recovering"
+
+// IsRecovering indicates whether NonceManager is in recovery mode
+func (nm *NonceManager) IsRecovering(key string) (bool, error) {
+	recovering, ok, err := nm.loadBool(computeKey(key, recoveringSuf))
+	return recovering && ok, err
+}
+
+// SetRecovering set recovery status
+func (nm *NonceManager) SetRecovering(key string, status bool) error {
+	nm.set(computeKey(key, recoveringSuf), status)
+	return nil
+}
+
+func (nm *NonceManager) loadUint64(key string) (value uint64, ok bool, err error) {
+	v, ok := nm.cache.Load(key)
+	if !ok {
+		return 0, false, nil
+	}
+
+	rv, ok := v.(uint64)
+	if !ok {
+		return 0, false, errors.InvalidFormatError("loaded value is not uint64")
+	}
+
+	return rv, true, nil
+}
+
+func (nm *NonceManager) loadBool(key string) (value, ok bool, err error) {
+	v, ok := nm.cache.Load(key)
+	if !ok {
+		return false, false, nil
+	}
+
+	rv, ok := v.(bool)
+	if !ok {
+		return false, false, errors.InvalidFormatError("loaded value is not bool")
+	}
+
+	return rv, true, nil
+}
+
+func (nm *NonceManager) set(key string, value interface{}) {
+	nm.cache.Store(key, value)
+}
+
+func (nm *NonceManager) incrUint64(key string) error {
+	v, ok, err := nm.loadUint64(key)
+	if err != nil {
+		return err
+	} else if !ok {
+		return errors.NotFoundError("no nonce cached for key %q", key)
+	}
+
+	// Stores incremented nonce
+	nm.set(key, v+1)
+
+	return nil
+}
+
+func computeKey(key, suffix string) string {
+	return fmt.Sprintf("%v-%v", key, suffix)
 }

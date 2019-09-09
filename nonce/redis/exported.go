@@ -10,21 +10,21 @@ import (
 const component = "nonce.redis"
 
 var (
-	nc       *Nonce
+	nm       *NonceManager
 	initOnce = &sync.Once{}
 )
 
 // Init initializes Nonce
 func Init() {
 	initOnce.Do(func() {
-		if nc != nil {
+		if nm != nil {
 			return
 		}
 
 		pool := NewPool(viper.GetString(addressViperKey))
 
 		// Initialize Nonce
-		nc = NewNonce(pool, viper.GetInt(lockTimeoutViperKey))
+		nm = NewNonceManager(pool)
 
 		log.WithFields(log.Fields{
 			"type": "redis",
@@ -32,12 +32,12 @@ func Init() {
 	})
 }
 
-// GlobalNonce returns global Sarama Nonce
-func GlobalNonce() *Nonce {
-	return nc
+// GlobalNonceManager returns global NonceManager
+func GlobalNonceManager() *NonceManager {
+	return nm
 }
 
-// SetGlobalNonce sets global Sarama Nonce
-func SetGlobalNonce(nonce *Nonce) {
-	nc = nonce
+// SetGlobalNonce sets global NonceManager
+func SetGlobalNonceManager(m *NonceManager) {
+	nm = m
 }

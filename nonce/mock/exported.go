@@ -8,19 +8,19 @@ import (
 )
 
 var (
-	nc       *Nonce
+	nm       *NonceManager
 	initOnce = &sync.Once{}
 )
 
 // Init initializes Faucet
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
-		if nc != nil {
+		if nm != nil {
 			return
 		}
 
 		// Initialize Faucet
-		nc = NewNonce()
+		nm = NewNonceManager()
 
 		log.WithFields(log.Fields{
 			"type": "mock",
@@ -29,11 +29,11 @@ func Init(ctx context.Context) {
 }
 
 // GlobalFaucet returns global Mock Nonce
-func GlobalNonce() *Nonce {
-	return nc
+func GlobalNonceManager() *NonceManager {
+	return nm
 }
 
 // SetGlobalFaucet sets global Mock Nonce
-func SetGlobalNonce(nonce *Nonce) {
-	nc = nonce
+func SetGlobalNonceManager(m *NonceManager) {
+	nm = m
 }

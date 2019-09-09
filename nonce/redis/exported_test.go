@@ -8,5 +8,5 @@ import (
 
 func TestInit(t *testing.T) {
 	Init()
-	assert.NotNil(t, nc, "Faucet should have been set")
+	assert.NotNil(t, nm, "Faucet should have been set")
 }

@@ -12,14 +12,14 @@ import (
 )
 
 var (
-	nc       Nonce
+	m        Manager
 	initOnce = &sync.Once{}
 )
 
 // Init initializes Nonce
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
-		if nc != nil {
+		if m != nil {
 			return
 		}
 
@@ -29,27 +29,27 @@ func Init(ctx context.Context) {
 			redis.Init()
 
 			// Set Nonce
-			nc = redis.GlobalNonce()
+			m = redis.GlobalNonceManager()
 		case "mock":
 			// Initialize Mock Nonce
 			mock.Init(ctx)
 
 			// Set Nonce
-			nc = mock.GlobalNonce()
+			m = mock.GlobalNonceManager()
 		default:
 			log.WithFields(log.Fields{
 				"type": viper.GetString(typeViperKey),
-			}).Fatalf("nonce: unknown type")
+			}).Fatalf("nonce: unknown storage type")
 		}
 	})
 }
 
-// GlobalNonce returns global Sarama Nonce
-func GlobalNonce() Nonce {
-	return nc
+// GlobalManager returns globalNonceManager
+func GlobalManager() Manager {
+	return m
 }
 
-// SetGlobalNonce sets global Sarama Nonce
-func SetGlobalNonce(nonce Nonce) {
-	nc = nonce
+// SetGlobalManager sets global Manager
+func SetGlobalManager(mngr Manager) {
+	m = mngr
 }
