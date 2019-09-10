@@ -86,7 +86,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 
 			if contract.DeployedBytecode != nil {
 				// Registers the methods list
-				_, err = conn.Do("RPUSH", methodKey(codeHash[:], sel), [][]byte{methodJSONs[method.Name]})
+				_, err = conn.Do("RPUSH", methodKey(codeHash[:], sel), methodJSONs[method.Name])
 				if err != nil {
 					return nil, errors.FromError(err).ExtendComponent(component)
 				}	
@@ -117,7 +117,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 
 			// If not found, register it
 			if !found {
-				_, err := conn.Do("RPUSH", methodKey(defaultCodeHash[:], sel), [][]byte{methodJSONs[method.Name]})
+				_, err := conn.Do("RPUSH", methodKey(defaultCodeHash[:], sel), methodJSONs[method.Name])
 				if err != nil {
 					return nil, errors.FromError(err).ExtendComponent(component)
 				}
@@ -130,7 +130,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 			indexedCount := getIndexedCount(event)
 
 			if contract.DeployedBytecode != nil {
-				_, err := conn.Do("RPUSH", eventKey(codeHash[:], eventID[:], indexedCount), [][]byte{eventJSONs[event.Name]})
+				_, err := conn.Do("RPUSH", eventKey(codeHash[:], eventID[:], indexedCount), eventJSONs[event.Name])
 				if err != nil {
 					return nil, errors.FromError(err).ExtendComponent(component)
 				}
@@ -161,7 +161,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 
 			// If not found, register it
 			if !found {
-				_, err := conn.Do("RPUSH", eventKey(defaultCodeHash[:], eventID[:], indexedCount), [][]byte{eventJSONs[event.Name]})
+				_, err := conn.Do("RPUSH", eventKey(defaultCodeHash[:], eventID[:], indexedCount), eventJSONs[event.Name])
 				if err != nil {
 					return nil, errors.FromError(err).ExtendComponent(component)
 				}
@@ -300,16 +300,14 @@ func (r *ContractRegistry) GetMethodsBySelector(ctx context.Context, req *svc.Ge
 	}
 	
 	// TODO: Handle the indexedCount thing
-	reply, err := conn.Do("LINDEX", methodKey(codeHashToLookup[:], selector), 0)
+	reply, err := conn.Do("LRANGE", methodKey(codeHashToLookup[:], selector), 0, -1)
 	
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 	
 	if reply == nil {
-		return nil, errors.NotFoundError("method not found").SetComponent(component)	
-	return nil, errors.NotFoundError("method not found").SetComponent(component)
-		return nil, errors.NotFoundError("method not found").SetComponent(component)	
+		return nil, errors.NotFoundError("method not found").SetComponent(component)		
 	}
 
 	methodJSONs, err := remote.ByteSlices(reply, nil)
