@@ -18,11 +18,9 @@ func TestInit(t *testing.T) {
 	abiResp, err := GlobalRegistry().GetContractABI(
 		context.Background(),
 		&svc.GetContractRequest{
-			Contract: &abi.Contract{
-				Id: &abi.ContractId{
-					Name: "ERC20",
-					Tag:  "v0.1.3",
-				},
+			ContractId: &abi.ContractId{
+				Name: "ERC20",
+				Tag:  "v0.1.3",
 			},
 		})
 	assert.NotNil(t, abiResp, "Method should be available")
@@ -31,11 +29,9 @@ func TestInit(t *testing.T) {
 	bytecodeResp, err := GlobalRegistry().GetContractBytecode(
 		context.Background(),
 		&svc.GetContractRequest{
-			Contract: &abi.Contract{
-				Id: &abi.ContractId{
-					Name: "ERC20",
-					Tag:  "v0.1.3",
-				},
+			ContractId: &abi.ContractId{
+				Name: "ERC20",
+				Tag:  "v0.1.3",
 			},
 		})
 	assert.NotNil(t, bytecodeResp, "Bytecode should be available")
@@ -44,11 +40,9 @@ func TestInit(t *testing.T) {
 	deployedBytecodeResp, err := GlobalRegistry().GetContractDeployedBytecode(
 		context.Background(),
 		&svc.GetContractRequest{
-			Contract: &abi.Contract{
-				Id: &abi.ContractId{
-					Name: "ERC20",
-					Tag:  "v0.1.3",
-				},
+			ContractId: &abi.ContractId{
+				Name: "ERC20",
+				Tag:  "v0.1.3",
 			},
 		})
 	assert.NotNil(t, deployedBytecodeResp, "DeployedBytecode should be available")

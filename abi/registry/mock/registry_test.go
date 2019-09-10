@@ -4,11 +4,10 @@ import (
 	"math/big"
 	"testing"
 
-	"golang.org/x/net/context"
-
-	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/net/context"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
@@ -16,23 +15,14 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	ierror "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/mock"
 )
 
 var ERC20 = []byte(
 	`[{
     "anonymous": false,
     "inputs": [
-      {
-        "indexed": true,
-        "name": "account",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "name": "account2",
-        "type": "address"
-      }
+      {"indexed": true, "name": "account", "type": "address"},
+      {"indexed": false, "name": "account2", "type": "address"}
     ],
     "name": "MinterAdded",
     "type": "event"
@@ -40,17 +30,11 @@ var ERC20 = []byte(
   {
     "constant": true,
     "inputs": [
-      {
-        "name": "account",
-        "type": "address"
-      }
+      {"name": "account", "type": "address"}
     ],
     "name": "isMinter",
     "outputs": [
-      {
-        "name": "",
-        "type": "bool"
-      }
+      {"name": "", "type": "bool"}
     ],
     "payable": false,
     "stateMutability": "view",
@@ -59,58 +43,36 @@ var ERC20 = []byte(
 
 var ERC20bis = []byte(
 	`[{
-        "anonymous": false,
-        "inputs": [
-          {
-            "indexed": false,
-            "name": "account",
-            "type": "address"
-          },
-          {
-            "indexed": true,
-            "name": "account2",
-            "type": "address"
-          }
-        ],
-        "name": "MinterAdded",
-        "type": "event"
-      },
-	  {
-        "anonymous": false,
-        "inputs": [
-          {
-            "indexed": false,
-            "name": "account",
-            "type": "address"
-          },
-          {
-            "indexed": true,
-            "name": "account2",
-            "type": "address"
-          }
-        ],
-        "name": "MinterAddedBis",
-        "type": "event"
-      },
-      {
-        "constant": true,
-        "inputs": [
-          {
-            "name": "account",
-            "type": "address"
-          }
-        ],
-        "name": "isMinter",
-        "outputs": [
-          {
-            "name": "",
-            "type": "bool"
-          }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-        }]`)
+	"anonymous": false,
+	"inputs": [
+	  {"indexed": false, "name": "account", "type": "address"},
+	  {"indexed": true, "name": "account2", "type": "address"}
+	],
+	"name": "MinterAdded",
+	"type": "event"
+  },
+  {
+	"anonymous": false,
+	"inputs": [
+	  {"indexed": false, "name": "account", "type": "address"},
+	  {"indexed": true, "name": "account2", "type": "address"}
+	],
+	"name": "MinterAddedBis",
+	"type": "event"
+  },
+  {
+	"constant": true,
+	"inputs": [
+	  {"name": "account", "type": "address"}
+	],
+	"name": "isMinter",
+	"outputs": [
+	  {"name": "", "type": "bool"}
+	],
+	"payable": false,
+	"stateMutability": "view",
+	"type": "function"
+	}]`)
 
 var methodSig = []byte("isMinter(address)")
 var eventSig = []byte("MinterAdded(address,address)")
@@ -143,10 +105,7 @@ var ContractInstance = common.AccountInstance{
 }
 
 func TestRegisterContract(t *testing.T) {
-	blocks := make(map[string][]*ethtypes.Block)
-	mec := mock.NewClient(blocks)
-
-	r := NewRegistry(mec)
+	r := NewRegistry()
 	_, err := r.RegisterContract(
 		context.Background(),
 		&svc.RegisterContractRequest{
@@ -173,10 +132,7 @@ func TestRegisterContract(t *testing.T) {
 }
 
 func TestContractRegistryBySig(t *testing.T) {
-	blocks := make(map[string][]*ethtypes.Block)
-	mec := mock.NewClient(blocks)
-
-	r := NewRegistry(mec)
+	r := NewRegistry()
 	_, err := r.RegisterContract(context.Background(),
 		&svc.RegisterContractRequest{Contract: ERC20Contract},
 	)
@@ -186,26 +142,22 @@ func TestContractRegistryBySig(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	// Get ABI
-	abiResp, err := r.GetContractABI(context.Background(),
+	// Get Contract
+	contractResp, err := r.GetContract(context.Background(),
 		&svc.GetContractRequest{
-			Contract: &abi.Contract{
-				Id: &abi.ContractId{
-					Name: "ERC20",
-					Tag:  "v1.0.0",
-				},
+			ContractId: &abi.ContractId{
+				Name: "ERC20",
+				Tag:  "v1.0.0",
 			},
 		})
 	assert.NoError(t, err)
-	assert.Equal(t, ERC20Contract.Abi, abiResp.GetAbi())
+	assert.Equal(t, ERC20Contract.Abi, contractResp.GetContract().GetAbi())
 
-	abiResp, err = r.GetContractABI(context.Background(),
+	abiResp, err := r.GetContractABI(context.Background(),
 		&svc.GetContractRequest{
-			Contract: &abi.Contract{
-				Id: &abi.ContractId{
-					Name: "ERC20",
-					Tag:  "covfefe",
-				},
+			ContractId: &abi.ContractId{
+				Name: "ERC20",
+				Tag:  "covfefe",
 			},
 		})
 	assert.Error(t, err, "GetContractABI should error when unknown contract")
@@ -215,25 +167,46 @@ func TestContractRegistryBySig(t *testing.T) {
 	assert.True(t, errors.IsStorageError(ierr), "GetContractABI error should be a storage error")
 	assert.Nil(t, abiResp)
 
+	// Get ABI
+	abiResp, err = r.GetContractABI(context.Background(),
+		&svc.GetContractRequest{
+			ContractId: &abi.ContractId{
+				Name: "ERC20",
+				Tag:  "v1.0.0",
+			},
+		})
+	assert.NoError(t, err)
+	assert.Equal(t, ERC20Contract.Abi, abiResp.GetAbi())
+
+	abiResp, err = r.GetContractABI(context.Background(),
+		&svc.GetContractRequest{
+			ContractId: &abi.ContractId{
+				Name: "ERC20",
+				Tag:  "covfefe",
+			},
+		})
+	assert.Error(t, err, "GetContractABI should error when unknown contract")
+	ierr, ok = err.(*ierror.Error)
+	assert.True(t, ok, "GetContractABI error should cast to internal error")
+	assert.Equal(t, "contract-registry.mock", ierr.GetComponent(), "GetContractABI error component should be correct")
+	assert.True(t, errors.IsStorageError(ierr), "GetContractABI error should be a storage error")
+	assert.Nil(t, abiResp)
+
 	// Get Bytecode
 	bytecodeResp, err := r.GetContractBytecode(context.Background(),
 		&svc.GetContractRequest{
-			Contract: &abi.Contract{
-				Id: &abi.ContractId{
-					Name: "ERC20",
-					Tag:  "v1.0.0",
-				},
+			ContractId: &abi.ContractId{
+				Name: "ERC20",
+				Tag:  "v1.0.0",
 			},
 		})
 	assert.NoError(t, err)
 	assert.Equal(t, ERC20Contract.Bytecode, bytecodeResp.GetBytecode())
 	bytecodeResp, err = r.GetContractBytecode(context.Background(),
 		&svc.GetContractRequest{
-			Contract: &abi.Contract{
-				Id: &abi.ContractId{
-					Name: "ERC20",
-					Tag:  "covfefe",
-				},
+			ContractId: &abi.ContractId{
+				Name: "ERC20",
+				Tag:  "covfefe",
 			},
 		})
 	assert.Error(t, err, "GetContractBytecode should error when unknown contract")
@@ -246,22 +219,18 @@ func TestContractRegistryBySig(t *testing.T) {
 	// Get DeployedBytecode
 	deployedBytecodeResp, err := r.GetContractDeployedBytecode(context.Background(),
 		&svc.GetContractRequest{
-			Contract: &abi.Contract{
-				Id: &abi.ContractId{
-					Name: "ERC20",
-					Tag:  "v1.0.0",
-				},
+			ContractId: &abi.ContractId{
+				Name: "ERC20",
+				Tag:  "v1.0.0",
 			},
 		})
 	assert.NoError(t, err)
 	assert.Equal(t, ERC20Contract.DeployedBytecode, deployedBytecodeResp.GetDeployedBytecode())
 	deployedBytecodeResp, err = r.GetContractDeployedBytecode(context.Background(),
 		&svc.GetContractRequest{
-			Contract: &abi.Contract{
-				Id: &abi.ContractId{
-					Name: "ERC20",
-					Tag:  "covfefe",
-				},
+			ContractId: &abi.ContractId{
+				Name: "ERC20",
+				Tag:  "covfefe",
 			},
 		})
 	assert.Error(t, err, "Should error when unknown contract")
@@ -306,8 +275,11 @@ func TestContractRegistryBySig(t *testing.T) {
 	assert.Equal(t, [][]byte{eventJSONs["MinterAdded"], eventJSONsBis["MinterAdded"]}, eventResp.GetDefaultEvents())
 
 	// Update smart-contract address
-	_, err = r.RequestAddressUpdate(context.Background(),
-		&svc.AddressUpdateRequest{AccountInstance: &ContractInstance})
+	_, err = r.SetAccountCodeHash(context.Background(),
+		&svc.SetAccountCodeHashRequest{
+			AccountInstance: &ContractInstance,
+			CodeHash:        crypto.Keccak256([]byte{1, 2, 3}),
+		})
 	assert.NoError(t, err)
 
 	// Get MethodBySelector

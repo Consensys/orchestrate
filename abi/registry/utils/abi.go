@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+
 	pkgJson "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 )
