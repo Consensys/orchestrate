@@ -1,6 +1,7 @@
 package redis
 
 import (
+	"fmt"
 	"context"
 	"reflect"
 
@@ -26,203 +27,109 @@ type ContractRegistry struct {
 	pool *remote.Pool
 }
 
-// Conn is a wrapper around a remote.Conn that handles internal errors
-type Conn struct{ remote.Conn }
-
-// Dial returns a connection to redis
-func Dial(network, address string, options ...remote.DialOption) (remote.Conn, error) {
-	conn, err := remote.Dial(network, address, options...)
-	if err != nil {
-		return conn, errors.ConnectionError(err.Error())
-	}
-	return Conn{conn}, nil
-}
-
-// Do sends a commands to the remote Redis instance
-func (conn Conn) Do(commandName string, args ...interface{}) (interface{}, error) {
-	reply, err := conn.Conn.Do(commandName, args...)
-	if err != nil {
-		return reply, errors.ConnectionError(err.Error())
-	}
-	return reply, nil
+// Conn dials remote redis and returns a new Connexion
+func (r *ContractRegistry) Conn() *Conn {
+	return &Conn{Conn: r.pool.Get()}
 }
 
 // RegisterContract registers a contract
 func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.RegisterContractRequest) (*svc.RegisterContractResponse, error) {
-	conn := r.pool.Get()
+	conn := r.Conn()
 	defer conn.Close()
 
 	contract := req.GetContract()
 
-	if contract.Bytecode != nil {
-		bytecodeHash := crypto.Keccak256Hash(contract.Bytecode)
-		_, err := conn.Do("SET", contract.Short(), bytecodeHash)
-		if err != nil {
-			return nil, errors.FromError(err).ExtendComponent(component)
-		}
+	if contract.Bytecode == nil {
+		return nil, errors.InvalidArgError("No contract bytecode found in request").ExtendComponent(component)
+	}
 
-		marshalledContract, _ := proto.Marshal(&abi.Contract{
-			Abi:              contract.Abi,
-			Bytecode:         contract.Bytecode,
-			DeployedBytecode: contract.DeployedBytecode,
-		})
-
-		_, err = conn.Do("SET", bytecodeHash, marshalledContract)
-		if err != nil {
-			return nil, errors.FromError(err).ExtendComponent(component)
-		}
+	if contract.DeployedBytecode != nil {
+		return nil, errors.InvalidArgError("No contract deployed bytecode found in request").ExtendComponent(component)
 	}
 
 	if len(contract.Abi) != 0 {
-		// Preformat the keys and values that we are going to
-		codeHash := crypto.Keccak256Hash(contract.DeployedBytecode)
-		contractAbi, err := contract.ToABI()
-		if err != nil {
-			return nil, errors.FromError(err).ExtendComponent(component)
-		}
+		return nil, errors.InvalidArgError("Sent an empty ABI").ExtendComponent(component)
+	}
 
-		methodJSONs, eventJSONs, err := utils.ParseJSONABI(contract.Abi)
-		if err != nil {
-			return nil, errors.FromError(err).ExtendComponent(component)
-		}
+	// Attempt deserializing the ABI
+	contractAbi, err := contract.ToABI()
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
 
-		for _, method := range contractAbi.Methods {
+	// Attemps deserializing methods and events
+	methodJSONs, eventJSONs, err := utils.ParseJSONABI(contract.Abi)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
 
-			sel := utils.SigHashToSelector(method.Id())
+	byteCodeHash := crypto.Keccak256Hash(contract.Bytecode)
+	deployedByteCodeHash := crypto.Keccak256Hash(contract.DeployedBytecode)
 
-			if contract.DeployedBytecode != nil {
-				// Registers the methods list
-				_, err = conn.Do("RPUSH", methodKey(codeHash[:], sel), methodJSONs[method.Name])
-				if err != nil {
-					return nil, errors.FromError(err).ExtendComponent(component)
-				}
-			}
+	err = ByteCodeHash.Set(conn, contract.Short(), contract.GetTag(), byteCodeHash)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
 
-			found := false
+	if err = Artifact.Set(conn, byteCodeHash,
+		&abi.Contract{
+			Abi:              contract.Abi,
+			Bytecode:         contract.Bytecode,
+			DeployedBytecode: contract.DeployedBytecode,
+		},
+	); err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
 
-			// Attempts to find the registered method
-			reply, err := conn.Do("LRANGE", methodKey(defaultCodeHash[:], sel), 0, -1)
-			if err != nil {
-				return nil, errors.FromError(err).ExtendComponent(component)
-			}
+	if err := Methods.Registers(conn, 
+		deployedByteCodeHash,
+		defaultCodeHash,
+		contractAbi.Methods,
+		methodJSONs,
+	); err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
 
-			if reply != nil {
-				replySlice, err := remote.ByteSlices(reply, nil)
-				if err != nil {
-					return nil, errors.FromError(err).ExtendComponent(component)
-				}
-
-				for _, registeredMethod := range replySlice {
-					if reflect.DeepEqual(registeredMethod, methodJSONs[method.Name]) {
-						found = true
-						break
-					}
-				}
-			}
-
-			// If not found, register it
-			if !found {
-				_, err := conn.Do("RPUSH", methodKey(defaultCodeHash[:], sel), methodJSONs[method.Name])
-				if err != nil {
-					return nil, errors.FromError(err).ExtendComponent(component)
-				}
-			}
-		}
-
-		for _, event := range contractAbi.Events {
-
-			eventID := event.Id()
-			indexedCount := getIndexedCount(event)
-
-			if contract.DeployedBytecode != nil {
-				_, err := conn.Do("RPUSH", eventKey(codeHash[:], eventID[:], indexedCount), eventJSONs[event.Name])
-				if err != nil {
-					return nil, errors.FromError(err).ExtendComponent(component)
-				}
-			}
-
-			found := false
-
-			// Attempts to find the registered event
-			reply, err := conn.Do("LRANGE", eventKey(defaultCodeHash[:], eventID[:], indexedCount), 0, -1)
-			if err != nil {
-				return nil, errors.FromError(err).ExtendComponent(component)
-			}
-
-			if reply != nil {
-				replySlice, err := remote.ByteSlices(reply, nil)
-				if err != nil {
-					return nil, errors.FromError(err).ExtendComponent(component)
-				}
-
-				for _, registeredEvent := range replySlice {
-					if reflect.DeepEqual(registeredEvent, eventJSONs[event.Name]) {
-						found = true
-						break
-					}
-				}
-			}
-
-			// If not found, register it
-			if !found {
-				_, err := conn.Do("RPUSH", eventKey(defaultCodeHash[:], eventID[:], indexedCount), eventJSONs[event.Name])
-				if err != nil {
-					return nil, errors.FromError(err).ExtendComponent(component)
-				}
-			}
-		}
+	if err := Events.Registers(conn, 
+		deployedByteCodeHash,
+		defaultCodeHash,
+		contractAbi.Events,
+		eventJSONs,
+	); err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
 	return &svc.RegisterContractResponse{}, nil
 }
 
 // GetContract looks up an *abi.Contract object stored in Redis
-func (r *ContractRegistry) GetContract(contractName string) (*abi.Contract, error) {
+func (r *ContractRegistry) GetContract(name string, tag string) (*abi.Contract, error) {
 
-	conn := r.pool.Get()
+	conn := r.Conn()
 	defer conn.Close()
 
-	reply, err := conn.Do("GET", contractName)
+	byteCodeHash, err := ByteCodeHash.Get(conn, name, tag)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	if reply == nil {
-		return nil, errors.NotFoundError("Could not find bytecode hash for contract name").SetComponent(component)
-	}
-
-	bytecodeHash, err := remote.Bytes(reply, nil)
+	artifact, err := Artifact.Get(conn, byteCodeHash)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	reply, err = conn.Do("GET", bytecodeHash)
-	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
-	}
-
-	if reply == nil {
-		return nil, errors.NotFoundError("Contract ABI not found").SetComponent(component)
-	}
-
-	contractBytes, err := remote.Bytes(reply, nil)
-	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
-	}
-
-	contract := &abi.Contract{}
-	err = proto.Unmarshal(contractBytes, contract)
-	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
-	}
-
-	return contract, nil
+	return artifact, nil
 }
 
 // GetContractABI retrieve contract ABI
 func (r *ContractRegistry) GetContractABI(ctx context.Context, req *svc.GetContractRequest) (*svc.GetContractABIResponse, error) {
 
-	contract, err := r.GetContract(req.GetContractId().Short())
+	contractID := req.GetContractId()
+	if contractID == nil {
+		return nil, errors.InvalidArgError("No contract ID found in request").ExtendComponent(component)
+	}
+
+	contract, err := r.GetContract(contractID.Name, contractID.Tag)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -235,7 +142,12 @@ func (r *ContractRegistry) GetContractABI(ctx context.Context, req *svc.GetContr
 // GetContractBytecode returns the bytecode
 func (r *ContractRegistry) GetContractBytecode(ctx context.Context, req *svc.GetContractRequest) (*svc.GetContractBytecodeResponse, error) {
 
-	contract, err := r.GetContract(req.GetContractId().Short())
+	contractID := req.GetContractId()
+	if contractID == nil {
+		return nil, errors.InvalidArgError("No contract ID found in request").ExtendComponent(component)
+	}
+
+	contract, err := r.GetContract(contractID.Name, contractID.Tag)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -248,7 +160,12 @@ func (r *ContractRegistry) GetContractBytecode(ctx context.Context, req *svc.Get
 // GetContractDeployedBytecode returns the deployed bytecode
 func (r *ContractRegistry) GetContractDeployedBytecode(ctx context.Context, req *svc.GetContractRequest) (*svc.GetContractDeployedBytecodeResponse, error) {
 
-	contract, err := r.GetContract(req.GetContractId().Short())
+	contractID := req.GetContractId()
+	if contractID == nil {
+		return nil, errors.InvalidArgError("No contract ID found in request").ExtendComponent(component)
+	}
+
+	contract, err := r.GetContract(contractID.Name, contractID.Tag)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -258,74 +175,63 @@ func (r *ContractRegistry) GetContractDeployedBytecode(ctx context.Context, req 
 	}, nil
 }
 
-// getCodehash retrieve codehash of a contract instance
-func (r *ContractRegistry) getCodehash(contract common.AccountInstance) (ethcommon.Hash, bool, error) {
-
-	conn := r.pool.Get()
-	defer conn.Close()
-
-	reply, err := conn.Do("GET",
-		codeHashKey(contract.GetChain().String(), contract.GetAccount().GetRaw()))
-
-	if err != nil {
-		return ethcommon.Hash{}, false, errors.FromError(err).ExtendComponent(component)
-	}
-
-	if reply == nil {
-		return ethcommon.Hash{}, false, nil
-	}
-
-	codeHash, err := remote.Bytes(reply, nil)
-	if err != nil {
-		return ethcommon.Hash{}, false, errors.FromError(err).ExtendComponent(component)
-	}
-
-	return ethcommon.BytesToHash(codeHash), true, nil
-}
-
 // GetMethodsBySelector retrieve methods using 4 bytes unique selector
 func (r *ContractRegistry) GetMethodsBySelector(ctx context.Context, req *svc.GetMethodsBySelectorRequest) (*svc.GetMethodsBySelectorResponse, error) {
 
-	conn := r.pool.Get()
+	conn := r.Conn()
 	defer conn.Close()
 
-	var selector [4]byte
-	copy(selector[:], req.GetSelector())
+	selectorBytes := req.GetSelector()
+	if len(selectorBytes) == 0 {
+		return nil, errors.InvalidArgError("No selector found in request").ExtendComponent(component)
+	}
+	
+	selector := utils.SigHashToSelector(req.GetSelector())
+	
+	accountInstance := req.GetAccountInstance()
+	if len(selectorBytes) == 0 {
+		return nil, errors.InvalidArgError("No account instance found in request").ExtendComponent(component)
+	}
 
-	codeHashToLookup, codeHashFound, err := r.getCodehash(*req.GetAccountInstance())
+	chain := accountInstance.GetChain()
+	if len(selectorBytes) == 0 {
+		return nil, errors.InvalidArgError("No ethereum chainID found in request").ExtendComponent(component)
+	}
+
+	address := accountInstance.GetAccount()
+	if len(selectorBytes) == 0 {
+		return nil, errors.InvalidArgError("No ethereum account instance found in request").ExtendComponent(component)
+	}
+
+	deployedByteCodeHash, err := DeployedByteCodeHash.Get(conn, chain, address)
+
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	// Case where the connexion to redis is codeHashFound, but the hash is not found
-	if !codeHashFound {
-		// Use the defaultCodeHash instead, and try to look at the default registry
-		codeHashToLookup = defaultCodeHash
-	}
-	
-	// TODO: Handle the indexedCount thing
-	reply, err := conn.Do("LRANGE", methodKey(codeHashToLookup[:], selector), 0, -1)
-	
-	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
-	}
-	
-	if reply == nil {
-		return nil, errors.NotFoundError("method not found").SetComponent(component)		
+	codeHashFound := true
+
+	if deployedByteCodeHash == ethcommon.Hash{} {
+		codeHashFound = false
+		deployedByteCodeHash = defaultCodeHash
 	}
 
-	methodJSONs, err := remote.ByteSlices(reply, nil)
+	method, err := Methods.LRange(deployedByteCodeHash, selector)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	if method == nil {
+		return nil, errors.NotFoundError("Method not found for given selector").SetComponent(component)
 	}
 
 	response := &svc.GetMethodsBySelectorResponse{}
 
 	switch {
 	case codeHashFound:
-		response.Method = methodJSONs[0]
+		response.Method = method[0]
 	default:
-		response.DefaultMethods = methodJSONs
+		response.DefaultMethods = method
 	}
 
 	return response, nil
@@ -349,16 +255,16 @@ func (r *ContractRegistry) GetEventsBySigHash(ctx context.Context, req *svc.GetE
 		// Use the defaultCodeHash instead, and try to look at the default registry
 		codeHashToLookup = defaultCodeHash
 	}
-	
+
 	// TODO: Handle the indexedCount thing
 	reply, err := conn.Do("LINDEX", eventKey(codeHashToLookup[:], selector[:], uint(indexedCount)), 0)
-	
+
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
-	
+
 	if reply == nil {
-		return nil, errors.NotFoundError("event not found").SetComponent(component)	
+		return nil, errors.NotFoundError("event not found").SetComponent(component)
 	}
 
 	eventJSONs, err := remote.ByteSlices(reply, nil)
@@ -394,7 +300,7 @@ func (r *ContractRegistry) GetTags(ctx context.Context, req *svc.GetTagsRequest)
 func (r *ContractRegistry) SetAccountCodeHash(ctx context.Context, req *svc.SetAccountCodeHashRequest) (*svc.SetAccountCodeHashResponse, error) {
 	conn := r.pool.Get()
 	defer conn.Close()
-	
+
 	chainID := req.GetAccountInstance().GetChain()
 	addr := req.GetAccountInstance().GetAccount().Address()
 
