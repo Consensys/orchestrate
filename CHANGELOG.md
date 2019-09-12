@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.9.1
+
+*Released on September 12th 2019*
+
+- [FIX] Generate protobuf files
+
 ### Version 0.9.0
 
 *Released on September 6th 2019*
