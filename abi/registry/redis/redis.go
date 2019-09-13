@@ -1,9 +1,41 @@
 package redis
 
 import (
+	"time"
 	remote "github.com/gomodule/redigo/redis"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 )
+
+// PoolConfig is a place holder to configure the redis client
+type PoolConfig struct {
+	MaxIdle int
+	MaxActive int
+	MaxConnLifetime time.Duration
+	IdleTimeout time.Duration
+	Wait bool
+	URI string
+}
+
+// NewPool creates a new redis pool
+func NewPool(conf *PoolConfig) *remote.Pool {
+	return &remote.Pool{
+		// TODO Fine tune those parameters or make them accessible in config file
+		MaxIdle:     conf.MaxIdle,
+		MaxActive:   conf.MaxActive,
+		MaxConnLifetime: conf.MaxConnLifetime,
+		IdleTimeout: conf.IdleTimeout,
+		Wait: conf.Wait,
+		Dial:        func() (remote.Conn, error) { return dial("tcp", conf.URI) },
+	}
+}
+
+func dial(network, address string, options ...remote.DialOption) (remote.Conn, error) {
+	conn, err := remote.Dial(network, address, options...)
+	if err != nil {
+		return conn, errors.ConnectionError(err.Error())
+	}
+	return conn, nil
+}
 
 // Conn is a wrapper around a remote.Conn that handles internal errors
 type Conn struct{ remote.Conn }
