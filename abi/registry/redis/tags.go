@@ -5,10 +5,10 @@ const tagsPrefix = "TagsPrefix"
 // TagModel is a zero object gathering methods to look up a abis in redis
 type TagModel struct{}
 
-// Tag returns is sugar to return an abi object
-var Tag = &TagModel{}
+// Tags returns is sugar to manage tags
+var Tags = &TagModel{}
 
-// Key serializes a lookup key for an ABI stored on redis
+// Key serializes a lookup key for a list of tags stored on redis
 func (*TagModel) Key(name string) []byte {
 	prefixBytes := []byte(tagsPrefix)
 	// Allocate memory to build the key
@@ -18,12 +18,37 @@ func (*TagModel) Key(name string) []byte {
 	return res
 }
 
-// Get returns a serialized contract from its corresponding bytecode hash
-func (t *TagModel) Get(conn *Conn, name string) ([][]byte, error) {
-	return conn.LRange(t.Key(name))
+// Get returns a list of tags for a given contract name
+func (t *TagModel) Get(conn *Conn, name string) ([]string, bool, error) {
+	tagsBytes, ok, err := conn.LRange(t.Key(name))
+	if !ok || err != nil {
+		return []string{}, false, err 
+	}
+
+	// TODO: Make this block error-free. Not all []byte are valid string
+	tags := make([]string, len(tagsBytes))
+	for index, tagBytes := range tagsBytes {
+		tags[index] = string(tagBytes)
+	}
+
+	return tags, ok, err
 }
 
-// Add stores an abi object in the registry
-func (t *TagModel) Add(conn *Conn, name string, tagBytes []byte) error {
-	return conn.LPush(t.Key(name), tagBytes)
+// PushIfNotExist stores a new tag in the registry. The function is idemnpotent
+func (t *TagModel) PushIfNotExist(conn *Conn, name string, tag string) error {
+	registeredTags, ok, err := t.Get(conn, name)
+	if err != nil {
+		return err
+	}
+
+	// If a list of tags exists for the tag. Check if the new tag is already registered.
+	if ok {
+		for _, registeredTag := range registeredTags {
+			if registeredTag == tag {
+				return nil
+			}
+		}
+	}
+	
+	return conn.LPush(t.Key(name), []byte(tag))
 }

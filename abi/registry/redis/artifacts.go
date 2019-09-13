@@ -16,7 +16,7 @@ type ArtifactModel struct{}
 // Artifact returns a model object
 var Artifact = &ArtifactModel{}
 
-// Key serializes a lookup key for an ABI stored on redis
+// Key serializes a lookup key for contract artifacts stored in redis
 func (*ArtifactModel) Key(byteCodeHash ethcommon.Hash) []byte {
 	// Allocate memory to build the key
 	res := make([]byte, 0, len(artifactPrefix)+len(byteCodeHash))
@@ -26,21 +26,22 @@ func (*ArtifactModel) Key(byteCodeHash ethcommon.Hash) []byte {
 }
 
 // Get returns a serialized contract from its corresponding bytecode hash
-func (a *ArtifactModel) Get(conn *Conn, byteCodeHash ethcommon.Hash) (*abi.Contract, error) {
-	marshalledArtifact, err := conn.Get(a.Key(byteCodeHash))
-	if err != nil {
-		return nil, err
+func (a *ArtifactModel) Get(conn *Conn, byteCodeHash ethcommon.Hash) (*abi.Contract, bool, error) {
+	marshalledArtifact, ok, err := conn.Get(a.Key(byteCodeHash))
+	if err != nil || !ok {
+		// The check is redundant because !ok => err != nil
+		return nil, false, err
 	}
 
 	contract := &abi.Contract{}
 	if err = proto.Unmarshal(marshalledArtifact, contract); err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return nil, false, errors.FromError(err).ExtendComponent(component)
 	}
 
-	return contract, nil
+	return contract, true, nil
 }
 
-// Set stores an abi object in the registry
+// Set stores an artifact in the registry
 func (a *ArtifactModel) Set(conn *Conn, byteCodeHash ethcommon.Hash, contract *abi.Contract) error {
 	marshalledArtifact, err := proto.Marshal(contract)
 	if err != nil {

@@ -23,24 +23,24 @@ func (conn *Conn) Do(commandName string, args ...interface{}) (interface{}, erro
 }
 
 // Get returns a stored byteslice stored on redis
-func (conn *Conn) Get(key []byte) ([]byte, error) {
+func (conn *Conn) Get(key []byte) ([]byte, bool, error) {
 	reply, err := conn.Do("GET", key)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, false, err
 	}
 
 	if reply == nil {
 		// No error is returned is returned if the abi is not stored.
 		// This is higher level code's responsibility to deal with it
-		return nil, nil
+		return []byte{}, false, nil
 	}
 
 	res, err := remote.Bytes(reply, nil)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, false, err
 	}
 
-	return res, nil
+	return res, true, nil
 }
 
 // Set value at a given key in the redis store
@@ -64,24 +64,24 @@ func (conn *Conn) LPush(key, value []byte) (error) {
 }
 
 // LRange returns an entire list stored on Redis
-func (conn *Conn) LRange(key []byte) ([][]byte, error) {
+func (conn *Conn) LRange(key []byte) ([][]byte, bool, error) {
 	reply, err := conn.Do("LRANGE", key, 0, -1)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	if reply == nil {
 		// No error is returned is returned if the abi is not stored.
 		// This is higher level code's responsibility to deal with it
-		return [][]byte{}, nil
+		return [][]byte{}, false, nil
 	}
 
 	res, err := remote.ByteSlices(reply, nil)
 	if err != nil {
-		return [][]byte{}, err
+		return [][]byte{}, false, err
 	}
 
-	return res, nil
+	return res, true, nil
 }
 
 // Send writes a request in the redis buffer
@@ -95,45 +95,45 @@ func (conn *Conn) Flush() error {
 }
 
 // ReceiveBytes wait for the connexion respond with a []byte
-func (conn *Conn) ReceiveBytes() ([]byte, error) {
+func (conn *Conn) ReceiveBytes() ([]byte, bool, error) {
 	reply, err := conn.Conn.Receive()
 	if err != nil {
-		return nil, err
+		return []byte{}, false, err
 	}
 
 	if reply == nil {
 		// No error is returned is returned if the abi is not stored.
 		// This is higher level code's responsibility to deal with it
-		return nil, nil
+		return []byte{}, false, nil
 	}
 
 	res, err := remote.Bytes(reply, nil)
 	if err != nil {
-		return nil, err
+		return []byte{}, false, err
 	}
 
-	return res, nil
+	return res, true, nil
 }
 
 // ReceiveByteSlices returns a pipelined [][]byte result
-func (conn *Conn) ReceiveByteSlices() ([][]byte, error) {
+func (conn *Conn) ReceiveByteSlices() ([][]byte, bool, error) {
 	reply, err := conn.Conn.Receive()
 	if err != nil {
-		return nil, err
+		return [][]byte{}, false, err
 	}
 
 	if reply == nil {
 		// No error is returned is returned if the abi is not stored.
 		// This is higher level code's responsibility to deal with it
-		return nil, nil
+		return [][]byte{}, false, nil
 	}
 
 	res, err := remote.ByteSlices(reply, nil)
 	if err != nil {
-		return nil, err
+		return [][]byte{}, false, err
 	}
 
-	return res, nil
+	return res, true, nil
 }
 
 // ReceiveCheck returns an error if the pipelined result is an error

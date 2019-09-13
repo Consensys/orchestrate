@@ -16,7 +16,7 @@ type MethodsModel struct{}
 // Methods returns an
 var Methods = &MethodsModel{}
 
-// Key serialize a lookup key for an ABI stored on redis
+// Key serialize a lookup key for a set of methods stored on redis
 func (*MethodsModel) Key(deployedByteCodeHash ethcommon.Hash, selector [4]byte) []byte {
 	// Allocate memory to build the key
 	res := make([]byte, 0, len(methodsPrefix)+len(deployedByteCodeHash)+4)
@@ -27,7 +27,7 @@ func (*MethodsModel) Key(deployedByteCodeHash ethcommon.Hash, selector [4]byte) 
 }
 
 // Get returns a serialized contract from its corresponding bytecode hash
-func (m *MethodsModel) Get(conn *Conn, deployedByteCodeHash ethcommon.Hash, selector [4]byte) ([][]byte, error) {
+func (m *MethodsModel) Get(conn *Conn, deployedByteCodeHash ethcommon.Hash, selector [4]byte) ([][]byte, bool, error) {
 	return conn.LRange(m.Key(deployedByteCodeHash, selector))
 }
 
@@ -38,7 +38,6 @@ func (m *MethodsModel) Push(conn *Conn, deployedByteCodeHash ethcommon.Hash, sel
 
 // Find checks if a method is already registered for a given tuple (deployed bytecode hash, selector)
 func (m *MethodsModel) Find(registeredMethods [][]byte, methodBytes []byte) (bool) {
-
 	for _, registeredMethod := range registeredMethods {
 		if reflect.DeepEqual(registeredMethod, methodBytes) {
 			return true
@@ -98,12 +97,12 @@ func (m *MethodsModel) Registers(conn *Conn,
 
 	// Fetch methods if they have already been registered
 	for index, methodKey := range methodKeys {
-		registeredMethod, err := conn.ReceiveByteSlices()
+		registeredMethod, ok, err := conn.ReceiveByteSlices()
 		if err != nil {
 			return err
 		}
 
-		if !m.Find(registeredMethod, methodJSONs[methods[methodKey].Name]) {
+		if !ok || !m.Find(registeredMethod, methodJSONs[methods[methodKey].Name]) {
 			notFoundCount++
 
 			err = conn.SendLPush(

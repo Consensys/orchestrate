@@ -12,10 +12,10 @@ const deployedByteCodeHashPrefix = "DeployedByteCodeHashPrefix"
 // DeployedByteCodeHashModel is a zero object gathering methods to look up a abis in redis
 type DeployedByteCodeHashModel struct{}
 
-// DeployedByteCodeHash returns is sugar to return an abi object
+// DeployedByteCodeHash returns is sugar to manage deployed bytecode hashes
 var DeployedByteCodeHash = &DeployedByteCodeHashModel{}
 
-// Key serializes a lookup key for an ABI stored on redis
+// Key serializes a lookup key for deployed bytecode hash stored on redis
 func (*DeployedByteCodeHashModel) Key(chain *chain.Chain, address *ethereum.Account) []byte {
 	prefixBytes := []byte(deployedByteCodeHashPrefix)
 	chainBytes := chain.String()
@@ -29,20 +29,16 @@ func (*DeployedByteCodeHashModel) Key(chain *chain.Chain, address *ethereum.Acco
 }
 
 // Get returns a serialized contract from its corresponding bytecode hash
-func (b *DeployedByteCodeHashModel) Get(conn *Conn, chain *chain.Chain, address *ethereum.Account) (ethcommon.Hash, error) {
-	bytes, err := conn.Get(b.Key(chain, address))
-	if err != nil {
-		return ethcommon.Hash{}, err
+func (b *DeployedByteCodeHashModel) Get(conn *Conn, chain *chain.Chain, address *ethereum.Account) (ethcommon.Hash, bool, error) {
+	bytes, ok, err := conn.Get(b.Key(chain, address))
+	if err != nil || !ok {
+		return ethcommon.Hash{}, false, err
 	}
 
-	if len(bytes) == 0 {
-		return ethcommon.Hash{}, nil
-	}
-
-	return ethcommon.BytesToHash(bytes), nil
+	return ethcommon.BytesToHash(bytes), true, nil
 }
 
-// Set stores an abi object in the registry
+// Set stores a deployed bytecode hash in the registry
 func (b *DeployedByteCodeHashModel) Set(conn *Conn, chain *chain.Chain, address *ethereum.Account, byteCodeHash ethcommon.Hash) error {
 	return conn.Set(b.Key(chain, address), byteCodeHash[:])
 }

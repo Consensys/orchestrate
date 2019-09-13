@@ -15,7 +15,7 @@ type EventsModel struct{}
 // Events returns an
 var Events = &EventsModel{}
 
-// Key serialize a lookup key for an ABI stored on redis
+// Key serialize a lookup key for a set of events stored on redis
 func (*EventsModel) Key(deployedByteCodeHash, eventID ethcommon.Hash, index uint) []byte {
 	indexBytes := []byte{byte(index)}
 	// Allocate memory to build the key
@@ -29,18 +29,17 @@ func (*EventsModel) Key(deployedByteCodeHash, eventID ethcommon.Hash, index uint
 }
 
 // Get returns a serialized contract from its corresponding bytecode hash
-func (e *EventsModel) Get(conn *Conn, deployedByteCodeHash, eventID ethcommon.Hash, index uint) ([][]byte, error) {
+func (e *EventsModel) Get(conn *Conn, deployedByteCodeHash, eventID ethcommon.Hash, index uint) ([][]byte, bool, error) {
 	return conn.LRange(e.Key(deployedByteCodeHash, eventID, index))
 }
 
-// Push stores an abi object in the registry
+// Push stores a new event in the registry
 func (e *EventsModel) Push(conn *Conn, deployedByteCodeHash, eventID ethcommon.Hash, index uint, eventBytes []byte) error {
 	return conn.LPush(e.Key(deployedByteCodeHash, eventID, index), eventBytes)
 }
 
 // Find checks if an event is already registered for a given tuple (deployed bytecode hash, eventID, indexed count)
 func (e *EventsModel) Find(registeredEvents [][]byte, event []byte) (bool) {
-
 	for _, registeredMethod := range registeredEvents {
 		if reflect.DeepEqual(registeredMethod, event) {
 			return true
@@ -49,7 +48,6 @@ func (e *EventsModel) Find(registeredEvents [][]byte, event []byte) (bool) {
 
 	return false
 }
-
 
 // Registers a batch of event from an Abi
 func (e *EventsModel) Registers(conn *Conn, 
@@ -103,12 +101,12 @@ func (e *EventsModel) Registers(conn *Conn,
 
 	// Fetch events if they have already been registered
 	for index, eventKey := range eventKeys {
-		registeredEvents, err := conn.ReceiveByteSlices()
+		registeredEvents, ok, err := conn.ReceiveByteSlices()
 		if err != nil {
 			return err
 		}
 
-		if !e.Find(registeredEvents, eventJSONs[events[eventKey].Name]) {
+		if !ok || !e.Find(registeredEvents, eventJSONs[events[eventKey].Name]) {
 			notFoundCount++
 
 			err = conn.SendLPush(

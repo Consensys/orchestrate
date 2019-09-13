@@ -9,10 +9,10 @@ const byteCodeHashPrefix = "ByteCodeHashPrefix"
 // ByteCodeHashModel is a zero object gathering methods to look up a abis in redis
 type ByteCodeHashModel struct{}
 
-// ByteCodeHash returns is sugar to return an abi object
+// ByteCodeHash returns is sugar to manage bytecode hashes
 var ByteCodeHash = &ByteCodeHashModel{}
 
-// Key serializes a lookup key for an ABI stored on redis
+// Key serializes a lookup key for bytecode hash stored on redis
 func (*ByteCodeHashModel) Key(name string, tag string) []byte {
 	prefixBytes := []byte(byteCodeHashPrefix)
 	// Allocate memory to build the key
@@ -24,23 +24,16 @@ func (*ByteCodeHashModel) Key(name string, tag string) []byte {
 }
 
 // Get returns a serialized contract from its corresponding bytecode hash
-func (b *ByteCodeHashModel) Get(conn *Conn, name string, tag string) (ethcommon.Hash, error) {
-	bytes, err := conn.Get(b.Key(name, tag))
-	if err != nil {
-		return ethcommon.Hash{}, err
+func (b *ByteCodeHashModel) Get(conn *Conn, name string, tag string) (ethcommon.Hash, bool, error) {
+	bytes, ok, err := conn.Get(b.Key(name, tag))
+	if err != nil || !ok {
+		return ethcommon.Hash{}, false, err
 	}
 
-	if len(bytes) == 0 {
-		return ethcommon.Hash{}, nil
-	}
-
-	return ethcommon.BytesToHash(bytes), nil
+	return ethcommon.BytesToHash(bytes), true, nil
 }
 
-// Set stores an abi object in the registry
+// Set stores a bytecode hash in the registry
 func (b *ByteCodeHashModel) Set(conn *Conn, name string, tag string, byteCodeHash ethcommon.Hash) error {
 	return conn.Set(b.Key(name, tag), byteCodeHash[:])
 }
-
-// FromAccountInstance
-func (b *ByteCodeHashModel) FromAccountInstance()
