@@ -15,13 +15,13 @@ func init() {
 var (
 	creditorAddressFlag     = "faucet-creditor"
 	creditorAddressViperKey = "faucet.creditors"
-	creditorAddressDefault  = []string{}
+	creditorAddressDefault  []string
 	creditorAddressEnv      = "FAUCET_CREDITOR_ADDRESS"
 )
 
 // FaucetAddress register flag for Faucet address
 func FaucetAddress(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Address of Faucet on each chain (format <chainID>:<Address>)
+	desc := fmt.Sprintf(`Address of Faucet on each chain (format <chainID>@<Address>)
 Environment variable: %q`, creditorAddressEnv)
 	f.StringSlice(creditorAddressFlag, creditorAddressDefault, desc)
 	_ = viper.BindPFlag(creditorAddressViperKey, f.Lookup(creditorAddressFlag))
