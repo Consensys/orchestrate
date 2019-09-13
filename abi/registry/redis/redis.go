@@ -2,30 +2,31 @@ package redis
 
 import (
 	"time"
+
 	remote "github.com/gomodule/redigo/redis"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 )
 
 // PoolConfig is a place holder to configure the redis client
 type PoolConfig struct {
-	MaxIdle int
-	MaxActive int
+	MaxIdle         int
+	MaxActive       int
 	MaxConnLifetime time.Duration
-	IdleTimeout time.Duration
-	Wait bool
-	URI string
+	IdleTimeout     time.Duration
+	Wait            bool
+	URI             string
 }
 
 // NewPool creates a new redis pool
 func NewPool(conf *PoolConfig) *remote.Pool {
 	return &remote.Pool{
 		// TODO Fine tune those parameters or make them accessible in config file
-		MaxIdle:     conf.MaxIdle,
-		MaxActive:   conf.MaxActive,
+		MaxIdle:         conf.MaxIdle,
+		MaxActive:       conf.MaxActive,
 		MaxConnLifetime: conf.MaxConnLifetime,
-		IdleTimeout: conf.IdleTimeout,
-		Wait: conf.Wait,
-		Dial:        func() (remote.Conn, error) { return dial("tcp", conf.URI) },
+		IdleTimeout:     conf.IdleTimeout,
+		Wait:            conf.Wait,
+		Dial:            func() (remote.Conn, error) { return dial("tcp", conf.URI) },
 	}
 }
 
@@ -40,9 +41,9 @@ func dial(network, address string, options ...remote.DialOption) (remote.Conn, e
 // Conn is a wrapper around a remote.Conn that handles internal errors
 type Conn struct{ remote.Conn }
 
-// Close terminates the connexion with the redis store
+// Close terminates the connection  with the redis store
 func (conn *Conn) Close() {
-	conn.Conn.Close()
+	_ = conn.Conn.Close()
 }
 
 // Do sends a commands to the remote Redis instance
@@ -55,7 +56,7 @@ func (conn *Conn) Do(commandName string, args ...interface{}) (interface{}, erro
 }
 
 // Get returns a stored byteslice stored on redis
-func (conn *Conn) Get(key []byte) ([]byte, bool, error) {
+func (conn *Conn) Get(key []byte) (byteslice []byte, ok bool, err error) {
 	reply, err := conn.Do("GET", key)
 	if err != nil {
 		return []byte{}, false, err
@@ -86,7 +87,7 @@ func (conn *Conn) Set(key, value []byte) error {
 }
 
 // LPush appends a stored list with a new element
-func (conn *Conn) LPush(key, value []byte) (error) {
+func (conn *Conn) LPush(key, value []byte) error {
 	_, err := conn.Do("LPUSH", key, value)
 	if err != nil {
 		return err
@@ -96,7 +97,7 @@ func (conn *Conn) LPush(key, value []byte) (error) {
 }
 
 // LRange returns an entire list stored on Redis
-func (conn *Conn) LRange(key []byte) ([][]byte, bool, error) {
+func (conn *Conn) LRange(key []byte) (list [][]byte, ok bool, err error) {
 	reply, err := conn.Do("LRANGE", key, 0, -1)
 	if err != nil {
 		return nil, false, err
@@ -126,8 +127,8 @@ func (conn *Conn) Flush() error {
 	return conn.Conn.Flush()
 }
 
-// ReceiveBytes wait for the connexion respond with a []byte
-func (conn *Conn) ReceiveBytes() ([]byte, bool, error) {
+// ReceiveBytes wait for the connection respond with a []byte
+func (conn *Conn) ReceiveBytes() (bytes []byte, ok bool, err error) {
 	reply, err := conn.Conn.Receive()
 	if err != nil {
 		return []byte{}, false, err
@@ -148,7 +149,7 @@ func (conn *Conn) ReceiveBytes() ([]byte, bool, error) {
 }
 
 // ReceiveByteSlices returns a pipelined [][]byte result
-func (conn *Conn) ReceiveByteSlices() ([][]byte, bool, error) {
+func (conn *Conn) ReceiveByteSlices() (byteSlices [][]byte, ok bool, err error) {
 	reply, err := conn.Conn.Receive()
 	if err != nil {
 		return [][]byte{}, false, err
@@ -169,13 +170,13 @@ func (conn *Conn) ReceiveByteSlices() ([][]byte, bool, error) {
 }
 
 // ReceiveCheck returns an error if the pipelined result is an error
-func (conn *Conn) ReceiveCheck() (error) {
+func (conn *Conn) ReceiveCheck() error {
 	_, err := conn.Conn.Receive()
 	return err
 }
 
 // SendGet returns a stored byteslice stored on redis, but does not flush
-func (conn *Conn) SendGet(key []byte) (error) {
+func (conn *Conn) SendGet(key []byte) error {
 	return conn.Send("GET", key)
 }
 
@@ -185,11 +186,11 @@ func (conn *Conn) SendSet(key, value []byte) error {
 }
 
 // SendLPush appends a stored list with a new element, but does not flush
-func (conn *Conn) SendLPush(key, value []byte) (error) {
+func (conn *Conn) SendLPush(key, value []byte) error {
 	return conn.Send("LPUSH", key, value)
 }
 
 // SendLRange returns an entire list stored on Redis, but does not flush
-func (conn *Conn) SendLRange(key []byte) (error) {
+func (conn *Conn) SendLRange(key []byte) error {
 	return conn.Send("LRANGE", key, 0, -1)
 }

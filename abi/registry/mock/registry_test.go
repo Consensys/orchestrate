@@ -240,6 +240,16 @@ func TestContractRegistryBySig(t *testing.T) {
 	assert.True(t, errors.IsStorageError(ierr), "GetContractDeployedBytecode error should be a storage error")
 	assert.Nil(t, deployedBytecodeResp)
 
+	// Get Catalog
+	namesResp, err := r.GetCatalog(context.Background(), &svc.GetCatalogRequest{})
+	assert.NoError(t, err)
+	assert.Equal(t, []string{"ERC20"}, namesResp.GetNames())
+
+	// Get Tags
+	tagsResp, err := r.GetTags(context.Background(), &svc.GetTagsRequest{Name: "ERC20"})
+	assert.NoError(t, err)
+	assert.Equal(t, []string{"v1.0.0", "v1.0.1"}, tagsResp.GetTags())
+
 	// Get MethodBySelector on default
 	methodResp, err := r.GetMethodsBySelector(context.Background(),
 		&svc.GetMethodsBySelectorRequest{

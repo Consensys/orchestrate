@@ -42,7 +42,7 @@ func (a *ArtifactModel) Get(conn *Conn, byteCodeHash ethcommon.Hash) (*abi.Contr
 }
 
 // Set stores an artifact in the registry
-func (a *ArtifactModel) Set(conn *Conn, byteCodeHash ethcommon.Hash, contract *abi.Contract) error {
+func (a *ArtifactModel) Set(conn *Conn, byteCodeHash ethcommon.Hash, contract proto.Message) error {
 	marshalledArtifact, err := proto.Marshal(contract)
 	if err != nil {
 		return err

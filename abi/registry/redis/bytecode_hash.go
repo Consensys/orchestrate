@@ -13,7 +13,7 @@ type ByteCodeHashModel struct{}
 var ByteCodeHash = &ByteCodeHashModel{}
 
 // Key serializes a lookup key for bytecode hash stored on redis
-func (*ByteCodeHashModel) Key(name string, tag string) []byte {
+func (*ByteCodeHashModel) Key(name, tag string) []byte {
 	prefixBytes := []byte(byteCodeHashPrefix)
 	// Allocate memory to build the key
 	res := make([]byte, 0, len(prefixBytes)+len(name)+len(tag))
@@ -24,7 +24,7 @@ func (*ByteCodeHashModel) Key(name string, tag string) []byte {
 }
 
 // Get returns a serialized contract from its corresponding bytecode hash
-func (b *ByteCodeHashModel) Get(conn *Conn, name string, tag string) (ethcommon.Hash, bool, error) {
+func (b *ByteCodeHashModel) Get(conn *Conn, name, tag string) (ethcommon.Hash, bool, error) {
 	bytes, ok, err := conn.Get(b.Key(name, tag))
 	if err != nil || !ok {
 		return ethcommon.Hash{}, false, err
@@ -34,6 +34,6 @@ func (b *ByteCodeHashModel) Get(conn *Conn, name string, tag string) (ethcommon.
 }
 
 // Set stores a bytecode hash in the registry
-func (b *ByteCodeHashModel) Set(conn *Conn, name string, tag string, byteCodeHash ethcommon.Hash) error {
+func (b *ByteCodeHashModel) Set(conn *Conn, name, tag string, byteCodeHash ethcommon.Hash) error {
 	return conn.Set(b.Key(name, tag), byteCodeHash[:])
 }

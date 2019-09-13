@@ -9,12 +9,15 @@ import (
 
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/redis"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
 )
 
 var (
 	registry svc.RegistryServer
 	initOnce = &sync.Once{}
+	redisOpt = "redis"
+	mockOpt  = "mock"
 )
 
 // Init initialize ABI ContractRegistry
@@ -28,6 +31,12 @@ func Init(ctx context.Context) {
 		ethclient.Init(ctx)
 
 		switch viper.GetString(typeViperKey) {
+		case redisOpt:
+			// Initialize mock Registry
+			redis.Init()
+
+			// Create registry
+			registry = redis.GlobalContractRegistry()
 		case "mock":
 			// Initialize mock Registry
 			mock.Init()

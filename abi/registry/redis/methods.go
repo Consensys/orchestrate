@@ -2,15 +2,16 @@ package redis
 
 import (
 	"reflect"
-	ethcommon "github.com/ethereum/go-ethereum/common"
+
 	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/utils"
 )
 
 const methodsPrefix = "MethodsPrefix"
 
-// MethodsModel is a zero-byte object gathering methods usefull to interact with Events
+// MethodsModel is a zero-byte object gathering methods useful to interact with Events
 type MethodsModel struct{}
 
 // Methods returns an
@@ -27,7 +28,7 @@ func (*MethodsModel) Key(deployedByteCodeHash ethcommon.Hash, selector [4]byte) 
 }
 
 // Get returns a serialized contract from its corresponding bytecode hash
-func (m *MethodsModel) Get(conn *Conn, deployedByteCodeHash ethcommon.Hash, selector [4]byte) ([][]byte, bool, error) {
+func (m *MethodsModel) Get(conn *Conn, deployedByteCodeHash ethcommon.Hash, selector [4]byte) (methods [][]byte, ok bool, err error) {
 	return conn.LRange(m.Key(deployedByteCodeHash, selector))
 }
 
@@ -37,7 +38,7 @@ func (m *MethodsModel) Push(conn *Conn, deployedByteCodeHash ethcommon.Hash, sel
 }
 
 // Find checks if a method is already registered for a given tuple (deployed bytecode hash, selector)
-func (m *MethodsModel) Find(registeredMethods [][]byte, methodBytes []byte) (bool) {
+func (m *MethodsModel) Find(registeredMethods [][]byte, methodBytes []byte) bool {
 	for _, registeredMethod := range registeredMethods {
 		if reflect.DeepEqual(registeredMethod, methodBytes) {
 			return true
@@ -48,8 +49,9 @@ func (m *MethodsModel) Find(registeredMethods [][]byte, methodBytes []byte) (boo
 }
 
 // Registers all the methods of an abi in the registry
-func (m *MethodsModel) Registers(conn *Conn,
-	deployedByteCodeHash, defaultByteCodeHash ethcommon.Hash, 
+func (m *MethodsModel) Registers(
+	conn *Conn,
+	deployedByteCodeHash, defaultByteCodeHash ethcommon.Hash,
 	methods map[string]ethabi.Method,
 	methodJSONs map[string][]byte) error {
 
@@ -67,7 +69,7 @@ func (m *MethodsModel) Registers(conn *Conn,
 	// Push all methods to the new contract bytecodehash
 	for index, methodKey := range methodKeys {
 		err := conn.SendLPush(
-			m.Key(deployedByteCodeHash, selectors[index]), 
+			m.Key(deployedByteCodeHash, selectors[index]),
 			methodJSONs[methods[methodKey].Name])
 
 		if err != nil {
@@ -75,7 +77,10 @@ func (m *MethodsModel) Registers(conn *Conn,
 		}
 	}
 
-	conn.Flush()
+	err := conn.Flush()
+	if err != nil {
+		return err
+	}
 
 	// Check the outcome of the redis request
 	for _, selector := range selectors {
@@ -90,7 +95,10 @@ func (m *MethodsModel) Registers(conn *Conn,
 		}
 	}
 
-	conn.Flush()
+	err = conn.Flush()
+	if err != nil {
+		return err
+	}
 
 	// Accumulate the results if Find
 	notFoundCount := 0
@@ -106,7 +114,7 @@ func (m *MethodsModel) Registers(conn *Conn,
 			notFoundCount++
 
 			err = conn.SendLPush(
-				m.Key(deployedByteCodeHash, selectors[index]), 
+				m.Key(deployedByteCodeHash, selectors[index]),
 				methodJSONs[methods[methodKey].Name],
 			)
 
@@ -116,9 +124,12 @@ func (m *MethodsModel) Registers(conn *Conn,
 		}
 	}
 
-	conn.Flush()
+	err = conn.Flush()
+	if err != nil {
+		return err
+	}
 
-	// Check that all new registrations methods as default have been successfull
+	// Check that all new registrations methods as default have been successful
 	for index := 0; index < notFoundCount; index++ {
 		err := conn.ReceiveCheck()
 		if err != nil {

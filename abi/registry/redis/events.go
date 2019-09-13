@@ -9,7 +9,7 @@ import (
 
 const eventsPrefix = "EventsPrefix"
 
-// EventsModel is a zero-byte object gathering events usefull to interact with Events
+// EventsModel is a zero-byte object gathering events useful to interact with Events
 type EventsModel struct{}
 
 // Events returns an
@@ -29,7 +29,7 @@ func (*EventsModel) Key(deployedByteCodeHash, eventID ethcommon.Hash, index uint
 }
 
 // Get returns a serialized contract from its corresponding bytecode hash
-func (e *EventsModel) Get(conn *Conn, deployedByteCodeHash, eventID ethcommon.Hash, index uint) ([][]byte, bool, error) {
+func (e *EventsModel) Get(conn *Conn, deployedByteCodeHash, eventID ethcommon.Hash, index uint) (events [][]byte, ok bool, err error) {
 	return conn.LRange(e.Key(deployedByteCodeHash, eventID, index))
 }
 
@@ -39,7 +39,7 @@ func (e *EventsModel) Push(conn *Conn, deployedByteCodeHash, eventID ethcommon.H
 }
 
 // Find checks if an event is already registered for a given tuple (deployed bytecode hash, eventID, indexed count)
-func (e *EventsModel) Find(registeredEvents [][]byte, event []byte) (bool) {
+func (e *EventsModel) Find(registeredEvents [][]byte, event []byte) bool {
 	for _, registeredMethod := range registeredEvents {
 		if reflect.DeepEqual(registeredMethod, event) {
 			return true
@@ -50,11 +50,11 @@ func (e *EventsModel) Find(registeredEvents [][]byte, event []byte) (bool) {
 }
 
 // Registers a batch of event from an Abi
-func (e *EventsModel) Registers(conn *Conn, 
+func (e *EventsModel) Registers(conn *Conn,
 	deployedByteCodeHash, defaultByteCodeHash ethcommon.Hash,
 	events map[string]ethabi.Event,
 	eventJSONs map[string][]byte,
-	) error {
+) error {
 
 	// Build a list of map keys, so that we always iterate on them with the same order
 	// And precompute the events ids and indexedCounts, and concatenate them in the same order.
@@ -71,7 +71,7 @@ func (e *EventsModel) Registers(conn *Conn,
 	// Push all events to the new contract's bytecodehash
 	for index, eventKey := range eventKeys {
 		err := conn.SendLPush(
-			e.Key(deployedByteCodeHash, eventIDs[index], indexedCounts[index]), 
+			e.Key(deployedByteCodeHash, eventIDs[index], indexedCounts[index]),
 			eventJSONs[events[eventKey].Name])
 
 		if err != nil {
@@ -79,7 +79,10 @@ func (e *EventsModel) Registers(conn *Conn,
 		}
 	}
 
-	conn.Flush()
+	err := conn.Flush()
+	if err != nil {
+		return err
+	}
 
 	// Check the outcome of the redis request
 	for index := range eventKeys {
@@ -94,7 +97,10 @@ func (e *EventsModel) Registers(conn *Conn,
 		}
 	}
 
-	conn.Flush()
+	err = conn.Flush()
+	if err != nil {
+		return err
+	}
 
 	// Accumulate the results if Find
 	notFoundCount := 0
@@ -110,7 +116,7 @@ func (e *EventsModel) Registers(conn *Conn,
 			notFoundCount++
 
 			err = conn.SendLPush(
-				e.Key(deployedByteCodeHash, eventIDs[index], indexedCounts[index]), 
+				e.Key(deployedByteCodeHash, eventIDs[index], indexedCounts[index]),
 				eventJSONs[events[eventKey].Name],
 			)
 
@@ -120,9 +126,12 @@ func (e *EventsModel) Registers(conn *Conn,
 		}
 	}
 
-	conn.Flush()
+	err = conn.Flush()
+	if err != nil {
+		return err
+	}
 
-	// Check that all new registrations methods as default have been successfull
+	// Check that all new registrations methods as default have been successful
 	for index := 0; index < notFoundCount; index++ {
 		err := conn.ReceiveCheck()
 		if err != nil {

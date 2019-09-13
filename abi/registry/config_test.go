@@ -13,10 +13,10 @@ func TestStoreType(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	ContractRegistryType(flgs)
 
-	expected := "mock"
+	expected := mockOpt
 	assert.Equal(t, expected, viper.GetString(typeViperKey), "Default")
 
-	expected = "redis"
+	expected = redisOpt
 	_ = os.Setenv(typeEnv, expected)
 	assert.Equal(t, expected, viper.GetString(typeViperKey), "From Environment Variable")
 	_ = os.Unsetenv(typeEnv)
@@ -27,7 +27,7 @@ func TestStoreType(t *testing.T) {
 	err := flgs.Parse(args)
 	assert.NoError(t, err, "No error expected")
 
-	expected = "mock"
+	expected = mockOpt
 	assert.Equal(t, expected, viper.GetString(typeViperKey), "From flag")
 }
 

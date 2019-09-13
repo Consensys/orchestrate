@@ -11,6 +11,7 @@ import (
 func init() {
 	_ = viper.BindEnv(typeViperKey, typeEnv)
 	viper.SetDefault(typeViperKey, typeDefault)
+
 	_ = viper.BindEnv(abiViperKey, abiEnv)
 	viper.SetDefault(abiViperKey, abiDefault)
 }
@@ -50,8 +51,7 @@ Environment variable: %q`, `<contract>:<abi>:<bytecode>:<deployedBytecode>`, abi
 }
 
 // FromABIConfig read viper config and return contracts
-func FromABIConfig() ([]*abi.Contract, error) {
-	contracts := []*abi.Contract{}
+func FromABIConfig() (contracts []*abi.Contract, err error) {
 	for _, ABI := range viper.GetStringSlice(abiViperKey) {
 		c, err := abi.StringToContract(ABI)
 		if err != nil {

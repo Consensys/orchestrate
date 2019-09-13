@@ -18,19 +18,19 @@ func (*CatalogModel) Key() []byte {
 }
 
 // Get returns a list of contract name
-func (t *CatalogModel) Get(conn *Conn) ([]string, bool, error) {
-	tagsBytes, ok, err := conn.LRange(t.Key())
+func (t *CatalogModel) Get(conn *Conn) (names []string, ok bool, err error) {
+	namesBytes, ok, err := conn.LRange(t.Key())
 	if !ok || err != nil {
-		return []string{}, false, err 
+		return []string{}, false, err
 	}
 
 	// TODO: Make this block error-free. Not all []byte are valid string
-	tags := make([]string, len(tagsBytes))
-	for index, tagBytes := range tagsBytes {
-		tags[index] = string(tagBytes)
+	names = make([]string, len(namesBytes))
+	for index, nameBytes := range namesBytes {
+		names[index] = string(nameBytes)
 	}
 
-	return tags, ok, err
+	return names, ok, err
 }
 
 // PushIfNotExist push a new contract name in the registry. The function is idemnpotent
@@ -48,6 +48,6 @@ func (t *CatalogModel) PushIfNotExist(conn *Conn, name string) error {
 			}
 		}
 	}
-	
+
 	return conn.LPush(t.Key(), []byte(name))
 }

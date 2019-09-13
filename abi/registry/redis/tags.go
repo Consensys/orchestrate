@@ -19,14 +19,14 @@ func (*TagModel) Key(name string) []byte {
 }
 
 // Get returns a list of tags for a given contract name
-func (t *TagModel) Get(conn *Conn, name string) ([]string, bool, error) {
+func (t *TagModel) Get(conn *Conn, name string) (tags []string, ok bool, err error) {
 	tagsBytes, ok, err := conn.LRange(t.Key(name))
 	if !ok || err != nil {
-		return []string{}, false, err 
+		return []string{}, false, err
 	}
 
 	// TODO: Make this block error-free. Not all []byte are valid string
-	tags := make([]string, len(tagsBytes))
+	tags = make([]string, len(tagsBytes))
 	for index, tagBytes := range tagsBytes {
 		tags[index] = string(tagBytes)
 	}
@@ -35,7 +35,7 @@ func (t *TagModel) Get(conn *Conn, name string) ([]string, bool, error) {
 }
 
 // PushIfNotExist stores a new tag in the registry. The function is idemnpotent
-func (t *TagModel) PushIfNotExist(conn *Conn, name string, tag string) error {
+func (t *TagModel) PushIfNotExist(conn *Conn, name, tag string) error {
 	registeredTags, ok, err := t.Get(conn, name)
 	if err != nil {
 		return err
@@ -49,6 +49,6 @@ func (t *TagModel) PushIfNotExist(conn *Conn, name string, tag string) error {
 			}
 		}
 	}
-	
+
 	return conn.LPush(t.Key(name), []byte(tag))
 }

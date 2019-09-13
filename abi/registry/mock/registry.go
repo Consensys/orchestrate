@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"reflect"
+	"sort"
 
 	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -20,7 +21,7 @@ import (
 // ContractRegistry stores contract ABI and bytecode in memory
 type ContractRegistry struct {
 	// Contract registry/name#tag to bytecode hash
-	contractHashes map[string]ethcommon.Hash
+	contractHashes map[string]map[string]ethcommon.Hash
 
 	// Bytecode hash to artifacts (ABI, bytecode and deployed bytecode)
 	artifacts map[ethcommon.Hash]*artifact
@@ -46,7 +47,7 @@ var defaultCodehash = ethcommon.Hash{}
 // NewRegistry creates a ContractRegistry
 func NewRegistry() *ContractRegistry {
 	r := &ContractRegistry{
-		contractHashes: make(map[string]ethcommon.Hash),
+		contractHashes: make(map[string]map[string]ethcommon.Hash),
 		artifacts:      make(map[ethcommon.Hash]*artifact),
 		codehashes:     make(map[string]map[ethcommon.Address]ethcommon.Hash),
 		methods:        make(map[ethcommon.Hash]map[[4]byte][][]byte),
@@ -63,7 +64,11 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 
 	if contract.Bytecode != nil {
 		bytecodeHash := crypto.Keccak256Hash(contract.Bytecode)
-		r.contractHashes[contract.Short()] = bytecodeHash
+
+		if r.contractHashes[contract.GetName()] == nil {
+			r.contractHashes[contract.GetName()] = make(map[string]ethcommon.Hash)
+		}
+		r.contractHashes[contract.GetName()][contract.GetTag()] = bytecodeHash
 
 		r.artifacts[bytecodeHash] = &artifact{
 			Abi:              contract.Abi,
@@ -214,12 +219,12 @@ func parseRawJSON(data []byte) (methods, events map[string][]byte, err error) {
 }
 
 func (r *ContractRegistry) getArtifact(id *abi.ContractId) (a *artifact, ok bool) {
-	a, ok = r.artifacts[r.contractHashes[id.Short()]]
+	a, ok = r.artifacts[r.contractHashes[id.GetName()][id.GetTag()]]
 	return a, ok
 }
 
 func (r *ContractRegistry) getContract(id *abi.ContractId) (c *abi.Contract, ok bool) {
-	a, ok := r.artifacts[r.contractHashes[id.Short()]]
+	a, ok := r.artifacts[r.contractHashes[id.GetName()][id.GetTag()]]
 	if !ok {
 		return nil, ok
 	}
@@ -365,14 +370,26 @@ func (r *ContractRegistry) GetEventsBySigHash(ctx context.Context, req *svc.GetE
 
 // Returns a list of all registered contracts. Name is used to filter contractIds based on their contract name, empty to list all contract names & tags.
 func (r *ContractRegistry) GetCatalog(ctx context.Context, req *svc.GetCatalogRequest) (*svc.GetCatalogResponse, error) {
-	// TODO
-	return nil, nil
+	resp := &svc.GetCatalogResponse{}
+	for name := range r.contractHashes {
+		resp.Names = append(resp.Names, name)
+	}
+	sort.Strings(resp.Names)
+	return resp, nil
 }
 
 // Returns a list of all registered contracts. Name is used to filter contractIds based on their contract name, empty to list all contract names & tags.
 func (r *ContractRegistry) GetTags(ctx context.Context, req *svc.GetTagsRequest) (*svc.GetTagsResponse, error) {
-	// TODO
-	return nil, nil
+	if _, ok := r.contractHashes[req.GetName()]; !ok {
+		return nil, errors.NotFoundError("No Tags found for requested contract name").ExtendComponent(component)
+	}
+
+	resp := &svc.GetTagsResponse{}
+	for tag := range r.contractHashes[req.GetName()] {
+		resp.Tags = append(resp.Tags, tag)
+	}
+	sort.Strings(resp.Tags)
+	return resp, nil
 }
 
 // Request an update of the codehash of the contract address
