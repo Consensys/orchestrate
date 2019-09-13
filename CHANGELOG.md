@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.2
+
+*Released on September 13th 2019*
+
+- [FIX] Change desc from chainID:address to chaindID@address for flag FAUCET_CREDITOR_ADDRESS
+
 ### Version 0.4.1
 
 *Released on July 19th 2019*
