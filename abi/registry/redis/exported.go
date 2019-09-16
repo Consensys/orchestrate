@@ -21,12 +21,13 @@ func Init() {
 		}
 
 		// Initialize gRPC registry
-		registry = NewRegistry()
+		registry = NewRegistry(NewPool(Config(), Dial))
 
 		log.Infof("%q: store ready", component)
 	})
 }
 
+// GlobalContractRegistry returns the global contract registry object
 func GlobalContractRegistry() *ContractRegistry {
 	return registry
 }

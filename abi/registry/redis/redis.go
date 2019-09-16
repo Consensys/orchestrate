@@ -18,7 +18,7 @@ type PoolConfig struct {
 }
 
 // NewPool creates a new redis pool
-func NewPool(conf *PoolConfig) *remote.Pool {
+func NewPool(conf *PoolConfig, dialFunc DialFunc) *remote.Pool {
 	return &remote.Pool{
 		// TODO Fine tune those parameters or make them accessible in config file
 		MaxIdle:         conf.MaxIdle,
@@ -26,11 +26,15 @@ func NewPool(conf *PoolConfig) *remote.Pool {
 		MaxConnLifetime: conf.MaxConnLifetime,
 		IdleTimeout:     conf.IdleTimeout,
 		Wait:            conf.Wait,
-		Dial:            func() (remote.Conn, error) { return dial("tcp", conf.URI) },
+		Dial:            func() (remote.Conn, error) { return dialFunc("tcp", conf.URI) },
 	}
 }
 
-func dial(network, address string, options ...remote.DialOption) (remote.Conn, error) {
+// DialFunc is a function alias for function used by the pool to dial redis 
+type DialFunc func(network, address string, options ...remote.DialOption) (remote.Conn, error)
+
+// Dial is the regular redis dialer
+func Dial(network, address string, options ...remote.DialOption) (remote.Conn, error) {
 	conn, err := remote.Dial(network, address, options...)
 	if err != nil {
 		return conn, errors.ConnectionError(err.Error())

@@ -33,9 +33,10 @@ func (r *ContractRegistry) Conn() *Conn {
 }
 
 // NewRegistry creates a ContractRegistry
-func NewRegistry() *ContractRegistry {
-	r := &ContractRegistry{}
-	return r
+func NewRegistry(pool *remote.Pool) *ContractRegistry {
+	return &ContractRegistry{
+		pool: pool,
+	}
 }
 
 // RegisterContract registers a contract
@@ -117,7 +118,7 @@ func (r *ContractRegistry) DeregisterContract(ctx context.Context, req *svc.Dere
 	return nil, errors.FeatureNotSupportedError("Registry does not support Deregistration yet")
 }
 
-// DeregisterContract remove the name + tag association to a contract artifact (abi, bytecode, deployedBytecode). Artifacts are not deleted.
+// DeleteArtifact remove the name + tag association to a contract artifact (abi, bytecode, deployedBytecode). Artifacts are not deleted.
 func (r *ContractRegistry) DeleteArtifact(ctx context.Context, req *svc.DeleteArtifactRequest) (*svc.DeleteArtifactResponse, error) {
 	return nil, errors.FeatureNotSupportedError("Registry does not support Deregistration yet")
 }
@@ -145,7 +146,7 @@ func (r *ContractRegistry) getContract(name, tag string) (*abi.Contract, error) 
 	return artifact, nil
 }
 
-// GetContractABI retrieve contract ABI
+// GetContract retrieves the whole contract object
 func (r *ContractRegistry) GetContract(ctx context.Context, req *svc.GetContractRequest) (*svc.GetContractResponse, error) {
 
 	contractID := req.GetContractId()
