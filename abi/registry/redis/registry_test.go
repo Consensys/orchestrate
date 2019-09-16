@@ -3,9 +3,19 @@ package redis
 import (
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/suites"
+	"github.com/stretchr/testify/suite"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/testutils"
 )
 
-func TestRegistry(t *testing.T) {
-	suites.RunRegistry(t, NewRegistry(NewPool(Config(), DialMock)))
+type MockTestSuite struct {
+	testutils.ContractRegistryTestSuite
+}
+
+func (s *MockTestSuite) SetupTest() {
+	s.R = NewRegistry(NewPool(Config(), DialMock))
+}
+
+func TestMock(t *testing.T) {
+	s := new(MockTestSuite)
+	suite.Run(t, s)
 }
