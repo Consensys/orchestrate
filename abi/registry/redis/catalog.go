@@ -49,5 +49,5 @@ func (t *CatalogModel) PushIfNotExist(conn *Conn, name string) error {
 		}
 	}
 
-	return conn.LPush(t.Key(), []byte(name))
+	return conn.RPush(t.Key(), []byte(name))
 }

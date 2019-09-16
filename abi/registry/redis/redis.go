@@ -30,7 +30,7 @@ func NewPool(conf *PoolConfig, dialFunc DialFunc) *remote.Pool {
 	}
 }
 
-// DialFunc is a function alias for function used by the pool to dial redis 
+// DialFunc is a function alias for function used by the pool to dial redis
 type DialFunc func(network, address string, options ...remote.DialOption) (remote.Conn, error)
 
 // Dial is the regular redis dialer
@@ -67,7 +67,7 @@ func (conn *Conn) Get(key []byte) (byteslice []byte, ok bool, err error) {
 	}
 
 	if reply == nil {
-		// No error is returned is returned if the abi is not stored.
+		// No error is returned if the abi is not stored.
 		// This is higher level code's responsibility to deal with it
 		return []byte{}, false, nil
 	}
@@ -77,27 +77,25 @@ func (conn *Conn) Get(key []byte) (byteslice []byte, ok bool, err error) {
 		return []byte{}, false, err
 	}
 
+	if len(res) == 0 {
+		// No error is returned if the abi is not stored.
+		// This is higher level code's responsibility to deal with it
+		return []byte{}, false, nil
+	}
+
 	return res, true, nil
 }
 
 // Set value at a given key in the redis store
 func (conn *Conn) Set(key, value []byte) error {
 	_, err := conn.Do("SET", key, value)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
-// LPush appends a stored list with a new element
-func (conn *Conn) LPush(key, value []byte) error {
-	_, err := conn.Do("LPUSH", key, value)
-	if err != nil {
-		return err
-	}
-
-	return nil
+// RPush appends a stored list with a new element
+func (conn *Conn) RPush(key, value []byte) error {
+	_, err := conn.Do("RPUSH", key, value)
+	return err
 }
 
 // LRange returns an entire list stored on Redis
@@ -118,17 +116,31 @@ func (conn *Conn) LRange(key []byte) (list [][]byte, ok bool, err error) {
 		return [][]byte{}, false, err
 	}
 
+	if len(res) == 0 {
+		// No error is returned if the abi is not stored.
+		// This is higher level code's responsibility to deal with it
+		return [][]byte{}, false, nil
+	}
+
 	return res, true, nil
 }
 
 // Send writes a request in the redis buffer
 func (conn *Conn) Send(commandName string, args ...interface{}) error {
-	return conn.Conn.Send(commandName, args)
+	err := conn.Conn.Send(commandName, args...)
+	if err != nil {
+		return errors.ConnectionError(err.Error())
+	}
+	return nil
 }
 
 // Flush a batch of requests to the remote redis
 func (conn *Conn) Flush() error {
-	return conn.Conn.Flush()
+	err := conn.Conn.Flush()
+	if err != nil {
+		return errors.ConnectionError(err.Error())
+	}
+	return nil
 }
 
 // ReceiveBytes wait for the connection respond with a []byte
@@ -147,6 +159,12 @@ func (conn *Conn) ReceiveBytes() (bytes []byte, ok bool, err error) {
 	res, err := remote.Bytes(reply, nil)
 	if err != nil {
 		return []byte{}, false, err
+	}
+
+	if len(res) == 0 {
+		// No error is returned if the abi is not stored.
+		// This is higher level code's responsibility to deal with it
+		return []byte{}, false, nil
 	}
 
 	return res, true, nil
@@ -170,6 +188,12 @@ func (conn *Conn) ReceiveByteSlices() (byteSlices [][]byte, ok bool, err error) 
 		return [][]byte{}, false, err
 	}
 
+	if len(res) == 0 {
+		// No error is returned if the abi is not stored.
+		// This is higher level code's responsibility to deal with it
+		return [][]byte{}, false, nil
+	}
+
 	return res, true, nil
 }
 
@@ -189,9 +213,9 @@ func (conn *Conn) SendSet(key, value []byte) error {
 	return conn.Send("SET", key, value)
 }
 
-// SendLPush appends a stored list with a new element, but does not flush
-func (conn *Conn) SendLPush(key, value []byte) error {
-	return conn.Send("LPUSH", key, value)
+// SendRPush appends a stored list with a new element, but does not flush
+func (conn *Conn) SendRPush(key, value []byte) error {
+	return conn.Send("RPUSH", key, value)
 }
 
 // SendLRange returns an entire list stored on Redis, but does not flush

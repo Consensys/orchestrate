@@ -35,7 +35,7 @@ func (e *EventsModel) Get(conn *Conn, deployedByteCodeHash, eventID ethcommon.Ha
 
 // Push stores a new event in the registry
 func (e *EventsModel) Push(conn *Conn, deployedByteCodeHash, eventID ethcommon.Hash, index uint, eventBytes []byte) error {
-	return conn.LPush(e.Key(deployedByteCodeHash, eventID, index), eventBytes)
+	return conn.RPush(e.Key(deployedByteCodeHash, eventID, index), eventBytes)
 }
 
 // Find checks if an event is already registered for a given tuple (deployed bytecode hash, eventID, indexed count)
@@ -70,7 +70,7 @@ func (e *EventsModel) Registers(conn *Conn,
 
 	// Push all events to the new contract's bytecodehash
 	for index, eventKey := range eventKeys {
-		err := conn.SendLPush(
+		err := conn.SendRPush(
 			e.Key(deployedByteCodeHash, eventIDs[index], indexedCounts[index]),
 			eventJSONs[events[eventKey].Name])
 
@@ -117,8 +117,8 @@ func (e *EventsModel) Registers(conn *Conn,
 		if !ok || !e.Find(registeredEvents, eventJSONs[events[eventKey].Name]) {
 			notFoundCount++
 
-			err = conn.SendLPush(
-				e.Key(deployedByteCodeHash, eventIDs[index], indexedCounts[index]),
+			err = conn.SendRPush(
+				e.Key(defaultCodeHash, eventIDs[index], indexedCounts[index]),
 				eventJSONs[events[eventKey].Name],
 			)
 

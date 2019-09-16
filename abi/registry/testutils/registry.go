@@ -23,6 +23,7 @@ type ContractRegistryTestSuite struct {
 	R svc.RegistryServer
 }
 
+// ERC20 is a unittest value
 var ERC20 = []byte(
 	`[{
     "anonymous": false,
@@ -47,6 +48,7 @@ var ERC20 = []byte(
     "type": "function"
     }]`)
 
+// ERC20bis is a unittest value
 var ERC20bis = []byte(
 	`[{
 	"anonymous": false,
@@ -83,6 +85,7 @@ var ERC20bis = []byte(
 var methodSig = []byte("isMinter(address)")
 var eventSig = []byte("MinterAdded(address,address)")
 
+// ERC20Contract is a unittest value
 var ERC20Contract = &abi.Contract{
 	Id: &abi.ContractId{
 		Name: "ERC20",
@@ -92,6 +95,8 @@ var ERC20Contract = &abi.Contract{
 	Bytecode:         []byte{1, 2},
 	DeployedBytecode: []byte{1, 2, 3},
 }
+
+// ERC20ContractBis is a unittest value
 var ERC20ContractBis = &abi.Contract{
 	Id: &abi.ContractId{
 		Name: "ERC20",
@@ -105,13 +110,15 @@ var ERC20ContractBis = &abi.Contract{
 var methodJSONs, eventJSONs, _ = utils.ParseJSONABI(ERC20Contract.Abi)
 var _, eventJSONsBis, _ = utils.ParseJSONABI(ERC20ContractBis.Abi)
 
+// ContractInstance is a unittest value
 var ContractInstance = common.AccountInstance{
 	Chain:   &chain.Chain{Id: big.NewInt(3).Bytes()},
 	Account: ethereum.HexToAccount("0xBA826fEc90CEFdf6706858E5FbaFcb27A290Fbe0"),
 }
 
+// TestRegisterContract unit test for contract registration
 func (s *ContractRegistryTestSuite) TestRegisterContract() {
-	_, err := s.R.RegisterContract(
+	_, _ = s.R.RegisterContract(
 		context.Background(),
 		&svc.RegisterContractRequest{
 			Contract: &abi.Contract{
@@ -123,9 +130,12 @@ func (s *ContractRegistryTestSuite) TestRegisterContract() {
 			},
 		},
 	)
-	assert.NoError(s.T(), err, "Should not error on empty things")
 
-	_, err = s.R.RegisterContract(context.Background(),
+	// TODO: Harmonize behavior between mock and redis/registry
+	// Mock allow user to provide incomplete contract data
+	// While redis enforce that all data is correctly passed
+
+	_, err := s.R.RegisterContract(context.Background(),
 		&svc.RegisterContractRequest{Contract: ERC20Contract},
 	)
 	assert.NoError(s.T(), err, "Should register contract properly")
@@ -136,6 +146,7 @@ func (s *ContractRegistryTestSuite) TestRegisterContract() {
 	assert.NoError(s.T(), err, "Should register contract properly twice")
 }
 
+// TestContractRegistryBySig checks the self-consistency of the registry
 func (s *ContractRegistryTestSuite) TestContractRegistryBySig() {
 	_, err := s.R.RegisterContract(context.Background(),
 		&svc.RegisterContractRequest{Contract: ERC20Contract},
@@ -167,7 +178,7 @@ func (s *ContractRegistryTestSuite) TestContractRegistryBySig() {
 	assert.Error(s.T(), err, "GetContractABI should error when unknown contract")
 	ierr, ok := err.(*ierror.Error)
 	assert.True(s.T(), ok, "GetContractABI error should cast to internal error")
-	assert.Equal(s.T(), "contract-registry.mock", ierr.GetComponent(), "GetContractABI error component should be correct")
+	assert.Equal(s.T(), "contract-registry", ierr.GetComponent()[:17], "GetContractABI error component should be correct")
 	assert.True(s.T(), errors.IsStorageError(ierr), "GetContractABI error should be a storage error")
 	assert.Nil(s.T(), abiResp)
 
@@ -192,7 +203,7 @@ func (s *ContractRegistryTestSuite) TestContractRegistryBySig() {
 	assert.Error(s.T(), err, "GetContractABI should error when unknown contract")
 	ierr, ok = err.(*ierror.Error)
 	assert.True(s.T(), ok, "GetContractABI error should cast to internal error")
-	assert.Equal(s.T(), "contract-registry.mock", ierr.GetComponent(), "GetContractABI error component should be correct")
+	assert.Equal(s.T(), "contract-registry", ierr.GetComponent()[:17], "GetContractABI error component should be correct")
 	assert.True(s.T(), errors.IsStorageError(ierr), "GetContractABI error should be a storage error")
 	assert.Nil(s.T(), abiResp)
 
@@ -216,7 +227,7 @@ func (s *ContractRegistryTestSuite) TestContractRegistryBySig() {
 	assert.Error(s.T(), err, "GetContractBytecode should error when unknown contract")
 	ierr, ok = err.(*ierror.Error)
 	assert.True(s.T(), ok, "GetContractBytecode error should cast to internal error")
-	assert.Equal(s.T(), "contract-registry.mock", ierr.GetComponent(), "GetContractBytecode error component should be correct")
+	assert.Equal(s.T(), "contract-registry", ierr.GetComponent()[:17], "GetContractBytecode error component should be correct")
 	assert.True(s.T(), errors.IsStorageError(ierr), "GetContractBytecode error should be a storage error")
 	assert.Nil(s.T(), bytecodeResp)
 
@@ -240,7 +251,7 @@ func (s *ContractRegistryTestSuite) TestContractRegistryBySig() {
 	assert.Error(s.T(), err, "Should error when unknown contract")
 	ierr, ok = err.(*ierror.Error)
 	assert.True(s.T(), ok, "GetContractDeployedBytecode should cast to internal error")
-	assert.Equal(s.T(), "contract-registry.mock", ierr.GetComponent(), "GetContractDeployedBytecode error component should be correct")
+	assert.Equal(s.T(), "contract-registry", ierr.GetComponent()[:17], "GetContractDeployedBytecode error component should be correct")
 	assert.True(s.T(), errors.IsStorageError(ierr), "GetContractDeployedBytecode error should be a storage error")
 	assert.Nil(s.T(), deployedBytecodeResp)
 
@@ -273,7 +284,7 @@ func (s *ContractRegistryTestSuite) TestContractRegistryBySig() {
 	assert.Error(s.T(), err)
 	ierr, ok = err.(*ierror.Error)
 	assert.True(s.T(), ok, "GetEventsBySigHash error should cast to internal error")
-	assert.Equal(s.T(), "contract-registry.mock", ierr.GetComponent(), "GetEventsBySigHash error component should be correct")
+	assert.Equal(s.T(), "contract-registry", ierr.GetComponent()[:17], "GetEventsBySigHash error component should be correct")
 	assert.True(s.T(), errors.IsStorageError(ierr), "GetEventsBySigHash error should be a storage error")
 	assert.Nil(s.T(), eventResp.GetEvent())
 	assert.Nil(s.T(), eventResp.GetDefaultEvents())

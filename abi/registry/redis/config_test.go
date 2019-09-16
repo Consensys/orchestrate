@@ -2,8 +2,8 @@ package redis
 
 import (
 	"os"
-	"time"
 	"testing"
+	"time"
 
 	"github.com/spf13/pflag"
 	"github.com/stretchr/testify/assert"
@@ -23,7 +23,7 @@ func TestConfig(t *testing.T) {
 	assert.Equal(t, redisMaxConnLifetimeDefault, config.MaxConnLifetime, "Wrong default for redis MaxConnLifetime")
 	assert.Equal(t, redisIdleTimeoutDefault, config.IdleTimeout, "Wrong default for redis IdleTimeout")
 	assert.Equal(t, redisWaitDefault, config.Wait, "Wrong default for redis Wait")
-	
+
 	// Custom values to pass either as flags or env
 	customURI := "abcd:6788"
 	customMaxIdleConn := "1679536"
@@ -47,8 +47,8 @@ func TestConfig(t *testing.T) {
 	assert.Equal(t, customURI, config.URI, "Wrong value for redis URI value")
 	assert.Equal(t, 1679536, config.MaxIdle, "Wrong value for redis maxIdleConn")
 	assert.Equal(t, 68609800, config.MaxActive, "Wrong value for MaxActiveConn")
-	assert.Equal(t, time.Duration(1) * time.Second, config.MaxConnLifetime, "Wrong value for redis MaxConnLifetime")
-	assert.Equal(t, time.Duration(1) * time.Second, config.IdleTimeout, "Wrong value for redis IdleTimeout")
+	assert.Equal(t, time.Duration(1)*time.Second, config.MaxConnLifetime, "Wrong value for redis MaxConnLifetime")
+	assert.Equal(t, time.Duration(1)*time.Second, config.IdleTimeout, "Wrong value for redis IdleTimeout")
 	assert.Equal(t, true, config.Wait, "Wrong value for redis Wait")
 
 }

@@ -50,5 +50,5 @@ func (t *TagModel) PushIfNotExist(conn *Conn, name, tag string) error {
 		}
 	}
 
-	return conn.LPush(t.Key(name), []byte(tag))
+	return conn.RPush(t.Key(name), []byte(tag))
 }

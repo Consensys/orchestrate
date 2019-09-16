@@ -34,7 +34,7 @@ func (m *MethodsModel) Get(conn *Conn, deployedByteCodeHash ethcommon.Hash, sele
 
 // Push a new methods to the registered methods list that have the same selector
 func (m *MethodsModel) Push(conn *Conn, deployedByteCodeHash ethcommon.Hash, selector [4]byte, methodBytes []byte) error {
-	return conn.LPush(m.Key(deployedByteCodeHash, selector), methodBytes)
+	return conn.RPush(m.Key(deployedByteCodeHash, selector), methodBytes)
 }
 
 // Find checks if a method is already registered for a given tuple (deployed bytecode hash, selector)
@@ -68,7 +68,7 @@ func (m *MethodsModel) Registers(
 
 	// Push all methods to the new contract bytecodehash
 	for index, methodKey := range methodKeys {
-		err := conn.SendLPush(
+		err := conn.SendRPush(
 			m.Key(deployedByteCodeHash, selectors[index]),
 			methodJSONs[methods[methodKey].Name])
 
@@ -115,8 +115,8 @@ func (m *MethodsModel) Registers(
 		if !ok || !m.Find(registeredMethod, methodJSONs[methods[methodKey].Name]) {
 			notFoundCount++
 
-			err = conn.SendLPush(
-				m.Key(deployedByteCodeHash, selectors[index]),
+			err = conn.SendRPush(
+				m.Key(defaultCodeHash, selectors[index]),
 				methodJSONs[methods[methodKey].Name],
 			)
 

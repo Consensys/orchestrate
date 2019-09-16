@@ -3,6 +3,8 @@ package redis
 import (
 	"context"
 
+	// log "github.com/sirupsen/logrus"
+
 	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -71,6 +73,11 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 
 	byteCodeHash := crypto.Keccak256Hash(bytecode)
 	deployedByteCodeHash := crypto.Keccak256Hash(deployedBytecode)
+
+	err = Catalog.PushIfNotExist(conn, name)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
 
 	err = Tags.PushIfNotExist(conn, name, tag)
 	if err != nil {
@@ -231,27 +238,26 @@ func (r *ContractRegistry) GetMethodsBySelector(ctx context.Context, req *svc.Ge
 
 	selector := utils.SigHashToSelector(req.GetSelector())
 
+	// Flag used to detect if we need to query with the default code hash or not
+	codeFound := false
+	deployedByteCodeHash := defaultCodeHash
+
+	// Check if the address and chainID have been provided in the request
 	accountChain, address, err := checkExtractChainAddress(req.GetAccountInstance())
-	if err != nil {
-		return nil, err
-	}
+	addressChainProvided := err == nil
 
-	deployedByteCodeHash, codeFound, err := DeployedByteCodeHash.Get(conn, accountChain, address)
-
-	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
-	}
-
-	if !codeFound {
-		deployedByteCodeHash = defaultCodeHash
+	if addressChainProvided {
+		// If a contract has been registered at given chainID:address, override the default value we gave earlier
+		deployedByteCodeHash, codeFound, err = DeployedByteCodeHash.Get(conn, accountChain, address)
+		if err != nil {
+			return nil, errors.FromError(err).ExtendComponent(component)
+		}
 	}
 
 	method, methodFound, err := Methods.Get(conn, deployedByteCodeHash, selector)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
-	}
-
-	if !methodFound {
+	} else if !methodFound {
 		return nil, errors.NotFoundError("Method not found for given selector").SetComponent(component)
 	}
 
@@ -282,14 +288,19 @@ func (r *ContractRegistry) GetEventsBySigHash(ctx context.Context, req *svc.GetE
 
 	sigHash := ethcommon.BytesToHash(sigHashBytes)
 
-	accountChain, address, err := checkExtractChainAddress(req.GetAccountInstance())
-	if err != nil {
-		return nil, err
-	}
+	// Flag used to detect if we need to query with the default code hash or not
+	codeFound := false
+	deployedByteCodeHash := defaultCodeHash
 
-	deployedByteCodeHash, codeFound, err := DeployedByteCodeHash.Get(conn, accountChain, address)
-	if err != nil {
-		return nil, err
+	// Check if the address and chainID have been provided in the request
+	accountChain, address, err := checkExtractChainAddress(req.GetAccountInstance())
+	addressChainProvided := err == nil
+
+	if addressChainProvided {
+		deployedByteCodeHash, codeFound, err = DeployedByteCodeHash.Get(conn, accountChain, address)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// Case where the connection to redis is codeHashFound, but the hash is not found
@@ -298,12 +309,10 @@ func (r *ContractRegistry) GetEventsBySigHash(ctx context.Context, req *svc.GetE
 		deployedByteCodeHash = defaultCodeHash
 	}
 
-	event, ok, err := Events.Get(conn, deployedByteCodeHash, sigHash, indexedCount)
+	event, eventFound, err := Events.Get(conn, deployedByteCodeHash, sigHash, indexedCount)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
-	}
-
-	if !ok {
+	} else if !eventFound {
 		return nil, errors.NotFoundError("event not found").SetComponent(component)
 	}
 
@@ -414,15 +423,16 @@ func checkExtractChainAddress(accountInstance *common.AccountInstance) (*chain.C
 }
 
 func checkExtractArtifacts(contract *abi.Contract) (bytecode, deployedBytecode, abiBytes []byte, err error) {
+
 	if contract.Bytecode == nil {
 		return []byte{}, []byte{}, []byte{}, errors.InvalidArgError("No contract bytecode provided in request").ExtendComponent(component)
 	}
 
-	if contract.DeployedBytecode != nil {
+	if contract.DeployedBytecode == nil {
 		return []byte{}, []byte{}, []byte{}, errors.InvalidArgError("No contract deployed bytecode provided in request").ExtendComponent(component)
 	}
 
-	if len(contract.Abi) != 0 {
+	if len(contract.Abi) == 0 {
 		return []byte{}, []byte{}, []byte{}, errors.InvalidArgError("No abi provided in request").ExtendComponent(component)
 	}
 
