@@ -2,7 +2,6 @@ package mock
 
 import (
 	"context"
-	"encoding/json"
 	"reflect"
 	"sort"
 
@@ -10,7 +9,6 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 
-	pkgJson "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
@@ -83,7 +81,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(component)
 		}
-		methodJSONs, eventJSONs, err := parseRawJSON(contract.Abi)
+		methodJSONs, eventJSONs, err := utils.ParseJSONABI(contract.Abi)
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(component)
 		}
@@ -167,55 +165,6 @@ func (r *ContractRegistry) DeregisterContract(ctx context.Context, req *svc.Dere
 func (r *ContractRegistry) DeleteArtifact(ctx context.Context, req *svc.DeleteArtifactRequest) (*svc.DeleteArtifactResponse, error) {
 	delete(r.artifacts, ethcommon.BytesToHash(req.GetBytecodeHash()))
 	return &svc.DeleteArtifactResponse{}, nil
-}
-
-func parseRawJSON(data []byte) (methods, events map[string][]byte, err error) {
-	// Retrieve fields types & names
-	type Arguments struct {
-		Name    string `json:"name"`
-		Type    string `json:"type"`
-		Indexed bool   `json:"indexed"`
-	}
-
-	var parsedFields []struct {
-		Type      string      `json:"type"`
-		Name      string      `json:"name"`
-		Constant  bool        `json:"constant"`
-		Anonymous bool        `json:"anonymous"`
-		Inputs    []Arguments `json:"inputs"`
-		Outputs   []Arguments `json:"outputs"`
-	}
-	err = pkgJson.Unmarshal(data, &parsedFields)
-	if err != nil {
-		return nil, nil, errors.FromError(err).ExtendComponent(component)
-	}
-
-	// Retrieve raw JSONs
-	normalizedJSON, err := pkgJson.Marshal(parsedFields)
-	if err != nil {
-		return nil, nil, errors.FromError(err).ExtendComponent(component)
-	}
-	var rawFields []json.RawMessage
-	err = pkgJson.Unmarshal(normalizedJSON, &rawFields)
-	if err != nil {
-		return nil, nil, errors.FromError(err).ExtendComponent(component)
-	}
-
-	methods = make(map[string][]byte)
-	events = make(map[string][]byte)
-	for i := 0; i < len(rawFields) && i < len(parsedFields); i++ {
-		fieldJSON, err := rawFields[i].MarshalJSON()
-		if err != nil {
-			return nil, nil, errors.FromError(err).ExtendComponent(component)
-		}
-		switch parsedFields[i].Type {
-		case "function", "":
-			methods[parsedFields[i].Name] = fieldJSON
-		case "event":
-			events[parsedFields[i].Name] = fieldJSON
-		}
-	}
-	return methods, events, nil
 }
 
 func (r *ContractRegistry) getArtifact(id *abi.ContractId) (a *artifact, ok bool) {

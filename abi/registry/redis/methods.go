@@ -84,7 +84,7 @@ func (m *MethodsModel) Registers(
 
 	// Check the outcome of the redis request
 	for _, selector := range selectors {
-		err := conn.ReceiveCheck()
+		err = conn.ReceiveCheck()
 		if err != nil {
 			return err
 		}
@@ -105,7 +105,9 @@ func (m *MethodsModel) Registers(
 
 	// Fetch methods if they have already been registered
 	for index, methodKey := range methodKeys {
-		registeredMethod, ok, err := conn.ReceiveByteSlices()
+		var registeredMethod [][]byte
+		var ok bool
+		registeredMethod, ok, err = conn.ReceiveByteSlices()
 		if err != nil {
 			return err
 		}

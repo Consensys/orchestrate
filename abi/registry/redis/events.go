@@ -86,7 +86,7 @@ func (e *EventsModel) Registers(conn *Conn,
 
 	// Check the outcome of the redis request
 	for index := range eventKeys {
-		err := conn.ReceiveCheck()
+		err = conn.ReceiveCheck()
 		if err != nil {
 			return err
 		}
@@ -107,7 +107,9 @@ func (e *EventsModel) Registers(conn *Conn,
 
 	// Fetch events if they have already been registered
 	for index, eventKey := range eventKeys {
-		registeredEvents, ok, err := conn.ReceiveByteSlices()
+		var registeredEvents [][]byte
+		var ok bool
+		registeredEvents, ok, err = conn.ReceiveByteSlices()
 		if err != nil {
 			return err
 		}
