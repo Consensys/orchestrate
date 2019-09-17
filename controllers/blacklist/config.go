@@ -15,13 +15,13 @@ func init() {
 var (
 	faucetBlacklistFlag     = "faucet-blacklist"
 	faucetBlacklistViperKey = "faucet.ctrl.blacklist"
-	faucetBlacklistDefault  = []string{}
+	faucetBlacklistDefault  []string
 	faucetBlacklistEnv      = "FAUCET_BLACKLIST"
 )
 
 // FaucetBlacklist register flag for Faucet address
 func FaucetBlacklist(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Blacklisted address (format <chainID>-<Address>)
+	desc := fmt.Sprintf(`Blacklisted addresses (format <chainID1>@<Address1> <chainID2>@<Address2>)
 Environment variable: %q`, faucetBlacklistEnv)
 	f.StringSlice(faucetBlacklistFlag, faucetBlacklistDefault, desc)
 	_ = viper.BindPFlag(faucetBlacklistViperKey, f.Lookup(faucetBlacklistFlag))
