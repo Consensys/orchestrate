@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.4.3
+
+*Released on September 17th 2019*
+
+- [FIX] Change desc from chainID-address to chaindID@address for flag FAUCET_BLACKLIST
+
 ### Version 0.4.2
 
 *Released on September 13th 2019*
