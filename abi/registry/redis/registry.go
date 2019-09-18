@@ -328,7 +328,7 @@ func (r *ContractRegistry) GetEventsBySigHash(ctx context.Context, req *svc.GetE
 	return response, nil
 }
 
-// GetCatalog returns a list of all registered contracts. Name is used to filter contractIds based on their contract name, empty to list all contract names & tags.
+// GetCatalog returns a list of all registered contracts.
 func (r *ContractRegistry) GetCatalog(ctx context.Context, req *svc.GetCatalogRequest) (*svc.GetCatalogResponse, error) {
 	conn := r.Conn()
 	defer conn.Close()
@@ -344,7 +344,7 @@ func (r *ContractRegistry) GetCatalog(ctx context.Context, req *svc.GetCatalogRe
 	}, nil
 }
 
-// GetTags returns a list of all registered contracts. Name is used to filter contractIds based on their contract name, empty to list all contract names & tags.
+// Returns a list of all tags available for a contract name.
 func (r *ContractRegistry) GetTags(ctx context.Context, req *svc.GetTagsRequest) (*svc.GetTagsResponse, error) {
 	conn := r.Conn()
 	defer conn.Close()
@@ -368,7 +368,7 @@ func (r *ContractRegistry) GetTags(ctx context.Context, req *svc.GetTagsRequest)
 	}, nil
 }
 
-// SetAccountCodeHash request an update of the codehash of the contract address
+// SetAccountCodeHash set the codehash of a contract address for a given chain
 func (r *ContractRegistry) SetAccountCodeHash(ctx context.Context, req *svc.SetAccountCodeHashRequest) (*svc.SetAccountCodeHashResponse, error) {
 	conn := r.Conn()
 	defer conn.Close()

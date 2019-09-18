@@ -13,7 +13,7 @@ var (
 	initOnce = &sync.Once{}
 )
 
-// Init initialize mock Contract Registry
+// Init initialize Contract Registry
 func Init() {
 	initOnce.Do(func() {
 		if registry != nil {
@@ -32,7 +32,7 @@ func GlobalContractRegistry() *ContractRegistry {
 	return registry
 }
 
-// SetGlobalContractRegistry set global mock store
+// SetGlobalContractRegistry set global contract registry
 func SetGlobalContractRegistry(r *ContractRegistry) {
 	registry = r
 }

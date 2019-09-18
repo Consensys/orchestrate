@@ -25,7 +25,7 @@ func (t *TagModel) Get(conn *Conn, name string) (tags []string, ok bool, err err
 		return []string{}, false, err
 	}
 
-	// TODO: Make this block error-free. Not all []byte are valid string
+	// Note: This block can panic, not all []byte are valid string
 	tags = make([]string, len(tagsBytes))
 	for index, tagBytes := range tagsBytes {
 		tags[index] = string(tagBytes)
@@ -34,7 +34,7 @@ func (t *TagModel) Get(conn *Conn, name string) (tags []string, ok bool, err err
 	return tags, ok, err
 }
 
-// PushIfNotExist stores a new tag in the registry. The function is idemnpotent
+// PushIfNotExist stores a new tag in the registry. The function is idempotent
 func (t *TagModel) PushIfNotExist(conn *Conn, name, tag string) error {
 	registeredTags, ok, err := t.Get(conn, name)
 	if err != nil {

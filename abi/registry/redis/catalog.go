@@ -24,7 +24,7 @@ func (t *CatalogModel) Get(conn *Conn) (names []string, ok bool, err error) {
 		return []string{}, false, err
 	}
 
-	// TODO: Make this block error-free. Not all []byte are valid string
+	// Note: This block can panic, not all []byte are valid string
 	names = make([]string, len(namesBytes))
 	for index, nameBytes := range namesBytes {
 		names[index] = string(nameBytes)
@@ -33,7 +33,7 @@ func (t *CatalogModel) Get(conn *Conn) (names []string, ok bool, err error) {
 	return names, ok, err
 }
 
-// PushIfNotExist push a new contract name in the registry. The function is idemnpotent
+// PushIfNotExist push a new contract name in the registry. The function is idempotent
 func (t *CatalogModel) PushIfNotExist(conn *Conn, name string) error {
 	registeredTags, ok, err := t.Get(conn)
 	if err != nil {

@@ -106,7 +106,7 @@ func (conn *Conn) LRange(key []byte) (list [][]byte, ok bool, err error) {
 	}
 
 	if reply == nil {
-		// No error is returned is returned if the abi is not stored.
+		// No error is returned if the abi is not stored.
 		// This is higher level code's responsibility to deal with it
 		return [][]byte{}, false, nil
 	}
@@ -151,7 +151,7 @@ func (conn *Conn) ReceiveBytes() (bytes []byte, ok bool, err error) {
 	}
 
 	if reply == nil {
-		// No error is returned is returned if the abi is not stored.
+		// No error is returned if the abi is not stored.
 		// This is higher level code's responsibility to deal with it
 		return []byte{}, false, nil
 	}
@@ -178,7 +178,7 @@ func (conn *Conn) ReceiveByteSlices() (byteSlices [][]byte, ok bool, err error) 
 	}
 
 	if reply == nil {
-		// No error is returned is returned if the abi is not stored.
+		// No error is returned if the abi is not stored.
 		// This is higher level code's responsibility to deal with it
 		return [][]byte{}, false, nil
 	}

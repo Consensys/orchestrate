@@ -79,6 +79,7 @@ func (e *EventsModel) Registers(conn *Conn,
 		}
 	}
 
+	// Warning: Only the first error will be returned
 	err := conn.Flush()
 	if err != nil {
 		return err
@@ -97,6 +98,7 @@ func (e *EventsModel) Registers(conn *Conn,
 		}
 	}
 
+	// Warning: Only the first error will be returned
 	err = conn.Flush()
 	if err != nil {
 		return err
@@ -128,6 +130,7 @@ func (e *EventsModel) Registers(conn *Conn,
 		}
 	}
 
+	// Warning: Only the first error will be returned
 	err = conn.Flush()
 	if err != nil {
 		return err

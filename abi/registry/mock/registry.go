@@ -161,7 +161,7 @@ func (r *ContractRegistry) DeregisterContract(ctx context.Context, req *svc.Dere
 	return &svc.DeregisterContractResponse{}, nil
 }
 
-// DeregisterContract remove the name + tag association to a contract artifact (abi, bytecode, deployedBytecode). Artifacts are not deleted.
+// DeleteArtifact remove an artifacts based on its BytecodeHash.
 func (r *ContractRegistry) DeleteArtifact(ctx context.Context, req *svc.DeleteArtifactRequest) (*svc.DeleteArtifactResponse, error) {
 	delete(r.artifacts, ethcommon.BytesToHash(req.GetBytecodeHash()))
 	return &svc.DeleteArtifactResponse{}, nil
@@ -317,7 +317,7 @@ func (r *ContractRegistry) GetEventsBySigHash(ctx context.Context, req *svc.GetE
 	return nil, errors.NotFoundError("events not found").SetComponent(component)
 }
 
-// Returns a list of all registered contracts. Name is used to filter contractIds based on their contract name, empty to list all contract names & tags.
+// GetCatalog returns a list of all registered contracts.
 func (r *ContractRegistry) GetCatalog(ctx context.Context, req *svc.GetCatalogRequest) (*svc.GetCatalogResponse, error) {
 	resp := &svc.GetCatalogResponse{}
 	for name := range r.contractHashes {
@@ -327,7 +327,7 @@ func (r *ContractRegistry) GetCatalog(ctx context.Context, req *svc.GetCatalogRe
 	return resp, nil
 }
 
-// Returns a list of all registered contracts. Name is used to filter contractIds based on their contract name, empty to list all contract names & tags.
+// Returns a list of all tags available for a contract name.
 func (r *ContractRegistry) GetTags(ctx context.Context, req *svc.GetTagsRequest) (*svc.GetTagsResponse, error) {
 	if _, ok := r.contractHashes[req.GetName()]; !ok {
 		return nil, errors.NotFoundError("No Tags found for requested contract name").ExtendComponent(component)
@@ -341,7 +341,7 @@ func (r *ContractRegistry) GetTags(ctx context.Context, req *svc.GetTagsRequest)
 	return resp, nil
 }
 
-// Request an update of the codehash of the contract address
+// SetAccountCodeHash set the codehash of a contract address for a given chain
 func (r *ContractRegistry) SetAccountCodeHash(ctx context.Context, req *svc.SetAccountCodeHashRequest) (*svc.SetAccountCodeHashResponse, error) {
 	chainID, addr := req.GetAccountInstance().GetChain(), req.GetAccountInstance().GetAccount().Address()
 

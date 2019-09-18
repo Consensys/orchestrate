@@ -77,6 +77,7 @@ func (m *MethodsModel) Registers(
 		}
 	}
 
+	// Warning: Only the first error will be returned
 	err := conn.Flush()
 	if err != nil {
 		return err
@@ -95,6 +96,7 @@ func (m *MethodsModel) Registers(
 		}
 	}
 
+	// Warning: Only the first error will be returned
 	err = conn.Flush()
 	if err != nil {
 		return err
@@ -126,6 +128,7 @@ func (m *MethodsModel) Registers(
 		}
 	}
 
+	// Warning: Only the first error will be returned
 	err = conn.Flush()
 	if err != nil {
 		return err
