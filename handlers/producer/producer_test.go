@@ -101,5 +101,4 @@ func TestTxDisabling(t *testing.T) {
 
 		assert.Equalf(t, expected, actual, "Error tx filter failed at scenario %v", k)
 	}
-
 }

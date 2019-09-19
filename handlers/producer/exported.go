@@ -31,12 +31,12 @@ func Init(ctx context.Context) {
 	})
 }
 
-// SetGlobalHandler sets global Gas Pricer Handler
-func SetGlobalHandler(h engine.HandlerFunc) {
-	handler = h
-}
-
 // GlobalHandler returns global Gas Pricer handler
 func GlobalHandler() engine.HandlerFunc {
 	return handler
+}
+
+// SetGlobalHandler sets global Gas Pricer Handler
+func SetGlobalHandler(h engine.HandlerFunc) {
+	handler = h
 }
