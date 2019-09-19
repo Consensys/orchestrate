@@ -6,14 +6,14 @@ import (
 	log "github.com/sirupsen/logrus"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/crafter"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry"
 )
 
 // Crafter creates a crafter handler
-func Crafter(r registry.Registry, c crafter.Crafter) engine.HandlerFunc {
+func Crafter(r contractregistry.RegistryClient, c crafter.Crafter) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"metadata.id": txctx.Envelope.GetMetadata().GetId(),
@@ -79,7 +79,7 @@ func getMethodAbi(txctx *engine.TxContext) (*abi.Method, error) {
 	return method, nil
 }
 
-func createTxPayload(txctx *engine.TxContext, methodAbi *abi.Method, r registry.Registry, c crafter.Crafter) ([]byte, error) {
+func createTxPayload(txctx *engine.TxContext, methodAbi *abi.Method, r contractregistry.RegistryClient, c crafter.Crafter) ([]byte, error) {
 	if txctx.Envelope.GetArgs().GetCall().GetMethod().IsConstructor() {
 		return createContractDeploymentPayload(txctx, methodAbi, r, c)
 	}
@@ -87,21 +87,21 @@ func createTxPayload(txctx *engine.TxContext, methodAbi *abi.Method, r registry.
 	return createTxCallPayload(txctx, methodAbi, c)
 }
 
-func createContractDeploymentPayload(txctx *engine.TxContext, methodAbi *abi.Method, r registry.Registry, c crafter.Crafter) ([]byte, error) {
-	var (
-		bytecode []byte
-		payload  []byte
-		err      error
-	)
+func createContractDeploymentPayload(txctx *engine.TxContext, methodAbi *abi.Method, r contractregistry.RegistryClient, c crafter.Crafter) ([]byte, error) {
 	// Transaction to be crafted is a Contract deployment
-	bytecode, err = r.GetContractBytecode(txctx.Envelope.GetArgs().GetCall().GetContract())
+	bytecodeResp, err := r.GetContractBytecode(
+		txctx.Context(),
+		&contractregistry.GetContractRequest{
+			ContractId: txctx.Envelope.GetArgs().GetCall().GetContract().GetId(),
+		},
+	)
 	if err != nil {
 		e := txctx.AbortWithError(err).ExtendComponent(component)
 		txctx.Logger.WithError(e).Errorf("crafter: could not retrieve contract bytecode")
 		return nil, e
 	}
 
-	payload, err = c.CraftConstructor(bytecode, *methodAbi, getTxArgs(txctx)...)
+	payload, err := c.CraftConstructor(bytecodeResp.GetBytecode(), *methodAbi, getTxArgs(txctx)...)
 	if err != nil {
 		e := txctx.AbortWithError(err).ExtendComponent(component)
 		txctx.Logger.WithError(e).Errorf("crafter: could not craft tx payload")

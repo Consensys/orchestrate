@@ -6,8 +6,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/service/contract-registry.git/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/crafter"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry"
 )
 
 var (
@@ -26,11 +26,11 @@ func Init(ctx context.Context) {
 		// Create crafter
 		crafter.Init()
 
-		// Initialize Registry
-		registry.Init(ctx)
+		// Initialize Registry Client
+		registryclient.Init(ctx)
 
 		// Create Handler
-		handler = Crafter(registry.GlobalRegistry(), crafter.GlobalCrafter())
+		handler = Crafter(registryclient.GlobalContractRegistryClient(), crafter.GlobalCrafter())
 
 		log.Infof("crafter: handler ready")
 	})

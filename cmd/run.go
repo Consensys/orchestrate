@@ -10,6 +10,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/tracing/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
+	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/service/contract-registry.git/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/controllers/amount"
@@ -58,6 +59,9 @@ func newRunCommand() *cobra.Command {
 	broker.KafkaTopicTxNonce(runCmd.Flags())
 	broker.InitKafkaSASLTLSFlags(runCmd.Flags())
 	broker.KafkaTopicTxRecover(runCmd.Flags())
+
+	// Contract Registry
+	registryclient.ContractRegistryGRPCTarget(runCmd.Flags())
 
 	return runCmd
 }

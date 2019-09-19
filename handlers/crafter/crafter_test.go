@@ -1,60 +1,28 @@
 package crafter
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
-
 	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
-	ethCommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
+	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/args"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
+	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/service/contract-registry.git/client/mock"
 )
 
-type MockABIRegistry struct{}
-
 const testsNum = 11
-
-func (r *MockABIRegistry) RegisterContract(contract *abi.Contract) error {
-	return nil
-}
-
-func (r *MockABIRegistry) GetContractABI(contract *abi.Contract) ([]byte, error) {
-	return []byte{}, nil
-}
-
-func (r *MockABIRegistry) GetContractBytecode(contract *abi.Contract) ([]byte, error) {
-	if contract.GetId().Name == "unknown" {
-		return []byte{}, errors.NotFoundError("could not retrieve bytecode").SetComponent("mock")
-	}
-	return []byte{246, 34}, nil
-}
-
-func (r *MockABIRegistry) GetContractDeployedBytecode(contract *abi.Contract) ([]byte, error) {
-	return []byte{}, nil
-}
-
-func (r *MockABIRegistry) GetMethodsBySelector(selector [4]byte, contract common.AccountInstance) (method *ethAbi.Method, methods []*ethAbi.Method, e error) {
-	return &ethAbi.Method{}, make([]*ethAbi.Method, 0), nil
-}
-
-func (r *MockABIRegistry) GetEventsBySigHash(selector ethCommon.Hash, contract common.AccountInstance, indexedInputCount uint) (event *ethAbi.Event, events []*ethAbi.Event, e error) {
-	return &ethAbi.Event{}, make([]*ethAbi.Event, 0), nil
-}
-
-func (r *MockABIRegistry) RequestAddressUpdate(contract common.AccountInstance) error {
-	return nil
-}
 
 type MockCrafter struct{}
 
@@ -237,14 +205,26 @@ func makeCrafterContext(i int) *engine.TxContext {
 
 type CrafterTestSuite struct {
 	testutils.HandlerTestSuite
+	contractRegistry *clientmock.ContractRegistryClient
 }
 
 func (s *CrafterTestSuite) SetupSuite() {
-	s.Handler = Crafter(&MockABIRegistry{}, &MockCrafter{})
+	s.contractRegistry = clientmock.New()
+	_, err := s.contractRegistry.RegisterContract(context.Background(),
+		&contractregistry.RegisterContractRequest{
+			Contract: &abi.Contract{
+				Id: &abi.ContractId{
+					Name: "known",
+				},
+				Bytecode: hexutil.MustDecode("0x"),
+			},
+		})
+	assert.NoError(s.T(), err)
+	s.Handler = Crafter(s.contractRegistry, &MockCrafter{})
 }
 
 func (s *CrafterTestSuite) TestCrafter() {
-	txctxs := []*engine.TxContext{}
+	var txctxs []*engine.TxContext
 	for i := 0; i < testsNum; i++ {
 		txctxs = append(txctxs, makeCrafterContext(i))
 	}
