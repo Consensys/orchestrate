@@ -40,14 +40,13 @@ func Decoder(r contractregistry.RegistryClient) engine.HandlerFunc {
 					SigHash: l.Topics[0].GetRaw(),
 					AccountInstance: &common.AccountInstance{
 						Chain:   txctx.Envelope.GetChain(),
-						Account: nil,
+						Account: l.GetAddress(),
 					},
 					IndexedInputCount: uint32(len(l.Topics) - 1),
 				})
 			if err != nil || (len(eventResp.GetEvent()) == 0 && len(eventResp.GetDefaultEvents()) == 0) {
-				txctx.Logger.WithError(err).Errorf("decoder: could not retrieve event ABI")
-				_ = txctx.AbortWithError(err)
-				return
+				txctx.Logger.WithError(err).Tracef("%s: could not retrieve event ABI, txHash: %s sigHash: %s, ", component, l.GetTxHash(), l.GetTopics()[0])
+				continue
 			}
 
 			// Decode log
@@ -56,9 +55,8 @@ func Decoder(r contractregistry.RegistryClient) engine.HandlerFunc {
 			if len(eventResp.GetEvent()) != 0 {
 				err = json.Unmarshal(eventResp.GetEvent(), event)
 				if err != nil {
-					txctx.Logger.WithError(err).Errorf("decoder: could not unmarshal event")
-					_ = txctx.AbortWithError(err)
-					return
+					txctx.Logger.WithError(err).Warnf("%s: could not unmarshal event ABI provided by the Contract Registry, txHash: %s sigHash: %s, ", component, l.GetTxHash(), l.GetTopics()[0])
+					continue
 				}
 				mapping, err = decoder.Decode(event, l)
 			} else {
@@ -67,21 +65,23 @@ func Decoder(r contractregistry.RegistryClient) engine.HandlerFunc {
 					err = json.Unmarshal(potentialEvent, event)
 					if err != nil {
 						// If it fails to unmarshal, try the next potential event
+						txctx.Logger.WithError(err).Tracef("%s: could not unmarshal potential event ABI, txHash: %s sigHash: %s, ", component, l.GetTxHash(), l.GetTopics()[0])
 						continue
 					}
 
 					// Try to decode
 					mapping, err = decoder.Decode(event, l)
 					if err == nil {
+						// As the decoding is successful, stop looping
 						break
 					}
 				}
 			}
 
 			if err != nil {
-				txctx.Logger.WithError(err).Errorf("decoder: could not decode log")
-				_ = txctx.AbortWithError(err)
-				return
+				// As all potentialEvents fail to unmarshal, go to the next log
+				txctx.Logger.WithError(err).Tracef("%s: could not unmarshal potential event ABI, txHash: %s sigHash: %s, ", component, l.GetTxHash(), l.GetTopics()[0])
+				continue
 			}
 
 			// Set decoded data on log
