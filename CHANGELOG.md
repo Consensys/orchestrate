@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.2.1
+
+*Released on September 19th 2019*
+
+- [FEAT] Add GetContract, GetCatalog, GetTags, DeregisterContract, DeleteArtifact & rename SetAccountCodeHash fcts to gRPC client
+
 ### Version 0.2.0
 
 *Released on September 3rd 2019*
