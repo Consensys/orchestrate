@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.6.2
+
+*Released on September 19th 2019*
+
+- [FEAT] Add Enricher handler to populate Contract Registry with newly deployed contracts
+
 ### Version 0.6.1
 
 *Released on August 12th 2019*
