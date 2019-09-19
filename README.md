@@ -510,6 +510,9 @@ Error codes are `uint64` that maps to five hex character code
 | 01XXX |          |    01000   | warning                       | Raised to indicate a warning               |
 | 01XXX |   011XX  |    01100   | retry_warning                 | Error occured system retries               |
 | 01XXX |   012XX  |    01200   | faucet_warning                | Faucet credit has been denied              |
+| 01XXX |   013XX  |    01300   | invalid_nonce_warning         | Exposure to send tx with invalid nonce     |
+| 01XXX |   013XX  |    01301   | nonce_too_high_warning        | Exposure to send tx with nonce too high    |
+| 01XXX |   013XX  |    01302   | nonce_too_high_low            | Exposure to send tx with nonce too low     |
 | 08XXX |          |    08000   | connection_exception          | Failed connecting to an external service   |
 | 08XXX |   081XX  |    08100   | kafka_connection_exception    | Failed connecting to Kafka                 |
 | 08XXX |   082XX  |    08200   | http_connection_exception     | Failed connecting to an HTTP service       |

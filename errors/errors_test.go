@@ -27,6 +27,30 @@ func TestFaucetWarning(t *testing.T) {
 	assert.Equal(t, "01200", e.Hex(), "FaucetWarning Hex reprensation should be correct")
 }
 
+func TestInvalidNonceWarning(t *testing.T) {
+	e := InvalidNonceWarning("test")
+	assert.Equal(t, uint64(4864), e.GetCode(), "InvalidNonceWarning code should be correct")
+	assert.True(t, IsWarning(e), "InvalidNonceWarning should be a connection error")
+	assert.True(t, IsInvalidNonceWarning(e), "InvalidNonceWarning should be a connection error")
+	assert.Equal(t, "01300", e.Hex(), "InvalidNonceWarning Hex reprensation should be correct")
+}
+
+func TestNonceTooHighWarning(t *testing.T) {
+	e := NonceTooHighWarning("test")
+	assert.Equal(t, uint64(4865), e.GetCode(), "NonceTooHighWarning code should be correct")
+	assert.True(t, IsWarning(e), "NonceTooHighWarning should be a connection error")
+	assert.True(t, IsInvalidNonceWarning(e), "NonceTooHighWarning should be a connection error")
+	assert.Equal(t, "01301", e.Hex(), "NonceTooHighWarning Hex reprensation should be correct")
+}
+
+func TestNonceTooLowWarning(t *testing.T) {
+	e := NonceTooLowWarning("test")
+	assert.Equal(t, uint64(4866), e.GetCode(), "NonceTooLowWarning code should be correct")
+	assert.True(t, IsWarning(e), "NonceTooLowWarning should be a connection error")
+	assert.True(t, IsInvalidNonceWarning(e), "NonceTooLowWarning should be a connection error")
+	assert.Equal(t, "01302", e.Hex(), "NonceTooLowWarning Hex reprensation should be correct")
+}
+
 func TestConnectionError(t *testing.T) {
 	e := ConnectionError("test")
 	assert.Equal(t, uint64(32768), e.GetCode(), "ConnectionError code should be correct")

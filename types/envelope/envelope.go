@@ -1,3 +1,4 @@
+//nolint:stylecheck
 package envelope
 
 import (
@@ -20,8 +21,8 @@ func (e *Envelope) Sender() ethcommon.Address {
 	return e.GetFrom().Address()
 }
 
-// Carrier returns an OpenTracing carrier based on envelope Metadata
-func (e *Envelope) Carrier() opentracing.TextMapCarrier {
+// maybeInitMetadata initialize metadata object with Extra field
+func (e *Envelope) maybeInitMetadata() {
 	if e.GetMetadata() == nil {
 		e.Metadata = &Metadata{
 			Extra: make(map[string]string),
@@ -29,6 +30,25 @@ func (e *Envelope) Carrier() opentracing.TextMapCarrier {
 	} else if e.GetMetadata().GetExtra() == nil {
 		e.GetMetadata().Extra = make(map[string]string)
 	}
+}
 
+// Carrier returns an OpenTracing carrier based on envelope Metadata
+func (e *Envelope) Carrier() opentracing.TextMapCarrier {
+	e.maybeInitMetadata()
 	return opentracing.TextMapCarrier(e.GetMetadata().GetExtra())
+}
+
+// GetMetadataValue retrieves value stored in Metadata extra
+func (e *Envelope) GetMetadataValue(key string) (string, bool) {
+	if e.GetMetadata() == nil || e.GetMetadata().GetExtra() == nil {
+		return "", false
+	}
+	v, ok := e.GetMetadata().GetExtra()[key]
+	return v, ok
+}
+
+// SetMetadataValue set a value stored in Metadata extra
+func (e *Envelope) SetMetadataValue(key, value string) {
+	e.maybeInitMetadata()
+	e.GetMetadata().GetExtra()[key] = value
 }

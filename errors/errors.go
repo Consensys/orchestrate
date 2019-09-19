@@ -11,6 +11,11 @@ const (
 	Retry          = Warning + 1<<8 // Retries (subclass 011XX)
 	Faucet         = Warning + 2<<8 // Faucet credit denied (subclass 012XX)
 
+	// Invalid Nonce warnings(class 013xx)
+	InvalidNonce = Warning + 3<<8
+	NonceTooHigh = InvalidNonce + 1
+	NonceTooLow  = InvalidNonce + 2
+
 	// Connnection Errors (class 08XXX)
 	Connection      uint64 = 8 << 12
 	KafkaConnection        = Connection + 1<<8 // Kafka Connection error (subclass 081XX)
@@ -93,6 +98,26 @@ func FaucetWarning(format string, a ...interface{}) *ierror.Error {
 // IsFaucetWarning indicate whether an error is a faucet Warning
 func IsFaucetWarning(err error) bool {
 	return isErrorClass(FromError(err).GetCode(), Faucet)
+}
+
+// InvalidNonceWarning are raised when an invalid nonce is detected
+func InvalidNonceWarning(format string, a ...interface{}) *ierror.Error {
+	return Errorf(InvalidNonce, format, a...)
+}
+
+// IsFaIsInvalidNonceWarningucetWarning indicate whether an error is an invalid nonce Warning
+func IsInvalidNonceWarning(err error) bool {
+	return isErrorClass(FromError(err).GetCode(), InvalidNonce)
+}
+
+// NonceTooHighWarning are raised when about to send a transaction with nonce too high
+func NonceTooHighWarning(format string, a ...interface{}) *ierror.Error {
+	return Errorf(NonceTooHigh, format, a...)
+}
+
+// NonceTooLowWarning are raised when about to send a transaction with nonce too low
+func NonceTooLowWarning(format string, a ...interface{}) *ierror.Error {
+	return Errorf(NonceTooLow, format, a...)
 }
 
 // ConnectionError is raised when failing to connect to an external service

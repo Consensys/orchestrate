@@ -53,6 +53,7 @@ lint:
   stage: test
   script:
     - make race
+    - echo GOGC=$GOGC
     - make lint
   cache:
     policy: pull

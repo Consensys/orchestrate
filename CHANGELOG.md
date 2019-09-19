@@ -2,6 +2,13 @@
 
 ### Version 0.9.1
 
+*Unreleased*
+
+- [FEAT] Add invalid nonce warnings
+- [FEAT] Add methods facilitating set/get metadata value on envelope
+
+### Version 0.9.1
+
 *Released on September 12th 2019*
 
 - [FIX] Generate protobuf files

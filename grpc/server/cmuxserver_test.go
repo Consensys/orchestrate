@@ -58,12 +58,12 @@ func TestCMuxServerListen(t *testing.T) {
 	mockh := NewMockHandler()
 	mux.Handle("/test", mockh)
 
-	cmuxsrv := CMuxServer{
-		grpc: grpc.NewServer(),
-		http: &http.Server{
+	cmuxsrv := NewCMuxServer(
+		grpc.NewServer(),
+		&http.Server{
 			Handler: mux,
 		},
-	}
+	)
 
 	mocksrv := NewMockGreeterServer()
 	helloworld.RegisterGreeterServer(cmuxsrv.grpc, mocksrv)
@@ -72,7 +72,6 @@ func TestCMuxServerListen(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer lis.Close()
 
 	errors := make(chan error)
 	go func() {
@@ -105,10 +104,4 @@ func TestCMuxServerListen(t *testing.T) {
 	}
 	assert.Nil(t, err, "Get should not error")
 	assert.Len(t, mockh.requests, 1, "HTTP should have treated a request")
-
-	err = cmuxsrv.Shutdown(context.Background())
-	assert.Nil(t, err, "Shutdown should not error")
-	for err := range errors {
-		t.Fatal(err)
-	}
 }

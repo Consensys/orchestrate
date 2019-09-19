@@ -1,4 +1,4 @@
-package envelope_store // nolint: golint
+package envelope_store //nolint:golint,stylecheck
 
 import (
 	"time"

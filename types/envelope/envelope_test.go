@@ -18,4 +18,13 @@ func TestEnvelope(t *testing.T) {
 		},
 	}
 	assert.Equal(t, `["00001@foo: Timeout error" "00000@bar: Unknown error"]`, envelope.Error(), "Error message should be correct")
+
+	// Test set and retrieving envelope Metadata
+	_, ok := envelope.GetMetadataValue("test-key")
+	assert.False(t, ok, "when no metadata has been set GetMetadataValue should not find data")
+
+	envelope.SetMetadataValue("test-key", "test-value")
+	v, ok := envelope.GetMetadataValue("test-key")
+	assert.True(t, ok, "when metadata has been set GetMetadataValue should find data")
+	assert.Equal(t, "test-value", v, "when metadata has been set GetMetadataValue should return expected value")
 }
