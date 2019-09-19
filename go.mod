@@ -13,7 +13,6 @@ require (
 	github.com/golang/protobuf v1.3.0
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
-	github.com/rafaeljusto/redigomock v0.0.0-20190202135759-257e089e14a1
 	github.com/rs/cors v1.6.0 // indirect
 	github.com/sirupsen/logrus v1.3.0
 	github.com/spf13/pflag v1.0.3

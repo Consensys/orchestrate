@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.7.1
+
+*Released on September 18th 2019*
+
+- [FEAT] Add Redis implementation for the registry
+- [FEAT] Add GetCatalog, GetTags, DeregisterContract functions to registry
+
 ### Version 0.7.0
 
 *Released on September 2nd 2019*
