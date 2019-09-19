@@ -2,11 +2,13 @@ module gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-listener.git
 
 require (
 	github.com/Shopify/sarama v1.22.0
-	github.com/sirupsen/logrus v1.4.0
-	github.com/spf13/cobra v0.0.3
+	github.com/ethereum/go-ethereum v1.8.27
+	github.com/sirupsen/logrus v1.4.2
+	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.3.0
-	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.8.0
+	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.9.1
+	gitlab.com/ConsenSys/client/fr/core-stack/service/contract-registry.git v0.2.1
 	gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git v0.5.0
-	gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.6.11
+	gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.7.1
 )

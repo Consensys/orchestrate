@@ -1,4 +1,4 @@
-package store
+package enricher
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 
 func TestInit(t *testing.T) {
 	Init(context.Background())
-	assert.NotNil(t, GlobalHandler(), "Global handler should have been set")
+	assert.NotNil(t, GlobalHandler(), "Global should have been set")
 
 	var handler engine.HandlerFunc
 	SetGlobalHandler(handler)
