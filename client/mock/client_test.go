@@ -4,14 +4,12 @@ import (
 	"context"
 	"testing"
 
-	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/assert"
 
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/mock"
 )
 
 var ERC20 = []byte(`[
@@ -51,44 +49,43 @@ var erc20Contract = &abi.Contract{
 	DeployedBytecode: []byte{1, 2, 3},
 }
 
-var queryContract = &abi.Contract{
-	Id: &abi.ContractId{
-		Name: "ERC20",
-		Tag:  "v1.0.0",
-	},
+var queryContractID = &abi.ContractId{
+	Name: "ERC20",
+	Tag:  "v1.0.0",
 }
 
 func TestContractRegistryClient(t *testing.T) {
-	blocks := make(map[string][]*ethtypes.Block)
-	mec := mock.NewClient(blocks)
-
-	client := New(mec)
-	var c interface{} = client
-	_, ok := c.(svc.RegistryClient)
-	assert.True(t, ok, "Should match ContractRegistryClient interface")
+	var client svc.RegistryClient = New() // Break if client does not implement interface
 
 	_, err := client.RegisterContract(context.Background(),
 		&svc.RegisterContractRequest{Contract: erc20Contract},
 	)
 	assert.NoError(t, err)
 
+	contractResp, err := client.GetContract(
+		context.Background(),
+		&svc.GetContractRequest{ContractId: queryContractID},
+	)
+	assert.NotNil(t, contractResp, "Method should be available")
+	assert.NoError(t, err, "Should not error")
+
 	abiResp, err := client.GetContractABI(
 		context.Background(),
-		&svc.GetContractRequest{Contract: queryContract},
+		&svc.GetContractRequest{ContractId: queryContractID},
 	)
 	assert.NotNil(t, abiResp, "Method should be available")
 	assert.NoError(t, err, "Should not error")
 
 	bytecodeResp, err := client.GetContractBytecode(
 		context.Background(),
-		&svc.GetContractRequest{Contract: queryContract},
+		&svc.GetContractRequest{ContractId: queryContractID},
 	)
 	assert.NotNil(t, bytecodeResp, "Bytecode should be available")
 	assert.NoError(t, err, "Should not error")
 
 	deployedBytecodeResp, err := client.GetContractDeployedBytecode(
 		context.Background(),
-		&svc.GetContractRequest{Contract: queryContract},
+		&svc.GetContractRequest{ContractId: queryContractID},
 	)
 	assert.NotNil(t, deployedBytecodeResp, "DeployedBytecode should be available")
 	assert.NoError(t, err, "Should not error")
@@ -109,4 +106,12 @@ func TestContractRegistryClient(t *testing.T) {
 			IndexedInputCount: 1})
 	assert.NoError(t, err)
 	assert.NotNil(t, eventResp)
+
+	catalogResp, err := client.GetCatalog(context.Background(), &svc.GetCatalogRequest{})
+	assert.NoError(t, err)
+	assert.NotNil(t, catalogResp)
+
+	tagsResp, err := client.GetTags(context.Background(), &svc.GetTagsRequest{Name: "ERC20"})
+	assert.NoError(t, err)
+	assert.NotNil(t, tagsResp)
 }
