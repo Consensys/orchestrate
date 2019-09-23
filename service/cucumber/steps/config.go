@@ -29,7 +29,7 @@ func InitFlags(f *pflag.FlagSet) {
 var (
 	cucumberTimeoutFlag     = "cucumber-steps-timeout"
 	cucumberTimeoutViperKey = "cucumber.steps.timeout"
-	cucumberTimeoutDefault  = 60
+	cucumberTimeoutDefault  = 15
 	cucumberTimeoutEnv      = "CUCUMBER_STEPS_TIMEOUT"
 )
 
@@ -44,7 +44,7 @@ Environment variable: %q`, cucumberTimeoutEnv)
 var (
 	cucumberMiningTimeoutFlag     = "cucumber-steps-miningtimeout"
 	cucumberMiningTimeoutViperKey = "cucumber.steps.miningtimeout"
-	cucumberMiningTimeoutDefault  = 60
+	cucumberMiningTimeoutDefault  = 30
 	cucumberMiningTimeoutEnv      = "CUCUMBER_STEPS_MININGTIMEOUT"
 )
 

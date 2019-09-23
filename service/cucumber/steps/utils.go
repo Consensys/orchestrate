@@ -78,7 +78,7 @@ func ParseEnvelope(m map[string]string) *envelope.Envelope {
 			e.Chain = chain.FromInt(int64(chainID))
 		case "from":
 			e.From = ethereum.HexToAccount(v)
-		case "contractName":
+		case contractName:
 			if e.GetArgs() == nil {
 				e.Args = &envelope.Args{}
 			}
@@ -93,7 +93,7 @@ func ParseEnvelope(m map[string]string) *envelope.Envelope {
 			}
 
 			e.GetArgs().GetCall().GetContract().GetId().Name = v
-		case "contractTag":
+		case contractTag:
 			if e.GetArgs() == nil {
 				e.Args = &envelope.Args{}
 			}

@@ -1,8 +1,12 @@
 package steps
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/ethereum/go-ethereum/common/hexutil"
+
+	abi "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 
 	"github.com/DATA-DOG/godog"
@@ -10,7 +14,10 @@ import (
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+
+	registry "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
+	registryClient "gitlab.com/ConsenSys/client/fr/core-stack/service/contract-registry.git/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/service/chanregistry"
 )
 
@@ -27,8 +34,16 @@ type ScenarioContext struct {
 	// Used to keep alias of contract addresses for example
 	Value map[string]interface{}
 
+	// RegistryClient
+	RegistryClient registry.RegistryClient
+
 	Logger *log.Entry
 }
+
+const (
+	contractName = "contractName"
+	contractTag  = "contractTag"
+)
 
 // initScenarioContext initilize a scenario context - create a random scenario id - initilize a logger enrich with the scenario name - initilize envelope chan
 func (sc *ScenarioContext) initScenarioContext(s interface{}) {
@@ -44,7 +59,7 @@ func (sc *ScenarioContext) initScenarioContext(s interface{}) {
 	sc.ScenarioID = uuid.NewV4().String()
 
 	sc.Logger = log.StandardLogger().WithFields(log.Fields{
-		"Sceneario": scenarioName,
+		"Scenario": scenarioName,
 	})
 
 	topics := []string{
@@ -56,6 +71,7 @@ func (sc *ScenarioContext) initScenarioContext(s interface{}) {
 		viper.GetString("kafka.topic.wallet.generator"),
 		viper.GetString("kafka.topic.wallet.generated"),
 	}
+
 	if primary := viper.GetString("cucumber.chainid.primary"); primary != "" {
 		topics = append(topics, fmt.Sprintf("%s-%s", viper.GetString("kafka.topic.decoder"), primary))
 	}
@@ -70,6 +86,52 @@ func (sc *ScenarioContext) initScenarioContext(s interface{}) {
 	for _, topic := range topics {
 		sc.EnvelopesChan[topic] = r.NewEnvelopeChan(sc.ScenarioID, topic)
 	}
+
+	sc.RegistryClient = registryClient.GlobalContractRegistryClient()
+}
+
+func (sc *ScenarioContext) iStoreTheFollowingContract(rawContracts *gherkin.DataTable) error {
+	head := rawContracts.Rows[0].Cells
+
+	for i := 1; i < len(rawContracts.Rows); i++ {
+		contract := &abi.Contract{Id: &abi.ContractId{}}
+
+		for j, cell := range head {
+			columnName := cell.Value
+			value := rawContracts.Rows[i].Cells[j].Value
+
+			switch columnName {
+			case "abi":
+				// Abi is a UTF-8 encoded string. Therefore, we can make the straightforward transition
+				contract.Abi = []byte(value)
+			case "bytecode":
+				// Bytecode is an hexstring encoded []byte. We are ok at panicking here.
+				contract.Bytecode = hexutil.MustDecode(value)
+			case "deployedBytecode":
+				// Bytecode is an hexstring encoded []byte
+				contract.DeployedBytecode = hexutil.MustDecode(value)
+			case contractName:
+				contract.Id.Name = value
+			case contractTag:
+				contract.Id.Tag = value
+			default:
+				// Ignore
+				log.Fatalf("Got unknown field name %q", columnName)
+			}
+		}
+
+		_, err := sc.RegistryClient.RegisterContract(
+			context.Background(),
+			&registry.RegisterContractRequest{
+				Contract: contract,
+			},
+		)
+
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (sc *ScenarioContext) iHaveTheFollowingEnvelope(rawEnvelopes *gherkin.DataTable) error {
@@ -221,6 +283,7 @@ func (sc *ScenarioContext) theTxcrafterShouldSetTheData() error {
 }
 
 func (sc *ScenarioContext) theTxSignerShouldSetFrom() error {
+
 	topic := viper.GetString("kafka.topic.wallet.generated")
 	e, err := ReadChanWithTimeout(sc.EnvelopesChan[topic], 10, len(sc.Envelopes))
 	if err != nil {
@@ -245,6 +308,7 @@ func (sc *ScenarioContext) theTxSignerShouldSetFrom() error {
 }
 
 func (sc *ScenarioContext) theTxnonceShouldSetTheNonce() error {
+
 	topic := viper.GetString("kafka.topic.signer")
 	e, err := ReadChanWithTimeout(sc.EnvelopesChan[topic], viper.GetInt64("cucumber.steps.timeout"), len(sc.Envelopes))
 	if err != nil {
@@ -431,6 +495,7 @@ func FeatureContext(s *godog.Suite) {
 	s.BeforeScenario(sc.initScenarioContext)
 	s.BeforeStep(sc.beforeStep)
 
+	s.Step(`^I store the following contract`, sc.iStoreTheFollowingContract)
 	s.Step(`^I have the following envelope:$`, sc.iHaveTheFollowingEnvelope)
 	s.Step(`^I send these envelopes to CoreStack$`, sc.iSendTheseEnvelopeToCoreStack)
 	s.Step(`^I send this envelope to tx-signer$`, sc.iSendTheseEnvelopeToTxSigner)

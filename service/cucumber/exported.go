@@ -27,6 +27,8 @@ func Init(ctx context.Context) {
 		// Initialize Steps
 		steps.Init(ctx)
 
+		//
+
 		// Initialize Channel registry
 		chanregistry.Init(ctx)
 
