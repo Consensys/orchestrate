@@ -10,12 +10,12 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/testutils"
 )
 
-type MockTestSuite struct {
+type RedisTestSuite struct {
 	testutils.ContractRegistryTestSuite
 	redisMock *miniredis.Miniredis
 }
 
-func (s *MockTestSuite) SetupTest() {
+func (s *RedisTestSuite) SetupTest() {
 	redisMock, err := miniredis.Run()
 	if err != nil {
 		log.Fatalf("Could not start miniredis: %v", err.Error())
@@ -28,7 +28,7 @@ func (s *MockTestSuite) SetupTest() {
 	s.redisMock = redisMock
 }
 
-func TestMock(t *testing.T) {
-	s := new(MockTestSuite)
+func TestRedis(t *testing.T) {
+	s := new(RedisTestSuite)
 	suite.Run(t, s)
 }

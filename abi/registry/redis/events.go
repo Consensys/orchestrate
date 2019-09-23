@@ -5,6 +5,8 @@ import (
 
 	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
 	ethcommon "github.com/ethereum/go-ethereum/common"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/common"
 )
 
 const eventsPrefix = "EventsPrefix"
@@ -65,7 +67,7 @@ func (e *EventsModel) Registers(conn *Conn,
 	for eventKey, event := range events {
 		eventKeys = append(eventKeys, eventKey)
 		eventIDs = append(eventIDs, event.Id())
-		indexedCounts = append(indexedCounts, getIndexedCount(event))
+		indexedCounts = append(indexedCounts, common.GetIndexedCount(event))
 	}
 
 	// Push all events to the new contract's bytecodehash

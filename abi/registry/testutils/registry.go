@@ -13,7 +13,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
 	ierror "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/error"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/utils"
+	rcommon "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/common"
 	"golang.org/x/net/context"
 )
 
@@ -100,15 +100,14 @@ var ERC20Contract = &abi.Contract{
 var ERC20ContractBis = &abi.Contract{
 	Id: &abi.ContractId{
 		Name: "ERC20",
-		Tag:  "v1.0.1",
 	},
 	Abi:              ERC20bis,
 	Bytecode:         []byte{1, 3},
 	DeployedBytecode: []byte{1, 2, 4},
 }
 
-var methodJSONs, eventJSONs, _ = utils.ParseJSONABI(ERC20Contract.Abi)
-var _, eventJSONsBis, _ = utils.ParseJSONABI(ERC20ContractBis.Abi)
+var methodJSONs, eventJSONs, _ = rcommon.ParseJSONABI(ERC20Contract.Abi)
+var _, eventJSONsBis, _ = rcommon.ParseJSONABI(ERC20ContractBis.Abi)
 
 // ContractInstance is a unittest value
 var ContractInstance = common.AccountInstance{
@@ -263,7 +262,7 @@ func (s *ContractRegistryTestSuite) TestContractRegistryBySig() {
 	// Get Tags
 	tagsResp, err := s.R.GetTags(context.Background(), &svc.GetTagsRequest{Name: "ERC20"})
 	assert.NoError(s.T(), err)
-	assert.Equal(s.T(), []string{"v1.0.0", "v1.0.1"}, tagsResp.GetTags())
+	assert.Equal(s.T(), []string{"latest", "v1.0.0"}, tagsResp.GetTags())
 
 	// Get MethodBySelector on default
 	methodResp, err := s.R.GetMethodsBySelector(context.Background(),

@@ -1,13 +1,14 @@
-package utils
+package common
 
 import (
 	"encoding/json"
 
+	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
 	pkgJson "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 )
 
-const component = "registry-utils"
+const component = "registry-common"
 
 // SigHashToSelector returns the selector associated to a signature hash
 func SigHashToSelector(data []byte) (res [4]byte) {
@@ -63,4 +64,14 @@ func ParseJSONABI(data []byte) (methods, events map[string][]byte, err error) {
 		}
 	}
 	return methods, events, nil
+}
+
+// GetIndexedCount returns the count of indexed inputs in the event
+func GetIndexedCount(event ethabi.Event) (indexedInputCount uint) {
+	for i := range event.Inputs {
+		if event.Inputs[i].Indexed {
+			indexedInputCount++
+		}
+	}
+	return indexedInputCount
 }

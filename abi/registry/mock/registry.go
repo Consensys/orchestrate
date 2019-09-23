@@ -13,7 +13,7 @@ import (
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/utils"
+	rcommon "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/common"
 )
 
 // ContractRegistry stores contract ABI and bytecode in memory
@@ -60,13 +60,20 @@ func NewRegistry() *ContractRegistry {
 func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.RegisterContractRequest) (*svc.RegisterContractResponse, error) {
 	contract := req.GetContract()
 
+	name, tag, err := rcommon.CheckExtractNameTag(contract.Id)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
 	if contract.Bytecode != nil {
 		bytecodeHash := crypto.Keccak256Hash(contract.Bytecode)
 
-		if r.contractHashes[contract.GetName()] == nil {
-			r.contractHashes[contract.GetName()] = make(map[string]ethcommon.Hash)
+		if r.contractHashes[name] == nil {
+			r.contractHashes[name] = make(map[string]ethcommon.Hash)
 		}
-		r.contractHashes[contract.GetName()][contract.GetTag()] = bytecodeHash
+
+		r.contractHashes[name][tag] = bytecodeHash
+		r.contractHashes[name]["latest"] = bytecodeHash
 
 		r.artifacts[bytecodeHash] = &artifact{
 			Abi:              contract.Abi,
@@ -81,7 +88,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(component)
 		}
-		methodJSONs, eventJSONs, err := utils.ParseJSONABI(contract.Abi)
+		methodJSONs, eventJSONs, err := rcommon.ParseJSONABI(contract.Abi)
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(component)
 		}
@@ -89,7 +96,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 		for _, m := range contractAbi.Methods {
 			// Register methods for this bytecode
 			method := m
-			sel := utils.SigHashToSelector(method.Id())
+			sel := rcommon.SigHashToSelector(method.Id())
 			if contract.DeployedBytecode != nil {
 				// Init map
 				if r.methods[codeHash] == nil {
@@ -168,12 +175,22 @@ func (r *ContractRegistry) DeleteArtifact(ctx context.Context, req *svc.DeleteAr
 }
 
 func (r *ContractRegistry) getArtifact(id *abi.ContractId) (a *artifact, ok bool) {
-	a, ok = r.artifacts[r.contractHashes[id.GetName()][id.GetTag()]]
+	name, tag, err := rcommon.CheckExtractNameTag(id)
+	if err != nil {
+		return nil, false
+	}
+
+	a, ok = r.artifacts[r.contractHashes[name][tag]]
 	return a, ok
 }
 
 func (r *ContractRegistry) getContract(id *abi.ContractId) (c *abi.Contract, ok bool) {
-	a, ok := r.artifacts[r.contractHashes[id.GetName()][id.GetTag()]]
+	name, tag, err := rcommon.CheckExtractNameTag(id)
+	if err != nil {
+		return nil, false
+	}
+
+	a, ok := r.artifacts[r.contractHashes[name][tag]]
 	if !ok {
 		return nil, ok
 	}
@@ -186,12 +203,19 @@ func (r *ContractRegistry) getContract(id *abi.ContractId) (c *abi.Contract, ok 
 	}, ok
 }
 
-// GetContractABI loads a contract
+// GetContract loads a contract
 func (r *ContractRegistry) GetContract(ctx context.Context, req *svc.GetContractRequest) (*svc.GetContractResponse, error) {
-	c, ok := r.getContract(req.GetContractId())
+	id := req.GetContractId()
+	_, _, err := rcommon.CheckExtractNameTag(id)
+	if err != nil {
+		return nil, err
+	}
+
+	c, ok := r.getContract(id)
 	if !ok {
 		return nil, errors.NotFoundError("contract not found").SetComponent(component)
 	}
+
 	return &svc.GetContractResponse{
 		Contract: c,
 	}, nil
@@ -199,10 +223,17 @@ func (r *ContractRegistry) GetContract(ctx context.Context, req *svc.GetContract
 
 // GetContractABI loads contract ABI
 func (r *ContractRegistry) GetContractABI(ctx context.Context, req *svc.GetContractRequest) (*svc.GetContractABIResponse, error) {
-	a, ok := r.getArtifact(req.GetContractId())
+	id := req.GetContractId()
+	_, _, err := rcommon.CheckExtractNameTag(id)
+	if err != nil {
+		return nil, err
+	}
+
+	a, ok := r.getArtifact(id)
 	if !ok {
 		return nil, errors.NotFoundError("contract ABI not found").SetComponent(component)
 	}
+
 	return &svc.GetContractABIResponse{
 		Abi: a.Abi,
 	}, nil
@@ -210,7 +241,13 @@ func (r *ContractRegistry) GetContractABI(ctx context.Context, req *svc.GetContr
 
 // GetContractBytecode loads contract bytecode
 func (r *ContractRegistry) GetContractBytecode(ctx context.Context, req *svc.GetContractRequest) (*svc.GetContractBytecodeResponse, error) {
-	a, ok := r.getArtifact(req.GetContractId())
+	id := req.GetContractId()
+	_, _, err := rcommon.CheckExtractNameTag(id)
+	if err != nil {
+		return nil, err
+	}
+
+	a, ok := r.getArtifact(id)
 	if !ok {
 		return nil, errors.NotFoundError("contract bytecode not found").SetComponent(component)
 	}
@@ -221,7 +258,13 @@ func (r *ContractRegistry) GetContractBytecode(ctx context.Context, req *svc.Get
 
 // GetContractDeployedBytecode loads contract deployed bytecode
 func (r *ContractRegistry) GetContractDeployedBytecode(ctx context.Context, req *svc.GetContractRequest) (*svc.GetContractDeployedBytecodeResponse, error) {
-	a, ok := r.getArtifact(req.GetContractId())
+	id := req.GetContractId()
+	_, _, err := rcommon.CheckExtractNameTag(id)
+	if err != nil {
+		return nil, err
+	}
+
+	a, ok := r.getArtifact(id)
 	if !ok {
 		return nil, errors.NotFoundError("contract deployed bytecode not found").SetComponent(component)
 	}
@@ -260,7 +303,7 @@ func (r *ContractRegistry) getCodehash(contract common.AccountInstance) (ethcomm
 
 // GetMethodsBySelector load method using 4 bytes unique selector and the address of the contract
 func (r *ContractRegistry) GetMethodsBySelector(ctx context.Context, req *svc.GetMethodsBySelectorRequest) (*svc.GetMethodsBySelectorResponse, error) {
-	sel := utils.SigHashToSelector(req.GetSelector())
+	sel := rcommon.SigHashToSelector(req.GetSelector())
 
 	// Search in specific method storage
 	codehash, err := r.getCodehash(*req.GetAccountInstance())
@@ -327,7 +370,7 @@ func (r *ContractRegistry) GetCatalog(ctx context.Context, req *svc.GetCatalogRe
 	return resp, nil
 }
 
-// Returns a list of all tags available for a contract name.
+// GetTags returns a list of all tags available for a contract name.
 func (r *ContractRegistry) GetTags(ctx context.Context, req *svc.GetTagsRequest) (*svc.GetTagsResponse, error) {
 	if _, ok := r.contractHashes[req.GetName()]; !ok {
 		return nil, errors.NotFoundError("No Tags found for requested contract name").ExtendComponent(component)

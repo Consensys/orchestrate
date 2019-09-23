@@ -2,10 +2,8 @@ package redis
 
 import (
 	"context"
+	"sort"
 
-	// log "github.com/sirupsen/logrus"
-
-	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	remote "github.com/gomodule/redigo/redis"
@@ -13,14 +11,10 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/utils"
+	common "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/common"
 )
 
 var (
-	defaultTag      = "latest"
 	defaultCodeHash = ethcommon.Hash{}
 )
 
@@ -49,12 +43,12 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 
 	contract := req.GetContract()
 
-	bytecode, deployedBytecode, abiRaw, err := checkExtractArtifacts(contract)
+	bytecode, deployedBytecode, abiRaw, err := common.CheckExtractArtifacts(contract)
 	if err != nil {
 		return nil, err
 	}
 
-	name, tag, err := checkExtractNameTag(contract)
+	name, tag, err := common.CheckExtractNameTag(contract.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +60,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 	}
 
 	// Attempts deserializing methods and events
-	methodJSONs, eventJSONs, err := utils.ParseJSONABI(abiRaw)
+	methodJSONs, eventJSONs, err := common.ParseJSONABI(abiRaw)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -140,14 +134,14 @@ func (r *ContractRegistry) getContract(name, tag string) (*abi.Contract, error) 
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	} else if !ok {
-		return nil, errors.NotFoundError("No contract found for given name and tags").SetComponent(component)
+		return nil, errors.NotFoundError("No contract bytecode hash found for given name and tags %v:%v", name, tag).SetComponent(component)
 	}
 
 	artifact, ok, err := Artifact.Get(conn, byteCodeHash)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	} else if !ok {
-		return nil, errors.NotFoundError("No contract found for given name and tags").SetComponent(component)
+		return nil, errors.NotFoundError("No artifact found for found bytecode hash %v. This means that the state of the database is inconsistent", byteCodeHash).SetComponent(component)
 	}
 
 	return artifact, nil
@@ -161,7 +155,12 @@ func (r *ContractRegistry) GetContract(ctx context.Context, req *svc.GetContract
 		return nil, errors.InvalidArgError("No contract ID found in request").ExtendComponent(component)
 	}
 
-	contract, err := r.getContract(contractID.Name, contractID.Tag)
+	name, tag, err := common.CheckExtractNameTag(contractID)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	contract, err := r.getContract(name, tag)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -179,7 +178,12 @@ func (r *ContractRegistry) GetContractABI(ctx context.Context, req *svc.GetContr
 		return nil, errors.InvalidArgError("No contract ID found in request").ExtendComponent(component)
 	}
 
-	contract, err := r.getContract(contractID.Name, contractID.Tag)
+	name, tag, err := common.CheckExtractNameTag(contractID)
+	if err != nil {
+		return nil, err
+	}
+
+	contract, err := r.getContract(name, tag)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -197,7 +201,12 @@ func (r *ContractRegistry) GetContractBytecode(ctx context.Context, req *svc.Get
 		return nil, errors.InvalidArgError("No contract ID found in request").ExtendComponent(component)
 	}
 
-	contract, err := r.getContract(contractID.Name, contractID.Tag)
+	name, tag, err := common.CheckExtractNameTag(contractID)
+	if err != nil {
+		return nil, err
+	}
+
+	contract, err := r.getContract(name, tag)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -215,7 +224,12 @@ func (r *ContractRegistry) GetContractDeployedBytecode(ctx context.Context, req 
 		return nil, errors.InvalidArgError("No contract ID found in request").ExtendComponent(component)
 	}
 
-	contract, err := r.getContract(contractID.Name, contractID.Tag)
+	name, tag, err := common.CheckExtractNameTag(contractID)
+	if err != nil {
+		return nil, err
+	}
+
+	contract, err := r.getContract(name, tag)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -236,14 +250,14 @@ func (r *ContractRegistry) GetMethodsBySelector(ctx context.Context, req *svc.Ge
 		return nil, errors.InvalidArgError("No selector found in request").ExtendComponent(component)
 	}
 
-	selector := utils.SigHashToSelector(req.GetSelector())
+	selector := common.SigHashToSelector(req.GetSelector())
 
 	// Flag used to detect if we need to query with the default code hash or not
 	codeFound := false
 	deployedByteCodeHash := defaultCodeHash
 
-	// Check if the address and chainID have been provided in the request
-	accountChain, address, err := checkExtractChainAddress(req.GetAccountInstance())
+	// common.Check if the address and chainID have been provided in the request
+	accountChain, address, err := common.CheckExtractChainAddress(req.GetAccountInstance())
 	addressChainProvided := err == nil
 
 	if addressChainProvided {
@@ -292,8 +306,8 @@ func (r *ContractRegistry) GetEventsBySigHash(ctx context.Context, req *svc.GetE
 	codeFound := false
 	deployedByteCodeHash := defaultCodeHash
 
-	// Check if the address and chainID have been provided in the request
-	accountChain, address, err := checkExtractChainAddress(req.GetAccountInstance())
+	// common.Check if the address and chainID have been provided in the request
+	accountChain, address, err := common.CheckExtractChainAddress(req.GetAccountInstance())
 	addressChainProvided := err == nil
 
 	if addressChainProvided {
@@ -339,12 +353,13 @@ func (r *ContractRegistry) GetCatalog(ctx context.Context, req *svc.GetCatalogRe
 		return nil, err
 	}
 
+	sort.Strings(catalog)
 	return &svc.GetCatalogResponse{
 		Names: catalog,
 	}, nil
 }
 
-// Returns a list of all tags available for a contract name.
+// GetTags returns a list of all tags available for a contract name.
 func (r *ContractRegistry) GetTags(ctx context.Context, req *svc.GetTagsRequest) (*svc.GetTagsResponse, error) {
 	conn := r.Conn()
 	defer conn.Close()
@@ -363,6 +378,7 @@ func (r *ContractRegistry) GetTags(ctx context.Context, req *svc.GetTagsRequest)
 		return nil, errors.NotFoundError("No Tags found for requested contract name").ExtendComponent(component)
 	}
 
+	sort.Strings(tags)
 	return &svc.GetTagsResponse{
 		Tags: tags,
 	}, nil
@@ -380,7 +396,7 @@ func (r *ContractRegistry) SetAccountCodeHash(ctx context.Context, req *svc.SetA
 
 	deployedByteCodeHash := ethcommon.BytesToHash(hashBytes)
 
-	accountChain, address, err := checkExtractChainAddress(req.GetAccountInstance())
+	accountChain, address, err := common.CheckExtractChainAddress(req.GetAccountInstance())
 	if err != nil {
 		return nil, err
 	}
@@ -391,65 +407,4 @@ func (r *ContractRegistry) SetAccountCodeHash(ctx context.Context, req *svc.SetA
 	}
 
 	return &svc.SetAccountCodeHashResponse{}, nil
-}
-
-// getIndexedCount returns the count of indexed inputs in the event
-func getIndexedCount(event ethabi.Event) uint {
-	var indexedInputCount uint
-	for i := range event.Inputs {
-		if event.Inputs[i].Indexed {
-			indexedInputCount++
-		}
-	}
-	return indexedInputCount
-}
-
-func checkExtractChainAddress(accountInstance *common.AccountInstance) (*chain.Chain, *ethereum.Account, error) {
-	if accountInstance == nil {
-		return nil, nil, errors.InvalidArgError("No account instance found in request").ExtendComponent(component)
-	}
-
-	accountChain := accountInstance.GetChain()
-	if accountChain == nil {
-		return nil, nil, errors.InvalidArgError("No ethereum chainID found in request").ExtendComponent(component)
-	}
-
-	address := accountInstance.GetAccount()
-	if address == nil {
-		return nil, nil, errors.InvalidArgError("No ethereum account instance found in request").ExtendComponent(component)
-	}
-
-	return accountChain, address, nil
-}
-
-func checkExtractArtifacts(contract *abi.Contract) (bytecode, deployedBytecode, abiBytes []byte, err error) {
-
-	if contract.Bytecode == nil {
-		return []byte{}, []byte{}, []byte{}, errors.InvalidArgError("No contract bytecode provided in request").ExtendComponent(component)
-	}
-
-	if contract.DeployedBytecode == nil {
-		return []byte{}, []byte{}, []byte{}, errors.InvalidArgError("No contract deployed bytecode provided in request").ExtendComponent(component)
-	}
-
-	if len(contract.Abi) == 0 {
-		return []byte{}, []byte{}, []byte{}, errors.InvalidArgError("No abi provided in request").ExtendComponent(component)
-	}
-
-	return contract.Bytecode, contract.DeployedBytecode, contract.Abi, nil
-}
-
-func checkExtractNameTag(contract *abi.Contract) (name, tag string, err error) {
-	name = contract.GetName()
-	if name == "" {
-		return "", "", errors.InvalidArgError("No abi provided in request").ExtendComponent(component)
-	}
-
-	// Set Tag to latest if it was not set in the request
-	tag = contract.GetTag()
-	if tag == "" {
-		tag = defaultTag
-	}
-
-	return name, tag, nil
 }

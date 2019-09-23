@@ -6,7 +6,7 @@ import (
 	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/common"
 )
 
 const methodsPrefix = "MethodsPrefix"
@@ -61,7 +61,7 @@ func (m *MethodsModel) Registers(
 	selectors := make([][4]byte, 0, len(methods))
 
 	for methodKey, method := range methods {
-		selector := utils.SigHashToSelector(method.Id())
+		selector := common.SigHashToSelector(method.Id())
 		methodKeys = append(methodKeys, methodKey)
 		selectors = append(selectors, selector)
 	}
