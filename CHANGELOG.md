@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.7.0
+
+*Released on September 23th 2019*
+
+- [FEAT] Allow decoding of some logs even if the decoding of a log failed
+- [FIX] Fix attempt to buff into a nil pointed object
+
 ### Version 0.6.2
 
 *Released on August 27th 2019*

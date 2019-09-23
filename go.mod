@@ -12,5 +12,6 @@ require (
 	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.9.1
 	gitlab.com/ConsenSys/client/fr/core-stack/service/contract-registry.git v0.2.1
 	gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.7.1
-	google.golang.org/genproto v0.0.0-20180831171423-11092d34479b // indirect
 )
+
+go 1.13
