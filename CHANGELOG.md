@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.2.2
+
+*Released on September 23th 2019*
+
+- [FIX] Bump to ethereum v0.7.2
+
 ### Version 0.2.1
 
 *Released on September 19th 2019*

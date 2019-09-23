@@ -9,6 +9,8 @@ require (
 	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.3.0
 	gitlab.com/ConsenSys/client/fr/core-stack/pkg.git v0.9.1
-	gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.7.1
+	gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git v0.7.2
 	google.golang.org/grpc v1.21.1
 )
+
+go 1.13

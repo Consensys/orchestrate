@@ -14,7 +14,7 @@ endif
 
 # Testing
 run-coverage: ## Generate global code coverage report
-	@sh scripts/coverage.sh $(PACKAGES)
+	@bash scripts/coverage.sh $(PACKAGES)
 
 coverage: run-coverage ## Generate and open coverage report
 	$(OPEN) coverage.html
