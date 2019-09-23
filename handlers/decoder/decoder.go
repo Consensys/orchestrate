@@ -51,7 +51,8 @@ func Decoder(r contractregistry.RegistryClient) engine.HandlerFunc {
 
 			// Decode log
 			var mapping map[string]string
-			var event *ethAbi.Event
+			event := &ethAbi.Event{}
+
 			if len(eventResp.GetEvent()) != 0 {
 				err = json.Unmarshal(eventResp.GetEvent(), event)
 				if err != nil {
