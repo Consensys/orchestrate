@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Version 0.7.2
+
+*Released on September 23th 2019*
+
+- [FIX] Add consistent input checks when calling registry
+- [FIX] Force tags & names ordering
+
 ### Version 0.7.1
 
 *Released on September 18th 2019*
