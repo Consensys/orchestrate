@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.6.2
+
+*Released on September 24th 2019*
+
+- [FEAT] Call contract-registry to fetch bytecode
+
 ### Version 0.6.1
 
 *Released on August 27th 2019*
@@ -20,7 +26,7 @@
 
 - [FEAT] Update `ethereum` to v0.6.6
 - [FEAT] Update `pkg` to v0.7.0
-- [FEAT] Add opentracing handler
+- [FEAT] Add OpenTracing handler
 
 ### Version 0.5.2
 

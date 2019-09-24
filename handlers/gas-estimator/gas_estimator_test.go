@@ -57,7 +57,7 @@ func (s *EstimatorTestSuite) SetupSuite() {
 
 func (s *EstimatorTestSuite) TestEstimator() {
 	rounds := 100
-	txctxs := []*engine.TxContext{}
+	var txctxs []*engine.TxContext
 	for i := 0; i < rounds; i++ {
 		txctxs = append(txctxs, makeGasEstimatorContext(i))
 	}
