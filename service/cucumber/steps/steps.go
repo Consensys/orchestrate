@@ -70,7 +70,6 @@ func (sc *ScenarioContext) initScenarioContext(s interface{}) {
 	for _, topic := range topics {
 		sc.EnvelopesChan[topic] = r.NewEnvelopeChan(sc.ScenarioID, topic)
 	}
-
 }
 
 func (sc *ScenarioContext) iHaveTheFollowingEnvelope(rawEnvelopes *gherkin.DataTable) error {
@@ -105,7 +104,7 @@ func (sc *ScenarioContext) iHaveTheFollowingEnvelope(rawEnvelopes *gherkin.DataT
 		}
 
 		mapEnvelope["ScenarioID"] = sc.ScenarioID
-		e := EnvelopeCrafter(mapEnvelope)
+		e := ParseEnvelope(mapEnvelope)
 		sc.Envelopes[mapEnvelope["metadataID"]] = e
 	}
 
@@ -117,6 +116,21 @@ func (sc *ScenarioContext) iHaveTheFollowingEnvelope(rawEnvelopes *gherkin.DataT
 func (sc *ScenarioContext) iSendTheseEnvelopeToCoreStack() error {
 
 	topic := viper.GetString("kafka.topic.crafter")
+	for _, e := range sc.Envelopes {
+		err := SendEnvelope(e, topic)
+		if err != nil {
+			sc.Logger.Errorf("cucumber: step failed got error %q", err)
+			return err
+		}
+	}
+
+	sc.Logger.Info("cucumber: step check")
+
+	return nil
+}
+
+func (sc *ScenarioContext) iSendTheseEnvelopeToTxSigner() error {
+	topic := viper.GetString("kafka.topic.signer")
 	for _, e := range sc.Envelopes {
 		err := SendEnvelope(e, topic)
 		if err != nil {
@@ -207,7 +221,6 @@ func (sc *ScenarioContext) theTxcrafterShouldSetTheData() error {
 }
 
 func (sc *ScenarioContext) theTxSignerShouldSetFrom() error {
-
 	topic := viper.GetString("kafka.topic.wallet.generated")
 	e, err := ReadChanWithTimeout(sc.EnvelopesChan[topic], 10, len(sc.Envelopes))
 	if err != nil {
@@ -232,7 +245,6 @@ func (sc *ScenarioContext) theTxSignerShouldSetFrom() error {
 }
 
 func (sc *ScenarioContext) theTxnonceShouldSetTheNonce() error {
-
 	topic := viper.GetString("kafka.topic.signer")
 	e, err := ReadChanWithTimeout(sc.EnvelopesChan[topic], viper.GetInt64("cucumber.steps.timeout"), len(sc.Envelopes))
 	if err != nil {
@@ -396,6 +408,7 @@ func (sc *ScenarioContext) iShouldCatchTheirContractAddresses() error {
 		if v.GetReceipt().GetContractAddress() == nil {
 			return fmt.Errorf("could not deploy contract")
 		}
+
 		sc.Value[v.GetMetadata().GetExtra()["AliasContractInstance"]] = v.GetReceipt().GetContractAddress()
 
 		// Envelope processed - remove from scenario context
@@ -420,6 +433,7 @@ func FeatureContext(s *godog.Suite) {
 
 	s.Step(`^I have the following envelope:$`, sc.iHaveTheFollowingEnvelope)
 	s.Step(`^I send these envelopes to CoreStack$`, sc.iSendTheseEnvelopeToCoreStack)
+	s.Step(`^I send this envelope to tx-signer$`, sc.iSendTheseEnvelopeToTxSigner)
 	s.Step(`^CoreStack should receive envelopes$`, sc.coreStackShouldReceiveEnvelopes)
 	s.Step(`^the tx-crafter should set the data$`, sc.theTxcrafterShouldSetTheData)
 	s.Step(`^the tx-nonce should set the nonce$`, sc.theTxnonceShouldSetTheNonce)

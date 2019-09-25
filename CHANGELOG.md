@@ -1,5 +1,10 @@
 # CHANGELOG
 
+### Version 
+
+- [FEAT] Add tests for invalid nonce
+- [FIX] Avoid blocking cucumber scenario executions when not consuming from every topic
+ 
 ### Version 0.4.2
 
 *Unreleased*

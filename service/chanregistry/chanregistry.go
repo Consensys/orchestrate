@@ -30,7 +30,7 @@ func (c *EnvelopeChanRegistry) NewEnvelopeChan(scenarioID, topic string) chan *e
 		c.EnvelopeChan[scenarioID] = make(map[string]chan *envelope.Envelope)
 	}
 	if c.EnvelopeChan[scenarioID][topic] == nil {
-		c.EnvelopeChan[scenarioID][topic] = make(chan *envelope.Envelope)
+		c.EnvelopeChan[scenarioID][topic] = make(chan *envelope.Envelope, 30)
 	}
 	return c.EnvelopeChan[scenarioID][topic]
 }

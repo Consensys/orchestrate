@@ -65,11 +65,9 @@ func SendEnvelope(e *envelope.Envelope, topic string) error {
 	return nil
 }
 
-// EnvelopeCrafter crafts a envelope from a string mapping
-func EnvelopeCrafter(m map[string]string) *envelope.Envelope {
-
+// ParseEnvelope parses a string mapping into an envelope
+func ParseEnvelope(m map[string]string) *envelope.Envelope {
 	e := &envelope.Envelope{}
-
 	for k, v := range m {
 		switch k {
 		case "chainId":
@@ -223,6 +221,19 @@ func EnvelopeCrafter(m map[string]string) *envelope.Envelope {
 					int64(protocolValue),
 				),
 			}
+		case "nonce":
+			nonce, err := strconv.ParseUint(v, 10, 64)
+			if err != nil {
+				panic("Failed to parse nonce")
+			}
+			if e.GetTx() == nil {
+				e.Tx = &ethereum.Transaction{}
+			}
+			if e.GetTx().GetTxData() == nil {
+				e.Tx.TxData = &ethereum.TxData{}
+			}
+
+			e.GetTx().GetTxData().SetNonce(nonce)
 		default:
 			if e.GetMetadata() != nil {
 				if e.GetMetadata().GetExtra() != nil {
