@@ -30,8 +30,8 @@ func Init(ctx context.Context) {
 		// Initialize the eth client
 		ethclient.Init(ctx)
 
-		// Create Nonce Handler
-		handler = Handler(nonce.GlobalNonce(), ethclient.GlobalClient().PendingNonceAt)
+		// Create Nonce handler
+		handler = Nonce(nonce.GlobalManager(), ethclient.GlobalClient())
 
 		log.Infof("logger: handler ready")
 	})

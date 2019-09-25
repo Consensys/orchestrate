@@ -4,172 +4,159 @@ import (
 	"context"
 	"fmt"
 	"math/big"
-	"sync"
-	"sync/atomic"
+	"strings"
 	"testing"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 
+	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/nonce.git/nonce/mock"
 )
 
-var noErrorChainID = int64(0)
-var error1ChainID = int64(1)
-var error2ChainID = int64(2)
-var error3ChainID = int64(3)
-var error4ChainID = int64(4)
-var error5ChainID = int64(5)
-var chainIDs = []int64{
-	noErrorChainID,
-	error1ChainID,
-	error2ChainID,
-	error3ChainID,
-	error4ChainID,
-	error5ChainID,
-}
-var nonceInCacheAddress = "0x1234608A02a7A15fd6689D6DaD560C44E9ab61Ff"
-var nonceNotInCacheAddress = "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"
-var addresses = []string{
-	nonceInCacheAddress,
-	nonceNotInCacheAddress,
-}
-var cacheNonce = uint64(53)
-var chainNonce = uint64(42)
+type MockChainStateReader struct{}
 
-type MockNonceGetter struct {
-	counter uint64
+func (r *MockChainStateReader) BalanceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, blockNumber *big.Int) (*big.Int, error) {
+	return big.NewInt(0), nil
 }
 
-func (g *MockNonceGetter) Get(ctx context.Context, chainID *big.Int, a ethcommon.Address) (uint64, error) {
-	atomic.AddUint64(&g.counter, 1)
-	if chainID.Int64() == error1ChainID {
-		// Simulate error on chain 0
+func (r *MockChainStateReader) StorageAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, key ethcommon.Hash, blockNumber *big.Int) ([]byte, error) {
+	return []byte{}, nil
+}
+
+func (r *MockChainStateReader) CodeAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, blockNumber *big.Int) ([]byte, error) {
+	return []byte{}, nil
+}
+
+func (r *MockChainStateReader) NonceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, blockNumber *big.Int) (uint64, error) {
+	return 0, nil
+}
+
+func (r *MockChainStateReader) PendingBalanceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address) (*big.Int, error) {
+	return big.NewInt(0), nil
+}
+
+func (r *MockChainStateReader) PendingStorageAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, key ethcommon.Hash) ([]byte, error) {
+	return []byte{}, nil
+}
+
+func (r *MockChainStateReader) PendingCodeAt(ctx context.Context, chainID *big.Int, account ethcommon.Address) ([]byte, error) {
+	return []byte{}, nil
+}
+
+func (r *MockChainStateReader) PendingNonceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address) (uint64, error) {
+	if chainID.Text(10) == "0" {
+		// Simulate error
 		return 0, fmt.Errorf("unknown chain")
 	}
-	return chainNonce, nil
+
+	return 10, nil
 }
 
-type MockNonce struct {
-	mux *sync.Mutex
+type MockNonceManager struct {
+	mock.NonceManager
 }
 
-func (nm *MockNonce) Get(chainID *big.Int, a *ethcommon.Address) (c uint64, inCache bool, e error) {
-	if chainID.Int64() == error2ChainID {
+func (nm *MockNonceManager) GetLastAttributed(key string) (value uint64, ok bool, err error) {
+	if strings.Contains(key, "error-on-get") {
 		// Simulate error
-		return 0, false, fmt.Errorf(" Error retrieving nonce")
+		return 0, false, fmt.Errorf("could not get nonce")
 	}
-
-	if a.Hex() == nonceNotInCacheAddress {
-		// Simulate unknown nonce
-		return 0, false, nil
-	}
-
-	return cacheNonce, true, nil
+	return nm.NonceManager.GetLastAttributed(key)
 }
 
-func (nm *MockNonce) Set(chainID *big.Int, a *ethcommon.Address, value uint64) error {
-	if chainID.Int64() == error3ChainID {
+func (nm *MockNonceManager) SetLastAttributed(key string, value uint64) error {
+	if strings.Contains(key, "error-on-set") {
 		// Simulate error
-		return fmt.Errorf(" Error setting nonce")
+		return fmt.Errorf("could not set nonce")
 	}
+	_ = nm.NonceManager.SetLastAttributed(key, value)
 	return nil
 }
 
-func (nm *MockNonce) Lock(chainID *big.Int, a *ethcommon.Address) (string, error) {
-	if chainID.Int64() == error4ChainID {
+func (nm *MockNonceManager) IncrLastAttributed(key string) error {
+	if strings.Contains(key, "error-on-incr") {
 		// Simulate error
-		return "", fmt.Errorf(" Error locking nonce")
+		return fmt.Errorf("could not increment nonce")
 	}
-	nm.mux.Lock()
-	return "random", nil
-}
-
-func (nm *MockNonce) Unlock(chainID *big.Int, a *ethcommon.Address, lockSig string) error {
-	nm.mux.Unlock()
-	if chainID.Int64() == error5ChainID {
-		// Simulate error
-		return fmt.Errorf(" Error unlocking nonce")
-	}
+	_ = nm.NonceManager.IncrLastAttributed(key)
 	return nil
 }
 
-// TODO : implement tests
-func makeNonceContext(chainID int64, address string) *engine.TxContext {
-	ctx := engine.NewTxContext()
-	ctx.Reset()
-	ctx.Logger = log.NewEntry(log.StandardLogger())
-	ctx.Envelope.Chain = chain.FromInt(chainID)
-	ctx.Envelope.From = ethereum.HexToAccount(address)
-	ctx.Envelope.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{}}
+type mockMsg string
 
-	switch chainID {
-	case noErrorChainID:
-		ctx.Set("expectedErrorCount", 0)
-	default:
-		ctx.Set("expectedErrorCount", 1)
-	}
+func (m mockMsg) Entrypoint() string    { return "" }
+func (m mockMsg) Value() []byte         { return []byte{} }
+func (m mockMsg) Key() []byte           { return []byte(m) }
+func (m mockMsg) Header() engine.Header { return &header{} }
 
-	if chainID == error1ChainID && address == nonceInCacheAddress {
-		// If nonce is in cache, there is no calibration
-		// Thus an error when getting nonce from chain is not seen
-		ctx.Set("expectedErrorCount", 0)
-	}
+type header struct{}
 
-	switch address {
-	case nonceInCacheAddress:
-		ctx.Set("expectedNonce", cacheNonce)
-	default:
-		ctx.Set("expectedNonce", chainNonce)
-	}
+func (h *header) Add(key, value string) {}
+func (h *header) Del(key string)        {}
+func (h *header) Get(key string) string { return "" }
+func (h *header) Set(key, value string) {}
 
-	return ctx
+func makeNonceContext(chainID int64, key string, expectedNonce uint64, expectedErrorCount int) *engine.TxContext {
+	txctx := engine.NewTxContext()
+	txctx.Reset()
+	txctx.Logger = log.NewEntry(log.StandardLogger())
+	txctx.Envelope.From = &ethereum.Account{Raw: []byte{}}
+	txctx.Envelope.Chain = chain.FromInt(chainID)
+	txctx.Envelope.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{}}
+	txctx.In = mockMsg(key)
+
+	txctx.Set("expectedErrorCount", expectedErrorCount)
+	txctx.Set("expectedNonce", expectedNonce)
+
+	return txctx
+}
+
+func assertTxContext(t *testing.T, txctx *engine.TxContext) {
+	assert.Len(t, txctx.Envelope.GetErrors(), txctx.Get("expectedErrorCount").(int), "Error count should be correct")
+	assert.Equal(t, txctx.Get("expectedNonce").(uint64), txctx.Envelope.GetTx().GetTxData().GetNonce(), "Nonce should be correct")
 }
 
 func TestNonceHandler(t *testing.T) {
-	viper.Set("redis.nonce.expiration.time", "3")
-	viper.Set("redis.nonce.expiration.time", "3")
-	nm := MockNonce{
-		mux: &sync.Mutex{},
-	}
-	ng := MockNonceGetter{}
-	nh := Handler(&nm, ng.Get)
+	m := mock.NewNonceManager()
+	nm := &MockNonceManager{*m}
+	h := Nonce(nm, &MockChainStateReader{})
 
-	rounds := 10
-	outs := make(chan *engine.TxContext, rounds*len(addresses)*len(chainIDs))
-	wg := &sync.WaitGroup{}
-	for i := 0; i < rounds; i++ {
-		for _, a := range addresses {
-			for _, c := range chainIDs {
-				wg.Add(1)
-				ctx := makeNonceContext(c, a)
-				go func(ctx *engine.TxContext) {
-					defer wg.Done()
-					nh(ctx)
-					outs <- ctx
-				}(ctx)
-			}
-		}
-	}
-	wg.Wait()
-	close(outs)
+	testKey1 := "key1"
+	// On 1st execution nonce should be 10 (as the mock client returns always return pending nonce 10)
+	txctx := makeNonceContext(1, testKey1, 10, 0)
+	h(txctx)
+	assertTxContext(t, txctx)
 
-	if len(outs) != rounds*len(addresses)*len(chainIDs) {
-		t.Errorf("NonceHandler: expected %v outs but got %v", rounds*len(addresses)*len(chainIDs), len(outs))
-	}
+	// On 2nd execution nonce should be 11 (as nonce should be retrieved from cache)
+	txctx = makeNonceContext(1, testKey1, 11, 0)
+	h(txctx)
+	assertTxContext(t, txctx)
 
-	for ctx := range outs {
-		if ctx.Get("expectedErrorCount").(int) > 0 {
-			if len(ctx.Envelope.GetErrors()) != ctx.Get("expectedErrorCount").(int) {
-				t.Errorf("Expected %v errors but got %v %v", ctx.Get("expectedErrorCount").(int), ctx.Envelope.GetErrors(), ctx.Envelope.GetFrom().Address())
-			}
-		} else {
-			if ctx.Envelope.Tx.TxData.GetNonce() != ctx.Get("expectedNonce").(uint64) {
-				t.Errorf("Expected Nonce to be %v but got %v", ctx.Get("expectedNonce").(uint64), ctx.Envelope.Tx.TxData.GetNonce())
-			}
-		}
-	}
+	// On 3rd execution we signal a recovery from 5 so expected nonce should be 5
+	txctx = makeNonceContext(1, testKey1, 5, 0)
+	txctx.Envelope.Metadata = &envelope.Metadata{Extra: map[string]string{"nonce.recovering.expected": "5"}}
+	h(txctx)
+	assertTxContext(t, txctx)
+	_, ok := txctx.Envelope.GetMetadataValue("nonce.recovering.expected")
+	assert.False(t, ok, "Recovery signal should have been reset")
+
+	// NonceManager should trigger an error get
+	txctx = makeNonceContext(1, "key-error-on-get", 0, 1)
+	h(txctx)
+	assertTxContext(t, txctx)
+
+	// NonceManager should trigger an error on set
+	txctx = makeNonceContext(1, "key-error-on-set", 10, 0)
+	h(txctx)
+	assertTxContext(t, txctx)
+
+	// NonceManager should error when unknown chain
+	txctx = makeNonceContext(0, "key", 0, 1)
+	h(txctx)
+	assertTxContext(t, txctx)
 }

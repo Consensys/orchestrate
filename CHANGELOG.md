@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.6.3
+
+*Unreleased*
+
+- [REFACTOR] Update nonce-management to v2
+
 ### Version 0.6.2
 
 *Released on August 27th 2019*
