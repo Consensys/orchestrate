@@ -1,8 +1,12 @@
 # CHANGELOG
 
-### Version 
+### Version 0.4.3
 
-- [FEAT] Add tests for invalid nonce
+*Unreleased*
+
+- [FEAT] Nonce Management v2
+- [FEAT] Contract-Registry
+- [FEAT] Wallet generator with Faucet
 - [FIX] Avoid blocking cucumber scenario executions when not consuming from every topic
  
 ### Version 0.4.2
