@@ -2,21 +2,23 @@ package steps
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-
-	"github.com/ethereum/go-ethereum/common/hexutil"
-
-	abi "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
+	"io/ioutil"
+	"os"
+	"path"
 
 	"github.com/DATA-DOG/godog"
 	"github.com/DATA-DOG/godog/gherkin"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
 	registry "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/contract-registry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 	registryClient "gitlab.com/ConsenSys/client/fr/core-stack/service/contract-registry.git/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/service/chanregistry"
 )
@@ -41,11 +43,12 @@ type ScenarioContext struct {
 }
 
 const (
+	fileName     = "fileName"
 	contractName = "contractName"
 	contractTag  = "contractTag"
 )
 
-// initScenarioContext initilize a scenario context - create a random scenario id - initilize a logger enrich with the scenario name - initilize envelope chan
+// initScenarioContext initialize a scenario context - create a random scenario id - initialize a logger enrich with the scenario name - initialize envelope chan
 func (sc *ScenarioContext) initScenarioContext(s interface{}) {
 
 	var scenarioName string
@@ -90,6 +93,12 @@ func (sc *ScenarioContext) initScenarioContext(s interface{}) {
 	sc.RegistryClient = registryClient.GlobalContractRegistryClient()
 }
 
+type artifact struct {
+	Abi              json.RawMessage
+	Bytecode         string
+	DeployedBytecode string
+}
+
 func (sc *ScenarioContext) iStoreTheFollowingContract(rawContracts *gherkin.DataTable) error {
 	head := rawContracts.Rows[0].Cells
 
@@ -101,22 +110,46 @@ func (sc *ScenarioContext) iStoreTheFollowingContract(rawContracts *gherkin.Data
 			value := rawContracts.Rows[i].Cells[j].Value
 
 			switch columnName {
-			case "abi":
+			case fileName:
+				var f *os.File
+				var err error
+				var found bool
+				for _, v := range viper.GetStringSlice("cucumber.paths") {
+					f, err = os.Open(path.Join(v, "artifacts", value))
+					if err != nil {
+						continue
+					}
+					found = true
+					defer func() {
+						closeErr := f.Close()
+						if err != nil {
+							log.Error(closeErr)
+						}
+					}()
+				}
+				if !found {
+					return os.ErrNotExist
+				}
+				var a artifact
+				rawABI, _ := ioutil.ReadAll(f)
+				err = json.Unmarshal(rawABI, &a)
+				if err != nil {
+					return err
+				}
+
 				// Abi is a UTF-8 encoded string. Therefore, we can make the straightforward transition
-				contract.Abi = []byte(value)
-			case "bytecode":
-				// Bytecode is an hexstring encoded []byte. We are ok at panicking here.
-				contract.Bytecode = hexutil.MustDecode(value)
-			case "deployedBytecode":
+				contract.Abi = a.Abi
 				// Bytecode is an hexstring encoded []byte
-				contract.DeployedBytecode = hexutil.MustDecode(value)
+				contract.Bytecode = hexutil.MustDecode(a.Bytecode)
+				// Bytecode is an hexstring encoded []byte
+				contract.DeployedBytecode = hexutil.MustDecode(a.DeployedBytecode)
 			case contractName:
 				contract.Id.Name = value
 			case contractTag:
 				contract.Id.Tag = value
 			default:
 				// Ignore
-				log.Fatalf("Got unknown field name %q", columnName)
+				return fmt.Errorf("got unknown field name %q", columnName)
 			}
 		}
 
@@ -418,9 +451,9 @@ func (sc *ScenarioContext) theTxdecoderShouldDecode() error {
 	}
 
 	for _, v := range e {
-		for _, log := range v.GetReceipt().GetLogs() {
-			if len(log.GetTopics()) > 0 {
-				if len(log.GetDecodedData()) == 0 {
+		for _, l := range v.GetReceipt().GetLogs() {
+			if len(l.GetTopics()) > 0 {
+				if len(l.GetDecodedData()) == 0 {
 					err := fmt.Errorf("tx-decoder could not decode the transaction")
 					sc.Logger.Errorf("cucumber: step failed with error %q", err)
 					return err

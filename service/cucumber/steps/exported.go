@@ -6,7 +6,7 @@ import (
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 )
 
-// Init inialize handlers
+// Init initialize handlers
 func Init(ctx context.Context) {
 	broker.InitSyncProducer(ctx)
 }

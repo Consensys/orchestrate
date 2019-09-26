@@ -27,25 +27,23 @@ func Init(ctx context.Context) {
 		// Initialize Steps
 		steps.Init(ctx)
 
-		//
-
 		// Initialize Channel registry
 		chanregistry.Init(ctx)
 
 		options = &godog.Options{
-			ShowStepDefinitions: viper.GetBool("cucumber.showstepdefinitions"),
-			Randomize:           viper.GetInt64("cucumber.randomize"),
-			StopOnFailure:       viper.GetBool("cucumber.stoponfailure"),
-			Strict:              viper.GetBool("cucumber.strict"),
-			NoColors:            viper.GetBool("cucumber.nocolors"),
-			Tags:                viper.GetString("cucumber.tags"),
-			Format:              viper.GetString("cucumber.format"),
-			Concurrency:         viper.GetInt("cucumber.concurrency"),
-			Paths:               viper.GetStringSlice("cucumber.paths"),
+			ShowStepDefinitions: viper.GetBool(cucumberShowStepDefinitionsViperKey),
+			Randomize:           viper.GetInt64(cucumberRandomizeViperKey),
+			StopOnFailure:       viper.GetBool(cucumberStopOnFailureViperKey),
+			Strict:              viper.GetBool(cucumberStrictViperKey),
+			NoColors:            viper.GetBool(cucumberNoColorsViperKey),
+			Tags:                viper.GetString(cucumberTagsViperKey),
+			Format:              viper.GetString(cucumberFormatViperKey),
+			Concurrency:         viper.GetInt(cucumberConcurrencyViperKey),
+			Paths:               viper.GetStringSlice(cucumberPathsViperKey),
 		}
 
-		if viper.GetString("cucumber.outputpath") != "" {
-			f, _ := os.Create(viper.GetString("cucumber.outputpath"))
+		if viper.GetString(cucumberOutputPathViperKey) != "" {
+			f, _ := os.Create(viper.GetString(cucumberOutputPathViperKey))
 			options.Output = f
 		}
 

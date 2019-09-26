@@ -5,22 +5,22 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/Shopify/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
-
 	"github.com/DATA-DOG/godog"
 	"github.com/DATA-DOG/godog/gherkin"
+	"github.com/Shopify/sarama"
 	"github.com/Shopify/sarama/mocks"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
+	crc "gitlab.com/ConsenSys/client/fr/core-stack/service/contract-registry.git/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/service/chanregistry"
 )
 
@@ -39,16 +39,18 @@ type ScenarioTestSuite struct {
 func (s *ScenarioTestSuite) SetupTest() {
 	s.Scenario = &ScenarioContext{
 		Logger: log.StandardLogger().WithFields(log.Fields{
-			"Sceneario": "test",
+			"Scenario": "test",
 		}),
 	}
 	s.Scenario.EnvelopesChan = make(map[string]chan *envelope.Envelope)
 	s.Scenario.Envelopes = make(map[string]*envelope.Envelope)
 	s.Scenario.Value = make(map[string]interface{})
 	s.Scenario.Value[testAddress] = testAddress
+	s.Scenario.RegistryClient = crc.New()
 
 	viper.Set("cucumber.steps.timeout", 1)
 	viper.Set("cucumber.steps.miningtimeout", 1)
+	viper.Set("cucumber.paths", []string{"../../../features"})
 }
 
 func (s *ScenarioTestSuite) TestInitScenarioContext() {
@@ -70,40 +72,50 @@ func (s *ScenarioTestSuite) TestInitScenarioContext() {
 	assert.Len(s.T(), s.Scenario.EnvelopesChan, 7, "Should not be empty")
 }
 
+func (s *ScenarioTestSuite) TestIStoreTheFollowingContract() {
+	contracts := &gherkin.DataTable{
+		Rows: []*gherkin.TableRow{
+			{
+				Cells: []*gherkin.TableCell{
+					{Value: contractName},
+					{Value: fileName},
+				},
+			},
+			{
+				Cells: []*gherkin.TableCell{
+					{Value: "SimpleToken"},
+					{Value: "SimpleToken.json"},
+				},
+			},
+		},
+	}
+	err := s.Scenario.iStoreTheFollowingContract(contracts)
+	assert.NoError(s.T(), err)
+}
+
 func (s *ScenarioTestSuite) TestIHaveTheFollowingEnvelope() {
 
 	rawEnvelopes := &gherkin.DataTable{
 		Rows: []*gherkin.TableRow{
-			&gherkin.TableRow{
+			{
 				Cells: []*gherkin.TableCell{
-					&gherkin.TableCell{
-						Value: "chainId",
-					},
-					&gherkin.TableCell{
-						Value: "from",
-					},
-					&gherkin.TableCell{
-						Value: "AliasTo",
-					},
+					{Value: "chainId"},
+					{Value: "from"},
+					{Value: "AliasTo"},
 				},
 			},
-			&gherkin.TableRow{
+			{
 				Cells: []*gherkin.TableCell{
-					&gherkin.TableCell{
-						Value: "888",
-					},
-					&gherkin.TableCell{
-						Value: "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
-					},
-					&gherkin.TableCell{
-						Value: testAddress,
-					},
+					{Value: "888"},
+					{Value: "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4"},
+					{Value: testAddress},
 				},
 			},
 		},
 	}
 
-	_ = s.Scenario.iHaveTheFollowingEnvelope(rawEnvelopes)
+	err := s.Scenario.iHaveTheFollowingEnvelope(rawEnvelopes)
+	assert.NoError(s.T(), err)
 }
 
 func (s *ScenarioTestSuite) TestISendTheseEnvelopeToCoreStack() {
@@ -317,7 +329,7 @@ func (s *ScenarioTestSuite) TestTheTxnonceShouldSetTheNonce() {
 
 	// Test step with unexpected envelopes
 	s.Scenario.Envelopes = map[string]*envelope.Envelope{
-		"unexpected1": &envelope.Envelope{
+		"unexpected1": {
 			From: ethereum.NewAccount(addr[0]),
 			Tx: &ethereum.Transaction{
 				TxData: &ethereum.TxData{
@@ -325,7 +337,7 @@ func (s *ScenarioTestSuite) TestTheTxnonceShouldSetTheNonce() {
 				},
 			},
 		},
-		"unexpected2": &envelope.Envelope{
+		"unexpected2": {
 			From: ethereum.NewAccount(addr[0]),
 			Tx: &ethereum.Transaction{
 				TxData: &ethereum.TxData{
@@ -441,7 +453,7 @@ func (s *ScenarioTestSuite) TestTheTxdecoderShouldDecode() {
 		Receipt: &ethereum.Receipt{
 			TxHash: ethereum.HexToHash("0x23e4210f0f39b6c69573a6b6ae7b767c0a6d41dc0e7f0644e2c7ed9f3a7f7146"),
 			Logs: []*ethereum.Log{
-				&ethereum.Log{
+				{
 					Topics: []*ethereum.Hash{
 						ethereum.HexToHash("0x23e4210f0f39b6c69573a6b6ae7b767c0a6d41dc0e7f0644e2c7ed9f3a7f7146"),
 						ethereum.HexToHash("0x23e4210f0f39b6c69573a6b6ae7b767c0a6d41dc0e7f0644e2c7ed9f3a7f7146"),
@@ -471,7 +483,7 @@ func (s *ScenarioTestSuite) TestTheTxdecoderShouldDecode() {
 		Receipt: &ethereum.Receipt{
 			TxHash: ethereum.HexToHash("0x23e4210f0f39b6c69573a6b6ae7b767c0a6d41dc0e7f0644e2c7ed9f3a7f7146"),
 			Logs: []*ethereum.Log{
-				&ethereum.Log{
+				{
 					Topics: []*ethereum.Hash{
 						ethereum.HexToHash("0x23e4210f0f39b6c69573a6b6ae7b767c0a6d41dc0e7f0644e2c7ed9f3a7f7146"),
 						ethereum.HexToHash("0x23e4210f0f39b6c69573a6b6ae7b767c0a6d41dc0e7f0644e2c7ed9f3a7f7146"),

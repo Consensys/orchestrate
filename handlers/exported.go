@@ -2,28 +2,21 @@ package handlers
 
 import (
 	"context"
-	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common"
 	registryClient "gitlab.com/ConsenSys/client/fr/core-stack/service/contract-registry.git/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/handlers/dispatcher"
 )
 
-// Init inialize handlers
+// Init handlers
 func Init(ctx context.Context) {
-	wg := sync.WaitGroup{}
-
-	wg.Add(2)
-	// Initialize Producer
-	go func() {
-		dispatcher.Init(ctx)
-		wg.Done()
-	}()
-	// Initialize the registryClient
-	go func() {
-		registryClient.Init(ctx)
-		wg.Done()
-	}()
-
-	// Wait for all handlers to be ready
-	wg.Wait()
+	common.InParallel(
+		func() {
+			dispatcher.Init(ctx)
+		},
+		// Initialize the registryClient
+		func() {
+			registryClient.Init(ctx)
+		},
+	)
 }

@@ -19,7 +19,6 @@ func Init(ctx context.Context) {
 
 		// Create EnvelopeRegistry
 		chanRegistry = NewChanRegistry()
-
 	})
 }
 
