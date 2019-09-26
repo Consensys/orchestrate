@@ -2,7 +2,7 @@
 
 ### Version 0.4.3
 
-*Unreleased*
+*Released on September 26th 2019*
 
 - [FEAT] Nonce Management v2
 - [FEAT] Contract-Registry
