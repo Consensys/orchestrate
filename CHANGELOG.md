@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.5.3
+
+*Released on September 29th 2019*
+
+- [FEAT] Arbitraty message signer compatible with ECRecover
+
 ### Version 0.5.2
 
 *Released on July 25th 2019*
