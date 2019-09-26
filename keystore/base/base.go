@@ -7,6 +7,7 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/keystore/crypto/signature"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/keystore/session"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/keystore/wallet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/secretstore/services"
@@ -25,68 +26,82 @@ func NewKeyStore(secretStore services.SecretStore) *KeyStore {
 }
 
 // SignTx returns a signed transaction. It is perfectly equivalent to SignTx
-func (s *KeyStore) SignTx(netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction) (raw []byte, hash *ethcommon.Hash, err error) {
+func (s *KeyStore) SignTx(netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error) {
 	// Creates a new signing session
-	sess := session.MakeTxSignature(s.SecretStore)
-	err = sess.SetWallet(&a)
+	sess := session.NewSigningSession(s.SecretStore)
+	err := sess.SetWallet(&a)
 	if err != nil {
 		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
 	}
-	sess.SetChain(netChain)
-	sess.SetTx(tx)
+
+	err = sess.SetChain(netChain)
+	if err != nil {
+		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
+	}
 
 	// Run signing session
-	err = sess.Run()
+	Raw, Hash, err := sess.ExecuteForTx(tx)
 	if err != nil {
 		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
 	}
-
-	return sess.Raw, sess.Hash, nil
+	return Raw, Hash, nil
 }
 
 // SignPrivateEEATx signs a private transaction
-func (s *KeyStore) SignPrivateEEATx(netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction, privateArgs *types.PrivateArgs) (raw []byte, txHash *ethcommon.Hash, err error) {
+func (s *KeyStore) SignPrivateEEATx(netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction, privateArgs *types.PrivateArgs) ([]byte, *ethcommon.Hash, error) {
 	// Creates a new signing session
-	sess := session.MakeTxSignature(s.SecretStore)
-	err = sess.SetWallet(&a)
+	sess := session.NewSigningSession(s.SecretStore)
+	err := sess.SetWallet(&a)
 	if err != nil {
 		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
 	}
-	sess.SetChain(netChain)
-	sess.SetTx(tx)
-	sess.SetPrivateArgs(privateArgs)
+	err = sess.SetChain(netChain)
+	if err != nil {
+		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
+	}
 
 	// Run signing session
-	err = sess.SignPrivateEEATransaction()
+	Raw, Hash, err := sess.ExecuteForEEATx(tx, privateArgs)
 	if err != nil {
 		return []byte{}, nil, err
 	}
-
-	return sess.Raw, sess.Hash, nil
+	return Raw, Hash, nil
 }
 
 // SignPrivateTesseraTx signs a private transaction using Tessera
-func (s *KeyStore) SignPrivateTesseraTx(netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction) (raw []byte, txHash *ethcommon.Hash, err error) {
+func (s *KeyStore) SignPrivateTesseraTx(netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error) {
 	// Creates a new signing session
-	sess := session.MakeTxSignature(s.SecretStore)
-	err = sess.SetWallet(&a)
+	sess := session.NewSigningSession(s.SecretStore)
+	err := sess.SetWallet(&a)
 	if err != nil {
 		return []byte{}, nil, err
 	}
-	sess.SetTx(tx)
 
-	// Run signing session
-	err = sess.SignPrivateTesseraTransaction()
+	Raw, Hash, err := sess.ExecuteForTesseraTx(tx)
+	if err != nil {
+		return []byte{}, nil, err
+	}
+	return Raw, Hash, nil
+}
+
+// SignMsg returns a signed message and its hash
+func (s *KeyStore) SignMsg(a ethcommon.Address, msg string) ([]byte, *ethcommon.Hash, error) {
+	// Creates a new signing session
+	sess := session.NewSigningSession(s.SecretStore)
+	err := sess.SetWallet(&a)
 	if err != nil {
 		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	return sess.Raw, sess.Hash, nil
-}
+	// Run signing session
+	// TODO: Add a possibility to use another ecdsa than ethereum's
+	//
+	Raw, Hash, err := sess.ExecuteForMsg([]byte(msg), signature.EthECDSA)
+	if err != nil {
+		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
+	}
 
-// SignMsg returns a signed message and its hash
-func (s *KeyStore) SignMsg(a ethcommon.Address, msg string) (rsv []byte, hash *ethcommon.Hash, err error) {
-	return []byte{}, nil, errors.FeatureNotSupportedError("SignMsg not implemented yet").SetComponent(component)
+	return Raw, Hash, nil
 }
 
 // SignRawHash returns a signed raw hash
@@ -99,9 +114,9 @@ func (s *KeyStore) SignRawHash(
 }
 
 // GenerateWallet create and stores a new wallet in the vault
-func (s *KeyStore) GenerateWallet() (add *ethcommon.Address, err error) {
+func (s *KeyStore) GenerateWallet() (*ethcommon.Address, error) {
 	w := wallet.NewWallet(s.SecretStore)
-	err = w.Generate()
+	err := w.Generate()
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -116,10 +131,10 @@ func (s *KeyStore) GenerateWallet() (add *ethcommon.Address, err error) {
 
 // ImportPrivateKey adds a private key in the vault
 // TODO: this is Unsafe and should be removed soon
-func (s *KeyStore) ImportPrivateKey(priv string) (err error) {
+func (s *KeyStore) ImportPrivateKey(priv string) error {
 
 	w := wallet.NewWallet(s.SecretStore)
-	err = w.FromPrivateKey(priv)
+	err := w.FromPrivateKey(priv)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(component)
 	}
