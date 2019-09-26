@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing"
+	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-sender.git/handlers/nonce"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-sender.git/handlers/producer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-sender.git/handlers/sender"
 )
@@ -22,6 +23,8 @@ func Init(ctx context.Context) {
 		},
 		// Initialize sender
 		func() { sender.Init(ctx) },
+		// Initialize nonce manager
+		func() { nonce.Init(ctx) },
 		// Initialize producer
 		func() { producer.Init(ctx) },
 	)

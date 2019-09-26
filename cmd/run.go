@@ -13,6 +13,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/client"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/rpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/nonce.git/nonce"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/nonce.git/nonce/redis"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-sender.git/app"
 )
 
@@ -40,10 +42,17 @@ func newRunCommand() *cobra.Command {
 	broker.KafkaGroup(runCmd.Flags())
 	broker.KafkaTopicTxSender(runCmd.Flags())
 	broker.KafkaTopicTxRecover(runCmd.Flags())
+	broker.KafkaTopicTxNonce(runCmd.Flags())
 	broker.InitKafkaSASLTLSFlags(runCmd.Flags())
 
 	// Register StoreGRPC flags
 	storeclient.EnvelopeStoreGRPCTarget(runCmd.Flags())
+
+	// Register Nonce Manager flags
+	nonce.Type(runCmd.Flags())
+	redis.Address(runCmd.Flags())
+	redis.LockTimeout(runCmd.Flags())
+	redis.ExpirationTime(runCmd.Flags())
 
 	return runCmd
 }

@@ -161,7 +161,7 @@ func makeSenderContext(i int) *engine.TxContext {
 				PrivateFor: []string{},
 			},
 		}
-		txctx.Set("error", "cannot process a private transaction with protocol type:123 ")
+		txctx.Set("error", "invalid private protocol \"type:123 \"")
 		txctx.Set("status", "")
 	case 8:
 		// Cannot send a private transaction if a protocol is not set
@@ -192,7 +192,7 @@ func makeSenderContext(i int) *engine.TxContext {
 				PrivateFor: []string{},
 			},
 		}
-		txctx.Set("error", "transactions executed with Constellation should be unsigned")
+		txctx.Set("error", "mock: failed to send an unsigned transaction")
 		txctx.Set("status", "")
 	}
 	return txctx

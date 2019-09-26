@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-sender.git/handlers/store"
+
 	log "github.com/sirupsen/logrus"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
@@ -31,7 +33,12 @@ func Init(ctx context.Context) {
 		ethclient.Init(ctx)
 
 		// Create Handler
-		handler = Sender(ethclient.GlobalClient(), storeclient.GlobalEnvelopeStoreClient())
+		handler = engine.CombineHandlers(
+			// Idempotency gate
+			store.TxAlreadySent(ethclient.GlobalClient(), storeclient.GlobalEnvelopeStoreClient()),
+			// Sender
+			Sender(ethclient.GlobalClient(), storeclient.GlobalEnvelopeStoreClient()),
+		)
 
 		log.Infof("sender: handler ready")
 	})
