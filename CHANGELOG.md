@@ -2,7 +2,7 @@
 
 ### Version 0.6.3
 
-*Unreleased*
+*Released on September 26th 2019*
 
 - [REFACTOR] Refactor handler sender into a composite handler
 - [FEAT] Nonce-Management v2
