@@ -7,7 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
-	svc "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/contract-registry"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/redis"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"

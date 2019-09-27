@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 
-	svc "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/contract-registry"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/ethereum/types/abi"
 )
 

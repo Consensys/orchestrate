@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
-	svc "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/contract-registry"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/ethereum/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/ethereum/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/ethereum/types/common"

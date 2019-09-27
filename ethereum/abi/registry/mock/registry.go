@@ -10,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
-	svc "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/contract-registry"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/ethereum/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/ethereum/types/common"
 	rcommon "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/common"

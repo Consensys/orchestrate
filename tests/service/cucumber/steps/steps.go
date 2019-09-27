@@ -15,7 +15,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
-	registry "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/contract-registry"
+	registry "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"

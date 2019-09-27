@@ -48,14 +48,14 @@ func Init(ctx context.Context) {
 			)
 		}
 
-		// Log registered services
+		// Log registered services_tmp
 		services := []string{}
 		for name := range server.GetServiceInfo() {
 			services = append(services, name)
 		}
 
 		log.WithFields(log.Fields{
-			"grpc.services": services,
+			"grpc.services_tmp": services,
 		}).Infof("grpc: server ready")
 	})
 }

@@ -9,7 +9,7 @@ import (
 	remote "github.com/gomodule/redigo/redis"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
-	svc "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/contract-registry"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/ethereum/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/common"
 )
@@ -18,7 +18,7 @@ var (
 	defaultCodeHash = ethcommon.Hash{}
 )
 
-// ContractRegistry is a Redis based implementation of the interface pkg.git/services/contract-registry.RegistryServer
+// ContractRegistry is a Redis based implementation of the interface pkg.git/services_tmp/contract-registry.RegistryServer
 type ContractRegistry struct {
 	pool *remote.Pool
 }

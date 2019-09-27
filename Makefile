@@ -15,7 +15,10 @@ endif
 run-coverage: ## Generate global code coverage report
 	@sh scripts/coverage.sh $(PACKAGES)
 
-coverage: run-coverage ## Generate and open coverage report
+coverage:
+	@docker-compose -f e2e/docker-compose.yml up -d
+	@sh scripts/coverage.sh $(PACKAGES)
+	@docker-compose -f e2e/docker-compose.yml down
 	$(OPEN) coverage.html
 
 race: ## Run data race detector
