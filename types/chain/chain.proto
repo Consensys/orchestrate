@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain";
+
+package chain;
+
+// Information about a Chain
+message Chain {
+    // Chain ID
+    // e.g. 1 for mainnet, 3 for Ropsten
+    bytes id = 1;
+}

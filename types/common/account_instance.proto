@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+import "types/ethereum/base.proto";
+import "types/chain/chain.proto";
+
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common";
+
+package common;
+
+// Information about an account on a chain 
+message AccountInstance {
+    // Chain ID of the chain
+    chain.Chain chain = 1;
+
+    // Deployment address of the contract
+    ethereum.Account account = 2;
+}

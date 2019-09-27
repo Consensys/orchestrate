@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+import "types/chain/chain.proto";
+import "types/chain/protocol.proto";
+import "types/ethereum/base.proto";
+import "types/ethereum/transaction.proto";
+import "types/ethereum/receipt.proto";
+import "types/args/private.proto";
+import "types/args/call.proto";
+import "types/error/error.proto";
+
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope";
+
+package envelope;
+
+// Metadata attached to an Envelope
+message Metadata {
+    // ID of the Envelope in UUID RFC 4122, ISO/IEC 9834-8:2005 format
+    // e.g a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
+    string id = 1;
+
+    // Extra information (optional)
+    map<string, string> extra = 2;
+}
+
+// Args are provided when requesting an execution
+message Args {
+    // Arguments to craft transaction
+    args.Call call = 1;
+
+    // Private arguments
+    args.Private private = 2;
+
+    // Arbitry data provided by user
+    ethereum.Data data = 3;
+}
+
+// Envelope wraps all information contextual to the transaction orchestrated
+message Envelope {
+    // Chain the transaction is orchestrated for
+    chain.Chain chain = 1;
+
+    // Protocol the transaction is orchestrated for
+    chain.Protocol protocol = 2;
+
+    // Sender of the transaction
+    // DATA (20 Bytes) - Ethereum Account Address
+    // e.g 0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C
+    ethereum.Account from = 3;
+
+    // Transaction
+    ethereum.Transaction tx = 4;
+
+    // Receipt of the transaction
+    ethereum.Receipt receipt = 5;
+
+    // Errors encountered while orchestrating the transaction
+    repeated error.Error errors = 6;
+
+    // Arguments provided by user
+    Args args = 7;
+
+    // Metadata of the envelope
+    Metadata metadata = 8;
+}
