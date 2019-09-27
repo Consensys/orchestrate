@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/examples"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/ethereum/examples"
 )
 
 // Define a handler method
