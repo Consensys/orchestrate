@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Version 0.2.3
+
+*Released on September 27th 2019*
+
+- [FIX] Add redis flags on CLI
+
 ### Version 0.2.2
 
 *Released on September 23th 2019*
