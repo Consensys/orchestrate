@@ -41,3 +41,8 @@ atlassian-ide-plugin.xml
 
 # Visual Code Studio
 .vscode
+
+# Cucumber report
+report/node_modules
+report/output/report.html
+report/output/report.json

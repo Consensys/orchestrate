@@ -8,10 +8,10 @@ variables:
   GOPATH: ${CI_PROJECT_DIR}/.gocache
   ARTIFACT_DOWNLOAD_ATTEMPTS: 5
   RESTORE_CACHE_ATTEMPTS: 5
-#  CI_DEBUG_TRACE: "true"
+  # CI_DEBUG_TRACE: "true"
 
 services:
-  - docker:dind
+  - docker:18-dind
 
 before_script:
   # Change git config so we can import go packages from GitLab

@@ -1,0 +1,14 @@
+# Source code
+.git
+.gitignore
+.dockerignore
+Dockerfile*
+docker-compose*
+.gitlab-ci.yml
+
+AUTHORS.md
+CONTRIBUTING.md
+LICENSE
+Makefile
+NOTICE
+README.md

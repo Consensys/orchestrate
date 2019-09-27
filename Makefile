@@ -34,6 +34,9 @@ lint:
 
 clean: mod-tidy lint-fix protobuf
 
+gocache:
+	mkdir .gocache
+
 generate-mocks:
 	mockgen -destination=mocks/mock_client.go -package=mocks \
 	gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/rpc Client
@@ -45,6 +48,7 @@ generate-mocks:
 tools: ## Install test tools
 	@GO111MODULE=off go get -u github.com/client9/misspell/cmd/misspell
 	@GO111MODULE=off go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
+	@GO111MODULE=off go get -u github.com/DATA-DOG/godog/cmd/godog
 	@GO111MODULE=off go get -u github.com/golang/mock/gomock
 
 help: ## Display this help screen
@@ -52,3 +56,7 @@ help: ## Display this help screen
 
 protobuf: ## Generate protobuf stubs
 	@docker-compose -f scripts/docker-compose.yml up
+
+report:
+	@docker-compose -f report/docker-compose.yml up
+	$(OPEN) report/output/report.html
