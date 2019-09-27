@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/viper"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/offset"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/tests/handlers/offset"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/pkg/utils"
 )
 

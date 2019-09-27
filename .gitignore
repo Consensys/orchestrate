@@ -43,6 +43,6 @@ atlassian-ide-plugin.xml
 .vscode
 
 # Cucumber report
-report/node_modules
-report/output/report.html
-report/output/report.json
+tests/report/node_modules
+tests/report/output/report.html
+tests/report/output/report.json

@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/tests/handlers/logger"
 )
 
 // NewCommand create root command

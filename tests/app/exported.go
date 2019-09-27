@@ -7,9 +7,9 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/loader"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/logger"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/offset"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/tests/handlers/loader"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/tests/handlers/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/tests/handlers/offset"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
