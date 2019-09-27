@@ -1,9 +1,8 @@
 # CHANGELOG
 
-
 ### Version 0.6.3
 
-*Unreleased*
+*Released on September 27th 2019*
 
 - [FEAT] Wallet generation with Faucet credit
 
