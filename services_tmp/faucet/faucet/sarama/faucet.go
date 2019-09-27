@@ -9,9 +9,9 @@ import (
 	"github.com/spf13/viper"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/types"
 )

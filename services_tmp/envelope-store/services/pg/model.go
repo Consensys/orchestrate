@@ -7,7 +7,7 @@ import (
 
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/proto"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/envelope-store"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 )
 

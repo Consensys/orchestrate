@@ -12,7 +12,7 @@ import (
 
 var (
 	fct      Faucet
-	initOnce = &sync.Once{}
+	initOnce  = &sync.Once{}
 )
 
 // Init initializes Faucet

@@ -16,9 +16,9 @@ import (
 	"github.com/spf13/viper"
 
 	registry "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/contract-registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/ethereum"
 	registryClient "gitlab.com/ConsenSys/client/fr/core-stack/service/contract-registry.git/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/service/chanregistry"
 )

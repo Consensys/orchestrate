@@ -7,9 +7,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/envelope-store"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 )
 

@@ -90,12 +90,12 @@ func (hash *HashiCorp) manageToken() {
 // Store writes in the vault
 func (hash *HashiCorp) Store(key, value string) error {
 	sec := NewSecret(key, value)
-	sec.SetClient(hash.Client)
+	SetClient(hash.Client)
 
 	hash.mut.Lock()
 	defer hash.mut.Unlock()
 
-	err := sec.Update()
+	err := Update()
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(component)
 	}
@@ -106,12 +106,12 @@ func (hash *HashiCorp) Store(key, value string) error {
 // Load reads in the vault
 func (hash *HashiCorp) Load(key string) (value string, ok bool, err error) {
 	sec := NewSecret(key, "")
-	sec.SetClient(hash.Client)
+	SetClient(hash.Client)
 
 	hash.mut.Lock()
 	defer hash.mut.Unlock()
 
-	v, ok, err := sec.GetValue()
+	v, ok, err := GetValue()
 	if err != nil {
 		return "", false, errors.FromError(err).ExtendComponent(component)
 	}
@@ -122,11 +122,11 @@ func (hash *HashiCorp) Load(key string) (value string, ok bool, err error) {
 // Delete removes a path in the vault
 func (hash *HashiCorp) Delete(key string) error {
 	sec := NewSecret(key, "")
-	sec.SetClient(hash.Client)
+	SetClient(hash.Client)
 
 	hash.mut.Lock()
 	defer hash.mut.Unlock()
-	err := sec.Delete()
+	err := Delete()
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(component)
 	}
@@ -137,12 +137,12 @@ func (hash *HashiCorp) Delete(key string) error {
 // List returns the list of all secrets stored in the vault
 func (hash *HashiCorp) List() (keys []string, err error) {
 	sec := NewSecret("", "")
-	sec.SetClient(hash.Client)
+	SetClient(hash.Client)
 
 	hash.mut.Lock()
 	defer hash.mut.Unlock()
 
-	keys, err = sec.List("")
+	keys, err = List("")
 	if err != nil {
 		return keys, errors.FromError(err).ExtendComponent(component)
 	}

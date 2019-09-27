@@ -12,7 +12,7 @@ import (
 
 var (
 	keyStore KeyStore
-	initOnce = &sync.Once{}
+	initOnce  = &sync.Once{}
 )
 
 // Init initialize Key Store

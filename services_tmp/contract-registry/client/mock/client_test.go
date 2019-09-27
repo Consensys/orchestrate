@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services/contract-registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/common"
 )
 
 var ERC20 = []byte(`[

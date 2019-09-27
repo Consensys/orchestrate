@@ -1,7 +1,7 @@
 package chanregistry
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/envelope"
 )
 
 // ChanRegistry keeps channel for each scenarios and topics

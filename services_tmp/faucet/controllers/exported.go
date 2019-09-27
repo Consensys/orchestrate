@@ -14,7 +14,7 @@ import (
 
 var (
 	ctrl     ControlFunc
-	initOnce = &sync.Once{}
+	initOnce  = &sync.Once{}
 )
 
 // Init intiliaze global controller

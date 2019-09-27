@@ -17,9 +17,9 @@ import (
 
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/ethereum"
 	crc "gitlab.com/ConsenSys/client/fr/core-stack/service/contract-registry.git/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/service/chanregistry"
 )
