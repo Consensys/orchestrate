@@ -11,6 +11,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/contract-registry.git/app"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/redis"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/rpc"
 )
 
@@ -33,6 +34,9 @@ func newRunCommand() *cobra.Command {
 	// ContractRegistry flag
 	registry.ContractRegistryType(runCmd.Flags())
 	registry.ABIs(runCmd.Flags())
+
+	// Redis ContractRegistry flag
+	redis.InitFlags(runCmd.Flags())
 
 	return runCmd
 }
