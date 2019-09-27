@@ -1,0 +1,89 @@
+package main
+
+import (
+	"context"
+	"os"
+	"sync"
+	"time"
+
+	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
+	grpcserver "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/grpc/server"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http/healthcheck"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/pkg/utils"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/examples/helloworld/helloworld"
+)
+
+type server struct{}
+
+// SayHello implements helloworld.GreeterServer
+func (s *server) SayHello(ctx context.Context, in *helloworld.HelloRequest) (*helloworld.HelloReply, error) {
+	defer log.Infof("Received: %v", in.Name)
+	switch in.Name {
+	case "":
+		return &helloworld.HelloReply{}, errors.InvalidParameterError("no name provided").SetComponent("e2e.grpc.server")
+	case "test-panic":
+		panic("name made me panic")
+	default:
+		// Simulate io time
+		time.Sleep(50 * time.Millisecond)
+		return &helloworld.HelloReply{Message: "Hello " + in.Name}, nil
+	}
+}
+
+var (
+	app       *App
+	startOnce = &sync.Once{}
+)
+
+func init() {
+	// Create app
+	app = NewApp()
+}
+
+// Run application
+func Start(ctx context.Context) {
+	startOnce.Do(func() {
+		// Set log level to debug
+		log.SetLevel(log.DebugLevel)
+
+		// Initialize GRPC server
+		grpcserver.AddEnhancers(
+			func(s *grpc.Server) *grpc.Server {
+				helloworld.RegisterGreeterServer(s, &server{})
+				return s
+			},
+		)
+		grpcserver.Init(ctx)
+
+		// Initialize HTTP server
+		http.Init(ctx)
+		http.Enhance(healthcheck.HealthCheck(app))
+
+		// Indicate that application is ready
+		app.ready.Store(true)
+
+		// Start listening
+		err := grpcserver.ListenAndServe()
+		if err != nil {
+			log.WithError(err).Error("main: error listening")
+		}
+	})
+}
+
+// Close gracefully stops the application
+func Close(ctx context.Context) {
+	log.Warn("app: closing...")
+	_ = grpcserver.GracefulStop(ctx)
+}
+
+func main() {
+	// Process signals
+	sig := utils.NewSignalListener(func(signal os.Signal) { Close(context.Background()) })
+	defer sig.Close()
+
+	// Start application
+	Start(context.Background())
+}

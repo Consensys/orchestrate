@@ -33,3 +33,5 @@ require (
 	google.golang.org/grpc v1.20.1
 	mellium.im/sasl v0.2.1 // indirect
 )
+
+go 1.13
