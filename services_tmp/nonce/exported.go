@@ -13,7 +13,7 @@ import (
 
 var (
 	m        Manager
-	initOnce = &sync.Once{}
+	initOnce  = &sync.Once{}
 )
 
 // Init initializes Nonce
