@@ -1,4 +1,4 @@
-package generator
+package wallet
 
 import (
 	"context"
@@ -7,8 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-signer.git/handlers/vault/wallet-generator/faucet"
-	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-signer.git/handlers/vault/wallet-generator/wallet"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/keystore"
 )
 
 var (
@@ -25,17 +24,15 @@ func Init(ctx context.Context) {
 
 		common.InParallel(
 			// Initialize keystore
-			func() { wallet.Init(ctx) },
-			func() { faucet.Init(ctx) },
+			func() { keystore.Init(ctx) },
 		)
 
 		// Create Handler
 		handler = engine.CombineHandlers(
-			wallet.GlobalHandler(),
-			faucet.GlobalHandler(),
+			Generator(keystore.GlobalKeyStore()),
 		)
 
-		log.Infof("wallet-generator: handler ready")
+		log.Infof("signer: handler ready")
 	})
 }
 

@@ -1,4 +1,4 @@
-package generator
+package wallet
 
 import (
 	log "github.com/sirupsen/logrus"
@@ -7,8 +7,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/keystore"
 )
 
-// WalletGenerator creates and handler responsible to generate wallets
-func WalletGenerator(s keystore.KeyStore) engine.HandlerFunc {
+// Generator creates and handler responsible to generate wallets
+func Generator(s keystore.KeyStore) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"keygen": "got a keygen request",

@@ -11,6 +11,12 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/tracing/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tessera"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/controllers/amount"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/controllers/blacklist"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/controllers/cooldown"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/controllers/creditor"
+	maxbalance "gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/controllers/max-balance"
+	"gitlab.com/ConsenSys/client/fr/core-stack/service/faucet.git/faucet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/keystore"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/secretstore"
 	"gitlab.com/ConsenSys/client/fr/core-stack/service/multi-vault.git/secretstore/hashicorp"
@@ -38,6 +44,14 @@ func newRunCommand() *cobra.Command {
 	keystore.InitFlags(runCmd.Flags())
 	secretstore.InitFlags(runCmd.Flags())
 	tessera.InitFlags(runCmd.Flags())
+
+	// Register Faucet flags
+	faucet.Type(runCmd.Flags())
+	amount.FaucetAmount(runCmd.Flags())
+	blacklist.FaucetBlacklist(runCmd.Flags())
+	cooldown.FaucetCooldown(runCmd.Flags())
+	creditor.FaucetAddress(runCmd.Flags())
+	maxbalance.FaucetMaxBalance(runCmd.Flags())
 
 	// Register Kafka flags
 	broker.KafkaAddresses(runCmd.Flags())

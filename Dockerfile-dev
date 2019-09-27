@@ -1,0 +1,19 @@
+FROM golang:1.12
+
+ARG GITLAB_USER
+ARG GITLAB_TOKEN
+
+RUN git config --global --add url."https://${GITLAB_USER}:${GITLAB_TOKEN}@gitlab.com/".insteadOf "git@gitlab.com:" && \
+    git config --global --add url."https://${GITLAB_USER}:${GITLAB_TOKEN}@gitlab.com/".insteadOf "https://gitlab.com/" && \
+    useradd appuser && \
+    mkdir /app
+WORKDIR /app
+
+# Use go mod with go 1.12
+ENV GO111MODULE=on
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+CMD ["go", "run", ".", "run"]
