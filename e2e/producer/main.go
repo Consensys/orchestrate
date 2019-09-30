@@ -2,49 +2,55 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/args"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
 
 var (
-	inTopic  = "topic-tx-nonce"
 	kafkaURL = []string{"localhost:9092"}
-	senders  = []string{
-		"0x664895b5fE3ddf049d2Fb508cfA03923859763C6",
-		// "0xf5956Eb46b377Ae41b41BDa94e6270208d8202bb",
-		// "0x93f7274c9059e601be4512F656B57b830e019E41",
-		// "0xbfc7137876d7Ac275019d70434B0f0779824a969",
-		// "0xA8d8DB1d8919665a18212374d623fc7C0dFDa410",
-	}
-	// ERC20Address of token contract to target
-	ERC20Address = "0x6AFE55b2b5CcA4920182a70c71e793A7Bf44a547"
+	topic    = "topic-tx-sender"
 )
 
-func newMessage(i int) *sarama.ProducerMessage {
+var letterRunes = []rune("abcdef0123456789")
+
+// RandString creates a random string
+func RandString(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
+}
+
+func newMessage() *sarama.ProducerMessage {
 	msg := &sarama.ProducerMessage{
-		Topic:     inTopic,
+		Topic:     topic,
 		Partition: -1,
 	}
 	b, _ := proto.Marshal(
 		&envelope.Envelope{
 			Chain: chain.FromInt(888),
-			From:  ethereum.HexToAccount(senders[i%len(senders)]),
-			Args: &envelope.Args{
-				Call: &args.Call{
-					Method: &abi.Method{Signature: "some-method"},
-					Args:   []string{"0x71a556C033cD4beB023eb2baa734d0e8304CA88a", "0x200"},
-				},
-			},
 			Tx: &ethereum.Transaction{
 				TxData: &ethereum.TxData{
-					To: ethereum.HexToAccount(ERC20Address),
+					Nonce:    1,
+					To:       ethereum.HexToAccount("0xfF778b716FC07D98839f48DdB88D8bE583BEB684"),
+					Value:    ethereum.HexToQuantity("0x2386f26fc10000"),
+					Gas:      21136,
+					GasPrice: ethereum.HexToQuantity("0xee6b2800"),
+					Data:     ethereum.HexToData("0xabcd"),
 				},
+				// TODO: fix the tx hash. At the moment it sends a transaction with nonce = 1 which failed when sent to a network (e.g. ganache)
+				Raw:  ethereum.HexToData("0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80"),
+				Hash: ethereum.HexToHash("0x" + RandString(64)),
+			},
+			Metadata: &envelope.Metadata{
+				Id: RandString(32),
 			},
 		},
 	)
@@ -60,7 +66,6 @@ func main() {
 	config.Producer.Return.Errors = true
 
 	// Create client
-
 	client, err := sarama.NewClient(kafkaURL, config)
 	if err != nil {
 		fmt.Println(err)
@@ -90,9 +95,9 @@ func main() {
 		}
 	}()
 
-	rounds := 10
+	rounds := 1
 	for i := 0; i < rounds; i++ {
-		p.Input() <- newMessage(i)
+		p.Input() <- newMessage()
 	}
 
 	for i := 0; i < rounds; i++ {
