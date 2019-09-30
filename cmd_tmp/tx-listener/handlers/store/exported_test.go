@@ -1,0 +1,18 @@
+package store
+
+import (
+	"context"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+)
+
+func TestInit(t *testing.T) {
+	Init(context.Background())
+	assert.NotNil(t, GlobalHandler(), "Global handler should have been set")
+
+	var handler engine.HandlerFunc
+	SetGlobalHandler(handler)
+	assert.Nil(t, GlobalHandler(), "Global should be reset to nil")
+}

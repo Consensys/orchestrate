@@ -1,0 +1,65 @@
+package cmd
+
+import (
+	"context"
+	"os"
+
+	"github.com/spf13/cobra"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/tracing/opentracing/jaeger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
+	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/service/envelope-store.git/client"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/rpc"
+	handler "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/handler/base"
+	listener "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/listener/base"
+	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-listener.git/app"
+)
+
+func newRunCommand() *cobra.Command {
+	runCmd := &cobra.Command{
+		Use:   "run",
+		Short: "Run application",
+		Run:   run,
+	}
+
+	// Register Engine flags
+	engine.InitFlags(runCmd.Flags())
+
+	// Register OpenTracing flags
+	jaeger.InitFlags(runCmd.Flags())
+
+	// Register HTTP server flags
+	http.Hostname(runCmd.Flags())
+
+	// Register Ethereum client flags
+	ethclient.URLs(runCmd.Flags())
+
+	// Register Kafka flags
+	broker.KafkaAddresses(runCmd.Flags())
+	broker.KafkaGroup(runCmd.Flags())
+	broker.KafkaTopicTxDecoder(runCmd.Flags())
+	broker.InitKafkaSASLTLSFlags(runCmd.Flags())
+
+	// Register StoreGRPC flags
+	storeclient.EnvelopeStoreGRPCTarget(runCmd.Flags())
+
+	// Listener flags
+	listener.InitFlags(runCmd.Flags())
+	handler.InitFlags(runCmd.Flags())
+
+	return runCmd
+}
+
+func run(cmd *cobra.Command, args []string) {
+	// Create app
+	ctx, cancel := context.WithCancel(context.Background())
+
+	// Process signals
+	sig := utils.NewSignalListener(func(signal os.Signal) { cancel() })
+	defer sig.Close()
+
+	// Start application
+	app.Start(ctx)
+}
