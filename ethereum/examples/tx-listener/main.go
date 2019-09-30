@@ -7,10 +7,10 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	handler "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/handler/base"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/listener"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
+	handler "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/tx-listener/handler/base"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/tx-listener/listener"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
 )
 
 // Handler is a engine HandlerFunc

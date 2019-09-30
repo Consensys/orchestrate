@@ -7,7 +7,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	errors "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
 )
 
 const component = "http"

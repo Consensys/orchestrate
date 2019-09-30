@@ -16,9 +16,9 @@ run-coverage: ## Generate global code coverage report
 	@sh scripts/coverage.sh $(PACKAGES)
 
 coverage:
-	@docker-compose -f e2e/docker-compose.yml up -d
+	@docker-compose -f e2e/docker-compose.yml up -d postgres
 	@sh scripts/coverage.sh $(PACKAGES)
-	@docker-compose -f e2e/docker-compose.yml down
+	@docker-compose -f e2e/docker-compose.yml down postgres
 	$(OPEN) coverage.html
 
 race: ## Run data race detector
@@ -42,10 +42,10 @@ gocache:
 
 generate-mocks:
 	mockgen -destination=mocks/mock_client.go -package=mocks \
-	gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/rpc Client
+	gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/rpc Client
 
 	mockgen -destination=mocks/mock_enclave_endpoint.go -package=mocks \
-	gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tessera EnclaveEndpoint
+	gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/tessera EnclaveEndpoint
 
 # Tools
 tools: ## Install test tools

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/abi";
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/abi";
 
 package abi;
 
@@ -56,6 +56,6 @@ message Event {
     // e.g "Transfer(address, address, uint256)"
     string signature = 1;
 
-     // ABI of the method (Optional)
+    // ABI of the method (Optional)
     bytes abi = 2;
 }

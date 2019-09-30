@@ -12,6 +12,6 @@ var defaults = {
 var options = nodeenvconfiguration({
     defaults: defaults,
     prefix: 'report'
-});    
+});
 
 reporter.generate(options);

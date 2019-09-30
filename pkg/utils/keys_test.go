@@ -6,7 +6,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
-	ierror "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/pkg/types/error"
+	ierror "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/error"
 )
 
 func TestKafkaChainTopic(t *testing.T) {

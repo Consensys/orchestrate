@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
-	errors "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
 )
 
 func init() {

@@ -9,7 +9,7 @@ import "types/args/private.proto";
 import "types/args/call.proto";
 import "types/error/error.proto";
 
-option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope";
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/envelope";
 
 package envelope;
 

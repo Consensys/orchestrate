@@ -25,13 +25,20 @@ services:
 
   redis:
     image: redis
-    ports: 
+    ports:
       - 6379:6379
     networks:
       - tx-nonce
     command: redis-server /usr/local/etc/redis/redis.conf
     volumes:
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+
+  postgres:
+    image: postgres:10.7-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - db-data:/var/lib/postgresql/data
 
   ganache:
     image: trufflesuite/ganache-cli:v6.4.3
@@ -60,6 +67,8 @@ services:
 
 volumes:
   chain-data:
+    driver: local
+  db-data:
     driver: local
 
 

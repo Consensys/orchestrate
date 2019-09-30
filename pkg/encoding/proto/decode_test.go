@@ -9,9 +9,9 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/pkg/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/pkg/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
 )
 
 func init() {

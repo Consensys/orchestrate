@@ -7,12 +7,12 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/golang/protobuf/proto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/pkg/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/pkg/types/args"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/pkg/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/pkg/types/envelope"
-	err "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/pkg/types/error"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/pkg/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/args"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/envelope"
+	err "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/error"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
 )
 
 var PostState, _ = hexutil.Decode("0xabcdef")

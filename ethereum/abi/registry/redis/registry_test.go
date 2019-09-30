@@ -7,7 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/suite"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/abi/registry/testutils"
 )
 
 type RedisTestSuite struct {

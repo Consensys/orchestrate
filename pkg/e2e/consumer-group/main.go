@@ -7,10 +7,10 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/tests/handlers/offset"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/pkg/utils"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/handlers/offset"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
 )
 
 // Define a handler method

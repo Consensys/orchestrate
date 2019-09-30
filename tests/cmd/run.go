@@ -5,13 +5,13 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/app"
-	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/service/cucumber"
-	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/service/cucumber/steps"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/app"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/cucumber"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/cucumber/steps"
 )
 
 func newRunCommand() *cobra.Command {

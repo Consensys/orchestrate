@@ -3,9 +3,9 @@ package handlers
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common"
-	registryClient "gitlab.com/ConsenSys/client/fr/core-stack/service/contract-registry.git/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/handlers/dispatcher"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
+	registryClient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/handlers/dispatcher"
 )
 
 // Init handlers

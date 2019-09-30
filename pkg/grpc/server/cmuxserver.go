@@ -9,8 +9,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/soheilhy/cmux"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
 	"google.golang.org/grpc"
 )
 

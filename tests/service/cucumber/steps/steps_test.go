@@ -15,13 +15,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/ethereum"
-	crc "gitlab.com/ConsenSys/client/fr/core-stack/service/contract-registry.git/client/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/service/chanregistry"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
+	crc "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry/client/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/chanregistry"
 )
 
 var testAddress = ethcommon.HexToAddress("0x00").Hex()

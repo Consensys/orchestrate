@@ -9,11 +9,11 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
-	svc "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/contract-registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/ethereum/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/ethereum/types/common"
-	rcommon "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/common"
+	rcommon "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/abi/registry/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/common"
 )
 
 // ContractRegistry stores contract ABI and bytecode in memory

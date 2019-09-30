@@ -4,12 +4,12 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient/rpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient/rpc"
 )
 
 var (
 	client   Client
-	initOnce  = &sync.Once{}
+	initOnce = &sync.Once{}
 )
 
 func Init(ctx context.Context) {

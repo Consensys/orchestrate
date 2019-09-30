@@ -10,7 +10,7 @@ package grpcserver
 // 	"github.com/soheilhy/cmux"
 // 	"github.com/spf13/viper"
 // 	"github.com/stretchr/testify/assert"
-// 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
+// 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
 // 	"google.golang.org/grpc"
 // 	"google.golang.org/grpc/examples/helloworld/helloworld"
 // )

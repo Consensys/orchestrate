@@ -6,17 +6,17 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/args"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/args"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/chain"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
-	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/ethereum"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
+	encoding "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/encoding/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
 )
 
 // GetChainCounts returns a mapping that counts the number of tx per chain

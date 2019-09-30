@@ -8,8 +8,8 @@ import (
 )
 
 func TestInit(t *testing.T) {
-	//Init(context.Background())
-	//assert.NotNil(t, GlobalOptions(), "Global should have been set")
+	// Init(context.Background())
+	// assert.NotNil(t, GlobalOptions(), "Global should have been set") no-lint:gocritic
 
 	var o *godog.Options
 	SetGlobalOptions(o)

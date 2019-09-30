@@ -5,33 +5,33 @@ import (
 	"fmt"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/tests/handlers/loader"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/tests/handlers/logger"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/tests/handlers/offset"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/handlers/loader"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/handlers/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/handlers/offset"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	server "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http/healthcheck"
-	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/handlers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/handlers/dispatcher"
-	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/service/cucumber"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
+	server "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http/healthcheck"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/handlers"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/handlers/dispatcher"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/cucumber"
 )
 
 var (
-	app         *App
+	app         *common.App
 	readyToTest chan bool
 	startOnce   = &sync.Once{}
 )
 
 func init() {
 	// Create app
-	app = NewApp()
+	app = common.NewApp()
 
 	// Set Kafka Group value
 	viper.Set("kafka.group", "group-e2e")
@@ -95,7 +95,7 @@ func Start(ctx context.Context) {
 		registerHandlers()
 
 		// Indicate that application is ready
-		app.ready.Store(true)
+		app.SetReady(true)
 
 		// Start consuming on every topics
 		// Initialize Topics list by chain

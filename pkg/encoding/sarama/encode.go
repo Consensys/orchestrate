@@ -3,8 +3,8 @@ package sarama
 import (
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/proto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
+	encoding "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/encoding/proto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
 )
 
 // Marshal a proto into a e a sarama.ProducerMessage

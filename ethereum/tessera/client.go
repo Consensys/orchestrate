@@ -1,7 +1,6 @@
 package tessera
 
 type Client interface {
-
 	// AddClient adds a Tessera client for a specified chain ID
 	AddClient(chainID string, tesseraEndpoint EnclaveEndpoint)
 
@@ -14,7 +13,6 @@ type Client interface {
 }
 
 type EnclaveEndpoint interface {
-
 	// PostRequest - sends a request to Tessera private enclave
 	// path - a URL path in a request to send
 	// request - a body of a request to send

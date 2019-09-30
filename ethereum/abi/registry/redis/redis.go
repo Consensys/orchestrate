@@ -4,7 +4,7 @@ import (
 	"time"
 
 	remote "github.com/gomodule/redigo/redis"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
 )
 
 // PoolConfig is a place holder to configure the redis client

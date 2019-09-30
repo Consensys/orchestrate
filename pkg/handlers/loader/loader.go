@@ -2,9 +2,9 @@ package loader
 
 import (
 	log "github.com/sirupsen/logrus"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/broker/sarama"
-	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
+	encoding "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/encoding/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
 )
 
 // Loader is an handler that Load sarama.ConsumerGroup messages

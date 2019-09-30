@@ -1,7 +1,7 @@
 package errors
 
 import (
-	ierror "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/pkg/types/error"
+	ierror "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/error"
 )
 
 // Error codes are uint64 for perfomances purposes but should be seen as 5 nibbles hex codes

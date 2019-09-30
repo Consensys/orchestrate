@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
 )
 
 // HandlerTestSuite is an utility suite to test an handler

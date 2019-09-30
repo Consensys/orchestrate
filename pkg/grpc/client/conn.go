@@ -8,8 +8,8 @@ import (
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	"github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
-	grpcerror "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/grpc/error"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
+	grpcerror "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/grpc/error"
 	"google.golang.org/grpc"
 )
 

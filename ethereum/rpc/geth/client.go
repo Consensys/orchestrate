@@ -9,9 +9,9 @@ import (
 	"github.com/cenkalti/backoff"
 	"github.com/ethereum/go-ethereum/rpc"
 	log "github.com/sirupsen/logrus"
-	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/json"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/logger"
+	encoding "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/encoding/json"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
 )
 
 // Client is a wrapper around Geth rpc client supporting Backoff retry strategy

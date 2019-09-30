@@ -11,7 +11,7 @@ import (
 
 var (
 	client   Client
-	initOnce  = &sync.Once{}
+	initOnce = &sync.Once{}
 )
 
 func Init(ctx context.Context) {
@@ -28,7 +28,7 @@ func Init(ctx context.Context) {
 			log.Infof("adding Tessera client for endpoint '%s' for chain id %s", endpoint, chainID)
 
 			enclaveHTTPClient := CreateEnclaveHTTPEndpoint(endpoint)
-			AddClient(chainID, enclaveHTTPClient)
+			client.AddClient(chainID, enclaveHTTPClient)
 
 			checkIfEndpointAccessible(chainID, endpoint)
 		}
@@ -36,7 +36,7 @@ func Init(ctx context.Context) {
 }
 
 func checkIfEndpointAccessible(chainID, endpoint string) {
-	_, err := GetStatus(chainID)
+	_, err := client.GetStatus(chainID)
 	if err != nil {
 		log.Errorf("status check failed for Tessera endpoint '%s' with error %s", endpoint, err)
 	}

@@ -8,7 +8,7 @@ const component = "abi.crafter"
 
 var (
 	crafter  Crafter
-	initOnce  = &sync.Once{}
+	initOnce = &sync.Once{}
 )
 
 // Init initialize ABI Registry

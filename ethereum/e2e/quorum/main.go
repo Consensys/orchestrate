@@ -7,10 +7,10 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/ethereum/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/ethereum/types/ethereum"
-	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
 )
 
 // This script has been implemented as part of ABC2D hackathon

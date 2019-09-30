@@ -7,11 +7,12 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
-	grpcserver "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/grpc/server"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http/healthcheck"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
+	grpcserver "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/grpc/server"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http/healthcheck"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/examples/helloworld/helloworld"
 )
@@ -34,13 +35,13 @@ func (s *server) SayHello(ctx context.Context, in *helloworld.HelloRequest) (*he
 }
 
 var (
-	app       *App
+	app       *common.App
 	startOnce = &sync.Once{}
 )
 
 func init() {
 	// Create app
-	app = NewApp()
+	app = common.NewApp()
 }
 
 // Run application
@@ -63,7 +64,7 @@ func Start(ctx context.Context) {
 		http.Enhance(healthcheck.HealthCheck(app))
 
 		// Indicate that application is ready
-		app.ready.Store(true)
+		app.SetReady(true)
 
 		// Start listening
 		err := grpcserver.ListenAndServe()

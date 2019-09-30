@@ -4,8 +4,8 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/golang/protobuf/proto"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/ethereum/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/abi"
 )
 
 const artifactPrefix = "ArtifactPrefix"

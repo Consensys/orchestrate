@@ -6,12 +6,12 @@ import (
 	"github.com/julien-marchand/healthcheck"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	server "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
+	server "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
 )
 
 // App interface
 type App interface {
-	Ready() error
+	IsReady() error
 }
 
 // HealthCheck register HTTP handlers for application healthcheck
@@ -26,7 +26,7 @@ func HealthCheck(app App) server.ServeMuxEnhancer {
 		health.AddLivenessCheck("liveness-check", func() error { return nil })
 
 		// Add a simple readiness check that always fails.
-		health.AddReadinessCheck("readiness-check", app.Ready)
+		health.AddReadinessCheck("readiness-check", app.IsReady)
 
 		// Expose prometheus metrics on /metrics
 		mux.Handle("/metrics", promhttp.HandlerFor(prometheus.DefaultGatherer, promhttp.HandlerOpts{}))

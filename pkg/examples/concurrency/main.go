@@ -6,8 +6,8 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/ethereum/examples"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/examples"
 )
 
 // ExampleHandler is an handler that increment counters

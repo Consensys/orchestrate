@@ -11,11 +11,11 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	log "github.com/sirupsen/logrus"
-	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/json"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/rpc"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/rpc/geth"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/rpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/rpc/geth"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/types"
+	encoding "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/encoding/json"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
 )
 
 // Client is a connector to Ethereum blockchains that uses Geth rpc client

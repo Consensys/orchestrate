@@ -2,7 +2,7 @@ syntax = "proto3";
 
 import "types/ethereum/base.proto";
 
-option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum";
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum";
 
 package ethereum;
 

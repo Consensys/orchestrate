@@ -5,9 +5,9 @@ import (
 	"math/big"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
 )
 
 // Tracker is a basic chain tracker that consider a block final if a a certain depth

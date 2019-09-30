@@ -53,7 +53,7 @@ func (tc *EnclaveClient) StoreRaw(chainID string, rawTx []byte, privateFrom stri
 	log.Info("Sending transaction body to 'storeraw' endpoint")
 
 	storeRawResponse := StoreRawResponse{}
-	err = PostRequest("storeraw", request, &storeRawResponse)
+	err = c.PostRequest("storeraw", request, &storeRawResponse)
 	if err != nil {
 		return nil, fmt.Errorf("failed to send a request to Tessera enclave: %s", err)
 	}
@@ -74,5 +74,5 @@ func (tc *EnclaveClient) GetStatus(chainID string) (status string, err error) {
 
 	log.Infof("Getting Tessera status for the %s chain", chainID)
 
-	return GetRequest("upcheck")
+	return c.GetRequest("upcheck")
 }

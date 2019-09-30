@@ -15,12 +15,12 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
-	registry "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/contract-registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/faucet/types/ethereum"
-	registryClient "gitlab.com/ConsenSys/client/fr/core-stack/service/contract-registry.git/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/tests/e2e.git/service/chanregistry"
+	registry "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
+	registryClient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/chanregistry"
 )
 
 // ScenarioContext is container for scenario context data

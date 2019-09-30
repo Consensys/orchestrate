@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 
 	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
-	pkgJson "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/json"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
+	pkgJson "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/encoding/json"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
 )
 
 const component = "registry-common"

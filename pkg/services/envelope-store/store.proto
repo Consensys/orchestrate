@@ -6,7 +6,7 @@ import "types/chain/chain.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
 
-option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/envelope-store";
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/envelope-store";
 
 package envelopestore;
 
@@ -48,7 +48,7 @@ message StatusInfo {
 }
 
 message StoreRequest {
-	envelope.Envelope envelope = 1;
+    envelope.Envelope envelope = 1;
 }
 
 message StoreResponse {

@@ -5,7 +5,7 @@ import (
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/ethereum/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/envelope"
 )
 
 // PrivateArgs are transaction arguments to provide to an Ethereum client supporting privacy (such as Quorum)

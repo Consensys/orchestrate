@@ -6,10 +6,10 @@ package envelope
 import (
 	"fmt"
 	"github.com/golang/protobuf/proto"
-	args2 "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/pkg/types/args"
-	chain2 "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/pkg/types/chain"
-	error2 "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/pkg/types/error"
-	ethereum2 "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/pkg/types/ethereum"
+	args2 "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/args"
+	chain2 "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/chain"
+	error2 "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/error"
+	ethereum2 "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
 	"math"
 )
 

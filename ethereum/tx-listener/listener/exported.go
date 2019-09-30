@@ -5,15 +5,15 @@ import (
 	"math/big"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/handler"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/tx-listener/listener/base"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/tx-listener/handler"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/tx-listener/listener/base"
 )
 
 var (
 	l        TxListener
 	conf     *base.Config
-	initOnce  = &sync.Once{}
+	initOnce = &sync.Once{}
 )
 
 func Init(ctx context.Context) {
@@ -34,7 +34,7 @@ func Init(ctx context.Context) {
 
 		go func() {
 			<-ctx.Done()
-			Close()
+			l.Close()
 		}()
 	})
 }
@@ -55,5 +55,5 @@ func SetGlobalListener(listener TxListener) {
 
 // Listen start listening
 func Listen(ctx context.Context, chains []*big.Int, h handler.TxListenerHandler) error {
-	return Listen(ctx, chains, h)
+	return l.Listen(ctx, chains, h)
 }

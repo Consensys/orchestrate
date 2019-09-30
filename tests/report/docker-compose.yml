@@ -4,9 +4,9 @@ services:
   report:
     build:
       context: .
-    # environment:
+        # environment:
         # REPORT_metadata_corestack-dev-env: "v0.1.1"
-        # REPORT_metadata_corestack-e2e: "v0.1.0"
+      # REPORT_metadata_corestack-e2e: "v0.1.0"
     volumes:
       - ./output:/use/src/app/in
       - ./output:/use/src/app/out

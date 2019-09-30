@@ -5,8 +5,8 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	grpcclient "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/grpc/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/pkg/tracing/opentracing/jaeger"
+	grpcclient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/grpc/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/tracing/opentracing/jaeger"
 	"google.golang.org/grpc/examples/helloworld/helloworld"
 )
 

@@ -7,10 +7,10 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
-	svc "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/services_tmp/contract-registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/abi/registry/redis"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/abi/registry/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/abi/registry/redis"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry"
 )
 
 var (

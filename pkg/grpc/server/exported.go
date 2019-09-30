@@ -7,10 +7,10 @@ import (
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
-	grpclogger "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/grpc/logger"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/pkg/tracing/opentracing/jaeger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
+	grpclogger "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/grpc/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/tracing/opentracing/jaeger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
 )
@@ -48,14 +48,14 @@ func Init(ctx context.Context) {
 			)
 		}
 
-		// Log registered services_tmp
+		// Log registered services
 		services := []string{}
 		for name := range server.GetServiceInfo() {
 			services = append(services, name)
 		}
 
 		log.WithFields(log.Fields{
-			"grpc.services_tmp": services,
+			"grpc.services": services,
 		}).Infof("grpc: server ready")
 	})
 }

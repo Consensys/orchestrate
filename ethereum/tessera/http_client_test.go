@@ -6,6 +6,7 @@ import (
 
 	"github.com/cenkalti/backoff"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/h2non/gock.v1"
 )
 
 type TestStruct struct {

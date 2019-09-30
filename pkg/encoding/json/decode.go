@@ -3,7 +3,7 @@ package json
 import (
 	"encoding/json"
 
-	errors "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
 )
 
 // Unmarshal parses the JSON-encoded data and stores the result in the value pointed to by v

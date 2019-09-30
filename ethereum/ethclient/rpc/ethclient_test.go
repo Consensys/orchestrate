@@ -10,10 +10,10 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/mocks"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/rpc/geth"
-	"gitlab.com/ConsenSys/client/fr/core-stack/service/ethereum.git/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/rpc/geth"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
 )
 
 const chainID = 888
