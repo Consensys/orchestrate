@@ -1,0 +1,68 @@
+version: '3.6'
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 32181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - tx-nonce
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - 9092:9092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:32181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - tx-nonce
+
+  redis:
+    image: redis
+    ports: 
+      - 6379:6379
+    networks:
+      - tx-nonce
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+
+  ganache:
+    image: trufflesuite/ganache-cli:v6.4.3
+    command: --db /db -d -p ${GANACHE_PORT-8545} -l ${GANACHE_GASLIMIT-0xfffffffffff} -i ${GANACHE_NETWORKID-888} ${GANACHE_ACCOUNTS} -b ${GANACHE_BLOCKTIME-4}
+    ports:
+      - ${GANACHE_PORT-8545}:8545
+    volumes:
+      - chain-data:/db
+    networks:
+      - tx-nonce
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.8
+    environment:
+      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+    ports:
+      - 5775:5775/udp
+      - 6831:6831/udp
+      - 6832:6832/udp
+      - 5778:5778
+      - 16686:16686
+      - 14268:14268
+      - 9411:9411
+    networks:
+      - tx-nonce
+
+volumes:
+  chain-data:
+    driver: local
+
+
+networks:
+  tx-nonce:
+    driver: bridge

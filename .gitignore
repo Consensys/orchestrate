@@ -4,6 +4,7 @@
 *.dll
 *.so
 *.dylib
+__pycache__
 
 # Test binary, build with `go test -c`
 *.test
@@ -15,10 +16,11 @@
 coverage.html
 *.cov.tmp
 
-# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
+# Jetbrains files
 .DS_Store
 .idea
 *.iml
+.idea_modules/
 
 # CMake
 cmake-build-*/
