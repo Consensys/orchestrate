@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/chain"
 
@@ -12,30 +11,43 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/types/ethereum"
 )
 
+/*
+	As the tag 0.3.0, the available public keys are:
+	[
+		0x93f7274c9059e601be4512F656B57b830e019E41
+		0x7E654d251Da770A068413677967F6d3Ea2FeA9E4
+		0xdbb881a51CD4023E4400CEF3ef73046743f08da3
+		0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff
+		0xA8d8DB1d8919665a18212374d623fc7C0dFDa410
+		0xffbBa394DEf3Ff1df0941c6429887107f58d4e9b
+		0x664895b5fE3ddf049d2Fb508cfA03923859763C6
+		0xfF778b716FC07D98839f48DdB88D8bE583BEB684
+		0xf5956Eb46b377Ae41b41BDa94e6270208d8202bb
+		0xbfc7137876d7Ac275019d70434B0f0779824a969
+	]
+*/
 var (
-	kafkaURL = []string{"localhost:9092"}
-	topic    = "topic-tx-sender"
+	kafkaURL    = []string{"localhost:9092"}
+	topicSigner = "topic-tx-signer"
+	topicWallet = "topic-wallet-generator"
+	senders     = []string{
+		"0xd71400daD07d70C976D6AAFC241aF1EA183a7236", // As of 0.3.0, this address is not stored by default
+		"0xf5956Eb46b377Ae41b41BDa94e6270208d8202bb",
+		"0x93f7274c9059e601be4512F656B57b830e019E41",
+		"0xbfc7137876d7Ac275019d70434B0f0779824a969",
+		"0xA8d8DB1d8919665a18212374d623fc7C0dFDa410",
+	}
 )
 
-var letterRunes = []rune("abcdef0123456789")
-
-// RandString creates a random string
-func RandString(n int) string {
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = letterRunes[rand.Intn(len(letterRunes))]
-	}
-	return string(b)
-}
-
-func newMessage() *sarama.ProducerMessage {
+func newTxMessage(i int) *sarama.ProducerMessage {
 	msg := &sarama.ProducerMessage{
-		Topic:     topic,
+		Topic:     topicSigner,
 		Partition: -1,
 	}
 	b, _ := proto.Marshal(
 		&envelope.Envelope{
-			Chain: chain.FromInt(888),
+			Chain: chain.FromInt(3),
+			From:  ethereum.HexToAccount(senders[i%len(senders)]),
 			Tx: &ethereum.Transaction{
 				TxData: &ethereum.TxData{
 					Nonce:    1,
@@ -45,13 +57,21 @@ func newMessage() *sarama.ProducerMessage {
 					GasPrice: ethereum.HexToQuantity("0xee6b2800"),
 					Data:     ethereum.HexToData("0xabcd"),
 				},
-				// TODO: fix the tx hash. At the moment it sends a transaction with nonce = 1 which failed when sent to a network (e.g. ganache)
-				Raw:  ethereum.HexToData("0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80"),
-				Hash: ethereum.HexToHash("0x" + RandString(64)),
 			},
-			Metadata: &envelope.Metadata{
-				Id: RandString(32),
-			},
+		},
+	)
+	msg.Value = sarama.ByteEncoder(b)
+	return msg
+}
+
+func newWalletMessage() *sarama.ProducerMessage {
+	msg := &sarama.ProducerMessage{
+		Topic:     topicWallet,
+		Partition: -1,
+	}
+	b, _ := proto.Marshal(
+		&envelope.Envelope{
+			Chain: &chain.Chain{Id: []byte{3}},
 		},
 	)
 	msg.Value = sarama.ByteEncoder(b)
@@ -62,22 +82,16 @@ func main() {
 	// Init config, specify appropriate version
 	config := sarama.NewConfig()
 	config.Version = sarama.V1_0_0_0
-	config.Producer.Return.Successes = true
-	config.Producer.Return.Errors = true
+	config.Consumer.Return.Errors = true
 
 	// Create client
+
 	client, err := sarama.NewClient(kafkaURL, config)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	defer func() {
-		fmt.Println("Closing a client")
-		e := client.Close()
-		if e != nil {
-			fmt.Println("Error while closing a client")
-		}
-	}()
+	defer func() { client.Close() }()
 	fmt.Println("Client ready")
 
 	// Create producer
@@ -87,25 +101,13 @@ func main() {
 		return
 	}
 	fmt.Println("Producer ready")
-	defer func() {
-		fmt.Println("Closing a producer")
-		e := p.Close()
-		if e != nil {
-			fmt.Println("Error while closing a producer: ", e)
-		}
-	}()
+	defer p.Close()
 
-	rounds := 1
+	rounds := 10
 	for i := 0; i < rounds; i++ {
-		p.Input() <- newMessage()
+		p.Input() <- newWalletMessage()
 	}
-
 	for i := 0; i < rounds; i++ {
-		select {
-		case success := <-p.Successes():
-			fmt.Println("Success", success)
-		case err := <-p.Errors():
-			fmt.Println("Error", err)
-		}
+		p.Input() <- newTxMessage(i)
 	}
 }
