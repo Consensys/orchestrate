@@ -359,7 +359,7 @@ func WithVaultToken(client *vault.Client) error {
 		log.Warningf("Token file path could not be found : %v", err.Error())
 		return err
 	}
-	os.Remove(filePath) // Immediately delete the file after it was read
+	_ = os.Remove(filePath) // Immediately delete the file after it was read
 
 	decoded := strings.TrimSuffix(string(encoded), "\n") // Remove the newline if it exists
 	decoded = strings.TrimSuffix(decoded, "\r")          // This one is for windows compatibility

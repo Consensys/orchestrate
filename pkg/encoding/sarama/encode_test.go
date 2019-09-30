@@ -67,8 +67,8 @@ var testEnvelope = &envelope.Envelope{
 		TxIndex:           1,
 	},
 	Errors: []*err.Error{
-		&err.Error{Code: 0, Message: "Error 0"},
-		&err.Error{Code: 1, Message: "Error 1"},
+		{Code: 0, Message: "Error 0"},
+		{Code: 1, Message: "Error 1"},
 	},
 	Metadata: &envelope.Metadata{
 		Id: "test",

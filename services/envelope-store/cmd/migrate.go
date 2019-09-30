@@ -25,7 +25,10 @@ func mewMigrateCmd() *cobra.Command {
 			migrate(db)
 		},
 		PersistentPostRun: func(cmd *cobra.Command, args []string) {
-			db.Close()
+			err := db.Close()
+			if err != nil {
+				log.WithError(err).Warn("could not close Postgres connection")
+			}
 		},
 	}
 

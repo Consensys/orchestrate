@@ -19,7 +19,7 @@ var (
 	values = []*big.Int{big.NewInt(9), big.NewInt(11), big.NewInt(10)}
 )
 
-func MockBalanceAt(ctx context.Context, chainID *big.Int, a ethcommon.Address, blocknumber *big.Int) (*big.Int, error) {
+func MockBalanceAt(ctx context.Context, chainID *big.Int, _ ethcommon.Address, _ *big.Int) (*big.Int, error) {
 	if chainID.Cmp(chains[2]) == 0 {
 		// Simulate error
 		return nil, errors.ConnectionError("balanceAtError")

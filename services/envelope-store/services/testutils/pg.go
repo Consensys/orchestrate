@@ -56,7 +56,10 @@ func (helper *PGTestHelper) InitTestDB(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	db.Close()
+	err = db.Close()
+	if err != nil {
+		log.WithError(err).Warn("could not close Postgres connection")
+	}
 
 	helper.DB = pg.Connect(&pg.Options{
 		Addr:     helper.Opts.Addr,
@@ -93,13 +96,19 @@ func (helper *PGTestHelper) Downgrade(t *testing.T) {
 // DropTestDB drop test database
 func (helper *PGTestHelper) DropTestDB(t *testing.T) {
 	// Close connection to test database
-	helper.DB.Close()
+	err := helper.DB.Close()
+	if err != nil {
+		log.WithError(err).Warn("could not close postgres connection")
+	}
 
 	// Drop test Database
 	db := pg.Connect(helper.Opts)
-	_, err := db.Exec(`DROP DATABASE test;`)
+	_, err = db.Exec(`DROP DATABASE test;`)
 	if err != nil {
 		log.Fatal(err)
 	}
-	db.Close()
+	err = db.Close()
+	if err != nil {
+		log.WithError(err).Warn("could not close postgres connection")
+	}
 }

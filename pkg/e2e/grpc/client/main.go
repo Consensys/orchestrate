@@ -38,7 +38,12 @@ func main() {
 	if err != nil {
 		log.WithError(err).Fatalf("e2e: GRPC client could not connect to server")
 	}
-	defer conn.Close()
+	defer func() {
+		err = conn.Close()
+		if err != nil {
+			log.WithError(err).Warn("could not close gRPC connection")
+		}
+	}()
 
 	client := helloworld.NewGreeterClient(conn)
 	// Should succeed

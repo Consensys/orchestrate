@@ -14,15 +14,9 @@ import (
 
 func TestGetChainCounts(t *testing.T) {
 	envelopes := map[string]*envelope.Envelope{
-		"1": &envelope.Envelope{
-			Chain: chain.FromInt(888),
-		},
-		"2": &envelope.Envelope{
-			Chain: chain.FromInt(777),
-		},
-		"3": &envelope.Envelope{
-			Chain: chain.FromInt(888),
-		},
+		"1": {Chain: chain.FromInt(888)},
+		"2": {Chain: chain.FromInt(777)},
+		"3": {Chain: chain.FromInt(888)},
 	}
 
 	counts := GetChainCounts(envelopes)

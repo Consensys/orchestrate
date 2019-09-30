@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/gomodule/redigo/redis"
+	log "github.com/sirupsen/logrus"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
 )
 
@@ -68,7 +70,10 @@ func (nm *NonceManager) SetRecovering(key string, status bool) error {
 
 func (nm *NonceManager) load(key string) (value interface{}, ok bool, err error) {
 	conn := nm.pool.Get()
-	defer conn.Close()
+	defer func() {
+		err := conn.Close()
+		log.WithError(err).Warn("could not close redis connection")
+	}()
 
 	reply, err := conn.Do("GET", key)
 	if err != nil {
@@ -116,7 +121,10 @@ func (nm *NonceManager) loadBool(key string) (value, ok bool, err error) {
 
 func (nm *NonceManager) set(key string, value interface{}) error {
 	conn := nm.pool.Get()
-	defer conn.Close()
+	defer func() {
+		err := conn.Close()
+		log.WithError(err).Warn("could not close redis connection")
+	}()
 
 	_, err := conn.Do("SET", key, value)
 	if err != nil {
@@ -128,7 +136,10 @@ func (nm *NonceManager) set(key string, value interface{}) error {
 
 func (nm *NonceManager) incr(key string) error {
 	conn := nm.pool.Get()
-	defer conn.Close()
+	defer func() {
+		err := conn.Close()
+		log.WithError(err).Warn("could not close redis connection")
+	}()
 
 	_, err := conn.Do("INCR", key)
 	if err != nil {

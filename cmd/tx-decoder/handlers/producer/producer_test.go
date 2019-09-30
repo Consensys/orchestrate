@@ -84,7 +84,7 @@ func TestTxDisabling(t *testing.T) {
 	// Manually sets the config field disable.external.tx to true to check the feature
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	InitFlags(flgs)
-	os.Setenv("DISABLE_EXTERNAL_TX", "true")
+	_ = os.Setenv("DISABLE_EXTERNAL_TX", "true")
 
 	for k := 0; k < 4; k++ {
 		txctx := makeProducerContext(k)
