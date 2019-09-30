@@ -2,8 +2,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/database/postgres"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/cmd_tmp/tx-crafter/handlers/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/logger"
 )
 
 // NewCommand create root command
@@ -20,13 +19,9 @@ func NewCommand() *cobra.Command {
 	// Set Persistent flags
 	logger.LogLevel(rootCmd.PersistentFlags())
 	logger.LogFormat(rootCmd.PersistentFlags())
-	postgres.PGFlags(rootCmd.PersistentFlags())
 
 	// Add Run command
 	rootCmd.AddCommand(newRunCommand())
-
-	// Add Migrate command
-	rootCmd.AddCommand(mewMigrateCmd())
 
 	return rootCmd
 }

@@ -6,7 +6,7 @@ import (
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/producer"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/cmd_tmp/tx-crafter/handlerstx-crafter/handlers/producer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/utils"
 )
 

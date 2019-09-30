@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/handlers/opentracing"
+	"gitlab.com/ConsenSys/client/fr/core-stack/pkg.git/cmd_tmp/tx-crafter/handlers/opentracing"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-crafter.git/handlers/crafter"
 	"gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-crafter.git/handlers/faucet"
 	gasestimator "gitlab.com/ConsenSys/client/fr/core-stack/worker/tx-crafter.git/handlers/gas-estimator"
