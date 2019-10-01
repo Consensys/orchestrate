@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
-	registryClient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry/client"
+	registryClient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/handlers/dispatcher"
 )
 

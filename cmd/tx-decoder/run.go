@@ -5,14 +5,15 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-decoder/handlers/producer"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/abi/registry"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient/rpc"
+	producer "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/producer/tx-decoder"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/tracing/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
+	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry"
 )
 
 func newRunCommand() *cobra.Command {
@@ -32,7 +33,7 @@ func newRunCommand() *cobra.Command {
 	rpc.URLs(runCmd.Flags())
 
 	// Register Decoder flags
-	registry.ABIs(runCmd.Flags())
+	contractregistry.ABIs(runCmd.Flags())
 
 	// Register Opentracing flags
 	jaeger.InitFlags(runCmd.Flags())

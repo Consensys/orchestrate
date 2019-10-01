@@ -4,19 +4,18 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/handlers/loader"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/handlers/logger"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/handlers/offset"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-signer/handlers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-signer/handlers/producer"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-signer/handlers/vault"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/loader/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/offset"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/opentracing"
+	producer "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/producer/tx-signer"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/vault"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/handlers/opentracing"
 	server "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http/healthcheck"
 )
@@ -47,6 +46,22 @@ func startServer(ctx context.Context) {
 	_ = server.ListenAndServe()
 }
 
+type serviceName string
+
+func initHandlers(ctx context.Context) {
+	common.InParallel(
+		// Initialize Jaeger tracer
+		func() {
+			ctx = context.WithValue(ctx, serviceName("service-name"), viper.GetString("jaeger.service.name"))
+			opentracing.Init(ctx)
+		},
+		// Initialize Vault
+		func() { vault.Init(ctx) },
+		// Initialize Producer
+		func() { producer.Init(ctx) },
+	)
+}
+
 func initComponents(ctx context.Context) {
 	common.InParallel(
 		// Initialize Engine
@@ -55,7 +70,7 @@ func initComponents(ctx context.Context) {
 		},
 		// Initialize Handlers
 		func() {
-			handlers.Init(ctx)
+			initHandlers(ctx)
 		},
 		// Initialize ConsumerGroup
 		func() {
@@ -67,7 +82,7 @@ func initComponents(ctx context.Context) {
 func registerHandlers() {
 	// Generic handlers on every worker
 	engine.Register(logger.Logger)
-	engine.Register(loader.Loader)
+	engine.Register(sarama.Loader)
 	engine.Register(offset.Marker)
 	engine.Register(producer.GlobalHandler())
 	engine.Register(opentracing.GlobalHandler())

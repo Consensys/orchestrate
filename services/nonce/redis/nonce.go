@@ -71,8 +71,8 @@ func (nm *NonceManager) SetRecovering(key string, status bool) error {
 func (nm *NonceManager) load(key string) (value interface{}, ok bool, err error) {
 	conn := nm.pool.Get()
 	defer func() {
-		err := conn.Close()
-		log.WithError(err).Warn("could not close redis connection")
+		closeErr := conn.Close()
+		log.WithError(closeErr).Warn("could not close redis connection")
 	}()
 
 	reply, err := conn.Do("GET", key)
@@ -122,8 +122,8 @@ func (nm *NonceManager) loadBool(key string) (value, ok bool, err error) {
 func (nm *NonceManager) set(key string, value interface{}) error {
 	conn := nm.pool.Get()
 	defer func() {
-		err := conn.Close()
-		log.WithError(err).Warn("could not close redis connection")
+		closeErr := conn.Close()
+		log.WithError(closeErr).Warn("could not close redis connection")
 	}()
 
 	_, err := conn.Do("SET", key, value)

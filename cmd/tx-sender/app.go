@@ -4,19 +4,19 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-sender/handlers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-sender/handlers/producer"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-sender/handlers/sender"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/loader/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/logger"
+	noncechecker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/nonce/checker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/offset"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/opentracing"
+	producer "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/producer/tx-sender"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/sender"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/handlers/loader"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/handlers/logger"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/handlers/offset"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/handlers/opentracing"
 	server "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http/healthcheck"
 )
@@ -47,13 +47,31 @@ func startServer(ctx context.Context) {
 	_ = server.ListenAndServe()
 }
 
+type serviceName string
+
+func initHandlers(ctx context.Context) {
+	common.InParallel(
+		// Initialize Jaeger tracer
+		func() {
+			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString("jaeger.service.name"))
+			opentracing.Init(ctxWithValue)
+		},
+		// Initialize sender
+		func() { sender.Init(ctx) },
+		// Initialize nonce manager
+		func() { noncechecker.Init(ctx) },
+		// Initialize producer
+		func() { producer.Init(ctx) },
+	)
+}
+
 func initComponents(ctx context.Context) {
 	common.InParallel(
 		// Initialize Engine
 		func() { engine.Init(ctx) },
 
 		// Initialize Handlers
-		func() { handlers.Init(ctx) },
+		func() { initHandlers(ctx) },
 
 		// Initialize ConsumerGroup
 		func() { broker.InitConsumerGroup(ctx) },
@@ -63,7 +81,7 @@ func initComponents(ctx context.Context) {
 func registerHandlers() {
 	// Generic handlers on every worker
 	engine.Register(logger.Logger)
-	engine.Register(loader.Loader)
+	engine.Register(sarama.Loader)
 	engine.Register(offset.Marker)
 	engine.Register(producer.GlobalHandler())
 	engine.Register(opentracing.GlobalHandler())

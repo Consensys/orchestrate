@@ -5,16 +5,15 @@ import (
 	"fmt"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/handlers/loader"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/handlers/logger"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/handlers/offset"
-
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+
+	loader "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/loader/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/offset"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
 	server "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http/healthcheck"
@@ -62,7 +61,7 @@ func initComponents(ctx context.Context) {
 		func() {
 			handlers.Init(ctx)
 		},
-		// Initialize cucumber registry
+		// Initialize cucumber handlers
 		func() {
 			cucumber.Init(ctx)
 		},

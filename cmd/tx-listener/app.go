@@ -4,22 +4,22 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
-
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-listener/handlers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-listener/handlers/loader"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-listener/handlers/producer"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-listener/handlers/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient"
 	txlconfig "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/tx-listener/handler/base"
 	txlhandler "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/tx-listener/handler/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/tx-listener/listener"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/enricher"
+	envelopeloader "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/envelope/loader"
+	receiptloader "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/loader/receipt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/opentracing"
+	producer "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/producer/tx-listener"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/handlers/logger"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/handlers/opentracing"
 	server "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http/healthcheck"
 )
@@ -45,13 +45,37 @@ func startServer(ctx context.Context) {
 	_ = server.ListenAndServe()
 }
 
+type serviceName string
+
+func initHandlers(ctx context.Context) {
+	common.InParallel(
+		// Initialize Jaeger
+		func() {
+			ctx = context.WithValue(ctx, serviceName("service-name"), viper.GetString("jaeger.service.name"))
+			opentracing.Init(ctx)
+		},
+		// Initialize store
+		func() {
+			envelopeloader.Init(ctx)
+		},
+		// Initialize enricher
+		func() {
+			enricher.Init(ctx)
+		},
+		// Initialize producer
+		func() {
+			producer.Init(ctx)
+		},
+	)
+}
+
 func initComponents(ctx context.Context) {
 	common.InParallel(
 		func() {
 			engine.Init(ctx)
 		},
 		func() {
-			handlers.Init(ctx)
+			initHandlers(ctx)
 		},
 		func() {
 			broker.InitSyncProducer(ctx)
@@ -68,9 +92,9 @@ func registerHandlers() {
 
 	// Specific handlers to tx-listener
 	engine.Register(producer.GlobalHandler())
-	engine.Register(loader.Loader)
+	engine.Register(receiptloader.Loader)
 	engine.Register(opentracing.GlobalHandler())
-	engine.Register(store.GlobalHandler())
+	engine.Register(envelopeloader.GlobalHandler())
 }
 
 // Start starts application

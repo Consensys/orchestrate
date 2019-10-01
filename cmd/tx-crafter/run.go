@@ -5,14 +5,15 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/abi/registry"
+
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient/rpc"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
+	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/tracing/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
-	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry/client"
+	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/controllers/amount"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/controllers/blacklist"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/controllers/cooldown"
@@ -49,7 +50,7 @@ func newRunCommand() *cobra.Command {
 	maxbalance.FaucetMaxBalance(runCmd.Flags())
 
 	// Register Crafter flags
-	registry.ABIs(runCmd.Flags())
+	contractregistry.ABIs(runCmd.Flags())
 
 	// Register Kafka flags
 	broker.KafkaAddresses(runCmd.Flags())

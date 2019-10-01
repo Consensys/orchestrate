@@ -24,7 +24,7 @@ func SetGlobalCrafter(c Crafter) {
 	crafter = c
 }
 
-// GlobalCrafter returns global ABI registry
+// GlobalCrafter returns global handler
 func GlobalCrafter() Crafter {
 	return crafter
 }

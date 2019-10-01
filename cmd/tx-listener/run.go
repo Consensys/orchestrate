@@ -11,9 +11,9 @@ import (
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
+	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/envelope-store/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/tracing/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
-	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/envelope-store/client"
 )
 
 func newRunCommand() *cobra.Command {

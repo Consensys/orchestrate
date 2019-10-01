@@ -2,7 +2,7 @@ package args
 
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
-	abi2 "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
 )
 
@@ -25,7 +25,7 @@ func SignatureToCall(sig string) (*Call, error) {
 	}
 
 	return &Call{
-		Method: &abi2.Method{
+		Method: &abi.Method{
 			Signature: sig,
 		},
 	}, nil

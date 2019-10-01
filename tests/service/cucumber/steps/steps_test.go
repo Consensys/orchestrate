@@ -17,10 +17,10 @@ import (
 
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
+	crc "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
-	crc "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/chanregistry"
 )
 

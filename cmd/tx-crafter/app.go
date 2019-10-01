@@ -4,22 +4,21 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-crafter/handlers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-crafter/handlers/crafter"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-crafter/handlers/faucet"
-	gasestimator "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-crafter/handlers/gas-estimator"
-	gaspricer "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-crafter/handlers/gas-pricer"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-crafter/handlers/producer"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/crafter"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/faucet"
+	gasestimator "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/gas/gas-estimator"
+	gaspricer "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/gas/gas-pricer"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/loader/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/offset"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/opentracing"
+	producer "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/producer/tx-crafter"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/handlers/loader"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/handlers/logger"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/handlers/offset"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/handlers/opentracing"
 	server "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http/healthcheck"
 )
@@ -48,6 +47,43 @@ func startServer(ctx context.Context) {
 	_ = server.ListenAndServe()
 }
 
+type serviceName string
+
+func initHandlers(ctx context.Context) {
+	common.InParallel(
+		// Initialize Jaeger tracer
+		func() {
+			ctx = context.WithValue(ctx, serviceName("service-name"), viper.GetString("jaeger.service.name"))
+			opentracing.Init(ctx)
+		},
+
+		// Initialize crafter
+		func() {
+			crafter.Init(ctx)
+		},
+
+		// Initialize faucet
+		func() {
+			faucet.Init(ctx)
+		},
+
+		// Initialize Gas Estimator
+		func() {
+			gasestimator.Init(ctx)
+		},
+
+		// Initialize Gas Pricer
+		func() {
+			gaspricer.Init(ctx)
+		},
+
+		// Initialize Producer
+		func() {
+			producer.Init(ctx)
+		},
+	)
+}
+
 func initConsumerGroup(ctx context.Context) {
 	common.InParallel(
 		// Initialize Engine
@@ -56,7 +92,7 @@ func initConsumerGroup(ctx context.Context) {
 		},
 		// Initialize Handlers
 		func() {
-			handlers.Init(ctx)
+			initHandlers(ctx)
 		},
 		// Initialize ConsumerGroup
 		func() {
@@ -66,7 +102,7 @@ func initConsumerGroup(ctx context.Context) {
 	// Register handlers on engine
 	// Generic handlers on every worker
 	engine.Register(logger.Logger)
-	engine.Register(loader.Loader)
+	engine.Register(sarama.Loader)
 	engine.Register(offset.Marker)
 	engine.Register(producer.GlobalHandler())
 	engine.Register(opentracing.GlobalHandler())

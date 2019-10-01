@@ -16,10 +16,10 @@ import (
 	"github.com/spf13/viper"
 
 	registry "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry"
+	registryClient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
-	registryClient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/chanregistry"
 )
 
