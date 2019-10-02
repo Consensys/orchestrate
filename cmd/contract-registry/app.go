@@ -28,10 +28,10 @@ func init() {
 // Run application
 func Start(ctx context.Context) {
 	startOnce.Do(func() {
-		// Initialize GRPC Server service
+		// Initialize gRPC Server service
 		services.Init(ctx)
 
-		// Initialize GRPC server
+		// Initialize gRPC server
 		grpcserver.AddEnhancers(
 			func(s *grpc.Server) *grpc.Server {
 				types.RegisterRegistryServer(s, services.GlobalRegistry())

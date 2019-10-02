@@ -14,10 +14,10 @@ import (
 // Crafter takes a method abi and args to craft a transaction
 type Crafter interface {
 	// CraftCall craft a call Transaction
-	CraftCall(method ethabi.Method, args ...string) ([]byte, error)
+	CraftCall(method *ethabi.Method, args ...string) ([]byte, error)
 
 	// CraftConstructor craft a Contract Deployment Transaction
-	CraftConstructor(bytecode []byte, method ethabi.Method, args ...string) ([]byte, error)
+	CraftConstructor(bytecode []byte, method *ethabi.Method, args ...string) ([]byte, error)
 }
 
 // PayloadCrafter is a structure that can Craft payloads
@@ -114,7 +114,7 @@ func bindArrayArg(t *ethabi.Type, arg string) (interface{}, error) {
 }
 
 // bindArgs cast string arguments into expected go-ethereum types
-func bindArgs(method ethabi.Method, args ...string) ([]interface{}, error) {
+func bindArgs(method *ethabi.Method, args ...string) ([]interface{}, error) {
 	if method.Inputs.LengthNonIndexed() != len(args) {
 		return nil,
 			errors.InvalidArgsCountError(
@@ -135,7 +135,7 @@ func bindArgs(method ethabi.Method, args ...string) ([]interface{}, error) {
 }
 
 // Pack automatically cast string args into correct Solidity type and pack arguments
-func (c *PayloadCrafter) Pack(method ethabi.Method, args ...string) ([]byte, error) {
+func (c *PayloadCrafter) Pack(method *ethabi.Method, args ...string) ([]byte, error) {
 	// Cast arguments
 	boundArgs, err := bindArgs(method, args...)
 	if err != nil {
@@ -152,7 +152,7 @@ func (c *PayloadCrafter) Pack(method ethabi.Method, args ...string) ([]byte, err
 }
 
 // CraftCall craft a transaction call payload
-func (c *PayloadCrafter) CraftCall(method ethabi.Method, args ...string) ([]byte, error) {
+func (c *PayloadCrafter) CraftCall(method *ethabi.Method, args ...string) ([]byte, error) {
 	// Pack arguments
 	arguments, err := c.Pack(method, args...)
 	if err != nil {
@@ -163,7 +163,7 @@ func (c *PayloadCrafter) CraftCall(method ethabi.Method, args ...string) ([]byte
 }
 
 // CraftConstructor craft contract creation a transaction payload
-func (c *PayloadCrafter) CraftConstructor(bytecode []byte, method ethabi.Method, args ...string) ([]byte, error) {
+func (c *PayloadCrafter) CraftConstructor(bytecode []byte, method *ethabi.Method, args ...string) ([]byte, error) {
 	if len(bytecode) == 0 {
 		return nil, errors.SolidityError("invalid empty bytecode").SetComponent(component)
 	}

@@ -19,12 +19,12 @@ func TestKafkaAddresses(t *testing.T) {
 	}
 	assert.Equal(t, expected, viper.GetStringSlice(name), "Default")
 
-	os.Setenv("KAFKA_ADDRESS", "localhost:9192")
+	_ = os.Setenv("KAFKA_ADDRESS", "localhost:9192")
 	expected = []string{
 		"localhost:9192",
 	}
 	assert.Equal(t, expected, viper.GetStringSlice(name), "From Environment Variable")
-	os.Unsetenv("KAFKA_ADDRESS")
+	_ = os.Unsetenv("KAFKA_ADDRESS")
 
 	args := []string{
 		"--kafka-address=127.0.0.1:9091",

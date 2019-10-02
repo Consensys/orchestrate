@@ -24,7 +24,7 @@ func TestFlags(t *testing.T) {
 		}
 	}
 
-	os.Setenv("TESSERA_ENDPOINTS",
+	_ = os.Setenv("TESSERA_ENDPOINTS",
 		"{\"10\": \"http://tessera1:9080\", \"22\": \"Somewhere over the rainbow\", \"888\": \"http://localhost:80\"}",
 	)
 

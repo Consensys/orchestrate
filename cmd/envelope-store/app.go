@@ -28,10 +28,10 @@ func init() {
 // Run application
 func Start(ctx context.Context) {
 	startOnce.Do(func() {
-		// Initialize GRPC Server service
+		// Initialize gRPC Server service
 		envelopestore.Init()
 
-		// Initialize GRPC server
+		// Initialize gRPC server
 		grpcserver.AddEnhancers(
 			func(s *grpc.Server) *grpc.Server {
 				svc.RegisterEnvelopeStoreServer(s, envelopestore.GlobalEnvelopeStoreServer())

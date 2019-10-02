@@ -26,7 +26,7 @@ func TestLog(t *testing.T) {
 
 	log := FromGethLog(ethlog)
 	assert.Equal(t, "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C", log.GetAddress().Address().Hex(), "Address should match")
-	topics := []string{}
+	var topics []string
 	for _, topic := range log.GetTopics() {
 		topics = append(topics, topic.Hash().Hex())
 	}

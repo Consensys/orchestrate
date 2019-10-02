@@ -17,10 +17,10 @@ func TestBlockBackoff(t *testing.T) {
 	expected := time.Second
 	assert.Equal(t, expected, viper.GetDuration(name), "Default")
 
-	os.Setenv("LISTENER_BLOCK_BACKOFF", "30s")
+	_ = os.Setenv("LISTENER_BLOCK_BACKOFF", "30s")
 	expected = 30 * time.Second
 	assert.Equal(t, expected, viper.GetDuration(name), "From Environment Variable")
-	os.Unsetenv("LISTENER_BLOCK_BACKOFF")
+	_ = os.Unsetenv("LISTENER_BLOCK_BACKOFF")
 
 	args := []string{
 		"--listener-block-backoff=36s",
@@ -39,10 +39,10 @@ func TestBlockLimit(t *testing.T) {
 	expected := int64(40)
 	assert.Equal(t, expected, viper.GetInt64(name), "Default")
 
-	os.Setenv("LISTENER_BLOCK_LIMIT", "45")
+	_ = os.Setenv("LISTENER_BLOCK_LIMIT", "45")
 	expected = int64(45)
 	assert.Equal(t, expected, viper.GetInt64(name), "From Environment Variable")
-	os.Unsetenv("LISTENER_BLOCK_LIMIT")
+	_ = os.Unsetenv("LISTENER_BLOCK_LIMIT")
 
 	args := []string{
 		"--listener-block-limit=60",

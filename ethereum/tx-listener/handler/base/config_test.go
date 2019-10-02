@@ -18,10 +18,10 @@ func TestStartDefault(t *testing.T) {
 	expected := "oldest"
 	assert.Equal(t, expected, viper.GetString(name), "Default")
 
-	os.Setenv("LISTENER_START_DEFAULT", "latest")
+	_ = os.Setenv("LISTENER_START_DEFAULT", "latest")
 	expected = "latest"
 	assert.Equal(t, expected, viper.GetString(name), "Env")
-	os.Unsetenv("LISTENER_START_DEFAULT")
+	_ = os.Unsetenv("LISTENER_START_DEFAULT")
 
 	args := []string{
 		"--listener-start-default=123",
@@ -38,13 +38,13 @@ func TestStart(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	Start(flgs)
 
-	expected := []string{}
+	var expected []string
 	assert.Equal(t, expected, viper.GetStringSlice(name), "Default")
 
-	os.Setenv("LISTENER_START", "3:oldest")
+	_ = os.Setenv("LISTENER_START", "3:oldest")
 	expected = []string{"3:oldest"}
 	assert.Equal(t, expected, viper.GetStringSlice(name), "Env")
-	os.Unsetenv("LISTENER_START")
+	_ = os.Unsetenv("LISTENER_START")
 
 	args := []string{
 		"--listener-start=2:latest",

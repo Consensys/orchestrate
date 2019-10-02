@@ -15,13 +15,13 @@ func TestBridgeLinks(t *testing.T) {
 	BridgeLinks(flgs)
 
 	// Test default
-	expected := []string{}
+	var expected []string
 	if len(expected) != len(viper.GetStringSlice(name)) {
 		t.Errorf("BridgeLinks #1: expected %v but got %v", expected, viper.GetStringSlice(name))
 	}
 
 	// Test environment variable
-	os.Setenv("BRIDGE_LINKS", "addr0@chainID0<>addr0@chainID0 addr1@chainID1<>addr1@chainID1")
+	_ = os.Setenv("BRIDGE_LINKS", "addr0@chainID0<>addr0@chainID0 addr1@chainID1<>addr1@chainID1")
 	expected = []string{
 		"addr0@chainID0<>addr0@chainID0",
 		"addr1@chainID1<>addr1@chainID1",
@@ -73,7 +73,7 @@ func TestBridgeMethodSignature(t *testing.T) {
 
 	// Test environment variable
 	expected = "TestMethod(address,uint256)"
-	os.Setenv("BRIDGE_METHODSIGNATURE", expected)
+	_ = os.Setenv("BRIDGE_METHODSIGNATURE", expected)
 	if expected != viper.GetString(name) {
 		t.Errorf("BridgeMethodSignature #2: expect %v but got %v", expected, viper.GetString(name))
 	}
@@ -103,7 +103,7 @@ func TestBridgeAuthority(t *testing.T) {
 
 	// Test environment variable
 	expected = "0xTestAddress"
-	os.Setenv("BRIDGE_AUTHORITY", "0xTestAddress")
+	_ = os.Setenv("BRIDGE_AUTHORITY", "0xTestAddress")
 	if expected != viper.GetString(name) {
 		t.Errorf("BridgeAuthority #2: expect %v but got %v", expected, viper.GetString(name))
 	}

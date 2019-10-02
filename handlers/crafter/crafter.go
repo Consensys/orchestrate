@@ -101,7 +101,7 @@ func createContractDeploymentPayload(txctx *engine.TxContext, methodAbi *abi.Met
 		return nil, e
 	}
 
-	payload, err := c.CraftConstructor(bytecodeResp.GetBytecode(), *methodAbi, getTxArgs(txctx)...)
+	payload, err := c.CraftConstructor(bytecodeResp.GetBytecode(), methodAbi, getTxArgs(txctx)...)
 	if err != nil {
 		e := txctx.AbortWithError(err).ExtendComponent(component)
 		txctx.Logger.WithError(e).Errorf("crafter: could not craft tx payload")
@@ -112,7 +112,7 @@ func createContractDeploymentPayload(txctx *engine.TxContext, methodAbi *abi.Met
 }
 
 func createTxCallPayload(txctx *engine.TxContext, methodAbi *abi.Method, c crafter.Crafter) ([]byte, error) {
-	var payload, err = c.CraftCall(*methodAbi, getTxArgs(txctx)...)
+	var payload, err = c.CraftCall(methodAbi, getTxArgs(txctx)...)
 	if err != nil {
 		e := txctx.AbortWithError(err).ExtendComponent(component)
 		txctx.Logger.WithError(e).Errorf("crafter: could not craft tx payload")

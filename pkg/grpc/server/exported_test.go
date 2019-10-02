@@ -16,7 +16,7 @@ package grpcserver
 // )
 
 // func TestListenAndServe(t *testing.T) {
-// 	// Init GRPC server
+// 	// Init gRPC server
 // 	AddEnhancers(
 // 		func(srv *grpc.Server) *grpc.Server {
 // 			helloworld.RegisterGreeterServer(srv, &DummyGreeterServer{})

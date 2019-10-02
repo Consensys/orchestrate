@@ -7,7 +7,7 @@ option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg
 
 package contractregistry;
 
-// Registry is a GRPC service responsible for registering Contracts
+// Registry is a gRPC service responsible for registering Contracts
 service Registry {
     // Register a contract
     rpc RegisterContract (RegisterContractRequest) returns (RegisterContractResponse);

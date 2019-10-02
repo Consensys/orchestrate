@@ -18,7 +18,7 @@ func TestHostname(t *testing.T) {
 		t.Errorf("HTTPHostname #1: expected %q but got %q", expected, viper.GetString(name))
 	}
 
-	os.Setenv("HTTP_HOSTNAME", "localhost:3000")
+	_ = os.Setenv("HTTP_HOSTNAME", "localhost:3000")
 	expected = "localhost:3000"
 	if viper.GetString(name) != expected {
 		t.Errorf("HTTPHostname #2: expected %q but got %q", expected, viper.GetString(name))

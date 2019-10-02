@@ -16,10 +16,10 @@ func TestTrackerDepth(t *testing.T) {
 	expected := int64(0)
 	assert.Equal(t, expected, viper.GetInt64(name), "Default")
 
-	os.Setenv("LISTENER_TRACKER_DEPTH", "45")
+	_ = os.Setenv("LISTENER_TRACKER_DEPTH", "45")
 	expected = int64(45)
 	assert.Equal(t, expected, viper.GetInt64(name), "From Environment Variable")
-	os.Unsetenv("LISTENER_TRACKER_DEPTH")
+	_ = os.Unsetenv("LISTENER_TRACKER_DEPTH")
 
 	args := []string{
 		"--listener-tracker-depth=60",

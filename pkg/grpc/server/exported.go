@@ -24,7 +24,7 @@ var (
 	enhancers  = []Enhancer{}
 )
 
-// Init initialize global GRPC server
+// Init initialize global gRPC server
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
 		if server == nil {
@@ -40,7 +40,7 @@ func Init(ctx context.Context) {
 			// Register server for prometheus metrics
 			grpc_prometheus.Register(server)
 
-			// Replace internal GRPC logger with a logrus logger
+			// Replace internal gRPC logger with a logrus logger
 			grpclog.SetLoggerV2(
 				&grpclogger.LogEntry{
 					Entry: log.WithFields(log.Fields{"system": "grpc.internal"}),
@@ -49,7 +49,7 @@ func Init(ctx context.Context) {
 		}
 
 		// Log registered services
-		services := []string{}
+		var services []string
 		for name := range server.GetServiceInfo() {
 			services = append(services, name)
 		}
@@ -60,17 +60,17 @@ func Init(ctx context.Context) {
 	})
 }
 
-// GlobalServer return global GRPC server
+// GlobalServer return global gRPC server
 func GlobalServer() *grpc.Server {
 	return server
 }
 
-// SetGlobalServer sets global GRPC server
+// SetGlobalServer sets global gRPC server
 func SetGlobalServer(s *grpc.Server) {
 	server = s
 }
 
-// AddEnhancers adds GRPC server enhancers that will be called at Init time
+// AddEnhancers adds gRPC server enhancers that will be called at Init time
 // Note that it should be called before Init()
 func AddEnhancers(fns ...Enhancer) {
 	enhancers = append(enhancers, fns...)
@@ -78,9 +78,9 @@ func AddEnhancers(fns ...Enhancer) {
 
 // ListenAndServe starts global server
 func ListenAndServe() error {
-	// Ensure GRPC server has been initialized
+	// Ensure gRPC server has been initialized
 	if server == nil {
-		log.Fatalf("grpc.server: GRPC server is not initialized")
+		log.Fatalf("grpc.server: gRPC server is not initialized")
 	}
 
 	// Ensure HTTP server has been initialized

@@ -113,7 +113,7 @@ func (s *errorInterceptorsSuite) TestPingErrorInternal() {
 }
 
 func (s *errorInterceptorsSuite) TestPingErrorGRPC() {
-	// GRPC error
+	// gRPC error
 	_, err := s.Client.PingError(
 		s.SimpleCtx(),
 		&testproto.PingRequest{Value: "test-error", ErrorCodeReturned: uint32(codes.OutOfRange)},

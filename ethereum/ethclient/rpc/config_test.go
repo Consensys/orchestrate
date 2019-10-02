@@ -14,7 +14,7 @@ func TestEthClientURLs(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	URLs(flgs)
 
-	expected := []string{}
+	var expected []string
 	if len(expected) != len(viper.GetStringSlice(name)) {
 		t.Errorf("EthClientURLs #1: expected %v but got %v", expected, viper.GetStringSlice(name))
 	} else {
@@ -25,7 +25,7 @@ func TestEthClientURLs(t *testing.T) {
 		}
 	}
 
-	os.Setenv("ETH_CLIENT_URL", "http://localhost:7546 http://localhost:8546")
+	_ = os.Setenv("ETH_CLIENT_URL", "http://localhost:7546 http://localhost:8546")
 	expected = []string{
 		"http://localhost:7546",
 		"http://localhost:8546",

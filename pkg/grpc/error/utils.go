@@ -62,13 +62,13 @@ func StatusToError(s *status.Status) *ierror.Error {
 	}
 }
 
-// ErrorToStatus convert an internal error to a GRPC status
+// ErrorToStatus convert an internal error to a gRPC status
 func ErrorToStatus(err error) (s *status.Status) {
 	if err == nil {
 		return nil
 	}
 
-	// If err is built on GRPC status
+	// If err is built on gRPC status
 	se, ok := status.FromError(err)
 	if ok {
 		// Detail status with internal error generated from se

@@ -33,10 +33,10 @@ func TestHost(t *testing.T) {
 	Host(flgs)
 	assert.Equal(t, hostDefault, viper.GetString(hostViperKey), "Default")
 
-	os.Setenv("JAEGER_AGENT_HOST", "env-jaeger")
+	_ = os.Setenv("JAEGER_AGENT_HOST", "env-jaeger")
 	expected := "env-jaeger"
 	assert.Equal(t, expected, viper.GetString(hostViperKey), "From Environment Variable")
-	os.Unsetenv("JAEGER_AGENT_HOST")
+	_ = os.Unsetenv("JAEGER_AGENT_HOST")
 
 	args := []string{
 		"--jaeger-host=flag-jaeger",
@@ -58,10 +58,10 @@ func TestPort(t *testing.T) {
 	Port(flgs)
 	assert.Equal(t, portDefault, viper.GetInt(portViperKey), "Default")
 
-	os.Setenv("JAEGER_AGENT_PORT", "5778")
+	_ = os.Setenv("JAEGER_AGENT_PORT", "5778")
 	expected := 5778
 	assert.Equal(t, expected, viper.GetInt(portViperKey), "From Environment Variable")
-	os.Unsetenv("JAEGER_AGENT_PORT")
+	_ = os.Unsetenv("JAEGER_AGENT_PORT")
 
 	args := []string{
 		"--jaeger-port=5779",
@@ -79,9 +79,9 @@ func TestServiceName(t *testing.T) {
 	assert.Equal(t, serviceNameDefault, viper.GetString(serviceNameViperKey), "Default")
 
 	expected := "Test-service"
-	os.Setenv(serviceNameEnv, expected)
+	_ = os.Setenv(serviceNameEnv, expected)
 	assert.Equal(t, expected, viper.GetString(serviceNameViperKey), "From Environment Variable")
-	os.Unsetenv(serviceNameEnv)
+	_ = os.Unsetenv(serviceNameEnv)
 
 	expected = "Test-service-2"
 	args := []string{
@@ -100,9 +100,9 @@ func TestEndPoint(t *testing.T) {
 	assert.Equal(t, endpointDefault, viper.GetString(endpointViperKey), "Default")
 
 	expected := "Test-endpoint"
-	os.Setenv(endpointEnv, expected)
+	_ = os.Setenv(endpointEnv, expected)
 	assert.Equal(t, expected, viper.GetString(endpointViperKey), "From Environment Variable")
-	os.Unsetenv(endpointEnv)
+	_ = os.Unsetenv(endpointEnv)
 
 	expected = "Test-endpoint-2"
 	args := []string{
@@ -121,9 +121,9 @@ func TestUser(t *testing.T) {
 	assert.Equal(t, userDefault, viper.GetString(userViperKey), "Default")
 
 	expected := "Test-user"
-	os.Setenv(userEnv, expected)
+	_ = os.Setenv(userEnv, expected)
 	assert.Equal(t, expected, viper.GetString(userViperKey), "From Environment Variable")
-	os.Unsetenv(userEnv)
+	_ = os.Unsetenv(userEnv)
 
 	expected = "Test-user-2"
 	args := []string{
@@ -142,9 +142,9 @@ func TestPassword(t *testing.T) {
 	assert.Equal(t, passwordDefault, viper.GetString(passwordViperKey), "Default")
 
 	expected := "Test-password"
-	os.Setenv(passwordEnv, expected)
+	_ = os.Setenv(passwordEnv, expected)
 	assert.Equal(t, expected, viper.GetString(passwordViperKey), "From Environment Variable")
-	os.Unsetenv(passwordEnv)
+	_ = os.Unsetenv(passwordEnv)
 
 	expected = "Test-password-2"
 	args := []string{
@@ -163,9 +163,9 @@ func TestDisabled(t *testing.T) {
 	assert.Equal(t, disabledDefault, viper.GetBool(disabledViperKey), "Default")
 
 	expected := "true"
-	os.Setenv(disabledEnv, expected)
+	_ = os.Setenv(disabledEnv, expected)
 	assert.Equal(t, true, viper.GetBool(disabledViperKey), "From Environment Variable")
-	os.Unsetenv(disabledEnv)
+	_ = os.Unsetenv(disabledEnv)
 
 	expected = "true"
 	args := []string{
@@ -189,9 +189,9 @@ func TestRpcMetrics(t *testing.T) {
 	assert.Equal(t, rpcMetricsDefault, viper.GetBool(rpcMetricsViperKey), "Default")
 
 	expected := "true"
-	os.Setenv(rpcMetricsEnv, expected)
+	_ = os.Setenv(rpcMetricsEnv, expected)
 	assert.Equal(t, true, viper.GetBool(rpcMetricsViperKey), "From Environment Variable")
-	os.Unsetenv(rpcMetricsEnv)
+	_ = os.Unsetenv(rpcMetricsEnv)
 
 	expected = "true"
 	args := []string{
@@ -210,9 +210,9 @@ func TestLogSpans(t *testing.T) {
 	assert.Equal(t, logSpansDefault, viper.GetBool(logSpansViperKey), "Default")
 
 	expected := "true"
-	os.Setenv(logSpansEnv, expected)
+	_ = os.Setenv(logSpansEnv, expected)
 	assert.Equal(t, true, viper.GetBool(logSpansViperKey), "From Environment Variable")
-	os.Unsetenv(logSpansEnv)
+	_ = os.Unsetenv(logSpansEnv)
 
 	expected = "true"
 	args := []string{
@@ -230,10 +230,10 @@ func TestSamplerParam(t *testing.T) {
 	SamplerParam(flgs)
 	assert.Equal(t, samplerParamDefault, viper.GetInt(samplerParamViperKey), "Default")
 
-	os.Setenv("JAEGER_SAMPLER_PARAM", "0")
+	_ = os.Setenv("JAEGER_SAMPLER_PARAM", "0")
 	expected := 0
 	assert.Equal(t, expected, viper.GetInt(samplerParamViperKey), "From Environment Variable")
-	os.Unsetenv("JAEGER_HOST")
+	_ = os.Unsetenv("JAEGER_HOST")
 
 	args := []string{
 		"--jaeger-sampler-param=0",
@@ -251,9 +251,9 @@ func TestSamplerType(t *testing.T) {
 	assert.Equal(t, samplerTypeDefault, viper.GetString(samplerTypeViperKey), "Default")
 
 	expected := "probabilistic"
-	os.Setenv(samplerTypeEnv, expected)
+	_ = os.Setenv(samplerTypeEnv, expected)
 	assert.Equal(t, expected, viper.GetString(samplerTypeViperKey), "From Environment Variable")
-	os.Unsetenv(samplerTypeEnv)
+	_ = os.Unsetenv(samplerTypeEnv)
 
 	expected = "rateLimiting"
 	args := []string{

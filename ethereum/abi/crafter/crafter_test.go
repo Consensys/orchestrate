@@ -96,10 +96,10 @@ func TestBindArgs(t *testing.T) {
 		_to    = "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"
 		_value = "0x2386f26fc10000"
 	)
-	_, e = bindArgs(*ERC20TransferMethod, _to, _value)
+	_, e = bindArgs(ERC20TransferMethod, _to, _value)
 	assert.Nil(t, e, "Prepare Args: should prepare args")
 
-	_, e = bindArgs(*ERC20TransferMethod, _to)
+	_, e = bindArgs(ERC20TransferMethod, _to)
 	assert.NotNil(t, e, "Parse method signature should fail")
 	ie, ok := e.(*ierror.Error)
 	assert.True(t, ok, "Error should cast to internal error")
@@ -114,7 +114,7 @@ func TestBindArgs(t *testing.T) {
 		_bytesB  = "0xa1a45fabb381e6ab02448013f651fa0792c3fa05b38771f161cb8f7ebdbee973b5"
 		_bytes16 = "0xa1b2c3d4e5f67890"
 	)
-	_, e = bindArgs(*CustomMethod, _address, _bytesA, _uint256, _uint17, _bool, _bytesB, _bytes16)
+	_, e = bindArgs(CustomMethod, _address, _bytesA, _uint256, _uint17, _bool, _bytesB, _bytes16)
 	assert.Nil(t, e, "Prepare Args: should prepare args")
 }
 
@@ -130,7 +130,7 @@ func TestPayloadCrafter(t *testing.T) {
 		_to    = "0xfF778b716FC07D98839f48DdB88D8bE583BEB684"
 		_value = "0x2386f26fc10000"
 	)
-	data, e := c.CraftCall(*ERC20TransferMethod, _to, _value)
+	data, e := c.CraftCall(ERC20TransferMethod, _to, _value)
 	assert.Nil(t, e, "Craft: received error")
 
 	assert.Equal(t, hexutil.Encode(data), ERC20Payload, "Craft: expected equal payload")
@@ -145,7 +145,7 @@ func TestPayloadCrafter(t *testing.T) {
 		_bytes16 = "0xa1b2c3d4e5f67890"
 	)
 
-	data, e = c.CraftCall(*CustomMethod, _address, _bytesA, _uint256, _uint17, _bool, _bytesB, _bytes16)
+	data, e = c.CraftCall(CustomMethod, _address, _bytesA, _uint256, _uint17, _bool, _bytesB, _bytes16)
 	assert.Nil(t, e, "Craft: received error")
 
 	expected := "0x1db71ad9000000000000000000000000ff778b716fc07d98839f48ddb88d8be583beb68400000000000000000000000000000000000000000000000000000000000000e00000000000000000000000006009608a02a7a15fd6689d6dad560c44e9ab61ff000000000000000000000dd9de0d2d100cee25d4ea45b8afa28bdfc1e2a775af000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000001200000000000000000a1b2c3d4e5f678900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000072386f26fc10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000021a1a45fabb381e6ab02448013f651fa0792c3fa05b38771f161cb8f7ebdbee973b500000000000000000000000000000000000000000000000000000000000000"
@@ -172,7 +172,7 @@ func TestPayloadCrafterConcurrent(t *testing.T) {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
-			raw, e := c.CraftCall(*ERC20TransferMethod, testCrafterData[i%2].to, testCrafterData[i%2].value)
+			raw, e := c.CraftCall(ERC20TransferMethod, testCrafterData[i%2].to, testCrafterData[i%2].value)
 			// Test as been designed such as 1 out of 6 entry are valid for a credit
 			if e == nil {
 				raws <- raw
@@ -198,7 +198,7 @@ func TestPayloadCrafterArray(t *testing.T) {
 	var (
 		_array = "[\"0x1\",\"0x2\",\"0x3\"]"
 	)
-	data, e := c.CraftCall(*ArrayInput, _array)
+	data, e := c.CraftCall(ArrayInput, _array)
 	assert.Nil(t, e, "Craft: received error")
 
 	expected := "0x71cc037a000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003"
@@ -213,7 +213,7 @@ func TestPayloadCrafterArrayAddress(t *testing.T) {
 	var (
 		_array = "[\"0xca35b7d915458ef540ade6068dfe2f44e8fa733c\",\"0x14723a09acff6d2a60dcdf7aa4aff308fddc160c\",\"0x4b0897b0513fdc7c541b6d9d7e929c4e5364d2db\"]"
 	)
-	data, e := c.CraftCall(*ArrayAddressInput, _array)
+	data, e := c.CraftCall(ArrayAddressInput, _array)
 	assert.Nil(t, e, "Craft: received error")
 
 	var expected = "0x620a6a89000000000000000000000000ca35b7d915458ef540ade6068dfe2f44e8fa733c00000000000000000000000014723a09acff6d2a60dcdf7aa4aff308fddc160c0000000000000000000000004b0897b0513fdc7c541b6d9d7e929c4e5364d2db"
@@ -228,7 +228,7 @@ func TestPayloadCrafterSliceAddress(t *testing.T) {
 	var (
 		_array = "[\"0xca35b7d915458ef540ade6068dfe2f44e8fa733c\",\"0x14723a09acff6d2a60dcdf7aa4aff308fddc160c\",\"0x4b0897b0513fdc7c541b6d9d7e929c4e5364d2db\"]"
 	)
-	data, err := c.CraftCall(*ArrayAddressInput, _array)
+	data, err := c.CraftCall(ArrayAddressInput, _array)
 	assert.Nil(t, err, "Craft: received error")
 
 	var expected = "0x8f2df58300000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000003000000000000000000000000ca35b7d915458ef540ade6068dfe2f44e8fa733c00000000000000000000000014723a09acff6d2a60dcdf7aa4aff308fddc160c0000000000000000000000004b0897b0513fdc7c541b6d9d7e929c4e5364d2db"

@@ -7,7 +7,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
 )
 
-// RecoverPanicHandler functions used by GRPC interceptor to recover panic
+// RecoverPanicHandler functions used by gRPC interceptor to recover panic
 func RecoverPanicHandler(p interface{}) error {
 	buf := make([]byte, 1<<16)
 	runtime.Stack(buf, true)

@@ -36,7 +36,7 @@ func main() {
 		"localhost:8080",
 	)
 	if err != nil {
-		log.WithError(err).Fatalf("e2e: GRPC client could not connect to server")
+		log.WithError(err).Fatalf("e2e: gRPC client could not connect to server")
 	}
 	defer func() {
 		err = conn.Close()

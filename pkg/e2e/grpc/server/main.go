@@ -50,7 +50,7 @@ func Start(ctx context.Context) {
 		// Set log level to debug
 		log.SetLevel(log.DebugLevel)
 
-		// Initialize GRPC server
+		// Initialize gRPC server
 		grpcserver.AddEnhancers(
 			func(s *grpc.Server) *grpc.Server {
 				helloworld.RegisterGreeterServer(s, &server{})

@@ -30,7 +30,7 @@ func NewHandler(e *engine.Engine, conf *Config) *Handler {
 
 // Setup is run at the beginning of a new session, before ConsumeClaim.
 func (h *Handler) Setup(s handler.TxListenerSession) error {
-	chains := []string{}
+	var chains []string
 	for _, chain := range s.Chains() {
 		chains = append(chains, chain.Text(10))
 	}

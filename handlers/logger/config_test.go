@@ -19,7 +19,7 @@ func TestLogLevel(t *testing.T) {
 		t.Errorf("LogLevel #1: expected %q but got %q", expected, viper.GetString(name))
 	}
 
-	os.Setenv("LOG_LEVEL", "fatal")
+	_ = os.Setenv("LOG_LEVEL", "fatal")
 	expected = "fatal"
 	if viper.GetString(name) != expected {
 		t.Errorf("LogLevel #2: expected %q but got %q", expected, viper.GetString(name))
@@ -46,7 +46,7 @@ func TestLogFormat(t *testing.T) {
 		t.Errorf("LogFormat #1: expected %q but got %q", expected, viper.GetString(name))
 	}
 
-	os.Setenv("LOG_FORMAT", "json")
+	_ = os.Setenv("LOG_FORMAT", "json")
 	expected = "json"
 	if viper.GetString(name) != expected {
 		t.Errorf("LogFormat #2: expected %q but got %q", expected, viper.GetString(name))

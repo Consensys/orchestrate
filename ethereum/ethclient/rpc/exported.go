@@ -32,7 +32,7 @@ func Init(ctx context.Context) {
 		rpcUrls := viper.GetStringSlice(urlViperKey)
 		log.Infof("Connecting to %d RPC URLs", len(rpcUrls))
 
-		chains := []string{}
+		var chains []string
 		for _, url := range viper.GetStringSlice(urlViperKey) {
 			chainID, err := client.Dial(ctx, url)
 			if err != nil {

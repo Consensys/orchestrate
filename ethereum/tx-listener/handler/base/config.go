@@ -38,7 +38,7 @@ Environment variable: %q`, startDefaultEnv)
 var (
 	startFlag     = "listener-start"
 	startViperKey = "listener.start"
-	startDefault  = []string{}
+	startDefault  []string
 	startEnv      = "LISTENER_START"
 )
 

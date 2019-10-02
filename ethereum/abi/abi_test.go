@@ -115,14 +115,14 @@ func TestMarshalABI(t *testing.T) {
 	assert.Nil(t, err, "Unmarshal should not error")
 
 	// Check constructor is equal
-	assertEqualMethod(t, abi1.Constructor, abi2.Constructor)
+	assertEqualMethod(t, &abi1.Constructor, &abi2.Constructor)
 
 	// Check methods are the same
 	assert.Equal(t, len(abi1.Methods), len(abi2.Methods), "Same count of methods expected")
 	for name, m1 := range abi1.Methods {
 		m2, ok := abi2.Methods[name]
 		assert.True(t, ok, "Should have a method names %q", name)
-		assertEqualMethod(t, m1, m2)
+		assertEqualMethod(t, &m1, &m2)
 	}
 
 	// Check events are the same
@@ -130,11 +130,11 @@ func TestMarshalABI(t *testing.T) {
 	for name, e1 := range abi1.Events {
 		e2, ok := abi2.Events[name]
 		assert.True(t, ok, "Should have a method names %q", name)
-		assertEqualEvent(t, e1, e2)
+		assertEqualEvent(t, &e1, &e2)
 	}
 }
 
-func assertEqualMethod(t *testing.T, m1, m2 ethabi.Method) {
+func assertEqualMethod(t *testing.T, m1, m2 *ethabi.Method) {
 	assert.Equal(t, m1.Name, m2.Name, "Method Name should be equal")
 	assert.Equal(t, m1.Const, m2.Const, "Method constant should be equal")
 	assert.Equal(t, len(m1.Inputs), len(m2.Inputs), "Method constant should have same count of inputs")
@@ -143,7 +143,7 @@ func assertEqualMethod(t *testing.T, m1, m2 ethabi.Method) {
 	assert.Equal(t, m1.Sig(), m2.Sig(), "Method Sig should be equal")
 }
 
-func assertEqualEvent(t *testing.T, e1, e2 ethabi.Event) {
+func assertEqualEvent(t *testing.T, e1, e2 *ethabi.Event) {
 	assert.Equal(t, e1.Name, e2.Name, "Method Name should be equal")
 	assert.Equal(t, e1.Anonymous, e2.Anonymous, "Method anonymous should be equal")
 	assert.Equal(t, len(e1.Inputs), len(e2.Inputs), "Method constant should have same count of inputs")

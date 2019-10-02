@@ -16,7 +16,7 @@ import (
 
 const netClosingErrorMsg = "use of closed network connection"
 
-// CMuxServer is a server that enables to simultaneously serve GRPC and HTTP traffic
+// CMuxServer is a server that enables to simultaneously serve gRPC and HTTP traffic
 type CMuxServer struct {
 	grpc *grpc.Server
 	http *http.Server
@@ -44,7 +44,7 @@ func (s *CMuxServer) ListenAndServe(network, address string) error {
 
 // Serve accepts incoming connections on the listener lis
 func (s *CMuxServer) Serve(lis net.Listener) error {
-	// Create a multiplexer to dispatch traffic between GRPC and HTTP
+	// Create a multiplexer to dispatch traffic between gRPC and HTTP
 	tcpMux := cmux.New(lis)
 	grpcL := tcpMux.MatchWithWriters(cmux.HTTP2MatchHeaderFieldPrefixSendSettings("content-type", "application/grpc"))
 	httpL := tcpMux.Match(cmux.HTTP1Fast())
@@ -53,7 +53,7 @@ func (s *CMuxServer) Serve(lis net.Listener) error {
 	wait.Add(2)
 	defer wait.Wait()
 
-	// Start GRPC server
+	// Start gRPC server
 	go func() {
 		if err := s.grpc.Serve(grpcL); err != nil && err != grpc.ErrServerStopped && !strings.Contains(err.Error(), netClosingErrorMsg) {
 			e := errors.GRPCConnectionError(err.Error()).SetComponent(component)
@@ -84,7 +84,7 @@ func (s *CMuxServer) Serve(lis net.Listener) error {
 func (s *CMuxServer) Shutdown(ctx context.Context) error {
 	var e error
 	common.InParallel(
-		// GracefulStop GRPC server
+		// GracefulStop gRPC server
 		func() { s.grpc.GracefulStop() },
 		// Stop HTTP server
 		func() {
