@@ -18,7 +18,7 @@ func init() {
 var (
 	logLevelFlag     = "log-level"
 	logLevelViperKey = "log.level"
-	logLevelDefault  = "debug"
+	logLevelDefault  = "info"
 	logLevelEnv      = "LOG_LEVEL"
 )
 

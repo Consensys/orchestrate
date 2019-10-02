@@ -14,7 +14,7 @@ func TestLogLevel(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	LogLevel(flgs)
 
-	expected := "debug"
+	expected := "info"
 	if viper.GetString(name) != expected {
 		t.Errorf("LogLevel #1: expected %q but got %q", expected, viper.GetString(name))
 	}
