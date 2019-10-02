@@ -47,7 +47,7 @@ func newRunCommand() *cobra.Command {
 	return runCmd
 }
 
-func run(cmd *cobra.Command, args []string) {
+func run(_ *cobra.Command, _ []string) {
 	// Create app
 	ctx, cancel := context.WithCancel(context.Background())
 

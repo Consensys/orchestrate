@@ -71,7 +71,7 @@ func TestErrorToStatus(t *testing.T) {
 	testErrorToStatus(t, errors.ConflictedError("test"), codes.Aborted)
 	testErrorToStatus(t, errors.OutOfRangeError("test"), codes.OutOfRange)
 	testErrorToStatus(t, errors.InvalidSignatureError("test"), codes.InvalidArgument)
-	testErrorToStatus(t, errors.InsuficientResourcesError("test"), codes.ResourceExhausted)
+	testErrorToStatus(t, errors.InsufficientResourcesError("test"), codes.ResourceExhausted)
 	testErrorToStatus(t, errors.CancelledError("test"), codes.Canceled)
 	testErrorToStatus(t, errors.DeadlineExceededError("test"), codes.DeadlineExceeded)
 	testErrorToStatus(t, errors.NotFoundError("test"), codes.NotFound)

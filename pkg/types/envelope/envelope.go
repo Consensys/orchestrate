@@ -35,7 +35,7 @@ func (e *Envelope) maybeInitMetadata() {
 // Carrier returns an OpenTracing carrier based on envelope Metadata
 func (e *Envelope) Carrier() opentracing.TextMapCarrier {
 	e.maybeInitMetadata()
-	return opentracing.TextMapCarrier(e.GetMetadata().GetExtra())
+	return e.GetMetadata().GetExtra()
 }
 
 // GetMetadataValue retrieves value stored in Metadata extra

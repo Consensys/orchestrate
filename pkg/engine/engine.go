@@ -28,7 +28,7 @@ type Engine struct {
 	// ctxPool is a pool to re-cycle TxContext
 	ctxPool *sync.Pool
 
-	// slots is a channel to limit the number of messages treated concurently by the Engine
+	// slots is a channel to limit the number of messages treated concurrently by the Engine
 	slots chan struct{}
 
 	// Logger
@@ -140,7 +140,7 @@ runningLoop:
 	}).Debugf("engine: left running loop")
 }
 
-// CleanUp clean Engine ressources
+// CleanUp clean Engine resources
 //
 // After completion of each Run() calls you should always call CleanUp
 // to avoid memory leak and be able to re-initialize Engine
@@ -183,7 +183,7 @@ func TimeoutHandler(h HandlerFunc, timeout time.Duration, msg string) HandlerFun
 	return func(txctx *TxContext) {
 		// Create timeout context
 		timeoutCtx, cancel := context.WithTimeout(txctx.Context(), timeout)
-		defer cancel() // We always cancel to avoid memort leak
+		defer cancel() // We always cancel to avoid memory leak
 
 		// Attach time out context to TxContext
 		txctx.WithContext(timeoutCtx)

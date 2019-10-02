@@ -46,7 +46,7 @@ func (s *ProducerTestSuite) SetupSuite() {
 }
 
 func (s *ProducerTestSuite) TestProducer() {
-	txctxSlice := []*engine.TxContext{}
+	var txctxSlice []*engine.TxContext
 	for i := 0; i < rounds; i++ {
 		txctxSlice = append(txctxSlice, makeProducerContext(i, s.p))
 	}

@@ -10,11 +10,11 @@ import (
 // NonceManager is a NonceManager that works with in memory cache
 //
 // Important note:
-// NonceManager makes the assumption that disctinct goroutines access
+// NonceManager makes the assumption that distinct goroutines access
 // nonces for non overlapping set of keys (so there is never competitive access
 // to a nonce for a given key)
 // Accessing the same key from 2 different goroutines could result
-// in discrepencies in nonce updates
+// in discrepancies in nonce updates
 type NonceManager struct {
 	cache *sync.Map
 }
@@ -39,7 +39,7 @@ func (nm *NonceManager) SetLastAttributed(key string, value uint64) error {
 	return nil
 }
 
-// IncrLastAttributed increment last arributed nonce
+// IncrLastAttributed increment last attributed nonce
 //
 // Important note:
 // Incrementation does not append atomically so you should

@@ -59,8 +59,7 @@ func GetError(ctx context.Context) error {
 	return err
 }
 
-func (ec *Client) Networks(ctx context.Context) []*big.Int {
-	chains := []*big.Int{}
+func (ec *Client) Networks(ctx context.Context) (chains []*big.Int) {
 	for chain := range ec.blocks {
 		c, ok := big.NewInt(0).SetString(chain, 10)
 		if !ok {

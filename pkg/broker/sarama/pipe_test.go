@@ -36,7 +36,7 @@ func feed(in chan<- *sarama.ConsumerMessage, rounds int) {
 	}
 }
 
-func (s *TestPipeSuite) TestPipeInterupted() {
+func (s *TestPipeSuite) TestPipeInterrupted() {
 	in := make(chan *sarama.ConsumerMessage)
 	// Initialize pipe with a cancellable context
 	ctx, cancel := context.WithCancel(context.Background())

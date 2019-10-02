@@ -11,6 +11,9 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/tracing/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/controllers/amount"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/controllers/creditor"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/faucet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/keystore"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/secretstore"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/secretstore/hashicorp"
@@ -29,7 +32,7 @@ func newRunCommand() *cobra.Command {
 	// Register HTTP server flags
 	http.Hostname(runCmd.Flags())
 
-	// Register Opentracing flags
+	// Register OpenTracing flags
 	jaeger.InitFlags(runCmd.Flags())
 
 	// Register KeyStore flags
@@ -48,10 +51,15 @@ func newRunCommand() *cobra.Command {
 	broker.KafkaTopicTxRecover(runCmd.Flags())
 	broker.InitKafkaSASLTLSFlags(runCmd.Flags())
 
+	// Register Faucet flags
+	faucet.Type(runCmd.Flags())
+	amount.FaucetAmount(runCmd.Flags())
+	creditor.FaucetAddress(runCmd.Flags())
+
 	return runCmd
 }
 
-func run(cmd *cobra.Command, args []string) {
+func run(_ *cobra.Command, _ []string) {
 	// Create app
 	ctx, cancel := context.WithCancel(context.Background())
 

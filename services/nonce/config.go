@@ -33,7 +33,7 @@ type Config struct {
 	// Cooldown Delay
 	Delay time.Duration
 
-	// Cooldown uses an underlying SripeMutext
+	// Cooldown uses an underlying StripeMutex
 	Stripes int
 }
 

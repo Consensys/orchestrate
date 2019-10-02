@@ -1,6 +1,6 @@
 # Core-stack | Worker Nonce :: Consumer-sign_Q/mock
 # Simulates a consumer connected to worker nonce's output (Sign Q perspective)
-# For testing puposes
+# For testing purposes
 # @author Guillaume Lethuillier <guillaume.lethuillier@consensys.net>
 
 from kafka import KafkaConsumer

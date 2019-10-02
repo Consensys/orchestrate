@@ -40,7 +40,7 @@ func StatusToError(s *status.Status) *ierror.Error {
 	case codes.PermissionDenied:
 		return errors.PermissionDeniedError(s.Message())
 	case codes.ResourceExhausted:
-		return errors.InsuficientResourcesError(s.Message())
+		return errors.InsufficientResourcesError(s.Message())
 	case codes.FailedPrecondition:
 		return errors.FailedPreconditionError(s.Message())
 	case codes.Aborted:
@@ -117,7 +117,7 @@ func ErrorToStatus(err error) (s *status.Status) {
 			s, _ = status.New(codes.InvalidArgument, e.GetMessage()).WithDetails(e)
 		}
 
-	// Insuficient resources
+	// Insufficient resources
 	case errors.IsInsufficientResourcesError(e):
 		s, _ = status.New(codes.ResourceExhausted, e.GetMessage()).WithDetails(e)
 

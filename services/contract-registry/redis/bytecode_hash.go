@@ -6,7 +6,7 @@ import (
 
 const byteCodeHashPrefix = "ByteCodeHashPrefix"
 
-// ByteCodeHashModel is a zero object gathering methods to look up a abis in redis
+// ByteCodeHashModel is a zero object gathering methods to look up a bytecode in redis
 type ByteCodeHashModel struct{}
 
 // ByteCodeHash returns is sugar to manage bytecode hashes

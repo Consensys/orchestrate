@@ -10,7 +10,7 @@ import (
 
 const artifactPrefix = "ArtifactPrefix"
 
-// ArtifactModel is a zero object gathering methods to look up a abis in redis
+// ArtifactModel is a zero object gathering methods to look up an ABI in redis
 type ArtifactModel struct{}
 
 // Artifact returns a model object

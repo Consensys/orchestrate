@@ -4,7 +4,7 @@ import (
 	ierror "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/error"
 )
 
-// Error codes are uint64 for perfomances purposes but should be seen as 5 nibbles hex codes
+// Error codes are uint64 for performances purposes but should be seen as 5 nibbles hex codes
 const (
 	// Warnings (class 01XXX)
 	Warning uint64 = 1 << 12
@@ -16,7 +16,7 @@ const (
 	NonceTooHigh = InvalidNonce + 1
 	NonceTooLow  = InvalidNonce + 2
 
-	// Connnection Errors (class 08XXX)
+	// Connection Errors (class 08XXX)
 	Connection      uint64 = 8 << 12
 	KafkaConnection        = Connection + 1<<8 // Kafka Connection error (subclass 081XX)
 	HTTPConnection         = Connection + 2<<8 // HTTP Connection error (subclass 082XX)
@@ -50,7 +50,7 @@ const (
 	InvalidFormat             = Data + 3<<8  // Invalid format (subclass 423XX)
 	InvalidParameter          = Data + 4<<8  // Invalid parameter provided (subclass 424XX)
 
-	// Insuficient resources (class 53XXX)
+	// Insufficient resources (class 53XXX)
 	InsufficientResources uint64 = 5<<16 + 3<<12
 
 	// Operation intervention error (class 57XXX)
@@ -241,7 +241,7 @@ func EncodingError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(Encoding, format, a...)
 }
 
-// SolidityError is raised when a Data related in transaction crafing is incorrect
+// SolidityError is raised when a Data related in transaction crafting is incorrect
 func SolidityError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(Solidity, format, a...)
 }
@@ -291,12 +291,12 @@ func IsInvalidParameterError(err error) bool {
 	return isErrorClass(FromError(err).GetCode(), InvalidParameter)
 }
 
-// InsuficientResourcesError is raised when a system can not handle more operations
-func InsuficientResourcesError(format string, a ...interface{}) *ierror.Error {
+// InsufficientResourcesError is raised when a system can not handle more operations
+func InsufficientResourcesError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(InsufficientResources, format, a...)
 }
 
-// IsInsufficientResourcesError indicate whether an error is an insuficient resources error
+// IsInsufficientResourcesError indicate whether an error is an insufficient resources error
 func IsInsufficientResourcesError(err error) bool {
 	return isErrorClass(FromError(err).GetCode(), InsufficientResources)
 }

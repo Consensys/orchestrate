@@ -75,7 +75,7 @@ func (h *EngineConsumerGroupHandler) ConsumeClaim(s sarama.ConsumerGroupSession,
 	ctx := WithConsumerGroupSessionAndClaim(s.Context(), s, c)
 	h.engine.Run(ctx, Pipe(ctx, c.Messages()))
 
-	logger.Infof("sarama: stoped consuming claim")
+	logger.Infof("sarama: stopped consuming claim")
 
 	return nil
 }

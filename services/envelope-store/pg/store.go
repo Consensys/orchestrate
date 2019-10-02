@@ -36,7 +36,7 @@ func (s *EnvelopeStore) Store(ctx context.Context, req *evlpstore.StoreRequest) 
 	}
 
 	// Execute ORM query
-	// If unicity contraint is broken then it update the former value
+	// If uniqueness constraint is broken then it update the former value
 	_, err = s.db.ModelContext(ctx, model).
 		OnConflict("ON CONSTRAINT envelopes_envelope_id_key DO UPDATE").
 		Set("envelope = ?envelope").
@@ -109,7 +109,7 @@ func (s *EnvelopeStore) SetStatus(ctx context.Context, req *evlpstore.SetStatusR
 
 // LoadPending loads pending envelopes
 func (s *EnvelopeStore) LoadPending(ctx context.Context, req *evlpstore.LoadPendingRequest) (*evlpstore.LoadPendingResponse, error) {
-	models := []*EnvelopeModel{}
+	var models []*EnvelopeModel
 
 	err := s.db.ModelContext(ctx, &models).
 		Where("status = 'pending'").
@@ -119,7 +119,7 @@ func (s *EnvelopeStore) LoadPending(ctx context.Context, req *evlpstore.LoadPend
 		return nil, errors.NotFoundError("envelope not found").ExtendComponent(component)
 	}
 
-	resps := []*evlpstore.StoreResponse{}
+	var resps []*evlpstore.StoreResponse
 	for _, model := range models {
 		resp, err := model.ToStoreResponse()
 		if err != nil {

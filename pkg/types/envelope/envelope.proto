@@ -31,7 +31,7 @@ message Args {
     // Private arguments
     args.Private private = 2;
 
-    // Arbitry data provided by user
+    // Arbitrary data provided by user
     ethereum.Data data = 3;
 }
 

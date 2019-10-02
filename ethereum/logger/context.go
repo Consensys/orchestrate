@@ -16,7 +16,7 @@ func WithLogEntry(ctx context.Context, entry *log.Entry) context.Context {
 	return context.WithValue(ctx, logEntryCtxKey, entry)
 }
 
-// GetLogEntry return logrus entry atteched to context
+// GetLogEntry return logrus entry attached to context
 func GetLogEntry(ctx context.Context) *log.Entry {
 	entry, ok := ctx.Value(logEntryCtxKey).(*log.Entry)
 	if !ok {

@@ -35,7 +35,7 @@ func newRunCommand() *cobra.Command {
 	// Register Decoder flags
 	contractregistry.ABIs(runCmd.Flags())
 
-	// Register Opentracing flags
+	// Register OpenTracing flags
 	jaeger.InitFlags(runCmd.Flags())
 
 	// Register Kafka flags
@@ -51,7 +51,7 @@ func newRunCommand() *cobra.Command {
 	return runCmd
 }
 
-func run(cmd *cobra.Command, args []string) {
+func run(_ *cobra.Command, _ []string) {
 	// Create app
 	ctx, cancel := context.WithCancel(context.Background())
 

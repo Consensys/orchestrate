@@ -95,7 +95,7 @@ func TestCMuxServerListen(t *testing.T) {
 	_, err = client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "test"})
 	assert.Nil(t, err, "SayHello should not error")
 	assert.Len(t, mocksrv.requests, 1, "GRPC should have treated a request")
-	grpcconn.Close()
+	_ = grpcconn.Close()
 
 	// HTTP
 	_, err = http.Get(fmt.Sprintf("http://%v/test", lis.Addr().String()))

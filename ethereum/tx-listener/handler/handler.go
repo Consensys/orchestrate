@@ -12,7 +12,7 @@ type TxListenerSession interface {
 	Chains() []*big.Int
 }
 
-// ChainListener is a listner on a given chain
+// ChainListener is a listener on a given chain
 type ChainListener interface {
 	// ChainID returns ID of the chain being listen
 	ChainID() *big.Int
@@ -26,7 +26,7 @@ type ChainListener interface {
 	// Blocks returns a channel of Blocks are they are mined
 	Blocks() <-chan *types.TxListenerBlock
 
-	// Errors returns a channel of Erros encountered while listening
+	// Errors returns a channel of Errors encountered while listening
 	Errors() <-chan *types.TxListenerError
 
 	// Context associated to the current
@@ -34,7 +34,7 @@ type ChainListener interface {
 }
 
 // TxListenerHandler instances are used to handle individual .
-// It also provides hooks to allow you to trigger custom logics before or after the listening loop(s).
+// It also provides hooks to allow you to trigger custom logic before or after the listening loop(s).
 //
 // PLEASE NOTE that handlers are likely to be called from several goroutines concurrently,
 // ensure that all state is safely protected against race conditions.
@@ -50,7 +50,7 @@ type TxListenerHandler interface {
 	// Cleanup is run at the end of a session, once all Listen goroutines have exited
 	Cleanup(TxListenerSession) error
 
-	// Listen must start a consumer loop of ChainListener Receipts() (and optionnaly Blocks() and Errors())
+	// Listen must start a consumer loop of ChainListener Receipts() (and optionally Blocks() and Errors())
 	// Once the Receipts() channel is closed, the Handler must finish its processing
 	// loop and exit.
 	Listen(TxListenerSession, ChainListener) error

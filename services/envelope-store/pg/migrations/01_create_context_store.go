@@ -21,13 +21,13 @@ func createContextTable(db migrations.DB) error {
 }
 
 func dropContextTable(db migrations.DB) error {
-	log.Debugf("Droping table %q...", contextStoreTableName)
+	log.Debugf("Dropping table %q...", contextStoreTableName)
 	_, err := db.Exec(`DROP TABLE ?;`, pg.Q(contextStoreTableName))
 	if err != nil {
 		log.WithError(err).Errorf("Could not drop table %q", contextStoreTableName)
 		return err
 	}
-	log.Infof("Droped table %q", contextStoreTableName)
+	log.Infof("Dropped table %q", contextStoreTableName)
 
 	return nil
 }

@@ -82,7 +82,7 @@ func (s *TracerTestSuite) SetupSuite() {
 func (s *TracerTestSuite) TestTxSpanFromBroker() {
 
 	rounds := 5
-	txctxSlice := []*engine.TxContext{}
+	var txctxSlice []*engine.TxContext
 	for i := 0; i < rounds; i++ {
 		txctxSlice = append(txctxSlice, makeTracerContext(i))
 	}

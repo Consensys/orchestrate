@@ -28,7 +28,7 @@ func Init(ctx context.Context) {
 		common.InParallel(
 			// Initialize EEA signer
 			func() { eea.Init(ctx) },
-			// Initialize Tessea Signer
+			// Initialize Tessera Signer
 			func() { tessera.Init(ctx) },
 			// Initialize Public Ethereum Signer
 			func() { ethereum.Init(ctx) },

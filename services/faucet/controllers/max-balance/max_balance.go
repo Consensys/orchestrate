@@ -34,7 +34,7 @@ func (ctrl *Controller) Control(credit faucet.CreditFunc) faucet.CreditFunc {
 			return big.NewInt(0), false, errors.FromError(err).ExtendComponent(component)
 		}
 
-		// Ensure MaxBalance is repected
+		// Ensure MaxBalance is respected
 		if balance.Add(balance, r.Amount).Cmp(ctrl.conf.MaxBalance) >= 0 {
 			// Do not credit if final balance would be superior to max authorized
 			return big.NewInt(0), false, errors.FaucetWarning("account balance too high").ExtendComponent(component)

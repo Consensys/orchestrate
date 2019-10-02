@@ -19,5 +19,5 @@ func TestSign(t *testing.T) {
 	addr, err := csutils.EcRecover(hash, sig)
 	assert.Nil(t, err, "EcRecover should not error")
 	expected := crypto.PubkeyToAddress(key.PublicKey)
-	assert.Equal(t, expected.Hex(), addr.Hex(), "ECRecover should return corret address")
+	assert.Equal(t, expected.Hex(), addr.Hex(), "ECRecover should return correct address")
 }

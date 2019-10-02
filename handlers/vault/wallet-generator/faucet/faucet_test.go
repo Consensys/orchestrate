@@ -54,7 +54,7 @@ func (s *FaucetTestSuite) SetupSuite() {
 func (s *FaucetTestSuite) TestFaucet() {
 
 	rounds := 10
-	txctxs := []*engine.TxContext{}
+	var txctxs []*engine.TxContext
 	for i := 0; i < rounds; i++ {
 		txctxs = append(txctxs, makeFaucetContext(i))
 	}

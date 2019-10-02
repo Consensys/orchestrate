@@ -46,7 +46,7 @@ func (s *MarkerTestSuite) SetupSuite() {
 
 func (s *MarkerTestSuite) TestMarker() {
 	rounds := 100
-	txctxs := []*engine.TxContext{}
+	var txctxs []*engine.TxContext
 	for i := 0; i < rounds; i++ {
 		txctxs = append(txctxs, makeMarkerContext(i))
 	}

@@ -91,7 +91,7 @@ func (tx *Transaction) SetRaw(r []byte) *Transaction {
 // TxHash return transaction hash
 func (tx *Transaction) TxHash() ethcommon.Hash {
 	if tx.GetHash() == nil {
-		return ethcommon.Hash([32]byte{})
+		return [32]byte{}
 	}
 	return tx.GetHash().Hash()
 }

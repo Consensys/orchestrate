@@ -160,8 +160,8 @@ func TestConsume(t *testing.T) {
 	assert.Equal(t, int32(count), counter.counter, "Count of processed message should be correct")
 }
 
-// MockConsumerMessages Creates "nbTopics" topics, "nbPartition" partitions, and "nbMessageByParition" messages by partition
-func MockConsumerMessages(topics []string, nbPartition, nbMessageByParition int) (msgs map[string]map[int32][]*sarama.ConsumerMessage, counter int) {
+// MockConsumerMessages Creates "nbTopics" topics, "nbPartition" partitions, and "nbMessageByPartition" messages by partition
+func MockConsumerMessages(topics []string, nbPartition, nbMessageByPartition int) (msgs map[string]map[int32][]*sarama.ConsumerMessage, counter int) {
 
 	m := make(map[string]map[int32][]*sarama.ConsumerMessage)
 	count := 0
@@ -170,7 +170,7 @@ func MockConsumerMessages(topics []string, nbPartition, nbMessageByParition int)
 		m[topic] = make(map[int32][]*sarama.ConsumerMessage)
 		for partition := range make([]int32, nbPartition) {
 			m[topic][int32(partition)] = []*sarama.ConsumerMessage{}
-			for i := range make([]int, nbMessageByParition) {
+			for i := range make([]int, nbMessageByPartition) {
 				m[topic][int32(partition)] = append(m[topic][int32(partition)], &sarama.ConsumerMessage{
 					Topic:     topic,
 					Partition: int32(partition),

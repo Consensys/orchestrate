@@ -32,7 +32,7 @@ func newRunCommand() *cobra.Command {
 	// Register Engine flags
 	engine.InitFlags(runCmd.Flags())
 
-	// Register Opentracing flags
+	// Register OpenTracing flags
 	jaeger.InitFlags(runCmd.Flags())
 
 	// Register HTTP server flags
@@ -66,7 +66,7 @@ func newRunCommand() *cobra.Command {
 	return runCmd
 }
 
-func run(cmd *cobra.Command, args []string) {
+func run(_ *cobra.Command, _ []string) {
 	// Create app
 	ctx, cancel := context.WithCancel(context.Background())
 

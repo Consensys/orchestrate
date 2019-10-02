@@ -34,7 +34,7 @@ func (t *Tracker) ChainID() *big.Int {
 	return big.NewInt(0).Set(t.chainID)
 }
 
-// HighestBlock returns highest mined & considered filnal block on the tracked chain
+// HighestBlock returns highest mined & considered final block on the tracked chain
 func (t *Tracker) HighestBlock(ctx context.Context) (int64, error) {
 	logCtx := logger.WithLogEntry(
 		ctx,

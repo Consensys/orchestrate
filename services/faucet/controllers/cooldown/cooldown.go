@@ -31,7 +31,7 @@ func NewController(conf *Config) *Controller {
 	}
 }
 
-// IsCoolingDown indicates if faucet is cooling doan
+// IsCoolingDown indicates if faucet is cooling down
 func (ctrl *Controller) IsCoolingDown(chainID *big.Int, a ethcommon.Address) bool {
 	key := utils.ToChainAccountKey(chainID, a)
 	lastAuthorized, _ := ctrl.lastAuthorized.LoadOrStore(key, time.Time{})

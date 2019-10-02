@@ -19,7 +19,7 @@ type TestRequest struct {
 // AssertRequest make sure that a TestRequest is matching expected result
 func AssertRequest(t *testing.T, test *TestRequest) {
 	assert.Equal(t, test.ResultOK, test.ExpectedOK, "Credit status incorrect")
-	assert.Equal(t, 0, test.ResultAmount.Cmp(test.ExpectedAmount), "Amound credited should be correct")
+	assert.Equal(t, 0, test.ResultAmount.Cmp(test.ExpectedAmount), "Amount credited should be correct")
 	if test.ExpectedErr {
 		assert.NotNil(t, test.ResultErr, "Credit should error")
 	} else {

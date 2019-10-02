@@ -2,7 +2,7 @@ package redis
 
 const catalogPrefix = "catalogPrefix"
 
-// CatalogModel is a zero object gathering methods to look up a abis in redis
+// CatalogModel is a zero object gathering methods
 type CatalogModel struct{}
 
 // Catalog returns is sugar to return a CatalogModel object

@@ -14,7 +14,7 @@ func (l logger) Error(msg string) {
 }
 
 func (l logger) Infof(msg string, args ...interface{}) {
-	// Jaegger logger Infof is called each time a span is reported
+	// Jaeger logger Infof is called each time a span is reported
 	// so we prefer to debug to avoid logging to much
 	l.entry.Debugf(msg, args...)
 }

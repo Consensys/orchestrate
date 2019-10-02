@@ -33,7 +33,7 @@ func (nm *NonceManager) SetLastAttributed(key string, value uint64) error {
 	return nm.set(computeKey(key, lastAttributedSuf), value)
 }
 
-// IncrLastAttributed increment last arributed nonce
+// IncrLastAttributed increment last attributed nonce
 func (nm *NonceManager) IncrLastAttributed(key string) error {
 	return nm.incr(computeKey(key, lastAttributedSuf))
 }

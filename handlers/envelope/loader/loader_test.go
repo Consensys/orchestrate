@@ -79,7 +79,7 @@ func (s *StoreTestSuite) SetupSuite() {
 
 func (s *StoreTestSuite) TestStore() {
 	rounds := 2
-	txctxs := []*engine.TxContext{}
+	var txctxs []*engine.TxContext
 	for i := 0; i < rounds; i++ {
 		txctxs = append(txctxs, makeContext(i, s.store))
 	}

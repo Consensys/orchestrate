@@ -29,7 +29,7 @@ func TxSpanFromBroker(tracer opentracing.Tracer, defaultOperationName string) en
 		txctx.Next()
 
 		// find Span in TxContext.Envelope metadata, this section has been moved after the txctx.Next()
-		// to be as generalistic as possible
+		// to be as generalist as possible
 		if spanContext, err := tracer.Extract(opentracing.TextMap, txctx.Envelope.Carrier()); err == nil {
 			opts = append(opts, opentracing.FollowsFrom(spanContext))
 			txctx.Logger.Tracef("TxSpanFromBroker: Spancontext in Envelope: %v", spanContext)
@@ -37,7 +37,7 @@ func TxSpanFromBroker(tracer opentracing.Tracer, defaultOperationName string) en
 			txctx.Logger.Tracef("TxSpanFromBroker: No span found during span Extraction: %v", err)
 		}
 
-		// find span context in opentracing library
+		// find span context in OpenTracing library
 		if spanParent := opentracing.SpanFromContext(txctx.Context()); spanParent != nil {
 			opts = append(opts, opentracing.FollowsFrom(spanParent.Context()))
 			txctx.Logger.Tracef("TxSpanFromBroker: Spanparent in Envelope: %v", spanParent)
@@ -45,7 +45,7 @@ func TxSpanFromBroker(tracer opentracing.Tracer, defaultOperationName string) en
 			txctx.Logger.Tracef("TxSpanFromBroker: No span found during span Extraction from context: %v", spanParent)
 		}
 
-		// Update span operationName if it has been created by the other middelwares
+		// Update span operationName if it has been created by the other middleware
 		if value, ok := txctx.Get("operationName").(string); ok {
 			_operationName = value
 		}

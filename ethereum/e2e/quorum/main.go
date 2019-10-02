@@ -98,7 +98,7 @@ func main() {
 		},
 	}
 
-	// Prepare arguments and send trasaction
+	// Prepare arguments and send transaction
 	args := types.Envelope2SendTxArgs(e)
 	txHash, err := ethclient.GlobalClient().SendTransaction(context.Background(), chain, args)
 	if err != nil {

@@ -30,7 +30,7 @@ func FromAWSError(err error) *ierror.Error {
 		case secretsmanager.ErrCodeInvalidRequestException:
 			return errors.ConflictedError(awsErr.Message())
 		case secretsmanager.ErrCodeLimitExceededException:
-			return errors.InsuficientResourcesError(awsErr.Message())
+			return errors.InsufficientResourcesError(awsErr.Message())
 		case secretsmanager.ErrCodeMalformedPolicyDocumentException:
 			return errors.InvalidFormatError(awsErr.Message())
 		case secretsmanager.ErrCodePreconditionNotMetException:

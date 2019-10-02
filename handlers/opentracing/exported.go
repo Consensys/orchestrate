@@ -38,12 +38,12 @@ func Init(ctx context.Context) {
 	})
 }
 
-// SetGlobalHandler sets global Opentracing Handler
+// SetGlobalHandler sets global OpenTracing Handler
 func SetGlobalHandler(h engine.HandlerFunc) {
 	handler = h
 }
 
-// GlobalHandler returns global Opentracing handler
+// GlobalHandler returns global OpenTracing handler
 func GlobalHandler() engine.HandlerFunc {
 	return handler
 }

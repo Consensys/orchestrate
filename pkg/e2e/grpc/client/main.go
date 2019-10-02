@@ -28,7 +28,7 @@ func main() {
 	// Set log level to debug
 	log.SetLevel(log.DebugLevel)
 
-	// Initialize Jaegger
+	// Initialize Jaeger
 	jaeger.Init(context.Background())
 
 	conn, err := grpcclient.DialContextWithDefaultOptions(

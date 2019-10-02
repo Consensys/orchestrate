@@ -17,7 +17,7 @@ var (
 	initOnce = &sync.Once{}
 )
 
-// Init intiliaze global controller
+// Init global controller
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
 		if ctrl != nil {

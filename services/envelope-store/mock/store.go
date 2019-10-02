@@ -125,7 +125,7 @@ func (s *EnvelopeStore) LoadPending(ctx context.Context, req *evlpstore.LoadPend
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	resps := []*evlpstore.StoreResponse{}
+	var resps []*evlpstore.StoreResponse
 	for _, model := range s.byID {
 		if model.Status == "pending" && time.Now().Add(-utils.PDurationToDuration(req.GetDuration())).Sub(model.SentAt) > 0 {
 			resp, err := model.ToStoreResponse()

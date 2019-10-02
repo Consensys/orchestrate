@@ -12,7 +12,7 @@ var (
 	initOnce = &sync.Once{}
 )
 
-// Init intilialize global Engine
+// Init initialize global Engine
 // Configuration is loaded from viper
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
@@ -49,7 +49,7 @@ func Run(ctx context.Context, input <-chan Msg) {
 	e.Run(ctx, input)
 }
 
-// CleanUp clean engine ressources
+// CleanUp clean engine resources
 func CleanUp() {
 	e.CleanUp()
 }

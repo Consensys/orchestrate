@@ -38,7 +38,7 @@ func TestLog(t *testing.T) {
 	assert.Equal(t, "0x656c34545f90a730a19008c0e7a7cd4fb3895064b48d6d69761bd5abad681056", log.GetBlockHash().Hex(), "BlockHash should match")
 	assert.True(t, log.Removed, "Removed should match")
 
-	topicHashes := []ethcommon.Hash{}
+	var topicHashes []ethcommon.Hash
 	for _, topic := range log.GetTopics() {
 		topicHashes = append(topicHashes, topic.Hash())
 	}
@@ -55,7 +55,7 @@ func TestReceipt(t *testing.T) {
 		GasUsed:           uint64(156),
 		CumulativeGasUsed: uint64(14567),
 		Logs: []*ethtypes.Log{
-			&ethtypes.Log{
+			{
 				Address: ethcommon.HexToAddress("0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C"),
 				Topics: []ethcommon.Hash{
 					ethcommon.HexToHash("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"),

@@ -87,7 +87,7 @@ func (s *DispacherTestSuite) SetupSuite() {
 }
 
 func (s *DispacherTestSuite) TestDispatcher() {
-	txctxs := []*engine.TxContext{}
+	var txctxs []*engine.TxContext
 	for i := 0; i < testsNum; i++ {
 		txctxs = append(txctxs, makeCrafterContext(i))
 	}

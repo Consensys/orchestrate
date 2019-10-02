@@ -72,7 +72,7 @@ func makeContext(hash, metadata string, chn int64, expectedErrors int) *engine.T
 	txctx.Envelope.Tx = &ethereum.Transaction{
 		Hash: ethereum.HexToHash(hash),
 	}
-	txctx.Envelope.Metadata = (&envelope.Metadata{Id: metadata})
+	txctx.Envelope.Metadata = &envelope.Metadata{Id: metadata}
 	txctx.Set("expectedErrors", expectedErrors)
 	return txctx
 }
@@ -101,7 +101,7 @@ func TestTxAlreadySent(t *testing.T) {
 		mh.Handle,
 	)
 
-	// #1: First envelope should be send correcly and mock handler
+	// #1: First envelope should be send correctly and mock handler
 	txctx := makeContext(
 		"0x7a34cbb73c02aa3309c343e9e9b35f2a992aaa623c2ec2524816f476c63d2efa",
 		"1",

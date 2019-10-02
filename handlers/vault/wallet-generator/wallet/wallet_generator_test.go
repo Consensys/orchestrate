@@ -41,7 +41,7 @@ func (s *GeneratorSuite) SetupSuite() {
 
 func (s *GeneratorSuite) TestGenerator() {
 	rounds := 100
-	txctxs := []*engine.TxContext{}
+	var txctxs []*engine.TxContext
 
 	for i := 0; i < rounds; i++ {
 		txctxs = append(txctxs, makeGeneratorContext(i))

@@ -70,7 +70,7 @@ $ go run e2e/producer/main.go
 │   │   └── worker.go               # create worker
 │   ├── app.go                      # main application object
 │   ├── consumer_group.go           # kafka consumer group
-│   └── server.go                   # server to expose metrics, liveness, readyness check...
+│   └── server.go                   # server to expose metrics, liveness, readiness check...
 ├── cmd/                            # command line interface (we use Cobra)
 │   ├── root.go                     # root command from which all CLI commands inherit
 │   └── run.go                      # run command to start the application
@@ -110,4 +110,4 @@ To be able to build a project which uses private repositories
 echo 'GITLAB_USER=\nGITLAB_TOKEN=\n' > .env
 ```
 
-Then fill the .env file with your Gitlab username and an acces token with read_repository scope (User > Settings > Access Tokens).
+Then fill the .env file with your Gitlab username and an access token with read_repository scope (User > Settings > Access Tokens).

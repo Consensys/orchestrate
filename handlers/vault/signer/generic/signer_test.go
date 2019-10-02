@@ -86,7 +86,7 @@ func makeSignerContext(i int) *engine.TxContext {
 	return txctx
 }
 
-func TestGenereric(t *testing.T) {
+func TestGeneric(t *testing.T) {
 	// Just checking the signer is properly generated
 	handler := GenerateSignerHandler(
 		mockSignerFunc,

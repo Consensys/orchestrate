@@ -43,7 +43,7 @@ func (err *Error) ExtendComponent(name string) *Error {
 	return err
 }
 
-// Hex returns error code in HEX reprensatation
+// Hex returns error code in HEX representation
 func (err *Error) Hex() string {
 	return fmt.Sprintf("%05X", err.GetCode())
 }

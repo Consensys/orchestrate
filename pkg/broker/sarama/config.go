@@ -326,7 +326,7 @@ func WalletGeneratedGroup(f *pflag.FlagSet) {
 	consumerGroupFlag(f, walletGeneratedGroupFlag, walletGeneratedGroupViperKey, walletGeneratedGroupEnv, walletGeneratedGroupDefault)
 }
 
-// InitKafkaSASLFlags register flags for SASL authentification
+// InitKafkaSASLFlags register flags for SASL authentication
 func InitKafkaSASLFlags(f *pflag.FlagSet) {
 	KafkaSASLEnable(f)
 	KafkaSASLMechanism(f)

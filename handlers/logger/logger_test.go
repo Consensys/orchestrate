@@ -26,7 +26,7 @@ func (s *LoggerTestSuite) SetupSuite() {
 
 func (s *LoggerTestSuite) TestLogger() {
 	rounds := 100
-	txctxs := []*engine.TxContext{}
+	var txctxs []*engine.TxContext
 	for i := 0; i < rounds; i++ {
 		txctxs = append(txctxs, makeLoggerContext())
 	}

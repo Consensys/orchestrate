@@ -107,7 +107,7 @@ func (h *Handler) Listen(session handler.TxListenerSession, l handler.ChainListe
 	}()
 
 	wait.Wait()
-	logger.Infof("tx-listener: stoped listening")
+	logger.Infof("tx-listener: stopped listening")
 
 	return nil
 }

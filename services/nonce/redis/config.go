@@ -53,7 +53,7 @@ var (
 	expirationTimeEnv      = "REDIS_NONCE_EXPIRATION_TIME"
 )
 
-// ExpirationTime register expriration time flag
+// ExpirationTime register expiration time flag
 func ExpirationTime(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Redis nonce expiration time (duration in s).
 Environment variable: %q`, expirationTimeEnv)

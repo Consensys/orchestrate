@@ -7,7 +7,7 @@ import (
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/envelope-store"
 )
 
-// TxAlreadySent implements an handler that controls wether transaction associated to envelope
+// TxAlreadySent implements an handler that controls whether transaction associated to envelope
 // has already been sent and abort execution of pending handlers
 //
 // This handler makes guarantee that envelopes with the same ID will not be send twice (scenario that could append in case

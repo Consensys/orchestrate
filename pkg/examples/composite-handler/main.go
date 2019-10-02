@@ -39,17 +39,17 @@ func main() {
 	engine.Init(context.Background())
 
 	// Declare individual handlers
-	pipepline1 := pipeline("1")
-	pipepline2 := pipeline("2")
-	pipepline3 := pipeline("3")
-	pipepline4 := pipeline("4")
+	pipeline1 := pipeline("1")
+	pipeline2 := pipeline("2")
+	pipeline3 := pipeline("3")
+	pipeline4 := pipeline("4")
 	middleware1 := middleware("1")
 	middleware2 := middleware("2")
 	middleware3 := middleware("3")
 
 	// Declare 2 composite handlers
-	left := engine.CombineHandlers(middleware2, pipepline2)
-	right := engine.CombineHandlers(middleware3, aborter, pipepline3)
+	left := engine.CombineHandlers(middleware2, pipeline2)
+	right := engine.CombineHandlers(middleware3, aborter, pipeline3)
 
 	// Declare a forked handler
 	fork := func(txctx *engine.TxContext) {
@@ -62,7 +62,7 @@ func main() {
 	}
 
 	// Declare overall composite handler
-	handler := engine.CombineHandlers(pipepline1, middleware1, fork, pipepline4)
+	handler := engine.CombineHandlers(pipeline1, middleware1, fork, pipeline4)
 
 	// Register composite handler
 	engine.Register(handler)

@@ -55,7 +55,7 @@ func (s *PricerTestSuite) SetupSuite() {
 
 func (s *PricerTestSuite) TestEstimator() {
 	rounds := 100
-	txctxs := []*engine.TxContext{}
+	var txctxs []*engine.TxContext
 	for i := 0; i < rounds; i++ {
 		txctxs = append(txctxs, makeGasPricerContext(i))
 	}

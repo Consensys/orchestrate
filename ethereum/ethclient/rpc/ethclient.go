@@ -214,8 +214,7 @@ func toBlockNumArg(number *big.Int) string {
 }
 
 // Networks return networks ID multi client is connected to
-func (ec *Client) Networks(ctx context.Context) []*big.Int {
-	networks := []*big.Int{}
+func (ec *Client) Networks(ctx context.Context) (networks []*big.Int) {
 	for _, c := range ec.rpcs {
 		// Retrieve network version
 		var version string

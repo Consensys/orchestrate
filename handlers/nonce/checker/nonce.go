@@ -23,7 +23,7 @@ func Checker(nm nonce.Sender, ec ethclient.ChainStateReader) engine.HandlerFunc 
 			"metadata.id": txctx.Envelope.GetMetadata().GetId(),
 		})
 
-		// Retrieves nonce key for nonce manager procesing
+		// Retrieves nonce key for nonce manager processing
 		nonceKey := string(txctx.In.Key())
 		var expectedNonce uint64
 
@@ -54,7 +54,7 @@ func Checker(nm nonce.Sender, ec ethclient.ChainStateReader) engine.HandlerFunc 
 			expectedNonce = pendingNonce
 		}
 
-		// Compare expected nonce to attributed nonced
+		// Compare expected nonce to attributed nonce
 		// to make sure we do not sent a transaction with invalid nonce
 		n := txctx.Envelope.GetTx().GetTxData().GetNonce()
 		if n != expectedNonce {
@@ -132,7 +132,7 @@ func RecoveryStatusSetter(nm nonce.Sender) engine.HandlerFunc {
 		// Execute pending handlers
 		txctx.Next()
 
-		// Retrieves nonce key for nonce manager procesing
+		// Retrieves nonce key for nonce manager processing
 		nonceKey := string(txctx.In.Key())
 
 		// Test if we have entered recovery mode

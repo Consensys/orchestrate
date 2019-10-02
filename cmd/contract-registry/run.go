@@ -40,7 +40,7 @@ func newRunCommand() *cobra.Command {
 	return runCmd
 }
 
-func run(cmd *cobra.Command, args []string) {
+func run(_ *cobra.Command, _ []string) {
 	// Process signals
 	sig := utils.NewSignalListener(func(signal os.Signal) { Close(context.Background()) })
 	defer sig.Close()

@@ -25,7 +25,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
 )
 
-// Loader is a Middleware enginer.HandlerFunc that Load sarama.ConsumerGroup messages
+// Loader is a Middleware engine.HandlerFunc that Load sarama.ConsumerGroup messages
 func Loader(txctx *engine.TxContext) {
 	// Cast message into sarama.ConsumerMessage
 	receipt, ok := txctx.In.(*types.TxListenerReceipt)

@@ -26,7 +26,7 @@ type TxContext struct {
 	Logger *log.Entry
 
 	// ctx is a go context that is attached to the TxContext
-	// It allows to carry deadlines, cancelation signals, ettxctx. between handlers
+	// It allows to carry deadlines, cancellation signals, etc. between handlers
 	//
 	// This approach is not recommended by go context documentation
 	// txctx.f. https://golang.org/pkg/context/#pkg-overview
@@ -158,7 +158,7 @@ type sequence struct {
 	txctx *TxContext
 }
 
-// sequences are pooled to relieve presure on garbage collector
+// sequences are pooled to relieve pressure on garbage collector
 var seqPool = sync.Pool{
 	New: func() interface{} { return &sequence{index: -1} },
 }

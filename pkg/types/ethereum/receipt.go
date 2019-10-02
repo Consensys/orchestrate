@@ -7,7 +7,7 @@ import (
 
 // FromGethReceipt creates a receipt from a Geth Receipt
 func FromGethReceipt(r *ethtypes.Receipt) *Receipt {
-	logs := []*Log{}
+	var logs []*Log
 	for _, log := range r.Logs {
 		logs = append(logs, FromGethLog(log))
 	}
@@ -60,7 +60,7 @@ func (r *Receipt) SetTxIndex(idx uint64) *Receipt {
 // FromGethLog creates a new log from a Geth log
 func FromGethLog(log *ethtypes.Log) *Log {
 	// Format topics
-	topics := []*Hash{}
+	var topics []*Hash
 	for _, topic := range log.Topics {
 		topics = append(topics, &Hash{Raw: topic.Bytes()})
 	}

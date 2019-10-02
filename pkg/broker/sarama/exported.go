@@ -94,7 +94,7 @@ func SetGlobalConfig(cfg *sarama.Config) {
 	config = cfg
 }
 
-// InitClient initilialize Sarama Client
+// InitClient initialize Sarama Client
 // It bases on viper configuration to get Kafka address
 func InitClient(ctx context.Context) {
 	initClientOnce.Do(func() {
@@ -124,7 +124,10 @@ func InitClient(ctx context.Context) {
 		// Close when context is canceled
 		go func() {
 			<-ctx.Done()
-			client.Close()
+			closeErr := client.Close()
+			if closeErr != nil {
+				log.WithError(closeErr).Warn("could not close client")
+			}
 		}()
 	})
 }
@@ -160,7 +163,10 @@ func InitSyncProducer(ctx context.Context) {
 		// Close when context is canceled
 		go func() {
 			<-ctx.Done()
-			producer.Close()
+			closeErr := producer.Close()
+			if closeErr != nil {
+				log.WithError(closeErr).Warn("could not close client")
+			}
 		}()
 	})
 }
@@ -198,7 +204,10 @@ func InitConsumerGroup(ctx context.Context) {
 		// Close when context is canceled
 		go func() {
 			<-ctx.Done()
-			group.Close()
+			closeErr := group.Close()
+			if closeErr != nil {
+				log.WithError(closeErr).Warn("could not close client")
+			}
 		}()
 	})
 }

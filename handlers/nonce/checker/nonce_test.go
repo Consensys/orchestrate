@@ -87,7 +87,7 @@ func (nm *MockNonceManager) IncrLastSent(key string) error {
 }
 
 func (nm *MockNonceManager) IsRecovering(key string) (bool, error) {
-	if strings.Contains(key, "erro-on-recovering-is") {
+	if strings.Contains(key, "error-on-recovering-is") {
 		// Simulate error
 		return false, fmt.Errorf("coult not load recovery status")
 	}
@@ -196,7 +196,7 @@ func TestChecker(t *testing.T) {
 	h(txctx)
 	assertTxContext(t, txctx)
 	recovering, _ = nm.IsRecovering(testKey1)
-	assert.False(t, recovering, "NonceManager should have stoped recovering")
+	assert.False(t, recovering, "NonceManager should have stopped recovering")
 
 	// Execution with invalid chain
 	txctx = makeContext(0, "key2", 10, 0, 1)

@@ -21,7 +21,7 @@ var (
 	initOnce   = &sync.Once{}
 	server     *grpc.Server
 	cmuxserver *CMuxServer
-	enhancers  = []Enhancer{}
+	enhancers  []Enhancer
 )
 
 // Init initialize global gRPC server
@@ -117,7 +117,7 @@ func GracefulStop(ctx context.Context) error {
 	err := cmuxserver.Shutdown(ctx)
 	if err != nil {
 		log.WithError(errors.FromError(err).ExtendComponent(component)).
-			Errorf("grpc.server: error while gracefully stoping server")
+			Errorf("grpc.server: error while gracefully stopping server")
 		return err
 	}
 	return nil

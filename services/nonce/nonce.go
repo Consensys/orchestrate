@@ -26,7 +26,7 @@ type Sender interface {
 	// IsRecovering indicates whether we are recovering nonces
 	IsRecovering(key string) (bool, error)
 
-	// SetRevoring allows to set recovering status
+	// SetRecovering allows to set recovering status
 	SetRecovering(key string, status bool) error
 }
 

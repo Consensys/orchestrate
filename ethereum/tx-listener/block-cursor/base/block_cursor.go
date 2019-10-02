@@ -38,7 +38,7 @@ type BlockCursor struct {
 	// blockFutures is a channel of block being
 	blockFutures chan *types.Future
 
-	// Closing utilies
+	// Closing utils
 	closeOnce *sync.Once
 	closed    chan struct{}
 
@@ -216,7 +216,7 @@ func (bc *BlockCursor) fetchBlock(ctx context.Context, blockNumber int64) *types
 		}
 
 		// Retrieve receipts in separate go-routines
-		rFutures := []*types.Future{}
+		var rFutures []*types.Future
 		for _, tx := range bl.Block.Transactions() {
 			rFutures = append(rFutures, bc.fetchReceipt(ctx, tx.Hash()))
 		}
