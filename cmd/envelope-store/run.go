@@ -12,7 +12,7 @@ import (
 	envelopestore "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/envelope-store"
 )
 
-func newRunCommand() *cobra.Command {
+func NewRunCommand() *cobra.Command {
 	runCmd := &cobra.Command{
 		Use:   "run",
 		Short: "Run application",

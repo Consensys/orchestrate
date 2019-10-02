@@ -1,4 +1,4 @@
-package main
+package txdecoder
 
 import (
 	"context"
@@ -16,7 +16,7 @@ import (
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry"
 )
 
-func newRunCommand() *cobra.Command {
+func NewRunCommand() *cobra.Command {
 	runCmd := &cobra.Command{
 		Use:   "run",
 		Short: "Run application",

@@ -1,4 +1,4 @@
-package main
+package txnonce
 
 import (
 	"context"
@@ -15,7 +15,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/nonce/redis"
 )
 
-func newRunCommand() *cobra.Command {
+func NewRunCommand() *cobra.Command {
 	runCmd := &cobra.Command{
 		Use:   "run",
 		Short: "Run application",
