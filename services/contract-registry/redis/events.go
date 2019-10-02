@@ -66,7 +66,7 @@ func (e *EventsModel) Registers(conn *Conn,
 
 	for eventKey, event := range events {
 		eventKeys = append(eventKeys, eventKey)
-		eventIDs = append(eventIDs, event.Id())
+		eventIDs = append(eventIDs, event.ID())
 		indexedCounts = append(indexedCounts, common.GetIndexedCount(event))
 	}
 

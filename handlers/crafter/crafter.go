@@ -33,7 +33,7 @@ func Crafter(r contractregistry.RegistryClient, c crafter.Crafter) engine.Handle
 		txctx.Logger.WithFields(log.Fields{
 			"method.sig":    methodAbi.Sig(),
 			"method.string": methodAbi.String(),
-			"method.id":     hexutil.Encode(methodAbi.Id()),
+			"method.id":     hexutil.Encode(methodAbi.ID()),
 		}).Debugf("crafter: method call")
 
 		payload, err := createTxPayload(txctx, methodAbi, r, c)

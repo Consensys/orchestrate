@@ -159,7 +159,7 @@ func (c *PayloadCrafter) CraftCall(method ethabi.Method, args ...string) ([]byte
 		return nil, err
 	}
 
-	return append(method.Id(), arguments...), nil
+	return append(method.ID(), arguments...), nil
 }
 
 // CraftConstructor craft contract creation a transaction payload
@@ -185,9 +185,9 @@ func SignatureToMethod(methodSig string) (*ethabi.Method, error) {
 	}
 
 	method := &ethabi.Method{
-		Name:   splt[0],
-		Const:  false,
-		Inputs: ethabi.Arguments{},
+		RawName: splt[0],
+		Const:   false,
+		Inputs:  ethabi.Arguments{},
 	}
 
 	inputArgs := splt[1][:len(splt[1])-1]

@@ -96,7 +96,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 		for _, m := range contractAbi.Methods {
 			// Register methods for this bytecode
 			method := m
-			sel := rcommon.SigHashToSelector(method.Id())
+			sel := rcommon.SigHashToSelector(method.ID())
 			if contract.DeployedBytecode != nil {
 				// Init map
 				if r.methods[codeHash] == nil {
@@ -132,27 +132,27 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 					r.events[codeHash] = make(map[ethcommon.Hash]map[uint][][]byte)
 				}
 				// Init map
-				if r.events[codeHash][event.Id()] == nil {
-					r.events[codeHash][event.Id()] = make(map[uint][][]byte)
+				if r.events[codeHash][event.ID()] == nil {
+					r.events[codeHash][event.ID()] = make(map[uint][][]byte)
 				}
 
-				r.events[codeHash][event.Id()][indexedCount] = [][]byte{eventJSONs[event.Name]}
+				r.events[codeHash][event.ID()][indexedCount] = [][]byte{eventJSONs[event.Name]}
 			}
 
 			// Init map
-			if r.events[defaultCodehash][event.Id()] == nil {
-				r.events[defaultCodehash][event.Id()] = make(map[uint][][]byte)
+			if r.events[defaultCodehash][event.ID()] == nil {
+				r.events[defaultCodehash][event.ID()] = make(map[uint][][]byte)
 			}
 			// Register in default events if not present
 			found := false
-			for _, registeredEvent := range r.events[defaultCodehash][event.Id()][indexedCount] {
+			for _, registeredEvent := range r.events[defaultCodehash][event.ID()][indexedCount] {
 				if reflect.DeepEqual(registeredEvent, eventJSONs[event.Name]) {
 					found = true
 				}
 			}
 			if !found {
-				r.events[defaultCodehash][event.Id()][indexedCount] = append(
-					r.events[defaultCodehash][event.Id()][indexedCount],
+				r.events[defaultCodehash][event.ID()][indexedCount] = append(
+					r.events[defaultCodehash][event.ID()][indexedCount],
 					eventJSONs[event.Name],
 				)
 			}

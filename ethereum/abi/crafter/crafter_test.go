@@ -245,7 +245,7 @@ func TestSignatureToMethod(t *testing.T) {
 	var EmptyMethod = newMethod([]byte(`{
 		"inputs": [
 		],
-		"name": "empty"
+		"rawName": "empty"
 	}`))
 
 	var ERC20TransferMethod = newMethod([]byte(`{
@@ -259,7 +259,7 @@ func TestSignatureToMethod(t *testing.T) {
 				"type": "uint256"
 			}
 		],
-		"name": "transfer"
+		"rawName": "transfer"
 	}`))
 
 	tests := []struct {

@@ -61,7 +61,7 @@ func (m *MethodsModel) Registers(
 	selectors := make([][4]byte, 0, len(methods))
 
 	for methodKey, method := range methods {
-		selector := common.SigHashToSelector(method.Id())
+		selector := common.SigHashToSelector(method.ID())
 		methodKeys = append(methodKeys, methodKey)
 		selectors = append(selectors, selector)
 	}

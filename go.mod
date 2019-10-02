@@ -17,7 +17,7 @@ require (
 	github.com/deckarep/golang-set v1.7.1 // indirect
 	github.com/eapache/go-resiliency v1.2.0 // indirect
 	github.com/elastic/gosigar v0.10.5 // indirect
-	github.com/ethereum/go-ethereum v1.9.0
+	github.com/ethereum/go-ethereum v1.9.5
 	github.com/frankban/quicktest v1.5.0 // indirect
 	github.com/go-pg/migrations v6.7.3+incompatible
 	github.com/go-pg/pg v8.0.6+incompatible

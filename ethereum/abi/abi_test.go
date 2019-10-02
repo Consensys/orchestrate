@@ -148,5 +148,5 @@ func assertEqualEvent(t *testing.T, e1, e2 ethabi.Event) {
 	assert.Equal(t, e1.Anonymous, e2.Anonymous, "Method anonymous should be equal")
 	assert.Equal(t, len(e1.Inputs), len(e2.Inputs), "Method constant should have same count of inputs")
 	assert.Equal(t, e1.String(), e2.String(), "Event String should be equal")
-	assert.Equal(t, e1.Id().Hex(), e2.Id().Hex(), "Event Sig should be equal")
+	assert.Equal(t, e1.ID().Hex(), e2.ID().Hex(), "Event Sig should be equal")
 }
