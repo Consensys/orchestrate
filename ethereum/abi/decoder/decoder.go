@@ -13,7 +13,7 @@ import (
 
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/ethereum"
 )
 
 // FormatIndexedArg transforms a data to string

@@ -8,8 +8,8 @@ import (
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/ethereum"
 )
 
 // Crafter creates a crafter handler

@@ -9,11 +9,11 @@ import (
 	"github.com/spf13/viper"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/ethereum"
 )
 
 // Faucet allows to credit by sending messages to a Kafka topic

@@ -7,9 +7,9 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/nonce"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/ethereum"
 )
 
 // Handler creates and return an handler for nonce

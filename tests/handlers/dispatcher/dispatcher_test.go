@@ -11,7 +11,7 @@ import (
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/envelope"
 )
 
 const testsNum = 3

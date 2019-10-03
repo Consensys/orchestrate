@@ -11,9 +11,9 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/common"
 	rcommon "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/common"
 )
 
 // ContractRegistry stores contract ABI and bytecode in memory

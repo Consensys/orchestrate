@@ -10,8 +10,8 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/ethereum"
 )
 
 func init() {

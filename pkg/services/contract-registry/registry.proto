@@ -3,7 +3,7 @@ syntax = "proto3";
 import "types/abi/abi.proto";
 import "types/common/account_instance.proto";
 
-option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/contract-registry";
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/contract-registry";
 
 package contractregistry;
 

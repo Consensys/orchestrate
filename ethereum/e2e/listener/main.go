@@ -20,9 +20,9 @@ import (
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/ethereum"
 )
 
 // Loader is a Middleware engine.HandlerFunc that Load sarama.ConsumerGroup messages

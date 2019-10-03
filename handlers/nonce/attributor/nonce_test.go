@@ -12,10 +12,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/nonce/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/ethereum"
 )
 
 type MockChainStateReader struct{}

@@ -2,15 +2,18 @@ package main
 
 import (
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/contract-registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/envelope-store"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-crafter"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-decoder"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-listener"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-nonce"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-sender"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-signer"
+
+	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/contract-registry"
+	envelopestore "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/envelope-store"
+	txcrafter "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-crafter"
+	txdecoder "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-decoder"
+	txlistener "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-listener"
+	txnonce "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-nonce"
+	txsender "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-sender"
+	txsigner "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/cmd/tx-signer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/tracing/opentracing/jaeger"
 )
 
 // NewCommand create root command
@@ -28,15 +31,21 @@ func NewCommand() *cobra.Command {
 	logger.LogLevel(rootCmd.PersistentFlags())
 	logger.LogFormat(rootCmd.PersistentFlags())
 
+	// Register HTTP server flags
+	http.Hostname(rootCmd.PersistentFlags())
+
+	// Register OpenTracing flags
+	jaeger.InitFlags(rootCmd.PersistentFlags())
+
 	// Add Run command
-	rootCmd.AddCommand(txcrafter.NewRunCommand())
-	rootCmd.AddCommand(txnonce.NewRunCommand())
-	rootCmd.AddCommand(txsigner.NewRunCommand())
-	rootCmd.AddCommand(txsender.NewRunCommand())
-	rootCmd.AddCommand(txlistener.NewRunCommand())
-	rootCmd.AddCommand(txdecoder.NewRunCommand())
-	rootCmd.AddCommand(contractregistry.NewRunCommand())
-	rootCmd.AddCommand(envelopestore.NewRunCommand())
+	rootCmd.AddCommand(txcrafter.NewRootCommand())
+	rootCmd.AddCommand(txnonce.NewRootCommand())
+	rootCmd.AddCommand(txsigner.NewRootCommand())
+	rootCmd.AddCommand(txsender.NewRootCommand())
+	rootCmd.AddCommand(txlistener.NewRootCommand())
+	rootCmd.AddCommand(txdecoder.NewRootCommand())
+	rootCmd.AddCommand(contractregistry.NewRootCommand())
+	rootCmd.AddCommand(envelopestore.NewRootCommand())
 
 	return rootCmd
 }

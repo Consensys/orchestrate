@@ -3,13 +3,13 @@ package steps
 import (
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/chain"
 
 	"github.com/Shopify/sarama"
 	"github.com/Shopify/sarama/mocks"
 	"github.com/stretchr/testify/assert"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/envelope"
 )
 
 func TestGetChainCounts(t *testing.T) {

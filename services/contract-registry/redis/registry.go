@@ -9,8 +9,8 @@ import (
 	remote "github.com/gomodule/redigo/redis"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/abi"
 )
 
 var (

@@ -10,8 +10,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/envelope-store/pg/migrations"
 )
 
-// mewMigrateCmd create migrate command
-func mewMigrateCmd() *cobra.Command {
+// newMigrateCmd create migrate command
+func newMigrateCmd() *cobra.Command {
 	var db *pg.DB
 
 	migrateCmd := &cobra.Command{

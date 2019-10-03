@@ -13,7 +13,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine/testutils"
 	crc "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry/client/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/ethereum"
 )
 
 var testsNum = 2

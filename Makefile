@@ -1,5 +1,6 @@
 GOFILES := $(shell find . -name '*.go' | egrep -v "^\./\.go" | grep -v _test.go)
 PACKAGES ?= $(shell go list ./...)
+CMD = tx-crafter tx-nonce tx-signer tx-sender tx-listener tx-decoder contract-registry envelope-store
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
@@ -15,21 +16,17 @@ endif
 run-coverage: ## Generate global code coverage report
 	@sh scripts/coverage.sh $(PACKAGES)
 
-build:
-	docker build --target tx-crafter --build-arg GITLAB_USER=${GITLAB_USER} --build-arg GITLAB_TOKEN=${GITLAB_TOKEN} --no-cache .
-	docker build --target tx-nonce --build-arg GITLAB_USER=${GITLAB_USER} --build-arg GITLAB_TOKEN=${GITLAB_TOKEN} .
-	docker build --target tx-signer --build-arg GITLAB_USER=${GITLAB_USER} --build-arg GITLAB_TOKEN=${GITLAB_TOKEN} .
-	docker build --target tx-sender --build-arg GITLAB_USER=${GITLAB_USER} --build-arg GITLAB_TOKEN=${GITLAB_TOKEN} .
-	docker build --target tx-listener --build-arg GITLAB_USER=${GITLAB_USER} --build-arg GITLAB_TOKEN=${GITLAB_TOKEN} .
-	docker build --target tx-decoder --build-arg GITLAB_USER=${GITLAB_USER} --build-arg GITLAB_TOKEN=${GITLAB_TOKEN} .
-	docker build --target contract-registry --build-arg GITLAB_USER=${GITLAB_USER} --build-arg GITLAB_TOKEN=${GITLAB_TOKEN} .
-	docker build --target envelope-store --build-arg GITLAB_USER=${GITLAB_USER} --build-arg GITLAB_TOKEN=${GITLAB_TOKEN} .
+gobuild:
+	@go build -o ./build/corestack .
+
+docker-build:
+	@docker-compose build
 
 coverage:
 	@docker-compose -f e2e/docker-compose.yml up -d postgres
 	@sh scripts/coverage.sh $(PACKAGES)
 	@docker-compose -f e2e/docker-compose.yml down postgres
-	$(OPEN) coverage.html
+	$(OPEN) build/coverage/coverage.html
 
 race: ## Run data race detector
 	@go test -race -short ${PACKAGES}
@@ -73,3 +70,14 @@ protobuf: ## Generate protobuf stubs
 report:
 	@docker-compose -f report/docker-compose.yml up
 	$(OPEN) report/output/report.html
+
+gen-help: gobuild
+	@mkdir -p build/cmd
+	@for cmd in $(CMD); do \
+		./build/corestack $$cmd help run | tail -n +4 > build/cmd/$$cmd.md; \
+	done
+
+gen-help-docker: docker-build
+	@for cmd in $(CMD); do \
+		docker-compose run worker $$cmd help run | tail -n +4 | head -n -1 > build/cmd/$$cmd.md; \
+	done

@@ -17,10 +17,10 @@ import (
 
 	registry "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry"
 	registryClient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/chanregistry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/ethereum"
 )
 
 // ScenarioContext is container for scenario context data

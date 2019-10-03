@@ -2,10 +2,10 @@ package common
 
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/ethereum"
 )
 
 const (

@@ -2,7 +2,7 @@ package grpcerror
 
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
-	ierror "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/error"
+	ierror "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/error"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

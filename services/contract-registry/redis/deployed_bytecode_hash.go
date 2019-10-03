@@ -5,7 +5,7 @@ import (
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/ethereum"
 )
 
 const deployedByteCodeHashPrefix = "DeployedByteCodeHashPrefix"

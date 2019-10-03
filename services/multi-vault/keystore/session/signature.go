@@ -9,10 +9,10 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
-	pkgchain "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/keystore/crypto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/keystore/wallet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/secretstore/services"
+	pkgchain "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/chain"
 	"golang.org/x/crypto/sha3"
 )
 

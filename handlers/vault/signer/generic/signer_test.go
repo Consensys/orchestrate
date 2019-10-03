@@ -9,9 +9,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/keystore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/ethereum"
 )
 
 func mockSignerFunc(keystore.KeyStore, *engine.TxContext, ethcommon.Address, *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error) {

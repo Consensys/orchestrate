@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/secretstore/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/chain"
 )
 
 var testPKeys = []struct {

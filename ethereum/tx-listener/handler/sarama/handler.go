@@ -11,8 +11,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/tx-listener/handler/base"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/envelope"
 )
 
 // Handler implements TxListenerHandler interface

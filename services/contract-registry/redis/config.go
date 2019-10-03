@@ -14,7 +14,7 @@ var (
 	redisURIDefault  = "localhost:6379"
 	redisURIEnv      = "CONTRACT_REGISTRY_REDIS_URI"
 	redisURIDesc     = fmt.Sprintf(`URI of the Redis contract registry to connect to.
-	Environment variable: %q`, redisURIEnv)
+Environment variable: %q`, redisURIEnv)
 )
 
 var (
@@ -23,7 +23,7 @@ var (
 	redisMaxIdleConnDefault  = 10000
 	redisMaxIdleConnEnv      = "CONTRACT_REGISTRY_REDIS_MAX_IDLE_CONNS"
 	redisMaxIdleConnDesc     = fmt.Sprintf(`Maximum number of idle connection in the redis pool.
-	Environment variable: %q`, redisMaxIdleConnEnv)
+Environment variable: %q`, redisMaxIdleConnEnv)
 )
 
 var (
@@ -32,7 +32,7 @@ var (
 	redisMaxActiveConnDefault  = 20000
 	redisMaxActiveConnEnv      = "CONTRACT_REGISTRY_REDIS_MAX_ACTIVE_CONNS"
 	redisMaxActiveConnDesc     = fmt.Sprintf(`Maximum number of active connection  in the redis pool
-	Environment variable: %q`, redisMaxActiveConnEnv)
+Environment variable: %q`, redisMaxActiveConnEnv)
 )
 
 var (
@@ -41,7 +41,7 @@ var (
 	redisMaxConnLifetimeDefault  = time.Duration(480) * time.Second
 	redisMaxConnLifetimeEnv      = "CONTRACT_REGISTRY_REDIS_MAX_CONN_LIFETIME"
 	redisMaxConnLifetimeDesc     = fmt.Sprintf(`Max lifetime of a redis connection  in the pool
-	Environment variable: %q`, redisMaxConnLifetimeEnv)
+Environment variable: %q`, redisMaxConnLifetimeEnv)
 )
 
 var (
@@ -50,7 +50,7 @@ var (
 	redisIdleTimeoutDefault  = time.Duration(240) * time.Second
 	redisIdleTimeoutEnv      = "CONTRACT_REGISTRY_REDIS_IDLE_TIMEOUT"
 	redisIdleTimeoutDesc     = fmt.Sprintf(`Close connection after remaining idle for this duration
-	Environment variable: %q`, redisIdleTimeoutEnv)
+Environment variable: %q`, redisIdleTimeoutEnv)
 )
 
 var (
@@ -59,7 +59,7 @@ var (
 	redisWaitDefault  = true
 	redisWaitEnv      = "CONTRACT_REGISTRY_REDIS_WAIT"
 	redisWaitDesc     = fmt.Sprintf(`If Wait is true and the pool is at the MaxActive limit, then Get() waits for a connection to be returned to the pool before returning.
-	Environment variable: %q`, redisWaitEnv)
+Environment variable: %q`, redisWaitEnv)
 )
 
 func init() {

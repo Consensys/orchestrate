@@ -8,12 +8,12 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/common"
-	ierror "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/error"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
 	rcommon "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/common"
+	ierror "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/error"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/ethereum"
 	"golang.org/x/net/context"
 )
 

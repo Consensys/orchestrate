@@ -16,8 +16,8 @@ import (
 	ethereumHandlers "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/vault/signer/ethereum"
 	tesseraHandlers "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/vault/signer/tessera"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/ethereum"
 )
 
 type MockTxSigner struct {

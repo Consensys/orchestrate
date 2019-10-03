@@ -56,4 +56,4 @@ run:
     - .gocache
 
 service:
-  golangci-lint-version: 1.16.x
+  golangci-lint-version: 1.19.x

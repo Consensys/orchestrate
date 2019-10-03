@@ -5,7 +5,7 @@ import (
 	"github.com/golang/protobuf/proto"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/abi"
 )
 
 const artifactPrefix = "ArtifactPrefix"

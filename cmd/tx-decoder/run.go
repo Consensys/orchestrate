@@ -10,13 +10,11 @@ import (
 	producer "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/producer/tx-decoder"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/tracing/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry"
 )
 
-func NewRunCommand() *cobra.Command {
+func newRunCommand() *cobra.Command {
 	runCmd := &cobra.Command{
 		Use:   "run",
 		Short: "Run application",
@@ -26,17 +24,11 @@ func NewRunCommand() *cobra.Command {
 	// Register Engine flags
 	engine.InitFlags(runCmd.Flags())
 
-	// Register HTTP server flags
-	http.Hostname(runCmd.Flags())
-
 	// Register Ethereum client flags
 	rpc.URLs(runCmd.Flags())
 
 	// Register Decoder flags
 	contractregistry.ABIs(runCmd.Flags())
-
-	// Register OpenTracing flags
-	jaeger.InitFlags(runCmd.Flags())
 
 	// Register Kafka flags
 	broker.KafkaAddresses(runCmd.Flags())

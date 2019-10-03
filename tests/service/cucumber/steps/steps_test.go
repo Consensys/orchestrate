@@ -18,10 +18,10 @@ import (
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
 	crc "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry/client/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/chanregistry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/ethereum"
 )
 
 var testAddress = ethcommon.HexToAddress("0x00").Hex()

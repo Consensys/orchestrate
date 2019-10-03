@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/controllers/amount"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/controllers/blacklist"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/controllers/cooldown"
@@ -24,38 +25,26 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		// Initialize Controllers
-		wg := &sync.WaitGroup{}
-		wg.Add(6)
-
-		// Initialize Faucet
-		go func() {
-			faucet.Init(ctx)
-			wg.Done()
-		}()
-
-		// Initialize Controllers
-		go func() {
-			maxbalance.Init(ctx)
-			wg.Done()
-		}()
-		go func() {
-			blacklist.Init(ctx)
-			wg.Done()
-		}()
-		go func() {
-			cooldown.Init(ctx)
-			wg.Done()
-		}()
-		go func() {
-			amount.Init(ctx)
-			wg.Done()
-		}()
-		go func() {
-			creditor.Init(ctx)
-			wg.Done()
-		}()
-		wg.Wait()
+		common.InParallel(
+			func() {
+				faucet.Init(ctx)
+			},
+			func() {
+				maxbalance.Init(ctx)
+			},
+			func() {
+				blacklist.Init(ctx)
+			},
+			func() {
+				cooldown.Init(ctx)
+			},
+			func() {
+				amount.Init(ctx)
+			},
+			func() {
+				creditor.Init(ctx)
+			},
+		)
 
 		// Combine controls
 		ctrl = CombineControls(

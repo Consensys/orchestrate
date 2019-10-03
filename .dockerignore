@@ -6,6 +6,10 @@ Dockerfile*
 docker-compose*
 .gitlab-ci.yml
 
+build/
+e2e/
+scripts/
+
 AUTHORS
 CONTRIBUTING.md
 LICENSE

@@ -6,17 +6,17 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/args"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/args"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/chain"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/encoding/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/ethereum"
 )
 
 // GetChainCounts returns a mapping that counts the number of tx per chain

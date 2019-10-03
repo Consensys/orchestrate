@@ -9,8 +9,8 @@ import (
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/ethereum"
 )
 
 // This script has been implemented as part of ABC2D hackathon

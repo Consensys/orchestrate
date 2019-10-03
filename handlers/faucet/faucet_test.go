@@ -11,8 +11,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/chain"
 	faucettypes "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/chain"
 )
 
 type MockFaucet struct {

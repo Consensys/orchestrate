@@ -10,8 +10,8 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/keystore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/chain"
 )
 
 func makeGeneratorContext(i int) *engine.TxContext {

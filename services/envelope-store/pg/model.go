@@ -7,8 +7,8 @@ import (
 
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/encoding/proto"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/envelope-store"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/envelope"
 )
 
 // EnvelopeModel represent elements in `envelopes` table

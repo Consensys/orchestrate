@@ -11,7 +11,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/common"
 )
 
 // Decoder creates a decode handler

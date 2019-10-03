@@ -6,11 +6,11 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/keystore/crypto/signature"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/keystore/session"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/keystore/wallet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/secretstore/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/chain"
 )
 
 // KeyStore olds the methods of the interfaces BaseKeyStore

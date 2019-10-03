@@ -22,7 +22,8 @@ coverage.html
 *.iml
 .idea_modules/
 
-# CMake
+# Build
+build/
 cmake-build-*/
 
 # File-based project format

@@ -8,8 +8,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/tessera"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/tracing/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/controllers/amount"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/controllers/creditor"
@@ -19,7 +17,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/secretstore/hashicorp"
 )
 
-func NewRunCommand() *cobra.Command {
+func newRunCommand() *cobra.Command {
 	runCmd := &cobra.Command{
 		Use:   "run",
 		Short: "Run application",
@@ -28,12 +26,6 @@ func NewRunCommand() *cobra.Command {
 
 	// Register Engine flags
 	engine.InitFlags(runCmd.Flags())
-
-	// Register HTTP server flags
-	http.Hostname(runCmd.Flags())
-
-	// Register OpenTracing flags
-	jaeger.InitFlags(runCmd.Flags())
 
 	// Register KeyStore flags
 	hashicorp.InitFlags(runCmd.Flags())
