@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/logger"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/steps"
@@ -29,7 +29,7 @@ func NewRunCommand() *cobra.Command {
 	logger.LogFormat(runCmd.Flags())
 
 	// Register HTTP server flags
-	http.Hostname(runCmd.Flags())
+	metrics.Hostname(runCmd.Flags())
 
 	// Register Kafka flags
 	broker.InitKafkaFlags(runCmd.Flags())

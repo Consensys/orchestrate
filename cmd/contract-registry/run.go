@@ -7,6 +7,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
+	grpcserver "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/grpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/rest"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry"
 )
@@ -17,6 +19,12 @@ func newRunCommand() *cobra.Command {
 		Short: "Run application",
 		Run:   run,
 	}
+
+	// Hostname & port for servers
+	grpcserver.Hostname(runCmd.Flags())
+	grpcserver.Port(runCmd.Flags())
+	rest.Hostname(runCmd.Flags())
+	rest.Port(runCmd.Flags())
 
 	// ContractRegistry flag
 	contractregistry.Type(runCmd.Flags())

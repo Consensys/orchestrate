@@ -2,11 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### 🆕 Features
+
+* Add a new server for APIs services exposing a REST endpoint that will redirect queries to the gRPC endpoint and a swagger UI + documentation  
+
+### ⚠ BREAKING CHANGES
+* **config** grpc & metrics server have been split. Default port for
+  * grpc server remains 8080
+  * newly rest server is 8081 
+  * metrics server has changed and is now 8082
+
+
 ## 1.0.0 (2019-11-07)
 
 This is the first stable release of Orchestrate.
 
-### Features
+### 🆕 Features
 
 * **Transaction Management**, automatically manage transactions lifecycle
     * Transaction crafting: craft transactions and deploy contract based on the bytecode in the Contract Registry

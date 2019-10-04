@@ -9,9 +9,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	grpcserver "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/server"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/healthcheck"
+	grpcserver "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/grpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/examples/helloworld/helloworld"
@@ -35,14 +34,9 @@ func (s *server) SayHello(ctx context.Context, in *helloworld.HelloRequest) (*he
 }
 
 var (
-	app       *common.App
+	app       = common.NewApp()
 	startOnce = &sync.Once{}
 )
-
-func init() {
-	// Create app
-	app = common.NewApp()
-}
 
 // Run application
 func Start(ctx context.Context) {
@@ -60,24 +54,21 @@ func Start(ctx context.Context) {
 		grpcserver.Init(ctx)
 
 		// Initialize HTTP server
-		http.Init(ctx)
-		http.Enhance(healthcheck.HealthCheck(app))
+		metrics.Init(ctx)
+		metrics.Enhance(metrics.Enhancer(app.IsAlive, app.IsReady))
 
 		// Indicate that application is ready
 		app.SetReady(true)
 
 		// Start listening
-		err := grpcserver.ListenAndServe()
-		if err != nil {
-			log.WithError(err).Error("main: error listening")
-		}
+		grpcserver.ListenAndServe()
 	})
 }
 
 // Close gracefully stops the application
 func Close(ctx context.Context) {
 	log.Warn("app: closing...")
-	_ = grpcserver.GracefulStop(ctx)
+	grpcserver.StopServer(ctx)
 }
 
 func main() {

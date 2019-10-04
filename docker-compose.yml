@@ -5,6 +5,7 @@ x-default-variables: &default-variables
   CONTRACT_REGISTRY_URL: ${CONTRACT_REGISTRY_URL-contract-registry:8080}
   KAFKA_URL: ${KAFKA_URL-kafka:29092}
   ETH_CLIENT_URL: ${ETH_CLIENT_URL-http://geth:8545}
+  ETH_CLIENT_RETRY_MAX_ELAPSED_TIME: 5s
   LOG_LEVEL: ${LOG_LEVEL-debug}
   LOG_FORMAT: ${LOG_FORMAT-}
   JAEGER_AGENT_HOST: ${JAEGER_AGENT_HOST-jaeger}
@@ -14,17 +15,17 @@ x-default-variables: &default-variables
   VAULT_ADDR: ${VAULT_ADDR-http://vault:8200}
   # FAUCET_CREDITOR_ADDRESS: ${FAUCET_CREDITOR_ADDRESS-0x93f7274c9059e601be4512f656b57b830e019e41}@${GETH_NETWORKID-888}
   ABI: ${ABI-}
-  ETH_CLIENT_RETRY_MAX_ELAPSED_TIME: 5s
 
 x-container-common: &container-common
+  image: golang:1.13
   restart: ${CONTAINER_RESTART-on-failure}
+  entrypoint: /bin/main
   networks:
     - orchestrate
     - quorum-tessera
   volumes:
-    - ./build/bin/orchestrate:/bin/main
-  image: golang:1.13
-  entrypoint: /bin/main
+    - ./build/bin/orchestrate:/bin/main:ro
+    - ./public:/go/public:ro
 
 x-contract-registry-common: &contract-registry-common
   CONTRACT_REGISTRY_TYPE: ${CONTRACT_REGISTRY_TYPE-}
@@ -56,7 +57,7 @@ services:
   contract-registry:
     <<: *container-common
     ports:
-      - 8081:8080
+      - 8080:8080
     environment:
       <<: *default-variables
       <<: *contract-registry-common

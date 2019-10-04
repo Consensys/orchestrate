@@ -10,8 +10,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/abi/decoder"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/common"
+	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
 )
 
 // Decoder creates a decode handler

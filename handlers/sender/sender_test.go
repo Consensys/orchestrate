@@ -13,11 +13,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/envelope-store"
-	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/envelope-store/client/mock"
 	typesArgs "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/args"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
+	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
+	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 

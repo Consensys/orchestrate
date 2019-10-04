@@ -1,0 +1,459 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Contract-Registry",
+    "version": "1.0",
+    "contact": {
+      "name": "✉ PegaSys Orchestrate",
+      "email": "support@pegasys.tech"
+    }
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/contracts": {
+      "get": {
+        "summary": "Returns a list of all registered contracts",
+        "operationId": "GetCatalog",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/contractregistryGetCatalogResponse"
+            }
+          }
+        },
+        "tags": [
+          "Registry"
+        ]
+      }
+    },
+    "/v1/contracts/{contractId.name}/{contractId.tag}": {
+      "get": {
+        "summary": "Retrieve contract",
+        "operationId": "GetContract",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/contractregistryGetContractResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "contractId.name",
+            "description": "Name of contract\ne.g. \"ERC20\"",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contractId.tag",
+            "description": "Contract tag\ne.g \"v2.1.3\"",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contractId.registry",
+            "description": "Registry of contract\ne.g. \"registry.consensys.net/orchestrate\".",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Registry"
+        ]
+      }
+    },
+    "/v1/contracts/{contractId.name}/{contractId.tag}/abi": {
+      "get": {
+        "summary": "Retrieve contract ABI",
+        "operationId": "GetContractABI",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/contractregistryGetContractABIResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "contractId.name",
+            "description": "Name of contract\ne.g. \"ERC20\"",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contractId.tag",
+            "description": "Contract tag\ne.g \"v2.1.3\"",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contractId.registry",
+            "description": "Registry of contract\ne.g. \"registry.consensys.net/orchestrate\".",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Registry"
+        ]
+      }
+    },
+    "/v1/contracts/{contractId.name}/{contractId.tag}/bytecode": {
+      "get": {
+        "summary": "Returns the bytecode",
+        "operationId": "GetContractBytecode",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/contractregistryGetContractBytecodeResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "contractId.name",
+            "description": "Name of contract\ne.g. \"ERC20\"",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contractId.tag",
+            "description": "Contract tag\ne.g \"v2.1.3\"",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contractId.registry",
+            "description": "Registry of contract\ne.g. \"registry.consensys.net/orchestrate\".",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Registry"
+        ]
+      }
+    },
+    "/v1/contracts/{contractId.name}/{contractId.tag}/deployedBytecode": {
+      "get": {
+        "summary": "Returns the deployed bytecode",
+        "operationId": "GetContractDeployedBytecode",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/contractregistryGetContractDeployedBytecodeResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "contractId.name",
+            "description": "Name of contract\ne.g. \"ERC20\"",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contractId.tag",
+            "description": "Contract tag\ne.g \"v2.1.3\"",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contractId.registry",
+            "description": "Registry of contract\ne.g. \"registry.consensys.net/orchestrate\".",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Registry"
+        ]
+      }
+    },
+    "/v1/contracts/{name}": {
+      "get": {
+        "summary": "Returns a list of all tags associated to a contract",
+        "operationId": "GetTags",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/contractregistryGetTagsResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "description": "Name is used to filter contractIds based on their contract name, empty to list all contract names \u0026 tags.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Registry"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "abiContract": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/abiContractId",
+          "title": "A set of fields that identify a contract on a particular chain"
+        },
+        "abi": {
+          "type": "string",
+          "format": "byte",
+          "title": "Contract ABI (optional)"
+        },
+        "bytecode": {
+          "type": "string",
+          "format": "byte",
+          "title": "Contract deployment bytecode (optional)"
+        },
+        "methods": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/abiMethod"
+          },
+          "title": "Methods of the contract"
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/abiEvent"
+          },
+          "title": "Event of the contract"
+        },
+        "deployedBytecode": {
+          "type": "string",
+          "format": "byte",
+          "title": "Contract deployed bytecode (optional)"
+        }
+      },
+      "title": "Contract holds contract information"
+    },
+    "abiContractId": {
+      "type": "object",
+      "properties": {
+        "registry": {
+          "type": "string",
+          "title": "Registry of contract\ne.g. \"registry.consensys.net/orchestrate\""
+        },
+        "name": {
+          "type": "string",
+          "title": "Name of contract\ne.g. \"ERC20\""
+        },
+        "tag": {
+          "type": "string",
+          "title": "Contract tag\ne.g \"v2.1.3\""
+        }
+      }
+    },
+    "abiEvent": {
+      "type": "object",
+      "properties": {
+        "signature": {
+          "type": "string",
+          "title": "Name of the event to call on contract\ne.g \"Transfer(address, address, uint256)\""
+        },
+        "abi": {
+          "type": "string",
+          "format": "byte",
+          "title": "ABI of the method (Optional)"
+        }
+      },
+      "title": "Event"
+    },
+    "abiMethod": {
+      "type": "object",
+      "properties": {
+        "signature": {
+          "type": "string",
+          "title": "Signature of the method to call on contract\ne.g \"transfer(address,uint256)\""
+        },
+        "abi": {
+          "type": "string",
+          "format": "byte",
+          "title": "ABI of the method (Optional)"
+        }
+      },
+      "title": "Method"
+    },
+    "chainChain": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "byte",
+          "title": "Chain ID\ne.g. 1 for mainnet, 3 for Ropsten"
+        }
+      },
+      "title": "Information about a Chain"
+    },
+    "commonAccountInstance": {
+      "type": "object",
+      "properties": {
+        "chain": {
+          "$ref": "#/definitions/chainChain",
+          "title": "Chain ID of the chain"
+        },
+        "account": {
+          "$ref": "#/definitions/ethereumAccount",
+          "title": "Deployment address of the contract"
+        }
+      },
+      "title": "Information about an account on a chain"
+    },
+    "contractregistryDeleteArtifactResponse": {
+      "type": "object"
+    },
+    "contractregistryDeregisterContractResponse": {
+      "type": "object"
+    },
+    "contractregistryGetCatalogResponse": {
+      "type": "object",
+      "properties": {
+        "names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "contractregistryGetContractABIResponse": {
+      "type": "object",
+      "properties": {
+        "abi": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "contractregistryGetContractBytecodeResponse": {
+      "type": "object",
+      "properties": {
+        "bytecode": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "contractregistryGetContractDeployedBytecodeResponse": {
+      "type": "object",
+      "properties": {
+        "deployedBytecode": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "contractregistryGetContractResponse": {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "$ref": "#/definitions/abiContract"
+        }
+      }
+    },
+    "contractregistryGetEventsBySigHashResponse": {
+      "type": "object",
+      "properties": {
+        "event": {
+          "type": "string",
+          "format": "byte",
+          "title": "Contains the ABI of the exact event if the deployed contract has a known bytecode"
+        },
+        "defaultEvents": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "byte"
+          },
+          "title": "Contains the ABIs of the potential event(s) if the deployed contract is not known"
+        }
+      }
+    },
+    "contractregistryGetMethodsBySelectorResponse": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "type": "string",
+          "format": "byte",
+          "title": "Contains the ABI of the exact method if the deployed contract has a known bytecode"
+        },
+        "defaultMethods": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "byte"
+          },
+          "title": "Contains the ABIs of the potential methods(s) if the deployed contract is not known"
+        }
+      }
+    },
+    "contractregistryGetTagsResponse": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "contractregistryRegisterContractResponse": {
+      "type": "object"
+    },
+    "contractregistrySetAccountCodeHashResponse": {
+      "type": "object"
+    },
+    "ethereumAccount": {
+      "type": "object",
+      "properties": {
+        "raw": {
+          "type": "string",
+          "format": "byte",
+          "title": "Account address in hex format\ne.g. 0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C"
+        }
+      },
+      "title": "Ethereum Log"
+    }
+  },
+  "externalDocs": {
+    "description": "📒 Documentation of PegaSys Orchestrate",
+    "url": "https://docs.orchestrate.pegasys.tech/en/latest/"
+  }
+}

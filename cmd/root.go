@@ -12,7 +12,7 @@ import (
 	txsender "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/tx-sender"
 	txsigner "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/tx-signer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/logger"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/jaeger"
 )
 
@@ -32,7 +32,8 @@ func NewCommand() *cobra.Command {
 	logger.LogFormat(rootCmd.PersistentFlags())
 
 	// Register HTTP server flags
-	http.Hostname(rootCmd.PersistentFlags())
+	metrics.Hostname(rootCmd.PersistentFlags())
+	metrics.Port(rootCmd.PersistentFlags())
 
 	// Register OpenTracing flags
 	jaeger.InitFlags(rootCmd.PersistentFlags())

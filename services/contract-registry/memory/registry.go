@@ -9,10 +9,10 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/contract-registry"
 	rcommon "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/common"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
 )
 
 // ContractRegistry stores contract ABI and bytecode in memory

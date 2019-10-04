@@ -4,8 +4,6 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/jaeger"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
@@ -23,30 +21,14 @@ import (
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	server "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/healthcheck"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/metrics"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/jaeger"
 )
 
 var (
-	app       *common.App
+	app       = common.NewApp()
 	startOnce = &sync.Once{}
 )
-
-func init() {
-	// Create app
-	app = common.NewApp()
-}
-
-func startServer(ctx context.Context) {
-	// Initialize server
-	server.Init(ctx)
-
-	// Register Healthcheck
-	server.Enhance(healthcheck.HealthCheck(app))
-
-	// Start Listening
-	_ = server.ListenAndServe()
-}
 
 type serviceName string
 
@@ -111,11 +93,7 @@ func registerHandlers() {
 func Start(ctx context.Context) {
 	startOnce.Do(func() {
 		cancelCtx, cancel := context.WithCancel(ctx)
-		go func() {
-			// Start Server
-			startServer(ctx)
-			cancel()
-		}()
+		go metrics.StartServer(ctx, cancel, app.IsAlive, app.IsReady)
 
 		// Initialize all components of the server
 		initComponents(cancelCtx)
@@ -124,7 +102,7 @@ func Start(ctx context.Context) {
 		registerHandlers()
 
 		// Indicate that application is ready
-		// TODO: we need to update so ready can append when Consume has finished to Setup
+		// TODO: we need to update so SetReady can be called when Consume has finished to Setup
 		app.SetReady(true)
 
 		// Create handler

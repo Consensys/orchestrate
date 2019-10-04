@@ -62,6 +62,9 @@ tools: ## Install test tools
 	@GO111MODULE=off go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
 	@GO111MODULE=off go get -u github.com/DATA-DOG/godog/cmd/godog
 	@GO111MODULE=off go get -u github.com/golang/mock/gomock
+	@GO111MODULE=off go get -u github.com/golang/protobuf/protoc-gen-go
+	@GO111MODULE=off go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
+    @GO111MODULE=off go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
 
 # Help
 help: ## Display this help screen
@@ -128,6 +131,6 @@ stop-quorum:
 down-quorum:
 	@docker-compose -f scripts/deps/docker-compose.quorum.yml down --volumes --timeout 0
 
-up-all: deps quorum orchestrate
+up: deps quorum orchestrate
 
-down-all: down-orchestrate down-quorum down-deps
+down: down-orchestrate down-quorum down-deps

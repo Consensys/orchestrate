@@ -22,6 +22,11 @@ func NewApp() *App {
 	return app
 }
 
+// IsAlive indicates if application is alive
+func (app *App) IsAlive() error {
+	return nil
+}
+
 // Ready indicates if application is ready
 func (app *App) IsReady() error {
 	select {

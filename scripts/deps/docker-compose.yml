@@ -42,19 +42,33 @@ services:
   postgres-contract-registry:
     <<: *container-common
     image: postgres:10-alpine
-    ports:
-      - 5432
     volumes:
       - db-data-contract-registry:/var/lib/postgresql/data
+    ports:
+      - 5432
 
   postgres-envelope-store:
     <<: *container-common
     image: postgres:10-alpine
-    ports:
-      - 5432
     volumes:
       - db-data-envelope-store:/var/lib/postgresql/data
-  
+    ports:
+      - 5432
+
+  pgadmin:
+    <<: *container-common
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_SERVER_JSON_FILE: /pgadmin4/servers.json
+    volumes:
+      - pgadmin:/root/.pgadmin
+      - ./config/pgadmin/servers.json:/pgadmin4/servers.json
+      - ./config/pgadmin/password:/pgadmin4/password
+    ports:
+      - 5050:80
+
   geth:
     <<: *container-common
     image: ethereum/client-go:v1.9.0
@@ -120,6 +134,8 @@ volumes:
   db-data-envelope-store:
     driver: local
   chain-data:
+    driver: local
+  pgadmin:
     driver: local
 
 

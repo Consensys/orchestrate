@@ -50,6 +50,9 @@ linters:
     - unconvert
     - unparam
 
+issues:
+  max-same-issues: 10
+
 run:
   deadline: 20m
   skip-dirs:

@@ -7,9 +7,9 @@ import (
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
 )
 
 // ContractRegistry is a contract registry based on PostgreSQL
@@ -171,7 +171,7 @@ func (r *ContractRegistry) GetContract(ctx context.Context, req *svc.GetContract
 		Where("r.name = ?", name).
 		First()
 	if err != nil {
-		log.WithError(err).Debugf("could not load contract")
+		log.WithError(err).Debugf("could not load contract with name: %s and tag: %s", name, tag)
 		return nil, errors.StorageError("could not load contract (%v)", err).ExtendComponent(component)
 	}
 
@@ -204,7 +204,7 @@ func (r *ContractRegistry) GetContractABI(ctx context.Context, req *svc.GetContr
 		Where("r.name = ?", name).
 		First()
 	if err != nil {
-		log.WithError(err).Debugf("could not load contract")
+		log.WithError(err).Debugf("could not load contract with name: %s and tag: %s", name, tag)
 		return nil, errors.StorageError("could not load contract (%v)", err).ExtendComponent(component)
 	}
 
@@ -229,7 +229,7 @@ func (r *ContractRegistry) GetContractBytecode(ctx context.Context, req *svc.Get
 		Where("r.name = ?", name).
 		First()
 	if err != nil {
-		log.WithError(err).Debugf("could not load contract")
+		log.WithError(err).Debugf("could not load contract with name: %s and tag: %s", name, tag)
 		return nil, errors.StorageError("could not load contract (%v)", err).ExtendComponent(component)
 	}
 
@@ -240,7 +240,7 @@ func (r *ContractRegistry) GetContractBytecode(ctx context.Context, req *svc.Get
 
 // GetContractDeployedBytecode loads contract deployed bytecode
 func (r *ContractRegistry) GetContractDeployedBytecode(ctx context.Context, req *svc.GetContractRequest) (*svc.GetContractDeployedBytecodeResponse, error) {
-	name, tagName, err := common.CheckExtractNameTag(req.GetContractId())
+	name, tag, err := common.CheckExtractNameTag(req.GetContractId())
 	if err != nil {
 		return nil, err
 	}
@@ -250,11 +250,11 @@ func (r *ContractRegistry) GetContractDeployedBytecode(ctx context.Context, req 
 		Column("deployed_bytecode").
 		Join("JOIN tags AS t ON t.artifact_id = artifact_model.id").
 		Join("JOIN repositories AS r ON r.id = t.repository_id").
-		Where("t.name = ?", tagName).
+		Where("t.name = ?", tag).
 		Where("r.name = ?", name).
 		First()
 	if err != nil {
-		log.WithError(err).Debugf("could not load contract")
+		log.WithError(err).Debugf("could not load contract with name: %s and tag: %s", name, tag)
 		return nil, errors.StorageError("could not load contract (%v)", err).ExtendComponent(component)
 	}
 

@@ -1,0 +1,29 @@
+{
+    "Servers": {
+        "1": {
+            "Name": "Contract Registry",
+            "Group": "Orchestrate",
+            "Port": 5432,
+            "Username": "postgres",
+            "Host": "postgres-contract-registry",
+            "SSLMode": "prefer",
+            "MaintenanceDB": "postgres",
+            "PassFile": "/pgadmin4/password",
+            "BGColor": "#3E5D6B",
+            "FGColor": "#67C39B"
+        },
+        "2": {
+            "Name": "Envelope Store",
+            "Group": "Orchestrate",
+            "Port": 5432,
+            "Username": "postgres",
+            "Host": "postgres-envelope-store",
+            "SSLMode": "prefer",
+            "MaintenanceDB": "postgres",
+            "PassFile": "/pgadmin4/password",
+            "BGColor": "#3E5D6B",
+            "FGColor": "#67C39B"
+        }
+    }
+}
+

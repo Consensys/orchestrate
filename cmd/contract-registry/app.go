@@ -2,64 +2,76 @@ package contractregistry
 
 import (
 	"context"
+	"net/http"
+	"path"
 	"sync"
+
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
-	grpcserver "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/server"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/healthcheck"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/contract-registry"
-	services "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry"
+	grpcserver "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/grpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/metrics"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/rest"
+	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
 )
 
 var (
-	app       *common.App
+	app       = common.NewApp()
 	startOnce = &sync.Once{}
 )
-
-func init() {
-	// Create app
-	app = common.NewApp()
-}
 
 // Run application
 func Start(ctx context.Context) {
 	startOnce.Do(func() {
 		// Initialize gRPC Server service
-		services.Init(ctx)
+		contractregistry.Init(ctx)
 
-		// Initialize gRPC server
-		grpcserver.AddEnhancers(
-			func(s *grpc.Server) *grpc.Server {
-				types.RegisterRegistryServer(s, services.GlobalRegistry())
-				return s
+		cancelCtx, cancel := context.WithCancel(ctx)
+		go metrics.StartServer(ctx, cancel, app.IsAlive, app.IsReady)
+
+		go func() {
+			// Initialize gRPC server
+			grpcserver.AddEnhancers(
+				func(s *grpc.Server) *grpc.Server {
+					types.RegisterRegistryServer(s, contractregistry.GlobalRegistry())
+					return s
+				})
+			grpcserver.Init(cancelCtx)
+			grpcserver.ListenAndServe()
+			cancel()
+		}()
+
+		// Initialize REST server
+		rest.AddEnhancers(
+			func(cancelCtx context.Context, _ *http.ServeMux, gwMux *runtime.ServeMux, conn *grpc.ClientConn) error {
+				return types.RegisterRegistryHandler(cancelCtx, gwMux, conn)
 			},
-		)
-		grpcserver.Init(ctx)
-
-		// Initialize HTTP server for healthchecks
-		http.Init(ctx)
-		http.Enhance(healthcheck.HealthCheck(app))
+			func(ctx context.Context, mux *http.ServeMux, _ *runtime.ServeMux, _ *grpc.ClientConn) error {
+				mux.HandleFunc("/swagger/swagger.json", rest.ServeFile(path.Join(rest.SwaggerSpecsPath, "types/contract-registry/registry.swagger.json")))
+				return nil
+			})
+		rest.Init(cancelCtx)
 
 		// Indicate that application is ready
 		app.SetReady(true)
 
-		// Start listening
-		err := grpcserver.ListenAndServe()
-		if err != nil {
-			log.WithError(err).Error("app: error listening")
-		}
+		rest.ListenAndServe()
+		cancel()
 	})
 }
 
 // Close gracefully stops the application
 func Close(ctx context.Context) {
 	log.Warn("app: stopping...")
-	err := grpcserver.GracefulStop(ctx)
-	if err != nil {
-		log.WithError(err).Error("app: error stopping application")
-	}
+	app.SetReady(false)
+	common.InParallel(
+		func() { grpcserver.StopServer(ctx) },
+		func() { metrics.StopServer(ctx) },
+		func() { rest.StopServer(ctx) },
+	)
+	log.Info("app: gracefully stopped application")
 }

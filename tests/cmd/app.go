@@ -13,8 +13,7 @@ import (
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	server "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/healthcheck"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/handlers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/handlers/dispatcher"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber"
@@ -26,22 +25,6 @@ var (
 	readyToTest chan bool
 	startOnce   = &sync.Once{}
 )
-
-func init() {
-	// Create app
-	app = common.NewApp()
-}
-
-func startServer(ctx context.Context) {
-	// Initialize server
-	server.Init(ctx)
-
-	// Register Healthcheck
-	server.Enhance(healthcheck.HealthCheck(app))
-
-	// Start Listening
-	_ = server.ListenAndServe()
-}
 
 func LongKeyOf(topics map[string]string) dispatcher.KeyOfFunc {
 	return func(txctx *engine.TxContext) (string, error) {
@@ -117,11 +100,7 @@ func registerHandlers() {
 func Start(ctx context.Context) {
 	startOnce.Do(func() {
 		cancelCtx, cancel := context.WithCancel(ctx)
-		go func() {
-			// Start Server
-			startServer(ctx)
-			cancel()
-		}()
+		go metrics.StartServer(ctx, cancel, app.IsAlive, app.IsReady)
 
 		// Initialize ConsumerGroup
 		initComponents(cancelCtx)
