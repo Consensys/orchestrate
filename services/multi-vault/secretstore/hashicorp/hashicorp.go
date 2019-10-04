@@ -1,217 +1,138 @@
 package hashicorp
 
 import (
-	"encoding/json"
-	"sync"
+	"crypto/tls"
+	"io/ioutil"
+	"net/http"
+	"os"
+	"strings"
 	"time"
 
+	"golang.org/x/net/http2"
+	"golang.org/x/time/rate"
+
+	"github.com/hashicorp/go-cleanhttp"
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/hashicorp/vault/api"
 	log "github.com/sirupsen/logrus"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
 )
 
-// HashiCorp wraps a hashicorps client an manage the unsealing
-type HashiCorp struct {
-	mut    sync.Mutex
-	rtl    *RenewTokenLoop
+// Hashicorp is a wrapper around an Hashicorp object
+type Hashicorp struct {
+	// Client is the hashicorp's implementation of the vault client
 	Client *api.Client
+	// Logical is the query implementation of the vault
+	Logical Logical
 }
 
-// NewHashiCorp construct a new hashicorps vault given a configfile or nil
-func NewHashiCorp(config *api.Config) (*HashiCorp, error) {
-	if config == nil {
-		// This will read the environments variable
-		config = api.DefaultConfig()
-		if config.Error != nil {
-			return nil, errors.ConfigError(config.Error.Error()).SetComponent(component)
-		}
-	}
+// Logical is a wrapper around api.Logical
+type Logical interface {
+	// Read value stored at given subpath
+	Read(subpath string) (value string, ok bool, err error)
+	// Write a value in the vault at given subpath
+	Write(subpath, value string) error
+	// List retrieve all the keys availables in the vault
+	List(subpath string) ([]string, error)
+	// Delete remove the key from the vault
+	Delete(subpath string) error
+}
 
-	client, err := api.NewClient(config)
+// NewVaultClient returns a default object
+func NewVaultClient(config *Config) (*Hashicorp, error) {
+	// Instantiate an api.Client from local config object
+	vaultConfig := ToVaultConfig(config)
+	client, err := api.NewClient(vaultConfig)
 	if err != nil {
-		return nil, errors.ConnectionError(config.Error.Error()).SetComponent(component)
+		return nil, errors.ConnectionError(vaultConfig.Error.Error()).
+			SetComponent(component)
 	}
 
-	_ = WithVaultToken(client) // If the token was not found. The error is ignored
-
-	hash := &HashiCorp{
+	hashicorp := &Hashicorp{
 		Client: client,
 	}
 
-	hash.manageToken()
-	return hash, nil
+	switch config.KVVersion {
+	default:
+		hashicorp.Logical = NewLogicalV2(client.Logical(), config.MountPoint, config.SecretPath)
+	case "v1":
+		hashicorp.Logical = NewLogicalV1(client.Logical(), config.MountPoint, config.SecretPath)
+	}
+
+	return hashicorp, nil
 }
 
-func (hash *HashiCorp) manageToken() {
-	secret, err := hash.Client.Auth().Token().LookupSelf()
-	if err != nil {
-		log.Fatalf("Initial token lookup failed : %v", err)
+// ToVaultConfig extracts an api.Config object from self
+func ToVaultConfig(c *Config) *api.Config {
+	// Create Vault Configuration
+	config := api.DefaultConfig()
+	config.Address = c.Address
+	config.HttpClient = cleanhttp.DefaultClient()
+	config.HttpClient.Timeout = time.Second * 60
+
+	// Create Transport
+	transport := config.HttpClient.Transport.(*http.Transport)
+	transport.TLSHandshakeTimeout = 10 * time.Second
+	transport.TLSClientConfig = &tls.Config{
+		MinVersion: tls.VersionTLS12,
+	}
+	if err := http2.ConfigureTransport(transport); err != nil {
+		config.Error = err
+		return config
 	}
 
-	vaultTTL64, err := secret.Data["ttl"].(json.Number).Int64()
-	if err != nil {
-		log.Fatalf("Could not read vault ttl : %v", err)
+	// Configure TLS
+	tlsConfig := &api.TLSConfig{
+		CACert:        c.CACert,
+		CAPath:        c.CAPath,
+		ClientCert:    c.ClientCert,
+		ClientKey:     c.ClientKey,
+		TLSServerName: c.TLSServerName,
+		Insecure:      c.SkipVerify,
 	}
 
-	vaultTokenTTL := int(vaultTTL64)
-	if vaultTokenTTL < 1 {
-		// case where the tokenTTL is infinite
-		return
+	_ = config.ConfigureTLS(tlsConfig)
+
+	config.Limiter = rate.NewLimiter(rate.Limit(c.RateLimit), c.BurstLimit)
+	config.MaxRetries = c.MaxRetries
+	config.Timeout = c.ClientTimeout
+
+	// Ensure redirects are not automatically followed
+	// Note that this is sane for the API client as it has its own
+	// redirect handling logic (and thus also for command/meta),
+	// but in e.g. http_test actual redirect handling is necessary
+	config.HttpClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		// Returning this value causes the Go net library to not close the
+		// response body and to nil out the error. Otherwise retry clients may
+		// try three times on every redirect because it sees an error from this
+		// function (to prevent redirects) passing through to it.
+		return http.ErrUseLastResponse
 	}
 
-	log.Debugf("Vault TTL: %v", vaultTokenTTL)
-	log.Debugf("64: %v", vaultTTL64)
+	config.Backoff = retryablehttp.LinearJitterBackoff
 
-	timeToWait := time.Duration(
-		int(float64(
-			vaultTokenTTL,
-		)*0.75), // We wait 75% of the TTL to refresh
-	) * time.Second
-
-	ticker := time.NewTicker(timeToWait)
-	log.Debugf("time to wait: %v", timeToWait)
-
-	hash.rtl = &RenewTokenLoop{
-		TTL:    vaultTokenTTL,
-		ticker: ticker,
-		Quit:   make(chan bool, 1),
-		Hash:   hash,
-
-		RtlTimeRetry:      2,
-		RtlMaxNumberRetry: 3,
-	}
-
-	err = hash.rtl.Refresh()
-	if err != nil {
-		log.Fatalf("Initial token refresh failed : %v", err)
-	}
+	return config
 }
 
-// Store writes in the vault
-func (hash *HashiCorp) Store(key, value string) error {
-	sec := NewSecret(key, value)
-	sec.SetClient(hash.Client)
-
-	hash.mut.Lock()
-	defer hash.mut.Unlock()
-
-	err := sec.Update()
+// SetTokenFromConfig set the initial client token
+func (v *Hashicorp) SetTokenFromConfig(c *Config) error {
+	encoded, err := ioutil.ReadFile(c.TokenFilePath)
 	if err != nil {
-		return errors.FromError(err).ExtendComponent(component)
+		log.Warningf("Token file path could not be found : %v", err.Error())
+		return err
 	}
+	// Immediately delete the file after it was read
+	_ = os.Remove(c.TokenFilePath)
+
+	decoded := strings.TrimSuffix(string(encoded), "\n") // Remove the newline if it exists
+	decoded = strings.TrimSuffix(decoded, "\r")          // This one is for windows compatibility
+	v.Client.SetToken(decoded)
 
 	return nil
 }
 
-// Load reads in the vault
-func (hash *HashiCorp) Load(key string) (value string, ok bool, err error) {
-	sec := NewSecret(key, "")
-	sec.SetClient(hash.Client)
-
-	hash.mut.Lock()
-	defer hash.mut.Unlock()
-
-	v, ok, err := sec.GetValue()
-	if err != nil {
-		return "", false, errors.FromError(err).ExtendComponent(component)
-	}
-
-	return v, ok, nil
-}
-
-// Delete removes a path in the vault
-func (hash *HashiCorp) Delete(key string) error {
-	sec := NewSecret(key, "")
-	sec.SetClient(hash.Client)
-
-	hash.mut.Lock()
-	defer hash.mut.Unlock()
-	err := sec.Delete()
-	if err != nil {
-		return errors.FromError(err).ExtendComponent(component)
-	}
-
-	return nil
-}
-
-// List returns the list of all secrets stored in the vault
-func (hash *HashiCorp) List() (keys []string, err error) {
-	sec := NewSecret("", "")
-	sec.SetClient(hash.Client)
-
-	hash.mut.Lock()
-	defer hash.mut.Unlock()
-
-	keys, err = sec.List("")
-	if err != nil {
-		return keys, errors.FromError(err).ExtendComponent(component)
-	}
-	return keys, nil
-}
-
-// RenewTokenLoop handle the token renewal of the application
-type RenewTokenLoop struct {
-	TTL    int
-	ticker *time.Ticker
-	Quit   chan bool
-	Hash   *HashiCorp
-
-	RtlTimeRetry      int // RtlTimeRetry : Time between each retry of token renewal
-	RtlMaxNumberRetry int // RtlMaxNumberRetry : Max number of retry for token renewal
-}
-
-// Refresh the token
-func (loop *RenewTokenLoop) Refresh() error {
-	retry := 0
-	for {
-		// Regularly try renewing the token
-		newTokenSecret, err := loop.
-			Hash.Client.Auth().Token().RenewSelf(0)
-
-		if err == nil {
-			loop.Hash.mut.Lock()
-			loop.Hash.Client.SetToken(
-				newTokenSecret.Auth.ClientToken,
-			)
-			loop.Hash.mut.Unlock()
-			log.Debugf("Successfully refreshed token, TokenTTL is %v", loop.TTL)
-			return nil
-		}
-
-		retry++
-		if retry < loop.RtlMaxNumberRetry {
-			// Max number number of retry reached : graceful shutdown
-			log.Error("Graceful shutdown of the vault, the token could not be renewed")
-			return errors.InternalError("token refresh failed (%v)", err).SetComponent(component)
-		}
-
-		time.Sleep(time.Duration(loop.RtlTimeRetry) * time.Second)
-	}
-}
-
-// Run contains the token regeneration routine
-func (loop *RenewTokenLoop) Run() {
-
-	for {
-		select {
-		case <-loop.ticker.C:
-			err := loop.Refresh()
-			if err != nil {
-				loop.Quit <- true
-			}
-
-		// TODO: Be able to graceful shutdown every other services in the infra
-		case <-loop.Quit:
-			// The token parameter is ignored
-			_ = loop.
-				Hash.Client.Auth().Token().RevokeSelf("this parameter is ignored")
-			// Erase the local value of the token
-			loop.Hash.Client.SetToken("")
-			// Wait 5 seconds for the ongoing requests to return
-			time.Sleep(time.Duration(5) * time.Second)
-			// Crash the app
-			log.Fatal("Graceful shutdown of the vault, the token has been revoked")
-		}
-	}
-
+// Auth is a shortcut to get the Auth object of the client
+func (v *Hashicorp) Auth() *api.Auth {
+	return v.Client.Auth()
 }

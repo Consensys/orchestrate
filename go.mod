@@ -29,7 +29,8 @@ require (
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/hashicorp/go-cleanhttp v0.5.1
 	github.com/hashicorp/go-retryablehttp v0.6.2
-	github.com/hashicorp/vault/api v1.0.4
+	github.com/hashicorp/vault v1.2.3
+	github.com/hashicorp/vault/api v1.0.5-0.20190909201928-35325e2c3262
 	github.com/jcmturner/gofork v1.0.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/julien-marchand/healthcheck v0.1.0
@@ -64,7 +65,6 @@ require (
 	golang.org/x/crypto v0.0.0-20191001170739-f9e2070545dc
 	golang.org/x/net v0.0.0-20191002035440-2ec189313ef0
 	golang.org/x/sys v0.0.0-20191002063906-3421d5a6bb1c // indirect
-	golang.org/x/text v0.3.2 // indirect
 	golang.org/x/time v0.0.0-20190921001708-c4c64cad1fd0
 	google.golang.org/genproto v0.0.0-20190927181202-20e1ac93f88c // indirect
 	google.golang.org/grpc v1.24.0

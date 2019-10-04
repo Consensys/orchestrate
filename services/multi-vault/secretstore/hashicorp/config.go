@@ -1,26 +1,33 @@
 package hashicorp
 
 import (
-	"crypto/tls"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"os"
-	"strings"
 	"time"
 
-	"github.com/hashicorp/go-cleanhttp"
-	"github.com/hashicorp/go-retryablehttp"
-	vault "github.com/hashicorp/vault/api"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"golang.org/x/net/http2"
-	"golang.org/x/time/rate"
 )
 
-func init() {
+// Config object that be converted into an api.Config later
+type Config struct {
+	TokenFilePath string
+	MountPoint    string
+	KVVersion     string
+	SecretPath    string
+	RateLimit     float64
+	BurstLimit    int
+	Address       string
+	CACert        string
+	CAPath        string
+	ClientCert    string
+	ClientKey     string
+	ClientTimeout time.Duration
+	MaxRetries    int
+	SkipVerify    bool
+	TLSServerName string
+}
 
+func init() {
 	viper.SetDefault(vaultTokenFilePathViperKey, vaultTokenFilePathDefault)
 	_ = viper.BindEnv(vaultTokenFilePathViperKey, vaultTokenFilePathEnv)
 
@@ -136,25 +143,24 @@ var (
 
 // InitFlags register flags for hashicorp vault
 func InitFlags(f *pflag.FlagSet) {
-	VaultTokenFilePath(f)
-	VaultMountPoint(f)
-	VaultKVVersion(f)
-	VaultSecretPath(f)
-	VaultRateLimit(f)
-	VaultBurstLimit(f)
-	VaultAddress(f)
-	VaultCACert(f)
-	VaultCAPath(f)
-	VaultClientCert(f)
-	VaultClientKey(f)
-	VaultClientTimeout(f)
-	VaultMaxRetries(f)
-	VaultSkipVerify(f)
-	VaultTLSServerName(f)
+	vaultAddress(f)
+	vaultBurstLimit(f)
+	vaultCACert(f)
+	vaultCAPath(f)
+	vaultClientCert(f)
+	vaultClientKey(f)
+	vaultClientTimeout(f)
+	vaultKVVersion(f)
+	vaultMaxRetries(f)
+	vaultMountPoint(f)
+	vaultRateLimit(f)
+	vaultSecretPath(f)
+	vaultSkipVerify(f)
+	vaultTLSServerName(f)
+	vaultTokenFilePath(f)
 }
 
-// VaultTokenFilePath registers a flag for the kv version being used
-func VaultTokenFilePath(f *pflag.FlagSet) {
+func vaultTokenFilePath(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Specifies the token file path.
 Parameter ignored if the token has been passed by VAULT_TOKEN
 Environment variable: %q `, vaultTokenFilePathEnv)
@@ -162,16 +168,14 @@ Environment variable: %q `, vaultTokenFilePathEnv)
 	_ = viper.BindPFlag(vaultTokenFilePathViperKey, f.Lookup(vaultTokenFilePathFlag))
 }
 
-// VaultMountPoint registers a flag for the kv version being used
-func VaultMountPoint(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Specifies the mount point used.
+func vaultMountPoint(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Specifies the mount point used. Should not start with a \"//\"
 Environment variable: %q `, vaultMountPointEnv)
 	f.String(vaultMountPointFlag, vaultMountPointDefault, desc)
 	_ = viper.BindPFlag(vaultMountPointViperKey, f.Lookup(vaultMountPointFlag))
 }
 
-// VaultKVVersion registers a flag for the kv version being used
-func VaultKVVersion(f *pflag.FlagSet) {
+func vaultKVVersion(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Determine which version of the kv secret engine we will be using
 Can be "v1" or "v2".
 Environment variable: %q `, vaultKVVersionEnv)
@@ -179,191 +183,107 @@ Environment variable: %q `, vaultKVVersionEnv)
 	_ = viper.BindPFlag(vaultKVVersionViperKey, f.Lookup(vaultKVVersionFlag))
 }
 
-// VaultSecretPath registers a flag for the path used by vault secret engine
-func VaultSecretPath(f *pflag.FlagSet) {
+func vaultSecretPath(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Hashicorp secret path
 Environment variable: %q`, vaultSecretPathEnv)
 	f.String(vaultSecretPathFlag, vaultSecretPathDefault, desc)
 	_ = viper.BindPFlag(vaultSecretPathViperKey, f.Lookup(vaultSecretPathFlag))
 }
 
-// VaultRateLimit registers a flag for the path used by vault secret engine
-func VaultRateLimit(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Hashicorp secret path
+func vaultRateLimit(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Hashicorp query rate limit
 Environment variable: %q`, vaultRateLimitEnv)
 	f.Float64(vaultRateLimitFlag, vaultRateLimitDefault, desc)
 	_ = viper.BindPFlag(vaultRateLimitViperKey, f.Lookup(vaultRateLimitFlag))
 }
 
-// VaultBurstLimit registers a flag for the path used by vault secret engine
-func VaultBurstLimit(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Hashicorp secret path
+func vaultBurstLimit(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Hashicorp query burst limit
 Environment variable: %q`, vaultRateLimitEnv)
 	f.Int(vaultBurstLimitFlag, vaultBurstLimitDefault, desc)
 	_ = viper.BindPFlag(vaultBurstLimitViperKey, f.Lookup(vaultBurstLimitFlag))
 }
 
-// VaultAddress registers a flag for the path used by vault secret engine
-func VaultAddress(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Hashicorp secret path
+func vaultAddress(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Hashicorp address of the remote hashicorp vault
 Environment variable: %q`, vaultAddressEnv)
 	f.String(vaultAddressFlag, vaultAddressDefault, desc)
 	_ = viper.BindPFlag(vaultAddressViperKey, f.Lookup(vaultAddressFlag))
 }
 
-// VaultCACert registers a flag for the path used by vault secret engine
-func VaultCACert(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Hashicorp secret path
+func vaultCACert(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Hashicorp CA certificate
 Environment variable: %q`, vaultCACertEnv)
 	f.String(vaultCACertFlag, vaultCACertDefault, desc)
 	_ = viper.BindPFlag(vaultCACertViperKey, f.Lookup(vaultCACertFlag))
 }
 
-// VaultCAPath registers a flag for the path used by vault secret engine
-func VaultCAPath(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Hashicorp secret path
+func vaultCAPath(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Path toward the CA certificate
 Environment variable: %q`, vaultCAPathEnv)
 	f.String(vaultCAPathFlag, vaultCAPathDefault, desc)
 	_ = viper.BindPFlag(vaultCAPathViperKey, f.Lookup(vaultCAPathFlag))
 }
 
-// VaultClientCert registers a flag for the path used by vault secret engine
-func VaultClientCert(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Hashicorp secret path
+func vaultClientCert(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Certificate of the client
 Environment variable: %q`, vaultClientCertEnv)
 	f.String(vaultClientCertFlag, vaultClientCertDefault, desc)
 	_ = viper.BindPFlag(vaultClientCertViperKey, f.Lookup(vaultClientCertFlag))
 }
 
-// VaultClientKey registers a flag for the path used by vault secret engine
-func VaultClientKey(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Hashicorp secret path
+func vaultClientKey(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Hashicorp client key
 Environment variable: %q`, vaultClientKeyEnv)
 	f.String(vaultClientKeyFlag, vaultClientKeyDefault, desc)
 	_ = viper.BindPFlag(vaultClientKeyViperKey, f.Lookup(vaultClientKeyFlag))
 }
 
-// VaultClientTimeout registers a flag for the path used by vault secret engine
-func VaultClientTimeout(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Hashicorp secret path
+func vaultClientTimeout(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Hashicorp clean timeout of the client
 Environment variable: %q`, vaultClientTimeoutEnv)
 	f.Duration(vaultClientTimeoutFlag, vaultClientTimeoutDefault, desc)
 	_ = viper.BindPFlag(vaultClientTimeoutViperKey, f.Lookup(vaultClientTimeoutFlag))
 }
 
-// VaultMaxRetries registers a flag for the path used by vault secret engine
-func VaultMaxRetries(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Hashicorp secret path
+func vaultMaxRetries(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Hashicorp max retry for a request
 Environment variable: %q`, vaultMaxRetriesEnv)
 	f.Int(vaultMaxRetriesFlag, vaultMaxRetriesDefault, desc)
 	_ = viper.BindPFlag(vaultMaxRetriesViperKey, f.Lookup(vaultMaxRetriesFlag))
 }
 
-// VaultSkipVerify registers a flag for vault client
-func VaultSkipVerify(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Hashicorp secret path
+func vaultSkipVerify(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Hashicorp skip verification
 Environment variable: %q`, vaultSkipVerifyEnv)
 	f.Bool(vaultSkipVerifyFlag, vaultSkipVerifyDefault, desc)
 	_ = viper.BindPFlag(vaultSkipVerifyViperKey, f.Lookup(vaultSkipVerifyFlag))
 }
 
-// VaultTLSServerName registers a flag for vault client
-func VaultTLSServerName(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Hashicorp secret path
+func vaultTLSServerName(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Hashicorp TLS server name
 Environment variable: %q`, vaultTLSServerNameEnv)
 	f.String(vaultTLSServerNameFlag, vaultTLSServerNameDefault, desc)
 	_ = viper.BindPFlag(vaultTLSServerNameViperKey, f.Lookup(vaultTLSServerNameFlag))
 }
 
-// TODO: update Hashicorp creation
-
-// NewConfig override the environment variable
-// defined by the SDK with the parameters passed by Viper
-func NewConfig() *vault.Config {
-	// Create Vault Configuration
-	config := &vault.Config{
-		Address:    viper.GetString(vaultAddressViperKey),
-		HttpClient: cleanhttp.DefaultClient(),
-	}
-	config.HttpClient.Timeout = time.Second * 60
-
-	// Create Transport
-	transport := config.HttpClient.Transport.(*http.Transport)
-	transport.TLSHandshakeTimeout = 10 * time.Second
-	transport.TLSClientConfig = &tls.Config{
-		MinVersion: tls.VersionTLS12,
-	}
-	if err := http2.ConfigureTransport(transport); err != nil {
-		config.Error = err
-		return config
-	}
-
-	// Replicate ReadEnvironment behavior
-
-	// Configure TLS
-	tlsConfig := &vault.TLSConfig{
+// ConfigFromViper returns a local config object that be converted into an api.Config
+func ConfigFromViper() *Config {
+	return &Config{
+		Address:       viper.GetString(vaultAddressViperKey),
+		BurstLimit:    viper.GetInt(vaultBurstLimitViperKey),
 		CACert:        viper.GetString(vaultCACertViperKey),
 		CAPath:        viper.GetString(vaultCAPathViperKey),
 		ClientCert:    viper.GetString(vaultClientCertViperKey),
 		ClientKey:     viper.GetString(vaultClientKeyViperKey),
+		ClientTimeout: viper.GetDuration(vaultClientTimeoutViperKey),
+		KVVersion:     viper.GetString(vaultKVVersionViperKey),
+		MaxRetries:    viper.GetInt(vaultMaxRetriesViperKey),
+		MountPoint:    viper.GetString(vaultMountPointViperKey),
+		RateLimit:     viper.GetFloat64(vaultRateLimitViperKey),
+		SecretPath:    viper.GetString(vaultSecretPathViperKey),
+		SkipVerify:    viper.GetBool(vaultSkipVerifyViperKey),
 		TLSServerName: viper.GetString(vaultTLSServerNameViperKey),
-		Insecure:      viper.GetBool(vaultSkipVerifyViperKey),
+		TokenFilePath: viper.GetString(vaultTokenFilePathViperKey),
 	}
-
-	_ = config.ConfigureTLS(tlsConfig)
-
-	rateLimit := viper.GetFloat64(vaultRateLimitViperKey)
-	burstLimit := viper.GetInt(vaultBurstLimitViperKey)
-	config.Limiter = rate.NewLimiter(rate.Limit(rateLimit), burstLimit)
-	config.MaxRetries = viper.GetInt(vaultMaxRetriesViperKey)
-	config.Timeout = viper.GetDuration(vaultClientTimeoutViperKey)
-
-	// Ensure redirects are not automatically followed
-	// Note that this is sane for the API client as it has its own
-	// redirect handling logic (and thus also for command/meta),
-	// but in e.g. http_test actual redirect handling is necessary
-	config.HttpClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-		// Returning this value causes the Go net library to not close the
-		// response body and to nil out the error. Otherwise retry clients may
-		// try three times on every redirect because it sees an error from this
-		// function (to prevent redirects) passing through to it.
-		return http.ErrUseLastResponse
-	}
-
-	config.Backoff = retryablehttp.LinearJitterBackoff
-
-	return config
-}
-
-// GetSecretPath returns the secret path set in deployment by vault
-func GetSecretPath() string {
-	return viper.GetString(vaultSecretPathViperKey)
-}
-
-// GetKVVersion returns the secret path set in deployment by vault
-func GetKVVersion() string {
-	return viper.GetString(vaultKVVersionViperKey)
-}
-
-// GetMountPoint returns the secret path set in deployment by vault
-func GetMountPoint() string {
-	return viper.GetString(vaultMountPointViperKey)
-}
-
-// WithVaultToken set the initial client token
-func WithVaultToken(client *vault.Client) error {
-	filePath := viper.GetString(vaultTokenFilePathViperKey)
-
-	encoded, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		log.Warningf("Token file path could not be found : %v", err.Error())
-		return err
-	}
-	_ = os.Remove(filePath) // Immediately delete the file after it was read
-
-	decoded := strings.TrimSuffix(string(encoded), "\n") // Remove the newline if it exists
-	decoded = strings.TrimSuffix(decoded, "\r")          // This one is for windows compatibility
-	client.SetToken(decoded)
-
-	return nil
 }

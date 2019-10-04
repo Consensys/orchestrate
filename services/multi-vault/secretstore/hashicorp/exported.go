@@ -10,7 +10,7 @@ import (
 const component = "secretstore.hashicorp"
 
 var (
-	store    *HashiCorp
+	store    *SecretStore
 	initOnce = &sync.Once{}
 )
 
@@ -21,7 +21,7 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		vault, err := NewHashiCorp(NewConfig())
+		vault, err := NewSecretStore(ConfigFromViper())
 		if err != nil {
 			log.Fatalf("Key Store: Cannot init hashicorp vault got error: %q", err)
 		}
@@ -32,11 +32,11 @@ func Init(ctx context.Context) {
 }
 
 // SetGlobalStore sets global mock SecretStore
-func SetGlobalStore(h *HashiCorp) {
+func SetGlobalStore(h *SecretStore) {
 	store = h
 }
 
 // GlobalStore returns global mock SecretStore
-func GlobalStore() *HashiCorp {
+func GlobalStore() *SecretStore {
 	return store
 }
