@@ -39,6 +39,7 @@ func (s *SecretStore) Delete(key string) error {
 
 // List secret
 func (s *SecretStore) List() (keys []string, err error) {
+	keys = []string{}
 	s.secrets.Range(func(key, value interface{}) bool {
 		keys = append(keys, key.(string))
 		return true

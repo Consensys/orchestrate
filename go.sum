@@ -400,13 +400,11 @@ github.com/hashicorp/vault-plugin-secrets-gcpkms v0.5.2-0.20190814210149-315cdbf
 github.com/hashicorp/vault-plugin-secrets-kv v0.5.2-0.20190814210155-e060c2a001a8 h1:8nZOMqGQQiuWNld162nxUvM4/7EW4NOO9gpyp7LCC84=
 github.com/hashicorp/vault-plugin-secrets-kv v0.5.2-0.20190814210155-e060c2a001a8/go.mod h1:5ksi71TrWxz7ZRo0MIlsry2lYDlZQyLalN4cF8a4vnk=
 github.com/hashicorp/vault/api v1.0.1/go.mod h1:AV/+M5VPDpB90arloVX0rVDUIHkONiwz5Uza9HRtpUE=
-github.com/hashicorp/vault/api v1.0.4 h1:j08Or/wryXT4AcHj1oCbMd7IijXcKzYUGw59LGu9onU=
 github.com/hashicorp/vault/api v1.0.4/go.mod h1:gDcqh3WGcR1cpF5AJz/B1UFheUEneMoIospckxBxk6Q=
 github.com/hashicorp/vault/api v1.0.5-0.20190814205728-e9c5cd8aca98/go.mod h1:t4IAg1Is4bLUtTq8cGgeUh0I8oDRBXPk2bM1Jvg/nWA=
 github.com/hashicorp/vault/api v1.0.5-0.20190909201928-35325e2c3262 h1:En9ph/axtiRQX8mt4+fVBOgNfEmndq5c+K0fUBviFTQ=
 github.com/hashicorp/vault/api v1.0.5-0.20190909201928-35325e2c3262/go.mod h1:LGTA4eiQKhPGTBgi6fCuAT5n0S3CJBHa7cpUotrLxjw=
 github.com/hashicorp/vault/sdk v0.1.8/go.mod h1:tHZfc6St71twLizWNHvnnbiGFo1aq0eD2jGPLtP8kAU=
-github.com/hashicorp/vault/sdk v0.1.13 h1:mOEPeOhT7jl0J4AMl1E705+BcmeRs1VmKNb9F0sMLy8=
 github.com/hashicorp/vault/sdk v0.1.13/go.mod h1:B+hVj7TpuQY1Y/GPbCpffmgd+tSEwvhkWnjtSYCaS2M=
 github.com/hashicorp/vault/sdk v0.1.14-0.20190814205504-1cad00d1133b/go.mod h1:B+hVj7TpuQY1Y/GPbCpffmgd+tSEwvhkWnjtSYCaS2M=
 github.com/hashicorp/vault/sdk v0.1.14-0.20190909201848-e0fbf9b652e2 h1:b65cSyZqljnCPzzsUXvR4P0eXypo1xahQyG809+IySk=

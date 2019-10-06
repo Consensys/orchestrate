@@ -25,7 +25,7 @@ docker-build:
 coverage:
 	@docker-compose -f e2e/docker-compose.yml up -d postgres
 	@sh scripts/coverage.sh $(PACKAGES)
-	@docker-compose -f e2e/docker-compose.yml down postgres
+	@docker-compose -f e2e/docker-compose.yml stop postgres
 	$(OPEN) build/coverage/coverage.html
 
 race: ## Run data race detector
