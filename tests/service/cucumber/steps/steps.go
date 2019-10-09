@@ -426,7 +426,7 @@ func (sc *ScenarioContext) theTxlistenerShouldCatchTheTx() error {
 				return err
 			}
 			if v.GetReceipt().GetStatus() == 0 {
-				err := fmt.Errorf("tx-listener : transaction reverted")
+				err := fmt.Errorf("tx-listener: transaction reverted")
 				sc.Logger.Errorf("cucumber: step failed with error %q", err)
 				return err
 			}

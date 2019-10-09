@@ -6,12 +6,11 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient/rpc"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient/rpc"
 	producer "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/producer/tx-decoder"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
-	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry"
 )
 
 func newRunCommand() *cobra.Command {
@@ -25,10 +24,7 @@ func newRunCommand() *cobra.Command {
 	engine.InitFlags(runCmd.Flags())
 
 	// Register Ethereum client flags
-	rpc.URLs(runCmd.Flags())
-
-	// Register Decoder flags
-	contractregistry.ABIs(runCmd.Flags())
+	ethclient.URLs(runCmd.Flags())
 
 	// Register Kafka flags
 	broker.KafkaAddresses(runCmd.Flags())

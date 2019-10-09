@@ -119,7 +119,7 @@ func ToVaultConfig(c *Config) *api.Config {
 func (v *Hashicorp) SetTokenFromConfig(c *Config) error {
 	encoded, err := ioutil.ReadFile(c.TokenFilePath)
 	if err != nil {
-		log.Warningf("Token file path could not be found : %v", err.Error())
+		log.Warningf("Token file path could not be found: %v", err.Error())
 		return err
 	}
 	// Immediately delete the file after it was read

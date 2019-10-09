@@ -14,8 +14,8 @@ type RenewTokenLoop struct {
 	Quit   chan bool
 	Hash   *SecretStore
 
-	RtlTimeRetry      int // RtlTimeRetry : Time between each retry of token renewal
-	RtlMaxNumberRetry int // RtlMaxNumberRetry : Max number of retry for token renewal
+	RtlTimeRetry      int // RtlTimeRetry: Time between each retry of token renewal
+	RtlMaxNumberRetry int // RtlMaxNumberRetry: Max number of retry for token renewal
 }
 
 // Refresh the token
@@ -38,7 +38,7 @@ func (loop *RenewTokenLoop) Refresh() error {
 
 		retry++
 		if retry < loop.RtlMaxNumberRetry {
-			// Max number number of retry reached : graceful shutdown
+			// Max number number of retry reached: graceful shutdown
 			log.Error("Graceful shutdown of the vault, the token could not be renewed")
 			return errors.InternalError("token refresh failed (%v)", err).SetComponent(component)
 		}

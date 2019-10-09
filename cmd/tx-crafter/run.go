@@ -11,7 +11,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
 	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
-	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/controllers/amount"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/controllers/blacklist"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/controllers/cooldown"
@@ -40,9 +39,6 @@ func newRunCommand() *cobra.Command {
 	cooldown.FaucetCooldown(runCmd.Flags())
 	creditor.FaucetAddress(runCmd.Flags())
 	maxbalance.FaucetMaxBalance(runCmd.Flags())
-
-	// Register Crafter flags
-	contractregistry.ABIs(runCmd.Flags())
 
 	// Register Kafka flags
 	broker.KafkaAddresses(runCmd.Flags())

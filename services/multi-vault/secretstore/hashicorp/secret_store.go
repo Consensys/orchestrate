@@ -22,12 +22,12 @@ func NewSecretStore(config *Config) (*SecretStore, error) {
 
 	client, err := NewVaultClient(config)
 	if err != nil {
-		log.Fatalf("Could not start vault : %v", err)
+		log.Fatalf("Could not start vault: %v", err)
 	}
 
 	err = client.SetTokenFromConfig(config)
 	if err != nil {
-		log.Fatalf("Could not start vault : %v", err)
+		log.Fatalf("Could not start vault: %v", err)
 	}
 
 	hash := &SecretStore{
@@ -43,12 +43,12 @@ func NewSecretStore(config *Config) (*SecretStore, error) {
 func (store *SecretStore) ManageToken() {
 	secret, err := store.Client.Auth().Token().LookupSelf()
 	if err != nil {
-		log.Fatalf("Initial token lookup failed : %v", err)
+		log.Fatalf("Initial token lookup failed: %v", err)
 	}
 
 	vaultTTL64, err := secret.Data["ttl"].(json.Number).Int64()
 	if err != nil {
-		log.Fatalf("Could not read vault ttl : %v", err)
+		log.Fatalf("Could not read vault ttl: %v", err)
 	}
 
 	vaultTokenTTL := int(vaultTTL64)
@@ -81,7 +81,7 @@ func (store *SecretStore) ManageToken() {
 
 	err = store.rtl.Refresh()
 	if err != nil {
-		log.Fatalf("Initial token refresh failed : %v", err)
+		log.Fatalf("Initial token refresh failed: %v", err)
 	}
 }
 
