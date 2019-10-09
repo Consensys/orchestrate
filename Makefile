@@ -74,10 +74,11 @@ report:
 gen-help: gobuild
 	@mkdir -p build/cmd
 	@for cmd in $(CMD); do \
-		./build/corestack $$cmd help run | tail -n +4 > build/cmd/$$cmd.md; \
+		./build/corestack help $$cmd run | tail -n +4 > build/cmd/$$cmd.md; \
 	done
 
 gen-help-docker: docker-build
+	@mkdir -p build/cmd
 	@for cmd in $(CMD); do \
-		docker-compose run worker $$cmd help run | tail -n +4 | head -n -1 > build/cmd/$$cmd.md; \
+		docker-compose run worker help $$cmd run | tail -n +4 | head -n -1 > build/cmd/$$cmd.md; \
 	done
