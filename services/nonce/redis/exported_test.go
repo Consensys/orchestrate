@@ -8,5 +8,9 @@ import (
 
 func TestInit(t *testing.T) {
 	Init()
-	assert.NotNil(t, nm, "Faucet should have been set")
+	assert.NotNil(t, GlobalNonceManager(), "Faucet should have been set")
+
+	var n *NonceManager
+	SetGlobalNonceManager(n)
+	assert.Nil(t, GlobalNonceManager(), "Global should be reset to nil")
 }

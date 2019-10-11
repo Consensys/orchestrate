@@ -1,11 +1,23 @@
 package txsigner
 
-/*
+import (
+	"context"
+	"testing"
 
-ERROR DURING tests : time="2019-05-03T12:47:31+02:00" level=fatal msg="sarama: could not to start client" error="kafka: client has run out of available brokers to talk to (Is your cluster reachable?)"
+	"github.com/Shopify/sarama/mocks"
+	"github.com/stretchr/testify/assert"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
+)
 
 func TestInit(t *testing.T) {
+	producer := &mocks.SyncProducer{}
+	broker.SetGlobalSyncProducer(producer)
+
 	Init(context.Background())
 	assert.NotNil(t, handler, "Global handler should have been set")
+
+	var h engine.HandlerFunc
+	SetGlobalHandler(h)
+	assert.Nil(t, GlobalHandler(), "Global should be reset to nil")
 }
-*/

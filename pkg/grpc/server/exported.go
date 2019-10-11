@@ -28,7 +28,7 @@ var (
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
 		if server == nil {
-			// Initialize opentracing tracer
+			// Initialize OpenTracing tracer
 			jaeger.Init(ctx)
 
 			// Declare server with interceptors

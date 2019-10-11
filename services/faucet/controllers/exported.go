@@ -26,24 +26,12 @@ func Init(ctx context.Context) {
 		}
 
 		common.InParallel(
-			func() {
-				faucet.Init(ctx)
-			},
-			func() {
-				maxbalance.Init(ctx)
-			},
-			func() {
-				blacklist.Init(ctx)
-			},
-			func() {
-				cooldown.Init(ctx)
-			},
-			func() {
-				amount.Init(ctx)
-			},
-			func() {
-				creditor.Init(ctx)
-			},
+			func() { faucet.Init(ctx) },
+			func() { maxbalance.Init(ctx) },
+			func() { blacklist.Init(ctx) },
+			func() { cooldown.Init(ctx) },
+			func() { amount.Init(ctx) },
+			func() { creditor.Init(ctx) },
 		)
 
 		// Combine controls
