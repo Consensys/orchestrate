@@ -6,6 +6,7 @@ set -Eeu
 mkdir -p build/coverage
 echo "mode: count" > build/coverage/tmp.out
 for package in $@; do
+  [ "${package}" = *"e2e"* ] || [ "${package}" = *"examples"* ] && continue
   go test -covermode=count -coverprofile build/coverage/profile.out "${package}"
   if [ -f build/coverage/profile.out ]; then
     tail -q -n +2 build/coverage/profile.out >> build/coverage/tmp.out
@@ -14,7 +15,7 @@ for package in $@; do
 done
 
 # Ignore generated files
-cat build/coverage/tmp.out | grep -v ".pb.go" --exclude-dir=examples --exclude-dir=e2e > build/coverage/cover.out
+cat build/coverage/tmp.out | grep -v ".pb.go" > build/coverage/cover.out
 
 # Generate coverage report in html formart
 go tool cover -func=build/coverage/cover.out

@@ -1,8 +1,6 @@
 package envelopestore
 
 import (
-	"fmt"
-
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -41,7 +39,7 @@ func newMigrateCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Printf("Database initialized\n")
+			log.Infof("Database initialized\n")
 			return nil
 		},
 	}
@@ -87,7 +85,7 @@ func newMigrateCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Printf("%v\n", version)
+			log.Infof("%v\n", version)
 			return nil
 		},
 	}
@@ -104,7 +102,7 @@ func newMigrateCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Printf("%v\n", version)
+			log.Infof("%v\n", version)
 			return nil
 		},
 	}

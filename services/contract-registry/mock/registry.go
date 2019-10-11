@@ -5,7 +5,6 @@ import (
 	"reflect"
 	"sort"
 
-	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 
@@ -60,13 +59,13 @@ func NewRegistry() *ContractRegistry {
 func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.RegisterContractRequest) (*svc.RegisterContractResponse, error) {
 	contract := req.GetContract()
 
-	name, tag, err := rcommon.CheckExtractNameTag(contract.Id)
+	name, tag, err := rcommon.CheckExtractNameTag(contract.GetId())
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	if contract.Bytecode != nil {
-		bytecodeHash := crypto.Keccak256Hash(contract.Bytecode)
+	if contract.GetBytecode() != nil {
+		bytecodeHash := crypto.Keccak256Hash(contract.GetBytecode())
 
 		if r.contractHashes[name] == nil {
 			r.contractHashes[name] = make(map[string]ethcommon.Hash)
@@ -76,19 +75,19 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 		r.contractHashes[name]["latest"] = bytecodeHash
 
 		r.artifacts[bytecodeHash] = &artifact{
-			Abi:              contract.Abi,
-			Bytecode:         contract.Bytecode,
-			DeployedBytecode: contract.DeployedBytecode,
+			Abi:              contract.GetAbi(),
+			Bytecode:         contract.GetBytecode(),
+			DeployedBytecode: contract.GetDeployedBytecode(),
 		}
 	}
 
-	if len(contract.Abi) != 0 {
-		codeHash := crypto.Keccak256Hash(contract.DeployedBytecode)
+	if len(contract.GetAbi()) != 0 {
+		codeHash := crypto.Keccak256Hash(contract.GetDeployedBytecode())
 		contractAbi, err := contract.ToABI()
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(component)
 		}
-		methodJSONs, eventJSONs, err := rcommon.ParseJSONABI(contract.Abi)
+		methodJSONs, eventJSONs, err := rcommon.ParseJSONABI(contract.GetAbi())
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(component)
 		}
@@ -97,7 +96,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 			// Register methods for this bytecode
 			method := m
 			sel := rcommon.SigHashToSelector(method.ID())
-			if contract.DeployedBytecode != nil {
+			if contract.GetDeployedBytecode() != nil {
 				// Init map
 				if r.methods[codeHash] == nil {
 					r.methods[codeHash] = make(map[[4]byte][][]byte)
@@ -123,10 +122,10 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 
 		for _, e := range contractAbi.Events {
 			event := e
-			indexedCount := getIndexedCount(event)
+			indexedCount := rcommon.GetIndexedCount(event)
 
 			// Register events for this bytecode
-			if contract.DeployedBytecode != nil {
+			if contract.GetDeployedBytecode() != nil {
 				// Init map
 				if r.events[codeHash] == nil {
 					r.events[codeHash] = make(map[ethcommon.Hash]map[uint][][]byte)
@@ -271,17 +270,6 @@ func (r *ContractRegistry) GetContractDeployedBytecode(ctx context.Context, req 
 	return &svc.GetContractDeployedBytecodeResponse{
 		DeployedBytecode: a.DeployedBytecode,
 	}, nil
-}
-
-// getIndexedCount returns the count of indexed inputs in the event
-func getIndexedCount(event ethabi.Event) uint {
-	var indexedInputCount uint
-	for i := range event.Inputs {
-		if event.Inputs[i].Indexed {
-			indexedInputCount++
-		}
-	}
-	return indexedInputCount
 }
 
 // getCodehash retrieve codehash of a contract instance

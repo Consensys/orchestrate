@@ -6,6 +6,8 @@ import (
 	"sync"
 	"sync/atomic"
 
+	log "github.com/sirupsen/logrus"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/examples"
 )
@@ -67,6 +69,6 @@ func main() {
 	engine.CleanUp()
 
 	// Print counters
-	fmt.Printf("* Safe counter: %v\n", h.safeCounter)
-	fmt.Printf("* Unsafe counter: %v\n", h.unsafeCounter)
+	log.Infof("* Safe counter: %v\n", h.safeCounter)
+	log.Infof("* Unsafe counter: %v\n", h.unsafeCounter)
 }

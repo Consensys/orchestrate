@@ -1,6 +1,7 @@
 GOFILES := $(shell find . -name '*.go' | egrep -v "^\./\.go" | grep -v _test.go)
 PACKAGES ?= $(shell go list ./...)
-CMD = tx-crafter tx-nonce tx-signer tx-sender tx-listener tx-decoder contract-registry envelope-store
+CMD_RUN = tx-crafter tx-nonce tx-signer tx-sender tx-listener tx-decoder contract-registry envelope-store
+CMD_MIGRATE = envelope-store
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
@@ -73,12 +74,18 @@ report:
 
 gen-help: gobuild
 	@mkdir -p build/cmd
-	@for cmd in $(CMD); do \
-		./build/corestack help $$cmd run | tail -n +4 > build/cmd/$$cmd.md; \
+	@for cmd in $(CMD_RUN); do \
+		./build/corestack help $$cmd run | tail -n +4 > build/cmd/$$cmd-run.md; \
+	done
+	@for cmd in $(CMD_MIGRATE); do \
+		./build/corestack help $$cmd migrate | tail -n +4 > build/cmd/$$cmd-migrate.md; \
 	done
 
 gen-help-docker: docker-build
 	@mkdir -p build/cmd
 	@for cmd in $(CMD); do \
-		docker-compose run worker help $$cmd run | tail -n +4 | head -n -1 > build/cmd/$$cmd.md; \
+		docker-compose run worker help $$cmd run | tail -n +4 | head -n -1 > build/cmd/$$cmd-run.md; \
+	done
+	@for cmd in $(CMD); do \
+		docker-compose run worker help $$cmd migrate | tail -n +4 | head -n -1 > build/cmd/$$cmd-migrate.md; \
 	done
