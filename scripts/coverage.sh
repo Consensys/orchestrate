@@ -6,7 +6,7 @@ set -Eeu
 mkdir -p build/coverage
 echo "mode: count" > build/coverage/tmp.out
 for package in $@; do
-  [ "${package}" = *"e2e"* ] || [ "${package}" = *"examples"* ] && continue
+  [ "${package}" = *"e2e"* ] || [ "${package}" = *"examples"* ] || [ "${package}" = *"testutils"* ] && continue
   go test -covermode=count -coverprofile build/coverage/profile.out "${package}"
   if [ -f build/coverage/profile.out ]; then
     tail -q -n +2 build/coverage/profile.out >> build/coverage/tmp.out

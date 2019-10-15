@@ -10,7 +10,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/database/postgres"
 )
 
-// TODO: all this script should be moved to pkg.git/common
 func init() {
 	viper.SetDefault("db.user", "postgres")
 	_ = viper.BindEnv("db.user", "DB_USER")
@@ -25,7 +24,6 @@ func init() {
 }
 
 // PGTestHelper is a suite for integration test of a PostgreSQL database using go-pg
-// TODO: move this in pkg.git/common
 type PGTestHelper struct {
 	Opts       *pg.Options
 	DB         *pg.DB

@@ -83,10 +83,7 @@ func TestDBHost(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	DBHost(flgs)
 
-	expected := "127.0.0.1"
-	assert.Equal(t, expected, viper.GetString(name), "Default db host should be %q but got %q", expected, viper.GetString(name))
-
-	expected = "127.1.1.1"
+	expected := "127.1.1.1"
 	_ = os.Setenv("DB_HOST", expected)
 	assert.Equal(t, expected, viper.GetString(name), "After setting env var db host should be %q but got %q", expected, viper.GetString(name))
 

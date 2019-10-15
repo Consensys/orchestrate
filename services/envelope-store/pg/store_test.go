@@ -5,15 +5,15 @@ package pg
 import (
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/envelope-store/pg/migrations"
-
 	"github.com/stretchr/testify/suite"
+	pgTestUtils "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/database/postgres/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/envelope-store/pg/migrations"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/envelope-store/testutils"
 )
 
 type ModelsTestSuite struct {
 	testutils.EnvelopeStoreTestSuite
-	pg *testutils.PGTestHelper
+	pg *pgTestUtils.PGTestHelper
 }
 
 func (s *ModelsTestSuite) SetupSuite() {
@@ -35,6 +35,6 @@ func (s *ModelsTestSuite) TearDownSuite() {
 
 func TestModels(t *testing.T) {
 	s := new(ModelsTestSuite)
-	s.pg = testutils.NewPGTestHelper(migrations.Collection)
+	s.pg = pgTestUtils.NewPGTestHelper(migrations.Collection)
 	suite.Run(t, s)
 }

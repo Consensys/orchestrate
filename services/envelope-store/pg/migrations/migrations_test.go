@@ -3,12 +3,11 @@
 package migrations
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/go-pg/pg"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/envelope-store/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/database/postgres/testutils"
 )
 
 type MigrationsTestSuite struct {
@@ -40,12 +39,8 @@ func (s *MigrationsTestSuite) TestMigrationVersion() {
 		pg.Q("gopg_migrations"),
 	)
 
-	if err != nil {
-		s.T().Errorf("Error querying version: %v", err)
-	}
-
-	expected := int64(3)
-	s.Assert().Equal(expected, version, fmt.Sprintf("Migration should be on version=%v", expected))
+	s.Assert().NoError(err, "Error querying version")
+	s.Assert().Equal(int64(3), version, "Migration should be on correct version")
 }
 
 func (s *MigrationsTestSuite) TestCreateEnvelopeTable() {
@@ -55,11 +50,8 @@ func (s *MigrationsTestSuite) TestCreateEnvelopeTable() {
 		Where("tablename = '?'", pg.Q("envelopes")).
 		Count()
 
-	if err != nil {
-		s.T().Errorf("Query failed: %v", err)
-	}
-
-	s.Assert().Equal(1, n, "Envelope table should have been created")
+	s.Assert().NoError(err, "Query failed")
+	s.Assert().Equal(1, n, "Table should have been created")
 }
 
 func (s *MigrationsTestSuite) TestAddEnvelopeStoreColumns() {
@@ -68,12 +60,8 @@ func (s *MigrationsTestSuite) TestAddEnvelopeStoreColumns() {
 		Where("table_name = '?'", pg.Q("envelopes")).
 		Count()
 
-	if err != nil {
-		s.T().Errorf("Query failed: %v", err)
-	}
-
-	expected := 10
-	s.Assert().Equal(expected, n, fmt.Sprintf("Envelope table should have %v columns", expected))
+	s.Assert().NoError(err, "Query failed")
+	s.Assert().Equal(10, n, "Envelope table should have correct number of columns")
 }
 
 func TestMigrations(t *testing.T) {

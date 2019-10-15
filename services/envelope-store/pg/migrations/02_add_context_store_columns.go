@@ -9,18 +9,18 @@ func addColumnsOnEnvelopeStore(db migrations.DB) error {
 	log.Debugf("Adding columns on table %q...", "envelopes")
 
 	// Remark: you will note that we consider that chain ID should be max a uint256
-	_, err := db.Exec(
-		`CREATE TYPE status AS ENUM ('stored', 'error', 'pending', 'mined');
-ALTER TABLE envelopes 
-	ADD COLUMN id serial PRIMARY KEY, 
-	ADD COLUMN chain_id varchar(66) NOT NULL, 
-	ADD COLUMN tx_hash char(66) NOT NULL, 
+	_, err := db.Exec(`
+CREATE TYPE status AS ENUM ('stored', 'error', 'pending', 'mined');
+ALTER TABLE envelopes
+	ADD COLUMN id serial PRIMARY KEY,
+	ADD COLUMN chain_id varchar(66) NOT NULL,
+	ADD COLUMN tx_hash char(66) NOT NULL,
 	ADD CONSTRAINT uni_tx UNIQUE (chain_id, tx_hash),
-	ADD COLUMN envelope_id uuid NOT NULL UNIQUE, 
+	ADD COLUMN envelope_id uuid NOT NULL UNIQUE,
 	ADD COLUMN status status default 'stored' NOT NULL, 
 	ADD COLUMN stored_at timestamptz default (now() at time zone 'utc') NOT NULL, 
-	ADD COLUMN error_at timestamptz, 
-	ADD COLUMN sent_at timestamptz, 
+	ADD COLUMN error_at timestamptz,
+	ADD COLUMN sent_at timestamptz,
 	ADD COLUMN mined_at timestamptz, 
 	ADD COLUMN envelope bytea NOT NULL;
 
@@ -42,8 +42,8 @@ CREATE OR REPLACE FUNCTION status_updated() RETURNS TRIGGER AS
 
 CREATE TRIGGER status_trig 
 	BEFORE INSERT OR UPDATE OF status ON envelopes
-	FOR EACH ROW EXECUTE PROCEDURE status_updated();`,
-	)
+	FOR EACH ROW EXECUTE PROCEDURE status_updated();
+	`)
 
 	if err != nil {
 		return err
@@ -57,8 +57,8 @@ CREATE TRIGGER status_trig
 func dropColumnsOnEnvelopeStore(db migrations.DB) error {
 	log.Debugf("Removing columns on table %q...", "envelopes")
 
-	_, err := db.Exec(
-		`DROP TRIGGER status_trig ON envelopes;
+	_, err := db.Exec(`
+DROP TRIGGER status_trig ON envelopes;
 DROP FUNCTION status_updated();
 
 ALTER TABLE envelopes 
@@ -72,8 +72,8 @@ ALTER TABLE envelopes
 	DROP COLUMN sent_at, 
 	DROP COLUMN mined_at, 
 	DROP COLUMN envelope;
-DROP TYPE status;`,
-	)
+DROP TYPE status;
+	`)
 
 	if err != nil {
 		return err
