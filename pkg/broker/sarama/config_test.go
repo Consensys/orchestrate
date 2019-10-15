@@ -112,7 +112,7 @@ func TestInitKafkaTLSFlags(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 
 	InitKafkaSASLTLSFlags(flgs)
-	assert.Equal(t, false, viper.GetBool("kafka.tls.enable"), "From default")
+	assert.Equal(t, false, viper.GetBool("kafka.tls.enabled"), "From default")
 	assert.Equal(t, false, viper.GetBool("kafka.tls.insecureSkipVerify"), "From default")
 	assert.Equal(t, "", viper.GetString("kafka.tls.clientCertfilepath"), "From default")
 	assert.Equal(t, "", viper.GetString("kafka.tls.clientkeyfilepath"), "From default")

@@ -10,7 +10,7 @@ import (
 )
 
 func TestEthClientURLs(t *testing.T) {
-	name := "eth.clients"
+	name := "eth.client.url"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	URLs(flgs)
 
@@ -42,8 +42,8 @@ func TestEthClientURLs(t *testing.T) {
 	}
 
 	args := []string{
-		"--eth-client=http://localhost:6546",
-		"--eth-client=http://localhost:7546,http://localhost:8646",
+		"--eth-client-url=http://localhost:6546",
+		"--eth-client-url=http://localhost:7546,http://localhost:8646",
 	}
 	err := flgs.Parse(args)
 	assert.Nil(t, err)

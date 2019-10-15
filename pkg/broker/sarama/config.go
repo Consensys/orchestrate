@@ -161,11 +161,11 @@ var (
 	walletGeneratedDefault  = "topic-wallet-generated"
 )
 
-// TODO: implement test for all Topics flags & Goup flags
+// TODO: implement test for all Topics flags & Group flags
 
 // KafkaTopicTxCrafter register flag for Kafka topic
 func KafkaTopicTxCrafter(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Kafka topic for messages waiting to have transaction payload crafted
+	desc := fmt.Sprintf(`Kafka topic for envelopes waiting for their transaction payload crafted
 Environment variable: %q`, txCrafterTopicEnv)
 	f.String(txCrafterFlag, txCrafterTopicDefault, desc)
 	_ = viper.BindPFlag(txCrafterViperKey, f.Lookup(txCrafterFlag))
@@ -173,15 +173,15 @@ Environment variable: %q`, txCrafterTopicEnv)
 
 // KafkaTopicTxNonce register flag for Kafka topic
 func KafkaTopicTxNonce(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Kafka topic for messages waiting to have transaction nonce set
-Environment variable: %q`, txNonceViperKey)
+	desc := fmt.Sprintf(`Kafka topic for envelopes waiting for their transaction nonce set
+Environment variable: %q`, txNonceTopicEnv)
 	f.String(txNonceFlag, txNonceTopicDefault, desc)
 	_ = viper.BindPFlag(txNonceViperKey, f.Lookup(txNonceFlag))
 }
 
 // KafkaTopicTxSigner register flag for Kafka topic
 func KafkaTopicTxSigner(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Kafka topic for messages waiting to have transaction signed
+	desc := fmt.Sprintf(`Kafka topic for envelopes waiting for their transaction signed
 Environment variable: %q`, txSignerTopicEnv)
 	f.String(txSignerFlag, txSignerTopicDefault, desc)
 	_ = viper.BindPFlag(txSignerViperKey, f.Lookup(txSignerFlag))
@@ -189,7 +189,7 @@ Environment variable: %q`, txSignerTopicEnv)
 
 // KafkaTopicTxSender register flag for Kafka topic
 func KafkaTopicTxSender(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Kafka topic for messages waiting to have transaction sent
+	desc := fmt.Sprintf(`Kafka topic for envelopes waiting for their transaction sent
 Environment variable: %q`, txSenderTopicEnv)
 	f.String(txSenderFlag, txSenderTopicDefault, desc)
 	_ = viper.BindPFlag(txSenderViperKey, f.Lookup(txSenderFlag))
@@ -197,7 +197,7 @@ Environment variable: %q`, txSenderTopicEnv)
 
 // KafkaTopicTxDecoder register flag for Kafka topic
 func KafkaTopicTxDecoder(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Kafka topic for messages waiting to have receipt decoded
+	desc := fmt.Sprintf(`Kafka topic for envelopes waiting for their receipt decoded
 Environment variable: %q`, txDecoderTopicEnv)
 	f.String(txDecoderFlag, txDecoderTopicDefault, desc)
 	_ = viper.BindPFlag(txDecoderViperKey, f.Lookup(txDecoderFlag))
@@ -205,7 +205,7 @@ Environment variable: %q`, txDecoderTopicEnv)
 
 // KafkaTopicTxRecover register flag for Kafka topic
 func KafkaTopicTxRecover(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Kafka topic for messages waiting to have transaction recovered
+	desc := fmt.Sprintf(`Kafka topic for envelopes waiting for their transaction recovered
 Environment variable: %q`, txRecoverTopicEnv)
 	f.String(txRecoverFlag, txRecoverTopicDefault, desc)
 	_ = viper.BindPFlag(txRecoverViperKey, f.Lookup(txRecoverFlag))
@@ -443,9 +443,9 @@ func InitKafkaSASLTLSFlags(f *pflag.FlagSet) {
 
 // Kafka TLS Enable environment variables
 var (
-	kafkaTLSEnableFlag     = "kafka-tls-enable"
-	kafkaTLSEnableViperKey = "kafka.tls.enable"
-	kafkaTLSEnableEnv      = "KAFKA_TLS_ENABLE"
+	kafkaTLSEnableFlag     = "kafka-tls-enabled"
+	kafkaTLSEnableViperKey = "kafka.tls.enabled"
+	kafkaTLSEnableEnv      = "KAFKA_TLS_ENABLED"
 	kafkaTLSEnableDefault  = false
 )
 

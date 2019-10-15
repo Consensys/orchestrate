@@ -55,7 +55,7 @@ var (
 
 // Slots register flag for Kafka server addresses
 func Slots(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Maximum number of messages the engine can treat concurrently.
+	desc := fmt.Sprintf(`Maximum number of messages that can be treated concurrently.
 Environment variable: %q`, engineSlotsEnv)
 	f.Uint(engineSlotsFlag, engineSlotsDefault, desc)
 	_ = viper.BindPFlag(engineSlotsViperKey, f.Lookup(engineSlotsFlag))

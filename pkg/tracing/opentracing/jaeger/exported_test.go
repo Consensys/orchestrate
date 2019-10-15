@@ -11,6 +11,9 @@ import (
 
 func TestInit(t *testing.T) {
 	Init(context.Background())
-	_, ok := opentracing.GlobalTracer().(*jaeger.Tracer)
-	assert.True(t, ok, "Jaeger Tracer should have been set")
+	tracer := opentracing.GlobalTracer()
+	assert.NotNil(t, tracer, "Jaeger Tracer should not be nil")
+
+	_, ok := tracer.(*jaeger.Tracer)
+	assert.True(t, ok, "Jaeger Tracer should cast to jaeger.Tracer")
 }

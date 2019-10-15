@@ -14,10 +14,10 @@ func init() {
 }
 
 var (
-	typeFlag     = "nonce"
-	typeViperKey = "nonce.type"
+	typeFlag     = "nonce-manager-type"
+	typeViperKey = "nonce.manager.type"
 	typeDefault  = "redis"
-	typeEnv      = "NONCE_MANAGER"
+	typeEnv      = "NONCE_MANAGER_TYPE"
 )
 
 // Type register flag for Nonce Cooldown

@@ -53,7 +53,7 @@ var (
 
 // BlockLimit register flag for Listener Block limit
 func BlockLimit(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Limit number of block that can be prefetched while listening
+	desc := fmt.Sprintf(`Limit number of blocks that can be prefetched while listening
 Environment variable: %q`, blockLimitEnv)
 	f.Int64(blockLimitFlag, blockLimitDefault, desc)
 	_ = viper.BindPFlag(blockLimitViperKey, f.Lookup(blockLimitFlag))

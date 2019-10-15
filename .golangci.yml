@@ -51,7 +51,7 @@ linters:
     - unparam
 
 run:
-  deadline: 5m
+  deadline: 20m
   skip-dirs:
     - .gocache
 

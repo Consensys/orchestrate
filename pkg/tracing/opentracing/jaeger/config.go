@@ -13,24 +13,22 @@ func init() {
 	_ = viper.BindEnv(hostViperKey, hostEnv)
 	viper.SetDefault(portViperKey, portDefault)
 	_ = viper.BindEnv(portViperKey, portEnv)
-	viper.SetDefault(samplerParamViperKey, samplerParamDefault)
-	_ = viper.BindEnv(samplerParamViperKey, samplerParamEnv)
-	viper.SetDefault(samplerTypeViperKey, samplerTypeDefault)
-	_ = viper.BindEnv(samplerTypeViperKey, samplerTypeEnv)
 	viper.SetDefault(serviceNameViperKey, serviceNameDefault)
 	_ = viper.BindEnv(serviceNameViperKey, serviceNameEnv)
-	viper.SetDefault(endpointViperKey, endpointDefault)
-	_ = viper.BindEnv(endpointViperKey, endpointEnv)
+	viper.SetDefault(rpcMetricsViperKey, rpcMetricsDefault)
+	_ = viper.BindEnv(rpcMetricsViperKey, rpcMetricsEnv)
+	viper.SetDefault(enabledViperKey, enabledDefault)
+	_ = viper.BindEnv(enabledViperKey, enabledEnv)
+	viper.SetDefault(collectorURLViperKey, collectorURLDefault)
+	_ = viper.BindEnv(collectorURLViperKey, collectorURLEnv)
 	viper.SetDefault(userViperKey, userDefault)
 	_ = viper.BindEnv(userViperKey, userEnv)
 	viper.SetDefault(passwordViperKey, passwordDefault)
 	_ = viper.BindEnv(passwordViperKey, passwordEnv)
-	viper.SetDefault(logSpansViperKey, logSpansDefault)
-	_ = viper.BindEnv(logSpansViperKey, logSpansEnv)
-	viper.SetDefault(disabledViperKey, disabledDefault)
-	_ = viper.BindEnv(disabledViperKey, disabledEnv)
-	viper.SetDefault(rpcMetricsViperKey, rpcMetricsDefault)
-	_ = viper.BindEnv(rpcMetricsViperKey, rpcMetricsEnv)
+	viper.SetDefault(samplerParamViperKey, samplerParamDefault)
+	_ = viper.BindEnv(samplerParamViperKey, samplerParamEnv)
+	viper.SetDefault(samplerTypeViperKey, samplerTypeDefault)
+	_ = viper.BindEnv(samplerTypeViperKey, samplerTypeEnv)
 	viper.SetDefault(logSpansViperKey, logSpansDefault)
 	_ = viper.BindEnv(logSpansViperKey, logSpansEnv)
 }
@@ -41,16 +39,17 @@ func InitFlags(f *pflag.FlagSet) {
 	Port(f)
 	ServiceName(f)
 	RPCMetrics(f)
-	Disabled(f)
-	Endpoint(f)
+	Enabled(f)
+	CollectorURL(f)
 	User(f)
 	Password(f)
 	SamplerParam(f)
 	SamplerType(f)
+	LogSpans(f)
 }
 
 var (
-	hostFlag     = "jaeger-host"
+	hostFlag     = "jaeger-agent-host"
 	hostViperKey = "jaeger.agent.host"
 	hostDefault  = "localhost"
 	hostEnv      = "JAEGER_AGENT_HOST"
@@ -65,7 +64,7 @@ Environment variable: %q`, hostEnv)
 }
 
 var (
-	portFlag     = "jaeger-port"
+	portFlag     = "jaeger-agent-port"
 	portViperKey = "jaeger.agent.port"
 	portDefault  = 6831
 	portEnv      = "JAEGER_AGENT_PORT"
@@ -81,7 +80,7 @@ Environment variable: %q`, portEnv)
 
 var (
 	serviceNameViperKey = "jaeger.service.name"
-	serviceNameFlag     = "jaeger-service"
+	serviceNameFlag     = "jaeger-service-name"
 	serviceNameDefault  = "jaeger"
 	serviceNameEnv      = "JAEGER_SERVICE_NAME"
 )
@@ -95,18 +94,18 @@ Environment variable: %q`, serviceNameEnv)
 }
 
 var (
-	endpointViperKey = "jaeger.endpoint"
-	endpointFlag     = "jaeger-endpoint"
-	endpointDefault  = ""
-	endpointEnv      = "JAEGER_ENDPOINT"
+	collectorURLViperKey = "jaeger.collector.url"
+	collectorURLFlag     = "jaeger-collector-url"
+	collectorURLDefault  = ""
+	collectorURLEnv      = "JAEGER_COLLECTOR_URL"
 )
 
-// Endpoint register a flag for Jaeger Endpoint
-func Endpoint(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Jaeger collector endpoint to send spans to
-Environment variable: %q`, endpointEnv)
-	f.String(endpointFlag, endpointDefault, desc)
-	_ = viper.BindPFlag(endpointViperKey, f.Lookup(endpointFlag))
+// CollectorURL register a flag for Jaeger collector url
+func CollectorURL(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Jaeger collector url to send spans to
+Environment variable: %q`, collectorURLEnv)
+	f.String(collectorURLFlag, collectorURLDefault, desc)
+	_ = viper.BindPFlag(collectorURLViperKey, f.Lookup(collectorURLFlag))
 }
 
 var (
@@ -118,7 +117,7 @@ var (
 
 // User register a flag for Jaeger User
 func User(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Jaeger collector User
+	desc := fmt.Sprintf(`Jaeger User
 Environment variable: %q`, userEnv)
 	f.String(userFlag, userDefault, desc)
 	_ = viper.BindPFlag(userViperKey, f.Lookup(userFlag))
@@ -131,27 +130,27 @@ var (
 	passwordEnv      = "JAEGER_PASSWORD"
 )
 
-// Password register a flag for Jaeger Endpoint
+// Password register a flag for Jaeger password
 func Password(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Jaeger collector password
+	desc := fmt.Sprintf(`Jaeger password
 Environment variable: %q`, passwordEnv)
 	f.String(passwordFlag, passwordDefault, desc)
 	_ = viper.BindPFlag(passwordViperKey, f.Lookup(passwordFlag))
 }
 
 var (
-	disabledViperKey = "jaeger.disabled"
-	disabledFlag     = "jaeger-disabled"
-	disabledDefault  = false
-	disabledEnv      = "JAEGER_DISABLED"
+	enabledViperKey = "jaeger.enabled"
+	enabledFlag     = "jaeger-enabled"
+	enabledDefault  = true
+	enabledEnv      = "JAEGER_ENABLED"
 )
 
-// Disabled register a flag to disable Jaeger
-func Disabled(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Disable Jaeger reporting
-Environment variable: %q`, disabledEnv)
-	f.Bool(disabledFlag, disabledDefault, desc)
-	_ = viper.BindPFlag(disabledViperKey, f.Lookup(disabledFlag))
+// Enabled register a flag to enable Jaeger
+func Enabled(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Enable Jaeger reporting
+Environment variable: %q`, enabledEnv)
+	f.Bool(enabledFlag, enabledDefault, desc)
+	_ = viper.BindPFlag(enabledViperKey, f.Lookup(enabledFlag))
 }
 
 var (
@@ -171,14 +170,14 @@ Environment variable: %q`, rpcMetricsEnv)
 
 var (
 	logSpansViperKey = "jaeger.reporter.log.spans"
-	logSpansFlag     = "jaeger-log-spans"
+	logSpansFlag     = "jaeger-reporter-log-spans"
 	logSpansDefault  = true
 	logSpansEnv      = "JAEGER_REPORTER_LOG_SPANS"
 )
 
 // LogSpans register a flag for LogSpans Jaeger option
 func LogSpans(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`When enabled Jager reporter to run in parallel
+	desc := fmt.Sprintf(`LogSpans, when true, enables LoggingReporter that runs in parallel with the main reporter and logs all submitted spans.
 Environment variable: %q`, logSpansEnv)
 	f.Bool(logSpansFlag, logSpansDefault, desc)
 	_ = viper.BindPFlag(logSpansViperKey, f.Lookup(logSpansFlag))
@@ -191,7 +190,7 @@ var (
 	samplerParamEnv      = "JAEGER_SAMPLER_PARAM"
 )
 
-// SamplerParam register a flag for jaeger
+// SamplerParam register a flag for Jaeger
 func SamplerParam(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Jaeger sampler
 Environment variable: %q`, samplerParamEnv)
@@ -218,7 +217,7 @@ Environment variable: %q`, samplerTypeEnv)
 func NewConfig() *config.Configuration {
 	return &config.Configuration{
 		ServiceName: viper.GetString(serviceNameViperKey),
-		Disabled:    viper.GetBool(disabledViperKey),
+		Disabled:    !viper.GetBool(enabledViperKey),
 		RPCMetrics:  viper.GetBool(rpcMetricsViperKey),
 		Sampler: &config.SamplerConfig{
 			Type:  viper.GetString(samplerTypeViperKey),
@@ -227,7 +226,7 @@ func NewConfig() *config.Configuration {
 		Reporter: &config.ReporterConfig{
 			LogSpans:           viper.GetBool(logSpansViperKey),
 			LocalAgentHostPort: fmt.Sprintf("%v:%v", viper.GetString(hostViperKey), viper.GetString(portViperKey)),
-			CollectorEndpoint:  viper.GetString(endpointViperKey),
+			CollectorEndpoint:  viper.GetString(collectorURLViperKey),
 			User:               viper.GetString(userViperKey),
 			Password:           viper.GetString(passwordViperKey),
 		},

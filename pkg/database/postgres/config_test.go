@@ -3,6 +3,7 @@ package postgres
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/go-pg/pg"
@@ -19,8 +20,8 @@ func TestDBUser(t *testing.T) {
 	expected := "postgres" //nolint:goconst
 	assert.Equal(t, expected, viper.GetString(name), "Default db user should be %q but got %q", expected, viper.GetString(name))
 
-	_ = os.Setenv("DB_USER", "env-user")
 	expected = "env-user"
+	_ = os.Setenv("DB_USER", expected)
 	assert.Equal(t, expected, viper.GetString(name), "After setting env var db user should be %q but got %q", expected, viper.GetString(name))
 
 	args := []string{
@@ -41,8 +42,8 @@ func TestDBPassword(t *testing.T) {
 	expected := "postgres"
 	assert.Equal(t, expected, viper.GetString(name), "Default db password should be %q but got %q", expected, viper.GetString(name))
 
-	_ = os.Setenv("DB_PASSWORD", "env-password")
 	expected = "env-password"
+	_ = os.Setenv("DB_PASSWORD", expected)
 	assert.Equal(t, expected, viper.GetString(name), "After setting env var db password should be %q but got %q", expected, viper.GetString(name))
 
 	args := []string{
@@ -63,8 +64,8 @@ func TestDBDatabase(t *testing.T) {
 	expected := "postgres"
 	assert.Equal(t, expected, viper.GetString(name), "Default db database should be %q but got %q", expected, viper.GetString(name))
 
-	_ = os.Setenv("DB_DATABASE", "env-database")
 	expected = "env-database"
+	_ = os.Setenv("DB_DATABASE", expected)
 	assert.Equal(t, expected, viper.GetString(name), "After setting env var db database should be %q but got %q", expected, viper.GetString(name))
 
 	args := []string{
@@ -85,8 +86,8 @@ func TestDBHost(t *testing.T) {
 	expected := "127.0.0.1"
 	assert.Equal(t, expected, viper.GetString(name), "Default db host should be %q but got %q", expected, viper.GetString(name))
 
-	_ = os.Setenv("DB_HOST", "127.1.1.1")
 	expected = "127.1.1.1"
+	_ = os.Setenv("DB_HOST", expected)
 	assert.Equal(t, expected, viper.GetString(name), "After setting env var db host should be %q but got %q", expected, viper.GetString(name))
 
 	args := []string{
@@ -107,8 +108,8 @@ func TestDBPort(t *testing.T) {
 	expected := 5432
 	assert.Equal(t, expected, viper.GetInt(name), "Default db port should be %v but got %v", expected, viper.GetInt(name))
 
-	_ = os.Setenv("DB_PORT", "5433")
 	expected = 5433
+	_ = os.Setenv("DB_PORT", strconv.FormatInt(int64(expected), 10))
 	assert.Equal(t, expected, viper.GetInt(name), "After setting env var db port should be %v but got %v", expected, viper.GetInt(name))
 
 	args := []string{

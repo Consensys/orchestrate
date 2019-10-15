@@ -14,8 +14,8 @@ func init() {
 }
 
 var (
-	faucetAmountFlag     = "faucet-amount"
-	faucetAmountViperKey = "faucet.amount"
+	faucetAmountFlag     = "faucet-credit-amount"
+	faucetAmountViperKey = "faucet.credit.amount"
 	faucetAmountDefault  = "100000000000000000"
 	faucetAmountEnv      = "FAUCET_CREDIT_AMOUNT"
 )

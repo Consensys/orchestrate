@@ -37,8 +37,8 @@ func Init(ctx context.Context) {
 			chainID, err := client.Dial(ctx, url)
 			if err != nil {
 				log.WithError(err).WithFields(log.Fields{
-					"eth-client": url,
-					"error":      err,
+					"eth-client-url": url,
+					"error":          err,
 				}).Fatalf("ethereum: could not dial client")
 			}
 			log.Infof("Created client for chain id %s for RPC URL %s", chainID.String(), url)

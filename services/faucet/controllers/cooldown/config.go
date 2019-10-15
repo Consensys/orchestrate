@@ -14,15 +14,15 @@ func init() {
 }
 
 var (
-	faucetCooldownFlag     = "faucet-cooldown"
-	faucetCooldownViperKey = "faucet.ctrl.cooldown"
+	faucetCooldownFlag     = "faucet-cooldown-time"
+	faucetCooldownViperKey = "faucet.ctrl.cooldown.time"
 	faucetCooldownDefault  = 60 * time.Second
 	faucetCooldownEnv      = "FAUCET_COOLDOWN_TIME"
 )
 
 // FaucetCooldown register flag for Faucet Cooldown
 func FaucetCooldown(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Faucet minimum to wait before crediting an address again
+	desc := fmt.Sprintf(`Faucet minimum time to wait before crediting an address again
 Environment variable: %q`, faucetCooldownEnv)
 	f.Duration(faucetCooldownFlag, faucetCooldownDefault, desc)
 	_ = viper.BindPFlag(faucetCooldownViperKey, f.Lookup(faucetCooldownFlag))

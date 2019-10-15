@@ -37,8 +37,6 @@ func newRunCommand() *cobra.Command {
 	// Register Nonce Manager flags
 	nonce.Type(runCmd.Flags())
 	redis.Address(runCmd.Flags())
-	redis.LockTimeout(runCmd.Flags())
-	redis.ExpirationTime(runCmd.Flags())
 
 	return runCmd
 }

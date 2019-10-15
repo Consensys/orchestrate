@@ -14,15 +14,15 @@ func init() {
 }
 
 var (
-	faucetMaxFlag     = "faucet-max"
-	faucetMaxViperKey = "faucet.ctrl.max"
+	faucetMaxFlag     = "faucet-max-balance"
+	faucetMaxViperKey = "faucet.ctrl.max-balance"
 	faucetMaxDefault  = "200000000000000000"
 	faucetMaxEnv      = "FAUCET_MAX_BALANCE"
 )
 
 // FaucetMaxBalance register flag for Faucet Max Balance
 func FaucetMaxBalance(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Max balance (Wei in decimal format)
+	desc := fmt.Sprintf(`Faucet will stop crediting an address when it reaches this balance (Wei in decimal format)
 Environment variable: %q`, faucetMaxEnv)
 	f.String(faucetMaxFlag, faucetMaxDefault, desc)
 	_ = viper.BindPFlag(faucetMaxViperKey, f.Lookup(faucetMaxFlag))

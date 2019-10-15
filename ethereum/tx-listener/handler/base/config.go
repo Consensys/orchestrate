@@ -44,7 +44,7 @@ var (
 
 // Start register flag for Listener Start Position
 func Start(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Position listener should start listening from (format <chainID>:<blockNumber>-<txIndex> or <chainID>:<blockNumber>) (e.g. 0x2a:2348721-5 or 0x3:latest)
+	desc := fmt.Sprintf(`Position listener should start listening from (format <chainID>:<blockNumber>-<txIndex> or <chainID>:<blockNumber>) (e.g. 42:2348721-5 or 3:latest)
 Environment variable: %q`, startEnv)
 	f.StringSlice(startFlag, startDefault, desc)
 	_ = viper.BindPFlag(startViperKey, f.Lookup(startFlag))

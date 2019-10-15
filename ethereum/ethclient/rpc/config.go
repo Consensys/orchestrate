@@ -13,8 +13,8 @@ func init() {
 }
 
 var (
-	urlFlag     = "eth-client"
-	urlViperKey = "eth.clients"
+	urlFlag     = "eth-client-url"
+	urlViperKey = "eth.client.url"
 	urlDefault  []string
 	urlEnv      = "ETH_CLIENT_URL"
 )

@@ -83,7 +83,7 @@ func main() {
 	log.SetLevel(log.DebugLevel)
 
 	// Initialize Listener
-	viper.Set("eth.clients", []string{
+	viper.Set("eth.client.url", []string{
 		"https://ropsten.infura.io/v3/81e039ce6c8a465180822b525e3644d7",
 		// "https://rinkeby.infura.io/v3/bfc9d6e51fbc4d3db54bea58d1094f9c",
 		// "https://kovan.infura.io/v3/bfc9d6e51fbc4d3db54bea58d1094f9c",

@@ -169,7 +169,7 @@ Environment variable: %q `, vaultTokenFilePathEnv)
 }
 
 func vaultMountPoint(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Specifies the mount point used. Should not start with a \"//\"
+	desc := fmt.Sprintf(`Specifies the mount point used. Should not start with a //
 Environment variable: %q `, vaultMountPointEnv)
 	f.String(vaultMountPointFlag, vaultMountPointDefault, desc)
 	_ = viper.BindPFlag(vaultMountPointViperKey, f.Lookup(vaultMountPointFlag))

@@ -18,10 +18,10 @@ func TestInitFlags(t *testing.T) {
 	assert.Equal(t, hostDefault, viper.GetString(hostViperKey), "Default")
 	assert.Equal(t, portDefault, viper.GetInt(portViperKey), "Default")
 	assert.Equal(t, serviceNameDefault, viper.GetString(serviceNameViperKey), "Default")
-	assert.Equal(t, endpointDefault, viper.GetString(endpointViperKey), "Default")
+	assert.Equal(t, collectorURLDefault, viper.GetString(collectorURLViperKey), "Default")
 	assert.Equal(t, userDefault, viper.GetString(userViperKey), "Default")
 	assert.Equal(t, passwordDefault, viper.GetString(passwordViperKey), "Default")
-	assert.Equal(t, disabledDefault, viper.GetBool(disabledViperKey), "Default")
+	assert.Equal(t, enabledDefault, viper.GetBool(enabledViperKey), "Default")
 	assert.Equal(t, rpcMetricsDefault, viper.GetBool(rpcMetricsViperKey), "Default")
 	assert.Equal(t, logSpansDefault, viper.GetBool(logSpansViperKey), "Default")
 	assert.Equal(t, samplerParamDefault, viper.GetInt(samplerParamViperKey), "Default")
@@ -33,13 +33,13 @@ func TestHost(t *testing.T) {
 	Host(flgs)
 	assert.Equal(t, hostDefault, viper.GetString(hostViperKey), "Default")
 
-	_ = os.Setenv("JAEGER_AGENT_HOST", "env-jaeger")
 	expected := "env-jaeger"
+	_ = os.Setenv("JAEGER_AGENT_HOST", expected)
 	assert.Equal(t, expected, viper.GetString(hostViperKey), "From Environment Variable")
 	_ = os.Unsetenv("JAEGER_AGENT_HOST")
 
 	args := []string{
-		"--jaeger-host=flag-jaeger",
+		"--jaeger-agent-host=flag-jaeger",
 	}
 	err := flgs.Parse(args)
 	assert.NoError(t, err, "No error expected")
@@ -58,13 +58,13 @@ func TestPort(t *testing.T) {
 	Port(flgs)
 	assert.Equal(t, portDefault, viper.GetInt(portViperKey), "Default")
 
-	_ = os.Setenv("JAEGER_AGENT_PORT", "5778")
 	expected := 5778
+	_ = os.Setenv("JAEGER_AGENT_PORT", strconv.FormatInt(int64(expected), 10))
 	assert.Equal(t, expected, viper.GetInt(portViperKey), "From Environment Variable")
 	_ = os.Unsetenv("JAEGER_AGENT_PORT")
 
 	args := []string{
-		"--jaeger-port=5779",
+		"--jaeger-agent-port=5779",
 	}
 	err := flgs.Parse(args)
 	assert.NoError(t, err, "No error expected")
@@ -96,23 +96,23 @@ func TestServiceName(t *testing.T) {
 
 func TestEndPoint(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	Endpoint(flgs)
-	assert.Equal(t, endpointDefault, viper.GetString(endpointViperKey), "Default")
+	CollectorURL(flgs)
+	assert.Equal(t, collectorURLDefault, viper.GetString(collectorURLViperKey), "Default")
 
 	expected := "Test-endpoint"
-	_ = os.Setenv(endpointEnv, expected)
-	assert.Equal(t, expected, viper.GetString(endpointViperKey), "From Environment Variable")
-	_ = os.Unsetenv(endpointEnv)
+	_ = os.Setenv(collectorURLEnv, expected)
+	assert.Equal(t, expected, viper.GetString(collectorURLViperKey), "From Environment Variable")
+	_ = os.Unsetenv(collectorURLEnv)
 
 	expected = "Test-endpoint-2"
 	args := []string{
-		fmt.Sprintf("--%v=%v", endpointFlag, expected),
+		fmt.Sprintf("--%v=%v", collectorURLFlag, expected),
 	}
 
 	err := flgs.Parse(args)
 	assert.NoError(t, err, "No error expected")
 
-	assert.Equal(t, expected, viper.GetString(endpointViperKey), "From Flag")
+	assert.Equal(t, expected, viper.GetString(collectorURLViperKey), "From Flag")
 }
 
 func TestUser(t *testing.T) {
@@ -157,29 +157,29 @@ func TestPassword(t *testing.T) {
 	assert.Equal(t, expected, viper.GetString(passwordViperKey), "From Flag")
 }
 
-func TestDisabled(t *testing.T) {
+func TestEnabled(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	Disabled(flgs)
-	assert.Equal(t, disabledDefault, viper.GetBool(disabledViperKey), "Default")
+	Enabled(flgs)
+	assert.Equal(t, enabledDefault, viper.GetBool(enabledViperKey), "Default")
 
 	expected := "true"
-	_ = os.Setenv(disabledEnv, expected)
-	assert.Equal(t, true, viper.GetBool(disabledViperKey), "From Environment Variable")
-	_ = os.Unsetenv(disabledEnv)
+	_ = os.Setenv(enabledEnv, expected)
+	assert.Equal(t, true, viper.GetBool(enabledViperKey), "From Environment Variable")
+	_ = os.Unsetenv(enabledEnv)
 
 	expected = "true"
 	args := []string{
-		fmt.Sprintf("--%v=%v", disabledFlag, expected),
+		fmt.Sprintf("--%v=%v", enabledFlag, expected),
 	}
 
 	err := flgs.Parse(args)
 	assert.NoError(t, err, "No error expected")
 
-	assert.Equal(t, true, viper.GetBool(disabledViperKey), "From Flag")
+	assert.Equal(t, true, viper.GetBool(enabledViperKey), "From Flag")
 
 	// As tests are run in the same context when in the same package,
-	// disabledFlag has to be reset to default value after update testing for exported_test.go to be successful
-	e := flgs.Set(disabledFlag, strconv.FormatBool(disabledDefault))
+	// enabledFlag has to be reset to default value after update testing for exported_test.go to be successful
+	e := flgs.Set(enabledFlag, strconv.FormatBool(enabledDefault))
 	assert.NoError(t, e, "No error expected")
 }
 

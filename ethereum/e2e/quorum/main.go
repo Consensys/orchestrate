@@ -65,7 +65,7 @@ func main() {
 	log.SetLevel(log.DebugLevel)
 
 	// Initialize client
-	viper.Set("eth.clients", []string{
+	viper.Set("eth.client.url", []string{
 		"https://e0jcrldvk7:eOjDFyulgTHhUm1C5hAjvW9fAPZBM-eciSfA0bzlkyU@e0w1quks6d-e0x1svr9gn-rpc.eu-central-1.kaleido.io",
 	})
 
