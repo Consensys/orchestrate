@@ -9,6 +9,7 @@ import (
 	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpctesting "github.com/grpc-ecosystem/go-grpc-middleware/testing"
 	testproto "github.com/grpc-ecosystem/go-grpc-middleware/testing/testproto"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
@@ -63,7 +64,7 @@ func (s *errorPingService) PingList(ping *testproto.PingRequest, stream testprot
 
 func (s *errorPingService) PingStream(stream testproto.TestService_PingStreamServer) error {
 	count := int32(0)
-	fmt.Println("PingStream")
+	log.Info("PingStream")
 	for {
 		ping, err := stream.Recv()
 		if err == io.EOF {

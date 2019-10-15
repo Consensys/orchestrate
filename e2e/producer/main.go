@@ -6,6 +6,7 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/golang/protobuf/proto"
+	log "github.com/sirupsen/logrus"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/envelope"
@@ -86,33 +87,33 @@ func main() {
 
 	// Create client
 
-	fmt.Println("Connecting to Kafka: ", kafkaURL)
+	log.Info("Connecting to Kafka: ", kafkaURL)
 	client, err := sarama.NewClient(kafkaURL, config)
 	if err != nil {
-		fmt.Println(err)
+		log.Info(err)
 		return
 	}
 	defer func() {
-		fmt.Println("Closing a client")
+		log.Info("Closing a client")
 		e := client.Close()
 		if e != nil {
-			fmt.Println("Error while closing a client")
+			log.Info("Error while closing a client")
 		}
 	}()
-	fmt.Println("Client ready")
+	log.Info("Client ready")
 
 	// Create producer
 	p, err := sarama.NewAsyncProducerFromClient(client)
 	if err != nil {
-		fmt.Println(err)
+		log.Info(err)
 		return
 	}
-	fmt.Println("Producer ready")
+	log.Info("Producer ready")
 	defer func() {
-		fmt.Println("Closing a producer")
+		log.Info("Closing a producer")
 		e := p.Close()
 		if e != nil {
-			fmt.Println("Error while closing a producer: ", e)
+			log.Info("Error while closing a producer: ", e)
 		}
 	}()
 
@@ -124,7 +125,7 @@ func main() {
 	for i := 0; i < rounds; i++ {
 		select {
 		case success := <-p.Successes():
-			fmt.Println("Success: ", success.Topic, success.Key)
+			log.Info("Success: ", success.Topic, success.Key)
 		case err := <-p.Errors():
 			fmt.Println("Error", err)
 		}

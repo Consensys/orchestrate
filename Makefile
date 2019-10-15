@@ -75,17 +75,17 @@ report:
 gen-help: gobuild
 	@mkdir -p build/cmd
 	@for cmd in $(CMD_RUN); do \
-		./build/corestack help $$cmd run | tail -n +4 > build/cmd/$$cmd-run.md; \
+		./build/corestack help $$cmd run | tail -n +3 > build/cmd/$$cmd-run.md; \
 	done
 	@for cmd in $(CMD_MIGRATE); do \
-		./build/corestack help $$cmd migrate | tail -n +4 > build/cmd/$$cmd-migrate.md; \
+		./build/corestack help $$cmd migrate | tail -n +3 > build/cmd/$$cmd-migrate.md; \
 	done
 
 gen-help-docker: docker-build
 	@mkdir -p build/cmd
 	@for cmd in $(CMD); do \
-		docker-compose run worker help $$cmd run | tail -n +4 | head -n -1 > build/cmd/$$cmd-run.md; \
+		docker-compose run worker help $$cmd run | tail -n +3 | head -n -1 > build/cmd/$$cmd-run.md; \
 	done
 	@for cmd in $(CMD); do \
-		docker-compose run worker help $$cmd migrate | tail -n +4 | head -n -1 > build/cmd/$$cmd-migrate.md; \
+		docker-compose run worker help $$cmd migrate | tail -n +3 | head -n -1 > build/cmd/$$cmd-migrate.md; \
 	done

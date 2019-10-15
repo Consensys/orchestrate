@@ -75,7 +75,7 @@ func (helper *PGTestHelper) InitTestDB(t *testing.T) {
 func (helper *PGTestHelper) Upgrade(t *testing.T) {
 	oldVersion, newVersion, err := helper.Collection.Run(helper.DB, "up")
 	if err != nil {
-		t.Errorf("Migrate up: %v\n", err)
+		t.Errorf("Failed migrate up: %v\n", err)
 	} else {
 		t.Logf("Migrated up from version=%v to version=%v\n", oldVersion, newVersion)
 	}
@@ -85,7 +85,7 @@ func (helper *PGTestHelper) Upgrade(t *testing.T) {
 func (helper *PGTestHelper) Downgrade(t *testing.T) {
 	oldVersion, newVersion, err := helper.Collection.Run(helper.DB, "reset")
 	if err != nil {
-		t.Errorf("Migrate down: %v\n", err)
+		t.Errorf("Failed migrate down: %v\n", err)
 	} else {
 		t.Logf("Migrated down from version=%v to version=%v\n", oldVersion, newVersion)
 	}
