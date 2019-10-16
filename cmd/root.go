@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"github.com/spf13/cobra"
@@ -19,7 +19,7 @@ import (
 // NewCommand create root command
 func NewCommand() *cobra.Command {
 	rootCmd := &cobra.Command{
-		Use:              "app",
+		Use:              "corestack",
 		TraverseChildren: true,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			// This is executed before each run (included on children command run)

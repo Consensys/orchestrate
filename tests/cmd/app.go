@@ -1,4 +1,4 @@
-package app
+package main
 
 import (
 	"context"
@@ -8,9 +8,7 @@ import (
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-
 	loader "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/loader/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/logger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/offset"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
@@ -20,6 +18,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/handlers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/handlers/dispatcher"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/cucumber"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/cucumber/steps"
 )
 
 var (
@@ -31,9 +30,6 @@ var (
 func init() {
 	// Create app
 	app = common.NewApp()
-
-	// Set Kafka Group value
-	viper.Set("kafka.group", "group-e2e")
 }
 
 func startServer(ctx context.Context) {
@@ -47,6 +43,38 @@ func startServer(ctx context.Context) {
 	_ = server.ListenAndServe()
 }
 
+func LongKeyOf(topics map[string]string) dispatcher.KeyOfFunc {
+	return func(txtcx *engine.TxContext) (string, error) {
+		topic, ok := topics[txtcx.In.Entrypoint()]
+		if !ok {
+			return "", fmt.Errorf("unknown message entrypoint")
+		}
+
+		scenario, ok := txtcx.Envelope.GetMetadataValue("scenario.id")
+		if !ok {
+			return "", fmt.Errorf("message has no test scenario")
+		}
+
+		return steps.LongKeyOf(topic, scenario, txtcx.Envelope.GetMetadata().Id), nil
+	}
+}
+
+func ShortKeyOf(topics map[string]string) dispatcher.KeyOfFunc {
+	return func(txtcx *engine.TxContext) (string, error) {
+		topic, ok := topics[txtcx.In.Entrypoint()]
+		if !ok {
+			return "", fmt.Errorf("unknown message entrypoint")
+		}
+
+		scenario, ok := txtcx.Envelope.GetMetadataValue("scenario.id")
+		if !ok {
+			return "", fmt.Errorf("message has no test scenario")
+		}
+
+		return steps.ShortKeyOf(topic, scenario), nil
+	}
+}
+
 func initComponents(ctx context.Context) {
 	common.InParallel(
 		// Initialize Engine
@@ -55,10 +83,20 @@ func initComponents(ctx context.Context) {
 		},
 		// Initialize ConsumerGroup
 		func() {
+			viper.Set("kafka.group", "group-e2e")
 			broker.InitConsumerGroup(ctx)
 		},
 		// Initialize Handlers
 		func() {
+			// Prepare topics map for dispatcher
+			topics := make(map[string]string)
+			for _, topic := range steps.TOPICS {
+				topics[viper.GetString(fmt.Sprintf("kafka.topic.%v", topic))] = topic
+			}
+			dispatcher.SetKeyOfFuncs(
+				LongKeyOf(topics),
+				ShortKeyOf(topics),
+			)
 			handlers.Init(ctx)
 		},
 		// Initialize cucumber handlers
@@ -70,7 +108,6 @@ func initComponents(ctx context.Context) {
 
 func registerHandlers() {
 	// Generic handlers on every worker
-	engine.Register(logger.Logger)
 	engine.Register(loader.Loader)
 	engine.Register(offset.Marker)
 	engine.Register(dispatcher.GlobalHandler())
@@ -79,7 +116,6 @@ func registerHandlers() {
 // Start starts application
 func Start(ctx context.Context) {
 	startOnce.Do(func() {
-
 		cancelCtx, cancel := context.WithCancel(ctx)
 		go func() {
 			// Start Server
@@ -96,22 +132,10 @@ func Start(ctx context.Context) {
 		// Indicate that application is ready
 		app.SetReady(true)
 
-		// Start consuming on every topics
-		// Initialize Topics list by chain
-		topics := []string{
-			viper.GetString("kafka.topic.crafter"),
-			viper.GetString("kafka.topic.nonce"),
-			viper.GetString("kafka.topic.signer"),
-			viper.GetString("kafka.topic.sender"),
-			viper.GetString("kafka.topic.decoded"),
-			viper.GetString("kafka.topic.wallet.generator"),
-			viper.GetString("kafka.topic.wallet.generated"),
-		}
-		if primary := viper.GetString("cucumber.chainid.primary"); primary != "" {
-			topics = append(topics, fmt.Sprintf("%s-%s", viper.GetString("kafka.topic.decoder"), primary))
-		}
-		if secondary := viper.GetString("cucumber.chainid.secondary"); secondary != "" {
-			topics = append(topics, fmt.Sprintf("%s-%s", viper.GetString("kafka.topic.decoder"), secondary))
+		// Start consuming on every topics of interest
+		var topics []string
+		for _, topic := range steps.TOPICS {
+			topics = append(topics, viper.GetString(fmt.Sprintf("kafka.topic.%v", topic)))
 		}
 
 		readyToTest = make(chan bool, 1)

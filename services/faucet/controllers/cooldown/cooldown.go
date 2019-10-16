@@ -7,11 +7,11 @@ import (
 	"time"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	stripedmutex "github.com/nmvalera/striped-mutex"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/faucet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/types"
-	stripedmutex "gitlab.com/ConsenSys/client/fr/core-stack/striped-mutex.git"
 )
 
 // Controller that forces a minimum time interval between 2 credits

@@ -8,7 +8,13 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
 )
 
+func testKeyOf(txctx *engine.TxContext) (string, error) {
+	return "", nil
+}
+
 func TestInit(t *testing.T) {
+	SetKeyOfFuncs(testKeyOf)
+
 	Init(context.Background())
 	assert.NotNil(t, GlobalHandler(), "Global should have been set")
 

@@ -1,42 +1,60 @@
 package dispatcher
 
 import (
-	"fmt"
-
+	"github.com/golang/protobuf/proto"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/chanregistry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/envelope"
 )
 
-// Dispacher is dispatching envelopes to registered channels
-func Dispacher(c chanregistry.ChanRegistry) engine.HandlerFunc {
+// KeyOfFunc should return channel key to distach envelope to
+type KeyOfFunc func(txtcx *engine.TxContext) (string, error)
+
+// Dispatcher dispatch envelopes into a channel registry
+func Dispatcher(reg *chanregistry.ChanRegistry, keyOfs ...KeyOfFunc) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
+		if txctx.In == nil {
+			panic("input message is nil")
+		}
 
-		txctx.Next()
+		txctx.Logger = txctx.Logger.WithFields(log.Fields{
+			"scenario.id": txctx.Envelope.GetMetadata().GetExtra()["scenario.id"],
+			"metadata.id": txctx.Envelope.GetMetadata().GetId(),
+			"msg.topic":   txctx.In.Entrypoint(),
+		})
 
-		msg := txctx.In
-		if msg == nil {
-			txctx.Logger.Error("dispacher: received invalid message")
-			_ = txctx.AbortWithError(fmt.Errorf("invalid input message format"))
+		// Copy envelope before dispatching (it ensures that envelope can de manipulated in a concurrent safe manner once dispatched)
+		e := proto.Clone(txctx.Envelope).(*envelope.Envelope)
+
+		// Loop over key functions until we succeed in dispatching envelope to channel indexed by key
+		for _, keyOf := range keyOfs {
+			// Compute envelope key
+			key, err := keyOf(txctx)
+			if err != nil {
+				// Could not compute key
+				continue
+			}
+
+			// Dispatch envlope
+			err = reg.Send(
+				key,
+				e,
+			)
+			if err != nil {
+				// Could not dispatch
+				continue
+			}
+
+			txctx.Logger.WithFields(log.Fields{
+				"key": key,
+			}).Debugf("dispatcher: envelope dispatched")
+
+			// Envelope has been successfully dispatched so we return
 			return
 		}
 
-		extra := txctx.Envelope.GetMetadata().GetExtra()
-
-		if extra["ScenarioID"] != "" {
-			envelopeChan := c.GetEnvelopeChan(extra["ScenarioID"], msg.Entrypoint())
-			if envelopeChan != nil {
-				envelopeChan <- txctx.Envelope
-				return
-			}
-		}
-
-		txctx.Logger.
-			WithFields(log.Fields{
-				"MetadataID": txctx.Envelope.GetMetadata().GetId(),
-				"msg.Topic":  msg.Entrypoint(),
-			}).
-			Error("dispacher: received unknown envelope")
-		_ = txctx.AbortWithError(fmt.Errorf("scenarioID unknown, envelope not dispatched"))
+		// Failed in dispatching envelope thus we ignore
+		txctx.Logger.Warnf("dispatcher: untracked envelope not dispatched")
 	}
 }

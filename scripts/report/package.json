@@ -1,0 +1,15 @@
+{
+  "name": "cucumber-html-reporter",
+  "version": "1.0.0",
+  "description": "CoreStack E2E cucumber tests report",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cucumber-html-reporter": "~5.0.0",
+    "node-env-configuration": "~1.0.3"
+  }
+}

@@ -1,25 +1,33 @@
-package cmd
+package main
 
 import (
 	"context"
 	"os"
 
 	"github.com/spf13/cobra"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/logger"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/app"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/cucumber"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/cucumber/steps"
 )
 
-func newRunCommand() *cobra.Command {
+func NewRunCommand() *cobra.Command {
 	runCmd := &cobra.Command{
 		Use:   "run",
 		Short: "Run application",
 		Run:   run,
+		PreRun: func(cmd *cobra.Command, args []string) {
+			// This is executed before each run (included on children command run)
+			logger.InitLogger()
+		},
 	}
+
+	// Set logger flags
+	logger.LogLevel(runCmd.Flags())
+	logger.LogFormat(runCmd.Flags())
 
 	// Register Engine flags
 	engine.InitFlags(runCmd.Flags())
@@ -56,5 +64,5 @@ func run(_ *cobra.Command, _ []string) {
 	defer sig.Close()
 
 	// Start application
-	app.Start(ctx)
+	Start(ctx)
 }

@@ -18,7 +18,7 @@ run-coverage: ## Generate global code coverage report
 	@sh scripts/coverage.sh $(PACKAGES)
 
 gobuild:
-	@go build -o ./build/corestack .
+	@go build -i -o ./build/bin/corestack
 
 docker-build:
 	@docker-compose build
@@ -75,17 +75,39 @@ report:
 gen-help: gobuild
 	@mkdir -p build/cmd
 	@for cmd in $(CMD_RUN); do \
-		./build/corestack help $$cmd run | tail -n +3 > build/cmd/$$cmd-run.md; \
+		./build/bin/corestack help $$cmd run | tail -n +3 > build/cmd/$$cmd-run.md; \
 	done
 	@for cmd in $(CMD_MIGRATE); do \
-		./build/corestack help $$cmd migrate | tail -n +3 > build/cmd/$$cmd-migrate.md; \
+		./build/bin/corestack help $$cmd migrate | tail -n +3 > build/cmd/$$cmd-migrate.md; \
 	done
 
 gen-help-docker: docker-build
 	@mkdir -p build/cmd
-	@for cmd in $(CMD); do \
+	@for cmd in $(CMD_RUN); do \
 		docker-compose run worker help $$cmd run | tail -n +3 | head -n -1 > build/cmd/$$cmd-run.md; \
 	done
-	@for cmd in $(CMD); do \
+	@for cmd in $(CMD_MIGRATE); do \
 		docker-compose run worker help $$cmd migrate | tail -n +3 | head -n -1 > build/cmd/$$cmd-migrate.md; \
 	done
+
+gobuild-e2e:
+	@go build -i -o ./build/bin/e2e ./tests/cmd 
+
+corestack: gobuild
+	@docker-compose -f docker-compose.dev.yml up -d $(CMD_RUN)
+
+stop-corestack:
+	@docker-compose -f docker-compose.dev.yml stop $(CMD_RUN)
+
+deps:
+	@docker-compose -f scripts/deps/docker-compose.yml up -d
+
+quorum:
+	@docker-compose -f scripts/deps/docker-compose.quorum.yml up -d
+
+stop-quorum:
+	@docker-compose -f scripts/deps/docker-compose.quorum.yml stop
+
+e2e: gobuild-e2e
+	@docker-compose -f docker-compose.dev.yml up e2e
+	@docker-compose -f scripts/report/docker-compose.yml up

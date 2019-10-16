@@ -1,0 +1,157 @@
+version: '3.7'
+
+x-default-variables: &default-variables
+  GRPC_TARGET_ENVELOPE_STORE: ${GRPC_TARGET_ENVELOPE_STORE-envelope-store:8080}
+  GRPC_TARGET_CONTRACT_REGISTRY: ${GRPC_TARGET_CONTRACT_REGISTRY-contract-registry:8080}
+  KAFKA_ADDRESS: ${KAFKA_ADDRESS-kafka:29092}
+  ETH_CLIENT_URL: ${ETH_CLIENT_URL-http://geth:8545}
+  LOG_LEVEL: ${LOG_LEVEL-debug}
+  LOG_FORMAT: ${LOG_FORMAT-}
+  JAEGER_AGENT_HOST: ${JAEGER_AGENT_HOST-jaeger}
+  JAEGER_AGENT_PORT: ${JAEGER_AGENT_PORT-6831}
+  NONCE_MANAGER_TYPE: ${NONCE_MANAGER_TYPE-redis}
+  REDIS_ADDRESS: ${REDIS_ADDRESS-redis:6379}
+  SECRET_PKEY: ${SECRET_PKEY-}
+  # FAUCET_CREDITOR_ADDRESS: ${FAUCET_CREDITOR_ADDRESS-0x93f7274c9059e601be4512f656b57b830e019e41}@${GETH_NETWORKID-888}
+  ABI: ${ABI-}
+  ETH_CLIENT_RETRY_MAX_ELAPSED_TIME: 5s
+
+x-container-common: &container-common
+  restart: ${CONTAINER_RESTART-on-failure}
+  networks:
+    - corestack
+    - quorum-tessera
+  volumes:
+    - ./build/bin/corestack:/bin/main
+  image: golang:1.13
+  entrypoint: /bin/main
+
+x-envelope-store-common: &envelope-store-common
+  environment:
+    DB_HOST: postgres
+
+services:
+  envelope-store-migration-init:
+    <<: *container-common
+    <<: *envelope-store-common
+    restart: "no"
+    command: envelope-store migrate init
+
+  envelope-store-migration:
+    <<: *container-common
+    <<: *envelope-store-common
+    restart: "no"
+    depends_on:
+      - envelope-store-migration-init
+    command: envelope-store migrate
+
+  envelope-store:
+    <<: *container-common
+    <<: *envelope-store-common
+    depends_on:
+      - envelope-store-migration
+    command: envelope-store run
+
+  contract-registry:
+    <<: *container-common
+    ports:
+      - 8081:8080
+    environment:
+      <<: *default-variables
+    command: contract-registry run
+
+  tx-crafter:
+    <<: *container-common
+    environment:
+      <<: *default-variables
+      JAEGER_SERVICE_NAME: TX-CRAFTER
+    depends_on:
+      - contract-registry
+    command: tx-crafter run
+
+  tx-nonce:
+    <<: *container-common
+    environment: 
+      <<: *default-variables
+      JAEGER_SERVICE_NAME: TX-NONCE
+    command: tx-nonce run
+  
+  tx-signer-init:
+    image: alpine:3.10
+    <<: *container-common
+    environment: 
+      <<: *default-variables
+      SECRET_STORE: ${SECRET_STORE-hashicorp}
+      VAULT_ADDR: ${VAULT_ADDR-http://vault:8200}
+    restart: "no"
+    working_dir: /scripts
+    volumes:
+      - ./scripts/hashicorp:/scripts
+      - vault-token:/vault/token
+    command: /bin/sh ./init.sh
+
+  tx-signer:
+    <<: *container-common
+    environment: 
+      <<: *default-variables
+      JAEGER_SERVICE_NAME: TX-SIGNER
+      TESSERA_ENDPOINTS: ${TESSERA_ENDPOINTS}
+    volumes:
+      - vault-token:/vault/token
+      - ./build/bin/corestack:/bin/main
+    depends_on:
+      - tx-signer-init
+    command: tx-signer run
+
+  tx-sender:
+    <<: *container-common
+    environment: 
+      <<: *default-variables
+      JAEGER_SERVICE_NAME: TX-SENDER
+    command: tx-sender run
+
+  tx-listener:
+    <<: *container-common
+    environment:
+      <<: *default-variables
+      LISTENER_START_DEFAULT: latest
+      JAEGER_SERVICE_NAME: TX-LISTENER
+    depends_on:
+      - envelope-store
+    command: tx-listener run
+
+  tx-decoder:
+    <<: *container-common
+    environment: 
+      <<: *default-variables
+      JAEGER_SERVICE_NAME: TX-DECODER
+    depends_on:
+      - contract-registry
+    command: tx-decoder run
+
+  e2e:
+    <<: *container-common
+    environment: 
+      <<: *default-variables
+      CUCUMBER_OUTPUTPATH: "/report/output/report.json"
+      CUCUMBER_PATHS: "/features"
+      CUCUMBER_FORMAT: "cucumber"
+      CUCUMBER_ALIAS: "chain.primary:888 chain.private:10"
+    restart: "no"
+    command: e2e run
+    volumes:
+      - ./build/bin/e2e:/bin/main
+      - ./build/report:/report/output
+      - ./tests/features:/features
+  
+volumes:
+  vault-token:
+    driver: local
+
+networks:
+  corestack:
+    external:
+      name: deps_corestack
+  quorum-tessera:
+    external:
+      name: deps_quorum-tessera

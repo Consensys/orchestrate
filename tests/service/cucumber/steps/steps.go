@@ -2,158 +2,201 @@ package steps
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/hex"
 	"fmt"
-	"io/ioutil"
-	"os"
-	"path"
+	"time"
 
 	"github.com/DATA-DOG/godog"
 	"github.com/DATA-DOG/godog/gherkin"
-	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/Shopify/sarama"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
+	encoding "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/encoding/sarama"
 	registry "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry"
-	registryClient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry/client"
+	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/chanregistry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/cucumber/parser"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/ethereum"
 )
+
+var TOPICS = [...]string{
+	"crafter",
+	"nonce",
+	"signer",
+	"sender",
+	"decoded",
+	"recover",
+	"wallet.generator",
+	"wallet.generated",
+}
+
+// NewID creates a 8 character long random id
+func NewID() string {
+	u := uuid.NewV4()
+	buf := make([]byte, 8)
+	hex.Encode(buf, u[0:4])
+	return string(buf)
+}
+
+// ScenarioID generates a random scenario ID
+func ScenarioID(def *gherkin.ScenarioDefinition) string {
+	return fmt.Sprintf("|%v|-%v", fmt.Sprintf("%-20v", def.Name)[:20], NewID())
+}
 
 // ScenarioContext is container for scenario context data
 type ScenarioContext struct {
-	ScenarioID string
+	ID         string
+	Definition *gherkin.ScenarioDefinition
 
-	// Topics -> chan *envelope.Envelope
-	EnvelopesChan map[string]chan *envelope.Envelope
+	// Parser to parse cucumber/gherkin entries
+	parser *parser.Parser
 
-	// MetadataId -> *envelope.Envelope (keep envelopes to be processed and checked)
-	Envelopes map[string]*envelope.Envelope
+	// trackers track envelopes that are generated within the test session
+	// as they are processed in the system
+	trackers []*tracker
 
-	// Used to keep alias of contract addresses for example
-	Value map[string]interface{}
+	// defaultTracker allows to capture envelopes that are generated
+	// within the system (to be captured those envelopes should have scenario.id set)
+	defaultTracker *tracker
+
+	// chanReg to register envelopes channels on trackers
+	chanReg *chanregistry.ChanRegistry
 
 	// RegistryClient
-	RegistryClient registry.RegistryClient
+	Registry registry.RegistryClient
 
-	Logger *log.Entry
+	// Producer to producer envelopes in topics
+	producer sarama.SyncProducer
+
+	logger *log.Entry
 }
 
-const (
-	fileName     = "fileName"
-	contractName = "contractName"
-	contractTag  = "contractTag"
-)
+func NewScenarioContext(
+	chanReg *chanregistry.ChanRegistry,
+	reg registry.RegistryClient,
+	producer sarama.SyncProducer,
+	p *parser.Parser,
+) *ScenarioContext {
+	return &ScenarioContext{
+		chanReg:  chanReg,
+		Registry: reg,
+		producer: producer,
+		parser:   p,
+		logger:   log.NewEntry(log.StandardLogger()),
+	}
+}
 
 // initScenarioContext initialize a scenario context - create a random scenario id - initialize a logger enrich with the scenario name - initialize envelope chan
-func (sc *ScenarioContext) initScenarioContext(s interface{}) {
-
-	var scenarioName string
+func (sc *ScenarioContext) init(s interface{}) {
+	// Extract scenario definition
 	switch t := s.(type) {
 	case *gherkin.Scenario:
-		scenarioName = t.Name
+		sc.Definition = &t.ScenarioDefinition
 	case *gherkin.ScenarioOutline:
-		scenarioName = t.Name
+		sc.Definition = &t.ScenarioDefinition
 	}
 
-	sc.ScenarioID = uuid.NewV4().String()
+	// Compute scenario ID
+	sc.ID = ScenarioID(sc.Definition)
 
-	sc.Logger = log.StandardLogger().WithFields(log.Fields{
-		"Scenario": scenarioName,
+	// Prepare default tracker
+	sc.defaultTracker = sc.newTracker(nil)
+
+	// Enrich logger
+	sc.logger = sc.logger.WithFields(log.Fields{
+		"scenario.name": sc.Definition.Name,
+		"scenario.id":   sc.ID,
 	})
-
-	topics := []string{
-		viper.GetString("kafka.topic.crafter"),
-		viper.GetString("kafka.topic.nonce"),
-		viper.GetString("kafka.topic.signer"),
-		viper.GetString("kafka.topic.sender"),
-		viper.GetString("kafka.topic.decoded"),
-		viper.GetString("kafka.topic.wallet.generator"),
-		viper.GetString("kafka.topic.wallet.generated"),
-	}
-
-	if primary := viper.GetString("cucumber.chainid.primary"); primary != "" {
-		topics = append(topics, fmt.Sprintf("%s-%s", viper.GetString("kafka.topic.decoder"), primary))
-	}
-	if secondary := viper.GetString("cucumber.chainid.secondary"); secondary != "" {
-		topics = append(topics, fmt.Sprintf("%s-%s", viper.GetString("kafka.topic.decoder"), secondary))
-	}
-
-	sc.EnvelopesChan = make(map[string]chan *envelope.Envelope)
-	sc.Envelopes = make(map[string]*envelope.Envelope)
-	sc.Value = make(map[string]interface{})
-	r := chanregistry.GlobalChanRegistry()
-	for _, topic := range topics {
-		sc.EnvelopesChan[topic] = r.NewEnvelopeChan(sc.ScenarioID, topic)
-	}
-
-	sc.RegistryClient = registryClient.GlobalContractRegistryClient()
 }
 
-type artifact struct {
-	Abi              json.RawMessage
-	Bytecode         string
-	DeployedBytecode string
-}
+func (sc *ScenarioContext) newTracker(e *envelope.Envelope) *tracker {
+	if e != nil {
+		sc.setMetadata(e)
+	}
+	// Set envelope metadata so it can be tracked
 
-func (sc *ScenarioContext) iStoreTheFollowingContract(rawContracts *gherkin.DataTable) error {
-	head := rawContracts.Rows[0].Cells
+	// Create tracker and attach envelope
+	t := newTracker()
+	t.current = e
 
-	for i := 1; i < len(rawContracts.Rows); i++ {
-		contract := &abi.Contract{Id: &abi.ContractId{}}
+	// Initialize output channels on tracker and register channels on channel registry
+	for _, topic := range TOPICS {
+		// Create channel
+		// TODO: make chan size configurable
+		ch := make(chan *envelope.Envelope, 30)
 
-		for j, cell := range head {
-			columnName := cell.Value
-			value := rawContracts.Rows[i].Cells[j].Value
+		// Add channel as a tracker output
+		t.addOutput(topic, ch)
 
-			switch columnName {
-			case fileName:
-				var f *os.File
-				var err error
-				var found bool
-				for _, v := range viper.GetStringSlice("cucumber.paths") {
-					f, err = os.Open(path.Join(v, "artifacts", value))
-					if err != nil {
-						continue
-					}
-					found = true
-					defer func() {
-						closeErr := f.Close()
-						if err != nil {
-							log.Error(closeErr)
-						}
-					}()
-				}
-				if !found {
-					return os.ErrNotExist
-				}
-				var a artifact
-				rawABI, _ := ioutil.ReadAll(f)
-				err = json.Unmarshal(rawABI, &a)
-				if err != nil {
-					return err
-				}
-
-				// Abi is a UTF-8 encoded string. Therefore, we can make the straightforward transition
-				contract.Abi = a.Abi
-				// Bytecode is an hexstring encoded []byte
-				contract.Bytecode = hexutil.MustDecode(a.Bytecode)
-				// Bytecode is an hexstring encoded []byte
-				contract.DeployedBytecode = hexutil.MustDecode(a.DeployedBytecode)
-			case contractName:
-				contract.Id.Name = value
-			case contractTag:
-				contract.Id.Tag = value
-			default:
-				// Ignore
-				return fmt.Errorf("got unknown field name %q", columnName)
-			}
+		// Register channel on channel registry
+		if e != nil {
+			sc.chanReg.Register(LongKeyOf(topic, sc.ID, e.GetMetadata().GetId()), ch)
+		} else {
+			sc.chanReg.Register(ShortKeyOf(topic, sc.ID), ch)
 		}
+	}
 
-		_, err := sc.RegistryClient.RegisterContract(
+	return t
+}
+
+func (sc *ScenarioContext) setMetadata(e *envelope.Envelope) {
+	// Prepare envelope metadata
+	e.SetMetadataValue("debug", "true")
+	e.SetMetadataValue("scenario.id", sc.ID)
+	e.SetMetadataValue("scenario.name", sc.Definition.Name)
+	e.GetMetadata().Id = uuid.NewV4().String()
+}
+
+func (sc *ScenarioContext) newTrackers(envelopes []*envelope.Envelope) []*tracker {
+	// Create a tracker for every envelope
+	var trackers []*tracker
+	for _, e := range envelopes {
+		// Create a tracker
+		trackers = append(trackers, sc.newTracker(e))
+	}
+
+	return trackers
+}
+
+func (sc *ScenarioContext) setTrackers(trackers []*tracker) {
+	sc.trackers = trackers
+}
+
+func (sc *ScenarioContext) sendEnvelope(topic string, e *envelope.Envelope) error {
+	// Prepare message to be sent
+	msg := &sarama.ProducerMessage{Topic: viper.GetString(fmt.Sprintf("kafka.topic.%v", topic))}
+	err := encoding.Marshal(e, msg)
+	if err != nil {
+		return err
+	}
+
+	// Send message
+	_, _, err = sc.producer.SendMessage(msg)
+	if err != nil {
+		return err
+	}
+
+	log.WithFields(log.Fields{
+		"metadata.id":   e.GetMetadata().GetId(),
+		"scenario.id":   sc.ID,
+		"scenario.name": sc.Definition.Name,
+	}).Debugf("scenario: envelope sent")
+
+	return nil
+}
+
+func (sc *ScenarioContext) iRegisterTheFollowingContract(table *gherkin.DataTable) error {
+	// Parse table
+	contracts, err := sc.parser.ParseContracts(sc.ID, table)
+	if err != nil {
+		return err
+	}
+
+	// Register contracts on the registry
+	for _, contract := range contracts {
+		_, err := sc.Registry.RegisterContract(
 			context.Background(),
 			&registry.RegisterContractRequest{
 				Contract: contract,
@@ -164,383 +207,174 @@ func (sc *ScenarioContext) iStoreTheFollowingContract(rawContracts *gherkin.Data
 			return err
 		}
 	}
+
 	return nil
 }
 
-func (sc *ScenarioContext) iHaveTheFollowingEnvelope(rawEnvelopes *gherkin.DataTable) error {
-
-	head := rawEnvelopes.Rows[0].Cells
-
-	for i := 1; i < len(rawEnvelopes.Rows); i++ {
-		mapEnvelope := make(map[string]string)
-		for j, cell := range head {
-			// Replace "Aliases"
-			switch {
-			case cell.Value == "AliasTo":
-				val := sc.Value[rawEnvelopes.Rows[i].Cells[j].Value]
-				switch v := val.(type) {
-				case string:
-					mapEnvelope["to"] = val.(string)
-				case *ethereum.Account:
-					mapEnvelope["to"] = val.(*ethereum.Account).Hex()
-				default:
-					return fmt.Errorf("unexpected type %T", v)
-				}
-			case cell.Value == "AliasChainId":
-				mapEnvelope["chainId"] = viper.GetString(fmt.Sprintf("cucumber.chainid.%s", rawEnvelopes.Rows[i].Cells[j].Value))
-			default:
-				mapEnvelope[cell.Value] = rawEnvelopes.Rows[i].Cells[j].Value
-
-			}
-		}
-
-		if mapEnvelope["metadataID"] == "" {
-			mapEnvelope["metadataID"] = uuid.NewV4().String()
-		}
-
-		mapEnvelope["ScenarioID"] = sc.ScenarioID
-		e := ParseEnvelope(mapEnvelope)
-		sc.Envelopes[mapEnvelope["metadataID"]] = e
+func (sc *ScenarioContext) iSendEnvelopesToTopic(topic string, table *gherkin.DataTable) error {
+	// Parse table
+	envelopes, err := sc.parser.ParseEnvelopes(sc.ID, table)
+	if err != nil {
+		return err
 	}
 
-	sc.Logger.Info("cucumber: step check")
+	// Set trackers for each envelope
+	sc.setTrackers(sc.newTrackers(envelopes))
 
-	return nil
-}
-
-func (sc *ScenarioContext) iSendTheseEnvelopeToCoreStack() error {
-
-	topic := viper.GetString("kafka.topic.crafter")
-	for _, e := range sc.Envelopes {
-		err := SendEnvelope(e, topic)
+	// Send envelopes
+	for _, t := range sc.trackers {
+		err := sc.sendEnvelope(topic, t.current)
 		if err != nil {
-			sc.Logger.Errorf("cucumber: step failed got error %q", err)
 			return err
 		}
 	}
 
-	sc.Logger.Info("cucumber: step check")
+	return nil
+}
+
+func (sc *ScenarioContext) iHaveDeployedContract(alias string, table *gherkin.DataTable) error {
+	// Parse table
+	envelopes, err := sc.parser.ParseEnvelopes(sc.ID, table)
+	if err != nil {
+		return err
+	}
+
+	// Set trackers
+	trackers := sc.newTrackers(envelopes)
+
+	if len(trackers) != 1 {
+		return fmt.Errorf("%v: should deploy exactly 1 contract", sc.ID)
+	}
+
+	// Send envelope
+	err = sc.sendEnvelope("crafter", trackers[0].current)
+	if err != nil {
+		return err
+	}
+
+	// Catch envelope after it has been decoded
+	err = trackers[0].load("decoded", 30*time.Second)
+	if err != nil {
+		return fmt.Errorf("%v: no receipt for contract %q deployment", sc.ID, alias)
+	}
+
+	// Alias contract address
+	if trackers[0].current.GetReceipt().GetContractAddress() == nil {
+		return fmt.Errorf("%v: contract %q could not be deployed", sc.ID, alias)
+	}
+	sc.parser.Aliases.Set(sc.ID, alias, trackers[0].current.GetReceipt().GetContractAddress().Hex())
 
 	return nil
 }
 
-func (sc *ScenarioContext) iSendTheseEnvelopeToTxSigner() error {
-	topic := viper.GetString("kafka.topic.signer")
-	for _, e := range sc.Envelopes {
-		err := SendEnvelope(e, topic)
+func (sc *ScenarioContext) envelopeShouldBeInTopic(topic string) error {
+	for i, t := range sc.trackers {
+		err := t.load(topic, 5*time.Second)
 		if err != nil {
-			sc.Logger.Errorf("cucumber: step failed got error %q", err)
-			return err
+			return fmt.Errorf("%v: envelope n°%v not in topic %q", sc.ID, i, topic)
 		}
 	}
-
-	sc.Logger.Info("cucumber: step check")
-
 	return nil
 }
 
-func (sc *ScenarioContext) iSendTheseEnvelopeInWalletGenerator() error {
-
-	topic := viper.GetString("kafka.topic.wallet.generator")
-	for _, e := range sc.Envelopes {
-		sc.Logger.Infof("cucumber: sending envelope %+v", e)
-		err := SendEnvelope(e, topic)
-		if err != nil {
-			sc.Logger.Errorf("cucumber: sending envelopes to CoreStack failed with error %q", err)
-			return err
+func (sc *ScenarioContext) envelopesShouldHavePayloadSet() error {
+	for i, t := range sc.trackers {
+		if t.current.GetTx().GetTxData().GetData() == nil {
+			return fmt.Errorf("%v: payload not set envelope n°%v", sc.ID, i)
 		}
 	}
-
-	sc.Logger.Info("cucumber: step check")
-
 	return nil
 }
 
-func (sc *ScenarioContext) coreStackShouldReceiveEnvelopes() error {
-
-	topic := viper.GetString("kafka.topic.crafter")
-	e, err := ReadChanWithTimeout(sc.EnvelopesChan[topic], viper.GetInt64("cucumber.steps.timeout"), len(sc.Envelopes))
-	if err != nil {
-		sc.Logger.Errorf("cucumber: receiving envelopes from CoreStack failed with error %q", err)
-		return err
-	}
-
-	sc.Logger.WithFields(log.Fields{
-		"EnvelopeReceived": len(e),
-		"msg.Topic":        topic,
-	}).Info("cucumber: step check")
-
-	return nil
-}
-
-func (sc *ScenarioContext) walletGeneratorShouldReceiveThem() error {
-
-	topic := viper.GetString("kafka.topic.wallet.generator")
-	e, err := ReadChanWithTimeout(sc.EnvelopesChan[topic], 10, len(sc.Envelopes))
-	if err != nil {
-		sc.Logger.Errorf("cucumber: step failed got error %q", err)
-		return err
-	}
-
-	sc.Logger.WithFields(log.Fields{
-		"EnvelopeReceived": len(e),
-		"msg.Topic":        topic,
-	}).Info("cucumber: step check")
-
-	return nil
-}
-
-func (sc *ScenarioContext) theTxcrafterShouldSetTheData() error {
-
-	topic := viper.GetString("kafka.topic.nonce")
-	e, err := ReadChanWithTimeout(sc.EnvelopesChan[topic], viper.GetInt64("cucumber.steps.timeout"), len(sc.Envelopes))
-	if err != nil {
-		sc.Logger.Errorf("cucumber: reading from topic %s failed with error %q", topic, err)
-		return err
-	}
-
-	for _, v := range e {
-		if v.GetTx().GetTxData().GetData() == nil {
-			err := fmt.Errorf("tx-crafter could not craft transaction")
-			sc.Logger.Errorf("cucumber: step failed with error %q", err)
-			return err
-		}
-	}
-
-	sc.Logger.WithFields(log.Fields{
-		"EnvelopeReceived": len(e),
-		"msg.Topic":        topic,
-	}).Info("cucumber: step check")
-
-	return nil
-}
-
-func (sc *ScenarioContext) theTxSignerShouldSetFrom() error {
-
-	topic := viper.GetString("kafka.topic.wallet.generated")
-	e, err := ReadChanWithTimeout(sc.EnvelopesChan[topic], 10, len(sc.Envelopes))
-	if err != nil {
-		sc.Logger.Errorf("cucumber: step failed got error %q", err)
-		return err
-	}
-
-	for _, v := range e {
-		if v.GetFrom() == nil {
-			err := fmt.Errorf("tx-signer could not generate the wallet")
-			sc.Logger.Errorf("cucumber: step failed got error %q", err)
-			return err
-		}
-	}
-
-	sc.Logger.WithFields(log.Fields{
-		"EnvelopeReceived": len(e),
-		"msg.Topic":        topic,
-	}).Info("cucumber: step check")
-
-	return nil
-}
-
-func (sc *ScenarioContext) theTxnonceShouldSetTheNonce() error {
-
-	topic := viper.GetString("kafka.topic.signer")
-	e, err := ReadChanWithTimeout(sc.EnvelopesChan[topic], viper.GetInt64("cucumber.steps.timeout"), len(sc.Envelopes))
-	if err != nil {
-		sc.Logger.Errorf("cucumber: failed to read from topic %s with error %q", topic, err)
-		return err
-	}
-
+func (sc *ScenarioContext) envelopesShouldHaveNonceSet() error {
 	nonces := make(map[string]map[string]map[uint64]bool)
-	for _, v := range e {
-		chain := v.GetChain().ID().String()
-		addr := v.GetFrom().Address().Hex()
-		nonce := v.GetTx().GetTxData().GetNonce()
-
-		if nonces[chain] == nil {
+	for _, t := range sc.trackers {
+		chain := t.current.GetChain().ID().String()
+		addr := t.current.GetFrom().Address().Hex()
+		nonce := t.current.GetTx().GetTxData().GetNonce()
+		if _, ok := nonces[chain]; !ok {
 			nonces[chain] = make(map[string]map[uint64]bool)
 		}
-		if nonces[chain][addr] == nil {
+		if _, ok := nonces[chain][addr]; !ok {
 			nonces[chain][addr] = make(map[uint64]bool)
 		}
-		if nonces[chain][addr][nonce] {
-			err := fmt.Errorf("tx-nonce set 2 times the same nonce: %d", v.GetTx().GetTxData().GetNonce())
-			sc.Logger.Errorf("cucumber: step failed with error %q", err)
-			return err
+		if _, ok := nonces[chain][addr][nonce]; ok {
+			return fmt.Errorf("%v: nonce %d attributed more than once", sc.ID, t.current.GetTx().GetTxData().GetNonce())
 		}
 		nonces[chain][addr][nonce] = true
 	}
 
-	sc.Logger.WithFields(log.Fields{
-		"EnvelopeReceived": len(e),
-		"msg.Topic":        topic,
-	}).Info("cucumber: step check")
-
 	return nil
 }
 
-func (sc *ScenarioContext) theTxsignerShouldSign() error {
-
-	topic := viper.GetString("kafka.topic.sender")
-	e, err := ReadChanWithTimeout(sc.EnvelopesChan[topic], viper.GetInt64("cucumber.steps.timeout"), len(sc.Envelopes))
-	if err != nil {
-		sc.Logger.Errorf("cucumber: failed to read from topic %s with error %q", topic, err)
-		return err
-	}
-
-	for _, v := range e {
-		if v.GetTx().GetRaw() == nil {
-			err := fmt.Errorf("tx-signer could not sign")
-			sc.Logger.Errorf("cucumber: step failed with error %q", err)
-			return err
-		}
-	}
-
-	sc.Logger.WithFields(log.Fields{
-		"EnvelopeReceived": len(e),
-		"msg.Topic":        topic,
-	}).Info("cucumber: step check")
-
-	return nil
-}
-
-func (sc *ScenarioContext) theTxsenderShouldSendTheTx() error {
-	// TODO call API envelope store
-
-	return nil
-}
-
-func (sc *ScenarioContext) theTxlistenerShouldCatchTheTx() error {
-
-	for chain, count := range GetChainCounts(sc.Envelopes) {
-
-		topic := fmt.Sprintf("%v-%v", viper.GetString("kafka.topic.decoder"), chain)
-		e, err := ReadChanWithTimeout(sc.EnvelopesChan[topic], viper.GetInt64("cucumber.steps.miningtimeout"), int(count))
-		if err != nil {
-			sc.Logger.Errorf("cucumber: failed to read from topic %s failed with error %q", topic, err)
-			return err
+func (sc *ScenarioContext) envelopesShouldHaveRawAndHashSet() error {
+	for i, t := range sc.trackers {
+		if t.current.GetTx().GetRaw() == nil {
+			return fmt.Errorf("%v: raw not set on envelope n°%v", sc.ID, i)
 		}
 
-		for _, v := range e {
-			if v.GetReceipt().GetTxHash() == nil {
-				err := fmt.Errorf("tx-listener could not catch the tx")
-				sc.Logger.Errorf("cucumber: step failed with error %q", err)
-				return err
-			}
-			if v.GetReceipt().GetStatus() == 0 {
-				err := fmt.Errorf("tx-listener: transaction reverted")
-				sc.Logger.Errorf("cucumber: step failed with error %q", err)
-				return err
-			}
+		if t.current.GetTx().GetHash() == nil {
+			return fmt.Errorf("%v: hash not set on envelope n°%v", sc.ID, i)
 		}
-
-		sc.Logger.WithFields(log.Fields{
-			"EnvelopeReceived": len(e),
-			"msg.Topic":        topic,
-		}).Info("cucumber: step check")
 	}
-
 	return nil
 }
 
-func (sc *ScenarioContext) theTxdecoderShouldDecode() error {
-	topic := viper.GetString("kafka.topic.decoded")
-	channel := sc.EnvelopesChan[topic]
-	e, err := ReadChanWithTimeout(channel, viper.GetInt64("cucumber.steps.timeout"), len(sc.Envelopes))
-	if err != nil {
-		sc.Logger.Errorf("cucumber: failed to read from topic %s with error %q", topic, err)
-		return err
+func (sc *ScenarioContext) envelopesShouldHaveFromSet() error {
+	for i, t := range sc.trackers {
+		if t.current.GetFrom() == nil {
+			return fmt.Errorf("%v: from not set on envelope n°%v", sc.ID, i)
+		}
 	}
+	return nil
+}
 
-	for _, v := range e {
-		for _, l := range v.GetReceipt().GetLogs() {
-			if len(l.GetTopics()) > 0 {
-				if len(l.GetDecodedData()) == 0 {
-					err := fmt.Errorf("tx-decoder could not decode the transaction")
-					sc.Logger.Errorf("cucumber: step failed with error %q", err)
-					return err
-				}
+func (sc *ScenarioContext) envelopesShouldHaveLogDecoded() error {
+	for i, t := range sc.trackers {
+		for _, l := range t.current.GetReceipt().GetLogs() {
+			if len(l.GetTopics()) > 0 && len(l.GetDecodedData()) == 0 {
+				return fmt.Errorf("%v: log have not been decoded on envelope n°%v", sc.ID, i)
 			}
 		}
 	}
-
-	sc.Logger.WithFields(log.Fields{
-		"EnvelopeReceived": len(e),
-		"msg.Topic":        topic,
-	}).Info("cucumber: step check")
-
-	return nil
-}
-
-func (sc *ScenarioContext) beforeStep(s *gherkin.Step) {
-
-	sc.Logger = sc.Logger.WithFields(log.Fields{
-		"Step": s.Text,
-	})
-}
-
-func (sc *ScenarioContext) iShouldCatchTheirContractAddresses() error {
-
-	topic := viper.GetString("kafka.topic.decoded")
-	channel := sc.EnvelopesChan[topic]
-	e, err := ReadChanWithTimeout(channel, viper.GetInt64("cucumber.steps.timeout"), len(sc.Envelopes))
-	if err != nil {
-		sc.Logger.Errorf("cucumber: failed to read from a topic %s with error %q", topic, err)
-		return err
-	}
-
-	// Consume unused envelopes stuck in chan
-	topics := []string{
-		viper.GetString("kafka.topic.crafter"),
-		viper.GetString("kafka.topic.nonce"),
-		viper.GetString("kafka.topic.signer"),
-		viper.GetString("kafka.topic.sender"),
-	}
-	for _, topic := range topics {
-		_, _ = ReadChanWithTimeout(sc.EnvelopesChan[topic], viper.GetInt64("cucumber.steps.timeout"), len(e))
-	}
-	for chain, count := range GetChainCounts(sc.Envelopes) {
-		_, _ = ReadChanWithTimeout(sc.EnvelopesChan[fmt.Sprintf("%v-%v", viper.GetString("kafka.topic.decoder"), chain)], viper.GetInt64("cucumber.steps.timeout"), int(count))
-	}
-
-	for _, v := range e {
-		if v.GetReceipt().GetContractAddress() == nil {
-			return fmt.Errorf("could not deploy contract")
-		}
-
-		sc.Value[v.GetMetadata().GetExtra()["AliasContractInstance"]] = v.GetReceipt().GetContractAddress()
-
-		// Envelope processed - remove from scenario context
-		delete(sc.Envelopes, v.GetMetadata().GetId())
-	}
-
-	sc.Logger.WithFields(log.Fields{
-		"EnvelopeReceived": len(e),
-		"msg.Topic":        channel,
-	}).Info("cucumber: step check")
 
 	return nil
 }
 
 // FeatureContext is a initializer for cucumber scenario methods
 func FeatureContext(s *godog.Suite) {
+	sc := NewScenarioContext(
+		chanregistry.GlobalChanRegistry(),
+		registryclient.GlobalContractRegistryClient(),
+		broker.GlobalSyncProducer(),
+		parser.GlobalParser(),
+	)
 
-	sc := &ScenarioContext{}
+	s.BeforeScenario(sc.init)
 
-	s.BeforeScenario(sc.initScenarioContext)
-	s.BeforeStep(sc.beforeStep)
+	s.BeforeStep(func(s *gherkin.Step) {
+		log.WithFields(log.Fields{
+			"step.text":     s.Text,
+			"scenario.name": sc.Definition.Name,
+			"scenario.id":   sc.ID,
+		}).Debugf("scenario: step starts")
+	})
+	s.AfterStep(func(s *gherkin.Step, err error) {
+		log.WithError(err).
+			WithFields(log.Fields{
+				"step.text":     s.Text,
+				"scenario.name": sc.Definition.Name,
+				"scenario.id":   sc.ID,
+			}).Debugf("scenario: step completed")
+	})
 
-	s.Step(`^I store the following contract`, sc.iStoreTheFollowingContract)
-	s.Step(`^I have the following envelope:$`, sc.iHaveTheFollowingEnvelope)
-	s.Step(`^I send these envelopes to CoreStack$`, sc.iSendTheseEnvelopeToCoreStack)
-	s.Step(`^I send this envelope to tx-signer$`, sc.iSendTheseEnvelopeToTxSigner)
-	s.Step(`^CoreStack should receive envelopes$`, sc.coreStackShouldReceiveEnvelopes)
-	s.Step(`^the tx-crafter should set the data$`, sc.theTxcrafterShouldSetTheData)
-	s.Step(`^the tx-nonce should set the nonce$`, sc.theTxnonceShouldSetTheNonce)
-	s.Step(`^the tx-signer should sign$`, sc.theTxsignerShouldSign)
-	s.Step(`^the tx-sender should send the tx$`, sc.theTxsenderShouldSendTheTx)
-	s.Step(`^the tx-listener should catch the tx$`, sc.theTxlistenerShouldCatchTheTx)
-	s.Step(`^the tx-decoder should decode$`, sc.theTxdecoderShouldDecode)
-	s.Step(`^I should catch their contract addresses$`, sc.iShouldCatchTheirContractAddresses)
-	s.Step(`^I send these envelope in WalletGenerator$`, sc.iSendTheseEnvelopeInWalletGenerator)
-	s.Step(`^WalletGenerator should receive them$`, sc.walletGeneratorShouldReceiveThem)
-	s.Step(`^the tx-signer should set the data$`, sc.theTxSignerShouldSetFrom)
+	s.Step(`^I register the following contract$`, sc.iRegisterTheFollowingContract)
+	s.Step(`^I have deployed contract "([^"]*)"$`, sc.iHaveDeployedContract)
+	s.Step(`^I send envelopes to topic "([^"]*)"$`, sc.iSendEnvelopesToTopic)
+	s.Step(`^Envelopes should be in topic "([^"]*)"$`, sc.envelopeShouldBeInTopic)
+	s.Step(`^Envelopes should have payload set$`, sc.envelopesShouldHavePayloadSet)
+	s.Step(`^Envelopes should have nonce set$`, sc.envelopesShouldHaveNonceSet)
+	s.Step(`^Envelopes should have raw and hash set$`, sc.envelopesShouldHaveRawAndHashSet)
+	s.Step(`^Envelopes should have from set$`, sc.envelopesShouldHaveFromSet)
+	s.Step(`^Envelopes should have log decoded$`, sc.envelopesShouldHaveLogDecoded)
 }

@@ -1,19 +1,19 @@
-Feature: deploy an ERC20 contract
+Feature: deploy ERC20 contract
   As an external developer
   I want to deploy a contract
 
-  Scenario: Create an instance of ERC20
-    Given I have the following envelope:
-      | AliasChainId | from                                       | contractName | methodSignature | gas     |
-      | primary      | 0x7E654d251Da770A068413677967F6d3Ea2FeA9E4 | SimpleToken  | constructor()   | 2000000 |
-    When I store the following contract
-      | contractName | fileName         |
+  Scenario: Deploy ERC20
+    Given I register the following contract
+      | name         | artifacts        |
       | SimpleToken  | SimpleToken.json |
-    And I send these envelopes to CoreStack
-    Then CoreStack should receive envelopes
-    Then the tx-crafter should set the data
-    Then the tx-nonce should set the nonce
-    Then the tx-signer should sign
-    Then the tx-sender should send the tx
-    Then the tx-listener should catch the tx
-    Then the tx-decoder should decode
+    When I send envelopes to topic "crafter"
+      | chain.id       | from                                       | contract.name | method.sig      | tx.gas     |
+      | chain.primary  | 0x7E654d251Da770A068413677967F6d3Ea2FeA9E4 | SimpleToken   | constructor()   | 2000000 |
+    Then Envelopes should be in topic "crafter"
+    Then Envelopes should be in topic "nonce"
+    Then Envelopes should be in topic "signer"
+    And Envelopes should have nonce set
+    Then Envelopes should be in topic "sender"
+    And Envelopes should have raw and hash set
+    Then Envelopes should be in topic "decoded"
+    And Envelopes should have log decoded

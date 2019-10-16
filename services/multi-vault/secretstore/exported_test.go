@@ -15,8 +15,8 @@ func TestInit(t *testing.T) {
 	Init(context.Background())
 	assert.NotNil(t, secretStore, "Global secretStore should have been set")
 
-	var secretStore services.SecretStore
-	SetGlobalSecretStore(secretStore)
+	var s services.SecretStore
+	SetGlobalSecretStore(s)
 	assert.Nil(t, GlobalSecretStore(), "Global should be reset to nil")
 
 }

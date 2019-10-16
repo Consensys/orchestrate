@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
-	registryClient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry/client"
+	registry "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/handlers/dispatcher"
 )
 
@@ -16,7 +16,7 @@ func Init(ctx context.Context) {
 		},
 		// Initialize the registryClient
 		func() {
-			registryClient.Init(ctx)
+			registry.Init(ctx)
 		},
 	)
 }

@@ -193,3 +193,18 @@ Environment variable: %q`, cucumberOutputPathEnv)
 	f.String(cucumberOutputPathFlag, cucumberOutputPathDefault, desc)
 	_ = viper.BindPFlag(cucumberOutputPathViperKey, f.Lookup(cucumberOutputPathFlag))
 }
+
+var (
+	cucumberAliasesFlag     = "cucumber-aliases"
+	cucumberAliasesViperKey = "cucumber.aliases"
+	cucumberAliasesDefault  = []string{}
+	cucumberAliasesEnv      = "CUCUMBER_ALIAS"
+)
+
+// Aliases register flag for aliases
+func Aliases(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Aliases for cucumber test scenarios (e.g chain.primary:888)
+Environment variable: %q`, cucumberAliasesEnv)
+	f.StringSlice(cucumberAliasesFlag, cucumberAliasesDefault, desc)
+	_ = viper.BindPFlag(cucumberAliasesViperKey, f.Lookup(cucumberAliasesFlag))
+}

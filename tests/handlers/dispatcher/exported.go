@@ -10,9 +10,14 @@ import (
 )
 
 var (
-	handler  engine.HandlerFunc
-	initOnce = &sync.Once{}
+	handler    engine.HandlerFunc
+	initOnce   = &sync.Once{}
+	keyOfFuncs []KeyOfFunc
 )
+
+func SetKeyOfFuncs(keyOfs ...KeyOfFunc) {
+	keyOfFuncs = keyOfs
+}
 
 // Init initialize Dispatcher Handler
 func Init(ctx context.Context) {
@@ -24,7 +29,7 @@ func Init(ctx context.Context) {
 		// Initialize Channel registry
 		chanregistry.Init(ctx)
 
-		handler = Dispacher(chanregistry.GlobalChanRegistry())
+		handler = Dispatcher(chanregistry.GlobalChanRegistry(), keyOfFuncs...)
 
 		log.Infof("dispatcher: handler ready")
 	})

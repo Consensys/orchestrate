@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	chanRegistry *EnvelopeChanRegistry
+	chanRegistry *ChanRegistry
 	initOnce     = &sync.Once{}
 )
 
@@ -23,11 +23,11 @@ func Init(ctx context.Context) {
 }
 
 // SetGlobalChanRegistry sets global ChanRegistry
-func SetGlobalChanRegistry(c *EnvelopeChanRegistry) {
+func SetGlobalChanRegistry(c *ChanRegistry) {
 	chanRegistry = c
 }
 
 // GlobalHandler returns global EnvelopeRegistry
-func GlobalChanRegistry() *EnvelopeChanRegistry {
+func GlobalChanRegistry() *ChanRegistry {
 	return chanRegistry
 }

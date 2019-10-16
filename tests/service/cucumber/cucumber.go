@@ -9,7 +9,6 @@ import (
 )
 
 func Run(cancel context.CancelFunc, opt *godog.Options) {
-
 	status := godog.RunWithOptions("tests", func(s *godog.Suite) {
 		steps.FeatureContext(s)
 	}, *opt)

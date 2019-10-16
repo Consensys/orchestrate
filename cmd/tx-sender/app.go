@@ -84,10 +84,12 @@ func registerHandlers() {
 	engine.Register(logger.Logger)
 	engine.Register(sarama.Loader)
 	engine.Register(offset.Marker)
+	engine.Register(noncechecker.GlobalRecoveryStatusSetter())
 	engine.Register(producer.GlobalHandler())
 	engine.Register(opentracing.GlobalHandler())
 
 	// Specific handlers tk Sender worker
+	engine.Register(noncechecker.GlobalChecker())
 	engine.Register(sender.GlobalHandler())
 }
 

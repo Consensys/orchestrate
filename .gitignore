@@ -5,6 +5,7 @@
 *.so
 *.dylib
 __pycache__
+bin/
 
 # Test binary, build with `go test -c`
 *.test
@@ -32,9 +33,6 @@ cmake-build-*/
 
 # JIRA plugin
 atlassian-ide-plugin.xml
-
-# Environment file
-.env
 
 # Go packages and sources:
 .gocache

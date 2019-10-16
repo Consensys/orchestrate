@@ -27,14 +27,14 @@ var (
 func TestCoolDown(t *testing.T) {
 	// Create CoolDown controlled credit
 	conf := &Config{
-		Delay:   10 * time.Millisecond,
+		Delay:   100 * time.Millisecond,
 		Stripes: 2,
 	}
 	cntrl := NewController(conf)
 	credit := cntrl.Control(mock.Credit)
 
 	// Prepare test data
-	rounds := 600
+	rounds := 60
 	tests := make([]*testutils.TestRequest, 0)
 	for i := 0; i < rounds; i++ {
 		var expectedAmount *big.Int
@@ -72,10 +72,10 @@ func TestCoolDown(t *testing.T) {
 		switch i % 6 {
 		case 2:
 			// Sleeps half cooldown time
-			time.Sleep(5 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 		case 5:
 			// Sleep to cooldown delay on controller
-			time.Sleep(10 * time.Millisecond)
+			time.Sleep(100 * time.Millisecond)
 		}
 	}
 	wg.Wait()

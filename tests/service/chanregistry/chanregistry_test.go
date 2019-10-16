@@ -4,21 +4,23 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/envelope"
 )
 
 func TestChanRegistry(t *testing.T) {
-	chanregistry := NewChanRegistry()
-	assert.NotNil(t, chanregistry, "Registry should have been set")
+	reg := NewChanRegistry()
 
-	scenarioID := "testScenario"
-	topic := "testTopic"
-	topicChan := chanregistry.NewEnvelopeChan(scenarioID, topic)
-	assert.NotNil(t, topicChan, "Channel should have been created")
+	assert.False(t, reg.HasChan("test-key"), "No channel should be registered")
+	in := &envelope.Envelope{}
+	err := reg.Send("test-key", in)
+	assert.NotNil(t, err, "Sending envelope to non registered channel should error")
 
-	assert.Nil(t, chanregistry.GetEnvelopeChan("dummy", "dummy"), "Should not get a chan")
-	assert.NotNil(t, chanregistry.GetEnvelopeChan(scenarioID, topic), "Should get a chan")
+	// Register channel
+	ch := make(chan *envelope.Envelope, 2)
+	reg.Register("test-key", ch)
+	assert.True(t, reg.HasChan("test-key"), "Channel should be registered")
 
-	_ = chanregistry.CloseEnvelopeChan(scenarioID, topic)
-	assert.Nil(t, chanregistry.GetEnvelopeChan(scenarioID, topic), "Should not get a chan")
-
+	err = reg.Send("test-key", in)
+	assert.Nil(t, err, "Sending envelope to registered channel should not error")
+	assert.Equal(t, in, <-ch, "Envelope should have been sent to channel")
 }

@@ -11,7 +11,7 @@ func TestInit(t *testing.T) {
 	Init(context.Background())
 	assert.NotNil(t, GlobalChanRegistry(), "Global should have been set")
 
-	var c *EnvelopeChanRegistry
+	var c *ChanRegistry
 	SetGlobalChanRegistry(c)
 	assert.Nil(t, GlobalChanRegistry(), "Global should be reset to nil")
 }
