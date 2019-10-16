@@ -31,9 +31,6 @@ var l = createLogger("worker")
 func init() {
 	// Create app
 	app = common.NewApp()
-
-	// Set Kafka Group value
-	viper.Set("kafka.group", "group-sender")
 }
 
 func startServer(ctx context.Context) {
@@ -74,7 +71,11 @@ func initComponents(ctx context.Context) {
 		func() { initHandlers(ctx) },
 
 		// Initialize ConsumerGroup
-		func() { broker.InitConsumerGroup(ctx) },
+		func() {
+			// Set Kafka Group value
+			viper.Set("kafka.group", "group-sender")
+			broker.InitConsumerGroup(ctx)
+		},
 	)
 }
 
