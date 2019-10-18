@@ -18,7 +18,7 @@ run-coverage: ## Generate global code coverage report
 	@sh scripts/coverage.sh $(PACKAGES)
 
 gobuild:
-	@go build -i -o ./build/bin/corestack
+	@GOOS=linux GOARCH=amd64 go build -i -o ./build/bin/corestack
 
 docker-build:
 	@docker-compose build
@@ -91,7 +91,7 @@ gen-help-docker: docker-build
 	done
 
 gobuild-e2e:
-	@go build -i -o ./build/bin/e2e ./tests/cmd 
+	@GOOS=linux GOARCH=amd64 go build -i -o ./build/bin/e2e ./tests/cmd 
 
 corestack: gobuild
 	@docker-compose -f docker-compose.dev.yml up -d $(CMD_RUN)
