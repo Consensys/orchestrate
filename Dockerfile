@@ -36,4 +36,3 @@ COPY --from=builder /bin/main /go/bin/main
 USER appuser
 EXPOSE 8080
 ENTRYPOINT ["/go/bin/main"]
-CMD ["run"]

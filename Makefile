@@ -1,5 +1,5 @@
 GOFILES := $(shell find . -name '*.go' | egrep -v "^\./\.go" | grep -v _test.go)
-PACKAGES ?= $(shell go list ./...)
+PACKAGES ?= $(shell go list ./... | go list ./... | grep -Fv -e e2e -e examples )
 CMD_RUN = tx-crafter tx-nonce tx-signer tx-sender tx-listener tx-decoder contract-registry envelope-store
 CMD_MIGRATE = envelope-store
 
@@ -74,20 +74,22 @@ report:
 
 gen-help: gobuild
 	@mkdir -p build/cmd
+	@./build/bin/corestack help tx-crafter | grep -A 9999 "Global Flags:" | head -n -2 > build/cmd/global.txt
 	@for cmd in $(CMD_RUN); do \
-		./build/bin/corestack help $$cmd run | tail -n +3 > build/cmd/$$cmd-run.md; \
+		./build/bin/corestack help $$cmd run | grep -B 9999 "Global Flags:" | tail -n +3 | head -n -2 > build/cmd/$$cmd-run.txt; \
 	done
 	@for cmd in $(CMD_MIGRATE); do \
-		./build/bin/corestack help $$cmd migrate | tail -n +3 > build/cmd/$$cmd-migrate.md; \
+		./build/bin/corestack help $$cmd migrate | grep -B 9999 "Global Flags:" | tail -n +3 | head -n -2 > build/cmd/$$cmd-migrate.txt; \
 	done
 
 gen-help-docker: docker-build
 	@mkdir -p build/cmd
+	@docker-compose run worker help tx-crafter | grep -A 9999 "Global Flags:" | head -n -3 > build/cmd/global.txt
 	@for cmd in $(CMD_RUN); do \
-		docker-compose run worker help $$cmd run | tail -n +3 | head -n -1 > build/cmd/$$cmd-run.md; \
+		docker-compose run worker help $$cmd run | grep -B 9999 "Global Flags:" | tail -n +3 | head -n -3 > build/cmd/$$cmd-run.txt; \
 	done
 	@for cmd in $(CMD_MIGRATE); do \
-		docker-compose run worker help $$cmd migrate | tail -n +3 | head -n -1 > build/cmd/$$cmd-migrate.md; \
+		docker-compose run worker help $$cmd migrate | grep -B 9999 "Global Flags:" | tail -n +3 | head -n -3 > build/cmd/$$cmd-migrate.txt; \
 	done
 
 gobuild-e2e:
