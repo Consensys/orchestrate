@@ -5,6 +5,7 @@ import (
 	"math/big"
 
 	"github.com/Shopify/sarama"
+	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/encoding/sarama"
@@ -35,6 +36,9 @@ func (f *Faucet) prepareMsg(r *types.Request, msg *sarama.ProducerMessage) error
 		From:  ethereum.HexToAccount(r.Creditor.Hex()),
 		Tx: &ethereum.Transaction{
 			TxData: (&ethereum.TxData{}).SetValue(r.Amount).SetTo(r.Beneficiary),
+		},
+		Metadata: &envelope.Metadata{
+			Id: uuid.NewV4().String(),
 		},
 	}
 
