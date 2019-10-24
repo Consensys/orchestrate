@@ -101,14 +101,27 @@ corestack: gobuild
 stop-corestack:
 	@docker-compose -f docker-compose.dev.yml stop $(CMD_RUN)
 
+down-corestack:
+	@docker-compose -f docker-compose.dev.yml down --volumes --timeout 0
+
 deps:
 	@docker-compose -f scripts/deps/docker-compose.yml up -d
+
+down-deps:
+	@docker-compose -f scripts/deps/docker-compose.yml down --volumes --timeout 0
 
 quorum:
 	@docker-compose -f scripts/deps/docker-compose.quorum.yml up -d
 
 stop-quorum:
 	@docker-compose -f scripts/deps/docker-compose.quorum.yml stop
+
+down-quorum:
+	@docker-compose -f scripts/deps/docker-compose.quorum.yml down --volumes --timeout 0
+
+up-all: deps quorum corestack
+
+down-all: down-corestack down-quorum down-deps
 
 e2e: gobuild-e2e
 	@docker-compose -f docker-compose.dev.yml up e2e

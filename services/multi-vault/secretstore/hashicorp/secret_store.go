@@ -20,23 +20,23 @@ type SecretStore struct {
 // NewSecretStore construct a new hashicorps vault given a configfile or nil
 func NewSecretStore(config *Config) (*SecretStore, error) {
 
-	client, err := NewVaultClient(config)
+	hash, err := NewVaultClient(config)
 	if err != nil {
 		log.Fatalf("Could not start vault: %v", err)
 	}
 
-	err = client.SetTokenFromConfig(config)
+	err = hash.SetTokenFromConfig(config)
 	if err != nil {
 		log.Fatalf("Could not start vault: %v", err)
 	}
 
-	hash := &SecretStore{
-		Client: client,
+	store := &SecretStore{
+		Client: hash,
 		Config: config,
 	}
 
 	store.ManageToken()
-	return hash, nil
+	return store, nil
 }
 
 // ManageToken starts a loop that will renew the token automatically

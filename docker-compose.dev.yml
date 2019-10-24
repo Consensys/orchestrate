@@ -12,6 +12,8 @@ x-default-variables: &default-variables
   NONCE_MANAGER_TYPE: ${NONCE_MANAGER_TYPE-redis}
   REDIS_ADDRESS: ${REDIS_ADDRESS-redis:6379}
   SECRET_PKEY: ${SECRET_PKEY-}
+  SECRET_STORE: ${SECRET_STORE-hashicorp}
+  VAULT_ADDR: ${VAULT_ADDR-http://vault:8200}
   # FAUCET_CREDITOR_ADDRESS: ${FAUCET_CREDITOR_ADDRESS-0x93f7274c9059e601be4512f656b57b830e019e41}@${GETH_NETWORKID-888}
   ABI: ${ABI-}
   ETH_CLIENT_RETRY_MAX_ELAPSED_TIME: 5s
@@ -81,13 +83,12 @@ services:
     <<: *container-common
     environment: 
       <<: *default-variables
-      SECRET_STORE: ${SECRET_STORE-hashicorp}
-      VAULT_ADDR: ${VAULT_ADDR-http://vault:8200}
     restart: "no"
     working_dir: /scripts
     volumes:
       - ./scripts/hashicorp:/scripts
       - vault-token:/vault/token
+    entrypoint: ""
     command: /bin/sh ./init.sh
 
   tx-signer:

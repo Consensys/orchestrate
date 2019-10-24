@@ -45,7 +45,7 @@ func NewVaultClient(config *Config) (*Hashicorp, error) {
 	vaultConfig := ToVaultConfig(config)
 	client, err := api.NewClient(vaultConfig)
 	if err != nil {
-		return nil, errors.ConnectionError(vaultConfig.Error.Error()).
+		return nil, errors.ConnectionError("Connection error: %v", err).
 			SetComponent(component)
 	}
 
