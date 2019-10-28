@@ -1,4 +1,4 @@
-package opentracing
+package trainjector
 
 import (
 	"testing"
@@ -7,7 +7,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/tracing/opentracing"
@@ -18,7 +17,7 @@ var (
 	OpenTracingRootName = "Root Operation"
 	OpenTracingName     = "Transaction Operation"
 	MockTracer          = mocktracer.New()
-	Mod                 = 5
+	Mod                 = 2
 )
 
 func makeTracerContext(i int) *engine.TxContext {
@@ -26,26 +25,14 @@ func makeTracerContext(i int) *engine.TxContext {
 	txctx := engine.NewTxContext().Prepare(log.NewEntry(log.StandardLogger()), nil)
 
 	switch i % Mod {
-
 	default:
 		// There is no previous span and operation Name is not changed
 		return txctx
 	case 1:
 		// There is a previous span in the txctx context
-		// The handler should override it
+		// The handler should create a Child span of the previously existing one
 		mockSpan := MockTracer.SpanBuilder(OpenTracingRootName).Build()
 		mockSpan.AttachTo(txctx)
-		return txctx
-	case 2:
-		// There is a previous span in the Envelope Carrier
-		// The handler should create a Child span of the previously existing one
-		mockSpanContext := oTMocktracer.MockSpanContext{
-			TraceID: 10,
-			SpanID:  11,
-			Sampled: true,
-			Baggage: nil,
-		}
-		_ = MockTracer.InjectInCarrier(mockSpanContext, txctx)
 		return txctx
 	}
 }
@@ -56,7 +43,7 @@ type TracerTestSuite struct {
 
 func (s *TracerTestSuite) SetupSuite() {
 	opentracing.SetGlobalTracer(MockTracer)
-	s.Handler = TxSpanFromBroker(MockTracer, OpenTracingName)
+	s.Handler = TraceInjector(MockTracer, OpenTracingName)
 }
 
 func (s *TracerTestSuite) TestTxSpanFromBroker() {
@@ -64,7 +51,8 @@ func (s *TracerTestSuite) TestTxSpanFromBroker() {
 	rounds := 2
 	var txctxSlice []*engine.TxContext
 	for i := 0; i < rounds; i++ {
-		txctxSlice = append(txctxSlice, makeTracerContext(i))
+		txctx := makeTracerContext(i)
+		txctxSlice = append(txctxSlice, txctx)
 	}
 
 	log.Infof("TestTxSpanFromBroker: txctxSlice: %v", txctxSlice)
@@ -80,12 +68,8 @@ func (s *TracerTestSuite) TestTxSpanFromBroker() {
 
 		switch i % Mod {
 		default:
-			assert.Equal(s.T(), OpenTracingName, span.Span.(*oTMocktracer.MockSpan).OperationName, "Expected right operationName")
+			// We just need to know if there was a panic in there
 		case 1:
-			assert.Equal(s.T(), OpenTracingName, span.Span.(*oTMocktracer.MockSpan).OperationName, "Expected right operationName")
-		case 2:
-			assert.Equal(s.T(), OpenTracingName, span.Span.(*oTMocktracer.MockSpan).OperationName, "Expected right operationName")
-			assert.Equal(s.T(), 44, span.Span.(*oTMocktracer.MockSpan).ParentID, "Expected right ParentID from txctx.Context")
 			assert.Equal(s.T(), 43, spanContext.(oTMocktracer.MockSpanContext).TraceID, "Expected right TraceID from txctx.Envelope.Metadata")
 		}
 	}

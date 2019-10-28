@@ -4,8 +4,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/opentracing/opentracing-go"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/tracing/opentracing"
 )
 
 // Errors which may occur at operation time.
@@ -15,51 +15,25 @@ var (
 
 // TxSpanFromBroker create a new span with the given operation name and options. If a span
 // is found in the TxContext and in the go Context, it will be used as the parent of the resulting span.
-func TxSpanFromBroker(tracer opentracing.Tracer, defaultOperationName string) engine.HandlerFunc {
+func TxSpanFromBroker(tracer *opentracing.Tracer, defaultOperationName string) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		// opts is a list of StartSpanOptions to setup the Span on creation
-		opts := make([]opentracing.StartSpanOption, 0)
-
+		// If there is a span in the context, finish it
+		prevSpan := opentracing.SpanFromContext(txctx)
+		if prevSpan.Span != nil {
+			prevSpan.Finish()
+		}
 		// Prevent updating global operationName variable
 		_operationName := defaultOperationName
-
-		// startTime will be used to setup the Start Time of the span when created
-		startTime := time.Now()
-
+		// Builds a span following from a carried trace if it exists
+		span := tracer.SpanBuilder(_operationName).
+			FollowingFromCarrier(txctx).
+			StartingAt(time.Now()).
+			Build()
+		// Attach the span to txctx
+		span.AttachTo(txctx)
+		// Run the next middlewares
 		txctx.Next()
-
-		// find Span in TxContext.Envelope metadata, this section has been moved after the txctx.Next()
-		// to be as generalist as possible
-		if spanContext, err := tracer.Extract(opentracing.TextMap, txctx.Envelope.Carrier()); err == nil {
-			opts = append(opts, opentracing.FollowsFrom(spanContext))
-			txctx.Logger.Tracef("TxSpanFromBroker: Spancontext in Envelope: %v", spanContext)
-		} else {
-			txctx.Logger.Tracef("TxSpanFromBroker: No span found during span Extraction: %v", err)
-		}
-
-		// find span context in OpenTracing library
-		if spanParent := opentracing.SpanFromContext(txctx.Context()); spanParent != nil {
-			opts = append(opts, opentracing.FollowsFrom(spanParent.Context()))
-			txctx.Logger.Tracef("TxSpanFromBroker: Spanparent in Envelope: %v", spanParent)
-		} else {
-			txctx.Logger.Tracef("TxSpanFromBroker: No span found during span Extraction from context: %v", spanParent)
-		}
-
-		// Update span operationName if it has been created by the other middleware
-		if value, ok := txctx.Get("operationName").(string); ok {
-			_operationName = value
-		}
-
-		// Add in StartSpanOptions the starting time previously set
-		opts = append(opts, opentracing.StartTime(startTime))
-
-		span := tracer.StartSpan(_operationName, opts...)
-		defer span.Finish()
-
-		txctx.WithContext(opentracing.ContextWithSpan(txctx.Context(), span))
-
-		if err := tracer.Inject(span.Context(), opentracing.TextMap, txctx.Envelope.Carrier()); err != nil {
-			txctx.Logger.Errorf("TxSpanFromBroker: Error during span Injection %v", err)
-		}
+		// Close the span and report
+		span.Finish()
 	}
 }

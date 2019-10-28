@@ -10,7 +10,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
 	grpclogger "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/grpc/logger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/tracing/opentracing/jaeger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/tracing/opentracing"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
 )
@@ -29,7 +29,7 @@ func Init(ctx context.Context) {
 	initOnce.Do(func() {
 		if server == nil {
 			// Initialize OpenTracing tracer
-			jaeger.Init(ctx)
+			opentracing.Init(ctx)
 
 			// Declare server with interceptors
 			server = NewServerWithDefaultOptions()

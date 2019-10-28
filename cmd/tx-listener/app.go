@@ -17,6 +17,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/logger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/opentracing"
 	producer "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/producer/tx-listener"
+	injector "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/trace-injector"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
@@ -51,8 +52,13 @@ func initHandlers(ctx context.Context) {
 	common.InParallel(
 		// Initialize Jaeger
 		func() {
-			ctx = context.WithValue(ctx, serviceName("service-name"), viper.GetString("jaeger.service.name"))
-			opentracing.Init(ctx)
+			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString("jaeger.service.name"))
+			opentracing.Init(ctxWithValue)
+		},
+		// Initialize Jaeger trace injector
+		func() {
+			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString("jaeger.service.name"))
+			injector.Init(ctxWithValue)
 		},
 		// Initialize store
 		func() {
@@ -91,10 +97,12 @@ func registerHandlers() {
 	engine.Register(logger.Logger)
 
 	// Specific handlers to tx-listener
-	engine.Register(producer.GlobalHandler())
-	engine.Register(receiptloader.Loader)
 	engine.Register(opentracing.GlobalHandler())
+	engine.Register(receiptloader.Loader)
 	engine.Register(envelopeloader.GlobalHandler())
+	engine.Register(opentracing.GlobalHandler())
+	engine.Register(producer.GlobalHandler())
+	engine.Register(injector.GlobalHandler())
 }
 
 // Start starts application

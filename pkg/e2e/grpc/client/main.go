@@ -6,7 +6,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	grpcclient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/grpc/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/tracing/opentracing/jaeger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/tracing/opentracing"
 	"google.golang.org/grpc/examples/helloworld/helloworld"
 )
 
@@ -29,7 +29,7 @@ func main() {
 	log.SetLevel(log.DebugLevel)
 
 	// Initialize Jaeger
-	jaeger.Init(context.Background())
+	opentracing.Init(context.Background())
 
 	conn, err := grpcclient.DialContextWithDefaultOptions(
 		context.Background(),

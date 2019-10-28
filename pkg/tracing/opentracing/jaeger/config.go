@@ -5,7 +5,13 @@ import (
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+
+	"github.com/opentracing/opentracing-go"
+	log "github.com/sirupsen/logrus"
 	"github.com/uber/jaeger-client-go/config"
+	"github.com/uber/jaeger-client-go/rpcmetrics"
+	jaegermetrics "github.com/uber/jaeger-lib/metrics"
+	"github.com/uber/jaeger-lib/metrics/prometheus"
 )
 
 func init() {
@@ -231,4 +237,27 @@ func NewConfig() *config.Configuration {
 			Password:           viper.GetString(passwordViperKey),
 		},
 	}
+}
+
+// TracerFromConfig returns a wrapped tracer from config object
+func TracerFromConfig(c *config.Configuration) (opentracing.Tracer, error) {
+	metrics := prometheus.New()
+	tracer, _, err := c.NewTracer(
+		config.Logger(logger{entry: log.StandardLogger().WithFields(log.Fields{"system": "opentracing.jaeger"})}),
+		config.Observer(rpcmetrics.NewObserver(metrics.Namespace(jaegermetrics.NSOptions{Name: c.ServiceName}), rpcmetrics.DefaultNameNormalizer)),
+	)
+
+	return tracer, err
+}
+
+// TracerFromViperConfig returns a wrapped Tracer object.
+// Log fatal if it encounters an error
+func TracerFromViperConfig() opentracing.Tracer {
+	conf := NewConfig()
+	tracer, err := TracerFromConfig(conf)
+	if err != nil {
+		log.Fatalf("Could not instantiate tracer object: %v", err)
+	}
+
+	return tracer
 }

@@ -13,6 +13,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/offset"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/opentracing"
 	producer "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/producer/tx-nonce"
+	injector "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/trace-injector"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
@@ -47,8 +48,13 @@ func initHandlers(ctx context.Context) {
 	common.InParallel(
 		// Initialize Jaeger tracer
 		func() {
-			ctx = context.WithValue(ctx, serviceName("service-name"), viper.GetString("jaeger.service.name"))
-			opentracing.Init(ctx)
+			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString("jaeger.service.name"))
+			opentracing.Init(ctxWithValue)
+		},
+		// Initialize Jaeger tracer injector
+		func() {
+			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString("jaeger.service.name"))
+			injector.Init(ctxWithValue)
 		},
 		// Initialize Nonce manager
 		func() {
@@ -82,11 +88,13 @@ func initComponents(ctx context.Context) {
 
 func registerHandlers() {
 	// Generic handlers on every engine
+	engine.Register(opentracing.GlobalHandler())
 	engine.Register(logger.Logger)
 	engine.Register(sarama.Loader)
 	engine.Register(offset.Marker)
-	engine.Register(producer.GlobalHandler())
 	engine.Register(opentracing.GlobalHandler())
+	engine.Register(producer.GlobalHandler())
+	engine.Register(injector.GlobalHandler())
 
 	// Specific handlers tk Tx-Nonce worker
 	engine.Register(nonceattributor.GlobalHandler())

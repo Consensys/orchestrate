@@ -1,4 +1,4 @@
-package opentracing
+package trainjector
 
 import (
 	"context"
@@ -31,9 +31,9 @@ func Init(ctx context.Context) {
 		}
 
 		// Create Handler
-		handler = TxSpanFromBroker(opentracing.GetGlobalTracer(), operationName)
+		handler = TraceInjector(opentracing.GetGlobalTracer(), operationName)
 
-		log.Infof("logger: open-tracing span-creator handler ready")
+		log.Infof("logger: open-tracing trace-injector handler ready")
 	})
 }
 

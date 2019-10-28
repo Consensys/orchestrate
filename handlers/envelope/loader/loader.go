@@ -49,5 +49,7 @@ func EnvelopeLoader(s evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
 		}
 
 		txctx.Logger.Debugf("envelope-loader: envelope re-constituted")
+
+		txctx.Next()
 	}
 }

@@ -16,6 +16,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/offset"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/opentracing"
 	producer "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/producer/tx-crafter"
+	injector "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/trace-injector"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
@@ -50,10 +51,14 @@ func initHandlers(ctx context.Context) {
 	common.InParallel(
 		// Initialize Jaeger tracer
 		func() {
-			ctx = context.WithValue(ctx, serviceName("service-name"), viper.GetString("jaeger.service.name"))
-			opentracing.Init(ctx)
+			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString("jaeger.service.name"))
+			opentracing.Init(ctxWithValue)
 		},
-
+		// Initialize trace injector
+		func() {
+			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString("jaeger.service.name"))
+			injector.Init(ctxWithValue)
+		},
 		// Initialize crafter
 		func() {
 			crafter.Init(ctx)
@@ -100,11 +105,13 @@ func initConsumerGroup(ctx context.Context) {
 	)
 	// Register handlers on engine
 	// Generic handlers on every worker
+	engine.Register(opentracing.GlobalHandler())
 	engine.Register(logger.Logger)
 	engine.Register(sarama.Loader)
 	engine.Register(offset.Marker)
-	engine.Register(producer.GlobalHandler())
 	engine.Register(opentracing.GlobalHandler())
+	engine.Register(producer.GlobalHandler())
+	engine.Register(injector.GlobalHandler())
 
 	// Specific handlers tk Tx-Crafter worker
 	engine.Register(faucet.GlobalHandler())
