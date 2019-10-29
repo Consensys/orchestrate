@@ -60,6 +60,9 @@ func (l *SignalListener) processSignal(sig os.Signal) {
 	case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
 		log.Warnf("signal: %q intercepted", sig.String())
 		l.cb(sig)
+	case syscall.SIGPIPE:
+		// Ignore random broken pipe
+		log.Debugf("signal: %q intercepted", sig.String())
 	default:
 		log.Warnf("signal: unknown signal %q intercepted", sig.String())
 	}
