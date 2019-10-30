@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine/testutils"
@@ -33,10 +32,8 @@ func makeFaucetContext(i int) *engine.TxContext {
 	switch i % 2 {
 	case 0:
 		txctx.Envelope.Chain = chain.FromInt(0)
-		txctx.Set("errors", 1)
 	case 1:
 		txctx.Envelope.Chain = chain.FromInt(10)
-		txctx.Set("errors", 0)
 	}
 	return txctx
 }
@@ -58,14 +55,6 @@ func (s *FaucetTestSuite) TestFaucet() {
 
 	// Handle contexts
 	s.Handle(txctxs)
-
-	for _, txctx := range txctxs {
-		assert.Len(s.T(), txctx.Envelope.Errors, txctx.Get("errors").(int), "Expected right count of errors")
-		for _, err := range txctx.Envelope.Errors {
-			assert.Equal(s.T(), "handler.faucet.mock", err.GetComponent(), "Error should  component should have been set")
-			assert.True(s.T(), errors.IsFaucetWarning(err), "Error should  be correct")
-		}
-	}
 }
 
 func TestFaucet(t *testing.T) {

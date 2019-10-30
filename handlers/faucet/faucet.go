@@ -3,6 +3,7 @@ package faucet
 import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/faucet"
 	faucettypes "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/types"
 )
@@ -23,8 +24,8 @@ func Faucet(fct faucet.Faucet) engine.HandlerFunc {
 		// Credit
 		amount, approved, err := fct.Credit(txctx.Context(), req)
 		if err != nil {
-			e := txctx.Error(err).ExtendComponent(component)
-			txctx.Logger.WithError(e).Errorf("faucet: credit error")
+			e := errors.FromError(err).ExtendComponent(component)
+			txctx.Logger.WithError(e).Warnf("faucet: credit error")
 			return
 		}
 
