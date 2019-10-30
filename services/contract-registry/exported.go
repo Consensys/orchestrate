@@ -7,17 +7,22 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry/pg"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry/redis"
+)
+
+const (
+	component   = "contract-registry"
+	postgresOpt = "postgres"
+	redisOpt    = "redis"
+	mockOpt     = "mock"
 )
 
 var (
 	registry svc.RegistryServer
 	initOnce = &sync.Once{}
-	redisOpt = "redis"
-	mockOpt  = "mock"
 )
 
 // Init initialize ABI ContractRegistry
@@ -27,17 +32,20 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		// Initialize Ethereum client
-		ethclient.Init(ctx)
-
 		switch viper.GetString(typeViperKey) {
+		case postgresOpt:
+			// Initialize postgres Registry
+			pg.Init()
+
+			// Create contract-registry
+			registry = pg.GlobalContractRegistry()
 		case redisOpt:
-			// Initialize mock Registry
+			// Initialize redis Registry
 			redis.Init()
 
 			// Create contract-registry
 			registry = redis.GlobalContractRegistry()
-		case "mock":
+		case mockOpt:
 			// Initialize mock Registry
 			mock.Init()
 
@@ -46,13 +54,13 @@ func Init(ctx context.Context) {
 		default:
 			log.WithFields(log.Fields{
 				"type": viper.GetString(typeViperKey),
-			}).Fatal("contract-registry: unknown type")
+			}).Fatalf("%s: unknown type", component)
 		}
 
 		// Read ABIs from ABI viper configuration
 		contracts, err := FromABIConfig()
 		if err != nil {
-			log.WithError(err).Fatal("abi: could not initialize contract-registry")
+			log.WithError(err).Fatalf("%s: could not initialize contract-registry", component)
 		}
 
 		// Register contracts
@@ -60,7 +68,7 @@ func Init(ctx context.Context) {
 			_, err := registry.RegisterContract(ctx, &svc.RegisterContractRequest{Contract: contract})
 
 			if err != nil {
-				log.WithError(err).Fatal("abi: could not register ABI")
+				log.WithError(err).Fatalf("%s: could not register ABI", component)
 			}
 		}
 	})

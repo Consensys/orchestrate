@@ -1,11 +1,11 @@
-package envelopestore
+package contractregistry
 
 import (
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/database/postgres"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/envelope-store/pg/migrations"
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry/pg/migrations"
 )
 
 // newMigrateCmd create migrate command

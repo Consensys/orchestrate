@@ -1,11 +1,14 @@
+//nolint:stylecheck
 package abi
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"regexp"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
+	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
 )
@@ -100,8 +103,8 @@ func StringToContract(s string) (*Contract, error) {
 }
 
 // ToABI returns a Geth ABI object built from a contract ABI
-func (c *Contract) ToABI() (*abi.ABI, error) {
-	a := &abi.ABI{}
+func (c *Contract) ToABI() (*ethabi.ABI, error) {
+	a := &ethabi.ABI{}
 
 	if len(c.Abi) > 0 {
 		err := a.UnmarshalJSON(c.Abi)
@@ -111,6 +114,25 @@ func (c *Contract) ToABI() (*abi.ABI, error) {
 	}
 
 	return a, nil
+}
+
+// GetABICompacted returns a compacted version of the ABI
+func (c *Contract) GetABICompacted() ([]byte, error) {
+	buffer := new(bytes.Buffer)
+	if err := json.Compact(buffer, c.Abi); err != nil {
+		return nil, err
+	}
+	return buffer.Bytes(), nil
+}
+
+// CompactABI compact inplace the ABI
+func (c *Contract) CompactABI() error {
+	compactedABI, err := c.GetABICompacted()
+	if err != nil {
+		return err
+	}
+	c.Abi = compactedABI
+	return nil
 }
 
 // IsConstructor indicate whether the method refers to a deployment

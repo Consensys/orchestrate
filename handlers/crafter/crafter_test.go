@@ -216,7 +216,9 @@ func (s *CrafterTestSuite) SetupSuite() {
 				Id: &abi.ContractId{
 					Name: "known",
 				},
-				Bytecode: hexutil.MustDecode("0x"),
+				Abi:              []byte(`[]`),
+				Bytecode:         []byte{1, 2, 3},
+				DeployedBytecode: []byte{1, 2},
 			},
 		})
 	assert.NoError(s.T(), err)

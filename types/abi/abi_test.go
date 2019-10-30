@@ -48,7 +48,7 @@ func TestFromString(t *testing.T) {
 	assert.NotEmpty(t, c.Abi, "ABI should have been registered")
 	assert.Equal(t, []byte{0xab, 0xcd, 0x12, 0x34, 0xef}, c.Bytecode, "Bytecode should be correct")
 
-	c, err = StringToContract("ERC20[v0.1.2-alpha]:[{\"constant\":true,\"inputs\":[],\"name\":\"testMethod\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]:0xabcd1234ef:0xabcd1234ef")
+	c, err = StringToContract("ERC20[v0.1.2-alpha]:[    {\"constant\":true,\"inputs\":[],\"name\":\"testMethod\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]:0xabcd1234ef:0xabcd1234ef")
 	assert.NoError(t, err, "No error expected")
 	assert.Equal(t, "ERC20", c.GetName(), "Contract should be correct")
 	assert.Equal(t, "v0.1.2-alpha", c.GetTag(), "Tag should be correct")
@@ -60,6 +60,15 @@ func TestFromString(t *testing.T) {
 	assert.NoError(t, err, "ABI has been properly parsed")
 	assert.Len(t, gethABI.Methods, 1, "Method has been registered")
 	assert.Equal(t, "testMethod", gethABI.Methods["testMethod"].Name, "method name should match")
+
+	compactedBytes := []byte(`[{"constant":true,"inputs":[],"name":"testMethod","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}]`)
+	compactedABI, err := c.GetABICompacted()
+	assert.NoError(t, err, "ABI should be properly compacted")
+	assert.Equal(t, compactedBytes, compactedABI)
+
+	err = c.CompactABI()
+	assert.NoError(t, err, "ABI should be properly compacted")
+	assert.Equal(t, compactedBytes, c.GetAbi())
 
 	_, err = StringToContract("ERC20[v0.1.2;alpha]")
 	assert.Error(t, err, "Expected error")

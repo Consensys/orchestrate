@@ -1,11 +1,11 @@
 package main
 
 import (
-	"log"
 	"os"
 	"os/signal"
 
 	"github.com/Shopify/sarama"
+	log "github.com/sirupsen/logrus"
 )
 
 var kafkaUrls = []string{"localhost:9092"}
@@ -43,12 +43,12 @@ ConsumerLoop:
 	for {
 		select {
 		case msg := <-partitionConsumer.Messages():
-			log.Printf("Consumed message offset %d\n", msg.Offset)
+			log.Infof("Consumed message offset %d", msg.Offset)
 			consumed++
 		case <-signals:
 			break ConsumerLoop
 		}
 	}
 
-	log.Printf("Consumed: %d\n", consumed)
+	log.Infof("Consumed: %d", consumed)
 }

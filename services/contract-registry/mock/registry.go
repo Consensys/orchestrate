@@ -21,7 +21,7 @@ type ContractRegistry struct {
 	contractHashes map[string]map[string]ethcommon.Hash
 
 	// Bytecode hash to artifacts (ABI, bytecode and deployed bytecode)
-	artifacts map[ethcommon.Hash]*artifact
+	artifacts map[ethcommon.Hash]*rcommon.Artifact
 
 	// Address to Codehash (deployed bytecode hash) map
 	codehashes map[string]map[ethcommon.Address]ethcommon.Hash
@@ -33,19 +33,13 @@ type ContractRegistry struct {
 	events map[ethcommon.Hash]map[ethcommon.Hash]map[uint][][]byte
 }
 
-type artifact struct {
-	Abi              []byte `protobuf:"bytes,2,opt,name=abi,proto3" json:"abi,omitempty"`
-	Bytecode         []byte `protobuf:"bytes,3,opt,name=bytecode,proto3" json:"bytecode,omitempty"`
-	DeployedBytecode []byte `protobuf:"bytes,6,opt,name=deployedBytecode,proto3" json:"deployedBytecode,omitempty"`
-}
-
 var defaultCodehash = ethcommon.Hash{}
 
 // NewRegistry creates a ContractRegistry
 func NewRegistry() *ContractRegistry {
 	r := &ContractRegistry{
 		contractHashes: make(map[string]map[string]ethcommon.Hash),
-		artifacts:      make(map[ethcommon.Hash]*artifact),
+		artifacts:      make(map[ethcommon.Hash]*rcommon.Artifact),
 		codehashes:     make(map[string]map[ethcommon.Address]ethcommon.Hash),
 		methods:        make(map[ethcommon.Hash]map[[4]byte][][]byte),
 		events:         make(map[ethcommon.Hash]map[ethcommon.Hash]map[uint][][]byte),
@@ -59,13 +53,18 @@ func NewRegistry() *ContractRegistry {
 func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.RegisterContractRequest) (*svc.RegisterContractResponse, error) {
 	contract := req.GetContract()
 
+	bytecode, deployedBytecode, abiRaw, err := rcommon.CheckExtractArtifacts(contract)
+	if err != nil {
+		return nil, err
+	}
+
 	name, tag, err := rcommon.CheckExtractNameTag(contract.GetId())
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	if contract.GetBytecode() != nil {
-		bytecodeHash := crypto.Keccak256Hash(contract.GetBytecode())
+	if bytecode != nil {
+		bytecodeHash := crypto.Keccak256Hash(bytecode)
 
 		if r.contractHashes[name] == nil {
 			r.contractHashes[name] = make(map[string]ethcommon.Hash)
@@ -74,20 +73,20 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 		r.contractHashes[name][tag] = bytecodeHash
 		r.contractHashes[name]["latest"] = bytecodeHash
 
-		r.artifacts[bytecodeHash] = &artifact{
-			Abi:              contract.GetAbi(),
-			Bytecode:         contract.GetBytecode(),
-			DeployedBytecode: contract.GetDeployedBytecode(),
+		r.artifacts[bytecodeHash] = &rcommon.Artifact{
+			Abi:              abiRaw,
+			Bytecode:         bytecode,
+			DeployedBytecode: deployedBytecode,
 		}
 	}
 
-	if len(contract.GetAbi()) != 0 {
-		codeHash := crypto.Keccak256Hash(contract.GetDeployedBytecode())
+	if len(abiRaw) != 0 {
+		codeHash := crypto.Keccak256Hash(deployedBytecode)
 		contractAbi, err := contract.ToABI()
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(component)
 		}
-		methodJSONs, eventJSONs, err := rcommon.ParseJSONABI(contract.GetAbi())
+		methodJSONs, eventJSONs, err := rcommon.ParseJSONABI(abiRaw)
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(component)
 		}
@@ -96,7 +95,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 			// Register methods for this bytecode
 			method := m
 			sel := rcommon.SigHashToSelector(method.ID())
-			if contract.GetDeployedBytecode() != nil {
+			if deployedBytecode != nil {
 				// Init map
 				if r.methods[codeHash] == nil {
 					r.methods[codeHash] = make(map[[4]byte][][]byte)
@@ -125,7 +124,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 			indexedCount := rcommon.GetIndexedCount(event)
 
 			// Register events for this bytecode
-			if contract.GetDeployedBytecode() != nil {
+			if deployedBytecode != nil {
 				// Init map
 				if r.events[codeHash] == nil {
 					r.events[codeHash] = make(map[ethcommon.Hash]map[uint][][]byte)
@@ -173,7 +172,7 @@ func (r *ContractRegistry) DeleteArtifact(ctx context.Context, req *svc.DeleteAr
 	return &svc.DeleteArtifactResponse{}, nil
 }
 
-func (r *ContractRegistry) getArtifact(id *abi.ContractId) (a *artifact, ok bool) {
+func (r *ContractRegistry) getArtifact(id *abi.ContractId) (a *rcommon.Artifact, ok bool) {
 	name, tag, err := rcommon.CheckExtractNameTag(id)
 	if err != nil {
 		return nil, false
@@ -212,7 +211,7 @@ func (r *ContractRegistry) GetContract(ctx context.Context, req *svc.GetContract
 
 	c, ok := r.getContract(id)
 	if !ok {
-		return nil, errors.NotFoundError("contract not found").SetComponent(component)
+		return nil, errors.StorageError("could not load contract (%v)", err).ExtendComponent(component)
 	}
 
 	return &svc.GetContractResponse{

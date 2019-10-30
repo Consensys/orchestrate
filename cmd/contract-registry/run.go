@@ -6,10 +6,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry/redis"
 )
 
 func newRunCommand() *cobra.Command {
@@ -19,15 +17,9 @@ func newRunCommand() *cobra.Command {
 		Run:   run,
 	}
 
-	// EthClient flag
-	ethclient.URLs(runCmd.Flags())
-
 	// ContractRegistry flag
 	contractregistry.Type(runCmd.Flags())
 	contractregistry.ABIs(runCmd.Flags())
-
-	// Redis ContractRegistry flag
-	redis.InitFlags(runCmd.Flags())
 
 	return runCmd
 }

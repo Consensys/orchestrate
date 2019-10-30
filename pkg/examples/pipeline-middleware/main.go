@@ -9,7 +9,7 @@ import (
 )
 
 func aborter(txctx *engine.TxContext) {
-	txctx.Logger.Infof("Aborting %v\n", txctx.In.(examples.Msg))
+	txctx.Logger.Infof("Aborting %v", txctx.In.(examples.Msg))
 	txctx.Abort()
 }
 

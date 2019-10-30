@@ -13,7 +13,7 @@ func TestStoreType(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	Type(flgs)
 
-	expected := "pg"
+	expected := "postgres"
 	assert.Equal(t, expected, viper.GetString(typeViperKey), "Default")
 
 	expected = "env-store"
@@ -22,7 +22,7 @@ func TestStoreType(t *testing.T) {
 	_ = os.Unsetenv(typeEnv)
 
 	args := []string{
-		"--envelope-store=flag-store",
+		"--envelope-store-type=flag-store",
 	}
 	err := flgs.Parse(args)
 	assert.NoError(t, err, "No error expected")

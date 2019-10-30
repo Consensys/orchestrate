@@ -23,7 +23,7 @@ func Init() {
 		// Initialize gRPC contract-registry
 		registry = NewRegistry(NewPool(Config(), Dial))
 
-		log.Infof("%q: store ready", component)
+		log.Infof("%s: store ready", component)
 	})
 }
 

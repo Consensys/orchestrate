@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"math/big"
 
 	log "github.com/sirupsen/logrus"
@@ -21,7 +20,7 @@ func Handler(txctx *engine.TxContext) {
 		panic("loader: expected a types.TxListenerReceipt")
 	}
 
-	fmt.Printf("* New receipt ChainID=%v BlockNumber=%v Txindex=%v TxHash=%v\n", r.ChainID.Text(10), r.BlockNumber, r.TxIndex, r.TxHash.Hex())
+	log.Infof("* New receipt ChainID=%v BlockNumber=%v Txindex=%v TxHash=%v", r.ChainID.Text(10), r.BlockNumber, r.TxIndex, r.TxHash.Hex())
 }
 
 func main() {

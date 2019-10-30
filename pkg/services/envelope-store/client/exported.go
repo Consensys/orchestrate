@@ -8,12 +8,15 @@ import (
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/opentracing"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
 	grpcclient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/grpc/client"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/envelope-store"
 )
 
 const component = "envelope-store.client"
+
+type serviceName string
 
 var (
 	client   evlpstore.EnvelopeStoreClient
@@ -27,6 +30,8 @@ func Init(ctx context.Context) {
 			return
 		}
 
+		ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString("jaeger.service.name"))
+		opentracing.Init(ctxWithValue)
 		var err error
 		conn, err = grpcclient.DialContextWithDefaultOptions(
 			ctx,

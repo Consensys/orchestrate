@@ -35,6 +35,15 @@ var ERC20 = []byte(
     "type": "event"
   },
   {
+	"anonymous": false,
+	"inputs": [
+	  {"indexed": false, "name": "account", "type": "address"},
+	  {"indexed": true, "name": "account2", "type": "address"}
+	],
+	"name": "MinterAddedBis",
+	"type": "event"
+  },
+  {
     "constant": true,
     "inputs": [
       {"name": "account", "type": "address"}
@@ -95,6 +104,7 @@ var ERC20Contract = &abi.Contract{
 	Bytecode:         []byte{1, 2},
 	DeployedBytecode: []byte{1, 2, 3},
 }
+var compactedERC20, _ = ERC20Contract.GetABICompacted()
 
 // ERC20ContractBis is a unittest value
 var ERC20ContractBis = &abi.Contract{
@@ -165,7 +175,7 @@ func (s *ContractRegistryTestSuite) TestContractRegistryBySig() {
 			},
 		})
 	assert.NoError(s.T(), err)
-	assert.Equal(s.T(), ERC20Contract.Abi, contractResp.GetContract().GetAbi())
+	assert.Equal(s.T(), compactedERC20, contractResp.GetContract().GetAbi())
 
 	abiResp, err := s.R.GetContractABI(context.Background(),
 		&svc.GetContractRequest{
@@ -190,7 +200,7 @@ func (s *ContractRegistryTestSuite) TestContractRegistryBySig() {
 			},
 		})
 	assert.NoError(s.T(), err)
-	assert.Equal(s.T(), ERC20Contract.Abi, abiResp.GetAbi())
+	assert.Equal(s.T(), compactedERC20, abiResp.GetAbi())
 
 	abiResp, err = s.R.GetContractABI(context.Background(),
 		&svc.GetContractRequest{

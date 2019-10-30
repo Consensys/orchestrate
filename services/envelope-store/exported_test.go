@@ -10,7 +10,7 @@ import (
 )
 
 func TestInit(t *testing.T) {
-	viper.Set(typeViperKey, "mock")
+	viper.Set(typeViperKey, mockOpt)
 	Init()
 	assert.NotNil(t, GlobalEnvelopeStoreServer(), "Global should have been set")
 

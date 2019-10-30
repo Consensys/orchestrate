@@ -13,10 +13,10 @@ func init() {
 }
 
 var (
-	typeFlag     = "envelope-store"
+	typeFlag     = "envelope-store-type"
 	typeViperKey = "envelope-store.type"
-	typeDefault  = "pg"
-	typeEnv      = "ENVELOPE_STORE"
+	typeDefault  = postgresOpt
+	typeEnv      = "ENVELOPE_STORE_TYPE"
 )
 
 // Type register flag for the Envelope Store to select

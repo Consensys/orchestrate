@@ -10,6 +10,12 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/envelope-store/pg"
 )
 
+const (
+	component   = "envelope-store"
+	postgresOpt = "postgres"
+	mockOpt     = "mock"
+)
+
 var (
 	store    evlpstore.EnvelopeStoreServer
 	initOnce = &sync.Once{}
@@ -22,13 +28,13 @@ func Init() {
 		}
 
 		switch viper.GetString(typeViperKey) {
-		case "pg":
+		case postgresOpt:
 			// Initialize Sarama Faucet
 			pg.Init()
 
 			// Set Faucet
 			store = pg.GlobalEnvelopeStore()
-		case "mock":
+		case mockOpt:
 			// Initialize Mock Faucet
 			mock.Init()
 
@@ -37,7 +43,7 @@ func Init() {
 		default:
 			log.WithFields(log.Fields{
 				"type": viper.GetString(typeViperKey),
-			}).Fatalf("envelope-store: unknown type")
+			}).Fatalf("%s: unknown type", component)
 		}
 	})
 }

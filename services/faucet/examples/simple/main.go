@@ -60,7 +60,7 @@ package main
 // 			Value: big.NewInt(300000000000000000), // 0.3 ETH
 // 		},
 // 	)
-// 	fmt.Printf("* 1. Amount credited=%v (credited=%v)\n", amount, ok)
+// 	fmt.Printf("* 1. Amount credited=%v (credited=%v)", amount, ok)
 
 // 	// Credit a random ethereum address
 // 	amount, ok, _  = f.Credit(
@@ -71,7 +71,7 @@ package main
 // 			Value: big.NewInt(100000000000000000), // 0.1 ETH
 // 		},
 // 	)
-// 	fmt.Printf("* 2. Amount credited=%v (credited=%v)\n", amount, ok)
+// 	fmt.Printf("* 2. Amount credited=%v (credited=%v)", amount, ok)
 
 // 	// Credit address again (expected to fail due to CoolDown)
 // 	amount, ok, _ = f.Credit(
@@ -82,7 +82,7 @@ package main
 // 			Value: big.NewInt(100000000000000000), // 0.1 ETH
 // 		},
 // 	)
-// 	fmt.Printf("* 3. Amount credited=%v (credited=%v)\n", amount, ok)
+// 	fmt.Printf("* 3. Amount credited=%v (credited=%v)n", amount, ok)
 
 // 	// Credit black list address again (expected to fail due to BLackList)
 // 	amount, ok, _ =	f.Credit(
@@ -93,5 +93,5 @@ package main
 // 			Value: big.NewInt(100000000000000000), // 0.1 ETH
 // 		},
 // 	)
-// 	fmt.Printf("* 4. Amount credited=%v (credited=%v)\n", amount, ok)
+// 	fmt.Printf("* 4. Amount credited=%v (credited=%v)", amount, ok)
 // }

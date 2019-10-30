@@ -1,7 +1,7 @@
 GOFILES := $(shell find . -name '*.go' | egrep -v "^\./\.go" | grep -v _test.go)
 PACKAGES ?= $(shell go list ./... | go list ./... | grep -Fv -e e2e -e examples )
 CMD_RUN = tx-crafter tx-nonce tx-signer tx-sender tx-listener tx-decoder contract-registry envelope-store
-CMD_MIGRATE = envelope-store
+CMD_MIGRATE = contract-registry envelope-store
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
@@ -96,13 +96,13 @@ gobuild-e2e:
 	@GOOS=linux GOARCH=amd64 go build -i -o ./build/bin/e2e ./tests/cmd 
 
 corestack: gobuild
-	@docker-compose -f docker-compose.dev.yml up -d $(CMD_RUN)
+	@docker-compose up -d $(CMD_RUN)
 
 stop-corestack:
-	@docker-compose -f docker-compose.dev.yml stop $(CMD_RUN)
+	@docker-compose stop $(CMD_RUN)
 
 down-corestack:
-	@docker-compose -f docker-compose.dev.yml down --volumes --timeout 0
+	@docker-compose down --volumes --timeout 0
 
 deps:
 	@docker-compose -f scripts/deps/docker-compose.yml up -d
@@ -124,5 +124,5 @@ up-all: deps quorum corestack
 down-all: down-corestack down-quorum down-deps
 
 e2e: gobuild-e2e
-	@docker-compose -f docker-compose.dev.yml up e2e
+	@docker-compose up e2e
 	@docker-compose -f scripts/report/docker-compose.yml up

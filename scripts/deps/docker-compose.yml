@@ -39,13 +39,21 @@ services:
     volumes:
       - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf
 
-  postgres:
+  postgres-contract-registry:
     <<: *container-common
     image: postgres:10-alpine
     ports:
-      - 5432:5432
+      - 5432
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - db-data-contract-registry:/var/lib/postgresql/data
+
+  postgres-envelope-store:
+    <<: *container-common
+    image: postgres:10-alpine
+    ports:
+      - 5432
+    volumes:
+      - db-data-envelope-store:/var/lib/postgresql/data
   
   geth:
     <<: *container-common
@@ -105,8 +113,11 @@ services:
       - 14268:14268
       - 9411:9411
 
+
 volumes:
-  db-data:
+  db-data-contract-registry:
+    driver: local
+  db-data-envelope-store:
     driver: local
   chain-data:
     driver: local
@@ -115,4 +126,3 @@ volumes:
 networks:
   corestack:
     driver: bridge
-

@@ -69,6 +69,6 @@ func main() {
 	engine.CleanUp()
 
 	// Print counters
-	log.Infof("* Safe counter: %v\n", h.safeCounter)
-	log.Infof("* Unsafe counter: %v\n", h.unsafeCounter)
+	log.Infof("* Safe counter: %v", h.safeCounter)
+	log.Infof("* Unsafe counter: %v", h.unsafeCounter)
 }

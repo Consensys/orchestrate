@@ -13,7 +13,7 @@ func TestStoreType(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	Type(flgs)
 
-	expected := mockOpt
+	expected := postgresOpt
 	assert.Equal(t, expected, viper.GetString(typeViperKey), "Default")
 
 	expected = redisOpt
@@ -22,7 +22,7 @@ func TestStoreType(t *testing.T) {
 	_ = os.Unsetenv(typeEnv)
 
 	args := []string{
-		"--contract-registry=mock",
+		"--contract-registry-type=mock",
 	}
 	err := flgs.Parse(args)
 	assert.NoError(t, err, "No error expected")
@@ -75,5 +75,5 @@ func TestFromABIConfig(t *testing.T) {
 	contracts, err := FromABIConfig()
 
 	assert.Nil(t, err, "Should parse default properly")
-	assert.Len(t, contracts, 2, "Expected 2 contract")
+	assert.Len(t, contracts, 0, "Expected 2 contract")
 }

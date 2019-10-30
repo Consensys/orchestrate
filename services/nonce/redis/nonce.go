@@ -72,7 +72,9 @@ func (nm *NonceManager) load(key string) (value interface{}, ok bool, err error)
 	conn := nm.pool.Get()
 	defer func() {
 		closeErr := conn.Close()
-		log.WithError(closeErr).Warn("could not close redis connection")
+		if closeErr != nil {
+			log.WithError(closeErr).Warn("could not close redis connection")
+		}
 	}()
 
 	reply, err := conn.Do("GET", key)
@@ -123,7 +125,9 @@ func (nm *NonceManager) set(key string, value interface{}) error {
 	conn := nm.pool.Get()
 	defer func() {
 		closeErr := conn.Close()
-		log.WithError(closeErr).Warn("could not close redis connection")
+		if closeErr != nil {
+			log.WithError(closeErr).Warn("could not close redis connection")
+		}
 	}()
 
 	_, err := conn.Do("SET", key, value)
@@ -137,8 +141,10 @@ func (nm *NonceManager) set(key string, value interface{}) error {
 func (nm *NonceManager) incr(key string) error {
 	conn := nm.pool.Get()
 	defer func() {
-		err := conn.Close()
-		log.WithError(err).Warn("could not close redis connection")
+		closeErr := conn.Close()
+		if closeErr != nil {
+			log.WithError(closeErr).Warn("could not close redis connection")
+		}
 	}()
 
 	_, err := conn.Do("INCR", key)

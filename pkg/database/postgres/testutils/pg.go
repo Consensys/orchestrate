@@ -1,6 +1,7 @@
 package testutils
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/go-pg/migrations"
@@ -8,6 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/database/postgres"
+	"k8s.io/apimachinery/pkg/util/rand"
 )
 
 func init() {
@@ -28,6 +30,7 @@ type PGTestHelper struct {
 	Opts       *pg.Options
 	DB         *pg.DB
 	Collection *migrations.Collection
+	TestDBName string
 }
 
 // NewPGTestHelper creates a new PGTestHelper
@@ -35,23 +38,21 @@ func NewPGTestHelper(collection *migrations.Collection) *PGTestHelper {
 	return &PGTestHelper{
 		Opts:       postgres.NewOptions(),
 		Collection: collection,
+		TestDBName: fmt.Sprintf("test_%s", rand.String(10)),
 	}
 }
 
 // InitTestDB initialize a test database for integration tests
 func (helper *PGTestHelper) InitTestDB(t *testing.T) {
-	// Create a test database
 	db := pg.Connect(helper.Opts)
-
-	testTable := "test"
-	_, err := db.Exec(`DROP DATABASE IF EXISTS ?;`, pg.Q(testTable))
+	_, err := db.Exec(`DROP DATABASE IF EXISTS ?;`, pg.Q(helper.TestDBName))
 	if err != nil {
-		log.Fatal(err)
+		log.WithError(err).Fatal("could not drop database")
 	}
 
-	_, err = db.Exec(`CREATE DATABASE ?;`, pg.Q(testTable))
+	_, err = db.Exec(`CREATE DATABASE ?;`, pg.Q(helper.TestDBName))
 	if err != nil {
-		log.Fatal(err)
+		log.WithError(err).Fatal("could not create database")
 	}
 
 	err = db.Close()
@@ -63,11 +64,11 @@ func (helper *PGTestHelper) InitTestDB(t *testing.T) {
 		Addr:     helper.Opts.Addr,
 		User:     helper.Opts.User,
 		Password: helper.Opts.Password,
-		Database: "test",
+		Database: helper.TestDBName,
 	})
 	_, _, err = helper.Collection.Run(helper.DB, "init")
 	if err != nil {
-		log.Fatal(err)
+		log.WithError(err).Fatal("could not init database")
 	}
 }
 
@@ -75,9 +76,9 @@ func (helper *PGTestHelper) InitTestDB(t *testing.T) {
 func (helper *PGTestHelper) Upgrade(t *testing.T) {
 	oldVersion, newVersion, err := helper.Collection.Run(helper.DB, "up")
 	if err != nil {
-		t.Errorf("Failed migrate up: %v\n", err)
+		t.Errorf("Failed migrate up: %v", err)
 	} else {
-		t.Logf("Migrated up from version=%v to version=%v\n", oldVersion, newVersion)
+		t.Logf("Migrated up from version=%v to version=%v", oldVersion, newVersion)
 	}
 }
 
@@ -85,9 +86,9 @@ func (helper *PGTestHelper) Upgrade(t *testing.T) {
 func (helper *PGTestHelper) Downgrade(t *testing.T) {
 	oldVersion, newVersion, err := helper.Collection.Run(helper.DB, "reset")
 	if err != nil {
-		t.Errorf("Failed migrate down: %v\n", err)
+		t.Errorf("Failed migrate down: %v", err)
 	} else {
-		t.Logf("Migrated down from version=%v to version=%v\n", oldVersion, newVersion)
+		t.Logf("Migrated down from version=%v to version=%v", oldVersion, newVersion)
 	}
 }
 
@@ -101,9 +102,9 @@ func (helper *PGTestHelper) DropTestDB(t *testing.T) {
 
 	// Drop test Database
 	db := pg.Connect(helper.Opts)
-	_, err = db.Exec(`DROP DATABASE test;`)
+	_, err = db.Exec(`DROP DATABASE ?;`, pg.Q(helper.TestDBName))
 	if err != nil {
-		log.Fatal(err)
+		log.WithError(err).Fatal("could not drop database")
 	}
 	err = db.Close()
 	if err != nil {

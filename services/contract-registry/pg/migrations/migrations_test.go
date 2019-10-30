@@ -40,13 +40,13 @@ func (s *MigrationsTestSuite) TestMigrationVersion() {
 	)
 
 	s.Assert().NoError(err, "Error querying version")
-	s.Assert().Equal(int64(3), version, "Migration should be on correct version")
+	s.Assert().Equal(int64(1), version, "Migration should be on correct version")
 }
 
-func (s *MigrationsTestSuite) TestCreateEnvelopeTable() {
+func (s *MigrationsTestSuite) TestCreateArtifactsTable() {
 	n, err := s.pg.DB.Model().
 		Table("pg_catalog.pg_tables").
-		Where("tablename = '?'", pg.Q("envelopes")).
+		Where("tablename = '?'", pg.Q("codehashes")).
 		Count()
 
 	s.Assert().NoError(err, "Query failed")
@@ -54,13 +54,6 @@ func (s *MigrationsTestSuite) TestCreateEnvelopeTable() {
 }
 
 func (s *MigrationsTestSuite) TestAddEnvelopeStoreColumns() {
-	n, err := s.pg.DB.Model().
-		Table("information_schema.columns").
-		Where("table_name = '?'", pg.Q("envelopes")).
-		Count()
-
-	s.Assert().NoError(err, "Query failed")
-	s.Assert().Equal(10, n, "Envelope table should have correct number of columns")
 }
 
 func TestMigrations(t *testing.T) {

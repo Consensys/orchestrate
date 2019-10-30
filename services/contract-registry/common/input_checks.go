@@ -49,7 +49,11 @@ func CheckExtractArtifacts(contract *abi.Contract) (bytecode, deployedBytecode, 
 		return []byte{}, []byte{}, []byte{}, errors.InvalidArgError("No abi provided in request").ExtendComponent(component)
 	}
 
-	return contract.Bytecode, contract.DeployedBytecode, contract.Abi, nil
+	compactedABI, err := contract.GetABICompacted()
+	if err != nil {
+		return []byte{}, []byte{}, []byte{}, errors.FromError(err).ExtendComponent(component)
+	}
+	return contract.GetBytecode(), contract.GetDeployedBytecode(), compactedABI, nil
 }
 
 // CheckExtractNameTag validates a request input, that is supposed to provide name + tag data

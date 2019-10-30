@@ -11,6 +11,6 @@ import (
 func RecoverPanicHandler(p interface{}) error {
 	buf := make([]byte, 1<<16)
 	runtime.Stack(buf, true)
-	log.Errorf("panic recovered:\n%+v", string(buf))
+	log.Errorf("panic recovered:%+v", string(buf))
 	return errors.InternalError("%s", p)
 }
