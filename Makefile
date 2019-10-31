@@ -21,13 +21,13 @@ gobuild:
 	@GOOS=linux GOARCH=amd64 go build -i -o ./build/bin/corestack
 
 docker-build:
-	@docker-compose build
+	@DOCKER_BUILDKIT=1 docker build -t orchestrate .
 
 coverage:
 	@docker-compose -f e2e/docker-compose.yml up -d postgres
 	@sh scripts/coverage.sh $(PACKAGES)
 	@docker-compose -f e2e/docker-compose.yml stop postgres
-	$(OPEN) build/coverage/coverage.html
+	$(OPEN) build/coverage/coverage.html`
 
 race: ## Run data race detector
 	@go test -race -short ${PACKAGES}
@@ -84,12 +84,12 @@ gen-help: gobuild
 
 gen-help-docker: docker-build
 	@mkdir -p build/cmd
-	@docker-compose run worker help tx-crafter | grep -A 9999 "Global Flags:" | head -n -3 > build/cmd/global.txt
+	@docker run orchestrate help tx-crafter | grep -A 9999 "Global Flags:" | head -n -3 > build/cmd/global.txt
 	@for cmd in $(CMD_RUN); do \
-		docker-compose run worker help $$cmd run | grep -B 9999 "Global Flags:" | tail -n +3 | head -n -3 > build/cmd/$$cmd-run.txt; \
+		docker run orchestrate help $$cmd run | grep -B 9999 "Global Flags:" | tail -n +3 | head -n -3 > build/cmd/$$cmd-run.txt; \
 	done
 	@for cmd in $(CMD_MIGRATE); do \
-		docker-compose run worker help $$cmd migrate | grep -B 9999 "Global Flags:" | tail -n +3 | head -n -3 > build/cmd/$$cmd-migrate.txt; \
+		docker run orchestrate help $$cmd migrate | grep -B 9999 "Global Flags:" | tail -n +3 | head -n -3 > build/cmd/$$cmd-migrate.txt; \
 	done
 
 gobuild-e2e:

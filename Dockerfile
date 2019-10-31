@@ -3,18 +3,12 @@
 ############################
 FROM golang:1.13 AS builder
 
-ARG GITLAB_USER
-ARG GITLAB_TOKEN
-
-RUN git config --global --add url."https://${GITLAB_USER}:${GITLAB_TOKEN}@gitlab.com/".insteadOf "git@gitlab.com:" && \
-    git config --global --add url."https://${GITLAB_USER}:${GITLAB_TOKEN}@gitlab.com/".insteadOf "https://gitlab.com/" && \
-    useradd appuser && \
+RUN useradd appuser && \
     mkdir /app
 WORKDIR /app
 
 # Use go mod with go 1.13
 ENV GO111MODULE=on
-ENV GOPRIVATE=gitlab.com/ConsenSys/client/fr/core-stack
 COPY go.mod go.sum ./
 RUN go mod download
 

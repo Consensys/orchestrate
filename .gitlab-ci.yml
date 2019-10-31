@@ -17,11 +17,32 @@ before_script:
   # Change git config so we can import go packages from GitLab
   - git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/".insteadOf "git@gitlab.com:"
   - git config --global --add url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/".insteadOf "https://gitlab.com/"
-
   # Set GOPATH
   - mkdir -p ${GOPATH}
   - export PATH="${PATH}:${GOPATH}/bin:${GOROOT}/bin"
   - make tools
+
+.docker-setup: &docker-setup
+  image: docker:19
+  stage: build
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+
+.build-img: &build-img
+  script:
+    # Build image following http://label-schema.org/rc1/ label convention convention
+    - du -shc * .* | sort -r
+    - DOCKER_BUILDKIT=1 docker build
+      --label org.label-schema.schema-version="1.0.0-rc1"
+      --label org.label-schema.build-date=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
+      --label org.label-schema.name="${CI_PROJECT_NAME}"
+      --label org.label-schema.version="branch"
+      --label org.label-schema.vcs-url="${CI_PROJECT_URL}"
+      --label org.label-schema.vcs-ref="${CI_COMMIT_SHA:0:8}"
+      --label org.label-schema.vendor="PegaSys"
+      -t ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA} .
+    # Push images
+    - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}
 
 cache-update:
   image: golang:1.12
@@ -45,10 +66,6 @@ test:
     - postgres:10.7-alpine
   variables:
     DB_HOST: "postgres"
-  cache:
-    policy: pull
-    paths:
-      - ${GOPATH}
   except:
     - tags
 
@@ -58,9 +75,48 @@ lint:
   script:
     - make race
     - make lint
-  cache:
-    policy: pull
-    paths:
-      - ${GOPATH}
   except:
     - tags
+
+build-on-branch:
+  <<: *docker-setup
+  <<: *build-img
+  after_script:
+    - docker logout $CI_REGISTRY
+  only:
+    - /^dev[a-zA-Z0-9\/-]*$/
+    - /^feature/[a-zA-Z0-9\/-]*$/
+    - /^fix/[a-zA-Z0-9\/-]*$/
+
+build-on-release:
+  <<: *docker-setup
+  <<: *build-img
+  after_script:
+    - docker tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}:rc
+    - docker push ${CI_REGISTRY_IMAGE}:rc
+    - docker logout $CI_REGISTRY
+  only:
+    - /^release/[a-zA-Z0-9\/-]*$/
+
+build-on-master:
+  <<: *docker-setup
+  <<: *build-img
+  after_script:
+    - docker tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}:latest
+    - docker push ${CI_REGISTRY_IMAGE}:latest
+    - docker logout $CI_REGISTRY
+  only:
+    - master
+
+build-on-tag:
+  <<: *docker-setup
+  script:
+    # `tag` doesnt build a new image, just applies tag existing commit on master
+    - docker pull ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}
+    - docker tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}
+    - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}
+  after_script:
+    - docker logout $CI_REGISTRY
+  only:
+    refs:
+      - tags
