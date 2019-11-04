@@ -8,7 +8,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	ierror "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/error"
+	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/error"
 )
 
 var testKey = "test"

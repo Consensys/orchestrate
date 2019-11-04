@@ -5,15 +5,18 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	crc "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	crc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/contract-registry/client"
+)
+
+const (
+	component = "handler.listener.enricher"
 )
 
 var (
-	component = "handler.listener.enricher"
-	handler   engine.HandlerFunc
-	initOnce  = &sync.Once{}
+	handler  engine.HandlerFunc
+	initOnce = &sync.Once{}
 )
 
 // Init initialize handler

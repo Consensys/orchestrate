@@ -11,8 +11,8 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 )
 
 type ExportedTestSuite struct {
@@ -77,7 +77,7 @@ func (s *ExportedTestSuite) TestInitClient() {
 	config := sarama.NewConfig()
 	SetGlobalConfig(config)
 
-	viper.Set(kafkaAddressViperKey, []string{
+	viper.Set(KafkaURLViperKey, []string{
 		seedBroker.Addr(),
 	})
 	InitClient(context.Background())
@@ -93,7 +93,7 @@ func (s *ExportedTestSuite) TestInitSyncProducer() {
 	config.Producer.Return.Successes = true
 	SetGlobalConfig(config)
 
-	viper.Set(kafkaAddressViperKey, []string{
+	viper.Set(KafkaURLViperKey, []string{
 		seedBroker.Addr(),
 	})
 	InitClient(context.Background())

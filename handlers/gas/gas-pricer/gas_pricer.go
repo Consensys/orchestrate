@@ -3,8 +3,8 @@ package gaspricer
 import (
 	log "github.com/sirupsen/logrus"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 )
 
 // Pricer creates a handler that set a Gas Price

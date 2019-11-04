@@ -1,9 +1,9 @@
 package tessera
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/tessera"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tessera"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
 // If we need to send a transaction to Tessera enclave we first need to send a transaction data to Tessera

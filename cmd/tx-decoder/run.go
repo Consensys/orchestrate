@@ -6,11 +6,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient/rpc"
-	producer "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/producer/tx-decoder"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/rpc"
+	producer "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/producer/tx-decoder"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
 func newRunCommand() *cobra.Command {
@@ -20,14 +19,11 @@ func newRunCommand() *cobra.Command {
 		Run:   run,
 	}
 
-	// Register Engine flags
-	engine.InitFlags(runCmd.Flags())
-
 	// Register Ethereum client flags
 	ethclient.URLs(runCmd.Flags())
 
 	// Register Kafka flags
-	broker.KafkaAddresses(runCmd.Flags())
+	broker.KafkaURL(runCmd.Flags())
 	broker.KafkaGroup(runCmd.Flags())
 	broker.KafkaTopicTxDecoded(runCmd.Flags())
 	broker.KafkaTopicTxDecoder(runCmd.Flags())

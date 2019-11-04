@@ -10,10 +10,10 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	crc "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry/client/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/chanregistry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/cucumber/parser"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/envelope"
+	crc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/contract-registry/client/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/chanregistry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/parser"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 )
 
 type ScenarioTestSuite struct {
@@ -26,7 +26,7 @@ type ScenarioTestSuite struct {
 
 func (s *ScenarioTestSuite) SetupSuite() {
 	// Set viper configuration
-	viper.Set("kafka.topic.crafter", "tx-crafter")
+	viper.Set("topic.tx.crafter", "tx-crafter")
 
 	// Set channel registry
 	s.chanReg = chanregistry.NewChanRegistry()
@@ -99,7 +99,7 @@ func (s *ScenarioTestSuite) TestISendEnvelopesToTopic() {
 	}
 
 	s.producer.ExpectSendMessageAndSucceed()
-	err := s.Context.iSendEnvelopesToTopic("crafter", table)
+	err := s.Context.iSendEnvelopesToTopic("tx.crafter", table)
 	assert.NoError(s.T(), err)
 }
 
@@ -114,10 +114,10 @@ func (s *ScenarioTestSuite) TestEnvelopeShouldBeInTopic() {
 		Metadata: input.GetMetadata(),
 	}
 
-	err := s.Context.chanReg.Send(LongKeyOf("crafter", output.GetMetadata().GetExtra()["scenario.id"], output.GetMetadata().Id), output)
+	err := s.Context.chanReg.Send(LongKeyOf("tx.crafter", output.GetMetadata().GetExtra()["scenario.id"], output.GetMetadata().Id), output)
 	assert.Nil(s.T(), err, "Send in registry should not error")
 
-	err = s.Context.envelopeShouldBeInTopic("crafter")
+	err = s.Context.envelopeShouldBeInTopic("tx.crafter")
 	assert.Nil(s.T(), err, "envelopeShouldBeInTopic should not error")
 	assert.Equal(s.T(), output, s.Context.trackers[0].current, "Envelope on tracker should have been updated")
 }

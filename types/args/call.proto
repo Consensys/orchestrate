@@ -2,7 +2,7 @@ syntax = "proto3";
 
 import "types/abi/abi.proto";
 
-option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/args";
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/args";
 
 package args;
 

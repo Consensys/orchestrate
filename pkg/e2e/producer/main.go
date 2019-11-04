@@ -5,7 +5,7 @@ import (
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 )
 
 func main() {

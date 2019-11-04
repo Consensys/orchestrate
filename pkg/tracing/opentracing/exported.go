@@ -7,7 +7,7 @@ import (
 
 	extOpentracing "github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/tracing/opentracing/jaeger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/jaeger"
 )
 
 var (

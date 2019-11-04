@@ -3,8 +3,8 @@ package clientmock
 import (
 	"context"
 
-	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/envelope-store"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/envelope-store/mock"
+	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/envelope-store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/memory"
 	"google.golang.org/grpc"
 )
 
@@ -15,7 +15,7 @@ type EnvelopeStoreClient struct {
 
 func New() *EnvelopeStoreClient {
 	return &EnvelopeStoreClient{
-		srv: mock.NewEnvelopeStore(),
+		srv: memory.NewEnvelopeStore(),
 	}
 }
 

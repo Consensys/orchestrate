@@ -7,12 +7,12 @@ import (
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
-	grpcserver "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/grpc/server"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http/healthcheck"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry"
-	services "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
+	grpcserver "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/server"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/healthcheck"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/contract-registry"
+	services "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry"
 )
 
 var (

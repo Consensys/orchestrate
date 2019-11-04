@@ -8,23 +8,23 @@ import (
 )
 
 func init() {
-	viper.SetDefault(grpcTargetContractRegistryViperKey, grpcTargetContractRegistryDefault)
-	_ = viper.BindEnv(grpcTargetContractRegistryViperKey, grpcTargetContractRegistryEnv)
+	viper.SetDefault(ContractRegistryURLViperKey, contractRegistryURLDefault)
+	_ = viper.BindEnv(ContractRegistryURLViperKey, contractRegistryURLEnv)
 }
 
-var (
-	grpcTargetContractRegistryFlag     = "grpc-target-contract-registry"
-	grpcTargetContractRegistryViperKey = "grpc.target.contract.registry"
-	grpcTargetContractRegistryDefault  = "localhost:8080"
-	grpcTargetContractRegistryEnv      = "GRPC_TARGET_CONTRACT_REGISTRY"
+const (
+	contractRegistryURLFlag     = "contract-registry-url"
+	ContractRegistryURLViperKey = "contract.registry.url"
+	contractRegistryURLDefault  = "localhost:8080"
+	contractRegistryURLEnv      = "CONTRACT_REGISTRY_URL"
 )
 
-// ContractRegistryGRPCTarget register flag for Ethereum client URLs
-func ContractRegistryGRPCTarget(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`GRPC target Contract Registry (See https://github.com/grpc/grpc/blob/master/doc/naming.md)
-Environment variable: %q`, grpcTargetContractRegistryEnv)
-	f.String(grpcTargetContractRegistryFlag, grpcTargetContractRegistryDefault, desc)
-	viper.SetDefault(grpcTargetContractRegistryViperKey, grpcTargetContractRegistryDefault)
-	_ = viper.BindPFlag(grpcTargetContractRegistryViperKey, f.Lookup(grpcTargetContractRegistryFlag))
-	_ = viper.BindEnv(grpcTargetContractRegistryViperKey, grpcTargetContractRegistryEnv)
+// ContractRegistryURL register flag for Ethereum client URLs
+func ContractRegistryURL(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`URL (GRPC target) of the Contract Registry (See https://github.com/grpc/grpc/blob/master/doc/naming.md)
+Environment variable: %q`, contractRegistryURLEnv)
+	f.String(contractRegistryURLFlag, contractRegistryURLDefault, desc)
+	viper.SetDefault(ContractRegistryURLViperKey, contractRegistryURLDefault)
+	_ = viper.BindPFlag(ContractRegistryURLViperKey, f.Lookup(contractRegistryURLFlag))
+	_ = viper.BindEnv(ContractRegistryURLViperKey, contractRegistryURLEnv)
 }

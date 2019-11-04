@@ -2,8 +2,8 @@ package base
 
 import (
 	"github.com/spf13/pflag"
-	cursor "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/tx-listener/block-cursor/base"
-	tiptracker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/tx-listener/tip-tracker/base"
+	cursor "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tx-listener/block-cursor/base"
+	tiptracker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tx-listener/tip-tracker/base"
 )
 
 // Config configuration of a TxListener

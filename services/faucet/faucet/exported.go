@@ -6,8 +6,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/faucet/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/faucet/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet/sarama"
 )
 
 var (

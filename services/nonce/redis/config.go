@@ -8,21 +8,21 @@ import (
 )
 
 func init() {
-	viper.SetDefault(addressViperKey, addressDefault)
-	_ = viper.BindEnv(addressViperKey, addressEnv)
+	viper.SetDefault(URLViperKey, urlDefault)
+	_ = viper.BindEnv(URLViperKey, urlEnv)
 }
 
-var (
-	addressFlag     = "redis-address"
-	addressViperKey = "redis.address"
-	addressDefault  = "localhost:6379"
-	addressEnv      = "REDIS_ADDRESS"
+const (
+	urlFlag     = "redis-url"
+	URLViperKey = "redis.url"
+	urlDefault  = "localhost:6379"
+	urlEnv      = "REDIS_URL"
 )
 
-// Address register a flag for Redis server address
-func Address(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Address of Redis server to connect to.
-Environment variable: %q`, addressEnv)
-	f.String(addressFlag, addressDefault, desc)
-	_ = viper.BindPFlag(addressViperKey, f.Lookup(addressFlag))
+// URL register a flag for Redis server URL
+func URL(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`URL (address) of Redis server to connect to.
+Environment variable: %q`, urlEnv)
+	f.String(urlFlag, urlDefault, desc)
+	_ = viper.BindPFlag(URLViperKey, f.Lookup(urlFlag))
 }

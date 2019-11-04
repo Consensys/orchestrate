@@ -17,17 +17,11 @@ endif
 run-coverage: ## Generate global code coverage report
 	@sh scripts/coverage.sh $(PACKAGES)
 
-gobuild:
-	@GOOS=linux GOARCH=amd64 go build -i -o ./build/bin/corestack
-
-docker-build:
-	@DOCKER_BUILDKIT=1 docker build -t orchestrate .
-
 coverage:
 	@docker-compose -f e2e/docker-compose.yml up -d postgres
 	@sh scripts/coverage.sh $(PACKAGES)
 	@docker-compose -f e2e/docker-compose.yml stop postgres
-	$(OPEN) build/coverage/coverage.html`
+	$(OPEN) build/coverage/coverage.html
 
 race: ## Run data race detector
 	@go test -race -short ${PACKAGES}
@@ -43,6 +37,13 @@ lint:
 	@misspell -error $(GOFILES)
 	@golangci-lint run
 
+run-e2e: gobuild-e2e
+	@docker-compose up e2e
+	@docker-compose -f scripts/report/docker-compose.yml up
+
+e2e: run-e2e
+	$(OPEN) build/report/report.html
+
 clean: mod-tidy lint-fix protobuf
 
 gocache:
@@ -50,10 +51,10 @@ gocache:
 
 generate-mocks:
 	mockgen -destination=mocks/mock_client.go -package=mocks \
-	gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/rpc Client
+	gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/rpc Client
 
 	mockgen -destination=mocks/mock_enclave_endpoint.go -package=mocks \
-	gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/tessera EnclaveEndpoint
+	gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tessera EnclaveEndpoint
 
 # Tools
 tools: ## Install test tools
@@ -62,24 +63,18 @@ tools: ## Install test tools
 	@GO111MODULE=off go get -u github.com/DATA-DOG/godog/cmd/godog
 	@GO111MODULE=off go get -u github.com/golang/mock/gomock
 
+# Help
 help: ## Display this help screen
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-protobuf: ## Generate protobuf stubs
-	@docker-compose -f scripts/docker-compose.yml up
-
-report:
-	@docker-compose -f report/docker-compose.yml up
-	$(OPEN) report/output/report.html
-
 gen-help: gobuild
 	@mkdir -p build/cmd
-	@./build/bin/corestack help tx-crafter | grep -A 9999 "Global Flags:" | head -n -2 > build/cmd/global.txt
+	@./build/bin/orchestrate help tx-crafter | grep -A 9999 "Global Flags:" | head -n -2 > build/cmd/global.txt
 	@for cmd in $(CMD_RUN); do \
-		./build/bin/corestack help $$cmd run | grep -B 9999 "Global Flags:" | tail -n +3 | head -n -2 > build/cmd/$$cmd-run.txt; \
+		./build/bin/orchestrate help $$cmd run | grep -B 9999 "Global Flags:" | tail -n +3 | head -n -2 > build/cmd/$$cmd-run.txt; \
 	done
 	@for cmd in $(CMD_MIGRATE); do \
-		./build/bin/corestack help $$cmd migrate | grep -B 9999 "Global Flags:" | tail -n +3 | head -n -2 > build/cmd/$$cmd-migrate.txt; \
+		./build/bin/orchestrate help $$cmd migrate | grep -B 9999 "Global Flags:" | tail -n +3 | head -n -2 > build/cmd/$$cmd-migrate.txt; \
 	done
 
 gen-help-docker: docker-build
@@ -92,16 +87,30 @@ gen-help-docker: docker-build
 		docker run orchestrate help $$cmd migrate | grep -B 9999 "Global Flags:" | tail -n +3 | head -n -3 > build/cmd/$$cmd-migrate.txt; \
 	done
 
-gobuild-e2e:
-	@GOOS=linux GOARCH=amd64 go build -i -o ./build/bin/e2e ./tests/cmd 
+# Protobuf
+protobuf: ## Generate protobuf stubs
+	@docker-compose -f scripts/docker-compose.yml up
 
-corestack: gobuild
+# Create kafka topics
+topics:
+	@bash scripts/kafka/initTopics.sh
+
+gobuild:
+	@GOOS=linux GOARCH=amd64 go build -i -o ./build/bin/orchestrate
+
+docker-build:
+	@DOCKER_BUILDKIT=1 docker build -t orchestrate .
+
+gobuild-e2e:
+	@GOOS=linux GOARCH=amd64 go build -i -o ./build/bin/e2e ./tests/cmd
+
+orchestrate: gobuild
 	@docker-compose up -d $(CMD_RUN)
 
-stop-corestack:
+stop-orchestrate:
 	@docker-compose stop $(CMD_RUN)
 
-down-corestack:
+down-orchestrate:
 	@docker-compose down --volumes --timeout 0
 
 deps:
@@ -119,10 +128,6 @@ stop-quorum:
 down-quorum:
 	@docker-compose -f scripts/deps/docker-compose.quorum.yml down --volumes --timeout 0
 
-up-all: deps quorum corestack
+up-all: deps quorum orchestrate
 
-down-all: down-corestack down-quorum down-deps
-
-e2e: gobuild-e2e
-	@docker-compose up e2e
-	@docker-compose -f scripts/report/docker-compose.yml up
+down-all: down-orchestrate down-quorum down-deps

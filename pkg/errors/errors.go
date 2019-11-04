@@ -1,7 +1,7 @@
 package errors
 
 import (
-	ierror "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/error"
+	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/error"
 )
 
 // Error codes are uint64 for performances purposes but should be seen as 5 nibbles hex codes

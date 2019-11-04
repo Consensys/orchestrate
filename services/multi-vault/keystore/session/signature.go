@@ -7,12 +7,12 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/rlp"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/keystore/crypto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/keystore/wallet"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/secretstore/services"
-	pkgchain "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore/crypto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore/wallet"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/services"
+	pkgchain "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 	"golang.org/x/crypto/sha3"
 )
 

@@ -1,13 +1,13 @@
-package mock
+package memory
 
 import (
 	"fmt"
 	"strings"
 	"time"
 
-	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/envelope-store"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/envelope"
+	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/envelope-store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 )
 
 // EnvelopeModel is a entry into mock envelope Store

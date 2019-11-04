@@ -8,14 +8,15 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/faucet"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet"
 )
 
+const component = "controller.blacklist"
+
 var (
-	component = "controller.blacklist"
-	ctrl      *Controller
-	initOnce  = &sync.Once{}
+	ctrl     *Controller
+	initOnce = &sync.Once{}
 )
 
 // Init initialize BlackList Controller

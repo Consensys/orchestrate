@@ -6,17 +6,15 @@ import (
 
 	"github.com/spf13/cobra"
 
-	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient/rpc"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/controllers/amount"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/controllers/blacklist"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/controllers/cooldown"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/controllers/creditor"
-	maxbalance "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/controllers/max-balance"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/faucet"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/rpc"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/contract-registry/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers/amount"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers/blacklist"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers/cooldown"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers/creditor"
+	maxbalance "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers/max-balance"
 )
 
 func newRunCommand() *cobra.Command {
@@ -26,14 +24,10 @@ func newRunCommand() *cobra.Command {
 		Run:   run,
 	}
 
-	// Register Engine flags
-	engine.InitFlags(runCmd.Flags())
-
 	// Register Ethereum client flags
 	ethclient.URLs(runCmd.Flags())
 
 	// Register Faucet flags
-	faucet.Type(runCmd.Flags())
 	amount.FaucetAmount(runCmd.Flags())
 	blacklist.FaucetBlacklist(runCmd.Flags())
 	cooldown.FaucetCooldown(runCmd.Flags())
@@ -41,7 +35,7 @@ func newRunCommand() *cobra.Command {
 	maxbalance.FaucetMaxBalance(runCmd.Flags())
 
 	// Register Kafka flags
-	broker.KafkaAddresses(runCmd.Flags())
+	broker.KafkaURL(runCmd.Flags())
 	broker.KafkaGroup(runCmd.Flags())
 	broker.KafkaTopicTxCrafter(runCmd.Flags())
 	broker.KafkaTopicTxNonce(runCmd.Flags())
@@ -49,7 +43,7 @@ func newRunCommand() *cobra.Command {
 	broker.KafkaTopicTxRecover(runCmd.Flags())
 
 	// Contract Registry
-	registryclient.ContractRegistryGRPCTarget(runCmd.Flags())
+	registryclient.ContractRegistryURL(runCmd.Flags())
 
 	return runCmd
 }

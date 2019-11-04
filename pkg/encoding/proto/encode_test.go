@@ -6,8 +6,8 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
 func TestMarshaller(t *testing.T) {

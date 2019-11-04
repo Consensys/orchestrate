@@ -5,15 +5,16 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/abi/crafter"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/abi/crafter"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/contract-registry/client"
 )
 
+const component = "handler.crafter"
+
 var (
-	component = "handler.crafter"
-	handler   engine.HandlerFunc
-	initOnce  = &sync.Once{}
+	handler  engine.HandlerFunc
+	initOnce = &sync.Once{}
 )
 
 // Init initialize Crafter Handler

@@ -6,10 +6,10 @@ import (
 	"sync"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/faucet"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
 )
 
 // Controller is a controller that holds a list of account that should not be credited

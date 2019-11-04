@@ -5,8 +5,8 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
-	err "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/error"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	err "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/error"
 )
 
 func TestNewClient(t *testing.T) {

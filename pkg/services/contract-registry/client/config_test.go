@@ -11,20 +11,20 @@ import (
 
 func TestGRPCContractRegistryTarget(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	ContractRegistryGRPCTarget(flgs)
+	ContractRegistryURL(flgs)
 	expected := "localhost:8080"
-	assert.Equal(t, expected, viper.GetString(grpcTargetContractRegistryViperKey), "Default")
+	assert.Equal(t, expected, viper.GetString(ContractRegistryURLViperKey), "Default")
 
-	_ = os.Setenv(grpcTargetContractRegistryEnv, "env-grpc-contract-registry")
+	_ = os.Setenv(contractRegistryURLEnv, "env-grpc-contract-registry")
 	expected = "env-grpc-contract-registry"
-	assert.Equal(t, expected, viper.GetString(grpcTargetContractRegistryViperKey), "From Environment Variable")
-	_ = os.Unsetenv(grpcTargetContractRegistryEnv)
+	assert.Equal(t, expected, viper.GetString(ContractRegistryURLViperKey), "From Environment Variable")
+	_ = os.Unsetenv(contractRegistryURLEnv)
 
 	args := []string{
-		"--grpc-target-contract-registry=flag-grpc-contract-registry",
+		"--contract-registry-url=flag-grpc-contract-registry",
 	}
 	err := flgs.Parse(args)
 	assert.Nil(t, err, "Parse Contract Registry flags should not error")
 	expected = "flag-grpc-contract-registry"
-	assert.Equal(t, expected, viper.GetString(grpcTargetContractRegistryViperKey), "From Flag")
+	assert.Equal(t, expected, viper.GetString(ContractRegistryURLViperKey), "From Flag")
 }

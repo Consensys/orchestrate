@@ -13,7 +13,7 @@ func init() {
 	_ = viper.BindEnv(faucetCooldownViperKey, faucetCooldownEnv)
 }
 
-var (
+const (
 	faucetCooldownFlag     = "faucet-cooldown-time"
 	faucetCooldownViperKey = "faucet.ctrl.cooldown.time"
 	faucetCooldownDefault  = 60 * time.Second

@@ -6,7 +6,7 @@ import (
 	"regexp"
 
 	"github.com/ethereum/go-ethereum/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
 // KafkaChainTopic computes Kafka topic identified by chain

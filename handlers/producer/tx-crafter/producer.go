@@ -3,11 +3,11 @@ package txcrafter
 import (
 	"github.com/Shopify/sarama"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/producer"
-	encoding "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/encoding/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/producer"
+	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
 // PrepareMsg prepare message to produce from TxContexts
@@ -19,12 +19,12 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 	}
 
 	// Set Topic to Nonce topic
-	msg.Topic = viper.GetString("kafka.topic.nonce")
+	msg.Topic = viper.GetString("topic.tx.nonce")
 
 	// If an error occurred then we redirect to recovery
 	for _, err := range txctx.Envelope.GetErrors() {
 		if !errors.IsWarning(err) {
-			msg.Topic = viper.GetString("kafka.topic.recover")
+			msg.Topic = viper.GetString("topic.tx.recover")
 			break
 		}
 	}

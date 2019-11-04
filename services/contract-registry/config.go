@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
 )
 
 func init() {
@@ -16,7 +16,7 @@ func init() {
 	viper.SetDefault(abiViperKey, abiDefault)
 }
 
-var (
+const (
 	typeFlag     = "contract-registry-type"
 	typeViperKey = "contract-registry.type"
 	typeDefault  = "postgres"

@@ -1,4 +1,4 @@
-module gitlab.com/ConsenSys/client/fr/core-stack/corestack.git
+module gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git
 
 require (
 	github.com/ConsenSys/golang-utils v0.0.0-20190722185538-95555d181804
@@ -31,7 +31,6 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.6.2
 	github.com/hashicorp/vault v1.2.3
 	github.com/hashicorp/vault/api v1.0.5-0.20190909201928-35325e2c3262
-	github.com/jackc/pgx v3.3.0+incompatible
 	github.com/jcmturner/gofork v1.0.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/julien-marchand/healthcheck v0.1.0

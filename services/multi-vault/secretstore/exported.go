@@ -6,10 +6,16 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/secretstore/aws"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/secretstore/hashicorp"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/secretstore/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/secretstore/services"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/aws"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/hashicorp"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/memory"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/services"
+)
+
+const (
+	hashicorpOpt = "hashicorp"
+	memoryOpt    = "in-memory"
+	awsOpt       = "aws"
 )
 
 var (
@@ -25,23 +31,23 @@ func Init(ctx context.Context) {
 		}
 
 		switch viper.GetString(secretStoreViperKey) {
-		case "test":
-			// Create Key Store from a Mock SecretStore
-			mock.Init(ctx)
-			secretStore = mock.GlobalStore()
+		case memoryOpt:
+			// Create Key Store from a Memory SecretStore
+			memory.Init(ctx)
+			secretStore = memory.GlobalStore()
 
-		case "hashicorp":
-			// Create an hashicorp vault object
+		case hashicorpOpt:
+			// Create an HashiCorp Vault object
 			hashicorp.Init(ctx)
 			secretStore = hashicorp.GlobalStore()
 
-		case "aws":
-			// Create an hashicorp vault object
+		case awsOpt:
+			// Create an HashiCorp Vault vault object
 			aws.Init(ctx)
 			secretStore = aws.GlobalStore()
 
 		default:
-			// Key Store type should be one of "test", "hashicorp"
+			// Key Store type should be one of "memory", "hashicorp"
 			log.Fatalf("Secret Store: Invalid Store type %q", viper.GetString(secretStoreViperKey))
 		}
 

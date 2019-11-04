@@ -1,4 +1,4 @@
-package mock
+package memory
 
 import (
 	"context"
@@ -10,7 +10,7 @@ var (
 	initOnce = &sync.Once{}
 )
 
-// Init initialize Crafter Handler
+// Init initialize Handler
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
 		if store != nil {
@@ -22,12 +22,12 @@ func Init(ctx context.Context) {
 	})
 }
 
-// SetGlobalStore sets global mock SecretStore
+// SetGlobalStore sets global memory SecretStore
 func SetGlobalStore(s *SecretStore) {
 	store = s
 }
 
-// GlobalStore returns global mock SecretStore
+// GlobalStore returns global memory SecretStore
 func GlobalStore() *SecretStore {
 	return store
 }

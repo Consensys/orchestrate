@@ -6,7 +6,7 @@ import (
 	"github.com/julien-marchand/healthcheck"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	server "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
+	server "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 )
 
 // App interface

@@ -3,8 +3,8 @@ package loader
 import (
 	log "github.com/sirupsen/logrus"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/envelope-store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/envelope-store"
 )
 
 // EnvelopeLoader creates and handler that load envelopes

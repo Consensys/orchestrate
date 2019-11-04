@@ -5,13 +5,12 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/logger"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/cucumber"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/cucumber/steps"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/logger"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/steps"
 )
 
 func NewRunCommand() *cobra.Command {
@@ -29,14 +28,11 @@ func NewRunCommand() *cobra.Command {
 	logger.LogLevel(runCmd.Flags())
 	logger.LogFormat(runCmd.Flags())
 
-	// Register Engine flags
-	engine.InitFlags(runCmd.Flags())
-
 	// Register HTTP server flags
 	http.Hostname(runCmd.Flags())
 
 	// Register Kafka flags
-	broker.KafkaAddresses(runCmd.Flags())
+	broker.KafkaURL(runCmd.Flags())
 	broker.KafkaGroup(runCmd.Flags())
 	broker.KafkaTopicTxCrafter(runCmd.Flags())
 	broker.KafkaTopicTxNonce(runCmd.Flags())

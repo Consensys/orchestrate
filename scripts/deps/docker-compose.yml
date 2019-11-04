@@ -3,7 +3,7 @@ version: '3.7'
 x-container-common: &container-common
   restart: ${CONTAINER_RESTART-on-failure}
   networks:
-    - corestack
+    - orchestrate
 
 services:
   zookeeper:
@@ -124,5 +124,5 @@ volumes:
 
 
 networks:
-  corestack:
+  orchestrate:
     driver: bridge

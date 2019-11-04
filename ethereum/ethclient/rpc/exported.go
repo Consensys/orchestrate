@@ -7,7 +7,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/rpc/geth"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/rpc/geth"
 )
 
 const component = "ethclient.rpc"

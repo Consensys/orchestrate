@@ -9,8 +9,8 @@ import (
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 )
 
 func TestContext(t *testing.T) {

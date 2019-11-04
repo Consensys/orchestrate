@@ -12,22 +12,22 @@ import (
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
-	encoding "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/encoding/sarama"
-	registry "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry"
-	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/chanregistry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/cucumber/parser"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/envelope"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
+	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/contract-registry"
+	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/contract-registry/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/chanregistry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/parser"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 )
 
 var TOPICS = [...]string{
-	"crafter",
-	"nonce",
-	"signer",
-	"sender",
-	"decoded",
-	"recover",
+	"tx.crafter",
+	"tx.nonce",
+	"tx.signer",
+	"tx.sender",
+	"tx.decoded",
+	"tx.recover",
 	"wallet.generator",
 	"wallet.generated",
 }
@@ -166,7 +166,7 @@ func (sc *ScenarioContext) setTrackers(trackers []*tracker) {
 
 func (sc *ScenarioContext) sendEnvelope(topic string, e *envelope.Envelope) error {
 	// Prepare message to be sent
-	msg := &sarama.ProducerMessage{Topic: viper.GetString(fmt.Sprintf("kafka.topic.%v", topic))}
+	msg := &sarama.ProducerMessage{Topic: viper.GetString(fmt.Sprintf("topic.%v", topic))}
 	err := encoding.Marshal(e, msg)
 	if err != nil {
 		return err
@@ -247,13 +247,13 @@ func (sc *ScenarioContext) iHaveDeployedContract(alias string, table *gherkin.Da
 	}
 
 	// Send envelope
-	err = sc.sendEnvelope("crafter", trackers[0].current)
+	err = sc.sendEnvelope("tx.crafter", trackers[0].current)
 	if err != nil {
 		return err
 	}
 
 	// Catch envelope after it has been decoded
-	err = trackers[0].load("decoded", 30*time.Second)
+	err = trackers[0].load("tx.decoded", 30*time.Second)
 	if err != nil {
 		return fmt.Errorf("%v: no receipt for contract %q deployment", sc.ID, alias)
 	}

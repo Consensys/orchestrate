@@ -7,9 +7,9 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/assert"
 
-	svc "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/common"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/contract-registry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/common"
 )
 
 var ERC20 = []byte(`[

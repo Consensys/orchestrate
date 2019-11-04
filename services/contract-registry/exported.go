@@ -7,10 +7,10 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
-	svc "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry/pg"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry/redis"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/contract-registry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/memory"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/pg"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/redis"
 )
 
 const (
@@ -47,10 +47,10 @@ func Init(ctx context.Context) {
 			registry = redis.GlobalContractRegistry()
 		case mockOpt:
 			// Initialize mock Registry
-			mock.Init()
+			memory.Init()
 
 			// Create contract-registry
-			registry = mock.GlobalContractRegistry()
+			registry = memory.GlobalContractRegistry()
 		default:
 			log.WithFields(log.Fields{
 				"type": viper.GetString(typeViperKey),

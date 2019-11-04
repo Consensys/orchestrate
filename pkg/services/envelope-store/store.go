@@ -3,7 +3,7 @@ package envelope_store //nolint:golint,stylecheck
 import (
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
 // HasBeenSent indicates whether a transaction has been sent

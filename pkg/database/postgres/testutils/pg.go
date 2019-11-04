@@ -8,7 +8,7 @@ import (
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/database/postgres"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	"k8s.io/apimachinery/pkg/util/rand"
 )
 

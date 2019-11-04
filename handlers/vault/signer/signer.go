@@ -1,7 +1,7 @@
 package signer
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 )
 
 // TxSigner creates a signer handler

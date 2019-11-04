@@ -8,11 +8,11 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/gogo/protobuf/proto"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/tx-listener/handler/base"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tx-listener/handler/base"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 )
 
 // Handler implements TxListenerHandler interface
@@ -49,7 +49,7 @@ func (h *Handler) GetInitialPosition(chain *big.Int) (blockNumber, txIndex int64
 	}
 
 	// BlockNumber == -2 means we should start listening from position of the last produced message
-	decoderTopic := utils.KafkaChainTopic(viper.GetString("kafka.topic.decoder"), chain)
+	decoderTopic := utils.KafkaChainTopic(viper.GetString("topic.tx.decoder"), chain)
 
 	// Retrieve last record
 	lastRecord, err := h.getLastRecord(decoderTopic, 0)

@@ -4,7 +4,7 @@ import "types/error/error.proto";
 import "types/ethereum/base.proto";
 import "types/chain/chain.proto";
 
-option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/faucet";
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/faucet";
 
 package faucet;
 

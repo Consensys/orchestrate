@@ -12,7 +12,7 @@ func init() {
 	_ = viper.BindEnv(hostnameViperKey, hostnameEnv)
 }
 
-var (
+const (
 	hostnameFlag     = "http-hostname"
 	hostnameViperKey = "http.hostname"
 	hostnameDefault  = ":8080"

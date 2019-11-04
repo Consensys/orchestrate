@@ -13,7 +13,7 @@ func init() {
 	viper.SetDefault(faucetMaxViperKey, faucetMaxDefault)
 }
 
-var (
+const (
 	faucetMaxFlag     = "faucet-max-balance"
 	faucetMaxViperKey = "faucet.ctrl.max-balance"
 	faucetMaxDefault  = "200000000000000000"

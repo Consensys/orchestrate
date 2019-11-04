@@ -7,10 +7,10 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/assert"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/ethereum"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
 func newConsumerMessage() *broker.Msg {

@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/vault/vault"
 
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/secretstore/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/testutils"
 )
 
 type HashicorpKeyStoreTestSuite struct {

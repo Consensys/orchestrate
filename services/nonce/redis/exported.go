@@ -21,7 +21,7 @@ func Init() {
 			return
 		}
 
-		pool := NewPool(viper.GetString(addressViperKey))
+		pool := NewPool(viper.GetString(URLViperKey))
 
 		// Initialize Nonce
 		nm = NewNonceManager(pool)

@@ -6,8 +6,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
-	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry"
 )
 
 func newRunCommand() *cobra.Command {
@@ -20,6 +21,9 @@ func newRunCommand() *cobra.Command {
 	// ContractRegistry flag
 	contractregistry.Type(runCmd.Flags())
 	contractregistry.ABIs(runCmd.Flags())
+
+	// Postgres flags
+	postgres.PGFlags(runCmd.Flags())
 
 	return runCmd
 }

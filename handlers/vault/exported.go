@@ -4,10 +4,10 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/vault/signer"
-	generator "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/vault/wallet-generator"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/signer"
+	generator "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/wallet-generator"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 )
 
 var (

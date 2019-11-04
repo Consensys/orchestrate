@@ -16,7 +16,7 @@ func init() {
 	_ = viper.BindEnv(bridgeAuthorityViperKey, bridgeAuthorityEnv)
 }
 
-var (
+const (
 	bridgeLinksFlag     = "bridge-links"
 	bridgeLinksViperKey = "bridge.links"
 	bridgeLinksEnv      = "BRIDGE_LINKS"
@@ -30,7 +30,7 @@ Environment variable: %q`, bridgeLinksEnv)
 	_ = viper.BindPFlag(bridgeLinksViperKey, f.Lookup(bridgeLinksFlag))
 }
 
-var (
+const (
 	bridgeMethodSignatureFlag     = "bridge-methodsignature"
 	bridgeMethodSignatureViperKey = "bridge.methodsignature"
 	bridgeMethodSignatureDefault  = "RelayMessage(bytes,address,address)"
@@ -45,7 +45,7 @@ Environment variable: %q`, bridgeMethodSignatureEnv)
 	_ = viper.BindPFlag(bridgeMethodSignatureViperKey, f.Lookup(bridgeMethodSignatureFlag))
 }
 
-var (
+const (
 	bridgeAuthorityFlag     = "bridge-authority"
 	bridgeAuthorityViperKey = "bridge.authority"
 	bridgeAuthorityEnv      = "BRIDGE_AUTHORITY"

@@ -13,7 +13,7 @@ func init() {
 	_ = viper.BindEnv(faucetAmountViperKey, faucetAmountEnv)
 }
 
-var (
+const (
 	faucetAmountFlag     = "faucet-credit-amount"
 	faucetAmountViperKey = "faucet.credit.amount"
 	faucetAmountDefault  = "100000000000000000"

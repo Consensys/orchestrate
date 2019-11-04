@@ -5,9 +5,9 @@ import (
 	"math/big"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/tx-listener/handler"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/tx-listener/listener/base"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tx-listener/handler"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tx-listener/listener/base"
 )
 
 var (

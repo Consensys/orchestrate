@@ -8,20 +8,20 @@ import (
 )
 
 func init() {
-	_ = viper.BindEnv(tesseraEndpointsViperKey, tesseraEndpointsEnv)
-	viper.SetDefault(tesseraEndpointsViperKey, tesseraEndpointsDefault)
+	_ = viper.BindEnv(URLsViperKey, urlsEnv)
+	viper.SetDefault(URLsViperKey, urlsDefault)
 }
 
 var (
-	tesseraEndpointsFlag     = "tessera-endpoints"
-	tesseraEndpointsViperKey = "tessera.endpoints"
-	tesseraEndpointsEnv      = "TESSERA_ENDPOINTS"
-	tesseraEndpointsDefault  = map[string]string{}
+	urlsFlag     = "tessera-url"
+	URLsViperKey = "tessera.urls"
+	urlsEnv      = "TESSERA_URL"
+	urlsDefault  = map[string]string{}
 )
 
 func InitFlags(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Tessera endpoints
-Environment variable: %q`, tesseraEndpointsEnv)
-	f.StringToString(tesseraEndpointsFlag, tesseraEndpointsDefault, desc)
-	_ = viper.BindPFlag(tesseraEndpointsViperKey, f.Lookup(tesseraEndpointsFlag))
+	desc := fmt.Sprintf(`Tessera URLs (endpoints)
+Environment variable: %q`, urlsEnv)
+	f.StringToString(urlsFlag, urlsDefault, desc)
+	_ = viper.BindPFlag(URLsViperKey, f.Lookup(urlsFlag))
 }

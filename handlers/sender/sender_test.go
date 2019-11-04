@@ -11,14 +11,14 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/envelope-store"
-	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/envelope-store/client/mock"
-	typesArgs "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/args"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/envelope-store"
+	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/envelope-store/client/mock"
+	typesArgs "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/args"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
 type MockTxSender struct {

@@ -6,10 +6,10 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/vault/wallet-generator/faucet"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/vault/wallet-generator/wallet"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/wallet-generator/faucet"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/wallet-generator/wallet"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 )
 
 var (

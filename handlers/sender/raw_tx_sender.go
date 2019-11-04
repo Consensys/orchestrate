@@ -1,8 +1,8 @@
 package sender
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 )
 
 // RawTxSender creates an handler that send raw transactions to an Ethereum client

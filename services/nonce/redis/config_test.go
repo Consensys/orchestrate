@@ -10,28 +10,28 @@ import (
 )
 
 func TestAddress(t *testing.T) {
-	name := "redis.address"
+	name := "redis.url"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	Address(flgs)
+	URL(flgs)
 	expected := "localhost:6379"
 	if viper.GetString(name) != expected {
-		t.Errorf("RedisAddress #1: expected %q but got %q", expected, viper.GetString(name))
+		t.Errorf("RedisURL #1: expected %q but got %q", expected, viper.GetString(name))
 	}
 
-	_ = os.Setenv("REDIS_ADDRESS", "127.0.0.1:6378")
+	_ = os.Setenv("REDIS_URL", "127.0.0.1:6378")
 	expected = "127.0.0.1:6378"
 	if viper.GetString(name) != expected {
-		t.Errorf("RedisAddress #2: expected %q but got %q", expected, viper.GetString(name))
+		t.Errorf("RedisURL #2: expected %q but got %q", expected, viper.GetString(name))
 	}
 
 	args := []string{
-		"--redis-address=127.0.0.1:6379",
+		"--redis-url=127.0.0.1:6379",
 	}
 	err := flgs.Parse(args)
 	assert.Nil(t, err, "No error expected")
 
 	expected = "127.0.0.1:6379"
 	if viper.GetString(name) != expected {
-		t.Errorf("RedisAddress #3: expected %q but got %q", expected, viper.GetString(name))
+		t.Errorf("RedisURL #3: expected %q but got %q", expected, viper.GetString(name))
 	}
 }

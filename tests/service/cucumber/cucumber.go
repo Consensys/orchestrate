@@ -5,7 +5,7 @@ import (
 
 	"github.com/DATA-DOG/godog"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/cucumber/steps"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/steps"
 )
 
 func Run(cancel context.CancelFunc, opt *godog.Options) {

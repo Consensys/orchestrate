@@ -10,14 +10,14 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/magiconair/properties/assert"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/tessera"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/types"
-	eeaHandlers "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/vault/signer/eea"
-	ethereumHandlers "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/vault/signer/ethereum"
-	tesseraHandlers "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/vault/signer/tessera"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tessera"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
+	eeaHandlers "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/signer/eea"
+	ethereumHandlers "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/signer/ethereum"
+	tesseraHandlers "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/signer/tessera"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
 type MockTxSigner struct {

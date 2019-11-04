@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
 func init() {
@@ -46,7 +46,7 @@ func InitFlags(f *pflag.FlagSet) {
 	Slots(f)
 }
 
-var (
+const (
 	engineSlotsFlag     = "engine-slots"
 	engineSlotsViperKey = "engine.slots"
 	engineSlotsDefault  = uint(20)

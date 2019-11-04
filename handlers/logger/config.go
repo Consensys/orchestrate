@@ -15,7 +15,7 @@ func init() {
 	_ = viper.BindEnv(logFormatViperKey, logFormatEnv)
 }
 
-var (
+const (
 	logLevelFlag     = "log-level"
 	logLevelViperKey = "log.level"
 	logLevelDefault  = "info"
@@ -30,7 +30,7 @@ Environment variable: %q`, []string{"panic", "fatal", "error", "warn", "info", "
 	_ = viper.BindPFlag(logLevelViperKey, f.Lookup(logLevelFlag))
 }
 
-var (
+const (
 	logFormatFlag     = "log-format"
 	logFormatViperKey = "log.format"
 	logFormatDefault  = "text"

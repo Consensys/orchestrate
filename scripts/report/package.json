@@ -1,7 +1,7 @@
 {
   "name": "cucumber-html-reporter",
   "version": "1.0.0",
-  "description": "CoreStack E2E cucumber tests report",
+  "description": "Orchestrate E2E cucumber tests report",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"

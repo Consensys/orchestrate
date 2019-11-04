@@ -6,7 +6,7 @@ package args
 import (
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
-	abi "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/abi"
+	abi "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
 	math "math"
 )
 

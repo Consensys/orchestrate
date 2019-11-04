@@ -1,4 +1,4 @@
-package mock
+package memory
 
 import (
 	"sync"
@@ -6,7 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const component = "envelope-store.mock"
+const component = "envelope-store.in-memory"
 
 var (
 	store    *EnvelopeStore
@@ -23,7 +23,7 @@ func Init() {
 		// Initialize gRPC store
 		store = NewEnvelopeStore()
 
-		log.Infof("envelope-store.mock: store ready")
+		log.Infof("%s: store ready", component)
 	})
 }
 

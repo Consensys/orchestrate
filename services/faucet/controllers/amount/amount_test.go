@@ -7,9 +7,9 @@ import (
 	"testing"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/faucet/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/types/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types/testutils"
 )
 
 var (

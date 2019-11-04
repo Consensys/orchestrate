@@ -10,7 +10,7 @@ import (
 	eth "github.com/ethereum/go-ethereum"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
 )
 
 // Client is a Mock client

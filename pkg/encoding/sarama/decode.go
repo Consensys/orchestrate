@@ -2,9 +2,9 @@ package sarama
 
 import (
 	"github.com/golang/protobuf/proto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
-	encoding "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/encoding/proto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/proto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
 // Unmarshal a sarama message into a protobuffer

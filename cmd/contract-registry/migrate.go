@@ -4,8 +4,8 @@ import (
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/database/postgres"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry/pg/migrations"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/pg/migrations"
 )
 
 // newMigrateCmd create migrate command
@@ -29,6 +29,9 @@ func newMigrateCmd() *cobra.Command {
 			}
 		},
 	}
+
+	// Postgres flags
+	postgres.PGFlags(migrateCmd.Flags())
 
 	// Register Init command
 	initCmd := &cobra.Command{

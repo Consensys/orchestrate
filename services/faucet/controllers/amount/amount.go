@@ -4,8 +4,8 @@ import (
 	"context"
 	"math/big"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/faucet"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
 )
 
 // Controller is a Controller that set the Amount to be transferred

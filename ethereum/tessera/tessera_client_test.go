@@ -8,7 +8,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/mocks"
 )
 
 const chainID = 888

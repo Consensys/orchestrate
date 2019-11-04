@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
 // Conn is a wrapper around a redis.Conn that handles internal errors

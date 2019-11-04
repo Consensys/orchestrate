@@ -4,19 +4,20 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/envelope/storer"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/envelope/storer"
 
 	log "github.com/sirupsen/logrus"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/envelope-store/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/envelope-store/client"
 )
 
+const component = "handler.sender"
+
 var (
-	component = "handler.sender"
-	handler   engine.HandlerFunc
-	initOnce  = &sync.Once{}
+	handler  engine.HandlerFunc
+	initOnce = &sync.Once{}
 )
 
 // Init initialize Sender Handler

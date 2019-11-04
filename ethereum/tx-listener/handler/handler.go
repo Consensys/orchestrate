@@ -4,7 +4,7 @@ import (
 	"context"
 	"math/big"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
 )
 
 // ListenerSession

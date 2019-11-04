@@ -11,9 +11,9 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/secretstore/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/memory"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 )
 
 var testPKeys = []struct {
@@ -68,7 +68,7 @@ type BaseKeyStoreTestSuite struct {
 }
 
 func (s *BaseKeyStoreTestSuite) SetupTest() {
-	s.Store = NewKeyStore(mock.NewSecretStore())
+	s.Store = NewKeyStore(memory.NewSecretStore())
 }
 
 // TestSignTx is a test suit for KeyStore that test ethereum signature
@@ -136,7 +136,7 @@ func TestPrivateTxSigning(t *testing.T) {
 
 	privateFrom := "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
 
-	store := NewKeyStore(mock.NewSecretStore())
+	store := NewKeyStore(memory.NewSecretStore())
 	err := store.ImportPrivateKey(privateKey)
 	assert.NoError(t, err)
 
@@ -165,7 +165,7 @@ func TestPrivateTesseraTxSigning(t *testing.T) {
 	expected := "0xf865808203e8832dc6c094000000000000000000000000000000000000000080831234561ba0e04e1c11a8626c77fc2b61c246b066f765613b6104a824bb229889c45dae9922a018b07c72e29e7869422680979e5a4dfe0fd9fbcaa62bb3d0c9320a30b03d91c4"
 	data := "0x123456"
 
-	store := NewKeyStore(mock.NewSecretStore())
+	store := NewKeyStore(memory.NewSecretStore())
 	err := store.ImportPrivateKey(privateKey)
 	assert.NoError(t, err)
 

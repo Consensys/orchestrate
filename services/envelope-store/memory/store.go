@@ -1,4 +1,4 @@
-package mock
+package memory
 
 import (
 	"context"
@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
-	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/envelope-store"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/envelope-store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
 const (
@@ -19,14 +19,14 @@ const (
 	MINED   = "mined"
 )
 
-// EnvelopeStore is a mock in memory version of a envelope store
+// EnvelopeStore is a in memory version of a envelope store
 type EnvelopeStore struct {
 	mux      *sync.Mutex
 	byID     map[string]*EnvelopeModel
 	byTxHash map[string]*EnvelopeModel
 }
 
-// NewEnvelopeStore creates a new mock envelope store
+// NewEnvelopeStore creates a new in memory envelope store
 func NewEnvelopeStore() *EnvelopeStore {
 	return &EnvelopeStore{
 		mux:      &sync.Mutex{},

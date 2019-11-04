@@ -1,7 +1,7 @@
 package examples
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 )
 
 // Msg is a dummy engine.Msg implementation

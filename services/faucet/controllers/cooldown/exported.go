@@ -5,14 +5,15 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/faucet"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet"
 )
 
+const component = "controller.cooldown"
+
 var (
-	component = "controller.cooldown"
-	ctrl      *Controller
-	config    *Config
-	initOnce  = &sync.Once{}
+	ctrl     *Controller
+	config   *Config
+	initOnce = &sync.Once{}
 )
 
 // Init initialize BlackList Controller

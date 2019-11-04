@@ -5,14 +5,15 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 )
 
+const component = "handler.gas-estimator"
+
 var (
-	component = "handler.gas-estimator"
-	handler   engine.HandlerFunc
-	initOnce  = &sync.Once{}
+	handler  engine.HandlerFunc
+	initOnce = &sync.Once{}
 )
 
 // Init initialize Gas Estimator Handler

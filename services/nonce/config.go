@@ -13,7 +13,7 @@ func init() {
 	_ = viper.BindEnv(typeViperKey, typeEnv)
 }
 
-var (
+const (
 	typeFlag     = "nonce-manager-type"
 	typeViperKey = "nonce.manager.type"
 	typeDefault  = "redis"

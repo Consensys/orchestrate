@@ -6,7 +6,7 @@ import (
 
 	"github.com/Shopify/sarama/mocks"
 	"github.com/stretchr/testify/assert"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 )
 
 func TestInit(t *testing.T) {

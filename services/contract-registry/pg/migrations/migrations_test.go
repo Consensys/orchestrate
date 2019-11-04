@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-pg/pg"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/database/postgres/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres/testutils"
 )
 
 type MigrationsTestSuite struct {

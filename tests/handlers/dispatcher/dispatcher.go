@@ -3,9 +3,9 @@ package dispatcher
 import (
 	"github.com/golang/protobuf/proto"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/chanregistry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/chanregistry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 )
 
 // KeyOfFunc should return channel key to distach envelope to
@@ -36,7 +36,7 @@ func Dispatcher(reg *chanregistry.ChanRegistry, keyOfs ...KeyOfFunc) engine.Hand
 				continue
 			}
 
-			// Dispatch envlope
+			// Dispatch envelope
 			err = reg.Send(
 				key,
 				e,

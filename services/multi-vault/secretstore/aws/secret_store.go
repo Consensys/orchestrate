@@ -4,7 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
 // SecretStore can manage secrets on AWS secret manager
@@ -98,7 +98,7 @@ func (s *SecretStore) create(key, value string) (err error) {
 	}
 
 	input := secretsmanager.CreateSecretInput{
-		Description:  aws.String("Miscellaneous core-stack secret"),
+		Description:  aws.String("Miscellaneous Orchestrate secret"),
 		Name:         aws.String(key),
 		SecretString: aws.String(value),
 	}

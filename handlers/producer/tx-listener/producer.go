@@ -3,10 +3,10 @@ package txlistener
 import (
 	"github.com/Shopify/sarama"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/producer"
-	encoding "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/encoding/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/producer"
+	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
 // PrepareMsg prepare message to produce from TxContexts
@@ -18,7 +18,7 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 	}
 
 	// Set Topic to Nonce topic
-	msg.Topic = utils.KafkaChainTopic(viper.GetString("kafka.topic.decoder"), txctx.Envelope.GetChain().ID())
+	msg.Topic = utils.KafkaChainTopic(viper.GetString("topic.tx.decoder"), txctx.Envelope.GetChain().ID())
 
 	// Set key
 	Sender := txctx.Envelope.GetFrom().Address()

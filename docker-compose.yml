@@ -1,17 +1,17 @@
 version: '3.7'
 
 x-default-variables: &default-variables
-  GRPC_TARGET_ENVELOPE_STORE: ${GRPC_TARGET_ENVELOPE_STORE-envelope-store:8080}
-  GRPC_TARGET_CONTRACT_REGISTRY: ${GRPC_TARGET_CONTRACT_REGISTRY-contract-registry:8080}
-  KAFKA_ADDRESS: ${KAFKA_ADDRESS-kafka:29092}
+  ENVELOPE_STORE_URL: ${ENVELOPE_STORE_URL-envelope-store:8080}
+  CONTRACT_REGISTRY_URL: ${CONTRACT_REGISTRY_URL-contract-registry:8080}
+  KAFKA_URL: ${KAFKA_URL-kafka:29092}
   ETH_CLIENT_URL: ${ETH_CLIENT_URL-http://geth:8545}
   LOG_LEVEL: ${LOG_LEVEL-debug}
   LOG_FORMAT: ${LOG_FORMAT-}
   JAEGER_AGENT_HOST: ${JAEGER_AGENT_HOST-jaeger}
   JAEGER_AGENT_PORT: ${JAEGER_AGENT_PORT-6831}
   NONCE_MANAGER_TYPE: ${NONCE_MANAGER_TYPE-}
-  REDIS_ADDRESS: ${REDIS_ADDRESS-redis:6379}
-  VAULT_ADDR: ${VAULT_ADDR-http://vault:8200}
+  REDIS_URL: ${REDIS_URL-redis:6379}
+  VAULT_URL: ${VAULT_URL-http://vault:8200}
   # FAUCET_CREDITOR_ADDRESS: ${FAUCET_CREDITOR_ADDRESS-0x93f7274c9059e601be4512f656b57b830e019e41}@${GETH_NETWORKID-888}
   ABI: ${ABI-}
   ETH_CLIENT_RETRY_MAX_ELAPSED_TIME: 5s
@@ -19,10 +19,10 @@ x-default-variables: &default-variables
 x-container-common: &container-common
   restart: ${CONTAINER_RESTART-on-failure}
   networks:
-    - corestack
+    - orchestrate
     - quorum-tessera
   volumes:
-    - ./build/bin/corestack:/bin/main
+    - ./build/bin/orchestrate:/bin/main
   image: golang:1.13
   entrypoint: /bin/main
 
@@ -125,12 +125,12 @@ services:
     environment:
       <<: *default-variables
       JAEGER_SERVICE_NAME: TX-SIGNER
-      TESSERA_ENDPOINTS: ${TESSERA_ENDPOINTS}
+      TESSERA_URL: ${TESSERA_URL}
       SECRET_PKEY: ${SECRET_PKEY-}
       SECRET_STORE: ${SECRET_STORE-hashicorp}
     volumes:
-      - vault-token:/vault/token
-      - ./build/bin/corestack:/bin/main
+      - vault-token:/vault/token:ro
+      - ./build/bin/orchestrate:/bin/main
     depends_on:
       - tx-signer-init
     command: tx-signer run
@@ -181,9 +181,9 @@ volumes:
     driver: local
 
 networks:
-  corestack:
+  orchestrate:
     external:
-      name: deps_corestack
+      name: deps_orchestrate
   quorum-tessera:
     external:
       name: deps_quorum-tessera

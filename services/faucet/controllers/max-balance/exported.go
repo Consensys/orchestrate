@@ -7,15 +7,16 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/faucet"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet"
 )
 
+const component = "controller.max-balance"
+
 var (
-	component = "controller.max-balance"
-	ctrl      *Controller
-	config    *Config
-	initOnce  = sync.Once{}
+	ctrl     *Controller
+	config   *Config
+	initOnce = sync.Once{}
 )
 
 // Init initialize BlackList Controller

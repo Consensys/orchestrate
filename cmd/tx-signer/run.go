@@ -5,16 +5,14 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/tessera"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/controllers/amount"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/controllers/creditor"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet/faucet"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/keystore"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/secretstore"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/multi-vault/secretstore/hashicorp"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tessera"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers/amount"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers/creditor"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/hashicorp"
 )
 
 func newRunCommand() *cobra.Command {
@@ -24,9 +22,6 @@ func newRunCommand() *cobra.Command {
 		Run:   run,
 	}
 
-	// Register Engine flags
-	engine.InitFlags(runCmd.Flags())
-
 	// Register KeyStore flags
 	hashicorp.InitFlags(runCmd.Flags())
 	keystore.InitFlags(runCmd.Flags())
@@ -34,7 +29,7 @@ func newRunCommand() *cobra.Command {
 	tessera.InitFlags(runCmd.Flags())
 
 	// Register Kafka flags
-	broker.KafkaAddresses(runCmd.Flags())
+	broker.KafkaURL(runCmd.Flags())
 	broker.KafkaGroup(runCmd.Flags())
 	broker.KafkaTopicTxSigner(runCmd.Flags())
 	broker.KafkaTopicTxSender(runCmd.Flags())
@@ -44,7 +39,6 @@ func newRunCommand() *cobra.Command {
 	broker.InitKafkaSASLTLSFlags(runCmd.Flags())
 
 	// Register Faucet flags
-	faucet.Type(runCmd.Flags())
 	amount.FaucetAmount(runCmd.Flags())
 	creditor.FaucetAddress(runCmd.Flags())
 

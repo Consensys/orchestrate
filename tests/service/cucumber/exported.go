@@ -8,9 +8,9 @@ import (
 	"github.com/DATA-DOG/godog"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/chanregistry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/cucumber/parser"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/cucumber/steps"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/chanregistry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/parser"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/steps"
 )
 
 var (

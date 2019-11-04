@@ -4,8 +4,8 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/nonce/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/nonce/redis"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/redis"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"

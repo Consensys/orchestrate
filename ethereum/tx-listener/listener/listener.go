@@ -4,7 +4,7 @@ import (
 	"context"
 	"math/big"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/tx-listener/handler"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tx-listener/handler"
 )
 
 // TxListener is a transaction listener that allows to listen to multiple blockchains simultaneously

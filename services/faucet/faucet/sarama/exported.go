@@ -5,13 +5,14 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 )
 
+const component = "faucet.sarama"
+
 var (
-	component = "faucet.sarama"
-	fct       *Faucet
-	initOnce  = &sync.Once{}
+	fct      *Faucet
+	initOnce = &sync.Once{}
 )
 
 // Init initializes Faucet

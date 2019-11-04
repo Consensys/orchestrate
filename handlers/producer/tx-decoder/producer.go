@@ -4,9 +4,9 @@ import (
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/producer"
-	encoding "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/encoding/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/producer"
+	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 )
 
 // PrepareMsg prepare message to produce from TxContexts
@@ -18,7 +18,7 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 	}
 
 	// Set Topic to Nonce topic
-	msg.Topic = viper.GetString("kafka.topic.decoded")
+	msg.Topic = viper.GetString("topic.tx.decoded")
 
 	// Set key
 	msg.Key = sarama.ByteEncoder(txctx.Envelope.GetChain().ID().Bytes())
@@ -26,14 +26,14 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 	return nil
 }
 
-// Producer creates a producer handler that filters in corestack transaction
+// Producer creates a producer handler that filters in Orchestrate transaction
 // NB: If the transaction
 func Producer(p sarama.SyncProducer) engine.HandlerFunc {
 
 	classicProducer := producer.Producer(p, PrepareMsg)
 
 	return func(txctx *engine.TxContext) {
-		// Test if transaction was matched by corestack.
+		// Test if transaction was matched by Orchestrate.
 		// TODO: Have an actual flag to make the check, because there is no guarantee
 		// that metadata and tx will be unset in unmatched transaction forever.
 		// TODO: Make it possible to filter at the last moment. So that we can produce in multiple topics

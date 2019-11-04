@@ -7,9 +7,9 @@ package main
 // 	"time"
 
 // 	"github.com/ethereum/go-ethereum/common"
-// 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/core/services"
-// 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum"
-// 	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/faucet"
+// 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/core/services"
+// 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum"
+// 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet"
 // )
 
 // func mockCredit(ctx context.Context, r *services.FaucetRequest) (*big.Int, bool, error) {

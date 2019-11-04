@@ -54,7 +54,7 @@ func InitFlags(f *pflag.FlagSet) {
 	LogSpans(f)
 }
 
-var (
+const (
 	hostFlag     = "jaeger-agent-host"
 	hostViperKey = "jaeger.agent.host"
 	hostDefault  = "localhost"
@@ -69,7 +69,7 @@ Environment variable: %q`, hostEnv)
 	_ = viper.BindPFlag(hostViperKey, f.Lookup(hostFlag))
 }
 
-var (
+const (
 	portFlag     = "jaeger-agent-port"
 	portViperKey = "jaeger.agent.port"
 	portDefault  = 6831
@@ -84,7 +84,7 @@ Environment variable: %q`, portEnv)
 	_ = viper.BindPFlag(portViperKey, f.Lookup(portFlag))
 }
 
-var (
+const (
 	serviceNameViperKey = "jaeger.service.name"
 	serviceNameFlag     = "jaeger-service-name"
 	serviceNameDefault  = "jaeger"
@@ -99,7 +99,7 @@ Environment variable: %q`, serviceNameEnv)
 	_ = viper.BindPFlag(serviceNameViperKey, f.Lookup(serviceNameFlag))
 }
 
-var (
+const (
 	collectorURLViperKey = "jaeger.collector.url"
 	collectorURLFlag     = "jaeger-collector-url"
 	collectorURLDefault  = ""
@@ -114,7 +114,7 @@ Environment variable: %q`, collectorURLEnv)
 	_ = viper.BindPFlag(collectorURLViperKey, f.Lookup(collectorURLFlag))
 }
 
-var (
+const (
 	userViperKey = "jaeger.user"
 	userFlag     = "jaeger-user"
 	userDefault  = ""
@@ -129,7 +129,7 @@ Environment variable: %q`, userEnv)
 	_ = viper.BindPFlag(userViperKey, f.Lookup(userFlag))
 }
 
-var (
+const (
 	passwordViperKey = "jaeger.password"
 	passwordFlag     = "jaeger-password"
 	passwordDefault  = ""
@@ -144,7 +144,7 @@ Environment variable: %q`, passwordEnv)
 	_ = viper.BindPFlag(passwordViperKey, f.Lookup(passwordFlag))
 }
 
-var (
+const (
 	enabledViperKey = "jaeger.enabled"
 	enabledFlag     = "jaeger-enabled"
 	enabledDefault  = true
@@ -159,7 +159,7 @@ Environment variable: %q`, enabledEnv)
 	_ = viper.BindPFlag(enabledViperKey, f.Lookup(enabledFlag))
 }
 
-var (
+const (
 	rpcMetricsViperKey = "jaeger.rpc.metrics"
 	rpcMetricsFlag     = "jaeger-rpc-metrics"
 	rpcMetricsDefault  = false
@@ -174,7 +174,7 @@ Environment variable: %q`, rpcMetricsEnv)
 	_ = viper.BindPFlag(rpcMetricsViperKey, f.Lookup(rpcMetricsFlag))
 }
 
-var (
+const (
 	logSpansViperKey = "jaeger.reporter.log.spans"
 	logSpansFlag     = "jaeger-reporter-log-spans"
 	logSpansDefault  = true
@@ -189,7 +189,7 @@ Environment variable: %q`, logSpansEnv)
 	_ = viper.BindPFlag(logSpansViperKey, f.Lookup(logSpansFlag))
 }
 
-var (
+const (
 	samplerParamFlag     = "jaeger-sampler-param"
 	samplerParamViperKey = "jaeger.sampler.param"
 	samplerParamDefault  = 1
@@ -204,7 +204,7 @@ Environment variable: %q`, samplerParamEnv)
 	_ = viper.BindPFlag(samplerParamViperKey, f.Lookup(samplerParamFlag))
 }
 
-var (
+const (
 	samplerTypeFlag     = "jaeger-sampler-type"
 	samplerTypeViperKey = "jaeger.sampler.type"
 	samplerTypeDefault  = "const"

@@ -8,17 +8,17 @@ import (
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	loader "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/loader/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/offset"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	server "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http/healthcheck"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/handlers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/handlers/dispatcher"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/cucumber"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/tests/service/cucumber/steps"
+	loader "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/loader/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/offset"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	server "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/healthcheck"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/handlers"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/handlers/dispatcher"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/steps"
 )
 
 var (
@@ -91,7 +91,7 @@ func initComponents(ctx context.Context) {
 			// Prepare topics map for dispatcher
 			topics := make(map[string]string)
 			for _, topic := range steps.TOPICS {
-				topics[viper.GetString(fmt.Sprintf("kafka.topic.%v", topic))] = topic
+				topics[viper.GetString(fmt.Sprintf("topic.%v", topic))] = topic
 			}
 			dispatcher.SetKeyOfFuncs(
 				LongKeyOf(topics),
@@ -135,7 +135,7 @@ func Start(ctx context.Context) {
 		// Start consuming on every topics of interest
 		var topics []string
 		for _, topic := range steps.TOPICS {
-			topics = append(topics, viper.GetString(fmt.Sprintf("kafka.topic.%v", topic)))
+			topics = append(topics, viper.GetString(fmt.Sprintf("topic.%v", topic)))
 		}
 
 		readyToTest = make(chan bool, 1)
@@ -156,7 +156,7 @@ func Start(ctx context.Context) {
 			cg,
 		)
 		if err != nil {
-			log.WithError(err).Fatal("worker: error on consumer")
+			log.WithError(err).Fatalf("worker: error on consumer with topics: %s", topics)
 		}
 
 	})

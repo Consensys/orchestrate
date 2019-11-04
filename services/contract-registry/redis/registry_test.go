@@ -6,7 +6,7 @@ import (
 	"github.com/alicebob/miniredis"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/testutils"
 )
 
 type RedisTestSuite struct {

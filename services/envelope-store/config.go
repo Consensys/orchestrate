@@ -12,7 +12,7 @@ func init() {
 	_ = viper.BindEnv(typeViperKey, typeEnv)
 }
 
-var (
+const (
 	typeFlag     = "envelope-store-type"
 	typeViperKey = "envelope-store.type"
 	typeDefault  = postgresOpt
@@ -22,7 +22,7 @@ var (
 // Type register flag for the Envelope Store to select
 func Type(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Type of Envelope Store (one of %q)
-Environment variable: %q`, []string{"mock", "pg"}, typeEnv)
+Environment variable: %q`, []string{postgresOpt, inMemoryOpt}, typeEnv)
 	f.String(typeFlag, typeDefault, desc)
 	_ = viper.BindPFlag(typeViperKey, f.Lookup(typeFlag))
 }

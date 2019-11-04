@@ -7,8 +7,8 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 
-	svc "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/abi"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/contract-registry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
 )
 
 func TestInit(t *testing.T) {

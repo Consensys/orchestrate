@@ -20,7 +20,7 @@ func InitFlags(f *pflag.FlagSet) {
 	Start(f)
 }
 
-var (
+const (
 	startDefaultFlag     = "listener-start-default"
 	startDefaultViperKey = "listener.start-default"
 	startDefaultDefault  = "oldest"

@@ -8,19 +8,19 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient/rpc"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/decoder"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/loader/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/logger"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/offset"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/opentracing"
-	producer "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/producer/tx-decoder"
-	injector "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/trace-injector"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	server "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http/healthcheck"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/rpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/decoder"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/loader/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/offset"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/opentracing"
+	producer "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/producer/tx-decoder"
+	injector "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/trace-injector"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	server "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/healthcheck"
 )
 
 var (
@@ -121,7 +121,7 @@ func Start(ctx context.Context) {
 		// Initialize Topics list by chain
 		var topics []string
 		for _, chainID := range rpc.GlobalClient().Networks(context.Background()) {
-			topics = append(topics, fmt.Sprintf("%v-%v", viper.GetString("kafka.topic.decoder"), chainID.String()))
+			topics = append(topics, fmt.Sprintf("%v-%v", viper.GetString("topic.tx.decoder"), chainID.String()))
 		}
 
 		log.Infof("Connecting to the following Kafka topics %v", topics)

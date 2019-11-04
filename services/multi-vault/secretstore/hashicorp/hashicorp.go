@@ -16,7 +16,7 @@ import (
 	"github.com/hashicorp/vault/api"
 	log "github.com/sirupsen/logrus"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
 // Hashicorp is a wrapper around an Hashicorp object

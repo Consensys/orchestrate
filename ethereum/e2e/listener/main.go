@@ -10,19 +10,19 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
-	handlercfg "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/tx-listener/handler/base"
-	handler "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/tx-listener/handler/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/tx-listener/listener"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/tx-listener/listener/base"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/logger"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/producer"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
-	encoding "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/encoding/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/ethereum"
+	handlercfg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tx-listener/handler/base"
+	handler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tx-listener/handler/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tx-listener/listener"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tx-listener/listener/base"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/producer"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
 // Loader is a Middleware engine.HandlerFunc that Load sarama.ConsumerGroup messages
@@ -63,7 +63,7 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 	}
 
 	// Set Topic to Nonce topic
-	msg.Topic = utils.KafkaChainTopic(viper.GetString("kafka.topic.decoder"), txctx.Envelope.GetChain().ID())
+	msg.Topic = utils.KafkaChainTopic(viper.GetString("topic.tx.decoder"), txctx.Envelope.GetChain().ID())
 
 	log.WithFields(log.Fields{
 		"topic": msg.Topic,
@@ -89,7 +89,7 @@ func main() {
 		// "https://kovan.infura.io/v3/bfc9d6e51fbc4d3db54bea58d1094f9c",
 		// "https://mainnet.infura.io/v3/bfc9d6e51fbc4d3db54bea58d1094f9c",
 	})
-	viper.Set("kafka.topic.decoder", "dodo")
+	viper.Set("topic.tx.decoder", "dodo")
 
 	// Initialize listener config than initialize listener
 	config := base.NewConfig()

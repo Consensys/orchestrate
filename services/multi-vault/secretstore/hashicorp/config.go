@@ -46,8 +46,8 @@ func init() {
 	viper.SetDefault(vaultBurstLimitViperKey, vaultBurstLimitDefault)
 	_ = viper.BindEnv(vaultBurstLimitViperKey, vaultBurstLimitEnv)
 
-	viper.SetDefault(vaultAddressViperKey, vaultAddressDefault)
-	_ = viper.BindEnv(vaultAddressViperKey, vaultAddressEnv)
+	viper.SetDefault(vaultURLViperKey, vaultURLDefault)
+	_ = viper.BindEnv(vaultURLViperKey, vaultURLEnv)
 
 	viper.SetDefault(vaultCACertViperKey, vaultCACertDefault)
 	_ = viper.BindEnv(vaultCACertViperKey, vaultCACertEnv)
@@ -74,16 +74,16 @@ func init() {
 	_ = viper.BindEnv(vaultTLSServerNameViperKey, vaultTLSServerNameEnv)
 }
 
-var (
-	vaultTokenFilePathEnv = "VAULT_TOKEN_FILEPATH"
+const (
+	vaultTokenFilePathEnv = "VAULT_TOKEN_FILE"
 	vaultMountPointEnv    = "VAULT_MOUNT_POINT"
 	vaultKVVersionEnv     = "VAULT_KV_VERSION"
 	vaultSecretPathEnv    = "VAULT_SECRET_PATH"
 	vaultRateLimitEnv     = "VAULT_RATE_LIMIT"
 	vaultBurstLimitEnv    = "VAULT_BURST_LIMIT"
-	vaultAddressEnv       = "VAULT_ADDR"
-	vaultCACertEnv        = "VAULT_CACERT"
-	vaultCAPathEnv        = "VAULT_CAPATH"
+	vaultURLEnv           = "VAULT_URL"
+	vaultCACertEnv        = "VAULT_CA_CERT"
+	vaultCAPathEnv        = "VAULT_CA_PATH"
 	vaultClientCertEnv    = "VAULT_CLIENT_CERT"
 	vaultClientKeyEnv     = "VAULT_CLIENT_KEY"
 	vaultClientTimeoutEnv = "VAULT_CLIENT_TIMEOUT"
@@ -91,15 +91,15 @@ var (
 	vaultSkipVerifyEnv    = "VAULT_SKIP_VERIFY"
 	vaultTLSServerNameEnv = "VAULT_TLS_SERVER_NAME"
 
-	vaultTokenFilePathFlag = "vault-token-filepath"
+	vaultTokenFilePathFlag = "vault-token-file"
 	vaultMountPointFlag    = "vault-mount-point"
 	vaultKVVersionFlag     = "vault-kv-version"
 	vaultSecretPathFlag    = "vault-secret-path"
 	vaultRateLimitFlag     = "vault-rate-limit"
 	vaultBurstLimitFlag    = "vault-burst-limit"
-	vaultAddressFlag       = "vault-addr"
-	vaultCACertFlag        = "vault-cacert"
-	vaultCAPathFlag        = "vault-capath"
+	vaultURLFlag           = "vault-url"
+	vaultCACertFlag        = "vault-ca-cert"
+	vaultCAPathFlag        = "vault-ca-path"
 	vaultClientCertFlag    = "vault-client-cert"
 	vaultClientKeyFlag     = "vault-client-key"
 	vaultClientTimeoutFlag = "vault-client-timeout"
@@ -107,15 +107,15 @@ var (
 	vaultSkipVerifyFlag    = "vault-skip-verify"
 	vaultTLSServerNameFlag = "vault-tls-server-name"
 
-	vaultTokenFilePathViperKey = "vault.token.filepath"
+	vaultTokenFilePathViperKey = "vault.token.file"
 	vaultMountPointViperKey    = "vault.mount.point"
 	vaultKVVersionViperKey     = "vault.kv.version"
 	vaultSecretPathViperKey    = "vault.secret.path"
 	vaultRateLimitViperKey     = "vault.rate.limit"
 	vaultBurstLimitViperKey    = "vault.burst.limit"
-	vaultAddressViperKey       = "vault.addr"
-	vaultCACertViperKey        = "vault.cacert"
-	vaultCAPathViperKey        = "vault.capath"
+	vaultURLViperKey           = "vault.url"
+	vaultCACertViperKey        = "vault.ca.cert"
+	vaultCAPathViperKey        = "vault.ca.path"
 	vaultClientCertViperKey    = "vault.client.cert"
 	vaultClientKeyViperKey     = "vault.client.key"
 	vaultClientTimeoutViperKey = "vault.client.timeout"
@@ -128,22 +128,22 @@ var (
 	vaultMountPointDefault    = "secret"
 	vaultKVVersionDefault     = "v2" // Could be "v1"
 	vaultSecretPathDefault    = "default"
-	vaultRateLimitDefault     float64
-	vaultBurstLimitDefault    int
-	vaultAddressDefault       = "https://127.0.0.1:8200"
-	vaultCACertDefault        string
-	vaultCAPathDefault        string
-	vaultClientCertDefault    string
-	vaultClientKeyDefault     string
+	vaultRateLimitDefault     = float64(0)
+	vaultBurstLimitDefault    = int(0)
+	vaultURLDefault           = "https://127.0.0.1:8200"
+	vaultCACertDefault        = ""
+	vaultCAPathDefault        = ""
+	vaultClientCertDefault    = ""
+	vaultClientKeyDefault     = ""
 	vaultClientTimeoutDefault = time.Second * 60
-	vaultMaxRetriesDefault    int
-	vaultSkipVerifyDefault    bool
-	vaultTLSServerNameDefault string
+	vaultMaxRetriesDefault    = int(0)
+	vaultSkipVerifyDefault    = false
+	vaultTLSServerNameDefault = ""
 )
 
-// InitFlags register flags for hashicorp vault
+// InitFlags register flags for HashiCorp Vault
 func InitFlags(f *pflag.FlagSet) {
-	vaultAddress(f)
+	vaultURL(f)
 	vaultBurstLimit(f)
 	vaultCACert(f)
 	vaultCAPath(f)
@@ -204,11 +204,11 @@ Environment variable: %q`, vaultRateLimitEnv)
 	_ = viper.BindPFlag(vaultBurstLimitViperKey, f.Lookup(vaultBurstLimitFlag))
 }
 
-func vaultAddress(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Hashicorp address of the remote hashicorp vault
-Environment variable: %q`, vaultAddressEnv)
-	f.String(vaultAddressFlag, vaultAddressDefault, desc)
-	_ = viper.BindPFlag(vaultAddressViperKey, f.Lookup(vaultAddressFlag))
+func vaultURL(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Hashicorp URL of the remote hashicorp vault
+Environment variable: %q`, vaultURLEnv)
+	f.String(vaultURLFlag, vaultURLDefault, desc)
+	_ = viper.BindPFlag(vaultURLViperKey, f.Lookup(vaultURLFlag))
 }
 
 func vaultCACert(f *pflag.FlagSet) {
@@ -270,7 +270,7 @@ Environment variable: %q`, vaultTLSServerNameEnv)
 // ConfigFromViper returns a local config object that be converted into an api.Config
 func ConfigFromViper() *Config {
 	return &Config{
-		Address:       viper.GetString(vaultAddressViperKey),
+		Address:       viper.GetString(vaultURLViperKey),
 		BurstLimit:    viper.GetInt(vaultBurstLimitViperKey),
 		CACert:        viper.GetString(vaultCACertViperKey),
 		CAPath:        viper.GetString(vaultCAPathViperKey),

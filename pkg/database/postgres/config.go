@@ -33,7 +33,7 @@ func PGFlags(f *pflag.FlagSet) {
 	DBPoolSize(f)
 }
 
-var (
+const (
 	dbUserFlag     = "db-user"
 	dbUserViperKey = "db.user"
 	dbUserDefault  = "postgres"
@@ -48,7 +48,7 @@ Environment variable: %q`, dbUserEnv)
 	_ = viper.BindPFlag(dbUserViperKey, f.Lookup(dbUserFlag))
 }
 
-var (
+const (
 	dbPasswordFlag     = "db-password"
 	dbPasswordViperKey = "db.password"
 	dbPasswordDefault  = "postgres"
@@ -63,7 +63,7 @@ Environment variable: %q`, dbPasswordEnv)
 	_ = viper.BindPFlag(dbPasswordViperKey, f.Lookup(dbPasswordFlag))
 }
 
-var (
+const (
 	dbDatabaseFlag     = "db-database"
 	dbDatabaseViperKey = "db.database"
 	dbDatabaseDefault  = "postgres"
@@ -78,7 +78,7 @@ Environment variable: %q`, dbDatabaseEnv)
 	_ = viper.BindPFlag(dbDatabaseViperKey, f.Lookup(dbDatabaseFlag))
 }
 
-var (
+const (
 	dbHostFlag     = "db-host"
 	dbHostViperKey = "db.host"
 	dbHostDefault  = "127.0.0.1"
@@ -93,7 +93,7 @@ Environment variable: %q`, dbHostEnv)
 	_ = viper.BindPFlag(dbHostViperKey, f.Lookup(dbHostFlag))
 }
 
-var (
+const (
 	dbPortFlag     = "db-port"
 	dbPortViperKey = "db.port"
 	dbPortDefault  = 5432
@@ -108,7 +108,7 @@ Environment variable: %q`, dbPortEnv)
 	_ = viper.BindPFlag(dbPortViperKey, f.Lookup(dbPortFlag))
 }
 
-var (
+const (
 	dbPoolSizeFlag     = "db-poolsize"
 	dbPoolSizeViperKey = "db.poolsize"
 	dbPoolSizeDefault  = 0

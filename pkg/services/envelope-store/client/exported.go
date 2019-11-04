@@ -8,10 +8,10 @@ import (
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/opentracing"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
-	grpcclient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/grpc/client"
-	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/envelope-store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/opentracing"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	grpcclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/client"
+	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/envelope-store"
 )
 
 const component = "envelope-store.client"
@@ -35,7 +35,7 @@ func Init(ctx context.Context) {
 		var err error
 		conn, err = grpcclient.DialContextWithDefaultOptions(
 			ctx,
-			viper.GetString(grpcTargetEnvelopeStoreViperKey),
+			viper.GetString(EnvelopeStoreURLViperKey),
 		)
 		if err != nil {
 			e := errors.FromError(err).ExtendComponent(component)
@@ -45,7 +45,7 @@ func Init(ctx context.Context) {
 		client = evlpstore.NewEnvelopeStoreClient(conn)
 
 		log.WithFields(log.Fields{
-			"grpc.target": viper.GetString(grpcTargetEnvelopeStoreViperKey),
+			"url": viper.GetString(EnvelopeStoreURLViperKey),
 		}).Infof("%s: client ready", component)
 	})
 }

@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
-	pgTestUtils "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/database/postgres/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/envelope-store/pg/migrations"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/envelope-store/testutils"
+	pgTestUtils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/pg/migrations"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/testutils"
 )
 
 type ModelsTestSuite struct {

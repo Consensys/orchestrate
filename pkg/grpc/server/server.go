@@ -9,7 +9,7 @@ import (
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
-	grpcerror "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/grpc/error"
+	grpcerror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/error"
 	"google.golang.org/grpc"
 )
 

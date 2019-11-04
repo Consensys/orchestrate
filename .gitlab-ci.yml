@@ -31,7 +31,6 @@ before_script:
 .build-img: &build-img
   script:
     # Build image following http://label-schema.org/rc1/ label convention convention
-    - du -shc * .* | sort -r
     - DOCKER_BUILDKIT=1 docker build
       --label org.label-schema.schema-version="1.0.0-rc1"
       --label org.label-schema.build-date=`date -u +"%Y-%m-%dT%H:%M:%SZ"`

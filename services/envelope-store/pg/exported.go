@@ -4,13 +4,14 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/database/postgres"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 )
 
+const component = "envelope-store.pg"
+
 var (
-	component = "envelope-store.pg"
-	store     *EnvelopeStore
-	initOnce  = &sync.Once{}
+	store    *EnvelopeStore
+	initOnce = &sync.Once{}
 )
 
 // Init initialize Postgres Envelope Store

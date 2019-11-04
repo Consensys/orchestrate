@@ -6,10 +6,10 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
-	svc "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/contract-registry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
 )
 
 // ContractRegistry is a contract registry based on PostgreSQL

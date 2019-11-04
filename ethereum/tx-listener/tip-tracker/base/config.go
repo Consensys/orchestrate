@@ -22,7 +22,7 @@ func InitFlags(f *pflag.FlagSet) {
 	Depth(f)
 }
 
-var (
+const (
 	depthFlag     = "listener-tracker-depth"
 	depthViperKey = "listener.tracker.depth"
 	depthDefault  = int64(0)

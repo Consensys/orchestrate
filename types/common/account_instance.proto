@@ -3,7 +3,7 @@ syntax = "proto3";
 import "types/ethereum/base.proto";
 import "types/chain/chain.proto";
 
-option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/common";
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/common";
 
 package common;
 

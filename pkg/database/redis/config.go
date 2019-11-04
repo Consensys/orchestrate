@@ -12,7 +12,7 @@ func init() {
 	_ = viper.BindEnv(addressViperKey, addressEnv)
 }
 
-var (
+const (
 	addressFlag     = "redis-address"
 	addressViperKey = "redis.address"
 	addressDefault  = "localhost:6379"

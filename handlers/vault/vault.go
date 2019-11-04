@@ -2,7 +2,7 @@ package vault
 
 import (
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 )
 
 // Vault creates a Vault handler
@@ -12,9 +12,9 @@ import (
 func Vault(signer, generator engine.HandlerFunc) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		switch txctx.In.Entrypoint() {
-		case viper.GetString("kafka.topic.signer"):
+		case viper.GetString("topic.tx.signer"):
 			signer(txctx)
-		case viper.GetString("kafka.topic.wallet.generator"):
+		case viper.GetString("topic.wallet.generator"):
 			generator(txctx)
 		}
 	}

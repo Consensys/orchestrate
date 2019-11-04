@@ -5,8 +5,8 @@ import (
 
 	"google.golang.org/grpc"
 
-	svc "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry/mock"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/contract-registry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/memory"
 )
 
 // ContractRegistryClient is a client that wraps an RegistryServer into an ContractRegistryClient
@@ -16,7 +16,7 @@ type ContractRegistryClient struct {
 
 func New() *ContractRegistryClient {
 	return &ContractRegistryClient{
-		srv: mock.NewRegistry(),
+		srv: memory.NewRegistry(),
 	}
 }
 

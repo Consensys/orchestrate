@@ -29,7 +29,7 @@ func InitFlags(f *pflag.FlagSet) {
 	BlockLimit(f)
 }
 
-var (
+const (
 	blockBackoffFlag     = "listener-block-backoff"
 	blockBackoffViperKey = "listener.block.backoff"
 	blockBackoffDefault  = time.Second
@@ -44,7 +44,7 @@ Environment variable: %q`, blockBackoffEnv)
 	_ = viper.BindPFlag(blockBackoffViperKey, f.Lookup(blockBackoffFlag))
 }
 
-var (
+const (
 	blockLimitFlag     = "listener-block-limit"
 	blockLimitViperKey = "listener.block.limit"
 	blockLimitDefault  = int64(40)

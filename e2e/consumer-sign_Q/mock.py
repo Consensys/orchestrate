@@ -1,4 +1,4 @@
-# Core-stack | Worker Nonce :: Consumer-sign_Q/mock
+# Orchestrate | Worker Nonce :: Consumer-sign_Q/mock
 # Simulates a consumer connected to worker nonce's output (Sign Q perspective)
 # For testing purposes
 # @author Guillaume Lethuillier <guillaume.lethuillier@consensys.net>

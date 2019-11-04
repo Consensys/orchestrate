@@ -13,7 +13,7 @@ func TestSecretStore(t *testing.T) {
 	name := "secret.store"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	SecFlag(flgs)
-	expected := "test"
+	expected := "in-memory"
 	assert.Equal(t, expected, viper.GetString(name), "Default")
 
 	_ = os.Setenv("SECRET_STORE", "env-store")

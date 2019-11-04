@@ -1,4 +1,4 @@
-package mock
+package memory
 
 import (
 	"sync"
@@ -6,7 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const component = "contract-registry.mock"
+const component = "contract-registry.in-memory"
 
 var (
 	registry *ContractRegistry
@@ -23,7 +23,7 @@ func Init() {
 		// Initialize gRPC contract-registry
 		registry = NewRegistry()
 
-		log.Infof("%q: store ready", component)
+		log.Infof("%s: store ready", component)
 	})
 }
 

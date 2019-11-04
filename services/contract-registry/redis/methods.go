@@ -3,7 +3,7 @@ package redis
 import (
 	"reflect"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/common"
 
 	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
 	ethcommon "github.com/ethereum/go-ethereum/common"

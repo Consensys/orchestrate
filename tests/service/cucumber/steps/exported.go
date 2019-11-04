@@ -3,7 +3,7 @@ package steps
 import (
 	"context"
 
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 )
 
 // Init initialize handlers

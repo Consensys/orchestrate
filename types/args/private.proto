@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/args";
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/args";
 
 package args;
 

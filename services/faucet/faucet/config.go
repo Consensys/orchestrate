@@ -13,11 +13,11 @@ func init() {
 	_ = viper.BindEnv(typeViperKey, typeEnv)
 }
 
-var (
-	typeFlag     = "faucet"
+const (
+	typeFlag     = "faucet-type"
 	typeViperKey = "faucet.type"
 	typeDefault  = "sarama"
-	typeEnv      = "FAUCET"
+	typeEnv      = "FAUCET_TYPE"
 )
 
 // Type register flag for Faucet Cooldown

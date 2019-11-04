@@ -6,14 +6,15 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/envelope-store/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/envelope-store/client"
 )
 
+const component = "handler.listener.store"
+
 var (
-	component = "handler.listener.store"
-	handler   engine.HandlerFunc
-	initOnce  = &sync.Once{}
+	handler  engine.HandlerFunc
+	initOnce = &sync.Once{}
 )
 
 // Init initialize Sender Handler

@@ -9,7 +9,7 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
-	mockclient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient/mock"
+	mockclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/mock"
 )
 
 // TODO: update with distinct blocks

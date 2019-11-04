@@ -44,7 +44,7 @@ func InitFlags(f *pflag.FlagSet) {
 	OutputPath(f)
 }
 
-var (
+const (
 	cucumberShowStepDefinitionsFlag     = "cucumber-showstepdefinitions"
 	cucumberShowStepDefinitionsViperKey = "cucumber.showstepdefinitions"
 	cucumberShowStepDefinitionsDefault  = false
@@ -59,7 +59,7 @@ Environment variable: %q`, cucumberShowStepDefinitionsEnv)
 	_ = viper.BindPFlag(cucumberShowStepDefinitionsViperKey, f.Lookup(cucumberShowStepDefinitionsFlag))
 }
 
-var (
+const (
 	cucumberRandomizeFlag     = "cucumber-randomize"
 	cucumberRandomizeViperKey = "cucumber.randomize"
 	cucumberRandomizeDefault  = -1
@@ -74,7 +74,7 @@ Environment variable: %q`, cucumberRandomizeEnv)
 	_ = viper.BindPFlag(cucumberRandomizeViperKey, f.Lookup(cucumberRandomizeFlag))
 }
 
-var (
+const (
 	cucumberStopOnFailureFlag     = "cucumber-stoponfailure"
 	cucumberStopOnFailureViperKey = "cucumber.stoponfailure"
 	cucumberStopOnFailureDefault  = false
@@ -89,7 +89,7 @@ Environment variable: %q`, cucumberStopOnFailureEnv)
 	_ = viper.BindPFlag(cucumberStopOnFailureViperKey, f.Lookup(cucumberStopOnFailureFlag))
 }
 
-var (
+const (
 	cucumberStrictFlag     = "cucumber-strict"
 	cucumberStrictViperKey = "cucumber.strict"
 	cucumberStrictDefault  = false
@@ -104,7 +104,7 @@ Environment variable: %q`, cucumberStrictEnv)
 	_ = viper.BindPFlag(cucumberStrictViperKey, f.Lookup(cucumberStrictFlag))
 }
 
-var (
+const (
 	cucumberNoColorsFlag     = "cucumber-nocolors"
 	cucumberNoColorsViperKey = "cucumber.nocolors"
 	cucumberNoColorsDefault  = false
@@ -119,7 +119,7 @@ Environment variable: %q`, cucumberNoColorsEnv)
 	_ = viper.BindPFlag(cucumberNoColorsViperKey, f.Lookup(cucumberNoColorsFlag))
 }
 
-var (
+const (
 	cucumberTagsFlag     = "cucumber-tags"
 	cucumberTagsViperKey = "cucumber.tags"
 	cucumberTagsDefault  = ""
@@ -134,7 +134,7 @@ Environment variable: %q`, cucumberTagsEnv)
 	_ = viper.BindPFlag(cucumberTagsViperKey, f.Lookup(cucumberTagsFlag))
 }
 
-var (
+const (
 	cucumberFormatFlag     = "cucumber-format"
 	cucumberFormatViperKey = "cucumber.format"
 	cucumberFormatDefault  = "pretty"
@@ -149,7 +149,7 @@ Environment variable: %q`, cucumberFormatEnv)
 	_ = viper.BindPFlag(cucumberFormatViperKey, f.Lookup(cucumberFormatFlag))
 }
 
-var (
+const (
 	cucumberConcurrencyFlag     = "cucumber-concurrency"
 	cucumberConcurrencyViperKey = "cucumber.concurrency"
 	cucumberConcurrencyDefault  = 1
@@ -179,7 +179,7 @@ Environment variable: %q`, cucumberPathsEnv)
 	_ = viper.BindPFlag(cucumberPathsViperKey, f.Lookup(cucumberPathsFlag))
 }
 
-var (
+const (
 	cucumberOutputPathFlag     = "cucumber-outputpath"
 	cucumberOutputPathViperKey = "cucumber.outputpath"
 	cucumberOutputPathDefault  = ""
@@ -197,7 +197,7 @@ Environment variable: %q`, cucumberOutputPathEnv)
 var (
 	cucumberAliasesFlag     = "cucumber-aliases"
 	cucumberAliasesViperKey = "cucumber.aliases"
-	cucumberAliasesDefault  = []string{}
+	cucumberAliasesDefault  []string
 	cucumberAliasesEnv      = "CUCUMBER_ALIAS"
 )
 

@@ -7,18 +7,18 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/loader/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/logger"
-	nonceattributor "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/nonce/attributor"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/offset"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/opentracing"
-	producer "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/producer/tx-nonce"
-	injector "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/trace-injector"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	server "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http/healthcheck"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/loader/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/logger"
+	nonceattributor "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/nonce/attributor"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/offset"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/opentracing"
+	producer "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/producer/tx-nonce"
+	injector "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/trace-injector"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	server "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/healthcheck"
 )
 
 var (
@@ -125,7 +125,7 @@ func Start(ctx context.Context) {
 		err := broker.Consume(
 			ctx,
 			[]string{
-				viper.GetString("kafka.topic.nonce"),
+				viper.GetString("topic.tx.nonce"),
 			},
 			broker.NewEngineConsumerGroupHandler(engine.GlobalEngine()),
 		)

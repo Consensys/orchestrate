@@ -6,8 +6,8 @@ package common
 import (
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
-	chain "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/chain"
-	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/ethereum"
+	chain "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
+	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 	math "math"
 )
 

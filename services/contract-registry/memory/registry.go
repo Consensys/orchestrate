@@ -1,4 +1,4 @@
-package mock
+package memory
 
 import (
 	"context"
@@ -8,11 +8,11 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
-	svc "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/contract-registry"
-	rcommon "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/contract-registry/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/contract-registry"
+	rcommon "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/common"
 )
 
 // ContractRegistry stores contract ABI and bytecode in memory

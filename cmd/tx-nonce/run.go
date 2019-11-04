@@ -5,12 +5,11 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient/rpc"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/nonce"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/services/nonce/redis"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/rpc"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/redis"
 )
 
 func newRunCommand() *cobra.Command {
@@ -20,14 +19,11 @@ func newRunCommand() *cobra.Command {
 		Run:   run,
 	}
 
-	// Register Engine flags
-	engine.InitFlags(runCmd.Flags())
-
 	// Register Ethereum client flags
 	ethclient.URLs(runCmd.Flags())
 
 	// Register Kafka flags
-	broker.KafkaAddresses(runCmd.Flags())
+	broker.KafkaURL(runCmd.Flags())
 	broker.KafkaGroup(runCmd.Flags())
 	broker.KafkaTopicTxNonce(runCmd.Flags())
 	broker.KafkaTopicTxSigner(runCmd.Flags())
@@ -36,7 +32,7 @@ func newRunCommand() *cobra.Command {
 
 	// Register Nonce Manager flags
 	nonce.Type(runCmd.Flags())
-	redis.Address(runCmd.Flags())
+	redis.URL(runCmd.Flags())
 
 	return runCmd
 }

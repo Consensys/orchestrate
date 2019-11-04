@@ -17,7 +17,7 @@ func init() {
 	viper.SetDefault(maxElapsedTimeViperKey, maxElapsedTimeDefault)
 }
 
-var (
+const (
 	maxElapsedTimeFlag     = "ethclient-retry-maxelapsedtime"
 	maxElapsedTimeViperKey = "ethclient.retry.maxelapsedtime"
 	maxElapsedTimeDefault  = 1 * time.Hour

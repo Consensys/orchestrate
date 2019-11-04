@@ -1,12 +1,12 @@
 # Contributing Guidelines
 
-:dolphin: Thanks for being interested in contributing to Core-Stack! People will :heart: you for that. :thumbsup:
+:dolphin: Thanks for being interested in contributing to Orchestrate! People will :heart: you for that. :thumbsup:
 
 ## Create dev environment
 
 ### Prerequisite
 
-Core-Stack requires 
+Orchestrate requires 
 
 - Go 1.11
 - ```docker``` & ```docker-compose```

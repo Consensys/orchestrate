@@ -7,19 +7,19 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/loader/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/logger"
-	noncechecker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/nonce/checker"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/offset"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/opentracing"
-	producer "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/producer/tx-sender"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/sender"
-	injector "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/trace-injector"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	server "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http/healthcheck"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/loader/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/logger"
+	noncechecker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/nonce/checker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/offset"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/opentracing"
+	producer "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/producer/tx-sender"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/sender"
+	injector "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/trace-injector"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	server "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/healthcheck"
 )
 
 var (
@@ -123,7 +123,7 @@ func Start(ctx context.Context) {
 		app.SetReady(true)
 
 		topics := []string{
-			viper.GetString("kafka.topic.sender"),
+			viper.GetString("topic.tx.sender"),
 		}
 		l.WithFields(log.Fields{
 			"topics": topics,

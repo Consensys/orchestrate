@@ -8,9 +8,9 @@ echo "Creating topics if not exist..."
 TOPICS=()
 TX_DECODER=tx-nonce
 
-for ENDPOINT in ${ETH_CLIENT_URL-http://localhost:8545}
+for URL in ${ETH_CLIENT_URL-http://localhost:8545}
 do
-    TOPICS+=($TX_DECODER-$(curl -H "Content-Type: application/json" -X POST --data '{"jsonrpc":"2.0","method":"net_version","params":[],"id":1}' $ENDPOINT | jq .result | jq tonumber))
+    TOPICS+=($TX_DECODER-$(curl -H "Content-Type: application/json" -X POST --data '{"jsonrpc":"2.0","method":"net_version","params":[],"id":1}' $URL | jq .result | jq tonumber))
 done
 
 for NAME in ${TOPICS[@]}

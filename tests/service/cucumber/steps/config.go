@@ -26,7 +26,7 @@ func InitFlags(f *pflag.FlagSet) {
 	ChainIDSecondary(f)
 }
 
-var (
+const (
 	cucumberTimeoutFlag     = "cucumber-steps-timeout"
 	cucumberTimeoutViperKey = "cucumber.steps.timeout"
 	cucumberTimeoutDefault  = 15
@@ -41,7 +41,7 @@ Environment variable: %q`, cucumberTimeoutEnv)
 	_ = viper.BindPFlag(cucumberTimeoutViperKey, f.Lookup(cucumberTimeoutFlag))
 }
 
-var (
+const (
 	cucumberMiningTimeoutFlag     = "cucumber-steps-miningtimeout"
 	cucumberMiningTimeoutViperKey = "cucumber.steps.miningtimeout"
 	cucumberMiningTimeoutDefault  = 30
@@ -56,7 +56,7 @@ Environment variable: %q`, cucumberMiningTimeoutEnv)
 	_ = viper.BindPFlag(cucumberMiningTimeoutViperKey, f.Lookup(cucumberMiningTimeoutFlag))
 }
 
-var (
+const (
 	cucumberChainIDPrimaryFlag     = "cucumber-chainid-primary"
 	cucumberChainIDPrimaryViperKey = "cucumber.chainid.primary"
 	cucumberChainIDPrimaryDefault  = ""
@@ -71,7 +71,7 @@ Environment variable: %q`, cucumberChainIDPrimaryEnv)
 	_ = viper.BindPFlag(cucumberChainIDPrimaryViperKey, f.Lookup(cucumberChainIDPrimaryFlag))
 }
 
-var (
+const (
 	cucumberChainIDSecondaryFlag     = "cucumber-chainid-secondary"
 	cucumberChainIDSecondaryViperKey = "cucumber.chainid.secondary"
 	cucumberChainIDSecondaryDefault  = ""

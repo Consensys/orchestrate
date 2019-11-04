@@ -6,11 +6,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/ethereum/ethclient/rpc"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/services/envelope-store/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/rpc"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/envelope-store/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
 func newRunCommand() *cobra.Command {
@@ -20,21 +19,18 @@ func newRunCommand() *cobra.Command {
 		Run:   run,
 	}
 
-	// Register Engine flags
-	engine.InitFlags(runCmd.Flags())
-
 	// Register Ethereum client flags
 	ethclient.URLs(runCmd.Flags())
 
 	// Register Kafka flags
-	broker.KafkaAddresses(runCmd.Flags())
+	broker.KafkaURL(runCmd.Flags())
 	broker.KafkaGroup(runCmd.Flags())
 	broker.KafkaTopicTxSender(runCmd.Flags())
 	broker.KafkaTopicTxRecover(runCmd.Flags())
 	broker.InitKafkaSASLTLSFlags(runCmd.Flags())
 
 	// Register StoreGRPC flags
-	storeclient.EnvelopeStoreGRPCTarget(runCmd.Flags())
+	storeclient.EnvelopeStoreURL(runCmd.Flags())
 
 	return runCmd
 }

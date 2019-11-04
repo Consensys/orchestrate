@@ -7,21 +7,21 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/crafter"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/faucet"
-	gasestimator "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/gas/gas-estimator"
-	gaspricer "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/gas/gas-pricer"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/loader/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/logger"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/offset"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/opentracing"
-	producer "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/producer/tx-crafter"
-	injector "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/trace-injector"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	server "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/http/healthcheck"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/crafter"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/faucet"
+	gasestimator "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/gas/gas-estimator"
+	gaspricer "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/gas/gas-pricer"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/loader/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/offset"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/opentracing"
+	producer "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/producer/tx-crafter"
+	injector "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/trace-injector"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	server "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/healthcheck"
 )
 
 var (
@@ -142,7 +142,7 @@ func Start(ctx context.Context) {
 		err := broker.Consume(
 			cancelCtx,
 			[]string{
-				viper.GetString("kafka.topic.crafter"),
+				viper.GetString("topic.tx.crafter"),
 			},
 			broker.NewEngineConsumerGroupHandler(engine.GlobalEngine()),
 		)

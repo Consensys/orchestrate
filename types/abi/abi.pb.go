@@ -22,7 +22,7 @@ const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type ContractId struct {
 	// Registry of contract
-	// e.g. "registry.consensys.net/corestack"
+	// e.g. "registry.consensys.net/orchestrate"
 	Registry string `protobuf:"bytes,1,opt,name=registry,proto3" json:"registry,omitempty"`
 	// Name of contract
 	// e.g. "ERC20"

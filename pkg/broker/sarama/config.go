@@ -10,8 +10,8 @@ import (
 func init() {
 
 	// Kafka general parameters
-	viper.SetDefault(kafkaAddressViperKey, kafkaAddressDefault)
-	_ = viper.BindEnv(kafkaAddressViperKey, kafkaAddressEnv)
+	viper.SetDefault(KafkaURLViperKey, kafkaURLDefault)
+	_ = viper.BindEnv(KafkaURLViperKey, kafkaURLEnv)
 	viper.SetDefault(kafkaGroupViperKey, kafkaGroupDefault)
 	_ = viper.BindEnv(kafkaGroupViperKey, kafkaGroupEnv)
 
@@ -85,21 +85,21 @@ func init() {
 }
 
 var (
-	kafkaAddressFlag     = "kafka-address"
-	kafkaAddressViperKey = "kafka.addresses"
-	kafkaAddressDefault  = []string{"localhost:9092"}
-	kafkaAddressEnv      = "KAFKA_ADDRESS"
+	kafkaURLFlag     = "kafka-url"
+	KafkaURLViperKey = "kafka.url"
+	kafkaURLDefault  = []string{"localhost:9092"}
+	kafkaURLEnv      = "KAFKA_URL"
 )
 
-// KafkaAddresses register flag for Kafka server addresses
-func KafkaAddresses(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Address of Kafka server to connect to.
-Environment variable: %q`, kafkaAddressEnv)
-	f.StringSlice(kafkaAddressFlag, kafkaAddressDefault, desc)
-	_ = viper.BindPFlag(kafkaAddressViperKey, f.Lookup(kafkaAddressFlag))
+// KafkaURL register flag for Kafka server urls
+func KafkaURL(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`URL (addresses) of Kafka server(s) to connect to.
+Environment variable: %q`, kafkaURLEnv)
+	f.StringSlice(kafkaURLFlag, kafkaURLDefault, desc)
+	_ = viper.BindPFlag(KafkaURLViperKey, f.Lookup(kafkaURLFlag))
 }
 
-var (
+const (
 	kafkaGroupFlag     = "kafka-group"
 	kafkaGroupViperKey = "kafka.group"
 	kafkaGroupDefault  = "group-e2e"
@@ -114,50 +114,50 @@ Environment variable: %q`, kafkaGroupEnv)
 	_ = viper.BindPFlag(kafkaGroupViperKey, f.Lookup(kafkaGroupEnv))
 }
 
-var (
-	txCrafterFlag         = "topic-crafter"
-	txCrafterViperKey     = "kafka.topic.crafter"
-	txCrafterTopicEnv     = "KAFKA_TOPIC_TX_CRAFTER"
+const (
+	txCrafterFlag         = "topic-tx-crafter"
+	txCrafterViperKey     = "topic.tx.crafter"
+	txCrafterTopicEnv     = "TOPIC_TX_CRAFTER"
 	txCrafterTopicDefault = "topic-tx-crafter"
 
-	txNonceFlag         = "topic-nonce"
-	txNonceViperKey     = "kafka.topic.nonce"
-	txNonceTopicEnv     = "KAFKA_TOPIC_TX_NONCE"
+	txNonceFlag         = "topic-tx-nonce"
+	txNonceViperKey     = "topic.tx.nonce"
+	txNonceTopicEnv     = "TOPIC_TX_NONCE"
 	txNonceTopicDefault = "topic-tx-nonce"
 
-	txSignerFlag         = "topic-signer"
-	txSignerViperKey     = "kafka.topic.signer"
-	txSignerTopicEnv     = "KAFKA_TOPIC_TX_SIGNER"
+	txSignerFlag         = "topic-tx-signer"
+	txSignerViperKey     = "topic.tx.signer"
+	txSignerTopicEnv     = "TOPIC_TX_SIGNER"
 	txSignerTopicDefault = "topic-tx-signer"
 
-	txSenderFlag         = "topic-sender"
-	txSenderViperKey     = "kafka.topic.sender"
-	txSenderTopicEnv     = "KAFKA_TOPIC_TX_SENDER"
+	txSenderFlag         = "topic-tx-sender"
+	txSenderViperKey     = "topic.tx.sender"
+	txSenderTopicEnv     = "TOPIC_TX_SENDER"
 	txSenderTopicDefault = "topic-tx-sender"
 
-	txDecoderFlag         = "topic-decoder"
-	txDecoderViperKey     = "kafka.topic.decoder"
-	txDecoderTopicEnv     = "KAFKA_TOPIC_TX_DECODER"
+	txDecoderFlag         = "topic-tx-decoder"
+	txDecoderViperKey     = "topic.tx.decoder"
+	txDecoderTopicEnv     = "TOPIC_TX_DECODER"
 	txDecoderTopicDefault = "topic-tx-decoder"
 
-	txDecodedFlag         = "topic-decoded"
-	txDecodedViperKey     = "kafka.topic.decoded"
-	txDecodedTopicEnv     = "KAFKA_TOPIC_TX_DECODED"
+	txDecodedFlag         = "topic-tx-decoded"
+	txDecodedViperKey     = "topic.tx.decoded"
+	txDecodedTopicEnv     = "TOPIC_TX_DECODED"
 	txDecodedTopicDefault = "topic-tx-decoded"
 
-	txRecoverFlag         = "topic-recover"
-	txRecoverViperKey     = "kafka.topic.recover"
-	txRecoverTopicEnv     = "KAFKA_TOPIC_TX_RECOVER"
+	txRecoverFlag         = "topic-tx-recover"
+	txRecoverViperKey     = "topic.tx.recover"
+	txRecoverTopicEnv     = "TOPIC_TX_RECOVER"
 	txRecoverTopicDefault = "topic-tx-recover"
 
 	walletGeneratorFlag     = "topic-wallet-generator"
-	walletGeneratorViperKey = "kafka.topic.wallet.generator"
-	walletGeneratorTopicEnv = "KAFKA_TOPIC_WALLET_GENERATOR"
+	walletGeneratorViperKey = "topic.wallet.generator"
+	walletGeneratorTopicEnv = "TOPIC_WALLET_GENERATOR"
 	walletGeneratorDefault  = "topic-wallet-generator"
 
 	walletGeneratedFlag     = "topic-wallet-generated"
-	walletGeneratedViperKey = "kafka.topic.wallet.generated"
-	walletGeneratedTopicEnv = "KAFKA_TOPIC_WALLET_GENERATED"
+	walletGeneratedViperKey = "topic.wallet.generated"
+	walletGeneratedTopicEnv = "TOPIC_WALLET_GENERATED"
 	walletGeneratedDefault  = "topic-wallet-generated"
 )
 
@@ -236,7 +236,7 @@ Environment variable: %q`, walletGeneratedTopicEnv)
 }
 
 // Kafka Consumer group environment variables
-var (
+const (
 	crafterGroupFlag     = "group-crafter"
 	crafterGroupViperKey = "kafka.group.crafter"
 	crafterGroupEnv      = "KAFKA_GROUP_CRAFTER"
@@ -274,7 +274,7 @@ var (
 
 	walletGeneratedGroupFlag     = "group-wallet-generated"
 	walletGeneratedGroupViperKey = "kafka.group.wallet.generated"
-	walletGeneratedGroupEnv      = "KAFKA_GROUP_WALLET_GENERATed"
+	walletGeneratedGroupEnv      = "KAFKA_GROUP_WALLET_GENERATED"
 	walletGeneratedGroupDefault  = "group-wallet-generated"
 )
 
@@ -337,7 +337,7 @@ func InitKafkaSASLFlags(f *pflag.FlagSet) {
 }
 
 // Kafka SASL Enable environment variables
-var (
+const (
 	kafkaSASLEnableFlag     = "kafka-sasl-enable"
 	kafkaSASLEnableViperKey = "kafka.sasl.enable"
 	kafkaSASLEnableEnv      = "KAFKA_SASL_ENABLE"
@@ -353,11 +353,11 @@ Environment variable: %q`, kafkaSASLEnableEnv)
 }
 
 // Kafka SASL mechanism environment variables
-var (
+const (
 	kafkaSASLMechanismFlag     = "kafka-sasl-mechanism"
 	kafkaSASLMechanismViperKey = "kafka.sasl.mechanism"
 	kafkaSASLMechanismEnv      = "KAFKA_SASL_MECHANISM"
-	kafkaSASLMechanismDefault  string
+	kafkaSASLMechanismDefault  = ""
 )
 
 // KafkaSASLMechanism register flag
@@ -369,7 +369,7 @@ Environment variable: %q`, kafkaSASLMechanismEnv)
 }
 
 // Kafka SASL Handshake environment variables
-var (
+const (
 	kafkaSASLHandshakeFlag     = "kafka-sasl-handshake"
 	kafkaSASLHandshakeViperKey = "kafka.sasl.handshake"
 	kafkaSASLHandshakeEnv      = "KAFKA_SASL_HANDSHAKE"
@@ -385,11 +385,11 @@ Environment variable: %q`, kafkaSASLHandshakeEnv)
 }
 
 // Kafka SASL User environment variables
-var (
+const (
 	kafkaSASLUserFlag     = "kafka-sasl-user"
 	kafkaSASLUserViperKey = "kafka.sasl.user"
 	kafkaSASLUserEnv      = "KAFKA_SASL_USER"
-	kafkaSASLUserDefault  string
+	kafkaSASLUserDefault  = ""
 )
 
 // KafkaSASLUser register flag
@@ -401,11 +401,11 @@ Environment variable: %q`, kafkaSASLUserEnv)
 }
 
 // Kafka SASL Password environment variables
-var (
+const (
 	kafkaSASLPasswordFlag     = "kafka-sasl-password"
 	kafkaSASLPasswordViperKey = "kafka.sasl.password"
 	kafkaSASLPasswordEnv      = "KAFKA_SASL_PASSWORD"
-	kafkaSASLPasswordDefault  string
+	kafkaSASLPasswordDefault  = ""
 )
 
 // KafkaSASLPassword register flag
@@ -417,11 +417,11 @@ Environment variable: %q`, kafkaSASLPasswordEnv)
 }
 
 // Kafka SASL SCRAMAuthzID environment variables
-var (
+const (
 	kafkaSASLSCRAMAuthzIDFlag     = "kafka-sasl-scramauthzid"
 	kafkaSASLSCRAMAuthzIDViperKey = "kafka.sasl.scramauthzid"
 	kafkaSASLSCRAMAuthzIDEnv      = "KAFKA_SASL_SCRAMAUTHZID"
-	kafkaSASLSCRAMAuthzIDDefault  string
+	kafkaSASLSCRAMAuthzIDDefault  = ""
 )
 
 // KafkaSASLSCRAMAuthzID register flag
@@ -442,7 +442,7 @@ func InitKafkaSASLTLSFlags(f *pflag.FlagSet) {
 }
 
 // Kafka TLS Enable environment variables
-var (
+const (
 	kafkaTLSEnableFlag     = "kafka-tls-enabled"
 	kafkaTLSEnableViperKey = "kafka.tls.enabled"
 	kafkaTLSEnableEnv      = "KAFKA_TLS_ENABLED"
@@ -458,10 +458,10 @@ Environment variable: %q`, kafkaTLSEnableEnv)
 }
 
 // Kafka TLS InsecureSkipVerify environment variables
-var (
-	kafkaTLSInsecureSkipVerifyFlag     = "kafka-tls-insecureSkipVerify"
-	kafkaTLSInsecureSkipVerifyViperKey = "kafka.tls.insecureSkipVerify"
-	kafkaTLSInsecureSkipVerifyEnv      = "KAFKA_TLS_INSECURESKIPVERIFY"
+const (
+	kafkaTLSInsecureSkipVerifyFlag     = "kafka-tls-insecure-skip-verify"
+	kafkaTLSInsecureSkipVerifyViperKey = "kafka.tls.insecure.skip.verify"
+	kafkaTLSInsecureSkipVerifyEnv      = "KAFKA_TLS_INSECURE_SKIP_VERIFY"
 	kafkaTLSInsecureSkipVerifyDefault  = false
 )
 
@@ -474,11 +474,11 @@ Environment variable: %q`, kafkaTLSInsecureSkipVerifyEnv)
 }
 
 // Kafka TLS ClientCertFilePath environment variables
-var (
-	kafkaTLSClientCertFilePathFlag     = "kafka-tls-clientcertfilepath"
-	kafkaTLSClientCertFilePathViperKey = "kafka.tls.clientCertfilepath"
-	kafkaTLSClientCertFilePathEnv      = "KAFKA_TLS_CLIENTCERTFILEPATH"
-	kafkaTLSClientCertFilePathDefault  string
+const (
+	kafkaTLSClientCertFilePathFlag     = "kafka-tls-client-cert-file"
+	kafkaTLSClientCertFilePathViperKey = "kafka.tls.client.cert.file"
+	kafkaTLSClientCertFilePathEnv      = "KAFKA_TLS_CLIENT_CERT_FILE"
+	kafkaTLSClientCertFilePathDefault  = ""
 )
 
 // KafkaTLSClientCertFilePath register flag
@@ -490,11 +490,11 @@ Environment variable: %q`, kafkaTLSClientCertFilePathEnv)
 }
 
 // Kafka TLS ClientKeyFilePath environment variables
-var (
-	kafkaTLSClientKeyFilePathFlag     = "kafka-tls-clientkeyfilepath"
-	kafkaTLSClientKeyFilePathViperKey = "kafka.tls.clientkeyfilepath"
-	kafkaTLSClientKeyFilePathEnv      = "KAFKA_TLS_CLIENTKEYFILEPATH"
-	kafkaTLSClientKeyFilePathDefault  string
+const (
+	kafkaTLSClientKeyFilePathFlag     = "kafka-tls-client-key-file"
+	kafkaTLSClientKeyFilePathViperKey = "kafka.tls.client.key.file"
+	kafkaTLSClientKeyFilePathEnv      = "KAFKA_TLS_CLIENT_KEY_FILE"
+	kafkaTLSClientKeyFilePathDefault  = ""
 )
 
 // KafkaTLSClientKeyFilePath register flag
@@ -506,11 +506,11 @@ Environment variable: %q`, kafkaTLSClientKeyFilePathEnv)
 }
 
 // Kafka TLS CACertFilePath environment variables
-var (
-	kafkaTLSCACertFilePathFlag     = "kafka-tls-cacertfilepath"
-	kafkaTLSCACertFilePathViperKey = "kafka.tls.cacertfilepath"
-	kafkaTLSCACertFilePathEnv      = "KAFKA_TLS_CACERTFILEPATH"
-	kafkaTLSCACertFilePathDefault  string
+const (
+	kafkaTLSCACertFilePathFlag     = "kafka-tls-ca-cert-file"
+	kafkaTLSCACertFilePathViperKey = "kafka.tls.ca.cert.file"
+	kafkaTLSCACertFilePathEnv      = "KAFKA_TLS_CA_CERT_FILE"
+	kafkaTLSCACertFilePathDefault  = ""
 )
 
 // KafkaTLSCaCertFilePath register flag

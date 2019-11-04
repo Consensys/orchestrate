@@ -109,7 +109,7 @@ func InitClient(ctx context.Context) {
 
 		// Create sarama client
 		var err error
-		client, err = NewClient(viper.GetStringSlice(kafkaAddressViperKey), config)
+		client, err = NewClient(viper.GetStringSlice(KafkaURLViperKey), config)
 		if err != nil {
 			log.WithError(err).Fatalf("sarama: could not to start client")
 		}

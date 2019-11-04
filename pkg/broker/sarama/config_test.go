@@ -10,25 +10,25 @@ import (
 )
 
 func TestKafkaAddresses(t *testing.T) {
-	name := "kafka.addresses"
+	name := "kafka.url"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	KafkaAddresses(flgs)
+	KafkaURL(flgs)
 
 	expected := []string{
 		"localhost:9092",
 	}
 	assert.Equal(t, expected, viper.GetStringSlice(name), "Default")
 
-	_ = os.Setenv("KAFKA_ADDRESS", "localhost:9192")
+	_ = os.Setenv("KAFKA_URL", "localhost:9192")
 	expected = []string{
 		"localhost:9192",
 	}
 	assert.Equal(t, expected, viper.GetStringSlice(name), "From Environment Variable")
-	_ = os.Unsetenv("KAFKA_ADDRESS")
+	_ = os.Unsetenv("KAFKA_URL")
 
 	args := []string{
-		"--kafka-address=127.0.0.1:9091",
-		"--kafka-address=127.0.0.2:9091",
+		"--kafka-url=127.0.0.1:9091",
+		"--kafka-url=127.0.0.2:9091",
 	}
 	err := flgs.Parse(args)
 	assert.NoError(t, err, "No error expected")
@@ -44,31 +44,31 @@ func TestTopics(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 
 	KafkaTopicTxCrafter(flgs)
-	assert.Equal(t, "topic-tx-crafter", viper.GetString("kafka.topic.crafter"), "From default")
+	assert.Equal(t, "topic-tx-crafter", viper.GetString("topic.tx.crafter"), "From default")
 
 	KafkaTopicTxNonce(flgs)
-	assert.Equal(t, "topic-tx-nonce", viper.GetString("kafka.topic.nonce"), "From default")
+	assert.Equal(t, "topic-tx-nonce", viper.GetString("topic.tx.nonce"), "From default")
 
 	KafkaTopicTxSigner(flgs)
-	assert.Equal(t, "topic-tx-signer", viper.GetString("kafka.topic.signer"), "From default")
+	assert.Equal(t, "topic-tx-signer", viper.GetString("topic.tx.signer"), "From default")
 
 	KafkaTopicTxSender(flgs)
-	assert.Equal(t, "topic-tx-sender", viper.GetString("kafka.topic.sender"), "From default")
+	assert.Equal(t, "topic-tx-sender", viper.GetString("topic.tx.sender"), "From default")
 
 	KafkaTopicTxDecoder(flgs)
-	assert.Equal(t, "topic-tx-decoder", viper.GetString("kafka.topic.decoder"), "From default")
+	assert.Equal(t, "topic-tx-decoder", viper.GetString("topic.tx.decoder"), "From default")
 
 	KafkaTopicTxRecover(flgs)
-	assert.Equal(t, "topic-tx-recover", viper.GetString("kafka.topic.recover"), "From default")
+	assert.Equal(t, "topic-tx-recover", viper.GetString("topic.tx.recover"), "From default")
 
 	KafkaTopicTxDecoded(flgs)
-	assert.Equal(t, "topic-tx-decoded", viper.GetString("kafka.topic.decoded"), "From default")
+	assert.Equal(t, "topic-tx-decoded", viper.GetString("topic.tx.decoded"), "From default")
 
 	KafkaTopicWalletGenerator(flgs)
-	assert.Equal(t, "topic-wallet-generator", viper.GetString("kafka.topic.wallet.generator"), "From default")
+	assert.Equal(t, "topic-wallet-generator", viper.GetString("topic.wallet.generator"), "From default")
 
 	KafkaTopicWalletGenerated(flgs)
-	assert.Equal(t, "topic-wallet-generated", viper.GetString("kafka.topic.wallet.generated"), "From default")
+	assert.Equal(t, "topic-wallet-generated", viper.GetString("topic.wallet.generated"), "From default")
 }
 
 func TestConsumerGroup(t *testing.T) {
@@ -113,8 +113,8 @@ func TestInitKafkaTLSFlags(t *testing.T) {
 
 	InitKafkaSASLTLSFlags(flgs)
 	assert.Equal(t, false, viper.GetBool("kafka.tls.enabled"), "From default")
-	assert.Equal(t, false, viper.GetBool("kafka.tls.insecureSkipVerify"), "From default")
-	assert.Equal(t, "", viper.GetString("kafka.tls.clientCertfilepath"), "From default")
-	assert.Equal(t, "", viper.GetString("kafka.tls.clientkeyfilepath"), "From default")
-	assert.Equal(t, "", viper.GetString("kafka.tls.cacertfilepath"), "From default")
+	assert.Equal(t, false, viper.GetBool("kafka.tls.insecure.skip.verify"), "From default")
+	assert.Equal(t, "", viper.GetString("kafka.tls.client.cert.file"), "From default")
+	assert.Equal(t, "", viper.GetString("kafka.tls.client.key.file"), "From default")
+	assert.Equal(t, "", viper.GetString("kafka.tls.ca.cert.file"), "From default")
 }

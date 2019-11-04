@@ -2,7 +2,7 @@ package generic
 
 import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 )
 
 // TODO: should be moved to pkg. Should be a method on Envelope.GetTransaction() *ethtypes.Transaction

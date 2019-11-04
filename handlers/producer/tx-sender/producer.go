@@ -3,11 +3,11 @@ package txsender
 import (
 	"github.com/Shopify/sarama"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/handlers/producer"
-	encoding "gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/encoding/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/producer"
+	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
 // PrepareMsg prepare message to produce from TxContexts
@@ -25,14 +25,14 @@ loop:
 			continue
 		default:
 			// If an error occurred we redirect to recovery
-			msg.Topic = viper.GetString("kafka.topic.recover")
+			msg.Topic = viper.GetString("topic.tx.recover")
 			break loop
 		}
 	}
 
 	// If no error and nonce is invalid we redirect envelope to tx-nonce
 	if b, ok := txctx.Get("invalid.nonce").(bool); len(txctx.Envelope.GetErrors()) == 0 && ok && b {
-		msg.Topic = viper.GetString("kafka.topic.nonce")
+		msg.Topic = viper.GetString("topic.tx.nonce")
 	}
 
 	// Marshal Envelope into sarama Message

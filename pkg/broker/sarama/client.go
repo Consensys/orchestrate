@@ -2,7 +2,7 @@ package sarama
 
 import (
 	"github.com/Shopify/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/corestack.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
 // NewClient creates a new sarama client and connects to one of the given broker addresses
