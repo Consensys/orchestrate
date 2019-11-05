@@ -18,8 +18,8 @@ var cmdExample = &cobra.Command{
 	Use:   "example [OPTIONS]",
 	Short: "An example command",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Log-Level:", viper.GetString("log.level"))
-		fmt.Println("Log-Format:", viper.GetString("log.format"))
+		fmt.Println("Log-Level:", viper.GetString(logger.LogLevelViperKey))
+		fmt.Println("Log-Format:", viper.GetString(logger.LogFormatViperKey))
 	},
 }
 

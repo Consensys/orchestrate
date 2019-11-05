@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	crc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/contract-registry/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/chanregistry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/parser"
@@ -26,7 +27,7 @@ type ScenarioTestSuite struct {
 
 func (s *ScenarioTestSuite) SetupSuite() {
 	// Set viper configuration
-	viper.Set("topic.tx.crafter", "tx-crafter")
+	viper.Set(broker.TxCrafterViperKey, "tx-crafter")
 
 	// Set channel registry
 	s.chanReg = chanregistry.NewChanRegistry()

@@ -17,7 +17,7 @@ func TestInitFlags(t *testing.T) {
 
 	assert.Equal(t, hostDefault, viper.GetString(hostViperKey), "Default")
 	assert.Equal(t, portDefault, viper.GetInt(portViperKey), "Default")
-	assert.Equal(t, serviceNameDefault, viper.GetString(serviceNameViperKey), "Default")
+	assert.Equal(t, serviceNameDefault, viper.GetString(ServiceNameViperKey), "Default")
 	assert.Equal(t, collectorURLDefault, viper.GetString(collectorURLViperKey), "Default")
 	assert.Equal(t, userDefault, viper.GetString(userViperKey), "Default")
 	assert.Equal(t, passwordDefault, viper.GetString(passwordViperKey), "Default")
@@ -76,11 +76,11 @@ func TestPort(t *testing.T) {
 func TestServiceName(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	ServiceName(flgs)
-	assert.Equal(t, serviceNameDefault, viper.GetString(serviceNameViperKey), "Default")
+	assert.Equal(t, serviceNameDefault, viper.GetString(ServiceNameViperKey), "Default")
 
 	expected := "Test-service"
 	_ = os.Setenv(serviceNameEnv, expected)
-	assert.Equal(t, expected, viper.GetString(serviceNameViperKey), "From Environment Variable")
+	assert.Equal(t, expected, viper.GetString(ServiceNameViperKey), "From Environment Variable")
 	_ = os.Unsetenv(serviceNameEnv)
 
 	expected = "Test-service-2"
@@ -91,7 +91,7 @@ func TestServiceName(t *testing.T) {
 	err := flgs.Parse(args)
 	assert.NoError(t, err, "No error expected")
 
-	assert.Equal(t, expected, viper.GetString(serviceNameViperKey), "From Flag")
+	assert.Equal(t, expected, viper.GetString(ServiceNameViperKey), "From Flag")
 }
 
 func TestEndPoint(t *testing.T) {

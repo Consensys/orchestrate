@@ -9,15 +9,15 @@ import (
 )
 
 func init() {
-	viper.SetDefault(logLevelViperKey, logLevelDefault)
-	_ = viper.BindEnv(logLevelViperKey, logLevelEnv)
-	viper.SetDefault(logFormatViperKey, logFormatDefault)
-	_ = viper.BindEnv(logFormatViperKey, logFormatEnv)
+	viper.SetDefault(LogLevelViperKey, logLevelDefault)
+	_ = viper.BindEnv(LogLevelViperKey, logLevelEnv)
+	viper.SetDefault(LogFormatViperKey, logFormatDefault)
+	_ = viper.BindEnv(LogFormatViperKey, logFormatEnv)
 }
 
 const (
 	logLevelFlag     = "log-level"
-	logLevelViperKey = "log.level"
+	LogLevelViperKey = "log.level"
 	logLevelDefault  = "info"
 	logLevelEnv      = "LOG_LEVEL"
 )
@@ -27,12 +27,12 @@ func LogLevel(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Log level (one of %q).
 Environment variable: %q`, []string{"panic", "fatal", "error", "warn", "info", "debug", "trace"}, logLevelEnv)
 	f.String(logLevelFlag, logLevelDefault, desc)
-	_ = viper.BindPFlag(logLevelViperKey, f.Lookup(logLevelFlag))
+	_ = viper.BindPFlag(LogLevelViperKey, f.Lookup(logLevelFlag))
 }
 
 const (
 	logFormatFlag     = "log-format"
-	logFormatViperKey = "log.format"
+	LogFormatViperKey = "log.format"
 	logFormatDefault  = "text"
 	logFormatEnv      = "LOG_FORMAT"
 )
@@ -42,19 +42,19 @@ func LogFormat(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Log formatter (one of %q).
 Environment variable: %q`, []string{"text", "json"}, logFormatEnv)
 	f.String(logFormatFlag, logFormatDefault, desc)
-	_ = viper.BindPFlag(logFormatViperKey, f.Lookup(logFormatFlag))
+	_ = viper.BindPFlag(LogFormatViperKey, f.Lookup(logFormatFlag))
 }
 
 // InitLogger Initialize logrus Logger
 func InitLogger() {
-	switch viper.GetString(logFormatViperKey) {
+	switch viper.GetString(LogFormatViperKey) {
 	case "json":
 		log.SetFormatter(&log.JSONFormatter{})
 	default:
 		log.SetFormatter(&log.TextFormatter{})
 	}
 
-	if logLevel, err := log.ParseLevel(viper.GetString(logLevelViperKey)); err != nil {
+	if logLevel, err := log.ParseLevel(viper.GetString(LogLevelViperKey)); err != nil {
 		log.Fatalf("Invalid log level: %v", err)
 	} else {
 		log.New()

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/jaeger"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
@@ -50,12 +52,12 @@ func initHandlers(ctx context.Context) {
 	common.InParallel(
 		// Initialize Jaeger tracer
 		func() {
-			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString("jaeger.service.name"))
+			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString(jaeger.ServiceNameViperKey))
 			opentracing.Init(ctxWithValue)
 		},
 		// Initialize trace injector
 		func() {
-			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString("jaeger.service.name"))
+			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString(jaeger.ServiceNameViperKey))
 			injector.Init(ctxWithValue)
 		},
 		// Initialize decoder
@@ -82,7 +84,7 @@ func initConsumerGroup(ctx context.Context) {
 		// Initialize ConsumerGroup
 		func() {
 			// Set Kafka Group value
-			viper.Set("kafka.group", "group-decoder")
+			viper.Set(broker.KafkaGroupViperKey, "group-decoder")
 			broker.InitConsumerGroup(ctx)
 		},
 		// Initialize Ethereum client
@@ -121,7 +123,7 @@ func Start(ctx context.Context) {
 		// Initialize Topics list by chain
 		var topics []string
 		for _, chainID := range rpc.GlobalClient().Networks(context.Background()) {
-			topics = append(topics, fmt.Sprintf("%v-%v", viper.GetString("topic.tx.decoder"), chainID.String()))
+			topics = append(topics, fmt.Sprintf("%v-%v", viper.GetString(broker.TxDecoderViperKey), chainID.String()))
 		}
 
 		log.Infof("Connecting to the following Kafka topics %v", topics)

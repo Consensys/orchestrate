@@ -8,6 +8,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
@@ -49,7 +50,7 @@ func (f *Faucet) prepareMsg(r *types.Request, msg *sarama.ProducerMessage) error
 	}
 
 	// Message should be sent to crafter topic
-	msg.Topic = viper.GetString("topic.tx.crafter")
+	msg.Topic = viper.GetString(broker.TxCrafterViperKey)
 	msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(r.ChainID, r.Creditor))
 
 	return nil

@@ -14,14 +14,14 @@ func TestShowStepDefinitions(t *testing.T) {
 	ShowStepDefinitions(flgs)
 
 	// Test default
-	expected := cucumberShowStepDefinitionsDefault
-	assert.Equal(t, expected, viper.GetBool(cucumberShowStepDefinitionsViperKey), "Default config should match")
+	expected := showStepDefinitionsDefault
+	assert.Equal(t, expected, viper.GetBool(ShowStepDefinitionsViperKey), "Default config should match")
 
 	// Test environment variable
 	_ = os.Setenv("CUCUMBER_SHOWSTEPDEFINITION", "1")
 
 	expected = true
-	assert.Equal(t, expected, viper.GetBool(cucumberShowStepDefinitionsViperKey), "Changing env var should change ShowStepDefinitions")
+	assert.Equal(t, expected, viper.GetBool(ShowStepDefinitionsViperKey), "Changing env var should change ShowStepDefinitions")
 	_ = os.Unsetenv("CUCUMBER_SHOWSTEPDEFINITION")
 
 	// Test flags
@@ -32,7 +32,7 @@ func TestShowStepDefinitions(t *testing.T) {
 	assert.Nil(t, err)
 
 	expected = true
-	assert.Equal(t, expected, viper.GetBool(cucumberShowStepDefinitionsViperKey), "Changing flags should change ShowStepDefinitions")
+	assert.Equal(t, expected, viper.GetBool(ShowStepDefinitionsViperKey), "Changing flags should change ShowStepDefinitions")
 }
 
 func TestRandomize(t *testing.T) {
@@ -40,13 +40,13 @@ func TestRandomize(t *testing.T) {
 	Randomize(flgs)
 
 	// Test default
-	expected := cucumberRandomizeDefault
-	assert.Equal(t, expected, viper.GetInt(cucumberRandomizeViperKey), "Default config should match")
+	expected := randomizeDefault
+	assert.Equal(t, expected, viper.GetInt(RandomizeViperKey), "Default config should match")
 
 	// Test environment variable
 	_ = os.Setenv("CUCUMBER_RANDOMIZE", "-1")
 	expected = -1
-	assert.Equal(t, expected, viper.GetInt(cucumberRandomizeViperKey), "Changing env var should change Randomize")
+	assert.Equal(t, expected, viper.GetInt(RandomizeViperKey), "Changing env var should change Randomize")
 	_ = os.Unsetenv("CUCUMBER_RANDOMIZE")
 
 	// Test flags
@@ -57,7 +57,7 @@ func TestRandomize(t *testing.T) {
 	assert.Nil(t, err)
 
 	expected = 10
-	assert.Equal(t, expected, viper.GetInt(cucumberRandomizeViperKey), "Changing flags should change Randomize")
+	assert.Equal(t, expected, viper.GetInt(RandomizeViperKey), "Changing flags should change Randomize")
 }
 
 func TestStopOnFailure(t *testing.T) {
@@ -65,13 +65,13 @@ func TestStopOnFailure(t *testing.T) {
 	StopOnFailure(flgs)
 
 	// Test default
-	expected := cucumberStopOnFailureDefault
-	assert.Equal(t, expected, viper.GetBool(cucumberStopOnFailureViperKey), "Default config should match")
+	expected := stopOnFailureDefault
+	assert.Equal(t, expected, viper.GetBool(StopOnFailureViperKey), "Default config should match")
 
 	// Test environment variable
 	_ = os.Setenv("CUCUMBER_STOPONFAILURE", "1")
 	expected = true
-	assert.Equal(t, expected, viper.GetBool(cucumberStopOnFailureViperKey), "Changing env var should change StopOnFailure")
+	assert.Equal(t, expected, viper.GetBool(StopOnFailureViperKey), "Changing env var should change StopOnFailure")
 	_ = os.Unsetenv("CUCUMBER_STOPONFAILURE")
 
 	// Test flags
@@ -82,7 +82,7 @@ func TestStopOnFailure(t *testing.T) {
 	assert.Nil(t, err)
 
 	expected = true
-	assert.Equal(t, expected, viper.GetBool(cucumberStopOnFailureViperKey), "Changing flags should change StopOnFailure")
+	assert.Equal(t, expected, viper.GetBool(StopOnFailureViperKey), "Changing flags should change StopOnFailure")
 }
 
 func TestStrict(t *testing.T) {
@@ -90,13 +90,13 @@ func TestStrict(t *testing.T) {
 	Strict(flgs)
 
 	// Test default
-	expected := cucumberStrictDefault
-	assert.Equal(t, expected, viper.GetBool(cucumberStrictViperKey), "Default config should match")
+	expected := strictDefault
+	assert.Equal(t, expected, viper.GetBool(StrictViperKey), "Default config should match")
 
 	// Test environment variable
 	_ = os.Setenv("CUCUMBER_STRICT", "1")
 	expected = true
-	assert.Equal(t, expected, viper.GetBool(cucumberStrictViperKey), "Changing env var should change Strict")
+	assert.Equal(t, expected, viper.GetBool(StrictViperKey), "Changing env var should change Strict")
 	_ = os.Unsetenv("CUCUMBER_STRICT")
 
 	// Test flags
@@ -107,7 +107,7 @@ func TestStrict(t *testing.T) {
 	assert.Nil(t, err)
 
 	expected = true
-	assert.Equal(t, expected, viper.GetBool(cucumberStrictViperKey), "Changing flags should change Strict")
+	assert.Equal(t, expected, viper.GetBool(StrictViperKey), "Changing flags should change Strict")
 }
 
 func TestNoColors(t *testing.T) {
@@ -115,13 +115,13 @@ func TestNoColors(t *testing.T) {
 	NoColors(flgs)
 
 	// Test default
-	expected := cucumberNoColorsDefault
-	assert.Equal(t, expected, viper.GetBool(cucumberNoColorsViperKey), "Default config should match")
+	expected := noColorsDefault
+	assert.Equal(t, expected, viper.GetBool(NoColorsViperKey), "Default config should match")
 
 	// Test environment variable
 	_ = os.Setenv("CUCUMBER_NOCOLORS", "1")
 	expected = true
-	assert.Equal(t, expected, viper.GetBool(cucumberNoColorsViperKey), "Changing env var should change NoColors")
+	assert.Equal(t, expected, viper.GetBool(NoColorsViperKey), "Changing env var should change NoColors")
 	_ = os.Unsetenv("CUCUMBER_NOCOLORS")
 
 	// Test flags
@@ -132,7 +132,7 @@ func TestNoColors(t *testing.T) {
 	assert.Nil(t, err)
 
 	expected = true
-	assert.Equal(t, expected, viper.GetBool(cucumberNoColorsViperKey), "Changing flags should change NoColors")
+	assert.Equal(t, expected, viper.GetBool(NoColorsViperKey), "Changing flags should change NoColors")
 }
 
 func TestTags(t *testing.T) {
@@ -140,13 +140,13 @@ func TestTags(t *testing.T) {
 	Tags(flgs)
 
 	// Test default
-	expected := cucumberTagsDefault
-	assert.Equal(t, expected, viper.GetString(cucumberTagsViperKey), "Default config should match")
+	expected := tagsDefault
+	assert.Equal(t, expected, viper.GetString(TagsViperKey), "Default config should match")
 
 	// Test environment variable
 	_ = os.Setenv("CUCUMBER_TAGS", "test")
 	expected = "test"
-	assert.Equal(t, expected, viper.GetString(cucumberTagsViperKey), "Changing env var should change Tags")
+	assert.Equal(t, expected, viper.GetString(TagsViperKey), "Changing env var should change Tags")
 	_ = os.Unsetenv("CUCUMBER_TAGS")
 
 	// Test flags
@@ -156,7 +156,7 @@ func TestTags(t *testing.T) {
 	err := flgs.Parse(args)
 	assert.Nil(t, err)
 	expected = "test"
-	assert.Equal(t, expected, viper.GetString(cucumberTagsViperKey), "Changing flags should change Tags")
+	assert.Equal(t, expected, viper.GetString(TagsViperKey), "Changing flags should change Tags")
 }
 
 func TestFormat(t *testing.T) {
@@ -164,13 +164,13 @@ func TestFormat(t *testing.T) {
 	Format(flgs)
 
 	// Test default
-	expected := cucumberFormatDefault
-	assert.Equal(t, expected, viper.GetString(cucumberFormatViperKey), "Default config should match")
+	expected := formatDefault
+	assert.Equal(t, expected, viper.GetString(FormatViperKey), "Default config should match")
 
 	// Test environment variable
 	_ = os.Setenv("CUCUMBER_FORMAT", "test")
 	expected = "test"
-	assert.Equal(t, expected, viper.GetString(cucumberFormatViperKey), "Changing env var should change Format")
+	assert.Equal(t, expected, viper.GetString(FormatViperKey), "Changing env var should change Format")
 	_ = os.Unsetenv("CUCUMBER_FORMAT")
 
 	// Test flags
@@ -180,7 +180,7 @@ func TestFormat(t *testing.T) {
 	err := flgs.Parse(args)
 	assert.Nil(t, err)
 	expected = "test"
-	assert.Equal(t, expected, viper.GetString(cucumberFormatViperKey), "Changing flags should change Format")
+	assert.Equal(t, expected, viper.GetString(FormatViperKey), "Changing flags should change Format")
 }
 
 func TestConcurrency(t *testing.T) {
@@ -188,13 +188,13 @@ func TestConcurrency(t *testing.T) {
 	Concurrency(flgs)
 
 	// Test default
-	expected := cucumberConcurrencyDefault
-	assert.Equal(t, expected, viper.GetInt(cucumberConcurrencyViperKey), "Default config should match")
+	expected := concurrencyDefault
+	assert.Equal(t, expected, viper.GetInt(ConcurrencyViperKey), "Default config should match")
 
 	// Test environment variable
 	_ = os.Setenv("CUCUMBER_CONCURRENCY", "20")
 	expected = 20
-	assert.Equal(t, expected, viper.GetInt(cucumberConcurrencyViperKey), "Changing env var should change Concurrency")
+	assert.Equal(t, expected, viper.GetInt(ConcurrencyViperKey), "Changing env var should change Concurrency")
 	_ = os.Unsetenv("CUCUMBER_CONCURRENCY")
 
 	// Test flags
@@ -205,7 +205,7 @@ func TestConcurrency(t *testing.T) {
 	assert.Nil(t, err)
 
 	expected = 10
-	assert.Equal(t, expected, viper.GetInt(cucumberConcurrencyViperKey), "Changing flags should change Concurrency")
+	assert.Equal(t, expected, viper.GetInt(ConcurrencyViperKey), "Changing flags should change Concurrency")
 }
 
 func TestPaths(t *testing.T) {
@@ -213,8 +213,8 @@ func TestPaths(t *testing.T) {
 	Paths(flgs)
 
 	// Test default
-	expected := cucumberPathsDefault
-	assert.Equal(t, expected, viper.GetStringSlice(cucumberPathsViperKey), "Default config should match")
+	expected := pathsDefault
+	assert.Equal(t, expected, viper.GetStringSlice(PathsViperKey), "Default config should match")
 
 	// Test environment variable
 	_ = os.Setenv("CUCUMBER_PATHS", "test1 test2")
@@ -222,7 +222,7 @@ func TestPaths(t *testing.T) {
 		"test1",
 		"test2",
 	}
-	assert.Equal(t, expected, viper.GetStringSlice(cucumberPathsViperKey), "Changing env var should change Paths")
+	assert.Equal(t, expected, viper.GetStringSlice(PathsViperKey), "Changing env var should change Paths")
 	_ = os.Unsetenv("CUCUMBER_PATHS")
 
 	// Test flags
@@ -236,7 +236,7 @@ func TestPaths(t *testing.T) {
 		"test3",
 		"test4",
 	}
-	assert.Equal(t, expected, viper.GetStringSlice(cucumberPathsViperKey), "Changing flags should change Paths")
+	assert.Equal(t, expected, viper.GetStringSlice(PathsViperKey), "Changing flags should change Paths")
 }
 
 func TestOutputPath(t *testing.T) {
@@ -244,13 +244,13 @@ func TestOutputPath(t *testing.T) {
 	OutputPath(flgs)
 
 	// Test default
-	expected := cucumberOutputPathDefault
-	assert.Equal(t, expected, viper.GetString(cucumberOutputPathViperKey), "Default config should match")
+	expected := outputPathDefault
+	assert.Equal(t, expected, viper.GetString(OutputPathViperKey), "Default config should match")
 
 	// Test environment variable
 	_ = os.Setenv("CUCUMBER_OUTPUTPATH", "test")
 	expected = "test"
-	assert.Equal(t, expected, viper.GetString(cucumberOutputPathViperKey), "Changing env var should change OutputPath")
+	assert.Equal(t, expected, viper.GetString(OutputPathViperKey), "Changing env var should change OutputPath")
 	_ = os.Unsetenv("CUCUMBER_OUTPUTPATH")
 
 	// Test flags
@@ -260,7 +260,7 @@ func TestOutputPath(t *testing.T) {
 	err := flgs.Parse(args)
 	assert.Nil(t, err)
 	expected = "test"
-	assert.Equal(t, expected, viper.GetString(cucumberOutputPathViperKey), "Changing flags should change OutputPath")
+	assert.Equal(t, expected, viper.GetString(OutputPathViperKey), "Changing flags should change OutputPath")
 }
 
 func TestInitFlags(t *testing.T) {

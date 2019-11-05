@@ -4,6 +4,7 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/producer"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
@@ -18,7 +19,7 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 	}
 
 	// Set Topic to Nonce topic
-	msg.Topic = utils.KafkaChainTopic(viper.GetString("topic.tx.decoder"), txctx.Envelope.GetChain().ID())
+	msg.Topic = utils.KafkaChainTopic(viper.GetString(broker.TxDecoderViperKey), txctx.Envelope.GetChain().ID())
 
 	// Set key
 	Sender := txctx.Envelope.GetFrom().Address()

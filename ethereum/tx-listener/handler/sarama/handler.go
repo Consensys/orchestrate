@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tx-listener/handler/base"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
@@ -49,7 +50,7 @@ func (h *Handler) GetInitialPosition(chain *big.Int) (blockNumber, txIndex int64
 	}
 
 	// BlockNumber == -2 means we should start listening from position of the last produced message
-	decoderTopic := utils.KafkaChainTopic(viper.GetString("topic.tx.decoder"), chain)
+	decoderTopic := utils.KafkaChainTopic(viper.GetString(broker.DecoderGroupViperKey), chain)
 
 	// Retrieve last record
 	lastRecord, err := h.getLastRecord(decoderTopic, 0)
@@ -74,8 +75,8 @@ func (h *Handler) getLastRecord(topic string, partition int32) (*sarama.Record, 
 		return nil, err
 	}
 
-	// Get broker Leader fo topic-partition
-	broker, err := h.client.Leader(topic, partition)
+	// Get broker Leader of topic-partition
+	leader, err := h.client.Leader(topic, partition)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +89,7 @@ func (h *Handler) getLastRecord(topic string, partition int32) (*sarama.Record, 
 	req.AddBlock(topic, 0, lastOffset-1, h.client.Config().Consumer.Fetch.Max)
 	req.Version = 4
 	req.Isolation = sarama.ReadUncommitted
-	response, err := broker.Fetch(req)
+	response, err := leader.Fetch(req)
 
 	if err != nil {
 		return nil, err

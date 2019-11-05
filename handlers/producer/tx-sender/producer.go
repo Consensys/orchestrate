@@ -4,6 +4,7 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/producer"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -25,14 +26,14 @@ loop:
 			continue
 		default:
 			// If an error occurred we redirect to recovery
-			msg.Topic = viper.GetString("topic.tx.recover")
+			msg.Topic = viper.GetString(broker.TxRecoverViperKey)
 			break loop
 		}
 	}
 
 	// If no error and nonce is invalid we redirect envelope to tx-nonce
 	if b, ok := txctx.Get("invalid.nonce").(bool); len(txctx.Envelope.GetErrors()) == 0 && ok && b {
-		msg.Topic = viper.GetString("topic.tx.nonce")
+		msg.Topic = viper.GetString(broker.TxNonceViperKey)
 	}
 
 	// Marshal Envelope into sarama Message

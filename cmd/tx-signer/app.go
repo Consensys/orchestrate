@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/jaeger"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
@@ -50,12 +52,12 @@ func initHandlers(ctx context.Context) {
 	common.InParallel(
 		// Initialize Jaeger tracer
 		func() {
-			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString("jaeger.service.name"))
+			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString(jaeger.ServiceNameViperKey))
 			opentracing.Init(ctxWithValue)
 		},
 		// Initialize Jaeger tracer injector
 		func() {
-			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString("jaeger.service.name"))
+			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString(jaeger.ServiceNameViperKey))
 			injector.Init(ctxWithValue)
 		},
 		// Initialize Vault
@@ -78,7 +80,7 @@ func initComponents(ctx context.Context) {
 		// Initialize ConsumerGroup
 		func() {
 			// Set Kafka Group value
-			viper.Set("kafka.group", "group-signer")
+			viper.Set(broker.KafkaGroupViperKey, "group-signer")
 			broker.InitConsumerGroup(ctx)
 		},
 	)
@@ -120,8 +122,8 @@ func Start(ctx context.Context) {
 		app.SetReady(true)
 
 		topics := []string{
-			viper.GetString("topic.tx.signer"),
-			viper.GetString("topic.wallet.generator"),
+			viper.GetString(broker.TxSignerViperKey),
+			viper.GetString(broker.WalletGeneratorViperKey),
 		}
 		l.WithFields(log.Fields{
 			"topics": topics,

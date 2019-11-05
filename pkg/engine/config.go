@@ -10,8 +10,8 @@ import (
 )
 
 func init() {
-	viper.SetDefault(engineSlotsViperKey, engineSlotsDefault)
-	_ = viper.BindEnv(engineSlotsViperKey, engineSlotsEnv)
+	viper.SetDefault(SlotsViperKey, slotsDefault)
+	_ = viper.BindEnv(SlotsViperKey, slotsEnv)
 }
 
 // Config is engine configuration
@@ -37,7 +37,7 @@ func (c *Config) Validate() error {
 // NewConfig create new engine configuration
 func NewConfig() Config {
 	config := Config{}
-	config.Slots = viper.GetInt64("engine.slots")
+	config.Slots = viper.GetInt64(SlotsViperKey)
 	return config
 }
 
@@ -47,16 +47,16 @@ func InitFlags(f *pflag.FlagSet) {
 }
 
 const (
-	engineSlotsFlag     = "engine-slots"
-	engineSlotsViperKey = "engine.slots"
-	engineSlotsDefault  = uint(20)
-	engineSlotsEnv      = "ENGINE_SLOTS"
+	slotsFlag     = "engine-slots"
+	SlotsViperKey = "engine.slots"
+	slotsDefault  = uint(20)
+	slotsEnv      = "ENGINE_SLOTS"
 )
 
 // Slots register flag for Kafka server addresses
 func Slots(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Maximum number of messages that can be treated concurrently.
-Environment variable: %q`, engineSlotsEnv)
-	f.Uint(engineSlotsFlag, engineSlotsDefault, desc)
-	_ = viper.BindPFlag(engineSlotsViperKey, f.Lookup(engineSlotsFlag))
+Environment variable: %q`, slotsEnv)
+	f.Uint(slotsFlag, slotsDefault, desc)
+	_ = viper.BindPFlag(SlotsViperKey, f.Lookup(slotsFlag))
 }

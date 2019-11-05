@@ -26,7 +26,7 @@ func handler(txctx *engine.TxContext) {
 
 func main() {
 	// Initialize consumer group
-	viper.Set("worker.group", "e2e-group")
+	viper.Set(broker.KafkaGroupViperKey, "e2e-group")
 	broker.InitConsumerGroup(context.Background())
 
 	// Initialize engine

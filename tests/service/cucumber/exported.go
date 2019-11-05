@@ -35,19 +35,19 @@ func Init(ctx context.Context) {
 		chanregistry.Init(ctx)
 
 		options = &godog.Options{
-			ShowStepDefinitions: viper.GetBool(cucumberShowStepDefinitionsViperKey),
-			Randomize:           viper.GetInt64(cucumberRandomizeViperKey),
-			StopOnFailure:       viper.GetBool(cucumberStopOnFailureViperKey),
-			Strict:              viper.GetBool(cucumberStrictViperKey),
-			NoColors:            viper.GetBool(cucumberNoColorsViperKey),
-			Tags:                viper.GetString(cucumberTagsViperKey),
-			Format:              viper.GetString(cucumberFormatViperKey),
-			Concurrency:         viper.GetInt(cucumberConcurrencyViperKey),
-			Paths:               viper.GetStringSlice(cucumberPathsViperKey),
+			ShowStepDefinitions: viper.GetBool(ShowStepDefinitionsViperKey),
+			Randomize:           viper.GetInt64(RandomizeViperKey),
+			StopOnFailure:       viper.GetBool(StopOnFailureViperKey),
+			Strict:              viper.GetBool(StrictViperKey),
+			NoColors:            viper.GetBool(NoColorsViperKey),
+			Tags:                viper.GetString(TagsViperKey),
+			Format:              viper.GetString(FormatViperKey),
+			Concurrency:         viper.GetInt(ConcurrencyViperKey),
+			Paths:               viper.GetStringSlice(PathsViperKey),
 		}
 
-		if viper.GetString(cucumberOutputPathViperKey) != "" {
-			f, _ := os.Create(viper.GetString(cucumberOutputPathViperKey))
+		if viper.GetString(OutputPathViperKey) != "" {
+			f, _ := os.Create(viper.GetString(OutputPathViperKey))
 			options.Output = f
 		}
 

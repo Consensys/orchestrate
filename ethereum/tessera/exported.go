@@ -21,7 +21,7 @@ func Init(ctx context.Context) {
 		}
 
 		client = NewEnclaveClient()
-		tesseraEndpoints := viper.GetStringMapString("tessera.urls")
+		tesseraEndpoints := viper.GetStringMapString(URLsViperKey)
 		log.Infof("connecting to %d Tessera URLs", len(tesseraEndpoints))
 
 		for chainID, endpoint := range tesseraEndpoints {

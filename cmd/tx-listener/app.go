@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/jaeger"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
@@ -52,12 +54,12 @@ func initHandlers(ctx context.Context) {
 	common.InParallel(
 		// Initialize Jaeger
 		func() {
-			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString("jaeger.service.name"))
+			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString(jaeger.ServiceNameViperKey))
 			opentracing.Init(ctxWithValue)
 		},
 		// Initialize Jaeger trace injector
 		func() {
-			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString("jaeger.service.name"))
+			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString(jaeger.ServiceNameViperKey))
 			injector.Init(ctxWithValue)
 		},
 		// Initialize store

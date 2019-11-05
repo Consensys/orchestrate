@@ -19,8 +19,8 @@ func init() {
 	_ = viper.BindEnv(hostViperKey, hostEnv)
 	viper.SetDefault(portViperKey, portDefault)
 	_ = viper.BindEnv(portViperKey, portEnv)
-	viper.SetDefault(serviceNameViperKey, serviceNameDefault)
-	_ = viper.BindEnv(serviceNameViperKey, serviceNameEnv)
+	viper.SetDefault(ServiceNameViperKey, serviceNameDefault)
+	_ = viper.BindEnv(ServiceNameViperKey, serviceNameEnv)
 	viper.SetDefault(rpcMetricsViperKey, rpcMetricsDefault)
 	_ = viper.BindEnv(rpcMetricsViperKey, rpcMetricsEnv)
 	viper.SetDefault(enabledViperKey, enabledDefault)
@@ -85,7 +85,7 @@ Environment variable: %q`, portEnv)
 }
 
 const (
-	serviceNameViperKey = "jaeger.service.name"
+	ServiceNameViperKey = "jaeger.service.name"
 	serviceNameFlag     = "jaeger-service-name"
 	serviceNameDefault  = "jaeger"
 	serviceNameEnv      = "JAEGER_SERVICE_NAME"
@@ -96,7 +96,7 @@ func ServiceName(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Jaeger ServiceName to use on the tracer
 Environment variable: %q`, serviceNameEnv)
 	f.String(serviceNameFlag, serviceNameDefault, desc)
-	_ = viper.BindPFlag(serviceNameViperKey, f.Lookup(serviceNameFlag))
+	_ = viper.BindPFlag(ServiceNameViperKey, f.Lookup(serviceNameFlag))
 }
 
 const (
@@ -222,7 +222,7 @@ Environment variable: %q`, samplerTypeEnv)
 // NewConfig create new Jaeger configuration
 func NewConfig() *config.Configuration {
 	return &config.Configuration{
-		ServiceName: viper.GetString(serviceNameViperKey),
+		ServiceName: viper.GetString(ServiceNameViperKey),
 		Disabled:    !viper.GetBool(enabledViperKey),
 		RPCMetrics:  viper.GetBool(rpcMetricsViperKey),
 		Sampler: &config.SamplerConfig{

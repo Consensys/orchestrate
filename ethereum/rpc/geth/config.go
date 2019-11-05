@@ -8,11 +8,18 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	RetryInitialIntervalViperKey = "ethclient.retry.initinterval"
+	RetryRandomFactorViperKey    = "ethclient.retry.randomfactor"
+	RetryMultiplierViperKey      = "ethclient.retry.multiplier"
+	RetryMaxIntervalViperKey     = "ethclient.retry.maxinterval"
+)
+
 func init() {
-	viper.SetDefault("ethclient.retry.initinterval", 500*time.Millisecond)
-	viper.SetDefault("ethclient.retry.randomfactor", 0.5)
-	viper.SetDefault("ethclient.retry.multiplier", 1.5)
-	viper.SetDefault("ethclient.retry.maxinterval", 30*time.Second)
+	viper.SetDefault(RetryInitialIntervalViperKey, 500*time.Millisecond)
+	viper.SetDefault(RetryRandomFactorViperKey, 0.5)
+	viper.SetDefault(RetryMultiplierViperKey, 1.5)
+	viper.SetDefault(RetryMaxIntervalViperKey, 30*time.Second)
 	_ = viper.BindEnv(maxElapsedTimeViperKey, maxElapsedTimeEnv)
 	viper.SetDefault(maxElapsedTimeViperKey, maxElapsedTimeDefault)
 }
@@ -47,10 +54,10 @@ type RetryConfig struct {
 // NewRetryConfig creates a New Configuration for an Ex
 func NewRetryConfig() *RetryConfig {
 	config := &RetryConfig{}
-	config.InitialInterval = viper.GetDuration("ethclient.retry.initinterval")
-	config.RandomizationFactor = viper.GetFloat64("ethclient.retry.randomfactor")
-	config.Multiplier = viper.GetFloat64("ethclient.retry.multiplier")
-	config.MaxInterval = viper.GetDuration("ethclient.retry.maxinterval")
+	config.InitialInterval = viper.GetDuration(RetryInitialIntervalViperKey)
+	config.RandomizationFactor = viper.GetFloat64(RetryRandomFactorViperKey)
+	config.Multiplier = viper.GetFloat64(RetryMultiplierViperKey)
+	config.MaxInterval = viper.GetDuration(RetryMaxIntervalViperKey)
 	config.MaxElapsedTime = viper.GetDuration(maxElapsedTimeViperKey)
 
 	return config

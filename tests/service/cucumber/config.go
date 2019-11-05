@@ -8,26 +8,26 @@ import (
 )
 
 func init() {
-	viper.SetDefault(cucumberShowStepDefinitionsViperKey, cucumberShowStepDefinitionsDefault)
-	_ = viper.BindEnv(cucumberShowStepDefinitionsViperKey, cucumberShowStepDefinitionsEnv)
-	viper.SetDefault(cucumberRandomizeViperKey, cucumberRandomizeDefault)
-	_ = viper.BindEnv(cucumberRandomizeViperKey, cucumberRandomizeEnv)
-	viper.SetDefault(cucumberStopOnFailureViperKey, cucumberStopOnFailureDefault)
-	_ = viper.BindEnv(cucumberStopOnFailureViperKey, cucumberStopOnFailureEnv)
-	viper.SetDefault(cucumberStrictViperKey, cucumberStrictDefault)
-	_ = viper.BindEnv(cucumberStrictViperKey, cucumberStrictEnv)
-	viper.SetDefault(cucumberNoColorsViperKey, cucumberNoColorsDefault)
-	_ = viper.BindEnv(cucumberNoColorsViperKey, cucumberNoColorsEnv)
-	viper.SetDefault(cucumberTagsViperKey, cucumberTagsDefault)
-	_ = viper.BindEnv(cucumberTagsViperKey, cucumberTagsEnv)
-	viper.SetDefault(cucumberFormatViperKey, cucumberFormatDefault)
-	_ = viper.BindEnv(cucumberFormatViperKey, cucumberFormatEnv)
-	viper.SetDefault(cucumberConcurrencyViperKey, cucumberConcurrencyDefault)
-	_ = viper.BindEnv(cucumberConcurrencyViperKey, cucumberConcurrencyEnv)
-	viper.SetDefault(cucumberPathsViperKey, cucumberPathsDefault)
-	_ = viper.BindEnv(cucumberPathsViperKey, cucumberPathsEnv)
-	viper.SetDefault(cucumberOutputPathViperKey, cucumberOutputPathDefault)
-	_ = viper.BindEnv(cucumberOutputPathViperKey, cucumberOutputPathEnv)
+	viper.SetDefault(ShowStepDefinitionsViperKey, showStepDefinitionsDefault)
+	_ = viper.BindEnv(ShowStepDefinitionsViperKey, showStepDefinitionsEnv)
+	viper.SetDefault(RandomizeViperKey, randomizeDefault)
+	_ = viper.BindEnv(RandomizeViperKey, randomizeEnv)
+	viper.SetDefault(StopOnFailureViperKey, stopOnFailureDefault)
+	_ = viper.BindEnv(StopOnFailureViperKey, stopOnFailureEnv)
+	viper.SetDefault(StrictViperKey, strictDefault)
+	_ = viper.BindEnv(StrictViperKey, strictEnv)
+	viper.SetDefault(NoColorsViperKey, noColorsDefault)
+	_ = viper.BindEnv(NoColorsViperKey, noColorsEnv)
+	viper.SetDefault(TagsViperKey, tagsDefault)
+	_ = viper.BindEnv(TagsViperKey, tagsEnv)
+	viper.SetDefault(FormatViperKey, formatDefault)
+	_ = viper.BindEnv(FormatViperKey, formatEnv)
+	viper.SetDefault(ConcurrencyViperKey, concurrencyDefault)
+	_ = viper.BindEnv(ConcurrencyViperKey, concurrencyEnv)
+	viper.SetDefault(PathsViperKey, pathsDefault)
+	_ = viper.BindEnv(PathsViperKey, pathsEnv)
+	viper.SetDefault(OutputPathViperKey, outputPathDefault)
+	_ = viper.BindEnv(OutputPathViperKey, outputPathEnv)
 }
 
 // InitFlags register Cucumber flags
@@ -45,166 +45,166 @@ func InitFlags(f *pflag.FlagSet) {
 }
 
 const (
-	cucumberShowStepDefinitionsFlag     = "cucumber-showstepdefinitions"
-	cucumberShowStepDefinitionsViperKey = "cucumber.showstepdefinitions"
-	cucumberShowStepDefinitionsDefault  = false
-	cucumberShowStepDefinitionsEnv      = "CUCUMBER_SHOWSTEPDEFINITION"
+	showStepDefinitionsFlag     = "cucumber-showstepdefinitions"
+	ShowStepDefinitionsViperKey = "cucumber.showstepdefinitions"
+	showStepDefinitionsDefault  = false
+	showStepDefinitionsEnv      = "CUCUMBER_SHOWSTEPDEFINITION"
 )
 
 // ShowStepDefinitions register flag for Godog ShowStepDefinitions Option
 func ShowStepDefinitions(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Print step definitions found and exit
-Environment variable: %q`, cucumberShowStepDefinitionsEnv)
-	f.Bool(cucumberShowStepDefinitionsFlag, cucumberShowStepDefinitionsDefault, desc)
-	_ = viper.BindPFlag(cucumberShowStepDefinitionsViperKey, f.Lookup(cucumberShowStepDefinitionsFlag))
+Environment variable: %q`, showStepDefinitionsEnv)
+	f.Bool(showStepDefinitionsFlag, showStepDefinitionsDefault, desc)
+	_ = viper.BindPFlag(ShowStepDefinitionsViperKey, f.Lookup(showStepDefinitionsFlag))
 }
 
 const (
-	cucumberRandomizeFlag     = "cucumber-randomize"
-	cucumberRandomizeViperKey = "cucumber.randomize"
-	cucumberRandomizeDefault  = -1
-	cucumberRandomizeEnv      = "CUCUMBER_RANDOMIZE"
+	randomizeFlag     = "cucumber-randomize"
+	RandomizeViperKey = "cucumber.randomize"
+	randomizeDefault  = -1
+	randomizeEnv      = "CUCUMBER_RANDOMIZE"
 )
 
 // Randomize register flag for randomize feature tests
 func Randomize(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Seed to randomize feature tests. The default value of -1 means to have a random seed. 0 means do not randomize
-Environment variable: %q`, cucumberRandomizeEnv)
-	f.Int(cucumberRandomizeFlag, cucumberRandomizeDefault, desc)
-	_ = viper.BindPFlag(cucumberRandomizeViperKey, f.Lookup(cucumberRandomizeFlag))
+Environment variable: %q`, randomizeEnv)
+	f.Int(randomizeFlag, randomizeDefault, desc)
+	_ = viper.BindPFlag(RandomizeViperKey, f.Lookup(randomizeFlag))
 }
 
 const (
-	cucumberStopOnFailureFlag     = "cucumber-stoponfailure"
-	cucumberStopOnFailureViperKey = "cucumber.stoponfailure"
-	cucumberStopOnFailureDefault  = false
-	cucumberStopOnFailureEnv      = "CUCUMBER_STOPONFAILURE"
+	stopOnFailureFlag     = "cucumber-stoponfailure"
+	StopOnFailureViperKey = "cucumber.stoponfailure"
+	stopOnFailureDefault  = false
+	stopOnFailureEnv      = "CUCUMBER_STOPONFAILURE"
 )
 
 // StopOnFailure register flag for Godog StopOnFailure Option
 func StopOnFailure(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Stops on the first failure
-Environment variable: %q`, cucumberStopOnFailureEnv)
-	f.Bool(cucumberStopOnFailureFlag, cucumberStopOnFailureDefault, desc)
-	_ = viper.BindPFlag(cucumberStopOnFailureViperKey, f.Lookup(cucumberStopOnFailureFlag))
+Environment variable: %q`, stopOnFailureEnv)
+	f.Bool(stopOnFailureFlag, stopOnFailureDefault, desc)
+	_ = viper.BindPFlag(StopOnFailureViperKey, f.Lookup(stopOnFailureFlag))
 }
 
 const (
-	cucumberStrictFlag     = "cucumber-strict"
-	cucumberStrictViperKey = "cucumber.strict"
-	cucumberStrictDefault  = false
-	cucumberStrictEnv      = "CUCUMBER_STRICT"
+	strictFlag     = "cucumber-strict"
+	StrictViperKey = "cucumber.strict"
+	strictDefault  = false
+	strictEnv      = "CUCUMBER_STRICT"
 )
 
 // Strict register flag for Godog Strict Option
 func Strict(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Fail suite when there are pending or undefined steps
-Environment variable: %q`, cucumberStrictEnv)
-	f.Bool(cucumberStrictFlag, cucumberStrictDefault, desc)
-	_ = viper.BindPFlag(cucumberStrictViperKey, f.Lookup(cucumberStrictFlag))
+Environment variable: %q`, strictEnv)
+	f.Bool(strictFlag, strictDefault, desc)
+	_ = viper.BindPFlag(StrictViperKey, f.Lookup(strictFlag))
 }
 
 const (
-	cucumberNoColorsFlag     = "cucumber-nocolors"
-	cucumberNoColorsViperKey = "cucumber.nocolors"
-	cucumberNoColorsDefault  = false
-	cucumberNoColorsEnv      = "CUCUMBER_NOCOLORS"
+	noColorsFlag     = "cucumber-nocolors"
+	NoColorsViperKey = "cucumber.nocolors"
+	noColorsDefault  = false
+	noColorsEnv      = "CUCUMBER_NOCOLORS"
 )
 
 // NoColors register flag for Godog NoColors Option
 func NoColors(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Forces ansi color stripping
-Environment variable: %q`, cucumberNoColorsEnv)
-	f.Bool(cucumberNoColorsFlag, cucumberNoColorsDefault, desc)
-	_ = viper.BindPFlag(cucumberNoColorsViperKey, f.Lookup(cucumberNoColorsFlag))
+Environment variable: %q`, noColorsEnv)
+	f.Bool(noColorsFlag, noColorsDefault, desc)
+	_ = viper.BindPFlag(NoColorsViperKey, f.Lookup(noColorsFlag))
 }
 
 const (
-	cucumberTagsFlag     = "cucumber-tags"
-	cucumberTagsViperKey = "cucumber.tags"
-	cucumberTagsDefault  = ""
-	cucumberTagsEnv      = "CUCUMBER_TAGS"
+	tagsFlag     = "cucumber-tags"
+	TagsViperKey = "cucumber.tags"
+	tagsDefault  = ""
+	tagsEnv      = "CUCUMBER_TAGS"
 )
 
 // Tags register flag for Godog Tags Option
 func Tags(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Various filters for scenarios parsed from feature files
-Environment variable: %q`, cucumberTagsEnv)
-	f.String(cucumberTagsFlag, cucumberTagsDefault, desc)
-	_ = viper.BindPFlag(cucumberTagsViperKey, f.Lookup(cucumberTagsFlag))
+Environment variable: %q`, tagsEnv)
+	f.String(tagsFlag, tagsDefault, desc)
+	_ = viper.BindPFlag(TagsViperKey, f.Lookup(tagsFlag))
 }
 
 const (
-	cucumberFormatFlag     = "cucumber-format"
-	cucumberFormatViperKey = "cucumber.format"
-	cucumberFormatDefault  = "pretty"
-	cucumberFormatEnv      = "CUCUMBER_FORMAT"
+	formatFlag     = "cucumber-format"
+	FormatViperKey = "cucumber.format"
+	formatDefault  = "pretty"
+	formatEnv      = "CUCUMBER_FORMAT"
 )
 
 // Format register flag for Godog Format Option
 func Format(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`The formatter name (events|junit|pretty|cucumber)
-Environment variable: %q`, cucumberFormatEnv)
-	f.String(cucumberFormatFlag, cucumberFormatDefault, desc)
-	_ = viper.BindPFlag(cucumberFormatViperKey, f.Lookup(cucumberFormatFlag))
+Environment variable: %q`, formatEnv)
+	f.String(formatFlag, formatDefault, desc)
+	_ = viper.BindPFlag(FormatViperKey, f.Lookup(formatFlag))
 }
 
 const (
-	cucumberConcurrencyFlag     = "cucumber-concurrency"
-	cucumberConcurrencyViperKey = "cucumber.concurrency"
-	cucumberConcurrencyDefault  = 1
-	cucumberConcurrencyEnv      = "CUCUMBER_CONCURRENCY"
+	concurrencyFlag     = "cucumber-concurrency"
+	ConcurrencyViperKey = "cucumber.concurrency"
+	concurrencyDefault  = 1
+	concurrencyEnv      = "CUCUMBER_CONCURRENCY"
 )
 
 // Concurrency register flag for Godog Concurrency Option
 func Concurrency(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Concurrency rate, not all formatters accepts this
-Environment variable: %q`, cucumberConcurrencyEnv)
-	f.Int(cucumberConcurrencyFlag, cucumberConcurrencyDefault, desc)
-	_ = viper.BindPFlag(cucumberConcurrencyViperKey, f.Lookup(cucumberConcurrencyFlag))
+Environment variable: %q`, concurrencyEnv)
+	f.Int(concurrencyFlag, concurrencyDefault, desc)
+	_ = viper.BindPFlag(ConcurrencyViperKey, f.Lookup(concurrencyFlag))
 }
 
 var (
-	cucumberPathsFlag     = "cucumber-paths"
-	cucumberPathsViperKey = "cucumber.paths"
-	cucumberPathsDefault  = []string{"features"}
-	cucumberPathsEnv      = "CUCUMBER_PATHS"
+	pathsFlag     = "cucumber-paths"
+	PathsViperKey = "cucumber.paths"
+	pathsDefault  = []string{"features"}
+	pathsEnv      = "CUCUMBER_PATHS"
 )
 
 // Paths register flag for Godog Paths Option
 func Paths(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`All feature file paths
-Environment variable: %q`, cucumberPathsEnv)
-	f.StringSlice(cucumberPathsFlag, cucumberPathsDefault, desc)
-	_ = viper.BindPFlag(cucumberPathsViperKey, f.Lookup(cucumberPathsFlag))
+Environment variable: %q`, pathsEnv)
+	f.StringSlice(pathsFlag, pathsDefault, desc)
+	_ = viper.BindPFlag(PathsViperKey, f.Lookup(pathsFlag))
 }
 
 const (
-	cucumberOutputPathFlag     = "cucumber-outputpath"
-	cucumberOutputPathViperKey = "cucumber.outputpath"
-	cucumberOutputPathDefault  = ""
-	cucumberOutputPathEnv      = "CUCUMBER_OUTPUTPATH"
+	outputPathFlag     = "cucumber-outputpath"
+	OutputPathViperKey = "cucumber.outputpath"
+	outputPathDefault  = ""
+	outputPathEnv      = "CUCUMBER_OUTPUTPATH"
 )
 
 // OutputPath register flag for Godog OutputPath Option
 func OutputPath(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Where it should print the cucumber output (only works with cucumber format)
-Environment variable: %q`, cucumberOutputPathEnv)
-	f.String(cucumberOutputPathFlag, cucumberOutputPathDefault, desc)
-	_ = viper.BindPFlag(cucumberOutputPathViperKey, f.Lookup(cucumberOutputPathFlag))
+Environment variable: %q`, outputPathEnv)
+	f.String(outputPathFlag, outputPathDefault, desc)
+	_ = viper.BindPFlag(OutputPathViperKey, f.Lookup(outputPathFlag))
 }
 
 var (
-	cucumberAliasesFlag     = "cucumber-aliases"
-	cucumberAliasesViperKey = "cucumber.aliases"
-	cucumberAliasesDefault  []string
-	cucumberAliasesEnv      = "CUCUMBER_ALIAS"
+	aliasesFlag     = "cucumber-aliases"
+	AliasesViperKey = "cucumber.aliases"
+	aliasesDefault  []string
+	aliasesEnv      = "CUCUMBER_ALIAS"
 )
 
 // Aliases register flag for aliases
 func Aliases(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Aliases for cucumber test scenarios (e.g chain.primary:888)
-Environment variable: %q`, cucumberAliasesEnv)
-	f.StringSlice(cucumberAliasesFlag, cucumberAliasesDefault, desc)
-	_ = viper.BindPFlag(cucumberAliasesViperKey, f.Lookup(cucumberAliasesFlag))
+Environment variable: %q`, aliasesEnv)
+	f.StringSlice(aliasesFlag, aliasesDefault, desc)
+	_ = viper.BindPFlag(AliasesViperKey, f.Lookup(aliasesFlag))
 }

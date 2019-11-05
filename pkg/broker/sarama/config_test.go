@@ -89,9 +89,6 @@ func TestConsumerGroup(t *testing.T) {
 
 	DecoderGroup(flgs)
 	assert.Equal(t, "group-decoder", viper.GetString("kafka.group.decoder"), "From default")
-
-	BridgeGroup(flgs)
-	assert.Equal(t, "group-bridge", viper.GetString("kafka.group.bridge"), "From default")
 }
 
 func TestInitKafkaSASLFlags(t *testing.T) {

@@ -22,6 +22,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	server "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/healthcheck"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/jaeger"
 )
 
 var (
@@ -51,12 +52,12 @@ func initHandlers(ctx context.Context) {
 	common.InParallel(
 		// Initialize Jaeger tracer
 		func() {
-			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString("jaeger.service.name"))
+			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString(jaeger.ServiceNameViperKey))
 			opentracing.Init(ctxWithValue)
 		},
 		// Initialize trace injector
 		func() {
-			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString("jaeger.service.name"))
+			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString(jaeger.ServiceNameViperKey))
 			injector.Init(ctxWithValue)
 		},
 		// Initialize crafter
@@ -99,7 +100,7 @@ func initConsumerGroup(ctx context.Context) {
 		// Initialize ConsumerGroup
 		func() {
 			// Set Kafka Group value
-			viper.Set("kafka.group", "group-crafter")
+			viper.Set(broker.KafkaGroupViperKey, "group-crafter")
 			broker.InitConsumerGroup(ctx)
 		},
 	)
@@ -142,7 +143,7 @@ func Start(ctx context.Context) {
 		err := broker.Consume(
 			cancelCtx,
 			[]string{
-				viper.GetString("topic.tx.crafter"),
+				viper.GetString(broker.TxCrafterViperKey),
 			},
 			broker.NewEngineConsumerGroupHandler(engine.GlobalEngine()),
 		)

@@ -2,6 +2,7 @@ package vault
 
 import (
 	"github.com/spf13/viper"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 )
 
@@ -12,9 +13,9 @@ import (
 func Vault(signer, generator engine.HandlerFunc) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		switch txctx.In.Entrypoint() {
-		case viper.GetString("topic.tx.signer"):
+		case viper.GetString(broker.TxSignerViperKey):
 			signer(txctx)
-		case viper.GetString("topic.wallet.generator"):
+		case viper.GetString(broker.WalletGeneratorViperKey):
 			generator(txctx)
 		}
 	}

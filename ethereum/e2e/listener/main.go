@@ -63,7 +63,7 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 	}
 
 	// Set Topic to Nonce topic
-	msg.Topic = utils.KafkaChainTopic(viper.GetString("topic.tx.decoder"), txctx.Envelope.GetChain().ID())
+	msg.Topic = utils.KafkaChainTopic(viper.GetString(broker.TxDecoderViperKey), txctx.Envelope.GetChain().ID())
 
 	log.WithFields(log.Fields{
 		"topic": msg.Topic,

@@ -193,12 +193,12 @@ func InitConsumerGroup(ctx context.Context) {
 
 		// Create group
 		var err error
-		group, err = NewConsumerGroupFromClient(viper.GetString(kafkaGroupViperKey), client)
+		group, err = NewConsumerGroupFromClient(viper.GetString(KafkaGroupViperKey), client)
 		if err != nil {
 			log.WithError(err).Fatalf("sarama: could not create consumer group")
 		}
 		log.WithFields(log.Fields{
-			"group": viper.GetString(kafkaGroupViperKey),
+			"group": viper.GetString(KafkaGroupViperKey),
 		}).Infof("sarama: consumer group ready")
 
 		// Close when context is canceled
