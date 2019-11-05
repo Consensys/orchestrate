@@ -9,7 +9,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
-// SecretStore wraps a hashicorps client an manage the unsealing
+// SecretStore wraps a Hashicorp client an manage the unsealing
 type SecretStore struct {
 	mut    sync.Mutex
 	rtl    *RenewTokenLoop
@@ -17,7 +17,7 @@ type SecretStore struct {
 	Config *Config
 }
 
-// NewSecretStore construct a new hashicorps vault given a configfile or nil
+// NewSecretStore construct a new Hashicorp vault given a configfile or nil
 func NewSecretStore(config *Config) (*SecretStore, error) {
 
 	hash, err := NewVaultClient(config)

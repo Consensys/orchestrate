@@ -8,7 +8,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 )
 
-// KeyOfFunc should return channel key to distach envelope to
+// KeyOfFunc should return channel key to dispatch envelope to
 type KeyOfFunc func(txtcx *engine.TxContext) (string, error)
 
 // Dispatcher dispatch envelopes into a channel registry

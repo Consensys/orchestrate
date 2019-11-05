@@ -44,6 +44,15 @@ var ERC20 = []byte(
 	"type": "event"
   },
   {
+	"anonymous": false,
+	"inputs": [
+	  {"indexed": false, "name": "account", "type": "address"},
+	  {"indexed": false, "name": "account2", "type": "address"}
+	],
+	"name": "MinterAddedTer",
+	"type": "event"
+  },
+  {
     "constant": true,
     "inputs": [
       {"name": "account", "type": "address"}

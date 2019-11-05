@@ -88,7 +88,7 @@ func TestParseEnvelopes(t *testing.T) {
 		Aliases: NewAliasRegistry(),
 	}
 
-	// Set a chain alias in global namescape
+	// Set a chain alias in global namespace
 	p.Aliases.Set("global", "chain.primary", "888")
 
 	// Set contract alias in local namespaces

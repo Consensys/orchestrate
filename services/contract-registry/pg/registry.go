@@ -83,8 +83,6 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 			return nil, errors.FromError(err).ExtendComponent(component)
 		}
 
-		var methods []*MethodModel
-		var events []*EventModel
 		if len(abiRaw) != 0 {
 			codeHash := crypto.Keccak256Hash(deployedBytecode)
 			contractAbi, err := contract.ToABI()
@@ -96,6 +94,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 				return nil, errors.FromError(err).ExtendComponent(component)
 			}
 
+			var methods []*MethodModel
 			for _, m := range contractAbi.Methods {
 				// Register methods for this bytecode
 				method := m
@@ -116,10 +115,10 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 				return nil, errors.FromError(err).ExtendComponent(component)
 			}
 
+			var events []*EventModel
 			for _, e := range contractAbi.Events {
 				event := e
 				indexedCount := common.GetIndexedCount(event)
-
 				// Register events for this bytecode
 				if deployedBytecode != nil {
 					events = append(events, &EventModel{

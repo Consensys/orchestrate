@@ -15,7 +15,7 @@ type ChanRegistry struct {
 	chans map[string]chan *envelope.Envelope
 }
 
-// NewChanRegistry creates a new channel regsistry
+// NewChanRegistry creates a new channel registry
 func NewChanRegistry() *ChanRegistry {
 	return &ChanRegistry{
 		mux:   &sync.RWMutex{},

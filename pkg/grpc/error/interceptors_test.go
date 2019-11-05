@@ -170,7 +170,7 @@ func (s *errorInterceptorsSuite) TestPingListInternal() {
 }
 
 func (s *errorInterceptorsSuite) TestPingListGRPC() {
-	// GPRC
+	// gRPC
 	stream, err := s.Client.PingList(
 		s.SimpleCtx(),
 		&testproto.PingRequest{Value: "test-error", ErrorCodeReturned: uint32(codes.OutOfRange)},
@@ -184,7 +184,7 @@ func (s *errorInterceptorsSuite) TestPingListGRPC() {
 }
 
 func (s *errorInterceptorsSuite) TestPingListFmt() {
-	// GPRC
+	// gRPC
 	stream, err := s.Client.PingList(
 		s.SimpleCtx(),
 		&testproto.PingRequest{Value: "fmt", ErrorCodeReturned: 1},

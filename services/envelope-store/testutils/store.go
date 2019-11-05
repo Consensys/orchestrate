@@ -284,7 +284,7 @@ func (s *EnvelopeStoreTestSuite) TestLoadPending() {
 		&evlpstore.LoadPendingRequest{
 			Duration: utils.DurationToPDuration(0),
 		},
-		func(t *testing.T, err error) { assert.Nil(t, err, "LoadPendinf should not error") },
+		func(t *testing.T, err error) { assert.Nil(t, err, "LoadPending should not error") },
 		func(t *testing.T, resp *evlpstore.LoadPendingResponse) {
 			assert.Len(t, resp.GetResponses(), 3, "Count of envelope pending incorrect")
 		},
@@ -295,7 +295,7 @@ func (s *EnvelopeStoreTestSuite) TestLoadPending() {
 		&evlpstore.LoadPendingRequest{
 			Duration: utils.DurationToPDuration(300 * time.Millisecond),
 		},
-		func(t *testing.T, err error) { assert.Nil(t, err, "LoadPendinf should not error") },
+		func(t *testing.T, err error) { assert.Nil(t, err, "LoadPending should not error") },
 		func(t *testing.T, resp *evlpstore.LoadPendingResponse) {
 			assert.Len(t, resp.GetResponses(), 2, "Count of envelope pending incorrect")
 		},
@@ -306,7 +306,7 @@ func (s *EnvelopeStoreTestSuite) TestLoadPending() {
 		&evlpstore.LoadPendingRequest{
 			Duration: utils.DurationToPDuration(500 * time.Millisecond),
 		},
-		func(t *testing.T, err error) { assert.Nil(t, err, "LoadPendinf should not error") },
+		func(t *testing.T, err error) { assert.Nil(t, err, "LoadPending should not error") },
 		func(t *testing.T, resp *evlpstore.LoadPendingResponse) {
 			assert.Len(t, resp.GetResponses(), 1, "Count of envelope pending incorrect")
 		},
@@ -317,7 +317,7 @@ func (s *EnvelopeStoreTestSuite) TestLoadPending() {
 		&evlpstore.LoadPendingRequest{
 			Duration: utils.DurationToPDuration(700 * time.Millisecond),
 		},
-		func(t *testing.T, err error) { assert.Nil(t, err, "LoadPendinf should not error") },
+		func(t *testing.T, err error) { assert.Nil(t, err, "LoadPending should not error") },
 		func(t *testing.T, resp *evlpstore.LoadPendingResponse) {
 			assert.Len(t, resp.GetResponses(), 0, "Count of envelope pending incorrect")
 		},

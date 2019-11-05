@@ -81,7 +81,7 @@ type EventModel struct {
 	// Artifact data
 	Codehash          common.Hash
 	SigHash           common.Hash
-	IndexedInputCount uint
+	IndexedInputCount uint `sql:",notnull"`
 
 	ABI []byte
 }

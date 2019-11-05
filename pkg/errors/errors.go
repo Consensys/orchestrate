@@ -105,7 +105,7 @@ func InvalidNonceWarning(format string, a ...interface{}) *ierror.Error {
 	return Errorf(InvalidNonce, format, a...)
 }
 
-// IsFaIsInvalidNonceWarningucetWarning indicate whether an error is an invalid nonce Warning
+// IsInvalidNonceWarning indicate whether an error is an invalid nonce Warning
 func IsInvalidNonceWarning(err error) bool {
 	return isErrorClass(FromError(err).GetCode(), InvalidNonce)
 }

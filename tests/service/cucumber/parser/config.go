@@ -15,7 +15,7 @@ func init() {
 var (
 	cucumberAliasesFlag     = "cucumber-aliases"
 	cucumberAliasesViperKey = "cucumber.aliases"
-	cucumberAliasesDefault  = []string{}
+	cucumberAliasesDefault  []string
 	cucumberAliasesEnv      = "CUCUMBER_ALIAS"
 )
 

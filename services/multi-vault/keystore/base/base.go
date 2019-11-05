@@ -13,7 +13,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 )
 
-// KeyStore olds the methods of the interfaces BaseKeyStore
+// KeyStore holds the methods of the interfaces BaseKeyStore
 type KeyStore struct {
 	SecretStore services.SecretStore
 }

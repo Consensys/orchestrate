@@ -66,7 +66,7 @@ func (l *LogicalV1) Delete(subpath string) error {
 	return nil
 }
 
-// List retrieve all the keys availables in the vault
+// List retrieve all the keys available in the vault
 func (l *LogicalV1) List(subpath string) ([]string, error) {
 	res, err := l.Base.List(path.Join(l.MountPoint, l.SecretPath, subpath))
 	if err != nil {

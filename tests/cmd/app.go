@@ -44,18 +44,18 @@ func startServer(ctx context.Context) {
 }
 
 func LongKeyOf(topics map[string]string) dispatcher.KeyOfFunc {
-	return func(txtcx *engine.TxContext) (string, error) {
-		topic, ok := topics[txtcx.In.Entrypoint()]
+	return func(txctx *engine.TxContext) (string, error) {
+		topic, ok := topics[txctx.In.Entrypoint()]
 		if !ok {
 			return "", fmt.Errorf("unknown message entrypoint")
 		}
 
-		scenario, ok := txtcx.Envelope.GetMetadataValue("scenario.id")
+		scenario, ok := txctx.Envelope.GetMetadataValue("scenario.id")
 		if !ok {
 			return "", fmt.Errorf("message has no test scenario")
 		}
 
-		return steps.LongKeyOf(topic, scenario, txtcx.Envelope.GetMetadata().Id), nil
+		return steps.LongKeyOf(topic, scenario, txctx.Envelope.GetMetadata().Id), nil
 	}
 }
 

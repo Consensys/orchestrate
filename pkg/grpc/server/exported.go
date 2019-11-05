@@ -111,7 +111,7 @@ func ListenAndServe() error {
 func GracefulStop(ctx context.Context) error {
 	log.Info("grpc.server: stopping server")
 	if cmuxserver == nil {
-		log.Fatalf("grpc.server: server is not listening call ListendAndServe first")
+		log.Fatalf("grpc.server: server is not listening call ListenAndServe first")
 	}
 
 	err := cmuxserver.Shutdown(ctx)

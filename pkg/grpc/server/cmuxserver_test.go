@@ -81,7 +81,7 @@ func TestCMuxServerListen(t *testing.T) {
 		close(errors)
 	}()
 
-	// Test GPRC
+	// Test GRPC
 	grpcconn, err := grpc.DialContext(
 		context.Background(),
 		lis.Addr().String(),

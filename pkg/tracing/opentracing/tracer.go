@@ -9,7 +9,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
-// Tracer is a facade to manage opentracing utilities more easily
+// Tracer is a facade to manage OpenTracing utilities more easily
 type Tracer struct {
 	Internal opentracing.Tracer
 }
@@ -19,7 +19,7 @@ func NewTracer(internal opentracing.Tracer) *Tracer {
 	return &Tracer{Internal: internal}
 }
 
-// SpanBuilder is a set of opentracing options
+// SpanBuilder is a set of OpenTracing options
 type SpanBuilder struct {
 	Opts          []opentracing.StartSpanOption
 	Tracer        *Tracer

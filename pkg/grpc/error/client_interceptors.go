@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// UnaryClientInterceptor returns a grpc uniary interceptor (middleware) that allows
+// UnaryClientInterceptor returns a grpc unary interceptor (middleware) that allows
 // to intercept translate grpc errors into internal errors
 func UnaryClientInterceptor() grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {

@@ -46,7 +46,7 @@ func (s *TestPipeSuite) TestPipeInterrupted() {
 	rounds := 100
 	go feed(in, rounds)
 
-	// Eraly pipe cancellation
+	// Early pipe cancellation
 	time.Sleep(10 * time.Millisecond)
 	cancel()
 
