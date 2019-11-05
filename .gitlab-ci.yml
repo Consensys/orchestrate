@@ -60,7 +60,7 @@ test:
   stage: test
   coverage: /^total:.*\s(\d+.\d+)%/
   script:
-    - make run-coverage
+    - time make run-coverage
   services:
     - postgres:10.7-alpine
   variables:
@@ -72,8 +72,15 @@ lint:
   image: golang:1.12
   stage: test
   script:
-    - make race
-    - make lint
+    - time make lint
+  except:
+    - tags
+
+race:
+  image: golang:1.12
+  stage: test
+  script:
+    - time make race
   except:
     - tags
 

@@ -2,7 +2,7 @@
 curl --header "X-Vault-Token: ${ROOT_TOKEN}" \
      --request POST \
      --data '{"ttl": "5m", "renewable": true}' \
-    ${VAULT_URL}/v1/auth/token/create > token.json
+    ${VAULT_ADDR}/v1/auth/token/create > token.json
 
 token=$(cat token.json | jq .auth | jq .client_token | tr -d '"')
 

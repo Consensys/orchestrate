@@ -9,8 +9,6 @@
 * **config**Rename `GRPC_TARGET_ENVELOPE_STORE` to `ENVELOPE_STORE_URL`
 * **config**Rename `KAFKA_ADDRESS` to `KAFKA_URL`
 * **config**Rename `REDIS_ADDRESS` to `REDIS_URL`
-* **config**Rename `VAULT_ADDR` to `VAULT_URL`
-* **config**Rename `VAULT_CACERT` to `VAULT_CA_CERT`
 * **config**Rename `TESSERA_ENDPOINTS` to `TESSERA_URL`
 * **config** Rename `mock` options to `in-memory`
 * **config** Remove `--engine-slot`
