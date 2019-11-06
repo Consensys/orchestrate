@@ -41,101 +41,104 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 		return nil, err
 	}
 
-	if bytecode != nil {
-		repositoryModel := &RepositoryModel{
-			Name: name,
-		}
-		_, err = r.db.ModelContext(ctx, repositoryModel).
-			OnConflict("DO NOTHING").
-			Returning("id").
-			SelectOrInsert()
+	repositoryModel := &RepositoryModel{
+		Name: name,
+	}
+	_, err = r.db.ModelContext(ctx, repositoryModel).
+		Column("id").
+		Where("name = ?name").
+		OnConflict("DO NOTHING").
+		Returning("id").
+		SelectOrInsert()
+	if err != nil {
+		log.WithError(err).Debug("could not create repository")
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	artifact := &ArtifactModel{
+		Abi:              abiRaw,
+		Bytecode:         bytecode,
+		DeployedBytecode: deployedBytecode,
+		Codehash:         crypto.Keccak256(deployedBytecode),
+	}
+	_, err = r.db.ModelContext(ctx, artifact).
+		Column("id").
+		Where("abi = ?abi").
+		Where("codehash = ?codehash").
+		OnConflict("DO NOTHING").
+		Returning("id").
+		SelectOrInsert()
+	if err != nil {
+		log.WithError(err).Debug("could not create artifact")
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	tag := &TagModel{
+		Name:         tagName,
+		RepositoryID: repositoryModel.ID,
+		ArtifactID:   artifact.ID,
+	}
+	_, err = r.db.ModelContext(ctx, tag).
+		OnConflict("ON CONSTRAINT tags_name_repository_id_key DO UPDATE").
+		Set("artifact_id = ?artifact_id").
+		Insert()
+	if err != nil {
+		log.WithError(err).Debug("could not create tag")
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	if len(abiRaw) != 0 {
+		codeHash := crypto.Keccak256Hash(deployedBytecode)
+		contractAbi, err := contract.ToABI()
 		if err != nil {
-			log.WithError(err).Debug("could not create repository")
+			return nil, errors.FromError(err).ExtendComponent(component)
+		}
+		methodJSONs, eventJSONs, err := common.ParseJSONABI(abiRaw)
+		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(component)
 		}
 
-		artifact := &ArtifactModel{
-			Abi:              abiRaw,
-			Bytecode:         bytecode,
-			DeployedBytecode: deployedBytecode,
-			Codehash:         crypto.Keccak256(deployedBytecode),
+		var methods []*MethodModel
+		for _, m := range contractAbi.Methods {
+			// Register methods for this bytecode
+			method := m
+			sel := common.SigHashToSelector(method.ID())
+			if deployedBytecode != nil {
+				methods = append(methods, &MethodModel{
+					Codehash: codeHash,
+					Selector: sel,
+					ABI:      methodJSONs[method.Name],
+				})
+			}
 		}
-		_, err = r.db.ModelContext(ctx, artifact).
+		_, err = r.db.ModelContext(ctx, &methods).
 			OnConflict("DO NOTHING").
-			Returning("id").
-			SelectOrInsert()
-		if err != nil {
-			log.WithError(err).Debug("could not create artifact")
-			return nil, errors.FromError(err).ExtendComponent(component)
-		}
-
-		tag := &TagModel{
-			Name:         tagName,
-			RepositoryID: repositoryModel.ID,
-			ArtifactID:   artifact.ID,
-		}
-		_, err = r.db.ModelContext(ctx, tag).
-			OnConflict("ON CONSTRAINT tags_name_repository_id_key DO UPDATE").
-			Set("artifact_id = ?artifact_id").
 			Insert()
 		if err != nil {
-			log.WithError(err).Debug("could not create tag")
+			log.WithError(err).Debug("could not insert methods")
 			return nil, errors.FromError(err).ExtendComponent(component)
 		}
 
-		if len(abiRaw) != 0 {
-			codeHash := crypto.Keccak256Hash(deployedBytecode)
-			contractAbi, err := contract.ToABI()
-			if err != nil {
-				return nil, errors.FromError(err).ExtendComponent(component)
+		var events []*EventModel
+		for _, e := range contractAbi.Events {
+			event := e
+			indexedCount := common.GetIndexedCount(event)
+			// Register events for this bytecode
+			if deployedBytecode != nil {
+				events = append(events, &EventModel{
+					Codehash:          codeHash,
+					SigHash:           event.ID(),
+					IndexedInputCount: indexedCount,
+					ABI:               eventJSONs[event.Name],
+				})
 			}
-			methodJSONs, eventJSONs, err := common.ParseJSONABI(abiRaw)
-			if err != nil {
-				return nil, errors.FromError(err).ExtendComponent(component)
-			}
-
-			var methods []*MethodModel
-			for _, m := range contractAbi.Methods {
-				// Register methods for this bytecode
-				method := m
-				sel := common.SigHashToSelector(method.ID())
-				if deployedBytecode != nil {
-					methods = append(methods, &MethodModel{
-						Codehash: codeHash,
-						Selector: sel,
-						ABI:      methodJSONs[method.Name],
-					})
-				}
-			}
-			_, err = r.db.ModelContext(ctx, &methods).
-				OnConflict("DO NOTHING").
-				Insert()
-			if err != nil {
-				log.WithError(err).Debug("could not insert methods")
-				return nil, errors.FromError(err).ExtendComponent(component)
-			}
-
-			var events []*EventModel
-			for _, e := range contractAbi.Events {
-				event := e
-				indexedCount := common.GetIndexedCount(event)
-				// Register events for this bytecode
-				if deployedBytecode != nil {
-					events = append(events, &EventModel{
-						Codehash:          codeHash,
-						SigHash:           event.ID(),
-						IndexedInputCount: indexedCount,
-						ABI:               eventJSONs[event.Name],
-					})
-				}
-			}
-			_, err = r.db.ModelContext(ctx, &events).
-				OnConflict("DO NOTHING").
-				Insert()
-			if err != nil {
-				log.WithError(err).Debug("could not insert events")
-				return nil, errors.FromError(err).ExtendComponent(component)
-			}
+		}
+		_, err = r.db.ModelContext(ctx, &events).
+			OnConflict("DO NOTHING").
+			Insert()
+		if err != nil {
+			log.WithError(err).Debug("could not insert events")
+			return nil, errors.FromError(err).ExtendComponent(component)
 		}
 	}
 

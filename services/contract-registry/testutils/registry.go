@@ -125,6 +125,16 @@ var ERC20ContractBis = &abi.Contract{
 	DeployedBytecode: []byte{1, 2, 4},
 }
 
+// ERC20ContractBis is a unittest value
+var anotherERC20Contract = &abi.Contract{
+	Id: &abi.ContractId{
+		Name: "AnotherERC20",
+	},
+	Abi:              ERC20bis,
+	Bytecode:         []byte{1, 3},
+	DeployedBytecode: []byte{1, 2, 4},
+}
+
 var methodJSONs, eventJSONs, _ = rcommon.ParseJSONABI(ERC20Contract.Abi)
 var _, eventJSONsBis, _ = rcommon.ParseJSONABI(ERC20ContractBis.Abi)
 
@@ -162,6 +172,17 @@ func (s *ContractRegistryTestSuite) TestRegisterContract() {
 		&svc.RegisterContractRequest{Contract: ERC20Contract},
 	)
 	assert.NoError(s.T(), err, "Should register contract properly twice")
+
+	_, err = s.R.RegisterContract(context.Background(),
+		&svc.RegisterContractRequest{Contract: anotherERC20Contract},
+	)
+	assert.NoError(s.T(), err, "Should register contract properly twice")
+
+	catalogResp, err := s.R.GetCatalog(context.Background(),
+		&svc.GetCatalogRequest{},
+	)
+	assert.NoError(s.T(), err, "Should getCatalog properly")
+	assert.Equal(s.T(), []string{"AnotherERC20", "ERC20"}, catalogResp.GetNames())
 }
 
 // TestContractRegistryBySig checks the self-consistency of the contract-registry

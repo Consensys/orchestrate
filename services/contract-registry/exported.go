@@ -10,14 +10,12 @@ import (
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/services/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/memory"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/pg"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/redis"
 )
 
 const (
 	component   = "contract-registry"
 	postgresOpt = "postgres"
-	redisOpt    = "redis"
-	mockOpt     = "mock"
+	memoryOpt   = "in-memory"
 )
 
 var (
@@ -39,13 +37,7 @@ func Init(ctx context.Context) {
 
 			// Create contract-registry
 			registry = pg.GlobalContractRegistry()
-		case redisOpt:
-			// Initialize redis Registry
-			redis.Init()
-
-			// Create contract-registry
-			registry = redis.GlobalContractRegistry()
-		case mockOpt:
+		case memoryOpt:
 			// Initialize mock Registry
 			memory.Init()
 

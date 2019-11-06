@@ -37,15 +37,15 @@ func CheckExtractArtifacts(contract *abi.Contract) (bytecode, deployedBytecode, 
 		return []byte{}, []byte{}, []byte{}, errors.InvalidArgError("No contract provided in request").ExtendComponent(component)
 	}
 
-	if contract.Bytecode == nil {
+	if contract.GetBytecode() == nil {
 		return []byte{}, []byte{}, []byte{}, errors.InvalidArgError("No contract bytecode provided in request").ExtendComponent(component)
 	}
 
-	if contract.DeployedBytecode == nil {
+	if contract.GetDeployedBytecode() == nil {
 		return []byte{}, []byte{}, []byte{}, errors.InvalidArgError("No contract deployed bytecode provided in request").ExtendComponent(component)
 	}
 
-	if len(contract.Abi) == 0 {
+	if len(contract.GetAbi()) == 0 {
 		return []byte{}, []byte{}, []byte{}, errors.InvalidArgError("No abi provided in request").ExtendComponent(component)
 	}
 
@@ -62,13 +62,13 @@ func CheckExtractNameTag(id *abi.ContractId) (name, tag string, err error) {
 		return "", "", errors.InvalidArgError("Nil ContractId passed in the request").ExtendComponent(component)
 	}
 
-	name = id.Name
+	name = id.GetName()
 	if name == "" {
 		return "", "", errors.InvalidArgError("No abi provided in request").ExtendComponent(component)
 	}
 
 	// Set Tag to latest if it was not set in the request
-	tag = id.Tag
+	tag = id.GetTag()
 	if tag == "" {
 		tag = defaultTag
 	}

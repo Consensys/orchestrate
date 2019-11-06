@@ -19,14 +19,14 @@ func init() {
 const (
 	typeFlag     = "contract-registry-type"
 	typeViperKey = "contract-registry.type"
-	typeDefault  = "postgres"
+	typeDefault  = postgresOpt
 	typeEnv      = "CONTRACT_REGISTRY_TYPE"
 )
 
 // Type register flag for the Contract Registry to select
 func Type(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Type of Contract Registry (one of %q)
-Environment variable: %q`, []string{"mock", "postgres"}, typeEnv)
+Environment variable: %q`, []string{postgresOpt, memoryOpt}, typeEnv)
 	f.String(typeFlag, typeDefault, desc)
 	_ = viper.BindPFlag(typeViperKey, f.Lookup(typeFlag))
 }

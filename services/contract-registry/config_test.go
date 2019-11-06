@@ -16,18 +16,18 @@ func TestStoreType(t *testing.T) {
 	expected := postgresOpt
 	assert.Equal(t, expected, viper.GetString(typeViperKey), "Default")
 
-	expected = redisOpt
+	expected = memoryOpt
 	_ = os.Setenv(typeEnv, expected)
 	assert.Equal(t, expected, viper.GetString(typeViperKey), "From Environment Variable")
 	_ = os.Unsetenv(typeEnv)
 
 	args := []string{
-		"--contract-registry-type=mock",
+		"--contract-registry-type=in-memory",
 	}
 	err := flgs.Parse(args)
 	assert.NoError(t, err, "No error expected")
 
-	expected = mockOpt
+	expected = memoryOpt
 	assert.Equal(t, expected, viper.GetString(typeViperKey), "From flag")
 }
 
