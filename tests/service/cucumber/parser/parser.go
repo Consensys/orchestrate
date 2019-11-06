@@ -344,7 +344,7 @@ func GetInitTxData(tx *ethereum.Transaction) *ethereum.TxData {
 func (p *Parser) openArtifact(fileName string) ([]byte, error) {
 	// Loop over all cucumber folders to possibly find file
 	// <cucumber_folder>/artifacts/<fileName>
-	for _, v := range viper.GetStringSlice("cucumber-paths") {
+	for _, v := range viper.GetStringSlice("cucumber.paths") {
 		f, err := os.Open(path.Join(v, "artifacts", fileName))
 		if err != nil {
 			continue
