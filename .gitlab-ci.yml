@@ -28,9 +28,9 @@ before_script:
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
 
-.build-img: &build-img
+.build-orchestrate: &build-orchestrate
   script:
-    # Build image following http://label-schema.org/rc1/ label convention convention
+    # Build orchestrate image following http://label-schema.org/rc1/ label convention convention
     - DOCKER_BUILDKIT=1 docker build
       --label org.label-schema.schema-version="1.0.0-rc1"
       --label org.label-schema.build-date=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
@@ -43,8 +43,24 @@ before_script:
     # Push images
     - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}
 
+.build-e2e: &build-e2e
+  script:
+    # Build e2e image
+    - DOCKER_BUILDKIT=1 docker build
+      --label org.label-schema.schema-version="1.0.0-rc1"
+      --label org.label-schema.build-date=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
+      --label org.label-schema.name="${CI_PROJECT_NAME}/e2e"
+      --label org.label-schema.version="branch"
+      --label org.label-schema.vcs-url="${CI_PROJECT_URL}"
+      --label org.label-schema.vcs-ref="${CI_COMMIT_SHA:0:8}"
+      --label org.label-schema.vendor="PegaSys"
+      -f ./tests/Dockerfile
+      -t ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA} .
+    # Push images
+    - docker push ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA}
+
 cache-update:
-  image: golang:1.12
+  image: golang:1.13
   stage: cache-update
   script:
     - go mod download -json
@@ -56,7 +72,7 @@ cache-update:
     - master
 
 test:
-  image: golang:1.12
+  image: golang:1.13
   stage: test
   coverage: /^total:.*\s(\d+.\d+)%/
   script:
@@ -69,7 +85,7 @@ test:
     - tags
 
 lint:
-  image: golang:1.12
+  image: golang:1.13
   stage: test
   script:
     - time make lint
@@ -77,16 +93,17 @@ lint:
     - tags
 
 race:
-  image: golang:1.12
+  image: golang:1.13
   stage: test
   script:
     - time make race
   except:
     - tags
 
-build-on-branch:
+#Build orchestrate
+build-orchestrate-on-branch:
   <<: *docker-setup
-  <<: *build-img
+  <<: *build-orchestrate
   after_script:
     - docker logout $CI_REGISTRY
   only:
@@ -94,9 +111,9 @@ build-on-branch:
     - /^feature/[a-zA-Z0-9\/-]*$/
     - /^fix/[a-zA-Z0-9\/-]*$/
 
-build-on-release:
+build-orchestrate-on-release:
   <<: *docker-setup
-  <<: *build-img
+  <<: *build-orchestrate
   after_script:
     - docker tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}:rc
     - docker push ${CI_REGISTRY_IMAGE}:rc
@@ -104,9 +121,9 @@ build-on-release:
   only:
     - /^release/[a-zA-Z0-9\/-]*$/
 
-build-on-master:
+build-orchestrate-on-master:
   <<: *docker-setup
-  <<: *build-img
+  <<: *build-orchestrate
   after_script:
     - docker tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}:latest
     - docker push ${CI_REGISTRY_IMAGE}:latest
@@ -114,13 +131,57 @@ build-on-master:
   only:
     - master
 
-build-on-tag:
+build-orchestrate-on-tag:
   <<: *docker-setup
   script:
     # `tag` doesnt build a new image, just applies tag existing commit on master
     - docker pull ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}
     - docker tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}
     - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}
+  after_script:
+    - docker logout $CI_REGISTRY
+  only:
+    refs:
+      - tags
+
+#Build e2e
+build-e2e-on-branch:
+  <<: *docker-setup
+  <<: *build-e2e
+  after_script:
+    - docker logout $CI_REGISTRY
+  only:
+    - /^dev[a-zA-Z0-9\/-]*$/
+    - /^feature/[a-zA-Z0-9\/-]*$/
+    - /^fix/[a-zA-Z0-9\/-]*$/
+
+build-e2e-on-release:
+  <<: *docker-setup
+  <<: *build-e2e
+  after_script:
+    - docker tag ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}:rc
+    - docker push ${CI_REGISTRY_IMAGE}/e2e:rc
+    - docker logout $CI_REGISTRY
+  only:
+    - /^release/[a-zA-Z0-9\/-]*$/
+
+build-e2e-on-master:
+  <<: *docker-setup
+  <<: *build-e2e
+  after_script:
+    - docker tag ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}:latest
+    - docker push ${CI_REGISTRY_IMAGE}/e2e:latest
+    - docker logout $CI_REGISTRY
+  only:
+    - master
+
+build-e2e-on-tag:
+  <<: *docker-setup
+  script:
+    # `tag` doesnt build a new image, just applies tag existing commit on master
+    - docker pull ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA}
+    - docker tag ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}
+    - docker push ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_TAG}
   after_script:
     - docker logout $CI_REGISTRY
   only:
