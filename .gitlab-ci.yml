@@ -1,6 +1,5 @@
 ---
 stages:
-  - cache-update
   - test
   - build
 
@@ -59,18 +58,6 @@ before_script:
     # Push images
     - docker push ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA}
 
-cache-update:
-  image: golang:1.13
-  stage: cache-update
-  script:
-    - go mod download -json
-  cache:
-    policy: push
-    paths:
-      - ${GOPATH}
-  only:
-    - master
-
 test:
   image: golang:1.13
   stage: test
@@ -88,7 +75,7 @@ lint:
   image: golang:1.13
   stage: test
   script:
-    - time make lint
+    - make lint
   except:
     - tags
 
@@ -96,7 +83,7 @@ race:
   image: golang:1.13
   stage: test
   script:
-    - time make race
+    - make race
   except:
     - tags
 

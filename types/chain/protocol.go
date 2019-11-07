@@ -1,8 +1,8 @@
 package chain
 
-// IsPantheon indicates whether if protocol is Pantheon
-func (p *Protocol) IsPantheon() bool {
-	return p.GetType() == ProtocolType_PANTHEON_ORION
+// IsBesu indicates whether if protocol is Besu
+func (p *Protocol) IsBesu() bool {
+	return p.GetType() == ProtocolType_BESU_ORION
 }
 
 // IsConstellation indicates whether if protocol is Constellation with Quorum

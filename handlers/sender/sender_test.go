@@ -103,12 +103,12 @@ func makeSenderContext(i int) *engine.TxContext {
 		txctx.Set("error", "mock: failed to send an unsigned transaction")
 		txctx.Set("status", "")
 	case 4:
-		// Cannot send a Pantheon Orion transaction
+		// Cannot send a Besu Orion transaction
 		txctx.Envelope.Chain = chain.FromInt(0)
 		txctx.Envelope.Tx = &ethereum.Transaction{}
 		txctx.Envelope.Metadata = (&envelope.Metadata{Id: RandString(10)})
 		txctx.Envelope.Protocol = &chain.Protocol{
-			Type: chain.ProtocolType_PANTHEON_ORION,
+			Type: chain.ProtocolType_BESU_ORION,
 		}
 		txctx.Envelope.Args = &envelope.Args{
 			Private: &typesArgs.Private{

@@ -173,7 +173,7 @@ func makeSignerContext(i int) *engine.TxContext {
 		txctx.Envelope.Chain = chain.FromInt(10)
 		txctx.Envelope.Tx = &ethereum.Transaction{}
 		txctx.Envelope.Protocol = &chain.Protocol{
-			Type: chain.ProtocolType_PANTHEON_ORION,
+			Type: chain.ProtocolType_BESU_ORION,
 		}
 		txctx.Set("errors", 0)
 		txctx.Set("raw", signedPrivateTx)

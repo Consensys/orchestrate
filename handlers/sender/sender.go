@@ -55,7 +55,7 @@ func Sender(ec ethclient.TransactionSender, s evlpstore.EnvelopeStoreClient) eng
 		} else {
 			protocol := txctx.Envelope.GetProtocol()
 			switch {
-			case protocol.IsPantheon():
+			case protocol.IsBesu():
 				rawPrivateTxSender(txctx)
 			case protocol.IsTessera():
 				tesseraRawPrivateTxSender(txctx)

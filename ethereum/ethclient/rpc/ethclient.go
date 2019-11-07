@@ -470,7 +470,7 @@ func (ec *Client) SendQuorumRawPrivateTransaction(ctx context.Context, chainID *
 // SendRawPrivateTransaction send a raw transaction to an Ethereum node supporting EEA extension
 func (ec *Client) SendRawPrivateTransaction(ctx context.Context, chainID *big.Int, raw []byte, args *types.PrivateArgs) (ethcommon.Hash, error) {
 	// Send a raw signed transactions using EEA extension method
-	// Method documentation here: https://docs.pantheon.pegasys.tech/en/latest/Reference/Pantheon-API-Methods/#eea_sendrawtransaction
+	// Method documentation here: https://besu.hyperledger.org/en/stable/Reference/API-Methods/#eea_sendrawtransaction
 	var hash string
 	err := ec.getRPC(chainID).CallContext(ctx, &hash, "eea_sendRawTransaction", hexutil.Encode(raw))
 	if err != nil {

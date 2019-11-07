@@ -15,7 +15,7 @@ func TxSigner(eeaSigner, publicEthereumSigner, tesseraSigner engine.HandlerFunc)
 			publicEthereumSigner(txctx)
 		case txctx.Envelope.Protocol != nil && txctx.Envelope.Protocol.IsConstellation():
 			// Do nothing as the ethereum node is going to perform the signature
-		case txctx.Envelope.Protocol != nil && txctx.Envelope.Protocol.IsPantheon():
+		case txctx.Envelope.Protocol != nil && txctx.Envelope.Protocol.IsBesu():
 			// Sign for EEA private transaction implementation
 			eeaSigner(txctx)
 		case txctx.Envelope.Protocol != nil && txctx.Envelope.Protocol.IsTessera():
