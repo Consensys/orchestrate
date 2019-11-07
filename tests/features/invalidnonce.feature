@@ -1,3 +1,4 @@
+@public-tx
 Feature: Invalid Nonce
   As an external developer
   I want transaction with invalid nonce to be recovered, sent to blockchain and mined

@@ -1,3 +1,4 @@
+@public-tx
 Feature: Send transfer transaction
   As an external developer
   I want to process a single transfer transaction

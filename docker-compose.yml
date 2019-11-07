@@ -169,6 +169,8 @@ services:
       CUCUMBER_PATHS: "/features"
       CUCUMBER_FORMAT: "cucumber"
       CUCUMBER_ALIAS: "chain.primary:888 chain.private:10"
+      # Uncomment CUCUMBER_TAGS if only run features and scenarios with @public-tx or @wallet tags ("," = OR, "&&" = AND, "~" = NOT)
+      # CUCUMBER_TAGS: "@public-tx,@wallet"
     restart: "no"
     command: e2e run
     volumes:

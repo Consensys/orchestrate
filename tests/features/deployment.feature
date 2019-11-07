@@ -1,3 +1,4 @@
+@public-tx
 Feature: deploy ERC20 contract
   As an external developer
   I want to deploy a contract

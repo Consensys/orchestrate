@@ -1,3 +1,4 @@
+@private-tx
 Feature: Deploy private ERC20 contract
   As an external developer
   I want to deploy a private contract

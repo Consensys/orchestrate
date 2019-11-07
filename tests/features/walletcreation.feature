@@ -1,7 +1,9 @@
+@public-tx
 Feature: Generate wallet
   As as external developer
   I want to generate a new wallet
 
+  @wallet
   Scenario: Generate wallet
     When I send envelopes to topic "wallet.generator"
     |
@@ -10,6 +12,7 @@ Feature: Generate wallet
     Then Envelopes should be in topic "wallet.generated"
     And Envelopes should have from set
 
+  @wallet
   Scenario: Generate wallet with Faucet credit
      When I send envelopes to topic "wallet.generator"
     | chain.id           | tx.value           |  

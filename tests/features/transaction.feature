@@ -1,3 +1,4 @@
+@public-tx
 Feature: Multiple transactions
   As an external developer
   I want to process multiple transactions
