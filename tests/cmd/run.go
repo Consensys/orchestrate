@@ -32,8 +32,7 @@ func NewRunCommand() *cobra.Command {
 	http.Hostname(runCmd.Flags())
 
 	// Register Kafka flags
-	broker.KafkaURL(runCmd.Flags())
-	broker.KafkaGroup(runCmd.Flags())
+	broker.InitKafkaFlags(runCmd.Flags())
 	broker.KafkaTopicTxCrafter(runCmd.Flags())
 	broker.KafkaTopicTxNonce(runCmd.Flags())
 	broker.KafkaTopicTxSigner(runCmd.Flags())
@@ -42,7 +41,6 @@ func NewRunCommand() *cobra.Command {
 	broker.KafkaTopicTxDecoded(runCmd.Flags())
 	broker.KafkaTopicWalletGenerator(runCmd.Flags())
 	broker.KafkaTopicWalletGenerated(runCmd.Flags())
-	broker.InitKafkaSASLTLSFlags(runCmd.Flags())
 
 	// Register Cucumber flag
 	cucumber.InitFlags(runCmd.Flags())

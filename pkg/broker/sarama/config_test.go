@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestKafkaAddresses(t *testing.T) {
+func TestKafkaUrl(t *testing.T) {
 	name := "kafka.url"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	KafkaURL(flgs)
@@ -38,6 +38,14 @@ func TestKafkaAddresses(t *testing.T) {
 		"127.0.0.2:9091",
 	}
 	assert.Equal(t, expected, viper.GetStringSlice(name), "From flag")
+}
+
+func TestKafkaConsumerMaxWaitTime(t *testing.T) {
+
+	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
+	KafkaConsumerMaxWaitTime(f)
+
+	assert.Equal(t, kafkaConsumerMaxWaitTimeDefault, viper.GetInt(kafkaConsumerMaxWaitTimeViperKey), "Default")
 }
 
 func TestTopics(t *testing.T) {
@@ -108,10 +116,22 @@ func TestInitKafkaTLSFlags(t *testing.T) {
 
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 
-	InitKafkaSASLTLSFlags(flgs)
+	InitKafkaTLSFlags(flgs)
 	assert.Equal(t, false, viper.GetBool("kafka.tls.enabled"), "From default")
 	assert.Equal(t, false, viper.GetBool("kafka.tls.insecure.skip.verify"), "From default")
 	assert.Equal(t, "", viper.GetString("kafka.tls.client.cert.file"), "From default")
 	assert.Equal(t, "", viper.GetString("kafka.tls.client.key.file"), "From default")
 	assert.Equal(t, "", viper.GetString("kafka.tls.ca.cert.file"), "From default")
+}
+
+func TestInitKafkaFlags(t *testing.T) {
+
+	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
+
+	InitKafkaFlags(flgs)
+
+	TestKafkaUrl(t)
+	TestInitKafkaSASLFlags(t)
+	TestInitKafkaTLSFlags(t)
+	TestKafkaConsumerMaxWaitTime(t)
 }

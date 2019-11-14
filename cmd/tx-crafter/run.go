@@ -35,11 +35,9 @@ func newRunCommand() *cobra.Command {
 	maxbalance.FaucetMaxBalance(runCmd.Flags())
 
 	// Register Kafka flags
-	broker.KafkaURL(runCmd.Flags())
-	broker.KafkaGroup(runCmd.Flags())
+	broker.InitKafkaFlags(runCmd.Flags())
 	broker.KafkaTopicTxCrafter(runCmd.Flags())
 	broker.KafkaTopicTxNonce(runCmd.Flags())
-	broker.InitKafkaSASLTLSFlags(runCmd.Flags())
 	broker.KafkaTopicTxRecover(runCmd.Flags())
 
 	// Contract Registry

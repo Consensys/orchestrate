@@ -4,6 +4,7 @@ import (
 	"context"
 	"io/ioutil"
 	"sync"
+	"time"
 
 	"crypto/tls"
 	"crypto/x509"
@@ -61,6 +62,7 @@ func InitConfig() {
 	config.Producer.Return.Errors = true
 	config.Producer.Return.Successes = true
 	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+	config.Consumer.MaxWaitTime = time.Duration(viper.GetInt64(kafkaConsumerMaxWaitTimeViperKey)) * time.Millisecond
 
 	config.Net.SASL.Enable = viper.GetBool(kafkaSASLEnableViperKey)
 	config.Net.SASL.Mechanism = sarama.SASLMechanism(viper.GetString(kafkaSASLMechanismViperKey))

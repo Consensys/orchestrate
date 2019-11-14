@@ -29,14 +29,12 @@ func newRunCommand() *cobra.Command {
 	tessera.InitFlags(runCmd.Flags())
 
 	// Register Kafka flags
-	broker.KafkaURL(runCmd.Flags())
-	broker.KafkaGroup(runCmd.Flags())
+	broker.InitKafkaFlags(runCmd.Flags())
 	broker.KafkaTopicTxSigner(runCmd.Flags())
 	broker.KafkaTopicTxSender(runCmd.Flags())
 	broker.KafkaTopicWalletGenerator(runCmd.Flags())
 	broker.KafkaTopicWalletGenerated(runCmd.Flags())
 	broker.KafkaTopicTxRecover(runCmd.Flags())
-	broker.InitKafkaSASLTLSFlags(runCmd.Flags())
 
 	// Register Faucet flags
 	amount.FaucetAmount(runCmd.Flags())

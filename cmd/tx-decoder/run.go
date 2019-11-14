@@ -23,11 +23,9 @@ func newRunCommand() *cobra.Command {
 	ethclient.URLs(runCmd.Flags())
 
 	// Register Kafka flags
-	broker.KafkaURL(runCmd.Flags())
-	broker.KafkaGroup(runCmd.Flags())
+	broker.InitKafkaFlags(runCmd.Flags())
 	broker.KafkaTopicTxDecoded(runCmd.Flags())
 	broker.KafkaTopicTxDecoder(runCmd.Flags())
-	broker.InitKafkaSASLTLSFlags(runCmd.Flags())
 
 	// Registers local flags for handler producer
 	producer.InitFlags(runCmd.Flags())

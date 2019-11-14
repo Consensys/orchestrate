@@ -80,6 +80,19 @@ func init() {
 	_ = viper.BindEnv(kafkaTLSClientKeyFilePathViperKey, kafkaTLSClientKeyFilePathEnv)
 	viper.SetDefault(kafkaTLSCACertFilePathViperKey, kafkaTLSCACertFilePathDefault)
 	_ = viper.BindEnv(kafkaTLSCACertFilePathViperKey, kafkaTLSCACertFilePathEnv)
+
+	// Kafka Consumer
+	viper.SetDefault(kafkaConsumerMaxWaitTimeViperKey, kafkaConsumerMaxWaitTimeDefault)
+	_ = viper.BindEnv(kafkaConsumerMaxWaitTimeViperKey, kafkaConsumerMaxWaitTimeEnv)
+}
+
+// InitKafkaFlags
+func InitKafkaFlags(f *pflag.FlagSet) {
+	KafkaURL(f)
+	KafkaGroup(f)
+	InitKafkaSASLFlags(f)
+	InitKafkaTLSFlags(f)
+	KafkaConsumerMaxWaitTime(f)
 }
 
 var (
@@ -89,7 +102,7 @@ var (
 	kafkaURLEnv      = "KAFKA_URL"
 )
 
-// KafkaURL register flag for Kafka server urls
+// KafkaURL register flag for Kafka server
 func KafkaURL(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`URL (addresses) of Kafka server(s) to connect to.
 Environment variable: %q`, kafkaURLEnv)
@@ -100,8 +113,8 @@ Environment variable: %q`, kafkaURLEnv)
 const (
 	kafkaGroupFlag     = "kafka-group"
 	KafkaGroupViperKey = "kafka.group"
-	kafkaGroupDefault  = "group-e2e"
 	kafkaGroupEnv      = "KAFKA_GROUP"
+	kafkaGroupDefault  = "group-e2e"
 )
 
 // KafkaGroup register flag for Kafka group
@@ -109,7 +122,7 @@ func KafkaGroup(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Address of Kafka server to connect to.
 Environment variable: %q`, kafkaGroupEnv)
 	f.String(kafkaGroupFlag, kafkaGroupDefault, desc)
-	_ = viper.BindPFlag(KafkaGroupViperKey, f.Lookup(kafkaGroupEnv))
+	_ = viper.BindPFlag(KafkaGroupViperKey, f.Lookup(kafkaGroupFlag))
 }
 
 const (
@@ -420,8 +433,8 @@ Environment variable: %q`, kafkaSASLSCRAMAuthzIDEnv)
 	_ = viper.BindPFlag(kafkaSASLSCRAMAuthzIDViperKey, f.Lookup(kafkaSASLSCRAMAuthzIDFlag))
 }
 
-// InitKafkaSASLTLSFlags register flags for SASL and SSL
-func InitKafkaSASLTLSFlags(f *pflag.FlagSet) {
+// InitKafkaTLSFlags register flags for SASL and SSL
+func InitKafkaTLSFlags(f *pflag.FlagSet) {
 	KafkaTLSEnable(f)
 	KafkaTLSInsecureSkipVerify(f)
 	KafkaTLSClientCertFilePath(f)
@@ -507,4 +520,20 @@ func KafkaTLSCaCertFilePath(f *pflag.FlagSet) {
 Environment variable: %q`, kafkaTLSCACertFilePathEnv)
 	f.String(kafkaTLSCACertFilePathFlag, kafkaTLSCACertFilePathDefault, desc)
 	_ = viper.BindPFlag(kafkaTLSCACertFilePathViperKey, f.Lookup(kafkaTLSCACertFilePathFlag))
+}
+
+// Kafka Consumer MaxWaitTime wait time environment variables
+const (
+	kafkaConsumerMaxWaitTimeViperFlag = "kafka-consumer-max-wait-time"
+	kafkaConsumerMaxWaitTimeViperKey  = "kafka.consumer.max.wait.time"
+	kafkaConsumerMaxWaitTimeEnv       = "KAFKA_CONSUMER_MAX_WAIT_TIME"
+	kafkaConsumerMaxWaitTimeDefault   = 20
+)
+
+// Kafka Consumer MaxWaitTime configuration
+func KafkaConsumerMaxWaitTime(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Kafka consumer max wait time.
+Environment variable: %q in ms`, kafkaConsumerMaxWaitTimeEnv)
+	f.Int(kafkaConsumerMaxWaitTimeViperFlag, kafkaConsumerMaxWaitTimeDefault, desc)
+	_ = viper.BindPFlag(kafkaConsumerMaxWaitTimeViperKey, f.Lookup(kafkaConsumerMaxWaitTimeViperFlag))
 }

@@ -23,12 +23,10 @@ func newRunCommand() *cobra.Command {
 	ethclient.URLs(runCmd.Flags())
 
 	// Register Kafka flags
-	broker.KafkaURL(runCmd.Flags())
-	broker.KafkaGroup(runCmd.Flags())
+	broker.InitKafkaFlags(runCmd.Flags())
 	broker.KafkaTopicTxNonce(runCmd.Flags())
 	broker.KafkaTopicTxSigner(runCmd.Flags())
 	broker.KafkaTopicTxRecover(runCmd.Flags())
-	broker.InitKafkaSASLTLSFlags(runCmd.Flags())
 
 	// Register Nonce Manager flags
 	nonce.Type(runCmd.Flags())
