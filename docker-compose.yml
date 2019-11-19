@@ -109,8 +109,8 @@ services:
     command: tx-nonce run
 
   tx-signer-init:
-    image: alpine:3.10
     <<: *container-common
+    image: alpine:3.10
     environment:
       <<: *default-variables
     restart: "no"
@@ -118,8 +118,8 @@ services:
     volumes:
       - ./scripts/hashicorp:/scripts
       - vault-token:/vault/token
-    entrypoint: ""
-    command: /bin/sh ./init.sh
+    entrypoint: /bin/sh
+    command: ./init.sh
 
   tx-signer:
     <<: *container-common
@@ -179,9 +179,11 @@ services:
       - ./build/report:/report/output
       - ./tests/features:/features
 
+
 volumes:
   vault-token:
     driver: local
+
 
 networks:
   orchestrate:

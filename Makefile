@@ -21,7 +21,7 @@ coverage:
 	@docker-compose -f e2e/docker-compose.yml up -d postgres
 	@sh scripts/coverage.sh $(PACKAGES)
 	@docker-compose -f e2e/docker-compose.yml stop postgres
-	$(OPEN) build/coverage/coverage.html
+	@$(OPEN) build/coverage/coverage.html 2>/dev/null
 
 race: ## Run data race detector
 	@go test -race -short ${PACKAGES}
@@ -42,7 +42,7 @@ run-e2e: gobuild-e2e
 	@docker-compose -f scripts/report/docker-compose.yml up
 
 e2e: run-e2e
-	$(OPEN) build/report/report.html
+	@$(OPEN) build/report/report.html 2>/dev/null
 
 clean: mod-tidy lint-fix protobuf
 
@@ -57,9 +57,11 @@ generate-mocks:
 	gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tessera EnclaveEndpoint
 
 # Tools
-tools: ## Install test tools
+lint-tools:
 	@GO111MODULE=off go get -u github.com/client9/misspell/cmd/misspell
 	@GO111MODULE=off go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
+
+tools: lint-tools ## Install test tools
 	@GO111MODULE=off go get -u github.com/DATA-DOG/godog/cmd/godog
 	@GO111MODULE=off go get -u github.com/golang/mock/gomock
 	@GO111MODULE=off go get -u github.com/golang/protobuf/protoc-gen-go

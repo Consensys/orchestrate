@@ -1,0 +1,41 @@
+version: '3.7'
+
+services:
+  portainer:
+    image: portainer/portainer
+    command: -H unix:///var/run/docker.sock
+    restart: unless-stopped
+    ports:
+      - 9000:9000
+      - 8000:8000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_SERVER_JSON_FILE: /pgadmin4/servers.json
+    restart: unless-stopped
+    volumes:
+      - pgadmin:/root/.pgadmin
+      - ./config/pgadmin/servers.json:/pgadmin4/servers.json
+      - ./config/pgadmin/password:/pgadmin4/password
+    ports:
+      - 9001:80
+    networks:
+      - orchestrate
+
+
+volumes:
+  portainer_data:
+  pgadmin:
+    driver: local
+
+
+networks:
+  orchestrate:
+    external:
+      name: deps_orchestrate

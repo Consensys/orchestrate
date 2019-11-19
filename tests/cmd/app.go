@@ -137,7 +137,6 @@ func Start(ctx context.Context) {
 		if err != nil {
 			log.WithError(err).Fatalf("worker: error on consumer with topics: %s", topics)
 		}
-
 	})
 }
 

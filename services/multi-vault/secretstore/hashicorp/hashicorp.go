@@ -19,9 +19,9 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
-// Hashicorp is a wrapper around an Hashicorp object
+// HashiCorp is a wrapper around an HashiCorp object
 type Hashicorp struct {
-	// Client is the hashicorp's implementation of the vault client
+	// Client is the HashiCorp implementation of the vault client
 	Client *api.Client
 	// Logical is the query implementation of the vault
 	Logical Logical
