@@ -29,7 +29,7 @@ func Init(ctx context.Context) {
 			opentracing.Init(ctx)
 
 			// Declare server with interceptors
-			server = NewServerWithDefaultOptions()
+			server = NewServer()
 
 			// Apply enhancers on server
 			ApplyEnhancers(server, enhancers...)

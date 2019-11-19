@@ -78,7 +78,7 @@ func initComponents(ctx context.Context) {
 
 func registerHandlers() {
 	// Generic handlers on every worker
-	engine.Register(logger.Logger)
+	engine.Register(logger.Logger("debug"))
 
 	// Specific handlers to tx-listener
 	engine.Register(opentracing.GlobalHandler())

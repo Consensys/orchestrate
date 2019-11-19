@@ -9,16 +9,23 @@ import (
 )
 
 // Logger creates a handler middleware that log basic information about tx execution
-func Logger(txctx *engine.TxContext) {
-	txctx.Logger.Trace("logger: new message")
-	start := time.Now()
+func Logger(level string) engine.HandlerFunc {
+	logLevel, err := log.ParseLevel(level)
+	if err != nil {
+		log.Fatalf("Invalid log level: %v", err)
+	}
 
-	txctx.Next()
+	return func(txctx *engine.TxContext) {
+		txctx.Logger.Trace("logger: new message")
+		start := time.Now()
 
-	txctx.Logger.
-		WithFields(log.Fields{
-			"latency": time.Since(start),
-		}).
-		WithError(fmt.Errorf("%q", txctx.Envelope.GetErrors())).
-		Info("logger: message processed")
+		txctx.Next()
+
+		txctx.Logger.
+			WithFields(log.Fields{
+				"latency": time.Since(start),
+			}).
+			WithError(fmt.Errorf("%q", txctx.Envelope.GetErrors())).
+			Log(logLevel, "logger: message processed")
+	}
 }

@@ -104,7 +104,7 @@ func main() {
 	// Init Producer
 	broker.InitSyncProducer(context.Background())
 
-	engine.Register(logger.Logger)
+	engine.Register(logger.Logger("info"))
 	engine.Register(Loader)
 	engine.Register(Producer(broker.GlobalSyncProducer()))
 

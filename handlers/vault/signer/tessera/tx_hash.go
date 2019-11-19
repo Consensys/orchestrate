@@ -1,6 +1,7 @@
 package tessera
 
 import (
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tessera"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -30,5 +31,6 @@ func txHashSetter(tesseraClient tessera.Client) engine.HandlerFunc {
 		}
 
 		txctx.Envelope.GetTx().GetTxData().SetData(txHash)
+		txctx.Logger.Debugf("Sent transaction body to 'storesaw' endpoint and get txHash to be signed: %s", hexutil.Encode(txHash))
 	}
 }

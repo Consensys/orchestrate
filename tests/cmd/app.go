@@ -21,7 +21,7 @@ import (
 )
 
 var (
-	app         *common.App
+	app         = common.NewApp()
 	readyToTest chan bool
 	startOnce   = &sync.Once{}
 )

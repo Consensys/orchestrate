@@ -30,9 +30,6 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 // Producer creates a producer handler that filters in Orchestrate transaction
 // NB: If the transaction
 func Producer(p sarama.SyncProducer) engine.HandlerFunc {
-
-	classicProducer := producer.Producer(p, PrepareMsg)
-
 	return func(txctx *engine.TxContext) {
 		// Test if transaction was matched by Orchestrate.
 		// TODO: Have an actual flag to make the check, because there is no guarantee
@@ -53,6 +50,6 @@ func Producer(p sarama.SyncProducer) engine.HandlerFunc {
 		}
 
 		// Else normally call the producer as we would normally do
-		classicProducer(txctx)
+		producer.Producer(p, PrepareMsg)(txctx)
 	}
 }

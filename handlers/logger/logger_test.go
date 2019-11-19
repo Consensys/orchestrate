@@ -21,7 +21,7 @@ type LoggerTestSuite struct {
 }
 
 func (s *LoggerTestSuite) SetupSuite() {
-	s.Handler = Logger
+	s.Handler = Logger("info")
 }
 
 func (s *LoggerTestSuite) TestLogger() {
@@ -41,4 +41,14 @@ func (s *LoggerTestSuite) TestLogger() {
 
 func TestLogger(t *testing.T) {
 	suite.Run(t, new(LoggerTestSuite))
+}
+
+func TestError(t *testing.T) {
+	defer func() { log.StandardLogger().ExitFunc = nil }()
+	var fatal bool
+	log.StandardLogger().ExitFunc = func(int) { fatal = true }
+
+	fatal = false
+	Logger("test")
+	assert.Equal(t, true, fatal)
 }

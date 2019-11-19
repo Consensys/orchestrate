@@ -6,7 +6,11 @@ All notable changes to this project will be documented in this file.
 
 ### 🆕 Features
 
-* Add a new server for APIs services exposing a REST endpoint that will redirect queries to the gRPC endpoint and a swagger UI + documentation  
+* Add a new server for APIs services exposing a REST endpoint that will redirect queries to the gRPC endpoint and a swagger UI + documentation
+* Add the new flag `KAFKA_CONSUMER_MAX_WAIT_TIME` to configure the maximum waiting time to consume message if messages do not exceed the size`Consumer.Fetch.Min.Byte` (default=20ms)
+
+### 🛠 Bug fixes
+* Clean logs: downgrade `OK` and `NotFound` logs to debug level in grpc server and have logger handler in debug level for tx-listener and tx-decoder
 
 ### ⚠ BREAKING CHANGES
 * **config** grpc & metrics server have been split. Default port for

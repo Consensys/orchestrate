@@ -90,7 +90,7 @@ func initConsumerGroup(ctx context.Context) {
 	// Register handlers on engine
 	// Generic handlers on every worker
 	engine.Register(opentracing.GlobalHandler())
-	engine.Register(logger.Logger)
+	engine.Register(logger.Logger("info"))
 	engine.Register(sarama.Loader)
 	engine.Register(offset.Marker)
 	engine.Register(opentracing.GlobalHandler())
