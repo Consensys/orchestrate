@@ -72,7 +72,7 @@ lint:
   <<: *go-setup
   script:
     - make tools
-    - make lint
+    - make lint-ci
   except:
     - tags
 

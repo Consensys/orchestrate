@@ -29,11 +29,11 @@ race: ## Run data race detector
 mod-tidy: 
 	@go mod tidy
 
-lint-fix:
+lint:
 	@misspell -w $(GOFILES)
 	@golangci-lint run --fix
 
-lint:
+lint-ci:
 	@misspell -error $(GOFILES)
 	@golangci-lint run
 

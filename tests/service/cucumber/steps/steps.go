@@ -269,7 +269,7 @@ func (sc *ScenarioContext) iHaveDeployedContract(alias string, table *gherkin.Da
 
 func (sc *ScenarioContext) envelopeShouldBeInTopic(topic string) error {
 	for i, t := range sc.trackers {
-		err := t.load(topic, 5*time.Second)
+		err := t.load(topic, viper.GetDuration(CucumberTimeoutViperKey))
 		if err != nil {
 			return fmt.Errorf("%v: envelope n°%v not in topic %q", sc.ID, i, topic)
 		}
