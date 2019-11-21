@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 ### 🛠 Bug fixes
 * Clean logs: downgrade `OK` and `NotFound` logs to debug level in grpc server and have logger handler in debug level for tx-listener and tx-decoder
 * e2e: use `CUCUMBER_STEPS_TIMEOUT` to put a timeout in cucumber steps before failing
+* Makefile: add bootstrap stage to wait quorum, geth and kafka to start
 
 ### ⚠ BREAKING CHANGES
 * **config** grpc & metrics server have been split. Default port for

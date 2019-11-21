@@ -108,19 +108,6 @@ services:
       JAEGER_SERVICE_NAME: TX-NONCE
     command: tx-nonce run
 
-  tx-signer-init:
-    <<: *container-common
-    image: alpine:3.10
-    environment:
-      <<: *default-variables
-    restart: "no"
-    working_dir: /scripts
-    volumes:
-      - ./scripts/hashicorp:/scripts
-      - vault-token:/vault/token
-    entrypoint: /bin/sh
-    command: ./init.sh
-
   tx-signer:
     <<: *container-common
     environment:
@@ -132,8 +119,6 @@ services:
     volumes:
       - vault-token:/vault/token:ro
       - ./build/bin/orchestrate:/bin/main
-    depends_on:
-      - tx-signer-init
     command: tx-signer run
 
   tx-sender:
@@ -182,7 +167,8 @@ services:
 
 volumes:
   vault-token:
-    driver: local
+    external:
+      name: deps_vault-token
 
 
 networks:

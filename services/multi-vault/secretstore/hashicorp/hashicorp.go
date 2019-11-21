@@ -119,11 +119,14 @@ func ToVaultConfig(c *Config) *api.Config {
 func (v *Hashicorp) SetTokenFromConfig(c *Config) error {
 	encoded, err := ioutil.ReadFile(c.TokenFilePath)
 	if err != nil {
-		log.Warningf("Token file path could not be found: %v", err.Error())
+		log.WithError(err).Errorf("Token file path could not be found: %v", err.Error())
 		return err
 	}
 	// Immediately delete the file after it was read
-	_ = os.Remove(c.TokenFilePath)
+	err = os.Remove(c.TokenFilePath)
+	if err != nil {
+		log.WithError(err).Errorf("could not delete token file")
+	}
 
 	decoded := strings.TrimSuffix(string(encoded), "\n") // Remove the newline if it exists
 	decoded = strings.TrimSuffix(decoded, "\r")          // This one is for windows compatibility

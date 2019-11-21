@@ -111,6 +111,17 @@ services:
       - ./config/hashicorp/config.hcl:/vault/config.hcl:ro
     entrypoint: vault server -config=/vault
 
+  vault-init:
+    <<: *container-common
+    build: ./config/hashicorp
+    environment:
+      VAULT_ADDR: ${VAULT_ADDR-http://vault:8200}
+    restart: "no"
+    depends_on:
+      - vault
+    volumes:
+      - vault-token:/vault/token
+
   jaeger:
     <<: *container-common
     image: jaegertracing/all-in-one:1.8
@@ -132,6 +143,8 @@ volumes:
   db-data-envelope-store:
     driver: local
   chain-data:
+    driver: local
+  vault-token:
     driver: local
 
 
