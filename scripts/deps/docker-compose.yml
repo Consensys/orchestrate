@@ -29,6 +29,12 @@ services:
       KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://${KAFKA_EXTERNAL_HOSTNAME-localhost}:${KAFKA_EXTERNAL_PORT-9092}
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--list", "--bootstrap-server", "kafka:9092"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
 
   redis:
     <<: *container-common
@@ -88,6 +94,12 @@ services:
       - ./config/geth/keystore:/nodeData/keystore
       - ./config/geth/password:/nodeData/password
       - chain-data:/nodeData/geth
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--proxy", "off", "http://localhost:8545"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
 
   vault:
     <<: *container-common

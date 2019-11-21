@@ -106,6 +106,9 @@ gobuild:
 docker-build:
 	@DOCKER_BUILDKIT=1 docker build -t orchestrate .
 
+bootstrap:
+	@bash scripts/bootstrap.sh
+
 gobuild-e2e:
 	@GOOS=linux GOARCH=amd64 go build -i -o ./build/bin/e2e ./tests/cmd
 
@@ -133,6 +136,6 @@ stop-quorum:
 down-quorum:
 	@docker-compose -f scripts/deps/docker-compose.quorum.yml down --volumes --timeout 0
 
-up: deps quorum orchestrate
+up: deps quorum bootstrap orchestrate
 
 down: down-orchestrate down-quorum down-deps

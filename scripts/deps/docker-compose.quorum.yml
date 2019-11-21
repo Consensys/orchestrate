@@ -15,7 +15,6 @@ x-quorum-def:
     - "21000"
     - "50400"
   healthcheck:
-    test: ["CMD", "wget", "--spider", "--proxy", "off", "http://localhost:8545"]
     interval: 3s
     timeout: 3s
     retries: 10
@@ -73,12 +72,6 @@ x-tessera-def:
     - "9000"
     - "9080"
   restart: "no"
-  healthcheck:
-    test: ["CMD-SHELL", "[ -S /qdata/tm/tm.ipc ] || exit 1"]
-    interval: 3s
-    timeout: 3s
-    retries: 20
-    start_period: 5s
   entrypoint:
     - /bin/sh
     - -c
@@ -199,6 +192,8 @@ services:
     environment:
       - PRIVATE_CONFIG=/qdata/tm/tm.ipc
       - NODE_ID=1
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--proxy", "off", "http://172.16.239.11:8545"]
     networks:
       quorum-tessera:
         ipv4_address: 172.16.239.11
@@ -228,6 +223,8 @@ services:
     environment:
       - PRIVATE_CONFIG=/qdata/tm/tm.ipc
       - NODE_ID=2
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--proxy", "off", "http://172.16.239.11:8545"]
     networks:
       quorum-tessera:
         ipv4_address: 172.16.239.12
@@ -255,6 +252,8 @@ services:
     environment:
       - PRIVATE_CONFIG=/qdata/tm/tm.ipc
       - NODE_ID=3
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--proxy", "off", "http://172.16.239.11:8545"]
     networks:
       quorum-tessera:
         ipv4_address: 172.16.239.13
