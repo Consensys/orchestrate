@@ -7,7 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const component = "secretstore.hashicorp"
+const component = "secret-store.hashicorp"
 
 var (
 	store    *SecretStore

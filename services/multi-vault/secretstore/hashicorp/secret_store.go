@@ -87,13 +87,16 @@ func (store *SecretStore) ManageToken() {
 
 // Store writes in the vault
 func (store *SecretStore) Store(key, value string) error {
-	_, ok, err := store.Client.Logical.Read(key)
+	storedValue, ok, err := store.Client.Logical.Read(key)
 	if err != nil {
 		return errors.ConnectionError(err.Error()).ExtendComponent(component)
 	}
 
 	if ok {
-		return errors.AlreadyExistsError("A secret already exists for key: %v", key).ExtendComponent(component)
+		if storedValue == value {
+			return nil
+		}
+		return errors.AlreadyExistsError("A different secret already exists for key: %v", key).ExtendComponent(component)
 	}
 
 	err = store.Client.Logical.Write(key, value)

@@ -2,6 +2,8 @@ package memory
 
 import (
 	"sync"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
 // SecretStore holds a pool of private keys in memory
@@ -18,6 +20,15 @@ func NewSecretStore() *SecretStore {
 
 // Store secret
 func (s *SecretStore) Store(key, value string) error {
+	v, ok := s.secrets.Load(key)
+
+	if ok {
+		if v == value {
+			return nil
+		}
+		return errors.AlreadyExistsError("A different secret already exists for key: %v", key).ExtendComponent(component)
+	}
+
 	s.secrets.Store(key, value)
 	return nil
 }

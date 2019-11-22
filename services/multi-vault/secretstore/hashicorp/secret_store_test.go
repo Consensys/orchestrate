@@ -61,7 +61,7 @@ func SetupTest(s *HashicorpKeyStoreTestSuite, t *testing.T) {
 	s.Store = secretStore
 }
 
-func TestMock(t *testing.T) {
+func TestHashiCorp(t *testing.T) {
 	s := new(HashicorpKeyStoreTestSuite)
 	SetupTest(s, t)
 	suite.Run(t, s)

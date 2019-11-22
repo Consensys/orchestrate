@@ -5,6 +5,8 @@ import (
 	"sync"
 )
 
+const component = "secret-store.in-memory"
+
 var (
 	store    *SecretStore
 	initOnce = &sync.Once{}
