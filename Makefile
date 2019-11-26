@@ -44,10 +44,7 @@ run-e2e: gobuild-e2e
 e2e: run-e2e
 	@$(OPEN) build/report/report.html 2>/dev/null
 
-clean: mod-tidy lint-fix protobuf
-
-gocache:
-	mkdir .gocache
+clean: mod-tidy lint-ci protobuf
 
 generate-mocks:
 	mockgen -destination=mocks/mock_client.go -package=mocks \

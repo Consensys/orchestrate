@@ -54,7 +54,7 @@ func initHandlers(ctx context.Context) {
 	)
 }
 
-func initConsumerGroup(ctx context.Context) {
+func initComponents(ctx context.Context) {
 	common.InParallel(
 		// Initialize Engine
 		func() {
@@ -97,7 +97,7 @@ func Start(ctx context.Context) {
 		go metrics.StartServer(ctx, cancel, app.IsAlive, app.IsReady)
 
 		// Initialize ConsumerGroup
-		initConsumerGroup(cancelCtx)
+		initComponents(cancelCtx)
 
 		// Initialize Topics list by chain
 		var topics []string
