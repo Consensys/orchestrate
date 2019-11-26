@@ -32,10 +32,10 @@ var _ = utilities.NewDoubleArray
 var _ = descriptor.ForMessage
 
 var (
-	filter_Registry_GetContract_0 = &utilities.DoubleArray{Encoding: map[string]int{"contractId": 0, "name": 1, "tag": 2}, Base: []int{1, 1, 1, 2, 0, 0}, Check: []int{0, 1, 2, 2, 3, 4}}
+	filter_ContractRegistry_GetContract_0 = &utilities.DoubleArray{Encoding: map[string]int{"contractId": 0, "name": 1, "tag": 2}, Base: []int{1, 1, 1, 2, 0, 0}, Check: []int{0, 1, 2, 2, 3, 4}}
 )
 
-func request_Registry_GetContract_0(ctx context.Context, marshaler runtime.Marshaler, client RegistryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_ContractRegistry_GetContract_0(ctx context.Context, marshaler runtime.Marshaler, client ContractRegistryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetContractRequest
 	var metadata runtime.ServerMetadata
 
@@ -71,7 +71,7 @@ func request_Registry_GetContract_0(ctx context.Context, marshaler runtime.Marsh
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Registry_GetContract_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ContractRegistry_GetContract_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -80,7 +80,7 @@ func request_Registry_GetContract_0(ctx context.Context, marshaler runtime.Marsh
 
 }
 
-func local_request_Registry_GetContract_0(ctx context.Context, marshaler runtime.Marshaler, server RegistryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_ContractRegistry_GetContract_0(ctx context.Context, marshaler runtime.Marshaler, server ContractRegistryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetContractRequest
 	var metadata runtime.ServerMetadata
 
@@ -113,7 +113,7 @@ func local_request_Registry_GetContract_0(ctx context.Context, marshaler runtime
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "contractId.tag", err)
 	}
 
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_Registry_GetContract_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_ContractRegistry_GetContract_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -123,10 +123,10 @@ func local_request_Registry_GetContract_0(ctx context.Context, marshaler runtime
 }
 
 var (
-	filter_Registry_GetContractABI_0 = &utilities.DoubleArray{Encoding: map[string]int{"contractId": 0, "name": 1, "tag": 2}, Base: []int{1, 1, 1, 2, 0, 0}, Check: []int{0, 1, 2, 2, 3, 4}}
+	filter_ContractRegistry_GetContractABI_0 = &utilities.DoubleArray{Encoding: map[string]int{"contractId": 0, "name": 1, "tag": 2}, Base: []int{1, 1, 1, 2, 0, 0}, Check: []int{0, 1, 2, 2, 3, 4}}
 )
 
-func request_Registry_GetContractABI_0(ctx context.Context, marshaler runtime.Marshaler, client RegistryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_ContractRegistry_GetContractABI_0(ctx context.Context, marshaler runtime.Marshaler, client ContractRegistryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetContractRequest
 	var metadata runtime.ServerMetadata
 
@@ -162,7 +162,7 @@ func request_Registry_GetContractABI_0(ctx context.Context, marshaler runtime.Ma
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Registry_GetContractABI_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ContractRegistry_GetContractABI_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -171,7 +171,7 @@ func request_Registry_GetContractABI_0(ctx context.Context, marshaler runtime.Ma
 
 }
 
-func local_request_Registry_GetContractABI_0(ctx context.Context, marshaler runtime.Marshaler, server RegistryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_ContractRegistry_GetContractABI_0(ctx context.Context, marshaler runtime.Marshaler, server ContractRegistryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetContractRequest
 	var metadata runtime.ServerMetadata
 
@@ -204,7 +204,7 @@ func local_request_Registry_GetContractABI_0(ctx context.Context, marshaler runt
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "contractId.tag", err)
 	}
 
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_Registry_GetContractABI_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_ContractRegistry_GetContractABI_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -214,10 +214,10 @@ func local_request_Registry_GetContractABI_0(ctx context.Context, marshaler runt
 }
 
 var (
-	filter_Registry_GetContractBytecode_0 = &utilities.DoubleArray{Encoding: map[string]int{"contractId": 0, "name": 1, "tag": 2}, Base: []int{1, 1, 1, 2, 0, 0}, Check: []int{0, 1, 2, 2, 3, 4}}
+	filter_ContractRegistry_GetContractBytecode_0 = &utilities.DoubleArray{Encoding: map[string]int{"contractId": 0, "name": 1, "tag": 2}, Base: []int{1, 1, 1, 2, 0, 0}, Check: []int{0, 1, 2, 2, 3, 4}}
 )
 
-func request_Registry_GetContractBytecode_0(ctx context.Context, marshaler runtime.Marshaler, client RegistryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_ContractRegistry_GetContractBytecode_0(ctx context.Context, marshaler runtime.Marshaler, client ContractRegistryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetContractRequest
 	var metadata runtime.ServerMetadata
 
@@ -253,7 +253,7 @@ func request_Registry_GetContractBytecode_0(ctx context.Context, marshaler runti
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Registry_GetContractBytecode_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ContractRegistry_GetContractBytecode_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -262,7 +262,7 @@ func request_Registry_GetContractBytecode_0(ctx context.Context, marshaler runti
 
 }
 
-func local_request_Registry_GetContractBytecode_0(ctx context.Context, marshaler runtime.Marshaler, server RegistryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_ContractRegistry_GetContractBytecode_0(ctx context.Context, marshaler runtime.Marshaler, server ContractRegistryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetContractRequest
 	var metadata runtime.ServerMetadata
 
@@ -295,7 +295,7 @@ func local_request_Registry_GetContractBytecode_0(ctx context.Context, marshaler
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "contractId.tag", err)
 	}
 
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_Registry_GetContractBytecode_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_ContractRegistry_GetContractBytecode_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -305,10 +305,10 @@ func local_request_Registry_GetContractBytecode_0(ctx context.Context, marshaler
 }
 
 var (
-	filter_Registry_GetContractDeployedBytecode_0 = &utilities.DoubleArray{Encoding: map[string]int{"contractId": 0, "name": 1, "tag": 2}, Base: []int{1, 1, 1, 2, 0, 0}, Check: []int{0, 1, 2, 2, 3, 4}}
+	filter_ContractRegistry_GetContractDeployedBytecode_0 = &utilities.DoubleArray{Encoding: map[string]int{"contractId": 0, "name": 1, "tag": 2}, Base: []int{1, 1, 1, 2, 0, 0}, Check: []int{0, 1, 2, 2, 3, 4}}
 )
 
-func request_Registry_GetContractDeployedBytecode_0(ctx context.Context, marshaler runtime.Marshaler, client RegistryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_ContractRegistry_GetContractDeployedBytecode_0(ctx context.Context, marshaler runtime.Marshaler, client ContractRegistryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetContractRequest
 	var metadata runtime.ServerMetadata
 
@@ -344,7 +344,7 @@ func request_Registry_GetContractDeployedBytecode_0(ctx context.Context, marshal
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Registry_GetContractDeployedBytecode_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ContractRegistry_GetContractDeployedBytecode_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -353,7 +353,7 @@ func request_Registry_GetContractDeployedBytecode_0(ctx context.Context, marshal
 
 }
 
-func local_request_Registry_GetContractDeployedBytecode_0(ctx context.Context, marshaler runtime.Marshaler, server RegistryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_ContractRegistry_GetContractDeployedBytecode_0(ctx context.Context, marshaler runtime.Marshaler, server ContractRegistryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetContractRequest
 	var metadata runtime.ServerMetadata
 
@@ -386,7 +386,7 @@ func local_request_Registry_GetContractDeployedBytecode_0(ctx context.Context, m
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "contractId.tag", err)
 	}
 
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_Registry_GetContractDeployedBytecode_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_ContractRegistry_GetContractDeployedBytecode_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -395,7 +395,7 @@ func local_request_Registry_GetContractDeployedBytecode_0(ctx context.Context, m
 
 }
 
-func request_Registry_GetCatalog_0(ctx context.Context, marshaler runtime.Marshaler, client RegistryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_ContractRegistry_GetCatalog_0(ctx context.Context, marshaler runtime.Marshaler, client ContractRegistryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetCatalogRequest
 	var metadata runtime.ServerMetadata
 
@@ -404,7 +404,7 @@ func request_Registry_GetCatalog_0(ctx context.Context, marshaler runtime.Marsha
 
 }
 
-func local_request_Registry_GetCatalog_0(ctx context.Context, marshaler runtime.Marshaler, server RegistryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_ContractRegistry_GetCatalog_0(ctx context.Context, marshaler runtime.Marshaler, server ContractRegistryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetCatalogRequest
 	var metadata runtime.ServerMetadata
 
@@ -413,7 +413,7 @@ func local_request_Registry_GetCatalog_0(ctx context.Context, marshaler runtime.
 
 }
 
-func request_Registry_GetTags_0(ctx context.Context, marshaler runtime.Marshaler, client RegistryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_ContractRegistry_GetTags_0(ctx context.Context, marshaler runtime.Marshaler, client ContractRegistryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetTagsRequest
 	var metadata runtime.ServerMetadata
 
@@ -440,7 +440,7 @@ func request_Registry_GetTags_0(ctx context.Context, marshaler runtime.Marshaler
 
 }
 
-func local_request_Registry_GetTags_0(ctx context.Context, marshaler runtime.Marshaler, server RegistryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_ContractRegistry_GetTags_0(ctx context.Context, marshaler runtime.Marshaler, server ContractRegistryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetTagsRequest
 	var metadata runtime.ServerMetadata
 
@@ -467,12 +467,12 @@ func local_request_Registry_GetTags_0(ctx context.Context, marshaler runtime.Mar
 
 }
 
-// RegisterRegistryHandlerServer registers the http handlers for service Registry to "mux".
-// UnaryRPC     :call RegistryServer directly.
+// RegisterContractRegistryHandlerServer registers the http handlers for service ContractRegistry to "mux".
+// UnaryRPC     :call ContractRegistryServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
-func RegisterRegistryHandlerServer(ctx context.Context, mux *runtime.ServeMux, server RegistryServer) error {
+func RegisterContractRegistryHandlerServer(ctx context.Context, mux *runtime.ServeMux, server ContractRegistryServer) error {
 
-	mux.Handle("GET", pattern_Registry_GetContract_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_ContractRegistry_GetContract_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -481,18 +481,18 @@ func RegisterRegistryHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Registry_GetContract_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_ContractRegistry_GetContract_0(rctx, inboundMarshaler, server, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Registry_GetContract_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ContractRegistry_GetContract_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_Registry_GetContractABI_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_ContractRegistry_GetContractABI_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -501,18 +501,18 @@ func RegisterRegistryHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Registry_GetContractABI_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_ContractRegistry_GetContractABI_0(rctx, inboundMarshaler, server, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Registry_GetContractABI_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ContractRegistry_GetContractABI_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_Registry_GetContractBytecode_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_ContractRegistry_GetContractBytecode_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -521,18 +521,18 @@ func RegisterRegistryHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Registry_GetContractBytecode_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_ContractRegistry_GetContractBytecode_0(rctx, inboundMarshaler, server, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Registry_GetContractBytecode_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ContractRegistry_GetContractBytecode_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_Registry_GetContractDeployedBytecode_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_ContractRegistry_GetContractDeployedBytecode_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -541,18 +541,18 @@ func RegisterRegistryHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Registry_GetContractDeployedBytecode_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_ContractRegistry_GetContractDeployedBytecode_0(rctx, inboundMarshaler, server, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Registry_GetContractDeployedBytecode_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ContractRegistry_GetContractDeployedBytecode_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_Registry_GetCatalog_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_ContractRegistry_GetCatalog_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -561,18 +561,18 @@ func RegisterRegistryHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Registry_GetCatalog_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_ContractRegistry_GetCatalog_0(rctx, inboundMarshaler, server, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Registry_GetCatalog_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ContractRegistry_GetCatalog_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_Registry_GetTags_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_ContractRegistry_GetTags_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -581,23 +581,23 @@ func RegisterRegistryHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Registry_GetTags_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_ContractRegistry_GetTags_0(rctx, inboundMarshaler, server, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Registry_GetTags_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ContractRegistry_GetTags_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
 	return nil
 }
 
-// RegisterRegistryHandlerFromEndpoint is same as RegisterRegistryHandler but
+// RegisterContractRegistryHandlerFromEndpoint is same as RegisterContractRegistryHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
-func RegisterRegistryHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
+func RegisterContractRegistryHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
 	conn, err := grpc.Dial(endpoint, opts...)
 	if err != nil {
 		return err
@@ -617,23 +617,23 @@ func RegisterRegistryHandlerFromEndpoint(ctx context.Context, mux *runtime.Serve
 		}()
 	}()
 
-	return RegisterRegistryHandler(ctx, mux, conn)
+	return RegisterContractRegistryHandler(ctx, mux, conn)
 }
 
-// RegisterRegistryHandler registers the http handlers for service Registry to "mux".
+// RegisterContractRegistryHandler registers the http handlers for service ContractRegistry to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterRegistryHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	return RegisterRegistryHandlerClient(ctx, mux, NewRegistryClient(conn))
+func RegisterContractRegistryHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+	return RegisterContractRegistryHandlerClient(ctx, mux, NewContractRegistryClient(conn))
 }
 
-// RegisterRegistryHandlerClient registers the http handlers for service Registry
-// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "RegistryClient".
-// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "RegistryClient"
+// RegisterContractRegistryHandlerClient registers the http handlers for service ContractRegistry
+// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "ContractRegistryClient".
+// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "ContractRegistryClient"
 // doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
-// "RegistryClient" to call the correct interceptors.
-func RegisterRegistryHandlerClient(ctx context.Context, mux *runtime.ServeMux, client RegistryClient) error {
+// "ContractRegistryClient" to call the correct interceptors.
+func RegisterContractRegistryHandlerClient(ctx context.Context, mux *runtime.ServeMux, client ContractRegistryClient) error {
 
-	mux.Handle("GET", pattern_Registry_GetContract_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_ContractRegistry_GetContract_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -642,18 +642,18 @@ func RegisterRegistryHandlerClient(ctx context.Context, mux *runtime.ServeMux, c
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Registry_GetContract_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_ContractRegistry_GetContract_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Registry_GetContract_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ContractRegistry_GetContract_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_Registry_GetContractABI_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_ContractRegistry_GetContractABI_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -662,18 +662,18 @@ func RegisterRegistryHandlerClient(ctx context.Context, mux *runtime.ServeMux, c
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Registry_GetContractABI_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_ContractRegistry_GetContractABI_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Registry_GetContractABI_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ContractRegistry_GetContractABI_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_Registry_GetContractBytecode_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_ContractRegistry_GetContractBytecode_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -682,18 +682,18 @@ func RegisterRegistryHandlerClient(ctx context.Context, mux *runtime.ServeMux, c
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Registry_GetContractBytecode_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_ContractRegistry_GetContractBytecode_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Registry_GetContractBytecode_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ContractRegistry_GetContractBytecode_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_Registry_GetContractDeployedBytecode_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_ContractRegistry_GetContractDeployedBytecode_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -702,18 +702,18 @@ func RegisterRegistryHandlerClient(ctx context.Context, mux *runtime.ServeMux, c
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Registry_GetContractDeployedBytecode_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_ContractRegistry_GetContractDeployedBytecode_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Registry_GetContractDeployedBytecode_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ContractRegistry_GetContractDeployedBytecode_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_Registry_GetCatalog_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_ContractRegistry_GetCatalog_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -722,18 +722,18 @@ func RegisterRegistryHandlerClient(ctx context.Context, mux *runtime.ServeMux, c
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Registry_GetCatalog_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_ContractRegistry_GetCatalog_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Registry_GetCatalog_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ContractRegistry_GetCatalog_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_Registry_GetTags_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_ContractRegistry_GetTags_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -742,14 +742,14 @@ func RegisterRegistryHandlerClient(ctx context.Context, mux *runtime.ServeMux, c
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Registry_GetTags_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_ContractRegistry_GetTags_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Registry_GetTags_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ContractRegistry_GetTags_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -757,29 +757,29 @@ func RegisterRegistryHandlerClient(ctx context.Context, mux *runtime.ServeMux, c
 }
 
 var (
-	pattern_Registry_GetContract_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 1, 0, 4, 1, 5, 3}, []string{"v1", "contracts", "contractId.name", "contractId.tag"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_ContractRegistry_GetContract_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 1, 0, 4, 1, 5, 3}, []string{"v1", "contracts", "contractId.name", "contractId.tag"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Registry_GetContractABI_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"v1", "contracts", "contractId.name", "contractId.tag", "abi"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_ContractRegistry_GetContractABI_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"v1", "contracts", "contractId.name", "contractId.tag", "abi"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Registry_GetContractBytecode_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"v1", "contracts", "contractId.name", "contractId.tag", "bytecode"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_ContractRegistry_GetContractBytecode_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"v1", "contracts", "contractId.name", "contractId.tag", "bytecode"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Registry_GetContractDeployedBytecode_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"v1", "contracts", "contractId.name", "contractId.tag", "deployedBytecode"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_ContractRegistry_GetContractDeployedBytecode_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"v1", "contracts", "contractId.name", "contractId.tag", "deployedBytecode"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Registry_GetCatalog_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "contracts"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_ContractRegistry_GetCatalog_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "contracts"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Registry_GetTags_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "contracts", "name"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_ContractRegistry_GetTags_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "contracts", "name"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (
-	forward_Registry_GetContract_0 = runtime.ForwardResponseMessage
+	forward_ContractRegistry_GetContract_0 = runtime.ForwardResponseMessage
 
-	forward_Registry_GetContractABI_0 = runtime.ForwardResponseMessage
+	forward_ContractRegistry_GetContractABI_0 = runtime.ForwardResponseMessage
 
-	forward_Registry_GetContractBytecode_0 = runtime.ForwardResponseMessage
+	forward_ContractRegistry_GetContractBytecode_0 = runtime.ForwardResponseMessage
 
-	forward_Registry_GetContractDeployedBytecode_0 = runtime.ForwardResponseMessage
+	forward_ContractRegistry_GetContractDeployedBytecode_0 = runtime.ForwardResponseMessage
 
-	forward_Registry_GetCatalog_0 = runtime.ForwardResponseMessage
+	forward_ContractRegistry_GetCatalog_0 = runtime.ForwardResponseMessage
 
-	forward_Registry_GetTags_0 = runtime.ForwardResponseMessage
+	forward_ContractRegistry_GetTags_0 = runtime.ForwardResponseMessage
 )

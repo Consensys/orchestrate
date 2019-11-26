@@ -11,11 +11,11 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/common"
-	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
 )
 
 // Decoder creates a decode handler
-func Decoder(r contractregistry.RegistryClient) engine.HandlerFunc {
+func Decoder(r svc.ContractRegistryClient) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"chain.id":    txctx.Envelope.GetChain().ID().String(),
@@ -36,7 +36,7 @@ func Decoder(r contractregistry.RegistryClient) engine.HandlerFunc {
 			// Retrieve event ABI from contract-registry
 			eventResp, err := r.GetEventsBySigHash(
 				txctx.Context(),
-				&contractregistry.GetEventsBySigHashRequest{
+				&svc.GetEventsBySigHashRequest{
 					SigHash: l.Topics[0].GetRaw(),
 					AccountInstance: &common.AccountInstance{
 						Chain:   txctx.Envelope.GetChain(),

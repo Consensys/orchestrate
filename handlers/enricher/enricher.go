@@ -10,7 +10,7 @@ import (
 )
 
 // Enricher is a Middleware engine.HandlerFunc
-func Enricher(r svc.RegistryClient, ec ethclient.ChainStateReader) engine.HandlerFunc {
+func Enricher(r svc.ContractRegistryClient, ec ethclient.ChainStateReader) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		if len(txctx.Envelope.GetReceipt().GetContractAddress().Address().Bytes()) != 0 {
 			code, err := ec.CodeAt(txctx.Context(),

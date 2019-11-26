@@ -17,7 +17,7 @@ var (
 	defaultCodeHash = ethcommon.Hash{}
 )
 
-// ContractRegistry is a Redis based implementation of the interface pkg.git/services/contract-registry.RegistryServer
+// ContractRegistry is a Redis based implementation of the interface types/contract-registry.ContractRegistryServer
 type ContractRegistry struct {
 	pool *remote.Pool
 }
@@ -27,8 +27,8 @@ func (r *ContractRegistry) Conn() *Conn {
 	return &Conn{Conn: r.pool.Get()}
 }
 
-// NewRegistry creates a ContractRegistry
-func NewRegistry(pool *remote.Pool) *ContractRegistry {
+// NewContractRegistry creates a ContractRegistry
+func NewContractRegistry(pool *remote.Pool) *ContractRegistry {
 	return &ContractRegistry{
 		pool: pool,
 	}

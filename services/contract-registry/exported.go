@@ -19,7 +19,7 @@ const (
 )
 
 var (
-	registry svc.RegistryServer
+	registry svc.ContractRegistryServer
 	initOnce = &sync.Once{}
 )
 
@@ -67,11 +67,11 @@ func Init(ctx context.Context) {
 }
 
 // SetGlobalRegistry sets global contract-registry
-func SetGlobalRegistry(r svc.RegistryServer) {
+func SetGlobalRegistry(r svc.ContractRegistryServer) {
 	registry = r
 }
 
 // GlobalRegistry returns global contract-registry
-func GlobalRegistry() svc.RegistryServer {
+func GlobalRegistry() svc.ContractRegistryServer {
 	return registry
 }

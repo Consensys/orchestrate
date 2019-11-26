@@ -1,9 +1,9 @@
 syntax = "proto3";
 
 import "google/api/annotations.proto";
+import "protoc-gen-swagger/options/annotations.proto";
 import "types/abi/abi.proto";
 import "types/common/account_instance.proto";
-import "protoc-gen-swagger/options/annotations.proto";
 
 
 option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry";
@@ -12,21 +12,21 @@ package contractregistry;
 
 option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
 	info: {
-		title: "Contract-Registry";
-        version: "1.0";
+		title: "Contract-Registry"
+        version: "1.0"
         contact: {
-            name: "✉ PegaSys Orchestrate";
-            email: "support@pegasys.tech";
-        };
-    };
+            name: "✉ PegaSys Orchestrate"
+            email: "support@pegasys.tech"
+        }
+    }
     external_docs: {
-        url: "https://docs.orchestrate.pegasys.tech/en/latest/";
-        description: "📒 Documentation of PegaSys Orchestrate";
+        url: "https://docs.orchestrate.pegasys.tech/en/latest/"
+        description: "📒 Documentation of PegaSys Orchestrate"
     }
 };
 
 // Registry is a gRPC service responsible for registering Contracts
-service Registry {
+service ContractRegistry {
     // Register a contract
     rpc RegisterContract (RegisterContractRequest) returns (RegisterContractResponse);
     // DeregisterContract remove the name + tag association to a contract artifact (abi, bytecode, deployedBytecode). Artifacts are not deleted.
@@ -83,7 +83,6 @@ service Registry {
     // Set the codeHash of the given account
     rpc SetAccountCodeHash (SetAccountCodeHashRequest) returns (SetAccountCodeHashResponse);
 }
-
 
 // Register
 message RegisterContractRequest {

@@ -11,12 +11,12 @@ import (
 
 // ContractRegistryClient is a client that wraps an RegistryServer into an ContractRegistryClient
 type ContractRegistryClient struct {
-	srv svc.RegistryServer
+	srv svc.ContractRegistryServer
 }
 
 func New() *ContractRegistryClient {
 	return &ContractRegistryClient{
-		srv: memory.NewRegistry(),
+		srv: memory.NewContractRegistry(),
 	}
 }
 

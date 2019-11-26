@@ -21,7 +21,7 @@ func Init() {
 		}
 
 		// Initialize gRPC contract-registry
-		registry = NewRegistry()
+		registry = NewContractRegistry()
 
 		log.Infof("%s: store ready", component)
 	})

@@ -3,6 +3,7 @@ syntax = "proto3";
 import "google/api/annotations.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
+import "protoc-gen-swagger/options/annotations.proto";
 import "types/envelope/envelope.proto";
 import "types/ethereum/base.proto";
 import "types/chain/chain.proto";
@@ -10,6 +11,21 @@ import "types/chain/chain.proto";
 option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store";
 
 package envelopestore;
+
+option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
+	info: {
+		title: "Envelope-Store"
+        version: "1.0"
+        contact: {
+            name: "✉ PegaSys Orchestrate"
+            email: "support@pegasys.tech"
+        }
+    }
+    external_docs: {
+        url: "https://docs.orchestrate.pegasys.tech/en/latest/"
+        description: "📒 Documentation of PegaSys Orchestrate"
+    }
+};
 
 // Possible statuses for a transaction
 enum Status {
@@ -32,7 +48,7 @@ service EnvelopeStore {
     }
 
     // Load Envelope by transaction hash
-    rpc LoadByTxHash (LoadByTxHashRequest) returns (StoreResponse)
+    rpc LoadByTxHash (LoadByTxHashRequest) returns (StoreResponse);
 
     // SetStatus set an envelope status
     rpc SetStatus (SetStatusRequest) returns (StatusResponse);

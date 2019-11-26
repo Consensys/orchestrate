@@ -16,7 +16,7 @@ import (
 const component = "contract-registry.client"
 
 var (
-	client   svc.RegistryClient
+	client   svc.ContractRegistryClient
 	conn     *grpc.ClientConn
 	initOnce = &sync.Once{}
 )
@@ -36,7 +36,7 @@ func Init(ctx context.Context) {
 			log.WithError(errors.FromError(err).ExtendComponent(component)).Fatalf("%s: failed to dial grpc server", component)
 		}
 
-		client = svc.NewRegistryClient(conn)
+		client = svc.NewContractRegistryClient(conn)
 
 		log.WithFields(log.Fields{
 			"url": viper.GetString(ContractRegistryURLViperKey),
@@ -48,11 +48,11 @@ func Close() {
 	_ = conn.Close()
 }
 
-func GlobalContractRegistryClient() svc.RegistryClient {
+func GlobalContractRegistryClient() svc.ContractRegistryClient {
 	return client
 }
 
 // SetGlobalContractRegistryClient sets ContractRegistry global configuration
-func SetGlobalContractRegistryClient(c svc.RegistryClient) {
+func SetGlobalContractRegistryClient(c svc.ContractRegistryClient) {
 	client = c
 }

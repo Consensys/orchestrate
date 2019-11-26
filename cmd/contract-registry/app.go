@@ -16,7 +16,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/rest"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
 )
 
 var (
@@ -37,7 +37,7 @@ func Start(ctx context.Context) {
 			// Initialize gRPC server
 			grpcserver.AddEnhancers(
 				func(s *grpc.Server) *grpc.Server {
-					types.RegisterRegistryServer(s, contractregistry.GlobalRegistry())
+					svc.RegisterContractRegistryServer(s, contractregistry.GlobalRegistry())
 					return s
 				})
 			grpcserver.Init(cancelCtx)
@@ -48,7 +48,7 @@ func Start(ctx context.Context) {
 		// Initialize REST server
 		rest.AddEnhancers(
 			func(cancelCtx context.Context, _ *http.ServeMux, gwMux *runtime.ServeMux, conn *grpc.ClientConn) error {
-				return types.RegisterRegistryHandler(cancelCtx, gwMux, conn)
+				return svc.RegisterContractRegistryHandler(cancelCtx, gwMux, conn)
 			},
 			func(ctx context.Context, mux *http.ServeMux, _ *runtime.ServeMux, _ *grpc.ClientConn) error {
 				mux.HandleFunc("/swagger/swagger.json", rest.ServeFile(path.Join(rest.SwaggerSpecsPath, "types/contract-registry/registry.swagger.json")))

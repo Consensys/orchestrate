@@ -23,7 +23,7 @@ func (s *RedisTestSuite) SetupTest() {
 	config := Config()
 	config.URI = redisMock.Addr()
 
-	s.R = NewRegistry(NewPool(config, Dial))
+	s.R = NewContractRegistry(NewPool(config, Dial))
 	s.redisMock = redisMock
 }
 

@@ -1,13 +1,13 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "types/envelope-store/store.proto",
-    "version": "version not set"
+    "title": "Envelope-Store",
+    "version": "1.0",
+    "contact": {
+      "name": "✉ PegaSys Orchestrate",
+      "email": "support@pegasys.tech"
+    }
   },
-  "schemes": [
-    "http",
-    "https"
-  ],
   "consumes": [
     "application/json"
   ],
@@ -593,5 +593,9 @@
       },
       "title": "Transaction data"
     }
+  },
+  "externalDocs": {
+    "description": "📒 Documentation of PegaSys Orchestrate",
+    "url": "https://docs.orchestrate.pegasys.tech/en/latest/"
   }
 }

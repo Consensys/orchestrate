@@ -65,7 +65,7 @@ type ScenarioContext struct {
 	chanReg *chanregistry.ChanRegistry
 
 	// RegistryClient
-	Registry registry.RegistryClient
+	Registry registry.ContractRegistryClient
 
 	// Producer to producer envelopes in topics
 	producer sarama.SyncProducer
@@ -75,7 +75,7 @@ type ScenarioContext struct {
 
 func NewScenarioContext(
 	chanReg *chanregistry.ChanRegistry,
-	reg registry.RegistryClient,
+	reg registry.ContractRegistryClient,
 	producer sarama.SyncProducer,
 	p *parser.Parser,
 ) *ScenarioContext {

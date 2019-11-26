@@ -8,12 +8,12 @@ import (
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
-	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
 // Crafter creates a crafter handler
-func Crafter(r contractregistry.RegistryClient, c crafter.Crafter) engine.HandlerFunc {
+func Crafter(r svc.ContractRegistryClient, c crafter.Crafter) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"metadata.id": txctx.Envelope.GetMetadata().GetId(),
@@ -79,7 +79,7 @@ func getMethodAbi(txctx *engine.TxContext) (*abi.Method, error) {
 	return method, nil
 }
 
-func createTxPayload(txctx *engine.TxContext, methodAbi *abi.Method, r contractregistry.RegistryClient, c crafter.Crafter) ([]byte, error) {
+func createTxPayload(txctx *engine.TxContext, methodAbi *abi.Method, r svc.ContractRegistryClient, c crafter.Crafter) ([]byte, error) {
 	if txctx.Envelope.GetArgs().GetCall().GetMethod().IsConstructor() {
 		return createContractDeploymentPayload(txctx, methodAbi, r, c)
 	}
@@ -87,11 +87,11 @@ func createTxPayload(txctx *engine.TxContext, methodAbi *abi.Method, r contractr
 	return createTxCallPayload(txctx, methodAbi, c)
 }
 
-func createContractDeploymentPayload(txctx *engine.TxContext, methodAbi *abi.Method, r contractregistry.RegistryClient, c crafter.Crafter) ([]byte, error) {
+func createContractDeploymentPayload(txctx *engine.TxContext, methodAbi *abi.Method, r svc.ContractRegistryClient, c crafter.Crafter) ([]byte, error) {
 	// Transaction to be crafted is a Contract deployment
 	bytecodeResp, err := r.GetContractBytecode(
 		txctx.Context(),
-		&contractregistry.GetContractRequest{
+		&svc.GetContractRequest{
 			ContractId: txctx.Envelope.GetArgs().GetCall().GetContract().GetId(),
 		},
 	)

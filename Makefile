@@ -91,7 +91,7 @@ gen-help-docker: docker-build
 
 # Protobuf
 protobuf: ## Generate protobuf stubs
-	@docker-compose -f scripts/docker-compose.yml up
+	@docker-compose -f scripts/docker-compose.yml up --build
 
 # Create kafka topics
 topics:

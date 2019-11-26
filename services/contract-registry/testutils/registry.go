@@ -20,7 +20,7 @@ import (
 // ContractRegistryTestSuite  is a test suit for EnvelopeStore
 type ContractRegistryTestSuite struct {
 	suite.Suite
-	R svc.RegistryServer
+	R svc.ContractRegistryServer
 }
 
 // ERC20 is a unittest value

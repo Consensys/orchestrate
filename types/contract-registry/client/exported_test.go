@@ -12,7 +12,7 @@ func TestInit(t *testing.T) {
 	Init(context.Background())
 	assert.NotNil(t, GlobalContractRegistryClient(), "Global should have been set")
 
-	var c svc.RegistryClient
+	var c svc.ContractRegistryClient
 	SetGlobalContractRegistryClient(c)
 	assert.Nil(t, GlobalContractRegistryClient(), "Global should be reset to nil")
 }

@@ -35,8 +35,8 @@ type ContractRegistry struct {
 
 var defaultCodehash = ethcommon.Hash{}
 
-// NewRegistry creates a ContractRegistry
-func NewRegistry() *ContractRegistry {
+// NewContractRegistry creates a ContractRegistry
+func NewContractRegistry() *ContractRegistry {
 	r := &ContractRegistry{
 		contractHashes: make(map[string]map[string]ethcommon.Hash),
 		artifacts:      make(map[ethcommon.Hash]*rcommon.Artifact),

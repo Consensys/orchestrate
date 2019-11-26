@@ -55,7 +55,7 @@ var queryContractID = &abi.ContractId{
 }
 
 func TestContractRegistryClient(t *testing.T) {
-	var client svc.RegistryClient = New() // Break if client does not implement interface
+	var client svc.ContractRegistryClient = New() // Break if client does not implement interface
 
 	_, err := client.RegisterContract(context.Background(),
 		&svc.RegisterContractRequest{Contract: erc20Contract},

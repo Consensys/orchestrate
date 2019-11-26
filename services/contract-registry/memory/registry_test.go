@@ -13,7 +13,7 @@ type MemoryTestSuite struct {
 }
 
 func (s *MemoryTestSuite) SetupTest() {
-	s.R = NewRegistry()
+	s.R = NewContractRegistry()
 }
 
 func TestMemory(t *testing.T) {
