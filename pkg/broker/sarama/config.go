@@ -56,8 +56,8 @@ func init() {
 	_ = viper.BindEnv(WalletGeneratedGroupViperKey, walletGeneratedGroupEnv)
 
 	// Kafka SASL
-	viper.SetDefault(kafkaSASLEnableViperKey, kafkaSASLEnableDefault)
-	_ = viper.BindEnv(kafkaSASLEnableViperKey, kafkaSASLEnableEnv)
+	viper.SetDefault(kafkaSASLEnabledViperKey, kafkaSASLEnabledDefault)
+	_ = viper.BindEnv(kafkaSASLEnabledViperKey, kafkaSASLEnabledEnv)
 	viper.SetDefault(kafkaSASLMechanismViperKey, kafkaSASLMechanismDefault)
 	_ = viper.BindEnv(kafkaSASLMechanismViperKey, kafkaSASLMechanismEnv)
 	viper.SetDefault(kafkaSASLHandshakeViperKey, kafkaSASLHandshakeDefault)
@@ -339,18 +339,18 @@ func InitKafkaSASLFlags(f *pflag.FlagSet) {
 
 // Kafka SASL Enable environment variables
 const (
-	kafkaSASLEnableFlag     = "kafka-sasl-enable"
-	kafkaSASLEnableViperKey = "kafka.sasl.enable"
-	kafkaSASLEnableEnv      = "KAFKA_SASL_ENABLE"
-	kafkaSASLEnableDefault  = false
+	kafkaSASLEnabledFlag     = "kafka-sasl-enabled"
+	kafkaSASLEnabledViperKey = "kafka.sasl.enabled"
+	kafkaSASLEnabledEnv      = "KAFKA_SASL_ENABLED"
+	kafkaSASLEnabledDefault  = false
 )
 
 // KafkaSASLEnable register flag
 func KafkaSASLEnable(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Whether or not to use SASL authentication when connecting to the broker
-Environment variable: %q`, kafkaSASLEnableEnv)
-	f.Bool(kafkaSASLEnableFlag, kafkaSASLEnableDefault, desc)
-	_ = viper.BindPFlag(kafkaSASLEnableViperKey, f.Lookup(kafkaSASLEnableFlag))
+Environment variable: %q`, kafkaSASLEnabledEnv)
+	f.Bool(kafkaSASLEnabledFlag, kafkaSASLEnabledDefault, desc)
+	_ = viper.BindPFlag(kafkaSASLEnabledViperKey, f.Lookup(kafkaSASLEnabledFlag))
 }
 
 // Kafka SASL mechanism environment variables

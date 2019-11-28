@@ -19,6 +19,8 @@ All notable changes to this project will be documented in this file.
   * grpc server remains 8080
   * newly rest server is 8081 
   * metrics server has changed and is now 8082
+* **config** Rename `KAFKA_SASL_ENABLE` to `KAFKA_SASL_ENABLED`
+  
 
 
 ## 1.0.0 (2019-11-07)

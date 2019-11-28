@@ -64,7 +64,7 @@ func InitConfig() {
 	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
 	config.Consumer.MaxWaitTime = time.Duration(viper.GetInt64(kafkaConsumerMaxWaitTimeViperKey)) * time.Millisecond
 
-	config.Net.SASL.Enable = viper.GetBool(kafkaSASLEnableViperKey)
+	config.Net.SASL.Enable = viper.GetBool(kafkaSASLEnabledViperKey)
 	config.Net.SASL.Mechanism = sarama.SASLMechanism(viper.GetString(kafkaSASLMechanismViperKey))
 	config.Net.SASL.Handshake = viper.GetBool(kafkaSASLHandshakeViperKey)
 	config.Net.SASL.User = viper.GetString(kafkaSASLUserViperKey)
