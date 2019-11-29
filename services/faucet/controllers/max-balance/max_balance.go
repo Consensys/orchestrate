@@ -27,17 +27,17 @@ func NewController(conf *Config) *Controller {
 
 // Control apply MaxBalance controller on a credit function
 func (ctrl *Controller) Control(credit faucet.CreditFunc) faucet.CreditFunc {
-	return func(ctx context.Context, r *types.Request) (*big.Int, bool, error) {
+	return func(ctx context.Context, r *types.Request) (*big.Int, error) {
 		// Retrieve account balance
 		balance, err := ctrl.conf.BalanceAt(ctx, r.ChainID, r.Beneficiary, nil)
 		if err != nil {
-			return big.NewInt(0), false, errors.FromError(err).ExtendComponent(component)
+			return big.NewInt(0), errors.FromError(err).ExtendComponent(component)
 		}
 
 		// Ensure MaxBalance is respected
 		if balance.Add(balance, r.Amount).Cmp(ctrl.conf.MaxBalance) >= 0 {
 			// Do not credit if final balance would be superior to max authorized
-			return big.NewInt(0), false, errors.FaucetWarning("account balance too high").ExtendComponent(component)
+			return big.NewInt(0), errors.FaucetWarning("account balance too high").ExtendComponent(component)
 		}
 
 		return credit(ctx, r)

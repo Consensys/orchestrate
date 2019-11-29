@@ -57,18 +57,18 @@ func (f *Faucet) prepareMsg(r *types.Request, msg *sarama.ProducerMessage) error
 }
 
 // Credit process a Faucet credit request
-func (f *Faucet) Credit(ctx context.Context, r *types.Request) (*big.Int, bool, error) {
+func (f *Faucet) Credit(ctx context.Context, r *types.Request) (*big.Int, error) {
 	// Prepare Message
 	msg := &sarama.ProducerMessage{}
 	err := f.prepareMsg(r, msg)
 	if err != nil {
-		return big.NewInt(0), false, errors.FromError(err).ExtendComponent(component)
+		return big.NewInt(0), errors.FromError(err).ExtendComponent(component)
 	}
 
 	// Send message
 	partition, offset, err := f.p.SendMessage(msg)
 	if err != nil {
-		return big.NewInt(0), false, errors.FromError(err).ExtendComponent(component)
+		return big.NewInt(0), errors.FromError(err).ExtendComponent(component)
 	}
 
 	log.WithFields(log.Fields{
@@ -77,5 +77,5 @@ func (f *Faucet) Credit(ctx context.Context, r *types.Request) (*big.Int, bool, 
 		"kafka.out.topic":     msg.Topic,
 	}).Tracef("faucet: message produced")
 
-	return r.Amount, true, nil
+	return r.Amount, nil
 }

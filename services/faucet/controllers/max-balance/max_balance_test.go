@@ -37,7 +37,7 @@ func TestMaxBalance(t *testing.T) {
 	credit := c.Control(mock.Credit)
 
 	// Prepare test data
-	rounds := 600
+	rounds := 50
 	tests := make([]*testutils.TestRequest, 0)
 	for i := 0; i < rounds; i++ {
 		var expectedAmount *big.Int
@@ -60,7 +60,6 @@ func TestMaxBalance(t *testing.T) {
 					ChainID: chains[i%3],
 					Amount:  values[i%3],
 				},
-				ExpectedOK:     i%3 == 0,
 				ExpectedAmount: expectedAmount,
 				ExpectedErr:    expectedErr,
 			},
@@ -73,8 +72,8 @@ func TestMaxBalance(t *testing.T) {
 		wg.Add(1)
 		go func(test *testutils.TestRequest) {
 			defer wg.Done()
-			amount, ok, err := credit(context.Background(), test.Req)
-			test.ResultAmount, test.ResultOK, test.ResultErr = amount, ok, err
+			amount, err := credit(context.Background(), test.Req)
+			test.ResultAmount, test.ResultErr = amount, err
 		}(test)
 	}
 	wg.Wait()

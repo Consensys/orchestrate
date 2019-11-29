@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
 )
@@ -38,16 +39,16 @@ func (ctrl *Controller) Creditor(chainID *big.Int) (ethcommon.Address, bool) {
 
 // Control apply BlackList controller on a credit function
 func (ctrl *Controller) Control(credit faucet.CreditFunc) faucet.CreditFunc {
-	return func(ctx context.Context, r *types.Request) (*big.Int, bool, error) {
+	return func(ctx context.Context, r *types.Request) (*big.Int, error) {
 		creditor, ok := ctrl.Creditor(r.ChainID)
 		if !ok {
 			// No creditor for the given chain
-			return big.NewInt(0), false, nil
+			return big.NewInt(0), errors.FaucetNotConfiguredWarning("no creditor for the given chain")
 		}
 
 		if creditor.Hex() == r.Beneficiary.Hex() {
 			// Creditor does auto-credit
-			return big.NewInt(0), false, nil
+			return big.NewInt(0), errors.FaucetSelfCreditWarning("attempt to credit the creditor")
 		}
 
 		return credit(ctx, &types.Request{

@@ -30,7 +30,7 @@ func TestCreditor(t *testing.T) {
 	credit := cntrl.Control(mock.Credit)
 
 	// Prepare test data
-	rounds := 600
+	rounds := 50
 	tests := make([]*testutils.TestRequest, 0)
 	for i := 0; i < rounds; i++ {
 		tests = append(
@@ -41,7 +41,6 @@ func TestCreditor(t *testing.T) {
 					Beneficiary: addresses[i%3],
 					Amount:      big.NewInt(20),
 				},
-				ExpectedOK:     true,
 				ExpectedAmount: big.NewInt(10),
 				ExpectedErr:    false,
 			},
@@ -54,7 +53,7 @@ func TestCreditor(t *testing.T) {
 		wg.Add(1)
 		go func(test *testutils.TestRequest) {
 			defer wg.Done()
-			test.ResultAmount, test.ResultOK, test.ResultErr = credit(context.Background(), test.Req)
+			test.ResultAmount, test.ResultErr = credit(context.Background(), test.Req)
 		}(test)
 	}
 	wg.Wait()

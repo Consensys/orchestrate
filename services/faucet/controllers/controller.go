@@ -34,6 +34,6 @@ func NewControlledFaucet(f faucet.Faucet, controls ...ControlFunc) *ControlledFa
 }
 
 // Credit credit
-func (f *ControlledFaucet) Credit(ctx context.Context, r *types.Request) (*big.Int, bool, error) {
+func (f *ControlledFaucet) Credit(ctx context.Context, r *types.Request) (*big.Int, error) {
 	return f.credit(ctx, r)
 }

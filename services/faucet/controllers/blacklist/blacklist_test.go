@@ -32,7 +32,7 @@ func TestBlackList(t *testing.T) {
 	credit := cntrl.Control(mock.Credit)
 
 	// Prepare test data
-	rounds := 600
+	rounds := 50
 	tests := make([]*testutils.TestRequest, 0)
 	for i := 0; i < rounds; i++ {
 		var expectedAmount *big.Int
@@ -52,7 +52,6 @@ func TestBlackList(t *testing.T) {
 					Beneficiary: addresses[(i+i%2)%3],
 					Amount:      big.NewInt(10),
 				},
-				ExpectedOK:     i%2 == 1,
 				ExpectedAmount: expectedAmount,
 				ExpectedErr:    expectErr,
 			},
@@ -65,8 +64,8 @@ func TestBlackList(t *testing.T) {
 		wg.Add(1)
 		go func(test *testutils.TestRequest) {
 			defer wg.Done()
-			amount, ok, err := credit(context.Background(), test.Req)
-			test.ResultAmount, test.ResultOK, test.ResultErr = amount, ok, err
+			amount, err := credit(context.Background(), test.Req)
+			test.ResultAmount, test.ResultErr = amount, err
 		}(test)
 	}
 	wg.Wait()

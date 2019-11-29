@@ -31,7 +31,6 @@ func TestFaucet(t *testing.T) {
 			tests,
 			&testutils.TestRequest{
 				Req:            r,
-				ExpectedOK:     true,
 				ExpectedAmount: big.NewInt(20),
 				ExpectedErr:    false,
 			},
@@ -45,8 +44,8 @@ func TestFaucet(t *testing.T) {
 		wg.Add(1)
 		go func(test *testutils.TestRequest) {
 			defer wg.Done()
-			amount, ok, err := f.Credit(context.Background(), test.Req)
-			test.ResultAmount, test.ResultOK, test.ResultErr = amount, ok, err
+			amount, err := f.Credit(context.Background(), test.Req)
+			test.ResultAmount, test.ResultErr = amount, err
 		}(test)
 	}
 	wg.Wait()

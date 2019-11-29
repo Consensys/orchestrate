@@ -22,21 +22,28 @@ func Faucet(fct faucet.Faucet) engine.HandlerFunc {
 		}
 
 		// Credit
-		amount, approved, err := fct.Credit(txctx.Context(), req)
+		amount, err := fct.Credit(txctx.Context(), req)
 		if err != nil {
-			e := errors.FromError(err).ExtendComponent(component)
-			txctx.Logger.WithError(e).Warnf("faucet: credit error")
-			return
+			switch {
+			case errors.IsFaucetSelfCreditWarning(err):
+				return
+			case errors.IsFaucetNotConfiguredWarning(err):
+				e := errors.FromError(err).ExtendComponent(component)
+				txctx.Logger.WithError(e).Debug("faucet: not configured")
+				return
+			case errors.IsWarning(err):
+				e := errors.FromError(err).ExtendComponent(component)
+				txctx.Logger.WithError(e).Debugf("faucet: credit refused")
+				return
+			default:
+				e := errors.FromError(err).ExtendComponent(component)
+				txctx.Logger.WithError(e).Error("faucet: credit error")
+				return
+			}
 		}
 
-		if !approved {
-			txctx.Logger.Debugf("faucet: credit not approved")
-			return
-		}
-
-		txctx.Logger = txctx.Logger.WithFields(log.Fields{
+		txctx.Logger.WithFields(log.Fields{
 			"faucet.amount": amount.Text(10),
-		})
-		txctx.Logger.Debugf("faucet: credit approved")
+		}).Infof("faucet: credit approved")
 	}
 }

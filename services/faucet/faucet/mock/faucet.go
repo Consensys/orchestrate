@@ -8,8 +8,8 @@ import (
 )
 
 // Credit is a Mock crediting function
-func Credit(ctx context.Context, r *types.Request) (*big.Int, bool, error) {
-	return r.Amount, true, nil
+func Credit(ctx context.Context, r *types.Request) (*big.Int, error) {
+	return r.Amount, nil
 }
 
 // Faucet is a mock Faucet
@@ -21,6 +21,6 @@ func NewFaucet() *Faucet {
 }
 
 // Credit is mock crediting function
-func (faucet *Faucet) Credit(ctx context.Context, r *types.Request) (*big.Int, bool, error) {
+func (faucet *Faucet) Credit(ctx context.Context, r *types.Request) (*big.Int, error) {
 	return Credit(ctx, r)
 }

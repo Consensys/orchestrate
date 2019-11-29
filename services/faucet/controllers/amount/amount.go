@@ -4,6 +4,7 @@ import (
 	"context"
 	"math/big"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
 )
@@ -22,9 +23,9 @@ func NewController(conf *Config) *Controller {
 
 // Control apply BlackList controller on a credit function
 func (ctrl *Controller) Control(credit faucet.CreditFunc) faucet.CreditFunc {
-	return func(ctx context.Context, r *types.Request) (*big.Int, bool, error) {
+	return func(ctx context.Context, r *types.Request) (*big.Int, error) {
 		if ctrl.conf.Amount.Text(10) == "0" {
-			return big.NewInt(0), false, nil
+			return big.NewInt(0), errors.FaucetNotConfiguredWarning("credit is configured to zero")
 		}
 
 		return credit(ctx, &types.Request{

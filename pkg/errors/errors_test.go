@@ -27,6 +27,24 @@ func TestFaucetWarning(t *testing.T) {
 	assert.Equal(t, "01200", e.Hex(), "FaucetWarning Hex representation should be correct")
 }
 
+func TestFaucetNotConfiguredWarning(t *testing.T) {
+	e := FaucetNotConfiguredWarning("test")
+	assert.Equal(t, uint64(4609), e.GetCode(), "FaucetNotConfiguredWarning code should be correct")
+	assert.True(t, IsWarning(e), "FaucetNotConfiguredWarning should be a connection error")
+	assert.True(t, IsFaucetWarning(e), "FaucetNotConfiguredWarning should be a connection error")
+	assert.True(t, IsFaucetNotConfiguredWarning(e), "FaucetNotConfiguredWarning should be a connection error")
+	assert.Equal(t, "01201", e.Hex(), "FaucetNotConfiguredWarning Hex representation should be correct")
+}
+
+func TestFaucetSelfCreditWarning(t *testing.T) {
+	e := FaucetSelfCreditWarning("test")
+	assert.Equal(t, uint64(4610), e.GetCode(), "FaucetSelfCreditWarning code should be correct")
+	assert.True(t, IsWarning(e), "FaucetSelfCreditWarning should be a connection error")
+	assert.True(t, IsFaucetWarning(e), "FaucetSelfCreditWarning should be a connection error")
+	assert.True(t, IsFaucetSelfCreditWarning(e), "FaucetSelfCreditWarning should be a connection error")
+	assert.Equal(t, "01202", e.Hex(), "FaucetSelfCreditWarning Hex representation should be correct")
+}
+
 func TestInvalidNonceWarning(t *testing.T) {
 	e := InvalidNonceWarning("test")
 	assert.Equal(t, uint64(4864), e.GetCode(), "InvalidNonceWarning code should be correct")

@@ -34,17 +34,14 @@ func TestCoolDown(t *testing.T) {
 	credit := cntrl.Control(mock.Credit)
 
 	// Prepare test data
-	rounds := 60
+	rounds := 50
 	tests := make([]*testutils.TestRequest, 0)
 	for i := 0; i < rounds; i++ {
 		var expectedAmount *big.Int
-		var expectedErr bool
 		if i%6 < 3 {
 			expectedAmount = big.NewInt(10)
-			expectedErr = false
 		} else {
 			expectedAmount = big.NewInt(0)
-			expectedErr = true
 		}
 		tests = append(
 			tests,
@@ -54,9 +51,8 @@ func TestCoolDown(t *testing.T) {
 					Beneficiary: addresses[i%3],
 					Amount:      big.NewInt(10),
 				},
-				ExpectedOK:     i%6 < 3,
 				ExpectedAmount: expectedAmount,
-				ExpectedErr:    expectedErr,
+				ExpectedErr:    i%6 >= 3,
 			},
 		)
 	}
@@ -67,7 +63,7 @@ func TestCoolDown(t *testing.T) {
 		wg.Add(1)
 		go func(test *testutils.TestRequest) {
 			defer wg.Done()
-			test.ResultAmount, test.ResultOK, test.ResultErr = credit(context.Background(), test.Req)
+			test.ResultAmount, test.ResultErr = credit(context.Background(), test.Req)
 		}(test)
 		switch i % 6 {
 		case 2:

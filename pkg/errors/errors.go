@@ -7,9 +7,11 @@ import (
 // Error codes are uint64 for performances purposes but should be seen as 5 nibbles hex codes
 const (
 	// Warnings (class 01XXX)
-	Warning uint64 = 1 << 12
-	Retry          = Warning + 1<<8 // Retries (subclass 011XX)
-	Faucet         = Warning + 2<<8 // Faucet credit denied (subclass 012XX)
+	Warning             uint64 = 1 << 12
+	Retry                      = Warning + 1<<8 // Retries (subclass 011XX)
+	Faucet                     = Warning + 2<<8 // Faucet credit denied (subclass 012XX)
+	FaucetNotConfigured        = Faucet + 1     // Faucet is not configured for this chain
+	FaucetSelfCredit           = Faucet + 2     // Faucet credit cannot target the creditor
 
 	// Invalid Nonce warnings(class 013xx)
 	InvalidNonce = Warning + 3<<8
@@ -98,6 +100,26 @@ func FaucetWarning(format string, a ...interface{}) *ierror.Error {
 // IsFaucetWarning indicate whether an error is a faucet Warning
 func IsFaucetWarning(err error) bool {
 	return isErrorClass(FromError(err).GetCode(), Faucet)
+}
+
+// FaucetNotConfigured are raised when a faucet credit has been denied
+func FaucetNotConfiguredWarning(format string, a ...interface{}) *ierror.Error {
+	return Errorf(FaucetNotConfigured, format, a...)
+}
+
+// IsFaucetNotConfiguredWarning indicate whether an error is a faucetNotConfigured Warning
+func IsFaucetNotConfiguredWarning(err error) bool {
+	return isErrorClass(FromError(err).GetCode(), FaucetNotConfigured)
+}
+
+// FaucetSelfCredit are raised when a faucet credit is attempted on the creditor
+func FaucetSelfCreditWarning(format string, a ...interface{}) *ierror.Error {
+	return Errorf(FaucetSelfCredit, format, a...)
+}
+
+// IsFaucetSelfCreditWarning indicate whether an error is a FaucetSelfCredit warning
+func IsFaucetSelfCreditWarning(err error) bool {
+	return isErrorClass(FromError(err).GetCode(), FaucetSelfCredit)
 }
 
 // InvalidNonceWarning are raised when an invalid nonce is detected

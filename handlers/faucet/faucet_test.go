@@ -18,11 +18,11 @@ type MockFaucet struct {
 	t *testing.T
 }
 
-func (f *MockFaucet) Credit(ctx context.Context, r *faucettypes.Request) (*big.Int, bool, error) {
+func (f *MockFaucet) Credit(ctx context.Context, r *faucettypes.Request) (*big.Int, error) {
 	if r.ChainID.Text(10) == "0" {
-		return big.NewInt(0), false, errors.FaucetWarning("could not credit").SetComponent("mock")
+		return big.NewInt(0), errors.FaucetWarning("could not credit").SetComponent("mock")
 	}
-	return r.Amount, true, nil
+	return r.Amount, nil
 }
 
 func makeFaucetContext(i int) *engine.TxContext {

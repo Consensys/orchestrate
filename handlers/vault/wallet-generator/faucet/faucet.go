@@ -3,6 +3,7 @@ package faucet
 import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet"
 	faucettypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
 )
@@ -31,21 +32,28 @@ func Faucet(fct faucet.Faucet) engine.HandlerFunc {
 		}
 
 		// Credit
-		amount, approved, err := fct.Credit(txctx.Context(), req)
+		amount, err := fct.Credit(txctx.Context(), req)
 		if err != nil {
-			e := txctx.Error(err).ExtendComponent(component)
-			txctx.Logger.WithError(e).Errorf("faucet: credit error")
-			return
+			switch {
+			case errors.IsFaucetSelfCreditWarning(err):
+				return
+			case errors.IsFaucetNotConfiguredWarning(err):
+				e := errors.FromError(err).ExtendComponent(component)
+				txctx.Logger.WithError(e).Debug("faucet: not configured")
+				return
+			case errors.IsWarning(err):
+				e := errors.FromError(err).ExtendComponent(component)
+				txctx.Logger.WithError(e).Debugf("faucet: credit refused")
+				return
+			default:
+				e := errors.FromError(err).ExtendComponent(component)
+				txctx.Logger.WithError(e).Error("faucet: credit error")
+				return
+			}
 		}
 
-		if approved {
-			txctx.Logger.WithFields(log.Fields{
-				"faucet.amount": amount.Text(10),
-			}).Debugf("faucet: credit approved")
-		} else {
-			txctx.Logger.WithFields(log.Fields{
-				"faucet.amount": amount.Text(10),
-			}).Debugf("faucet: credit not approved")
-		}
+		txctx.Logger.WithFields(log.Fields{
+			"faucet.amount": amount.Text(10),
+		}).Infof("faucet: credit approved")
 	}
 }
