@@ -46,6 +46,7 @@ This is the first stable release of Orchestrate.
 
 This is the list of breaking change with the Beta release. 
 
+* **config** Rename `JAEGER_DISABLED` to `JAEGER_ENABLED`
 * **config** Rename `GRPC_TARGET_CONTRACT_REGISTRY` to `CONTRACT_REGISTRY_URL`
 * **config** Rename `GRPC_TARGET_ENVELOPE_STORE` to `ENVELOPE_STORE_URL`
 * **config** Rename `KAFKA_ADDRESS` to `KAFKA_URL`

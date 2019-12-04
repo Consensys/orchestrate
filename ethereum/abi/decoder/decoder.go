@@ -48,7 +48,7 @@ func GetElemType(t *abi.Type) (abi.Type, error) {
 	switch strings.Count(t.Elem.String(), "(") {
 	case 0:
 		// Not a struct - able to return the correct type
-		return abi.NewType(t.Elem.String(), nil)
+		return abi.NewType(t.Elem.String(), "", nil)
 	case 1:
 		// Simple struct containing elementary types
 		nestedTypes := regexp.MustCompile(`\((.*?)\)`).FindStringSubmatch(fmt.Sprintf("%v", t.Elem))
@@ -62,7 +62,7 @@ func GetElemType(t *abi.Type) (abi.Type, error) {
 			}
 		}
 
-		return abi.NewType("tuple", tupleArgs)
+		return abi.NewType("tuple", "", tupleArgs)
 	}
 
 	return abi.Type{}, errors.FeatureNotSupportedError("no go-ethereum type for %v", t).SetComponent(component)

@@ -86,7 +86,7 @@ func bindArg(t *ethabi.Type, arg string) (interface{}, error) {
 }
 
 func bindArrayArg(t *ethabi.Type, arg string) (interface{}, error) {
-	elemType, _ := ethabi.NewType(t.Elem.String(), nil)
+	elemType, _ := ethabi.NewType(t.Elem.String(), "", nil)
 	slice := reflect.MakeSlice(reflect.SliceOf(elemType.Type), 0, 0)
 
 	var argArray []string
@@ -193,7 +193,7 @@ func SignatureToMethod(methodSig string) (*ethabi.Method, error) {
 	inputArgs := splt[1][:len(splt[1])-1]
 	if inputArgs != "" {
 		for _, arg := range strings.Split(inputArgs, ",") {
-			inputType, err := ethabi.NewType(arg, nil)
+			inputType, err := ethabi.NewType(arg, "", nil)
 			if err != nil {
 				return nil, errors.InvalidSignatureError(methodSig).SetMessage("invalid method signature (%v)", err).SetComponent(component)
 			}

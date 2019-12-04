@@ -43,7 +43,7 @@ func TestFormatIndexedArg(t *testing.T) {
 			"1",
 		},
 	} {
-		typeArg, _ := abi.NewType(test.argType, nil)
+		typeArg, _ := abi.NewType(test.argType, "", nil)
 		output, _ := FormatIndexedArg(&typeArg, test.arg)
 
 		if test.expectedOutput != output {
