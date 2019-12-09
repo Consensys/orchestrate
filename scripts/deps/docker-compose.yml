@@ -59,7 +59,7 @@ services:
     volumes:
       - db-data-envelope-store:/var/lib/postgresql/data
     ports:
-      - 5432
+      - 5432:5432
 
   geth:
     <<: *container-common

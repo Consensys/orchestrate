@@ -57,6 +57,8 @@ run:
   deadline: 20m
   skip-dirs:
     - .gocache
+  skip-files:
+    - services/chain-registry/genstatic/gen.go
 
 service:
   golangci-lint-version: 1.20.x
