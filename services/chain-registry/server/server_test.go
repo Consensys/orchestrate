@@ -241,7 +241,8 @@ func TestServerResponseEmptyBackend(t *testing.T) {
 		test := test
 
 		t.Run(test.desc, func(t *testing.T) {
-			t.Parallel()
+			// Comment following to avoid race
+			// t.Parallel()
 
 			testServer := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 				rw.WriteHeader(http.StatusOK)
