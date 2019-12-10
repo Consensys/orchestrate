@@ -8,6 +8,7 @@ import (
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	"k8s.io/apimachinery/pkg/util/rand"
 )
@@ -46,14 +47,10 @@ func NewPGTestHelper(collection *migrations.Collection) *PGTestHelper {
 func (helper *PGTestHelper) InitTestDB(t *testing.T) {
 	db := pg.Connect(helper.Opts)
 	_, err := db.Exec(`DROP DATABASE IF EXISTS ?;`, pg.Q(helper.TestDBName))
-	if err != nil {
-		log.WithError(err).Fatal("could not drop database")
-	}
+	assert.NoError(t, err, "could not drop database")
 
 	_, err = db.Exec(`CREATE DATABASE ?;`, pg.Q(helper.TestDBName))
-	if err != nil {
-		log.WithError(err).Fatal("could not create database")
-	}
+	assert.NoError(t, err, "could not create database")
 
 	err = db.Close()
 	if err != nil {
@@ -75,21 +72,17 @@ func (helper *PGTestHelper) InitTestDB(t *testing.T) {
 // Upgrade run migrations 'up'
 func (helper *PGTestHelper) Upgrade(t *testing.T) {
 	oldVersion, newVersion, err := helper.Collection.Run(helper.DB, "up")
-	if err != nil {
-		t.Errorf("Failed migrate up: %v", err)
-	} else {
-		t.Logf("Migrated up from version=%v to version=%v", oldVersion, newVersion)
-	}
+	assert.NoError(t, err, "Failed migrate up")
+
+	t.Logf("Migrated up from version=%v to version=%v", oldVersion, newVersion)
 }
 
 // Downgrade run migrations 'reset'
 func (helper *PGTestHelper) Downgrade(t *testing.T) {
 	oldVersion, newVersion, err := helper.Collection.Run(helper.DB, "reset")
-	if err != nil {
-		t.Errorf("Failed migrate down: %v", err)
-	} else {
-		t.Logf("Migrated down from version=%v to version=%v", oldVersion, newVersion)
-	}
+	assert.NoError(t, err, "Failed migrate down")
+
+	t.Logf("Migrated down from version=%v to version=%v", oldVersion, newVersion)
 }
 
 // DropTestDB drop test database
@@ -103,9 +96,8 @@ func (helper *PGTestHelper) DropTestDB(t *testing.T) {
 	// Drop test Database
 	db := pg.Connect(helper.Opts)
 	_, err = db.Exec(`DROP DATABASE ?;`, pg.Q(helper.TestDBName))
-	if err != nil {
-		log.WithError(err).Fatal("could not drop database")
-	}
+	assert.NoError(t, err, "could not drop database")
+
 	err = db.Close()
 	if err != nil {
 		log.WithError(err).Warn("could not close postgres connection")

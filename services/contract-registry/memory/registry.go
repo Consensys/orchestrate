@@ -101,20 +101,20 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 					r.methods[codeHash] = make(map[[4]byte][][]byte)
 				}
 
-				r.methods[codeHash][sel] = [][]byte{methodJSONs[method.Name]}
+				r.methods[codeHash][sel] = [][]byte{methodJSONs[method.Sig()]}
 			}
 
 			// Register in default methods if not present
 			found := false
 			for _, registeredMethod := range r.methods[defaultCodehash][sel] {
-				if reflect.DeepEqual(registeredMethod, methodJSONs[method.Name]) {
+				if reflect.DeepEqual(registeredMethod, methodJSONs[method.Sig()]) {
 					found = true
 				}
 			}
 			if !found {
 				r.methods[defaultCodehash][sel] = append(
 					r.methods[defaultCodehash][sel],
-					methodJSONs[method.Name],
+					methodJSONs[method.Sig()],
 				)
 			}
 		}
@@ -134,7 +134,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 					r.events[codeHash][event.ID()] = make(map[uint][][]byte)
 				}
 
-				r.events[codeHash][event.ID()][indexedCount] = [][]byte{eventJSONs[event.Name]}
+				r.events[codeHash][event.ID()][indexedCount] = [][]byte{eventJSONs[event.Sig()]}
 			}
 
 			// Init map
@@ -144,14 +144,14 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 			// Register in default events if not present
 			found := false
 			for _, registeredEvent := range r.events[defaultCodehash][event.ID()][indexedCount] {
-				if reflect.DeepEqual(registeredEvent, eventJSONs[event.Name]) {
+				if reflect.DeepEqual(registeredEvent, eventJSONs[event.Sig()]) {
 					found = true
 				}
 			}
 			if !found {
 				r.events[defaultCodehash][event.ID()][indexedCount] = append(
 					r.events[defaultCodehash][event.ID()][indexedCount],
-					eventJSONs[event.Name],
+					eventJSONs[event.Sig()],
 				)
 			}
 		}

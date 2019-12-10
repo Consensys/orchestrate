@@ -60,9 +60,19 @@ func ParseJSONABI(data []byte) (methods, events map[string][]byte, err error) {
 		}
 		switch parsedFields[i].Type {
 		case "function", "":
-			methods[parsedFields[i].Name] = fieldJSON
+			var m *ethabi.Method
+			err := json.Unmarshal(fieldJSON, &m)
+			if err != nil {
+				return nil, nil, errors.FromError(err).ExtendComponent(component)
+			}
+			methods[m.Name+m.Sig()] = fieldJSON
 		case "event":
-			events[parsedFields[i].Name] = fieldJSON
+			var e *ethabi.Event
+			err := json.Unmarshal(fieldJSON, &e)
+			if err != nil {
+				return nil, nil, errors.FromError(err).ExtendComponent(component)
+			}
+			events[e.Name+e.Sig()] = fieldJSON
 		}
 	}
 	return methods, events, nil

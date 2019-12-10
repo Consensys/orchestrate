@@ -74,7 +74,7 @@ func (e *EventsModel) Registers(conn *Conn,
 	for index, eventKey := range eventKeys {
 		err := conn.SendRPush(
 			e.Key(deployedByteCodeHash, eventIDs[index], indexedCounts[index]),
-			eventJSONs[events[eventKey].Name])
+			eventJSONs[events[eventKey].Sig()])
 
 		if err != nil {
 			return err
@@ -118,12 +118,12 @@ func (e *EventsModel) Registers(conn *Conn,
 			return err
 		}
 
-		if !ok || !e.Find(registeredEvents, eventJSONs[events[eventKey].Name]) {
+		if !ok || !e.Find(registeredEvents, eventJSONs[events[eventKey].Sig()]) {
 			notFoundCount++
 
 			err = conn.SendRPush(
 				e.Key(defaultCodeHash, eventIDs[index], indexedCounts[index]),
-				eventJSONs[events[eventKey].Name],
+				eventJSONs[events[eventKey].Sig()],
 			)
 
 			if err != nil {

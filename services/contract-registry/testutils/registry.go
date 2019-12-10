@@ -23,8 +23,8 @@ type ContractRegistryTestSuite struct {
 	R svc.ContractRegistryServer
 }
 
-// ERC20 is a unittest value
-var ERC20 = []byte(
+// erc20 is a unittest value
+var erc20 = []byte(
 	`[{
     "anonymous": false,
     "inputs": [
@@ -66,12 +66,21 @@ var ERC20 = []byte(
     "type": "function"
     }]`)
 
-// ERC20bis is a unittest value
-var ERC20bis = []byte(
+// erc20bis is a unittest value
+var erc20bis = []byte(
 	`[{
 	"anonymous": false,
 	"inputs": [
 	  {"indexed": false, "name": "account", "type": "address"},
+	  {"indexed": true, "name": "account2", "type": "address"}
+	],
+	"name": "MinterAdded",
+	"type": "event"
+  },
+  {
+	"anonymous": false,
+	"inputs": [
+	  {"indexed": false, "name": "account", "type": "uint256"},
 	  {"indexed": true, "name": "account2", "type": "address"}
 	],
 	"name": "MinterAdded",
@@ -98,45 +107,58 @@ var ERC20bis = []byte(
 	"payable": false,
 	"stateMutability": "view",
 	"type": "function"
+	},
+  {
+	"constant": true,
+	"inputs": [
+	  {"name": "accountBis", "type": "uint256"}
+	],
+	"name": "isMinter",
+	"outputs": [
+	  {"name": "", "type": "bool"}
+	],
+	"payable": false,
+	"stateMutability": "view",
+	"type": "function"
 	}]`)
 
 var methodSig = []byte("isMinter(address)")
 var eventSig = []byte("MinterAdded(address,address)")
 
-// ERC20Contract is a unittest value
-var ERC20Contract = &abi.Contract{
+// erc20Contract is a unittest value
+var erc20Contract = &abi.Contract{
 	Id: &abi.ContractId{
 		Name: "ERC20",
 		Tag:  "v1.0.0",
 	},
-	Abi:              ERC20,
+	Abi:              erc20,
 	Bytecode:         []byte{1, 2},
 	DeployedBytecode: []byte{1, 2, 3},
 }
-var compactedERC20, _ = ERC20Contract.GetABICompacted()
+var compactedERC20, _ = erc20Contract.GetABICompacted()
 
-// ERC20ContractBis is a unittest value
-var ERC20ContractBis = &abi.Contract{
+// erc20ContractBis is a unittest value
+var erc20ContractBis = &abi.Contract{
 	Id: &abi.ContractId{
 		Name: "ERC20",
 	},
-	Abi:              ERC20bis,
+	Abi:              erc20bis,
 	Bytecode:         []byte{1, 3},
 	DeployedBytecode: []byte{1, 2, 4},
 }
 
-// ERC20ContractBis is a unittest value
+// erc20ContractBis is a unittest value
 var anotherERC20Contract = &abi.Contract{
 	Id: &abi.ContractId{
 		Name: "AnotherERC20",
 	},
-	Abi:              ERC20bis,
+	Abi:              erc20bis,
 	Bytecode:         []byte{1, 3},
 	DeployedBytecode: []byte{1, 2, 4},
 }
 
-var methodJSONs, eventJSONs, _ = rcommon.ParseJSONABI(ERC20Contract.Abi)
-var _, eventJSONsBis, _ = rcommon.ParseJSONABI(ERC20ContractBis.Abi)
+var methodJSONs, eventJSONs, _ = rcommon.ParseJSONABI(erc20Contract.Abi)
+var _, eventJSONsBis, _ = rcommon.ParseJSONABI(erc20ContractBis.Abi)
 
 // ContractInstance is a unittest value
 var ContractInstance = common.AccountInstance{
@@ -164,12 +186,12 @@ func (s *ContractRegistryTestSuite) TestRegisterContract() {
 	// While redis enforce that all data is correctly passed
 
 	_, err := s.R.RegisterContract(context.Background(),
-		&svc.RegisterContractRequest{Contract: ERC20Contract},
+		&svc.RegisterContractRequest{Contract: erc20Contract},
 	)
 	assert.NoError(s.T(), err, "Should register contract properly")
 
 	_, err = s.R.RegisterContract(context.Background(),
-		&svc.RegisterContractRequest{Contract: ERC20Contract},
+		&svc.RegisterContractRequest{Contract: erc20Contract},
 	)
 	assert.NoError(s.T(), err, "Should register contract properly twice")
 
@@ -188,11 +210,11 @@ func (s *ContractRegistryTestSuite) TestRegisterContract() {
 // TestContractRegistryBySig checks the self-consistency of the contract-registry
 func (s *ContractRegistryTestSuite) TestContractRegistryBySig() {
 	_, err := s.R.RegisterContract(context.Background(),
-		&svc.RegisterContractRequest{Contract: ERC20Contract},
+		&svc.RegisterContractRequest{Contract: erc20Contract},
 	)
 	assert.NoError(s.T(), err)
 	_, err = s.R.RegisterContract(context.Background(),
-		&svc.RegisterContractRequest{Contract: ERC20ContractBis},
+		&svc.RegisterContractRequest{Contract: erc20ContractBis},
 	)
 	assert.NoError(s.T(), err)
 
@@ -255,7 +277,7 @@ func (s *ContractRegistryTestSuite) TestContractRegistryBySig() {
 			},
 		})
 	assert.NoError(s.T(), err)
-	assert.Equal(s.T(), ERC20Contract.Bytecode, bytecodeResp.GetBytecode())
+	assert.Equal(s.T(), erc20Contract.Bytecode, bytecodeResp.GetBytecode())
 	bytecodeResp, err = s.R.GetContractBytecode(context.Background(),
 		&svc.GetContractRequest{
 			ContractId: &abi.ContractId{
@@ -279,7 +301,7 @@ func (s *ContractRegistryTestSuite) TestContractRegistryBySig() {
 			},
 		})
 	assert.NoError(s.T(), err)
-	assert.Equal(s.T(), ERC20Contract.DeployedBytecode, deployedBytecodeResp.GetDeployedBytecode())
+	assert.Equal(s.T(), erc20Contract.DeployedBytecode, deployedBytecodeResp.GetDeployedBytecode())
 	deployedBytecodeResp, err = s.R.GetContractDeployedBytecode(context.Background(),
 		&svc.GetContractRequest{
 			ContractId: &abi.ContractId{
@@ -312,7 +334,7 @@ func (s *ContractRegistryTestSuite) TestContractRegistryBySig() {
 		})
 	assert.NoError(s.T(), err)
 	assert.Nil(s.T(), methodResp.GetMethod())
-	assert.Equal(s.T(), [][]byte{methodJSONs["isMinter"]}, methodResp.GetDefaultMethods())
+	assert.Equal(s.T(), [][]byte{methodJSONs["isMinter(address)"]}, methodResp.GetDefaultMethods())
 
 	// Get EventsBySigHash wrong indexed count
 	eventResp, err := s.R.GetEventsBySigHash(context.Background(),
@@ -336,7 +358,9 @@ func (s *ContractRegistryTestSuite) TestContractRegistryBySig() {
 			IndexedInputCount: 1})
 	assert.NoError(s.T(), err)
 	assert.Nil(s.T(), eventResp.GetEvent())
-	assert.Equal(s.T(), [][]byte{eventJSONs["MinterAdded"], eventJSONsBis["MinterAdded"]}, eventResp.GetDefaultEvents())
+	assert.Equal(s.T(),
+		[][]byte{eventJSONs["MinterAdded(address,address)"], eventJSONsBis["MinterAdded(address,address)"]},
+		eventResp.GetDefaultEvents())
 
 	// Update smart-contract address
 	_, err = s.R.SetAccountCodeHash(context.Background(),
@@ -352,7 +376,7 @@ func (s *ContractRegistryTestSuite) TestContractRegistryBySig() {
 			Selector:        crypto.Keccak256(methodSig)[:4],
 			AccountInstance: &ContractInstance})
 	assert.NoError(s.T(), err)
-	assert.Equal(s.T(), methodJSONs["isMinter"], methodResp.GetMethod())
+	assert.Equal(s.T(), methodJSONs["isMinter(address)"], methodResp.GetMethod())
 	assert.Nil(s.T(), methodResp.GetDefaultMethods())
 
 	// Get EventsBySigHash
@@ -363,6 +387,6 @@ func (s *ContractRegistryTestSuite) TestContractRegistryBySig() {
 			AccountInstance:   &ContractInstance,
 			IndexedInputCount: 1})
 	assert.NoError(s.T(), err)
-	assert.Equal(s.T(), eventJSONs["MinterAdded"], eventResp.GetEvent())
+	assert.Equal(s.T(), eventJSONs["MinterAdded(address,address)"], eventResp.GetEvent())
 	assert.Nil(s.T(), eventResp.GetDefaultEvents())
 }

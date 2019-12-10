@@ -7,7 +7,7 @@ mkdir -p build/coverage
 go test -covermode=count -coverprofile build/coverage/profile.out "$@"
 
 # Ignore generated & testutils files
-cat build/coverage/profile.out | grep -Fv -e ".pb.go" -e ".pb.gw.go" -e "/test" -e "/testutils" > build/coverage/cover.out
+cat build/coverage/profile.out | grep -Fv -e ".pb.go" -e ".pb.gw.go" -e "/tests" -e "/testutils" > build/coverage/cover.out
 
 # Generate coverage report in html formart
 go tool cover -func=build/coverage/cover.out | grep total:

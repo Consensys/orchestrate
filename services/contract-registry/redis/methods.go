@@ -70,7 +70,7 @@ func (m *MethodsModel) Registers(
 	for index, methodKey := range methodKeys {
 		err := conn.SendRPush(
 			m.Key(deployedByteCodeHash, selectors[index]),
-			methodJSONs[methods[methodKey].Name])
+			methodJSONs[methods[methodKey].Sig()])
 
 		if err != nil {
 			return err
@@ -114,12 +114,12 @@ func (m *MethodsModel) Registers(
 			return err
 		}
 
-		if !ok || !m.Find(registeredMethod, methodJSONs[methods[methodKey].Name]) {
+		if !ok || !m.Find(registeredMethod, methodJSONs[methods[methodKey].Sig()]) {
 			notFoundCount++
 
 			err = conn.SendRPush(
 				m.Key(defaultCodeHash, selectors[index]),
-				methodJSONs[methods[methodKey].Name],
+				methodJSONs[methods[methodKey].Sig()],
 			)
 
 			if err != nil {

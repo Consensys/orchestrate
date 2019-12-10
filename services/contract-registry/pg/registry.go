@@ -107,7 +107,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 				methods = append(methods, &MethodModel{
 					Codehash: codeHash,
 					Selector: sel,
-					ABI:      methodJSONs[method.Name],
+					ABI:      methodJSONs[method.Sig()],
 				})
 			}
 		}
@@ -129,7 +129,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 					Codehash:          codeHash,
 					SigHash:           event.ID(),
 					IndexedInputCount: indexedCount,
-					ABI:               eventJSONs[event.Name],
+					ABI:               eventJSONs[event.Sig()],
 				})
 			}
 		}
