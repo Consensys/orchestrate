@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## v1.1.0 (2019-12-10)
 
 ### 🆕 Features
 
@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 * Add the new flag `KAFKA_CONSUMER_MAX_WAIT_TIME` to configure the maximum waiting time to consume message if messages do not exceed the size`Consumer.Fetch.Min.Byte` (default=20ms)
 
 ### 🛠 Bug fixes
+* Fix issue when registering a contract with methods/events having the same name and different signatures
 * Clean logs: downgrade `OK` and `NotFound` logs to debug level in grpc server and have logger handler in debug level for tx-listener and tx-decoder
 * e2e: use `CUCUMBER_STEPS_TIMEOUT` to put a timeout in cucumber steps before failing
 * Makefile: add bootstrap stage to wait quorum, geth and kafka to start
@@ -21,8 +22,8 @@ All notable changes to this project will be documented in this file.
   * metrics server has changed and is now 8082
 * **config** Rename `KAFKA_SASL_ENABLE` to `KAFKA_SASL_ENABLED`
   
-
-
+  
+  
 ## 1.0.0 (2019-11-07)
 
 This is the first stable release of Orchestrate.
