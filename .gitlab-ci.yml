@@ -95,14 +95,7 @@ build-orchestrate-on-branch:
     - /^dev[a-zA-Z0-9\/-]*$/
     - /^feature/[a-zA-Z0-9\/-]*$/
     - /^fix/[a-zA-Z0-9\/-]*$/
-
-build-orchestrate-on-release:
-  <<: *docker-setup
-  script:
-    - *build-orchestrate
-    - docker tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}:rc
-    - docker push ${CI_REGISTRY_IMAGE}:rc
-  only:
+    - /^maintenance/[a-zA-Z0-9\/-]*$/
     - /^release/[a-zA-Z0-9\/-]*$/
 
 build-orchestrate-on-master:
@@ -125,6 +118,7 @@ build-orchestrate-on-tag:
     refs:
       - tags
 
+
 #Build e2e
 build-e2e-on-branch:
   <<: *docker-setup
@@ -136,14 +130,7 @@ build-e2e-on-branch:
     - /^dev[a-zA-Z0-9\/-]*$/
     - /^feature/[a-zA-Z0-9\/-]*$/
     - /^fix/[a-zA-Z0-9\/-]*$/
-
-build-e2e-on-release:
-  <<: *docker-setup
-  script:
-    - *build-e2e
-    - docker tag ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}/e2e:rc
-    - docker push ${CI_REGISTRY_IMAGE}/e2e:rc
-  only:
+    - /^maintenance/[a-zA-Z0-9\/-]*$/
     - /^release/[a-zA-Z0-9\/-]*$/
 
 build-e2e-on-master:
