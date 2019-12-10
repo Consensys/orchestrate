@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store"
+
 	"github.com/containous/traefik/v2/pkg/api"
 	"github.com/containous/traefik/v2/pkg/config/runtime"
 	"github.com/containous/traefik/v2/pkg/config/static"
@@ -23,8 +25,9 @@ func Init(ctx context.Context) {
 			return
 		}
 
+		store.Init()
 		// Set Chain-Registry handler
-		handler = New()
+		handler = New(store.GlobalStoreRegistry())
 	})
 }
 

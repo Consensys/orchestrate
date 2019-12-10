@@ -61,6 +61,14 @@ services:
     ports:
       - 5432:5432
 
+  postgres-chain-registry:
+    <<: *container-common
+    image: postgres:10-alpine
+    volumes:
+      - db-data-chain-registry:/var/lib/postgresql/data
+    ports:
+      - 5432
+
   geth:
     <<: *container-common
     image: ethereum/client-go:v1.9.0
@@ -138,6 +146,8 @@ services:
 
 
 volumes:
+  db-data-chain-registry:
+    driver: local
   db-data-contract-registry:
     driver: local
   db-data-envelope-store:

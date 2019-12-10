@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
+
 	"github.com/containous/traefik/v2/pkg/config/runtime"
 	"github.com/gorilla/mux"
 )
@@ -23,10 +25,13 @@ func writeError(rw http.ResponseWriter, msg string, code int) {
 }
 
 type Handler struct {
+	store types.ChainRegistryStore
 }
 
-func New() *Handler {
-	return &Handler{}
+func New(store types.ChainRegistryStore) *Handler {
+	return &Handler{
+		store: store,
+	}
 }
 
 // Add internal routes to router

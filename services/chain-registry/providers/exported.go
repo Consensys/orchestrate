@@ -7,7 +7,7 @@ import (
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/containous/traefik/v2/pkg/provider/aggregator"
 	internal "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/providers/chain-registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/providers/test"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/providers/registry"
 )
 
 var (
@@ -29,10 +29,10 @@ func Init(ctx context.Context) {
 			log.WithoutContext().WithError(err).Fatalf("error adding internal provider")
 		}
 
-		// TODO: test provider should be replaced
-		err = providerAggregator.AddProvider(test.New())
+		registry.Init()
+		err = providerAggregator.AddProvider(registry.GlobalProvider())
 		if err != nil {
-			log.WithoutContext().WithError(err).Fatalf("error adding test provider")
+			log.WithoutContext().WithError(err).Fatalf("error adding registry provider")
 		}
 	})
 }

@@ -15,6 +15,7 @@ require (
 	github.com/btcsuite/btcd v0.20.1-beta // indirect
 	github.com/c0va23/go-proxyprotocol v0.9.1
 	github.com/cenkalti/backoff v2.2.1+incompatible
+	github.com/cenkalti/backoff/v3 v3.0.0
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/circonus-labs/circonus-gometrics v2.3.1+incompatible
 	github.com/containous/alice v0.0.0-20181107144136-d83ebdd94cbd

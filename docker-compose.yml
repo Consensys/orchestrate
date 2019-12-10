@@ -35,6 +35,10 @@ x-envelope-store-common: &envelope-store-common
   ENVELOPE_STORE_TYPE: ${ENVELOPE_STORE_TYPE-}
   DB_HOST: postgres-envelope-store
 
+x-chain-registry-common: &chain-registry-common
+  CHAIN_REGISTRY_TYPE: ${CHAIN_REGISTRY_TYPE-}
+  DB_HOST: postgres-chain-registry
+
 services:
   contract-registry-migration-init:
     <<: *container-common
@@ -91,6 +95,36 @@ services:
     depends_on:
       - envelope-store-migration
     command: envelope-store run
+
+  chain-registry-migration-init:
+    <<: *container-common
+    environment:
+      <<: *default-variables
+      <<: *chain-registry-common
+    restart: "no"
+    command: chain-registry migrate init
+
+  chain-registry-migration:
+    <<: *container-common
+    environment:
+      <<: *default-variables
+      <<: *chain-registry-common
+    restart: "no"
+    depends_on:
+      - chain-registry-migration-init
+    command: chain-registry migrate
+
+  chain-registry:
+    <<: *container-common
+    ports:
+      - 8080:80
+      - 8081:81
+    environment:
+      <<: *default-variables
+      <<: *chain-registry-common
+    depends_on:
+      - chain-registry-migration
+    command: chain-registry run
 
   tx-crafter:
     <<: *container-common
