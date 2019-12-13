@@ -87,7 +87,6 @@ func registerHandlers() {
 // Start starts application
 func Start(ctx context.Context) {
 	startOnce.Do(func() {
-
 		cancelCtx, cancel := context.WithCancel(ctx)
 		go metrics.StartServer(ctx, cancel, app.IsAlive, app.IsReady)
 

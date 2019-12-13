@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### 🆕 Features
+
+* Add new flag and environment variable `REDIS_EXPIRATION` to configure Redis entry expiration. It is useful for `tx-nonce` and `tx-sender` workers to expire keys and force a nonce recalibration from chain after inactivity of a sender
+* Add new flag and environment variable `NONCE_CHECKER_MAX_RECOVERY` to configure max number of nonce recoveries to perform on a given envelope on `tx-sender`
+* Nonce checker on `tx-sender` ignores envelopes with metadata entry `tx.mode` set to `raw`
+* To start `tx-nonce` and `tx-sender` with nonce manager in memory set configuration `NONCE_MANAGER_TYPE=in-memory`
+
+### 🛠 Bug fixes
+
+* On `envelopestore`, when storing a 2nd envelope with same `tx_hash` and `chain_id` but a distinct `metadata.id` overides the first one
+
 ## v1.1.0 (2019-12-10)
 
 ### 🆕 Features

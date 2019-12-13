@@ -24,7 +24,7 @@ func Init() {
 		pool := NewPool(viper.GetString(URLViperKey))
 
 		// Initialize Nonce
-		nm = NewNonceManager(pool)
+		nm = NewNonceManager(pool, NewConfig())
 
 		log.WithFields(log.Fields{
 			"type": "redis",

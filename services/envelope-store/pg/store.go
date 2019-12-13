@@ -45,8 +45,17 @@ func (s *EnvelopeStore) Store(ctx context.Context, req *evlpstore.StoreRequest) 
 		Returning("*").
 		Insert()
 	if err != nil {
-		log.WithError(err).Error("Could not store")
-		return &evlpstore.StoreResponse{}, errors.ConstraintViolatedError("envelope already stored").ExtendComponent(component)
+		// Possibly we got an error due to unique contraint on tx,chain_id so we try again
+		_, err = s.db.ModelContext(ctx, model).
+			OnConflict("ON CONSTRAINT uni_tx DO UPDATE").
+			Set("envelope = ?envelope").
+			Set("envelope_id = ?envelope_id").
+			Returning("*").
+			Insert()
+		if err != nil {
+			log.WithError(err).Error("Could not store")
+			return &evlpstore.StoreResponse{}, errors.StorageError("%v", err).ExtendComponent(component)
+		}
 	}
 
 	return model.ToStoreResponse()

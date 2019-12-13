@@ -27,12 +27,16 @@ func Init(ctx context.Context) {
 		// Initialize the eth client
 		ethclient.Init(ctx)
 
+		// Create recovery tracker
+		tracker := NewRecoveryTracker()
+
+		conf := NewConfig()
 		if checker == nil {
-			checker = Checker(nonce.GlobalManager(), ethclient.GlobalClient())
+			checker = Checker(conf, nonce.GlobalManager(), ethclient.GlobalClient(), tracker)
 		}
 
 		if recStatusSetter == nil {
-			recStatusSetter = RecoveryStatusSetter(nonce.GlobalManager())
+			recStatusSetter = RecoveryStatusSetter(nonce.GlobalManager(), tracker)
 		}
 
 		log.Infof("nonce: handlers checker & recovery status setter ready")

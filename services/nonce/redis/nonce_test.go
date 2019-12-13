@@ -19,7 +19,10 @@ var testKey = "test-key"
 
 func TestNonceManager(t *testing.T) {
 	mredis := NewRedisMock()
-	nm = NewNonceManager(NewPool(mredis.Addr()))
+	conf := &Configuration{
+		Expiration: 1,
+	}
+	nm = NewNonceManager(NewPool(mredis.Addr()), conf)
 
 	n, ok, err := nm.GetLastAttributed(testKey)
 	assert.Nil(t, err, "When manager is empty: GetLastAttributed should not error")
@@ -43,7 +46,10 @@ func TestNonceManager(t *testing.T) {
 
 func TestNonceNonceSender(t *testing.T) {
 	mredis := NewRedisMock()
-	nm = NewNonceManager(NewPool(mredis.Addr()))
+	conf := &Configuration{
+		Expiration: 1,
+	}
+	nm = NewNonceManager(NewPool(mredis.Addr()), conf)
 
 	n, ok, err := nm.GetLastSent(testKey)
 	assert.Nil(t, err, "When manager is empty: GetLastSent should not error")
@@ -71,4 +77,5 @@ func TestNonceNonceSender(t *testing.T) {
 
 	recovering, _ = nm.IsRecovering(testKey)
 	assert.True(t, recovering, "When recovery status has been set: IsRecovering should be true")
+
 }

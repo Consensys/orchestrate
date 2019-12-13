@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/memory"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/redis"
 
 	log "github.com/sirupsen/logrus"
@@ -30,12 +30,12 @@ func Init(ctx context.Context) {
 
 			// Set Nonce
 			m = redis.GlobalNonceManager()
-		case "mock":
+		case "in-memory":
 			// Initialize Mock Nonce
-			mock.Init(ctx)
+			memory.Init(ctx)
 
 			// Set Nonce
-			m = mock.GlobalNonceManager()
+			m = memory.GlobalNonceManager()
 		default:
 			log.WithFields(log.Fields{
 				"type": viper.GetString(typeViperKey),

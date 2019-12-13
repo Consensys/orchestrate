@@ -42,23 +42,20 @@ func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFun
 			}).Warnf("nonce: recalibrate nonce following recovery signal")
 
 			n = expectedNonce
-
-			// Reset signal field
-			delete(txctx.Envelope.GetMetadata().GetExtra(), "nonce.recovering.expected")
 		} else {
 			// No signal for nonce recovery
 			// Retrieve last attributed nonce from nonce manager
 			lastAttributed, ok, err := nm.GetLastAttributed(nonceKey)
 			if err != nil {
 				e := txctx.AbortWithError(err).ExtendComponent(component)
-				txctx.Logger.WithError(e).Errorf("nonce: could not retrieve last attributed nonce")
+				txctx.Logger.WithError(e).Errorf("nonce: could not load last attributed nonce")
 				return
 			}
 
 			// If no nonce is available in nonce manager
 			// we calibrate by querying chain
 			if !ok {
-				txctx.Logger.Debugf("nonce: not in cache, get from chain")
+				txctx.Logger.Debugf("nonce: calibrating nonce from chain")
 
 				// Retrieve nonce from chain
 				pendingNonce, err := ec.PendingNonceAt(txctx.Context(), chainID, sender)
@@ -96,7 +93,7 @@ func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFun
 				//
 				// So we log the error and process next envelope
 				e := errors.FromError(err).ExtendComponent(component)
-				txctx.Logger.WithError(e).Errorf("nonce: could not set nonce on cache")
+				txctx.Logger.WithError(e).Errorf("nonce: could not store last attributed nonce")
 			}
 		}
 	}

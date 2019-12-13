@@ -12,7 +12,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/memory"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
@@ -58,7 +58,7 @@ func (r *MockChainStateReader) PendingNonceAt(ctx context.Context, chainID *big.
 }
 
 type MockNonceManager struct {
-	mock.NonceManager
+	memory.NonceManager
 }
 
 func (nm *MockNonceManager) GetLastAttributed(key string) (value uint64, ok bool, err error) {
@@ -122,7 +122,7 @@ func assertTxContext(t *testing.T, txctx *engine.TxContext) {
 }
 
 func TestNonceHandler(t *testing.T) {
-	m := mock.NewNonceManager()
+	m := memory.NewNonceManager()
 	nm := &MockNonceManager{*m}
 	h := Nonce(nm, &MockChainStateReader{})
 
@@ -142,8 +142,6 @@ func TestNonceHandler(t *testing.T) {
 	txctx.Envelope.Metadata = &envelope.Metadata{Extra: map[string]string{"nonce.recovering.expected": "5"}}
 	h(txctx)
 	assertTxContext(t, txctx)
-	_, ok := txctx.Envelope.GetMetadataValue("nonce.recovering.expected")
-	assert.False(t, ok, "Recovery signal should have been reset")
 
 	// NonceManager should trigger an error get
 	txctx = makeNonceContext(1, "key-error-on-get", 0, 1)

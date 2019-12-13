@@ -12,7 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/memory"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
@@ -57,7 +57,7 @@ func (r *MockChainStateReader) PendingNonceAt(ctx context.Context, chainID *big.
 }
 
 type MockNonceManager struct {
-	mock.NonceManager
+	memory.NonceManager
 }
 
 func (nm *MockNonceManager) GetLastSent(key string) (value uint64, ok bool, err error) {
@@ -119,8 +119,10 @@ func (h *header) Set(key, value string) {}
 func makeContext(
 	chainID int64,
 	key string,
+	invalid bool,
 	nonce, expectedNonceInMetadata uint64,
-	expectedErrorCount int,
+	expectedRecoveryCount, expectedErrorCount int,
+	errorOnSend string,
 ) *engine.TxContext {
 	txctx := engine.NewTxContext()
 	txctx.Reset()
@@ -134,6 +136,9 @@ func makeContext(
 
 	txctx.Set("expectedErrorCount", expectedErrorCount)
 	txctx.Set("expectedNonceInMetadata", expectedNonceInMetadata)
+	txctx.Set("expectedInvalid", invalid)
+	txctx.Set("expectedRecoveryCount", expectedRecoveryCount)
+	txctx.Set("errorOnSend", errorOnSend)
 
 	return txctx
 }
@@ -151,75 +156,118 @@ func assertTxContext(t *testing.T, txctx *engine.TxContext) {
 		_, ok := txctx.Envelope.GetMetadataValue("nonce.recovering.expected")
 		assert.False(t, ok, "Signal for nonce recovery in envelope metadata should not have been set")
 	}
+
+	if txctx.Get("expectedInvalid").(bool) {
+		v, ok := txctx.Get("invalid.nonce").(bool)
+		assert.True(t, ok && v, "Nonce invalidity should be correct")
+	} else {
+		invalid, ok := txctx.Get("invalid.nonce").(bool)
+		assert.False(t, ok || invalid, "Nonce invalidity should be correct")
+	}
+
+	var recoveryCount int
+	v, ok := txctx.Envelope.GetMetadataValue("nonce.recovering.count")
+	if ok {
+		i, err := strconv.Atoi(v)
+		if err != nil {
+			panic(err)
+		}
+		recoveryCount = i
+	}
+	assert.Equal(t, txctx.Get("expectedRecoveryCount").(int), recoveryCount, "Recovery count should be")
+}
+
+func MockSenderHandler(txctx *engine.TxContext) {
+	if v, ok := txctx.Get("errorOnSend").(string); ok && v != "" {
+		_ = txctx.Error(fmt.Errorf(v))
+	}
 }
 
 func TestChecker(t *testing.T) {
-	m := mock.NewNonceManager()
+	m := memory.NewNonceManager()
 	nm := &MockNonceManager{*m}
+	tracker := NewRecoveryTracker()
+	conf := &Configuration{
+		MaxRecovery: 5,
+	}
 	h := engine.CombineHandlers(
-		RecoveryStatusSetter(nm),
-		Checker(nm, &MockChainStateReader{}),
+		RecoveryStatusSetter(nm, tracker),
+		Checker(conf, nm, &MockChainStateReader{}, tracker),
+		MockSenderHandler,
 	)
 
 	testKey1 := "key1"
 	// On 1st execution envelope with nonce 10 should be valid (as the mock client returns always return pending nonce 10)
-	txctx := makeContext(1, testKey1, 10, 0, 0)
+	txctx := makeContext(1, testKey1, false, 10, 0, 0, 0, "")
 	h(txctx)
 	assertTxContext(t, txctx)
 
 	// On 2nd execution envelope with nonce 11 should be valid nonce manager should have incremented last sent
-	txctx = makeContext(1, testKey1, 11, 0, 0)
+	txctx = makeContext(1, testKey1, false, 11, 0, 0, 0, "")
 	h(txctx)
 	assertTxContext(t, txctx)
 
 	// On 3rd execution envelope with nonce 10 should be too low
-	txctx = makeContext(1, testKey1, 10, 0, 0)
+	txctx = makeContext(1, testKey1, true, 10, 0, 1, 0, "")
 	h(txctx)
 	assertTxContext(t, txctx)
 
 	// On 4th execution envelope with nonce 14 should be too high
 	// Checker should signal in metadata
-	txctx = makeContext(1, testKey1, 14, 12, 0)
+	txctx = makeContext(1, testKey1, true, 14, 12, 1, 0, "")
 	h(txctx)
 	assertTxContext(t, txctx)
-	recovering, _ := nm.IsRecovering(testKey1)
+	recovering := tracker.Recovering(testKey1) > 0
 	assert.True(t, recovering, "NonceManager should be recovering")
 
 	// On 5th execution envelope with nonce 15 should be too high
 	// Checker should not signal in metadata
-	txctx = makeContext(1, testKey1, 15, 0, 0)
+	txctx = makeContext(1, testKey1, true, 15, 0, 3, 0, "")
+	txctx.Envelope.SetMetadataValue("nonce.recovering.count", fmt.Sprintf("%v", 2))
 	h(txctx)
 	assertTxContext(t, txctx)
 
 	// On 6th execution envelope with nonce 12 be valid
-	txctx = makeContext(1, testKey1, 12, 0, 0)
+	txctx = makeContext(1, testKey1, false, 12, 0, 0, 0, "")
 	h(txctx)
 	assertTxContext(t, txctx)
-	recovering, _ = nm.IsRecovering(testKey1)
+	recovering = tracker.Recovering(testKey1) > 0
 	assert.False(t, recovering, "NonceManager should have stopped recovering")
 
+	// On 7th execution envelope with nonce 14 but raw mode should be valid
+	txctx = makeContext(1, testKey1, false, 14, 0, 0, 0, "")
+	txctx.Envelope.SetMetadataValue("tx.mode", "raw")
+
+	h(txctx)
+	assertTxContext(t, txctx)
+	recovering = tracker.Recovering(testKey1) > 0
+	assert.False(t, recovering, "NonceManager should not be recovering")
+
 	// Execution with invalid chain
-	txctx = makeContext(0, "key2", 10, 0, 1)
+	txctx = makeContext(0, "key2", false, 10, 0, 0, 1, "")
 	h(txctx)
 	assertTxContext(t, txctx)
 
 	// Execution with error on nonce manager
-	txctx = makeContext(1, "key-error-on-get", 10, 0, 1)
+	txctx = makeContext(1, "key-error-on-get", false, 10, 0, 0, 1, "")
 	h(txctx)
 	assertTxContext(t, txctx)
 
 	// Execution with error on nonce manager
-	txctx = makeContext(1, "key-error-on-set", 10, 0, 0)
+	txctx = makeContext(1, "key-error-on-set", false, 10, 0, 0, 0, "")
 	h(txctx)
 	assertTxContext(t, txctx)
 
-	// Execution with error on nonce manager
-	txctx = makeContext(1, "key-error-on-recovering-is", 10, 0, 0)
+	// Execution with nonce too low on send
+	txctx = makeContext(1, testKey1, true, 13, 0, 1, 0, "json-rpc: nonce too low")
 	h(txctx)
 	assertTxContext(t, txctx)
+	v, _, _ := nm.GetLastSent(testKey1)
+	assert.Equal(t, uint64(9), v, "Nonce should have been re-initialized")
 
-	// Execution with error on nonce manager
-	txctx = makeContext(1, "key-error-on-recovering-set", 10, 0, 0)
+	// Execution with recovery count exceeded
+	txctx = makeContext(1, testKey1, false, 13, 0, 10, 1, "")
+	txctx.Envelope.SetMetadataValue("nonce.recovering.count", fmt.Sprintf("%v", 10))
 	h(txctx)
 	assertTxContext(t, txctx)
 }

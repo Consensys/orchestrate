@@ -7,8 +7,11 @@ import (
 	"github.com/spf13/cobra"
 
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/rpc"
+	noncechecker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/nonce/checker"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/redis"
 	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store/client"
 )
 
@@ -29,6 +32,11 @@ func newRunCommand() *cobra.Command {
 
 	// Register StoreGRPC flags
 	storeclient.EnvelopeStoreURL(runCmd.Flags())
+
+	// Register Nonce Manager flags
+	nonce.Type(runCmd.Flags())
+	redis.Flags(runCmd.Flags())
+	noncechecker.Flags(runCmd.Flags())
 
 	return runCmd
 }

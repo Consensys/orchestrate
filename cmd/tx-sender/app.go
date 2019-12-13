@@ -76,12 +76,14 @@ func registerHandlers() {
 	engine.Register(sarama.Loader)
 	engine.Register(offset.Marker)
 	engine.Register(opentracing.GlobalHandler())
+
+	// Recovery Status Setter surrounds the producer
+	// c.f. docstring RecoveryStatusSetter handler
+	engine.Register(noncechecker.GlobalRecoveryStatusSetter())
 	engine.Register(producer.GlobalHandler())
 	engine.Register(injector.GlobalHandler())
-	engine.Register(noncechecker.GlobalRecoveryStatusSetter())
-
-	// Specific handlers tk Sender worker
 	engine.Register(noncechecker.GlobalChecker())
+
 	engine.Register(sender.GlobalHandler())
 }
 

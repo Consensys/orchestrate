@@ -27,6 +27,7 @@ require (
 	github.com/elazarl/go-bindata-assetfs v1.0.0
 	github.com/ethereum/go-ethereum v1.9.7
 	github.com/frankban/quicktest v1.5.0 // indirect
+	github.com/go-acme/lego/v3 v3.1.0
 	github.com/go-pg/migrations v6.7.3+incompatible
 	github.com/go-pg/pg v8.0.6+incompatible
 	github.com/gogo/protobuf v1.3.1

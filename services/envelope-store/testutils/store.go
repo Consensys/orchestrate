@@ -247,6 +247,41 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 			assert.Equal(t, "888", resp.GetEnvelope().GetChain().ID().String(), "LoadByTxHash ChainID should be correct")
 		},
 	)
+
+	// Stores an envelope with new ID but same Chain and Hash
+	newID := "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-9b53"
+	evlp = &envelope.Envelope{
+		Chain:    chain.FromInt(888),
+		Metadata: &envelope.Metadata{Id: newID},
+		Tx: &ethereum.Transaction{
+			Raw:  ethereum.HexToData("0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80"),
+			Hash: ethereum.HexToHash(newHash),
+		},
+	}
+	s.AssertStore(
+		context.Background(),
+		&evlpstore.StoreRequest{
+			Envelope: evlp,
+		},
+		func(t *testing.T, err error) { assert.Nil(t, err, "Store should not error") },
+		func(t *testing.T, resp *evlpstore.StoreResponse) {
+			assert.Equal(t, evlpstore.Status_STORED, resp.GetStatusInfo().GetStatus(), "Store status should have been reset to stored")
+		},
+	)
+
+	// Load by ID
+	s.AssertLoadByID(
+		context.Background(),
+		&evlpstore.LoadByIDRequest{
+			Id: newID,
+		},
+		func(t *testing.T, err error) { assert.Nil(t, err, "LoadByID should not error") },
+		func(t *testing.T, resp *evlpstore.StoreResponse) {
+			assert.Equal(t, "888", resp.GetEnvelope().GetChain().ID().String(), "LoadByID ChainID should be correct")
+			assert.Equal(t, newHash, resp.GetEnvelope().GetTx().GetHash().Hex(), "Store hash should have been updated")
+		},
+	)
+
 }
 
 // TestLoadPending test load pending envelopes

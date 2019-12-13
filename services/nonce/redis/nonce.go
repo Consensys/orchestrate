@@ -12,12 +12,14 @@ import (
 // NonceManager manages nonce using an underlying redis cache
 type NonceManager struct {
 	pool *redis.Pool
+	conf *Configuration
 }
 
 // NewNonceManager creates a new NonceManager using an underlying redis cache
-func NewNonceManager(pool *redis.Pool) *NonceManager {
+func NewNonceManager(pool *redis.Pool, conf *Configuration) *NonceManager {
 	return &NonceManager{
 		pool: pool,
+		conf: conf,
 	}
 }
 
@@ -130,7 +132,8 @@ func (nm *NonceManager) set(key string, value interface{}) error {
 		}
 	}()
 
-	_, err := conn.Do("SET", key, value)
+	// Set value with expiration
+	_, err := conn.Do("PSETEX", key, nm.conf.Expiration, value)
 	if err != nil {
 		return errors.FromError(err).SetComponent(component)
 	}
