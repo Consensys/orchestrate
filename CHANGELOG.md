@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## v1.2.0 (2019-12-13)
 
 ### 🆕 Features
 
@@ -13,8 +13,9 @@ All notable changes to this project will be documented in this file.
 
 ### 🛠 Bug fixes
 
-* Fix exposition of Swagger-UI in Docker images
 * On `envelopestore`, when storing a 2nd envelope with same `tx_hash` and `chain_id` but a distinct `metadata.id` overwrites the first one
+* Fix exposition of Swagger-UI in Docker images
+
 
 ## v1.1.0 (2019-12-10)
 
