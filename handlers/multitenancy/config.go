@@ -10,8 +10,8 @@ import (
 func init() {
 	viper.SetDefault(EnabledViperKey, enabledDefault)
 	_ = viper.BindEnv(EnabledViperKey, enabledEnv)
-	viper.SetDefault(AuthServiceCertificateViperKey, authServiceCertificateDefault)
-	_ = viper.BindEnv(AuthServiceCertificateViperKey, authServiceCertificateEnv)
+	viper.SetDefault(TenantNamespaceViperKey, tenantNamespaceDefault)
+	_ = viper.BindEnv(TenantNamespaceViperKey, tenantNamespaceEnv)
 }
 
 // Enable or disable the multi-tenancy support process
@@ -30,18 +30,18 @@ Environment variable: %q`, []string{"false", "true"}, enabledEnv)
 	_ = viper.BindPFlag(EnabledViperKey, f.Lookup(enabledFlag))
 }
 
-// Provision trusted certificate of the authentication service (base64 encoded)
+// Provision tenant namespace to retrieve the tenant id in the OpenId or Access Token (JWT)
 const (
-	authServiceCertificateFlag     = "auth-service-certificate"
-	AuthServiceCertificateViperKey = "auth.service.certificate"
-	authServiceCertificateDefault  = ""
-	authServiceCertificateEnv      = "AUTH_SERVICE_CERTIFICATE"
+	tenantNamespaceFlag     = "tenant-namespace"
+	TenantNamespaceViperKey = "tenant.namespace"
+	tenantNamespaceDefault  = "http://tenant.info"
+	tenantNamespaceEnv      = "TENANT_NAMESPACE"
 )
 
-// AuthServiceCertificate register flag for Authentication service Certificate
-func AuthServiceCertificate(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Certificate of the authentication service encoded in base64
-Environment variable: %q`, authServiceCertificateEnv)
-	f.String(authServiceCertificateFlag, authServiceCertificateDefault, desc)
-	_ = viper.BindPFlag(AuthServiceCertificateViperKey, f.Lookup(authServiceCertificateFlag))
+// TenantNamespace register flag for tenant namespace
+func TenantNamespace(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Tenant Namespace to retrieve the tenant id in the OpenId or Access Token (JWT)
+Environment variable: %q`, tenantNamespaceEnv)
+	f.String(tenantNamespaceFlag, tenantNamespaceDefault, desc)
+	_ = viper.BindPFlag(TenantNamespaceViperKey, f.Lookup(tenantNamespaceFlag))
 }

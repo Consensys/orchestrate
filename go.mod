@@ -21,6 +21,7 @@ require (
 	github.com/containous/alice v0.0.0-20181107144136-d83ebdd94cbd
 	github.com/containous/traefik/v2 v2.0.5
 	github.com/deckarep/golang-set v1.7.1 // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/eapache/channels v1.1.0
 	github.com/eapache/go-resiliency v1.2.0 // indirect
 	github.com/elastic/gosigar v0.10.5 // indirect
@@ -77,6 +78,7 @@ require (
 	golang.org/x/crypto v0.0.0-20191202143827-86a70503ff7e
 	golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f // indirect
 	golang.org/x/net v0.0.0-20191126235420-ef20fe5d7933
+	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/sys v0.0.0-20191128015809-6d18c012aee9 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0
 	golang.org/x/tools v0.0.0-20191203134012-c197fd4bf371 // indirect

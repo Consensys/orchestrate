@@ -61,7 +61,8 @@ const (
 	DeadlineExceeded            = OperatorIntervention + 2
 
 	// Cryptographic operation error (class C0XXX)
-	CryptoOperation uint64 = 12 << 16
+	CryptoOperation               uint64 = 12 << 16
+	InvalidCryptographicSignature        = CryptoOperation + 1 // Invalid signature during cryptographic verification (subclass C0001)
 
 	// Storage Error (class DBXXX)
 	Storage            uint64 = 13<<16 + 11<<12
@@ -352,6 +353,18 @@ func CryptoOperationError(format string, a ...interface{}) *ierror.Error {
 func IsCryptoOperationError(err error) bool {
 	return isErrorClass(FromError(err).GetCode(), CryptoOperation)
 }
+
+// InvalidCryptographicSignature is raised when failing a signature cryptographic verification
+func InvalidCryptographicSignatureError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(InvalidCryptographicSignature, format, a...)
+}
+
+// IsInvalidCryptographicSignatureError indicate whether an error is a signature cryptographic verification error
+func IsInvalidCryptographicSignatureError(err error) bool {
+	return isErrorClass(FromError(err).GetCode(), InvalidCryptographicSignature)
+}
+
+// InvalidCryptographicSignature
 
 // StorageError is raised when an error is encountered while accessing stored Data
 func StorageError(format string, a ...interface{}) *ierror.Error {

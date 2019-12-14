@@ -15,7 +15,7 @@ var (
 	initOnce = &sync.Once{}
 )
 
-// Init initialize Crafter Handler
+// Init initialize opentracing Handler
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
 		if handler != nil {
