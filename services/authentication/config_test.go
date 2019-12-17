@@ -22,3 +22,12 @@ func TestAuthServiceCertificate(t *testing.T) {
 	expected := authServiceCertificateExpected
 	assert.Equal(t, expected, viper.GetString(name), "TenancyEnable #1")
 }
+
+func TestTenantNamespace(t *testing.T) {
+	name := "tenant.namespace"
+	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
+	TenantNamespace(flgs)
+
+	expected := false
+	assert.Equal(t, expected, viper.GetBool(name), "TenantNamespace #1")
+}

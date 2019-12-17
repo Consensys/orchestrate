@@ -117,10 +117,10 @@ func TestInvalidAuthenticationError(t *testing.T) {
 }
 
 func TestUnauthenticatedError(t *testing.T) {
-	e := UnauthenticatedError("test")
-	assert.Equal(t, uint64(36865), e.GetCode(), "UnauthenticatedError code should be correct")
-	assert.True(t, IsInvalidAuthenticationError(e), "UnauthenticatedError should be a connection error")
-	assert.Equal(t, "09001", e.Hex(), "UnauthenticatedError Hex representation should be correct")
+	e := UnauthorizedError("test")
+	assert.Equal(t, uint64(36865), e.GetCode(), "UnauthorizedError code should be correct")
+	assert.True(t, IsInvalidAuthenticationError(e), "UnauthorizedError should be a connection error")
+	assert.Equal(t, "09001", e.Hex(), "UnauthorizedError Hex representation should be correct")
 }
 
 func TestPermissionDeniedError(t *testing.T) {

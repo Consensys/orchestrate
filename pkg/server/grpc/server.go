@@ -2,6 +2,7 @@ package grpcserver
 
 import (
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
@@ -38,6 +39,7 @@ func NewServer() *grpc.Server {
 			grpc_opentracing.StreamServerInterceptor(grpc_opentracing.WithTracer(opentracing.GlobalTracer())),
 			grpc_logrus.StreamServerInterceptor(log.NewEntry(log.StandardLogger()), opts...),
 			grpc_prometheus.StreamServerInterceptor,
+			grpc_auth.StreamServerInterceptor(AuthTokenTenant),
 			grpcerror.StreamServerInterceptor(),
 			grpc_recovery.StreamServerInterceptor(grpc_recovery.WithRecoveryHandler(RecoverPanicHandler)),
 		)),
@@ -46,6 +48,7 @@ func NewServer() *grpc.Server {
 			grpc_opentracing.UnaryServerInterceptor(grpc_opentracing.WithTracer(opentracing.GlobalTracer())),
 			grpc_logrus.UnaryServerInterceptor(log.NewEntry(log.StandardLogger()), opts...),
 			grpc_prometheus.UnaryServerInterceptor,
+			grpc_auth.UnaryServerInterceptor(AuthTokenTenant),
 			grpcerror.UnaryServerInterceptor(),
 			grpc_recovery.UnaryServerInterceptor(grpc_recovery.WithRecoveryHandler(RecoverPanicHandler)),
 		)),

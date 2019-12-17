@@ -6,7 +6,11 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-const Component = "authentication"
+const (
+	Component    = "authentication"
+	TokenInfoKey = "token_info"
+	TenantIDKey  = "tenant_id"
+)
 
 // Expose method to extract and verify the validity of an ID / Access Token (JWT format)
 type Manager interface {

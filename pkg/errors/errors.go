@@ -28,7 +28,7 @@ const (
 
 	// Authentication Errors (class 09XXX)
 	InvalidAuthentication uint64 = 9 << 12
-	Unauthenticated              = InvalidAuthentication + 1 // Invalid request credentials (code 09001)
+	Unauthorized                 = InvalidAuthentication + 1 // Authentication is required and has failed or has not yet been provided. (code 09001)
 	PermissionDenied             = InvalidAuthentication + 2 // no permission to execute operation (code 09002)
 
 	// Feature Not Supported Errors (class 0AXXX)
@@ -188,9 +188,9 @@ func IsInvalidAuthenticationError(err error) bool {
 	return isErrorClass(FromError(err).GetCode(), InvalidAuthentication)
 }
 
-// UnauthenticatedError is raised when authentication credentials are invalid
-func UnauthenticatedError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(Unauthenticated, format, a...)
+// UnauthorizedError is raised when authentication credentials are invalid
+func UnauthorizedError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(Unauthorized, format, a...)
 }
 
 // PermissionDeniedError is raised when authentication credentials are invalid

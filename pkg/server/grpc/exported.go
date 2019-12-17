@@ -5,6 +5,8 @@ import (
 	"net"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/token"
+
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -27,6 +29,9 @@ func Init(ctx context.Context) {
 		if server == nil {
 			// Initialize OpenTracing tracer
 			opentracing.Init(ctx)
+
+			// Initialize Authentication Manager
+			token.Init(ctx)
 
 			// Declare server with interceptors
 			server = NewServer()

@@ -56,7 +56,7 @@ func StatusToError(s *status.Status) *ierror.Error {
 	case codes.DataLoss:
 		return errors.DataCorruptedError(s.Message())
 	case codes.Unauthenticated:
-		return errors.UnauthenticatedError(s.Message())
+		return errors.UnauthorizedError(s.Message())
 	default:
 		return errors.InternalError(s.Message())
 	}
@@ -89,7 +89,7 @@ func ErrorToStatus(err error) (s *status.Status) {
 	// Invalid authentication
 	case errors.IsInvalidAuthenticationError(e):
 		switch e.GetCode() {
-		case errors.Unauthenticated:
+		case errors.Unauthorized:
 			s, _ = status.New(codes.Unauthenticated, e.GetMessage()).WithDetails(e)
 		case errors.PermissionDenied:
 			s, _ = status.New(codes.PermissionDenied, e.GetMessage()).WithDetails(e)

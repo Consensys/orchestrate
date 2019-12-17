@@ -40,7 +40,7 @@ func TestStatusToError(t *testing.T) {
 	testStatusToError(t, codes.Internal, errors.Internal)
 	testStatusToError(t, codes.Unavailable, errors.GRPCConnection)
 	testStatusToError(t, codes.DataLoss, errors.DataCorrupted)
-	testStatusToError(t, codes.Unauthenticated, errors.Unauthenticated)
+	testStatusToError(t, codes.Unauthenticated, errors.Unauthorized)
 }
 
 func testErrorToStatus(t *testing.T, err error, code codes.Code) {
@@ -64,7 +64,7 @@ func TestErrorToStatus(t *testing.T) {
 	// When error is not nil should map to status with expected error code
 	testErrorToStatus(t, errors.FaucetWarning("test"), Warning)
 	testErrorToStatus(t, errors.KafkaConnectionError("test"), codes.Unavailable)
-	testErrorToStatus(t, errors.UnauthenticatedError("test"), codes.Unauthenticated)
+	testErrorToStatus(t, errors.UnauthorizedError("test"), codes.Unauthenticated)
 	testErrorToStatus(t, errors.PermissionDeniedError("test"), codes.PermissionDenied)
 	testErrorToStatus(t, errors.FeatureNotSupportedError("test"), codes.Unimplemented)
 	testErrorToStatus(t, errors.FailedPreconditionError("test"), codes.FailedPrecondition)
