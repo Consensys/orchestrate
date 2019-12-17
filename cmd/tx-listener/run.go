@@ -8,6 +8,7 @@ import (
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/rpc"
 	handler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tx-listener/handler/base"
 	listener "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tx-listener/listener/base"
+	producer "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/producer/tx-listener"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store/client"
@@ -33,6 +34,9 @@ func newRunCommand() *cobra.Command {
 	// Listener flags
 	listener.InitFlags(runCmd.Flags())
 	handler.InitFlags(runCmd.Flags())
+
+	// Registers local flags for handler producer
+	producer.InitFlags(runCmd.Flags())
 
 	return runCmd
 }

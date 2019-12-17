@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 * Add new flag and environment variable `NONCE_CHECKER_MAX_RECOVERY` to configure max number of nonce recoveries to perform on a given envelope on `tx-sender`
 * Nonce checker on `tx-sender` ignores envelopes with metadata entry `tx.mode` set to `raw`
 * To start `tx-nonce` and `tx-sender` with nonce manager in memory set configuration `NONCE_MANAGER_TYPE=in-memory`
+* Add new flag and environment variable `DISABLE_EXTERNAL_TX` in the tx-listener to filter transactions not sent through Orchestrate
 
 ### 🛠 Bug fixes
 
