@@ -2,6 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
+
 ## v1.2.0 (2019-12-13)
 
 ### 🆕 Features
@@ -9,13 +10,22 @@ All notable changes to this project will be documented in this file.
 * Add new flag and environment variable `REDIS_EXPIRATION` to configure Redis entry expiration. It is useful for `tx-nonce` and `tx-sender` workers to expire keys and force a nonce recalibration from chain after inactivity of a sender
 * Add new flag and environment variable `NONCE_CHECKER_MAX_RECOVERY` to configure max number of nonce recoveries to perform on a given envelope on `tx-sender`
 * Nonce checker on `tx-sender` ignores envelopes with metadata entry `tx.mode` set to `raw`
-* To start `tx-nonce` and `tx-sender` with nonce manager in memory set configuration `NONCE_MANAGER_TYPE=in-memory`
 * Add new flag and environment variable `DISABLE_EXTERNAL_TX` in the tx-listener to filter transactions not sent through Orchestrate
 
 ### 🛠 Bug fixes
 
+* Fix connection issue when trying to connect to some Infura endpoints
 * On `envelopestore`, when storing a 2nd envelope with same `tx_hash` and `chain_id` but a distinct `metadata.id` overwrites the first one
 * Fix exposition of Swagger-UI in Docker images
+
+### ⚠ BREAKING CHANGES
+* **config** Rename `mock` options to `in-memory` for the `NONCE_MANAGER_TYPE` of the `tx-nonce` and `tx-sender` 
+
+
+## 1.0.2 (2019-12-18)
+
+### 🛠 Bug fixes
+* Fix issue when registering a contract with no methods and/or no events
 
 
 ## v1.1.0 (2019-12-10)
@@ -26,7 +36,6 @@ All notable changes to this project will be documented in this file.
 * Add the new flag `KAFKA_CONSUMER_MAX_WAIT_TIME` to configure the maximum waiting time to consume message if messages do not exceed the size`Consumer.Fetch.Min.Byte` (default=20ms)
 
 ### 🛠 Bug fixes
-* Fix issue when registering a contract with methods/events having the same name and different signatures
 * Clean logs: downgrade `OK` and `NotFound` logs to debug level in grpc server and have logger handler in debug level for tx-listener and tx-decoder
 * e2e: use `CUCUMBER_STEPS_TIMEOUT` to put a timeout in cucumber steps before failing
 * Makefile: add bootstrap stage to wait quorum, geth and kafka to start
@@ -38,6 +47,11 @@ All notable changes to this project will be documented in this file.
   * metrics server has changed and is now 8082
 * **config** Rename `KAFKA_SASL_ENABLE` to `KAFKA_SASL_ENABLED`
 
+
+## 1.0.1 (2019-12-10)
+
+### 🛠 Bug fixes
+* Fix issue when registering a contract with methods/events having the same name and different signatures
 
 
 ## 1.0.0 (2019-11-07)
