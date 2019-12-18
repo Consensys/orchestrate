@@ -352,7 +352,7 @@ func (r *ContractRegistry) GetCatalog(ctx context.Context, req *svc.GetCatalogRe
 		return nil, err
 	}
 
-	sort.Strings(catalog)
+	sort.Sort(common.Alphabetic(catalog))
 	return &svc.GetCatalogResponse{
 		Names: catalog,
 	}, nil
@@ -377,7 +377,7 @@ func (r *ContractRegistry) GetTags(ctx context.Context, req *svc.GetTagsRequest)
 		return nil, errors.NotFoundError("No Tags found for requested contract name").ExtendComponent(component)
 	}
 
-	sort.Strings(tags)
+	sort.Sort(common.Alphabetic(tags))
 	return &svc.GetTagsResponse{
 		Tags: tags,
 	}, nil

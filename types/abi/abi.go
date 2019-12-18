@@ -62,7 +62,7 @@ func StringToContract(s string) (*Contract, error) {
 	parts := contractPattern.FindStringSubmatch(s)
 
 	if len(parts) != 6 {
-		return nil, errors.InvalidFormatError("invalid contract (expected format %q) %q", contractRegexp, s).SetComponent(component)
+		return nil, errors.InvalidFormatError("invalid contract (expected format %s) %q", contractRegexp, s).SetComponent(component)
 	}
 
 	c := &Contract{

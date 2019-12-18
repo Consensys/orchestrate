@@ -122,6 +122,8 @@ var erc20bis = []byte(
 	"type": "function"
 	}]`)
 
+var emptyABI = []byte(`[]`)
+
 var methodSig = []byte("isMinter(address)")
 var eventSig = []byte("MinterAdded(address,address)")
 
@@ -191,6 +193,21 @@ func (s *ContractRegistryTestSuite) TestRegisterContract() {
 	assert.NoError(s.T(), err, "Should register contract properly")
 
 	_, err = s.R.RegisterContract(context.Background(),
+		&svc.RegisterContractRequest{
+			Contract: &abi.Contract{
+				Id: &abi.ContractId{
+					Name: "EmptyABI",
+					Tag:  "v1.0.0",
+				},
+				Abi:              emptyABI,
+				Bytecode:         []byte{1, 3},
+				DeployedBytecode: []byte{1, 2, 4},
+			},
+		},
+	)
+	assert.NoError(s.T(), err, "Should register EmptyABI contract properly")
+
+	_, err = s.R.RegisterContract(context.Background(),
 		&svc.RegisterContractRequest{Contract: erc20Contract},
 	)
 	assert.NoError(s.T(), err, "Should register contract properly twice")
@@ -204,7 +221,7 @@ func (s *ContractRegistryTestSuite) TestRegisterContract() {
 		&svc.GetCatalogRequest{},
 	)
 	assert.NoError(s.T(), err, "Should getCatalog properly")
-	assert.Equal(s.T(), []string{"AnotherERC20", "ERC20"}, catalogResp.GetNames())
+	assert.Equal(s.T(), []string{"AnotherERC20", "EmptyABI", "ERC20"}, catalogResp.GetNames())
 }
 
 // TestContractRegistryBySig checks the self-consistency of the contract-registry

@@ -353,7 +353,7 @@ func (r *ContractRegistry) GetCatalog(ctx context.Context, req *svc.GetCatalogRe
 	for name := range r.contractHashes {
 		resp.Names = append(resp.Names, name)
 	}
-	sort.Strings(resp.Names)
+	sort.Sort(rcommon.Alphabetic(resp.Names))
 	return resp, nil
 }
 
@@ -367,7 +367,7 @@ func (r *ContractRegistry) GetTags(ctx context.Context, req *svc.GetTagsRequest)
 	for tag := range r.contractHashes[req.GetName()] {
 		resp.Tags = append(resp.Tags, tag)
 	}
-	sort.Strings(resp.Tags)
+	sort.Sort(rcommon.Alphabetic(resp.Tags))
 	return resp, nil
 }
 

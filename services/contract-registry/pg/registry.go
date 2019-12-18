@@ -111,12 +111,14 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 				})
 			}
 		}
-		_, err = r.db.ModelContext(ctx, &methods).
-			OnConflict("DO NOTHING").
-			Insert()
-		if err != nil {
-			log.WithError(err).Debug("could not insert methods")
-			return nil, errors.FromError(err).ExtendComponent(component)
+		if methods != nil {
+			_, err = r.db.ModelContext(ctx, &methods).
+				OnConflict("DO NOTHING").
+				Insert()
+			if err != nil {
+				log.WithError(err).Debug("could not insert methods")
+				return nil, errors.FromError(err).ExtendComponent(component)
+			}
 		}
 
 		var events []*EventModel
@@ -133,12 +135,14 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 				})
 			}
 		}
-		_, err = r.db.ModelContext(ctx, &events).
-			OnConflict("DO NOTHING").
-			Insert()
-		if err != nil {
-			log.WithError(err).Debug("could not insert events")
-			return nil, errors.FromError(err).ExtendComponent(component)
+		if events != nil {
+			_, err = r.db.ModelContext(ctx, &events).
+				OnConflict("DO NOTHING").
+				Insert()
+			if err != nil {
+				log.WithError(err).Debug("could not insert events")
+				return nil, errors.FromError(err).ExtendComponent(component)
+			}
 		}
 	}
 
@@ -343,7 +347,7 @@ func (r *ContractRegistry) GetCatalog(ctx context.Context, req *svc.GetCatalogRe
 	var names []string
 	err := r.db.ModelContext(ctx, (*RepositoryModel)(nil)).
 		Column("name").
-		Order("name").
+		OrderExpr("lower(name)").
 		Select(&names)
 	if err != nil {
 		log.WithError(err).Error("could not get Catalog")
@@ -358,7 +362,7 @@ func (r *ContractRegistry) GetTags(ctx context.Context, req *svc.GetTagsRequest)
 	err := r.db.ModelContext(ctx, (*TagModel)(nil)).
 		Column("tag_model.name").
 		Join("JOIN repositories AS r ON r.id = tag_model.repository_id").
-		Order("tag_model.name").
+		OrderExpr("lower(tag_model.name)").
 		Select(&names)
 	if err != nil {
 		log.WithError(err).Error("Could not get Tags")
