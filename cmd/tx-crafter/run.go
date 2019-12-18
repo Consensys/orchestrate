@@ -25,7 +25,7 @@ func newRunCommand() *cobra.Command {
 	}
 
 	// Register Ethereum client flags
-	ethclient.URLs(runCmd.Flags())
+	ethclient.Flags(runCmd.Flags())
 
 	// Register Faucet flags
 	amount.FaucetAmount(runCmd.Flags())

@@ -18,6 +18,7 @@ func Init(ctx context.Context) {
 			return
 		}
 
+		// Initialize RPC client
 		rpc.Init(ctx)
 
 		client = rpc.GlobalClient()

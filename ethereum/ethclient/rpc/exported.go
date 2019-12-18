@@ -2,19 +2,17 @@ package rpc
 
 import (
 	"context"
-	"math/big"
 	"sync"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/rpc/geth"
 )
 
 const component = "ethclient.rpc"
 
 var (
 	client   *Client
-	config   *geth.Config
+	config   *Config
 	initOnce = &sync.Once{}
 )
 
@@ -25,10 +23,11 @@ func Init(ctx context.Context) {
 		}
 
 		if config == nil {
-			config = geth.NewConfig()
+			config = NewConfig()
 		}
 
 		client = NewClient(config)
+
 		rpcUrls := viper.GetStringSlice(urlViperKey)
 		log.Infof("Connecting to %d RPC URLs", len(rpcUrls))
 
@@ -48,12 +47,8 @@ func Init(ctx context.Context) {
 		log.WithFields(log.Fields{
 			"chains": chains,
 		}).Infof("ethereum: multi-client ready")
-	})
-}
 
-// Dial
-func Dial(ctx context.Context, rawurl string) (*big.Int, error) {
-	return client.Dial(ctx, rawurl)
+	})
 }
 
 // GlobalClient returns global Client

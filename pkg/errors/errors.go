@@ -14,9 +14,9 @@ const (
 	FaucetSelfCredit           = Faucet + 2     // Faucet credit cannot target the creditor
 
 	// Invalid Nonce warnings(class 013xx)
-	InvalidNonce = Warning + 3<<8
-	NonceTooHigh = InvalidNonce + 1
-	NonceTooLow  = InvalidNonce + 2
+	InvalidNonce        = Warning + 3<<8
+	InvalidNonceTooHigh = InvalidNonce + 1
+	InvalidNonceTooLow  = InvalidNonce + 2
 
 	// Connection Errors (class 08XXX)
 	Connection      uint64 = 8 << 12
@@ -28,7 +28,7 @@ const (
 
 	// Authentication Errors (class 09XXX)
 	InvalidAuthentication uint64 = 9 << 12
-	Unauthorized                 = InvalidAuthentication + 1 // Authentication is required and has failed or has not yet been provided. (code 09001)
+	Unauthorized                 = InvalidAuthentication + 1 // Invalid request credentials (code 09001)
 	PermissionDenied             = InvalidAuthentication + 2 // no permission to execute operation (code 09002)
 
 	// Feature Not Supported Errors (class 0AXXX)
@@ -59,6 +59,10 @@ const (
 	OperatorIntervention uint64 = 5<<16 + 7<<12 //
 	Canceled                    = OperatorIntervention + 1
 	DeadlineExceeded            = OperatorIntervention + 2
+
+	// Ethereum error (class BEXXX)
+	Ethereum    uint64 = 11<<16 + 14<<12
+	NonceTooLow        = Ethereum + 1
 
 	// Cryptographic operation error (class C0XXX)
 	CryptoOperation               uint64 = 12 << 16
@@ -135,12 +139,12 @@ func IsInvalidNonceWarning(err error) bool {
 
 // NonceTooHighWarning are raised when about to send a transaction with nonce too high
 func NonceTooHighWarning(format string, a ...interface{}) *ierror.Error {
-	return Errorf(NonceTooHigh, format, a...)
+	return Errorf(InvalidNonceTooHigh, format, a...)
 }
 
 // NonceTooLowWarning are raised when about to send a transaction with nonce too low
 func NonceTooLowWarning(format string, a ...interface{}) *ierror.Error {
-	return Errorf(NonceTooLow, format, a...)
+	return Errorf(InvalidNonceTooLow, format, a...)
 }
 
 // ConnectionError is raised when failing to connect to an external service
@@ -342,6 +346,21 @@ func CancelledError(format string, a ...interface{}) *ierror.Error {
 // DeadlineExceededError is raised when deadline expired before operation could complete
 func DeadlineExceededError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(DeadlineExceeded, format, a...)
+}
+
+// EthereumError is raised when JSON-RPC call returns an error (such as Nonce too Low)
+func EthereumError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(Ethereum, format, a...)
+}
+
+// IsEthereumError indicate whether an error is an Etehreum error
+func IsEthereumError(err error) bool {
+	return isErrorClass(FromError(err).GetCode(), Ethereum)
+}
+
+// NonceTooLowError is raised when JSON-RPC returns a "Nonce too low" when sending a transaction
+func NonceTooLowError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(NonceTooLow, format, a...)
 }
 
 // CryptoOperationError is raised when failing a cryptographic operation

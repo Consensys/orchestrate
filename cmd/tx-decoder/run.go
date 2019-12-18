@@ -20,7 +20,7 @@ func newRunCommand() *cobra.Command {
 	}
 
 	// Register Ethereum client flags
-	ethclient.URLs(runCmd.Flags())
+	ethclient.Flags(runCmd.Flags())
 
 	// Register Kafka flags
 	broker.InitKafkaFlags(runCmd.Flags())

@@ -2,223 +2,118 @@ package rpc
 
 import (
 	"context"
-	"encoding/json"
 	"math/big"
 	"sync"
 
 	eth "github.com/ethereum/go-ethereum"
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/rpc"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/rpc/geth"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
-	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
 // Client is a connector to Ethereum blockchains that uses Geth rpc client
 type Client struct {
-	mux  *sync.Mutex
-	rpcs map[string]rpc.Client
+	mux  *sync.RWMutex
+	urls map[string]string
 
-	conf *geth.Config
+	clientV2 *ClientV2
 }
 
 // NewClient creates a new MultiClient
-func NewClient(conf *geth.Config) *Client {
+func NewClient(conf *Config) *Client {
 	return &Client{
-		mux:  &sync.Mutex{},
-		rpcs: make(map[string]rpc.Client),
-		conf: conf,
+		mux:      &sync.RWMutex{},
+		urls:     make(map[string]string),
+		clientV2: NewClientV2(conf),
 	}
 }
 
-// Dial an Ethereum client
 func (ec *Client) Dial(ctx context.Context, rawurl string) (*big.Int, error) {
-	// Dial using an rpc client
-	c, err := geth.DialContext(ctx, rawurl, ec.conf)
-	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
-	}
-
 	// Retrieve network version
 	var version string
-	if err = c.CallContext(ctx, &version, "net_version"); err != nil {
+	if err := ec.clientV2.Call(ctx, rawurl, &version, "net_version"); err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
 	chainID, ok := big.NewInt(0).SetString(version, 10)
 	if !ok {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return nil, errors.InvalidFormatError("invalid chain identifier %v", chainID)
 	}
 
 	// Register client
 	ec.mux.Lock()
-	ec.rpcs[chainID.Text(10)] = c
+	ec.urls[chainID.Text(10)] = rawurl
 	ec.mux.Unlock()
 
 	return chainID, nil
 }
 
-// Close client and all underlying Geth RPC client
-func (ec *Client) Close() {
-	log.Infof("Closing RPC clients. Number of clients %d", len(ec.rpcs))
-	for _, c := range ec.rpcs {
-		go c.Close()
+func (ec *Client) getURL(chainID *big.Int) (string, error) {
+	ec.mux.RLock()
+	defer ec.mux.RUnlock()
+	c, ok := ec.urls[chainID.Text(10)]
+	if !ok {
+		return "", errors.EthConnectionError("no RPC connection registered for chain %q", chainID.Text(10))
 	}
+	return c, nil
 }
 
-func (ec *Client) getRPC(chainID *big.Int) rpc.Client {
-	c, ok := ec.rpcs[chainID.Text(10)]
-	if ok {
-		return c
-	}
-
-	nullClient := geth.CreateNullClient(chainID)
-	ec.rpcs[chainID.String()] = nullClient
-	return nullClient
-}
-
-type txExtraInfo struct {
-	BlockNumber *string            `json:"blockNumber,omitempty"`
-	BlockHash   *ethcommon.Hash    `json:"blockHash,omitempty"`
-	From        *ethcommon.Address `json:"from,omitempty"`
-}
-
-type Body struct {
-	Transactions []*ethtypes.Transaction `json:"transactions"`
-}
-
-func blockFromRaw(raw json.RawMessage) (*ethtypes.Block, error) {
-	// Unmarshal block header information
-	var header *ethtypes.Header
-	if err := encoding.Unmarshal(raw, &header); err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
-	}
-
-	// Unmarshal block body information
-	var body *Body
-	if err := encoding.Unmarshal(raw, &body); err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
-	}
-
-	return ethtypes.NewBlock(header, body.Transactions, []*ethtypes.Header{}, []*ethtypes.Receipt{}), nil
-}
-
-// BlockByHash returns the given full block.
 func (ec *Client) BlockByHash(ctx context.Context, chainID *big.Int, hash ethcommon.Hash) (*ethtypes.Block, error) {
-	// Perform RPC call
-	var raw json.RawMessage
-	err := ec.getRPC(chainID).CallContext(ctx, &raw, "eth_getBlockByHash", hash, true)
+	url, err := ec.getURL(chainID)
 	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return nil, err
 	}
-
-	return blockFromRaw(raw)
+	return ec.clientV2.BlockByHash(ctx, url, hash)
 }
 
-// BlockByNumber returns a block from the current canonical chain. If number is nil, the
-// latest known block is returned.
-//
-// Note that loading full blocks requires two requests. Use HeaderByNumber
-// if you don't need all transactions or uncle headers.
 func (ec *Client) BlockByNumber(ctx context.Context, chainID, number *big.Int) (*ethtypes.Block, error) {
-	// Perform RPC call
-	var raw json.RawMessage
-	err := ec.getRPC(chainID).CallContext(ctx, &raw, "eth_getBlockByNumber", toBlockNumArg(number), true)
+	url, err := ec.getURL(chainID)
 	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return nil, err
 	}
-
-	return blockFromRaw(raw)
+	return ec.clientV2.BlockByNumber(ctx, url, number)
 }
 
-// HeaderByHash returns the block header with the given hash.
 func (ec *Client) HeaderByHash(ctx context.Context, chainID *big.Int, hash ethcommon.Hash) (*ethtypes.Header, error) {
-	var head *ethtypes.Header
-	err := ec.getRPC(chainID).CallContext(ctx, &head, "eth_getBlockByHash", hash, false)
+	url, err := ec.getURL(chainID)
 	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return nil, err
 	}
-
-	if head == nil {
-		return nil, errors.NotFoundError("not found").SetComponent(component)
-	}
-
-	return head, nil
+	return ec.clientV2.HeaderByHash(ctx, url, hash)
 }
 
-// HeaderByNumber returns a block header from the current canonical chain. If number is
-// nil, the latest known header is returned.
 func (ec *Client) HeaderByNumber(ctx context.Context, chainID, number *big.Int) (*ethtypes.Header, error) {
-	var head *ethtypes.Header
-	err := ec.getRPC(chainID).CallContext(ctx, &head, "eth_getBlockByNumber", toBlockNumArg(number), false)
+	url, err := ec.getURL(chainID)
 	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return nil, err
 	}
-
-	if head == nil {
-		return nil, errors.NotFoundError("not found").SetComponent(component)
-	}
-
-	return head, nil
+	return ec.clientV2.HeaderByNumber(ctx, url, number)
 }
 
-// TransactionByHash returns the transaction with the given hash.
 func (ec *Client) TransactionByHash(ctx context.Context, chainID *big.Int, hash ethcommon.Hash) (tx *ethtypes.Transaction, isPending bool, err error) {
-	var raw json.RawMessage
-	err = ec.getRPC(chainID).CallContext(ctx, &raw, "eth_getTransactionByHash", hash)
+	url, err := ec.getURL(chainID)
 	if err != nil {
-		return nil, false, errors.FromError(err).ExtendComponent(component)
+		return nil, false, err
 	}
-	if err := encoding.Unmarshal(raw, &tx); err != nil {
-		return nil, false, errors.FromError(err).ExtendComponent(component)
-	}
-
-	if _, r, _ := tx.RawSignatureValues(); r == nil {
-		return nil, false, errors.DataCorruptedError("transaction without signature").ExtendComponent(component)
-	}
-
-	// Unmarshal block body information
-	var extra *txExtraInfo
-	if err := encoding.Unmarshal(raw, &extra); err != nil {
-		return nil, false, errors.FromError(err).ExtendComponent(component)
-	}
-
-	return tx, extra.BlockNumber == nil, nil
+	return ec.clientV2.TransactionByHash(ctx, url, hash)
 }
 
-// TransactionReceipt returns the receipt of a transaction by transaction hash.
-// Note that the receipt is not available for pending transactions.
 func (ec *Client) TransactionReceipt(ctx context.Context, chainID *big.Int, txHash ethcommon.Hash) (*ethtypes.Receipt, error) {
-	var r *ethtypes.Receipt
-	err := ec.getRPC(chainID).CallContext(ctx, &r, "eth_getTransactionReceipt", txHash)
+	url, err := ec.getURL(chainID)
 	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return nil, err
 	}
-
-	if r == nil {
-		return nil, errors.NotFoundError("not found").SetComponent(component)
-	}
-
-	return r, nil
+	return ec.clientV2.TransactionReceipt(ctx, url, txHash)
 }
 
-func toBlockNumArg(number *big.Int) string {
-	if number == nil {
-		return "latest"
-	}
-	return hexutil.EncodeBig(number)
-}
-
-// Networks return networks ID multi client is connected to
 func (ec *Client) Networks(ctx context.Context) (networks []*big.Int) {
-	for _, c := range ec.rpcs {
+	ec.mux.RLock()
+	defer ec.mux.RUnlock()
+	for _, url := range ec.urls {
 		// Retrieve network version
 		var version string
-		if err := c.CallContext(ctx, &version, "net_version"); err != nil {
+		if err := ec.clientV2.Call(ctx, url, &version, "net_version"); err != nil {
 			continue
 		}
 
@@ -234,247 +129,138 @@ func (ec *Client) Networks(ctx context.Context) (networks []*big.Int) {
 	return networks
 }
 
-type Progress struct {
-	StartingBlock hexutil.Uint64
-	CurrentBlock  hexutil.Uint64
-	HighestBlock  hexutil.Uint64
-	PulledStates  hexutil.Uint64
-	KnownStates   hexutil.Uint64
-}
-
-// SyncProgress retrieves the current progress of the sync algorithm. If there's
-// no sync currently running, it returns nil.
 func (ec *Client) SyncProgress(ctx context.Context, chainID *big.Int) (*eth.SyncProgress, error) {
-	var raw json.RawMessage
-	if err := ec.getRPC(chainID).CallContext(ctx, &raw, "eth_syncing"); err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+	url, err := ec.getURL(chainID)
+	if err != nil {
+		return nil, err
 	}
-	// Handle the possible response types
-	var syncing bool
-	if err := encoding.Unmarshal(raw, &syncing); err == nil {
-		return nil, nil
-	}
-
-	var progress *Progress
-	if err := encoding.Unmarshal(raw, &progress); err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
-	}
-
-	return &eth.SyncProgress{
-		StartingBlock: uint64(progress.StartingBlock),
-		CurrentBlock:  uint64(progress.CurrentBlock),
-		HighestBlock:  uint64(progress.HighestBlock),
-		PulledStates:  uint64(progress.PulledStates),
-		KnownStates:   uint64(progress.KnownStates),
-	}, nil
+	return ec.clientV2.SyncProgress(ctx, url)
 }
 
-// State Access
-
-// BalanceAt returns the wei balance of the given account.
-// The block number can be nil, in which case the balance is taken from the latest known block.
 func (ec *Client) BalanceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, blockNumber *big.Int) (*big.Int, error) {
-	var result hexutil.Big
-	err := ec.getRPC(chainID).CallContext(ctx, &result, "eth_getBalance", account, toBlockNumArg(blockNumber))
+	url, err := ec.getURL(chainID)
 	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return nil, err
 	}
-	return (*big.Int)(&result), nil
+	return ec.clientV2.BalanceAt(ctx, url, account, blockNumber)
 }
 
-// StorageAt returns the value of key in the contract storage of the given account.
-// The block number can be nil, in which case the value is taken from the latest known block.
 func (ec *Client) StorageAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, key ethcommon.Hash, blockNumber *big.Int) ([]byte, error) {
-	var result hexutil.Bytes
-	err := ec.getRPC(chainID).CallContext(ctx, &result, "eth_getStorageAt", account, key, toBlockNumArg(blockNumber))
+	url, err := ec.getURL(chainID)
 	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return nil, err
 	}
-	return result, nil
+	return ec.clientV2.StorageAt(ctx, url, account, key, blockNumber)
 }
 
-// CodeAt returns the contract code of the given account.
-// The block number can be nil, in which case the code is taken from the latest known block.
 func (ec *Client) CodeAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, blockNumber *big.Int) ([]byte, error) {
-	var result hexutil.Bytes
-	err := ec.getRPC(chainID).CallContext(ctx, &result, "eth_getCode", account, toBlockNumArg(blockNumber))
+	url, err := ec.getURL(chainID)
 	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return nil, err
 	}
-	return result, nil
+	return ec.clientV2.CodeAt(ctx, url, account, blockNumber)
 }
 
-// NonceAt returns the account nonce of the given account.
-// The block number can be nil, in which case the nonce is taken from the latest known block.
 func (ec *Client) NonceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, blockNumber *big.Int) (uint64, error) {
-	var result hexutil.Uint64
-	err := ec.getRPC(chainID).CallContext(ctx, &result, "eth_getTransactionCount", account, toBlockNumArg(blockNumber))
+	url, err := ec.getURL(chainID)
 	if err != nil {
-		return 0, errors.FromError(err).ExtendComponent(component)
+		return 0, err
 	}
-	return uint64(result), nil
+	return ec.clientV2.NonceAt(ctx, url, account, blockNumber)
 }
 
-// Pending State
-
-// PendingBalanceAt returns the wei balance of the given account in the pending state.
 func (ec *Client) PendingBalanceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address) (*big.Int, error) {
-	var result hexutil.Big
-	err := ec.getRPC(chainID).CallContext(ctx, &result, "eth_getBalance", account, "pending")
+	url, err := ec.getURL(chainID)
 	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return nil, err
 	}
-	return (*big.Int)(&result), nil
+	return ec.clientV2.PendingBalanceAt(ctx, url, account)
 }
 
-// PendingStorageAt returns the value of key in the contract storage of the given account in the pending state.
 func (ec *Client) PendingStorageAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, key ethcommon.Hash) ([]byte, error) {
-	var result hexutil.Bytes
-	err := ec.getRPC(chainID).CallContext(ctx, &result, "eth_getStorageAt", account, key, "pending")
+	url, err := ec.getURL(chainID)
 	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return nil, err
 	}
-	return result, nil
+	return ec.clientV2.PendingStorageAt(ctx, url, account, key)
 }
 
-// PendingCodeAt returns the contract code of the given account in the pending state.
 func (ec *Client) PendingCodeAt(ctx context.Context, chainID *big.Int, account ethcommon.Address) ([]byte, error) {
-	var result hexutil.Bytes
-	err := ec.getRPC(chainID).CallContext(ctx, &result, "eth_getCode", account, "pending")
+	url, err := ec.getURL(chainID)
 	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return nil, err
 	}
-	return result, nil
+	return ec.clientV2.PendingCodeAt(ctx, url, account)
 }
 
-// PendingNonceAt returns the account nonce of the given account in the pending state.
-// This is the nonce that should be used for the next transaction.
 func (ec *Client) PendingNonceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address) (uint64, error) {
-	var result hexutil.Uint64
-	err := ec.getRPC(chainID).CallContext(ctx, &result, "eth_getTransactionCount", account, "pending")
+	url, err := ec.getURL(chainID)
 	if err != nil {
-		return 0, errors.FromError(err).ExtendComponent(component)
+		return 0, err
 	}
-	return uint64(result), nil
+	return ec.clientV2.PendingNonceAt(ctx, url, account)
 }
 
-// Contract Calling
-
-// CallContract executes a message call transaction, which is directly executed in the VM
-// of the node, but never mined into the blockchain.
-//
-// blockNumber selects the block height at which the call runs. It can be nil, in which
-// case the code is taken from the latest known block. Note that state from very old
-// blocks might not be available.
 func (ec *Client) CallContract(ctx context.Context, chainID *big.Int, msg *eth.CallMsg, blockNumber *big.Int) ([]byte, error) {
-	var hex hexutil.Bytes
-	err := ec.getRPC(chainID).CallContext(ctx, &hex, "eth_call", toCallArg(msg), toBlockNumArg(blockNumber))
+	url, err := ec.getURL(chainID)
 	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return nil, err
 	}
-	return hex, nil
+	return ec.clientV2.CallContract(ctx, url, msg, blockNumber)
 }
 
-// PendingCallContract executes a message call transaction using the EVM.
-// The state seen by the contract call is the pending state.
 func (ec *Client) PendingCallContract(ctx context.Context, chainID *big.Int, msg *eth.CallMsg) ([]byte, error) {
-	var hex hexutil.Bytes
-	err := ec.getRPC(chainID).CallContext(ctx, &hex, "eth_call", toCallArg(msg), "pending")
+	url, err := ec.getURL(chainID)
 	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return nil, err
 	}
-	return hex, nil
+	return ec.clientV2.PendingCallContract(ctx, url, msg)
 }
 
-// SuggestGasPrice retrieves the currently suggested gas price to allow a timely
-// execution of a transaction.
 func (ec *Client) SuggestGasPrice(ctx context.Context, chainID *big.Int) (*big.Int, error) {
-	var hex hexutil.Big
-	err := ec.getRPC(chainID).CallContext(ctx, &hex, "eth_gasPrice")
+	url, err := ec.getURL(chainID)
 	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return nil, err
 	}
-
-	return (*big.Int)(&hex), nil
+	return ec.clientV2.SuggestGasPrice(ctx, url)
 }
 
-// EstimateGas tries to estimate the gas needed to execute a specific transaction based on
-// the current pending state of the backend blockchain. There is no guarantee that this is
-// the true gas limit requirement as other transactions may be added or removed by miners,
-// but it should provide a basis for setting a reasonable default.
 func (ec *Client) EstimateGas(ctx context.Context, chainID *big.Int, msg *eth.CallMsg) (uint64, error) {
-	var hex hexutil.Uint64
-	err := ec.getRPC(chainID).CallContext(ctx, &hex, "eth_estimateGas", toCallArg(msg))
+	url, err := ec.getURL(chainID)
 	if err != nil {
-		return 0, errors.FromError(err).ExtendComponent(component)
+		return 0, err
 	}
-	return uint64(hex), nil
+	return ec.clientV2.EstimateGas(ctx, url, msg)
 }
 
-func toCallArg(msg *eth.CallMsg) interface{} {
-	arg := map[string]interface{}{
-		"from": msg.From,
-		"to":   msg.To,
-	}
-	if len(msg.Data) > 0 {
-		arg["data"] = hexutil.Bytes(msg.Data)
-	}
-	if msg.Value != nil {
-		arg["value"] = (*hexutil.Big)(msg.Value)
-	}
-	if msg.Gas != 0 {
-		arg["gas"] = hexutil.Uint64(msg.Gas)
-	}
-	if msg.GasPrice != nil {
-		arg["gasPrice"] = (*hexutil.Big)(msg.GasPrice)
-	}
-	return arg
-}
-
-// SendRawTransaction allows to send a raw transaction
 func (ec *Client) SendRawTransaction(ctx context.Context, chainID *big.Int, raw string) error {
-	err := ec.getRPC(chainID).CallContext(ctx, nil, "eth_sendRawTransaction", raw)
+	url, err := ec.getURL(chainID)
 	if err != nil {
-		return errors.FromError(err).ExtendComponent(component)
+		return err
 	}
-	return nil
+	return ec.clientV2.SendRawTransaction(ctx, url, raw)
 }
 
-// SendTransaction send transaction to an Ethereum node
 func (ec *Client) SendTransaction(ctx context.Context, chainID *big.Int, args *types.SendTxArgs) (txHash ethcommon.Hash, err error) {
-	log.WithFields(log.Fields{
-		"nonce": args.Nonce.String(),
-		"from":  args.From.Hex(),
-	}).Info("sending a transaction")
-
-	err = ec.getRPC(chainID).CallContext(ctx, &txHash, "eth_sendTransaction", &args)
+	url, err := ec.getURL(chainID)
 	if err != nil {
-		return ethcommon.Hash{}, errors.FromError(err).ExtendComponent(component)
+		return ethcommon.Hash{}, err
 	}
-	return txHash, nil
+	return ec.clientV2.SendTransaction(ctx, url, args)
 }
 
 func (ec *Client) SendQuorumRawPrivateTransaction(ctx context.Context, chainID *big.Int, signedTxHash []byte, privateFor []string) (ethcommon.Hash, error) {
-	rawTxHashHex := hexutil.Encode(signedTxHash)
-	privateForParam := map[string]interface{}{
-		"privateFor": privateFor,
-	}
-	var hash string
-	err := ec.getRPC(chainID).CallContext(ctx, &hash, "eth_sendRawPrivateTransaction", rawTxHashHex, privateForParam)
+	url, err := ec.getURL(chainID)
 	if err != nil {
-		return ethcommon.Hash{}, errors.FromError(err).ExtendComponent(component)
+		return ethcommon.Hash{}, err
 	}
-	return ethcommon.HexToHash(hash), nil
+	return ec.clientV2.SendQuorumRawPrivateTransaction(ctx, url, signedTxHash, privateFor)
 }
 
-// SendRawPrivateTransaction send a raw transaction to an Ethereum node supporting EEA extension
 func (ec *Client) SendRawPrivateTransaction(ctx context.Context, chainID *big.Int, raw []byte, args *types.PrivateArgs) (ethcommon.Hash, error) {
-	// Send a raw signed transactions using EEA extension method
-	// Method documentation here: https://besu.hyperledger.org/en/stable/Reference/API-Methods/#eea_sendrawtransaction
-	var hash string
-	err := ec.getRPC(chainID).CallContext(ctx, &hash, "eea_sendRawTransaction", hexutil.Encode(raw))
+	url, err := ec.getURL(chainID)
 	if err != nil {
-		return ethcommon.Hash{}, errors.FromError(err).ExtendComponent(component)
+		return ethcommon.Hash{}, err
 	}
-	return ethcommon.HexToHash(hash), nil
+	return ec.clientV2.SendRawPrivateTransaction(ctx, url, raw, args)
 }

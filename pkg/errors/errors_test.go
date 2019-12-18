@@ -116,7 +116,7 @@ func TestInvalidAuthenticationError(t *testing.T) {
 	assert.Equal(t, "09000", e.Hex(), "Hex representation should be correct")
 }
 
-func TestUnauthenticatedError(t *testing.T) {
+func TestUnauthorizedError(t *testing.T) {
 	e := UnauthorizedError("test")
 	assert.Equal(t, uint64(36865), e.GetCode(), "UnauthorizedError code should be correct")
 	assert.True(t, IsInvalidAuthenticationError(e), "UnauthorizedError should be a connection error")
@@ -267,6 +267,20 @@ func TestDeadlineExceededError(t *testing.T) {
 	assert.Equal(t, uint64(356354), e.GetCode(), "DeadlineExceededError code should be correct")
 	assert.True(t, IsOperatorInterventionError(e), "DeadlineExceededError should be a OperatorInterventionError")
 	assert.Equal(t, "57002", e.Hex(), "Hex representation should be correct")
+}
+
+func TestEthereumError(t *testing.T) {
+	e := EthereumError("test")
+	assert.Equal(t, uint64(778240), e.GetCode(), "EthereumError code should be correct")
+	assert.True(t, IsEthereumError(e), "EthereumError should be a EthereumError")
+	assert.Equal(t, "BE000", e.Hex(), "Hex representation should be correct")
+}
+
+func TestNonceTooLowError(t *testing.T) {
+	e := NonceTooLowError("test")
+	assert.Equal(t, uint64(778241), e.GetCode(), "NonceTooLowError code should be correct")
+	assert.True(t, IsEthereumError(e), "NonceTooLowError should be a EthereumError")
+	assert.Equal(t, "BE001", e.Hex(), "Hex representation should be correct")
 }
 
 func TestCryptoOperationError(t *testing.T) {
