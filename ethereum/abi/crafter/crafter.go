@@ -1,7 +1,10 @@
 package crafter
 
 import (
+	"fmt"
+	"math/big"
 	"reflect"
+	"strconv"
 	"strings"
 
 	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
@@ -50,14 +53,25 @@ func bindArg(t *ethabi.Type, arg string) (interface{}, error) {
 		}
 		return data, nil
 
-	case ethabi.IntTy, ethabi.UintTy:
-		// In current version we bind all types of integers to *big.Int
-		// Meaning we do not yet support int8, int16, int32, int64, uint8, uin16, uint32, uint64
-		data, err := hexutil.DecodeBig(arg)
-		if err != nil {
-			return data, errors.InvalidArgError("invalid int/uint %q", arg).SetComponent(component)
+	case ethabi.IntTy:
+		switch t.Size {
+		// only int of size 8, 16, 32, 64 should be bind in int
+		// other ones should be in *big.Int see packNum in go-ethereum/accounts/abi/pack.go https://github.com/ethereum/go-ethereum/blob/master/accounts/abi/pack.go
+		case 8, 16, 32, 64:
+			return bindIntArg(t, arg)
+		default:
+			return bindBigIntArg(t, arg)
 		}
-		return data, nil
+
+	case ethabi.UintTy:
+		switch t.Size {
+		// only uint of size 8, 16, 32, 64 should be bind in uint
+		// other ones should be in *big.Int see packNum in go-ethereum/accounts/abi/pack.go https://github.com/ethereum/go-ethereum/blob/master/accounts/abi/pack.go
+		case 8, 16, 32, 64:
+			return bindUintArg(t, arg)
+		default:
+			return bindBigIntArg(t, arg)
+		}
 
 	case ethabi.BoolTy:
 		switch arg {
@@ -83,6 +97,114 @@ func bindArg(t *ethabi.Type, arg string) (interface{}, error) {
 		return nil, errors.FeatureNotSupportedError("solidity type %q not supported", t.T).SetComponent(component)
 	}
 
+}
+
+// Code inspired by github.com/ethereum/go-ethereum/common/hexutil/hexutil.go
+func checkNumber(input string) (raw string, isNegative bool, err error) {
+	if input == "" {
+		return "", isNegative, hexutil.ErrEmptyString
+	}
+	if input[0] == '-' {
+		isNegative = true
+		input = input[1:]
+	}
+	if !has0xPrefix(input) {
+		return "", isNegative, hexutil.ErrMissingPrefix
+	}
+	input = input[2:]
+	if input == "" {
+		return "", isNegative, hexutil.ErrEmptyNumber
+	}
+	if len(input) > 1 && input[0] == '0' {
+		return "", isNegative, hexutil.ErrLeadingZero
+	}
+	if isNegative {
+		input = "-" + input
+	}
+	return input, isNegative, nil
+}
+
+// Code inspired by github.com/ethereum/go-ethereum/common/hexutil/hexutil.go
+func has0xPrefix(input string) bool {
+	return len(input) >= 2 && input[0] == '0' && (input[1] == 'x' || input[1] == 'X')
+}
+
+func bindBigIntArg(t *ethabi.Type, arg string) (interface{}, error) {
+	// Check that it is a pointer to big int
+	if t.Kind != reflect.Ptr {
+		return nil, errors.InvalidArgError("bindBigIntArg: invalid type for %s - expected type kind %s but got %s", arg, reflect.Ptr, t.Kind).SetComponent(component)
+	}
+
+	// If arg is negative
+	if arg != "" && arg[0] == '-' {
+		raw, _, err := checkNumber(arg)
+		if err != nil {
+			return nil, errors.InvalidArgError("bindBigIntArg: invalid negative invalid number %q", err).SetComponent(component)
+		}
+
+		i := new(big.Int)
+		i, ok := i.SetString(raw, 16)
+		if !ok {
+			return nil, errors.FromError(fmt.Errorf("bindBigIntArg: could not decode negative value of %s", arg)).SetComponent(component)
+		}
+		return i, nil
+	}
+
+	data, err := hexutil.DecodeBig(arg)
+	if err != nil {
+		return data, errors.InvalidArgError("bindBigIntArg invalid number %q", arg).SetComponent(component)
+	}
+	return data, nil
+}
+
+func bindIntArg(t *ethabi.Type, arg string) (interface{}, error) {
+	raw, _, err := checkNumber(arg)
+	if err != nil {
+		return nil, errors.InvalidArgError("bindIntArg: invalid number %q", err).SetComponent(component)
+	}
+
+	number, err := strconv.ParseInt(raw, 16, t.Size)
+	if err != nil {
+		return nil, errors.InvalidArgError("bindIntArg: could not parse number %q", err).SetComponent(component)
+	}
+
+	switch t.Size {
+	case 8:
+		return int8(number), nil
+	case 16:
+		return int16(number), nil
+	case 32:
+		return int32(number), nil
+	case 64:
+		return number, nil
+	default:
+		return nil, errors.InvalidArgError("bindIntArg: invalid size").SetComponent(component)
+	}
+}
+
+func bindUintArg(t *ethabi.Type, arg string) (interface{}, error) {
+	raw, isNegative, err := checkNumber(arg)
+	if err != nil && isNegative {
+		return nil, errors.InvalidArgError("bindUintArg: invalid number %q", err).SetComponent(component)
+	}
+
+	number, err := strconv.ParseUint(raw, 16, t.Size)
+	if err != nil {
+		return nil, errors.InvalidArgError("bindUintArg: could not parse number %q", err).SetComponent(component)
+	}
+
+	switch t.Size {
+	case 8:
+		return uint8(number), nil
+	case 16:
+		return uint16(number), nil
+	case 32:
+		return uint32(number), nil
+	case 64:
+		return number, nil
+	default:
+		return nil, errors.InvalidArgError("bindUintArg: invalid size").SetComponent(component)
+	}
 }
 
 func bindArrayArg(t *ethabi.Type, arg string) (interface{}, error) {

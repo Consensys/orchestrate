@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"strconv"
+	"strings"
 	"sync"
 	"testing"
 
@@ -41,7 +43,7 @@ func TestBindArg(t *testing.T) {
 
 	testBindArg(t, bindArgTest{&addrtype, "malformed-address", true})
 
-	dectype, _ := abi.NewType("int", "", nil)
+	dectype, _ := abi.NewType("int256", "", nil)
 	dec := testBindArg(t, bindArgTest{&dectype, "0x400", false}).(*big.Int)
 	assert.Equal(t, dec.Int64(), int64(1024), fmt.Sprintf("Expect bind to %v but got %v", 1024, dec.Int64()))
 
@@ -203,6 +205,203 @@ func TestPayloadCrafterArray(t *testing.T) {
 
 	expected := "0x71cc037a000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003"
 	assert.Equal(t, hexutil.Encode(data), expected, "Craft: expected equal payload")
+}
+
+func TestCraftCall(t *testing.T) {
+
+	testSuite := []struct {
+		sig            string
+		arg            string
+		expectedOutput string
+		expectedError  bool
+	}{
+		{
+			sig:            "testMethod(int8)",
+			arg:            strings.ReplaceAll(strconv.FormatInt(int64(-15), 16), "-", "-0x"),
+			expectedOutput: "0xc16c27eefffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1",
+			expectedError:  false,
+		},
+		{
+			sig:            "testMethod(int8)",
+			arg:            "0x" + strconv.FormatInt(int64(15), 16),
+			expectedOutput: "0xc16c27ee000000000000000000000000000000000000000000000000000000000000000f",
+			expectedError:  false,
+		},
+		{
+			sig:            "testMethod(int16)",
+			arg:            strings.ReplaceAll(strconv.FormatInt(int64(-777), 16), "-", "-0x"),
+			expectedOutput: "0xc24f04e6fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffcf7",
+			expectedError:  false,
+		},
+		{
+			sig:            "testMethod(int16)",
+			arg:            "0x" + strconv.FormatInt(int64(777), 16),
+			expectedOutput: "0xc24f04e60000000000000000000000000000000000000000000000000000000000000309",
+			expectedError:  false,
+		},
+		{
+			sig:            "testMethod(int32)",
+			arg:            strings.ReplaceAll(strconv.FormatInt(int64(-666), 16), "-", "-0x"),
+			expectedOutput: "0x36cd9d4bfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffd66",
+			expectedError:  false,
+		},
+		{
+			sig:            "testMethod(int32)",
+			arg:            "0x" + strconv.FormatInt(int64(666), 16),
+			expectedOutput: "0x36cd9d4b000000000000000000000000000000000000000000000000000000000000029a",
+			expectedError:  false,
+		},
+		{
+			sig:            "testMethod(int64)",
+			arg:            strings.ReplaceAll(strconv.FormatInt(int64(-9876543234567), 16), "-", "-0x"),
+			expectedOutput: "0xc8ad54c4fffffffffffffffffffffffffffffffffffffffffffffffffffff70470261df9",
+			expectedError:  false,
+		},
+		{
+			sig:            "testMethod(int64)",
+			arg:            "0x" + strconv.FormatInt(int64(9876543234567), 16),
+			expectedOutput: "0xc8ad54c4000000000000000000000000000000000000000000000000000008fb8fd9e207",
+			expectedError:  false,
+		},
+		{
+			sig:            "testMethod(uint8)",
+			arg:            "0x" + strconv.FormatUint(uint64(45), 16),
+			expectedOutput: "0x41798113000000000000000000000000000000000000000000000000000000000000002d",
+			expectedError:  false,
+		},
+		{
+			sig:            "testMethod(uint16)",
+			arg:            "0x" + strconv.FormatUint(uint64(888), 16),
+			expectedOutput: "0x2e861b5e0000000000000000000000000000000000000000000000000000000000000378",
+			expectedError:  false,
+		},
+		{
+			sig:            "testMethod(uint32)",
+			arg:            "0x" + strconv.FormatUint(uint64(888), 16),
+			expectedOutput: "0x16da88d70000000000000000000000000000000000000000000000000000000000000378",
+			expectedError:  false,
+		},
+		{
+			sig:            "testMethod(uint64)",
+			arg:            "0x" + strconv.FormatUint(uint64(888), 16),
+			expectedOutput: "0x9eb806d20000000000000000000000000000000000000000000000000000000000000378",
+			expectedError:  false,
+		},
+		{
+			sig:            "testMethod(int256)",
+			arg:            hexutil.EncodeBig(big.NewInt(456744578797645890)),
+			expectedOutput: "0x9a75060d0000000000000000000000000000000000000000000000000656aec64451b042",
+			expectedError:  false,
+		},
+		{
+			sig:            "testMethod(int256)",
+			arg:            fmt.Sprintf("%#x", big.NewInt(-456744578797645890)),
+			expectedOutput: "0x9a75060dfffffffffffffffffffffffffffffffffffffffffffffffff9a95139bbae4fbe",
+			expectedError:  false,
+		},
+		{
+			sig:            "testMethod(uint256)",
+			arg:            hexutil.EncodeBig(big.NewInt(898555348797645890)),
+			expectedOutput: "0xcbef6d0e0000000000000000000000000000000000000000000000000c784f54381c6442",
+			expectedError:  false,
+		},
+		{
+			sig:            "testMethod(int40)",
+			arg:            hexutil.EncodeBig(big.NewInt(8764243)),
+			expectedOutput: "0x7bf30fef000000000000000000000000000000000000000000000000000000000085bb53",
+			expectedError:  false,
+		},
+		{
+			sig:            "testMethod(int40)",
+			arg:            fmt.Sprintf("%#x", big.NewInt(-8764243)),
+			expectedOutput: "0x7bf30fefffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7a44ad",
+			expectedError:  false,
+		},
+		{
+			sig:            "testMethod(uint24)",
+			arg:            fmt.Sprintf("%#x", big.NewInt(7565467)),
+			expectedOutput: "0x8db79faf000000000000000000000000000000000000000000000000000000000073709b",
+			expectedError:  false,
+		},
+		{
+			sig:            "testMethod(uint8)",
+			arg:            "",
+			expectedOutput: "",
+			expectedError:  true,
+		},
+		{
+			sig:            "testMethod(uint8)",
+			arg:            "a",
+			expectedOutput: "",
+			expectedError:  true,
+		},
+		{
+			sig:            "testMethod(uint8)",
+			arg:            "-0xa",
+			expectedOutput: "",
+			expectedError:  true,
+		},
+		{
+			sig:            "testMethod(int8)",
+			arg:            "0s",
+			expectedOutput: "",
+			expectedError:  true,
+		},
+		{
+			sig:            "testMethod(uint8)",
+			arg:            "0x",
+			expectedOutput: "",
+			expectedError:  true,
+		},
+		{
+			sig:            "testMethod(uint8)",
+			arg:            "0x07ab",
+			expectedOutput: "",
+			expectedError:  true,
+		},
+		{
+			sig:            "testMethod(int8)",
+			arg:            "0x7Zab",
+			expectedOutput: "",
+			expectedError:  true,
+		},
+		{
+			sig:            "testMethod(uint8)",
+			arg:            "0x7Zab",
+			expectedOutput: "",
+			expectedError:  true,
+		},
+		{
+			sig:            "testMethod(uint8)",
+			arg:            "-0xa",
+			expectedOutput: "",
+			expectedError:  true,
+		},
+		{
+			sig:            "testMethod(uint8)",
+			arg:            "0x9a95139bbae4fbe",
+			expectedOutput: "",
+			expectedError:  true,
+		},
+		{
+			sig:            "testMethod(int8)",
+			arg:            "0x9a95139bbae4fbe",
+			expectedOutput: "",
+			expectedError:  true,
+		},
+	}
+
+	for i, test := range testSuite {
+		ArrayInput, _ := SignatureToMethod(test.sig)
+		c := PayloadCrafter{}
+		data, err := c.CraftCall(ArrayInput, test.arg)
+		if test.expectedError {
+			assert.Error(t, err, "Craft (%d/%d): should get an error", i+1, len(testSuite))
+			return
+		}
+		assert.NoError(t, err, "Craft (%d/%d):: should not get an error", i+1, len(testSuite))
+		assert.Equal(t, test.expectedOutput, hexutil.Encode(data), "Craft (%d/%d): expected equal payload", i+1, len(testSuite))
+	}
 }
 
 func TestPayloadCrafterArrayAddress(t *testing.T) {

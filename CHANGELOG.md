@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file.
 * Fix connection issue when trying to connect to some Infura endpoints
 * On `envelopestore`, when storing a 2nd envelope with same `tx_hash` and `chain_id` but a distinct `metadata.id` overwrites the first one
 * Fix exposition of Swagger-UI in Docker images
+* Fix crafting transactions with other types from uint256 and int256
 
 ### ⚠ BREAKING CHANGES
 * **config** Rename `mock` options to `in-memory` for the `NONCE_MANAGER_TYPE` of the `tx-nonce` and `tx-sender` 
