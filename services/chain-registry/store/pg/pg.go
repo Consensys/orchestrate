@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/go-pg/pg"
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
@@ -24,152 +23,129 @@ func NewChainRegistryPGOptions(opts *pg.Options) *ChainRegistry {
 	return NewChainRegistry(pg.Connect(opts))
 }
 
-// RegisterConfig register a config
-func (r *ChainRegistry) RegisterConfig(ctx context.Context, config *types.Config) error {
+func (r *ChainRegistry) RegisterNode(ctx context.Context, node *types.Node) error {
 
-	configStruct, err := types.GetConfigStruct(config.ConfigType)
-	if err != nil {
-		return errors.FromError(err).ExtendComponent(component)
-	}
-
-	err = types.UnmarshalJSONConfig(config.Config, configStruct)
-	if err != nil {
-		return errors.FromError(err).ExtendComponent(component)
-	}
-
-	_, err = r.db.ModelContext(ctx, config).
+	_, err := r.db.ModelContext(ctx, node).
+		Returning("id").
 		Insert()
 	if err != nil {
-		log.WithError(err).Debugf("could not register configs")
 		return errors.FromError(err).ExtendComponent(component)
 	}
 
 	return nil
 }
 
-// RegisterConfigs register many configs at once
-func (r *ChainRegistry) RegisterConfigs(ctx context.Context, configs *[]types.Config) error {
+func (r *ChainRegistry) GetNodes(ctx context.Context) ([]*types.Node, error) {
+	nodes := make([]*types.Node, 0)
 
-	for _, config := range *configs {
-		configStruct, err := types.GetConfigStruct(config.ConfigType)
-		if err != nil {
-			return errors.FromError(err).ExtendComponent(component)
-		}
-
-		err = types.UnmarshalJSONConfig(config.Config, configStruct)
-		if err != nil {
-			return errors.FromError(err).ExtendComponent(component)
-		}
-	}
-
-	_, err := r.db.ModelContext(ctx, configs).
-		Insert()
-	if err != nil {
-		log.WithError(err).Debugf("could not register configs")
-		return errors.FromError(err).ExtendComponent(component)
-	}
-
-	return nil
-}
-
-// GetConfigById retrieves config with an id
-func (r *ChainRegistry) GetConfig(ctx context.Context) ([]*types.Config, error) {
-	var configs []*types.Config
-
-	err := r.db.ModelContext(ctx, &configs).
+	err := r.db.ModelContext(ctx, &nodes).
 		Select()
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	return configs, nil
+	return nodes, nil
 }
 
-// GetConfigById retrieves config with an id
-func (r *ChainRegistry) GetConfigByID(ctx context.Context, config *types.Config) error {
+func (r *ChainRegistry) GetNodesByTenantID(ctx context.Context, tenantID string) ([]*types.Node, error) {
+	nodes := make([]*types.Node, 0)
 
-	err := r.db.ModelContext(ctx, config).
-		Where("id = ?", config.ID).
-		Select()
-	if err != nil {
-		return errors.FromError(err).ExtendComponent(component)
-	}
-
-	return nil
-}
-
-// GetConfigByTenantID retrieves configs of a tenantId
-func (r *ChainRegistry) GetConfigByTenantID(ctx context.Context, config *types.Config) ([]*types.Config, error) {
-	var configs []*types.Config
-
-	err := r.db.ModelContext(ctx, &configs).
-		Where("tenant_id = ?", config.TenantID).
+	err := r.db.ModelContext(ctx, &nodes).
+		Where("tenant_id = ?", tenantID).
 		Select()
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	return configs, nil
+	return nodes, nil
 }
 
-// UpdateConfigByID updates a config
-func (r *ChainRegistry) UpdateConfigByID(ctx context.Context, config *types.Config) error {
-	// Check if config match struct
-	configStruct, err := types.GetConfigStruct(config.ConfigType)
+func (r *ChainRegistry) GetNodeByName(ctx context.Context, tenantID, name string) (*types.Node, error) {
+	node := &types.Node{}
+
+	err := r.db.ModelContext(ctx, node).
+		Where("name = ?", name).
+		Where("tenant_id = ?", tenantID).
+		Select()
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	return node, nil
+}
+
+func (r *ChainRegistry) GetNodeByID(ctx context.Context, id int) (*types.Node, error) {
+	node := &types.Node{}
+
+	err := r.db.ModelContext(ctx, node).
+		Where("id = ?", id).
+		Select()
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	return node, nil
+}
+
+func (r *ChainRegistry) UpdateNodeByName(ctx context.Context, node *types.Node) error {
+
+	res, err := r.db.ModelContext(ctx, node).
+		Where("tenant_id = ?", node.TenantID).
+		Where("name = ?", node.Name).
+		UpdateNotNull()
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(component)
 	}
 
-	err = types.UnmarshalJSONConfig(config.Config, configStruct)
-	if err != nil {
-		return errors.FromError(err).ExtendComponent(component)
+	if res.RowsReturned() == 0 && res.RowsAffected() == 0 {
+		return errors.NotFoundError("no node found with tenant_id=%s and name=%s", node.TenantID, node.Name).ExtendComponent(component)
 	}
-
-	_, err = r.db.ModelContext(ctx, config).
-		Set("name = ?name").
-		Set("config_type = ?config_type").
-		Set("config = ?config").
-		Where("id = ?id").
-		Update()
-	if err != nil {
-		return errors.FromError(err).ExtendComponent(component)
-	}
-
 	return nil
 }
 
-// DeregisterConfigByID deletes a config
-func (r *ChainRegistry) DeregisterConfigByID(ctx context.Context, config *types.Config) error {
-	_, err := r.db.ModelContext(ctx, config).
-		Where("id = ?id").
-		Delete()
-	if err != nil {
-		return errors.FromError(err).ExtendComponent(component)
-	}
+func (r *ChainRegistry) UpdateNodeByID(ctx context.Context, node *types.Node) error {
 
-	return nil
-}
-
-// DeregisterConfigsByIds deletes many configs
-func (r *ChainRegistry) DeregisterConfigsByIds(ctx context.Context, configs *[]types.Config) error {
-	_, err := r.db.ModelContext(ctx, configs).
+	res, err := r.db.ModelContext(ctx, node).
 		WherePK().
-		Delete()
+		UpdateNotNull()
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(component)
 	}
 
+	if res.RowsReturned() == 0 && res.RowsAffected() == 0 {
+		return errors.NotFoundError("no node found with id %d", node.ID).ExtendComponent(component)
+	}
 	return nil
 }
 
-// DeregisterConfigByTenantID deletes configs of a tenant
-func (r *ChainRegistry) DeregisterConfigByTenantID(ctx context.Context, config *types.Config) error {
-	_, err := r.db.ModelContext(ctx, config).
-		Where("tenant_id = ?tenant_id").
+func (r *ChainRegistry) DeleteNodeByName(ctx context.Context, node *types.Node) error {
+
+	res, err := r.db.ModelContext(ctx, node).
+		Where("tenant_id = ?", node.TenantID).
+		Where("name = ?", node.Name).
 		Delete()
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(component)
 	}
 
+	if res.RowsReturned() == 0 && res.RowsAffected() == 0 {
+		return errors.NotFoundError("no node found with tenant_id=%s and name=%s", node.TenantID, node.Name).ExtendComponent(component)
+	}
+	return nil
+}
+
+func (r *ChainRegistry) DeleteNodeByID(ctx context.Context, id int) error {
+	node := &types.Node{}
+
+	res, err := r.db.ModelContext(ctx, node).
+		Where("id = ?", id).
+		Delete()
+	if err != nil {
+		return errors.FromError(err).ExtendComponent(component)
+	}
+
+	if res.RowsReturned() == 0 && res.RowsAffected() == 0 {
+		return errors.NotFoundError("no node found with id %d", id).ExtendComponent(component)
+	}
 	return nil
 }

@@ -117,8 +117,8 @@ services:
   chain-registry:
     <<: *container-common
     ports:
-      - 8080:80
-      - 8081:81
+      - 7080:80
+      - 7081:81
     environment:
       <<: *default-variables
       <<: *chain-registry-common

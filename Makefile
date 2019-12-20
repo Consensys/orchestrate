@@ -24,7 +24,7 @@ coverage:
 	@$(OPEN) build/coverage/coverage.html 2>/dev/null
 
 race: ## Run data race detector
-	@go test -race -short ${PACKAGES}
+	@go test -count=1 -race -short ${PACKAGES}
 
 mod-tidy: 
 	@go mod tidy

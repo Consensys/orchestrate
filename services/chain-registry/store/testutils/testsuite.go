@@ -2,74 +2,12 @@ package testutils
 
 import (
 	"context"
-	"fmt"
+	"testing"
 
-	"github.com/containous/traefik/v2/pkg/config/dynamic"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
-
-var httpRouter1 = &dynamic.Router{
-	Service: "testService",
-}
-var JSONHttpRouter1, _ = json.Marshal(httpRouter1)
-
-var httpRouter2 = &dynamic.Router{
-	Rule: "testRule",
-}
-var JSONHttpRouter2, _ = json.Marshal(httpRouter2)
-
-var httpMiddleware1 = &dynamic.Middleware{
-	AddPrefix: &dynamic.AddPrefix{Prefix: "testPrefix"},
-}
-var JSONHttpMiddleware1, _ = json.Marshal(httpMiddleware1)
-
-var configs = []types.Config{
-	{
-		Name:       "testRouter1",
-		ConfigType: types.HTTPROUTER,
-		Config:     JSONHttpRouter1,
-	},
-	{
-		Name:       "testRouter2",
-		ConfigType: types.HTTPROUTER,
-		Config:     JSONHttpRouter2,
-	},
-	{
-		Name:       "testMiddleware1",
-		ConfigType: types.HTTPMIDDLEWARE,
-		Config:     JSONHttpMiddleware1,
-	},
-}
-
-var configsWithDifferentTenants = []types.Config{
-	{
-		Name:       "testRouter1",
-		TenantID:   "tenant1",
-		ConfigType: types.HTTPROUTER,
-		Config:     JSONHttpRouter1,
-	},
-	{
-		Name:       "testRouter2",
-		TenantID:   "tenant2",
-		ConfigType: types.HTTPROUTER,
-		Config:     JSONHttpRouter2,
-	},
-	{
-		Name:       "testMiddleware1",
-		TenantID:   "tenant2",
-		ConfigType: types.HTTPMIDDLEWARE,
-		Config:     JSONHttpMiddleware1,
-	},
-	{
-		Name:       "testMiddleware1",
-		TenantID:   "tenant1",
-		ConfigType: types.HTTPMIDDLEWARE,
-		Config:     JSONHttpMiddleware1,
-	},
-}
 
 // EnvelopeStoreTestSuite is a test suit for EnvelopeStore
 type ChainRegistryTestSuite struct {
@@ -77,130 +15,231 @@ type ChainRegistryTestSuite struct {
 	Store types.ChainRegistryStore
 }
 
-func (s *ChainRegistryTestSuite) TestRegisterConfig() {
-	config := &types.Config{
-		Name:       "test",
-		ConfigType: types.HTTPROUTER,
-		Config:     JSONHttpRouter1,
-	}
+const (
+	nodeName1 = "testNode1"
+	nodeName2 = "testNode2"
+	nodeName3 = "testNode3"
+	tenantID1 = "tenantID1"
+	tenantID2 = "tenantID2"
+)
 
-	err := s.Store.RegisterConfig(context.Background(), config)
-	assert.NoError(s.T(), err, "Should register config properly")
+var tenantID1Nodes = map[string]*types.Node{
+	nodeName1: {
+		Name:                    nodeName1,
+		TenantID:                tenantID1,
+		URLs:                    []string{"testUrl1", "testUrl2"},
+		ListenerDepth:           1,
+		ListenerBlockPosition:   1,
+		ListenerFromBlock:       1,
+		ListenerBackOffDuration: "1s",
+	},
+	nodeName2: {
+		Name:                    nodeName2,
+		TenantID:                tenantID1,
+		URLs:                    []string{"testUrl1", "testUrl2"},
+		ListenerDepth:           2,
+		ListenerBlockPosition:   2,
+		ListenerFromBlock:       2,
+		ListenerBackOffDuration: "2s",
+	},
+}
+var tenantID2Nodes = map[string]*types.Node{
+	nodeName1: {
+		Name:                    nodeName1,
+		TenantID:                tenantID2,
+		URLs:                    []string{"testUrl1", "testUrl2"},
+		ListenerDepth:           1,
+		ListenerBlockPosition:   1,
+		ListenerFromBlock:       1,
+		ListenerBackOffDuration: "1s",
+	},
+	nodeName2: {
+		Name:                    nodeName2,
+		TenantID:                tenantID2,
+		URLs:                    []string{"testUrl1", "testUrl2"},
+		ListenerDepth:           2,
+		ListenerBlockPosition:   2,
+		ListenerFromBlock:       2,
+		ListenerBackOffDuration: "2s",
+	},
+	nodeName3: {
+		Name:                    nodeName3,
+		TenantID:                tenantID2,
+		URLs:                    []string{"testUrl1", "testUrl2"},
+		ListenerDepth:           3,
+		ListenerBlockPosition:   3,
+		ListenerFromBlock:       3,
+		ListenerBackOffDuration: "3s",
+	},
+}
 
-	err = s.Store.RegisterConfig(context.Background(), config)
+var NodesSample = map[string]map[string]*types.Node{
+	tenantID1: tenantID1Nodes,
+	tenantID2: tenantID2Nodes,
+}
+
+func CompareNodes(t *testing.T, node1, node2 *types.Node) {
+	assert.Equal(t, node1.Name, node2.Name, "Should get the same node name")
+	assert.Equal(t, node1.TenantID, node2.TenantID, "Should get the same node tenantID")
+	assert.Equal(t, node1.URLs, node2.URLs, "Should get the same node URLs")
+	assert.Equal(t, node1.ListenerDepth, node2.ListenerDepth, "Should get the same node ListenerDepth")
+	assert.Equal(t, node1.ListenerBlockPosition, node2.ListenerBlockPosition, "Should get the same node")
+	assert.Equal(t, node1.ListenerFromBlock, node2.ListenerFromBlock, "Should get the same node ListenerBlockPosition")
+	assert.Equal(t, node1.ListenerBackOffDuration, node2.ListenerBackOffDuration, "Should get the same node ListenerBackOffDuration")
+}
+
+func (s *ChainRegistryTestSuite) TestRegisterNode() {
+	err := s.Store.RegisterNode(context.Background(), NodesSample[tenantID1][nodeName1])
+	assert.NoError(s.T(), err, "Should register node properly")
+
+	err = s.Store.RegisterNode(context.Background(), NodesSample[tenantID1][nodeName1])
 	assert.Error(s.T(), err, "Should get an error violating the 'unique' constrain")
+}
 
-	errorConfig := &types.Config{
-		Name:       "test",
-		ConfigType: types.HTTPMIDDLEWARE,
-		Config:     JSONHttpRouter1,
+func (s *ChainRegistryTestSuite) TestRegisterNodes() {
+	for _, nodes := range NodesSample {
+		for _, node := range nodes {
+			_ = s.Store.RegisterNode(context.Background(), node)
+		}
 	}
-	err = s.Store.RegisterConfig(context.Background(), errorConfig)
-	assert.Error(s.T(), err, "Should get an error when config does not corresponds to the config type")
 }
 
-func (s *ChainRegistryTestSuite) TestRegisterConfigs() {
-	err := s.Store.RegisterConfigs(context.Background(), &configs)
-	assert.NoError(s.T(), err, "Should register configs properly")
-}
+func (s *ChainRegistryTestSuite) TestGetNodes() {
+	s.TestRegisterNodes()
 
-func (s *ChainRegistryTestSuite) TestRegisterConfigsWithDifferentTenant() {
-	err := s.Store.RegisterConfigs(context.Background(), &configsWithDifferentTenants)
-	assert.NoError(s.T(), err, "Should register configs properly")
-}
+	nodes, err := s.Store.GetNodes(context.Background())
+	assert.NoError(s.T(), err, "Should get nodes without errors")
+	assert.Len(s.T(), nodes, len(tenantID1Nodes)+len(tenantID2Nodes), "Should get the same number of nodes")
 
-func (s *ChainRegistryTestSuite) TestGetConfigByID() {
-	s.TestRegisterConfigs()
-	config := &types.Config{
-		ID: 2,
+	for _, node := range nodes {
+		CompareNodes(s.T(), node, NodesSample[node.TenantID][node.Name])
 	}
-	err := s.Store.GetConfigByID(context.Background(), config)
-	assert.NoError(s.T(), err, "Should get config properly")
-	assert.Equal(s.T(), configs[config.ID-1].Name, config.Name, "GetConfigById should retrieve the correct name")
-	assert.Equal(s.T(), configs[config.ID-1].ConfigType, config.ConfigType, "GetConfigById should retrieve the correct configType")
-
-	configError := &types.Config{
-		ID: -1,
-	}
-	err = s.Store.GetConfigByID(context.Background(), configError)
-	assert.Error(s.T(), err, "Should get an error when ID is wrong")
 }
 
-func (s *ChainRegistryTestSuite) TestGetConfigByTenantID() {
-	s.TestRegisterConfigs()
-	config := &types.Config{
-		TenantID: "default",
+func (s *ChainRegistryTestSuite) TestGetNodesByTenantID() {
+	s.TestRegisterNodes()
+
+	nodes, err := s.Store.GetNodesByTenantID(context.Background(), tenantID2)
+	assert.NoError(s.T(), err, "Should get nodes without errors")
+	assert.Len(s.T(), nodes, len(NodesSample[tenantID2]), "Should get the same number of nodes")
+	for i := 0; i < len(NodesSample[tenantID2]); i++ {
+		CompareNodes(s.T(), nodes[i], NodesSample[tenantID2][nodes[i].Name])
 	}
-	configs, err := s.Store.GetConfigByTenantID(context.Background(), config)
-	assert.NoError(s.T(), err, "Should get configs properly")
-	assert.Len(s.T(), configs, len(configs), fmt.Sprintf("Should get %d configs", len(configs)))
 }
 
-func (s *ChainRegistryTestSuite) TestUpdateConfigByID() {
-	s.TestRegisterConfigs()
+func (s *ChainRegistryTestSuite) TestGetNodeByName() {
+	s.TestRegisterNodes()
 
-	JSONHttpMiddleware2, _ := json.Marshal(&dynamic.Middleware{
-		AddPrefix: &dynamic.AddPrefix{Prefix: "newTestPrefix"},
-	})
+	node, err := s.Store.GetNodeByName(context.Background(), tenantID2, nodeName2)
+	assert.NoError(s.T(), err, "Should get node without errors")
 
-	config := &types.Config{
-		ID:         3,
-		Name:       "testMiddleware2",
-		ConfigType: types.HTTPMIDDLEWARE,
-		Config:     JSONHttpMiddleware2,
-	}
-	err := s.Store.UpdateConfigByID(context.Background(), config)
-	assert.NoError(s.T(), err, "Should update config properly")
-
-	configReq := &types.Config{ID: 3}
-	err = s.Store.GetConfigByID(context.Background(), configReq)
-	assert.NoError(s.T(), err, "Should get config properly")
-	assert.Equal(s.T(), configReq.Name, config.Name, "GetConfigById should retrieve the correct name")
-	assert.Equal(s.T(), configReq.ConfigType, config.ConfigType, "GetConfigById should retrieve the correct name")
+	CompareNodes(s.T(), node, NodesSample[tenantID2][nodeName2])
 }
 
-func (s *ChainRegistryTestSuite) TestDeregisterConfigByID() {
-	s.TestRegisterConfigs()
+func (s *ChainRegistryTestSuite) TestGetNodeByID() {
+	s.TestRegisterNodes()
 
-	err := s.Store.DeregisterConfigByID(context.Background(), &types.Config{ID: 1})
-	assert.NoError(s.T(), err, "Should get config properly")
+	testNode, _ := s.Store.GetNodeByName(context.Background(), tenantID2, nodeName3)
 
-	configReq := &types.Config{
-		TenantID: "default",
-	}
-	configsReq, err := s.Store.GetConfigByTenantID(context.Background(), configReq)
-	assert.NoError(s.T(), err, "Should get configs properly")
-	assert.Len(s.T(), configsReq, len(configs)-1, "")
+	node, err := s.Store.GetNodeByID(context.Background(), testNode.ID)
+	assert.NoError(s.T(), err, "Should get node without errors")
+
+	CompareNodes(s.T(), node, NodesSample[tenantID2][nodeName3])
 }
 
-func (s *ChainRegistryTestSuite) TestDeregisterConfigsByIds() {
-	s.TestRegisterConfigs()
+func (s *ChainRegistryTestSuite) TestUpdateNodeByName() {
+	s.TestRegisterNodes()
 
-	var configsToDelete = []types.Config{{ID: 1}, {ID: 2}}
+	testNode := NodesSample[tenantID1][nodeName2]
+	testNode.URLs = []string{"testUrl1"}
+	err := s.Store.UpdateNodeByName(context.Background(), testNode)
+	assert.NoError(s.T(), err, "Should get node without errors")
 
-	err := s.Store.DeregisterConfigsByIds(context.Background(), &configsToDelete)
-	assert.NoError(s.T(), err, "Should get config properly")
-
-	configReq := &types.Config{
-		TenantID: "default",
-	}
-	configsReq, err := s.Store.GetConfigByTenantID(context.Background(), configReq)
-	assert.NoError(s.T(), err, "Should get configs properly")
-	assert.Len(s.T(), configsReq, len(configs)-len(configsToDelete), "")
+	node, _ := s.Store.GetNodeByName(context.Background(), tenantID1, nodeName2)
+	CompareNodes(s.T(), node, testNode)
 }
 
-func (s *ChainRegistryTestSuite) TestDeregisterConfigByTenantID() {
-	s.TestRegisterConfigsWithDifferentTenant()
-	tenantIDToDelete := "tenant1"
+func (s *ChainRegistryTestSuite) TestNotFoundTenantErrorUpdateNodeByName() {
+	testNode := NodesSample[tenantID1][nodeName2]
+	testNode.URLs = []string{"testUrl1"}
+	err := s.Store.UpdateNodeByName(context.Background(), testNode)
+	assert.Error(s.T(), err, "Should get node without errors")
+}
 
-	configsReq, err := s.Store.GetConfigByTenantID(context.Background(), &types.Config{TenantID: tenantIDToDelete})
-	assert.NoError(s.T(), err, "Should get configs properly")
-	assert.Len(s.T(), configsReq, 2, "Should have config")
+func (s *ChainRegistryTestSuite) TestNotFoundNameErrorUpdateNodeByName() {
+	s.TestRegisterNodes()
 
-	err = s.Store.DeregisterConfigByTenantID(context.Background(), &types.Config{TenantID: tenantIDToDelete})
-	assert.NoError(s.T(), err, "Should delete config properly")
+	testNode := &types.Node{
+		Name:     tenantID1,
+		TenantID: "errorNodeName",
+		URLs:     []string{"testUrl1"},
+	}
+	err := s.Store.UpdateNodeByName(context.Background(), testNode)
+	assert.Error(s.T(), err, "Should get node without errors")
+}
 
-	configsReq2, err := s.Store.GetConfigByTenantID(context.Background(), &types.Config{TenantID: tenantIDToDelete})
-	assert.NoError(s.T(), err, "Should get configs properly")
-	assert.Len(s.T(), configsReq2, 0, "Should not have config anymore")
+func (s *ChainRegistryTestSuite) TestUpdateNodeByID() {
+	s.TestRegisterNodes()
+
+	testNode, _ := s.Store.GetNodeByName(context.Background(), tenantID1, nodeName2)
+	testNode.ListenerFromBlock = 10
+	err := s.Store.UpdateNodeByID(context.Background(), testNode)
+	assert.NoError(s.T(), err, "Should get node without errors")
+
+	node, _ := s.Store.GetNodeByName(context.Background(), tenantID1, nodeName2)
+	CompareNodes(s.T(), node, testNode)
+}
+
+func (s *ChainRegistryTestSuite) TestErrorNotFoundUpdateNodeByID() {
+	s.TestRegisterNodes()
+
+	testNode := &types.Node{
+		ID:   100000,
+		URLs: []string{"testUrl1"},
+	}
+	err := s.Store.UpdateNodeByID(context.Background(), testNode)
+	assert.Error(s.T(), err, "Should update node with errors")
+}
+
+func (s *ChainRegistryTestSuite) TestDeleteNodeByName() {
+	s.TestRegisterNodes()
+
+	testNode := NodesSample[tenantID1][nodeName2]
+	err := s.Store.DeleteNodeByName(context.Background(), testNode)
+	assert.NoError(s.T(), err, "Should get node without errors")
+
+	node, err := s.Store.GetNodeByName(context.Background(), tenantID1, nodeName2)
+	assert.Error(s.T(), err, "Should get node without errors")
+	assert.Nil(s.T(), node, "Should not get node")
+}
+
+func (s *ChainRegistryTestSuite) TestErrorNotFoundDeleteNodeByName() {
+	s.TestRegisterNodes()
+
+	testNode := &types.Node{
+		Name:     tenantID1,
+		TenantID: "errorNodeName",
+	}
+	err := s.Store.DeleteNodeByName(context.Background(), testNode)
+	assert.Error(s.T(), err, "Should delete node with errors")
+}
+
+func (s *ChainRegistryTestSuite) TestDeleteNodeByID() {
+	s.TestRegisterNodes()
+
+	node, _ := s.Store.GetNodeByName(context.Background(), tenantID1, nodeName2)
+
+	err := s.Store.DeleteNodeByID(context.Background(), node.ID)
+	assert.NoError(s.T(), err, "Should get node without errors")
+
+	node, err = s.Store.GetNodeByName(context.Background(), tenantID1, nodeName2)
+	assert.Error(s.T(), err, "Should get node without errors")
+	assert.Nil(s.T(), node, "Should not get node")
+}
+
+func (s *ChainRegistryTestSuite) TestErrorNotFoundDeleteNodeByID() {
+	s.TestRegisterNodes()
+
+	err := s.Store.DeleteNodeByID(context.Background(), 10000)
+	assert.Error(s.T(), err, "Should delete node with errors")
 }

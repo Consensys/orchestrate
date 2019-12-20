@@ -2,51 +2,166 @@ package memory
 
 import (
 	"context"
+	"fmt"
+	"time"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
 
 type ChainRegistry struct {
+	Counter      int
+	NodesByID    map[int]*types.Node
+	NodesByNames map[string]map[string]*types.Node
 }
 
 // NewChainRegistry creates a new chain registry
 func NewChainRegistry() *ChainRegistry {
-	return &ChainRegistry{}
+	return &ChainRegistry{
+		Counter:      1,
+		NodesByID:    make(map[int]*types.Node),
+		NodesByNames: make(map[string]map[string]*types.Node),
+	}
 }
 
-// TODO: Implement in memory registry
-func (r *ChainRegistry) RegisterConfig(ctx context.Context, config *types.Config) error {
+func isNil(items ...interface{}) bool {
+	for _, v := range items {
+		if v == nil {
+			return true
+		}
+	}
+	return false
+}
+
+func (r *ChainRegistry) RegisterNode(ctx context.Context, node *types.Node) error {
+
+	if isNil(node.Name, node.TenantID, node.URLs, node.ListenerDepth, node.ListenerBlockPosition, node.ListenerFromBlock, node.ListenerBackOffDuration) {
+		return errors.FromError(fmt.Errorf("invalid node")).ExtendComponent(component)
+	}
+
+	if r.NodesByNames[node.TenantID] == nil {
+		r.NodesByNames[node.TenantID] = make(map[string]*types.Node)
+	}
+
+	if r.NodesByNames[node.TenantID][node.Name] != nil {
+		return errors.FromError(fmt.Errorf("node tenantID=%s name=%s already exitst", node.TenantID, node.Name)).ExtendComponent(component)
+	}
+
+	node.ID = r.Counter
+	r.NodesByNames[node.TenantID][node.Name] = node
+	r.NodesByID[r.Counter] = node
+	r.Counter++
 	return nil
 }
 
-func (r *ChainRegistry) RegisterConfigs(ctx context.Context, configs *[]types.Config) error {
+func (r *ChainRegistry) GetNodes(ctx context.Context) ([]*types.Node, error) {
+	nodes := make([]*types.Node, 0)
+
+	for _, node := range r.NodesByID {
+		nodes = append(nodes, node)
+	}
+
+	return nodes, nil
+}
+
+func (r *ChainRegistry) GetNodesByTenantID(ctx context.Context, tenantID string) ([]*types.Node, error) {
+	nodes := make([]*types.Node, 0)
+
+	if tenantNodes, ok := r.NodesByNames[tenantID]; ok {
+		for _, node := range tenantNodes {
+			nodes = append(nodes, node)
+		}
+	} else {
+		return nil, errors.NotFoundError("unknown tenantID=%s", tenantID).ExtendComponent(component)
+	}
+
+	return nodes, nil
+}
+
+func (r *ChainRegistry) GetNodeByName(ctx context.Context, tenantID, name string) (*types.Node, error) {
+	if _, ok := r.NodesByNames[tenantID]; ok {
+		if node, ok := r.NodesByNames[tenantID][name]; ok {
+			return node, nil
+		}
+		return nil, errors.NotFoundError("unknown node with tenantID=%s and name=%s", name, tenantID).ExtendComponent(component)
+	}
+
+	return nil, errors.NotFoundError("unknown node with tenantID=%s", tenantID).ExtendComponent(component)
+}
+
+func (r *ChainRegistry) GetNodeByID(ctx context.Context, id int) (*types.Node, error) {
+	if _, ok := r.NodesByID[id]; !ok {
+		return nil, errors.FromError(fmt.Errorf("unknown node ID=%d", id)).ExtendComponent(component)
+	}
+
+	return r.NodesByID[id], nil
+}
+
+var FieldsToNotUpdate = map[string]bool{
+	"ID":        true,
+	"CreatedAt": true,
+	"UpdatedAt": true,
+}
+
+func (r *ChainRegistry) UpdateNodeByName(ctx context.Context, node *types.Node) error {
+
+	if _, ok := r.NodesByNames[node.TenantID][node.Name]; !ok {
+		return errors.NotFoundError("no node found with id %d", node.ID).ExtendComponent(component)
+	}
+	nodeToUpdate := r.NodesByNames[node.TenantID][node.Name]
+
+	nodeToUpdate.Name = node.Name
+	nodeToUpdate.URLs = node.URLs
+	nodeToUpdate.ListenerBackOffDuration = node.ListenerBackOffDuration
+	nodeToUpdate.ListenerBlockPosition = node.ListenerBlockPosition
+	nodeToUpdate.ListenerFromBlock = node.ListenerFromBlock
+	nodeToUpdate.ListenerDepth = node.ListenerDepth
+	currentTime := time.Now()
+	nodeToUpdate.UpdatedAt = &currentTime
+
 	return nil
 }
 
-func (r *ChainRegistry) GetConfig(ctx context.Context) ([]*types.Config, error) {
-	return nil, nil
-}
+func (r *ChainRegistry) UpdateNodeByID(ctx context.Context, node *types.Node) error {
+	if _, ok := r.NodesByID[node.ID]; !ok {
+		return errors.NotFoundError("no node found with id %d", node.ID).ExtendComponent(component)
+	}
+	nodeToUpdate := r.NodesByID[node.ID]
 
-func (r *ChainRegistry) GetConfigByID(ctx context.Context, config *types.Config) error {
+	nodeToUpdate.Name = node.Name
+	nodeToUpdate.URLs = node.URLs
+	nodeToUpdate.ListenerBackOffDuration = node.ListenerBackOffDuration
+	nodeToUpdate.ListenerBlockPosition = node.ListenerBlockPosition
+	nodeToUpdate.ListenerFromBlock = node.ListenerFromBlock
+	nodeToUpdate.ListenerDepth = node.ListenerDepth
+	currentTime := time.Now()
+	nodeToUpdate.UpdatedAt = &currentTime
+
 	return nil
 }
 
-func (r *ChainRegistry) GetConfigByTenantID(ctx context.Context, config *types.Config) ([]*types.Config, error) {
-	return nil, nil
-}
+func (r *ChainRegistry) DeleteNodeByName(ctx context.Context, node *types.Node) error {
+	if _, ok := r.NodesByNames[node.TenantID]; !ok {
+		return errors.NotFoundError("no node found with tenant_id=%s", node.TenantID).ExtendComponent(component)
+	}
 
-func (r *ChainRegistry) UpdateConfigByID(ctx context.Context, config *types.Config) error {
+	if _, ok := r.NodesByNames[node.TenantID][node.Name]; !ok {
+		return errors.NotFoundError("no node found with tenant_id=%s and name=%s", node.TenantID, node.Name).ExtendComponent(component)
+	}
+
+	delete(r.NodesByID, r.NodesByNames[node.TenantID][node.Name].ID)
+	delete(r.NodesByNames[node.TenantID], node.Name)
 	return nil
 }
 
-func (r *ChainRegistry) DeregisterConfigByID(ctx context.Context, config *types.Config) error {
-	return nil
-}
+func (r *ChainRegistry) DeleteNodeByID(ctx context.Context, id int) error {
+	if _, ok := r.NodesByID[id]; !ok {
+		return errors.NotFoundError("no node found with id=%d", id).ExtendComponent(component)
+	}
 
-func (r *ChainRegistry) DeregisterConfigsByIds(ctx context.Context, configs *[]types.Config) error {
-	return nil
-}
+	delete(r.NodesByNames[r.NodesByID[id].TenantID], r.NodesByID[id].Name)
+	delete(r.NodesByID, id)
 
-func (r *ChainRegistry) DeregisterConfigByTenantID(ctx context.Context, config *types.Config) error {
 	return nil
 }

@@ -29,6 +29,11 @@ func NewContractRegistryFromPGOptions(opts *pg.Options) *ContractRegistry {
 
 // RegisterContract register a contract including ABI, bytecode and deployed bytecode
 func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.RegisterContractRequest) (*svc.RegisterContractResponse, error) {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
 	contract := req.GetContract()
 
 	bytecode, deployedBytecode, abiRaw, err := common.CheckExtractArtifacts(contract)
@@ -44,7 +49,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 	repositoryModel := &RepositoryModel{
 		Name: name,
 	}
-	_, err = r.db.ModelContext(ctx, repositoryModel).
+	_, err = tx.ModelContext(ctx, repositoryModel).
 		Column("id").
 		Where("name = ?name").
 		OnConflict("DO NOTHING").
@@ -61,7 +66,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 		DeployedBytecode: deployedBytecode,
 		Codehash:         crypto.Keccak256(deployedBytecode),
 	}
-	_, err = r.db.ModelContext(ctx, artifact).
+	_, err = tx.ModelContext(ctx, artifact).
 		Column("id").
 		Where("abi = ?abi").
 		Where("codehash = ?codehash").
@@ -78,7 +83,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 		RepositoryID: repositoryModel.ID,
 		ArtifactID:   artifact.ID,
 	}
-	_, err = r.db.ModelContext(ctx, tag).
+	_, err = tx.ModelContext(ctx, tag).
 		OnConflict("ON CONSTRAINT tags_name_repository_id_key DO UPDATE").
 		Set("artifact_id = ?artifact_id").
 		Insert()
@@ -112,7 +117,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 			}
 		}
 		if methods != nil {
-			_, err = r.db.ModelContext(ctx, &methods).
+			_, err = tx.ModelContext(ctx, &methods).
 				OnConflict("DO NOTHING").
 				Insert()
 			if err != nil {
@@ -136,7 +141,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 			}
 		}
 		if events != nil {
-			_, err = r.db.ModelContext(ctx, &events).
+			_, err = tx.ModelContext(ctx, &events).
 				OnConflict("DO NOTHING").
 				Insert()
 			if err != nil {
@@ -146,7 +151,7 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 		}
 	}
 
-	return &svc.RegisterContractResponse{}, nil
+	return &svc.RegisterContractResponse{}, tx.Commit()
 }
 
 // DeregisterContract remove the name + tag association to a contract artifact (abi, bytecode, deployedBytecode). Artifacts are not deleted.

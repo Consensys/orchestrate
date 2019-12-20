@@ -3,13 +3,13 @@ package types
 import "context"
 
 type ChainRegistryStore interface {
-	RegisterConfig(ctx context.Context, config *Config) error
-	RegisterConfigs(ctx context.Context, configs *[]Config) error
-	GetConfig(ctx context.Context) ([]*Config, error)
-	GetConfigByID(ctx context.Context, config *Config) error
-	GetConfigByTenantID(ctx context.Context, config *Config) ([]*Config, error)
-	UpdateConfigByID(ctx context.Context, config *Config) error
-	DeregisterConfigByID(ctx context.Context, config *Config) error
-	DeregisterConfigsByIds(ctx context.Context, config *[]Config) error
-	DeregisterConfigByTenantID(ctx context.Context, config *Config) error
+	RegisterNode(ctx context.Context, node *Node) error
+	GetNodes(ctx context.Context) ([]*Node, error)
+	GetNodesByTenantID(ctx context.Context, tenantID string) ([]*Node, error)
+	GetNodeByName(ctx context.Context, tenantID string, name string) (*Node, error)
+	GetNodeByID(ctx context.Context, ID int) (*Node, error)
+	UpdateNodeByName(ctx context.Context, node *Node) error
+	UpdateNodeByID(ctx context.Context, node *Node) error
+	DeleteNodeByName(ctx context.Context, node *Node) error
+	DeleteNodeByID(ctx context.Context, ID int) error
 }

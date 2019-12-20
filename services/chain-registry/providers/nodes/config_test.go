@@ -1,4 +1,4 @@
-package registry
+package nodes
 
 import (
 	"os"
@@ -11,25 +11,25 @@ import (
 )
 
 func TestProviderRefreshInterval(t *testing.T) {
-	name := "provider.refreshInterval"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	ProviderRefreshInterval(flgs)
-	expected := time.Second
-	assert.Equal(t, expected, viper.GetDuration(name), "Default")
 
-	_ = os.Setenv("PROVIDER_REFRESHINTERVAL", "30s")
+	expected := time.Second
+	assert.Equal(t, expected, viper.GetDuration(ProviderRefreshIntervalViperKey), "Default")
+
+	_ = os.Setenv("PROVIDER_NODES_REFRESH_INTERVAL", "30s")
 	expected = 30 * time.Second
-	assert.Equal(t, expected, viper.GetDuration(name), "From Environment Variable")
-	_ = os.Unsetenv("PROVIDER_REFRESHINTERVAL")
+	assert.Equal(t, expected, viper.GetDuration(ProviderRefreshIntervalViperKey), "From Environment Variable")
+	_ = os.Unsetenv("PROVIDER_NODES_REFRESH_INTERVAL")
 
 	args := []string{
-		"--provider-refreshInterval=36s",
+		"--provider-nodes-refreshInterval=36s",
 	}
 	err := flgs.Parse(args)
 	assert.Nil(t, err)
 
 	expected = 36 * time.Second
-	assert.Equal(t, expected, viper.GetDuration(name), "From Flag")
+	assert.Equal(t, expected, viper.GetDuration(ProviderRefreshIntervalViperKey), "From Flag")
 }
 
 func TestFlags(t *testing.T) {

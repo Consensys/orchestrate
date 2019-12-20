@@ -1,4 +1,4 @@
-package registry
+package nodes
 
 import (
 	"context"
@@ -35,13 +35,13 @@ func (p *Provider) Provide(configurationChan chan<- dynamic.Message, pool *safe.
 			for {
 				select {
 				case <-ticker.C:
-					data, err := p.Registry.GetConfig(routineCtx)
+					nodes, err := p.Registry.GetNodes(routineCtx)
 					if err != nil {
 						log.Errorf("error get chain registry data, %v", err)
 						return err
 					}
 
-					configuration, err := types.BuildConfiguration(data)
+					configuration, err := types.BuildConfiguration(nodes)
 					if err != nil {
 						return err
 					}

@@ -13,6 +13,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const component = "chain-registry.store.api"
+
 var (
 	handler  *Handler
 	initOnce = &sync.Once{}
@@ -27,7 +29,7 @@ func Init(ctx context.Context) {
 
 		store.Init()
 		// Set Chain-Registry handler
-		handler = New(store.GlobalStoreRegistry())
+		handler = NewHandler(store.GlobalStoreRegistry())
 	})
 }
 

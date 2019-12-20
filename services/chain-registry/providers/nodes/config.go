@@ -1,4 +1,4 @@
-package registry
+package nodes
 
 import (
 	"fmt"
@@ -18,10 +18,10 @@ func Flags(f *pflag.FlagSet) {
 }
 
 const (
-	providerRefreshIntervalFlag     = "provider-refreshInterval"
-	ProviderRefreshIntervalViperKey = "provider.refreshInterval"
+	providerRefreshIntervalFlag     = "provider-nodes-refreshInterval"
+	ProviderRefreshIntervalViperKey = "provider.nodes.refreshInterval"
 	providerRefreshIntervalDefault  = time.Second
-	providerRefreshIntervalEnv      = "PROVIDER_REFRESHINTERVAL"
+	providerRefreshIntervalEnv      = "PROVIDER_NODES_REFRESH_INTERVAL"
 )
 
 // ProviderRefreshInterval register flag for refresh interval duration
