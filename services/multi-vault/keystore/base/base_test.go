@@ -1,9 +1,12 @@
 package base
 
 import (
+	"context"
 	"math/big"
 	"sync"
 	"testing"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 
 	"github.com/ConsenSys/golang-utils/ethereum"
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -15,6 +18,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/memory"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 )
+
+// TODO: add new test with multi-tenancy context value
 
 var testPKeys = []struct {
 	prv string
@@ -40,7 +45,7 @@ var arbitraryMsg = []string{
 	"Rust is for people who crave speed and stability in a language. By speed, we mean the speed of the programs that you can create with Rust and the speed at which Rust lets you write them. The Rust compiler’s checks ensure stability through feature additions and refactoring. This is in contrast to the brittle legacy code in languages without these checks, which developers are often afraid to modify. By striving for zero-cost abstractions, higher-level features that compile to lower-level code as fast as code written manually, Rust endeavors to make safe code be fast code as well.",
 }
 
-func makeSignTxInput(i int) (*chain.Chain, ethcommon.Address, *ethtypes.Transaction) {
+func makeSignTxInput(i int) (context.Context, *chain.Chain, ethcommon.Address, *ethtypes.Transaction) {
 	netChain := &chain.Chain{
 		Id: big.NewInt(testChainsIds[i%len(testChainsIds)]).Bytes(),
 	}
@@ -53,7 +58,7 @@ func makeSignTxInput(i int) (*chain.Chain, ethcommon.Address, *ethtypes.Transact
 		big.NewInt(1000),
 		hexutil.MustDecode("0xa2bcdef3"),
 	)
-	return netChain, address, tx
+	return context.Background(), netChain, address, tx
 }
 
 func makeSignMsgInput(i int) (a ethcommon.Address, msg string) {
@@ -68,13 +73,13 @@ type BaseKeyStoreTestSuite struct {
 }
 
 func (s *BaseKeyStoreTestSuite) SetupTest() {
-	s.Store = NewKeyStore(memory.NewSecretStore())
+	s.Store = NewKeyStore(memory.NewSecretStore(multitenancy.New(false)))
 }
 
 // TestSignTx is a test suit for KeyStore that test ethereum signature
 func (s *BaseKeyStoreTestSuite) TestSignTx() {
 	for _, priv := range testPKeys {
-		err := s.Store.ImportPrivateKey(priv.prv)
+		err := s.Store.ImportPrivateKey(context.Background(), priv.prv)
 		assert.NoError(s.T(), err)
 	}
 
@@ -101,7 +106,7 @@ func (s *BaseKeyStoreTestSuite) TestSignTx() {
 
 func (s *BaseKeyStoreTestSuite) TestSignMsg() {
 	for _, priv := range testPKeys {
-		err := s.Store.ImportPrivateKey(priv.prv)
+		err := s.Store.ImportPrivateKey(context.Background(), priv.prv)
 		assert.Nil(s.T(), err)
 	}
 
@@ -109,7 +114,7 @@ func (s *BaseKeyStoreTestSuite) TestSignMsg() {
 	rounds := 20
 	for i := 0; i < rounds; i++ {
 		address, msg := makeSignMsgInput(i)
-		signature, hash, err := s.Store.SignMsg(address, msg)
+		signature, hash, err := s.Store.SignMsg(context.Background(), address, msg)
 		assert.Nil(s.T(), err, "The msg has not been signed")
 
 		recoveredAddress, err := ethereum.EcRecover(*hash, signature)
@@ -119,7 +124,7 @@ func (s *BaseKeyStoreTestSuite) TestSignMsg() {
 }
 
 func (s *BaseKeyStoreTestSuite) TestGenerateWallet() {
-	_, err := s.Store.GenerateWallet()
+	_, err := s.Store.GenerateWallet(context.Background())
 	assert.Nil(s.T(), err, "Wallet should be generated")
 }
 
@@ -136,8 +141,8 @@ func TestPrivateTxSigning(t *testing.T) {
 
 	privateFrom := "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
 
-	store := NewKeyStore(memory.NewSecretStore())
-	err := store.ImportPrivateKey(privateKey)
+	store := NewKeyStore(memory.NewSecretStore(multitenancy.New(false)))
+	err := store.ImportPrivateKey(context.Background(), privateKey)
 	assert.NoError(t, err)
 
 	chainID := 44
@@ -156,7 +161,7 @@ func TestPrivateTxSigning(t *testing.T) {
 		PrivateTxType: "restricted",
 	}
 
-	bytes, _, err := store.SignPrivateEEATx(chain.FromInt(int64(chainID)), ethcommon.HexToAddress("0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73"), tx, privateArgs)
+	bytes, _, err := store.SignPrivateEEATx(context.Background(), chain.FromInt(int64(chainID)), ethcommon.HexToAddress("0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73"), tx, privateArgs)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, hexutil.Encode(bytes))
 }
@@ -165,8 +170,8 @@ func TestPrivateTesseraTxSigning(t *testing.T) {
 	expected := "0xf865808203e8832dc6c094000000000000000000000000000000000000000080831234561ba0e04e1c11a8626c77fc2b61c246b066f765613b6104a824bb229889c45dae9922a018b07c72e29e7869422680979e5a4dfe0fd9fbcaa62bb3d0c9320a30b03d91c4"
 	data := "0x123456"
 
-	store := NewKeyStore(memory.NewSecretStore())
-	err := store.ImportPrivateKey(privateKey)
+	store := NewKeyStore(memory.NewSecretStore(multitenancy.New(false)))
+	err := store.ImportPrivateKey(context.Background(), privateKey)
 	assert.NoError(t, err)
 
 	chainID := 44
@@ -179,7 +184,7 @@ func TestPrivateTesseraTxSigning(t *testing.T) {
 		hexutil.MustDecode(data),
 	)
 
-	bytes, _, err := store.SignPrivateTesseraTx(chain.FromInt(int64(chainID)), ethcommon.HexToAddress("0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73"), tx)
+	bytes, _, err := store.SignPrivateTesseraTx(context.Background(), chain.FromInt(int64(chainID)), ethcommon.HexToAddress("0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73"), tx)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, hexutil.Encode(bytes))
 }

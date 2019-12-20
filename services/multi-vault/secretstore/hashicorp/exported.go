@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
+
 	log "github.com/sirupsen/logrus"
 )
 
@@ -21,7 +23,10 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		vault, err := NewSecretStore(ConfigFromViper())
+		// Initialize Key Builder
+		multitenancy.Init(ctx)
+
+		vault, err := NewSecretStore(ConfigFromViper(), multitenancy.GlobalKeyBuilder())
 		if err != nil {
 			log.Fatalf("Key Store: Cannot init hashicorp vault got error: %q", err)
 		}

@@ -6,6 +6,8 @@ import (
 	"path"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
+
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
@@ -25,6 +27,8 @@ var (
 // Run application
 func Start(ctx context.Context) {
 	startOnce.Do(func() {
+		multitenancy.Init(ctx)
+
 		// Initialize gRPC Server service
 		envelopestore.Init()
 

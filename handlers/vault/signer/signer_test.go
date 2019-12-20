@@ -1,6 +1,7 @@
 package signer
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"testing"
@@ -33,7 +34,7 @@ var signedTx = "0x01"
 var signedPrivateTx = "0x02"
 var signedTesseraTx = "0x03"
 
-func (s *MockTxSigner) SignTx(netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction) (raw []byte, hash *ethcommon.Hash, err error) {
+func (s *MockTxSigner) SignTx(ctx context.Context, netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction) (raw []byte, hash *ethcommon.Hash, err error) {
 	if netChain.ID().String() == "0" {
 		return []byte(``), nil, fmt.Errorf("could not sign public ethereum transaction")
 	}
@@ -41,7 +42,7 @@ func (s *MockTxSigner) SignTx(netChain *chain.Chain, a ethcommon.Address, tx *et
 	return hexutil.MustDecode(signedTx), &h, nil
 }
 
-func (s *MockTxSigner) SignPrivateEEATx(netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction, privateArgs *types.PrivateArgs) (raw []byte, hash *ethcommon.Hash, err error) {
+func (s *MockTxSigner) SignPrivateEEATx(ctx context.Context, netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction, privateArgs *types.PrivateArgs) (raw []byte, hash *ethcommon.Hash, err error) {
 	if netChain.ID().String() == "0" {
 		return []byte(``), nil, fmt.Errorf("could not sign eea transaction")
 	}
@@ -49,7 +50,7 @@ func (s *MockTxSigner) SignPrivateEEATx(netChain *chain.Chain, a ethcommon.Addre
 	return hexutil.MustDecode(signedPrivateTx), &h, nil
 }
 
-func (s *MockTxSigner) SignPrivateTesseraTx(netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction) (raw []byte, txHash *ethcommon.Hash, err error) {
+func (s *MockTxSigner) SignPrivateTesseraTx(ctx context.Context, netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction) (raw []byte, txHash *ethcommon.Hash, err error) {
 	if netChain.ID().String() == "0" {
 		return []byte(``), nil, fmt.Errorf("could not sign tessera transaction")
 	}
@@ -57,11 +58,11 @@ func (s *MockTxSigner) SignPrivateTesseraTx(netChain *chain.Chain, a ethcommon.A
 	return hexutil.MustDecode(signedTesseraTx), &h, nil
 }
 
-func (s *MockTxSigner) SignMsg(a ethcommon.Address, msg string) (rsv []byte, hash *ethcommon.Hash, err error) {
+func (s *MockTxSigner) SignMsg(ctx context.Context, a ethcommon.Address, msg string) (rsv []byte, hash *ethcommon.Hash, err error) {
 	return []byte{}, nil, fmt.Errorf("signMsg not implemented")
 }
 
-func (s *MockTxSigner) GenerateWallet() (add *ethcommon.Address, err error) {
+func (s *MockTxSigner) GenerateWallet(ctx context.Context) (add *ethcommon.Address, err error) {
 	return nil, fmt.Errorf("signMsg not implemented")
 }
 
@@ -69,7 +70,7 @@ func (s *MockTxSigner) SignRawHash(a ethcommon.Address, hash []byte) (rsv []byte
 	return []byte{}, fmt.Errorf("signMsg not implemented")
 }
 
-func (s *MockTxSigner) ImportPrivateKey(priv string) (err error) {
+func (s *MockTxSigner) ImportPrivateKey(ctx context.Context, priv string) (err error) {
 	return fmt.Errorf("importPrivateKey not implemented")
 }
 

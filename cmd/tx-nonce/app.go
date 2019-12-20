@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
@@ -39,6 +41,10 @@ func initHandlers(ctx context.Context) {
 		func() {
 			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString(jaeger.ServiceNameViperKey))
 			injector.Init(ctxWithValue)
+		},
+		// Initialize Multi-tenancy
+		func() {
+			multitenancy.Init(ctx)
 		},
 		// Initialize Nonce manager
 		func() {
@@ -79,6 +85,7 @@ func registerHandlers() {
 	engine.Register(opentracing.GlobalHandler())
 	engine.Register(producer.GlobalHandler())
 	engine.Register(injector.GlobalHandler())
+	engine.Register(multitenancy.GlobalHandler())
 
 	// Specific handlers tk Tx-Nonce worker
 	engine.Register(nonceattributor.GlobalHandler())

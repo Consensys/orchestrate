@@ -2,7 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
 
+### 🆕 Multi-tenancy & JWT Authentication
+* Add handler into `tx-crafter`, `tx-decoder`,  `tx-nonce`, `tx-sender`, `tx-signer`
+    * Authenticate (Verify and Validate) the Envelope using the ID/Access Token (JWT) present in the Metadata 
+    * Extract the tenantID from the ID/Access Token (JWT)
+* Add Interceptor into gRPC API into `contract-registry` and `envelope-store`
+    * Authenticate (Verify and Validate) the request with the ID/Access Token (JWT) present in the HTTP Header 
+    * Extract the tenantID from the ID/Access Token (JWT)
+* Store private keys based on the tenantID and the address of the keys
+* Add flag and environment variable:
+    * `MULTI_TENANCY_ENABLED` to enable multi-tenancy. 
+    * `AUTH_SERVICE_CERTIFICATE` to provision trusted certificate of the service who generate ID/Access Token (authentication service). 
+    * `TENANT_NAMESPACE` to provision tenant namespace to retrieve the tenant id in the OpenId or Access Token (JWT). 
+    
 ## v1.2.0 (2019-20-13)
 
 ### 🆕 Features

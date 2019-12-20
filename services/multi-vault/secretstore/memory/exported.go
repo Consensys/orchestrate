@@ -3,6 +3,8 @@ package memory
 import (
 	"context"
 	"sync"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 )
 
 const component = "secret-store.in-memory"
@@ -19,8 +21,11 @@ func Init(ctx context.Context) {
 			return
 		}
 
+		// Initialize Key Builder
+		multitenancy.Init(ctx)
+
 		// Set store
-		store = NewSecretStore()
+		store = NewSecretStore(multitenancy.GlobalKeyBuilder())
 	})
 }
 

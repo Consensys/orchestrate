@@ -1,6 +1,7 @@
 package session
 
 import (
+	"context"
 	"math/big"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -31,9 +32,9 @@ func NewSigningSession(secretStore services.SecretStore) *SigningSession {
 }
 
 // SetWallet sets the wallet to the provided address
-func (sess *SigningSession) SetWallet(address *ethcommon.Address) error {
+func (sess *SigningSession) SetWallet(ctx context.Context, address *ethcommon.Address) error {
 	w := wallet.NewWallet(sess.secretStore)
-	err := w.Load(address)
+	err := w.Load(ctx, address)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(component)
 	}

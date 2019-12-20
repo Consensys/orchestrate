@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
@@ -43,6 +45,10 @@ func initHandlers(ctx context.Context) {
 			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString(jaeger.ServiceNameViperKey))
 			injector.Init(ctxWithValue)
 		},
+		// Initialize Multi-tenancy
+		func() {
+			multitenancy.Init(ctx)
+		},
 		// Initialize sender
 		func() { sender.Init(ctx) },
 		// Initialize nonce manager
@@ -75,6 +81,7 @@ func registerHandlers() {
 	engine.Register(logger.Logger("info"))
 	engine.Register(sarama.Loader)
 	engine.Register(offset.Marker)
+	engine.Register(multitenancy.GlobalHandler())
 	engine.Register(opentracing.GlobalHandler())
 
 	// Recovery Status Setter surrounds the producer

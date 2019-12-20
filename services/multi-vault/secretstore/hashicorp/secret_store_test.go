@@ -4,6 +4,8 @@ import (
 	"net"
 	"testing"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
+
 	"github.com/hashicorp/vault/api"
 	"github.com/hashicorp/vault/http"
 	"github.com/hashicorp/vault/vault"
@@ -11,6 +13,8 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/testutils"
 )
+
+// TODO: add new test with multi-tenancy context value
 
 type HashicorpKeyStoreTestSuite struct {
 	testutils.SecretStoreTestSuite
@@ -46,8 +50,9 @@ func MockHashicorp(t *testing.T, config *Config) (net.Listener, *SecretStore) {
 	}
 
 	secretStore := &SecretStore{
-		Client: hash,
-		Config: config,
+		Client:     hash,
+		Config:     config,
+		KeyBuilder: multitenancy.New(false),
 	}
 	secretStore.ManageToken()
 

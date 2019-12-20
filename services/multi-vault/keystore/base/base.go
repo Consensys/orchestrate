@@ -1,6 +1,8 @@
 package base
 
 import (
+	"context"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -26,10 +28,10 @@ func NewKeyStore(secretStore services.SecretStore) *KeyStore {
 }
 
 // SignTx returns a signed transaction. It is perfectly equivalent to SignTx
-func (s *KeyStore) SignTx(netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error) {
+func (s *KeyStore) SignTx(ctx context.Context, netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error) {
 	// Creates a new signing session
 	sess := session.NewSigningSession(s.SecretStore)
-	err := sess.SetWallet(&a)
+	err := sess.SetWallet(ctx, &a)
 	if err != nil {
 		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -48,10 +50,10 @@ func (s *KeyStore) SignTx(netChain *chain.Chain, a ethcommon.Address, tx *ethtyp
 }
 
 // SignPrivateEEATx signs a private transaction
-func (s *KeyStore) SignPrivateEEATx(netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction, privateArgs *types.PrivateArgs) ([]byte, *ethcommon.Hash, error) {
+func (s *KeyStore) SignPrivateEEATx(ctx context.Context, netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction, privateArgs *types.PrivateArgs) ([]byte, *ethcommon.Hash, error) {
 	// Creates a new signing session
 	sess := session.NewSigningSession(s.SecretStore)
-	err := sess.SetWallet(&a)
+	err := sess.SetWallet(ctx, &a)
 	if err != nil {
 		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -69,10 +71,10 @@ func (s *KeyStore) SignPrivateEEATx(netChain *chain.Chain, a ethcommon.Address, 
 }
 
 // SignPrivateTesseraTx signs a private transaction using Tessera
-func (s *KeyStore) SignPrivateTesseraTx(netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error) {
+func (s *KeyStore) SignPrivateTesseraTx(ctx context.Context, netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error) {
 	// Creates a new signing session
 	sess := session.NewSigningSession(s.SecretStore)
-	err := sess.SetWallet(&a)
+	err := sess.SetWallet(ctx, &a)
 	if err != nil {
 		return []byte{}, nil, err
 	}
@@ -85,10 +87,10 @@ func (s *KeyStore) SignPrivateTesseraTx(netChain *chain.Chain, a ethcommon.Addre
 }
 
 // SignMsg returns a signed message and its hash
-func (s *KeyStore) SignMsg(a ethcommon.Address, msg string) ([]byte, *ethcommon.Hash, error) {
+func (s *KeyStore) SignMsg(ctx context.Context, a ethcommon.Address, msg string) ([]byte, *ethcommon.Hash, error) {
 	// Creates a new signing session
 	sess := session.NewSigningSession(s.SecretStore)
-	err := sess.SetWallet(&a)
+	err := sess.SetWallet(ctx, &a)
 	if err != nil {
 		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -114,14 +116,14 @@ func (s *KeyStore) SignRawHash(
 }
 
 // GenerateWallet create and stores a new wallet in the vault
-func (s *KeyStore) GenerateWallet() (*ethcommon.Address, error) {
+func (s *KeyStore) GenerateWallet(ctx context.Context) (*ethcommon.Address, error) {
 	w := wallet.NewWallet(s.SecretStore)
 	err := w.Generate()
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	err = w.Store()
+	err = w.Store(ctx)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -131,7 +133,7 @@ func (s *KeyStore) GenerateWallet() (*ethcommon.Address, error) {
 
 // ImportPrivateKey adds a private key in the vault
 // TODO: this is Unsafe and should be removed soon
-func (s *KeyStore) ImportPrivateKey(priv string) error {
+func (s *KeyStore) ImportPrivateKey(ctx context.Context, priv string) error {
 
 	w := wallet.NewWallet(s.SecretStore)
 	err := w.FromPrivateKey(priv)
@@ -139,7 +141,7 @@ func (s *KeyStore) ImportPrivateKey(priv string) error {
 		return errors.FromError(err).ExtendComponent(component)
 	}
 
-	err = w.Store()
+	err = w.Store(ctx)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(component)
 	}

@@ -1,25 +1,35 @@
 package memory
 
 import (
+	"context"
 	"sync"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
+	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/error"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
 // SecretStore holds a pool of private keys in memory
 type SecretStore struct {
-	secrets *sync.Map
+	secrets    *sync.Map
+	KeyBuilder *multitenancy.KeyBuilder
 }
 
 // NewSecretStore creates a new static signer
-func NewSecretStore() *SecretStore {
+func NewSecretStore(keyBuilder *multitenancy.KeyBuilder) *SecretStore {
 	return &SecretStore{
-		secrets: &sync.Map{},
+		secrets:    &sync.Map{},
+		KeyBuilder: keyBuilder,
 	}
 }
 
 // Store secret
-func (s *SecretStore) Store(key, value string) error {
+func (s *SecretStore) Store(ctx context.Context, rawKey, value string) error {
+	key, err := s.KeyBuilder.BuildKey(ctx, rawKey)
+	if err != nil {
+		return err.(*ierror.Error).ExtendComponent(component)
+	}
 	v, ok := s.secrets.Load(key)
 
 	if ok {
@@ -34,7 +44,11 @@ func (s *SecretStore) Store(key, value string) error {
 }
 
 // Load secret
-func (s *SecretStore) Load(key string) (value string, ok bool, err error) {
+func (s *SecretStore) Load(ctx context.Context, rawKey string) (value string, ok bool, err error) {
+	key, err := s.KeyBuilder.BuildKey(ctx, rawKey)
+	if err != nil {
+		return "", false, err.(*ierror.Error).ExtendComponent(component)
+	}
 	v, ok := s.secrets.Load(key)
 	if !ok {
 		return "", false, nil
@@ -43,7 +57,11 @@ func (s *SecretStore) Load(key string) (value string, ok bool, err error) {
 }
 
 // Delete secret
-func (s *SecretStore) Delete(key string) error {
+func (s *SecretStore) Delete(ctx context.Context, rawKey string) error {
+	key, err := s.KeyBuilder.BuildKey(ctx, rawKey)
+	if err != nil {
+		return err.(*ierror.Error).ExtendComponent(component)
+	}
 	s.secrets.Delete(key)
 	return nil
 }

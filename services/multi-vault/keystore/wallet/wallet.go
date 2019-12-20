@@ -1,6 +1,7 @@
 package wallet
 
 import (
+	"context"
 	"crypto/ecdsa"
 	"encoding/hex"
 
@@ -50,8 +51,9 @@ func (w *Wallet) FromPrivateKey(priv string) error {
 }
 
 // Store saves wallet information to secret store
-func (w *Wallet) Store() error {
+func (w *Wallet) Store(ctx context.Context) error {
 	if err := w.sec.Store(
+		ctx,
 		w.address.Hex(),
 		hex.EncodeToString(crypto.FromECDSA(w.priv)),
 	); err != nil {
@@ -62,9 +64,9 @@ func (w *Wallet) Store() error {
 }
 
 // Load wallets values by fetching wallet secret store
-func (w *Wallet) Load(a *common.Address) (err error) {
+func (w *Wallet) Load(ctx context.Context, a *common.Address) (err error) {
 	w.address = *a
-	priv, ok, err := w.sec.Load(a.Hex())
+	priv, ok, err := w.sec.Load(ctx, a.Hex())
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(component)
 	}

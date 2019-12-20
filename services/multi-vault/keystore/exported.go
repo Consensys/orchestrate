@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore/base"
@@ -22,6 +24,7 @@ func Init(ctx context.Context) {
 			return
 		}
 
+		multitenancy.Init(ctx)
 		secretstore.Init(ctx)
 		keyStore = base.NewKeyStore(secretstore.GlobalSecretStore())
 

@@ -21,7 +21,7 @@ func Signer(k keystore.KeyStore) engine.HandlerFunc {
 }
 
 func signTx(s keystore.KeyStore, txctx *engine.TxContext, sender common.Address, t *ethtypes.Transaction) ([]byte, *common.Hash, error) {
-	b, hash, err := s.SignPrivateEEATx(txctx.Envelope.GetChain(), sender, t, &types.PrivateArgs{
+	b, hash, err := s.SignPrivateEEATx(txctx.Context(), txctx.Envelope.GetChain(), sender, t, &types.PrivateArgs{
 		PrivateFor:    txctx.Envelope.GetArgs().GetPrivate().GetPrivateFor(),
 		PrivateFrom:   txctx.Envelope.GetArgs().GetPrivate().GetPrivateFrom(),
 		PrivateTxType: txctx.Envelope.GetArgs().GetPrivate().GetPrivateTxType(),

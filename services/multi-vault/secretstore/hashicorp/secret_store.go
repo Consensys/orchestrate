@@ -1,24 +1,27 @@
 package hashicorp
 
 import (
+	"context"
 	"encoding/json"
 	"sync"
 	"time"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 )
 
 // SecretStore wraps a HashiCorp client an manage the unsealing
 type SecretStore struct {
-	mut    sync.Mutex
-	rtl    *RenewTokenLoop
-	Client *Hashicorp
-	Config *Config
+	mut        sync.Mutex
+	rtl        *RenewTokenLoop
+	Client     *Hashicorp
+	Config     *Config
+	KeyBuilder *multitenancy.KeyBuilder
 }
 
 // NewSecretStore construct a new HashiCorp vault given a configfile or nil
-func NewSecretStore(config *Config) (*SecretStore, error) {
+func NewSecretStore(config *Config, keyBuilder *multitenancy.KeyBuilder) (*SecretStore, error) {
 
 	hash, err := NewVaultClient(config)
 	if err != nil {
@@ -31,8 +34,9 @@ func NewSecretStore(config *Config) (*SecretStore, error) {
 	}
 
 	store := &SecretStore{
-		Client: hash,
-		Config: config,
+		Client:     hash,
+		Config:     config,
+		KeyBuilder: keyBuilder,
 	}
 
 	store.ManageToken()
@@ -86,7 +90,11 @@ func (store *SecretStore) ManageToken() {
 }
 
 // Store writes in the vault
-func (store *SecretStore) Store(key, value string) error {
+func (store *SecretStore) Store(ctx context.Context, rawKey, value string) error {
+	key, err := store.KeyBuilder.BuildKey(ctx, rawKey)
+	if err != nil {
+		return errors.FromError(err).ExtendComponent(component)
+	}
 	storedValue, ok, err := store.Client.Logical.Read(key)
 	if err != nil {
 		return errors.ConnectionError(err.Error()).ExtendComponent(component)
@@ -107,7 +115,11 @@ func (store *SecretStore) Store(key, value string) error {
 }
 
 // Load reads in the vault
-func (store *SecretStore) Load(key string) (value string, ok bool, err error) {
+func (store *SecretStore) Load(ctx context.Context, rawKey string) (value string, ok bool, err error) {
+	key, err := store.KeyBuilder.BuildKey(ctx, rawKey)
+	if err != nil {
+		return "", false, errors.FromError(err).ExtendComponent(component)
+	}
 	value, ok, err = store.Client.Logical.Read(key)
 	if err != nil {
 		return "", false, errors.ConnectionError(err.Error()).ExtendComponent(component)
@@ -116,8 +128,12 @@ func (store *SecretStore) Load(key string) (value string, ok bool, err error) {
 }
 
 // Delete removes a path in the vault
-func (store *SecretStore) Delete(key string) error {
-	err := store.Client.Logical.Delete(key)
+func (store *SecretStore) Delete(ctx context.Context, rawKey string) error {
+	key, err := store.KeyBuilder.BuildKey(ctx, rawKey)
+	if err != nil {
+		return errors.FromError(err).ExtendComponent(component)
+	}
+	err = store.Client.Logical.Delete(key)
 	if err != nil {
 		return errors.ConnectionError(err.Error()).ExtendComponent(component)
 	}

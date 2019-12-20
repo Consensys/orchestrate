@@ -15,7 +15,7 @@ func Generator(s keystore.KeyStore) engine.HandlerFunc {
 			"id":     txctx.Envelope.GetMetadata().GetId(),
 		})
 
-		add, err := s.GenerateWallet()
+		add, err := s.GenerateWallet(txctx.Context())
 		if err != nil {
 			e := txctx.AbortWithError(err)
 			txctx.Logger.WithError(e).Errorf("keygen: could not generate wallet")

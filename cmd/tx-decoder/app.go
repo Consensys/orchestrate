@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/metrics"
 
 	log "github.com/sirupsen/logrus"
@@ -42,6 +44,10 @@ func initHandlers(ctx context.Context) {
 		func() {
 			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString(jaeger.ServiceNameViperKey))
 			injector.Init(ctxWithValue)
+		},
+		// Initialize Multi-tenancy
+		func() {
+			multitenancy.Init(ctx)
 		},
 		// Initialize decoder
 		func() {
@@ -84,6 +90,7 @@ func initComponents(ctx context.Context) {
 	engine.Register(opentracing.GlobalHandler())
 	engine.Register(producer.GlobalHandler())
 	engine.Register(injector.GlobalHandler())
+	engine.Register(multitenancy.GlobalHandler())
 
 	// Specific handlers of Tx-Decoder worker
 	engine.Register(decoder.GlobalHandler())

@@ -20,7 +20,7 @@ func Signer(k keystore.KeyStore) engine.HandlerFunc {
 }
 
 func signTx(s keystore.KeyStore, txctx *engine.TxContext, sender common.Address, t *ethtypes.Transaction) ([]byte, *common.Hash, error) {
-	b, hash, err := s.SignTx(txctx.Envelope.GetChain(), sender, t)
+	b, hash, err := s.SignTx(txctx.Context(), txctx.Envelope.GetChain(), sender, t)
 	if err != nil {
 		return b, hash, errors.FromError(err).ExtendComponent(component)
 	}

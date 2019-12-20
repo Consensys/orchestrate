@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
@@ -42,6 +44,10 @@ func initHandlers(ctx context.Context) {
 			ctxWithValue := context.WithValue(ctx, serviceName("service-name"), viper.GetString(jaeger.ServiceNameViperKey))
 			injector.Init(ctxWithValue)
 		},
+		// Initialize Multi-tenancy
+		func() {
+			multitenancy.Init(ctx)
+		},
 		// Initialize Vault
 		func() { vault.Init(ctx) },
 		// Initialize Producer
@@ -77,6 +83,7 @@ func registerHandlers() {
 	engine.Register(opentracing.GlobalHandler())
 	engine.Register(producer.GlobalHandler())
 	engine.Register(injector.GlobalHandler())
+	engine.Register(multitenancy.GlobalHandler())
 
 	// Specific handlers for Signer worker
 	engine.Register(vault.GlobalHandler())

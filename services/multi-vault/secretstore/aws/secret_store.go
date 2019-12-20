@@ -1,27 +1,37 @@
 package aws
 
 import (
+	"context"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
+	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/error"
 )
 
 // SecretStore can manage secrets on AWS secret manager
 type SecretStore struct {
-	client *secretsmanager.SecretsManager
+	client     *secretsmanager.SecretsManager
+	KeyBuilder *multitenancy.KeyBuilder
 }
 
 // NewSecretStore returns a default configured AWS secretstore
-func NewSecretStore() *SecretStore {
+func NewSecretStore(keyBuilder *multitenancy.KeyBuilder) *SecretStore {
 	secretStoreSession, _ := session.NewSession()
 	return &SecretStore{
-		client: secretsmanager.New(secretStoreSession),
+		client:     secretsmanager.New(secretStoreSession),
+		KeyBuilder: keyBuilder,
 	}
 }
 
 // Store set the new string value in the AWS secrets manager
-func (s *SecretStore) Store(key, value string) (err error) {
+func (s *SecretStore) Store(ctx context.Context, rawKey, value string) (err error) {
+	key, err := s.KeyBuilder.BuildKey(ctx, rawKey)
+	if err != nil {
+		return err.(*ierror.Error).ExtendComponent(component)
+	}
 	err = s.create(key, value)
 	if err != nil {
 		err = s.update(key, value)
@@ -34,9 +44,14 @@ func (s *SecretStore) Store(key, value string) (err error) {
 }
 
 // Delete removes a secret from the secret store
-func (s *SecretStore) Delete(key string) (err error) {
+func (s *SecretStore) Delete(ctx context.Context, rawKey string) (err error) {
 	if s.client == nil {
 		return errors.InternalError("client not set").SetComponent(component)
+	}
+
+	key, err := s.KeyBuilder.BuildKey(ctx, rawKey)
+	if err != nil {
+		return err.(*ierror.Error).ExtendComponent(component)
 	}
 
 	input := secretsmanager.DeleteSecretInput{
@@ -74,11 +89,15 @@ func (s *SecretStore) List() ([]string, error) {
 }
 
 // Load the secret value from the secret manager of AWS
-func (s *SecretStore) Load(key string) (value string, ok bool, err error) {
+func (s *SecretStore) Load(ctx context.Context, rawKey string) (value string, ok bool, err error) {
 	if s.client == nil {
 		return "", false, errors.InternalError("client not set").SetComponent(component)
 	}
 
+	key, err := s.KeyBuilder.BuildKey(ctx, rawKey)
+	if err != nil {
+		return "", false, err.(*ierror.Error).ExtendComponent(component)
+	}
 	input := secretsmanager.GetSecretValueInput{
 		SecretId:     aws.String(key),
 		VersionStage: aws.String("AWSCURRENT"),

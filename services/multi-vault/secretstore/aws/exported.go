@@ -3,6 +3,8 @@ package aws
 import (
 	"context"
 	"sync"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 )
 
 const component = "secret-store.aws"
@@ -19,8 +21,9 @@ func Init(ctx context.Context) {
 			return
 		}
 
+		multitenancy.Init(ctx)
 		// Set store
-		store = NewSecretStore()
+		store = NewSecretStore(multitenancy.GlobalKeyBuilder())
 	})
 }
 

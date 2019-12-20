@@ -5,6 +5,7 @@ package multitenancy
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"testing"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication"
@@ -76,6 +77,8 @@ func (m *MultiTenancyTestSuite) TestMultiTenancyErrorUseCases() {
 		txctxs = append(txctxs, makeMultiTenancyContextForError(i))
 	}
 
+	_ = os.Setenv("MULTI_TENANCY_ENABLED", strconv.FormatBool(true))
+
 	// Handle contexts
 	m.Handle(txctxs)
 
@@ -125,6 +128,8 @@ func (m *MultiTenancyTestSuite) TestMultiTenancy() {
 	for i := 0; i < testsNum; i++ {
 		txctxs = append(txctxs, makeMultiTenancyContext(i))
 	}
+
+	_ = os.Setenv("MULTI_TENANCY_ENABLED", strconv.FormatBool(true))
 
 	// Handle contexts
 	m.Handle(txctxs)

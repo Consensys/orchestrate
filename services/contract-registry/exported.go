@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
@@ -29,6 +31,8 @@ func Init(ctx context.Context) {
 		if registry != nil {
 			return
 		}
+
+		multitenancy.Init(ctx)
 
 		switch viper.GetString(typeViperKey) {
 		case postgresOpt:

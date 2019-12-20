@@ -4,6 +4,10 @@ import (
 	"context"
 	"sync"
 
+	"github.com/spf13/viper"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/token"
 
 	log "github.com/sirupsen/logrus"
@@ -24,8 +28,13 @@ func Init(ctx context.Context) {
 			return
 		}
 
+		// Initialize Key Builder
+		multitenancy.Init(ctx)
+
 		// Initialize Authentication Manager
 		token.Init(ctx)
+
+		log.Infof("multitenancy enable: %v", viper.GetBool(multitenancy.EnabledViperKey))
 
 		// Create Handler
 		handler = ExtractTenant(token.GlobalAuth())
