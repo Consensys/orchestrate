@@ -8,8 +8,10 @@ import (
 func createContextTable(db migrations.DB) error {
 	log.Debug("Creating tables...")
 	_, err := db.Exec(`
+CREATE EXTENSION IF NOT EXISTS  pgcrypto;
+
 CREATE TABLE nodes (
-	id SERIAL PRIMARY KEY,
+	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	name VARCHAR(66) NOT NULL,
 	tenant_id VARCHAR(66) NOT NULL,
 	urls TEXT[] NOT NULL,

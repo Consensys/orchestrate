@@ -17,16 +17,6 @@ var getNodesByIDTests = []HTTPRouteTests{
 		expectedBody:        func() string { return expectedSuccessStatusBody },
 	},
 	{
-		name:                "TestGetNodeByName400",
-		store:               &MockChainRegistry{},
-		httpMethod:          http.MethodGet,
-		path:                strings.ReplaceAll(getNodeByIDPath, "{"+nodeIDPath+"}", "error"),
-		body:                func() []byte { return nil },
-		expectedStatusCode:  http.StatusBadRequest,
-		expectedContentType: expectedErrorStatusContentType,
-		expectedBody:        func() string { return expectedInvalidIDErrorBody },
-	},
-	{
 		name:                "TestGetNodeByID404",
 		store:               &ErrorChainRegistry{},
 		httpMethod:          http.MethodGet,

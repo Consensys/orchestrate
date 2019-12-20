@@ -18,7 +18,6 @@ import (
 const (
 	expectedInternalServerErrorBody  = "{\"message\":\"test error\"}\n"
 	expectedNotFoundErrorBody        = "{\"message\":\"DB200@: not found error\"}\n"
-	expectedInvalidIDErrorBody       = "{\"message\":\"invalid ID format\"}\n"
 	expectedInvalidURLErrorBody      = "{\"message\":\"FF000@chain-registry.store.api: parse test.com: invalid URI for request\"}\n"
 	expectedInvalidErrorBody         = "{\"message\":\"FF000@chain-registry.store.api: json: unknown field \\\"unknownField\\\"\"}\n"
 	expectedSuccessStatusBody        = "{}\n"
@@ -100,7 +99,7 @@ func (s *RouteTestSuite) UseErrorChainRegistry() {
 type MockChainRegistry struct{}
 
 func (e *MockChainRegistry) RegisterNode(_ context.Context, node *models.Node) error {
-	node.ID = 1
+	node.ID = "1"
 	node.Name = "nodeName1"
 	node.TenantID = "tenantID1"
 	node.URLs = []string{"testUrl1", "testUrl2"}
@@ -120,13 +119,13 @@ func (e *MockChainRegistry) GetNodesByTenantID(_ context.Context, _ string) ([]*
 func (e *MockChainRegistry) GetNodeByName(_ context.Context, _, _ string) (*models.Node, error) {
 	return &models.Node{}, nil
 }
-func (e *MockChainRegistry) GetNodeByID(_ context.Context, _ int) (*models.Node, error) {
+func (e *MockChainRegistry) GetNodeByID(_ context.Context, _ string) (*models.Node, error) {
 	return &models.Node{}, nil
 }
 func (e *MockChainRegistry) UpdateNodeByName(_ context.Context, _ *models.Node) error { return nil }
 func (e *MockChainRegistry) UpdateNodeByID(_ context.Context, _ *models.Node) error   { return nil }
 func (e *MockChainRegistry) DeleteNodeByName(_ context.Context, _ *models.Node) error { return nil }
-func (e *MockChainRegistry) DeleteNodeByID(_ context.Context, _ int) error            { return nil }
+func (e *MockChainRegistry) DeleteNodeByID(_ context.Context, _ string) error         { return nil }
 
 type ErrorChainRegistry struct{}
 
@@ -150,8 +149,8 @@ func (e *ErrorChainRegistry) GetNodeByName(_ context.Context, _, name string) (*
 	}
 	return nil, errTest
 }
-func (e *ErrorChainRegistry) GetNodeByID(_ context.Context, id int) (*models.Node, error) {
-	if id == 0 {
+func (e *ErrorChainRegistry) GetNodeByID(_ context.Context, id string) (*models.Node, error) {
+	if id == "0" {
 		return nil, errors.NotFoundError("not found error")
 	}
 	return nil, errTest
@@ -163,7 +162,7 @@ func (e *ErrorChainRegistry) UpdateNodeByName(_ context.Context, node *models.No
 	return errTest
 }
 func (e *ErrorChainRegistry) UpdateNodeByID(_ context.Context, node *models.Node) error {
-	if node.ID == 0 {
+	if node.ID == "0" {
 		return errors.NotFoundError("not found error")
 	}
 	return errTest
@@ -174,8 +173,8 @@ func (e *ErrorChainRegistry) DeleteNodeByName(_ context.Context, node *models.No
 	}
 	return errTest
 }
-func (e *ErrorChainRegistry) DeleteNodeByID(_ context.Context, id int) error {
-	if id == 0 {
+func (e *ErrorChainRegistry) DeleteNodeByID(_ context.Context, id string) error {
+	if id == "0" {
 		return errors.NotFoundError("not found error")
 	}
 	return errTest

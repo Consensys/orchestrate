@@ -74,7 +74,7 @@ func (r *ChainRegistry) GetNodeByName(ctx context.Context, tenantID, name string
 	return node, nil
 }
 
-func (r *ChainRegistry) GetNodeByID(ctx context.Context, id int) (*types.Node, error) {
+func (r *ChainRegistry) GetNodeByID(ctx context.Context, id string) (*types.Node, error) {
 	node := &types.Node{}
 
 	err := r.db.ModelContext(ctx, node).
@@ -113,7 +113,7 @@ func (r *ChainRegistry) UpdateNodeByID(ctx context.Context, node *types.Node) er
 	}
 
 	if res.RowsReturned() == 0 && res.RowsAffected() == 0 {
-		return errors.NotFoundError("no node found with id %d", node.ID).ExtendComponent(component)
+		return errors.NotFoundError("no node found with id %s", node.ID).ExtendComponent(component)
 	}
 	return nil
 }
@@ -134,7 +134,7 @@ func (r *ChainRegistry) DeleteNodeByName(ctx context.Context, node *types.Node) 
 	return nil
 }
 
-func (r *ChainRegistry) DeleteNodeByID(ctx context.Context, id int) error {
+func (r *ChainRegistry) DeleteNodeByID(ctx context.Context, id string) error {
 	node := &types.Node{}
 
 	res, err := r.db.ModelContext(ctx, node).
@@ -145,7 +145,7 @@ func (r *ChainRegistry) DeleteNodeByID(ctx context.Context, id int) error {
 	}
 
 	if res.RowsReturned() == 0 && res.RowsAffected() == 0 {
-		return errors.NotFoundError("no node found with id %d", id).ExtendComponent(component)
+		return errors.NotFoundError("no node found with id %s", id).ExtendComponent(component)
 	}
 	return nil
 }

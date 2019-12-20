@@ -17,16 +17,6 @@ var deleteNodeByIDTests = []HTTPRouteTests{
 		expectedBody:        func() string { return expectedSuccessStatusBody },
 	},
 	{
-		name:                "TestDeleteNodeByName400",
-		store:               &MockChainRegistry{},
-		httpMethod:          http.MethodDelete,
-		path:                strings.ReplaceAll(deleteNodeByIDPath, "{"+nodeIDPath+"}", "error"),
-		body:                func() []byte { return nil },
-		expectedStatusCode:  http.StatusBadRequest,
-		expectedContentType: expectedErrorStatusContentType,
-		expectedBody:        func() string { return expectedInvalidIDErrorBody },
-	},
-	{
 		name:                "TestDeleteNodeByID404",
 		store:               &ErrorChainRegistry{},
 		httpMethod:          http.MethodDelete,

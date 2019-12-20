@@ -27,7 +27,7 @@ var postNodeTests = []HTTPRouteTests{
 		},
 		expectedStatusCode:  http.StatusOK,
 		expectedContentType: expectedSuccessStatusContentType,
-		expectedBody:        func() string { return "{\"id\":1}\n" },
+		expectedBody:        func() string { return "{\"id\":\"1\"}\n" },
 	},
 	{
 		name:       "TestPostNode400WithTwiceSameURL",

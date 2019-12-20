@@ -5,22 +5,20 @@ import (
 	"fmt"
 	"time"
 
+	uuid "github.com/satori/go.uuid"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
 
 type ChainRegistry struct {
-	Counter      int
-	NodesByID    map[int]*types.Node
+	NodesByID    map[string]*types.Node
 	NodesByNames map[string]map[string]*types.Node
 }
 
 // NewChainRegistry creates a new chain registry
 func NewChainRegistry() *ChainRegistry {
 	return &ChainRegistry{
-		Counter:      1,
-		NodesByID:    make(map[int]*types.Node),
+		NodesByID:    make(map[string]*types.Node),
 		NodesByNames: make(map[string]map[string]*types.Node),
 	}
 }
@@ -48,10 +46,9 @@ func (r *ChainRegistry) RegisterNode(ctx context.Context, node *types.Node) erro
 		return errors.FromError(fmt.Errorf("node tenantID=%s name=%s already exitst", node.TenantID, node.Name)).ExtendComponent(component)
 	}
 
-	node.ID = r.Counter
+	node.ID = uuid.NewV4().String()
 	r.NodesByNames[node.TenantID][node.Name] = node
-	r.NodesByID[r.Counter] = node
-	r.Counter++
+	r.NodesByID[node.ID] = node
 	return nil
 }
 
@@ -90,24 +87,18 @@ func (r *ChainRegistry) GetNodeByName(ctx context.Context, tenantID, name string
 	return nil, errors.NotFoundError("unknown node with tenantID=%s", tenantID).ExtendComponent(component)
 }
 
-func (r *ChainRegistry) GetNodeByID(ctx context.Context, id int) (*types.Node, error) {
+func (r *ChainRegistry) GetNodeByID(ctx context.Context, id string) (*types.Node, error) {
 	if _, ok := r.NodesByID[id]; !ok {
-		return nil, errors.FromError(fmt.Errorf("unknown node ID=%d", id)).ExtendComponent(component)
+		return nil, errors.FromError(fmt.Errorf("unknown node ID=%s", id)).ExtendComponent(component)
 	}
 
 	return r.NodesByID[id], nil
 }
 
-var FieldsToNotUpdate = map[string]bool{
-	"ID":        true,
-	"CreatedAt": true,
-	"UpdatedAt": true,
-}
-
 func (r *ChainRegistry) UpdateNodeByName(ctx context.Context, node *types.Node) error {
 
 	if _, ok := r.NodesByNames[node.TenantID][node.Name]; !ok {
-		return errors.NotFoundError("no node found with id %d", node.ID).ExtendComponent(component)
+		return errors.NotFoundError("no node found with id %s", node.ID).ExtendComponent(component)
 	}
 	nodeToUpdate := r.NodesByNames[node.TenantID][node.Name]
 
@@ -125,7 +116,7 @@ func (r *ChainRegistry) UpdateNodeByName(ctx context.Context, node *types.Node) 
 
 func (r *ChainRegistry) UpdateNodeByID(ctx context.Context, node *types.Node) error {
 	if _, ok := r.NodesByID[node.ID]; !ok {
-		return errors.NotFoundError("no node found with id %d", node.ID).ExtendComponent(component)
+		return errors.NotFoundError("no node found with id %s", node.ID).ExtendComponent(component)
 	}
 	nodeToUpdate := r.NodesByID[node.ID]
 
@@ -155,9 +146,9 @@ func (r *ChainRegistry) DeleteNodeByName(ctx context.Context, node *types.Node) 
 	return nil
 }
 
-func (r *ChainRegistry) DeleteNodeByID(ctx context.Context, id int) error {
+func (r *ChainRegistry) DeleteNodeByID(ctx context.Context, id string) error {
 	if _, ok := r.NodesByID[id]; !ok {
-		return errors.NotFoundError("no node found with id=%d", id).ExtendComponent(component)
+		return errors.NotFoundError("no node found with id=%s", id).ExtendComponent(component)
 	}
 
 	delete(r.NodesByNames[r.NodesByID[id].TenantID], r.NodesByID[id].Name)

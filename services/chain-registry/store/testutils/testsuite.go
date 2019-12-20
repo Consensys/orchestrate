@@ -194,7 +194,7 @@ func (s *ChainRegistryTestSuite) TestErrorNotFoundUpdateNodeByID() {
 	s.TestRegisterNodes()
 
 	testNode := &types.Node{
-		ID:   100000,
+		ID:   "0d60a85e-0b90-4482-a14c-108aea2557aa",
 		URLs: []string{"testUrl1"},
 	}
 	err := s.Store.UpdateNodeByID(context.Background(), testNode)
@@ -240,6 +240,6 @@ func (s *ChainRegistryTestSuite) TestDeleteNodeByID() {
 func (s *ChainRegistryTestSuite) TestErrorNotFoundDeleteNodeByID() {
 	s.TestRegisterNodes()
 
-	err := s.Store.DeleteNodeByID(context.Background(), 10000)
+	err := s.Store.DeleteNodeByID(context.Background(), "0d60a85e-0b90-4482-a14c-108aea2557aa")
 	assert.Error(s.T(), err, "Should delete node with errors")
 }

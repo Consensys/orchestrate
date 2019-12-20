@@ -16,15 +16,15 @@ const component = "chain-registry.store"
 type Node struct {
 	tableName struct{} `sql:"nodes"` //nolint:unused,structcheck
 
-	ID                      int        `json:"id,omitempty" sql:",pk"`
+	ID                      string     `json:"id,omitempty" sql:",pk"`
 	Name                    string     `json:"name,omitempty"`
 	TenantID                string     `json:"tenantID,omitempty"`
 	URLs                    []string   `json:"urls,omitempty" sql:"urls,array"`
 	CreatedAt               *time.Time `json:"createdAt,omitempty"`
 	UpdatedAt               *time.Time `json:"updatedAt,omitempty"`
-	ListenerDepth           uint       `json:"listenerDepth,omitempty"`
+	ListenerDepth           uint64     `json:"listenerDepth,omitempty"`
 	ListenerBlockPosition   uint64     `json:"listenerBlockPosition,string,omitempty"`
-	ListenerFromBlock       uint64     `json:"listenerFromBlock,string,omitempty"`
+	ListenerFromBlock       int64      `json:"listenerFromBlock,string,omitempty"`
 	ListenerBackOffDuration string     `json:"listenerBackOffDuration,omitempty"`
 }
 
@@ -55,7 +55,7 @@ func BuildConfiguration(nodes []*Node) (*dynamic.Configuration, error) {
 		config.HTTP.Routers[nodeID] = &dynamic.Router{
 			EntryPoints: []string{"http"},
 			Service:     nodeID,
-			Rule:        fmt.Sprintf("Path(`/%d`) || Path(`/%s/%s`)", node.ID, node.TenantID, node.Name),
+			Rule:        fmt.Sprintf("Path(`/%s`) || Path(`/%s/%s`)", node.ID, node.TenantID, node.Name),
 		}
 
 		servers := make([]dynamic.Server, 0)

@@ -25,21 +25,6 @@ var patchNodeByIDTests = []HTTPRouteTests{
 		expectedBody:        func() string { return expectedSuccessStatusBody },
 	},
 	{
-		name:       "TestPatchNodeByID400WrongID",
-		store:      &MockChainRegistry{},
-		httpMethod: http.MethodPatch,
-		path:       strings.ReplaceAll(patchNodeByIDPath, "{"+nodeIDPath+"}", "error"),
-		body: func() []byte {
-			body, _ := json.Marshal(&models.Node{
-				URLs: []string{"http://test.com"},
-			})
-			return body
-		},
-		expectedStatusCode:  http.StatusBadRequest,
-		expectedContentType: expectedErrorStatusContentType,
-		expectedBody:        func() string { return expectedInvalidIDErrorBody },
-	},
-	{
 		name:       "TestPatchNodeByID400WithWrongURL",
 		store:      &MockChainRegistry{},
 		httpMethod: http.MethodPatch,

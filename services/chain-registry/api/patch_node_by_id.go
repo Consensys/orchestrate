@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
@@ -14,11 +13,7 @@ type patchNodeByIDResponse struct{}
 func (h Handler) patchNodeByID(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
-	nodeID, err := strconv.Atoi(mux.Vars(request)[nodeIDPath])
-	if err != nil {
-		writeError(rw, "invalid ID format", http.StatusBadRequest)
-		return
-	}
+	nodeID := mux.Vars(request)[nodeIDPath]
 
 	nodeRequest, err := UnmarshalNodeRequestBody(request.Body)
 	if err != nil {
