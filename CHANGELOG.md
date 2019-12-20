@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 
 
-## v1.2.0 (2019-12-13)
+## v1.2.0 (2019-20-13)
 
 ### 🆕 Features
 
