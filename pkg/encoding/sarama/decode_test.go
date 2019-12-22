@@ -47,6 +47,6 @@ func TestUnmarshallerError(t *testing.T) {
 	}
 	pb := &ethereum.TxData{}
 	err := errors.FromError(Unmarshal(msg, pb))
-	assert.NotNil(t, err, "Unmarshal should error")
+	assert.Error(t, err, "Unmarshal should error")
 	assert.Equal(t, err.GetComponent(), "encoding.sarama", "Error code should be correct")
 }

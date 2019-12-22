@@ -14,10 +14,10 @@ func TestSign(t *testing.T) {
 
 	hash := common.HexToHash("")
 	sig, err := EthECDSA.Sign(hash.Bytes(), key)
-	assert.Nil(t, err, "Sign should not error")
+	assert.NoError(t, err, "Sign should not error")
 
 	addr, err := csutils.EcRecover(hash, sig)
-	assert.Nil(t, err, "EcRecover should not error")
+	assert.NoError(t, err, "EcRecover should not error")
 	expected := crypto.PubkeyToAddress(key.PublicKey)
 	assert.Equal(t, expected.Hex(), addr.Hex(), "ECRecover should return correct address")
 }

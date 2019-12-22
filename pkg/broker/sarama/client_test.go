@@ -11,7 +11,7 @@ import (
 
 func TestNewClient(t *testing.T) {
 	_, e := NewClient([]string{"unknown"}, sarama.NewConfig())
-	assert.NotNil(t, e, "Client should error")
+	assert.Error(t, e, "Client should error")
 	ie, ok := e.(*err.Error)
 	assert.True(t, ok, "Error should cast to internal error")
 	assert.Equal(t, "broker.sarama", ie.GetComponent(), "Component should be correct")

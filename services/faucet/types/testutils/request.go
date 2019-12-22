@@ -20,8 +20,8 @@ type TestRequest struct {
 func AssertRequest(t *testing.T, test *TestRequest) {
 	assert.True(t, test.ResultAmount.Cmp(test.ExpectedAmount) == 0, "Amount credited should be correct expecting %s, got %s, %s", test.ResultAmount, test.ExpectedAmount)
 	if test.ExpectedErr {
-		assert.NotNil(t, test.ResultErr, "Credit should error")
+		assert.Error(t, test.ResultErr, "Credit should error")
 	} else {
-		assert.Nil(t, test.ResultErr, "Credit should not error")
+		assert.NoError(t, test.ResultErr, "Credit should not error")
 	}
 }

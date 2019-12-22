@@ -116,10 +116,10 @@ func (s *ScenarioTestSuite) TestEnvelopeShouldBeInTopic() {
 	}
 
 	err := s.Context.chanReg.Send(LongKeyOf("tx.crafter", output.GetMetadata().GetExtra()["scenario.id"], output.GetMetadata().Id), output)
-	assert.Nil(s.T(), err, "Send in registry should not error")
+	assert.NoError(s.T(), err, "Send in registry should not error")
 
 	err = s.Context.envelopeShouldBeInTopic("tx.crafter")
-	assert.Nil(s.T(), err, "envelopeShouldBeInTopic should not error")
+	assert.NoError(s.T(), err, "envelopeShouldBeInTopic should not error")
 	assert.Equal(s.T(), output, s.Context.trackers[0].current, "Envelope on tracker should have been updated")
 }
 

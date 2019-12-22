@@ -12,7 +12,7 @@ import (
 
 func testStatusToError(t *testing.T, code codes.Code, errcode uint64) {
 	err := errors.FromError(StatusToError(status.New(code, "test")))
-	assert.NotNil(t, err, "Should error")
+	assert.Error(t, err, "Should error")
 	assert.Equal(t, "test", err.GetMessage(), "Error message should be correct")
 	assert.Equal(t, errcode, err.GetCode(), "Error code should be correct")
 }

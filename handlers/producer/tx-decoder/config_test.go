@@ -25,7 +25,7 @@ func TestDisableExternalTx(t *testing.T) {
 		"--disable-external-tx=true",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err, "No error expected")
+	assert.NoError(t, err, "No error expected")
 
 	expected = true
 	assert.Equal(t, expected, ExternalTxDisabled(), "Flag")

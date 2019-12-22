@@ -26,7 +26,7 @@ func TestUnmarshal(t *testing.T) {
 		if test.errMsg == "" {
 			assert.Nil(t, err, "Unmarshal should not error")
 		} else {
-			assert.NotNil(t, err, "Unmarshal should error")
+			assert.Error(t, err, "Unmarshal should error")
 			assert.Equal(t, "encoding.json", err.GetComponent(), "Error code should be correct")
 			assert.Equal(t, test.errMsg, err.GetMessage(), "Error message should be correct")
 		}

@@ -13,7 +13,7 @@ func TestChanRegistry(t *testing.T) {
 	assert.False(t, reg.HasChan("test-key"), "No channel should be registered")
 	in := &envelope.Envelope{}
 	err := reg.Send("test-key", in)
-	assert.NotNil(t, err, "Sending envelope to non registered channel should error")
+	assert.Error(t, err, "Sending envelope to non registered channel should error")
 
 	// Register channel
 	ch := make(chan *envelope.Envelope, 2)
@@ -21,6 +21,6 @@ func TestChanRegistry(t *testing.T) {
 	assert.True(t, reg.HasChan("test-key"), "Channel should be registered")
 
 	err = reg.Send("test-key", in)
-	assert.Nil(t, err, "Sending envelope to registered channel should not error")
+	assert.NoError(t, err, "Sending envelope to registered channel should not error")
 	assert.Equal(t, in, <-ch, "Envelope should have been sent to channel")
 }

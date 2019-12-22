@@ -102,7 +102,7 @@ func TestBindArgs(t *testing.T) {
 	assert.Nil(t, e, "Prepare Args: should prepare args")
 
 	_, e = bindArgs(ERC20TransferMethod, _to)
-	assert.NotNil(t, e, "Parse method signature should fail")
+	assert.Error(t, e, "Parse method signature should fail")
 	ie, ok := e.(*ierror.Error)
 	assert.True(t, ok, "Error should cast to internal error")
 	assert.Equal(t, "abi.crafter", ie.GetComponent(), "Component should be correct")

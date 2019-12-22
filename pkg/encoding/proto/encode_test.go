@@ -28,6 +28,6 @@ func TestMarshaller(t *testing.T) {
 
 func TestMarshallerError(t *testing.T) {
 	b, err := Marshal(nil)
-	assert.NotNil(t, err, "Marshal should error on nil")
+	assert.Error(t, err, "Marshal should error on nil")
 	assert.Equal(t, []byte(nil), b, "Marshal nil should be correct")
 }

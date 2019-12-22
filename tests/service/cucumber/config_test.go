@@ -29,7 +29,7 @@ func TestShowStepDefinitions(t *testing.T) {
 		"--cucumber-showstepdefinitions",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	expected = true
 	assert.Equal(t, expected, viper.GetBool(ShowStepDefinitionsViperKey), "Changing flags should change ShowStepDefinitions")
@@ -54,7 +54,7 @@ func TestRandomize(t *testing.T) {
 		"--cucumber-randomize=10",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	expected = 10
 	assert.Equal(t, expected, viper.GetInt(RandomizeViperKey), "Changing flags should change Randomize")
@@ -79,7 +79,7 @@ func TestStopOnFailure(t *testing.T) {
 		"--cucumber-stoponfailure",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	expected = true
 	assert.Equal(t, expected, viper.GetBool(StopOnFailureViperKey), "Changing flags should change StopOnFailure")
@@ -104,7 +104,7 @@ func TestStrict(t *testing.T) {
 		"--cucumber-strict",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	expected = true
 	assert.Equal(t, expected, viper.GetBool(StrictViperKey), "Changing flags should change Strict")
@@ -129,7 +129,7 @@ func TestNoColors(t *testing.T) {
 		"--cucumber-nocolors",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	expected = true
 	assert.Equal(t, expected, viper.GetBool(NoColorsViperKey), "Changing flags should change NoColors")
@@ -154,7 +154,7 @@ func TestTags(t *testing.T) {
 		"--cucumber-tags=test",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	expected = "test"
 	assert.Equal(t, expected, viper.GetString(TagsViperKey), "Changing flags should change Tags")
 }
@@ -178,7 +178,7 @@ func TestFormat(t *testing.T) {
 		"--cucumber-format=test",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	expected = "test"
 	assert.Equal(t, expected, viper.GetString(FormatViperKey), "Changing flags should change Format")
 }
@@ -202,7 +202,7 @@ func TestConcurrency(t *testing.T) {
 		"--cucumber-concurrency=10",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	expected = 10
 	assert.Equal(t, expected, viper.GetInt(ConcurrencyViperKey), "Changing flags should change Concurrency")

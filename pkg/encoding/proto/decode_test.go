@@ -47,13 +47,13 @@ func TestUnmarshaller(t *testing.T) {
 func TestUnmarshalError(t *testing.T) {
 	pb := &ethereum.TxData{}
 	err := errors.FromError(Unmarshal([]byte{0xab, 0x00}, pb))
-	assert.NotNil(t, err, "Unmarshal should error")
+	assert.Error(t, err, "Unmarshal should error")
 	assert.Equal(t, err.GetComponent(), "encoding.proto", "Error code should be correct")
 }
 
 func TestUnmarshalMergeError(t *testing.T) {
 	pb := &ethereum.TxData{}
 	err := errors.FromError(UnmarshalMerge([]byte{0xab, 0x00}, pb))
-	assert.NotNil(t, err, "UnmarshalMerge should error")
+	assert.Error(t, err, "UnmarshalMerge should error")
 	assert.Equal(t, err.GetComponent(), "encoding.proto", "Error code should be correct")
 }

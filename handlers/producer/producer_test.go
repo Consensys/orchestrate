@@ -53,7 +53,7 @@ func (s *ProducerTestSuite) TestProducer() {
 
 	s.Handle(txctxSlice)
 	err := s.p.Close() // This will error if messages have not been sent properly
-	assert.Nil(s.T(), err, "Message should have been sent")
+	assert.NoError(s.T(), err, "Message should have been sent")
 }
 
 func TestProducer(t *testing.T) {

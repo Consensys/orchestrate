@@ -23,7 +23,7 @@ type EnvelopeStoreTestSuite struct {
 }
 
 func AssertError(t *testing.T, expected string, isError func(err error) bool, err error) {
-	assert.NotNil(t, err, "Error should not be nil")
+	assert.Error(t, err, "Error should not be nil")
 	assert.Contains(t, errors.FromError(err).GetComponent(), expected, "Component should be correct")
 	assert.True(t, isError(err), "Error should be from correct class")
 }
@@ -130,7 +130,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 		&evlpstore.StoreRequest{
 			Envelope: evlp,
 		},
-		func(t *testing.T, err error) { assert.Nil(t, err, "Store should not error") },
+		func(t *testing.T, err error) { assert.NoError(t, err, "Store should not error") },
 		func(t *testing.T, resp *evlpstore.StoreResponse) {
 			assert.Equal(t, evlpstore.Status_STORED, resp.GetStatusInfo().GetStatus(), "Store default status should be correct")
 			assert.True(t, time.Since(resp.GetStatusInfo().StoredAtTime()) < 200*time.Millisecond, "Store stored date should be close")
@@ -144,7 +144,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 			Chain:  chain.FromInt(888),
 			TxHash: ethereum.HexToHash("0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210"),
 		},
-		func(t *testing.T, err error) { assert.Nil(t, err, "LoadByTxHash should not error") },
+		func(t *testing.T, err error) { assert.NoError(t, err, "LoadByTxHash should not error") },
 		func(t *testing.T, resp *evlpstore.StoreResponse) {
 			assert.Equal(t, evlpstore.Status_STORED, resp.GetStatusInfo().GetStatus(), "LoadByTxHash status should be correct")
 			assert.Equal(t, "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11", resp.GetEnvelope().GetMetadata().GetId(), "LoadByTxHash Envelope ID should be correct")
@@ -159,7 +159,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 			Id:     "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11",
 			Status: evlpstore.Status_PENDING,
 		},
-		func(t *testing.T, err error) { assert.Nil(t, err, "SetStatus should not error") },
+		func(t *testing.T, err error) { assert.NoError(t, err, "SetStatus should not error") },
 		func(t *testing.T, resp *evlpstore.StatusResponse) {
 			assert.Equal(t, evlpstore.Status_PENDING, resp.GetStatusInfo().GetStatus(), "SetStatus status should be PENDING")
 			assert.True(t, time.Since(resp.GetStatusInfo().SentAtTime()) < 200*time.Millisecond, "Store pending date should be close")
@@ -172,7 +172,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 			Id:     "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11",
 			Status: evlpstore.Status_ERROR,
 		},
-		func(t *testing.T, err error) { assert.Nil(t, err, "SetStatus should not error") },
+		func(t *testing.T, err error) { assert.NoError(t, err, "SetStatus should not error") },
 		func(t *testing.T, resp *evlpstore.StatusResponse) {
 			assert.Equal(t, evlpstore.Status_ERROR, resp.GetStatusInfo().GetStatus(), "SetStatus status should be ERROR")
 			assert.True(t, time.Since(resp.GetStatusInfo().ErrorAtTime()) < 200*time.Millisecond, "Store error date should be close")
@@ -185,7 +185,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 			Id:     "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11",
 			Status: evlpstore.Status_MINED,
 		},
-		func(t *testing.T, err error) { assert.Nil(t, err, "SetStatus should not error") },
+		func(t *testing.T, err error) { assert.NoError(t, err, "SetStatus should not error") },
 		func(t *testing.T, resp *evlpstore.StatusResponse) {
 			assert.Equal(t, evlpstore.Status_MINED, resp.GetStatusInfo().GetStatus(), "SetStatus status should be MINED")
 			assert.True(t, time.Since(resp.GetStatusInfo().MinedAtTime()) < 200*time.Millisecond, "Store mined date should be close")
@@ -198,7 +198,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 		&evlpstore.LoadByIDRequest{
 			Id: "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11",
 		},
-		func(t *testing.T, err error) { assert.Nil(t, err, "LoadByID should not error") },
+		func(t *testing.T, err error) { assert.NoError(t, err, "LoadByID should not error") },
 		func(t *testing.T, resp *evlpstore.StoreResponse) {
 			assert.Equal(t, evlpstore.Status_MINED, resp.GetStatusInfo().GetStatus(), "LoadByID status should be MINED")
 			assert.True(t, resp.GetStatusInfo().SentAtTime().Sub(resp.GetStatusInfo().StoredAtTime()) > 0, "Stored should be older than sent date")
@@ -222,7 +222,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 		&evlpstore.StoreRequest{
 			Envelope: evlp,
 		},
-		func(t *testing.T, err error) { assert.Nil(t, err, "Store should update and not error") },
+		func(t *testing.T, err error) { assert.NoError(t, err, "Store should update and not error") },
 		func(t *testing.T, resp *evlpstore.StoreResponse) {
 			assert.Equal(t, evlpstore.Status_STORED, resp.GetStatusInfo().GetStatus(), "Store status should have been reset to stored")
 			assert.Equal(t, newHash, resp.GetEnvelope().GetTx().GetHash().Hex(), "Store hash should have been updated")
@@ -240,7 +240,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 			Chain:  chain.FromInt(888),
 			TxHash: ethereum.HexToHash(newHash),
 		},
-		func(t *testing.T, err error) { assert.Nil(t, err, "LoadByTxHash should not error") },
+		func(t *testing.T, err error) { assert.NoError(t, err, "LoadByTxHash should not error") },
 		func(t *testing.T, resp *evlpstore.StoreResponse) {
 			assert.Equal(t, evlpstore.Status_STORED, resp.GetStatusInfo().GetStatus(), "LoadByTxHash status should be correct")
 			assert.Equal(t, "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11", resp.GetEnvelope().GetMetadata().GetId(), "LoadByTxHash Envelope ID should be correct")
@@ -319,7 +319,7 @@ func (s *EnvelopeStoreTestSuite) TestLoadPending() {
 		&evlpstore.LoadPendingRequest{
 			Duration: utils.DurationToPDuration(0),
 		},
-		func(t *testing.T, err error) { assert.Nil(t, err, "LoadPending should not error") },
+		func(t *testing.T, err error) { assert.NoError(t, err, "LoadPending should not error") },
 		func(t *testing.T, resp *evlpstore.LoadPendingResponse) {
 			assert.Len(t, resp.GetResponses(), 3, "Count of envelope pending incorrect")
 		},
@@ -330,7 +330,7 @@ func (s *EnvelopeStoreTestSuite) TestLoadPending() {
 		&evlpstore.LoadPendingRequest{
 			Duration: utils.DurationToPDuration(300 * time.Millisecond),
 		},
-		func(t *testing.T, err error) { assert.Nil(t, err, "LoadPending should not error") },
+		func(t *testing.T, err error) { assert.NoError(t, err, "LoadPending should not error") },
 		func(t *testing.T, resp *evlpstore.LoadPendingResponse) {
 			assert.Len(t, resp.GetResponses(), 2, "Count of envelope pending incorrect")
 		},
@@ -341,7 +341,7 @@ func (s *EnvelopeStoreTestSuite) TestLoadPending() {
 		&evlpstore.LoadPendingRequest{
 			Duration: utils.DurationToPDuration(500 * time.Millisecond),
 		},
-		func(t *testing.T, err error) { assert.Nil(t, err, "LoadPending should not error") },
+		func(t *testing.T, err error) { assert.NoError(t, err, "LoadPending should not error") },
 		func(t *testing.T, resp *evlpstore.LoadPendingResponse) {
 			assert.Len(t, resp.GetResponses(), 1, "Count of envelope pending incorrect")
 		},
@@ -352,7 +352,7 @@ func (s *EnvelopeStoreTestSuite) TestLoadPending() {
 		&evlpstore.LoadPendingRequest{
 			Duration: utils.DurationToPDuration(700 * time.Millisecond),
 		},
-		func(t *testing.T, err error) { assert.Nil(t, err, "LoadPending should not error") },
+		func(t *testing.T, err error) { assert.NoError(t, err, "LoadPending should not error") },
 		func(t *testing.T, resp *evlpstore.LoadPendingResponse) {
 			assert.Len(t, resp.GetResponses(), 0, "Count of envelope pending incorrect")
 		},

@@ -10,7 +10,7 @@ import (
 
 func TestDialContext(t *testing.T) {
 	conn, err := DialContext(context.Background(), "unknown-target")
-	assert.NotNil(t, err, "Dial should error")
+	assert.Error(t, err, "Dial should error")
 	assert.True(t, errors.IsConnectionError(err), "Error should be a gRPC connection error")
 	assert.Nil(t, conn, "Connection should be nil")
 }

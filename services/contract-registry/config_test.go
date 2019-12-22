@@ -58,7 +58,7 @@ func TestABIs(t *testing.T) {
 		"--abi=MyContract[v2]:[ABI2]",
 	}
 	err = flgs.Parse(args)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	t.Logf("Flags: %v", len(viper.GetStringSlice(name)))
 	expected = []string{
@@ -74,6 +74,6 @@ func TestFromABIConfig(t *testing.T) {
 
 	contracts, err := FromABIConfig()
 
-	assert.Nil(t, err, "Should parse default properly")
+	assert.NoError(t, err, "Should parse default properly")
 	assert.Len(t, contracts, 0, "Expected 2 contract")
 }

@@ -21,10 +21,10 @@ func TestTracker(t *testing.T) {
 
 	// Get envelope
 	err := tracker.load("test-output", time.Second)
-	assert.Nil(t, err, "#1 load should not error")
+	assert.NoError(t, err, "#1 load should not error")
 	assert.Equal(t, input, tracker.current, "#1 envelope should have been loaded")
 
 	// Second load should error
 	err = tracker.load("test-output", time.Second)
-	assert.NotNil(t, err, "#2 Load should not error")
+	assert.Error(t, err, "#2 Load should not error")
 }
