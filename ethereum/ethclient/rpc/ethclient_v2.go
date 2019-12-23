@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"math/big"
 	"net"
 	"net/http"
@@ -20,11 +19,13 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
+
+type ProcessResultFunc func(result json.RawMessage) error
 
 // ClientV2 is a connector to Ethereum blockchains that uses Geth rpc client
 type ClientV2 struct {
@@ -79,12 +80,42 @@ func NewClientV2(conf *Config) *ClientV2 {
 	}
 }
 
-func (ec *ClientV2) Call(ctx context.Context, endpoint string, result interface{}, method string, args ...interface{}) error {
+func (ec *ClientV2) Call(ctx context.Context, endpoint string, processResult func(result json.RawMessage) error, method string, args ...interface{}) error {
 	req, err := ec.newJSONRpcRequestWithContext(ctx, endpoint, method, args...)
 	if err != nil {
 		return err
 	}
 
+	bckoff := backoff.WithContext(ec.pool.Get().(backoff.BackOff), req.Context())
+	defer ec.pool.Put(bckoff)
+
+	return ec.callWithRetry(req, processResult, bckoff)
+}
+
+func (ec *ClientV2) callWithRetry(req *http.Request, processResult func(result json.RawMessage) error, bckoff backoff.BackOff) error {
+	return backoff.RetryNotify(
+		func() error {
+			e := ec.call(req, processResult)
+			switch {
+			case e == nil:
+				return nil
+			case errors.IsConnectionError(e),
+				errors.IsNotFoundError(e) && utils.ShouldRetryNotFoundError(req.Context()):
+				return e
+			default:
+				return backoff.Permanent(e)
+			}
+		},
+		bckoff,
+		func(e error, duration time.Duration) {
+			log.FromContext(req.Context()).
+				WithError(e).
+				Warnf("eth-client: JSON-RPC call failed, retrying in %v...", duration)
+		},
+	)
+}
+
+func (ec *ClientV2) call(req *http.Request, processResult ProcessResultFunc) error {
 	resp, err := ec.do(req)
 	if err != nil {
 		return err
@@ -105,11 +136,7 @@ func (ec *ClientV2) Call(ctx context.Context, endpoint string, result interface{
 	case len(respMsg.Result) == 0:
 		return errors.NotFoundError("not found")
 	default:
-		err := json.Unmarshal(respMsg.Result, &result)
-		if err != nil {
-			return errors.EncodingError(err.Error())
-		}
-		return nil
+		return processResult(respMsg.Result)
 	}
 }
 
@@ -169,34 +196,16 @@ func (ec *ClientV2) newJSONRpcRequestWithContext(ctx context.Context, endpoint, 
 	return req, nil
 }
 
-func (ec *ClientV2) do(req *http.Request) (resp *http.Response, err error) {
-	bckoff := backoff.WithContext(ec.pool.Get().(backoff.BackOff), req.Context())
-	defer ec.pool.Put(bckoff)
-
-	err = backoff.RetryNotify(
-		func() error {
-			resp, err = ec.client.Do(req)
-			switch {
-			case err != nil:
-				return err
-			case resp.StatusCode < 200, resp.StatusCode >= 300:
-				return fmt.Errorf("%v (code=%v)", resp.Status, resp.StatusCode)
-			default:
-				return nil
-			}
-		},
-		bckoff,
-		func(err error, duration time.Duration) {
-			log.FromContext(req.Context()).
-				WithError(err).
-				WithFields(logrus.Fields{
-					"json-rpc.url": req.URL.String(),
-				}).Warnf("eth-client: JSON-RPC call failed, retrying in %v...", duration)
-		},
-	)
+func (ec *ClientV2) do(req *http.Request) (*http.Response, error) {
+	resp, err := ec.client.Do(req)
 	if err != nil {
 		return nil, errors.EthConnectionError(err.Error())
 	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, errors.EthConnectionError("%v (code=%v)", resp.Status, resp.StatusCode)
+	}
+
 	return resp, nil
 }
 
@@ -219,35 +228,60 @@ type txExtraInfo struct {
 }
 
 type Body struct {
+	Hash         ethcommon.Hash          `json:"hash"`
 	Transactions []*ethtypes.Transaction `json:"transactions"`
+	UncleHashes  []ethcommon.Hash        `json:"uncles"`
 }
 
-func blockFromRaw(raw json.RawMessage) (*ethtypes.Block, error) {
-	// Unmarshal block header information
-	var header *ethtypes.Header
-	if err := encoding.Unmarshal(raw, &header); err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
-	}
+func processResult(v interface{}) ProcessResultFunc {
+	return func(result json.RawMessage) error {
+		err := json.Unmarshal(result, &v)
+		if err != nil {
+			return errors.EncodingError(err.Error())
+		}
 
-	// Unmarshal block body information
-	var body *Body
-	if err := encoding.Unmarshal(raw, &body); err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return nil
 	}
+}
 
-	return ethtypes.NewBlock(header, body.Transactions, []*ethtypes.Header{}, []*ethtypes.Receipt{}), nil
+func processBlockResult(header **ethtypes.Header, body **Body) ProcessResultFunc {
+	return func(result json.RawMessage) error {
+		var raw json.RawMessage
+		err := processResult(&raw)(result)
+		if err != nil {
+			return err
+		}
+
+		if len(raw) == 0 {
+			// Block was not found
+			return errors.NotFoundError("block not found")
+		}
+
+		// Unmarshal block header information
+		if err := encoding.Unmarshal(raw, header); err != nil {
+			return errors.FromError(err).ExtendComponent(component)
+		}
+
+		// Unmarshal block body information
+		if err := encoding.Unmarshal(raw, body); err != nil {
+			return errors.FromError(err).ExtendComponent(component)
+		}
+
+		return nil
+	}
 }
 
 // BlockByHash returns the given full block.
 func (ec *ClientV2) BlockByHash(ctx context.Context, endpoint string, hash ethcommon.Hash) (*ethtypes.Block, error) {
 	// Perform RPC call
-	var raw json.RawMessage
-	err := ec.Call(ctx, endpoint, &raw, "eth_getBlockByHash", hash, true)
+	var header *ethtypes.Header
+	var body *Body
+	err := ec.Call(ctx, endpoint, processBlockResult(&header, &body), "eth_getBlockByHash", hash, true)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	return blockFromRaw(raw)
+	return ethtypes.NewBlock(header, body.Transactions, []*ethtypes.Header{}, []*ethtypes.Receipt{}), nil
 }
 
 // BlockByNumber returns a block from the current canonical chain. If number is nil, the
@@ -257,19 +291,36 @@ func (ec *ClientV2) BlockByHash(ctx context.Context, endpoint string, hash ethco
 // if you don't need all transactions or uncle headers.
 func (ec *ClientV2) BlockByNumber(ctx context.Context, endpoint string, number *big.Int) (*ethtypes.Block, error) {
 	// Perform RPC call
-	var raw json.RawMessage
-	err := ec.Call(ctx, endpoint, &raw, "eth_getBlockByNumber", toBlockNumArg(number), true)
+	var header *ethtypes.Header
+	var body *Body
+	err := ec.Call(ctx, endpoint, processBlockResult(&header, &body), "eth_getBlockByNumber", toBlockNumArg(number), true)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	return blockFromRaw(raw)
+	return ethtypes.NewBlock(header, body.Transactions, []*ethtypes.Header{}, []*ethtypes.Receipt{}), nil
+}
+
+func processHeaderResult(head **ethtypes.Header) ProcessResultFunc {
+	return func(result json.RawMessage) error {
+		err := processResult(head)(result)
+		if err != nil {
+			return err
+		}
+
+		if *head == nil {
+			// Block was not found
+			return errors.NotFoundError("block not found")
+		}
+
+		return nil
+	}
 }
 
 // HeaderByHash returns the block header with the given hash.
 func (ec *ClientV2) HeaderByHash(ctx context.Context, endpoint string, hash ethcommon.Hash) (*ethtypes.Header, error) {
 	var head *ethtypes.Header
-	err := ec.Call(ctx, endpoint, &head, "eth_getBlockByHash", hash, false)
+	err := ec.Call(ctx, endpoint, processHeaderResult(&head), "eth_getBlockByHash", hash, false)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -281,7 +332,7 @@ func (ec *ClientV2) HeaderByHash(ctx context.Context, endpoint string, hash ethc
 // nil, the latest known header is returned.
 func (ec *ClientV2) HeaderByNumber(ctx context.Context, endpoint string, number *big.Int) (*ethtypes.Header, error) {
 	var head *ethtypes.Header
-	err := ec.Call(ctx, endpoint, &head, "eth_getBlockByNumber", toBlockNumArg(number), false)
+	err := ec.Call(ctx, endpoint, processHeaderResult(&head), "eth_getBlockByNumber", toBlockNumArg(number), false)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -289,38 +340,73 @@ func (ec *ClientV2) HeaderByNumber(ctx context.Context, endpoint string, number 
 	return head, nil
 }
 
+func processTxResult(tx **ethtypes.Transaction, extra **txExtraInfo) ProcessResultFunc {
+	return func(result json.RawMessage) error {
+		var raw json.RawMessage
+		err := processResult(&raw)(result)
+		if err != nil {
+			return err
+		}
+
+		if len(raw) == 0 {
+			// Block was not found
+			return errors.NotFoundError("transaction not found")
+		}
+
+		if err := encoding.Unmarshal(raw, tx); err != nil {
+			return errors.FromError(err)
+		}
+
+		if _, r, _ := (*tx).RawSignatureValues(); r == nil {
+			return errors.DataCorruptedError("transaction without signature")
+		}
+
+		// Unmarshal block body information
+		if err := encoding.Unmarshal(raw, extra); err != nil {
+			return errors.FromError(err)
+		}
+
+		return nil
+	}
+}
+
 // TransactionByHash returns the transaction with the given hash.
-func (ec *ClientV2) TransactionByHash(ctx context.Context, endpoint string, hash ethcommon.Hash) (tx *ethtypes.Transaction, isPending bool, err error) {
-	var raw json.RawMessage
-	err = ec.Call(ctx, endpoint, &raw, "eth_getTransactionByHash", hash)
-	if err != nil {
-		return nil, false, errors.FromError(err).ExtendComponent(component)
-	}
-	if err := encoding.Unmarshal(raw, &tx); err != nil {
-		return nil, false, errors.FromError(err).ExtendComponent(component)
-	}
-
-	if _, r, _ := tx.RawSignatureValues(); r == nil {
-		return nil, false, errors.DataCorruptedError("transaction without signature").ExtendComponent(component)
-	}
-
-	// Unmarshal block body information
+func (ec *ClientV2) TransactionByHash(ctx context.Context, endpoint string, hash ethcommon.Hash) (*ethtypes.Transaction, bool, error) {
+	var tx *ethtypes.Transaction
 	var extra *txExtraInfo
-	if err := encoding.Unmarshal(raw, &extra); err != nil {
+	err := ec.Call(ctx, endpoint, processTxResult(&tx, &extra), "eth_getTransactionByHash", hash)
+	if err != nil {
 		return nil, false, errors.FromError(err).ExtendComponent(component)
 	}
 
 	return tx, extra.BlockNumber == nil, nil
 }
 
+func processReceiptResult(receipt **ethtypes.Receipt) ProcessResultFunc {
+	return func(result json.RawMessage) error {
+		err := processResult(&receipt)(result)
+		if err != nil {
+			return err
+		}
+
+		if *receipt == nil {
+			// Receipt was not found
+			return errors.NotFoundError("receipt not found")
+		}
+
+		return nil
+	}
+}
+
 // TransactionReceipt returns the receipt of a transaction by transaction hash.
 // Note that the receipt is not available for pending transactions.
 func (ec *ClientV2) TransactionReceipt(ctx context.Context, endpoint string, txHash ethcommon.Hash) (*ethtypes.Receipt, error) {
 	var r *ethtypes.Receipt
-	err := ec.Call(ctx, endpoint, &r, "eth_getTransactionReceipt", txHash)
+	err := ec.Call(ctx, endpoint, processReceiptResult(&r), "eth_getTransactionReceipt", txHash)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
+
 	return r, nil
 }
 
@@ -339,22 +425,38 @@ type Progress struct {
 	KnownStates   hexutil.Uint64
 }
 
+func processProgressResult(progress **Progress) ProcessResultFunc {
+	return func(result json.RawMessage) error {
+		var raw json.RawMessage
+		err := processResult(&raw)(result)
+		if err != nil {
+			return err
+		}
+
+		var syncing bool
+		if err = encoding.Unmarshal(raw, &syncing); err == nil {
+			return nil
+		}
+
+		err = json.Unmarshal(raw, progress)
+		if err != nil {
+			return errors.EncodingError(err.Error())
+		}
+
+		return nil
+	}
+}
+
 // SyncProgress retrieves the current progress of the sync algorithm. If there's
 // no sync currently running, it returns nil.
 func (ec *ClientV2) SyncProgress(ctx context.Context, endpoint string) (*eth.SyncProgress, error) {
-	var raw json.RawMessage
-	if err := ec.Call(ctx, endpoint, &raw, "eth_syncing"); err != nil {
+	var progress *Progress
+	if err := ec.Call(ctx, endpoint, processProgressResult(&progress), "eth_syncing"); err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
-	}
-	// Handle the possible response types
-	var syncing bool
-	if err := encoding.Unmarshal(raw, &syncing); err == nil {
-		return nil, nil
 	}
 
-	var progress *Progress
-	if err := encoding.Unmarshal(raw, &progress); err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+	if progress == nil {
+		return nil, nil
 	}
 
 	return &eth.SyncProgress{
@@ -371,88 +473,88 @@ func (ec *ClientV2) SyncProgress(ctx context.Context, endpoint string) (*eth.Syn
 // BalanceAt returns the wei balance of the given account.
 // The block number can be nil, in which case the balance is taken from the latest known block.
 func (ec *ClientV2) BalanceAt(ctx context.Context, endpoint string, account ethcommon.Address, blockNumber *big.Int) (*big.Int, error) {
-	var result hexutil.Big
-	err := ec.Call(ctx, endpoint, &result, "eth_getBalance", account, toBlockNumArg(blockNumber))
+	var balance hexutil.Big
+	err := ec.Call(ctx, endpoint, processResult(&balance), "eth_getBalance", account, toBlockNumArg(blockNumber))
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
-	return (*big.Int)(&result), nil
+	return (*big.Int)(&balance), nil
 }
 
 // StorageAt returns the value of key in the contract storage of the given account.
 // The block number can be nil, in which case the value is taken from the latest known block.
 func (ec *ClientV2) StorageAt(ctx context.Context, endpoint string, account ethcommon.Address, key ethcommon.Hash, blockNumber *big.Int) ([]byte, error) {
-	var result hexutil.Bytes
-	err := ec.Call(ctx, endpoint, &result, "eth_getStorageAt", account, key, toBlockNumArg(blockNumber))
+	var storage hexutil.Bytes
+	err := ec.Call(ctx, endpoint, processResult(&storage), "eth_getStorageAt", account, key, toBlockNumArg(blockNumber))
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
-	return result, nil
+	return storage, nil
 }
 
 // CodeAt returns the contract code of the given account.
 // The block number can be nil, in which case the code is taken from the latest known block.
 func (ec *ClientV2) CodeAt(ctx context.Context, endpoint string, account ethcommon.Address, blockNumber *big.Int) ([]byte, error) {
-	var result hexutil.Bytes
-	err := ec.Call(ctx, endpoint, &result, "eth_getCode", account, toBlockNumArg(blockNumber))
+	var code hexutil.Bytes
+	err := ec.Call(ctx, endpoint, processResult(&code), "eth_getCode", account, toBlockNumArg(blockNumber))
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
-	return result, nil
+	return code, nil
 }
 
 // NonceAt returns the account nonce of the given account.
 // The block number can be nil, in which case the nonce is taken from the latest known block.
 func (ec *ClientV2) NonceAt(ctx context.Context, endpoint string, account ethcommon.Address, blockNumber *big.Int) (uint64, error) {
-	var result hexutil.Uint64
-	err := ec.Call(ctx, endpoint, &result, "eth_getTransactionCount", account, toBlockNumArg(blockNumber))
+	var nonce hexutil.Uint64
+	err := ec.Call(ctx, endpoint, processResult(&nonce), "eth_getTransactionCount", account, toBlockNumArg(blockNumber))
 	if err != nil {
 		return 0, errors.FromError(err).ExtendComponent(component)
 	}
-	return uint64(result), nil
+	return uint64(nonce), nil
 }
 
 // Pending State
 
 // PendingBalanceAt returns the wei balance of the given account in the pending state.
 func (ec *ClientV2) PendingBalanceAt(ctx context.Context, endpoint string, account ethcommon.Address) (*big.Int, error) {
-	var result hexutil.Big
-	err := ec.Call(ctx, endpoint, &result, "eth_getBalance", account, "pending")
+	var balance hexutil.Big
+	err := ec.Call(ctx, endpoint, processResult(&balance), "eth_getBalance", account, "pending")
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
-	return (*big.Int)(&result), nil
+	return (*big.Int)(&balance), nil
 }
 
 // PendingStorageAt returns the value of key in the contract storage of the given account in the pending state.
 func (ec *ClientV2) PendingStorageAt(ctx context.Context, endpoint string, account ethcommon.Address, key ethcommon.Hash) ([]byte, error) {
-	var result hexutil.Bytes
-	err := ec.Call(ctx, endpoint, &result, "eth_getStorageAt", account, key, "pending")
+	var storage hexutil.Bytes
+	err := ec.Call(ctx, endpoint, processResult(&storage), "eth_getStorageAt", account, key, "pending")
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
-	return result, nil
+	return storage, nil
 }
 
 // PendingCodeAt returns the contract code of the given account in the pending state.
 func (ec *ClientV2) PendingCodeAt(ctx context.Context, endpoint string, account ethcommon.Address) ([]byte, error) {
-	var result hexutil.Bytes
-	err := ec.Call(ctx, endpoint, &result, "eth_getCode", account, "pending")
+	var code hexutil.Bytes
+	err := ec.Call(ctx, endpoint, processResult(&code), "eth_getCode", account, "pending")
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
-	return result, nil
+	return code, nil
 }
 
 // PendingNonceAt returns the account nonce of the given account in the pending state.
 // This is the nonce that should be used for the next transaction.
 func (ec *ClientV2) PendingNonceAt(ctx context.Context, endpoint string, account ethcommon.Address) (uint64, error) {
-	var result hexutil.Uint64
-	err := ec.Call(ctx, endpoint, &result, "eth_getTransactionCount", account, "pending")
+	var nonce hexutil.Uint64
+	err := ec.Call(ctx, endpoint, processResult(&nonce), "eth_getTransactionCount", account, "pending")
 	if err != nil {
 		return 0, errors.FromError(err).ExtendComponent(component)
 	}
-	return uint64(result), nil
+	return uint64(nonce), nil
 }
 
 // Contract Calling
@@ -465,7 +567,7 @@ func (ec *ClientV2) PendingNonceAt(ctx context.Context, endpoint string, account
 // blocks might not be available.
 func (ec *ClientV2) CallContract(ctx context.Context, endpoint string, msg *eth.CallMsg, blockNumber *big.Int) ([]byte, error) {
 	var hex hexutil.Bytes
-	err := ec.Call(ctx, endpoint, &hex, "eth_call", toCallArg(msg), toBlockNumArg(blockNumber))
+	err := ec.Call(ctx, endpoint, processResult(&hex), "eth_call", toCallArg(msg), toBlockNumArg(blockNumber))
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -476,7 +578,7 @@ func (ec *ClientV2) CallContract(ctx context.Context, endpoint string, msg *eth.
 // The state seen by the contract call is the pending state.
 func (ec *ClientV2) PendingCallContract(ctx context.Context, endpoint string, msg *eth.CallMsg) ([]byte, error) {
 	var hex hexutil.Bytes
-	err := ec.Call(ctx, endpoint, &hex, "eth_call", toCallArg(msg), "pending")
+	err := ec.Call(ctx, endpoint, processResult(&hex), "eth_call", toCallArg(msg), "pending")
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -487,7 +589,7 @@ func (ec *ClientV2) PendingCallContract(ctx context.Context, endpoint string, ms
 // execution of a transaction.
 func (ec *ClientV2) SuggestGasPrice(ctx context.Context, endpoint string) (*big.Int, error) {
 	var hex hexutil.Big
-	err := ec.Call(ctx, endpoint, &hex, "eth_gasPrice")
+	err := ec.Call(ctx, endpoint, processResult(&hex), "eth_gasPrice")
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -501,7 +603,7 @@ func (ec *ClientV2) SuggestGasPrice(ctx context.Context, endpoint string) (*big.
 // but it should provide a basis for setting a reasonable default.
 func (ec *ClientV2) EstimateGas(ctx context.Context, endpoint string, msg *eth.CallMsg) (uint64, error) {
 	var hex hexutil.Uint64
-	err := ec.Call(ctx, endpoint, &hex, "eth_estimateGas", toCallArg(msg))
+	err := ec.Call(ctx, endpoint, processResult(&hex), "eth_estimateGas", toCallArg(msg))
 	if err != nil {
 		return 0, errors.FromError(err).ExtendComponent(component)
 	}
@@ -530,7 +632,7 @@ func toCallArg(msg *eth.CallMsg) interface{} {
 
 // SendRawTransaction allows to send a raw transaction
 func (ec *ClientV2) SendRawTransaction(ctx context.Context, endpoint, raw string) error {
-	err := ec.Call(ctx, endpoint, nil, "eth_sendRawTransaction", raw)
+	err := ec.Call(ctx, endpoint, processResult(nil), "eth_sendRawTransaction", raw)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(component)
 	}
@@ -539,7 +641,7 @@ func (ec *ClientV2) SendRawTransaction(ctx context.Context, endpoint, raw string
 
 // SendTransaction send transaction to an Ethereum node
 func (ec *ClientV2) SendTransaction(ctx context.Context, endpoint string, args *types.SendTxArgs) (txHash ethcommon.Hash, err error) {
-	err = ec.Call(ctx, endpoint, &txHash, "eth_sendTransaction", &args)
+	err = ec.Call(ctx, endpoint, processResult(&txHash), "eth_sendTransaction", &args)
 	if err != nil {
 		return ethcommon.Hash{}, errors.FromError(err).ExtendComponent(component)
 	}
@@ -552,7 +654,7 @@ func (ec *ClientV2) SendQuorumRawPrivateTransaction(ctx context.Context, endpoin
 		"privateFor": privateFor,
 	}
 	var hash string
-	err := ec.Call(ctx, endpoint, &hash, "eth_sendRawPrivateTransaction", rawTxHashHex, privateForParam)
+	err := ec.Call(ctx, endpoint, processResult(&hash), "eth_sendRawPrivateTransaction", rawTxHashHex, privateForParam)
 	if err != nil {
 		return ethcommon.Hash{}, errors.FromError(err).ExtendComponent(component)
 	}
@@ -564,7 +666,7 @@ func (ec *ClientV2) SendRawPrivateTransaction(ctx context.Context, endpoint stri
 	// Send a raw signed transactions using EEA extension method
 	// Method documentation here: https://besu.hyperledger.org/en/stable/Reference/API-Methods/#eea_sendrawtransaction
 	var hash string
-	err := ec.Call(ctx, endpoint, &hash, "eea_sendRawTransaction", hexutil.Encode(raw))
+	err := ec.Call(ctx, endpoint, processResult(&hash), "eea_sendRawTransaction", hexutil.Encode(raw))
 	if err != nil {
 		return ethcommon.Hash{}, errors.FromError(err).ExtendComponent(component)
 	}

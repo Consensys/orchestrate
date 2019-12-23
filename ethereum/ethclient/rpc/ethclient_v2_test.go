@@ -12,13 +12,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cenkalti/backoff"
 	eth "github.com/ethereum/go-ethereum"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
-	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
@@ -28,7 +29,7 @@ var testConfig = &Config{
 		InitialInterval:     time.Millisecond,
 		RandomizationFactor: 0.5,
 		Multiplier:          1.5,
-		MaxInterval:         30 * time.Second,
+		MaxInterval:         time.Millisecond,
 		MaxElapsedTime:      time.Millisecond,
 	},
 }
@@ -113,8 +114,12 @@ func TestDo(t *testing.T) {
 func makeRespBody(result interface{}, errMsg string) io.ReadCloser {
 	respMsg := &JSONRpcMessage{}
 	if result != nil {
-		jsonResult, _ := json.Marshal(result)
-		respMsg.Result = json.RawMessage(jsonResult)
+		if b, ok := result.([]byte); ok {
+			respMsg.Result = json.RawMessage(b)
+		} else {
+			jsonResult, _ := json.Marshal(result)
+			respMsg.Result = json.RawMessage(jsonResult)
+		}
 	}
 
 	if errMsg != "" {
@@ -123,8 +128,56 @@ func makeRespBody(result interface{}, errMsg string) io.ReadCloser {
 		}
 	}
 	b, _ := json.Marshal(respMsg)
-	log.Infof(string(b))
 	return ioutil.NopCloser(bytes.NewReader(b))
+}
+
+type MockBackoff struct {
+	hasRetried bool
+}
+
+func (b *MockBackoff) Reset() {}
+
+func (b *MockBackoff) NextBackOff() time.Duration {
+	b.hasRetried = true
+	return backoff.Stop
+}
+
+func TestCallWithRetry(t *testing.T) {
+	ec := newClient()
+	var raw json.RawMessage
+
+	// Test 1: connection error
+	bckoff := &MockBackoff{}
+	ctx := newContext(fmt.Errorf("test-error"), 0, nil)
+	req, _ := ec.newJSONRpcRequestWithContext(ctx, "test-endpoint", "test_method")
+	err := ec.callWithRetry(req, processResult(&raw), bckoff)
+	assert.Error(t, err, "#1 TestCallWithRetry should  error")
+	assert.True(t, bckoff.hasRetried, "#1 Should have retried")
+
+	// Test 2: not found error
+	bckoff = &MockBackoff{}
+	ctx = newContext(nil, 200, makeRespBody([]byte{}, ""))
+	req, _ = ec.newJSONRpcRequestWithContext(ctx, "test-endpoint", "test_method")
+	err = ec.callWithRetry(req, processResult(&raw), bckoff)
+	assert.Error(t, err, "#2 TestCallWithRetry should  error")
+	assert.False(t, bckoff.hasRetried, "#2 Should not have retried")
+
+	// Test 3: not found error with retry context
+	bckoff = &MockBackoff{}
+	ctx = newContext(nil, 200, makeRespBody([]byte{}, ""))
+	ctx = utils.RetryNotFoundError(ctx, true)
+	req, _ = ec.newJSONRpcRequestWithContext(ctx, "test-endpoint", "test_method")
+	err = ec.callWithRetry(req, processResult(&raw), bckoff)
+	assert.Error(t, err, "#3 TestCallWithRetry should  error")
+	assert.True(t, bckoff.hasRetried, "#3 Should have retried")
+
+	// Test 4: invalid response body
+	bckoff = &MockBackoff{}
+	ctx = newContext(nil, 200, makeRespBody([]byte(`"%@`), ""))
+	req, _ = ec.newJSONRpcRequestWithContext(ctx, "test-endpoint", "test_method")
+	err = ec.callWithRetry(req, processResult(&raw), bckoff)
+	assert.Error(t, err, "#4 TestCallWithRetry should  error")
+	assert.False(t, bckoff.hasRetried, "#4 Should not have retried")
 }
 
 func TestBlockByHash(t *testing.T) {
@@ -153,6 +206,12 @@ func TestBlockByHash(t *testing.T) {
 	_, err = ec.BlockByHash(ctx, "test-endpoint", ethcommon.HexToHash(""))
 	assert.Error(t, err, "#3 BlockByHash should error")
 	assert.True(t, errors.IsNotFoundError(err), "#3 BlockByHash error should be not found")
+
+	// Test 4: null block response
+	ctx = newContext(nil, 200, makeRespBody([]byte(`null`), ""))
+	_, err = ec.BlockByHash(ctx, "test-endpoint", ethcommon.HexToHash(""))
+	assert.Error(t, err, "#4 BlockByHash should error")
+	assert.True(t, errors.IsNotFoundError(err), "#4 BlockByHash error should be not found")
 }
 
 func TestBlockByNumber(t *testing.T) {
@@ -180,8 +239,13 @@ func TestBlockByNumber(t *testing.T) {
 	ctx = newContext(nil, 200, makeRespBody(nil, ""))
 	_, err = ec.BlockByNumber(ctx, "test-endpoint", nil)
 	assert.Error(t, err, "#3 BlockByNumber should error")
-	t.Logf("%v", err)
 	assert.True(t, errors.IsNotFoundError(err), "#3 BlockByNumber error should be not found")
+
+	// Test 4: null block response
+	ctx = newContext(nil, 200, makeRespBody([]byte(`null`), ""))
+	_, err = ec.BlockByNumber(ctx, "test-endpoint", nil)
+	assert.Error(t, err, "#4 BlockByNumber should error")
+	assert.True(t, errors.IsNotFoundError(err), "#4 BlockByNumber error should be not found")
 }
 
 func TestHeaderByHash(t *testing.T) {
@@ -206,9 +270,15 @@ func TestHeaderByHash(t *testing.T) {
 
 	// Test 3: empty response
 	ctx = newContext(nil, 200, makeRespBody(nil, ""))
-	_, err = ec.HeaderByHash(ctx, "test-endpoint", ethcommon.HexToHash(""))
+	_, err = ec.HeaderByHash(ctx, "test-endpoint", ethcommon.Hash{})
 	assert.Error(t, err, "#3 HeaderByHash should error")
 	assert.True(t, errors.IsNotFoundError(err), "#3 HeaderByHash error should be not found")
+
+	// Test 4: null block response
+	ctx = newContext(nil, 200, makeRespBody([]byte(`null`), ""))
+	_, err = ec.HeaderByHash(ctx, "test-endpoint", ethcommon.Hash{})
+	assert.Error(t, err, "#4 HeaderByHash should error")
+	assert.True(t, errors.IsNotFoundError(err), "#4 HeaderByHash error should be not found")
 }
 
 func TestHeaderByNumber(t *testing.T) {
@@ -236,6 +306,12 @@ func TestHeaderByNumber(t *testing.T) {
 	_, err = ec.HeaderByNumber(ctx, "test-endpoint", nil)
 	assert.Error(t, err, "#3 HeaderByNumber should error")
 	assert.True(t, errors.IsNotFoundError(err), "#3 HeaderByNumber error should be not found")
+
+	// Test 4: null header response
+	ctx = newContext(nil, 200, makeRespBody([]byte(`null`), ""))
+	_, err = ec.HeaderByNumber(ctx, "test-endpoint", nil)
+	assert.Error(t, err, "#4 HeaderByNumber should error")
+	assert.True(t, errors.IsNotFoundError(err), "#4 HeaderByNumber error should be not found")
 }
 
 type transactionResp struct {
@@ -315,6 +391,12 @@ func TestTransactionByHash(t *testing.T) {
 	assert.NoError(t, err, "#3 TransactionByHash should not  error")
 	assert.False(t, isPending, "#3 TransactionByHash tx should not be pending")
 	assert.Equal(t, expectedTx.Hash().Hex(), tx.Hash().Hex(), "#3 TransactionByHash tx should have correct hash")
+
+	// Test 4: null tx response
+	ctx = newContext(nil, 200, makeRespBody([]byte(`null`), ""))
+	_, _, err = ec.TransactionByHash(ctx, "test-endpoint", ethcommon.HexToHash(""))
+	assert.Error(t, err, "#4 TransactionByHash should error")
+	assert.True(t, errors.IsNotFoundError(err), "#4 TransactionByHash error should be not found")
 }
 
 type receiptResp struct {
@@ -370,6 +452,11 @@ func TestTransactionReceipt(t *testing.T) {
 	assert.NoError(t, err, "#2 TransactionReceipt should not  error")
 	assert.Equal(t, expectedReceipt.CumulativeGasUsed, receipt.CumulativeGasUsed, "#2 TransactionReceipt receipt should have correct cumulative gas used")
 
+	// Test 3: null receipt response
+	ctx = newContext(nil, 200, makeRespBody([]byte(`null`), ""))
+	_, err = ec.TransactionReceipt(ctx, "test-endpoint", ethcommon.HexToHash(""))
+	assert.Error(t, err, "#4 TransactionReceipt should error")
+	assert.True(t, errors.IsNotFoundError(err), "#4 TransactionReceipt error should be not found")
 }
 
 func TestSyncProgress(t *testing.T) {
@@ -633,110 +720,3 @@ func TestSendRawPrivateTransaction(t *testing.T) {
 	_, err := ec.SendRawPrivateTransaction(ctx, "test-endpoint", nil, &types.PrivateArgs{})
 	assert.Error(t, err, "#1 SendRawPrivateTransaction should  error")
 }
-
-// const chainID = 888
-
-// var chainIDBigInt = big.NewInt(int64(chainID))
-
-// var errTest = fmt.Errorf("test error")
-// var privateArgs = &types.PrivateArgs{
-// 	PrivateFrom:   "0x01",
-// 	PrivateFor:    []string{"0x02"},
-// 	PrivateTxType: "abc",
-// }
-
-// var expectedPrivateForArg = map[string]interface{}{
-// 	"privateFor": privateArgs.PrivateFor,
-// }
-
-// var ctx, _ = context.WithCancel(context.Background())
-// var gethClient *Client
-// var ctrl *gomock.Controller
-// var mockRPCClient *mocks.MockClient
-
-// func setupTest(t *testing.T) {
-// 	ctrl = gomock.NewController(t)
-// 	gethClient = NewClient(&geth.Config{})
-// 	mockRPCClient = mocks.NewMockClient(ctrl)
-// }
-
-// func TestQuorumRawPrivateTransaction(t *testing.T) {
-// 	setupTest(t)
-// 	defer ctrl.Finish()
-
-// 	setMockClient(mockRPCClient)
-// 	mockRPCClient.
-// 		EXPECT().
-// 		CallContext(ctx, gomock.Any(), "eth_sendRawPrivateTransaction", "0x010203", expectedPrivateForArg).
-// 		Return(nil).
-// 		SetArg(1, "0x1234").
-// 		Times(1)
-
-// 	hash, err := gethClient.SendQuorumRawPrivateTransaction(ctx, chainIDBigInt, []byte{1, 2, 3}, privateArgs.PrivateFor)
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, ethcommon.HexToHash("0x1234"), hash)
-// }
-
-// func TestQuorumRawPrivateTransactionWhenRPCCallFails(t *testing.T) {
-// 	setupTest(t)
-// 	defer ctrl.Finish()
-
-// 	setMockClient(mockRPCClient)
-// 	mockRPCClient.
-// 		EXPECT().
-// 		CallContext(ctx, gomock.Any(), "eth_sendRawPrivateTransaction", "0x010203", expectedPrivateForArg).
-// 		Return(errTest).
-// 		Times(1)
-
-// 	hash, err := gethClient.SendQuorumRawPrivateTransaction(ctx, chainIDBigInt, []byte{1, 2, 3}, privateArgs.PrivateFor)
-// 	assert.Error(t, err, errTest.Error())
-// 	assert.Equal(t, ethcommon.HexToHash("0x0"), hash)
-// }
-
-// func TestSendRawPrivateTransaction(t *testing.T) {
-// 	setupTest(t)
-// 	defer ctrl.Finish()
-
-// 	setMockClient(mockRPCClient)
-// 	mockRPCClient.
-// 		EXPECT().
-// 		CallContext(ctx, gomock.Any(), "eea_sendRawTransaction", "0x010203").
-// 		Return(nil).
-// 		SetArg(1, "0x1234").
-// 		Times(1)
-
-// 	hash, err := gethClient.SendRawPrivateTransaction(ctx, chainIDBigInt, []byte{1, 2, 3}, privateArgs)
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, ethcommon.HexToHash("0x1234"), hash)
-// }
-
-// func TestSendRawPrivateTransactionWhenRPCCallFails(t *testing.T) {
-// 	setupTest(t)
-// 	defer ctrl.Finish()
-
-// 	setMockClient(mockRPCClient)
-// 	mockRPCClient.
-// 		EXPECT().
-// 		CallContext(ctx, gomock.Any(), "eea_sendRawTransaction", "0x010203").
-// 		Return(errTest).
-// 		Times(1)
-
-// 	hash, err := gethClient.SendRawPrivateTransaction(ctx, chainIDBigInt, []byte{1, 2, 3}, privateArgs)
-// 	assert.Error(t, err, errTest.Error())
-// 	assert.Equal(t, ethcommon.HexToHash("0x0"), hash)
-// }
-
-// func TestReturnErrorIfCannotGetRPC(t *testing.T) {
-// 	setupTest(t)
-// 	defer ctrl.Finish()
-
-// 	hash, err := gethClient.SendRawPrivateTransaction(ctx, chainIDBigInt, []byte{1, 2, 3}, privateArgs)
-// 	e := errors.FromError(err)
-// 	assert.Equal(t, "no RPC connection registered for chain \"888\"", e.GetMessage(), "Error message should be correct")
-// 	assert.Equal(t, "08300", e.Hex(), "Error hex code should be correct")
-// 	assert.Equal(t, ethcommon.HexToHash("0x0"), hash)
-// }
-
-// func setMockClient(mockClient *mocks.MockClient) {
-// 	gethClient.rpcs[strconv.Itoa(chainID)] = mockClient
-// }

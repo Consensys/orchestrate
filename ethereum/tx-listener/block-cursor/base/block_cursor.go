@@ -6,10 +6,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/ethereum/go-ethereum/common"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/logger"
+	ethclientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/utils"
 	tiptracker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tx-listener/tip-tracker"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -119,6 +120,8 @@ func (bc *BlockCursor) feeder() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	logCtx := log.With(ctx, log.Str("chain.id", bc.t.ChainID().Text(10)))
+
 	// We trigger to start listener
 	bc.trig()
 feedingLoop:
@@ -131,7 +134,7 @@ feedingLoop:
 		case <-bc.trigger:
 			if bc.blockNumber <= bc.currentHead {
 				// We are behind chain head meaning we have at least one block to fetch
-				bc.blockFutures <- bc.fetchBlock(ctx, bc.blockNumber)
+				bc.blockFutures <- bc.fetchBlock(logCtx, bc.blockNumber)
 
 				// Increment block position
 				bc.blockNumber++
@@ -140,10 +143,8 @@ feedingLoop:
 				bc.trig()
 			} else {
 				// We are ahead of chain head so we refresh chain head
-				head, err := bc.t.HighestBlock(ctx)
-				log.WithFields(log.Fields{
-					"number": head,
-				}).Tracef("tx-listener: highest block")
+				head, err := bc.t.HighestBlock(logCtx)
+				log.FromContext(logCtx).WithField("number", head).Tracef("tx-listener: highest block")
 				if head > bc.currentHead {
 					// Chain has moved forward (meaning at least one new final block is ready to be fetched)
 					bc.currentHead = head
@@ -177,22 +178,20 @@ feedingLoop:
 func (bc *BlockCursor) fetchBlock(ctx context.Context, blockNumber int64) *types.Future {
 	bFuture := types.NewFuture()
 
-	log.WithFields(log.Fields{
-		"block.number": blockNumber,
-	}).Tracef("tx-listener: fetch block")
+	logCtx := log.With(ctx, func(fields logrus.Fields) { fields["block.number"] = blockNumber })
+
+	log.FromContext(logCtx).(logrus.Ext1FieldLogger).Tracef("tx-listener: fetch block")
+
 	// Retrieve block in a separate goroutine
 	go func() {
 		defer bFuture.Close()
-		logCtx := logger.WithLogEntry(
-			ctx,
-			log.NewEntry(log.StandardLogger()).
-				WithFields(log.Fields{
-					"chain.id": bc.ChainID().Text(10),
-				}),
+		block, err := bc.ec.BlockByNumber(
+			ethclientutils.RetryNotFoundError(logCtx, true),
+			bc.ChainID(),
+			big.NewInt(blockNumber),
 		)
-
-		block, err := bc.ec.BlockByNumber(logCtx, bc.ChainID(), big.NewInt(blockNumber))
 		if err != nil {
+			log.FromContext(logCtx).WithError(err).Errorf("tx-listener: failed to retrieve block")
 			bFuture.Err() <- &types.TxListenerError{
 				ChainID: bc.ChainID(),
 				Err:     errors.FromError(err).ExtendComponent(component),
@@ -218,7 +217,7 @@ func (bc *BlockCursor) fetchBlock(ctx context.Context, blockNumber int64) *types
 		// Retrieve receipts in separate go-routines
 		var rFutures []*types.Future
 		for _, tx := range bl.Block.Transactions() {
-			rFutures = append(rFutures, bc.fetchReceipt(ctx, tx.Hash()))
+			rFutures = append(rFutures, bc.fetchReceipt(logCtx, tx.Hash()))
 		}
 
 		for i, rFuture := range rFutures {
@@ -249,19 +248,15 @@ func (bc *BlockCursor) fetchBlock(ctx context.Context, blockNumber int64) *types
 func (bc *BlockCursor) fetchReceipt(ctx context.Context, txHash common.Hash) *types.Future {
 	future := types.NewFuture()
 
-	log.WithFields(log.Fields{
-		"tx.hash": txHash.Hex(),
-	}).Tracef("tx-listener: fetch receipt")
+	logCtx := log.With(ctx, log.Str("tx.hash", txHash.Hex()))
+	log.FromContext(logCtx).(logrus.Ext1FieldLogger).Tracef("tx-listener: fetch receipt")
 	go func() {
 		defer future.Close()
-		logCtx := logger.WithLogEntry(
-			ctx,
-			log.NewEntry(log.StandardLogger()).
-				WithFields(log.Fields{
-					"chain.id": bc.ChainID().Text(10),
-				}),
+		receipt, err := bc.ec.TransactionReceipt(
+			ethclientutils.RetryNotFoundError(logCtx, true),
+			bc.ChainID(),
+			txHash,
 		)
-		receipt, err := bc.ec.TransactionReceipt(logCtx, bc.ChainID(), txHash)
 		if err != nil {
 			future.Err() <- &types.TxListenerError{
 				ChainID: bc.ChainID(),

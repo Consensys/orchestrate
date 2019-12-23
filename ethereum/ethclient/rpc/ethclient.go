@@ -32,7 +32,7 @@ func NewClient(conf *Config) *Client {
 func (ec *Client) Dial(ctx context.Context, rawurl string) (*big.Int, error) {
 	// Retrieve network version
 	var version string
-	if err := ec.clientV2.Call(ctx, rawurl, &version, "net_version"); err != nil {
+	if err := ec.clientV2.Call(ctx, rawurl, processResult(&version), "net_version"); err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
@@ -113,7 +113,7 @@ func (ec *Client) Networks(ctx context.Context) (networks []*big.Int) {
 	for _, url := range ec.urls {
 		// Retrieve network version
 		var version string
-		if err := ec.clientV2.Call(ctx, url, &version, "net_version"); err != nil {
+		if err := ec.clientV2.Call(ctx, url, processResult(&version), "net_version"); err != nil {
 			continue
 		}
 
