@@ -108,6 +108,8 @@ func (ec *ClientV2) callWithRetry(req *http.Request, processResult func(result j
 		},
 		bckoff,
 		func(e error, duration time.Duration) {
+			// Reset body before retrying
+			req.Body, _ = req.GetBody()
 			log.FromContext(req.Context()).
 				WithError(e).
 				Warnf("eth-client: JSON-RPC call failed, retrying in %v...", duration)

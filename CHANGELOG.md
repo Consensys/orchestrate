@@ -17,6 +17,12 @@ All notable changes to this project will be documented in this file.
     * `AUTH_SERVICE_CERTIFICATE` to provision trusted certificate of the service who generate ID/Access Token (authentication service). 
     * `TENANT_NAMESPACE` to provision tenant namespace to retrieve the tenant id in the OpenId or Access Token (JWT). 
     
+## v1.2.1 (2019-12-23)
+
+### 🛠 Bug fixes
+
+* Upgrade retry policy when getting `NotFoundError` on JSON-RPC request. In particular it allows the transaction listener to effectively handle Infura endpoint that have sync discrepancies.
+
 ## v1.2.0 (2019-20-13)
 
 ### 🆕 Features
