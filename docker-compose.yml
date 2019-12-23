@@ -15,6 +15,9 @@ x-default-variables: &default-variables
   VAULT_ADDR: ${VAULT_ADDR-http://vault:8200}
   # FAUCET_CREDITOR_ADDRESS: ${FAUCET_CREDITOR_ADDRESS-0x93f7274c9059e601be4512f656b57b830e019e41}@${GETH_NETWORKID-888}
   ABI: ${ABI-}
+  MULTI_TENANCY_ENABLED: ${MULTI_TENANCY_ENABLED-false}
+  TENANT_NAMESPACE: ${TENANT_NAMESPACE-http://tenant.info/}
+  AUTH_SERVICE_CERTIFICATE: ${AUTH_SERVICE_CERTIFICATE-}
 
 x-container-common: &container-common
   image: golang:1.13
