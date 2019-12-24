@@ -1,4 +1,4 @@
-package nodes
+package chainregistry
 
 import (
 	"fmt"
@@ -18,15 +18,15 @@ func Flags(f *pflag.FlagSet) {
 }
 
 const (
-	providerRefreshIntervalFlag     = "provider-nodes-refresh-interval"
-	ProviderRefreshIntervalViperKey = "provider.nodes.refresh-interval"
-	providerRefreshIntervalDefault  = 1 * time.Second
-	providerRefreshIntervalEnv      = "PROVIDER_NODES_REFRESH_INTERVAL"
+	providerRefreshIntervalFlag     = "provider-refresh-interval"
+	ProviderRefreshIntervalViperKey = "provider.refresh-interval"
+	providerRefreshIntervalDefault  = 5 * time.Second
+	providerRefreshIntervalEnv      = "PROVIDER_REFRESH_INTERVAL"
 )
 
 // ProviderRefreshInterval register flag for refresh interval duration
 func ProviderRefreshInterval(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Time interval for refreshing the configuration from storage
+	desc := fmt.Sprintf(`Time interval for refreshing the configuration from the chain-registry
 Environment variable: %q`, providerRefreshIntervalEnv)
 	f.Duration(providerRefreshIntervalFlag, providerRefreshIntervalDefault, desc)
 	_ = viper.BindPFlag(ProviderRefreshIntervalViperKey, f.Lookup(providerRefreshIntervalFlag))

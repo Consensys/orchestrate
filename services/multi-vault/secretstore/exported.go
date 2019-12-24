@@ -52,7 +52,6 @@ func Init(ctx context.Context) {
 		}
 
 		log.Infof("Secret Store: %q ready", viper.GetString(secretStoreViperKey))
-
 	})
 }
 

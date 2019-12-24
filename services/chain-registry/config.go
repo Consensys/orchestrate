@@ -15,10 +15,10 @@ import (
 const DefaultInternalEntryPointName = "orchestrate"
 
 func init() {
-	viper.SetDefault(ChainProxyAddressViperKey, chainProxyAddressDefault)
-	_ = viper.BindEnv(ChainProxyAddressViperKey, chainProxyAddressEnv)
-	viper.SetDefault(ChainRegistryAddressViperKey, chainRegistryAddressDefault)
-	_ = viper.BindEnv(ChainRegistryAddressViperKey, chainRegistryAddressEnv)
+	viper.SetDefault(ProxyAddressViperKey, proxyAddressDefault)
+	_ = viper.BindEnv(ProxyAddressViperKey, proxyAddressEnv)
+	viper.SetDefault(AddressViperKey, addressDefault)
+	_ = viper.BindEnv(AddressViperKey, addressEnv)
 	viper.SetDefault(ProvidersThrottleDurationViperKey, providersThrottleDurationDefault)
 	_ = viper.BindEnv(ProvidersThrottleDurationViperKey, providersThrottleDurationEnv)
 }
@@ -30,33 +30,33 @@ func Flags(f *pflag.FlagSet) {
 }
 
 const (
-	chainProxyAddressFlag     = "chain-proxy-addr"
-	ChainProxyAddressViperKey = "chain.proxy.addr"
-	chainProxyAddressDefault  = ":80"
-	chainProxyAddressEnv      = "CHAIN_PROXY_ADDRESS"
+	proxyAddressFlag     = "chain-proxy-addr"
+	ProxyAddressViperKey = "chain.proxy.addr"
+	proxyAddressDefault  = ":80"
+	proxyAddressEnv      = "CHAIN_PROXY_ADDRESS"
 )
 
 // ProxyAddress register flag for chain proxy address
 func ProxyAddress(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Address to expose Chain-Registry Proxy to blockchain nodes
-Environment variable: %q`, chainProxyAddressEnv)
-	f.String(chainProxyAddressFlag, chainProxyAddressDefault, desc)
-	_ = viper.BindPFlag(ChainProxyAddressViperKey, f.Lookup(chainProxyAddressFlag))
+Environment variable: %q`, proxyAddressEnv)
+	f.String(proxyAddressFlag, proxyAddressDefault, desc)
+	_ = viper.BindPFlag(ProxyAddressViperKey, f.Lookup(proxyAddressFlag))
 }
 
 const (
-	chainRegistryAddressFlag     = "chain-registry-addr"
-	ChainRegistryAddressViperKey = "chain.registry.addr"
-	chainRegistryAddressDefault  = ":81"
-	chainRegistryAddressEnv      = "CHAIN_REGISTRY_ADDRESS"
+	addressFlag     = "chain-registry-addr"
+	AddressViperKey = "chain.registry.addr"
+	addressDefault  = ":81"
+	addressEnv      = "CHAIN_REGISTRY_ADDRESS"
 )
 
 // RegistryAddress register flag for chain proxy address
 func RegistryAddress(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Address to expose Chain-Registry Registry to blockchain nodes
-Environment variable: %q`, chainRegistryAddressEnv)
-	f.String(chainRegistryAddressFlag, chainRegistryAddressDefault, desc)
-	_ = viper.BindPFlag(ChainRegistryAddressViperKey, f.Lookup(chainRegistryAddressFlag))
+Environment variable: %q`, addressEnv)
+	f.String(addressFlag, addressDefault, desc)
+	_ = viper.BindPFlag(AddressViperKey, f.Lookup(addressFlag))
 }
 
 const (
@@ -76,12 +76,12 @@ Environment variable: %q`, providersThrottleDurationEnv)
 
 func NewConfig() *static.Configuration {
 	orchestrateEp := &static.EntryPoint{
-		Address: viper.GetString(ChainRegistryAddressViperKey),
+		Address: viper.GetString(AddressViperKey),
 	}
 	orchestrateEp.SetDefaults()
 
 	httpEp := &static.EntryPoint{
-		Address: viper.GetString(ChainProxyAddressViperKey),
+		Address: viper.GetString(ProxyAddressViperKey),
 	}
 	httpEp.SetDefaults()
 	httpEp.ProxyProtocol = &static.ProxyProtocol{

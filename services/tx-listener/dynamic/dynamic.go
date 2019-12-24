@@ -1,6 +1,8 @@
 package dynamic
 
 import (
+	"time"
+
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -14,8 +16,9 @@ type Configuration struct {
 }
 
 type Listener struct {
-	BlockPosition uint64
-	Depth         uint64
+	BlockPosition   uint64
+	Depth           uint64
+	BackOffDuration time.Duration
 }
 
 type Node struct {

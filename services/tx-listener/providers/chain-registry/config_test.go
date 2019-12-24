@@ -1,4 +1,4 @@
-package nodes
+package chainregistry
 
 import (
 	"os"
@@ -13,17 +13,16 @@ import (
 func TestProviderRefreshInterval(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	ProviderRefreshInterval(flgs)
-
-	expected := time.Second
+	expected := 5 * time.Second
 	assert.Equal(t, expected, viper.GetDuration(ProviderRefreshIntervalViperKey), "Default")
 
-	_ = os.Setenv("PROVIDER_NODES_REFRESH_INTERVAL", "30s")
+	_ = os.Setenv("PROVIDER_REFRESH_INTERVAL", "30s")
 	expected = 30 * time.Second
 	assert.Equal(t, expected, viper.GetDuration(ProviderRefreshIntervalViperKey), "From Environment Variable")
-	_ = os.Unsetenv("PROVIDER_NODES_REFRESH_INTERVAL")
+	_ = os.Unsetenv("PROVIDER_REFRESH_INTERVAL")
 
 	args := []string{
-		"--provider-nodes-refresh-interval=36s",
+		"--provider-refresh-interval=36s",
 	}
 	err := flgs.Parse(args)
 	assert.Nil(t, err)
