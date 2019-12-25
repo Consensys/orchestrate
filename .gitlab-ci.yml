@@ -141,9 +141,7 @@ release-orchestrate:
 build-e2e-on-branch:
   <<: *docker-setup
   script:
-    - *build-orchestrate
-  after_script:
-    - docker logout $CI_REGISTRY
+    - *build-e2e
   only:
     - /^dev\/[a-zA-Z0-9\/\-.]*$/
     - /^feature\/[a-zA-Z0-9\/\-.]*$/
@@ -157,8 +155,6 @@ build-e2e-on-master:
     - *build-e2e
     - docker tag ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}/e2e:latest
     - docker push ${CI_REGISTRY_IMAGE}/e2e:latest
-  after_script:
-    - docker logout $CI_REGISTRY
   only:
     - master
 
