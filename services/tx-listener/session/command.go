@@ -1,6 +1,8 @@
 package session
 
 import (
+	"reflect"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 )
 
@@ -18,9 +20,36 @@ type Command struct {
 }
 
 func CompareConfiguration(oldConfig, newConfig *dynamic.Configuration) []*Command {
-	var commands []*Command
-	for _, node := range newConfig.Nodes {
-		commands = append(commands, &Command{Type: START, Node: node})
+	commands := make([]*Command, 0)
+
+	for k, v := range newConfig.Nodes {
+		if oldConfig.Nodes[k] == nil {
+			command := &Command{
+				Type: START,
+				Node: v,
+			}
+			commands = append(commands, command)
+		}
 	}
+
+	for k, v := range oldConfig.Nodes {
+		if newConfig.Nodes[k] == nil {
+			command := &Command{
+				Type: STOP,
+				Node: v,
+			}
+			commands = append(commands, command)
+			continue
+		}
+
+		if !reflect.DeepEqual(newConfig.Nodes[k], oldConfig.Nodes[k]) {
+			command := &Command{
+				Type: UPDATE,
+				Node: newConfig.Nodes[k],
+			}
+			commands = append(commands, command)
+		}
+	}
+
 	return commands
 }
