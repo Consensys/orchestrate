@@ -17,6 +17,7 @@ type OffsetManagerTestSuite struct {
 
 func (s *OffsetManagerTestSuite) TestManagerLastBlock() {
 	node := &dynamic.Node{
+
 		ID: "test-node",
 		Listener: &dynamic.Listener{
 			BlockPosition: 10,
@@ -25,7 +26,7 @@ func (s *OffsetManagerTestSuite) TestManagerLastBlock() {
 
 	lastBlockNumber, err := s.Manager.GetLastBlockNumber(context.Background(), node)
 	assert.Nil(s.T(), err, "GetLastBlockNumber should not error")
-	assert.Equal(s.T(), uint64(10), lastBlockNumber, "Lastblock should be correct")
+	assert.Equal(s.T(), uint64(0), lastBlockNumber, "Lastblock should be correct")
 
 	err = s.Manager.SetLastBlockNumber(context.Background(), node, 12)
 	assert.Nil(s.T(), err, "SetLastBlockNumber should not error")

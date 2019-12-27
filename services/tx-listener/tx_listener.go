@@ -12,12 +12,12 @@ import (
 )
 
 type TxListener struct {
-	manager *session.Manager
+	manager session.SManager
 }
 
-func NewTxListener(prvdr provider.Provider, hk hook.Hook, offsets offset.Manager) *TxListener {
+func NewTxListener(prvdr provider.Provider, hk hook.Hook, offsets offset.Manager, ec ethereum.EthClient) *TxListener {
 	manager := session.NewManager(
-		ethereum.NewSessionBuilder(hk, offsets),
+		ethereum.NewSessionBuilder(hk, offsets, ec),
 		prvdr,
 	)
 	return &TxListener{

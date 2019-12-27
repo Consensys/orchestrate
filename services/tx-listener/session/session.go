@@ -13,3 +13,7 @@ type Session interface {
 type Builder interface {
 	NewSession(node *dynamic.Node) (Session, error)
 }
+
+type SManager interface {
+	Start(ctx context.Context)
+}

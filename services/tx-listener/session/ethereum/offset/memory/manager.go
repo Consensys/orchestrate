@@ -25,7 +25,7 @@ func (m *Manager) GetLastBlockNumber(ctx context.Context, node *dynamic.Node) (u
 	defer m.mux.Unlock()
 	blockNumber, ok := m.cache[fmt.Sprintf("blockNumber-%v", node.ID)]
 	if !ok {
-		return node.Listener.BlockPosition, nil
+		return 0, nil
 	}
 	return blockNumber, nil
 }

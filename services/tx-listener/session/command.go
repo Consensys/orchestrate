@@ -9,6 +9,7 @@ type Type int
 const (
 	START Type = iota
 	STOP
+	UPDATE
 )
 
 type Command struct {
@@ -17,5 +18,9 @@ type Command struct {
 }
 
 func CompareConfiguration(oldConfig, newConfig *dynamic.Configuration) []*Command {
-	return []*Command{}
+	var commands []*Command
+	for _, node := range newConfig.Nodes {
+		commands = append(commands, &Command{Type: START, Node: node})
+	}
+	return commands
 }

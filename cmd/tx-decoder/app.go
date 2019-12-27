@@ -2,7 +2,6 @@ package txdecoder
 
 import (
 	"context"
-	"fmt"
 	"sync"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
@@ -106,14 +105,6 @@ func Start(ctx context.Context) {
 		// Initialize ConsumerGroup
 		initComponents(cancelCtx)
 
-		// Initialize Topics list by chain
-		var topics []string
-		for _, chainID := range rpc.GlobalClient().Networks(context.Background()) {
-			topics = append(topics, fmt.Sprintf("%v-%v", viper.GetString(broker.TxDecoderViperKey), chainID.String()))
-		}
-
-		log.Infof("Connecting to the following Kafka topics %v", topics)
-
 		// Indicate that application is ready
 		// TODO: we need to update so SetReady can be called when Consume has finished to Setup
 		app.SetReady(true)
@@ -121,7 +112,7 @@ func Start(ctx context.Context) {
 		// Start consuming on topic tx-decoder
 		err := broker.Consume(
 			cancelCtx,
-			topics,
+			[]string{viper.GetString(broker.TxDecoderViperKey)},
 			broker.NewEngineConsumerGroupHandler(engine.GlobalEngine()),
 		)
 		if err != nil {

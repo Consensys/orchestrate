@@ -104,7 +104,7 @@ type GasPricerV2 interface {
 
 // ChainSyncReaderV2 is a service to access to the node's current sync status
 type ChainSyncReaderV2 interface {
-	Networks(ctx context.Context) []*big.Int
+	Network(ctx context.Context, url string) (*big.Int, error)
 	SyncProgress(ctx context.Context, url string) (*eth.SyncProgress, error)
 }
 

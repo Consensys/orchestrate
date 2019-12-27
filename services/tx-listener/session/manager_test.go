@@ -2,11 +2,18 @@ package session
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
+)
+
+const (
+	keyError = "error"
 )
 
 type MockSession struct {
@@ -20,6 +27,10 @@ func NewMockSession() *MockSession {
 }
 
 func (s *MockSession) Run(ctx context.Context) error {
+	if ctx.Value(keyError) != nil {
+		return fmt.Errorf("test")
+	}
+
 	<-ctx.Done()
 	// Simulate some latency before finishing
 	time.Sleep(50 * time.Millisecond)
@@ -33,6 +44,10 @@ type MockBuilder struct {
 }
 
 func (b *MockBuilder) NewSession(node *dynamic.Node) (Session, error) {
+	if node.ID == keyError {
+		return nil, fmt.Errorf("test")
+	}
+
 	return b.getSession(node.ID), nil
 }
 
@@ -55,6 +70,9 @@ func (b *MockBuilder) getSession(key string) *MockSession {
 type MockProvider struct{}
 
 func (p *MockProvider) Run(ctx context.Context, configInput chan<- *dynamic.Message) error {
+	if ctx.Value(keyError) != nil {
+		return fmt.Errorf("test")
+	}
 	<-ctx.Done()
 	return nil
 }
@@ -127,4 +145,91 @@ func TestManager(t *testing.T) {
 		t.Errorf("Session 2 did not complete")
 	case <-session2.hasRan:
 	}
+}
+
+func TestErrors(t *testing.T) {
+	provider := &MockProvider{}
+	builder := &MockBuilder{
+		mux:      &sync.Mutex{},
+		sessions: make(map[string]*MockSession),
+	}
+	manager := NewManager(builder, provider)
+	err := fmt.Errorf("test")
+	go func() {
+		manager.errors <- err
+	}()
+
+	assert.Equal(t, err, <-manager.Errors(), "should get error")
+}
+
+func TestListenProvider(t *testing.T) {
+	provider := &MockProvider{}
+	builder := &MockBuilder{
+		mux:      &sync.Mutex{},
+		sessions: make(map[string]*MockSession),
+	}
+	manager := NewManager(builder, provider)
+
+	ctx := context.WithValue(context.Background(), keyError, true) // nolint
+	go func() {
+		manager.listenProvider(ctx)
+	}()
+
+	assert.Error(t, <-manager.Errors(), "should get error")
+}
+
+func TestListenConfiguration(t *testing.T) {
+	provider := &MockProvider{}
+	builder := &MockBuilder{
+		mux:      &sync.Mutex{},
+		sessions: make(map[string]*MockSession),
+	}
+	manager := NewManager(builder, provider)
+	node1 := &dynamic.Node{ID: "test"}
+
+	go func() {
+		manager.msgInput <- &dynamic.Message{
+			Provider: "test",
+			Configuration: &dynamic.Configuration{Nodes: map[string]*dynamic.Node{
+				"test": node1,
+			}},
+		}
+	}()
+	go func() { manager.listenConfiguration() }()
+	cmd := <-manager.commands
+	assert.Equal(t, cmd.Type, START, "should get start command")
+	assert.Equal(t, cmd.Node, node1, "should get start command")
+}
+
+func TestExecuteCommand(t *testing.T) {
+	provider := &MockProvider{}
+	builder := &MockBuilder{
+		mux:      &sync.Mutex{},
+		sessions: make(map[string]*MockSession),
+	}
+	manager := NewManager(builder, provider)
+
+	cmd := &Command{
+		Type: UPDATE,
+		Node: &dynamic.Node{ID: "test", TenantID: "test", Name: "test"},
+	}
+	manager.executeCommand(context.Background(), cmd)
+}
+
+func TestRunSession(t *testing.T) {
+	provider := &MockProvider{}
+	builder := &MockBuilder{
+		mux:      &sync.Mutex{},
+		sessions: make(map[string]*MockSession),
+	}
+	manager := NewManager(builder, provider)
+
+	node := &dynamic.Node{ID: keyError}
+	ctx := context.WithValue(context.Background(), keyError, true) // nolint
+
+	go func() {
+		manager.runSession(ctx, node)
+	}()
+
+	assert.Error(t, <-manager.Errors(), "should get error")
 }

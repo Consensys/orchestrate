@@ -23,7 +23,7 @@ type Node struct {
 	CreatedAt               *time.Time `json:"createdAt,omitempty"`
 	UpdatedAt               *time.Time `json:"updatedAt,omitempty"`
 	ListenerDepth           uint64     `json:"listenerDepth,omitempty"`
-	ListenerBlockPosition   uint64     `json:"listenerBlockPosition,string,omitempty"`
+	ListenerBlockPosition   int64      `json:"listenerBlockPosition,string,omitempty"`
 	ListenerFromBlock       int64      `json:"listenerFromBlock,string,omitempty"`
 	ListenerBackOffDuration string     `json:"listenerBackOffDuration,omitempty"`
 }

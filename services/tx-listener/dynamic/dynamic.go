@@ -1,6 +1,7 @@
 package dynamic
 
 import (
+	"math/big"
 	"time"
 
 	uuid "github.com/satori/go.uuid"
@@ -16,9 +17,9 @@ type Configuration struct {
 }
 
 type Listener struct {
-	BlockPosition   uint64
-	Depth           uint64
-	BackOffDuration time.Duration
+	BlockPosition int64
+	Depth         uint64
+	Backoff       time.Duration
 }
 
 type Node struct {
@@ -26,6 +27,7 @@ type Node struct {
 	TenantID string
 	Name     string
 	URL      string
+	ChainID  *big.Int
 
 	Listener *Listener
 

@@ -4,7 +4,9 @@ import (
 	"context"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
+	provider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/providers/listener-v1"
 	kafkahook "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/hooks/kafka"
 	memoryoffset "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/offset/memory"
 )
@@ -30,8 +32,15 @@ func Init(ctx context.Context) {
 
 		kafkahook.Init(ctx)
 		memoryoffset.Init(ctx)
+		rpc.Init(ctx)
+		provider.Init(ctx)
 
-		listener = NewTxListener(&NullProvider{}, kafkahook.GlobalHook(), memoryoffset.GlobalManager())
+		listener = NewTxListener(
+			provider.GlobalProvider(),
+			kafkahook.GlobalHook(),
+			memoryoffset.GlobalManager(),
+			rpc.GlobalClientV2(),
+		)
 	})
 }
 

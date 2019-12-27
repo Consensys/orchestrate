@@ -21,11 +21,11 @@ type Client struct {
 }
 
 // NewClient creates a new MultiClient
-func NewClient(conf *Config) *Client {
+func NewClient(clientV2 *ClientV2) *Client {
 	return &Client{
 		mux:      &sync.RWMutex{},
 		urls:     make(map[string]string),
-		clientV2: NewClientV2(conf),
+		clientV2: clientV2,
 	}
 }
 
@@ -111,14 +111,8 @@ func (ec *Client) Networks(ctx context.Context) (networks []*big.Int) {
 	ec.mux.RLock()
 	defer ec.mux.RUnlock()
 	for _, url := range ec.urls {
-		// Retrieve network version
-		var version string
-		if err := ec.clientV2.Call(ctx, url, processResult(&version), "net_version"); err != nil {
-			continue
-		}
-
-		chain, ok := big.NewInt(0).SetString(version, 10)
-		if !ok {
+		chain, err := ec.clientV2.Network(ctx, url)
+		if err != nil {
 			continue
 		}
 

@@ -720,3 +720,23 @@ func TestSendRawPrivateTransaction(t *testing.T) {
 	_, err := ec.SendRawPrivateTransaction(ctx, "test-endpoint", nil, &types.PrivateArgs{})
 	assert.Error(t, err, "#1 SendRawPrivateTransaction should  error")
 }
+
+func TestNetwork(t *testing.T) {
+	ec := newClient()
+
+	// Test 1 with Error
+	ctx := newContext(fmt.Errorf("test-error"), 0, nil)
+	_, err := ec.Network(ctx, "test-endpoint")
+	assert.Error(t, err, "#1 Network should  error")
+
+	// Test 2 without error
+	ctx = newContext(nil, 200, makeRespBody("1234", ""))
+	chain, err := ec.Network(ctx, "test-endpoint")
+	assert.NoError(t, err, "#2 Network should not error")
+	assert.Equal(t, uint64(1234), chain.Uint64(), "#2 Chain id should match")
+
+	// Test 3 without encoding format
+	ctx = newContext(nil, 200, makeRespBody("%/", ""))
+	_, err = ec.Network(ctx, "test-endpoint")
+	assert.Error(t, err, "#3 Network should error")
+}

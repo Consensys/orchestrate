@@ -12,7 +12,7 @@ type NodeRequest struct {
 	Name                    string   `json:"name,omitempty"`
 	URLs                    []string `json:"urls,omitempty" sql:"urls,array"`
 	ListenerDepth           uint64   `json:"listenerDepth,omitempty"`
-	ListenerBlockPosition   uint64   `json:"listenerBlockPosition,string,omitempty"`
+	ListenerBlockPosition   int64    `json:"listenerBlockPosition,string,omitempty"`
 	ListenerFromBlock       int64    `json:"listenerFromBlock,string,omitempty"`
 	ListenerBackOffDuration string   `json:"listenerBackOffDuration,omitempty"`
 }

@@ -470,6 +470,21 @@ func (ec *ClientV2) SyncProgress(ctx context.Context, endpoint string) (*eth.Syn
 	}, nil
 }
 
+// SendRawPrivateTransaction send a raw transaction to an Ethereum node supporting EEA extension
+func (ec *ClientV2) Network(ctx context.Context, endpoint string) (*big.Int, error) {
+	var version string
+	if err := ec.Call(ctx, endpoint, processResult(&version), "net_version"); err != nil {
+		return nil, err
+	}
+
+	chain, ok := big.NewInt(0).SetString(version, 10)
+	if !ok {
+		return nil, errors.EncodingError("invalid network id %q", version)
+	}
+
+	return chain, nil
+}
+
 // State Access
 
 // BalanceAt returns the wei balance of the given account.

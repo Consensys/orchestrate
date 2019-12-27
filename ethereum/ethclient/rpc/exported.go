@@ -12,6 +12,7 @@ const component = "ethclient.rpc"
 
 var (
 	client   *Client
+	clientV2 *ClientV2
 	config   *Config
 	initOnce = &sync.Once{}
 )
@@ -26,13 +27,15 @@ func Init(ctx context.Context) {
 			config = NewConfig()
 		}
 
-		client = NewClient(config)
+		// Set Client
+		clientV2 = NewClientV2(config)
+		client = NewClient(clientV2)
 
-		rpcUrls := viper.GetStringSlice(urlViperKey)
+		rpcUrls := viper.GetStringSlice(URLViperKey)
 		log.Infof("Connecting to %d RPC URLs", len(rpcUrls))
 
 		var chains []string
-		for _, url := range viper.GetStringSlice(urlViperKey) {
+		for _, url := range viper.GetStringSlice(URLViperKey) {
 			chainID, err := client.Dial(ctx, url)
 			if err != nil {
 				log.WithError(err).WithFields(log.Fields{
@@ -54,6 +57,11 @@ func Init(ctx context.Context) {
 // GlobalClient returns global Client
 func GlobalClient() *Client {
 	return client
+}
+
+// GlobalClient returns global Client
+func GlobalClientV2() *ClientV2 {
+	return clientV2
 }
 
 // SetGlobalClient sets global Client

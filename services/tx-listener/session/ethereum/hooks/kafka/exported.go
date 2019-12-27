@@ -3,6 +3,12 @@ package kafka
 import (
 	"context"
 	"sync"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/rpc"
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
+	crc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client"
+	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store/client"
 )
 
 var (
@@ -10,10 +16,31 @@ var (
 	initOnce = &sync.Once{}
 )
 
+func initComponent(ctx context.Context) {
+	common.InParallel(
+		// Initialize Ethereum Client
+		func() { rpc.Init(ctx) },
+		// Initialize Contract Registry Client
+		func() { crc.Init(ctx) },
+		// Initialize Envelope store client
+		func() { storeclient.Init(ctx) },
+		// Initialize Sync Producer
+		func() { broker.InitSyncProducer(ctx) },
+	)
+}
+
 // Init Kafka hook
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
-		hook = &Hook{}
+		initComponent(ctx)
+
+		hook = NewHook(
+			NewConfig(),
+			crc.GlobalContractRegistryClient(),
+			rpc.GlobalClientV2(),
+			storeclient.GlobalEnvelopeStoreClient(),
+			broker.GlobalSyncProducer(),
+		)
 	})
 }
 

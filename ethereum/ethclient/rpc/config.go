@@ -9,8 +9,8 @@ import (
 )
 
 func init() {
-	_ = viper.BindEnv(urlViperKey, urlEnv)
-	viper.SetDefault(urlViperKey, urlDefault)
+	_ = viper.BindEnv(URLViperKey, urlEnv)
+	viper.SetDefault(URLViperKey, urlDefault)
 	viper.SetDefault(RetryInitialIntervalViperKey, 500*time.Millisecond)
 	viper.SetDefault(RetryRandomFactorViperKey, 0.5)
 	viper.SetDefault(RetryMultiplierViperKey, 1.5)
@@ -21,7 +21,7 @@ func init() {
 
 var (
 	urlFlag     = "eth-client-url"
-	urlViperKey = "eth.client.url"
+	URLViperKey = "eth.client.url"
 	urlDefault  []string
 	urlEnv      = "ETH_CLIENT_URL"
 )
@@ -36,7 +36,7 @@ func URLs(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Ethereum client url
 Environment variable: %q`, urlEnv)
 	f.StringSlice(urlFlag, urlDefault, desc)
-	_ = viper.BindPFlag(urlViperKey, f.Lookup(urlFlag))
+	_ = viper.BindPFlag(URLViperKey, f.Lookup(urlFlag))
 }
 
 const (
