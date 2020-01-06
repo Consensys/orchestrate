@@ -31,14 +31,15 @@ func (s *ProviderTestSuite) TestProvide() {
 	ctx := context.Background()
 	providerConfigUpdateCh := make(chan dynamic.Message)
 	pool := safe.NewPool(ctx)
-	err := s.provider.Provide(providerConfigUpdateCh, pool)
+	go func() {
+		err := s.provider.Provide(providerConfigUpdateCh, pool)
+		assert.NoError(s.T(), err, "Should Provide without error")
+	}()
 	config := <-providerConfigUpdateCh
 
 	assert.Equal(s.T(), viper.GetString(store.TypeViperKey), config.ProviderName, "Should get the correct providerName")
-	assert.NoError(s.T(), err, "Should Provide without error")
 
 	pool.Stop()
-	assert.NoError(s.T(), err, "Should Provide without error")
 }
 
 func TestProviderTestSuite(t *testing.T) {

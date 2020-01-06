@@ -757,17 +757,17 @@ func RegisterContractRegistryHandlerClient(ctx context.Context, mux *runtime.Ser
 }
 
 var (
-	pattern_ContractRegistry_GetContract_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 1, 0, 4, 1, 5, 3}, []string{"v1", "contracts", "contractId.name", "contractId.tag"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_ContractRegistry_GetContract_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 1, 0, 4, 1, 5, 2}, []string{"contracts", "contractId.name", "contractId.tag"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_ContractRegistry_GetContractABI_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"v1", "contracts", "contractId.name", "contractId.tag", "abi"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_ContractRegistry_GetContractABI_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"contracts", "contractId.name", "contractId.tag", "abi"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_ContractRegistry_GetContractBytecode_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"v1", "contracts", "contractId.name", "contractId.tag", "bytecode"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_ContractRegistry_GetContractBytecode_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"contracts", "contractId.name", "contractId.tag", "bytecode"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_ContractRegistry_GetContractDeployedBytecode_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"v1", "contracts", "contractId.name", "contractId.tag", "deployedBytecode"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_ContractRegistry_GetContractDeployedBytecode_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"contracts", "contractId.name", "contractId.tag", "deployedBytecode"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_ContractRegistry_GetCatalog_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "contracts"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_ContractRegistry_GetCatalog_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"contracts"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_ContractRegistry_GetTags_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "contracts", "name"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_ContractRegistry_GetTags_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"contracts", "name"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (

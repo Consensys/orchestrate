@@ -13,7 +13,7 @@ func TestKeyBuilder_BuildKey(t *testing.T) {
 		ctx context.Context
 		key string
 	}
-	tests := []struct { //nolint:maligned
+	tests := []struct { //nolint:maligned // reason
 		name         string
 		multitenancy bool
 		args         args

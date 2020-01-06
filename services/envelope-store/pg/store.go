@@ -62,7 +62,7 @@ func (s *EnvelopeStore) Store(ctx context.Context, req *evlpstore.StoreRequest) 
 }
 
 // LoadByTxHash load envelope by transaction hash
-func (s *EnvelopeStore) LoadByTxHash(ctx context.Context, req *evlpstore.LoadByTxHashRequest) (*evlpstore.StoreResponse, error) { //nolint:interfacer
+func (s *EnvelopeStore) LoadByTxHash(ctx context.Context, req *evlpstore.LoadByTxHashRequest) (*evlpstore.StoreResponse, error) { //nolint:interfacer // reason
 	model := &EnvelopeModel{
 		ChainID: req.GetChain().ID().String(),
 		TxHash:  req.GetTxHash().Hex(),
@@ -80,7 +80,7 @@ func (s *EnvelopeStore) LoadByTxHash(ctx context.Context, req *evlpstore.LoadByT
 }
 
 // LoadByID context envelope by envelope ID
-func (s *EnvelopeStore) LoadByID(ctx context.Context, req *evlpstore.LoadByIDRequest) (*evlpstore.StoreResponse, error) { //nolint:interfacer
+func (s *EnvelopeStore) LoadByID(ctx context.Context, req *evlpstore.LoadByIDRequest) (*evlpstore.StoreResponse, error) { //nolint:interfacer // reason
 	model := &EnvelopeModel{
 		EnvelopeID: req.GetId(),
 	}

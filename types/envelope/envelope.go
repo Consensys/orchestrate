@@ -1,4 +1,4 @@
-//nolint:stylecheck
+//nolint:stylecheck // reason
 package envelope
 
 import (

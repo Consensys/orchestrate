@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-pg/pg"
+	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
@@ -13,8 +14,18 @@ type ChainRegistry struct {
 	db *pg.DB
 }
 
+type dbLogger struct{}
+
+func (d dbLogger) BeforeQuery(_ *pg.QueryEvent) {
+}
+
+func (d dbLogger) AfterQuery(q *pg.QueryEvent) {
+	log.Trace(q.FormattedQuery())
+}
+
 // NewChainRegistry creates a new chain registry
 func NewChainRegistry(db *pg.DB) *ChainRegistry {
+	db.AddQueryHook(dbLogger{})
 	return &ChainRegistry{db: db}
 }
 
@@ -103,6 +114,24 @@ func (r *ChainRegistry) UpdateNodeByName(ctx context.Context, node *types.Node) 
 	return nil
 }
 
+func (r *ChainRegistry) UpdateBlockPositionByName(ctx context.Context, name, tenantID string, blockPosition int64) error {
+	node := &types.Node{}
+
+	res, err := r.db.ModelContext(ctx, node).
+		Set("listener_block_position = ?", blockPosition).
+		Where("tenant_id = ?", tenantID).
+		Where("name = ?", name).
+		Update()
+	if err != nil {
+		return errors.FromError(err).ExtendComponent(component)
+	}
+
+	if res.RowsReturned() == 0 && res.RowsAffected() == 0 {
+		return errors.NotFoundError("no node found with tenant_id=%s and name=%s", node.TenantID, node.Name).ExtendComponent(component)
+	}
+	return nil
+}
+
 func (r *ChainRegistry) UpdateNodeByID(ctx context.Context, node *types.Node) error {
 
 	res, err := r.db.ModelContext(ctx, node).
@@ -114,6 +143,23 @@ func (r *ChainRegistry) UpdateNodeByID(ctx context.Context, node *types.Node) er
 
 	if res.RowsReturned() == 0 && res.RowsAffected() == 0 {
 		return errors.NotFoundError("no node found with id %s", node.ID).ExtendComponent(component)
+	}
+	return nil
+}
+
+func (r *ChainRegistry) UpdateBlockPositionByID(ctx context.Context, id string, blockPosition int64) error {
+	node := &types.Node{}
+
+	res, err := r.db.ModelContext(ctx, node).
+		Set("listener_block_position = ?", blockPosition).
+		Where("id = ?", id).
+		Update()
+	if err != nil {
+		return errors.FromError(err).ExtendComponent(component)
+	}
+
+	if res.RowsReturned() == 0 && res.RowsAffected() == 0 {
+		return errors.NotFoundError("no node found with id %s", id).ExtendComponent(component)
 	}
 	return nil
 }

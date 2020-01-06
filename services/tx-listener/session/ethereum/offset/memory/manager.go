@@ -10,17 +10,17 @@ import (
 
 type Manager struct {
 	mux   *sync.Mutex
-	cache map[string]uint64
+	cache map[string]int64
 }
 
 func NewManager() *Manager {
 	return &Manager{
 		mux:   &sync.Mutex{},
-		cache: make(map[string]uint64),
+		cache: make(map[string]int64),
 	}
 }
 
-func (m *Manager) GetLastBlockNumber(ctx context.Context, node *dynamic.Node) (uint64, error) {
+func (m *Manager) GetLastBlockNumber(_ context.Context, node *dynamic.Node) (int64, error) {
 	m.mux.Lock()
 	defer m.mux.Unlock()
 	blockNumber, ok := m.cache[fmt.Sprintf("blockNumber-%v", node.ID)]
@@ -30,26 +30,26 @@ func (m *Manager) GetLastBlockNumber(ctx context.Context, node *dynamic.Node) (u
 	return blockNumber, nil
 }
 
-func (m *Manager) SetLastBlockNumber(ctx context.Context, node *dynamic.Node, blockNumber uint64) error {
+func (m *Manager) SetLastBlockNumber(_ context.Context, node *dynamic.Node, blockNumber int64) error {
 	m.mux.Lock()
 	defer m.mux.Unlock()
 	m.cache[fmt.Sprintf("blockNumber-%v", node.ID)] = blockNumber
 	return nil
 }
 
-func (m *Manager) GetLastTxIndex(ctx context.Context, node *dynamic.Node, blockNumber uint64) (uint64, error) {
+func (m *Manager) GetLastTxIndex(_ context.Context, node *dynamic.Node, blockNumber int64) (uint64, error) {
 	m.mux.Lock()
 	defer m.mux.Unlock()
 	txIndex, ok := m.cache[fmt.Sprintf("txIndex-%v-%v", node.ID, blockNumber)]
 	if !ok {
 		return 0, nil
 	}
-	return txIndex, nil
+	return uint64(txIndex), nil
 }
 
-func (m *Manager) SetLastTxIndex(ctx context.Context, node *dynamic.Node, blockNumber, txIndex uint64) error {
+func (m *Manager) SetLastTxIndex(_ context.Context, node *dynamic.Node, blockNumber int64, txIndex uint64) error {
 	m.mux.Lock()
 	defer m.mux.Unlock()
-	m.cache[fmt.Sprintf("txIndex-%v-%v", node.ID, blockNumber)] = txIndex
+	m.cache[fmt.Sprintf("txIndex-%v-%v", node.ID, blockNumber)] = int64(txIndex)
 	return nil
 }

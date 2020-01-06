@@ -60,7 +60,7 @@ func TestAuthToken_VerifyToken(t *testing.T) {
 		rawToken                 string
 		certificateForValidation string
 	}
-	tests := []struct { //nolint:maligned
+	tests := []struct { //nolint:maligned // reason
 		name              string
 		fields            *fields
 		args              *args

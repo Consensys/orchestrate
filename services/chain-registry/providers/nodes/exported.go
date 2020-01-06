@@ -1,6 +1,7 @@
 package nodes
 
 import (
+	"context"
 	"sync"
 
 	"github.com/containous/traefik/v2/pkg/provider"
@@ -14,13 +15,13 @@ var (
 )
 
 // Init initializes a ChainRegistry store
-func Init() {
+func Init(ctx context.Context) {
 	initOnce.Do(func() {
 		if provide != nil {
 			return
 		}
 
-		store.Init()
+		store.Init(ctx)
 		registry := store.GlobalStoreRegistry()
 		provide = NewProvider(viper.GetString(store.TypeViperKey), registry, viper.GetDuration(ProviderRefreshIntervalViperKey))
 

@@ -32,7 +32,7 @@ func Flags(f *pflag.FlagSet) {
 const (
 	proxyAddressFlag     = "chain-proxy-addr"
 	ProxyAddressViperKey = "chain.proxy.addr"
-	proxyAddressDefault  = ":80"
+	proxyAddressDefault  = ":8080"
 	proxyAddressEnv      = "CHAIN_PROXY_ADDRESS"
 )
 
@@ -47,7 +47,7 @@ Environment variable: %q`, proxyAddressEnv)
 const (
 	addressFlag     = "chain-registry-addr"
 	AddressViperKey = "chain.registry.addr"
-	addressDefault  = ":81"
+	addressDefault  = ":8081"
 	addressEnv      = "CHAIN_REGISTRY_ADDRESS"
 )
 

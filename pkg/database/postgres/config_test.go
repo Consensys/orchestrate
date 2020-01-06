@@ -17,7 +17,7 @@ func TestDBUser(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	DBUser(flgs)
 
-	expected := "postgres" //nolint:goconst
+	expected := "postgres" //nolint:goconst // reason
 	assert.Equal(t, expected, viper.GetString(name), "Default db user should be %q but got %q", expected, viper.GetString(name))
 
 	expected = "env-user"

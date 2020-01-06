@@ -175,7 +175,7 @@ func RegisterEnvelopeStoreHandlerClient(ctx context.Context, mux *runtime.ServeM
 }
 
 var (
-	pattern_EnvelopeStore_LoadByID_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "envelopes", "id"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_EnvelopeStore_LoadByID_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"envelopes", "id"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (

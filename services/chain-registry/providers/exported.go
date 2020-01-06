@@ -29,7 +29,7 @@ func Init(ctx context.Context) {
 			log.WithoutContext().WithError(err).Fatalf("error adding internal provider")
 		}
 
-		nodes.Init()
+		nodes.Init(ctx)
 		err = providerAggregator.AddProvider(nodes.GlobalProvider())
 		if err != nil {
 			log.WithoutContext().WithError(err).Fatalf("error adding registry provider")

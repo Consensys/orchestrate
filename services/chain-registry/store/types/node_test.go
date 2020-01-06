@@ -7,6 +7,68 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestIsValidNode(t *testing.T) {
+	testSet := []struct {
+		node    *Node
+		isValid bool
+	}{
+		{&Node{
+			Name:                    "test",
+			TenantID:                "test",
+			URLs:                    []string{"test.com", "test.net"},
+			ListenerDepth:           1,
+			ListenerBlockPosition:   1,
+			ListenerFromBlock:       1,
+			ListenerBackOffDuration: "2s",
+		},
+			true,
+		},
+		{&Node{
+			TenantID:                "test",
+			URLs:                    []string{"test.com", "test.net"},
+			ListenerDepth:           1,
+			ListenerBlockPosition:   1,
+			ListenerFromBlock:       1,
+			ListenerBackOffDuration: "2s",
+		},
+			false,
+		},
+		{&Node{
+			Name:                    "test",
+			URLs:                    []string{"test.com", "test.net"},
+			ListenerDepth:           1,
+			ListenerBlockPosition:   1,
+			ListenerFromBlock:       1,
+			ListenerBackOffDuration: "2s",
+		},
+			false,
+		},
+		{&Node{
+			Name:                    "test",
+			TenantID:                "test",
+			ListenerDepth:           1,
+			ListenerBlockPosition:   1,
+			ListenerFromBlock:       1,
+			ListenerBackOffDuration: "2s",
+		},
+			false,
+		},
+		{&Node{
+			Name:                  "test",
+			TenantID:              "test",
+			URLs:                  []string{"test.com", "test.net"},
+			ListenerDepth:         1,
+			ListenerBlockPosition: 1,
+			ListenerFromBlock:     1,
+		},
+			false,
+		},
+	}
+
+	for _, test := range testSet {
+		assert.Equal(t, test.node.IsValid(), test.isValid)
+	}
+}
 func TestBuildConfiguration(t *testing.T) {
 
 	testSet := []struct {
@@ -71,6 +133,6 @@ func TestBuildConfiguration(t *testing.T) {
 		expectedOutput := test.expectedOutput(NewConfig())
 
 		t.Log()
-		assert.Equalf(t, expectedOutput.HTTP.Routers, output.HTTP.Routers, "Chain-registry - Store (%d/%d): expected %v but got %v", i+1, len(testSet), expectedOutput, output)
+		assert.Equal(t, expectedOutput.HTTP.Routers, output.HTTP.Routers, "Chain-registry - Store (%d/%d): expected %v but got %v", i+1, len(testSet), expectedOutput, output)
 	}
 }

@@ -1,4 +1,4 @@
-package envelope_store //nolint:golint,stylecheck
+package envelope_store //nolint:golint,stylecheck // reason
 
 import (
 	"time"

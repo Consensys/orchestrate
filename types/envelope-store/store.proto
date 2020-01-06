@@ -43,7 +43,7 @@ service EnvelopeStore {
     // Load envelope by identifier
     rpc LoadByID (LoadByIDRequest) returns (StoreResponse) {
         option (google.api.http) = {
-            get: "/v1/envelopes/{id}"
+            get: "/envelopes/{id}"
         };
     }
 

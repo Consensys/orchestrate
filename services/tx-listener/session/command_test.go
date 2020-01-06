@@ -3,13 +3,14 @@ package session
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 )
 
-var config1 = &dynamic.Node{Name: "test"}
-var config2 = &dynamic.Node{Name: "test2"}
+var config1 = &dynamic.Node{Name: "test", Listener: &dynamic.Listener{Depth: 1, Backoff: time.Second}}
+var config2 = &dynamic.Node{Name: "test2", Listener: &dynamic.Listener{Depth: 1, Backoff: time.Second}}
 
 func TestCompareConfiguation(t *testing.T) {
 

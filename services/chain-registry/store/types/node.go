@@ -14,7 +14,7 @@ import (
 const component = "chain-registry.store"
 
 type Node struct {
-	tableName struct{} `sql:"nodes"` //nolint:unused,structcheck
+	tableName struct{} `sql:"nodes"` //nolint:unused,structcheck // reason
 
 	ID                      string     `json:"id,omitempty" sql:",pk"`
 	Name                    string     `json:"name,omitempty"`
@@ -26,6 +26,22 @@ type Node struct {
 	ListenerBlockPosition   int64      `json:"listenerBlockPosition,string,omitempty"`
 	ListenerFromBlock       int64      `json:"listenerFromBlock,string,omitempty"`
 	ListenerBackOffDuration string     `json:"listenerBackOffDuration,omitempty"`
+}
+
+func (n *Node) IsValid() bool {
+	if n.Name == "" {
+		return false
+	}
+	if n.TenantID == "" {
+		return false
+	}
+	if len(n.URLs) == 0 {
+		return false
+	}
+	if n.ListenerBackOffDuration == "" {
+		return false
+	}
+	return true
 }
 
 func NewConfig() *dynamic.Configuration {

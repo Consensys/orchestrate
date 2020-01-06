@@ -16,7 +16,37 @@ All notable changes to this project will be documented in this file.
     * `MULTI_TENANCY_ENABLED` to enable multi-tenancy. 
     * `AUTH_SERVICE_CERTIFICATE` to provision trusted certificate of the service who generate ID/Access Token (authentication service). 
     * `TENANT_NAMESPACE` to provision tenant namespace to retrieve the tenant id in the OpenId or Access Token (JWT). 
-    
+ 
+### 🆕 Chain-registry and tx-listener
+* Add the chain-registry microservice that:
+    * Serves an API to store a list of ethereum nodes with their configurations (URLs, tenantID, name, block depth, block position, backoff duration). The API allows to dynamically update the nodes configuration instead of passing them in environment variable.
+        * GET `/nodes`: get the list of nodes registered
+        * GET `/nodes/{tenantID}`: get the list of nodes registered for a given {tenantID}
+        * GET `/nodes/{tenantID}/{nodeName}`: get the node configuration given by the {tenantID} and {nodeName}
+        * GET `/node/{nodeID}`: get the node configuration given by the {nodeID}
+        * POST `/nodes/{tenantID}`: create a new node for a given {tenantID}
+        * PATCH `/nodes/{tenantID}/{nodeName}`: modify the node configuration for a given {tenantID} and {nodeName}
+        * PATCH `/node/{nodeID}`: modify the node configuration for a given {nodeID}
+        * PATCH `/nodes/{tenantID}/{nodeName}/block-position`: modify the block position of a node for a given {tenantID} and {nodeName}
+        * PATCH `/node/{nodeID}//block-position`: modify the block position of a node for a given {nodeID}
+        * DELETE `/nodes/{tenantID}/{nodeName}`: delete the node configuration given by the {tenantID} and {nodeName}
+        * DELETE `/node/{nodeID}`: delete the node configuration given by the {nodeID}
+    * Proxy the ethereum nodes
+* Add flag and environment variable:
+    * `CHAIN_PROXY_ADDRESS` to set the address/port that exposes the proxy to nodes
+    * `CHAIN_REGISTRY_ADDRESS` to set the address/port that exposes the chain registry API
+    * `CHAIN_REGISTRY_TYPE` to set type of Chain Registry among "postgres" and "in-memory"
+    * `CHAIN_REGISTRY_INIT` to initialize the chain registry with some specific nodes
+    * `CHAIN_REGISTRY_PROVIDER_NODES_REFRESH_INTERVAL` to set the time interval for refreshing the list of nodes from storage
+    * `CHAIN_REGISTRY_URL` to set the URL to reach the chain-registry
+    * `TX_LISTENER_PROVIDER_REFRESH_INTERVAL` to set the time interval for refreshing the list of nodes from the chain registry
+ 
+### ⚠ BREAKING CHANGES
+ * Remove `/v1` prefix in the http rest path for the envelope-store and chain-registry
+ * The `tx-listener` produces kafka messages only in the topic `topic-tx-decoder` instead of the `topic-tx-decoder-{chainID}`
+ * The `tx-decoder` consumes kafka messages only in the topic `topic-tx-decoder` instead of the `topic-tx-decoder-{chainID}`
+
+
 ## v1.2.1 (2019-12-23)
 
 ### 🛠 Bug fixes

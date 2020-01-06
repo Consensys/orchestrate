@@ -4,6 +4,8 @@ import (
 	"context"
 	"os"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store"
+
 	"github.com/spf13/cobra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
@@ -22,6 +24,9 @@ func newRunCommand() *cobra.Command {
 
 	// Postgres flags
 	postgres.PGFlags(runCmd.Flags())
+
+	// Chain registry store flags
+	store.Flags(runCmd.Flags())
 
 	return runCmd
 }

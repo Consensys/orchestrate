@@ -12,6 +12,7 @@ import (
 
 func TestInit(t *testing.T) {
 	Init(context.Background())
+	Init(context.Background())
 }
 
 func TestNewBuilder(t *testing.T) {

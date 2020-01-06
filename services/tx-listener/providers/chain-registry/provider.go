@@ -76,14 +76,21 @@ func (p *Provider) buildConfiguration(nodes []*types.Node) *dynamic.Message {
 	}
 
 	for _, node := range nodes {
+		duration, err := time.ParseDuration(node.ListenerBackOffDuration)
+		if err != nil {
+			log.Errorf("cannot parse duration for node ID:%s - TenantID:%s - Name:%s", node.ID, node.TenantID, node.Name)
+		}
+
 		msg.Configuration.Nodes[node.ID] = &dynamic.Node{
 			ID:       node.ID,
 			TenantID: node.TenantID,
 			Name:     node.Name,
-			URL:      node.URLs[0],
+			// TODO: to replace by fmt.Sprintf("%s/%s", viper.GetString(ChainProxyURLViperKey), node.ID) when traefik is fully working
+			URL: node.URLs[0],
 			Listener: &dynamic.Listener{
 				BlockPosition: node.ListenerBlockPosition,
 				Depth:         node.ListenerDepth,
+				Backoff:       duration,
 			},
 		}
 	}

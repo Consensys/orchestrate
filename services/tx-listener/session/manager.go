@@ -86,7 +86,7 @@ func (m *Manager) listenProvider(ctx context.Context) {
 	log.Infof("Starting provider %T", m.provider)
 	err := m.provider.Run(ctx, m.msgInput)
 	if err != nil {
-		m.errors <- err
+		log.FromContext(ctx).WithError(err).Errorf("error while listening provider")
 	}
 	close(m.msgInput)
 }
@@ -116,10 +116,9 @@ func (m *Manager) executeCommand(ctx context.Context, command *Command) {
 		m.runSession(ctx, command.Node)
 	case STOP:
 		m.stopSession(command.Node)
-	// TODO: implement UPDATE_CONFIG
-	// case UPDATE_CONFIG:
-	// 	m.stopSession(command.Node)
-	// 	m.runSession(ctx, command.Node)
+	case UPDATE:
+		m.stopSession(command.Node)
+		m.runSession(ctx, command.Node)
 	default:
 		log.WithoutContext().WithFields(logrus.Fields{
 			"type":          command.Type,
@@ -134,7 +133,7 @@ func (m *Manager) runSession(ctx context.Context, node *dynamic.Node) {
 	// Build session
 	s, err := m.builder.NewSession(node)
 	if err != nil {
-		m.errors <- err
+		log.FromContext(ctx).WithError(err).Errorf("error while creating new session")
 		return
 	}
 
@@ -156,7 +155,7 @@ func (m *Manager) runSession(ctx context.Context, node *dynamic.Node) {
 		err := sess.session.Run(log.With(cancelableCtx, log.Str("session.node.id", node.ID)))
 		m.removeSession(node.ID)
 		if err != nil {
-			m.errors <- err
+			log.FromContext(ctx).WithError(err).Errorf("error while running session")
 		}
 		logger.Infof("Session stopped")
 		m.wg.Done()

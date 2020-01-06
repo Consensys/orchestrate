@@ -6,9 +6,9 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
-	provider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/providers/listener-v1"
+	registryprovider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/providers/chain-registry"
 	kafkahook "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/hooks/kafka"
-	memoryoffset "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/offset/memory"
+	registryoffset "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/offset/chain-registry"
 )
 
 var (
@@ -19,7 +19,7 @@ var (
 // TODO: NullProvider should be replaced with chain-registry provider
 type NullProvider struct{}
 
-func (p *NullProvider) Run(ctx context.Context, configInput chan<- *dynamic.Message) error {
+func (p *NullProvider) Run(_ context.Context, _ chan<- *dynamic.Message) error {
 	return nil
 }
 
@@ -30,15 +30,15 @@ func Init(ctx context.Context) {
 			return
 		}
 
+		registryprovider.Init(ctx)
 		kafkahook.Init(ctx)
-		memoryoffset.Init(ctx)
+		registryoffset.Init(ctx)
 		rpc.Init(ctx)
-		provider.Init(ctx)
 
 		listener = NewTxListener(
-			provider.GlobalProvider(),
+			registryprovider.GlobalProvider(),
 			kafkahook.GlobalHook(),
-			memoryoffset.GlobalManager(),
+			registryoffset.GlobalManager(),
 			rpc.GlobalClientV2(),
 		)
 	})

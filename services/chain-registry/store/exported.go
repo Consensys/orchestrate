@@ -1,6 +1,9 @@
 package store
 
 import (
+	"context"
+	"encoding/json"
+	"strings"
 	"sync"
 
 	log "github.com/sirupsen/logrus"
@@ -22,7 +25,7 @@ var (
 )
 
 // Init initializes a ChainRegistry store
-func Init() {
+func Init(ctx context.Context) {
 	initOnce.Do(func() {
 		if store != nil {
 			return
@@ -45,6 +48,24 @@ func Init() {
 			log.WithFields(log.Fields{
 				"type": viper.GetString(TypeViperKey),
 			}).Fatalf("%s: unknown type", component)
+			return
+		}
+
+		// Init Config
+		nodes := viper.GetStringSlice(InitViperKey)
+		for _, v := range nodes {
+			node := &types.Node{}
+			dec := json.NewDecoder(strings.NewReader(v))
+			dec.DisallowUnknownFields() // Force errors if unknown fields
+			err := dec.Decode(node)
+			if err != nil {
+				log.Warnf("%s: init - invalid node config - got %v", component, err)
+			}
+			err = store.RegisterNode(ctx, node)
+			if err != nil {
+				log.Warnf("%s: init - could not register node - got %v", component, err)
+			}
+			log.Infof("%s: init - node %s registered with id %s", component, node.Name, node.ID)
 		}
 	})
 }

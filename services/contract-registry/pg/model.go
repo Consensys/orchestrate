@@ -6,7 +6,7 @@ import (
 
 // RepositoryModel represent a space where contract tags are listed
 type RepositoryModel struct {
-	tableName struct{} `sql:"repositories"` //nolint:unused,structcheck
+	tableName struct{} `sql:"repositories"` //nolint:unused,structcheck // reason
 
 	// ID technical identifier
 	ID int
@@ -17,7 +17,7 @@ type RepositoryModel struct {
 
 // TagModel represent a Tag on a Repository pointing towards a Source code
 type TagModel struct {
-	tableName struct{} `sql:"tags"` //nolint:unused,structcheck
+	tableName struct{} `sql:"tags"` //nolint:unused,structcheck // reason
 
 	// ID technical identifier
 	ID int
@@ -31,7 +31,7 @@ type TagModel struct {
 
 // ArtifactModel represent an artifact compiled from a source code
 type ArtifactModel struct {
-	tableName struct{} `sql:"artifacts"` //nolint:unused,structcheck
+	tableName struct{} `sql:"artifacts"` //nolint:unused,structcheck // reason
 
 	// ID technical identifier
 	ID int
@@ -46,7 +46,7 @@ type ArtifactModel struct {
 
 // CodehashModel represent the codehash of smart contract addresses
 type CodehashModel struct {
-	tableName struct{} `sql:"codehashes"` //nolint:unused,structcheck
+	tableName struct{} `sql:"codehashes"` //nolint:unused,structcheck // reason
 
 	// ID technical identifier
 	ID int
@@ -59,7 +59,7 @@ type CodehashModel struct {
 
 // MethodModel represent the codehash of smart contract addresses
 type MethodModel struct {
-	tableName struct{} `sql:"methods"` //nolint:unused,structcheck
+	tableName struct{} `sql:"methods"` //nolint:unused,structcheck // reason
 
 	// ID technical identifier
 	ID int
@@ -73,7 +73,7 @@ type MethodModel struct {
 
 // EventModel represent the codehash of smart contract addresses
 type EventModel struct {
-	tableName struct{} `sql:"events"` //nolint:unused,structcheck
+	tableName struct{} `sql:"events"` //nolint:unused,structcheck // reason
 
 	// ID technical identifier
 	ID int

@@ -44,7 +44,7 @@ func NewHook(conf *Config, registry svc.ContractRegistryClient, ec ethclient.Cha
 }
 
 func (hk *Hook) AfterNewBlock(ctx context.Context, node *dynamic.Node, block *ethtypes.Block, receipts []*ethtypes.Receipt) error {
-	blockLogCtx := log.With(ctx, log.Str("block.hash", block.Hash().Hex()))
+	blockLogCtx := log.With(ctx, log.Str("block.number", block.Number().String()))
 	var evlps []*envelope.Envelope
 	for idx, r := range receipts {
 		receiptLogCtx := log.With(blockLogCtx, log.Str("receipt.txhash", r.TxHash.Hex()))

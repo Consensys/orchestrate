@@ -15,7 +15,7 @@
     "application/json"
   ],
   "paths": {
-    "/v1/contracts": {
+    "/contracts": {
       "get": {
         "summary": "Returns a list of all registered contracts",
         "operationId": "GetCatalog",
@@ -32,7 +32,7 @@
         ]
       }
     },
-    "/v1/contracts/{contractId.name}/{contractId.tag}": {
+    "/contracts/{contractId.name}/{contractId.tag}": {
       "get": {
         "summary": "Retrieve contract",
         "operationId": "GetContract",
@@ -72,7 +72,7 @@
         ]
       }
     },
-    "/v1/contracts/{contractId.name}/{contractId.tag}/abi": {
+    "/contracts/{contractId.name}/{contractId.tag}/abi": {
       "get": {
         "summary": "Retrieve contract ABI",
         "operationId": "GetContractABI",
@@ -112,7 +112,7 @@
         ]
       }
     },
-    "/v1/contracts/{contractId.name}/{contractId.tag}/bytecode": {
+    "/contracts/{contractId.name}/{contractId.tag}/bytecode": {
       "get": {
         "summary": "Returns the bytecode",
         "operationId": "GetContractBytecode",
@@ -152,7 +152,7 @@
         ]
       }
     },
-    "/v1/contracts/{contractId.name}/{contractId.tag}/deployedBytecode": {
+    "/contracts/{contractId.name}/{contractId.tag}/deployedBytecode": {
       "get": {
         "summary": "Returns the deployed bytecode",
         "operationId": "GetContractDeployedBytecode",
@@ -192,7 +192,7 @@
         ]
       }
     },
-    "/v1/contracts/{name}": {
+    "/contracts/{name}": {
       "get": {
         "summary": "Returns a list of all tags associated to a contract",
         "operationId": "GetTags",

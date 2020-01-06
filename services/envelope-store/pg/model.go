@@ -13,7 +13,7 @@ import (
 
 // EnvelopeModel represent elements in `envelopes` table
 type EnvelopeModel struct {
-	tableName struct{} `sql:"envelopes"` //nolint:unused,structcheck
+	tableName struct{} `sql:"envelopes"` //nolint:unused,structcheck // reason
 
 	// ID technical identifier
 	ID int32

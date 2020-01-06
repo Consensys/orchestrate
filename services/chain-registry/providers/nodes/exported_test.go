@@ -1,6 +1,7 @@
 package nodes
 
 import (
+	"context"
 	"testing"
 
 	"github.com/containous/traefik/v2/pkg/provider"
@@ -8,11 +9,11 @@ import (
 )
 
 func TestInit(t *testing.T) {
-	Init()
+	Init(context.Background())
 	assert.NotNil(t, GlobalProvider(), "Global should have been set")
 
 	testProvider := GlobalProvider()
-	Init()
+	Init(context.Background())
 	assert.Equal(t, testProvider, GlobalProvider(), "Provider should not have change after re-initialize")
 
 	var p provider.Provider

@@ -82,7 +82,7 @@ func (ec *EthClientV2) getError(ctx context.Context) error {
 	}
 }
 
-func (ec *EthClientV2) BlockByHash(ctx context.Context, url string, hash ethcommon.Hash) (*ethtypes.Block, error) {
+func (ec *EthClientV2) BlockByHash(ctx context.Context, _ string, hash ethcommon.Hash) (*ethtypes.Block, error) {
 	if err := ec.getError(ctx); err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (ec *EthClientV2) BlockByHash(ctx context.Context, url string, hash ethcomm
 	return nil, errors.NotFoundError("block not found")
 }
 
-func (ec *EthClientV2) BlockByNumber(ctx context.Context, url string, number *big.Int) (*ethtypes.Block, error) {
+func (ec *EthClientV2) BlockByNumber(ctx context.Context, _ string, number *big.Int) (*ethtypes.Block, error) {
 	if err := ec.getError(ctx); err != nil {
 		return nil, err
 	}
@@ -132,7 +132,7 @@ func (ec *EthClientV2) HeaderByNumber(ctx context.Context, url string, number *b
 	return block.Header(), nil
 }
 
-func (ec *EthClientV2) TransactionByHash(ctx context.Context, url string, hash ethcommon.Hash) (tx *ethtypes.Transaction, isPending bool, err error) {
+func (ec *EthClientV2) TransactionByHash(ctx context.Context, _ string, hash ethcommon.Hash) (tx *ethtypes.Transaction, isPending bool, err error) {
 	if err := ec.getError(ctx); err != nil {
 		return nil, false, err
 	}
@@ -147,7 +147,7 @@ func (ec *EthClientV2) TransactionByHash(ctx context.Context, url string, hash e
 	return nil, false, errors.NotFoundError("tx not found")
 }
 
-func (ec *EthClientV2) TransactionReceipt(ctx context.Context, url string, txHash ethcommon.Hash) (*ethtypes.Receipt, error) {
+func (ec *EthClientV2) TransactionReceipt(ctx context.Context, _ string, txHash ethcommon.Hash) (*ethtypes.Receipt, error) {
 	if err := ec.getError(ctx); err != nil {
 		return nil, err
 	}
@@ -162,14 +162,14 @@ func (ec *EthClientV2) TransactionReceipt(ctx context.Context, url string, txHas
 	return nil, errors.NotFoundError("receipt not found")
 }
 
-func (ec *EthClientV2) Network(ctx context.Context, url string) (*big.Int, error) {
+func (ec *EthClientV2) Network(ctx context.Context, _ string) (*big.Int, error) {
 	if err := ec.getError(ctx); err != nil {
 		return nil, err
 	}
 	return ec.chainID, nil
 }
 
-func (ec *EthClientV2) SyncProgress(ctx context.Context, url string) (*eth.SyncProgress, error) {
+func (ec *EthClientV2) SyncProgress(ctx context.Context, _ string) (*eth.SyncProgress, error) {
 	if err := ec.getError(ctx); err != nil {
 		return nil, err
 	}
@@ -198,7 +198,7 @@ func NewMockHook() *MockHook {
 	}
 }
 
-func (hk *MockHook) AfterNewBlock(ctx context.Context, node *dynamic.Node, block *ethtypes.Block, receipts []*ethtypes.Receipt) error {
+func (hk *MockHook) AfterNewBlock(_ context.Context, node *dynamic.Node, block *ethtypes.Block, receipts []*ethtypes.Receipt) error {
 	hk.Calls <- &hookCall{
 		node:     node,
 		block:    block,
@@ -426,7 +426,7 @@ func TestRun(t *testing.T) {
 	}
 	close(errChan)
 	lastBlock, _ := offsets.GetLastBlockNumber(context.Background(), node)
-	assert.Equal(t, uint64(2), lastBlock, "Offset manager should have properly updated block processed")
+	assert.Equal(t, int64(2), lastBlock, "Offset manager should have properly updated block processed")
 }
 
 func TestRunWithError(t *testing.T) {

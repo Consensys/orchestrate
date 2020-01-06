@@ -77,6 +77,7 @@ func (s *Session) run(ctx context.Context) (err error) {
 	// Wait for an error or for context to be canceled
 	case err = <-s.errors:
 		if err != context.DeadlineExceeded && err != context.Canceled {
+			log.FromContext(ctx).WithError(err).Errorf("error while listening")
 			// If we get an error we cancel execution
 			cancel()
 		}
@@ -134,10 +135,10 @@ func (s *Session) initPosition(ctx context.Context) error {
 				return err
 			}
 			s.currentChainTip = tip
-			blockPosition = tip
+			blockPosition = int64(tip)
 		} else {
 			// Start from position provided
-			blockPosition = uint64(s.Node.Listener.BlockPosition)
+			blockPosition = s.Node.Listener.BlockPosition
 		}
 	} else {
 		// It is not the first time we listen the node
@@ -145,8 +146,8 @@ func (s *Session) initPosition(ctx context.Context) error {
 		blockPosition++
 	}
 
-	// Set blockposition
-	s.blockPosition = blockPosition
+	// Set block position
+	s.blockPosition = uint64(blockPosition)
 
 	return nil
 }
@@ -184,7 +185,7 @@ listeningLoop:
 	ticker.Stop()
 	close(s.fetchedBlocks)
 
-	log.FromContext(ctx).WithField("block.stop", s.blockPosition).Errorf("Stopped listening")
+	log.FromContext(ctx).WithField("block.stop", s.blockPosition).Infof("Stopped listening")
 }
 
 func (s *Session) callHooks(ctx context.Context) {
@@ -213,7 +214,7 @@ func (s *Session) callHook(ctx context.Context, block *fetchedBlock) error {
 	err := s.hook.AfterNewBlock(ctx, s.Node, block.block, block.receipts)
 	if err == nil {
 		// Update last block processed
-		err = s.offsets.SetLastBlockNumber(ctx, s.Node, block.block.NumberU64())
+		err = s.offsets.SetLastBlockNumber(ctx, s.Node, int64(block.block.NumberU64()))
 	}
 	return err
 }

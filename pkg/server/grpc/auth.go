@@ -45,7 +45,7 @@ func AuthTokenTenant(ctx context.Context) (context.Context, error) {
 
 	// Add the Token information and the Tenant Id in the go Context and Tag the Tenant for grpc
 	grpc_ctxtags.Extract(ctx).Set("auth.tenant", tenantIDValue)
-	newCtx := context.WithValue(context.WithValue(ctx, // nolint:golint
+	newCtx := context.WithValue(context.WithValue(ctx, // nolint:golint // reason
 		authentication.TokenInfoKey, token),
 		authentication.TenantIDKey, tenantIDValue)
 

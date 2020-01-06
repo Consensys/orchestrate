@@ -36,42 +36,42 @@ service ContractRegistry {
     // Retrieve contract
     rpc GetContract (GetContractRequest) returns (GetContractResponse) {
         option (google.api.http) = {
-            get: "/v1/contracts/{contractId.name}/{contractId.tag}"
+            get: "/contracts/{contractId.name}/{contractId.tag}"
         };
     }
 
     // Retrieve contract ABI
     rpc GetContractABI (GetContractRequest) returns (GetContractABIResponse) {
         option (google.api.http) = {
-            get: "/v1/contracts/{contractId.name}/{contractId.tag}/abi"
+            get: "/contracts/{contractId.name}/{contractId.tag}/abi"
         };
     }
 
     // Returns the bytecode
     rpc GetContractBytecode (GetContractRequest) returns (GetContractBytecodeResponse) {
         option (google.api.http) = {
-            get: "/v1/contracts/{contractId.name}/{contractId.tag}/bytecode"
+            get: "/contracts/{contractId.name}/{contractId.tag}/bytecode"
         };
     }
 
     // Returns the deployed bytecode
     rpc GetContractDeployedBytecode (GetContractRequest) returns (GetContractDeployedBytecodeResponse) {
         option (google.api.http) = {
-            get: "/v1/contracts/{contractId.name}/{contractId.tag}/deployedBytecode"
+            get: "/contracts/{contractId.name}/{contractId.tag}/deployedBytecode"
         };
     }
 
     // Returns a list of all registered contracts
     rpc GetCatalog (GetCatalogRequest) returns (GetCatalogResponse) {
         option (google.api.http) = {
-            get: "/v1/contracts"
+            get: "/contracts"
         };
     }
 
     // Returns a list of all tags associated to a contract
     rpc GetTags (GetTagsRequest) returns (GetTagsResponse) {
         option (google.api.http) = {
-            get: "/v1/contracts/{name}"
+            get: "/contracts/{name}"
         };
     }
 

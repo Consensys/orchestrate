@@ -17,13 +17,13 @@ func TestProviderRefreshInterval(t *testing.T) {
 	expected := time.Second
 	assert.Equal(t, expected, viper.GetDuration(ProviderRefreshIntervalViperKey), "Default")
 
-	_ = os.Setenv("PROVIDER_NODES_REFRESH_INTERVAL", "30s")
+	_ = os.Setenv("CHAIN_REGISTRY_PROVIDER_NODES_REFRESH_INTERVAL", "30s")
 	expected = 30 * time.Second
 	assert.Equal(t, expected, viper.GetDuration(ProviderRefreshIntervalViperKey), "From Environment Variable")
-	_ = os.Unsetenv("PROVIDER_NODES_REFRESH_INTERVAL")
+	_ = os.Unsetenv("CHAIN_REGISTRY_PROVIDER_NODES_REFRESH_INTERVAL")
 
 	args := []string{
-		"--provider-nodes-refresh-interval=36s",
+		"--chain-registry-provider-nodes-refresh-interval=36s",
 	}
 	err := flgs.Parse(args)
 	assert.Nil(t, err)

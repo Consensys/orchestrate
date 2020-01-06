@@ -50,6 +50,8 @@ func TestHTTPRouteTests(t *testing.T) {
 		getNodesByTenantIDTests,
 		patchNodeByIDTests,
 		patchNodeByNameTests,
+		patchBlockPositionByIDTests,
+		patchBlockNumberByNameTests,
 		postNodeTests,
 	}
 
@@ -124,6 +126,12 @@ func (e *MockChainRegistry) GetNodeByID(_ context.Context, _ string) (*models.No
 }
 func (e *MockChainRegistry) UpdateNodeByName(_ context.Context, _ *models.Node) error { return nil }
 func (e *MockChainRegistry) UpdateNodeByID(_ context.Context, _ *models.Node) error   { return nil }
+func (e *MockChainRegistry) UpdateBlockPositionByName(_ context.Context, _, _ string, _ int64) error {
+	return nil
+}
+func (e *MockChainRegistry) UpdateBlockPositionByID(_ context.Context, _ string, _ int64) error {
+	return nil
+}
 func (e *MockChainRegistry) DeleteNodeByName(_ context.Context, _ *models.Node) error { return nil }
 func (e *MockChainRegistry) DeleteNodeByID(_ context.Context, _ string) error         { return nil }
 
@@ -131,7 +139,7 @@ type ErrorChainRegistry struct{}
 
 var errTest = fmt.Errorf("test error")
 
-func (e *ErrorChainRegistry) RegisterNode(_ context.Context, node *models.Node) error {
+func (e *ErrorChainRegistry) RegisterNode(_ context.Context, _ *models.Node) error {
 	return errTest
 }
 func (e *ErrorChainRegistry) GetNodes(_ context.Context) ([]*models.Node, error) {
@@ -161,8 +169,20 @@ func (e *ErrorChainRegistry) UpdateNodeByName(_ context.Context, node *models.No
 	}
 	return errTest
 }
+func (e *ErrorChainRegistry) UpdateBlockPositionByName(_ context.Context, name, _ string, _ int64) error {
+	if name == notFoundErrorFilter {
+		return errors.NotFoundError("not found error")
+	}
+	return errTest
+}
 func (e *ErrorChainRegistry) UpdateNodeByID(_ context.Context, node *models.Node) error {
 	if node.ID == "0" {
+		return errors.NotFoundError("not found error")
+	}
+	return errTest
+}
+func (e *ErrorChainRegistry) UpdateBlockPositionByID(_ context.Context, id string, _ int64) error {
+	if id == "0" {
 		return errors.NotFoundError("not found error")
 	}
 	return errTest

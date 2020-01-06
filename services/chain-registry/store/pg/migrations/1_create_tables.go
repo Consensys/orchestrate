@@ -17,9 +17,9 @@ CREATE TABLE nodes (
 	urls TEXT[] NOT NULL,
 	created_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL, 
 	updated_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL, 
-	listener_depth INTEGER NOT NULL,
-	listener_block_position BIGINT NOT NULL,
-	listener_from_block BIGINT NOT NULL,
+	listener_depth INTEGER,
+	listener_block_position BIGINT,
+	listener_from_block BIGINT,
 	listener_back_off_duration VARCHAR(66) NOT NULL
 );
 CREATE UNIQUE INDEX ON nodes (tenant_id, name);

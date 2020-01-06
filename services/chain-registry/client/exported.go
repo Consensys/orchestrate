@@ -6,6 +6,8 @@ import (
 	"sync"
 	"time"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/spf13/viper"
 )
 
@@ -22,13 +24,13 @@ func Init(_ context.Context) {
 			return
 		}
 
-		client = &HTTPClient{
-			client: http.Client{
-				Timeout: 10 * time.Second,
-			},
-			config: Config{
-				url: viper.GetString(ChainRegistryURLViperKey)},
-		}
+		url := viper.GetString(ChainRegistryURLViperKey)
+		client = NewHTTPClient(
+			http.Client{Timeout: 10 * time.Second},
+			Config{URL: url},
+		)
+
+		log.Infof("%s: client ready - url: %s", component, url)
 	})
 }
 

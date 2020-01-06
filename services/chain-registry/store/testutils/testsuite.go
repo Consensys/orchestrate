@@ -96,6 +96,19 @@ func (s *ChainRegistryTestSuite) TestRegisterNode() {
 	assert.Error(s.T(), err, "Should get an error violating the 'unique' constrain")
 }
 
+func (s *ChainRegistryTestSuite) TestRegisterNodeWithError() {
+	nodeError := &types.Node{
+		Name:                    "test",
+		TenantID:                "test",
+		ListenerDepth:           2,
+		ListenerBlockPosition:   2,
+		ListenerFromBlock:       2,
+		ListenerBackOffDuration: "2s",
+	}
+	err := s.Store.RegisterNode(context.Background(), nodeError)
+	assert.Error(s.T(), err, "Should get an error when a field is missing")
+}
+
 func (s *ChainRegistryTestSuite) TestRegisterNodes() {
 	for _, nodes := range NodesSample {
 		for _, node := range nodes {
@@ -178,6 +191,37 @@ func (s *ChainRegistryTestSuite) TestNotFoundNameErrorUpdateNodeByName() {
 	assert.Error(s.T(), err, "Should get node without errors")
 }
 
+func (s *ChainRegistryTestSuite) TestUpdateBlockPositionByName() {
+	s.TestRegisterNodes()
+
+	testNode := NodesSample[tenantID1][nodeName2]
+	testNode.ListenerBlockPosition = 777
+	err := s.Store.UpdateBlockPositionByName(context.Background(), testNode.Name, testNode.TenantID, testNode.ListenerBlockPosition)
+	assert.NoError(s.T(), err, "Should get node without errors")
+
+	node, _ := s.Store.GetNodeByName(context.Background(), tenantID1, nodeName2)
+	CompareNodes(s.T(), node, testNode)
+}
+
+func (s *ChainRegistryTestSuite) TestNotFoundTenantErrorUpdateBlockPositionByName() {
+	testNode := NodesSample[tenantID1][nodeName2]
+	testNode.ListenerBlockPosition = 777
+	err := s.Store.UpdateBlockPositionByName(context.Background(), testNode.Name, testNode.TenantID, testNode.ListenerBlockPosition)
+	assert.Error(s.T(), err, "Should get node without errors")
+}
+
+func (s *ChainRegistryTestSuite) TestNotFoundNameErrorUpdateBlockPositionByName() {
+	s.TestRegisterNodes()
+
+	testNode := &types.Node{
+		Name:                  tenantID1,
+		TenantID:              "errorNodeName",
+		ListenerBlockPosition: 777,
+	}
+	err := s.Store.UpdateBlockPositionByName(context.Background(), testNode.Name, testNode.TenantID, testNode.ListenerBlockPosition)
+	assert.Error(s.T(), err, "Should get node without errors")
+}
+
 func (s *ChainRegistryTestSuite) TestUpdateNodeByID() {
 	s.TestRegisterNodes()
 
@@ -198,6 +242,29 @@ func (s *ChainRegistryTestSuite) TestErrorNotFoundUpdateNodeByID() {
 		URLs: []string{"testUrl1"},
 	}
 	err := s.Store.UpdateNodeByID(context.Background(), testNode)
+	assert.Error(s.T(), err, "Should update node with errors")
+}
+
+func (s *ChainRegistryTestSuite) TestUpdateBlockPositionByID() {
+	s.TestRegisterNodes()
+
+	testNode, _ := s.Store.GetNodeByName(context.Background(), tenantID1, nodeName2)
+	testNode.ListenerBlockPosition = 10
+	err := s.Store.UpdateBlockPositionByID(context.Background(), testNode.ID, testNode.ListenerBlockPosition)
+	assert.NoError(s.T(), err, "Should get node without errors")
+
+	node, _ := s.Store.GetNodeByName(context.Background(), tenantID1, nodeName2)
+	CompareNodes(s.T(), testNode, node)
+}
+
+func (s *ChainRegistryTestSuite) TestErrorNotFoundUpdateBlockPositionByID() {
+	s.TestRegisterNodes()
+
+	testNode := &types.Node{
+		ID:                    "0d60a85e-0b90-4482-a14c-108aea2557aa",
+		ListenerBlockPosition: 10,
+	}
+	err := s.Store.UpdateBlockPositionByID(context.Background(), testNode.ID, testNode.ListenerBlockPosition)
 	assert.Error(s.T(), err, "Should update node with errors")
 }
 

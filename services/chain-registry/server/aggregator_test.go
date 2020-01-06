@@ -110,6 +110,60 @@ func TestAggregator(t *testing.T) {
 	}
 }
 
+func TestAggregatorTCP(t *testing.T) {
+	testCases := []struct {
+		desc     string
+		given    dynamic.Configurations
+		expected *dynamic.TCPConfiguration
+	}{
+		{
+			desc: "Returns a TCP configuration",
+			given: dynamic.Configurations{
+				"provider-1": &dynamic.Configuration{
+					TCP: &dynamic.TCPConfiguration{
+						Routers: map[string]*dynamic.TCPRouter{
+							"router-1": {},
+						},
+						Services: map[string]*dynamic.TCPService{
+							"service-1": {},
+						},
+					},
+				},
+				"provider-2": &dynamic.Configuration{
+					TCP: &dynamic.TCPConfiguration{
+						Routers: map[string]*dynamic.TCPRouter{
+							"router-2": {},
+						},
+						Services: map[string]*dynamic.TCPService{
+							"service-2": {},
+						},
+					},
+				},
+			},
+			expected: &dynamic.TCPConfiguration{
+				Routers: map[string]*dynamic.TCPRouter{
+					"router-1@provider-1": {},
+					"router-2@provider-2": {},
+				},
+				Services: map[string]*dynamic.TCPService{
+					"service-1@provider-1": {},
+					"service-2@provider-2": {},
+				},
+			},
+		},
+	}
+
+	for _, test := range testCases {
+		test := test
+		t.Run(test.desc, func(t *testing.T) {
+			t.Parallel()
+
+			actual := mergeConfiguration(test.given)
+			assert.Equal(t, test.expected, actual.TCP)
+		})
+	}
+}
+
 func TestAggregator_tlsoptions(t *testing.T) {
 	testCases := []struct {
 		desc     string

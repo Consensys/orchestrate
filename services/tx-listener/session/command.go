@@ -1,8 +1,6 @@
 package session
 
 import (
-	"reflect"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 )
 
@@ -42,7 +40,7 @@ func CompareConfiguration(oldConfig, newConfig *dynamic.Configuration) []*Comman
 			continue
 		}
 
-		if !reflect.DeepEqual(newConfig.Nodes[k], oldConfig.Nodes[k]) {
+		if !isEqualNode(newConfig.Nodes[k], oldConfig.Nodes[k]) {
 			command := &Command{
 				Type: UPDATE,
 				Node: newConfig.Nodes[k],
@@ -52,4 +50,12 @@ func CompareConfiguration(oldConfig, newConfig *dynamic.Configuration) []*Comman
 	}
 
 	return commands
+}
+
+func isEqualNode(node1, node2 *dynamic.Node) bool {
+	return node1.TenantID == node2.TenantID &&
+		node1.Name == node2.Name &&
+		node1.URL == node2.URL &&
+		node1.Listener.Depth == node2.Listener.Depth &&
+		node1.Listener.Backoff == node2.Listener.Backoff
 }
