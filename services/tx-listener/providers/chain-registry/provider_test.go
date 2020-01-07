@@ -48,8 +48,11 @@ type ProviderTestSuite struct {
 
 func (s *ProviderTestSuite) SetupTest() {
 	s.provider = &Provider{
-		Client:          &MockClient{i: 0},
-		RefreshInterval: 1 * time.Second,
+		Client: &MockClient{i: 0},
+		conf: &Config{
+			RefreshInterval: time.Millisecond,
+			ChainProxyURL:   "http://test-proxy",
+		},
 	}
 }
 
@@ -68,6 +71,12 @@ func (s *ProviderTestSuite) TestRun() {
 	config = <-providerConfigUpdateCh
 	assert.Equal(s.T(), "chain-registry", config.Provider, "Should get the correct providerName")
 	assert.Len(s.T(), config.Configuration.Nodes, 1)
+	assert.Equal(
+		s.T(),
+		"http://test-proxy/0d60a85e-0b90-4482-a14c-108aea2557aa",
+		config.Configuration.Nodes["0d60a85e-0b90-4482-a14c-108aea2557aa"].URL,
+		"Node URL should be correct",
+	)
 
 	cancel()
 }

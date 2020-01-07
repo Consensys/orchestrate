@@ -4,8 +4,6 @@ import (
 	"context"
 	"sync"
 
-	"github.com/spf13/viper"
-
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 )
 
@@ -24,8 +22,8 @@ func Init(ctx context.Context) {
 		chainregistry.Init(ctx)
 
 		provider = &Provider{
-			Client:          chainregistry.GlobalClient(),
-			RefreshInterval: viper.GetDuration(ProviderRefreshIntervalViperKey),
+			Client: chainregistry.GlobalClient(),
+			conf:   NewConfig(),
 		}
 	})
 }

@@ -6,18 +6,16 @@ import (
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 )
 
 func init() {
 	viper.SetDefault(ProviderRefreshIntervalViperKey, providerRefreshIntervalDefault)
 	_ = viper.BindEnv(ProviderRefreshIntervalViperKey, providerRefreshIntervalEnv)
-	viper.SetDefault(ChainProxyURLViperKey, chainProxyURLDefault)
-	_ = viper.BindEnv(ChainProxyURLViperKey, chainProxyURLEnv)
 }
 
 func Flags(f *pflag.FlagSet) {
 	ProviderRefreshInterval(f)
-	ChainProxyURL(f)
 }
 
 const (
@@ -35,17 +33,14 @@ Environment variable: %q`, providerRefreshIntervalEnv)
 	_ = viper.BindPFlag(ProviderRefreshIntervalViperKey, f.Lookup(providerRefreshIntervalFlag))
 }
 
-const (
-	chainProxyURLFlag     = "chain-proxy-url"
-	ChainProxyURLViperKey = "chain.proxy.url"
-	chainProxyURLDefault  = "localhost:8081"
-	chainProxyURLEnv      = "CHAIN_PROXY_URL"
-)
+type Config struct {
+	RefreshInterval time.Duration
+	ChainProxyURL   string
+}
 
-// ProviderRefreshInterval register flag for refresh interval duration
-func ChainProxyURL(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`URL of the Chain proxy
-Environment variable: %q`, chainProxyURLEnv)
-	f.String(chainProxyURLFlag, chainProxyURLDefault, desc)
-	_ = viper.BindPFlag(ChainProxyURLViperKey, f.Lookup(chainProxyURLFlag))
+func NewConfig() *Config {
+	return &Config{
+		ChainProxyURL:   viper.GetString(chainregistry.ChainProxyURLViperKey),
+		RefreshInterval: viper.GetDuration(ProviderRefreshIntervalViperKey),
+	}
 }

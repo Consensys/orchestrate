@@ -28,6 +28,7 @@ func Init(ctx context.Context) {
 		}
 
 		store.Init(ctx)
+
 		// Set Chain-Registry handler
 		handler = NewHandler(store.GlobalStoreRegistry())
 	})

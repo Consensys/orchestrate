@@ -12,7 +12,7 @@ import (
 func TestChainRegistryTarget(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	ChainRegistryURL(flgs)
-	expected := "localhost:8080"
+	expected := "localhost:8081"
 	assert.Equal(t, expected, viper.GetString(ChainRegistryURLViperKey), "Default")
 
 	_ = os.Setenv(chainRegistryURLEnv, "env-chain-registry")

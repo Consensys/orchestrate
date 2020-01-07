@@ -2,6 +2,7 @@ package chainregistry
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/cenkalti/backoff/v3"
@@ -16,8 +17,8 @@ import (
 )
 
 type Provider struct {
-	Client          chainregistry.Client
-	RefreshInterval time.Duration
+	Client chainregistry.Client
+	conf   *Config
 }
 
 func (p *Provider) Run(ctx context.Context, configInput chan<- *dynamic.Message) error {
@@ -46,7 +47,7 @@ func (p *Provider) run(ctx context.Context, configInput chan<- *dynamic.Message)
 		return errors.InternalError("client not initialized")
 	}
 
-	ticker := time.NewTicker(p.RefreshInterval)
+	ticker := time.NewTicker(p.conf.RefreshInterval)
 	defer ticker.Stop()
 
 loop:
@@ -85,8 +86,7 @@ func (p *Provider) buildConfiguration(nodes []*types.Node) *dynamic.Message {
 			ID:       node.ID,
 			TenantID: node.TenantID,
 			Name:     node.Name,
-			// TODO: to replace by fmt.Sprintf("%s/%s", viper.GetString(ChainProxyURLViperKey), node.ID) when traefik is fully working
-			URL: node.URLs[0],
+			URL:      fmt.Sprintf("%v/%v", p.conf.ChainProxyURL, node.ID),
 			Listener: &dynamic.Listener{
 				BlockPosition: node.ListenerBlockPosition,
 				Depth:         node.ListenerDepth,

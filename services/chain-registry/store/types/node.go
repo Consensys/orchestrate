@@ -76,7 +76,6 @@ func BuildConfiguration(nodes []*Node) (*dynamic.Configuration, error) {
 
 		servers := make([]dynamic.Server, 0)
 		for _, nodeURL := range node.URLs {
-
 			u, err := url.Parse(nodeURL)
 			if err != nil {
 				return nil, errors.FromError(err).ExtendComponent(component)
@@ -87,9 +86,11 @@ func BuildConfiguration(nodes []*Node) (*dynamic.Configuration, error) {
 				URL:    nodeURL,
 			})
 		}
+
 		config.HTTP.Services[nodeID] = &dynamic.Service{
 			LoadBalancer: &dynamic.ServersLoadBalancer{
-				Servers: servers,
+				PassHostHeader: func(v bool) *bool { return &v }(false),
+				Servers:        servers,
 			},
 		}
 	}

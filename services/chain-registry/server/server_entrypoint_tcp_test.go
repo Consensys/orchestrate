@@ -1,3 +1,6 @@
+// All scripts in server are highly inspired from Traefik server
+// c.f. https://github.com/containous/traefik/tree/v2.0.5/pkg/server
+
 package server
 
 import (

@@ -1,3 +1,6 @@
+// All scripts in server are highly inspired from Traefik server
+// c.f. https://github.com/containous/traefik/tree/v2.0.5/pkg/server
+
 package server
 
 import (
@@ -18,14 +21,14 @@ import (
 	"github.com/containous/traefik/v2/pkg/middlewares/tracing"
 	"github.com/containous/traefik/v2/pkg/responsemodifiers"
 	"github.com/containous/traefik/v2/pkg/server/middleware"
-	"github.com/containous/traefik/v2/pkg/server/router"
 	routertcp "github.com/containous/traefik/v2/pkg/server/router/tcp"
-	"github.com/containous/traefik/v2/pkg/server/service"
 	"github.com/containous/traefik/v2/pkg/server/service/tcp"
 	tcpCore "github.com/containous/traefik/v2/pkg/tcp"
 	"github.com/eapache/channels"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/server/router"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/server/service"
 )
 
 // loadConfiguration manages dynamically routers, middlewares, servers and TLS configurations
@@ -103,6 +106,7 @@ func (s *Server) createHTTPHandlers(ctx context.Context, configuration *runtime.
 	}
 	serviceManager := service.NewManager(configuration.Services, s.defaultRoundTripper, s.metricsRegistry, s.routinesPool, apiHandler, s.restHandler)
 	middlewaresBuilder := middleware.NewBuilder(configuration.Middlewares, serviceManager)
+
 	responseModifierFactory := responsemodifiers.NewBuilder(configuration.Middlewares)
 	routerManager := router.NewManager(configuration, serviceManager, middlewaresBuilder, responseModifierFactory)
 
