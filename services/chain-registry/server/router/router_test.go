@@ -300,8 +300,6 @@ func TestRouterManager_Get(t *testing.T) {
 	for _, test := range testCases {
 		test := test
 		t.Run(test.desc, func(t *testing.T) {
-			t.Parallel()
-
 			rtConf := runtime.NewConfig(dynamic.Configuration{
 				HTTP: &dynamic.HTTPConfiguration{
 					Services:    test.serviceConfig,
@@ -685,8 +683,6 @@ func TestRuntimeConfiguration(t *testing.T) {
 		test := test
 
 		t.Run(test.desc, func(t *testing.T) {
-			t.Parallel()
-
 			entryPoints := []string{"web"}
 
 			rtConf := runtime.NewConfig(dynamic.Configuration{

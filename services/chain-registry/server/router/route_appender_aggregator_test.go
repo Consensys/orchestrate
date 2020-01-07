@@ -55,8 +55,6 @@ func TestNewRouteAppenderAggregator(t *testing.T) {
 	for _, test := range testCases {
 		test := test
 		t.Run(test.desc, func(t *testing.T) {
-			t.Parallel()
-
 			ctx := context.Background()
 
 			router := NewRouteAppenderAggregator(ctx, &test.staticConf, "traefik", nil)

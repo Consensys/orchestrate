@@ -105,8 +105,6 @@ func TestAggregator(t *testing.T) {
 	for _, test := range testCases {
 		test := test
 		t.Run(test.desc, func(t *testing.T) {
-			t.Parallel()
-
 			actual := mergeConfiguration(test.given)
 			assert.Equal(t, test.expected, actual.HTTP)
 		})
@@ -159,8 +157,6 @@ func TestAggregatorTCP(t *testing.T) {
 	for _, test := range testCases {
 		test := test
 		t.Run(test.desc, func(t *testing.T) {
-			t.Parallel()
-
 			actual := mergeConfiguration(test.given)
 			assert.Equal(t, test.expected, actual.TCP)
 		})
@@ -344,8 +340,6 @@ func TestAggregator_tlsoptions(t *testing.T) {
 		test := test
 
 		t.Run(test.desc, func(t *testing.T) {
-			t.Parallel()
-
 			actual := mergeConfiguration(test.given)
 			assert.Equal(t, test.expected, actual.TLS.Options)
 		})
