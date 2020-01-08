@@ -14,7 +14,7 @@ func Faucet(fct faucet.Faucet) engine.HandlerFunc {
 
 		// Skip if the chainId is unset
 		if txctx.Envelope.GetChain() == nil || txctx.Envelope.GetChain().ID() == nil {
-			txctx.Logger.Debugf("faucet: skipping faucet request because no chainI")
+			txctx.Logger.Debugf("faucet: skipping faucet request because no chainID")
 			return
 		}
 

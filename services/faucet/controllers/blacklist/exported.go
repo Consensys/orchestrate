@@ -37,7 +37,7 @@ func Init(ctx context.Context) {
 		// BlackList accounts by reading viper configuration
 		blacklist := viper.GetStringSlice(faucetBlacklistViperKey)
 		for _, bl := range blacklist {
-			chainID, addr, err := utils.FromChainAccountKey(bl)
+			chainID, addr, err := utils.FromChainAddressKey(bl)
 			if err != nil {
 				logger.WithError(err).Fatalf("faucet: could not initialize controller")
 			}

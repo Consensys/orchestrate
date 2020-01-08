@@ -36,7 +36,7 @@ services:
     --label org.label-schema.build-date=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
     --label org.label-schema.name="${CI_PROJECT_NAME}"
     --label org.label-schema.version="branch"
-    --label org.label-schema.url="https://docs.orchestrate.pegasys.tech}"
+    --label org.label-schema.url="https://docs.orchestrate.pegasys.tech"
     --label org.label-schema.vcs-url="${CI_PROJECT_URL}"
     --label org.label-schema.vcs-ref="${CI_COMMIT_SHA:0:8}"
     --label org.label-schema.vendor="PegaSys"
@@ -51,7 +51,7 @@ services:
     --label org.label-schema.build-date=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
     --label org.label-schema.name="${CI_PROJECT_NAME}/e2e"
     --label org.label-schema.version="branch"
-    --label org.label-schema.url="https://docs.orchestrate.pegasys.tech}"
+    --label org.label-schema.url="https://docs.orchestrate.pegasys.tech"
     --label org.label-schema.vcs-url="${CI_PROJECT_URL}"
     --label org.label-schema.vcs-ref="${CI_COMMIT_SHA:0:8}"
     --label org.label-schema.vendor="PegaSys"

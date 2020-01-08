@@ -21,7 +21,7 @@ var (
 
 // FaucetAddress register flag for Faucet address
 func FaucetAddress(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Addresses of Faucet on each chain (format <chainID>@<Address>)
+	desc := fmt.Sprintf(`Addresses of Faucet on each chain (format <address>@<chainID>)
 Environment variable: %q`, creditorAddressEnv)
 	f.StringSlice(creditorAddressFlag, creditorAddressDefault, desc)
 	_ = viper.BindPFlag(creditorAddressViperKey, f.Lookup(creditorAddressFlag))

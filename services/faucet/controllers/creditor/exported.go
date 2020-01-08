@@ -10,6 +10,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet"
 )
 
+const component = "faucet"
+
 var (
 	ctrl     *Controller
 	initOnce = &sync.Once{}
@@ -32,14 +34,14 @@ func Init(ctx context.Context) {
 
 		// Set creditors
 		for _, creditor := range viper.GetStringSlice(creditorAddressViperKey) {
-			chainID, addr, err := utils.FromChainAccountKey(creditor)
+			chainID, addr, err := utils.FromChainAddressKey(creditor)
 			if err != nil {
-				logger.WithError(err).Fatalf("faucet: could not initialize controller")
+				logger.WithError(err).Fatalf("%s: could not initialize controller", component)
 			}
 			ctrl.SetCreditor(chainID, addr)
 		}
 
-		logger.Info("faucet: controller ready")
+		logger.Infof("%s: controller ready", component)
 	})
 }
 
