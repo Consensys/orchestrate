@@ -359,10 +359,6 @@ func (r *ContractRegistry) GetCatalog(ctx context.Context, req *svc.GetCatalogRe
 
 // GetTags returns a list of all tags available for a contract name.
 func (r *ContractRegistry) GetTags(ctx context.Context, req *svc.GetTagsRequest) (*svc.GetTagsResponse, error) {
-	if _, ok := r.contractHashes[req.GetName()]; !ok {
-		return nil, errors.NotFoundError("No Tags found for requested contract name").ExtendComponent(component)
-	}
-
 	resp := &svc.GetTagsResponse{}
 	for tag := range r.contractHashes[req.GetName()] {
 		resp.Tags = append(resp.Tags, tag)

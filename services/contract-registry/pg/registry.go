@@ -367,6 +367,7 @@ func (r *ContractRegistry) GetTags(ctx context.Context, req *svc.GetTagsRequest)
 	err := r.db.ModelContext(ctx, (*TagModel)(nil)).
 		Column("tag_model.name").
 		Join("JOIN repositories AS r ON r.id = tag_model.repository_id").
+		Where("r.name = ?", req.GetName()).
 		OrderExpr("lower(tag_model.name)").
 		Select(&names)
 	if err != nil {

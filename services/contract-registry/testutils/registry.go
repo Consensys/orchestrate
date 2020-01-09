@@ -339,7 +339,11 @@ func (s *ContractRegistryTestSuite) TestContractRegistryBySig() {
 	assert.Equal(s.T(), []string{"ERC20"}, namesResp.GetNames())
 
 	// Get Tags
-	tagsResp, err := s.R.GetTags(context.Background(), &svc.GetTagsRequest{Name: "ERC20"})
+	tagsResp, err := s.R.GetTags(context.Background(), &svc.GetTagsRequest{Name: "Unknown"})
+	assert.NoError(s.T(), err)
+	assert.Equal(s.T(), []string(nil), tagsResp.GetTags())
+
+	tagsResp, err = s.R.GetTags(context.Background(), &svc.GetTagsRequest{Name: "ERC20"})
 	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), []string{"latest", "v1.0.0"}, tagsResp.GetTags())
 
