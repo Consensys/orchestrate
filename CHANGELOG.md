@@ -16,7 +16,7 @@ All notable changes to this project will be documented in this file.
     * `MULTI_TENANCY_ENABLED` to enable multi-tenancy. 
     * `AUTH_JWT_CERTIFICATE` to provision trusted certificate to control signature of ID / Access Token (JWT)
     * `AUTH_JWT_CLAIMS_NAMESPACE` to provision the namespace to retrieve Orchestrate AUth element in OpenId or Access Token (JWT) (in particular multitenancy information)
-    * `AUTH_API_KEY` secret allowing to bypass JWT authentication (usuful for some microservice to microservice communications)
+    * `AUTH_API_KEY` secret allowing to bypass JWT authentication (useful for some microservice to microservice communications)
  
 ### 🆕 Chain-registry and tx-listener
 * Add the chain-registry microservice that:
@@ -48,13 +48,20 @@ All notable changes to this project will be documented in this file.
  * The `tx-decoder` consumes kafka messages only in the topic `topic-tx-decoder` instead of the `topic-tx-decoder-{chainID}`
  * `ETH_CLIENT_URL` is deprecated, the chains urls have to be set in `CHAIN_REGISTRY_INIT`
 
+
+## v1.2.2 (2020-01-09)
+
+### 🛠 Bug fixes
+
+* Fix incorrect filtering on "name" argument on the GetTags method of the Contract Registry
+
 ## v1.2.1 (2019-12-23)
 
 ### 🛠 Bug fixes
 
 * Upgrade retry policy when getting `NotFoundError` on JSON-RPC request. In particular it allows the transaction listener to effectively handle Infura endpoint that have sync discrepancies.
 
-## v1.2.0 (2019-20-13)
+## v1.2.0 (2019-12-13)
 
 ### 🆕 Features
 
