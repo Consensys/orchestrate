@@ -281,7 +281,7 @@ func (r *ContractRegistry) getCodehash(contract common.AccountInstance) (ethcomm
 		}
 	}
 
-	instance, _ := contract.Short()
+	instance := contract.Short()
 	return ethcommon.Hash{},
 		errors.NotFoundError(
 			"contract instance %q not registered", instance,

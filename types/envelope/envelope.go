@@ -18,6 +18,9 @@ func (e *Envelope) Error() string {
 
 // Sender returns sender of the transaction
 func (e *Envelope) Sender() ethcommon.Address {
+	if e.GetFrom() == nil {
+		return ethcommon.Address{0}
+	}
 	return e.GetFrom().Address()
 }
 

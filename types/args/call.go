@@ -10,11 +10,17 @@ var component = "types.args"
 
 // Short returns a string representation of the method
 func (c *Call) Short() string {
+	if c.GetMethod() == nil {
+		return ""
+	}
 	return c.GetMethod().GetName()
 }
 
 // IsConstructor indicate whether this method for contract deployment
 func (c *Call) IsConstructor() bool {
+	if c.GetMethod() == nil {
+		return false
+	}
 	return c.GetMethod().IsConstructor()
 }
 

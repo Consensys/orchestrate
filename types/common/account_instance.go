@@ -3,8 +3,17 @@ package common
 import "fmt"
 
 // Short returns a string representation of the account instance
-func (instance *AccountInstance) Short() (string, error) {
-	// TODO: this method can never error
-	addr := instance.GetAccount().Address()
-	return fmt.Sprintf("%v@%v", addr.String(), instance.GetChain().GetId()), nil
+func (instance *AccountInstance) Short() string {
+	var addr, id string
+	if instance.GetAccount() == nil {
+		addr = ""
+	} else {
+		addr = instance.GetAccount().Address().String()
+	}
+	if instance.GetChain() == nil {
+		id = ""
+	} else {
+		id = string(instance.GetChain().GetId())
+	}
+	return fmt.Sprintf("%v@%v", addr, id)
 }

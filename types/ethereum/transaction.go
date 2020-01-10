@@ -14,6 +14,9 @@ func (txData *TxData) SetNonce(n uint64) *TxData {
 
 // ToAddress return To in common.Address format
 func (txData *TxData) Receiver() ethcommon.Address {
+	if txData.GetTo() == nil {
+		return ethcommon.Address{0}
+	}
 	return txData.GetTo().Address()
 }
 
@@ -39,6 +42,9 @@ func (txData *TxData) SetValue(v *big.Int) *TxData {
 
 // GetValueBig returns value of a transaction as a Big integer value
 func (txData *TxData) GetValueBig() *big.Int {
+	if txData.GetValue() == nil {
+		return big.NewInt(0)
+	}
 	return txData.GetValue().Value()
 }
 

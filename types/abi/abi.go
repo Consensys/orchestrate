@@ -29,23 +29,38 @@ func (c *ContractId) Short() string {
 }
 
 func (c *Contract) GetName() string {
+	if c.GetId() == nil {
+		return ""
+	}
 	return c.GetId().GetName()
 }
 
 func (c *Contract) SetName(name string) {
+	if c.Id == nil {
+		c.Id = &ContractId{}
+	}
 	c.Id.Name = name
 }
 
 func (c *Contract) GetTag() string {
+	if c.GetId() == nil {
+		return ""
+	}
 	return c.GetId().GetTag()
 }
 
 func (c *Contract) SetTag(tag string) {
+	if c.Id == nil {
+		c.Id = &ContractId{}
+	}
 	c.Id.Tag = tag
 }
 
 // Short returns a short string representation of contract information
 func (c *Contract) Short() string {
+	if c.Id == nil {
+		return ""
+	}
 	return c.GetId().Short()
 }
 
