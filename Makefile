@@ -136,3 +136,12 @@ down-quorum:
 up: deps quorum bootstrap orchestrate
 
 down: down-orchestrate down-quorum down-deps
+
+hashicorp-accounts:
+	@bash scripts/deps/config/hashicorp/vault.sh kv list secret/default
+
+hashicorp-token-lookup:
+	@bash scripts/deps/config/hashicorp/vault.sh token lookup
+
+hashicorp-vault:
+	@bash scripts/deps/config/hashicorp/vault.sh $(COMMAND)

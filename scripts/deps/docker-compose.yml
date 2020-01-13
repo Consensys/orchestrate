@@ -129,6 +129,8 @@ services:
       - vault
     volumes:
       - vault-token:/vault/token
+      - ./config/hashicorp/init.sh:/init.sh
+    command: sh /init.sh
 
   jaeger:
     <<: *container-common
