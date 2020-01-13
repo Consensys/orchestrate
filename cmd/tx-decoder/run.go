@@ -6,10 +6,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/rpc"
 	producer "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/producer/tx-decoder"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client"
 )
 
 func newRunCommand() *cobra.Command {
@@ -19,9 +19,6 @@ func newRunCommand() *cobra.Command {
 		Run:   run,
 	}
 
-	// Register Ethereum client flags
-	ethclient.Flags(runCmd.Flags())
-
 	// Register Kafka flags
 	broker.InitKafkaFlags(runCmd.Flags())
 	broker.KafkaTopicTxDecoded(runCmd.Flags())
@@ -29,6 +26,9 @@ func newRunCommand() *cobra.Command {
 
 	// Registers local flags for handler producer
 	producer.InitFlags(runCmd.Flags())
+
+	// Contract Registry
+	registryclient.ContractRegistryURL(runCmd.Flags())
 
 	return runCmd
 }

@@ -11,6 +11,7 @@ import (
 	chnregclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	provider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/providers/chain-registry"
 	hook "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/hooks/kafka"
+	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client"
 	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store/client"
 )
 
@@ -34,8 +35,9 @@ func newRunCommand() *cobra.Command {
 	// Listener flags
 	provider.Flags(runCmd.Flags())
 	chnregclient.Flags(runCmd.Flags())
+	registryclient.ContractRegistryURL(runCmd.Flags())
 
-	// Registers local flags for handler producer
+	// Register local flags for handler producer
 	hook.InitFlags(runCmd.Flags())
 
 	return runCmd
