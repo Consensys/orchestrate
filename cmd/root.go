@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/chain-registry"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/contract-registry"
@@ -49,6 +51,10 @@ func NewCommand() *cobra.Command {
 	rootCmd.AddCommand(contractregistry.NewRootCommand())
 	rootCmd.AddCommand(envelopestore.NewRootCommand())
 	rootCmd.AddCommand(chainregistry.NewRootCommand())
+
+	// Register Multi-Tenancy flags
+	multitenancy.Enabled(rootCmd.PersistentFlags())
+	authentication.Flags(rootCmd.PersistentFlags())
 
 	return rootCmd
 }

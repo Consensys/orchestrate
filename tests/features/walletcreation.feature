@@ -6,8 +6,8 @@ Feature: Generate wallet
   @wallet
   Scenario: Generate wallet
     When I send envelopes to topic "wallet.generator"
-    |
-    |
+    | tenantid                             |
+    | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
     Then Envelopes should be in topic "wallet.generator"
     Then Envelopes should be in topic "wallet.generated"
     And Envelopes should have from set
@@ -15,8 +15,8 @@ Feature: Generate wallet
   @wallet
   Scenario: Generate wallet with Faucet credit
      When I send envelopes to topic "wallet.generator"
-    | chain.id           | tx.value           |  
-    | chain.primary      | 100000000000000000 |
+    | chain.id           | tx.value           | tenantid                             |
+    | chain.primary      | 100000000000000000 | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
     Then Envelopes should be in topic "wallet.generator"
     Then Envelopes should be in topic "wallet.generated"
     And Envelopes should have from set

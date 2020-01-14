@@ -50,6 +50,7 @@ require (
 	github.com/magiconair/properties v1.8.1
 	github.com/nmvalera/striped-mutex v0.1.0
 	github.com/opentracing/opentracing-go v1.1.0
+	github.com/ory/fosite v0.30.2
 	github.com/pelletier/go-toml v1.6.0 // indirect
 	github.com/pierrec/lz4 v2.3.0+incompatible // indirect
 	github.com/prometheus/client_golang v1.2.1

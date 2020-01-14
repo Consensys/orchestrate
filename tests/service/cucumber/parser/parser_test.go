@@ -91,9 +91,9 @@ func TestParseEnvelopes(t *testing.T) {
 	// Set a chain alias in global namespace
 	p.Aliases.Set("global", "chain.primary", "888")
 
-	// Set contract alias in local namespaces
-	p.Aliases.Set("test-1", "contract.my-token", "0xEA674fdDe714fd979de3EdF0F56AA9716B898ec8")
-	p.Aliases.Set("test-2", "contract.my-token", "0x77F888CC34a3E6EC4935eF27a83a48fAe548fa4d")
+	// Set Contract alias in local namespaces
+	p.Aliases.Set("test-1", "Contract.my-token", "0xEA674fdDe714fd979de3EdF0F56AA9716B898ec8")
+	p.Aliases.Set("test-2", "Contract.my-token", "0x77F888CC34a3E6EC4935eF27a83a48fAe548fa4d")
 
 	headers := &gherkin.TableRow{
 		Cells: []*gherkin.TableCell{
@@ -109,7 +109,7 @@ func TestParseEnvelopes(t *testing.T) {
 		Cells: []*gherkin.TableCell{
 			{Value: "17"},
 			{Value: "0xe3F5351F8da45aE9150441E3Af21906CCe4cBbc0"},
-			{Value: "contract.my-token"},
+			{Value: "Contract.my-token"},
 			{Value: "2"},
 			{Value: "1,2"},
 		},
@@ -119,7 +119,7 @@ func TestParseEnvelopes(t *testing.T) {
 		Cells: []*gherkin.TableCell{
 			{Value: "chain.primary"},
 			{Value: "0xe3F5351F8da45aE9150441E3Af21906CCe4cBbc0"},
-			{Value: "contract.my-token"},
+			{Value: "Contract.my-token"},
 			{Value: "1"},
 			{Value: "1,2,3"},
 		},

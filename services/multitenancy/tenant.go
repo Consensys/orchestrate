@@ -40,8 +40,8 @@ func SplitTenant(key string) (context.Context, string, error) {
 	case 1:
 		return context.Background(), key, nil
 	case 2:
-		ctx := context.WithValue(context.Background(), authentication.TenantIDKey, slicePkey[0]) // nolint
-		return ctx, slicePkey[1], nil
+		ctx := context.WithValue(context.Background(), authentication.TenantIDKey, slicePkey[1]) // nolint
+		return ctx, slicePkey[0], nil
 	default:
 		return nil, "", errors.InvalidFormatError("The key have more than one separator as " + sep)
 

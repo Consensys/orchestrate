@@ -4,6 +4,10 @@ import (
 	"context"
 	"os"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication"
+	auth "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/token/generator"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
+
 	"github.com/spf13/cobra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/logger"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
@@ -45,6 +49,11 @@ func NewRunCommand() *cobra.Command {
 	// Register Cucumber flag
 	cucumber.InitFlags(runCmd.Flags())
 	steps.InitFlags(runCmd.Flags())
+
+	// Register Multi-Tenancy flags
+	multitenancy.Enabled(runCmd.Flags())
+	authentication.Flags(runCmd.Flags())
+	auth.AuthServicePrivateKey(runCmd.Flags())
 
 	return runCmd
 }

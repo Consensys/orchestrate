@@ -12,6 +12,8 @@ import (
 )
 
 var testKey = "test"
+var tenantIDKey = "tenant_id"
+var tenantIDValue = "f30c452b-e5fb-4102-a45d-bc00a060bcc6"
 
 func newPipeline(s string) HandlerFunc {
 	return func(txctx *TxContext) {
@@ -135,6 +137,27 @@ func TestCombineHandlers(t *testing.T) {
 
 	assert.Equal(t, expected, res, "Call order on handlers should be correct")
 	assert.Len(t, txctx.Envelope.Errors, 2, "Error count should be correct")
+}
+
+func TestTxContextAndContext(t *testing.T) {
+	// Initialize context
+	txctx := NewTxContext()
+	txctx.Prepare(nil, nil)
+	txctx.Set(tenantIDKey, tenantIDValue)
+
+	txctxTenantID, ok := txctx.Get(tenantIDKey).(string)
+	if !ok || txctxTenantID == "" {
+		assert.Fail(t, "txctx: not able to retrieve the tenant ID: The tenant_id is not present in the txContext")
+	}
+	assert.Equal(t, tenantIDValue, txctxTenantID, "The tenant_id is not present in the txContext")
+
+	ctx := txctx.Context()
+	ctxTenantID, ok := ctx.Value(tenantIDKey).(string)
+	if !ok || ctxTenantID == "" {
+		assert.Fail(t, "ctx: not able to retrieve the tenant ID: The tenant_id is not present in the txContext")
+	}
+	assert.Equal(t, tenantIDValue, ctxTenantID, "The tenant_id is not present in the txContext")
+
 }
 
 func TestCombineHandlersNested(t *testing.T) {

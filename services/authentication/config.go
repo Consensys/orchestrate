@@ -14,6 +14,11 @@ func init() {
 	_ = viper.BindEnv(TenantNamespaceViperKey, tenantNamespaceEnv)
 }
 
+func Flags(f *pflag.FlagSet) {
+	AuthServiceCertificate(f)
+	TenantNamespace(f)
+}
+
 // Provision trusted certificate of the authentication service (base64 encoded)
 const (
 	authServiceCertificateFlag     = "auth-service-certificate"

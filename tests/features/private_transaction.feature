@@ -5,11 +5,11 @@ Feature: Deploy private ERC20 contract
 
   Scenario: Deploy private ERC20 contract
    Given I register the following contract
-      | name         | artifacts        |
-      | SimpleToken  | SimpleToken.json |
+      | name         | artifacts        | tenantid                             |
+      | SimpleToken  | SimpleToken.json | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
     When I send envelopes to topic "tx.crafter"
-      | chain.id      | from                                       | contract.name | method.sig    | tx.gas  | privateFor                                   | privateFrom                                   | privateTxType            | protocol |
-      | chain.private | 0x7E654d251Da770A068413677967F6d3Ea2FeA9E4 | SimpleToken   | constructor() | 2000000 | QfeDAys9MPDs2XHExtc84jKGHxZg/aj52DTh0vtA3Xc= | BULeR8JyUWhiuuCMU/HLA0Q5pzkYT+cHII3ZKBey3Bo=  | whatAmISupposedToSetHere | 2        |
+      | chain.id      | from                                       | contract.name | method.sig    | tx.gas  | privateFor                                   | privateFrom                                   | privateTxType            | protocol | tenantid                             |
+      | chain.private | 0x7E654d251Da770A068413677967F6d3Ea2FeA9E4 | SimpleToken   | constructor() | 2000000 | QfeDAys9MPDs2XHExtc84jKGHxZg/aj52DTh0vtA3Xc= | BULeR8JyUWhiuuCMU/HLA0Q5pzkYT+cHII3ZKBey3Bo=  | whatAmISupposedToSetHere | 2        | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.nonce"
     Then Envelopes should be in topic "tx.signer"

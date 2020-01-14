@@ -5,11 +5,11 @@ Feature: deploy ERC20 contract
 
   Scenario: Deploy ERC20
     Given I register the following contract
-      | name         | artifacts        |
-      | SimpleToken  | SimpleToken.json |
+      | name         | artifacts        | tenantid                             |
+      | SimpleToken  | SimpleToken.json | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
     When I send envelopes to topic "tx.crafter"
-      | chain.id       | from                                       | contract.name | method.sig      | tx.gas     |
-      | chain.primary  | 0x7E654d251Da770A068413677967F6d3Ea2FeA9E4 | SimpleToken   | constructor()   | 2000000 |
+      | chain.id       | from                                       | contract.name | method.sig      | tx.gas  | tenantid                             |
+      | chain.primary  | 0x7E654d251Da770A068413677967F6d3Ea2FeA9E4 | SimpleToken   | constructor()   | 2000000 | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.nonce"
     Then Envelopes should be in topic "tx.signer"

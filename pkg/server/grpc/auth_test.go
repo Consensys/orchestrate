@@ -156,7 +156,7 @@ func TestAuthTokenTenant(t *testing.T) {
 }
 
 func setupContext(tokenValue string) context.Context {
-	md := metadata.Pairs("authorization", "bearer "+tokenValue)
+	md := metadata.Pairs("authorization", "Bearer "+tokenValue)
 	ctx := metautils.NiceMD(md).ToIncoming(context.TODO())
 
 	return ctx

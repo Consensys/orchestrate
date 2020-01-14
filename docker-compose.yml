@@ -34,10 +34,12 @@ x-container-common: &container-common
     - ./public:/go/public:ro
 
 x-contract-registry-common: &contract-registry-common
+  MULTI_TENANCY_ENABLED: 'false'
   CONTRACT_REGISTRY_TYPE: ${CONTRACT_REGISTRY_TYPE-}
   DB_HOST: postgres-contract-registry
 
 x-envelope-store-common: &envelope-store-common
+  MULTI_TENANCY_ENABLED: 'false'
   ENVELOPE_STORE_TYPE: ${ENVELOPE_STORE_TYPE-}
   DB_HOST: postgres-envelope-store
 
@@ -200,6 +202,7 @@ services:
       CUCUMBER_PATHS: "/features"
       CUCUMBER_FORMAT: "cucumber"
       CUCUMBER_ALIAS: "chain.primary:888 chain.private:10"
+      AUTH_SERVICE_PRIVATE_KEY: ${AUTH_SERVICE_PRIVATE_KEY-}
       # Uncomment CUCUMBER_TAGS if only run features and scenarios with @public-tx or @wallet tags ("," = OR, "&&" = AND, "~" = NOT)
       # CUCUMBER_TAGS: "@public-tx,@wallet"
     restart: "no"

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/dgrijalva/jwt-go"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 )
 
 // TODO: adding new tests to add coverage
@@ -133,6 +134,34 @@ func TestAuthToken_VerifyToken(t *testing.T) {
 					t.Errorf("VerifyToken() error = %v, isInvalid %d", jerr, tt.errValue)
 					return
 				}
+			}
+		})
+	}
+}
+
+func TestAuthToken_AddingJWToken(t *testing.T) {
+	tests := []struct {
+		name    string
+		wantErr bool
+	}{
+		{
+			"nominal usecase",
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			// Initialize context and apply combinedHandler
+			txctx := engine.NewTxContext()
+			txctx.Prepare(nil, nil)
+			txctx.Envelope.SetMetadataValue(OauthToken, idToken)
+
+			got := GetGRPCOptionJWTokenFromEnvelope(txctx)
+
+			if (got == nil) != tt.wantErr {
+				t.Errorf("GetGRPCOptionJWTokenFromEnvelope() wantErr %v", tt.wantErr)
+				return
 			}
 		})
 	}

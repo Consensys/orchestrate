@@ -5,10 +5,10 @@ Feature: Invalid Nonce
 
   Scenario: Nonce Too High
     When I send envelopes to topic "tx.signer"
-      | chain.id      | from                                       | tx.nonce  | tx.gasPrice | tx.gas |
-      | chain.primary | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 1000000   | 1000000000  | 21000  |
-      | chain.primary | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 1000001   | 1000000000  | 21000  |
-      | chain.primary | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 1000002   | 1000000000  | 21000  |
+      | chain.id      | from                                       | tx.nonce  | tx.gasPrice | tx.gas | tenantid                             |
+      | chain.primary | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 1000000   | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+      | chain.primary | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 1000001   | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+      | chain.primary | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 1000002   | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
     Then Envelopes should be in topic "tx.signer"
     Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.nonce"
@@ -19,8 +19,8 @@ Feature: Invalid Nonce
 
   Scenario: Nonce Too Low
     When I send envelopes to topic "tx.signer"
-      | chain.id      | from                                       | tx.nonce  | tx.gasPrice | tx.gas |
-      | chain.primary | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 0   | 1000000000  | 21000  |
+      | chain.id      | from                                       | tx.nonce  | tx.gasPrice | tx.gas | tenantid                             |
+      | chain.primary | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 0         | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
     Then Envelopes should be in topic "tx.signer"
     Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.nonce"
@@ -31,13 +31,13 @@ Feature: Invalid Nonce
 
   Scenario: Chaotic nonce
     When I send envelopes to topic "tx.signer"
-      | chain.id      | from                                       | tx.nonce  | tx.gasPrice | tx.gas |
-      | chain.primary | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 1000002   | 1000000000  | 21000  |
-      | chain.primary | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 1         | 1000000000  | 21000  |
-      | chain.primary | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 1000000   | 1000000000  | 21000  |
-      | chain.primary | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 0         | 1000000000  | 21000  |
-      | chain.primary | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 1000001   | 1000000000  | 21000  |
-      | chain.primary | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 2         | 1000000000  | 21000  |
+      | chain.id      | from                                       | tx.nonce  | tx.gasPrice | tx.gas | tenantid                             |
+      | chain.primary | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 1000002   | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+      | chain.primary | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 1         | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+      | chain.primary | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 1000000   | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+      | chain.primary | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 0         | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+      | chain.primary | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 1000001   | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+      | chain.primary | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 2         | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
     Then Envelopes should be in topic "tx.signer"
     Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.nonce"

@@ -13,17 +13,13 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 )
 
-const (
-	TokenHeaderKey = "bearer"
-)
-
 // AuthTokenTenant functions used by gRPC interceptor to authenticate the caller with ID / Access Token and extract tenantID
 func AuthTokenTenant(ctx context.Context) (context.Context, error) {
 	if !viper.GetBool(multitenancy.EnabledViperKey) {
 		// Run the next Interceptor
 		return ctx, nil
 	}
-	rawToken, err := grpc_auth.AuthFromMD(ctx, TokenHeaderKey)
+	rawToken, err := grpc_auth.AuthFromMD(ctx, token_manager.HeaderKey)
 	if err != nil {
 		e := errors.UnauthorizedError("Token Not Found with bearer")
 		return nil, e

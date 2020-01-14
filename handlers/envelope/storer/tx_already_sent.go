@@ -4,6 +4,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/token"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
 )
 
@@ -19,12 +20,16 @@ import (
 // 3. Set envelope status
 func TxAlreadySent(ec ethclient.ChainLedgerReader, s evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
+		// Extract JWT if present
+		jwTokenGRPCOption := token.GetGRPCOptionJWTokenFromEnvelope(txctx)
+
 		// Load possibly already sent envelope
 		resp, err := s.LoadByID(
 			txctx.Context(),
 			&evlpstore.LoadByIDRequest{
 				Id: txctx.Envelope.GetMetadata().GetId(),
-			})
+			},
+			jwTokenGRPCOption)
 		if err != nil && !errors.IsNotFoundError(err) {
 			// Connection to store is broken
 			e := txctx.AbortWithError(err).ExtendComponent(component)

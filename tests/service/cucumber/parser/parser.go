@@ -10,6 +10,10 @@ import (
 	"strconv"
 	"strings"
 
+	auth "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/token/generator"
+
+	"google.golang.org/grpc"
+
 	"github.com/DATA-DOG/godog/gherkin"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	log "github.com/sirupsen/logrus"
@@ -21,6 +25,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
+const tenantIDKey = "tenantid"
+
 type artifact struct {
 	Abi              json.RawMessage
 	Bytecode         string
@@ -31,29 +37,34 @@ type Parser struct {
 	Aliases *AliasRegistry
 }
 
+type ContractSpec struct {
+	Contract    *abi.Contract
+	AccessToken grpc.CallOption
+}
+
 func New() *Parser {
 	return &Parser{
 		Aliases: NewAliasRegistry(),
 	}
 }
 
-func (p *Parser) ParseContracts(scenario string, table *gherkin.DataTable) ([]*abi.Contract, error) {
-	var contracts []*abi.Contract
+func (p *Parser) ParseContracts(scenario string, table *gherkin.DataTable) ([]*ContractSpec, error) {
+	var contractSpecs []*ContractSpec
 	headers := table.Rows[0]
 	for _, row := range table.Rows[1:] {
-		contract := &abi.Contract{}
-		err := p.ParseContract(scenario, headers, row, contract)
+		contractSpec := &ContractSpec{Contract: &abi.Contract{}}
+		err := p.ParseContract(scenario, headers, row, contractSpec)
 		if err != nil {
 			return nil, err
 		}
-		contracts = append(contracts, contract)
+		contractSpecs = append(contractSpecs, contractSpec)
 	}
-	return contracts, nil
+	return contractSpecs, nil
 }
 
-func (p *Parser) ParseContract(scenario string, headers, row *gherkin.TableRow, contract *abi.Contract) error {
+func (p *Parser) ParseContract(scenario string, headers, row *gherkin.TableRow, contractSpec *ContractSpec) error {
 	for i, cell := range row.Cells {
-		err := p.ParseContractCell(headers.Cells[i].Value, cell.Value, contract)
+		err := p.ParseContractCell(headers.Cells[i].Value, cell.Value, contractSpec)
 		if err != nil {
 			return err
 		}
@@ -96,7 +107,7 @@ func (p *Parser) ParseEnvelope(scenario string, headers, row *gherkin.TableRow, 
 	return nil
 }
 
-func (p *Parser) ParseContractCell(header, cell string, contract *abi.Contract) error {
+func (p *Parser) ParseContractCell(header, cell string, contractSpec *ContractSpec) error {
 	switch header {
 	case "artifacts":
 		raw, err := p.openArtifact(cell)
@@ -111,21 +122,28 @@ func (p *Parser) ParseContractCell(header, cell string, contract *abi.Contract) 
 		}
 
 		// Abi is a UTF-8 encoded string. Therefore, we can make the straightforward transition
-		contract.Abi = a.Abi
+		contractSpec.Contract.Abi = a.Abi
 		// Bytecode is an hexstring encoded []byte
-		contract.Bytecode = hexutil.MustDecode(a.Bytecode)
+		contractSpec.Contract.Bytecode = hexutil.MustDecode(a.Bytecode)
 		// Bytecode is an hexstring encoded []byte
-		contract.DeployedBytecode = hexutil.MustDecode(a.DeployedBytecode)
+		contractSpec.Contract.DeployedBytecode = hexutil.MustDecode(a.DeployedBytecode)
 	case "name":
-		if contract.Id == nil {
-			contract.Id = &abi.ContractId{}
+		if contractSpec.Contract.Id == nil {
+			contractSpec.Contract.Id = &abi.ContractId{}
 		}
-		contract.Id.Name = cell
+		contractSpec.Contract.Id.Name = cell
 	case "tag":
-		if contract.Id == nil {
-			contract.Id = &abi.ContractId{}
+		if contractSpec.Contract.Id == nil {
+			contractSpec.Contract.Id = &abi.ContractId{}
 		}
-		contract.Id.Tag = cell
+		contractSpec.Contract.Id.Tag = cell
+	case tenantIDKey:
+		var err error
+		log.Tracef("got tenantid colunm with cell %s", cell)
+		contractSpec.AccessToken, err = auth.GlobalJWTGenerator().InjectAccessTokenIntoGRPC(cell)
+		if err != nil {
+			return err
+		}
 	default:
 		return fmt.Errorf("unknown field %q", header)
 	}
@@ -217,10 +235,14 @@ func (p *Parser) ParseCallCell(header, cell string, call *args.Call) error {
 		if call.Contract == nil {
 			call.Contract = &abi.Contract{}
 		}
+		contractSpec := &ContractSpec{
+			Contract: call.Contract,
+		}
+
 		err := p.ParseContractCell(
 			strings.TrimPrefix(header, "contract."),
 			cell,
-			call.Contract,
+			contractSpec,
 		)
 		if err != nil {
 			return err
@@ -292,6 +314,12 @@ func (p *Parser) ParseEnvelopeCell(header, cell string, e *envelope.Envelope) er
 			Type: chain.ProtocolType(
 				int64(protocol),
 			),
+		}
+	case header == tenantIDKey:
+		fmt.Printf("got tenantid colunm with cell %s", cell)
+		err := auth.GlobalJWTGenerator().InjectAccessTokenIntoEnvelop(cell, e)
+		if err != nil {
+			return err
 		}
 	default:
 		return fmt.Errorf("got unknown header %q", header)

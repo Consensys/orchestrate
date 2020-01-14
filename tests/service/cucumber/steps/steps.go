@@ -189,18 +189,19 @@ func (sc *ScenarioContext) sendEnvelope(topic string, e *envelope.Envelope) erro
 
 func (sc *ScenarioContext) iRegisterTheFollowingContract(table *gherkin.DataTable) error {
 	// Parse table
-	contracts, err := sc.parser.ParseContracts(sc.ID, table)
+	parseContracts, err := sc.parser.ParseContracts(sc.ID, table)
 	if err != nil {
 		return err
 	}
 
-	// Register contracts on the registry
-	for _, contract := range contracts {
+	// Register parseContracts on the registry
+	for _, parseContract := range parseContracts {
 		_, err := sc.Registry.RegisterContract(
 			context.Background(),
 			&registry.RegisterContractRequest{
-				Contract: contract,
+				Contract: parseContract.Contract,
 			},
+			parseContract.AccessToken,
 		)
 
 		if err != nil {

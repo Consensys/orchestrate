@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	auth "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/token/generator"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -22,6 +24,9 @@ func Init(ctx context.Context) {
 		parser = &Parser{
 			Aliases: NewAliasRegistry(),
 		}
+
+		// Initialize Multi-tenancy
+		auth.Init(ctx)
 
 		// Register aliases
 		log.Infof("Registering %v aliases", len(viper.GetStringSlice(cucumberAliasesViperKey)))

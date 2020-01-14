@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/token"
+
 	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
 	log "github.com/sirupsen/logrus"
 
@@ -33,6 +35,8 @@ func Decoder(r svc.ContractRegistryClient) engine.HandlerFunc {
 				return
 			}
 
+			// Extract JWT if present
+			jwTokenGRPCOption := token.GetGRPCOptionJWTokenFromEnvelope(txctx)
 			// Retrieve event ABI from contract-registry
 			eventResp, err := r.GetEventsBySigHash(
 				txctx.Context(),
@@ -43,7 +47,9 @@ func Decoder(r svc.ContractRegistryClient) engine.HandlerFunc {
 						Account: l.GetAddress(),
 					},
 					IndexedInputCount: uint32(len(l.Topics) - 1),
-				})
+				},
+				jwTokenGRPCOption,
+			)
 			if err != nil || (len(eventResp.GetEvent()) == 0 && len(eventResp.GetDefaultEvents()) == 0) {
 				txctx.Logger.WithError(err).Tracef("%s: could not retrieve event ABI, txHash: %s sigHash: %s, ", component, l.GetTxHash(), l.GetTopics()[0])
 				continue

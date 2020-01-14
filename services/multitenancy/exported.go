@@ -5,8 +5,6 @@ import (
 	"sync"
 
 	"github.com/spf13/viper"
-
-	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -33,5 +31,4 @@ func GlobalKeyBuilder() *KeyBuilder {
 // SetGlobalAuth sets global Authentication Manager
 func SetKeyBuilder(key *KeyBuilder) {
 	keyBuilder = key
-	log.Debug("Key Builder: set")
 }
