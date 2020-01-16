@@ -1,0 +1,13 @@
+package jwt
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestInit(t *testing.T) {
+	var a *Auth
+	SetGlobalAuth(a)
+	assert.Nil(t, GlobalAuth(), "Global Auth should be reset to nil")
+}

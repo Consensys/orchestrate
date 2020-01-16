@@ -1,14 +1,9 @@
-package authentication
+package certificate
 
 import (
-	"bytes"
-	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
-	"os"
 	"testing"
-
-	"github.com/dgrijalva/jwt-go"
 )
 
 const (
@@ -45,7 +40,7 @@ mwIDAQAB
 `
 )
 
-func Test_getPemCert(t *testing.T) {
+func TestDecodeStringToCertificate(t *testing.T) {
 	tests := []struct {
 		name    string
 		param   string
@@ -69,58 +64,13 @@ func Test_getPemCert(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_ = os.Setenv("AUTH_SERVICE_CERTIFICATE", tt.param)
-			got, err := getCert()
+			got, err := DecodeStringToCertificate(tt.param)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("getCert() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("DecodeStringToCertificate() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if (got == nil) != tt.wantErr {
-				t.Errorf("getCert() got = %v, certificateBadFormatedOrchestrateTest different fron nil", got)
-			}
-		})
-	}
-}
-
-func TestValidatedCertKey(t *testing.T) {
-	type args struct {
-		token *jwt.Token
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    string
-		wantErr bool
-	}{
-		{
-			"nominal case",
-			args{
-				&jwt.Token{},
-			},
-			pubKeyExpectedOrchestrateTest,
-			false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			_ = os.Setenv("AUTH_SERVICE_CERTIFICATE", certificateExpectedOrchestrateTest)
-			got, err := ValidatedKey(tt.args.token)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ValidatedKey() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-
-			publicKey, ok := got.(*rsa.PublicKey)
-			if (!ok) != tt.wantErr {
-				t.Errorf("ValidatedKey() error = %v, wantErr %v", err, tt.wantErr)
-			}
-
-			bytePublicKey, _ := PublicKeyToBytes(publicKey)
-
-			byteExpected := []byte(tt.want)
-
-			if !bytes.Equal(bytePublicKey, byteExpected) {
-				t.Errorf("ValidatedKey() got = \n %v\n, want \n%v\n", string(bytePublicKey), tt.want)
+				t.Errorf("DecodeStringToCertificate() got = %v, certificateBadFormatedOrchestrateTest different fron nil", got)
 			}
 		})
 	}

@@ -1,6 +1,9 @@
 package grpcserver
 
 import (
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
+
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
@@ -10,6 +13,7 @@ import (
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	grpcerror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/error"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -33,13 +37,18 @@ func NewServer() *grpc.Server {
 		grpc_logrus.WithLevels(CodeToLevel),
 	}
 
+	authF := Auth(
+		jwt.GlobalAuth(),
+		viper.GetBool(multitenancy.EnabledViperKey),
+	)
+
 	return grpc.NewServer(
 		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
 			grpc_ctxtags.StreamServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
 			grpc_opentracing.StreamServerInterceptor(grpc_opentracing.WithTracer(opentracing.GlobalTracer())),
 			grpc_logrus.StreamServerInterceptor(log.NewEntry(log.StandardLogger()), opts...),
 			grpc_prometheus.StreamServerInterceptor,
-			grpc_auth.StreamServerInterceptor(AuthTokenTenant),
+			grpc_auth.StreamServerInterceptor(authF),
 			grpcerror.StreamServerInterceptor(),
 			grpc_recovery.StreamServerInterceptor(grpc_recovery.WithRecoveryHandler(RecoverPanicHandler)),
 		)),
@@ -48,7 +57,7 @@ func NewServer() *grpc.Server {
 			grpc_opentracing.UnaryServerInterceptor(grpc_opentracing.WithTracer(opentracing.GlobalTracer())),
 			grpc_logrus.UnaryServerInterceptor(log.NewEntry(log.StandardLogger()), opts...),
 			grpc_prometheus.UnaryServerInterceptor,
-			grpc_auth.UnaryServerInterceptor(AuthTokenTenant),
+			grpc_auth.UnaryServerInterceptor(authF),
 			grpcerror.UnaryServerInterceptor(),
 			grpc_recovery.UnaryServerInterceptor(grpc_recovery.WithRecoveryHandler(RecoverPanicHandler)),
 		)),

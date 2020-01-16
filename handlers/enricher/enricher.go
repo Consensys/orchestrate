@@ -5,7 +5,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/token"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/common"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
 )
@@ -27,15 +26,12 @@ func Enricher(r svc.ContractRegistryClient, ec ethclient.ChainStateReader) engin
 				return
 			}
 
-			// Extract JWT if present
-			jwTokenGRPCOption := token.GetGRPCOptionJWTokenFromEnvelope(txctx)
-
 			_, err = r.SetAccountCodeHash(txctx.Context(),
 				&svc.SetAccountCodeHashRequest{
 					AccountInstance: &common.AccountInstance{},
 					CodeHash:        crypto.Keccak256Hash(code).Bytes(),
 				},
-				jwTokenGRPCOption)
+			)
 			if err != nil {
 				_ = txctx.AbortWithError(errors.InternalError("invalid input message format")).
 					SetComponent(component)

@@ -10,9 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	auth "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/token/generator"
-
-	"google.golang.org/grpc"
+	generator "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt/generator"
 
 	"github.com/DATA-DOG/godog/gherkin"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -25,7 +23,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
-const tenantIDKey = "tenantid"
+const tenantIDHeader = "tenantid"
 
 type artifact struct {
 	Abi              json.RawMessage
@@ -34,12 +32,13 @@ type artifact struct {
 }
 
 type Parser struct {
-	Aliases *AliasRegistry
+	Aliases      *AliasRegistry
+	JWTGenerator *generator.JWTGenerator
 }
 
 type ContractSpec struct {
-	Contract    *abi.Contract
-	AccessToken grpc.CallOption
+	Contract *abi.Contract
+	JWTToken string
 }
 
 func New() *Parser {
@@ -137,10 +136,10 @@ func (p *Parser) ParseContractCell(header, cell string, contractSpec *ContractSp
 			contractSpec.Contract.Id = &abi.ContractId{}
 		}
 		contractSpec.Contract.Id.Tag = cell
-	case tenantIDKey:
+	case tenantIDHeader:
 		var err error
 		log.Tracef("got tenantid colunm with cell %s", cell)
-		contractSpec.AccessToken, err = auth.GlobalJWTGenerator().InjectAccessTokenIntoGRPC(cell)
+		contractSpec.JWTToken, err = p.JWTGenerator.GenerateAccessTokenWithTenantID(cell)
 		if err != nil {
 			return err
 		}
@@ -315,12 +314,15 @@ func (p *Parser) ParseEnvelopeCell(header, cell string, e *envelope.Envelope) er
 				int64(protocol),
 			),
 		}
-	case header == tenantIDKey:
+	case header == tenantIDHeader:
 		fmt.Printf("got tenantid colunm with cell %s", cell)
-		err := auth.GlobalJWTGenerator().InjectAccessTokenIntoEnvelop(cell, e)
+
+		auth, err := p.JWTGenerator.GenerateAccessTokenWithTenantID(cell)
 		if err != nil {
 			return err
 		}
+		// Add authorization header
+		e.SetMetadataValue("Authorization", "Bearer "+auth)
 	default:
 		return fmt.Errorf("got unknown header %q", header)
 	}

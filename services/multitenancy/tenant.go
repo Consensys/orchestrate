@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication"
 )
 
 var sep = "@"
@@ -24,8 +23,9 @@ func (k *KeyBuilder) BuildKey(ctx context.Context, key string) (string, error) {
 	if !k.multitenancy {
 		return key, nil
 	}
-	tenantID, ok := ctx.Value(authentication.TenantIDKey).(string)
-	if !ok || tenantID == "" {
+
+	tenantID := TenantIDFromContext(ctx)
+	if tenantID == "" {
 		return "", errors.NotFoundError("not able to retrieve the tenant ID: The tenant_id is not present in the Context")
 	}
 
@@ -40,10 +40,9 @@ func SplitTenant(key string) (context.Context, string, error) {
 	case 1:
 		return context.Background(), key, nil
 	case 2:
-		ctx := context.WithValue(context.Background(), authentication.TenantIDKey, slicePkey[1]) // nolint
+		ctx := WithTenantID(context.Background(), slicePkey[1])
 		return ctx, slicePkey[0], nil
 	default:
 		return nil, "", errors.InvalidFormatError("The key have more than one separator as " + sep)
-
 	}
 }

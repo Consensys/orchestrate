@@ -4,8 +4,6 @@ import (
 	"context"
 	"reflect"
 	"testing"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication"
 )
 
 func TestKeyBuilder_BuildKey(t *testing.T) {
@@ -34,7 +32,7 @@ func TestKeyBuilder_BuildKey(t *testing.T) {
 			"nominal case with tenant",
 			true,
 			args{
-				ctx: context.WithValue(context.Background(), authentication.TenantIDKey, "b49ee1bc-f0fa-430d-89b2-a4fd0dc98906"), // nolint
+				ctx: WithTenantID(context.Background(), "b49ee1bc-f0fa-430d-89b2-a4fd0dc98906"),
 				key: "56202652FDFFD802B7252A456DBD8F3ECC0352BBDE76C23B40AFE8AEBD714E2E",
 			},
 			"b49ee1bc-f0fa-430d-89b2-a4fd0dc9890656202652FDFFD802B7252A456DBD8F3ECC0352BBDE76C23B40AFE8AEBD714E2E",
@@ -86,7 +84,7 @@ func TestSplitTenant(t *testing.T) {
 		{
 			"pkey with tenant",
 			"56202652FDFFD802B7252A456DBD8F3ECC0352BBDE76C23B40AFE8AEBD714E2E@b49ee1bc-f0fa-430d-89b2-a4fd0dc98906",
-			context.WithValue(context.Background(), authentication.TenantIDKey, "b49ee1bc-f0fa-430d-89b2-a4fd0dc98906"), // nolint
+			WithTenantID(context.Background(), "b49ee1bc-f0fa-430d-89b2-a4fd0dc98906"),
 			"56202652FDFFD802B7252A456DBD8F3ECC0352BBDE76C23B40AFE8AEBD714E2E",
 			false,
 		},

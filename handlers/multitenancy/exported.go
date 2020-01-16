@@ -8,7 +8,7 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/token"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
@@ -32,12 +32,12 @@ func Init(ctx context.Context) {
 		multitenancy.Init(ctx)
 
 		// Initialize Authentication Manager
-		token.Init(ctx)
+		jwt.Init(ctx)
 
 		log.Infof("multitenancy enable: %v", viper.GetBool(multitenancy.EnabledViperKey))
 
 		// Create Handler
-		handler = ExtractTenant(token.GlobalAuth())
+		handler = ExtractTenant(jwt.GlobalAuth())
 
 		log.Infof("authentication multi-tenancy: handler ready")
 	})

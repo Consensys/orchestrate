@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	auth "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/token/generator"
+	generator "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt/generator"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -21,12 +21,13 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		parser = &Parser{
-			Aliases: NewAliasRegistry(),
-		}
-
 		// Initialize Multi-tenancy
-		auth.Init(ctx)
+		generator.Init(ctx)
+
+		parser = &Parser{
+			Aliases:      NewAliasRegistry(),
+			JWTGenerator: generator.GlobalJWTGenerator(),
+		}
 
 		// Register aliases
 		log.Infof("Registering %v aliases", len(viper.GetStringSlice(cucumberAliasesViperKey)))

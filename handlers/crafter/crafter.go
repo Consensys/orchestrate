@@ -8,7 +8,6 @@ import (
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/token"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
@@ -89,16 +88,12 @@ func createTxPayload(txctx *engine.TxContext, methodAbi *abi.Method, r svc.Contr
 }
 
 func createContractDeploymentPayload(txctx *engine.TxContext, methodAbi *abi.Method, r svc.ContractRegistryClient, c crafter.Crafter) ([]byte, error) {
-	// Extract JWT if present
-	jwTokenGRPCOption := token.GetGRPCOptionJWTokenFromEnvelope(txctx)
-
 	// Transaction to be crafted is a Contract deployment
 	bytecodeResp, err := r.GetContractBytecode(
 		txctx.Context(),
 		&svc.GetContractRequest{
 			ContractId: txctx.Envelope.GetArgs().GetCall().GetContract().GetId(),
 		},
-		jwTokenGRPCOption,
 	)
 	if err != nil {
 		e := txctx.AbortWithError(err).ExtendComponent(component)

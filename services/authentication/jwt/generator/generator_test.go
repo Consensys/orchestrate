@@ -13,8 +13,7 @@ var (
 
 func TestGenerateAccessToken(t *testing.T) {
 	type fields struct {
-		multitenancy    bool
-		tenantNamespace string
+		claimsNamespace string
 		privateKey      *rsa.PrivateKey
 	}
 
@@ -34,7 +33,6 @@ func TestGenerateAccessToken(t *testing.T) {
 		{
 			"nominal case one line customClaim",
 			fields{
-				true,
 				"http://tenant.info/",
 				key,
 			},
@@ -47,7 +45,6 @@ func TestGenerateAccessToken(t *testing.T) {
 		{
 			"nominal case struct customClaim",
 			fields{
-				true,
 				"http://tenant.info/",
 				key,
 			},
@@ -61,8 +58,7 @@ func TestGenerateAccessToken(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			j := &JWTGenerator{
-				tt.fields.multitenancy,
-				tt.fields.tenantNamespace,
+				tt.fields.claimsNamespace,
 				tt.fields.privateKey,
 			}
 			gotToken, err := j.GenerateAccessToken(tt.args.customClaims)
@@ -82,7 +78,7 @@ func TestGenerateIDToken(t *testing.T) {
 
 	type fields struct {
 		multitenancy    bool
-		tenantNamespace string
+		claimsNamespace string
 		privateKey      *rsa.PrivateKey
 	}
 
@@ -125,8 +121,7 @@ func TestGenerateIDToken(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			j := &JWTGenerator{
-				multitenancy:    tt.fields.multitenancy,
-				tenantNamespace: tt.fields.tenantNamespace,
+				ClaimsNamespace: tt.fields.claimsNamespace,
 				privateKey:      tt.fields.privateKey,
 			}
 			gotToken, err := j.GenerateIDToken(tt.args.customClaims)
@@ -153,7 +148,7 @@ func TestLoadRsaPrivateKeyFromVar(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			got := LoadRsaPrivateKeyFromVar(rsaPrivateKeyString)
+			got, _ := LoadRsaPrivateKeyFromVar(rsaPrivateKeyString)
 			if (got == nil) != tt.wantErr {
 				t.Errorf("LoadRsaPrivateKeyFromVar() got is empty")
 				return

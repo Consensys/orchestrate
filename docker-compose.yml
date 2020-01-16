@@ -19,8 +19,8 @@ x-default-variables: &default-variables
   # FAUCET_CREDITOR_ADDRESS: ${FAUCET_CREDITOR_ADDRESS-0x93f7274c9059e601be4512f656b57b830e019e41}@${GETH_NETWORKID-888}
   ABI: ${ABI-}
   MULTI_TENANCY_ENABLED: ${MULTI_TENANCY_ENABLED-false}
-  TENANT_NAMESPACE: ${TENANT_NAMESPACE-http://tenant.info/}
-  AUTH_SERVICE_CERTIFICATE: ${AUTH_SERVICE_CERTIFICATE-}
+  AUTH_JWT_CLAIMS_NAMESPACE: ${AUTH_JWT_CLAIMS_NAMESPACE-http://tenant.info/}
+  AUTH_JWT_CERTIFICATE: ${AUTH_JWT_CERTIFICATE-}
 
 x-container-common: &container-common
   image: golang:1.13
@@ -202,7 +202,7 @@ services:
       CUCUMBER_PATHS: "/features"
       CUCUMBER_FORMAT: "cucumber"
       CUCUMBER_ALIAS: "chain.primary:888 chain.private:10"
-      AUTH_SERVICE_PRIVATE_KEY: ${AUTH_SERVICE_PRIVATE_KEY-}
+      AUTH_JWT_PRIVATE_KEY: ${AUTH_JWT_PRIVATE_KEY-}
       # Uncomment CUCUMBER_TAGS if only run features and scenarios with @public-tx or @wallet tags ("," = OR, "&&" = AND, "~" = NOT)
       # CUCUMBER_TAGS: "@public-tx,@wallet"
     restart: "no"

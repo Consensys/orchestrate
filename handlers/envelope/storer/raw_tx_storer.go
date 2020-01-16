@@ -3,22 +3,18 @@ package storer
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/token"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
 )
 
 func RawTxStore(store evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		// Extract JWT if present
-		jwTokenGRPCOption := token.GetGRPCOptionJWTokenFromEnvelope(txctx)
-
 		// Store envelope
 		_, err := store.Store(
 			txctx.Context(),
 			&evlpstore.StoreRequest{
 				Envelope: txctx.Envelope,
 			},
-			jwTokenGRPCOption)
+		)
 		if err != nil {
 			// Connection to store is broken
 			e := txctx.AbortWithError(err).ExtendComponent(component)
@@ -38,7 +34,7 @@ func RawTxStore(store evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
 					Id:     txctx.Envelope.GetMetadata().GetId(),
 					Status: evlpstore.Status_ERROR,
 				},
-				jwTokenGRPCOption)
+			)
 			if storeErr != nil {
 				// Connection to store is broken
 				e := errors.FromError(storeErr).ExtendComponent(component)
@@ -54,7 +50,7 @@ func RawTxStore(store evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
 				Id:     txctx.Envelope.GetMetadata().GetId(),
 				Status: evlpstore.Status_PENDING,
 			},
-			jwTokenGRPCOption)
+		)
 		if err != nil {
 			// Connection to store is broken
 			e := errors.FromError(err).ExtendComponent(component)

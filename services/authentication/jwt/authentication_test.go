@@ -1,11 +1,15 @@
-package token
+package jwt
 
 import (
-	"os"
+	"context"
+	"crypto/rsa"
+	"fmt"
 	"testing"
 
 	"github.com/dgrijalva/jwt-go"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"github.com/stretchr/testify/assert"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/certificate"
+	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/utils"
 )
 
 // TODO: adding new tests to add coverage
@@ -53,7 +57,7 @@ gvimsav4koWYWME=
 -----END CERTIFICATE-----`
 )
 
-func TestAuthToken_VerifyToken(t *testing.T) {
+func TestAuth(t *testing.T) {
 	type fields struct {
 		Parser *jwt.Parser
 	}
@@ -98,7 +102,7 @@ func TestAuthToken_VerifyToken(t *testing.T) {
 			true,
 		},
 		{
-			"nominal case",
+			"no tenant id",
 			&fields{
 				Parser: &jwt.Parser{
 					SkipClaimsValidation: true,
@@ -110,58 +114,30 @@ func TestAuthToken_VerifyToken(t *testing.T) {
 			},
 			true,
 			0,
-			false,
+			true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_ = os.Setenv("AUTH_SERVICE_CERTIFICATE", tt.args.certificateForValidation)
-			a := &AuthToken{
+			cert, _ := certificate.DecodeStringToCertificate(tt.args.certificateForValidation)
+			pubKey := cert.PublicKey.(*rsa.PublicKey)
+			a := NewAuth(&Config{
 				Parser: tt.fields.Parser,
-			}
-			got, err := a.Verify(tt.args.rawToken)
-			if (err != nil) != tt.isInvalid {
-				t.Errorf("VerifyToken() error = %v, isInvalid %v", err, tt.isInvalid)
-				return
-			}
-			if got.Valid != tt.signatureIsValide {
-				t.Errorf("VerifyToken() got = %v, want %v", got, tt.signatureIsValide)
-				return
-			}
+				Key:    func(token *jwt.Token) (interface{}, error) { return pubKey, nil },
+			})
 
-			if (err != nil) && tt.isInvalid {
-				if jerr, ok := err.(*jwt.ValidationError); !ok || jerr.Errors != tt.errValue {
-					t.Errorf("VerifyToken() error = %v, isInvalid %d", jerr, tt.errValue)
-					return
-				}
-			}
-		})
-	}
-}
+			ctx := authutils.WithAuthorization(context.Background(), fmt.Sprintf("Bearer %v", tt.args.rawToken))
+			checkedCtx, err := a.Check(ctx)
+			token := FromContext(checkedCtx)
 
-func TestAuthToken_AddingJWToken(t *testing.T) {
-	tests := []struct {
-		name    string
-		wantErr bool
-	}{
-		{
-			"nominal usecase",
-			false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+			switch {
+			case tt.isInvalid:
+				assert.Error(t, err, "Check should have error")
+				assert.Nil(t, token, "Token should not have been set")
 
-			// Initialize context and apply combinedHandler
-			txctx := engine.NewTxContext()
-			txctx.Prepare(nil, nil)
-			txctx.Envelope.SetMetadataValue(OauthToken, idToken)
-
-			got := GetGRPCOptionJWTokenFromEnvelope(txctx)
-
-			if (got == nil) != tt.wantErr {
-				t.Errorf("GetGRPCOptionJWTokenFromEnvelope() wantErr %v", tt.wantErr)
-				return
+			case !tt.isInvalid:
+				assert.NoError(t, err, "Check should not have error")
+				assert.NotNil(t, token, "Token should have been set")
 			}
 		})
 	}

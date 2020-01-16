@@ -6,76 +6,45 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
+	"fmt"
 	"io/ioutil"
 	"time"
-
-	"google.golang.org/grpc"
 
 	"github.com/ory/fosite"
 	"github.com/ory/fosite/handler/oauth2"
 	"github.com/ory/fosite/handler/openid"
-	"github.com/ory/fosite/token/jwt"
+	fositejwt "github.com/ory/fosite/token/jwt"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/token"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt"
 )
 
 type JWTGenerator struct {
-	multitenancy    bool
-	tenantNamespace string
+	ClaimsNamespace string
 	privateKey      *rsa.PrivateKey
 }
 
-func New(multiTenancyEnabled bool, tenantNamespace, pemPrivateKey string) *JWTGenerator {
-	if multiTenancyEnabled {
-		return &JWTGenerator{
-			multitenancy:    multiTenancyEnabled,
-			tenantNamespace: tenantNamespace,
-			privateKey:      LoadRsaPrivateKeyFromVar(pemPrivateKey),
-		}
+func New(multiTenancyEnabled bool, namespace, pemPrivateKey string) (*JWTGenerator, error) {
+	pkey, err := LoadRsaPrivateKeyFromVar(pemPrivateKey)
+	if err != nil {
+		return nil, err
 	}
 	return &JWTGenerator{
-		multitenancy: multiTenancyEnabled,
-	}
+		ClaimsNamespace: namespace,
+		privateKey:      pkey,
+	}, nil
 }
 
-func (j *JWTGenerator) InjectAccessTokenIntoEnvelop(tenantID string, e *envelope.Envelope) error {
-	if j.multitenancy {
-		log.Debugf("inject AccessToken in the envelope")
-		customClaims := map[string]interface{}{j.tenantNamespace + authentication.TenantIDKey: tenantID}
-		accessToken, err := j.GenerateAccessToken(customClaims)
-		if err != nil {
-			log.Errorf("Unable to GenerateAccessToken: %s", err)
-			return err
-		}
-		e.SetMetadataValue(token.OauthToken, accessToken)
-	}
-	return nil
-}
-
-func (j *JWTGenerator) InjectAccessTokenIntoGRPC(tenantID string) (grpc.CallOption, error) {
-	var accessToken string
-	var err error
-	if j.multitenancy {
-		log.Debugf("inject AccessToken in the gRPC")
-		customClaims := map[string]interface{}{j.tenantNamespace + authentication.TenantIDKey: tenantID}
-		accessToken, err = j.GenerateAccessToken(customClaims)
-		if err != nil {
-			log.Errorf("Unable to GenerateAccessToken: %s", err)
-			return nil, err
-		}
-	} else {
-		accessToken = ""
-	}
-	perRPCCredentials := token.NewJWTAccessFromEnvelope(accessToken)
-
-	return grpc.PerRPCCredentials(perRPCCredentials), nil
+func (j *JWTGenerator) GenerateAccessTokenWithTenantID(tenantID string) (string, error) {
+	customClaims := map[string]interface{}{
+		j.ClaimsNamespace: &jwt.OrchestrateClaims{
+			TenantID: tenantID,
+		}}
+	return j.GenerateAccessToken(customClaims)
 }
 
 func (j *JWTGenerator) GenerateAccessToken(customClaims map[string]interface{}) (tokenValue string, err error) {
 	jwtGenerator := &oauth2.DefaultJWTStrategy{
-		JWTStrategy: &jwt.RS256JWTStrategy{
+		JWTStrategy: &fositejwt.RS256JWTStrategy{
 			PrivateKey: j.privateKey,
 		},
 	}
@@ -87,14 +56,14 @@ func (j *JWTGenerator) GenerateAccessToken(customClaims map[string]interface{}) 
 			Secret: []byte("mysecret"),
 		},
 		Session: &oauth2.JWTSession{
-			JWTClaims: &jwt.JWTClaims{
+			JWTClaims: &fositejwt.JWTClaims{
 				Issuer:    "Orchestrate",
 				Subject:   "e2e-test",
 				IssuedAt:  time.Now().UTC(),
 				NotBefore: time.Now().UTC(),
 				Extra:     customClaims,
 			},
-			JWTHeader: &jwt.Headers{
+			JWTHeader: &fositejwt.Headers{
 				Extra: make(map[string]interface{}),
 			},
 			ExpiresAt: map[fosite.TokenType]time.Time{
@@ -110,20 +79,20 @@ func (j *JWTGenerator) GenerateAccessToken(customClaims map[string]interface{}) 
 func (j *JWTGenerator) GenerateIDToken(customClaims map[string]interface{}) (tokenValue string, err error) {
 
 	jwtGenerator := &openid.DefaultStrategy{
-		JWTStrategy: &jwt.RS256JWTStrategy{
+		JWTStrategy: &fositejwt.RS256JWTStrategy{
 			PrivateKey: j.privateKey,
 		},
 	}
 
 	tokenRequest := fosite.NewAccessRequest(&openid.DefaultSession{
-		Claims: &jwt.IDTokenClaims{
+		Claims: &fositejwt.IDTokenClaims{
 			Issuer:   "Orchestrate",
 			Subject:  "e2e-test",
 			Audience: []string{"https://auth0.com/api/v2/"},
 			IssuedAt: time.Now().UTC(),
 			Extra:    customClaims,
 		},
-		Headers: &jwt.Headers{},
+		Headers: &fositejwt.Headers{},
 	})
 
 	idToken, err := jwtGenerator.GenerateIDToken(context.Background(), tokenRequest)
@@ -165,18 +134,18 @@ func LoadRSAPrivateKeyFromFile(rsaPrivateKeyLocation string) (*rsa.PrivateKey, e
 	return privateKey, nil
 }
 
-func LoadRsaPrivateKeyFromVar(rawPrivateKey string) *rsa.PrivateKey {
+func LoadRsaPrivateKeyFromVar(rawPrivateKey string) (*rsa.PrivateKey, error) {
 	decodedPrivateKey, err := base64.StdEncoding.DecodeString(rawPrivateKey)
 	if err != nil {
 		log.Errorf("Unable to Decode RSA private key")
-		return nil
+		return nil, err
 	}
 	// Parse the private key
 	var parsedKey interface{}
 	if parsedKey, err = x509.ParsePKCS1PrivateKey(decodedPrivateKey); err != nil {
 		if parsedKey, err = x509.ParsePKCS8PrivateKey(decodedPrivateKey); err != nil { // note this returns type `interface{}`
 			log.Errorf("Unable to parse RSA private key")
-			return nil
+			return nil, err
 		}
 	}
 
@@ -185,7 +154,7 @@ func LoadRsaPrivateKeyFromVar(rawPrivateKey string) *rsa.PrivateKey {
 	privateKey, ok = parsedKey.(*rsa.PrivateKey)
 	if !ok {
 		log.Errorf("Unable to parse RSA private key, generating a temp one")
-		return nil
+		return nil, fmt.Errorf("invalid rsa private key")
 	}
-	return privateKey
+	return privateKey, nil
 }

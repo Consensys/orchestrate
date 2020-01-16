@@ -1,4 +1,4 @@
-package authentication
+package jwt
 
 import (
 	"os"
@@ -14,19 +14,19 @@ const (
 )
 
 func TestAuthServiceCertificate(t *testing.T) {
-	name := "auth.service.certificate"
+	name := "auth.jwt.certificate"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	AuthServiceCertificate(flgs)
+	Certificate(flgs)
 
-	_ = os.Setenv("AUTH_SERVICE_CERTIFICATE", authServiceCertificateExpected)
+	_ = os.Setenv("AUTH_JWT_CERTIFICATE", authServiceCertificateExpected)
 	expected := authServiceCertificateExpected
 	assert.Equal(t, expected, viper.GetString(name), "TenancyEnable #1")
 }
 
 func TestTenantNamespace(t *testing.T) {
-	name := "tenant.namespace"
+	name := "auth.jawt.claims.namespace"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	TenantNamespace(flgs)
+	ClaimsNamespace(flgs)
 
 	expected := false
 	assert.Equal(t, expected, viper.GetBool(name), "TenantNamespace #1")

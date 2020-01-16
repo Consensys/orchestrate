@@ -3,8 +3,6 @@ package kafka
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/token"
-
 	"github.com/Shopify/sarama"
 	"github.com/containous/traefik/v2/pkg/log"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
@@ -120,7 +118,6 @@ func (hk *Hook) registerDeployedContract(ctx context.Context, node *dynamic.Node
 			return err
 		}
 
-		jwTokenGRPCOption := token.GetGRPCOptionJWTokenFromContext(ctx)
 		_, err = hk.registry.SetAccountCodeHash(ctx,
 			&svc.SetAccountCodeHashRequest{
 				AccountInstance: &common.AccountInstance{
@@ -129,7 +126,6 @@ func (hk *Hook) registerDeployedContract(ctx context.Context, node *dynamic.Node
 				},
 				CodeHash: crypto.Keccak256Hash(code).Bytes(),
 			},
-			jwTokenGRPCOption,
 		)
 		if err != nil {
 			return err

@@ -14,6 +14,7 @@ import (
 	"github.com/spf13/viper"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
+	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/chanregistry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/parser"
 	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
@@ -197,11 +198,10 @@ func (sc *ScenarioContext) iRegisterTheFollowingContract(table *gherkin.DataTabl
 	// Register parseContracts on the registry
 	for _, parseContract := range parseContracts {
 		_, err := sc.Registry.RegisterContract(
-			context.Background(),
+			authutils.WithAuthorization(context.Background(), "Bearer "+parseContract.JWTToken),
 			&registry.RegisterContractRequest{
 				Contract: parseContract.Contract,
 			},
-			parseContract.AccessToken,
 		)
 
 		if err != nil {

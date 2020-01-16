@@ -2,7 +2,6 @@ package loader
 
 import (
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/token"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
@@ -35,9 +34,6 @@ func EnvelopeLoader(s evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
 			"metadata.id": txctx.Envelope.GetMetadata().GetId(),
 		})
 
-		// Extract JWT if present
-		jwTokenGRPCOption := token.GetGRPCOptionJWTokenFromEnvelope(txctx)
-
 		// Transaction has been mined so we set status to `mined`
 		_, err = s.SetStatus(
 			txctx.Context(),
@@ -45,7 +41,6 @@ func EnvelopeLoader(s evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
 				Id:     txctx.Envelope.GetMetadata().GetId(),
 				Status: evlpstore.Status_MINED,
 			},
-			jwTokenGRPCOption,
 		)
 		if err != nil {
 			// Connection to store is broken

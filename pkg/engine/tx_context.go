@@ -94,14 +94,16 @@ func (txctx *TxContext) Prepare(logger *log.Entry, msg Msg) *TxContext {
 	return txctx
 }
 
+type txCtxKey string
+
 // Set is used to store a new key/value pair exclusively for this context
 func (txctx *TxContext) Set(key string, value interface{}) {
-	txctx.WithContext(context.WithValue(txctx.Context(), key, value)) // nolint
+	txctx.WithContext(context.WithValue(txctx.Context(), txCtxKey(key), value))
 }
 
 // Get returns the value for the given key
 func (txctx *TxContext) Get(key string) interface{} {
-	return txctx.Context().Value(key)
+	return txctx.Context().Value(txCtxKey(key))
 }
 
 // Context returns the go context attached to TxContext.

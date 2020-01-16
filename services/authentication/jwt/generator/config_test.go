@@ -39,11 +39,11 @@ fFbOLWYBe5uMoHIn9FdJFQ==`
 )
 
 func TestAuthServicePrivateKey(t *testing.T) {
-	name := "auth.service.private.key"
+	name := "auth.jwt.private.key"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	AuthServicePrivateKey(flgs)
+	PrivateKey(flgs)
 
-	_ = os.Setenv("AUTH_SERVICE_PRIVATE_KEY", authServicePrivateKeyExpected)
+	_ = os.Setenv("AUTH_JWT_PRIVATE_KEY", authServicePrivateKeyExpected)
 	expected := authServicePrivateKeyExpected
 	assert.Equal(t, expected, viper.GetString(name), "TenancyEnable #1")
 }

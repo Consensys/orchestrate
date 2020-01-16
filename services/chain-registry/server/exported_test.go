@@ -18,9 +18,7 @@ func TestInit(t *testing.T) {
 		EntryPoints: static.EntryPoints{
 			"test": {Address: "localhost:8080", ForwardedHeaders: &static.ForwardedHeaders{Insecure: true, TrustedIPs: []string{}}},
 		},
-		CertificatesResolvers: map[string]static.CertificateResolver{
-			"test": {ACME: &acme.Configuration{Storage: "test", TLSChallenge: &acme.TLSChallenge{}}},
-		},
+		CertificatesResolvers: map[string]static.CertificateResolver{},
 	})
 	Init(context.Background())
 	assert.NotNil(t, GlobalServer(), "Global server should have been set")
@@ -40,21 +38,12 @@ func TestInitACMEProvider(t *testing.T) {
 	}{
 		{
 			&static.Configuration{
-				CertificatesResolvers: map[string]static.CertificateResolver{
-					"test": {ACME: &acme.Configuration{Storage: "test", TLSChallenge: &acme.TLSChallenge{}}},
-				},
+				CertificatesResolvers: map[string]static.CertificateResolver{},
 			},
 			&aggregator.ProviderAggregator{},
 			traefiktls.NewManager(),
 			func() []*acme.Provider {
 				providers := make([]*acme.Provider, 0)
-				provider := &acme.Provider{
-					Configuration:  &acme.Configuration{Storage: "test", TLSChallenge: &acme.TLSChallenge{}},
-					Store:          acme.NewLocalStore("test"),
-					ChallengeStore: acme.NewLocalChallengeStore(),
-					ResolverName:   "test",
-				}
-				providers = append(providers, provider)
 				return providers
 			},
 		},

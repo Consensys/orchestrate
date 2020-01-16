@@ -1,16 +1,15 @@
-package token
+package key
 
 import (
 	"context"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication"
-
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 var (
-	auth     authentication.Manager
+	auth     *Auth
 	initOnce = &sync.Once{}
 )
 
@@ -21,17 +20,17 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		auth = New()
+		auth = NewAuth(viper.GetString(APIKeyViperKey))
 	})
 }
 
 // GlobalAuth returns global Authentication Manager
-func GlobalAuth() authentication.Manager {
+func GlobalAuth() *Auth {
 	return auth
 }
 
 // SetGlobalAuth sets global Authentication Manager
-func SetGlobalAuth(authManager authentication.Manager) {
-	auth = authManager
-	log.Debug("authentication manager: set")
+func SetGlobalAuth(a *Auth) {
+	auth = a
+	log.Debug("auth: set")
 }

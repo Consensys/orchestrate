@@ -4,8 +4,8 @@ import (
 	"context"
 	"os"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication"
-	auth "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/token/generator"
+	authentication "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt/generator"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 
 	"github.com/spf13/cobra"
@@ -53,7 +53,7 @@ func NewRunCommand() *cobra.Command {
 	// Register Multi-Tenancy flags
 	multitenancy.Enabled(runCmd.Flags())
 	authentication.Flags(runCmd.Flags())
-	auth.AuthServicePrivateKey(runCmd.Flags())
+	generator.PrivateKey(runCmd.Flags())
 
 	return runCmd
 }

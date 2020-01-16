@@ -2,7 +2,8 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication"
+	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt"
+	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/key"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/chain-registry"
@@ -54,7 +55,8 @@ func NewCommand() *cobra.Command {
 
 	// Register Multi-Tenancy flags
 	multitenancy.Enabled(rootCmd.PersistentFlags())
-	authentication.Flags(rootCmd.PersistentFlags())
+	authjwt.Flags(rootCmd.PersistentFlags())
+	authkey.APIKey(rootCmd.PersistentFlags())
 
 	return rootCmd
 }

@@ -28,6 +28,7 @@ func DialContextWithDefaultOptions(ctx context.Context, target string) (conn *gr
 		ctx,
 		target,
 		grpc.WithInsecure(),
+		grpc.WithPerRPCCredentials(&PerRPCCredentials{}),
 		grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(
 			grpcerror.UnaryClientInterceptor(),
 			grpc_opentracing.UnaryClientInterceptor(grpc_opentracing.WithTracer(opentracing.GlobalTracer())),
