@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 
 	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
@@ -13,7 +12,7 @@ var postNodeTests = []HTTPRouteTests{
 		name:       "TestPostNode200",
 		store:      &MockChainRegistry{},
 		httpMethod: http.MethodPost,
-		path:       strings.ReplaceAll(postNodePath, "{"+tenantIDPath+"}", "testTenantID"),
+		path:       "/testTenantID/nodes",
 		body: func() []byte {
 			body, _ := json.Marshal(&models.Node{
 				Name:                    "testName",
@@ -33,7 +32,7 @@ var postNodeTests = []HTTPRouteTests{
 		name:       "TestPostNode400WithTwiceSameURL",
 		store:      &MockChainRegistry{},
 		httpMethod: http.MethodPost,
-		path:       strings.ReplaceAll(postNodePath, "{"+tenantIDPath+"}", "testTenantID"),
+		path:       "/testTenantID/nodes",
 		body: func() []byte {
 			body, _ := json.Marshal(&models.Node{
 				URLs: []string{"http://test.com", "http://test.com"},
@@ -50,7 +49,7 @@ var postNodeTests = []HTTPRouteTests{
 		name:       "TestPostNode400WrongURL",
 		store:      &MockChainRegistry{},
 		httpMethod: http.MethodPost,
-		path:       strings.ReplaceAll(postNodePath, "{"+tenantIDPath+"}", "testTenantID"),
+		path:       "/testTenantID/nodes",
 		body: func() []byte {
 			body, _ := json.Marshal(&models.Node{
 				URLs: []string{"test.com"},
@@ -65,7 +64,7 @@ var postNodeTests = []HTTPRouteTests{
 		name:                "TestPostNode400WrongBody",
 		store:               &MockChainRegistry{},
 		httpMethod:          http.MethodPost,
-		path:                strings.ReplaceAll(postNodePath, "{"+tenantIDPath+"}", "testTenantID"),
+		path:                "/testTenantID/nodes",
 		body:                func() []byte { return []byte(`{"unknownField":"error"}`) },
 		expectedStatusCode:  http.StatusBadRequest,
 		expectedContentType: expectedErrorStatusContentType,
@@ -75,7 +74,7 @@ var postNodeTests = []HTTPRouteTests{
 		name:       "TestPostNode500",
 		store:      &ErrorChainRegistry{},
 		httpMethod: http.MethodPost,
-		path:       strings.ReplaceAll(postNodePath, "{"+tenantIDPath+"}", "testTenantID"),
+		path:       "/testTenantID/nodes",
 		body: func() []byte {
 			body, _ := json.Marshal(&models.Node{
 				Name:                    "testName",

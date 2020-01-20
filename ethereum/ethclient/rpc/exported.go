@@ -6,6 +6,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	httpclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/client"
 )
 
 const component = "ethclient.rpc"
@@ -28,7 +29,8 @@ func Init(ctx context.Context) {
 		}
 
 		// Set Client
-		clientV2 = NewClientV2(config)
+		httpclient.Init(ctx)
+		clientV2 = NewClientV2(config, httpclient.GlobalClient())
 		client = NewClient(clientV2)
 
 		rpcUrls := viper.GetStringSlice(URLViperKey)

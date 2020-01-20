@@ -16,9 +16,11 @@ type MockClient struct {
 	i int
 }
 
-func (m *MockClient) GetNodeByID(_ string) (*types.Node, error) { return &types.Node{}, nil }
+func (m *MockClient) GetNodeByID(_ context.Context, _ string) (*types.Node, error) {
+	return &types.Node{}, nil
+}
 
-func (m *MockClient) GetNodes() ([]*types.Node, error) {
+func (m *MockClient) GetNodes(_ context.Context) ([]*types.Node, error) {
 	switch m.i % 2 {
 	case 0:
 		m.i++
@@ -37,7 +39,7 @@ func (m *MockClient) GetNodes() ([]*types.Node, error) {
 	}
 }
 
-func (m *MockClient) UpdateBlockPosition(_ string, _ int64) error {
+func (m *MockClient) UpdateBlockPosition(_ context.Context, _ string, _ int64) error {
 	return nil
 }
 

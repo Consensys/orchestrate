@@ -63,6 +63,7 @@ func (i *Provider) apiConfiguration(cfg *dynamic.Configuration) {
 		Service:     "api@internal",
 		Priority:    math.MaxInt32 - 1,
 		Rule:        "PathPrefix(`/`)",
+		Middlewares: []string{"orchestrate-auth"},
 	}
 	cfg.HTTP.Services["api"] = &dynamic.Service{}
 }

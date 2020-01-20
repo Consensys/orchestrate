@@ -55,10 +55,9 @@ func (rt mockRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) 
 }
 
 func newClient() *ClientV2 {
-	ec := NewClientV2(testConfig)
-	ec.client = &http.Client{
+	ec := NewClientV2(testConfig, &http.Client{
 		Transport: mockRoundTripper{},
-	}
+	})
 	return ec
 }
 

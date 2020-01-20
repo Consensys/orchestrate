@@ -2,6 +2,7 @@ package txdecoder
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
@@ -23,6 +24,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/jaeger"
+	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/key"
+	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/utils"
 )
 
 var (
@@ -98,6 +101,11 @@ func initComponents(ctx context.Context) {
 // Start starts application
 func Start(ctx context.Context) {
 	startOnce.Do(func() {
+		apiKey := viper.GetString(authkey.APIKeyViperKey)
+		if apiKey != "" {
+			// Inject authorization header in context for later authentication
+			ctx = authutils.WithAuthorization(ctx, fmt.Sprintf("APIKey %v", apiKey))
+		}
 
 		cancelCtx, cancel := context.WithCancel(ctx)
 		go metrics.StartServer(ctx, cancel, app.IsAlive, app.IsReady)

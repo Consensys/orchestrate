@@ -16,7 +16,7 @@ import (
 	"github.com/containous/traefik/v2/pkg/middlewares/tracing"
 	"github.com/containous/traefik/v2/pkg/responsemodifiers"
 	"github.com/containous/traefik/v2/pkg/rules"
-	"github.com/containous/traefik/v2/pkg/server/middleware"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/server/middleware"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/server/service"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/server/utils"
 )

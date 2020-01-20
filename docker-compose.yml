@@ -21,6 +21,7 @@ x-default-variables: &default-variables
   MULTI_TENANCY_ENABLED: ${MULTI_TENANCY_ENABLED-false}
   AUTH_JWT_CLAIMS_NAMESPACE: ${AUTH_JWT_CLAIMS_NAMESPACE-http://tenant.info/}
   AUTH_JWT_CERTIFICATE: ${AUTH_JWT_CERTIFICATE-}
+  AUTH_API_KEY: ${AUTH_API_KEY-}
 
 x-container-common: &container-common
   image: golang:1.13

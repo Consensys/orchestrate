@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -113,11 +114,11 @@ func (s *ClientTestSuite) TestGetNodeByID() {
 	for _, test := range testSuite {
 		server := test.server()
 		s.client = NewHTTPClient(
-			*server.Client(),
-			Config{URL: server.URL},
+			server.Client(),
+			&Config{URL: server.URL},
 		)
 
-		output, err := s.client.GetNodeByID(test.input)
+		output, err := s.client.GetNodeByID(context.Background(), test.input)
 		test.testOutput(s.T(), output, err)
 		server.Close()
 	}
@@ -191,11 +192,11 @@ func (s *ClientTestSuite) TestGetNodes() {
 	for _, test := range testSuite {
 		server := test.server()
 		s.client = NewHTTPClient(
-			*server.Client(),
-			Config{URL: server.URL},
+			server.Client(),
+			&Config{URL: server.URL},
 		)
 
-		output, err := s.client.GetNodes()
+		output, err := s.client.GetNodes(context.Background())
 		test.testOutput(s.T(), output, err)
 		server.Close()
 	}
@@ -251,11 +252,11 @@ func (s *ClientTestSuite) TestUpdateBlockPosition() {
 	for _, test := range testSuite {
 		server := test.server()
 		s.client = NewHTTPClient(
-			*server.Client(),
-			Config{URL: server.URL},
+			server.Client(),
+			&Config{URL: server.URL},
 		)
 
-		err := s.client.UpdateBlockPosition("nodeID", 1)
+		err := s.client.UpdateBlockPosition(context.Background(), "nodeID", 1)
 		test.testOutput(s.T(), err)
 		server.Close()
 	}

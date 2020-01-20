@@ -23,7 +23,7 @@ type JWTGenerator struct {
 	privateKey      *rsa.PrivateKey
 }
 
-func New(multiTenancyEnabled bool, namespace, pemPrivateKey string) (*JWTGenerator, error) {
+func New(namespace, pemPrivateKey string) (*JWTGenerator, error) {
 	pkey, err := LoadRsaPrivateKeyFromVar(pemPrivateKey)
 	if err != nil {
 		return nil, err

@@ -1,6 +1,7 @@
 package chainregistry
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -40,18 +41,18 @@ var MockNodesMap = map[string]*types.Node{
 
 type Mock struct{}
 
-func (c *Mock) GetNodeByID(nodeID string) (*types.Node, error) {
+func (c *Mock) GetNodeByID(_ context.Context, nodeID string) (*types.Node, error) {
 	if _, ok := MockNodesMap[nodeID]; !ok {
 		return nil, fmt.Errorf("test")
 	}
 	return MockNodesMap[nodeID], nil
 }
 
-func (c *Mock) GetNodes() ([]*types.Node, error) {
+func (c *Mock) GetNodes(_ context.Context) ([]*types.Node, error) {
 	return MockNodesSlice, nil
 }
 
-func (c *Mock) UpdateBlockPosition(nodeID string, blockNumber int64) error {
+func (c *Mock) UpdateBlockPosition(_ context.Context, nodeID string, blockNumber int64) error {
 	if _, ok := MockNodesMap[nodeID]; !ok {
 		return fmt.Errorf("test")
 	}

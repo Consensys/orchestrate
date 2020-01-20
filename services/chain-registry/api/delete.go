@@ -14,7 +14,7 @@ type deleteResponse struct{}
 func (h Handler) deleteNodeByID(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
-	nodeID := mux.Vars(request)[nodeIDPath]
+	nodeID := mux.Vars(request)["nodeID"]
 
 	err := h.store.DeleteNodeByID(request.Context(), nodeID)
 	if err != nil {
@@ -29,9 +29,9 @@ func (h Handler) deleteNodeByName(rw http.ResponseWriter, request *http.Request)
 	rw.Header().Set("Content-Type", "application/json")
 
 	node := &models.Node{
-		Name: mux.Vars(request)[nodeNamePath],
+		Name: mux.Vars(request)["nodeName"],
 		// TODO: replace tenantID when extract token
-		TenantID: mux.Vars(request)[tenantIDPath],
+		TenantID: mux.Vars(request)["tenantID"],
 	}
 
 	err := h.store.DeleteNodeByName(request.Context(), node)

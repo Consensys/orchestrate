@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/containous/alice"
 	"github.com/containous/traefik/v2/pkg/config/dynamic"
 	"github.com/containous/traefik/v2/pkg/config/runtime"
 	"github.com/containous/traefik/v2/pkg/config/static"
@@ -48,6 +49,7 @@ type Server struct {
 	tlsManager                 *tls.Manager
 	api                        api.Builder
 	restHandler                http.Handler
+	orchestrateMiddlewares     map[string]alice.Constructor
 }
 
 // RouteAppenderFactory the route appender factory interface
@@ -62,6 +64,7 @@ func NewServer(
 	entryPoints TCPEntryPoints,
 	tlsManager *tls.Manager,
 	apiBuilder api.Builder,
+	orchestrateMiddlewares map[string]alice.Constructor,
 ) *Server {
 	server := &Server{}
 
@@ -70,6 +73,9 @@ func NewServer(
 	if apiBuilder != nil {
 		server.api = apiBuilder
 	}
+
+	// Add custom Orchestrate middlewares
+	server.orchestrateMiddlewares = orchestrateMiddlewares
 
 	if staticConfig.Providers != nil && staticConfig.Providers.Rest != nil {
 		server.restHandler = staticConfig.Providers.Rest.Handler()

@@ -24,42 +24,23 @@ func NewHandler(store types.ChainRegistryStore) *Handler {
 	}
 }
 
-var (
-	NodesPrefixPath              = "/nodes"
-	NodePrefixPath               = "/node"
-	nodeIDPath                   = "nodeID"
-	tenantIDPath                 = "tenantID"
-	nodeNamePath                 = "nodeName"
-	BlockPositionPath            = "block-position"
-	getNodesPath                 = NodesPrefixPath
-	getNodesByTenantIDPath       = fmt.Sprintf("%s/{%s}", NodesPrefixPath, tenantIDPath)
-	getNodeByNamePath            = fmt.Sprintf("%s/{%s}/{%s}", NodesPrefixPath, tenantIDPath, nodeNamePath)
-	getNodeByIDPath              = fmt.Sprintf("%s/{%s}", NodePrefixPath, nodeIDPath)
-	postNodePath                 = fmt.Sprintf("%s/{%s}", NodesPrefixPath, tenantIDPath)
-	patchNodeByNamePath          = fmt.Sprintf("%s/{%s}/{%s}", NodesPrefixPath, tenantIDPath, nodeNamePath)
-	patchBlockPositionByNamePath = fmt.Sprintf("%s/%s", patchNodeByNamePath, BlockPositionPath)
-	patchNodeByIDPath            = fmt.Sprintf("%s/{%s}", NodePrefixPath, nodeIDPath)
-	patchBlockPositionByIDPath   = fmt.Sprintf("%s/%s", patchNodeByIDPath, BlockPositionPath)
-	deleteNodeByNamePath         = fmt.Sprintf("%s/{%s}/{%s}", NodesPrefixPath, tenantIDPath, nodeNamePath)
-	deleteNodeByIDPath           = fmt.Sprintf("%s/{%s}", NodePrefixPath, nodeIDPath)
-)
-
 // Add internal routes to router
 func (h *Handler) Append(router *mux.Router) {
-	router.Methods(http.MethodGet).Path(getNodesPath).HandlerFunc(h.getNodes)
-	router.Methods(http.MethodGet).Path(getNodesByTenantIDPath).HandlerFunc(h.getNodesByTenantID)
-	router.Methods(http.MethodGet).Path(getNodeByNamePath).HandlerFunc(h.getNodeByName)
-	router.Methods(http.MethodGet).Path(getNodeByIDPath).HandlerFunc(h.getNodeByID)
+	router.Methods(http.MethodGet).Path("/nodes").HandlerFunc(h.getNodes)
+	router.Methods(http.MethodGet).Path("/{tenantID}/nodes").HandlerFunc(h.getNodesByTenantID)
+	router.Methods(http.MethodGet).Path("/{tenantID}/nodes/{nodeName}").HandlerFunc(h.getNodeByName)
+	router.Methods(http.MethodGet).Path("/nodes/{nodeID}").HandlerFunc(h.getNodeByID)
 
-	router.Methods(http.MethodPost).Path(postNodePath).HandlerFunc(h.postNode)
+	router.Methods(http.MethodPost).Path("/nodes").HandlerFunc(h.postNode)
+	router.Methods(http.MethodPost).Path("/{tenantID}/nodes").HandlerFunc(h.postNode)
 
-	router.Methods(http.MethodPatch).Path(patchNodeByNamePath).HandlerFunc(h.patchNodeByName)
-	router.Methods(http.MethodPatch).Path(patchBlockPositionByNamePath).HandlerFunc(h.patchBlockPositionByName)
-	router.Methods(http.MethodPatch).Path(patchNodeByIDPath).HandlerFunc(h.patchNodeByID)
-	router.Methods(http.MethodPatch).Path(patchBlockPositionByIDPath).HandlerFunc(h.patchBlockPositionByID)
+	router.Methods(http.MethodPatch).Path("/{tenantID}/nodes/{nodeName}").HandlerFunc(h.patchNodeByName)
+	router.Methods(http.MethodPatch).Path("/{tenantID}/nodes/{nodeName}/block-position").HandlerFunc(h.patchBlockPositionByName)
+	router.Methods(http.MethodPatch).Path("/nodes/{nodeID}").HandlerFunc(h.patchNodeByID)
+	router.Methods(http.MethodPatch).Path("/nodes/{nodeID}/block-position").HandlerFunc(h.patchBlockPositionByID)
 
-	router.Methods(http.MethodDelete).Path(deleteNodeByNamePath).HandlerFunc(h.deleteNodeByName)
-	router.Methods(http.MethodDelete).Path(deleteNodeByIDPath).HandlerFunc(h.deleteNodeByID)
+	router.Methods(http.MethodDelete).Path("/{tenantID}/nodes/{nodeName}").HandlerFunc(h.deleteNodeByName)
+	router.Methods(http.MethodDelete).Path("/nodes/{nodeID}").HandlerFunc(h.deleteNodeByID)
 }
 
 type Builder func(config *runtime.Configuration) http.Handler

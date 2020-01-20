@@ -28,7 +28,7 @@ func (h Handler) patchNodeByName(rw http.ResponseWriter, request *http.Request) 
 	node := &models.Node{
 		Name: mux.Vars(request)["nodeName"],
 		// TODO: replace tenantID when extract token
-		TenantID:                mux.Vars(request)[tenantIDPath],
+		TenantID:                mux.Vars(request)["tenantID"],
 		URLs:                    nodeRequest.URLs,
 		ListenerDepth:           nodeRequest.ListenerDepth,
 		ListenerBlockPosition:   nodeRequest.ListenerBlockPosition,
@@ -55,7 +55,7 @@ func (h Handler) patchBlockPositionByName(rw http.ResponseWriter, request *http.
 		return
 	}
 
-	err = h.store.UpdateBlockPositionByName(request.Context(), mux.Vars(request)[nodeNamePath], mux.Vars(request)[tenantIDPath], p.BlockPosition)
+	err = h.store.UpdateBlockPositionByName(request.Context(), mux.Vars(request)["nodeName"], mux.Vars(request)["tenantID"], p.BlockPosition)
 	if err != nil {
 		handleChainRegistryStoreError(rw, err)
 		return
@@ -67,7 +67,7 @@ func (h Handler) patchBlockPositionByName(rw http.ResponseWriter, request *http.
 func (h Handler) patchNodeByID(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
-	nodeID := mux.Vars(request)[nodeIDPath]
+	nodeID := mux.Vars(request)["nodeID"]
 
 	nodeRequest, err := UnmarshalNodeRequestBody(request.Body)
 	if err != nil {
@@ -97,7 +97,7 @@ func (h Handler) patchNodeByID(rw http.ResponseWriter, request *http.Request) {
 func (h Handler) patchBlockPositionByID(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
-	nodeID := mux.Vars(request)[nodeIDPath]
+	nodeID := mux.Vars(request)["nodeID"]
 
 	p := &PatchBlockPositionRequest{}
 	err := UnmarshalBody(request.Body, p)

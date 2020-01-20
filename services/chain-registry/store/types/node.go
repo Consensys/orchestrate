@@ -71,7 +71,10 @@ func BuildConfiguration(nodes []*Node) (*dynamic.Configuration, error) {
 		config.HTTP.Routers[nodeID] = &dynamic.Router{
 			EntryPoints: []string{"http"},
 			Service:     nodeID,
-			Rule:        fmt.Sprintf("Path(`/%s`) || Path(`/%s/%s`)", node.ID, node.TenantID, node.Name),
+			// We set path Rule with tenantID placeholder so it is parsed by gorilla mux
+			// and can be used by middlewares (in particular the authentication middleware)
+			Rule:        fmt.Sprintf("Path(`/%s`) || Path(`/{tenantID:%s}/%s`)", node.ID, node.TenantID, node.Name),
+			Middlewares: []string{"orchestrate-auth"},
 		}
 
 		servers := make([]dynamic.Server, 0)

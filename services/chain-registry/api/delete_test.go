@@ -2,7 +2,6 @@ package api
 
 import (
 	"net/http"
-	"strings"
 )
 
 var deleteNodeByIDTests = []HTTPRouteTests{
@@ -10,7 +9,7 @@ var deleteNodeByIDTests = []HTTPRouteTests{
 		name:                "TestDeleteNodeByID200",
 		store:               &MockChainRegistry{},
 		httpMethod:          http.MethodDelete,
-		path:                strings.ReplaceAll(deleteNodeByIDPath, "{"+nodeIDPath+"}", "1"),
+		path:                "/nodes/1",
 		body:                func() []byte { return nil },
 		expectedStatusCode:  http.StatusOK,
 		expectedContentType: expectedSuccessStatusContentType,
@@ -20,7 +19,7 @@ var deleteNodeByIDTests = []HTTPRouteTests{
 		name:                "TestDeleteNodeByID404",
 		store:               &ErrorChainRegistry{},
 		httpMethod:          http.MethodDelete,
-		path:                strings.ReplaceAll(deleteNodeByIDPath, "{"+nodeIDPath+"}", "0"),
+		path:                "/nodes/0",
 		body:                func() []byte { return nil },
 		expectedStatusCode:  http.StatusNotFound,
 		expectedContentType: expectedErrorStatusContentType,
@@ -30,7 +29,7 @@ var deleteNodeByIDTests = []HTTPRouteTests{
 		name:                "TestDeleteNodeByID500",
 		store:               &ErrorChainRegistry{},
 		httpMethod:          http.MethodDelete,
-		path:                strings.ReplaceAll(deleteNodeByIDPath, "{"+nodeIDPath+"}", "1"),
+		path:                "/nodes/1",
 		body:                func() []byte { return nil },
 		expectedStatusCode:  http.StatusInternalServerError,
 		expectedContentType: expectedErrorStatusContentType,
@@ -43,7 +42,7 @@ var deleteNodesByNameTests = []HTTPRouteTests{
 		name:                "TestDeleteNodeByName200",
 		store:               &MockChainRegistry{},
 		httpMethod:          http.MethodDelete,
-		path:                strings.ReplaceAll(strings.ReplaceAll(getNodeByNamePath, "{"+tenantIDPath+"}", "testTenantID"), "{"+nodeNamePath+"}", "testNodeName"),
+		path:                "/testTenantID/nodes/testNodeName",
 		body:                func() []byte { return nil },
 		expectedStatusCode:  http.StatusOK,
 		expectedContentType: expectedSuccessStatusContentType,
@@ -53,7 +52,7 @@ var deleteNodesByNameTests = []HTTPRouteTests{
 		name:                "TestDeleteNodeByName404",
 		store:               &ErrorChainRegistry{},
 		httpMethod:          http.MethodDelete,
-		path:                strings.ReplaceAll(strings.ReplaceAll(getNodeByNamePath, "{"+tenantIDPath+"}", "testTenantID"), "{"+nodeNamePath+"}", "notFoundError"),
+		path:                "/testTenantID/nodes/notFoundError",
 		body:                func() []byte { return nil },
 		expectedStatusCode:  http.StatusNotFound,
 		expectedContentType: expectedErrorStatusContentType,
@@ -63,7 +62,7 @@ var deleteNodesByNameTests = []HTTPRouteTests{
 		name:                "TestDeleteNodeByName500",
 		store:               &ErrorChainRegistry{},
 		httpMethod:          http.MethodDelete,
-		path:                strings.ReplaceAll(strings.ReplaceAll(getNodeByNamePath, "{"+tenantIDPath+"}", "testTenantID"), "{"+nodeNamePath+"}", "testNodeName"),
+		path:                "/testTenantID/nodes/testNodeName",
 		body:                func() []byte { return nil },
 		expectedStatusCode:  http.StatusInternalServerError,
 		expectedContentType: expectedErrorStatusContentType,

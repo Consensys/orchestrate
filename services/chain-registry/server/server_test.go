@@ -140,7 +140,7 @@ func setupListenProvider(throttleDuration time.Duration) (server *Server, stop c
 		},
 	}
 
-	server = NewServer(staticConfiguration, nil, nil, nil, nil)
+	server = NewServer(staticConfiguration, nil, nil, nil, nil, nil)
 	go server.listenProviders(stop)
 
 	return server, stop, invokeStopChan
@@ -257,7 +257,7 @@ func TestServerResponseEmptyBackend(t *testing.T) {
 				"http": &TCPEntryPoint{},
 			}
 
-			srv := NewServer(globalConfig, nil, entryPointsConfig, nil, nil)
+			srv := NewServer(globalConfig, nil, entryPointsConfig, nil, nil, nil)
 			rtConf := runtime.NewConfig(dynamic.Configuration{HTTP: test.config(testServer.URL)})
 			entryPoints, _ := srv.createHTTPHandlers(context.Background(), rtConf, []string{"http"})
 

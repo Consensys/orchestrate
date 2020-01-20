@@ -5,7 +5,9 @@ import (
 	"net"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication"
+	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt"
+	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/key"
 
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	log "github.com/sirupsen/logrus"
@@ -31,10 +33,12 @@ func Init(ctx context.Context) {
 			opentracing.Init(ctx)
 
 			// Initialize Authentication Manager
-			jwt.Init(ctx)
+			authjwt.Init(ctx)
+			authkey.Init(ctx)
+			auth := authentication.CombineAuth(authkey.GlobalAuth(), authjwt.GlobalAuth())
 
 			// Declare server with interceptors
-			server = NewServer()
+			server = NewServer(auth)
 
 			// Apply enhancers on server
 			ApplyEnhancers(server, enhancers...)

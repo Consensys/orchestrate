@@ -138,7 +138,6 @@ func (p *Parser) ParseContractCell(header, cell string, contractSpec *ContractSp
 		contractSpec.Contract.Id.Tag = cell
 	case tenantIDHeader:
 		var err error
-		log.Tracef("got tenantid colunm with cell %s", cell)
 		contractSpec.JWTToken, err = p.JWTGenerator.GenerateAccessTokenWithTenantID(cell)
 		if err != nil {
 			return err

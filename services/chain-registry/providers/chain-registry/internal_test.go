@@ -51,6 +51,7 @@ func (s *ProviderTestSuite) TestCreateConfiguration() {
 					Service:     "api@internal",
 					Priority:    math.MaxInt32 - 1,
 					Rule:        "PathPrefix(`/`)",
+					Middlewares: []string{"orchestrate-auth"},
 				},
 			},
 			Middlewares: make(map[string]*dynamic.Middleware),

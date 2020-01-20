@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 
 	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
@@ -13,7 +12,7 @@ var patchNodeByNameTests = []HTTPRouteTests{
 		name:       "TestPatchNodeByName200",
 		store:      &MockChainRegistry{},
 		httpMethod: http.MethodPatch,
-		path:       strings.ReplaceAll(strings.ReplaceAll(patchNodeByNamePath, "{"+tenantIDPath+"}", "testTenantID"), "{"+nodeNamePath+"}", "nodeName"),
+		path:       "/testTenantID/nodes/testNodeName",
 		body: func() []byte {
 			body, _ := json.Marshal(&models.Node{
 				URLs: []string{"http://test.com"},
@@ -28,7 +27,7 @@ var patchNodeByNameTests = []HTTPRouteTests{
 		name:       "TestPatchNodeByName400WithWrongURL",
 		store:      &MockChainRegistry{},
 		httpMethod: http.MethodPatch,
-		path:       strings.ReplaceAll(strings.ReplaceAll(patchNodeByNamePath, "{"+tenantIDPath+"}", "testTenantID"), "{"+nodeNamePath+"}", "nodeName"),
+		path:       "/testTenantID/nodes/testNodeName",
 		body: func() []byte {
 			body, _ := json.Marshal(&models.Node{
 				URLs: []string{"test.com"},
@@ -46,7 +45,7 @@ var patchNodeByNameTests = []HTTPRouteTests{
 		name:                "TestPatchNodeByName400WrongBody",
 		store:               &MockChainRegistry{},
 		httpMethod:          http.MethodPatch,
-		path:                strings.ReplaceAll(strings.ReplaceAll(patchNodeByNamePath, "{"+tenantIDPath+"}", "testTenantID"), "{"+nodeNamePath+"}", "nodeName"),
+		path:                "/testTenantID/nodes/testNodeName",
 		body:                func() []byte { return []byte(`{"unknownField":"error"}`) },
 		expectedStatusCode:  http.StatusBadRequest,
 		expectedContentType: expectedErrorStatusContentType,
@@ -56,7 +55,7 @@ var patchNodeByNameTests = []HTTPRouteTests{
 		name:       "TestPatchNodeByName404",
 		store:      &ErrorChainRegistry{},
 		httpMethod: http.MethodPatch,
-		path:       strings.ReplaceAll(strings.ReplaceAll(patchNodeByNamePath, "{"+tenantIDPath+"}", "testTenantID"), "{"+nodeNamePath+"}", "notFoundError"),
+		path:       "/testTenantID/nodes/notFoundError",
 		body: func() []byte {
 			body, _ := json.Marshal(&models.Node{
 				URLs: []string{"http://test.com"},
@@ -71,7 +70,7 @@ var patchNodeByNameTests = []HTTPRouteTests{
 		name:       "TestPatchNodeByName500",
 		store:      &ErrorChainRegistry{},
 		httpMethod: http.MethodPatch,
-		path:       strings.ReplaceAll(strings.ReplaceAll(patchNodeByNamePath, "{"+tenantIDPath+"}", "testTenantID"), "{"+nodeNamePath+"}", "testNodeName"),
+		path:       "/testTenantID/nodes/testNodeName",
 		body: func() []byte {
 			body, _ := json.Marshal(&models.Node{
 				URLs: []string{"http://test.com"},
@@ -89,7 +88,7 @@ var patchNodeByIDTests = []HTTPRouteTests{
 		name:       "TestPatchNodeByIDByID200",
 		store:      &MockChainRegistry{},
 		httpMethod: http.MethodPatch,
-		path:       strings.ReplaceAll(patchNodeByIDPath, "{"+nodeIDPath+"}", "1"),
+		path:       "/nodes/1",
 		body: func() []byte {
 			body, _ := json.Marshal(&models.Node{
 				URLs: []string{"http://test.com"},
@@ -104,7 +103,7 @@ var patchNodeByIDTests = []HTTPRouteTests{
 		name:       "TestPatchNodeByID400WithWrongURL",
 		store:      &MockChainRegistry{},
 		httpMethod: http.MethodPatch,
-		path:       strings.ReplaceAll(patchNodeByIDPath, "{"+nodeIDPath+"}", "1"),
+		path:       "/nodes/1",
 		body: func() []byte {
 			body, _ := json.Marshal(&models.Node{
 				URLs: []string{"test.com"},
@@ -122,7 +121,7 @@ var patchNodeByIDTests = []HTTPRouteTests{
 		name:                "TestPatchNodeByID400WrongBody",
 		store:               &MockChainRegistry{},
 		httpMethod:          http.MethodPatch,
-		path:                strings.ReplaceAll(patchNodeByIDPath, "{"+nodeIDPath+"}", "1"),
+		path:                "/nodes/1",
 		body:                func() []byte { return []byte(`{"unknownField":"error"}`) },
 		expectedStatusCode:  http.StatusBadRequest,
 		expectedContentType: expectedErrorStatusContentType,
@@ -135,7 +134,7 @@ var patchNodeByIDTests = []HTTPRouteTests{
 		name:       "TestPatchNodeByID404",
 		store:      &ErrorChainRegistry{},
 		httpMethod: http.MethodPatch,
-		path:       strings.ReplaceAll(patchNodeByIDPath, "{"+nodeIDPath+"}", "0"),
+		path:       "/nodes/0",
 		body: func() []byte {
 			body, _ := json.Marshal(&models.Node{
 				URLs: []string{"http://test.com"},
@@ -150,7 +149,7 @@ var patchNodeByIDTests = []HTTPRouteTests{
 		name:       "TestPatchNodeByID500",
 		store:      &ErrorChainRegistry{},
 		httpMethod: http.MethodPatch,
-		path:       strings.ReplaceAll(patchNodeByIDPath, "{"+nodeIDPath+"}", "1"),
+		path:       "/nodes/1",
 		body: func() []byte {
 			body, _ := json.Marshal(&models.Node{
 				URLs: []string{"http://test.com"},
@@ -168,7 +167,7 @@ var patchBlockPositionByIDTests = []HTTPRouteTests{
 		name:       "TestPatchBlockPositionByIDByID200",
 		store:      &MockChainRegistry{},
 		httpMethod: http.MethodPatch,
-		path:       strings.ReplaceAll(patchBlockPositionByIDPath, "{"+nodeIDPath+"}", "1"),
+		path:       "/nodes/1/block-position",
 		body: func() []byte {
 			body, _ := json.Marshal(&PatchBlockPositionRequest{
 				BlockPosition: 10,
@@ -183,7 +182,7 @@ var patchBlockPositionByIDTests = []HTTPRouteTests{
 		name:                "TestPatchBlockPositionByID400WrongBody",
 		store:               &MockChainRegistry{},
 		httpMethod:          http.MethodPatch,
-		path:                strings.ReplaceAll(patchBlockPositionByIDPath, "{"+nodeIDPath+"}", "1"),
+		path:                "/nodes/1/block-position",
 		body:                func() []byte { return []byte(`{"unknownField":"error"}`) },
 		expectedStatusCode:  http.StatusBadRequest,
 		expectedContentType: expectedErrorStatusContentType,
@@ -196,7 +195,7 @@ var patchBlockPositionByIDTests = []HTTPRouteTests{
 		name:       "TestPatchBlockPositionByID404",
 		store:      &ErrorChainRegistry{},
 		httpMethod: http.MethodPatch,
-		path:       strings.ReplaceAll(patchBlockPositionByIDPath, "{"+nodeIDPath+"}", "0"),
+		path:       "/nodes/0/block-position",
 		body: func() []byte {
 			body, _ := json.Marshal(&PatchBlockPositionRequest{
 				BlockPosition: 10,
@@ -211,7 +210,7 @@ var patchBlockPositionByIDTests = []HTTPRouteTests{
 		name:       "TestPatchBlockPositionByID500",
 		store:      &ErrorChainRegistry{},
 		httpMethod: http.MethodPatch,
-		path:       strings.ReplaceAll(patchBlockPositionByIDPath, "{"+nodeIDPath+"}", "1"),
+		path:       "/nodes/1/block-position",
 		body: func() []byte {
 			body, _ := json.Marshal(&PatchBlockPositionRequest{
 				BlockPosition: 10,
@@ -229,7 +228,7 @@ var patchBlockNumberByNameTests = []HTTPRouteTests{
 		name:       "TestPatchBlockNumberByName200",
 		store:      &MockChainRegistry{},
 		httpMethod: http.MethodPatch,
-		path:       strings.ReplaceAll(strings.ReplaceAll(patchBlockPositionByNamePath, "{"+tenantIDPath+"}", "testTenantID"), "{"+nodeNamePath+"}", "nodeName"),
+		path:       "/testTenantID/nodes/testNodeName/block-position",
 		body: func() []byte {
 			body, _ := json.Marshal(&PatchBlockPositionRequest{
 				BlockPosition: 10,
@@ -244,7 +243,7 @@ var patchBlockNumberByNameTests = []HTTPRouteTests{
 		name:                "TestPatchBlockNumberByName400WrongBody",
 		store:               &MockChainRegistry{},
 		httpMethod:          http.MethodPatch,
-		path:                strings.ReplaceAll(strings.ReplaceAll(patchBlockPositionByNamePath, "{"+tenantIDPath+"}", "testTenantID"), "{"+nodeNamePath+"}", "nodeName"),
+		path:                "/testTenantID/nodes/testNodeName/block-position",
 		body:                func() []byte { return []byte(`{"unknownField":"error"}`) },
 		expectedStatusCode:  http.StatusBadRequest,
 		expectedContentType: expectedErrorStatusContentType,
@@ -254,7 +253,7 @@ var patchBlockNumberByNameTests = []HTTPRouteTests{
 		name:       "TestPatchBlockNumberByName404",
 		store:      &ErrorChainRegistry{},
 		httpMethod: http.MethodPatch,
-		path:       strings.ReplaceAll(strings.ReplaceAll(patchBlockPositionByNamePath, "{"+tenantIDPath+"}", "testTenantID"), "{"+nodeNamePath+"}", "notFoundError"),
+		path:       "/testTenantID/nodes/notFoundError/block-position",
 		body: func() []byte {
 			body, _ := json.Marshal(&PatchBlockPositionRequest{
 				BlockPosition: 10,
@@ -269,7 +268,7 @@ var patchBlockNumberByNameTests = []HTTPRouteTests{
 		name:       "TestPatchBlockNumberByName500",
 		store:      &ErrorChainRegistry{},
 		httpMethod: http.MethodPatch,
-		path:       strings.ReplaceAll(strings.ReplaceAll(patchBlockPositionByNamePath, "{"+tenantIDPath+"}", "testTenantID"), "{"+nodeNamePath+"}", "testNodeName"),
+		path:       "/testTenantID/nodes/testNodeName/block-position",
 		body: func() []byte {
 			body, _ := json.Marshal(&PatchBlockPositionRequest{
 				BlockPosition: 10,

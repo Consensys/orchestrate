@@ -55,7 +55,7 @@ loop:
 		select {
 		case <-ticker.C:
 			var nodes []*types.Node
-			nodes, err = p.Client.GetNodes()
+			nodes, err = p.Client.GetNodes(ctx)
 			if err != nil {
 				log.FromContext(logCtx).WithError(err).Errorf("failed to fetch nodes from chain registry")
 				break loop

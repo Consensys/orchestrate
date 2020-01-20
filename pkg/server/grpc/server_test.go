@@ -3,5 +3,5 @@ package grpcserver
 import "testing"
 
 func TestNewServer(t *testing.T) {
-	NewServer()
+	NewServer(nil)
 }

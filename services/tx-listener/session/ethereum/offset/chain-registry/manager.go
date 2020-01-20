@@ -25,16 +25,16 @@ func NewManager(r registry.Client) *Manager {
 	}
 }
 
-func (m *Manager) GetLastBlockNumber(_ context.Context, node *dynamic.Node) (int64, error) {
-	n, err := m.registry.GetNodeByID(node.ID)
+func (m *Manager) GetLastBlockNumber(ctx context.Context, node *dynamic.Node) (int64, error) {
+	n, err := m.registry.GetNodeByID(ctx, node.ID)
 	if err != nil {
 		return 0, errors.FromError(err).ExtendComponent(component)
 	}
 	return n.ListenerBlockPosition, nil
 }
 
-func (m *Manager) SetLastBlockNumber(_ context.Context, node *dynamic.Node, blockNumber int64) error {
-	err := m.registry.UpdateBlockPosition(node.ID, blockNumber)
+func (m *Manager) SetLastBlockNumber(ctx context.Context, node *dynamic.Node, blockNumber int64) error {
+	err := m.registry.UpdateBlockPosition(ctx, node.ID, blockNumber)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(component)
 	}

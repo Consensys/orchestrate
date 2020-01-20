@@ -47,7 +47,7 @@ func TestReuseService(t *testing.T) {
 		),
 	)
 
-	srv := NewServer(staticConfig, nil, entryPoints, nil, nil)
+	srv := NewServer(staticConfig, nil, entryPoints, nil, nil, nil)
 
 	rtConf := runtime.NewConfig(dynamic.Configuration{HTTP: dynamicConfigs})
 	entrypointsHandlers, _ := srv.createHTTPHandlers(context.Background(), rtConf, []string{"http"})

@@ -16,11 +16,11 @@ import (
 	"github.com/containous/traefik/v2/pkg/middlewares/accesslog"
 	"github.com/containous/traefik/v2/pkg/middlewares/requestdecorator"
 	"github.com/containous/traefik/v2/pkg/responsemodifiers"
-	"github.com/containous/traefik/v2/pkg/server/middleware"
 	"github.com/containous/traefik/v2/pkg/testhelpers"
 	"github.com/containous/traefik/v2/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/server/middleware"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/server/service"
 )
 
@@ -308,7 +308,7 @@ func TestRouterManager_Get(t *testing.T) {
 				},
 			})
 			serviceManager := service.NewManager(rtConf.Services, http.DefaultTransport, nil, nil, nil, nil)
-			middlewaresBuilder := middleware.NewBuilder(rtConf.Middlewares, serviceManager)
+			middlewaresBuilder := middleware.NewBuilder(rtConf.Middlewares, serviceManager, nil)
 			responseModifierFactory := responsemodifiers.NewBuilder(rtConf.Middlewares)
 			routerManager := NewManager(rtConf, serviceManager, middlewaresBuilder, responseModifierFactory)
 
@@ -409,7 +409,7 @@ func TestAccessLog(t *testing.T) {
 			})
 
 			serviceManager := service.NewManager(rtConf.Services, http.DefaultTransport, nil, nil, nil, nil)
-			middlewaresBuilder := middleware.NewBuilder(rtConf.Middlewares, serviceManager)
+			middlewaresBuilder := middleware.NewBuilder(rtConf.Middlewares, serviceManager, nil)
 			responseModifierFactory := responsemodifiers.NewBuilder(rtConf.Middlewares)
 			routerManager := NewManager(rtConf, serviceManager, middlewaresBuilder, responseModifierFactory)
 
@@ -693,7 +693,7 @@ func TestRuntimeConfiguration(t *testing.T) {
 				},
 			})
 			serviceManager := service.NewManager(rtConf.Services, http.DefaultTransport, nil, nil, nil, nil)
-			middlewaresBuilder := middleware.NewBuilder(rtConf.Middlewares, serviceManager)
+			middlewaresBuilder := middleware.NewBuilder(rtConf.Middlewares, serviceManager, nil)
 			responseModifierFactory := responsemodifiers.NewBuilder(map[string]*runtime.MiddlewareInfo{})
 			routerManager := NewManager(rtConf, serviceManager, middlewaresBuilder, responseModifierFactory)
 
@@ -762,7 +762,7 @@ func TestProviderOnMiddlewares(t *testing.T) {
 		},
 	})
 	serviceManager := service.NewManager(rtConf.Services, http.DefaultTransport, nil, nil, nil, nil)
-	middlewaresBuilder := middleware.NewBuilder(rtConf.Middlewares, serviceManager)
+	middlewaresBuilder := middleware.NewBuilder(rtConf.Middlewares, serviceManager, nil)
 	responseModifierFactory := responsemodifiers.NewBuilder(map[string]*runtime.MiddlewareInfo{})
 	routerManager := NewManager(rtConf, serviceManager, middlewaresBuilder, responseModifierFactory)
 
@@ -817,7 +817,7 @@ func BenchmarkRouterServe(b *testing.B) {
 		},
 	})
 	serviceManager := service.NewManager(rtConf.Services, &staticTransport{res}, nil, nil, nil, nil)
-	middlewaresBuilder := middleware.NewBuilder(rtConf.Middlewares, serviceManager)
+	middlewaresBuilder := middleware.NewBuilder(rtConf.Middlewares, serviceManager, nil)
 	responseModifierFactory := responsemodifiers.NewBuilder(rtConf.Middlewares)
 	routerManager := NewManager(rtConf, serviceManager, middlewaresBuilder, responseModifierFactory)
 

@@ -20,13 +20,13 @@ import (
 	"github.com/containous/traefik/v2/pkg/middlewares/requestdecorator"
 	"github.com/containous/traefik/v2/pkg/middlewares/tracing"
 	"github.com/containous/traefik/v2/pkg/responsemodifiers"
-	"github.com/containous/traefik/v2/pkg/server/middleware"
 	routertcp "github.com/containous/traefik/v2/pkg/server/router/tcp"
 	"github.com/containous/traefik/v2/pkg/server/service/tcp"
 	tcpCore "github.com/containous/traefik/v2/pkg/tcp"
 	"github.com/eapache/channels"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/server/middleware"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/server/router"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/server/service"
 )
@@ -105,7 +105,7 @@ func (s *Server) createHTTPHandlers(ctx context.Context, configuration *runtime.
 		apiHandler = s.api(configuration)
 	}
 	serviceManager := service.NewManager(configuration.Services, s.defaultRoundTripper, s.metricsRegistry, s.routinesPool, apiHandler, s.restHandler)
-	middlewaresBuilder := middleware.NewBuilder(configuration.Middlewares, serviceManager)
+	middlewaresBuilder := middleware.NewBuilder(configuration.Middlewares, serviceManager, s.orchestrateMiddlewares)
 
 	responseModifierFactory := responsemodifiers.NewBuilder(configuration.Middlewares)
 	routerManager := router.NewManager(configuration, serviceManager, middlewaresBuilder, responseModifierFactory)

@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -24,7 +23,6 @@ func Init(ctx context.Context) {
 		}
 		var err error
 		jwtGenerator, err = New(
-			viper.GetBool(multitenancy.EnabledViperKey),
 			viper.GetString(jwt.ClaimsNamespaceViperKey),
 			viper.GetString(PrivateKeyViperKey),
 		)

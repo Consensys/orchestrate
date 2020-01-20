@@ -2,17 +2,16 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
 
 type Config struct {
@@ -20,23 +19,23 @@ type Config struct {
 }
 
 type HTTPClient struct {
-	client http.Client
+	client *http.Client
 
-	config Config
+	config *Config
 }
 
-func NewHTTPClient(h http.Client, c Config) *HTTPClient {
+func NewHTTPClient(h *http.Client, c *Config) *HTTPClient {
 	return &HTTPClient{
 		client: h,
 		config: c,
 	}
 }
 
-func (c *HTTPClient) GetNodeByID(nodeID string) (*types.Node, error) {
-	url := fmt.Sprintf("%s%s/%s", c.config.URL, api.NodePrefixPath, nodeID)
-	r, err := c.client.Get(url)
+func (c *HTTPClient) GetNodeByID(ctx context.Context, nodeID string) (*types.Node, error) {
+	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%v/nodes/%v", c.config.URL, nodeID), nil)
+	r, err := c.client.Do(req)
 	if err != nil {
-		return nil, errors.FromError(fmt.Errorf("%v - url: %s", err, url)).ExtendComponent(component)
+		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 	defer func() {
 		if deferErr := r.Body.Close(); err != nil {
@@ -55,11 +54,11 @@ func (c *HTTPClient) GetNodeByID(nodeID string) (*types.Node, error) {
 	return node, nil
 }
 
-func (c *HTTPClient) GetNodes() ([]*types.Node, error) {
-	url := fmt.Sprintf("%s%s", c.config.URL, api.NodesPrefixPath)
-	r, err := c.client.Get(url)
+func (c *HTTPClient) GetNodes(ctx context.Context) ([]*types.Node, error) {
+	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%v/nodes", c.config.URL), nil)
+	r, err := c.client.Do(req)
 	if err != nil {
-		return nil, errors.FromError(fmt.Errorf("%v - url: %s", err, url)).ExtendComponent(component)
+		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 	defer func() {
 		if deferErr := r.Body.Close(); err != nil {
@@ -68,7 +67,7 @@ func (c *HTTPClient) GetNodes() ([]*types.Node, error) {
 	}()
 
 	if r.StatusCode != http.StatusOK {
-		return nil, errors.FromError(fmt.Errorf("could not get nodes - got %d - url %s", r.StatusCode, url)).ExtendComponent(component)
+		return nil, errors.FromError(fmt.Errorf("could not get nodes - got %d", r.StatusCode)).ExtendComponent(component)
 	}
 
 	var nodes []*types.Node
@@ -79,17 +78,16 @@ func (c *HTTPClient) GetNodes() ([]*types.Node, error) {
 	return nodes, nil
 }
 
-func (c *HTTPClient) UpdateBlockPosition(nodeID string, blockNumber int64) error {
+func (c *HTTPClient) UpdateBlockPosition(ctx context.Context, nodeID string, blockNumber int64) error {
 	body := new(bytes.Buffer)
 	_ = json.NewEncoder(body).Encode(&api.PatchBlockPositionRequest{
 		BlockPosition: blockNumber,
 	})
 
-	url := fmt.Sprintf("%s%s/%s/%s", c.config.URL, api.NodePrefixPath, nodeID, api.BlockPositionPath)
-	req, _ := http.NewRequest(http.MethodPatch, url, body)
+	req, _ := http.NewRequestWithContext(ctx, http.MethodPatch, fmt.Sprintf("%v/nodes/%v/block-position", c.config.URL, nodeID), body)
 	r, err := c.client.Do(req)
 	if err != nil {
-		return errors.FromError(fmt.Errorf("%v - url: %s", err, url)).ExtendComponent(component)
+		return errors.FromError(err).ExtendComponent(component)
 	}
 	defer func() {
 		if deferErr := r.Body.Close(); err != nil {
@@ -100,7 +98,7 @@ func (c *HTTPClient) UpdateBlockPosition(nodeID string, blockNumber int64) error
 	if r.StatusCode != http.StatusOK {
 		buf := new(bytes.Buffer)
 		_, _ = buf.ReadFrom(r.Body)
-		return errors.FromError(fmt.Errorf("could not update block position - got %d - url: %s - body: %s", r.StatusCode, url, buf.String())).ExtendComponent(component)
+		return errors.FromError(fmt.Errorf("could not update block position - got %d - body: %s", r.StatusCode, buf.String())).ExtendComponent(component)
 	}
 
 	return nil

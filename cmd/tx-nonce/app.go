@@ -2,15 +2,15 @@ package txnonce
 
 import (
 	"context"
+	"fmt"
 	"sync"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/loader/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
 	nonceattributor "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/nonce/attributor"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/offset"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/opentracing"
@@ -21,6 +21,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/jaeger"
+	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/key"
+	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/utils"
 )
 
 var (
@@ -94,6 +96,12 @@ func registerHandlers() {
 // Start starts application
 func Start(ctx context.Context) {
 	startOnce.Do(func() {
+		apiKey := viper.GetString(authkey.APIKeyViperKey)
+		if apiKey != "" {
+			// Inject authorization header in context for later authentication
+			ctx = authutils.WithAuthorization(ctx, fmt.Sprintf("APIKey %v", apiKey))
+		}
+
 		cancelCtx, cancel := context.WithCancel(ctx)
 		go metrics.StartServer(ctx, cancel, app.IsAlive, app.IsReady)
 

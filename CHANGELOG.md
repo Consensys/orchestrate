@@ -14,8 +14,9 @@ All notable changes to this project will be documented in this file.
 * Store private keys based on the tenantID and the address of the keys
 * Add flag and environment variable:
     * `MULTI_TENANCY_ENABLED` to enable multi-tenancy. 
-    * `AUTH_SERVICE_CERTIFICATE` to provision trusted certificate of the service who generate ID/Access Token (authentication service). 
-    * `TENANT_NAMESPACE` to provision tenant namespace to retrieve the tenant id in the OpenId or Access Token (JWT). 
+    * `AUTH_JWT_CERTIFICATE` to provision trusted certificate to control signature of ID / Access Token (JWT)
+    * `AUTH_JWT_CLAIMS_NAMESPACE` to provision the namespace to retrieve Orchestrate AUth element in OpenId or Access Token (JWT) (in particular multitenancy information)
+    * `AUTH_API_KEY` secret allowing to bypass JWT authentication (usuful for some microservice to microservice communications)
  
 ### 🆕 Chain-registry and tx-listener
 * Add the chain-registry microservice that:

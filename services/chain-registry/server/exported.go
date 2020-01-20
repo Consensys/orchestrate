@@ -2,8 +2,10 @@ package server
 
 import (
 	"context"
+	"net/http"
 	"sync"
 
+	"github.com/containous/alice"
 	"github.com/containous/traefik/v2/pkg/config/dynamic"
 	"github.com/containous/traefik/v2/pkg/config/static"
 	"github.com/containous/traefik/v2/pkg/log"
@@ -11,8 +13,13 @@ import (
 	"github.com/containous/traefik/v2/pkg/provider/aggregator"
 	"github.com/containous/traefik/v2/pkg/server/router"
 	traefiktls "github.com/containous/traefik/v2/pkg/tls"
+	"github.com/spf13/viper"
+	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt"
+	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/key"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api"
+	authmiddleware "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/middlewares/auth"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/providers"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 )
 
 var (
@@ -56,6 +63,22 @@ func initACMEProvider(c *static.Configuration, providerAggregator *aggregator.Pr
 	return resolvers
 }
 
+func initOrchestrateMiddlewares(ctx context.Context) map[string]alice.Constructor {
+	middlewares := make(map[string]alice.Constructor)
+	authkey.Init(ctx)
+	authjwt.Init(ctx)
+
+	middlewares["orchestrate-auth"] = func(next http.Handler) (http.Handler, error) {
+		return authmiddleware.New(
+			authjwt.GlobalAuth(),
+			authkey.GlobalAuth(),
+			viper.GetBool(multitenancy.EnabledViperKey),
+			next), nil
+	}
+
+	return middlewares
+}
+
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
 		if svr != nil {
@@ -75,15 +98,18 @@ func Init(ctx context.Context) {
 		serverEntryPointsTCP := make(TCPEntryPoints)
 		var err error
 		for entryPointName, config := range staticConfig.EntryPoints {
-			ctx := log.With(context.Background(), log.Str(log.EntryPointName, entryPointName))
-			serverEntryPointsTCP[entryPointName], err = NewTCPEntryPoint(ctx, config)
+			logCtx := log.With(context.Background(), log.Str(log.EntryPointName, entryPointName))
+			serverEntryPointsTCP[entryPointName], err = NewTCPEntryPoint(logCtx, config)
 			if err != nil {
 				log.WithoutContext().WithError(err).Fatalf("error while building entryPoint %s", entryPointName)
 			}
 			serverEntryPointsTCP[entryPointName].RouteAppenderFactory = router.NewRouteAppenderFactory(*staticConfig, entryPointName, nil)
 		}
 
-		svr = NewServer(staticConfig, providers.ProviderAggregator(), serverEntryPointsTCP, tlsManager, api.NewBuilder(staticConfig))
+		// Initialize custom orchestrate midddleware
+		middlewares := initOrchestrateMiddlewares(ctx)
+
+		svr = NewServer(staticConfig, providers.ProviderAggregator(), serverEntryPointsTCP, tlsManager, api.NewBuilder(staticConfig), middlewares)
 
 		resolverNames := map[string]struct{}{}
 		for _, p := range acmeProviders {

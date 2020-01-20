@@ -1,7 +1,7 @@
 package grpcserver
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -31,14 +31,14 @@ func CodeToLevel(code codes.Code) log.Level {
 }
 
 // NewServer creates a new server with specific logrus options
-func NewServer() *grpc.Server {
+func NewServer(auth authentication.Auth) *grpc.Server {
 
 	opts := []grpc_logrus.Option{
 		grpc_logrus.WithLevels(CodeToLevel),
 	}
 
 	authF := Auth(
-		jwt.GlobalAuth(),
+		auth,
 		viper.GetBool(multitenancy.EnabledViperKey),
 	)
 

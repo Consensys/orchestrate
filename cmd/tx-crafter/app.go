@@ -2,9 +2,8 @@ package txcrafter
 
 import (
 	"context"
+	"fmt"
 	"sync"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -15,6 +14,7 @@ import (
 	gaspricer "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/gas/gas-pricer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/loader/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/offset"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/opentracing"
 	producer "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/producer/tx-crafter"
@@ -24,6 +24,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/jaeger"
+	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/key"
+	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/utils"
 )
 
 var (
@@ -115,6 +117,11 @@ func initComponents(ctx context.Context) {
 // Start starts application
 func Start(ctx context.Context) {
 	startOnce.Do(func() {
+		apiKey := viper.GetString(authkey.APIKeyViperKey)
+		if apiKey != "" {
+			// Inject authorization header in context for later authentication
+			ctx = authutils.WithAuthorization(ctx, fmt.Sprintf("APIKey %v", apiKey))
+		}
 
 		cancelCtx, cancel := context.WithCancel(ctx)
 		go metrics.StartServer(ctx, cancel, app.IsAlive, app.IsReady)
