@@ -34,13 +34,13 @@ Environment variable: %q`, providerRefreshIntervalEnv)
 }
 
 type Config struct {
-	RefreshInterval time.Duration
-	ChainProxyURL   string
+	RefreshInterval  time.Duration
+	ChainRegistryURL string
 }
 
 func NewConfig() *Config {
 	return &Config{
-		ChainProxyURL:   viper.GetString(chainregistry.ChainProxyURLViperKey),
-		RefreshInterval: viper.GetDuration(ProviderRefreshIntervalViperKey),
+		ChainRegistryURL: viper.GetString(chainregistry.ChainRegistryURLViperKey),
+		RefreshInterval:  viper.GetDuration(ProviderRefreshIntervalViperKey),
 	}
 }

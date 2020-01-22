@@ -60,8 +60,8 @@ func (s *ProviderTestSuite) SetupTest() {
 	s.provider = &Provider{
 		Client: &MockClient{i: 0},
 		conf: &Config{
-			RefreshInterval: time.Millisecond,
-			ChainProxyURL:   "http://test-proxy",
+			RefreshInterval:  time.Millisecond,
+			ChainRegistryURL: "http://test-proxy",
 		},
 	}
 }

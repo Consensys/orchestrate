@@ -38,7 +38,7 @@ func Init(ctx context.Context) {
 
 		// Create Handler
 		handler = engine.CombineHandlers(
-			NodeInjector(multitenancyEnabled, registry.GlobalClient(), viper.GetString(registry.ChainProxyURLViperKey)),
+			NodeInjector(multitenancyEnabled, registry.GlobalClient(), viper.GetString(registry.ChainRegistryURLViperKey)),
 			ChainIDInjector(ethclient.GlobalClient()),
 		)
 

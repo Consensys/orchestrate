@@ -86,7 +86,7 @@ func (p *Provider) buildConfiguration(nodes []*types.Node) *dynamic.Message {
 			ID:       node.ID,
 			TenantID: node.TenantID,
 			Name:     node.Name,
-			URL:      fmt.Sprintf("%v/%v", p.conf.ChainProxyURL, node.ID),
+			URL:      fmt.Sprintf("%v/%v", p.conf.ChainRegistryURL, node.ID),
 			Listener: &dynamic.Listener{
 				BlockPosition: node.ListenerBlockPosition,
 				Depth:         node.ListenerDepth,

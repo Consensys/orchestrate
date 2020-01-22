@@ -15,7 +15,7 @@ import (
 )
 
 // NodeInjector enrich the envelope with the nodeID, nodeName and inject in the input.Context the proxy URL
-func NodeInjector(multitenancyEnabled bool, r registry.Client, chainProxyHostname string) engine.HandlerFunc {
+func NodeInjector(multitenancyEnabled bool, r registry.Client, chainRegistryURL string) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		// check nodeID and inject if not present
 		tenantID := multitenancy.DefaultTenantIDName
@@ -40,7 +40,7 @@ func NodeInjector(multitenancyEnabled bool, r registry.Client, chainProxyHostnam
 		txctx.Envelope.GetChain().SetNodeID(node.ID)
 
 		// Inject chain proxy path as /tenantID/nodeName
-		proxyURL := fmt.Sprintf("%s/%s", chainProxyHostname, proxy.PathByNodeName(tenantID, node.Name))
+		proxyURL := fmt.Sprintf("%s/%s", chainRegistryURL, proxy.PathByNodeName(tenantID, node.Name))
 		txctx.WithContext(proxy.With(txctx.Context(), proxyURL))
 	}
 }

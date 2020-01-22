@@ -1,12 +1,10 @@
 version: '3.7'
 
 x-default-variables: &default-variables
-  ENVELOPE_STORE_URL: ${ENVELOPE_STORE_URL-envelope-store:8080}
-  CONTRACT_REGISTRY_URL: ${CONTRACT_REGISTRY_URL-contract-registry:8080}
-  KAFKA_URL: ${KAFKA_URL-kafka:29092}
-  CHAIN_REGISTRY_INIT: ${CHAIN_REGISTRY_INIT-}
   CHAIN_REGISTRY_URL: ${CHAIN_REGISTRY_URL-http://chain-registry:8081}
-  CHAIN_PROXY_URL: ${CHAIN_PROXY_URL-http://chain-registry:8080}
+  CONTRACT_REGISTRY_URL: ${CONTRACT_REGISTRY_URL-contract-registry:8080}
+  ENVELOPE_STORE_URL: ${ENVELOPE_STORE_URL-envelope-store:8080}
+  KAFKA_URL: ${KAFKA_URL-kafka:29092}
   ETH_CLIENT_RETRY_MAX_ELAPSED_TIME: 5s
   LOG_LEVEL: ${LOG_LEVEL-debug}
   LOG_FORMAT: ${LOG_FORMAT-}
@@ -16,7 +14,6 @@ x-default-variables: &default-variables
   REDIS_URL: ${REDIS_URL-redis:6379}
   VAULT_ADDR: ${VAULT_ADDR-http://vault:8200}
   # FAUCET_CREDITOR_ADDRESS: ${FAUCET_CREDITOR_ADDRESS-0x93f7274c9059e601be4512f656b57b830e019e41}@${GETH_NETWORKID-888}
-  ABI: ${ABI-}
   MULTI_TENANCY_ENABLED: ${MULTI_TENANCY_ENABLED-false}
   AUTH_JWT_CLAIMS_NAMESPACE: ${AUTH_JWT_CLAIMS_NAMESPACE-http://tenant.info/}
   AUTH_JWT_CERTIFICATE: ${AUTH_JWT_CERTIFICATE-}
@@ -73,6 +70,7 @@ services:
     environment:
       <<: *default-variables
       <<: *chain-registry-common
+      CHAIN_REGISTRY_INIT: ${CHAIN_REGISTRY_INIT-}
     depends_on:
       - chain-registry-migration
     command: chain-registry run
@@ -104,6 +102,7 @@ services:
     environment:
       <<: *default-variables
       <<: *contract-registry-common
+      ABI: ${ABI-}
     depends_on:
       - contract-registry-migration
     command: contract-registry run
