@@ -48,6 +48,14 @@ func (c *Mock) GetNodeByID(_ context.Context, nodeID string) (*types.Node, error
 	return MockNodesMap[nodeID], nil
 }
 
+func (c *Mock) GetNodeByTenantAndNodeName(_ context.Context, _, _ string) (*types.Node, error) {
+	return nil, nil
+}
+
+func (c *Mock) GetNodeByTenantAndNodeID(_ context.Context, _, _ string) (*types.Node, error) {
+	return nil, nil
+}
+
 func (c *Mock) GetNodes(_ context.Context) ([]*types.Node, error) {
 	return MockNodesSlice, nil
 }

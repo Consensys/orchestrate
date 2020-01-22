@@ -2,6 +2,7 @@ package gaspricer
 
 import (
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
@@ -11,8 +12,13 @@ import (
 func Pricer(p ethclient.GasPricer) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		if txctx.Envelope.GetTx().GetTxData().GetGasPrice() == nil {
+			url, err := proxy.GetURL(txctx)
+			if err != nil {
+				return
+			}
+
 			// Request a gas price suggestion
-			p, err := p.SuggestGasPrice(txctx.Context(), txctx.Envelope.Chain.ID())
+			p, err := p.SuggestGasPrice(txctx.Context(), url)
 			if err != nil {
 				e := txctx.AbortWithError(err).ExtendComponent(component)
 				txctx.Logger.WithError(e).Errorf("gas-pricer: could not suggest gas price")

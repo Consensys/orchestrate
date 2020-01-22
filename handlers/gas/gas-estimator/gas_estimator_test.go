@@ -2,8 +2,9 @@ package gasestimator
 
 import (
 	"context"
-	"math/big"
 	"testing"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 
 	eth "github.com/ethereum/go-ethereum"
 	log "github.com/sirupsen/logrus"
@@ -12,7 +13,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
@@ -20,8 +20,8 @@ type MockGasEstimator struct {
 	t *testing.T
 }
 
-func (e *MockGasEstimator) EstimateGas(ctx context.Context, chainID *big.Int, call *eth.CallMsg) (uint64, error) { // nolint:gocritic
-	if chainID.Text(10) == "0" {
+func (e *MockGasEstimator) EstimateGas(ctx context.Context, endpoint string, call *eth.CallMsg) (uint64, error) { // nolint:gocritic
+	if endpoint == "error" {
 		return 0, errors.ConnectionError("could not estimate gas").SetComponent("mock")
 	}
 	return 18, nil
@@ -36,11 +36,11 @@ func makeGasEstimatorContext(i int) *engine.TxContext {
 
 	switch i % 2 {
 	case 0:
-		txctx.Envelope.Chain = (&chain.Chain{}).SetID(big.NewInt(0))
+		txctx.WithContext(proxy.With(txctx.Context(), "error"))
 		txctx.Set("errors", 1)
 		txctx.Set("result", uint64(0))
 	case 1:
-		txctx.Envelope.Chain = (&chain.Chain{}).SetID(big.NewInt(1))
+		txctx.WithContext(proxy.With(txctx.Context(), "testURL"))
 		txctx.Set("errors", 0)
 		txctx.Set("result", uint64(18))
 	}

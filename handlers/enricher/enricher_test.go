@@ -2,72 +2,133 @@ package enricher
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 
-	ethTypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/golang/mock/gomock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/common"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/mock"
+	ethclientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine/testutils"
-	crc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client/mock"
+	registrymock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
-var testsNum = 2
+var testCodeNoError = []byte{1, 2}
+var testCodeError = []byte{1, 2, 3}
 
-type EnricherTestSuite struct {
-	testutils.HandlerTestSuite
-	contractRegistry *crc.ContractRegistryClient
-}
+const (
+	noErrorURL                 = "noError"
+	codeAtErrorURL             = "codeAtError"
+	setAccountCodeHashErrorURL = "setAccountCodeHashError"
+	testAccount                = "0xdbb881a51cd4023e4400cef3ef73046743f08da3"
+)
 
-func (s *EnricherTestSuite) SetupSuite() {
-	blocks := make(map[string][]*ethTypes.Block)
-	mec := mock.NewClient(blocks)
-
-	crc.New()
-
-	s.contractRegistry = crc.New()
-	s.Handler = Enricher(s.contractRegistry, mec)
-}
-
-func makeEnricherContext(i int) *engine.TxContext {
-	ctx := engine.NewTxContext()
-	ctx.Reset()
-	ctx.Logger = log.NewEntry(log.StandardLogger())
-	ctx.Envelope.Receipt = &ethereum.Receipt{}
-
-	switch i % 2 {
-	case 0:
-		ctx.Set("errors", 0)
-	case 1:
-		ctx.Set("errors", 0)
-		ctx.Envelope.Receipt.ContractAddress = ethereum.HexToAccount("0xd71400daD07d70C976D6AAFC241aF1EA183a7236")
-	default:
-		panic(fmt.Sprintf("No test case with number %d", i))
+func TestNodeInjector(t *testing.T) {
+	testSet := []struct {
+		name          string
+		input         func(txctx *engine.TxContext) *engine.TxContext
+		expectedTxctx func(txctx *engine.TxContext) *engine.TxContext
+	}{
+		{
+			"Enrich without error",
+			func(txctx *engine.TxContext) *engine.TxContext {
+				txctx.WithContext(proxy.With(txctx.Context(), noErrorURL))
+				txctx.Envelope.Receipt = &ethereum.Receipt{ContractAddress: ethereum.HexToAccount(testAccount)}
+				return txctx
+			},
+			func(txctx *engine.TxContext) *engine.TxContext {
+				return txctx
+			},
+		},
+		{
+			"Enrich with error at CodeAt",
+			func(txctx *engine.TxContext) *engine.TxContext {
+				txctx.WithContext(proxy.With(txctx.Context(), codeAtErrorURL))
+				txctx.Envelope.Receipt = &ethereum.Receipt{ContractAddress: ethereum.HexToAccount(testAccount)}
+				return txctx
+			},
+			func(txctx *engine.TxContext) *engine.TxContext {
+				err := errors.InternalError(
+					"could not read account code for chain %s and account %s",
+					codeAtErrorURL,
+					txctx.Envelope.GetReceipt().GetContractAddress().Address().String(),
+				).SetComponent(component)
+				txctx.Envelope.Errors = append(txctx.Envelope.Errors, err)
+				return txctx
+			},
+		},
+		{
+			"Enrich with error at SetAccountCodeHash",
+			func(txctx *engine.TxContext) *engine.TxContext {
+				txctx.WithContext(proxy.With(txctx.Context(), setAccountCodeHashErrorURL))
+				txctx.Envelope.Receipt = &ethereum.Receipt{ContractAddress: ethereum.HexToAccount(testAccount)}
+				return txctx
+			},
+			func(txctx *engine.TxContext) *engine.TxContext {
+				err := errors.InternalError("invalid input message format").SetComponent(component)
+				txctx.Envelope.Errors = append(txctx.Envelope.Errors, err)
+				return txctx
+			},
+		},
 	}
-	return ctx
-}
 
-func (s *EnricherTestSuite) TestEnricher() {
-	var txctxs []*engine.TxContext
-	for i := 0; i < testsNum-1; i++ {
-		txctxs = append(txctxs, makeEnricherContext(i))
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockClient := ethclientmock.NewMockChainStateReader(mockCtrl)
+	mockRegistry := registrymock.NewMockContractRegistryClient(mockCtrl)
+
+	mockClient.EXPECT().
+		CodeAt(gomock.Any(), gomock.Eq(noErrorURL), gomock.Any(), gomock.Any()).
+		Return(testCodeNoError, nil).
+		AnyTimes()
+	mockClient.EXPECT().
+		CodeAt(gomock.Any(), gomock.Eq(codeAtErrorURL), gomock.Any(), gomock.Any()).
+		Return(nil, fmt.Errorf("error")).
+		AnyTimes()
+	mockClient.EXPECT().
+		CodeAt(gomock.Any(), gomock.Eq(setAccountCodeHashErrorURL), gomock.Any(), gomock.Any()).
+		Return(testCodeError, nil).
+		AnyTimes()
+	mockRegistry.EXPECT().
+		SetAccountCodeHash(gomock.Any(), &svc.SetAccountCodeHashRequest{
+			AccountInstance: &common.AccountInstance{},
+			CodeHash:        crypto.Keccak256Hash(testCodeNoError).Bytes(),
+		}).
+		Return(nil, nil).
+		AnyTimes()
+	mockRegistry.EXPECT().
+		SetAccountCodeHash(gomock.Any(), &svc.SetAccountCodeHashRequest{
+			AccountInstance: &common.AccountInstance{},
+			CodeHash:        crypto.Keccak256Hash(testCodeError).Bytes(),
+		}).
+		Return(nil, fmt.Errorf("error")).
+		AnyTimes()
+
+	h := Enricher(mockRegistry, mockClient)
+
+	for _, test := range testSet {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			txctx := engine.NewTxContext()
+			txctx.Logger = log.NewEntry(log.New())
+
+			h(test.input(txctx))
+
+			expectedTxctx := engine.NewTxContext()
+			expectedTxctx.Logger = txctx.Logger
+			expectedTxctx = test.expectedTxctx(test.input(expectedTxctx))
+
+			assert.True(t, reflect.DeepEqual(txctx, expectedTxctx), "Expected same input")
+		})
 	}
-
-	// Handle contexts
-	s.Handle(txctxs)
-
-	for _, txctx := range txctxs {
-		assert.Len(s.T(), txctx.Envelope.Errors, txctx.Get("errors").(int), "Expected right count of errors", txctx.Envelope.Args)
-		for _, err := range txctx.Envelope.Errors {
-			assert.Equal(s.T(), txctx.Get("error.code").(uint64), err.GetCode(), "Error code be correct")
-		}
-	}
-}
-
-func TestEnricher(t *testing.T) {
-	suite.Run(t, new(EnricherTestSuite))
 }

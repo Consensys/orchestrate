@@ -3,10 +3,11 @@ package sender
 import (
 	"context"
 	"fmt"
-	"math/big"
 	"math/rand"
 	"sync"
 	"testing"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
@@ -17,7 +18,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
-	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store/client/mock"
+	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store/client/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
@@ -25,29 +26,34 @@ type MockTxSender struct {
 	t *testing.T
 }
 
-func (s *MockTxSender) SendRawTransaction(ctx context.Context, chainID *big.Int, raw string) error {
-	if chainID.Text(10) == "0" {
+const (
+	endpointNoError = "testURL"
+	endpointError   = "error"
+)
+
+func (s *MockTxSender) SendRawTransaction(ctx context.Context, endpoint, raw string) error {
+	if endpoint == endpointError {
 		return fmt.Errorf("mock: failed to send a raw transaction")
 	}
 	return nil
 }
 
-func (s *MockTxSender) SendTransaction(ctx context.Context, chainID *big.Int, args *types.SendTxArgs) (ethcommon.Hash, error) {
-	if chainID.Text(10) == "0" {
+func (s *MockTxSender) SendTransaction(ctx context.Context, endpoint string, args *types.SendTxArgs) (ethcommon.Hash, error) {
+	if endpoint == endpointError {
 		return ethcommon.Hash{}, fmt.Errorf("mock: failed to send an unsigned transaction")
 	}
 	return ethcommon.HexToHash("0x" + RandString(32)), nil
 }
 
-func (s *MockTxSender) SendRawPrivateTransaction(ctx context.Context, chainID *big.Int, raw []byte, args *types.PrivateArgs) (ethcommon.Hash, error) {
-	if chainID.Text(10) == "0" {
+func (s *MockTxSender) SendRawPrivateTransaction(ctx context.Context, endpoint string, raw []byte, args *types.PrivateArgs) (ethcommon.Hash, error) {
+	if endpoint == endpointError {
 		return ethcommon.Hash{}, fmt.Errorf("mock: failed to send a raw private transaction")
 	}
 	return ethcommon.Hash{}, nil
 }
 
-func (s *MockTxSender) SendQuorumRawPrivateTransaction(ctx context.Context, chainID *big.Int, signedTxHash []byte, privateFor []string) (ethcommon.Hash, error) {
-	if chainID.Text(10) == "0" {
+func (s *MockTxSender) SendQuorumRawPrivateTransaction(ctx context.Context, endpoint string, signedTxHash []byte, privateFor []string) (ethcommon.Hash, error) {
+	if endpoint == endpointError {
 		return ethcommon.Hash{}, fmt.Errorf("mock: failed to send a raw Tessera transaction")
 	}
 	return ethcommon.Hash{}, nil
@@ -72,41 +78,41 @@ func makeSenderContext(i int) *engine.TxContext {
 	switch i % 10 {
 	case 0:
 		// Valid send base transaction
-		txctx.Envelope.Chain = chain.FromInt(8)
+		txctx.WithContext(proxy.With(txctx.Context(), endpointNoError))
 		txctx.Envelope.Tx = &ethereum.Transaction{
 			Raw:  txData,
 			Hash: txHash,
 		}
-		txctx.Envelope.Metadata = (&envelope.Metadata{Id: RandString(10)})
+		txctx.Envelope.Metadata = &envelope.Metadata{Id: RandString(10)}
 		txctx.Set("status", "PENDING")
 	case 1:
 		// Invalid send base transaction
-		txctx.Envelope.Chain = chain.FromInt(0)
+		txctx.WithContext(proxy.With(txctx.Context(), endpointError))
 		txctx.Envelope.Tx = &ethereum.Transaction{
 			Raw:  txData,
 			Hash: txHash,
 		}
-		txctx.Envelope.Metadata = (&envelope.Metadata{Id: RandString(10)})
+		txctx.Envelope.Metadata = &envelope.Metadata{Id: RandString(10)}
 		txctx.Set("error", "mock: failed to send a raw transaction")
 		txctx.Set("status", "ERROR")
 	case 2:
 		//
-		txctx.Envelope.Chain = chain.FromInt(10)
+		txctx.WithContext(proxy.With(txctx.Context(), endpointNoError))
 		txctx.Envelope.Tx = &ethereum.Transaction{}
-		txctx.Envelope.Metadata = (&envelope.Metadata{Id: RandString(10)})
+		txctx.Envelope.Metadata = &envelope.Metadata{Id: RandString(10)}
 		txctx.Set("status", "PENDING")
 	case 3:
 		// Cannot send a public transaction
-		txctx.Envelope.Chain = chain.FromInt(0)
+		txctx.WithContext(proxy.With(txctx.Context(), endpointError))
 		txctx.Envelope.Tx = &ethereum.Transaction{}
-		txctx.Envelope.Metadata = (&envelope.Metadata{Id: RandString(10)})
+		txctx.Envelope.Metadata = &envelope.Metadata{Id: RandString(10)}
 		txctx.Set("error", "mock: failed to send an unsigned transaction")
 		txctx.Set("status", "")
 	case 4:
 		// Cannot send a Besu Orion transaction
-		txctx.Envelope.Chain = chain.FromInt(0)
+		txctx.WithContext(proxy.With(txctx.Context(), endpointError))
 		txctx.Envelope.Tx = &ethereum.Transaction{}
-		txctx.Envelope.Metadata = (&envelope.Metadata{Id: RandString(10)})
+		txctx.Envelope.Metadata = &envelope.Metadata{Id: RandString(10)}
 		txctx.Envelope.Protocol = &chain.Protocol{
 			Type: chain.ProtocolType_BESU_ORION,
 		}
@@ -119,9 +125,9 @@ func makeSenderContext(i int) *engine.TxContext {
 		txctx.Set("status", "")
 	case 5:
 		// Cannot send a Quorum Tessera transaction
-		txctx.Envelope.Chain = chain.FromInt(0)
+		txctx.WithContext(proxy.With(txctx.Context(), endpointError))
 		txctx.Envelope.Tx = &ethereum.Transaction{}
-		txctx.Envelope.Metadata = (&envelope.Metadata{Id: RandString(10)})
+		txctx.Envelope.Metadata = &envelope.Metadata{Id: RandString(10)}
 		txctx.Envelope.Protocol = &chain.Protocol{
 			Type: chain.ProtocolType_QUORUM_TESSERA,
 		}
@@ -134,9 +140,9 @@ func makeSenderContext(i int) *engine.TxContext {
 		txctx.Set("status", "ERROR")
 	case 6:
 		// Cannot send a Quorum Constellation transaction
-		txctx.Envelope.Chain = chain.FromInt(0)
+		txctx.WithContext(proxy.With(txctx.Context(), endpointError))
 		txctx.Envelope.Tx = &ethereum.Transaction{}
-		txctx.Envelope.Metadata = (&envelope.Metadata{Id: RandString(10)})
+		txctx.Envelope.Metadata = &envelope.Metadata{Id: RandString(10)}
 		txctx.Envelope.Protocol = &chain.Protocol{
 			Type: chain.ProtocolType_QUORUM_CONSTELLATION,
 		}
@@ -149,9 +155,9 @@ func makeSenderContext(i int) *engine.TxContext {
 		txctx.Set("status", "")
 	case 7:
 		// Cannot send a transaction with unknown protocol type
-		txctx.Envelope.Chain = chain.FromInt(0)
+		txctx.WithContext(proxy.With(txctx.Context(), endpointError))
 		txctx.Envelope.Tx = &ethereum.Transaction{}
-		txctx.Envelope.Metadata = (&envelope.Metadata{Id: RandString(10)})
+		txctx.Envelope.Metadata = &envelope.Metadata{Id: RandString(10)}
 		txctx.Envelope.Protocol = &chain.Protocol{
 			Type: 123,
 		}
@@ -164,9 +170,9 @@ func makeSenderContext(i int) *engine.TxContext {
 		txctx.Set("status", "")
 	case 8:
 		// Cannot send a private transaction if a protocol is not set
-		txctx.Envelope.Chain = chain.FromInt(0)
+		txctx.WithContext(proxy.With(txctx.Context(), endpointError))
 		txctx.Envelope.Tx = &ethereum.Transaction{}
-		txctx.Envelope.Metadata = (&envelope.Metadata{Id: RandString(10)})
+		txctx.Envelope.Metadata = &envelope.Metadata{Id: RandString(10)}
 		txctx.Envelope.Protocol = nil
 		txctx.Envelope.Args = &envelope.Args{
 			Private: &typesArgs.Private{
@@ -177,12 +183,12 @@ func makeSenderContext(i int) *engine.TxContext {
 		txctx.Set("status", "")
 	case 9:
 		// Cannot send a signed private transaction with Constellation protocol
-		txctx.Envelope.Chain = chain.FromInt(0)
+		txctx.WithContext(proxy.With(txctx.Context(), endpointError))
 		txctx.Envelope.Tx = &ethereum.Transaction{
 			Raw:  txData,
 			Hash: txHash,
 		}
-		txctx.Envelope.Metadata = (&envelope.Metadata{Id: RandString(10)})
+		txctx.Envelope.Metadata = &envelope.Metadata{Id: RandString(10)}
 		txctx.Envelope.Protocol = &chain.Protocol{
 			Type: chain.ProtocolType_QUORUM_CONSTELLATION,
 		}

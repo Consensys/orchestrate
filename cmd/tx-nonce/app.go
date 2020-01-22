@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sync"
 
+	chaininjector "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/chain-injector"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
@@ -56,6 +58,11 @@ func initHandlers(ctx context.Context) {
 		func() {
 			producer.Init(ctx)
 		},
+
+		// Initialize ChainID injector
+		func() {
+			chaininjector.Init(ctx)
+		},
 	)
 }
 
@@ -90,6 +97,7 @@ func registerHandlers() {
 	engine.Register(multitenancy.GlobalHandler())
 
 	// Specific handlers tk Tx-Nonce worker
+	engine.Register(chaininjector.GlobalHandler())
 	engine.Register(nonceattributor.GlobalHandler())
 }
 

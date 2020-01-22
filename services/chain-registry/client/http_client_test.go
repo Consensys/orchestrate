@@ -124,6 +124,94 @@ func (s *ClientTestSuite) TestGetNodeByID() {
 	}
 }
 
+func (s *ClientTestSuite) TestGetNodeByTenantAndNodeName() {
+	testSuite := []struct {
+		server        func() *httptest.Server
+		tenantID      string
+		nodeName      string
+		testOutput    func(t *testing.T, output *types.Node, err error)
+		expectedError bool
+	}{
+		{
+			func() *httptest.Server {
+				return httptest.NewServer(
+					http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+						r, _ := json.Marshal([]*types.Node{MockNodesSlice[0]})
+						_, _ = rw.Write(r)
+					}),
+				)
+			},
+			MockNodesSlice[0].TenantID,
+			MockNodesSlice[0].Name,
+			func(t *testing.T, output *types.Node, err error) {
+				assert.NoError(t, err, "should not get error")
+				assert.True(t, reflect.DeepEqual(output, MockNodesSlice[0]), "should be the same node")
+			},
+			false,
+		},
+		{
+			func() *httptest.Server {
+				return httptest.NewServer(
+					http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+						http.Error(rw, "error", 500)
+					}),
+				)
+			},
+			MockNodesSlice[0].TenantID,
+			MockNodesSlice[0].Name,
+			func(t *testing.T, output *types.Node, err error) {
+				assert.Error(t, err, "should not get error")
+				assert.Nil(t, output, "should be nil")
+			},
+			true,
+		},
+		{
+			func() *httptest.Server {
+				return httptest.NewServer(
+					http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+						_, _ = rw.Write([]byte(`test`))
+					}),
+				)
+			},
+			MockNodesSlice[0].TenantID,
+			MockNodesSlice[0].Name,
+			func(t *testing.T, output *types.Node, err error) {
+				assert.Error(t, err, "should not get error")
+				assert.Nil(t, output, "should be nil")
+			},
+			true,
+		},
+		{
+			func() *httptest.Server {
+				h := httptest.NewServer(
+					http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {}),
+				)
+				h.Close()
+				return h
+			},
+			MockNodesSlice[0].TenantID,
+			MockNodesSlice[0].Name,
+			func(t *testing.T, output *types.Node, err error) {
+				assert.Error(t, err, "should not get error")
+				assert.Nil(t, output, "should be nil")
+			},
+			true,
+		},
+	}
+
+	for _, test := range testSuite {
+		server := test.server()
+		s.client = NewHTTPClient(
+			server.Client(),
+			&Config{URL: server.URL},
+		)
+
+		output, err := s.client.GetNodeByTenantAndNodeName(context.Background(), test.tenantID, test.nodeName)
+		test.testOutput(s.T(), output, err)
+		server.Close()
+	}
+}
+
 func (s *ClientTestSuite) TestGetNodes() {
 	testSuite := []struct {
 		server        func() *httptest.Server

@@ -19,8 +19,10 @@ var (
 	values = []*big.Int{big.NewInt(9), big.NewInt(11), big.NewInt(10)}
 )
 
-func MockBalanceAt(ctx context.Context, chainID *big.Int, _ ethcommon.Address, _ *big.Int) (*big.Int, error) {
-	if chainID.Cmp(chains[2]) == 0 {
+const endpointTestError = "error"
+
+func MockBalanceAt(ctx context.Context, endpoint string, _ ethcommon.Address, _ *big.Int) (*big.Int, error) {
+	if endpoint == endpointTestError {
 		// Simulate error
 		return nil, errors.ConnectionError("balanceAtError")
 	}
@@ -42,15 +44,19 @@ func TestMaxBalance(t *testing.T) {
 	for i := 0; i < rounds; i++ {
 		var expectedAmount *big.Int
 		var expectedErr bool
+		var endpoint string
 		switch i % 3 {
 		case 0:
 			expectedAmount = big.NewInt(9)
+			endpoint = "testURL"
 		case 1:
 			expectedAmount = big.NewInt(0)
 			expectedErr = true
+			endpoint = endpointTestError
 		case 2:
 			expectedAmount = big.NewInt(0)
 			expectedErr = true
+			endpoint = endpointTestError
 		}
 
 		tests = append(
@@ -59,6 +65,7 @@ func TestMaxBalance(t *testing.T) {
 				Req: &types.Request{
 					ChainID: chains[i%3],
 					Amount:  values[i%3],
+					NodeURL: endpoint,
 				},
 				ExpectedAmount: expectedAmount,
 				ExpectedErr:    expectedErr,

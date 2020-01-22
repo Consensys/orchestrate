@@ -9,8 +9,6 @@ import (
 )
 
 func init() {
-	_ = viper.BindEnv(URLViperKey, urlEnv)
-	viper.SetDefault(URLViperKey, urlDefault)
 	viper.SetDefault(RetryInitialIntervalViperKey, 500*time.Millisecond)
 	viper.SetDefault(RetryRandomFactorViperKey, 0.5)
 	viper.SetDefault(RetryMultiplierViperKey, 1.5)
@@ -19,24 +17,8 @@ func init() {
 	viper.SetDefault(maxElapsedTimeViperKey, maxElapsedTimeDefault)
 }
 
-var (
-	urlFlag     = "eth-client-url"
-	URLViperKey = "eth.client.url"
-	urlDefault  []string
-	urlEnv      = "ETH_CLIENT_URL"
-)
-
 func Flags(f *pflag.FlagSet) {
-	URLs(f)
 	MaxElapsedTime(f)
-}
-
-// URLs register flag for Ethereum client urls
-func URLs(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Ethereum client url
-Environment variable: %q`, urlEnv)
-	f.StringSlice(urlFlag, urlDefault, desc)
-	_ = viper.BindPFlag(URLViperKey, f.Lookup(urlFlag))
 }
 
 const (

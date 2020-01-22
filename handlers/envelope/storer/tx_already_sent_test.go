@@ -6,6 +6,8 @@ import (
 	"math/big"
 	"testing"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
+
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	log "github.com/sirupsen/logrus"
@@ -14,7 +16,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
-	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store/client/mock"
+	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store/client/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
@@ -32,24 +34,24 @@ func (ec *MockChainLedgerReader) SendTx(hash string) {
 	ec.txs[hash] = true
 }
 
-func (ec *MockChainLedgerReader) BlockByHash(ctx context.Context, chainID *big.Int, hash ethcommon.Hash) (*ethtypes.Block, error) {
+func (ec *MockChainLedgerReader) BlockByHash(ctx context.Context, endpoint string, hash ethcommon.Hash) (*ethtypes.Block, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (ec *MockChainLedgerReader) BlockByNumber(ctx context.Context, chainID, number *big.Int) (*ethtypes.Block, error) {
+func (ec *MockChainLedgerReader) BlockByNumber(ctx context.Context, endpoint string, number *big.Int) (*ethtypes.Block, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (ec *MockChainLedgerReader) HeaderByHash(ctx context.Context, chainID *big.Int, hash ethcommon.Hash) (*ethtypes.Header, error) {
+func (ec *MockChainLedgerReader) HeaderByHash(ctx context.Context, endpoint string, hash ethcommon.Hash) (*ethtypes.Header, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (ec *MockChainLedgerReader) HeaderByNumber(ctx context.Context, chainID, number *big.Int) (*ethtypes.Header, error) {
+func (ec *MockChainLedgerReader) HeaderByNumber(ctx context.Context, endpoint string, number *big.Int) (*ethtypes.Header, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (ec *MockChainLedgerReader) TransactionByHash(ctx context.Context, chainID *big.Int, hash ethcommon.Hash) (tx *ethtypes.Transaction, isPending bool, err error) {
-	if chainID.Text(10) == "0" {
+func (ec *MockChainLedgerReader) TransactionByHash(ctx context.Context, endpoint string, hash ethcommon.Hash) (tx *ethtypes.Transaction, isPending bool, err error) {
+	if endpoint == "0" {
 		return nil, false, fmt.Errorf("unknown chain")
 	}
 	_, ok := ec.txs[hash.Hex()]
@@ -60,15 +62,15 @@ func (ec *MockChainLedgerReader) TransactionByHash(ctx context.Context, chainID 
 }
 
 // TransactionReceipt returns the receipt of a transaction by transaction hash.
-func (ec *MockChainLedgerReader) TransactionReceipt(ctx context.Context, chainID *big.Int, txHash ethcommon.Hash) (*ethtypes.Receipt, error) {
+func (ec *MockChainLedgerReader) TransactionReceipt(ctx context.Context, endpoint string, txHash ethcommon.Hash) (*ethtypes.Receipt, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func makeContext(hash, metadata string, chn int64, expectedErrors int) *engine.TxContext {
+func makeContext(hash, metadata, endpoint string, expectedErrors int) *engine.TxContext {
 	txctx := engine.NewTxContext()
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
-	txctx.Envelope.Chain = chain.FromInt(chn)
+	txctx.WithContext(proxy.With(txctx.Context(), endpoint))
 	txctx.Envelope.Tx = &ethereum.Transaction{
 		Hash: ethereum.HexToHash(hash),
 	}
@@ -105,7 +107,7 @@ func TestTxAlreadySent(t *testing.T) {
 	txctx := makeContext(
 		"0x7a34cbb73c02aa3309c343e9e9b35f2a992aaa623c2ec2524816f476c63d2efa",
 		"1",
-		8,
+		"8",
 		0,
 	)
 	handler(txctx)
@@ -138,7 +140,7 @@ func TestTxAlreadySent(t *testing.T) {
 	txctx = makeContext(
 		"0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b",
 		"2",
-		8,
+		"8",
 		0,
 	)
 	handler(txctx)
@@ -170,7 +172,7 @@ func TestTxAlreadySent(t *testing.T) {
 	txctx = makeContext(
 		"0x60a417c21da71cea33821071e99871fa2c23ad8103b889cf8a459b0b5320fd46",
 		"3",
-		8,
+		"8",
 		0,
 	)
 	handler(txctx)

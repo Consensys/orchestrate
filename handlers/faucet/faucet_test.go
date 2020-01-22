@@ -5,6 +5,8 @@ import (
 	"math/big"
 	"testing"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
@@ -31,8 +33,10 @@ func makeFaucetContext(i int) *engine.TxContext {
 	txctx.Logger = log.NewEntry(log.StandardLogger())
 	switch i % 2 {
 	case 0:
+		txctx.WithContext(proxy.With(txctx.Context(), "testURL"))
 		txctx.Envelope.Chain = chain.FromInt(0)
 	case 1:
+		txctx.WithContext(proxy.With(txctx.Context(), "testURL"))
 		txctx.Envelope.Chain = chain.FromInt(10)
 	}
 	return txctx
@@ -43,7 +47,7 @@ type FaucetTestSuite struct {
 }
 
 func (s *FaucetTestSuite) SetupSuite() {
-	s.Handler = Faucet(&MockFaucet{t: s.T()})
+	s.Handler = Faucet(true, &MockFaucet{t: s.T()})
 }
 
 func (s *FaucetTestSuite) TestFaucet() {

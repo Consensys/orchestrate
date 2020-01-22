@@ -27,6 +27,7 @@ var TOPICS = [...]string{
 	"tx.nonce",
 	"tx.signer",
 	"tx.sender",
+	"tx.decoder",
 	"tx.decoded",
 	"tx.recover",
 	"wallet.generator",

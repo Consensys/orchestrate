@@ -7,7 +7,7 @@ import (
 var deleteNodeByIDTests = []HTTPRouteTests{
 	{
 		name:                "TestDeleteNodeByID200",
-		store:               &MockChainRegistry{},
+		store:               UseMockChainRegistry,
 		httpMethod:          http.MethodDelete,
 		path:                "/nodes/1",
 		body:                func() []byte { return nil },
@@ -17,7 +17,7 @@ var deleteNodeByIDTests = []HTTPRouteTests{
 	},
 	{
 		name:                "TestDeleteNodeByID404",
-		store:               &ErrorChainRegistry{},
+		store:               UseErrorChainRegistry,
 		httpMethod:          http.MethodDelete,
 		path:                "/nodes/0",
 		body:                func() []byte { return nil },
@@ -27,7 +27,7 @@ var deleteNodeByIDTests = []HTTPRouteTests{
 	},
 	{
 		name:                "TestDeleteNodeByID500",
-		store:               &ErrorChainRegistry{},
+		store:               UseErrorChainRegistry,
 		httpMethod:          http.MethodDelete,
 		path:                "/nodes/1",
 		body:                func() []byte { return nil },
@@ -40,7 +40,7 @@ var deleteNodeByIDTests = []HTTPRouteTests{
 var deleteNodesByNameTests = []HTTPRouteTests{
 	{
 		name:                "TestDeleteNodeByName200",
-		store:               &MockChainRegistry{},
+		store:               UseMockChainRegistry,
 		httpMethod:          http.MethodDelete,
 		path:                "/testTenantID/nodes/testNodeName",
 		body:                func() []byte { return nil },
@@ -50,7 +50,7 @@ var deleteNodesByNameTests = []HTTPRouteTests{
 	},
 	{
 		name:                "TestDeleteNodeByName404",
-		store:               &ErrorChainRegistry{},
+		store:               UseErrorChainRegistry,
 		httpMethod:          http.MethodDelete,
 		path:                "/testTenantID/nodes/notFoundError",
 		body:                func() []byte { return nil },
@@ -60,7 +60,7 @@ var deleteNodesByNameTests = []HTTPRouteTests{
 	},
 	{
 		name:                "TestDeleteNodeByName500",
-		store:               &ErrorChainRegistry{},
+		store:               UseErrorChainRegistry,
 		httpMethod:          http.MethodDelete,
 		path:                "/testTenantID/nodes/testNodeName",
 		body:                func() []byte { return nil },

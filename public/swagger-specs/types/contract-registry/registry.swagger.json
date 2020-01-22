@@ -313,6 +313,12 @@
           "type": "string",
           "format": "byte",
           "title": "Chain ID\ne.g. 1 for mainnet, 3 for Ropsten"
+        },
+        "node_id": {
+          "type": "string"
+        },
+        "node_name": {
+          "type": "string"
         }
       },
       "title": "Information about a Chain"

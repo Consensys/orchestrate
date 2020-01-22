@@ -9,7 +9,7 @@ import (
 )
 
 var kafkaUrls = []string{"localhost:9092"}
-var inTopic = "topic-tx-sender"
+var inTopic = "topic-tx-decoded"
 
 func main() {
 	consumer, err := sarama.NewConsumer(kafkaUrls, nil)

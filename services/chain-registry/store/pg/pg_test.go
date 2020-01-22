@@ -66,17 +66,17 @@ func TestErrorSuite(t *testing.T) {
 }
 
 func (s *ErrorTestSuite) TestGetNodes() {
-	_, err := s.Store.GetNodes(context.Background())
+	_, err := s.Store.GetNodes(context.Background(), nil)
 	assert.Error(s.T(), err, "Should get nodes with errors")
 }
 
 func (s *ErrorTestSuite) TestGetNodesByTenantID() {
-	_, err := s.Store.GetNodesByTenantID(context.Background(), "test")
+	_, err := s.Store.GetNodesByTenantID(context.Background(), "test", nil)
 	assert.Error(s.T(), err, "Should get nodes with errors")
 }
 
 func (s *ErrorTestSuite) TestGetNodeByName() {
-	_, err := s.Store.GetNodeByName(context.Background(), "test", "test")
+	_, err := s.Store.GetNodeByTenantIDAndNodeName(context.Background(), "test", "test")
 	assert.Error(s.T(), err, "Should get node with errors")
 }
 

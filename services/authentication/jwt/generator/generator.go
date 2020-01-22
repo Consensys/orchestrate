@@ -34,15 +34,15 @@ func New(namespace, pemPrivateKey string) (*JWTGenerator, error) {
 	}, nil
 }
 
-func (j *JWTGenerator) GenerateAccessTokenWithTenantID(tenantID string) (string, error) {
+func (j *JWTGenerator) GenerateAccessTokenWithTenantID(tenantID string, ttl time.Duration) (string, error) {
 	customClaims := map[string]interface{}{
 		j.ClaimsNamespace: &jwt.OrchestrateClaims{
 			TenantID: tenantID,
 		}}
-	return j.GenerateAccessToken(customClaims)
+	return j.GenerateAccessToken(customClaims, ttl)
 }
 
-func (j *JWTGenerator) GenerateAccessToken(customClaims map[string]interface{}) (tokenValue string, err error) {
+func (j *JWTGenerator) GenerateAccessToken(customClaims map[string]interface{}, ttl time.Duration) (tokenValue string, err error) {
 	jwtGenerator := &oauth2.DefaultJWTStrategy{
 		JWTStrategy: &fositejwt.RS256JWTStrategy{
 			PrivateKey: j.privateKey,
@@ -67,7 +67,7 @@ func (j *JWTGenerator) GenerateAccessToken(customClaims map[string]interface{}) 
 				Extra: make(map[string]interface{}),
 			},
 			ExpiresAt: map[fosite.TokenType]time.Time{
-				fosite.AccessToken: time.Now().UTC().Add(time.Hour),
+				fosite.AccessToken: time.Now().UTC().Add(ttl),
 			},
 		},
 	}

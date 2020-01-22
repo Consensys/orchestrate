@@ -26,14 +26,14 @@ type Hook struct {
 	conf *Config
 
 	registry svc.ContractRegistryClient
-	ec       ethclient.ChainStateReaderV2
+	ec       ethclient.ChainStateReader
 
 	store evlpstore.EnvelopeStoreClient
 
 	producer sarama.SyncProducer
 }
 
-func NewHook(conf *Config, registry svc.ContractRegistryClient, ec ethclient.ChainStateReaderV2, store evlpstore.EnvelopeStoreClient, producer sarama.SyncProducer) *Hook {
+func NewHook(conf *Config, registry svc.ContractRegistryClient, ec ethclient.ChainStateReader, store evlpstore.EnvelopeStoreClient, producer sarama.SyncProducer) *Hook {
 	return &Hook{
 		conf:     conf,
 		registry: registry,

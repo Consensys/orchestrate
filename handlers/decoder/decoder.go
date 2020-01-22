@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+
 	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
 	log "github.com/sirupsen/logrus"
 
@@ -26,9 +28,9 @@ func Decoder(r svc.ContractRegistryClient) engine.HandlerFunc {
 		// For each log in receipt
 		for _, l := range txctx.Envelope.GetReceipt().GetLogs() {
 			if len(l.GetTopics()) == 0 {
-				// This scenario is not supposed to append
-				err := fmt.Errorf("invalid receipt (no topics in log)")
-				txctx.Logger.WithError(err).Errorf("decoder: invalid receipt")
+				// This scenario is not supposed to happen
+				err := errors.InternalError("invalid receipt (no topics in log)").ExtendComponent(component)
+				txctx.Logger.WithError(err).Errorf("invalid receipt")
 				_ = txctx.AbortWithError(err)
 				return
 			}

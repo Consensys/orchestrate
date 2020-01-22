@@ -3,6 +3,8 @@ package gasestimator
 import (
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
+
 	"github.com/ethereum/go-ethereum"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
@@ -34,7 +36,13 @@ func Estimator(p ethclient.GasEstimator) engine.HandlerFunc {
 
 			// Estimate gas
 			EnvelopeToCallMsg(txctx.Envelope, call)
-			g, err := p.EstimateGas(txctx.Context(), txctx.Envelope.GetChain().ID(), call)
+
+			url, err := proxy.GetURL(txctx)
+			if err != nil {
+				return
+			}
+
+			g, err := p.EstimateGas(txctx.Context(), url, call)
 			if err != nil {
 				e := txctx.AbortWithError(err).ExtendComponent(component)
 				txctx.Logger.WithError(e).Errorf("gas-estimator: could not estimate gas limit")

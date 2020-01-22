@@ -23,8 +23,8 @@ type fetchedBlock struct {
 }
 
 type EthClient interface {
-	ethclient.ChainLedgerReaderV2
-	ethclient.ChainSyncReaderV2
+	ethclient.ChainLedgerReader
+	ethclient.ChainSyncReader
 }
 
 type Session struct {

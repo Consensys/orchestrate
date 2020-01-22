@@ -27,9 +27,9 @@ func NewHandler(store types.ChainRegistryStore) *Handler {
 // Add internal routes to router
 func (h *Handler) Append(router *mux.Router) {
 	router.Methods(http.MethodGet).Path("/nodes").HandlerFunc(h.getNodes)
-	router.Methods(http.MethodGet).Path("/{tenantID}/nodes").HandlerFunc(h.getNodesByTenantID)
-	router.Methods(http.MethodGet).Path("/{tenantID}/nodes/{nodeName}").HandlerFunc(h.getNodeByName)
 	router.Methods(http.MethodGet).Path("/nodes/{nodeID}").HandlerFunc(h.getNodeByID)
+	router.Methods(http.MethodGet).Path("/{tenantID}/nodes").HandlerFunc(h.getNodesByTenantID)
+	router.Methods(http.MethodGet).Path("/{tenantID}/nodes/{nodeID}").HandlerFunc(h.getNodeByTenantIDAndNodeID)
 
 	router.Methods(http.MethodPost).Path("/nodes").HandlerFunc(h.postNode)
 	router.Methods(http.MethodPost).Path("/{tenantID}/nodes").HandlerFunc(h.postNode)

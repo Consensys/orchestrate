@@ -20,6 +20,14 @@ func (m *MockClient) GetNodeByID(_ context.Context, _ string) (*types.Node, erro
 	return &types.Node{}, nil
 }
 
+func (m *MockClient) GetNodeByTenantAndNodeName(_ context.Context, _, _ string) (*types.Node, error) {
+	return nil, nil
+}
+
+func (m *MockClient) GetNodeByTenantAndNodeID(_ context.Context, _, _ string) (*types.Node, error) {
+	return nil, nil
+}
+
 func (m *MockClient) GetNodes(_ context.Context) ([]*types.Node, error) {
 	switch m.i % 2 {
 	case 0:

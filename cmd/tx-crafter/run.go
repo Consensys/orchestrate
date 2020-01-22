@@ -6,7 +6,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/rpc"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers/amount"
@@ -23,9 +22,6 @@ func newRunCommand() *cobra.Command {
 		Short: "Run application",
 		Run:   run,
 	}
-
-	// Register Ethereum client flags
-	ethclient.Flags(runCmd.Flags())
 
 	// Register Faucet flags
 	amount.FaucetAmount(runCmd.Flags())

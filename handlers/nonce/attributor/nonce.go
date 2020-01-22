@@ -3,6 +3,8 @@ package nonceattributor
 import (
 	"strconv"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
+
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
@@ -56,9 +58,13 @@ func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFun
 			// we calibrate by querying chain
 			if !ok {
 				txctx.Logger.Debugf("nonce: calibrating nonce from chain")
+				url, err := proxy.GetURL(txctx)
+				if err != nil {
+					return
+				}
 
 				// Retrieve nonce from chain
-				pendingNonce, err := ec.PendingNonceAt(txctx.Context(), chainID, sender)
+				pendingNonce, err := ec.PendingNonceAt(txctx.Context(), url, sender)
 				if err != nil {
 					e := txctx.AbortWithError(err).ExtendComponent(component)
 					txctx.Logger.WithError(e).Errorf("nonce: could not read nonce from chain")

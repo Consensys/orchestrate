@@ -39,7 +39,7 @@ func Init(ctx context.Context) {
 			registryprovider.GlobalProvider(),
 			kafkahook.GlobalHook(),
 			registryoffset.GlobalManager(),
-			rpc.GlobalClientV2(),
+			rpc.GlobalClient(),
 		)
 	})
 }

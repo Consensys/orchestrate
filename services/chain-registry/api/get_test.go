@@ -7,7 +7,7 @@ import (
 var getNodesByIDTests = []HTTPRouteTests{
 	{
 		name:                "TestGetNodeByID200",
-		store:               &MockChainRegistry{},
+		store:               UseMockChainRegistry,
 		httpMethod:          http.MethodGet,
 		path:                "/nodes/1",
 		body:                func() []byte { return nil },
@@ -17,7 +17,7 @@ var getNodesByIDTests = []HTTPRouteTests{
 	},
 	{
 		name:                "TestGetNodeByID404",
-		store:               &ErrorChainRegistry{},
+		store:               UseErrorChainRegistry,
 		httpMethod:          http.MethodGet,
 		path:                "/nodes/0",
 		body:                func() []byte { return nil },
@@ -27,7 +27,7 @@ var getNodesByIDTests = []HTTPRouteTests{
 	},
 	{
 		name:                "TestGetNodeByID500",
-		store:               &ErrorChainRegistry{},
+		store:               UseErrorChainRegistry,
 		httpMethod:          http.MethodGet,
 		path:                "/nodes/1",
 		body:                func() []byte { return nil },
@@ -40,7 +40,7 @@ var getNodesByIDTests = []HTTPRouteTests{
 var getNodesTests = []HTTPRouteTests{
 	{
 		name:                "TestGetNodes200",
-		store:               &MockChainRegistry{},
+		store:               UseMockChainRegistry,
 		httpMethod:          http.MethodGet,
 		path:                "/nodes",
 		body:                func() []byte { return nil },
@@ -50,7 +50,7 @@ var getNodesTests = []HTTPRouteTests{
 	},
 	{
 		name:                "TestGetNodeByID500",
-		store:               &ErrorChainRegistry{},
+		store:               UseErrorChainRegistry,
 		httpMethod:          http.MethodGet,
 		path:                "/nodes",
 		body:                func() []byte { return nil },
@@ -63,7 +63,7 @@ var getNodesTests = []HTTPRouteTests{
 var getNodesByTenantIDTests = []HTTPRouteTests{
 	{
 		name:                "TestGetNodesByTenantID200",
-		store:               &MockChainRegistry{},
+		store:               UseMockChainRegistry,
 		httpMethod:          http.MethodGet,
 		path:                "/testTenantID/nodes",
 		body:                func() []byte { return nil },
@@ -73,7 +73,7 @@ var getNodesByTenantIDTests = []HTTPRouteTests{
 	},
 	{
 		name:                "TestGetNodesByTenantID404",
-		store:               &ErrorChainRegistry{},
+		store:               UseErrorChainRegistry,
 		httpMethod:          http.MethodGet,
 		path:                "/notFoundError/nodes",
 		body:                func() []byte { return nil },
@@ -83,7 +83,7 @@ var getNodesByTenantIDTests = []HTTPRouteTests{
 	},
 	{
 		name:                "TestGetNodesByTenantID500",
-		store:               &ErrorChainRegistry{},
+		store:               UseErrorChainRegistry,
 		httpMethod:          http.MethodGet,
 		path:                "/testTenantID/nodes",
 		body:                func() []byte { return nil },
@@ -96,7 +96,7 @@ var getNodesByTenantIDTests = []HTTPRouteTests{
 var getNodesByNameTests = []HTTPRouteTests{
 	{
 		name:                "TestGetNodeByName200",
-		store:               &MockChainRegistry{},
+		store:               UseMockChainRegistry,
 		httpMethod:          http.MethodGet,
 		path:                "/testTenantID/nodes/testNodeName",
 		body:                func() []byte { return nil },
@@ -106,7 +106,7 @@ var getNodesByNameTests = []HTTPRouteTests{
 	},
 	{
 		name:                "TestGetNodeByName404",
-		store:               &ErrorChainRegistry{},
+		store:               UseErrorChainRegistry,
 		httpMethod:          http.MethodGet,
 		path:                "/testTenantID/nodes/notFoundError",
 		body:                func() []byte { return nil },
@@ -116,7 +116,7 @@ var getNodesByNameTests = []HTTPRouteTests{
 	},
 	{
 		name:                "TestGetNodeByName500",
-		store:               &ErrorChainRegistry{},
+		store:               UseErrorChainRegistry,
 		httpMethod:          http.MethodGet,
 		path:                "/testTenantID/nodes/testNodeName",
 		body:                func() []byte { return nil },

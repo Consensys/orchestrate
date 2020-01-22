@@ -10,7 +10,7 @@ import (
 var postNodeTests = []HTTPRouteTests{
 	{
 		name:       "TestPostNode200",
-		store:      &MockChainRegistry{},
+		store:      UseMockChainRegistry,
 		httpMethod: http.MethodPost,
 		path:       "/testTenantID/nodes",
 		body: func() []byte {
@@ -30,7 +30,7 @@ var postNodeTests = []HTTPRouteTests{
 	},
 	{
 		name:       "TestPostNode400WithTwiceSameURL",
-		store:      &MockChainRegistry{},
+		store:      UseMockChainRegistry,
 		httpMethod: http.MethodPost,
 		path:       "/testTenantID/nodes",
 		body: func() []byte {
@@ -47,7 +47,7 @@ var postNodeTests = []HTTPRouteTests{
 	},
 	{
 		name:       "TestPostNode400WrongURL",
-		store:      &MockChainRegistry{},
+		store:      UseMockChainRegistry,
 		httpMethod: http.MethodPost,
 		path:       "/testTenantID/nodes",
 		body: func() []byte {
@@ -62,7 +62,7 @@ var postNodeTests = []HTTPRouteTests{
 	},
 	{
 		name:                "TestPostNode400WrongBody",
-		store:               &MockChainRegistry{},
+		store:               UseMockChainRegistry,
 		httpMethod:          http.MethodPost,
 		path:                "/testTenantID/nodes",
 		body:                func() []byte { return []byte(`{"unknownField":"error"}`) },
@@ -72,7 +72,7 @@ var postNodeTests = []HTTPRouteTests{
 	},
 	{
 		name:       "TestPostNode500",
-		store:      &ErrorChainRegistry{},
+		store:      UseErrorChainRegistry,
 		httpMethod: http.MethodPost,
 		path:       "/testTenantID/nodes",
 		body: func() []byte {

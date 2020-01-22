@@ -46,6 +46,7 @@ All notable changes to this project will be documented in this file.
  * Remove `/v1` prefix in the http rest path for the envelope-store and chain-registry
  * The `tx-listener` produces kafka messages only in the topic `topic-tx-decoder` instead of the `topic-tx-decoder-{chainID}`
  * The `tx-decoder` consumes kafka messages only in the topic `topic-tx-decoder` instead of the `topic-tx-decoder-{chainID}`
+ * `ETH_CLIENT_URL` is deprecated, the chains urls have to be set in `CHAIN_REGISTRY_INIT`
 
 
 ## v1.2.1 (2019-12-23)

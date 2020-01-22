@@ -4,14 +4,20 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 )
 
 // TesseraRawPrivateTxSender creates an handler that send raw private transactions to a Quorum Tessera client
 func TesseraRawPrivateTxSender(ec ethclient.TransactionSender) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		_, err := ec.SendQuorumRawPrivateTransaction(
+		url, err := proxy.GetURL(txctx)
+		if err != nil {
+			return
+		}
+
+		_, err = ec.SendQuorumRawPrivateTransaction(
 			txctx.Context(),
-			txctx.Envelope.GetChain().ID(),
+			url,
 			txctx.Envelope.GetTx().GetRaw().GetRaw(),
 			types.Call2PrivateArgs(txctx.Envelope.GetArgs()).PrivateFor,
 		)

@@ -5,6 +5,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/common"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
 )
@@ -13,15 +14,20 @@ import (
 func Enricher(r svc.ContractRegistryClient, ec ethclient.ChainStateReader) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		if len(txctx.Envelope.GetReceipt().GetContractAddress().Address().Bytes()) != 0 {
+			url, err := proxy.GetURL(txctx)
+			if err != nil {
+				return
+			}
+
 			code, err := ec.CodeAt(txctx.Context(),
-				txctx.Envelope.Chain.ID(),
+				url,
 				txctx.Envelope.GetReceipt().GetContractAddress().Address(),
 				nil)
 			if err != nil {
 				_ = txctx.AbortWithError(errors.InternalError(
 					"could not read account code for chain %s and account %s",
-					txctx.Envelope.Chain.ID(),
-					txctx.Envelope.GetReceipt().GetContractAddress().Address(),
+					url,
+					txctx.Envelope.GetReceipt().GetContractAddress().Address().String(),
 				)).SetComponent(component)
 				return
 			}

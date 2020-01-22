@@ -9,6 +9,7 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"time"
 
 	generator "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt/generator"
 
@@ -138,7 +139,7 @@ func (p *Parser) ParseContractCell(header, cell string, contractSpec *ContractSp
 		contractSpec.Contract.Id.Tag = cell
 	case tenantIDHeader:
 		var err error
-		contractSpec.JWTToken, err = p.JWTGenerator.GenerateAccessTokenWithTenantID(cell)
+		contractSpec.JWTToken, err = p.JWTGenerator.GenerateAccessTokenWithTenantID(cell, 24*time.Hour)
 		if err != nil {
 			return err
 		}
@@ -205,6 +206,10 @@ func (p *Parser) ParseChainCell(header, cell string, chn *chain.Chain) error {
 			return err
 		}
 		chn.Id = big.NewInt(raw).Bytes()
+	case "nodeName":
+		chn.NodeName = cell
+	case "nodeID":
+		chn.NodeId = cell
 	default:
 		return fmt.Errorf("unknown field %q", header)
 	}
@@ -314,9 +319,7 @@ func (p *Parser) ParseEnvelopeCell(header, cell string, e *envelope.Envelope) er
 			),
 		}
 	case header == tenantIDHeader:
-		fmt.Printf("got tenantid colunm with cell %s", cell)
-
-		auth, err := p.JWTGenerator.GenerateAccessTokenWithTenantID(cell)
+		auth, err := p.JWTGenerator.GenerateAccessTokenWithTenantID(cell, 24*time.Hour)
 		if err != nil {
 			return err
 		}

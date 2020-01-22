@@ -37,3 +37,15 @@ func (c *Chain) SetID(id *big.Int) *Chain {
 	c.Id = id.Bytes()
 	return c
 }
+
+// SetNodeID set node id
+func (c *Chain) SetNodeID(nodeID string) *Chain {
+	c.NodeId = nodeID
+	return c
+}
+
+// SetNodeName set node name
+func (c *Chain) SetNodeName(nodeName string) *Chain {
+	c.NodeName = nodeName
+	return c
+}

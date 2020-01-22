@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama/mock"
+	cgmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 )
 
@@ -116,7 +116,7 @@ func (s *ExportedTestSuite) TestSetSyncProducer() {
 func (s *ExportedTestSuite) TestSetConsumerGroup() {
 
 	msgs := make(map[string]map[int32][]*sarama.ConsumerMessage)
-	cg := mock.NewConsumerGroup("test-group", msgs)
+	cg := cgmock.NewConsumerGroup("test-group", msgs)
 
 	SetGlobalConsumerGroup(cg)
 
@@ -138,7 +138,7 @@ func TestConsume(t *testing.T) {
 	msgs, count := MockConsumerMessages(topics, 3, 10)
 
 	// Create consumer group
-	cg := mock.NewConsumerGroup("test-group", msgs)
+	cg := cgmock.NewConsumerGroup("test-group", msgs)
 	SetGlobalConsumerGroup(cg)
 	ctx, cancel := context.WithCancel(context.Background())
 

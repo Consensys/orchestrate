@@ -4,7 +4,6 @@ x-default-variables: &default-variables
   ENVELOPE_STORE_URL: ${ENVELOPE_STORE_URL-envelope-store:8080}
   CONTRACT_REGISTRY_URL: ${CONTRACT_REGISTRY_URL-contract-registry:8080}
   KAFKA_URL: ${KAFKA_URL-kafka:29092}
-  ETH_CLIENT_URL: ${ETH_CLIENT_URL-http://geth:8545}
   CHAIN_REGISTRY_INIT: ${CHAIN_REGISTRY_INIT-}
   CHAIN_REGISTRY_URL: ${CHAIN_REGISTRY_URL-http://chain-registry:8081}
   CHAIN_PROXY_URL: ${CHAIN_PROXY_URL-http://chain-registry:8080}

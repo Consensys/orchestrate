@@ -50,7 +50,7 @@ func (s *ProviderTestSuite) TestCreateConfiguration() {
 					EntryPoints: []string{"orchestrate"},
 					Service:     "api@internal",
 					Priority:    math.MaxInt32 - 1,
-					Rule:        "PathPrefix(`/`)",
+					Rule:        "PathPrefix(`/{tenantID}`)",
 					Middlewares: []string{"orchestrate-auth"},
 				},
 			},

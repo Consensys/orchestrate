@@ -4,6 +4,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
 )
 
@@ -36,12 +37,16 @@ func TxAlreadySent(ec ethclient.ChainLedgerReader, s evlpstore.EnvelopeStoreClie
 		// Tx has already been stored
 		if resp.GetStatusInfo().HasBeenSent() {
 			txctx.Logger.Warnf("store: transaction has already been stored")
+			url, err := proxy.GetURL(txctx)
+			if err != nil {
+				return
+			}
 
 			// We make sure that transaction has not already been sent
 			// by querying the chain
 			tx, _, err := ec.TransactionByHash(
 				txctx.Context(),
-				resp.GetEnvelope().GetChain().ID(),
+				url,
 				resp.GetEnvelope().GetTx().GetHash().Hash(),
 			)
 

@@ -7,9 +7,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
 )
 
-func TestGetIndexedCount(t *testing.T) {
-	var ERC20 = []byte(
-		`[{
+var ERC20 = []byte(
+	`[{
     "anonymous": false,
     "inputs": [
       {"indexed": true, "name": "account", "type": "address"},
@@ -26,6 +25,8 @@ func TestGetIndexedCount(t *testing.T) {
     "name": "MinterAdded2",
     "type": "event"
     }]`)
+
+func TestGetIndexedCount(t *testing.T) {
 
 	var ERC20Contract = &abi.Contract{
 		Id: &abi.ContractId{

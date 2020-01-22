@@ -5,13 +5,14 @@ import (
 	"math/big"
 	"testing"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
@@ -19,30 +20,35 @@ type MockGasPricer struct {
 	t *testing.T
 }
 
-func (e *MockGasPricer) SuggestGasPrice(ctx context.Context, chainID *big.Int) (*big.Int, error) {
-	if chainID.Text(10) == "0" {
+func (e *MockGasPricer) SuggestGasPrice(ctx context.Context, endpoint string) (*big.Int, error) {
+	if endpoint == "error" {
 		return big.NewInt(0), errors.ConnectionError("could not estimate gas")
 	}
 	return big.NewInt(10), nil
 }
 
 func makeGasPricerContext(i int) *engine.TxContext {
-	ctx := engine.NewTxContext()
-	ctx.Reset()
-	ctx.Logger = log.NewEntry(log.StandardLogger())
-	ctx.Envelope.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{}}
+	txctx := engine.NewTxContext()
+	txctx.Reset()
+	txctx.Logger = log.NewEntry(log.StandardLogger())
+	txctx.Envelope.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{}}
 
-	switch i % 2 {
+	switch i % 3 {
 	case 0:
-		ctx.Envelope.Chain = (&chain.Chain{}).SetID(big.NewInt(0))
-		ctx.Set("errors", 1)
-		ctx.Set("result", big.NewInt(0))
+		txctx.WithContext(proxy.With(txctx.Context(), "error"))
+		txctx.Set("errors", 1)
+		txctx.Set("result", big.NewInt(0))
 	case 1:
-		ctx.Envelope.Chain = (&chain.Chain{}).SetID(big.NewInt(1))
-		ctx.Set("errors", 0)
-		ctx.Set("result", big.NewInt(10))
+		txctx.WithContext(proxy.With(txctx.Context(), "testURL"))
+		txctx.Set("errors", 0)
+		txctx.Set("result", big.NewInt(10))
+	case 2:
+		gp := big.NewInt(10)
+		txctx.Envelope.GetTx().GetTxData().SetGasPrice(gp)
+		txctx.Set("errors", 0)
+		txctx.Set("result", gp)
 	}
-	return ctx
+	return txctx
 }
 
 type PricerTestSuite struct {

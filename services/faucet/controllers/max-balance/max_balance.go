@@ -11,7 +11,7 @@ import (
 )
 
 // BalanceAtFunc should return a balance
-type BalanceAtFunc func(ctx context.Context, chainID *big.Int, a ethcommon.Address, blocknumber *big.Int) (*big.Int, error)
+type BalanceAtFunc func(ctx context.Context, endpoint string, a ethcommon.Address, blocknumber *big.Int) (*big.Int, error)
 
 // Controller is a controller that ensures an address can not be credit above a given limit
 type Controller struct {
@@ -29,7 +29,7 @@ func NewController(conf *Config) *Controller {
 func (ctrl *Controller) Control(credit faucet.CreditFunc) faucet.CreditFunc {
 	return func(ctx context.Context, r *types.Request) (*big.Int, error) {
 		// Retrieve account balance
-		balance, err := ctrl.conf.BalanceAt(ctx, r.ChainID, r.Beneficiary, nil)
+		balance, err := ctrl.conf.BalanceAt(ctx, r.NodeURL, r.Beneficiary, nil)
 		if err != nil {
 			return big.NewInt(0), errors.FromError(err).ExtendComponent(component)
 		}

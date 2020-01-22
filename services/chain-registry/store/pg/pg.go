@@ -2,6 +2,7 @@ package pg
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
@@ -46,11 +47,15 @@ func (r *ChainRegistry) RegisterNode(ctx context.Context, node *types.Node) erro
 	return nil
 }
 
-func (r *ChainRegistry) GetNodes(ctx context.Context) ([]*types.Node, error) {
+func (r *ChainRegistry) GetNodes(ctx context.Context, filters map[string]string) ([]*types.Node, error) {
 	nodes := make([]*types.Node, 0)
 
-	err := r.db.ModelContext(ctx, &nodes).
-		Select()
+	req := r.db.ModelContext(ctx, &nodes)
+	for k, v := range filters {
+		req.Where(fmt.Sprintf("%s = ?", k), v)
+	}
+
+	err := req.Select()
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -58,24 +63,42 @@ func (r *ChainRegistry) GetNodes(ctx context.Context) ([]*types.Node, error) {
 	return nodes, nil
 }
 
-func (r *ChainRegistry) GetNodesByTenantID(ctx context.Context, tenantID string) ([]*types.Node, error) {
+func (r *ChainRegistry) GetNodesByTenantID(ctx context.Context, tenantID string, filters map[string]string) ([]*types.Node, error) {
 	nodes := make([]*types.Node, 0)
 
-	err := r.db.ModelContext(ctx, &nodes).
+	req := r.db.ModelContext(ctx, &nodes).
+		Where("tenant_id = ?", tenantID)
+	for k, v := range filters {
+		req.Where(fmt.Sprintf("%s = ?", k), v)
+	}
+
+	err := req.Select()
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	return nodes, nil
+}
+
+func (r *ChainRegistry) GetNodeByTenantIDAndNodeName(ctx context.Context, tenantID, name string) (*types.Node, error) {
+	node := &types.Node{}
+
+	err := r.db.ModelContext(ctx, node).
+		Where("name = ?", name).
 		Where("tenant_id = ?", tenantID).
 		Select()
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	return nodes, nil
+	return node, nil
 }
 
-func (r *ChainRegistry) GetNodeByName(ctx context.Context, tenantID, name string) (*types.Node, error) {
+func (r *ChainRegistry) GetNodeByTenantIDAndNodeID(ctx context.Context, tenantID, id string) (*types.Node, error) {
 	node := &types.Node{}
 
 	err := r.db.ModelContext(ctx, node).
-		Where("name = ?", name).
+		Where("id = ?", id).
 		Where("tenant_id = ?", tenantID).
 		Select()
 	if err != nil {

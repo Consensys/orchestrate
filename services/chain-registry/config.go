@@ -12,7 +12,9 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/logger"
 )
 
-const DefaultInternalEntryPointName = "orchestrate"
+const (
+	DefaultInternalEntryPointName = "orchestrate"
+)
 
 func init() {
 	viper.SetDefault(ProxyAddressViperKey, proxyAddressDefault)

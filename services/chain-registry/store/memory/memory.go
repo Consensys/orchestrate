@@ -43,7 +43,9 @@ func (r *ChainRegistry) RegisterNode(_ context.Context, node *types.Node) error 
 	return nil
 }
 
-func (r *ChainRegistry) GetNodes(_ context.Context) ([]*types.Node, error) {
+func (r *ChainRegistry) GetNodes(_ context.Context, filters map[string]string) ([]*types.Node, error) {
+	// TODO: implement filters
+
 	nodes := make([]*types.Node, 0)
 
 	for _, node := range r.NodesByID {
@@ -53,11 +55,14 @@ func (r *ChainRegistry) GetNodes(_ context.Context) ([]*types.Node, error) {
 	return nodes, nil
 }
 
-func (r *ChainRegistry) GetNodesByTenantID(_ context.Context, tenantID string) ([]*types.Node, error) {
+func (r *ChainRegistry) GetNodesByTenantID(_ context.Context, tenantID string, filters map[string]string) ([]*types.Node, error) {
+	// TODO: implement filters
+
 	nodes := make([]*types.Node, 0)
 
 	if tenantNodes, ok := r.NodesByNames[tenantID]; ok {
 		for _, node := range tenantNodes {
+
 			nodes = append(nodes, node)
 		}
 	} else {
@@ -67,7 +72,7 @@ func (r *ChainRegistry) GetNodesByTenantID(_ context.Context, tenantID string) (
 	return nodes, nil
 }
 
-func (r *ChainRegistry) GetNodeByName(_ context.Context, tenantID, name string) (*types.Node, error) {
+func (r *ChainRegistry) GetNodeByTenantIDAndNodeName(_ context.Context, tenantID, name string) (*types.Node, error) {
 	if _, ok := r.NodesByNames[tenantID]; ok {
 		if node, ok := r.NodesByNames[tenantID][name]; ok {
 			return node, nil
@@ -76,6 +81,14 @@ func (r *ChainRegistry) GetNodeByName(_ context.Context, tenantID, name string) 
 	}
 
 	return nil, errors.NotFoundError("unknown node with tenantID=%s", tenantID).ExtendComponent(component)
+}
+
+func (r *ChainRegistry) GetNodeByTenantIDAndNodeID(ctx context.Context, tenantID, id string) (*types.Node, error) {
+	if _, ok := r.NodesByID[id]; !ok || r.NodesByID[id].TenantID != tenantID {
+		return nil, errors.FromError(fmt.Errorf("unknown node ID=%s", id)).ExtendComponent(component)
+	}
+
+	return r.NodesByID[id], nil
 }
 
 func (r *ChainRegistry) GetNodeByID(_ context.Context, id string) (*types.Node, error) {

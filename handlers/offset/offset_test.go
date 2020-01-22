@@ -9,14 +9,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine/testutils"
 )
 
 var (
-	session = mock.NewConsumerGroupSession(context.Background(), "test-group", make(map[string][]int32))
-	c       = mock.NewConsumerGroupClaim("test-topic", 0, 0)
+	session = mocks.NewConsumerGroupSession(context.Background(), "test-group", make(map[string][]int32))
+	c       = mocks.NewConsumerGroupClaim("test-topic", 0, 0)
 )
 
 func makeMarkerContext(i int) *engine.TxContext {

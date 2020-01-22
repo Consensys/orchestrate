@@ -4,6 +4,9 @@ import (
 	"context"
 	"sync"
 
+	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
+
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers"
@@ -28,7 +31,7 @@ func Init(ctx context.Context) {
 		controllers.Init(ctx)
 
 		// Create Handler
-		handler = Faucet(faucet.GlobalFaucet())
+		handler = Faucet(viper.GetBool(multitenancy.EnabledViperKey), faucet.GlobalFaucet())
 
 		log.Infof("logger: handler ready")
 	})

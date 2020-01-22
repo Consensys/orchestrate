@@ -9,4 +9,8 @@ message Chain {
     // Chain ID
     // e.g. 1 for mainnet, 3 for Ropsten
     bytes id = 1;
+
+    string node_id = 2;
+
+    string node_name = 3;
 }

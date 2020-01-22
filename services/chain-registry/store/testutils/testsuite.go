@@ -120,7 +120,7 @@ func (s *ChainRegistryTestSuite) TestRegisterNodes() {
 func (s *ChainRegistryTestSuite) TestGetNodes() {
 	s.TestRegisterNodes()
 
-	nodes, err := s.Store.GetNodes(context.Background())
+	nodes, err := s.Store.GetNodes(context.Background(), nil)
 	assert.NoError(s.T(), err, "Should get nodes without errors")
 	assert.Len(s.T(), nodes, len(tenantID1Nodes)+len(tenantID2Nodes), "Should get the same number of nodes")
 
@@ -132,7 +132,7 @@ func (s *ChainRegistryTestSuite) TestGetNodes() {
 func (s *ChainRegistryTestSuite) TestGetNodesByTenantID() {
 	s.TestRegisterNodes()
 
-	nodes, err := s.Store.GetNodesByTenantID(context.Background(), tenantID2)
+	nodes, err := s.Store.GetNodesByTenantID(context.Background(), tenantID2, nil)
 	assert.NoError(s.T(), err, "Should get nodes without errors")
 	assert.Len(s.T(), nodes, len(NodesSample[tenantID2]), "Should get the same number of nodes")
 	for i := 0; i < len(NodesSample[tenantID2]); i++ {
@@ -143,7 +143,7 @@ func (s *ChainRegistryTestSuite) TestGetNodesByTenantID() {
 func (s *ChainRegistryTestSuite) TestGetNodeByName() {
 	s.TestRegisterNodes()
 
-	node, err := s.Store.GetNodeByName(context.Background(), tenantID2, nodeName2)
+	node, err := s.Store.GetNodeByTenantIDAndNodeName(context.Background(), tenantID2, nodeName2)
 	assert.NoError(s.T(), err, "Should get node without errors")
 
 	CompareNodes(s.T(), node, NodesSample[tenantID2][nodeName2])
@@ -152,7 +152,7 @@ func (s *ChainRegistryTestSuite) TestGetNodeByName() {
 func (s *ChainRegistryTestSuite) TestGetNodeByID() {
 	s.TestRegisterNodes()
 
-	testNode, _ := s.Store.GetNodeByName(context.Background(), tenantID2, nodeName3)
+	testNode, _ := s.Store.GetNodeByTenantIDAndNodeName(context.Background(), tenantID2, nodeName3)
 
 	node, err := s.Store.GetNodeByID(context.Background(), testNode.ID)
 	assert.NoError(s.T(), err, "Should get node without errors")
@@ -168,7 +168,7 @@ func (s *ChainRegistryTestSuite) TestUpdateNodeByName() {
 	err := s.Store.UpdateNodeByName(context.Background(), testNode)
 	assert.NoError(s.T(), err, "Should get node without errors")
 
-	node, _ := s.Store.GetNodeByName(context.Background(), tenantID1, nodeName2)
+	node, _ := s.Store.GetNodeByTenantIDAndNodeName(context.Background(), tenantID1, nodeName2)
 	CompareNodes(s.T(), node, testNode)
 }
 
@@ -199,7 +199,7 @@ func (s *ChainRegistryTestSuite) TestUpdateBlockPositionByName() {
 	err := s.Store.UpdateBlockPositionByName(context.Background(), testNode.Name, testNode.TenantID, testNode.ListenerBlockPosition)
 	assert.NoError(s.T(), err, "Should get node without errors")
 
-	node, _ := s.Store.GetNodeByName(context.Background(), tenantID1, nodeName2)
+	node, _ := s.Store.GetNodeByTenantIDAndNodeName(context.Background(), tenantID1, nodeName2)
 	CompareNodes(s.T(), node, testNode)
 }
 
@@ -225,12 +225,12 @@ func (s *ChainRegistryTestSuite) TestNotFoundNameErrorUpdateBlockPositionByName(
 func (s *ChainRegistryTestSuite) TestUpdateNodeByID() {
 	s.TestRegisterNodes()
 
-	testNode, _ := s.Store.GetNodeByName(context.Background(), tenantID1, nodeName2)
+	testNode, _ := s.Store.GetNodeByTenantIDAndNodeName(context.Background(), tenantID1, nodeName2)
 	testNode.ListenerFromBlock = 10
 	err := s.Store.UpdateNodeByID(context.Background(), testNode)
 	assert.NoError(s.T(), err, "Should get node without errors")
 
-	node, _ := s.Store.GetNodeByName(context.Background(), tenantID1, nodeName2)
+	node, _ := s.Store.GetNodeByTenantIDAndNodeName(context.Background(), tenantID1, nodeName2)
 	CompareNodes(s.T(), node, testNode)
 }
 
@@ -248,12 +248,12 @@ func (s *ChainRegistryTestSuite) TestErrorNotFoundUpdateNodeByID() {
 func (s *ChainRegistryTestSuite) TestUpdateBlockPositionByID() {
 	s.TestRegisterNodes()
 
-	testNode, _ := s.Store.GetNodeByName(context.Background(), tenantID1, nodeName2)
+	testNode, _ := s.Store.GetNodeByTenantIDAndNodeName(context.Background(), tenantID1, nodeName2)
 	testNode.ListenerBlockPosition = 10
 	err := s.Store.UpdateBlockPositionByID(context.Background(), testNode.ID, testNode.ListenerBlockPosition)
 	assert.NoError(s.T(), err, "Should get node without errors")
 
-	node, _ := s.Store.GetNodeByName(context.Background(), tenantID1, nodeName2)
+	node, _ := s.Store.GetNodeByTenantIDAndNodeName(context.Background(), tenantID1, nodeName2)
 	CompareNodes(s.T(), testNode, node)
 }
 
@@ -275,7 +275,7 @@ func (s *ChainRegistryTestSuite) TestDeleteNodeByName() {
 	err := s.Store.DeleteNodeByName(context.Background(), testNode)
 	assert.NoError(s.T(), err, "Should get node without errors")
 
-	node, err := s.Store.GetNodeByName(context.Background(), tenantID1, nodeName2)
+	node, err := s.Store.GetNodeByTenantIDAndNodeName(context.Background(), tenantID1, nodeName2)
 	assert.Error(s.T(), err, "Should get node without errors")
 	assert.Nil(s.T(), node, "Should not get node")
 }
@@ -294,12 +294,12 @@ func (s *ChainRegistryTestSuite) TestErrorNotFoundDeleteNodeByName() {
 func (s *ChainRegistryTestSuite) TestDeleteNodeByID() {
 	s.TestRegisterNodes()
 
-	node, _ := s.Store.GetNodeByName(context.Background(), tenantID1, nodeName2)
+	node, _ := s.Store.GetNodeByTenantIDAndNodeName(context.Background(), tenantID1, nodeName2)
 
 	err := s.Store.DeleteNodeByID(context.Background(), node.ID)
 	assert.NoError(s.T(), err, "Should get node without errors")
 
-	node, err = s.Store.GetNodeByName(context.Background(), tenantID1, nodeName2)
+	node, err = s.Store.GetNodeByTenantIDAndNodeName(context.Background(), tenantID1, nodeName2)
 	assert.Error(s.T(), err, "Should get node without errors")
 	assert.Nil(s.T(), node, "Should not get node")
 }

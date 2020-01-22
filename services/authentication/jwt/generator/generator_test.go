@@ -4,6 +4,7 @@ import (
 	"crypto/rsa"
 	"fmt"
 	"testing"
+	"time"
 )
 
 var (
@@ -61,7 +62,7 @@ func TestGenerateAccessToken(t *testing.T) {
 				tt.fields.claimsNamespace,
 				tt.fields.privateKey,
 			}
-			gotToken, err := j.GenerateAccessToken(tt.args.customClaims)
+			gotToken, err := j.GenerateAccessToken(tt.args.customClaims, 24*time.Hour)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GenerateAccessToken() error = %v, wantErr %v", err, tt.wantErr)
 				return

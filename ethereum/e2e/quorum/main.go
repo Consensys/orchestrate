@@ -6,8 +6,7 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
@@ -47,19 +46,20 @@ func main() {
 	log.SetFormatter(&log.TextFormatter{})
 	log.SetLevel(log.DebugLevel)
 
-	// Initialize client
-	viper.Set("eth.client.url", []string{
-		"https://e0jcrldvk7:eOjDFyulgTHhUm1C5hAjvW9fAPZBM-eciSfA0bzlkyU@e0w1quks6d-e0x1svr9gn-rpc.eu-central-1.kaleido.io",
-	})
+	urls := map[string]string{
+		"quorum": "http://localhost:22000",
+	}
+
+	endpoint := urls["quorum"]
 
 	ethclient.Init(context.Background())
 
-	chain := ethclient.GlobalClient().Networks(context.Background())[0]
-	log.Infof("Connected to chain: %v", chain.Text(16))
+	chainID, _ := ethclient.GlobalClient().Network(context.Background(), endpoint)
+	log.Infof("Connected to chain: %v", chainID.Text(16))
 
 	// Create a Envelope for PrivateFor including Cargill & Admin nodes
 	e := &envelope.Envelope{
-		From: ethereum.HexToAccount("0x22460fa1b318897934fF1bb3dfeA19Ed9B218dB4"),
+		From: ethereum.HexToAccount("0x7E654d251Da770A068413677967F6d3Ea2FeA9E4"),
 		// Call: &common.Call{
 		// 	Quorum: &quorum.Quorum{
 		// 		Version:     "1.10.1",
@@ -83,7 +83,7 @@ func main() {
 
 	// Prepare arguments and send transaction
 	args := types.Envelope2SendTxArgs(e)
-	txHash, err := ethclient.GlobalClient().SendTransaction(context.Background(), chain, args)
+	txHash, err := ethclient.GlobalClient().SendTransaction(context.Background(), endpoint, args)
 	if err != nil {
 		log.WithError(err).Errorf("Could not send Quorum private for transaction")
 		return
@@ -92,7 +92,7 @@ func main() {
 
 	// Wait for receipt
 	for {
-		receipt, err := ethclient.GlobalClient().TransactionReceipt(context.Background(), chain, txHash)
+		receipt, err := ethclient.GlobalClient().TransactionReceipt(context.Background(), endpoint, txHash)
 		if receipt == nil {
 			log.WithError(err).Warnf("Waiting for receipt")
 			time.Sleep(time.Second)

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sync"
 
+	chaininjector "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/chain-injector"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
 
 	log "github.com/sirupsen/logrus"
@@ -58,6 +60,10 @@ func initHandlers(ctx context.Context) {
 		func() { noncechecker.Init(ctx) },
 		// Initialize producer
 		func() { producer.Init(ctx) },
+		// Initialize ChainID injector
+		func() {
+			chaininjector.Init(ctx)
+		},
 	)
 }
 
@@ -89,6 +95,7 @@ func registerHandlers() {
 
 	// Recovery Status Setter surrounds the producer
 	// c.f. docstring RecoveryStatusSetter handler
+	engine.Register(chaininjector.GlobalHandler())
 	engine.Register(noncechecker.GlobalRecoveryStatusSetter())
 	engine.Register(producer.GlobalHandler())
 	engine.Register(injector.GlobalHandler())

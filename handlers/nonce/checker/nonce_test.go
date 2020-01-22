@@ -8,47 +8,50 @@ import (
 	"strings"
 	"testing"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
+
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/memory"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
 type MockChainStateReader struct{}
 
-func (r *MockChainStateReader) BalanceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, blockNumber *big.Int) (*big.Int, error) {
+const endpointError = "error"
+
+func (r *MockChainStateReader) BalanceAt(ctx context.Context, endpoint string, account ethcommon.Address, blockNumber *big.Int) (*big.Int, error) {
 	return big.NewInt(0), nil
 }
 
-func (r *MockChainStateReader) StorageAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, key ethcommon.Hash, blockNumber *big.Int) ([]byte, error) {
+func (r *MockChainStateReader) StorageAt(ctx context.Context, endpoint string, account ethcommon.Address, key ethcommon.Hash, blockNumber *big.Int) ([]byte, error) {
 	return []byte{}, nil
 }
 
-func (r *MockChainStateReader) CodeAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, blockNumber *big.Int) ([]byte, error) {
+func (r *MockChainStateReader) CodeAt(ctx context.Context, endpoint string, account ethcommon.Address, blockNumber *big.Int) ([]byte, error) {
 	return []byte{}, nil
 }
 
-func (r *MockChainStateReader) NonceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, blockNumber *big.Int) (uint64, error) {
+func (r *MockChainStateReader) NonceAt(ctx context.Context, endpoint string, account ethcommon.Address, blockNumber *big.Int) (uint64, error) {
 	return 0, nil
 }
 
-func (r *MockChainStateReader) PendingBalanceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address) (*big.Int, error) {
+func (r *MockChainStateReader) PendingBalanceAt(ctx context.Context, endpoint string, account ethcommon.Address) (*big.Int, error) {
 	return big.NewInt(0), nil
 }
 
-func (r *MockChainStateReader) PendingStorageAt(ctx context.Context, chainID *big.Int, account ethcommon.Address, key ethcommon.Hash) ([]byte, error) {
+func (r *MockChainStateReader) PendingStorageAt(ctx context.Context, endpoint string, account ethcommon.Address, key ethcommon.Hash) ([]byte, error) {
 	return []byte{}, nil
 }
 
-func (r *MockChainStateReader) PendingCodeAt(ctx context.Context, chainID *big.Int, account ethcommon.Address) ([]byte, error) {
+func (r *MockChainStateReader) PendingCodeAt(ctx context.Context, endpoint string, account ethcommon.Address) ([]byte, error) {
 	return []byte{}, nil
 }
 
-func (r *MockChainStateReader) PendingNonceAt(ctx context.Context, chainID *big.Int, account ethcommon.Address) (uint64, error) {
-	if chainID.Text(10) == "0" {
+func (r *MockChainStateReader) PendingNonceAt(ctx context.Context, endpoint string, account ethcommon.Address) (uint64, error) {
+	if endpoint == endpointError {
 		// Simulate error
 		return 0, fmt.Errorf("unknown chain")
 	}
@@ -117,7 +120,7 @@ func (h *header) Get(key string) string { return "" }
 func (h *header) Set(key, value string) {}
 
 func makeContext(
-	chainID int64,
+	endpoint,
 	key string,
 	invalid bool,
 	nonce, expectedNonceInMetadata uint64,
@@ -128,11 +131,11 @@ func makeContext(
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
 	txctx.Envelope.From = &ethereum.Account{Raw: []byte{}}
-	txctx.Envelope.Chain = chain.FromInt(chainID)
 	txctx.Envelope.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{
 		Nonce: nonce,
 	}}
 	txctx.In = mockMsg(key)
+	txctx.WithContext(proxy.With(txctx.Context(), endpoint))
 
 	txctx.Set("expectedErrorCount", expectedErrorCount)
 	txctx.Set("expectedNonceInMetadata", expectedNonceInMetadata)
@@ -198,23 +201,23 @@ func TestChecker(t *testing.T) {
 
 	testKey1 := "key1"
 	// On 1st execution envelope with nonce 10 should be valid (as the mock client returns always return pending nonce 10)
-	txctx := makeContext(1, testKey1, false, 10, 0, 0, 0, "")
+	txctx := makeContext("testURL", testKey1, false, 10, 0, 0, 0, "")
 	h(txctx)
 	assertTxContext(t, txctx)
 
 	// On 2nd execution envelope with nonce 11 should be valid nonce manager should have incremented last sent
-	txctx = makeContext(1, testKey1, false, 11, 0, 0, 0, "")
+	txctx = makeContext("testURL", testKey1, false, 11, 0, 0, 0, "")
 	h(txctx)
 	assertTxContext(t, txctx)
 
 	// On 3rd execution envelope with nonce 10 should be too low
-	txctx = makeContext(1, testKey1, true, 10, 0, 1, 0, "")
+	txctx = makeContext("testURL", testKey1, true, 10, 0, 1, 0, "")
 	h(txctx)
 	assertTxContext(t, txctx)
 
 	// On 4th execution envelope with nonce 14 should be too high
 	// Checker should signal in metadata
-	txctx = makeContext(1, testKey1, true, 14, 12, 1, 0, "")
+	txctx = makeContext("testURL", testKey1, true, 14, 12, 1, 0, "")
 	h(txctx)
 	assertTxContext(t, txctx)
 	recovering := tracker.Recovering(testKey1) > 0
@@ -222,20 +225,20 @@ func TestChecker(t *testing.T) {
 
 	// On 5th execution envelope with nonce 15 should be too high
 	// Checker should not signal in metadata
-	txctx = makeContext(1, testKey1, true, 15, 0, 3, 0, "")
+	txctx = makeContext("testURL", testKey1, true, 15, 0, 3, 0, "")
 	txctx.Envelope.SetMetadataValue("nonce.recovering.count", fmt.Sprintf("%v", 2))
 	h(txctx)
 	assertTxContext(t, txctx)
 
 	// On 6th execution envelope with nonce 12 be valid
-	txctx = makeContext(1, testKey1, false, 12, 0, 0, 0, "")
+	txctx = makeContext("testURL", testKey1, false, 12, 0, 0, 0, "")
 	h(txctx)
 	assertTxContext(t, txctx)
 	recovering = tracker.Recovering(testKey1) > 0
 	assert.False(t, recovering, "NonceManager should have stopped recovering")
 
 	// On 7th execution envelope with nonce 14 but raw mode should be valid
-	txctx = makeContext(1, testKey1, false, 14, 0, 0, 0, "")
+	txctx = makeContext("testURL", testKey1, false, 14, 0, 0, 0, "")
 	txctx.Envelope.SetMetadataValue("tx.mode", "raw")
 
 	h(txctx)
@@ -244,29 +247,29 @@ func TestChecker(t *testing.T) {
 	assert.False(t, recovering, "NonceManager should not be recovering")
 
 	// Execution with invalid chain
-	txctx = makeContext(0, "key2", false, 10, 0, 0, 1, "")
+	txctx = makeContext(endpointError, "key2", false, 10, 0, 0, 1, "")
 	h(txctx)
 	assertTxContext(t, txctx)
 
 	// Execution with error on nonce manager
-	txctx = makeContext(1, "key-error-on-get", false, 10, 0, 0, 1, "")
+	txctx = makeContext("testURL", "key-error-on-get", false, 10, 0, 0, 1, "")
 	h(txctx)
 	assertTxContext(t, txctx)
 
 	// Execution with error on nonce manager
-	txctx = makeContext(1, "key-error-on-set", false, 10, 0, 0, 0, "")
+	txctx = makeContext("testURL", "key-error-on-set", false, 10, 0, 0, 0, "")
 	h(txctx)
 	assertTxContext(t, txctx)
 
 	// Execution with nonce too low on send
-	txctx = makeContext(1, testKey1, true, 13, 0, 1, 0, "json-rpc: nonce too low")
+	txctx = makeContext("testURL", testKey1, true, 13, 0, 1, 0, "json-rpc: nonce too low")
 	h(txctx)
 	assertTxContext(t, txctx)
 	v, _, _ := nm.GetLastSent(testKey1)
 	assert.Equal(t, uint64(9), v, "Nonce should have been re-initialized")
 
 	// Execution with recovery count exceeded
-	txctx = makeContext(1, testKey1, false, 13, 0, 10, 1, "")
+	txctx = makeContext("testURL", testKey1, false, 13, 0, 10, 1, "")
 	txctx.Envelope.SetMetadataValue("nonce.recovering.count", fmt.Sprintf("%v", 10))
 	h(txctx)
 	assertTxContext(t, txctx)

@@ -4,6 +4,8 @@ import (
 	"context"
 	"math/big"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
+
 	"github.com/Shopify/sarama"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
@@ -33,7 +35,7 @@ func NewFaucet(p sarama.SyncProducer) *Faucet {
 func (f *Faucet) prepareMsg(r *types.Request, msg *sarama.ProducerMessage) error {
 	// Create Trace for Crediting message
 	e := &envelope.Envelope{
-		Chain: (&chain.Chain{}).SetID(r.ChainID),
+		Chain: (&chain.Chain{}).SetID(r.ChainID).SetNodeID(r.NodeID).SetNodeName(r.NodeName),
 		From:  ethereum.HexToAccount(r.Creditor.Hex()),
 		Tx: &ethereum.Transaction{
 			TxData: (&ethereum.TxData{}).SetValue(r.Amount).SetTo(r.Beneficiary),
@@ -41,6 +43,10 @@ func (f *Faucet) prepareMsg(r *types.Request, msg *sarama.ProducerMessage) error
 		Metadata: &envelope.Metadata{
 			Id: uuid.NewV4().String(),
 		},
+	}
+
+	if r.AuthToken != "" {
+		e.SetMetadataValue(multitenancy.AuthorizationMetadata, r.AuthToken)
 	}
 
 	// Unmarshal envelope

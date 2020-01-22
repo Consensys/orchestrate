@@ -12,6 +12,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestPGFlags(t *testing.T) {
+	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
+	PGFlags(f)
+}
+
 func TestDBUser(t *testing.T) {
 	name := "db.user"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
@@ -117,6 +122,28 @@ func TestDBPort(t *testing.T) {
 
 	expected = 5442
 	assert.Equal(t, expected, viper.GetInt(name), "After setting flag db port should be %v but got %v", expected, viper.GetInt(name))
+}
+
+func TestDBPoolSize(t *testing.T) {
+	name := "db.poolsize"
+	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
+	DBPoolSize(flgs)
+
+	expected := 0
+	assert.Equal(t, expected, viper.GetInt(name), "Default db pool size should be %v but got %v", expected, viper.GetInt(name))
+
+	expected = 1
+	_ = os.Setenv("DB_POOLSIZE", strconv.FormatInt(int64(expected), 10))
+	assert.Equal(t, expected, viper.GetInt(name), "After setting env var db port should be %v but got %v", expected, viper.GetInt(name))
+
+	args := []string{
+		"--db-poolsize=2",
+	}
+	err := flgs.Parse(args)
+	assert.NoError(t, err, "No error expected")
+
+	expected = 2
+	assert.Equal(t, expected, viper.GetInt(name), "After setting flag db poolsize should be %v but got %v", expected, viper.GetInt(name))
 }
 
 func TestNewOptions(t *testing.T) {

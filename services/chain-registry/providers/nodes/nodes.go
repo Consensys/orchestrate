@@ -35,7 +35,7 @@ func (p *Provider) Provide(configurationChan chan<- dynamic.Message, pool *safe.
 			for {
 				select {
 				case <-ticker.C:
-					nodes, err := p.Registry.GetNodes(routineCtx)
+					nodes, err := p.Registry.GetNodes(routineCtx, nil)
 					if err != nil {
 						log.Errorf("error get chain registry data, %v", err)
 						return err

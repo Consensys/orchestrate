@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/rpc"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce"
@@ -18,9 +17,6 @@ func newRunCommand() *cobra.Command {
 		Short: "Run application",
 		Run:   run,
 	}
-
-	// Register Ethereum client flags
-	ethclient.Flags(runCmd.Flags())
 
 	// Register Kafka flags
 	broker.InitKafkaFlags(runCmd.Flags())

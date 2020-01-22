@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sync"
 
+	chaininjector "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/chain-injector"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
@@ -76,6 +78,11 @@ func initHandlers(ctx context.Context) {
 		func() {
 			producer.Init(ctx)
 		},
+
+		// Initialize ChainID injector
+		func() {
+			chaininjector.Init(ctx)
+		},
 	)
 }
 
@@ -108,6 +115,7 @@ func initComponents(ctx context.Context) {
 	engine.Register(multitenancy.GlobalHandler())
 
 	// Specific handlers tk Tx-Crafter worker
+	engine.Register(chaininjector.GlobalHandler())
 	engine.Register(faucet.GlobalHandler())
 	engine.Register(crafter.GlobalHandler())
 	engine.Register(gaspricer.GlobalHandler())

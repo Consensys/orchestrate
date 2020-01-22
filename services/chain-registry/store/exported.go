@@ -6,6 +6,8 @@ import (
 	"strings"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/memory"
@@ -54,17 +56,28 @@ func Init(ctx context.Context) {
 		// Init Config
 		nodes := viper.GetStringSlice(InitViperKey)
 		for _, v := range nodes {
-			node := &types.Node{}
+			node := &types.Node{
+				// Default values
+				ListenerDepth:           1,
+				ListenerBlockPosition:   -1,
+				ListenerFromBlock:       -1,
+				ListenerBackOffDuration: "1s",
+			}
 			dec := json.NewDecoder(strings.NewReader(v))
 			dec.DisallowUnknownFields() // Force errors if unknown fields
 			err := dec.Decode(node)
 			if err != nil {
 				log.Warnf("%s: init - invalid node config - got %v", component, err)
 			}
+			if !viper.GetBool(multitenancy.EnabledViperKey) {
+				node.TenantID = multitenancy.DefaultTenantIDName
+			}
+
 			err = store.RegisterNode(ctx, node)
 			if err != nil {
 				log.Warnf("%s: init - could not register node - got %v", component, err)
 			}
+
 			log.Infof("%s: init - node %s registered with id %s", component, node.Name, node.ID)
 		}
 	})

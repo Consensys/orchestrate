@@ -16,6 +16,11 @@ var (
 	initOnce = &sync.Once{}
 )
 
+const (
+	redisOpt    = "redis"
+	inMemoryOpt = "in-memory"
+)
+
 // Init initializes Nonce
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
@@ -24,13 +29,13 @@ func Init(ctx context.Context) {
 		}
 
 		switch viper.GetString(typeViperKey) {
-		case "redis":
+		case redisOpt:
 			// Initialize Redis Nonce Manager
 			redis.Init()
 
 			// Set Nonce
 			m = redis.GlobalNonceManager()
-		case "in-memory":
+		case inMemoryOpt:
 			// Initialize Mock Nonce
 			memory.Init(ctx)
 

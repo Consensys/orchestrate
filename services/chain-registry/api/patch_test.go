@@ -10,7 +10,7 @@ import (
 var patchNodeByNameTests = []HTTPRouteTests{
 	{
 		name:       "TestPatchNodeByName200",
-		store:      &MockChainRegistry{},
+		store:      UseMockChainRegistry,
 		httpMethod: http.MethodPatch,
 		path:       "/testTenantID/nodes/testNodeName",
 		body: func() []byte {
@@ -25,7 +25,7 @@ var patchNodeByNameTests = []HTTPRouteTests{
 	},
 	{
 		name:       "TestPatchNodeByName400WithWrongURL",
-		store:      &MockChainRegistry{},
+		store:      UseMockChainRegistry,
 		httpMethod: http.MethodPatch,
 		path:       "/testTenantID/nodes/testNodeName",
 		body: func() []byte {
@@ -43,7 +43,7 @@ var patchNodeByNameTests = []HTTPRouteTests{
 	},
 	{
 		name:                "TestPatchNodeByName400WrongBody",
-		store:               &MockChainRegistry{},
+		store:               UseMockChainRegistry,
 		httpMethod:          http.MethodPatch,
 		path:                "/testTenantID/nodes/testNodeName",
 		body:                func() []byte { return []byte(`{"unknownField":"error"}`) },
@@ -53,7 +53,7 @@ var patchNodeByNameTests = []HTTPRouteTests{
 	},
 	{
 		name:       "TestPatchNodeByName404",
-		store:      &ErrorChainRegistry{},
+		store:      UseErrorChainRegistry,
 		httpMethod: http.MethodPatch,
 		path:       "/testTenantID/nodes/notFoundError",
 		body: func() []byte {
@@ -68,7 +68,7 @@ var patchNodeByNameTests = []HTTPRouteTests{
 	},
 	{
 		name:       "TestPatchNodeByName500",
-		store:      &ErrorChainRegistry{},
+		store:      UseErrorChainRegistry,
 		httpMethod: http.MethodPatch,
 		path:       "/testTenantID/nodes/testNodeName",
 		body: func() []byte {
@@ -86,7 +86,7 @@ var patchNodeByNameTests = []HTTPRouteTests{
 var patchNodeByIDTests = []HTTPRouteTests{
 	{
 		name:       "TestPatchNodeByIDByID200",
-		store:      &MockChainRegistry{},
+		store:      UseMockChainRegistry,
 		httpMethod: http.MethodPatch,
 		path:       "/nodes/1",
 		body: func() []byte {
@@ -101,7 +101,7 @@ var patchNodeByIDTests = []HTTPRouteTests{
 	},
 	{
 		name:       "TestPatchNodeByID400WithWrongURL",
-		store:      &MockChainRegistry{},
+		store:      UseMockChainRegistry,
 		httpMethod: http.MethodPatch,
 		path:       "/nodes/1",
 		body: func() []byte {
@@ -119,7 +119,7 @@ var patchNodeByIDTests = []HTTPRouteTests{
 	},
 	{
 		name:                "TestPatchNodeByID400WrongBody",
-		store:               &MockChainRegistry{},
+		store:               UseMockChainRegistry,
 		httpMethod:          http.MethodPatch,
 		path:                "/nodes/1",
 		body:                func() []byte { return []byte(`{"unknownField":"error"}`) },
@@ -132,7 +132,7 @@ var patchNodeByIDTests = []HTTPRouteTests{
 	},
 	{
 		name:       "TestPatchNodeByID404",
-		store:      &ErrorChainRegistry{},
+		store:      UseErrorChainRegistry,
 		httpMethod: http.MethodPatch,
 		path:       "/nodes/0",
 		body: func() []byte {
@@ -147,7 +147,7 @@ var patchNodeByIDTests = []HTTPRouteTests{
 	},
 	{
 		name:       "TestPatchNodeByID500",
-		store:      &ErrorChainRegistry{},
+		store:      UseErrorChainRegistry,
 		httpMethod: http.MethodPatch,
 		path:       "/nodes/1",
 		body: func() []byte {
@@ -165,7 +165,7 @@ var patchNodeByIDTests = []HTTPRouteTests{
 var patchBlockPositionByIDTests = []HTTPRouteTests{
 	{
 		name:       "TestPatchBlockPositionByIDByID200",
-		store:      &MockChainRegistry{},
+		store:      UseMockChainRegistry,
 		httpMethod: http.MethodPatch,
 		path:       "/nodes/1/block-position",
 		body: func() []byte {
@@ -180,7 +180,7 @@ var patchBlockPositionByIDTests = []HTTPRouteTests{
 	},
 	{
 		name:                "TestPatchBlockPositionByID400WrongBody",
-		store:               &MockChainRegistry{},
+		store:               UseMockChainRegistry,
 		httpMethod:          http.MethodPatch,
 		path:                "/nodes/1/block-position",
 		body:                func() []byte { return []byte(`{"unknownField":"error"}`) },
@@ -193,7 +193,7 @@ var patchBlockPositionByIDTests = []HTTPRouteTests{
 	},
 	{
 		name:       "TestPatchBlockPositionByID404",
-		store:      &ErrorChainRegistry{},
+		store:      UseErrorChainRegistry,
 		httpMethod: http.MethodPatch,
 		path:       "/nodes/0/block-position",
 		body: func() []byte {
@@ -208,7 +208,7 @@ var patchBlockPositionByIDTests = []HTTPRouteTests{
 	},
 	{
 		name:       "TestPatchBlockPositionByID500",
-		store:      &ErrorChainRegistry{},
+		store:      UseErrorChainRegistry,
 		httpMethod: http.MethodPatch,
 		path:       "/nodes/1/block-position",
 		body: func() []byte {
@@ -226,7 +226,7 @@ var patchBlockPositionByIDTests = []HTTPRouteTests{
 var patchBlockNumberByNameTests = []HTTPRouteTests{
 	{
 		name:       "TestPatchBlockNumberByName200",
-		store:      &MockChainRegistry{},
+		store:      UseMockChainRegistry,
 		httpMethod: http.MethodPatch,
 		path:       "/testTenantID/nodes/testNodeName/block-position",
 		body: func() []byte {
@@ -241,7 +241,7 @@ var patchBlockNumberByNameTests = []HTTPRouteTests{
 	},
 	{
 		name:                "TestPatchBlockNumberByName400WrongBody",
-		store:               &MockChainRegistry{},
+		store:               UseMockChainRegistry,
 		httpMethod:          http.MethodPatch,
 		path:                "/testTenantID/nodes/testNodeName/block-position",
 		body:                func() []byte { return []byte(`{"unknownField":"error"}`) },
@@ -251,7 +251,7 @@ var patchBlockNumberByNameTests = []HTTPRouteTests{
 	},
 	{
 		name:       "TestPatchBlockNumberByName404",
-		store:      &ErrorChainRegistry{},
+		store:      UseErrorChainRegistry,
 		httpMethod: http.MethodPatch,
 		path:       "/testTenantID/nodes/notFoundError/block-position",
 		body: func() []byte {
@@ -266,7 +266,7 @@ var patchBlockNumberByNameTests = []HTTPRouteTests{
 	},
 	{
 		name:       "TestPatchBlockNumberByName500",
-		store:      &ErrorChainRegistry{},
+		store:      UseErrorChainRegistry,
 		httpMethod: http.MethodPatch,
 		path:       "/testTenantID/nodes/testNodeName/block-position",
 		body: func() []byte {

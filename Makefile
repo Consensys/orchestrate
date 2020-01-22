@@ -1,5 +1,5 @@
 GOFILES := $(shell find . -name '*.go' | grep -v services/chain-registry/genstatic/gen.go | egrep -v "^\./\.go" | grep -v _test.go)
-PACKAGES ?= $(shell go list ./... | go list ./... | grep -Fv -e e2e -e examples -e genstatic )
+PACKAGES ?= $(shell go list ./... | go list ./... | grep -Fv -e e2e -e examples -e genstatic -e mocks )
 CMD_RUN = tx-crafter tx-nonce tx-signer tx-sender tx-listener tx-decoder contract-registry chain-registry envelope-store
 CMD_MIGRATE = contract-registry envelope-store chain-registry
 
@@ -47,11 +47,11 @@ e2e: run-e2e
 clean: mod-tidy lint-ci protobuf
 
 generate-mocks:
-	mockgen -destination=mocks/mock_client.go -package=mocks \
-	gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/rpc Client
-
-	mockgen -destination=mocks/mock_enclave_endpoint.go -package=mocks \
-	gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tessera EnclaveEndpoint
+	mockgen -source=services/chain-registry/client/client.go -destination=services/chain-registry/client/mocks/mock_client.go -package=mocks
+	mockgen -source=ethereum/ethclient/ethclient.go -destination=ethereum/ethclient/mocks/mock_client.go -package=mocks
+	mockgen -source=types/contract-registry/registry.pb.go -destination=types/contract-registry/client/mocks/mock_client.go -package=mocks
+	mockgen -source=types/envelope-store/store.pb.go -destination=types/envelope-store/client/mocks/mock_client.go -package=mocks
+	mockgen -source=services/chain-registry/store/types/store.go -destination=services/chain-registry/store/mocks/mock_store.go -package=mocks
 
 # Tools
 lint-tools:
@@ -61,6 +61,7 @@ lint-tools:
 tools: lint-tools ## Install test tools
 	@GO111MODULE=off go get -u github.com/DATA-DOG/godog/cmd/godog
 	@GO111MODULE=off go get -u github.com/golang/mock/gomock
+	@GO111MODULE=off go get -u github.com/golang/mock/mockgen
 	@GO111MODULE=off go get -u github.com/golang/protobuf/protoc-gen-go
 	@GO111MODULE=off go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
     @GO111MODULE=off go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger

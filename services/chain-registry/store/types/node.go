@@ -29,19 +29,7 @@ type Node struct {
 }
 
 func (n *Node) IsValid() bool {
-	if n.Name == "" {
-		return false
-	}
-	if n.TenantID == "" {
-		return false
-	}
-	if len(n.URLs) == 0 {
-		return false
-	}
-	if n.ListenerBackOffDuration == "" {
-		return false
-	}
-	return true
+	return n.Name != "" && n.TenantID != "" && len(n.URLs) != 0 && n.ListenerBackOffDuration != ""
 }
 
 func NewConfig() *dynamic.Configuration {

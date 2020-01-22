@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"strings"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
+
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
@@ -67,12 +69,17 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 			return
 		}
 
+		url, err := proxy.GetURL(txctx)
+		if err != nil {
+			return
+		}
+
 		if ok {
 			expectedNonce = lastSent + 1
 		} else {
 			// If no nonce is available (meaning that envelope being processed is the first one for the pair sender,chain)
 			// then we retrieve nonce from chain
-			pendingNonce, err := ec.PendingNonceAt(txctx.Context(), chainID, sender)
+			pendingNonce, err := ec.PendingNonceAt(txctx.Context(), url, sender)
 			if err != nil {
 				e := txctx.AbortWithError(err).ExtendComponent(component)
 				txctx.Logger.WithError(e).Errorf("nonce: could not read nonce from chain")
@@ -175,7 +182,7 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 			}
 
 			// We recalibrate nonce from chain
-			pendingNonce, err := ec.PendingNonceAt(txctx.Context(), chainID, sender)
+			pendingNonce, err := ec.PendingNonceAt(txctx.Context(), url, sender)
 			if err != nil {
 				e := txctx.AbortWithError(err).ExtendComponent(component)
 				txctx.Logger.WithError(e).Errorf("nonce: could not read nonce from chain")

@@ -7,10 +7,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/golang/mock/gomock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/mocks"
+
 	"github.com/stretchr/testify/assert"
 
 	"github.com/gorilla/mux"
-	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
@@ -29,7 +31,7 @@ const (
 
 type HTTPRouteTests struct {
 	name                string
-	store               models.ChainRegistryStore
+	store               func(t *testing.T) models.ChainRegistryStore
 	httpMethod          string
 	path                string
 	body                func() []byte
@@ -60,7 +62,7 @@ func TestHTTPRouteTests(t *testing.T) {
 			tt := tt // NOTE: https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
 			t.Run(tt.name, func(t *testing.T) {
 				t.Parallel() // marks each test case as capable of running in parallel with each other
-				c := tt.store
+				c := tt.store(t)
 				r := mux.NewRouter()
 				NewHandler(c).Append(r)
 
@@ -79,128 +81,85 @@ func testResponse(t *testing.T, w *httptest.ResponseRecorder, expectedStatusCode
 	assert.Equal(t, expectedBody, w.Body.String(), "Did not get expected body %s, but got %s", expectedBody, w.Body.String())
 }
 
-type RouteTestSuite struct {
-	suite.Suite
-	Router *mux.Router
-}
+func UseMockChainRegistry(t *testing.T) models.ChainRegistryStore {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockStore := mocks.NewMockChainRegistryStore(mockCtrl)
 
-func (s *RouteTestSuite) UseMockChainRegistry() {
-	c := &MockChainRegistry{}
-	r := mux.NewRouter()
-	NewHandler(c).Append(r)
-	s.Router = r
-}
+	mockStore.EXPECT().RegisterNode(gomock.Any(), gomock.Any()).DoAndReturn(
+		func(_ context.Context, node *models.Node) error {
+			node.ID = "1"
+			node.Name = "nodeName1"
+			node.TenantID = "tenantID1"
+			node.URLs = []string{"testUrl1", "testUrl2"}
+			node.ListenerDepth = 1
+			node.ListenerBlockPosition = 1
+			node.ListenerFromBlock = 1
+			node.ListenerBackOffDuration = "1s"
+			return nil
+		}).AnyTimes()
+	mockStore.EXPECT().GetNodes(gomock.Any(), gomock.Any()).Return([]*models.Node{}, nil).AnyTimes()
+	mockStore.EXPECT().GetNodesByTenantID(gomock.Any(), gomock.Any(), gomock.Any()).Return([]*models.Node{}, nil).AnyTimes()
+	mockStore.EXPECT().GetNodeByTenantIDAndNodeName(gomock.Any(), gomock.Any(), gomock.Any()).Return(&models.Node{}, nil).AnyTimes()
+	mockStore.EXPECT().GetNodeByTenantIDAndNodeID(gomock.Any(), gomock.Any(), gomock.Any()).Return(&models.Node{}, nil).AnyTimes()
+	mockStore.EXPECT().GetNodeByID(gomock.Any(), gomock.Any()).Return(&models.Node{}, nil).AnyTimes()
+	mockStore.EXPECT().UpdateNodeByName(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	mockStore.EXPECT().UpdateNodeByID(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	mockStore.EXPECT().UpdateBlockPositionByName(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	mockStore.EXPECT().UpdateBlockPositionByID(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	mockStore.EXPECT().DeleteNodeByName(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	mockStore.EXPECT().DeleteNodeByID(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
 
-func (s *RouteTestSuite) UseErrorChainRegistry() {
-	c := &ErrorChainRegistry{}
-	r := mux.NewRouter()
-	NewHandler(c).Append(r)
-	s.Router = r
+	return mockStore
 }
-
-type MockChainRegistry struct{}
-
-func (e *MockChainRegistry) RegisterNode(_ context.Context, node *models.Node) error {
-	node.ID = "1"
-	node.Name = "nodeName1"
-	node.TenantID = "tenantID1"
-	node.URLs = []string{"testUrl1", "testUrl2"}
-	node.ListenerDepth = 1
-	node.ListenerBlockPosition = 1
-	node.ListenerFromBlock = 1
-	node.ListenerBackOffDuration = "1s"
-	return nil
-}
-
-func (e *MockChainRegistry) GetNodes(_ context.Context) ([]*models.Node, error) {
-	return []*models.Node{}, nil
-}
-func (e *MockChainRegistry) GetNodesByTenantID(_ context.Context, _ string) ([]*models.Node, error) {
-	return []*models.Node{}, nil
-}
-func (e *MockChainRegistry) GetNodeByName(_ context.Context, _, _ string) (*models.Node, error) {
-	return &models.Node{}, nil
-}
-func (e *MockChainRegistry) GetNodeByID(_ context.Context, _ string) (*models.Node, error) {
-	return &models.Node{}, nil
-}
-func (e *MockChainRegistry) UpdateNodeByName(_ context.Context, _ *models.Node) error { return nil }
-func (e *MockChainRegistry) UpdateNodeByID(_ context.Context, _ *models.Node) error   { return nil }
-func (e *MockChainRegistry) UpdateBlockPositionByName(_ context.Context, _, _ string, _ int64) error {
-	return nil
-}
-func (e *MockChainRegistry) UpdateBlockPositionByID(_ context.Context, _ string, _ int64) error {
-	return nil
-}
-func (e *MockChainRegistry) DeleteNodeByName(_ context.Context, _ *models.Node) error { return nil }
-func (e *MockChainRegistry) DeleteNodeByID(_ context.Context, _ string) error         { return nil }
-
-type ErrorChainRegistry struct{}
 
 var errTest = fmt.Errorf("test error")
+var errNotFound = errors.NotFoundError("not found error")
 
-func (e *ErrorChainRegistry) RegisterNode(_ context.Context, _ *models.Node) error {
-	return errTest
-}
-func (e *ErrorChainRegistry) GetNodes(_ context.Context) ([]*models.Node, error) {
-	return nil, errTest
-}
-func (e *ErrorChainRegistry) GetNodesByTenantID(_ context.Context, tenantID string) ([]*models.Node, error) {
-	if tenantID == notFoundErrorFilter {
-		return nil, errors.NotFoundError("not found error")
-	}
-	return nil, errTest
-}
-func (e *ErrorChainRegistry) GetNodeByName(_ context.Context, _, name string) (*models.Node, error) {
-	if name == notFoundErrorFilter {
-		return nil, errors.NotFoundError("not found error")
-	}
-	return nil, errTest
-}
-func (e *ErrorChainRegistry) GetNodeByID(_ context.Context, id string) (*models.Node, error) {
-	if id == "0" {
-		return nil, errors.NotFoundError("not found error")
-	}
-	return nil, errTest
-}
-func (e *ErrorChainRegistry) UpdateNodeByName(_ context.Context, node *models.Node) error {
-	if node.Name == notFoundErrorFilter {
-		return errors.NotFoundError("not found error")
-	}
-	return errTest
-}
-func (e *ErrorChainRegistry) UpdateBlockPositionByName(_ context.Context, name, _ string, _ int64) error {
-	if name == notFoundErrorFilter {
-		return errors.NotFoundError("not found error")
-	}
-	return errTest
-}
-func (e *ErrorChainRegistry) UpdateNodeByID(_ context.Context, node *models.Node) error {
-	if node.ID == "0" {
-		return errors.NotFoundError("not found error")
-	}
-	return errTest
-}
-func (e *ErrorChainRegistry) UpdateBlockPositionByID(_ context.Context, id string, _ int64) error {
-	if id == "0" {
-		return errors.NotFoundError("not found error")
-	}
-	return errTest
-}
-func (e *ErrorChainRegistry) DeleteNodeByName(_ context.Context, node *models.Node) error {
-	if node.Name == notFoundErrorFilter {
-		return errors.NotFoundError("not found error")
-	}
-	return errTest
-}
-func (e *ErrorChainRegistry) DeleteNodeByID(_ context.Context, id string) error {
-	if id == "0" {
-		return errors.NotFoundError("not found error")
-	}
-	return errTest
-}
+func UseErrorChainRegistry(t *testing.T) models.ChainRegistryStore {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockStore := mocks.NewMockChainRegistryStore(mockCtrl)
 
-func TestRouteSuite(t *testing.T) {
-	s := new(RouteTestSuite)
-	suite.Run(t, s)
+	mockStore.EXPECT().RegisterNode(gomock.Any(), gomock.Any()).Return(errTest).AnyTimes()
+	mockStore.EXPECT().GetNodes(gomock.Any(), gomock.Any()).Return(nil, errTest).AnyTimes()
+
+	mockStore.EXPECT().GetNodesByTenantID(gomock.Any(), gomock.Eq(notFoundErrorFilter), gomock.Any()).Return(nil, errNotFound).AnyTimes()
+	mockStore.EXPECT().GetNodesByTenantID(gomock.Any(), gomock.Not(gomock.Eq(notFoundErrorFilter)), gomock.Any()).Return(nil, errTest).AnyTimes()
+	mockStore.EXPECT().GetNodeByTenantIDAndNodeName(gomock.Any(), gomock.Any(), gomock.Eq(notFoundErrorFilter)).Return(nil, errNotFound).AnyTimes()
+	mockStore.EXPECT().GetNodeByTenantIDAndNodeName(gomock.Any(), gomock.Any(), gomock.Not(gomock.Eq(notFoundErrorFilter))).Return(nil, errTest).AnyTimes()
+	mockStore.EXPECT().GetNodeByTenantIDAndNodeID(gomock.Any(), gomock.Any(), gomock.Eq(notFoundErrorFilter)).Return(nil, errNotFound).AnyTimes()
+	mockStore.EXPECT().GetNodeByTenantIDAndNodeID(gomock.Any(), gomock.Any(), gomock.Not(gomock.Eq(notFoundErrorFilter))).Return(nil, errTest).AnyTimes()
+	mockStore.EXPECT().GetNodeByID(gomock.Any(), gomock.Eq("0")).Return(nil, errNotFound).AnyTimes()
+	mockStore.EXPECT().GetNodeByID(gomock.Any(), gomock.Not(gomock.Eq("0"))).Return(nil, errTest).AnyTimes()
+	mockStore.EXPECT().UpdateNodeByName(gomock.Any(), gomock.Any()).DoAndReturn(
+		func(_ context.Context, node *models.Node) error {
+			if node.Name == notFoundErrorFilter {
+				return errors.NotFoundError("not found error")
+			}
+			return errTest
+		}).AnyTimes()
+	mockStore.EXPECT().UpdateNodeByID(gomock.Any(), gomock.Any()).DoAndReturn(
+		func(_ context.Context, node *models.Node) error {
+			if node.ID == "0" {
+				return errors.NotFoundError("not found error")
+			}
+			return errTest
+		}).AnyTimes()
+	mockStore.EXPECT().UpdateBlockPositionByName(gomock.Any(), gomock.Eq(notFoundErrorFilter), gomock.Any(), gomock.Any()).Return(errNotFound).AnyTimes()
+	mockStore.EXPECT().UpdateBlockPositionByName(gomock.Any(), gomock.Not(gomock.Eq(notFoundErrorFilter)), gomock.Any(), gomock.Any()).Return(errTest).AnyTimes()
+	mockStore.EXPECT().UpdateBlockPositionByID(gomock.Any(), gomock.Eq("0"), gomock.Any()).Return(errNotFound).AnyTimes()
+	mockStore.EXPECT().UpdateBlockPositionByID(gomock.Any(), gomock.Not(gomock.Eq("0")), gomock.Any()).Return(errTest).AnyTimes()
+	mockStore.EXPECT().DeleteNodeByName(gomock.Any(), gomock.Any()).DoAndReturn(
+		func(_ context.Context, node *models.Node) error {
+			if node.Name == notFoundErrorFilter {
+				return errors.NotFoundError("not found error")
+			}
+			return errTest
+
+		}).AnyTimes()
+	mockStore.EXPECT().DeleteNodeByID(gomock.Any(), gomock.Eq("0")).Return(errNotFound).AnyTimes()
+	mockStore.EXPECT().DeleteNodeByID(gomock.Any(), gomock.Not(gomock.Eq("0"))).Return(errTest).AnyTimes()
+
+	return mockStore
 }
