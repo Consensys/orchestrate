@@ -41,3 +41,8 @@ func TestMetricsPort(t *testing.T) {
 	Port(flgs)
 	assert.Equal(t, uint64(8081), viper.GetUint64("rest.port"), "Default Port should be correct")
 }
+
+func TestFlags(t *testing.T) {
+	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
+	Flags(f)
+}

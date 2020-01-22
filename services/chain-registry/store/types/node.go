@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"math"
 	"net/url"
 	"strings"
 	"time"
@@ -57,7 +58,8 @@ func BuildConfiguration(nodes []*Node) (*dynamic.Configuration, error) {
 		nodeID := strings.Join([]string{node.TenantID, node.Name}, "-")
 
 		config.HTTP.Routers[nodeID] = &dynamic.Router{
-			EntryPoints: []string{"http"},
+			EntryPoints: []string{"orchestrate"},
+			Priority:    math.MaxInt32,
 			Service:     nodeID,
 			// We set path Rule with tenantID placeholder so it is parsed by gorilla mux
 			// and can be used by middlewares (in particular the authentication middleware)

@@ -21,10 +21,8 @@ func newRunCommand() *cobra.Command {
 	}
 
 	// Hostname & port for servers
-	grpcserver.Hostname(runCmd.Flags())
-	grpcserver.Port(runCmd.Flags())
-	rest.Hostname(runCmd.Flags())
-	rest.Port(runCmd.Flags())
+	grpcserver.Flags(runCmd.Flags())
+	rest.Flags(runCmd.Flags())
 
 	// ContractRegistry flag
 	contractregistry.Type(runCmd.Flags())

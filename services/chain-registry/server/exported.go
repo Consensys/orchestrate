@@ -11,7 +11,6 @@ import (
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/containous/traefik/v2/pkg/provider/acme"
 	"github.com/containous/traefik/v2/pkg/provider/aggregator"
-	"github.com/containous/traefik/v2/pkg/server/router"
 	traefiktls "github.com/containous/traefik/v2/pkg/tls"
 	"github.com/spf13/viper"
 	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt"
@@ -19,6 +18,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api"
 	authmiddleware "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/middlewares/auth"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/providers"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/server/router"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 )
 
@@ -103,10 +103,10 @@ func Init(ctx context.Context) {
 			if err != nil {
 				log.WithoutContext().WithError(err).Fatalf("error while building entryPoint %s", entryPointName)
 			}
-			serverEntryPointsTCP[entryPointName].RouteAppenderFactory = router.NewRouteAppenderFactory(*staticConfig, entryPointName, nil)
+			serverEntryPointsTCP[entryPointName].RouteAppenderFactory = router.NewRouteAppenderFactory(staticConfig, entryPointName, nil)
 		}
 
-		// Initialize custom orchestrate midddleware
+		// Initialize custom orchestrate middleware
 		middlewares := initOrchestrateMiddlewares(ctx)
 
 		svr = NewServer(staticConfig, providers.ProviderAggregator(), serverEntryPointsTCP, tlsManager, api.NewBuilder(staticConfig), middlewares)
@@ -119,7 +119,7 @@ func Init(ctx context.Context) {
 	})
 }
 
-// SetGlobalStaticConfig set traefil static configuration for global server
+// SetGlobalStaticConfig set Traefik static configuration for global server
 func SetGlobalStaticConfig(config *static.Configuration) {
 	staticConfig = config
 }

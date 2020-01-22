@@ -10,46 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestProxyAddress(t *testing.T) {
-	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	ProxyAddress(f)
-	expected := ":8080"
-	assert.Equal(t, expected, viper.GetString(ProxyAddressViperKey), "Default")
-
-	_ = os.Setenv(proxyAddressEnv, "proxy-address-env")
-	expected = "proxy-address-env"
-	assert.Equal(t, expected, viper.GetString(ProxyAddressViperKey), "From Environment Variable")
-	_ = os.Unsetenv(proxyAddressEnv)
-
-	args := []string{
-		"--chain-proxy-addr=proxy-address-flag",
-	}
-	err := f.Parse(args)
-	assert.Nil(t, err, "Parse Chain Proxy flags should not error")
-	expected = "proxy-address-flag"
-	assert.Equal(t, expected, viper.GetString(ProxyAddressViperKey), "From Flag")
-}
-
-func TestRegistryAddress(t *testing.T) {
-	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	RegistryAddress(f)
-	expected := ":8081"
-	assert.Equal(t, expected, viper.GetString(AddressViperKey), "Default")
-
-	_ = os.Setenv(addressEnv, "chain-registry-addr-env")
-	expected = "chain-registry-addr-env"
-	assert.Equal(t, expected, viper.GetString(AddressViperKey), "From Environment Variable")
-	_ = os.Unsetenv(addressEnv)
-
-	args := []string{
-		"--chain-registry-addr=chain-registry-addr-flag",
-	}
-	err := f.Parse(args)
-	assert.Nil(t, err, "Parse Chain Registry flags should not error")
-	expected = "chain-registry-addr-flag"
-	assert.Equal(t, expected, viper.GetString(AddressViperKey), "From Flag")
-}
-
 func TestProvidersThrottleDuration(t *testing.T) {
 	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	ProvidersThrottleDuration(f)
@@ -78,7 +38,4 @@ func TestNewConfig(t *testing.T) {
 func TestFlags(t *testing.T) {
 	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	Flags(f)
-	TestProxyAddress(t)
-	TestRegistryAddress(t)
-	TestProvidersThrottleDuration(t)
 }

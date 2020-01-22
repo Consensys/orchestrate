@@ -36,8 +36,7 @@ func NewCommand() *cobra.Command {
 	logger.LogFormat(rootCmd.PersistentFlags())
 
 	// Register HTTP server flags
-	metrics.Hostname(rootCmd.PersistentFlags())
-	metrics.Port(rootCmd.PersistentFlags())
+	metrics.Flags(rootCmd.PersistentFlags())
 
 	// Register OpenTracing flags
 	jaeger.InitFlags(rootCmd.PersistentFlags())
@@ -49,9 +48,9 @@ func NewCommand() *cobra.Command {
 	rootCmd.AddCommand(txsender.NewRootCommand())
 	rootCmd.AddCommand(txlistener.NewRootCommand())
 	rootCmd.AddCommand(txdecoder.NewRootCommand())
+	rootCmd.AddCommand(chainregistry.NewRootCommand())
 	rootCmd.AddCommand(contractregistry.NewRootCommand())
 	rootCmd.AddCommand(envelopestore.NewRootCommand())
-	rootCmd.AddCommand(chainregistry.NewRootCommand())
 
 	// Register Multi-Tenancy flags
 	multitenancy.Enabled(rootCmd.PersistentFlags())

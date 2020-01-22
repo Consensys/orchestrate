@@ -48,3 +48,8 @@ Environment variable: %q`, portEnv)
 func URL() string {
 	return fmt.Sprintf("%s:%d", viper.GetString(HostnameViperKey), viper.GetUint(PortViperKey))
 }
+
+func Flags(f *pflag.FlagSet) {
+	Hostname(f)
+	Port(f)
+}

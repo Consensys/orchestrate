@@ -37,7 +37,7 @@ Environment variable: %q`, []string{postgresOpt, memoryOpt}, typeEnv)
 var (
 	initFlag     = "chain-registry-init"
 	InitViperKey = "chain-registry.init"
-	initDefault  = []string{}
+	initDefault  []string
 	initEnv      = "CHAIN_REGISTRY_INIT"
 )
 

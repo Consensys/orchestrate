@@ -33,21 +33,50 @@ x-container-common: &container-common
     - ./build/bin/orchestrate:/bin/main:ro
     - ./public:/go/public:ro
 
-x-contract-registry-common: &contract-registry-common
-  MULTI_TENANCY_ENABLED: 'false'
-  CONTRACT_REGISTRY_TYPE: ${CONTRACT_REGISTRY_TYPE-}
-  DB_HOST: postgres-contract-registry
-
-x-envelope-store-common: &envelope-store-common
-  MULTI_TENANCY_ENABLED: 'false'
-  ENVELOPE_STORE_TYPE: ${ENVELOPE_STORE_TYPE-}
-  DB_HOST: postgres-envelope-store
-
 x-chain-registry-common: &chain-registry-common
   CHAIN_REGISTRY_TYPE: ${CHAIN_REGISTRY_TYPE-}
   DB_HOST: postgres-chain-registry
 
+x-contract-registry-common: &contract-registry-common
+  CONTRACT_REGISTRY_TYPE: ${CONTRACT_REGISTRY_TYPE-}
+  DB_HOST: postgres-contract-registry
+
+x-envelope-store-common: &envelope-store-common
+  ENVELOPE_STORE_TYPE: ${ENVELOPE_STORE_TYPE-}
+  DB_HOST: postgres-envelope-store
+
 services:
+  chain-registry-migration-init:
+    <<: *container-common
+    environment:
+      <<: *default-variables
+      <<: *chain-registry-common
+    restart: "no"
+    command: chain-registry migrate init
+
+  chain-registry-migration:
+    <<: *container-common
+    environment:
+      <<: *default-variables
+      <<: *chain-registry-common
+    restart: "no"
+    depends_on:
+      - chain-registry-migration-init
+    command: chain-registry migrate
+
+  chain-registry:
+    <<: *container-common
+    ports:
+      - 8010:8080
+      - 8011:8081
+      - 8012:8082
+    environment:
+      <<: *default-variables
+      <<: *chain-registry-common
+    depends_on:
+      - chain-registry-migration
+    command: chain-registry run
+
   contract-registry-migration-init:
     <<: *container-common
     environment:
@@ -71,6 +100,7 @@ services:
     ports:
       - 8020:8080
       - 8021:8081
+      - 8022:8082
     environment:
       <<: *default-variables
       <<: *contract-registry-common
@@ -101,42 +131,13 @@ services:
     ports:
       - 8030:8080
       - 8031:8081
+      - 8032:8082
     environment:
       <<: *default-variables
       <<: *envelope-store-common
     depends_on:
       - envelope-store-migration
     command: envelope-store run
-
-  chain-registry-migration-init:
-    <<: *container-common
-    environment:
-      <<: *default-variables
-      <<: *chain-registry-common
-    restart: "no"
-    command: chain-registry migrate init
-
-  chain-registry-migration:
-    <<: *container-common
-    environment:
-      <<: *default-variables
-      <<: *chain-registry-common
-    restart: "no"
-    depends_on:
-      - chain-registry-migration-init
-    command: chain-registry migrate
-
-  chain-registry:
-    <<: *container-common
-    ports:
-      - 8010:8080
-      - 8011:8081
-    environment:
-      <<: *default-variables
-      <<: *chain-registry-common
-    depends_on:
-      - chain-registry-migration
-    command: chain-registry run
 
   tx-crafter:
     <<: *container-common

@@ -14,6 +14,7 @@ import (
 	"github.com/containous/traefik/v2/pkg/metrics"
 	"github.com/containous/traefik/v2/pkg/types"
 	"github.com/gorilla/mux"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/healthcheck"
 )
 
 // NewRouteAppenderAggregator Creates a new RouteAppenderAggregator
@@ -21,8 +22,8 @@ func NewRouteAppenderAggregator(ctx context.Context, conf *static.Configuration,
 	entryPointName string, runtimeConfiguration *runtime.Configuration) *RouteAppenderAggregator {
 	aggregator := &RouteAppenderAggregator{}
 
-	if conf.Ping != nil && conf.Ping.EntryPoint == entryPointName {
-		aggregator.AddAppender(conf.Ping)
+	if entryPointName == "metrics" {
+		aggregator.AddAppender(&healthcheck.Handler{})
 	}
 
 	if conf.Metrics != nil && conf.Metrics.Prometheus != nil && conf.Metrics.Prometheus.EntryPoint == entryPointName {

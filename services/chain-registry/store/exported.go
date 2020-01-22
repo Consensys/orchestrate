@@ -6,13 +6,12 @@ import (
 	"strings"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/memory"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/pg"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 )
 
 const (
@@ -75,10 +74,14 @@ func Init(ctx context.Context) {
 
 			err = store.RegisterNode(ctx, node)
 			if err != nil {
-				log.Warnf("%s: init - could not register node - got %v", component, err)
+				updateErr := store.UpdateNodeByName(ctx, node)
+				if updateErr != nil {
+					log.Fatalf("%s: init - could not register new node nor update existing node - got %v & %v", component, err, updateErr)
+				}
+				log.Infof("%s: init - node %s updated", component, node.Name)
+			} else {
+				log.Infof("%s: init - node %s registered with id %s", component, node.Name, node.ID)
 			}
-
-			log.Infof("%s: init - node %s registered with id %s", component, node.Name, node.ID)
 		}
 	})
 }

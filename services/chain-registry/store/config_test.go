@@ -35,21 +35,12 @@ func TestInitRegistry(t *testing.T) {
 	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	InitRegistry(f)
 
-	expected := []string{}
+	var expected []string
 	assert.Equal(t, expected, viper.GetStringSlice(InitViperKey), "Default")
 
 	_ = os.Setenv(initEnv, "test1 test2")
 	assert.Equal(t, []string{"test1", "test2"}, viper.GetStringSlice(InitViperKey), "From Environment Variable")
 	_ = os.Unsetenv(initEnv)
-
-	args := []string{
-		"--chain-registry-init=test2",
-		"--chain-registry-init=test3",
-	}
-	err := f.Parse(args)
-	assert.NoError(t, err, "No error expected")
-
-	assert.Equal(t, []string{"test2", "test3"}, viper.GetStringSlice(InitViperKey), "From flag")
 }
 
 func TestFlags(t *testing.T) {
