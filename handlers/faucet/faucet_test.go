@@ -47,7 +47,7 @@ type FaucetTestSuite struct {
 }
 
 func (s *FaucetTestSuite) SetupSuite() {
-	s.Handler = Faucet(true, &MockFaucet{t: s.T()})
+	s.Handler = Faucet(&MockFaucet{t: s.T()})
 }
 
 func (s *FaucetTestSuite) TestFaucet() {

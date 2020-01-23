@@ -179,6 +179,11 @@ func makeSignerContext(i int) *engine.TxContext {
 		txctx.Set("errors", 0)
 		txctx.Set("raw", signedPrivateTx)
 		txctx.Set("hash", "0x0000000000000000000000000000000000000000000000000000000000abcdef")
+	case 8:
+		txctx.Envelope.Tx = &ethereum.Transaction{}
+		txctx.Set("errors", 1)
+		txctx.Set("raw", "0x")
+		txctx.Set("hash", "0x")
 	}
 	return txctx
 }

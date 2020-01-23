@@ -13,6 +13,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 )
 
+const component = "handler.signer"
+
 var (
 	handler  engine.HandlerFunc
 	initOnce = &sync.Once{}

@@ -2,6 +2,7 @@ package signer
 
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
 // TxSigner creates a signer handler
@@ -9,6 +10,13 @@ import (
 // It is a fork handler that allow signing for either eea, tessera or public ethereum
 func TxSigner(eeaSigner, publicEthereumSigner, tesseraSigner engine.HandlerFunc) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
+		if txctx.Envelope.GetChain().ID() == nil {
+			err := errors.DataError("cannot sign transaction without chainID").SetComponent(component)
+			txctx.Logger.WithError(err).Errorf("failed to sign transaction")
+			_ = txctx.AbortWithError(err)
+			return
+		}
+
 		switch {
 		default:
 			// Default sign for public ethereum

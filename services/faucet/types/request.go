@@ -12,7 +12,6 @@ type Request struct {
 	NodeURL     string
 	NodeName    string
 	NodeID      string
-	AuthToken   string
 	Creditor    ethcommon.Address
 	Beneficiary ethcommon.Address
 	Amount      *big.Int

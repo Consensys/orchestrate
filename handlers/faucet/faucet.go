@@ -4,14 +4,13 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet"
 	faucettypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
 )
 
 // Faucet creates a Faucet handler
-func Faucet(multitenancy bool, fct faucet.Faucet) engine.HandlerFunc {
+func Faucet(fct faucet.Faucet) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		// Beneficiary
 		beneficiary := txctx.Envelope.Sender()
@@ -29,16 +28,6 @@ func Faucet(multitenancy bool, fct faucet.Faucet) engine.HandlerFunc {
 			NodeName:    txctx.Envelope.GetChain().GetNodeName(),
 			Beneficiary: beneficiary,
 			Amount:      txctx.Envelope.GetTx().GetTxData().GetValueBig(),
-		}
-
-		if multitenancy {
-			auth := authutils.AuthorizationFromContext(txctx.Context())
-			if auth == "" {
-				er := txctx.AbortWithError(errors.UnauthorizedError("missing Access Token")).ExtendComponent(component)
-				txctx.Logger.WithError(er).Errorf("Token Not Found: could extract the Access Token from the envelop")
-				return
-			}
-			req.AuthToken = auth
 		}
 
 		// Credit

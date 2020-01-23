@@ -4,6 +4,8 @@ import (
 	"context"
 	"math/big"
 
+	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/utils"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
 
 	"github.com/Shopify/sarama"
@@ -32,7 +34,7 @@ func NewFaucet(p sarama.SyncProducer) *Faucet {
 	}
 }
 
-func (f *Faucet) prepareMsg(r *types.Request, msg *sarama.ProducerMessage) error {
+func (f *Faucet) prepareMsg(ctx context.Context, r *types.Request, msg *sarama.ProducerMessage) error {
 	// Create Trace for Crediting message
 	e := &envelope.Envelope{
 		Chain: (&chain.Chain{}).SetID(r.ChainID).SetNodeID(r.NodeID).SetNodeName(r.NodeName),
@@ -45,8 +47,8 @@ func (f *Faucet) prepareMsg(r *types.Request, msg *sarama.ProducerMessage) error
 		},
 	}
 
-	if r.AuthToken != "" {
-		e.SetMetadataValue(multitenancy.AuthorizationMetadata, r.AuthToken)
+	if authToken := authutils.AuthorizationFromContext(ctx); authToken != "" {
+		e.SetMetadataValue(multitenancy.AuthorizationMetadata, authToken)
 	}
 
 	// Unmarshal envelope
@@ -66,7 +68,7 @@ func (f *Faucet) prepareMsg(r *types.Request, msg *sarama.ProducerMessage) error
 func (f *Faucet) Credit(ctx context.Context, r *types.Request) (*big.Int, error) {
 	// Prepare Message
 	msg := &sarama.ProducerMessage{}
-	err := f.prepareMsg(r, msg)
+	err := f.prepareMsg(ctx, r, msg)
 	if err != nil {
 		return big.NewInt(0), errors.FromError(err).ExtendComponent(component)
 	}

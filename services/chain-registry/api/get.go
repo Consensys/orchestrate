@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"html"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -12,7 +13,8 @@ func (h Handler) getNodes(rw http.ResponseWriter, request *http.Request) {
 
 	filters := make(map[string]string)
 	for k := range request.URL.Query() {
-		filters[k] = request.URL.Query().Get(k)
+		key := html.EscapeString(k)
+		filters[key] = html.EscapeString(request.URL.Query().Get(k))
 	}
 
 	nodes, err := h.store.GetNodes(request.Context(), filters)
@@ -43,7 +45,8 @@ func (h Handler) getNodesByTenantID(rw http.ResponseWriter, request *http.Reques
 
 	filters := make(map[string]string)
 	for k := range request.URL.Query() {
-		filters[k] = request.URL.Query().Get(k)
+		key := html.EscapeString(k)
+		filters[key] = html.EscapeString(request.URL.Query().Get(k))
 	}
 
 	nodes, err := h.store.GetNodesByTenantID(request.Context(), mux.Vars(request)["tenantID"], filters)
