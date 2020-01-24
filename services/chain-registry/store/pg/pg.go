@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	uuid "github.com/satori/go.uuid"
+
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -36,6 +38,10 @@ func NewChainRegistryPGOptions(opts *pg.Options) *ChainRegistry {
 }
 
 func (r *ChainRegistry) RegisterNode(ctx context.Context, node *types.Node) error {
+
+	if node.ID == "" {
+		node.ID = uuid.NewV4().String()
+	}
 
 	_, err := r.db.ModelContext(ctx, node).
 		Returning("id").
