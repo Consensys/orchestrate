@@ -62,6 +62,14 @@ func writeError(rw http.ResponseWriter, msg string, code int) {
 	http.Error(rw, string(data), code)
 }
 
+type NodeRegisterRequest struct {
+	Name                    string   `json:"name,omitempty"`
+	URLs                    []string `json:"urls,omitempty" sql:"urls,array"`
+	ListenerDepth           uint64   `json:"listenerDepth,omitempty"`
+	ListenerFromBlock       int64    `json:"listenerFromBlock,string,omitempty"`
+	ListenerBackOffDuration string   `json:"listenerBackOffDuration,omitempty"`
+}
+
 type NodeRequest struct {
 	Name                    string   `json:"name,omitempty"`
 	URLs                    []string `json:"urls,omitempty" sql:"urls,array"`
@@ -104,4 +112,29 @@ func UnmarshalNodeRequestBody(body io.ReadCloser) (*NodeRequest, error) {
 	}
 
 	return nodeRequest, nil
+}
+
+func UnmarshalNodeRegisterRequestBody(body io.ReadCloser) (*NodeRegisterRequest, error) {
+	nodeRegisterRequest := &NodeRegisterRequest{}
+
+	err := UnmarshalBody(body, nodeRegisterRequest)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	// Check uniqueness of each urls
+	keys := make(map[string]bool)
+	for _, url := range nodeRegisterRequest.URLs {
+		_, err := neturl.ParseRequestURI(url)
+		if err != nil {
+			return nil, errors.FromError(err).ExtendComponent(component)
+		}
+
+		if _, value := keys[url]; value {
+			return nil, errors.FromError(fmt.Errorf("cannot have twice the same url - got at least two times %s", url)).ExtendComponent(component)
+		}
+		keys[url] = true
+	}
+
+	return nodeRegisterRequest, nil
 }

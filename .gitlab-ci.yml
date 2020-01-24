@@ -64,7 +64,7 @@ test:
   <<: *go-setup
   coverage: /^total:.*\s(\d+.\d+)%/
   services:
-    - postgres:10.7-alpine
+    - postgres:11.6-alpine
   variables:
     DB_HOST: "postgres"
   script:

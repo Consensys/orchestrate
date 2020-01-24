@@ -18,7 +18,6 @@ var postNodeTests = []HTTPRouteTests{
 				Name:                    "testName",
 				URLs:                    []string{"http://test.com"},
 				ListenerDepth:           1,
-				ListenerBlockPosition:   1,
 				ListenerFromBlock:       1,
 				ListenerBackOffDuration: "1s",
 			})
@@ -80,7 +79,6 @@ var postNodeTests = []HTTPRouteTests{
 				Name:                    "testName",
 				URLs:                    []string{"http://test.com"},
 				ListenerDepth:           1,
-				ListenerBlockPosition:   1,
 				ListenerFromBlock:       1,
 				ListenerBackOffDuration: "1s",
 			})

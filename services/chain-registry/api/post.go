@@ -15,21 +15,21 @@ type postNodeResponse struct {
 func (h Handler) postNode(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
-	nodeRequest, err := UnmarshalNodeRequestBody(request.Body)
+	nodeRegisterRequest, err := UnmarshalNodeRegisterRequestBody(request.Body)
 	if err != nil {
 		writeError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	node := &models.Node{
-		Name: nodeRequest.Name,
+		Name: nodeRegisterRequest.Name,
 		//TODO: replace tenantID by the one extracted in the token when ready
 		TenantID:                mux.Vars(request)["tenantID"],
-		URLs:                    nodeRequest.URLs,
-		ListenerDepth:           nodeRequest.ListenerDepth,
-		ListenerBlockPosition:   nodeRequest.ListenerBlockPosition,
-		ListenerFromBlock:       nodeRequest.ListenerFromBlock,
-		ListenerBackOffDuration: nodeRequest.ListenerBackOffDuration,
+		URLs:                    nodeRegisterRequest.URLs,
+		ListenerDepth:           nodeRegisterRequest.ListenerDepth,
+		ListenerBlockPosition:   nodeRegisterRequest.ListenerFromBlock,
+		ListenerFromBlock:       nodeRegisterRequest.ListenerFromBlock,
+		ListenerBackOffDuration: nodeRegisterRequest.ListenerBackOffDuration,
 	}
 
 	err = h.store.RegisterNode(request.Context(), node)
