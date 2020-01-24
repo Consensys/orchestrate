@@ -15,6 +15,7 @@ import (
 	txnonce "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/tx-nonce"
 	txsender "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/tx-sender"
 	txsigner "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/tx-signer"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/logger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/jaeger"
@@ -48,9 +49,10 @@ func NewCommand() *cobra.Command {
 	rootCmd.AddCommand(txsender.NewRootCommand())
 	rootCmd.AddCommand(txlistener.NewRootCommand())
 	rootCmd.AddCommand(txdecoder.NewRootCommand())
-	rootCmd.AddCommand(chainregistry.NewRootCommand())
 	rootCmd.AddCommand(contractregistry.NewRootCommand())
 	rootCmd.AddCommand(envelopestore.NewRootCommand())
+	rootCmd.AddCommand(chainregistry.NewRootCommand())
+	rootCmd.AddCommand(utils.NewRootCommand())
 
 	// Register Multi-Tenancy flags
 	multitenancy.Enabled(rootCmd.PersistentFlags())

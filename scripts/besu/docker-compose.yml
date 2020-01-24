@@ -1,0 +1,110 @@
+---
+version: '3.4'
+
+x-orion-common: &orion-common
+  image: pegasyseng/orion:develop
+  entrypoint: ["bash", "orion.sh"]
+  networks:
+    - orchestrate
+  volumes:
+    - ./orion.sh:/opt/orion/orion.sh
+    - ./config:/config
+
+x-orion-env-common: &orion-env-common
+  LOG4J_CONFIGURATION_FILE: /config/log-config.xml
+
+x-besu-common: &besu-common
+  image: besu-pplus
+  entrypoint: ["bash", "besu.sh"]
+  networks:
+    - orchestrate
+  volumes:
+    - public-keys:/opt/besu/public-keys/
+    - ./besu.sh:/opt/besu/besu.sh
+    - ./config:/config
+
+x-besu-env-common: &besu-env-common
+  RPC_HTTP_API: WEB3,ETH,NET,EEA,PRIV,ADMIN,PERM,ibft
+  RPC_WS_API: WEB3,ETH,NET,EEA,PRIV,ADMIN,PERM,ibft
+  METRICS: 1
+  LOG4J_CONFIGURATION_FILE: /config/log-config.xml
+
+services:
+  validator1-bootnode:
+    <<: *besu-common
+    build: 
+      context: .
+      args:
+        BINTRAY_USER_NAME: ${BINTRAY_USER_NAME-}
+        BINTRAY_PASSWORD:  ${BINTRAY_PASSWORD-}
+        PPLUS_VERSION: 1.0.1-SNAPSHOT
+    environment:
+      <<: *besu-env-common
+      NODE_NAME: validator1-bootnode
+      ORION_URL: http://orion1:8888
+      ORION_NAME: orion1
+      BOOTNODE: 1
+    ports:
+      - 8540:8545
+    depends_on:
+      - orion1
+
+  orion1:
+    <<: *orion-common
+    environment:
+      <<: *orion-env-common
+      ORION_NAME: orion1
+
+  validator2:
+    <<: *besu-common
+    environment:
+      <<: *besu-env-common
+      NODE_NAME: validator2
+      ORION_URL: http://orion2:8888
+      ORION_NAME: orion2
+    ports:
+      - 8544:8545
+    depends_on:
+      - orion2
+      - validator1-bootnode
+
+  orion2:
+    <<: *orion-common
+    environment:
+      <<: *orion-env-common
+      ORION_NAME: orion2
+    depends_on:
+      - orion1
+
+  validator3:
+    <<: *besu-common
+    environment:
+      <<: *besu-env-common
+      NODE_NAME: validator3
+      ORION_URL: http://orion3:8888
+      ORION_NAME: orion3
+    ports:
+      - 8545:8545
+    depends_on:
+      - validator1-bootnode
+      - orion3
+  
+  orion3:
+    <<: *orion-common
+    environment:
+      <<: *orion-env-common
+      ORION_NAME: orion3
+    depends_on:
+      - orion1
+
+networks:
+  orchestrate:
+    external:
+      name: deps_orchestrate
+
+volumes:
+  public-keys:
+  prometheus:
+  grafana:
+  vault-token:
+    driver: local

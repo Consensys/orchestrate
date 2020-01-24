@@ -93,8 +93,11 @@ func BuildConfiguration(chains []*Chain) (*dynamic.Configuration, error) {
 			Service:     chainKey,
 			// We set path Rule with tenantID placeholder so it is parsed by gorilla mux
 			// and can be used by middlewares (in particular the authentication middleware)
-			Rule:        fmt.Sprintf("Path(`/%s`) || Path(`/{tenantID:%s}/%s`)", chain.UUID, chain.TenantID, chain.Name),
-			Middlewares: []string{"orchestrate-auth"},
+			Rule: fmt.Sprintf("Path(`/%s`) || Path(`/{tenantID:%s}/%s`)", chain.UUID, chain.TenantID, chain.Name),
+			Middlewares: []string{
+				"orchestrate-auth",
+				"strip-path@internal",
+			},
 		}
 
 		servers := make([]dynamic.Server, 0)

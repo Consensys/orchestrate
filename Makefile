@@ -92,11 +92,11 @@ gen-help-docker: docker-build
 
 # Protobuf
 protobuf: ## Generate protobuf stubs
-	@docker-compose -f scripts/docker-compose.yml up --build
+	@docker-compose -f scripts/protobuf/docker-compose.yml up --build
 
 # Create kafka topics
 topics:
-	@bash scripts/kafka/initTopics.sh
+	@bash scripts/deps/kafka/initTopics.sh
 
 gobuild:
 	@GOOS=linux GOARCH=amd64 go build -i -o ./build/bin/orchestrate
@@ -125,18 +125,36 @@ deps:
 down-deps:
 	@docker-compose -f scripts/deps/docker-compose.yml down --volumes --timeout 0
 
+geth:
+	@docker-compose -f scripts/geth/docker-compose.yml up -d
+
+stop-geth:
+	@docker-compose -f scripts/geth/docker-compose.yml stop
+
+down-geth:
+	@docker-compose -f scripts/geth/docker-compose.yml down  --volumes --timeout 0
+
 quorum:
-	@docker-compose -f scripts/deps/docker-compose.quorum.yml up -d
+	@docker-compose -f scripts/quorum/docker-compose.yml up -d
 
 stop-quorum:
-	@docker-compose -f scripts/deps/docker-compose.quorum.yml stop
+	@docker-compose -f scripts/quorum/docker-compose.yml stop
 
 down-quorum:
-	@docker-compose -f scripts/deps/docker-compose.quorum.yml down --volumes --timeout 0
+	@docker-compose -f scripts/quorum/docker-compose.yml down --volumes --timeout 0
 
-up: deps quorum bootstrap orchestrate
+besu:
+	@docker-compose -f scripts/besu/docker-compose.yml up -d
 
-down: down-orchestrate down-quorum down-deps
+stop-besu:
+	@docker-compose -f scripts/besu/docker-compose.yml stop
+
+down-besu:
+	@docker-compose -f scripts/besu/docker-compose.yml down --volumes --timeout 0
+
+up: deps geth besu quorum bootstrap orchestrate
+
+down: down-orchestrate down-quorum down-geth down-besu down-deps 
 
 hashicorp-accounts:
 	@bash scripts/deps/config/hashicorp/vault.sh kv list secret/default

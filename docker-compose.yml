@@ -5,6 +5,8 @@ x-default-variables: &default-variables
   CONTRACT_REGISTRY_URL: ${CONTRACT_REGISTRY_URL-contract-registry:8080}
   ENVELOPE_STORE_URL: ${ENVELOPE_STORE_URL-envelope-store:8080}
   KAFKA_URL: ${KAFKA_URL-kafka:29092}
+  CHAIN_REGISTRY_INIT: ${CHAIN_REGISTRY_INIT-}
+  CHAIN_REGISTRY_URL: ${CHAIN_REGISTRY_URL-http://chain-registry:8081}
   ETH_CLIENT_RETRY_MAX_ELAPSED_TIME: 5s
   LOG_LEVEL: ${LOG_LEVEL-debug}
   LOG_FORMAT: ${LOG_FORMAT-}
@@ -17,6 +19,7 @@ x-default-variables: &default-variables
   MULTI_TENANCY_ENABLED: ${MULTI_TENANCY_ENABLED-false}
   AUTH_JWT_CLAIMS_NAMESPACE: ${AUTH_JWT_CLAIMS_NAMESPACE-http://tenant.info/}
   AUTH_JWT_CERTIFICATE: ${AUTH_JWT_CERTIFICATE-}
+  AUTH_JWT_PRIVATE_KEY: ${AUTH_JWT_PRIVATE_KEY-}  
   AUTH_API_KEY: ${AUTH_API_KEY-}
 
 x-container-common: &container-common
@@ -25,7 +28,7 @@ x-container-common: &container-common
   entrypoint: /bin/main
   networks:
     - orchestrate
-    - quorum-tessera
+    - quorum
   volumes:
     - ./build/bin/orchestrate:/bin/main:ro
     - ./public:/go/public:ro
@@ -64,7 +67,6 @@ services:
   chain-registry:
     <<: *container-common
     ports:
-      - 8010:8080
       - 8011:8081
       - 8012:8082
     environment:
@@ -211,17 +213,22 @@ services:
       - ./build/report:/report/output
       - ./tests/features:/features
 
+  generate-jwt:
+    <<: *container-common
+    environment:
+      <<: *default-variables
+    command: utils generate-jwt
+    restart: "no"
 
 volumes:
   vault-token:
     external:
       name: deps_vault-token
 
-
 networks:
   orchestrate:
     external:
       name: deps_orchestrate
-  quorum-tessera:
+  quorum:
     external:
-      name: deps_quorum-tessera
+      name: quorum_quorum-tessera

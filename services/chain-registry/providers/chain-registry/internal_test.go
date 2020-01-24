@@ -54,7 +54,13 @@ func (s *ProviderTestSuite) TestCreateConfiguration() {
 					Middlewares: []string{"orchestrate-auth"},
 				},
 			},
-			Middlewares: make(map[string]*dynamic.Middleware),
+			Middlewares: map[string]*dynamic.Middleware{
+				"strip-path": &dynamic.Middleware{
+					StripPrefixRegex: &dynamic.StripPrefixRegex{
+						Regex: []string{"/.+"},
+					},
+				},
+			},
 			Services: map[string]*dynamic.Service{
 				"api": {},
 			},

@@ -31,3 +31,13 @@ Environment variable: %q`, chainRegistryURLEnv)
 	viper.SetDefault(ChainRegistryURLViperKey, chainRegistryURLDefault)
 	_ = viper.BindPFlag(ChainRegistryURLViperKey, f.Lookup(chainRegistryURLFlag))
 }
+
+type Config struct {
+	URL string
+}
+
+func NewConfig() *Config {
+	return &Config{
+		URL: viper.GetString(ChainRegistryURLViperKey),
+	}
+}

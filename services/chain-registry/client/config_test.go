@@ -32,4 +32,5 @@ func TestChainRegistryTarget(t *testing.T) {
 func TestFlags(t *testing.T) {
 	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	Flags(f)
+	assert.Equal(t, chainRegistryURLDefault, viper.GetString(ChainRegistryURLViperKey), "Default")
 }

@@ -66,4 +66,10 @@ func (i *Provider) apiConfiguration(cfg *dynamic.Configuration) {
 		Middlewares: []string{"orchestrate-auth"},
 	}
 	cfg.HTTP.Services["api"] = &dynamic.Service{}
+
+	cfg.HTTP.Middlewares["strip-path"] = &dynamic.Middleware{
+		StripPrefixRegex: &dynamic.StripPrefixRegex{
+			Regex: []string{"/.+"},
+		},
+	}
 }

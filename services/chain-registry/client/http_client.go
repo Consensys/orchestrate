@@ -15,10 +15,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
 
-type Config struct {
-	URL string
-}
-
 type HTTPClient struct {
 	client *http.Client
 
