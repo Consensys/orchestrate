@@ -35,7 +35,7 @@ var signedPrivateTx = "0x02"
 var signedTesseraTx = "0x03"
 
 func (s *MockTxSigner) SignTx(ctx context.Context, netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction) (raw []byte, hash *ethcommon.Hash, err error) {
-	if netChain.ID().String() == "0" {
+	if netChain.GetBigChainID().String() == "0" {
 		return []byte(``), nil, fmt.Errorf("could not sign public ethereum transaction")
 	}
 	h := ethcommon.HexToHash("0xabcdef")
@@ -43,7 +43,7 @@ func (s *MockTxSigner) SignTx(ctx context.Context, netChain *chain.Chain, a ethc
 }
 
 func (s *MockTxSigner) SignPrivateEEATx(ctx context.Context, netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction, privateArgs *types.PrivateArgs) (raw []byte, hash *ethcommon.Hash, err error) {
-	if netChain.ID().String() == "0" {
+	if netChain.GetBigChainID().String() == "0" {
 		return []byte(``), nil, fmt.Errorf("could not sign eea transaction")
 	}
 	h := ethcommon.HexToHash("0xabcdef")
@@ -51,7 +51,7 @@ func (s *MockTxSigner) SignPrivateEEATx(ctx context.Context, netChain *chain.Cha
 }
 
 func (s *MockTxSigner) SignPrivateTesseraTx(ctx context.Context, netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction) (raw []byte, txHash *ethcommon.Hash, err error) {
-	if netChain.ID().String() == "0" {
+	if netChain.GetBigChainID().String() == "0" {
 		return []byte(``), nil, fmt.Errorf("could not sign tessera transaction")
 	}
 	h := ethcommon.HexToHash("0xabcdef")

@@ -22,10 +22,10 @@ func Faucet(fct faucet.Faucet) engine.HandlerFunc {
 
 		// Create Faucet request
 		req := &faucettypes.Request{
-			ChainID:     txctx.Envelope.GetChain().ID(),
-			NodeURL:     url,
-			NodeID:      txctx.Envelope.GetChain().GetNodeId(),
-			NodeName:    txctx.Envelope.GetChain().GetNodeName(),
+			ChainID:     txctx.Envelope.GetChain().GetBigChainID(),
+			ChainURL:    url,
+			ChainUUID:   txctx.Envelope.GetChain().GetUuid(),
+			ChainName:   txctx.Envelope.GetChain().GetName(),
 			Beneficiary: beneficiary,
 			Amount:      txctx.Envelope.GetTx().GetTxData().GetValueBig(),
 		}

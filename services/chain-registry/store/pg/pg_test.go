@@ -6,7 +6,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/go-pg/pg"
+	"github.com/go-pg/pg/v9"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 
@@ -65,52 +65,52 @@ func TestErrorSuite(t *testing.T) {
 	suite.Run(t, new(ErrorTestSuite))
 }
 
-func (s *ErrorTestSuite) TestGetNodes() {
-	_, err := s.Store.GetNodes(context.Background(), nil)
-	assert.Error(s.T(), err, "Should get nodes with errors")
+func (s *ErrorTestSuite) TestGetChains() {
+	_, err := s.Store.GetChains(context.Background(), nil)
+	assert.Error(s.T(), err, "Should get chains with errors")
 }
 
-func (s *ErrorTestSuite) TestGetNodesByTenantID() {
-	_, err := s.Store.GetNodesByTenantID(context.Background(), "test", nil)
-	assert.Error(s.T(), err, "Should get nodes with errors")
+func (s *ErrorTestSuite) TestGetChainsByTenantID() {
+	_, err := s.Store.GetChainsByTenantID(context.Background(), "test", nil)
+	assert.Error(s.T(), err, "Should get chains with errors")
 }
 
-func (s *ErrorTestSuite) TestGetNodeByName() {
-	_, err := s.Store.GetNodeByTenantIDAndNodeName(context.Background(), "test", "test")
-	assert.Error(s.T(), err, "Should get node with errors")
+func (s *ErrorTestSuite) TestGetChainByName() {
+	_, err := s.Store.GetChainByTenantIDAndName(context.Background(), "test", "test")
+	assert.Error(s.T(), err, "Should get chain with errors")
 }
 
-func (s *ErrorTestSuite) TestGetNodeByID() {
-	_, err := s.Store.GetNodeByID(context.Background(), "test")
-	assert.Error(s.T(), err, "Should get node with errors")
+func (s *ErrorTestSuite) TestGetChainByUUID() {
+	_, err := s.Store.GetChainByUUID(context.Background(), "test")
+	assert.Error(s.T(), err, "Should get chain with errors")
 }
 
-func (s *ErrorTestSuite) TestUpdateNodeByName() {
-	err := s.Store.UpdateNodeByName(context.Background(), &types.Node{Name: "test"})
-	assert.Error(s.T(), err, "Should update node with errors")
+func (s *ErrorTestSuite) TestUpdateChainByName() {
+	err := s.Store.UpdateChainByName(context.Background(), &types.Chain{Name: "test"})
+	assert.Error(s.T(), err, "Should update chain with errors")
 }
 
 func (s *ErrorTestSuite) TestUpdateBlockPositionByName() {
 	err := s.Store.UpdateBlockPositionByName(context.Background(), "test", "test", 777)
-	assert.Error(s.T(), err, "Should update node with errors")
+	assert.Error(s.T(), err, "Should update chain with errors")
 }
 
-func (s *ErrorTestSuite) TestUpdateNodeByID() {
-	err := s.Store.UpdateNodeByID(context.Background(), &types.Node{ID: "test"})
-	assert.Error(s.T(), err, "Should update node with errors")
+func (s *ErrorTestSuite) TestUpdateChainByUUID() {
+	err := s.Store.UpdateChainByUUID(context.Background(), &types.Chain{UUID: "test"})
+	assert.Error(s.T(), err, "Should update chain with errors")
 }
 
-func (s *ErrorTestSuite) TestUpdateBlockPositionByID() {
-	err := s.Store.UpdateBlockPositionByID(context.Background(), "test", 777)
-	assert.Error(s.T(), err, "Should update node with errors")
+func (s *ErrorTestSuite) TestUpdateBlockPositionByUUID() {
+	err := s.Store.UpdateBlockPositionByUUID(context.Background(), "test", 777)
+	assert.Error(s.T(), err, "Should update chain with errors")
 }
 
-func (s *ErrorTestSuite) TestDeleteNodeByName() {
-	err := s.Store.DeleteNodeByName(context.Background(), &types.Node{Name: "test"})
-	assert.Error(s.T(), err, "Should update node with errors")
+func (s *ErrorTestSuite) TestDeleteChainByName() {
+	err := s.Store.DeleteChainByName(context.Background(), &types.Chain{Name: "test"})
+	assert.Error(s.T(), err, "Should update chain with errors")
 }
 
-func (s *ErrorTestSuite) TestDeleteNodeByID() {
-	err := s.Store.DeleteNodeByID(context.Background(), "test")
-	assert.Error(s.T(), err, "Should update node with errors")
+func (s *ErrorTestSuite) TestDeleteChainByUUID() {
+	err := s.Store.DeleteChainByUUID(context.Background(), "test")
+	assert.Error(s.T(), err, "Should update chain with errors")
 }

@@ -199,17 +199,17 @@ func (p *Parser) ParseMethodCell(header, cell string, method *abi.Method) error 
 
 func (p *Parser) ParseChainCell(header, cell string, chn *chain.Chain) error {
 	switch header {
-	case "id":
+	case "chainID":
 		// Retrieve chain id
 		raw, err := strconv.ParseInt(cell, 10, 64)
 		if err != nil {
 			return err
 		}
-		chn.Id = big.NewInt(raw).Bytes()
-	case "nodeName":
-		chn.NodeName = cell
-	case "nodeID":
-		chn.NodeId = cell
+		chn.ChainId = big.NewInt(raw).Bytes()
+	case "name":
+		chn.Name = cell
+	case "uuid":
+		chn.Uuid = cell
 	default:
 		return fmt.Errorf("unknown field %q", header)
 	}

@@ -32,7 +32,7 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 
 	// Set key
 	Sender := txctx.Envelope.Sender()
-	msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(txctx.Envelope.GetChain().ID(), Sender))
+	msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(txctx.Envelope.GetChain().GetBigChainID(), Sender))
 
 	return nil
 }

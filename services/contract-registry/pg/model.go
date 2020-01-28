@@ -6,9 +6,9 @@ import (
 
 // RepositoryModel represent a space where contract tags are listed
 type RepositoryModel struct {
-	tableName struct{} `sql:"repositories"` //nolint:unused,structcheck // reason
+	tableName struct{} `pg:"repositories"` //nolint:unused,structcheck // reason
 
-	// ID technical identifier
+	// UUID technical identifier
 	ID int
 
 	// Repository name
@@ -17,9 +17,9 @@ type RepositoryModel struct {
 
 // TagModel represent a Tag on a Repository pointing towards a Source code
 type TagModel struct {
-	tableName struct{} `sql:"tags"` //nolint:unused,structcheck // reason
+	tableName struct{} `pg:"tags"` //nolint:unused,structcheck // reason
 
-	// ID technical identifier
+	// UUID technical identifier
 	ID int
 
 	// Tag name
@@ -31,9 +31,9 @@ type TagModel struct {
 
 // ArtifactModel represent an artifact compiled from a source code
 type ArtifactModel struct {
-	tableName struct{} `sql:"artifacts"` //nolint:unused,structcheck // reason
+	tableName struct{} `pg:"artifacts"` //nolint:unused,structcheck // reason
 
-	// ID technical identifier
+	// UUID technical identifier
 	ID int
 
 	// Artifact data
@@ -46,9 +46,9 @@ type ArtifactModel struct {
 
 // CodehashModel represent the codehash of smart contract addresses
 type CodehashModel struct {
-	tableName struct{} `sql:"codehashes"` //nolint:unused,structcheck // reason
+	tableName struct{} `pg:"codehashes"` //nolint:unused,structcheck // reason
 
-	// ID technical identifier
+	// UUID technical identifier
 	ID int
 
 	// Artifact data
@@ -59,9 +59,9 @@ type CodehashModel struct {
 
 // MethodModel represent the codehash of smart contract addresses
 type MethodModel struct {
-	tableName struct{} `sql:"methods"` //nolint:unused,structcheck // reason
+	tableName struct{} `pg:"methods"` //nolint:unused,structcheck // reason
 
-	// ID technical identifier
+	// UUID technical identifier
 	ID int
 
 	// Artifact data
@@ -73,15 +73,15 @@ type MethodModel struct {
 
 // EventModel represent the codehash of smart contract addresses
 type EventModel struct {
-	tableName struct{} `sql:"events"` //nolint:unused,structcheck // reason
+	tableName struct{} `pg:"events"` //nolint:unused,structcheck // reason
 
-	// ID technical identifier
+	// UUID technical identifier
 	ID int
 
 	// Artifact data
 	Codehash          common.Hash
 	SigHash           common.Hash
-	IndexedInputCount uint `sql:",notnull"`
+	IndexedInputCount uint `pg:",use_zero"`
 
 	ABI []byte
 }

@@ -56,9 +56,9 @@ func TestParseMethodCell(t *testing.T) {
 func TestParseChainCell(t *testing.T) {
 	p := &Parser{}
 	chn := &chain.Chain{}
-	err := p.ParseChainCell("id", "17", chn)
+	err := p.ParseChainCell("chainID", "17", chn)
 	assert.NoError(t, err, "ParseChainCell should not error when setting id")
-	assert.Equal(t, "17", chn.ID().String(), "ID should have been set")
+	assert.Equal(t, "17", chn.GetBigChainID().String(), "UUID should have been set")
 
 	err = p.ParseChainCell("unknown", "17", chn)
 	assert.Error(t, err, "ParseChainCell should error when setting unknonw")
@@ -97,7 +97,7 @@ func TestParseEnvelopes(t *testing.T) {
 
 	headers := &gherkin.TableRow{
 		Cells: []*gherkin.TableCell{
-			{Value: "chain.id"},
+			{Value: "chain.chainID"},
 			{Value: "from"},
 			{Value: "tx.to"},
 			{Value: "protocol"},
@@ -131,20 +131,20 @@ func TestParseEnvelopes(t *testing.T) {
 
 	evlps, err := p.ParseEnvelopes("test-1", table)
 	assert.NoError(t, err, "ParseEnvelopes should not error")
-	assert.Equal(t, "17", evlps[0].GetChain().ID().String(), "#1 chain id should be correct")
+	assert.Equal(t, "17", evlps[0].GetChain().GetBigChainID().String(), "#1 chain id should be correct")
 	assert.Equal(t, "0xe3F5351F8da45aE9150441E3Af21906CCe4cBbc0", evlps[0].GetFrom().Hex(), "#1 chain id should be correct")
 	assert.Equal(t, "0xEA674fdDe714fd979de3EdF0F56AA9716B898ec8", evlps[0].GetTx().GetTxData().GetTo().Hex(), "#1 chain id should be correct")
 	assert.Equal(t, "type:QUORUM_TESSERA ", evlps[0].GetProtocol().String(), "#1 chain id should be correct")
 	assert.Equal(t, []string{"1", "2"}, evlps[0].GetArgs().GetCall().GetArgs(), "#1 args should be correct")
 
-	assert.Equal(t, "888", evlps[1].GetChain().ID().String(), "#2 chain id should be correct")
+	assert.Equal(t, "888", evlps[1].GetChain().GetBigChainID().String(), "#2 chain id should be correct")
 	assert.Equal(t, "0xe3F5351F8da45aE9150441E3Af21906CCe4cBbc0", evlps[1].GetFrom().Hex(), "#2 chain id should be correct")
 	assert.Equal(t, "0xEA674fdDe714fd979de3EdF0F56AA9716B898ec8", evlps[1].GetTx().GetTxData().GetTo().Hex(), "#2 chain id should be correct")
 	assert.Equal(t, "type:QUORUM_CONSTELLATION ", evlps[1].GetProtocol().String(), "#2 chain id should be correct")
 
 	evlps, err = p.ParseEnvelopes("test-2", table)
 	assert.NoError(t, err, "ParseEnvelopes should not error")
-	assert.Equal(t, "888", evlps[1].GetChain().ID().String(), "#3 chain id should be correct")
+	assert.Equal(t, "888", evlps[1].GetChain().GetBigChainID().String(), "#3 chain id should be correct")
 	assert.Equal(t, "0xe3F5351F8da45aE9150441E3Af21906CCe4cBbc0", evlps[0].GetFrom().Hex(), "#3 chain id should be correct")
 	assert.Equal(t, "0x77F888CC34a3E6EC4935eF27a83a48fAe548fa4d", evlps[0].GetTx().GetTxData().GetTo().Hex(), "#3 chain id should be correct")
 }

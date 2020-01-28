@@ -18,11 +18,11 @@ import (
 func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		// Retrieve chainID and sender address
-		chainID, sender := txctx.Envelope.GetChain().ID(), txctx.Envelope.GetFrom().Address()
+		chainID, sender := txctx.Envelope.GetChain().GetBigChainID(), txctx.Envelope.GetFrom().Address()
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"tx.sender":   sender.Hex(),
-			"chain.id":    chainID.String(),
-			"metadata.id": txctx.Envelope.GetMetadata().GetId(),
+			"tx.sender":     sender.Hex(),
+			"chain.chainID": chainID.String(),
+			"metadata.id":   txctx.Envelope.GetMetadata().GetId(),
 		})
 
 		// Nonce to attribute to tx

@@ -155,7 +155,7 @@ func TestAuth(t *testing.T) {
 				token := authjwt.FromContext(checkedCtx)
 				assert.NotNil(t, token, "Token should not be nil")
 				tenantID := token.Claims.(*authjwt.Claims).Orchestrate.TenantID
-				assert.Equal(t, tt.want, tenantID, "Tenant ID should be correct")
+				assert.Equal(t, tt.want, tenantID, "Tenant UUID should be correct")
 			}
 		})
 	}

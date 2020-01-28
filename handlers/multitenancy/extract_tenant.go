@@ -15,9 +15,9 @@ const AuthorizationMetadata = "Authorization"
 // ExtractTenant handler operate:
 // - check if the multi-tenancy is enable
 // - load /extract the certificate of the Auth Service from config
-// - extract the <ID/Access> Token from the Envelop
+// - extract the <UUID/Access> Token from the Envelop
 // - verify the signature and verify if the certificate from the Token is the same that the loaded certificate => oidc/KeySet
-// - extract the Tenant ID
+// - extract the Tenant UUID
 // - inject the Tenant in the Envelop
 func ExtractTenant(auth authentication.Auth) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {

@@ -54,7 +54,7 @@ func (s *EnvelopeStore) Store(ctx context.Context, req *evlpstore.StoreRequest) 
 	// Store model
 	s.byID[req.GetEnvelope().GetMetadata().GetId()] = model
 
-	k := key(req.GetEnvelope().GetChain().ID().String(), req.GetEnvelope().GetTx().GetHash().Hex())
+	k := key(req.GetEnvelope().GetChain().GetBigChainID().String(), req.GetEnvelope().GetTx().GetHash().Hex())
 	s.byTxHash[k] = model
 
 	return model.ToStoreResponse()
@@ -65,17 +65,17 @@ func (s *EnvelopeStore) LoadByTxHash(ctx context.Context, req *evlpstore.LoadByT
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	model, ok := s.byTxHash[key(req.GetChain().ID().String(), req.GetTxHash().Hex())]
+	model, ok := s.byTxHash[key(req.GetChain().GetBigChainID().String(), req.GetTxHash().Hex())]
 	if !ok {
 		return &evlpstore.StoreResponse{},
-			errors.NotFoundError("no envelope for chain %q txHash %q", req.GetChain().ID().String(), req.GetTxHash().Hex()).
+			errors.NotFoundError("no envelope for chain %q txHash %q", req.GetChain().GetBigChainID().String(), req.GetTxHash().Hex()).
 				SetComponent(component)
 	}
 
 	return model.ToStoreResponse()
 }
 
-// LoadByID context envelope by envelope ID
+// LoadByID context envelope by envelope UUID
 func (s *EnvelopeStore) LoadByID(ctx context.Context, req *evlpstore.LoadByIDRequest) (*evlpstore.StoreResponse, error) {
 	s.mux.Lock()
 	defer s.mux.Unlock()
@@ -83,7 +83,7 @@ func (s *EnvelopeStore) LoadByID(ctx context.Context, req *evlpstore.LoadByIDReq
 	model, ok := s.byID[req.GetId()]
 	if !ok {
 		return &evlpstore.StoreResponse{},
-			errors.NotFoundError("no envelope for ID %q", req.GetId()).
+			errors.NotFoundError("no envelope for UUID %q", req.GetId()).
 				SetComponent(component)
 	}
 
@@ -98,7 +98,7 @@ func (s *EnvelopeStore) SetStatus(ctx context.Context, req *evlpstore.SetStatusR
 	model, ok := s.byID[req.GetId()]
 	if !ok {
 		return &evlpstore.StatusResponse{},
-			errors.NotFoundError("no envelope for ID %q", req.GetId()).
+			errors.NotFoundError("no envelope for UUID %q", req.GetId()).
 				SetComponent(component)
 	}
 

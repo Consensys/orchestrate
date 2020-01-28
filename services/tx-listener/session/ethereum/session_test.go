@@ -181,7 +181,7 @@ func (ec *EthClientV2) SyncProgress(ctx context.Context, _ string) (*eth.SyncPro
 }
 
 type hookCall struct {
-	node     *dynamic.Node
+	chain    *dynamic.Chain
 	block    *ethtypes.Block
 	receipts []*ethtypes.Receipt
 }
@@ -198,9 +198,9 @@ func NewMockHook() *MockHook {
 	}
 }
 
-func (hk *MockHook) AfterNewBlock(_ context.Context, node *dynamic.Node, block *ethtypes.Block, receipts []*ethtypes.Receipt) error {
+func (hk *MockHook) AfterNewBlock(_ context.Context, chain *dynamic.Chain, block *ethtypes.Block, receipts []*ethtypes.Receipt) error {
 	hk.Calls <- &hookCall{
-		node:     node,
+		chain:    chain,
 		block:    block,
 		receipts: receipts,
 	}
@@ -233,8 +233,8 @@ func TestGetChainTip(t *testing.T) {
 	ec.Mine(&block)
 
 	sess := &Session{
-		ec:   ec,
-		Node: &dynamic.Node{Listener: &dynamic.Listener{}},
+		ec:    ec,
+		Chain: &dynamic.Chain{Listener: &dynamic.Listener{}},
 	}
 
 	tip, err := sess.getChainTip(context.Background())
@@ -252,8 +252,8 @@ func TestFetchReceipt(t *testing.T) {
 	ec.Mine(&block)
 
 	sess := &Session{
-		ec:   ec,
-		Node: &dynamic.Node{},
+		ec:    ec,
+		Chain: &dynamic.Chain{},
 	}
 
 	// Unkwnon transaction
@@ -289,8 +289,8 @@ func TestFetchBlock(t *testing.T) {
 	ec.Mine(&block)
 
 	sess := &Session{
-		ec:   ec,
-		Node: &dynamic.Node{},
+		ec:    ec,
+		Chain: &dynamic.Chain{},
 	}
 
 	future := sess.fetchBlock(context.Background(), 0)
@@ -322,7 +322,7 @@ func TestInit(t *testing.T) {
 
 	// Test 1: init from latest
 	sess := builder.newSession(
-		&dynamic.Node{
+		&dynamic.Chain{
 			Listener: &dynamic.Listener{
 				BlockPosition: -1,
 			},
@@ -333,11 +333,11 @@ func TestInit(t *testing.T) {
 	assert.NoError(t, err, "Init should not error")
 	assert.Equal(t, uint64(1), sess.currentChainTip, "#1 Chain tip should be correct")
 	assert.Equal(t, uint64(1), sess.blockPosition, "#1 blockPosition should be correct")
-	assert.Equal(t, uint64(1), sess.Node.ChainID.Uint64(), "#1 node chain ID should have been set")
+	assert.Equal(t, uint64(1), sess.Chain.ChainID.Uint64(), "#1 chain chain UUID should have been set")
 
 	// Test 2: init from block 2
 	sess = builder.newSession(
-		&dynamic.Node{
+		&dynamic.Chain{
 			Listener: &dynamic.Listener{
 				BlockPosition: 2,
 			},
@@ -350,10 +350,10 @@ func TestInit(t *testing.T) {
 	assert.Equal(t, uint64(2), sess.blockPosition, "#2 blockPosition should be correct")
 
 	// Test 3: init with offset manager initialized
-	_ = offsets.SetLastBlockNumber(context.Background(), &dynamic.Node{ID: "test-init"}, 14)
+	_ = offsets.SetLastBlockNumber(context.Background(), &dynamic.Chain{UUID: "test-init"}, 14)
 	sess = builder.newSession(
-		&dynamic.Node{
-			ID: "test-init",
+		&dynamic.Chain{
+			UUID: "test-init",
 			Listener: &dynamic.Listener{
 				BlockPosition: 2,
 			},
@@ -381,14 +381,14 @@ func TestRun(t *testing.T) {
 	builder := NewSessionBuilder(hk, offsets, ec)
 
 	// New session starting on block one
-	node := &dynamic.Node{
-		ID: "test-node",
+	chain := &dynamic.Chain{
+		UUID: "test-chain",
 		Listener: &dynamic.Listener{
 			BlockPosition: 1,
 			Backoff:       10 * time.Millisecond,
 		},
 	}
-	sess := builder.newSession(node)
+	sess := builder.newSession(chain)
 
 	// Start session
 	errChan := make(chan error)
@@ -425,7 +425,7 @@ func TestRun(t *testing.T) {
 		t.Errorf("TestRun: session should have completed")
 	}
 	close(errChan)
-	lastBlock, _ := offsets.GetLastBlockNumber(context.Background(), node)
+	lastBlock, _ := offsets.GetLastBlockNumber(context.Background(), chain)
 	assert.Equal(t, int64(2), lastBlock, "Offset manager should have properly updated block processed")
 }
 
@@ -444,14 +444,14 @@ func TestRunWithError(t *testing.T) {
 	builder := NewSessionBuilder(hk, offsets, ec)
 
 	// New session starting on block one
-	node := &dynamic.Node{
-		ID: "test-node",
+	chain := &dynamic.Chain{
+		UUID: "test-chain",
 		Listener: &dynamic.Listener{
 			BlockPosition: 1,
 			Backoff:       10 * time.Millisecond,
 		},
 	}
-	sess := builder.newSession(node)
+	sess := builder.newSession(chain)
 
 	// Start session
 	errChan := make(chan error)

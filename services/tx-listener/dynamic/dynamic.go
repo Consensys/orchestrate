@@ -13,7 +13,7 @@ type Message struct {
 }
 
 type Configuration struct {
-	Nodes map[string]*Node
+	Chains map[string]*Chain
 }
 
 type Listener struct {
@@ -22,8 +22,8 @@ type Listener struct {
 	Backoff       time.Duration
 }
 
-type Node struct {
-	ID       string
+type Chain struct {
+	UUID     string
 	TenantID string
 	Name     string
 	URL      string
@@ -34,9 +34,9 @@ type Node struct {
 	Active bool
 }
 
-func (n *Node) SetDefault() {
-	if n.ID == "" {
-		n.ID = uuid.NewV4().String()
+func (n *Chain) SetDefault() {
+	if n.UUID == "" {
+		n.UUID = uuid.NewV4().String()
 	}
 
 	if n.Listener == nil {

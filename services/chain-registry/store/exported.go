@@ -11,7 +11,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/memory"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/pg"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 )
 
 const (
@@ -52,37 +51,9 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		// Init Config
-		nodes := viper.GetStringSlice(InitViperKey)
-		for _, v := range nodes {
-			node := &types.Node{
-				// Default values
-				ListenerDepth:           1,
-				ListenerBlockPosition:   -1,
-				ListenerFromBlock:       -1,
-				ListenerBackOffDuration: "1s",
-			}
-			dec := json.NewDecoder(strings.NewReader(v))
-			dec.DisallowUnknownFields() // Force errors if unknown fields
-			err := dec.Decode(node)
-			if err != nil {
-				log.Warnf("%s: init - invalid node config - got %v", component, err)
-			}
-			if !viper.GetBool(multitenancy.EnabledViperKey) {
-				node.TenantID = multitenancy.DefaultTenantIDName
-			}
-
-			err = store.RegisterNode(ctx, node)
-			if err != nil {
-				updateErr := store.UpdateNodeByName(ctx, node)
-				if updateErr != nil {
-					log.Fatalf("%s: init - could not register new node nor update existing node - got %v & %v", component, err, updateErr)
-				}
-				log.Infof("%s: init - node %s updated", component, node.Name)
-			} else {
-				log.Infof("%s: init - node %s registered with id %s", component, node.Name, node.ID)
-			}
-		}
+		// Init chains
+		chains := viper.GetStringSlice(InitViperKey)
+		importChains(ctx, chains, store)
 	})
 }
 
@@ -94,4 +65,28 @@ func SetGlobalStoreRegistry(r types.ChainRegistryStore) {
 // GlobalRegistry returns global a chain-registry store
 func GlobalStoreRegistry() types.ChainRegistryStore {
 	return store
+}
+
+func importChains(ctx context.Context, chains []string, s types.ChainRegistryStore) {
+	for _, v := range chains {
+		chain := &types.Chain{}
+		dec := json.NewDecoder(strings.NewReader(v))
+		dec.DisallowUnknownFields() // Force errors if unknown fields
+		err := dec.Decode(chain)
+		if err != nil {
+			log.Warnf("%s: init - invalid chain config - got %v", component, err)
+			continue
+		}
+
+		err = s.RegisterChain(ctx, chain)
+		if err != nil {
+			updateErr := s.UpdateChainByName(ctx, chain)
+			if updateErr != nil {
+				log.Fatalf("%s: init - could not register new chain nor update existing chain - got %v & %v", component, err, updateErr)
+			}
+			log.Infof("%s: init - chain %s updated", component, chain.Name)
+		} else {
+			log.Infof("%s: init - chain %s registered with id %s", component, chain.Name, chain.UUID)
+		}
+	}
 }

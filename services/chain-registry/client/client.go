@@ -7,9 +7,9 @@ import (
 )
 
 type Client interface {
-	GetNodes(ctx context.Context) ([]*types.Node, error)
-	GetNodeByID(ctx context.Context, nodeID string) (*types.Node, error)
-	GetNodeByTenantAndNodeName(ctx context.Context, tenantID, nodeName string) (*types.Node, error)
-	GetNodeByTenantAndNodeID(ctx context.Context, tenantID, nodeID string) (*types.Node, error)
-	UpdateBlockPosition(ctx context.Context, nodeID string, blockNumber int64) error
+	GetChains(ctx context.Context) ([]*types.Chain, error)
+	GetChainByUUID(ctx context.Context, chainUUID string) (*types.Chain, error)
+	GetChainByTenantAndName(ctx context.Context, tenantID, chainName string) (*types.Chain, error)
+	GetChainByTenantAndUUID(ctx context.Context, tenantID, chainUUID string) (*types.Chain, error)
+	UpdateBlockPosition(ctx context.Context, chainUUID string, blockNumber int64) error
 }

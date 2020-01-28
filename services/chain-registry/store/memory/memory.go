@@ -5,183 +5,182 @@ import (
 	"fmt"
 	"time"
 
-	uuid "github.com/satori/go.uuid"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
 
 type ChainRegistry struct {
-	NodesByID    map[string]*types.Node
-	NodesByNames map[string]map[string]*types.Node
+	ChainsByUUID  map[string]*types.Chain
+	ChainsByNames map[string]map[string]*types.Chain
 }
 
 // NewChainRegistry creates a new chain registry
 func NewChainRegistry() *ChainRegistry {
 	return &ChainRegistry{
-		NodesByID:    make(map[string]*types.Node),
-		NodesByNames: make(map[string]map[string]*types.Node),
+		ChainsByUUID:  make(map[string]*types.Chain),
+		ChainsByNames: make(map[string]map[string]*types.Chain),
 	}
 }
 
-func (r *ChainRegistry) RegisterNode(_ context.Context, node *types.Node) error {
+func (r *ChainRegistry) RegisterChain(_ context.Context, chain *types.Chain) error {
+	chain.SetDefault()
 
-	if !node.IsValid() {
-		return errors.FromError(fmt.Errorf("invalid node")).ExtendComponent(component)
+	if !chain.IsValid() {
+		return errors.FromError(fmt.Errorf("invalid chain")).ExtendComponent(component)
 	}
 
-	if r.NodesByNames[node.TenantID] == nil {
-		r.NodesByNames[node.TenantID] = make(map[string]*types.Node)
+	if r.ChainsByNames[chain.TenantID] == nil {
+		r.ChainsByNames[chain.TenantID] = make(map[string]*types.Chain)
 	}
 
-	if r.NodesByNames[node.TenantID][node.Name] != nil {
-		return errors.FromError(fmt.Errorf("node tenantID=%s name=%s already exitst", node.TenantID, node.Name)).ExtendComponent(component)
+	if r.ChainsByNames[chain.TenantID][chain.Name] != nil {
+		return errors.FromError(fmt.Errorf("chain tenantID=%s name=%s already exitst", chain.TenantID, chain.Name)).ExtendComponent(component)
 	}
 
-	node.ID = uuid.NewV4().String()
-	r.NodesByNames[node.TenantID][node.Name] = node
-	r.NodesByID[node.ID] = node
+	r.ChainsByNames[chain.TenantID][chain.Name] = chain
+	r.ChainsByUUID[chain.UUID] = chain
 	return nil
 }
 
-func (r *ChainRegistry) GetNodes(_ context.Context, filters map[string]string) ([]*types.Node, error) {
+func (r *ChainRegistry) GetChains(_ context.Context, filters map[string]string) ([]*types.Chain, error) {
 	// TODO: implement filters
 
-	nodes := make([]*types.Node, 0)
+	chains := make([]*types.Chain, 0)
 
-	for _, node := range r.NodesByID {
-		nodes = append(nodes, node)
+	for _, chain := range r.ChainsByUUID {
+		chains = append(chains, chain)
 	}
 
-	return nodes, nil
+	return chains, nil
 }
 
-func (r *ChainRegistry) GetNodesByTenantID(_ context.Context, tenantID string, filters map[string]string) ([]*types.Node, error) {
+func (r *ChainRegistry) GetChainsByTenantID(_ context.Context, tenantID string, filters map[string]string) ([]*types.Chain, error) {
 	// TODO: implement filters
 
-	nodes := make([]*types.Node, 0)
+	chains := make([]*types.Chain, 0)
 
-	if tenantNodes, ok := r.NodesByNames[tenantID]; ok {
-		for _, node := range tenantNodes {
+	if tenantChains, ok := r.ChainsByNames[tenantID]; ok {
+		for _, chain := range tenantChains {
 
-			nodes = append(nodes, node)
+			chains = append(chains, chain)
 		}
 	} else {
 		return nil, errors.NotFoundError("unknown tenantID=%s", tenantID).ExtendComponent(component)
 	}
 
-	return nodes, nil
+	return chains, nil
 }
 
-func (r *ChainRegistry) GetNodeByTenantIDAndNodeName(_ context.Context, tenantID, name string) (*types.Node, error) {
-	if _, ok := r.NodesByNames[tenantID]; ok {
-		if node, ok := r.NodesByNames[tenantID][name]; ok {
-			return node, nil
+func (r *ChainRegistry) GetChainByTenantIDAndName(_ context.Context, tenantID, name string) (*types.Chain, error) {
+	if _, ok := r.ChainsByNames[tenantID]; ok {
+		if chain, ok := r.ChainsByNames[tenantID][name]; ok {
+			return chain, nil
 		}
-		return nil, errors.NotFoundError("unknown node with tenantID=%s and name=%s", name, tenantID).ExtendComponent(component)
+		return nil, errors.NotFoundError("unknown chain with tenantID=%s and name=%s", name, tenantID).ExtendComponent(component)
 	}
 
-	return nil, errors.NotFoundError("unknown node with tenantID=%s", tenantID).ExtendComponent(component)
+	return nil, errors.NotFoundError("unknown chain with tenantID=%s", tenantID).ExtendComponent(component)
 }
 
-func (r *ChainRegistry) GetNodeByTenantIDAndNodeID(ctx context.Context, tenantID, id string) (*types.Node, error) {
-	if _, ok := r.NodesByID[id]; !ok || r.NodesByID[id].TenantID != tenantID {
-		return nil, errors.FromError(fmt.Errorf("unknown node ID=%s", id)).ExtendComponent(component)
+func (r *ChainRegistry) GetChainByTenantIDAndUUID(ctx context.Context, tenantID, id string) (*types.Chain, error) {
+	if _, ok := r.ChainsByUUID[id]; !ok || r.ChainsByUUID[id].TenantID != tenantID {
+		return nil, errors.FromError(fmt.Errorf("unknown chain UUID=%s", id)).ExtendComponent(component)
 	}
 
-	return r.NodesByID[id], nil
+	return r.ChainsByUUID[id], nil
 }
 
-func (r *ChainRegistry) GetNodeByID(_ context.Context, id string) (*types.Node, error) {
-	if _, ok := r.NodesByID[id]; !ok {
-		return nil, errors.FromError(fmt.Errorf("unknown node ID=%s", id)).ExtendComponent(component)
+func (r *ChainRegistry) GetChainByUUID(_ context.Context, id string) (*types.Chain, error) {
+	if _, ok := r.ChainsByUUID[id]; !ok {
+		return nil, errors.FromError(fmt.Errorf("unknown chain UUID=%s", id)).ExtendComponent(component)
 	}
 
-	return r.NodesByID[id], nil
+	return r.ChainsByUUID[id], nil
 }
 
-func (r *ChainRegistry) UpdateNodeByName(_ context.Context, node *types.Node) error {
-	nodeToUpdate, ok := r.NodesByNames[node.TenantID][node.Name]
+func (r *ChainRegistry) UpdateChainByName(_ context.Context, chain *types.Chain) error {
+	chainToUpdate, ok := r.ChainsByNames[chain.TenantID][chain.Name]
 	if !ok {
-		return errors.NotFoundError("no node found with tenantID %s and name %s", node.TenantID, node.Name).ExtendComponent(component)
+		return errors.NotFoundError("no chain found with tenantID %s and name %s", chain.TenantID, chain.Name).ExtendComponent(component)
 	}
 
-	nodeToUpdate.Name = node.Name
-	nodeToUpdate.URLs = node.URLs
-	nodeToUpdate.ListenerBackOffDuration = node.ListenerBackOffDuration
-	nodeToUpdate.ListenerBlockPosition = node.ListenerBlockPosition
-	nodeToUpdate.ListenerFromBlock = node.ListenerFromBlock
-	nodeToUpdate.ListenerDepth = node.ListenerDepth
+	chainToUpdate.Name = chain.Name
+	chainToUpdate.URLs = chain.URLs
+	chainToUpdate.ListenerBackOffDuration = chain.ListenerBackOffDuration
+	chainToUpdate.ListenerBlockPosition = chain.ListenerBlockPosition
+	chainToUpdate.ListenerFromBlock = chain.ListenerFromBlock
+	chainToUpdate.ListenerDepth = chain.ListenerDepth
 	currentTime := time.Now()
-	nodeToUpdate.UpdatedAt = &currentTime
+	chainToUpdate.UpdatedAt = &currentTime
 
 	return nil
 }
 
 func (r *ChainRegistry) UpdateBlockPositionByName(_ context.Context, name, tenantID string, blockPosition int64) error {
-	nodeToUpdate, ok := r.NodesByNames[tenantID][name]
+	chainToUpdate, ok := r.ChainsByNames[tenantID][name]
 	if !ok {
-		return errors.NotFoundError("no node found with tenantID %s and name %s", tenantID, name).ExtendComponent(component)
+		return errors.NotFoundError("no chain found with tenantID %s and name %s", tenantID, name).ExtendComponent(component)
 	}
 
-	nodeToUpdate.ListenerBlockPosition = blockPosition
+	*chainToUpdate.ListenerBlockPosition = blockPosition
 	currentTime := time.Now()
-	nodeToUpdate.UpdatedAt = &currentTime
+	chainToUpdate.UpdatedAt = &currentTime
 
 	return nil
 }
 
-func (r *ChainRegistry) UpdateNodeByID(_ context.Context, node *types.Node) error {
-	nodeToUpdate, ok := r.NodesByID[node.ID]
+func (r *ChainRegistry) UpdateChainByUUID(_ context.Context, chain *types.Chain) error {
+	chainToUpdate, ok := r.ChainsByUUID[chain.UUID]
 	if !ok {
-		return errors.NotFoundError("no node found with id %s", node.ID).ExtendComponent(component)
+		return errors.NotFoundError("no chain found with id %s", chain.UUID).ExtendComponent(component)
 	}
 
-	nodeToUpdate.Name = node.Name
-	nodeToUpdate.URLs = node.URLs
-	nodeToUpdate.ListenerBackOffDuration = node.ListenerBackOffDuration
-	nodeToUpdate.ListenerBlockPosition = node.ListenerBlockPosition
-	nodeToUpdate.ListenerFromBlock = node.ListenerFromBlock
-	nodeToUpdate.ListenerDepth = node.ListenerDepth
+	chainToUpdate.Name = chain.Name
+	chainToUpdate.URLs = chain.URLs
+	chainToUpdate.ListenerBackOffDuration = chain.ListenerBackOffDuration
+	chainToUpdate.ListenerBlockPosition = chain.ListenerBlockPosition
+	chainToUpdate.ListenerFromBlock = chain.ListenerFromBlock
+	chainToUpdate.ListenerDepth = chain.ListenerDepth
 	currentTime := time.Now()
-	nodeToUpdate.UpdatedAt = &currentTime
+	chainToUpdate.UpdatedAt = &currentTime
 
 	return nil
 }
 
-func (r *ChainRegistry) UpdateBlockPositionByID(_ context.Context, id string, blockPosition int64) error {
-	nodeToUpdate, ok := r.NodesByID[id]
+func (r *ChainRegistry) UpdateBlockPositionByUUID(_ context.Context, id string, blockPosition int64) error {
+	chainToUpdate, ok := r.ChainsByUUID[id]
 	if !ok {
-		return errors.NotFoundError("no node found with id %s", id).ExtendComponent(component)
+		return errors.NotFoundError("no chain found with id %s", id).ExtendComponent(component)
 	}
 
-	nodeToUpdate.ListenerBlockPosition = blockPosition
+	*chainToUpdate.ListenerBlockPosition = blockPosition
 	currentTime := time.Now()
-	nodeToUpdate.UpdatedAt = &currentTime
+	chainToUpdate.UpdatedAt = &currentTime
 
 	return nil
 }
 
-func (r *ChainRegistry) DeleteNodeByName(_ context.Context, node *types.Node) error {
-	if _, ok := r.NodesByNames[node.TenantID]; !ok {
-		return errors.NotFoundError("no node found with tenant_id=%s", node.TenantID).ExtendComponent(component)
+func (r *ChainRegistry) DeleteChainByName(_ context.Context, chain *types.Chain) error {
+	if _, ok := r.ChainsByNames[chain.TenantID]; !ok {
+		return errors.NotFoundError("no chain found with tenant_id=%s", chain.TenantID).ExtendComponent(component)
 	}
 
-	if _, ok := r.NodesByNames[node.TenantID][node.Name]; !ok {
-		return errors.NotFoundError("no node found with tenant_id=%s and name=%s", node.TenantID, node.Name).ExtendComponent(component)
+	if _, ok := r.ChainsByNames[chain.TenantID][chain.Name]; !ok {
+		return errors.NotFoundError("no chain found with tenant_id=%s and name=%s", chain.TenantID, chain.Name).ExtendComponent(component)
 	}
 
-	delete(r.NodesByID, r.NodesByNames[node.TenantID][node.Name].ID)
-	delete(r.NodesByNames[node.TenantID], node.Name)
+	delete(r.ChainsByUUID, r.ChainsByNames[chain.TenantID][chain.Name].UUID)
+	delete(r.ChainsByNames[chain.TenantID], chain.Name)
 	return nil
 }
 
-func (r *ChainRegistry) DeleteNodeByID(_ context.Context, id string) error {
-	if _, ok := r.NodesByID[id]; !ok {
-		return errors.NotFoundError("no node found with id=%s", id).ExtendComponent(component)
+func (r *ChainRegistry) DeleteChainByUUID(_ context.Context, id string) error {
+	if _, ok := r.ChainsByUUID[id]; !ok {
+		return errors.NotFoundError("no chain found with id=%s", id).ExtendComponent(component)
 	}
 
-	delete(r.NodesByNames[r.NodesByID[id].TenantID], r.NodesByID[id].Name)
-	delete(r.NodesByID, id)
+	delete(r.ChainsByNames[r.ChainsByUUID[id].TenantID], r.ChainsByUUID[id].Name)
+	delete(r.ChainsByUUID, id)
 
 	return nil
 }

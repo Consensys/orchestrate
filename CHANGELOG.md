@@ -20,27 +20,23 @@ All notable changes to this project will be documented in this file.
  
 ### 🆕 Chain-registry and tx-listener
 * Add the chain-registry microservice that:
-    * Serves an API to store a list of ethereum nodes with their configurations (URLs, tenantID, name, block depth, block position, backoff duration). The API allows to dynamically update the nodes configuration instead of passing them in environment variable.
-        * GET `/nodes`: get the list of nodes registered
-        * GET `/nodes/{tenantID}`: get the list of nodes registered for a given {tenantID}
-        * GET `/nodes/{tenantID}/{nodeName}`: get the node configuration given by the {tenantID} and {nodeName}
-        * GET `/node/{nodeID}`: get the node configuration given by the {nodeID}
-        * POST `/nodes/{tenantID}`: create a new node for a given {tenantID}
-        * PATCH `/nodes/{tenantID}/{nodeName}`: modify the node configuration for a given {tenantID} and {nodeName}
-        * PATCH `/node/{nodeID}`: modify the node configuration for a given {nodeID}
-        * PATCH `/nodes/{tenantID}/{nodeName}/block-position`: modify the block position of a node for a given {tenantID} and {nodeName}
-        * PATCH `/node/{nodeID}//block-position`: modify the block position of a node for a given {nodeID}
-        * DELETE `/nodes/{tenantID}/{nodeName}`: delete the node configuration given by the {tenantID} and {nodeName}
-        * DELETE `/node/{nodeID}`: delete the node configuration given by the {nodeID}
-    * Proxy the ethereum nodes
+    * Serves an API to store a list of ethereum chains with their configurations (URLs, tenantID, name, block depth, block position, backoff duration). The API allows to dynamically update the chains configuration instead of passing them in environment variable.
+        * GET `/chains`: get the list of chains registered
+        * GET `/chains/{uuid}`: get the chain configuration given by the {uuid}
+        * GET `/chains/{tenantID}`: get the list of chains registered for a given {tenantID}
+        * GET `/chains/{tenantID}/{name}`: get the chain configuration given by the {tenantID} and {name}
+        * POST `/chains/{tenantID}`: create a new chain for a given {tenantID}
+        * PATCH `/chains/{uuid}`: modify the chain configuration for a given {uuid}
+        * PATCH `/chains/{tenantID}/{name}`: modify the chain configuration for a given {tenantID} and {name}
+        * DELETE `/chains/{uuid}`: delete the chain configuration given by the {uuid}
+        * DELETE `/chains/{tenantID}/{name}`: delete the chain configuration given by the {tenantID} and {name}
+    * Proxy the ethereum chains
 * Add flag and environment variable:
-    * `CHAIN_PROXY_ADDRESS` to set the address/port that exposes the proxy to nodes
-    * `CHAIN_REGISTRY_ADDRESS` to set the address/port that exposes the chain registry API
     * `CHAIN_REGISTRY_TYPE` to set type of Chain Registry among "postgres" and "in-memory"
-    * `CHAIN_REGISTRY_INIT` to initialize the chain registry with some specific nodes
-    * `CHAIN_REGISTRY_PROVIDER_NODES_REFRESH_INTERVAL` to set the time interval for refreshing the list of nodes from storage
+    * `CHAIN_REGISTRY_INIT` to initialize the chain registry with some specific chains
+    * `CHAIN_REGISTRY_PROVIDER_CHAINS_REFRESH_INTERVAL` to set the time interval for refreshing the list of chains from storage
     * `CHAIN_REGISTRY_URL` to set the URL to reach the chain-registry
-    * `TX_LISTENER_PROVIDER_REFRESH_INTERVAL` to set the time interval for refreshing the list of nodes from the chain registry
+    * `TX_LISTENER_PROVIDER_REFRESH_INTERVAL` to set the time interval for refreshing the list of chains from the chain registry
  
 ### ⚠ BREAKING CHANGES
  * Remove `/v1` prefix in the http rest path for the envelope-store and chain-registry

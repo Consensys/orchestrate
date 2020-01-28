@@ -4,113 +4,72 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-
 	"github.com/gorilla/mux"
 	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
 
-type PatchBlockPositionRequest struct {
-	BlockPosition int64 `json:"blockPosition,string,omitempty"`
+type PatchRequest struct {
+	Name     string    `json:"name,omitempty"`
+	URLs     []string  `json:"urls,omitempty" pg:"urls,array" validate:"unique,dive,url"`
+	Listener *Listener `json:"listener,omitempty"`
 }
 
-type patchResponse struct{}
+type PatchResponse struct{}
 
-func (h Handler) patchNodeByName(rw http.ResponseWriter, request *http.Request) {
+func (h Handler) patchChainByName(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
-	nodeRequest, err := UnmarshalNodeRequestBody(request.Body)
+	chainRequest := &PatchRequest{Listener: &Listener{}}
+	err := UnmarshalBody(request.Body, chainRequest)
 	if err != nil {
 		writeError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	node := &models.Node{
-		Name: mux.Vars(request)["nodeName"],
-		// TODO: replace tenantID when extract token
-		TenantID:                mux.Vars(request)["tenantID"],
-		URLs:                    nodeRequest.URLs,
-		ListenerDepth:           nodeRequest.ListenerDepth,
-		ListenerBlockPosition:   nodeRequest.ListenerBlockPosition,
-		ListenerFromBlock:       nodeRequest.ListenerFromBlock,
-		ListenerBackOffDuration: nodeRequest.ListenerBackOffDuration,
+	chain := &models.Chain{
+		Name:     mux.Vars(request)["name"],
+		TenantID: mux.Vars(request)["tenantID"],
+		URLs:     chainRequest.URLs,
+	}
+	if chainRequest.Listener != nil {
+		chain.ListenerDepth = chainRequest.Listener.Depth
+		chain.ListenerBlockPosition = chainRequest.Listener.BlockPosition
+		chain.ListenerBackOffDuration = chainRequest.Listener.BackOffDuration
 	}
 
-	err = h.store.UpdateNodeByName(request.Context(), node)
+	err = h.store.UpdateChainByName(request.Context(), chain)
 	if err != nil {
 		handleChainRegistryStoreError(rw, err)
 		return
 	}
 
-	_ = json.NewEncoder(rw).Encode(&patchResponse{})
+	_ = json.NewEncoder(rw).Encode(&PatchResponse{})
 }
 
-func (h Handler) patchBlockPositionByName(rw http.ResponseWriter, request *http.Request) {
+func (h Handler) patchChainByUUID(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
-	p := &PatchBlockPositionRequest{}
-	err := UnmarshalBody(request.Body, p)
-	if err != nil {
-		writeError(rw, errors.FromError(err).ExtendComponent(component).Error(), http.StatusBadRequest)
-		return
-	}
-
-	err = h.store.UpdateBlockPositionByName(request.Context(), mux.Vars(request)["nodeName"], mux.Vars(request)["tenantID"], p.BlockPosition)
-	if err != nil {
-		handleChainRegistryStoreError(rw, err)
-		return
-	}
-
-	_ = json.NewEncoder(rw).Encode(&patchResponse{})
-}
-
-func (h Handler) patchNodeByID(rw http.ResponseWriter, request *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-
-	nodeID := mux.Vars(request)["nodeID"]
-
-	nodeRequest, err := UnmarshalNodeRequestBody(request.Body)
+	chainRequest := &PatchRequest{Listener: &Listener{}}
+	err := UnmarshalBody(request.Body, chainRequest)
 	if err != nil {
 		writeError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	node := &models.Node{
-		ID:                      nodeID,
-		Name:                    nodeRequest.Name,
-		URLs:                    nodeRequest.URLs,
-		ListenerDepth:           nodeRequest.ListenerDepth,
-		ListenerBlockPosition:   nodeRequest.ListenerBlockPosition,
-		ListenerFromBlock:       nodeRequest.ListenerFromBlock,
-		ListenerBackOffDuration: nodeRequest.ListenerBackOffDuration,
+	chain := &models.Chain{
+		UUID:                    mux.Vars(request)["uuid"],
+		Name:                    chainRequest.Name,
+		URLs:                    chainRequest.URLs,
+		ListenerDepth:           chainRequest.Listener.Depth,
+		ListenerBlockPosition:   chainRequest.Listener.BlockPosition,
+		ListenerBackOffDuration: chainRequest.Listener.BackOffDuration,
 	}
 
-	err = h.store.UpdateNodeByID(request.Context(), node)
+	err = h.store.UpdateChainByUUID(request.Context(), chain)
 	if err != nil {
 		handleChainRegistryStoreError(rw, err)
 		return
 	}
 
-	_ = json.NewEncoder(rw).Encode(&patchResponse{})
-}
-
-func (h Handler) patchBlockPositionByID(rw http.ResponseWriter, request *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-
-	nodeID := mux.Vars(request)["nodeID"]
-
-	p := &PatchBlockPositionRequest{}
-	err := UnmarshalBody(request.Body, p)
-	if err != nil {
-		writeError(rw, errors.FromError(err).ExtendComponent(component).Error(), http.StatusBadRequest)
-		return
-	}
-
-	err = h.store.UpdateBlockPositionByID(request.Context(), nodeID, p.BlockPosition)
-	if err != nil {
-		handleChainRegistryStoreError(rw, err)
-		return
-	}
-
-	_ = json.NewEncoder(rw).Encode(&patchResponse{})
+	_ = json.NewEncoder(rw).Encode(&PatchResponse{})
 }

@@ -63,9 +63,9 @@ func TestMaxBalance(t *testing.T) {
 			tests,
 			&testutils.TestRequest{
 				Req: &types.Request{
-					ChainID: chains[i%3],
-					Amount:  values[i%3],
-					NodeURL: endpoint,
+					ChainID:  chains[i%3],
+					Amount:   values[i%3],
+					ChainURL: endpoint,
 				},
 				ExpectedAmount: expectedAmount,
 				ExpectedErr:    expectedErr,

@@ -22,7 +22,7 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 	msg.Topic = viper.GetString(broker.TxDecodedViperKey)
 
 	// Set key
-	msg.Key = sarama.ByteEncoder(txctx.Envelope.GetChain().ID().Bytes())
+	msg.Key = sarama.ByteEncoder(txctx.Envelope.GetChain().GetBigChainID().Bytes())
 
 	return nil
 }

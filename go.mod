@@ -27,9 +27,10 @@ require (
 	github.com/elazarl/go-bindata-assetfs v1.0.0
 	github.com/ethereum/go-ethereum v1.9.7
 	github.com/frankban/quicktest v1.5.0 // indirect
-	github.com/go-pg/migrations v6.7.3+incompatible
-	github.com/go-pg/pg v8.0.6+incompatible
-	github.com/gogo/protobuf v1.3.1
+	github.com/go-pg/migrations/v7 v7.1.9
+	github.com/go-pg/pg/v9 v9.1.1
+	github.com/go-playground/validator/v10 v10.1.0
+	github.com/gogo/protobuf v1.3.1 // indirect
 	github.com/golang/mock v1.3.1
 	github.com/golang/protobuf v1.3.2
 	github.com/gomodule/redigo v2.0.0+incompatible
@@ -44,7 +45,6 @@ require (
 	github.com/hashicorp/vault v1.2.3
 	github.com/hashicorp/vault/api v1.0.5-0.20190909201928-35325e2c3262
 	github.com/jcmturner/gofork v1.0.0 // indirect
-	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/julien-marchand/healthcheck v0.1.0
 	github.com/klauspost/compress v1.9.3 // indirect
 	github.com/magiconair/properties v1.8.1
@@ -74,9 +74,9 @@ require (
 	github.com/vulcand/oxy v1.0.0
 	github.com/yuin/gopher-lua v0.0.0-20190514113301-1cd887cd7036 // indirect
 	go.uber.org/atomic v1.5.1 // indirect
-	golang.org/x/crypto v0.0.0-20191202143827-86a70503ff7e
+	golang.org/x/crypto v0.0.0-20191206172530-e9b2fee46413
 	golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f // indirect
-	golang.org/x/net v0.0.0-20191126235420-ef20fe5d7933
+	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553
 	golang.org/x/sys v0.0.0-20191128015809-6d18c012aee9 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0
 	golang.org/x/tools v0.0.0-20191203134012-c197fd4bf371 // indirect
@@ -86,7 +86,6 @@ require (
 	gopkg.in/jcmturner/gokrb5.v7 v7.3.0 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 	k8s.io/apimachinery v0.0.0-20190612205821-1799e75a0719
-	mellium.im/sasl v0.2.1 // indirect
 )
 
 replace (

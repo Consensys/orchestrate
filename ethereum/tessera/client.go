@@ -1,7 +1,7 @@
 package tessera
 
 type Client interface {
-	// AddClient adds a Tessera client for a specified chain ID
+	// AddClient adds a Tessera client for a specified chain UUID
 	AddClient(chainID string, tesseraEndpoint EnclaveEndpoint)
 
 	// StoreRaw stores "data" field of a transaction in Tessera privacy enclave

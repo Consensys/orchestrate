@@ -4,10 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	uuid "github.com/satori/go.uuid"
-
-	"github.com/go-pg/pg"
-	log "github.com/sirupsen/logrus"
+	"github.com/go-pg/pg/v9"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
@@ -17,18 +14,8 @@ type ChainRegistry struct {
 	db *pg.DB
 }
 
-type dbLogger struct{}
-
-func (d dbLogger) BeforeQuery(_ *pg.QueryEvent) {
-}
-
-func (d dbLogger) AfterQuery(q *pg.QueryEvent) {
-	log.Trace(q.FormattedQuery())
-}
-
 // NewChainRegistry creates a new chain registry
 func NewChainRegistry(db *pg.DB) *ChainRegistry {
-	db.AddQueryHook(dbLogger{})
 	return &ChainRegistry{db: db}
 }
 
@@ -37,14 +24,10 @@ func NewChainRegistryPGOptions(opts *pg.Options) *ChainRegistry {
 	return NewChainRegistry(pg.Connect(opts))
 }
 
-func (r *ChainRegistry) RegisterNode(ctx context.Context, node *types.Node) error {
+func (r *ChainRegistry) RegisterChain(ctx context.Context, chain *types.Chain) error {
+	chain.SetDefault()
 
-	if node.ID == "" {
-		node.ID = uuid.NewV4().String()
-	}
-
-	_, err := r.db.ModelContext(ctx, node).
-		Returning("id").
+	_, err := r.db.ModelContext(ctx, chain).
 		Insert()
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(component)
@@ -53,10 +36,10 @@ func (r *ChainRegistry) RegisterNode(ctx context.Context, node *types.Node) erro
 	return nil
 }
 
-func (r *ChainRegistry) GetNodes(ctx context.Context, filters map[string]string) ([]*types.Node, error) {
-	nodes := make([]*types.Node, 0)
+func (r *ChainRegistry) GetChains(ctx context.Context, filters map[string]string) ([]*types.Chain, error) {
+	chains := make([]*types.Chain, 0)
 
-	req := r.db.ModelContext(ctx, &nodes)
+	req := r.db.ModelContext(ctx, &chains)
 	for k, v := range filters {
 		req.Where(fmt.Sprintf("%s = ?", k), v)
 	}
@@ -66,13 +49,13 @@ func (r *ChainRegistry) GetNodes(ctx context.Context, filters map[string]string)
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	return nodes, nil
+	return chains, nil
 }
 
-func (r *ChainRegistry) GetNodesByTenantID(ctx context.Context, tenantID string, filters map[string]string) ([]*types.Node, error) {
-	nodes := make([]*types.Node, 0)
+func (r *ChainRegistry) GetChainsByTenantID(ctx context.Context, tenantID string, filters map[string]string) ([]*types.Chain, error) {
+	chains := make([]*types.Chain, 0)
 
-	req := r.db.ModelContext(ctx, &nodes).
+	req := r.db.ModelContext(ctx, &chains).
 		Where("tenant_id = ?", tenantID)
 	for k, v := range filters {
 		req.Where(fmt.Sprintf("%s = ?", k), v)
@@ -83,13 +66,13 @@ func (r *ChainRegistry) GetNodesByTenantID(ctx context.Context, tenantID string,
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	return nodes, nil
+	return chains, nil
 }
 
-func (r *ChainRegistry) GetNodeByTenantIDAndNodeName(ctx context.Context, tenantID, name string) (*types.Node, error) {
-	node := &types.Node{}
+func (r *ChainRegistry) GetChainByTenantIDAndName(ctx context.Context, tenantID, name string) (*types.Chain, error) {
+	chain := &types.Chain{}
 
-	err := r.db.ModelContext(ctx, node).
+	err := r.db.ModelContext(ctx, chain).
 		Where("name = ?", name).
 		Where("tenant_id = ?", tenantID).
 		Select()
@@ -97,56 +80,56 @@ func (r *ChainRegistry) GetNodeByTenantIDAndNodeName(ctx context.Context, tenant
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	return node, nil
+	return chain, nil
 }
 
-func (r *ChainRegistry) GetNodeByTenantIDAndNodeID(ctx context.Context, tenantID, id string) (*types.Node, error) {
-	node := &types.Node{}
+func (r *ChainRegistry) GetChainByTenantIDAndUUID(ctx context.Context, tenantID, uuid string) (*types.Chain, error) {
+	chain := &types.Chain{}
 
-	err := r.db.ModelContext(ctx, node).
-		Where("id = ?", id).
+	err := r.db.ModelContext(ctx, chain).
+		Where("uuid = ?", uuid).
 		Where("tenant_id = ?", tenantID).
 		Select()
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	return node, nil
+	return chain, nil
 }
 
-func (r *ChainRegistry) GetNodeByID(ctx context.Context, id string) (*types.Node, error) {
-	node := &types.Node{}
+func (r *ChainRegistry) GetChainByUUID(ctx context.Context, uuid string) (*types.Chain, error) {
+	chain := &types.Chain{}
 
-	err := r.db.ModelContext(ctx, node).
-		Where("id = ?", id).
+	err := r.db.ModelContext(ctx, chain).
+		Where("uuid = ?", uuid).
 		Select()
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	return node, nil
+	return chain, nil
 }
 
-func (r *ChainRegistry) UpdateNodeByName(ctx context.Context, node *types.Node) error {
+func (r *ChainRegistry) UpdateChainByName(ctx context.Context, chain *types.Chain) error {
 
-	res, err := r.db.ModelContext(ctx, node).
-		Where("tenant_id = ?", node.TenantID).
-		Where("name = ?", node.Name).
-		UpdateNotNull()
+	res, err := r.db.ModelContext(ctx, chain).
+		Where("tenant_id = ?", chain.TenantID).
+		Where("name = ?", chain.Name).
+		UpdateNotZero()
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(component)
 	}
 
 	if res.RowsReturned() == 0 && res.RowsAffected() == 0 {
-		return errors.NotFoundError("no node found with tenant_id=%s and name=%s", node.TenantID, node.Name).ExtendComponent(component)
+		return errors.NotFoundError("no chain found with tenant_id=%s and name=%s", chain.TenantID, chain.Name).ExtendComponent(component)
 	}
 	return nil
 }
 
 func (r *ChainRegistry) UpdateBlockPositionByName(ctx context.Context, name, tenantID string, blockPosition int64) error {
-	node := &types.Node{}
+	chain := &types.Chain{}
 
-	res, err := r.db.ModelContext(ctx, node).
+	res, err := r.db.ModelContext(ctx, chain).
 		Set("listener_block_position = ?", blockPosition).
 		Where("tenant_id = ?", tenantID).
 		Where("name = ?", name).
@@ -156,71 +139,71 @@ func (r *ChainRegistry) UpdateBlockPositionByName(ctx context.Context, name, ten
 	}
 
 	if res.RowsReturned() == 0 && res.RowsAffected() == 0 {
-		return errors.NotFoundError("no node found with tenant_id=%s and name=%s", node.TenantID, node.Name).ExtendComponent(component)
+		return errors.NotFoundError("no chain found with tenant_id=%s and name=%s", tenantID, name).ExtendComponent(component)
 	}
 	return nil
 }
 
-func (r *ChainRegistry) UpdateNodeByID(ctx context.Context, node *types.Node) error {
+func (r *ChainRegistry) UpdateChainByUUID(ctx context.Context, chain *types.Chain) error {
 
-	res, err := r.db.ModelContext(ctx, node).
+	res, err := r.db.ModelContext(ctx, chain).
 		WherePK().
-		UpdateNotNull()
+		UpdateNotZero()
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(component)
 	}
 
 	if res.RowsReturned() == 0 && res.RowsAffected() == 0 {
-		return errors.NotFoundError("no node found with id %s", node.ID).ExtendComponent(component)
+		return errors.NotFoundError("no chain found with uuid %s", chain.UUID).ExtendComponent(component)
 	}
 	return nil
 }
 
-func (r *ChainRegistry) UpdateBlockPositionByID(ctx context.Context, id string, blockPosition int64) error {
-	node := &types.Node{}
+func (r *ChainRegistry) UpdateBlockPositionByUUID(ctx context.Context, uuid string, blockPosition int64) error {
+	chain := &types.Chain{}
 
-	res, err := r.db.ModelContext(ctx, node).
+	res, err := r.db.ModelContext(ctx, chain).
 		Set("listener_block_position = ?", blockPosition).
-		Where("id = ?", id).
+		Where("uuid = ?", uuid).
 		Update()
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(component)
 	}
 
 	if res.RowsReturned() == 0 && res.RowsAffected() == 0 {
-		return errors.NotFoundError("no node found with id %s", id).ExtendComponent(component)
+		return errors.NotFoundError("no chain found with uuid %s", uuid).ExtendComponent(component)
 	}
 	return nil
 }
 
-func (r *ChainRegistry) DeleteNodeByName(ctx context.Context, node *types.Node) error {
+func (r *ChainRegistry) DeleteChainByName(ctx context.Context, chain *types.Chain) error {
 
-	res, err := r.db.ModelContext(ctx, node).
-		Where("tenant_id = ?", node.TenantID).
-		Where("name = ?", node.Name).
+	res, err := r.db.ModelContext(ctx, chain).
+		Where("tenant_id = ?", chain.TenantID).
+		Where("name = ?", chain.Name).
 		Delete()
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(component)
 	}
 
 	if res.RowsReturned() == 0 && res.RowsAffected() == 0 {
-		return errors.NotFoundError("no node found with tenant_id=%s and name=%s", node.TenantID, node.Name).ExtendComponent(component)
+		return errors.NotFoundError("no chain found with tenant_id=%s and name=%s", chain.TenantID, chain.Name).ExtendComponent(component)
 	}
 	return nil
 }
 
-func (r *ChainRegistry) DeleteNodeByID(ctx context.Context, id string) error {
-	node := &types.Node{}
+func (r *ChainRegistry) DeleteChainByUUID(ctx context.Context, uuid string) error {
+	chain := &types.Chain{}
 
-	res, err := r.db.ModelContext(ctx, node).
-		Where("id = ?", id).
+	res, err := r.db.ModelContext(ctx, chain).
+		Where("uuid = ?", uuid).
 		Delete()
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(component)
 	}
 
 	if res.RowsReturned() == 0 && res.RowsAffected() == 0 {
-		return errors.NotFoundError("no node found with id %s", id).ExtendComponent(component)
+		return errors.NotFoundError("no chain found with uuid %s", uuid).ExtendComponent(component)
 	}
 	return nil
 }

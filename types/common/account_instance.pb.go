@@ -24,7 +24,7 @@ const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 // Information about an account on a chain
 type AccountInstance struct {
-	// Chain ID of the chain
+	// Chain GetBigChainID of the chain
 	Chain *chain.Chain `protobuf:"bytes,1,opt,name=chain,proto3" json:"chain,omitempty"`
 	// Deployment address of the contract
 	Account              *ethereum.Account `protobuf:"bytes,2,opt,name=account,proto3" json:"account,omitempty"`

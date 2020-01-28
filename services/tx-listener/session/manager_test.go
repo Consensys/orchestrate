@@ -43,12 +43,12 @@ type MockBuilder struct {
 	sessions map[string]*MockSession
 }
 
-func (b *MockBuilder) NewSession(node *dynamic.Node) (Session, error) {
-	if node.ID == keyError {
+func (b *MockBuilder) NewSession(chain *dynamic.Chain) (Session, error) {
+	if chain.UUID == keyError {
 		return nil, fmt.Errorf("test")
 	}
 
-	return b.getSession(node.ID), nil
+	return b.getSession(chain.UUID), nil
 }
 
 func (b *MockBuilder) addSession(key string, sess *MockSession) {
@@ -86,10 +86,10 @@ func TestManager(t *testing.T) {
 	manager := NewManager(builder, prvdr)
 
 	// Prepare 2 sessions
-	testNode1, testNode2 := "test-node-1", "test-node-2"
+	testChain1, testChain2 := "test-chain-1", "test-chain-2"
 	session1, session2 := NewMockSession(), NewMockSession()
-	builder.addSession(testNode1, session1)
-	builder.addSession(testNode2, session2)
+	builder.addSession(testChain1, session1)
+	builder.addSession(testChain2, session2)
 
 	// Start manager
 	ctx, cancel := context.WithCancel(context.Background())
@@ -102,23 +102,23 @@ func TestManager(t *testing.T) {
 	// Send command to start both session
 	manager.commands <- &Command{
 		Type: START,
-		Node: &dynamic.Node{
-			ID: testNode1,
+		Chain: &dynamic.Chain{
+			UUID: testChain1,
 		},
 	}
 
 	manager.commands <- &Command{
 		Type: START,
-		Node: &dynamic.Node{
-			ID: testNode2,
+		Chain: &dynamic.Chain{
+			UUID: testChain2,
 		},
 	}
 
 	// Stop first session
 	manager.commands <- &Command{
 		Type: STOP,
-		Node: &dynamic.Node{
-			ID: testNode1,
+		Chain: &dynamic.Chain{
+			UUID: testChain1,
 		},
 	}
 
@@ -181,20 +181,20 @@ func TestListenConfiguration(t *testing.T) {
 		sessions: make(map[string]*MockSession),
 	}
 	manager := NewManager(builder, provider)
-	node1 := &dynamic.Node{ID: "test"}
+	chain1 := &dynamic.Chain{UUID: "test"}
 
 	go func() {
 		manager.msgInput <- &dynamic.Message{
 			Provider: "test",
-			Configuration: &dynamic.Configuration{Nodes: map[string]*dynamic.Node{
-				"test": node1,
+			Configuration: &dynamic.Configuration{Chains: map[string]*dynamic.Chain{
+				"test": chain1,
 			}},
 		}
 	}()
 	go func() { manager.listenConfiguration() }()
 	cmd := <-manager.commands
 	assert.Equal(t, cmd.Type, START, "should get start command")
-	assert.Equal(t, cmd.Node, node1, "should get start command")
+	assert.Equal(t, cmd.Chain, chain1, "should get start command")
 }
 
 func TestExecuteCommand(t *testing.T) {
@@ -205,13 +205,13 @@ func TestExecuteCommand(t *testing.T) {
 	}
 	manager := NewManager(builder, provider)
 
-	node := &dynamic.Node{ID: "test", TenantID: "test", Name: "test"}
+	chain := &dynamic.Chain{UUID: "test", TenantID: "test", Name: "test"}
 	session1 := NewMockSession()
-	builder.addSession(node.ID, session1)
+	builder.addSession(chain.UUID, session1)
 
 	cmd := &Command{
-		Type: UPDATE,
-		Node: node,
+		Type:  UPDATE,
+		Chain: chain,
 	}
 	manager.executeCommand(context.Background(), cmd)
 }
@@ -224,10 +224,10 @@ func TestRunSession(t *testing.T) {
 	}
 	manager := NewManager(builder, provider)
 
-	node := &dynamic.Node{ID: keyError}
+	chain := &dynamic.Chain{UUID: keyError}
 	ctx := context.WithValue(context.Background(), keyError, true) // nolint
 
 	go func() {
-		manager.runSession(ctx, node)
+		manager.runSession(ctx, chain)
 	}()
 }

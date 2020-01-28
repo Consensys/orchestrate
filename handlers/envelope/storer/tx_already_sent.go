@@ -11,7 +11,7 @@ import (
 // TxAlreadySent implements an handler that controls whether transaction associated to envelope
 // has already been sent and abort execution of pending handlers
 //
-// This handler makes guarantee that envelopes with the same ID will not be send twice (scenario that could append in case
+// This handler makes guarantee that envelopes with the same UUID will not be send twice (scenario that could append in case
 // of crash. As transaction orchestration system is configured to consume Kafka messages at least once).
 //
 // Warning: above guarantee require embedded handler to

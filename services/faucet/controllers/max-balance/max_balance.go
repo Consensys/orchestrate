@@ -29,7 +29,7 @@ func NewController(conf *Config) *Controller {
 func (ctrl *Controller) Control(credit faucet.CreditFunc) faucet.CreditFunc {
 	return func(ctx context.Context, r *types.Request) (*big.Int, error) {
 		// Retrieve account balance
-		balance, err := ctrl.conf.BalanceAt(ctx, r.NodeURL, r.Beneficiary, nil)
+		balance, err := ctrl.conf.BalanceAt(ctx, r.ChainURL, r.Beneficiary, nil)
 		if err != nil {
 			return big.NewInt(0), errors.FromError(err).ExtendComponent(component)
 		}

@@ -130,7 +130,7 @@ func TestGenerateIDToken(t *testing.T) {
 				t.Errorf("GenerateIDToken() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			fmt.Printf("ID Token value: \n%s\n", gotToken)
+			fmt.Printf("UUID Token value: \n%s\n", gotToken)
 
 		})
 	}

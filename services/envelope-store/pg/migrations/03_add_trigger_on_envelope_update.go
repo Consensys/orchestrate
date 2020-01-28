@@ -1,14 +1,14 @@
 package migrations
 
 import (
-	"github.com/go-pg/migrations"
+	"github.com/go-pg/migrations/v7"
 	log "github.com/sirupsen/logrus"
 )
 
 func addTriggerOnEnvelopeUpdate(db migrations.DB) error {
 	log.Debugf("Add trigger envelope_trig")
 
-	// Remark: you will note that we consider that chain ID should be max a uint256
+	// Remark: you will note that we consider that chain UUID should be max a uint256
 	_, err := db.Exec(
 		`CREATE OR REPLACE FUNCTION envelope_updated() RETURNS TRIGGER AS 
 	$$

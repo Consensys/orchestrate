@@ -20,7 +20,7 @@ func NewAuth(key string) *Auth {
 
 const apiKeyPrefix = "APIKey "
 
-// Parse and verify the validity of the Token (ID or Access) and return a struct for a JWT (JSON Web Token)
+// Parse and verify the validity of the Token (UUID or Access) and return a struct for a JWT (JSON Web Token)
 func (a *Auth) Check(ctx context.Context) (context.Context, error) {
 	if a.key == "" {
 		// If no key provided we deactivate authentication

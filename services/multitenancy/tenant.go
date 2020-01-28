@@ -26,7 +26,7 @@ func (k *KeyBuilder) BuildKey(ctx context.Context, key string) (string, error) {
 
 	tenantID := TenantIDFromContext(ctx)
 	if tenantID == "" {
-		return "", errors.NotFoundError("not able to retrieve the tenant ID: The tenant_id is not present in the Context")
+		return "", errors.NotFoundError("not able to retrieve the tenant UUID: The tenant_id is not present in the Context")
 	}
 
 	newKey := tenantID + key

@@ -32,8 +32,8 @@ func NewHTTPClient(h *http.Client, c *Config) *HTTPClient {
 	}
 }
 
-func (c *HTTPClient) GetNodes(ctx context.Context) ([]*types.Node, error) {
-	reqURL := fmt.Sprintf("%v/nodes", c.config.URL)
+func (c *HTTPClient) GetChains(ctx context.Context) ([]*types.Chain, error) {
+	reqURL := fmt.Sprintf("%v/chains", c.config.URL)
 	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, reqURL, nil)
 	r, err := c.client.Do(req)
 	if err != nil {
@@ -46,19 +46,19 @@ func (c *HTTPClient) GetNodes(ctx context.Context) ([]*types.Node, error) {
 	}()
 
 	if r.StatusCode != http.StatusOK {
-		return nil, errors.FromError(fmt.Errorf("could not get nodes %s - got %d", reqURL, r.StatusCode)).ExtendComponent(component)
+		return nil, errors.FromError(fmt.Errorf("could not get chains %s - got %d", reqURL, r.StatusCode)).ExtendComponent(component)
 	}
 
-	var nodes []*types.Node
-	if err := json.NewDecoder(r.Body).Decode(&nodes); err != nil {
+	var chains []*types.Chain
+	if err := json.NewDecoder(r.Body).Decode(&chains); err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	return nodes, nil
+	return chains, nil
 }
 
-func (c *HTTPClient) GetNodeByID(ctx context.Context, nodeID string) (*types.Node, error) {
-	reqURL := fmt.Sprintf("%v/nodes/%v", c.config.URL, nodeID)
+func (c *HTTPClient) GetChainByUUID(ctx context.Context, chainUUID string) (*types.Chain, error) {
+	reqURL := fmt.Sprintf("%v/chains/%v", c.config.URL, chainUUID)
 	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, reqURL, nil)
 	r, err := c.client.Do(req)
 	if err != nil {
@@ -71,45 +71,21 @@ func (c *HTTPClient) GetNodeByID(ctx context.Context, nodeID string) (*types.Nod
 	}()
 
 	if r.StatusCode != http.StatusOK {
-		return nil, errors.FromError(fmt.Errorf("could not get node %s - got %d", reqURL, r.StatusCode)).ExtendComponent(component)
+		return nil, errors.FromError(fmt.Errorf("could not get chain %s - got %d", reqURL, r.StatusCode)).ExtendComponent(component)
 	}
 
-	node := &types.Node{}
-	if err := json.NewDecoder(r.Body).Decode(node); err != nil {
+	chain := &types.Chain{}
+	if err := json.NewDecoder(r.Body).Decode(chain); err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
-	return node, nil
+	return chain, nil
 }
 
-func (c *HTTPClient) GetNodeByTenantAndNodeID(ctx context.Context, tenantID, nodeID string) (*types.Node, error) {
-	reqURL := fmt.Sprintf("%s/%s/nodes/%s", c.config.URL, tenantID, nodeID)
-	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, reqURL, nil)
-	r, err := c.client.Do(req)
-	if err != nil {
-		return nil, errors.FromError(fmt.Errorf("%v - url: %s", err, reqURL)).ExtendComponent(component)
-	}
-	defer func() {
-		if deferErr := r.Body.Close(); err != nil {
-			log.WithError(deferErr).Errorf("%s: could close body", component)
-		}
-	}()
-
-	if r.StatusCode != http.StatusOK {
-		return nil, errors.FromError(fmt.Errorf("could not get node %s - got %d", reqURL, r.StatusCode)).ExtendComponent(component)
-	}
-
-	node := &types.Node{}
-	if err := json.NewDecoder(r.Body).Decode(node); err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
-	}
-	return node, nil
-}
-
-func (c *HTTPClient) GetNodeByTenantAndNodeName(ctx context.Context, tenantID, nodeName string) (*types.Node, error) {
+func (c *HTTPClient) GetChainByTenantAndUUID(ctx context.Context, tenantID, chainUUID string) (*types.Chain, error) {
 	baseURL, _ := url.Parse(c.config.URL)
-	baseURL.Path = fmt.Sprintf("%s/nodes", tenantID)
+	baseURL.Path = fmt.Sprintf("%s/chains", tenantID)
 	params := url.Values{}
-	params.Add("name", nodeName)
+	params.Add("uuid", chainUUID)
 	baseURL.RawQuery = params.Encode()
 	reqURL := baseURL.String()
 
@@ -125,27 +101,51 @@ func (c *HTTPClient) GetNodeByTenantAndNodeName(ctx context.Context, tenantID, n
 	}()
 
 	if r.StatusCode != http.StatusOK {
-		return nil, errors.FromError(fmt.Errorf("could not get node %s - got %d", reqURL, r.StatusCode)).ExtendComponent(component)
+		return nil, errors.FromError(fmt.Errorf("could not get chain %s - got %d", reqURL, r.StatusCode)).ExtendComponent(component)
 	}
 
-	nodes := make([]*types.Node, 0)
-	if err := json.NewDecoder(r.Body).Decode(&nodes); err != nil {
+	chains := make([]*types.Chain, 0)
+	if err := json.NewDecoder(r.Body).Decode(&chains); err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
-	if len(nodes) != 1 {
-		return nil, errors.FromError(fmt.Errorf("did not expected to get many nodes with same for tenantID:%s and name:%s  from the chain registry - %s", tenantID, nodeName, reqURL)).ExtendComponent(component)
+	if len(chains) != 1 {
+		return nil, errors.FromError(fmt.Errorf("did not expected to get many chains with same for tenantID:%s and uuid:%s  from the chain registry - %s", tenantID, chainUUID, reqURL)).ExtendComponent(component)
 	}
-
-	return nodes[0], nil
+	return chains[0], nil
 }
 
-func (c *HTTPClient) UpdateBlockPosition(ctx context.Context, nodeID string, blockNumber int64) error {
+func (c *HTTPClient) GetChainByTenantAndName(ctx context.Context, tenantID, chainName string) (*types.Chain, error) {
+	reqURL := fmt.Sprintf("%s/%s/chains/%s", c.config.URL, tenantID, chainName)
+
+	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, reqURL, nil)
+	r, err := c.client.Do(req)
+	if err != nil {
+		return nil, errors.FromError(fmt.Errorf("%v - url: %s", err, reqURL)).ExtendComponent(component)
+	}
+	defer func() {
+		if deferErr := r.Body.Close(); err != nil {
+			log.WithError(deferErr).Errorf("%s: could close body", component)
+		}
+	}()
+
+	if r.StatusCode != http.StatusOK {
+		return nil, errors.FromError(fmt.Errorf("could not get chain %s - got %d", reqURL, r.StatusCode)).ExtendComponent(component)
+	}
+
+	chain := &types.Chain{}
+	if err := json.NewDecoder(r.Body).Decode(chain); err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+	return chain, nil
+}
+
+func (c *HTTPClient) UpdateBlockPosition(ctx context.Context, chainUUID string, blockNumber int64) error {
+	reqURL := fmt.Sprintf("%v/chains/%v", c.config.URL, chainUUID)
 	body := new(bytes.Buffer)
-	_ = json.NewEncoder(body).Encode(&api.PatchBlockPositionRequest{
-		BlockPosition: blockNumber,
+	_ = json.NewEncoder(body).Encode(&api.PatchRequest{
+		Listener: &api.Listener{BlockPosition: &blockNumber},
 	})
 
-	reqURL := fmt.Sprintf("%v/nodes/%v/block-position", c.config.URL, nodeID)
 	req, _ := http.NewRequestWithContext(ctx, http.MethodPatch, reqURL, body)
 	r, err := c.client.Do(req)
 	if err != nil {

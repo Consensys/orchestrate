@@ -17,9 +17,9 @@ type TransactionSignerFunc func(keystore.KeyStore, *engine.TxContext, common.Add
 func GenerateSignerHandler(signerFunc TransactionSignerFunc, backend keystore.KeyStore, successMsg, errorMsg string) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"chain.id":    txctx.Envelope.GetChain().ID().String(),
-			"tx.sender":   txctx.Envelope.GetFrom().Address().Hex(),
-			"metadata.id": txctx.Envelope.GetMetadata().GetId(),
+			"chain.chainID": txctx.Envelope.GetChain().GetBigChainID().String(),
+			"tx.sender":     txctx.Envelope.GetFrom().Address().Hex(),
+			"metadata.id":   txctx.Envelope.GetMetadata().GetId(),
 		})
 
 		if txctx.Envelope.GetTx().GetRaw() != nil {

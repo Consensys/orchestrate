@@ -11,7 +11,7 @@ type Session interface {
 }
 
 type Builder interface {
-	NewSession(node *dynamic.Node) (Session, error)
+	NewSession(chain *dynamic.Chain) (Session, error)
 }
 
 type SManager interface {

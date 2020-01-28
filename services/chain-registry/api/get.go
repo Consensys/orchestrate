@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func (h Handler) getNodes(rw http.ResponseWriter, request *http.Request) {
+func (h Handler) getChains(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
 	filters := make(map[string]string)
@@ -17,30 +17,28 @@ func (h Handler) getNodes(rw http.ResponseWriter, request *http.Request) {
 		filters[key] = html.EscapeString(request.URL.Query().Get(k))
 	}
 
-	nodes, err := h.store.GetNodes(request.Context(), filters)
+	chains, err := h.store.GetChains(request.Context(), filters)
 	if err != nil {
 		handleChainRegistryStoreError(rw, err)
 		return
 	}
 
-	_ = json.NewEncoder(rw).Encode(nodes)
+	_ = json.NewEncoder(rw).Encode(chains)
 }
 
-func (h Handler) getNodeByID(rw http.ResponseWriter, request *http.Request) {
+func (h Handler) getChainByUUID(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
-	nodeID := mux.Vars(request)["nodeID"]
-
-	node, err := h.store.GetNodeByID(request.Context(), nodeID)
+	chain, err := h.store.GetChainByUUID(request.Context(), mux.Vars(request)["uuid"])
 	if err != nil {
 		handleChainRegistryStoreError(rw, err)
 		return
 	}
 
-	_ = json.NewEncoder(rw).Encode(node)
+	_ = json.NewEncoder(rw).Encode(chain)
 }
 
-func (h Handler) getNodesByTenantID(rw http.ResponseWriter, request *http.Request) {
+func (h Handler) getChainsByTenantID(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
 	filters := make(map[string]string)
@@ -49,23 +47,23 @@ func (h Handler) getNodesByTenantID(rw http.ResponseWriter, request *http.Reques
 		filters[key] = html.EscapeString(request.URL.Query().Get(k))
 	}
 
-	nodes, err := h.store.GetNodesByTenantID(request.Context(), mux.Vars(request)["tenantID"], filters)
+	chains, err := h.store.GetChainsByTenantID(request.Context(), mux.Vars(request)["tenantID"], filters)
 	if err != nil {
 		handleChainRegistryStoreError(rw, err)
 		return
 	}
 
-	_ = json.NewEncoder(rw).Encode(nodes)
+	_ = json.NewEncoder(rw).Encode(chains)
 }
 
-func (h Handler) getNodeByTenantIDAndNodeID(rw http.ResponseWriter, request *http.Request) {
+func (h Handler) getChainByTenantIDAndName(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
-	node, err := h.store.GetNodeByTenantIDAndNodeID(request.Context(), mux.Vars(request)["tenantID"], mux.Vars(request)["nodeID"])
+	chain, err := h.store.GetChainByTenantIDAndName(request.Context(), mux.Vars(request)["tenantID"], mux.Vars(request)["name"])
 	if err != nil {
 		handleChainRegistryStoreError(rw, err)
 		return
 	}
 
-	_ = json.NewEncoder(rw).Encode(node)
+	_ = json.NewEncoder(rw).Encode(chain)
 }

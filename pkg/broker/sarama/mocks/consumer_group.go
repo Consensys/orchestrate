@@ -146,12 +146,12 @@ func (s *ConsumerGroupSession) Claims() map[string][]int32 {
 	return s.claims
 }
 
-// MemberID returns the cluster member ID.
+// MemberID returns the cluster member UUID.
 func (s *ConsumerGroupSession) MemberID() string {
 	return s.memberID
 }
 
-// GenerationID returns the current generation ID.
+// GenerationID returns the current generation UUID.
 func (s *ConsumerGroupSession) GenerationID() int32 {
 	return s.generationID
 }

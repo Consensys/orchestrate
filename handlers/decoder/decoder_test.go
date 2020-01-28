@@ -31,7 +31,7 @@ func TestDecoder(t *testing.T) {
 		{
 			"Receipt without error and log decoded",
 			func(txctx *engine.TxContext) *engine.TxContext {
-				txctx.Envelope.Chain = (&chain.Chain{}).SetID(big.NewInt(1))
+				txctx.Envelope.Chain = (&chain.Chain{}).SetChainID(big.NewInt(1))
 				txctx.Envelope.Receipt = &ethereum.Receipt{
 					Logs: []*ethereum.Log{
 						{
@@ -58,7 +58,7 @@ func TestDecoder(t *testing.T) {
 		}, {
 			"Receipt without error and unknown abi",
 			func(txctx *engine.TxContext) *engine.TxContext {
-				txctx.Envelope.Chain = (&chain.Chain{}).SetID(big.NewInt(1))
+				txctx.Envelope.Chain = (&chain.Chain{}).SetChainID(big.NewInt(1))
 				txctx.Envelope.Receipt = &ethereum.Receipt{
 					Logs: []*ethereum.Log{
 						{
@@ -86,7 +86,7 @@ func TestDecoder(t *testing.T) {
 		{
 			"Receipt without topics",
 			func(txctx *engine.TxContext) *engine.TxContext {
-				txctx.Envelope.Chain = (&chain.Chain{}).SetID(big.NewInt(1))
+				txctx.Envelope.Chain = (&chain.Chain{}).SetChainID(big.NewInt(1))
 				txctx.Envelope.Receipt = &ethereum.Receipt{
 					Logs: []*ethereum.Log{
 						{

@@ -28,7 +28,7 @@ type EthClient interface {
 }
 
 type Session struct {
-	Node *dynamic.Node
+	Chain *dynamic.Chain
 
 	ec EthClient
 
@@ -112,23 +112,23 @@ func (s *Session) init(ctx context.Context) error {
 }
 
 func (s *Session) initChainID(ctx context.Context) error {
-	chain, err := s.ec.Network(ctx, s.Node.URL)
+	chain, err := s.ec.Network(ctx, s.Chain.URL)
 	if err != nil {
 		return err
 	}
-	s.Node.ChainID = chain
+	s.Chain.ChainID = chain
 	return nil
 }
 
 func (s *Session) initPosition(ctx context.Context) error {
-	blockPosition, err := s.offsets.GetLastBlockNumber(ctx, s.Node)
+	blockPosition, err := s.offsets.GetLastBlockNumber(ctx, s.Chain)
 	if err != nil {
 		return err
 	}
 
 	if blockPosition == 0 {
-		// We listen the node for the first time
-		if s.Node.Listener.BlockPosition < 0 {
+		// We listen the chain for the first time
+		if s.Chain.Listener.BlockPosition < 0 {
 			// Start from latest block
 			tip, err := s.getChainTip(ctx)
 			if err != nil {
@@ -138,10 +138,10 @@ func (s *Session) initPosition(ctx context.Context) error {
 			blockPosition = int64(tip)
 		} else {
 			// Start from position provided
-			blockPosition = s.Node.Listener.BlockPosition
+			blockPosition = s.Chain.Listener.BlockPosition
 		}
 	} else {
-		// It is not the first time we listen the node
+		// It is not the first time we listen the chain
 		// So we start listening from next block
 		blockPosition++
 	}
@@ -154,7 +154,7 @@ func (s *Session) initPosition(ctx context.Context) error {
 
 func (s *Session) listen(ctx context.Context) {
 	log.FromContext(ctx).WithField("block.start", s.blockPosition).Errorf("start listening")
-	ticker := time.NewTicker(s.Node.Listener.Backoff)
+	ticker := time.NewTicker(s.Chain.Listener.Backoff)
 listeningLoop:
 	for {
 		select {
@@ -211,10 +211,10 @@ func (s *Session) callHooks(ctx context.Context) {
 
 func (s *Session) callHook(ctx context.Context, block *fetchedBlock) error {
 	// Call hook
-	err := s.hook.AfterNewBlock(ctx, s.Node, block.block, block.receipts)
+	err := s.hook.AfterNewBlock(ctx, s.Chain, block.block, block.receipts)
 	if err == nil {
 		// Update last block processed
-		err = s.offsets.SetLastBlockNumber(ctx, s.Node, int64(block.block.NumberU64()))
+		err = s.offsets.SetLastBlockNumber(ctx, s.Chain, int64(block.block.NumberU64()))
 	}
 	return err
 }
@@ -223,7 +223,7 @@ func (s *Session) fetchBlock(ctx context.Context, blockPosition uint64) *Future 
 	return NewFuture(func() (interface{}, error) {
 		blck, err := s.ec.BlockByNumber(
 			ethclientutils.RetryNotFoundError(ctx, true),
-			s.Node.URL,
+			s.Chain.URL,
 			big.NewInt(int64(blockPosition)),
 		)
 		if err != nil {
@@ -265,7 +265,7 @@ func (s *Session) fetchReceipt(ctx context.Context, txHash ethcommon.Hash) *Futu
 	return NewFuture(func() (interface{}, error) {
 		receipt, err := s.ec.TransactionReceipt(
 			ethclientutils.RetryNotFoundError(ctx, true),
-			s.Node.URL,
+			s.Chain.URL,
 			txHash,
 		)
 		if err != nil {
@@ -279,7 +279,7 @@ func (s *Session) fetchReceipt(ctx context.Context, txHash ethcommon.Hash) *Futu
 func (s *Session) getChainTip(ctx context.Context) (tip uint64, err error) {
 	head, err := s.ec.HeaderByNumber(
 		ethclientutils.RetryNotFoundError(ctx, true),
-		s.Node.URL,
+		s.Chain.URL,
 		nil,
 	)
 	if err != nil {
@@ -287,8 +287,8 @@ func (s *Session) getChainTip(ctx context.Context) (tip uint64, err error) {
 		return 0, err
 	}
 
-	if head.Number.Uint64() > s.Node.Listener.Depth {
-		tip = head.Number.Uint64() - s.Node.Listener.Depth
+	if head.Number.Uint64() > s.Chain.Listener.Depth {
+		tip = head.Number.Uint64() - s.Chain.Listener.Depth
 	}
 
 	return
@@ -322,13 +322,13 @@ func NewSessionBuilder(hk hook.Hook, offsets offset.Manager, ec EthClient) *Sess
 	}
 }
 
-func (b *SessionBuilder) NewSession(node *dynamic.Node) (session.Session, error) {
-	return b.newSession(node), nil
+func (b *SessionBuilder) NewSession(chain *dynamic.Chain) (session.Session, error) {
+	return b.newSession(chain), nil
 }
 
-func (b *SessionBuilder) newSession(node *dynamic.Node) *Session {
+func (b *SessionBuilder) newSession(chain *dynamic.Chain) *Session {
 	return &Session{
-		Node:          node,
+		Chain:         chain,
 		ec:            b.ec,
 		hook:          b.hook,
 		offsets:       b.offsets,

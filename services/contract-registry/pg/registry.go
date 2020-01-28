@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/go-pg/pg"
+	"github.com/go-pg/pg/v9"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/common"
@@ -278,7 +278,7 @@ func (r *ContractRegistry) GetMethodsBySelector(ctx context.Context, req *svc.Ge
 	err := r.db.ModelContext(ctx, method).
 		Column("method_model.abi").
 		Join("JOIN codehashes AS c ON c.codehash = method_model.codehash").
-		Where("c.chain_id = ?", req.GetAccountInstance().GetChain().ID().String()).
+		Where("c.chain_id = ?", req.GetAccountInstance().GetChain().GetBigChainID().String()).
 		Where("c.address = ?", req.GetAccountInstance().GetAccount().GetRaw()).
 		Where("method_model.selector = ?", req.GetSelector()).
 		First()
@@ -314,7 +314,7 @@ func (r *ContractRegistry) GetEventsBySigHash(ctx context.Context, req *svc.GetE
 	err := r.db.ModelContext(ctx, event).
 		Column("event_model.abi").
 		Join("JOIN codehashes AS c ON c.codehash = event_model.codehash").
-		Where("c.chain_id = ?", req.GetAccountInstance().GetChain().ID().String()).
+		Where("c.chain_id = ?", req.GetAccountInstance().GetChain().GetBigChainID().String()).
 		Where("c.address = ?", req.GetAccountInstance().GetAccount().GetRaw()).
 		Where("event_model.sig_hash = ?", req.GetSigHash()).
 		Where("event_model.indexed_input_count = ?", req.GetIndexedInputCount()).
@@ -380,7 +380,7 @@ func (r *ContractRegistry) GetTags(ctx context.Context, req *svc.GetTagsRequest)
 // SetAccountCodeHash set the codehash of a contract address for a given chain
 func (r *ContractRegistry) SetAccountCodeHash(ctx context.Context, req *svc.SetAccountCodeHashRequest) (*svc.SetAccountCodeHashResponse, error) {
 	codehash := &CodehashModel{
-		ChainID:  req.GetAccountInstance().GetChain().ID().String(),
+		ChainID:  req.GetAccountInstance().GetChain().GetBigChainID().String(),
 		Address:  req.GetAccountInstance().GetAccount().GetRaw(),
 		Codehash: req.GetCodeHash(),
 	}

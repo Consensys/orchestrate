@@ -31,7 +31,7 @@ const (
 	testAccount                = "0xdbb881a51cd4023e4400cef3ef73046743f08da3"
 )
 
-func TestNodeInjector(t *testing.T) {
+func TestEnricher(t *testing.T) {
 	testSet := []struct {
 		name          string
 		input         func(txctx *engine.TxContext) *engine.TxContext

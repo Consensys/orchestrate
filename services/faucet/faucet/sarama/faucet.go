@@ -37,7 +37,7 @@ func NewFaucet(p sarama.SyncProducer) *Faucet {
 func (f *Faucet) prepareMsg(ctx context.Context, r *types.Request, msg *sarama.ProducerMessage) error {
 	// Create Trace for Crediting message
 	e := &envelope.Envelope{
-		Chain: (&chain.Chain{}).SetID(r.ChainID).SetNodeID(r.NodeID).SetNodeName(r.NodeName),
+		Chain: (&chain.Chain{}).SetChainID(r.ChainID).SetUUID(r.ChainUUID).SetName(r.ChainName),
 		From:  ethereum.HexToAccount(r.Creditor.Hex()),
 		Tx: &ethereum.Transaction{
 			TxData: (&ethereum.TxData{}).SetValue(r.Amount).SetTo(r.Beneficiary),

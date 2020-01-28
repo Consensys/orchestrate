@@ -1,7 +1,7 @@
 package envelopestore
 
 import (
-	"github.com/go-pg/pg"
+	"github.com/go-pg/pg/v9"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"

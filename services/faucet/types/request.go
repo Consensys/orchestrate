@@ -9,9 +9,9 @@ import (
 // Request holds information for a Faucet Credit Request
 type Request struct {
 	ChainID     *big.Int
-	NodeURL     string
-	NodeName    string
-	NodeID      string
+	ChainURL    string
+	ChainName   string
+	ChainUUID   string
 	Creditor    ethcommon.Address
 	Beneficiary ethcommon.Address
 	Amount      *big.Int

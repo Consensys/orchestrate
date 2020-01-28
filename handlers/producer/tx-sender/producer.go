@@ -14,7 +14,7 @@ import (
 // PrepareMsg prepare message to produce from TxContexts
 func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 	// Set message Key
-	msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(txctx.Envelope.GetChain().ID(), txctx.Envelope.Sender()))
+	msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(txctx.Envelope.GetChain().GetBigChainID(), txctx.Envelope.Sender()))
 
 	// We loop over errors to
 	// - determine to which topic to send transaction

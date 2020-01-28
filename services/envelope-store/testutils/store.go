@@ -147,8 +147,8 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 		func(t *testing.T, err error) { assert.NoError(t, err, "LoadByTxHash should not error") },
 		func(t *testing.T, resp *evlpstore.StoreResponse) {
 			assert.Equal(t, evlpstore.Status_STORED, resp.GetStatusInfo().GetStatus(), "LoadByTxHash status should be correct")
-			assert.Equal(t, "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11", resp.GetEnvelope().GetMetadata().GetId(), "LoadByTxHash Envelope ID should be correct")
-			assert.Equal(t, "888", resp.GetEnvelope().GetChain().ID().String(), "LoadByTxHash ChainID should be correct")
+			assert.Equal(t, "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11", resp.GetEnvelope().GetMetadata().GetId(), "LoadByTxHash Envelope UUID should be correct")
+			assert.Equal(t, "888", resp.GetEnvelope().GetChain().GetBigChainID().String(), "LoadByTxHash GetBigChainID should be correct")
 		},
 	)
 
@@ -192,7 +192,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 		},
 	)
 
-	// Load by ID
+	// Load by UUID
 	s.AssertLoadByID(
 		context.Background(),
 		&evlpstore.LoadByIDRequest{
@@ -205,7 +205,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 		},
 	)
 
-	// Stores an already existing envelope ID with new hash
+	// Stores an already existing envelope UUID with new hash
 	newHash := "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a21a"
 	evlp = &envelope.Envelope{
 		Chain:    chain.FromInt(888),
@@ -243,12 +243,12 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 		func(t *testing.T, err error) { assert.NoError(t, err, "LoadByTxHash should not error") },
 		func(t *testing.T, resp *evlpstore.StoreResponse) {
 			assert.Equal(t, evlpstore.Status_STORED, resp.GetStatusInfo().GetStatus(), "LoadByTxHash status should be correct")
-			assert.Equal(t, "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11", resp.GetEnvelope().GetMetadata().GetId(), "LoadByTxHash Envelope ID should be correct")
-			assert.Equal(t, "888", resp.GetEnvelope().GetChain().ID().String(), "LoadByTxHash ChainID should be correct")
+			assert.Equal(t, "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11", resp.GetEnvelope().GetMetadata().GetId(), "LoadByTxHash Envelope UUID should be correct")
+			assert.Equal(t, "888", resp.GetEnvelope().GetChain().GetBigChainID().String(), "LoadByTxHash GetBigChainID should be correct")
 		},
 	)
 
-	// Stores an envelope with new ID but same Chain and Hash
+	// Stores an envelope with new UUID but same Chain and Hash
 	newID := "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-9b53"
 	evlp = &envelope.Envelope{
 		Chain:    chain.FromInt(888),
@@ -269,7 +269,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 		},
 	)
 
-	// Load by ID
+	// Load by UUID
 	s.AssertLoadByID(
 		context.Background(),
 		&evlpstore.LoadByIDRequest{
@@ -277,7 +277,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 		},
 		func(t *testing.T, err error) { assert.Nil(t, err, "LoadByID should not error") },
 		func(t *testing.T, resp *evlpstore.StoreResponse) {
-			assert.Equal(t, "888", resp.GetEnvelope().GetChain().ID().String(), "LoadByID ChainID should be correct")
+			assert.Equal(t, "888", resp.GetEnvelope().GetChain().GetBigChainID().String(), "LoadByID GetBigChainID should be correct")
 			assert.Equal(t, newHash, resp.GetEnvelope().GetTx().GetHash().Hex(), "Store hash should have been updated")
 		},
 	)

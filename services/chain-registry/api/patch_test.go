@@ -3,18 +3,16 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-
-	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
 
-var patchNodeByNameTests = []HTTPRouteTests{
+var patchChainByNameTests = []HTTPRouteTests{
 	{
-		name:       "TestPatchNodeByName200",
+		name:       "TestPatchChainByName200",
 		store:      UseMockChainRegistry,
 		httpMethod: http.MethodPatch,
-		path:       "/testTenantID/nodes/testNodeName",
+		path:       "/testTenantID/chains/testChainName",
 		body: func() []byte {
-			body, _ := json.Marshal(&models.Node{
+			body, _ := json.Marshal(&PatchRequest{
 				URLs: []string{"http://test.com"},
 			})
 			return body
@@ -24,12 +22,12 @@ var patchNodeByNameTests = []HTTPRouteTests{
 		expectedBody:        func() string { return expectedSuccessStatusBody },
 	},
 	{
-		name:       "TestPatchNodeByName400WithWrongURL",
+		name:       "TestPatchChainByName400WithWrongURL",
 		store:      UseMockChainRegistry,
 		httpMethod: http.MethodPatch,
-		path:       "/testTenantID/nodes/testNodeName",
+		path:       "/testTenantID/chains/testChainName",
 		body: func() []byte {
-			body, _ := json.Marshal(&models.Node{
+			body, _ := json.Marshal(&PatchRequest{
 				URLs: []string{"test.com"},
 			})
 			return body
@@ -37,27 +35,26 @@ var patchNodeByNameTests = []HTTPRouteTests{
 		expectedStatusCode:  http.StatusBadRequest,
 		expectedContentType: expectedErrorStatusContentType,
 		expectedBody: func() string {
-			data, _ := json.Marshal(apiError{Message: "FF000@chain-registry.store.api: parse test.com: invalid URI for request"})
-			return string(data) + "\n"
+			return expectedInvalidBodyError
 		},
 	},
 	{
-		name:                "TestPatchNodeByName400WrongBody",
+		name:                "TestPatchChainByName400WrongBody",
 		store:               UseMockChainRegistry,
 		httpMethod:          http.MethodPatch,
-		path:                "/testTenantID/nodes/testNodeName",
+		path:                "/testTenantID/chains/testChainName",
 		body:                func() []byte { return []byte(`{"unknownField":"error"}`) },
 		expectedStatusCode:  http.StatusBadRequest,
 		expectedContentType: expectedErrorStatusContentType,
-		expectedBody:        func() string { return expectedInvalidErrorBody },
+		expectedBody:        func() string { return expectedUnknownBodyError },
 	},
 	{
-		name:       "TestPatchNodeByName404",
+		name:       "TestPatchChainByName404",
 		store:      UseErrorChainRegistry,
 		httpMethod: http.MethodPatch,
-		path:       "/testTenantID/nodes/notFoundError",
+		path:       "/testTenantID/chains/notFoundError",
 		body: func() []byte {
-			body, _ := json.Marshal(&models.Node{
+			body, _ := json.Marshal(&PatchRequest{
 				URLs: []string{"http://test.com"},
 			})
 			return body
@@ -67,12 +64,12 @@ var patchNodeByNameTests = []HTTPRouteTests{
 		expectedBody:        func() string { return expectedNotFoundErrorBody },
 	},
 	{
-		name:       "TestPatchNodeByName500",
+		name:       "TestPatchChainByName500",
 		store:      UseErrorChainRegistry,
 		httpMethod: http.MethodPatch,
-		path:       "/testTenantID/nodes/testNodeName",
+		path:       "/testTenantID/chains/testChainName",
 		body: func() []byte {
-			body, _ := json.Marshal(&models.Node{
+			body, _ := json.Marshal(&PatchRequest{
 				URLs: []string{"http://test.com"},
 			})
 			return body
@@ -83,14 +80,14 @@ var patchNodeByNameTests = []HTTPRouteTests{
 	},
 }
 
-var patchNodeByIDTests = []HTTPRouteTests{
+var patchChainByUUIDTests = []HTTPRouteTests{
 	{
-		name:       "TestPatchNodeByIDByID200",
+		name:       "TestPatchChainByUUIDByID200",
 		store:      UseMockChainRegistry,
 		httpMethod: http.MethodPatch,
-		path:       "/nodes/1",
+		path:       "/chains/1",
 		body: func() []byte {
-			body, _ := json.Marshal(&models.Node{
+			body, _ := json.Marshal(&PatchRequest{
 				URLs: []string{"http://test.com"},
 			})
 			return body
@@ -100,12 +97,12 @@ var patchNodeByIDTests = []HTTPRouteTests{
 		expectedBody:        func() string { return expectedSuccessStatusBody },
 	},
 	{
-		name:       "TestPatchNodeByID400WithWrongURL",
+		name:       "TestPatchChainByUUID400WithWrongURL",
 		store:      UseMockChainRegistry,
 		httpMethod: http.MethodPatch,
-		path:       "/nodes/1",
+		path:       "/chains/1",
 		body: func() []byte {
-			body, _ := json.Marshal(&models.Node{
+			body, _ := json.Marshal(&PatchRequest{
 				URLs: []string{"test.com"},
 			})
 			return body
@@ -113,30 +110,28 @@ var patchNodeByIDTests = []HTTPRouteTests{
 		expectedStatusCode:  http.StatusBadRequest,
 		expectedContentType: expectedErrorStatusContentType,
 		expectedBody: func() string {
-			data, _ := json.Marshal(apiError{Message: "FF000@chain-registry.store.api: parse test.com: invalid URI for request"})
-			return string(data) + "\n"
+			return expectedInvalidBodyError
 		},
 	},
 	{
-		name:                "TestPatchNodeByID400WrongBody",
+		name:                "TestPatchChainByUUID400WrongBody",
 		store:               UseMockChainRegistry,
 		httpMethod:          http.MethodPatch,
-		path:                "/nodes/1",
+		path:                "/chains/1",
 		body:                func() []byte { return []byte(`{"unknownField":"error"}`) },
 		expectedStatusCode:  http.StatusBadRequest,
 		expectedContentType: expectedErrorStatusContentType,
 		expectedBody: func() string {
-			data, _ := json.Marshal(apiError{Message: "FF000@chain-registry.store.api: json: unknown field \"unknownField\""})
-			return string(data) + "\n"
+			return expectedUnknownBodyError
 		},
 	},
 	{
-		name:       "TestPatchNodeByID404",
+		name:       "TestPatchChainByUUID404",
 		store:      UseErrorChainRegistry,
 		httpMethod: http.MethodPatch,
-		path:       "/nodes/0",
+		path:       "/chains/0",
 		body: func() []byte {
-			body, _ := json.Marshal(&models.Node{
+			body, _ := json.Marshal(&PatchRequest{
 				URLs: []string{"http://test.com"},
 			})
 			return body
@@ -146,132 +141,13 @@ var patchNodeByIDTests = []HTTPRouteTests{
 		expectedBody:        func() string { return expectedNotFoundErrorBody },
 	},
 	{
-		name:       "TestPatchNodeByID500",
+		name:       "TestPatchChainByUUID500",
 		store:      UseErrorChainRegistry,
 		httpMethod: http.MethodPatch,
-		path:       "/nodes/1",
+		path:       "/chains/1",
 		body: func() []byte {
-			body, _ := json.Marshal(&models.Node{
+			body, _ := json.Marshal(&PatchRequest{
 				URLs: []string{"http://test.com"},
-			})
-			return body
-		},
-		expectedStatusCode:  http.StatusInternalServerError,
-		expectedContentType: expectedErrorStatusContentType,
-		expectedBody:        func() string { return expectedInternalServerErrorBody },
-	},
-}
-
-var patchBlockPositionByIDTests = []HTTPRouteTests{
-	{
-		name:       "TestPatchBlockPositionByIDByID200",
-		store:      UseMockChainRegistry,
-		httpMethod: http.MethodPatch,
-		path:       "/nodes/1/block-position",
-		body: func() []byte {
-			body, _ := json.Marshal(&PatchBlockPositionRequest{
-				BlockPosition: 10,
-			})
-			return body
-		},
-		expectedStatusCode:  http.StatusOK,
-		expectedContentType: expectedSuccessStatusContentType,
-		expectedBody:        func() string { return expectedSuccessStatusBody },
-	},
-	{
-		name:                "TestPatchBlockPositionByID400WrongBody",
-		store:               UseMockChainRegistry,
-		httpMethod:          http.MethodPatch,
-		path:                "/nodes/1/block-position",
-		body:                func() []byte { return []byte(`{"unknownField":"error"}`) },
-		expectedStatusCode:  http.StatusBadRequest,
-		expectedContentType: expectedErrorStatusContentType,
-		expectedBody: func() string {
-			data, _ := json.Marshal(apiError{Message: "FF000@chain-registry.store.api: json: unknown field \"unknownField\""})
-			return string(data) + "\n"
-		},
-	},
-	{
-		name:       "TestPatchBlockPositionByID404",
-		store:      UseErrorChainRegistry,
-		httpMethod: http.MethodPatch,
-		path:       "/nodes/0/block-position",
-		body: func() []byte {
-			body, _ := json.Marshal(&PatchBlockPositionRequest{
-				BlockPosition: 10,
-			})
-			return body
-		},
-		expectedStatusCode:  http.StatusNotFound,
-		expectedContentType: expectedErrorStatusContentType,
-		expectedBody:        func() string { return expectedNotFoundErrorBody },
-	},
-	{
-		name:       "TestPatchBlockPositionByID500",
-		store:      UseErrorChainRegistry,
-		httpMethod: http.MethodPatch,
-		path:       "/nodes/1/block-position",
-		body: func() []byte {
-			body, _ := json.Marshal(&PatchBlockPositionRequest{
-				BlockPosition: 10,
-			})
-			return body
-		},
-		expectedStatusCode:  http.StatusInternalServerError,
-		expectedContentType: expectedErrorStatusContentType,
-		expectedBody:        func() string { return expectedInternalServerErrorBody },
-	},
-}
-
-var patchBlockNumberByNameTests = []HTTPRouteTests{
-	{
-		name:       "TestPatchBlockNumberByName200",
-		store:      UseMockChainRegistry,
-		httpMethod: http.MethodPatch,
-		path:       "/testTenantID/nodes/testNodeName/block-position",
-		body: func() []byte {
-			body, _ := json.Marshal(&PatchBlockPositionRequest{
-				BlockPosition: 10,
-			})
-			return body
-		},
-		expectedStatusCode:  http.StatusOK,
-		expectedContentType: expectedSuccessStatusContentType,
-		expectedBody:        func() string { return expectedSuccessStatusBody },
-	},
-	{
-		name:                "TestPatchBlockNumberByName400WrongBody",
-		store:               UseMockChainRegistry,
-		httpMethod:          http.MethodPatch,
-		path:                "/testTenantID/nodes/testNodeName/block-position",
-		body:                func() []byte { return []byte(`{"unknownField":"error"}`) },
-		expectedStatusCode:  http.StatusBadRequest,
-		expectedContentType: expectedErrorStatusContentType,
-		expectedBody:        func() string { return expectedInvalidErrorBody },
-	},
-	{
-		name:       "TestPatchBlockNumberByName404",
-		store:      UseErrorChainRegistry,
-		httpMethod: http.MethodPatch,
-		path:       "/testTenantID/nodes/notFoundError/block-position",
-		body: func() []byte {
-			body, _ := json.Marshal(&PatchBlockPositionRequest{
-				BlockPosition: 10,
-			})
-			return body
-		},
-		expectedStatusCode:  http.StatusNotFound,
-		expectedContentType: expectedErrorStatusContentType,
-		expectedBody:        func() string { return expectedNotFoundErrorBody },
-	},
-	{
-		name:       "TestPatchBlockNumberByName500",
-		store:      UseErrorChainRegistry,
-		httpMethod: http.MethodPatch,
-		path:       "/testTenantID/nodes/testNodeName/block-position",
-		body: func() []byte {
-			body, _ := json.Marshal(&PatchBlockPositionRequest{
-				BlockPosition: 10,
 			})
 			return body
 		},

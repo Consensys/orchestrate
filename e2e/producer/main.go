@@ -36,7 +36,7 @@ func newMessage(i int) *sarama.ProducerMessage {
 	tx.TxData = txData
 	b, _ := proto.Marshal(
 		&envelope.Envelope{
-			Chain: &chain.Chain{NodeName: "geth"},
+			Chain: &chain.Chain{Name: "geth"},
 			From:  ethereum.HexToAccount(`0xdbb881a51cd4023e4400cef3ef73046743f08da3`),
 			Tx:    tx,
 			Metadata: &envelope.Metadata{

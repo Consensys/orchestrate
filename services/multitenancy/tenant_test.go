@@ -63,7 +63,7 @@ func TestKeyBuilder_BuildKey(t *testing.T) {
 				t.Errorf("BuildKey() got = %v, want %v", got, tt.want)
 			}
 			if tt.wantErr {
-				if err.Error() != "DB200@: not able to retrieve the tenant ID: The tenant_id is not present in the Context" {
+				if err.Error() != "DB200@: not able to retrieve the tenant UUID: The tenant_id is not present in the Context" {
 					t.Errorf("SplitTenant() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}

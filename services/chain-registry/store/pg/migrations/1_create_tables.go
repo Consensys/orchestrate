@@ -1,16 +1,15 @@
 package migrations
 
 import (
-	"github.com/go-pg/migrations"
+	"github.com/go-pg/migrations/v7"
 	log "github.com/sirupsen/logrus"
 )
 
 func createContextTable(db migrations.DB) error {
 	log.Debug("Creating tables...")
 	_, err := db.Exec(`
-
-CREATE TABLE nodes (
-	id UUID PRIMARY KEY,
+CREATE TABLE chains (
+	uuid UUID PRIMARY KEY,
 	name VARCHAR(66) NOT NULL,
 	tenant_id VARCHAR(66) NOT NULL,
 	urls TEXT[] NOT NULL,
@@ -21,9 +20,9 @@ CREATE TABLE nodes (
 	listener_from_block BIGINT,
 	listener_back_off_duration VARCHAR(66) NOT NULL
 );
-CREATE UNIQUE INDEX ON nodes (tenant_id, name);
+CREATE UNIQUE INDEX ON chains (tenant_id, name);
 
-CREATE OR REPLACE FUNCTION node_updated() RETURNS TRIGGER AS 
+CREATE OR REPLACE FUNCTION chain_updated() RETURNS TRIGGER AS 
 	$$
 	BEGIN
 		NEW.updated_at = (now() at time zone 'utc');
@@ -31,10 +30,10 @@ CREATE OR REPLACE FUNCTION node_updated() RETURNS TRIGGER AS
 	END;
 	$$ LANGUAGE plpgsql;
 
-CREATE TRIGGER node_trigger
-	BEFORE UPDATE ON nodes
+CREATE TRIGGER chain_trigger
+	BEFORE UPDATE ON chains
 	FOR EACH ROW 
-	EXECUTE PROCEDURE node_updated();
+	EXECUTE PROCEDURE chain_updated();
 `)
 	if err != nil {
 		log.WithError(err).Error("Could not create tables")
@@ -48,9 +47,9 @@ CREATE TRIGGER node_trigger
 func dropContextTable(db migrations.DB) error {
 	log.Debug("Dropping tables")
 	_, err := db.Exec(`
-DROP TRIGGER node_trigger ON nodes;
-DROP FUNCTION node_updated();
-DROP TABLE nodes;
+DROP TRIGGER chain_trigger ON chains;
+DROP FUNCTION chain_updated();
+DROP TABLE chains;
 `)
 	if err != nil {
 		log.WithError(err).Error("Could not drop tables")

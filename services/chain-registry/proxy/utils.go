@@ -33,6 +33,6 @@ func GetURL(txctx *engine.TxContext) (string, error) {
 	return chainProxyURL, nil
 }
 
-func PathByNodeName(tenantID, nodeName string) string {
-	return fmt.Sprintf("%s/%s", tenantID, nodeName)
+func PathByChainName(tenantID, chainName string) string {
+	return fmt.Sprintf("%s/%s", tenantID, chainName)
 }

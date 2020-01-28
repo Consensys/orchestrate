@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-pg/pg"
+	"github.com/go-pg/pg/v9"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
@@ -64,7 +64,7 @@ func (s *EnvelopeStore) Store(ctx context.Context, req *evlpstore.StoreRequest) 
 // LoadByTxHash load envelope by transaction hash
 func (s *EnvelopeStore) LoadByTxHash(ctx context.Context, req *evlpstore.LoadByTxHashRequest) (*evlpstore.StoreResponse, error) { //nolint:interfacer // reason
 	model := &EnvelopeModel{
-		ChainID: req.GetChain().ID().String(),
+		ChainID: req.GetChain().GetBigChainID().String(),
 		TxHash:  req.GetTxHash().Hex(),
 	}
 
@@ -79,7 +79,7 @@ func (s *EnvelopeStore) LoadByTxHash(ctx context.Context, req *evlpstore.LoadByT
 	return model.ToStoreResponse()
 }
 
-// LoadByID context envelope by envelope ID
+// LoadByID context envelope by envelope UUID
 func (s *EnvelopeStore) LoadByID(ctx context.Context, req *evlpstore.LoadByIDRequest) (*evlpstore.StoreResponse, error) { //nolint:interfacer // reason
 	model := &EnvelopeModel{
 		EnvelopeID: req.GetId(),

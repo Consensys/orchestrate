@@ -16,34 +16,37 @@ type MockClient struct {
 	i int
 }
 
-func (m *MockClient) GetNodeByID(_ context.Context, _ string) (*types.Node, error) {
-	return &types.Node{}, nil
+func (m *MockClient) GetChainByUUID(_ context.Context, _ string) (*types.Chain, error) {
+	return &types.Chain{}, nil
 }
 
-func (m *MockClient) GetNodeByTenantAndNodeName(_ context.Context, _, _ string) (*types.Node, error) {
+func (m *MockClient) GetChainByTenantAndName(_ context.Context, _, _ string) (*types.Chain, error) {
 	return nil, nil
 }
 
-func (m *MockClient) GetNodeByTenantAndNodeID(_ context.Context, _, _ string) (*types.Node, error) {
+func (m *MockClient) GetChainByTenantAndUUID(_ context.Context, _, _ string) (*types.Chain, error) {
 	return nil, nil
 }
 
-func (m *MockClient) GetNodes(_ context.Context) ([]*types.Node, error) {
+func (m *MockClient) GetChains(_ context.Context) ([]*types.Chain, error) {
 	switch m.i % 2 {
 	case 0:
 		m.i++
-		return []*types.Node{}, nil
+		return []*types.Chain{}, nil
 	case 1:
 		m.i++
-		return []*types.Node{
+		return []*types.Chain{
 			{
-				ID:       "0d60a85e-0b90-4482-a14c-108aea2557aa",
-				Name:     "42",
-				TenantID: "0d60a85e-0b90-4482-a14c-108aea2557bb",
-				URLs:     []string{"https://estcequecestbientotlapero.fr/"},
+				UUID:                    "0d60a85e-0b90-4482-a14c-108aea2557aa",
+				Name:                    "42",
+				TenantID:                "0d60a85e-0b90-4482-a14c-108aea2557bb",
+				URLs:                    []string{"https://estcequecestbientotlapero.fr/"},
+				ListenerDepth:           &(&struct{ x uint64 }{1}).x,
+				ListenerBlockPosition:   &(&struct{ x int64 }{1}).x,
+				ListenerBackOffDuration: &(&struct{ x string }{"1s"}).x,
 			}}, nil
 	default:
-		return []*types.Node{}, nil
+		return []*types.Chain{}, nil
 	}
 }
 
@@ -76,16 +79,16 @@ func (s *ProviderTestSuite) TestRun() {
 	}()
 	config := <-providerConfigUpdateCh
 	assert.Equal(s.T(), "chain-registry", config.Provider, "Should get the correct providerName")
-	assert.Len(s.T(), config.Configuration.Nodes, 0)
+	assert.Len(s.T(), config.Configuration.Chains, 0)
 
 	config = <-providerConfigUpdateCh
 	assert.Equal(s.T(), "chain-registry", config.Provider, "Should get the correct providerName")
-	assert.Len(s.T(), config.Configuration.Nodes, 1)
+	assert.Len(s.T(), config.Configuration.Chains, 1)
 	assert.Equal(
 		s.T(),
 		"http://test-proxy/0d60a85e-0b90-4482-a14c-108aea2557aa",
-		config.Configuration.Nodes["0d60a85e-0b90-4482-a14c-108aea2557aa"].URL,
-		"Node URL should be correct",
+		config.Configuration.Chains["0d60a85e-0b90-4482-a14c-108aea2557aa"].URL,
+		"Chain URL should be correct",
 	)
 
 	cancel()

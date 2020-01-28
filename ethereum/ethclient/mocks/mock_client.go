@@ -6,7 +6,7 @@ package mocks
 
 import (
 	context "context"
-	go_ethereum "github.com/ethereum/go-ethereum"
+	ethereum "github.com/ethereum/go-ethereum"
 	common "github.com/ethereum/go-ethereum/common"
 	types "github.com/ethereum/go-ethereum/core/types"
 	gomock "github.com/golang/mock/gomock"
@@ -378,7 +378,7 @@ func (m *MockContractCaller) EXPECT() *MockContractCallerMockRecorder {
 }
 
 // CallContract mocks base method
-func (m *MockContractCaller) CallContract(ctx context.Context, url string, msg *go_ethereum.CallMsg, blockNumber *big.Int) ([]byte, error) {
+func (m *MockContractCaller) CallContract(ctx context.Context, url string, msg *ethereum.CallMsg, blockNumber *big.Int) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CallContract", ctx, url, msg, blockNumber)
 	ret0, _ := ret[0].([]byte)
@@ -393,7 +393,7 @@ func (mr *MockContractCallerMockRecorder) CallContract(ctx, url, msg, blockNumbe
 }
 
 // PendingCallContract mocks base method
-func (m *MockContractCaller) PendingCallContract(ctx context.Context, url string, msg *go_ethereum.CallMsg) ([]byte, error) {
+func (m *MockContractCaller) PendingCallContract(ctx context.Context, url string, msg *ethereum.CallMsg) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PendingCallContract", ctx, url, msg)
 	ret0, _ := ret[0].([]byte)
@@ -431,7 +431,7 @@ func (m *MockGasEstimator) EXPECT() *MockGasEstimatorMockRecorder {
 }
 
 // EstimateGas mocks base method
-func (m *MockGasEstimator) EstimateGas(ctx context.Context, url string, msg *go_ethereum.CallMsg) (uint64, error) {
+func (m *MockGasEstimator) EstimateGas(ctx context.Context, url string, msg *ethereum.CallMsg) (uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EstimateGas", ctx, url, msg)
 	ret0, _ := ret[0].(uint64)
@@ -522,10 +522,10 @@ func (mr *MockChainSyncReaderMockRecorder) Network(ctx, url interface{}) *gomock
 }
 
 // SyncProgress mocks base method
-func (m *MockChainSyncReader) SyncProgress(ctx context.Context, url string) (*go_ethereum.SyncProgress, error) {
+func (m *MockChainSyncReader) SyncProgress(ctx context.Context, url string) (*ethereum.SyncProgress, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SyncProgress", ctx, url)
-	ret0, _ := ret[0].(*go_ethereum.SyncProgress)
+	ret0, _ := ret[0].(*ethereum.SyncProgress)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -830,7 +830,7 @@ func (mr *MockClientMockRecorder) PendingNonceAt(ctx, url, account interface{}) 
 }
 
 // CallContract mocks base method
-func (m *MockClient) CallContract(ctx context.Context, url string, msg *go_ethereum.CallMsg, blockNumber *big.Int) ([]byte, error) {
+func (m *MockClient) CallContract(ctx context.Context, url string, msg *ethereum.CallMsg, blockNumber *big.Int) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CallContract", ctx, url, msg, blockNumber)
 	ret0, _ := ret[0].([]byte)
@@ -845,7 +845,7 @@ func (mr *MockClientMockRecorder) CallContract(ctx, url, msg, blockNumber interf
 }
 
 // PendingCallContract mocks base method
-func (m *MockClient) PendingCallContract(ctx context.Context, url string, msg *go_ethereum.CallMsg) ([]byte, error) {
+func (m *MockClient) PendingCallContract(ctx context.Context, url string, msg *ethereum.CallMsg) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PendingCallContract", ctx, url, msg)
 	ret0, _ := ret[0].([]byte)
@@ -860,7 +860,7 @@ func (mr *MockClientMockRecorder) PendingCallContract(ctx, url, msg interface{})
 }
 
 // EstimateGas mocks base method
-func (m *MockClient) EstimateGas(ctx context.Context, url string, msg *go_ethereum.CallMsg) (uint64, error) {
+func (m *MockClient) EstimateGas(ctx context.Context, url string, msg *ethereum.CallMsg) (uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EstimateGas", ctx, url, msg)
 	ret0, _ := ret[0].(uint64)
@@ -905,10 +905,10 @@ func (mr *MockClientMockRecorder) Network(ctx, url interface{}) *gomock.Call {
 }
 
 // SyncProgress mocks base method
-func (m *MockClient) SyncProgress(ctx context.Context, url string) (*go_ethereum.SyncProgress, error) {
+func (m *MockClient) SyncProgress(ctx context.Context, url string) (*ethereum.SyncProgress, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SyncProgress", ctx, url)
-	ret0, _ := ret[0].(*go_ethereum.SyncProgress)
+	ret0, _ := ret[0].(*ethereum.SyncProgress)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

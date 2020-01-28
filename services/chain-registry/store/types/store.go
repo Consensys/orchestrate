@@ -3,16 +3,16 @@ package types
 import "context"
 
 type ChainRegistryStore interface {
-	RegisterNode(ctx context.Context, node *Node) error
-	GetNodes(ctx context.Context, filters map[string]string) ([]*Node, error)
-	GetNodesByTenantID(ctx context.Context, tenantID string, filters map[string]string) ([]*Node, error)
-	GetNodeByTenantIDAndNodeName(ctx context.Context, tenantID string, name string) (*Node, error)
-	GetNodeByTenantIDAndNodeID(ctx context.Context, tenantID string, id string) (*Node, error)
-	GetNodeByID(ctx context.Context, ID string) (*Node, error)
-	UpdateNodeByName(ctx context.Context, node *Node) error
+	RegisterChain(ctx context.Context, chain *Chain) error
+	GetChains(ctx context.Context, filters map[string]string) ([]*Chain, error)
+	GetChainsByTenantID(ctx context.Context, tenantID string, filters map[string]string) ([]*Chain, error)
+	GetChainByTenantIDAndName(ctx context.Context, tenantID string, name string) (*Chain, error)
+	GetChainByTenantIDAndUUID(ctx context.Context, tenantID string, uuid string) (*Chain, error)
+	GetChainByUUID(ctx context.Context, uuid string) (*Chain, error)
+	UpdateChainByName(ctx context.Context, chain *Chain) error
 	UpdateBlockPositionByName(ctx context.Context, name, tenantID string, blockPosition int64) error
-	UpdateNodeByID(ctx context.Context, node *Node) error
-	UpdateBlockPositionByID(ctx context.Context, id string, blockPosition int64) error
-	DeleteNodeByName(ctx context.Context, node *Node) error
-	DeleteNodeByID(ctx context.Context, ID string) error
+	UpdateChainByUUID(ctx context.Context, chain *Chain) error
+	UpdateBlockPositionByUUID(ctx context.Context, uuid string, blockPosition int64) error
+	DeleteChainByName(ctx context.Context, chain *Chain) error
+	DeleteChainByUUID(ctx context.Context, uuid string) error
 }

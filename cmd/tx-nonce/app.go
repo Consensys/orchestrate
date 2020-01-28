@@ -59,7 +59,7 @@ func initHandlers(ctx context.Context) {
 			producer.Init(ctx)
 		},
 
-		// Initialize ChainID injector
+		// Initialize GetBigChainID injector
 		func() {
 			chaininjector.Init(ctx)
 		},

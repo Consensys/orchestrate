@@ -4,32 +4,32 @@ import (
 	"net/http"
 )
 
-var getNodesByIDTests = []HTTPRouteTests{
+var getChainsByUUIDTests = []HTTPRouteTests{
 	{
-		name:                "TestGetNodeByID200",
+		name:                "TestGetChainByUUID200",
 		store:               UseMockChainRegistry,
 		httpMethod:          http.MethodGet,
-		path:                "/nodes/1",
+		path:                "/chains/1",
 		body:                func() []byte { return nil },
 		expectedStatusCode:  http.StatusOK,
 		expectedContentType: expectedSuccessStatusContentType,
 		expectedBody:        func() string { return expectedSuccessStatusBody },
 	},
 	{
-		name:                "TestGetNodeByID404",
+		name:                "TestGetChainByUUID404",
 		store:               UseErrorChainRegistry,
 		httpMethod:          http.MethodGet,
-		path:                "/nodes/0",
+		path:                "/chains/0",
 		body:                func() []byte { return nil },
 		expectedStatusCode:  http.StatusNotFound,
 		expectedContentType: expectedErrorStatusContentType,
 		expectedBody:        func() string { return expectedNotFoundErrorBody },
 	},
 	{
-		name:                "TestGetNodeByID500",
+		name:                "TestGetChainByUUID500",
 		store:               UseErrorChainRegistry,
 		httpMethod:          http.MethodGet,
-		path:                "/nodes/1",
+		path:                "/chains/1",
 		body:                func() []byte { return nil },
 		expectedStatusCode:  http.StatusInternalServerError,
 		expectedContentType: expectedErrorStatusContentType,
@@ -37,22 +37,32 @@ var getNodesByIDTests = []HTTPRouteTests{
 	},
 }
 
-var getNodesTests = []HTTPRouteTests{
+var getChainsTests = []HTTPRouteTests{
 	{
-		name:                "TestGetNodes200",
+		name:                "TestGetChains200",
 		store:               UseMockChainRegistry,
 		httpMethod:          http.MethodGet,
-		path:                "/nodes",
+		path:                "/chains",
 		body:                func() []byte { return nil },
 		expectedStatusCode:  http.StatusOK,
 		expectedContentType: expectedSuccessStatusContentType,
 		expectedBody:        func() string { return expectedSuccessStatusSliceBody },
 	},
 	{
-		name:                "TestGetNodeByID500",
+		name:                "TestGetChains200",
+		store:               UseMockChainRegistry,
+		httpMethod:          http.MethodGet,
+		path:                "/chains?name=test",
+		body:                func() []byte { return nil },
+		expectedStatusCode:  http.StatusOK,
+		expectedContentType: expectedSuccessStatusContentType,
+		expectedBody:        func() string { return expectedSuccessStatusSliceBody },
+	},
+	{
+		name:                "TestGetChainByUUID500",
 		store:               UseErrorChainRegistry,
 		httpMethod:          http.MethodGet,
-		path:                "/nodes",
+		path:                "/chains",
 		body:                func() []byte { return nil },
 		expectedStatusCode:  http.StatusInternalServerError,
 		expectedContentType: expectedErrorStatusContentType,
@@ -60,32 +70,42 @@ var getNodesTests = []HTTPRouteTests{
 	},
 }
 
-var getNodesByTenantIDTests = []HTTPRouteTests{
+var getChainsByTenantIDTests = []HTTPRouteTests{
 	{
-		name:                "TestGetNodesByTenantID200",
+		name:                "TestGetChainsByTenantID200",
 		store:               UseMockChainRegistry,
 		httpMethod:          http.MethodGet,
-		path:                "/testTenantID/nodes",
+		path:                "/testTenantID/chains",
 		body:                func() []byte { return nil },
 		expectedStatusCode:  http.StatusOK,
 		expectedContentType: expectedSuccessStatusContentType,
 		expectedBody:        func() string { return expectedSuccessStatusSliceBody },
 	},
 	{
-		name:                "TestGetNodesByTenantID404",
+		name:                "TestGetChainsByTenantID200",
+		store:               UseMockChainRegistry,
+		httpMethod:          http.MethodGet,
+		path:                "/testTenantID/chains?uuid=test",
+		body:                func() []byte { return nil },
+		expectedStatusCode:  http.StatusOK,
+		expectedContentType: expectedSuccessStatusContentType,
+		expectedBody:        func() string { return expectedSuccessStatusSliceBody },
+	},
+	{
+		name:                "TestGetChainsByTenantID404",
 		store:               UseErrorChainRegistry,
 		httpMethod:          http.MethodGet,
-		path:                "/notFoundError/nodes",
+		path:                "/notFoundError/chains",
 		body:                func() []byte { return nil },
 		expectedStatusCode:  http.StatusNotFound,
 		expectedContentType: expectedErrorStatusContentType,
 		expectedBody:        func() string { return expectedNotFoundErrorBody },
 	},
 	{
-		name:                "TestGetNodesByTenantID500",
+		name:                "TestGetChainsByTenantID500",
 		store:               UseErrorChainRegistry,
 		httpMethod:          http.MethodGet,
-		path:                "/testTenantID/nodes",
+		path:                "/testTenantID/chains",
 		body:                func() []byte { return nil },
 		expectedStatusCode:  http.StatusInternalServerError,
 		expectedContentType: expectedErrorStatusContentType,
@@ -93,32 +113,32 @@ var getNodesByTenantIDTests = []HTTPRouteTests{
 	},
 }
 
-var getNodesByNameTests = []HTTPRouteTests{
+var getChainByNameTests = []HTTPRouteTests{
 	{
-		name:                "TestGetNodeByName200",
+		name:                "TestGetChainByName200",
 		store:               UseMockChainRegistry,
 		httpMethod:          http.MethodGet,
-		path:                "/testTenantID/nodes/testNodeName",
+		path:                "/testTenantID/chains/testChainName",
 		body:                func() []byte { return nil },
 		expectedStatusCode:  http.StatusOK,
 		expectedContentType: expectedSuccessStatusContentType,
 		expectedBody:        func() string { return expectedSuccessStatusBody },
 	},
 	{
-		name:                "TestGetNodeByName404",
+		name:                "TestGetChainByName404",
 		store:               UseErrorChainRegistry,
 		httpMethod:          http.MethodGet,
-		path:                "/testTenantID/nodes/notFoundError",
+		path:                "/testTenantID/chains/notFoundError",
 		body:                func() []byte { return nil },
 		expectedStatusCode:  http.StatusNotFound,
 		expectedContentType: expectedErrorStatusContentType,
 		expectedBody:        func() string { return expectedNotFoundErrorBody },
 	},
 	{
-		name:                "TestGetNodeByName500",
+		name:                "TestGetChainByName500",
 		store:               UseErrorChainRegistry,
 		httpMethod:          http.MethodGet,
-		path:                "/testTenantID/nodes/testNodeName",
+		path:                "/testTenantID/chains/testChainName",
 		body:                func() []byte { return nil },
 		expectedStatusCode:  http.StatusInternalServerError,
 		expectedContentType: expectedErrorStatusContentType,

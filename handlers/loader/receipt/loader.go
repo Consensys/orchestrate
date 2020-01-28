@@ -26,14 +26,14 @@ func Loader(txctx *engine.TxContext) {
 		SetBlockNumber(uint64(receipt.BlockNumber)).
 		SetTxIndex(receipt.TxIndex)
 	txctx.Envelope.Chain = &chain.Chain{
-		Id: receipt.ChainID.Bytes(),
+		ChainId: receipt.ChainID.Bytes(),
 	}
 
 	// Enrich Logger
 	txctx.Logger = txctx.Logger.WithFields(log.Fields{
-		"chain.id":   receipt.ChainID.Text(10),
-		"tx.hash":    receipt.TxHash.Hex(),
-		"block.hash": receipt.BlockHash.Hex(),
+		"chain.chainID": receipt.ChainID.Text(10),
+		"tx.hash":       receipt.TxHash.Hex(),
+		"block.hash":    receipt.BlockHash.Hex(),
 	})
 
 	txctx.Logger.Tracef("loader: message loaded: %v", txctx.Envelope.String())

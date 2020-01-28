@@ -60,9 +60,9 @@ func (b *TxListenerBlock) Copy() *TxListenerBlock {
 }
 
 // TxListenerError is what is provided to the user when an error occurs.
-// It wraps an error and includes the chain ID
+// It wraps an error and includes the chain UUID
 type TxListenerError struct {
-	// Network ID the error occurred on
+	// Network UUID the error occurred on
 	ChainID *big.Int
 
 	// Error

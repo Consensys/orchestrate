@@ -20,7 +20,7 @@ func txHashSetter(tesseraClient tessera.Client) engine.HandlerFunc {
 		}
 
 		txHash, err := tesseraClient.StoreRaw(
-			txctx.Envelope.GetChain().ID().String(),
+			txctx.Envelope.GetChain().GetBigChainID().String(),
 			txctx.Envelope.GetTx().GetTxData().GetDataBytes(),
 			txctx.Envelope.GetArgs().GetPrivate().GetPrivateFrom(),
 		)

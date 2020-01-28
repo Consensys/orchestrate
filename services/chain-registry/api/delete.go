@@ -11,12 +11,10 @@ import (
 
 type deleteResponse struct{}
 
-func (h Handler) deleteNodeByID(rw http.ResponseWriter, request *http.Request) {
+func (h Handler) deleteChainByUUID(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
-	nodeID := mux.Vars(request)["nodeID"]
-
-	err := h.store.DeleteNodeByID(request.Context(), nodeID)
+	err := h.store.DeleteChainByUUID(request.Context(), mux.Vars(request)["uuid"])
 	if err != nil {
 		handleChainRegistryStoreError(rw, err)
 		return
@@ -25,16 +23,15 @@ func (h Handler) deleteNodeByID(rw http.ResponseWriter, request *http.Request) {
 	_ = json.NewEncoder(rw).Encode(&deleteResponse{})
 }
 
-func (h Handler) deleteNodeByName(rw http.ResponseWriter, request *http.Request) {
+func (h Handler) deleteChainByName(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
-	node := &models.Node{
-		Name: mux.Vars(request)["nodeName"],
-		// TODO: replace tenantID when extract token
+	chain := &models.Chain{
+		Name:     mux.Vars(request)["name"],
 		TenantID: mux.Vars(request)["tenantID"],
 	}
 
-	err := h.store.DeleteNodeByName(request.Context(), node)
+	err := h.store.DeleteChainByName(request.Context(), chain)
 	if err != nil {
 		handleChainRegistryStoreError(rw, err)
 		return

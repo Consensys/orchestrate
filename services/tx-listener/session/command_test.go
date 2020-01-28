@@ -9,8 +9,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 )
 
-var config1 = &dynamic.Node{Name: "test", Listener: &dynamic.Listener{Depth: 1, Backoff: time.Second}}
-var config2 = &dynamic.Node{Name: "test2", Listener: &dynamic.Listener{Depth: 1, Backoff: time.Second}}
+var config1 = &dynamic.Chain{Name: "test", Listener: &dynamic.Listener{Depth: 1, Backoff: time.Second}}
+var config2 = &dynamic.Chain{Name: "test2", Listener: &dynamic.Listener{Depth: 1, Backoff: time.Second}}
 
 func TestCompareConfiguation(t *testing.T) {
 
@@ -20,55 +20,55 @@ func TestCompareConfiguation(t *testing.T) {
 		expectedCommand []*Command
 	}{
 		{
-			oldConfig: &dynamic.Configuration{Nodes: map[string]*dynamic.Node{
+			oldConfig: &dynamic.Configuration{Chains: map[string]*dynamic.Chain{
 				"test": config1,
 			}},
-			newConfig: &dynamic.Configuration{Nodes: map[string]*dynamic.Node{
+			newConfig: &dynamic.Configuration{Chains: map[string]*dynamic.Chain{
 				"test": config1,
 			}},
 			expectedCommand: []*Command{},
 		},
 		{
-			oldConfig: &dynamic.Configuration{Nodes: map[string]*dynamic.Node{
+			oldConfig: &dynamic.Configuration{Chains: map[string]*dynamic.Chain{
 				"test": config1,
 			}},
-			newConfig: &dynamic.Configuration{Nodes: map[string]*dynamic.Node{
+			newConfig: &dynamic.Configuration{Chains: map[string]*dynamic.Chain{
 				"test":  config1,
 				"test2": config1,
 			}},
 			expectedCommand: []*Command{
 				{
-					Type: START,
-					Node: config1,
+					Type:  START,
+					Chain: config1,
 				},
 			},
 		},
 		{
-			oldConfig: &dynamic.Configuration{Nodes: map[string]*dynamic.Node{
+			oldConfig: &dynamic.Configuration{Chains: map[string]*dynamic.Chain{
 				"test":  config1,
 				"test2": config1,
 			}},
-			newConfig: &dynamic.Configuration{Nodes: map[string]*dynamic.Node{
+			newConfig: &dynamic.Configuration{Chains: map[string]*dynamic.Chain{
 				"test": config1,
 			}},
 			expectedCommand: []*Command{
 				{
-					Type: STOP,
-					Node: config1,
+					Type:  STOP,
+					Chain: config1,
 				},
 			},
 		},
 		{
-			oldConfig: &dynamic.Configuration{Nodes: map[string]*dynamic.Node{
+			oldConfig: &dynamic.Configuration{Chains: map[string]*dynamic.Chain{
 				"test": config1,
 			}},
-			newConfig: &dynamic.Configuration{Nodes: map[string]*dynamic.Node{
+			newConfig: &dynamic.Configuration{Chains: map[string]*dynamic.Chain{
 				"test": config2,
 			}},
 			expectedCommand: []*Command{
 				{
-					Type: UPDATE,
-					Node: config2,
+					Type:  UPDATE,
+					Chain: config2,
 				},
 			},
 		},

@@ -20,8 +20,8 @@ import (
 const (
 	expectedInternalServerErrorBody  = "{\"message\":\"test error\"}\n"
 	expectedNotFoundErrorBody        = "{\"message\":\"DB200@: not found error\"}\n"
-	expectedInvalidURLErrorBody      = "{\"message\":\"FF000@chain-registry.store.api: parse test.com: invalid URI for request\"}\n"
-	expectedInvalidErrorBody         = "{\"message\":\"FF000@chain-registry.store.api: json: unknown field \\\"unknownField\\\"\"}\n"
+	expectedInvalidBodyError         = "{\"message\":\"FF000@chain-registry.store.api: invalid body\"}\n"
+	expectedUnknownBodyError         = "{\"message\":\"FF000@chain-registry.store.api: json: unknown field \\\"unknownField\\\"\"}\n"
 	expectedSuccessStatusBody        = "{}\n"
 	expectedSuccessStatusSliceBody   = "[]\n"
 	expectedSuccessStatusContentType = "application/json"
@@ -44,17 +44,15 @@ func TestHTTPRouteTests(t *testing.T) {
 	t.Parallel()
 
 	testsSuite := [][]HTTPRouteTests{
-		deleteNodeByIDTests,
-		deleteNodesByNameTests,
-		getNodesTests,
-		getNodesByIDTests,
-		getNodesByNameTests,
-		getNodesByTenantIDTests,
-		patchNodeByIDTests,
-		patchNodeByNameTests,
-		patchBlockPositionByIDTests,
-		patchBlockNumberByNameTests,
-		postNodeTests,
+		deleteChainByUUIDTests,
+		deleteChainsByNameTests,
+		getChainsTests,
+		getChainsByUUIDTests,
+		getChainByNameTests,
+		getChainsByTenantIDTests,
+		patchChainByUUIDTests,
+		patchChainByNameTests,
+		postChainTests,
 	}
 
 	for _, tests := range testsSuite {
@@ -86,29 +84,33 @@ func UseMockChainRegistry(t *testing.T) models.ChainRegistryStore {
 	defer mockCtrl.Finish()
 	mockStore := mocks.NewMockChainRegistryStore(mockCtrl)
 
-	mockStore.EXPECT().RegisterNode(gomock.Any(), gomock.Any()).DoAndReturn(
-		func(_ context.Context, node *models.Node) error {
-			node.ID = "1"
-			node.Name = "nodeName1"
-			node.TenantID = "tenantID1"
-			node.URLs = []string{"testUrl1", "testUrl2"}
-			node.ListenerDepth = 1
-			node.ListenerBlockPosition = 1
-			node.ListenerFromBlock = 1
-			node.ListenerBackOffDuration = "1s"
+	mockStore.EXPECT().RegisterChain(gomock.Any(), gomock.Any()).DoAndReturn(
+		func(_ context.Context, chain *models.Chain) error {
+			listenerDepth := uint64(1)
+			listenerBlockPosition := int64(1)
+			listenerFromBlock := int64(1)
+			listenerBackOffDuration := "1s"
+			chain.UUID = "1"
+			chain.Name = "chainName1"
+			chain.TenantID = "tenantID1"
+			chain.URLs = []string{"testUrl1", "testUrl2"}
+			chain.ListenerDepth = &listenerDepth
+			chain.ListenerBlockPosition = &listenerBlockPosition
+			chain.ListenerFromBlock = &listenerFromBlock
+			chain.ListenerBackOffDuration = &listenerBackOffDuration
 			return nil
 		}).AnyTimes()
-	mockStore.EXPECT().GetNodes(gomock.Any(), gomock.Any()).Return([]*models.Node{}, nil).AnyTimes()
-	mockStore.EXPECT().GetNodesByTenantID(gomock.Any(), gomock.Any(), gomock.Any()).Return([]*models.Node{}, nil).AnyTimes()
-	mockStore.EXPECT().GetNodeByTenantIDAndNodeName(gomock.Any(), gomock.Any(), gomock.Any()).Return(&models.Node{}, nil).AnyTimes()
-	mockStore.EXPECT().GetNodeByTenantIDAndNodeID(gomock.Any(), gomock.Any(), gomock.Any()).Return(&models.Node{}, nil).AnyTimes()
-	mockStore.EXPECT().GetNodeByID(gomock.Any(), gomock.Any()).Return(&models.Node{}, nil).AnyTimes()
-	mockStore.EXPECT().UpdateNodeByName(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
-	mockStore.EXPECT().UpdateNodeByID(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	mockStore.EXPECT().GetChains(gomock.Any(), gomock.Any()).Return([]*models.Chain{}, nil).AnyTimes()
+	mockStore.EXPECT().GetChainsByTenantID(gomock.Any(), gomock.Any(), gomock.Any()).Return([]*models.Chain{}, nil).AnyTimes()
+	mockStore.EXPECT().GetChainByTenantIDAndName(gomock.Any(), gomock.Any(), gomock.Any()).Return(&models.Chain{}, nil).AnyTimes()
+	mockStore.EXPECT().GetChainByTenantIDAndUUID(gomock.Any(), gomock.Any(), gomock.Any()).Return(&models.Chain{}, nil).AnyTimes()
+	mockStore.EXPECT().GetChainByUUID(gomock.Any(), gomock.Any()).Return(&models.Chain{}, nil).AnyTimes()
+	mockStore.EXPECT().UpdateChainByName(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	mockStore.EXPECT().UpdateChainByUUID(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
 	mockStore.EXPECT().UpdateBlockPositionByName(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
-	mockStore.EXPECT().UpdateBlockPositionByID(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
-	mockStore.EXPECT().DeleteNodeByName(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
-	mockStore.EXPECT().DeleteNodeByID(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	mockStore.EXPECT().UpdateBlockPositionByUUID(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	mockStore.EXPECT().DeleteChainByName(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	mockStore.EXPECT().DeleteChainByUUID(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
 
 	return mockStore
 }
@@ -121,45 +123,45 @@ func UseErrorChainRegistry(t *testing.T) models.ChainRegistryStore {
 	defer mockCtrl.Finish()
 	mockStore := mocks.NewMockChainRegistryStore(mockCtrl)
 
-	mockStore.EXPECT().RegisterNode(gomock.Any(), gomock.Any()).Return(errTest).AnyTimes()
-	mockStore.EXPECT().GetNodes(gomock.Any(), gomock.Any()).Return(nil, errTest).AnyTimes()
+	mockStore.EXPECT().RegisterChain(gomock.Any(), gomock.Any()).Return(errTest).AnyTimes()
+	mockStore.EXPECT().GetChains(gomock.Any(), gomock.Any()).Return(nil, errTest).AnyTimes()
 
-	mockStore.EXPECT().GetNodesByTenantID(gomock.Any(), gomock.Eq(notFoundErrorFilter), gomock.Any()).Return(nil, errNotFound).AnyTimes()
-	mockStore.EXPECT().GetNodesByTenantID(gomock.Any(), gomock.Not(gomock.Eq(notFoundErrorFilter)), gomock.Any()).Return(nil, errTest).AnyTimes()
-	mockStore.EXPECT().GetNodeByTenantIDAndNodeName(gomock.Any(), gomock.Any(), gomock.Eq(notFoundErrorFilter)).Return(nil, errNotFound).AnyTimes()
-	mockStore.EXPECT().GetNodeByTenantIDAndNodeName(gomock.Any(), gomock.Any(), gomock.Not(gomock.Eq(notFoundErrorFilter))).Return(nil, errTest).AnyTimes()
-	mockStore.EXPECT().GetNodeByTenantIDAndNodeID(gomock.Any(), gomock.Any(), gomock.Eq(notFoundErrorFilter)).Return(nil, errNotFound).AnyTimes()
-	mockStore.EXPECT().GetNodeByTenantIDAndNodeID(gomock.Any(), gomock.Any(), gomock.Not(gomock.Eq(notFoundErrorFilter))).Return(nil, errTest).AnyTimes()
-	mockStore.EXPECT().GetNodeByID(gomock.Any(), gomock.Eq("0")).Return(nil, errNotFound).AnyTimes()
-	mockStore.EXPECT().GetNodeByID(gomock.Any(), gomock.Not(gomock.Eq("0"))).Return(nil, errTest).AnyTimes()
-	mockStore.EXPECT().UpdateNodeByName(gomock.Any(), gomock.Any()).DoAndReturn(
-		func(_ context.Context, node *models.Node) error {
-			if node.Name == notFoundErrorFilter {
-				return errors.NotFoundError("not found error")
+	mockStore.EXPECT().GetChainsByTenantID(gomock.Any(), gomock.Eq(notFoundErrorFilter), gomock.Any()).Return(nil, errNotFound).AnyTimes()
+	mockStore.EXPECT().GetChainsByTenantID(gomock.Any(), gomock.Not(gomock.Eq(notFoundErrorFilter)), gomock.Any()).Return(nil, errTest).AnyTimes()
+	mockStore.EXPECT().GetChainByTenantIDAndName(gomock.Any(), gomock.Any(), gomock.Eq(notFoundErrorFilter)).Return(nil, errNotFound).AnyTimes()
+	mockStore.EXPECT().GetChainByTenantIDAndName(gomock.Any(), gomock.Any(), gomock.Not(gomock.Eq(notFoundErrorFilter))).Return(nil, errTest).AnyTimes()
+	mockStore.EXPECT().GetChainByTenantIDAndUUID(gomock.Any(), gomock.Any(), gomock.Eq(notFoundErrorFilter)).Return(nil, errNotFound).AnyTimes()
+	mockStore.EXPECT().GetChainByTenantIDAndUUID(gomock.Any(), gomock.Any(), gomock.Not(gomock.Eq(notFoundErrorFilter))).Return(nil, errTest).AnyTimes()
+	mockStore.EXPECT().GetChainByUUID(gomock.Any(), gomock.Eq("0")).Return(nil, errNotFound).AnyTimes()
+	mockStore.EXPECT().GetChainByUUID(gomock.Any(), gomock.Not(gomock.Eq("0"))).Return(nil, errTest).AnyTimes()
+	mockStore.EXPECT().UpdateChainByName(gomock.Any(), gomock.Any()).DoAndReturn(
+		func(_ context.Context, chain *models.Chain) error {
+			if chain.Name == notFoundErrorFilter {
+				return errNotFound
 			}
 			return errTest
 		}).AnyTimes()
-	mockStore.EXPECT().UpdateNodeByID(gomock.Any(), gomock.Any()).DoAndReturn(
-		func(_ context.Context, node *models.Node) error {
-			if node.ID == "0" {
-				return errors.NotFoundError("not found error")
+	mockStore.EXPECT().UpdateChainByUUID(gomock.Any(), gomock.Any()).DoAndReturn(
+		func(_ context.Context, chain *models.Chain) error {
+			if chain.UUID == "0" {
+				return errNotFound
 			}
 			return errTest
 		}).AnyTimes()
 	mockStore.EXPECT().UpdateBlockPositionByName(gomock.Any(), gomock.Eq(notFoundErrorFilter), gomock.Any(), gomock.Any()).Return(errNotFound).AnyTimes()
 	mockStore.EXPECT().UpdateBlockPositionByName(gomock.Any(), gomock.Not(gomock.Eq(notFoundErrorFilter)), gomock.Any(), gomock.Any()).Return(errTest).AnyTimes()
-	mockStore.EXPECT().UpdateBlockPositionByID(gomock.Any(), gomock.Eq("0"), gomock.Any()).Return(errNotFound).AnyTimes()
-	mockStore.EXPECT().UpdateBlockPositionByID(gomock.Any(), gomock.Not(gomock.Eq("0")), gomock.Any()).Return(errTest).AnyTimes()
-	mockStore.EXPECT().DeleteNodeByName(gomock.Any(), gomock.Any()).DoAndReturn(
-		func(_ context.Context, node *models.Node) error {
-			if node.Name == notFoundErrorFilter {
+	mockStore.EXPECT().UpdateBlockPositionByUUID(gomock.Any(), gomock.Eq("0"), gomock.Any()).Return(errNotFound).AnyTimes()
+	mockStore.EXPECT().UpdateBlockPositionByUUID(gomock.Any(), gomock.Not(gomock.Eq("0")), gomock.Any()).Return(errTest).AnyTimes()
+	mockStore.EXPECT().DeleteChainByName(gomock.Any(), gomock.Any()).DoAndReturn(
+		func(_ context.Context, chain *models.Chain) error {
+			if chain.Name == notFoundErrorFilter {
 				return errors.NotFoundError("not found error")
 			}
 			return errTest
 
 		}).AnyTimes()
-	mockStore.EXPECT().DeleteNodeByID(gomock.Any(), gomock.Eq("0")).Return(errNotFound).AnyTimes()
-	mockStore.EXPECT().DeleteNodeByID(gomock.Any(), gomock.Not(gomock.Eq("0"))).Return(errTest).AnyTimes()
+	mockStore.EXPECT().DeleteChainByUUID(gomock.Any(), gomock.Eq("0")).Return(errNotFound).AnyTimes()
+	mockStore.EXPECT().DeleteChainByUUID(gomock.Any(), gomock.Not(gomock.Eq("0"))).Return(errTest).AnyTimes()
 
 	return mockStore
 }

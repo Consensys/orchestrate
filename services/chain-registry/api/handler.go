@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	neturl "net/url"
 
+	"github.com/go-playground/validator/v10"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 
@@ -26,21 +26,19 @@ func NewHandler(store types.ChainRegistryStore) *Handler {
 
 // Add internal routes to router
 func (h *Handler) Append(router *mux.Router) {
-	router.Methods(http.MethodGet).Path("/nodes").HandlerFunc(h.getNodes)
-	router.Methods(http.MethodGet).Path("/nodes/{nodeID}").HandlerFunc(h.getNodeByID)
-	router.Methods(http.MethodGet).Path("/{tenantID}/nodes").HandlerFunc(h.getNodesByTenantID)
-	router.Methods(http.MethodGet).Path("/{tenantID}/nodes/{nodeID}").HandlerFunc(h.getNodeByTenantIDAndNodeID)
+	router.Methods(http.MethodGet).Path("/chains").HandlerFunc(h.getChains)
+	router.Methods(http.MethodGet).Path("/chains/{uuid}").HandlerFunc(h.getChainByUUID)
+	router.Methods(http.MethodGet).Path("/{tenantID}/chains").HandlerFunc(h.getChainsByTenantID)
+	router.Methods(http.MethodGet).Path("/{tenantID}/chains/{name}").HandlerFunc(h.getChainByTenantIDAndName)
 
-	router.Methods(http.MethodPost).Path("/nodes").HandlerFunc(h.postNode)
-	router.Methods(http.MethodPost).Path("/{tenantID}/nodes").HandlerFunc(h.postNode)
+	router.Methods(http.MethodPost).Path("/chains").HandlerFunc(h.postChain)
+	router.Methods(http.MethodPost).Path("/{tenantID}/chains").HandlerFunc(h.postChain)
 
-	router.Methods(http.MethodPatch).Path("/{tenantID}/nodes/{nodeName}").HandlerFunc(h.patchNodeByName)
-	router.Methods(http.MethodPatch).Path("/{tenantID}/nodes/{nodeName}/block-position").HandlerFunc(h.patchBlockPositionByName)
-	router.Methods(http.MethodPatch).Path("/nodes/{nodeID}").HandlerFunc(h.patchNodeByID)
-	router.Methods(http.MethodPatch).Path("/nodes/{nodeID}/block-position").HandlerFunc(h.patchBlockPositionByID)
+	router.Methods(http.MethodPatch).Path("/{tenantID}/chains/{name}").HandlerFunc(h.patchChainByName)
+	router.Methods(http.MethodPatch).Path("/chains/{uuid}").HandlerFunc(h.patchChainByUUID)
 
-	router.Methods(http.MethodDelete).Path("/{tenantID}/nodes/{nodeName}").HandlerFunc(h.deleteNodeByName)
-	router.Methods(http.MethodDelete).Path("/nodes/{nodeID}").HandlerFunc(h.deleteNodeByID)
+	router.Methods(http.MethodDelete).Path("/{tenantID}/chains/{name}").HandlerFunc(h.deleteChainByName)
+	router.Methods(http.MethodDelete).Path("/chains/{uuid}").HandlerFunc(h.deleteChainByUUID)
 }
 
 type Builder func(config *runtime.Configuration) http.Handler
@@ -50,9 +48,12 @@ type apiError struct {
 }
 
 func handleChainRegistryStoreError(rw http.ResponseWriter, err error) {
-	if errors.IsNotFoundError(err) {
+	switch {
+	case errors.IsAlreadyExistsError(err):
+		writeError(rw, err.Error(), http.StatusConflict)
+	case errors.IsNotFoundError(err):
 		writeError(rw, err.Error(), http.StatusNotFound)
-	} else if err != nil {
+	case err != nil:
 		writeError(rw, err.Error(), http.StatusInternalServerError)
 	}
 }
@@ -62,79 +63,26 @@ func writeError(rw http.ResponseWriter, msg string, code int) {
 	http.Error(rw, string(data), code)
 }
 
-type NodeRegisterRequest struct {
-	Name                    string   `json:"name,omitempty"`
-	URLs                    []string `json:"urls,omitempty" sql:"urls,array"`
-	ListenerDepth           uint64   `json:"listenerDepth,omitempty"`
-	ListenerFromBlock       int64    `json:"listenerFromBlock,string,omitempty"`
-	ListenerBackOffDuration string   `json:"listenerBackOffDuration,omitempty"`
+type Listener struct {
+	Depth           *uint64 `json:"depth,omitempty"`
+	BlockPosition   *int64  `json:"blockPosition,string,omitempty"`
+	BackOffDuration *string `json:"backOffDuration,omitempty"`
 }
 
-type NodeRequest struct {
-	Name                    string   `json:"name,omitempty"`
-	URLs                    []string `json:"urls,omitempty" sql:"urls,array"`
-	ListenerDepth           uint64   `json:"listenerDepth,omitempty"`
-	ListenerBlockPosition   int64    `json:"listenerBlockPosition,string,omitempty"`
-	ListenerFromBlock       int64    `json:"listenerFromBlock,string,omitempty"`
-	ListenerBackOffDuration string   `json:"listenerBackOffDuration,omitempty"`
-}
+var validate = validator.New()
 
-func UnmarshalBody(body io.ReadCloser, req interface{}) error {
+func UnmarshalBody(body io.Reader, req interface{}) error {
 	dec := json.NewDecoder(body)
 	dec.DisallowUnknownFields() // Force errors if unknown fields
 	err := dec.Decode(req)
 	if err != nil {
-		return err
+		return errors.FromError(err).ExtendComponent(component)
 	}
+
+	err = validate.Struct(req)
+	if err != nil {
+		return errors.FromError(fmt.Errorf("invalid body")).ExtendComponent(component)
+	}
+
 	return nil
-}
-
-func UnmarshalNodeRequestBody(body io.ReadCloser) (*NodeRequest, error) {
-	nodeRequest := &NodeRequest{}
-
-	err := UnmarshalBody(body, nodeRequest)
-	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
-	}
-
-	// Check uniqueness of each urls
-	keys := make(map[string]bool)
-	for _, url := range nodeRequest.URLs {
-		_, err := neturl.ParseRequestURI(url)
-		if err != nil {
-			return nil, errors.FromError(err).ExtendComponent(component)
-		}
-
-		if _, value := keys[url]; value {
-			return nil, errors.FromError(fmt.Errorf("cannot have twice the same url - got at least two times %s", url)).ExtendComponent(component)
-		}
-		keys[url] = true
-	}
-
-	return nodeRequest, nil
-}
-
-func UnmarshalNodeRegisterRequestBody(body io.ReadCloser) (*NodeRegisterRequest, error) {
-	nodeRegisterRequest := &NodeRegisterRequest{}
-
-	err := UnmarshalBody(body, nodeRegisterRequest)
-	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
-	}
-
-	// Check uniqueness of each urls
-	keys := make(map[string]bool)
-	for _, url := range nodeRegisterRequest.URLs {
-		_, err := neturl.ParseRequestURI(url)
-		if err != nil {
-			return nil, errors.FromError(err).ExtendComponent(component)
-		}
-
-		if _, value := keys[url]; value {
-			return nil, errors.FromError(fmt.Errorf("cannot have twice the same url - got at least two times %s", url)).ExtendComponent(component)
-		}
-		keys[url] = true
-	}
-
-	return nodeRegisterRequest, nil
 }

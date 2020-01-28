@@ -19,12 +19,13 @@ const (
 	InvalidNonceTooLow  = InvalidNonce + 2
 
 	// Connection Errors (class 08XXX)
-	Connection      uint64 = 8 << 12
-	KafkaConnection        = Connection + 1<<8 // Kafka Connection error (subclass 081XX)
-	HTTPConnection         = Connection + 2<<8 // HTTP Connection error (subclass 082XX)
-	EthConnection          = Connection + 3<<8 // Ethereum Connection error (subclass 083XX)
-	GRPCConnection         = Connection + 4<<8 // gRPC Connection error (subclass 084XX)
-	RedisConnection        = Connection + 5<<8 // Redis Connection error (subclass 085XX)
+	Connection         uint64 = 8 << 12
+	KafkaConnection           = Connection + 1<<8 // Kafka Connection error (subclass 081XX)
+	HTTPConnection            = Connection + 2<<8 // HTTP Connection error (subclass 082XX)
+	EthConnection             = Connection + 3<<8 // Ethereum Connection error (subclass 083XX)
+	GRPCConnection            = Connection + 4<<8 // gRPC Connection error (subclass 084XX)
+	RedisConnection           = Connection + 5<<8 // Redis Connection error (subclass 085XX)
+	PostgresConnection        = Connection + 6<<8 // Postgres Connection error (subclass 086XX)
 
 	// Authentication Errors (class 09XXX)
 	InvalidAuthentication uint64 = 9 << 12
@@ -180,6 +181,16 @@ func GRPCConnectionError(format string, a ...interface{}) *ierror.Error {
 // RedisConnectionError is raised when failing to connect to Redis
 func RedisConnectionError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(RedisConnection, format, a...)
+}
+
+// PostgresConnectionError is raised when failing to connect to Postgres
+func PostgresConnectionError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(PostgresConnection, format, a...)
+}
+
+// IsPostgresConnectionError indicate whether an error is a Postgres connection error
+func IsPostgresConnectionError(err error) bool {
+	return isErrorClass(FromError(err).GetCode(), PostgresConnection)
 }
 
 // InvalidAuthenticationError is raised when access to an operation has been denied
@@ -408,6 +419,11 @@ func IsConstraintViolatedError(err error) bool {
 // AlreadyExistsError is raised when a Data constraint has been violated
 func AlreadyExistsError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(AlreadyExists, format, a...)
+}
+
+// IsAlreadyExistsError indicate whether an error is an already exists error
+func IsAlreadyExistsError(err error) bool {
+	return isErrorClass(FromError(err).GetCode(), AlreadyExists)
 }
 
 // NoDataFoundError is raised when accessing a missing Data

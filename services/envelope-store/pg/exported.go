@@ -23,7 +23,7 @@ func Init() {
 
 		// Initialize gRPC store
 		opts := postgres.NewOptions()
-		store = NewEnvelopeStoreFromPGOptions(opts)
+		store = NewEnvelopeStore(postgres.New(opts))
 		log.WithFields(log.Fields{
 			"db.address":  opts.Addr,
 			"db.database": opts.Database,

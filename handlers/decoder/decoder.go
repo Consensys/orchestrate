@@ -20,9 +20,9 @@ import (
 func Decoder(r svc.ContractRegistryClient) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"chain.id":    txctx.Envelope.GetChain().ID().String(),
-			"tx.hash":     txctx.Envelope.GetReceipt().GetTxHash().Hex(),
-			"metadata.id": txctx.Envelope.GetMetadata().GetId(),
+			"chain.chainID": txctx.Envelope.GetChain().GetBigChainID().String(),
+			"tx.hash":       txctx.Envelope.GetReceipt().GetTxHash().Hex(),
+			"metadata.id":   txctx.Envelope.GetMetadata().GetId(),
 		})
 
 		// For each log in receipt

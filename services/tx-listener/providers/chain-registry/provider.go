@@ -54,13 +54,13 @@ loop:
 	for {
 		select {
 		case <-ticker.C:
-			var nodes []*types.Node
-			nodes, err = p.Client.GetNodes(ctx)
+			var chains []*types.Chain
+			chains, err = p.Client.GetChains(ctx)
 			if err != nil {
-				log.FromContext(logCtx).WithError(err).Errorf("failed to fetch nodes from chain registry")
+				log.FromContext(logCtx).WithError(err).Errorf("failed to fetch chains from chain registry")
 				break loop
 			}
-			configInput <- p.buildConfiguration(nodes)
+			configInput <- p.buildConfiguration(chains)
 		case <-logCtx.Done():
 		}
 	}
@@ -68,28 +68,28 @@ loop:
 	return
 }
 
-func (p *Provider) buildConfiguration(nodes []*types.Node) *dynamic.Message {
+func (p *Provider) buildConfiguration(chains []*types.Chain) *dynamic.Message {
 	msg := &dynamic.Message{
 		Provider: "chain-registry",
 		Configuration: &dynamic.Configuration{
-			Nodes: make(map[string]*dynamic.Node),
+			Chains: make(map[string]*dynamic.Chain),
 		},
 	}
 
-	for _, node := range nodes {
-		duration, err := time.ParseDuration(node.ListenerBackOffDuration)
+	for _, chain := range chains {
+		duration, err := time.ParseDuration(*chain.ListenerBackOffDuration)
 		if err != nil {
-			log.Errorf("cannot parse duration for node ID:%s - TenantID:%s - Name:%s", node.ID, node.TenantID, node.Name)
+			log.Errorf("cannot parse duration for chain UUID:%s - TenantID:%s - Name:%s", chain.UUID, chain.TenantID, chain.Name)
 		}
 
-		msg.Configuration.Nodes[node.ID] = &dynamic.Node{
-			ID:       node.ID,
-			TenantID: node.TenantID,
-			Name:     node.Name,
-			URL:      fmt.Sprintf("%v/%v", p.conf.ChainRegistryURL, node.ID),
+		msg.Configuration.Chains[chain.UUID] = &dynamic.Chain{
+			UUID:     chain.UUID,
+			TenantID: chain.TenantID,
+			Name:     chain.Name,
+			URL:      fmt.Sprintf("%v/%v", p.conf.ChainRegistryURL, chain.UUID),
 			Listener: &dynamic.Listener{
-				BlockPosition: node.ListenerBlockPosition,
-				Depth:         node.ListenerDepth,
+				BlockPosition: *chain.ListenerBlockPosition,
+				Depth:         *chain.ListenerDepth,
 				Backoff:       duration,
 			},
 		}

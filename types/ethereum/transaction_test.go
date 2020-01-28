@@ -87,3 +87,32 @@ func TestTransactionWithoutRawDataAndHashAreUnsigned(t *testing.T) {
 		"Transaction is unsigned",
 	)
 }
+
+func TestTransaction_IsSigned(t *testing.T) {
+	tx := &Transaction{}
+	assert.False(t, tx.IsSigned(), "should not be signed")
+}
+
+func TestTransaction_SetHash(t *testing.T) {
+	h := common.BigToHash(big.NewInt(1))
+	tx := (&Transaction{}).SetHash(h)
+	assert.Equal(t, h, tx.GetHash().Hash(), "should not be equal")
+}
+
+func TestTransaction_SetRaw(t *testing.T) {
+	r := []byte{1}
+	tx := (&Transaction{}).SetRaw(r)
+	assert.Equal(t, r, tx.GetRaw().Raw, "should not be equal")
+}
+
+func TestTxData_SetTo(t *testing.T) {
+	to := common.HexToAddress("0x0")
+	txData := (&TxData{}).SetTo(to)
+	assert.Equal(t, to, txData.GetTo().Address(), "should not be equal")
+}
+
+func TestTxData_SetValue(t *testing.T) {
+	v := big.NewInt(1)
+	txData := (&TxData{}).SetValue(v)
+	assert.Equal(t, v, txData.GetValue().Value(), "should not be equal")
+}

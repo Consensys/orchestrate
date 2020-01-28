@@ -15,16 +15,18 @@
     "chainChain": {
       "type": "object",
       "properties": {
-        "id": {
+        "chain_id": {
           "type": "string",
           "format": "byte",
           "title": "Chain ID\ne.g. 1 for mainnet, 3 for Ropsten"
         },
-        "node_id": {
-          "type": "string"
+        "uuid": {
+          "type": "string",
+          "title": "UUID in the chain registry"
         },
-        "node_name": {
-          "type": "string"
+        "name": {
+          "type": "string",
+          "title": "Name in the chain registry"
         }
       },
       "title": "Information about a Chain"

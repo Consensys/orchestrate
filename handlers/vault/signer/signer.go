@@ -10,7 +10,7 @@ import (
 // It is a fork handler that allow signing for either eea, tessera or public ethereum
 func TxSigner(eeaSigner, publicEthereumSigner, tesseraSigner engine.HandlerFunc) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		if txctx.Envelope.GetChain().ID() == nil {
+		if txctx.Envelope.GetChain().GetBigChainID() == nil {
 			err := errors.DataError("cannot sign transaction without chainID").SetComponent(component)
 			txctx.Logger.WithError(err).Errorf("failed to sign transaction")
 			_ = txctx.AbortWithError(err)

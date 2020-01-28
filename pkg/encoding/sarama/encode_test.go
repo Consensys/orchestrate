@@ -20,7 +20,7 @@ var Bloom, _ = hexutil.Decode("0x00000000000000000000000000000000000000000000000
 
 var testEnvelope = &envelope.Envelope{
 	Chain: &chain.Chain{
-		Id: []byte{0x1},
+		ChainId: []byte{0x1},
 	},
 	Protocol: &chain.Protocol{Type: chain.ProtocolType_BESU_ORION},
 	From:     &ethereum.Account{Raw: hexutil.MustDecode("0xdbb881a51CD4023E4400CEF3ef73046743f08da3")},

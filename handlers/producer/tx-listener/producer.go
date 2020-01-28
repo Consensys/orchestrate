@@ -20,11 +20,11 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 	}
 
 	// Set Topic to Nonce topic
-	msg.Topic = utils.KafkaChainTopic(viper.GetString(broker.TxDecoderViperKey), txctx.Envelope.GetChain().ID())
+	msg.Topic = utils.KafkaChainTopic(viper.GetString(broker.TxDecoderViperKey), txctx.Envelope.GetChain().GetBigChainID())
 
 	// Set key
 	Sender := txctx.Envelope.GetFrom().Address()
-	msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(txctx.Envelope.GetChain().ID(), Sender))
+	msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(txctx.Envelope.GetChain().GetBigChainID(), Sender))
 
 	return nil
 }

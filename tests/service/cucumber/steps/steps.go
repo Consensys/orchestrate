@@ -42,7 +42,7 @@ func NewID() string {
 	return string(buf)
 }
 
-// ScenarioID generates a random scenario ID
+// ScenarioID generates a random scenario UUID
 func ScenarioID(def *gherkin.ScenarioDefinition) string {
 	return fmt.Sprintf("|%v|-%v", fmt.Sprintf("%-20v", def.Name)[:20], NewID())
 }
@@ -100,7 +100,7 @@ func (sc *ScenarioContext) init(s interface{}) {
 		sc.Definition = &t.ScenarioDefinition
 	}
 
-	// Compute scenario ID
+	// Compute scenario UUID
 	sc.ID = ScenarioID(sc.Definition)
 
 	// Prepare default tracker
@@ -291,7 +291,7 @@ func (sc *ScenarioContext) envelopesShouldHavePayloadSet() error {
 func (sc *ScenarioContext) envelopesShouldHaveNonceSet() error {
 	nonces := make(map[string]map[string]map[uint64]bool)
 	for _, t := range sc.trackers {
-		chain := t.current.GetChain().ID().String()
+		chain := t.current.GetChain().GetBigChainID().String()
 		addr := t.current.GetFrom().Address().Hex()
 		nonce := t.current.GetTx().GetTxData().GetNonce()
 		if _, ok := nonces[chain]; !ok {

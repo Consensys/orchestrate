@@ -56,8 +56,8 @@ func (sess *SigningSession) getSigner() (ethtypes.Signer, error) {
 		return nil, errors.FailedPreconditionError("chain not set").ExtendComponent(component)
 	}
 
-	// We copy chain ID to ensure pointer can be safely used elsewhere
-	signer = ethtypes.NewEIP155Signer(new(big.Int).Set(sess.chain.ID()))
+	// We copy chain UUID to ensure pointer can be safely used elsewhere
+	signer = ethtypes.NewEIP155Signer(new(big.Int).Set(sess.chain.GetBigChainID()))
 
 	return signer, nil
 }
@@ -169,7 +169,7 @@ func privateTxHash(tx *ethtypes.Transaction, privateArgs *types.PrivateArgs, cha
 		tx.To(),
 		tx.Value(),
 		tx.Data(),
-		chain.ID(),
+		chain.GetBigChainID(),
 		uint(0),
 		uint(0),
 		privateArgs.PrivateFrom,

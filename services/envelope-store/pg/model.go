@@ -13,9 +13,9 @@ import (
 
 // EnvelopeModel represent elements in `envelopes` table
 type EnvelopeModel struct {
-	tableName struct{} `sql:"envelopes"` //nolint:unused,structcheck // reason
+	tableName struct{} `pg:"envelopes"` //nolint:unused,structcheck // reason
 
-	// ID technical identifier
+	// UUID technical identifier
 	ID int32
 
 	// Envelope Identifier
@@ -93,7 +93,7 @@ func FromEnvelope(e *envelope.Envelope) (*EnvelopeModel, error) {
 	return &EnvelopeModel{
 		Envelope:   b,
 		EnvelopeID: e.GetMetadata().GetId(),
-		ChainID:    e.GetChain().ID().String(),
+		ChainID:    e.GetChain().GetBigChainID().String(),
 		TxHash:     e.GetTx().GetHash().Hex(),
 	}, nil
 }

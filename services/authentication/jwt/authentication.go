@@ -19,7 +19,7 @@ func NewAuth(conf *Config) *Auth {
 
 const authPrefix = "Bearer "
 
-// Parse and verify the validity of the Token (ID or Access) and return a struct for a JWT (JSON Web Token)
+// Parse and verify the validity of the Token (UUID or Access) and return a struct for a JWT (JSON Web Token)
 func (a *Auth) Check(ctx context.Context) (context.Context, error) {
 	if a.conf.Key == nil {
 		// If no KeyFunc provided we deactivate authentication
@@ -45,10 +45,10 @@ func (a *Auth) Check(ctx context.Context) (context.Context, error) {
 		return ctx, errors.UnauthorizedError("invalid Access Token")
 	}
 
-	// Extract multitenancy ID from token
+	// Extract multitenancy UUID from token
 	tenantID := token.Claims.(*Claims).Orchestrate.TenantID
 	if tenantID == "" {
-		return ctx, errors.PermissionDeniedError("tenant missing in ID / Access Token")
+		return ctx, errors.PermissionDeniedError("tenant missing in UUID / Access Token")
 	}
 
 	ctx = With(ctx, token)

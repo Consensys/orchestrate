@@ -23,7 +23,7 @@ func Init() {
 
 		// Initialize Postgres store
 		opts := postgres.NewOptions()
-		contractRegistry = NewContractRegistryFromPGOptions(opts)
+		contractRegistry = NewContractRegistry(postgres.New(opts))
 		log.WithFields(log.Fields{
 			"db.address":  opts.Addr,
 			"db.database": opts.Database,

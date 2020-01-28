@@ -11,60 +11,60 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/offset/testutils"
 )
 
-var MockNodesSlice = []*types.Node{
+var MockChainsSlice = []*types.Chain{
 	{
-		ID:                      "test-node",
+		UUID:                    "test-chain",
 		Name:                    "test",
 		TenantID:                "test",
 		URLs:                    []string{"test"},
-		ListenerDepth:           0,
-		ListenerBlockPosition:   0,
-		ListenerFromBlock:       0,
-		ListenerBackOffDuration: "0s",
+		ListenerDepth:           &(&struct{ x uint64 }{0}).x,
+		ListenerBlockPosition:   &(&struct{ x int64 }{0}).x,
+		ListenerFromBlock:       &(&struct{ x int64 }{0}).x,
+		ListenerBackOffDuration: &(&struct{ x string }{"0s"}).x,
 	},
 	{
-		ID:                      "test-node1",
+		UUID:                    "test-chain1",
 		Name:                    "test1",
 		TenantID:                "test1",
 		URLs:                    []string{"test1"},
-		ListenerDepth:           1,
-		ListenerBlockPosition:   1,
-		ListenerFromBlock:       1,
-		ListenerBackOffDuration: "1s",
+		ListenerDepth:           &(&struct{ x uint64 }{1}).x,
+		ListenerBlockPosition:   &(&struct{ x int64 }{1}).x,
+		ListenerFromBlock:       &(&struct{ x int64 }{1}).x,
+		ListenerBackOffDuration: &(&struct{ x string }{"1s"}).x,
 	},
 }
 
-var MockNodesMap = map[string]*types.Node{
-	"test-node":  MockNodesSlice[0],
-	"test-node1": MockNodesSlice[1],
+var MockChainsMap = map[string]*types.Chain{
+	"test-chain":  MockChainsSlice[0],
+	"test-chain1": MockChainsSlice[1],
 }
 
 type Mock struct{}
 
-func (c *Mock) GetNodeByID(_ context.Context, nodeID string) (*types.Node, error) {
-	if _, ok := MockNodesMap[nodeID]; !ok {
+func (c *Mock) GetChainByUUID(_ context.Context, chainUUID string) (*types.Chain, error) {
+	if _, ok := MockChainsMap[chainUUID]; !ok {
 		return nil, fmt.Errorf("test")
 	}
-	return MockNodesMap[nodeID], nil
+	return MockChainsMap[chainUUID], nil
 }
 
-func (c *Mock) GetNodeByTenantAndNodeName(_ context.Context, _, _ string) (*types.Node, error) {
+func (c *Mock) GetChainByTenantAndName(_ context.Context, _, _ string) (*types.Chain, error) {
 	return nil, nil
 }
 
-func (c *Mock) GetNodeByTenantAndNodeID(_ context.Context, _, _ string) (*types.Node, error) {
+func (c *Mock) GetChainByTenantAndUUID(_ context.Context, _, _ string) (*types.Chain, error) {
 	return nil, nil
 }
 
-func (c *Mock) GetNodes(_ context.Context) ([]*types.Node, error) {
-	return MockNodesSlice, nil
+func (c *Mock) GetChains(_ context.Context) ([]*types.Chain, error) {
+	return MockChainsSlice, nil
 }
 
-func (c *Mock) UpdateBlockPosition(_ context.Context, nodeID string, blockNumber int64) error {
-	if _, ok := MockNodesMap[nodeID]; !ok {
+func (c *Mock) UpdateBlockPosition(_ context.Context, chainUUID string, blockNumber int64) error {
+	if _, ok := MockChainsMap[chainUUID]; !ok {
 		return fmt.Errorf("test")
 	}
-	MockNodesMap[nodeID].ListenerBlockPosition = blockNumber
+	MockChainsMap[chainUUID].ListenerBlockPosition = &(&struct{ x int64 }{blockNumber}).x
 	return nil
 }
 

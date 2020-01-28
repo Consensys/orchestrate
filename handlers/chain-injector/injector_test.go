@@ -22,51 +22,51 @@ import (
 
 const (
 	testChainProxyURL = "test"
-	testNodeID        = "testNodeID"
-	testNodeName      = "testNodeName"
-	testNodeError     = "error"
+	testChainUUID     = "testChainUUID"
+	testChainName     = "testChainName"
+	testChainError    = "error"
 	testTenantID      = "testTenantID"
 )
 
-var testNode = &types.Node{
-	ID:                      testNodeID,
-	Name:                    testNodeName,
+var testChain = &types.Chain{
+	UUID:                    testChainUUID,
+	Name:                    testChainName,
 	TenantID:                testTenantID,
 	URLs:                    []string{"test"},
-	ListenerDepth:           1,
-	ListenerBlockPosition:   2,
-	ListenerFromBlock:       3,
-	ListenerBackOffDuration: "4s",
+	ListenerDepth:           &(&struct{ x uint64 }{1}).x,
+	ListenerBlockPosition:   &(&struct{ x int64 }{2}).x,
+	ListenerFromBlock:       &(&struct{ x int64 }{3}).x,
+	ListenerBackOffDuration: &(&struct{ x string }{"4s"}).x,
 }
 
-var testNodeDefaultTenant = &types.Node{
-	ID:                      testNodeID,
-	Name:                    testNodeName,
+var testChainDefaultTenant = &types.Chain{
+	UUID:                    testChainUUID,
+	Name:                    testChainName,
 	TenantID:                multitenancy.DefaultTenantIDName,
 	URLs:                    []string{"test"},
-	ListenerDepth:           1,
-	ListenerBlockPosition:   2,
-	ListenerFromBlock:       3,
-	ListenerBackOffDuration: "4s",
+	ListenerDepth:           &(&struct{ x uint64 }{1}).x,
+	ListenerBlockPosition:   &(&struct{ x int64 }{2}).x,
+	ListenerFromBlock:       &(&struct{ x int64 }{3}).x,
+	ListenerBackOffDuration: &(&struct{ x string }{"4s"}).x,
 }
-var MockNodesByID = map[string]map[string]*types.Node{
+var MockChainsByUUID = map[string]map[string]*types.Chain{
 	testTenantID: {
-		testNodeID: testNode,
+		testChainUUID: testChain,
 	},
 	multitenancy.DefaultTenantIDName: {
-		testNodeID: testNodeDefaultTenant,
+		testChainUUID: testChainDefaultTenant,
 	},
 }
-var MockNodesByName = map[string]map[string]*types.Node{
+var MockChainsByName = map[string]map[string]*types.Chain{
 	testTenantID: {
-		testNodeName: testNode,
+		testChainName: testChain,
 	},
 	multitenancy.DefaultTenantIDName: {
-		testNodeName: testNodeDefaultTenant,
+		testChainName: testChainDefaultTenant,
 	},
 }
 
-func TestNodeInjector(t *testing.T) {
+func TestChainInjector(t *testing.T) {
 	testSet := []struct {
 		name          string
 		multitenancy  bool
@@ -74,39 +74,39 @@ func TestNodeInjector(t *testing.T) {
 		expectedTxctx func(txctx *engine.TxContext) *engine.TxContext
 	}{
 		{
-			"With multitenancy and nodeID filled",
+			"With multitenancy and chainUUID filled",
 			true,
 			func(txctx *engine.TxContext) *engine.TxContext {
-				txctx.Envelope.Chain = (&chain.Chain{}).SetNodeID(testNodeID)
+				txctx.Envelope.Chain = (&chain.Chain{}).SetUUID(testChainUUID)
 				txctx.WithContext(multitenancy.WithTenantID(txctx.Context(), testTenantID))
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
-				txctx.Envelope.Chain.SetNodeName(MockNodesByID[testTenantID][testNodeID].Name)
-				url := fmt.Sprintf("%s/%s/%s", testChainProxyURL, testTenantID, MockNodesByID[testTenantID][testNodeID].Name)
+				txctx.Envelope.GetChain().SetName(MockChainsByUUID[testTenantID][testChainUUID].Name)
+				url := fmt.Sprintf("%s/%s/%s", testChainProxyURL, testTenantID, MockChainsByUUID[testTenantID][testChainUUID].Name)
 				txctx.WithContext(proxy.With(txctx.Context(), url))
 				return txctx
 			},
 		},
 		{
-			"Without multitenancy and nodeID filled",
+			"Without multitenancy and chainUUID filled",
 			false,
 			func(txctx *engine.TxContext) *engine.TxContext {
-				txctx.Envelope.Chain = (&chain.Chain{}).SetNodeID(testNodeID)
+				txctx.Envelope.Chain = (&chain.Chain{}).SetUUID(testChainUUID)
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
-				txctx.Envelope.Chain.SetNodeName(MockNodesByID[multitenancy.DefaultTenantIDName][testNodeID].Name)
-				url := fmt.Sprintf("%s/%s/%s", testChainProxyURL, multitenancy.DefaultTenantIDName, MockNodesByID[multitenancy.DefaultTenantIDName][testNodeID].Name)
+				txctx.Envelope.GetChain().SetName(MockChainsByUUID[multitenancy.DefaultTenantIDName][testChainUUID].Name)
+				url := fmt.Sprintf("%s/%s/%s", testChainProxyURL, multitenancy.DefaultTenantIDName, MockChainsByUUID[multitenancy.DefaultTenantIDName][testChainUUID].Name)
 				txctx.WithContext(proxy.With(txctx.Context(), url))
 				return txctx
 			},
 		},
 		{
-			"Without multitenancy and wrong nodeID filled",
+			"Without multitenancy and wrong chainUUID filled",
 			false,
 			func(txctx *engine.TxContext) *engine.TxContext {
-				txctx.Envelope.Chain = (&chain.Chain{}).SetNodeID(testNodeError)
+				txctx.Envelope.Chain = (&chain.Chain{}).SetUUID(testChainError)
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
@@ -116,16 +116,16 @@ func TestNodeInjector(t *testing.T) {
 			},
 		},
 		{
-			"With multitenancy and nodeName filled",
+			"With multitenancy and chainName filled",
 			true,
 			func(txctx *engine.TxContext) *engine.TxContext {
-				txctx.Envelope.Chain = (&chain.Chain{}).SetNodeName(testNodeName)
+				txctx.Envelope.Chain = (&chain.Chain{}).SetName(testChainName)
 				txctx.WithContext(multitenancy.WithTenantID(txctx.Context(), testTenantID))
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
-				txctx.Envelope.Chain.SetNodeID(MockNodesByName[testTenantID][testNodeName].ID)
-				url := fmt.Sprintf("%s/%s/%s", testChainProxyURL, testTenantID, testNodeName)
+				txctx.Envelope.Chain.SetUUID(MockChainsByName[testTenantID][testChainName].UUID)
+				url := fmt.Sprintf("%s/%s/%s", testChainProxyURL, testTenantID, testChainName)
 				txctx.WithContext(proxy.With(txctx.Context(), url))
 				return txctx
 			},
@@ -134,7 +134,7 @@ func TestNodeInjector(t *testing.T) {
 			"With multitenancy and no tenantID found",
 			true,
 			func(txctx *engine.TxContext) *engine.TxContext {
-				txctx.Envelope.Chain = (&chain.Chain{}).SetNodeName(testNodeName)
+				txctx.Envelope.Chain = (&chain.Chain{}).SetName(testChainName)
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
@@ -144,13 +144,13 @@ func TestNodeInjector(t *testing.T) {
 			},
 		},
 		{
-			"Without nodeID and nodeName filled",
+			"Without chainUUID and chainName filled",
 			false,
 			func(txctx *engine.TxContext) *engine.TxContext {
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
-				err := errors.InternalError("invalid envelope - no node id or node name are filled - cannot retrieve chain id").ExtendComponent(component)
+				err := errors.InternalError("invalid envelope - no chain uuid or chain name are filled - cannot retrieve chain data").ExtendComponent(component)
 				txctx.Envelope.Errors = append(txctx.Envelope.Errors, err)
 				return txctx
 			},
@@ -160,12 +160,12 @@ func TestNodeInjector(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockClient := mocks.NewMockClient(mockCtrl)
-	mockClient.EXPECT().GetNodeByTenantAndNodeID(gomock.Any(), gomock.Eq(testTenantID), gomock.Eq(testNodeID)).Return(MockNodesByID[testTenantID][testNodeID], nil).AnyTimes()
-	mockClient.EXPECT().GetNodeByTenantAndNodeID(gomock.Any(), gomock.Eq(multitenancy.DefaultTenantIDName), gomock.Eq(testNodeID)).Return(MockNodesByID[multitenancy.DefaultTenantIDName][testNodeID], nil).AnyTimes()
-	mockClient.EXPECT().GetNodeByTenantAndNodeID(gomock.Any(), gomock.Eq(multitenancy.DefaultTenantIDName), gomock.Eq(testNodeError)).Return(nil, fmt.Errorf("error")).AnyTimes()
-	mockClient.EXPECT().GetNodeByTenantAndNodeName(gomock.Any(), gomock.Eq(testTenantID), gomock.Eq(testNodeName)).Return(MockNodesByName[testTenantID][testNodeName], nil).AnyTimes()
-	mockClient.EXPECT().GetNodeByTenantAndNodeName(gomock.Any(), gomock.Eq(multitenancy.DefaultTenantIDName), gomock.Eq(testNodeName)).Return(MockNodesByName[multitenancy.DefaultTenantIDName][testNodeName], nil).AnyTimes()
-	mockClient.EXPECT().GetNodeByTenantAndNodeName(gomock.Any(), gomock.Eq(testNodeError), gomock.Eq(testNodeError)).Return(nil, fmt.Errorf("error")).AnyTimes()
+	mockClient.EXPECT().GetChainByTenantAndUUID(gomock.Any(), gomock.Eq(testTenantID), gomock.Eq(testChainUUID)).Return(MockChainsByUUID[testTenantID][testChainUUID], nil).AnyTimes()
+	mockClient.EXPECT().GetChainByTenantAndUUID(gomock.Any(), gomock.Eq(multitenancy.DefaultTenantIDName), gomock.Eq(testChainUUID)).Return(MockChainsByUUID[multitenancy.DefaultTenantIDName][testChainUUID], nil).AnyTimes()
+	mockClient.EXPECT().GetChainByTenantAndUUID(gomock.Any(), gomock.Eq(multitenancy.DefaultTenantIDName), gomock.Eq(testChainError)).Return(nil, fmt.Errorf("error")).AnyTimes()
+	mockClient.EXPECT().GetChainByTenantAndName(gomock.Any(), gomock.Eq(testTenantID), gomock.Eq(testChainName)).Return(MockChainsByName[testTenantID][testChainName], nil).AnyTimes()
+	mockClient.EXPECT().GetChainByTenantAndName(gomock.Any(), gomock.Eq(multitenancy.DefaultTenantIDName), gomock.Eq(testChainName)).Return(MockChainsByName[multitenancy.DefaultTenantIDName][testChainName], nil).AnyTimes()
+	mockClient.EXPECT().GetChainByTenantAndName(gomock.Any(), gomock.Eq(testChainError), gomock.Eq(testChainError)).Return(nil, fmt.Errorf("error")).AnyTimes()
 
 	for _, test := range testSet {
 		test := test
@@ -175,7 +175,7 @@ func TestNodeInjector(t *testing.T) {
 			txctx := engine.NewTxContext()
 			txctx.Logger = log.NewEntry(log.New())
 
-			h := NodeInjector(test.multitenancy, mockClient, testChainProxyURL)
+			h := ChainInjector(test.multitenancy, mockClient, testChainProxyURL)
 			h(test.input(txctx))
 
 			expectedTxctx := engine.NewTxContext()
@@ -204,19 +204,19 @@ func TestChainIDInjector(t *testing.T) {
 		expectedTxctx func(txctx *engine.TxContext) *engine.TxContext
 	}{
 		{
-			"Set chain ID in Envelope",
+			"Set chain UUID in Envelope",
 			func(txctx *engine.TxContext) *engine.TxContext {
 				txctx.Envelope.Chain = &chain.Chain{}
 				txctx.WithContext(proxy.With(txctx.Context(), noErrorURL))
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
-				txctx.Envelope.Chain.SetID(networkID)
+				txctx.Envelope.Chain.SetChainID(networkID)
 				return txctx
 			},
 		},
 		{
-			"Set chain ID in Envelope with error",
+			"Set chain UUID in Envelope with error",
 			func(txctx *engine.TxContext) *engine.TxContext {
 				txctx.Envelope.Chain = &chain.Chain{}
 				txctx.WithContext(proxy.With(txctx.Context(), errorURL))

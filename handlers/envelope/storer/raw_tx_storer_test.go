@@ -23,16 +23,16 @@ func TestRawTxStore(t *testing.T) {
 		{
 			"Store",
 			func(txctx *engine.TxContext) *engine.TxContext {
-				txctx.Envelope.Chain = (&chain.Chain{}).SetID(big.NewInt(1))
+				txctx.Envelope.Chain = (&chain.Chain{}).SetChainID(big.NewInt(1))
 				txctx.Envelope.Metadata = &envelope.Metadata{Id: "test"}
 				return txctx
 			},
 			envstore.Status_PENDING,
 		},
 		{
-			"Store envelope without Metadata ID",
+			"Store envelope without Metadata UUID",
 			func(txctx *engine.TxContext) *engine.TxContext {
-				txctx.Envelope.Chain = (&chain.Chain{}).SetID(big.NewInt(1))
+				txctx.Envelope.Chain = (&chain.Chain{}).SetChainID(big.NewInt(1))
 				txctx.Envelope.Metadata = &envelope.Metadata{Id: "test"}
 				err := errors.InternalError("error").ExtendComponent(component)
 				txctx.Envelope.Errors = append(txctx.Envelope.Errors, err)

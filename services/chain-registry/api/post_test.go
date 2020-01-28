@@ -3,37 +3,42 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-
-	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
 
-var postNodeTests = []HTTPRouteTests{
+var postChainTests = []HTTPRouteTests{
 	{
-		name:       "TestPostNode200",
+		name:       "TestPostChain200",
 		store:      UseMockChainRegistry,
 		httpMethod: http.MethodPost,
-		path:       "/testTenantID/nodes",
+		path:       "/testTenantID/chains",
 		body: func() []byte {
-			body, _ := json.Marshal(&models.Node{
-				Name:                    "testName",
-				URLs:                    []string{"http://test.com"},
-				ListenerDepth:           1,
-				ListenerFromBlock:       1,
-				ListenerBackOffDuration: "1s",
+			listenerDepth := uint64(1)
+			listenerBlockPosition := int64(1)
+			listenerBackOffDuration := "1s"
+
+			body, _ := json.Marshal(&PostRequest{
+				Name: "testName",
+				URLs: []string{"http://test.com"},
+				Listener: &Listener{
+					Depth:           &listenerDepth,
+					BlockPosition:   &listenerBlockPosition,
+					BackOffDuration: &listenerBackOffDuration,
+				},
 			})
 			return body
 		},
 		expectedStatusCode:  http.StatusOK,
 		expectedContentType: expectedSuccessStatusContentType,
-		expectedBody:        func() string { return "{\"id\":\"1\"}\n" },
+		expectedBody:        func() string { return "{\"uuid\":\"1\"}\n" },
 	},
 	{
-		name:       "TestPostNode400WithTwiceSameURL",
+		name:       "TestPostChain400WithTwiceSameURL",
 		store:      UseMockChainRegistry,
 		httpMethod: http.MethodPost,
-		path:       "/testTenantID/nodes",
+		path:       "/testTenantID/chains",
 		body: func() []byte {
-			body, _ := json.Marshal(&models.Node{
+			body, _ := json.Marshal(&PostRequest{
+				Name: "testName",
 				URLs: []string{"http://test.com", "http://test.com"},
 			})
 			return body
@@ -41,46 +46,53 @@ var postNodeTests = []HTTPRouteTests{
 		expectedStatusCode:  http.StatusBadRequest,
 		expectedContentType: expectedErrorStatusContentType,
 		expectedBody: func() string {
-			return "{\"message\":\"FF000@chain-registry.store.api: cannot have twice the same url - got at least two times http://test.com\"}\n"
+			return expectedInvalidBodyError
 		},
 	},
 	{
-		name:       "TestPostNode400WrongURL",
+		name:       "TestPostChain400WrongURL",
 		store:      UseMockChainRegistry,
 		httpMethod: http.MethodPost,
-		path:       "/testTenantID/nodes",
+		path:       "/testTenantID/chains",
 		body: func() []byte {
-			body, _ := json.Marshal(&models.Node{
+			body, _ := json.Marshal(&PostRequest{
+				Name: "testName",
 				URLs: []string{"test.com"},
 			})
 			return body
 		},
 		expectedStatusCode:  http.StatusBadRequest,
 		expectedContentType: expectedErrorStatusContentType,
-		expectedBody:        func() string { return expectedInvalidURLErrorBody },
+		expectedBody:        func() string { return expectedInvalidBodyError },
 	},
 	{
-		name:                "TestPostNode400WrongBody",
+		name:                "TestPostChain400WrongBody",
 		store:               UseMockChainRegistry,
 		httpMethod:          http.MethodPost,
-		path:                "/testTenantID/nodes",
+		path:                "/testTenantID/chains",
 		body:                func() []byte { return []byte(`{"unknownField":"error"}`) },
 		expectedStatusCode:  http.StatusBadRequest,
 		expectedContentType: expectedErrorStatusContentType,
-		expectedBody:        func() string { return expectedInvalidErrorBody },
+		expectedBody:        func() string { return expectedUnknownBodyError },
 	},
 	{
-		name:       "TestPostNode500",
+		name:       "TestPostChain500",
 		store:      UseErrorChainRegistry,
 		httpMethod: http.MethodPost,
-		path:       "/testTenantID/nodes",
+		path:       "/testTenantID/chains",
 		body: func() []byte {
-			body, _ := json.Marshal(&models.Node{
-				Name:                    "testName",
-				URLs:                    []string{"http://test.com"},
-				ListenerDepth:           1,
-				ListenerFromBlock:       1,
-				ListenerBackOffDuration: "1s",
+			listenerDepth := uint64(1)
+			listenerBlockPosition := int64(1)
+			listenerBackOffDuration := "1s"
+
+			body, _ := json.Marshal(&PostRequest{
+				Name: "testName",
+				URLs: []string{"http://test.com"},
+				Listener: &Listener{
+					Depth:           &listenerDepth,
+					BlockPosition:   &listenerBlockPosition,
+					BackOffDuration: &listenerBackOffDuration,
+				},
 			})
 			return body
 		},

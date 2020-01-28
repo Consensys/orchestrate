@@ -77,8 +77,8 @@ func TestHook(t *testing.T) {
 	var block ethtypes.Block
 	_ = rlp.DecodeBytes(blockEnc, &block)
 
-	node := &dynamic.Node{
-		ID:      "test-node",
+	c := &dynamic.Chain{
+		UUID:    "test-c",
 		URL:     "test-url",
 		ChainID: big.NewInt(1),
 	}
@@ -88,25 +88,25 @@ func TestHook(t *testing.T) {
 		TxHash:          ethcommon.HexToHash("0xdead"),
 		ContractAddress: ethcommon.HexToAddress("0xbabde"),
 	}
-	err := hk.AfterNewBlock(context.Background(), node, &block, []*ethtypes.Receipt{receipt})
+	err := hk.AfterNewBlock(context.Background(), c, &block, []*ethtypes.Receipt{receipt})
 	assert.NoError(t, err, "#1 AfterNewBlock should not error")
 
 	// Test 2: we store envelope on envelope store
 	_, _ = store.Store(context.Background(), &evlpstore.StoreRequest{
 		Envelope: &envelope.Envelope{
-			Chain: chain.FromBigInt(node.ChainID),
+			Chain: chain.FromBigInt(c.ChainID),
 			Tx: &ethereum.Transaction{
 				Hash: ethereum.HexToHash(receipt.TxHash.Hex()),
 			},
 		},
 	})
 	producer.ExpectSendMessageAndSucceed()
-	err = hk.AfterNewBlock(context.Background(), node, &block, []*ethtypes.Receipt{receipt})
+	err = hk.AfterNewBlock(context.Background(), c, &block, []*ethtypes.Receipt{receipt})
 	assert.NoError(t, err, "#2 AfterNewBlock should not error")
 
 	// Test 3: producer fails
 	producer.ExpectSendMessageAndFail(fmt.Errorf("test-producer-error"))
-	err = hk.AfterNewBlock(context.Background(), node, &block, []*ethtypes.Receipt{receipt})
+	err = hk.AfterNewBlock(context.Background(), c, &block, []*ethtypes.Receipt{receipt})
 	assert.Error(t, err, "#3 AfterNewBlock should error")
 	assert.Equal(t, "test-producer-error", err.Error(), "#3 AfterNewBlock error message should be correct")
 }

@@ -16,297 +16,323 @@ type ChainRegistryTestSuite struct {
 }
 
 const (
-	nodeName1 = "testNode1"
-	nodeName2 = "testNode2"
-	nodeName3 = "testNode3"
-	tenantID1 = "tenantID1"
-	tenantID2 = "tenantID2"
+	chainName1    = "testChain1"
+	chainName2    = "testChain2"
+	chainName3    = "testChain3"
+	tenantID1     = "tenantID1"
+	tenantID2     = "tenantID2"
+	errorTenantID = "errorTenantID"
 )
 
-var tenantID1Nodes = map[string]*types.Node{
-	nodeName1: {
-		Name:                    nodeName1,
+var tenantID1Chains = map[string]*types.Chain{
+	chainName1: {
+		Name:                    chainName1,
 		TenantID:                tenantID1,
 		URLs:                    []string{"testUrl1", "testUrl2"},
-		ListenerDepth:           1,
-		ListenerBlockPosition:   1,
-		ListenerFromBlock:       1,
-		ListenerBackOffDuration: "1s",
+		ListenerDepth:           &(&struct{ x uint64 }{1}).x,
+		ListenerBlockPosition:   &(&struct{ x int64 }{1}).x,
+		ListenerFromBlock:       &(&struct{ x int64 }{1}).x,
+		ListenerBackOffDuration: &(&struct{ x string }{"1s"}).x,
 	},
-	nodeName2: {
-		Name:                    nodeName2,
+	chainName2: {
+		Name:                    chainName2,
 		TenantID:                tenantID1,
 		URLs:                    []string{"testUrl1", "testUrl2"},
-		ListenerDepth:           2,
-		ListenerBlockPosition:   2,
-		ListenerFromBlock:       2,
-		ListenerBackOffDuration: "2s",
+		ListenerDepth:           &(&struct{ x uint64 }{2}).x,
+		ListenerBlockPosition:   &(&struct{ x int64 }{2}).x,
+		ListenerFromBlock:       &(&struct{ x int64 }{2}).x,
+		ListenerBackOffDuration: &(&struct{ x string }{"2s"}).x,
 	},
 }
-var tenantID2Nodes = map[string]*types.Node{
-	nodeName1: {
-		Name:                    nodeName1,
+var tenantID2Chains = map[string]*types.Chain{
+	chainName1: {
+		Name:                    chainName1,
 		TenantID:                tenantID2,
 		URLs:                    []string{"testUrl1", "testUrl2"},
-		ListenerDepth:           1,
-		ListenerBlockPosition:   1,
-		ListenerFromBlock:       1,
-		ListenerBackOffDuration: "1s",
+		ListenerDepth:           &(&struct{ x uint64 }{1}).x,
+		ListenerBlockPosition:   &(&struct{ x int64 }{1}).x,
+		ListenerFromBlock:       &(&struct{ x int64 }{1}).x,
+		ListenerBackOffDuration: &(&struct{ x string }{"1s"}).x,
 	},
-	nodeName2: {
-		Name:                    nodeName2,
+	chainName2: {
+		Name:                    chainName2,
 		TenantID:                tenantID2,
 		URLs:                    []string{"testUrl1", "testUrl2"},
-		ListenerDepth:           2,
-		ListenerBlockPosition:   2,
-		ListenerFromBlock:       2,
-		ListenerBackOffDuration: "2s",
+		ListenerDepth:           &(&struct{ x uint64 }{2}).x,
+		ListenerBlockPosition:   &(&struct{ x int64 }{2}).x,
+		ListenerFromBlock:       &(&struct{ x int64 }{2}).x,
+		ListenerBackOffDuration: &(&struct{ x string }{"2s"}).x,
 	},
-	nodeName3: {
-		Name:                    nodeName3,
+	chainName3: {
+		Name:                    chainName3,
 		TenantID:                tenantID2,
 		URLs:                    []string{"testUrl1", "testUrl2"},
-		ListenerDepth:           3,
-		ListenerBlockPosition:   3,
-		ListenerFromBlock:       3,
-		ListenerBackOffDuration: "3s",
+		ListenerDepth:           &(&struct{ x uint64 }{3}).x,
+		ListenerBlockPosition:   &(&struct{ x int64 }{3}).x,
+		ListenerFromBlock:       &(&struct{ x int64 }{3}).x,
+		ListenerBackOffDuration: &(&struct{ x string }{"3s"}).x,
 	},
 }
 
-var NodesSample = map[string]map[string]*types.Node{
-	tenantID1: tenantID1Nodes,
-	tenantID2: tenantID2Nodes,
+var ChainsSample = map[string]map[string]*types.Chain{
+	tenantID1: tenantID1Chains,
+	tenantID2: tenantID2Chains,
 }
 
-func CompareNodes(t *testing.T, node1, node2 *types.Node) {
-	assert.Equal(t, node1.Name, node2.Name, "Should get the same node name")
-	assert.Equal(t, node1.TenantID, node2.TenantID, "Should get the same node tenantID")
-	assert.Equal(t, node1.URLs, node2.URLs, "Should get the same node URLs")
-	assert.Equal(t, node1.ListenerDepth, node2.ListenerDepth, "Should get the same node ListenerDepth")
-	assert.Equal(t, node1.ListenerBlockPosition, node2.ListenerBlockPosition, "Should get the same node")
-	assert.Equal(t, node1.ListenerFromBlock, node2.ListenerFromBlock, "Should get the same node ListenerBlockPosition")
-	assert.Equal(t, node1.ListenerBackOffDuration, node2.ListenerBackOffDuration, "Should get the same node ListenerBackOffDuration")
+func CompareChains(t *testing.T, chain1, chain2 *types.Chain) {
+	assert.Equal(t, chain1.Name, chain2.Name, "Should get the same chain name")
+	assert.Equal(t, chain1.TenantID, chain2.TenantID, "Should get the same chain tenantID")
+	assert.Equal(t, chain1.URLs, chain2.URLs, "Should get the same chain URLs")
+	assert.Equal(t, chain1.ListenerDepth, chain2.ListenerDepth, "Should get the same chain ListenerDepth")
+	assert.Equal(t, chain1.ListenerBlockPosition, chain2.ListenerBlockPosition, "Should get the same chain")
+	assert.Equal(t, chain1.ListenerFromBlock, chain2.ListenerFromBlock, "Should get the same chain ListenerBlockPosition")
+	assert.Equal(t, chain1.ListenerBackOffDuration, chain2.ListenerBackOffDuration, "Should get the same chain ListenerBackOffDuration")
 }
 
-func (s *ChainRegistryTestSuite) TestRegisterNode() {
-	err := s.Store.RegisterNode(context.Background(), NodesSample[tenantID1][nodeName1])
-	assert.NoError(s.T(), err, "Should register node properly")
+func (s *ChainRegistryTestSuite) TestRegisterChain() {
+	err := s.Store.RegisterChain(context.Background(), ChainsSample[tenantID1][chainName1])
+	assert.NoError(s.T(), err, "Should register chain properly")
 
-	err = s.Store.RegisterNode(context.Background(), NodesSample[tenantID1][nodeName1])
+	err = s.Store.RegisterChain(context.Background(), ChainsSample[tenantID1][chainName1])
 	assert.Error(s.T(), err, "Should get an error violating the 'unique' constrain")
 }
 
-func (s *ChainRegistryTestSuite) TestRegisterNodeWithError() {
-	nodeError := &types.Node{
-		Name:                    "test",
-		TenantID:                "test",
-		ListenerDepth:           2,
-		ListenerBlockPosition:   2,
-		ListenerFromBlock:       2,
-		ListenerBackOffDuration: "2s",
+func (s *ChainRegistryTestSuite) TestRegisterChainWithError() {
+	listenerDepth := uint64(2)
+	listenerBlockPosition := int64(2)
+	listenerFromBlock := int64(2)
+	listenerBackOffDuration := "2s"
+	chainError := &types.Chain{
+		Name:                    "chainName1",
+		TenantID:                "tenantID1",
+		ListenerDepth:           &listenerDepth,
+		ListenerBlockPosition:   &listenerBlockPosition,
+		ListenerFromBlock:       &listenerFromBlock,
+		ListenerBackOffDuration: &listenerBackOffDuration,
 	}
-	err := s.Store.RegisterNode(context.Background(), nodeError)
+	err := s.Store.RegisterChain(context.Background(), chainError)
 	assert.Error(s.T(), err, "Should get an error when a field is missing")
 }
 
-func (s *ChainRegistryTestSuite) TestRegisterNodes() {
-	for _, nodes := range NodesSample {
-		for _, node := range nodes {
-			_ = s.Store.RegisterNode(context.Background(), node)
+func (s *ChainRegistryTestSuite) TestRegisterChains() {
+	for _, chains := range ChainsSample {
+		for _, chain := range chains {
+			_ = s.Store.RegisterChain(context.Background(), chain)
 		}
 	}
 }
 
-func (s *ChainRegistryTestSuite) TestGetNodes() {
-	s.TestRegisterNodes()
+func (s *ChainRegistryTestSuite) TestGetChains() {
+	s.TestRegisterChains()
 
-	nodes, err := s.Store.GetNodes(context.Background(), nil)
-	assert.NoError(s.T(), err, "Should get nodes without errors")
-	assert.Len(s.T(), nodes, len(tenantID1Nodes)+len(tenantID2Nodes), "Should get the same number of nodes")
+	chains, err := s.Store.GetChains(context.Background(), nil)
+	assert.NoError(s.T(), err, "Should get chains without errors")
+	assert.Len(s.T(), chains, len(tenantID1Chains)+len(tenantID2Chains), "Should get the same number of chains")
 
-	for _, node := range nodes {
-		CompareNodes(s.T(), node, NodesSample[node.TenantID][node.Name])
+	for _, chain := range chains {
+		CompareChains(s.T(), chain, ChainsSample[chain.TenantID][chain.Name])
 	}
 }
 
-func (s *ChainRegistryTestSuite) TestGetNodesByTenantID() {
-	s.TestRegisterNodes()
+func (s *ChainRegistryTestSuite) TestGetChainsByTenantID() {
+	s.TestRegisterChains()
 
-	nodes, err := s.Store.GetNodesByTenantID(context.Background(), tenantID2, nil)
-	assert.NoError(s.T(), err, "Should get nodes without errors")
-	assert.Len(s.T(), nodes, len(NodesSample[tenantID2]), "Should get the same number of nodes")
-	for i := 0; i < len(NodesSample[tenantID2]); i++ {
-		CompareNodes(s.T(), nodes[i], NodesSample[tenantID2][nodes[i].Name])
+	chains, err := s.Store.GetChainsByTenantID(context.Background(), tenantID2, nil)
+	assert.NoError(s.T(), err, "Should get chains without errors")
+	assert.Len(s.T(), chains, len(ChainsSample[tenantID2]), "Should get the same number of chains")
+	for i := 0; i < len(ChainsSample[tenantID2]); i++ {
+		CompareChains(s.T(), chains[i], ChainsSample[tenantID2][chains[i].Name])
 	}
 }
 
-func (s *ChainRegistryTestSuite) TestGetNodeByName() {
-	s.TestRegisterNodes()
+func (s *ChainRegistryTestSuite) TestGetChainByName() {
+	s.TestRegisterChains()
 
-	node, err := s.Store.GetNodeByTenantIDAndNodeName(context.Background(), tenantID2, nodeName2)
-	assert.NoError(s.T(), err, "Should get node without errors")
+	chain, err := s.Store.GetChainByTenantIDAndName(context.Background(), tenantID2, chainName2)
+	assert.NoError(s.T(), err, "Should get chain without errors")
 
-	CompareNodes(s.T(), node, NodesSample[tenantID2][nodeName2])
+	CompareChains(s.T(), chain, ChainsSample[tenantID2][chainName2])
 }
 
-func (s *ChainRegistryTestSuite) TestGetNodeByID() {
-	s.TestRegisterNodes()
+func (s *ChainRegistryTestSuite) TestGetChainByTenantIDAndUUID() {
+	s.TestRegisterChains()
 
-	testNode, _ := s.Store.GetNodeByTenantIDAndNodeName(context.Background(), tenantID2, nodeName3)
+	testChain, _ := s.Store.GetChainByTenantIDAndName(context.Background(), tenantID2, chainName3)
 
-	node, err := s.Store.GetNodeByID(context.Background(), testNode.ID)
-	assert.NoError(s.T(), err, "Should get node without errors")
+	chain, err := s.Store.GetChainByTenantIDAndUUID(context.Background(), testChain.TenantID, testChain.UUID)
+	assert.NoError(s.T(), err, "Should get chain without errors")
 
-	CompareNodes(s.T(), node, NodesSample[tenantID2][nodeName3])
+	CompareChains(s.T(), chain, ChainsSample[tenantID2][chainName3])
 }
 
-func (s *ChainRegistryTestSuite) TestUpdateNodeByName() {
-	s.TestRegisterNodes()
+func (s *ChainRegistryTestSuite) TestGetChainByUUID() {
+	s.TestRegisterChains()
 
-	testNode := NodesSample[tenantID1][nodeName2]
-	testNode.URLs = []string{"testUrl1"}
-	err := s.Store.UpdateNodeByName(context.Background(), testNode)
-	assert.NoError(s.T(), err, "Should get node without errors")
+	testChain, _ := s.Store.GetChainByTenantIDAndName(context.Background(), tenantID2, chainName3)
 
-	node, _ := s.Store.GetNodeByTenantIDAndNodeName(context.Background(), tenantID1, nodeName2)
-	CompareNodes(s.T(), node, testNode)
+	chain, err := s.Store.GetChainByUUID(context.Background(), testChain.UUID)
+	assert.NoError(s.T(), err, "Should get chain without errors")
+
+	CompareChains(s.T(), chain, ChainsSample[tenantID2][chainName3])
 }
 
-func (s *ChainRegistryTestSuite) TestNotFoundTenantErrorUpdateNodeByName() {
-	testNode := NodesSample[tenantID1][nodeName2]
-	testNode.URLs = []string{"testUrl1"}
-	err := s.Store.UpdateNodeByName(context.Background(), testNode)
-	assert.Error(s.T(), err, "Should get node without errors")
+func (s *ChainRegistryTestSuite) TestUpdateChainByName() {
+	s.TestRegisterChains()
+
+	testChain := ChainsSample[tenantID1][chainName2]
+	testChain.URLs = []string{"testUrl1"}
+	err := s.Store.UpdateChainByName(context.Background(), testChain)
+	assert.NoError(s.T(), err, "Should get chain without errors")
+
+	chain, _ := s.Store.GetChainByTenantIDAndName(context.Background(), tenantID1, chainName2)
+	CompareChains(s.T(), chain, testChain)
 }
 
-func (s *ChainRegistryTestSuite) TestNotFoundNameErrorUpdateNodeByName() {
-	s.TestRegisterNodes()
+func (s *ChainRegistryTestSuite) TestNotFoundTenantErrorUpdateChainByName() {
+	testChain := ChainsSample[tenantID1][chainName2]
+	testChain.URLs = []string{"testUrl1"}
+	err := s.Store.UpdateChainByName(context.Background(), testChain)
+	assert.Error(s.T(), err, "Should get chain without errors")
+}
 
-	testNode := &types.Node{
+func (s *ChainRegistryTestSuite) TestNotFoundNameErrorUpdateChainByName() {
+	s.TestRegisterChains()
+
+	testChain := &types.Chain{
 		Name:     tenantID1,
-		TenantID: "errorNodeName",
+		TenantID: errorTenantID,
 		URLs:     []string{"testUrl1"},
 	}
-	err := s.Store.UpdateNodeByName(context.Background(), testNode)
-	assert.Error(s.T(), err, "Should get node without errors")
+	err := s.Store.UpdateChainByName(context.Background(), testChain)
+	assert.Error(s.T(), err, "Should get chain without errors")
 }
 
 func (s *ChainRegistryTestSuite) TestUpdateBlockPositionByName() {
-	s.TestRegisterNodes()
+	s.TestRegisterChains()
 
-	testNode := NodesSample[tenantID1][nodeName2]
-	testNode.ListenerBlockPosition = 777
-	err := s.Store.UpdateBlockPositionByName(context.Background(), testNode.Name, testNode.TenantID, testNode.ListenerBlockPosition)
-	assert.NoError(s.T(), err, "Should get node without errors")
+	listenerBlockPosition := int64(777)
 
-	node, _ := s.Store.GetNodeByTenantIDAndNodeName(context.Background(), tenantID1, nodeName2)
-	CompareNodes(s.T(), node, testNode)
+	testChain := ChainsSample[tenantID1][chainName2]
+	testChain.ListenerBlockPosition = &listenerBlockPosition
+	err := s.Store.UpdateBlockPositionByName(context.Background(), testChain.Name, testChain.TenantID, *testChain.ListenerBlockPosition)
+	assert.NoError(s.T(), err, "Should get chain without errors")
+
+	chain, _ := s.Store.GetChainByTenantIDAndName(context.Background(), tenantID1, chainName2)
+	CompareChains(s.T(), chain, testChain)
 }
 
 func (s *ChainRegistryTestSuite) TestNotFoundTenantErrorUpdateBlockPositionByName() {
-	testNode := NodesSample[tenantID1][nodeName2]
-	testNode.ListenerBlockPosition = 777
-	err := s.Store.UpdateBlockPositionByName(context.Background(), testNode.Name, testNode.TenantID, testNode.ListenerBlockPosition)
-	assert.Error(s.T(), err, "Should get node without errors")
+	listenerBlockPosition := int64(777)
+
+	testChain := ChainsSample[tenantID1][chainName2]
+	testChain.ListenerBlockPosition = &listenerBlockPosition
+	err := s.Store.UpdateBlockPositionByName(context.Background(), testChain.Name, testChain.TenantID, *testChain.ListenerBlockPosition)
+	assert.Error(s.T(), err, "Should get chain without errors")
 }
 
 func (s *ChainRegistryTestSuite) TestNotFoundNameErrorUpdateBlockPositionByName() {
-	s.TestRegisterNodes()
+	s.TestRegisterChains()
 
-	testNode := &types.Node{
+	listenerBlockPosition := int64(777)
+
+	testChain := &types.Chain{
 		Name:                  tenantID1,
-		TenantID:              "errorNodeName",
-		ListenerBlockPosition: 777,
+		TenantID:              errorTenantID,
+		ListenerBlockPosition: &listenerBlockPosition,
 	}
-	err := s.Store.UpdateBlockPositionByName(context.Background(), testNode.Name, testNode.TenantID, testNode.ListenerBlockPosition)
-	assert.Error(s.T(), err, "Should get node without errors")
+	err := s.Store.UpdateBlockPositionByName(context.Background(), testChain.Name, testChain.TenantID, *testChain.ListenerBlockPosition)
+	assert.Error(s.T(), err, "Should get chain without errors")
 }
 
-func (s *ChainRegistryTestSuite) TestUpdateNodeByID() {
-	s.TestRegisterNodes()
+func (s *ChainRegistryTestSuite) TestUpdateChainByUUID() {
+	s.TestRegisterChains()
 
-	testNode, _ := s.Store.GetNodeByTenantIDAndNodeName(context.Background(), tenantID1, nodeName2)
-	testNode.ListenerFromBlock = 10
-	err := s.Store.UpdateNodeByID(context.Background(), testNode)
-	assert.NoError(s.T(), err, "Should get node without errors")
+	testChain, _ := s.Store.GetChainByTenantIDAndName(context.Background(), tenantID1, chainName2)
+	testChain.ListenerFromBlock = &(&struct{ x int64 }{10}).x
+	err := s.Store.UpdateChainByUUID(context.Background(), testChain)
+	assert.NoError(s.T(), err, "Should get chain without errors")
 
-	node, _ := s.Store.GetNodeByTenantIDAndNodeName(context.Background(), tenantID1, nodeName2)
-	CompareNodes(s.T(), node, testNode)
+	chain, _ := s.Store.GetChainByTenantIDAndName(context.Background(), tenantID1, chainName2)
+	CompareChains(s.T(), chain, testChain)
 }
 
-func (s *ChainRegistryTestSuite) TestErrorNotFoundUpdateNodeByID() {
-	s.TestRegisterNodes()
+func (s *ChainRegistryTestSuite) TestErrorNotFoundUpdateChainByUUID() {
+	s.TestRegisterChains()
 
-	testNode := &types.Node{
-		ID:   "0d60a85e-0b90-4482-a14c-108aea2557aa",
+	testChain := &types.Chain{
+		UUID: "0d60a85e-0b90-4482-a14c-108aea2557aa",
 		URLs: []string{"testUrl1"},
 	}
-	err := s.Store.UpdateNodeByID(context.Background(), testNode)
-	assert.Error(s.T(), err, "Should update node with errors")
+	err := s.Store.UpdateChainByUUID(context.Background(), testChain)
+	assert.Error(s.T(), err, "Should update chain with errors")
 }
 
-func (s *ChainRegistryTestSuite) TestUpdateBlockPositionByID() {
-	s.TestRegisterNodes()
+func (s *ChainRegistryTestSuite) TestUpdateBlockPositionByUUID() {
+	s.TestRegisterChains()
 
-	testNode, _ := s.Store.GetNodeByTenantIDAndNodeName(context.Background(), tenantID1, nodeName2)
-	testNode.ListenerBlockPosition = 10
-	err := s.Store.UpdateBlockPositionByID(context.Background(), testNode.ID, testNode.ListenerBlockPosition)
-	assert.NoError(s.T(), err, "Should get node without errors")
+	listenerBlockPosition := int64(10)
 
-	node, _ := s.Store.GetNodeByTenantIDAndNodeName(context.Background(), tenantID1, nodeName2)
-	CompareNodes(s.T(), testNode, node)
+	testChain, _ := s.Store.GetChainByTenantIDAndName(context.Background(), tenantID1, chainName2)
+	testChain.ListenerBlockPosition = &listenerBlockPosition
+	err := s.Store.UpdateBlockPositionByUUID(context.Background(), testChain.UUID, *testChain.ListenerBlockPosition)
+	assert.NoError(s.T(), err, "Should get chain without errors")
+
+	chain, _ := s.Store.GetChainByTenantIDAndName(context.Background(), tenantID1, chainName2)
+	CompareChains(s.T(), testChain, chain)
 }
 
-func (s *ChainRegistryTestSuite) TestErrorNotFoundUpdateBlockPositionByID() {
-	s.TestRegisterNodes()
+func (s *ChainRegistryTestSuite) TestErrorNotFoundUpdateBlockPositionByUUID() {
+	s.TestRegisterChains()
 
-	testNode := &types.Node{
-		ID:                    "0d60a85e-0b90-4482-a14c-108aea2557aa",
-		ListenerBlockPosition: 10,
+	listenerBlockPosition := int64(10)
+
+	testChain := &types.Chain{
+		UUID:                  "0d60a85e-0b90-4482-a14c-108aea2557aa",
+		ListenerBlockPosition: &listenerBlockPosition,
 	}
-	err := s.Store.UpdateBlockPositionByID(context.Background(), testNode.ID, testNode.ListenerBlockPosition)
-	assert.Error(s.T(), err, "Should update node with errors")
+	err := s.Store.UpdateBlockPositionByUUID(context.Background(), testChain.UUID, *testChain.ListenerBlockPosition)
+	assert.Error(s.T(), err, "Should update chain with errors")
 }
 
-func (s *ChainRegistryTestSuite) TestDeleteNodeByName() {
-	s.TestRegisterNodes()
+func (s *ChainRegistryTestSuite) TestDeleteChainByName() {
+	s.TestRegisterChains()
 
-	testNode := NodesSample[tenantID1][nodeName2]
-	err := s.Store.DeleteNodeByName(context.Background(), testNode)
-	assert.NoError(s.T(), err, "Should get node without errors")
+	testChain := ChainsSample[tenantID1][chainName2]
+	err := s.Store.DeleteChainByName(context.Background(), testChain)
+	assert.NoError(s.T(), err, "Should get chain without errors")
 
-	node, err := s.Store.GetNodeByTenantIDAndNodeName(context.Background(), tenantID1, nodeName2)
-	assert.Error(s.T(), err, "Should get node without errors")
-	assert.Nil(s.T(), node, "Should not get node")
+	chain, err := s.Store.GetChainByTenantIDAndName(context.Background(), tenantID1, chainName2)
+	assert.Error(s.T(), err, "Should get chain without errors")
+	assert.Nil(s.T(), chain, "Should not get chain")
 }
 
-func (s *ChainRegistryTestSuite) TestErrorNotFoundDeleteNodeByName() {
-	s.TestRegisterNodes()
+func (s *ChainRegistryTestSuite) TestErrorNotFoundDeleteChainByName() {
+	s.TestRegisterChains()
 
-	testNode := &types.Node{
+	testChain := &types.Chain{
 		Name:     tenantID1,
-		TenantID: "errorNodeName",
+		TenantID: errorTenantID,
 	}
-	err := s.Store.DeleteNodeByName(context.Background(), testNode)
-	assert.Error(s.T(), err, "Should delete node with errors")
+	err := s.Store.DeleteChainByName(context.Background(), testChain)
+	assert.Error(s.T(), err, "Should delete chain with errors")
 }
 
-func (s *ChainRegistryTestSuite) TestDeleteNodeByID() {
-	s.TestRegisterNodes()
+func (s *ChainRegistryTestSuite) TestDeleteChainByUUID() {
+	s.TestRegisterChains()
 
-	node, _ := s.Store.GetNodeByTenantIDAndNodeName(context.Background(), tenantID1, nodeName2)
+	chain, _ := s.Store.GetChainByTenantIDAndName(context.Background(), tenantID1, chainName2)
 
-	err := s.Store.DeleteNodeByID(context.Background(), node.ID)
-	assert.NoError(s.T(), err, "Should get node without errors")
+	err := s.Store.DeleteChainByUUID(context.Background(), chain.UUID)
+	assert.NoError(s.T(), err, "Should get chain without errors")
 
-	node, err = s.Store.GetNodeByTenantIDAndNodeName(context.Background(), tenantID1, nodeName2)
-	assert.Error(s.T(), err, "Should get node without errors")
-	assert.Nil(s.T(), node, "Should not get node")
+	chain, err = s.Store.GetChainByTenantIDAndName(context.Background(), tenantID1, chainName2)
+	assert.Error(s.T(), err, "Should get chain without errors")
+	assert.Nil(s.T(), chain, "Should not get chain")
 }
 
-func (s *ChainRegistryTestSuite) TestErrorNotFoundDeleteNodeByID() {
-	s.TestRegisterNodes()
+func (s *ChainRegistryTestSuite) TestErrorNotFoundDeleteChainByUUID() {
+	s.TestRegisterChains()
 
-	err := s.Store.DeleteNodeByID(context.Background(), "0d60a85e-0b90-4482-a14c-108aea2557aa")
-	assert.Error(s.T(), err, "Should delete node with errors")
+	err := s.Store.DeleteChainByUUID(context.Background(), "0d60a85e-0b90-4482-a14c-108aea2557aa")
+	assert.Error(s.T(), err, "Should delete chain with errors")
 }

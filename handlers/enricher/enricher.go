@@ -44,7 +44,7 @@ func Enricher(r svc.ContractRegistryClient, ec ethclient.ChainStateReader) engin
 				return
 			}
 			txctx.Logger.Debugf("%s successfully SetAccountCodeHash in Contract Registry for chain %s and account %s with codehash",
-				txctx.Envelope.Chain.ID(),
+				txctx.Envelope.Chain.GetBigChainID(),
 				txctx.Envelope.GetReceipt().GetContractAddress().Address(),
 				crypto.Keccak256Hash(code))
 		}

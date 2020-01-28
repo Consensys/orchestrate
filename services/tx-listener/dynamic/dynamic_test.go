@@ -6,9 +6,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNode(t *testing.T) {
-	node := &Node{}
-	node.SetDefault()
-	assert.NotNil(t, node.Listener, "Listener should be set")
-	assert.NotEqual(t, "", node.ID, "Listener should be set")
+func TestChain(t *testing.T) {
+	chain := &Chain{}
+	chain.SetDefault()
+	assert.NotNil(t, chain.Listener, "Listener should be set")
+	assert.NotEqual(t, "", chain.UUID, "Listener should be set")
 }

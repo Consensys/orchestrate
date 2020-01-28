@@ -13,7 +13,7 @@ func Faucet(fct faucet.Faucet) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 
 		// Skip if the chainId is unset
-		if txctx.Envelope.GetChain() == nil || txctx.Envelope.GetChain().ID() == nil {
+		if txctx.Envelope.GetChain() == nil || txctx.Envelope.GetChain().GetBigChainID() == nil {
 			txctx.Logger.Debugf("faucet: skipping faucet request because no chainID")
 			return
 		}
@@ -26,7 +26,7 @@ func Faucet(fct faucet.Faucet) engine.HandlerFunc {
 
 		// Create Faucet request
 		req := &faucettypes.Request{
-			ChainID:     txctx.Envelope.GetChain().ID(),
+			ChainID:     txctx.Envelope.GetChain().GetBigChainID(),
 			Beneficiary: txctx.Envelope.Sender(),
 			Amount:      txctx.Envelope.GetTx().GetTxData().GetValueBig(),
 		}

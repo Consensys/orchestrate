@@ -20,36 +20,36 @@ func NewManager() *Manager {
 	}
 }
 
-func (m *Manager) GetLastBlockNumber(_ context.Context, node *dynamic.Node) (int64, error) {
+func (m *Manager) GetLastBlockNumber(_ context.Context, chain *dynamic.Chain) (int64, error) {
 	m.mux.Lock()
 	defer m.mux.Unlock()
-	blockNumber, ok := m.cache[fmt.Sprintf("blockNumber-%v", node.ID)]
+	blockNumber, ok := m.cache[fmt.Sprintf("blockNumber-%v", chain.UUID)]
 	if !ok {
 		return 0, nil
 	}
 	return blockNumber, nil
 }
 
-func (m *Manager) SetLastBlockNumber(_ context.Context, node *dynamic.Node, blockNumber int64) error {
+func (m *Manager) SetLastBlockNumber(_ context.Context, chain *dynamic.Chain, blockNumber int64) error {
 	m.mux.Lock()
 	defer m.mux.Unlock()
-	m.cache[fmt.Sprintf("blockNumber-%v", node.ID)] = blockNumber
+	m.cache[fmt.Sprintf("blockNumber-%v", chain.UUID)] = blockNumber
 	return nil
 }
 
-func (m *Manager) GetLastTxIndex(_ context.Context, node *dynamic.Node, blockNumber int64) (uint64, error) {
+func (m *Manager) GetLastTxIndex(_ context.Context, chain *dynamic.Chain, blockNumber int64) (uint64, error) {
 	m.mux.Lock()
 	defer m.mux.Unlock()
-	txIndex, ok := m.cache[fmt.Sprintf("txIndex-%v-%v", node.ID, blockNumber)]
+	txIndex, ok := m.cache[fmt.Sprintf("txIndex-%v-%v", chain.UUID, blockNumber)]
 	if !ok {
 		return 0, nil
 	}
 	return uint64(txIndex), nil
 }
 
-func (m *Manager) SetLastTxIndex(_ context.Context, node *dynamic.Node, blockNumber int64, txIndex uint64) error {
+func (m *Manager) SetLastTxIndex(_ context.Context, chain *dynamic.Chain, blockNumber int64, txIndex uint64) error {
 	m.mux.Lock()
 	defer m.mux.Unlock()
-	m.cache[fmt.Sprintf("txIndex-%v-%v", node.ID, blockNumber)] = int64(txIndex)
+	m.cache[fmt.Sprintf("txIndex-%v-%v", chain.UUID, blockNumber)] = int64(txIndex)
 	return nil
 }

@@ -38,11 +38,11 @@ func Sender(ec ethclient.TransactionSender, s evlpstore.EnvelopeStoreClient) eng
 
 	return func(txctx *engine.TxContext) {
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"chain.id":    txctx.Envelope.GetChain().ID().String(),
-			"metadata.id": txctx.Envelope.GetMetadata().GetId(),
-			"tx.raw":      utils.ShortString(txctx.Envelope.GetTx().GetRaw().Hex(), 30),
-			"tx.hash":     txctx.Envelope.GetTx().GetHash().Hex(),
-			"from":        txctx.Envelope.GetFrom().Hex(),
+			"chain.chainID": txctx.Envelope.GetChain().GetBigChainID().String(),
+			"metadata.id":   txctx.Envelope.GetMetadata().GetId(),
+			"tx.raw":        utils.ShortString(txctx.Envelope.GetTx().GetRaw().Hex(), 30),
+			"tx.hash":       txctx.Envelope.GetTx().GetHash().Hex(),
+			"from":          txctx.Envelope.GetFrom().Hex(),
 		})
 
 		// If public transaction

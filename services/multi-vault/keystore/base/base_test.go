@@ -47,7 +47,7 @@ var arbitraryMsg = []string{
 
 func makeSignTxInput(i int) (context.Context, *chain.Chain, ethcommon.Address, *ethtypes.Transaction) {
 	netChain := &chain.Chain{
-		Id: big.NewInt(testChainsIds[i%len(testChainsIds)]).Bytes(),
+		ChainId: big.NewInt(testChainsIds[i%len(testChainsIds)]).Bytes(),
 	}
 	address := ethcommon.HexToAddress(testPKeys[i%len(testPKeys)].a)
 	tx := ethtypes.NewTransaction(

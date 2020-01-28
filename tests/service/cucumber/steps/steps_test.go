@@ -47,7 +47,7 @@ func (s *ScenarioTestSuite) TestInitScenarioContext() {
 	scenario.Name = "test-1"
 	s.Context.init(scenario)
 	assert.Equal(s.T(), "test-1", s.Context.Definition.Name, "Context definition should have been set")
-	assert.NotEqual(s.T(), "", s.Context.ID, "ID should have been set")
+	assert.NotEqual(s.T(), "", s.Context.ID, "UUID should have been set")
 
 	scenarioOutline := &gherkin.ScenarioOutline{}
 	scenarioOutline.Name = "test-2"
@@ -60,7 +60,7 @@ func (s *ScenarioTestSuite) TestParseEnvelopes() {
 		Rows: []*gherkin.TableRow{
 			{
 				Cells: []*gherkin.TableCell{
-					{Value: "chain.id"},
+					{Value: "chain.chainID"},
 					{Value: "from"},
 				},
 			},
@@ -86,7 +86,7 @@ func (s *ScenarioTestSuite) TestISendEnvelopesToTopic() {
 		Rows: []*gherkin.TableRow{
 			{
 				Cells: []*gherkin.TableCell{
-					{Value: "chain.id"},
+					{Value: "chain.chainID"},
 					{Value: "from"},
 				},
 			},

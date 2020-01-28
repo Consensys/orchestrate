@@ -8,5 +8,5 @@ import (
 )
 
 type Hook interface {
-	AfterNewBlock(ctx context.Context, node *dynamic.Node, block *ethtypes.Block, receipts []*ethtypes.Receipt) error
+	AfterNewBlock(ctx context.Context, chain *dynamic.Chain, block *ethtypes.Block, receipts []*ethtypes.Receipt) error
 }

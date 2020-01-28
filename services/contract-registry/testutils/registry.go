@@ -164,7 +164,7 @@ var _, eventJSONsBis, _ = rcommon.ParseJSONABI(erc20ContractBis.Abi)
 
 // ContractInstance is a unittest value
 var ContractInstance = common.AccountInstance{
-	Chain:   &chain.Chain{Id: big.NewInt(3).Bytes()},
+	Chain:   &chain.Chain{ChainId: big.NewInt(3).Bytes()},
 	Account: ethereum.HexToAccount("0xBA826fEc90CEFdf6706858E5FbaFcb27A290Fbe0"),
 }
 

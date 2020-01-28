@@ -113,25 +113,25 @@ func (m *Manager) listenCommands(ctx context.Context) {
 func (m *Manager) executeCommand(ctx context.Context, command *Command) {
 	switch command.Type {
 	case START:
-		m.runSession(ctx, command.Node)
+		m.runSession(ctx, command.Chain)
 	case STOP:
-		m.stopSession(command.Node)
+		m.stopSession(command.Chain)
 	case UPDATE:
-		m.stopSession(command.Node)
-		m.runSession(ctx, command.Node)
+		m.stopSession(command.Chain)
+		m.runSession(ctx, command.Chain)
 	default:
 		log.WithoutContext().WithFields(logrus.Fields{
-			"type":          command.Type,
-			"node.id":       command.Node.ID,
-			"node.tenantId": command.Node.TenantID,
-			"node.name":     command.Node.Name,
+			"type":           command.Type,
+			"chain.uuid":     command.Chain.UUID,
+			"chain.tenantId": command.Chain.TenantID,
+			"chain.name":     command.Chain.Name,
 		}).Errorf("Unknown command")
 	}
 }
 
-func (m *Manager) runSession(ctx context.Context, node *dynamic.Node) {
+func (m *Manager) runSession(ctx context.Context, chain *dynamic.Chain) {
 	// Build session
-	s, err := m.builder.NewSession(node)
+	s, err := m.builder.NewSession(chain)
 	if err != nil {
 		log.FromContext(ctx).WithError(err).Errorf("error while creating new session")
 		return
@@ -145,15 +145,15 @@ func (m *Manager) runSession(ctx context.Context, node *dynamic.Node) {
 	}
 
 	// Add session
-	m.addSession(node.ID, sess)
+	m.addSession(chain.UUID, sess)
 
 	// Start goroutine to run session
 	m.wg.Add(1)
 	go func() {
-		logger := log.WithoutContext().WithField("session.node.id", node.ID)
+		logger := log.WithoutContext().WithField("session.chain.uuid", chain.UUID)
 		logger.Infof("Session starts")
-		err := sess.session.Run(log.With(cancelableCtx, log.Str("session.node.id", node.ID)))
-		m.removeSession(node.ID)
+		err := sess.session.Run(log.With(cancelableCtx, log.Str("session.chain.uuid", chain.UUID)))
+		m.removeSession(chain.UUID)
 		if err != nil {
 			log.FromContext(ctx).WithError(err).Errorf("error while running session")
 		}
@@ -163,10 +163,10 @@ func (m *Manager) runSession(ctx context.Context, node *dynamic.Node) {
 	}()
 }
 
-func (m *Manager) stopSession(node *dynamic.Node) {
-	sess, ok := m.getSession(node.ID)
+func (m *Manager) stopSession(chain *dynamic.Chain) {
+	sess, ok := m.getSession(chain.UUID)
 	if ok {
-		log.WithoutContext().WithField("session.node.id", node.ID).Infof("Stopping session")
+		log.WithoutContext().WithField("session.chain.uuid", chain.UUID).Infof("Stopping session")
 		sess.cancel()
 	}
 }

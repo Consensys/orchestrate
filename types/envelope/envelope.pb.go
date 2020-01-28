@@ -26,7 +26,7 @@ const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 // Metadata attached to an Envelope
 type Metadata struct {
-	// ID of the Envelope in UUID RFC 4122, ISO/IEC 9834-8:2005 format
+	// UUID of the Envelope in UUID RFC 4122, ISO/IEC 9834-8:2005 format
 	// e.g a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// Extra information (optional)

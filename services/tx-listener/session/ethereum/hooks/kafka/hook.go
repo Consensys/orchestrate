@@ -43,14 +43,14 @@ func NewHook(conf *Config, registry svc.ContractRegistryClient, ec ethclient.Cha
 	}
 }
 
-func (hk *Hook) AfterNewBlock(ctx context.Context, node *dynamic.Node, block *ethtypes.Block, receipts []*ethtypes.Receipt) error {
+func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *ethtypes.Block, receipts []*ethtypes.Receipt) error {
 	blockLogCtx := log.With(ctx, log.Str("block.number", block.Number().String()))
 	var evlps []*envelope.Envelope
 	for idx, r := range receipts {
 		receiptLogCtx := log.With(blockLogCtx, log.Str("receipt.txhash", r.TxHash.Hex()))
 
 		// Register deployed contract
-		err := hk.registerDeployedContract(receiptLogCtx, node, r, block)
+		err := hk.registerDeployedContract(receiptLogCtx, c, r, block)
 		if err != nil {
 			log.FromContext(receiptLogCtx).WithError(err).Errorf("could not register deployed contract on registry")
 			return err
@@ -60,7 +60,7 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, node *dynamic.Node, block *et
 		receipt := ethereum.FromGethReceipt(r)
 
 		// Load envelope from envelope store
-		evlp, err := hk.loadEnvelope(receiptLogCtx, node, receipt)
+		evlp, err := hk.loadEnvelope(receiptLogCtx, c, receipt)
 		switch {
 		case err == nil:
 		case !hk.conf.DisableExternalTx && errors.IsNotFoundError(err):
@@ -87,7 +87,7 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, node *dynamic.Node, block *et
 	}
 
 	// Prepare messages to be produced
-	msgs, err := hk.prepareEnvelopeMsgs(evlps, hk.conf.TopicTxDecoder, node.ID)
+	msgs, err := hk.prepareEnvelopeMsgs(evlps, hk.conf.TopicTxDecoder, c.UUID)
 	if err != nil {
 		log.FromContext(blockLogCtx).WithError(err).Errorf("failed to prepare messages")
 		return err
@@ -105,12 +105,12 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, node *dynamic.Node, block *et
 	return nil
 }
 
-func (hk *Hook) registerDeployedContract(ctx context.Context, node *dynamic.Node, receipt *ethtypes.Receipt, block *ethtypes.Block) error {
+func (hk *Hook) registerDeployedContract(ctx context.Context, c *dynamic.Chain, receipt *ethtypes.Receipt, block *ethtypes.Block) error {
 	if receipt.ContractAddress.Hex() != "0x0000000000000000000000000000000000000000" {
 		log.FromContext(ctx).WithField("contract.address", receipt.ContractAddress.Hex()).Infof("new contract deployed")
 		code, err := hk.ec.CodeAt(
 			ethclientutils.RetryNotFoundError(ctx, true),
-			node.URL,
+			c.URL,
 			receipt.ContractAddress,
 			block.Number(),
 		)
@@ -121,7 +121,7 @@ func (hk *Hook) registerDeployedContract(ctx context.Context, node *dynamic.Node
 		_, err = hk.registry.SetAccountCodeHash(ctx,
 			&svc.SetAccountCodeHashRequest{
 				AccountInstance: &common.AccountInstance{
-					Chain:   chain.FromBigInt(node.ChainID),
+					Chain:   chain.FromBigInt(c.ChainID),
 					Account: ethereum.HexToAccount(receipt.ContractAddress.Hex()),
 				},
 				CodeHash: crypto.Keccak256Hash(code).Bytes(),
@@ -134,11 +134,11 @@ func (hk *Hook) registerDeployedContract(ctx context.Context, node *dynamic.Node
 	return nil
 }
 
-func (hk *Hook) loadEnvelope(ctx context.Context, node *dynamic.Node, receipt *ethereum.Receipt) (*envelope.Envelope, error) {
+func (hk *Hook) loadEnvelope(ctx context.Context, c *dynamic.Chain, receipt *ethereum.Receipt) (*envelope.Envelope, error) {
 	resp, err := hk.store.LoadByTxHash(
 		ctx,
 		&evlpstore.LoadByTxHashRequest{
-			Chain:  chain.FromBigInt(node.ChainID),
+			Chain:  chain.FromBigInt(c.ChainID),
 			TxHash: receipt.GetTxHash(),
 		})
 	if err != nil {
@@ -171,7 +171,7 @@ func (hk *Hook) prepareMsg(pb proto.Message, topic, key string) (*sarama.Produce
 	// Set topic to TxDecoder
 	msg.Topic = topic
 
-	// Set Message key to node ID
+	// Set Message key to chain UUID
 	msg.Key = sarama.StringEncoder(key)
 
 	return msg, nil
