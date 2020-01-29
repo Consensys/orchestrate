@@ -26,6 +26,7 @@ COPY --from=builder /etc/passwd /etc/passwd
 
 COPY --from=builder /bin/main /go/bin/main
 COPY --from=builder /app/public /public
+COPY --from=builder /app/TERMS_OF_SERVICE /
 
 # Use an unprivileged user.
 USER appuser
