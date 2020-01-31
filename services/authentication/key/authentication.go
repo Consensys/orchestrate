@@ -18,8 +18,6 @@ func NewAuth(key string) *Auth {
 	}
 }
 
-const apiKeyPrefix = "APIKey "
-
 // Parse and verify the validity of the Token (UUID or Access) and return a struct for a JWT (JSON Web Token)
 func (a *Auth) Check(ctx context.Context) (context.Context, error) {
 	if a.key == "" {
@@ -28,13 +26,13 @@ func (a *Auth) Check(ctx context.Context) (context.Context, error) {
 	}
 
 	// Extract Key from context
-	auth, ok := authutils.ParseAuth(apiKeyPrefix, authutils.AuthorizationFromContext(ctx))
-	if !ok {
-		return ctx, errors.UnauthorizedError("missing authentication key")
+	apiKey := authutils.APIKeyFromContext(ctx)
+	if apiKey == "" {
+		return ctx, errors.UnauthorizedError("missing API key")
 	}
 
-	if auth != a.key {
-		return ctx, errors.UnauthorizedError("invalid Token authentication key")
+	if apiKey != a.key {
+		return ctx, errors.UnauthorizedError("invalid API key")
 	}
 
 	// Enrich context with JWT token

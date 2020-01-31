@@ -9,13 +9,14 @@ import (
 	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/utils"
 )
 
-const AuthorizationHeader = "authorization"
-
 func Auth(auth authentication.Auth, multitenancy bool) grpc_auth.AuthFunc {
 	return func(ctx context.Context) (context.Context, error) {
 		if multitenancy {
-			authorization := metautils.ExtractIncoming(ctx).Get(AuthorizationHeader)
-			checkedCtx, err := auth.Check(authutils.WithAuthorization(ctx, authorization))
+			authorization := metautils.ExtractIncoming(ctx).Get(authentication.AuthorizationHeader)
+			apiKey := metautils.ExtractIncoming(ctx).Get(authentication.APIKeyHeader)
+
+			ctx = authutils.WithAPIKey(authutils.WithAuthorization(ctx, authorization), apiKey)
+			checkedCtx, err := auth.Check(ctx)
 			if err != nil {
 				return ctx, err
 			}

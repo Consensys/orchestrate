@@ -2,7 +2,6 @@ package txdecoder
 
 import (
 	"context"
-	"fmt"
 	"sync"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
@@ -104,7 +103,7 @@ func Start(ctx context.Context) {
 		apiKey := viper.GetString(authkey.APIKeyViperKey)
 		if apiKey != "" {
 			// Inject authorization header in context for later authentication
-			ctx = authutils.WithAuthorization(ctx, fmt.Sprintf("APIKey %v", apiKey))
+			ctx = authutils.WithAPIKey(ctx, apiKey)
 		}
 
 		cancelCtx, cancel := context.WithCancel(ctx)

@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"testing"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication"
+
 	"github.com/stretchr/testify/assert"
 	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/utils"
 )
@@ -37,5 +39,15 @@ func TestTransport(t *testing.T) {
 	_, _ = transport.RoundTrip(req)
 	assert.Equal(t, 2, mockTransport.roundTrips, "Mock transport should have been called")
 	auth = req.Header.Get("Authorization")
+	assert.Equal(t, "test-auth", auth, "Authorization header shuld be empty")
+
+	// Test setting X-API-KEY in context
+	req, _ = http.NewRequestWithContext(
+		authutils.WithAPIKey(context.Background(), "test-auth"),
+		http.MethodGet, "", nil,
+	)
+	_, _ = transport.RoundTrip(req)
+	assert.Equal(t, 3, mockTransport.roundTrips, "Mock transport should have been called")
+	auth = req.Header.Get(authentication.APIKeyHeader)
 	assert.Equal(t, "test-auth", auth, "Authorization header shuld be empty")
 }

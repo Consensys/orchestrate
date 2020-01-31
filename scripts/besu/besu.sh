@@ -6,7 +6,7 @@ rm -rf /opt/besu/database
 echo "BESU_OPTS: $BESU_OPTS"
 
 # Initialize command
-cmd="besu"
+cmd="/opt/besu/bin/besu"
 
 # Set P2P flag
 p2p_host=`awk 'END{print $1}' /etc/hosts`
@@ -17,7 +17,7 @@ if [[ ! -z "${BOOTNODE}" ]];
 then
     echo "Starting as Bootnode"
     # Save bootnode PKEY in volume
-    besu $@ public-key export --to="/opt/besu/public-keys/bootnode.pub"  
+    /opt/besu/bin/besu public-key export --to="/opt/besu/public-keys/bootnode.pub"
     cmd="${cmd} --bootnodes"
 else
     # Wait for bootnode public key to be generated

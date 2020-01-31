@@ -34,11 +34,11 @@ func TestGenerateAccessToken(t *testing.T) {
 		{
 			"nominal case one line customClaim",
 			fields{
-				"http://tenant.info/",
+				"http://orchestrate.info/",
 				key,
 			},
 			args{
-				customClaims: map[string]interface{}{"http://tenant.info/tenant_id": "f30c452b-e5fb-4102-a45d-bc00a060bcc6"},
+				customClaims: map[string]interface{}{"http://orchestrate.info/tenant_id": "f30c452b-e5fb-4102-a45d-bc00a060bcc6"},
 			},
 			"",
 			false,
@@ -46,11 +46,11 @@ func TestGenerateAccessToken(t *testing.T) {
 		{
 			"nominal case struct customClaim",
 			fields{
-				"http://tenant.info/",
+				"http://orchestrate.info/",
 				key,
 			},
 			args{
-				customClaims: map[string]interface{}{"http://tenant.info/": map[string]interface{}{"tenant_id": "f30c452b-e5fb-4102-a45d-bc00a060bcc6"}},
+				customClaims: map[string]interface{}{"http://orchestrate.info": map[string]interface{}{"tenant_id": "f30c452b-e5fb-4102-a45d-bc00a060bcc6"}},
 			},
 			"",
 			false,
@@ -100,7 +100,7 @@ func TestGenerateIDToken(t *testing.T) {
 				key,
 			},
 			args{
-				customClaims: map[string]interface{}{"http://tenant.info/tenant_id": "f30c452b-e5fb-4102-a45d-bc00a060bcc6"},
+				customClaims: map[string]interface{}{"http://orchestrate.info/tenant_id": "f30c452b-e5fb-4102-a45d-bc00a060bcc6"},
 			},
 			"",
 			false,
@@ -113,7 +113,7 @@ func TestGenerateIDToken(t *testing.T) {
 				key,
 			},
 			args{
-				customClaims: map[string]interface{}{"http://tenant.info/": map[string]interface{}{"tenant_id": "f30c452b-e5fb-4102-a45d-bc00a060bcc6"}},
+				customClaims: map[string]interface{}{"http://orchestrate.info": map[string]interface{}{"tenant_id": "f30c452b-e5fb-4102-a45d-bc00a060bcc6"}},
 			},
 			"",
 			false,

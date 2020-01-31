@@ -24,8 +24,7 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 }
 
 func (t *Transport) addAuthorizationHeader(req *http.Request) {
-	auth := authutils.AuthorizationFromContext(req.Context())
-	if auth != "" {
-		req.Header.Add("Authorization", auth)
-	}
+	authutils.AddAuthorizationHeader(req)
+
+	authutils.AddXAPIKeyHeader(req)
 }

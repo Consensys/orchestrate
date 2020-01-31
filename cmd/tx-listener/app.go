@@ -2,7 +2,6 @@ package txlistener
 
 import (
 	"context"
-	"fmt"
 	"sync"
 
 	"github.com/spf13/viper"
@@ -25,7 +24,7 @@ func Start(ctx context.Context) {
 		apiKey := viper.GetString(authkey.APIKeyViperKey)
 		if apiKey != "" {
 			// Inject authorization header in context for later authentication
-			ctx = authutils.WithAuthorization(ctx, fmt.Sprintf("APIKey %v", apiKey))
+			ctx = authutils.WithAPIKey(ctx, apiKey)
 		}
 
 		cancelCtx, cancel := context.WithCancel(ctx)

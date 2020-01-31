@@ -4,6 +4,8 @@ import (
 	"context"
 	"math/big"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication"
+
 	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/utils"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
@@ -49,6 +51,9 @@ func (f *Faucet) prepareMsg(ctx context.Context, r *types.Request, msg *sarama.P
 
 	if authToken := authutils.AuthorizationFromContext(ctx); authToken != "" {
 		e.SetMetadataValue(multitenancy.AuthorizationMetadata, authToken)
+	}
+	if apiKey := authutils.APIKeyFromContext(ctx); apiKey != "" {
+		e.SetMetadataValue(authentication.APIKeyHeader, apiKey)
 	}
 
 	// Unmarshal envelope

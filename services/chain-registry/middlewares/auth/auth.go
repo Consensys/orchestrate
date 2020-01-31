@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication"
+
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/gorilla/mux"
 	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt"
@@ -11,8 +13,6 @@ import (
 	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 )
-
-const AuthorizationHeader = "Authorization"
 
 type Auth struct {
 	next         http.Handler
@@ -37,18 +37,23 @@ func New(
 
 func (a *Auth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	if a.multitenancy {
-		// Extract Authorization credentials from HTTP headers
-		authorization := req.Header.Get(AuthorizationHeader)
-		authCtx := authutils.WithAuthorization(req.Context(), authorization)
+
+		// Extract API Key credentials from HTTP headers
+		apiKey := req.Header.Get(authentication.APIKeyHeader)
+		apiKeyCtx := authutils.WithAPIKey(req.Context(), apiKey)
 
 		// Perform API Key Authentication
-		checkedCtx, err := a.authkey.Check(authCtx)
+		checkedCtx, err := a.authkey.Check(apiKeyCtx)
 		if err == nil {
 			// Bypass JWT authentication
 			log.FromContext(req.Context()).Debugf("API Key Authentication succeeded")
 			a.serveNext(rw, req.WithContext(checkedCtx))
 			return
 		}
+
+		// Extract Authorization credentials from HTTP headers
+		authorization := req.Header.Get(authentication.AuthorizationHeader)
+		authCtx := authutils.WithAuthorization(req.Context(), authorization)
 
 		// Perform JWT Authentication
 		checkedCtx, err = a.authjwt.Check(authCtx)
@@ -90,7 +95,8 @@ func (a *Auth) writeUnauthorized(rw http.ResponseWriter, err error) {
 func (a *Auth) serveNext(rw http.ResponseWriter, req *http.Request) {
 	// Remove authorization header
 	// So possibly another Authorization will be set by Proxy
-	req.Header.Del(AuthorizationHeader)
+	req.Header.Del(authentication.AuthorizationHeader)
+	req.Header.Del(authentication.APIKeyHeader)
 
 	// Execute next handlers
 	a.next.ServeHTTP(rw, req)

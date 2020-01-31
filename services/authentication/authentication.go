@@ -2,6 +2,9 @@ package authentication
 
 import "context"
 
+const APIKeyHeader = "X-API-Key"
+const AuthorizationHeader = "Authorization"
+
 type AuthFunc func(ctx context.Context) (context.Context, error)
 
 type Auth interface {

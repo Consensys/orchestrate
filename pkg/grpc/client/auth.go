@@ -3,7 +3,8 @@ package grpcclient
 import (
 	"context"
 
-	grpcserver "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/grpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication"
+
 	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/utils"
 )
 
@@ -13,7 +14,11 @@ func (cred *PerRPCCredentials) GetRequestMetadata(ctx context.Context, uri ...st
 	headers := make(map[string]string)
 	auth := authutils.AuthorizationFromContext(ctx)
 	if auth != "" {
-		headers[grpcserver.AuthorizationHeader] = auth
+		headers[authentication.AuthorizationHeader] = auth
+	}
+	apiKey := authutils.APIKeyFromContext(ctx)
+	if apiKey != "" {
+		headers[authentication.APIKeyHeader] = apiKey
 	}
 	return headers, nil
 }

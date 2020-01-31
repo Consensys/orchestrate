@@ -602,6 +602,28 @@
       "title": "Transaction data"
     }
   },
+  "securityDefinitions": {
+    "ApiKeyAuth": {
+      "type": "apiKey",
+      "description": "Add the value of your API-Key",
+      "name": "X-API-Key",
+      "in": "header"
+    },
+    "JWTAuth": {
+      "type": "apiKey",
+      "description": "Add your Token as: `Bearer` Token",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "JWTAuth": []
+    },
+    {
+      "ApiKeyAuth": []
+    }
+  ],
   "externalDocs": {
     "description": "📒 Documentation of PegaSys Orchestrate",
     "url": "https://docs.orchestrate.pegasys.tech/en/latest/"
