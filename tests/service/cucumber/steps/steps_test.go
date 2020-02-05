@@ -1,7 +1,10 @@
 package steps
 
 import (
+	"net/http"
 	"testing"
+
+	httpclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/client"
 
 	"github.com/DATA-DOG/godog/gherkin"
 	"github.com/Shopify/sarama/mocks"
@@ -13,16 +16,19 @@ import (
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/chanregistry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/parser"
-	crc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/tracker"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
+	crc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 )
 
 type ScenarioTestSuite struct {
 	suite.Suite
-	Context  *ScenarioContext
-	chanReg  *chanregistry.ChanRegistry
-	producer *mocks.SyncProducer
-	crc      *crc.ContractRegistryClient
+	Context    *ScenarioContext
+	chanReg    *chanregistry.ChanRegistry
+	producer   *mocks.SyncProducer
+	httpClient *http.Client
+	crc        svc.ContractRegistryClient
 }
 
 func (s *ScenarioTestSuite) SetupSuite() {
@@ -32,11 +38,12 @@ func (s *ScenarioTestSuite) SetupSuite() {
 	// Set channel registry
 	s.chanReg = chanregistry.NewChanRegistry()
 	s.producer = mocks.NewSyncProducer(s.T(), nil)
-	s.crc = crc.New()
+	s.httpClient = httpclient.GlobalClient()
+	s.crc = crc.GlobalClient()
 }
 
 func (s *ScenarioTestSuite) SetupTest() {
-	s.Context = NewScenarioContext(s.chanReg, s.crc, s.producer, parser.New())
+	s.Context = NewScenarioContext(s.chanReg, s.httpClient, s.crc, s.producer, parser.New())
 	sc := &gherkin.Scenario{}
 	sc.Name = "test-scenario"
 	s.Context.init(sc)
@@ -78,7 +85,7 @@ func (s *ScenarioTestSuite) TestParseEnvelopes() {
 
 	trackers := s.Context.newTrackers(envelopes)
 	require.Len(s.T(), trackers, 1, "A tracker should have been created")
-	assert.Equal(s.T(), "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4", trackers[0].current.GetFrom().Hex())
+	assert.Equal(s.T(), "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4", trackers[0].Current.GetFrom().Hex())
 }
 
 func (s *ScenarioTestSuite) TestISendEnvelopesToTopic() {
@@ -109,7 +116,7 @@ func (s *ScenarioTestSuite) TestEnvelopeShouldBeInTopic() {
 	input := &envelope.Envelope{}
 	s.Context.setMetadata(input)
 	t := s.Context.newTracker(input)
-	s.Context.setTrackers([]*tracker{t})
+	s.Context.setTrackers([]*tracker.Tracker{t})
 
 	output := &envelope.Envelope{
 		Metadata: input.GetMetadata(),
@@ -120,7 +127,7 @@ func (s *ScenarioTestSuite) TestEnvelopeShouldBeInTopic() {
 
 	err = s.Context.envelopeShouldBeInTopic("tx.crafter")
 	assert.NoError(s.T(), err, "envelopeShouldBeInTopic should not error")
-	assert.Equal(s.T(), output, s.Context.trackers[0].current, "Envelope on tracker should have been updated")
+	assert.Equal(s.T(), output, s.Context.trackers[0].Current, "Envelope on tracker should have been updated")
 }
 
 func TestScenarioTestSuite(t *testing.T) {

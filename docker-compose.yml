@@ -25,6 +25,7 @@ x-container-common: &container-common
   image: golang:1.13
   restart: ${CONTAINER_RESTART-on-failure}
   entrypoint: /bin/main
+  tty: true
   networks:
     - orchestrate
     - quorum

@@ -5,12 +5,12 @@ Feature: Multiple transactions
 
   Scenario: Send transactions
     Given I register the following contract
-      | name         | artifacts        | tenantid                             |
-      | SimpleToken  | SimpleToken.json | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+      | name        | artifacts        | tenantid                             |
+      | SimpleToken | SimpleToken.json | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
     And I have deployed contract "token-besu"
       | chain.name | from                                       | contract.name | method.sig    | tx.gas  | tenantid                             |
       | besu       | 0x7E654d251Da770A068413677967F6d3Ea2FeA9E4 | SimpleToken   | constructor() | 2000000 | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
-    And I have deployed contract "token-geth"  
+    And I have deployed contract "token-geth"
       | chain.name | from                                       | contract.name | method.sig    | tx.gas  | tenantid                             |
       | geth       | 0x7E654d251Da770A068413677967F6d3Ea2FeA9E4 | SimpleToken   | constructor() | 2000000 | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
     When I send envelopes to topic "tx.crafter"

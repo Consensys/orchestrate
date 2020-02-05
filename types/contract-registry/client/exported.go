@@ -48,11 +48,11 @@ func Close() {
 	_ = conn.Close()
 }
 
-func GlobalContractRegistryClient() svc.ContractRegistryClient {
+func GlobalClient() svc.ContractRegistryClient {
 	return client
 }
 
-// SetGlobalContractRegistryClient sets ContractRegistry global configuration
-func SetGlobalContractRegistryClient(c svc.ContractRegistryClient) {
+// SetGlobalClient sets ContractRegistry global configuration
+func SetGlobalClient(c svc.ContractRegistryClient) {
 	client = c
 }

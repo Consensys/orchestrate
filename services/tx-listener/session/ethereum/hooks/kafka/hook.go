@@ -71,7 +71,7 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 				Metadata: &envelope.Metadata{Id: uuid.NewV4().String()},
 			}
 		case errors.IsNotFoundError(err):
-			// We could not found the envelope and external transaction are diasbled so we skip
+			// We could not found the envelope and external transaction are disabled so we skip
 			log.FromContext(receiptLogCtx).WithError(err).Debugf("skipping external receipt")
 			continue
 		default:

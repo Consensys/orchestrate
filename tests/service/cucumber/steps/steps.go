@@ -1,9 +1,9 @@
 package steps
 
 import (
-	"context"
 	"encoding/hex"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/DATA-DOG/godog"
@@ -14,9 +14,10 @@ import (
 	"github.com/spf13/viper"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
-	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/utils"
+	httpclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/chanregistry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/parser"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/tracker"
 	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
 	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
@@ -57,17 +58,22 @@ type ScenarioContext struct {
 
 	// trackers track envelopes that are generated within the test session
 	// as they are processed in the system
-	trackers []*tracker
+	trackers []*tracker.Tracker
 
 	// defaultTracker allows to capture envelopes that are generated
 	// within the system (to be captured those envelopes should have scenario.id set)
-	defaultTracker *tracker
+	defaultTracker *tracker.Tracker
 
 	// chanReg to register envelopes channels on trackers
 	chanReg *chanregistry.ChanRegistry
 
+	httpClient   *http.Client
+	httpResponse *http.Response
+
+	httpAliases *parser.AliasRegistry
+
 	// RegistryClient
-	Registry registry.ContractRegistryClient
+	ContractRegistry registry.ContractRegistryClient
 
 	// Producer to producer envelopes in topics
 	producer sarama.SyncProducer
@@ -77,16 +83,19 @@ type ScenarioContext struct {
 
 func NewScenarioContext(
 	chanReg *chanregistry.ChanRegistry,
-	reg registry.ContractRegistryClient,
+	httpClient *http.Client,
+	contractRegistry registry.ContractRegistryClient,
 	producer sarama.SyncProducer,
 	p *parser.Parser,
 ) *ScenarioContext {
 	return &ScenarioContext{
-		chanReg:  chanReg,
-		Registry: reg,
-		producer: producer,
-		parser:   p,
-		logger:   log.NewEntry(log.StandardLogger()),
+		chanReg:          chanReg,
+		httpClient:       httpClient,
+		httpAliases:      parser.NewAliasRegistry(),
+		ContractRegistry: contractRegistry,
+		producer:         producer,
+		parser:           p,
+		logger:           log.NewEntry(log.StandardLogger()),
 	}
 }
 
@@ -113,15 +122,15 @@ func (sc *ScenarioContext) init(s interface{}) {
 	})
 }
 
-func (sc *ScenarioContext) newTracker(e *envelope.Envelope) *tracker {
+func (sc *ScenarioContext) newTracker(e *envelope.Envelope) *tracker.Tracker {
 	if e != nil {
 		sc.setMetadata(e)
 	}
 	// Set envelope metadata so it can be tracked
 
 	// Create tracker and attach envelope
-	t := newTracker()
-	t.current = e
+	t := tracker.NewTracker()
+	t.Current = e
 
 	// Initialize output channels on tracker and register channels on channel registry
 	for _, topic := range TOPICS {
@@ -130,7 +139,7 @@ func (sc *ScenarioContext) newTracker(e *envelope.Envelope) *tracker {
 		ch := make(chan *envelope.Envelope, 30)
 
 		// Add channel as a tracker output
-		t.addOutput(topic, ch)
+		t.AddOutput(topic, ch)
 
 		// Register channel on channel registry
 		if e != nil {
@@ -151,9 +160,9 @@ func (sc *ScenarioContext) setMetadata(e *envelope.Envelope) {
 	e.GetMetadata().Id = uuid.NewV4().String()
 }
 
-func (sc *ScenarioContext) newTrackers(envelopes []*envelope.Envelope) []*tracker {
+func (sc *ScenarioContext) newTrackers(envelopes []*envelope.Envelope) []*tracker.Tracker {
 	// Create a tracker for every envelope
-	var trackers []*tracker
+	var trackers []*tracker.Tracker
 	for _, e := range envelopes {
 		// Create a tracker
 		trackers = append(trackers, sc.newTracker(e))
@@ -162,7 +171,7 @@ func (sc *ScenarioContext) newTrackers(envelopes []*envelope.Envelope) []*tracke
 	return trackers
 }
 
-func (sc *ScenarioContext) setTrackers(trackers []*tracker) {
+func (sc *ScenarioContext) setTrackers(trackers []*tracker.Tracker) {
 	sc.trackers = trackers
 }
 
@@ -189,30 +198,6 @@ func (sc *ScenarioContext) sendEnvelope(topic string, e *envelope.Envelope) erro
 	return nil
 }
 
-func (sc *ScenarioContext) iRegisterTheFollowingContract(table *gherkin.DataTable) error {
-	// Parse table
-	parseContracts, err := sc.parser.ParseContracts(sc.ID, table)
-	if err != nil {
-		return err
-	}
-
-	// Register parseContracts on the registry
-	for _, parseContract := range parseContracts {
-		_, err := sc.Registry.RegisterContract(
-			authutils.WithAuthorization(context.Background(), "Bearer "+parseContract.JWTToken),
-			&registry.RegisterContractRequest{
-				Contract: parseContract.Contract,
-			},
-		)
-
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (sc *ScenarioContext) iSendEnvelopesToTopic(topic string, table *gherkin.DataTable) error {
 	// Parse table
 	envelopes, err := sc.parser.ParseEnvelopes(sc.ID, table)
@@ -225,7 +210,7 @@ func (sc *ScenarioContext) iSendEnvelopesToTopic(topic string, table *gherkin.Da
 
 	// Send envelopes
 	for _, t := range sc.trackers {
-		err := sc.sendEnvelope(topic, t.current)
+		err := sc.sendEnvelope(topic, t.Current)
 		if err != nil {
 			return err
 		}
@@ -249,29 +234,29 @@ func (sc *ScenarioContext) iHaveDeployedContract(alias string, table *gherkin.Da
 	}
 
 	// Send envelope
-	err = sc.sendEnvelope("tx.crafter", trackers[0].current)
+	err = sc.sendEnvelope("tx.crafter", trackers[0].Current)
 	if err != nil {
 		return err
 	}
 
 	// Catch envelope after it has been decoded
-	err = trackers[0].load("tx.decoded", 30*time.Second)
+	err = trackers[0].Load("tx.decoded", 30*time.Second)
 	if err != nil {
 		return fmt.Errorf("%v: no receipt for contract %q deployment", sc.ID, alias)
 	}
 
 	// Alias contract address
-	if trackers[0].current.GetReceipt().GetContractAddress() == nil {
+	if trackers[0].Current.GetReceipt().GetContractAddress() == nil {
 		return fmt.Errorf("%v: contract %q could not be deployed", sc.ID, alias)
 	}
-	sc.parser.Aliases.Set(sc.ID, alias, trackers[0].current.GetReceipt().GetContractAddress().Hex())
+	sc.parser.Aliases.Set(sc.ID, alias, trackers[0].Current.GetReceipt().GetContractAddress().Hex())
 
 	return nil
 }
 
 func (sc *ScenarioContext) envelopeShouldBeInTopic(topic string) error {
 	for i, t := range sc.trackers {
-		err := t.load(topic, viper.GetDuration(CucumberTimeoutViperKey))
+		err := t.Load(topic, viper.GetDuration(CucumberTimeoutViperKey))
 		if err != nil {
 			return fmt.Errorf("%v: envelope n°%v not in topic %q", sc.ID, i, topic)
 		}
@@ -281,7 +266,7 @@ func (sc *ScenarioContext) envelopeShouldBeInTopic(topic string) error {
 
 func (sc *ScenarioContext) envelopesShouldHavePayloadSet() error {
 	for i, t := range sc.trackers {
-		if t.current.GetTx().GetTxData().GetData() == nil {
+		if t.Current.GetTx().GetTxData().GetData() == nil {
 			return fmt.Errorf("%v: payload not set envelope n°%v", sc.ID, i)
 		}
 	}
@@ -291,9 +276,9 @@ func (sc *ScenarioContext) envelopesShouldHavePayloadSet() error {
 func (sc *ScenarioContext) envelopesShouldHaveNonceSet() error {
 	nonces := make(map[string]map[string]map[uint64]bool)
 	for _, t := range sc.trackers {
-		chain := t.current.GetChain().GetBigChainID().String()
-		addr := t.current.GetFrom().Address().Hex()
-		nonce := t.current.GetTx().GetTxData().GetNonce()
+		chain := t.Current.GetChain().GetBigChainID().String()
+		addr := t.Current.GetFrom().Address().Hex()
+		nonce := t.Current.GetTx().GetTxData().GetNonce()
 		if _, ok := nonces[chain]; !ok {
 			nonces[chain] = make(map[string]map[uint64]bool)
 		}
@@ -301,7 +286,7 @@ func (sc *ScenarioContext) envelopesShouldHaveNonceSet() error {
 			nonces[chain][addr] = make(map[uint64]bool)
 		}
 		if _, ok := nonces[chain][addr][nonce]; ok {
-			return fmt.Errorf("%v: nonce %d attributed more than once", sc.ID, t.current.GetTx().GetTxData().GetNonce())
+			return fmt.Errorf("%v: nonce %d attributed more than once", sc.ID, t.Current.GetTx().GetTxData().GetNonce())
 		}
 		nonces[chain][addr][nonce] = true
 	}
@@ -311,11 +296,11 @@ func (sc *ScenarioContext) envelopesShouldHaveNonceSet() error {
 
 func (sc *ScenarioContext) envelopesShouldHaveRawAndHashSet() error {
 	for i, t := range sc.trackers {
-		if t.current.GetTx().GetRaw() == nil {
+		if t.Current.GetTx().GetRaw() == nil {
 			return fmt.Errorf("%v: raw not set on envelope n°%v", sc.ID, i)
 		}
 
-		if t.current.GetTx().GetHash() == nil {
+		if t.Current.GetTx().GetHash() == nil {
 			return fmt.Errorf("%v: hash not set on envelope n°%v", sc.ID, i)
 		}
 	}
@@ -324,7 +309,7 @@ func (sc *ScenarioContext) envelopesShouldHaveRawAndHashSet() error {
 
 func (sc *ScenarioContext) envelopesShouldHaveFromSet() error {
 	for i, t := range sc.trackers {
-		if t.current.GetFrom() == nil {
+		if t.Current.GetFrom() == nil {
 			return fmt.Errorf("%v: from not set on envelope n°%v", sc.ID, i)
 		}
 	}
@@ -333,7 +318,7 @@ func (sc *ScenarioContext) envelopesShouldHaveFromSet() error {
 
 func (sc *ScenarioContext) envelopesShouldHaveLogDecoded() error {
 	for i, t := range sc.trackers {
-		for _, l := range t.current.GetReceipt().GetLogs() {
+		for _, l := range t.Current.GetReceipt().GetLogs() {
 			if len(l.GetTopics()) > 0 && len(l.GetDecodedData()) == 0 {
 				return fmt.Errorf("%v: log have not been decoded on envelope n°%v", sc.ID, i)
 			}
@@ -347,7 +332,8 @@ func (sc *ScenarioContext) envelopesShouldHaveLogDecoded() error {
 func FeatureContext(s *godog.Suite) {
 	sc := NewScenarioContext(
 		chanregistry.GlobalChanRegistry(),
-		registryclient.GlobalContractRegistryClient(),
+		httpclient.GlobalClient(),
+		registryclient.GlobalClient(),
 		broker.GlobalSyncProducer(),
 		parser.GlobalParser(),
 	)
@@ -370,7 +356,9 @@ func FeatureContext(s *godog.Suite) {
 			}).Debugf("scenario: step completed")
 	})
 
-	s.Step(`^I register the following contract$`, sc.iRegisterTheFollowingContract)
+	initHTTP(s, sc)
+	registerContractRegistrySteps(s, sc)
+
 	s.Step(`^I have deployed contract "([^"]*)"$`, sc.iHaveDeployedContract)
 	s.Step(`^I send envelopes to topic "([^"]*)"$`, sc.iSendEnvelopesToTopic)
 	s.Step(`^Envelopes should be in topic "([^"]*)"$`, sc.envelopeShouldBeInTopic)

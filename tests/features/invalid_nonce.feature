@@ -5,10 +5,10 @@ Feature: Invalid Nonce
 
   Scenario: Nonce Too High
     When I send envelopes to topic "tx.signer"
-      | chain.name | from                                       | tx.nonce  | tx.gasPrice | tx.gas | tenantid                             |
-      | besu       | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 1000000   | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
-      | besu       | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 1000001   | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
-      | besu       | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 1000002   | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+      | chain.name | from                                       | tx.nonce | tx.gasPrice | tx.gas | tenantid                             |
+      | besu       | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 1000000  | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+      | besu       | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 1000001  | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+      | besu       | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 1000002  | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
     Then Envelopes should be in topic "tx.signer"
     Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.nonce"
@@ -20,14 +20,14 @@ Feature: Invalid Nonce
 
   Scenario: Nonce Too Low
     Given I register the following contract
-      | name         | artifacts        | tenantid                             |
-      | SimpleToken  | SimpleToken.json | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+      | name        | artifacts        | tenantid                             |
+      | SimpleToken | SimpleToken.json | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
     And I have deployed contract "token"
       | chain.name | from                                       | contract.name | method.sig    | tx.gas  | tenantid                             |
       | besu       | 0xbfc7137876d7ac275019d70434b0f0779824a969 | SimpleToken   | constructor() | 2000000 | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
     When I send envelopes to topic "tx.signer"
-      | chain.name | from                                       | tx.nonce  | tx.gasPrice | tx.gas | tenantid                             |
-      | besu       | 0xbfc7137876d7ac275019d70434b0f0779824a969 | 0         | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+      | chain.name | from                                       | tx.nonce | tx.gasPrice | tx.gas | tenantid                             |
+      | besu       | 0xbfc7137876d7ac275019d70434b0f0779824a969 | 0        | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
     Then Envelopes should be in topic "tx.signer"
     Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.nonce"
@@ -39,18 +39,18 @@ Feature: Invalid Nonce
 
   Scenario: Chaotic nonce
     Given I register the following contract
-      | name         | artifacts        | tenantid                             |
-      | SimpleToken  | SimpleToken.json | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+      | name        | artifacts        | tenantid                             |
+      | SimpleToken | SimpleToken.json | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
     # Next deployment purpose is to increase account nonce to at least 1
     And I have deployed contract "token"
       | chain.name | from                                       | contract.name | method.sig    | tx.gas  | tenantid                             |
       | besu       | 0x93f7274c9059e601be4512f656b57b830e019e41 | SimpleToken   | constructor() | 2000000 | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
     When I send envelopes to topic "tx.signer"
-      | chain.name | from                                       | tx.nonce  | tx.gasPrice | tx.gas | tenantid                             |
-      | besu       | 0x93f7274c9059e601be4512f656b57b830e019e41 | 1000002   | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
-      | besu       | 0x93f7274c9059e601be4512f656b57b830e019e41 | 1000000   | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
-      | besu       | 0x93f7274c9059e601be4512f656b57b830e019e41 | 0         | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
-      | besu       | 0x93f7274c9059e601be4512f656b57b830e019e41 | 1000001   | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+      | chain.name | from                                       | tx.nonce | tx.gasPrice | tx.gas | tenantid                             |
+      | besu       | 0x93f7274c9059e601be4512f656b57b830e019e41 | 1000002  | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+      | besu       | 0x93f7274c9059e601be4512f656b57b830e019e41 | 1000000  | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+      | besu       | 0x93f7274c9059e601be4512f656b57b830e019e41 | 0        | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+      | besu       | 0x93f7274c9059e601be4512f656b57b830e019e41 | 1000001  | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
     Then Envelopes should be in topic "tx.signer"
     Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.nonce"

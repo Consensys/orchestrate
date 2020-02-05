@@ -34,7 +34,7 @@ Error codes are `uint64` that maps to five hex character code
 | Class | Subclass | Error Code | Condition                     | Comment                                    |
 |-------|----------|------------|-------------------------------|--------------------------------------------|
 | 01XXX |          |    01000   | warning                       | Raised to indicate a warning               |
-| 01XXX |   011XX  |    01100   | retry_warning                 | Error occured system retries               |
+| 01XXX |   011XX  |    01100   | retry_warning                 | Error occurred system retries              |
 | 01XXX |   012XX  |    01200   | faucet_warning                | Faucet credit has been denied              |
 | 01XXX |   013XX  |    01300   | invalid_nonce_warning         | Exposure to send tx with invalid nonce     |
 | 01XXX |   013XX  |    01301   | nonce_too_high_warning        | Exposure to send tx with nonce too high    |
@@ -63,7 +63,7 @@ Error codes are `uint64` that maps to five hex character code
 | 42XXX |   422XX  |    42205   | invalid_event_data            | Invalid data in event log                  |
 | 42XXX |   423XX  |    42300   | invalid_format                | Data does not match expected format        |
 | 42XXX |   424XX  |    42400   | invalid_parameter             | Invalid parameter provided                 |
-| 53XXX |          |    53000   | insuficient_resources         | System can not handle more operations      |
+| 53XXX |          |    53000   | insufficient_resources        | System can not handle more operations      |
 | 57XXX |          |    57000   | operator_intervention         | Operator interfered with operation         |
 | 57XXX |          |    57001   | operation_canceled            | Operation canceled (typically by caller)   |
 | C0XXX |          |    C0000   | crypto_operation_exception    | Failed a cryptographical operation         |
@@ -74,3 +74,21 @@ Error codes are `uint64` that maps to five hex character code
 | F0XXX |          |    F0000   | invalid_config                | Invalid configuration                      |
 | FFXXX |          |    FF000   | internal_error                | Internal error                             |
 | FFXXX |   FF1XX  |    FF100   | data_corrupted                | Data is corrupted                          |
+
+## Local Development Interfaces
+
+### APIs
+
+[Chain Registry HTTP](http://localhost:8011)
+
+[Contract Registry OpenAPI](http://localhost:8021/swagger)
+
+[Envelope Store OpenAPI](http://localhost:8031/swagger)
+
+### Tools
+
+[Portainer UI](http://localhost:9000)
+
+[PGAdmin UI](http://localhost:9001)
+
+[Jaeger UI](http://localhost:16686)

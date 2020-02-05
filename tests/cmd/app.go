@@ -13,11 +13,13 @@ import (
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	httpclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/handlers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/handlers/dispatcher"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/steps"
+	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client"
 )
 
 var (
@@ -85,6 +87,14 @@ func initComponents(ctx context.Context) {
 		// Initialize cucumber handlers
 		func() {
 			cucumber.Init(ctx)
+		},
+		// Initialize the chainregistryClient
+		func() {
+			httpclient.Init(ctx)
+		},
+		// Initialize the contractregistryClient
+		func() {
+			contractregistry.Init(ctx)
 		},
 	)
 }

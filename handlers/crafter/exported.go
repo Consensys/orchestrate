@@ -31,7 +31,7 @@ func Init(ctx context.Context) {
 		registryclient.Init(ctx)
 
 		// Create Handler
-		handler = Crafter(registryclient.GlobalContractRegistryClient(), crafter.GlobalCrafter())
+		handler = Crafter(registryclient.GlobalClient(), crafter.GlobalCrafter())
 
 		log.Infof("crafter: handler ready")
 	})

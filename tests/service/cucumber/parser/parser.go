@@ -1,22 +1,14 @@
 package parser
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"math/big"
-	"os"
-	"path"
 	"strconv"
 	"strings"
 	"time"
 
-	generator "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt/generator"
-
 	"github.com/DATA-DOG/godog/gherkin"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
+	generator "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt/generator"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/args"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
@@ -26,50 +18,15 @@ import (
 
 const tenantIDHeader = "tenantid"
 
-type artifact struct {
-	Abi              json.RawMessage
-	Bytecode         string
-	DeployedBytecode string
-}
-
 type Parser struct {
 	Aliases      *AliasRegistry
 	JWTGenerator *generator.JWTGenerator
-}
-
-type ContractSpec struct {
-	Contract *abi.Contract
-	JWTToken string
 }
 
 func New() *Parser {
 	return &Parser{
 		Aliases: NewAliasRegistry(),
 	}
-}
-
-func (p *Parser) ParseContracts(scenario string, table *gherkin.DataTable) ([]*ContractSpec, error) {
-	var contractSpecs []*ContractSpec
-	headers := table.Rows[0]
-	for _, row := range table.Rows[1:] {
-		contractSpec := &ContractSpec{Contract: &abi.Contract{}}
-		err := p.ParseContract(scenario, headers, row, contractSpec)
-		if err != nil {
-			return nil, err
-		}
-		contractSpecs = append(contractSpecs, contractSpec)
-	}
-	return contractSpecs, nil
-}
-
-func (p *Parser) ParseContract(scenario string, headers, row *gherkin.TableRow, contractSpec *ContractSpec) error {
-	for i, cell := range row.Cells {
-		err := p.ParseContractCell(headers.Cells[i].Value, cell.Value, contractSpec)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func (p *Parser) ParseEnvelopes(scenario string, table *gherkin.DataTable) ([]*envelope.Envelope, error) {
@@ -103,48 +60,6 @@ func (p *Parser) ParseEnvelope(scenario string, headers, row *gherkin.TableRow, 
 		if err != nil {
 			return err
 		}
-	}
-	return nil
-}
-
-func (p *Parser) ParseContractCell(header, cell string, contractSpec *ContractSpec) error {
-	switch header {
-	case "artifacts":
-		raw, err := p.openArtifact(cell)
-		if err != nil {
-			return err
-		}
-
-		var a artifact
-		err = json.Unmarshal(raw, &a)
-		if err != nil {
-			return err
-		}
-
-		// Abi is a UTF-8 encoded string. Therefore, we can make the straightforward transition
-		contractSpec.Contract.Abi = a.Abi
-		// Bytecode is an hexstring encoded []byte
-		contractSpec.Contract.Bytecode = hexutil.MustDecode(a.Bytecode)
-		// Bytecode is an hexstring encoded []byte
-		contractSpec.Contract.DeployedBytecode = hexutil.MustDecode(a.DeployedBytecode)
-	case "name":
-		if contractSpec.Contract.Id == nil {
-			contractSpec.Contract.Id = &abi.ContractId{}
-		}
-		contractSpec.Contract.Id.Name = cell
-	case "tag":
-		if contractSpec.Contract.Id == nil {
-			contractSpec.Contract.Id = &abi.ContractId{}
-		}
-		contractSpec.Contract.Id.Tag = cell
-	case tenantIDHeader:
-		var err error
-		contractSpec.JWTToken, err = p.JWTGenerator.GenerateAccessTokenWithTenantID(cell, 24*time.Hour)
-		if err != nil {
-			return err
-		}
-	default:
-		return fmt.Errorf("unknown field %q", header)
 	}
 	return nil
 }
@@ -197,7 +112,7 @@ func (p *Parser) ParseMethodCell(header, cell string, method *abi.Method) error 
 	return nil
 }
 
-func (p *Parser) ParseChainCell(header, cell string, chn *chain.Chain) error {
+func (p *Parser) ParseTxChainCell(header, cell string, chn *chain.Chain) error {
 	switch header {
 	case "chainID":
 		// Retrieve chain id
@@ -273,10 +188,10 @@ func (p *Parser) ParseEnvelopeCell(header, cell string, e *envelope.Envelope) er
 	case header == "from":
 		e.From = ethereum.HexToAccount(cell)
 	case strings.HasPrefix(header, "chain."):
-		err := p.ParseChainCell(
+		err := p.ParseTxChainCell(
 			strings.TrimPrefix(header, "chain."),
 			cell,
-			GetInitChain(e),
+			GetInitTxChain(e),
 		)
 		if err != nil {
 			return err
@@ -331,7 +246,7 @@ func (p *Parser) ParseEnvelopeCell(header, cell string, e *envelope.Envelope) er
 	return nil
 }
 
-func GetInitChain(e *envelope.Envelope) *chain.Chain {
+func GetInitTxChain(e *envelope.Envelope) *chain.Chain {
 	if e.Chain == nil {
 		e.Chain = &chain.Chain{}
 	}
@@ -371,25 +286,4 @@ func GetInitTxData(tx *ethereum.Transaction) *ethereum.TxData {
 		tx.TxData = &ethereum.TxData{}
 	}
 	return tx.TxData
-}
-
-func (p *Parser) openArtifact(fileName string) ([]byte, error) {
-	// Loop over all cucumber folders to possibly find file
-	// <cucumber_folder>/artifacts/<fileName>
-	for _, v := range viper.GetStringSlice("cucumber.paths") {
-		f, err := os.Open(path.Join(v, "artifacts", fileName))
-		if err != nil {
-			continue
-		}
-
-		bytes, readErr := ioutil.ReadAll(f)
-
-		err = f.Close()
-		if err != nil {
-			log.Error(err)
-		}
-
-		return bytes, readErr
-	}
-	return nil, os.ErrNotExist
 }

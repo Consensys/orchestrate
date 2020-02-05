@@ -34,7 +34,7 @@ func Init(ctx context.Context) {
 		crc.Init(ctx)
 
 		// Create Handler
-		handler = Enricher(crc.GlobalContractRegistryClient(), ethclient.GlobalClient())
+		handler = Enricher(crc.GlobalClient(), ethclient.GlobalClient())
 
 		log.Infof("enricher: handler ready")
 	})

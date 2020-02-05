@@ -10,9 +10,9 @@ import (
 
 func TestInit(t *testing.T) {
 	Init(context.Background())
-	assert.NotNil(t, GlobalContractRegistryClient(), "Global should have been set")
+	assert.NotNil(t, GlobalClient(), "Global should have been set")
 
 	var c svc.ContractRegistryClient
-	SetGlobalContractRegistryClient(c)
-	assert.Nil(t, GlobalContractRegistryClient(), "Global should be reset to nil")
+	SetGlobalClient(c)
+	assert.Nil(t, GlobalClient(), "Global should be reset to nil")
 }

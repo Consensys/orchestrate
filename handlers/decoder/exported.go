@@ -27,7 +27,7 @@ func Init(ctx context.Context) {
 		registryclient.Init(ctx)
 
 		// Create Handler
-		handler = Decoder(registryclient.GlobalContractRegistryClient())
+		handler = Decoder(registryclient.GlobalClient())
 
 		log.Infof("decoder: handler ready")
 	})

@@ -53,14 +53,14 @@ func TestParseMethodCell(t *testing.T) {
 	assert.Error(t, err, "ParseMethodCell should error when setting unknonw")
 }
 
-func TestParseChainCell(t *testing.T) {
+func TestParseTxChainCell(t *testing.T) {
 	p := &Parser{}
 	chn := &chain.Chain{}
-	err := p.ParseChainCell("chainID", "17", chn)
+	err := p.ParseTxChainCell("chainID", "17", chn)
 	assert.NoError(t, err, "ParseChainCell should not error when setting id")
 	assert.Equal(t, "17", chn.GetBigChainID().String(), "UUID should have been set")
 
-	err = p.ParseChainCell("unknown", "17", chn)
+	err = p.ParseTxChainCell("unknown", "17", chn)
 	assert.Error(t, err, "ParseChainCell should error when setting unknonw")
 }
 

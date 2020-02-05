@@ -11,7 +11,7 @@ var (
 	initOnce = &sync.Once{}
 )
 
-// Init initialize ABI Registry
+// Init initialize Crafter
 func Init() {
 	initOnce.Do(func() {
 		// Create crafter

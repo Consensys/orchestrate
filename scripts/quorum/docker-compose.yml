@@ -7,13 +7,14 @@
 # e.g.: QUORUM_TX_MANAGER_DOCKER_IMAGE=quorumengineering/constellation:0.3.2 docker-compose up -d
 # To use Remix, set QUORUM_GETH_ARGS="--rpccorsdomain https://remix.ethereum.org"
 version: "3.7"
+
 x-quorum-def:
   &quorum-def
   restart: "on-failure"
   image: "${QUORUM_DOCKER_IMAGE:-quorumengineering/quorum:2.2.4}"
   expose:
-    - "21000"
-    - "50400"
+    - 21000
+    - 50400
   healthcheck:
     test: ["CMD", "wget", "--spider", "--proxy", "off", "http://localhost:8545"]
     interval: 3s
@@ -70,8 +71,8 @@ x-tessera-def:
   &tessera-def
   image: "${QUORUM_TX_MANAGER_DOCKER_IMAGE:-quorumengineering/tessera:0.9.2}"
   expose:
-    - "9000"
-    - "9080"
+    - 9000
+    - 9080
   restart: "no"
   entrypoint:
     - /bin/sh
@@ -184,7 +185,7 @@ services:
     << : *quorum-def
     hostname: quorum1
     ports:
-      - "22000:8545"
+      - 22000:8545
     volumes:
       - vol1:/qdata
       - ./config:/examples:ro
@@ -201,7 +202,7 @@ services:
     << : *tessera-def
     hostname: tessera1
     ports:
-      - "9081:9080"
+      - 9081:9080
     volumes:
       - vol1:/qdata
       - ./config:/examples:ro
@@ -214,7 +215,7 @@ services:
     << : *quorum-def
     hostname: quorum2
     ports:
-      - "22001:8545"
+      - 22001:8545
     volumes:
       - vol2:/qdata
       - ./config:/examples:ro
@@ -231,7 +232,7 @@ services:
     << : *tessera-def
     hostname: tessera2
     ports:
-      - "9082:9080"
+      - 9082:9080
     volumes:
       - vol2:/qdata
       - ./config:/examples:ro
@@ -244,7 +245,7 @@ services:
     << : *quorum-def
     hostname: quorum3
     ports:
-      - "22002:8545"
+      - 22002:8545
     volumes:
       - vol3:/qdata    
       - ./config:/examples:ro
@@ -259,7 +260,7 @@ services:
     << : *tessera-def
     hostname: tessera3
     ports:
-      - "9083:9080"
+      - 9083:9080
     volumes:
       - vol3:/qdata
       - ./config:/examples:ro
@@ -281,6 +282,6 @@ networks:
       name: deps_orchestrate
 
 volumes:
-  "vol1":
-  "vol2":
-  "vol3":
+  vol1:
+  vol2:
+  vol3:

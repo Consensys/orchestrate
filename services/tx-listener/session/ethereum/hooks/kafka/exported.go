@@ -36,7 +36,7 @@ func Init(ctx context.Context) {
 
 		hook = NewHook(
 			NewConfig(),
-			crc.GlobalContractRegistryClient(),
+			crc.GlobalClient(),
 			rpc.GlobalClient(),
 			storeclient.GlobalEnvelopeStoreClient(),
 			broker.GlobalSyncProducer(),
