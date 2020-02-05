@@ -25,6 +25,8 @@ var (
 	claimsNamespace                   = "http://orchestrate.info"
 )
 
+// TODO: adding tests with APIKey Header and TenantID header
+
 func TestAuth(t *testing.T) {
 	type args struct {
 		ctx               context.Context

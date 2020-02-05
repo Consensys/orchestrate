@@ -17,10 +17,7 @@ endif
 run-coverage: ## Generate global code coverage report
 	@sh scripts/coverage.sh $(PACKAGES)
 
-coverage:
-	@docker-compose -f e2e/docker-compose.yml up -d postgres
-	@sh scripts/coverage.sh $(PACKAGES)
-	@docker-compose -f e2e/docker-compose.yml stop postgres
+coverage: postgres run-coverage down-postgres
 	@$(OPEN) build/coverage/coverage.html 2>/dev/null
 
 race: ## Run data race detector
@@ -151,6 +148,12 @@ stop-besu:
 
 down-besu:
 	@docker-compose -f scripts/besu/docker-compose.yml down --volumes --timeout 0
+
+postgres:
+	@docker-compose -f e2e/docker-compose.yml up -d postgres
+
+down-postgres:
+	@docker-compose -f e2e/docker-compose.yml stop postgres
 
 up: deps geth besu quorum bootstrap orchestrate
 

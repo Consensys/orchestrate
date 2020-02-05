@@ -15,16 +15,14 @@ import (
 )
 
 // ChainInjector enrich the envelope with the chainUUID, chainName and inject in the input.Context the proxy URL
-func ChainInjector(multitenancyEnabled bool, r registry.Client, chainRegistryURL string) engine.HandlerFunc {
+func ChainInjector(r registry.Client, chainRegistryURL string) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		// check chainUUID and inject if not present
-		tenantID := multitenancy.DefaultTenantIDName
-		if multitenancyEnabled {
-			if tenantID = multitenancy.TenantIDFromContext(txctx.Context()); tenantID == "" {
-				e := txctx.AbortWithError(errors.InternalError("invalid tenantID not found")).ExtendComponent(component)
-				txctx.Logger.Error(e)
-				return
-			}
+		// retrieve tenantID and check if present
+		tenantID := multitenancy.TenantIDFromContext(txctx.Context())
+		if tenantID == "" {
+			e := txctx.AbortWithError(errors.InternalError("invalid tenantID not found")).ExtendComponent(component)
+			txctx.Logger.Error(e)
+			return
 		}
 
 		// Check if chain exist

@@ -3,6 +3,8 @@ package kafka
 import (
 	"context"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
+
 	"github.com/Shopify/sarama"
 	"github.com/containous/traefik/v2/pkg/log"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
@@ -135,6 +137,7 @@ func (hk *Hook) registerDeployedContract(ctx context.Context, c *dynamic.Chain, 
 }
 
 func (hk *Hook) loadEnvelope(ctx context.Context, c *dynamic.Chain, receipt *ethereum.Receipt) (*envelope.Envelope, error) {
+	ctx = multitenancy.WithTenantID(ctx, c.TenantID)
 	resp, err := hk.store.LoadByTxHash(
 		ctx,
 		&evlpstore.LoadByTxHashRequest{

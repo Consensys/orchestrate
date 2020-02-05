@@ -4,13 +4,11 @@ import (
 	"context"
 	"sync"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
-	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
-
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 )
 
 const component = "handler.chaininjector"
@@ -34,11 +32,9 @@ func Init(ctx context.Context) {
 		// Initialize chain-registry client
 		registry.Init(ctx)
 
-		multitenancyEnabled := viper.GetBool(multitenancy.EnabledViperKey)
-
 		// Create Handler
 		handler = engine.CombineHandlers(
-			ChainInjector(multitenancyEnabled, registry.GlobalClient(), viper.GetString(registry.ChainRegistryURLViperKey)),
+			ChainInjector(registry.GlobalClient(), viper.GetString(registry.ChainRegistryURLViperKey)),
 			ChainIDInjector(ethclient.GlobalClient()),
 		)
 

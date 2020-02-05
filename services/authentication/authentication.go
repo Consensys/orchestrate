@@ -2,6 +2,8 @@ package authentication
 
 import "context"
 
+// The TenantID Header have to be used only between tx-listener  and envelop-store
+const TenantIDHeader = "X-Tenant-ID"
 const APIKeyHeader = "X-API-Key"
 const AuthorizationHeader = "Authorization"
 

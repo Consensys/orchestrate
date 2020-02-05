@@ -7,6 +7,7 @@ import (
 type tenancyCtxKey string
 
 const TenantIDKey tenancyCtxKey = "tenant_id"
+const DefaultTenantIDName = "_"
 
 func WithTenantID(ctx context.Context, tenantID string) context.Context {
 	return context.WithValue(ctx, TenantIDKey, tenantID)

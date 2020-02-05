@@ -3,6 +3,8 @@ package grpcclient
 import (
 	"context"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication"
 
 	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/utils"
@@ -19,6 +21,10 @@ func (cred *PerRPCCredentials) GetRequestMetadata(ctx context.Context, uri ...st
 	apiKey := authutils.APIKeyFromContext(ctx)
 	if apiKey != "" {
 		headers[authentication.APIKeyHeader] = apiKey
+	}
+	tenantID := multitenancy.TenantIDFromContext(ctx)
+	if tenantID != "" {
+		headers[authentication.TenantIDHeader] = tenantID
 	}
 	return headers, nil
 }

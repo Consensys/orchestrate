@@ -23,6 +23,7 @@ func ExtractTenant(auth authentication.Auth) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		txctx.Logger.Tracef("Start handler ExtractTenant")
 		if !viper.GetBool(multitenancy.EnabledViperKey) {
+			txctx.WithContext(multitenancy.WithTenantID(txctx.Context(), multitenancy.DefaultTenantIDName))
 			return
 		}
 

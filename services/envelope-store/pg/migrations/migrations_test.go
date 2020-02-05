@@ -40,7 +40,7 @@ func (s *MigrationsTestSuite) TestMigrationVersion() {
 	)
 
 	s.Assert().NoError(err, "Error querying version")
-	s.Assert().Equal(int64(3), version, "Migration should be on correct version")
+	s.Assert().Equal(int64(4), version, "Migration should be on correct version")
 }
 
 func (s *MigrationsTestSuite) TestCreateEnvelopeTable() {
@@ -60,7 +60,7 @@ func (s *MigrationsTestSuite) TestAddEnvelopeStoreColumns() {
 		Count()
 
 	s.Assert().NoError(err, "Query failed")
-	s.Assert().Equal(10, n, "Envelope table should have correct number of columns")
+	s.Assert().Equal(11, n, "Envelope table should have correct number of columns")
 }
 
 func TestMigrations(t *testing.T) {

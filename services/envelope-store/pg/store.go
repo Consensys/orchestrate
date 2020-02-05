@@ -5,6 +5,8 @@ import (
 	"strings"
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
+
 	"github.com/go-pg/pg/v9"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -30,7 +32,7 @@ func NewEnvelopeStoreFromPGOptions(opts *pg.Options) *EnvelopeStore {
 // Store context envelope
 func (s *EnvelopeStore) Store(ctx context.Context, req *evlpstore.StoreRequest) (*evlpstore.StoreResponse, error) {
 	// create model from envelope
-	model, err := FromEnvelope(req.GetEnvelope())
+	model, err := FromEnvelope(ctx, req.GetEnvelope())
 	if err != nil {
 		return &evlpstore.StoreResponse{}, errors.FromError(err).SetComponent(component)
 	}
@@ -63,14 +65,17 @@ func (s *EnvelopeStore) Store(ctx context.Context, req *evlpstore.StoreRequest) 
 
 // LoadByTxHash load envelope by transaction hash
 func (s *EnvelopeStore) LoadByTxHash(ctx context.Context, req *evlpstore.LoadByTxHashRequest) (*evlpstore.StoreResponse, error) { //nolint:interfacer // reason
+	tenantID := multitenancy.TenantIDFromContext(ctx)
 	model := &EnvelopeModel{
-		ChainID: req.GetChain().GetBigChainID().String(),
-		TxHash:  req.GetTxHash().Hex(),
+		ChainID:  req.GetChain().GetBigChainID().String(),
+		TenantID: tenantID,
+		TxHash:   req.GetTxHash().Hex(),
 	}
 
 	err := s.db.ModelContext(ctx, model).
 		Where("chain_id = ?", model.ChainID).
 		Where("tx_hash = ?", model.TxHash).
+		Where("tenant_id = ?", model.TenantID).
 		Select()
 	if err != nil {
 		return &evlpstore.StoreResponse{}, errors.NotFoundError("envelope not found").ExtendComponent(component)
@@ -81,12 +86,15 @@ func (s *EnvelopeStore) LoadByTxHash(ctx context.Context, req *evlpstore.LoadByT
 
 // LoadByID context envelope by envelope UUID
 func (s *EnvelopeStore) LoadByID(ctx context.Context, req *evlpstore.LoadByIDRequest) (*evlpstore.StoreResponse, error) { //nolint:interfacer // reason
+	tenantID := multitenancy.TenantIDFromContext(ctx)
 	model := &EnvelopeModel{
 		EnvelopeID: req.GetId(),
+		TenantID:   tenantID,
 	}
 
 	err := s.db.ModelContext(ctx, model).
 		Where("envelope_id = ?", model.EnvelopeID).
+		Where("tenant_id = ?", model.TenantID).
 		Select()
 	if err != nil {
 		return &evlpstore.StoreResponse{}, errors.NotFoundError("envelope not found").ExtendComponent(component)
@@ -97,16 +105,19 @@ func (s *EnvelopeStore) LoadByID(ctx context.Context, req *evlpstore.LoadByIDReq
 
 // SetStatus set a context status
 func (s *EnvelopeStore) SetStatus(ctx context.Context, req *evlpstore.SetStatusRequest) (*evlpstore.StatusResponse, error) {
+	tenantID := multitenancy.TenantIDFromContext(ctx)
 	// Define model
 	model := &EnvelopeModel{
 		EnvelopeID: req.GetId(),
+		TenantID:   tenantID,
 		Status:     strings.ToLower(req.GetStatus().String()),
 	}
 
 	// Update status value
 	_, err := s.db.ModelContext(ctx, model).
 		Set("status = ?status").
-		Where("envelope_id = ?envelope_id").
+		Where("envelope_id = ?", model.EnvelopeID).
+		Where("tenant_id = ?", model.TenantID).
 		Returning("*").
 		Update()
 	if err != nil {

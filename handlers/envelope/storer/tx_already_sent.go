@@ -5,6 +5,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
 )
 
@@ -20,6 +21,8 @@ import (
 // 3. Set envelope status
 func TxAlreadySent(ec ethclient.ChainLedgerReader, s evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
+		tenantID := multitenancy.TenantIDFromContext(txctx.Context())
+		txctx.Logger.Tracef("from TxAlreadySent => TenantID value: %s", tenantID)
 		// Load possibly already sent envelope
 		resp, err := s.LoadByID(
 			txctx.Context(),

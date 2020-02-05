@@ -93,6 +93,7 @@ func TestChainInjector(t *testing.T) {
 			false,
 			func(txctx *engine.TxContext) *engine.TxContext {
 				txctx.Envelope.Chain = (&chain.Chain{}).SetUUID(testChainUUID)
+				txctx.WithContext(multitenancy.WithTenantID(txctx.Context(), multitenancy.DefaultTenantIDName))
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
@@ -107,6 +108,7 @@ func TestChainInjector(t *testing.T) {
 			false,
 			func(txctx *engine.TxContext) *engine.TxContext {
 				txctx.Envelope.Chain = (&chain.Chain{}).SetUUID(testChainError)
+				txctx.WithContext(multitenancy.WithTenantID(txctx.Context(), multitenancy.DefaultTenantIDName))
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
@@ -147,6 +149,7 @@ func TestChainInjector(t *testing.T) {
 			"Without chainUUID and chainName filled",
 			false,
 			func(txctx *engine.TxContext) *engine.TxContext {
+				txctx.WithContext(multitenancy.WithTenantID(txctx.Context(), multitenancy.DefaultTenantIDName))
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
@@ -175,7 +178,7 @@ func TestChainInjector(t *testing.T) {
 			txctx := engine.NewTxContext()
 			txctx.Logger = log.NewEntry(log.New())
 
-			h := ChainInjector(test.multitenancy, mockClient, testChainProxyURL)
+			h := ChainInjector(mockClient, testChainProxyURL)
 			h(test.input(txctx))
 
 			expectedTxctx := engine.NewTxContext()

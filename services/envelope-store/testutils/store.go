@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -80,9 +82,10 @@ func (s *EnvelopeStoreTestSuite) AssertLoadPending(
 
 // TestEnvelopeStore test envelope store
 func (s *EnvelopeStoreTestSuite) TestStore() {
+	ctx := multitenancy.WithTenantID(context.Background(), multitenancy.DefaultTenantIDName)
 	// Load envelopes before storing
 	s.AssertLoadByTxHash(
-		context.Background(),
+		ctx,
 		&evlpstore.LoadByTxHashRequest{
 			Chain:  chain.FromInt(888),
 			TxHash: ethereum.HexToHash("0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210"),
@@ -92,7 +95,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 	)
 
 	s.AssertLoadByID(
-		context.Background(),
+		ctx,
 		&evlpstore.LoadByIDRequest{
 			Id: "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11",
 		},
@@ -101,7 +104,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 	)
 
 	s.AssertSetStatus(
-		context.Background(),
+		ctx,
 		&evlpstore.SetStatusRequest{
 			Id:     "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11",
 			Status: evlpstore.Status_PENDING,
@@ -126,7 +129,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 		},
 	}
 	s.AssertStore(
-		context.Background(),
+		ctx,
 		&evlpstore.StoreRequest{
 			Envelope: evlp,
 		},
@@ -139,7 +142,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 
 	// Load Envelope
 	s.AssertLoadByTxHash(
-		context.Background(),
+		ctx,
 		&evlpstore.LoadByTxHashRequest{
 			Chain:  chain.FromInt(888),
 			TxHash: ethereum.HexToHash("0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210"),
@@ -154,7 +157,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 
 	// Set Status
 	s.AssertSetStatus(
-		context.Background(),
+		ctx,
 		&evlpstore.SetStatusRequest{
 			Id:     "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11",
 			Status: evlpstore.Status_PENDING,
@@ -167,7 +170,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 	)
 
 	s.AssertSetStatus(
-		context.Background(),
+		ctx,
 		&evlpstore.SetStatusRequest{
 			Id:     "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11",
 			Status: evlpstore.Status_ERROR,
@@ -180,7 +183,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 	)
 
 	s.AssertSetStatus(
-		context.Background(),
+		ctx,
 		&evlpstore.SetStatusRequest{
 			Id:     "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11",
 			Status: evlpstore.Status_MINED,
@@ -194,7 +197,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 
 	// Load by UUID
 	s.AssertLoadByID(
-		context.Background(),
+		ctx,
 		&evlpstore.LoadByIDRequest{
 			Id: "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11",
 		},
@@ -218,7 +221,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 
 	time.Sleep(300 * time.Millisecond)
 	s.AssertStore(
-		context.Background(),
+		ctx,
 		&evlpstore.StoreRequest{
 			Envelope: evlp,
 		},
@@ -235,7 +238,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 
 	// Load Envelope by TxHash with new hash
 	s.AssertLoadByTxHash(
-		context.Background(),
+		ctx,
 		&evlpstore.LoadByTxHashRequest{
 			Chain:  chain.FromInt(888),
 			TxHash: ethereum.HexToHash(newHash),
@@ -259,7 +262,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 		},
 	}
 	s.AssertStore(
-		context.Background(),
+		ctx,
 		&evlpstore.StoreRequest{
 			Envelope: evlp,
 		},
@@ -271,7 +274,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 
 	// Load by UUID
 	s.AssertLoadByID(
-		context.Background(),
+		ctx,
 		&evlpstore.LoadByIDRequest{
 			Id: newID,
 		},
@@ -286,6 +289,8 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 
 // TestLoadPending test load pending envelopes
 func (s *EnvelopeStoreTestSuite) TestLoadPending() {
+	ctx := multitenancy.WithTenantID(context.Background(), multitenancy.DefaultTenantIDName)
+
 	for i, chainID := range []int64{1, 2, 3, 12, 42, 888} {
 		e := &envelope.Envelope{
 			Chain:    chain.FromInt(chainID),
@@ -293,7 +298,7 @@ func (s *EnvelopeStoreTestSuite) TestLoadPending() {
 		}
 
 		_, _ = s.Store.Store(
-			context.Background(),
+			ctx,
 			&evlpstore.StoreRequest{
 				Envelope: e,
 			},
@@ -305,7 +310,7 @@ func (s *EnvelopeStoreTestSuite) TestLoadPending() {
 		if i%2 == 0 {
 			// Every 2 transactions we set status to pending
 			_, _ = s.Store.SetStatus(
-				context.Background(),
+				ctx,
 				&evlpstore.SetStatusRequest{
 					Id:     fmt.Sprintf("a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a1%v", i),
 					Status: evlpstore.Status_PENDING,
@@ -315,7 +320,7 @@ func (s *EnvelopeStoreTestSuite) TestLoadPending() {
 	}
 
 	s.AssertLoadPending(
-		context.Background(),
+		ctx,
 		&evlpstore.LoadPendingRequest{
 			Duration: utils.DurationToPDuration(0),
 		},
@@ -326,7 +331,7 @@ func (s *EnvelopeStoreTestSuite) TestLoadPending() {
 	)
 
 	s.AssertLoadPending(
-		context.Background(),
+		ctx,
 		&evlpstore.LoadPendingRequest{
 			Duration: utils.DurationToPDuration(300 * time.Millisecond),
 		},
@@ -337,7 +342,7 @@ func (s *EnvelopeStoreTestSuite) TestLoadPending() {
 	)
 
 	s.AssertLoadPending(
-		context.Background(),
+		ctx,
 		&evlpstore.LoadPendingRequest{
 			Duration: utils.DurationToPDuration(500 * time.Millisecond),
 		},
@@ -348,7 +353,7 @@ func (s *EnvelopeStoreTestSuite) TestLoadPending() {
 	)
 
 	s.AssertLoadPending(
-		context.Background(),
+		ctx,
 		&evlpstore.LoadPendingRequest{
 			Duration: utils.DurationToPDuration(700 * time.Millisecond),
 		},

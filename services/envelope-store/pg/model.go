@@ -1,9 +1,12 @@
 package pg
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
@@ -20,6 +23,9 @@ type EnvelopeModel struct {
 
 	// Envelope Identifier
 	EnvelopeID string
+
+	// Tenant Identifier
+	TenantID string
 
 	// Ethereum info about transaction
 	ChainID string
@@ -83,16 +89,19 @@ func (model *EnvelopeModel) ToStoreResponse() (*evlpstore.StoreResponse, error) 
 }
 
 // FromEnvelope creates a model from an envelope
-func FromEnvelope(e *envelope.Envelope) (*EnvelopeModel, error) {
+func FromEnvelope(ctx context.Context, e *envelope.Envelope) (*EnvelopeModel, error) {
 	// Marshal envelope
 	b, err := encoding.Marshal(e)
 	if err != nil {
 		return nil, err
 	}
 
+	tenantID := multitenancy.TenantIDFromContext(ctx)
+
 	return &EnvelopeModel{
 		Envelope:   b,
 		EnvelopeID: e.GetMetadata().GetId(),
+		TenantID:   tenantID,
 		ChainID:    e.GetChain().GetBigChainID().String(),
 		TxHash:     e.GetTx().GetHash().Hex(),
 	}, nil

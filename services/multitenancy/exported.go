@@ -12,10 +12,6 @@ var (
 	initOnce   = &sync.Once{}
 )
 
-const (
-	DefaultTenantIDName = "_"
-)
-
 // Init initializes key Builder with EnabledViperKey
 func Init(_ context.Context) {
 	initOnce.Do(func() {
