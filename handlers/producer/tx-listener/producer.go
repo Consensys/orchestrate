@@ -23,7 +23,7 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 	msg.Topic = utils.KafkaChainTopic(viper.GetString(broker.TxDecoderViperKey), txctx.Envelope.GetChain().GetBigChainID())
 
 	// Set key
-	Sender := txctx.Envelope.GetFrom().Address()
+	Sender := txctx.Envelope.Sender()
 	msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(txctx.Envelope.GetChain().GetBigChainID(), Sender))
 
 	return nil
@@ -37,7 +37,7 @@ func Producer(p sarama.SyncProducer) engine.HandlerFunc {
 		if ExternalTxDisabled() && (txctx.Envelope.Metadata == nil || txctx.Envelope.Tx == nil) {
 
 			// For robustness make sure that receipt and tx hash are set even though tx-listener already guarantee it
-			if txctx.Envelope.Receipt != nil && txctx.Envelope.Receipt.TxHash != nil {
+			if txctx.Envelope.Receipt != nil && txctx.Envelope.Receipt.TxHash != "" {
 				txctx.Logger.WithFields(log.Fields{
 					"tx.hash": txctx.Envelope.Receipt.GetTxHash(),
 				}).Debugf("External tx disabled, skipping transaction with tx hash")

@@ -85,7 +85,7 @@ func (s *ScenarioTestSuite) TestParseEnvelopes() {
 
 	trackers := s.Context.newTrackers(envelopes)
 	require.Len(s.T(), trackers, 1, "A tracker should have been created")
-	assert.Equal(s.T(), "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4", trackers[0].Current.GetFrom().Hex())
+	assert.Equal(s.T(), "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4", trackers[0].Current.GetFrom())
 }
 
 func (s *ScenarioTestSuite) TestISendEnvelopesToTopic() {

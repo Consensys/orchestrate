@@ -31,7 +31,7 @@ func makeContext(i int, store *clientmock.EnvelopeStoreClient) *engine.TxContext
 	// Initialize context
 	txctx := engine.NewTxContext().Prepare(log.NewEntry(log.StandardLogger()), nil)
 
-	hash, uuid := ethereum.HexToHash("0x"+RandString(64)), RandString(32)
+	hash, uuid := "0x"+RandString(64), RandString(32)
 
 	// Prepare context
 	txctx.Envelope.Chain = chain.FromInt(10)
@@ -46,7 +46,7 @@ func makeContext(i int, store *clientmock.EnvelopeStoreClient) *engine.TxContext
 			Chain: chain.FromInt(10),
 			Tx: &ethereum.Transaction{
 				Hash: hash,
-				Raw:  ethereum.HexToData("0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80"),
+				Raw:  "0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80",
 			},
 			Metadata: &envelope.Metadata{Id: uuid},
 		}

@@ -67,11 +67,11 @@ func (p *Parser) ParseEnvelope(scenario string, headers, row *gherkin.TableRow, 
 func (p *Parser) ParseTxCell(header, cell string, tx *ethereum.Transaction) error {
 	switch header {
 	case "raw":
-		tx.Raw = ethereum.HexToData(cell)
+		tx.Raw = cell
 	case "hash":
-		tx.Hash = ethereum.HexToHash(cell)
+		tx.Hash = cell
 	case "to":
-		GetInitTxData(tx).To = ethereum.HexToAccount(cell)
+		GetInitTxData(tx).To = cell
 	case "gas":
 		gas, err := strconv.ParseUint(cell, 10, 32)
 		if err != nil {
@@ -79,17 +79,17 @@ func (p *Parser) ParseTxCell(header, cell string, tx *ethereum.Transaction) erro
 		}
 		GetInitTxData(tx).Gas = gas
 	case "gasPrice":
-		gasPrice, err := strconv.Atoi(cell)
-		if err != nil {
-			return err
+		gasPrice, ok := (new(big.Int)).SetString(cell, 10)
+		if !ok {
+			return fmt.Errorf("invalid gas price")
 		}
-		GetInitTxData(tx).GasPrice = ethereum.IntToQuantity(int64(gasPrice))
+		GetInitTxData(tx).GasPrice = gasPrice.String()
 	case "value":
-		value, err := strconv.Atoi(cell)
-		if err != nil {
-			return err
+		value, ok := (new(big.Int)).SetString(cell, 10)
+		if !ok {
+			return fmt.Errorf("invalid value")
 		}
-		GetInitTxData(tx).Value = ethereum.IntToQuantity(int64(value))
+		GetInitTxData(tx).Value = value.String()
 	case "nonce":
 		nonce, err := strconv.ParseUint(cell, 10, 64)
 		if err != nil {
@@ -116,11 +116,11 @@ func (p *Parser) ParseTxChainCell(header, cell string, chn *chain.Chain) error {
 	switch header {
 	case "chainID":
 		// Retrieve chain id
-		raw, err := strconv.ParseInt(cell, 10, 64)
-		if err != nil {
-			return err
+		chainID, ok := (new(big.Int)).SetString(cell, 10)
+		if !ok {
+			return fmt.Errorf("invalid chainID")
 		}
-		chn.ChainId = big.NewInt(raw).Bytes()
+		chn.ChainId = chainID.String()
 	case "name":
 		chn.Name = cell
 	case "uuid":
@@ -186,7 +186,7 @@ func (p *Parser) ParseCallCell(header, cell string, call *args.Call) error {
 func (p *Parser) ParseEnvelopeCell(header, cell string, e *envelope.Envelope) error {
 	switch {
 	case header == "from":
-		e.From = ethereum.HexToAccount(cell)
+		e.From = cell
 	case strings.HasPrefix(header, "chain."):
 		err := p.ParseTxChainCell(
 			strings.TrimPrefix(header, "chain."),

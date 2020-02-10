@@ -33,7 +33,7 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 		}
 
 		// Set key for Kafka partitions
-		Sender := txctx.Envelope.GetFrom().Address()
+		Sender := txctx.Envelope.Sender()
 		msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(txctx.Envelope.GetChain().GetBigChainID(), Sender))
 
 		return nil
@@ -41,7 +41,7 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 		msg.Topic = viper.GetString(broker.WalletGeneratedViperKey)
 
 		// Set key for Kafka partitions
-		msg.Key = sarama.StringEncoder(txctx.Envelope.GetFrom().Address().Hex())
+		msg.Key = sarama.StringEncoder(txctx.Envelope.GetFrom())
 
 		return nil
 	}

@@ -20,7 +20,7 @@ func TestFromBigInt(t *testing.T) {
 	assert.Equal(t, int64(54), chain.GetBigChainID().Int64(), "#3: Chain UUID should match")
 
 	chain.SetChainID(big.NewInt(54))
-	assert.Equal(t, []byte{0x36}, chain.ChainId, "#4: Chain UUID should have be correct")
+	assert.Equal(t, "54", chain.ChainId, "#4: Chain UUID should have be correct")
 }
 
 func TestFromString(t *testing.T) {

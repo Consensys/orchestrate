@@ -130,7 +130,6 @@ func makeContext(
 	txctx := engine.NewTxContext()
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
-	txctx.Envelope.From = &ethereum.Account{Raw: []byte{}}
 	txctx.Envelope.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{
 		Nonce: nonce,
 	}}

@@ -18,7 +18,7 @@ func TesseraRawPrivateTxSender(ec ethclient.TransactionSender) engine.HandlerFun
 		_, err = ec.SendQuorumRawPrivateTransaction(
 			txctx.Context(),
 			url,
-			txctx.Envelope.GetTx().GetRaw().GetRaw(),
+			txctx.Envelope.GetTx().GetRaw(),
 			types.Call2PrivateArgs(txctx.Envelope.GetArgs()).PrivateFor,
 		)
 		if err != nil {

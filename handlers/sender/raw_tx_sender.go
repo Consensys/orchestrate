@@ -17,7 +17,7 @@ func RawTxSender(ec ethclient.TransactionSender) engine.HandlerFunc {
 		err = ec.SendRawTransaction(
 			txctx.Context(),
 			url,
-			txctx.Envelope.GetTx().GetRaw().Hex(),
+			txctx.Envelope.GetTx().GetRaw(),
 		)
 		if err != nil {
 			e := txctx.AbortWithError(err).ExtendComponent(component)

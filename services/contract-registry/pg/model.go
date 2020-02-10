@@ -1,9 +1,5 @@
 package pg
 
-import (
-	"github.com/ethereum/go-ethereum/common"
-)
-
 // RepositoryModel represent a space where contract tags are listed
 type RepositoryModel struct {
 	tableName struct{} `pg:"repositories"` //nolint:unused,structcheck // reason
@@ -37,11 +33,11 @@ type ArtifactModel struct {
 	ID int
 
 	// Artifact data
-	Abi              []byte
-	Bytecode         []byte
-	DeployedBytecode []byte
+	Abi              string
+	Bytecode         string
+	DeployedBytecode string
 	// Codehash stored on the Ethereum account. Correspond to the hash of the deployedBytecode
-	Codehash []byte
+	Codehash string
 }
 
 // CodehashModel represent the codehash of smart contract addresses
@@ -53,8 +49,8 @@ type CodehashModel struct {
 
 	// Artifact data
 	ChainID  string
-	Address  []byte
-	Codehash []byte
+	Address  string
+	Codehash string
 }
 
 // MethodModel represent the codehash of smart contract addresses
@@ -65,10 +61,10 @@ type MethodModel struct {
 	ID int
 
 	// Artifact data
-	Codehash common.Hash
+	Codehash string
 	Selector [4]byte
 
-	ABI []byte
+	ABI string
 }
 
 // EventModel represent the codehash of smart contract addresses
@@ -79,9 +75,9 @@ type EventModel struct {
 	ID int
 
 	// Artifact data
-	Codehash          common.Hash
-	SigHash           common.Hash
+	Codehash          string
+	SigHash           string
 	IndexedInputCount uint `pg:",use_zero"`
 
-	ABI []byte
+	ABI string
 }

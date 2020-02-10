@@ -33,9 +33,9 @@ type RawABI struct {
 }
 
 // ParseJSONABI returns a decoded ABI object
-func ParseJSONABI(data []byte) (methods, events map[string][]byte, err error) {
+func ParseJSONABI(data string) (methods, events map[string]string, err error) {
 	var parsedFields []RawABI
-	err = pkgjson.Unmarshal(data, &parsedFields)
+	err = pkgjson.Unmarshal([]byte(data), &parsedFields)
 	if err != nil {
 		return nil, nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -51,8 +51,8 @@ func ParseJSONABI(data []byte) (methods, events map[string][]byte, err error) {
 		return nil, nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	methods = make(map[string][]byte)
-	events = make(map[string][]byte)
+	methods = make(map[string]string)
+	events = make(map[string]string)
 	for i := 0; i < len(rawFields) && i < len(parsedFields); i++ {
 		fieldJSON, err := rawFields[i].MarshalJSON()
 		if err != nil {
@@ -65,14 +65,14 @@ func ParseJSONABI(data []byte) (methods, events map[string][]byte, err error) {
 			if err != nil {
 				return nil, nil, errors.FromError(err).ExtendComponent(component)
 			}
-			methods[m.Name+m.Sig()] = fieldJSON
+			methods[m.Name+m.Sig()] = string(fieldJSON)
 		case "event":
 			var e *ethabi.Event
 			err := json.Unmarshal(fieldJSON, &e)
 			if err != nil {
 				return nil, nil, errors.FromError(err).ExtendComponent(component)
 			}
-			events[e.Name+e.Sig()] = fieldJSON
+			events[e.Name+e.Sig()] = string(fieldJSON)
 		}
 	}
 	return methods, events, nil

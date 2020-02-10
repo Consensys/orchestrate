@@ -50,7 +50,7 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 		}
 
 		// Retrieve chainID and sender address
-		chainID, sender := txctx.Envelope.GetChain().GetBigChainID(), txctx.Envelope.GetFrom().Address()
+		chainID, sender := txctx.Envelope.GetChain().GetBigChainID(), txctx.Envelope.Sender()
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"tx.sender":     sender.Hex(),
 			"chain.chainID": chainID.String(),
@@ -245,6 +245,6 @@ func resetTx(tx *ethereum.Transaction) {
 	if tx.GetTxData() != nil {
 		tx.GetTxData().SetNonce(0)
 	}
-	tx.Hash = nil
-	tx.Raw = nil
+	tx.Hash = ""
+	tx.Raw = ""
 }

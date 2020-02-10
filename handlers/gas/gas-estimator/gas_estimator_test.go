@@ -31,7 +31,6 @@ func makeGasEstimatorContext(i int) *engine.TxContext {
 	txctx := engine.NewTxContext()
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
-	txctx.Envelope.From = &ethereum.Account{}
 	txctx.Envelope.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{}}
 
 	switch i % 2 {

@@ -44,11 +44,7 @@ func makeSignerContext(i int) *engine.TxContext {
 	case 0:
 		txctx.Envelope.Chain = chain.FromInt(10)
 		txctx.Envelope.Tx = &ethereum.Transaction{
-			TxData: &ethereum.TxData{
-				Data: &ethereum.Data{
-					Raw: []byte{0},
-				},
-			},
+			TxData: &ethereum.TxData{},
 		}
 		txctx.Envelope.Protocol = &chain.Protocol{
 			Type: chain.ProtocolType_QUORUM_TESSERA,
@@ -56,11 +52,7 @@ func makeSignerContext(i int) *engine.TxContext {
 	case 1:
 		txctx.Envelope.Chain = chain.FromInt(10)
 		txctx.Envelope.Tx = &ethereum.Transaction{
-			TxData: &ethereum.TxData{
-				Data: &ethereum.Data{
-					Raw: []byte{0},
-				},
-			},
+			TxData: &ethereum.TxData{},
 		}
 		txctx.Envelope.Protocol = &chain.Protocol{
 			Type: chain.ProtocolType_QUORUM_TESSERA,
@@ -68,11 +60,7 @@ func makeSignerContext(i int) *engine.TxContext {
 	case 2:
 		txctx.Envelope.Chain = chain.FromInt(10)
 		txctx.Envelope.Tx = &ethereum.Transaction{
-			TxData: &ethereum.TxData{
-				Data: &ethereum.Data{
-					Raw: []byte{0},
-				},
-			},
+			TxData: &ethereum.TxData{},
 		}
 		txctx.Envelope.Protocol = &chain.Protocol{
 			Type: chain.ProtocolType_QUORUM_TESSERA,

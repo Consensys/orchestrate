@@ -54,7 +54,7 @@ func makeCrafterContext(i int) *engine.TxContext {
 	switch i {
 	case 0:
 		ctx.Set("errors", 0)
-		ctx.Set("result", "0x")
+		ctx.Set("result", "")
 	case 1:
 		ctx.Envelope.Tx.TxData = (&ethereum.TxData{}).SetData(hexutil.MustDecode("0xa9059cbb"))
 		ctx.Set("errors", 0)
@@ -78,7 +78,7 @@ func makeCrafterContext(i int) *engine.TxContext {
 		}
 		ctx.Set("errors", 1)
 		ctx.Set("error.code", errors.InvalidArgsCountError("").GetCode())
-		ctx.Set("result", "0x")
+		ctx.Set("result", "")
 	case 4:
 		ctx.Envelope.Args = &envelope.Args{
 
@@ -106,14 +106,14 @@ func makeCrafterContext(i int) *engine.TxContext {
 				// Invalid ABI
 				Method: &abi.Method{
 					Signature: "constructor()",
-					Abi:       []byte{1, 2, 3},
+					Abi:       hexutil.Encode([]byte{1, 2, 3}),
 				},
 				Args: []string{"0xabcd"},
 			},
 		}
 		ctx.Set("errors", 1)
 		ctx.Set("error.code", errors.EncodingError("").GetCode())
-		ctx.Set("result", "0x")
+		ctx.Set("result", "")
 	case 6:
 		ctx.Envelope.Args = &envelope.Args{
 			Call: &args.Call{
@@ -129,7 +129,7 @@ func makeCrafterContext(i int) *engine.TxContext {
 		}
 		ctx.Set("errors", 1)
 		ctx.Set("error.code", errors.InvalidSignatureError("").GetCode())
-		ctx.Set("result", "0x")
+		ctx.Set("result", "")
 	case 7:
 		ctx.Envelope.Args = &envelope.Args{
 
@@ -146,7 +146,7 @@ func makeCrafterContext(i int) *engine.TxContext {
 		}
 		ctx.Set("errors", 1)
 		ctx.Set("error.code", errors.NotFoundError("").GetCode())
-		ctx.Set("result", "0x")
+		ctx.Set("result", "")
 	case 8:
 		ctx.Envelope.Args = &envelope.Args{
 
@@ -163,7 +163,7 @@ func makeCrafterContext(i int) *engine.TxContext {
 		}
 		ctx.Set("errors", 1)
 		ctx.Set("error.code", errors.InvalidArgsCountError("").GetCode())
-		ctx.Set("result", "0x")
+		ctx.Set("result", "")
 	case 9:
 		ctx.Envelope.Args = &envelope.Args{
 
@@ -216,9 +216,9 @@ func (s *CrafterTestSuite) SetupSuite() {
 				Id: &abi.ContractId{
 					Name: "known",
 				},
-				Abi:              []byte(`[]`),
-				Bytecode:         []byte{1, 2, 3},
-				DeployedBytecode: []byte{1, 2},
+				Abi:              `[]`,
+				Bytecode:         hexutil.Encode([]byte{1, 2, 3}),
+				DeployedBytecode: hexutil.Encode([]byte{1, 2}),
 			},
 		})
 	assert.NoError(s.T(), err)
@@ -239,7 +239,7 @@ func (s *CrafterTestSuite) TestCrafter() {
 		for _, err := range txctx.Envelope.Errors {
 			assert.Equal(s.T(), txctx.Get("error.code").(uint64), err.GetCode(), "Error code be correct")
 		}
-		assert.Equal(s.T(), txctx.Get("result").(string), txctx.Envelope.Tx.TxData.GetData().Hex(), "Expected correct payload", txctx.Envelope.Args)
+		assert.Equal(s.T(), txctx.Get("result").(string), txctx.Envelope.Tx.TxData.GetData(), "Expected correct payload", txctx.Envelope.Args)
 	}
 }
 

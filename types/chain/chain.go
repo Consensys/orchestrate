@@ -16,25 +16,26 @@ func FromString(chainID string) *Chain {
 // FromInt creates a new chain id from an integer value
 func FromInt(chainID int64) *Chain {
 	return &Chain{
-		ChainId: big.NewInt(chainID).Bytes(),
+		ChainId: big.NewInt(chainID).String(),
 	}
 }
 
 // FromBigInt create a new chain id from a big integer value
 func FromBigInt(chainID *big.Int) *Chain {
 	return &Chain{
-		ChainId: chainID.Bytes(),
+		ChainId: chainID.String(),
 	}
 }
 
 // UUID return chain UUID in big.Int format
 func (c *Chain) GetBigChainID() *big.Int {
-	return big.NewInt(0).SetBytes(c.GetChainId())
+	chainID, _ := big.NewInt(0).SetString(c.GetChainId(), 10)
+	return chainID
 }
 
 // SetChainID set chain UUID
-func (c *Chain) SetChainID(id *big.Int) *Chain {
-	c.ChainId = id.Bytes()
+func (c *Chain) SetChainID(chainID *big.Int) *Chain {
+	c.ChainId = chainID.String()
 	return c
 }
 

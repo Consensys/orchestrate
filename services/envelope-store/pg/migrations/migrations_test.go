@@ -36,7 +36,7 @@ func (s *MigrationsTestSuite) TestMigrationVersion() {
 	_, err := s.pg.DB.QueryOne(
 		pg.Scan(&version),
 		`SELECT version FROM ? ORDER BY id DESC LIMIT 1`,
-		pg.Q("gopg_migrations"),
+		pg.SafeQuery("gopg_migrations"),
 	)
 
 	s.Assert().NoError(err, "Error querying version")
@@ -46,7 +46,7 @@ func (s *MigrationsTestSuite) TestMigrationVersion() {
 func (s *MigrationsTestSuite) TestCreateEnvelopeTable() {
 	n, err := s.pg.DB.Model().
 		Table("pg_catalog.pg_tables").
-		Where("tablename = '?'", pg.Q("envelopes")).
+		Where("tablename = '?'", pg.SafeQuery("envelopes")).
 		Count()
 
 	s.Assert().NoError(err, "Query failed")
@@ -56,7 +56,7 @@ func (s *MigrationsTestSuite) TestCreateEnvelopeTable() {
 func (s *MigrationsTestSuite) TestAddEnvelopeStoreColumns() {
 	n, err := s.pg.DB.Model().
 		Table("information_schema.columns").
-		Where("table_name = '?'", pg.Q("envelopes")).
+		Where("table_name = '?'", pg.SafeQuery("envelopes")).
 		Count()
 
 	s.Assert().NoError(err, "Query failed")

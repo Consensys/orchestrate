@@ -25,10 +25,10 @@ message Contract {
     ContractId id = 1;
 
     // Contract ABI (optional)
-    bytes abi = 2;
+    string abi = 2;
 
     // Contract deployment bytecode (optional)
-    bytes bytecode = 3;
+    string bytecode = 3;
 
     // Methods of the contract
     repeated Method methods = 4;
@@ -37,7 +37,7 @@ message Contract {
     repeated Event events = 5;
 
     // Contract deployed bytecode (optional)
-    bytes deployedBytecode = 6;
+    string deployedBytecode = 6;
 }
 
 // Method
@@ -47,7 +47,7 @@ message Method {
     string signature = 1;
 
     // ABI of the method (Optional)
-    bytes abi = 2;
+    string abi = 2;
 }
 
 // Event
@@ -57,5 +57,5 @@ message Event {
     string signature = 1;
 
     // ABI of the method (Optional)
-    bytes abi = 2;
+    string abi = 2;
 }

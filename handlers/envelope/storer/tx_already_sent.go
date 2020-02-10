@@ -50,7 +50,7 @@ func TxAlreadySent(ec ethclient.ChainLedgerReader, s evlpstore.EnvelopeStoreClie
 			tx, _, err := ec.TransactionByHash(
 				txctx.Context(),
 				url,
-				resp.GetEnvelope().GetTx().GetHash().Hash(),
+				resp.GetEnvelope().GetTx().TxHash(),
 			)
 
 			if err != nil {

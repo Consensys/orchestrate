@@ -5,6 +5,8 @@ import (
 	"math/big"
 	"testing"
 
+	ethcommon "github.com/ethereum/go-ethereum/common"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -13,7 +15,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	faucettypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
 type MockFaucet struct {
@@ -37,7 +38,7 @@ func makeFaucetContext(i int) *engine.TxContext {
 		txctx.Set("errors", 0)
 	case 1:
 		txctx.Envelope.Chain = chain.FromInt(10)
-		txctx.Envelope.From = (&ethereum.Account{}).SetAddress([]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1})
+		txctx.Envelope.From = ethcommon.HexToAddress("0x1").Hex()
 		txctx.Set("errors", 0)
 	}
 	return txctx

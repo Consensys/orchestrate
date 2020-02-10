@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
+
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
@@ -62,12 +64,15 @@ func makeProducerContext(i int) *engine.TxContext {
 
 	switch i % 3 {
 	case 0:
+		txctx.Envelope.Chain = &chain.Chain{ChainId: "1"}
 		txctx.Envelope.Metadata = &envelope.Metadata{}
 		txctx.Set("produced", false)
 	case 1:
+		txctx.Envelope.Chain = &chain.Chain{ChainId: "2"}
 		txctx.Envelope.Tx = &ethereum.Transaction{}
 		txctx.Set("produced", false)
 	case 2:
+		txctx.Envelope.Chain = &chain.Chain{ChainId: "3"}
 		txctx.Envelope.Tx = &ethereum.Transaction{}
 		txctx.Envelope.Metadata = &envelope.Metadata{}
 		txctx.Set("produced", true)

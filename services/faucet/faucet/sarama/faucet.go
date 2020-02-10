@@ -40,7 +40,7 @@ func (f *Faucet) prepareMsg(ctx context.Context, r *types.Request, msg *sarama.P
 	// Create Trace for Crediting message
 	e := &envelope.Envelope{
 		Chain: (&chain.Chain{}).SetChainID(r.ChainID).SetUUID(r.ChainUUID).SetName(r.ChainName),
-		From:  ethereum.HexToAccount(r.Creditor.Hex()),
+		From:  r.Creditor.Hex(),
 		Tx: &ethereum.Transaction{
 			TxData: (&ethereum.TxData{}).SetValue(r.Amount).SetTo(r.Beneficiary),
 		},

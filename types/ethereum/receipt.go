@@ -2,6 +2,7 @@ package ethereum
 
 import (
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
 
@@ -13,11 +14,11 @@ func FromGethReceipt(r *ethtypes.Receipt) *Receipt {
 	}
 
 	return &Receipt{
-		TxHash:            &Hash{Raw: r.TxHash.Bytes()},
-		ContractAddress:   &Account{Raw: r.ContractAddress.Bytes()},
-		PostState:         r.PostState,
+		TxHash:            r.TxHash.String(),
+		ContractAddress:   r.ContractAddress.String(),
+		PostState:         hexutil.Encode(r.PostState),
 		Status:            r.Status,
-		Bloom:             r.Bloom.Bytes(),
+		Bloom:             hexutil.Encode(r.Bloom.Bytes()),
 		Logs:              logs,
 		GasUsed:           r.GasUsed,
 		CumulativeGasUsed: r.CumulativeGasUsed,
@@ -32,22 +33,13 @@ func (r *Receipt) SetBlockNumber(number uint64) *Receipt {
 
 // SetBlockHash set block hash
 func (r *Receipt) SetBlockHash(h common.Hash) *Receipt {
-	if r.GetBlockHash() != nil {
-		r.GetBlockHash().Raw = h.Bytes()
-	} else {
-		r.BlockHash = &Hash{Raw: h.Bytes()}
-	}
-
+	r.BlockHash = h.String()
 	return r
 }
 
 // SetTxHash set transaction hash
 func (r *Receipt) SetTxHash(h common.Hash) *Receipt {
-	if r.GetTxHash() != nil {
-		r.GetTxHash().Raw = h.Bytes()
-	} else {
-		r.TxHash = &Hash{Raw: h.Bytes()}
-	}
+	r.TxHash = h.String()
 	return r
 }
 
@@ -60,21 +52,30 @@ func (r *Receipt) SetTxIndex(idx uint64) *Receipt {
 // FromGethLog creates a new log from a Geth log
 func FromGethLog(log *ethtypes.Log) *Log {
 	// Format topics
-	var topics []*Hash
+	var topics []string
 	for _, topic := range log.Topics {
-		topics = append(topics, &Hash{Raw: topic.Bytes()})
+		topics = append(topics, topic.String())
 	}
 
 	return &Log{
-		Address:     &Account{Raw: log.Address.Bytes()},
+		Address:     log.Address.String(),
 		Topics:      topics,
-		Data:        log.Data,
+		Data:        hexutil.Encode(log.Data),
 		DecodedData: make(map[string]string),
 		BlockNumber: log.BlockNumber,
-		TxHash:      &Hash{Raw: log.TxHash.Bytes()},
+		TxHash:      log.TxHash.String(),
 		TxIndex:     uint64(log.TxIndex),
-		BlockHash:   &Hash{Raw: log.BlockHash.Bytes()},
+		BlockHash:   log.BlockHash.String(),
 		Index:       uint64(log.Index),
 		Removed:     log.Removed,
 	}
+}
+
+func (r *Receipt) GetContractAddr() common.Address {
+	return common.HexToAddress(r.GetContractAddress())
+}
+
+func (r *Receipt) GetTxHashPtr() *common.Hash {
+	hash := common.HexToHash(r.GetTxHash())
+	return &hash
 }

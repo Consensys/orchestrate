@@ -96,7 +96,7 @@ func TestHook(t *testing.T) {
 		Envelope: &envelope.Envelope{
 			Chain: chain.FromBigInt(c.ChainID),
 			Tx: &ethereum.Transaction{
-				Hash: ethereum.HexToHash(receipt.TxHash.Hex()),
+				Hash: receipt.TxHash.Hex(),
 			},
 		},
 	})

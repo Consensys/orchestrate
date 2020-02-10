@@ -19,7 +19,7 @@ func Crafter(r svc.ContractRegistryClient, c crafter.Crafter) engine.HandlerFunc
 			"metadata.id": txctx.Envelope.GetMetadata().GetId(),
 		})
 
-		if txctx.Envelope.GetTx().GetTxData().GetData() != nil {
+		if txctx.Envelope.GetTx().GetTxData().GetData() != "" {
 			// If transaction has already been crafted there is nothing to do
 			return
 		}
@@ -55,7 +55,7 @@ func getMethodAbi(txctx *engine.TxContext) (*abi.Method, error) {
 	var method *abi.Method
 	if ABI := txctx.Envelope.GetArgs().GetCall().GetMethod().GetAbi(); len(ABI) > 0 {
 		// ABI was provided in the Envelope
-		err := encoding.Unmarshal(ABI, method)
+		err := encoding.Unmarshal([]byte(ABI), method)
 		if err != nil {
 			e := txctx.AbortWithError(err).ExtendComponent(component)
 			txctx.Logger.WithError(e).Errorf("crafter: invalid ABI provided")
@@ -101,7 +101,7 @@ func createContractDeploymentPayload(txctx *engine.TxContext, methodAbi *abi.Met
 		return nil, e
 	}
 
-	payload, err := c.CraftConstructor(bytecodeResp.GetBytecode(), methodAbi, getTxArgs(txctx)...)
+	payload, err := c.CraftConstructor([]byte(bytecodeResp.GetBytecode()), methodAbi, getTxArgs(txctx)...)
 	if err != nil {
 		e := txctx.AbortWithError(err).ExtendComponent(component)
 		txctx.Logger.WithError(e).Errorf("crafter: could not craft tx payload")

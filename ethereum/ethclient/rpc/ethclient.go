@@ -647,13 +647,12 @@ func (ec *Client) SendTransaction(ctx context.Context, endpoint string, args *ty
 	return txHash, nil
 }
 
-func (ec *Client) SendQuorumRawPrivateTransaction(ctx context.Context, endpoint string, signedTxHash []byte, privateFor []string) (ethcommon.Hash, error) {
-	rawTxHashHex := hexutil.Encode(signedTxHash)
+func (ec *Client) SendQuorumRawPrivateTransaction(ctx context.Context, endpoint, signedTxHash string, privateFor []string) (ethcommon.Hash, error) {
 	privateForParam := map[string]interface{}{
 		"privateFor": privateFor,
 	}
 	var hash string
-	err := ec.Call(ctx, endpoint, processResult(&hash), "eth_sendRawPrivateTransaction", rawTxHashHex, privateForParam)
+	err := ec.Call(ctx, endpoint, processResult(&hash), "eth_sendRawPrivateTransaction", signedTxHash, privateForParam)
 	if err != nil {
 		return ethcommon.Hash{}, errors.FromError(err).ExtendComponent(component)
 	}
@@ -661,11 +660,11 @@ func (ec *Client) SendQuorumRawPrivateTransaction(ctx context.Context, endpoint 
 }
 
 // SendRawPrivateTransaction send a raw transaction to an Ethereum node supporting EEA extension
-func (ec *Client) SendRawPrivateTransaction(ctx context.Context, endpoint string, raw []byte, args *types.PrivateArgs) (ethcommon.Hash, error) {
+func (ec *Client) SendRawPrivateTransaction(ctx context.Context, endpoint, raw string, args *types.PrivateArgs) (ethcommon.Hash, error) {
 	// Send a raw signed transactions using EEA extension method
 	// Method documentation here: https://besu.hyperledger.org/en/stable/Reference/API-Methods/#eea_sendrawtransaction
 	var hash string
-	err := ec.Call(ctx, endpoint, processResult(&hash), "eea_sendRawTransaction", hexutil.Encode(raw))
+	err := ec.Call(ctx, endpoint, processResult(&hash), "eea_sendRawTransaction", raw)
 	if err != nil {
 		return ethcommon.Hash{}, errors.FromError(err).ExtendComponent(component)
 	}

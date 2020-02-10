@@ -135,7 +135,7 @@ message DeregisterContractResponse {
 
 message DeleteArtifactRequest {
     // Hash of the bytecode pointing to an artifact to delete
-    bytes bytecodeHash = 1;
+    string bytecodeHash = 1;
 }
 message DeleteArtifactResponse {
 }
@@ -150,15 +150,15 @@ message GetContractResponse {
 }
 
 message GetContractABIResponse {
-    bytes abi = 1;
+    string abi = 1;
 }
 
 message GetContractBytecodeResponse {
-    bytes bytecode = 1;
+    string bytecode = 1;
 }
 
 message GetContractDeployedBytecodeResponse {
-    bytes deployedBytecode = 1;
+    string deployedBytecode = 1;
 }
 
 
@@ -187,14 +187,14 @@ message GetMethodsBySelectorRequest {
 }
 message GetMethodsBySelectorResponse {
     // Contains the ABI of the exact method if the deployed contract has a known bytecode
-    bytes method = 1;
+    string method = 1;
     // Contains the ABIs of the potential methods(s) if the deployed contract is not known 
-    repeated bytes defaultMethods = 2;
+    repeated string defaultMethods = 2;
 }
 
 message GetEventsBySigHashRequest {
     // Event signature hash (aka: topic[0])
-    bytes sigHash = 1;
+    string sigHash = 1;
 
     // Chain & Address of the contract
     common.AccountInstance accountInstance = 2;
@@ -204,9 +204,9 @@ message GetEventsBySigHashRequest {
 }
 message GetEventsBySigHashResponse {
     // Contains the ABI of the exact event if the deployed contract has a known bytecode
-    bytes event = 1;
+    string event = 1;
     // Contains the ABIs of the potential event(s) if the deployed contract is not known 
-    repeated bytes defaultEvents = 2;
+    repeated string defaultEvents = 2;
 }
 
 // Update
@@ -214,7 +214,7 @@ message SetAccountCodeHashRequest {
     // Chain & address of the account to update
     common.AccountInstance accountInstance = 1;
 
-    bytes codeHash = 2;
+    string codeHash = 2;
 }
 message SetAccountCodeHashResponse {
 }

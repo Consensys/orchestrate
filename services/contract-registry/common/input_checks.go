@@ -1,58 +1,38 @@
 package common
 
 import (
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
 const (
 	defaultTag = "latest"
 )
 
-// CheckExtractChainAddress validates a request input that is supposed to chain and address data
-func CheckExtractChainAddress(accountInstance *common.AccountInstance) (*chain.Chain, *ethereum.Account, error) {
-	if accountInstance == nil {
-		return nil, nil, errors.InvalidArgError("No account instance found in request").ExtendComponent(component)
-	}
-
-	accountChain := accountInstance.GetChain()
-	if accountChain == nil {
-		return nil, nil, errors.InvalidArgError("No ethereum chainID found in request").ExtendComponent(component)
-	}
-
-	address := accountInstance.GetAccount()
-	if address == nil {
-		return nil, nil, errors.InvalidArgError("No ethereum account instance found in request").ExtendComponent(component)
-	}
-
-	return accountChain, address, nil
-}
-
 // CheckExtractArtifacts validates a request input, that is supposed to provide artifacts data
-func CheckExtractArtifacts(contract *abi.Contract) (bytecode, deployedBytecode, abiBytes []byte, err error) {
+func CheckExtractArtifacts(contract *abi.Contract) (bytecode, deployedBytecode, abiBytes string, err error) {
 	if contract == nil {
-		return []byte{}, []byte{}, []byte{}, errors.InvalidArgError("No contract provided in request").ExtendComponent(component)
+		return "", "", "", errors.InvalidArgError("no contract provided in request").ExtendComponent(component)
 	}
 
-	if contract.GetBytecode() == nil {
-		return []byte{}, []byte{}, []byte{}, errors.InvalidArgError("No contract bytecode provided in request").ExtendComponent(component)
+	if _, err = hexutil.Decode(contract.GetBytecode()); err != nil {
+		return "", "", "", errors.InvalidArgError("invalid bytecode or no contract bytecode provided in request").ExtendComponent(component)
 	}
 
-	if contract.GetDeployedBytecode() == nil {
-		return []byte{}, []byte{}, []byte{}, errors.InvalidArgError("No contract deployed bytecode provided in request").ExtendComponent(component)
+	if _, err = hexutil.Decode(contract.GetDeployedBytecode()); err != nil {
+		return "", "", "", errors.InvalidArgError("invalid deployed bytecode or no contract deployed bytecode provided in requestor").ExtendComponent(component)
 	}
 
-	if len(contract.GetAbi()) == 0 {
-		return []byte{}, []byte{}, []byte{}, errors.InvalidArgError("No abi provided in request").ExtendComponent(component)
+	if contract.GetAbi() == "" {
+		return "", "", "", errors.InvalidArgError("No abi provided in request").ExtendComponent(component)
 	}
 
 	compactedABI, err := contract.GetABICompacted()
 	if err != nil {
-		return []byte{}, []byte{}, []byte{}, errors.FromError(err).ExtendComponent(component)
+		return "", "", "", errors.FromError(err).ExtendComponent(component)
 	}
+
 	return contract.GetBytecode(), contract.GetDeployedBytecode(), compactedABI, nil
 }
 

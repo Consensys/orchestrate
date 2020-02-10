@@ -21,10 +21,10 @@ type TransactionSender interface {
 	// SendQuorumRawPrivateTransaction sends a raw signed transaction to a Quorum node
 	// signedTxHash - is a hash returned by Quorum and then signed by a client
 	// privateFor - is a list of public keys of Quorum nodes that can receive a private transaction
-	SendQuorumRawPrivateTransaction(ctx context.Context, url string, signedTxHash []byte, privateFor []string) (ethcommon.Hash, error)
+	SendQuorumRawPrivateTransaction(ctx context.Context, url string, signedTxHash string, privateFor []string) (ethcommon.Hash, error)
 
 	// SendRawPrivateTransaction send a raw transaction to a Ethreum node supporting privacy with EEA privacy extensions
-	SendRawPrivateTransaction(ctx context.Context, url string, raw []byte, args *types.PrivateArgs) (ethcommon.Hash, error)
+	SendRawPrivateTransaction(ctx context.Context, url string, raw string, args *types.PrivateArgs) (ethcommon.Hash, error)
 }
 
 // ChainLedgerReader is a service to access a blockchain ledger information

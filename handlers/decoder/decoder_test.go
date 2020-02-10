@@ -7,10 +7,11 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
@@ -35,11 +36,11 @@ func TestDecoder(t *testing.T) {
 				txctx.Envelope.Receipt = &ethereum.Receipt{
 					Logs: []*ethereum.Log{
 						{
-							Data: hexutil.MustDecode("0x000000000000000000000000000000000000000000000001a055690d9db80000"),
-							Topics: []*ethereum.Hash{
-								ethereum.HexToHash("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"),
-								ethereum.HexToHash("0x000000000000000000000000ba826fec90cefdf6706858e5fbafcb27a290fbe0"),
-								ethereum.HexToHash("0x0000000000000000000000004aee792a88edda29932254099b9d1e06d537883f"),
+							Data: "0x000000000000000000000000000000000000000000000001a055690d9db80000",
+							Topics: []string{
+								"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+								"0x000000000000000000000000ba826fec90cefdf6706858e5fbafcb27a290fbe0",
+								"0x0000000000000000000000004aee792a88edda29932254099b9d1e06d537883f",
 							},
 						},
 					},
@@ -55,18 +56,19 @@ func TestDecoder(t *testing.T) {
 				txctx.Envelope.GetReceipt().Logs[0].Event = testEvent
 				return txctx
 			},
-		}, {
+		},
+		{
 			"Receipt without error and unknown abi",
 			func(txctx *engine.TxContext) *engine.TxContext {
 				txctx.Envelope.Chain = (&chain.Chain{}).SetChainID(big.NewInt(1))
 				txctx.Envelope.Receipt = &ethereum.Receipt{
 					Logs: []*ethereum.Log{
 						{
-							Data: hexutil.MustDecode("0x000000000000000000000000000000000000000000000001a055690d9db80000"),
-							Topics: []*ethereum.Hash{
-								ethereum.HexToHash("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"),
-								ethereum.HexToHash("0x000000000000000000000000ba826fec90cefdf6706858e5fbafcb27a290fbe0"),
-								ethereum.HexToHash("0x0000000000000000000000004aee792a88edda29932254099b9d1e06d537883f"),
+							Data: "0x000000000000000000000000000000000000000000000001a055690d9db80000",
+							Topics: []string{
+								"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+								"0x000000000000000000000000ba826fec90cefdf6706858e5fbafcb27a290fbe0",
+								"0x0000000000000000000000004aee792a88edda29932254099b9d1e06d537883f",
 							},
 						},
 					},
@@ -90,8 +92,8 @@ func TestDecoder(t *testing.T) {
 				txctx.Envelope.Receipt = &ethereum.Receipt{
 					Logs: []*ethereum.Log{
 						{
-							Data:   hexutil.MustDecode("0x000000000000000000000000000000000000000000000001a055690d9db80000"),
-							Topics: []*ethereum.Hash{},
+							Data:   "0x000000000000000000000000000000000000000000000001a055690d9db80000",
+							Topics: []string{},
 						},
 					},
 				}
@@ -119,17 +121,20 @@ func TestDecoder(t *testing.T) {
 	]`
 
 	registry := clientmock.New()
-	_, _ = registry.RegisterContract(context.Background(),
+	_, err := registry.RegisterContract(context.Background(),
 		&contractregistry.RegisterContractRequest{
 			Contract: &abi.Contract{
 				Id: &abi.ContractId{
 					Name: "known",
 				},
-				Abi:              []byte(testABI),
-				Bytecode:         []byte{1, 2, 3},
-				DeployedBytecode: []byte{1, 2},
+				Abi:              testABI,
+				Bytecode:         hexutil.Encode([]byte{1, 2, 3}),
+				DeployedBytecode: hexutil.Encode([]byte{1, 2}),
 			},
 		})
+	if err != nil {
+		t.Fatalf("could not register contract - %v", err)
+	}
 	h := Decoder(registry)
 
 	for _, test := range testSet {
@@ -149,5 +154,4 @@ func TestDecoder(t *testing.T) {
 			assert.True(t, reflect.DeepEqual(txctx, expectedTxctx), "Expected same input")
 		})
 	}
-
 }

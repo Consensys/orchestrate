@@ -246,10 +246,10 @@ func (sc *ScenarioContext) iHaveDeployedContract(alias string, table *gherkin.Da
 	}
 
 	// Alias contract address
-	if trackers[0].Current.GetReceipt().GetContractAddress() == nil {
+	if trackers[0].Current.GetReceipt().GetContractAddress() == "" {
 		return fmt.Errorf("%v: contract %q could not be deployed", sc.ID, alias)
 	}
-	sc.parser.Aliases.Set(sc.ID, alias, trackers[0].Current.GetReceipt().GetContractAddress().Hex())
+	sc.parser.Aliases.Set(sc.ID, alias, trackers[0].Current.GetReceipt().GetContractAddress())
 
 	return nil
 }
@@ -266,7 +266,7 @@ func (sc *ScenarioContext) envelopeShouldBeInTopic(topic string) error {
 
 func (sc *ScenarioContext) envelopesShouldHavePayloadSet() error {
 	for i, t := range sc.trackers {
-		if t.Current.GetTx().GetTxData().GetData() == nil {
+		if t.Current.GetTx().GetTxData().GetData() == "" {
 			return fmt.Errorf("%v: payload not set envelope n°%v", sc.ID, i)
 		}
 	}
@@ -277,7 +277,7 @@ func (sc *ScenarioContext) envelopesShouldHaveNonceSet() error {
 	nonces := make(map[string]map[string]map[uint64]bool)
 	for _, t := range sc.trackers {
 		chain := t.Current.GetChain().GetBigChainID().String()
-		addr := t.Current.GetFrom().Address().Hex()
+		addr := t.Current.GetFrom()
 		nonce := t.Current.GetTx().GetTxData().GetNonce()
 		if _, ok := nonces[chain]; !ok {
 			nonces[chain] = make(map[string]map[uint64]bool)
@@ -296,11 +296,11 @@ func (sc *ScenarioContext) envelopesShouldHaveNonceSet() error {
 
 func (sc *ScenarioContext) envelopesShouldHaveRawAndHashSet() error {
 	for i, t := range sc.trackers {
-		if t.Current.GetTx().GetRaw() == nil {
+		if t.Current.GetTx().GetRaw() == "" {
 			return fmt.Errorf("%v: raw not set on envelope n°%v", sc.ID, i)
 		}
 
-		if t.Current.GetTx().GetHash() == nil {
+		if t.Current.GetTx().GetHash() == "" {
 			return fmt.Errorf("%v: hash not set on envelope n°%v", sc.ID, i)
 		}
 	}
@@ -309,7 +309,7 @@ func (sc *ScenarioContext) envelopesShouldHaveRawAndHashSet() error {
 
 func (sc *ScenarioContext) envelopesShouldHaveFromSet() error {
 	for i, t := range sc.trackers {
-		if t.Current.GetFrom() == nil {
+		if t.Current.GetFrom() == "" {
 			return fmt.Errorf("%v: from not set on envelope n°%v", sc.ID, i)
 		}
 	}

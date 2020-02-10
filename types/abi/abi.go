@@ -66,7 +66,7 @@ func (c *Contract) Short() string {
 
 // Long return a long string representation of contract information
 func (c *Contract) Long() string {
-	return fmt.Sprintf("%v:%v:%v", c.Short(), string(c.Abi), string(c.Bytecode))
+	return fmt.Sprintf("%v:%v:%v", c.Short(), c.Abi, c.Bytecode)
 }
 
 var contractRegexp = `^(?P<contract>[a-zA-Z0-9]+)(?:\[(?P<tag>[0-9a-zA-Z-.]+)\])?(?::(?P<abi>\[.+\]))?(?::(?P<bytecode>0[xX][a-fA-F0-9]+))?(?::(?P<deployedBytecode>0[xX][a-fA-F0-9]+))?$`
@@ -91,24 +91,24 @@ func StringToContract(s string) (*Contract, error) {
 	if parts[4] == "" {
 		parts[4] = "0x"
 	}
-	bytecode, err := hexutil.Decode(parts[4])
+	_, err := hexutil.Decode(parts[4])
 	if err != nil {
 		return nil, errors.InvalidFormatError("invalid contract bytecode on %q", c.Short()).SetComponent(component)
 	}
-	c.Bytecode = bytecode
+	c.Bytecode = parts[4]
 
 	// Make sure deployedBytecode is valid and set deployedBytecode
 	if parts[5] == "" {
 		parts[5] = "0x"
 	}
-	deployedBytecode, err := hexutil.Decode(parts[5])
+	_, err = hexutil.Decode(parts[5])
 	if err != nil {
 		return nil, errors.InvalidFormatError("invalid contract deployed bytecode on %q", c.Short()).SetComponent(component)
 	}
-	c.DeployedBytecode = deployedBytecode
+	c.DeployedBytecode = parts[5]
 
 	// Set ABI and make sure it is valid
-	c.Abi = []byte(parts[3])
+	c.Abi = parts[3]
 	_, err = c.ToABI()
 	if err != nil {
 		return nil, errors.InvalidFormatError("invalid contract ABI on %q", c.Short()).SetComponent(component)
@@ -122,7 +122,7 @@ func (c *Contract) ToABI() (*ethabi.ABI, error) {
 	a := &ethabi.ABI{}
 
 	if len(c.Abi) > 0 {
-		err := a.UnmarshalJSON(c.Abi)
+		err := a.UnmarshalJSON([]byte(c.Abi))
 		if err != nil {
 			return nil, errors.EncodingError(err.Error()).SetComponent(component)
 		}
@@ -132,12 +132,12 @@ func (c *Contract) ToABI() (*ethabi.ABI, error) {
 }
 
 // GetABICompacted returns a compacted version of the ABI
-func (c *Contract) GetABICompacted() ([]byte, error) {
+func (c *Contract) GetABICompacted() (string, error) {
 	buffer := new(bytes.Buffer)
-	if err := json.Compact(buffer, c.Abi); err != nil {
-		return nil, err
+	if err := json.Compact(buffer, []byte(c.Abi)); err != nil {
+		return "", err
 	}
-	return buffer.Bytes(), nil
+	return buffer.String(), nil
 }
 
 // CompactABI compact inplace the ABI

@@ -68,7 +68,7 @@ func (mr *MockTransactionSenderMockRecorder) SendRawTransaction(ctx, url, raw in
 }
 
 // SendQuorumRawPrivateTransaction mocks base method
-func (m *MockTransactionSender) SendQuorumRawPrivateTransaction(ctx context.Context, url string, signedTxHash []byte, privateFor []string) (common.Hash, error) {
+func (m *MockTransactionSender) SendQuorumRawPrivateTransaction(ctx context.Context, url, signedTxHash string, privateFor []string) (common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendQuorumRawPrivateTransaction", ctx, url, signedTxHash, privateFor)
 	ret0, _ := ret[0].(common.Hash)
@@ -83,7 +83,7 @@ func (mr *MockTransactionSenderMockRecorder) SendQuorumRawPrivateTransaction(ctx
 }
 
 // SendRawPrivateTransaction mocks base method
-func (m *MockTransactionSender) SendRawPrivateTransaction(ctx context.Context, url string, raw []byte, args *types0.PrivateArgs) (common.Hash, error) {
+func (m *MockTransactionSender) SendRawPrivateTransaction(ctx context.Context, url, raw string, args *types0.PrivateArgs) (common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendRawPrivateTransaction", ctx, url, raw, args)
 	ret0, _ := ret[0].(common.Hash)
@@ -589,7 +589,7 @@ func (mr *MockClientMockRecorder) SendRawTransaction(ctx, url, raw interface{}) 
 }
 
 // SendQuorumRawPrivateTransaction mocks base method
-func (m *MockClient) SendQuorumRawPrivateTransaction(ctx context.Context, url string, signedTxHash []byte, privateFor []string) (common.Hash, error) {
+func (m *MockClient) SendQuorumRawPrivateTransaction(ctx context.Context, url, signedTxHash string, privateFor []string) (common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendQuorumRawPrivateTransaction", ctx, url, signedTxHash, privateFor)
 	ret0, _ := ret[0].(common.Hash)
@@ -604,7 +604,7 @@ func (mr *MockClientMockRecorder) SendQuorumRawPrivateTransaction(ctx, url, sign
 }
 
 // SendRawPrivateTransaction mocks base method
-func (m *MockClient) SendRawPrivateTransaction(ctx context.Context, url string, raw []byte, args *types0.PrivateArgs) (common.Hash, error) {
+func (m *MockClient) SendRawPrivateTransaction(ctx context.Context, url, raw string, args *types0.PrivateArgs) (common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendRawPrivateTransaction", ctx, url, raw, args)
 	ret0, _ := ret[0].(common.Hash)

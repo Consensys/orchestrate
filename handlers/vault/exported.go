@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	chaininjector "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/chain-injector"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/signer"
 	generator "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/wallet-generator"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
@@ -23,9 +25,16 @@ func Init(ctx context.Context) {
 			func() { signer.Init(ctx) },
 			// Initialize Sync Producer
 			func() { generator.Init(ctx) },
+			// Initialize ChainID injector
+			func() { chaininjector.Init(ctx) },
 		)
 
-		handler = Vault(signer.GlobalHandler(), generator.GlobalHandler())
+		signerHandler := engine.CombineHandlers(
+			chaininjector.GlobalHandler(),
+			signer.GlobalHandler(),
+		)
+
+		handler = Vault(signerHandler, generator.GlobalHandler())
 	})
 }
 

@@ -106,7 +106,6 @@ func makeNonceContext(endpoint, key string, expectedNonce uint64, expectedErrorC
 	txctx := engine.NewTxContext()
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
-	txctx.Envelope.From = &ethereum.Account{Raw: []byte{}}
 	txctx.Envelope.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{}}
 	txctx.In = mockMsg(key)
 	txctx.WithContext(proxy.With(txctx.Context(), endpoint))

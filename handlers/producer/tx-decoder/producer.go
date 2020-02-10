@@ -38,7 +38,7 @@ func Producer(p sarama.SyncProducer) engine.HandlerFunc {
 		if ExternalTxDisabled() && (txctx.Envelope.Metadata == nil || txctx.Envelope.Tx == nil) {
 
 			// For robustness make sure that receipt and tx hash are set even though tx-listener already guarantee it
-			if txctx.Envelope.Receipt != nil && txctx.Envelope.Receipt.TxHash != nil {
+			if txctx.Envelope.Receipt != nil && txctx.Envelope.Receipt.TxHash != "" {
 				txctx.Logger.WithFields(log.Fields{
 					"tx.hash": txctx.Envelope.Receipt.GetTxHash(),
 				}).Debugf("External tx disabled, skipping transaction with tx hash")

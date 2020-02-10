@@ -8,7 +8,7 @@ package chain;
 message Chain {
     // Chain ID
     // e.g. 1 for mainnet, 3 for Ropsten
-    bytes chain_id = 1;
+    string chain_id = 1;
 
     // UUID in the chain registry
     string uuid = 2;

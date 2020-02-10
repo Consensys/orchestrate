@@ -16,15 +16,15 @@ func TestParseTxCell(t *testing.T) {
 	tx := &ethereum.Transaction{}
 	err := p.ParseTxCell("raw", "0xabcd", tx)
 	assert.NoError(t, err, "ParseTxCell should not error when setting raw")
-	assert.Equal(t, "0xabcd", tx.GetRaw().Hex(), "Raw should have been set")
+	assert.Equal(t, "0xabcd", tx.GetRaw(), "Raw should have been set")
 
 	err = p.ParseTxCell("hash", "0xabcd000000000000000000000000000000000000000000000000000000000000", tx)
 	assert.NoError(t, err, "ParseTxCell should not error when setting hash")
-	assert.Equal(t, "0xabcd000000000000000000000000000000000000000000000000000000000000", tx.GetHash().Hex(), "Hash should have been set")
+	assert.Equal(t, "0xabcd000000000000000000000000000000000000000000000000000000000000", tx.GetHash(), "Hash should have been set")
 
 	err = p.ParseTxCell("to", "0xabcd000000abcd000000abcd000000abcd000000", tx)
 	assert.NoError(t, err, "ParseTxCell should not error when setting to")
-	assert.Equal(t, ethereum.HexToAccount("0xabcd000000abcd000000abcd000000abcd000000").Hex(), tx.GetTxData().GetTo().Hex(), "To should have been set")
+	assert.Equal(t, "0xabcd000000abcd000000abcd000000abcd000000", tx.GetTxData().GetTo(), "To should have been set")
 
 	err = p.ParseTxCell("gas", "1000", tx)
 	assert.NoError(t, err, "ParseTxCell should not error when setting gas")
@@ -32,7 +32,7 @@ func TestParseTxCell(t *testing.T) {
 
 	err = p.ParseTxCell("gasPrice", "1000000000", tx)
 	assert.NoError(t, err, "ParseTxCell should not error when setting gas price")
-	assert.Equal(t, "1000000000", tx.GetTxData().GetGasPrice().Value().String(), "GasPrice should have been set")
+	assert.Equal(t, "1000000000", tx.GetTxData().GetGasPrice(), "GasPrice should have been set")
 
 	err = p.ParseTxCell("nonce", "17", tx)
 	assert.NoError(t, err, "ParseTxCell should not error when setting nonce")
@@ -132,19 +132,19 @@ func TestParseEnvelopes(t *testing.T) {
 	evlps, err := p.ParseEnvelopes("test-1", table)
 	assert.NoError(t, err, "ParseEnvelopes should not error")
 	assert.Equal(t, "17", evlps[0].GetChain().GetBigChainID().String(), "#1 chain id should be correct")
-	assert.Equal(t, "0xe3F5351F8da45aE9150441E3Af21906CCe4cBbc0", evlps[0].GetFrom().Hex(), "#1 chain id should be correct")
-	assert.Equal(t, "0xEA674fdDe714fd979de3EdF0F56AA9716B898ec8", evlps[0].GetTx().GetTxData().GetTo().Hex(), "#1 chain id should be correct")
+	assert.Equal(t, "0xe3F5351F8da45aE9150441E3Af21906CCe4cBbc0", evlps[0].GetFrom(), "#1 chain id should be correct")
+	assert.Equal(t, "0xEA674fdDe714fd979de3EdF0F56AA9716B898ec8", evlps[0].GetTx().GetTxData().GetTo(), "#1 chain id should be correct")
 	assert.Equal(t, "type:QUORUM_TESSERA ", evlps[0].GetProtocol().String(), "#1 chain id should be correct")
 	assert.Equal(t, []string{"1", "2"}, evlps[0].GetArgs().GetCall().GetArgs(), "#1 args should be correct")
 
 	assert.Equal(t, "888", evlps[1].GetChain().GetBigChainID().String(), "#2 chain id should be correct")
-	assert.Equal(t, "0xe3F5351F8da45aE9150441E3Af21906CCe4cBbc0", evlps[1].GetFrom().Hex(), "#2 chain id should be correct")
-	assert.Equal(t, "0xEA674fdDe714fd979de3EdF0F56AA9716B898ec8", evlps[1].GetTx().GetTxData().GetTo().Hex(), "#2 chain id should be correct")
+	assert.Equal(t, "0xe3F5351F8da45aE9150441E3Af21906CCe4cBbc0", evlps[1].GetFrom(), "#2 chain id should be correct")
+	assert.Equal(t, "0xEA674fdDe714fd979de3EdF0F56AA9716B898ec8", evlps[1].GetTx().GetTxData().GetTo(), "#2 chain id should be correct")
 	assert.Equal(t, "type:QUORUM_CONSTELLATION ", evlps[1].GetProtocol().String(), "#2 chain id should be correct")
 
 	evlps, err = p.ParseEnvelopes("test-2", table)
 	assert.NoError(t, err, "ParseEnvelopes should not error")
 	assert.Equal(t, "888", evlps[1].GetChain().GetBigChainID().String(), "#3 chain id should be correct")
-	assert.Equal(t, "0xe3F5351F8da45aE9150441E3Af21906CCe4cBbc0", evlps[0].GetFrom().Hex(), "#3 chain id should be correct")
-	assert.Equal(t, "0x77F888CC34a3E6EC4935eF27a83a48fAe548fa4d", evlps[0].GetTx().GetTxData().GetTo().Hex(), "#3 chain id should be correct")
+	assert.Equal(t, "0xe3F5351F8da45aE9150441E3Af21906CCe4cBbc0", evlps[0].GetFrom(), "#3 chain id should be correct")
+	assert.Equal(t, "0x77F888CC34a3E6EC4935eF27a83a48fAe548fa4d", evlps[0].GetTx().GetTxData().GetTo(), "#3 chain id should be correct")
 }

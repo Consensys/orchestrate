@@ -3,12 +3,13 @@ package common
 import (
 	"testing"
 
+	"github.com/ethereum/go-ethereum/common/hexutil"
+
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
 )
 
-var ERC20 = []byte(
-	`[{
+var ERC20 = `[{
     "anonymous": false,
     "inputs": [
       {"indexed": true, "name": "account", "type": "address"},
@@ -24,7 +25,7 @@ var ERC20 = []byte(
     ],
     "name": "MinterAdded2",
     "type": "event"
-    }]`)
+    }]`
 
 func TestGetIndexedCount(t *testing.T) {
 
@@ -34,8 +35,8 @@ func TestGetIndexedCount(t *testing.T) {
 			Tag:  "v1.0.0",
 		},
 		Abi:              ERC20,
-		Bytecode:         []byte{1, 2},
-		DeployedBytecode: []byte{1, 2, 3},
+		Bytecode:         hexutil.Encode([]byte{1, 2}),
+		DeployedBytecode: hexutil.Encode([]byte{1, 2, 3}),
 	}
 	erc20ABI, err := ERC20Contract.ToABI()
 	assert.NoError(t, err, "should not error on toABI()")

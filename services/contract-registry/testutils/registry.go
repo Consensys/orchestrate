@@ -3,17 +3,18 @@ package testutils
 import (
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/error"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	rcommon "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/common"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
-	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/error"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 	"golang.org/x/net/context"
 )
 
@@ -24,8 +25,7 @@ type ContractRegistryTestSuite struct {
 }
 
 // erc20 is a unittest value
-var erc20 = []byte(
-	`[{
+var erc20 = `[{
     "anonymous": false,
     "inputs": [
       {"indexed": true, "name": "account", "type": "address"},
@@ -64,11 +64,10 @@ var erc20 = []byte(
     "payable": false,
     "stateMutability": "view",
     "type": "function"
-    }]`)
+    }]`
 
 // erc20bis is a unittest value
-var erc20bis = []byte(
-	`[{
+var erc20bis = `[{
 	"anonymous": false,
 	"inputs": [
 	  {"indexed": false, "name": "account", "type": "address"},
@@ -120,12 +119,18 @@ var erc20bis = []byte(
 	"payable": false,
 	"stateMutability": "view",
 	"type": "function"
-	}]`)
+	}]`
 
-var emptyABI = []byte(`[]`)
+var emptyABI = `[]`
 
-var methodSig = []byte("isMinter(address)")
-var eventSig = []byte("MinterAdded(address,address)")
+var methodSig = "isMinter(address)"
+var eventSig = "MinterAdded(address,address)"
+
+var erc20ContractDeployedBytecode, _ = hexutil.Decode("0x73826de86e5a28e1f79d52f6d88ca0b8a57eff2237637d6c406af2e303cf8f89")
+var erc20ContractBytecode = "0x73826de86e5a28e1f79d52f6d88ca0b8a57eff2237637d6c406af2e303cf8f89"
+
+var erc20ContractBisBytecode = "0x2e75b5703314331a53c60d6bb61b90ce3e18e135e5be4b4db52322379f7e9cdc"
+var erc20ContractBisDeployedBytecode = "0x5bf34a6d0c82db24303b4b7d308fb3a484686785cb39f9e54d14fd31d0bb1ac5"
 
 // erc20Contract is a unittest value
 var erc20Contract = &abi.Contract{
@@ -134,8 +139,8 @@ var erc20Contract = &abi.Contract{
 		Tag:  "v1.0.0",
 	},
 	Abi:              erc20,
-	Bytecode:         []byte{1, 2},
-	DeployedBytecode: []byte{1, 2, 3},
+	Bytecode:         erc20ContractBytecode,
+	DeployedBytecode: hexutil.Encode(erc20ContractDeployedBytecode),
 }
 var compactedERC20, _ = erc20Contract.GetABICompacted()
 
@@ -145,8 +150,8 @@ var erc20ContractBis = &abi.Contract{
 		Name: "ERC20",
 	},
 	Abi:              erc20bis,
-	Bytecode:         []byte{1, 3},
-	DeployedBytecode: []byte{1, 2, 4},
+	Bytecode:         erc20ContractBisBytecode,
+	DeployedBytecode: erc20ContractBisDeployedBytecode,
 }
 
 // erc20ContractBis is a unittest value
@@ -155,8 +160,8 @@ var anotherERC20Contract = &abi.Contract{
 		Name: "AnotherERC20",
 	},
 	Abi:              erc20bis,
-	Bytecode:         []byte{1, 3},
-	DeployedBytecode: []byte{1, 2, 4},
+	Bytecode:         erc20ContractBisBytecode,
+	DeployedBytecode: erc20ContractBisDeployedBytecode,
 }
 
 var methodJSONs, eventJSONs, _ = rcommon.ParseJSONABI(erc20Contract.Abi)
@@ -164,8 +169,8 @@ var _, eventJSONsBis, _ = rcommon.ParseJSONABI(erc20ContractBis.Abi)
 
 // ContractInstance is a unittest value
 var ContractInstance = common.AccountInstance{
-	Chain:   &chain.Chain{ChainId: big.NewInt(3).Bytes()},
-	Account: ethereum.HexToAccount("0xBA826fEc90CEFdf6706858E5FbaFcb27A290Fbe0"),
+	Chain:   &chain.Chain{ChainId: big.NewInt(3).String()},
+	Account: "0xBA826fEc90CEFdf6706858E5FbaFcb27A290Fbe0",
 }
 
 // TestRegisterContract unit test for contract registration
@@ -178,7 +183,7 @@ func (s *ContractRegistryTestSuite) TestRegisterContract() {
 					Name: "ERC20",
 					Tag:  "v1.0.0",
 				},
-				Abi: []byte{},
+				Abi: "",
 			},
 		},
 	)
@@ -200,8 +205,8 @@ func (s *ContractRegistryTestSuite) TestRegisterContract() {
 					Tag:  "v1.0.0",
 				},
 				Abi:              emptyABI,
-				Bytecode:         []byte{1, 3},
-				DeployedBytecode: []byte{1, 2, 4},
+				Bytecode:         erc20ContractBisBytecode,
+				DeployedBytecode: erc20ContractBisDeployedBytecode,
 			},
 		},
 	)
@@ -350,17 +355,17 @@ func (s *ContractRegistryTestSuite) TestContractRegistryBySig() {
 	// Get MethodBySelector on default
 	methodResp, err := s.R.GetMethodsBySelector(context.Background(),
 		&svc.GetMethodsBySelectorRequest{
-			Selector:        crypto.Keccak256(methodSig)[:4],
+			Selector:        crypto.Keccak256([]byte(methodSig))[:4],
 			AccountInstance: &common.AccountInstance{},
 		})
 	assert.NoError(s.T(), err)
-	assert.Nil(s.T(), methodResp.GetMethod())
-	assert.Equal(s.T(), [][]byte{methodJSONs["isMinter(address)"]}, methodResp.GetDefaultMethods())
+	assert.Equal(s.T(), "", methodResp.GetMethod())
+	assert.Equal(s.T(), []string{methodJSONs["isMinter(address)"]}, methodResp.GetDefaultMethods())
 
 	// Get EventsBySigHash wrong indexed count
 	eventResp, err := s.R.GetEventsBySigHash(context.Background(),
 		&svc.GetEventsBySigHashRequest{
-			SigHash:           crypto.Keccak256Hash(eventSig).Bytes(),
+			SigHash:           crypto.Keccak256Hash([]byte(eventSig)).String(),
 			AccountInstance:   &ContractInstance,
 			IndexedInputCount: 0})
 	assert.Error(s.T(), err)
@@ -368,33 +373,33 @@ func (s *ContractRegistryTestSuite) TestContractRegistryBySig() {
 	assert.True(s.T(), ok, "GetEventsBySigHash error should cast to internal error")
 	assert.Equal(s.T(), "contract-registry", ierr.GetComponent()[:17], "GetEventsBySigHash error component should be correct")
 	assert.True(s.T(), errors.IsStorageError(ierr), "GetEventsBySigHash error should be a storage error")
-	assert.Nil(s.T(), eventResp.GetEvent())
+	assert.Equal(s.T(), "", eventResp.GetEvent())
 	assert.Nil(s.T(), eventResp.GetDefaultEvents())
 
 	// Get EventsBySigHash
 	eventResp, err = s.R.GetEventsBySigHash(context.Background(),
 		&svc.GetEventsBySigHashRequest{
-			SigHash:           crypto.Keccak256Hash(eventSig).Bytes(),
+			SigHash:           crypto.Keccak256Hash([]byte(eventSig)).String(),
 			AccountInstance:   &ContractInstance,
 			IndexedInputCount: 1})
 	assert.NoError(s.T(), err)
-	assert.Nil(s.T(), eventResp.GetEvent())
+	assert.Equal(s.T(), "", eventResp.GetEvent())
 	assert.Equal(s.T(),
-		[][]byte{eventJSONs["MinterAdded(address,address)"], eventJSONsBis["MinterAdded(address,address)"]},
+		[]string{eventJSONs["MinterAdded(address,address)"], eventJSONsBis["MinterAdded(address,address)"]},
 		eventResp.GetDefaultEvents())
 
 	// Update smart-contract address
 	_, err = s.R.SetAccountCodeHash(context.Background(),
 		&svc.SetAccountCodeHashRequest{
 			AccountInstance: &ContractInstance,
-			CodeHash:        crypto.Keccak256([]byte{1, 2, 3}),
+			CodeHash:        hexutil.Encode(crypto.Keccak256(erc20ContractDeployedBytecode)),
 		})
 	assert.NoError(s.T(), err)
 
 	// Get MethodBySelector
 	methodResp, err = s.R.GetMethodsBySelector(context.Background(),
 		&svc.GetMethodsBySelectorRequest{
-			Selector:        crypto.Keccak256(methodSig)[:4],
+			Selector:        crypto.Keccak256([]byte(methodSig))[:4],
 			AccountInstance: &ContractInstance})
 	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), methodJSONs["isMinter(address)"], methodResp.GetMethod())
@@ -404,7 +409,7 @@ func (s *ContractRegistryTestSuite) TestContractRegistryBySig() {
 	eventResp, err = s.R.GetEventsBySigHash(
 		context.Background(),
 		&svc.GetEventsBySigHashRequest{
-			SigHash:           crypto.Keccak256Hash(eventSig).Bytes(),
+			SigHash:           crypto.Keccak256Hash([]byte(eventSig)).String(),
 			AccountInstance:   &ContractInstance,
 			IndexedInputCount: 1})
 	assert.NoError(s.T(), err)

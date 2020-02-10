@@ -72,7 +72,7 @@ func makeContext(hash, metadata, endpoint string, expectedErrors int) *engine.Tx
 	txctx.Logger = log.NewEntry(log.StandardLogger())
 	txctx.WithContext(proxy.With(txctx.Context(), endpoint))
 	txctx.Envelope.Tx = &ethereum.Transaction{
-		Hash: ethereum.HexToHash(hash),
+		Hash: hash,
 	}
 	txctx.Envelope.Metadata = &envelope.Metadata{Id: metadata}
 	txctx.Set("expectedErrors", expectedErrors)
@@ -124,7 +124,7 @@ func TestTxAlreadySent(t *testing.T) {
 				},
 				Chain: chain.FromInt(8),
 				Tx: &ethereum.Transaction{
-					Hash: ethereum.HexToHash("0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b"),
+					Hash: "0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b",
 				},
 			},
 		},
@@ -157,7 +157,7 @@ func TestTxAlreadySent(t *testing.T) {
 				},
 				Chain: chain.FromInt(8),
 				Tx: &ethereum.Transaction{
-					Hash: ethereum.HexToHash("0x60a417c21da71cea33821071e99871fa2c23ad8103b889cf8a459b0b5320fd46"),
+					Hash: "0x60a417c21da71cea33821071e99871fa2c23ad8103b889cf8a459b0b5320fd46",
 				},
 			},
 		},

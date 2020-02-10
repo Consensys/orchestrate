@@ -229,12 +229,10 @@
         },
         "abi": {
           "type": "string",
-          "format": "byte",
           "title": "Contract ABI (optional)"
         },
         "bytecode": {
           "type": "string",
-          "format": "byte",
           "title": "Contract deployment bytecode (optional)"
         },
         "methods": {
@@ -253,7 +251,6 @@
         },
         "deployedBytecode": {
           "type": "string",
-          "format": "byte",
           "title": "Contract deployed bytecode (optional)"
         }
       },
@@ -285,7 +282,6 @@
         },
         "abi": {
           "type": "string",
-          "format": "byte",
           "title": "ABI of the method (Optional)"
         }
       },
@@ -300,7 +296,6 @@
         },
         "abi": {
           "type": "string",
-          "format": "byte",
           "title": "ABI of the method (Optional)"
         }
       },
@@ -311,7 +306,6 @@
       "properties": {
         "chain_id": {
           "type": "string",
-          "format": "byte",
           "title": "Chain ID\ne.g. 1 for mainnet, 3 for Ropsten"
         },
         "uuid": {
@@ -333,7 +327,7 @@
           "title": "Chain ID of the chain"
         },
         "account": {
-          "$ref": "#/definitions/ethereumAccount",
+          "type": "string",
           "title": "Deployment address of the contract"
         }
       },
@@ -360,8 +354,7 @@
       "type": "object",
       "properties": {
         "abi": {
-          "type": "string",
-          "format": "byte"
+          "type": "string"
         }
       }
     },
@@ -369,8 +362,7 @@
       "type": "object",
       "properties": {
         "bytecode": {
-          "type": "string",
-          "format": "byte"
+          "type": "string"
         }
       }
     },
@@ -378,8 +370,7 @@
       "type": "object",
       "properties": {
         "deployedBytecode": {
-          "type": "string",
-          "format": "byte"
+          "type": "string"
         }
       }
     },
@@ -396,14 +387,12 @@
       "properties": {
         "event": {
           "type": "string",
-          "format": "byte",
           "title": "Contains the ABI of the exact event if the deployed contract has a known bytecode"
         },
         "defaultEvents": {
           "type": "array",
           "items": {
-            "type": "string",
-            "format": "byte"
+            "type": "string"
           },
           "title": "Contains the ABIs of the potential event(s) if the deployed contract is not known"
         }
@@ -414,14 +403,12 @@
       "properties": {
         "method": {
           "type": "string",
-          "format": "byte",
           "title": "Contains the ABI of the exact method if the deployed contract has a known bytecode"
         },
         "defaultMethods": {
           "type": "array",
           "items": {
-            "type": "string",
-            "format": "byte"
+            "type": "string"
           },
           "title": "Contains the ABIs of the potential methods(s) if the deployed contract is not known"
         }
@@ -443,17 +430,6 @@
     },
     "contractregistrySetAccountCodeHashResponse": {
       "type": "object"
-    },
-    "ethereumAccount": {
-      "type": "object",
-      "properties": {
-        "raw": {
-          "type": "string",
-          "format": "byte",
-          "title": "Account address in hex format\ne.g. 0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C"
-        }
-      },
-      "title": "Ethereum Log"
     }
   },
   "securityDefinitions": {

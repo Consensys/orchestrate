@@ -45,14 +45,14 @@ func (s *MockTxSender) SendTransaction(ctx context.Context, endpoint string, arg
 	return ethcommon.HexToHash("0x" + RandString(32)), nil
 }
 
-func (s *MockTxSender) SendRawPrivateTransaction(ctx context.Context, endpoint string, raw []byte, args *types.PrivateArgs) (ethcommon.Hash, error) {
+func (s *MockTxSender) SendRawPrivateTransaction(ctx context.Context, endpoint, raw string, args *types.PrivateArgs) (ethcommon.Hash, error) {
 	if endpoint == endpointError {
 		return ethcommon.Hash{}, fmt.Errorf("mock: failed to send a raw private transaction")
 	}
 	return ethcommon.Hash{}, nil
 }
 
-func (s *MockTxSender) SendQuorumRawPrivateTransaction(ctx context.Context, endpoint string, signedTxHash []byte, privateFor []string) (ethcommon.Hash, error) {
+func (s *MockTxSender) SendQuorumRawPrivateTransaction(ctx context.Context, endpoint, signedTxHash string, privateFor []string) (ethcommon.Hash, error) {
 	if endpoint == endpointError {
 		return ethcommon.Hash{}, fmt.Errorf("mock: failed to send a raw Tessera transaction")
 	}
@@ -73,8 +73,8 @@ func makeSenderContext(i int) *engine.TxContext {
 	txctx := engine.NewTxContext()
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
-	txData := ethereum.HexToData("0xabde4f3a")
-	txHash := ethereum.HexToHash("0x" + RandString(64))
+	txData := "0xabde4f3a"
+	txHash := "0x" + RandString(64)
 	switch i % 10 {
 	case 0:
 		// Valid send base transaction
@@ -214,7 +214,7 @@ func TestSender(t *testing.T) {
 	for i := 0; i < rounds; i++ {
 		wg.Add(1)
 		txctx := makeSenderContext(i)
-		t.Log(txctx)
+
 		go func(txctx *engine.TxContext) {
 			defer wg.Done()
 			sender(txctx)

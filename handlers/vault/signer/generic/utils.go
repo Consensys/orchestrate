@@ -22,7 +22,7 @@ func TransactionFromTxContext(txctx *engine.TxContext) *ethtypes.Transaction {
 	}
 
 	// Create transaction
-	address := txctx.Envelope.GetTx().GetTxData().GetTo().Address()
+	address := txctx.Envelope.GetTx().GetTxData().Receiver()
 	return ethtypes.NewTransaction(
 		txctx.Envelope.GetTx().GetTxData().GetNonce(),
 		address,

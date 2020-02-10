@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -19,9 +18,7 @@ func init() {
 }
 
 var msg = &envelope.Envelope{
-	From: &ethereum.Account{
-		Raw: hexutil.MustDecode("0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C"),
-	},
+	From: "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C",
 }
 var buf, _ = proto.Marshal(msg)
 
@@ -40,7 +37,7 @@ func TestUnmarshaller(t *testing.T) {
 	wg.Wait()
 
 	for _, tr := range envelopes {
-		assert.Equal(t, msg.GetFrom().Hex(), tr.GetFrom().Hex(), "Expected correct unmarshalled message")
+		assert.Equal(t, msg.GetFrom(), tr.GetFrom(), "Expected correct unmarshalled message")
 	}
 }
 

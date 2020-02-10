@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/ethereum/go-ethereum/common/hexutil"
+
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/assert"
 
@@ -12,7 +14,7 @@ import (
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
 )
 
-var ERC20 = []byte(`[
+var ERC20 = `[
 	{
 		"anonymous":false,
 		"inputs":[
@@ -34,7 +36,7 @@ var ERC20 = []byte(`[
 		"payable":false,
 		"stateMutability":"view",
 		"type":"function"
-	}]`)
+	}]`
 
 var methodSig = []byte("isMinter(address)")
 var eventSig = []byte("MinterAdded(address,address)")
@@ -45,8 +47,8 @@ var erc20Contract = &abi.Contract{
 		Tag:  "v1.0.0",
 	},
 	Abi:              ERC20,
-	Bytecode:         []byte{1, 2},
-	DeployedBytecode: []byte{1, 2, 3},
+	Bytecode:         hexutil.Encode([]byte{1, 2}),
+	DeployedBytecode: hexutil.Encode([]byte{1, 2, 3}),
 }
 
 var queryContractID = &abi.ContractId{
@@ -101,7 +103,7 @@ func TestContractRegistryClient(t *testing.T) {
 
 	eventResp, err := client.GetEventsBySigHash(context.Background(),
 		&svc.GetEventsBySigHashRequest{
-			SigHash:           crypto.Keccak256Hash(eventSig).Bytes(),
+			SigHash:           crypto.Keccak256Hash(eventSig).String(),
 			AccountInstance:   &common.AccountInstance{},
 			IndexedInputCount: 1})
 	assert.NoError(t, err)

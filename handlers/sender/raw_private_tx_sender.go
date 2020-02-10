@@ -18,7 +18,7 @@ func RawPrivateTxSender(ec ethclient.TransactionSender) engine.HandlerFunc {
 		txHash, err := ec.SendRawPrivateTransaction(
 			txctx.Context(),
 			url,
-			txctx.Envelope.GetTx().GetRaw().GetRaw(),
+			txctx.Envelope.GetTx().GetRaw(),
 			types.Call2PrivateArgs(txctx.Envelope.GetArgs()),
 		)
 		if err != nil {

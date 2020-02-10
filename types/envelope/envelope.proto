@@ -2,7 +2,6 @@ syntax = "proto3";
 
 import "types/chain/chain.proto";
 import "types/chain/protocol.proto";
-import "types/ethereum/base.proto";
 import "types/ethereum/transaction.proto";
 import "types/ethereum/receipt.proto";
 import "types/args/private.proto";
@@ -32,7 +31,7 @@ message Args {
     args.Private private = 2;
 
     // Arbitrary data provided by user
-    ethereum.Data data = 3;
+    string data = 3;
 }
 
 // Envelope wraps all information contextual to the transaction orchestrated
@@ -46,7 +45,7 @@ message Envelope {
     // Sender of the transaction
     // DATA (20 Bytes) - Ethereum Account Address
     // e.g 0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C
-    ethereum.Account from = 3;
+    string from = 3;
 
     // Transaction
     ethereum.Transaction tx = 4;

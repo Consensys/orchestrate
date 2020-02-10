@@ -69,7 +69,7 @@ func (s *EnvelopeStore) LoadByTxHash(ctx context.Context, req *evlpstore.LoadByT
 	model := &EnvelopeModel{
 		ChainID:  req.GetChain().GetBigChainID().String(),
 		TenantID: tenantID,
-		TxHash:   req.GetTxHash().Hex(),
+		TxHash:   req.GetTxHash(),
 	}
 
 	err := s.db.ModelContext(ctx, model).

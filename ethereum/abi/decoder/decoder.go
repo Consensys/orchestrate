@@ -156,8 +156,8 @@ func Decode(event *abi.Event, txLog *ethereum.Log) (map[string]string, error) {
 			expectedTopics, len(txLog.Topics)-1,
 		).SetComponent(component)
 	}
-
-	unpackValues, err := event.Inputs.UnpackValues(txLog.Data)
+	d, _ := hexutil.Decode(txLog.Data)
+	unpackValues, err := event.Inputs.UnpackValues(d)
 	if err != nil {
 		return nil, errors.InvalidEventDataError(
 			"invalid event data %v", txLog.Data,
@@ -175,7 +175,7 @@ func Decode(event *abi.Event, txLog *ethereum.Log) (map[string]string, error) {
 		input := event.Inputs[i]
 
 		if input.Indexed {
-			decoded, err = FormatIndexedArg(&input.Type, txLog.Topics[topicIndex].Hash())
+			decoded, err = FormatIndexedArg(&input.Type, common.HexToHash(txLog.Topics[topicIndex]))
 			topicIndex++
 		} else {
 			decoded, err = FormatNonIndexedArg(&input.Type, unpackValues[unpackValuesIndex])

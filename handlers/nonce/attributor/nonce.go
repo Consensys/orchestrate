@@ -18,7 +18,7 @@ import (
 func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		// Retrieve chainID and sender address
-		chainID, sender := txctx.Envelope.GetChain().GetBigChainID(), txctx.Envelope.GetFrom().Address()
+		chainID, sender := txctx.Envelope.GetChain().GetBigChainID(), txctx.Envelope.Sender()
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"tx.sender":     sender.Hex(),
 			"chain.chainID": chainID.String(),

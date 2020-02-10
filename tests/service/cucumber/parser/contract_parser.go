@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/DATA-DOG/godog/gherkin"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
@@ -65,11 +64,11 @@ func (p *Parser) ParseContractCell(header, cell string, contractSpec *ContractSp
 		}
 
 		// Abi is a UTF-8 encoded string. Therefore, we can make the straightforward transition
-		contractSpec.Contract.Abi = a.Abi
+		contractSpec.Contract.Abi = string(a.Abi)
 		// Bytecode is an hexstring encoded []byte
-		contractSpec.Contract.Bytecode = hexutil.MustDecode(a.Bytecode)
+		contractSpec.Contract.Bytecode = a.Bytecode
 		// Bytecode is an hexstring encoded []byte
-		contractSpec.Contract.DeployedBytecode = hexutil.MustDecode(a.DeployedBytecode)
+		contractSpec.Contract.DeployedBytecode = a.DeployedBytecode
 	case "name":
 		if contractSpec.Contract.Id == nil {
 			contractSpec.Contract.Id = &abi.ContractId{}

@@ -3,15 +3,17 @@ package testutils
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"testing"
 	"time"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
@@ -88,7 +90,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 		ctx,
 		&evlpstore.LoadByTxHashRequest{
 			Chain:  chain.FromInt(888),
-			TxHash: ethereum.HexToHash("0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210"),
+			TxHash: "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210",
 		},
 		func(t *testing.T, err error) { AssertError(t, "envelope-store", errors.IsNotFoundError, err) },
 		func(t *testing.T, resp *evlpstore.StoreResponse) {},
@@ -120,12 +122,12 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 		Tx: &ethereum.Transaction{
 			TxData: &ethereum.TxData{
 				Nonce:    10,
-				To:       ethereum.HexToAccount("0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C"),
-				GasPrice: ethereum.IntToQuantity(2000),
-				Data:     ethereum.HexToData("0xabcd"),
+				To:       "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C",
+				GasPrice: "2000",
+				Data:     "0xabcd",
 			},
-			Raw:  ethereum.HexToData("0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80"),
-			Hash: ethereum.HexToHash("0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210"),
+			Raw:  "0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80",
+			Hash: "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210",
 		},
 	}
 	s.AssertStore(
@@ -145,7 +147,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 		ctx,
 		&evlpstore.LoadByTxHashRequest{
 			Chain:  chain.FromInt(888),
-			TxHash: ethereum.HexToHash("0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210"),
+			TxHash: "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210",
 		},
 		func(t *testing.T, err error) { assert.NoError(t, err, "LoadByTxHash should not error") },
 		func(t *testing.T, resp *evlpstore.StoreResponse) {
@@ -214,8 +216,8 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 		Chain:    chain.FromInt(888),
 		Metadata: &envelope.Metadata{Id: "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11"},
 		Tx: &ethereum.Transaction{
-			Raw:  ethereum.HexToData("0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80"),
-			Hash: ethereum.HexToHash(newHash),
+			Raw:  "0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80",
+			Hash: newHash,
 		},
 	}
 
@@ -228,7 +230,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 		func(t *testing.T, err error) { assert.NoError(t, err, "Store should update and not error") },
 		func(t *testing.T, resp *evlpstore.StoreResponse) {
 			assert.Equal(t, evlpstore.Status_STORED, resp.GetStatusInfo().GetStatus(), "Store status should have been reset to stored")
-			assert.Equal(t, newHash, resp.GetEnvelope().GetTx().GetHash().Hex(), "Store hash should have been updated")
+			assert.Equal(t, newHash, resp.GetEnvelope().GetTx().GetHash(), "Store hash should have been updated")
 			assert.True(t, time.Since(resp.GetStatusInfo().StoredAtTime()) < 200*time.Millisecond, "Store stored date should be close")
 			assert.True(t, time.Time{}.Equal(resp.GetStatusInfo().SentAtTime()), "Store SentAt should have been reset")
 			assert.True(t, time.Time{}.Equal(resp.GetStatusInfo().MinedAtTime()), "Store MinedAt should have been reset")
@@ -241,7 +243,7 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 		ctx,
 		&evlpstore.LoadByTxHashRequest{
 			Chain:  chain.FromInt(888),
-			TxHash: ethereum.HexToHash(newHash),
+			TxHash: newHash,
 		},
 		func(t *testing.T, err error) { assert.NoError(t, err, "LoadByTxHash should not error") },
 		func(t *testing.T, resp *evlpstore.StoreResponse) {
@@ -257,8 +259,8 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 		Chain:    chain.FromInt(888),
 		Metadata: &envelope.Metadata{Id: newID},
 		Tx: &ethereum.Transaction{
-			Raw:  ethereum.HexToData("0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80"),
-			Hash: ethereum.HexToHash(newHash),
+			Raw:  "0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80",
+			Hash: newHash,
 		},
 	}
 	s.AssertStore(
@@ -281,10 +283,20 @@ func (s *EnvelopeStoreTestSuite) TestStore() {
 		func(t *testing.T, err error) { assert.Nil(t, err, "LoadByID should not error") },
 		func(t *testing.T, resp *evlpstore.StoreResponse) {
 			assert.Equal(t, "888", resp.GetEnvelope().GetChain().GetBigChainID().String(), "LoadByID GetBigChainID should be correct")
-			assert.Equal(t, newHash, resp.GetEnvelope().GetTx().GetHash().Hex(), "Store hash should have been updated")
+			assert.Equal(t, newHash, resp.GetEnvelope().GetTx().GetHash(), "Store hash should have been updated")
 		},
 	)
 
+}
+
+var letterRunes = []rune("abcdef0123456789")
+
+func RandString(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
 }
 
 // TestLoadPending test load pending envelopes
@@ -294,6 +306,7 @@ func (s *EnvelopeStoreTestSuite) TestLoadPending() {
 	for i, chainID := range []int64{1, 2, 3, 12, 42, 888} {
 		e := &envelope.Envelope{
 			Chain:    chain.FromInt(chainID),
+			Tx:       &ethereum.Transaction{Hash: "0x" + RandString(64)},
 			Metadata: &envelope.Metadata{Id: fmt.Sprintf("a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a1%v", i)},
 		}
 

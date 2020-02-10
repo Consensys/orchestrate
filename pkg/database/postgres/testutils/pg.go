@@ -46,10 +46,10 @@ func NewPGTestHelper(collection *migrations.Collection) *PGTestHelper {
 // InitTestDB initialize a test database for integration tests
 func (helper *PGTestHelper) InitTestDB(t *testing.T) {
 	db := pg.Connect(helper.Opts)
-	_, err := db.Exec(`DROP DATABASE IF EXISTS ?;`, pg.Q(helper.TestDBName))
+	_, err := db.Exec(`DROP DATABASE IF EXISTS ?;`, pg.SafeQuery(helper.TestDBName))
 	assert.NoError(t, err, "could not drop database")
 
-	_, err = db.Exec(`CREATE DATABASE ?;`, pg.Q(helper.TestDBName))
+	_, err = db.Exec(`CREATE DATABASE ?;`, pg.SafeQuery(helper.TestDBName))
 	assert.NoError(t, err, "could not create database")
 
 	err = db.Close()
@@ -95,7 +95,7 @@ func (helper *PGTestHelper) DropTestDB(t *testing.T) {
 
 	// Drop test Database
 	db := pg.Connect(helper.Opts)
-	_, err = db.Exec(`DROP DATABASE ?;`, pg.Q(helper.TestDBName))
+	_, err = db.Exec(`DROP DATABASE ?;`, pg.SafeQuery(helper.TestDBName))
 	assert.NoError(t, err, "could not drop database")
 
 	err = db.Close()

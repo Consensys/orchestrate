@@ -36,17 +36,17 @@ func (s *MigrationsTestSuite) TestMigrationVersion() {
 	_, err := s.pg.DB.QueryOne(
 		pg.Scan(&version),
 		`SELECT version FROM ? ORDER BY id DESC LIMIT 1`,
-		pg.Q("gopg_migrations"),
+		pg.SafeQuery("gopg_migrations"),
 	)
 
 	s.Assert().NoError(err, "Error querying version")
-	s.Assert().Equal(int64(1), version, "Migration should be on correct version")
+	s.Assert().Equal(int64(2), version, "Migration should be on correct version")
 }
 
 func (s *MigrationsTestSuite) TestCreateArtifactsTable() {
 	n, err := s.pg.DB.Model().
 		Table("pg_catalog.pg_tables").
-		Where("tablename = '?'", pg.Q("codehashes")).
+		Where("tablename = '?'", pg.SafeQuery("codehashes")).
 		Count()
 
 	s.Assert().NoError(err, "Query failed")

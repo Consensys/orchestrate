@@ -22,9 +22,9 @@ func TestTxData(t *testing.T) {
 	var txData *TxData
 
 	assert.Equal(t, EmptyAddress, txData.Receiver().Hex(), "Address should be empty")
-	assert.Equal(t, int64(0), txData.GetValue().Value().Int64(), "Value should be 0")
-	assert.Equal(t, int64(0), txData.GetGasPrice().Value().Int64(), "Gas price should be 0")
-	assert.Equal(t, "0x", txData.GetData().Hex(), "Data should be empty")
+	assert.Equal(t, int64(0), txData.GetValueBig().Int64(), "Value should be 0")
+	assert.Equal(t, int64(0), txData.GetGasPriceBig().Int64(), "Gas price should be 0")
+	assert.Equal(t, "", txData.GetData(), "Data should be empty")
 
 	// // TxData information
 	txData = &TxData{}
@@ -38,10 +38,10 @@ func TestTxData(t *testing.T) {
 
 	assert.Equal(t, uint64(10), txData.GetNonce(), "Nonce should be set")
 	assert.Equal(t, "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C", txData.Receiver().Hex(), "To Address should be set")
-	assert.Equal(t, int64(100000), txData.GetValue().Value().Int64(), "Value should be set")
-	assert.Equal(t, int64(200000), txData.GetGasPrice().Value().Int64(), "Gas price should be set")
+	assert.Equal(t, int64(100000), txData.GetValueBig().Int64(), "Value should be set")
+	assert.Equal(t, int64(200000), txData.GetGasPriceBig().Int64(), "Gas price should be set")
 	assert.Equal(t, uint64(2000), txData.GetGas(), "Gas should be set")
-	assert.Equal(t, []byte{0xab, 0xcd}, txData.GetData().GetRaw(), "Data should be set")
+	assert.Equal(t, "0xabcd", txData.GetData(), "Data should be set")
 }
 
 func TestTransaction(t *testing.T) {
@@ -62,7 +62,7 @@ func TestTransaction(t *testing.T) {
 	)
 	assert.Equal(t,
 		"0xf86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80",
-		tx.GetRaw().Hex(),
+		tx.GetRaw(),
 		"Raw should be set",
 	)
 	assert.Equal(t,
@@ -96,23 +96,23 @@ func TestTransaction_IsSigned(t *testing.T) {
 func TestTransaction_SetHash(t *testing.T) {
 	h := common.BigToHash(big.NewInt(1))
 	tx := (&Transaction{}).SetHash(h)
-	assert.Equal(t, h, tx.GetHash().Hash(), "should not be equal")
+	assert.Equal(t, h.Hex(), tx.GetHash(), "should not be equal")
 }
 
 func TestTransaction_SetRaw(t *testing.T) {
 	r := []byte{1}
 	tx := (&Transaction{}).SetRaw(r)
-	assert.Equal(t, r, tx.GetRaw().Raw, "should not be equal")
+	assert.Equal(t, hexutil.Encode(r), tx.GetRaw(), "should not be equal")
 }
 
 func TestTxData_SetTo(t *testing.T) {
 	to := common.HexToAddress("0x0")
 	txData := (&TxData{}).SetTo(to)
-	assert.Equal(t, to, txData.GetTo().Address(), "should not be equal")
+	assert.Equal(t, to.Hex(), txData.GetTo(), "should not be equal")
 }
 
 func TestTxData_SetValue(t *testing.T) {
 	v := big.NewInt(1)
 	txData := (&TxData{}).SetValue(v)
-	assert.Equal(t, v, txData.GetValue().Value(), "should not be equal")
+	assert.Equal(t, v, txData.GetValueBig(), "should not be equal")
 }

@@ -12,7 +12,7 @@ func createContextTable(db migrations.DB) error {
 	log.Debugf("Creating table %q...", contextStoreTableName)
 	_, err := db.Exec(`
 CREATE TABLE ? ();
-	`, pg.Q(contextStoreTableName))
+	`, pg.SafeQuery(contextStoreTableName))
 	if err != nil {
 		log.WithError(err).Errorf("Could not create table %q", contextStoreTableName)
 		return err
@@ -26,7 +26,7 @@ func dropContextTable(db migrations.DB) error {
 	log.Debugf("Dropping table %q...", contextStoreTableName)
 	_, err := db.Exec(`
 DROP TABLE ?;
-	`, pg.Q(contextStoreTableName))
+	`, pg.SafeQuery(contextStoreTableName))
 	if err != nil {
 		log.WithError(err).Errorf("Could not drop table %q", contextStoreTableName)
 		return err

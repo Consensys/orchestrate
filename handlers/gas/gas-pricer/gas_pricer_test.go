@@ -75,7 +75,7 @@ func (s *PricerTestSuite) TestEstimator() {
 			assert.Equal(s.T(), "handler.gas-pricer", err.GetComponent(), "Error should  component should have been set")
 			assert.True(s.T(), errors.IsConnectionError(err), "Error should  be correct")
 		}
-		assert.Equal(s.T(), txctx.Get("result").(*big.Int), txctx.Envelope.GetTx().GetTxData().GetGasPrice().Value(), "Expected correct Gas price")
+		assert.Equal(s.T(), txctx.Get("result").(*big.Int), txctx.Envelope.GetTx().GetTxData().GetGasPriceBig(), "Expected correct Gas price")
 	}
 }
 

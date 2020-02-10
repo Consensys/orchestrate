@@ -21,7 +21,7 @@ func Decoder(r svc.ContractRegistryClient) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"chain.chainID": txctx.Envelope.GetChain().GetBigChainID().String(),
-			"tx.hash":       txctx.Envelope.GetReceipt().GetTxHash().Hex(),
+			"tx.hash":       txctx.Envelope.GetReceipt().GetTxHash(),
 			"metadata.id":   txctx.Envelope.GetMetadata().GetId(),
 		})
 
@@ -39,7 +39,7 @@ func Decoder(r svc.ContractRegistryClient) engine.HandlerFunc {
 			eventResp, err := r.GetEventsBySigHash(
 				txctx.Context(),
 				&svc.GetEventsBySigHashRequest{
-					SigHash: l.Topics[0].GetRaw(),
+					SigHash: l.Topics[0],
 					AccountInstance: &common.AccountInstance{
 						Chain:   txctx.Envelope.GetChain(),
 						Account: l.GetAddress(),
@@ -47,7 +47,7 @@ func Decoder(r svc.ContractRegistryClient) engine.HandlerFunc {
 					IndexedInputCount: uint32(len(l.Topics) - 1),
 				},
 			)
-			if err != nil || (len(eventResp.GetEvent()) == 0 && len(eventResp.GetDefaultEvents()) == 0) {
+			if err != nil || (eventResp.GetEvent() == "" && len(eventResp.GetDefaultEvents()) == 0) {
 				txctx.Logger.WithError(err).Tracef("%s: could not retrieve event ABI, txHash: %s sigHash: %s, ", component, l.GetTxHash(), l.GetTopics()[0])
 				continue
 			}
@@ -56,8 +56,8 @@ func Decoder(r svc.ContractRegistryClient) engine.HandlerFunc {
 			var mapping map[string]string
 			event := &ethAbi.Event{}
 
-			if len(eventResp.GetEvent()) != 0 {
-				err = json.Unmarshal(eventResp.GetEvent(), event)
+			if eventResp.GetEvent() != "" {
+				err = json.Unmarshal([]byte(eventResp.GetEvent()), event)
 				if err != nil {
 					txctx.Logger.WithError(err).Warnf("%s: could not unmarshal event ABI provided by the Contract Registry, txHash: %s sigHash: %s, ", component, l.GetTxHash(), l.GetTopics()[0])
 					continue
@@ -66,7 +66,7 @@ func Decoder(r svc.ContractRegistryClient) engine.HandlerFunc {
 			} else {
 				for _, potentialEvent := range eventResp.GetDefaultEvents() {
 					// Try to unmarshal
-					err = json.Unmarshal(potentialEvent, event)
+					err = json.Unmarshal([]byte(potentialEvent), event)
 					if err != nil {
 						// If it fails to unmarshal, try the next potential event
 						txctx.Logger.WithError(err).Tracef("%s: could not unmarshal potential event ABI, txHash: %s sigHash: %s, ", component, l.GetTxHash(), l.GetTopics()[0])

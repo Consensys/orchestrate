@@ -3,6 +3,8 @@ package pg
 import (
 	"context"
 
+	"github.com/ethereum/go-ethereum/common/hexutil"
+
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/go-pg/pg/v9"
 	log "github.com/sirupsen/logrus"
@@ -60,11 +62,15 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
+	d, err := hexutil.Decode(deployedBytecode)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
 	artifact := &ArtifactModel{
 		Abi:              abiRaw,
 		Bytecode:         bytecode,
 		DeployedBytecode: deployedBytecode,
-		Codehash:         crypto.Keccak256(deployedBytecode),
+		Codehash:         hexutil.Encode(crypto.Keccak256(d)),
 	}
 	_, err = tx.ModelContext(ctx, artifact).
 		Column("id").
@@ -92,8 +98,8 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	if len(abiRaw) != 0 {
-		codeHash := crypto.Keccak256Hash(deployedBytecode)
+	if abiRaw != "" {
+		codeHash := crypto.Keccak256Hash(d)
 		contractAbi, err := contract.ToABI()
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(component)
@@ -108,9 +114,9 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 			// Register methods for this bytecode
 			method := m
 			sel := common.SigHashToSelector(method.ID())
-			if deployedBytecode != nil {
+			if deployedBytecode != "" {
 				methods = append(methods, &MethodModel{
-					Codehash: codeHash,
+					Codehash: codeHash.Hex(),
 					Selector: sel,
 					ABI:      methodJSONs[method.Sig()],
 				})
@@ -131,10 +137,10 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 			event := e
 			indexedCount := common.GetIndexedCount(event)
 			// Register events for this bytecode
-			if deployedBytecode != nil {
+			if deployedBytecode != "" {
 				events = append(events, &EventModel{
-					Codehash:          codeHash,
-					SigHash:           event.ID(),
+					Codehash:          codeHash.Hex(),
+					SigHash:           event.ID().Hex(),
 					IndexedInputCount: indexedCount,
 					ABI:               eventJSONs[event.Sig()],
 				})
@@ -279,7 +285,7 @@ func (r *ContractRegistry) GetMethodsBySelector(ctx context.Context, req *svc.Ge
 		Column("method_model.abi").
 		Join("JOIN codehashes AS c ON c.codehash = method_model.codehash").
 		Where("c.chain_id = ?", req.GetAccountInstance().GetChain().GetBigChainID().String()).
-		Where("c.address = ?", req.GetAccountInstance().GetAccount().GetRaw()).
+		Where("c.address = ?", req.GetAccountInstance().GetAccount()).
 		Where("method_model.selector = ?", req.GetSelector()).
 		First()
 	if err == nil {
@@ -298,12 +304,11 @@ func (r *ContractRegistry) GetMethodsBySelector(ctx context.Context, req *svc.Ge
 		return nil, errors.NotFoundError("method not found").ExtendComponent(component)
 	}
 
-	var methodsABI [][]byte
+	var methodsABI []string
 	for _, m := range defaultMethods {
 		methodsABI = append(methodsABI, m.ABI)
 	}
 	return &svc.GetMethodsBySelectorResponse{
-		Method:         nil,
 		DefaultMethods: methodsABI,
 	}, nil
 }
@@ -315,7 +320,7 @@ func (r *ContractRegistry) GetEventsBySigHash(ctx context.Context, req *svc.GetE
 		Column("event_model.abi").
 		Join("JOIN codehashes AS c ON c.codehash = event_model.codehash").
 		Where("c.chain_id = ?", req.GetAccountInstance().GetChain().GetBigChainID().String()).
-		Where("c.address = ?", req.GetAccountInstance().GetAccount().GetRaw()).
+		Where("c.address = ?", req.GetAccountInstance().GetAccount()).
 		Where("event_model.sig_hash = ?", req.GetSigHash()).
 		Where("event_model.indexed_input_count = ?", req.GetIndexedInputCount()).
 		First()
@@ -337,12 +342,11 @@ func (r *ContractRegistry) GetEventsBySigHash(ctx context.Context, req *svc.GetE
 		return nil, errors.NotFoundError("event not found").ExtendComponent(component)
 	}
 
-	var eventsABI [][]byte
+	var eventsABI []string
 	for _, e := range defaultEvents {
 		eventsABI = append(eventsABI, e.ABI)
 	}
 	return &svc.GetEventsBySigHashResponse{
-		Event:         nil,
 		DefaultEvents: eventsABI,
 	}, nil
 }
@@ -381,7 +385,7 @@ func (r *ContractRegistry) GetTags(ctx context.Context, req *svc.GetTagsRequest)
 func (r *ContractRegistry) SetAccountCodeHash(ctx context.Context, req *svc.SetAccountCodeHashRequest) (*svc.SetAccountCodeHashResponse, error) {
 	codehash := &CodehashModel{
 		ChainID:  req.GetAccountInstance().GetChain().GetBigChainID().String(),
-		Address:  req.GetAccountInstance().GetAccount().GetRaw(),
+		Address:  req.GetAccountInstance().GetAccount(),
 		Codehash: req.GetCodeHash(),
 	}
 

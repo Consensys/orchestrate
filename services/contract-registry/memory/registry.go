@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"sort"
 
+	"github.com/ethereum/go-ethereum/common/hexutil"
+
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 
@@ -27,10 +29,10 @@ type ContractRegistry struct {
 	codehashes map[string]map[ethcommon.Address]ethcommon.Hash
 
 	// Codehash to Selector to method ABIs
-	methods map[ethcommon.Hash]map[[4]byte][][]byte
+	methods map[ethcommon.Hash]map[[4]byte][]string
 
 	// Codehash to SigHash to event ABIs
-	events map[ethcommon.Hash]map[ethcommon.Hash]map[uint][][]byte
+	events map[ethcommon.Hash]map[ethcommon.Hash]map[uint][]string
 }
 
 var defaultCodehash = ethcommon.Hash{}
@@ -41,11 +43,11 @@ func NewContractRegistry() *ContractRegistry {
 		contractHashes: make(map[string]map[string]ethcommon.Hash),
 		artifacts:      make(map[ethcommon.Hash]*rcommon.Artifact),
 		codehashes:     make(map[string]map[ethcommon.Address]ethcommon.Hash),
-		methods:        make(map[ethcommon.Hash]map[[4]byte][][]byte),
-		events:         make(map[ethcommon.Hash]map[ethcommon.Hash]map[uint][][]byte),
+		methods:        make(map[ethcommon.Hash]map[[4]byte][]string),
+		events:         make(map[ethcommon.Hash]map[ethcommon.Hash]map[uint][]string),
 	}
-	r.methods[defaultCodehash] = make(map[[4]byte][][]byte)
-	r.events[defaultCodehash] = make(map[ethcommon.Hash]map[uint][][]byte)
+	r.methods[defaultCodehash] = make(map[[4]byte][]string)
+	r.events[defaultCodehash] = make(map[ethcommon.Hash]map[uint][]string)
 	return r
 }
 
@@ -63,8 +65,9 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	if bytecode != nil {
-		bytecodeHash := crypto.Keccak256Hash(bytecode)
+	if bytecode != "" {
+		b, _ := hexutil.Decode(bytecode)
+		bytecodeHash := crypto.Keccak256Hash(b)
 
 		if r.contractHashes[name] == nil {
 			r.contractHashes[name] = make(map[string]ethcommon.Hash)
@@ -80,8 +83,9 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 		}
 	}
 
-	if len(abiRaw) != 0 {
-		codeHash := crypto.Keccak256Hash(deployedBytecode)
+	if abiRaw != "" {
+		c, _ := hexutil.Decode(deployedBytecode)
+		codeHash := crypto.Keccak256Hash(c)
 		contractAbi, err := contract.ToABI()
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(component)
@@ -95,13 +99,13 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 			// Register methods for this bytecode
 			method := m
 			sel := rcommon.SigHashToSelector(method.ID())
-			if deployedBytecode != nil {
+			if deployedBytecode != "" {
 				// Init map
 				if r.methods[codeHash] == nil {
-					r.methods[codeHash] = make(map[[4]byte][][]byte)
+					r.methods[codeHash] = make(map[[4]byte][]string)
 				}
 
-				r.methods[codeHash][sel] = [][]byte{methodJSONs[method.Sig()]}
+				r.methods[codeHash][sel] = []string{methodJSONs[method.Sig()]}
 			}
 
 			// Register in default methods if not present
@@ -124,22 +128,22 @@ func (r *ContractRegistry) RegisterContract(ctx context.Context, req *svc.Regist
 			indexedCount := rcommon.GetIndexedCount(event)
 
 			// Register events for this bytecode
-			if deployedBytecode != nil {
+			if deployedBytecode != "" {
 				// Init map
 				if r.events[codeHash] == nil {
-					r.events[codeHash] = make(map[ethcommon.Hash]map[uint][][]byte)
+					r.events[codeHash] = make(map[ethcommon.Hash]map[uint][]string)
 				}
 				// Init map
 				if r.events[codeHash][event.ID()] == nil {
-					r.events[codeHash][event.ID()] = make(map[uint][][]byte)
+					r.events[codeHash][event.ID()] = make(map[uint][]string)
 				}
 
-				r.events[codeHash][event.ID()][indexedCount] = [][]byte{eventJSONs[event.Sig()]}
+				r.events[codeHash][event.ID()][indexedCount] = []string{eventJSONs[event.Sig()]}
 			}
 
 			// Init map
 			if r.events[defaultCodehash][event.ID()] == nil {
-				r.events[defaultCodehash][event.ID()] = make(map[uint][][]byte)
+				r.events[defaultCodehash][event.ID()] = make(map[uint][]string)
 			}
 			// Register in default events if not present
 			found := false
@@ -168,7 +172,7 @@ func (r *ContractRegistry) DeregisterContract(ctx context.Context, req *svc.Dere
 
 // DeleteArtifact remove an artifacts based on its BytecodeHash.
 func (r *ContractRegistry) DeleteArtifact(ctx context.Context, req *svc.DeleteArtifactRequest) (*svc.DeleteArtifactResponse, error) {
-	delete(r.artifacts, ethcommon.BytesToHash(req.GetBytecodeHash()))
+	delete(r.artifacts, ethcommon.HexToHash(req.GetBytecodeHash()))
 	return &svc.DeleteArtifactResponse{}, nil
 }
 
@@ -275,7 +279,7 @@ func (r *ContractRegistry) GetContractDeployedBytecode(ctx context.Context, req 
 func (r *ContractRegistry) getCodehash(contract common.AccountInstance) (ethcommon.Hash, error) {
 	codehashes, ok := r.codehashes[contract.GetChain().String()]
 	if ok {
-		codehash, ok := codehashes[contract.GetAccount().Address()]
+		codehash, ok := codehashes[contract.GetAccountAddress()]
 		if ok {
 			return codehash, nil
 		}
@@ -308,7 +312,6 @@ func (r *ContractRegistry) GetMethodsBySelector(ctx context.Context, req *svc.Ge
 	defaultMethods, ok := r.methods[defaultCodehash][sel]
 	if ok {
 		return &svc.GetMethodsBySelectorResponse{
-			Method:         nil,
 			DefaultMethods: defaultMethods,
 		}, nil
 	}
@@ -320,7 +323,7 @@ func (r *ContractRegistry) GetMethodsBySelector(ctx context.Context, req *svc.Ge
 func (r *ContractRegistry) GetEventsBySigHash(ctx context.Context, req *svc.GetEventsBySigHashRequest) (*svc.GetEventsBySigHashResponse, error) {
 	// Search in specific event storage
 	codehash, err := r.getCodehash(*req.GetAccountInstance())
-	sigHash := ethcommon.BytesToHash(req.SigHash)
+	sigHash := ethcommon.HexToHash(req.SigHash)
 	indexedInputCount := uint(req.IndexedInputCount)
 
 	if err == nil {
@@ -339,7 +342,6 @@ func (r *ContractRegistry) GetEventsBySigHash(ctx context.Context, req *svc.GetE
 	// Search in default events
 	if defaultEvents, ok := r.events[defaultCodehash][sigHash][indexedInputCount]; ok {
 		return &svc.GetEventsBySigHashResponse{
-			Event:         nil,
 			DefaultEvents: defaultEvents,
 		}, nil
 	}
@@ -369,7 +371,7 @@ func (r *ContractRegistry) GetTags(ctx context.Context, req *svc.GetTagsRequest)
 
 // SetAccountCodeHash set the codehash of a contract address for a given chain
 func (r *ContractRegistry) SetAccountCodeHash(ctx context.Context, req *svc.SetAccountCodeHashRequest) (*svc.SetAccountCodeHashResponse, error) {
-	chainID, addr := req.GetAccountInstance().GetChain(), req.GetAccountInstance().GetAccount().Address()
+	chainID, addr := req.GetAccountInstance().GetChain(), req.GetAccountInstance().GetAccountAddress()
 
 	// Codehash already stored for this contract instance
 	if _, ok := r.codehashes[chainID.String()][addr]; ok {
@@ -381,7 +383,7 @@ func (r *ContractRegistry) SetAccountCodeHash(ctx context.Context, req *svc.SetA
 		r.codehashes[chainStr] = make(map[ethcommon.Address]ethcommon.Hash)
 	}
 
-	r.codehashes[chainStr][addr] = ethcommon.BytesToHash(req.GetCodeHash())
+	r.codehashes[chainStr][addr] = ethcommon.HexToHash(req.GetCodeHash())
 
 	return &svc.SetAccountCodeHashResponse{}, nil
 }

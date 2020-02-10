@@ -11,7 +11,7 @@ import (
 // Pricer creates a handler that set a Gas Price
 func Pricer(p ethclient.GasPricer) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		if txctx.Envelope.GetTx().GetTxData().GetGasPrice() == nil {
+		if txctx.Envelope.GetTx().GetTxData().GetGasPrice() == "" {
 			url, err := proxy.GetURL(txctx)
 			if err != nil {
 				return

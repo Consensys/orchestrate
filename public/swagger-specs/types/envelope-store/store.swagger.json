@@ -52,12 +52,10 @@
         },
         "abi": {
           "type": "string",
-          "format": "byte",
           "title": "Contract ABI (optional)"
         },
         "bytecode": {
           "type": "string",
-          "format": "byte",
           "title": "Contract deployment bytecode (optional)"
         },
         "methods": {
@@ -76,7 +74,6 @@
         },
         "deployedBytecode": {
           "type": "string",
-          "format": "byte",
           "title": "Contract deployed bytecode (optional)"
         }
       },
@@ -108,7 +105,6 @@
         },
         "abi": {
           "type": "string",
-          "format": "byte",
           "title": "ABI of the method (Optional)"
         }
       },
@@ -123,7 +119,6 @@
         },
         "abi": {
           "type": "string",
-          "format": "byte",
           "title": "ABI of the method (Optional)"
         }
       },
@@ -176,7 +171,6 @@
       "properties": {
         "chain_id": {
           "type": "string",
-          "format": "byte",
           "title": "Chain ID\ne.g. 1 for mainnet, 3 for Ropsten"
         },
         "uuid": {
@@ -229,7 +223,7 @@
           "title": "Private arguments"
         },
         "data": {
-          "$ref": "#/definitions/ethereumData",
+          "type": "string",
           "title": "Arbitrary data provided by user"
         }
       },
@@ -247,7 +241,7 @@
           "title": "Protocol the transaction is orchestrated for"
         },
         "from": {
-          "$ref": "#/definitions/ethereumAccount",
+          "type": "string",
           "title": "Sender of the transaction\nDATA (20 Bytes) - Ethereum Account Address\ne.g 0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C"
         },
         "tx": {
@@ -388,56 +382,22 @@
       },
       "title": "Error"
     },
-    "ethereumAccount": {
-      "type": "object",
-      "properties": {
-        "raw": {
-          "type": "string",
-          "format": "byte",
-          "title": "Account address in hex format\ne.g. 0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C"
-        }
-      },
-      "title": "Ethereum Log"
-    },
-    "ethereumData": {
-      "type": "object",
-      "properties": {
-        "raw": {
-          "type": "string",
-          "format": "byte",
-          "title": "Raw value of an Ethereum data\ne.g 0xaf23"
-        }
-      },
-      "title": "Ethereum Data"
-    },
-    "ethereumHash": {
-      "type": "object",
-      "properties": {
-        "raw": {
-          "type": "string",
-          "format": "byte",
-          "title": "Raw value of a hash"
-        }
-      },
-      "title": "Ethereum Hash"
-    },
     "ethereumLog": {
       "type": "object",
       "properties": {
         "address": {
-          "$ref": "#/definitions/ethereumAccount",
+          "type": "string",
           "title": "DATA (20 Bytes) - Address from which log originated\ne.g 0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C"
         },
         "topics": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/ethereumHash"
+            "type": "string"
           },
           "title": "Array of DATA (32 Bytes) - Array of 0 to 4 indexed log arguments\ne.g. 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
         },
         "data": {
           "type": "string",
-          "format": "byte",
           "title": "DATA - Non-indexed arguments of the log"
         },
         "event": {
@@ -456,7 +416,7 @@
           "title": "QUANTITY - Block number where this transaction was in"
         },
         "tx_hash": {
-          "$ref": "#/definitions/ethereumHash",
+          "type": "string",
           "title": "DATA (32 Bytes) - Hash of the transaction.\ne.g. 0x3b198bfd5d2907285af009e9ae84a0ecd63677110d89d7e030251acb87f6487e"
         },
         "tx_index": {
@@ -465,7 +425,7 @@
           "description": "QUANTITY - Integer of the transactions index position in the block."
         },
         "block_hash": {
-          "$ref": "#/definitions/ethereumHash",
+          "type": "string",
           "title": "DATA (32 Bytes) - Hash of the block where this transaction was in.\ne.g. 0x656c34545f90a730a19008c0e7a7cd4fb3895064b48d6d69761bd5abad681056"
         },
         "index": {
@@ -481,26 +441,15 @@
       },
       "title": "Ethereum Log"
     },
-    "ethereumQuantity": {
-      "type": "object",
-      "properties": {
-        "raw": {
-          "type": "string",
-          "format": "byte",
-          "title": "Raw value of the quantity\ne.g 0xaf23"
-        }
-      },
-      "title": "Ethereum Hash"
-    },
     "ethereumReceipt": {
       "type": "object",
       "properties": {
         "tx_hash": {
-          "$ref": "#/definitions/ethereumHash",
+          "type": "string",
           "title": "HASH (32 Bytes) - Hash of the transaction.\ne.g 0x3b198bfd5d2907285af009e9ae84a0ecd63677110d89d7e030251acb87f6487e"
         },
         "block_hash": {
-          "$ref": "#/definitions/ethereumHash",
+          "type": "string",
           "title": "HASH (32 Bytes) - Hash of the block where this transaction was in.\ne.g. 0x656c34545f90a730a19008c0e7a7cd4fb3895064b48d6d69761bd5abad681056"
         },
         "block_number": {
@@ -514,12 +463,11 @@
           "description": "QUANTITY - Integer of the transactions index position in the block."
         },
         "contract_address": {
-          "$ref": "#/definitions/ethereumAccount",
+          "type": "string",
           "title": "DATA (20 Bytes) - The contract address created, if the transaction was a contract creation\ne.g 0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C"
         },
         "post_state": {
           "type": "string",
-          "format": "byte",
           "title": "DATA (32 Bytes) - State root hash after executing transaction\ne.g. 0x656c34545f90a730a19008c0e7a7cd4fb3895064b48d6d69761bd5abad681056"
         },
         "status": {
@@ -529,7 +477,6 @@
         },
         "bloom": {
           "type": "string",
-          "format": "byte",
           "description": "DATA (256 Bytes) - Bloom filter of logs/events generated by contracts during transaction execution."
         },
         "logs": {
@@ -559,11 +506,11 @@
           "$ref": "#/definitions/ethereumTxData"
         },
         "raw": {
-          "$ref": "#/definitions/ethereumData",
+          "type": "string",
           "title": "DATA - The signed, RLP encoded transaction"
         },
         "hash": {
-          "$ref": "#/definitions/ethereumHash",
+          "type": "string",
           "title": "DATA (32 Bytes) - Hash of the transaction.\ne.g. 0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210"
         }
       },
@@ -578,11 +525,11 @@
           "description": "QUANTITY - Integer of a nonce."
         },
         "to": {
-          "$ref": "#/definitions/ethereumAccount",
+          "type": "string",
           "title": "DATA (20 Bytes) - The address of the receiver. null when it’s a contract creation transaction.\ne.g. 0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C"
         },
         "value": {
-          "$ref": "#/definitions/ethereumQuantity",
+          "type": "string",
           "title": "QUANTITY - Integer of the value sent with this transaction.\ne.g 0xaf23"
         },
         "gas": {
@@ -591,11 +538,11 @@
           "description": "QUANTITY - Integer of the gas provided for the transaction execution."
         },
         "gas_price": {
-          "$ref": "#/definitions/ethereumQuantity",
+          "type": "string",
           "title": "QUANTITY - Integer of the gas price used for each paid gas.\ne.g 0xaf23b"
         },
         "data": {
-          "$ref": "#/definitions/ethereumData",
+          "type": "string",
           "title": "DATA - Hash of the method signature (4 bytes) followed by encoded parameters.\ne.g 0xa9059cbb000000000000000000000000ff778b716fc07d98839f48ddb88d8be583beb684000000000000000000000000000000000000000000000000002386f26fc10000"
         }
       },

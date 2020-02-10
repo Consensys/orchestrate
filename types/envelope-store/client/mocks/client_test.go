@@ -26,7 +26,7 @@ func TestEnvelopeStoreClient(t *testing.T) {
 				Chain:    chain.FromInt(888),
 				Metadata: &envelope.Metadata{Id: "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11"},
 				Tx: &ethereum.Transaction{
-					Hash: ethereum.HexToHash("0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210"),
+					Hash: "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210",
 				},
 			},
 		},
@@ -45,7 +45,7 @@ func TestEnvelopeStoreClient(t *testing.T) {
 		context.Background(),
 		&evlpstore.LoadByTxHashRequest{
 			Chain:  chain.FromInt(888),
-			TxHash: ethereum.HexToHash("0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210"),
+			TxHash: "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210",
 		},
 	)
 	assert.Nil(t, err, "LoadByTxHash should not error")

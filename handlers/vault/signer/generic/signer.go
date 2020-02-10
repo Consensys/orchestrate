@@ -18,11 +18,11 @@ func GenerateSignerHandler(signerFunc TransactionSignerFunc, backend keystore.Ke
 	return func(txctx *engine.TxContext) {
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"chain.chainID": txctx.Envelope.GetChain().GetBigChainID().String(),
-			"tx.sender":     txctx.Envelope.GetFrom().Address().Hex(),
+			"tx.sender":     txctx.Envelope.GetFrom(),
 			"metadata.id":   txctx.Envelope.GetMetadata().GetId(),
 		})
 
-		if txctx.Envelope.GetTx().GetRaw() != nil {
+		if txctx.Envelope.GetTx().GetRaw() != "" {
 			// Tx has already been signed
 			return
 		}
@@ -30,7 +30,7 @@ func GenerateSignerHandler(signerFunc TransactionSignerFunc, backend keystore.Ke
 		var t = TransactionFromTxContext(txctx)
 
 		// Sign transaction
-		sender := txctx.Envelope.GetFrom().Address()
+		sender := txctx.Envelope.Sender()
 		raw, h, err := signerFunc(backend, txctx, sender, t)
 		if err != nil {
 			txctx.Logger.WithError(err).Warnf(errorMsg)

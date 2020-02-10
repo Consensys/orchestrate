@@ -124,9 +124,9 @@ func (hk *Hook) registerDeployedContract(ctx context.Context, c *dynamic.Chain, 
 			&svc.SetAccountCodeHashRequest{
 				AccountInstance: &common.AccountInstance{
 					Chain:   chain.FromBigInt(c.ChainID),
-					Account: ethereum.HexToAccount(receipt.ContractAddress.Hex()),
+					Account: receipt.ContractAddress.Hex(),
 				},
-				CodeHash: crypto.Keccak256Hash(code).Bytes(),
+				CodeHash: crypto.Keccak256Hash(code).String(),
 			},
 		)
 		if err != nil {

@@ -26,7 +26,7 @@ func Loader(txctx *engine.TxContext) {
 		SetBlockNumber(uint64(receipt.BlockNumber)).
 		SetTxIndex(receipt.TxIndex)
 	txctx.Envelope.Chain = &chain.Chain{
-		ChainId: receipt.ChainID.Bytes(),
+		ChainId: receipt.ChainID.String(),
 	}
 
 	// Enrich Logger

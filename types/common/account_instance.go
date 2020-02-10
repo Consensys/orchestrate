@@ -1,19 +1,27 @@
 package common
 
-import "fmt"
+import (
+	"fmt"
+
+	ethcommon "github.com/ethereum/go-ethereum/common"
+)
 
 // Short returns a string representation of the account instance
-func (instance *AccountInstance) Short() string {
+func (i *AccountInstance) Short() string {
 	var addr, id string
-	if instance.GetAccount() == nil {
+	if i.GetAccount() == "nil" {
 		addr = ""
 	} else {
-		addr = instance.GetAccount().Address().String()
+		addr = i.GetAccount()
 	}
-	if instance.GetChain() == nil {
+	if i.GetChain() == nil {
 		id = ""
 	} else {
-		id = string(instance.GetChain().GetChainId())
+		id = i.GetChain().GetChainId()
 	}
 	return fmt.Sprintf("%v@%v", addr, id)
+}
+
+func (i *AccountInstance) GetAccountAddress() ethcommon.Address {
+	return ethcommon.HexToAddress(i.GetAccount())
 }

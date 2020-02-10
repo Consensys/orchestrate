@@ -103,6 +103,6 @@ func FromEnvelope(ctx context.Context, e *envelope.Envelope) (*EnvelopeModel, er
 		EnvelopeID: e.GetMetadata().GetId(),
 		TenantID:   tenantID,
 		ChainID:    e.GetChain().GetBigChainID().String(),
-		TxHash:     e.GetTx().GetHash().Hex(),
+		TxHash:     e.GetTx().GetHash(),
 	}, nil
 }

@@ -48,7 +48,7 @@ type SendTxArgs struct {
 
 // Envelope2SendTxArgs creates SendTxArgs from an Envelope
 func Envelope2SendTxArgs(e *envelope.Envelope) *SendTxArgs {
-	from := e.GetFrom().Address()
+	from := ethcommon.HexToAddress(e.GetFrom())
 	args := SendTxArgs{
 		From:        from,
 		GasPrice:    (*hexutil.Big)(e.GetTx().GetTxData().GetGasPriceBig()),
@@ -66,8 +66,8 @@ func Envelope2SendTxArgs(e *envelope.Envelope) *SendTxArgs {
 		args.Nonce = (*hexutil.Uint64)(&nonce)
 	}
 
-	if e.GetTx().GetTxData().GetTo() != nil {
-		to := e.GetTx().GetTxData().GetTo().Address()
+	if e.GetTx().GetTxData().GetTo() != "" {
+		to := ethcommon.HexToAddress(e.GetTx().GetTxData().GetTo())
 		args.To = &to
 	}
 

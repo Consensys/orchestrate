@@ -1,7 +1,5 @@
 syntax = "proto3";
 
-import "types/ethereum/base.proto";
-
 option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum";
 
 package ethereum;
@@ -13,22 +11,22 @@ message TxData {
 
     // DATA (20 Bytes) - The address of the receiver. null when it’s a contract creation transaction.
     // e.g. 0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C
-    Account to = 2;
+    string to = 2;
 
     // QUANTITY - Integer of the value sent with this transaction.
     // e.g 0xaf23
-    Quantity value = 3;
+    string value = 3;
 
     // QUANTITY - Integer of the gas provided for the transaction execution.
     uint64 gas = 4;
 
     // QUANTITY - Integer of the gas price used for each paid gas.
     // e.g 0xaf23b
-    Quantity gas_price = 5;
+    string gas_price = 5;
 
     // DATA - Hash of the method signature (4 bytes) followed by encoded parameters.
     // e.g 0xa9059cbb000000000000000000000000ff778b716fc07d98839f48ddb88d8be583beb684000000000000000000000000000000000000000000000000002386f26fc10000
-    Data data = 6;
+    string data = 6;
 }
 
 // Transaction
@@ -36,9 +34,9 @@ message Transaction {
     TxData tx_data = 1;
 
     // DATA - The signed, RLP encoded transaction
-    Data raw = 2;
+    string raw = 2;
 
     // DATA (32 Bytes) - Hash of the transaction.
     // e.g. 0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210
-    Hash hash = 3;
+    string hash = 3;
 }

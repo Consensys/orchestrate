@@ -34,7 +34,7 @@ func TestUnmarshaller(t *testing.T) {
 	wg.Wait()
 
 	for _, e := range envelopes {
-		if e.GetFrom().Address().Hex() != "0xdbb881a51CD4023E4400CEF3ef73046743f08da3" {
+		if e.GetFrom() != "0xdbb881a51CD4023E4400CEF3ef73046743f08da3" {
 			t.Errorf("Unmarshaller: expected %q but got %q", "abcde", e.From)
 		}
 	}

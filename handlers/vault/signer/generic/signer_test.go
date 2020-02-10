@@ -30,15 +30,15 @@ func makeSignerContext(i int) *engine.TxContext {
 		h := ethcommon.HexToHash("0x12345678")
 		txctx.Envelope.Chain = chain.FromInt(10)
 		txctx.Envelope.Tx = &ethereum.Transaction{
-			Raw:  ethereum.HexToData(alreadySignedTx),
-			Hash: ethereum.NewHash(h.Bytes()),
+			Raw:  alreadySignedTx,
+			Hash: h.String(),
 		}
 	case 1:
 		h := ethcommon.HexToHash("0x12345678")
 		txctx.Envelope.Chain = chain.FromInt(0)
 		txctx.Envelope.Tx = &ethereum.Transaction{
-			Raw:  ethereum.HexToData(alreadySignedTx),
-			Hash: ethereum.NewHash(h.Bytes()),
+			Raw:  alreadySignedTx,
+			Hash: h.String(),
 		}
 	case 2:
 		txctx.Envelope.Chain = chain.FromInt(0)
@@ -50,9 +50,7 @@ func makeSignerContext(i int) *engine.TxContext {
 		txctx.Envelope.Chain = chain.FromInt(10)
 		txctx.Envelope.Tx = &ethereum.Transaction{
 			TxData: &ethereum.TxData{
-				Data: &ethereum.Data{
-					Raw: []byte{0},
-				},
+				Data: "",
 			},
 		}
 		txctx.Envelope.Protocol = &chain.Protocol{
@@ -68,9 +66,7 @@ func makeSignerContext(i int) *engine.TxContext {
 		txctx.Envelope.Chain = chain.FromInt(0)
 		txctx.Envelope.Tx = &ethereum.Transaction{
 			TxData: &ethereum.TxData{
-				Data: &ethereum.Data{
-					Raw: []byte{0},
-				},
+				Data: "",
 			},
 		}
 		txctx.Envelope.Protocol = &chain.Protocol{
