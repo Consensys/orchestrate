@@ -19,7 +19,8 @@ Feature: chain registry
       "listener": {
         "depth": 1,
         "blockPosition": "1",
-        "backOffDuration": "1s"
+        "backOffDuration": "1s",
+        "externalTxEnabled": true
       }
     }
     """
@@ -76,7 +77,8 @@ Feature: chain registry
       "listener": {
         "depth": 1,
         "blockPosition": "1",
-        "backOffDuration": "1s"
+        "backOffDuration": "1s",
+        "externalTxEnabled": true
       }
     }
     """
@@ -87,7 +89,8 @@ Feature: chain registry
     """
     {
       "listener": {
-        "backOffDuration": "2s"
+        "backOffDuration": "2s",
+        "externalTxEnabled": false
       }
     }
     """

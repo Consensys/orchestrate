@@ -108,7 +108,7 @@ func ListenAndServe() {
 	}
 }
 
-// GracefulStop stops the gRPC server gracefully.
+// StopServer stops the gRPC server gracefully.
 // It stops accepting new connections and blocks until all connections are processed
 func StopServer(_ context.Context) {
 	server.GracefulStop()

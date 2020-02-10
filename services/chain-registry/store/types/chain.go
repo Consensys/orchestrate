@@ -22,16 +22,17 @@ const component = "chain-registry.store"
 type Chain struct {
 	tableName struct{} `pg:"chains"` // nolint:unused,structcheck // reason
 
-	UUID                    string     `json:"uuid,omitempty" pg:",pk"`
-	Name                    string     `json:"name,omitempty"`
-	TenantID                string     `json:"tenantID,omitempty"`
-	URLs                    []string   `json:"urls,omitempty" pg:"urls,array"`
-	CreatedAt               *time.Time `json:"createdAt,omitempty"`
-	UpdatedAt               *time.Time `json:"updatedAt,omitempty"`
-	ListenerDepth           *uint64    `json:"listenerDepth,omitempty"`
-	ListenerBlockPosition   *int64     `json:"listenerBlockPosition,string,omitempty"`
-	ListenerFromBlock       *int64     `json:"listenerFromBlock,string,omitempty"`
-	ListenerBackOffDuration *string    `json:"listenerBackOffDuration,omitempty"`
+	UUID                      string     `json:"uuid,omitempty" pg:",pk"`
+	Name                      string     `json:"name,omitempty"`
+	TenantID                  string     `json:"tenantID,omitempty"`
+	URLs                      []string   `json:"urls,omitempty" pg:"urls,array"`
+	CreatedAt                 *time.Time `json:"createdAt,omitempty"`
+	UpdatedAt                 *time.Time `json:"updatedAt,omitempty"`
+	ListenerDepth             *uint64    `json:"listenerDepth,omitempty"`
+	ListenerBlockPosition     *int64     `json:"listenerBlockPosition,string,omitempty"`
+	ListenerFromBlock         *int64     `json:"listenerFromBlock,string,omitempty"`
+	ListenerBackOffDuration   *string    `json:"listenerBackOffDuration,omitempty"`
+	ListenerExternalTxEnabled *bool      `json:"listenerExternalTxEnabled,omitempty"`
 }
 
 func (c *Chain) IsValid() bool {

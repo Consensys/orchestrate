@@ -35,6 +35,7 @@ func (h Handler) patchChainByName(rw http.ResponseWriter, request *http.Request)
 		chain.ListenerDepth = chainRequest.Listener.Depth
 		chain.ListenerBlockPosition = chainRequest.Listener.BlockPosition
 		chain.ListenerBackOffDuration = chainRequest.Listener.BackOffDuration
+		chain.ListenerExternalTxEnabled = chainRequest.Listener.ExternalTxEnabled
 	}
 
 	err = h.store.UpdateChainByName(request.Context(), chain)
@@ -57,12 +58,13 @@ func (h Handler) patchChainByUUID(rw http.ResponseWriter, request *http.Request)
 	}
 
 	chain := &models.Chain{
-		UUID:                    mux.Vars(request)["uuid"],
-		Name:                    chainRequest.Name,
-		URLs:                    chainRequest.URLs,
-		ListenerDepth:           chainRequest.Listener.Depth,
-		ListenerBlockPosition:   chainRequest.Listener.BlockPosition,
-		ListenerBackOffDuration: chainRequest.Listener.BackOffDuration,
+		UUID:                      mux.Vars(request)["uuid"],
+		Name:                      chainRequest.Name,
+		URLs:                      chainRequest.URLs,
+		ListenerDepth:             chainRequest.Listener.Depth,
+		ListenerBlockPosition:     chainRequest.Listener.BlockPosition,
+		ListenerBackOffDuration:   chainRequest.Listener.BackOffDuration,
+		ListenerExternalTxEnabled: chainRequest.Listener.ExternalTxEnabled,
 	}
 
 	err = h.store.UpdateChainByUUID(request.Context(), chain)

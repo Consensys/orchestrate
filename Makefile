@@ -153,7 +153,7 @@ postgres:
 	@docker-compose -f e2e/docker-compose.yml up -d postgres
 
 down-postgres:
-	@docker-compose -f e2e/docker-compose.yml stop postgres
+	@docker-compose -f e2e/docker-compose.yml rm --force -s -v postgres
 
 up: deps geth besu quorum bootstrap orchestrate
 
@@ -167,3 +167,9 @@ hashicorp-token-lookup:
 
 hashicorp-vault:
 	@bash scripts/deps/config/hashicorp/vault.sh $(COMMAND)
+
+pgadmin:
+	@docker-compose -f scripts/deps/docker-compose-tools.yml up -d pgadmin
+
+down-pgadmin:
+	@docker-compose -f scripts/deps/docker-compose-tools.yml rm --force -s -v pgadmin

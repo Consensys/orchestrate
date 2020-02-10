@@ -18,7 +18,8 @@ CREATE TABLE chains (
 	listener_depth INTEGER,
 	listener_block_position BIGINT,
 	listener_from_block BIGINT,
-	listener_back_off_duration VARCHAR(66) NOT NULL
+	listener_back_off_duration VARCHAR(66) NOT NULL,
+	listener_external_tx_enabled BOOLEAN DEFAULT false NOT NULL
 );
 CREATE UNIQUE INDEX ON chains (tenant_id, name);
 

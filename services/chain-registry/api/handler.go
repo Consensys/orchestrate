@@ -64,9 +64,10 @@ func writeError(rw http.ResponseWriter, msg string, code int) {
 }
 
 type Listener struct {
-	Depth           *uint64 `json:"depth,omitempty"`
-	BlockPosition   *int64  `json:"blockPosition,string,omitempty"`
-	BackOffDuration *string `json:"backOffDuration,omitempty"`
+	Depth             *uint64 `json:"depth,omitempty"`
+	BlockPosition     *int64  `json:"blockPosition,string,omitempty"`
+	BackOffDuration   *string `json:"backOffDuration,omitempty"`
+	ExternalTxEnabled *bool   `json:"externalTxEnabled,omitempty"`
 }
 
 var validate = validator.New()

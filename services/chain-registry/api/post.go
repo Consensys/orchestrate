@@ -29,13 +29,14 @@ func (h Handler) postChain(rw http.ResponseWriter, request *http.Request) {
 	}
 
 	chain := &models.Chain{
-		Name:                    chainRequest.Name,
-		TenantID:                mux.Vars(request)["tenantID"],
-		URLs:                    chainRequest.URLs,
-		ListenerDepth:           chainRequest.Listener.Depth,
-		ListenerBlockPosition:   chainRequest.Listener.BlockPosition,
-		ListenerFromBlock:       chainRequest.Listener.BlockPosition,
-		ListenerBackOffDuration: chainRequest.Listener.BackOffDuration,
+		Name:                      chainRequest.Name,
+		TenantID:                  mux.Vars(request)["tenantID"],
+		URLs:                      chainRequest.URLs,
+		ListenerDepth:             chainRequest.Listener.Depth,
+		ListenerBlockPosition:     chainRequest.Listener.BlockPosition,
+		ListenerFromBlock:         chainRequest.Listener.BlockPosition,
+		ListenerBackOffDuration:   chainRequest.Listener.BackOffDuration,
+		ListenerExternalTxEnabled: chainRequest.Listener.ExternalTxEnabled,
 	}
 
 	err = h.store.RegisterChain(request.Context(), chain)

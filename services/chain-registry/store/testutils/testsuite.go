@@ -9,7 +9,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
 
-// EnvelopeStoreTestSuite is a test suit for EnvelopeStore
+// ChainRegistryTestSuite is a test suit for ChainRegistry
 type ChainRegistryTestSuite struct {
 	suite.Suite
 	Store types.ChainRegistryStore
@@ -46,13 +46,14 @@ var tenantID1Chains = map[string]*types.Chain{
 }
 var tenantID2Chains = map[string]*types.Chain{
 	chainName1: {
-		Name:                    chainName1,
-		TenantID:                tenantID2,
-		URLs:                    []string{"testUrl1", "testUrl2"},
-		ListenerDepth:           &(&struct{ x uint64 }{1}).x,
-		ListenerBlockPosition:   &(&struct{ x int64 }{1}).x,
-		ListenerFromBlock:       &(&struct{ x int64 }{1}).x,
-		ListenerBackOffDuration: &(&struct{ x string }{"1s"}).x,
+		Name:                      chainName1,
+		TenantID:                  tenantID2,
+		URLs:                      []string{"testUrl1", "testUrl2"},
+		ListenerDepth:             &(&struct{ x uint64 }{1}).x,
+		ListenerBlockPosition:     &(&struct{ x int64 }{1}).x,
+		ListenerFromBlock:         &(&struct{ x int64 }{1}).x,
+		ListenerBackOffDuration:   &(&struct{ x string }{"1s"}).x,
+		ListenerExternalTxEnabled: &(&struct{ x bool }{true}).x,
 	},
 	chainName2: {
 		Name:                    chainName2,
@@ -87,6 +88,7 @@ func CompareChains(t *testing.T, chain1, chain2 *types.Chain) {
 	assert.Equal(t, chain1.ListenerBlockPosition, chain2.ListenerBlockPosition, "Should get the same chain")
 	assert.Equal(t, chain1.ListenerFromBlock, chain2.ListenerFromBlock, "Should get the same chain ListenerBlockPosition")
 	assert.Equal(t, chain1.ListenerBackOffDuration, chain2.ListenerBackOffDuration, "Should get the same chain ListenerBackOffDuration")
+	assert.Equal(t, chain1.ListenerExternalTxEnabled, chain2.ListenerExternalTxEnabled, "Should get the same chain ListenerExternalTxEnabled")
 }
 
 func (s *ChainRegistryTestSuite) TestRegisterChain() {
