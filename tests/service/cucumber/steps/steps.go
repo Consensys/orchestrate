@@ -6,11 +6,16 @@ import (
 	"net/http"
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
+
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 
 	"github.com/DATA-DOG/godog"
 	"github.com/DATA-DOG/godog/gherkin"
 	"github.com/Shopify/sarama"
+	"github.com/cucumber/godog"
+	"github.com/cucumber/godog/gherkin"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -22,7 +27,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/tracker"
 	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
 	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 )
 
 const GenericNamespace = "_"
@@ -50,12 +54,6 @@ func NewID() string {
 // ScenarioID generates a random scenario UUID
 func ScenarioID(def *gherkin.ScenarioDefinition) string {
 	return fmt.Sprintf("|%v|-%v", fmt.Sprintf("%-20v", def.Name)[:20], NewID())
-}
-
-// AuthSetup is container for authentication context data
-type AuthSetup struct {
-	authMethod string
-	authData   string
 }
 
 // ScenarioContext is container for scenario context data
@@ -89,15 +87,6 @@ type ScenarioContext struct {
 	producer sarama.SyncProducer
 
 	logger *log.Entry
-
-	authSetup AuthSetup
-}
-
-func setServiceURL(sc *ScenarioContext) {
-
-	sc.httpAliases.Set(GenericNamespace, "chain-registry", viper.GetString(chainregistry.ChainRegistryURLViperKey))
-	sc.httpAliases.Set(GenericNamespace, "contract-registry", "http://contract-registry:8081")
-	sc.httpAliases.Set(GenericNamespace, "envelope-store", "http://envelope-store:8081")
 }
 
 func NewScenarioContext(
@@ -107,7 +96,7 @@ func NewScenarioContext(
 	producer sarama.SyncProducer,
 	p *parser.Parser,
 ) *ScenarioContext {
-	sc := &ScenarioContext{
+	return &ScenarioContext{
 		chanReg:          chanReg,
 		httpClient:       httpClient,
 		httpAliases:      parser.NewAliasRegistry(),
@@ -115,12 +104,7 @@ func NewScenarioContext(
 		producer:         producer,
 		parser:           p,
 		logger:           log.NewEntry(log.StandardLogger()),
-		authSetup:        AuthSetup{},
 	}
-
-	setServiceURL(sc)
-
-	return sc
 }
 
 // initScenarioContext initialize a scenario context - create a random scenario id - initialize a logger enrich with the scenario name - initialize envelope chan
@@ -146,7 +130,7 @@ func (sc *ScenarioContext) init(s interface{}) {
 	})
 }
 
-func (sc *ScenarioContext) newTracker(e *envelope.Envelope) *tracker.Tracker {
+func (sc *ScenarioContext) newTracker(e *tx.Builder) *tracker.Tracker {
 	if e != nil {
 		sc.setMetadata(e)
 	}
@@ -160,14 +144,14 @@ func (sc *ScenarioContext) newTracker(e *envelope.Envelope) *tracker.Tracker {
 	for _, topic := range TOPICS {
 		// Create channel
 		// TODO: make chan size configurable
-		ch := make(chan *envelope.Envelope, 30)
+		ch := make(chan *tx.Builder, 30)
 
 		// Add channel as a tracker output
 		t.AddOutput(topic, ch)
 
 		// Register channel on channel registry
 		if e != nil {
-			sc.chanReg.Register(LongKeyOf(topic, sc.ID, e.GetMetadata().GetId()), ch)
+			sc.chanReg.Register(LongKeyOf(topic, sc.ID, e.GetID()), ch)
 		} else {
 			sc.chanReg.Register(ShortKeyOf(topic, sc.ID), ch)
 		}
@@ -176,15 +160,15 @@ func (sc *ScenarioContext) newTracker(e *envelope.Envelope) *tracker.Tracker {
 	return t
 }
 
-func (sc *ScenarioContext) setMetadata(e *envelope.Envelope) {
+func (sc *ScenarioContext) setMetadata(e *tx.Builder) {
 	// Prepare envelope metadata
-	e.SetMetadataValue("debug", "true")
-	e.SetMetadataValue("scenario.id", sc.ID)
-	e.SetMetadataValue("scenario.name", sc.Definition.Name)
-	e.GetMetadata().Id = uuid.NewV4().String()
+	_ = e.SetID(uuid.NewV4().String()).
+		SetContextLabelsValue("debug", "true").
+		SetContextLabelsValue("scenario.id", sc.ID).
+		SetContextLabelsValue("scenario.name", sc.Definition.Name)
 }
 
-func (sc *ScenarioContext) newTrackers(envelopes []*envelope.Envelope) []*tracker.Tracker {
+func (sc *ScenarioContext) newTrackers(envelopes []*tx.Builder) []*tracker.Tracker {
 	// Create a tracker for every envelope
 	var trackers []*tracker.Tracker
 	for _, e := range envelopes {
@@ -199,10 +183,11 @@ func (sc *ScenarioContext) setTrackers(trackers []*tracker.Tracker) {
 	sc.trackers = trackers
 }
 
-func (sc *ScenarioContext) sendEnvelope(topic string, e *envelope.Envelope) error {
+func (sc *ScenarioContext) sendEnvelope(topic string, e *tx.Builder) error {
 	// Prepare message to be sent
 	msg := &sarama.ProducerMessage{Topic: viper.GetString(fmt.Sprintf("topic.%v", topic))}
-	err := encoding.Marshal(e, msg)
+
+	err := encoding.Marshal(e.TxEnvelopeAsRequest(), msg)
 	if err != nil {
 		return err
 	}
@@ -214,7 +199,7 @@ func (sc *ScenarioContext) sendEnvelope(topic string, e *envelope.Envelope) erro
 	}
 
 	log.WithFields(log.Fields{
-		"metadata.id":   e.GetMetadata().GetId(),
+		"id":            e.GetID(),
 		"scenario.id":   sc.ID,
 		"scenario.name": sc.Definition.Name,
 	}).Debugf("scenario: envelope sent")
@@ -226,7 +211,7 @@ func (sc *ScenarioContext) iSendEnvelopesToTopic(topic string, table *gherkin.Da
 	// Parse table
 	envelopes, err := sc.parser.ParseEnvelopes(sc.ID, table)
 	if err != nil {
-		return err
+		return errors.DataError("could not parse tx request - got %v", err)
 	}
 
 	// Set trackers for each envelope
@@ -236,7 +221,7 @@ func (sc *ScenarioContext) iSendEnvelopesToTopic(topic string, table *gherkin.Da
 	for _, t := range sc.trackers {
 		err := sc.sendEnvelope(topic, t.Current)
 		if err != nil {
-			return err
+			return errors.InternalError("could not send tx request - got %v", err)
 		}
 	}
 
@@ -290,7 +275,7 @@ func (sc *ScenarioContext) envelopeShouldBeInTopic(topic string) error {
 
 func (sc *ScenarioContext) envelopesShouldHavePayloadSet() error {
 	for i, t := range sc.trackers {
-		if t.Current.GetTx().GetTxData().GetData() == "" {
+		if t.Current.GetData() == "" {
 			return fmt.Errorf("%v: payload not set envelope n°%v", sc.ID, i)
 		}
 	}
@@ -300,9 +285,13 @@ func (sc *ScenarioContext) envelopesShouldHavePayloadSet() error {
 func (sc *ScenarioContext) envelopesShouldHaveNonceSet() error {
 	nonces := make(map[string]map[string]map[uint64]bool)
 	for _, t := range sc.trackers {
-		chain := t.Current.GetChain().GetBigChainID().String()
-		addr := t.Current.GetFrom()
-		nonce := t.Current.GetTx().GetTxData().GetNonce()
+		chain := t.Current.GetChainID().String()
+		addr := t.Current.GetFromString()
+		nonce, err := t.Current.GetNonceUint64()
+		if err != nil {
+			return err
+		}
+
 		if _, ok := nonces[chain]; !ok {
 			nonces[chain] = make(map[string]map[uint64]bool)
 		}
@@ -310,7 +299,7 @@ func (sc *ScenarioContext) envelopesShouldHaveNonceSet() error {
 			nonces[chain][addr] = make(map[uint64]bool)
 		}
 		if _, ok := nonces[chain][addr][nonce]; ok {
-			return fmt.Errorf("%v: nonce %d attributed more than once", sc.ID, t.Current.GetTx().GetTxData().GetNonce())
+			return fmt.Errorf("%v: nonce %d attributed more than once", sc.ID, t.Current.Nonce)
 		}
 		nonces[chain][addr][nonce] = true
 	}
@@ -320,11 +309,11 @@ func (sc *ScenarioContext) envelopesShouldHaveNonceSet() error {
 
 func (sc *ScenarioContext) envelopesShouldHaveRawAndHashSet() error {
 	for i, t := range sc.trackers {
-		if t.Current.GetTx().GetRaw() == "" {
+		if t.Current.Raw == "" {
 			return fmt.Errorf("%v: raw not set on envelope n°%v", sc.ID, i)
 		}
 
-		if t.Current.GetTx().GetHash() == "" {
+		if t.Current.TxHash == nil {
 			return fmt.Errorf("%v: hash not set on envelope n°%v", sc.ID, i)
 		}
 	}
@@ -333,7 +322,7 @@ func (sc *ScenarioContext) envelopesShouldHaveRawAndHashSet() error {
 
 func (sc *ScenarioContext) envelopesShouldHaveFromSet() error {
 	for i, t := range sc.trackers {
-		if t.Current.GetFrom() == "" {
+		if t.Current.From == nil {
 			return fmt.Errorf("%v: from not set on envelope n°%v", sc.ID, i)
 		}
 	}

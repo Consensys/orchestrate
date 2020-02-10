@@ -11,13 +11,13 @@ import (
 // Pricer creates a handler that set a Gas Price
 func Pricer(p ethclient.GasPricer) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		if txctx.Envelope.GetTx().GetTxData().GetGasPrice() == "" {
+		if txctx.Builder.GasPrice == nil {
 			url, err := proxy.GetURL(txctx)
 			if err != nil {
 				return
 			}
 
-			// Request a gas price suggestion
+			// Builder a gas price suggestion
 			p, err := p.SuggestGasPrice(txctx.Context(), url)
 			if err != nil {
 				e := txctx.AbortWithError(err).ExtendComponent(component)
@@ -26,7 +26,7 @@ func Pricer(p ethclient.GasPricer) engine.HandlerFunc {
 			}
 
 			// Set gas price
-			txctx.Envelope.Tx.TxData.SetGasPrice(p)
+			_ = txctx.Builder.SetGasPrice(p)
 			txctx.Logger.Debugf("gas-pricer: gas price set")
 
 			return
@@ -34,7 +34,7 @@ func Pricer(p ethclient.GasPricer) engine.HandlerFunc {
 
 		// Enrich logger
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"tx.gas.price": txctx.Envelope.GetTx().GetTxData().GetGasPrice(),
+			"tx.gas.price": txctx.Builder.GasPrice.String(),
 		})
 	}
 }

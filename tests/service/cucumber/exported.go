@@ -5,9 +5,9 @@ import (
 	"os"
 	"sync"
 
+	"github.com/cucumber/godog"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 
-	"github.com/DATA-DOG/godog"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/chanregistry"
@@ -44,7 +44,7 @@ func Init(ctx context.Context) {
 			StopOnFailure:       viper.GetBool(StopOnFailureViperKey),
 			Strict:              viper.GetBool(StrictViperKey),
 			NoColors:            viper.GetBool(NoColorsViperKey),
-			Tags:                tags,
+			Tags:                viper.GetString(TagsViperKey),
 			Format:              viper.GetString(FormatViperKey),
 			Concurrency:         viper.GetInt(ConcurrencyViperKey),
 			Paths:               viper.GetStringSlice(PathsViperKey),

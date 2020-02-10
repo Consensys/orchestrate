@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"testing"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
+
 	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	log "github.com/sirupsen/logrus"
@@ -15,14 +17,11 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/args"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
 	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client/mocks"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
-const testsNum = 11
+const testsNum = 8
 
 type MockCrafter struct{}
 
@@ -49,154 +48,51 @@ func makeCrafterContext(i int) *engine.TxContext {
 	ctx := engine.NewTxContext()
 	ctx.Reset()
 	ctx.Logger = log.NewEntry(log.StandardLogger())
-	ctx.Envelope.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{}}
+	ctx.Builder = tx.NewBuilder()
 
 	switch i {
 	case 0:
 		ctx.Set("errors", 0)
 		ctx.Set("result", "")
 	case 1:
-		ctx.Envelope.Tx.TxData = (&ethereum.TxData{}).SetData(hexutil.MustDecode("0xa9059cbb"))
+		_ = ctx.Builder.SetData(hexutil.MustDecode("0xa9059cbb"))
 		ctx.Set("errors", 0)
 		ctx.Set("result", "0xa9059cbb")
 	case 2:
-		ctx.Envelope.Args = &envelope.Args{
-
-			Call: &args.Call{
-				Method: &abi.Method{Signature: "known()"},
-				Args:   []string{"test"},
-			},
-		}
+		_ = ctx.Builder.SetMethodSignature("known()").SetArgs([]string{"test"})
 		ctx.Set("errors", 0)
 		ctx.Set("result", callPayload)
 	case 3:
-		ctx.Envelope.Args = &envelope.Args{
-
-			Call: &args.Call{
-				Method: &abi.Method{Signature: "known()"},
-			},
-		}
+		_ = ctx.Builder.SetMethodSignature("known()")
 		ctx.Set("errors", 1)
 		ctx.Set("error.code", errors.InvalidArgsCountError("").GetCode())
 		ctx.Set("result", "")
 	case 4:
-		ctx.Envelope.Args = &envelope.Args{
-
-			Call: &args.Call{
-				Contract: &abi.Contract{
-					Id: &abi.ContractId{
-						Name: "known",
-					},
-				},
-				Method: &abi.Method{Signature: "constructor()"},
-				Args:   []string{"0xabcd"},
-			},
-		}
+		_ = ctx.Builder.SetContractName("known").SetMethodSignature("constructor()").SetArgs([]string{"test"})
 		ctx.Set("errors", 0)
 		ctx.Set("result", constructorPayload)
 	case 5:
-		ctx.Envelope.Args = &envelope.Args{
-
-			Call: &args.Call{
-				Contract: &abi.Contract{
-					Id: &abi.ContractId{
-						Name: "known",
-					},
-				},
-				// Invalid ABI
-				Method: &abi.Method{
-					Signature: "constructor()",
-					Abi:       hexutil.Encode([]byte{1, 2, 3}),
-				},
-				Args: []string{"0xabcd"},
-			},
-		}
-		ctx.Set("errors", 1)
-		ctx.Set("error.code", errors.EncodingError("").GetCode())
-		ctx.Set("result", "")
-	case 6:
-		ctx.Envelope.Args = &envelope.Args{
-			Call: &args.Call{
-				Contract: &abi.Contract{
-					Id: &abi.ContractId{
-						Name: "known",
-					},
-				},
-				// Invalid method signature
-				Method: &abi.Method{Signature: "constructor)"},
-				Args:   []string{"0xabcd"},
-			},
-		}
+		// Invalid method signature
+		_ = ctx.Builder.SetContractName("known").SetMethodSignature("constructor)").SetArgs([]string{"0xabcd"})
 		ctx.Set("errors", 1)
 		ctx.Set("error.code", errors.InvalidSignatureError("").GetCode())
 		ctx.Set("result", "")
-	case 7:
-		ctx.Envelope.Args = &envelope.Args{
-
-			Call: &args.Call{
-				Contract: &abi.Contract{
-					Id: &abi.ContractId{
-						Name: "unknown",
-					},
-				},
-				Method: &abi.Method{Signature: "constructor()"},
-				// Invalid contract name
-				Args: []string{"0xabcd"},
-			},
-		}
+	case 6:
+		// Invalid contract name
+		_ = ctx.Builder.SetContractName("unknown").SetMethodSignature("constructor()").SetArgs([]string{"0xabcd"})
 		ctx.Set("errors", 1)
 		ctx.Set("error.code", errors.NotFoundError("").GetCode())
 		ctx.Set("result", "")
-	case 8:
-		ctx.Envelope.Args = &envelope.Args{
-
-			Call: &args.Call{
-				Contract: &abi.Contract{
-					Id: &abi.ContractId{
-						Name: "known",
-					},
-				},
-				Method: &abi.Method{Signature: "constructor()"},
-				// Invalid number of arguments for a constructor
-				Args: []string{"0xabcd", "123"},
-			},
-		}
+	case 7:
+		// Invalid number of arguments for a constructor
+		_ = ctx.Builder.SetContractName("known").SetMethodSignature("constructor()").SetArgs([]string{"0xabcd", "123"})
 		ctx.Set("errors", 1)
 		ctx.Set("error.code", errors.InvalidArgsCountError("").GetCode())
 		ctx.Set("result", "")
-	case 9:
-		ctx.Envelope.Args = &envelope.Args{
-
-			Call: &args.Call{
-				Contract: &abi.Contract{
-					Id: &abi.ContractId{
-						Name: "known",
-					},
-				},
-				Method: &abi.Method{Signature: "constructor()"},
-				Args:   []string{"0xabcd"},
-			},
-		}
-		ctx.Envelope.Tx = nil
+	case 8:
+		_ = ctx.Builder.SetContractName("known").SetMethodSignature("constructor()").SetArgs([]string{"0xabcd"})
 		ctx.Set("errors", 0)
 		ctx.Set("result", constructorPayload)
-	case 10:
-		ctx.Envelope.Args = &envelope.Args{
-
-			Call: &args.Call{
-				Contract: &abi.Contract{
-					Id: &abi.ContractId{
-						Name: "known",
-					},
-				},
-				Method: &abi.Method{Signature: "constructor()"},
-				Args:   []string{"0xabcd"},
-			},
-		}
-		ctx.Envelope.Tx = &ethereum.Transaction{TxData: nil}
-		ctx.Set("errors", 0)
-		ctx.Set("result", constructorPayload)
-
 	default:
 		panic(fmt.Sprintf("No test case with number %d", i))
 	}
@@ -234,12 +130,12 @@ func (s *CrafterTestSuite) TestCrafter() {
 	// Handle contexts
 	s.Handle(txctxs)
 
-	for _, txctx := range txctxs {
-		assert.Len(s.T(), txctx.Envelope.Errors, txctx.Get("errors").(int), "Expected right count of errors", txctx.Envelope.Args)
-		for _, err := range txctx.Envelope.Errors {
-			assert.Equal(s.T(), txctx.Get("error.code").(uint64), err.GetCode(), "Error code be correct")
+	for i, txctx := range txctxs {
+		assert.Len(s.T(), txctx.Builder.Errors, txctx.Get("errors").(int), "%d/%d - Expected right count of errors", i, len(txctxs), txctx.Builder.Args)
+		for _, err := range txctx.Builder.Errors {
+			assert.Equal(s.T(), txctx.Get("error.code").(uint64), err.GetCode(), "%d/%d - Error code be correct", i, len(txctxs))
 		}
-		assert.Equal(s.T(), txctx.Get("result").(string), txctx.Envelope.Tx.TxData.GetData(), "Expected correct payload", txctx.Envelope.Args)
+		assert.Equal(s.T(), txctx.Get("result").(string), txctx.Builder.GetData(), "%d/%d - Expected correct payload", i, len(txctxs), txctx.Builder.Args)
 	}
 }
 

@@ -1,0 +1,121 @@
+syntax = "proto3";
+
+import "types/error/error.proto";
+import "types/ethereum/receipt.proto";
+import "types/ethereum/transaction.proto";
+
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx";
+
+package tx;
+
+message TxRequest {
+    // Technical header (optional)
+    map<string, string> headers = 1;
+
+    // Name of the Chain as registered on the chain registry
+    // e.g. 1 for mainnet, 3 for Ropsten
+    string chain = 2;
+
+    // Type of a protocol that should be used
+    Method method = 3;
+
+    // Params for the transaction
+    Params params = 4;
+
+    // ID of the Request in UUID RFC 4122, ISO/IEC 9834-8:2005 format
+    // e.g a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
+    string id = 5;
+
+    // [option]
+    map<string, string> context_labels = 6;
+}
+
+message TxEnvelope {
+    oneof msg {
+        TxRequest tx_request = 2;
+        TxResponse tx_response = 3;
+    }
+
+    map<string, string> internal_labels = 1;
+}
+
+enum Method {
+    // Classic Ethereum Transaction
+    ETH_SENDRAWTRANSACTION = 0;
+
+    // Quorum Constellation
+    ETH_SENDPRIVATETRANSACTION = 1;
+
+    // Quorum Tessera
+    ETH_SENDRAWPRIVATETRANSACTION = 2;
+
+    // Besu Orion
+    EEA_SENDPRIVATETRANSACTION = 3;
+}
+
+message Params {
+    // Sender of the transaction - Ethereum Account Address
+    // e.g 0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C
+    string from = 1;
+
+    // The address of the receiver. null when it’s a contract creation transaction.
+    // e.g. 0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C
+    string to = 2;
+
+    // Integer of the gas provided for the transaction execution.
+    string gas = 4;
+
+    // Integer of the gas price used for each paid gas.
+    // e.g 0xaf23b
+    string gas_price = 5;
+
+    // Integer of the value sent with this transaction.
+    // e.g 0xaf23
+    string value = 6;
+
+    // Integer of a nonce.
+    string nonce = 7;
+
+    // Hash of the method signature (4 bytes) followed by encoded parameters.
+    // e.g 0xa9059cbb000000000000000000000000ff778b716fc07d98839f48ddb88d8be583beb684000000000000000000000000000000000000000000000000002386f26fc10000
+    string data = 8;
+
+    // Contract identifier
+    // e.g. "ERC20[v1.0.0]"
+    string contract = 9;
+
+    // Signature of the method to call on contract
+    // e.g "transfer(address,uint256)"
+    string method_signature = 10;
+
+    // Arguments to feed on transaction call
+    repeated string args = 11;
+
+    // The signed, RLP encoded transaction
+    string raw = 12;
+
+    repeated string private_for = 13;
+
+    string private_from = 14;
+
+    string private_tx_type = 15;
+
+    string privacy_group_id = 16;
+}
+
+message TxResponse {
+    // Extra information (optional)
+    map<string, string> headers = 1;
+
+    // ID of the Response in UUID RFC 4122, ISO/IEC 9834-8:2005 format
+    // e.g a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
+    string id = 2;
+
+    // [option]
+    map<string, string> context_labels = 3;
+
+    ethereum.Transaction transaction = 4;
+    ethereum.Receipt receipt = 5;
+
+    repeated error.Error errors = 6;
+}

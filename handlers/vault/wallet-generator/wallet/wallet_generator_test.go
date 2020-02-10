@@ -11,7 +11,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 )
 
 func makeGeneratorContext(i int) *engine.TxContext {
@@ -20,10 +19,10 @@ func makeGeneratorContext(i int) *engine.TxContext {
 	txctx.Logger = log.NewEntry(log.StandardLogger())
 	switch i % 2 {
 	case 0:
-		txctx.Envelope.Chain = chain.FromInt(0)
+		_ = txctx.Builder.SetChainIDUint64(0)
 		txctx.Set("errors", 0)
 	case 1:
-		txctx.Envelope.Chain = chain.FromInt(10)
+		_ = txctx.Builder.SetChainIDUint64(10)
 		txctx.Set("errors", 0)
 	}
 	return txctx
@@ -52,8 +51,8 @@ func (s *GeneratorSuite) TestGenerator() {
 	for _, txctx := range txctxs {
 		// Handle contexts
 
-		assert.Len(s.T(), txctx.Envelope.Errors, txctx.Get("errors").(int), "Expected right count of errors")
-		assert.NotEqual(s.T(), txctx.Envelope.Sender(), ethcommon.Address{}, "Expected new address to be set")
+		assert.Len(s.T(), txctx.Builder.Errors, txctx.Get("errors").(int), "Expected right count of errors")
+		assert.NotEqual(s.T(), txctx.Builder.MustGetFromAddress(), ethcommon.Address{}, "Expected new address to be set")
 	}
 }
 

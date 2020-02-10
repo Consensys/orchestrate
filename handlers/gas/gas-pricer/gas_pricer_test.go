@@ -13,7 +13,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
 type MockGasPricer struct {
@@ -31,20 +30,20 @@ func makeGasPricerContext(i int) *engine.TxContext {
 	txctx := engine.NewTxContext()
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
-	txctx.Envelope.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{}}
 
+	var nilBigInt *big.Int
 	switch i % 3 {
 	case 0:
 		txctx.WithContext(proxy.With(txctx.Context(), "error"))
 		txctx.Set("errors", 1)
-		txctx.Set("result", big.NewInt(0))
+		txctx.Set("result", nilBigInt)
 	case 1:
 		txctx.WithContext(proxy.With(txctx.Context(), "testURL"))
 		txctx.Set("errors", 0)
 		txctx.Set("result", big.NewInt(10))
 	case 2:
 		gp := big.NewInt(10)
-		txctx.Envelope.GetTx().GetTxData().SetGasPrice(gp)
+		_ = txctx.Builder.SetGasPrice(gp)
 		txctx.Set("errors", 0)
 		txctx.Set("result", gp)
 	}
@@ -70,12 +69,12 @@ func (s *PricerTestSuite) TestEstimator() {
 	s.Handle(txctxs)
 
 	for _, txctx := range txctxs {
-		assert.Len(s.T(), txctx.Envelope.Errors, txctx.Get("errors").(int), "Expected right count of errors")
-		for _, err := range txctx.Envelope.Errors {
+		assert.Len(s.T(), txctx.Builder.Errors, txctx.Get("errors").(int), "Expected right count of errors")
+		for _, err := range txctx.Builder.Errors {
 			assert.Equal(s.T(), "handler.gas-pricer", err.GetComponent(), "Error should  component should have been set")
 			assert.True(s.T(), errors.IsConnectionError(err), "Error should  be correct")
 		}
-		assert.Equal(s.T(), txctx.Get("result").(*big.Int), txctx.Envelope.GetTx().GetTxData().GetGasPriceBig(), "Expected correct Gas price")
+		assert.Equal(s.T(), txctx.Get("result").(*big.Int), txctx.Builder.GetGasPrice(), "Expected correct Gas price")
 	}
 }
 

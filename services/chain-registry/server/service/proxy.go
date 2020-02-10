@@ -23,7 +23,7 @@ import (
 const StatusClientClosedRequest = 499
 
 // StatusClientClosedRequestText non-standard HTTP status for client disconnection
-const StatusClientClosedRequestText = "Client Closed Request"
+const StatusClientClosedRequestText = "Client Closed Builder"
 
 func buildProxy(passHostHeader *bool, responseForwarding *dynamic.ResponseForwarding, defaultRoundTripper http.RoundTripper, bufferPool httputil.BufferPool, responseModifier func(*http.Response) error) (http.Handler, error) {
 	var flushInterval types.Duration

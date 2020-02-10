@@ -12,7 +12,7 @@ func RawTxStore(store evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
 		_, err := store.Store(
 			txctx.Context(),
 			&evlpstore.StoreRequest{
-				Envelope: txctx.Envelope,
+				Envelope: txctx.Builder.TxEnvelopeAsRequest(),
 			},
 		)
 		if err != nil {
@@ -26,12 +26,12 @@ func RawTxStore(store evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
 		txctx.Next()
 
 		// If an error occurred when executing pending handlers
-		if len(txctx.Envelope.GetErrors()) != 0 {
+		if len(txctx.Builder.GetErrors()) != 0 {
 			// We update status in storage
 			_, storeErr := store.SetStatus(
 				txctx.Context(),
 				&evlpstore.SetStatusRequest{
-					Id:     txctx.Envelope.GetMetadata().GetId(),
+					Id:     txctx.Builder.GetID(),
 					Status: evlpstore.Status_ERROR,
 				},
 			)
@@ -47,7 +47,7 @@ func RawTxStore(store evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
 		_, err = store.SetStatus(
 			txctx.Context(),
 			&evlpstore.SetStatusRequest{
-				Id:     txctx.Envelope.GetMetadata().GetId(),
+				Id:     txctx.Builder.GetID(),
 				Status: evlpstore.Status_PENDING,
 			},
 		)

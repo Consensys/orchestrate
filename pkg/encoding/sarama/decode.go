@@ -9,7 +9,7 @@ import (
 
 // Unmarshal a sarama message into a protobuffer
 func Unmarshal(msg *sarama.Msg, pb proto.Message) error {
-	// Unmarshal Sarama message to Envelope
+	// Unmarshal Sarama message to Builder
 	err := encoding.Unmarshal(msg.Value(), pb)
 	if err != nil {
 		return errors.FromError(err).SetComponent(component)

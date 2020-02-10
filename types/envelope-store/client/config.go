@@ -21,7 +21,7 @@ const (
 
 // EnvelopeStoreURL register flag for Ethereum client URLs
 func EnvelopeStoreURL(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`URL (GRPC target) Envelope Store (See https://github.com/grpc/grpc/blob/master/doc/naming.md)
+	desc := fmt.Sprintf(`URL (GRPC target) Builder Store (See https://github.com/grpc/grpc/blob/master/doc/naming.md)
 Environment variable: %q`, envelopeStoreURLEnv)
 	f.String(envelopeStoreURLFlag, envelopeStoreURLDefault, desc)
 	viper.SetDefault(EnvelopeStoreURLViperKey, envelopeStoreURLDefault)

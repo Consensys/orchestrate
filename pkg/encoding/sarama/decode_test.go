@@ -4,29 +4,29 @@ import (
 	"sync"
 	"testing"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
+
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/assert"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
 func newConsumerMessage() *broker.Msg {
 	msg := broker.Msg{}
-	msg.ConsumerMessage.Value, _ = proto.Marshal(testEnvelope)
+	msg.ConsumerMessage.Value, _ = proto.Marshal(builder.TxRequest())
 	return &msg
 }
 
 func TestUnmarshaller(t *testing.T) {
-	envelopes := make([]*envelope.Envelope, 0)
+	envelopes := make([]*tx.TxRequest, 0)
 	rounds := 1000
 	wg := &sync.WaitGroup{}
 	for i := 1; i < rounds; i++ {
-		envelopes = append(envelopes, &envelope.Envelope{})
+		envelopes = append(envelopes, &tx.TxRequest{})
 		wg.Add(1)
-		go func(e *envelope.Envelope) {
+		go func(e *tx.TxRequest) {
 			defer wg.Done()
 			_ = Unmarshal(newConsumerMessage(), e)
 		}(envelopes[len(envelopes)-1])
@@ -34,8 +34,8 @@ func TestUnmarshaller(t *testing.T) {
 	wg.Wait()
 
 	for _, e := range envelopes {
-		if e.GetFrom() != "0xdbb881a51CD4023E4400CEF3ef73046743f08da3" {
-			t.Errorf("Unmarshaller: expected %q but got %q", "abcde", e.From)
+		if e.GetParams().GetFrom() != "0xdbb881a51CD4023E4400CEF3ef73046743f08da3" {
+			t.Errorf("Unmarshaller: expected %q but got %q", "abcde", e.GetId())
 		}
 	}
 
@@ -45,7 +45,7 @@ func TestUnmarshallerError(t *testing.T) {
 	msg := &broker.Msg{
 		ConsumerMessage: sarama.ConsumerMessage{Value: []byte{0xab, 0x10}},
 	}
-	pb := &ethereum.TxData{}
+	pb := &tx.TxRequest{}
 	err := errors.FromError(Unmarshal(msg, pb))
 	assert.Error(t, err, "Unmarshal should error")
 	assert.Equal(t, err.GetComponent(), "encoding.sarama", "Error code should be correct")

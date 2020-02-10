@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"testing"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
+
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/chanregistry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 )
 
 func testKeyOf1(txctx *engine.TxContext) (string, error) {
@@ -33,7 +34,6 @@ func makeContext(key1, key2 string) *engine.TxContext {
 	txctx := engine.NewTxContext()
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
-	txctx.Envelope = &envelope.Envelope{}
 	txctx.In = &broker.Msg{
 		ConsumerMessage: sarama.ConsumerMessage{
 			Topic: "testTopic",
@@ -53,7 +53,7 @@ func makeContext(key1, key2 string) *engine.TxContext {
 
 func TestDispatcher(t *testing.T) {
 	reg := chanregistry.NewChanRegistry()
-	ch := make(chan *envelope.Envelope, 10)
+	ch := make(chan *tx.Builder, 10)
 	reg.Register("known-key", ch)
 	h := Dispatcher(reg, testKeyOf1, testKeyOf2)
 
@@ -62,9 +62,9 @@ func TestDispatcher(t *testing.T) {
 	h(txctx)
 	select {
 	case e := <-ch:
-		assert.Equal(t, txctx.Envelope, e, "#1: Envelope should match")
+		assert.Equal(t, txctx.Builder, e, "#1: Builder should match")
 	default:
-		t.Errorf("#1: Envelope should have been dispatched")
+		t.Errorf("#1: Builder should have been dispatched")
 	}
 
 	// Handle context
@@ -72,9 +72,9 @@ func TestDispatcher(t *testing.T) {
 	h(txctx)
 	select {
 	case e := <-ch:
-		assert.Equal(t, txctx.Envelope, e, "#2: Envelope should match")
+		assert.Equal(t, txctx.Builder, e, "#2: Builder should match")
 	default:
-		t.Errorf("#2: Envelope should have been dispatched")
+		t.Errorf("#2: Builder should have been dispatched")
 	}
 
 	// Handle context

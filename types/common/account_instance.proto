@@ -1,7 +1,5 @@
 syntax = "proto3";
 
-import "types/chain/chain.proto";
-
 option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/common";
 
 package common;
@@ -9,7 +7,7 @@ package common;
 // Information about an account on a chain 
 message AccountInstance {
     // Chain ID of the chain
-    chain.Chain chain = 1;
+    string chain_id = 1;
 
     // Deployment address of the contract
     string account = 2;

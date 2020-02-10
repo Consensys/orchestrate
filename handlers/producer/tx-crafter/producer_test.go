@@ -7,13 +7,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 )
 
 func TestPrepareMsg(t *testing.T) {
 	// No error
 	txctx := engine.NewTxContext()
-	txctx.Envelope = &envelope.Envelope{}
 	msg := &sarama.ProducerMessage{}
 	_ = PrepareMsg(txctx, msg)
 	assert.Equal(t, "topic-tx-nonce", msg.Topic, "If no error out topic should be nonce")

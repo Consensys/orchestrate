@@ -12,17 +12,17 @@ import (
 // Tessera enclave. We then need to sign the updated transaction
 func txHashSetter(tesseraClient tessera.Client) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		if txctx.Envelope.GetTx().GetTxData() == nil {
-			err := errors.DataError("can not send transaction with no data to Tessera").SetComponent(component)
+		if txctx.Builder.GetData() == "" {
+			err := errors.DataError("can not send transaction without data to Tessera").SetComponent(component)
 			txctx.Logger.WithError(err).Errorf("failed to get transaction hash from Tessera")
 			_ = txctx.AbortWithError(err)
 			return
 		}
 
 		txHash, err := tesseraClient.StoreRaw(
-			txctx.Envelope.GetChain().GetBigChainID().String(),
-			txctx.Envelope.GetTx().GetTxData().GetDataBytes(),
-			txctx.Envelope.GetArgs().GetPrivate().GetPrivateFrom(),
+			txctx.Builder.GetChainIDString(),
+			txctx.Builder.MustGetDataBytes(),
+			txctx.Builder.GetPrivateFrom(),
 		)
 		if err != nil {
 			e := txctx.AbortWithError(err).ExtendComponent(component)
@@ -30,7 +30,7 @@ func txHashSetter(tesseraClient tessera.Client) engine.HandlerFunc {
 			return
 		}
 
-		txctx.Envelope.GetTx().GetTxData().SetData(txHash)
+		_ = txctx.Builder.SetData(txHash)
 		txctx.Logger.Debugf("Sent transaction body to 'storesaw' endpoint and get txHash to be signed: %s", hexutil.Encode(txHash))
 	}
 }

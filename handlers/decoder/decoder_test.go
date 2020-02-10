@@ -13,7 +13,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
 	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
@@ -32,8 +31,8 @@ func TestDecoder(t *testing.T) {
 		{
 			"Receipt without error and log decoded",
 			func(txctx *engine.TxContext) *engine.TxContext {
-				txctx.Envelope.Chain = (&chain.Chain{}).SetChainID(big.NewInt(1))
-				txctx.Envelope.Receipt = &ethereum.Receipt{
+				_ = txctx.Builder.SetChainID(big.NewInt(1))
+				txctx.Builder.Receipt = &ethereum.Receipt{
 					Logs: []*ethereum.Log{
 						{
 							Data: "0x000000000000000000000000000000000000000000000001a055690d9db80000",
@@ -48,20 +47,20 @@ func TestDecoder(t *testing.T) {
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
-				txctx.Envelope.GetReceipt().Logs[0].DecodedData = map[string]string{
+				txctx.Builder.GetReceipt().Logs[0].DecodedData = map[string]string{
 					"from":   "0xBA826fEc90CEFdf6706858E5FbaFcb27A290Fbe0",
 					"to":     "0x4aEE792A88eDDA29932254099b9d1e06D537883f",
 					"tokens": "30000000000000000000",
 				}
-				txctx.Envelope.GetReceipt().Logs[0].Event = testEvent
+				txctx.Builder.GetReceipt().Logs[0].Event = testEvent
 				return txctx
 			},
 		},
 		{
 			"Receipt without error and unknown abi",
 			func(txctx *engine.TxContext) *engine.TxContext {
-				txctx.Envelope.Chain = (&chain.Chain{}).SetChainID(big.NewInt(1))
-				txctx.Envelope.Receipt = &ethereum.Receipt{
+				_ = txctx.Builder.SetChainID(big.NewInt(1))
+				txctx.Builder.Receipt = &ethereum.Receipt{
 					Logs: []*ethereum.Log{
 						{
 							Data: "0x000000000000000000000000000000000000000000000001a055690d9db80000",
@@ -76,20 +75,20 @@ func TestDecoder(t *testing.T) {
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
-				txctx.Envelope.GetReceipt().Logs[0].DecodedData = map[string]string{
+				txctx.Builder.GetReceipt().Logs[0].DecodedData = map[string]string{
 					"from":   "0xBA826fEc90CEFdf6706858E5FbaFcb27A290Fbe0",
 					"to":     "0x4aEE792A88eDDA29932254099b9d1e06D537883f",
 					"tokens": "30000000000000000000",
 				}
-				txctx.Envelope.GetReceipt().Logs[0].Event = testEvent
+				txctx.Builder.GetReceipt().Logs[0].Event = testEvent
 				return txctx
 			},
 		},
 		{
 			"Receipt without topics",
 			func(txctx *engine.TxContext) *engine.TxContext {
-				txctx.Envelope.Chain = (&chain.Chain{}).SetChainID(big.NewInt(1))
-				txctx.Envelope.Receipt = &ethereum.Receipt{
+				_ = txctx.Builder.SetChainID(big.NewInt(1))
+				txctx.Builder.Receipt = &ethereum.Receipt{
 					Logs: []*ethereum.Log{
 						{
 							Data:   "0x000000000000000000000000000000000000000000000001a055690d9db80000",
@@ -101,7 +100,7 @@ func TestDecoder(t *testing.T) {
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
 				err := errors.InternalError("invalid receipt (no topics in log)").ExtendComponent(component)
-				txctx.Envelope.Errors = append(txctx.Envelope.Errors, err)
+				txctx.Builder.Errors = append(txctx.Builder.Errors, err)
 				return txctx
 			},
 		},

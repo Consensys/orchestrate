@@ -3,6 +3,7 @@ package sender
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 )
 
@@ -14,10 +15,16 @@ func RawTxSender(ec ethclient.TransactionSender) engine.HandlerFunc {
 			return
 		}
 
+		if txctx.Builder.Raw == "" {
+			err := errors.DataError("no raw filled")
+			_ = txctx.AbortWithError(err).ExtendComponent(component)
+			return
+		}
+
 		err = ec.SendRawTransaction(
 			txctx.Context(),
 			url,
-			txctx.Envelope.GetTx().GetRaw(),
+			txctx.Builder.Raw,
 		)
 		if err != nil {
 			e := txctx.AbortWithError(err).ExtendComponent(component)

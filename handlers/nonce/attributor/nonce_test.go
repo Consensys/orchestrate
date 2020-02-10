@@ -15,41 +15,39 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/memory"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
 type MockChainStateReader struct{}
 
-func (r *MockChainStateReader) BalanceAt(ctx context.Context, endpoint string, account ethcommon.Address, blockNumber *big.Int) (*big.Int, error) {
+func (r *MockChainStateReader) BalanceAt(_ context.Context, _ string, _ ethcommon.Address, _ *big.Int) (*big.Int, error) {
 	return big.NewInt(0), nil
 }
 
-func (r *MockChainStateReader) StorageAt(ctx context.Context, endpoint string, account ethcommon.Address, key ethcommon.Hash, blockNumber *big.Int) ([]byte, error) {
+func (r *MockChainStateReader) StorageAt(_ context.Context, _ string, _ ethcommon.Address, _ ethcommon.Hash, _ *big.Int) ([]byte, error) {
 	return []byte{}, nil
 }
 
-func (r *MockChainStateReader) CodeAt(ctx context.Context, endpoint string, account ethcommon.Address, blockNumber *big.Int) ([]byte, error) {
+func (r *MockChainStateReader) CodeAt(_ context.Context, _ string, _ ethcommon.Address, _ *big.Int) ([]byte, error) {
 	return []byte{}, nil
 }
 
-func (r *MockChainStateReader) NonceAt(ctx context.Context, endpoint string, account ethcommon.Address, blockNumber *big.Int) (uint64, error) {
+func (r *MockChainStateReader) NonceAt(_ context.Context, _ string, _ ethcommon.Address, _ *big.Int) (uint64, error) {
 	return 0, nil
 }
 
-func (r *MockChainStateReader) PendingBalanceAt(ctx context.Context, endpoint string, account ethcommon.Address) (*big.Int, error) {
+func (r *MockChainStateReader) PendingBalanceAt(_ context.Context, _ string, _ ethcommon.Address) (*big.Int, error) {
 	return big.NewInt(0), nil
 }
 
-func (r *MockChainStateReader) PendingStorageAt(ctx context.Context, endpoint string, account ethcommon.Address, key ethcommon.Hash) ([]byte, error) {
+func (r *MockChainStateReader) PendingStorageAt(_ context.Context, _ string, _ ethcommon.Address, _ ethcommon.Hash) ([]byte, error) {
 	return []byte{}, nil
 }
 
-func (r *MockChainStateReader) PendingCodeAt(ctx context.Context, endpoint string, account ethcommon.Address) ([]byte, error) {
+func (r *MockChainStateReader) PendingCodeAt(_ context.Context, _ string, _ ethcommon.Address) ([]byte, error) {
 	return []byte{}, nil
 }
 
-func (r *MockChainStateReader) PendingNonceAt(ctx context.Context, endpoint string, account ethcommon.Address) (uint64, error) {
+func (r *MockChainStateReader) PendingNonceAt(_ context.Context, endpoint string, _ ethcommon.Address) (uint64, error) {
 	if endpoint == "0" {
 		// Simulate error
 		return 0, fmt.Errorf("unknown chain")
@@ -97,17 +95,17 @@ func (m mockMsg) Header() engine.Header { return &header{} }
 
 type header struct{}
 
-func (h *header) Add(key, value string) {}
-func (h *header) Del(key string)        {}
-func (h *header) Get(key string) string { return "" }
-func (h *header) Set(key, value string) {}
+func (h *header) Add(_, _ string)     {}
+func (h *header) Del(_ string)        {}
+func (h *header) Get(_ string) string { return "" }
+func (h *header) Set(_, _ string)     {}
 
 func makeNonceContext(endpoint, key string, expectedNonce uint64, expectedErrorCount int) *engine.TxContext {
 	txctx := engine.NewTxContext()
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
-	txctx.Envelope.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{}}
 	txctx.In = mockMsg(key)
+	_ = txctx.Builder.SetFrom(ethcommon.HexToAddress("0x1"))
 	txctx.WithContext(proxy.With(txctx.Context(), endpoint))
 
 	txctx.Set("expectedErrorCount", expectedErrorCount)
@@ -117,8 +115,8 @@ func makeNonceContext(endpoint, key string, expectedNonce uint64, expectedErrorC
 }
 
 func assertTxContext(t *testing.T, txctx *engine.TxContext) {
-	assert.Len(t, txctx.Envelope.GetErrors(), txctx.Get("expectedErrorCount").(int), "Error count should be correct")
-	assert.Equal(t, txctx.Get("expectedNonce").(uint64), txctx.Envelope.GetTx().GetTxData().GetNonce(), "Nonce should be correct")
+	assert.Len(t, txctx.Builder.GetErrors(), txctx.Get("expectedErrorCount").(int), "Error count should be correct")
+	assert.Equal(t, txctx.Get("expectedNonce").(uint64), txctx.Builder.MustGetNonceUint64(), "Nonce should be correct")
 }
 
 func TestNonceHandler(t *testing.T) {
@@ -139,7 +137,7 @@ func TestNonceHandler(t *testing.T) {
 
 	// On 3rd execution we signal a recovery from 5 so expected nonce should be 5
 	txctx = makeNonceContext("1", testKey1, 5, 0)
-	txctx.Envelope.Metadata = &envelope.Metadata{Extra: map[string]string{"nonce.recovering.expected": "5"}}
+	_ = txctx.Builder.SetInternalLabelsValue("nonce.recovering.expected", "5")
 	h(txctx)
 	assertTxContext(t, txctx)
 

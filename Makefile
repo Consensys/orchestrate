@@ -49,6 +49,7 @@ generate-mocks:
 	mockgen -source=types/contract-registry/registry.pb.go -destination=types/contract-registry/client/mocks/mock_client.go -package=mocks
 	mockgen -source=types/envelope-store/store.pb.go -destination=types/envelope-store/client/mocks/mock_client.go -package=mocks
 	mockgen -source=services/chain-registry/store/types/store.go -destination=services/chain-registry/store/mocks/mock_store.go -package=mocks
+	mockgen -source=services/multi-vault/keystore/keystore.go -destination=services/multi-vault/keystore/mocks/mock_client.go -package=mocks
 
 # Tools
 lint-tools: ## Install linting tools
@@ -56,7 +57,7 @@ lint-tools: ## Install linting tools
 	@GO111MODULE=off go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
 
 tools: lint-tools ## Install test tools
-	@GO111MODULE=off go get -u github.com/DATA-DOG/godog/cmd/godog
+	@GO111MODULE=off go get -u github.com/cucumber/godog/cmd/godog
 	@GO111MODULE=off go get -u github.com/golang/mock/gomock
 	@GO111MODULE=off go get -u github.com/golang/mock/mockgen
 	@GO111MODULE=off go get -u github.com/golang/protobuf/protoc-gen-go

@@ -3,22 +3,25 @@ package proto
 import (
 	"testing"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 )
 
 func TestMarshaller(t *testing.T) {
-	msg := &envelope.Envelope{
-		From: "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C",
+	uuid := "957e4d77-5dbb-484e-998c-e44c0dd8891d"
+
+	msg := &tx.TxRequest{
+		Id: uuid,
 	}
 	b, _ := Marshal(msg)
 
-	var evlp = &envelope.Envelope{}
+	var evlp = &tx.TxRequest{}
 	_ = proto.Unmarshal(b, evlp)
 
-	if evlp.GetFrom() != "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C" {
-		t.Errorf("EnvelopeMarshaller: expected %q but got %q", "abcde", evlp.GetFrom())
+	if evlp.GetId() != uuid {
+		t.Errorf("EnvelopeMarshaller: expected %q but got %q", uuid, evlp.GetId())
 	}
 }
 

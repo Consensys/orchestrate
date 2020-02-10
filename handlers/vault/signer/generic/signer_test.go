@@ -2,7 +2,10 @@ package generic
 
 import (
 	"fmt"
+	"math/big"
 	"testing"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
@@ -10,8 +13,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
 func mockSignerFunc(keystore.KeyStore, *engine.TxContext, ethcommon.Address, *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error) {
@@ -25,59 +26,88 @@ func makeSignerContext(i int) *engine.TxContext {
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
 
-	switch i % 8 {
+	switch i % 5 {
 	case 0:
-		h := ethcommon.HexToHash("0x12345678")
-		txctx.Envelope.Chain = chain.FromInt(10)
-		txctx.Envelope.Tx = &ethereum.Transaction{
-			Raw:  alreadySignedTx,
-			Hash: h.String(),
-		}
+		_ = txctx.Builder.
+			SetTxHash(ethcommon.HexToHash("0x12345678")).
+			SetChainIDUint64(10).
+			SetNonce(10).
+			SetValue(big.NewInt(100)).
+			MustSetToString("0x1").
+			MustSetFromString("0x2").
+			SetGas(11).
+			SetGasPrice(big.NewInt(12))
 	case 1:
-		h := ethcommon.HexToHash("0x12345678")
-		txctx.Envelope.Chain = chain.FromInt(0)
-		txctx.Envelope.Tx = &ethereum.Transaction{
-			Raw:  alreadySignedTx,
-			Hash: h.String(),
-		}
+		_ = txctx.Builder.
+			SetTxHash(ethcommon.HexToHash("0x12345678")).
+			SetChainIDUint64(0).
+			SetNonce(10).
+			SetValue(big.NewInt(100)).
+			MustSetToString("0x1").
+			MustSetFromString("0x2").
+			SetGas(11).
+			SetGasPrice(big.NewInt(12))
 	case 2:
-		txctx.Envelope.Chain = chain.FromInt(0)
-		txctx.Envelope.Tx = &ethereum.Transaction{}
+		_ = txctx.Builder.SetChainIDUint64(0).
+			SetChainIDUint64(0).
+			SetNonce(10).
+			SetValue(big.NewInt(100)).
+			MustSetToString("0x1").
+			MustSetFromString("0x2").
+			SetGas(11).
+			SetGasPrice(big.NewInt(12))
 	case 3:
-		txctx.Envelope.Chain = chain.FromInt(10)
-		txctx.Envelope.Tx = &ethereum.Transaction{}
+		_ = txctx.Builder.SetChainIDUint64(10).
+			SetChainIDUint64(10).
+			SetNonce(10).
+			SetValue(big.NewInt(100)).
+			MustSetToString("0x1").
+			MustSetFromString("0x2").
+			SetGas(11).
+			SetGasPrice(big.NewInt(12))
 	case 4:
-		txctx.Envelope.Chain = chain.FromInt(10)
-		txctx.Envelope.Tx = &ethereum.Transaction{
-			TxData: &ethereum.TxData{
-				Data: "",
-			},
-		}
-		txctx.Envelope.Protocol = &chain.Protocol{
-			Type: chain.ProtocolType_QUORUM_TESSERA,
-		}
+		_ = txctx.Builder.
+			SetChainIDUint64(10).
+			MustSetDataString("0").
+			SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION).
+			SetNonce(10).
+			SetValue(big.NewInt(100)).
+			MustSetToString("0x1").
+			MustSetFromString("0x2").
+			SetGas(11).
+			SetGasPrice(big.NewInt(12))
 	case 5:
-		txctx.Envelope.Chain = chain.FromInt(10)
-		txctx.Envelope.Tx = &ethereum.Transaction{}
-		txctx.Envelope.Protocol = &chain.Protocol{
-			Type: chain.ProtocolType_QUORUM_TESSERA,
-		}
+		_ = txctx.Builder.
+			SetChainIDUint64(10).
+			SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION).
+			SetNonce(10).
+			MustSetRawString(alreadySignedTx).
+			SetValue(big.NewInt(100)).
+			MustSetToString("0x1").
+			MustSetFromString("0x2").
+			SetGas(11).
+			SetGasPrice(big.NewInt(12))
 	case 6:
-		txctx.Envelope.Chain = chain.FromInt(0)
-		txctx.Envelope.Tx = &ethereum.Transaction{
-			TxData: &ethereum.TxData{
-				Data: "",
-			},
-		}
-		txctx.Envelope.Protocol = &chain.Protocol{
-			Type: chain.ProtocolType_QUORUM_TESSERA,
-		}
+		_ = txctx.Builder.
+			SetChainIDUint64(0).
+			MustSetRawString("0").
+			SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION).
+			SetNonce(10).
+			SetValue(big.NewInt(100)).
+			MustSetToString("0x1").
+			MustSetFromString("0x2").
+			SetGas(11).
+			SetGasPrice(big.NewInt(12))
 	case 7:
-		txctx.Envelope.Chain = chain.FromInt(10)
-		txctx.Envelope.Tx = &ethereum.Transaction{}
-		txctx.Envelope.Protocol = &chain.Protocol{
-			Type: chain.ProtocolType_BESU_ORION,
-		}
+		_ = txctx.Builder.
+			SetChainIDUint64(0).
+			SetMethod(tx.Method_EEA_SENDPRIVATETRANSACTION).
+			SetNonce(10).
+			SetValue(big.NewInt(100)).
+			MustSetToString("0x1").
+			MustSetFromString("0x2").
+			SetGas(11).
+			SetGasPrice(big.NewInt(12))
 	}
 	return txctx
 }
@@ -95,8 +125,8 @@ func TestGeneric(t *testing.T) {
 	for i := 0; i < ROUNDS; i++ {
 		txctx := makeSignerContext(i)
 		handler(txctx)
-		assert.NotNilf(t, txctx.Envelope.Tx.GetRaw(), fmt.Sprintf("TxRawSignature should not be nil"))
-		assert.NotNilf(t, txctx.Envelope.Tx.GetHash(), fmt.Sprintf("TxHash should not be nil"))
+		assert.NotNilf(t, txctx.Builder.GetRaw(), fmt.Sprintf("TxRawSignature should not be nil"))
+		assert.NotNilf(t, txctx.Builder.GetTxHash(), fmt.Sprintf("TxHash should not be nil"))
 
 	}
 }

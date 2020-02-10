@@ -284,7 +284,7 @@ func (r *ContractRegistry) GetMethodsBySelector(ctx context.Context, req *svc.Ge
 	err := r.db.ModelContext(ctx, method).
 		Column("method_model.abi").
 		Join("JOIN codehashes AS c ON c.codehash = method_model.codehash").
-		Where("c.chain_id = ?", req.GetAccountInstance().GetChain().GetBigChainID().String()).
+		Where("c.chain_id = ?", req.GetAccountInstance().GetChainId()).
 		Where("c.address = ?", req.GetAccountInstance().GetAccount()).
 		Where("method_model.selector = ?", req.GetSelector()).
 		First()
@@ -319,7 +319,7 @@ func (r *ContractRegistry) GetEventsBySigHash(ctx context.Context, req *svc.GetE
 	err := r.db.ModelContext(ctx, event).
 		Column("event_model.abi").
 		Join("JOIN codehashes AS c ON c.codehash = event_model.codehash").
-		Where("c.chain_id = ?", req.GetAccountInstance().GetChain().GetBigChainID().String()).
+		Where("c.chain_id = ?", req.GetAccountInstance().GetChainId()).
 		Where("c.address = ?", req.GetAccountInstance().GetAccount()).
 		Where("event_model.sig_hash = ?", req.GetSigHash()).
 		Where("event_model.indexed_input_count = ?", req.GetIndexedInputCount()).
@@ -384,7 +384,7 @@ func (r *ContractRegistry) GetTags(ctx context.Context, req *svc.GetTagsRequest)
 // SetAccountCodeHash set the codehash of a contract address for a given chain
 func (r *ContractRegistry) SetAccountCodeHash(ctx context.Context, req *svc.SetAccountCodeHashRequest) (*svc.SetAccountCodeHashResponse, error) {
 	codehash := &CodehashModel{
-		ChainID:  req.GetAccountInstance().GetChain().GetBigChainID().String(),
+		ChainID:  req.GetAccountInstance().GetChainId(),
 		Address:  req.GetAccountInstance().GetAccount(),
 		Codehash: req.GetCodeHash(),
 	}

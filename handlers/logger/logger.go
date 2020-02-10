@@ -25,7 +25,7 @@ func Logger(level string) engine.HandlerFunc {
 			WithFields(log.Fields{
 				"latency": time.Since(start),
 			}).
-			WithError(fmt.Errorf("%q", txctx.Envelope.GetErrors())).
+			WithError(fmt.Errorf("%q", txctx.Builder.GetErrors())).
 			Log(logLevel, "logger: message processed")
 	}
 }

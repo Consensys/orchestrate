@@ -6,11 +6,12 @@ import (
 	"strings"
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
 )
 
@@ -21,7 +22,7 @@ type EnvelopeModel struct {
 	// UUID technical identifier
 	ID int32
 
-	// Envelope Identifier
+	// Builder Identifier
 	EnvelopeID string
 
 	// Tenant Identifier
@@ -31,7 +32,7 @@ type EnvelopeModel struct {
 	ChainID string
 	TxHash  string
 
-	// Envelope
+	// Builder
 	Envelope []byte
 
 	// Status
@@ -62,11 +63,6 @@ func (model *EnvelopeModel) StatusFormatted() evlpstore.Status {
 	return evlpstore.Status(status)
 }
 
-// UnmarshalEnvelope returns a proto envelope from model
-func (model *EnvelopeModel) UnmarshalEnvelope(e *envelope.Envelope) error {
-	return encoding.Unmarshal(model.Envelope, e)
-}
-
 func (model *EnvelopeModel) ToStatusResponse() (*evlpstore.StatusResponse, error) {
 	return &evlpstore.StatusResponse{
 		StatusInfo: model.StatusInfo(),
@@ -76,11 +72,11 @@ func (model *EnvelopeModel) ToStatusResponse() (*evlpstore.StatusResponse, error
 func (model *EnvelopeModel) ToStoreResponse() (*evlpstore.StoreResponse, error) {
 	resp := &evlpstore.StoreResponse{
 		StatusInfo: model.StatusInfo(),
-		Envelope:   &envelope.Envelope{},
+		Envelope:   &tx.TxEnvelope{},
 	}
 
 	// Unmarshal envelope
-	err := model.UnmarshalEnvelope(resp.GetEnvelope())
+	err := encoding.Unmarshal(model.Envelope, resp.GetEnvelope())
 	if err != nil {
 		return &evlpstore.StoreResponse{}, err
 	}
@@ -89,7 +85,7 @@ func (model *EnvelopeModel) ToStoreResponse() (*evlpstore.StoreResponse, error) 
 }
 
 // FromEnvelope creates a model from an envelope
-func FromEnvelope(ctx context.Context, e *envelope.Envelope) (*EnvelopeModel, error) {
+func FromEnvelope(ctx context.Context, e *tx.TxEnvelope) (*EnvelopeModel, error) {
 	// Marshal envelope
 	b, err := encoding.Marshal(e)
 	if err != nil {
@@ -100,9 +96,9 @@ func FromEnvelope(ctx context.Context, e *envelope.Envelope) (*EnvelopeModel, er
 
 	return &EnvelopeModel{
 		Envelope:   b,
-		EnvelopeID: e.GetMetadata().GetId(),
+		EnvelopeID: e.GetID(),
 		TenantID:   tenantID,
-		ChainID:    e.GetChain().GetBigChainID().String(),
-		TxHash:     e.GetTx().GetHash(),
+		ChainID:    e.GetChainID(),
+		TxHash:     e.GetTxHash(),
 	}, nil
 }

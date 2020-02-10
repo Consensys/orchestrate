@@ -12,13 +12,13 @@ func UnsignedTxStore(store evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
 		txctx.Next()
 
 		// If no error occurred while executing pending handlers
-		if len(txctx.Envelope.GetErrors()) == 0 {
+		if len(txctx.Builder.GetErrors()) == 0 {
 			// Store envelope
 			// We can not store envelope before sending transaction because we do not know the transaction hash
 			// This is an issue for overall consistency of the system before/after transaction is mined
 			_, err := store.Store(txctx.Context(),
 				&evlpstore.StoreRequest{
-					Envelope: txctx.Envelope,
+					Envelope: txctx.Builder.TxEnvelopeAsRequest(),
 				},
 			)
 			if err != nil {
@@ -31,7 +31,7 @@ func UnsignedTxStore(store evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
 			// Transaction has been properly sent so we set status to `pending`
 			_, err = store.SetStatus(txctx.Context(),
 				&evlpstore.SetStatusRequest{
-					Id:     txctx.Envelope.GetMetadata().GetId(),
+					Id:     txctx.Builder.GetID(),
 					Status: evlpstore.Status_PENDING,
 				},
 			)

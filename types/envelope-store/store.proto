@@ -4,8 +4,7 @@ import "google/api/annotations.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 import "protoc-gen-swagger/options/annotations.proto";
-import "types/envelope/envelope.proto";
-import "types/chain/chain.proto";
+import "types/tx/tx.proto";
 
 option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store";
 
@@ -100,12 +99,12 @@ message StatusInfo {
 }
 
 message StoreRequest {
-    envelope.Envelope envelope = 1;
+    tx.TxEnvelope envelope = 1;
 }
 
 message StoreResponse {
     // Envelope
-    envelope.Envelope envelope = 1;
+    tx.TxEnvelope envelope = 1;
 
     StatusInfo status_info = 2;
 }
@@ -117,7 +116,7 @@ message LoadByIDRequest {
 
 message LoadByTxHashRequest {
     // Chain the transaction has been sent to
-    chain.Chain chain = 2;
+    string chain_id = 2;
 
     // Hash of the transaction
     string tx_hash = 3;

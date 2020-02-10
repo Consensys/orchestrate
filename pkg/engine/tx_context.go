@@ -4,17 +4,19 @@ import (
 	"context"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
+
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/error"
 )
 
-// TxContext is the most important part of an engine.
+// Builder is the most important part of an engine.
 // It allows to pass variables between handlers
 type TxContext struct {
-	// Envelope stores all information about transaction lifecycle
-	Envelope *envelope.Envelope
+	// Builder stores all information about transaction lifecycle
+	// TODO: move builder in context
+	Builder *tx.Builder
 
 	// Input message
 	In Msg
@@ -22,10 +24,10 @@ type TxContext struct {
 	// Array of sequences of handlers to execute on a given context
 	stack []*sequence
 
-	// Logger logrus log entry for this TxContext execution
+	// Logger logrus log entry for this Builder execution
 	Logger *log.Entry
 
-	// ctx is a go context that is attached to the TxContext
+	// ctx is a go context that is attached to the Builder
 	// It allows to carry deadlines, cancellation signals, etc. between handlers
 	//
 	// This approach is not recommended by go context documentation
@@ -33,23 +35,23 @@ type TxContext struct {
 	//
 	// Still this recommendation against has been actively questioned
 	// (txctx.f https://github.com/golang/go/issues/22602)
-	// Also net/http has been following this implementation for the Request object
+	// Also net/http has been following this implementation for the Builder object
 	// (txctx.f. https://github.com/golang/go/blob/master/src/net/http/request.go#L107)
 	ctx context.Context
 }
 
-// NewTxContext creates a new TxContext
+// NewTxContext creates a new Builder
 func NewTxContext() *TxContext {
 	return &TxContext{
-		Envelope: &envelope.Envelope{},
+		Builder: tx.NewBuilder(),
 	}
 }
 
-// Reset re-initialize TxContext
+// Reset re-initialize Builder
 func (txctx *TxContext) Reset() {
 	txctx.ctx = nil
+	txctx.Builder = tx.NewBuilder()
 	txctx.In = nil
-	txctx.Envelope.Reset()
 	txctx.stack = nil
 	txctx.Logger = nil
 }
@@ -62,15 +64,15 @@ func (txctx *TxContext) Next() {
 	}
 }
 
-// Error attaches an error to TxContext
+// Error attaches an error to Builder
 func (txctx *TxContext) Error(err error) *ierror.Error {
 	if err == nil {
 		panic("err is nil")
 	}
 
-	txctx.Envelope.Errors = append(txctx.Envelope.Errors, errors.FromError(err))
+	_ = txctx.Builder.AppendError(errors.FromError(err))
 
-	return txctx.Envelope.Errors[len(txctx.Envelope.Errors)-1]
+	return txctx.Builder.GetErrors()[len(txctx.Builder.Errors)-1]
 }
 
 // Abort prevents pending handlers to be executed
@@ -86,7 +88,7 @@ func (txctx *TxContext) AbortWithError(err error) *ierror.Error {
 	return txctx.Error(err)
 }
 
-// Prepare re-initializes TxContext, set handlers, set logger and set message
+// Prepare re-initializes Builder, set handlers, set logger and set message
 func (txctx *TxContext) Prepare(logger *log.Entry, msg Msg) *TxContext {
 	txctx.Reset()
 	txctx.In = msg
@@ -106,7 +108,7 @@ func (txctx *TxContext) Get(key string) interface{} {
 	return txctx.Context().Value(txCtxKey(key))
 }
 
-// Context returns the go context attached to TxContext.
+// Context returns the go context attached to Builder.
 // To change the go context, use WithContext.
 //
 // The returned context is always non-nil; it defaults to the background context.
@@ -117,7 +119,7 @@ func (txctx *TxContext) Context() context.Context {
 	return context.Background()
 }
 
-// WithContext attach a go context to TxContext
+// WithContext attach a go context to Builder
 // The go context provided as argument must be non nil or WithContext will panic
 func (txctx *TxContext) WithContext(ctx context.Context) *TxContext {
 	if ctx == nil {
@@ -137,7 +139,7 @@ func (txctx *TxContext) applyHandlers(handlers ...HandlerFunc) {
 	seq.handlers = handlers
 	seq.txctx = txctx
 
-	// Attach the sequence to the TxContext
+	// Attach the sequence to the Builder
 	txctx.stack = append(txctx.stack, seq)
 
 	// Execute sequence

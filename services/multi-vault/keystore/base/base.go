@@ -2,6 +2,7 @@ package base
 
 import (
 	"context"
+	"math/big"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
 
@@ -12,7 +13,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore/session"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore/wallet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/services"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 )
 
 // KeyStore holds the methods of the interfaces BaseKeyStore
@@ -28,7 +28,7 @@ func NewKeyStore(secretStore services.SecretStore) *KeyStore {
 }
 
 // SignTx returns a signed transaction. It is perfectly equivalent to SignTx
-func (s *KeyStore) SignTx(ctx context.Context, netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error) {
+func (s *KeyStore) SignTx(ctx context.Context, netChain *big.Int, a ethcommon.Address, tx *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error) {
 	// Creates a new signing session
 	sess := session.NewSigningSession(s.SecretStore)
 	err := sess.SetWallet(ctx, &a)
@@ -50,7 +50,7 @@ func (s *KeyStore) SignTx(ctx context.Context, netChain *chain.Chain, a ethcommo
 }
 
 // SignPrivateEEATx signs a private transaction
-func (s *KeyStore) SignPrivateEEATx(ctx context.Context, netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction, privateArgs *types.PrivateArgs) ([]byte, *ethcommon.Hash, error) {
+func (s *KeyStore) SignPrivateEEATx(ctx context.Context, netChain *big.Int, a ethcommon.Address, tx *ethtypes.Transaction, privateArgs *types.PrivateArgs) ([]byte, *ethcommon.Hash, error) {
 	// Creates a new signing session
 	sess := session.NewSigningSession(s.SecretStore)
 	err := sess.SetWallet(ctx, &a)
@@ -71,7 +71,7 @@ func (s *KeyStore) SignPrivateEEATx(ctx context.Context, netChain *chain.Chain, 
 }
 
 // SignPrivateTesseraTx signs a private transaction using Tessera
-func (s *KeyStore) SignPrivateTesseraTx(ctx context.Context, netChain *chain.Chain, a ethcommon.Address, tx *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error) {
+func (s *KeyStore) SignPrivateTesseraTx(ctx context.Context, netChain *big.Int, a ethcommon.Address, tx *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error) {
 	// Creates a new signing session
 	sess := session.NewSigningSession(s.SecretStore)
 	err := sess.SetWallet(ctx, &a)

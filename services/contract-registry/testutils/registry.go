@@ -12,7 +12,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	rcommon "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/common"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
 	"golang.org/x/net/context"
@@ -169,7 +168,7 @@ var _, eventJSONsBis, _ = rcommon.ParseJSONABI(erc20ContractBis.Abi)
 
 // ContractInstance is a unittest value
 var ContractInstance = common.AccountInstance{
-	Chain:   &chain.Chain{ChainId: big.NewInt(3).String()},
+	ChainId: big.NewInt(3).String(),
 	Account: "0xBA826fEc90CEFdf6706858E5FbaFcb27A290Fbe0",
 }
 

@@ -12,8 +12,8 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication"
 
-	"github.com/DATA-DOG/godog"
-	"github.com/DATA-DOG/godog/gherkin"
+	"github.com/cucumber/godog"
+	"github.com/cucumber/godog/gherkin"
 	merror "github.com/hashicorp/go-multierror"
 	log "github.com/sirupsen/logrus"
 )

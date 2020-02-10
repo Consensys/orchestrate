@@ -1,8 +1,6 @@
 package receipt
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
-
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
@@ -21,13 +19,11 @@ func Loader(txctx *engine.TxContext) {
 	}
 
 	// Set receipt
-	txctx.Envelope.Receipt = ethereum.FromGethReceipt(&receipt.Receipt).
+	txctx.Builder.Receipt = ethereum.FromGethReceipt(&receipt.Receipt).
 		SetBlockHash(receipt.BlockHash).
 		SetBlockNumber(uint64(receipt.BlockNumber)).
 		SetTxIndex(receipt.TxIndex)
-	txctx.Envelope.Chain = &chain.Chain{
-		ChainId: receipt.ChainID.String(),
-	}
+	txctx.Builder.ChainID = receipt.ChainID
 
 	// Enrich Logger
 	txctx.Logger = txctx.Logger.WithFields(log.Fields{
@@ -36,5 +32,5 @@ func Loader(txctx *engine.TxContext) {
 		"block.hash":    receipt.BlockHash.Hex(),
 	})
 
-	txctx.Logger.Tracef("loader: message loaded: %v", txctx.Envelope.String())
+	txctx.Logger.Tracef("loader: message loaded: %v", txctx.Builder)
 }

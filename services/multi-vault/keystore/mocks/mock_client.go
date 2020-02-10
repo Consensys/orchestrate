@@ -10,7 +10,7 @@ import (
 	types "github.com/ethereum/go-ethereum/core/types"
 	gomock "github.com/golang/mock/gomock"
 	types0 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
-	chain "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
+	big "math/big"
 	reflect "reflect"
 )
 
@@ -38,7 +38,7 @@ func (m *MockKeyStore) EXPECT() *MockKeyStoreMockRecorder {
 }
 
 // SignTx mocks base method
-func (m *MockKeyStore) SignTx(ctx context.Context, chain *chain.Chain, a common.Address, tx *types.Transaction) ([]byte, *common.Hash, error) {
+func (m *MockKeyStore) SignTx(ctx context.Context, chain *big.Int, a common.Address, tx *types.Transaction) ([]byte, *common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignTx", ctx, chain, a, tx)
 	ret0, _ := ret[0].([]byte)
@@ -54,7 +54,7 @@ func (mr *MockKeyStoreMockRecorder) SignTx(ctx, chain, a, tx interface{}) *gomoc
 }
 
 // SignPrivateEEATx mocks base method
-func (m *MockKeyStore) SignPrivateEEATx(ctx context.Context, chain *chain.Chain, a common.Address, tx *types.Transaction, privateArgs *types0.PrivateArgs) ([]byte, *common.Hash, error) {
+func (m *MockKeyStore) SignPrivateEEATx(ctx context.Context, chain *big.Int, a common.Address, tx *types.Transaction, privateArgs *types0.PrivateArgs) ([]byte, *common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignPrivateEEATx", ctx, chain, a, tx, privateArgs)
 	ret0, _ := ret[0].([]byte)
@@ -70,7 +70,7 @@ func (mr *MockKeyStoreMockRecorder) SignPrivateEEATx(ctx, chain, a, tx, privateA
 }
 
 // SignPrivateTesseraTx mocks base method
-func (m *MockKeyStore) SignPrivateTesseraTx(ctx context.Context, chain *chain.Chain, a common.Address, tx *types.Transaction) ([]byte, *common.Hash, error) {
+func (m *MockKeyStore) SignPrivateTesseraTx(ctx context.Context, chain *big.Int, a common.Address, tx *types.Transaction) ([]byte, *common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignPrivateTesseraTx", ctx, chain, a, tx)
 	ret0, _ := ret[0].([]byte)

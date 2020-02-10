@@ -43,250 +43,6 @@
     }
   },
   "definitions": {
-    "abiContract": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "$ref": "#/definitions/abiContractId",
-          "title": "A set of fields that identify a contract on a particular chain"
-        },
-        "abi": {
-          "type": "string",
-          "title": "Contract ABI (optional)"
-        },
-        "bytecode": {
-          "type": "string",
-          "title": "Contract deployment bytecode (optional)"
-        },
-        "methods": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/abiMethod"
-          },
-          "title": "Methods of the contract"
-        },
-        "events": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/abiEvent"
-          },
-          "title": "Event of the contract"
-        },
-        "deployedBytecode": {
-          "type": "string",
-          "title": "Contract deployed bytecode (optional)"
-        }
-      },
-      "title": "Contract holds contract information"
-    },
-    "abiContractId": {
-      "type": "object",
-      "properties": {
-        "registry": {
-          "type": "string",
-          "title": "Registry of contract\ne.g. \"registry.consensys.net/orchestrate\""
-        },
-        "name": {
-          "type": "string",
-          "title": "Name of contract\ne.g. \"ERC20\""
-        },
-        "tag": {
-          "type": "string",
-          "title": "Contract tag\ne.g \"v2.1.3\""
-        }
-      }
-    },
-    "abiEvent": {
-      "type": "object",
-      "properties": {
-        "signature": {
-          "type": "string",
-          "title": "Name of the event to call on contract\ne.g \"Transfer(address, address, uint256)\""
-        },
-        "abi": {
-          "type": "string",
-          "title": "ABI of the method (Optional)"
-        }
-      },
-      "title": "Event"
-    },
-    "abiMethod": {
-      "type": "object",
-      "properties": {
-        "signature": {
-          "type": "string",
-          "title": "Signature of the method to call on contract\ne.g \"transfer(address,uint256)\""
-        },
-        "abi": {
-          "type": "string",
-          "title": "ABI of the method (Optional)"
-        }
-      },
-      "title": "Method"
-    },
-    "argsCall": {
-      "type": "object",
-      "properties": {
-        "contract": {
-          "$ref": "#/definitions/abiContract",
-          "title": "Contract to call method on"
-        },
-        "method": {
-          "$ref": "#/definitions/abiMethod",
-          "title": "Method to call"
-        },
-        "args": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "title": "Arguments to feed on transaction call"
-        }
-      },
-      "title": "Call contains information for a contract call"
-    },
-    "argsPrivate": {
-      "type": "object",
-      "properties": {
-        "private_from": {
-          "type": "string",
-          "title": "When sending a private transaction, the sending party's base64-encoded public key to use.\nIf not present and passing private_for"
-        },
-        "private_for": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "When sending a private transaction, an array of the recipients' base64-encoded public keys."
-        },
-        "private_tx_type": {
-          "type": "string",
-          "title": "For Quorum \u003e=2.2.1 support"
-        }
-      },
-      "title": "Private arguments"
-    },
-    "chainChain": {
-      "type": "object",
-      "properties": {
-        "chain_id": {
-          "type": "string",
-          "title": "Chain ID\ne.g. 1 for mainnet, 3 for Ropsten"
-        },
-        "uuid": {
-          "type": "string",
-          "title": "UUID in the chain registry"
-        },
-        "name": {
-          "type": "string",
-          "title": "Name in the chain registry"
-        }
-      },
-      "title": "Information about a Chain"
-    },
-    "chainProtocol": {
-      "type": "object",
-      "properties": {
-        "type": {
-          "$ref": "#/definitions/chainProtocolType",
-          "title": "Type of a protocol that should be used"
-        },
-        "extra": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          },
-          "title": "Extra information (optional)"
-        }
-      },
-      "title": "Information about a Chain"
-    },
-    "chainProtocolType": {
-      "type": "string",
-      "enum": [
-        "ETHEREUM_CONSTANTINOPLE",
-        "QUORUM_CONSTELLATION",
-        "QUORUM_TESSERA",
-        "BESU_ORION"
-      ],
-      "default": "ETHEREUM_CONSTANTINOPLE"
-    },
-    "envelopeArgs": {
-      "type": "object",
-      "properties": {
-        "call": {
-          "$ref": "#/definitions/argsCall",
-          "title": "Arguments to craft transaction"
-        },
-        "private": {
-          "$ref": "#/definitions/argsPrivate",
-          "title": "Private arguments"
-        },
-        "data": {
-          "type": "string",
-          "title": "Arbitrary data provided by user"
-        }
-      },
-      "title": "Args are provided when requesting an execution"
-    },
-    "envelopeEnvelope": {
-      "type": "object",
-      "properties": {
-        "chain": {
-          "$ref": "#/definitions/chainChain",
-          "title": "Chain the transaction is orchestrated for"
-        },
-        "protocol": {
-          "$ref": "#/definitions/chainProtocol",
-          "title": "Protocol the transaction is orchestrated for"
-        },
-        "from": {
-          "type": "string",
-          "title": "Sender of the transaction\nDATA (20 Bytes) - Ethereum Account Address\ne.g 0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C"
-        },
-        "tx": {
-          "$ref": "#/definitions/ethereumTransaction",
-          "title": "Transaction"
-        },
-        "receipt": {
-          "$ref": "#/definitions/ethereumReceipt",
-          "title": "Receipt of the transaction"
-        },
-        "errors": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/errorError"
-          },
-          "title": "Errors encountered while orchestrating the transaction"
-        },
-        "args": {
-          "$ref": "#/definitions/envelopeArgs",
-          "title": "Arguments provided by user"
-        },
-        "metadata": {
-          "$ref": "#/definitions/envelopeMetadata",
-          "title": "Metadata of the envelope"
-        }
-      },
-      "title": "Envelope wraps all information contextual to the transaction orchestrated"
-    },
-    "envelopeMetadata": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "title": "ID of the Envelope in UUID RFC 4122, ISO/IEC 9834-8:2005 format\ne.g a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
-        },
-        "extra": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          },
-          "title": "Extra information (optional)"
-        }
-      },
-      "title": "Metadata attached to an Envelope"
-    },
     "envelopestoreLoadPendingResponse": {
       "type": "object",
       "properties": {
@@ -348,7 +104,7 @@
       "type": "object",
       "properties": {
         "envelope": {
-          "$ref": "#/definitions/envelopeEnvelope",
+          "$ref": "#/definitions/txTxEnvelope",
           "title": "Envelope"
         },
         "status_info": {
@@ -502,26 +258,11 @@
     "ethereumTransaction": {
       "type": "object",
       "properties": {
-        "tx_data": {
-          "$ref": "#/definitions/ethereumTxData"
+        "from": {
+          "type": "string"
         },
-        "raw": {
-          "type": "string",
-          "title": "DATA - The signed, RLP encoded transaction"
-        },
-        "hash": {
-          "type": "string",
-          "title": "DATA (32 Bytes) - Hash of the transaction.\ne.g. 0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210"
-        }
-      },
-      "title": "Transaction"
-    },
-    "ethereumTxData": {
-      "type": "object",
-      "properties": {
         "nonce": {
           "type": "string",
-          "format": "uint64",
           "description": "QUANTITY - Integer of a nonce."
         },
         "to": {
@@ -534,7 +275,6 @@
         },
         "gas": {
           "type": "string",
-          "format": "uint64",
           "description": "QUANTITY - Integer of the gas provided for the transaction execution."
         },
         "gas_price": {
@@ -544,9 +284,182 @@
         "data": {
           "type": "string",
           "title": "DATA - Hash of the method signature (4 bytes) followed by encoded parameters.\ne.g 0xa9059cbb000000000000000000000000ff778b716fc07d98839f48ddb88d8be583beb684000000000000000000000000000000000000000000000000002386f26fc10000"
+        },
+        "raw": {
+          "type": "string",
+          "title": "DATA - The signed, RLP encoded transaction"
+        },
+        "tx_hash": {
+          "type": "string",
+          "title": "DATA (32 Bytes) - Hash of the transaction.\ne.g. 0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210"
         }
       },
-      "title": "Transaction data"
+      "title": "Transaction"
+    },
+    "txMethod": {
+      "type": "string",
+      "enum": [
+        "ETH_SENDRAWTRANSACTION",
+        "ETH_SENDPRIVATETRANSACTION",
+        "ETH_SENDRAWPRIVATETRANSACTION",
+        "EEA_SENDPRIVATETRANSACTION"
+      ],
+      "default": "ETH_SENDRAWTRANSACTION",
+      "title": "- ETH_SENDRAWTRANSACTION: Classic Ethereum Transaction\n - ETH_SENDPRIVATETRANSACTION: Quorum Constellation\n - ETH_SENDRAWPRIVATETRANSACTION: Quorum Tessera\n - EEA_SENDPRIVATETRANSACTION: Besu Orion"
+    },
+    "txParams": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "title": "Sender of the transaction - Ethereum Account Address\ne.g 0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C"
+        },
+        "to": {
+          "type": "string",
+          "title": "The address of the receiver. null when it’s a contract creation transaction.\ne.g. 0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C"
+        },
+        "gas": {
+          "type": "string",
+          "description": "Integer of the gas provided for the transaction execution."
+        },
+        "gas_price": {
+          "type": "string",
+          "title": "Integer of the gas price used for each paid gas.\ne.g 0xaf23b"
+        },
+        "value": {
+          "type": "string",
+          "title": "Integer of the value sent with this transaction.\ne.g 0xaf23"
+        },
+        "nonce": {
+          "type": "string",
+          "description": "Integer of a nonce."
+        },
+        "data": {
+          "type": "string",
+          "title": "Hash of the method signature (4 bytes) followed by encoded parameters.\ne.g 0xa9059cbb000000000000000000000000ff778b716fc07d98839f48ddb88d8be583beb684000000000000000000000000000000000000000000000000002386f26fc10000"
+        },
+        "contract": {
+          "type": "string",
+          "title": "Contract identifier\ne.g. \"ERC20[v1.0.0]\""
+        },
+        "method_signature": {
+          "type": "string",
+          "title": "Signature of the method to call on contract\ne.g \"transfer(address,uint256)\""
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "Arguments to feed on transaction call"
+        },
+        "raw": {
+          "type": "string",
+          "title": "The signed, RLP encoded transaction"
+        },
+        "private_for": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "private_from": {
+          "type": "string"
+        },
+        "private_tx_type": {
+          "type": "string"
+        },
+        "privacy_group_id": {
+          "type": "string"
+        }
+      }
+    },
+    "txTxEnvelope": {
+      "type": "object",
+      "properties": {
+        "tx_request": {
+          "$ref": "#/definitions/txTxRequest"
+        },
+        "tx_response": {
+          "$ref": "#/definitions/txTxResponse"
+        },
+        "internal_labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "txTxRequest": {
+      "type": "object",
+      "properties": {
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Technical header (optional)"
+        },
+        "chain": {
+          "type": "string",
+          "title": "Name of the Chain as registered on the chain registry\ne.g. 1 for mainnet, 3 for Ropsten"
+        },
+        "method": {
+          "$ref": "#/definitions/txMethod",
+          "title": "Type of a protocol that should be used"
+        },
+        "params": {
+          "$ref": "#/definitions/txParams",
+          "title": "Params for the transaction"
+        },
+        "id": {
+          "type": "string",
+          "title": "ID of the Request in UUID RFC 4122, ISO/IEC 9834-8:2005 format\ne.g a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+        },
+        "context_labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "[option]"
+        }
+      }
+    },
+    "txTxResponse": {
+      "type": "object",
+      "properties": {
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Extra information (optional)"
+        },
+        "id": {
+          "type": "string",
+          "title": "ID of the Response in UUID RFC 4122, ISO/IEC 9834-8:2005 format\ne.g a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+        },
+        "context_labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "[option]"
+        },
+        "transaction": {
+          "$ref": "#/definitions/ethereumTransaction"
+        },
+        "receipt": {
+          "$ref": "#/definitions/ethereumReceipt"
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/errorError"
+          }
+        }
+      }
     }
   },
   "securityDefinitions": {

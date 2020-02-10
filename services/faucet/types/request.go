@@ -6,7 +6,7 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
-// Request holds information for a Faucet Credit Request
+// Builder holds information for a Faucet Credit Builder
 type Request struct {
 	ChainID     *big.Int
 	ChainURL    string

@@ -6,6 +6,8 @@ import (
 	"math/big"
 	"testing"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -13,11 +15,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
 	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store/client/mocks"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
 type MockChainLedgerReader struct {
@@ -50,7 +49,7 @@ func (ec *MockChainLedgerReader) HeaderByNumber(ctx context.Context, endpoint st
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (ec *MockChainLedgerReader) TransactionByHash(ctx context.Context, endpoint string, hash ethcommon.Hash) (tx *ethtypes.Transaction, isPending bool, err error) {
+func (ec *MockChainLedgerReader) TransactionByHash(ctx context.Context, endpoint string, hash ethcommon.Hash) (*ethtypes.Transaction, bool, error) {
 	if endpoint == "0" {
 		return nil, false, fmt.Errorf("unknown chain")
 	}
@@ -66,21 +65,18 @@ func (ec *MockChainLedgerReader) TransactionReceipt(ctx context.Context, endpoin
 	return nil, fmt.Errorf("not implemented")
 }
 
-func makeContext(hash, metadata, endpoint string, expectedErrors int) *engine.TxContext {
+func makeContext(hash, id, endpoint string, expectedErrors int) *engine.TxContext {
 	txctx := engine.NewTxContext()
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
 	txctx.WithContext(proxy.With(txctx.Context(), endpoint))
-	txctx.Envelope.Tx = &ethereum.Transaction{
-		Hash: hash,
-	}
-	txctx.Envelope.Metadata = &envelope.Metadata{Id: metadata}
+	_ = txctx.Builder.SetID(id).SetTxHashString(hash)
 	txctx.Set("expectedErrors", expectedErrors)
 	return txctx
 }
 
 func assertCtx(t *testing.T, txctx *engine.TxContext) {
-	assert.Len(t, txctx.Envelope.GetErrors(), txctx.Get("expectedErrors").(int), "Error count should be valid")
+	assert.Len(t, txctx.Builder.GetErrors(), txctx.Get("expectedErrors").(int), "Error count should be valid")
 }
 
 type mockHandler struct {
@@ -115,18 +111,11 @@ func TestTxAlreadySent(t *testing.T) {
 	assert.Equal(t, 1, mh.callCount, "Mock handler should been executed")
 
 	// Store envelope, do not send transaction and set envelope status before handing context
+	b := tx.NewBuilder().SetID("2").SetChainID(big.NewInt(8)).SetTxHash(ethcommon.HexToHash("0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b"))
 	_, _ = client.Store(
 		context.Background(),
 		&evlpstore.StoreRequest{
-			Envelope: &envelope.Envelope{
-				Metadata: &envelope.Metadata{
-					Id: "2",
-				},
-				Chain: chain.FromInt(8),
-				Tx: &ethereum.Transaction{
-					Hash: "0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b",
-				},
-			},
+			Envelope: b.TxEnvelopeAsRequest(),
 		},
 	)
 	ec.SendTx("0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b")
@@ -148,18 +137,11 @@ func TestTxAlreadySent(t *testing.T) {
 	assert.Equal(t, 1, mh.callCount, "Mock handler should not have been executed")
 
 	// Store envelope, does not send transaction and set envelope status before handing context
+	b = tx.NewBuilder().SetID("3").SetChainID(big.NewInt(8)).SetTxHash(ethcommon.HexToHash("0x60a417c21da71cea33821071e99871fa2c23ad8103b889cf8a459b0b5320fd46"))
 	_, _ = client.Store(
 		context.Background(),
 		&evlpstore.StoreRequest{
-			Envelope: &envelope.Envelope{
-				Metadata: &envelope.Metadata{
-					Id: "3",
-				},
-				Chain: chain.FromInt(8),
-				Tx: &ethereum.Transaction{
-					Hash: "0x60a417c21da71cea33821071e99871fa2c23ad8103b889cf8a459b0b5320fd46",
-				},
-			},
+			Envelope: b.TxEnvelopeAsRequest(),
 		},
 	)
 	_, _ = client.SetStatus(

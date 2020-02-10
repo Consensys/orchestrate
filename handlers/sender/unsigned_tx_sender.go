@@ -15,18 +15,23 @@ func UnsignedTxSender(ec ethclient.TransactionSender) engine.HandlerFunc {
 			return
 		}
 
-		txHash, err := ec.SendTransaction(
-			txctx.Context(),
-			url,
-			types.Envelope2SendTxArgs(txctx.Envelope),
-		)
+		txArgs, err := types.Envelope2SendTxArgs(txctx.Builder)
 		if err != nil {
-			e := txctx.AbortWithError(err).ExtendComponent(component)
-			txctx.Logger.WithError(e).Errorf("sender: failed to send unsigned transaction")
+			_ = txctx.AbortWithError(err).ExtendComponent(component)
 			return
 		}
 
-		// Transaction has been properly sent so we set tx hash on Envelope
-		txctx.Envelope.GetTx().SetHash(txHash)
+		txHash, err := ec.SendTransaction(
+			txctx.Context(),
+			url,
+			txArgs,
+		)
+		if err != nil {
+			_ = txctx.AbortWithError(err).ExtendComponent(component)
+			return
+		}
+
+		// Transaction has been properly sent so we set tx hash on Builder
+		_ = txctx.Builder.SetTxHash(txHash)
 	}
 }

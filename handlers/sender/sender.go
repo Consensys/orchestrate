@@ -6,7 +6,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/envelope/storer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
 )
 
@@ -38,43 +37,29 @@ func Sender(ec ethclient.TransactionSender, s evlpstore.EnvelopeStoreClient) eng
 
 	return func(txctx *engine.TxContext) {
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"chain.chainID": txctx.Envelope.GetChain().GetBigChainID().String(),
-			"metadata.id":   txctx.Envelope.GetMetadata().GetId(),
-			"tx.raw":        utils.ShortString(txctx.Envelope.GetTx().GetRaw(), 30),
-			"tx.hash":       txctx.Envelope.GetTx().GetHash(),
-			"from":          txctx.Envelope.GetFrom(),
+			"chainID": txctx.Builder.GetChainIDString(),
+			"id":      txctx.Builder.GetID(),
+			"tx.raw":  txctx.Builder.GetShortRaw(),
+			"tx.hash": txctx.Builder.GetTxHashString(),
+			"from":    txctx.Builder.GetFromString(),
 		})
 
-		// If public transaction
-		if txctx.Envelope.GetArgs().GetPrivate() == nil {
-			if txctx.Envelope.GetTx().IsSigned() {
-				rawTxSender(txctx)
-			} else {
-				unsignedTxSender(txctx)
-			}
-		} else {
-			protocol := txctx.Envelope.GetProtocol()
-			switch {
-			case protocol.IsBesu():
-				rawPrivateTxSender(txctx)
-			case protocol.IsTessera():
-				tesseraRawPrivateTxSender(txctx)
-			case protocol.IsConstellation():
-				unsignedTxSender(txctx)
-			case protocol == nil:
-				err := errors.InvalidFormatError(
-					"protocol should be specified to send a private transaction",
-				).SetComponent(component)
-				txctx.Logger.WithError(err).Errorf("sender: could not send private transaction")
-				_ = txctx.AbortWithError(err)
-			default:
-				err := errors.DataError(
-					"invalid private protocol %q",
-					protocol.String(),
-				).SetComponent(component)
-				txctx.Logger.WithError(err).Errorf("sender: could not send private transaction")
-				_ = txctx.AbortWithError(err)
-			}
+		switch {
+		case txctx.Builder.IsEthSendRawTransaction():
+			rawTxSender(txctx)
+		case txctx.Builder.IsEthSendPrivateTransaction():
+			unsignedTxSender(txctx)
+		case txctx.Builder.IsEthSendRawPrivateTransaction():
+			tesseraRawPrivateTxSender(txctx)
+		case txctx.Builder.IsEeaSendPrivateTransaction():
+			rawPrivateTxSender(txctx)
+		default:
+			err := errors.DataError(
+				"invalid private protocol %q",
+				txctx.Builder.Method.String(),
+			).SetComponent(component)
+			txctx.Logger.WithError(err).Errorf("sender: could not send private transaction")
+			_ = txctx.AbortWithError(err)
 		}
 	}
 }

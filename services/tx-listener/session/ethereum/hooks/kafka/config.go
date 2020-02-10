@@ -6,11 +6,11 @@ import (
 )
 
 type Config struct {
-	TopicTxDecoder string
+	OutTopic string
 }
 
 func NewConfig() *Config {
 	return &Config{
-		TopicTxDecoder: viper.GetString(broker.TxDecoderViperKey),
+		OutTopic: viper.GetString(broker.TxDecodedViperKey),
 	}
 }

@@ -3,7 +3,7 @@ package cucumber
 import (
 	"context"
 
-	"github.com/DATA-DOG/godog"
+	"github.com/cucumber/godog"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/steps"
 )

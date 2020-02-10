@@ -3,9 +3,10 @@ package types
 import (
 	"math/big"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
+
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 )
 
 // PrivateArgs are transaction arguments to provide to an Ethereum client supporting privacy (such as Quorum)
@@ -17,11 +18,11 @@ type PrivateArgs struct {
 }
 
 // Call2PrivateArgs creates PrivateArgs from a call object
-func Call2PrivateArgs(args *envelope.Args) *PrivateArgs {
+func Call2PrivateArgs(req *tx.Builder) *PrivateArgs {
 	var privateArgs PrivateArgs
-	privateArgs.PrivateFrom = args.GetPrivate().GetPrivateFrom()
-	privateArgs.PrivateFor = args.GetPrivate().GetPrivateFor()
-	privateArgs.PrivateTxType = args.GetPrivate().GetPrivateTxType()
+	privateArgs.PrivateFrom = req.PrivateFrom
+	privateArgs.PrivateFor = req.PrivateFor
+	privateArgs.PrivateTxType = req.PrivateTxType
 	return &privateArgs
 }
 
@@ -46,32 +47,35 @@ type SendTxArgs struct {
 	PrivateArgs
 }
 
-// Envelope2SendTxArgs creates SendTxArgs from an Envelope
-func Envelope2SendTxArgs(e *envelope.Envelope) *SendTxArgs {
-	from := ethcommon.HexToAddress(e.GetFrom())
+// Envelope2SendTxArgs creates SendTxArgs from an Builder
+func Envelope2SendTxArgs(req *tx.Builder) (*SendTxArgs, error) {
+	from, err := req.GetFromAddress()
+	if err != nil {
+		return nil, err
+	}
+
 	args := SendTxArgs{
 		From:        from,
-		GasPrice:    (*hexutil.Big)(e.GetTx().GetTxData().GetGasPriceBig()),
-		Value:       (*hexutil.Big)(e.GetTx().GetTxData().GetValueBig()),
-		Data:        hexutil.Bytes(e.GetTx().GetTxData().GetDataBytes()),
-		Input:       hexutil.Bytes(e.GetTx().GetTxData().GetDataBytes()),
-		PrivateArgs: *(Call2PrivateArgs(e.GetArgs())),
+		GasPrice:    (*hexutil.Big)(req.GetGasPrice()),
+		Value:       (*hexutil.Big)(req.GetValue()),
+		Data:        hexutil.Bytes(req.Data),
+		Input:       hexutil.Bytes(req.Data),
+		PrivateArgs: *(Call2PrivateArgs(req)),
 	}
 
-	if gas := e.GetTx().GetTxData().GetGas(); gas != 0 {
-		args.Gas = (*hexutil.Uint64)(&gas)
+	if req.Gas != nil {
+		args.Gas = (*hexutil.Uint64)(req.Gas)
 	}
 
-	if nonce := e.GetTx().GetTxData().GetNonce(); nonce != 0 {
-		args.Nonce = (*hexutil.Uint64)(&nonce)
+	if req.Nonce != nil {
+		args.Nonce = (*hexutil.Uint64)(req.Gas)
 	}
 
-	if e.GetTx().GetTxData().GetTo() != "" {
-		to := ethcommon.HexToAddress(e.GetTx().GetTxData().GetTo())
-		args.To = &to
+	if req.To != nil {
+		args.To = req.GetTo()
 	}
 
-	return &args
+	return &args, nil
 }
 
 // CallArgs contains parameters for contract calls.

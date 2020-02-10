@@ -6,18 +6,19 @@ import (
 	"math/big"
 	"testing"
 
+	uuid "github.com/satori/go.uuid"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
+
 	"github.com/Shopify/sarama/mocks"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 	crc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client/mocks"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
 	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store/client/mocks"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
 type testKey string
@@ -63,7 +64,7 @@ func (ec *MockChainStateReader) PendingNonceAt(ctx context.Context, url string, 
 func TestHook(t *testing.T) {
 	// Initialize hook
 	conf := &Config{
-		TopicTxDecoder: "test-topic-decoder",
+		OutTopic: "test-topic-decoder",
 	}
 	registry := crc.New()
 	ec := &MockChainStateReader{}
@@ -95,12 +96,7 @@ func TestHook(t *testing.T) {
 
 	// Test 2: we store envelope on envelope store
 	_, _ = store.Store(context.Background(), &evlpstore.StoreRequest{
-		Envelope: &envelope.Envelope{
-			Chain: chain.FromBigInt(c.ChainID),
-			Tx: &ethereum.Transaction{
-				Hash: receipt.TxHash.Hex(),
-			},
-		},
+		Envelope: tx.NewBuilder().SetID(uuid.NewV4().String()).SetChainID(c.ChainID).SetTxHash(receipt.TxHash).TxEnvelopeAsRequest(),
 	})
 	producer.ExpectSendMessageAndSucceed()
 	err = hk.AfterNewBlock(context.Background(), c, &block, []*ethtypes.Receipt{receipt})

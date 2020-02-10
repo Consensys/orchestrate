@@ -14,10 +14,10 @@ func (i *AccountInstance) Short() string {
 	} else {
 		addr = i.GetAccount()
 	}
-	if i.GetChain() == nil {
+	if i.GetChainId() == "" {
 		id = ""
 	} else {
-		id = i.GetChain().GetChainId()
+		id = i.GetChainId()
 	}
 	return fmt.Sprintf("%v@%v", addr, id)
 }

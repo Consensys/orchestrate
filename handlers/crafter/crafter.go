@@ -5,26 +5,25 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/abi/crafter"
-	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
 // Crafter creates a crafter handler
 func Crafter(r svc.ContractRegistryClient, c crafter.Crafter) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"metadata.id": txctx.Envelope.GetMetadata().GetId(),
+			"id": txctx.Builder.ID,
 		})
 
-		if txctx.Envelope.GetTx().GetTxData().GetData() != "" {
+		if txctx.Builder.GetData() != "" {
 			// If transaction has already been crafted there is nothing to do
 			return
 		}
 
-		// Try to read ABI in Envelope Call
+		// Try to read ABI in Builder Call
 		methodAbi, err := getMethodAbi(txctx)
 		if err != nil || methodAbi == nil {
 			return
@@ -42,45 +41,36 @@ func Crafter(r svc.ContractRegistryClient, c crafter.Crafter) engine.HandlerFunc
 		}
 
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"tx.data": utils.ShortString(hexutil.Encode(payload), 10),
+			"data": utils.ShortString(hexutil.Encode(payload), 10),
 		})
 
-		attachTxPayload(txctx, payload)
+		_ = txctx.Builder.SetData(payload)
 
 		txctx.Logger.Tracef("crafter: tx data payload set")
 	}
 }
 
 func getMethodAbi(txctx *engine.TxContext) (*abi.Method, error) {
-	var method *abi.Method
-	if ABI := txctx.Envelope.GetArgs().GetCall().GetMethod().GetAbi(); len(ABI) > 0 {
-		// ABI was provided in the Envelope
-		err := encoding.Unmarshal([]byte(ABI), method)
-		if err != nil {
-			e := txctx.AbortWithError(err).ExtendComponent(component)
-			txctx.Logger.WithError(e).Errorf("crafter: invalid ABI provided")
-			return nil, err
-		}
-	} else if methodSig := txctx.Envelope.GetArgs().GetCall().GetMethod().GetSignature(); methodSig != "" {
-		// Generate method ABI from signature
-		m, err := crafter.SignatureToMethod(methodSig)
-		if err != nil {
-			e := txctx.AbortWithError(err).ExtendComponent(component)
-			txctx.Logger.WithError(e).Errorf("crafter: could not generate method ABI from signature")
-			return nil, e
-		}
-		method = m
-		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"crafter.method": methodSig,
-		})
+	if txctx.Builder.MethodSignature == "" {
+		return nil, errors.DataError("No method signature provided")
 	}
-	// Nothing to craft
+
+	// Generate method ABI from signature
+	method, err := crafter.SignatureToMethod(txctx.Builder.MethodSignature)
+	if err != nil {
+		e := txctx.AbortWithError(err).ExtendComponent(component)
+		txctx.Logger.WithError(e).Errorf("crafter: could not generate method ABI from signature")
+		return nil, e
+	}
+	txctx.Logger = txctx.Logger.WithFields(log.Fields{
+		"crafter.method": txctx.Builder.GetMethodSignature(),
+	})
 
 	return method, nil
 }
 
 func createTxPayload(txctx *engine.TxContext, methodAbi *abi.Method, r svc.ContractRegistryClient, c crafter.Crafter) ([]byte, error) {
-	if txctx.Envelope.GetArgs().GetCall().GetMethod().IsConstructor() {
+	if txctx.Builder.IsConstructor() {
 		return createContractDeploymentPayload(txctx, methodAbi, r, c)
 	}
 
@@ -92,7 +82,7 @@ func createContractDeploymentPayload(txctx *engine.TxContext, methodAbi *abi.Met
 	bytecodeResp, err := r.GetContractBytecode(
 		txctx.Context(),
 		&svc.GetContractRequest{
-			ContractId: txctx.Envelope.GetArgs().GetCall().GetContract().GetId(),
+			ContractId: txctx.Builder.GetContractID(),
 		},
 	)
 	if err != nil {
@@ -123,27 +113,10 @@ func createTxCallPayload(txctx *engine.TxContext, methodAbi *abi.Method, c craft
 }
 
 func getTxArgs(txctx *engine.TxContext) []string {
-	args := txctx.Envelope.GetArgs().GetCall().GetArgs()
+	args := txctx.Builder.GetArgs()
 	txctx.Logger = txctx.Logger.WithFields(log.Fields{
 		"crafter.args": args,
 	})
 
 	return args
-}
-
-func attachTxPayload(txctx *engine.TxContext, payload []byte) {
-	attachTxDataIfMissing(txctx)
-	setTxPayload(txctx, payload)
-}
-
-func attachTxDataIfMissing(txctx *engine.TxContext) {
-	if txctx.Envelope.GetTx() == nil {
-		txctx.Envelope.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{}}
-	} else if txctx.Envelope.GetTx().GetTxData() == nil {
-		txctx.Envelope.Tx.TxData = &ethereum.TxData{}
-	}
-}
-
-func setTxPayload(txctx *engine.TxContext, payload []byte) {
-	txctx.Envelope.GetTx().GetTxData().SetData(payload)
 }

@@ -15,42 +15,41 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/memory"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
 type MockChainStateReader struct{}
 
 const endpointError = "error"
 
-func (r *MockChainStateReader) BalanceAt(ctx context.Context, endpoint string, account ethcommon.Address, blockNumber *big.Int) (*big.Int, error) {
+func (r *MockChainStateReader) BalanceAt(_ context.Context, _ string, _ ethcommon.Address, _ *big.Int) (*big.Int, error) {
 	return big.NewInt(0), nil
 }
 
-func (r *MockChainStateReader) StorageAt(ctx context.Context, endpoint string, account ethcommon.Address, key ethcommon.Hash, blockNumber *big.Int) ([]byte, error) {
+func (r *MockChainStateReader) StorageAt(_ context.Context, _ string, _ ethcommon.Address, _ ethcommon.Hash, _ *big.Int) ([]byte, error) {
 	return []byte{}, nil
 }
 
-func (r *MockChainStateReader) CodeAt(ctx context.Context, endpoint string, account ethcommon.Address, blockNumber *big.Int) ([]byte, error) {
+func (r *MockChainStateReader) CodeAt(_ context.Context, _ string, _ ethcommon.Address, _ *big.Int) ([]byte, error) {
 	return []byte{}, nil
 }
 
-func (r *MockChainStateReader) NonceAt(ctx context.Context, endpoint string, account ethcommon.Address, blockNumber *big.Int) (uint64, error) {
+func (r *MockChainStateReader) NonceAt(_ context.Context, _ string, _ ethcommon.Address, _ *big.Int) (uint64, error) {
 	return 0, nil
 }
 
-func (r *MockChainStateReader) PendingBalanceAt(ctx context.Context, endpoint string, account ethcommon.Address) (*big.Int, error) {
+func (r *MockChainStateReader) PendingBalanceAt(_ context.Context, _ string, _ ethcommon.Address) (*big.Int, error) {
 	return big.NewInt(0), nil
 }
 
-func (r *MockChainStateReader) PendingStorageAt(ctx context.Context, endpoint string, account ethcommon.Address, key ethcommon.Hash) ([]byte, error) {
+func (r *MockChainStateReader) PendingStorageAt(_ context.Context, _ string, _ ethcommon.Address, _ ethcommon.Hash) ([]byte, error) {
 	return []byte{}, nil
 }
 
-func (r *MockChainStateReader) PendingCodeAt(ctx context.Context, endpoint string, account ethcommon.Address) ([]byte, error) {
+func (r *MockChainStateReader) PendingCodeAt(_ context.Context, _ string, _ ethcommon.Address) ([]byte, error) {
 	return []byte{}, nil
 }
 
-func (r *MockChainStateReader) PendingNonceAt(ctx context.Context, endpoint string, account ethcommon.Address) (uint64, error) {
+func (r *MockChainStateReader) PendingNonceAt(_ context.Context, endpoint string, _ ethcommon.Address) (uint64, error) {
 	if endpoint == endpointError {
 		// Simulate error
 		return 0, fmt.Errorf("unknown chain")
@@ -114,10 +113,10 @@ func (m mockMsg) Header() engine.Header { return &header{} }
 
 type header struct{}
 
-func (h *header) Add(key, value string) {}
-func (h *header) Del(key string)        {}
-func (h *header) Get(key string) string { return "" }
-func (h *header) Set(key, value string) {}
+func (h *header) Add(_, _ string)     {}
+func (h *header) Del(_ string)        {}
+func (h *header) Get(_ string) string { return "" }
+func (h *header) Set(_, _ string)     {}
 
 func makeContext(
 	endpoint,
@@ -130,9 +129,7 @@ func makeContext(
 	txctx := engine.NewTxContext()
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
-	txctx.Envelope.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{
-		Nonce: nonce,
-	}}
+	_ = txctx.Builder.SetFrom(ethcommon.HexToAddress("0x1")).SetNonce(nonce)
 	txctx.In = mockMsg(key)
 	txctx.WithContext(proxy.With(txctx.Context(), endpoint))
 
@@ -146,17 +143,17 @@ func makeContext(
 }
 
 func assertTxContext(t *testing.T, txctx *engine.TxContext) {
-	assert.Len(t, txctx.Envelope.GetErrors(), txctx.Get("expectedErrorCount").(int), "Error count should be correct")
+	assert.Len(t, txctx.Builder.GetErrors(), txctx.Get("expectedErrorCount").(int), "Error count should be correct")
 
 	expectedNonceInMetadata := txctx.Get("expectedNonceInMetadata").(uint64)
 	if expectedNonceInMetadata > 0 {
-		v, ok := txctx.Envelope.GetMetadataValue("nonce.recovering.expected")
-		assert.True(t, ok, "Signal for nonce recovery in envelope metadata should have been set")
+		v := txctx.Builder.GetInternalLabelsValue("nonce.recovering.expected")
+		assert.NotNil(t, v, "Signal for nonce recovery in envelope metadata should have been set")
 		lastSent, _ := strconv.ParseUint(v, 10, 64)
 		assert.Equal(t, expectedNonceInMetadata, lastSent, "Nonce in metadata should be correct")
 	} else {
-		_, ok := txctx.Envelope.GetMetadataValue("nonce.recovering.expected")
-		assert.False(t, ok, "Signal for nonce recovery in envelope metadata should not have been set")
+		v := txctx.Builder.GetInternalLabelsValue("nonce.recovering.expected")
+		assert.Empty(t, v, "Signal for nonce recovery in envelope metadata should not have been set")
 	}
 
 	if txctx.Get("expectedInvalid").(bool) {
@@ -168,8 +165,8 @@ func assertTxContext(t *testing.T, txctx *engine.TxContext) {
 	}
 
 	var recoveryCount int
-	v, ok := txctx.Envelope.GetMetadataValue("nonce.recovering.count")
-	if ok {
+	v := txctx.Builder.GetInternalLabelsValue("nonce.recovering.count")
+	if v != "" {
 		i, err := strconv.Atoi(v)
 		if err != nil {
 			panic(err)
@@ -225,7 +222,7 @@ func TestChecker(t *testing.T) {
 	// On 5th execution envelope with nonce 15 should be too high
 	// Checker should not signal in metadata
 	txctx = makeContext("testURL", testKey1, true, 15, 0, 3, 0, "")
-	txctx.Envelope.SetMetadataValue("nonce.recovering.count", fmt.Sprintf("%v", 2))
+	_ = txctx.Builder.SetInternalLabelsValue("nonce.recovering.count", fmt.Sprintf("%v", 2))
 	h(txctx)
 	assertTxContext(t, txctx)
 
@@ -238,7 +235,7 @@ func TestChecker(t *testing.T) {
 
 	// On 7th execution envelope with nonce 14 but raw mode should be valid
 	txctx = makeContext("testURL", testKey1, false, 14, 0, 0, 0, "")
-	txctx.Envelope.SetMetadataValue("tx.mode", "raw")
+	_ = txctx.Builder.SetInternalLabelsValue("tx.mode", "raw")
 
 	h(txctx)
 	assertTxContext(t, txctx)
@@ -269,7 +266,7 @@ func TestChecker(t *testing.T) {
 
 	// Execution with recovery count exceeded
 	txctx = makeContext("testURL", testKey1, false, 13, 0, 10, 1, "")
-	txctx.Envelope.SetMetadataValue("nonce.recovering.count", fmt.Sprintf("%v", 10))
+	_ = txctx.Builder.SetInternalLabelsValue("nonce.recovering.count", fmt.Sprintf("%v", 10))
 	h(txctx)
 	assertTxContext(t, txctx)
 }

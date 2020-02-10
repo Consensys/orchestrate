@@ -14,7 +14,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	faucettypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 )
 
 type MockFaucet struct {
@@ -34,11 +33,10 @@ func makeFaucetContext(i int) *engine.TxContext {
 	txctx.Logger = log.NewEntry(log.StandardLogger())
 	switch i % 2 {
 	case 0:
-		txctx.Envelope.Chain = chain.FromInt(0)
+		_ = txctx.Builder.SetChainID(big.NewInt(0))
 		txctx.Set("errors", 0)
 	case 1:
-		txctx.Envelope.Chain = chain.FromInt(10)
-		txctx.Envelope.From = ethcommon.HexToAddress("0x1").Hex()
+		_ = txctx.Builder.SetChainID(big.NewInt(10)).SetFrom(ethcommon.HexToAddress("0x1"))
 		txctx.Set("errors", 0)
 	}
 	return txctx
@@ -64,7 +62,7 @@ func (s *FaucetTestSuite) TestFaucet() {
 	s.Handle(txctxs)
 
 	for _, txctx := range txctxs {
-		assert.Len(s.T(), txctx.Envelope.Errors, txctx.Get("errors").(int), "Expected right count of errors")
+		assert.Len(s.T(), txctx.Builder.Errors, txctx.Get("errors").(int), "Expected right count of errors")
 	}
 }
 

@@ -12,22 +12,23 @@ import (
 // Faucet creates a Faucet handler
 func Faucet(fct faucet.Faucet) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		// Beneficiary
-		beneficiary := txctx.Envelope.Sender()
-
 		url, err := proxy.GetURL(txctx)
 		if err != nil {
 			return
 		}
 
+		if txctx.Builder.GetChainID() == nil || txctx.Builder.GetValue() == nil {
+			return
+		}
+
 		// Create Faucet request
 		req := &faucettypes.Request{
-			ChainID:     txctx.Envelope.GetChain().GetBigChainID(),
+			ChainID:     txctx.Builder.GetChainID(),
 			ChainURL:    url,
-			ChainUUID:   txctx.Envelope.GetChain().GetUuid(),
-			ChainName:   txctx.Envelope.GetChain().GetName(),
-			Beneficiary: beneficiary,
-			Amount:      txctx.Envelope.GetTx().GetTxData().GetValueBig(),
+			ChainUUID:   txctx.Builder.GetChainUUID(),
+			ChainName:   txctx.Builder.GetChainName(),
+			Beneficiary: txctx.Builder.MustGetFromAddress(),
+			Amount:      txctx.Builder.GetValue(),
 		}
 
 		// Credit

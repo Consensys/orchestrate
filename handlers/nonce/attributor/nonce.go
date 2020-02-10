@@ -10,19 +10,22 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
 // Handler creates and return an handler for nonce
 func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		// Retrieve chainID and sender address
-		chainID, sender := txctx.Envelope.GetChain().GetBigChainID(), txctx.Envelope.Sender()
+		sender, err := txctx.Builder.GetFromAddress()
+		if err != nil {
+			_ = txctx.AbortWithError(err).ExtendComponent(component)
+			return
+		}
+
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"tx.sender":     sender.Hex(),
-			"chain.chainID": chainID.String(),
-			"metadata.id":   txctx.Envelope.GetMetadata().GetId(),
+			"from":    sender.Hex(),
+			"chainID": txctx.Builder.GetChainIDString(),
+			"id":      txctx.Builder.GetID(),
 		})
 
 		// Nonce to attribute to tx
@@ -31,7 +34,7 @@ func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFun
 		nonceKey := string(txctx.In.Key())
 
 		// First check if signal for recovering nonce
-		if v, ok := txctx.Envelope.GetMetadataValue("nonce.recovering.expected"); ok {
+		if v := txctx.Builder.GetInternalLabelsValue("nonce.recovering.expected"); v != "" {
 			expectedNonce, err := strconv.ParseUint(v, 10, 64)
 			if err != nil {
 				e := txctx.AbortWithError(err).ExtendComponent(component)
@@ -78,7 +81,7 @@ func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFun
 		}
 
 		// Set nonce
-		setNonce(txctx.Envelope, n)
+		_ = txctx.Builder.SetNonce(n)
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"tx.nonce": n,
 		})
@@ -87,7 +90,7 @@ func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFun
 		txctx.Next()
 
 		// If pending handlers executed correctly we increment nonce
-		if len(txctx.Envelope.GetErrors()) == 0 {
+		if len(txctx.Builder.GetErrors()) == 0 {
 			// Increment nonce
 			err := nm.SetLastAttributed(nonceKey, n)
 			if err != nil {
@@ -103,15 +106,4 @@ func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFun
 			}
 		}
 	}
-}
-
-func setNonce(e *envelope.Envelope, n uint64) {
-	// Initialize Transaction on envelope if needed
-	if e.GetTx() == nil {
-		e.Tx = &ethereum.Transaction{TxData: &ethereum.TxData{}}
-	} else if e.GetTx().GetTxData() == nil {
-		e.Tx.TxData = &ethereum.TxData{}
-	}
-	// Set transaction nonce
-	e.GetTx().GetTxData().SetNonce(n)
 }

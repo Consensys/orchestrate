@@ -70,7 +70,7 @@ func (s *TracerTestSuite) TestTxSpanFromBroker() {
 		default:
 			// We just need to know if there was a panic in there
 		case 1:
-			assert.Equal(s.T(), 43, spanContext.(oTMocktracer.MockSpanContext).TraceID, "Expected right TraceID from txctx.Envelope.Metadata")
+			assert.Equal(s.T(), 43, spanContext.(oTMocktracer.MockSpanContext).TraceID, "Expected right TraceID from txctx.Builder.Metadata")
 		}
 	}
 }

@@ -14,9 +14,9 @@ type HandlerTestSuite struct {
 	Handler engine.HandlerFunc
 }
 
-// Handle execute handler concurrently on every input TxContext
+// Handle execute handler concurrently on every input Builder
 func (s *HandlerTestSuite) Handle(txctxs []*engine.TxContext) {
-	// Execute handler on every TxContext concurrently
+	// Execute handler on every Builder concurrently
 	wg := &sync.WaitGroup{}
 	for _, txctx := range txctxs {
 		wg.Add(1)
@@ -25,6 +25,6 @@ func (s *HandlerTestSuite) Handle(txctxs []*engine.TxContext) {
 			wg.Done()
 		}(txctx)
 	}
-	// Wait for all TxContext to have complete execution
+	// Wait for all Builder to have complete execution
 	wg.Wait()
 }

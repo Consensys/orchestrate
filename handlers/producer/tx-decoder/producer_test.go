@@ -1,17 +1,14 @@
 package txdecoder
 
 import (
+	"math/big"
 	"testing"
 	"time"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
 type MockSyncProducer struct {
@@ -60,9 +57,7 @@ func makeProducerContext() *engine.TxContext {
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
 
-	txctx.Envelope.Chain = &chain.Chain{ChainId: "3"}
-	txctx.Envelope.Tx = &ethereum.Transaction{}
-	txctx.Envelope.Metadata = &envelope.Metadata{}
+	_ = txctx.Builder.SetChainID(big.NewInt(3))
 	txctx.Set("produced", true)
 
 	return txctx

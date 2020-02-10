@@ -13,22 +13,16 @@ func Faucet(fct faucet.Faucet) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 
 		// Skip if the chainId is unset
-		if txctx.Envelope.GetChain() == nil || txctx.Envelope.GetChain().GetBigChainID() == nil {
+		if txctx.Builder.ChainID == nil {
 			txctx.Logger.Debugf("faucet: skipping faucet request because no chainID")
-			return
-		}
-
-		// Skip if no sender has been set
-		if txctx.Envelope.Sender().Hex() == "0x0000000000000000000000000000000000000000" {
-			txctx.Logger.Debugf("faucet: skipping faucet request because no sender address has been set")
 			return
 		}
 
 		// Create Faucet request
 		req := &faucettypes.Request{
-			ChainID:     txctx.Envelope.GetChain().GetBigChainID(),
-			Beneficiary: txctx.Envelope.Sender(),
-			Amount:      txctx.Envelope.GetTx().GetTxData().GetValueBig(),
+			ChainID:     txctx.Builder.ChainID,
+			Beneficiary: txctx.Builder.MustGetFromAddress(),
+			Amount:      txctx.Builder.GetValue(),
 		}
 
 		// Credit

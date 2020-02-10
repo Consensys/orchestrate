@@ -60,7 +60,7 @@ func (s *MigrationsTestSuite) TestAddEnvelopeStoreColumns() {
 		Count()
 
 	s.Assert().NoError(err, "Query failed")
-	s.Assert().Equal(11, n, "Envelope table should have correct number of columns")
+	s.Assert().Equal(11, n, "Builder table should have correct number of columns")
 }
 
 func TestMigrations(t *testing.T) {

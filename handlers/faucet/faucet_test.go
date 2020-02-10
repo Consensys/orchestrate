@@ -13,7 +13,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	faucettypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 )
 
 type MockFaucet struct {
@@ -34,10 +33,10 @@ func makeFaucetContext(i int) *engine.TxContext {
 	switch i % 2 {
 	case 0:
 		txctx.WithContext(proxy.With(txctx.Context(), "testURL"))
-		txctx.Envelope.Chain = chain.FromInt(0)
+		_ = txctx.Builder.SetChainID(big.NewInt(0))
 	case 1:
 		txctx.WithContext(proxy.With(txctx.Context(), "testURL"))
-		txctx.Envelope.Chain = chain.FromInt(10)
+		_ = txctx.Builder.SetChainID(big.NewInt(10))
 	}
 	return txctx
 }

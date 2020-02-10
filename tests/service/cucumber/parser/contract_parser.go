@@ -8,7 +8,7 @@ import (
 	"path"
 	"time"
 
-	"github.com/DATA-DOG/godog/gherkin"
+	"github.com/cucumber/godog/gherkin"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"

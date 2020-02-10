@@ -2,15 +2,15 @@ package mocks
 
 import (
 	"context"
+	"math/big"
 	"testing"
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
+
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
 func TestEnvelopeStoreClient(t *testing.T) {
@@ -22,13 +22,11 @@ func TestEnvelopeStoreClient(t *testing.T) {
 	_, err := client.Store(
 		context.Background(),
 		&evlpstore.StoreRequest{
-			Envelope: &envelope.Envelope{
-				Chain:    chain.FromInt(888),
-				Metadata: &envelope.Metadata{Id: "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11"},
-				Tx: &ethereum.Transaction{
-					Hash: "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210",
-				},
-			},
+			Envelope: tx.NewBuilder().
+				SetChainIDUint64(888).
+				SetID("a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11").
+				MustSetTxHashString("0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210").
+				TxEnvelopeAsRequest(),
 		},
 	)
 	assert.Nil(t, err, "Store should not error")
@@ -44,8 +42,8 @@ func TestEnvelopeStoreClient(t *testing.T) {
 	_, err = client.LoadByTxHash(
 		context.Background(),
 		&evlpstore.LoadByTxHashRequest{
-			Chain:  chain.FromInt(888),
-			TxHash: "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210",
+			ChainId: big.NewInt(888).String(),
+			TxHash:  "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210",
 		},
 	)
 	assert.Nil(t, err, "LoadByTxHash should not error")

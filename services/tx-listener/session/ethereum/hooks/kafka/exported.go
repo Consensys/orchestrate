@@ -22,7 +22,7 @@ func initComponent(ctx context.Context) {
 		func() { rpc.Init(ctx) },
 		// Initialize Contract Registry Client
 		func() { crc.Init(ctx) },
-		// Initialize Envelope store client
+		// Initialize Builder store client
 		func() { storeclient.Init(ctx) },
 		// Initialize Sync Producer
 		func() { broker.InitSyncProducer(ctx) },

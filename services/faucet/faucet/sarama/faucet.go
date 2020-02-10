@@ -4,6 +4,8 @@ import (
 	"context"
 	"math/big"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication"
 
 	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/utils"
@@ -19,9 +21,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
 // Faucet allows to credit by sending messages to a Kafka topic
@@ -38,26 +37,24 @@ func NewFaucet(p sarama.SyncProducer) *Faucet {
 
 func (f *Faucet) prepareMsg(ctx context.Context, r *types.Request, msg *sarama.ProducerMessage) error {
 	// Create Trace for Crediting message
-	e := &envelope.Envelope{
-		Chain: (&chain.Chain{}).SetChainID(r.ChainID).SetUUID(r.ChainUUID).SetName(r.ChainName),
-		From:  r.Creditor.Hex(),
-		Tx: &ethereum.Transaction{
-			TxData: (&ethereum.TxData{}).SetValue(r.Amount).SetTo(r.Beneficiary),
-		},
-		Metadata: &envelope.Metadata{
-			Id: uuid.NewV4().String(),
-		},
-	}
+	b := tx.NewBuilder().
+		SetID(uuid.NewV4().String()).
+		SetChainName(r.ChainName).
+		SetFrom(r.Creditor).
+		SetValue(r.Amount).
+		SetTo(r.Beneficiary).
+		SetChainID(r.ChainID).
+		SetChainUUID(r.ChainUUID)
 
 	if authToken := authutils.AuthorizationFromContext(ctx); authToken != "" {
-		e.SetMetadataValue(multitenancy.AuthorizationMetadata, authToken)
+		_ = b.SetHeadersValue(multitenancy.AuthorizationMetadata, authToken)
 	}
 	if apiKey := authutils.APIKeyFromContext(ctx); apiKey != "" {
-		e.SetMetadataValue(authentication.APIKeyHeader, apiKey)
+		_ = b.SetHeadersValue(authentication.APIKeyHeader, apiKey)
 	}
 
 	// Unmarshal envelope
-	err := encoding.Marshal(e, msg)
+	err := encoding.Marshal(b.TxEnvelopeAsRequest(), msg)
 	if err != nil {
 		return err
 	}

@@ -14,7 +14,7 @@ var (
 	initOnce = &sync.Once{}
 )
 
-// Init initialize Postgres Envelope Store
+// Init initialize Postgres Builder Store
 func Init() {
 	initOnce.Do(func() {
 		if store != nil {

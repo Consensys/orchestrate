@@ -4,19 +4,20 @@ import (
 	"testing"
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
+
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 )
 
 func TestTracker(t *testing.T) {
 	tracker := NewTracker()
 
 	// Register output on Tracker
-	ch := make(chan *envelope.Envelope, 10)
+	ch := make(chan *tx.Builder, 10)
 	tracker.AddOutput("test-output", ch)
 
 	// Input an envelope in channel
-	input := &envelope.Envelope{}
+	input := tx.NewBuilder()
 	ch <- input
 
 	// Get envelope

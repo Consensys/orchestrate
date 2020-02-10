@@ -301,29 +301,11 @@
       },
       "title": "Method"
     },
-    "chainChain": {
+    "commonAccountInstance": {
       "type": "object",
       "properties": {
         "chain_id": {
           "type": "string",
-          "title": "Chain ID\ne.g. 1 for mainnet, 3 for Ropsten"
-        },
-        "uuid": {
-          "type": "string",
-          "title": "UUID in the chain registry"
-        },
-        "name": {
-          "type": "string",
-          "title": "Name in the chain registry"
-        }
-      },
-      "title": "Information about a Chain"
-    },
-    "commonAccountInstance": {
-      "type": "object",
-      "properties": {
-        "chain": {
-          "$ref": "#/definitions/chainChain",
           "title": "Chain ID of the chain"
         },
         "account": {

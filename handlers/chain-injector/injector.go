@@ -4,8 +4,6 @@ import (
 	"fmt"
 
 	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 
@@ -17,55 +15,43 @@ import (
 // ChainInjector enrich the envelope with the chainUUID, chainName and inject in the input.Context the proxy URL
 func ChainInjector(r registry.Client, chainRegistryURL string) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
+		// Check if chain exist
+		if txctx.Builder.GetChainName() == "" {
+			_ = txctx.AbortWithError(errors.DataError("no chainName found")).ExtendComponent(component)
+			return
+		}
+
 		// retrieve tenantID and check if present
 		tenantID := multitenancy.TenantIDFromContext(txctx.Context())
 		if tenantID == "" {
-			e := txctx.AbortWithError(errors.InternalError("invalid tenantID not found")).ExtendComponent(component)
-			txctx.Logger.Error(e)
+			_ = txctx.AbortWithError(errors.DataError("no tenantID found")).ExtendComponent(component)
 			return
 		}
 
-		// Check if chain exist
-		chain, err := getChain(txctx, r, tenantID)
-		if err != nil {
-			e := txctx.AbortWithError(errors.FromError(err)).ExtendComponent(component)
-			txctx.Logger.Error(e)
-			return
-		}
+		if txctx.Builder.GetChainUUID() == "" {
+			chain, err := r.GetChainByTenantAndName(txctx.Context(), tenantID, txctx.Builder.GetChainName())
+			if err != nil {
+				_ = txctx.AbortWithError(errors.FromError(err)).ExtendComponent(component)
+				return
+			}
 
-		// Re-inject chain Name and chain UUID from chain registry
-		txctx.Envelope.GetChain().SetName(chain.Name)
-		txctx.Envelope.GetChain().SetUUID(chain.UUID)
+			// Inject chain UUID from chain registry
+			_ = txctx.Builder.SetChainUUID(chain.UUID)
+		}
 
 		// Inject chain proxy path as /tenantID/chainName
-		proxyURL := fmt.Sprintf("%s/%s", chainRegistryURL, proxy.PathByChainName(tenantID, chain.Name))
+		proxyURL := fmt.Sprintf("%s/%s", chainRegistryURL, proxy.PathByChainName(tenantID, txctx.Builder.GetChainName()))
 		txctx.WithContext(proxy.With(txctx.Context(), proxyURL))
 	}
-}
-
-// getChain retrieves chain in the chain registry
-func getChain(txctx *engine.TxContext, r registry.Client, tenantID string) (*types.Chain, error) {
-	var n *types.Chain
-	var err error
-	chainUUID := txctx.Envelope.GetChain().GetUuid()
-	chainName := txctx.Envelope.GetChain().GetName()
-	switch {
-	case chainUUID != "":
-		n, err = r.GetChainByTenantAndUUID(txctx.Context(), tenantID, chainUUID)
-	case chainName != "":
-		n, err = r.GetChainByTenantAndName(txctx.Context(), tenantID, chainName)
-	default:
-		return nil, errors.InternalError("invalid envelope - no chain uuid or chain name are filled - cannot retrieve chain data")
-	}
-	if err != nil {
-		return nil, err
-	}
-	return n, nil
 }
 
 // ChainIDInjector enrich the envelope with the chain UUID retrieved from the chain proxy
 func ChainIDInjector(ec ethclient.ChainSyncReader) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
+		if txctx.Builder.GetChainID() != nil {
+			return
+		}
+
 		chainProxyURL := proxy.FromContext(txctx.Context())
 		chainID, err := ec.Network(txctx.Context(), chainProxyURL)
 		if err != nil {
@@ -73,7 +59,7 @@ func ChainIDInjector(ec ethclient.ChainSyncReader) engine.HandlerFunc {
 			txctx.Logger.WithError(e).Errorf("injector: could not retrieve chain id from %s", chainProxyURL)
 			return
 		}
-		txctx.Envelope.GetChain().SetChainID(chainID)
+		_ = txctx.Builder.SetChainID(chainID)
 		txctx.Logger.Debugf("injector: chain id %s injected", chainID.String())
 	}
 }

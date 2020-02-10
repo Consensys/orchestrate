@@ -5,7 +5,6 @@ go 1.13
 require (
 	github.com/ConsenSys/golang-utils v0.0.0-20190722185538-95555d181804
 	github.com/DATA-DOG/go-sqlmock v1.3.3 // indirect
-	github.com/DATA-DOG/godog v0.7.13
 	github.com/Shopify/sarama v1.24.1
 	github.com/alicebob/gopher-json v0.0.0-20180125190556-5a6b3ba71ee6 // indirect
 	github.com/alicebob/miniredis v2.5.0+incompatible
@@ -19,6 +18,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/containous/alice v0.0.0-20181107144136-d83ebdd94cbd
 	github.com/containous/traefik/v2 v2.0.5
+	github.com/cucumber/godog v0.8.1
 	github.com/deckarep/golang-set v1.7.1 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/eapache/channels v1.1.0
@@ -49,6 +49,7 @@ require (
 	github.com/julien-marchand/healthcheck v0.1.0
 	github.com/klauspost/compress v1.9.3 // indirect
 	github.com/magiconair/properties v1.8.1
+	github.com/mitchellh/mapstructure v1.1.2
 	github.com/nmvalera/striped-mutex v0.1.0
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/ory/fosite v0.30.2

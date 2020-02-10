@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
 )
 
 // ChanRegistry holds a set of indexed envelopes channels
@@ -12,19 +12,19 @@ import (
 type ChanRegistry struct {
 	mux *sync.RWMutex
 
-	chans map[string]chan *envelope.Envelope
+	chans map[string]chan *tx.Builder
 }
 
 // NewChanRegistry creates a new channel registry
 func NewChanRegistry() *ChanRegistry {
 	return &ChanRegistry{
 		mux:   &sync.RWMutex{},
-		chans: make(map[string]chan *envelope.Envelope),
+		chans: make(map[string]chan *tx.Builder),
 	}
 }
 
 // Register register a new channel
-func (r *ChanRegistry) Register(key string, ch chan *envelope.Envelope) {
+func (r *ChanRegistry) Register(key string, ch chan *tx.Builder) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -42,7 +42,7 @@ func (r *ChanRegistry) HasChan(key string) bool {
 }
 
 // Send envelope to channel registered for key
-func (r *ChanRegistry) Send(key string, e *envelope.Envelope) error {
+func (r *ChanRegistry) Send(key string, e *tx.Builder) error {
 	r.mux.RLock()
 	defer r.mux.RUnlock()
 

@@ -52,9 +52,9 @@ func (s *EnvelopeStore) Store(ctx context.Context, req *evlpstore.StoreRequest) 
 	}
 
 	// Store model
-	s.byID[req.GetEnvelope().GetMetadata().GetId()] = model
+	s.byID[req.GetEnvelope().GetID()] = model
 
-	k := key(req.GetEnvelope().GetChain().GetBigChainID().String(), req.GetEnvelope().GetTx().GetHash())
+	k := key(req.GetEnvelope().GetChainID(), req.GetEnvelope().GetTxHash())
 	s.byTxHash[k] = model
 
 	return model.ToStoreResponse()
@@ -65,10 +65,10 @@ func (s *EnvelopeStore) LoadByTxHash(ctx context.Context, req *evlpstore.LoadByT
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	model, ok := s.byTxHash[key(req.GetChain().GetBigChainID().String(), req.GetTxHash())]
+	model, ok := s.byTxHash[key(req.GetChainId(), req.GetTxHash())]
 	if !ok {
 		return &evlpstore.StoreResponse{},
-			errors.NotFoundError("no envelope for chain %q txHash %q", req.GetChain().GetBigChainID().String(), req.GetTxHash()).
+			errors.NotFoundError("no envelope for chain %q txHash %q", req.GetChainId(), req.GetTxHash()).
 				SetComponent(component)
 	}
 

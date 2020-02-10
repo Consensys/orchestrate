@@ -13,7 +13,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore/crypto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore/wallet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/services"
-	pkgchain "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -21,7 +20,7 @@ import (
 type SigningSession struct {
 	secretStore services.SecretStore
 	wallet      *wallet.Wallet
-	chain       *pkgchain.Chain
+	chain       *big.Int
 }
 
 // NewSigningSession create a new tx signature session from address
@@ -44,7 +43,7 @@ func (sess *SigningSession) SetWallet(ctx context.Context, address *ethcommon.Ad
 }
 
 // SetChain is a setter for the chain used in the signed process
-func (sess *SigningSession) SetChain(netChain *pkgchain.Chain) error {
+func (sess *SigningSession) SetChain(netChain *big.Int) error {
 	sess.chain = netChain
 	return nil
 }
@@ -57,7 +56,7 @@ func (sess *SigningSession) getSigner() (ethtypes.Signer, error) {
 	}
 
 	// We copy chain UUID to ensure pointer can be safely used elsewhere
-	signer = ethtypes.NewEIP155Signer(new(big.Int).Set(sess.chain.GetBigChainID()))
+	signer = ethtypes.NewEIP155Signer(new(big.Int).Set(sess.chain))
 
 	return signer, nil
 }
@@ -161,7 +160,7 @@ func (sess *SigningSession) ExecuteForTesseraTx(tx *ethtypes.Transaction) ([]byt
 	return signedRaw, &txHash, nil
 }
 
-func privateTxHash(tx *ethtypes.Transaction, privateArgs *types.PrivateArgs, chain *pkgchain.Chain) ethcommon.Hash {
+func privateTxHash(tx *ethtypes.Transaction, privateArgs *types.PrivateArgs, chain *big.Int) ethcommon.Hash {
 	hash := rlpHash([]interface{}{
 		tx.Nonce(),
 		tx.GasPrice(),
@@ -169,7 +168,7 @@ func privateTxHash(tx *ethtypes.Transaction, privateArgs *types.PrivateArgs, cha
 		tx.To(),
 		tx.Value(),
 		tx.Data(),
-		chain.GetBigChainID(),
+		chain,
 		uint(0),
 		uint(0),
 		privateArgs.PrivateFrom,

@@ -5,15 +5,16 @@ import (
 	"strings"
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
 )
 
 // EnvelopeModel is a entry into mock envelope Store
 type EnvelopeModel struct {
 	// envelope
-	envelope *envelope.Envelope
+	envelope *tx.TxEnvelope
 
 	// Status
 	Status   string

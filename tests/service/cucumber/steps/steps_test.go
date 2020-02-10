@@ -4,10 +4,12 @@ import (
 	"net/http"
 	"testing"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
+
 	httpclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/client"
 
-	"github.com/DATA-DOG/godog/gherkin"
 	"github.com/Shopify/sarama/mocks"
+	"github.com/cucumber/godog/gherkin"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -19,7 +21,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/tracker"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
 	crc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 )
 
 type ScenarioTestSuite struct {
@@ -67,7 +68,7 @@ func (s *ScenarioTestSuite) TestParseEnvelopes() {
 		Rows: []*gherkin.TableRow{
 			{
 				Cells: []*gherkin.TableCell{
-					{Value: "chain.chainID"},
+					{Value: "chainID"},
 					{Value: "from"},
 				},
 			},
@@ -85,7 +86,7 @@ func (s *ScenarioTestSuite) TestParseEnvelopes() {
 
 	trackers := s.Context.newTrackers(envelopes)
 	require.Len(s.T(), trackers, 1, "A tracker should have been created")
-	assert.Equal(s.T(), "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4", trackers[0].Current.GetFrom())
+	assert.Equal(s.T(), "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4", trackers[0].Current.GetFromString())
 }
 
 func (s *ScenarioTestSuite) TestISendEnvelopesToTopic() {
@@ -93,7 +94,7 @@ func (s *ScenarioTestSuite) TestISendEnvelopesToTopic() {
 		Rows: []*gherkin.TableRow{
 			{
 				Cells: []*gherkin.TableCell{
-					{Value: "chain.chainID"},
+					{Value: "chainID"},
 					{Value: "from"},
 				},
 			},
@@ -113,21 +114,21 @@ func (s *ScenarioTestSuite) TestISendEnvelopesToTopic() {
 
 func (s *ScenarioTestSuite) TestEnvelopeShouldBeInTopic() {
 	// Prepare trackers
-	input := &envelope.Envelope{}
+	input := tx.NewBuilder()
 	s.Context.setMetadata(input)
 	t := s.Context.newTracker(input)
 	s.Context.setTrackers([]*tracker.Tracker{t})
 
-	output := &envelope.Envelope{
-		Metadata: input.GetMetadata(),
-	}
+	output := tx.NewBuilder().
+		SetID(input.GetID()).
+		SetContextLabels(input.GetContextLabels())
 
-	err := s.Context.chanReg.Send(LongKeyOf("tx.crafter", output.GetMetadata().GetExtra()["scenario.id"], output.GetMetadata().Id), output)
+	err := s.Context.chanReg.Send(LongKeyOf("tx.crafter", output.GetContextLabelsValue("scenario.id"), output.GetID()), output)
 	assert.NoError(s.T(), err, "Send in registry should not error")
 
 	err = s.Context.envelopeShouldBeInTopic("tx.crafter")
 	assert.NoError(s.T(), err, "envelopeShouldBeInTopic should not error")
-	assert.Equal(s.T(), output, s.Context.trackers[0].Current, "Envelope on tracker should have been updated")
+	assert.Equal(s.T(), output, s.Context.trackers[0].Current, "Builder on tracker should have been updated")
 }
 
 func TestScenarioTestSuite(t *testing.T) {

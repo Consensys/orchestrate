@@ -67,7 +67,7 @@ func (s *EnvelopeStore) Store(ctx context.Context, req *evlpstore.StoreRequest) 
 func (s *EnvelopeStore) LoadByTxHash(ctx context.Context, req *evlpstore.LoadByTxHashRequest) (*evlpstore.StoreResponse, error) { //nolint:interfacer // reason
 	tenantID := multitenancy.TenantIDFromContext(ctx)
 	model := &EnvelopeModel{
-		ChainID:  req.GetChain().GetBigChainID().String(),
+		ChainID:  req.GetChainId(),
 		TenantID: tenantID,
 		TxHash:   req.GetTxHash(),
 	}

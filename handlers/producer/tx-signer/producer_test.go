@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 )
 
 type TestMsg string
@@ -27,7 +26,6 @@ func (h *header) Set(key, value string) {}
 func TestPrepareMsgSigner(t *testing.T) {
 	// No error
 	txctx := engine.NewTxContext()
-	txctx.Envelope = &envelope.Envelope{}
 
 	txctx.In = TestMsg("topic-tx-signer")
 	msg := &sarama.ProducerMessage{}
@@ -43,7 +41,6 @@ func TestPrepareMsgSigner(t *testing.T) {
 func TestPrepareMsgGenerateWallet(t *testing.T) {
 	// No error
 	txctx := engine.NewTxContext()
-	txctx.Envelope = &envelope.Envelope{}
 
 	txctx.In = TestMsg("topic-wallet-generator")
 	msg := &sarama.ProducerMessage{}

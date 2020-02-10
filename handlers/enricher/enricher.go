@@ -13,7 +13,7 @@ import (
 // Enricher is a Middleware engine.HandlerFunc
 func Enricher(r svc.ContractRegistryClient, ec ethclient.ChainStateReader) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		if txctx.Envelope.GetReceipt().GetContractAddress() != "" {
+		if txctx.Builder.GetReceipt().GetContractAddress() != "" {
 			url, err := proxy.GetURL(txctx)
 			if err != nil {
 				return
@@ -21,13 +21,13 @@ func Enricher(r svc.ContractRegistryClient, ec ethclient.ChainStateReader) engin
 
 			code, err := ec.CodeAt(txctx.Context(),
 				url,
-				txctx.Envelope.GetReceipt().GetContractAddr(),
+				txctx.Builder.GetReceipt().GetContractAddr(),
 				nil)
 			if err != nil {
 				_ = txctx.AbortWithError(errors.InternalError(
 					"could not read account code for chain %s and account %s",
 					url,
-					txctx.Envelope.GetReceipt().GetContractAddr().Hex(),
+					txctx.Builder.GetReceipt().GetContractAddr().Hex(),
 				)).SetComponent(component)
 				return
 			}
@@ -44,8 +44,8 @@ func Enricher(r svc.ContractRegistryClient, ec ethclient.ChainStateReader) engin
 				return
 			}
 			txctx.Logger.Debugf("%s successfully SetAccountCodeHash in Contract Registry for chain %s and account %s with codehash",
-				txctx.Envelope.Chain.GetBigChainID(),
-				txctx.Envelope.GetReceipt().GetContractAddress(),
+				txctx.Builder.GetChainIDString(),
+				txctx.Builder.GetReceipt().GetContractAddress(),
 				crypto.Keccak256Hash(code))
 		}
 	}

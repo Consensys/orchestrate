@@ -3,22 +3,22 @@ package gasestimator
 import (
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 
 	"github.com/ethereum/go-ethereum"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 )
 
-// EnvelopeToCallMsg enrich an ethereum.CallMsg with Envelope information
-func EnvelopeToCallMsg(e *envelope.Envelope, call *ethereum.CallMsg) {
-	to := e.GetTx().GetTxData().Receiver()
-	call.To = &to
-	call.From = e.Sender()
-	call.Value = e.GetTx().GetTxData().GetValueBig()
-	call.Data = e.GetTx().GetTxData().GetDataBytes()
+// EnvelopeToCallMsg enrich an ethereum.CallMsg with Builder information
+func EnvelopeToCallMsg(b *tx.Builder, call *ethereum.CallMsg) {
+	call.To = b.GetTo()
+	call.From = b.MustGetFromAddress()
+	call.Value = b.GetValue()
+	call.Data = b.MustGetDataBytes()
 }
 
 // Estimator creates an handler that set Gas Limit
@@ -29,13 +29,13 @@ func Estimator(p ethclient.GasEstimator) engine.HandlerFunc {
 
 	return func(txctx *engine.TxContext) {
 
-		if txctx.Envelope.GetTx().GetTxData().GetGas() == 0 {
+		if txctx.Builder.Gas == nil {
 			// Retrieve re-cycled CallMsg
 			call := pool.Get().(*ethereum.CallMsg)
 			defer pool.Put(call)
 
 			// Estimate gas
-			EnvelopeToCallMsg(txctx.Envelope, call)
+			EnvelopeToCallMsg(txctx.Builder, call)
 
 			url, err := proxy.GetURL(txctx)
 			if err != nil {
@@ -50,7 +50,7 @@ func Estimator(p ethclient.GasEstimator) engine.HandlerFunc {
 			}
 
 			// Set gas limit on context
-			txctx.Envelope.GetTx().GetTxData().SetGas(g)
+			_ = txctx.Builder.SetGas(g)
 
 			// Enrich logger
 			txctx.Logger = txctx.Logger.WithFields(log.Fields{
@@ -61,7 +61,7 @@ func Estimator(p ethclient.GasEstimator) engine.HandlerFunc {
 
 		// Enrich logger
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"tx.gas": txctx.Envelope.GetTx().GetTxData().GetGas(),
+			"tx.gas": txctx.Builder.GetGas(),
 		})
 	}
 }

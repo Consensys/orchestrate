@@ -2,45 +2,37 @@ package txsender
 
 import (
 	"github.com/Shopify/sarama"
+	"github.com/golang/protobuf/proto"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/producer"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
 // PrepareMsg prepare message to produce from TxContexts
 func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
-	// Set message Key
-	msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(txctx.Envelope.GetChain().GetBigChainID(), txctx.Envelope.Sender()))
+	var p proto.Message
 
-	// We loop over errors to
-	// - determine to which topic to send transaction
-	// - remove invalid nonce warnings
-loop:
-	for _, err := range txctx.Envelope.GetErrors() {
-		switch {
-		case errors.IsWarning(err):
-			continue
-		default:
-			// If an error occurred we redirect to recovery
-			msg.Topic = viper.GetString(broker.TxRecoverViperKey)
-			break loop
-		}
-	}
-
-	// If no error and nonce is invalid we redirect envelope to tx-nonce
-	if b, ok := txctx.Get("invalid.nonce").(bool); len(txctx.Envelope.GetErrors()) == 0 && ok && b {
+	b, ok := txctx.Get("invalid.nonce").(bool)
+	switch {
+	case len(txctx.Builder.GetErrors()) == 0 && ok && b:
 		msg.Topic = viper.GetString(broker.TxNonceViperKey)
+		p = txctx.Builder.TxEnvelopeAsRequest()
+	case !txctx.Builder.OnlyWarnings():
+		msg.Topic = viper.GetString(broker.TxRecoverViperKey)
+		p = txctx.Builder.TxResponse()
 	}
 
-	// Marshal Envelope into sarama Message
-	err := encoding.Marshal(txctx.Envelope, msg)
+	// Marshal Builder into sarama Message
+	err := encoding.Marshal(p, msg)
 	if err != nil {
 		return err
 	}
+
+	// Set message Key
+	msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(txctx.Builder.ChainID, txctx.Builder.MustGetFromAddress()))
 
 	return nil
 }

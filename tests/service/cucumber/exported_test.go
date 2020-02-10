@@ -3,7 +3,7 @@ package cucumber
 import (
 	"testing"
 
-	"github.com/DATA-DOG/godog"
+	"github.com/cucumber/godog"
 	"github.com/stretchr/testify/assert"
 )
 

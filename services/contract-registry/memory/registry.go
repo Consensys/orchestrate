@@ -277,7 +277,7 @@ func (r *ContractRegistry) GetContractDeployedBytecode(ctx context.Context, req 
 
 // getCodehash retrieve codehash of a contract instance
 func (r *ContractRegistry) getCodehash(contract common.AccountInstance) (ethcommon.Hash, error) {
-	codehashes, ok := r.codehashes[contract.GetChain().String()]
+	codehashes, ok := r.codehashes[contract.GetChainId()]
 	if ok {
 		codehash, ok := codehashes[contract.GetAccountAddress()]
 		if ok {
@@ -371,14 +371,14 @@ func (r *ContractRegistry) GetTags(ctx context.Context, req *svc.GetTagsRequest)
 
 // SetAccountCodeHash set the codehash of a contract address for a given chain
 func (r *ContractRegistry) SetAccountCodeHash(ctx context.Context, req *svc.SetAccountCodeHashRequest) (*svc.SetAccountCodeHashResponse, error) {
-	chainID, addr := req.GetAccountInstance().GetChain(), req.GetAccountInstance().GetAccountAddress()
+	chainID, addr := req.GetAccountInstance().GetChainId(), req.GetAccountInstance().GetAccountAddress()
 
 	// Codehash already stored for this contract instance
-	if _, ok := r.codehashes[chainID.String()][addr]; ok {
+	if _, ok := r.codehashes[chainID][addr]; ok {
 		return &svc.SetAccountCodeHashResponse{}, nil
 	}
 
-	chainStr := chainID.String()
+	chainStr := chainID
 	if _, ok := r.codehashes[chainStr]; !ok {
 		r.codehashes[chainStr] = make(map[ethcommon.Address]ethcommon.Hash)
 	}

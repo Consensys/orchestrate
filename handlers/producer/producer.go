@@ -1,15 +1,12 @@
 package producer
 
 import (
-	"fmt"
-
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 )
 
-// PrepareMsg function should prepare a sarama.ProducerMessage from a TxContext
+// PrepareMsg function should prepare a sarama.ProducerMessage from a Builder
 type PrepareMsg func(*engine.TxContext, *sarama.ProducerMessage) error
 
 // Producer creates a producer handler
@@ -42,39 +39,6 @@ func Producer(p sarama.SyncProducer, prepareMsg PrepareMsg) engine.HandlerFunc {
 			txctx.Logger.Tracef("producer: message produced")
 		} else {
 			txctx.Logger.Tracef("producer: no message produced")
-		}
-	}
-}
-
-// MultiProducer creates a multi producer handler
-func MultiProducer(p sarama.SyncProducer, prepareMsg PrepareMsg) engine.HandlerFunc {
-	return func(txctx *engine.TxContext) {
-		txctx.Next()
-
-		// Pass through the handler if no envelopes to send
-		if txctx.Get("envelopes") == nil {
-			return
-		}
-
-		// Test if able to cast txctx into []*envelope.Envelope
-		envelopes, ok := txctx.Get("envelopes").([]*envelope.Envelope)
-		if !ok {
-			err := fmt.Errorf("not able to cast envelopes %q", envelopes)
-			_ = txctx.AbortWithError(err)
-			txctx.Logger.WithError(err).Errorf("multiProducer: could not produce messages")
-			return
-		}
-
-		for _, e := range envelopes {
-			// Prepare Message
-			subTxctx := &engine.TxContext{
-				Envelope: e,
-				Logger:   txctx.Logger,
-			}
-			subTxctx.WithContext(txctx.Context())
-			subTxctx.Set("envelopes", nil)
-
-			Producer(p, prepareMsg)(subTxctx)
 		}
 	}
 }

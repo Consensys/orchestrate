@@ -4,16 +4,14 @@ import (
 	"fmt"
 	"math/big"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
+
 	"github.com/ethereum/go-ethereum/common"
 	uuid "github.com/satori/go.uuid"
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 	log "github.com/sirupsen/logrus"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
 var (
@@ -25,25 +23,17 @@ func newMessage(i int) *sarama.ProducerMessage {
 		Topic:     "topic-tx-crafter",
 		Partition: -1,
 	}
-	tx := ethereum.NewTx()
-	txData := &ethereum.TxData{}
-	txData = txData.
+
+	builder := tx.NewBuilder().
 		SetNonce(uint64(i)).
 		SetTo(common.HexToAddress("0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C")).
+		SetFrom(common.HexToAddress("0xdbb881a51cd4023e4400cef3ef73046743f08da3")).
 		SetValue(big.NewInt(100000)).
-		SetGas(21000)
+		SetGas(21000).
+		SetChainName("geth")
+	builder.ID = uuid.NewV4().String()
 
-	tx.TxData = txData
-	b, _ := proto.Marshal(
-		&envelope.Envelope{
-			Chain: &chain.Chain{Name: "geth"},
-			From:  `0xdbb881a51cd4023e4400cef3ef73046743f08da3`,
-			Tx:    tx,
-			Metadata: &envelope.Metadata{
-				Id: uuid.NewV4().String(),
-			},
-		},
-	)
+	b, _ := proto.Marshal(builder.TxRequest())
 	msg.Value = sarama.ByteEncoder(b)
 	return msg
 }

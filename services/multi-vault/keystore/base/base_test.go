@@ -16,7 +16,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/memory"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/chain"
 )
 
 // TODO: add new test with multi-tenancy context value
@@ -45,10 +44,8 @@ var arbitraryMsg = []string{
 	"Rust is for people who crave speed and stability in a language. By speed, we mean the speed of the programs that you can create with Rust and the speed at which Rust lets you write them. The Rust compiler’s checks ensure stability through feature additions and refactoring. This is in contrast to the brittle legacy code in languages without these checks, which developers are often afraid to modify. By striving for zero-cost abstractions, higher-level features that compile to lower-level code as fast as code written manually, Rust endeavors to make safe code be fast code as well.",
 }
 
-func makeSignTxInput(i int) (context.Context, *chain.Chain, ethcommon.Address, *ethtypes.Transaction) {
-	netChain := &chain.Chain{
-		ChainId: big.NewInt(testChainsIds[i%len(testChainsIds)]).String(),
-	}
+func makeSignTxInput(i int) (context.Context, *big.Int, ethcommon.Address, *ethtypes.Transaction) {
+	netChain := big.NewInt(testChainsIds[i%len(testChainsIds)])
 	address := ethcommon.HexToAddress(testPKeys[i%len(testPKeys)].a)
 	tx := ethtypes.NewTransaction(
 		10,
@@ -145,7 +142,6 @@ func TestPrivateTxSigning(t *testing.T) {
 	err := store.ImportPrivateKey(context.Background(), privateKey)
 	assert.NoError(t, err)
 
-	chainID := 44
 	tx := ethtypes.NewTransaction(
 		0,
 		ethcommon.HexToAddress("0x0"),
@@ -161,7 +157,7 @@ func TestPrivateTxSigning(t *testing.T) {
 		PrivateTxType: "restricted",
 	}
 
-	bytes, _, err := store.SignPrivateEEATx(context.Background(), chain.FromInt(int64(chainID)), ethcommon.HexToAddress("0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73"), tx, privateArgs)
+	bytes, _, err := store.SignPrivateEEATx(context.Background(), big.NewInt(44), ethcommon.HexToAddress("0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73"), tx, privateArgs)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, hexutil.Encode(bytes))
 }
@@ -174,7 +170,6 @@ func TestPrivateTesseraTxSigning(t *testing.T) {
 	err := store.ImportPrivateKey(context.Background(), privateKey)
 	assert.NoError(t, err)
 
-	chainID := 44
 	tx := ethtypes.NewTransaction(
 		0,
 		ethcommon.HexToAddress("0x0"),
@@ -184,7 +179,7 @@ func TestPrivateTesseraTxSigning(t *testing.T) {
 		hexutil.MustDecode(data),
 	)
 
-	bytes, _, err := store.SignPrivateTesseraTx(context.Background(), chain.FromInt(int64(chainID)), ethcommon.HexToAddress("0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73"), tx)
+	bytes, _, err := store.SignPrivateTesseraTx(context.Background(), big.NewInt(44), ethcommon.HexToAddress("0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73"), tx)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, hexutil.Encode(bytes))
 }

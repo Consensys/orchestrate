@@ -37,17 +37,17 @@ func makeMultiTenancyContext(i int) *engine.TxContext {
 	ctx := engine.NewTxContext()
 	ctx.Reset()
 	ctx.Logger = log.NewEntry(log.StandardLogger())
-	ctx.Envelope.Receipt = &ethereum.Receipt{}
+	ctx.Builder.Receipt = &ethereum.Receipt{}
 
 	switch i % 4 {
 	case 0:
 		// Error Use case:  Token is expired
-		ctx.Envelope.SetMetadataValue(AuthorizationMetadata, idToken)
+		_ = ctx.Builder.SetHeadersValue(AuthorizationMetadata, idToken)
 		ctx.Set(keyExpectedValue, "b49ee1bc-f0fa-430d-89b2-a4fd0dc98906")
 		ctx.Set("errors", 0)
 	case 1:
 		// Error Use case:  UntrustedSigner
-		ctx.Envelope.SetMetadataValue(AuthorizationMetadata, accessTokenWithoutTenantID)
+		_ = ctx.Builder.SetHeadersValue(AuthorizationMetadata, accessTokenWithoutTenantID)
 		ctx.Set("errors", 1)
 		ctx.Set("error.code", errors.Unauthorized)
 	case 2:
@@ -56,7 +56,7 @@ func makeMultiTenancyContext(i int) *engine.TxContext {
 		ctx.Set("error.code", errors.Unauthorized)
 	case 3:
 		// Error Use case:  UntrustedSigner
-		ctx.Envelope.SetMetadataValue(AuthorizationMetadata, accessTokenUntrustedSigner)
+		_ = ctx.Builder.SetHeadersValue(AuthorizationMetadata, accessTokenUntrustedSigner)
 		ctx.Set("errors", 1)
 		ctx.Set("error.code", errors.Unauthorized)
 	default:
@@ -83,9 +83,9 @@ func (m *MultiTenancyTestSuite) TestMultiTenancy() {
 	m.Handle(txctxs)
 
 	for _, txctx := range txctxs {
-		assert.Len(m.T(), txctx.Envelope.Errors, txctx.Get("errors").(int), "Expected right count of errors", txctx.Envelope.Args)
+		assert.Len(m.T(), txctx.Builder.Errors, txctx.Get("errors").(int), "Expected right count of errors", txctx.Builder.Args)
 		if txctx.Get("errors").(int) != 0 {
-			for _, err := range txctx.Envelope.Errors {
+			for _, err := range txctx.Builder.Errors {
 				assert.Equal(m.T(), txctx.Get("error.code").(uint64), err.GetCode(), "Error code be correct")
 			}
 		} else {

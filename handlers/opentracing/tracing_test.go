@@ -37,7 +37,7 @@ func makeTracerContext(i int) *engine.TxContext {
 		mockSpan.AttachTo(txctx)
 		return txctx
 	case 2:
-		// There is a previous span in the Envelope Carrier
+		// There is a previous span in the Builder Carrier
 		// The handler should create a Child span of the previously existing one
 		mockSpanContext := oTMocktracer.MockSpanContext{
 			TraceID: 10,
@@ -86,7 +86,7 @@ func (s *TracerTestSuite) TestTxSpanFromBroker() {
 		case 2:
 			assert.Equal(s.T(), OpenTracingName, span.Span.(*oTMocktracer.MockSpan).OperationName, "Expected right operationName")
 			assert.Equal(s.T(), 44, span.Span.(*oTMocktracer.MockSpan).ParentID, "Expected right ParentID from txctx.Context")
-			assert.Equal(s.T(), 43, spanContext.(oTMocktracer.MockSpanContext).TraceID, "Expected right TraceID from txctx.Envelope.Metadata")
+			assert.Equal(s.T(), 43, spanContext.(oTMocktracer.MockSpanContext).TraceID, "Expected right TraceID from txctx.Builder.Metadata")
 		}
 	}
 }

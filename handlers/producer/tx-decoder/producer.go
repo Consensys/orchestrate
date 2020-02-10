@@ -11,8 +11,8 @@ import (
 
 // PrepareMsg prepare message to produce from TxContexts
 func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
-	// Marshal Envelope into sarama Message
-	err := encoding.Marshal(txctx.Envelope, msg)
+	// Marshal Builder into sarama Message
+	err := encoding.Marshal(txctx.Builder.TxResponse(), msg)
 	if err != nil {
 		return err
 	}
@@ -21,7 +21,7 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 	msg.Topic = viper.GetString(broker.TxDecodedViperKey)
 
 	// Set key
-	msg.Key = sarama.StringEncoder(txctx.Envelope.GetChain().GetUuid())
+	// msg.Key = sarama.ByteEncoder(txctx.Builder.ChainID.Bytes())
 
 	return nil
 }
