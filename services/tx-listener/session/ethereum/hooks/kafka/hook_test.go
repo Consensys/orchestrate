@@ -63,8 +63,7 @@ func (ec *MockChainStateReader) PendingNonceAt(ctx context.Context, url string, 
 func TestHook(t *testing.T) {
 	// Initialize hook
 	conf := &Config{
-		TopicTxDecoder:    "test-topic-decoder",
-		DisableExternalTx: true,
+		TopicTxDecoder: "test-topic-decoder",
 	}
 	registry := crc.New()
 	ec := &MockChainStateReader{}
@@ -77,10 +76,13 @@ func TestHook(t *testing.T) {
 	var block ethtypes.Block
 	_ = rlp.DecodeBytes(blockEnc, &block)
 
+	listener := &dynamic.Listener{ExternalTxEnabled: false}
+
 	c := &dynamic.Chain{
-		UUID:    "test-c",
-		URL:     "test-url",
-		ChainID: big.NewInt(1),
+		UUID:     "test-c",
+		URL:      "test-url",
+		ChainID:  big.NewInt(1),
+		Listener: listener,
 	}
 
 	// Test 1: envelope store is empty so producer should not be called thus no error

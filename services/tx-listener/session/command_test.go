@@ -9,8 +9,9 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 )
 
-var config1 = &dynamic.Chain{Name: "test", Listener: &dynamic.Listener{Depth: 1, Backoff: time.Second}}
-var config2 = &dynamic.Chain{Name: "test2", Listener: &dynamic.Listener{Depth: 1, Backoff: time.Second}}
+var config1 = &dynamic.Chain{Name: "test", Listener: &dynamic.Listener{Depth: 1, Backoff: time.Second, ExternalTxEnabled: false}}
+var config2 = &dynamic.Chain{Name: "test2", Listener: &dynamic.Listener{Depth: 1, Backoff: time.Second, ExternalTxEnabled: false}}
+var configExternTxEnabled = &dynamic.Chain{Name: "test2", Listener: &dynamic.Listener{Depth: 1, Backoff: time.Second, ExternalTxEnabled: true}}
 
 func TestCompareConfiguation(t *testing.T) {
 
@@ -69,6 +70,20 @@ func TestCompareConfiguation(t *testing.T) {
 				{
 					Type:  UPDATE,
 					Chain: config2,
+				},
+			},
+		},
+		{
+			oldConfig: &dynamic.Configuration{Chains: map[string]*dynamic.Chain{
+				"test": config1,
+			}},
+			newConfig: &dynamic.Configuration{Chains: map[string]*dynamic.Chain{
+				"test": configExternTxEnabled,
+			}},
+			expectedCommand: []*Command{
+				{
+					Type:  UPDATE,
+					Chain: configExternTxEnabled,
 				},
 			},
 		},

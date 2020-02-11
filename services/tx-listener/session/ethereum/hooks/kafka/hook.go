@@ -65,7 +65,7 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 		evlp, err := hk.loadEnvelope(receiptLogCtx, c, receipt)
 		switch {
 		case err == nil:
-		case !hk.conf.DisableExternalTx && errors.IsNotFoundError(err):
+		case c.Listener.ExternalTxEnabled && !errors.IsNotFoundError(err):
 			// External transaction
 			evlp = &envelope.Envelope{
 				Metadata: &envelope.Metadata{Id: uuid.NewV4().String()},
