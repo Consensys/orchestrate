@@ -1,10 +1,11 @@
-package api
+package chains
 
 import (
 	"encoding/json"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api/utils"
 	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
 
@@ -20,9 +21,9 @@ func (h Handler) patchChainByName(rw http.ResponseWriter, request *http.Request)
 	rw.Header().Set("Content-Type", "application/json")
 
 	chainRequest := &PatchRequest{Listener: &Listener{}}
-	err := UnmarshalBody(request.Body, chainRequest)
+	err := utils.UnmarshalBody(request.Body, chainRequest)
 	if err != nil {
-		writeError(rw, err.Error(), http.StatusBadRequest)
+		utils.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -40,7 +41,7 @@ func (h Handler) patchChainByName(rw http.ResponseWriter, request *http.Request)
 
 	err = h.store.UpdateChainByName(request.Context(), chain)
 	if err != nil {
-		handleChainRegistryStoreError(rw, err)
+		utils.HandleStoreError(rw, err)
 		return
 	}
 
@@ -51,9 +52,9 @@ func (h Handler) patchChainByUUID(rw http.ResponseWriter, request *http.Request)
 	rw.Header().Set("Content-Type", "application/json")
 
 	chainRequest := &PatchRequest{Listener: &Listener{}}
-	err := UnmarshalBody(request.Body, chainRequest)
+	err := utils.UnmarshalBody(request.Body, chainRequest)
 	if err != nil {
-		writeError(rw, err.Error(), http.StatusBadRequest)
+		utils.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -69,7 +70,7 @@ func (h Handler) patchChainByUUID(rw http.ResponseWriter, request *http.Request)
 
 	err = h.store.UpdateChainByUUID(request.Context(), chain)
 	if err != nil {
-		handleChainRegistryStoreError(rw, err)
+		utils.HandleStoreError(rw, err)
 		return
 	}
 

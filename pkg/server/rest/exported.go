@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	log "github.com/sirupsen/logrus"
@@ -47,8 +48,10 @@ func Init(ctx context.Context) {
 			mux.Handle("/", gw)
 
 			server = &http.Server{
-				Addr:    URL(),
-				Handler: mux,
+				Addr:         URL(),
+				Handler:      mux,
+				WriteTimeout: 10 * time.Second,
+				ReadTimeout:  10 * time.Second,
 			}
 		}
 	})

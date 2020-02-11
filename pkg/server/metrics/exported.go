@@ -5,6 +5,7 @@ import (
 	"net"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/julien-marchand/healthcheck"
 
@@ -28,9 +29,12 @@ func Init(_ context.Context) {
 		}
 
 		// Initialize server
-		server = &http.Server{}
-		server.Addr = URL()
-		server.Handler = mux
+		server = &http.Server{
+			Addr:         URL(),
+			Handler:      mux,
+			WriteTimeout: 10 * time.Second,
+			ReadTimeout:  10 * time.Second,
+		}
 	})
 }
 

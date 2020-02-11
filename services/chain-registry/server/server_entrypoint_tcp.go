@@ -402,8 +402,10 @@ func createHTTPServer(ctx context.Context, ln net.Listener, configuration *stati
 	}
 
 	serverHTTP := &http.Server{
-		Handler:  handler,
-		ErrorLog: httpServerLogger,
+		Handler:      handler,
+		ErrorLog:     httpServerLogger,
+		WriteTimeout: 10 * time.Second,
+		ReadTimeout:  10 * time.Second,
 	}
 
 	listener := newHTTPForwarder(ln)

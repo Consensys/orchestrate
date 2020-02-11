@@ -1,17 +1,10 @@
-package api
+package chains
 
 import (
-	"encoding/json"
-	"fmt"
-	"io"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
-
-	"github.com/containous/traefik/v2/pkg/config/runtime"
 	"github.com/gorilla/mux"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
 
 type Handler struct {
@@ -41,49 +34,9 @@ func (h *Handler) Append(router *mux.Router) {
 	router.Methods(http.MethodDelete).Path("/chains/{uuid}").HandlerFunc(h.deleteChainByUUID)
 }
 
-type Builder func(config *runtime.Configuration) http.Handler
-
-type apiError struct {
-	Message string `json:"message"`
-}
-
-func handleChainRegistryStoreError(rw http.ResponseWriter, err error) {
-	switch {
-	case errors.IsAlreadyExistsError(err):
-		writeError(rw, err.Error(), http.StatusConflict)
-	case errors.IsNotFoundError(err):
-		writeError(rw, err.Error(), http.StatusNotFound)
-	case err != nil:
-		writeError(rw, err.Error(), http.StatusInternalServerError)
-	}
-}
-
-func writeError(rw http.ResponseWriter, msg string, code int) {
-	data, _ := json.Marshal(apiError{Message: msg})
-	http.Error(rw, string(data), code)
-}
-
 type Listener struct {
 	Depth             *uint64 `json:"depth,omitempty"`
 	BlockPosition     *int64  `json:"blockPosition,string,omitempty"`
 	BackOffDuration   *string `json:"backOffDuration,omitempty"`
 	ExternalTxEnabled *bool   `json:"externalTxEnabled,omitempty"`
-}
-
-var validate = validator.New()
-
-func UnmarshalBody(body io.Reader, req interface{}) error {
-	dec := json.NewDecoder(body)
-	dec.DisallowUnknownFields() // Force errors if unknown fields
-	err := dec.Decode(req)
-	if err != nil {
-		return errors.FromError(err).ExtendComponent(component)
-	}
-
-	err = validate.Struct(req)
-	if err != nil {
-		return errors.FromError(fmt.Errorf("invalid body")).ExtendComponent(component)
-	}
-
-	return nil
 }

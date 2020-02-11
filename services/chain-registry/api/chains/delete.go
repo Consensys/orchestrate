@@ -1,12 +1,12 @@
-package api
+package chains
 
 import (
 	"encoding/json"
 	"net/http"
 
-	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
-
 	"github.com/gorilla/mux"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api/utils"
+	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
 
 type deleteResponse struct{}
@@ -16,7 +16,7 @@ func (h Handler) deleteChainByUUID(rw http.ResponseWriter, request *http.Request
 
 	err := h.store.DeleteChainByUUID(request.Context(), mux.Vars(request)["uuid"])
 	if err != nil {
-		handleChainRegistryStoreError(rw, err)
+		utils.HandleStoreError(rw, err)
 		return
 	}
 
@@ -33,7 +33,7 @@ func (h Handler) deleteChainByName(rw http.ResponseWriter, request *http.Request
 
 	err := h.store.DeleteChainByName(request.Context(), chain)
 	if err != nil {
-		handleChainRegistryStoreError(rw, err)
+		utils.HandleStoreError(rw, err)
 		return
 	}
 

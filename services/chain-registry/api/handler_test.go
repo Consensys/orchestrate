@@ -8,6 +8,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api/chains"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api/utils"
 )
 
 func TestUnmarshalBody(t *testing.T) {
@@ -16,27 +18,27 @@ func TestUnmarshalBody(t *testing.T) {
 		body           func() []byte
 		input          interface{}
 		expectedOutput interface{}
-		expectecError  error
+		expectedError  error
 	}{
 		{
 			name:           "unknown field",
 			body:           func() []byte { return []byte(`{"unknownField":"error"}`) },
-			input:          &PostRequest{},
-			expectedOutput: &PostRequest{},
-			expectecError:  errors.FromError(fmt.Errorf("json: unknown field \"unknownField\"")).ExtendComponent(component),
+			input:          &chains.PostRequest{},
+			expectedOutput: &chains.PostRequest{},
+			expectedError:  errors.FromError(fmt.Errorf("json: unknown field \"unknownField\"")).ExtendComponent(component),
 		},
 		{
 			name: "twice same URL field",
 			body: func() []byte {
-				body, _ := json.Marshal(&PostRequest{
+				body, _ := json.Marshal(&chains.PostRequest{
 					Name: "testName",
 					URLs: []string{"http://test.com", "http://test.com"},
 				})
 				return body
 			},
-			input:          &PostRequest{},
-			expectedOutput: &PostRequest{Name: "testName", URLs: []string{"http://test.com", "http://test.com"}},
-			expectecError:  errors.FromError(fmt.Errorf("invalid body")).ExtendComponent(component),
+			input:          &chains.PostRequest{},
+			expectedOutput: &chains.PostRequest{Name: "testName", URLs: []string{"http://test.com", "http://test.com"}},
+			expectedError:  errors.FromError(fmt.Errorf("invalid body")).ExtendComponent(component),
 		},
 	}
 
@@ -45,9 +47,9 @@ func TestUnmarshalBody(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel() // marks each test case as capable of running in parallel with each other
 
-			err := UnmarshalBody(bytes.NewReader(test.body()), test.input)
+			err := utils.UnmarshalBody(bytes.NewReader(test.body()), test.input)
 
-			assert.Equal(t, test.expectecError, err, "should get same error")
+			assert.Equal(t, test.expectedError, err, "should get same error")
 			assert.Equal(t, test.input, test.expectedOutput, "should unmarshal without error")
 		})
 	}

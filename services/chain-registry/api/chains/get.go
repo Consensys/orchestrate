@@ -1,4 +1,4 @@
-package api
+package chains
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api/utils"
 )
 
 func (h Handler) getChains(rw http.ResponseWriter, request *http.Request) {
@@ -19,7 +20,7 @@ func (h Handler) getChains(rw http.ResponseWriter, request *http.Request) {
 
 	chains, err := h.store.GetChains(request.Context(), filters)
 	if err != nil {
-		handleChainRegistryStoreError(rw, err)
+		utils.HandleStoreError(rw, err)
 		return
 	}
 
@@ -31,7 +32,7 @@ func (h Handler) getChainByUUID(rw http.ResponseWriter, request *http.Request) {
 
 	chain, err := h.store.GetChainByUUID(request.Context(), mux.Vars(request)["uuid"])
 	if err != nil {
-		handleChainRegistryStoreError(rw, err)
+		utils.HandleStoreError(rw, err)
 		return
 	}
 
@@ -49,7 +50,7 @@ func (h Handler) getChainsByTenantID(rw http.ResponseWriter, request *http.Reque
 
 	chains, err := h.store.GetChainsByTenantID(request.Context(), mux.Vars(request)["tenantID"], filters)
 	if err != nil {
-		handleChainRegistryStoreError(rw, err)
+		utils.HandleStoreError(rw, err)
 		return
 	}
 
@@ -61,7 +62,7 @@ func (h Handler) getChainByTenantIDAndName(rw http.ResponseWriter, request *http
 
 	chain, err := h.store.GetChainByTenantIDAndName(request.Context(), mux.Vars(request)["tenantID"], mux.Vars(request)["name"])
 	if err != nil {
-		handleChainRegistryStoreError(rw, err)
+		utils.HandleStoreError(rw, err)
 		return
 	}
 

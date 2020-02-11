@@ -1,4 +1,4 @@
-package api
+package chains
 
 import (
 	"net/http"

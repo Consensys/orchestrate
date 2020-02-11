@@ -5,34 +5,27 @@ import (
 	"net/http"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store"
-
 	"github.com/containous/traefik/v2/pkg/api"
 	"github.com/containous/traefik/v2/pkg/config/runtime"
 	"github.com/containous/traefik/v2/pkg/config/static"
 	"github.com/gorilla/mux"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api/chains"
 )
 
 const component = "chain-registry.store.api"
 
 var (
-	handler  *Handler
 	initOnce = &sync.Once{}
 )
 
 // Initialize API handlers
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
-		if handler != nil {
-			return
-		}
-
-		store.Init(ctx)
-
-		// Set Chain-Registry handler
-		handler = NewHandler(store.GlobalStoreRegistry())
+		chains.Init(ctx)
 	})
 }
+
+type Builder func(config *runtime.Configuration) http.Handler
 
 // NewBuilder returns a http.Handler builder based on runtime.Configuration
 func NewBuilder(staticConfig *static.Configuration) Builder {
@@ -45,7 +38,7 @@ func NewBuilder(staticConfig *static.Configuration) Builder {
 		}
 
 		// Append Chain-Registry routes
-		handler.Append(router)
+		chains.GlobalHandler().Append(router)
 
 		return router
 	}

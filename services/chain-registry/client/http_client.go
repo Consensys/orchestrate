@@ -9,9 +9,8 @@ import (
 	"net/url"
 
 	log "github.com/sirupsen/logrus"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api/chains"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
 
@@ -45,12 +44,12 @@ func (c *HTTPClient) GetChains(ctx context.Context) ([]*types.Chain, error) {
 		return nil, errors.FromError(fmt.Errorf("could not get chains %s - got %d", reqURL, r.StatusCode)).ExtendComponent(component)
 	}
 
-	var chains []*types.Chain
-	if err := json.NewDecoder(r.Body).Decode(&chains); err != nil {
+	var chns []*types.Chain
+	if err := json.NewDecoder(r.Body).Decode(&chns); err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	return chains, nil
+	return chns, nil
 }
 
 func (c *HTTPClient) GetChainByUUID(ctx context.Context, chainUUID string) (*types.Chain, error) {
@@ -100,14 +99,14 @@ func (c *HTTPClient) GetChainByTenantAndUUID(ctx context.Context, tenantID, chai
 		return nil, errors.FromError(fmt.Errorf("could not get chain %s - got %d", reqURL, r.StatusCode)).ExtendComponent(component)
 	}
 
-	chains := make([]*types.Chain, 0)
-	if err := json.NewDecoder(r.Body).Decode(&chains); err != nil {
+	chns := make([]*types.Chain, 0)
+	if err := json.NewDecoder(r.Body).Decode(&chns); err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
-	if len(chains) != 1 {
+	if len(chns) != 1 {
 		return nil, errors.FromError(fmt.Errorf("did not expected to get many chains with same for tenantID:%s and uuid:%s  from the chain registry - %s", tenantID, chainUUID, reqURL)).ExtendComponent(component)
 	}
-	return chains[0], nil
+	return chns[0], nil
 }
 
 func (c *HTTPClient) GetChainByTenantAndName(ctx context.Context, tenantID, chainName string) (*types.Chain, error) {
@@ -138,8 +137,8 @@ func (c *HTTPClient) GetChainByTenantAndName(ctx context.Context, tenantID, chai
 func (c *HTTPClient) UpdateBlockPosition(ctx context.Context, chainUUID string, blockNumber int64) error {
 	reqURL := fmt.Sprintf("%v/chains/%v", c.config.URL, chainUUID)
 	body := new(bytes.Buffer)
-	_ = json.NewEncoder(body).Encode(&api.PatchRequest{
-		Listener: &api.Listener{BlockPosition: &blockNumber},
+	_ = json.NewEncoder(body).Encode(&chains.PatchRequest{
+		Listener: &chains.Listener{BlockPosition: &blockNumber},
 	})
 
 	req, _ := http.NewRequestWithContext(ctx, http.MethodPatch, reqURL, body)
