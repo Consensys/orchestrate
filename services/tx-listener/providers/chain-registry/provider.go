@@ -88,9 +88,10 @@ func (p *Provider) buildConfiguration(chains []*types.Chain) *dynamic.Message {
 			Name:     chain.Name,
 			URL:      fmt.Sprintf("%v/%v", p.conf.ChainRegistryURL, chain.UUID),
 			Listener: &dynamic.Listener{
-				BlockPosition: *chain.ListenerBlockPosition,
-				Depth:         *chain.ListenerDepth,
-				Backoff:       duration,
+				BlockPosition:     *chain.ListenerBlockPosition,
+				Depth:             *chain.ListenerDepth,
+				Backoff:           duration,
+				ExternalTxEnabled: *chain.ListenerExternalTxEnabled,
 			},
 		}
 	}

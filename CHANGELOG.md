@@ -43,6 +43,7 @@ All notable changes to this project will be documented in this file.
  * The `tx-listener` produces kafka messages only in the topic `topic-tx-decoder` instead of the `topic-tx-decoder-{chainID}`
  * The `tx-decoder` consumes kafka messages only in the topic `topic-tx-decoder` instead of the `topic-tx-decoder-{chainID}`
  * `ETH_CLIENT_URL` is deprecated, the chains urls have to be set in `CHAIN_REGISTRY_INIT`
+ * removes flag and environment variable `DISABLE_EXTERNAL_TX` in the tx-listener and tx-decoder
 
 
 ## v1.2.2 (2020-01-09)

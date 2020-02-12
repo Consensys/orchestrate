@@ -1,7 +1,6 @@
 package txdecoder
 
 import (
-	"os"
 	"testing"
 	"time"
 
@@ -9,7 +8,6 @@ import (
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/pflag"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
@@ -57,26 +55,15 @@ func (m *MockSyncProducer) Close() error {
 	return nil
 }
 
-func makeProducerContext(i int) *engine.TxContext {
+func makeProducerContext() *engine.TxContext {
 	txctx := engine.NewTxContext()
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
 
-	switch i % 3 {
-	case 0:
-		txctx.Envelope.Chain = &chain.Chain{ChainId: "1"}
-		txctx.Envelope.Metadata = &envelope.Metadata{}
-		txctx.Set("produced", false)
-	case 1:
-		txctx.Envelope.Chain = &chain.Chain{ChainId: "2"}
-		txctx.Envelope.Tx = &ethereum.Transaction{}
-		txctx.Set("produced", false)
-	case 2:
-		txctx.Envelope.Chain = &chain.Chain{ChainId: "3"}
-		txctx.Envelope.Tx = &ethereum.Transaction{}
-		txctx.Envelope.Metadata = &envelope.Metadata{}
-		txctx.Set("produced", true)
-	}
+	txctx.Envelope.Chain = &chain.Chain{ChainId: "3"}
+	txctx.Envelope.Tx = &ethereum.Transaction{}
+	txctx.Envelope.Metadata = &envelope.Metadata{}
+	txctx.Set("produced", true)
 
 	return txctx
 }
@@ -86,24 +73,18 @@ func TestTxDisabling(t *testing.T) {
 	mock := NewMockSyncProducer()
 	handler := Producer(mock)
 
-	// Manually sets the config field disable.external.tx to true to check the feature
-	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	InitFlags(flgs)
-	_ = os.Setenv("DISABLE_EXTERNAL_TX", "true")
-
-	for k := 0; k < 4; k++ {
-		txctx := makeProducerContext(k)
-		expected := txctx.Get("produced").(bool)
-		handler(txctx)
-		// Depending on the case we detect if the message was produced or not
-		var actual bool
-		select {
-		case <-time.After(time.Duration(1) * time.Second):
-			actual = false
-		case <-mock.Produced:
-			actual = true
-		}
-
-		assert.Equalf(t, expected, actual, "Error tx filter failed at scenario %v", k)
+	txctx := makeProducerContext()
+	expected := txctx.Get("produced").(bool)
+	handler(txctx)
+	// Depending on the case we detect if the message was produced or not
+	var actual bool
+	select {
+	case <-time.After(time.Duration(1) * time.Second):
+		actual = false
+	case <-mock.Produced:
+		actual = true
 	}
+
+	assert.Equalf(t, expected, actual, "Error tx filter failed")
+
 }

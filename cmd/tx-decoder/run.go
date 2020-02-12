@@ -6,7 +6,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	producer "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/producer/tx-decoder"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client"
@@ -23,9 +22,6 @@ func newRunCommand() *cobra.Command {
 	broker.InitKafkaFlags(runCmd.Flags())
 	broker.KafkaTopicTxDecoded(runCmd.Flags())
 	broker.KafkaTopicTxDecoder(runCmd.Flags())
-
-	// Registers local flags for handler producer
-	producer.InitFlags(runCmd.Flags())
 
 	// Contract Registry
 	registryclient.ContractRegistryURL(runCmd.Flags())

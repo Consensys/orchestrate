@@ -37,13 +37,14 @@ func (m *MockClient) GetChains(_ context.Context) ([]*types.Chain, error) {
 		m.i++
 		return []*types.Chain{
 			{
-				UUID:                    "0d60a85e-0b90-4482-a14c-108aea2557aa",
-				Name:                    "42",
-				TenantID:                "0d60a85e-0b90-4482-a14c-108aea2557bb",
-				URLs:                    []string{"https://estcequecestbientotlapero.fr/"},
-				ListenerDepth:           &(&struct{ x uint64 }{1}).x,
-				ListenerBlockPosition:   &(&struct{ x int64 }{1}).x,
-				ListenerBackOffDuration: &(&struct{ x string }{"1s"}).x,
+				UUID:                      "0d60a85e-0b90-4482-a14c-108aea2557aa",
+				Name:                      "42",
+				TenantID:                  "0d60a85e-0b90-4482-a14c-108aea2557bb",
+				URLs:                      []string{"https://estcequecestbientotlapero.fr/"},
+				ListenerDepth:             &(&struct{ x uint64 }{1}).x,
+				ListenerBlockPosition:     &(&struct{ x int64 }{1}).x,
+				ListenerBackOffDuration:   &(&struct{ x string }{"1s"}).x,
+				ListenerExternalTxEnabled: &(&struct{ x bool }{true}).x,
 			}}, nil
 	default:
 		return []*types.Chain{}, nil

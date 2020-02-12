@@ -63,19 +63,25 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 
 		// Load envelope from envelope store
 		evlp, err := hk.loadEnvelope(receiptLogCtx, c, receipt)
+		isExternalTx := errors.IsNotFoundError(err)
+
 		switch {
 		case err == nil:
-		case c.Listener.ExternalTxEnabled && !errors.IsNotFoundError(err):
-			// External transaction
+		case c.Listener.ExternalTxEnabled && isExternalTx:
+			// External transaction that we listen to, we create an envelope for it
+			envelopeUUID := uuid.NewV4().String()
+
+			log.FromContext(receiptLogCtx).WithField("uuid", envelopeUUID).Debugf("External transaction received")
 			evlp = &envelope.Envelope{
-				Metadata: &envelope.Metadata{Id: uuid.NewV4().String()},
+				Metadata: &envelope.Metadata{Id: envelopeUUID},
+				Chain:    &chain.Chain{Uuid: c.UUID},
 			}
-		case errors.IsNotFoundError(err):
-			// We could not found the envelope and external transaction are disabled so we skip
-			log.FromContext(receiptLogCtx).WithError(err).Debugf("skipping external receipt")
+		case !c.Listener.ExternalTxEnabled && isExternalTx:
+			// External transaction that we skip
+			log.FromContext(receiptLogCtx).WithError(err).Debugf("Skipping external transaction")
 			continue
 		default:
-			log.FromContext(receiptLogCtx).WithError(err).Errorf("failed to load envelope")
+			log.FromContext(receiptLogCtx).WithError(err).Errorf("Failed to load envelope")
 			return err
 		}
 
