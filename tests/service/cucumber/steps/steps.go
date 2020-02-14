@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
+
 	"github.com/DATA-DOG/godog"
 	"github.com/DATA-DOG/godog/gherkin"
 	"github.com/Shopify/sarama"
@@ -22,6 +24,8 @@ import (
 	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 )
+
+const GenericNamespace = "_"
 
 var TOPICS = [...]string{
 	"tx.crafter",
@@ -46,6 +50,12 @@ func NewID() string {
 // ScenarioID generates a random scenario UUID
 func ScenarioID(def *gherkin.ScenarioDefinition) string {
 	return fmt.Sprintf("|%v|-%v", fmt.Sprintf("%-20v", def.Name)[:20], NewID())
+}
+
+// AuthSetup is container for authentication context data
+type AuthSetup struct {
+	authMethod string
+	authData   string
 }
 
 // ScenarioContext is container for scenario context data
@@ -79,6 +89,15 @@ type ScenarioContext struct {
 	producer sarama.SyncProducer
 
 	logger *log.Entry
+
+	authSetup AuthSetup
+}
+
+func setServiceURL(sc *ScenarioContext) {
+
+	sc.httpAliases.Set(GenericNamespace, "chain-registry", viper.GetString(chainregistry.ChainRegistryURLViperKey))
+	sc.httpAliases.Set(GenericNamespace, "contract-registry", "http://contract-registry:8081")
+	sc.httpAliases.Set(GenericNamespace, "envelope-store", "http://envelope-store:8081")
 }
 
 func NewScenarioContext(
@@ -88,7 +107,7 @@ func NewScenarioContext(
 	producer sarama.SyncProducer,
 	p *parser.Parser,
 ) *ScenarioContext {
-	return &ScenarioContext{
+	sc := &ScenarioContext{
 		chanReg:          chanReg,
 		httpClient:       httpClient,
 		httpAliases:      parser.NewAliasRegistry(),
@@ -96,7 +115,12 @@ func NewScenarioContext(
 		producer:         producer,
 		parser:           p,
 		logger:           log.NewEntry(log.StandardLogger()),
+		authSetup:        AuthSetup{},
 	}
+
+	setServiceURL(sc)
+
+	return sc
 }
 
 // initScenarioContext initialize a scenario context - create a random scenario id - initialize a logger enrich with the scenario name - initialize envelope chan

@@ -5,6 +5,8 @@ import (
 	"os"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
+
 	"github.com/DATA-DOG/godog"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -34,13 +36,15 @@ func Init(ctx context.Context) {
 		// Initialize Channel registry
 		chanregistry.Init(ctx)
 
+		tags := listTagCucumber()
+
 		options = &godog.Options{
 			ShowStepDefinitions: viper.GetBool(ShowStepDefinitionsViperKey),
 			Randomize:           viper.GetInt64(RandomizeViperKey),
 			StopOnFailure:       viper.GetBool(StopOnFailureViperKey),
 			Strict:              viper.GetBool(StrictViperKey),
 			NoColors:            viper.GetBool(NoColorsViperKey),
-			Tags:                viper.GetString(TagsViperKey),
+			Tags:                tags,
 			Format:              viper.GetString(FormatViperKey),
 			Concurrency:         viper.GetInt(ConcurrencyViperKey),
 			Paths:               viper.GetStringSlice(PathsViperKey),
@@ -53,6 +57,17 @@ func Init(ctx context.Context) {
 
 		log.Infof("cucumber: service ready")
 	})
+}
+
+func listTagCucumber() (tags string) {
+	externalTag := viper.GetString(TagsViperKey)
+	if externalTag != "" && !viper.GetBool(multitenancy.EnabledViperKey) {
+		tags = externalTag + " && ~@multi-tenancy"
+	} else if !viper.GetBool(multitenancy.EnabledViperKey) {
+		tags = " ~@multi-tenancy"
+	}
+
+	return tags
 }
 
 // SetGlobalOptions sets global Cucumber Handler

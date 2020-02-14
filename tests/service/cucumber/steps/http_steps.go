@@ -8,63 +8,124 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication"
 
 	"github.com/DATA-DOG/godog"
 	"github.com/DATA-DOG/godog/gherkin"
+	merror "github.com/hashicorp/go-multierror"
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 )
 
 func (sc *ScenarioContext) resetResponse(interface{}) {
 	sc.httpResponse = &http.Response{}
 }
 
-var r = regexp.MustCompile("{{([^}]*)}}")
+func (sc *ScenarioContext) resetAuth(interface{}) {
+	sc.authSetup = AuthSetup{}
+}
 
-func (sc *ScenarioContext) iSendRequestTo(method, endpoint string) error {
-	sc.httpResponse = &http.Response{}
-
-	endpoint, err := sc.replaceEndpointAliases(endpoint)
-	if err != nil {
-		return err
+func (sc *ScenarioContext) iSetAuth(authMethod, value string) error {
+	switch authMethod {
+	case "API-Key":
+		log.Tracef("API Key Set")
+		sc.authSetup.authMethod = authentication.APIKeyHeader
+		sc.authSetup.authData = value
+		return nil
+	case "JWT":
+		log.Tracef("JWT Set")
+		sc.authSetup.authMethod = authentication.AuthorizationHeader
+		sc.authSetup.authData = value
+		return nil
+	default:
+		sc.logger.Trace("No authentication set for the request")
+		return nil
 	}
+}
 
-	req, err := http.NewRequest(method, fmt.Sprintf("%s%s", viper.GetString(client.ChainRegistryURLViperKey), endpoint), nil)
-	if err != nil {
-		return err
+func (sc *ScenarioContext) iInjectAuth(req *http.Request) error {
+	switch sc.authSetup.authMethod {
+	case authentication.APIKeyHeader:
+		log.Tracef("API Key Set")
+		req.Header.Add(authentication.APIKeyHeader, sc.authSetup.authData)
+	case authentication.AuthorizationHeader:
+		log.Tracef("JWT")
+		auth, err := sc.parser.JWTGenerator.GenerateAccessTokenWithTenantID(sc.authSetup.authData, 24*time.Hour)
+		if err != nil {
+			return err
+		}
+		log.Tracef("Auth JWT token: %s", auth)
+		req.Header.Add(authentication.AuthorizationHeader, "Bearer "+auth)
+	default:
+		req.Header.Del(authentication.AuthorizationHeader)
+		req.Header.Del(authentication.APIKeyHeader)
 	}
+	return nil
+}
 
+func (sc *ScenarioContext) iManageResponse(req *http.Request) error {
 	resp, err := sc.httpClient.Do(req)
 	if err != nil {
 		return err
 	} else if resp == nil {
-		return fmt.Errorf("invalid response when sending %s request on %s", method, endpoint)
+		return fmt.Errorf("invalid response: ")
 	}
 	sc.httpResponse = resp
 	return nil
 }
 
-func (sc *ScenarioContext) iSendRequestToWithJSON(method, endpoint string, body *gherkin.DocString) error {
-	sc.httpResponse = &http.Response{}
+func (sc *ScenarioContext) iSendRequestTo(method, endpoint string) error {
+	sc.resetResponse(nil)
 
 	endpoint, err := sc.replaceEndpointAliases(endpoint)
 	if err != nil {
 		return err
 	}
 
-	req, err := http.NewRequest(method, fmt.Sprintf("%s%s", viper.GetString(client.ChainRegistryURLViperKey), endpoint), bytes.NewBuffer([]byte(body.Content)))
+	req, err := http.NewRequest(method, endpoint, nil)
 	if err != nil {
 		return err
 	}
 
-	resp, err := sc.httpClient.Do(req)
+	err = sc.iInjectAuth(req)
 	if err != nil {
 		return err
-	} else if resp == nil {
-		return fmt.Errorf("invalid response when sending %s request on %s", method, endpoint)
 	}
-	sc.httpResponse = resp
+
+	err = sc.iManageResponse(req)
+	if err != nil {
+		err = merror.Append(err, fmt.Errorf("when sending %s request on %s", method, endpoint))
+		return err
+	}
+
+	return nil
+}
+
+func (sc *ScenarioContext) iSendRequestToWithJSON(method, endpoint string, body *gherkin.DocString) error {
+	sc.resetResponse(nil)
+
+	endpoint, err := sc.replaceEndpointAliases(endpoint)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest(method, endpoint, bytes.NewBuffer([]byte(body.Content)))
+	if err != nil {
+		return err
+	}
+
+	err = sc.iInjectAuth(req)
+	if err != nil {
+		return err
+	}
+
+	err = sc.iManageResponse(req)
+	if err != nil {
+		err = merror.Append(err, fmt.Errorf("when sending %s request on %s", method, endpoint))
+		return err
+	}
+
 	return nil
 }
 
@@ -134,11 +195,16 @@ func (sc *ScenarioContext) iStoreTheUUIDAs(alias string) (err error) {
 	return
 }
 
+var r = regexp.MustCompile("{{([^}]*)}}")
+
 func (sc *ScenarioContext) replaceEndpointAliases(endpoint string) (string, error) {
 	for _, alias := range r.FindAllStringSubmatch(endpoint, -1) {
 		v, ok := sc.httpAliases.Get(sc.ID, alias[1])
 		if !ok {
-			return "", fmt.Errorf("could not replace alias %s", v)
+			v, ok = sc.httpAliases.Get(GenericNamespace, alias[1])
+			if !ok {
+				return "", fmt.Errorf("could not replace alias %s", v)
+			}
 		}
 		endpoint = strings.Replace(endpoint, alias[0], v, 1)
 	}
@@ -148,7 +214,9 @@ func (sc *ScenarioContext) replaceEndpointAliases(endpoint string) (string, erro
 func initHTTP(s *godog.Suite, sc *ScenarioContext) {
 
 	s.BeforeScenario(sc.resetResponse)
+	s.BeforeScenario(sc.resetAuth)
 
+	s.Step(`^I set authentication method "(API-Key|JWT)" with "([^"]*)"$`, sc.iSetAuth)
 	s.Step(`^I send "(GET|POST|PATCH|PUT|DELETE)" request to "([^"]*)"$`, sc.iSendRequestTo)
 	s.Step(`^I send "(GET|POST|PATCH|PUT|DELETE)" request to "([^"]*)" with json:$`, sc.iSendRequestToWithJSON)
 	s.Step(`^I store the UUID as "([^"]*)"`, sc.iStoreTheUUIDAs)
