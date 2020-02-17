@@ -17,6 +17,17 @@ type PatchRequest struct {
 
 type PatchResponse struct{}
 
+// @Summary Updates a chain by tenantID and name
+// @Accept json
+// @Produce json
+// @Param tenantID path string true "ID of the tenant"
+// @Param name path string true "Name of the chain"
+// @Param request body PatchRequest true "Patch request body"
+// @Success 200 {object} PatchResponse
+// @Failure 400
+// @Failure 404
+// @Failure 500
+// @Router /{tenantID}/chains/{name} [patch]
 func (h Handler) patchChainByName(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
@@ -48,6 +59,16 @@ func (h Handler) patchChainByName(rw http.ResponseWriter, request *http.Request)
 	_ = json.NewEncoder(rw).Encode(&PatchResponse{})
 }
 
+// @Summary Updates a chain by ID
+// @Accept json
+// @Produce json
+// @Param uuid path string true "ID of the chain"
+// @Param request body PatchRequest true "Chain update request"
+// @Success 200 {object} PatchResponse
+// @Failure 400
+// @Failure 404
+// @Failure 500
+// @Router /chains/{uuid} [patch]
 func (h Handler) patchChainByUUID(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 

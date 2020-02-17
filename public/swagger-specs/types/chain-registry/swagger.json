@@ -1,0 +1,365 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "PegaSys Orchestrate Chain Registry API. Enables dynamic management of chains",
+        "title": "Chain Registry API",
+        "contact": {
+            "name": "Contact PegaSys Orchestrate",
+            "url": "https://pegasys.tech/contact/",
+            "email": "support@pegasys.tech"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "2.0"
+    },
+    "paths": {
+        "/chains": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Retrieves a list of all registered chains",
+                "responses": {
+                    "200": {},
+                    "404": {},
+                    "500": {}
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Registers a new chain",
+                "parameters": [
+                    {
+                        "description": "Chain registration request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/chains.PostRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/chains.PostResponse"
+                        }
+                    },
+                    "400": {},
+                    "404": {},
+                    "500": {}
+                }
+            }
+        },
+        "/chains/{uuid}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Retrieves a chain by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the chain",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {},
+                    "400": {},
+                    "404": {},
+                    "500": {}
+                }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Deletes a chain by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the chain",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/chains.deleteResponse"
+                        }
+                    },
+                    "400": {},
+                    "404": {},
+                    "500": {}
+                }
+            },
+            "patch": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Updates a chain by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the chain",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Chain update request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/chains.PatchRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/chains.PatchResponse"
+                        }
+                    },
+                    "400": {},
+                    "404": {},
+                    "500": {}
+                }
+            }
+        },
+        "/{tenantID}/chains": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Retrieves a list of all registered chains by tenantID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the tenant",
+                        "name": "tenantID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {},
+                    "400": {},
+                    "404": {},
+                    "500": {}
+                }
+            }
+        },
+        "/{tenantID}/chains/{name}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Retrieves a chain by tenantID and name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the tenant",
+                        "name": "tenantID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Name of the chain",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {},
+                    "400": {},
+                    "404": {},
+                    "500": {}
+                }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Deletes a chain by tenantID and name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the tenant",
+                        "name": "tenantID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Name of the chain",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/chains.deleteResponse"
+                        }
+                    },
+                    "400": {},
+                    "404": {},
+                    "500": {}
+                }
+            },
+            "patch": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Updates a chain by tenantID and name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the tenant",
+                        "name": "tenantID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Name of the chain",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Patch request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/chains.PatchRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/chains.PatchResponse"
+                        }
+                    },
+                    "400": {},
+                    "404": {},
+                    "500": {}
+                }
+            }
+        }
+    },
+    "definitions": {
+        "chains.Listener": {
+            "type": "object",
+            "properties": {
+                "backOffDuration": {
+                    "type": "string"
+                },
+                "blockPosition": {
+                    "type": "integer"
+                },
+                "depth": {
+                    "type": "integer"
+                },
+                "externalTxEnabled": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "chains.PatchRequest": {
+            "type": "object",
+            "properties": {
+                "listener": {
+                    "type": "object",
+                    "$ref": "#/definitions/chains.Listener"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "urls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "chains.PatchResponse": {
+            "type": "object"
+        },
+        "chains.PostRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "listener": {
+                    "type": "object",
+                    "$ref": "#/definitions/chains.Listener"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "urls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "chains.PostResponse": {
+            "type": "object",
+            "properties": {
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "chains.deleteResponse": {
+            "type": "object"
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "X-API-Key",
+            "in": "header"
+        },
+        "JWTAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

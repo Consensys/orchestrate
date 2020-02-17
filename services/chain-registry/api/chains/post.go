@@ -19,6 +19,14 @@ type PostResponse struct {
 	UUID string `json:"uuid"`
 }
 
+// @Summary Registers a new chain
+// @Accept json
+// @Produce json
+// @Param request body PostRequest true "Chain registration request"
+// @Success 200 {object} PostResponse
+// @Failure 400
+// @Failure 500
+// @Router /chains [post]
 func (h Handler) postChain(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
