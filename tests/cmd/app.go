@@ -35,12 +35,12 @@ func LongKeyOf(topics map[string]string) dispatcher.KeyOfFunc {
 			return "", fmt.Errorf("unknown message entrypoint")
 		}
 
-		scenario := txctx.Builder.GetContextLabelsValue("scenario.id")
+		scenario := txctx.Envelope.GetContextLabelsValue("scenario.id")
 		if scenario == "" {
 			return "", fmt.Errorf("message has no test scenario")
 		}
 
-		return steps.LongKeyOf(topic, scenario, txctx.Builder.GetID()), nil
+		return steps.LongKeyOf(topic, scenario, txctx.Envelope.GetID()), nil
 	}
 }
 
@@ -51,7 +51,7 @@ func ShortKeyOf(topics map[string]string) dispatcher.KeyOfFunc {
 			return "", fmt.Errorf("unknown message entrypoint")
 		}
 
-		scenario := txtcx.Builder.GetContextLabelsValue("scenario.id")
+		scenario := txtcx.Envelope.GetContextLabelsValue("scenario.id")
 		if scenario == "" {
 			return "", fmt.Errorf("message has no test scenario")
 		}

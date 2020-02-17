@@ -55,7 +55,7 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 	var evlps []*tx.TxResponse
 
 	for idx, r := range receipts {
-		b := tx.NewBuilder()
+		b := tx.NewEnvelope()
 
 		receiptLogCtx := log.With(blockLogCtx, log.Str("receipt.txhash", r.TxHash.Hex()))
 
@@ -73,7 +73,7 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 		req, err := hk.loadEnvelope(receiptLogCtx, c, receipt)
 		isExternalTx := errors.IsNotFoundError(err)
 		if req != nil {
-			b, err = req.Builder()
+			b, err = req.Envelope()
 			if err != nil {
 				log.FromContext(receiptLogCtx).WithError(err).Errorf("loaded invalid envelope - id: %s", req.GetID())
 				return err

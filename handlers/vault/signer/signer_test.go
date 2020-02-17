@@ -98,7 +98,7 @@ func makeSignerContext(i int) *engine.TxContext {
 
 	switch i % 1 {
 	case 0:
-		_ = txctx.Builder.
+		_ = txctx.Envelope.
 			SetChainIDUint64(10).
 			SetGas(10).
 			SetNonce(11).
@@ -111,7 +111,7 @@ func makeSignerContext(i int) *engine.TxContext {
 		txctx.Set("raw", alreadySignedTx)
 		txctx.Set("hash", "0x0000000000000000000000000000000000000000000000000000000012345678")
 	case 1:
-		_ = txctx.Builder.
+		_ = txctx.Envelope.
 			SetChainIDUint64(0).
 			SetGas(10).
 			SetNonce(11).
@@ -124,33 +124,33 @@ func makeSignerContext(i int) *engine.TxContext {
 		txctx.Set("raw", alreadySignedTx)
 		txctx.Set("hash", "0x0000000000000000000000000000000000000000000000000000000012345678")
 	case 2:
-		_ = txctx.Builder.SetChainIDUint64(0)
+		_ = txctx.Envelope.SetChainIDUint64(0)
 		txctx.Set("errors", 1)
 		txctx.Set("raw", "")
 		txctx.Set("hash", "")
 	case 3:
-		_ = txctx.Builder.SetChainIDUint64(10)
+		_ = txctx.Envelope.SetChainIDUint64(10)
 		txctx.Set("errors", 0)
 		txctx.Set("raw", signedTx)
 		txctx.Set("hash", "0x0000000000000000000000000000000000000000000000000000000000abcdef")
 	case 4:
-		_ = txctx.Builder.SetChainIDUint64(10).SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION).SetDataString("")
+		_ = txctx.Envelope.SetChainIDUint64(10).SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION).SetDataString("")
 		txctx.Set("errors", 0)
 		txctx.Set("errors", 0)
 		txctx.Set("raw", signedTesseraTx)
 		txctx.Set("hash", "0x0000000000000000000000000000000000000000000000000000000000abcdef")
 	case 5:
-		_ = txctx.Builder.SetChainIDUint64(10).SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION)
+		_ = txctx.Envelope.SetChainIDUint64(10).SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION)
 		txctx.Set("errors", 1)
 		txctx.Set("raw", "")
 		txctx.Set("hash", "")
 	case 6:
-		_ = txctx.Builder.SetChainIDUint64(0).SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION).SetDataString("")
+		_ = txctx.Envelope.SetChainIDUint64(0).SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION).SetDataString("")
 		txctx.Set("errors", 1)
 		txctx.Set("raw", "")
 		txctx.Set("hash", "")
 	case 7:
-		_ = txctx.Builder.SetChainIDUint64(10).SetMethod(tx.Method_EEA_SENDPRIVATETRANSACTION).SetDataString("")
+		_ = txctx.Envelope.SetChainIDUint64(10).SetMethod(tx.Method_EEA_SENDPRIVATETRANSACTION).SetDataString("")
 		txctx.Set("errors", 0)
 		txctx.Set("raw", signedPrivateTx)
 		txctx.Set("hash", "0x0000000000000000000000000000000000000000000000000000000000abcdef")
@@ -194,8 +194,8 @@ func TestSigner(t *testing.T) {
 
 	for out := range outs {
 		errCount, raw, hash := out.Get("errors").(int), out.Get("raw").(string), out.Get("hash").(string)
-		assert.Equal(t, len(out.Builder.Errors), errCount, fmt.Sprintf("Signer: expected %v errors but got %v", errCount, out.Builder.Errors))
-		assert.Equal(t, out.Builder.GetRaw(), raw, fmt.Sprintf("Signer: expected Raw %v but got %v", raw, out.Builder.GetRaw()))
-		assert.Equal(t, out.Builder.GetTxHash().Hex(), hash, fmt.Sprintf("Signer: expected hash %v but got %v", hash, out.Builder.MustGetTxHashValue().Hex()))
+		assert.Equal(t, len(out.Envelope.Errors), errCount, fmt.Sprintf("Signer: expected %v errors but got %v", errCount, out.Envelope.Errors))
+		assert.Equal(t, out.Envelope.GetRaw(), raw, fmt.Sprintf("Signer: expected Raw %v but got %v", raw, out.Envelope.GetRaw()))
+		assert.Equal(t, out.Envelope.GetTxHash().Hex(), hash, fmt.Sprintf("Signer: expected hash %v but got %v", hash, out.Envelope.MustGetTxHashValue().Hex()))
 	}
 }

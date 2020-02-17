@@ -38,7 +38,7 @@ func makeSignerContext(_ int) *engine.TxContext {
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
 
-	_ = txctx.Builder.
+	_ = txctx.Envelope.
 		SetChainIDUint64(10).
 		SetData([]byte{0}).
 		SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION)
@@ -52,7 +52,7 @@ func TestTxHashSetter(t *testing.T) {
 	for i := 0; i < ROUNDS; i++ {
 		txctx := makeSignerContext(i)
 		setter(txctx)
-		assert.Emptyf(t, txctx.Builder.GetErrors(), fmt.Sprintf("TxHash should not be nil"))
-		assert.NotNilf(t, txctx.Builder.GetData(), fmt.Sprintf("TxHash should not be nil"))
+		assert.Emptyf(t, txctx.Envelope.GetErrors(), fmt.Sprintf("TxHash should not be nil"))
+		assert.NotNilf(t, txctx.Envelope.GetData(), fmt.Sprintf("TxHash should not be nil"))
 	}
 }

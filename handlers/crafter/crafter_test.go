@@ -48,49 +48,49 @@ func makeCrafterContext(i int) *engine.TxContext {
 	ctx := engine.NewTxContext()
 	ctx.Reset()
 	ctx.Logger = log.NewEntry(log.StandardLogger())
-	ctx.Builder = tx.NewBuilder()
+	ctx.Envelope = tx.NewEnvelope()
 
 	switch i {
 	case 0:
 		ctx.Set("errors", 0)
 		ctx.Set("result", "")
 	case 1:
-		_ = ctx.Builder.SetData(hexutil.MustDecode("0xa9059cbb"))
+		_ = ctx.Envelope.SetData(hexutil.MustDecode("0xa9059cbb"))
 		ctx.Set("errors", 0)
 		ctx.Set("result", "0xa9059cbb")
 	case 2:
-		_ = ctx.Builder.SetMethodSignature("known()").SetArgs([]string{"test"})
+		_ = ctx.Envelope.SetMethodSignature("known()").SetArgs([]string{"test"})
 		ctx.Set("errors", 0)
 		ctx.Set("result", callPayload)
 	case 3:
-		_ = ctx.Builder.SetMethodSignature("known()")
+		_ = ctx.Envelope.SetMethodSignature("known()")
 		ctx.Set("errors", 1)
 		ctx.Set("error.code", errors.InvalidArgsCountError("").GetCode())
 		ctx.Set("result", "")
 	case 4:
-		_ = ctx.Builder.SetContractName("known").SetMethodSignature("constructor()").SetArgs([]string{"test"})
+		_ = ctx.Envelope.SetContractName("known").SetMethodSignature("constructor()").SetArgs([]string{"test"})
 		ctx.Set("errors", 0)
 		ctx.Set("result", constructorPayload)
 	case 5:
 		// Invalid method signature
-		_ = ctx.Builder.SetContractName("known").SetMethodSignature("constructor)").SetArgs([]string{"0xabcd"})
+		_ = ctx.Envelope.SetContractName("known").SetMethodSignature("constructor)").SetArgs([]string{"0xabcd"})
 		ctx.Set("errors", 1)
 		ctx.Set("error.code", errors.InvalidSignatureError("").GetCode())
 		ctx.Set("result", "")
 	case 6:
 		// Invalid contract name
-		_ = ctx.Builder.SetContractName("unknown").SetMethodSignature("constructor()").SetArgs([]string{"0xabcd"})
+		_ = ctx.Envelope.SetContractName("unknown").SetMethodSignature("constructor()").SetArgs([]string{"0xabcd"})
 		ctx.Set("errors", 1)
 		ctx.Set("error.code", errors.NotFoundError("").GetCode())
 		ctx.Set("result", "")
 	case 7:
 		// Invalid number of arguments for a constructor
-		_ = ctx.Builder.SetContractName("known").SetMethodSignature("constructor()").SetArgs([]string{"0xabcd", "123"})
+		_ = ctx.Envelope.SetContractName("known").SetMethodSignature("constructor()").SetArgs([]string{"0xabcd", "123"})
 		ctx.Set("errors", 1)
 		ctx.Set("error.code", errors.InvalidArgsCountError("").GetCode())
 		ctx.Set("result", "")
 	case 8:
-		_ = ctx.Builder.SetContractName("known").SetMethodSignature("constructor()").SetArgs([]string{"0xabcd"})
+		_ = ctx.Envelope.SetContractName("known").SetMethodSignature("constructor()").SetArgs([]string{"0xabcd"})
 		ctx.Set("errors", 0)
 		ctx.Set("result", constructorPayload)
 	default:
@@ -131,11 +131,11 @@ func (s *CrafterTestSuite) TestCrafter() {
 	s.Handle(txctxs)
 
 	for i, txctx := range txctxs {
-		assert.Len(s.T(), txctx.Builder.Errors, txctx.Get("errors").(int), "%d/%d - Expected right count of errors", i, len(txctxs), txctx.Builder.Args)
-		for _, err := range txctx.Builder.Errors {
+		assert.Len(s.T(), txctx.Envelope.Errors, txctx.Get("errors").(int), "%d/%d - Expected right count of errors", i, len(txctxs), txctx.Envelope.Args)
+		for _, err := range txctx.Envelope.Errors {
 			assert.Equal(s.T(), txctx.Get("error.code").(uint64), err.GetCode(), "%d/%d - Error code be correct", i, len(txctxs))
 		}
-		assert.Equal(s.T(), txctx.Get("result").(string), txctx.Builder.GetData(), "%d/%d - Expected correct payload", i, len(txctxs), txctx.Builder.Args)
+		assert.Equal(s.T(), txctx.Get("result").(string), txctx.Envelope.GetData(), "%d/%d - Expected correct payload", i, len(txctxs), txctx.Envelope.Args)
 	}
 }
 

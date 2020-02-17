@@ -19,11 +19,11 @@ func Loader(txctx *engine.TxContext) {
 	}
 
 	// Set receipt
-	txctx.Builder.Receipt = ethereum.FromGethReceipt(&receipt.Receipt).
+	txctx.Envelope.Receipt = ethereum.FromGethReceipt(&receipt.Receipt).
 		SetBlockHash(receipt.BlockHash).
 		SetBlockNumber(uint64(receipt.BlockNumber)).
 		SetTxIndex(receipt.TxIndex)
-	txctx.Builder.ChainID = receipt.ChainID
+	txctx.Envelope.ChainID = receipt.ChainID
 
 	// Enrich Logger
 	txctx.Logger = txctx.Logger.WithFields(log.Fields{
@@ -32,5 +32,5 @@ func Loader(txctx *engine.TxContext) {
 		"block.hash":    receipt.BlockHash.Hex(),
 	})
 
-	txctx.Logger.Tracef("loader: message loaded: %v", txctx.Builder)
+	txctx.Logger.Tracef("loader: message loaded: %v", txctx.Envelope)
 }

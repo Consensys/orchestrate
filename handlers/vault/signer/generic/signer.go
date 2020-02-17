@@ -17,24 +17,24 @@ type TransactionSignerFunc func(keystore.KeyStore, *engine.TxContext, common.Add
 func GenerateSignerHandler(signerFunc TransactionSignerFunc, backend keystore.KeyStore, successMsg, errorMsg string) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"chainID": txctx.Builder.GetChainIDString(),
-			"from":    txctx.Builder.GetFromString(),
-			"id":      txctx.Builder.GetID(),
+			"chainID": txctx.Envelope.GetChainIDString(),
+			"from":    txctx.Envelope.GetFromString(),
+			"id":      txctx.Envelope.GetID(),
 		})
 
-		if txctx.Builder.GetRaw() != "" {
+		if txctx.Envelope.GetRaw() != "" {
 			// Tx has already been signed
 			return
 		}
 
-		transaction, err := txctx.Builder.GetTransaction()
+		transaction, err := txctx.Envelope.GetTransaction()
 		if err != nil {
 			txctx.Logger.WithError(err).Errorf(errorMsg)
 			_ = txctx.AbortWithError(err)
 			return
 		}
 
-		from, err := txctx.Builder.GetFromAddress()
+		from, err := txctx.Envelope.GetFromAddress()
 		if err != nil {
 			txctx.Logger.WithError(err).Errorf(errorMsg)
 			_ = txctx.AbortWithError(err)
@@ -50,7 +50,7 @@ func GenerateSignerHandler(signerFunc TransactionSignerFunc, backend keystore.Ke
 		}
 
 		// Update trace information
-		_ = txctx.Builder.SetRaw(raw).SetTxHash(*h)
+		_ = txctx.Envelope.SetRaw(raw).SetTxHash(*h)
 
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"raw":    utils.ShortString(hexutil.Encode(raw), 10),

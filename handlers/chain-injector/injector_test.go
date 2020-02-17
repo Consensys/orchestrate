@@ -66,12 +66,12 @@ func TestChainInjector(t *testing.T) {
 		{
 			"tenantID and chainName filled",
 			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Builder.SetChainName(testChainName)
+				_ = txctx.Envelope.SetChainName(testChainName)
 				txctx.WithContext(multitenancy.WithTenantID(txctx.Context(), testTenantID))
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Builder.SetChainUUID(MockChainsByName[testTenantID][testChainName].UUID)
+				_ = txctx.Envelope.SetChainUUID(MockChainsByName[testTenantID][testChainName].UUID)
 				url := fmt.Sprintf("%s/%s/%s", testChainProxyURL, testTenantID, testChainName)
 				txctx.WithContext(proxy.With(txctx.Context(), url))
 				return txctx
@@ -80,11 +80,11 @@ func TestChainInjector(t *testing.T) {
 		{
 			"no tenantID found",
 			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Builder.SetChainName(testChainName)
+				_ = txctx.Envelope.SetChainName(testChainName)
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Builder.AppendError(errors.DataError("no tenantID found").ExtendComponent(component))
+				_ = txctx.Envelope.AppendError(errors.DataError("no tenantID found").ExtendComponent(component))
 				return txctx
 			},
 		},
@@ -95,19 +95,19 @@ func TestChainInjector(t *testing.T) {
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Builder.AppendError(errors.DataError("no chainName found").ExtendComponent(component))
+				_ = txctx.Envelope.AppendError(errors.DataError("no chainName found").ExtendComponent(component))
 				return txctx
 			},
 		},
 		{
 			"error when calling the chain registry",
 			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Builder.SetChainName(testChainError)
+				_ = txctx.Envelope.SetChainName(testChainError)
 				txctx.WithContext(multitenancy.WithTenantID(txctx.Context(), testChainError))
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Builder.AppendError(errors.FromError(fmt.Errorf("error")).ExtendComponent(component))
+				_ = txctx.Envelope.AppendError(errors.FromError(fmt.Errorf("error")).ExtendComponent(component))
 				return txctx
 			},
 		},
@@ -156,25 +156,25 @@ func TestChainIDInjector(t *testing.T) {
 		expectedTxctx func(txctx *engine.TxContext) *engine.TxContext
 	}{
 		{
-			"Set chain UUID in Builder",
+			"Set chain UUID in Envelope",
 			func(txctx *engine.TxContext) *engine.TxContext {
 				txctx.WithContext(proxy.With(txctx.Context(), noErrorURL))
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Builder.SetChainID(networkID)
+				_ = txctx.Envelope.SetChainID(networkID)
 				return txctx
 			},
 		},
 		{
-			"Set chain UUID in Builder with error",
+			"Set chain UUID in Envelope with error",
 			func(txctx *engine.TxContext) *engine.TxContext {
 				txctx.WithContext(proxy.With(txctx.Context(), errorURL))
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
 				err := errors.FromError(errorNetwork).ExtendComponent(component)
-				txctx.Builder.Errors = append(txctx.Builder.Errors, err)
+				txctx.Envelope.Errors = append(txctx.Envelope.Errors, err)
 				return txctx
 			},
 		},

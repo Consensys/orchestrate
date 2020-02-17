@@ -11,7 +11,7 @@ func Generator(s keystore.KeyStore) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"keygen": "got a keygen request",
-			"id":     txctx.Builder.GetID(),
+			"id":     txctx.Envelope.GetID(),
 		})
 
 		add, err := s.GenerateWallet(txctx.Context())
@@ -20,7 +20,7 @@ func Generator(s keystore.KeyStore) engine.HandlerFunc {
 			txctx.Logger.WithError(e).Errorf("keygen: could not generate wallet")
 		}
 
-		_ = txctx.Builder.SetFrom(*add)
+		_ = txctx.Envelope.SetFrom(*add)
 
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"keygen":  "completed a key gen request",

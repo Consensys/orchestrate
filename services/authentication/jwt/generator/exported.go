@@ -15,7 +15,7 @@ var (
 	initOnce     = &sync.Once{}
 )
 
-// Init initializes key Builder with EnabledViperKey
+// Init initializes key Envelope with EnabledViperKey
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
 		if jwtGenerator != nil {

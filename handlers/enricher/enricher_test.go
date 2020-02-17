@@ -41,7 +41,7 @@ func TestEnricher(t *testing.T) {
 			"Enrich without error",
 			func(txctx *engine.TxContext) *engine.TxContext {
 				txctx.WithContext(proxy.With(txctx.Context(), noErrorURL))
-				txctx.Builder.Receipt = &ethereum.Receipt{ContractAddress: testAccount}
+				txctx.Envelope.Receipt = &ethereum.Receipt{ContractAddress: testAccount}
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
@@ -52,16 +52,16 @@ func TestEnricher(t *testing.T) {
 			"Enrich with error at CodeAt",
 			func(txctx *engine.TxContext) *engine.TxContext {
 				txctx.WithContext(proxy.With(txctx.Context(), codeAtErrorURL))
-				txctx.Builder.Receipt = &ethereum.Receipt{ContractAddress: testAccount}
+				txctx.Envelope.Receipt = &ethereum.Receipt{ContractAddress: testAccount}
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
 				err := errors.InternalError(
 					"could not read account code for chain %s and account %s",
 					codeAtErrorURL,
-					txctx.Builder.GetReceipt().GetContractAddr().Hex(),
+					txctx.Envelope.GetReceipt().GetContractAddr().Hex(),
 				).SetComponent(component)
-				txctx.Builder.Errors = append(txctx.Builder.Errors, err)
+				txctx.Envelope.Errors = append(txctx.Envelope.Errors, err)
 				return txctx
 			},
 		},
@@ -69,12 +69,12 @@ func TestEnricher(t *testing.T) {
 			"Enrich with error at SetAccountCodeHash",
 			func(txctx *engine.TxContext) *engine.TxContext {
 				txctx.WithContext(proxy.With(txctx.Context(), setAccountCodeHashErrorURL))
-				txctx.Builder.Receipt = &ethereum.Receipt{ContractAddress: testAccount}
+				txctx.Envelope.Receipt = &ethereum.Receipt{ContractAddress: testAccount}
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
 				err := errors.InternalError("invalid input message format").SetComponent(component)
-				txctx.Builder.Errors = append(txctx.Builder.Errors, err)
+				txctx.Envelope.Errors = append(txctx.Envelope.Errors, err)
 				return txctx
 			},
 		},

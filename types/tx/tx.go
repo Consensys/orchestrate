@@ -17,15 +17,15 @@ var MethodMap = map[string]Method{
 	"EEA_SENDPRIVATETRANSACTION":    Method_EEA_SENDPRIVATETRANSACTION,
 }
 
-func (m *TxEnvelope) Builder() (*Builder, error) {
-	var b *Builder
+func (m *TxEnvelope) Envelope() (*Envelope, error) {
+	var b *Envelope
 
 	var err error
 	switch x := m.Msg.(type) {
 	case *TxEnvelope_TxRequest:
-		b, err = x.TxRequest.Builder()
+		b, err = x.TxRequest.Envelope()
 	case *TxEnvelope_TxResponse:
-		b, err = x.TxResponse.Builder()
+		b, err = x.TxResponse.Envelope()
 	default:
 		return nil, errors.DataError("invalid tx envelope")
 	}
@@ -41,8 +41,8 @@ func (m *TxEnvelope) Builder() (*Builder, error) {
 	return b, nil
 }
 
-func (m *TxRequest) Builder() (*Builder, error) {
-	builder := &Builder{
+func (m *TxRequest) Envelope() (*Envelope, error) {
+	envelope := &Envelope{
 		ID:            m.GetId(),
 		Headers:       m.GetHeaders(),
 		ContextLabels: m.GetContextLabels(),
@@ -68,23 +68,25 @@ func (m *TxRequest) Builder() (*Builder, error) {
 		InternalLabels: make(map[string]string),
 	}
 
-	if errs := builder.loadPtrFields(m.GetParams().GetGas(), m.GetParams().GetNonce(), m.GetParams().GetGasPrice(), m.GetParams().GetValue(), m.GetParams().GetFrom(), m.GetParams().GetTo()); len(errs) > 0 {
+	if errs := envelope.loadPtrFields(m.GetParams().GetGas(), m.GetParams().GetNonce(), m.GetParams().GetGasPrice(), m.GetParams().GetValue(), m.GetParams().GetFrom(), m.GetParams().GetTo()); len(errs) > 0 {
 		return nil, errors.DataError("%v", errs)
 	}
 
-	if contractName, contractTag, err := m.GetParams().GetParsedContract(); err == nil {
-		_ = builder.SetContractName(contractName).SetContractTag(contractTag)
+	contractName, contractTag, err := m.GetParams().GetParsedContract()
+	if err != nil {
+		return nil, errors.DataError("%v", err)
 	}
+	_ = envelope.SetContractName(contractName).SetContractTag(contractTag)
 
-	if err := builder.Validate(); err != nil {
+	if err := envelope.Validate(); err != nil {
 		return nil, errors.DataError("%v", err)
 	}
 
-	return builder, nil
+	return envelope, nil
 }
 
-func (m *TxResponse) Builder() (*Builder, error) {
-	builder := &Builder{
+func (m *TxResponse) Envelope() (*Envelope, error) {
+	envelope := &Envelope{
 		ID:            m.GetId(),
 		Headers:       m.GetHeaders(),
 		ContextLabels: m.GetContextLabels(),
@@ -97,20 +99,20 @@ func (m *TxResponse) Builder() (*Builder, error) {
 		InternalLabels: make(map[string]string),
 	}
 
-	if errs := builder.loadPtrFields(m.GetTransaction().GetGas(), m.GetTransaction().GetNonce(), m.GetTransaction().GetGasPrice(), m.GetTransaction().GetValue(), m.GetTransaction().GetFrom(), m.GetTransaction().GetTo()); len(errs) > 0 {
+	if errs := envelope.loadPtrFields(m.GetTransaction().GetGas(), m.GetTransaction().GetNonce(), m.GetTransaction().GetGasPrice(), m.GetTransaction().GetValue(), m.GetTransaction().GetFrom(), m.GetTransaction().GetTo()); len(errs) > 0 {
 		return nil, errors.DataError("%v", errs)
 	}
 
-	if err := builder.Validate(); err != nil {
+	if err := envelope.Validate(); err != nil {
 		return nil, errors.DataError("%v", err)
 	}
 
-	return builder, nil
+	return envelope, nil
 }
 
 func (p *Params) GetParsedContract() (contractName, contractTag string, err error) {
 	if p.GetContract() == "" {
-		return "", "", errors.DataError("no contract filled")
+		return "", "", nil
 	}
 
 	re := regexp.MustCompile(`^(.*)\[(.*)\]$`)
@@ -156,10 +158,12 @@ func (m *TxEnvelope) SetTxHash(txHash string) *TxEnvelope {
 
 func (m *TxEnvelope) GetID() string {
 	switch x := m.Msg.(type) {
-	default:
-		return x.(*TxEnvelope_TxRequest).TxRequest.GetId()
+	case *TxEnvelope_TxRequest:
+		return x.TxRequest.GetId()
 	case *TxEnvelope_TxResponse:
 		return x.TxResponse.GetId()
+	default:
+		return ""
 	}
 }
 

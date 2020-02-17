@@ -24,7 +24,7 @@ type Manager struct {
 	// Wait Group to keep track of running sessions
 	wg *sync.WaitGroup
 
-	// Builder used to create listening sessions
+	// Envelope used to create listening sessions
 	builder Builder
 
 	// Configuration

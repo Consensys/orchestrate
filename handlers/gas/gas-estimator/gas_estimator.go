@@ -13,8 +13,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 )
 
-// EnvelopeToCallMsg enrich an ethereum.CallMsg with Builder information
-func EnvelopeToCallMsg(b *tx.Builder, call *ethereum.CallMsg) {
+// EnvelopeToCallMsg enrich an ethereum.CallMsg with Envelope information
+func EnvelopeToCallMsg(b *tx.Envelope, call *ethereum.CallMsg) {
 	call.To = b.GetTo()
 	call.From = b.MustGetFromAddress()
 	call.Value = b.GetValue()
@@ -29,13 +29,13 @@ func Estimator(p ethclient.GasEstimator) engine.HandlerFunc {
 
 	return func(txctx *engine.TxContext) {
 
-		if txctx.Builder.Gas == nil {
+		if txctx.Envelope.Gas == nil {
 			// Retrieve re-cycled CallMsg
 			call := pool.Get().(*ethereum.CallMsg)
 			defer pool.Put(call)
 
 			// Estimate gas
-			EnvelopeToCallMsg(txctx.Builder, call)
+			EnvelopeToCallMsg(txctx.Envelope, call)
 
 			url, err := proxy.GetURL(txctx)
 			if err != nil {
@@ -50,7 +50,7 @@ func Estimator(p ethclient.GasEstimator) engine.HandlerFunc {
 			}
 
 			// Set gas limit on context
-			_ = txctx.Builder.SetGas(g)
+			_ = txctx.Envelope.SetGas(g)
 
 			// Enrich logger
 			txctx.Logger = txctx.Logger.WithFields(log.Fields{
@@ -61,7 +61,7 @@ func Estimator(p ethclient.GasEstimator) engine.HandlerFunc {
 
 		// Enrich logger
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"tx.gas": txctx.Builder.GetGas(),
+			"tx.gas": txctx.Envelope.GetGas(),
 		})
 	}
 }

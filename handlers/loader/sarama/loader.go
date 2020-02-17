@@ -43,14 +43,14 @@ func loadTxEnvelope(txctx *engine.TxContext) {
 	}
 	txctx.Logger.Tracef("loader: tx envelope loaded: %v", txEnvelope)
 
-	builder, err := txEnvelope.Builder()
+	envelope, err := txEnvelope.Envelope()
 	if err != nil {
 		e := txctx.AbortWithError(err).ExtendComponent(component)
 		txctx.Logger.WithError(e).Errorf("loader: invalid tx envelope")
 		return
 	}
 
-	txctx.Builder = builder
+	txctx.Envelope = envelope
 }
 
 func loadTxRequest(txctx *engine.TxContext) {
@@ -62,14 +62,14 @@ func loadTxRequest(txctx *engine.TxContext) {
 	}
 	txctx.Logger.Tracef("loader: tx request loaded: %v", txRequest)
 
-	builder, err := txRequest.Builder()
+	envelope, err := txRequest.Envelope()
 	if err != nil {
 		e := txctx.AbortWithError(err).ExtendComponent(component)
 		txctx.Logger.WithError(e).Errorf("loader: invalid tx request")
 		return
 	}
 
-	txctx.Builder = builder
+	txctx.Envelope = envelope
 }
 
 func loadTxResponse(txctx *engine.TxContext) {
@@ -81,12 +81,12 @@ func loadTxResponse(txctx *engine.TxContext) {
 	}
 	txctx.Logger.Tracef("loader: tx response loaded: %v", txResponse)
 
-	builder, err := txResponse.Builder()
+	envelope, err := txResponse.Envelope()
 	if err != nil {
 		e := txctx.AbortWithError(err).ExtendComponent(component)
 		txctx.Logger.WithError(e).Errorf("loader: invalid tx response")
 		return
 	}
 
-	txctx.Builder = builder
+	txctx.Envelope = envelope
 }

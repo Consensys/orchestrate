@@ -28,7 +28,7 @@ func makeSignerContext(i int) *engine.TxContext {
 
 	switch i % 5 {
 	case 0:
-		_ = txctx.Builder.
+		_ = txctx.Envelope.
 			SetTxHash(ethcommon.HexToHash("0x12345678")).
 			SetChainIDUint64(10).
 			SetNonce(10).
@@ -38,7 +38,7 @@ func makeSignerContext(i int) *engine.TxContext {
 			SetGas(11).
 			SetGasPrice(big.NewInt(12))
 	case 1:
-		_ = txctx.Builder.
+		_ = txctx.Envelope.
 			SetTxHash(ethcommon.HexToHash("0x12345678")).
 			SetChainIDUint64(0).
 			SetNonce(10).
@@ -48,7 +48,7 @@ func makeSignerContext(i int) *engine.TxContext {
 			SetGas(11).
 			SetGasPrice(big.NewInt(12))
 	case 2:
-		_ = txctx.Builder.SetChainIDUint64(0).
+		_ = txctx.Envelope.SetChainIDUint64(0).
 			SetChainIDUint64(0).
 			SetNonce(10).
 			SetValue(big.NewInt(100)).
@@ -57,7 +57,7 @@ func makeSignerContext(i int) *engine.TxContext {
 			SetGas(11).
 			SetGasPrice(big.NewInt(12))
 	case 3:
-		_ = txctx.Builder.SetChainIDUint64(10).
+		_ = txctx.Envelope.SetChainIDUint64(10).
 			SetChainIDUint64(10).
 			SetNonce(10).
 			SetValue(big.NewInt(100)).
@@ -66,7 +66,7 @@ func makeSignerContext(i int) *engine.TxContext {
 			SetGas(11).
 			SetGasPrice(big.NewInt(12))
 	case 4:
-		_ = txctx.Builder.
+		_ = txctx.Envelope.
 			SetChainIDUint64(10).
 			MustSetDataString("0").
 			SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION).
@@ -77,7 +77,7 @@ func makeSignerContext(i int) *engine.TxContext {
 			SetGas(11).
 			SetGasPrice(big.NewInt(12))
 	case 5:
-		_ = txctx.Builder.
+		_ = txctx.Envelope.
 			SetChainIDUint64(10).
 			SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION).
 			SetNonce(10).
@@ -88,7 +88,7 @@ func makeSignerContext(i int) *engine.TxContext {
 			SetGas(11).
 			SetGasPrice(big.NewInt(12))
 	case 6:
-		_ = txctx.Builder.
+		_ = txctx.Envelope.
 			SetChainIDUint64(0).
 			MustSetRawString("0").
 			SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION).
@@ -99,7 +99,7 @@ func makeSignerContext(i int) *engine.TxContext {
 			SetGas(11).
 			SetGasPrice(big.NewInt(12))
 	case 7:
-		_ = txctx.Builder.
+		_ = txctx.Envelope.
 			SetChainIDUint64(0).
 			SetMethod(tx.Method_EEA_SENDPRIVATETRANSACTION).
 			SetNonce(10).
@@ -125,8 +125,8 @@ func TestGeneric(t *testing.T) {
 	for i := 0; i < ROUNDS; i++ {
 		txctx := makeSignerContext(i)
 		handler(txctx)
-		assert.NotNilf(t, txctx.Builder.GetRaw(), fmt.Sprintf("TxRawSignature should not be nil"))
-		assert.NotNilf(t, txctx.Builder.GetTxHash(), fmt.Sprintf("TxHash should not be nil"))
+		assert.NotNilf(t, txctx.Envelope.GetRaw(), fmt.Sprintf("TxRawSignature should not be nil"))
+		assert.NotNilf(t, txctx.Envelope.GetTxHash(), fmt.Sprintf("TxHash should not be nil"))
 
 	}
 }

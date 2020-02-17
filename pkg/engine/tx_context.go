@@ -11,12 +11,11 @@ import (
 	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/error"
 )
 
-// Builder is the most important part of an engine.
+// Envelope is the most important part of an engine.
 // It allows to pass variables between handlers
 type TxContext struct {
-	// Builder stores all information about transaction lifecycle
-	// TODO: move builder in context
-	Builder *tx.Builder
+	// Envelope stores all information about transaction lifecycle
+	Envelope *tx.Envelope
 
 	// Input message
 	In Msg
@@ -24,10 +23,10 @@ type TxContext struct {
 	// Array of sequences of handlers to execute on a given context
 	stack []*sequence
 
-	// Logger logrus log entry for this Builder execution
+	// Logger logrus log entry for this Envelope execution
 	Logger *log.Entry
 
-	// ctx is a go context that is attached to the Builder
+	// ctx is a go context that is attached to the Envelope
 	// It allows to carry deadlines, cancellation signals, etc. between handlers
 	//
 	// This approach is not recommended by go context documentation
@@ -35,22 +34,22 @@ type TxContext struct {
 	//
 	// Still this recommendation against has been actively questioned
 	// (txctx.f https://github.com/golang/go/issues/22602)
-	// Also net/http has been following this implementation for the Builder object
+	// Also net/http has been following this implementation for the Envelope object
 	// (txctx.f. https://github.com/golang/go/blob/master/src/net/http/request.go#L107)
 	ctx context.Context
 }
 
-// NewTxContext creates a new Builder
+// NewTxContext creates a new Envelope
 func NewTxContext() *TxContext {
 	return &TxContext{
-		Builder: tx.NewBuilder(),
+		Envelope: tx.NewEnvelope(),
 	}
 }
 
-// Reset re-initialize Builder
+// Reset re-initialize Envelope
 func (txctx *TxContext) Reset() {
 	txctx.ctx = nil
-	txctx.Builder = tx.NewBuilder()
+	txctx.Envelope = tx.NewEnvelope()
 	txctx.In = nil
 	txctx.stack = nil
 	txctx.Logger = nil
@@ -64,15 +63,15 @@ func (txctx *TxContext) Next() {
 	}
 }
 
-// Error attaches an error to Builder
+// Error attaches an error to Envelope
 func (txctx *TxContext) Error(err error) *ierror.Error {
 	if err == nil {
 		panic("err is nil")
 	}
 
-	_ = txctx.Builder.AppendError(errors.FromError(err))
+	_ = txctx.Envelope.AppendError(errors.FromError(err))
 
-	return txctx.Builder.GetErrors()[len(txctx.Builder.Errors)-1]
+	return txctx.Envelope.GetErrors()[len(txctx.Envelope.Errors)-1]
 }
 
 // Abort prevents pending handlers to be executed
@@ -88,7 +87,7 @@ func (txctx *TxContext) AbortWithError(err error) *ierror.Error {
 	return txctx.Error(err)
 }
 
-// Prepare re-initializes Builder, set handlers, set logger and set message
+// Prepare re-initializes Envelope, set handlers, set logger and set message
 func (txctx *TxContext) Prepare(logger *log.Entry, msg Msg) *TxContext {
 	txctx.Reset()
 	txctx.In = msg
@@ -108,7 +107,7 @@ func (txctx *TxContext) Get(key string) interface{} {
 	return txctx.Context().Value(txCtxKey(key))
 }
 
-// Context returns the go context attached to Builder.
+// Context returns the go context attached to Envelope.
 // To change the go context, use WithContext.
 //
 // The returned context is always non-nil; it defaults to the background context.
@@ -119,7 +118,7 @@ func (txctx *TxContext) Context() context.Context {
 	return context.Background()
 }
 
-// WithContext attach a go context to Builder
+// WithContext attach a go context to Envelope
 // The go context provided as argument must be non nil or WithContext will panic
 func (txctx *TxContext) WithContext(ctx context.Context) *TxContext {
 	if ctx == nil {
@@ -139,7 +138,7 @@ func (txctx *TxContext) applyHandlers(handlers ...HandlerFunc) {
 	seq.handlers = handlers
 	seq.txctx = txctx
 
-	// Attach the sequence to the Builder
+	// Attach the sequence to the Envelope
 	txctx.stack = append(txctx.stack, seq)
 
 	// Execute sequence

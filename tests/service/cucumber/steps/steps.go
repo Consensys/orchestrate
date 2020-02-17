@@ -6,13 +6,11 @@ import (
 	"net/http"
 	"time"
 
+	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
 
-	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
-
-	"github.com/DATA-DOG/godog"
-	"github.com/DATA-DOG/godog/gherkin"
 	"github.com/Shopify/sarama"
 	"github.com/cucumber/godog"
 	"github.com/cucumber/godog/gherkin"
@@ -56,6 +54,12 @@ func ScenarioID(def *gherkin.ScenarioDefinition) string {
 	return fmt.Sprintf("|%v|-%v", fmt.Sprintf("%-20v", def.Name)[:20], NewID())
 }
 
+// AuthSetup is container for authentication context data
+type AuthSetup struct {
+	authMethod string
+	authData   string
+}
+
 // ScenarioContext is container for scenario context data
 type ScenarioContext struct {
 	ID         string
@@ -87,6 +91,15 @@ type ScenarioContext struct {
 	producer sarama.SyncProducer
 
 	logger *log.Entry
+
+	authSetup AuthSetup
+}
+
+func setServiceURL(sc *ScenarioContext) {
+
+	sc.httpAliases.Set(GenericNamespace, "chain-registry", viper.GetString(chainregistry.ChainRegistryURLViperKey))
+	sc.httpAliases.Set(GenericNamespace, "contract-registry", "http://contract-registry:8081")
+	sc.httpAliases.Set(GenericNamespace, "envelope-store", "http://envelope-store:8081")
 }
 
 func NewScenarioContext(
@@ -96,7 +109,7 @@ func NewScenarioContext(
 	producer sarama.SyncProducer,
 	p *parser.Parser,
 ) *ScenarioContext {
-	return &ScenarioContext{
+	sc := &ScenarioContext{
 		chanReg:          chanReg,
 		httpClient:       httpClient,
 		httpAliases:      parser.NewAliasRegistry(),
@@ -104,7 +117,12 @@ func NewScenarioContext(
 		producer:         producer,
 		parser:           p,
 		logger:           log.NewEntry(log.StandardLogger()),
+		authSetup:        AuthSetup{},
 	}
+
+	setServiceURL(sc)
+
+	return sc
 }
 
 // initScenarioContext initialize a scenario context - create a random scenario id - initialize a logger enrich with the scenario name - initialize envelope chan
@@ -130,7 +148,7 @@ func (sc *ScenarioContext) init(s interface{}) {
 	})
 }
 
-func (sc *ScenarioContext) newTracker(e *tx.Builder) *tracker.Tracker {
+func (sc *ScenarioContext) newTracker(e *tx.Envelope) *tracker.Tracker {
 	if e != nil {
 		sc.setMetadata(e)
 	}
@@ -144,7 +162,7 @@ func (sc *ScenarioContext) newTracker(e *tx.Builder) *tracker.Tracker {
 	for _, topic := range TOPICS {
 		// Create channel
 		// TODO: make chan size configurable
-		ch := make(chan *tx.Builder, 30)
+		ch := make(chan *tx.Envelope, 30)
 
 		// Add channel as a tracker output
 		t.AddOutput(topic, ch)
@@ -160,7 +178,7 @@ func (sc *ScenarioContext) newTracker(e *tx.Builder) *tracker.Tracker {
 	return t
 }
 
-func (sc *ScenarioContext) setMetadata(e *tx.Builder) {
+func (sc *ScenarioContext) setMetadata(e *tx.Envelope) {
 	// Prepare envelope metadata
 	_ = e.SetID(uuid.NewV4().String()).
 		SetContextLabelsValue("debug", "true").
@@ -168,7 +186,7 @@ func (sc *ScenarioContext) setMetadata(e *tx.Builder) {
 		SetContextLabelsValue("scenario.name", sc.Definition.Name)
 }
 
-func (sc *ScenarioContext) newTrackers(envelopes []*tx.Builder) []*tracker.Tracker {
+func (sc *ScenarioContext) newTrackers(envelopes []*tx.Envelope) []*tracker.Tracker {
 	// Create a tracker for every envelope
 	var trackers []*tracker.Tracker
 	for _, e := range envelopes {
@@ -183,7 +201,7 @@ func (sc *ScenarioContext) setTrackers(trackers []*tracker.Tracker) {
 	sc.trackers = trackers
 }
 
-func (sc *ScenarioContext) sendEnvelope(topic string, e *tx.Builder) error {
+func (sc *ScenarioContext) sendEnvelope(topic string, e *tx.Envelope) error {
 	// Prepare message to be sent
 	msg := &sarama.ProducerMessage{Topic: viper.GetString(fmt.Sprintf("topic.%v", topic))}
 

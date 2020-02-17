@@ -21,7 +21,7 @@ func Signer(k keystore.KeyStore, t tessera.Client) engine.HandlerFunc {
 }
 
 func signTx(s keystore.KeyStore, txctx *engine.TxContext, sender common.Address, t *ethtypes.Transaction) ([]byte, *common.Hash, error) {
-	b, hash, err := s.SignPrivateTesseraTx(txctx.Context(), txctx.Builder.ChainID, sender, t)
+	b, hash, err := s.SignPrivateTesseraTx(txctx.Context(), txctx.Envelope.ChainID, sender, t)
 	if err != nil {
 		return b, hash, errors.FromError(err).ExtendComponent(component)
 	}

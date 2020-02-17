@@ -169,6 +169,6 @@ func TestTimeoutHandler(t *testing.T) {
 
 	for out := range outs {
 		errCount := out.Get("errors").(int)
-		assert.Len(t, out.Builder.Errors, errCount, "Timeout: expected correct count of errors")
+		assert.Len(t, out.Envelope.Errors, errCount, "Timeout: expected correct count of errors")
 	}
 }

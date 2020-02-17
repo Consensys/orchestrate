@@ -21,7 +21,7 @@ func TestRawTxStore(t *testing.T) {
 		{
 			"Store",
 			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Builder.SetChainID(big.NewInt(1)).SetID("test")
+				_ = txctx.Envelope.SetChainID(big.NewInt(1)).SetID("test")
 				return txctx
 			},
 			envstore.Status_PENDING,
@@ -29,9 +29,9 @@ func TestRawTxStore(t *testing.T) {
 		{
 			"Store envelope without Metadata UUID",
 			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Builder.SetChainID(big.NewInt(1)).SetID("test")
+				_ = txctx.Envelope.SetChainID(big.NewInt(1)).SetID("test")
 				err := errors.InternalError("error").ExtendComponent(component)
-				txctx.Builder.Errors = append(txctx.Builder.Errors, err)
+				txctx.Envelope.Errors = append(txctx.Envelope.Errors, err)
 				return txctx
 			},
 			envstore.Status_ERROR,
@@ -50,7 +50,7 @@ func TestRawTxStore(t *testing.T) {
 			h := RawTxStore(registry)
 			h(test.input(txctx))
 
-			e, _ := registry.LoadByID(txctx.Context(), &envstore.LoadByIDRequest{Id: txctx.Builder.GetID()})
+			e, _ := registry.LoadByID(txctx.Context(), &envstore.LoadByIDRequest{Id: txctx.Envelope.GetID()})
 			assert.Equal(t, test.expectedStatus, e.StatusInfo.Status, "Expected same status")
 		})
 	}

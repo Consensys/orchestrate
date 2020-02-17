@@ -25,7 +25,7 @@ type Engine struct {
 	running   int64
 	cleanOnce *sync.Once
 
-	// ctxPool is a pool to re-cycle Builder
+	// ctxPool is a pool to re-cycle Envelope
 	ctxPool *sync.Pool
 
 	// slots is a channel to limit the number of messages treated concurrently by the Engine
@@ -185,7 +185,7 @@ func TimeoutHandler(h HandlerFunc, timeout time.Duration, msg string) HandlerFun
 		timeoutCtx, cancel := context.WithTimeout(txctx.Context(), timeout)
 		defer cancel() // We always cancel to avoid memory leak
 
-		// Attach time out context to Builder
+		// Attach time out context to Envelope
 		txctx.WithContext(timeoutCtx)
 
 		// Prepare channels

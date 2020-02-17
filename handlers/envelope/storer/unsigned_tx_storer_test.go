@@ -34,7 +34,7 @@ func TestUnsignedTxStore(t *testing.T) {
 			name: "Errors in envelope",
 			txctx: func(txctx *engine.TxContext) *engine.TxContext {
 				err := errors.FromError(fmt.Errorf("error")).ExtendComponent(component)
-				txctx.Builder.Errors = append(txctx.Builder.Errors, err)
+				txctx.Envelope.Errors = append(txctx.Envelope.Errors, err)
 				return txctx
 			},
 			expectedTxctx: func(txctx *engine.TxContext) *engine.TxContext {
@@ -59,7 +59,7 @@ func TestUnsignedTxStore(t *testing.T) {
 			},
 			expectedTxctx: func(txctx *engine.TxContext) *engine.TxContext {
 				err := errors.FromError(storeError).ExtendComponent(component)
-				txctx.Builder.Errors = append(txctx.Builder.Errors, err)
+				txctx.Envelope.Errors = append(txctx.Envelope.Errors, err)
 				return txctx
 			},
 		},
@@ -87,8 +87,8 @@ func TestUnsignedTxStore(t *testing.T) {
 			expectedTxctx.Logger = txctx.Logger
 			expectedTxctx = test.expectedTxctx(test.txctx(expectedTxctx))
 
-			t.Log(txctx.Builder.InternalLabels)
-			t.Log(expectedTxctx.Builder.InternalLabels)
+			t.Log(txctx.Envelope.InternalLabels)
+			t.Log(expectedTxctx.Envelope.InternalLabels)
 
 			assert.True(t, reflect.DeepEqual(txctx, expectedTxctx), "Expected same input")
 		})

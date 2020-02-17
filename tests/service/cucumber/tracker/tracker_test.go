@@ -13,11 +13,11 @@ func TestTracker(t *testing.T) {
 	tracker := NewTracker()
 
 	// Register output on Tracker
-	ch := make(chan *tx.Builder, 10)
+	ch := make(chan *tx.Envelope, 10)
 	tracker.AddOutput("test-output", ch)
 
 	// Input an envelope in channel
-	input := tx.NewBuilder()
+	input := tx.NewEnvelope()
 	ch <- input
 
 	// Get envelope

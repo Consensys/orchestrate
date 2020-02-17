@@ -96,7 +96,7 @@ func TestHook(t *testing.T) {
 
 	// Test 2: we store envelope on envelope store
 	_, _ = store.Store(context.Background(), &evlpstore.StoreRequest{
-		Envelope: tx.NewBuilder().SetID(uuid.NewV4().String()).SetChainID(c.ChainID).SetTxHash(receipt.TxHash).TxEnvelopeAsRequest(),
+		Envelope: tx.NewEnvelope().SetID(uuid.NewV4().String()).SetChainID(c.ChainID).SetTxHash(receipt.TxHash).TxEnvelopeAsRequest(),
 	})
 	producer.ExpectSendMessageAndSucceed()
 	err = hk.AfterNewBlock(context.Background(), c, &block, []*ethtypes.Receipt{receipt})

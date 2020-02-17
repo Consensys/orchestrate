@@ -5,7 +5,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
-// Marshal a proto into a message assumed to be an Builder
+// Marshal a proto into a message assumed to be an Envelope
 func Marshal(pb proto.Message) ([]byte, error) {
 	buf, err := proto.Marshal(pb)
 	if err != nil {

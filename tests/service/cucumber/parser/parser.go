@@ -27,8 +27,8 @@ func New() *Parser {
 	}
 }
 
-func (p *Parser) ParseEnvelopes(scenario string, table *gherkin.DataTable) ([]*tx.Builder, error) {
-	var envelopes []*tx.Builder
+func (p *Parser) ParseEnvelopes(scenario string, table *gherkin.DataTable) ([]*tx.Envelope, error) {
+	var envelopes []*tx.Envelope
 	headers := table.Rows[0]
 	for _, row := range table.Rows[1:] {
 		e, err := p.ParseTxRequest(scenario, headers, row)
@@ -40,8 +40,8 @@ func (p *Parser) ParseEnvelopes(scenario string, table *gherkin.DataTable) ([]*t
 	return envelopes, nil
 }
 
-func (p *Parser) ParseTxRequest(scenario string, headers, row *gherkin.TableRow) (*tx.Builder, error) {
-	builder := tx.NewBuilder()
+func (p *Parser) ParseTxRequest(scenario string, headers, row *gherkin.TableRow) (*tx.Envelope, error) {
+	envelope := tx.NewEnvelope()
 	gherkinRequest := make(map[string]interface{})
 
 	for i, cell := range row.Cells {
@@ -90,13 +90,13 @@ func (p *Parser) ParseTxRequest(scenario string, headers, row *gherkin.TableRow)
 		}
 	}
 
-	dec, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{ErrorUnused: true, Result: builder})
+	dec, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{ErrorUnused: true, Result: envelope})
 	err := dec.Decode(gherkinRequest)
 	if err != nil {
 		return nil, err
 	}
 
-	return builder, nil
+	return envelope, nil
 }
 
 func parseMappingStringString(gherkinRequest map[string]interface{}, header, value string) error {

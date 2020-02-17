@@ -9,7 +9,6 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope"
 	err "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/error"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
@@ -17,7 +16,7 @@ import (
 var PostState = "0xabcdef"
 var Bloom = "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f86c0184ee6b280082529094ff778b716fc07d98839f48ddb88d8be583beb684872386f26fc1000082abcd29a0d1139ca4c70345d16e00f624622ac85458d450e238a48744f419f5345c5ce562a05bd43c512fcaf79e1756b2015fec966419d34d2a87d867b9618a48eca33a1a80"
 
-var builder = tx.NewBuilder().
+var envlp = tx.NewEnvelope().
 	SetID("0cdac6e9-8836-4280-8d6b-2e01cba7a1ca").
 	SetMethod(tx.Method_EEA_SENDPRIVATETRANSACTION).
 	MustSetFromString("0xdbb881a51CD4023E4400CEF3ef73046743f08da3").
@@ -52,11 +51,11 @@ var builder = tx.NewBuilder().
 		{Code: 1, Message: "Error 1"},
 	})
 
-var expected, _ = proto.Marshal(builder.TxRequest())
+var expected, _ = proto.Marshal(envlp.TxEnvelopeAsRequest())
 
-func newEnvelope() *envelope.Envelope {
-	// Create Builder
-	e := &envelope.Envelope{}
+func newEnvelope() *tx.TxEnvelope {
+	// Create Envelope
+	e := &tx.TxEnvelope{}
 	_ = proto.Unmarshal(expected, e)
 
 	return e

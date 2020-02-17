@@ -105,7 +105,7 @@ func makeNonceContext(endpoint, key string, expectedNonce uint64, expectedErrorC
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
 	txctx.In = mockMsg(key)
-	_ = txctx.Builder.SetFrom(ethcommon.HexToAddress("0x1"))
+	_ = txctx.Envelope.SetFrom(ethcommon.HexToAddress("0x1"))
 	txctx.WithContext(proxy.With(txctx.Context(), endpoint))
 
 	txctx.Set("expectedErrorCount", expectedErrorCount)
@@ -115,8 +115,8 @@ func makeNonceContext(endpoint, key string, expectedNonce uint64, expectedErrorC
 }
 
 func assertTxContext(t *testing.T, txctx *engine.TxContext) {
-	assert.Len(t, txctx.Builder.GetErrors(), txctx.Get("expectedErrorCount").(int), "Error count should be correct")
-	assert.Equal(t, txctx.Get("expectedNonce").(uint64), txctx.Builder.MustGetNonceUint64(), "Nonce should be correct")
+	assert.Len(t, txctx.Envelope.GetErrors(), txctx.Get("expectedErrorCount").(int), "Error count should be correct")
+	assert.Equal(t, txctx.Get("expectedNonce").(uint64), txctx.Envelope.MustGetNonceUint64(), "Nonce should be correct")
 }
 
 func TestNonceHandler(t *testing.T) {
@@ -137,7 +137,7 @@ func TestNonceHandler(t *testing.T) {
 
 	// On 3rd execution we signal a recovery from 5 so expected nonce should be 5
 	txctx = makeNonceContext("1", testKey1, 5, 0)
-	_ = txctx.Builder.SetInternalLabelsValue("nonce.recovering.expected", "5")
+	_ = txctx.Envelope.SetInternalLabelsValue("nonce.recovering.expected", "5")
 	h(txctx)
 	assertTxContext(t, txctx)
 

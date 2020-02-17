@@ -16,7 +16,7 @@ import (
 func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		// Retrieve chainID and sender address
-		sender, err := txctx.Builder.GetFromAddress()
+		sender, err := txctx.Envelope.GetFromAddress()
 		if err != nil {
 			_ = txctx.AbortWithError(err).ExtendComponent(component)
 			return
@@ -24,8 +24,8 @@ func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFun
 
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"from":    sender.Hex(),
-			"chainID": txctx.Builder.GetChainIDString(),
-			"id":      txctx.Builder.GetID(),
+			"chainID": txctx.Envelope.GetChainIDString(),
+			"id":      txctx.Envelope.GetID(),
 		})
 
 		// Nonce to attribute to tx
@@ -34,7 +34,7 @@ func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFun
 		nonceKey := string(txctx.In.Key())
 
 		// First check if signal for recovering nonce
-		if v := txctx.Builder.GetInternalLabelsValue("nonce.recovering.expected"); v != "" {
+		if v := txctx.Envelope.GetInternalLabelsValue("nonce.recovering.expected"); v != "" {
 			expectedNonce, err := strconv.ParseUint(v, 10, 64)
 			if err != nil {
 				e := txctx.AbortWithError(err).ExtendComponent(component)
@@ -81,7 +81,7 @@ func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFun
 		}
 
 		// Set nonce
-		_ = txctx.Builder.SetNonce(n)
+		_ = txctx.Envelope.SetNonce(n)
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"tx.nonce": n,
 		})
@@ -90,7 +90,7 @@ func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFun
 		txctx.Next()
 
 		// If pending handlers executed correctly we increment nonce
-		if len(txctx.Builder.GetErrors()) == 0 {
+		if len(txctx.Envelope.GetErrors()) == 0 {
 			// Increment nonce
 			err := nm.SetLastAttributed(nonceKey, n)
 			if err != nil {

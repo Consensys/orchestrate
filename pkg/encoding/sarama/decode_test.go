@@ -15,7 +15,7 @@ import (
 
 func newConsumerMessage() *broker.Msg {
 	msg := broker.Msg{}
-	msg.ConsumerMessage.Value, _ = proto.Marshal(builder.TxRequest())
+	msg.ConsumerMessage.Value, _ = proto.Marshal(envlp.TxRequest())
 	return &msg
 }
 

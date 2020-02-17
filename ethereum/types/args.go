@@ -18,7 +18,7 @@ type PrivateArgs struct {
 }
 
 // Call2PrivateArgs creates PrivateArgs from a call object
-func Call2PrivateArgs(req *tx.Builder) *PrivateArgs {
+func Call2PrivateArgs(req *tx.Envelope) *PrivateArgs {
 	var privateArgs PrivateArgs
 	privateArgs.PrivateFrom = req.PrivateFrom
 	privateArgs.PrivateFor = req.PrivateFor
@@ -47,8 +47,8 @@ type SendTxArgs struct {
 	PrivateArgs
 }
 
-// Envelope2SendTxArgs creates SendTxArgs from an Builder
-func Envelope2SendTxArgs(req *tx.Builder) (*SendTxArgs, error) {
+// Envelope2SendTxArgs creates SendTxArgs from an Envelope
+func Envelope2SendTxArgs(req *tx.Envelope) (*SendTxArgs, error) {
 	from, err := req.GetFromAddress()
 	if err != nil {
 		return nil, err

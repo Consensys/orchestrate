@@ -70,13 +70,13 @@ func makeContext(hash, id, endpoint string, expectedErrors int) *engine.TxContex
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
 	txctx.WithContext(proxy.With(txctx.Context(), endpoint))
-	_ = txctx.Builder.SetID(id).SetTxHashString(hash)
+	_ = txctx.Envelope.SetID(id).SetTxHashString(hash)
 	txctx.Set("expectedErrors", expectedErrors)
 	return txctx
 }
 
 func assertCtx(t *testing.T, txctx *engine.TxContext) {
-	assert.Len(t, txctx.Builder.GetErrors(), txctx.Get("expectedErrors").(int), "Error count should be valid")
+	assert.Len(t, txctx.Envelope.GetErrors(), txctx.Get("expectedErrors").(int), "Error count should be valid")
 }
 
 type mockHandler struct {
@@ -111,7 +111,7 @@ func TestTxAlreadySent(t *testing.T) {
 	assert.Equal(t, 1, mh.callCount, "Mock handler should been executed")
 
 	// Store envelope, do not send transaction and set envelope status before handing context
-	b := tx.NewBuilder().SetID("2").SetChainID(big.NewInt(8)).SetTxHash(ethcommon.HexToHash("0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b"))
+	b := tx.NewEnvelope().SetID("2").SetChainID(big.NewInt(8)).SetTxHash(ethcommon.HexToHash("0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b"))
 	_, _ = client.Store(
 		context.Background(),
 		&evlpstore.StoreRequest{
@@ -137,7 +137,7 @@ func TestTxAlreadySent(t *testing.T) {
 	assert.Equal(t, 1, mh.callCount, "Mock handler should not have been executed")
 
 	// Store envelope, does not send transaction and set envelope status before handing context
-	b = tx.NewBuilder().SetID("3").SetChainID(big.NewInt(8)).SetTxHash(ethcommon.HexToHash("0x60a417c21da71cea33821071e99871fa2c23ad8103b889cf8a459b0b5320fd46"))
+	b = tx.NewEnvelope().SetID("3").SetChainID(big.NewInt(8)).SetTxHash(ethcommon.HexToHash("0x60a417c21da71cea33821071e99871fa2c23ad8103b889cf8a459b0b5320fd46"))
 	_, _ = client.Store(
 		context.Background(),
 		&evlpstore.StoreRequest{

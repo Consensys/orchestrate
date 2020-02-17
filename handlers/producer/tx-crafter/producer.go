@@ -17,21 +17,21 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 
 	// If an error occurred then we redirect to recovery with a tx response
 	switch {
-	case !txctx.Builder.OnlyWarnings():
+	case !txctx.Envelope.OnlyWarnings():
 		msg.Topic = viper.GetString(broker.TxRecoverViperKey)
-		p = txctx.Builder.TxResponse()
+		p = txctx.Envelope.TxResponse()
 	default:
 		msg.Topic = viper.GetString(broker.TxNonceViperKey)
-		p = txctx.Builder.TxEnvelopeAsRequest()
+		p = txctx.Envelope.TxEnvelopeAsRequest()
 	}
 
-	// Marshal Builder into sarama Message
+	// Marshal Envelope into sarama Message
 	err := encoding.Marshal(p, msg)
 	if err != nil {
 		return err
 	}
 
-	msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(txctx.Builder.ChainID, txctx.Builder.MustGetFromAddress()))
+	msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(txctx.Envelope.ChainID, txctx.Envelope.MustGetFromAddress()))
 
 	return nil
 }

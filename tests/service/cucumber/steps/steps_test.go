@@ -114,12 +114,12 @@ func (s *ScenarioTestSuite) TestISendEnvelopesToTopic() {
 
 func (s *ScenarioTestSuite) TestEnvelopeShouldBeInTopic() {
 	// Prepare trackers
-	input := tx.NewBuilder()
+	input := tx.NewEnvelope()
 	s.Context.setMetadata(input)
 	t := s.Context.newTracker(input)
 	s.Context.setTrackers([]*tracker.Tracker{t})
 
-	output := tx.NewBuilder().
+	output := tx.NewEnvelope().
 		SetID(input.GetID()).
 		SetContextLabels(input.GetContextLabels())
 
@@ -128,7 +128,7 @@ func (s *ScenarioTestSuite) TestEnvelopeShouldBeInTopic() {
 
 	err = s.Context.envelopeShouldBeInTopic("tx.crafter")
 	assert.NoError(s.T(), err, "envelopeShouldBeInTopic should not error")
-	assert.Equal(s.T(), output, s.Context.trackers[0].Current, "Builder on tracker should have been updated")
+	assert.Equal(s.T(), output, s.Context.trackers[0].Current, "Envelope on tracker should have been updated")
 }
 
 func TestScenarioTestSuite(t *testing.T) {

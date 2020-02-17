@@ -17,22 +17,25 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 
 	b, ok := txctx.Get("invalid.nonce").(bool)
 	switch {
-	case len(txctx.Builder.GetErrors()) == 0 && ok && b:
+	case len(txctx.Envelope.GetErrors()) == 0 && ok && b:
 		msg.Topic = viper.GetString(broker.TxNonceViperKey)
-		p = txctx.Builder.TxEnvelopeAsRequest()
-	case !txctx.Builder.OnlyWarnings():
+		p = txctx.Envelope.TxEnvelopeAsRequest()
+	case !txctx.Envelope.OnlyWarnings():
 		msg.Topic = viper.GetString(broker.TxRecoverViperKey)
-		p = txctx.Builder.TxResponse()
+		p = txctx.Envelope.TxResponse()
+	default:
+		// Not sending msg in kafka if no error or warnings
+		return nil
 	}
 
-	// Marshal Builder into sarama Message
+	// Marshal Envelope into sarama Message
 	err := encoding.Marshal(p, msg)
 	if err != nil {
 		return err
 	}
 
 	// Set message Key
-	msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(txctx.Builder.ChainID, txctx.Builder.MustGetFromAddress()))
+	msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(txctx.Envelope.ChainID, txctx.Envelope.MustGetFromAddress()))
 
 	return nil
 }

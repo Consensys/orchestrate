@@ -57,7 +57,7 @@ func makeProducerContext() *engine.TxContext {
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
 
-	_ = txctx.Builder.SetChainID(big.NewInt(3))
+	_ = txctx.Envelope.SetChainID(big.NewInt(3))
 	txctx.Set("produced", true)
 
 	return txctx

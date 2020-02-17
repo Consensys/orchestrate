@@ -35,7 +35,7 @@ func (s *LoggerTestSuite) TestLogger() {
 	s.Handle(txctxs)
 
 	for _, txctx := range txctxs {
-		assert.Len(s.T(), txctx.Builder.Errors, txctx.Get("errors").(int), "Expected right count of errors")
+		assert.Len(s.T(), txctx.Envelope.Errors, txctx.Get("errors").(int), "Expected right count of errors")
 	}
 }
 

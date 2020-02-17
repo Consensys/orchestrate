@@ -17,18 +17,18 @@ func Faucet(fct faucet.Faucet) engine.HandlerFunc {
 			return
 		}
 
-		if txctx.Builder.GetChainID() == nil || txctx.Builder.GetValue() == nil {
+		if txctx.Envelope.GetChainID() == nil || txctx.Envelope.GetValue() == nil {
 			return
 		}
 
 		// Create Faucet request
 		req := &faucettypes.Request{
-			ChainID:     txctx.Builder.GetChainID(),
+			ChainID:     txctx.Envelope.GetChainID(),
 			ChainURL:    url,
-			ChainUUID:   txctx.Builder.GetChainUUID(),
-			ChainName:   txctx.Builder.GetChainName(),
-			Beneficiary: txctx.Builder.MustGetFromAddress(),
-			Amount:      txctx.Builder.GetValue(),
+			ChainUUID:   txctx.Envelope.GetChainUUID(),
+			ChainName:   txctx.Envelope.GetChainName(),
+			Beneficiary: txctx.Envelope.MustGetFromAddress(),
+			Amount:      txctx.Envelope.GetValue(),
 		}
 
 		// Credit

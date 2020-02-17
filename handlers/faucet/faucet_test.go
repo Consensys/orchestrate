@@ -33,10 +33,10 @@ func makeFaucetContext(i int) *engine.TxContext {
 	switch i % 2 {
 	case 0:
 		txctx.WithContext(proxy.With(txctx.Context(), "testURL"))
-		_ = txctx.Builder.SetChainID(big.NewInt(0))
+		_ = txctx.Envelope.SetChainID(big.NewInt(0))
 	case 1:
 		txctx.WithContext(proxy.With(txctx.Context(), "testURL"))
-		_ = txctx.Builder.SetChainID(big.NewInt(10))
+		_ = txctx.Envelope.SetChainID(big.NewInt(10))
 	}
 	return txctx
 }

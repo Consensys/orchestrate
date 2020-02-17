@@ -18,7 +18,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
-type Builder struct {
+type Envelope struct {
 	ID            string `validate:"uuid4,required"`
 	Headers       map[string]string
 	ContextLabels map[string]string
@@ -32,8 +32,8 @@ type Builder struct {
 	InternalLabels map[string]string
 }
 
-func NewBuilder() *Builder {
-	return &Builder{
+func NewEnvelope() *Envelope {
+	return &Envelope{
 		Headers:        make(map[string]string),
 		ContextLabels:  make(map[string]string),
 		Errors:         make([]*error1.Error, 0),
@@ -41,79 +41,79 @@ func NewBuilder() *Builder {
 	}
 }
 
-func (b *Builder) GetID() string {
-	return b.ID
+func (e *Envelope) GetID() string {
+	return e.ID
 }
 
-func (b *Builder) SetID(id string) *Builder {
-	b.ID = id
-	return b
+func (e *Envelope) SetID(id string) *Envelope {
+	e.ID = id
+	return e
 }
 
-func (b *Builder) GetErrors() []*error1.Error {
-	return b.Errors
+func (e *Envelope) GetErrors() []*error1.Error {
+	return e.Errors
 }
 
 // Error returns string representation of errors encountered by envelope
-func (b *Builder) Error() string {
-	if len(b.GetErrors()) == 0 {
+func (e *Envelope) Error() string {
+	if len(e.GetErrors()) == 0 {
 		return ""
 	}
-	return fmt.Sprintf("%q", b.GetErrors())
+	return fmt.Sprintf("%q", e.GetErrors())
 }
 
-func (b *Builder) AppendError(err *error1.Error) *Builder {
-	b.Errors = append(b.Errors, err)
-	return b
+func (e *Envelope) AppendError(err *error1.Error) *Envelope {
+	e.Errors = append(e.Errors, err)
+	return e
 }
 
-func (b *Builder) AppendErrors(errs []*error1.Error) *Builder {
-	b.Errors = append(b.Errors, errs...)
-	return b
+func (e *Envelope) AppendErrors(errs []*error1.Error) *Envelope {
+	e.Errors = append(e.Errors, errs...)
+	return e
 }
-func (b *Builder) SetReceipt(receipt *ethereum.Receipt) *Builder {
-	b.Receipt = receipt
-	return b
+func (e *Envelope) SetReceipt(receipt *ethereum.Receipt) *Envelope {
+	e.Receipt = receipt
+	return e
 }
-func (b *Builder) GetReceipt() *ethereum.Receipt {
-	return b.Receipt
-}
-
-func (b *Builder) GetMethod() Method {
-	return b.Method
+func (e *Envelope) GetReceipt() *ethereum.Receipt {
+	return e.Receipt
 }
 
-func (b *Builder) SetMethod(method Method) *Builder {
-	b.Method = method
-	return b
+func (e *Envelope) GetMethod() Method {
+	return e.Method
+}
+
+func (e *Envelope) SetMethod(method Method) *Envelope {
+	e.Method = method
+	return e
 }
 
 // IsEthSendRawTransaction for a classic Ethereum transaction
-func (b *Builder) IsEthSendRawTransaction() bool {
-	return b.Method == Method_ETH_SENDRAWTRANSACTION
+func (e *Envelope) IsEthSendRawTransaction() bool {
+	return e.Method == Method_ETH_SENDRAWTRANSACTION
 }
 
 // IsEthSendPrivateTransaction for Quorum Constellation
-func (b *Builder) IsEthSendPrivateTransaction() bool {
-	return b.Method == Method_ETH_SENDPRIVATETRANSACTION
+func (e *Envelope) IsEthSendPrivateTransaction() bool {
+	return e.Method == Method_ETH_SENDPRIVATETRANSACTION
 }
 
 // IsEthSendRawPrivateTransaction for Quorum Tessera
-func (b *Builder) IsEthSendRawPrivateTransaction() bool {
-	return b.Method == Method_ETH_SENDRAWPRIVATETRANSACTION
+func (e *Envelope) IsEthSendRawPrivateTransaction() bool {
+	return e.Method == Method_ETH_SENDRAWPRIVATETRANSACTION
 }
 
 // IsEthSendRawTransaction for Besu Orion
-func (b *Builder) IsEeaSendPrivateTransaction() bool {
-	return b.Method == Method_EEA_SENDPRIVATETRANSACTION
+func (e *Envelope) IsEeaSendPrivateTransaction() bool {
+	return e.Method == Method_EEA_SENDPRIVATETRANSACTION
 }
 
-func (b *Builder) Carrier() opentracing.TextMapCarrier {
-	return b.ContextLabels
+func (e *Envelope) Carrier() opentracing.TextMapCarrier {
+	return e.ContextLabels
 }
 
-func (b *Builder) OnlyWarnings() bool {
-	for _, err := range b.GetErrors() {
+func (e *Envelope) OnlyWarnings() bool {
+	for _, err := range e.GetErrors() {
 		if !errors.IsWarning(err) {
 			return false
 		}
@@ -121,52 +121,52 @@ func (b *Builder) OnlyWarnings() bool {
 	return true
 }
 
-func (b *Builder) GetHeaders() map[string]string {
-	return b.Headers
+func (e *Envelope) GetHeaders() map[string]string {
+	return e.Headers
 }
-func (b *Builder) GetHeadersValue(key string) string {
-	return b.Headers[key]
+func (e *Envelope) GetHeadersValue(key string) string {
+	return e.Headers[key]
 }
-func (b *Builder) SetHeadersValue(key, value string) *Builder {
-	b.Headers[key] = value
-	return b
-}
-
-func (b *Builder) GetInternalLabels() map[string]string {
-	return b.InternalLabels
+func (e *Envelope) SetHeadersValue(key, value string) *Envelope {
+	e.Headers[key] = value
+	return e
 }
 
-func (b *Builder) GetInternalLabelsValue(key string) string {
-	return b.InternalLabels[key]
+func (e *Envelope) GetInternalLabels() map[string]string {
+	return e.InternalLabels
 }
 
-func (b *Builder) SetInternalLabelsValue(key, value string) *Builder {
-	b.InternalLabels[key] = value
-	return b
+func (e *Envelope) GetInternalLabelsValue(key string) string {
+	return e.InternalLabels[key]
 }
 
-func (b *Builder) SetContextLabelsValue(key, value string) *Builder {
-	b.ContextLabels[key] = value
-	return b
+func (e *Envelope) SetInternalLabelsValue(key, value string) *Envelope {
+	e.InternalLabels[key] = value
+	return e
 }
 
-func (b *Builder) SetContextLabels(ctxLabels map[string]string) *Builder {
-	b.ContextLabels = ctxLabels
-	return b
+func (e *Envelope) SetContextLabelsValue(key, value string) *Envelope {
+	e.ContextLabels[key] = value
+	return e
 }
 
-func (b *Builder) Validate() []error {
-	err := utils.GetValidator().Struct(b)
+func (e *Envelope) SetContextLabels(ctxLabels map[string]string) *Envelope {
+	e.ContextLabels = ctxLabels
+	return e
+}
+
+func (e *Envelope) Validate() []error {
+	err := utils.GetValidator().Struct(e)
 	if err != nil {
 		return utils.HandleValidatorError(err.(validator.ValidationErrors))
 	}
 	return nil
 }
-func (b *Builder) GetContextLabelsValue(key string) string {
-	return b.ContextLabels[key]
+func (e *Envelope) GetContextLabelsValue(key string) string {
+	return e.ContextLabels[key]
 }
-func (b *Builder) GetContextLabels() map[string]string {
-	return b.ContextLabels
+func (e *Envelope) GetContextLabels() map[string]string {
+	return e.ContextLabels
 }
 
 type Tx struct {
@@ -181,36 +181,37 @@ type Tx struct {
 	TxHash   *ethcommon.Hash `validate:"omitempty,required_with_all=Raw"`
 }
 
-func (b *Builder) GetTransaction() (*ethtypes.Transaction, error) {
-	nonce, err := b.GetNonceUint64()
+func (e *Envelope) GetTransaction() (*ethtypes.Transaction, error) {
+	// TODO: Use custom validation with https://godoc.org/gopkg.in/go-playground/validator.v10#Validate.StructFiltered
+	nonce, err := e.GetNonceUint64()
 	if err != nil {
 		return nil, err
 	}
-	value, err := b.GetValueBig()
+	value, err := e.GetValueBig()
 	if value == nil || err != nil {
-		_ = b.SetValue(big.NewInt(0))
+		_ = e.SetValue(big.NewInt(0))
 	}
-	gas, err := b.GetGasUint64()
+	gas, err := e.GetGasUint64()
 	if err != nil {
 		return nil, err
 	}
-	gasPrice, err := b.GetGasPriceBig()
+	gasPrice, err := e.GetGasPriceBig()
 	if err != nil {
 		return nil, err
 	}
 
-	if b.IsConstructor() {
+	if e.IsConstructor() {
 		// Create contract deployment transaction
 		return ethtypes.NewContractCreation(
 			nonce,
 			value,
 			gas,
 			gasPrice,
-			b.MustGetDataBytes(),
+			e.MustGetDataBytes(),
 		), nil
 	}
 
-	to, err := b.GetToAddress()
+	to, err := e.GetToAddress()
 	if err != nil {
 		return nil, err
 	}
@@ -222,359 +223,367 @@ func (b *Builder) GetTransaction() (*ethtypes.Transaction, error) {
 		value,
 		gas,
 		gasPrice,
-		b.MustGetDataBytes(),
+		e.MustGetDataBytes(),
 	), nil
 }
 
 // FROM
 
-func (b *Builder) GetFrom() *ethcommon.Address {
-	return b.From
+func (e *Envelope) GetFrom() *ethcommon.Address {
+	return e.From
 }
 
-func (b *Builder) GetFromAddress() (ethcommon.Address, error) {
-	if b.From == nil {
+func (e *Envelope) GetFromAddress() (ethcommon.Address, error) {
+	if e.From == nil {
 		return ethcommon.Address{}, errors.DataError("no from is filled")
 	}
-	return *b.From, nil
+	return *e.From, nil
 }
 
-func (b *Builder) MustGetFromAddress() ethcommon.Address {
-	if b.From == nil {
+func (e *Envelope) MustGetFromAddress() ethcommon.Address {
+	if e.From == nil {
 		return ethcommon.Address{}
 	}
-	return *b.From
+	return *e.From
 }
 
-func (b *Builder) GetFromString() string {
-	if b.From == nil {
+func (e *Envelope) GetFromString() string {
+	if e.From == nil {
 		return ""
 	}
-	return b.From.Hex()
+	return e.From.Hex()
 }
 
-func (b *Builder) SetFromString(from string) error {
+func (e *Envelope) SetFromString(from string) error {
 	if from != "" {
 		if !ethcommon.IsHexAddress(from) {
 			return errors.DataError("invalid from - got %s", from)
 		}
-		_ = b.SetFrom(ethcommon.HexToAddress(from))
+		_ = e.SetFrom(ethcommon.HexToAddress(from))
 	}
 	return nil
 }
 
-func (b *Builder) MustSetFromString(from string) *Builder {
-	_ = b.SetFrom(ethcommon.HexToAddress(from))
-	return b
+func (e *Envelope) MustSetFromString(from string) *Envelope {
+	_ = e.SetFrom(ethcommon.HexToAddress(from))
+	return e
 }
 
-func (b *Builder) SetFrom(from ethcommon.Address) *Builder {
-	b.From = &from
-	return b
+func (e *Envelope) SetFrom(from ethcommon.Address) *Envelope {
+	e.From = &from
+	return e
 }
 
 // TO
 
-func (b *Builder) GetTo() *ethcommon.Address {
-	return b.To
+func (e *Envelope) GetTo() *ethcommon.Address {
+	return e.To
 }
 
-func (b *Builder) GetToAddress() (ethcommon.Address, error) {
-	if b.To == nil {
+func (e *Envelope) GetToAddress() (ethcommon.Address, error) {
+	if e.To == nil {
 		return ethcommon.Address{}, errors.DataError("no to is filled")
 	}
-	return *b.To, nil
+	return *e.To, nil
 }
 
-func (b *Builder) MustGetToAddress() ethcommon.Address {
-	if b.To == nil {
+func (e *Envelope) MustGetToAddress() ethcommon.Address {
+	if e.To == nil {
 		return ethcommon.Address{}
 	}
-	return *b.To
+	return *e.To
 }
 
-func (b *Builder) GetToString() string {
-	if b.To == nil {
+func (e *Envelope) GetToString() string {
+	if e.To == nil {
 		return ""
 	}
-	return b.To.Hex()
+	return e.To.Hex()
 }
 
-func (b *Builder) MustSetToString(to string) *Builder {
-	_ = b.SetTo(ethcommon.HexToAddress(to))
-	return b
+func (e *Envelope) MustSetToString(to string) *Envelope {
+	_ = e.SetTo(ethcommon.HexToAddress(to))
+	return e
 }
 
-func (b *Builder) SetToString(to string) error {
+func (e *Envelope) SetToString(to string) error {
 	if to != "" {
 		if !ethcommon.IsHexAddress(to) {
 			return errors.DataError("invalid to - got %s", to)
 		}
-		_ = b.SetTo(ethcommon.HexToAddress(to))
+		_ = e.SetTo(ethcommon.HexToAddress(to))
 	}
 	return nil
 }
 
-func (b *Builder) SetTo(to ethcommon.Address) *Builder {
-	b.To = &to
-	return b
+func (e *Envelope) SetTo(to ethcommon.Address) *Envelope {
+	e.To = &to
+	return e
 }
 
 // GAS
 
-func (b *Builder) GetGas() *uint64 {
-	return b.Gas
+func (e *Envelope) GetGas() *uint64 {
+	return e.Gas
 }
-func (b *Builder) GetGasUint64() (uint64, error) {
-	if b.Gas == nil {
+func (e *Envelope) GetGasUint64() (uint64, error) {
+	if e.Gas == nil {
 		return 0, errors.DataError("no gas is filled")
 	}
-	return *b.Gas, nil
+	return *e.Gas, nil
 }
-func (b *Builder) MustGetGasUint64() uint64 {
-	if b.Gas == nil {
+func (e *Envelope) MustGetGasUint64() uint64 {
+	if e.Gas == nil {
 		return 0
 	}
-	return *b.Gas
+	return *e.Gas
 }
-func (b *Builder) GetGasString() string {
-	if b.Gas == nil {
+func (e *Envelope) GetGasString() string {
+	if e.Gas == nil {
 		return ""
 	}
-	return strconv.FormatUint(*b.Gas, 10)
+	return strconv.FormatUint(*e.Gas, 10)
 }
-func (b *Builder) SetGasString(gas string) error {
+func (e *Envelope) SetGasString(gas string) error {
 	if gas != "" {
 		g, err := strconv.ParseUint(gas, 10, 32)
 		if err != nil {
 			return errors.DataError("invalid gasPrice - got %s", gas)
 		}
-		_ = b.SetGas(g)
+		_ = e.SetGas(g)
 	}
 	return nil
 }
-func (b *Builder) SetGas(gas uint64) *Builder {
-	b.Gas = &(&struct{ x uint64 }{gas}).x
-	return b
+func (e *Envelope) SetGas(gas uint64) *Envelope {
+	e.Gas = &(&struct{ x uint64 }{gas}).x
+	return e
 }
 
 // NONCE
 
-func (b *Builder) GetNonce() *uint64 {
-	return b.Nonce
+func (e *Envelope) GetNonce() *uint64 {
+	return e.Nonce
 }
-func (b *Builder) GetNonceUint64() (uint64, error) {
-	if b.Nonce == nil {
+func (e *Envelope) GetNonceUint64() (uint64, error) {
+	if e.Nonce == nil {
 		return 0, errors.DataError("no nonce is filled")
 	}
-	return *b.Nonce, nil
+	return *e.Nonce, nil
 }
-func (b *Builder) MustGetNonceUint64() uint64 {
-	if b.Nonce == nil {
+func (e *Envelope) MustGetNonceUint64() uint64 {
+	if e.Nonce == nil {
 		return 0
 	}
-	return *b.Nonce
+	return *e.Nonce
 }
-func (b *Builder) GetNonceString() string {
-	if b.Nonce == nil {
+func (e *Envelope) GetNonceString() string {
+	if e.Nonce == nil {
 		return ""
 	}
-	return strconv.FormatUint(*b.Nonce, 10)
+	return strconv.FormatUint(*e.Nonce, 10)
 }
-func (b *Builder) SetNonceString(nonce string) error {
+func (e *Envelope) SetNonceString(nonce string) error {
 	if nonce != "" {
 		g, err := strconv.ParseUint(nonce, 10, 32)
 		if err != nil {
 			return errors.DataError("invalid nonce - got %s", nonce)
 		}
-		_ = b.SetNonce(g)
+		_ = e.SetNonce(g)
 	}
 	return nil
 }
-func (b *Builder) SetNonce(nonce uint64) *Builder {
-	b.Nonce = &(&struct{ x uint64 }{nonce}).x
-	return b
+func (e *Envelope) SetNonce(nonce uint64) *Envelope {
+	e.Nonce = &(&struct{ x uint64 }{nonce}).x
+	return e
 }
 
 // GASPRICE
 
-func (b *Builder) GetGasPrice() *big.Int {
-	return b.GasPrice
+func (e *Envelope) GetGasPrice() *big.Int {
+	return e.GasPrice
 }
 
-func (b *Builder) GetGasPriceBig() (*big.Int, error) {
-	if b.GasPrice == nil {
+func (e *Envelope) GetGasPriceBig() (*big.Int, error) {
+	if e.GasPrice == nil {
 		return nil, errors.DataError("no gasPrice is filled")
 	}
-	return b.GasPrice, nil
+	return e.GasPrice, nil
 }
 
-func (b *Builder) GetGasPriceString() string {
-	if b.GasPrice == nil {
+func (e *Envelope) GetGasPriceString() string {
+	if e.GasPrice == nil {
 		return ""
 	}
-	return b.GasPrice.String()
+	return e.GasPrice.String()
 }
 
-func (b *Builder) SetGasPriceString(gasPrice string) error {
+func (e *Envelope) SetGasPriceString(gasPrice string) error {
 	if gasPrice != "" {
 		g, ok := new(big.Int).SetString(gasPrice, 10)
 		if !ok {
 			return errors.DataError("invalid gasPrice - got %s", gasPrice)
 		}
-		_ = b.SetGasPrice(g)
+		_ = e.SetGasPrice(g)
 	}
 	return nil
 }
 
-func (b *Builder) SetGasPrice(gasPrice *big.Int) *Builder {
-	b.GasPrice = gasPrice
-	return b
+func (e *Envelope) SetGasPrice(gasPrice *big.Int) *Envelope {
+	e.GasPrice = gasPrice
+	return e
 }
 
 // VALUE
 
-func (b *Builder) GetValue() *big.Int {
-	return b.Value
+func (e *Envelope) GetValue() *big.Int {
+	return e.Value
 }
-func (b *Builder) GetValueBig() (*big.Int, error) {
-	if b.Value == nil {
+func (e *Envelope) GetValueBig() (*big.Int, error) {
+	if e.Value == nil {
 		return nil, errors.DataError("no value is filled")
 	}
-	return b.Value, nil
+	return e.Value, nil
 }
 
-func (b *Builder) GetValueString() string {
-	if b.Value == nil {
+func (e *Envelope) GetValueString() string {
+	if e.Value == nil {
 		return ""
 	}
-	return b.Value.String()
+	return e.Value.String()
 }
 
-func (b *Builder) SetValueString(value string) error {
+func (e *Envelope) SetValueString(value string) error {
 	if value != "" {
 		v, ok := new(big.Int).SetString(value, 10)
 		if !ok {
 			return errors.DataError("invalid value - got %s", value)
 		}
-		_ = b.SetValue(v)
+		_ = e.SetValue(v)
 	}
 	return nil
 }
 
-func (b *Builder) SetValue(value *big.Int) *Builder {
-	b.Value = value
-	return b
+func (e *Envelope) SetValue(value *big.Int) *Envelope {
+	e.Value = value
+	return e
 }
 
 // DATA
 
-func (b *Builder) GetData() string {
-	return b.Data
+func (e *Envelope) GetData() string {
+	return e.Data
 }
 
-func (b *Builder) MustGetDataBytes() []byte {
-	if b.Data == "" {
+func (e *Envelope) MustGetDataBytes() []byte {
+	if e.Data == "" {
 		return []byte{}
 	}
-	data, _ := hexutil.Decode(b.Data)
+	data, _ := hexutil.Decode(e.Data)
 	return data
 }
 
-func (b *Builder) SetData(data []byte) *Builder {
-	b.Data = hexutil.Encode(data)
-	return b
+func (e *Envelope) SetData(data []byte) *Envelope {
+	e.Data = hexutil.Encode(data)
+	return e
 }
 
-func (b *Builder) SetDataString(data string) error {
+func (e *Envelope) SetDataString(data string) error {
 	_, err := hexutil.Decode(data)
 	if err != nil {
 		return errors.DataError("invalid data")
 	}
-	b.Data = data
+	e.Data = data
 	return nil
 }
 
-func (b *Builder) MustSetDataString(data string) *Builder {
-	b.Data = data
-	return b
+func (e *Envelope) MustSetDataString(data string) *Envelope {
+	e.Data = data
+	return e
 }
 
 // RAW
 
-func (b *Builder) GetShortRaw() string {
-	return utils.ShortString(b.Raw, 30)
+func (e *Envelope) GetShortRaw() string {
+	return utils.ShortString(e.Raw, 30)
 }
 
-func (b *Builder) GetRaw() string {
-	return b.Raw
+func (e *Envelope) GetRaw() string {
+	return e.Raw
 }
 
-func (b *Builder) SetRaw(raw []byte) *Builder {
-	b.Raw = hexutil.Encode(raw)
-	return b
+func (e *Envelope) MustGetRawBytes() []byte {
+	if e.Raw == "" {
+		return []byte{}
+	}
+	raw, _ := hexutil.Decode(e.Raw)
+	return raw
 }
 
-func (b *Builder) SetRawString(raw string) error {
+func (e *Envelope) SetRaw(raw []byte) *Envelope {
+	e.Raw = hexutil.Encode(raw)
+	return e
+}
+
+func (e *Envelope) SetRawString(raw string) error {
 	_, err := hexutil.Decode(raw)
 	if err != nil {
 		return errors.DataError("invalid raw")
 	}
-	b.Raw = raw
+	e.Raw = raw
 	return nil
 }
 
-func (b *Builder) MustSetRawString(raw string) *Builder {
-	b.Raw = raw
-	return b
+func (e *Envelope) MustSetRawString(raw string) *Envelope {
+	e.Raw = raw
+	return e
 }
 
 // TXHASH
 
-func (b *Builder) GetTxHash() *ethcommon.Hash {
-	return b.TxHash
+func (e *Envelope) GetTxHash() *ethcommon.Hash {
+	return e.TxHash
 }
 
-func (b *Builder) GetTxHashValue() (ethcommon.Hash, error) {
-	if b.TxHash == nil {
+func (e *Envelope) GetTxHashValue() (ethcommon.Hash, error) {
+	if e.TxHash == nil {
 		return ethcommon.Hash{}, errors.DataError("no tx hash is filled")
 	}
-	return *b.TxHash, nil
+	return *e.TxHash, nil
 }
 
-func (b *Builder) MustGetTxHashValue() ethcommon.Hash {
-	if b.TxHash == nil {
+func (e *Envelope) MustGetTxHashValue() ethcommon.Hash {
+	if e.TxHash == nil {
 		return ethcommon.Hash{}
 	}
-	return *b.TxHash
+	return *e.TxHash
 }
 
-func (b *Builder) GetTxHashString() string {
-	if b.TxHash == nil {
+func (e *Envelope) GetTxHashString() string {
+	if e.TxHash == nil {
 		return ""
 	}
-	return b.TxHash.Hex()
+	return e.TxHash.Hex()
 }
 
-func (b *Builder) SetTxHash(hash ethcommon.Hash) *Builder {
-	b.TxHash = &hash
-	return b
+func (e *Envelope) SetTxHash(hash ethcommon.Hash) *Envelope {
+	e.TxHash = &hash
+	return e
 }
 
-func (b *Builder) SetTxHashString(txHash string) error {
+func (e *Envelope) SetTxHashString(txHash string) error {
 	if txHash != "" {
 		h, err := hexutil.Decode(txHash)
 		if err != nil || len(h) != ethcommon.HashLength {
 			return errors.DataError("invalid txHash - got %s", txHash)
 		}
-		_ = b.SetTxHash(ethcommon.BytesToHash(h))
+		_ = e.SetTxHash(ethcommon.BytesToHash(h))
 	}
 	return nil
 }
 
-func (b *Builder) MustSetTxHashString(txHash string) *Builder {
-	_ = b.SetTxHash(ethcommon.HexToHash(txHash))
-	return b
+func (e *Envelope) MustSetTxHashString(txHash string) *Envelope {
+	_ = e.SetTxHash(ethcommon.HexToHash(txHash))
+	return e
 }
 
 type Chain struct {
@@ -583,54 +592,54 @@ type Chain struct {
 	ChainUUID string `validate:"omitempty,uuid4"`
 }
 
-func (b *Builder) GetChainID() *big.Int {
-	return b.ChainID
+func (e *Envelope) GetChainID() *big.Int {
+	return e.ChainID
 }
 
-func (b *Builder) GetChainIDString() string {
-	if b.ChainID == nil {
+func (e *Envelope) GetChainIDString() string {
+	if e.ChainID == nil {
 		return ""
 	}
-	return b.ChainID.String()
+	return e.ChainID.String()
 }
 
-func (b *Builder) SetChainID(chainID *big.Int) *Builder {
-	b.ChainID = chainID
-	return b
+func (e *Envelope) SetChainID(chainID *big.Int) *Envelope {
+	e.ChainID = chainID
+	return e
 }
 
-func (b *Builder) SetChainIDUint64(chainID uint64) *Builder {
-	b.ChainID = big.NewInt(int64(chainID))
-	return b
+func (e *Envelope) SetChainIDUint64(chainID uint64) *Envelope {
+	e.ChainID = big.NewInt(int64(chainID))
+	return e
 }
 
-func (b *Builder) SetChainIDString(chainID string) error {
+func (e *Envelope) SetChainIDString(chainID string) error {
 	if chainID != "" {
 		v, ok := new(big.Int).SetString(chainID, 10)
 		if !ok {
 			return errors.DataError("invalid chainID - got %s", chainID)
 		}
-		_ = b.SetChainID(v)
+		_ = e.SetChainID(v)
 	}
 	return nil
 }
 
-func (b *Builder) GetChainName() string {
-	return b.ChainName
+func (e *Envelope) GetChainName() string {
+	return e.ChainName
 }
 
-func (b *Builder) SetChainName(chainName string) *Builder {
-	b.ChainName = chainName
-	return b
+func (e *Envelope) SetChainName(chainName string) *Envelope {
+	e.ChainName = chainName
+	return e
 }
 
-func (b *Builder) GetChainUUID() string {
-	return b.ChainUUID
+func (e *Envelope) GetChainUUID() string {
+	return e.ChainUUID
 }
 
-func (b *Builder) SetChainUUID(chainUUID string) *Builder {
-	b.ChainUUID = chainUUID
-	return b
+func (e *Envelope) SetChainUUID(chainUUID string) *Envelope {
+	e.ChainUUID = chainUUID
+	return e
 }
 
 type Contract struct {
@@ -640,60 +649,60 @@ type Contract struct {
 	Args            []string
 }
 
-func (b *Builder) GetContractID() *abi.ContractId {
+func (e *Envelope) GetContractID() *abi.ContractId {
 	return &abi.ContractId{
-		Name: b.ContractName,
-		Tag:  b.ContractTag,
+		Name: e.ContractName,
+		Tag:  e.ContractTag,
 	}
 }
 
 // IsConstructor indicate whether the method refers to a deployment
-func (b *Builder) IsConstructor() bool {
-	return b.GetMethodName() == "constructor"
+func (e *Envelope) IsConstructor() bool {
+	return e.MustGetMethodName() == "constructor"
 }
 
 // Short returns a short string representation of contract information
-func (b *Builder) GetMethodName() string {
-	return strings.Split(b.MethodSignature, "(")[0]
+func (e *Envelope) MustGetMethodName() string {
+	return strings.Split(e.MethodSignature, "(")[0]
 }
 
-func (b *Builder) GetMethodSignature() string {
-	return b.MethodSignature
+func (e *Envelope) GetMethodSignature() string {
+	return e.MethodSignature
 }
 
-func (b *Builder) GetArgs() []string {
-	return b.Args
+func (e *Envelope) GetArgs() []string {
+	return e.Args
 }
 
-func (b *Builder) SetContractName(contractName string) *Builder {
-	b.ContractName = contractName
-	return b
+func (e *Envelope) SetContractName(contractName string) *Envelope {
+	e.ContractName = contractName
+	return e
 }
 
-func (b *Builder) SetMethodSignature(methodSignature string) *Builder {
-	b.MethodSignature = methodSignature
-	return b
+func (e *Envelope) SetMethodSignature(methodSignature string) *Envelope {
+	e.MethodSignature = methodSignature
+	return e
 }
-func (b *Builder) SetArgs(args []string) *Builder {
-	b.Args = args
-	return b
-}
-
-func (b *Builder) SetContractTag(contractTag string) *Builder {
-	b.ContractTag = contractTag
-	return b
+func (e *Envelope) SetArgs(args []string) *Envelope {
+	e.Args = args
+	return e
 }
 
-func (b *Builder) ShortContract() string {
-	if b.ContractName == "" {
+func (e *Envelope) SetContractTag(contractTag string) *Envelope {
+	e.ContractTag = contractTag
+	return e
+}
+
+func (e *Envelope) ShortContract() string {
+	if e.ContractName == "" {
 		return ""
 	}
 
-	if b.ContractTag == "" {
-		return b.ContractName
+	if e.ContractTag == "" {
+		return e.ContractName
 	}
 
-	return fmt.Sprintf("%v[%v]", b.ContractName, b.ContractTag)
+	return fmt.Sprintf("%v[%v]", e.ContractName, e.ContractTag)
 }
 
 type Private struct {
@@ -703,130 +712,136 @@ type Private struct {
 	PrivacyGroupID string
 }
 
-func (b *Builder) GetPrivateFor() []string {
-	return b.PrivateFor
+func (e *Envelope) GetPrivateFor() []string {
+	return e.PrivateFor
 }
-func (b *Builder) SetPrivateFor(privateFor []string) *Builder {
-	b.PrivateFor = privateFor
-	return b
-}
-
-func (b *Builder) SetPrivateFrom(privateFrom string) *Builder {
-	b.PrivateFrom = privateFrom
-	return b
-}
-func (b *Builder) GetPrivateFrom() string {
-	return b.PrivateFrom
+func (e *Envelope) SetPrivateFor(privateFor []string) *Envelope {
+	e.PrivateFor = privateFor
+	return e
 }
 
-func (b *Builder) TxRequest() *TxRequest {
+func (e *Envelope) SetPrivateFrom(privateFrom string) *Envelope {
+	e.PrivateFrom = privateFrom
+	return e
+}
+func (e *Envelope) GetPrivateFrom() string {
+	return e.PrivateFrom
+}
+
+func (e *Envelope) TxRequest() *TxRequest {
 	req := &TxRequest{
-		Id:      b.ID,
-		Headers: b.Headers,
-		Chain:   b.ChainName,
-		Method:  b.Method,
+		Id:      e.ID,
+		Headers: e.Headers,
+		Chain:   e.GetChainName(),
+		Method:  e.Method,
 		Params: &Params{
-			From:            b.GetFromString(),
-			To:              b.GetToString(),
-			Gas:             b.GetGasString(),
-			GasPrice:        b.GetGasPriceString(),
-			Value:           b.GetValueString(),
-			Nonce:           b.GetNonceString(),
-			Data:            b.Data,
-			Contract:        b.ShortContract(),
-			MethodSignature: b.MethodSignature,
-			Args:            b.Args,
-			Raw:             b.Raw,
-			PrivateFor:      b.PrivateFor,
-			PrivateFrom:     b.PrivateFrom,
-			PrivateTxType:   b.PrivateTxType,
-			PrivacyGroupId:  b.PrivacyGroupID,
+			From:            e.GetFromString(),
+			To:              e.GetToString(),
+			Gas:             e.GetGasString(),
+			GasPrice:        e.GetGasPriceString(),
+			Value:           e.GetValueString(),
+			Nonce:           e.GetNonceString(),
+			Data:            e.GetData(),
+			Contract:        e.ShortContract(),
+			MethodSignature: e.GetMethodSignature(),
+			Args:            e.GetArgs(),
+			Raw:             e.GetRaw(),
+			PrivateFor:      e.GetPrivateFor(),
+			PrivateFrom:     e.GetPrivateFrom(),
+			PrivateTxType:   e.PrivateTxType,
+			PrivacyGroupId:  e.PrivacyGroupID,
 		},
-		ContextLabels: b.ContextLabels,
+		ContextLabels: e.ContextLabels,
 	}
 
 	return req
 }
 
-func (b *Builder) fieldsToInternal() {
-	if b.GetChainID() != nil {
-		b.InternalLabels["chainID"] = b.GetChainIDString()
+func (e *Envelope) fieldsToInternal() {
+	if e.InternalLabels == nil {
+		e.InternalLabels = make(map[string]string)
 	}
-	if b.GetTxHash() != nil {
-		b.InternalLabels["txHash"] = b.GetTxHashString()
+
+	if e.GetChainID() != nil {
+		e.InternalLabels["chainID"] = e.GetChainIDString()
 	}
-	if b.GetChainUUID() != "" {
-		b.InternalLabels["chainUUID"] = b.GetChainUUID()
+	if e.GetTxHash() != nil {
+		e.InternalLabels["txHash"] = e.GetTxHashString()
+	}
+	if e.GetChainUUID() != "" {
+		e.InternalLabels["chainUUID"] = e.GetChainUUID()
 	}
 }
 
-func (b *Builder) internalToFields() error {
-	if err := b.SetTxHashString(b.InternalLabels["txHash"]); err != nil {
+func (e *Envelope) internalToFields() error {
+	hash, ok := e.InternalLabels["txHash"]
+	if err := e.SetTxHashString(hash); err != nil && ok {
 		return err
 	}
-	if err := b.SetChainIDString(b.InternalLabels["chainID"]); err != nil {
+	if err := e.SetChainIDString(e.InternalLabels["chainID"]); err != nil {
 		return err
 	}
-	_ = b.SetChainUUID(b.InternalLabels["chainUUID"])
+	_ = e.SetChainUUID(e.InternalLabels["chainUUID"])
 	return nil
 }
 
-func (b *Builder) TxEnvelopeAsRequest() *TxEnvelope {
-	b.fieldsToInternal()
+func (e *Envelope) TxEnvelopeAsRequest() *TxEnvelope {
+	e.fieldsToInternal()
 	return &TxEnvelope{
-		InternalLabels: b.InternalLabels,
-		Msg:            &TxEnvelope_TxRequest{b.TxRequest()},
+		InternalLabels: e.InternalLabels,
+		Msg:            &TxEnvelope_TxRequest{e.TxRequest()},
 	}
 }
 
-func (b *Builder) TxEnvelopeAsResponse() *TxEnvelope {
-	b.fieldsToInternal()
+func (e *Envelope) TxEnvelopeAsResponse() *TxEnvelope {
+	e.fieldsToInternal()
 	return &TxEnvelope{
-		InternalLabels: b.InternalLabels,
-		Msg:            &TxEnvelope_TxResponse{b.TxResponse()},
+		InternalLabels: e.InternalLabels,
+		Msg:            &TxEnvelope_TxResponse{e.TxResponse()},
 	}
 }
 
-func (b *Builder) TxResponse() *TxResponse {
+func (e *Envelope) TxResponse() *TxResponse {
 	res := &TxResponse{
-		Headers:       b.Headers,
-		Id:            b.ID,
-		ContextLabels: b.ContextLabels,
+		Headers:       e.Headers,
+		Id:            e.ID,
+		ContextLabels: e.ContextLabels,
 		Transaction: &ethereum.Transaction{
-			From:     b.GetFromString(),
-			Nonce:    b.GetNonceString(),
-			To:       b.GetToString(),
-			Value:    b.GetValueString(),
-			Gas:      b.GetGasString(),
-			GasPrice: b.GetGasPriceString(),
-			Data:     b.GetData(),
-			TxHash:   b.GetTxHashString(),
+			From:     e.GetFromString(),
+			Nonce:    e.GetNonceString(),
+			To:       e.GetToString(),
+			Value:    e.GetValueString(),
+			Gas:      e.GetGasString(),
+			GasPrice: e.GetGasPriceString(),
+			Data:     e.GetData(),
+			Raw:      e.GetRaw(),
+			TxHash:   e.GetTxHashString(),
 		},
-		Receipt: b.Receipt,
-		Errors:  b.Errors,
+		Receipt: e.Receipt,
+		Errors:  e.Errors,
 	}
 
 	return res
 }
 
-func (b *Builder) loadPtrFields(gas, nonce, gasPrice, value, from, to string) []*error1.Error {
+func (e *Envelope) loadPtrFields(gas, nonce, gasPrice, value, from, to string) []*error1.Error {
 	errs := make([]*error1.Error, 0)
-	if err := b.SetGasString(gas); err != nil {
+	if err := e.SetGasString(gas); err != nil {
 		errs = append(errs, errors.FromError(err))
 	}
-	if err := b.SetNonceString(nonce); err != nil {
+	if err := e.SetNonceString(nonce); err != nil {
 		errs = append(errs, errors.FromError(err))
 	}
-	if err := b.SetGasPriceString(gasPrice); err != nil {
+	if err := e.SetGasPriceString(gasPrice); err != nil {
 		errs = append(errs, errors.FromError(err))
 	}
-	if err := b.SetValueString(value); err != nil {
+	if err := e.SetValueString(value); err != nil {
 		errs = append(errs, errors.FromError(err))
 	}
-	if err := b.SetFromString(from); err != nil {
+	if err := e.SetFromString(from); err != nil {
 		errs = append(errs, errors.FromError(err))
 	}
-	if err := b.SetToString(to); err != nil {
+	if err := e.SetToString(to); err != nil {
 		errs = append(errs, errors.FromError(err))
 	}
 

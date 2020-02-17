@@ -37,7 +37,7 @@ func NewFaucet(p sarama.SyncProducer) *Faucet {
 
 func (f *Faucet) prepareMsg(ctx context.Context, r *types.Request, msg *sarama.ProducerMessage) error {
 	// Create Trace for Crediting message
-	b := tx.NewBuilder().
+	b := tx.NewEnvelope().
 		SetID(uuid.NewV4().String()).
 		SetChainName(r.ChainName).
 		SetFrom(r.Creditor).

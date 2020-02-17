@@ -19,7 +19,7 @@ import (
 
 func controlRecoveryCount(txctx *engine.TxContext, conf *Configuration) error {
 	var count int
-	if v := txctx.Builder.GetInternalLabelsValue("nonce.recovering.count"); v != "" {
+	if v := txctx.Envelope.GetInternalLabelsValue("nonce.recovering.count"); v != "" {
 		i, err := strconv.Atoi(v)
 		if err != nil {
 			return err
@@ -33,7 +33,7 @@ func controlRecoveryCount(txctx *engine.TxContext, conf *Configuration) error {
 	}
 
 	// Incremenent recovery count on envelope
-	_ = txctx.Builder.SetInternalLabelsValue("nonce.recovering.count", fmt.Sprintf("%v", count+1))
+	_ = txctx.Envelope.SetInternalLabelsValue("nonce.recovering.count", fmt.Sprintf("%v", count+1))
 	return nil
 }
 
@@ -41,16 +41,16 @@ func controlRecoveryCount(txctx *engine.TxContext, conf *Configuration) error {
 // It makes sure that transactions with invalid nonce are not processed
 func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader, tracker *RecoveryTracker) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		if mode := txctx.Builder.GetInternalLabelsValue("tx.mode"); mode == "raw" {
+		if mode := txctx.Envelope.GetInternalLabelsValue("tx.mode"); mode == "raw" {
 			// If transaction has been generated externally we skip nonce check
 			txctx.Logger.WithFields(log.Fields{
-				"id": txctx.Builder.GetID(),
+				"id": txctx.Envelope.GetID(),
 			}).Debugf("nonce: skip check for raw transaction")
 			return
 		}
 
 		// Retrieve chainID and sender address
-		sender, err := txctx.Builder.GetFromAddress()
+		sender, err := txctx.Envelope.GetFromAddress()
 		if err != nil {
 			_ = txctx.AbortWithError(err).ExtendComponent(component)
 			return
@@ -58,8 +58,8 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"from":    sender.Hex(),
-			"chainID": txctx.Builder.GetChainIDString(),
-			"id":      txctx.Builder.GetID(),
+			"chainID": txctx.Envelope.GetChainIDString(),
+			"id":      txctx.Envelope.GetID(),
 		})
 
 		// Retrieves nonce key for nonce manager processing
@@ -97,7 +97,7 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 			expectedNonce = pendingNonce
 		}
 
-		n := *txctx.Builder.Nonce
+		n := *txctx.Envelope.Nonce
 		if n != expectedNonce {
 			// Attributes nonce is invalid
 			txctx.Logger.WithFields(log.Fields{
@@ -106,7 +106,7 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 			}).Warnf("nonce: invalid nonce")
 
 			// Reset tx nonce, hash and raw
-			resetTx(txctx.Builder)
+			resetTx(txctx.Envelope)
 
 			// Control recovery count
 			err := controlRecoveryCount(txctx, conf)
@@ -118,13 +118,13 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 
 			if n > expectedNonce {
 				// Nonce is too-high
-				if nonceRecoveringExpected := txctx.Builder.GetInternalLabelsValue("nonce.recovering.expected"); nonceRecoveringExpected != "" || tracker.Recovering(nonceKey) == 0 {
-					// Builder has already been recovered or it is the first one to be recovered
-					_ = txctx.Builder.SetInternalLabelsValue("nonce.recovering.expected", strconv.FormatUint(expectedNonce, 10))
+				if nonceRecoveringExpected := txctx.Envelope.GetInternalLabelsValue("nonce.recovering.expected"); nonceRecoveringExpected != "" || tracker.Recovering(nonceKey) == 0 {
+					// Envelope has already been recovered or it is the first one to be recovered
+					_ = txctx.Envelope.SetInternalLabelsValue("nonce.recovering.expected", strconv.FormatUint(expectedNonce, 10))
 				}
 			} else {
 				// If nonce is to low we remove any recovery signal in metadata (possibly coming from a prior execution)
-				delete(txctx.Builder.InternalLabels, "nonce.recovering.expected")
+				delete(txctx.Envelope.InternalLabels, "nonce.recovering.expected")
 			}
 
 			// We set a context value to indicate to other handlers that
@@ -138,14 +138,14 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 		}
 
 		// If nonce was valid we remove recovery signal in metadata (possibly coming from a prior execution)
-		delete(txctx.Builder.InternalLabels, "nonce.recovering.expected")
-		delete(txctx.Builder.InternalLabels, "nonce.recovering.count")
+		delete(txctx.Envelope.InternalLabels, "nonce.recovering.expected")
+		delete(txctx.Envelope.InternalLabels, "nonce.recovering.count")
 
 		// Execute pending handlers
 		txctx.Next()
 
 		// If pending handlers executed correctly we increment nonce
-		if len(txctx.Builder.GetErrors()) == 0 {
+		if len(txctx.Envelope.GetErrors()) == 0 {
 			// Possibly re-initiliaze recovery counter
 			tracker.Recovered(nonceKey)
 
@@ -166,7 +166,7 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 		}
 
 		var errs []*ierror.Error
-		for _, err := range txctx.Builder.GetErrors() {
+		for _, err := range txctx.Envelope.GetErrors() {
 			// TODO: update EthClient to process and standardize nonce too low errors
 			if !strings.Contains(err.String(), "nonce too low") {
 				errs = append(errs, err)
@@ -205,15 +205,15 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 			}
 
 			// Reset tx nonce, hash and raw
-			resetTx(txctx.Builder)
+			resetTx(txctx.Envelope)
 
 			// We set a context value to indicate to other handlers that
 			// an invalid nonce has been processed
 			txctx.Set("invalid.nonce", true)
 		}
 
-		// Update Builder errors with Nonce too Low error removed
-		txctx.Builder.Errors = errs
+		// Update Envelope errors with Nonce too Low error removed
+		txctx.Envelope.Errors = errs
 	}
 }
 
@@ -234,11 +234,11 @@ func RecoveryStatusSetter(nm nonce.Sender, tracker *RecoveryTracker) engine.Hand
 		nonceKey := string(txctx.In.Key())
 
 		// If are recovering we increment count
-		if nonceRecoveringExpected := txctx.Builder.GetInternalLabelsValue("nonce.recovering.expected"); nonceRecoveringExpected != "" {
+		if nonceRecoveringExpected := txctx.Envelope.GetInternalLabelsValue("nonce.recovering.expected"); nonceRecoveringExpected != "" {
 			tracker.Recover(nonceKey)
 		}
 
-		if b, ok := txctx.Get("invalid.nonce").(bool); len(txctx.Builder.GetErrors()) == 0 && (!ok || !b) {
+		if b, ok := txctx.Get("invalid.nonce").(bool); len(txctx.Envelope.GetErrors()) == 0 && (!ok || !b) {
 			// Transaction has been processed properly
 			// Deactivate recovery if activated
 			tracker.Recovered(nonceKey)
@@ -246,7 +246,7 @@ func RecoveryStatusSetter(nm nonce.Sender, tracker *RecoveryTracker) engine.Hand
 	}
 }
 
-func resetTx(req *tx.Builder) {
+func resetTx(req *tx.Envelope) {
 	req.Nonce = nil
 	req.TxHash = nil
 	req.Raw = ""

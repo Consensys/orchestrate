@@ -14,7 +14,7 @@ var (
 )
 
 // TxSpanFromBroker create a new span with the given operation name and options. If a span
-// is found in the Builder and in the go Context, it will be used as the parent of the resulting span.
+// is found in the Envelope and in the go Context, it will be used as the parent of the resulting span.
 func TxSpanFromBroker(tracer *opentracing.Tracer, defaultOperationName string) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		// If there is a span in the context, finish it

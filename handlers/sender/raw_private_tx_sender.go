@@ -16,7 +16,7 @@ func RawPrivateTxSender(ec ethclient.TransactionSender) engine.HandlerFunc {
 			return
 		}
 
-		if txctx.Builder.Raw == "" {
+		if txctx.Envelope.Raw == "" {
 			err := errors.DataError("no raw filled")
 			_ = txctx.AbortWithError(err).ExtendComponent(component)
 			return
@@ -25,8 +25,8 @@ func RawPrivateTxSender(ec ethclient.TransactionSender) engine.HandlerFunc {
 		txHash, err := ec.SendRawPrivateTransaction(
 			txctx.Context(),
 			url,
-			txctx.Builder.Raw,
-			types.Call2PrivateArgs(txctx.Builder),
+			txctx.Envelope.Raw,
+			types.Call2PrivateArgs(txctx.Envelope),
 		)
 		if err != nil {
 			e := txctx.AbortWithError(err).ExtendComponent(component)
@@ -34,7 +34,7 @@ func RawPrivateTxSender(ec ethclient.TransactionSender) engine.HandlerFunc {
 			return
 		}
 
-		// Transaction has been properly sent so we set tx hash on Builder
-		_ = txctx.Builder.SetTxHash(txHash)
+		// Transaction has been properly sent so we set tx hash on Envelope
+		_ = txctx.Envelope.SetTxHash(txHash)
 	}
 }

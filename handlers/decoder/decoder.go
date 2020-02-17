@@ -20,13 +20,13 @@ import (
 func Decoder(r svc.ContractRegistryClient) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"chainID": txctx.Builder.GetChainIDString(),
-			"tx.hash": txctx.Builder.Receipt.GetTxHash(),
-			"id":      txctx.Builder.GetID(),
+			"chainID": txctx.Envelope.GetChainIDString(),
+			"tx.hash": txctx.Envelope.Receipt.GetTxHash(),
+			"id":      txctx.Envelope.GetID(),
 		})
 
 		// For each log in receipt
-		for _, l := range txctx.Builder.Receipt.GetLogs() {
+		for _, l := range txctx.Envelope.Receipt.GetLogs() {
 			if len(l.GetTopics()) == 0 {
 				// This scenario is not supposed to happen
 				err := errors.InternalError("invalid receipt (no topics in log)").ExtendComponent(component)
@@ -41,7 +41,7 @@ func Decoder(r svc.ContractRegistryClient) engine.HandlerFunc {
 				&svc.GetEventsBySigHashRequest{
 					SigHash: l.Topics[0],
 					AccountInstance: &common.AccountInstance{
-						ChainId: txctx.Builder.GetChainIDString(),
+						ChainId: txctx.Envelope.GetChainIDString(),
 						Account: l.GetAddress(),
 					},
 					IndexedInputCount: uint32(len(l.Topics) - 1),

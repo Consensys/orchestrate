@@ -22,7 +22,7 @@ type EnvelopeModel struct {
 	// UUID technical identifier
 	ID int32
 
-	// Builder Identifier
+	// Envelope Identifier
 	EnvelopeID string
 
 	// Tenant Identifier
@@ -32,7 +32,7 @@ type EnvelopeModel struct {
 	ChainID string
 	TxHash  string
 
-	// Builder
+	// Envelope
 	Envelope []byte
 
 	// Status

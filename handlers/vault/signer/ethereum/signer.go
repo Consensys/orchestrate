@@ -21,7 +21,7 @@ func Signer(k keystore.KeyStore) engine.HandlerFunc {
 
 func signTx(s keystore.KeyStore, txctx *engine.TxContext, sender common.Address, t *ethtypes.Transaction) ([]byte, *common.Hash, error) {
 	txctx.Logger.Tracef("Start signTx from ethereum")
-	b, hash, err := s.SignTx(txctx.Context(), txctx.Builder.ChainID, sender, t)
+	b, hash, err := s.SignTx(txctx.Context(), txctx.Envelope.ChainID, sender, t)
 	if err != nil {
 		return b, hash, errors.FromError(err).ExtendComponent(component)
 	}

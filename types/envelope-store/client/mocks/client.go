@@ -28,7 +28,7 @@ func (client *EnvelopeStoreClient) LoadByID(ctx context.Context, in *evlpstore.L
 	return client.srv.LoadByID(ctx, in)
 }
 
-// Load Builder by transaction hash
+// Load Envelope by transaction hash
 func (client *EnvelopeStoreClient) LoadByTxHash(ctx context.Context, in *evlpstore.LoadByTxHashRequest, opts ...grpc.CallOption) (*evlpstore.StoreResponse, error) {
 	return client.srv.LoadByTxHash(ctx, in)
 }

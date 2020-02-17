@@ -59,7 +59,7 @@ func SpanFromContext(txctx *engine.TxContext) *Span {
 func (t *Tracer) SpanCtxFromCarrier(txctx *engine.TxContext) (opentracing.SpanContext, error) {
 	return t.Internal.Extract(
 		opentracing.TextMap,
-		txctx.Builder.Carrier())
+		txctx.Envelope.Carrier())
 }
 
 // InjectInCarrier a span context in the txctx carrier
@@ -67,7 +67,7 @@ func (t *Tracer) InjectInCarrier(spanCtx opentracing.SpanContext, txctx *engine.
 	return t.Internal.Inject(
 		spanCtx,
 		opentracing.TextMap,
-		txctx.Builder.Carrier(),
+		txctx.Envelope.Carrier(),
 	)
 }
 

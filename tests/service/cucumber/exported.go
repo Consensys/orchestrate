@@ -44,7 +44,7 @@ func Init(ctx context.Context) {
 			StopOnFailure:       viper.GetBool(StopOnFailureViperKey),
 			Strict:              viper.GetBool(StrictViperKey),
 			NoColors:            viper.GetBool(NoColorsViperKey),
-			Tags:                viper.GetString(TagsViperKey),
+			Tags:                tags,
 			Format:              viper.GetString(FormatViperKey),
 			Concurrency:         viper.GetInt(ConcurrencyViperKey),
 			Paths:               viper.GetStringSlice(PathsViperKey),

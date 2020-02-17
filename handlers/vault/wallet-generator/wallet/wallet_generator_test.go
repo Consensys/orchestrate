@@ -19,10 +19,10 @@ func makeGeneratorContext(i int) *engine.TxContext {
 	txctx.Logger = log.NewEntry(log.StandardLogger())
 	switch i % 2 {
 	case 0:
-		_ = txctx.Builder.SetChainIDUint64(0)
+		_ = txctx.Envelope.SetChainIDUint64(0)
 		txctx.Set("errors", 0)
 	case 1:
-		_ = txctx.Builder.SetChainIDUint64(10)
+		_ = txctx.Envelope.SetChainIDUint64(10)
 		txctx.Set("errors", 0)
 	}
 	return txctx
@@ -51,8 +51,8 @@ func (s *GeneratorSuite) TestGenerator() {
 	for _, txctx := range txctxs {
 		// Handle contexts
 
-		assert.Len(s.T(), txctx.Builder.Errors, txctx.Get("errors").(int), "Expected right count of errors")
-		assert.NotEqual(s.T(), txctx.Builder.MustGetFromAddress(), ethcommon.Address{}, "Expected new address to be set")
+		assert.Len(s.T(), txctx.Envelope.Errors, txctx.Get("errors").(int), "Expected right count of errors")
+		assert.NotEqual(s.T(), txctx.Envelope.MustGetFromAddress(), ethcommon.Address{}, "Expected new address to be set")
 	}
 }
 

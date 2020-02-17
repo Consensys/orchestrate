@@ -15,7 +15,7 @@ func RawTxSender(ec ethclient.TransactionSender) engine.HandlerFunc {
 			return
 		}
 
-		if txctx.Builder.Raw == "" {
+		if txctx.Envelope.Raw == "" {
 			err := errors.DataError("no raw filled")
 			_ = txctx.AbortWithError(err).ExtendComponent(component)
 			return
@@ -24,7 +24,7 @@ func RawTxSender(ec ethclient.TransactionSender) engine.HandlerFunc {
 		err = ec.SendRawTransaction(
 			txctx.Context(),
 			url,
-			txctx.Builder.Raw,
+			txctx.Envelope.Raw,
 		)
 		if err != nil {
 			e := txctx.AbortWithError(err).ExtendComponent(component)

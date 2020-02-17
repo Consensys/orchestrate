@@ -16,7 +16,7 @@ func TesseraRawPrivateTxSender(ec ethclient.TransactionSender) engine.HandlerFun
 			return
 		}
 
-		if txctx.Builder.Raw == "" || len(txctx.Builder.PrivateFor) == 0 {
+		if txctx.Envelope.Raw == "" || len(txctx.Envelope.PrivateFor) == 0 {
 			err := errors.DataError("no raw or privateFor filled")
 			_ = txctx.AbortWithError(err).ExtendComponent(component)
 			return
@@ -25,8 +25,8 @@ func TesseraRawPrivateTxSender(ec ethclient.TransactionSender) engine.HandlerFun
 		_, err = ec.SendQuorumRawPrivateTransaction(
 			txctx.Context(),
 			url,
-			txctx.Builder.Raw,
-			types.Call2PrivateArgs(txctx.Builder).PrivateFor,
+			txctx.Envelope.Raw,
+			types.Call2PrivateArgs(txctx.Envelope).PrivateFor,
 		)
 		if err != nil {
 			e := txctx.AbortWithError(err).ExtendComponent(component)

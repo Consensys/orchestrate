@@ -21,7 +21,7 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		// Initialize Key Builder
+		// Initialize Key Envelope
 		multitenancy.Init(ctx)
 
 		// Set store

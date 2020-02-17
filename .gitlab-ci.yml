@@ -64,8 +64,9 @@ test:
   <<: *go-setup
   coverage: /^total:.*\s(\d+.\d+)%/
   services:
-    - postgres:11.6-alpine
+    - postgres:10.12-alpine
   variables:
+    POSTGRES_PASSWORD: "postgres"
     DB_HOST: "postgres"
   script:
       - make run-coverage

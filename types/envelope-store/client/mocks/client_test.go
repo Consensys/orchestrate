@@ -22,7 +22,7 @@ func TestEnvelopeStoreClient(t *testing.T) {
 	_, err := client.Store(
 		context.Background(),
 		&evlpstore.StoreRequest{
-			Envelope: tx.NewBuilder().
+			Envelope: tx.NewEnvelope().
 				SetChainIDUint64(888).
 				SetID("a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11").
 				MustSetTxHashString("0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210").

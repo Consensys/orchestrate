@@ -77,7 +77,7 @@ func makeSenderContext(i int) *engine.TxContext {
 	case 0:
 		// Valid send base transaction
 		txctx.WithContext(proxy.With(txctx.Context(), endpointNoError))
-		_ = txctx.Builder.
+		_ = txctx.Envelope.
 			SetID(RandString(10)).
 			SetTxHash(ethcommon.HexToHash(txHash)).
 			SetRawString(txRaw)
@@ -85,7 +85,7 @@ func makeSenderContext(i int) *engine.TxContext {
 	case 1:
 		// Invalid send base transaction
 		txctx.WithContext(proxy.With(txctx.Context(), endpointError))
-		_ = txctx.Builder.
+		_ = txctx.Envelope.
 			SetID(RandString(10)).
 			SetTxHash(ethcommon.HexToHash(txHash)).
 			SetRawString(txRaw)
@@ -94,42 +94,42 @@ func makeSenderContext(i int) *engine.TxContext {
 	case 2:
 		//
 		txctx.WithContext(proxy.With(txctx.Context(), endpointNoError))
-		_ = txctx.Builder.SetID(RandString(10)).SetRawString(txRaw)
+		_ = txctx.Envelope.SetID(RandString(10)).SetRawString(txRaw)
 		txctx.Set("status", "PENDING")
 	case 3:
 		// Cannot send a public transaction
 		txctx.WithContext(proxy.With(txctx.Context(), endpointError))
-		_ = txctx.Builder.SetID(RandString(10))
+		_ = txctx.Envelope.SetID(RandString(10))
 		txctx.Set("error", "no raw filled")
 		txctx.Set("status", "")
 	case 4:
 		// Cannot send a Besu Orion transaction
 		txctx.WithContext(proxy.With(txctx.Context(), endpointError))
-		_ = txctx.Builder.SetID(RandString(10)).SetMethod(tx.Method_EEA_SENDPRIVATETRANSACTION).SetRawString(txRaw)
+		_ = txctx.Envelope.SetID(RandString(10)).SetMethod(tx.Method_EEA_SENDPRIVATETRANSACTION).SetRawString(txRaw)
 		txctx.Set("error", "mock: failed to send a raw private transaction")
 		txctx.Set("status", "")
 	case 5:
 		// Cannot send a Quorum Tessera transaction
 		txctx.WithContext(proxy.With(txctx.Context(), endpointError))
-		_ = txctx.Builder.SetID(RandString(10)).SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION).MustSetFromString("0x1").SetPrivateFor([]string{"test"}).SetRawString(txRaw)
+		_ = txctx.Envelope.SetID(RandString(10)).SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION).MustSetFromString("0x1").SetPrivateFor([]string{"test"}).SetRawString(txRaw)
 		txctx.Set("error", "mock: failed to send a raw Tessera transaction")
 		txctx.Set("status", "ERROR")
 	case 6:
 		// Cannot send a Quorum Constellation transaction
 		txctx.WithContext(proxy.With(txctx.Context(), endpointError))
-		_ = txctx.Builder.SetID(RandString(10)).SetMethod(tx.Method_ETH_SENDPRIVATETRANSACTION).MustSetFromString("0x1").SetRawString(txRaw)
+		_ = txctx.Envelope.SetID(RandString(10)).SetMethod(tx.Method_ETH_SENDPRIVATETRANSACTION).MustSetFromString("0x1").SetRawString(txRaw)
 		txctx.Set("error", "mock: failed to send an unsigned transaction")
 		txctx.Set("status", "")
 	case 7:
 		// 	// Cannot send a transaction with unknown protocol type
 		txctx.WithContext(proxy.With(txctx.Context(), endpointError))
-		_ = txctx.Builder.SetID(RandString(10)).SetMethod(123).MustSetFromString("0x1").SetRawString(txRaw)
+		_ = txctx.Envelope.SetID(RandString(10)).SetMethod(123).MustSetFromString("0x1").SetRawString(txRaw)
 		txctx.Set("error", "invalid private protocol \"123\"")
 		txctx.Set("status", "")
 	case 8:
 		// Cannot send a signed private transaction with Constellation protocol
 		txctx.WithContext(proxy.With(txctx.Context(), endpointError))
-		_ = txctx.Builder.
+		_ = txctx.Envelope.
 			SetID(RandString(10)).
 			SetMethod(tx.Method_ETH_SENDPRIVATETRANSACTION).
 			SetTxHash(ethcommon.HexToHash(txHash)).
@@ -167,16 +167,16 @@ func TestSender(t *testing.T) {
 		resp, _ := client.LoadByID(
 			context.Background(),
 			&evlpstore.LoadByIDRequest{
-				Id: out.Builder.GetID(),
+				Id: out.Envelope.GetID(),
 			},
 		)
 
 		expectedError := out.Get("error")
 		if expectedError != nil {
-			assert.Equal(t, expectedError.(string), out.Builder.Errors[0].Message, "")
+			assert.Equal(t, expectedError.(string), out.Envelope.Errors[0].Message, "")
 		} else {
 			assert.Equal(t, out.Get("status").(string), resp.GetStatusInfo().GetStatus().String(), "Incorrect envelope status")
-			assert.Len(t, out.Builder.Errors, 0, "")
+			assert.Len(t, out.Envelope.Errors, 0, "")
 		}
 	}
 }

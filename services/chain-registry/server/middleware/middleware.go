@@ -11,7 +11,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/server/utils"
 )
 
-// Builder the middleware builder
+// Envelope the middleware builder
 type Builder struct {
 	builder *middleware.Builder
 
@@ -22,7 +22,7 @@ type serviceBuilder interface {
 	BuildHTTP(ctx context.Context, serviceName string, responseModifier func(*http.Response) error) (http.Handler, error)
 }
 
-// NewBuilder creates a new Builder
+// NewBuilder creates a new Envelope
 func NewBuilder(
 	configs map[string]*runtime.MiddlewareInfo,
 	serviceBuilder serviceBuilder,

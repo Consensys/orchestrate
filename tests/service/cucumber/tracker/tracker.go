@@ -9,24 +9,24 @@ import (
 
 type Tracker struct {
 	// Output envelopes
-	output map[string]chan *tx.Builder
+	output map[string]chan *tx.Envelope
 
-	// Builder that can be diagnosed (last one retrieved from an out channel)
-	Current *tx.Builder
+	// Envelope that can be diagnosed (last one retrieved from an out channel)
+	Current *tx.Envelope
 }
 
 func NewTracker() *Tracker {
 	t := &Tracker{
-		output: make(map[string]chan *tx.Builder),
+		output: make(map[string]chan *tx.Envelope),
 	}
 	return t
 }
 
-func (t *Tracker) AddOutput(key string, ch chan *tx.Builder) {
+func (t *Tracker) AddOutput(key string, ch chan *tx.Envelope) {
 	t.output[key] = ch
 }
 
-func (t *Tracker) get(key string, timeout time.Duration) (*tx.Builder, error) {
+func (t *Tracker) get(key string, timeout time.Duration) (*tx.Envelope, error) {
 	ch, ok := t.output[key]
 	if !ok {
 		return nil, fmt.Errorf("output %q not tracked", key)

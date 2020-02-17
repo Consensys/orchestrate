@@ -15,26 +15,26 @@ import (
 func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 	var p proto.Message
 
-	// Marshal Builder into sarama Message
+	// Marshal Envelope into sarama Message
 	switch txctx.In.Entrypoint() {
 	case viper.GetString(broker.TxSignerViperKey):
 		switch {
-		case !txctx.Builder.OnlyWarnings():
+		case !txctx.Envelope.OnlyWarnings():
 			msg.Topic = viper.GetString(broker.TxRecoverViperKey)
-			p = txctx.Builder.TxResponse()
+			p = txctx.Envelope.TxResponse()
 		default:
 			msg.Topic = viper.GetString(broker.TxSenderViperKey)
-			p = txctx.Builder.TxEnvelopeAsRequest()
+			p = txctx.Envelope.TxEnvelopeAsRequest()
 		}
 
 		// Set key for Kafka partitions
-		msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(txctx.Builder.ChainID, txctx.Builder.MustGetFromAddress()))
+		msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(txctx.Envelope.ChainID, txctx.Envelope.MustGetFromAddress()))
 	case viper.GetString(broker.WalletGeneratorViperKey):
 		msg.Topic = viper.GetString(broker.WalletGeneratedViperKey)
-		p = txctx.Builder.TxResponse()
+		p = txctx.Envelope.TxResponse()
 
 		// Set key for Kafka partitions
-		msg.Key = sarama.StringEncoder(txctx.Builder.GetFromString())
+		msg.Key = sarama.StringEncoder(txctx.Envelope.GetFromString())
 	}
 
 	err := encoding.Marshal(p, msg)

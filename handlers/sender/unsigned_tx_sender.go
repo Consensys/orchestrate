@@ -15,7 +15,7 @@ func UnsignedTxSender(ec ethclient.TransactionSender) engine.HandlerFunc {
 			return
 		}
 
-		txArgs, err := types.Envelope2SendTxArgs(txctx.Builder)
+		txArgs, err := types.Envelope2SendTxArgs(txctx.Envelope)
 		if err != nil {
 			_ = txctx.AbortWithError(err).ExtendComponent(component)
 			return
@@ -31,7 +31,7 @@ func UnsignedTxSender(ec ethclient.TransactionSender) engine.HandlerFunc {
 			return
 		}
 
-		// Transaction has been properly sent so we set tx hash on Builder
-		_ = txctx.Builder.SetTxHash(txHash)
+		// Transaction has been properly sent so we set tx hash on Envelope
+		_ = txctx.Envelope.SetTxHash(txHash)
 	}
 }

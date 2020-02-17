@@ -16,7 +16,7 @@ import (
 // of crash. As transaction orchestration system is configured to consume Kafka messages at least once).
 //
 // Warning: above guarantee require embedded handler to
-// 1. Store envelope on Builder store
+// 1. Store envelope on Envelope store
 // 2. Send transaction to blockchain
 // 3. Set envelope status
 func TxAlreadySent(ec ethclient.ChainLedgerReader, s evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
@@ -27,7 +27,7 @@ func TxAlreadySent(ec ethclient.ChainLedgerReader, s evlpstore.EnvelopeStoreClie
 		resp, err := s.LoadByID(
 			txctx.Context(),
 			&evlpstore.LoadByIDRequest{
-				Id: txctx.Builder.GetID(),
+				Id: txctx.Envelope.GetID(),
 			},
 		)
 		if err != nil && !errors.IsNotFoundError(err) {

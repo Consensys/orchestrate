@@ -16,7 +16,7 @@ import (
 func ChainInjector(r registry.Client, chainRegistryURL string) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		// Check if chain exist
-		if txctx.Builder.GetChainName() == "" {
+		if txctx.Envelope.GetChainName() == "" {
 			_ = txctx.AbortWithError(errors.DataError("no chainName found")).ExtendComponent(component)
 			return
 		}
@@ -28,19 +28,19 @@ func ChainInjector(r registry.Client, chainRegistryURL string) engine.HandlerFun
 			return
 		}
 
-		if txctx.Builder.GetChainUUID() == "" {
-			chain, err := r.GetChainByTenantAndName(txctx.Context(), tenantID, txctx.Builder.GetChainName())
+		if txctx.Envelope.GetChainUUID() == "" {
+			chain, err := r.GetChainByTenantAndName(txctx.Context(), tenantID, txctx.Envelope.GetChainName())
 			if err != nil {
 				_ = txctx.AbortWithError(errors.FromError(err)).ExtendComponent(component)
 				return
 			}
 
 			// Inject chain UUID from chain registry
-			_ = txctx.Builder.SetChainUUID(chain.UUID)
+			_ = txctx.Envelope.SetChainUUID(chain.UUID)
 		}
 
 		// Inject chain proxy path as /tenantID/chainName
-		proxyURL := fmt.Sprintf("%s/%s", chainRegistryURL, proxy.PathByChainName(tenantID, txctx.Builder.GetChainName()))
+		proxyURL := fmt.Sprintf("%s/%s", chainRegistryURL, proxy.PathByChainName(tenantID, txctx.Envelope.GetChainName()))
 		txctx.WithContext(proxy.With(txctx.Context(), proxyURL))
 	}
 }
@@ -48,7 +48,7 @@ func ChainInjector(r registry.Client, chainRegistryURL string) engine.HandlerFun
 // ChainIDInjector enrich the envelope with the chain UUID retrieved from the chain proxy
 func ChainIDInjector(ec ethclient.ChainSyncReader) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		if txctx.Builder.GetChainID() != nil {
+		if txctx.Envelope.GetChainID() != nil {
 			return
 		}
 
@@ -59,7 +59,7 @@ func ChainIDInjector(ec ethclient.ChainSyncReader) engine.HandlerFunc {
 			txctx.Logger.WithError(e).Errorf("injector: could not retrieve chain id from %s", chainProxyURL)
 			return
 		}
-		_ = txctx.Builder.SetChainID(chainID)
+		_ = txctx.Envelope.SetChainID(chainID)
 		txctx.Logger.Debugf("injector: chain id %s injected", chainID.String())
 	}
 }

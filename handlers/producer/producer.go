@@ -6,7 +6,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 )
 
-// PrepareMsg function should prepare a sarama.ProducerMessage from a Builder
+// PrepareMsg function should prepare a sarama.ProducerMessage from a Envelope
 type PrepareMsg func(*engine.TxContext, *sarama.ProducerMessage) error
 
 // Producer creates a producer handler

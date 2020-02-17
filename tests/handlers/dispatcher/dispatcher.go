@@ -17,13 +17,13 @@ func Dispatcher(reg *chanregistry.ChanRegistry, keyOfs ...KeyOfFunc) engine.Hand
 		}
 
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"scenario.id": txctx.Builder.GetContextLabelsValue("scenario.id"),
-			"id":          txctx.Builder.GetID(),
+			"scenario.id": txctx.Envelope.GetContextLabelsValue("scenario.id"),
+			"id":          txctx.Envelope.GetID(),
 			"msg.topic":   txctx.In.Entrypoint(),
 		})
 
 		// Copy envelope before dispatching (it ensures that envelope can de manipulated in a concurrent safe manner once dispatched)
-		builder := *txctx.Builder
+		envelope := *txctx.Envelope
 
 		// Loop over key functions until we succeed in dispatching envelope to channel indexed by key
 		for _, keyOf := range keyOfs {
@@ -37,7 +37,7 @@ func Dispatcher(reg *chanregistry.ChanRegistry, keyOfs ...KeyOfFunc) engine.Hand
 			// Dispatch envelope
 			err = reg.Send(
 				key,
-				&builder,
+				&envelope,
 			)
 			if err != nil {
 				// Could not dispatch
@@ -48,7 +48,7 @@ func Dispatcher(reg *chanregistry.ChanRegistry, keyOfs ...KeyOfFunc) engine.Hand
 				"key": key,
 			}).Debugf("dispatcher: envelope dispatched")
 
-			// Builder has been successfully dispatched so we return
+			// Envelope has been successfully dispatched so we return
 			return
 		}
 

@@ -21,10 +21,10 @@ func Signer(k keystore.KeyStore) engine.HandlerFunc {
 }
 
 func signTx(s keystore.KeyStore, txctx *engine.TxContext, sender common.Address, t *ethtypes.Transaction) ([]byte, *common.Hash, error) {
-	b, hash, err := s.SignPrivateEEATx(txctx.Context(), txctx.Builder.ChainID, sender, t, &types.PrivateArgs{
-		PrivateFor:    txctx.Builder.PrivateFor,
-		PrivateFrom:   txctx.Builder.PrivateFrom,
-		PrivateTxType: txctx.Builder.PrivateTxType,
+	b, hash, err := s.SignPrivateEEATx(txctx.Context(), txctx.Envelope.ChainID, sender, t, &types.PrivateArgs{
+		PrivateFor:    txctx.Envelope.PrivateFor,
+		PrivateFrom:   txctx.Envelope.PrivateFrom,
+		PrivateTxType: txctx.Envelope.PrivateTxType,
 	})
 	if err != nil {
 		return b, hash, errors.FromError(err).ExtendComponent(component)

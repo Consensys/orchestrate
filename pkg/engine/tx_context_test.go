@@ -71,7 +71,7 @@ func TestApplyHandlers(t *testing.T) {
 	expected := []string{"pA", "mA-before", "err", "mB-before", "pB", "abort", "mB-after", "mA-after"}
 
 	assert.Equal(t, expected, res, "Call order on handlers should be correct")
-	assert.Len(t, txctx.Builder.Errors, 2, "Error count should be correct")
+	assert.Len(t, txctx.Envelope.Errors, 2, "Error count should be correct")
 }
 
 func TestCtxError(t *testing.T) {
@@ -80,13 +80,13 @@ func TestCtxError(t *testing.T) {
 	txctx := NewTxContext()
 	_ = txctx.Error(e).ExtendComponent("bar")
 
-	assert.Len(t, txctx.Builder.Errors, 1, "Error count should be correct")
+	assert.Len(t, txctx.Envelope.Errors, 1, "Error count should be correct")
 
 	e = ierror.New(5, "test Error").ExtendComponent("foo")
 	_ = txctx.Error(e)
 
-	assert.Len(t, txctx.Builder.GetErrors(), 2, "Error count should be correct")
-	assert.Equal(t, `["FF000@bar: test Error" "00005@foo: test Error"]`, txctx.Builder.Error(), "Error message should be correct")
+	assert.Len(t, txctx.Envelope.GetErrors(), 2, "Error count should be correct")
+	assert.Equal(t, `["FF000@bar: test Error" "00005@foo: test Error"]`, txctx.Envelope.Error(), "Error message should be correct")
 }
 
 func TestLogger(t *testing.T) {
@@ -102,7 +102,7 @@ func TestWithContext(t *testing.T) {
 	txctx := NewTxContext()
 	txctx.Prepare(log.NewEntry(log.StandardLogger()), nil)
 
-	// Update go context attached to Builder
+	// Update go context attached to Envelope
 	txctx.WithContext(context.WithValue(context.Background(), testingKey("test-key"), "test-value"))
 
 	// Check if go-context has been properly attached
@@ -134,7 +134,7 @@ func TestCombineHandlers(t *testing.T) {
 	expected := []string{"pA", "mA-before", "err", "mB-before", "pB", "abort", "mB-after", "mA-after"}
 
 	assert.Equal(t, expected, res, "Call order on handlers should be correct")
-	assert.Len(t, txctx.Builder.Errors, 2, "Error count should be correct")
+	assert.Len(t, txctx.Envelope.Errors, 2, "Error count should be correct")
 }
 
 func TestCombineHandlersNested(t *testing.T) {
@@ -162,7 +162,7 @@ func TestCombineHandlersNested(t *testing.T) {
 	expected := []string{"pA", "mA-before", "err", "mB-before", "pB", "abort", "mB-after", "mA-after"}
 
 	assert.Equal(t, expected, res, "Call order on handlers should be correct")
-	assert.Len(t, txctx.Builder.Errors, 2, "Error count should be correct")
+	assert.Len(t, txctx.Envelope.Errors, 2, "Error count should be correct")
 }
 
 func TestForkedHandler(t *testing.T) {

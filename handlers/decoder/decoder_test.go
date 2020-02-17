@@ -31,8 +31,8 @@ func TestDecoder(t *testing.T) {
 		{
 			"Receipt without error and log decoded",
 			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Builder.SetChainID(big.NewInt(1))
-				txctx.Builder.Receipt = &ethereum.Receipt{
+				_ = txctx.Envelope.SetChainID(big.NewInt(1))
+				txctx.Envelope.Receipt = &ethereum.Receipt{
 					Logs: []*ethereum.Log{
 						{
 							Data: "0x000000000000000000000000000000000000000000000001a055690d9db80000",
@@ -47,20 +47,20 @@ func TestDecoder(t *testing.T) {
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
-				txctx.Builder.GetReceipt().Logs[0].DecodedData = map[string]string{
+				txctx.Envelope.GetReceipt().Logs[0].DecodedData = map[string]string{
 					"from":   "0xBA826fEc90CEFdf6706858E5FbaFcb27A290Fbe0",
 					"to":     "0x4aEE792A88eDDA29932254099b9d1e06D537883f",
 					"tokens": "30000000000000000000",
 				}
-				txctx.Builder.GetReceipt().Logs[0].Event = testEvent
+				txctx.Envelope.GetReceipt().Logs[0].Event = testEvent
 				return txctx
 			},
 		},
 		{
 			"Receipt without error and unknown abi",
 			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Builder.SetChainID(big.NewInt(1))
-				txctx.Builder.Receipt = &ethereum.Receipt{
+				_ = txctx.Envelope.SetChainID(big.NewInt(1))
+				txctx.Envelope.Receipt = &ethereum.Receipt{
 					Logs: []*ethereum.Log{
 						{
 							Data: "0x000000000000000000000000000000000000000000000001a055690d9db80000",
@@ -75,20 +75,20 @@ func TestDecoder(t *testing.T) {
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
-				txctx.Builder.GetReceipt().Logs[0].DecodedData = map[string]string{
+				txctx.Envelope.GetReceipt().Logs[0].DecodedData = map[string]string{
 					"from":   "0xBA826fEc90CEFdf6706858E5FbaFcb27A290Fbe0",
 					"to":     "0x4aEE792A88eDDA29932254099b9d1e06D537883f",
 					"tokens": "30000000000000000000",
 				}
-				txctx.Builder.GetReceipt().Logs[0].Event = testEvent
+				txctx.Envelope.GetReceipt().Logs[0].Event = testEvent
 				return txctx
 			},
 		},
 		{
 			"Receipt without topics",
 			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Builder.SetChainID(big.NewInt(1))
-				txctx.Builder.Receipt = &ethereum.Receipt{
+				_ = txctx.Envelope.SetChainID(big.NewInt(1))
+				txctx.Envelope.Receipt = &ethereum.Receipt{
 					Logs: []*ethereum.Log{
 						{
 							Data:   "0x000000000000000000000000000000000000000000000001a055690d9db80000",
@@ -100,7 +100,7 @@ func TestDecoder(t *testing.T) {
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
 				err := errors.InternalError("invalid receipt (no topics in log)").ExtendComponent(component)
-				txctx.Builder.Errors = append(txctx.Builder.Errors, err)
+				txctx.Envelope.Errors = append(txctx.Envelope.Errors, err)
 				return txctx
 			},
 		},

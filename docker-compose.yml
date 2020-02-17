@@ -205,7 +205,7 @@ services:
       CUCUMBER_FORMAT: "cucumber"
       AUTH_JWT_PRIVATE_KEY: ${AUTH_JWT_PRIVATE_KEY-}
       # Uncomment CUCUMBER_TAGS if only run features and scenarios with @public-tx or @wallet tags ("," = OR, "&&" = AND, "~" = NOT)
-#      CUCUMBER_TAGS: "@public-tx,@wallet"
+      # CUCUMBER_TAGS: "@public-tx,@wallet"
     restart: "no"
     command: e2e run
     volumes:

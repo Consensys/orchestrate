@@ -28,7 +28,7 @@ func ExtractTenant(auth authentication.Auth) engine.HandlerFunc {
 		}
 
 		// Extract credentials from envelope metadata
-		authorization := txctx.Builder.GetHeadersValue(AuthorizationMetadata)
+		authorization := txctx.Envelope.GetHeadersValue(AuthorizationMetadata)
 
 		// Control authentication
 		checkedCtx, err := auth.Check(authutils.WithAuthorization(txctx.Context(), authorization))

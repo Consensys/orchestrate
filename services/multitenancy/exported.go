@@ -12,7 +12,7 @@ var (
 	initOnce   = &sync.Once{}
 )
 
-// Init initializes key Builder with EnabledViperKey
+// Init initializes key Envelope with EnabledViperKey
 func Init(_ context.Context) {
 	initOnce.Do(func() {
 		if keyBuilder != nil {

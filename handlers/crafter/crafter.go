@@ -15,15 +15,15 @@ import (
 func Crafter(r svc.ContractRegistryClient, c crafter.Crafter) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"id": txctx.Builder.ID,
+			"id": txctx.Envelope.ID,
 		})
 
-		if txctx.Builder.GetData() != "" {
+		if txctx.Envelope.GetData() != "" {
 			// If transaction has already been crafted there is nothing to do
 			return
 		}
 
-		// Try to read ABI in Builder Call
+		// Try to read ABI in Envelope Call
 		methodAbi, err := getMethodAbi(txctx)
 		if err != nil || methodAbi == nil {
 			return
@@ -44,33 +44,33 @@ func Crafter(r svc.ContractRegistryClient, c crafter.Crafter) engine.HandlerFunc
 			"data": utils.ShortString(hexutil.Encode(payload), 10),
 		})
 
-		_ = txctx.Builder.SetData(payload)
+		_ = txctx.Envelope.SetData(payload)
 
 		txctx.Logger.Tracef("crafter: tx data payload set")
 	}
 }
 
 func getMethodAbi(txctx *engine.TxContext) (*abi.Method, error) {
-	if txctx.Builder.MethodSignature == "" {
+	if txctx.Envelope.GetMethodSignature() == "" {
 		return nil, errors.DataError("No method signature provided")
 	}
 
 	// Generate method ABI from signature
-	method, err := crafter.SignatureToMethod(txctx.Builder.MethodSignature)
+	method, err := crafter.SignatureToMethod(txctx.Envelope.GetMethodSignature())
 	if err != nil {
 		e := txctx.AbortWithError(err).ExtendComponent(component)
 		txctx.Logger.WithError(e).Errorf("crafter: could not generate method ABI from signature")
 		return nil, e
 	}
 	txctx.Logger = txctx.Logger.WithFields(log.Fields{
-		"crafter.method": txctx.Builder.GetMethodSignature(),
+		"crafter.method": txctx.Envelope.GetMethodSignature(),
 	})
 
 	return method, nil
 }
 
 func createTxPayload(txctx *engine.TxContext, methodAbi *abi.Method, r svc.ContractRegistryClient, c crafter.Crafter) ([]byte, error) {
-	if txctx.Builder.IsConstructor() {
+	if txctx.Envelope.IsConstructor() {
 		return createContractDeploymentPayload(txctx, methodAbi, r, c)
 	}
 
@@ -82,7 +82,7 @@ func createContractDeploymentPayload(txctx *engine.TxContext, methodAbi *abi.Met
 	bytecodeResp, err := r.GetContractBytecode(
 		txctx.Context(),
 		&svc.GetContractRequest{
-			ContractId: txctx.Builder.GetContractID(),
+			ContractId: txctx.Envelope.GetContractID(),
 		},
 	)
 	if err != nil {
@@ -113,7 +113,7 @@ func createTxCallPayload(txctx *engine.TxContext, methodAbi *abi.Method, c craft
 }
 
 func getTxArgs(txctx *engine.TxContext) []string {
-	args := txctx.Builder.GetArgs()
+	args := txctx.Envelope.GetArgs()
 	txctx.Logger = txctx.Logger.WithFields(log.Fields{
 		"crafter.args": args,
 	})

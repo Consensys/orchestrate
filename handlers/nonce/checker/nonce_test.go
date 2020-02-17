@@ -129,7 +129,7 @@ func makeContext(
 	txctx := engine.NewTxContext()
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
-	_ = txctx.Builder.SetFrom(ethcommon.HexToAddress("0x1")).SetNonce(nonce)
+	_ = txctx.Envelope.SetFrom(ethcommon.HexToAddress("0x1")).SetNonce(nonce)
 	txctx.In = mockMsg(key)
 	txctx.WithContext(proxy.With(txctx.Context(), endpoint))
 
@@ -143,16 +143,16 @@ func makeContext(
 }
 
 func assertTxContext(t *testing.T, txctx *engine.TxContext) {
-	assert.Len(t, txctx.Builder.GetErrors(), txctx.Get("expectedErrorCount").(int), "Error count should be correct")
+	assert.Len(t, txctx.Envelope.GetErrors(), txctx.Get("expectedErrorCount").(int), "Error count should be correct")
 
 	expectedNonceInMetadata := txctx.Get("expectedNonceInMetadata").(uint64)
 	if expectedNonceInMetadata > 0 {
-		v := txctx.Builder.GetInternalLabelsValue("nonce.recovering.expected")
+		v := txctx.Envelope.GetInternalLabelsValue("nonce.recovering.expected")
 		assert.NotNil(t, v, "Signal for nonce recovery in envelope metadata should have been set")
 		lastSent, _ := strconv.ParseUint(v, 10, 64)
 		assert.Equal(t, expectedNonceInMetadata, lastSent, "Nonce in metadata should be correct")
 	} else {
-		v := txctx.Builder.GetInternalLabelsValue("nonce.recovering.expected")
+		v := txctx.Envelope.GetInternalLabelsValue("nonce.recovering.expected")
 		assert.Empty(t, v, "Signal for nonce recovery in envelope metadata should not have been set")
 	}
 
@@ -165,7 +165,7 @@ func assertTxContext(t *testing.T, txctx *engine.TxContext) {
 	}
 
 	var recoveryCount int
-	v := txctx.Builder.GetInternalLabelsValue("nonce.recovering.count")
+	v := txctx.Envelope.GetInternalLabelsValue("nonce.recovering.count")
 	if v != "" {
 		i, err := strconv.Atoi(v)
 		if err != nil {
@@ -222,7 +222,7 @@ func TestChecker(t *testing.T) {
 	// On 5th execution envelope with nonce 15 should be too high
 	// Checker should not signal in metadata
 	txctx = makeContext("testURL", testKey1, true, 15, 0, 3, 0, "")
-	_ = txctx.Builder.SetInternalLabelsValue("nonce.recovering.count", fmt.Sprintf("%v", 2))
+	_ = txctx.Envelope.SetInternalLabelsValue("nonce.recovering.count", fmt.Sprintf("%v", 2))
 	h(txctx)
 	assertTxContext(t, txctx)
 
@@ -235,7 +235,7 @@ func TestChecker(t *testing.T) {
 
 	// On 7th execution envelope with nonce 14 but raw mode should be valid
 	txctx = makeContext("testURL", testKey1, false, 14, 0, 0, 0, "")
-	_ = txctx.Builder.SetInternalLabelsValue("tx.mode", "raw")
+	_ = txctx.Envelope.SetInternalLabelsValue("tx.mode", "raw")
 
 	h(txctx)
 	assertTxContext(t, txctx)
@@ -266,7 +266,7 @@ func TestChecker(t *testing.T) {
 
 	// Execution with recovery count exceeded
 	txctx = makeContext("testURL", testKey1, false, 13, 0, 10, 1, "")
-	_ = txctx.Builder.SetInternalLabelsValue("nonce.recovering.count", fmt.Sprintf("%v", 10))
+	_ = txctx.Envelope.SetInternalLabelsValue("nonce.recovering.count", fmt.Sprintf("%v", 10))
 	h(txctx)
 	assertTxContext(t, txctx)
 }

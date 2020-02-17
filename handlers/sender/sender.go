@@ -37,26 +37,26 @@ func Sender(ec ethclient.TransactionSender, s evlpstore.EnvelopeStoreClient) eng
 
 	return func(txctx *engine.TxContext) {
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"chainID": txctx.Builder.GetChainIDString(),
-			"id":      txctx.Builder.GetID(),
-			"tx.raw":  txctx.Builder.GetShortRaw(),
-			"tx.hash": txctx.Builder.GetTxHashString(),
-			"from":    txctx.Builder.GetFromString(),
+			"chainID": txctx.Envelope.GetChainIDString(),
+			"id":      txctx.Envelope.GetID(),
+			"tx.raw":  txctx.Envelope.GetShortRaw(),
+			"tx.hash": txctx.Envelope.GetTxHashString(),
+			"from":    txctx.Envelope.GetFromString(),
 		})
 
 		switch {
-		case txctx.Builder.IsEthSendRawTransaction():
+		case txctx.Envelope.IsEthSendRawTransaction():
 			rawTxSender(txctx)
-		case txctx.Builder.IsEthSendPrivateTransaction():
+		case txctx.Envelope.IsEthSendPrivateTransaction():
 			unsignedTxSender(txctx)
-		case txctx.Builder.IsEthSendRawPrivateTransaction():
+		case txctx.Envelope.IsEthSendRawPrivateTransaction():
 			tesseraRawPrivateTxSender(txctx)
-		case txctx.Builder.IsEeaSendPrivateTransaction():
+		case txctx.Envelope.IsEeaSendPrivateTransaction():
 			rawPrivateTxSender(txctx)
 		default:
 			err := errors.DataError(
 				"invalid private protocol %q",
-				txctx.Builder.Method.String(),
+				txctx.Envelope.Method.String(),
 			).SetComponent(component)
 			txctx.Logger.WithError(err).Errorf("sender: could not send private transaction")
 			_ = txctx.AbortWithError(err)

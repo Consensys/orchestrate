@@ -24,17 +24,17 @@ func newMessage(i int) *sarama.ProducerMessage {
 		Partition: -1,
 	}
 
-	builder := tx.NewBuilder().
+	envelope := tx.NewEnvelope().
+		SetID(uuid.NewV4().String()).
 		SetNonce(uint64(i)).
 		SetTo(common.HexToAddress("0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C")).
 		SetFrom(common.HexToAddress("0xdbb881a51cd4023e4400cef3ef73046743f08da3")).
 		SetValue(big.NewInt(100000)).
 		SetGas(21000).
 		SetChainName("geth")
-	builder.ID = uuid.NewV4().String()
 
-	b, _ := proto.Marshal(builder.TxRequest())
-	msg.Value = sarama.ByteEncoder(b)
+	e, _ := proto.Marshal(envelope.TxRequest())
+	msg.Value = sarama.ByteEncoder(e)
 	return msg
 }
 
