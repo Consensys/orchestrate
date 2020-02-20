@@ -1,6 +1,6 @@
 GOFILES := $(shell find . -name '*.go' | grep -v services/chain-registry/genstatic/gen.go | egrep -v "^\./\.go" | grep -v _test.go)
 PACKAGES ?= $(shell go list ./... | go list ./... | grep -Fv -e e2e -e examples -e genstatic -e mocks )
-CMD_RUN = tx-crafter tx-nonce tx-signer tx-sender tx-listener tx-decoder contract-registry chain-registry envelope-store
+CMD_RUN = tx-crafter tx-nonce tx-signer tx-sender tx-listener contract-registry chain-registry envelope-store
 CMD_MIGRATE = contract-registry envelope-store chain-registry
 
 UNAME_S := $(shell uname -s)

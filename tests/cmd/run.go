@@ -41,7 +41,6 @@ func NewRunCommand() *cobra.Command {
 	broker.KafkaTopicTxNonce(runCmd.Flags())
 	broker.KafkaTopicTxSigner(runCmd.Flags())
 	broker.KafkaTopicTxSender(runCmd.Flags())
-	broker.KafkaTopicTxDecoder(runCmd.Flags())
 	broker.KafkaTopicTxDecoded(runCmd.Flags())
 	broker.KafkaTopicWalletGenerator(runCmd.Flags())
 	broker.KafkaTopicWalletGenerated(runCmd.Flags())

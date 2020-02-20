@@ -39,9 +39,10 @@ All notable changes to this project will be documented in this file.
     * `TX_LISTENER_PROVIDER_REFRESH_INTERVAL` to set the time interval for refreshing the list of chains from the chain registry
  
 ### ⚠ BREAKING CHANGES
+ * Remove the `tx-decoder` microservice and decode logs in the tx-listener. The tx-listener publish transactions directly in the `topic-tx-decoded`
+ * Instead of producing and consuming envelopes to Orchestrate, a user will produce `TxRequest` and only consume `TxResponse`
  * Remove `/v1` prefix in the http rest path for the envelope-store and chain-registry
- * The `tx-listener` produces kafka messages only in the topic `topic-tx-decoder` instead of the `topic-tx-decoder-{chainID}`
- * The `tx-decoder` consumes kafka messages only in the topic `topic-tx-decoder` instead of the `topic-tx-decoder-{chainID}`
+ * The `tx-listener` produces kafka messages only in the topic `topic-tx-decoded` instead of the `topic-tx-decoder-{chainID}`
  * `ETH_CLIENT_URL` is deprecated, the chains urls have to be set in `CHAIN_REGISTRY_INIT`
  * removes flag and environment variable `DISABLE_EXTERNAL_TX` in the tx-listener and tx-decoder
 

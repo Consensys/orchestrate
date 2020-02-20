@@ -22,7 +22,6 @@ func newRunCommand() *cobra.Command {
 
 	// Register Kafka flags
 	broker.InitKafkaFlags(runCmd.Flags())
-	broker.KafkaTopicTxDecoder(runCmd.Flags())
 
 	// Register StoreGRPC flags
 	storeclient.EnvelopeStoreURL(runCmd.Flags())

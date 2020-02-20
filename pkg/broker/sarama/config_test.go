@@ -63,9 +63,6 @@ func TestTopics(t *testing.T) {
 	KafkaTopicTxSender(flgs)
 	assert.Equal(t, "topic-tx-sender", viper.GetString("topic.tx.sender"), "From default")
 
-	KafkaTopicTxDecoder(flgs)
-	assert.Equal(t, "topic-tx-decoder", viper.GetString("topic.tx.decoder"), "From default")
-
 	KafkaTopicTxRecover(flgs)
 	assert.Equal(t, "topic-tx-recover", viper.GetString("topic.tx.recover"), "From default")
 

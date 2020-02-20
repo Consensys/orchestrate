@@ -187,15 +187,6 @@ services:
       - chain-registry
     command: tx-listener run
 
-  tx-decoder:
-    <<: *container-common
-    environment:
-      <<: *default-variables
-      JAEGER_SERVICE_NAME: TX-DECODER
-    depends_on:
-      - contract-registry
-    command: tx-decoder run
-
   e2e:
     <<: *container-common
     environment:

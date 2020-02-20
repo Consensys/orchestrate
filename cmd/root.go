@@ -10,7 +10,6 @@ import (
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/contract-registry"
 	envelopestore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/envelope-store"
 	txcrafter "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/tx-crafter"
-	txdecoder "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/tx-decoder"
 	txlistener "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/tx-listener"
 	txnonce "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/tx-nonce"
 	txsender "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/tx-sender"
@@ -48,7 +47,6 @@ func NewCommand() *cobra.Command {
 	rootCmd.AddCommand(txsigner.NewRootCommand())
 	rootCmd.AddCommand(txsender.NewRootCommand())
 	rootCmd.AddCommand(txlistener.NewRootCommand())
-	rootCmd.AddCommand(txdecoder.NewRootCommand())
 	rootCmd.AddCommand(contractregistry.NewRootCommand())
 	rootCmd.AddCommand(envelopestore.NewRootCommand())
 	rootCmd.AddCommand(chainregistry.NewRootCommand())

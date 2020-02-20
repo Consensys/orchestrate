@@ -25,7 +25,7 @@ func Loader(txctx *engine.TxContext) {
 	})
 
 	switch txctx.In.Entrypoint() {
-	case viper.GetString(broker.TxDecoderViperKey), viper.GetString(broker.TxDecodedViperKey), viper.GetString(broker.TxRecoverViperKey), viper.GetString(broker.WalletGeneratedViperKey):
+	case viper.GetString(broker.TxDecodedViperKey), viper.GetString(broker.TxRecoverViperKey), viper.GetString(broker.WalletGeneratedViperKey):
 		loadTxResponse(txctx)
 	default:
 		loadTxRequest(txctx)

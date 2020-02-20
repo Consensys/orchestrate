@@ -24,8 +24,6 @@ func init() {
 	_ = viper.BindEnv(TxSignerViperKey, txSignerTopicEnv)
 	viper.SetDefault(TxSenderViperKey, txSenderTopicDefault)
 	_ = viper.BindEnv(TxSenderViperKey, txSenderTopicEnv)
-	viper.SetDefault(TxDecoderViperKey, txDecoderTopicDefault)
-	_ = viper.BindEnv(TxDecoderViperKey, txDecoderTopicEnv)
 	viper.SetDefault(TxDecodedViperKey, txDecodedTopicDefault)
 	_ = viper.BindEnv(TxDecodedViperKey, txDecodedTopicEnv)
 	viper.SetDefault(TxRecoverViperKey, txRecoverTopicDefault)
@@ -146,11 +144,6 @@ const (
 	txSenderTopicEnv     = "TOPIC_TX_SENDER"
 	txSenderTopicDefault = "topic-tx-sender"
 
-	txDecoderFlag         = "topic-tx-decoder"
-	TxDecoderViperKey     = "topic.tx.decoder"
-	txDecoderTopicEnv     = "TOPIC_TX_DECODER"
-	txDecoderTopicDefault = "topic-tx-decoder"
-
 	txDecodedFlag         = "topic-tx-decoded"
 	TxDecodedViperKey     = "topic.tx.decoded"
 	txDecodedTopicEnv     = "TOPIC_TX_DECODED"
@@ -204,14 +197,6 @@ func KafkaTopicTxSender(f *pflag.FlagSet) {
 Environment variable: %q`, txSenderTopicEnv)
 	f.String(txSenderFlag, txSenderTopicDefault, desc)
 	_ = viper.BindPFlag(TxSenderViperKey, f.Lookup(txSenderFlag))
-}
-
-// KafkaTopicTxDecoder register flag for Kafka topic
-func KafkaTopicTxDecoder(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Kafka topic for envelopes waiting for their receipt decoded
-Environment variable: %q`, txDecoderTopicEnv)
-	f.String(txDecoderFlag, txDecoderTopicDefault, desc)
-	_ = viper.BindPFlag(TxDecoderViperKey, f.Lookup(txDecoderFlag))
 }
 
 // KafkaTopicTxRecover register flag for Kafka topic
