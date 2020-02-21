@@ -124,6 +124,14 @@ func (e *Envelope) OnlyWarnings() bool {
 func (e *Envelope) GetHeaders() map[string]string {
 	return e.Headers
 }
+
+func (e *Envelope) SetHeaders(headers map[string]string) *Envelope {
+	if headers != nil {
+		e.Headers = headers
+	}
+	return e
+}
+
 func (e *Envelope) GetHeadersValue(key string) string {
 	return e.Headers[key]
 }
@@ -140,6 +148,12 @@ func (e *Envelope) GetInternalLabelsValue(key string) string {
 	return e.InternalLabels[key]
 }
 
+func (e *Envelope) SetInternalLabels(internalLabels map[string]string) *Envelope {
+	if internalLabels != nil {
+		e.InternalLabels = internalLabels
+	}
+	return e
+}
 func (e *Envelope) SetInternalLabelsValue(key, value string) *Envelope {
 	e.InternalLabels[key] = value
 	return e
@@ -151,7 +165,9 @@ func (e *Envelope) SetContextLabelsValue(key, value string) *Envelope {
 }
 
 func (e *Envelope) SetContextLabels(ctxLabels map[string]string) *Envelope {
-	e.ContextLabels = ctxLabels
+	if ctxLabels != nil {
+		e.ContextLabels = ctxLabels
+	}
 	return e
 }
 
@@ -726,6 +742,24 @@ func (e *Envelope) SetPrivateFrom(privateFrom string) *Envelope {
 }
 func (e *Envelope) GetPrivateFrom() string {
 	return e.PrivateFrom
+}
+
+func (e *Envelope) SetPrivateTxType(privateTxType string) *Envelope {
+	e.PrivateTxType = privateTxType
+	return e
+}
+
+func (e *Envelope) GetPrivateTxType() string {
+	return e.PrivateTxType
+}
+
+func (e *Envelope) SetPrivacyGroupID(privacyGroupID string) *Envelope {
+	e.PrivacyGroupID = privacyGroupID
+	return e
+}
+
+func (e *Envelope) GetPrivacyGroupID() string {
+	return e.PrivacyGroupID
 }
 
 func (e *Envelope) TxRequest() *TxRequest {

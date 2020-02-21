@@ -41,7 +41,7 @@ func controlRecoveryCount(txctx *engine.TxContext, conf *Configuration) error {
 // It makes sure that transactions with invalid nonce are not processed
 func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader, tracker *RecoveryTracker) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		if mode := txctx.Envelope.GetInternalLabelsValue("tx.mode"); mode == "raw" {
+		if mode := txctx.Envelope.GetContextLabelsValue("txMode"); mode == "raw" {
 			// If transaction has been generated externally we skip nonce check
 			txctx.Logger.WithFields(log.Fields{
 				"id": txctx.Envelope.GetID(),
@@ -84,10 +84,9 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 		} else {
 			// If no nonce is available (meaning that envelope being processed is the first one for the pair sender,chain)
 			// then we retrieve nonce from chain
-			pendingNonce, err := ec.PendingNonceAt(txctx.Context(), url, sender)
-			if err != nil {
-				e := txctx.AbortWithError(err).ExtendComponent(component)
-				txctx.Logger.WithError(e).Errorf("nonce: could not read nonce from chain")
+			pendingNonce, callErr := ec.PendingNonceAt(txctx.Context(), url, sender)
+			if callErr != nil {
+				_ = txctx.AbortWithError(errors.EthereumError("could not read nonce from chain - got %v", callErr)).ExtendComponent(component)
 				return
 			}
 			txctx.Logger.WithFields(log.Fields{
@@ -97,7 +96,11 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 			expectedNonce = pendingNonce
 		}
 
-		n := *txctx.Envelope.Nonce
+		n, err := txctx.Envelope.GetNonceUint64()
+		if err != nil {
+			_ = txctx.AbortWithError(errors.DataError("could not check nonce - %s", err)).ExtendComponent(component)
+			return
+		}
 		if n != expectedNonce {
 			// Attributes nonce is invalid
 			txctx.Logger.WithFields(log.Fields{
@@ -181,16 +184,14 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 			// Control recovery count
 			err := controlRecoveryCount(txctx, conf)
 			if err != nil {
-				e := txctx.AbortWithError(err).ExtendComponent(component)
-				txctx.Logger.WithError(e).Errorf("nonce: abort transaction execution")
+				_ = txctx.AbortWithError(errors.FromError(fmt.Errorf("abort transaction execution - got %v", err))).ExtendComponent(component)
 				return
 			}
 
 			// We recalibrate nonce from chain
 			pendingNonce, err := ec.PendingNonceAt(txctx.Context(), url, sender)
 			if err != nil {
-				e := txctx.AbortWithError(err).ExtendComponent(component)
-				txctx.Logger.WithError(e).Errorf("nonce: could not read nonce from chain")
+				_ = txctx.AbortWithError(errors.FromError(fmt.Errorf("could not read nonce from chain - got %v", err))).ExtendComponent(component)
 				return
 			}
 			txctx.Logger.WithFields(log.Fields{
@@ -200,8 +201,7 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 			// Re-calibrate cache
 			err = nm.SetLastSent(nonceKey, pendingNonce-1)
 			if err != nil {
-				e := errors.FromError(err).ExtendComponent(component)
-				txctx.Logger.WithError(e).Errorf("nonce: could not store last sent nonce")
+				_ = txctx.AbortWithError(errors.FromError(fmt.Errorf("could not store last sent nonce - got %v", err))).ExtendComponent(component)
 			}
 
 			// Reset tx nonce, hash and raw

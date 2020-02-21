@@ -10,7 +10,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce"
 )
 
-const component = "handler.nonce"
+const component = "handler.nonce.attributor"
 
 var (
 	handler  engine.HandlerFunc

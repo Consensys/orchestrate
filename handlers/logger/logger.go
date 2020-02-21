@@ -24,8 +24,20 @@ func Logger(level string) engine.HandlerFunc {
 		txctx.Logger.
 			WithFields(log.Fields{
 				"latency": time.Since(start),
-			}).
-			WithError(fmt.Errorf("%q", txctx.Envelope.GetErrors())).
-			Log(logLevel, "logger: message processed")
+			})
+
+		switch {
+		case len(txctx.Envelope.GetErrors()) > 0 && txctx.Envelope.OnlyWarnings():
+			txctx.Logger.
+				WithError(fmt.Errorf("%q", txctx.Envelope.GetErrors())).
+				Warn("logger: message processed with warning")
+		case len(txctx.Envelope.GetErrors()) > 0:
+			txctx.Logger.
+				WithError(fmt.Errorf("%q", txctx.Envelope.GetErrors())).
+				Error("logger: message processed with error")
+		default:
+			txctx.Logger.
+				Log(logLevel, "logger: message processed")
+		}
 	}
 }

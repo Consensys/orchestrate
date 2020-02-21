@@ -235,7 +235,7 @@ func TestChecker(t *testing.T) {
 
 	// On 7th execution envelope with nonce 14 but raw mode should be valid
 	txctx = makeContext("testURL", testKey1, false, 14, 0, 0, 0, "")
-	_ = txctx.Envelope.SetInternalLabelsValue("tx.mode", "raw")
+	_ = txctx.Envelope.SetContextLabelsValue("txMode", "raw")
 
 	h(txctx)
 	assertTxContext(t, txctx)

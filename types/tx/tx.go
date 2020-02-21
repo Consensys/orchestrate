@@ -4,8 +4,6 @@ import (
 	"math/big"
 	"regexp"
 
-	error1 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/error"
-
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
@@ -33,7 +31,7 @@ func (m *TxEnvelope) Envelope() (*Envelope, error) {
 		return nil, err
 	}
 
-	b.InternalLabels = m.GetInternalLabels()
+	_ = b.SetInternalLabels(m.GetInternalLabels())
 	if err := b.internalToFields(); err != nil {
 		return nil, err
 	}
@@ -42,30 +40,23 @@ func (m *TxEnvelope) Envelope() (*Envelope, error) {
 }
 
 func (m *TxRequest) Envelope() (*Envelope, error) {
-	envelope := &Envelope{
-		ID:            m.GetId(),
-		Headers:       m.GetHeaders(),
-		ContextLabels: m.GetContextLabels(),
-		Method:        m.Method,
-		Tx: Tx{
-			Data: m.GetParams().GetData(),
-			Raw:  m.GetParams().GetRaw(),
-		},
-		Chain: Chain{
-			ChainName: m.GetChain(),
-		},
-		Contract: Contract{
-			MethodSignature: m.GetParams().GetMethodSignature(),
-			Args:            m.GetParams().GetArgs(),
-		},
-		Private: Private{
-			PrivateFor:     m.GetParams().GetPrivateFor(),
-			PrivateFrom:    m.GetParams().GetPrivateFrom(),
-			PrivateTxType:  m.GetParams().GetPrivateTxType(),
-			PrivacyGroupID: m.GetParams().GetPrivacyGroupId(),
-		},
-		Errors:         make([]*error1.Error, 0),
-		InternalLabels: make(map[string]string),
+	envelope := NewEnvelope().
+		SetID(m.GetId()).
+		SetHeaders(m.GetHeaders()).
+		SetContextLabels(m.GetContextLabels()).
+		SetMethod(m.GetMethod()).
+		SetChainName(m.GetChain())
+
+	if m.GetParams() != nil {
+		_ = envelope.
+			MustSetDataString(m.GetParams().GetData()).
+			MustSetRawString(m.GetParams().GetRaw()).
+			SetMethodSignature(m.GetParams().GetMethodSignature()).
+			SetArgs(m.GetParams().GetArgs()).
+			SetPrivateFor(m.GetParams().GetPrivateFor()).
+			SetPrivateFrom(m.GetParams().GetPrivateFrom()).
+			SetPrivateTxType(m.GetParams().GetPrivateTxType()).
+			SetPrivacyGroupID(m.GetParams().GetPrivacyGroupId())
 	}
 
 	if errs := envelope.loadPtrFields(m.GetParams().GetGas(), m.GetParams().GetNonce(), m.GetParams().GetGasPrice(), m.GetParams().GetValue(), m.GetParams().GetFrom(), m.GetParams().GetTo()); len(errs) > 0 {
@@ -86,17 +77,17 @@ func (m *TxRequest) Envelope() (*Envelope, error) {
 }
 
 func (m *TxResponse) Envelope() (*Envelope, error) {
-	envelope := &Envelope{
-		ID:            m.GetId(),
-		Headers:       m.GetHeaders(),
-		ContextLabels: m.GetContextLabels(),
-		Tx: Tx{
-			Data: m.GetTransaction().GetData(),
-			Raw:  m.GetTransaction().GetRaw(),
-		},
-		Receipt:        m.GetReceipt(),
-		Errors:         m.GetErrors(),
-		InternalLabels: make(map[string]string),
+	envelope := NewEnvelope().
+		SetID(m.GetId()).
+		SetHeaders(m.GetHeaders()).
+		SetContextLabels(m.GetContextLabels()).
+		AppendErrors(m.GetErrors()).
+		SetReceipt(m.GetReceipt())
+
+	if m.GetTransaction() != nil {
+		_ = envelope.
+			MustSetDataString(m.GetTransaction().GetData()).
+			MustSetRawString(m.GetTransaction().GetRaw())
 	}
 
 	if errs := envelope.loadPtrFields(m.GetTransaction().GetGas(), m.GetTransaction().GetNonce(), m.GetTransaction().GetGasPrice(), m.GetTransaction().GetValue(), m.GetTransaction().GetFrom(), m.GetTransaction().GetTo()); len(errs) > 0 {

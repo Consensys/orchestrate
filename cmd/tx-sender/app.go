@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	rawdecoder "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/raw-decoder"
+
 	chaininjector "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/chain-injector"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
@@ -94,9 +96,10 @@ func registerHandlers() {
 
 	// Recovery Status Setter surrounds the producer
 	// c.f. docstring RecoveryStatusSetter handler
-	engine.Register(chaininjector.GlobalHandler())
-	engine.Register(noncechecker.GlobalRecoveryStatusSetter())
 	engine.Register(producer.GlobalHandler())
+	engine.Register(chaininjector.GlobalHandler())
+	engine.Register(rawdecoder.RawDecoder)
+	engine.Register(noncechecker.GlobalRecoveryStatusSetter())
 	engine.Register(injector.GlobalHandler())
 	engine.Register(noncechecker.GlobalChecker())
 

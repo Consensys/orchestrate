@@ -64,8 +64,7 @@ func loadTxRequest(txctx *engine.TxContext) {
 
 	envelope, err := txRequest.Envelope()
 	if err != nil {
-		e := txctx.AbortWithError(err).ExtendComponent(component)
-		txctx.Logger.WithError(e).Errorf("loader: invalid tx request")
+		loadTxEnvelope(txctx)
 		return
 	}
 
@@ -83,8 +82,7 @@ func loadTxResponse(txctx *engine.TxContext) {
 
 	envelope, err := txResponse.Envelope()
 	if err != nil {
-		e := txctx.AbortWithError(err).ExtendComponent(component)
-		txctx.Logger.WithError(e).Errorf("loader: invalid tx response")
+		loadTxEnvelope(txctx)
 		return
 	}
 
