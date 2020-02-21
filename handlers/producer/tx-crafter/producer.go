@@ -21,7 +21,7 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 		msg.Topic = viper.GetString(broker.TxRecoverViperKey)
 		p = txctx.Envelope.TxResponse()
 	default:
-		msg.Topic = viper.GetString(broker.TxNonceViperKey)
+		msg.Topic = viper.GetString(broker.TxSignerViperKey)
 		p = txctx.Envelope.TxEnvelopeAsRequest()
 	}
 

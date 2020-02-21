@@ -4,7 +4,6 @@
 set -Eeu
 
 TX_CRAFTER=tx-crafter
-TX_NONCE=tx-nonce
 TX_SIGNER=tx-signer
 TX_SENDER=tx-sender
 TX_LISTENER=tx-listener

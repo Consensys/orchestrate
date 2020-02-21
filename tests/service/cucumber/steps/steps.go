@@ -31,7 +31,6 @@ const GenericNamespace = "_"
 
 var TOPICS = [...]string{
 	"tx.crafter",
-	"tx.nonce",
 	"tx.signer",
 	"tx.sender",
 	"tx.decoded",

@@ -4,11 +4,10 @@ import (
 	"context"
 	"sync"
 
-	chaininjector "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/chain-injector"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
+	chaininjector "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/chain-injector"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/crafter"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/faucet"
 	gasestimator "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/gas/gas-estimator"
@@ -16,6 +15,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/loader/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/logger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
+	nonceattributor "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/nonce/attributor"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/offset"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/opentracing"
 	producer "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/producer/tx-crafter"
@@ -72,7 +72,10 @@ func initHandlers(ctx context.Context) {
 		func() {
 			gaspricer.Init(ctx)
 		},
-
+		// Initialize Nonce Attributor
+		func() {
+			nonceattributor.Init(ctx)
+		},
 		// Initialize Producer
 		func() {
 			producer.Init(ctx)
@@ -119,6 +122,7 @@ func initComponents(ctx context.Context) {
 	engine.Register(crafter.GlobalHandler())
 	engine.Register(gaspricer.GlobalHandler())
 	engine.Register(gasestimator.GlobalHandler())
+	engine.Register(nonceattributor.GlobalHandler())
 }
 
 // Start starts application

@@ -149,13 +149,6 @@ services:
       - contract-registry
     command: tx-crafter run
 
-  tx-nonce:
-    <<: *container-common
-    environment:
-      <<: *default-variables
-      JAEGER_SERVICE_NAME: TX-NONCE
-    command: tx-nonce run
-
   tx-signer:
     <<: *container-common
     environment:

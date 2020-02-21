@@ -220,11 +220,11 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 // RecoveryStatusSetter returns and handler responsible to set nonce recovery status after envelope has been processed
 //
 // We set recovery status in a separated middleware handler that should be surrounding producer handler
-// So in case of nonce too high, we make sure that envelope has been effectively produced in tx-nonce topic before updating
+// So in case of nonce too high, we make sure that envelope has been effectively produced in tx-crafter topic before updating
 // recovery status on nonce manager.
 //
 // Setting recovery status before producing the envelope could result in case of crash
-// in a situation were would never be able to signal tx-nonce to recalibrate nonce
+// in a situation were would never be able to signal tx-crafter to recalibrate nonce
 func RecoveryStatusSetter(nm nonce.Sender, tracker *RecoveryTracker) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		// Execute pending handlers

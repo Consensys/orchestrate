@@ -18,8 +18,6 @@ func init() {
 	// Kafka topics for the tx workflow
 	viper.SetDefault(TxCrafterViperKey, txCrafterTopicDefault)
 	_ = viper.BindEnv(TxCrafterViperKey, txCrafterTopicEnv)
-	viper.SetDefault(TxNonceViperKey, txNonceTopicDefault)
-	_ = viper.BindEnv(TxNonceViperKey, txNonceTopicEnv)
 	viper.SetDefault(TxSignerViperKey, txSignerTopicDefault)
 	_ = viper.BindEnv(TxSignerViperKey, txSignerTopicEnv)
 	viper.SetDefault(TxSenderViperKey, txSenderTopicDefault)
@@ -38,8 +36,6 @@ func init() {
 	// Kafka consumer groups for tx workflow
 	viper.SetDefault(CrafterGroupViperKey, crafterGroupDefault)
 	_ = viper.BindEnv(CrafterGroupViperKey, crafterGroupEnv)
-	viper.SetDefault(NonceGroupViperKey, nonceGroupDefault)
-	_ = viper.BindEnv(NonceGroupViperKey, nonceGroupEnv)
 	viper.SetDefault(SignerGroupViperKey, signerGroupDefault)
 	_ = viper.BindEnv(SignerGroupViperKey, signerGroupEnv)
 	viper.SetDefault(SenderGroupViperKey, senderGroupDefault)
@@ -129,11 +125,6 @@ const (
 	txCrafterTopicEnv     = "TOPIC_TX_CRAFTER"
 	txCrafterTopicDefault = "topic-tx-crafter"
 
-	txNonceFlag         = "topic-tx-nonce"
-	TxNonceViperKey     = "topic.tx.nonce"
-	txNonceTopicEnv     = "TOPIC_TX_NONCE"
-	txNonceTopicDefault = "topic-tx-nonce"
-
 	txSignerFlag         = "topic-tx-signer"
 	TxSignerViperKey     = "topic.tx.signer"
 	txSignerTopicEnv     = "TOPIC_TX_SIGNER"
@@ -173,14 +164,6 @@ func KafkaTopicTxCrafter(f *pflag.FlagSet) {
 Environment variable: %q`, txCrafterTopicEnv)
 	f.String(txCrafterFlag, txCrafterTopicDefault, desc)
 	_ = viper.BindPFlag(TxCrafterViperKey, f.Lookup(txCrafterFlag))
-}
-
-// KafkaTopicTxNonce register flag for Kafka topic
-func KafkaTopicTxNonce(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Kafka topic for envelopes waiting for their transaction nonce set
-Environment variable: %q`, txNonceTopicEnv)
-	f.String(txNonceFlag, txNonceTopicDefault, desc)
-	_ = viper.BindPFlag(TxNonceViperKey, f.Lookup(txNonceFlag))
 }
 
 // KafkaTopicTxSigner register flag for Kafka topic
@@ -238,11 +221,6 @@ const (
 	crafterGroupEnv      = "KAFKA_GROUP_CRAFTER"
 	crafterGroupDefault  = "group-crafter"
 
-	nonceGroupFlag     = "group-nonce"
-	NonceGroupViperKey = "kafka.group.nonce"
-	nonceGroupEnv      = "KAFKA_GROUP_NONCE"
-	nonceGroupDefault  = "group-nonce"
-
 	signerGroupFlag     = "group-signer"
 	SignerGroupViperKey = "kafka.group.signer"
 	signerGroupEnv      = "KAFKA_GROUP_SIGNER"
@@ -280,11 +258,6 @@ Environment variable: %q`, env)
 // CrafterGroup register flag for kafka crafter group
 func CrafterGroup(f *pflag.FlagSet) {
 	consumerGroupFlag(f, crafterGroupFlag, CrafterGroupViperKey, crafterGroupEnv, crafterGroupDefault)
-}
-
-// NonceGroup register flag for kafka nonce group
-func NonceGroup(f *pflag.FlagSet) {
-	consumerGroupFlag(f, nonceGroupFlag, NonceGroupViperKey, nonceGroupEnv, nonceGroupDefault)
 }
 
 // SignerGroup register flag for kafka signer group

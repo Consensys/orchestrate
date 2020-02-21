@@ -33,7 +33,6 @@ func newRunCommand() *cobra.Command {
 	// Register Kafka flags
 	broker.InitKafkaFlags(runCmd.Flags())
 	broker.KafkaTopicTxCrafter(runCmd.Flags())
-	broker.KafkaTopicTxNonce(runCmd.Flags())
 	broker.KafkaTopicTxRecover(runCmd.Flags())
 
 	// Contract Registry

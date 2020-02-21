@@ -54,9 +54,6 @@ func TestTopics(t *testing.T) {
 	KafkaTopicTxCrafter(flgs)
 	assert.Equal(t, "topic-tx-crafter", viper.GetString("topic.tx.crafter"), "From default")
 
-	KafkaTopicTxNonce(flgs)
-	assert.Equal(t, "topic-tx-nonce", viper.GetString("topic.tx.nonce"), "From default")
-
 	KafkaTopicTxSigner(flgs)
 	assert.Equal(t, "topic-tx-signer", viper.GetString("topic.tx.signer"), "From default")
 
@@ -82,9 +79,6 @@ func TestConsumerGroup(t *testing.T) {
 
 	CrafterGroup(flgs)
 	assert.Equal(t, "group-crafter", viper.GetString("kafka.group.crafter"), "From default")
-
-	NonceGroup(flgs)
-	assert.Equal(t, "group-nonce", viper.GetString("kafka.group.nonce"), "From default")
 
 	SignerGroup(flgs)
 	assert.Equal(t, "group-signer", viper.GetString("kafka.group.signer"), "From default")

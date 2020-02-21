@@ -14,12 +14,12 @@ func TestPrepareMsg(t *testing.T) {
 	txctx := engine.NewTxContext()
 	msg := &sarama.ProducerMessage{}
 	_ = PrepareMsg(txctx, msg)
-	assert.Equal(t, "topic-tx-nonce", msg.Topic, "If no error out topic should be nonce")
+	assert.Equal(t, "topic-tx-signer", msg.Topic, "If no error out topic should be nonce")
 
 	// Faucet warning
 	_ = txctx.Error(errors.FaucetWarning("no credit"))
 	_ = PrepareMsg(txctx, msg)
-	assert.Equal(t, "topic-tx-nonce", msg.Topic, "If Faucet warning out topic should be nonce")
+	assert.Equal(t, "topic-tx-signer", msg.Topic, "If Faucet warning out topic should be nonce")
 
 	// Classic error
 	_ = txctx.Error(errors.ConnectionError("Connection error"))

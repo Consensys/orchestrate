@@ -38,7 +38,6 @@ func NewRunCommand() *cobra.Command {
 	// Register Kafka flags
 	broker.InitKafkaFlags(runCmd.Flags())
 	broker.KafkaTopicTxCrafter(runCmd.Flags())
-	broker.KafkaTopicTxNonce(runCmd.Flags())
 	broker.KafkaTopicTxSigner(runCmd.Flags())
 	broker.KafkaTopicTxSender(runCmd.Flags())
 	broker.KafkaTopicTxDecoded(runCmd.Flags())

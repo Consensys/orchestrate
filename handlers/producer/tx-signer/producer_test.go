@@ -30,7 +30,7 @@ func TestPrepareMsgSigner(t *testing.T) {
 	txctx.In = TestMsg("topic-tx-signer")
 	msg := &sarama.ProducerMessage{}
 	_ = PrepareMsg(txctx, msg)
-	assert.Equal(t, "topic-tx-sender", msg.Topic, "If no error out topic should be nonce")
+	assert.Equal(t, "topic-tx-sender", msg.Topic, "If no error out topic should be sender")
 
 	// Classic error
 	_ = txctx.Error(errors.ConnectionError("Connection error"))
@@ -45,7 +45,7 @@ func TestPrepareMsgGenerateWallet(t *testing.T) {
 	txctx.In = TestMsg("topic-wallet-generator")
 	msg := &sarama.ProducerMessage{}
 	_ = PrepareMsg(txctx, msg)
-	assert.Equal(t, "topic-wallet-generated", msg.Topic, "If no error out topic should be nonce")
+	assert.Equal(t, "topic-wallet-generated", msg.Topic, "If no error out topic should be wallet-generated")
 
 	// Classic error
 	_ = txctx.Error(errors.ConnectionError("Connection error"))

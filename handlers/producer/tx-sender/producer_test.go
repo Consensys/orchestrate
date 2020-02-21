@@ -24,7 +24,7 @@ func TestPrepareMsg(t *testing.T) {
 	txctx = engine.NewTxContext()
 	txctx.Set("invalid.nonce", true)
 	_ = PrepareMsg(txctx, msg)
-	assert.Equal(t, "topic-tx-nonce", msg.Topic, "If invalid nonce out topic should be tx-nonce")
+	assert.Equal(t, "topic-tx-crafter", msg.Topic, "If invalid nonce out topic should be tx-crafter")
 
 	txctx = engine.NewTxContext()
 	txctx.Set("invalid.nonce", true)

@@ -11,7 +11,6 @@ import (
 	envelopestore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/envelope-store"
 	txcrafter "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/tx-crafter"
 	txlistener "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/tx-listener"
-	txnonce "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/tx-nonce"
 	txsender "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/tx-sender"
 	txsigner "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/tx-signer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/utils"
@@ -43,7 +42,6 @@ func NewCommand() *cobra.Command {
 
 	// Add Run command
 	rootCmd.AddCommand(txcrafter.NewRootCommand())
-	rootCmd.AddCommand(txnonce.NewRootCommand())
 	rootCmd.AddCommand(txsigner.NewRootCommand())
 	rootCmd.AddCommand(txsender.NewRootCommand())
 	rootCmd.AddCommand(txlistener.NewRootCommand())

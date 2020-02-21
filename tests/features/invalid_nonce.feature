@@ -11,7 +11,6 @@ Feature: Invalid Nonce
       | besu       | 0xa8d8db1d8919665a18212374d623fc7c0dfda410 | 0x0000000000000000000000000000000000000000  |1000002  | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
     Then Envelopes should be in topic "tx.signer"
     Then Envelopes should be in topic "tx.sender"
-    Then Envelopes should be in topic "tx.nonce"
     Then Envelopes should be in topic "tx.signer"
     And Envelopes should have nonce set
     Then Envelopes should be in topic "tx.sender"
@@ -29,7 +28,6 @@ Feature: Invalid Nonce
       | besu       | 0xbfc7137876d7ac275019d70434b0f0779824a969 | 0x0000000000000000000000000000000000000000 | 0        | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
     Then Envelopes should be in topic "tx.signer"
     Then Envelopes should be in topic "tx.sender"
-    Then Envelopes should be in topic "tx.nonce"
     Then Envelopes should be in topic "tx.signer"
     And Envelopes should have nonce set
     Then Envelopes should be in topic "tx.sender"
@@ -51,7 +49,6 @@ Feature: Invalid Nonce
       | besu       | 0x93f7274c9059e601be4512f656b57b830e019e41 |0x0000000000000000000000000000000000000000| 1000001  | 1000000000  | 21000  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
     Then Envelopes should be in topic "tx.signer"
     Then Envelopes should be in topic "tx.sender"
-    Then Envelopes should be in topic "tx.nonce"
     Then Envelopes should be in topic "tx.signer"
     And Envelopes should have nonce set
     Then Envelopes should be in topic "tx.sender"
