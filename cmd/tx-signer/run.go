@@ -32,8 +32,8 @@ func newRunCommand() *cobra.Command {
 	broker.InitKafkaFlags(runCmd.Flags())
 	broker.KafkaTopicTxSigner(runCmd.Flags())
 	broker.KafkaTopicTxSender(runCmd.Flags())
-	broker.KafkaTopicWalletGenerator(runCmd.Flags())
-	broker.KafkaTopicWalletGenerated(runCmd.Flags())
+	broker.KafkaTopicAccountGenerator(runCmd.Flags())
+	broker.KafkaTopicAccountGenerated(runCmd.Flags())
 	broker.KafkaTopicTxRecover(runCmd.Flags())
 
 	// Register Faucet flags

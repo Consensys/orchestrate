@@ -29,10 +29,10 @@ type KeyStore interface {
 	// SignRawHash sign a bytes
 	SignRawHash(a ethcommon.Address, hash []byte) ([]byte, error)
 
-	// GenerateWallet creates a wallet
-	GenerateWallet(ctx context.Context) (*ethcommon.Address, error)
+	// GenerateAccount creates an account
+	GenerateAccount(ctx context.Context) (*ethcommon.Address, error)
 
-	// ImportPrivateKey creates a wallet
+	// ImportPrivateKey creates an account
 	ImportPrivateKey(ctx context.Context, priv string) error
 }
 

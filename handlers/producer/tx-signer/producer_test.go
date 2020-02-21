@@ -38,17 +38,17 @@ func TestPrepareMsgSigner(t *testing.T) {
 	assert.Equal(t, "topic-tx-recover", msg.Topic, "If error out topic should be recovery")
 }
 
-func TestPrepareMsgGenerateWallet(t *testing.T) {
+func TestPrepareMsgGenerateAccount(t *testing.T) {
 	// No error
 	txctx := engine.NewTxContext()
 
-	txctx.In = TestMsg("topic-wallet-generator")
+	txctx.In = TestMsg("topic-account-generator")
 	msg := &sarama.ProducerMessage{}
 	_ = PrepareMsg(txctx, msg)
-	assert.Equal(t, "topic-wallet-generated", msg.Topic, "If no error out topic should be wallet-generated")
+	assert.Equal(t, "topic-account-generated", msg.Topic, "If no error out topic should be account-generated")
 
 	// Classic error
 	_ = txctx.Error(errors.ConnectionError("Connection error"))
 	_ = PrepareMsg(txctx, msg)
-	assert.Equal(t, "topic-wallet-generated", msg.Topic, "If error out topic should be recovery")
+	assert.Equal(t, "topic-account-generated", msg.Topic, "If error out topic should be recovery")
 }

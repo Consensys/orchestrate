@@ -115,7 +115,7 @@ func Start(ctx context.Context) {
 
 		topics := []string{
 			viper.GetString(broker.TxSignerViperKey),
-			viper.GetString(broker.WalletGeneratorViperKey),
+			viper.GetString(broker.AccountGeneratorViperKey),
 		}
 		l.WithFields(log.Fields{
 			"topics": topics,

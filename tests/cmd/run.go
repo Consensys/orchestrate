@@ -41,8 +41,8 @@ func NewRunCommand() *cobra.Command {
 	broker.KafkaTopicTxSigner(runCmd.Flags())
 	broker.KafkaTopicTxSender(runCmd.Flags())
 	broker.KafkaTopicTxDecoded(runCmd.Flags())
-	broker.KafkaTopicWalletGenerator(runCmd.Flags())
-	broker.KafkaTopicWalletGenerated(runCmd.Flags())
+	broker.KafkaTopicAccountGenerator(runCmd.Flags())
+	broker.KafkaTopicAccountGenerated(runCmd.Flags())
 
 	// Register Cucumber flag
 	cucumber.InitFlags(runCmd.Flags())

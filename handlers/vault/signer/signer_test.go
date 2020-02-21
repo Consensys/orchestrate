@@ -63,7 +63,7 @@ func (s *MockTxSigner) SignMsg(_ context.Context, _ ethcommon.Address, _ string)
 	return []byte{}, nil, fmt.Errorf("signMsg not implemented")
 }
 
-func (s *MockTxSigner) GenerateWallet(_ context.Context) (add *ethcommon.Address, err error) {
+func (s *MockTxSigner) GenerateAccount(_ context.Context) (add *ethcommon.Address, err error) {
 	return nil, fmt.Errorf("signMsg not implemented")
 }
 

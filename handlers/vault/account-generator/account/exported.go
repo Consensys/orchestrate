@@ -1,15 +1,13 @@
-package generator
+package account
 
 import (
 	"context"
 	"sync"
 
 	log "github.com/sirupsen/logrus"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/wallet-generator/faucet"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/wallet-generator/wallet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore"
 )
 
 var (
@@ -26,17 +24,15 @@ func Init(ctx context.Context) {
 
 		common.InParallel(
 			// Initialize keystore
-			func() { wallet.Init(ctx) },
-			func() { faucet.Init(ctx) },
+			func() { keystore.Init(ctx) },
 		)
 
 		// Create Handler
 		handler = engine.CombineHandlers(
-			wallet.GlobalHandler(),
-			faucet.GlobalHandler(),
+			Generator(keystore.GlobalKeyStore()),
 		)
 
-		log.Infof("wallet-generator: handler ready")
+		log.Infof("signer: handler ready")
 	})
 }
 

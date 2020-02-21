@@ -35,8 +35,8 @@ var TOPICS = [...]string{
 	"tx.sender",
 	"tx.decoded",
 	"tx.recover",
-	"wallet.generator",
-	"wallet.generated",
+	"account.generator",
+	"account.generated",
 }
 
 // NewID creates a 8 character long random id

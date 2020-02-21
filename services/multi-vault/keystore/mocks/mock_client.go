@@ -116,19 +116,19 @@ func (mr *MockKeyStoreMockRecorder) SignRawHash(a, hash interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignRawHash", reflect.TypeOf((*MockKeyStore)(nil).SignRawHash), a, hash)
 }
 
-// GenerateWallet mocks base method
-func (m *MockKeyStore) GenerateWallet(ctx context.Context) (*common.Address, error) {
+// GenerateAccount mocks base method
+func (m *MockKeyStore) GenerateAccount(ctx context.Context) (*common.Address, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GenerateWallet", ctx)
+	ret := m.ctrl.Call(m, "GenerateAccount", ctx)
 	ret0, _ := ret[0].(*common.Address)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GenerateWallet indicates an expected call of GenerateWallet
-func (mr *MockKeyStoreMockRecorder) GenerateWallet(ctx interface{}) *gomock.Call {
+// GenerateAccount indicates an expected call of GenerateAccount
+func (mr *MockKeyStoreMockRecorder) GenerateAccount(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenerateWallet", reflect.TypeOf((*MockKeyStore)(nil).GenerateWallet), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenerateAccount", reflect.TypeOf((*MockKeyStore)(nil).GenerateAccount), ctx)
 }
 
 // ImportPrivateKey mocks base method

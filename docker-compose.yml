@@ -1,4 +1,4 @@
-version: '3.7'
+version: "3.7"
 
 x-default-variables: &default-variables
   CHAIN_REGISTRY_URL: ${CHAIN_REGISTRY_URL-http://chain-registry:8081}
@@ -18,7 +18,7 @@ x-default-variables: &default-variables
   MULTI_TENANCY_ENABLED: ${MULTI_TENANCY_ENABLED-false}
   AUTH_JWT_CLAIMS_NAMESPACE: ${AUTH_JWT_CLAIMS_NAMESPACE-http://tenant.info/}
   AUTH_JWT_CERTIFICATE: ${AUTH_JWT_CERTIFICATE-}
-  AUTH_JWT_PRIVATE_KEY: ${AUTH_JWT_PRIVATE_KEY-}  
+  AUTH_JWT_PRIVATE_KEY: ${AUTH_JWT_PRIVATE_KEY-}
   AUTH_API_KEY: ${AUTH_API_KEY-}
 
 x-container-common: &container-common
@@ -188,8 +188,8 @@ services:
       CUCUMBER_PATHS: "/features"
       CUCUMBER_FORMAT: "cucumber"
       AUTH_JWT_PRIVATE_KEY: ${AUTH_JWT_PRIVATE_KEY-}
-      # Uncomment CUCUMBER_TAGS if only run features and scenarios with @public-tx or @wallet tags ("," = OR, "&&" = AND, "~" = NOT)
-      # CUCUMBER_TAGS: "@public-tx,@wallet"
+      # Uncomment CUCUMBER_TAGS if only run features and scenarios with @public-tx or @account tags ("," = OR, "&&" = AND, "~" = NOT)
+      # CUCUMBER_TAGS: "@public-tx,@account"
     restart: "no"
     command: e2e run
     volumes:

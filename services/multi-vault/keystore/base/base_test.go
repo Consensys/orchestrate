@@ -120,9 +120,9 @@ func (s *BaseKeyStoreTestSuite) TestSignMsg() {
 	}
 }
 
-func (s *BaseKeyStoreTestSuite) TestGenerateWallet() {
-	_, err := s.Store.GenerateWallet(context.Background())
-	assert.Nil(s.T(), err, "Wallet should be generated")
+func (s *BaseKeyStoreTestSuite) TestGenerateAccount() {
+	_, err := s.Store.GenerateAccount(context.Background())
+	assert.Nil(s.T(), err, "Account should be generated")
 }
 
 func TestKeyStore(t *testing.T) {

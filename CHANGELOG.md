@@ -39,6 +39,7 @@ All notable changes to this project will be documented in this file.
     * `TX_LISTENER_PROVIDER_REFRESH_INTERVAL` to set the time interval for refreshing the list of chains from the chain registry
  
 ### ⚠ BREAKING CHANGES
+ * Rename the default topic names from `topic-wallet-generator` and `topic-wallet-generated` to `topic-account-generator` and `topic-account-generated` respectively
  * Remove the `tx-decoder` microservice and decode logs in the tx-listener. The tx-listener publish transactions directly in the `topic-tx-decoded`
  * Merge the `tx-nonce` microservice into `tx-crafter` microservice. Consequently topic `tx-nonce` has been deprecated
  * Instead of producing and consuming envelopes to Orchestrate, a user will produce `TxRequest` and only consume `TxResponse`

@@ -9,9 +9,9 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore/account"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore/crypto/signature"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore/session"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore/wallet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/services"
 )
 
@@ -31,7 +31,7 @@ func NewKeyStore(secretStore services.SecretStore) *KeyStore {
 func (s *KeyStore) SignTx(ctx context.Context, netChain *big.Int, a ethcommon.Address, tx *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error) {
 	// Creates a new signing session
 	sess := session.NewSigningSession(s.SecretStore)
-	err := sess.SetWallet(ctx, &a)
+	err := sess.SetAccount(ctx, &a)
 	if err != nil {
 		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -53,7 +53,7 @@ func (s *KeyStore) SignTx(ctx context.Context, netChain *big.Int, a ethcommon.Ad
 func (s *KeyStore) SignPrivateEEATx(ctx context.Context, netChain *big.Int, a ethcommon.Address, tx *ethtypes.Transaction, privateArgs *types.PrivateArgs) ([]byte, *ethcommon.Hash, error) {
 	// Creates a new signing session
 	sess := session.NewSigningSession(s.SecretStore)
-	err := sess.SetWallet(ctx, &a)
+	err := sess.SetAccount(ctx, &a)
 	if err != nil {
 		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -74,7 +74,7 @@ func (s *KeyStore) SignPrivateEEATx(ctx context.Context, netChain *big.Int, a et
 func (s *KeyStore) SignPrivateTesseraTx(ctx context.Context, netChain *big.Int, a ethcommon.Address, tx *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error) {
 	// Creates a new signing session
 	sess := session.NewSigningSession(s.SecretStore)
-	err := sess.SetWallet(ctx, &a)
+	err := sess.SetAccount(ctx, &a)
 	if err != nil {
 		return []byte{}, nil, err
 	}
@@ -90,7 +90,7 @@ func (s *KeyStore) SignPrivateTesseraTx(ctx context.Context, netChain *big.Int, 
 func (s *KeyStore) SignMsg(ctx context.Context, a ethcommon.Address, msg string) ([]byte, *ethcommon.Hash, error) {
 	// Creates a new signing session
 	sess := session.NewSigningSession(s.SecretStore)
-	err := sess.SetWallet(ctx, &a)
+	err := sess.SetAccount(ctx, &a)
 	if err != nil {
 		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -115,9 +115,9 @@ func (s *KeyStore) SignRawHash(
 	return []byte{}, errors.FeatureNotSupportedError("SignRawHash not implemented yet").SetComponent(component)
 }
 
-// GenerateWallet create and stores a new wallet in the vault
-func (s *KeyStore) GenerateWallet(ctx context.Context) (*ethcommon.Address, error) {
-	w := wallet.NewWallet(s.SecretStore)
+// GenerateAccount create and stores a new account in the vault
+func (s *KeyStore) GenerateAccount(ctx context.Context) (*ethcommon.Address, error) {
+	w := account.NewAccount(s.SecretStore)
 	err := w.Generate()
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
@@ -135,7 +135,7 @@ func (s *KeyStore) GenerateWallet(ctx context.Context) (*ethcommon.Address, erro
 // TODO: this is Unsafe and should be removed soon
 func (s *KeyStore) ImportPrivateKey(ctx context.Context, priv string) error {
 
-	w := wallet.NewWallet(s.SecretStore)
+	w := account.NewAccount(s.SecretStore)
 	err := w.FromPrivateKey(priv)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(component)

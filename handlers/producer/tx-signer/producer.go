@@ -29,8 +29,8 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 
 		// Set key for Kafka partitions
 		msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(txctx.Envelope.ChainID, txctx.Envelope.MustGetFromAddress()))
-	case viper.GetString(broker.WalletGeneratorViperKey):
-		msg.Topic = viper.GetString(broker.WalletGeneratedViperKey)
+	case viper.GetString(broker.AccountGeneratorViperKey):
+		msg.Topic = viper.GetString(broker.AccountGeneratedViperKey)
 		p = txctx.Envelope.TxResponse()
 
 		// Set key for Kafka partitions

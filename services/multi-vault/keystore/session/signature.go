@@ -10,8 +10,8 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore/account"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore/crypto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore/wallet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/services"
 	"golang.org/x/crypto/sha3"
 )
@@ -19,7 +19,7 @@ import (
 // SigningSession holds all the logic allowing the signature of an ethereum transaction
 type SigningSession struct {
 	secretStore services.SecretStore
-	wallet      *wallet.Wallet
+	account     *account.Account
 	chain       *big.Int
 }
 
@@ -30,15 +30,15 @@ func NewSigningSession(secretStore services.SecretStore) *SigningSession {
 	}
 }
 
-// SetWallet sets the wallet to the provided address
-func (sess *SigningSession) SetWallet(ctx context.Context, address *ethcommon.Address) error {
-	w := wallet.NewWallet(sess.secretStore)
+// SetAccount sets the account to the provided address
+func (sess *SigningSession) SetAccount(ctx context.Context, address *ethcommon.Address) error {
+	w := account.NewAccount(sess.secretStore)
 	err := w.Load(ctx, address)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(component)
 	}
 
-	sess.wallet = w
+	sess.account = w
 	return nil
 }
 
@@ -69,7 +69,7 @@ func (sess *SigningSession) ExecuteForTx(tx *ethtypes.Transaction) ([]byte, *eth
 		return []byte{}, nil, errors.CryptoOperationError(err.Error()).SetComponent(component)
 	}
 
-	t, err := ethtypes.SignTx(tx, signer, sess.wallet.Priv())
+	t, err := ethtypes.SignTx(tx, signer, sess.account.Priv())
 	if err != nil {
 		return []byte{}, nil, errors.CryptoOperationError(err.Error()).SetComponent(component)
 	}
@@ -88,7 +88,7 @@ func (sess *SigningSession) ExecuteForTx(tx *ethtypes.Transaction) ([]byte, *eth
 // it returns the message signature and the txhash
 func (sess *SigningSession) ExecuteForMsg(msg []byte, dsa crypto.DSA) ([]byte, *ethcommon.Hash, error) {
 	rawHash := ethcrypto.Keccak256(msg)
-	signature, err := dsa.Sign(rawHash, sess.wallet.Priv())
+	signature, err := dsa.Sign(rawHash, sess.account.Priv())
 	if err != nil {
 		return []byte{}, nil, errors.CryptoOperationError(err.Error()).SetComponent(component)
 	}
@@ -108,7 +108,7 @@ func (sess *SigningSession) ExecuteForEEATx(tx *ethtypes.Transaction, privateArg
 
 	hash := privateTxHash(tx, privateArgs, sess.chain)
 
-	sig, err := ethcrypto.Sign(hash[:], sess.wallet.Priv())
+	sig, err := ethcrypto.Sign(hash[:], sess.account.Priv())
 	if err != nil {
 		return []byte{}, nil, errors.CryptoOperationError(err.Error()).SetComponent(component)
 	}
@@ -128,7 +128,7 @@ func (sess *SigningSession) ExecuteForEEATx(tx *ethtypes.Transaction, privateArg
 // Signs a transaction for Tessera private enclave
 func (sess *SigningSession) ExecuteForTesseraTx(tx *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error) {
 	// Transactions for Tessera should be signed using Homestead signer
-	t, err := ethtypes.SignTx(tx, ethtypes.HomesteadSigner{}, sess.wallet.Priv())
+	t, err := ethtypes.SignTx(tx, ethtypes.HomesteadSigner{}, sess.account.Priv())
 	if err != nil {
 		return []byte{}, nil, errors.CryptoOperationError(err.Error()).SetComponent(component)
 	}

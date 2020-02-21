@@ -66,11 +66,11 @@ func TestTopics(t *testing.T) {
 	KafkaTopicTxDecoded(flgs)
 	assert.Equal(t, "topic-tx-decoded", viper.GetString("topic.tx.decoded"), "From default")
 
-	KafkaTopicWalletGenerator(flgs)
-	assert.Equal(t, "topic-wallet-generator", viper.GetString("topic.wallet.generator"), "From default")
+	KafkaTopicAccountGenerator(flgs)
+	assert.Equal(t, "topic-account-generator", viper.GetString("topic.account.generator"), "From default")
 
-	KafkaTopicWalletGenerated(flgs)
-	assert.Equal(t, "topic-wallet-generated", viper.GetString("topic.wallet.generated"), "From default")
+	KafkaTopicAccountGenerated(flgs)
+	assert.Equal(t, "topic-account-generated", viper.GetString("topic.account.generated"), "From default")
 }
 
 func TestConsumerGroup(t *testing.T) {

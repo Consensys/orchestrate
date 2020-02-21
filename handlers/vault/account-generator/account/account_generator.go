@@ -1,4 +1,4 @@
-package wallet
+package account
 
 import (
 	log "github.com/sirupsen/logrus"
@@ -6,7 +6,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore"
 )
 
-// Generator creates and handler responsible to generate wallets
+// Generator creates and handler responsible to generate accounts
 func Generator(s keystore.KeyStore) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
@@ -14,10 +14,10 @@ func Generator(s keystore.KeyStore) engine.HandlerFunc {
 			"id":     txctx.Envelope.GetID(),
 		})
 
-		add, err := s.GenerateWallet(txctx.Context())
+		add, err := s.GenerateAccount(txctx.Context())
 		if err != nil {
 			e := txctx.AbortWithError(err)
-			txctx.Logger.WithError(e).Errorf("keygen: could not generate wallet")
+			txctx.Logger.WithError(e).Errorf("keygen: could not generate account")
 		}
 
 		_ = txctx.Envelope.SetFrom(*add)

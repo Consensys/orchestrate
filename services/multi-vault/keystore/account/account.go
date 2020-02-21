@@ -1,4 +1,4 @@
-package wallet
+package account
 
 import (
 	"context"
@@ -11,23 +11,23 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/services"
 )
 
-// Wallet is a container
-type Wallet struct {
+// Account is a container
+type Account struct {
 	address common.Address
 	priv    *ecdsa.PrivateKey
 
 	sec services.SecretStore
 }
 
-// NewWallet construct a wallet object
-func NewWallet(sec services.SecretStore) *Wallet {
-	return &Wallet{
+// NewAccount construct an account object
+func NewAccount(sec services.SecretStore) *Account {
+	return &Account{
 		sec: sec,
 	}
 }
 
-// Generate create a keypair and set the result in the wallet
-func (w *Wallet) Generate() error {
+// Generate create a keypair and set the result in the account
+func (w *Account) Generate() error {
 	prv, err := crypto.GenerateKey()
 	if err != nil {
 		return errors.InternalError(err.Error()).SetComponent(component)
@@ -38,8 +38,8 @@ func (w *Wallet) Generate() error {
 	return nil
 }
 
-// FromPrivateKey creates a new wallet from a given private key
-func (w *Wallet) FromPrivateKey(priv string) error {
+// FromPrivateKey creates a new account from a given private key
+func (w *Account) FromPrivateKey(priv string) error {
 	prv, err := crypto.HexToECDSA(priv)
 	if err != nil {
 		return errors.InvalidFormatError("invalid hex private key %v...%v", priv[:5], priv[len(priv)-5:]).SetComponent(component)
@@ -50,8 +50,8 @@ func (w *Wallet) FromPrivateKey(priv string) error {
 	return nil
 }
 
-// Store saves wallet information to secret store
-func (w *Wallet) Store(ctx context.Context) error {
+// Store saves account information to secret store
+func (w *Account) Store(ctx context.Context) error {
 	if err := w.sec.Store(
 		ctx,
 		w.address.Hex(),
@@ -63,8 +63,8 @@ func (w *Wallet) Store(ctx context.Context) error {
 	return nil
 }
 
-// Load wallets values by fetching wallet secret store
-func (w *Wallet) Load(ctx context.Context, a *common.Address) (err error) {
+// Load accounts values by fetching account secret store
+func (w *Account) Load(ctx context.Context, a *common.Address) (err error) {
 	w.address = *a
 	priv, ok, err := w.sec.Load(ctx, a.Hex())
 	if err != nil {
@@ -83,12 +83,12 @@ func (w *Wallet) Load(ctx context.Context, a *common.Address) (err error) {
 	return nil
 }
 
-// Priv returns the private key of Wallet
-func (w *Wallet) Priv() *ecdsa.PrivateKey {
+// Priv returns the private key of Account
+func (w *Account) Priv() *ecdsa.PrivateKey {
 	return w.priv
 }
 
-// Address returns the address of the wallet
-func (w *Wallet) Address() *common.Address {
+// Address returns the address of the account
+func (w *Account) Address() *common.Address {
 	return &w.address
 }

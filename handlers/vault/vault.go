@@ -15,7 +15,7 @@ func Vault(signer, generator engine.HandlerFunc) engine.HandlerFunc {
 		switch txctx.In.Entrypoint() {
 		case viper.GetString(broker.TxSignerViperKey):
 			signer(txctx)
-		case viper.GetString(broker.WalletGeneratorViperKey):
+		case viper.GetString(broker.AccountGeneratorViperKey):
 			generator(txctx)
 		}
 	}
