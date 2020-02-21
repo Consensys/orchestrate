@@ -2,81 +2,81 @@ package chainregistry
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/offset"
 
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/offset/testutils"
 )
 
-var MockChainsSlice = []*types.Chain{
-	{
-		UUID:                    "test-chain",
-		Name:                    "test",
-		TenantID:                "test",
-		URLs:                    []string{"test"},
-		ListenerDepth:           &(&struct{ x uint64 }{0}).x,
-		ListenerBlockPosition:   &(&struct{ x int64 }{0}).x,
-		ListenerFromBlock:       &(&struct{ x int64 }{0}).x,
-		ListenerBackOffDuration: &(&struct{ x string }{"0s"}).x,
-	},
-	{
-		UUID:                    "test-chain1",
-		Name:                    "test1",
-		TenantID:                "test1",
-		URLs:                    []string{"test1"},
-		ListenerDepth:           &(&struct{ x uint64 }{1}).x,
-		ListenerBlockPosition:   &(&struct{ x int64 }{1}).x,
-		ListenerFromBlock:       &(&struct{ x int64 }{1}).x,
-		ListenerBackOffDuration: &(&struct{ x string }{"1s"}).x,
-	},
-}
-
-var MockChainsMap = map[string]*types.Chain{
-	"test-chain":  MockChainsSlice[0],
-	"test-chain1": MockChainsSlice[1],
-}
-
-type Mock struct{}
-
-func (c *Mock) GetChainByUUID(_ context.Context, chainUUID string) (*types.Chain, error) {
-	if _, ok := MockChainsMap[chainUUID]; !ok {
-		return nil, fmt.Errorf("test")
-	}
-	return MockChainsMap[chainUUID], nil
-}
-
-func (c *Mock) GetChainByTenantAndName(_ context.Context, _, _ string) (*types.Chain, error) {
-	return nil, nil
-}
-
-func (c *Mock) GetChainByTenantAndUUID(_ context.Context, _, _ string) (*types.Chain, error) {
-	return nil, nil
-}
-
-func (c *Mock) GetChains(_ context.Context) ([]*types.Chain, error) {
-	return MockChainsSlice, nil
-}
-
-func (c *Mock) UpdateBlockPosition(_ context.Context, chainUUID string, blockNumber int64) error {
-	if _, ok := MockChainsMap[chainUUID]; !ok {
-		return fmt.Errorf("test")
-	}
-	MockChainsMap[chainUUID].ListenerBlockPosition = &(&struct{ x int64 }{blockNumber}).x
-	return nil
+var mockChain = &types.Chain{
+	UUID:                    "test-chain",
+	Name:                    "test",
+	TenantID:                "test",
+	URLs:                    []string{"test"},
+	ListenerDepth:           &(&struct{ x uint64 }{0}).x,
+	ListenerBlockPosition:   &(&struct{ x int64 }{0}).x,
+	ListenerFromBlock:       &(&struct{ x int64 }{0}).x,
+	ListenerBackOffDuration: &(&struct{ x string }{"0s"}).x,
 }
 
 type ManagerTestSuite struct {
-	testutils.OffsetManagerTestSuite
+	suite.Suite
+	Manager offset.Manager
 }
 
+var mockChainRegistryClient *mocks.MockChainRegistryClient
+
 func (s *ManagerTestSuite) SetupTest() {
-	s.Manager = NewManager(&Mock{})
+	ctrl := gomock.NewController(s.T())
+	mockChainRegistryClient = mocks.NewMockChainRegistryClient(ctrl)
+
+	s.Manager = NewManager(mockChainRegistryClient)
+}
+
+func (s *ManagerTestSuite) TestManagerLastBlock() {
+	updatedBlockPosition := int64(12)
+	chain := &dynamic.Chain{
+		UUID: mockChain.UUID,
+	}
+
+	mockChainRegistryClient.EXPECT().GetChainByUUID(gomock.Any(), chain.UUID).Return(mockChain, nil)
+	mockChainRegistryClient.EXPECT().UpdateBlockPosition(gomock.Any(), chain.UUID, updatedBlockPosition)
+
+	lastBlockNumber, err := s.Manager.GetLastBlockNumber(context.Background(), chain)
+	assert.Nil(s.T(), err, "GetLastBlockNumber should not error")
+	assert.Equal(s.T(), *mockChain.ListenerBlockPosition, lastBlockNumber, "Lastblock should be correct")
+
+	err = s.Manager.SetLastBlockNumber(context.Background(), chain, updatedBlockPosition)
+	assert.Nil(s.T(), err, "SetLastBlockNumber should not error")
+}
+
+func (s *ManagerTestSuite) TestManagerLastIndex() {
+	chain := &dynamic.Chain{
+		UUID: mockChain.UUID,
+	}
+
+	lastTxIndex, err := s.Manager.GetLastTxIndex(context.Background(), chain, 10)
+	assert.Nil(s.T(), err, "GetLastTxIndex should not error")
+	assert.Equal(s.T(), uint64(0), lastTxIndex, "LastTxIndex should be correct")
+
+	err = s.Manager.SetLastTxIndex(context.Background(), chain, 10, 17)
+	assert.Nil(s.T(), err, "SetLastTxIndex should not error")
+
+	lastTxIndex, err = s.Manager.GetLastTxIndex(context.Background(), chain, 10)
+	assert.Nil(s.T(), err, "GetLastTxIndex should not error")
+	assert.Equal(s.T(), uint64(17), lastTxIndex, "LastTxIndex should be correct")
+
+	lastTxIndex, err = s.Manager.GetLastTxIndex(context.Background(), chain, 11)
+	assert.Nil(s.T(), err, "GetLastTxIndex should not error")
+	assert.Equal(s.T(), uint64(0), lastTxIndex, "LastTxIndex should be correct")
 }
 
 func TestRegistry(t *testing.T) {
-	s := new(ManagerTestSuite)
-	suite.Run(t, s)
+	suite.Run(t, new(ManagerTestSuite))
 }

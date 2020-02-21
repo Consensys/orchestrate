@@ -11,31 +11,31 @@ import (
 	reflect "reflect"
 )
 
-// MockClient is a mock of Client interface
-type MockClient struct {
+// MockChainRegistryClient is a mock of ChainRegistryClient interface
+type MockChainRegistryClient struct {
 	ctrl     *gomock.Controller
-	recorder *MockClientMockRecorder
+	recorder *MockChainRegistryClientMockRecorder
 }
 
-// MockClientMockRecorder is the mock recorder for MockClient
-type MockClientMockRecorder struct {
-	mock *MockClient
+// MockChainRegistryClientMockRecorder is the mock recorder for MockChainRegistryClient
+type MockChainRegistryClientMockRecorder struct {
+	mock *MockChainRegistryClient
 }
 
-// NewMockClient creates a new mock instance
-func NewMockClient(ctrl *gomock.Controller) *MockClient {
-	mock := &MockClient{ctrl: ctrl}
-	mock.recorder = &MockClientMockRecorder{mock}
+// NewMockChainRegistryClient creates a new mock instance
+func NewMockChainRegistryClient(ctrl *gomock.Controller) *MockChainRegistryClient {
+	mock := &MockChainRegistryClient{ctrl: ctrl}
+	mock.recorder = &MockChainRegistryClientMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockClient) EXPECT() *MockClientMockRecorder {
+func (m *MockChainRegistryClient) EXPECT() *MockChainRegistryClientMockRecorder {
 	return m.recorder
 }
 
 // GetChains mocks base method
-func (m *MockClient) GetChains(ctx context.Context) ([]*types.Chain, error) {
+func (m *MockChainRegistryClient) GetChains(ctx context.Context) ([]*types.Chain, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetChains", ctx)
 	ret0, _ := ret[0].([]*types.Chain)
@@ -44,13 +44,28 @@ func (m *MockClient) GetChains(ctx context.Context) ([]*types.Chain, error) {
 }
 
 // GetChains indicates an expected call of GetChains
-func (mr *MockClientMockRecorder) GetChains(ctx interface{}) *gomock.Call {
+func (mr *MockChainRegistryClientMockRecorder) GetChains(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChains", reflect.TypeOf((*MockClient)(nil).GetChains), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChains", reflect.TypeOf((*MockChainRegistryClient)(nil).GetChains), ctx)
+}
+
+// GetChainByName mocks base method
+func (m *MockChainRegistryClient) GetChainByName(ctx context.Context, chainName string) (*types.Chain, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetChainByName", ctx, chainName)
+	ret0, _ := ret[0].(*types.Chain)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetChainByName indicates an expected call of GetChainByName
+func (mr *MockChainRegistryClientMockRecorder) GetChainByName(ctx, chainName interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChainByName", reflect.TypeOf((*MockChainRegistryClient)(nil).GetChainByName), ctx, chainName)
 }
 
 // GetChainByUUID mocks base method
-func (m *MockClient) GetChainByUUID(ctx context.Context, chainUUID string) (*types.Chain, error) {
+func (m *MockChainRegistryClient) GetChainByUUID(ctx context.Context, chainUUID string) (*types.Chain, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetChainByUUID", ctx, chainUUID)
 	ret0, _ := ret[0].(*types.Chain)
@@ -59,43 +74,13 @@ func (m *MockClient) GetChainByUUID(ctx context.Context, chainUUID string) (*typ
 }
 
 // GetChainByUUID indicates an expected call of GetChainByUUID
-func (mr *MockClientMockRecorder) GetChainByUUID(ctx, chainUUID interface{}) *gomock.Call {
+func (mr *MockChainRegistryClientMockRecorder) GetChainByUUID(ctx, chainUUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChainByUUID", reflect.TypeOf((*MockClient)(nil).GetChainByUUID), ctx, chainUUID)
-}
-
-// GetChainByTenantAndName mocks base method
-func (m *MockClient) GetChainByTenantAndName(ctx context.Context, tenantID, chainName string) (*types.Chain, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetChainByTenantAndName", ctx, tenantID, chainName)
-	ret0, _ := ret[0].(*types.Chain)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetChainByTenantAndName indicates an expected call of GetChainByTenantAndName
-func (mr *MockClientMockRecorder) GetChainByTenantAndName(ctx, tenantID, chainName interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChainByTenantAndName", reflect.TypeOf((*MockClient)(nil).GetChainByTenantAndName), ctx, tenantID, chainName)
-}
-
-// GetChainByTenantAndUUID mocks base method
-func (m *MockClient) GetChainByTenantAndUUID(ctx context.Context, tenantID, chainUUID string) (*types.Chain, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetChainByTenantAndUUID", ctx, tenantID, chainUUID)
-	ret0, _ := ret[0].(*types.Chain)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetChainByTenantAndUUID indicates an expected call of GetChainByTenantAndUUID
-func (mr *MockClientMockRecorder) GetChainByTenantAndUUID(ctx, tenantID, chainUUID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChainByTenantAndUUID", reflect.TypeOf((*MockClient)(nil).GetChainByTenantAndUUID), ctx, tenantID, chainUUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChainByUUID", reflect.TypeOf((*MockChainRegistryClient)(nil).GetChainByUUID), ctx, chainUUID)
 }
 
 // UpdateBlockPosition mocks base method
-func (m *MockClient) UpdateBlockPosition(ctx context.Context, chainUUID string, blockNumber int64) error {
+func (m *MockChainRegistryClient) UpdateBlockPosition(ctx context.Context, chainUUID string, blockNumber int64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateBlockPosition", ctx, chainUUID, blockNumber)
 	ret0, _ := ret[0].(error)
@@ -103,7 +88,7 @@ func (m *MockClient) UpdateBlockPosition(ctx context.Context, chainUUID string, 
 }
 
 // UpdateBlockPosition indicates an expected call of UpdateBlockPosition
-func (mr *MockClientMockRecorder) UpdateBlockPosition(ctx, chainUUID, blockNumber interface{}) *gomock.Call {
+func (mr *MockChainRegistryClientMockRecorder) UpdateBlockPosition(ctx, chainUUID, blockNumber interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateBlockPosition", reflect.TypeOf((*MockClient)(nil).UpdateBlockPosition), ctx, chainUUID, blockNumber)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateBlockPosition", reflect.TypeOf((*MockChainRegistryClient)(nil).UpdateBlockPosition), ctx, chainUUID, blockNumber)
 }

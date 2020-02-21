@@ -15,20 +15,6 @@ func TestRegistryType(t *testing.T) {
 
 	expected := postgresOpt
 	assert.Equal(t, expected, viper.GetString(TypeViperKey), "Default")
-
-	expected = memoryOpt
-	_ = os.Setenv(typeEnv, expected)
-	assert.Equal(t, expected, viper.GetString(TypeViperKey), "From Environment Variable")
-	_ = os.Unsetenv(typeEnv)
-
-	args := []string{
-		"--chain-registry-type=in-memory",
-	}
-	err := f.Parse(args)
-	assert.NoError(t, err, "No error expected")
-
-	expected = memoryOpt
-	assert.Equal(t, expected, viper.GetString(TypeViperKey), "From flag")
 }
 
 func TestInitRegistry(t *testing.T) {

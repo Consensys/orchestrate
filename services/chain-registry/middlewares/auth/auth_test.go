@@ -56,20 +56,12 @@ func TestAuth(t *testing.T) {
 			true,
 		},
 		{
-			"with JWT Token and valid tenant",
+			"with JWT Token",
 			"/b49ee1bc-f0fa-430d-89b2-a4fd0dc98906",
 			authorizationHeader,
 			"Bearer " + bearer,
 			http.StatusOK,
 			true,
-		},
-		{
-			"with JWT Token but wrong tenant",
-			"/unkwown-tenant",
-			authorizationHeader,
-			"Bearer " + bearer,
-			http.StatusNotFound,
-			false,
 		},
 	}
 	for _, test := range testCases {
@@ -88,7 +80,7 @@ func TestAuth(t *testing.T) {
 				nextH,
 			)
 			handler := mux.NewRouter()
-			handler.PathPrefix("/{tenantID}").Handler(auth)
+			handler.PathPrefix("/").Handler(auth)
 
 			req := httptest.NewRequest("GET", "http://example.com"+test.path, nil)
 			if test.authorizationHeader == authorizationHeader {

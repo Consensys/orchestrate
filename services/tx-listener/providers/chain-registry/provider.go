@@ -17,7 +17,7 @@ import (
 )
 
 type Provider struct {
-	Client chainregistry.Client
+	Client chainregistry.ChainRegistryClient
 	conf   *Config
 }
 

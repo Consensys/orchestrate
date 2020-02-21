@@ -70,16 +70,6 @@ func (s *ErrorTestSuite) TestGetChains() {
 	assert.Error(s.T(), err, "Should get chains with errors")
 }
 
-func (s *ErrorTestSuite) TestGetChainsByTenantID() {
-	_, err := s.Store.GetChainsByTenantID(context.Background(), "test", nil)
-	assert.Error(s.T(), err, "Should get chains with errors")
-}
-
-func (s *ErrorTestSuite) TestGetChainByName() {
-	_, err := s.Store.GetChainByTenantIDAndName(context.Background(), "test", "test")
-	assert.Error(s.T(), err, "Should get chain with errors")
-}
-
 func (s *ErrorTestSuite) TestGetChainByUUID() {
 	_, err := s.Store.GetChainByUUID(context.Background(), "test")
 	assert.Error(s.T(), err, "Should get chain with errors")
@@ -90,23 +80,8 @@ func (s *ErrorTestSuite) TestUpdateChainByName() {
 	assert.Error(s.T(), err, "Should update chain with errors")
 }
 
-func (s *ErrorTestSuite) TestUpdateBlockPositionByName() {
-	err := s.Store.UpdateBlockPositionByName(context.Background(), "test", "test", 777)
-	assert.Error(s.T(), err, "Should update chain with errors")
-}
-
 func (s *ErrorTestSuite) TestUpdateChainByUUID() {
 	err := s.Store.UpdateChainByUUID(context.Background(), &types.Chain{UUID: "test"})
-	assert.Error(s.T(), err, "Should update chain with errors")
-}
-
-func (s *ErrorTestSuite) TestUpdateBlockPositionByUUID() {
-	err := s.Store.UpdateBlockPositionByUUID(context.Background(), "test", 777)
-	assert.Error(s.T(), err, "Should update chain with errors")
-}
-
-func (s *ErrorTestSuite) TestDeleteChainByName() {
-	err := s.Store.DeleteChainByName(context.Background(), &types.Chain{Name: "test"})
 	assert.Error(s.T(), err, "Should update chain with errors")
 }
 

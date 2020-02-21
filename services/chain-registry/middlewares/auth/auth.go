@@ -7,7 +7,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication"
 
 	"github.com/containous/traefik/v2/pkg/log"
-	"github.com/gorilla/mux"
 	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt"
 	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/key"
 	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/utils"
@@ -59,18 +58,13 @@ func (a *Auth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		checkedCtx, err = a.authjwt.Check(authCtx)
 		if err == nil {
 			// JWT Authentication succeeded
-			// We now control that tenantID passed in request pass and JWT token are the same
 			jwtTenantID := multitenancy.TenantIDFromContext(checkedCtx)
-			pathTenantID, ok := mux.Vars(req)["tenantID"]
-			if !ok || pathTenantID != jwtTenantID {
-				log.FromContext(req.Context()).Errorf("Permissioned to access tenant denied")
-				a.writeNotFound(rw)
-			} else {
-				log.FromContext(req.Context()).Debugf("JWT Authentication succeeded")
-				a.serveNext(rw, req.WithContext(checkedCtx))
-			}
+			checkedCtx = multitenancy.WithTenantID(checkedCtx, jwtTenantID)
+
+			log.FromContext(req.Context()).WithField("tenant_id", jwtTenantID).Debugf("JWT Authentication succeeded")
+
+			a.serveNext(rw, req.WithContext(checkedCtx))
 		} else {
-			// JWT Authentication failed
 			log.FromContext(req.Context()).WithError(err).Errorf("Authentication failed")
 			a.writeUnauthorized(rw, err)
 		}
@@ -78,12 +72,6 @@ func (a *Auth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		// Auth is deactivated
 		a.serveNext(rw, req)
 	}
-}
-
-func (a *Auth) writeNotFound(rw http.ResponseWriter) {
-	rw.Header().Set("Content-Type", "text/plain")
-	rw.WriteHeader(http.StatusNotFound)
-	_, _ = rw.Write([]byte(fmt.Sprintf("%d %s\n", http.StatusNotFound, http.StatusText(http.StatusNotFound))))
 }
 
 func (a *Auth) writeUnauthorized(rw http.ResponseWriter, err error) {

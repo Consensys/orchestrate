@@ -8,7 +8,6 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/memory"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/pg"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
@@ -16,7 +15,6 @@ import (
 const (
 	component   = "chain-registry.store"
 	postgresOpt = "postgres"
-	memoryOpt   = "in-memory"
 )
 
 var (
@@ -38,12 +36,6 @@ func Init(ctx context.Context) {
 
 			// Create contract-registry
 			store = pg.GlobalChainRegistry()
-		case memoryOpt:
-			// Initialize mock Registry
-			memory.Init()
-
-			// Create contract-registry
-			store = memory.GlobalChainRegistry()
 		default:
 			log.WithFields(log.Fields{
 				"type": viper.GetString(TypeViperKey),

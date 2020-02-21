@@ -29,7 +29,7 @@ const (
 // Type register flag for the Chain Registry to select
 func Type(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Type of Chain Registry (one of %q)
-Environment variable: %q`, []string{postgresOpt, memoryOpt}, typeEnv)
+Environment variable: %q`, []string{postgresOpt}, typeEnv)
 	f.String(typeFlag, typeDefault, desc)
 	_ = viper.BindPFlag(TypeViperKey, f.Lookup(typeFlag))
 }

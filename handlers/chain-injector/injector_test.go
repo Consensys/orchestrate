@@ -64,7 +64,7 @@ func TestChainInjector(t *testing.T) {
 		expectedTxctx func(txctx *engine.TxContext) *engine.TxContext
 	}{
 		{
-			"tenantID and chainName filled",
+			"chainUUID filled",
 			func(txctx *engine.TxContext) *engine.TxContext {
 				_ = txctx.Envelope.SetChainName(testChainName)
 				txctx.WithContext(multitenancy.WithTenantID(txctx.Context(), testTenantID))
@@ -72,7 +72,7 @@ func TestChainInjector(t *testing.T) {
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
 				_ = txctx.Envelope.SetChainUUID(MockChainsByName[testTenantID][testChainName].UUID)
-				url := fmt.Sprintf("%s/%s/%s", testChainProxyURL, testTenantID, testChainName)
+				url := fmt.Sprintf("%s/%s", testChainProxyURL, testChainUUID)
 				txctx.WithContext(proxy.With(txctx.Context(), url))
 				return txctx
 			},
@@ -115,9 +115,9 @@ func TestChainInjector(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockClient := mocks.NewMockClient(mockCtrl)
-	mockClient.EXPECT().GetChainByTenantAndName(gomock.Any(), gomock.Eq(testTenantID), gomock.Eq(testChainName)).Return(MockChainsByName[testTenantID][testChainName], nil).AnyTimes()
-	mockClient.EXPECT().GetChainByTenantAndName(gomock.Any(), gomock.Eq(testChainError), gomock.Eq(testChainError)).Return(nil, fmt.Errorf("error")).AnyTimes()
+	mockClient := mocks.NewMockChainRegistryClient(mockCtrl)
+	mockClient.EXPECT().GetChainByName(gomock.Any(), gomock.Eq(testChainName)).Return(MockChainsByName[testTenantID][testChainName], nil).AnyTimes()
+	mockClient.EXPECT().GetChainByName(gomock.Any(), gomock.Eq(testChainError)).Return(nil, fmt.Errorf("error")).AnyTimes()
 
 	for _, test := range testSet {
 		test := test

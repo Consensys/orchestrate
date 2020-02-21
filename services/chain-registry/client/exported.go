@@ -11,7 +11,7 @@ import (
 const component = "chain-registry.client"
 
 var (
-	client   Client
+	client   ChainRegistryClient
 	initOnce = &sync.Once{}
 )
 
@@ -34,11 +34,11 @@ func Init(ctx context.Context) {
 }
 
 // GlobalChainRegistryClient return the chain registry
-func GlobalClient() Client {
+func GlobalClient() ChainRegistryClient {
 	return client
 }
 
 // SetGlobalChainRegistryClient set a the chain registry client
-func SetGlobalClient(c Client) {
+func SetGlobalClient(c ChainRegistryClient) {
 	client = c
 }

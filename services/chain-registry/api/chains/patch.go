@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api/utils"
 	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 )
 
 type PatchRequest struct {
@@ -16,48 +17,6 @@ type PatchRequest struct {
 }
 
 type PatchResponse struct{}
-
-// @Summary Updates a chain by tenantID and name
-// @Accept json
-// @Produce json
-// @Param tenantID path string true "ID of the tenant"
-// @Param name path string true "Name of the chain"
-// @Param request body PatchRequest true "Patch request body"
-// @Success 200 {object} PatchResponse
-// @Failure 400
-// @Failure 404
-// @Failure 500
-// @Router /{tenantID}/chains/{name} [patch]
-func (h Handler) patchChainByName(rw http.ResponseWriter, request *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-
-	chainRequest := &PatchRequest{Listener: &Listener{}}
-	err := utils.UnmarshalBody(request.Body, chainRequest)
-	if err != nil {
-		utils.WriteError(rw, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	chain := &models.Chain{
-		Name:     mux.Vars(request)["name"],
-		TenantID: mux.Vars(request)["tenantID"],
-		URLs:     chainRequest.URLs,
-	}
-	if chainRequest.Listener != nil {
-		chain.ListenerDepth = chainRequest.Listener.Depth
-		chain.ListenerBlockPosition = chainRequest.Listener.BlockPosition
-		chain.ListenerBackOffDuration = chainRequest.Listener.BackOffDuration
-		chain.ListenerExternalTxEnabled = chainRequest.Listener.ExternalTxEnabled
-	}
-
-	err = h.store.UpdateChainByName(request.Context(), chain)
-	if err != nil {
-		utils.HandleStoreError(rw, err)
-		return
-	}
-
-	_ = json.NewEncoder(rw).Encode(&PatchResponse{})
-}
 
 // @Summary Updates a chain by ID
 // @Accept json
@@ -87,6 +46,11 @@ func (h Handler) patchChainByUUID(rw http.ResponseWriter, request *http.Request)
 		ListenerBlockPosition:     chainRequest.Listener.BlockPosition,
 		ListenerBackOffDuration:   chainRequest.Listener.BackOffDuration,
 		ListenerExternalTxEnabled: chainRequest.Listener.ExternalTxEnabled,
+	}
+
+	tenantID := multitenancy.TenantIDFromContext(request.Context())
+	if tenantID != "" {
+		chain.TenantID = tenantID
 	}
 
 	err = h.store.UpdateChainByUUID(request.Context(), chain)

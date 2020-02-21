@@ -18,7 +18,7 @@ Feature: Authentication on API
 
   Scenario: get authentication with JWT on chain-registry
     Given I set authentication method "JWT" with "f30c452b-e5fb-4102-a45d-bc00a060bcc6"
-    When I send "GET" request to "{{chain-registry}}/f30c452b-e5fb-4102-a45d-bc00a060bcc6/chains"
+    When I send "GET" request to "{{chain-registry}}/chains"
     Then the response code should be 200
 
   Scenario: get authentication with JWT on contract-registry

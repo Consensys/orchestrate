@@ -10,19 +10,21 @@ var postChainTests = []HTTPRouteTests{
 		name:       "TestPostChain200",
 		store:      UseMockChainRegistry,
 		httpMethod: http.MethodPost,
-		path:       "/testTenantID/chains",
+		path:       "/chains",
 		body: func() []byte {
 			listenerDepth := uint64(1)
 			listenerBlockPosition := int64(1)
 			listenerBackOffDuration := "1s"
+			listenerExternalTxEnabled := true
 
 			body, _ := json.Marshal(&PostRequest{
 				Name: "testName",
 				URLs: []string{"http://test.com"},
 				Listener: &Listener{
-					Depth:           &listenerDepth,
-					BlockPosition:   &listenerBlockPosition,
-					BackOffDuration: &listenerBackOffDuration,
+					Depth:             &listenerDepth,
+					BlockPosition:     &listenerBlockPosition,
+					BackOffDuration:   &listenerBackOffDuration,
+					ExternalTxEnabled: &listenerExternalTxEnabled,
 				},
 			})
 			return body
@@ -35,7 +37,7 @@ var postChainTests = []HTTPRouteTests{
 		name:       "TestPostChain400WithTwiceSameURL",
 		store:      UseMockChainRegistry,
 		httpMethod: http.MethodPost,
-		path:       "/testTenantID/chains",
+		path:       "/chains",
 		body: func() []byte {
 			body, _ := json.Marshal(&PostRequest{
 				Name: "testName",
@@ -53,7 +55,7 @@ var postChainTests = []HTTPRouteTests{
 		name:       "TestPostChain400WrongURL",
 		store:      UseMockChainRegistry,
 		httpMethod: http.MethodPost,
-		path:       "/testTenantID/chains",
+		path:       "/chains",
 		body: func() []byte {
 			body, _ := json.Marshal(&PostRequest{
 				Name: "testName",
@@ -69,7 +71,7 @@ var postChainTests = []HTTPRouteTests{
 		name:                "TestPostChain400WrongBody",
 		store:               UseMockChainRegistry,
 		httpMethod:          http.MethodPost,
-		path:                "/testTenantID/chains",
+		path:                "/chains",
 		body:                func() []byte { return []byte(`{"unknownField":"error"}`) },
 		expectedStatusCode:  http.StatusBadRequest,
 		expectedContentType: expectedErrorStatusContentType,
@@ -79,7 +81,7 @@ var postChainTests = []HTTPRouteTests{
 		name:       "TestPostChain500",
 		store:      UseErrorChainRegistry,
 		httpMethod: http.MethodPost,
-		path:       "/testTenantID/chains",
+		path:       "/chains",
 		body: func() []byte {
 			listenerDepth := uint64(1)
 			listenerBlockPosition := int64(1)

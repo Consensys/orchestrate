@@ -49,16 +49,6 @@ func (s *TestSuite) TestInitPostgres() {
 	assert.Nil(s.T(), GlobalStoreRegistry(), "Global should be reset to nil")
 }
 
-func (s *TestSuite) TestInitInMemory() {
-	viper.Set(TypeViperKey, memoryOpt)
-	Init(context.Background())
-	assert.NotNil(s.T(), GlobalStoreRegistry(), "Global should have been set")
-
-	var chainRegistry *pg.ChainRegistry
-	SetGlobalStoreRegistry(chainRegistry)
-	assert.Nil(s.T(), GlobalStoreRegistry(), "Global should be reset to nil")
-}
-
 func (s *TestSuite) TestInitDefault() {
 	defer func() { log.StandardLogger().ExitFunc = nil }()
 	var fatal bool

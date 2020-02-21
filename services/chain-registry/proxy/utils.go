@@ -2,7 +2,6 @@ package proxy
 
 import (
 	"context"
-	"fmt"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -31,8 +30,4 @@ func GetURL(txctx *engine.TxContext) (string, error) {
 	}
 
 	return chainProxyURL, nil
-}
-
-func PathByChainName(tenantID, chainName string) string {
-	return fmt.Sprintf("%s/%s", tenantID, chainName)
 }

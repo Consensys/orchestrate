@@ -15,10 +15,10 @@ const component = "tx-listener.offset"
 
 type Manager struct {
 	sm       *sync.Map
-	registry registry.Client
+	registry registry.ChainRegistryClient
 }
 
-func NewManager(r registry.Client) *Manager {
+func NewManager(r registry.ChainRegistryClient) *Manager {
 	return &Manager{
 		sm:       &sync.Map{},
 		registry: r,

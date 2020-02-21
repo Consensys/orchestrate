@@ -13,7 +13,7 @@ import (
 )
 
 // ChainInjector enrich the envelope with the chainUUID, chainName and inject in the input.Context the proxy URL
-func ChainInjector(r registry.Client, chainRegistryURL string) engine.HandlerFunc {
+func ChainInjector(r registry.ChainRegistryClient, chainRegistryURL string) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		// Check if chain exist
 		if txctx.Envelope.GetChainName() == "" {
@@ -29,7 +29,7 @@ func ChainInjector(r registry.Client, chainRegistryURL string) engine.HandlerFun
 		}
 
 		if txctx.Envelope.GetChainUUID() == "" {
-			chain, err := r.GetChainByTenantAndName(txctx.Context(), tenantID, txctx.Envelope.GetChainName())
+			chain, err := r.GetChainByName(txctx.Context(), txctx.Envelope.GetChainName())
 			if err != nil {
 				_ = txctx.AbortWithError(errors.FromError(err)).ExtendComponent(component)
 				return
@@ -39,8 +39,8 @@ func ChainInjector(r registry.Client, chainRegistryURL string) engine.HandlerFun
 			_ = txctx.Envelope.SetChainUUID(chain.UUID)
 		}
 
-		// Inject chain proxy path as /tenantID/chainName
-		proxyURL := fmt.Sprintf("%s/%s", chainRegistryURL, proxy.PathByChainName(tenantID, txctx.Envelope.GetChainName()))
+		// Inject chain proxy path as /chainUUID
+		proxyURL := fmt.Sprintf("%s/%s", chainRegistryURL, txctx.Envelope.GetChainUUID())
 		txctx.WithContext(proxy.With(txctx.Context(), proxyURL))
 	}
 }

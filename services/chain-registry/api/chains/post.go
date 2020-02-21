@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/gorilla/mux"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api/utils"
 	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 )
 
 type PostRequest struct {
@@ -37,9 +37,14 @@ func (h Handler) postChain(rw http.ResponseWriter, request *http.Request) {
 		return
 	}
 
+	tenantID := multitenancy.TenantIDFromContext(request.Context())
+	if tenantID == "" {
+		tenantID = multitenancy.DefaultTenantIDName
+	}
+
 	chain := &models.Chain{
 		Name:                      chainRequest.Name,
-		TenantID:                  mux.Vars(request)["tenantID"],
+		TenantID:                  tenantID,
 		URLs:                      chainRequest.URLs,
 		ListenerDepth:             chainRequest.Listener.Depth,
 		ListenerBlockPosition:     chainRequest.Listener.BlockPosition,
