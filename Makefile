@@ -51,6 +51,9 @@ generate-mocks:
 	mockgen -source=services/chain-registry/store/types/store.go -destination=services/chain-registry/store/mocks/mock_store.go -package=mocks
 	mockgen -source=services/multi-vault/keystore/keystore.go -destination=services/multi-vault/keystore/mocks/mock_client.go -package=mocks
 
+generate-swagger:
+	@bash scripts/swagger.sh
+
 # Tools
 lint-tools: ## Install linting tools
 	@GO111MODULE=off go get -u github.com/client9/misspell/cmd/misspell

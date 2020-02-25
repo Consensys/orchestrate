@@ -72,8 +72,8 @@ func NewBuilder(staticConfig *static.Configuration) Builder {
 
 func buildSwagger(router *mux.Router) {
 	fs := http.FileServer(http.Dir(swaggerUIPath))
-	router.Handle("/swagger/", http.StripPrefix("/swagger/", fs))
 	router.HandleFunc("/swagger/swagger.json", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, swaggerSpecsPath)
 	})
+	router.PathPrefix("/swagger/").Handler(http.StripPrefix("/swagger/", fs))
 }
