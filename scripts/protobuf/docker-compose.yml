@@ -7,7 +7,7 @@ services:
       args:
         PROTOC_TAG: '3.11.0'
         PROTOC_GEN_GO_TAG: 'v1.3.2'
-        GRPC_GATEWAY_TAG: 'v1.12.1'
+        GRPC_GATEWAY_TAG: 'v1.13.0'
     command: sh scripts/protobuf/generate-proto.sh
     volumes:
       - ../../:/src

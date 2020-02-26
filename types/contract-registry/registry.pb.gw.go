@@ -31,6 +31,40 @@ var _ = runtime.String
 var _ = utilities.NewDoubleArray
 var _ = descriptor.ForMessage
 
+func request_ContractRegistry_RegisterContract_0(ctx context.Context, marshaler runtime.Marshaler, client ContractRegistryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq RegisterContractRequest
+	var metadata runtime.ServerMetadata
+
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	}
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	msg, err := client.RegisterContract(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_ContractRegistry_RegisterContract_0(ctx context.Context, marshaler runtime.Marshaler, server ContractRegistryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq RegisterContractRequest
+	var metadata runtime.ServerMetadata
+
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	}
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	msg, err := server.RegisterContract(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
 var (
 	filter_ContractRegistry_GetContract_0 = &utilities.DoubleArray{Encoding: map[string]int{"contractId": 0, "name": 1, "tag": 2}, Base: []int{1, 1, 1, 2, 0, 0}, Check: []int{0, 1, 2, 2, 3, 4}}
 )
@@ -472,6 +506,26 @@ func local_request_ContractRegistry_GetTags_0(ctx context.Context, marshaler run
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
 func RegisterContractRegistryHandlerServer(ctx context.Context, mux *runtime.ServeMux, server ContractRegistryServer) error {
 
+	mux.Handle("POST", pattern_ContractRegistry_RegisterContract_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_ContractRegistry_RegisterContract_0(rctx, inboundMarshaler, server, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_ContractRegistry_RegisterContract_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
 	mux.Handle("GET", pattern_ContractRegistry_GetContract_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -633,6 +687,26 @@ func RegisterContractRegistryHandler(ctx context.Context, mux *runtime.ServeMux,
 // "ContractRegistryClient" to call the correct interceptors.
 func RegisterContractRegistryHandlerClient(ctx context.Context, mux *runtime.ServeMux, client ContractRegistryClient) error {
 
+	mux.Handle("POST", pattern_ContractRegistry_RegisterContract_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_ContractRegistry_RegisterContract_0(rctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_ContractRegistry_RegisterContract_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
 	mux.Handle("GET", pattern_ContractRegistry_GetContract_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -757,6 +831,8 @@ func RegisterContractRegistryHandlerClient(ctx context.Context, mux *runtime.Ser
 }
 
 var (
+	pattern_ContractRegistry_RegisterContract_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"contracts"}, "", runtime.AssumeColonVerbOpt(true)))
+
 	pattern_ContractRegistry_GetContract_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 1, 0, 4, 1, 5, 2}, []string{"contracts", "contractId.name", "contractId.tag"}, "", runtime.AssumeColonVerbOpt(true)))
 
 	pattern_ContractRegistry_GetContractABI_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"contracts", "contractId.name", "contractId.tag", "abi"}, "", runtime.AssumeColonVerbOpt(true)))
@@ -771,6 +847,8 @@ var (
 )
 
 var (
+	forward_ContractRegistry_RegisterContract_0 = runtime.ForwardResponseMessage
+
 	forward_ContractRegistry_GetContract_0 = runtime.ForwardResponseMessage
 
 	forward_ContractRegistry_GetContractABI_0 = runtime.ForwardResponseMessage

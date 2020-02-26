@@ -63,9 +63,6 @@ tools: lint-tools ## Install test tools
 	@GO111MODULE=off go get -u github.com/cucumber/godog/cmd/godog
 	@GO111MODULE=off go get -u github.com/golang/mock/gomock
 	@GO111MODULE=off go get -u github.com/golang/mock/mockgen
-	@GO111MODULE=off go get -u github.com/golang/protobuf/protoc-gen-go
-	@GO111MODULE=off go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
-	@GO111MODULE=off go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
 	@GO111MODULE=off go get -u github.com/swaggo/swag/cmd/swag
 
 # Help
