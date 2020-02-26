@@ -75,6 +75,18 @@ service EnvelopeStore {
         option (google.api.http) = {
             get: "/envelopes/{id}"
         };
+        option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+            responses: {
+                key: "500"
+                value: {
+                    description: "Internal Server Error"
+                    examples: {
+                        key: "application/json"
+                        value: '{ "error": "envelope not found", "code": 5, "message": "envelope not found", "details": [ { "@type": "type.googleapis.com/error.Error", "message": "envelope not found", "code": "897536", "component": "envelope-store.pg" } ] }'
+                    }
+                }
+            }
+        };
     }
 
     // Load Envelope by transaction hash

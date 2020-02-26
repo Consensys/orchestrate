@@ -26,6 +26,25 @@
               "$ref": "#/definitions/envelopestoreStoreResponse"
             }
           },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {},
+            "examples": {
+              "application/json": {
+                "error": "envelope not found",
+                "code": 5,
+                "message": "envelope not found",
+                "details": [
+                  {
+                    "@type": "type.googleapis.com/error.Error",
+                    "message": "envelope not found",
+                    "code": "897536",
+                    "component": "envelope-store.pg"
+                  }
+                ]
+              }
+            }
+          },
           "default": {
             "description": "An unexpected error response",
             "schema": {
