@@ -20,8 +20,8 @@ func TestIsValidChain(t *testing.T) {
 			TenantID:                "test",
 			URLs:                    []string{"test.com", "test.net"},
 			ListenerDepth:           &(&struct{ x uint64 }{1}).x,
-			ListenerBlockPosition:   &(&struct{ x int64 }{1}).x,
-			ListenerFromBlock:       &(&struct{ x int64 }{1}).x,
+			ListenerCurrentBlock:    &(&struct{ x uint64 }{1}).x,
+			ListenerStartingBlock:   &(&struct{ x uint64 }{1}).x,
 			ListenerBackOffDuration: &(&struct{ x string }{"2s"}).x,
 		},
 			true,
@@ -30,8 +30,8 @@ func TestIsValidChain(t *testing.T) {
 			TenantID:                "test",
 			URLs:                    []string{"test.com", "test.net"},
 			ListenerDepth:           &(&struct{ x uint64 }{1}).x,
-			ListenerBlockPosition:   &(&struct{ x int64 }{1}).x,
-			ListenerFromBlock:       &(&struct{ x int64 }{1}).x,
+			ListenerCurrentBlock:    &(&struct{ x uint64 }{1}).x,
+			ListenerStartingBlock:   &(&struct{ x uint64 }{1}).x,
 			ListenerBackOffDuration: &(&struct{ x string }{"2s"}).x,
 		},
 			false,
@@ -40,8 +40,8 @@ func TestIsValidChain(t *testing.T) {
 			Name:                    "test",
 			URLs:                    []string{"test.com", "test.net"},
 			ListenerDepth:           &(&struct{ x uint64 }{1}).x,
-			ListenerBlockPosition:   &(&struct{ x int64 }{1}).x,
-			ListenerFromBlock:       &(&struct{ x int64 }{1}).x,
+			ListenerCurrentBlock:    &(&struct{ x uint64 }{1}).x,
+			ListenerStartingBlock:   &(&struct{ x uint64 }{1}).x,
 			ListenerBackOffDuration: &(&struct{ x string }{"2s"}).x,
 		},
 			false,
@@ -50,8 +50,8 @@ func TestIsValidChain(t *testing.T) {
 			Name:                    "test",
 			TenantID:                "test",
 			ListenerDepth:           &(&struct{ x uint64 }{1}).x,
-			ListenerBlockPosition:   &(&struct{ x int64 }{1}).x,
-			ListenerFromBlock:       &(&struct{ x int64 }{1}).x,
+			ListenerCurrentBlock:    &(&struct{ x uint64 }{1}).x,
+			ListenerStartingBlock:   &(&struct{ x uint64 }{1}).x,
 			ListenerBackOffDuration: &(&struct{ x string }{"2s"}).x,
 		},
 			false,
@@ -61,8 +61,8 @@ func TestIsValidChain(t *testing.T) {
 			TenantID:              "test",
 			URLs:                  []string{"test.com", "test.net"},
 			ListenerDepth:         &(&struct{ x uint64 }{1}).x,
-			ListenerBlockPosition: &(&struct{ x int64 }{1}).x,
-			ListenerFromBlock:     &(&struct{ x int64 }{1}).x,
+			ListenerCurrentBlock:  &(&struct{ x uint64 }{1}).x,
+			ListenerStartingBlock: &(&struct{ x uint64 }{1}).x,
 		},
 			false,
 		},
@@ -80,8 +80,8 @@ func TestChain_SetDefaultIfNil(t *testing.T) {
 	assert.NotNil(t, chain.UUID, "Should not be empty")
 	assert.Equal(t, multitenancy.DefaultTenantIDName, chain.TenantID, "Should not be empty")
 	assert.Equal(t, uint64(0), *chain.ListenerDepth, "Should not be empty")
-	assert.Equal(t, int64(-1), *chain.ListenerBlockPosition, "Should not be empty")
-	assert.Equal(t, int64(-1), *chain.ListenerFromBlock, "Should not be empty")
+	assert.Equal(t, uint64(0), *chain.ListenerCurrentBlock, "Should not be empty")
+	assert.Equal(t, uint64(0), *chain.ListenerStartingBlock, "Should not be empty")
 	assert.Equal(t, "1s", *chain.ListenerBackOffDuration, "Should not be empty")
 }
 
@@ -96,7 +96,7 @@ func TestBuildConfiguration(t *testing.T) {
 				{UUID: "0d60a85e-0b90-4482-a14c-108aea2557aa", Name: "testChain", TenantID: "testTenantId", URLs: []string{"http://testURL1.com", "http://testURL2.com"}},
 			},
 			func(c *dynamic.Configuration) *dynamic.Configuration {
-				c.HTTP.Routers["testTenantId-testChain"] = &dynamic.Router{EntryPoints: []string{"orchestrate"}, Priority: math.MaxInt32, Service: "testTenantId-testChain", Rule: "Path(`/0d60a85e-0b90-4482-a14c-108aea2557aa`) || Path(`/{tenantID:testTenantId}/testChain`)", Middlewares: []string{"orchestrate-auth", "strip-path@internal"}}
+				c.HTTP.Routers["testTenantId-testChain"] = &dynamic.Router{EntryPoints: []string{"orchestrate"}, Priority: math.MaxInt32, Service: "testTenantId-testChain", Rule: "Path(`/0d60a85e-0b90-4482-a14c-108aea2557aa`)", Middlewares: []string{"orchestrate-auth", "strip-path@internal"}}
 				c.HTTP.Services["testTenantId-testChain"] = &dynamic.Service{LoadBalancer: &dynamic.ServersLoadBalancer{Servers: []dynamic.Server{
 					{Scheme: "http", URL: "http//testURL1.com"},
 					{Scheme: "http", URL: "http://testURL2.com"},
@@ -111,8 +111,8 @@ func TestBuildConfiguration(t *testing.T) {
 				{UUID: "39240e9f-ae09-4e95-9fd0-a712035c8ad7", Name: "testChain2", TenantID: "testTenantId", URLs: []string{"http://testURL10.com", "http://testURL20.com"}},
 			},
 			func(c *dynamic.Configuration) *dynamic.Configuration {
-				c.HTTP.Routers["testTenantId-testChain"] = &dynamic.Router{EntryPoints: []string{"orchestrate"}, Priority: math.MaxInt32, Service: "testTenantId-testChain", Rule: "Path(`/0d60a85e-0b90-4482-a14c-108aea2557aa`) || Path(`/{tenantID:testTenantId}/testChain`)", Middlewares: []string{"orchestrate-auth", "strip-path@internal"}}
-				c.HTTP.Routers["testTenantId-testChain2"] = &dynamic.Router{EntryPoints: []string{"orchestrate"}, Priority: math.MaxInt32, Service: "testTenantId-testChain2", Rule: "Path(`/39240e9f-ae09-4e95-9fd0-a712035c8ad7`) || Path(`/{tenantID:testTenantId}/testChain2`)", Middlewares: []string{"orchestrate-auth", "strip-path@internal"}}
+				c.HTTP.Routers["testTenantId-testChain"] = &dynamic.Router{EntryPoints: []string{"orchestrate"}, Priority: math.MaxInt32, Service: "testTenantId-testChain", Rule: "Path(`/0d60a85e-0b90-4482-a14c-108aea2557aa`)", Middlewares: []string{"orchestrate-auth", "strip-path@internal"}}
+				c.HTTP.Routers["testTenantId-testChain2"] = &dynamic.Router{EntryPoints: []string{"orchestrate"}, Priority: math.MaxInt32, Service: "testTenantId-testChain2", Rule: "Path(`/39240e9f-ae09-4e95-9fd0-a712035c8ad7`)", Middlewares: []string{"orchestrate-auth", "strip-path@internal"}}
 				c.HTTP.Services["testTenantId-testChain"] = &dynamic.Service{LoadBalancer: &dynamic.ServersLoadBalancer{Servers: []dynamic.Server{
 					{Scheme: "http", URL: "http//testURL1.com"},
 					{Scheme: "http", URL: "http://testURL2.com"},

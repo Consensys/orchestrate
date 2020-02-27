@@ -25,8 +25,8 @@ var MockChainsSlice = []*types.Chain{
 		TenantID:                "test",
 		URLs:                    []string{"test"},
 		ListenerDepth:           &(&struct{ x uint64 }{0}).x,
-		ListenerBlockPosition:   &(&struct{ x int64 }{10}).x,
-		ListenerFromBlock:       &(&struct{ x int64 }{0}).x,
+		ListenerCurrentBlock:    &(&struct{ x uint64 }{10}).x,
+		ListenerStartingBlock:   &(&struct{ x uint64 }{0}).x,
 		ListenerBackOffDuration: &(&struct{ x string }{"1s"}).x,
 	},
 	{
@@ -35,8 +35,8 @@ var MockChainsSlice = []*types.Chain{
 		TenantID:                "test1",
 		URLs:                    []string{"test1"},
 		ListenerDepth:           &(&struct{ x uint64 }{1}).x,
-		ListenerBlockPosition:   &(&struct{ x int64 }{1}).x,
-		ListenerFromBlock:       &(&struct{ x int64 }{1}).x,
+		ListenerCurrentBlock:    &(&struct{ x uint64 }{1}).x,
+		ListenerStartingBlock:   &(&struct{ x uint64 }{1}).x,
 		ListenerBackOffDuration: &(&struct{ x string }{"1s"}).x,
 	},
 }

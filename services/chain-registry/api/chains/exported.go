@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/rpc"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store"
 )
 
@@ -20,9 +22,10 @@ func Init(ctx context.Context) {
 		}
 
 		store.Init(ctx)
+		rpc.Init(ctx)
 
 		// Set Chain-Registry handler
-		handler = NewHandler(store.GlobalStoreRegistry())
+		handler = NewHandler(store.GlobalStoreRegistry(), rpc.GlobalClient())
 	})
 }
 

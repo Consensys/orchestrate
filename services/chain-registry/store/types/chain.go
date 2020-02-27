@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 
 	genuuid "github.com/satori/go.uuid"
@@ -22,17 +21,17 @@ const component = "chain-registry.store"
 type Chain struct {
 	tableName struct{} `pg:"chains"` // nolint:unused,structcheck // reason
 
-	UUID                      string     `json:"uuid,omitempty" pg:",pk"`
-	Name                      string     `json:"name,omitempty"`
-	TenantID                  string     `json:"tenantID,omitempty"`
-	URLs                      []string   `json:"urls,omitempty" pg:"urls,array"`
-	CreatedAt                 *time.Time `json:"createdAt,omitempty"`
-	UpdatedAt                 *time.Time `json:"updatedAt,omitempty"`
+	UUID                      string     `json:"uuid" pg:",pk"`
+	Name                      string     `json:"name"`
+	TenantID                  string     `json:"tenantID"`
+	URLs                      []string   `json:"urls" pg:"urls,array"`
 	ListenerDepth             *uint64    `json:"listenerDepth,omitempty"`
-	ListenerBlockPosition     *int64     `json:"listenerBlockPosition,string,omitempty"`
-	ListenerFromBlock         *int64     `json:"listenerFromBlock,string,omitempty"`
+	ListenerCurrentBlock      *uint64    `json:"listenerCurrentBlock,string,omitempty"`
+	ListenerStartingBlock     *uint64    `json:"listenerStartingBlock,string,omitempty"`
 	ListenerBackOffDuration   *string    `json:"listenerBackOffDuration,omitempty"`
 	ListenerExternalTxEnabled *bool      `json:"listenerExternalTxEnabled,omitempty"`
+	CreatedAt                 *time.Time `json:"createdAt"`
+	UpdatedAt                 *time.Time `json:"updatedAt,omitempty"`
 }
 
 func (c *Chain) IsValid() bool {
@@ -43,24 +42,27 @@ func (c *Chain) SetDefault() {
 	if c.UUID == "" {
 		c.UUID = genuuid.NewV4().String()
 	}
-	if !viper.GetBool(multitenancy.EnabledViperKey) && c.TenantID == "" {
+	if c.TenantID == "" {
 		c.TenantID = multitenancy.DefaultTenantIDName
 	}
 	if c.ListenerDepth == nil {
 		depth := uint64(0)
 		c.ListenerDepth = &depth
 	}
-	if c.ListenerBlockPosition == nil {
-		blockPosition := int64(-1)
-		c.ListenerBlockPosition = &blockPosition
+	if c.ListenerStartingBlock == nil {
+		startingBlock := uint64(0)
+		c.ListenerStartingBlock = &startingBlock
 	}
-	if c.ListenerFromBlock == nil {
-		fromBlock := *c.ListenerBlockPosition
-		c.ListenerFromBlock = &fromBlock
+	if c.ListenerCurrentBlock == nil {
+		c.ListenerCurrentBlock = c.ListenerStartingBlock
 	}
 	if c.ListenerBackOffDuration == nil {
 		backOffDuration := "1s"
 		c.ListenerBackOffDuration = &backOffDuration
+	}
+	if c.ListenerExternalTxEnabled == nil {
+		externalTxEnabled := false
+		c.ListenerExternalTxEnabled = &externalTxEnabled
 	}
 }
 
@@ -92,9 +94,8 @@ func BuildConfiguration(chains []*Chain) (*dynamic.Configuration, error) {
 			EntryPoints: []string{"orchestrate"},
 			Priority:    math.MaxInt32,
 			Service:     chainKey,
-			// We set path Rule with tenantID placeholder so it is parsed by gorilla mux
-			// and can be used by middlewares (in particular the authentication middleware)
-			Rule: fmt.Sprintf("Path(`/%s`) || Path(`/{tenantID:%s}/%s`)", chain.UUID, chain.TenantID, chain.Name),
+			Rule:        fmt.Sprintf("Path(`/%s`)", chain.UUID),
+			// TODO: Add middleware to verify that the chain is owned by the tenant doing the call
 			Middlewares: []string{
 				"orchestrate-auth",
 				"strip-path@internal",

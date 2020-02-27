@@ -4,14 +4,19 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"math/big"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/mocks"
+
+	ethereumMocks "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/mocks"
+
 	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 )
@@ -21,7 +26,7 @@ const (
 	expectedNotFoundErrorBody        = "{\"message\":\"DB200@: not found error\"}\n"
 	expectedInvalidBodyError         = "{\"message\":\"FF000@chain-registry.store.api: invalid body\"}\n"
 	expectedUnknownBodyError         = "{\"message\":\"FF000@chain-registry.store.api: json: unknown field \\\"unknownField\\\"\"}\n"
-	expectedSuccessStatusBody        = "{}\n"
+	expectedSuccessStatusBody        = "{\"uuid\":\"\",\"name\":\"\",\"tenantID\":\"\",\"urls\":null,\"createdAt\":null}\n"
 	expectedSuccessStatusSliceBody   = "[]\n"
 	expectedSuccessStatusContentType = "application/json"
 	expectedErrorStatusContentType   = "text/plain; charset=utf-8"
@@ -49,7 +54,6 @@ func TestHTTPRouteTests(t *testing.T) {
 		patchChainByUUIDTests,
 		postChainTests,
 	}
-
 	for _, tests := range testsSuite {
 		for _, tt := range tests {
 			tt := tt // NOTE: https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
@@ -58,7 +62,7 @@ func TestHTTPRouteTests(t *testing.T) {
 				t.Parallel() // marks each test case as capable of running in parallel with each other
 
 				router := mux.NewRouter()
-				NewHandler(tt.store(t)).Append(router)
+				NewHandler(tt.store(t), UseEthClient(t)).Append(router)
 
 				// Normal tests
 				writer := httptest.NewRecorder()
@@ -71,7 +75,14 @@ func TestHTTPRouteTests(t *testing.T) {
 	}
 
 	// Multi-tenant tests
-	for _, tests := range testsSuite {
+	testsSuiteMultitenant := [][]HTTPRouteTests{
+		deleteChainByUUIDTests,
+		getChainsTests,
+		getChainsByUUIDTests,
+		patchChainByUUIDTests,
+		postChainTestsMultitenant,
+	}
+	for _, tests := range testsSuiteMultitenant {
 		for _, tt := range tests {
 			tt := tt // NOTE: https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
 
@@ -79,11 +90,11 @@ func TestHTTPRouteTests(t *testing.T) {
 				t.Parallel() // marks each test case as capable of running in parallel with each other
 
 				router := mux.NewRouter()
-				NewHandler(tt.store(t)).Append(router)
+				NewHandler(tt.store(t), UseEthClient(t)).Append(router)
 
 				writer := httptest.NewRecorder()
 				request := httptest.NewRequest(tt.httpMethod, tt.path, bytes.NewReader(tt.body()))
-				request = request.WithContext(multitenancy.WithTenantID(request.Context(), "tenantID1"))
+				request = request.WithContext(multitenancy.WithTenantID(request.Context(), "tenantID"))
 				router.ServeHTTP(writer, request)
 				testResponse(t, writer, tt.expectedStatusCode, tt.expectedContentType, tt.expectedBody())
 			})
@@ -105,20 +116,10 @@ func UseMockChainRegistry(t *testing.T) models.ChainRegistryStore {
 
 	mockStore.EXPECT().RegisterChain(gomock.Any(), gomock.Any()).DoAndReturn(
 		func(ctx context.Context, chain *models.Chain) error {
-			listenerDepth := uint64(1)
-			listenerBlockPosition := int64(1)
-			listenerFromBlock := int64(1)
-			listenerBackOffDuration := "1s"
-			chain.UUID = "1"
-			chain.Name = "chainName1"
-			chain.TenantID = multitenancy.TenantIDFromContext(ctx)
-			chain.URLs = []string{"testUrl1", "testUrl2"}
-			chain.ListenerDepth = &listenerDepth
-			chain.ListenerBlockPosition = &listenerBlockPosition
-			chain.ListenerFromBlock = &listenerFromBlock
-			chain.ListenerBackOffDuration = &listenerBackOffDuration
+			chain.UUID = "uuid"
 			return nil
-		}).AnyTimes()
+		},
+	).AnyTimes()
 
 	mockStore.EXPECT().GetChains(gomock.Any(), gomock.Any()).Return([]*models.Chain{}, nil).AnyTimes()
 	mockStore.EXPECT().GetChainsByTenant(gomock.Any(), gomock.Any(), gomock.Any()).Return([]*models.Chain{}, nil).AnyTimes()
@@ -176,4 +177,14 @@ func UseErrorChainRegistry(t *testing.T) models.ChainRegistryStore {
 	mockStore.EXPECT().DeleteChainByUUIDAndTenant(gomock.Any(), gomock.Not(gomock.Eq("0")), gomock.Any()).Return(errTest).AnyTimes()
 
 	return mockStore
+}
+
+func UseEthClient(t *testing.T) *ethereumMocks.MockChainLedgerReader {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockEthClient := ethereumMocks.NewMockChainLedgerReader(mockCtrl)
+
+	mockEthClient.EXPECT().HeaderByNumber(gomock.Any(), gomock.Any(), gomock.Any()).Return(&types.Header{Number: big.NewInt(666)}, nil).AnyTimes()
+
+	return mockEthClient
 }

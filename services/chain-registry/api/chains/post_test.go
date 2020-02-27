@@ -5,6 +5,14 @@ import (
 	"net/http"
 )
 
+const (
+	name                     = "testName"
+	defaultResult            = "{\"uuid\":\"uuid\",\"name\":\"testName\",\"tenantID\":\"_\",\"urls\":[\"http://test.com\"],\"listenerDepth\":0,\"listenerCurrentBlock\":\"666\",\"listenerStartingBlock\":\"666\",\"listenerBackOffDuration\":\"1s\",\"listenerExternalTxEnabled\":false,\"createdAt\":null}\n"
+	defaultMultitenantResult = "{\"uuid\":\"uuid\",\"name\":\"testName\",\"tenantID\":\"tenantID\",\"urls\":[\"http://test.com\"],\"listenerDepth\":0,\"listenerCurrentBlock\":\"666\",\"listenerStartingBlock\":\"666\",\"listenerBackOffDuration\":\"1s\",\"listenerExternalTxEnabled\":false,\"createdAt\":null}\n"
+)
+
+var urls []string = []string{"http://test.com"}
+
 var postChainTests = []HTTPRouteTests{
 	{
 		name:       "TestPostChain200",
@@ -13,16 +21,16 @@ var postChainTests = []HTTPRouteTests{
 		path:       "/chains",
 		body: func() []byte {
 			listenerDepth := uint64(1)
-			listenerBlockPosition := int64(1)
+			listenerFromBlock := "500"
 			listenerBackOffDuration := "1s"
 			listenerExternalTxEnabled := true
 
 			body, _ := json.Marshal(&PostRequest{
 				Name: "testName",
 				URLs: []string{"http://test.com"},
-				Listener: &Listener{
+				Listener: &ListenerPostRequest{
 					Depth:             &listenerDepth,
-					BlockPosition:     &listenerBlockPosition,
+					FromBlock:         &listenerFromBlock,
 					BackOffDuration:   &listenerBackOffDuration,
 					ExternalTxEnabled: &listenerExternalTxEnabled,
 				},
@@ -31,8 +39,71 @@ var postChainTests = []HTTPRouteTests{
 		},
 		expectedStatusCode:  http.StatusOK,
 		expectedContentType: expectedSuccessStatusContentType,
-		expectedBody:        func() string { return "{\"uuid\":\"1\"}\n" },
+		expectedBody: func() string {
+			return "{\"uuid\":\"uuid\",\"name\":\"testName\",\"tenantID\":\"_\",\"urls\":[\"http://test.com\"],\"listenerDepth\":1,\"listenerCurrentBlock\":\"500\",\"listenerStartingBlock\":\"500\",\"listenerBackOffDuration\":\"1s\",\"listenerExternalTxEnabled\":true,\"createdAt\":null}\n"
+		},
 	},
+	{
+		name:       "TestPostChain200 Listener is Nil",
+		store:      UseMockChainRegistry,
+		httpMethod: http.MethodPost,
+		path:       "/chains",
+		body: func() []byte {
+			body, _ := json.Marshal(&PostRequest{
+				Name: "testName",
+				URLs: []string{"http://test.com"},
+			})
+			return body
+		},
+		expectedStatusCode:  http.StatusOK,
+		expectedContentType: expectedSuccessStatusContentType,
+		expectedBody: func() string {
+			return defaultResult
+		},
+	},
+	{
+		name:       "TestPostChain200 FromBlock is Nil",
+		store:      UseMockChainRegistry,
+		httpMethod: http.MethodPost,
+		path:       "/chains",
+		body: func() []byte {
+			body, _ := json.Marshal(&PostRequest{
+				Name:     name,
+				URLs:     urls,
+				Listener: &ListenerPostRequest{},
+			})
+			return body
+		},
+		expectedStatusCode:  http.StatusOK,
+		expectedContentType: expectedSuccessStatusContentType,
+		expectedBody: func() string {
+			return defaultResult
+		},
+	},
+	{
+		name:       "TestPostChain200 FromBlock is latest",
+		store:      UseMockChainRegistry,
+		httpMethod: http.MethodPost,
+		path:       "/chains",
+		body: func() []byte {
+			listenerFromBlock := LatestBlock
+
+			body, _ := json.Marshal(&PostRequest{
+				Name: name,
+				URLs: urls,
+				Listener: &ListenerPostRequest{
+					FromBlock: &listenerFromBlock,
+				},
+			})
+			return body
+		},
+		expectedStatusCode:  http.StatusOK,
+		expectedContentType: expectedSuccessStatusContentType,
+		expectedBody: func() string {
+			return defaultResult
+		},
+	},
+
 	{
 		name:       "TestPostChain400WithTwiceSameURL",
 		store:      UseMockChainRegistry,
@@ -40,7 +111,7 @@ var postChainTests = []HTTPRouteTests{
 		path:       "/chains",
 		body: func() []byte {
 			body, _ := json.Marshal(&PostRequest{
-				Name: "testName",
+				Name: name,
 				URLs: []string{"http://test.com", "http://test.com"},
 			})
 			return body
@@ -58,7 +129,7 @@ var postChainTests = []HTTPRouteTests{
 		path:       "/chains",
 		body: func() []byte {
 			body, _ := json.Marshal(&PostRequest{
-				Name: "testName",
+				Name: name,
 				URLs: []string{"test.com"},
 			})
 			return body
@@ -83,23 +154,36 @@ var postChainTests = []HTTPRouteTests{
 		httpMethod: http.MethodPost,
 		path:       "/chains",
 		body: func() []byte {
-			listenerDepth := uint64(1)
-			listenerBlockPosition := int64(1)
-			listenerBackOffDuration := "1s"
 
 			body, _ := json.Marshal(&PostRequest{
-				Name: "testName",
-				URLs: []string{"http://test.com"},
-				Listener: &Listener{
-					Depth:           &listenerDepth,
-					BlockPosition:   &listenerBlockPosition,
-					BackOffDuration: &listenerBackOffDuration,
-				},
+				Name: name,
+				URLs: urls,
 			})
 			return body
 		},
 		expectedStatusCode:  http.StatusInternalServerError,
 		expectedContentType: expectedErrorStatusContentType,
 		expectedBody:        func() string { return expectedInternalServerErrorBody },
+	},
+}
+
+var postChainTestsMultitenant = []HTTPRouteTests{
+	{
+		name:       "TestPostChain200",
+		store:      UseMockChainRegistry,
+		httpMethod: http.MethodPost,
+		path:       "/chains",
+		body: func() []byte {
+			body, _ := json.Marshal(&PostRequest{
+				Name: name,
+				URLs: urls,
+			})
+			return body
+		},
+		expectedStatusCode:  http.StatusOK,
+		expectedContentType: expectedSuccessStatusContentType,
+		expectedBody: func() string {
+			return defaultMultitenantResult
+		},
 	},
 }

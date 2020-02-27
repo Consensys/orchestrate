@@ -1,7 +1,6 @@
 package chains
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -9,18 +8,16 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 )
 
-type deleteResponse struct{}
-
 // @Summary Deletes a chain by ID
 // @Produce json
 // @Param uuid path string true "ID of the chain"
-// @Success 200 {object} deleteResponse
+// @Success 204
 // @Failure 400
+
 // @Failure 404
 // @Failure 500
 // @Router /chains/{uuid} [delete]
 func (h Handler) deleteChainByUUID(rw http.ResponseWriter, request *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
 	uuid := mux.Vars(request)["uuid"]
 
 	var err error
@@ -36,5 +33,5 @@ func (h Handler) deleteChainByUUID(rw http.ResponseWriter, request *http.Request
 		return
 	}
 
-	_ = json.NewEncoder(rw).Encode(&deleteResponse{})
+	rw.WriteHeader(http.StatusNoContent)
 }

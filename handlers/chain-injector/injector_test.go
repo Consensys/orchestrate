@@ -33,8 +33,8 @@ var testChain = &types.Chain{
 	TenantID:                testTenantID,
 	URLs:                    []string{"test"},
 	ListenerDepth:           &(&struct{ x uint64 }{1}).x,
-	ListenerBlockPosition:   &(&struct{ x int64 }{2}).x,
-	ListenerFromBlock:       &(&struct{ x int64 }{3}).x,
+	ListenerCurrentBlock:    &(&struct{ x uint64 }{2}).x,
+	ListenerStartingBlock:   &(&struct{ x uint64 }{3}).x,
 	ListenerBackOffDuration: &(&struct{ x string }{"4s"}).x,
 }
 
@@ -44,8 +44,8 @@ var testChainDefaultTenant = &types.Chain{
 	TenantID:                multitenancy.DefaultTenantIDName,
 	URLs:                    []string{"test"},
 	ListenerDepth:           &(&struct{ x uint64 }{1}).x,
-	ListenerBlockPosition:   &(&struct{ x int64 }{2}).x,
-	ListenerFromBlock:       &(&struct{ x int64 }{3}).x,
+	ListenerCurrentBlock:    &(&struct{ x uint64 }{2}).x,
+	ListenerStartingBlock:   &(&struct{ x uint64 }{3}).x,
 	ListenerBackOffDuration: &(&struct{ x string }{"4s"}).x,
 }
 var MockChainsByName = map[string]map[string]*types.Chain{

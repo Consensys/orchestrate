@@ -22,7 +22,7 @@ Feature: chain registry
         ],
         "listener": {
           "depth": 1,
-          "blockPosition": "1",
+          "fromBlock": "1",
           "backOffDuration": "1s",
           "externalTxEnabled": true
         }
@@ -43,7 +43,7 @@ Feature: chain registry
         ],
         "listener": {
           "depth": 1,
-          "blockPosition": "1",
+          "fromBlock": "1",
           "backOffDuration": "1s"
         }
       }
@@ -51,7 +51,7 @@ Feature: chain registry
     Then the response code should be 409
 
     When I send "DELETE" request to "{{chain-registry}}/chains/{{gethTempUUID}}"
-    Then the response code should be 200
+    Then the response code should be 204
 
     When I send "GET" request to "{{chain-registry}}/chains/{{gethTempUUID}}"
     Then the response code should be 500
@@ -67,7 +67,7 @@ Feature: chain registry
         ],
         "listener": {
           "depth": 1,
-          "blockPosition": "1",
+          "fromBlock": "1",
           "backOffDuration": "1s",
           "externalTxEnabled": true
         }
@@ -88,7 +88,7 @@ Feature: chain registry
         ],
         "listener": {
           "depth": 1,
-          "blockPosition": "1",
+          "fromBlock": "1",
           "backOffDuration": "1s"
         }
       }
@@ -96,7 +96,7 @@ Feature: chain registry
     Then the response code should be 409
 
     When I send "DELETE" request to "{{chain-registry}}/chains/{{gethTempUUID}}"
-    Then the response code should be 200
+    Then the response code should be 204
 
     When I send "GET" request to "{{chain-registry}}/chains/{{gethTempUUID}}"
     Then the response code should be 500
@@ -112,7 +112,7 @@ Feature: chain registry
         ],
         "listener": {
           "depth": 1,
-          "blockPosition": "1",
+          "fromBlock": "1",
           "backOffDuration": "1s",
           "externalTxEnabled": true
         }
@@ -132,7 +132,7 @@ Feature: chain registry
     Then the response code should be 200
 
     When I send "DELETE" request to "{{chain-registry}}/chains/{{gethTemp2UUID}}"
-    Then the response code should be 200
+    Then the response code should be 204
 
   Scenario: Patch chain with JWT
     Given I set authentication method "JWT" with "f30c452b-e5fb-4102-a45d-bc00a060bcc6"
@@ -145,7 +145,7 @@ Feature: chain registry
         ],
         "listener": {
           "depth": 1,
-          "blockPosition": "1",
+          "fromBlock": "1",
           "backOffDuration": "1s",
           "externalTxEnabled": true
         }
@@ -165,4 +165,4 @@ Feature: chain registry
     Then the response code should be 200
 
     When I send "DELETE" request to "{{chain-registry}}/chains/{{gethTemp2UUID}}"
-    Then the response code should be 200
+    Then the response code should be 204

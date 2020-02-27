@@ -50,6 +50,7 @@ generate-mocks:
 	mockgen -source=types/envelope-store/store.pb.go -destination=types/envelope-store/client/mocks/mock_client.go -package=mocks
 	mockgen -source=services/chain-registry/store/types/store.go -destination=services/chain-registry/store/mocks/mock_store.go -package=mocks
 	mockgen -source=services/multi-vault/keystore/keystore.go -destination=services/multi-vault/keystore/mocks/mock_client.go -package=mocks
+	mockgen -source=services/tx-listener/session/ethereum/offset/manager.go -destination=services/tx-listener/session/ethereum/offset/mocks/manager_mock.go -package=mocks
 
 generate-swagger:
 	@bash scripts/swagger.sh

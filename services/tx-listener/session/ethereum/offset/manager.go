@@ -7,8 +7,8 @@ import (
 )
 
 type Manager interface {
-	GetLastBlockNumber(ctx context.Context, chain *dynamic.Chain) (int64, error)
-	SetLastBlockNumber(ctx context.Context, chain *dynamic.Chain, blockNumber int64) error
-	GetLastTxIndex(ctx context.Context, chain *dynamic.Chain, blockNumber int64) (uint64, error)
-	SetLastTxIndex(ctx context.Context, chain *dynamic.Chain, blockNumber int64, txIndex uint64) error
+	GetLastBlockNumber(ctx context.Context, chain *dynamic.Chain) (uint64, error)
+	SetLastBlockNumber(ctx context.Context, chain *dynamic.Chain, blockNumber uint64) error
+	GetLastTxIndex(ctx context.Context, chain *dynamic.Chain, blockNumber uint64) (uint64, error)
+	SetLastTxIndex(ctx context.Context, chain *dynamic.Chain, blockNumber uint64, txIndex uint64) error
 }

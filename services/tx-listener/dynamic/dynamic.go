@@ -17,7 +17,8 @@ type Configuration struct {
 }
 
 type Listener struct {
-	BlockPosition     int64
+	StartingBlock     uint64
+	CurrentBlock      uint64
 	Depth             uint64
 	Backoff           time.Duration
 	ExternalTxEnabled bool

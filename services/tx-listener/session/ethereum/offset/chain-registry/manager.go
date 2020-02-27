@@ -25,15 +25,15 @@ func NewManager(r registry.ChainRegistryClient) *Manager {
 	}
 }
 
-func (m *Manager) GetLastBlockNumber(ctx context.Context, chain *dynamic.Chain) (int64, error) {
+func (m *Manager) GetLastBlockNumber(ctx context.Context, chain *dynamic.Chain) (uint64, error) {
 	n, err := m.registry.GetChainByUUID(ctx, chain.UUID)
 	if err != nil {
 		return 0, errors.FromError(err).ExtendComponent(component)
 	}
-	return *n.ListenerBlockPosition, nil
+	return *n.ListenerCurrentBlock, nil
 }
 
-func (m *Manager) SetLastBlockNumber(ctx context.Context, chain *dynamic.Chain, blockNumber int64) error {
+func (m *Manager) SetLastBlockNumber(ctx context.Context, chain *dynamic.Chain, blockNumber uint64) error {
 	err := m.registry.UpdateBlockPosition(ctx, chain.UUID, blockNumber)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(component)
@@ -41,7 +41,7 @@ func (m *Manager) SetLastBlockNumber(ctx context.Context, chain *dynamic.Chain, 
 	return nil
 }
 
-func (m *Manager) GetLastTxIndex(_ context.Context, chain *dynamic.Chain, blockNumber int64) (uint64, error) {
+func (m *Manager) GetLastTxIndex(_ context.Context, chain *dynamic.Chain, blockNumber uint64) (uint64, error) {
 	txIndex, ok := m.sm.Load(fmt.Sprintf("txIndex-%v-%v", chain.UUID, blockNumber))
 	if !ok {
 		return 0, nil
@@ -49,7 +49,7 @@ func (m *Manager) GetLastTxIndex(_ context.Context, chain *dynamic.Chain, blockN
 	return txIndex.(uint64), nil
 }
 
-func (m *Manager) SetLastTxIndex(_ context.Context, chain *dynamic.Chain, blockNumber int64, txIndex uint64) error {
+func (m *Manager) SetLastTxIndex(_ context.Context, chain *dynamic.Chain, blockNumber, txIndex uint64) error {
 	m.sm.Store(fmt.Sprintf("txIndex-%v-%v", chain.UUID, blockNumber), txIndex)
 	return nil
 }

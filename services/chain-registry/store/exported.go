@@ -70,6 +70,7 @@ func importChains(ctx context.Context, chains []string, s types.ChainRegistrySto
 			continue
 		}
 
+		chain.SetDefault()
 		err = s.RegisterChain(ctx, chain)
 		if err != nil {
 			updateErr := s.UpdateChainByName(ctx, chain)

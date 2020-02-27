@@ -82,25 +82,16 @@ func (c *HTTPClient) GetChainByUUID(ctx context.Context, chainUUID string) (*typ
 	return chain, nil
 }
 
-func (c *HTTPClient) UpdateBlockPosition(ctx context.Context, chainUUID string, blockNumber int64) error {
+func (c *HTTPClient) UpdateBlockPosition(ctx context.Context, chainUUID string, blockNumber uint64) error {
 	reqURL := fmt.Sprintf("%v/chains/%v", c.config.URL, chainUUID)
-	body := new(bytes.Buffer)
-	_ = json.NewEncoder(body).Encode(&chains.PatchRequest{
-		Listener: &chains.Listener{BlockPosition: &blockNumber},
-	})
 
-	req, _ := http.NewRequestWithContext(ctx, http.MethodPatch, reqURL, body)
-	r, err := c.client.Do(req)
+	response, err := c.patchRequest(ctx, reqURL, &chains.PatchRequest{
+		Listener: &chains.ListenerPatchRequest{CurrentBlock: &blockNumber},
+	})
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(component)
 	}
-	defer closeResponse(r)
-
-	if r.StatusCode != http.StatusOK {
-		buf := new(bytes.Buffer)
-		_, _ = buf.ReadFrom(r.Body)
-		return errors.FromError(fmt.Errorf("could not update block position %s - got %d - body: %s", reqURL, r.StatusCode, buf.String())).ExtendComponent(component)
-	}
+	defer closeResponse(response)
 
 	return nil
 }
@@ -114,6 +105,23 @@ func (c *HTTPClient) getRequest(ctx context.Context, reqURL string) (*http.Respo
 
 	if r.StatusCode != http.StatusOK {
 		return nil, errors.FromError(fmt.Errorf("get request: %s failed with error %d", reqURL, r.StatusCode)).ExtendComponent(component)
+	}
+
+	return r, nil
+}
+
+func (c *HTTPClient) patchRequest(ctx context.Context, reqURL string, patchRequest *chains.PatchRequest) (*http.Response, error) {
+	body := new(bytes.Buffer)
+	_ = json.NewEncoder(body).Encode(patchRequest)
+
+	req, _ := http.NewRequestWithContext(ctx, http.MethodPatch, reqURL, body)
+	r, err := c.client.Do(req)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	if r.StatusCode != http.StatusOK {
+		return nil, errors.FromError(fmt.Errorf("patch request: %s failed with error %d", reqURL, r.StatusCode)).ExtendComponent(component)
 	}
 
 	return r, nil

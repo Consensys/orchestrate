@@ -25,10 +25,7 @@ func NewChainRegistryPGOptions(opts *pg.Options) *ChainRegistry {
 }
 
 func (r *ChainRegistry) RegisterChain(ctx context.Context, chain *types.Chain) error {
-	chain.SetDefault()
-
-	_, err := r.db.ModelContext(ctx, chain).
-		Insert()
+	_, err := r.db.ModelContext(ctx, chain).Insert()
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(component)
 	}

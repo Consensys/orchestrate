@@ -50,7 +50,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/chains.PostResponse"
+                            "$ref": "#/definitions/chains.Chain"
                         }
                     },
                     "400": {},
@@ -136,7 +136,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/chains.PatchResponse"
+                            "$ref": "#/definitions/chains.Chain"
                         }
                     },
                     "400": {},
@@ -147,13 +147,16 @@
         }
     },
     "definitions": {
-        "chains.Listener": {
+        "chains.Chain": {
+            "$ref": "#/definitions/types.Chain"
+        },
+        "chains.ListenerPatchRequest": {
             "type": "object",
             "properties": {
                 "backOffDuration": {
                     "type": "string"
                 },
-                "blockPosition": {
+                "currentBlock": {
                     "type": "integer"
                 },
                 "depth": {
@@ -164,12 +167,29 @@
                 }
             }
         },
+        "chains.ListenerPostRequest": {
+            "type": "object",
+            "properties": {
+                "backOffDuration": {
+                    "type": "string"
+                },
+                "depth": {
+                    "type": "integer"
+                },
+                "externalTxEnabled": {
+                    "type": "boolean"
+                },
+                "fromBlock": {
+                    "type": "string"
+                }
+            }
+        },
         "chains.PatchRequest": {
             "type": "object",
             "properties": {
                 "listener": {
                     "type": "object",
-                    "$ref": "#/definitions/chains.Listener"
+                    "$ref": "#/definitions/chains.ListenerPatchRequest"
                 },
                 "name": {
                     "type": "string"
@@ -181,9 +201,6 @@
                     }
                 }
             }
-        },
-        "chains.PatchResponse": {
-            "type": "object"
         },
         "chains.PostRequest": {
             "type": "object",
@@ -193,7 +210,7 @@
             "properties": {
                 "listener": {
                     "type": "object",
-                    "$ref": "#/definitions/chains.Listener"
+                    "$ref": "#/definitions/chains.ListenerPostRequest"
                 },
                 "name": {
                     "type": "string"
@@ -203,14 +220,6 @@
                     "items": {
                         "type": "string"
                     }
-                }
-            }
-        },
-        "chains.PostResponse": {
-            "type": "object",
-            "properties": {
-                "uuid": {
-                    "type": "string"
                 }
             }
         },

@@ -30,8 +30,8 @@ var tenantID1Chains = map[string]*types.Chain{
 		TenantID:                tenantID1,
 		URLs:                    []string{"testUrl1", "testUrl2"},
 		ListenerDepth:           &(&struct{ x uint64 }{1}).x,
-		ListenerBlockPosition:   &(&struct{ x int64 }{1}).x,
-		ListenerFromBlock:       &(&struct{ x int64 }{1}).x,
+		ListenerCurrentBlock:    &(&struct{ x uint64 }{1}).x,
+		ListenerStartingBlock:   &(&struct{ x uint64 }{1}).x,
 		ListenerBackOffDuration: &(&struct{ x string }{"1s"}).x,
 	},
 	chainName2: {
@@ -39,8 +39,8 @@ var tenantID1Chains = map[string]*types.Chain{
 		TenantID:                tenantID1,
 		URLs:                    []string{"testUrl1", "testUrl2"},
 		ListenerDepth:           &(&struct{ x uint64 }{2}).x,
-		ListenerBlockPosition:   &(&struct{ x int64 }{2}).x,
-		ListenerFromBlock:       &(&struct{ x int64 }{2}).x,
+		ListenerCurrentBlock:    &(&struct{ x uint64 }{2}).x,
+		ListenerStartingBlock:   &(&struct{ x uint64 }{2}).x,
 		ListenerBackOffDuration: &(&struct{ x string }{"2s"}).x,
 	},
 }
@@ -50,8 +50,8 @@ var tenantID2Chains = map[string]*types.Chain{
 		TenantID:                  tenantID2,
 		URLs:                      []string{"testUrl1", "testUrl2"},
 		ListenerDepth:             &(&struct{ x uint64 }{1}).x,
-		ListenerBlockPosition:     &(&struct{ x int64 }{1}).x,
-		ListenerFromBlock:         &(&struct{ x int64 }{1}).x,
+		ListenerCurrentBlock:      &(&struct{ x uint64 }{1}).x,
+		ListenerStartingBlock:     &(&struct{ x uint64 }{1}).x,
 		ListenerBackOffDuration:   &(&struct{ x string }{"1s"}).x,
 		ListenerExternalTxEnabled: &(&struct{ x bool }{true}).x,
 	},
@@ -60,8 +60,8 @@ var tenantID2Chains = map[string]*types.Chain{
 		TenantID:                  tenantID2,
 		URLs:                      []string{"testUrl1", "testUrl2"},
 		ListenerDepth:             &(&struct{ x uint64 }{2}).x,
-		ListenerBlockPosition:     &(&struct{ x int64 }{2}).x,
-		ListenerFromBlock:         &(&struct{ x int64 }{2}).x,
+		ListenerCurrentBlock:      &(&struct{ x uint64 }{2}).x,
+		ListenerStartingBlock:     &(&struct{ x uint64 }{2}).x,
 		ListenerBackOffDuration:   &(&struct{ x string }{"2s"}).x,
 		ListenerExternalTxEnabled: &(&struct{ x bool }{true}).x,
 	},
@@ -70,8 +70,8 @@ var tenantID2Chains = map[string]*types.Chain{
 		TenantID:                  tenantID2,
 		URLs:                      []string{"testUrl1", "testUrl2"},
 		ListenerDepth:             &(&struct{ x uint64 }{3}).x,
-		ListenerBlockPosition:     &(&struct{ x int64 }{3}).x,
-		ListenerFromBlock:         &(&struct{ x int64 }{3}).x,
+		ListenerCurrentBlock:      &(&struct{ x uint64 }{3}).x,
+		ListenerStartingBlock:     &(&struct{ x uint64 }{3}).x,
 		ListenerBackOffDuration:   &(&struct{ x string }{"3s"}).x,
 		ListenerExternalTxEnabled: &(&struct{ x bool }{true}).x,
 	},
@@ -87,8 +87,8 @@ func CompareChains(t *testing.T, chain1, chain2 *types.Chain) {
 	assert.Equal(t, chain1.TenantID, chain2.TenantID, "Should get the same chain tenantID")
 	assert.Equal(t, chain1.URLs, chain2.URLs, "Should get the same chain URLs")
 	assert.Equal(t, chain1.ListenerDepth, chain2.ListenerDepth, "Should get the same chain ListenerDepth")
-	assert.Equal(t, chain1.ListenerBlockPosition, chain2.ListenerBlockPosition, "Should get the same chain")
-	assert.Equal(t, chain1.ListenerFromBlock, chain2.ListenerFromBlock, "Should get the same chain ListenerBlockPosition")
+	assert.Equal(t, chain1.ListenerCurrentBlock, chain2.ListenerCurrentBlock, "Should get the same chain")
+	assert.Equal(t, chain1.ListenerStartingBlock, chain2.ListenerStartingBlock, "Should get the same chain ListenerBlockPosition")
 	assert.Equal(t, chain1.ListenerBackOffDuration, chain2.ListenerBackOffDuration, "Should get the same chain ListenerBackOffDuration")
 	assert.Equal(t, chain1.ListenerExternalTxEnabled, chain2.ListenerExternalTxEnabled, "Should get the same chain ListenerExternalTxEnabled")
 }
@@ -103,15 +103,15 @@ func (s *ChainRegistryTestSuite) TestRegisterChain() {
 
 func (s *ChainRegistryTestSuite) TestRegisterChainWithError() {
 	listenerDepth := uint64(2)
-	listenerBlockPosition := int64(2)
-	listenerFromBlock := int64(2)
+	listenerCurrentBlock := uint64(2)
+	listenerStartingBlock := uint64(2)
 	listenerBackOffDuration := "2s"
 	chainError := &types.Chain{
 		Name:                    "chainName1",
 		TenantID:                "tenantID1",
 		ListenerDepth:           &listenerDepth,
-		ListenerBlockPosition:   &listenerBlockPosition,
-		ListenerFromBlock:       &listenerFromBlock,
+		ListenerCurrentBlock:    &listenerCurrentBlock,
+		ListenerStartingBlock:   &listenerStartingBlock,
 		ListenerBackOffDuration: &listenerBackOffDuration,
 	}
 	err := s.Store.RegisterChain(context.Background(), chainError)
@@ -121,7 +121,9 @@ func (s *ChainRegistryTestSuite) TestRegisterChainWithError() {
 func (s *ChainRegistryTestSuite) TestRegisterChains() {
 	for _, chains := range ChainsSample {
 		for _, chain := range chains {
-			_ = s.Store.RegisterChain(context.Background(), chain)
+			chain.SetDefault()
+			err := s.Store.RegisterChain(context.Background(), chain)
+			assert.NoError(s.T(), err, "Should not fail to register")
 		}
 	}
 }

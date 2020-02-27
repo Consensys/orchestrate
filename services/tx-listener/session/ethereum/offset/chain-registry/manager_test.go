@@ -20,8 +20,8 @@ var mockChain = &types.Chain{
 	TenantID:                "test",
 	URLs:                    []string{"test"},
 	ListenerDepth:           &(&struct{ x uint64 }{0}).x,
-	ListenerBlockPosition:   &(&struct{ x int64 }{0}).x,
-	ListenerFromBlock:       &(&struct{ x int64 }{0}).x,
+	ListenerCurrentBlock:    &(&struct{ x uint64 }{0}).x,
+	ListenerStartingBlock:   &(&struct{ x uint64 }{0}).x,
 	ListenerBackOffDuration: &(&struct{ x string }{"0s"}).x,
 }
 
@@ -40,19 +40,19 @@ func (s *ManagerTestSuite) SetupTest() {
 }
 
 func (s *ManagerTestSuite) TestManagerLastBlock() {
-	updatedBlockPosition := int64(12)
+	updatedCurrentBlock := uint64(12)
 	chain := &dynamic.Chain{
 		UUID: mockChain.UUID,
 	}
 
 	mockChainRegistryClient.EXPECT().GetChainByUUID(gomock.Any(), chain.UUID).Return(mockChain, nil)
-	mockChainRegistryClient.EXPECT().UpdateBlockPosition(gomock.Any(), chain.UUID, updatedBlockPosition)
+	mockChainRegistryClient.EXPECT().UpdateBlockPosition(gomock.Any(), chain.UUID, updatedCurrentBlock)
 
 	lastBlockNumber, err := s.Manager.GetLastBlockNumber(context.Background(), chain)
 	assert.Nil(s.T(), err, "GetLastBlockNumber should not error")
-	assert.Equal(s.T(), *mockChain.ListenerBlockPosition, lastBlockNumber, "Lastblock should be correct")
+	assert.Equal(s.T(), *mockChain.ListenerCurrentBlock, lastBlockNumber, "Lastblock should be correct")
 
-	err = s.Manager.SetLastBlockNumber(context.Background(), chain, updatedBlockPosition)
+	err = s.Manager.SetLastBlockNumber(context.Background(), chain, updatedCurrentBlock)
 	assert.Nil(s.T(), err, "SetLastBlockNumber should not error")
 }
 

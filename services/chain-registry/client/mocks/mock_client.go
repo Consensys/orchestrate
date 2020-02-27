@@ -80,7 +80,7 @@ func (mr *MockChainRegistryClientMockRecorder) GetChainByUUID(ctx, chainUUID int
 }
 
 // UpdateBlockPosition mocks base method
-func (m *MockChainRegistryClient) UpdateBlockPosition(ctx context.Context, chainUUID string, blockNumber int64) error {
+func (m *MockChainRegistryClient) UpdateBlockPosition(ctx context.Context, chainUUID string, blockNumber uint64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateBlockPosition", ctx, chainUUID, blockNumber)
 	ret0, _ := ret[0].(error)

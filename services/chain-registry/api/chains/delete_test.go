@@ -11,9 +11,9 @@ var deleteChainByUUIDTests = []HTTPRouteTests{
 		httpMethod:          http.MethodDelete,
 		path:                "/chains/1",
 		body:                func() []byte { return nil },
-		expectedStatusCode:  http.StatusOK,
-		expectedContentType: expectedSuccessStatusContentType,
-		expectedBody:        func() string { return expectedSuccessStatusBody },
+		expectedStatusCode:  http.StatusNoContent,
+		expectedContentType: "",
+		expectedBody:        func() string { return "" },
 	},
 	{
 		name:                "TestDeleteChainByUUID404",

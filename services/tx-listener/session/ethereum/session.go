@@ -126,34 +126,19 @@ func (s *Session) initPosition(ctx context.Context) error {
 		return err
 	}
 
-	if blockPosition == 0 {
-		// We listen the chain for the first time
-		if s.Chain.Listener.BlockPosition < 0 {
-			// Start from latest block
-			tip, err := s.getChainTip(ctx)
-			if err != nil {
-				return err
-			}
-			s.currentChainTip = tip
-			blockPosition = int64(tip)
-		} else {
-			// Start from position provided
-			blockPosition = s.Chain.Listener.BlockPosition
-		}
-	} else {
-		// It is not the first time we listen the chain
-		// So we start listening from next block
+	// if blockPosition and startingBlock are different then we have already started listening to that chain
+	// and we start at next block since the current one is already processed
+	if blockPosition != s.Chain.Listener.StartingBlock {
 		blockPosition++
 	}
 
-	// Set block position
-	s.blockPosition = uint64(blockPosition)
+	s.blockPosition = blockPosition
 
 	return nil
 }
 
 func (s *Session) listen(ctx context.Context) {
-	log.FromContext(ctx).WithField("block.start", s.blockPosition).Errorf("start listening")
+	log.FromContext(ctx).WithField("block.start", s.blockPosition).Infof("start listening")
 	ticker := time.NewTicker(s.Chain.Listener.Backoff)
 listeningLoop:
 	for {
@@ -214,7 +199,7 @@ func (s *Session) callHook(ctx context.Context, block *fetchedBlock) error {
 	err := s.hook.AfterNewBlock(ctx, s.Chain, block.block, block.receipts)
 	if err == nil {
 		// Update last block processed
-		err = s.offsets.SetLastBlockNumber(ctx, s.Chain, int64(block.block.NumberU64()))
+		err = s.offsets.SetLastBlockNumber(ctx, s.Chain, block.block.NumberU64())
 	}
 	return err
 }
