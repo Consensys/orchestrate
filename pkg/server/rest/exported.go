@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	grpcServer "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/grpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication"
 	"google.golang.org/grpc"
 )
 
@@ -43,7 +44,7 @@ func Init(ctx context.Context) {
 			fs := http.FileServer(http.Dir(swaggerUIPath))
 			mux.Handle("/swagger/", http.StripPrefix("/swagger/", fs))
 
-			gw := runtime.NewServeMux()
+			gw := runtime.NewServeMux(runtime.WithIncomingHeaderMatcher(authentication.CredMatcher))
 			ApplyEnhancers(mux, gw, grpcConn, enhancers...)
 			mux.Handle("/", gw)
 

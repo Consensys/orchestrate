@@ -41,7 +41,7 @@ func TestTransport(t *testing.T) {
 	auth = req.Header.Get("Authorization")
 	assert.Equal(t, "test-auth", auth, "Authorization header shuld be empty")
 
-	// Test setting X-API-KEY in context
+	// Test setting X-API-Key in context
 	req, _ = http.NewRequestWithContext(
 		authutils.WithAPIKey(context.Background(), "test-auth"),
 		http.MethodGet, "", nil,

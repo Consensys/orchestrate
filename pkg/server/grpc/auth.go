@@ -14,9 +14,11 @@ import (
 func Auth(auth authentication.Auth, multitenancyEnabled bool) grpc_auth.AuthFunc {
 	return func(ctx context.Context) (context.Context, error) {
 		if multitenancyEnabled {
-			authorization := metautils.ExtractIncoming(ctx).Get(authentication.AuthorizationHeader)
-			apiKey := metautils.ExtractIncoming(ctx).Get(authentication.APIKeyHeader)
-			tenantIDFromHeader := metautils.ExtractIncoming(ctx).Get(authentication.TenantIDHeader)
+			metadata := metautils.ExtractIncoming(ctx)
+
+			authorization := metadata.Get(authentication.AuthorizationHeader)
+			apiKey := metadata.Get(authentication.APIKeyHeader)
+			tenantIDFromHeader := metadata.Get(authentication.TenantIDHeader)
 
 			ctx = authutils.WithAPIKey(authutils.WithAuthorization(multitenancy.WithTenantID(ctx, tenantIDFromHeader), authorization), apiKey)
 			checkedCtx, err := auth.Check(ctx)

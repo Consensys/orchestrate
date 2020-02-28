@@ -81,27 +81,7 @@
                 }
             },
             "delete": {
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Deletes a chain by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "ID of the chain",
-                        "name": "uuid",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/chains.deleteResponse"
-                        }
-                    },
-                    "400": {},
                     "404": {},
                     "500": {}
                 }
@@ -222,9 +202,6 @@
                     }
                 }
             }
-        },
-        "chains.deleteResponse": {
-            "type": "object"
         }
     },
     "securityDefinitions": {

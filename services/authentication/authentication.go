@@ -1,8 +1,13 @@
 package authentication
 
-import "context"
+import (
+	"context"
+	"net/textproto"
 
-// The TenantID Header have to be used only between tx-listener  and envelop-store
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+)
+
+// The TenantID Header have to be used only between tx-listener and envelope-store
 const TenantIDHeader = "X-Tenant-ID"
 const APIKeyHeader = "X-API-Key"
 const AuthorizationHeader = "Authorization"
@@ -30,4 +35,16 @@ func (a *combinedAuth) Check(ctx context.Context) (context.Context, error) {
 
 func CombineAuth(auths ...Auth) Auth {
 	return &combinedAuth{auths: auths}
+}
+
+// CredMatcher Verifies that the header is part of the accepted headers
+func CredMatcher(headerKey string) (mdName string, ok bool) {
+	headerKey = textproto.CanonicalMIMEHeaderKey(headerKey)
+	if headerKey == textproto.CanonicalMIMEHeaderKey(TenantIDHeader) ||
+		headerKey == textproto.CanonicalMIMEHeaderKey(APIKeyHeader) ||
+		headerKey == textproto.CanonicalMIMEHeaderKey(AuthorizationHeader) {
+		return headerKey, true
+	}
+
+	return runtime.DefaultHeaderMatcher(headerKey)
 }
