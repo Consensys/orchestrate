@@ -39,14 +39,22 @@ All notable changes to this project will be documented in this file.
     * `TX_LISTENER_PROVIDER_REFRESH_INTERVAL` to set the time interval for refreshing the list of chains from the chain registry
  
 ### ⚠ BREAKING CHANGES
+#### Infrastructure
+ * Merge the `tx-decoder` microservice into `tx-listener` microservice. The `tx-listener` publishes transactions directly in the `topic-tx-decoded` 
+ * The `tx-listener` produces kafka messages exclusively in the topic `topic-tx-decoded` instead of the `topic-tx-decoder-{chainID}`
+ * Merge the `tx-nonce` microservice into `tx-crafter` microservice. The `tx-crafter` publishes transactions directly in the `topic-tx-signer`
+ * All microservices, now, have to go through the `chain-registry` microservice to communicate with any Blockchain
+#### Configuration
  * Rename the default topic names from `topic-wallet-generator` and `topic-wallet-generated` to `topic-account-generator` and `topic-account-generated` respectively
- * Remove the `tx-decoder` microservice and decode logs in the tx-listener. The tx-listener publish transactions directly in the `topic-tx-decoded`
- * Merge the `tx-nonce` microservice into `tx-crafter` microservice. Consequently topic `tx-nonce` has been deprecated
+ * Move environment variables `NONCE_MANAGER_TYPE` `REDIS_URL` `REDIS_LOCKTIMEOUT` from the `tx-nonce` to the `tx-crafter`
+ * Remove environment variable `ETH_CLIENT_URL`, the chains urls have to be set at start-up in `CHAIN_REGISTRY_INIT` of `chain-registry` microservice or dynamically using the chain-registry API. 
+ * Add the environment variable `CHAIN_REGISTRY_URL` to the `tx-listener`, `tx-crafter`, `tx-sender`
+ * Remove environment variable `DISABLE_EXTERNAL_TX` in the `tx-listener` and `tx-decoder`. The same feature can be found in the Chain-Registry API
+#### API 
+ * Remove `/v1` prefix in the HTTP REST path for the `envelope-store` and the `chain-registry`
  * Instead of producing and consuming envelopes to Orchestrate, a user will produce `TxRequest` and only consume `TxResponse`
- * Remove `/v1` prefix in the http rest path for the envelope-store and chain-registry
- * The `tx-listener` produces kafka messages only in the topic `topic-tx-decoded` instead of the `topic-tx-decoder-{chainID}`
- * `ETH_CLIENT_URL` is deprecated, the chains urls have to be set in `CHAIN_REGISTRY_INIT`
- * removes flag and environment variable `DISABLE_EXTERNAL_TX` in the tx-listener and tx-decoder
+ 
+ 
 
 
 ## v1.2.2 (2020-01-09)
