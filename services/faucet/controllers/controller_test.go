@@ -5,11 +5,13 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/golang/mock/gomock"
+	faucetMock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet/mocks"
+
 	"github.com/stretchr/testify/assert"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
 )
 
@@ -42,8 +44,10 @@ func (c *MockController) Control3(f faucet.CreditFunc) faucet.CreditFunc {
 }
 
 func TestCombineControls(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	mockFaucet := faucetMock.NewMockFaucet(mockCtrl)
 	c := MockController{make([]string, 0)}
-	creditor := CombineControls(c.Control1, c.Control2, c.Control3)(mock.Credit)
+	creditor := CombineControls(c.Control1, c.Control2, c.Control3)(mockFaucet.Credit)
 	amount, err := creditor(context.Background(), &types.Request{})
 	assert.Error(t, err, "Expected credited to be invalid")
 	assert.Equal(t, 0, amount.Cmp(big.NewInt(0)), "Wrong credit amount")
@@ -52,8 +56,10 @@ func TestCombineControls(t *testing.T) {
 }
 
 func TestControlledFaucet(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	mockFaucet := faucetMock.NewMockFaucet(mockCtrl)
 	c := MockController{make([]string, 0)}
-	f := NewControlledFaucet(&mock.Faucet{}, c.Control1, c.Control2, c.Control3)
+	f := NewControlledFaucet(mockFaucet, c.Control1, c.Control2, c.Control3)
 	amount, err := f.Credit(context.Background(), &types.Request{})
 	assert.Error(t, err, "Expected credited to be invalid")
 	assert.Equal(t, 0, amount.Cmp(big.NewInt(0)), "Wrong credit amount")

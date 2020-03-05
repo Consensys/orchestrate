@@ -3,82 +3,101 @@ package creditor
 import (
 	"context"
 	"math/big"
-	"sync"
+	"reflect"
 	"testing"
 
+	"github.com/golang/mock/gomock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	faucetMock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet/mocks"
+
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
+	faucettypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types/testutils"
 )
 
-var (
-	chains    = []*big.Int{big.NewInt(10), big.NewInt(2345)}
-	addresses = []ethcommon.Address{
-		ethcommon.HexToAddress("0xab"),
-		ethcommon.HexToAddress("0xcd"),
-		ethcommon.HexToAddress("0xef"),
-	}
-)
-
 func TestCreditor(t *testing.T) {
-	// Create Controller and set creditors
-	cntrl := NewController()
-	for i := range chains {
-		cntrl.SetCreditor(chains[i], addresses[i])
-	}
-	credit := cntrl.Control(mock.Credit)
-
-	// Prepare test data
-	rounds := 50
-	tests := make([]*testutils.TestRequest, 0)
-	for i := 0; i < rounds; i++ {
-		tests = append(
-			tests,
+	testSet := []struct {
+		name  string
+		input *testutils.TestRequest
+	}{
+		{
+			"no faucet candidate",
 			&testutils.TestRequest{
-				Req: &types.Request{
-					ChainID:     chains[i%2],
-					Beneficiary: addresses[i%3],
-					Amount:      big.NewInt(0),
+				Req: &faucettypes.Request{
+					Beneficiary: ethcommon.HexToAddress("0xab"),
 				},
-				ExpectedAmount: big.NewInt(0),
-				ExpectedErr:    i%6 == 0 || i%6 == 1,
+				ExpectedErr: errors.FaucetWarning("no faucet candidates").ExtendComponent(component),
 			},
-		)
-	}
-
-	// Apply tests
-	wg := &sync.WaitGroup{}
-	for _, test := range tests {
-		wg.Add(1)
-		go func(test *testutils.TestRequest) {
-			defer wg.Done()
-			test.ResultAmount, test.ResultErr = credit(context.Background(), test.Req)
-		}(test)
-	}
-	wg.Wait()
-
-	// Ensure results are correct
-	for _, test := range tests {
-		testutils.AssertRequest(t, test)
-	}
-}
-
-func TestCreditorNoCreditor(t *testing.T) {
-	// Create Controller and set creditors
-	cntrl := NewController()
-	credit := cntrl.Control(mock.Credit)
-
-	test := &testutils.TestRequest{
-		Req: &types.Request{
-			ChainID:     chains[0],
-			Beneficiary: addresses[0],
-			Amount:      big.NewInt(10),
 		},
-		ExpectedAmount: big.NewInt(0),
-		ExpectedErr:    true,
+		{
+			"faucet candidate",
+			&testutils.TestRequest{
+				Req: &faucettypes.Request{
+					Beneficiary: ethcommon.HexToAddress("0xab"),
+					FaucetsCandidates: map[string]faucettypes.Faucet{
+						"test": {
+							Amount:   big.NewInt(10),
+							Creditor: ethcommon.HexToAddress("0xab"),
+						},
+						"test1": {
+							Amount:   big.NewInt(11),
+							Creditor: ethcommon.HexToAddress("0xcd"),
+						},
+					},
+				},
+				ExpectedAmount: big.NewInt(11),
+			},
+		},
+		{
+			"creditor should discard all candidates",
+			&testutils.TestRequest{
+				Req: &faucettypes.Request{
+					Beneficiary: ethcommon.HexToAddress("0xab"),
+					FaucetsCandidates: map[string]faucettypes.Faucet{
+						"test": {
+							Amount:   big.NewInt(10),
+							Creditor: ethcommon.HexToAddress("0xab"),
+						},
+						"test1": {
+							Amount:   big.NewInt(11),
+							Creditor: ethcommon.HexToAddress("0xab"),
+						},
+					},
+				},
+				ExpectedErr: errors.FaucetSelfCreditWarning("attempt to credit the creditor").ExtendComponent(component),
+			},
+		},
 	}
-	test.ResultAmount, test.ResultErr = credit(context.Background(), test.Req)
 
-	testutils.AssertRequest(t, test)
+	// Create Controller and set creditors
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockFaucet := faucetMock.NewMockFaucet(mockCtrl)
+	mockFaucet.EXPECT().Credit(gomock.Any(), gomock.Any()).DoAndReturn(func(_ context.Context, r *faucettypes.Request) (*big.Int, error) {
+		if len(r.FaucetsCandidates) == 0 {
+			return nil, errors.FaucetWarning("no faucet request").ExtendComponent(component)
+		}
+		// Select a first faucet candidate for comparison
+		r.ElectedFaucet = reflect.ValueOf(r.FaucetsCandidates).MapKeys()[0].String()
+		for key, candidate := range r.FaucetsCandidates {
+			if candidate.Amount.Cmp(r.FaucetsCandidates[r.ElectedFaucet].Amount) == -1 {
+				r.ElectedFaucet = key
+			}
+		}
+		return r.FaucetsCandidates[r.ElectedFaucet].Amount, nil
+	}).AnyTimes()
+
+	cntrl := NewController()
+	credit := cntrl.Control(mockFaucet.Credit)
+
+	for _, test := range testSet {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			amount, err := credit(context.Background(), test.input.Req)
+			test.input.ResultAmount, test.input.ResultErr = amount, err
+			testutils.AssertRequest(t, test.input)
+		})
+	}
 }

@@ -15,7 +15,6 @@ func init() {
 }
 
 func Flags(f *pflag.FlagSet) {
-	Type(f)
 	InitRegistry(f)
 }
 
@@ -41,10 +40,10 @@ var (
 	initEnv      = "CHAIN_REGISTRY_INIT"
 )
 
-// Type register flag for the Chain Registry to select
+// Init register flag for the Chain Registry to define initialization state
 func InitRegistry(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Initialize Chain Registry
-Environment variable: %q`, typeEnv)
+Environment variable: %q`, initEnv)
 	f.StringSlice(initFlag, initDefault, desc)
 	_ = viper.BindPFlag(InitViperKey, f.Lookup(initFlag))
 }

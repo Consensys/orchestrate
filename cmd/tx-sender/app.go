@@ -111,7 +111,7 @@ func Start(ctx context.Context) {
 	startOnce.Do(func() {
 		apiKey := viper.GetString(authkey.APIKeyViperKey)
 		if apiKey != "" {
-			// Inject authorization header in context for later authentication
+			// chainUUIDInjector authorization header in context for later authentication
 			ctx = authutils.WithAPIKey(ctx, apiKey)
 		}
 

@@ -3,6 +3,7 @@ package sarama
 import (
 	"context"
 	"math/big"
+	"reflect"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
 
@@ -35,16 +36,17 @@ func NewFaucet(p sarama.SyncProducer) *Faucet {
 	}
 }
 
-func (f *Faucet) prepareMsg(ctx context.Context, r *types.Request, msg *sarama.ProducerMessage) error {
+func (f *Faucet) prepareMsg(ctx context.Context, r *types.Request, elected string, msg *sarama.ProducerMessage) error {
 	// Create Trace for Crediting message
 	b := tx.NewEnvelope().
 		SetID(uuid.NewV4().String()).
 		SetChainName(r.ChainName).
-		SetFrom(r.Creditor).
-		SetValue(r.Amount).
+		SetFrom(r.FaucetsCandidates[elected].Creditor).
+		SetValue(r.FaucetsCandidates[elected].Amount).
 		SetTo(r.Beneficiary).
 		SetChainID(r.ChainID).
-		SetChainUUID(r.ChainUUID)
+		SetChainUUID(r.ChainUUID).
+		SetContextLabelsValue("faucet.parentTxID", r.ParentTxID)
 
 	if authToken := authutils.AuthorizationFromContext(ctx); authToken != "" {
 		_ = b.SetHeadersValue(multitenancy.AuthorizationMetadata, authToken)
@@ -61,24 +63,32 @@ func (f *Faucet) prepareMsg(ctx context.Context, r *types.Request, msg *sarama.P
 
 	// Message should be sent to crafter topic
 	msg.Topic = viper.GetString(broker.TxCrafterViperKey)
-	msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(r.ChainID, r.Creditor))
+	msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(r.ChainID, r.FaucetsCandidates[elected].Creditor))
 
 	return nil
 }
 
 // Credit process a Faucet credit request
 func (f *Faucet) Credit(ctx context.Context, r *types.Request) (*big.Int, error) {
+	// Elect final faucet
+	if len(r.FaucetsCandidates) == 0 {
+		return nil, errors.FaucetWarning("no faucet request").ExtendComponent(component)
+	}
+
+	// Select a first faucet candidate for comparison
+	r.ElectedFaucet = ElectFaucet(r.FaucetsCandidates)
+
 	// Prepare Message
 	msg := &sarama.ProducerMessage{}
-	err := f.prepareMsg(ctx, r, msg)
+	err := f.prepareMsg(ctx, r, r.ElectedFaucet, msg)
 	if err != nil {
-		return big.NewInt(0), errors.FromError(err).ExtendComponent(component)
+		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
 	// Send message
 	partition, offset, err := f.p.SendMessage(msg)
 	if err != nil {
-		return big.NewInt(0), errors.FromError(err).ExtendComponent(component)
+		return nil, errors.KafkaConnectionError("could not send faucet transaction - got %v", err).ExtendComponent(component)
 	}
 
 	log.WithFields(log.Fields{
@@ -87,5 +97,17 @@ func (f *Faucet) Credit(ctx context.Context, r *types.Request) (*big.Int, error)
 		"kafka.out.topic":     msg.Topic,
 	}).Tracef("faucet: message produced")
 
-	return r.Amount, nil
+	return r.FaucetsCandidates[r.ElectedFaucet].Amount, nil
+}
+
+// ElectFaucet is currently selecting the remaining faucet candidates with the highest amount
+func ElectFaucet(faucetsCandidates map[string]types.Faucet) string {
+	// Select a first faucet candidate for comparison
+	electedFaucet := reflect.ValueOf(faucetsCandidates).MapKeys()[0].String()
+	for key, candidate := range faucetsCandidates {
+		if candidate.Amount.Cmp(faucetsCandidates[electedFaucet].Amount) > 0 {
+			electedFaucet = key
+		}
+	}
+	return electedFaucet
 }

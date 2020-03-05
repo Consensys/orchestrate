@@ -4,6 +4,8 @@ import (
 	"context"
 	"os"
 
+	chnregclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
+
 	"github.com/spf13/cobra"
 
 	noncechecker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/nonce/checker"
@@ -25,6 +27,9 @@ func newRunCommand() *cobra.Command {
 	broker.InitKafkaFlags(runCmd.Flags())
 	broker.KafkaTopicTxSender(runCmd.Flags())
 	broker.KafkaTopicTxRecover(runCmd.Flags())
+
+	// Chain Registry
+	chnregclient.Flags(runCmd.Flags())
 
 	// Register StoreGRPC flags
 	storeclient.EnvelopeStoreURL(runCmd.Flags())

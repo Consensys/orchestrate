@@ -119,7 +119,7 @@ var postChainTests = []HTTPRouteTests{
 		expectedStatusCode:  http.StatusBadRequest,
 		expectedContentType: expectedErrorStatusContentType,
 		expectedBody: func() string {
-			return expectedInvalidBodyError
+			return "{\"message\":\"42400@chain-registry.store.api: invalid body, with: field validation for 'URLs' failed on the 'unique' tag\"}\n"
 		},
 	},
 	{
@@ -136,7 +136,9 @@ var postChainTests = []HTTPRouteTests{
 		},
 		expectedStatusCode:  http.StatusBadRequest,
 		expectedContentType: expectedErrorStatusContentType,
-		expectedBody:        func() string { return expectedInvalidBodyError },
+		expectedBody: func() string {
+			return expectedNotUniqueURLsError
+		},
 	},
 	{
 		name:                "TestPostChain400WrongBody",

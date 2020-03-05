@@ -9,10 +9,10 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
 
-// ChainRegistryTestSuite is a test suit for ChainRegistry
-type ChainRegistryTestSuite struct {
+// ChainTestSuite is a test suite for ChainRegistry
+type ChainTestSuite struct {
 	suite.Suite
-	Store types.ChainRegistryStore
+	Store types.ChainStore
 }
 
 const (
@@ -93,7 +93,7 @@ func CompareChains(t *testing.T, chain1, chain2 *types.Chain) {
 	assert.Equal(t, chain1.ListenerExternalTxEnabled, chain2.ListenerExternalTxEnabled, "Should get the same chain ListenerExternalTxEnabled")
 }
 
-func (s *ChainRegistryTestSuite) TestRegisterChain() {
+func (s *ChainTestSuite) TestRegisterChain() {
 	err := s.Store.RegisterChain(context.Background(), ChainsSample[tenantID1][chainName1])
 	assert.NoError(s.T(), err, "Should register chain properly")
 
@@ -101,7 +101,7 @@ func (s *ChainRegistryTestSuite) TestRegisterChain() {
 	assert.Error(s.T(), err, "Should get an error violating the 'unique' constraint")
 }
 
-func (s *ChainRegistryTestSuite) TestRegisterChainWithError() {
+func (s *ChainTestSuite) TestRegisterChainWithError() {
 	listenerDepth := uint64(2)
 	listenerCurrentBlock := uint64(2)
 	listenerStartingBlock := uint64(2)
@@ -118,7 +118,7 @@ func (s *ChainRegistryTestSuite) TestRegisterChainWithError() {
 	assert.Error(s.T(), err, "Should get an error when a field is missing")
 }
 
-func (s *ChainRegistryTestSuite) TestRegisterChains() {
+func (s *ChainTestSuite) TestRegisterChains() {
 	for _, chains := range ChainsSample {
 		for _, chain := range chains {
 			chain.SetDefault()
@@ -128,7 +128,7 @@ func (s *ChainRegistryTestSuite) TestRegisterChains() {
 	}
 }
 
-func (s *ChainRegistryTestSuite) TestGetChains() {
+func (s *ChainTestSuite) TestGetChains() {
 	s.TestRegisterChains()
 
 	chains, err := s.Store.GetChains(context.Background(), nil)
@@ -140,7 +140,7 @@ func (s *ChainRegistryTestSuite) TestGetChains() {
 	}
 }
 
-func (s *ChainRegistryTestSuite) TestGetChainsByTenant() {
+func (s *ChainTestSuite) TestGetChainsByTenant() {
 	s.TestRegisterChains()
 
 	chains, err := s.Store.GetChainsByTenant(context.Background(), nil, tenantID1)
@@ -152,7 +152,7 @@ func (s *ChainRegistryTestSuite) TestGetChainsByTenant() {
 	}
 }
 
-func (s *ChainRegistryTestSuite) TestGetChainByUUID() {
+func (s *ChainTestSuite) TestGetChainByUUID() {
 	s.TestRegisterChains()
 
 	chainUUID := ChainsSample[tenantID1][chainName1].UUID
@@ -163,7 +163,7 @@ func (s *ChainRegistryTestSuite) TestGetChainByUUID() {
 	CompareChains(s.T(), chain, ChainsSample[tenantID1][chainName1])
 }
 
-func (s *ChainRegistryTestSuite) TestGetChainByUUIDByTenant() {
+func (s *ChainTestSuite) TestGetChainByUUIDByTenant() {
 	s.TestRegisterChains()
 
 	chainUUID := ChainsSample[tenantID1][chainName1].UUID
@@ -174,7 +174,7 @@ func (s *ChainRegistryTestSuite) TestGetChainByUUIDByTenant() {
 	assert.Equal(s.T(), tenantID1, chain.TenantID)
 }
 
-func (s *ChainRegistryTestSuite) TestUpdateChainByUUID() {
+func (s *ChainTestSuite) TestUpdateChainByUUID() {
 	s.TestRegisterChains()
 
 	testChain := ChainsSample[tenantID1][chainName2]
@@ -186,14 +186,14 @@ func (s *ChainRegistryTestSuite) TestUpdateChainByUUID() {
 	CompareChains(s.T(), chain, testChain)
 }
 
-func (s *ChainRegistryTestSuite) TestNotFoundTenantErrorUpdateChainByName() {
+func (s *ChainTestSuite) TestNotFoundTenantErrorUpdateChainByName() {
 	testChain := ChainsSample[tenantID1][chainName2]
 	testChain.URLs = []string{"testUrl1"}
 	err := s.Store.UpdateChainByName(context.Background(), testChain)
 	assert.Error(s.T(), err, "Should get chain without errors")
 }
 
-func (s *ChainRegistryTestSuite) TestNotFoundNameErrorUpdateChainByName() {
+func (s *ChainTestSuite) TestNotFoundNameErrorUpdateChainByName() {
 	s.TestRegisterChains()
 
 	testChain := &types.Chain{
@@ -205,7 +205,7 @@ func (s *ChainRegistryTestSuite) TestNotFoundNameErrorUpdateChainByName() {
 	assert.Error(s.T(), err, "Should get chain without errors")
 }
 
-func (s *ChainRegistryTestSuite) TestErrorNotFoundUpdateChainByUUID() {
+func (s *ChainTestSuite) TestErrorNotFoundUpdateChainByUUID() {
 	s.TestRegisterChains()
 
 	testChain := &types.Chain{
@@ -216,7 +216,7 @@ func (s *ChainRegistryTestSuite) TestErrorNotFoundUpdateChainByUUID() {
 	assert.Error(s.T(), err, "Should update chain with errors")
 }
 
-func (s *ChainRegistryTestSuite) TestDeleteChainByUUID() {
+func (s *ChainTestSuite) TestDeleteChainByUUID() {
 	s.TestRegisterChains()
 
 	chainUUID := ChainsSample[tenantID1][chainName1].UUID
@@ -225,7 +225,7 @@ func (s *ChainRegistryTestSuite) TestDeleteChainByUUID() {
 	assert.NoError(s.T(), err, "Should delete chain without errors")
 }
 
-func (s *ChainRegistryTestSuite) TestDeleteChainByUUIDByTenant() {
+func (s *ChainTestSuite) TestDeleteChainByUUIDByTenant() {
 	s.TestRegisterChains()
 
 	chainUUID := ChainsSample[tenantID1][chainName1].UUID
@@ -234,7 +234,7 @@ func (s *ChainRegistryTestSuite) TestDeleteChainByUUIDByTenant() {
 	assert.NoError(s.T(), err, "Should delete chain without errors")
 }
 
-func (s *ChainRegistryTestSuite) TestErrorNotFoundDeleteChainByUUIDAndTenant() {
+func (s *ChainTestSuite) TestErrorNotFoundDeleteChainByUUIDAndTenant() {
 	s.TestRegisterChains()
 
 	// tenantID2 in the context but we try to delete the chainUUID of tenantID1
@@ -244,7 +244,7 @@ func (s *ChainRegistryTestSuite) TestErrorNotFoundDeleteChainByUUIDAndTenant() {
 	assert.Error(s.T(), err, "Should delete chain with errors")
 }
 
-func (s *ChainRegistryTestSuite) TestErrorNotFoundDeleteChainByUUID() {
+func (s *ChainTestSuite) TestErrorNotFoundDeleteChainByUUID() {
 	s.TestRegisterChains()
 
 	err := s.Store.DeleteChainByUUID(context.Background(), "0d60a85e-0b90-4482-a14c-108aea2557aa")

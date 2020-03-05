@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
+
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers"
@@ -27,10 +29,13 @@ func Init(ctx context.Context) {
 		// Initialize Controlled Faucet
 		controllers.Init(ctx)
 
-		// Create Handler
-		handler = Faucet(faucet.GlobalFaucet())
+		// Initialize chain-registry client
+		registry.Init(ctx)
 
-		log.Infof("logger: handler ready")
+		// Create Handler
+		handler = Faucet(faucet.GlobalFaucet(), registry.GlobalClient())
+
+		log.Infof("%s: handler ready", component)
 	})
 }
 

@@ -24,7 +24,7 @@ import (
 const (
 	expectedInternalServerErrorBody  = "{\"message\":\"test error\"}\n"
 	expectedNotFoundErrorBody        = "{\"message\":\"DB200@: not found error\"}\n"
-	expectedInvalidBodyError         = "{\"message\":\"FF000@chain-registry.store.api: invalid body\"}\n"
+	expectedNotUniqueURLsError       = "{\"message\":\"42400@chain-registry.store.api: invalid body, with: field validation for 'URLs[0]' failed on the 'url' tag\"}\n"
 	expectedUnknownBodyError         = "{\"message\":\"FF000@chain-registry.store.api: json: unknown field \\\"unknownField\\\"\"}\n"
 	expectedSuccessStatusBody        = "{\"uuid\":\"\",\"name\":\"\",\"tenantID\":\"\",\"urls\":null,\"createdAt\":null}\n"
 	expectedSuccessStatusSliceBody   = "[]\n"
@@ -35,7 +35,7 @@ const (
 
 type HTTPRouteTests struct {
 	name                string
-	store               func(t *testing.T) models.ChainRegistryStore
+	store               func(t *testing.T) models.ChainStore
 	httpMethod          string
 	path                string
 	body                func() []byte
@@ -104,15 +104,15 @@ func TestHTTPRouteTests(t *testing.T) {
 }
 
 func testResponse(t *testing.T, w *httptest.ResponseRecorder, expectedStatusCode int, expectedContentType, expectedBody string) {
-	assert.Equal(t, expectedContentType, w.Header().Get("Content-Type"), "Did not get expected content type %s, but got %s", expectedContentType, w.Header().Get("Content-Type"))
-	assert.Equal(t, expectedStatusCode, w.Code, "Did not get expected HTTP status code %d, but got %d", expectedStatusCode, w.Code)
-	assert.Equal(t, expectedBody, w.Body.String(), "Did not get expected body %s, but got %s", expectedBody, w.Body.String())
+	assert.Equal(t, expectedContentType, w.Header().Get("Content-Type"), "Did not get expected content typ")
+	assert.Equal(t, expectedStatusCode, w.Code, "Did not get expected HTTP status code")
+	assert.Equal(t, expectedBody, w.Body.String(), "Did not get expected body")
 }
 
-func UseMockChainRegistry(t *testing.T) models.ChainRegistryStore {
+func UseMockChainRegistry(t *testing.T) models.ChainStore {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockStore := mocks.NewMockChainRegistryStore(mockCtrl)
+	mockStore := mocks.NewMockChainStore(mockCtrl)
 
 	mockStore.EXPECT().RegisterChain(gomock.Any(), gomock.Any()).DoAndReturn(
 		func(ctx context.Context, chain *models.Chain) error {
@@ -139,7 +139,7 @@ func UseMockChainRegistry(t *testing.T) models.ChainRegistryStore {
 var errTest = fmt.Errorf("test error")
 var errNotFound = errors.NotFoundError("not found error")
 
-func UseErrorChainRegistry(t *testing.T) models.ChainRegistryStore {
+func UseErrorChainRegistry(t *testing.T) models.ChainStore {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockStore := mocks.NewMockChainRegistryStore(mockCtrl)

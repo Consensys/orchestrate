@@ -22,7 +22,15 @@
                 ],
                 "summary": "Retrieves a list of all registered chains",
                 "responses": {
-                    "200": {},
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/chains.Chain"
+                            }
+                        }
+                    },
                     "404": {},
                     "500": {}
                 }
@@ -74,7 +82,12 @@
                     }
                 ],
                 "responses": {
-                    "200": {},
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/chains.Chain"
+                        }
+                    },
                     "400": {},
                     "404": {},
                     "500": {}
@@ -117,6 +130,144 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/chains.Chain"
+                        }
+                    },
+                    "400": {},
+                    "404": {},
+                    "500": {}
+                }
+            }
+        },
+        "/faucets": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Retrieves a list of all registered faucet",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/faucets.Faucet"
+                            }
+                        }
+                    },
+                    "404": {},
+                    "500": {}
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Registers a new faucet",
+                "parameters": [
+                    {
+                        "description": "Faucet registration request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/faucets.PostRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/faucets.Faucet"
+                        }
+                    },
+                    "400": {},
+                    "500": {}
+                }
+            }
+        },
+        "/faucets/{uuid}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Retrieves a faucet by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the faucet",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/faucets.Faucet"
+                        }
+                    },
+                    "400": {},
+                    "404": {},
+                    "500": {}
+                }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Deletes a faucet by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the faucet",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {},
+                    "400": {},
+                    "404": {},
+                    "500": {}
+                }
+            },
+            "patch": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Updates a faucet by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the faucet",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Faucet update request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/faucets.PatchRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/faucets.Faucet"
                         }
                     },
                     "400": {},
@@ -200,6 +351,63 @@
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "faucets.Faucet": {
+            "$ref": "#/definitions/types.Faucet"
+        },
+        "faucets.PatchRequest": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "string"
+                },
+                "chainRule": {
+                    "type": "string"
+                },
+                "cooldown": {
+                    "type": "string"
+                },
+                "creditorAccount": {
+                    "type": "string"
+                },
+                "maxBalance": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "faucets.PostRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "chainRule",
+                "cooldown",
+                "creditorAccount",
+                "maxBalance",
+                "name"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "string"
+                },
+                "chainRule": {
+                    "type": "string"
+                },
+                "cooldown": {
+                    "type": "string"
+                },
+                "creditorAccount": {
+                    "type": "string"
+                },
+                "maxBalance": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         }

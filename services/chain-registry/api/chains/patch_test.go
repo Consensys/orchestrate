@@ -35,7 +35,7 @@ var patchChainByUUIDTests = []HTTPRouteTests{
 		expectedStatusCode:  http.StatusBadRequest,
 		expectedContentType: expectedErrorStatusContentType,
 		expectedBody: func() string {
-			return expectedInvalidBodyError
+			return expectedNotUniqueURLsError
 		},
 	},
 	{

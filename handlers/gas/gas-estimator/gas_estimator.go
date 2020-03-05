@@ -29,7 +29,7 @@ func Estimator(p ethclient.GasEstimator) engine.HandlerFunc {
 
 	return func(txctx *engine.TxContext) {
 
-		if txctx.Envelope.Gas == nil {
+		if txctx.Envelope.GetGas() == nil {
 			// Retrieve re-cycled CallMsg
 			call := pool.Get().(*ethereum.CallMsg)
 			defer pool.Put(call)
@@ -61,7 +61,7 @@ func Estimator(p ethclient.GasEstimator) engine.HandlerFunc {
 
 		// Enrich logger
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"tx.gas": txctx.Envelope.GetGas(),
+			"tx.gas": txctx.Envelope.MustGetGasUint64(),
 		})
 	}
 }

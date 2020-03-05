@@ -14,18 +14,18 @@ import (
 type Chain = types.Chain
 
 type Handler struct {
-	store types.ChainRegistryStore
+	store types.ChainStore
 	ec    ethclient.ChainLedgerReader
 }
 
-func NewHandler(store types.ChainRegistryStore, ec ethclient.ChainLedgerReader) *Handler {
+func NewHandler(store types.ChainStore, ec ethclient.ChainLedgerReader) *Handler {
 	return &Handler{
 		store: store,
 		ec:    ec,
 	}
 }
 
-// Add internal routes to router
+// Add routes to router
 func (h *Handler) Append(router *mux.Router) {
 	router.Methods(http.MethodGet).Path("/chains").HandlerFunc(h.getChains)
 	router.Methods(http.MethodGet).Path("/chains/{uuid}").HandlerFunc(h.getChainByUUID)

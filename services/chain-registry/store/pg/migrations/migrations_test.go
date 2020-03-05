@@ -40,7 +40,7 @@ func (s *MigrationsTestSuite) TestMigrationVersion() {
 	)
 
 	s.Assert().NoError(err, "Error querying version")
-	s.Assert().Equal(int64(2), version, "Migration should be on correct version")
+	s.Assert().Equal(int64(1), version, "Migration should be on correct version")
 }
 
 func (s *MigrationsTestSuite) TestCreateChainTable() {
@@ -61,9 +61,6 @@ func (s *MigrationsTestSuite) TestCreateFaucetTable() {
 
 	s.Assert().NoError(err, "Query failed")
 	s.Assert().Equal(1, n, "Table should have been created")
-}
-
-func (s *MigrationsTestSuite) TestAddEnvelopeStoreColumns() {
 }
 
 func TestMigrations(t *testing.T) {

@@ -4,15 +4,12 @@ import (
 	"context"
 	"os"
 
+	chnregclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
+
 	"github.com/spf13/cobra"
 
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers/amount"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers/blacklist"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers/cooldown"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers/creditor"
-	maxbalance "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers/max-balance"
 	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client"
 )
 
@@ -23,17 +20,13 @@ func newRunCommand() *cobra.Command {
 		Run:   run,
 	}
 
-	// Register Faucet flags
-	amount.FaucetAmount(runCmd.Flags())
-	blacklist.FaucetBlacklist(runCmd.Flags())
-	cooldown.FaucetCooldown(runCmd.Flags())
-	creditor.FaucetAddress(runCmd.Flags())
-	maxbalance.FaucetMaxBalance(runCmd.Flags())
-
 	// Register Kafka flags
 	broker.InitKafkaFlags(runCmd.Flags())
 	broker.KafkaTopicTxCrafter(runCmd.Flags())
 	broker.KafkaTopicTxRecover(runCmd.Flags())
+
+	// Chain Registry
+	chnregclient.Flags(runCmd.Flags())
 
 	// Contract Registry
 	registryclient.ContractRegistryURL(runCmd.Flags())

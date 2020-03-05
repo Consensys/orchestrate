@@ -132,3 +132,20 @@ func closeResponse(response *http.Response) {
 		log.WithError(deferErr).Errorf("%s: could not close body", component)
 	}
 }
+
+func (c *HTTPClient) GetFaucetsByChainRule(ctx context.Context, chainRule string) ([]*types.Faucet, error) {
+	reqURL := fmt.Sprintf("%v/faucets?chain_rule=%s", c.config.URL, chainRule)
+
+	response, err := c.getRequest(ctx, reqURL)
+	if err != nil {
+		return nil, err
+	}
+	defer closeResponse(response)
+
+	faucetsResult := []*types.Faucet{}
+	if err := json.NewDecoder(response.Body).Decode(&faucetsResult); err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	return faucetsResult, nil
+}

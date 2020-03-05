@@ -4,7 +4,7 @@ package pg
 type RepositoryModel struct {
 	tableName struct{} `pg:"repositories"` //nolint:unused,structcheck // reason
 
-	// UUID technical identifier
+	// ID technical identifier
 	ID int
 
 	// Repository name
@@ -15,7 +15,7 @@ type RepositoryModel struct {
 type TagModel struct {
 	tableName struct{} `pg:"tags"` //nolint:unused,structcheck // reason
 
-	// UUID technical identifier
+	// ID technical identifier
 	ID int
 
 	// Tag name
@@ -29,7 +29,7 @@ type TagModel struct {
 type ArtifactModel struct {
 	tableName struct{} `pg:"artifacts"` //nolint:unused,structcheck // reason
 
-	// UUID technical identifier
+	// ID technical identifier
 	ID int
 
 	// Artifact data
@@ -44,7 +44,7 @@ type ArtifactModel struct {
 type CodehashModel struct {
 	tableName struct{} `pg:"codehashes"` //nolint:unused,structcheck // reason
 
-	// UUID technical identifier
+	// ID technical identifier
 	ID int
 
 	// Artifact data
@@ -57,7 +57,7 @@ type CodehashModel struct {
 type MethodModel struct {
 	tableName struct{} `pg:"methods"` //nolint:unused,structcheck // reason
 
-	// UUID technical identifier
+	// ID technical identifier
 	ID int
 
 	// Artifact data
@@ -71,7 +71,7 @@ type MethodModel struct {
 type EventModel struct {
 	tableName struct{} `pg:"events"` //nolint:unused,structcheck // reason
 
-	// UUID technical identifier
+	// ID technical identifier
 	ID int
 
 	// Artifact data

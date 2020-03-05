@@ -4,13 +4,18 @@ import (
 	"context"
 	"sync"
 
+	"github.com/spf13/viper"
+	chaininjector "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/chain-injector"
+	handlerfaucet "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/faucet"
+	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers"
+
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet"
 )
 
-const component = "handler.faucet"
+const component = "handler.account-generator.faucet"
 
 var (
 	handler  engine.HandlerFunc
@@ -27,10 +32,16 @@ func Init(ctx context.Context) {
 		// Initialize Controlled Faucet
 		controllers.Init(ctx)
 
-		// Create Handler
-		handler = Faucet(faucet.GlobalFaucet())
+		// Initialize chain-registry client
+		registry.Init(ctx)
 
-		log.Infof("logger: handler ready")
+		// Create Handler
+		handler = engine.CombineHandlers(
+			chaininjector.ChainUUIDHandlerWithoutAbort(registry.GlobalClient(), viper.GetString(registry.ChainRegistryURLViperKey)),
+			handlerfaucet.Faucet(faucet.GlobalFaucet(), registry.GlobalClient()),
+		)
+
+		log.Infof("%s: handler ready", component)
 	})
 }
 

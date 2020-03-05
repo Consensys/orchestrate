@@ -2,95 +2,142 @@ package maxbalance
 
 import (
 	"context"
+	"fmt"
 	"math/big"
-	"sync"
+	"reflect"
 	"testing"
 
+	"github.com/golang/mock/gomock"
+	ethClientMock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/mocks"
+	faucetMock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet/mocks"
+
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
+	faucettypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types/testutils"
 )
 
-var (
-	chains = []*big.Int{big.NewInt(10), big.NewInt(2345), big.NewInt(1)}
-	values = []*big.Int{big.NewInt(9), big.NewInt(11), big.NewInt(10)}
+const (
+	chainURLBalanceAtError = "error"
+	chainURLBalanceAt0     = "0"
+	chainURLBalanceAt10    = "10"
 )
 
-const endpointTestError = "error"
-
-func MockBalanceAt(ctx context.Context, endpoint string, _ ethcommon.Address, _ *big.Int) (*big.Int, error) {
-	if endpoint == endpointTestError {
-		// Simulate error
-		return nil, errors.ConnectionError("balanceAtError")
-	}
-	return big.NewInt(10), nil
-}
+var (
+	errBalanceAt = fmt.Errorf("error")
+)
 
 func TestMaxBalance(t *testing.T) {
-	// Create CoolDown controlled credit
-	conf := &Config{
-		BalanceAt:  MockBalanceAt,
-		MaxBalance: big.NewInt(20),
-	}
-	c := NewController(conf)
-	credit := c.Control(mock.Credit)
-
-	// Prepare test data
-	rounds := 50
-	tests := make([]*testutils.TestRequest, 0)
-	for i := 0; i < rounds; i++ {
-		var expectedAmount *big.Int
-		var expectedErr bool
-		var endpoint string
-		switch i % 3 {
-		case 0:
-			expectedAmount = big.NewInt(9)
-			endpoint = "testURL"
-		case 1:
-			expectedAmount = big.NewInt(0)
-			expectedErr = true
-			endpoint = endpointTestError
-		case 2:
-			expectedAmount = big.NewInt(0)
-			expectedErr = true
-			endpoint = endpointTestError
-		}
-
-		tests = append(
-			tests,
+	testSet := []struct {
+		name  string
+		input *testutils.TestRequest
+	}{
+		{
+			"no faucet candidate",
 			&testutils.TestRequest{
-				Req: &types.Request{
-					ChainID:  chains[i%3],
-					Amount:   values[i%3],
-					ChainURL: endpoint,
+				Req: &faucettypes.Request{
+					Beneficiary: ethcommon.HexToAddress("0xab"),
 				},
-				ExpectedAmount: expectedAmount,
-				ExpectedErr:    expectedErr,
+				ExpectedAmount: nil,
+				ExpectedErr:    errors.FaucetWarning("no faucet candidates").ExtendComponent(component),
 			},
-		)
+		},
+		{
+			"BalanceAt error",
+			&testutils.TestRequest{
+				Req: &faucettypes.Request{
+					Beneficiary: ethcommon.HexToAddress("0xab"),
+					ChainURL:    chainURLBalanceAtError,
+					FaucetsCandidates: map[string]faucettypes.Faucet{
+						"test": {
+							Amount:     big.NewInt(10),
+							MaxBalance: big.NewInt(10),
+						},
+						"test1": {
+							Amount:     big.NewInt(1),
+							MaxBalance: big.NewInt(10),
+						},
+					},
+				},
+				ExpectedErr: errors.FromError(errBalanceAt).ExtendComponent(component),
+			},
+		},
+		{
+			"credit after max balance control",
+			&testutils.TestRequest{
+				Req: &faucettypes.Request{
+					Beneficiary: ethcommon.HexToAddress("0xab"),
+					ChainURL:    chainURLBalanceAt0,
+					FaucetsCandidates: map[string]faucettypes.Faucet{
+						"test": {
+							Amount:     big.NewInt(10),
+							MaxBalance: big.NewInt(10),
+						},
+						"test1": {
+							Amount:     big.NewInt(1),
+							MaxBalance: big.NewInt(10),
+						},
+					},
+				},
+				ExpectedAmount: big.NewInt(10),
+			},
+		},
+		{
+			"remove all candidates after max balance control",
+			&testutils.TestRequest{
+				Req: &faucettypes.Request{
+					Beneficiary: ethcommon.HexToAddress("0xab"),
+					ChainURL:    chainURLBalanceAt10,
+					FaucetsCandidates: map[string]faucettypes.Faucet{
+						"test": {
+							Amount:     big.NewInt(10),
+							MaxBalance: big.NewInt(10),
+						},
+						"test1": {
+							Amount:     big.NewInt(1),
+							MaxBalance: big.NewInt(10),
+						},
+					},
+				},
+				ExpectedErr: errors.FaucetWarning("account balance too high").ExtendComponent(component),
+			},
+		},
 	}
 
-	// Apply tests
-	wg := &sync.WaitGroup{}
-	for _, test := range tests {
-		wg.Add(1)
-		go func(test *testutils.TestRequest) {
-			defer wg.Done()
-			amount, err := credit(context.Background(), test.Req)
-			test.ResultAmount, test.ResultErr = amount, err
-		}(test)
-	}
-	wg.Wait()
-
-	// Ensure results are correct
-	for _, test := range tests {
-		testutils.AssertRequest(t, test)
-		if test.ResultErr != nil {
-			assert.True(t, errors.IsFaucetWarning(test.ResultErr) || errors.IsConnectionError(test.ResultErr), "%v should be a faucet warning", test.ResultErr)
-			assert.Equal(t, "controller.max-balance", errors.FromError(test.ResultErr).GetComponent(), "Error component should be correct")
+	// Create Controller and set creditors
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockFaucet := faucetMock.NewMockFaucet(mockCtrl)
+	mockFaucet.EXPECT().Credit(gomock.Any(), gomock.Any()).DoAndReturn(func(_ context.Context, r *faucettypes.Request) (*big.Int, error) {
+		if len(r.FaucetsCandidates) == 0 {
+			return nil, errors.FaucetWarning("no faucet request").ExtendComponent(component)
 		}
+		// Select a first faucet candidate for comparison
+		r.ElectedFaucet = reflect.ValueOf(r.FaucetsCandidates).MapKeys()[0].String()
+		for key, candidate := range r.FaucetsCandidates {
+			if candidate.Amount.Cmp(r.FaucetsCandidates[r.ElectedFaucet].Amount) == -1 {
+				r.ElectedFaucet = key
+			}
+		}
+		return r.FaucetsCandidates[r.ElectedFaucet].Amount, nil
+	}).AnyTimes()
+
+	mockEthClient := ethClientMock.NewMockChainStateReader(mockCtrl)
+	mockEthClient.EXPECT().BalanceAt(gomock.Any(), gomock.Eq(chainURLBalanceAtError), gomock.Any(), gomock.Any()).Return(nil, errBalanceAt).AnyTimes()
+	mockEthClient.EXPECT().BalanceAt(gomock.Any(), gomock.Eq(chainURLBalanceAt0), gomock.Any(), gomock.Any()).Return(big.NewInt(0), nil).AnyTimes()
+	mockEthClient.EXPECT().BalanceAt(gomock.Any(), gomock.Eq(chainURLBalanceAt10), gomock.Any(), gomock.Any()).Return(big.NewInt(10), nil).AnyTimes()
+
+	cntrl := NewController(mockEthClient)
+	credit := cntrl.Control(mockFaucet.Credit)
+
+	for _, test := range testSet {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			amount, err := credit(context.Background(), test.input.Req)
+			test.input.ResultAmount, test.input.ResultErr = amount, err
+			testutils.AssertRequest(t, test.input)
+		})
 	}
 }

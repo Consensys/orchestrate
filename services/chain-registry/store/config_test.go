@@ -9,14 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRegistryType(t *testing.T) {
-	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	Type(f)
-
-	expected := postgresOpt
-	assert.Equal(t, expected, viper.GetString(TypeViperKey), "Default")
-}
-
 func TestInitRegistry(t *testing.T) {
 	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	InitRegistry(f)
@@ -32,6 +24,4 @@ func TestInitRegistry(t *testing.T) {
 func TestFlags(t *testing.T) {
 	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	Flags(f)
-	TestInitRegistry(t)
-	TestRegistryType(t)
 }

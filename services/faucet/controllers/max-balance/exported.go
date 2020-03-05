@@ -2,20 +2,17 @@ package maxbalance
 
 import (
 	"context"
-	"math/big"
 	"sync"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet"
 )
 
-const component = "controller.max-balance"
+const component = "faucet.controllers.maxbalance"
 
 var (
 	ctrl     *Controller
-	config   *Config
 	initOnce = sync.Once{}
 )
 
@@ -26,45 +23,16 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		// Set config if not yet set
-		if config == nil {
-			InitConfig(ctx)
-		}
+		// Initialize global MultiEthClient
+		ethclient.Init(ctx)
 
 		// Initialize controller
-		ctrl = NewController(config)
+		ctrl = NewController(ethclient.GlobalClient())
 
 		log.WithFields(log.Fields{
 			"controller": "max-balance",
-			"max":        ctrl.conf.MaxBalance.Text(10),
 		}).Info("faucet: controller ready")
 	})
-}
-
-// InitConfig initialize configuration
-func InitConfig(ctx context.Context) {
-	max, ok := big.NewInt(0).SetString(viper.GetString(faucetMaxViperKey), 10)
-	if !ok {
-		log.Fatalf("max-balance: invalid maximum balance %q", viper.GetString(faucetMaxViperKey))
-	}
-
-	// Initialize global MultiEthClient
-	ethclient.Init(ctx)
-
-	config = &Config{
-		MaxBalance: max,
-		BalanceAt:  ethclient.GlobalClient().BalanceAt,
-	}
-}
-
-// SetGlobalConfig sets global configuration
-func SetGlobalConfig(c *Config) {
-	config = c
-}
-
-// GlobalConfig returns global configuration
-func GlobalConfig() *Config {
-	return config
 }
 
 // GlobalController returns global blacklist controller

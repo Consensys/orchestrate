@@ -33,7 +33,7 @@ func Init(ctx context.Context) {
 		// Create Nonce handler
 		handler = Nonce(nonce.GlobalManager(), ethclient.GlobalClient())
 
-		log.Infof("logger: handler ready")
+		log.Infof("%s: handler ready", component)
 	})
 }
 

@@ -88,12 +88,12 @@ func TestAuth(t *testing.T) {
 		claimsOrchestrateNamespace string
 	}
 	tests := []struct { //nolint:maligned // reason
-		name              string
-		fields            *fields
-		args              *args
-		signatureIsValide bool
-		errValue          uint32
-		isInvalid         bool
+		name             string
+		fields           *fields
+		args             *args
+		signatureIsValid bool
+		errValue         uint32
+		isInvalid        bool
 	}{
 		{
 			"nominal usecase",

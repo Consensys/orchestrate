@@ -5,12 +5,10 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet"
 )
 
-const component = "faucet"
+const component = "faucet.controllers.creditor"
 
 var (
 	ctrl     *Controller
@@ -31,15 +29,6 @@ func Init(ctx context.Context) {
 		logger := log.WithFields(log.Fields{
 			"controller": "creditor",
 		})
-
-		// Set creditors
-		for _, creditor := range viper.GetStringSlice(creditorAddressViperKey) {
-			chainID, addr, err := utils.FromChainAddressKey(creditor)
-			if err != nil {
-				logger.WithError(err).Fatalf("%s: could not initialize controller", component)
-			}
-			ctrl.SetCreditor(chainID, addr)
-		}
 
 		logger.Infof("%s: controller ready", component)
 	})

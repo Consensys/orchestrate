@@ -85,7 +85,7 @@ func (s *TracerTestSuite) TestTxSpanFromBroker() {
 			assert.Equal(s.T(), OpenTracingName, span.Span.(*oTMocktracer.MockSpan).OperationName, "Expected right operationName")
 		case 2:
 			assert.Equal(s.T(), OpenTracingName, span.Span.(*oTMocktracer.MockSpan).OperationName, "Expected right operationName")
-			assert.Equal(s.T(), 44, span.Span.(*oTMocktracer.MockSpan).ParentID, "Expected right ParentID from txctx.Context")
+			assert.Equal(s.T(), 44, span.Span.(*oTMocktracer.MockSpan).ParentID, "Expected right ParentTxID from txctx.Context")
 			assert.Equal(s.T(), 43, spanContext.(oTMocktracer.MockSpanContext).TraceID, "Expected right TraceID from txctx.Envelope.Metadata")
 		}
 	}

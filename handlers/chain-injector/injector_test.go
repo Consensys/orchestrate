@@ -78,24 +78,13 @@ func TestChainInjector(t *testing.T) {
 			},
 		},
 		{
-			"no tenantID found",
-			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Envelope.SetChainName(testChainName)
-				return txctx
-			},
-			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Envelope.AppendError(errors.DataError("no tenantID found").ExtendComponent(component))
-				return txctx
-			},
-		},
-		{
 			"Without chainUUID and chainName filled",
 			func(txctx *engine.TxContext) *engine.TxContext {
 				txctx.WithContext(multitenancy.WithTenantID(txctx.Context(), multitenancy.DefaultTenantIDName))
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Envelope.AppendError(errors.DataError("no chainName found").ExtendComponent(component))
+				_ = txctx.Envelope.AppendError(errors.DataError("no chain name found").ExtendComponent(component))
 				return txctx
 			},
 		},
@@ -127,7 +116,7 @@ func TestChainInjector(t *testing.T) {
 			txctx := engine.NewTxContext()
 			txctx.Logger = log.NewEntry(log.New())
 
-			h := ChainInjector(mockClient, testChainProxyURL)
+			h := ChainUUIDHandler(mockClient, testChainProxyURL)
 			h(test.input(txctx))
 
 			expectedTxctx := engine.NewTxContext()
@@ -186,7 +175,7 @@ func TestChainIDInjector(t *testing.T) {
 	ec.EXPECT().Network(gomock.Any(), gomock.Eq(noErrorURL)).Return(networkID, nil).AnyTimes()
 	ec.EXPECT().Network(gomock.Any(), gomock.Eq(errorURL)).Return(nil, errorNetwork).AnyTimes()
 
-	h := ChainIDInjector(ec)
+	h := ChainIDInjectorHandler(ec)
 
 	for _, test := range testSet {
 		test := test

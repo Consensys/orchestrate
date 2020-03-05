@@ -32,7 +32,6 @@ All notable changes to this project will be documented in this file.
         * DELETE `/chains/{tenantID}/{name}`: delete the chain configuration given by the {tenantID} and {name}
     * Proxy the ethereum chains
 * Add flag and environment variable:
-    * `CHAIN_REGISTRY_TYPE` to set type of Chain Registry among "postgres" and "in-memory"
     * `CHAIN_REGISTRY_INIT` to initialize the chain registry with some specific chains
     * `CHAIN_REGISTRY_PROVIDER_CHAINS_REFRESH_INTERVAL` to set the time interval for refreshing the list of chains from storage
     * `CHAIN_REGISTRY_URL` to set the URL to reach the chain-registry

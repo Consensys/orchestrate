@@ -2,7 +2,6 @@ package chains
 
 import (
 	"encoding/json"
-	"html"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -13,19 +12,14 @@ import (
 
 // @Summary Retrieves a list of all registered chains
 // @Produce json
-// @Success 200
+// @Success 200 {array} Chain
 // @Failure 404
 // @Failure 500
 // @Router /chains [get]
 func (h Handler) getChains(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
-	filters := make(map[string]string)
-	for k := range request.URL.Query() {
-		key := html.EscapeString(k)
-		filters[key] = html.EscapeString(request.URL.Query().Get(k))
-	}
-
+	filters := utils.ToFilters(request.URL.Query())
 	var chains []*types.Chain
 	var err error
 	tenantID := multitenancy.TenantIDFromContext(request.Context())
@@ -46,7 +40,7 @@ func (h Handler) getChains(rw http.ResponseWriter, request *http.Request) {
 // @Summary Retrieves a chain by ID
 // @Produce json
 // @Param uuid path string true "ID of the chain"
-// @Success 200
+// @Success 200 {object} Chain
 // @Failure 400
 // @Failure 404
 // @Failure 500

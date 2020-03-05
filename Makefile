@@ -41,7 +41,7 @@ run-e2e: gobuild-e2e
 e2e: run-e2e
 	@$(OPEN) build/report/report.html 2>/dev/null
 
-clean: mod-tidy lint-ci protobuf ## Run all clean-up tasks
+clean: mod-tidy lint protobuf generate-swagger generate-mocks ## Run all clean-up tasks
 
 generate-mocks:
 	mockgen -source=services/chain-registry/client/client.go -destination=services/chain-registry/client/mocks/mock_client.go -package=mocks
@@ -51,6 +51,7 @@ generate-mocks:
 	mockgen -source=services/chain-registry/store/types/store.go -destination=services/chain-registry/store/mocks/mock_store.go -package=mocks
 	mockgen -source=services/multi-vault/keystore/keystore.go -destination=services/multi-vault/keystore/mocks/mock_client.go -package=mocks
 	mockgen -source=services/tx-listener/session/ethereum/offset/manager.go -destination=services/tx-listener/session/ethereum/offset/mocks/manager_mock.go -package=mocks
+	mockgen -source=services/faucet/faucet/faucet.go -destination=services/faucet/faucet/mocks/faucet_mock.go -package=mocks
 
 generate-swagger:
 	@bash scripts/swagger.sh

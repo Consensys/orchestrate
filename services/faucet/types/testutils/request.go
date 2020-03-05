@@ -12,15 +12,15 @@ import (
 type TestRequest struct {
 	Req                          *types.Request
 	ResultAmount, ExpectedAmount *big.Int
-	ExpectedErr                  bool
+	ExpectedErr                  error
 	ResultErr                    error
 }
 
 // AssertRequest make sure that a TestRequest is matching expected result
 func AssertRequest(t *testing.T, test *TestRequest) {
-	assert.True(t, test.ResultAmount.Cmp(test.ExpectedAmount) == 0, "Amount credited should be correct expecting %s, got %s, %s", test.ResultAmount, test.ExpectedAmount)
-	if test.ExpectedErr {
-		assert.Error(t, test.ResultErr, "Credit should error")
+	assert.Equal(t, test.ExpectedAmount, test.ResultAmount, "Amount credited should be correct expecting %s, got %s", test.ResultAmount, test.ExpectedAmount)
+	if test.ExpectedErr != nil {
+		assert.Equal(t, test.ExpectedErr, test.ResultErr, "Credit should error")
 	} else {
 		assert.NoError(t, test.ResultErr, "Credit should not error")
 	}

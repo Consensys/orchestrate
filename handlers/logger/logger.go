@@ -30,14 +30,14 @@ func Logger(level string) engine.HandlerFunc {
 		case len(txctx.Envelope.GetErrors()) > 0 && txctx.Envelope.OnlyWarnings():
 			txctx.Logger.
 				WithError(fmt.Errorf("%q", txctx.Envelope.GetErrors())).
-				Warn("logger: message processed with warning")
+				Warn("message processed with warning")
 		case len(txctx.Envelope.GetErrors()) > 0:
 			txctx.Logger.
 				WithError(fmt.Errorf("%q", txctx.Envelope.GetErrors())).
-				Error("logger: message processed with error")
+				Error("message processed with error")
 		default:
 			txctx.Logger.
-				Log(logLevel, "logger: message processed")
+				Log(logLevel, "message processed")
 		}
 	}
 }

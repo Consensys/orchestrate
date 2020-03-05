@@ -16,37 +16,65 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/testutils"
 )
 
-type ModelsTestSuite struct {
-	testutils.ChainRegistryTestSuite
-	pg *pgTestUtils.PGTestHelper
-}
-
-func (s *ModelsTestSuite) SetupSuite() {
+func (s *ChainModelsTestSuite) SetupSuite() {
 	s.pg.InitTestDB(s.T())
 	s.Store = NewChainRegistry(s.pg.DB)
 }
 
-func (s *ModelsTestSuite) SetupTest() {
+func (s *ChainModelsTestSuite) SetupTest() {
 	s.pg.Upgrade(s.T())
 }
 
-func (s *ModelsTestSuite) TearDownTest() {
+func (s *ChainModelsTestSuite) TearDownTest() {
 	s.pg.Downgrade(s.T())
 }
 
-func (s *ModelsTestSuite) TearDownSuite() {
+func (s *ChainModelsTestSuite) TearDownSuite() {
 	s.pg.DropTestDB(s.T())
 }
 
-func TestModels(t *testing.T) {
-	s := new(ModelsTestSuite)
+func (s *FaucetModelsTestSuite) SetupSuite() {
+	s.pg.InitTestDB(s.T())
+	s.Store = NewChainRegistry(s.pg.DB)
+}
+
+func (s *FaucetModelsTestSuite) SetupTest() {
+	s.pg.Upgrade(s.T())
+}
+
+func (s *FaucetModelsTestSuite) TearDownTest() {
+	s.pg.Downgrade(s.T())
+}
+
+func (s *FaucetModelsTestSuite) TearDownSuite() {
+	s.pg.DropTestDB(s.T())
+}
+
+type ChainModelsTestSuite struct {
+	pg *pgTestUtils.PGTestHelper
+	testutils.ChainTestSuite
+}
+
+func TestModelsChain(t *testing.T) {
+	s := new(ChainModelsTestSuite)
+	s.pg = pgTestUtils.NewPGTestHelper(migrations.Collection)
+	suite.Run(t, s)
+}
+
+type FaucetModelsTestSuite struct {
+	pg *pgTestUtils.PGTestHelper
+	testutils.FaucetTestSuite
+}
+
+func TestModelsFaucet(t *testing.T) {
+	s := new(FaucetModelsTestSuite)
 	s.pg = pgTestUtils.NewPGTestHelper(migrations.Collection)
 	suite.Run(t, s)
 }
 
 type ErrorTestSuite struct {
 	suite.Suite
-	Store types.ChainRegistryStore
+	Store types.ChainStore
 }
 
 func (s *ErrorTestSuite) SetupSuite() {

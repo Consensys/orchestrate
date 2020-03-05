@@ -4,12 +4,12 @@ import (
 	"context"
 	"os"
 
+	chnregclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
+
 	"github.com/spf13/cobra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tessera"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers/amount"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers/creditor"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/hashicorp"
@@ -36,9 +36,8 @@ func newRunCommand() *cobra.Command {
 	broker.KafkaTopicAccountGenerated(runCmd.Flags())
 	broker.KafkaTopicTxRecover(runCmd.Flags())
 
-	// Register Faucet flags
-	amount.FaucetAmount(runCmd.Flags())
-	creditor.FaucetAddress(runCmd.Flags())
+	// Chain Registry
+	chnregclient.Flags(runCmd.Flags())
 
 	return runCmd
 }

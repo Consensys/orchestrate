@@ -10,10 +10,10 @@ import (
 	"github.com/containous/traefik/v2/pkg/config/static"
 	"github.com/gorilla/mux"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api/chains"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api/faucets"
 )
 
 const (
-	component        = "chain-registry.store.api"
 	swaggerUIPath    = "./public/swagger-ui"
 	swaggerSpecsPath = "./public/swagger-specs/types/chain-registry/swagger.json"
 )
@@ -26,6 +26,7 @@ var (
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
 		chains.Init(ctx)
+		faucets.Init(ctx)
 	})
 }
 
@@ -43,6 +44,7 @@ func NewBuilder(staticConfig *static.Configuration) Builder {
 
 		// Append Chain-Registry routes
 		chains.GlobalHandler().Append(router)
+		faucets.GlobalHandler().Append(router)
 
 		// Append Swagger routes
 		buildSwagger(router)

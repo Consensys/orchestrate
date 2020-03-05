@@ -19,7 +19,7 @@ import (
 type EnvelopeModel struct {
 	tableName struct{} `pg:"envelopes"` //nolint:unused,structcheck // reason
 
-	// UUID technical identifier
+	// ID technical identifier
 	ID int32
 
 	// Envelope Identifier

@@ -8,11 +8,10 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet"
 )
 
-const component = "controller.cooldown"
+const component = "faucet.controllers.cooldown"
 
 var (
 	ctrl     *Controller
-	config   *Config
 	initOnce = &sync.Once{}
 )
 
@@ -23,34 +22,13 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		// Set config if not yet set
-		if config == nil {
-			InitConfig(ctx)
-		}
-
 		// Initialize controller
-		ctrl = NewController(config)
+		ctrl = NewController()
 
 		log.WithFields(log.Fields{
 			"controller": "cooldown",
-			"delay":      ctrl.conf.Delay,
 		}).Info("faucet: controller ready")
 	})
-}
-
-// InitConfig initialize configuration
-func InitConfig(ctx context.Context) {
-	config = NewConfig()
-}
-
-// SetGlobalConfig sets global configuration
-func SetGlobalConfig(c *Config) {
-	config = c
-}
-
-// GlobalConfig returns global configuration
-func GlobalConfig() *Config {
-	return config
 }
 
 // GlobalController returns global blacklist controller

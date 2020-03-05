@@ -5,8 +5,6 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet/sarama"
 )
 
@@ -22,24 +20,11 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		switch viper.GetString(typeViperKey) {
-		case "sarama":
-			// Initialize Sarama Faucet
-			sarama.Init(ctx)
+		// Initialize Sarama Faucet
+		sarama.Init(ctx)
 
-			// Set Faucet
-			fct = sarama.GlobalFaucet()
-		case "mock":
-			// Initialize Mock Faucet
-			mock.Init(ctx)
-
-			// Set Faucet
-			fct = mock.GlobalFaucet()
-		default:
-			log.WithFields(log.Fields{
-				"type": viper.GetString(typeViperKey),
-			}).Fatalf("faucet: unknown type")
-		}
+		// Set Faucet
+		fct = sarama.GlobalFaucet()
 	})
 }
 

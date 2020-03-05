@@ -28,13 +28,11 @@ func Pricer(p ethclient.GasPricer) engine.HandlerFunc {
 			// Set gas price
 			_ = txctx.Envelope.SetGasPrice(p)
 			txctx.Logger.Debugf("gas-pricer: gas price set")
-
-			return
 		}
 
 		// Enrich logger
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"tx.gas.price": txctx.Envelope.GasPrice.String(),
+			"tx.gasPrice": txctx.Envelope.GetGasPriceString(),
 		})
 	}
 }

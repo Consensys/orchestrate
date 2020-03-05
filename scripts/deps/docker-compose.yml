@@ -49,6 +49,15 @@ services:
     volumes:
       - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf
 
+  postgres-chain-registry:
+    <<: *container-common
+    <<: *postgres-common
+    image: postgres:10.12-alpine
+    volumes:
+      - db-data-chain-registry:/var/lib/postgresql/data
+    ports:
+      - 5432
+
   postgres-contract-registry:
     <<: *container-common
     <<: *postgres-common
@@ -66,15 +75,6 @@ services:
       - db-data-envelope-store:/var/lib/postgresql/data
     ports:
       - 5432:5432
-
-  postgres-chain-registry:
-    <<: *container-common
-    <<: *postgres-common
-    image: postgres:10.12-alpine
-    volumes:
-      - db-data-chain-registry:/var/lib/postgresql/data
-    ports:
-      - 5432
 
   vault:
     <<: *container-common
