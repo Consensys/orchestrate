@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/containous/alice"
 	"github.com/containous/traefik/v2/pkg/config/dynamic"
@@ -12,11 +13,13 @@ import (
 	"github.com/containous/traefik/v2/pkg/provider/acme"
 	"github.com/containous/traefik/v2/pkg/provider/aggregator"
 	traefiktls "github.com/containous/traefik/v2/pkg/tls"
+	"github.com/dgraph-io/ristretto"
 	"github.com/spf13/viper"
 	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt"
 	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/key"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api"
-	authmiddleware "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/middlewares/auth"
+	authmw "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/middlewares/auth"
+	ratelimitermw "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/middlewares/ratelimiter"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/providers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/server/router"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
@@ -63,17 +66,39 @@ func initACMEProvider(c *static.Configuration, providerAggregator *aggregator.Pr
 	return resolvers
 }
 
-func initOrchestrateMiddlewares(ctx context.Context) map[string]alice.Constructor {
-	middlewares := make(map[string]alice.Constructor)
+func initOrchestrateMiddlewares(ctx context.Context) map[string]func(string) alice.Constructor {
 	authkey.Init(ctx)
 	authjwt.Init(ctx)
 
-	middlewares["orchestrate-auth"] = func(next http.Handler) (http.Handler, error) {
-		return authmiddleware.New(
-			authjwt.GlobalAuth(),
-			authkey.GlobalAuth(),
-			viper.GetBool(multitenancy.EnabledViperKey),
-			next), nil
+	middlewares := make(map[string]func(string) alice.Constructor)
+
+	// Set Authentication middleware
+	middlewares["orchestrate-auth"] = func(routerName string) alice.Constructor {
+		return func(next http.Handler) (http.Handler, error) {
+			return authmw.New(
+				authjwt.GlobalAuth(),
+				authkey.GlobalAuth(),
+				viper.GetBool(multitenancy.EnabledViperKey),
+				next), nil
+		}
+	}
+
+	cache, _ := ristretto.NewCache(&ristretto.Config{
+		NumCounters: 1e7,     // number of keys to track frequency of (10M).
+		MaxCost:     1 << 30, // maximum cost of cache (1GB).
+		BufferItems: 64,      // number of keys per Get buffer.
+	})
+	mngr := ratelimitermw.NewManager(cache)
+	middlewares["orchestrate-ratelimit"] = func(routerName string) alice.Constructor {
+		return func(next http.Handler) (http.Handler, error) {
+			return ratelimitermw.New(
+				mngr,
+				time.Second,
+				30*time.Second,
+				5*time.Second,
+				routerName,
+				next), nil
+		}
 	}
 
 	return middlewares

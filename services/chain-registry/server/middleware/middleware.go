@@ -15,7 +15,7 @@ import (
 type Builder struct {
 	builder *middleware.Builder
 
-	orchestrateMiddlewares map[string]alice.Constructor
+	orchestrateMiddlewares map[string]func(routerName string) alice.Constructor
 }
 
 type serviceBuilder interface {
@@ -26,7 +26,7 @@ type serviceBuilder interface {
 func NewBuilder(
 	configs map[string]*runtime.MiddlewareInfo,
 	serviceBuilder serviceBuilder,
-	orchestrateMiddlewares map[string]alice.Constructor,
+	orchestrateMiddlewares map[string]func(routerName string) alice.Constructor,
 ) *Builder {
 	return &Builder{
 		builder:                middleware.NewBuilder(configs, serviceBuilder),
@@ -35,14 +35,14 @@ func NewBuilder(
 }
 
 // BuildChain creates a middleware chain
-func (b *Builder) BuildChain(ctx context.Context, middlewares []string) *alice.Chain {
+func (b *Builder) BuildChain(ctx context.Context, middlewares []string, routerName string) *alice.Chain {
 	// Compute Orchestrate custom Middleware chain
 	chain := alice.New()
 	var traefikMiddlewares []string
 	for _, middleware := range middlewares {
 		parts := strings.Split(utils.GetQualifiedName(ctx, middleware), "@")
-		if constructor, ok := b.orchestrateMiddlewares[parts[0]]; ok {
-			chain = chain.Append(constructor)
+		if constructorBuilder, ok := b.orchestrateMiddlewares[parts[0]]; ok {
+			chain = chain.Append(constructorBuilder(routerName))
 		} else {
 			traefikMiddlewares = append(traefikMiddlewares, middleware)
 		}

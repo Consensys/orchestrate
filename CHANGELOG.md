@@ -20,7 +20,7 @@ All notable changes to this project will be documented in this file.
  
 ### 🆕 Chain-registry and tx-listener
 * Add the chain-registry microservice that:
-    * Serves an API to store a list of ethereum chains with their configurations (URLs, tenantID, name, block depth, block position, backoff duration). The API allows to dynamically update the chains configuration instead of passing them in environment variable.
+    * Serves an API to store a list of ethereum chains with their configurations (URLs, tenantID, name, block depth, block position, backoff duration). The API allows to dynamically update chains configuration instead of passing them in environment variable.
         * GET `/chains`: get the list of chains registered
         * GET `/chains/{uuid}`: get the chain configuration given by the {uuid}
         * GET `/chains/{tenantID}`: get the list of chains registered for a given {tenantID}
@@ -30,13 +30,20 @@ All notable changes to this project will be documented in this file.
         * PATCH `/chains/{tenantID}/{name}`: modify the chain configuration for a given {tenantID} and {name}
         * DELETE `/chains/{uuid}`: delete the chain configuration given by the {uuid}
         * DELETE `/chains/{tenantID}/{name}`: delete the chain configuration given by the {tenantID} and {name}
+    * Serves an API to store a list of faucets rules their configurations (a creditor account, max balance, amount, cooldown). The API allows to dynamically update faucets configuration instead of passing them in environment variable.
+        * GET `/faucets`: get the list of faucets registered
+        * GET `/faucets/{uuid}`: get the faucet configuration given by the {uuid}
+        * POST `/faucets`: create a new faucet for a given {tenantID}
+        * PATCH `/faucets/{uuid}`: modify the faucets configuration for a given {uuid}
+        * DELETE `/faucets/{uuid}`: delete the faucets configuration given by the {uuid}
     * Proxy the ethereum chains
 * Add flag and environment variable:
     * `CHAIN_REGISTRY_INIT` to initialize the chain registry with some specific chains
     * `CHAIN_REGISTRY_PROVIDER_CHAINS_REFRESH_INTERVAL` to set the time interval for refreshing the list of chains from storage
     * `CHAIN_REGISTRY_URL` to set the URL to reach the chain-registry
     * `TX_LISTENER_PROVIDER_REFRESH_INTERVAL` to set the time interval for refreshing the list of chains from the chain registry
- 
+* Add rate limiter on chain registry to avoid bursty traffic on underlying chains (in particular when using Infura or Kaleido)
+  
 ### ⚠ BREAKING CHANGES
 #### Infrastructure
  * Merge the `tx-decoder` microservice into `tx-listener` microservice. The `tx-listener` publishes transactions directly in the `topic-tx-decoded` 
@@ -47,6 +54,7 @@ All notable changes to this project will be documented in this file.
  * Rename the default topic names from `topic-wallet-generator` and `topic-wallet-generated` to `topic-account-generator` and `topic-account-generated` respectively
  * Move environment variables `NONCE_MANAGER_TYPE` `REDIS_URL` `REDIS_LOCKTIMEOUT` from the `tx-nonce` to the `tx-crafter`
  * Remove environment variable `ETH_CLIENT_URL`, the chains urls have to be set at start-up in `CHAIN_REGISTRY_INIT` of `chain-registry` microservice or dynamically using the chain-registry API. 
+ * Remove environment variables `FAUCET_CREDIT_AMOUNT`, `FAUCET_BLACKLIST`, `FAUCET_COOLDOWN_TIME`, `FAUCET_CREDITOR_ADDRESS`, the faucets configurations are stored in the chain registry using its API. 
  * Add the environment variable `CHAIN_REGISTRY_URL` to the `tx-listener`, `tx-crafter`, `tx-sender`
  * Remove environment variable `DISABLE_EXTERNAL_TX` in the `tx-listener` and `tx-decoder`. The same feature can be found in the Chain-Registry API
 #### API 

@@ -9,10 +9,9 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 
-	genuuid "github.com/satori/go.uuid"
-
 	"github.com/containous/traefik/v2/pkg/config/dynamic"
 	"github.com/containous/traefik/v2/pkg/tls"
+	genuuid "github.com/satori/go.uuid"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
@@ -95,10 +94,10 @@ func BuildConfiguration(chains []*Chain) (*dynamic.Configuration, error) {
 			Priority:    math.MaxInt32,
 			Service:     chainKey,
 			Rule:        fmt.Sprintf("Path(`/%s`)", chain.UUID),
-			// TODO: Add middleware to verify that the chain is owned by the tenant doing the call
 			Middlewares: []string{
 				"orchestrate-auth",
 				"strip-path@internal",
+				"orchestrate-ratelimit",
 			},
 		}
 

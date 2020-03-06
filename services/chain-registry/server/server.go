@@ -49,7 +49,7 @@ type Server struct {
 	tlsManager                 *tls.Manager
 	api                        api.Builder
 	restHandler                http.Handler
-	orchestrateMiddlewares     map[string]alice.Constructor
+	orchestrateMiddlewares     map[string]func(string) alice.Constructor
 }
 
 // RouteAppenderFactory the route appender factory interface
@@ -64,7 +64,7 @@ func NewServer(
 	entryPoints TCPEntryPoints,
 	tlsManager *tls.Manager,
 	apiBuilder api.Builder,
-	orchestrateMiddlewares map[string]alice.Constructor,
+	orchestrateMiddlewares map[string]func(string) alice.Constructor,
 ) *Server {
 	server := &Server{}
 

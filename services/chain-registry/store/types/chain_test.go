@@ -93,34 +93,94 @@ func TestBuildConfiguration(t *testing.T) {
 	}{
 		{
 			[]*Chain{
-				{UUID: "0d60a85e-0b90-4482-a14c-108aea2557aa", Name: "testChain", TenantID: "testTenantId", URLs: []string{"http://testURL1.com", "http://testURL2.com"}},
+				{
+					UUID:     "0d60a85e-0b90-4482-a14c-108aea2557aa",
+					Name:     "testChain",
+					TenantID: "testTenantId",
+					URLs: []string{
+						"http://testURL1.com",
+						"http://testURL2.com",
+					},
+				},
 			},
 			func(c *dynamic.Configuration) *dynamic.Configuration {
-				c.HTTP.Routers["testTenantId-testChain"] = &dynamic.Router{EntryPoints: []string{"orchestrate"}, Priority: math.MaxInt32, Service: "testTenantId-testChain", Rule: "Path(`/0d60a85e-0b90-4482-a14c-108aea2557aa`)", Middlewares: []string{"orchestrate-auth", "strip-path@internal"}}
-				c.HTTP.Services["testTenantId-testChain"] = &dynamic.Service{LoadBalancer: &dynamic.ServersLoadBalancer{Servers: []dynamic.Server{
-					{Scheme: "http", URL: "http//testURL1.com"},
-					{Scheme: "http", URL: "http://testURL2.com"},
-				}}}
+				c.HTTP.Routers["testTenantId-testChain"] = &dynamic.Router{
+					EntryPoints: []string{"orchestrate"},
+					Priority:    math.MaxInt32,
+					Service:     "testTenantId-testChain",
+					Rule:        "Path(`/0d60a85e-0b90-4482-a14c-108aea2557aa`)",
+					Middlewares: []string{
+						"orchestrate-auth",
+						"strip-path@internal",
+						"orchestrate-ratelimit",
+					},
+				}
+				c.HTTP.Services["testTenantId-testChain"] = &dynamic.Service{
+					LoadBalancer: &dynamic.ServersLoadBalancer{
+						Servers: []dynamic.Server{
+							{Scheme: "http", URL: "http//testURL1.com"},
+							{Scheme: "http", URL: "http://testURL2.com"},
+						}}}
 				return c
 			},
 			false,
 		},
 		{
 			[]*Chain{
-				{UUID: "0d60a85e-0b90-4482-a14c-108aea2557aa", Name: "testChain", TenantID: "testTenantId", URLs: []string{"http://testURL1.com", "http://testURL2.com"}},
-				{UUID: "39240e9f-ae09-4e95-9fd0-a712035c8ad7", Name: "testChain2", TenantID: "testTenantId", URLs: []string{"http://testURL10.com", "http://testURL20.com"}},
+				{
+					UUID:     "0d60a85e-0b90-4482-a14c-108aea2557aa",
+					Name:     "testChain",
+					TenantID: "testTenantId",
+					URLs: []string{
+						"http://testURL1.com",
+						"http://testURL2.com",
+					},
+				},
+				{
+					UUID:     "39240e9f-ae09-4e95-9fd0-a712035c8ad7",
+					Name:     "testChain2",
+					TenantID: "testTenantId",
+					URLs: []string{
+						"http://testURL10.com",
+						"http://testURL20.com",
+					},
+				},
 			},
 			func(c *dynamic.Configuration) *dynamic.Configuration {
-				c.HTTP.Routers["testTenantId-testChain"] = &dynamic.Router{EntryPoints: []string{"orchestrate"}, Priority: math.MaxInt32, Service: "testTenantId-testChain", Rule: "Path(`/0d60a85e-0b90-4482-a14c-108aea2557aa`)", Middlewares: []string{"orchestrate-auth", "strip-path@internal"}}
-				c.HTTP.Routers["testTenantId-testChain2"] = &dynamic.Router{EntryPoints: []string{"orchestrate"}, Priority: math.MaxInt32, Service: "testTenantId-testChain2", Rule: "Path(`/39240e9f-ae09-4e95-9fd0-a712035c8ad7`)", Middlewares: []string{"orchestrate-auth", "strip-path@internal"}}
-				c.HTTP.Services["testTenantId-testChain"] = &dynamic.Service{LoadBalancer: &dynamic.ServersLoadBalancer{Servers: []dynamic.Server{
-					{Scheme: "http", URL: "http//testURL1.com"},
-					{Scheme: "http", URL: "http://testURL2.com"},
-				}}}
-				c.HTTP.Services["testTenantId-testChain2"] = &dynamic.Service{LoadBalancer: &dynamic.ServersLoadBalancer{Servers: []dynamic.Server{
-					{Scheme: "http", URL: "http//testURL10.com"},
-					{Scheme: "http", URL: "http://testURL20.com"},
-				}}}
+				c.HTTP.Routers["testTenantId-testChain"] = &dynamic.Router{
+					EntryPoints: []string{"orchestrate"},
+					Priority:    math.MaxInt32,
+					Service:     "testTenantId-testChain",
+					Rule:        "Path(`/0d60a85e-0b90-4482-a14c-108aea2557aa`)",
+					Middlewares: []string{
+						"orchestrate-auth",
+						"strip-path@internal",
+						"orchestrate-ratelimit",
+					},
+				}
+				c.HTTP.Routers["testTenantId-testChain2"] = &dynamic.Router{
+					EntryPoints: []string{"orchestrate"},
+					Priority:    math.MaxInt32,
+					Service:     "testTenantId-testChain2",
+					Rule:        "Path(`/39240e9f-ae09-4e95-9fd0-a712035c8ad7`)",
+					Middlewares: []string{
+						"orchestrate-auth",
+						"strip-path@internal",
+						"orchestrate-ratelimit",
+					},
+				}
+				c.HTTP.Services["testTenantId-testChain"] = &dynamic.Service{
+					LoadBalancer: &dynamic.ServersLoadBalancer{
+						Servers: []dynamic.Server{
+							{Scheme: "http", URL: "http//testURL1.com"},
+							{Scheme: "http", URL: "http://testURL2.com"},
+						}}}
+				c.HTTP.Services["testTenantId-testChain2"] = &dynamic.Service{
+					LoadBalancer: &dynamic.ServersLoadBalancer{
+						Servers: []dynamic.Server{
+							{Scheme: "http", URL: "http//testURL10.com"},
+							{Scheme: "http", URL: "http://testURL20.com"},
+						}}}
 				return c
 			},
 			false,

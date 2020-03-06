@@ -82,8 +82,7 @@ func NewConfig() *static.Configuration {
 		},
 		AccessLog: &traefiktypes.AccessLog{
 			Filters: &traefiktypes.AccessLogFilters{
-				StatusCodes: []string{"100-199", "400-599"},
-				MinDuration: traefiktypes.Duration(500 * time.Millisecond),
+				StatusCodes: []string{"100-199", "400-428", "430-599"},
 			},
 			Format: viperToTraefikLogFormat(viper.GetString(logger.LogFormatViperKey)),
 		},

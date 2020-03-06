@@ -26,10 +26,12 @@ func (h *MockHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 func TestBuilder(t *testing.T) {
 	h1 := &MockHandler{}
-	customMiddlewares := map[string]alice.Constructor{
-		"custom-middleware": func(next http.Handler) (http.Handler, error) {
-			h1.next = next
-			return h1, nil
+	customMiddlewares := map[string]func(string) alice.Constructor{
+		"custom-middleware": func(_ string) alice.Constructor {
+			return func(next http.Handler) (http.Handler, error) {
+				h1.next = next
+				return h1, nil
+			}
 		},
 	}
 
@@ -50,6 +52,7 @@ func TestBuilder(t *testing.T) {
 	chain := builder.BuildChain(
 		context.Background(),
 		[]string{"custom-middleware", "traefik-middleware"},
+		"test-name",
 	)
 	h2 := &MockHandler{}
 	h, _ := chain.Then(h2)

@@ -40,7 +40,7 @@ func buildProxy(passHostHeader *bool, responseForwarding *dynamic.ResponseForwar
 	proxy := &httputil.ReverseProxy{
 		Director: func(outReq *http.Request) {
 			u := outReq.URL
-			if outReq.RequestURI != "" {
+			if outReq.RequestURI != "/" {
 				parsedURL, err := url.ParseRequestURI(outReq.RequestURI)
 				if err == nil {
 					u = parsedURL

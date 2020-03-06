@@ -20,6 +20,7 @@ require (
 	github.com/containous/traefik/v2 v2.0.5
 	github.com/cucumber/godog v0.8.1
 	github.com/deckarep/golang-set v1.7.1 // indirect
+	github.com/dgraph-io/ristretto v0.0.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/eapache/channels v1.1.0
 	github.com/eapache/go-resiliency v1.2.0 // indirect
