@@ -22,6 +22,8 @@ type PatchRequest struct {
 // @Summary Updates a faucet by ID
 // @Accept json
 // @Produce json
+// @Security ApiKeyAuth
+// @Security JWTAuth
 // @Param uuid path string true "ID of the faucet"
 // @Param request body PatchRequest true "Faucet update request"
 // @Success 200 {object} Faucet

@@ -28,6 +28,8 @@ const LatestBlock string = "latest"
 // @Summary Registers a new chain
 // @Accept json
 // @Produce json
+// @Security ApiKeyAuth
+// @Security JWTAuth
 // @Param request body PostRequest true "Chain registration request"
 // @Success 200 {object} Chain
 // @Failure 400

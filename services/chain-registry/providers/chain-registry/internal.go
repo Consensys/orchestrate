@@ -57,12 +57,20 @@ func (i *Provider) createConfiguration() *dynamic.Configuration {
 }
 
 func (i *Provider) apiConfiguration(cfg *dynamic.Configuration) {
+	// Register swagger
+	cfg.HTTP.Routers["swagger"] = &dynamic.Router{
+		EntryPoints: []string{"orchestrate"},
+		Service:     "api@internal",
+		Priority:    math.MaxInt32 - 1,
+		Rule:        "PathPrefix(`/swagger`)",
+	}
+
 	// Register api
 	cfg.HTTP.Routers["api"] = &dynamic.Router{
 		EntryPoints: []string{"orchestrate"},
 		Service:     "api@internal",
-		Priority:    math.MaxInt32 - 1,
-		Rule:        "PathPrefix(`/{tenantID}`)",
+		Priority:    math.MaxInt32 - 2,
+		Rule:        "PathPrefix(`/`)",
 		Middlewares: []string{"orchestrate-auth"},
 	}
 	cfg.HTTP.Services["api"] = &dynamic.Service{}

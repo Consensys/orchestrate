@@ -25,6 +25,8 @@ type ListenerPatchRequest struct {
 // @Summary Updates a chain by ID
 // @Accept json
 // @Produce json
+// @Security ApiKeyAuth
+// @Security JWTAuth
 // @Param uuid path string true "ID of the chain"
 // @Param request body PatchRequest true "Chain update request"
 // @Success 200 {object} Chain

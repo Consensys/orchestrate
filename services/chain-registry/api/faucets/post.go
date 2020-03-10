@@ -22,6 +22,8 @@ type PostRequest struct {
 // @Summary Registers a new faucet
 // @Accept json
 // @Produce json
+// @Security ApiKeyAuth
+// @Security JWTAuth
 // @Param request body PostRequest true "Faucet registration request"
 // @Success 200 {object} Faucet
 // @Failure 400

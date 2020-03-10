@@ -12,6 +12,8 @@ import (
 
 // @Summary Retrieves a list of all registered chains
 // @Produce json
+// @Security ApiKeyAuth
+// @Security JWTAuth
 // @Success 200 {array} Chain
 // @Failure 404
 // @Failure 500
@@ -39,6 +41,8 @@ func (h Handler) getChains(rw http.ResponseWriter, request *http.Request) {
 
 // @Summary Retrieves a chain by ID
 // @Produce json
+// @Security ApiKeyAuth
+// @Security JWTAuth
 // @Param uuid path string true "ID of the chain"
 // @Success 200 {object} Chain
 // @Failure 400

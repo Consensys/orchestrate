@@ -10,10 +10,11 @@ import (
 
 // @Summary Deletes a chain by ID
 // @Produce json
+// @Security ApiKeyAuth
+// @Security JWTAuth
 // @Param uuid path string true "ID of the chain"
 // @Success 204
 // @Failure 400
-
 // @Failure 404
 // @Failure 500
 // @Router /chains/{uuid} [delete]

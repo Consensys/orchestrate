@@ -12,6 +12,8 @@ import (
 
 // @Summary Retrieves a list of all registered faucet
 // @Produce json
+// @Security ApiKeyAuth
+// @Security JWTAuth
 // @Success 200 {array} Faucet
 // @Failure 404
 // @Failure 500

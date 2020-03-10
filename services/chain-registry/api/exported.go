@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api/swagger"
+
 	"github.com/containous/traefik/v2/pkg/api"
 	"github.com/containous/traefik/v2/pkg/config/runtime"
 	"github.com/containous/traefik/v2/pkg/config/static"
@@ -12,46 +14,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api/chains"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api/faucets"
 )
-
-const (
-	swaggerUIPath    = "./public/swagger-ui"
-	swaggerSpecsPath = "./public/swagger-specs/types/chain-registry/swagger.json"
-)
-
-var (
-	initOnce = &sync.Once{}
-)
-
-// Init Initialize API handlers
-func Init(ctx context.Context) {
-	initOnce.Do(func() {
-		chains.Init(ctx)
-		faucets.Init(ctx)
-	})
-}
-
-type Builder func(config *runtime.Configuration) http.Handler
-
-// NewBuilder returns a http.Handler builder based on runtime.Configuration
-func NewBuilder(staticConfig *static.Configuration) Builder {
-	return func(configuration *runtime.Configuration) http.Handler {
-		router := mux.NewRouter()
-
-		// Append Traefik API routes
-		if staticConfig.API != nil {
-			api.New(*staticConfig, configuration).Append(router)
-		}
-
-		// Append Chain-Registry routes
-		chains.GlobalHandler().Append(router)
-		faucets.GlobalHandler().Append(router)
-
-		// Append Swagger routes
-		buildSwagger(router)
-
-		return router
-	}
-}
 
 // @title Chain Registry API
 // @version 2.0
@@ -72,10 +34,41 @@ func NewBuilder(staticConfig *static.Configuration) Builder {
 // @in header
 // @name Authorization
 
-func buildSwagger(router *mux.Router) {
-	fs := http.FileServer(http.Dir(swaggerUIPath))
-	router.HandleFunc("/swagger/swagger.json", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, swaggerSpecsPath)
+const (
+	swaggerUIPath    = "./public/swagger-ui"
+	swaggerSpecsPath = "./public/swagger-specs/types/chain-registry/swagger.json"
+)
+
+var (
+	initOnce = &sync.Once{}
+)
+
+// Init Initialize API handlers
+func Init(ctx context.Context) {
+	initOnce.Do(func() {
+		chains.Init(ctx)
+		faucets.Init(ctx)
+		swagger.Init(swaggerSpecsPath, swaggerUIPath)
 	})
-	router.PathPrefix("/swagger/").Handler(http.StripPrefix("/swagger/", fs))
+}
+
+type Builder func(config *runtime.Configuration) http.Handler
+
+// NewBuilder returns a http.Handler builder based on runtime.Configuration
+func NewBuilder(staticConfig *static.Configuration) Builder {
+	return func(configuration *runtime.Configuration) http.Handler {
+		router := mux.NewRouter()
+
+		// Append Traefik API routes
+		if staticConfig.API != nil {
+			api.New(*staticConfig, configuration).Append(router)
+		}
+
+		// Append Chain-Registry routes
+		swagger.GlobalHandler().Append(router)
+		chains.GlobalHandler().Append(router)
+		faucets.GlobalHandler().Append(router)
+
+		return router
+	}
 }

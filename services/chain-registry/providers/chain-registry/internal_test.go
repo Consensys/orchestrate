@@ -46,11 +46,17 @@ func (s *ProviderTestSuite) TestCreateConfiguration() {
 	cfg := &dynamic.Configuration{
 		HTTP: &dynamic.HTTPConfiguration{
 			Routers: map[string]*dynamic.Router{
-				"api": {
+				"swagger": {
 					EntryPoints: []string{"orchestrate"},
 					Service:     "api@internal",
 					Priority:    math.MaxInt32 - 1,
-					Rule:        "PathPrefix(`/{tenantID}`)",
+					Rule:        "PathPrefix(`/swagger`)",
+				},
+				"api": {
+					EntryPoints: []string{"orchestrate"},
+					Service:     "api@internal",
+					Priority:    math.MaxInt32 - 2,
+					Rule:        "PathPrefix(`/`)",
 					Middlewares: []string{"orchestrate-auth"},
 				},
 			},

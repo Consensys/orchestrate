@@ -11,6 +11,8 @@ import (
 
 // @Summary Deletes a faucet by ID
 // @Produce json
+// @Security ApiKeyAuth
+// @Security JWTAuth
 // @Param uuid path string true "ID of the faucet"
 // @Success 204
 // @Failure 400
