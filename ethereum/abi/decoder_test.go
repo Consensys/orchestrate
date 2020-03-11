@@ -1,4 +1,4 @@
-package decoder
+package abi
 
 import (
 	"encoding/json"

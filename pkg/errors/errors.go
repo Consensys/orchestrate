@@ -290,8 +290,8 @@ func IsSolidityError(err error) bool {
 }
 
 // InvalidSignatureError is raised when a Solidity method signature is invalid
-func InvalidSignatureError(sig string) *ierror.Error {
-	return Errorf(InvalidSignature, "%q is an invalid Solidity method signature (example of valid signature: transfer(address,uint256))", sig)
+func InvalidSignatureError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(InvalidSignature, format, a...)
 }
 
 // InvalidArgsCountError is raised when invalid arguments count is provided to craft a transaction

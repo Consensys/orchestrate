@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/abi/crafter"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client"
 )
@@ -24,14 +24,11 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		// Create crafter
-		crafter.Init()
-
 		// Initialize Registry Client
 		registryclient.Init(ctx)
 
 		// Create Handler
-		handler = Crafter(registryclient.GlobalClient(), crafter.GlobalCrafter())
+		handler = Crafter(registryclient.GlobalClient(), &abi.BaseCrafter{})
 
 		log.Infof("crafter: handler ready")
 	})

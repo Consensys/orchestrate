@@ -1,4 +1,4 @@
-package decoder
+package abi
 
 import (
 	"fmt"
@@ -29,7 +29,7 @@ func FormatIndexedArg(t *abi.Type, arg common.Hash) (string, error) {
 	case abi.FixedBytesTy:
 		return fmt.Sprintf("%v", hexutil.Encode(arg[common.HashLength-t.Type.Size():])), nil
 	case abi.BytesTy, abi.ArrayTy, abi.TupleTy:
-		return "", errors.FeatureNotSupportedError("not supported go-ethereum type %q", t.Kind).SetComponent(component)
+		return "", errors.FeatureNotSupportedError("not supported go-ethereum type %q", t.Kind)
 	default:
 		return fmt.Sprintf("%v", arg), nil
 	}
@@ -65,7 +65,7 @@ func GetElemType(t *abi.Type) (abi.Type, error) {
 		return abi.NewType("tuple", "", tupleArgs)
 	}
 
-	return abi.Type{}, errors.FeatureNotSupportedError("no go-ethereum type for %v", t).SetComponent(component)
+	return abi.Type{}, errors.FeatureNotSupportedError("no go-ethereum type for %v", t)
 }
 
 // FormatNonIndexedArrayArg transforms a data to string
@@ -81,7 +81,7 @@ func FormatNonIndexedArrayArg(t *abi.Type, arg interface{}) (string, error) {
 
 	jsonArgs, err := encoding.Marshal(arrayArgString)
 	if err != nil {
-		return "", errors.FromError(err).ExtendComponent(component)
+		return "", errors.FromError(err)
 	}
 	return string(jsonArgs), nil
 }
@@ -100,7 +100,7 @@ func FormatNonIndexedSliceArg(t *abi.Type, arg interface{}) (string, error) {
 
 	jsonArgs, err := encoding.Marshal(sliceArgString)
 	if err != nil {
-		return "", errors.FromError(err).ExtendComponent(component)
+		return "", errors.FromError(err)
 	}
 
 	return string(jsonArgs), nil
@@ -118,7 +118,7 @@ func FormatNonIndexedTupleArg(t *abi.Type, arg interface{}) (string, error) {
 	}
 	jsonArgs, err := encoding.Marshal(tuple)
 	if err != nil {
-		return "", errors.FromError(err).ExtendComponent(component)
+		return "", errors.FromError(err)
 	}
 
 	return string(jsonArgs), nil
@@ -143,7 +143,7 @@ func FormatNonIndexedArg(t *abi.Type, arg interface{}) (string, error) {
 	case abi.TupleTy:
 		return FormatNonIndexedTupleArg(t, arg)
 	default:
-		return "", errors.FeatureNotSupportedError("not supported go-ethereum type %q", t.Kind).SetComponent(component)
+		return "", errors.FeatureNotSupportedError("not supported go-ethereum type %q", t.Kind)
 	}
 }
 
@@ -154,14 +154,14 @@ func Decode(event *abi.Event, txLog *ethereum.Log) (map[string]string, error) {
 		return nil, errors.InvalidTopicsCountError(
 			"invalid topics count (expected %v but got %v)",
 			expectedTopics, len(txLog.Topics)-1,
-		).SetComponent(component)
+		)
 	}
 	d, _ := hexutil.Decode(txLog.Data)
 	unpackValues, err := event.Inputs.UnpackValues(d)
 	if err != nil {
 		return nil, errors.InvalidEventDataError(
 			"invalid event data %v", txLog.Data,
-		).SetComponent(component)
+		)
 	}
 
 	var (

@@ -413,6 +413,10 @@ func TestEnvelope_MethodSignature(t *testing.T) {
 	assert.False(t, b.IsConstructor())
 
 	assert.Equal(t, "testContractName[testContractTag]", b.ShortContract(), "Should be equal")
+
+	b.MethodSignature = "constructor()"
+	assert.True(t, b.IsConstructor())
+
 }
 
 func TestEnvelope_Args(t *testing.T) {

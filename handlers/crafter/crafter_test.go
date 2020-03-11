@@ -5,43 +5,36 @@ import (
 	"fmt"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
-
-	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
+	typesabi "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
 	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
 )
 
-const testsNum = 8
-
-type MockCrafter struct{}
-
-var (
-	callPayload        = "0xa9059cbb000000000000000000000000ff778b716fc07d98839f48ddb88d8be583beb684000000000000000000000000000000000000000000000000002386f26fc10000"
-	constructorPayload = "0xf622a9059cbb000000000000000000000000ff778b716fc07d98839f48ddb88d8be583beb684000000000000000000000000000000000000000000000000002386f26fc10000"
-)
-
-func (c *MockCrafter) CraftCall(method *ethAbi.Method, methodArgs ...string) ([]byte, error) {
-	if len(methodArgs) != 1 {
-		return []byte(``), errors.InvalidArgsCountError("could not craft call expected args len to be 1").SetComponent("mock")
-	}
-	return hexutil.MustDecode(callPayload), nil
+type MockCrafter struct {
+	crafter *abi.BaseCrafter
 }
 
-func (c *MockCrafter) CraftConstructor(bytecBTWode []byte, method *ethAbi.Method, methodArgs ...string) ([]byte, error) {
-	if len(methodArgs) != 1 {
-		return []byte(``), errors.InvalidArgsCountError("could not craft call expected args len to be 1").SetComponent("mock")
+func (c *MockCrafter) CraftCall(sig string, args ...string) ([]byte, error) {
+	if len(args) != 1 {
+		return []byte(``), fmt.Errorf("could not craft call expected args len to be 1")
 	}
-	return hexutil.MustDecode(constructorPayload), nil
+	return c.crafter.CraftCall(sig, args...)
+}
+
+func (c *MockCrafter) CraftConstructor(bytecode []byte, sig string, args ...string) ([]byte, error) {
+	if len(args) != 0 {
+		return []byte(``), fmt.Errorf("could not craft call expected args len to be 1")
+	}
+	return c.crafter.CraftConstructor(bytecode, sig)
 }
 
 func makeCrafterContext(i int) *engine.TxContext {
@@ -55,44 +48,49 @@ func makeCrafterContext(i int) *engine.TxContext {
 		ctx.Set("errors", 0)
 		ctx.Set("result", "")
 	case 1:
-		_ = ctx.Envelope.SetData(hexutil.MustDecode("0xa9059cbb"))
+		_ = ctx.Envelope.
+			SetData(hexutil.MustDecode("0xa9059cbb"))
 		ctx.Set("errors", 0)
 		ctx.Set("result", "0xa9059cbb")
 	case 2:
-		_ = ctx.Envelope.SetMethodSignature("known()").SetArgs([]string{"test"})
+		_ = ctx.Envelope.
+			SetMethodSignature("increment(uint256)").
+			SetArgs([]string{"0xab"})
 		ctx.Set("errors", 0)
-		ctx.Set("result", callPayload)
+		ctx.Set("result", "0x7cf5dab000000000000000000000000000000000000000000000000000000000000000ab")
 	case 3:
-		_ = ctx.Envelope.SetMethodSignature("known()")
+		_ = ctx.Envelope.
+			SetMethodSignature("testMethod()")
 		ctx.Set("errors", 1)
-		ctx.Set("error.code", errors.InvalidArgsCountError("").GetCode())
 		ctx.Set("result", "")
 	case 4:
-		_ = ctx.Envelope.SetContractName("known").SetMethodSignature("constructor()").SetArgs([]string{"test"})
+		_ = ctx.Envelope.
+			SetContractName("known").
+			SetMethodSignature("constructor()")
 		ctx.Set("errors", 0)
-		ctx.Set("result", constructorPayload)
+		ctx.Set("result", "0x6080604052348015600f57600080fd5b5061010a8061001f6000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80637cf5dab014602d575b600080fd5b605660048036036020811015604157600080fd5b81019080803590602001909291905050506058565b005b8060008082825401925050819055507f38ac789ed44572701765277c4d0970f2db1c1a571ed39e84358095ae4eaa54203382604051808373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019250505060405180910390a15056fea265627a7a72315820c084d653e3ba7607a5b05fb98edf3373a2b542aa6abdd9ae89cd4a407bb0a2b464736f6c63430005100032")
 	case 5:
 		// Invalid method signature
-		_ = ctx.Envelope.SetContractName("known").SetMethodSignature("constructor)").SetArgs([]string{"0xabcd"})
+		_ = ctx.Envelope.
+			SetContractName("known").
+			SetMethodSignature("constructor(")
 		ctx.Set("errors", 1)
-		ctx.Set("error.code", errors.InvalidSignatureError("").GetCode())
 		ctx.Set("result", "")
 	case 6:
 		// Invalid contract name
-		_ = ctx.Envelope.SetContractName("unknown").SetMethodSignature("constructor()").SetArgs([]string{"0xabcd"})
+		_ = ctx.Envelope.
+			SetContractName("unknown").
+			SetMethodSignature("constructor()")
 		ctx.Set("errors", 1)
-		ctx.Set("error.code", errors.NotFoundError("").GetCode())
 		ctx.Set("result", "")
 	case 7:
 		// Invalid number of arguments for a constructor
-		_ = ctx.Envelope.SetContractName("known").SetMethodSignature("constructor()").SetArgs([]string{"0xabcd", "123"})
+		_ = ctx.Envelope.
+			SetContractName("known").
+			SetMethodSignature("constructor()").
+			SetArgs([]string{"0xabcd"})
 		ctx.Set("errors", 1)
-		ctx.Set("error.code", errors.InvalidArgsCountError("").GetCode())
 		ctx.Set("result", "")
-	case 8:
-		_ = ctx.Envelope.SetContractName("known").SetMethodSignature("constructor()").SetArgs([]string{"0xabcd"})
-		ctx.Set("errors", 0)
-		ctx.Set("result", constructorPayload)
 	default:
 		panic(fmt.Sprintf("No test case with number %d", i))
 	}
@@ -108,13 +106,13 @@ func (s *CrafterTestSuite) SetupSuite() {
 	s.contractRegistry = clientmock.New()
 	_, err := s.contractRegistry.RegisterContract(context.Background(),
 		&contractregistry.RegisterContractRequest{
-			Contract: &abi.Contract{
-				Id: &abi.ContractId{
+			Contract: &typesabi.Contract{
+				Id: &typesabi.ContractId{
 					Name: "known",
 				},
-				Abi:              `[]`,
-				Bytecode:         hexutil.Encode([]byte{1, 2, 3}),
-				DeployedBytecode: hexutil.Encode([]byte{1, 2}),
+				Abi:              `[{"constant":false,"inputs":[{"internalType":"uint256","name":"value","type":"uint256"}],"name":"increment","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"from","type":"address"},{"indexed":false,"internalType":"uint256","name":"by","type":"uint256"}],"name":"Incremented","type":"event"}]`,
+				Bytecode:         "0x6080604052348015600f57600080fd5b5061010a8061001f6000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80637cf5dab014602d575b600080fd5b605660048036036020811015604157600080fd5b81019080803590602001909291905050506058565b005b8060008082825401925050819055507f38ac789ed44572701765277c4d0970f2db1c1a571ed39e84358095ae4eaa54203382604051808373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019250505060405180910390a15056fea265627a7a72315820c084d653e3ba7607a5b05fb98edf3373a2b542aa6abdd9ae89cd4a407bb0a2b464736f6c63430005100032",
+				DeployedBytecode: "0x6080604052348015600f57600080fd5b506004361060285760003560e01c80637cf5dab014602d575b600080fd5b605660048036036020811015604157600080fd5b81019080803590602001909291905050506058565b005b8060008082825401925050819055507f38ac789ed44572701765277c4d0970f2db1c1a571ed39e84358095ae4eaa54203382604051808373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019250505060405180910390a15056fea265627a7a72315820cc73213703da717157e9aa146473f2af6823d442bfb100062b58833aae34fa7b64736f6c63430005100032",
 			},
 		})
 	assert.NoError(s.T(), err)
@@ -123,7 +121,7 @@ func (s *CrafterTestSuite) SetupSuite() {
 
 func (s *CrafterTestSuite) TestCrafter() {
 	var txctxs []*engine.TxContext
-	for i := 0; i < testsNum; i++ {
+	for i := 0; i < 8; i++ {
 		txctxs = append(txctxs, makeCrafterContext(i))
 	}
 
@@ -132,9 +130,6 @@ func (s *CrafterTestSuite) TestCrafter() {
 
 	for i, txctx := range txctxs {
 		assert.Len(s.T(), txctx.Envelope.Errors, txctx.Get("errors").(int), "%d/%d - Expected right count of errors", i, len(txctxs), txctx.Envelope.Args)
-		for _, err := range txctx.Envelope.Errors {
-			assert.Equal(s.T(), txctx.Get("error.code").(uint64), err.GetCode(), "%d/%d - Error code be correct", i, len(txctxs))
-		}
 		assert.Equal(s.T(), txctx.Get("result").(string), txctx.Envelope.GetData(), "%d/%d - Expected correct payload", i, len(txctxs), txctx.Envelope.Args)
 	}
 }

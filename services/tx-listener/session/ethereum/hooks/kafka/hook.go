@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/abi/decoder"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
@@ -162,7 +162,7 @@ func (hk *Hook) decodeReceipt(ctx context.Context, c *dynamic.Chain, receipt *et
 				log.FromContext(ctx).WithError(err).Warnf("could not unmarshal event ABI provided by the Contract Registry, txHash: %s sigHash: %s, ", l.GetTxHash(), l.GetTopics()[0])
 				continue
 			}
-			mapping, err = decoder.Decode(event, l)
+			mapping, err = abi.Decode(event, l)
 		} else {
 			for _, potentialEvent := range eventResp.GetDefaultEvents() {
 				// Try to unmarshal
@@ -174,7 +174,7 @@ func (hk *Hook) decodeReceipt(ctx context.Context, c *dynamic.Chain, receipt *et
 				}
 
 				// Try to decode
-				mapping, err = decoder.Decode(event, l)
+				mapping, err = abi.Decode(event, l)
 				if err == nil {
 					// As the decoding is successful, stop looping
 					break
