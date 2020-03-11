@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
+
 	"github.com/gorilla/mux"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api/utils"
-	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 )
 
@@ -14,7 +15,7 @@ import (
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Success 200 {array} Faucet
+// @Success 200
 // @Failure 404
 // @Failure 500
 // @Router /faucets [get]
@@ -22,7 +23,7 @@ func (h Handler) getFaucets(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
 	filters := utils.ToFilters(request.URL.Query())
-	var faucets []*models.Faucet
+	var faucets []*types.Faucet
 	var err error
 	tenantID := multitenancy.TenantIDFromContext(request.Context())
 	if tenantID == "" || tenantID == multitenancy.DefaultTenantIDName {
@@ -42,7 +43,7 @@ func (h Handler) getFaucets(rw http.ResponseWriter, request *http.Request) {
 // @Summary Retrieves a faucet by ID
 // @Produce json
 // @Param uuid path string true "ID of the faucet"
-// @Success 200 {object} Faucet
+// @Success 200
 // @Failure 400
 // @Failure 404
 // @Failure 500
@@ -51,7 +52,7 @@ func (h Handler) getFaucetByUUID(rw http.ResponseWriter, request *http.Request) 
 	rw.Header().Set("Content-Type", "application/json")
 	uuid := mux.Vars(request)["uuid"]
 
-	var faucet *models.Faucet
+	var faucet *types.Faucet
 	var err error
 	tenantID := multitenancy.TenantIDFromContext(request.Context())
 	if tenantID == "" || tenantID == multitenancy.DefaultTenantIDName {

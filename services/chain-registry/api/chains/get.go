@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
+
 	"github.com/gorilla/mux"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 )
 
@@ -14,7 +15,7 @@ import (
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Success 200 {array} Chain
+// @Success 200
 // @Failure 404
 // @Failure 500
 // @Router /chains [get]
@@ -44,7 +45,7 @@ func (h Handler) getChains(rw http.ResponseWriter, request *http.Request) {
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param uuid path string true "ID of the chain"
-// @Success 200 {object} Chain
+// @Success 200
 // @Failure 400
 // @Failure 404
 // @Failure 500

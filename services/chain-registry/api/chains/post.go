@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 )
@@ -31,7 +33,7 @@ const LatestBlock string = "latest"
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param request body PostRequest true "Chain registration request"
-// @Success 200 {object} Chain
+// @Success 200
 // @Failure 400
 // @Failure 500
 // @Router /chains [post]
@@ -60,13 +62,13 @@ func (h Handler) postChain(rw http.ResponseWriter, request *http.Request) {
 	_ = json.NewEncoder(rw).Encode(chain)
 }
 
-func (h Handler) newChain(ctx context.Context, request *PostRequest) (*Chain, error) {
+func (h Handler) newChain(ctx context.Context, request *PostRequest) (*types.Chain, error) {
 	startingBlock, err := h.processStartingBlock(ctx, request.Listener.FromBlock, request.URLs)
 	if err != nil {
 		return nil, err
 	}
 
-	chain := &Chain{
+	chain := &types.Chain{
 		Name:                      request.Name,
 		URLs:                      request.URLs,
 		TenantID:                  multitenancy.TenantIDFromContext(ctx),

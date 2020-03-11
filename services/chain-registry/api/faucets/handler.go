@@ -7,8 +7,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
 
-type Faucet = types.Faucet
-
 type Handler struct {
 	store types.FaucetStore
 }

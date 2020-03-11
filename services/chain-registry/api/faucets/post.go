@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
+
 	uuid "github.com/satori/go.uuid"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api/utils"
-	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 )
 
@@ -25,7 +26,7 @@ type PostRequest struct {
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param request body PostRequest true "Faucet registration request"
-// @Success 200 {object} Faucet
+// @Success 200
 // @Failure 400
 // @Failure 500
 // @Router /faucets [post]
@@ -45,7 +46,7 @@ func (h Handler) postFaucet(rw http.ResponseWriter, request *http.Request) {
 		tenantID = multitenancy.DefaultTenantIDName
 	}
 
-	faucet := &models.Faucet{
+	faucet := &types.Faucet{
 		UUID:            uuid.NewV4().String(),
 		Name:            faucetRequest.Name,
 		TenantID:        tenantID,

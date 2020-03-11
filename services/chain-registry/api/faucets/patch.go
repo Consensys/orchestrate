@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
+
 	"github.com/gorilla/mux"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api/utils"
-	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 )
 
@@ -26,7 +27,7 @@ type PatchRequest struct {
 // @Security JWTAuth
 // @Param uuid path string true "ID of the faucet"
 // @Param request body PatchRequest true "Faucet update request"
-// @Success 200 {object} Faucet
+// @Success 200
 // @Failure 400
 // @Failure 404
 // @Failure 500
@@ -42,7 +43,7 @@ func (h Handler) patchFaucetByUUID(rw http.ResponseWriter, request *http.Request
 		return
 	}
 
-	faucet := &models.Faucet{
+	faucet := &types.Faucet{
 		UUID:            mux.Vars(request)["uuid"],
 		Name:            faucetRequest.Name,
 		ChainRule:       faucetRequest.ChainRule,

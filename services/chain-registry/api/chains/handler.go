@@ -11,8 +11,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
 
-type Chain = types.Chain
-
 type Handler struct {
 	store types.ChainStore
 	ec    ethclient.ChainLedgerReader

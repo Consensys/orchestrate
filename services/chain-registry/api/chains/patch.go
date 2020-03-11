@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
+
 	"github.com/gorilla/mux"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
@@ -29,7 +31,7 @@ type ListenerPatchRequest struct {
 // @Security JWTAuth
 // @Param uuid path string true "ID of the chain"
 // @Param request body PatchRequest true "Chain update request"
-// @Success 200 {object} Chain
+// @Success 200
 // @Failure 400
 // @Failure 404
 // @Failure 500
@@ -46,7 +48,7 @@ func (h Handler) patchChainByUUID(rw http.ResponseWriter, request *http.Request)
 
 	uuid := mux.Vars(request)["uuid"]
 
-	chain := &Chain{
+	chain := &types.Chain{
 		UUID:                      uuid,
 		Name:                      chainRequest.Name,
 		URLs:                      chainRequest.URLs,
