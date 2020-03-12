@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## v2.0.0 (2020-03-11)
 
 ### 🆕 Multi-tenancy & JWT Authentication
 * Add handler into `tx-crafter`, `tx-decoder`,  `tx-nonce`, `tx-sender`, `tx-signer`
