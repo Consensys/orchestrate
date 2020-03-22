@@ -9,18 +9,16 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	registryMock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mocks"
+	mockregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
-	faucetMock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet/mocks"
+	mockfaucet "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet/mock"
 	faucettypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
-
-	"github.com/golang/mock/gomock"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 )
 
 const (
@@ -139,11 +137,11 @@ func TestFaucet(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockRegistry := registryMock.NewMockFaucetClient(mockCtrl)
+	mockRegistry := mockregistry.NewMockFaucetClient(mockCtrl)
 	mockRegistry.EXPECT().GetFaucetsByChainRule(gomock.Any(), gomock.Eq(testChainUUID)).Return(testFaucets, nil).AnyTimes()
 	mockRegistry.EXPECT().GetFaucetsByChainRule(gomock.Any(), gomock.Eq(testChainUUIDError)).Return(nil, errGetFaucetsByChainRule).AnyTimes()
 
-	mockFaucet := faucetMock.NewMockFaucet(mockCtrl)
+	mockFaucet := mockfaucet.NewMockFaucet(mockCtrl)
 	mockFaucet.EXPECT().Credit(gomock.Any(), gomock.Any()).DoAndReturn(func(_ context.Context, req *faucettypes.Request) (*big.Int, error) {
 		switch req.ParentTxID {
 		case testIDSelfCreditError:

@@ -5,11 +5,10 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/envelope/storer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
+	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client"
 )
 
 const component = "handler.sender"

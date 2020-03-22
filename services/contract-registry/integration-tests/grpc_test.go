@@ -9,10 +9,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
-	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client/dialer"
+	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 )
 
 type contractRegistryGRPCTestSuite struct {
@@ -23,8 +23,11 @@ type contractRegistryGRPCTestSuite struct {
 }
 
 func (s *contractRegistryGRPCTestSuite) SetupSuite() {
-	client.Init(context.Background(), s.baseURL)
-	s.grpcClient = client.GlobalClient()
+	client, err := dialer.DialContextWithDefaultOptions(context.Background(), s.baseURL)
+	if err != nil {
+		panic(err)
+	}
+	s.grpcClient = client
 }
 
 func (s *contractRegistryGRPCTestSuite) TestContractRegistry_Validation() {

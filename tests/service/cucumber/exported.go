@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/cucumber/godog"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"

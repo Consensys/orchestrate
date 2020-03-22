@@ -7,9 +7,9 @@ import (
 	"github.com/spf13/viper"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/abi"
+	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
 )
 
 const component = "handler.crafter"

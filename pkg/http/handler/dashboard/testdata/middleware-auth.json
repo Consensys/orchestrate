@@ -1,0 +1,11 @@
+{
+	"auth": {},
+	"name": "auth@myprovider",
+	"provider": "myprovider",
+	"status": "enabled",
+	"type": "auth",
+	"usedBy": [
+		"bar@myprovider",
+		"test@myprovider"
+	]
+}

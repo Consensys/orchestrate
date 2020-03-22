@@ -5,9 +5,8 @@ package chanregistry
 import (
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
-
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 )
 
 func TestChanRegistry(t *testing.T) {

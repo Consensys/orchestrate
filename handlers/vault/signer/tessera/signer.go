@@ -1,12 +1,12 @@
 package tessera
 
 import (
-	"github.com/ethereum/go-ethereum/common"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tessera"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/signer/generic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/tessera"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore"
 )
 
@@ -20,7 +20,7 @@ func Signer(k keystore.KeyStore, t tessera.Client) engine.HandlerFunc {
 	)
 }
 
-func signTx(s keystore.KeyStore, txctx *engine.TxContext, sender common.Address, t *ethtypes.Transaction) ([]byte, *common.Hash, error) {
+func signTx(s keystore.KeyStore, txctx *engine.TxContext, sender ethcommon.Address, t *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error) {
 	b, hash, err := s.SignPrivateTesseraTx(txctx.Context(), txctx.Envelope.ChainID, sender, t)
 	if err != nil {
 		return b, hash, errors.FromError(err).ExtendComponent(component)

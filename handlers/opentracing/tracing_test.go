@@ -9,17 +9,16 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/mock"
 )
 
 var (
 	OpenTracingRootName = "Root Operation"
 	OpenTracingName     = "Transaction Operation"
-	MockTracer          = mocks.NewTracer()
+	MockTracer          = mock.NewTracer()
 	Mod                 = 5
 )
 

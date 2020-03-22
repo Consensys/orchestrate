@@ -1,13 +1,12 @@
 package multitenancy
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
-
 	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth"
+	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 )
 
 const AuthorizationMetadata = "Authorization"
@@ -19,11 +18,10 @@ const AuthorizationMetadata = "Authorization"
 // - verify the signature and verify if the certificate from the Token is the same that the loaded certificate => oidc/KeySet
 // - extract the Tenant UUID
 // - inject the Tenant in the Envelop
-func ExtractTenant(auth authentication.Auth) engine.HandlerFunc {
+func ExtractTenant(checker auth.Checker) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		txctx.Logger.Tracef("Start handler ExtractTenant")
 		if !viper.GetBool(multitenancy.EnabledViperKey) {
-			txctx.WithContext(multitenancy.WithTenantID(txctx.Context(), multitenancy.DefaultTenantIDName))
 			return
 		}
 
@@ -31,7 +29,7 @@ func ExtractTenant(auth authentication.Auth) engine.HandlerFunc {
 		authorization := txctx.Envelope.GetHeadersValue(AuthorizationMetadata)
 
 		// Control authentication
-		checkedCtx, err := auth.Check(authutils.WithAuthorization(txctx.Context(), authorization))
+		checkedCtx, err := checker.Check(authutils.WithAuthorization(txctx.Context(), authorization))
 		if err != nil {
 			e := txctx.AbortWithError(errors.UnauthorizedError(
 				err.Error(),

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 )
 
 // ChanRegistry holds a set of indexed envelopes channels

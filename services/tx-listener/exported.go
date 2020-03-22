@@ -4,23 +4,32 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/rpc"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
+	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app/worker"
+	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/key"
+	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/rpc"
+	orchlog "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/log"
 	registryprovider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/providers/chain-registry"
 	kafkahook "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/hooks/kafka"
 	registryoffset "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/offset/chain-registry"
 )
 
 var (
-	listener *TxListener
-	initOnce = &sync.Once{}
+	listener  *TxListener
+	appli     *app.App
+	initOnce  = &sync.Once{}
+	startOnce = &sync.Once{}
+	done      chan struct{}
+	cancel    func()
 )
 
-// TODO: NullProvider should be replaced with chain-registry provider
-type NullProvider struct{}
-
-func (p *NullProvider) Run(_ context.Context, _ chan<- *dynamic.Message) error {
-	return nil
+func initDependencies(ctx context.Context) {
+	registryprovider.Init(ctx)
+	kafkahook.Init(ctx)
+	registryoffset.Init(ctx)
+	rpc.Init(ctx)
 }
 
 // Init hook
@@ -30,10 +39,7 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		registryprovider.Init(ctx)
-		kafkahook.Init(ctx)
-		registryoffset.Init(ctx)
-		rpc.Init(ctx)
+		initDependencies(ctx)
 
 		listener = NewTxListener(
 			registryprovider.GlobalProvider(),
@@ -44,17 +50,40 @@ func Init(ctx context.Context) {
 	})
 }
 
-// SetGlobalListener set global TxListener
-func SetGlobalListener(l *TxListener) {
-	listener = l
+// Start starts application
+func Start(ctx context.Context) error {
+	startOnce.Do(func() {
+		// Create Configuration
+		cfg := app.NewConfig(viper.GetViper())
+		orchlog.ConfigureLogger(cfg.HTTP)
+
+		ctx, cancel = context.WithCancel(ctx)
+
+		// Create appli to expose metrics
+		appli = worker.New(cfg)
+		_ = appli.Start(ctx)
+
+		apiKey := viper.GetString(authkey.APIKeyViperKey)
+		if apiKey != "" {
+			// Inject authorization header in context for later authentication
+			ctx = authutils.WithAPIKey(ctx, apiKey)
+		}
+
+		Init(ctx)
+		done = make(chan struct{})
+		go func() {
+			listener.Start(ctx)
+			close(done)
+		}()
+
+	})
+
+	return nil
 }
 
-// GlobalListener return global TxListener
-func GlobalListener() *TxListener {
-	return listener
-}
-
-// Start global TxListener
-func Start(ctx context.Context) {
-	listener.Start(ctx)
+func Stop(ctx context.Context) error {
+	cancel()
+	_ = appli.Stop(ctx)
+	<-done
+	return nil
 }

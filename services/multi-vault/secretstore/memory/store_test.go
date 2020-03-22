@@ -5,9 +5,8 @@ package memory
 import (
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
-
 	"github.com/stretchr/testify/suite"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/testutils"
 )
 

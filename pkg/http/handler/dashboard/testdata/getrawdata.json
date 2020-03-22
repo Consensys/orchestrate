@@ -1,0 +1,97 @@
+{
+	"routers": {
+		"bar@myprovider": {
+			"entryPoints": [
+				"web"
+			],
+			"middlewares": [
+				"auth",
+				"addPrefixTest@anotherprovider"
+			],
+			"name": "bar@myprovider",
+			"provider": "myprovider",
+			"service": "foo-service@myprovider",
+			"rule": "Host(`foo.bar`)",
+			"status": "enabled",
+			"using": [
+				"web"
+			]
+		},
+		"test@myprovider": {
+			"entryPoints": [
+				"web"
+			],
+			"middlewares": [
+				"addPrefixTest",
+				"auth"
+			],
+			"name": "test@myprovider",
+			"provider": "myprovider",
+			"service": "foo-service@myprovider",
+			"rule": "Host(`foo.bar.other`)",
+			"status": "enabled",
+			"using": [
+				"web"
+			]
+		}
+	},
+	"middlewares": {
+		"addPrefixTest@anotherprovider": {
+			"addPrefix": {
+				"prefix": "/toto"
+			},
+			"name": "addPrefixTest@anotherprovider",
+			"provider": "anotherprovider",
+			"status": "enabled",
+			"type": "addprefix",
+			"usedBy": [
+				"bar@myprovider"
+			]
+		},
+		"addPrefixTest@myprovider": {
+			"addPrefix": {
+				"prefix": "/titi"
+			},
+			"name": "addPrefixTest@myprovider",
+			"provider": "myprovider",
+			"status": "enabled",
+			"type": "addprefix",
+			"usedBy": [
+				"test@myprovider"
+			]
+		},
+		"auth@myprovider": {
+			"auth": {},
+			"name": "auth@myprovider",
+			"provider": "myprovider",
+			"status": "enabled",
+			"type": "auth",
+			"usedBy": [
+				"bar@myprovider",
+				"test@myprovider"
+			]
+		}
+	},
+	"services": {
+		"foo-service@myprovider": {
+			"reverseProxy": {
+				"passHostHeader": true,
+				"loadBalancer": {
+					"servers": [
+						{
+							"url": "http://127.0.0.1"
+						}
+					]
+				}
+			},
+			"name": "foo-service@myprovider",
+			"provider": "myprovider",
+			"type": "reverseproxy",
+			"status": "enabled",
+			"usedBy": [
+				"bar@myprovider",
+				"test@myprovider"
+			]
+		}
+	}
+}

@@ -4,10 +4,9 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers/creditor"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers/cooldown"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers/creditor"
 	maxbalance "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers/max-balance"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet"
 )
@@ -24,7 +23,7 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		common.InParallel(
+		utils.InParallel(
 			func() { faucet.Init(ctx) },
 			func() { creditor.Init(ctx) },
 			func() { maxbalance.Init(ctx) },

@@ -3,10 +3,10 @@ package storer
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
 )
 
-func UnsignedTxStore(store evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
+func UnsignedTxStore(store svc.EnvelopeStoreClient) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		// Execute pending handlers (expected to send the transaction)
 		txctx.Next()
@@ -17,7 +17,7 @@ func UnsignedTxStore(store evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
 			// We can not store envelope before sending transaction because we do not know the transaction hash
 			// This is an issue for overall consistency of the system before/after transaction is mined
 			_, err := store.Store(txctx.Context(),
-				&evlpstore.StoreRequest{
+				&svc.StoreRequest{
 					Envelope: txctx.Envelope.TxEnvelopeAsRequest(),
 				},
 			)
@@ -30,9 +30,9 @@ func UnsignedTxStore(store evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
 
 			// Transaction has been properly sent so we set status to `pending`
 			_, err = store.SetStatus(txctx.Context(),
-				&evlpstore.SetStatusRequest{
+				&svc.SetStatusRequest{
 					Id:     txctx.Envelope.GetID(),
-					Status: evlpstore.Status_PENDING,
+					Status: svc.Status_PENDING,
 				},
 			)
 			if err != nil {

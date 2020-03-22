@@ -6,41 +6,38 @@ import (
 	"fmt"
 	"strings"
 
-	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
-
 	"github.com/Shopify/sarama"
 	"github.com/containous/traefik/v2/pkg/log"
+	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/golang/protobuf/proto"
 	uuid "github.com/satori/go.uuid"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
-	ethclientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/utils"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
+	ethclientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
+	svccontracts "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
+	svcenvelopes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/common"
-	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
-	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
 )
 
 type Hook struct {
 	conf *Config
 
-	registry svc.ContractRegistryClient
+	registry svccontracts.ContractRegistryClient
 	ec       ethclient.ChainStateReader
 
-	store evlpstore.EnvelopeStoreClient
+	store svcenvelopes.EnvelopeStoreClient
 
 	producer sarama.SyncProducer
 }
 
-func NewHook(conf *Config, registry svc.ContractRegistryClient, ec ethclient.ChainStateReader, store evlpstore.EnvelopeStoreClient, producer sarama.SyncProducer) *Hook {
+func NewHook(conf *Config, registry svccontracts.ContractRegistryClient, ec ethclient.ChainStateReader, store svcenvelopes.EnvelopeStoreClient, producer sarama.SyncProducer) *Hook {
 	return &Hook{
 		conf:     conf,
 		registry: registry,
@@ -138,7 +135,7 @@ func (hk *Hook) decodeReceipt(ctx context.Context, c *dynamic.Chain, receipt *et
 		// Retrieve event ABI from contract-registry
 		eventResp, err := hk.registry.GetEventsBySigHash(
 			ctx,
-			&svc.GetEventsBySigHashRequest{
+			&svccontracts.GetEventsBySigHashRequest{
 				SigHash: l.Topics[0],
 				AccountInstance: &common.AccountInstance{
 					ChainId: c.ChainID.String(),
@@ -221,7 +218,7 @@ func (hk *Hook) registerDeployedContract(ctx context.Context, c *dynamic.Chain, 
 		}
 
 		_, err = hk.registry.SetAccountCodeHash(ctx,
-			&svc.SetAccountCodeHashRequest{
+			&svccontracts.SetAccountCodeHashRequest{
 				AccountInstance: &common.AccountInstance{
 					ChainId: c.ChainID.String(),
 					Account: receipt.ContractAddress.Hex(),
@@ -237,10 +234,9 @@ func (hk *Hook) registerDeployedContract(ctx context.Context, c *dynamic.Chain, 
 }
 
 func (hk *Hook) loadEnvelope(ctx context.Context, c *dynamic.Chain, receipt *ethereum.Receipt) (*tx.TxEnvelope, error) {
-	ctx = multitenancy.WithTenantID(ctx, c.TenantID)
 	resp, err := hk.store.LoadByTxHash(
 		ctx,
-		&evlpstore.LoadByTxHashRequest{
+		&svcenvelopes.LoadByTxHashRequest{
 			ChainId: c.ChainID.String(),
 			TxHash:  receipt.GetTxHash(),
 		})

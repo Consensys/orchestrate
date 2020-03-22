@@ -2,10 +2,6 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt"
-	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/key"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
-
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/chain-registry"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/contract-registry"
 	envelopestore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/envelope-store"
@@ -15,7 +11,9 @@ import (
 	txsigner "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/tx-signer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/logger"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/metrics"
+	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt"
+	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/key"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/jaeger"
 )
 
@@ -33,9 +31,6 @@ func NewCommand() *cobra.Command {
 	// Set Persistent flags
 	logger.LogLevel(rootCmd.PersistentFlags())
 	logger.LogFormat(rootCmd.PersistentFlags())
-
-	// Register HTTP server flags
-	metrics.Flags(rootCmd.PersistentFlags())
 
 	// Register OpenTracing flags
 	jaeger.InitFlags(rootCmd.PersistentFlags())

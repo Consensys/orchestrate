@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/common"
 )
 
 const getEventsComponent = component + ".get-events"

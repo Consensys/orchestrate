@@ -2,7 +2,7 @@
 // +build !race
 // +build !integration
 
-package pg
+package pg_test
 
 import (
 	"context"
@@ -10,17 +10,17 @@ import (
 
 	"github.com/go-pg/pg/v9"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
-
 	"github.com/stretchr/testify/suite"
 	pgTestUtils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres/testutils"
+	pgstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/pg"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/pg/migrations"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
 
 func (s *ChainModelsTestSuite) SetupSuite() {
 	s.pg.InitTestDB(s.T())
-	s.Store = NewChainRegistry(s.pg.DB)
+	s.Store = pgstore.New(s.pg.DB)
 }
 
 func (s *ChainModelsTestSuite) SetupTest() {
@@ -37,7 +37,7 @@ func (s *ChainModelsTestSuite) TearDownSuite() {
 
 func (s *FaucetModelsTestSuite) SetupSuite() {
 	s.pg.InitTestDB(s.T())
-	s.Store = NewChainRegistry(s.pg.DB)
+	s.Store = pgstore.New(s.pg.DB)
 }
 
 func (s *FaucetModelsTestSuite) SetupTest() {
@@ -76,7 +76,7 @@ func TestModelsFaucet(t *testing.T) {
 
 type ErrorTestSuite struct {
 	suite.Suite
-	Store types.ChainStore
+	Store *pgstore.PG
 }
 
 func (s *ErrorTestSuite) SetupSuite() {
@@ -88,7 +88,7 @@ func (s *ErrorTestSuite) SetupSuite() {
 		PoolSize: 1,
 	}
 	db := pg.Connect(options)
-	s.Store = NewChainRegistry(db)
+	s.Store = pgstore.New(db)
 }
 
 func TestErrorSuite(t *testing.T) {

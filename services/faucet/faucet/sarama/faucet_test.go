@@ -9,13 +9,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Shopify/sarama/mocks"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
-
-	"github.com/Shopify/sarama/mocks"
-	ethcommon "github.com/ethereum/go-ethereum/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types/testutils"
 )

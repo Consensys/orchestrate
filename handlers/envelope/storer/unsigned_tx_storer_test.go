@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store/client/mocks"
+	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client/mock"
 	"golang.org/x/net/context"
 )
 
@@ -68,7 +68,7 @@ func TestUnsignedTxStore(t *testing.T) {
 	}
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	client := mocks.NewMockEnvelopeStoreClient(mockCtrl)
+	client := clientmock.NewMockEnvelopeStoreClient(mockCtrl)
 	client.EXPECT().Store(gomock.Eq(ctxStoreError), gomock.Any()).Return(nil, storeError).AnyTimes()
 	client.EXPECT().Store(gomock.Not(gomock.Eq(ctxStoreError)), gomock.Any()).Return(nil, nil).AnyTimes()
 	client.EXPECT().SetStatus(gomock.Eq(ctxSetStatusError), gomock.Any()).Return(nil, storeError).AnyTimes()

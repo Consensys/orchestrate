@@ -1,0 +1,24 @@
+[
+	{
+		"reverseProxy": {
+			"passHostHeader": true,
+			"loadBalancer": {
+				"servers": [
+					{
+						"url": "http://127.0.0.2"
+					}
+				]
+			}
+		},
+		"name": "baz@myprovider",
+		"provider": "myprovider",
+		"serverStatus": {
+			"http://127.0.0.2": "UP"
+		},
+		"status": "enabled",
+		"type": "reverseproxy",
+		"usedBy": [
+			"foo@myprovider"
+		]
+	}
+]

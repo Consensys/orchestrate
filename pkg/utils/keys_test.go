@@ -6,9 +6,9 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
-	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/error"
+	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/error"
 )
 
 func TestKafkaChainTopic(t *testing.T) {
@@ -19,7 +19,7 @@ func TestChainAccountKey(t *testing.T) {
 	assert.Equal(
 		t,
 		"0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C@3",
-		ToChainAccountKey(big.NewInt(3), common.HexToAddress("0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C")),
+		ToChainAccountKey(big.NewInt(3), ethcommon.HexToAddress("0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C")),
 		"Key should match",
 	)
 

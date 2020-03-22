@@ -4,8 +4,9 @@ import (
 	"github.com/go-pg/pg/v9"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/pg/migrations"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/store/postgres/migrations"
 )
 
 // newMigrateCmd create migrate command
@@ -17,7 +18,7 @@ func newMigrateCmd() *cobra.Command {
 		Short: "Migrate database",
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			// Set database connection
-			db = pg.Connect(postgres.NewOptions())
+			db = pg.Connect(postgres.NewOptions(viper.GetViper()))
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			migrate(db)

@@ -149,7 +149,7 @@ func TestDBPoolSize(t *testing.T) {
 }
 
 func TestNewOptions(t *testing.T) {
-	opts := NewOptions()
+	opts := NewOptions(viper.GetViper())
 	assert.Equal(t, opts, &pg.Options{
 		Addr:     fmt.Sprintf("%v:%v", viper.GetString("db.host"), viper.GetString("db.port")),
 		User:     viper.GetString("db.user"),

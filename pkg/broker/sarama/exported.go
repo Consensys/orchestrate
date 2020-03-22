@@ -2,12 +2,11 @@ package sarama
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"io/ioutil"
 	"sync"
 	"time"
-
-	"crypto/tls"
-	"crypto/x509"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"

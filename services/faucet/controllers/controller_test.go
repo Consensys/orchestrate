@@ -8,12 +8,10 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	faucetMock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet/mocks"
-
 	"github.com/stretchr/testify/assert"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet"
+	mockfaucet "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
 )
 
@@ -47,7 +45,7 @@ func (c *MockController) Control3(f faucet.CreditFunc) faucet.CreditFunc {
 
 func TestCombineControls(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
-	mockFaucet := faucetMock.NewMockFaucet(mockCtrl)
+	mockFaucet := mockfaucet.NewMockFaucet(mockCtrl)
 	c := MockController{make([]string, 0)}
 	creditor := CombineControls(c.Control1, c.Control2, c.Control3)(mockFaucet.Credit)
 	amount, err := creditor(context.Background(), &types.Request{})
@@ -59,7 +57,7 @@ func TestCombineControls(t *testing.T) {
 
 func TestControlledFaucet(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
-	mockFaucet := faucetMock.NewMockFaucet(mockCtrl)
+	mockFaucet := mockfaucet.NewMockFaucet(mockCtrl)
 	c := MockController{make([]string, 0)}
 	f := NewControlledFaucet(mockFaucet, c.Control1, c.Control2, c.Control3)
 	amount, err := f.Credit(context.Background(), &types.Request{})

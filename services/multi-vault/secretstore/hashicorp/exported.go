@@ -4,9 +4,8 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
-
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 )
 
 const component = "secret-store.hashicorp"

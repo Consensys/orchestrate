@@ -4,10 +4,9 @@ import (
 	"context"
 	"sync"
 
-	generator "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt/generator"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	generator "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt/generator"
 )
 
 var (

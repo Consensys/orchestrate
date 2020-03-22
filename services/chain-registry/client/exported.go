@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
-	httpclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 )
 
 const component = "chain-registry.client"
@@ -21,11 +21,9 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		httpclient.Init(ctx)
-
 		conf := NewConfig()
 		client = NewHTTPClient(
-			httpclient.GlobalClient(),
+			http.NewClient(),
 			conf,
 		)
 

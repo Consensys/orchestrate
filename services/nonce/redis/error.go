@@ -3,7 +3,7 @@ package redis
 import (
 	"github.com/gomodule/redigo/redis"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/error"
+	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/error"
 )
 
 func FromRedisError(err error) *ierror.Error {

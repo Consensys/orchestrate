@@ -8,8 +8,8 @@ import (
 
 	generator "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/account-generator"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/signer"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
 var (
@@ -20,7 +20,7 @@ var (
 // Init handlers
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
-		common.InParallel(
+		utils.InParallel(
 			// Initialize keystore
 			func() { signer.Init(ctx) },
 			// Initialize Sync Producer

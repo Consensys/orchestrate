@@ -5,12 +5,11 @@ import (
 	"sync"
 
 	"github.com/spf13/viper"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/rpc"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
-	crc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client"
-	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/rpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	crc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
+	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client"
 )
 
 var (
@@ -19,7 +18,7 @@ var (
 )
 
 func initComponent(ctx context.Context) {
-	common.InParallel(
+	utils.InParallel(
 		// Initialize Ethereum Client
 		func() { rpc.Init(ctx) },
 		// Initialize Contract Registry Client

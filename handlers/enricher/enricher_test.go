@@ -9,18 +9,16 @@ import (
 
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/golang/mock/gomock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/common"
-	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	ethclientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	registrymock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client/mocks"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	ethclientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
+	registrymock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client/mock"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 )
 
 var testCodeNoError = []byte{1, 2}

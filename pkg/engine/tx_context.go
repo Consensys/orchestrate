@@ -4,11 +4,11 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/error"
+	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/error"
 )
 
 // Envelope is the most important part of an engine.

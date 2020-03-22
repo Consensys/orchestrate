@@ -3,11 +3,10 @@ package dataagents
 import (
 	"context"
 
-	"github.com/go-pg/pg/v9/orm"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
-
 	"github.com/go-pg/pg/v9"
+	"github.com/go-pg/pg/v9/orm"
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/models"
 )

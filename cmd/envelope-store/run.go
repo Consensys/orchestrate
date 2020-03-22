@@ -4,13 +4,11 @@ import (
 	"context"
 	"os"
 
+	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/cobra"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
-	grpcserver "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/grpc"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/rest"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	envelopestore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/store"
 )
 
 func newRunCommand() *cobra.Command {
@@ -20,24 +18,28 @@ func newRunCommand() *cobra.Command {
 		Run:   run,
 	}
 
-	// Hostname & port for servers
-	grpcserver.Flags(runCmd.Flags())
-	rest.Flags(runCmd.Flags())
-
 	// EnvelopeStore flag
-	envelopestore.Type(runCmd.Flags())
-
-	// Postgres flags
-	postgres.PGFlags(runCmd.Flags())
+	store.Flags(runCmd.Flags())
 
 	return runCmd
 }
 
 func run(_ *cobra.Command, _ []string) {
-	// Process signals
-	sig := utils.NewSignalListener(func(signal os.Signal) { Close(context.Background()) })
-	defer sig.Close()
+	_ = envelopestore.Start(context.Background())
 
-	// Start application
-	Start(context.Background())
+	done := make(chan struct{})
+
+	// Process signals
+	sig := utils.NewSignalListener(func(signal os.Signal) {
+		err := envelopestore.Stop(context.Background())
+		if err != nil {
+			log.WithoutContext().WithError(err).Errorf("Application did not shutdown properly")
+		} else {
+			log.WithoutContext().WithError(err).Infof("Application gracefully closed")
+		}
+		close(done)
+	})
+	<-done
+
+	sig.Close()
 }

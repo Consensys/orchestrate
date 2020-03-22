@@ -2,15 +2,15 @@ package sender
 
 import (
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/envelope/storer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
 )
 
 // Sender creates sender handler
-func Sender(ec ethclient.TransactionSender, s evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
+func Sender(ec ethclient.TransactionSender, s svc.EnvelopeStoreClient) engine.HandlerFunc {
 	// Declare a set of handlers that will be forked by Sender handler
 	rawTxStore := storer.RawTxStore(s)
 	UnsignedTxStore := storer.UnsignedTxStore(s)

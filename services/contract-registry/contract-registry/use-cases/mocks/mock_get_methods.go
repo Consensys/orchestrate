@@ -7,7 +7,7 @@ package mocks
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	common "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/common"
+	common "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/common"
 	reflect "reflect"
 )
 

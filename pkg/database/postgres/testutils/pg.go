@@ -37,7 +37,7 @@ type PGTestHelper struct {
 // NewPGTestHelper creates a new PGTestHelper
 func NewPGTestHelper(collection *migrations.Collection) *PGTestHelper {
 	return &PGTestHelper{
-		Opts:       postgres.NewOptions(),
+		Opts:       postgres.NewOptions(viper.GetViper()),
 		Collection: collection,
 		TestDBName: fmt.Sprintf("test_%s", rand.String(10)),
 	}

@@ -1,4 +1,4 @@
-GOFILES := $(shell find . -name '*.go' | grep -v services/chain-registry/genstatic/gen.go | egrep -v "^\./\.go" | grep -v _test.go)
+GOFILES := $(shell find . -name '*.go' | grep -v pkg/http/handler/dashboard/genstatic/gen.go | grep -v pkg/http/handler/swagger/genstatic/gen.go | egrep -v "^\./\.go" | grep -v _test.go)
 PACKAGES ?= $(shell go list ./... | go list ./... | grep -Fv -e e2e -e examples -e genstatic -e mocks )
 CMD_RUN = tx-crafter tx-signer tx-sender tx-listener contract-registry chain-registry envelope-store
 CMD_PERSISTENT = redis postgres-chain-registry postgres-contract-registry postgres-envelope-store vault-init vault jaeger
@@ -58,6 +58,9 @@ gen-mocks:
 
 gen-swagger:
 	@go generate gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api
+
+generate-deepcopy:
+	@bash scripts/deepcopy/generate.sh
 
 # Tools
 lint-tools: ## Install linting tools

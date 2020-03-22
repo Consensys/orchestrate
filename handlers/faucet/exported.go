@@ -4,10 +4,9 @@ import (
 	"context"
 	"sync"
 
-	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
-
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet"
 )

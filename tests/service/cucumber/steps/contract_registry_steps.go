@@ -5,9 +5,8 @@ import (
 
 	"github.com/cucumber/godog"
 	"github.com/cucumber/godog/gherkin"
-
-	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/utils"
-	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
+	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
+	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 )
 
 func (sc *ScenarioContext) iRegisterTheFollowingContract(table *gherkin.DataTable) error {

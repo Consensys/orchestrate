@@ -6,19 +6,17 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/golang/mock/gomock"
-	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
-
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine/testutils"
-	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client/mocks"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
+	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client/mock"
+	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 )
 
 type MockCrafter struct {

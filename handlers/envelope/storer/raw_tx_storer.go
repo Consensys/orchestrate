@@ -3,15 +3,15 @@ package storer
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
 )
 
-func RawTxStore(store evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
+func RawTxStore(store svc.EnvelopeStoreClient) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		// Store envelope
 		_, err := store.Store(
 			txctx.Context(),
-			&evlpstore.StoreRequest{
+			&svc.StoreRequest{
 				Envelope: txctx.Envelope.TxEnvelopeAsRequest(),
 			},
 		)
@@ -30,9 +30,9 @@ func RawTxStore(store evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
 			// We update status in storage
 			_, storeErr := store.SetStatus(
 				txctx.Context(),
-				&evlpstore.SetStatusRequest{
+				&svc.SetStatusRequest{
 					Id:     txctx.Envelope.GetID(),
-					Status: evlpstore.Status_ERROR,
+					Status: svc.Status_ERROR,
 				},
 			)
 			if storeErr != nil {
@@ -46,9 +46,9 @@ func RawTxStore(store evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
 		// Transaction has been properly sent so we set status to `pending`
 		_, err = store.SetStatus(
 			txctx.Context(),
-			&evlpstore.SetStatusRequest{
+			&svc.SetStatusRequest{
 				Id:     txctx.Envelope.GetID(),
-				Status: evlpstore.Status_PENDING,
+				Status: svc.Status_PENDING,
 			},
 		)
 		if err != nil {

@@ -6,9 +6,8 @@ import (
 	"context"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet"
-
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet"
 )
 
 func TestInit(t *testing.T) {

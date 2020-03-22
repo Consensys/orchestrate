@@ -4,7 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/error"
+	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/error"
 )
 
 // FromAWSError transform an AWS error into an internal error

@@ -4,15 +4,15 @@ import (
 	"context"
 	"os"
 
-	authentication "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt/generator"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
-
+	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/cobra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt/generator"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/metrics"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	e2e "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/steps"
 )
@@ -32,9 +32,6 @@ func NewRunCommand() *cobra.Command {
 	logger.LogLevel(runCmd.Flags())
 	logger.LogFormat(runCmd.Flags())
 
-	// Register HTTP server flags
-	metrics.Hostname(runCmd.Flags())
-
 	// Register Kafka flags
 	broker.InitKafkaFlags(runCmd.Flags())
 	broker.KafkaTopicTxCrafter(runCmd.Flags())
@@ -50,20 +47,31 @@ func NewRunCommand() *cobra.Command {
 
 	// Register Multi-Tenancy flags
 	multitenancy.Enabled(runCmd.Flags())
-	authentication.Flags(runCmd.Flags())
+	auth.Flags(runCmd.Flags())
 	generator.PrivateKey(runCmd.Flags())
 
 	return runCmd
 }
 
 func run(_ *cobra.Command, _ []string) {
-	// Create app
-	ctx, cancel := context.WithCancel(context.Background())
+
+	done := make(chan struct{})
+	go func() {
+		_ = e2e.Start(context.Background())
+		close(done)
+	}()
 
 	// Process signals
-	sig := utils.NewSignalListener(func(signal os.Signal) { cancel() })
-	defer sig.Close()
+	sig := utils.NewSignalListener(func(signal os.Signal) {
+		err := e2e.Stop(context.Background())
+		if err != nil {
+			log.WithoutContext().WithError(err).Errorf("Application did not shutdown properly")
+		} else {
+			log.WithoutContext().WithError(err).Errorf("Application gracefully closed")
+		}
+	})
 
-	// Start application
-	Start(ctx)
+	<-done
+
+	sig.Close()
 }

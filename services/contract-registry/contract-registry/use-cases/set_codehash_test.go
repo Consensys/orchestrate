@@ -10,9 +10,9 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/models"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/testutils"
 )
 
 func TestSetCodeHash_Execute(t *testing.T) {
@@ -26,7 +26,7 @@ func TestSetCodeHash_Execute(t *testing.T) {
 		Address:  account.Account,
 		Codehash: codeHash,
 	}
-	mockCodeHashDataAgent := mocks.NewMockCodeHashDataAgent(ctrl)
+	mockCodeHashDataAgent := mock.NewMockCodeHashDataAgent(ctrl)
 	usecase := NewSetCodeHash(mockCodeHashDataAgent)
 
 	t.Run("should execute use case successfully", func(t *testing.T) {

@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	cgmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama/mocks"
+	cgmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 )
 

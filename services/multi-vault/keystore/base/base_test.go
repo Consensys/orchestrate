@@ -8,15 +8,14 @@ import (
 	"sync"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
-
 	"github.com/ConsenSys/golang-utils/ethereum"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/memory"
 )
 

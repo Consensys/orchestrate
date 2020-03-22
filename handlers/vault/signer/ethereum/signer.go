@@ -1,7 +1,7 @@
 package ethereum
 
 import (
-	"github.com/ethereum/go-ethereum/common"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/signer/generic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
@@ -19,7 +19,7 @@ func Signer(k keystore.KeyStore) engine.HandlerFunc {
 	)
 }
 
-func signTx(s keystore.KeyStore, txctx *engine.TxContext, sender common.Address, t *ethtypes.Transaction) ([]byte, *common.Hash, error) {
+func signTx(s keystore.KeyStore, txctx *engine.TxContext, sender ethcommon.Address, t *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error) {
 	txctx.Logger.Tracef("Start signTx from ethereum")
 	b, hash, err := s.SignTx(txctx.Context(), txctx.Envelope.ChainID, sender, t)
 	if err != nil {

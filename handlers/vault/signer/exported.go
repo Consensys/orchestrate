@@ -9,8 +9,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/signer/eea"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/signer/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/signer/tessera"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
 const component = "handler.signer"
@@ -27,7 +27,7 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		common.InParallel(
+		utils.InParallel(
 			// Initialize EEA signer
 			func() { eea.Init(ctx) },
 			// Initialize Tessera Signer

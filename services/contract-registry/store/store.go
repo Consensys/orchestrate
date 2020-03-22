@@ -2,12 +2,18 @@ package store
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/containous/traefik/v2/pkg/log"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/models"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/common"
+	pgstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/postgres"
 )
 
-//go:generate mockgen -source=../store/store.go -destination=../store/mocks/mock_store.go -package=mocks
+//go:generate mockgen -source=store.go -destination=mock/mock.go -package=mock
+
+const StoreName = "contracts"
 
 // Interfaces data agents
 type ContractDataAgent interface {
@@ -48,4 +54,47 @@ type RepositoryDataAgent interface {
 type TagDataAgent interface {
 	Insert(ctx context.Context, tag *models.TagModel) error
 	FindAllByName(ctx context.Context, name string) ([]string, error)
+}
+
+type Builder interface {
+	Build(ctx context.Context, conf *Config) (
+		ContractDataAgent,
+		RepositoryDataAgent,
+		TagDataAgent,
+		ArtifactDataAgent,
+		MethodDataAgent,
+		EventDataAgent,
+		CodeHashDataAgent,
+		error,
+	)
+}
+
+type builder struct {
+	postgres *pgstore.Builder
+}
+
+func NewBuilder(mngr postgres.Manager) Builder {
+	return &builder{
+		postgres: pgstore.NewBuilder(mngr),
+	}
+}
+
+func (b *builder) Build(ctx context.Context, conf *Config) (
+	ContractDataAgent,
+	RepositoryDataAgent,
+	TagDataAgent,
+	ArtifactDataAgent,
+	MethodDataAgent,
+	EventDataAgent,
+	CodeHashDataAgent,
+	error,
+) {
+	logCtx := log.With(ctx, log.Str("store", StoreName))
+	switch conf.Type {
+	case postgresType:
+		conf.Postgres.PG.ApplicationName = StoreName
+		return b.postgres.Build(logCtx, conf.Postgres)
+	default:
+		return nil, nil, nil, nil, nil, nil, nil, fmt.Errorf("invalid contract registry store type %q", conf.Type)
+	}
 }

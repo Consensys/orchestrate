@@ -6,7 +6,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
 
-//go:generate mockgen -source=client.go -destination=mocks/mock_client.go -package=mocks
+//go:generate mockgen -source=client.go -destination=mock/mock.go -package=mock
 
 type ChainClient interface {
 	GetChains(ctx context.Context) ([]*types.Chain, error)

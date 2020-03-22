@@ -1,0 +1,64 @@
+[
+	{
+		"reverseProxy": {
+			"passHostHeader": true,
+			"loadBalancer": {
+				"servers": [
+					{
+						"url": "http://127.0.0.1"
+					}
+				]
+			}
+		},
+		"name": "bar@myprovider",
+		"provider": "myprovider",
+		"serverStatus": {
+			"http://127.0.0.1": "UP"
+		},
+		"status": "enabled",
+		"type": "reverseproxy",
+		"usedBy": [
+			"foo@myprovider",
+			"test@myprovider"
+		]
+	},
+	{
+		"reverseProxy": {
+			"passHostHeader": true,
+			"loadBalancer": {
+				"servers": [
+					{
+						"url": "http://127.0.0.2"
+					}
+				],
+				"sticky": {
+					"cookie": {
+						"httpOnly": true,
+						"name": "chocolat",
+						"secure": true
+					}
+				}
+			}
+		},
+		"name": "baz@myprovider",
+		"provider": "myprovider",
+		"serverStatus": {
+			"http://127.0.0.2": "UP"
+		},
+		"status": "enabled",
+		"type": "reverseproxy",
+		"usedBy": [
+			"foo@myprovider"
+		]
+	},
+	{
+		"mock": {},
+		"name": "mock@myprovider",
+		"provider": "myprovider",
+		"status": "enabled",
+		"type": "mock",
+		"usedBy": [
+			"foo@myprovider"
+		]
+	}
+]

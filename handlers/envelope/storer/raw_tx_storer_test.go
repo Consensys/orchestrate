@@ -10,15 +10,15 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	envstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
-	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store/client/mocks"
+	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client/mock"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
 )
 
 func TestRawTxStore(t *testing.T) {
 	testSet := []struct {
 		name           string
 		input          func(txctx *engine.TxContext) *engine.TxContext
-		expectedStatus envstore.Status
+		expectedStatus svc.Status
 	}{
 		{
 			"Store",
@@ -26,7 +26,7 @@ func TestRawTxStore(t *testing.T) {
 				_ = txctx.Envelope.SetChainID(big.NewInt(1)).SetID("test")
 				return txctx
 			},
-			envstore.Status_PENDING,
+			svc.Status_PENDING,
 		},
 		{
 			"Store envelope without Metadata UUID",
@@ -36,7 +36,7 @@ func TestRawTxStore(t *testing.T) {
 				txctx.Envelope.Errors = append(txctx.Envelope.Errors, err)
 				return txctx
 			},
-			envstore.Status_ERROR,
+			svc.Status_ERROR,
 		},
 	}
 
@@ -52,7 +52,7 @@ func TestRawTxStore(t *testing.T) {
 			h := RawTxStore(registry)
 			h(test.input(txctx))
 
-			e, _ := registry.LoadByID(txctx.Context(), &envstore.LoadByIDRequest{Id: txctx.Envelope.GetID()})
+			e, _ := registry.LoadByID(txctx.Context(), &svc.LoadByIDRequest{Id: txctx.Envelope.GetID()})
 			assert.Equal(t, test.expectedStatus, e.StatusInfo.Status, "Expected same status")
 		})
 	}

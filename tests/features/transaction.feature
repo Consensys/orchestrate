@@ -27,9 +27,10 @@ Feature: Multiple transactions
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have log decoded
 
-  Scenario: Send raw transactions
-    # Send raw transaction with address:0xf5956Eb46b377Ae41b41BDa94e6270208d8202bb, nonce:0, gasLimit:21000, to:0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc290, value:0,5ETH
-    When I send envelopes to topic "tx.sender"
-      | chainName | contextLabels.txMode | tenantid                             | raw                                                                                                                                                                                                                  |
-      | besu      | raw                  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 | 0xf86780808252089488a5c2d9919e46f883eb62f7b8dd9d0cc45bc2908806f05b59d3b20000801ca09fd94be4942219541b1fd100341706e2e4caa365c926cde48d8c7aac8c5a0f69a034a00bd00f4ef680a3586208c462280d99cb35e8a89479494af09a7228fdd46a |
-    Then Envelopes should be in topic "tx.decoded"
+ # TODO: this scenario cannot run twice on the same network (sending twice the same transaction)
+ #  Scenario: Send raw transactions
+  # Send raw transaction with address:0xf5956Eb46b377Ae41b41BDa94e6270208d8202bb, nonce:0, gasLimit:21000, to:0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc290, value:0,5ETH
+   # When I send envelopes to topic "tx.sender"
+   #   | chainName | contextLabels.txMode | tenantid                             | raw                                                                                                                                                                                                                  |
+   #   | besu      | raw                  | f30c452b-e5fb-4102-a45d-bc00a060bcc6 | 0xf86780808252089488a5c2d9919e46f883eb62f7b8dd9d0cc45bc2908806f05b59d3b20000801ca09fd94be4942219541b1fd100341706e2e4caa365c926cde48d8c7aac8c5a0f69a034a00bd00f4ef680a3586208c462280d99cb35e8a89479494af09a7228fdd46a |
+   # Then Envelopes should be in topic "tx.decoded"

@@ -9,9 +9,9 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/models"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/testutils"
 )
 
 func TestGetMethods_Execute(t *testing.T) {
@@ -24,7 +24,7 @@ func TestGetMethods_Execute(t *testing.T) {
 		ABI: "eventABI",
 	}
 
-	mockMethodDataAgent := mocks.NewMockMethodDataAgent(ctrl)
+	mockMethodDataAgent := mock.NewMockMethodDataAgent(ctrl)
 	usecase := NewGetMethods(mockMethodDataAgent)
 
 	t.Run("should execute use case successfully if method is found", func(t *testing.T) {

@@ -17,7 +17,7 @@ services:
   - docker:18-dind
 
 .go-setup: &go-setup
-  image: golang:1.13
+  image: golang:1.14
   stage: test
   before_script:
     # Set GOPATH
@@ -120,6 +120,7 @@ lint:
   <<: *go-setup
   script:
     - make lint-tools
+    - export GOGC=10
     - make lint-ci
   except:
     - tags

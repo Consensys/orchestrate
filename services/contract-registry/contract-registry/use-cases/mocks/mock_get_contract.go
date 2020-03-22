@@ -7,7 +7,7 @@ package mocks
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	abi "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
+	abi "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/abi"
 	reflect "reflect"
 )
 

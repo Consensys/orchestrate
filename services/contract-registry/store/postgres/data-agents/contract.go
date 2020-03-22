@@ -6,28 +6,27 @@ import (
 	"github.com/go-pg/pg/v9"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/models"
 )
 
 // PGContract is a codehash data agent
 type PGContract struct {
 	db                  *pg.DB
-	repositoryDataAgent store.RepositoryDataAgent
-	artifactDataAgent   store.ArtifactDataAgent
-	tagDataAgent        store.TagDataAgent
-	methodDataAgent     store.MethodDataAgent
-	eventDataAgent      store.EventDataAgent
+	repositoryDataAgent *PGRepository
+	artifactDataAgent   *PGArtifact
+	tagDataAgent        *PGTag
+	methodDataAgent     *PGMethod
+	eventDataAgent      *PGEvent
 }
 
 // NewPGContract creates a new PGContract
 func NewPGContract(
 	db *pg.DB,
-	repositoryDataAgent store.RepositoryDataAgent,
-	artifactDataAgent store.ArtifactDataAgent,
-	tagDataAgent store.TagDataAgent,
-	methodDataAgent store.MethodDataAgent,
-	eventDataAgent store.EventDataAgent,
+	repositoryDataAgent *PGRepository,
+	artifactDataAgent *PGArtifact,
+	tagDataAgent *PGTag,
+	methodDataAgent *PGMethod,
+	eventDataAgent *PGEvent,
 ) *PGContract {
 	return &PGContract{
 		db:                  db,

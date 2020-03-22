@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	log "github.com/sirupsen/logrus"
-
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"

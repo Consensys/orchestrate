@@ -6,13 +6,14 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
 
 // FaucetTestSuite is a test suite for FaucetRegistry
 type FaucetTestSuite struct {
 	suite.Suite
-	Store types.FaucetStore
+	Store store.FaucetStore
 }
 
 const (

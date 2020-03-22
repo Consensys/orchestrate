@@ -10,15 +10,15 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/mocks"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/mock"
 )
 
 func TestRegisterContract_Execute(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockContractDA := mocks.NewMockContractDataAgent(ctrl)
+	mockContractDA := mock.NewMockContractDataAgent(ctrl)
 
 	usecase := NewRegisterContract(mockContractDA)
 

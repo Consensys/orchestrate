@@ -4,13 +4,15 @@ import (
 	"context"
 	"os"
 
+	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/cobra"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	chnregclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
+	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
+	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client"
+	txlistener "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener"
 	provider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/providers/chain-registry"
-	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client"
-	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store/client"
 )
 
 func newRunCommand() *cobra.Command {
@@ -35,13 +37,21 @@ func newRunCommand() *cobra.Command {
 }
 
 func run(_ *cobra.Command, _ []string) {
-	// Create app
-	ctx, cancel := context.WithCancel(context.Background())
+	_ = txlistener.Start(context.Background())
+
+	done := make(chan struct{})
 
 	// Process signals
-	sig := utils.NewSignalListener(func(signal os.Signal) { cancel() })
-	defer sig.Close()
+	sig := utils.NewSignalListener(func(signal os.Signal) {
+		err := txlistener.Stop(context.Background())
+		if err != nil {
+			log.WithoutContext().WithError(err).Errorf("Application did not shutdown properly")
+		} else {
+			log.WithoutContext().WithError(err).Infof("Application gracefully closed")
+		}
+		close(done)
+	})
+	<-done
 
-	// Start application
-	Start(ctx)
+	sig.Close()
 }

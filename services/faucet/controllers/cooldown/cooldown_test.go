@@ -10,12 +10,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
-
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	faucetMock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet/mocks"
+	mockfaucet "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet/mock"
 	faucettypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types/testutils"
 )
@@ -33,7 +32,7 @@ func TestCoolDown(t *testing.T) {
 	// Create Controller and set creditors
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockFaucet := faucetMock.NewMockFaucet(mockCtrl)
+	mockFaucet := mockfaucet.NewMockFaucet(mockCtrl)
 	mockFaucet.EXPECT().Credit(gomock.Any(), gomock.Any()).DoAndReturn(func(_ context.Context, r *faucettypes.Request) (*big.Int, error) {
 		if len(r.FaucetsCandidates) == 0 {
 			return nil, errors.FaucetWarning("no faucet request").ExtendComponent(component)

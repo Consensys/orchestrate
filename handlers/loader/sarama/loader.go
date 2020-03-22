@@ -6,7 +6,7 @@ import (
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 )
 
 // Loader is an handler that Load sarama.ConsumerGroup messages

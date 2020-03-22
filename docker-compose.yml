@@ -28,7 +28,7 @@ x-default-variables: &default-variables
   KAFKA_TLS_INSECURE_SKIP_VERIFY: ${KAFKA_TLS_INSECURE_SKIP_VERIFY-false}
 
 x-container-common: &container-common
-  image: golang:1.13
+  image: golang:1.14
   restart: ${CONTAINER_RESTART-on-failure}
   entrypoint: /bin/main
   tty: true

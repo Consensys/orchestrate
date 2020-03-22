@@ -6,7 +6,8 @@ import (
 
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 	provider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/providers"
 )
@@ -66,7 +67,7 @@ func (m *Manager) run(ctx context.Context) {
 		m.wg.Wait()
 		log.WithoutContext().Infof("TxListener stopped")
 	}()
-	common.InParallel(
+	utils.InParallel(
 		// Start provider and close input channel when Provider is done
 		func() {
 			m.listenProvider(ctx)
@@ -137,8 +138,16 @@ func (m *Manager) runSession(ctx context.Context, chain *dynamic.Chain) {
 		return
 	}
 
+	ctx = multitenancy.WithTenantID(ctx, chain.TenantID)
+	ctx = log.With(
+		ctx,
+		log.Str("session.uuid", chain.UUID),
+		log.Str("session.tenant", chain.TenantID),
+		log.Str("session.name", chain.Name),
+	)
+
 	// Make session cancelable session so we can stop it later on
-	cancelableCtx, cancel := context.WithCancel(ctx)
+	ctx, cancel := context.WithCancel(ctx)
 	sess := &cancelableSession{
 		session: s,
 		cancel:  cancel,
@@ -147,19 +156,18 @@ func (m *Manager) runSession(ctx context.Context, chain *dynamic.Chain) {
 	// Add session
 	m.addSession(chain.UUID, sess)
 
+	logger := log.FromContext(ctx)
 	// Start goroutine to run session
 	m.wg.Add(1)
 	go func() {
-		logger := log.WithoutContext().WithField("session.chain.uuid", chain.UUID)
-		logger.Infof("Session starts")
-		err := sess.session.Run(log.With(cancelableCtx, log.Str("session.chain.uuid", chain.UUID)))
+		logger.Infof("start session")
+		err := sess.session.Run(ctx)
 		m.removeSession(chain.UUID)
 		if err != nil {
-			log.FromContext(ctx).WithError(err).Errorf("error while running session")
+			logger.WithError(err).Errorf("session error")
 		}
-		logger.Infof("Session stopped")
+		logger.Infof("stop session")
 		m.wg.Done()
-
 	}()
 }
 

@@ -6,7 +6,7 @@ import (
 	"sync"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"

@@ -8,7 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/abi"
 )
 
 var ERC20 = `[{

@@ -11,12 +11,12 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 )
 
-var mockChainRegistryClient *mocks.MockChainRegistryClient
+var mockChainRegistryClient *mock.MockChainRegistryClient
 
 type ProviderTestSuite struct {
 	suite.Suite
@@ -25,7 +25,7 @@ type ProviderTestSuite struct {
 
 func (s *ProviderTestSuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
-	mockChainRegistryClient = mocks.NewMockChainRegistryClient(ctrl)
+	mockChainRegistryClient = mock.NewMockChainRegistryClient(ctrl)
 
 	s.provider = &Provider{
 		Client: mockChainRegistryClient,

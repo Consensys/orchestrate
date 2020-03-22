@@ -8,8 +8,8 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/account-generator/account"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/account-generator/faucet"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
 var (
@@ -24,7 +24,7 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		common.InParallel(
+		utils.InParallel(
 			// Initialize keystore
 			func() { account.Init(ctx) },
 			func() { faucet.Init(ctx) },

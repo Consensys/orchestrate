@@ -8,7 +8,7 @@ package main
 
 // 	"github.com/ethereum/go-ethereum/common"
 // 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/core/services"
-// 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum"
+// 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum"
 // 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet"
 // )
 
@@ -21,8 +21,8 @@ package main
 // 	chains := []*big.Int{
 // 		big.NewInt(3), //
 // 	}
-// 	addresses := []common.Address{
-// 		common.HexToAddress("0x7E654d251Da770A068413677967F6d3Ea2FeA9E4"),
+// 	addresses := []utils.Address{
+// 		utils.HexToAddress("0x7E654d251Da770A068413677967F6d3Ea2FeA9E4"),
 // 	}
 // 	bl := faucet.NewBlackList(chains, addresses)
 
@@ -35,7 +35,7 @@ package main
 // 	if err != nil {
 // 		panic(err)
 // 	}
-// 	balanceAt := func(ctx context.Context, chainID *big.Int, a common.Address) (*big.Int, error) {
+// 	balanceAt := func(ctx context.Context, chainID *big.Int, a utils.Address) (*big.Int, error) {
 // 		return ec.BalanceAt(ctx, a, nil)
 // 	}
 // 	mb := faucet.NewMaxBalance(
@@ -56,7 +56,7 @@ package main
 // 		context.Background(),
 // 		&services.FaucetRequest{
 // 			GetBigChainID: big.NewInt(3),
-// 			Address: common.HexToAddress("0xd048EB6e9B7031f4fcfE264736A26b2A2268154B"),
+// 			Address: utils.HexToAddress("0xd048EB6e9B7031f4fcfE264736A26b2A2268154B"),
 // 			Value: big.NewInt(300000000000000000), // 0.3 ETH
 // 		},
 // 	)
@@ -67,7 +67,7 @@ package main
 // 		context.Background(),
 // 		&services.FaucetRequest{
 // 			GetBigChainID: big.NewInt(3),
-// 			Address: common.HexToAddress("0xd048EB6e9B7031f4fcfE264736A26b2A2268154B"),
+// 			Address: utils.HexToAddress("0xd048EB6e9B7031f4fcfE264736A26b2A2268154B"),
 // 			Value: big.NewInt(100000000000000000), // 0.1 ETH
 // 		},
 // 	)
@@ -78,7 +78,7 @@ package main
 // 		context.Background(),
 // 		&services.FaucetRequest{
 // 			GetBigChainID: big.NewInt(3),
-// 			Address: common.HexToAddress("0xd048EB6e9B7031f4fcfE264736A26b2A2268154B"),
+// 			Address: utils.HexToAddress("0xd048EB6e9B7031f4fcfE264736A26b2A2268154B"),
 // 			Value: big.NewInt(100000000000000000), // 0.1 ETH
 // 		},
 // 	)
@@ -89,7 +89,7 @@ package main
 // 		context.Background(),
 // 		&services.FaucetRequest{
 // 			GetBigChainID: big.NewInt(3),
-// 			Address: common.HexToAddress("0x7E654d251Da770A068413677967F6d3Ea2FeA9E4"),
+// 			Address: utils.HexToAddress("0x7E654d251Da770A068413677967F6d3Ea2FeA9E4"),
 // 			Value: big.NewInt(100000000000000000), // 0.1 ETH
 // 		},
 // 	)

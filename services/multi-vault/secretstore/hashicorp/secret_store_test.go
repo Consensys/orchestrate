@@ -6,13 +6,11 @@ import (
 	"net"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
-
 	"github.com/hashicorp/vault/api"
 	"github.com/hashicorp/vault/http"
 	"github.com/hashicorp/vault/vault"
-
 	"github.com/stretchr/testify/suite"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/testutils"
 )
 

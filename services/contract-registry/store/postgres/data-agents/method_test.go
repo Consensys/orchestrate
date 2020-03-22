@@ -14,16 +14,15 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	pgTestUtils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/postgres/migrations"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/common"
 )
 
 type methodTestSuite struct {
 	suite.Suite
-	dataagent  store.MethodDataAgent
-	codeHashDA store.CodeHashDataAgent
+	dataagent  *PGMethod
+	codeHashDA *PGCodeHash
 	pg         *pgTestUtils.PGTestHelper
 }
 

@@ -1,58 +1,80 @@
 package envelopestore
 
 import (
+	"context"
+	"encoding/json"
 	"sync"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/containous/traefik/v2/pkg/log"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/memory"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/pg"
-	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
-)
-
-const (
-	component   = "envelope-store"
-	postgresOpt = "postgres"
-	inMemoryOpt = "in-memory"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
+	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt"
+	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/key"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
+	orchlog "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/log"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/store"
 )
 
 var (
-	store    evlpstore.EnvelopeStoreServer
+	cfg      *app.Config
+	appli    *app.App
 	initOnce = &sync.Once{}
 )
 
-func Init() {
+func initDependencies(ctx context.Context) {
+	authjwt.Init(ctx)
+	authkey.Init(ctx)
+}
+
+func Init(ctx context.Context) {
 	initOnce.Do(func() {
-		if store != nil {
+		if appli != nil {
 			return
 		}
 
-		switch viper.GetString(typeViperKey) {
-		case postgresOpt:
-			// Initialize Sarama Faucet
-			pg.Init()
+		if cfg == nil {
+			cfg = app.NewConfig(viper.GetViper())
+		}
+		orchlog.ConfigureLogger(cfg.HTTP)
 
-			// Set Faucet
-			store = pg.GlobalEnvelopeStore()
-		case inMemoryOpt:
-			// Initialize Mock Faucet
-			memory.Init()
+		jsonConf, err := json.Marshal(cfg.HTTP)
+		if err != nil {
+			log.WithoutContext().WithError(err).Fatalf("could not marshal HTTP configuration: %#v", cfg.HTTP)
+		} else {
+			log.WithoutContext().Infof("HTTP configuration loaded %s", string(jsonConf))
+		}
 
-			// Set Faucet
-			store = memory.GlobalEnvelopeStore()
-		default:
-			log.WithFields(log.Fields{
-				"type": viper.GetString(typeViperKey),
-			}).Fatalf("%s: unknown type", component)
+		// Initialize dependencied
+		initDependencies(ctx)
+
+		// Create GRPC service
+		service, err := NewService(postgres.GetManager(), store.NewConfig(viper.GetViper()))
+		if err != nil {
+			log.WithoutContext().WithError(err).Fatalf("could not create contracts GRPC service")
+		}
+
+		// Create App
+		appli, err = New(
+			cfg,
+			authjwt.GlobalChecker(),
+			authkey.GlobalChecker(),
+			viper.GetBool(multitenancy.EnabledViperKey),
+			service,
+			logrus.StandardLogger(),
+		)
+		if err != nil {
+			log.FromContext(ctx).WithError(err).Fatalf("Could not create application")
 		}
 	})
 }
 
-func GlobalEnvelopeStoreServer() evlpstore.EnvelopeStoreServer {
-	return store
+func Start(ctx context.Context) error {
+	Init(ctx)
+	return appli.Start(ctx)
 }
 
-// SetGlobalEnvelopeStoreServer sets EnvelopeStoreServer
-func SetGlobalEnvelopeStoreServer(s evlpstore.EnvelopeStoreServer) {
-	store = s
+func Stop(ctx context.Context) error {
+	return appli.Stop(ctx)
 }

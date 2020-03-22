@@ -2,102 +2,95 @@ package contractregistry
 
 import (
 	"context"
+	"encoding/json"
 	"sync"
 
-	"github.com/go-pg/pg/v9"
-
-	"github.com/spf13/cobra"
+	"github.com/containous/traefik/v2/pkg/log"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-
-	log "github.com/sirupsen/logrus"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
+	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt"
+	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/key"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
-	grpcserver "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/grpc"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/metrics"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/rest"
-	servicelayer "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/service"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
+	orchlog "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/log"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store"
 )
 
 var (
-	app       = common.NewApp()
-	startOnce = &sync.Once{}
+	cfg      *app.Config
+	appli    *app.App
+	initOnce = &sync.Once{}
 )
 
-// StartService Starts gRPC and HTTP servers
-func StartService(ctx context.Context, storeType string) {
-	startOnce.Do(func() {
-		log.Info("Starting service")
+func initDependencies(ctx context.Context) {
+	authjwt.Init(ctx)
+	authkey.Init(ctx)
+}
 
-		cancelCtx, cancel := context.WithCancel(ctx)
+func Init(ctx context.Context) {
+	initOnce.Do(func() {
+		if appli != nil {
+			return
+		}
 
-		// Initialize dependencies
-		multitenancy.Init(ctx)
-		db := createDBConnection(storeType)
+		if cfg == nil {
+			cfg = app.NewConfig(viper.GetViper())
+		}
+		orchlog.ConfigureLogger(cfg.HTTP)
 
-		// Start services
-		contractRegistryController := initializeController(db)
+		jsonConf, err := json.Marshal(cfg.HTTP)
+		if err != nil {
+			log.WithoutContext().WithError(err).Fatalf("could not marshal HTTP configuration: %#v", cfg.HTTP)
+		} else {
+			log.WithoutContext().Infof("HTTP configuration loaded %s", string(jsonConf))
+		}
 
-		go metrics.StartServer(ctx, cancel, app.IsAlive, app.IsReady)
-		go servicelayer.InitGRPC(cancelCtx, cancel, contractRegistryController)
-		servicelayer.InitHTTP(cancelCtx)
+		// Initialize dependencied
+		initDependencies(ctx)
 
-		// Initialize contracts from command line
-		initializeABIs(ctx, contractRegistryController)
+		// Create GRPC service
+		service, err := NewService(postgres.GetManager(), store.NewConfig(viper.GetViper()))
+		if err != nil {
+			log.WithoutContext().WithError(err).Fatalf("could not create contracts GRPC service")
+		}
 
-		// Indicate that application is ready
-		app.SetReady(true)
-
-		servicelayer.ListenAndServe(cancel)
+		// Create App
+		appli, err = New(
+			cfg,
+			authjwt.GlobalChecker(),
+			authkey.GlobalChecker(),
+			viper.GetBool(multitenancy.EnabledViperKey),
+			service,
+			logrus.StandardLogger(),
+		)
+		if err != nil {
+			log.FromContext(ctx).WithError(err).Fatalf("Could not create application")
+		}
 	})
 }
 
-// StopService gracefully stops the application
-func StopService(ctx context.Context) {
-	log.Warn("app: stopping...")
-	app.SetReady(false)
-
-	rest.StopServer(ctx)
-	grpcserver.StopServer(ctx)
-	metrics.StopServer(ctx)
-
-	log.Info("app: gracefully stopped application")
+func Start(ctx context.Context) error {
+	Init(ctx)
+	return appli.Start(ctx)
 }
 
-// Flags set up necessary flags for the contract registry
-func Flags(runCmd *cobra.Command) {
-	log.Info("Setting flags")
-
-	// Hostname & port for servers
-	grpcserver.Flags(runCmd.Flags())
-	rest.Flags(runCmd.Flags())
-
-	// ContractRegistry flags
-	bindTypeFlag(runCmd.Flags())
-	bindABIFlag(runCmd.Flags())
-
-	// Postgres flags
-	postgres.PGFlags(runCmd.Flags())
+func Stop(ctx context.Context) error {
+	return appli.Stop(ctx)
 }
 
-func createDBConnection(storeType string) *pg.DB {
-	switch storeType {
-	case postgresOpt:
-		opts := postgres.NewOptions()
+// // Flags set up necessary flags for the contract registry
+// func Flags(runCmd *cobra.Command) {
+// 	log.Info("Setting flags")
 
-		log.WithFields(log.Fields{
-			"db.address":  opts.Addr,
-			"db.database": opts.Database,
-			"db.user":     opts.User,
-		}).Infof("Contract registry db connected")
+// 	// Hostname & port for servers
+// 	grpcserver.Flags(runCmd.Flags())
+// 	rest.Flags(runCmd.Flags())
 
-		return postgres.New(opts)
-	default:
-		log.WithFields(log.Fields{
-			"type": viper.GetString(TypeViperKey),
-		}).Fatalf("%s: unknown store type", storeType)
+// 	// ContractRegistry flags
+// 	bindTypeFlag(runCmd.Flags())
+// 	bindABIFlag(runCmd.Flags())
 
-		return nil
-	}
-}
+// 	// Postgres flags
+// 	postgres.PGFlags(runCmd.Flags())
+// }

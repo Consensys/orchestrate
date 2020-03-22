@@ -13,16 +13,15 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	pgTestUtils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/postgres/migrations"
 )
 
 type tagTestSuite struct {
 	suite.Suite
-	dataagent  store.TagDataAgent
-	repoDA     store.RepositoryDataAgent
-	artifactDA store.ArtifactDataAgent
+	dataagent  *PGTag
+	repoDA     *PGRepository
+	artifactDA *PGArtifact
 	pg         *pgTestUtils.PGTestHelper
 }
 

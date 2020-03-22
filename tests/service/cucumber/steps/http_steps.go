@@ -10,12 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication"
-
 	"github.com/cucumber/godog"
 	"github.com/cucumber/godog/gherkin"
 	merror "github.com/hashicorp/go-multierror"
 	log "github.com/sirupsen/logrus"
+	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
 )
 
 func (sc *ScenarioContext) resetResponse(interface{}) {
@@ -30,12 +29,12 @@ func (sc *ScenarioContext) iSetAuth(authMethod, value string) error {
 	switch authMethod {
 	case "API-Key":
 		log.Tracef("API Key Set")
-		sc.authSetup.authMethod = authentication.APIKeyHeader
+		sc.authSetup.authMethod = authutils.APIKeyHeader
 		sc.authSetup.authData = value
 		return nil
 	case "JWT":
 		log.Tracef("JWT Set")
-		sc.authSetup.authMethod = authentication.AuthorizationHeader
+		sc.authSetup.authMethod = authutils.AuthorizationHeader
 		sc.authSetup.authData = value
 		return nil
 	default:
@@ -46,20 +45,20 @@ func (sc *ScenarioContext) iSetAuth(authMethod, value string) error {
 
 func (sc *ScenarioContext) iInjectAuth(req *http.Request) error {
 	switch sc.authSetup.authMethod {
-	case authentication.APIKeyHeader:
+	case authutils.APIKeyHeader:
 		log.Tracef("API Key Set")
-		req.Header.Add(authentication.APIKeyHeader, sc.authSetup.authData)
-	case authentication.AuthorizationHeader:
+		req.Header.Add(authutils.APIKeyHeader, sc.authSetup.authData)
+	case authutils.AuthorizationHeader:
 		log.Tracef("JWT")
-		auth, err := sc.parser.JWTGenerator.GenerateAccessTokenWithTenantID(sc.authSetup.authData, 24*time.Hour)
+		authorization, err := sc.parser.JWTGenerator.GenerateAccessTokenWithTenantID(sc.authSetup.authData, 24*time.Hour)
 		if err != nil {
 			return err
 		}
-		log.Tracef("Auth JWT token: %s", auth)
-		req.Header.Add(authentication.AuthorizationHeader, "Bearer "+auth)
+		log.Tracef("Auth JWT token: %s", authorization)
+		req.Header.Add(authutils.AuthorizationHeader, "Bearer "+authorization)
 	default:
-		req.Header.Del(authentication.AuthorizationHeader)
-		req.Header.Del(authentication.APIKeyHeader)
+		req.Header.Del(authutils.AuthorizationHeader)
+		req.Header.Del(authutils.APIKeyHeader)
 	}
 	return nil
 }

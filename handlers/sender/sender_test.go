@@ -9,17 +9,15 @@ import (
 	"sync"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
-
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
-	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store/client/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
+	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client/mock"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
 )
 
 type MockTxSender struct {
@@ -168,7 +166,7 @@ func TestSender(t *testing.T) {
 	for out := range outs {
 		resp, _ := client.LoadByID(
 			context.Background(),
-			&evlpstore.LoadByIDRequest{
+			&svc.LoadByIDRequest{
 				Id: out.Envelope.GetID(),
 			},
 		)

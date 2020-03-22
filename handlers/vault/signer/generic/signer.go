@@ -1,7 +1,7 @@
 package generic
 
 import (
-	"github.com/ethereum/go-ethereum/common"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	log "github.com/sirupsen/logrus"
@@ -11,7 +11,7 @@ import (
 )
 
 // TransactionSignerFunc is a generic function interface that support signature with EEA, Tessera, and Ethereum
-type TransactionSignerFunc func(keystore.KeyStore, *engine.TxContext, common.Address, *ethtypes.Transaction) ([]byte, *common.Hash, error)
+type TransactionSignerFunc func(keystore.KeyStore, *engine.TxContext, ethcommon.Address, *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error)
 
 // GenerateSignerHandler creates a signer handler
 func GenerateSignerHandler(signerFunc TransactionSignerFunc, backend keystore.KeyStore, successMsg, errorMsg string) engine.HandlerFunc {

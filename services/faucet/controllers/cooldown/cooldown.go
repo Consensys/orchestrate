@@ -7,10 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	stripedmutex "github.com/nmvalera/striped-mutex"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
 )

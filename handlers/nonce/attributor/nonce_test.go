@@ -9,13 +9,11 @@ import (
 	"strings"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
-
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
-
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/memory"
 )
 

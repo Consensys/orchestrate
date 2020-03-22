@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/assert"

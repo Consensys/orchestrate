@@ -7,35 +7,35 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore/mock"
 )
 
 type output struct {
 	sig  []byte
-	hash *common.Hash
+	hash *ethcommon.Hash
 	err  error
 }
 
-var addressNoError = common.HexToAddress("0x1")
-var hashNoError = common.HexToHash("0x1")
+var addressNoError = ethcommon.HexToAddress("0x1")
+var hashNoError = ethcommon.HexToHash("0x1")
 var sigNoError = []byte{1}
 
-var addressError = common.HexToAddress("0x2")
-var hashError = common.HexToHash("0x2")
+var addressError = ethcommon.HexToAddress("0x2")
+var hashError = ethcommon.HexToHash("0x2")
 var sigError = []byte{2}
 
 func TestSignTx(t *testing.T) {
 	testSet := []struct {
 		name           string
 		txctx          func(txctx *engine.TxContext) *engine.TxContext
-		sender         common.Address
+		sender         ethcommon.Address
 		expectedOutput output
 	}{
 		{
@@ -66,7 +66,7 @@ func TestSignTx(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	k := mocks.NewMockKeyStore(mockCtrl)
+	k := mock.NewMockKeyStore(mockCtrl)
 	k.EXPECT().
 		SignTx(gomock.Any(), gomock.Any(), addressNoError, gomock.Any()).
 		Return(sigNoError, &hashNoError, nil).

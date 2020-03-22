@@ -42,7 +42,7 @@ func NewConfig() Config {
 }
 
 // InitFlags register flags for engine
-func InitFlags(f *pflag.FlagSet) {
+func Flags(f *pflag.FlagSet) {
 	Slots(f)
 }
 

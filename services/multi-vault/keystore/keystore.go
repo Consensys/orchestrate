@@ -6,11 +6,11 @@ import (
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 )
 
-//go:generate mockgen -source=keystore.go -destination=mocks/mock_client.go -package=mocks
+//go:generate mockgen -source=keystore.go -destination=mock/mock.go -package=mock
 
 // KeyStore is an interface implemented by module that are able to perform signature transactions
 type KeyStore interface {

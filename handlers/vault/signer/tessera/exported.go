@@ -5,9 +5,9 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tessera"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/tessera"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore"
 )
 
@@ -25,7 +25,7 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		common.InParallel(
+		utils.InParallel(
 			// Initialize keystore
 			func() { keystore.Init(ctx) },
 			// Initialize Tessera

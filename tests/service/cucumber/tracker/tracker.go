@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 )
 
 type Tracker struct {

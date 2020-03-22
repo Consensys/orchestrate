@@ -10,7 +10,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/mock"
 )
 
 func TestGetTags_Execute(t *testing.T) {
@@ -18,7 +18,7 @@ func TestGetTags_Execute(t *testing.T) {
 	defer ctrl.Finish()
 
 	contractName := "myContract"
-	mockTagDataAgent := mocks.NewMockTagDataAgent(ctrl)
+	mockTagDataAgent := mock.NewMockTagDataAgent(ctrl)
 	usecase := NewGetTags(mockTagDataAgent)
 
 	t.Run("should execute use case successfully", func(t *testing.T) {

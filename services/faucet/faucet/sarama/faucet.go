@@ -5,21 +5,16 @@ import (
 	"math/big"
 	"reflect"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication"
-
-	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/utils"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
-
 	"github.com/Shopify/sarama"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
+	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
 )
@@ -52,7 +47,7 @@ func (f *Faucet) prepareMsg(ctx context.Context, r *types.Request, elected strin
 		_ = b.SetHeadersValue(multitenancy.AuthorizationMetadata, authToken)
 	}
 	if apiKey := authutils.APIKeyFromContext(ctx); apiKey != "" {
-		_ = b.SetHeadersValue(authentication.APIKeyHeader, apiKey)
+		_ = b.SetHeadersValue(authutils.APIKeyHeader, apiKey)
 	}
 
 	// Unmarshal envelope

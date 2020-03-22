@@ -10,14 +10,14 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/mock"
 )
 
 func TestGetCatalog_Execute(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockRepositoryDataAgent := mocks.NewMockRepositoryDataAgent(ctrl)
+	mockRepositoryDataAgent := mock.NewMockRepositoryDataAgent(ctrl)
 	usecase := NewGetCatalog(mockRepositoryDataAgent)
 
 	t.Run("should execute use case successfully", func(t *testing.T) {

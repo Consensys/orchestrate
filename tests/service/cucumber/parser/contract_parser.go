@@ -11,7 +11,7 @@ import (
 	"github.com/cucumber/godog/gherkin"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/abi"
 )
 
 type artifact struct {

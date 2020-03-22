@@ -13,13 +13,13 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/certificate"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine/testutils"
 	errors "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	authentication "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
 )
 
 var (
@@ -69,12 +69,12 @@ func makeMultiTenancyContext(i int) *engine.TxContext {
 
 func (m *MultiTenancyTestSuite) TestMultiTenancy() {
 	viper.Set(multitenancy.EnabledViperKey, true)
-	auth := authentication.NewAuth(&authentication.Config{
+	checker := authjwt.New(&authjwt.Config{
 		ClaimsNamespace: "http://orchestrate.info",
 		Parser:          &jwt.Parser{SkipClaimsValidation: true},
 		Key:             func(token *jwt.Token) (interface{}, error) { return cert.PublicKey, nil },
 	})
-	m.Handler = ExtractTenant(auth)
+	m.Handler = ExtractTenant(checker)
 
 	var txctxs []*engine.TxContext
 	for i := 0; i < 4; i++ {

@@ -6,13 +6,14 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
 
 // ChainTestSuite is a test suite for ChainRegistry
 type ChainTestSuite struct {
 	suite.Suite
-	Store types.ChainStore
+	Store store.ChainStore
 }
 
 const (

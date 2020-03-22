@@ -11,15 +11,15 @@ import (
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 )
 
 func TestContext(t *testing.T) {
 	ctx := WithConsumerGroupSessionAndClaim(
 		context.Background(),
-		mocks.NewConsumerGroupSession(context.TODO(), "test-group", make(map[string][]int32)),
-		mocks.NewConsumerGroupClaim("topic-test", 1, 0),
+		mock.NewConsumerGroupSession(context.TODO(), "test-group", make(map[string][]int32)),
+		mock.NewConsumerGroupClaim("topic-test", 1, 0),
 	)
 
 	s, c := GetConsumerGroupSessionAndClaim(ctx)
@@ -65,7 +65,7 @@ func TestConsumerGroupHandler(t *testing.T) {
 	}
 
 	// Create consumer group
-	cg := mocks.NewConsumerGroup("test-group", msgs)
+	cg := mock.NewConsumerGroup("test-group", msgs)
 	ctx, cancel := context.WithCancel(context.Background())
 
 	var err error

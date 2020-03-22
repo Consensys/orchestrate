@@ -9,16 +9,15 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mocks"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	ethclientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	ethclientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
 
 const (
@@ -106,7 +105,7 @@ func TestChainInjector(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockClient := mocks.NewMockChainRegistryClient(mockCtrl)
+	mockClient := mock.NewMockChainRegistryClient(mockCtrl)
 	mockClient.EXPECT().GetChainByName(gomock.Any(), gomock.Eq(testChainName)).Return(MockChainsByName[testTenantID][testChainName], nil).AnyTimes()
 	mockClient.EXPECT().GetChainByName(gomock.Any(), gomock.Eq(testChainError)).Return(nil, fmt.Errorf("error")).AnyTimes()
 

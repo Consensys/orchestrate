@@ -12,13 +12,13 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/mock"
 )
 
 var (
 	OpenTracingRootName = "Root Operation"
 	OpenTracingName     = "Transaction Operation"
-	MockTracer          = mocks.NewTracer()
+	MockTracer          = mock.NewTracer()
 	Mod                 = 2
 )
 

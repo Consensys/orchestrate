@@ -8,15 +8,13 @@ import (
 	"strings"
 	"time"
 
-	"golang.org/x/net/http2"
-	"golang.org/x/time/rate"
-
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/hashicorp/vault/api"
 	log "github.com/sirupsen/logrus"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"golang.org/x/net/http2"
+	"golang.org/x/time/rate"
 )
 
 // HashiCorp is a wrapper around an HashiCorp object

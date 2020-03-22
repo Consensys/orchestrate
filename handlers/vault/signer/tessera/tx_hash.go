@@ -2,9 +2,9 @@ package tessera
 
 import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tessera"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/tessera"
 )
 
 // If we need to send a transaction to Tessera enclave we first need to send a transaction data to Tessera

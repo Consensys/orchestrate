@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	csutils "github.com/ConsenSys/golang-utils/ethereum"
-	"github.com/ethereum/go-ethereum/common"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/assert"
 )
@@ -14,7 +14,7 @@ import (
 func TestSign(t *testing.T) {
 	key, _ := crypto.GenerateKey()
 
-	hash := common.HexToHash("")
+	hash := ethcommon.HexToHash("")
 	sig, err := EthECDSA.Sign(hash.Bytes(), key)
 	assert.NoError(t, err, "Sign should not error")
 

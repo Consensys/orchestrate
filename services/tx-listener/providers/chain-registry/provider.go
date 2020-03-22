@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cenkalti/backoff/v3"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/containous/traefik/v2/pkg/job"
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/containous/traefik/v2/pkg/safe"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"

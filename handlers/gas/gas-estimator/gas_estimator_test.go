@@ -6,8 +6,6 @@ import (
 	"context"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
-
 	eth "github.com/ethereum/go-ethereum"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -15,6 +13,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 )
 
 type MockGasEstimator struct {

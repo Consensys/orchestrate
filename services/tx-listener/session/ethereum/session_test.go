@@ -19,7 +19,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 	offset "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/offset/memory"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/offset/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/offset/mock"
 )
 
 type testKey string
@@ -313,7 +313,7 @@ func TestFetchBlock(t *testing.T) {
 func TestInit(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	ec := NewEthClientV2(big.NewInt(1))
-	offsets := mocks.NewMockManager(ctrl)
+	offsets := mock.NewMockManager(ctrl)
 
 	offsets.EXPECT().GetLastBlockNumber(gomock.Any(), gomock.Any()).Return(uint64(0), nil)
 

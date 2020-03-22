@@ -8,17 +8,15 @@ import (
 	"math/big"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
-
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
-	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store/client/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
+	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client/mock"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
 )
 
 type MockChainLedgerReader struct {
@@ -116,16 +114,16 @@ func TestTxAlreadySent(t *testing.T) {
 	b := tx.NewEnvelope().SetID("2").SetChainID(big.NewInt(8)).SetTxHash(ethcommon.HexToHash("0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b"))
 	_, _ = client.Store(
 		context.Background(),
-		&evlpstore.StoreRequest{
+		&svc.StoreRequest{
 			Envelope: b.TxEnvelopeAsRequest(),
 		},
 	)
 	ec.SendTx("0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b")
 	_, _ = client.SetStatus(
 		context.Background(),
-		&evlpstore.SetStatusRequest{
+		&svc.SetStatusRequest{
 			Id:     "2",
-			Status: evlpstore.Status_PENDING,
+			Status: svc.Status_PENDING,
 		},
 	)
 	txctx = makeContext(
@@ -142,15 +140,15 @@ func TestTxAlreadySent(t *testing.T) {
 	b = tx.NewEnvelope().SetID("3").SetChainID(big.NewInt(8)).SetTxHash(ethcommon.HexToHash("0x60a417c21da71cea33821071e99871fa2c23ad8103b889cf8a459b0b5320fd46"))
 	_, _ = client.Store(
 		context.Background(),
-		&evlpstore.StoreRequest{
+		&svc.StoreRequest{
 			Envelope: b.TxEnvelopeAsRequest(),
 		},
 	)
 	_, _ = client.SetStatus(
 		context.Background(),
-		&evlpstore.SetStatusRequest{
+		&svc.SetStatusRequest{
 			Id:     "3",
-			Status: evlpstore.Status_PENDING,
+			Status: svc.Status_PENDING,
 		},
 	)
 	txctx = makeContext(

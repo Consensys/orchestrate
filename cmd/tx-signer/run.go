@@ -4,15 +4,16 @@ import (
 	"context"
 	"os"
 
-	chnregclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
-
+	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/tessera"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/tessera"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	chnregclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/hashicorp"
+	txsigner "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer"
 )
 
 func newRunCommand() *cobra.Command {
@@ -43,13 +44,21 @@ func newRunCommand() *cobra.Command {
 }
 
 func run(_ *cobra.Command, _ []string) {
-	// Create app
-	ctx, cancel := context.WithCancel(context.Background())
+	_ = txsigner.Start(context.Background())
+
+	done := make(chan struct{})
 
 	// Process signals
-	sig := utils.NewSignalListener(func(signal os.Signal) { cancel() })
-	defer sig.Close()
+	sig := utils.NewSignalListener(func(signal os.Signal) {
+		err := txsigner.Stop(context.Background())
+		if err != nil {
+			log.WithoutContext().WithError(err).Errorf("Application did not shutdown properly")
+		} else {
+			log.WithoutContext().WithError(err).Infof("Application gracefully closed")
+		}
+		close(done)
+	})
+	<-done
 
-	// Start application
-	Start(ctx)
+	sig.Close()
 }

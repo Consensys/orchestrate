@@ -2,71 +2,106 @@ package integrationtests
 
 import (
 	"context"
-
-	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry"
-
 	"net/http"
 	"time"
 
-	"github.com/docker/docker/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/integration-test-utils/containers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/integration-test-utils/utils"
+	"github.com/containous/traefik/v2/pkg/log"
+	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/config"
+	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/postgres/migrations"
 )
 
 type IntegrationEnvironment struct {
-	client            *client.Client
-	postgresContainer *containers.PostgresContainer
+	client *docker.Client
+	pgmngr postgres.Manager
 }
 
-const (
-	component  = "contract-registry-integration"
-	metricsURL = "http://localhost:8082"
-)
-
 func NewIntegrationEnvironment() *IntegrationEnvironment {
-	cli := utils.NewDockerClient()
+	composition := &config.Composition{
+		Containers: map[string]*config.Container{
+			"postgres": &config.Container{Postgres: (&config.Postgres{}).SetDefault()},
+		},
+	}
+
+	client, err := docker.NewClient(composition)
+	if err != nil {
+		panic(err)
+	}
+
 	return &IntegrationEnvironment{
-		client:            utils.NewDockerClient(),
-		postgresContainer: containers.NewPostgresContainer(cli, component),
+		client: client,
+		pgmngr: postgres.NewManager(),
 	}
 }
 
 func (env *IntegrationEnvironment) Start() {
-	env.postgresContainer.Start(context.Background(), env.client)
-	env.migrate()
+	// Start postgres database
+	err := env.client.Up(context.Background(), "postgres")
+	if err != nil {
+		log.WithoutContext().WithError(err).Fatalf("could not up postgres")
+	}
+	// Wait 10 seconds for postgres database to be up
+	time.Sleep(10 * time.Second)
 
-	go contractregistry.StartService(context.Background(), "postgres")
+	// Migrate database
+	err = env.migrate()
+	if err != nil {
+		log.WithoutContext().WithError(err).Fatalf("could not migrate postgres")
+	}
+
+	// Start contract registry
+	err = contractregistry.Start(context.Background())
+	if err != nil {
+		// TODO: we should probably not panic here
+		log.WithoutContext().WithError(err).Fatalf("could not start contract-registry")
+	}
+
 	env.waitForService()
+	log.WithoutContext().Infof("contract-registry ready")
 }
 
 func (env *IntegrationEnvironment) Teardown() {
-	contractregistry.StopService(context.Background())
-	env.postgresContainer.Remove(context.Background(), env.client)
+	log.WithoutContext().Infof("tearing test suite down")
+	err := contractregistry.Stop(context.Background())
+	if err != nil {
+		// TODO: we should probably not panic here
+		log.WithoutContext().WithError(err).Errorf("could not stop contract-registry")
+	}
+
+	err = env.client.Down(context.Background(), "postgres")
+	if err != nil {
+		// TODO: we should probably not panic here
+		log.WithoutContext().WithError(err).Errorf("could not down postgres")
+	}
 }
 
-func (env *IntegrationEnvironment) migrate() {
-	db := env.postgresContainer.GetDB()
+func (env *IntegrationEnvironment) migrate() error {
+	db := env.pgmngr.Connect(context.Background(), postgres.NewOptions(viper.GetViper()))
 
 	_, _, err := migrations.Run(db, "init")
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	_, _, err = migrations.Run(db, "up")
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	err = db.Close()
 	if err != nil {
-		panic(err)
+		return err
 	}
+
+	return nil
 }
 
 func (env *IntegrationEnvironment) waitForService() {
 	for {
-		resp, _ := http.Get(metricsURL + "/ready")
+		resp, _ := http.Get("http://localhost:8082/ready")
 		if resp != nil && resp.StatusCode == 200 {
 			return
 		}

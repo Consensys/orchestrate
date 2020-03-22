@@ -1,5 +1,7 @@
 package nonce
 
+//go:generate mockgen -source=nonce.go -destination=mock/mock.go -package=mock
+
 // Attributor allows to keep track of nonces as they are attributed to transactions
 type Attributor interface {
 	//  GetLastAttributed retrieves last attributed nonce

@@ -1,12 +1,12 @@
 package storer
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
-	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
 )
 
 // TxAlreadySent implements an handler that controls whether transaction associated to envelope
@@ -19,14 +19,14 @@ import (
 // 1. Store envelope on Envelope store
 // 2. Send transaction to blockchain
 // 3. Set envelope status
-func TxAlreadySent(ec ethclient.ChainLedgerReader, s evlpstore.EnvelopeStoreClient) engine.HandlerFunc {
+func TxAlreadySent(ec ethclient.ChainLedgerReader, s svc.EnvelopeStoreClient) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		tenantID := multitenancy.TenantIDFromContext(txctx.Context())
 		txctx.Logger.Tracef("from TxAlreadySent => TenantID value: %s", tenantID)
 		// Load possibly already sent envelope
 		resp, err := s.LoadByID(
 			txctx.Context(),
-			&evlpstore.LoadByIDRequest{
+			&svc.LoadByIDRequest{
 				Id: txctx.Envelope.GetID(),
 			},
 		)

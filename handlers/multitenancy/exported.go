@@ -4,14 +4,11 @@ import (
 	"context"
 	"sync"
 
-	"github.com/spf13/viper"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/authentication/jwt"
-
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 )
 
 const component = "handler.multitenancy"
@@ -37,7 +34,7 @@ func Init(ctx context.Context) {
 		log.Infof("multitenancy enable: %v", viper.GetBool(multitenancy.EnabledViperKey))
 
 		// Create Handler
-		handler = ExtractTenant(jwt.GlobalAuth())
+		handler = ExtractTenant(jwt.GlobalChecker())
 
 		log.Infof("authentication multi-tenancy: handler ready")
 	})

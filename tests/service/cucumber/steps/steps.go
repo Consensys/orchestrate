@@ -3,13 +3,8 @@ package steps
 import (
 	"encoding/hex"
 	"fmt"
-	"net/http"
+	gohttp "net/http"
 	"time"
-
-	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
 
 	"github.com/Shopify/sarama"
 	"github.com/cucumber/godog"
@@ -19,12 +14,15 @@ import (
 	"github.com/spf13/viper"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
-	httpclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
+	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
+	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
+	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/chanregistry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/parser"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/tracker"
-	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
-	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client"
 )
 
 const GenericNamespace = "_"
@@ -77,8 +75,8 @@ type ScenarioContext struct {
 	// chanReg to register envelopes channels on trackers
 	chanReg *chanregistry.ChanRegistry
 
-	httpClient   *http.Client
-	httpResponse *http.Response
+	httpClient   *gohttp.Client
+	httpResponse *gohttp.Response
 
 	httpAliases *parser.AliasRegistry
 
@@ -102,7 +100,7 @@ func setServiceURL(sc *ScenarioContext) {
 
 func NewScenarioContext(
 	chanReg *chanregistry.ChanRegistry,
-	httpClient *http.Client,
+	httpClient *gohttp.Client,
 	contractRegistry registry.ContractRegistryClient,
 	producer sarama.SyncProducer,
 	p *parser.Parser,
@@ -361,7 +359,7 @@ func (sc *ScenarioContext) envelopesShouldHaveLogDecoded() error {
 func FeatureContext(s *godog.Suite) {
 	sc := NewScenarioContext(
 		chanregistry.GlobalChanRegistry(),
-		httpclient.GlobalClient(),
+		http.NewClient(),
 		registryclient.GlobalClient(),
 		broker.GlobalSyncProducer(),
 		parser.GlobalParser(),

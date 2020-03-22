@@ -8,22 +8,19 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/golang/mock/gomock"
-	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
-
-	uuid "github.com/satori/go.uuid"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
-
 	"github.com/Shopify/sarama/mocks"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/golang/mock/gomock"
+	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
+	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
+	crc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client/mock"
+	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client/mock"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
-	crc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client/mocks"
-	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store"
-	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/envelope-store/client/mocks"
 )
 
 type testKey string
@@ -105,7 +102,7 @@ func TestHook(t *testing.T) {
 	assert.NoError(t, err, "#1 AfterNewBlock should not error")
 
 	// Test 2: we store envelope on envelope store
-	_, _ = store.Store(context.Background(), &evlpstore.StoreRequest{
+	_, _ = store.Store(context.Background(), &svc.StoreRequest{
 		Envelope: tx.NewEnvelope().SetID(uuid.NewV4().String()).SetChainID(c.ChainID).SetTxHash(receipt.TxHash).TxEnvelopeAsRequest(),
 	})
 	producer.ExpectSendMessageAndSucceed()

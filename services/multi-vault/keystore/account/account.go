@@ -5,7 +5,7 @@ import (
 	"crypto/ecdsa"
 	"encoding/hex"
 
-	"github.com/ethereum/go-ethereum/common"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/services"
@@ -13,7 +13,7 @@ import (
 
 // Account is a container
 type Account struct {
-	address common.Address
+	address ethcommon.Address
 	priv    *ecdsa.PrivateKey
 
 	sec services.SecretStore
@@ -64,7 +64,7 @@ func (w *Account) Store(ctx context.Context) error {
 }
 
 // Load accounts values by fetching account secret store
-func (w *Account) Load(ctx context.Context, a *common.Address) (err error) {
+func (w *Account) Load(ctx context.Context, a *ethcommon.Address) (err error) {
 	w.address = *a
 	priv, ok, err := w.sec.Load(ctx, a.Hex())
 	if err != nil {
@@ -89,6 +89,6 @@ func (w *Account) Priv() *ecdsa.PrivateKey {
 }
 
 // Address returns the address of the account
-func (w *Account) Address() *common.Address {
+func (w *Account) Address() *ethcommon.Address {
 	return &w.address
 }

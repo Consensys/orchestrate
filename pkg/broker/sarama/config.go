@@ -8,7 +8,6 @@ import (
 )
 
 func init() {
-
 	// Kafka general parameters
 	viper.SetDefault(KafkaURLViperKey, kafkaURLDefault)
 	_ = viper.BindEnv(KafkaURLViperKey, kafkaURLEnv)
@@ -353,7 +352,7 @@ const (
 
 // KafkaSASLUser register flag
 func KafkaSASLUser(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Username for SASL/PLAIN or SASL/SCRAM authentication.
+	desc := fmt.Sprintf(`Username for SASL/PLAIN or SASL/SCRAM auth.
 Environment variable: %q`, kafkaSASLUserEnv)
 	f.String(kafkaSASLUserFlag, kafkaSASLUserDefault, desc)
 	_ = viper.BindPFlag(kafkaSASLUserViperKey, f.Lookup(kafkaSASLUserFlag))
@@ -369,7 +368,7 @@ const (
 
 // KafkaSASLPassword register flag
 func KafkaSASLPassword(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Password for SASL/PLAIN or SASL/SCRAM authentication.
+	desc := fmt.Sprintf(`Password for SASL/PLAIN or SASL/SCRAM auth.
 Environment variable: %q`, kafkaSASLPasswordEnv)
 	f.String(kafkaSASLPasswordFlag, kafkaSASLPasswordDefault, desc)
 	_ = viper.BindPFlag(kafkaSASLPasswordViperKey, f.Lookup(kafkaSASLPasswordFlag))

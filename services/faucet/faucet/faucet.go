@@ -7,7 +7,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
 )
 
-//go:generate mockgen -destination=mocks/mock_faucet.go -package=mocks . Faucet
+//go:generate mockgen -source=faucet.go -destination=mock/mock.go -package=mock
 
 // CreditFunc are functions expected to trigger an credit ether
 type CreditFunc func(ctx context.Context, r *types.Request) (*big.Int, error)

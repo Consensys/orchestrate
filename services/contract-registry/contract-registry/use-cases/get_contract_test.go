@@ -10,9 +10,9 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/models"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/testutils"
 )
 
 func TestGetContract_Execute(t *testing.T) {
@@ -20,7 +20,7 @@ func TestGetContract_Execute(t *testing.T) {
 	defer ctrl.Finish()
 
 	contract := testutils.FakeContract()
-	mockArtifactDataAgent := mocks.NewMockArtifactDataAgent(ctrl)
+	mockArtifactDataAgent := mock.NewMockArtifactDataAgent(ctrl)
 	usecase := NewGetContract(mockArtifactDataAgent)
 
 	t.Run("should execute use case successfully", func(t *testing.T) {

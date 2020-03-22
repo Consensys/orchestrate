@@ -3,7 +3,7 @@ package utils
 import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/abi"
 )
 
 const (

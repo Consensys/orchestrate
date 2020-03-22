@@ -3,12 +3,8 @@
 package steps
 
 import (
-	"net/http"
+	gohttp "net/http"
 	"testing"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
-
-	httpclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/client"
 
 	"github.com/Shopify/sarama/mocks"
 	"github.com/cucumber/godog/gherkin"
@@ -16,13 +12,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
+	crc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/chanregistry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/parser"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/tracker"
-	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
-	crc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client"
 )
 
 type ScenarioTestSuite struct {
@@ -30,7 +27,7 @@ type ScenarioTestSuite struct {
 	Context    *ScenarioContext
 	chanReg    *chanregistry.ChanRegistry
 	producer   *mocks.SyncProducer
-	httpClient *http.Client
+	httpClient *gohttp.Client
 	crc        svc.ContractRegistryClient
 }
 
@@ -41,7 +38,7 @@ func (s *ScenarioTestSuite) SetupSuite() {
 	// Set channel registry
 	s.chanReg = chanregistry.NewChanRegistry()
 	s.producer = mocks.NewSyncProducer(s.T(), nil)
-	s.httpClient = httpclient.GlobalClient()
+	s.httpClient = http.NewClient()
 	s.crc = crc.GlobalClient()
 }
 

@@ -6,14 +6,13 @@ import (
 	"context"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mocks"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/offset"
-
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/offset"
 )
 
 var mockChain = &types.Chain{
@@ -32,11 +31,11 @@ type ManagerTestSuite struct {
 	Manager offset.Manager
 }
 
-var mockChainRegistryClient *mocks.MockChainRegistryClient
+var mockChainRegistryClient *mock.MockChainRegistryClient
 
 func (s *ManagerTestSuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
-	mockChainRegistryClient = mocks.NewMockChainRegistryClient(ctrl)
+	mockChainRegistryClient = mock.NewMockChainRegistryClient(ctrl)
 
 	s.Manager = NewManager(mockChainRegistryClient)
 }

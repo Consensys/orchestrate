@@ -58,7 +58,8 @@ run:
   skip-dirs:
     - .gocache
   skip-files:
-    - services/chain-registry/genstatic/gen.go
+    - pkg/http/handler/dashboard/genstatic/gen.go
+    - pkg/http/handler/swagger/genstatic/gen.go
 
 service:
   golangci-lint-version: 1.20.x

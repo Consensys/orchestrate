@@ -6,8 +6,6 @@ import (
 	"reflect"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
-
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 	log "github.com/sirupsen/logrus"
@@ -15,6 +13,7 @@ import (
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 )
 
 func TestLoader(t *testing.T) {
