@@ -52,7 +52,7 @@ func TestTxHashSetter(t *testing.T) {
 	for i := 0; i < ROUNDS; i++ {
 		txctx := makeSignerContext(i)
 		setter(txctx)
-		assert.Emptyf(t, txctx.Envelope.GetErrors(), fmt.Sprintf("TxHash should not be nil"))
-		assert.NotNilf(t, txctx.Envelope.GetData(), fmt.Sprintf("TxHash should not be nil"))
+		assert.Emptyf(t, txctx.Envelope.GetErrors(), "TxHash should not be nil")
+		assert.NotNilf(t, txctx.Envelope.GetData(), "TxHash should not be nil")
 	}
 }

@@ -1,7 +1,6 @@
 package generic
 
 import (
-	"fmt"
 	"math/big"
 	"testing"
 
@@ -125,8 +124,8 @@ func TestGeneric(t *testing.T) {
 	for i := 0; i < ROUNDS; i++ {
 		txctx := makeSignerContext(i)
 		handler(txctx)
-		assert.NotNilf(t, txctx.Envelope.GetRaw(), fmt.Sprintf("TxRawSignature should not be nil"))
-		assert.NotNilf(t, txctx.Envelope.GetTxHash(), fmt.Sprintf("TxHash should not be nil"))
+		assert.NotNilf(t, txctx.Envelope.GetRaw(), "TxRawSignature should not be nil")
+		assert.NotNilf(t, txctx.Envelope.GetTxHash(), "TxHash should not be nil")
 
 	}
 }

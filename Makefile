@@ -41,6 +41,11 @@ run-e2e: gobuild-e2e
 e2e: run-e2e
 	@$(OPEN) build/report/report.html 2>/dev/null
 
+ci-e2e:
+	@docker-compose up e2e
+	@docker-compose -f scripts/report/docker-compose.yml up
+	@sh scripts/exitCode.sh
+
 clean: mod-tidy lint protobuf generate-swagger generate-mocks ## Run all clean-up tasks
 
 generate-mocks:
@@ -113,6 +118,9 @@ gobuild-e2e: ## Build Orchestrate e2e Docker image
 orchestrate: gobuild ## Start Orchestrate
 	@docker-compose up -d $(CMD_RUN)
 
+ci-orchestrate:
+	@docker-compose up -d $(CMD_RUN)
+
 stop-orchestrate: ## Stop Orchestrate
 	@docker-compose stop $(CMD_RUN)
 
@@ -161,6 +169,8 @@ down-postgres:
 up: deps geth besu quorum bootstrap orchestrate ## Start Orchestrate and deps
 
 down: down-orchestrate down-quorum down-geth down-besu down-deps  ## Down Orchestrate and deps
+
+ci-up: deps geth besu quorum bootstrap ci-orchestrate ## Start Orchestrate and deps
 
 hashicorp-accounts:
 	@bash scripts/deps/config/hashicorp/vault.sh kv list secret/default

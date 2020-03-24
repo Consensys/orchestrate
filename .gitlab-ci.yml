@@ -1,6 +1,7 @@
 ---
 stages:
   - test
+  - e2e
   - build
   - release
 
@@ -28,6 +29,33 @@ services:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
   after_script:
     - docker logout $CI_REGISTRY
+
+.docker-compose-setup: &docker-compose-setup
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - apk update
+    - apk upgrade
+    - apk add python python-dev py-pip libffi-dev openssl-dev libc-dev make bash jq curl build-base
+    - pip install --upgrade pip
+    - pip install docker-compose
+  after_script:
+    - docker logout $CI_REGISTRY
+
+.docker-compose-e2e: &docker-compose-e2e
+  stage: e2e
+  after_script:
+    - make down
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - build/bin/
+  artifacts:
+    when: always
+    paths:
+      - build/report/
+  except:
+    - tags
+
 
 .build-orchestrate: &build-orchestrate
   # Build orchestrate image following http://label-schema.org/rc1/ label convention convention
@@ -87,6 +115,37 @@ race:
     - make race
   except:
     - tags
+
+gobuild:
+  <<: *go-setup
+  script:
+    - make gobuild
+    - make gobuild-e2e
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - build/bin/
+  except:
+    - tags
+
+test-e2e:
+  <<: *docker-compose-setup
+  <<: *docker-compose-e2e
+  script:
+    - make ci-up
+    - make ci-e2e
+  only:
+    - master
+
+test-multitenancy-e2e:
+  <<: *docker-compose-setup
+  <<: *docker-compose-e2e
+  script:
+    - mv -f .env.multitenancy .env
+    - make ci-up
+    - make ci-e2e
+  only:
+    - master
 
 #Build orchestrate
 build-orchestrate-on-branch:
