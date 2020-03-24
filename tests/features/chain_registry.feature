@@ -54,7 +54,7 @@ Feature: chain registry
     Then the response code should be 204
 
     When I send "GET" request to "{{chain-registry}}/chains/{{gethTempUUID}}"
-    Then the response code should be 500
+    Then the response code should be 404
 
   Scenario: Add and remove a chain with JWT token
     Given I set authentication method "JWT" with "f30c452b-e5fb-4102-a45d-bc00a060bcc6"
@@ -99,7 +99,7 @@ Feature: chain registry
     Then the response code should be 204
 
     When I send "GET" request to "{{chain-registry}}/chains/{{gethTempUUID}}"
-    Then the response code should be 500
+    Then the response code should be 404
 
   Scenario: Patch chain with API key
     Given I set authentication method "API-Key" with "with-key"
