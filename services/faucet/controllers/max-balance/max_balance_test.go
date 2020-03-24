@@ -133,8 +133,6 @@ func TestMaxBalance(t *testing.T) {
 	for _, test := range testSet {
 		test := test
 		t.Run(test.name, func(t *testing.T) {
-			t.Parallel()
-
 			amount, err := credit(context.Background(), test.input.Req)
 			test.input.ResultAmount, test.input.ResultErr = amount, err
 			testutils.AssertRequest(t, test.input)
