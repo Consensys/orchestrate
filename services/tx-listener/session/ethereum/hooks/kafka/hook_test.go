@@ -6,6 +6,9 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/golang/mock/gomock"
+	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
+
 	uuid "github.com/satori/go.uuid"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
@@ -66,7 +69,12 @@ func TestHook(t *testing.T) {
 	conf := &Config{
 		OutTopic: "test-topic-decoder",
 	}
-	registry := crc.New()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	registry := crc.NewMockContractRegistryClient(ctrl)
+	registry.EXPECT().SetAccountCodeHash(gomock.Any(), gomock.Any(), gomock.Any()).Return(&contractregistry.SetAccountCodeHashResponse{}, nil).AnyTimes()
+
 	ec := &MockChainStateReader{}
 	store := clientmock.New()
 	producer := mocks.NewSyncProducer(t, nil)

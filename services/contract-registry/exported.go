@@ -4,78 +4,102 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
+	"github.com/go-pg/pg/v9"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/memory"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/pg"
-	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
-)
+	log "github.com/sirupsen/logrus"
 
-const (
-	component   = "contract-registry"
-	postgresOpt = "postgres"
-	memoryOpt   = "in-memory"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
+	grpcserver "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/grpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/metrics"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/server/rest"
+	servicelayer "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/service"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 )
 
 var (
-	registry svc.ContractRegistryServer
-	initOnce = &sync.Once{}
+	app       = common.NewApp()
+	startOnce = &sync.Once{}
 )
 
-// Init initialize ABI ContractRegistry
-func Init(ctx context.Context) {
-	initOnce.Do(func() {
-		if registry != nil {
-			return
-		}
+// StartService Starts gRPC and HTTP servers
+func StartService(ctx context.Context) {
+	startOnce.Do(func() {
+		log.Info("Starting service")
 
+		cancelCtx, cancel := context.WithCancel(ctx)
+
+		// Initialize dependencies
 		multitenancy.Init(ctx)
+		db := createDBConnection()
 
-		switch viper.GetString(typeViperKey) {
-		case postgresOpt:
-			// Initialize postgres Registry
-			pg.Init()
+		// Start services
+		contractRegistryController := initializeController(db)
 
-			// Create contract-registry
-			registry = pg.GlobalContractRegistry()
-		case memoryOpt:
-			// Initialize mock Registry
-			memory.Init()
+		go metrics.StartServer(ctx, cancel, app.IsAlive, app.IsReady)
+		go servicelayer.InitGRPC(cancelCtx, cancel, contractRegistryController)
+		servicelayer.InitHTTP(cancelCtx)
 
-			// Create contract-registry
-			registry = memory.GlobalContractRegistry()
-		default:
-			log.WithFields(log.Fields{
-				"type": viper.GetString(typeViperKey),
-			}).Fatalf("%s: unknown type", component)
-		}
+		// Initialize contracts from command line
+		initializeABIs(ctx, contractRegistryController)
 
-		// Read ABIs from ABI viper configuration
-		contracts, err := FromABIConfig()
-		if err != nil {
-			log.WithError(err).Fatalf("%s: could not initialize contract-registry", component)
-		}
+		// Indicate that application is ready
+		app.SetReady(true)
 
-		// Register contracts
-		for _, contract := range contracts {
-			_, err := registry.RegisterContract(ctx, &svc.RegisterContractRequest{Contract: contract})
-
-			if err != nil {
-				log.WithError(err).Fatalf("%s: could not register ABI", component)
-			}
-		}
+		servicelayer.ListenAndServe(cancel)
 	})
 }
 
-// SetGlobalRegistry sets global contract-registry
-func SetGlobalRegistry(r svc.ContractRegistryServer) {
-	registry = r
+// StopService gracefully stops the application
+func StopService(ctx context.Context) {
+	log.Warn("app: stopping...")
+	app.SetReady(false)
+	common.InParallel(
+		func() { grpcserver.StopServer(ctx) },
+		func() { metrics.StopServer(ctx) },
+		func() { rest.StopServer(ctx) },
+	)
+	log.Info("app: gracefully stopped application")
 }
 
-// GlobalRegistry returns global contract-registry
-func GlobalRegistry() svc.ContractRegistryServer {
-	return registry
+// Flags set up necessary flags for the contract registry
+func Flags(runCmd *cobra.Command) {
+	log.Info("Setting flags")
+
+	// Hostname & port for servers
+	grpcserver.Flags(runCmd.Flags())
+	rest.Flags(runCmd.Flags())
+
+	// ContractRegistry flags
+	bindTypeFlag(runCmd.Flags())
+	bindABIFlag(runCmd.Flags())
+
+	// Postgres flags
+	postgres.PGFlags(runCmd.Flags())
+}
+
+func createDBConnection() *pg.DB {
+	storeType := viper.GetString(typeViperKey)
+
+	switch storeType {
+	case postgresOpt:
+		opts := postgres.NewOptions()
+
+		log.WithFields(log.Fields{
+			"db.address":  opts.Addr,
+			"db.database": opts.Database,
+			"db.user":     opts.User,
+		}).Infof("Contract registry db connected")
+
+		return postgres.New(opts)
+	default:
+		log.WithFields(log.Fields{
+			"type": viper.GetString(typeViperKey),
+		}).Fatalf("%s: unknown store type", storeType)
+
+		return nil
+	}
 }

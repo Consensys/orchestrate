@@ -57,6 +57,7 @@ generate-mocks:
 	mockgen -source=services/multi-vault/keystore/keystore.go -destination=services/multi-vault/keystore/mocks/mock_client.go -package=mocks
 	mockgen -source=services/tx-listener/session/ethereum/offset/manager.go -destination=services/tx-listener/session/ethereum/offset/mocks/manager_mock.go -package=mocks
 	mockgen -source=services/faucet/faucet/faucet.go -destination=services/faucet/faucet/mocks/faucet_mock.go -package=mocks
+	cd services/contract-registry/scripts && bash generate-mocks.sh
 
 generate-swagger:
 	@bash scripts/swagger.sh

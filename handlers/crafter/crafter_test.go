@@ -1,9 +1,11 @@
 package crafter
 
 import (
-	"context"
 	"fmt"
 	"testing"
+
+	"github.com/golang/mock/gomock"
+	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	log "github.com/sirupsen/logrus"
@@ -13,8 +15,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine/testutils"
-	typesabi "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
-	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry"
 	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/contract-registry/client/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/tx"
 )
@@ -99,23 +99,14 @@ func makeCrafterContext(i int) *engine.TxContext {
 
 type CrafterTestSuite struct {
 	testutils.HandlerTestSuite
-	contractRegistry *clientmock.ContractRegistryClient
+	contractRegistry *clientmock.MockContractRegistryClient
 }
 
 func (s *CrafterTestSuite) SetupSuite() {
-	s.contractRegistry = clientmock.New()
-	_, err := s.contractRegistry.RegisterContract(context.Background(),
-		&contractregistry.RegisterContractRequest{
-			Contract: &typesabi.Contract{
-				Id: &typesabi.ContractId{
-					Name: "known",
-				},
-				Abi:              `[{"constant":false,"inputs":[{"internalType":"uint256","name":"value","type":"uint256"}],"name":"increment","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"from","type":"address"},{"indexed":false,"internalType":"uint256","name":"by","type":"uint256"}],"name":"Incremented","type":"event"}]`,
-				Bytecode:         "0x6080604052348015600f57600080fd5b5061010a8061001f6000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80637cf5dab014602d575b600080fd5b605660048036036020811015604157600080fd5b81019080803590602001909291905050506058565b005b8060008082825401925050819055507f38ac789ed44572701765277c4d0970f2db1c1a571ed39e84358095ae4eaa54203382604051808373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019250505060405180910390a15056fea265627a7a72315820c084d653e3ba7607a5b05fb98edf3373a2b542aa6abdd9ae89cd4a407bb0a2b464736f6c63430005100032",
-				DeployedBytecode: "0x6080604052348015600f57600080fd5b506004361060285760003560e01c80637cf5dab014602d575b600080fd5b605660048036036020811015604157600080fd5b81019080803590602001909291905050506058565b005b8060008082825401925050819055507f38ac789ed44572701765277c4d0970f2db1c1a571ed39e84358095ae4eaa54203382604051808373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019250505060405180910390a15056fea265627a7a72315820cc73213703da717157e9aa146473f2af6823d442bfb100062b58833aae34fa7b64736f6c63430005100032",
-			},
-		})
-	assert.NoError(s.T(), err)
+	ctrl := gomock.NewController(s.T())
+	defer ctrl.Finish()
+	s.contractRegistry = clientmock.NewMockContractRegistryClient(ctrl)
+
 	s.Handler = Crafter(s.contractRegistry, &MockCrafter{})
 }
 
@@ -124,6 +115,13 @@ func (s *CrafterTestSuite) TestCrafter() {
 	for i := 0; i < 8; i++ {
 		txctxs = append(txctxs, makeCrafterContext(i))
 	}
+
+	s.contractRegistry.EXPECT().GetContractBytecode(gomock.Any(), &contractregistry.GetContractRequest{
+		ContractId: txctxs[6].Envelope.GetContractID(),
+	}).Return(nil, fmt.Errorf("error"))
+	s.contractRegistry.EXPECT().GetContractBytecode(gomock.Any(), gomock.Any()).Return(&contractregistry.GetContractBytecodeResponse{
+		Bytecode: "0x6080604052348015600f57600080fd5b5061010a8061001f6000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80637cf5dab014602d575b600080fd5b605660048036036020811015604157600080fd5b81019080803590602001909291905050506058565b005b8060008082825401925050819055507f38ac789ed44572701765277c4d0970f2db1c1a571ed39e84358095ae4eaa54203382604051808373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019250505060405180910390a15056fea265627a7a72315820c084d653e3ba7607a5b05fb98edf3373a2b542aa6abdd9ae89cd4a407bb0a2b464736f6c63430005100032",
+	}, nil).AnyTimes()
 
 	// Handle contexts
 	s.Handle(txctxs)

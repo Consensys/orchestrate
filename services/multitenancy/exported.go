@@ -23,12 +23,12 @@ func Init(_ context.Context) {
 	})
 }
 
-// GlobalAuth returns global Authentication Manager
+// GlobalKeyBuilder returns global Authentication Manager
 func GlobalKeyBuilder() *KeyBuilder {
 	return keyBuilder
 }
 
-// SetGlobalAuth sets global Authentication Manager
+// SetKeyBuilder sets global Authentication Manager
 func SetKeyBuilder(key *KeyBuilder) {
 	keyBuilder = key
 }
