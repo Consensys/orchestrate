@@ -1,6 +1,8 @@
 GOFILES := $(shell find . -name '*.go' | grep -v services/chain-registry/genstatic/gen.go | egrep -v "^\./\.go" | grep -v _test.go)
 PACKAGES ?= $(shell go list ./... | go list ./... | grep -Fv -e e2e -e examples -e genstatic -e mocks )
 CMD_RUN = tx-crafter tx-signer tx-sender tx-listener contract-registry chain-registry envelope-store
+CMD_PERSISTENT = redis postgres-chain-registry postgres-contract-registry postgres-envelope-store vault-init vault jaeger
+CMD_KAFKA = zookeeper kafka
 CMD_MIGRATE = contract-registry envelope-store chain-registry
 
 UNAME_S := $(shell uname -s)
@@ -41,7 +43,7 @@ run-e2e: gobuild-e2e
 e2e: run-e2e
 	@$(OPEN) build/report/report.html 2>/dev/null
 
-ci-e2e:
+e2e-ci:
 	@docker-compose up e2e
 	@docker-compose -f scripts/report/docker-compose.yml up
 	@sh scripts/exitCode.sh
@@ -113,6 +115,9 @@ docker-build: ## Build Orchestrate Docker image
 bootstrap: ## Wait for dependencies to be ready
 	@bash scripts/bootstrap.sh
 
+bootstrap-deps: bootstrap ## Wait for dependencies to be ready
+	@bash scripts/bootstrap-deps.sh
+
 gobuild-e2e: ## Build Orchestrate e2e Docker image
 	@GOOS=linux GOARCH=amd64 go build -i -o ./build/bin/e2e ./tests/cmd
 
@@ -128,8 +133,11 @@ stop-orchestrate: ## Stop Orchestrate
 down-orchestrate:## Down Orchestrate
 	@docker-compose down --volumes --timeout 0
 
-deps:
-	@docker-compose -f scripts/deps/docker-compose.yml up -d
+deps-persistent:
+	@docker-compose -f scripts/deps/docker-compose.yml up -d $(CMD_PERSISTENT)
+
+deps: deps-persistent
+	@docker-compose -f scripts/deps/docker-compose.yml up -d $(CMD_KAFKA)
 
 down-deps:
 	@docker-compose -f scripts/deps/docker-compose.yml down --volumes --timeout 0
@@ -167,11 +175,13 @@ postgres:
 down-postgres:
 	@docker-compose -f e2e/docker-compose.yml rm --force -s -v postgres
 
-up: deps geth besu quorum bootstrap orchestrate ## Start Orchestrate and deps
+up: deps geth besu quorum bootstrap-deps orchestrate ## Start Orchestrate and deps
 
 down: down-orchestrate down-quorum down-geth down-besu down-deps  ## Down Orchestrate and deps
 
-ci-up: deps geth besu quorum bootstrap ci-orchestrate ## Start Orchestrate and deps
+up-ci: deps geth besu quorum bootstrap-deps ci-orchestrate ## Start Orchestrate and deps
+
+up-azure: deps-persistent geth besu quorum bootstrap orchestrate ## Start Blockchain and Orchestrate to be connect to Azure Event Hub
 
 hashicorp-accounts:
 	@bash scripts/deps/config/hashicorp/vault.sh kv list secret/default

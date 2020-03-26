@@ -5,7 +5,7 @@ go 1.13
 require (
 	github.com/ConsenSys/golang-utils v0.0.0-20190722185538-95555d181804
 	github.com/DATA-DOG/go-sqlmock v1.3.3 // indirect
-	github.com/Shopify/sarama v1.24.1
+	github.com/Shopify/sarama v1.26.1
 	github.com/alicebob/gopher-json v0.0.0-20180125190556-5a6b3ba71ee6 // indirect
 	github.com/alicebob/miniredis v2.5.0+incompatible
 	github.com/allegro/bigcache v1.2.1 // indirect
@@ -23,11 +23,9 @@ require (
 	github.com/dgraph-io/ristretto v0.0.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/eapache/channels v1.1.0
-	github.com/eapache/go-resiliency v1.2.0 // indirect
 	github.com/elastic/gosigar v0.10.5 // indirect
 	github.com/elazarl/go-bindata-assetfs v1.0.0
 	github.com/ethereum/go-ethereum v1.9.7
-	github.com/frankban/quicktest v1.5.0 // indirect
 	github.com/go-pg/migrations/v7 v7.1.9
 	github.com/go-pg/pg/v9 v9.1.1
 	github.com/go-playground/validator/v10 v10.1.0
@@ -46,20 +44,16 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.6.4
 	github.com/hashicorp/vault v1.2.3
 	github.com/hashicorp/vault/api v1.0.5-0.20190909201928-35325e2c3262
-	github.com/jcmturner/gofork v1.0.0 // indirect
 	github.com/julien-marchand/healthcheck v0.1.0
-	github.com/klauspost/compress v1.9.3 // indirect
 	github.com/magiconair/properties v1.8.1
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/nmvalera/striped-mutex v0.1.0
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/ory/fosite v0.30.2
 	github.com/pelletier/go-toml v1.6.0 // indirect
-	github.com/pierrec/lz4 v2.3.0+incompatible // indirect
 	github.com/prometheus/client_golang v1.2.1
 	github.com/prometheus/client_model v0.0.0-20191202183732-d1d2010b5bee // indirect
 	github.com/prometheus/procfs v0.0.8 // indirect
-	github.com/rcrowley/go-metrics v0.0.0-20190826022208-cac0b30c2563 // indirect
 	github.com/rs/cors v1.7.0 // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.4.2
@@ -77,16 +71,15 @@ require (
 	github.com/vulcand/oxy v1.0.0
 	github.com/yuin/gopher-lua v0.0.0-20190514113301-1cd887cd7036 // indirect
 	go.uber.org/atomic v1.5.1 // indirect
-	golang.org/x/crypto v0.0.0-20191206172530-e9b2fee46413
+	golang.org/x/crypto v0.0.0-20200204104054-c9f3fb736b72
 	golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f // indirect
-	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553
+	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
 	golang.org/x/sys v0.0.0-20191128015809-6d18c012aee9 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0
 	golang.org/x/tools v0.0.0-20191203134012-c197fd4bf371 // indirect
 	google.golang.org/genproto v0.0.0-20191203145615-049a07e0debe
 	google.golang.org/grpc v1.25.1
 	gopkg.in/h2non/gock.v1 v1.0.15
-	gopkg.in/jcmturner/gokrb5.v7 v7.3.0 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 	k8s.io/apimachinery v0.0.0-20190612205821-1799e75a0719
 )

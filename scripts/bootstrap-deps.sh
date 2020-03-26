@@ -3,7 +3,7 @@
 # Exit on error
 set -Eeu
 
-CONTAINERS=(geth_geth_1 quorum_quorum1_1)
+CONTAINERS=(deps_kafka_1)
 
 RETRY=20
 

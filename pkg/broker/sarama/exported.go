@@ -29,22 +29,29 @@ var (
 // NewTLSConfig inspired by https://medium.com/processone/using-tls-authentication-for-your-go-kafka-client-3c5841f2a625
 func NewTLSConfig(clientCertFilePath, clientKeyFilePath, caCertFilePath string) (*tls.Config, error) {
 	tlsConfig := tls.Config{}
+	var err error
 
-	// Load client cert
-	cert, err := tls.LoadX509KeyPair(clientCertFilePath, clientKeyFilePath)
-	if err != nil {
-		return &tls.Config{}, err
+	if clientCertFilePath != "" && clientKeyFilePath != "" {
+		// Load client cert
+		var cert tls.Certificate
+		cert, err = tls.LoadX509KeyPair(clientCertFilePath, clientKeyFilePath)
+		if err != nil {
+			return &tls.Config{}, err
+		}
+		tlsConfig.Certificates = []tls.Certificate{cert}
 	}
-	tlsConfig.Certificates = []tls.Certificate{cert}
 
-	// Load CA cert
-	caCert, err := ioutil.ReadFile(caCertFilePath)
-	if err != nil {
-		return &tls.Config{}, err
+	if clientCertFilePath != "" {
+		// Load CA cert
+		var caCert []byte
+		caCert, err = ioutil.ReadFile(caCertFilePath)
+		if err != nil {
+			return &tls.Config{}, err
+		}
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+		tlsConfig.RootCAs = caCertPool
 	}
-	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
-	tlsConfig.RootCAs = caCertPool
 
 	tlsConfig.BuildNameToCertificate()
 

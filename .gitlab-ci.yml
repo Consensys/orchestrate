@@ -132,8 +132,8 @@ test-e2e:
   <<: *docker-compose-setup
   <<: *docker-compose-e2e
   script:
-    - make ci-up
-    - make ci-e2e
+    - make up-ci
+    - make e2e-ci
   only:
     - master
 
@@ -142,8 +142,8 @@ test-multitenancy-e2e:
   <<: *docker-compose-e2e
   script:
     - mv -f .env.multitenancy .env
-    - make ci-up
-    - make ci-e2e
+    - make up-ci
+    - make e2e-ci
   only:
     - master
 
