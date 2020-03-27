@@ -3,6 +3,7 @@ stages:
   - test
   - e2e
   - build
+  - doc
   - release
 
 variables:
@@ -246,3 +247,83 @@ release-e2e:
     refs:
       - tags
   when: manual
+
+# Swagger API doc generation
+.swagger-doc-common-scripts: &swagger-doc-common-scripts
+  - swagger-combine swagger-combine.yml -o combined-schema.json
+  - redoc-cli bundle combined-schema.json
+  - mv redoc-static.html public/${API_DOC_VERSION}/index.html
+
+.swagger-doc: &swagger-doc
+# template to build swagger doc
+  image: node:stretch-slim
+  stage: doc
+  variables:
+    # default target is "latest" directory
+    API_DOC_VERSION: "latest"
+  before_script:
+    - npm install swagger-combine -g
+    - npm install redoc-cli -g
+    - mkdir -p public/${API_DOC_VERSION}
+  script:
+    *swagger-doc-common-scripts
+  cache:
+    paths:
+      - public
+
+swagger-doc-master:
+# build swagger doc for master
+  <<: *swagger-doc
+  only:
+    refs:
+      - master
+
+swagger-doc-tags:
+# build swagger doc for tagged versions
+  variables:
+    API_DOC_VERSION: $CI_COMMIT_TAG
+    DEFAULT_API_DOC_VERSION_REDIRECT: $CI_COMMIT_TAG
+  <<: *swagger-doc
+  script:
+    - *swagger-doc-common-scripts
+    # Create a redirect from stable to latest tagged version
+    - mkdir -p public/stable
+    - sed -e "s~{{LATEST_VERSION_URL}}~${CI_PAGES_URL}/${CI_COMMIT_TAG}~" public/index.html.template > public/stable/index.html
+  only:
+    refs:
+      - tags
+
+swagger-doc-branches:
+# build swagger doc for branches, not to be published on pages, only artefact available on gitlab
+  variables:
+    API_DOC_VERSION: $CI_COMMIT_BRANCH
+  <<: *swagger-doc
+  script:
+    - *swagger-doc-common-scripts
+    # Create a redirect from stable to latest branch version, only for testing as this artifact is not published
+    - mkdir -p public/stable
+    - sed -e "s~{{LATEST_VERSION_URL}}~${CI_PAGES_URL}/${CI_COMMIT_BRANCH}~" public/index.html.template > public/stable/index.html
+  artifacts:
+    paths:
+    - public
+    expire_in: 1 day
+  only:
+    refs:
+      - branches
+
+pages:
+# Release static swagger doc on gitlab pages
+  stage: release
+  script:
+    # create a redirect from home to latest
+    - sed -e "s~{{LATEST_VERSION_URL}}~${CI_PAGES_URL}/latest~" public/index.html.template > public/index.html
+  cache:
+    paths:
+    - public
+  artifacts:
+    paths:
+    - public
+  only:
+    refs:
+      - tags
+      - master

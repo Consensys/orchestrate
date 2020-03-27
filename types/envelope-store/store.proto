@@ -30,7 +30,6 @@ option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
                 type: TYPE_API_KEY;
                 in: IN_HEADER;
                 name: "Authorization";
-                description: "Add your Token as: `Bearer` Token";
             }
         }
         security: {
@@ -39,7 +38,6 @@ option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
                 type: TYPE_API_KEY;
                 in: IN_HEADER;
                 name: "X-API-Key";
-                description: "Add the value of your API-Key";
             }
         }
     }

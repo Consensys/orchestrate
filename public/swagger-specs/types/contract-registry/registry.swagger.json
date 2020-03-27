@@ -698,13 +698,11 @@
   "securityDefinitions": {
     "ApiKeyAuth": {
       "type": "apiKey",
-      "description": "Add the value of your API-Key",
       "name": "X-API-Key",
       "in": "header"
     },
     "JWTAuth": {
       "type": "apiKey",
-      "description": "Add your Token as: `Bearer` Token",
       "name": "Authorization",
       "in": "header"
     }

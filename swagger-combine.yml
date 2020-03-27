@@ -1,0 +1,24 @@
+# See https://github.com/maxdome/swagger-combine for this config file usage
+swagger: '2.0'
+info:
+  title: Pegasys Orchestrate REST API
+  version: 1.0.0
+  contact:
+    name: "✉ PegaSys Orchestrate"
+    email: "support@pegasys.tech"
+externalDocs:
+    description: "📒 Documentation of PegaSys Orchestrate"
+    url: "https://docs.orchestrate.pegasys.tech/en/latest/"
+apis:
+  - url: 'public/swagger-specs/types/chain-registry/swagger.json'
+    tags:
+      add:
+        - "Chain Registry"
+  - url: 'public/swagger-specs/types/envelope-store/store.swagger.json'
+    tags:
+      rename:
+        EnvelopeStore: "Envelope Store"
+  - url: 'public/swagger-specs/types/contract-registry/registry.swagger.json'
+    tags:
+      rename:
+        ContractRegistry: "Contract Registry"
