@@ -54,7 +54,7 @@ e2e-ci:
 clean: mod-tidy lint protobuf gen-swagger gen-mocks ## Run all clean-up tasks
 
 gen-mocks:
-	@go generate -mockgen ./...
+	@go generate -run mockgen ./...
 
 gen-swagger:
 	@go generate gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api
