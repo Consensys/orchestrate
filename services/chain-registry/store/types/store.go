@@ -2,6 +2,8 @@ package types
 
 import "context"
 
+//go:generate mockgen -source=store.go -destination=../mocks/mock_store.go -package=mocks
+
 type ChainStore interface {
 	RegisterChain(ctx context.Context, chain *Chain) error
 

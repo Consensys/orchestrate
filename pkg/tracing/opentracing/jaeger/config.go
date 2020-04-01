@@ -108,7 +108,7 @@ const (
 
 // CollectorURL register a flag for Jaeger collector url
 func CollectorURL(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Jaeger collector url to send spans to
+	desc := fmt.Sprintf(`Jaeger collector URL to send spans to
 Environment variable: %q`, collectorURLEnv)
 	f.String(collectorURLFlag, collectorURLDefault, desc)
 	_ = viper.BindPFlag(collectorURLViperKey, f.Lookup(collectorURLFlag))

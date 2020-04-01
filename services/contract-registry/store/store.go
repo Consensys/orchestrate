@@ -7,6 +7,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/common"
 )
 
+//go:generate mockgen -source=../store/store.go -destination=../store/mocks/mock_store.go -package=mocks
+
 // Interfaces data agents
 type ContractDataAgent interface {
 	Insert(

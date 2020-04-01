@@ -9,6 +9,8 @@ import (
 
 const getTagsComponent = component + ".get-tags"
 
+//go:generate mockgen -source=get_tags.go -destination=mocks/mock_get_tags.go -package=mocks
+
 type GetTagsUseCase interface {
 	Execute(ctx context.Context, name string) ([]string, error)
 }

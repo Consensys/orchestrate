@@ -7,4 +7,3 @@ services:
     volumes:
       - ../../build/report:/use/src/app/in
       - ../../build/report:/use/src/app/out
-

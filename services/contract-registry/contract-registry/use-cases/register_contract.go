@@ -16,6 +16,8 @@ import (
 
 const registerContractComponent = component + ".register-contract"
 
+//go:generate mockgen -source=register_contract.go -destination=mocks/mock_register_contract.go -package=mocks
+
 type RegisterContractUseCase interface {
 	Execute(ctx context.Context, contract *abi.Contract) error
 }

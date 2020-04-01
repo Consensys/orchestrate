@@ -11,6 +11,8 @@ import (
 
 const setCodeHashComponent = component + ".set-codehash"
 
+//go:generate mockgen -source=set_codehash.go -destination=mocks/mock_set_codehash.go -package=mocks
+
 type SetCodeHashUseCase interface {
 	Execute(ctx context.Context, account *common.AccountInstance, hash string) error
 }

@@ -10,6 +10,8 @@ import (
 
 const getMethodsComponent = component + ".get-methods"
 
+//go:generate mockgen -source=get_methods.go -destination=mocks/mock_get_methods.go -package=mocks
+
 type GetMethodsUseCase interface {
 	Execute(ctx context.Context, account *common.AccountInstance, selector []byte) (abi string, methodsABI []string, err error)
 }

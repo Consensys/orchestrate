@@ -6,6 +6,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
+//go:generate mockgen -source=store.pb.go -destination=client/mocks/mock_client.go -package=mocks
+
 // HasBeenSent indicates whether a transaction has been sent
 func (info *StatusInfo) HasBeenSent() bool {
 	return info.GetStatus() != Status_STORED

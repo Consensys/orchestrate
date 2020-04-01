@@ -10,6 +10,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/types"
 )
 
+//go:generate mockgen -source=ethclient.go -destination=mocks/mock_client.go -package=mocks
+
 // TransactionSender is a service for sending transaction to a blockchain
 type TransactionSender interface {
 	// SendTransaction injects a signed transaction into the pending pool for execution.

@@ -9,6 +9,8 @@ import (
 
 const getCatalogComponent = component + ".get-catalog"
 
+//go:generate mockgen -source=get_catalog.go -destination=mocks/mock_get_catalog.go -package=mocks
+
 type GetCatalogUseCase interface {
 	Execute(ctx context.Context) ([]string, error)
 }

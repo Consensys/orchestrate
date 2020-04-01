@@ -12,6 +12,8 @@ type Client interface {
 	GetStatus(chainID string) (status string, err error)
 }
 
+//go:generate mockgen -destination=mocks/mock_client.go -package=mocks . EnclaveEndpoint
+
 type EnclaveEndpoint interface {
 	// PostRequest - sends a request to Tessera private enclave
 	// path - a URL path in a request to send

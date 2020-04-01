@@ -10,6 +10,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multitenancy"
 )
 
+//go:generate mockgen -source=keystore.go -destination=mocks/mock_client.go -package=mocks
+
 // KeyStore is an interface implemented by module that are able to perform signature transactions
 type KeyStore interface {
 	// SignTx signs a transaction

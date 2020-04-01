@@ -49,23 +49,15 @@ e2e: run-e2e
 e2e-ci:
 	@docker-compose up e2e
 	@docker-compose -f scripts/report/docker-compose.yml up
-	@sh scripts/exitCode.sh
+	@exit $(docker inspect orchestrate_e2e_1 --format='{{.State.ExitCode}}')
 
-clean: mod-tidy lint protobuf generate-swagger generate-mocks ## Run all clean-up tasks
+clean: mod-tidy lint protobuf gen-swagger gen-mocks ## Run all clean-up tasks
 
-generate-mocks:
-	mockgen -source=services/chain-registry/client/client.go -destination=services/chain-registry/client/mocks/mock_client.go -package=mocks
-	mockgen -source=ethereum/ethclient/ethclient.go -destination=ethereum/ethclient/mocks/mock_client.go -package=mocks
-	mockgen -source=types/contract-registry/registry.pb.go -destination=types/contract-registry/client/mocks/mock_client.go -package=mocks
-	mockgen -source=types/envelope-store/store.pb.go -destination=types/envelope-store/client/mocks/mock_client.go -package=mocks
-	mockgen -source=services/chain-registry/store/types/store.go -destination=services/chain-registry/store/mocks/mock_store.go -package=mocks
-	mockgen -source=services/multi-vault/keystore/keystore.go -destination=services/multi-vault/keystore/mocks/mock_client.go -package=mocks
-	mockgen -source=services/tx-listener/session/ethereum/offset/manager.go -destination=services/tx-listener/session/ethereum/offset/mocks/manager_mock.go -package=mocks
-	mockgen -source=services/faucet/faucet/faucet.go -destination=services/faucet/faucet/mocks/faucet_mock.go -package=mocks
-	cd services/contract-registry/scripts && bash generate-mocks.sh
+gen-mocks:
+	@go generate -mockgen ./...
 
-generate-swagger:
-	@bash scripts/swagger.sh
+gen-swagger:
+	@go generate gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/api
 
 # Tools
 lint-tools: ## Install linting tools
@@ -73,8 +65,6 @@ lint-tools: ## Install linting tools
 	@GO111MODULE=off go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
 
 tools: lint-tools ## Install test tools
-	@GO111MODULE=off go get -u github.com/cucumber/godog/cmd/godog
-	@GO111MODULE=off go get -u github.com/golang/mock/gomock
 	@GO111MODULE=off go get -u github.com/golang/mock/mockgen
 	@GO111MODULE=off go get -u github.com/swaggo/swag/cmd/swag
 

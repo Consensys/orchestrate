@@ -10,6 +10,8 @@ import (
 
 const getEventsComponent = component + ".get-events"
 
+//go:generate mockgen -source=get_events.go -destination=mocks/mock_get_events.go -package=mocks
+
 type GetEventsUseCase interface {
 	Execute(ctx context.Context, account *common.AccountInstance, sighash string, indexedInputCount uint32) (abi string, eventsABI []string, err error)
 }

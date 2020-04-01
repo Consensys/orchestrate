@@ -11,6 +11,8 @@ import (
 
 const getContractComponent = component + ".get-contract"
 
+//go:generate mockgen -source=get_contract.go -destination=mocks/mock_get_contract.go -package=mocks
+
 type GetContractUseCase interface {
 	Execute(ctx context.Context, id *abi.ContractId) (*abi.Contract, error)
 }
