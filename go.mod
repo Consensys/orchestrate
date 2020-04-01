@@ -22,6 +22,8 @@ require (
 	github.com/deckarep/golang-set v1.7.1 // indirect
 	github.com/dgraph-io/ristretto v0.0.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/docker/docker v1.13.1
+	github.com/docker/go-connections v0.4.0
 	github.com/eapache/channels v1.1.0
 	github.com/elastic/gosigar v0.10.5 // indirect
 	github.com/elazarl/go-bindata-assetfs v1.0.0

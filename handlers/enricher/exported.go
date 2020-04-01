@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	"github.com/spf13/viper"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient"
 
 	log "github.com/sirupsen/logrus"
@@ -31,7 +33,7 @@ func Init(ctx context.Context) {
 		ethclient.Init(ctx)
 
 		// Initialize Contract Registry Client
-		crc.Init(ctx)
+		crc.Init(ctx, viper.GetString(crc.ContractRegistryURLViperKey))
 
 		// Create Handler
 		handler = Enricher(crc.GlobalClient(), ethclient.GlobalClient())

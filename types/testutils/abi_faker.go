@@ -2,6 +2,7 @@ package testutils
 
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/types/abi"
+	"k8s.io/apimachinery/pkg/util/rand"
 )
 
 const contractABI = `[
@@ -68,7 +69,7 @@ const eventSignature = "Incremented(address,uint256)"
 func FakeContract() *abi.Contract {
 	return &abi.Contract{
 		Id: &abi.ContractId{
-			Name: "MyContract",
+			Name: rand.String(5),
 			Tag:  "v1.0.0",
 		},
 		Abi:              contractABI,

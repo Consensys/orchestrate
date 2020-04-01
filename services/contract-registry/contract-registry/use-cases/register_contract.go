@@ -20,6 +20,11 @@ type RegisterContractUseCase interface {
 	Execute(ctx context.Context, contract *abi.Contract) error
 }
 
+type PGArtifactModel struct {
+	tableName struct{} `pg:"artifacts"` //nolint:unused,structcheck // reason
+	models.ArtifactModel
+}
+
 // RegisterContract is a use case to register a new contract
 type RegisterContract struct {
 	contractDataAgent store.ContractDataAgent

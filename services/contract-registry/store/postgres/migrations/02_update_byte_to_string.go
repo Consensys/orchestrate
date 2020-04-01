@@ -20,10 +20,10 @@ ALTER TABLE events
 	ALTER COLUMN abi TYPE TEXT USING convert_from(abi,'UTF-8');
 	`)
 	if err != nil {
-		log.WithError(err).Error("Could not create tables")
+		log.WithError(err).Error("Could not upgrade tables from bytes to string")
 		return err
 	}
-	log.Info("Created tables")
+	log.Info("Upgrades tables from bytes to string")
 
 	return nil
 }
@@ -43,10 +43,10 @@ ALTER TABLE events
 	ALTER COLUMN abi TYPE BYTEA USING abi::TEXT::BYTEA;
 `)
 	if err != nil {
-		log.WithError(err).Error("Could not drop tables")
+		log.WithError(err).Error("Could not downgrade from string to bytes")
 		return err
 	}
-	log.Info("Dropped tables")
+	log.Info("Downgraded from string to bytes")
 
 	return nil
 }

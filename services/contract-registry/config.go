@@ -14,7 +14,7 @@ import (
 
 const (
 	typeFlag     = "contract-registry-type"
-	typeViperKey = "contract-registry.type"
+	TypeViperKey = "contract-registry.type"
 	typeDefault  = postgresOpt
 	typeEnv      = "CONTRACT_REGISTRY_TYPE"
 	abiFlag      = "abi"
@@ -29,7 +29,7 @@ var abiDefault []string
 func bindTypeFlag(flag *pflag.FlagSet) {
 	description := fmt.Sprintf(`Type of Contract Registry (one of %q) Environment variable: %q`, []string{postgresOpt}, typeEnv)
 	flag.String(typeFlag, typeDefault, description)
-	_ = viper.BindPFlag(typeViperKey, flag.Lookup(typeFlag))
+	_ = viper.BindPFlag(TypeViperKey, flag.Lookup(typeFlag))
 }
 
 // bindABIFlag register flag for ABI

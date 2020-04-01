@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	"github.com/spf13/viper"
+
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
@@ -25,7 +27,7 @@ func Init(ctx context.Context) {
 		}
 
 		// Initialize Registry Client
-		registryclient.Init(ctx)
+		registryclient.Init(ctx, viper.GetString(registryclient.ContractRegistryURLViperKey))
 
 		// Create Handler
 		handler = Crafter(registryclient.GlobalClient(), &abi.BaseCrafter{})

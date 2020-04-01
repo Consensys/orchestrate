@@ -8,8 +8,6 @@ import (
 	"fmt"
 )
 
-const certificateType = "CERTIFICATE"
-
 func DecodeStringToCertificate(raw string) (*x509.Certificate, error) {
 	bytes, err := DecodeStringToASN1(raw)
 	if err != nil {

@@ -23,6 +23,21 @@ func init() {
 	_ = viper.BindEnv(dbPoolSizeViperKey, dbPoolSizeEnv)
 }
 
+func InitEnvs() {
+	viper.SetDefault(dbUserViperKey, dbUserDefault)
+	_ = viper.BindEnv(dbUserViperKey, dbUserEnv)
+	viper.SetDefault(dbPasswordViperKey, dbPasswordDefault)
+	_ = viper.BindEnv(dbPasswordViperKey, dbPasswordEnv)
+	viper.SetDefault(dbDatabaseViperKey, dbDatabaseDefault)
+	_ = viper.BindEnv(dbDatabaseViperKey, dbDatabaseEnv)
+	viper.SetDefault(dbHostViperKey, dbHostDefault)
+	_ = viper.BindEnv(dbHostViperKey, dbHostEnv)
+	viper.SetDefault(dbPortViperKey, dbPortDefault)
+	_ = viper.BindEnv(dbPortViperKey, dbPortEnv)
+	viper.SetDefault(dbPoolSizeViperKey, dbPoolSizeDefault)
+	_ = viper.BindEnv(dbPoolSizeViperKey, dbPoolSizeEnv)
+}
+
 // PGFlags register flags for Postgres database
 func PGFlags(f *pflag.FlagSet) {
 	DBUser(f)
@@ -125,6 +140,14 @@ Environment variable: %q`, dbPoolSizeEnv)
 
 // NewOptions creates new postgres options
 func NewOptions() *pg.Options {
+	fmt.Println("PG options!!!!!", &pg.Options{
+		Addr:     fmt.Sprintf("%v:%v", viper.GetString(dbHostViperKey), viper.GetString(dbPortViperKey)),
+		User:     viper.GetString(dbUserViperKey),
+		Password: viper.GetString(dbPasswordViperKey),
+		Database: viper.GetString(dbDatabaseViperKey),
+		PoolSize: viper.GetInt(dbPoolSizeViperKey),
+	})
+
 	return &pg.Options{
 		Addr:     fmt.Sprintf("%v:%v", viper.GetString(dbHostViperKey), viper.GetString(dbPortViperKey)),
 		User:     viper.GetString(dbUserViperKey),

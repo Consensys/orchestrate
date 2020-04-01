@@ -94,7 +94,7 @@ func initComponents(ctx context.Context) {
 		},
 		// Initialize the contractregistryClient
 		func() {
-			contractregistry.Init(ctx)
+			contractregistry.Init(ctx, viper.GetString(contractregistry.ContractRegistryURLViperKey))
 		},
 	)
 }

@@ -1,3 +1,5 @@
+// +build unit
+
 package certificate
 
 import (
@@ -38,6 +40,7 @@ addG8/Daj3SMWo8N8nhW1VX3JyQcuA3Jxvsyj8aYudoCWIhbYSsdeVY3JmUnIcGZ
 mwIDAQAB
 -----END RSA PUBLIC KEY-----
 `
+	certificateType = "CERTIFICATE"
 )
 
 func TestDecodeStringToCertificate(t *testing.T) {

@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -21,7 +20,7 @@ var (
 	initOnce = &sync.Once{}
 )
 
-func Init(ctx context.Context) {
+func Init(ctx context.Context, contractRegistryURL string) {
 	initOnce.Do(func() {
 		if client != nil {
 			return
@@ -30,7 +29,7 @@ func Init(ctx context.Context) {
 		var err error
 		conn, err = grpcclient.DialContextWithDefaultOptions(
 			ctx,
-			viper.GetString(ContractRegistryURLViperKey),
+			contractRegistryURL,
 		)
 		if err != nil {
 			log.WithError(errors.FromError(err).ExtendComponent(component)).Fatalf("%s: failed to dial grpc server", component)
@@ -39,7 +38,7 @@ func Init(ctx context.Context) {
 		client = svc.NewContractRegistryClient(conn)
 
 		log.WithFields(log.Fields{
-			"url": viper.GetString(ContractRegistryURLViperKey),
+			"url": contractRegistryURL,
 		}).Infof("%s: client ready", component)
 	})
 }

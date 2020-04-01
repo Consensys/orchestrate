@@ -1,3 +1,5 @@
+// +build unit
+
 package envelope_store //nolint:golint,stylecheck // reason
 
 import (

@@ -1,4 +1,6 @@
+// +build unit
 // +build !race
+// +build !integration
 
 package pg
 

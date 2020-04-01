@@ -68,7 +68,7 @@ services:
     restart: "no"
     depends_on:
       - chain-registry-migration-init
-    command: chain-registry migrate
+    command: chain-registry migrate up
 
   chain-registry:
     <<: *container-common
@@ -99,7 +99,7 @@ services:
     restart: "no"
     depends_on:
       - contract-registry-migration-init
-    command: contract-registry migrate
+    command: contract-registry migrate up
 
   contract-registry:
     <<: *container-common
@@ -131,7 +131,7 @@ services:
     restart: "no"
     depends_on:
       - envelope-store-migration-init
-    command: envelope-store migrate
+    command: envelope-store migrate up
 
   envelope-store:
     <<: *container-common

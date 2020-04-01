@@ -26,7 +26,7 @@ var (
 )
 
 // StartService Starts gRPC and HTTP servers
-func StartService(ctx context.Context) {
+func StartService(ctx context.Context, storeType string) {
 	startOnce.Do(func() {
 		log.Info("Starting service")
 
@@ -34,7 +34,7 @@ func StartService(ctx context.Context) {
 
 		// Initialize dependencies
 		multitenancy.Init(ctx)
-		db := createDBConnection()
+		db := createDBConnection(storeType)
 
 		// Start services
 		contractRegistryController := initializeController(db)
@@ -57,11 +57,11 @@ func StartService(ctx context.Context) {
 func StopService(ctx context.Context) {
 	log.Warn("app: stopping...")
 	app.SetReady(false)
-	common.InParallel(
-		func() { grpcserver.StopServer(ctx) },
-		func() { metrics.StopServer(ctx) },
-		func() { rest.StopServer(ctx) },
-	)
+
+	rest.StopServer(ctx)
+	grpcserver.StopServer(ctx)
+	metrics.StopServer(ctx)
+
 	log.Info("app: gracefully stopped application")
 }
 
@@ -81,9 +81,7 @@ func Flags(runCmd *cobra.Command) {
 	postgres.PGFlags(runCmd.Flags())
 }
 
-func createDBConnection() *pg.DB {
-	storeType := viper.GetString(typeViperKey)
-
+func createDBConnection(storeType string) *pg.DB {
 	switch storeType {
 	case postgresOpt:
 		opts := postgres.NewOptions()
@@ -97,7 +95,7 @@ func createDBConnection() *pg.DB {
 		return postgres.New(opts)
 	default:
 		log.WithFields(log.Fields{
-			"type": viper.GetString(typeViperKey),
+			"type": viper.GetString(TypeViperKey),
 		}).Fatalf("%s: unknown store type", storeType)
 
 		return nil

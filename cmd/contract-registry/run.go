@@ -4,10 +4,12 @@ import (
 	"context"
 	"os"
 
+	contract_registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry"
+
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
-	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry"
 )
 
 func newRunCommand() *cobra.Command {
@@ -18,16 +20,16 @@ func newRunCommand() *cobra.Command {
 	}
 
 	// Set flags
-	contractregistry.Flags(runCmd)
+	contract_registry.Flags(runCmd)
 
 	return runCmd
 }
 
 func run(_ *cobra.Command, _ []string) {
 	// Process signals
-	sig := utils.NewSignalListener(func(signal os.Signal) { contractregistry.StopService(context.Background()) })
+	sig := utils.NewSignalListener(func(signal os.Signal) { contract_registry.StopService(context.Background()) })
 	defer sig.Close()
 
 	// Start application
-	contractregistry.StartService(context.Background())
+	contract_registry.StartService(context.Background(), viper.GetString(contract_registry.TypeViperKey))
 }

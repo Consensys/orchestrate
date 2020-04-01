@@ -1,3 +1,5 @@
+// +build unit
+
 package client
 
 import (
@@ -9,7 +11,7 @@ import (
 )
 
 func TestInit(t *testing.T) {
-	Init(context.Background())
+	Init(context.Background(), contractRegistryURLDefault)
 	assert.NotNil(t, GlobalClient(), "Global should have been set")
 
 	var c svc.ContractRegistryClient

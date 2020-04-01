@@ -44,7 +44,7 @@ func CheckExtractNameTag(id *abi.ContractId) (name, tag string, err error) {
 
 	name = id.GetName()
 	if name == "" {
-		return "", "", errors.InvalidArgError("No abi provided in request").ExtendComponent(component)
+		return "", "", errors.InvalidArgError("No name provided in request").ExtendComponent(component)
 	}
 
 	// Set Tag to latest if it was not set in the request

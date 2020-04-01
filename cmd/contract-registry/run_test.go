@@ -1,3 +1,5 @@
+// +build unit
+
 package contractregistry
 
 import (

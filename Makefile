@@ -23,7 +23,10 @@ coverage: postgres run-coverage down-postgres
 	@$(OPEN) build/coverage/coverage.html 2>/dev/null
 
 race: ## Run data race detector
-	@go test -count=1 -race -short ${PACKAGES}
+	@go test -count=1 -race -tags unit -short ${PACKAGES}
+
+run-integration:
+	@go test -tags integration ${PACKAGES}
 
 mod-tidy: ## Run deps cleanup
 	@go mod tidy
