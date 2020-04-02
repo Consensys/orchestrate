@@ -373,7 +373,7 @@ func processReceiptResult(receipt **ethtypes.Receipt) ProcessResultFunc {
 			return err
 		}
 
-		if *receipt == nil {
+		if receipt == nil || *receipt == nil {
 			// Receipt was not found
 			return errors.NotFoundError("receipt not found")
 		}

@@ -53,8 +53,6 @@ func NewTLSConfig(clientCertFilePath, clientKeyFilePath, caCertFilePath string) 
 		tlsConfig.RootCAs = caCertPool
 	}
 
-	tlsConfig.BuildNameToCertificate()
-
 	tlsConfig.InsecureSkipVerify = viper.GetBool(kafkaTLSInsecureSkipVerifyViperKey)
 
 	return &tlsConfig, err

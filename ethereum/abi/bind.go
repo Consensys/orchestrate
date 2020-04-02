@@ -37,10 +37,6 @@ func BindArgs(arguments *ethabi.Arguments, args ...string) ([]interface{}, error
 
 // BindArg cast string argument into expected go-ethereum type
 func BindArg(t *ethabi.Type, arg string) (interface{}, error) {
-	return bindArg(t, arg)
-}
-
-func bindArg(t *ethabi.Type, arg string) (interface{}, error) {
 	switch t.T {
 	case ethabi.AddressTy:
 		if !ethcommon.IsHexAddress(arg) {
@@ -51,7 +47,10 @@ func bindArg(t *ethabi.Type, arg string) (interface{}, error) {
 	case ethabi.FixedBytesTy:
 		data, err := hexutil.Decode(arg)
 		if err != nil {
-			return data, errors.InvalidArgError("invalid bytes %q", arg)
+			return data, errors.InvalidArgError("invalid fixed bytes %q", arg)
+		}
+		if len(data) > t.Size {
+			return nil, errors.InvalidArgError("invalid fixed bytes %s of size %d - too big for %s", arg, len(data), t.String())
 		}
 		array := reflect.New(t.Type).Elem()
 
@@ -68,23 +67,34 @@ func bindArg(t *ethabi.Type, arg string) (interface{}, error) {
 		return data, nil
 
 	case ethabi.IntTy:
+		isNegative, isHex, err := checkArgNumber(arg)
+		if err != nil {
+			return nil, err
+		}
 		switch t.Size {
 		// only int of size 8, 16, 32, 64 should be bind in int
 		// other ones should be in *big.Int see packNum in go-ethereum/accounts/abi/pack.go https://github.com/ethereum/go-ethereum/blob/master/accounts/abi/pack.go
 		case 8, 16, 32, 64:
-			return bindIntArg(t, arg)
+			return bindIntArg(t, arg, isNegative, isHex)
 		default:
-			return bindBigIntArg(t, arg)
+			return bindBigIntArg(t, arg, isNegative, isHex)
 		}
 
 	case ethabi.UintTy:
+		isNegative, has0xPrefix, err := checkArgNumber(arg)
+		if err != nil {
+			return nil, err
+		}
+		if isNegative {
+			return nil, errors.InvalidArgError("did not expected negative value %s for %s", arg, t.String())
+		}
 		switch t.Size {
 		// only uint of size 8, 16, 32, 64 should be bind in uint
 		// other ones should be in *big.Int see packNum in go-ethereum/accounts/abi/pack.go https://github.com/ethereum/go-ethereum/blob/master/accounts/abi/pack.go
 		case 8, 16, 32, 64:
-			return bindUintArg(t, arg)
+			return bindUintArg(t, arg, has0xPrefix)
 		default:
-			return bindBigIntArg(t, arg)
+			return bindBigIntArg(t, arg, isNegative, has0xPrefix)
 		}
 
 	case ethabi.BoolTy:
@@ -107,47 +117,73 @@ func bindArg(t *ethabi.Type, arg string) (interface{}, error) {
 		return nil, errors.FeatureNotSupportedError("solidity tuple not supported yet")
 
 	default:
-		return nil, errors.FeatureNotSupportedError("solidity type %q not supported", t.T)
+		return nil, errors.FeatureNotSupportedError("solidity type %s not supported", t.String())
 	}
 }
 
-func bindBigIntArg(t *ethabi.Type, arg string) (interface{}, error) {
+func checkArgNumber(arg string) (isNeg, hasHexPrefix bool, err error) {
+	if arg == "" {
+		return false, false, errors.InvalidArgError("did not expected empty uint/int value")
+	}
+	neg := isNegative(arg)
+	if neg {
+		arg = arg[1:]
+	}
+	hasPrefix := has0xPrefix(arg)
+	if hasPrefix {
+		// Checks if it is a valid hex
+		// inspired by github.com/ethereum/go-ethereum/common/hexutil/hexutil.go
+		arg = arg[2:]
+		if arg == "" {
+			return neg, hasPrefix, errors.InvalidArgError("invalid number - no value after 0x prefix")
+		}
+		if len(arg) > 1 && arg[0] == '0' {
+			return neg, hasPrefix, errors.InvalidArgError("invalid number - got: %s", hexutil.ErrLeadingZero)
+		}
+
+	}
+	return neg, hasPrefix, nil
+}
+
+func bindBigIntArg(t *ethabi.Type, arg string, isNegative, has0xPrefix bool) (interface{}, error) {
 	// Check that it is a pointer to big int
 	if t.Kind != reflect.Ptr {
-		return nil, errors.InvalidArgError("bindBigIntArg: invalid type for %s - expected type kind %s but got %s", arg, reflect.Ptr, t.Kind)
+		return nil, errors.InvalidArgError("invalid type for %s - expected type kind %s but got %s", arg, reflect.Ptr, t.Kind)
 	}
 
-	// If arg is negative
-	if arg != "" && arg[0] == '-' {
-		raw, _, err := checkNumber(arg)
-		if err != nil {
-			return nil, errors.InvalidArgError("bindBigIntArg: invalid negative invalid number %q", err)
+	base := 10
+	raw := arg
+	if has0xPrefix {
+		if isNegative {
+			raw = fmt.Sprintf("-%s", arg[3:])
+		} else {
+			raw = arg[2:]
 		}
-
-		i := new(big.Int)
-		i, ok := i.SetString(raw, 16)
-		if !ok {
-			return nil, errors.FromError(fmt.Errorf("bindBigIntArg: could not decode negative value of %s", arg))
-		}
-		return i, nil
+		base = 16
 	}
 
-	data, err := hexutil.DecodeBig(arg)
-	if err != nil {
-		return data, errors.InvalidArgError("bindBigIntArg invalid number %q", arg)
+	bigNumber, ok := new(big.Int).SetString(raw, base)
+	if !ok {
+		return nil, errors.InvalidArgError("invalid %s %s", t.String(), arg)
 	}
-	return data, nil
+	return bigNumber, nil
 }
 
-func bindIntArg(t *ethabi.Type, arg string) (interface{}, error) {
-	raw, _, err := checkNumber(arg)
-	if err != nil {
-		return nil, errors.InvalidArgError("bindIntArg: invalid number %q", err)
+func bindIntArg(t *ethabi.Type, arg string, isNegative, has0xPrefix bool) (interface{}, error) {
+	base := 10
+	raw := arg
+	if has0xPrefix {
+		if isNegative {
+			raw = fmt.Sprintf("-%s", arg[3:])
+		} else {
+			raw = arg[2:]
+		}
+		base = 16
 	}
 
-	number, err := strconv.ParseInt(raw, 16, t.Size)
+	number, err := strconv.ParseInt(raw, base, t.Size)
 	if err != nil {
-		return nil, errors.InvalidArgError("bindIntArg: could not parse number %q", err)
+		return nil, errors.InvalidArgError("could not parse number %s - got %q", arg, err)
 	}
 
 	switch t.Size {
@@ -160,19 +196,21 @@ func bindIntArg(t *ethabi.Type, arg string) (interface{}, error) {
 	case 64:
 		return number, nil
 	default:
-		return nil, errors.InvalidArgError("bindIntArg: invalid size")
+		return nil, errors.InvalidArgError("invalid size %d - could not bind %s", t.Size, arg)
 	}
 }
 
-func bindUintArg(t *ethabi.Type, arg string) (interface{}, error) {
-	raw, isNegative, err := checkNumber(arg)
-	if err != nil && isNegative {
-		return nil, errors.InvalidArgError("bindUintArg: invalid number %q", err)
+func bindUintArg(t *ethabi.Type, arg string, has0xPrefix bool) (interface{}, error) {
+	base := 10
+	raw := arg
+	if has0xPrefix {
+		raw = arg[2:]
+		base = 16
 	}
 
-	number, err := strconv.ParseUint(raw, 16, t.Size)
+	number, err := strconv.ParseUint(raw, base, t.Size)
 	if err != nil {
-		return nil, errors.InvalidArgError("bindUintArg: could not parse number %q", err)
+		return nil, errors.InvalidArgError("could not parse number %s - got %q", arg, err)
 	}
 
 	switch t.Size {
@@ -185,38 +223,8 @@ func bindUintArg(t *ethabi.Type, arg string) (interface{}, error) {
 	case 64:
 		return number, nil
 	default:
-		return nil, errors.InvalidArgError("bindUintArg: invalid size")
+		return nil, errors.InvalidArgError("invalid size %d - could not bind %s", t.Size, arg)
 	}
-}
-
-// Code inspired by github.com/ethereum/go-ethereum/common/hexutil/hexutil.go
-func checkNumber(input string) (raw string, isNegative bool, err error) {
-	if input == "" {
-		return "", isNegative, hexutil.ErrEmptyString
-	}
-	if input[0] == '-' {
-		isNegative = true
-		input = input[1:]
-	}
-	if !has0xPrefix(input) {
-		return "", isNegative, hexutil.ErrMissingPrefix
-	}
-	input = input[2:]
-	if input == "" {
-		return "", isNegative, hexutil.ErrEmptyNumber
-	}
-	if len(input) > 1 && input[0] == '0' {
-		return "", isNegative, hexutil.ErrLeadingZero
-	}
-	if isNegative {
-		input = "-" + input
-	}
-	return input, isNegative, nil
-}
-
-// Code inspired by github.com/ethereum/go-ethereum/common/hexutil/hexutil.go
-func has0xPrefix(input string) bool {
-	return len(input) >= 2 && input[0] == '0' && (input[1] == 'x' || input[1] == 'X')
 }
 
 func bindArrayArg(t *ethabi.Type, arg string) (interface{}, error) {
@@ -226,7 +234,7 @@ func bindArrayArg(t *ethabi.Type, arg string) (interface{}, error) {
 	var argArray []string
 	err := json.Unmarshal([]byte(arg), &argArray)
 	if err != nil {
-		return nil, errors.FromError(err)
+		return nil, errors.InvalidArgError("could not parse array %s for %s - got %v", arg, t.String(), err)
 	}
 
 	// If t.Size == 0, then it is a dynamic array. We accept any length in this case.
@@ -238,11 +246,20 @@ func bindArrayArg(t *ethabi.Type, arg string) (interface{}, error) {
 			)
 	}
 	for _, v := range argArray {
-		typedArg, err := bindArg(&elemType, v)
+		typedArg, err := BindArg(&elemType, v)
 		if err != nil {
 			return nil, err
 		}
 		slice = reflect.Append(slice, reflect.ValueOf(typedArg))
 	}
 	return slice.Interface(), nil
+}
+
+// Code inspired by github.com/ethereum/go-ethereum/common/hexutil/hexutil.go
+func has0xPrefix(input string) bool {
+	return len(input) >= 2 && input[0] == '0' && (input[1] == 'x' || input[1] == 'X')
+}
+
+func isNegative(input string) bool {
+	return input[0] == '-'
 }

@@ -61,7 +61,8 @@ func TestMaxBalance(t *testing.T) {
 						},
 					},
 				},
-				ExpectedErr: errors.FromError(errBalanceAt).ExtendComponent(component),
+				ExpectedAmount: nil,
+				ExpectedErr:    errors.FromError(errBalanceAt).ExtendComponent(component),
 			},
 		},
 		{
@@ -82,6 +83,7 @@ func TestMaxBalance(t *testing.T) {
 					},
 				},
 				ExpectedAmount: big.NewInt(10),
+				ExpectedErr:    nil,
 			},
 		},
 		{
