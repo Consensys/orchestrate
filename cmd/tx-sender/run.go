@@ -32,7 +32,7 @@ func newRunCommand() *cobra.Command {
 	chnregclient.Flags(runCmd.Flags())
 
 	// Register StoreGRPC flags
-	storeclient.EnvelopeStoreURL(runCmd.Flags())
+	storeclient.Flags(runCmd.Flags())
 
 	// Register Nonce Manager flags
 	nonce.Type(runCmd.Flags())

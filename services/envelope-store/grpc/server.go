@@ -1,27 +1,32 @@
-package envelopestore
+package grpc
 
 import (
+	"context"
 	"reflect"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/config/static"
+	"google.golang.org/grpc"
+
 	grpcauth "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/interceptor/auth"
 	grpclogrus "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/interceptor/logrus"
 	staticinterceptor "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/interceptor/static"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/server"
 	staticserver "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/server/static"
 	staticservice "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/service/static"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
-	grpcservice "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/service/grpc"
 )
 
-func NewGRPCBuilder(
-	service svc.EnvelopeStoreServer,
-	checker auth.Checker, multitenancy bool,
+type ServerBuilder struct{
+	*staticserver.Builder
+}
+
+func NewServerBuilder(
+	srv svc.EnvelopeStoreServer,
+	checker auth.Checker, 
+	multitenancy bool,
 	logger *logrus.Logger,
-) (server.Builder, error) {
-	// Create GRPC server builder
+) (ServerBuilder, error) {
 	builder := staticserver.NewBuilder()
 
 	// Create interceptor builder
@@ -41,28 +46,20 @@ func NewGRPCBuilder(
 
 	builder.Interceptor = interceptorBuilder
 
-	// Add Builder for Contract-Registry service
+	// Add Builder for Envelope-store service
 	serviceBuilder := staticservice.NewBuilder()
 	serviceBuilder.AddBuilder(
 		reflect.TypeOf(&static.Envelopes{}),
-		grpcservice.NewBuilder(service),
+		newServiceBuilder(srv),
 	)
 	builder.Service = serviceBuilder
 
-	return builder, nil
+	return ServerBuilder{
+		builder,
+	}, nil
 }
 
-func NewGRPCStaticConfig() *static.Configuration {
-	return &static.Configuration{
-		Services: &static.Services{
-			Envelopes: &static.Envelopes{},
-		},
-		Interceptors: []*static.Interceptor{
-			&static.Interceptor{Tags: &static.Tags{}},
-			&static.Interceptor{Logrus: &static.Logrus{}},
-			&static.Interceptor{Auth: &static.Auth{}},
-			&static.Interceptor{Error: &static.Error{}},
-			&static.Interceptor{Recovery: &static.Recovery{}},
-		},
-	}
+
+func (b *ServerBuilder) BuildServer(ctx context.Context, name string, cfg interface{}) (*grpc.Server, error){
+	return b.Build(ctx, name, cfg)
 }

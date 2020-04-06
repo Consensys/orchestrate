@@ -13,7 +13,7 @@ import (
 
 type Builder struct{}
 
-// NewBuilder returns a http.Handler builder based on runtime.Configuration
+// NewRouterBuilder returns a http.Handler builder based on runtime.Configuration
 func NewBuilder() *Builder {
 	return &Builder{}
 }

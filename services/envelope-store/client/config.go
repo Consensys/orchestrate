@@ -5,11 +5,12 @@ import (
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/jaeger"
 )
 
-func init() {
-	viper.SetDefault(EnvelopeStoreURLViperKey, envelopeStoreURLDefault)
-	_ = viper.BindEnv(EnvelopeStoreURLViperKey, envelopeStoreURLEnv)
+type Config struct {
+	envelopeStoreURL string
+	serviceName string
 }
 
 const (
@@ -19,8 +20,21 @@ const (
 	envelopeStoreURLEnv      = "ENVELOPE_STORE_URL"
 )
 
-// EnvelopeStoreURL register flag for Ethereum client URLs
-func EnvelopeStoreURL(f *pflag.FlagSet) {
+func NewConfig(serviceName string, envelopeStoreURL string) Config {
+	return Config{
+		envelopeStoreURL,
+		serviceName,
+	}
+}
+
+func NewConfigFromViper(vipr *viper.Viper) Config {
+	return NewConfig(
+		vipr.GetString(EnvelopeStoreURLViperKey),
+		viper.GetString(jaeger.ServiceNameViperKey),
+	)
+}
+
+func Flags(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`URL (GRPC target) Envelope Store (See https://github.com/grpc/grpc/blob/master/doc/naming.md)
 Environment variable: %q`, envelopeStoreURLEnv)
 	f.String(envelopeStoreURLFlag, envelopeStoreURLDefault, desc)
