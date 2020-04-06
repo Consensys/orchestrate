@@ -120,7 +120,6 @@ integration:
 #  <<: *go-setup
 #  script:
 #    - make lint-tools
-#    - export GOGC=10
 #    - make lint-ci
 #  except:
 #    - tags
@@ -272,7 +271,7 @@ release-e2e:
 .swagger-doc: &swagger-doc
   # template to build swagger doc
   image: node:12.16.2-stretch-slim
-  stage: doc
+  stage: build
   variables:
     # default target is "latest" directory
     API_DOC_VERSION: "latest"
@@ -309,26 +308,26 @@ swagger-doc-tags:
     refs:
       - tags
 
-swagger-doc-branches:
-  # build swagger doc for branches, not to be published on pages, only artefact available on gitlab
-  variables:
-    API_DOC_VERSION: $CI_COMMIT_BRANCH
-  <<: *swagger-doc
-  script:
-    - *swagger-doc-common-scripts
-    # Create a redirect from stable to latest branch version, only for testing as this artifact is not published
-    - mkdir -p public/stable
-    - sed -e "s~{{LATEST_VERSION_URL}}~${CI_PAGES_URL}/${CI_COMMIT_BRANCH}~" public/index.html.template > public/stable/index.html
-  artifacts:
-    paths:
-      - public
-    expire_in: 1 day
-  only:
-    refs:
-      - branches
+#swagger-doc-branches:
+#  # build swagger doc for branches, not to be published on pages, only artifact available on Gitlab
+#  variables:
+#    API_DOC_VERSION: $CI_COMMIT_BRANCH
+#  <<: *swagger-doc
+#  script:
+#    - *swagger-doc-common-scripts
+#    # Create a redirect from stable to latest branch version, only for testing as this artifact is not published
+#    - mkdir -p public/stable
+#    - sed -e "s~{{LATEST_VERSION_URL}}~${CI_PAGES_URL}/${CI_COMMIT_BRANCH}~" public/index.html.template > public/stable/index.html
+#  artifacts:
+#    paths:
+#      - public
+#    expire_in: 1 day
+#  only:
+#    refs:
+#      - branches
 
 pages:
-  # Release static swagger doc on gitlab pages
+  # Release static swagger doc on Gitlab pages
   stage: release
   script:
     # create a redirect from home to latest

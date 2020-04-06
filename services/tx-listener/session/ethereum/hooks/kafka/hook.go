@@ -13,7 +13,6 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/golang/protobuf/proto"
-	uuid "github.com/satori/go.uuid"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/abi"
@@ -23,7 +22,6 @@ import (
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	svccontracts "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
-	svcenvelopes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 )
 
@@ -33,75 +31,39 @@ type Hook struct {
 	registry svccontracts.ContractRegistryClient
 	ec       ethclient.ChainStateReader
 
-	store svcenvelopes.EnvelopeStoreClient
-
 	producer sarama.SyncProducer
 }
 
-func NewHook(conf *Config, registry svccontracts.ContractRegistryClient, ec ethclient.ChainStateReader, store svcenvelopes.EnvelopeStoreClient, producer sarama.SyncProducer) *Hook {
+func NewHook(conf *Config, registry svccontracts.ContractRegistryClient, ec ethclient.ChainStateReader, producer sarama.SyncProducer) *Hook {
 	return &Hook{
 		conf:     conf,
 		registry: registry,
 		ec:       ec,
-		store:    store,
 		producer: producer,
 	}
 }
 
-func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *ethtypes.Block, receipts []*types.Receipt) error {
+func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *ethtypes.Block, envelopes []*tx.Envelope) error {
 	blockLogCtx := log.With(ctx, log.Str("block.number", block.Number().String()))
 	var evlps []*tx.TxResponse
 
-	for idx, r := range receipts {
-		b := tx.NewEnvelope()
+	for _, e := range envelopes {
 
-		receiptLogCtx := log.With(blockLogCtx, log.Str("receipt.txhash", r.TxHash))
+		receiptLogCtx := log.With(blockLogCtx, log.Str("receipt.txhash", e.GetTxHash().String()))
 
 		// Register deployed contract
-		err := hk.registerDeployedContract(receiptLogCtx, c, r, block)
+		err := hk.registerDeployedContract(receiptLogCtx, c, e.Receipt, block)
 		if err != nil {
 			log.FromContext(receiptLogCtx).WithError(err).Errorf("could not register deployed contract on registry")
 			return err
 		}
 
-		// Load envelope from envelope store
-		req, err := hk.loadEnvelope(receiptLogCtx, c, r)
-		isExternalTx := errors.IsNotFoundError(err)
-		if req != nil {
-			b, err = req.Envelope()
-			if err != nil {
-				log.FromContext(receiptLogCtx).WithError(err).Errorf("loaded invalid envelope - id: %s", req.GetID())
-				return err
-			}
-		}
-		switch {
-		case err == nil:
-		case c.Listener.ExternalTxEnabled && isExternalTx:
-			// External transaction that we listen to, we create an envelope for it
-			envelopeUUID := uuid.NewV4().String()
-			log.FromContext(receiptLogCtx).WithField("uuid", envelopeUUID).Debugf("External transaction received")
-			_ = b.SetID(envelopeUUID)
-		case !c.Listener.ExternalTxEnabled && isExternalTx:
-			// External transaction that we skip
-			log.FromContext(receiptLogCtx).WithError(err).Debugf("Skipping external transaction")
-			continue
-		default:
-			log.FromContext(receiptLogCtx).WithError(err).Errorf("Failed to load envelope")
-			return err
-		}
-
-		// Attach receipt to envelope
-		_ = b.SetReceipt(r.
-			SetBlockHash(block.Hash()).
-			SetBlockNumber(block.NumberU64()).
-			SetTxIndex(uint64(idx)))
-
-		err = hk.decodeReceipt(receiptLogCtx, c, b.Receipt)
+		err = hk.decodeReceipt(receiptLogCtx, c, e.Receipt)
 		if err != nil {
-			b.Errors = append(b.Errors, errors.FromError(err))
+			e.Errors = append(e.Errors, errors.FromError(err))
 		}
 
-		evlps = append(evlps, b.TxResponse())
+		evlps = append(evlps, e.TxResponse())
 	}
 
 	// Prepare messages to be produced
@@ -229,19 +191,6 @@ func (hk *Hook) registerDeployedContract(ctx context.Context, c *dynamic.Chain, 
 		}
 	}
 	return nil
-}
-
-func (hk *Hook) loadEnvelope(ctx context.Context, c *dynamic.Chain, receipt *types.Receipt) (*tx.TxEnvelope, error) {
-	resp, err := hk.store.LoadByTxHash(
-		ctx,
-		&svcenvelopes.LoadByTxHashRequest{
-			ChainId: c.ChainID.String(),
-			TxHash:  receipt.GetTxHash(),
-		})
-	if err != nil {
-		return nil, err
-	}
-	return resp.GetEnvelope(), nil
 }
 
 func (hk *Hook) prepareEnvelopeMsgs(evlps []*tx.TxResponse, topic, key string) ([]*sarama.ProducerMessage, error) {

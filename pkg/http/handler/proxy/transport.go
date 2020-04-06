@@ -35,7 +35,6 @@ func NewTransport(cfg *traefikstatic.ServersTransport) (http.RoundTripper, error
 	dialer := &net.Dialer{
 		Timeout:   30 * time.Second,
 		KeepAlive: 30 * time.Second,
-		DualStack: true,
 	}
 
 	if cfg.ForwardingTimeouts != nil {

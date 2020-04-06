@@ -37,7 +37,7 @@ func newRunCommand() *cobra.Command {
 	provider.Flags(runCmd.Flags())
 	chnregclient.Flags(runCmd.Flags())
 	registryclient.ContractRegistryURL(runCmd.Flags())
-	
+
 	http.MetricFlags(runCmd.Flags())
 
 	return runCmd

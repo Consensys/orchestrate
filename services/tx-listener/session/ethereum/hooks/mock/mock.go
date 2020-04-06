@@ -8,7 +8,7 @@ import (
 	context "context"
 	types "github.com/ethereum/go-ethereum/core/types"
 	gomock "github.com/golang/mock/gomock"
-	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
+	tx "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	dynamic "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 	reflect "reflect"
 )
@@ -37,15 +37,15 @@ func (m *MockHook) EXPECT() *MockHookMockRecorder {
 }
 
 // AfterNewBlock mocks base method.
-func (m *MockHook) AfterNewBlock(ctx context.Context, chain *dynamic.Chain, block *types.Block, receipts []*ethereum.Receipt) error {
+func (m *MockHook) AfterNewBlock(ctx context.Context, chain *dynamic.Chain, block *types.Block, envelopes []*tx.Envelope) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AfterNewBlock", ctx, chain, block, receipts)
+	ret := m.ctrl.Call(m, "AfterNewBlock", ctx, chain, block, envelopes)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // AfterNewBlock indicates an expected call of AfterNewBlock.
-func (mr *MockHookMockRecorder) AfterNewBlock(ctx, chain, block, receipts interface{}) *gomock.Call {
+func (mr *MockHookMockRecorder) AfterNewBlock(ctx, chain, block, envelopes interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AfterNewBlock", reflect.TypeOf((*MockHook)(nil).AfterNewBlock), ctx, chain, block, receipts)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AfterNewBlock", reflect.TypeOf((*MockHook)(nil).AfterNewBlock), ctx, chain, block, envelopes)
 }

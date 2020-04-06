@@ -84,7 +84,7 @@ func (m *Manager) run(ctx context.Context) {
 }
 
 func (m *Manager) listenProvider(ctx context.Context) {
-	log.Infof("Starting provider %T", m.provider)
+	log.FromContext(ctx).Infof("Starting provider %T", m.provider)
 	err := m.provider.Run(ctx, m.msgInput)
 	if err != nil {
 		log.FromContext(ctx).WithError(err).Errorf("error while listening provider")

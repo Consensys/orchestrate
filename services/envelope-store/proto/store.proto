@@ -90,6 +90,9 @@ service EnvelopeStore {
     // Load Envelope by transaction hash
     rpc LoadByTxHash (LoadByTxHashRequest) returns (StoreResponse);
 
+    // Load Envelopes by transaction hashes
+    rpc LoadByTxHashes (LoadByTxHashesRequest) returns (LoadByTxHashesResponse);
+
     // SetStatus set an envelope status
     rpc SetStatus (SetStatusRequest) returns (StatusResponse);
 
@@ -151,5 +154,18 @@ message LoadPendingRequest {
 
 message LoadPendingResponse {
     // Pending envelopes
+    repeated StoreResponse responses = 1;
+}
+
+message LoadByTxHashesRequest {
+    // Chain the transaction has been sent to
+    string chain_id = 2;
+
+    // Hash of the transactions
+    repeated string tx_hashes = 3;
+}
+
+message LoadByTxHashesResponse {
+    // Envelope
     repeated StoreResponse responses = 1;
 }

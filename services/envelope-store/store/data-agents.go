@@ -17,5 +17,6 @@ type EnvelopeAgent interface {
 	InsertDoUpdateOnUniTx(ctx context.Context, obj *models.EnvelopeModel) error
 	FindByFieldSet(ctx context.Context, fields map[string]string) (*models.EnvelopeModel, error)
 	FindPending(ctx context.Context, sentBeforeAt time.Time) ([]*models.EnvelopeModel, error)
+	FindByTxHashes(ctx context.Context, ids []string) ([]*models.EnvelopeModel, error)
 	UpdateStatus(ctx context.Context, obj *models.EnvelopeModel) error
 }

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/go-pg/pg/v9"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/store/models"
 )
 
@@ -68,6 +69,18 @@ func (ag *PGEnvelopeAgent) FindPending(ctx context.Context, sentBeforeAt time.Ti
 	err := ag.db.ModelContext(ctx, &envelopes).
 		Where("status = 'pending'").
 		Where("sent_at < ?", sentBeforeAt).
+		Select()
+
+	return envelopes, err
+}
+
+func (ag *PGEnvelopeAgent) FindByTxHashes(ctx context.Context, hashes []string) ([]*models.EnvelopeModel, error) {
+	var envelopes []*models.EnvelopeModel
+	if len(hashes) == 0 {
+		return envelopes, errors.InvalidArgError("empty hashes list provided")
+	}
+	err := ag.db.ModelContext(ctx, &envelopes).
+		Where("tx_hash in (?)", pg.In(hashes)).
 		Select()
 
 	return envelopes, err

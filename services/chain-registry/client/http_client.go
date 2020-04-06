@@ -245,7 +245,7 @@ func (c *HTTPClient) GetFaucetByUUID(ctx context.Context, faucetUUID string) (*m
 		defer closeResponse(response)
 
 		faucet := &models.Faucet{}
-		if err := json.NewDecoder(response.Body).Decode(faucet); err != nil {
+		if err = json.NewDecoder(response.Body).Decode(faucet); err != nil {
 			return nil, errors.FromError(err).ExtendComponent(component)
 		}
 
@@ -274,8 +274,8 @@ func (c *HTTPClient) GetFaucetsByChainRule(ctx context.Context, chainRule string
 	case http.StatusOK:
 		defer closeResponse(response)
 
-		faucetsResult := []*models.Faucet{}
-		if err := json.NewDecoder(response.Body).Decode(&faucetsResult); err != nil {
+		var faucetsResult []*models.Faucet
+		if err = json.NewDecoder(response.Body).Decode(&faucetsResult); err != nil {
 			return nil, errors.FromError(err).ExtendComponent(component)
 		}
 

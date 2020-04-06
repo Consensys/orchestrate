@@ -64,6 +64,21 @@ func (mr *MockEnvelopeStoreServerMockRecorder) LoadByTxHash(arg0, arg1 interface
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadByTxHash", reflect.TypeOf((*MockEnvelopeStoreServer)(nil).LoadByTxHash), arg0, arg1)
 }
 
+// LoadByTxHashes mocks base method.
+func (m *MockEnvelopeStoreServer) LoadByTxHashes(arg0 context.Context, arg1 *proto.LoadByTxHashesRequest) (*proto.LoadByTxHashesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LoadByTxHashes", arg0, arg1)
+	ret0, _ := ret[0].(*proto.LoadByTxHashesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// LoadByTxHashes indicates an expected call of LoadByTxHashes.
+func (mr *MockEnvelopeStoreServerMockRecorder) LoadByTxHashes(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadByTxHashes", reflect.TypeOf((*MockEnvelopeStoreServer)(nil).LoadByTxHashes), arg0, arg1)
+}
+
 // LoadPending mocks base method.
 func (m *MockEnvelopeStoreServer) LoadPending(arg0 context.Context, arg1 *proto.LoadPendingRequest) (*proto.LoadPendingResponse, error) {
 	m.ctrl.T.Helper()

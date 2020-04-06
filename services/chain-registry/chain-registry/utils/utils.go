@@ -13,8 +13,6 @@ import (
 	ethclientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/utils"
 )
 
-const component = "chain-registry.store.api"
-
 type apiError struct {
 	Message string `json:"message"`
 }

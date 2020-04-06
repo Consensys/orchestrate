@@ -1,3 +1,7 @@
+// +build unit
+// +build !race
+// +build !integration
+
 package prometheus
 
 import (

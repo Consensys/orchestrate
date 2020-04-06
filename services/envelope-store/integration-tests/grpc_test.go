@@ -42,6 +42,18 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_StoreEnvelope() {
 	var testChainID int64 = 888
 	testTxHash := "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210"
 
+	s.T().Run("should not load envelope by TxHashes", func(t *testing.T) {
+		resp, err := s.client.LoadByTxHashes(ctx, &svc.LoadByTxHashesRequest{
+			ChainId:  big.NewInt(testChainID).String(),
+			TxHashes: []string{testTxHash},
+		})
+
+		assert.Nil(t, err)
+		if resp != nil {
+			assert.Len(t, resp.Responses, 0)
+		}
+	})
+
 	s.T().Run("should store a new envelope", func(t *testing.T) {
 		// Store Envelope
 		b := tx.NewEnvelope().
@@ -82,6 +94,28 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_StoreEnvelope() {
 
 		assert.Nil(t, err)
 		assert.Equal(t, testEnvelopeUUID, resp.GetEnvelope().GetID(), "UUID should be the expected")
+	})
+
+	s.T().Run("should load envelope by TxHashes", func(t *testing.T) {
+		resp, err := s.client.LoadByTxHashes(ctx, &svc.LoadByTxHashesRequest{
+			ChainId:  big.NewInt(testChainID).String(),
+			TxHashes: []string{testTxHash},
+		})
+
+		assert.Nil(t, err)
+		if resp != nil {
+			assert.Len(t, resp.Responses, 1)
+			assert.Equal(t, testEnvelopeUUID, resp.Responses[0].GetEnvelope().GetID(), "UUID should be the expected")
+		}
+	})
+
+	s.T().Run("should not load envelope by TxHashes", func(t *testing.T) {
+		_, err := s.client.LoadByTxHashes(ctx, &svc.LoadByTxHashesRequest{
+			ChainId:  big.NewInt(testChainID).String(),
+			TxHashes: []string{},
+		})
+
+		assert.Error(t, err)
 	})
 }
 

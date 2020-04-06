@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
-
 	"github.com/cenkalti/backoff/v4"
 	"github.com/containous/traefik/v2/pkg/job"
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/containous/traefik/v2/pkg/safe"
+	"github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 )
 
@@ -60,7 +60,7 @@ loop:
 				log.FromContext(logCtx).WithError(err).Errorf("failed to fetch chains from chain registry")
 				break loop
 			}
-			configInput <- p.buildConfiguration(chains)
+			configInput <- p.buildConfiguration(ctx, chains)
 		case <-logCtx.Done():
 		}
 	}
@@ -68,7 +68,7 @@ loop:
 	return
 }
 
-func (p *Provider) buildConfiguration(chains []*models.Chain) *dynamic.Message {
+func (p *Provider) buildConfiguration(ctx context.Context, chains []*models.Chain) *dynamic.Message {
 	msg := &dynamic.Message{
 		Provider: "chain-registry",
 		Configuration: &dynamic.Configuration{
@@ -79,7 +79,10 @@ func (p *Provider) buildConfiguration(chains []*models.Chain) *dynamic.Message {
 	for _, chain := range chains {
 		duration, err := time.ParseDuration(*chain.ListenerBackOffDuration)
 		if err != nil {
-			log.Errorf("cannot parse duration for chain UUID:%s - TenantID:%s - Name:%s", chain.UUID, chain.TenantID, chain.Name)
+			log.FromContext(ctx).WithFields(logrus.Fields{
+				"TenantID": chain.TenantID,
+				"Name":     chain.Name,
+			}).Errorf("cannot parse duration: %s", *chain.ListenerBackOffDuration)
 		}
 
 		msg.Configuration.Chains[chain.UUID] = &dynamic.Chain{

@@ -42,7 +42,7 @@ func newRunCommand() *cobra.Command {
 
 	// Chain Registry
 	chnregclient.Flags(runCmd.Flags())
-	
+
 	http.MetricFlags(runCmd.Flags())
 
 	return runCmd

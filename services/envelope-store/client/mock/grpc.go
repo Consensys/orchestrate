@@ -75,6 +75,26 @@ func (mr *MockEnvelopeStoreClientMockRecorder) LoadByTxHash(arg0, arg1 interface
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadByTxHash", reflect.TypeOf((*MockEnvelopeStoreClient)(nil).LoadByTxHash), varargs...)
 }
 
+// LoadByTxHashes mocks base method.
+func (m *MockEnvelopeStoreClient) LoadByTxHashes(arg0 context.Context, arg1 *proto.LoadByTxHashesRequest, arg2 ...grpc.CallOption) (*proto.LoadByTxHashesResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "LoadByTxHashes", varargs...)
+	ret0, _ := ret[0].(*proto.LoadByTxHashesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// LoadByTxHashes indicates an expected call of LoadByTxHashes.
+func (mr *MockEnvelopeStoreClientMockRecorder) LoadByTxHashes(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadByTxHashes", reflect.TypeOf((*MockEnvelopeStoreClient)(nil).LoadByTxHashes), varargs...)
+}
+
 // LoadPending mocks base method.
 func (m *MockEnvelopeStoreClient) LoadPending(arg0 context.Context, arg1 *proto.LoadPendingRequest, arg2 ...grpc.CallOption) (*proto.LoadPendingResponse, error) {
 	m.ctrl.T.Helper()

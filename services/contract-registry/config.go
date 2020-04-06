@@ -21,7 +21,6 @@ const (
 	abiEnv      = "ABI"
 )
 
-
 var abiDefault []string
 
 // bindABIFlag register flag for ABI

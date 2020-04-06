@@ -43,7 +43,7 @@ func newRunCommand() *cobra.Command {
 	nonce.Type(runCmd.Flags())
 	redis.Flags(runCmd.Flags())
 	noncechecker.Flags(runCmd.Flags())
-	
+
 	http.MetricFlags(runCmd.Flags())
 
 	return runCmd

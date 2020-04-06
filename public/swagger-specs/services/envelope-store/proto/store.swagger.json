@@ -68,6 +68,18 @@
     }
   },
   "definitions": {
+    "envelopestoreLoadByTxHashesResponse": {
+      "type": "object",
+      "properties": {
+        "responses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/envelopestoreStoreResponse"
+          },
+          "title": "Envelope"
+        }
+      }
+    },
     "envelopestoreLoadPendingResponse": {
       "type": "object",
       "properties": {

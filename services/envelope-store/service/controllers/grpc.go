@@ -5,7 +5,6 @@ import (
 	"time"
 
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/proto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
@@ -16,22 +15,24 @@ import (
 )
 
 type GRPCService struct {
-	storeEnvelopeUseCase        usecases.StoreEnvelope
-	loadEnvelopeByTxHashUseCase usecases.LoadEnvelopeByTxHash
-	loadEnvelopeByIDUseCase     usecases.LoadEnvelopeByID
-	loadPendingEnvelopesUseCase usecases.LoadPendingEnvelopes
-	setEnvelopesStatusUseCase   usecases.SetEnvelopeStatus
+	storeEnvelopeUseCase          usecases.StoreEnvelope
+	loadEnvelopeByTxHashUseCase   usecases.LoadEnvelopeByTxHash
+	loadEnvelopeByTxHashesUseCase usecases.LoadEnvelopeByTxHashes
+	loadEnvelopeByIDUseCase       usecases.LoadEnvelopeByID
+	loadPendingEnvelopesUseCase   usecases.LoadPendingEnvelopes
+	setEnvelopesStatusUseCase     usecases.SetEnvelopeStatus
 }
 
 func NewGRPCService(
 	storeda store.DataAgents,
 ) (*GRPCService, error) {
 	return &GRPCService{
-		storeEnvelopeUseCase:        usecases.NewStoreEnvelope(storeda.Envelope),
-		loadEnvelopeByTxHashUseCase: usecases.NewLoadEnvelopeByTxHash(storeda.Envelope),
-		loadEnvelopeByIDUseCase:     usecases.NewLoadEnvelopeByID(storeda.Envelope),
-		loadPendingEnvelopesUseCase: usecases.NewLoadPendingEnvelopes(storeda.Envelope),
-		setEnvelopesStatusUseCase:   usecases.NewSetEnvelopeStatus(storeda.Envelope),
+		storeEnvelopeUseCase:          usecases.NewStoreEnvelope(storeda.Envelope),
+		loadEnvelopeByTxHashUseCase:   usecases.NewLoadEnvelopeByTxHash(storeda.Envelope),
+		loadEnvelopeByTxHashesUseCase: usecases.NewLoadEnvelopeByTxHashes(storeda.Envelope),
+		loadEnvelopeByIDUseCase:       usecases.NewLoadEnvelopeByID(storeda.Envelope),
+		loadPendingEnvelopesUseCase:   usecases.NewLoadPendingEnvelopes(storeda.Envelope),
+		setEnvelopesStatusUseCase:     usecases.NewSetEnvelopeStatus(storeda.Envelope),
 	}, nil
 }
 
@@ -86,6 +87,27 @@ func (s *GRPCService) LoadByTxHash(ctx context.Context, req *svc.LoadByTxHashReq
 	return resp, nil
 }
 
+func (s *GRPCService) LoadByTxHashes(ctx context.Context, req *svc.LoadByTxHashesRequest) (*svc.LoadByTxHashesResponse, error) {
+	envelopes, err := s.loadEnvelopeByTxHashesUseCase.Execute(
+		ctx,
+		multitenancy.TenantIDFromContext(ctx),
+		req.GetChainId(),
+		req.GetTxHashes(),
+	)
+	if err != nil {
+		return &svc.LoadByTxHashesResponse{}, err
+	}
+
+	responses, err := envelopesToStoreResponses(envelopes)
+	if err != nil {
+		return &svc.LoadByTxHashesResponse{}, err
+	}
+
+	return &svc.LoadByTxHashesResponse{
+		Responses: responses,
+	}, nil
+}
+
 func (s *GRPCService) SetStatus(ctx context.Context, req *svc.SetStatusRequest) (*svc.StatusResponse, error) {
 	envelope, err := s.setEnvelopesStatusUseCase.Execute(
 		ctx,
@@ -112,17 +134,12 @@ func (s *GRPCService) LoadPending(ctx context.Context, req *svc.LoadPendingReque
 		return &svc.LoadPendingResponse{}, err
 	}
 
-	var resps []*svc.StoreResponse
-	for _, envelope := range envelopes {
-		resp, err := envelopeModelToStoreResponse(envelope)
-		if err != nil {
-			return &svc.LoadPendingResponse{}, errors.FromError(err)
-		}
-		resps = append(resps, resp)
+	responses, err := envelopesToStoreResponses(envelopes)
+	if err != nil {
+		return &svc.LoadPendingResponse{}, err
 	}
-
 	return &svc.LoadPendingResponse{
-		Responses: resps,
+		Responses: responses,
 	}, nil
 }
 
@@ -135,4 +152,16 @@ func envelopeModelToStoreResponse(envelope *models.EnvelopeModel) (*svc.StoreRes
 	// Unmarshal envelope
 	err := encoding.Unmarshal(envelope.Envelope, resp.GetEnvelope())
 	return resp, err
+}
+
+func envelopesToStoreResponses(envelopes []*models.EnvelopeModel) (responses []*svc.StoreResponse, err error) {
+	for _, envelope := range envelopes {
+		var resp *svc.StoreResponse
+		resp, err = envelopeModelToStoreResponse(envelope)
+		if err != nil {
+			return
+		}
+		responses = append(responses, resp)
+	}
+	return
 }

@@ -12,7 +12,7 @@ import (
 )
 
 type LoadEnvelopeByTxHash interface {
-	Execute(ctx context.Context, tenantID string, chainID string, txHash string) (*models.EnvelopeModel, error)
+	Execute(ctx context.Context, tenantID, chainID string, txHash string) (*models.EnvelopeModel, error)
 }
 
 // RegisterContract is a use case to register a new contract

@@ -20,7 +20,6 @@ import (
 
 const postgresContainerID = "postgres-contract-registry"
 
-
 type IntegrationEnvironment struct {
 	client      *docker.Client
 	pgmngr      postgres.Manager
@@ -36,8 +35,8 @@ func NewIntegrationEnvironment() *IntegrationEnvironment {
 
 	envContract := testutils.FakeContract()
 	var re = regexp.MustCompile(`\s+`)
-	abi := fmt.Sprintf("%s:%s:%s:%s", envContract.Id.Name, re.ReplaceAllString(envContract.Abi, ""), envContract.Bytecode, envContract.DeployedBytecode)
-	viper.SetDefault(contractregistry.ABIViperKey, abi)
+	contractAbi := fmt.Sprintf("%s:%s:%s:%s", envContract.Id.Name, re.ReplaceAllString(envContract.Abi, ""), envContract.Bytecode, envContract.DeployedBytecode)
+	viper.SetDefault(contractregistry.ABIViperKey, contractAbi)
 
 	client, err := docker.NewClient(composition)
 	if err != nil {
@@ -45,8 +44,8 @@ func NewIntegrationEnvironment() *IntegrationEnvironment {
 	}
 
 	return &IntegrationEnvironment{
-		client: client,
-		pgmngr: postgres.NewManager(),
+		client:      client,
+		pgmngr:      postgres.NewManager(),
 		envContract: envContract,
 	}
 }

@@ -11,7 +11,9 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
 	ethclientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/utils"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
+	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session"
 	hook "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/hooks"
@@ -19,8 +21,8 @@ import (
 )
 
 type fetchedBlock struct {
-	block    *ethtypes.Block
-	receipts []*types.Receipt
+	block     *ethtypes.Block
+	envelopes []*tx.Envelope
 }
 
 type EthClient interface {
@@ -31,7 +33,8 @@ type EthClient interface {
 type Session struct {
 	Chain *dynamic.Chain
 
-	ec EthClient
+	ec    EthClient
+	store evlpstore.EnvelopeStoreClient
 
 	hook    hook.Hook
 	offsets offset.Manager
@@ -197,7 +200,7 @@ func (s *Session) callHooks(ctx context.Context) {
 
 func (s *Session) callHook(ctx context.Context, block *fetchedBlock) error {
 	// Call hook
-	err := s.hook.AfterNewBlock(ctx, s.Chain, block.block, block.receipts)
+	err := s.hook.AfterNewBlock(ctx, s.Chain, block.block, block.envelopes)
 	if err == nil {
 		// Update last block processed
 		err = s.offsets.SetLastBlockNumber(ctx, s.Chain, block.block.NumberU64())
@@ -216,29 +219,21 @@ func (s *Session) fetchBlock(ctx context.Context, blockPosition uint64) *Future 
 			log.FromContext(ctx).WithError(err).WithField("block.number", blockPosition).Errorf("failed to fetch block")
 			return nil, err
 		}
-
 		block := &fetchedBlock{block: blck}
 
-		// Fetch receipt for every transactions
-		futureReceipts := []*Future{}
-		for _, tx := range blck.Transactions() {
-			futureReceipts = append(futureReceipts, s.fetchReceipt(ctx, tx.Hash()))
+		ctx = multitenancy.WithTenantID(ctx, s.Chain.TenantID)
+
+		// Fetch envelopes from the envelope store
+		envelopeMap, err := s.fetchEnvelopes(ctx, blck.Transactions())
+		if err != nil {
+			return nil, err
 		}
 
-		for _, futureReceipt := range futureReceipts {
-			select {
-			case e := <-futureReceipt.Err():
-				if err == nil {
-					err = e
-				}
-			case res := <-futureReceipt.Result():
-				block.receipts = append(block.receipts, res.(*types.Receipt))
-			}
+		// Fetch receipt for transactions
+		futureEnvelopes := s.fetchReceipts(ctx, blck.Transactions(), envelopeMap)
 
-			// Close future
-			futureReceipt.Close()
-		}
-
+		// Await receipts
+		block.envelopes, err = awaitReceipts(futureEnvelopes)
 		if err != nil {
 			return nil, err
 		}
@@ -247,7 +242,85 @@ func (s *Session) fetchBlock(ctx context.Context, blockPosition uint64) *Future 
 	})
 }
 
-func (s *Session) fetchReceipt(ctx context.Context, txHash ethcommon.Hash) *Future {
+func (s *Session) fetchEnvelopes(ctx context.Context, transactions ethtypes.Transactions) (envelopeMap map[string]*tx.Envelope, err error) {
+	envelopeMap = make(map[string]*tx.Envelope)
+
+	// Load envelopes from the envelope store
+	if len(transactions) > 0 {
+		var txHashes []string
+		for _, t := range transactions {
+			txHashes = append(txHashes, t.Hash().String())
+		}
+		var resp *evlpstore.LoadByTxHashesResponse
+		resp, err = s.store.LoadByTxHashes(
+			ctx,
+			&evlpstore.LoadByTxHashesRequest{
+				ChainId:  s.Chain.ChainID.String(),
+				TxHashes: txHashes,
+			})
+		if err != nil {
+			return nil, err
+		}
+		for _, t := range resp.Responses {
+			envelope, er := t.GetEnvelope().Envelope()
+			if er != nil {
+				return nil, er
+			}
+			envelopeMap[t.Envelope.GetTxHash()] = envelope
+		}
+	}
+
+	return envelopeMap, nil
+}
+
+func (s *Session) fetchReceipts(ctx context.Context, transaction ethtypes.Transactions, envelopeMap map[string]*tx.Envelope) (futureEnvelopes []*Future) {
+	for _, blckTx := range transaction {
+		switch {
+		case isInternalTx(envelopeMap, blckTx):
+			futureEnvelopes = append(futureEnvelopes, s.fetchReceipt(
+				ctx,
+				envelopeMap[blckTx.Hash().String()],
+				blckTx.Hash()))
+			continue
+		case s.Chain.Listener.ExternalTxEnabled:
+			futureEnvelopes = append(futureEnvelopes, s.fetchReceipt(
+				ctx,
+				tx.NewEnvelope(),
+				blckTx.Hash()))
+			continue
+		default:
+			continue
+		}
+	}
+	return futureEnvelopes
+}
+
+func awaitReceipts(futureEnvelopes []*Future) (envelopes []*tx.Envelope, err error) {
+	for _, futureEnvelope := range futureEnvelopes {
+		select {
+		case e := <-futureEnvelope.Err():
+			if err == nil {
+				err = e
+			}
+		case res := <-futureEnvelope.Result():
+			envelopes = append(envelopes, res.(*tx.Envelope))
+		}
+
+		// Close future
+		futureEnvelope.Close()
+	}
+	if err != nil {
+		return nil, err
+	}
+	return envelopes, nil
+}
+
+func isInternalTx(envelopeMap map[string]*tx.Envelope, transaction *ethtypes.Transaction) bool {
+	_, ok := envelopeMap[transaction.Hash().String()]
+	return ok
+}
+
+func (s *Session) fetchReceipt(ctx context.Context, envelope *tx.Envelope, txHash ethcommon.Hash) *Future {
 	return NewFuture(func() (interface{}, error) {
 		receipt, err := s.ec.TransactionReceipt(
 			ethclientutils.RetryNotFoundError(ctx, true),
@@ -258,7 +331,12 @@ func (s *Session) fetchReceipt(ctx context.Context, txHash ethcommon.Hash) *Futu
 			log.FromContext(ctx).WithError(err).WithField("tx.hash", txHash.Hex()).Errorf("failed to fetch receipt")
 			return nil, err
 		}
-		return receipt, nil
+
+		// Attach receipt to envelope
+		return envelope.SetReceipt(receipt.
+			SetBlockHash(ethcommon.HexToHash(receipt.GetBlockHash())).
+			SetBlockNumber(receipt.GetBlockNumber()).
+			SetTxIndex(receipt.TxIndex)), nil
 	})
 }
 
@@ -297,14 +375,16 @@ type SessionBuilder struct {
 	hook    hook.Hook
 	offsets offset.Manager
 
-	ec EthClient
+	ec    EthClient
+	store evlpstore.EnvelopeStoreClient
 }
 
-func NewSessionBuilder(hk hook.Hook, offsets offset.Manager, ec EthClient) *SessionBuilder {
+func NewSessionBuilder(hk hook.Hook, offsets offset.Manager, ec EthClient, store evlpstore.EnvelopeStoreClient) *SessionBuilder {
 	return &SessionBuilder{
 		hook:    hk,
 		offsets: offsets,
 		ec:      ec,
+		store:   store,
 	}
 }
 
@@ -316,6 +396,7 @@ func (b *SessionBuilder) newSession(chain *dynamic.Chain) *Session {
 	return &Session{
 		Chain:         chain,
 		ec:            b.ec,
+		store:         b.store,
 		hook:          b.hook,
 		offsets:       b.offsets,
 		trigger:       make(chan struct{}, 1),

@@ -11,6 +11,8 @@ import (
 
 const storeServiceName = "envelopes"
 
+//go:generate mockgen -source=builder.go -destination=mock/mock.go -package=mock
+
 type Builder interface {
 	Build(ctx context.Context, conf *Config) (DataAgents, error)
 }

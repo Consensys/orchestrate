@@ -92,7 +92,14 @@ func (ec *Client) call(req *http.Request, processResult ProcessResultFunc) error
 	}
 
 	if resp.Body != nil {
-		defer resp.Body.Close()
+		defer func() {
+			err := resp.Body.Close()
+			if err != nil {
+				log.FromContext(req.Context()).
+					WithError(err).
+					Warn("could not close request body")
+			}
+		}()
 	}
 
 	var respMsg JSONRpcMessage
