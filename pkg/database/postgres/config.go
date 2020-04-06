@@ -140,14 +140,6 @@ Environment variable: %q`, dbPoolSizeEnv)
 
 // NewOptions creates new postgres options
 func NewOptions() *pg.Options {
-	fmt.Println("PG options!!!!!", &pg.Options{
-		Addr:     fmt.Sprintf("%v:%v", viper.GetString(dbHostViperKey), viper.GetString(dbPortViperKey)),
-		User:     viper.GetString(dbUserViperKey),
-		Password: viper.GetString(dbPasswordViperKey),
-		Database: viper.GetString(dbDatabaseViperKey),
-		PoolSize: viper.GetInt(dbPoolSizeViperKey),
-	})
-
 	return &pg.Options{
 		Addr:     fmt.Sprintf("%v:%v", viper.GetString(dbHostViperKey), viper.GetString(dbPortViperKey)),
 		User:     viper.GetString(dbUserViperKey),

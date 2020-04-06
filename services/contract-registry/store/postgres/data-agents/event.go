@@ -31,7 +31,6 @@ func (agent *PGEvent) InsertMultiple(ctx context.Context, events *[]*models.Even
 	}
 
 	return agent.insertMultiple(agent.db.ModelContext(ctx, events))
-
 }
 
 func (agent *PGEvent) insertMultiple(query *orm.Query) error {

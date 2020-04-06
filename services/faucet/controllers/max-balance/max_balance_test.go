@@ -10,13 +10,13 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 	ethClientMock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/ethereum/ethclient/mocks"
 	faucetMock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet/mocks"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	faucettypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types/testutils"
 )
 
 const (
@@ -31,80 +31,75 @@ var (
 
 func TestMaxBalance(t *testing.T) {
 	testSet := []struct {
-		name  string
-		input *testutils.TestRequest
+		name           string
+		Req            *faucettypes.Request
+		ExpectedAmount *big.Int
+		ExpectedErr    error
 	}{
 		{
 			"no faucet candidate",
-			&testutils.TestRequest{
-				Req: &faucettypes.Request{
-					Beneficiary: ethcommon.HexToAddress("0xab"),
-				},
-				ExpectedAmount: nil,
-				ExpectedErr:    errors.FaucetWarning("no faucet candidates").ExtendComponent(component),
+			&faucettypes.Request{
+				Beneficiary: ethcommon.HexToAddress("0xab"),
 			},
+			nil,
+			errors.FaucetWarning("no faucet candidates").ExtendComponent(component),
 		},
 		{
 			"BalanceAt error",
-			&testutils.TestRequest{
-				Req: &faucettypes.Request{
-					Beneficiary: ethcommon.HexToAddress("0xab"),
-					ChainURL:    chainURLBalanceAtError,
-					FaucetsCandidates: map[string]faucettypes.Faucet{
-						"test": {
-							Amount:     big.NewInt(10),
-							MaxBalance: big.NewInt(10),
-						},
-						"test1": {
-							Amount:     big.NewInt(1),
-							MaxBalance: big.NewInt(10),
-						},
+			&faucettypes.Request{
+				Beneficiary: ethcommon.HexToAddress("0xab"),
+				ChainURL:    chainURLBalanceAtError,
+				FaucetsCandidates: map[string]faucettypes.Faucet{
+					"test": {
+						Amount:     big.NewInt(10),
+						MaxBalance: big.NewInt(10),
+					},
+					"test1": {
+						Amount:     big.NewInt(4),
+						MaxBalance: big.NewInt(10),
 					},
 				},
-				ExpectedAmount: nil,
-				ExpectedErr:    errors.FromError(errBalanceAt).ExtendComponent(component),
 			},
+			nil,
+			errors.FromError(errBalanceAt).ExtendComponent(component),
 		},
 		{
 			"credit after max balance control",
-			&testutils.TestRequest{
-				Req: &faucettypes.Request{
-					Beneficiary: ethcommon.HexToAddress("0xab"),
-					ChainURL:    chainURLBalanceAt0,
-					FaucetsCandidates: map[string]faucettypes.Faucet{
-						"test": {
-							Amount:     big.NewInt(10),
-							MaxBalance: big.NewInt(10),
-						},
-						"test1": {
-							Amount:     big.NewInt(1),
-							MaxBalance: big.NewInt(10),
-						},
+			&faucettypes.Request{
+				Beneficiary: ethcommon.HexToAddress("0xab"),
+				ChainURL:    chainURLBalanceAt0,
+				FaucetsCandidates: map[string]faucettypes.Faucet{
+					"test": {
+						Amount:     big.NewInt(10),
+						MaxBalance: big.NewInt(10),
+					},
+					"test1": {
+						Amount:     big.NewInt(3),
+						MaxBalance: big.NewInt(10),
 					},
 				},
-				ExpectedAmount: big.NewInt(10),
-				ExpectedErr:    nil,
 			},
+			big.NewInt(10),
+			nil,
 		},
 		{
 			"remove all candidates after max balance control",
-			&testutils.TestRequest{
-				Req: &faucettypes.Request{
-					Beneficiary: ethcommon.HexToAddress("0xab"),
-					ChainURL:    chainURLBalanceAt10,
-					FaucetsCandidates: map[string]faucettypes.Faucet{
-						"test": {
-							Amount:     big.NewInt(10),
-							MaxBalance: big.NewInt(10),
-						},
-						"test1": {
-							Amount:     big.NewInt(1),
-							MaxBalance: big.NewInt(10),
-						},
+			&faucettypes.Request{
+				Beneficiary: ethcommon.HexToAddress("0xab"),
+				ChainURL:    chainURLBalanceAt10,
+				FaucetsCandidates: map[string]faucettypes.Faucet{
+					"test": {
+						Amount:     big.NewInt(10),
+						MaxBalance: big.NewInt(10),
+					},
+					"test1": {
+						Amount:     big.NewInt(2),
+						MaxBalance: big.NewInt(10),
 					},
 				},
-				ExpectedErr: errors.FaucetWarning("account balance too high").ExtendComponent(component),
 			},
+			nil,
+			errors.FaucetWarning("account balance too high").ExtendComponent(component),
 		},
 	}
 
@@ -116,10 +111,11 @@ func TestMaxBalance(t *testing.T) {
 		if len(r.FaucetsCandidates) == 0 {
 			return nil, errors.FaucetWarning("no faucet request").ExtendComponent(component)
 		}
+
 		// Select a first faucet candidate for comparison
 		r.ElectedFaucet = reflect.ValueOf(r.FaucetsCandidates).MapKeys()[0].String()
 		for key, candidate := range r.FaucetsCandidates {
-			if candidate.Amount.Cmp(r.FaucetsCandidates[r.ElectedFaucet].Amount) == -1 {
+			if candidate.Amount.Cmp(r.FaucetsCandidates[r.ElectedFaucet].Amount) > 0 {
 				r.ElectedFaucet = key
 			}
 		}
@@ -137,9 +133,13 @@ func TestMaxBalance(t *testing.T) {
 	for _, test := range testSet {
 		test := test
 		t.Run(test.name, func(t *testing.T) {
-			amount, err := credit(context.Background(), test.input.Req)
-			test.input.ResultAmount, test.input.ResultErr = amount, err
-			testutils.AssertRequest(t, test.input)
+			amount, err := credit(context.Background(), test.Req)
+			assert.Equal(t, test.ExpectedAmount, amount, "Amount credited should be correct expecting %s, got %s", test.ExpectedAmount, amount)
+			if test.ExpectedErr != nil {
+				assert.Equal(t, test.ExpectedErr, err, "Credit should error")
+			} else {
+				assert.NoError(t, err, "Credit should not error")
+			}
 		})
 	}
 }

@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 ## Unreleased
+* Fix a transaction crafting issue to able to craft uint and int arguments in decimal or hexadecimal 
+* Fix a contract registry issue to be able to register a contract without event
 
 ## v2.0.1 (2020-04-01)
 

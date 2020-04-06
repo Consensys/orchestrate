@@ -81,14 +81,14 @@ func (agent *PGContract) Insert(
 		return errors.FromError(err).ExtendComponent(component)
 	}
 
-	if methods != nil {
+	if methods != nil && len(*methods) > 0 {
 		err = agent.methodDataAgent.InsertMultiple(pgctx, methods)
 		if err != nil {
 			return errors.FromError(err).ExtendComponent(component)
 		}
 	}
 
-	if events != nil {
+	if events != nil && len(*events) > 0 {
 		err = agent.eventDataAgent.InsertMultiple(pgctx, events)
 		if err != nil {
 			return errors.FromError(err).ExtendComponent(component)

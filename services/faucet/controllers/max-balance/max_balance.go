@@ -38,7 +38,7 @@ func (ctrl *Controller) Control(credit faucet.CreditFunc) faucet.CreditFunc {
 
 		// Ensure MaxBalance is respected
 		for key, candidate := range r.FaucetsCandidates {
-			if balance.Add(balance, candidate.Amount).Cmp(candidate.MaxBalance) > 0 {
+			if new(big.Int).Add(candidate.Amount, balance).Cmp(candidate.MaxBalance) > 0 {
 				delete(r.FaucetsCandidates, key)
 			}
 		}
