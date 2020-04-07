@@ -104,6 +104,29 @@ func (s *contractTestSuite) TestPGContract_Insert() {
 		assert.Nil(t, err)
 	})
 
+	s.T().Run("should insert contract with empty methods successfully", func(t *testing.T) {
+		s.mockRepositoryDA.EXPECT().SelectOrInsert(gomock.Any(), gomock.Any()).Return(nil)
+		s.mockArtifactDA.EXPECT().SelectOrInsert(gomock.Any(), gomock.Any()).Return(nil)
+		s.mockTagDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
+
+		emptyMethods := []*models.MethodModel{}
+		emptyEvents := []*models.EventModel{}
+
+		err := s.dataagent.Insert(
+			context.Background(),
+			"name",
+			"tag",
+			"abi",
+			"bytecode",
+			"deployedBytecode",
+			"codeHash",
+			&emptyMethods,
+			&emptyEvents,
+		)
+
+		assert.Nil(t, err)
+	})
+
 	s.T().Run("should fail if repository data agent fails", func(t *testing.T) {
 		s.mockRepositoryDA.EXPECT().SelectOrInsert(gomock.Any(), gomock.Any()).Return(dataAgentError)
 
