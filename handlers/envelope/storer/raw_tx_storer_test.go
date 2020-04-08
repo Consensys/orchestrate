@@ -6,6 +6,7 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
@@ -47,11 +48,22 @@ func TestRawTxStore(t *testing.T) {
 
 			txctx := engine.NewTxContext()
 			txctx.Logger = log.NewEntry(log.New())
+			mockCtrl := gomock.NewController(t)
+			defer mockCtrl.Finish()
+			registry := clientmock.NewMockEnvelopeStoreClient(mockCtrl)
+			registry.EXPECT().Store(gomock.Any(), gomock.AssignableToTypeOf(&svc.StoreRequest{}))
+			registry.EXPECT().SetStatus(gomock.Any(), &svc.SetStatusRequest{
+				Id:     "test",
+				Status: test.expectedStatus,
+			})
+			registry.EXPECT().LoadByID(gomock.Any(), &svc.LoadByIDRequest{
+				Id: "test",
+			}).Return(&svc.StoreResponse{
+				StatusInfo: &svc.StatusInfo{Status: test.expectedStatus},
+			}, nil)
 
-			registry := clientmock.New()
 			h := RawTxStore(registry)
 			h(test.input(txctx))
-
 			e, _ := registry.LoadByID(txctx.Context(), &svc.LoadByIDRequest{Id: txctx.Envelope.GetID()})
 			assert.Equal(t, test.expectedStatus, e.StatusInfo.Status, "Expected same status")
 		})

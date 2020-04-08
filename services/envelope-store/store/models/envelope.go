@@ -39,7 +39,7 @@ type EnvelopeModel struct {
 	ErrorAt  time.Time
 }
 
-// FromEnvelope creates a model from an envelope
+// Creates an envelope model from a txEnvelope
 func NewEnvelopeFromTx(tenantID string, e *tx.TxEnvelope) (EnvelopeModel, error) {
 	// Marshal envelope
 	b, err := encoding.Marshal(e)
@@ -56,10 +56,10 @@ func NewEnvelopeFromTx(tenantID string, e *tx.TxEnvelope) (EnvelopeModel, error)
 	}, nil
 }
 
-func NewEnvelope(tenantId string, chainId string, txHash string) (EnvelopeModel) {
+func NewEnvelope(tenantID, chainID, txHash string) EnvelopeModel {
 	return EnvelopeModel{
-		ChainID:  chainId,
-		TenantID: tenantId,
+		ChainID:  chainID,
+		TenantID: tenantID,
 		TxHash:   txHash,
 	}
 }

@@ -13,7 +13,7 @@ var initOnce = &sync.Once{}
 var client *Client
 
 func Init(ctx context.Context) {
-	cfg := NewConfigFromViper(viper.GetViper()) 
+	cfg := NewConfigFromViper(viper.GetViper())
 	initOnce.Do(func() {
 		var err error
 		client, err = NewClient(ctx, &cfg)

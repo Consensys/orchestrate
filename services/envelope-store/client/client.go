@@ -15,7 +15,7 @@ const component = "envelope-store.client"
 
 type serviceName string
 type Client struct {
-	srv svc.EnvelopeStoreClient
+	srv  svc.EnvelopeStoreClient
 	conn *gogrpc.ClientConn
 }
 
@@ -38,10 +38,9 @@ func NewClient(ctx context.Context, cfg *Config) (*Client, error) {
 	log.WithFields(log.Fields{
 		"url": cfg.envelopeStoreURL,
 	}).Infof("%s: client ready", component)
-	
+
 	return &Client{
-		srv: client,
+		srv:  client,
 		conn: conn,
 	}, nil
 }
-

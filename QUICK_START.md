@@ -4,22 +4,22 @@
 
 Download the repository:
 ```bash
-$> go get -u gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git
+go get -u gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git
 ```
 
 Go to downloaded repository:
-```
-$> cd ${GOPATH}/src/gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git
+```bash
+cd ${GOPATH}/src/gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git
 ```
 
 Install vendors locally:
-```
-$> make mod-vendor
+```bash
+make mod-vendor
 ```
 
 Compile orchestrate binary
 ```bash
-$> make gobuild
+make gobuild
 ```
 
 ### Troubleshooting
@@ -46,7 +46,7 @@ Orchestrate requires a bunch of services to persist data and exchange message su
 
 To launch those service execute the next command:
 ```bash
-$> make deps
+make deps
 ```
 
 ### Step 2: Blockchain deps
@@ -54,20 +54,20 @@ $> make deps
 Orchestrate also requires at least one blockchain network for instance `Quorum` or `Besu`, and a EVM client such as `geth`. 
 For instance we could run besu and geth using the next make commands:
 ```bash
-$> make geth
-$> make quorum
+make geth
+make quorum
 ``` 
 
 ### Step 3: Orchestrate
 
 Finally we can run Orchestrate. Firstly, we validate if we have every required service running:
 ```bash
-$> make bootstrap-deps
+make bootstrap-deps
 ``` 
 
 If that exits without errors we can proceed spawning orchestrate:
 ```bash
-$> make orchestrate
+make orchestrate
 ```
 
 Above command is going to initialize one of each of the orchestrate service using the latest compile version located at `./build/bin/orchestrate`. By default
@@ -112,7 +112,7 @@ export AUTH_API_KEY="with-key"
 **Generate a token**
 
 Run the following command:
-```
-$> orchestrate utils generate-jwt --tenant {TENANT_ID} --expiration ${TIME_IN_HOURS}h
+```bash
+orchestrate utils generate-jwt --tenant {TENANT_ID} --expiration ${TIME_IN_HOURS}h
 ```
 

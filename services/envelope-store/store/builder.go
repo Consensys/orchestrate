@@ -17,7 +17,6 @@ type Builder interface {
 
 type builder struct {
 	postgres *pgstore.Builder
-	// memory   *memorystore.Builder
 }
 
 func NewBuilder(pgmngr postgres.Manager) Builder {
@@ -35,8 +34,6 @@ func (b *builder) Build(ctx context.Context, cfg *Config) (DataAgents, error) {
 		return DataAgents{
 			Envelope: pgEnvelopeAgent,
 		}, err
-	// case inMemoryType:
-	// 	return b.memory.Build(logCtx)
 	default:
 		return DataAgents{}, fmt.Errorf("invalid envelope registry store type %q", cfg.Type)
 	}

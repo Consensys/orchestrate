@@ -57,6 +57,7 @@ run:
   deadline: 20m
   skip-dirs:
     - .gocache
+    - vendor
   skip-files:
     - pkg/http/handler/dashboard/genstatic/gen.go
     - pkg/http/handler/swagger/genstatic/gen.go

@@ -1,4 +1,4 @@
-package use_cases
+package usecases
 
 import (
 	"context"
@@ -11,43 +11,45 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/store/models"
 )
 
-type LoadEnvelopeById interface {
-	Execute(ctx context.Context, tenantId string, envelopeId string) (models.EnvelopeModel, error)
+//go:generate mockgen -source=load_envelope_by_id.go -destination=mocks/load_envelope_by_id.go -package=mocks
+
+type LoadEnvelopeByID interface {
+	Execute(ctx context.Context, tenantID string, envelopeID string) (models.EnvelopeModel, error)
 }
 
 // RegisterContract is a use case to register a new contract
-type loadEnvelopeById struct {
+type loadEnvelopeByID struct {
 	envelopeAgent store.EnvelopeAgent
 }
 
 // NewGetCatalog creates a new GetCatalog
-func NewLoadEnvelopeById(envelopeAgent store.EnvelopeAgent) LoadEnvelopeById {
-	return &loadEnvelopeById{
+func NewLoadEnvelopeByID(envelopeAgent store.EnvelopeAgent) LoadEnvelopeByID {
+	return &loadEnvelopeByID{
 		envelopeAgent: envelopeAgent,
 	}
 }
 
-func (se *loadEnvelopeById) Execute(ctx context.Context, tenantId string, envelopeId string) (models.EnvelopeModel, error) {
+func (se *loadEnvelopeByID) Execute(ctx context.Context, tenantID, envelopeID string) (models.EnvelopeModel, error) {
 	logger := log.FromContext(ctx)
 
 	envelope, err := se.envelopeAgent.FindByFieldSet(ctx, map[string]string{
-		"envelope_id": envelopeId,
-		"tenant_id": tenantId,
+		"envelope_id": envelopeID,
+		"tenant_id":   tenantID,
 	})
 
 	if err != nil {
 		logger.
 			WithError(err).
 			WithFields(logrus.Fields{
-				"envelope.id": envelopeId,
-				"tenant":   tenantId,
+				"envelope.id": envelopeID,
+				"tenant":      tenantID,
 			}).
 			Debugf("could not load envelope")
 		if err == pg.ErrNoRows {
-			return models.EnvelopeModel{}, errors.NotFoundError("envelope with id %v does not exist", envelopeId)
+			return models.EnvelopeModel{}, errors.NotFoundError("envelope with id %v does not exist", envelopeID)
 		}
 		return models.EnvelopeModel{}, errors.StorageError(err.Error())
 	}
-	
+
 	return envelope, nil
 }

@@ -3,7 +3,7 @@ package envelopestore
 import (
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
+	pkgmultitenancy "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/store"
 )
 
@@ -24,6 +24,6 @@ func NewConfig(appCfg *app.Config, storeCfg *store.Config, multitenancy bool) Co
 func NewConfigFromViper(vipr *viper.Viper) Config {
 	return NewConfig(app.NewConfig(vipr),
 		store.NewConfig(vipr),
-		vipr.GetBool(multitenancy.EnabledViperKey),
+		vipr.GetBool(pkgmultitenancy.EnabledViperKey),
 	)
 }

@@ -1,4 +1,4 @@
-package use_cases
+package usecases
 
 import (
 	"context"
@@ -11,8 +11,10 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/store/models"
 )
 
+//go:generate mockgen -source=set_envelope_status.go -destination=mocks/set_envelope_status.go -package=mocks
+
 type SetEnvelopeStatus interface {
-	Execute(ctx context.Context, tenantId string, envelopeId string, nextStatus string) (models.EnvelopeModel, error)
+	Execute(ctx context.Context, tenantID string, envelopeID string, nextStatus string) (models.EnvelopeModel, error)
 }
 
 // RegisterContract is a use case to register a new contract
@@ -27,20 +29,20 @@ func NewSetEnvelopeStatus(envelopeAgent store.EnvelopeAgent) SetEnvelopeStatus {
 	}
 }
 
-func (se *setEnvelopeStatus) Execute(ctx context.Context, tenantId string, envelopeId string, nextStatus string) (models.EnvelopeModel, error) {
+func (se *setEnvelopeStatus) Execute(ctx context.Context, tenantID, envelopeID, nextStatus string) (models.EnvelopeModel, error) {
 	logger := log.FromContext(ctx)
 
 	envelope, err := se.envelopeAgent.FindByFieldSet(ctx, map[string]string{
-		"envelope_id": envelopeId,
-		"tenant_id":   tenantId,
+		"envelope_id": envelopeID,
+		"tenant_id":   tenantID,
 	})
 
 	if err != nil {
 		logger.
 			WithError(err).
 			WithFields(logrus.Fields{
-				"envelope.id": envelopeId,
-				"tenant":      tenantId,
+				"envelope.id": envelopeID,
+				"tenant":      tenantID,
 			}).
 			Debugf("could not load envelope")
 		return models.EnvelopeModel{}, errors.StorageError(err.Error())

@@ -17,13 +17,13 @@ import (
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
 )
 
-type ServerBuilder struct{
+type ServerBuilder struct {
 	*staticserver.Builder
 }
 
 func NewServerBuilder(
 	srv svc.EnvelopeStoreServer,
-	checker auth.Checker, 
+	checker auth.Checker,
 	multitenancy bool,
 	logger *logrus.Logger,
 ) (ServerBuilder, error) {
@@ -59,7 +59,6 @@ func NewServerBuilder(
 	}, nil
 }
 
-
-func (b *ServerBuilder) BuildServer(ctx context.Context, name string, cfg interface{}) (*grpc.Server, error){
+func (b *ServerBuilder) BuildServer(ctx context.Context, name string, cfg interface{}) (*grpc.Server, error) {
 	return b.Build(ctx, name, cfg)
 }

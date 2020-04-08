@@ -57,3 +57,7 @@ func NewConfig(staticCfg *traefikstatic.Configuration, watcherCfg *configwatcher
 		dynamic: dynamicCfg,
 	}
 }
+
+func (c *Config) DynamicCfg() *dynamic.Configuration {
+	return c.dynamic
+}

@@ -1,4 +1,4 @@
-package use_cases
+package usecases
 
 import (
 	"context"
@@ -9,6 +9,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/store/models"
 )
+
+//go:generate mockgen -source=load_pending_envelopes.go -destination=mocks/load_pending_envelopes.go -package=mocks
 
 type LoadPendingEnvelopes interface {
 	Execute(ctx context.Context, sentBeforeAt time.Time) ([]*models.EnvelopeModel, error)
@@ -34,11 +36,11 @@ func (se *loadPendingEnvelopes) Execute(ctx context.Context, sentBeforeAt time.T
 		logger.
 			WithError(err).
 			WithFields(logrus.Fields{
-				"status": "pending",
-				"sent_at":  sentBeforeAt,
+				"status":  "pending",
+				"sent_at": sentBeforeAt,
 			}).
 			Debugf("could not load envelope")
 	}
-	
+
 	return envelopes, nil
 }

@@ -19,7 +19,7 @@ func NewPGEnvelope(db *pg.DB) *PGEnvelopeAgent {
 	return &PGEnvelopeAgent{db: db}
 }
 
-func (ag *PGEnvelopeAgent) InsertDoUpdateOnEnvelopeIdKey(ctx context.Context, obj *models.EnvelopeModel) error {
+func (ag *PGEnvelopeAgent) InsertDoUpdateOnEnvelopeIDKey(ctx context.Context, obj *models.EnvelopeModel) error {
 	// Execute ORM query
 	// If uniqueness constraint is broken then it update the former value
 	_, err := ag.db.ModelContext(ctx, obj).
@@ -59,9 +59,9 @@ func (ag *PGEnvelopeAgent) FindByFieldSet(ctx context.Context, fields map[string
 	for key, val := range fields {
 		q.Where(fmt.Sprintf("%s = ?", key), val)
 	}
-	
+
 	err := q.Select()
-	return model, err;
+	return model, err
 }
 
 func (ag *PGEnvelopeAgent) FindPending(ctx context.Context, sentBeforeAt time.Time) ([]*models.EnvelopeModel, error) {
@@ -70,18 +70,17 @@ func (ag *PGEnvelopeAgent) FindPending(ctx context.Context, sentBeforeAt time.Ti
 		Where("status = 'pending'").
 		Where("sent_at < ?", sentBeforeAt).
 		Select()
-	
+
 	return envelopes, err
 }
 
-
-func (ag *PGEnvelopeAgent) UpdateStatus(ctx context.Context, envelope *models.EnvelopeModel) (error) {
+func (ag *PGEnvelopeAgent) UpdateStatus(ctx context.Context, envelope *models.EnvelopeModel) error {
 	_, err := ag.db.ModelContext(ctx, envelope).
 		Set("status = ?status").
 		Where("envelope_id = ?", envelope.EnvelopeID).
 		Where("tenant_id = ?", envelope.TenantID).
 		Returning("*").
 		Update()
-	
+
 	return err
 }

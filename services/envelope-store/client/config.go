@@ -10,7 +10,7 @@ import (
 
 type Config struct {
 	envelopeStoreURL string
-	serviceName string
+	serviceName      string
 }
 
 const (
@@ -20,7 +20,7 @@ const (
 	envelopeStoreURLEnv      = "ENVELOPE_STORE_URL"
 )
 
-func NewConfig(serviceName string, envelopeStoreURL string) Config {
+func NewConfig(serviceName, envelopeStoreURL string) Config {
 	return Config{
 		envelopeStoreURL,
 		serviceName,
@@ -30,7 +30,7 @@ func NewConfig(serviceName string, envelopeStoreURL string) Config {
 func NewConfigFromViper(vipr *viper.Viper) Config {
 	return NewConfig(
 		vipr.GetString(EnvelopeStoreURLViperKey),
-		viper.GetString(jaeger.ServiceNameViperKey),
+		vipr.GetString(jaeger.ServiceNameViperKey),
 	)
 }
 

@@ -10,6 +10,7 @@ import (
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
@@ -89,7 +90,11 @@ func (h *mockHandler) Handle(txctx *engine.TxContext) {
 
 func TestTxAlreadySent(t *testing.T) {
 	ec := NewMockChainLedgerReader()
-	client := clientmock.New()
+	ctrl := gomock.NewController(t)
+	client := clientmock.NewMockEnvelopeStoreClient(ctrl)
+	client.EXPECT().LoadByID(gomock.Any(),gomock.AssignableToTypeOf(&svc.LoadByIDRequest{})).AnyTimes()
+	client.EXPECT().Store(gomock.Any(),gomock.AssignableToTypeOf(&svc.StoreRequest{})).Times(2)
+	client.EXPECT().SetStatus(gomock.Any(),gomock.AssignableToTypeOf(&svc.SetStatusRequest{})).Times(2)
 	mh := mockHandler{}
 
 	// Prepare a test handler combined with a mock handler to
@@ -134,7 +139,7 @@ func TestTxAlreadySent(t *testing.T) {
 	)
 	handler(txctx)
 	assertCtx(t, txctx)
-	assert.Equal(t, 1, mh.callCount, "Mock handler should not have been executed")
+	assert.Equal(t, 2, mh.callCount, "Mock handler should have been executed")
 
 	// Store envelope, does not send transaction and set envelope status before handing context
 	b = tx.NewEnvelope().SetID("3").SetChainID(big.NewInt(8)).SetTxHash(ethcommon.HexToHash("0x60a417c21da71cea33821071e99871fa2c23ad8103b889cf8a459b0b5320fd46"))
@@ -159,6 +164,6 @@ func TestTxAlreadySent(t *testing.T) {
 	)
 	handler(txctx)
 	assertCtx(t, txctx)
-	assert.Equal(t, 2, mh.callCount, "Mock handler should not have been executed")
+	assert.Equal(t, 3, mh.callCount, "Mock handler should have been executed")
 
 }

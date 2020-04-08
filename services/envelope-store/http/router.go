@@ -17,20 +17,11 @@ func NewRouterBuilder(
 ) (RouterBuilder, error) {
 	builder := dynrouter.NewBuilder(staticCfg, nil)
 
-	var err error
 	// Create HTTP Handler Builder
-	builder.Handler, err = newHandlerBuilder(srv)
-	if err != nil {
-		return nil, err
-	}
+	builder.Handler = newHandlerBuilder(srv)
 
 	// Create Middleware Builder
-	builder.Middleware, err = newMiddlewareBuilder(jwt, key, multitenancy)
-	if err != nil {
-		return nil, err
-	}
+	builder.Middleware = newMiddlewareBuilder(jwt, key, multitenancy)
 
 	return builder, nil
 }
-
-

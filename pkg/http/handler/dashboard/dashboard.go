@@ -16,7 +16,7 @@ type Builder struct {
 	staticCfg *traefikstatic.Configuration
 }
 
-// NewRouterBuilder returns a http.Handler builder based on runtime.Configuration
+// NewBuilder returns a http.Handler builder based on runtime.Configuration
 func NewBuilder(cfg *traefikstatic.Configuration) *Builder {
 	return &Builder{
 		staticCfg: cfg,

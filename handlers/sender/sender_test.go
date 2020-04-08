@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
@@ -142,7 +143,14 @@ func makeSenderContext(i int) *engine.TxContext {
 
 func TestSender(t *testing.T) {
 	s := MockTxSender{t: t}
-	client := clientmock.New()
+	ctrl := gomock.NewController(t)
+	client := clientmock.NewMockEnvelopeStoreClient(ctrl)
+	client.EXPECT().Store(gomock.Any(), gomock.AssignableToTypeOf(&svc.StoreRequest{}), gomock.Any()).Times(15)
+	client.EXPECT().SetStatus(gomock.Any(), gomock.AssignableToTypeOf(&svc.SetStatusRequest{})).Times(15)
+	client.EXPECT().LoadByID(gomock.Any(), gomock.AssignableToTypeOf(&svc.LoadByIDRequest{})).
+		Times(15).Return(&svc.StoreResponse{
+		StatusInfo: &svc.StatusInfo{Status: svc.Status_PENDING},
+	}, nil)
 	sender := Sender(&s, client)
 
 	rounds := 15

@@ -1,5 +1,5 @@
-GOFILES := $(shell find . -name '*.go' | grep -v pkg/http/handler/dashboard/genstatic/gen.go | grep -v pkg/http/handler/swagger/genstatic/gen.go | egrep -v "^\./\.go" | grep -v _test.go)
-PACKAGES ?= $(shell go list ./... | go list ./... | grep -Fv -e e2e -e examples -e genstatic -e mocks )
+GOFILES := $(shell find . -name '*.go' -not -path "./vendor/*" | grep -v pkg/http/handler/dashboard/genstatic/gen.go | grep -v pkg/http/handler/swagger/genstatic/gen.go | egrep -v "^\./\.go" | grep -v _test.go)
+PACKAGES ?= $(shell go list ./... | grep -Fv -e e2e -e examples -e genstatic -e mocks )
 CMD_RUN = tx-crafter tx-signer tx-sender tx-listener contract-registry chain-registry envelope-store
 CMD_PERSISTENT = redis postgres-chain-registry postgres-contract-registry postgres-envelope-store vault-init vault jaeger
 CMD_KAFKA = zookeeper kafka
@@ -166,10 +166,10 @@ down-besu:
 	@docker-compose -f scripts/besu/docker-compose.yml down --volumes --timeout 0
 
 postgres:
-	@docker-compose -f e2e/docker-compose.yml up -d postgres
+	@docker-compose -f scripts/deps/docker-compose.yml up -d postgres-unit
 
 down-postgres:
-	@docker-compose -f e2e/docker-compose.yml rm --force -s -v postgres
+	@docker-compose -f scripts/deps/docker-compose.yml rm --force -s -v postgres-unit
 
 up: deps geth besu quorum bootstrap-deps orchestrate ## Start Orchestrate and deps
 

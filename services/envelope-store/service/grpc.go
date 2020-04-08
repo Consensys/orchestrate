@@ -18,7 +18,7 @@ import (
 type GRPCService struct {
 	storeEnvelopeUseCase        usecases.StoreEnvelope
 	loadEnvelopeByTxHashUseCase usecases.LoadEnvelopeByTxHash
-	loadEnvelopeByIdUseCase     usecases.LoadEnvelopeById
+	loadEnvelopeByIDUseCase     usecases.LoadEnvelopeByID
 	loadPendingEnvelopesUseCase usecases.LoadPendingEnvelopes
 	setEnvelopesStatusUseCase   usecases.SetEnvelopeStatus
 }
@@ -29,7 +29,7 @@ func NewGRPCService(
 	return &GRPCService{
 		storeEnvelopeUseCase:        usecases.NewStoreEnvelope(storeda.Envelope),
 		loadEnvelopeByTxHashUseCase: usecases.NewLoadEnvelopeByTxHash(storeda.Envelope),
-		loadEnvelopeByIdUseCase:     usecases.NewLoadEnvelopeById(storeda.Envelope),
+		loadEnvelopeByIDUseCase:     usecases.NewLoadEnvelopeByID(storeda.Envelope),
 		loadPendingEnvelopesUseCase: usecases.NewLoadPendingEnvelopes(storeda.Envelope),
 		setEnvelopesStatusUseCase:   usecases.NewSetEnvelopeStatus(storeda.Envelope),
 	}, nil
@@ -41,7 +41,7 @@ func (s *GRPCService) Store(ctx context.Context, req *svc.StoreRequest) (*svc.St
 		return &svc.StoreResponse{}, errors.StorageError("%v", err)
 	}
 
-	resp, err := envelopeModelToStoreResponse(envelope)
+	resp, err := envelopeModelToStoreResponse(&envelope)
 	if err != nil {
 		return &svc.StoreResponse{}, errors.StorageError("%v", err)
 	}
@@ -50,13 +50,16 @@ func (s *GRPCService) Store(ctx context.Context, req *svc.StoreRequest) (*svc.St
 }
 
 func (s *GRPCService) LoadByID(ctx context.Context, req *svc.LoadByIDRequest) (*svc.StoreResponse, error) {
-	envelope, err := s.loadEnvelopeByIdUseCase.Execute(
+	envelope, err := s.loadEnvelopeByIDUseCase.Execute(
 		ctx,
 		multitenancy.TenantIDFromContext(ctx),
 		req.GetId(),
 	)
+	if err != nil {
+		return &svc.StoreResponse{}, errors.StorageError("%v", err)
+	}
 
-	resp, err := envelopeModelToStoreResponse(envelope)
+	resp, err := envelopeModelToStoreResponse(&envelope)
 	if err != nil {
 		return &svc.StoreResponse{}, errors.StorageError("%v", err)
 	}
@@ -71,8 +74,11 @@ func (s *GRPCService) LoadByTxHash(ctx context.Context, req *svc.LoadByTxHashReq
 		req.GetChainId(),
 		req.GetTxHash(),
 	)
+	if err != nil {
+		return &svc.StoreResponse{}, errors.StorageError("%v", err)
+	}
 
-	resp, err := envelopeModelToStoreResponse(envelope)
+	resp, err := envelopeModelToStoreResponse(&envelope)
 	if err != nil {
 		return &svc.StoreResponse{}, errors.StorageError("%v", err)
 	}
@@ -90,7 +96,7 @@ func (s *GRPCService) SetStatus(ctx context.Context, req *svc.SetStatusRequest) 
 	if err != nil {
 		return &svc.StatusResponse{}, errors.StorageError("%v", err)
 	}
-	
+
 	return &svc.StatusResponse{
 		StatusInfo: envelope.StatusInfo(),
 	}, nil
@@ -108,7 +114,7 @@ func (s *GRPCService) LoadPending(ctx context.Context, req *svc.LoadPendingReque
 
 	var resps []*svc.StoreResponse
 	for _, envelope := range envelopes {
-		resp, err := envelopeModelToStoreResponse(*envelope)
+		resp, err := envelopeModelToStoreResponse(envelope)
 		if err != nil {
 			return &svc.LoadPendingResponse{}, errors.FromError(err)
 		}
@@ -120,7 +126,7 @@ func (s *GRPCService) LoadPending(ctx context.Context, req *svc.LoadPendingReque
 	}, nil
 }
 
-func envelopeModelToStoreResponse(envelope models.EnvelopeModel) (*svc.StoreResponse, error) {
+func envelopeModelToStoreResponse(envelope *models.EnvelopeModel) (*svc.StoreResponse, error) {
 	resp := &svc.StoreResponse{
 		StatusInfo: envelope.StatusInfo(),
 		Envelope:   &tx.TxEnvelope{},

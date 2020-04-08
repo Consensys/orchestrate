@@ -1,4 +1,4 @@
-package use_cases
+package usecases
 
 import (
 	"context"
@@ -11,8 +11,10 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/store/models"
 )
 
+//go:generate mockgen -source=load_envelope_by_tx_hash.go -destination=mocks/load_envelope_by_tx_hash.go -package=mocks
+
 type LoadEnvelopeByTxHash interface {
-	Execute(ctx context.Context, tenantId string, chainId string, txHash string) (models.EnvelopeModel, error)
+	Execute(ctx context.Context, tenantID string, chainID string, txHash string) (models.EnvelopeModel, error)
 }
 
 // RegisterContract is a use case to register a new contract
@@ -27,22 +29,22 @@ func NewLoadEnvelopeByTxHash(envelopeAgent store.EnvelopeAgent) LoadEnvelopeByTx
 	}
 }
 
-func (se *loadEnvelopeByTxHash) Execute(ctx context.Context, tenantId string, chainId string, txHash string) (models.EnvelopeModel, error) {
+func (se *loadEnvelopeByTxHash) Execute(ctx context.Context, tenantID, chainID, txHash string) (models.EnvelopeModel, error) {
 	logger := log.FromContext(ctx)
 
 	envelope, err := se.envelopeAgent.FindByFieldSet(ctx, map[string]string{
-		"chain_id": chainId,
-		"tx_hash": txHash,
-		"tenant_id": tenantId,
+		"chain_id":  chainID,
+		"tx_hash":   txHash,
+		"tenant_id": tenantID,
 	})
 
 	if err != nil {
 		logger.
 			WithError(err).
 			WithFields(logrus.Fields{
-				"chain.id": chainId,
+				"chain.id": chainID,
 				"tx.hash":  txHash,
-				"tenant":   tenantId,
+				"tenant":   tenantID,
 			}).
 			Debugf("could not load envelope")
 		if err == pg.ErrNoRows {
@@ -50,6 +52,6 @@ func (se *loadEnvelopeByTxHash) Execute(ctx context.Context, tenantId string, ch
 		}
 		return models.EnvelopeModel{}, errors.StorageError(err.Error())
 	}
-	
+
 	return envelope, nil
 }

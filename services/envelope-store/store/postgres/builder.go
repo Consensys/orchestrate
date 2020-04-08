@@ -17,6 +17,6 @@ func NewBuilder(mngr postgres.Manager) *Builder {
 
 func (b *Builder) Build(ctx context.Context, cfg *Config) (*pgda.PGEnvelopeAgent, error) {
 	db := b.postgres.Connect(ctx, cfg.PG)
-	
+
 	return pgda.NewPGEnvelope(db), nil
 }

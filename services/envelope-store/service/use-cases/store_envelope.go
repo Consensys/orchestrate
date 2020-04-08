@@ -1,4 +1,4 @@
-package use_cases
+package usecases
 
 import (
 	"context"
@@ -10,8 +10,10 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/store/models"
 )
 
+//go:generate mockgen -source=store_envelope.go -destination=mocks/store_envelope.go -package=mocks
+
 type StoreEnvelope interface {
-	Execute(ctx context.Context, tenantId string, envelopeItem *tx.TxEnvelope) (models.EnvelopeModel, error)
+	Execute(ctx context.Context, tenantID string, envelopeItem *tx.TxEnvelope) (models.EnvelopeModel, error)
 }
 
 // RegisterContract is a use case to register a new contract
@@ -26,22 +28,22 @@ func NewStoreEnvelope(envelopeAgent store.EnvelopeAgent) StoreEnvelope {
 	}
 }
 
-func (se *storeEnvelope) Execute(ctx context.Context, tenantId string, envelopeTx *tx.TxEnvelope) (models.EnvelopeModel, error) {
+func (se *storeEnvelope) Execute(ctx context.Context, tenantID string, envelopeTx *tx.TxEnvelope) (models.EnvelopeModel, error) {
 	logger := log.FromContext(ctx)
 
 	// create envelopeItem from envelope
-	envelope, err := models.NewEnvelopeFromTx(tenantId, envelopeTx)
+	envelope, err := models.NewEnvelopeFromTx(tenantID, envelopeTx)
 	if err != nil {
 		logger.WithError(err).Errorf("invalid envelope")
 		return models.EnvelopeModel{}, err
 	}
-	
-	err = se.envelopeAgent.InsertDoUpdateOnEnvelopeIdKey(ctx, &envelope)
+
+	err = se.envelopeAgent.InsertDoUpdateOnEnvelopeIDKey(ctx, &envelope)
 	if err != nil {
 		err = se.envelopeAgent.InsertDoUpdateOnUniTx(ctx, &envelope)
 		if err != nil {
 			logger.WithError(err).Errorf("could not store envelope")
-			return models.EnvelopeModel{},err
+			return models.EnvelopeModel{}, err
 		}
 	}
 

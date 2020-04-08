@@ -28,7 +28,6 @@ func newApplication(
 		return nil, err
 	}
 
-	
 	// Create GRPC entrypoint
 	grpcServer, err := grpcBuilder.BuildServer(ctx, "", grpc.NewStaticConfig())
 	if err != nil {

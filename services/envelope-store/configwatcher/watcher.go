@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
 )
 
 type Watcher configwatcher.Watcher
@@ -16,7 +16,7 @@ func NewWatcher(cfg Config, httpEps *http.EntryPoints) Watcher {
 	listeners := []func(context.Context, interface{}) error{
 		httpEps.Switch,
 	}
-	
+
 	return configwatcher.New(
 		cfg.watcher,
 		NewProvider(cfg.dynamic),
