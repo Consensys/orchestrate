@@ -150,7 +150,7 @@ func (s *ChainTestSuite) TestRegisterChainWithInvalidUrlsErr() {
 	chainError := &types.Chain{
 		Name:                    "chainNameErr",
 		TenantID:                "tenantID1",
-		URLs:                    []string{"123 1sda3"},
+		URLs:                    []string{"%!1231"},
 		ListenerDepth:           &listenerDepth,
 		ListenerCurrentBlock:    &listenerCurrentBlock,
 		ListenerStartingBlock:   &listenerStartingBlock,

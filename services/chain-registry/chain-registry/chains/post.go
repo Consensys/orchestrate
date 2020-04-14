@@ -13,14 +13,14 @@ import (
 
 type PostRequest struct {
 	Name     string               `json:"name" validate:"required"`
-	URLs     []string             `json:"urls" pg:"urls,array" validate:"min=1,unique,dive,url"`
+	URLs     []string             `json:"urls" pg:"urls,array" validate:"required,min=1,unique,dive,url"`
 	Listener *ListenerPostRequest `json:"listener,omitempty"`
 }
 
 type ListenerPostRequest struct {
 	Depth             *uint64 `json:"depth,omitempty"`
 	FromBlock         *string `json:"fromBlock,omitempty"`
-	BackOffDuration   *string `json:"backOffDuration,omitempty"`
+	BackOffDuration   *string `json:"backOffDuration,omitempty" validate:"omitempty,isDuration"`
 	ExternalTxEnabled *bool   `json:"externalTxEnabled,omitempty"`
 }
 

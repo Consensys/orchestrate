@@ -11,14 +11,14 @@ import (
 
 type PatchRequest struct {
 	Name     string                `json:"name,omitempty"`
-	URLs     []string              `json:"urls,omitempty" pg:"urls,array" validate:"unique,dive,url"`
+	URLs     []string              `json:"urls,omitempty" pg:"urls,array" validate:"omitempty,min=1,unique,dive,url"`
 	Listener *ListenerPatchRequest `json:"listener,omitempty"`
 }
 
 type ListenerPatchRequest struct {
 	Depth             *uint64 `json:"depth,omitempty"`
 	CurrentBlock      *uint64 `json:"currentBlock,string,omitempty"`
-	BackOffDuration   *string `json:"backOffDuration,omitempty"`
+	BackOffDuration   *string `json:"backOffDuration,omitempty" validate:"omitempty,isDuration"`
 	ExternalTxEnabled *bool   `json:"externalTxEnabled,omitempty"`
 }
 

@@ -135,7 +135,7 @@ Feature: chain registry
       """
       {
         "urls": [
-          "http//geth:8545"
+          "&£$&£$%"
         ]
       }
       """
@@ -209,12 +209,26 @@ Feature: chain registry
       {
         "name": "gethInvalid",
         "urls": [
-          "http//geth:8545"
+          "&£$&£$%"
         ],
         "listener": {
           "depth": 1,
           "fromBlock": "1",
-          "backOffDuration": "1000"
+          "backOffDuration": "1s"
+        }
+      }
+      """
+    Then the response code should be 400
+    
+    When I send "POST" request to "{{chain-registry}}/chains" with json:
+      """
+      {
+        "name": "gethInvalid",
+        "urls": [],
+        "listener": {
+          "depth": 1,
+          "fromBlock": "1",
+          "backOffDuration": "1s"
         }
       }
       """

@@ -37,7 +37,8 @@ func New(db *pg.DB) *PG {
 
 func (s *PG) RegisterChain(ctx context.Context, chain *types.Chain) error {
 	logger := log.FromContext(ctx)
-	if err := chain.Validate(); err != nil {
+
+	if err := chain.Validate(true); err != nil {
 		logger.WithError(err).Errorf("could not register chain")
 		return errors.DataError(err.Error())
 	}
@@ -133,7 +134,7 @@ func (s *PG) GetChainByUUIDAndTenant(ctx context.Context, chainUUID, tenantID st
 
 func (s *PG) UpdateChainByName(ctx context.Context, chain *types.Chain) error {
 	logger := log.FromContext(ctx)
-	if err := chain.Validate(); err != nil {
+	if err := chain.Validate(false); err != nil {
 		logger.WithError(err).Errorf("Failed to update chain by name")
 		return errors.DataError(err.Error())
 	}
@@ -157,7 +158,8 @@ func (s *PG) UpdateChainByName(ctx context.Context, chain *types.Chain) error {
 
 func (s *PG) UpdateChainByUUID(ctx context.Context, chain *types.Chain) error {
 	logger := log.FromContext(ctx)
-	if err := chain.Validate(); err != nil {
+
+	if err := chain.Validate(false); err != nil {
 		logger.WithError(err).Errorf("Failed to update chain by UUID")
 		return errors.DataError(err.Error())
 	}

@@ -1,65 +1,43 @@
 package types
 
 import (
-	"fmt"
-	"regexp"
 	"time"
 
-	"github.com/google/uuid"
 	genuuid "github.com/satori/go.uuid"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
 type Chain struct {
 	tableName struct{} `pg:"chains"` // nolint:unused,structcheck // reason
 
 	UUID                      string     `json:"uuid" pg:",pk"`
-	Name                      string     `json:"name"`
-	TenantID                  string     `json:"tenantID"`
-	URLs                      []string   `json:"urls" pg:"urls,array"`
+	Name                      string     `json:"name" validate:"required_with=UUID"`
+	TenantID                  string     `json:"tenantID" validate:"required_with=UUID"`
+	URLs                      []string   `json:"urls" pg:"urls,array" validate:"required_with=UUID,unique,dive,url"`
 	ListenerDepth             *uint64    `json:"listenerDepth,omitempty"`
 	ListenerCurrentBlock      *uint64    `json:"listenerCurrentBlock,string,omitempty"`
 	ListenerStartingBlock     *uint64    `json:"listenerStartingBlock,string,omitempty"`
-	ListenerBackOffDuration   *string    `json:"listenerBackOffDuration,omitempty"`
+	ListenerBackOffDuration   *string    `json:"listenerBackOffDuration,omitempty" validate:"required_with=UUID,omitempty,isDuration"`
 	ListenerExternalTxEnabled *bool      `json:"listenerExternalTxEnabled,omitempty"`
 	CreatedAt                 *time.Time `json:"createdAt"`
 	UpdatedAt                 *time.Time `json:"updatedAt,omitempty"`
 }
 
 func (c *Chain) IsValid() bool {
-	err := c.Validate()
+	err := c.Validate(true)
 	return err == nil
 }
 
-func (c *Chain) Validate() error {
-	if c.Name == "" {
-		return fmt.Errorf("chain name cannot be empty")
-	}
-	if c.TenantID == "" {
-		return fmt.Errorf("chain tenantID cannot be empty")
-	}
-
-	if c.ListenerBackOffDuration == nil || *c.ListenerBackOffDuration == "" {
-		return fmt.Errorf("chain backOffDuration cannot be empty")
-	} else if _, err := time.ParseDuration(*c.ListenerBackOffDuration); err != nil {
-		return err
+//nolint:gocritic
+func (c Chain) Validate(isNewChain bool) error {
+	// Remove UUID for chain updates so we do not validate required fields
+	if !isNewChain {
+		c.UUID = ""
 	}
 
-	if len(c.URLs) == 0 {
-		return fmt.Errorf("chain URLs cannot be an empty list")
-	}
-
-	for _, uri := range c.URLs {
-		if err := validateChainURL(uri); err != nil {
-			return err
-		}
-	}
-
-	if _, err := uuid.Parse(c.UUID); c.UUID != "" && err != nil {
-		return err
-	}
-
-	return nil
+	err := utils.GetValidator().Struct(c)
+	return err
 }
 
 func (c *Chain) SetDefault() {
@@ -88,13 +66,4 @@ func (c *Chain) SetDefault() {
 		externalTxEnabled := false
 		c.ListenerExternalTxEnabled = &externalTxEnabled
 	}
-}
-
-func validateChainURL(str string) error {
-	var re = regexp.MustCompile(`(?m)((https?://)?.*):(\d*)\/?(.*)`)
-	if !re.MatchString(str) {
-		return fmt.Errorf("malformed URL %s", str)
-	}
-
-	return nil
 }

@@ -5,6 +5,7 @@ package types
 import (
 	"testing"
 
+	genuuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 )
@@ -15,9 +16,10 @@ func TestIsValidChain(t *testing.T) {
 		isValid bool
 	}{
 		{&Chain{
+			UUID:                    genuuid.NewV4().String(),
 			Name:                    "test",
 			TenantID:                "test",
-			URLs:                    []string{"test.com", "test.net"},
+			URLs:                    []string{"http://test.com", "http://test.net"},
 			ListenerDepth:           &(&struct{ x uint64 }{1}).x,
 			ListenerCurrentBlock:    &(&struct{ x uint64 }{1}).x,
 			ListenerStartingBlock:   &(&struct{ x uint64 }{1}).x,
@@ -26,8 +28,9 @@ func TestIsValidChain(t *testing.T) {
 			true,
 		},
 		{&Chain{
+			UUID:                    genuuid.NewV4().String(),
 			TenantID:                "test",
-			URLs:                    []string{"test.com", "test.net"},
+			URLs:                    []string{"http://test.com", "http://test.net"},
 			ListenerDepth:           &(&struct{ x uint64 }{1}).x,
 			ListenerCurrentBlock:    &(&struct{ x uint64 }{1}).x,
 			ListenerStartingBlock:   &(&struct{ x uint64 }{1}).x,
@@ -36,8 +39,9 @@ func TestIsValidChain(t *testing.T) {
 			false,
 		},
 		{&Chain{
+			UUID:                    genuuid.NewV4().String(),
 			Name:                    "test",
-			URLs:                    []string{"test.com", "test.net"},
+			URLs:                    []string{},
 			ListenerDepth:           &(&struct{ x uint64 }{1}).x,
 			ListenerCurrentBlock:    &(&struct{ x uint64 }{1}).x,
 			ListenerStartingBlock:   &(&struct{ x uint64 }{1}).x,
@@ -46,6 +50,7 @@ func TestIsValidChain(t *testing.T) {
 			false,
 		},
 		{&Chain{
+			UUID:                    genuuid.NewV4().String(),
 			Name:                    "test",
 			TenantID:                "test",
 			ListenerDepth:           &(&struct{ x uint64 }{1}).x,
@@ -56,19 +61,44 @@ func TestIsValidChain(t *testing.T) {
 			false,
 		},
 		{&Chain{
+			UUID:                    genuuid.NewV4().String(),
 			Name:                  "test",
 			TenantID:              "test",
-			URLs:                  []string{"test.com", "test.net"},
+			URLs:                  []string{"http://test.com", "http://test.net"},
 			ListenerDepth:         &(&struct{ x uint64 }{1}).x,
 			ListenerCurrentBlock:  &(&struct{ x uint64 }{1}).x,
 			ListenerStartingBlock: &(&struct{ x uint64 }{1}).x,
 		},
 			false,
 		},
+		{&Chain{
+			UUID:                    genuuid.NewV4().String(),
+			Name:                    "test",
+			TenantID:                "test",
+			URLs:                    []string{"http://test.com", "http://test.net"},
+			ListenerDepth:           &(&struct{ x uint64 }{1}).x,
+			ListenerCurrentBlock:    &(&struct{ x uint64 }{1}).x,
+			ListenerStartingBlock:   &(&struct{ x uint64 }{1}).x,
+			ListenerBackOffDuration: &(&struct{ x string }{"200"}).x,
+		},
+			false,
+		},
+		{&Chain{
+			UUID:                    genuuid.NewV4().String(),
+			Name:                    "test",
+			TenantID:                "test",
+			URLs:                    []string{"%%%"},
+			ListenerDepth:           &(&struct{ x uint64 }{1}).x,
+			ListenerCurrentBlock:    &(&struct{ x uint64 }{1}).x,
+			ListenerStartingBlock:   &(&struct{ x uint64 }{1}).x,
+			ListenerBackOffDuration: &(&struct{ x string }{"2s"}).x,
+		},
+			false,
+		},
 	}
 
 	for _, test := range testSet {
-		assert.Equal(t, test.chain.IsValid(), test.isValid)
+		assert.Equal(t, test.isValid, test.chain.IsValid())
 	}
 }
 
