@@ -63,7 +63,7 @@ func (m *manager) Connect(ctx context.Context, conf *pg.Options) *pg.DB {
 			"idle.timeout":         conf.IdleTimeout,
 			"idle.check-frequency": conf.IdleCheckFrequency,
 		}).
-		Infof("creating postgres database")
+		Infof("creating postgres database connector")
 
 	return db
 }

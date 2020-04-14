@@ -15,7 +15,7 @@ type DataAgents struct {
 type EnvelopeAgent interface {
 	InsertDoUpdateOnEnvelopeIDKey(ctx context.Context, obj *models.EnvelopeModel) error
 	InsertDoUpdateOnUniTx(ctx context.Context, obj *models.EnvelopeModel) error
-	FindByFieldSet(ctx context.Context, fields map[string]string) (models.EnvelopeModel, error)
+	FindByFieldSet(ctx context.Context, fields map[string]string) (*models.EnvelopeModel, error)
 	FindPending(ctx context.Context, sentBeforeAt time.Time) ([]*models.EnvelopeModel, error)
 	UpdateStatus(ctx context.Context, obj *models.EnvelopeModel) error
 }

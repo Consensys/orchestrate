@@ -15,12 +15,10 @@ func init() {
 
 const (
 	postgresType = "postgres"
-	inMemoryType = "in-memory"
 )
 
 var availableTypes = []string{
 	postgresType,
-	inMemoryType,
 }
 
 const (

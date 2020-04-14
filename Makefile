@@ -26,7 +26,7 @@ race: ## Run data race detector
 	@go test -count=1 -race -tags unit -short ${PACKAGES}
 
 run-integration:
-	@go test -tags integration ${PACKAGES}
+	@go test -v -p 1 -tags integration ${PACKAGES}
 
 mod-tidy: ## Run deps cleanup
 	@go mod tidy

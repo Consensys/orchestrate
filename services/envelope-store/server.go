@@ -11,7 +11,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	orchlog "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/service"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/service/controllers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/store"
 )
 
@@ -46,7 +46,7 @@ func NewServer(ctx context.Context, cfg *Config) (*EnvelopStoreServer, error) {
 		return nil, err
 	}
 
-	srv, err := service.NewGRPCService(storeDataAgents)
+	srv, err := controllers.NewGRPCService(storeDataAgents)
 	if err != nil {
 		logger.WithError(err).Fatalf("could not create envelope store service")
 		return nil, err

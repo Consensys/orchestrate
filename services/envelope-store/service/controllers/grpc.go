@@ -1,4 +1,4 @@
-package service
+package controllers
 
 import (
 	"context"
@@ -9,8 +9,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/envelope-store/use-cases"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/service/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/store/models"
 )
@@ -38,12 +38,12 @@ func NewGRPCService(
 func (s *GRPCService) Store(ctx context.Context, req *svc.StoreRequest) (*svc.StoreResponse, error) {
 	envelope, err := s.storeEnvelopeUseCase.Execute(ctx, multitenancy.TenantIDFromContext(ctx), req.GetEnvelope())
 	if err != nil {
-		return &svc.StoreResponse{}, errors.StorageError("%v", err)
+		return &svc.StoreResponse{}, err
 	}
 
 	resp, err := envelopeModelToStoreResponse(&envelope)
 	if err != nil {
-		return &svc.StoreResponse{}, errors.StorageError("%v", err)
+		return &svc.StoreResponse{}, err
 	}
 
 	return resp, nil
@@ -56,12 +56,12 @@ func (s *GRPCService) LoadByID(ctx context.Context, req *svc.LoadByIDRequest) (*
 		req.GetId(),
 	)
 	if err != nil {
-		return &svc.StoreResponse{}, errors.StorageError("%v", err)
+		return &svc.StoreResponse{}, err
 	}
 
-	resp, err := envelopeModelToStoreResponse(&envelope)
+	resp, err := envelopeModelToStoreResponse(envelope)
 	if err != nil {
-		return &svc.StoreResponse{}, errors.StorageError("%v", err)
+		return &svc.StoreResponse{}, err
 	}
 
 	return resp, nil
@@ -75,12 +75,12 @@ func (s *GRPCService) LoadByTxHash(ctx context.Context, req *svc.LoadByTxHashReq
 		req.GetTxHash(),
 	)
 	if err != nil {
-		return &svc.StoreResponse{}, errors.StorageError("%v", err)
+		return &svc.StoreResponse{}, err
 	}
 
-	resp, err := envelopeModelToStoreResponse(&envelope)
+	resp, err := envelopeModelToStoreResponse(envelope)
 	if err != nil {
-		return &svc.StoreResponse{}, errors.StorageError("%v", err)
+		return &svc.StoreResponse{}, err
 	}
 
 	return resp, nil
@@ -94,7 +94,7 @@ func (s *GRPCService) SetStatus(ctx context.Context, req *svc.SetStatusRequest) 
 		req.GetStatus().String(),
 	)
 	if err != nil {
-		return &svc.StatusResponse{}, errors.StorageError("%v", err)
+		return &svc.StatusResponse{}, err
 	}
 
 	return &svc.StatusResponse{
@@ -109,7 +109,7 @@ func (s *GRPCService) LoadPending(ctx context.Context, req *svc.LoadPendingReque
 	)
 
 	if err != nil {
-		return &svc.LoadPendingResponse{}, errors.StorageError("%v", err)
+		return &svc.LoadPendingResponse{}, err
 	}
 
 	var resps []*svc.StoreResponse

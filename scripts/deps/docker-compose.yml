@@ -50,13 +50,13 @@ services:
       - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf
 
   postgres-unit:
+    <<: *container-common
+    <<: *postgres-common
     image: postgres:10.12-alpine
-    environment:
-      POSTGRES_PASSWORD: postgres
     ports:
       - 5432:5432
     volumes:
-      - db-data-postgres:/var/lib/postgresql/data
+      - db-data-postgres-unit:/var/lib/postgresql/data
 
   postgres-chain-registry:
     <<: *container-common
@@ -123,7 +123,7 @@ services:
       - 9411:9411
 
 volumes:
-  db-data-postgres:
+  db-data-postgres-unit:
     driver: local
   db-data-chain-registry:
     driver: local

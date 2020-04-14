@@ -10,32 +10,34 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/config"
-	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/postgres/migrations"
+	envelopestore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/store/postgres/migrations"
 )
 
-const postgresContainerID = "postgres-contract-registry"
+const postgresContainerID = "postgres-envelope-store"
 
 type IntegrationEnvironment struct {
 	client *docker.Client
 	pgmngr postgres.Manager
+	ctx    context.Context
 }
 
-func NewIntegrationEnvironment() *IntegrationEnvironment {
+func NewIntegrationEnvironment(ctx context.Context) *IntegrationEnvironment {
 	composition := &config.Composition{
 		Containers: map[string]*config.Container{
 			postgresContainerID: &config.Container{Postgres: (&config.Postgres{}).SetDefault()},
 		},
 	}
 
-	client, err := docker.NewClient(composition)
+	dockerClient, err := docker.NewClient(composition)
 	if err != nil {
 		panic(err)
 	}
 
 	return &IntegrationEnvironment{
-		client: client,
+		client: dockerClient,
 		pgmngr: postgres.NewManager(),
+		ctx:    ctx,
 	}
 }
 
@@ -44,6 +46,7 @@ func (env *IntegrationEnvironment) Start() {
 	err := env.client.Up(context.Background(), postgresContainerID)
 	if err != nil {
 		log.WithoutContext().WithError(err).Fatalf("could not up postgres")
+		return
 	}
 	// Wait 10 seconds for postgres database to be up
 	time.Sleep(10 * time.Second)
@@ -52,36 +55,37 @@ func (env *IntegrationEnvironment) Start() {
 	err = env.migrate()
 	if err != nil {
 		log.WithoutContext().WithError(err).Fatalf("could not migrate postgres")
+		return
 	}
 
-	// Start contract registry
-	err = contractregistry.Start(context.Background())
+	// Start envelope store
+	err = envelopestore.Start(env.ctx)
 	if err != nil {
-		// TODO: we should probably not panic here
-		log.WithoutContext().WithError(err).Fatalf("could not start contract-registry")
+		log.WithoutContext().WithError(err).Fatalf("could not start envelope-store")
+		return
 	}
 
 	env.waitForService()
-	log.WithoutContext().Infof("contract-registry ready")
+	log.WithoutContext().Infof("envelope-store ready")
 }
 
 func (env *IntegrationEnvironment) Teardown() {
 	log.WithoutContext().Infof("tearing test suite down")
-	err := contractregistry.Stop(context.Background())
+	err := envelopestore.Stop(env.ctx)
 	if err != nil {
-		// TODO: we should probably not panic here
-		log.WithoutContext().WithError(err).Errorf("could not stop contract-registry")
+		log.WithoutContext().WithError(err).Errorf("could not stop envelope-store")
+		return
 	}
 
-	err = env.client.Down(context.Background(), postgresContainerID)
+	err = env.client.Down(env.ctx, postgresContainerID)
 	if err != nil {
-		// TODO: we should probably not panic here
 		log.WithoutContext().WithError(err).Errorf("could not down postgres")
+		return
 	}
 }
 
 func (env *IntegrationEnvironment) migrate() error {
-	db := env.pgmngr.Connect(context.Background(), postgres.NewOptions(viper.GetViper()))
+	db := env.pgmngr.Connect(env.ctx, postgres.NewOptions(viper.GetViper()))
 
 	_, _, err := migrations.Run(db, "init")
 	if err != nil {

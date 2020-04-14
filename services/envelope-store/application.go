@@ -8,10 +8,10 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth"
 	pkggrpc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc"
 	pkghttp "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/configwatcher"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/grpc"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/http"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/service/configwatcher"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/service/grpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/service/http"
 )
 
 func newApplication(

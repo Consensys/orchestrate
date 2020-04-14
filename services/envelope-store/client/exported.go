@@ -18,7 +18,7 @@ func Init(ctx context.Context) {
 		var err error
 		client, err = NewClient(ctx, &cfg)
 		if err != nil {
-			log.FromContext(ctx).WithError(err).Fatalf("Could not create envelope store application")
+			log.FromContext(ctx).WithError(err).Fatalf("Could not create envelope store client")
 		}
 	})
 }

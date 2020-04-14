@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	mockauth "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/mock"
-	mockstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/service/mock"
+	mockstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/service/controllers/mock"
 )
 
 func TestApp(t *testing.T) {

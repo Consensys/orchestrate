@@ -11,44 +11,46 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/store/models"
 )
 
-//go:generate mockgen -source=load_envelope_by_id.go -destination=mocks/load_envelope_by_id.go -package=mocks
+//go:generate mockgen -source=load_envelope_by_tx_hash.go -destination=mocks/load_envelope_by_tx_hash.go -package=mocks
 
-type LoadEnvelopeByID interface {
-	Execute(ctx context.Context, tenantID string, envelopeID string) (models.EnvelopeModel, error)
+type LoadEnvelopeByTxHash interface {
+	Execute(ctx context.Context, tenantID string, chainID string, txHash string) (*models.EnvelopeModel, error)
 }
 
 // RegisterContract is a use case to register a new contract
-type loadEnvelopeByID struct {
+type loadEnvelopeByTxHash struct {
 	envelopeAgent store.EnvelopeAgent
 }
 
 // NewGetCatalog creates a new GetCatalog
-func NewLoadEnvelopeByID(envelopeAgent store.EnvelopeAgent) LoadEnvelopeByID {
-	return &loadEnvelopeByID{
+func NewLoadEnvelopeByTxHash(envelopeAgent store.EnvelopeAgent) LoadEnvelopeByTxHash {
+	return &loadEnvelopeByTxHash{
 		envelopeAgent: envelopeAgent,
 	}
 }
 
-func (se *loadEnvelopeByID) Execute(ctx context.Context, tenantID, envelopeID string) (models.EnvelopeModel, error) {
+func (se *loadEnvelopeByTxHash) Execute(ctx context.Context, tenantID, chainID, txHash string) (*models.EnvelopeModel, error) {
 	logger := log.FromContext(ctx)
 
 	envelope, err := se.envelopeAgent.FindByFieldSet(ctx, map[string]string{
-		"envelope_id": envelopeID,
-		"tenant_id":   tenantID,
+		"chain_id":  chainID,
+		"tx_hash":   txHash,
+		"tenant_id": tenantID,
 	})
 
 	if err != nil {
 		logger.
 			WithError(err).
 			WithFields(logrus.Fields{
-				"envelope.id": envelopeID,
-				"tenant":      tenantID,
+				"chain.id": chainID,
+				"tx.hash":  txHash,
+				"tenant":   tenantID,
 			}).
 			Debugf("could not load envelope")
 		if err == pg.ErrNoRows {
-			return models.EnvelopeModel{}, errors.NotFoundError("envelope with id %v does not exist", envelopeID)
+			return nil, errors.NotFoundError("no envelope with hash %v", txHash)
 		}
-		return models.EnvelopeModel{}, errors.StorageError(err.Error())
+		return nil, errors.StorageError(err.Error())
 	}
 
 	return envelope, nil

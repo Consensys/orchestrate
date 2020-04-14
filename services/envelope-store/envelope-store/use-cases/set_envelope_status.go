@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/containous/traefik/v2/pkg/log"
+	"github.com/go-pg/pg/v9"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/store"
@@ -14,7 +15,7 @@ import (
 //go:generate mockgen -source=set_envelope_status.go -destination=mocks/set_envelope_status.go -package=mocks
 
 type SetEnvelopeStatus interface {
-	Execute(ctx context.Context, tenantID string, envelopeID string, nextStatus string) (models.EnvelopeModel, error)
+	Execute(ctx context.Context, tenantID string, envelopeID string, nextStatus string) (*models.EnvelopeModel, error)
 }
 
 // RegisterContract is a use case to register a new contract
@@ -29,7 +30,7 @@ func NewSetEnvelopeStatus(envelopeAgent store.EnvelopeAgent) SetEnvelopeStatus {
 	}
 }
 
-func (se *setEnvelopeStatus) Execute(ctx context.Context, tenantID, envelopeID, nextStatus string) (models.EnvelopeModel, error) {
+func (se *setEnvelopeStatus) Execute(ctx context.Context, tenantID, envelopeID, nextStatus string) (*models.EnvelopeModel, error) {
 	logger := log.FromContext(ctx)
 
 	envelope, err := se.envelopeAgent.FindByFieldSet(ctx, map[string]string{
@@ -45,15 +46,18 @@ func (se *setEnvelopeStatus) Execute(ctx context.Context, tenantID, envelopeID, 
 				"tenant":      tenantID,
 			}).
 			Debugf("could not load envelope")
-		return models.EnvelopeModel{}, errors.StorageError(err.Error())
+		if err == pg.ErrNoRows {
+			return nil, errors.NotFoundError("no envelope with envelope id %v", envelopeID)
+		}
+		return nil, errors.StorageError(err.Error())
 	}
 
 	envelope.Status = strings.ToLower(nextStatus)
 
-	err = se.envelopeAgent.UpdateStatus(ctx, &envelope)
+	err = se.envelopeAgent.UpdateStatus(ctx, envelope)
 	if err != nil {
 		logger.WithError(err).Errorf("could not update envelope")
-		return models.EnvelopeModel{}, err
+		return nil, err
 	}
 
 	log.FromContext(ctx).
