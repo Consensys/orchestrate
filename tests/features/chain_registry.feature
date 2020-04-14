@@ -120,6 +120,26 @@ Feature: chain registry
       """
     Then the response code should be 200
     Then I store the UUID as "gethTemp2UUID"
+    
+    When I send "PATCH" request to "{{chain-registry}}/chains/{{gethTemp2UUID}}" with json:
+      """
+      {
+        "listener": {
+          "backOffDuration": "1000"
+        }
+      }
+      """
+    Then the response code should be 400
+    
+    When I send "PATCH" request to "{{chain-registry}}/chains/{{gethTemp2UUID}}" with json:
+      """
+      {
+        "urls": [
+          "http//geth:8545"
+        ]
+      }
+      """
+    Then the response code should be 400
 
     When I send "PATCH" request to "{{chain-registry}}/chains/{{gethTemp2UUID}}" with json:
       """
@@ -166,3 +186,36 @@ Feature: chain registry
 
     When I send "DELETE" request to "{{chain-registry}}/chains/{{gethTemp2UUID}}"
     Then the response code should be 204
+  
+  Scenario: Fail to register chains with invalid values
+    When I send "POST" request to "{{chain-registry}}/chains" with json:
+      """
+      {
+        "name": "gethInvalid",
+        "urls": [
+          "http://geth:8545"
+        ],
+        "listener": {
+          "depth": 1,
+          "fromBlock": "1",
+          "backOffDuration": "1000"
+        }
+      }
+      """
+    Then the response code should be 400
+    
+    When I send "POST" request to "{{chain-registry}}/chains" with json:
+      """
+      {
+        "name": "gethInvalid",
+        "urls": [
+          "http//geth:8545"
+        ],
+        "listener": {
+          "depth": 1,
+          "fromBlock": "1",
+          "backOffDuration": "1000"
+        }
+      }
+      """
+    Then the response code should be 400

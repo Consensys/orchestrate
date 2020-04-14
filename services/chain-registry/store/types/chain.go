@@ -1,8 +1,11 @@
 package types
 
 import (
+	"fmt"
+	"regexp"
 	"time"
 
+	"github.com/google/uuid"
 	genuuid "github.com/satori/go.uuid"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 )
@@ -24,7 +27,39 @@ type Chain struct {
 }
 
 func (c *Chain) IsValid() bool {
-	return c.Name != "" && c.TenantID != "" && len(c.URLs) != 0 && c.ListenerBackOffDuration != nil && *c.ListenerBackOffDuration != ""
+	err := c.Validate()
+	return err == nil
+}
+
+func (c *Chain) Validate() error {
+	if c.Name == "" {
+		return fmt.Errorf("chain name cannot be empty")
+	}
+	if c.TenantID == "" {
+		return fmt.Errorf("chain tenantID cannot be empty")
+	}
+
+	if c.ListenerBackOffDuration == nil || *c.ListenerBackOffDuration == "" {
+		return fmt.Errorf("chain backOffDuration cannot be empty")
+	} else if _, err := time.ParseDuration(*c.ListenerBackOffDuration); err != nil {
+		return err
+	}
+
+	if len(c.URLs) == 0 {
+		return fmt.Errorf("chain URLs cannot be an empty list")
+	}
+
+	for _, uri := range c.URLs {
+		if err := validateChainURL(uri); err != nil {
+			return err
+		}
+	}
+
+	if _, err := uuid.Parse(c.UUID); c.UUID != "" && err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *Chain) SetDefault() {
@@ -53,4 +88,13 @@ func (c *Chain) SetDefault() {
 		externalTxEnabled := false
 		c.ListenerExternalTxEnabled = &externalTxEnabled
 	}
+}
+
+func validateChainURL(str string) error {
+	var re = regexp.MustCompile(`(?m)((https?://)?.*):(\d*)\/?(.*)`)
+	if !re.MatchString(str) {
+		return fmt.Errorf("malformed URL %s", str)
+	}
+
+	return nil
 }

@@ -38,6 +38,8 @@ func HandleStoreError(rw http.ResponseWriter, err error) {
 		WriteError(rw, err.Error(), http.StatusConflict)
 	case errors.IsNotFoundError(err):
 		WriteError(rw, err.Error(), http.StatusNotFound)
+	case errors.IsDataError(err):
+		WriteError(rw, err.Error(), http.StatusBadRequest)
 	case err != nil:
 		WriteError(rw, err.Error(), http.StatusInternalServerError)
 	}

@@ -33,11 +33,11 @@ mod-tidy: ## Run deps cleanup
 
 lint: ## Run linter to fix issues
 	@misspell -w $(GOFILES)
-	@golangci-lint run --fix
+	@golangci-lint run --fast --fix
 
 lint-ci: ## Check linting
 	@misspell -error $(GOFILES)
-	@golangci-lint run
+	@golangci-lint run --fast
 
 run-e2e: gobuild-e2e
 	@docker-compose up e2e

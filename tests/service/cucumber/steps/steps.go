@@ -18,8 +18,9 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
-	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
+	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
 	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
+	envelopestore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/chanregistry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/parser"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/tracker"
@@ -92,10 +93,9 @@ type ScenarioContext struct {
 }
 
 func setServiceURL(sc *ScenarioContext) {
-
 	sc.httpAliases.Set(GenericNamespace, "chain-registry", viper.GetString(chainregistry.ChainRegistryURLViperKey))
-	sc.httpAliases.Set(GenericNamespace, "contract-registry", "http://contract-registry:8081")
-	sc.httpAliases.Set(GenericNamespace, "envelope-store", "http://envelope-store:8081")
+	sc.httpAliases.Set(GenericNamespace, "contract-registry", viper.GetString(contractregistry.ContractRegistryURLViperKey))
+	sc.httpAliases.Set(GenericNamespace, "envelope-store", viper.GetString(envelopestore.EnvelopeStoreURLViperKey))
 }
 
 func NewScenarioContext(
@@ -360,7 +360,7 @@ func FeatureContext(s *godog.Suite) {
 	sc := NewScenarioContext(
 		chanregistry.GlobalChanRegistry(),
 		http.NewClient(),
-		registryclient.GlobalClient(),
+		contractregistry.GlobalClient(),
 		broker.GlobalSyncProducer(),
 		parser.GlobalParser(),
 	)

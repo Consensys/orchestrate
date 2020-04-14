@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
@@ -29,7 +30,7 @@ var tenantID1Chains = map[string]*types.Chain{
 	chainName1: {
 		Name:                    chainName1,
 		TenantID:                tenantID1,
-		URLs:                    []string{"testUrl1", "testUrl2"},
+		URLs:                    []string{"http://testurlone.com", "http://testurltwo.com"},
 		ListenerDepth:           &(&struct{ x uint64 }{1}).x,
 		ListenerCurrentBlock:    &(&struct{ x uint64 }{1}).x,
 		ListenerStartingBlock:   &(&struct{ x uint64 }{1}).x,
@@ -38,7 +39,7 @@ var tenantID1Chains = map[string]*types.Chain{
 	chainName2: {
 		Name:                    chainName2,
 		TenantID:                tenantID1,
-		URLs:                    []string{"testUrl1", "testUrl2"},
+		URLs:                    []string{"http://localhost:8545", "https://localhost:443"},
 		ListenerDepth:           &(&struct{ x uint64 }{2}).x,
 		ListenerCurrentBlock:    &(&struct{ x uint64 }{2}).x,
 		ListenerStartingBlock:   &(&struct{ x uint64 }{2}).x,
@@ -49,7 +50,7 @@ var tenantID2Chains = map[string]*types.Chain{
 	chainName1: {
 		Name:                      chainName1,
 		TenantID:                  tenantID2,
-		URLs:                      []string{"testUrl1", "testUrl2"},
+		URLs:                      []string{"http://testurlone.com", "http://testurltwo.com"},
 		ListenerDepth:             &(&struct{ x uint64 }{1}).x,
 		ListenerCurrentBlock:      &(&struct{ x uint64 }{1}).x,
 		ListenerStartingBlock:     &(&struct{ x uint64 }{1}).x,
@@ -59,7 +60,7 @@ var tenantID2Chains = map[string]*types.Chain{
 	chainName2: {
 		Name:                      chainName2,
 		TenantID:                  tenantID2,
-		URLs:                      []string{"testUrl1", "testUrl2"},
+		URLs:                      []string{"http://testurlone.com", "http://testurltwo.com"},
 		ListenerDepth:             &(&struct{ x uint64 }{2}).x,
 		ListenerCurrentBlock:      &(&struct{ x uint64 }{2}).x,
 		ListenerStartingBlock:     &(&struct{ x uint64 }{2}).x,
@@ -69,7 +70,7 @@ var tenantID2Chains = map[string]*types.Chain{
 	chainName3: {
 		Name:                      chainName3,
 		TenantID:                  tenantID2,
-		URLs:                      []string{"testUrl1", "testUrl2"},
+		URLs:                      []string{"http://testurlone.com", "http://testurltwo.com"},
 		ListenerDepth:             &(&struct{ x uint64 }{3}).x,
 		ListenerCurrentBlock:      &(&struct{ x uint64 }{3}).x,
 		ListenerStartingBlock:     &(&struct{ x uint64 }{3}).x,
@@ -102,21 +103,63 @@ func (s *ChainTestSuite) TestRegisterChain() {
 	assert.Error(s.T(), err, "Should get an error violating the 'unique' constraint")
 }
 
-func (s *ChainTestSuite) TestRegisterChainWithError() {
+func (s *ChainTestSuite) TestRegisterChainWithMissingURLsFieldErr() {
 	listenerDepth := uint64(2)
 	listenerCurrentBlock := uint64(2)
 	listenerStartingBlock := uint64(2)
 	listenerBackOffDuration := "2s"
 	chainError := &types.Chain{
-		Name:                    "chainName1",
+		Name:                    "chainNameErr",
 		TenantID:                "tenantID1",
 		ListenerDepth:           &listenerDepth,
 		ListenerCurrentBlock:    &listenerCurrentBlock,
 		ListenerStartingBlock:   &listenerStartingBlock,
 		ListenerBackOffDuration: &listenerBackOffDuration,
 	}
+	chainError.SetDefault()
 	err := s.Store.RegisterChain(context.Background(), chainError)
-	assert.Error(s.T(), err, "Should get an error when a field is missing")
+	assert.Error(s.T(), err, "Should get an error when a field is missing URLs")
+	assert.True(s.T(), errors.IsDataError(err), "Should be a DataError")
+}
+
+func (s *ChainTestSuite) TestRegisterChainWithInvalidBackOffDurationErr() {
+	listenerDepth := uint64(2)
+	listenerCurrentBlock := uint64(2)
+	listenerStartingBlock := uint64(2)
+	listenerBackOffDuration := "2000"
+	chainError := &types.Chain{
+		Name:                    "chainNameErr",
+		TenantID:                "tenantID1",
+		URLs:                    []string{"http://testurlthree.com"},
+		ListenerDepth:           &listenerDepth,
+		ListenerCurrentBlock:    &listenerCurrentBlock,
+		ListenerStartingBlock:   &listenerStartingBlock,
+		ListenerBackOffDuration: &listenerBackOffDuration,
+	}
+	chainError.SetDefault()
+	err := s.Store.RegisterChain(context.Background(), chainError)
+	assert.Error(s.T(), err, "Should get an error when invalid backOffDuration")
+	assert.True(s.T(), errors.IsDataError(err), "Should be a DataError")
+}
+
+func (s *ChainTestSuite) TestRegisterChainWithInvalidUrlsErr() {
+	listenerDepth := uint64(2)
+	listenerCurrentBlock := uint64(2)
+	listenerStartingBlock := uint64(2)
+	listenerBackOffDuration := "2s"
+	chainError := &types.Chain{
+		Name:                    "chainNameErr",
+		TenantID:                "tenantID1",
+		URLs:                    []string{"123 1sda3"},
+		ListenerDepth:           &listenerDepth,
+		ListenerCurrentBlock:    &listenerCurrentBlock,
+		ListenerStartingBlock:   &listenerStartingBlock,
+		ListenerBackOffDuration: &listenerBackOffDuration,
+	}
+	chainError.SetDefault()
+	err := s.Store.RegisterChain(context.Background(), chainError)
+	assert.Error(s.T(), err, "Should get an error when invalid URI")
+	assert.True(s.T(), errors.IsDataError(err), "Should be a DataError")
 }
 
 func (s *ChainTestSuite) TestRegisterChains() {
@@ -179,7 +222,7 @@ func (s *ChainTestSuite) TestUpdateChainByUUID() {
 	s.TestRegisterChains()
 
 	testChain := ChainsSample[tenantID1][chainName2]
-	testChain.URLs = []string{"testUrl1"}
+	testChain.URLs = []string{"http://testurlone.com"}
 	err := s.Store.UpdateChainByUUID(context.Background(), testChain)
 	assert.NoError(s.T(), err, "Should update chain without errors")
 
@@ -189,7 +232,7 @@ func (s *ChainTestSuite) TestUpdateChainByUUID() {
 
 func (s *ChainTestSuite) TestNotFoundTenantErrorUpdateChainByName() {
 	testChain := ChainsSample[tenantID1][chainName2]
-	testChain.URLs = []string{"testUrl1"}
+	testChain.URLs = []string{"http://testurlone.com"}
 	err := s.Store.UpdateChainByName(context.Background(), testChain)
 	assert.Error(s.T(), err, "Should get chain without errors")
 }
@@ -200,7 +243,7 @@ func (s *ChainTestSuite) TestNotFoundNameErrorUpdateChainByName() {
 	testChain := &types.Chain{
 		Name:     tenantID1,
 		TenantID: errorTenantID,
-		URLs:     []string{"testUrl1"},
+		URLs:     []string{"http://testurlone.com"},
 	}
 	err := s.Store.UpdateChainByName(context.Background(), testChain)
 	assert.Error(s.T(), err, "Should get chain without errors")
@@ -211,7 +254,7 @@ func (s *ChainTestSuite) TestErrorNotFoundUpdateChainByUUID() {
 
 	testChain := &types.Chain{
 		UUID: "0d60a85e-0b90-4482-a14c-108aea2557aa",
-		URLs: []string{"testUrl1"},
+		URLs: []string{"http://testurlone.com"},
 	}
 	err := s.Store.UpdateChainByUUID(context.Background(), testChain)
 	assert.Error(s.T(), err, "Should update chain with errors")

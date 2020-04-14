@@ -37,6 +37,10 @@ func New(db *pg.DB) *PG {
 
 func (s *PG) RegisterChain(ctx context.Context, chain *types.Chain) error {
 	logger := log.FromContext(ctx)
+	if err := chain.Validate(); err != nil {
+		logger.WithError(err).Errorf("could not register chain")
+		return errors.DataError(err.Error())
+	}
 
 	_, err := s.db.ModelContext(ctx, chain).Insert()
 	if err != nil {
@@ -128,17 +132,23 @@ func (s *PG) GetChainByUUIDAndTenant(ctx context.Context, chainUUID, tenantID st
 }
 
 func (s *PG) UpdateChainByName(ctx context.Context, chain *types.Chain) error {
+	logger := log.FromContext(ctx)
+	if err := chain.Validate(); err != nil {
+		logger.WithError(err).Errorf("Failed to update chain by name")
+		return errors.DataError(err.Error())
+	}
+
 	res, err := s.db.ModelContext(ctx, chain).Where("name = ?", chain.Name).UpdateNotZero()
 	if err != nil {
 		errMessage := "Failed to update chain by name"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
+		logger.WithError(err).Error(errMessage)
 		return errors.PostgresConnectionError(errMessage).ExtendComponent(component)
 	}
 
 	if res.RowsReturned() == 0 && res.RowsAffected() == 0 {
 
 		errMessage := "no chain found with tenant_id=%s and name=%s"
-		log.FromContext(ctx).WithError(err).Error(errMessage, chain.TenantID, chain.Name)
+		logger.WithError(err).Error(errMessage, chain.TenantID, chain.Name)
 		return errors.NotFoundError(errMessage, chain.TenantID, chain.Name).ExtendComponent(component)
 	}
 
@@ -146,6 +156,12 @@ func (s *PG) UpdateChainByName(ctx context.Context, chain *types.Chain) error {
 }
 
 func (s *PG) UpdateChainByUUID(ctx context.Context, chain *types.Chain) error {
+	logger := log.FromContext(ctx)
+	if err := chain.Validate(); err != nil {
+		logger.WithError(err).Errorf("Failed to update chain by UUID")
+		return errors.DataError(err.Error())
+	}
+
 	res, err := s.db.ModelContext(ctx, chain).WherePK().UpdateNotZero()
 	if err != nil {
 		errMessage := "Failed to update chain by UUID"
