@@ -24,7 +24,7 @@ type IntegrationEnvironment struct {
 func NewIntegrationEnvironment() *IntegrationEnvironment {
 	composition := &config.Composition{
 		Containers: map[string]*config.Container{
-			postgresContainerID: &config.Container{Postgres: (&config.Postgres{}).SetDefault()},
+			postgresContainerID: {Postgres: (&config.Postgres{}).SetDefault()},
 		},
 	}
 

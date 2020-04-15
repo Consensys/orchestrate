@@ -48,7 +48,7 @@ func TestNewInternalConfig(t *testing.T) {
 						Middlewares: []string{"base-accesslog", "strip-api"},
 					},
 				},
-				"healthcheck": &dynamic.Router{
+				"healthcheck": {
 					Router: &traefikdynamic.Router{
 						EntryPoints: []string{"metrics"},
 						Service:     "healthcheck",
@@ -58,36 +58,36 @@ func TestNewInternalConfig(t *testing.T) {
 				},
 			},
 			Middlewares: map[string]*dynamic.Middleware{
-				"strip-api": &dynamic.Middleware{
+				"strip-api": {
 					Middleware: &traefikdynamic.Middleware{
 						StripPrefixRegex: &traefikdynamic.StripPrefixRegex{
 							Regex: []string{"/api"},
 						},
 					},
 				},
-				"strip-path": &dynamic.Middleware{
+				"strip-path": {
 					Middleware: &traefikdynamic.Middleware{
 						StripPrefixRegex: &traefikdynamic.StripPrefixRegex{
 							Regex: []string{"/.+"},
 						},
 					},
 				},
-				"auth": &dynamic.Middleware{
+				"auth": {
 					Auth: &dynamic.Auth{},
 				},
-				"ratelimit": &dynamic.Middleware{
+				"ratelimit": {
 					RateLimit: &dynamic.RateLimit{
 						MaxDelay:     time.Second,
 						DefaultDelay: 30 * time.Second,
 						Cooldown:     30 * time.Second,
 					},
 				},
-				"base-accesslog": &dynamic.Middleware{
+				"base-accesslog": {
 					AccessLog: &dynamic.AccessLog{
 						Format: "json",
 					},
 				},
-				"chain-proxy-accesslog": &dynamic.Middleware{
+				"chain-proxy-accesslog": {
 					AccessLog: &dynamic.AccessLog{
 						Filters: &dynamic.AccessLogFilters{
 							StatusCodes: []string{"100-199", "400-428", "430-599"},
@@ -97,16 +97,16 @@ func TestNewInternalConfig(t *testing.T) {
 				},
 			},
 			Services: map[string]*dynamic.Service{
-				"chains": &dynamic.Service{
+				"chains": {
 					Chains: &dynamic.Chains{},
 				},
-				"dashboard": &dynamic.Service{
+				"dashboard": {
 					Dashboard: &dynamic.Dashboard{},
 				},
-				"healthcheck": &dynamic.Service{
+				"healthcheck": {
 					HealthCheck: &dynamic.HealthCheck{},
 				},
-				"swagger": &dynamic.Service{
+				"swagger": {
 					Swagger: &dynamic.Swagger{
 						SpecsFile: "./public/swagger-specs/types/chain-registry/swagger.json",
 					},

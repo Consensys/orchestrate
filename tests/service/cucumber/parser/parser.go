@@ -9,7 +9,7 @@ import (
 	"github.com/cucumber/godog/gherkin"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/mitchellh/mapstructure"
-	generator "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt/generator"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt/generator"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 )

@@ -9,7 +9,7 @@ var Configs = map[string]interface{}{
 	"provider1": &dynamic.Configuration{
 		HTTP: &dynamic.HTTPConfiguration{
 			Routers: map[string]*dynamic.Router{
-				"router-proxy": &dynamic.Router{
+				"router-proxy": {
 					Router: &traefikdynamic.Router{
 						EntryPoints: []string{"ep-foo", "ep-bar"},
 						Middlewares: []string{"middleware-foo"},
@@ -19,22 +19,22 @@ var Configs = map[string]interface{}{
 				},
 			},
 			Middlewares: map[string]*dynamic.Middleware{
-				"middleware-foo": &dynamic.Middleware{
+				"middleware-foo": {
 					Middleware: &traefikdynamic.Middleware{
 						AddPrefix: &traefikdynamic.AddPrefix{
 							Prefix: "/foo",
 						},
 					},
 				},
-				"middleware-bar": &dynamic.Middleware{
+				"middleware-bar": {
 					Mock: &dynamic.Mock{},
 				},
 			},
 			Services: map[string]*dynamic.Service{
-				"proxy": &dynamic.Service{
+				"proxy": {
 					ReverseProxy: &dynamic.ReverseProxy{},
 				},
-				"dashboard": &dynamic.Service{
+				"dashboard": {
 					Dashboard: &dynamic.Dashboard{},
 				},
 			},
@@ -43,7 +43,7 @@ var Configs = map[string]interface{}{
 	"provider2": &dynamic.Configuration{
 		HTTP: &dynamic.HTTPConfiguration{
 			Routers: map[string]*dynamic.Router{
-				"router-dashboard": &dynamic.Router{
+				"router-dashboard": {
 					Router: &traefikdynamic.Router{
 						EntryPoints: []string{"ep-foo"},
 						Middlewares: []string{"accesslog", "middleware-bar@provider1"},
@@ -53,7 +53,7 @@ var Configs = map[string]interface{}{
 				},
 			},
 			Middlewares: map[string]*dynamic.Middleware{
-				"accesslog": &dynamic.Middleware{
+				"accesslog": {
 					AccessLog: &dynamic.AccessLog{},
 				},
 			},
@@ -64,7 +64,7 @@ var Configs = map[string]interface{}{
 var Config = &dynamic.Configuration{
 	HTTP: &dynamic.HTTPConfiguration{
 		Routers: map[string]*dynamic.Router{
-			"router-proxy@provider1": &dynamic.Router{
+			"router-proxy@provider1": {
 				Router: &traefikdynamic.Router{
 					EntryPoints: []string{"ep-foo", "ep-bar"},
 					Middlewares: []string{"middleware-foo@provider1"},
@@ -72,7 +72,7 @@ var Config = &dynamic.Configuration{
 					Service:     "proxy@provider1",
 				},
 			},
-			"router-dashboard@provider2": &dynamic.Router{
+			"router-dashboard@provider2": {
 				Router: &traefikdynamic.Router{
 					EntryPoints: []string{"ep-foo"},
 					Middlewares: []string{"accesslog@provider2", "middleware-bar@provider1"},
@@ -82,25 +82,25 @@ var Config = &dynamic.Configuration{
 			},
 		},
 		Middlewares: map[string]*dynamic.Middleware{
-			"middleware-foo@provider1": &dynamic.Middleware{
+			"middleware-foo@provider1": {
 				Middleware: &traefikdynamic.Middleware{
 					AddPrefix: &traefikdynamic.AddPrefix{
 						Prefix: "/foo",
 					},
 				},
 			},
-			"middleware-bar@provider1": &dynamic.Middleware{
+			"middleware-bar@provider1": {
 				Mock: &dynamic.Mock{},
 			},
-			"accesslog@provider2": &dynamic.Middleware{
+			"accesslog@provider2": {
 				AccessLog: &dynamic.AccessLog{},
 			},
 		},
 		Services: map[string]*dynamic.Service{
-			"proxy@provider1": &dynamic.Service{
+			"proxy@provider1": {
 				ReverseProxy: &dynamic.ReverseProxy{},
 			},
-			"dashboard@provider1": &dynamic.Service{
+			"dashboard@provider1": {
 				Dashboard: &dynamic.Dashboard{},
 			},
 		},

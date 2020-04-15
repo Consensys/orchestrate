@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net"
 
-	proxyprotocol "github.com/c0va23/go-proxyprotocol"
+	"github.com/c0va23/go-proxyprotocol"
 )
 
 //go:generate mockgen -source=write_closer.go -destination=mock/write_closer.go -package=mock

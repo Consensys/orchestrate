@@ -6,7 +6,7 @@ import (
 	"context"
 	"testing"
 
-	gomock "github.com/golang/mock/gomock"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/config/static"
@@ -32,8 +32,8 @@ func TestBuilder(t *testing.T) {
 	cfg := &static.Configuration{
 		Options: &static.Options{},
 		Interceptors: []*static.Interceptor{
-			&static.Interceptor{},
-			&static.Interceptor{},
+			{},
+			{},
 		},
 		Services: &static.Services{},
 	}

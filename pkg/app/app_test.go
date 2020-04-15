@@ -22,7 +22,7 @@ import (
 func TestApp(t *testing.T) {
 	httpEps := http.NewEntryPoints(
 		map[string]*traefikstatic.EntryPoint{
-			"test-ep": &traefikstatic.EntryPoint{
+			"test-ep": {
 				Address: "127.0.0.1:1",
 				Transport: &traefikstatic.EntryPointsTransport{
 					RespondingTimeouts: &traefikstatic.RespondingTimeouts{},

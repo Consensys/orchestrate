@@ -5,7 +5,7 @@ package tcp_test
 import (
 	"testing"
 
-	gomock "github.com/golang/mock/gomock"
+	"github.com/golang/mock/gomock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp/mock"
 )

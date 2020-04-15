@@ -1,7 +1,7 @@
 package mock
 
 import (
-	http "net/http"
+	"net/http"
 )
 
 func NewMockMiddleware(mockHandler http.Handler) func(http.Handler) http.Handler {

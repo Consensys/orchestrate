@@ -11,7 +11,7 @@ import (
 	"time"
 
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
-	gomock "github.com/golang/mock/gomock"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/mock"
@@ -46,7 +46,7 @@ func TestEntryPoints(t *testing.T) {
 
 	// Create Router Configuration
 	confs := map[string]*router.Router{
-		"test-ep": &router.Router{
+		"test-ep": {
 			HTTP:      &okHandler{httpHandler},
 			HTTPS:     &okHandler{httpsHandler},
 			TLSConfig: tlsConfig,
@@ -55,7 +55,7 @@ func TestEntryPoints(t *testing.T) {
 
 	eps := NewEntryPoints(
 		map[string]*traefikstatic.EntryPoint{
-			"test-ep": &traefikstatic.EntryPoint{
+			"test-ep": {
 				Address: "127.0.0.1:0",
 				Transport: &traefikstatic.EntryPointsTransport{
 					RespondingTimeouts: &traefikstatic.RespondingTimeouts{},

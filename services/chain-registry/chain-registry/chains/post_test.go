@@ -13,7 +13,7 @@ const (
 	defaultMultitenantResult = "{\"uuid\":\"uuid\",\"name\":\"testName\",\"tenantID\":\"tenantID\",\"urls\":[\"http://test.com\"],\"listenerDepth\":0,\"listenerCurrentBlock\":\"666\",\"listenerStartingBlock\":\"666\",\"listenerBackOffDuration\":\"1s\",\"listenerExternalTxEnabled\":false,\"createdAt\":null}\n"
 )
 
-var urls []string = []string{"http://test.com"}
+var urls = []string{"http://test.com"}
 
 var postChainTests = []HTTPRouteTests{
 	{

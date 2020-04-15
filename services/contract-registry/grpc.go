@@ -58,11 +58,11 @@ func NewGRPCStaticConfig() *static.Configuration {
 			Contracts: &static.Contracts{},
 		},
 		Interceptors: []*static.Interceptor{
-			&static.Interceptor{Tags: &static.Tags{}},
-			&static.Interceptor{Logrus: &static.Logrus{}},
-			&static.Interceptor{Auth: &static.Auth{}},
-			&static.Interceptor{Error: &static.Error{}},
-			&static.Interceptor{Recovery: &static.Recovery{}},
+			{Tags: &static.Tags{}},
+			{Logrus: &static.Logrus{}},
+			{Auth: &static.Auth{}},
+			{Error: &static.Error{}},
+			{Recovery: &static.Recovery{}},
 		},
 	}
 }

@@ -45,7 +45,7 @@ func TestNewInternalConfig(t *testing.T) {
 						Middlewares: []string{"base-accesslog", "strip-api"},
 					},
 				},
-				"healthcheck": &dynamic.Router{
+				"healthcheck": {
 					Router: &traefikdynamic.Router{
 						EntryPoints: []string{"metrics"},
 						Service:     "healthcheck",
@@ -55,33 +55,33 @@ func TestNewInternalConfig(t *testing.T) {
 				},
 			},
 			Middlewares: map[string]*dynamic.Middleware{
-				"strip-api": &dynamic.Middleware{
+				"strip-api": {
 					Middleware: &traefikdynamic.Middleware{
 						StripPrefixRegex: &traefikdynamic.StripPrefixRegex{
 							Regex: []string{"/api"},
 						},
 					},
 				},
-				"auth": &dynamic.Middleware{
+				"auth": {
 					Auth: &dynamic.Auth{},
 				},
-				"base-accesslog": &dynamic.Middleware{
+				"base-accesslog": {
 					AccessLog: &dynamic.AccessLog{
 						Format: "json",
 					},
 				},
 			},
 			Services: map[string]*dynamic.Service{
-				"contracts": &dynamic.Service{
+				"contracts": {
 					Contracts: &dynamic.Contracts{},
 				},
-				"dashboard": &dynamic.Service{
+				"dashboard": {
 					Dashboard: &dynamic.Dashboard{},
 				},
-				"healthcheck": &dynamic.Service{
+				"healthcheck": {
 					HealthCheck: &dynamic.HealthCheck{},
 				},
-				"swagger": &dynamic.Service{
+				"swagger": {
 					Swagger: &dynamic.Swagger{
 						SpecsFile: "./public/swagger-specs/types/contract-registry/registry.swagger.json",
 					},

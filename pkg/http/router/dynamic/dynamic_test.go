@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	gomock "github.com/golang/mock/gomock"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 	testutilsdynamic "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic/testutils"
 	mhandler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/mock"
