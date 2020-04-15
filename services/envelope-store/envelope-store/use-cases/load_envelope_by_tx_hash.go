@@ -11,8 +11,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/store/models"
 )
 
-//go:generate mockgen -source=load_envelope_by_tx_hash.go -destination=mocks/load_envelope_by_tx_hash.go -package=mocks
-
 type LoadEnvelopeByTxHash interface {
 	Execute(ctx context.Context, tenantID string, chainID string, txHash string) (*models.EnvelopeModel, error)
 }

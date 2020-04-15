@@ -276,6 +276,10 @@
           "type": "string",
           "format": "uint64",
           "description": "QUANTITY - The total amount of gas used when this transaction was executed in the block."
+        },
+        "revert_reason": {
+          "type": "string",
+          "title": "DATA - Revert reason if the transaction failed"
         }
       },
       "title": "Transaction Receipt"

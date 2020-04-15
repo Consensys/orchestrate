@@ -191,16 +191,16 @@ func TestBlockByHash(t *testing.T) {
 
 	// Test 2: empty block response
 	blockEnc := ethcommon.FromHex("f90260f901f9a083cafc574e1f51ba9dc0568fc617a08ea2429fb384059c972f13b19fa1c8dd55a01dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347948888f1f195afa192cfee860698584c030f4c9db1a0ef1552a40b7165c3cd773806b9e0c165b75356e0314bf0706f279c729f51e017a05fe50b260da6308036625b850b5d6ced6d0a9f814c0688bc91ffb7b7a3a54b67a0bc37d79753ad738a6dac4921e57392f145d8887476de3f783dfa7edae9283e52b90100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008302000001832fefd8825208845506eb0780a0bd4472abb6659ebe3ee06ee4d7b72a00a9f4d001caca51342001075469aff49888a13a5a8c8f2bb1c4f861f85f800a82c35094095e7baea6a6c7c4c2dfeb977efac326af552d870a801ba09bea4c4daac7c7c52e093e6a4c35dbbcf8856f1af7b059ba20253e70848d094fa08a8fae537ce25ed8cb5af9adac3f141af69bd515bd2ba031522df09b97dd72b1c0")
-	var expectedblock ethtypes.Block
-	if err = rlp.DecodeBytes(blockEnc, &expectedblock); err != nil {
+	var expectedBlock ethtypes.Block
+	if err = rlp.DecodeBytes(blockEnc, &expectedBlock); err != nil {
 		t.Fatal("decode error: ", err)
 	}
 
-	ctx = newContext(nil, 200, makeRespBody(*expectedblock.Header(), ""))
+	ctx = newContext(nil, 200, makeRespBody(*expectedBlock.Header(), ""))
 	respBlock, err := ec.BlockByHash(ctx, "test-endpoint", ethcommon.HexToHash(""))
 	assert.NoError(t, err, "#2 BlockByHash should not error")
-	assert.Equal(t, expectedblock.NumberU64(), respBlock.NumberU64(), "#2 BlockByHash block number should match")
-	assert.Equal(t, expectedblock.ParentHash().Hex(), respBlock.ParentHash().Hex(), "#2 BlockByHash parent hash should match")
+	assert.Equal(t, expectedBlock.NumberU64(), respBlock.NumberU64(), "#2 BlockByHash block number should match")
+	assert.Equal(t, expectedBlock.ParentHash().Hex(), respBlock.ParentHash().Hex(), "#2 BlockByHash parent hash should match")
 
 	// Test 3: empty block response
 	ctx = newContext(nil, 200, makeRespBody(nil, ""))
@@ -225,16 +225,16 @@ func TestBlockByNumber(t *testing.T) {
 
 	// Test 2: empty block response
 	blockEnc := ethcommon.FromHex("f90260f901f9a083cafc574e1f51ba9dc0568fc617a08ea2429fb384059c972f13b19fa1c8dd55a01dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347948888f1f195afa192cfee860698584c030f4c9db1a0ef1552a40b7165c3cd773806b9e0c165b75356e0314bf0706f279c729f51e017a05fe50b260da6308036625b850b5d6ced6d0a9f814c0688bc91ffb7b7a3a54b67a0bc37d79753ad738a6dac4921e57392f145d8887476de3f783dfa7edae9283e52b90100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008302000001832fefd8825208845506eb0780a0bd4472abb6659ebe3ee06ee4d7b72a00a9f4d001caca51342001075469aff49888a13a5a8c8f2bb1c4f861f85f800a82c35094095e7baea6a6c7c4c2dfeb977efac326af552d870a801ba09bea4c4daac7c7c52e093e6a4c35dbbcf8856f1af7b059ba20253e70848d094fa08a8fae537ce25ed8cb5af9adac3f141af69bd515bd2ba031522df09b97dd72b1c0")
-	var expectedblock ethtypes.Block
-	if err = rlp.DecodeBytes(blockEnc, &expectedblock); err != nil {
+	var expectedBlock ethtypes.Block
+	if err = rlp.DecodeBytes(blockEnc, &expectedBlock); err != nil {
 		t.Fatal("decode error: ", err)
 	}
 
-	ctx = newContext(nil, 200, makeRespBody(*expectedblock.Header(), ""))
+	ctx = newContext(nil, 200, makeRespBody(*expectedBlock.Header(), ""))
 	respBlock, err := ec.BlockByNumber(ctx, "test-endpoint", nil)
 	assert.NoError(t, err, "#2 BlockByNumber should not error")
-	assert.Equal(t, expectedblock.NumberU64(), respBlock.NumberU64(), "Block number should match")
-	assert.Equal(t, expectedblock.ParentHash().Hex(), respBlock.ParentHash().Hex(), "Parent hash should match")
+	assert.Equal(t, expectedBlock.NumberU64(), respBlock.NumberU64(), "Block number should match")
+	assert.Equal(t, expectedBlock.ParentHash().Hex(), respBlock.ParentHash().Hex(), "Parent hash should match")
 
 	// Test 3: empty block response
 	ctx = newContext(nil, 200, makeRespBody(nil, ""))
@@ -259,15 +259,15 @@ func TestHeaderByHash(t *testing.T) {
 
 	// Test 2: empty block response
 	blockEnc := ethcommon.FromHex("f90260f901f9a083cafc574e1f51ba9dc0568fc617a08ea2429fb384059c972f13b19fa1c8dd55a01dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347948888f1f195afa192cfee860698584c030f4c9db1a0ef1552a40b7165c3cd773806b9e0c165b75356e0314bf0706f279c729f51e017a05fe50b260da6308036625b850b5d6ced6d0a9f814c0688bc91ffb7b7a3a54b67a0bc37d79753ad738a6dac4921e57392f145d8887476de3f783dfa7edae9283e52b90100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008302000001832fefd8825208845506eb0780a0bd4472abb6659ebe3ee06ee4d7b72a00a9f4d001caca51342001075469aff49888a13a5a8c8f2bb1c4f861f85f800a82c35094095e7baea6a6c7c4c2dfeb977efac326af552d870a801ba09bea4c4daac7c7c52e093e6a4c35dbbcf8856f1af7b059ba20253e70848d094fa08a8fae537ce25ed8cb5af9adac3f141af69bd515bd2ba031522df09b97dd72b1c0")
-	var expectedblock ethtypes.Block
-	if err = rlp.DecodeBytes(blockEnc, &expectedblock); err != nil {
+	var expectedBlock ethtypes.Block
+	if err = rlp.DecodeBytes(blockEnc, &expectedBlock); err != nil {
 		t.Fatal("decode error: ", err)
 	}
 
-	ctx = newContext(nil, 200, makeRespBody(*expectedblock.Header(), ""))
+	ctx = newContext(nil, 200, makeRespBody(*expectedBlock.Header(), ""))
 	respHeader, err := ec.HeaderByHash(ctx, "test-endpoint", ethcommon.HexToHash(""))
 	assert.NoError(t, err, "#2 HeaderByHash should not error")
-	assert.Equal(t, expectedblock.ParentHash().Hex(), respHeader.ParentHash.Hex(), "#2 HeaderByHash parent hash should match")
+	assert.Equal(t, expectedBlock.ParentHash().Hex(), respHeader.ParentHash.Hex(), "#2 HeaderByHash parent hash should match")
 
 	// Test 3: empty response
 	ctx = newContext(nil, 200, makeRespBody(nil, ""))
@@ -292,15 +292,15 @@ func TestHeaderByNumber(t *testing.T) {
 
 	// Test 2: empty block response
 	blockEnc := ethcommon.FromHex("f90260f901f9a083cafc574e1f51ba9dc0568fc617a08ea2429fb384059c972f13b19fa1c8dd55a01dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347948888f1f195afa192cfee860698584c030f4c9db1a0ef1552a40b7165c3cd773806b9e0c165b75356e0314bf0706f279c729f51e017a05fe50b260da6308036625b850b5d6ced6d0a9f814c0688bc91ffb7b7a3a54b67a0bc37d79753ad738a6dac4921e57392f145d8887476de3f783dfa7edae9283e52b90100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008302000001832fefd8825208845506eb0780a0bd4472abb6659ebe3ee06ee4d7b72a00a9f4d001caca51342001075469aff49888a13a5a8c8f2bb1c4f861f85f800a82c35094095e7baea6a6c7c4c2dfeb977efac326af552d870a801ba09bea4c4daac7c7c52e093e6a4c35dbbcf8856f1af7b059ba20253e70848d094fa08a8fae537ce25ed8cb5af9adac3f141af69bd515bd2ba031522df09b97dd72b1c0")
-	var expectedblock ethtypes.Block
-	if err = rlp.DecodeBytes(blockEnc, &expectedblock); err != nil {
+	var expectedBlock ethtypes.Block
+	if err = rlp.DecodeBytes(blockEnc, &expectedBlock); err != nil {
 		t.Fatal("decode error: ", err)
 	}
 
-	ctx = newContext(nil, 200, makeRespBody(*expectedblock.Header(), ""))
+	ctx = newContext(nil, 200, makeRespBody(*expectedBlock.Header(), ""))
 	respHeader, err := ec.HeaderByNumber(ctx, "test-endpoint", nil)
 	assert.NoError(t, err, "#2 HeaderByNumber should not error")
-	assert.Equal(t, expectedblock.ParentHash().Hex(), respHeader.ParentHash.Hex(), "#2 HeaderByHash parent hash should match")
+	assert.Equal(t, expectedBlock.ParentHash().Hex(), respHeader.ParentHash.Hex(), "#2 HeaderByHash parent hash should match")
 
 	// Test 3: empty response
 	ctx = newContext(nil, 200, makeRespBody(nil, ""))

@@ -11,30 +11,30 @@ import (
 	reflect "reflect"
 )
 
-// MockBuilder is a mock of Builder interface
+// MockBuilder is a mock of Builder interface.
 type MockBuilder struct {
 	ctrl     *gomock.Controller
 	recorder *MockBuilderMockRecorder
 }
 
-// MockBuilderMockRecorder is the mock recorder for MockBuilder
+// MockBuilderMockRecorder is the mock recorder for MockBuilder.
 type MockBuilderMockRecorder struct {
 	mock *MockBuilder
 }
 
-// NewMockBuilder creates a new mock instance
+// NewMockBuilder creates a new mock instance.
 func NewMockBuilder(ctrl *gomock.Controller) *MockBuilder {
 	mock := &MockBuilder{ctrl: ctrl}
 	mock.recorder = &MockBuilderMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockBuilder) EXPECT() *MockBuilderMockRecorder {
 	return m.recorder
 }
 
-// Build mocks base method
+// Build mocks base method.
 func (m *MockBuilder) Build(ctx context.Context, name string, configuration interface{}) (func(http.Handler) http.Handler, func(*http.Response) error, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Build", ctx, name, configuration)
@@ -44,7 +44,7 @@ func (m *MockBuilder) Build(ctx context.Context, name string, configuration inte
 	return ret0, ret1, ret2
 }
 
-// Build indicates an expected call of Build
+// Build indicates an expected call of Build.
 func (mr *MockBuilderMockRecorder) Build(ctx, name, configuration interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Build", reflect.TypeOf((*MockBuilder)(nil).Build), ctx, name, configuration)

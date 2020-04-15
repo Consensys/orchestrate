@@ -364,7 +364,7 @@ func (e *Envelope) SetGasString(gas string) error {
 	if gas != "" {
 		g, err := strconv.ParseUint(gas, 10, 32)
 		if err != nil {
-			return errors.DataError("invalid gasPrice - got %s", gas)
+			return errors.DataError("invalid gas - got %s", gas)
 		}
 		_ = e.SetGas(g)
 	}

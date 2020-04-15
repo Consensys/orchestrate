@@ -11,30 +11,30 @@ import (
 	reflect "reflect"
 )
 
-// MockEnvelopeStoreServer is a mock of EnvelopeStoreServer interface
+// MockEnvelopeStoreServer is a mock of EnvelopeStoreServer interface.
 type MockEnvelopeStoreServer struct {
 	ctrl     *gomock.Controller
 	recorder *MockEnvelopeStoreServerMockRecorder
 }
 
-// MockEnvelopeStoreServerMockRecorder is the mock recorder for MockEnvelopeStoreServer
+// MockEnvelopeStoreServerMockRecorder is the mock recorder for MockEnvelopeStoreServer.
 type MockEnvelopeStoreServerMockRecorder struct {
 	mock *MockEnvelopeStoreServer
 }
 
-// NewMockEnvelopeStoreServer creates a new mock instance
+// NewMockEnvelopeStoreServer creates a new mock instance.
 func NewMockEnvelopeStoreServer(ctrl *gomock.Controller) *MockEnvelopeStoreServer {
 	mock := &MockEnvelopeStoreServer{ctrl: ctrl}
 	mock.recorder = &MockEnvelopeStoreServerMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockEnvelopeStoreServer) EXPECT() *MockEnvelopeStoreServerMockRecorder {
 	return m.recorder
 }
 
-// LoadByID mocks base method
+// LoadByID mocks base method.
 func (m *MockEnvelopeStoreServer) LoadByID(arg0 context.Context, arg1 *proto.LoadByIDRequest) (*proto.StoreResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "LoadByID", arg0, arg1)
@@ -43,13 +43,13 @@ func (m *MockEnvelopeStoreServer) LoadByID(arg0 context.Context, arg1 *proto.Loa
 	return ret0, ret1
 }
 
-// LoadByID indicates an expected call of LoadByID
+// LoadByID indicates an expected call of LoadByID.
 func (mr *MockEnvelopeStoreServerMockRecorder) LoadByID(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadByID", reflect.TypeOf((*MockEnvelopeStoreServer)(nil).LoadByID), arg0, arg1)
 }
 
-// LoadByTxHash mocks base method
+// LoadByTxHash mocks base method.
 func (m *MockEnvelopeStoreServer) LoadByTxHash(arg0 context.Context, arg1 *proto.LoadByTxHashRequest) (*proto.StoreResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "LoadByTxHash", arg0, arg1)
@@ -58,13 +58,13 @@ func (m *MockEnvelopeStoreServer) LoadByTxHash(arg0 context.Context, arg1 *proto
 	return ret0, ret1
 }
 
-// LoadByTxHash indicates an expected call of LoadByTxHash
+// LoadByTxHash indicates an expected call of LoadByTxHash.
 func (mr *MockEnvelopeStoreServerMockRecorder) LoadByTxHash(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadByTxHash", reflect.TypeOf((*MockEnvelopeStoreServer)(nil).LoadByTxHash), arg0, arg1)
 }
 
-// LoadPending mocks base method
+// LoadPending mocks base method.
 func (m *MockEnvelopeStoreServer) LoadPending(arg0 context.Context, arg1 *proto.LoadPendingRequest) (*proto.LoadPendingResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "LoadPending", arg0, arg1)
@@ -73,13 +73,13 @@ func (m *MockEnvelopeStoreServer) LoadPending(arg0 context.Context, arg1 *proto.
 	return ret0, ret1
 }
 
-// LoadPending indicates an expected call of LoadPending
+// LoadPending indicates an expected call of LoadPending.
 func (mr *MockEnvelopeStoreServerMockRecorder) LoadPending(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadPending", reflect.TypeOf((*MockEnvelopeStoreServer)(nil).LoadPending), arg0, arg1)
 }
 
-// SetStatus mocks base method
+// SetStatus mocks base method.
 func (m *MockEnvelopeStoreServer) SetStatus(arg0 context.Context, arg1 *proto.SetStatusRequest) (*proto.StatusResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetStatus", arg0, arg1)
@@ -88,13 +88,13 @@ func (m *MockEnvelopeStoreServer) SetStatus(arg0 context.Context, arg1 *proto.Se
 	return ret0, ret1
 }
 
-// SetStatus indicates an expected call of SetStatus
+// SetStatus indicates an expected call of SetStatus.
 func (mr *MockEnvelopeStoreServerMockRecorder) SetStatus(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetStatus", reflect.TypeOf((*MockEnvelopeStoreServer)(nil).SetStatus), arg0, arg1)
 }
 
-// Store mocks base method
+// Store mocks base method.
 func (m *MockEnvelopeStoreServer) Store(arg0 context.Context, arg1 *proto.StoreRequest) (*proto.StoreResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Store", arg0, arg1)
@@ -103,7 +103,7 @@ func (m *MockEnvelopeStoreServer) Store(arg0 context.Context, arg1 *proto.StoreR
 	return ret0, ret1
 }
 
-// Store indicates an expected call of Store
+// Store indicates an expected call of Store.
 func (mr *MockEnvelopeStoreServerMockRecorder) Store(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Store", reflect.TypeOf((*MockEnvelopeStoreServer)(nil).Store), arg0, arg1)

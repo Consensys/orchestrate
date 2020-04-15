@@ -11,34 +11,35 @@ import (
 	types "github.com/ethereum/go-ethereum/core/types"
 	gomock "github.com/golang/mock/gomock"
 	types0 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/types"
+	ethereum0 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
 	big "math/big"
 	reflect "reflect"
 )
 
-// MockTransactionSender is a mock of TransactionSender interface
+// MockTransactionSender is a mock of TransactionSender interface.
 type MockTransactionSender struct {
 	ctrl     *gomock.Controller
 	recorder *MockTransactionSenderMockRecorder
 }
 
-// MockTransactionSenderMockRecorder is the mock recorder for MockTransactionSender
+// MockTransactionSenderMockRecorder is the mock recorder for MockTransactionSender.
 type MockTransactionSenderMockRecorder struct {
 	mock *MockTransactionSender
 }
 
-// NewMockTransactionSender creates a new mock instance
+// NewMockTransactionSender creates a new mock instance.
 func NewMockTransactionSender(ctrl *gomock.Controller) *MockTransactionSender {
 	mock := &MockTransactionSender{ctrl: ctrl}
 	mock.recorder = &MockTransactionSenderMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockTransactionSender) EXPECT() *MockTransactionSenderMockRecorder {
 	return m.recorder
 }
 
-// SendTransaction mocks base method
+// SendTransaction mocks base method.
 func (m *MockTransactionSender) SendTransaction(ctx context.Context, url string, args *types0.SendTxArgs) (common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendTransaction", ctx, url, args)
@@ -47,13 +48,13 @@ func (m *MockTransactionSender) SendTransaction(ctx context.Context, url string,
 	return ret0, ret1
 }
 
-// SendTransaction indicates an expected call of SendTransaction
+// SendTransaction indicates an expected call of SendTransaction.
 func (mr *MockTransactionSenderMockRecorder) SendTransaction(ctx, url, args interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendTransaction", reflect.TypeOf((*MockTransactionSender)(nil).SendTransaction), ctx, url, args)
 }
 
-// SendRawTransaction mocks base method
+// SendRawTransaction mocks base method.
 func (m *MockTransactionSender) SendRawTransaction(ctx context.Context, url, raw string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendRawTransaction", ctx, url, raw)
@@ -61,13 +62,13 @@ func (m *MockTransactionSender) SendRawTransaction(ctx context.Context, url, raw
 	return ret0
 }
 
-// SendRawTransaction indicates an expected call of SendRawTransaction
+// SendRawTransaction indicates an expected call of SendRawTransaction.
 func (mr *MockTransactionSenderMockRecorder) SendRawTransaction(ctx, url, raw interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendRawTransaction", reflect.TypeOf((*MockTransactionSender)(nil).SendRawTransaction), ctx, url, raw)
 }
 
-// SendQuorumRawPrivateTransaction mocks base method
+// SendQuorumRawPrivateTransaction mocks base method.
 func (m *MockTransactionSender) SendQuorumRawPrivateTransaction(ctx context.Context, url, signedTxHash string, privateFor []string) (common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendQuorumRawPrivateTransaction", ctx, url, signedTxHash, privateFor)
@@ -76,13 +77,13 @@ func (m *MockTransactionSender) SendQuorumRawPrivateTransaction(ctx context.Cont
 	return ret0, ret1
 }
 
-// SendQuorumRawPrivateTransaction indicates an expected call of SendQuorumRawPrivateTransaction
+// SendQuorumRawPrivateTransaction indicates an expected call of SendQuorumRawPrivateTransaction.
 func (mr *MockTransactionSenderMockRecorder) SendQuorumRawPrivateTransaction(ctx, url, signedTxHash, privateFor interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendQuorumRawPrivateTransaction", reflect.TypeOf((*MockTransactionSender)(nil).SendQuorumRawPrivateTransaction), ctx, url, signedTxHash, privateFor)
 }
 
-// SendRawPrivateTransaction mocks base method
+// SendRawPrivateTransaction mocks base method.
 func (m *MockTransactionSender) SendRawPrivateTransaction(ctx context.Context, url, raw string, args *types0.PrivateArgs) (common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendRawPrivateTransaction", ctx, url, raw, args)
@@ -91,36 +92,36 @@ func (m *MockTransactionSender) SendRawPrivateTransaction(ctx context.Context, u
 	return ret0, ret1
 }
 
-// SendRawPrivateTransaction indicates an expected call of SendRawPrivateTransaction
+// SendRawPrivateTransaction indicates an expected call of SendRawPrivateTransaction.
 func (mr *MockTransactionSenderMockRecorder) SendRawPrivateTransaction(ctx, url, raw, args interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendRawPrivateTransaction", reflect.TypeOf((*MockTransactionSender)(nil).SendRawPrivateTransaction), ctx, url, raw, args)
 }
 
-// MockChainLedgerReader is a mock of ChainLedgerReader interface
+// MockChainLedgerReader is a mock of ChainLedgerReader interface.
 type MockChainLedgerReader struct {
 	ctrl     *gomock.Controller
 	recorder *MockChainLedgerReaderMockRecorder
 }
 
-// MockChainLedgerReaderMockRecorder is the mock recorder for MockChainLedgerReader
+// MockChainLedgerReaderMockRecorder is the mock recorder for MockChainLedgerReader.
 type MockChainLedgerReaderMockRecorder struct {
 	mock *MockChainLedgerReader
 }
 
-// NewMockChainLedgerReader creates a new mock instance
+// NewMockChainLedgerReader creates a new mock instance.
 func NewMockChainLedgerReader(ctrl *gomock.Controller) *MockChainLedgerReader {
 	mock := &MockChainLedgerReader{ctrl: ctrl}
 	mock.recorder = &MockChainLedgerReaderMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockChainLedgerReader) EXPECT() *MockChainLedgerReaderMockRecorder {
 	return m.recorder
 }
 
-// BlockByHash mocks base method
+// BlockByHash mocks base method.
 func (m *MockChainLedgerReader) BlockByHash(ctx context.Context, url string, hash common.Hash) (*types.Block, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BlockByHash", ctx, url, hash)
@@ -129,13 +130,13 @@ func (m *MockChainLedgerReader) BlockByHash(ctx context.Context, url string, has
 	return ret0, ret1
 }
 
-// BlockByHash indicates an expected call of BlockByHash
+// BlockByHash indicates an expected call of BlockByHash.
 func (mr *MockChainLedgerReaderMockRecorder) BlockByHash(ctx, url, hash interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BlockByHash", reflect.TypeOf((*MockChainLedgerReader)(nil).BlockByHash), ctx, url, hash)
 }
 
-// BlockByNumber mocks base method
+// BlockByNumber mocks base method.
 func (m *MockChainLedgerReader) BlockByNumber(ctx context.Context, url string, number *big.Int) (*types.Block, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BlockByNumber", ctx, url, number)
@@ -144,13 +145,13 @@ func (m *MockChainLedgerReader) BlockByNumber(ctx context.Context, url string, n
 	return ret0, ret1
 }
 
-// BlockByNumber indicates an expected call of BlockByNumber
+// BlockByNumber indicates an expected call of BlockByNumber.
 func (mr *MockChainLedgerReaderMockRecorder) BlockByNumber(ctx, url, number interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BlockByNumber", reflect.TypeOf((*MockChainLedgerReader)(nil).BlockByNumber), ctx, url, number)
 }
 
-// HeaderByHash mocks base method
+// HeaderByHash mocks base method.
 func (m *MockChainLedgerReader) HeaderByHash(ctx context.Context, url string, hash common.Hash) (*types.Header, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HeaderByHash", ctx, url, hash)
@@ -159,13 +160,13 @@ func (m *MockChainLedgerReader) HeaderByHash(ctx context.Context, url string, ha
 	return ret0, ret1
 }
 
-// HeaderByHash indicates an expected call of HeaderByHash
+// HeaderByHash indicates an expected call of HeaderByHash.
 func (mr *MockChainLedgerReaderMockRecorder) HeaderByHash(ctx, url, hash interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HeaderByHash", reflect.TypeOf((*MockChainLedgerReader)(nil).HeaderByHash), ctx, url, hash)
 }
 
-// HeaderByNumber mocks base method
+// HeaderByNumber mocks base method.
 func (m *MockChainLedgerReader) HeaderByNumber(ctx context.Context, url string, number *big.Int) (*types.Header, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HeaderByNumber", ctx, url, number)
@@ -174,13 +175,13 @@ func (m *MockChainLedgerReader) HeaderByNumber(ctx context.Context, url string, 
 	return ret0, ret1
 }
 
-// HeaderByNumber indicates an expected call of HeaderByNumber
+// HeaderByNumber indicates an expected call of HeaderByNumber.
 func (mr *MockChainLedgerReaderMockRecorder) HeaderByNumber(ctx, url, number interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HeaderByNumber", reflect.TypeOf((*MockChainLedgerReader)(nil).HeaderByNumber), ctx, url, number)
 }
 
-// TransactionByHash mocks base method
+// TransactionByHash mocks base method.
 func (m *MockChainLedgerReader) TransactionByHash(ctx context.Context, url string, hash common.Hash) (*types.Transaction, bool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TransactionByHash", ctx, url, hash)
@@ -190,51 +191,51 @@ func (m *MockChainLedgerReader) TransactionByHash(ctx context.Context, url strin
 	return ret0, ret1, ret2
 }
 
-// TransactionByHash indicates an expected call of TransactionByHash
+// TransactionByHash indicates an expected call of TransactionByHash.
 func (mr *MockChainLedgerReaderMockRecorder) TransactionByHash(ctx, url, hash interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TransactionByHash", reflect.TypeOf((*MockChainLedgerReader)(nil).TransactionByHash), ctx, url, hash)
 }
 
-// TransactionReceipt mocks base method
-func (m *MockChainLedgerReader) TransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*types.Receipt, error) {
+// TransactionReceipt mocks base method.
+func (m *MockChainLedgerReader) TransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*ethereum0.Receipt, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TransactionReceipt", ctx, url, txHash)
-	ret0, _ := ret[0].(*types.Receipt)
+	ret0, _ := ret[0].(*ethereum0.Receipt)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// TransactionReceipt indicates an expected call of TransactionReceipt
+// TransactionReceipt indicates an expected call of TransactionReceipt.
 func (mr *MockChainLedgerReaderMockRecorder) TransactionReceipt(ctx, url, txHash interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TransactionReceipt", reflect.TypeOf((*MockChainLedgerReader)(nil).TransactionReceipt), ctx, url, txHash)
 }
 
-// MockChainStateReader is a mock of ChainStateReader interface
+// MockChainStateReader is a mock of ChainStateReader interface.
 type MockChainStateReader struct {
 	ctrl     *gomock.Controller
 	recorder *MockChainStateReaderMockRecorder
 }
 
-// MockChainStateReaderMockRecorder is the mock recorder for MockChainStateReader
+// MockChainStateReaderMockRecorder is the mock recorder for MockChainStateReader.
 type MockChainStateReaderMockRecorder struct {
 	mock *MockChainStateReader
 }
 
-// NewMockChainStateReader creates a new mock instance
+// NewMockChainStateReader creates a new mock instance.
 func NewMockChainStateReader(ctrl *gomock.Controller) *MockChainStateReader {
 	mock := &MockChainStateReader{ctrl: ctrl}
 	mock.recorder = &MockChainStateReaderMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockChainStateReader) EXPECT() *MockChainStateReaderMockRecorder {
 	return m.recorder
 }
 
-// BalanceAt mocks base method
+// BalanceAt mocks base method.
 func (m *MockChainStateReader) BalanceAt(ctx context.Context, url string, account common.Address, blockNumber *big.Int) (*big.Int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BalanceAt", ctx, url, account, blockNumber)
@@ -243,13 +244,13 @@ func (m *MockChainStateReader) BalanceAt(ctx context.Context, url string, accoun
 	return ret0, ret1
 }
 
-// BalanceAt indicates an expected call of BalanceAt
+// BalanceAt indicates an expected call of BalanceAt.
 func (mr *MockChainStateReaderMockRecorder) BalanceAt(ctx, url, account, blockNumber interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BalanceAt", reflect.TypeOf((*MockChainStateReader)(nil).BalanceAt), ctx, url, account, blockNumber)
 }
 
-// StorageAt mocks base method
+// StorageAt mocks base method.
 func (m *MockChainStateReader) StorageAt(ctx context.Context, url string, account common.Address, key common.Hash, blockNumber *big.Int) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "StorageAt", ctx, url, account, key, blockNumber)
@@ -258,13 +259,13 @@ func (m *MockChainStateReader) StorageAt(ctx context.Context, url string, accoun
 	return ret0, ret1
 }
 
-// StorageAt indicates an expected call of StorageAt
+// StorageAt indicates an expected call of StorageAt.
 func (mr *MockChainStateReaderMockRecorder) StorageAt(ctx, url, account, key, blockNumber interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StorageAt", reflect.TypeOf((*MockChainStateReader)(nil).StorageAt), ctx, url, account, key, blockNumber)
 }
 
-// CodeAt mocks base method
+// CodeAt mocks base method.
 func (m *MockChainStateReader) CodeAt(ctx context.Context, url string, account common.Address, blockNumber *big.Int) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CodeAt", ctx, url, account, blockNumber)
@@ -273,13 +274,13 @@ func (m *MockChainStateReader) CodeAt(ctx context.Context, url string, account c
 	return ret0, ret1
 }
 
-// CodeAt indicates an expected call of CodeAt
+// CodeAt indicates an expected call of CodeAt.
 func (mr *MockChainStateReaderMockRecorder) CodeAt(ctx, url, account, blockNumber interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CodeAt", reflect.TypeOf((*MockChainStateReader)(nil).CodeAt), ctx, url, account, blockNumber)
 }
 
-// NonceAt mocks base method
+// NonceAt mocks base method.
 func (m *MockChainStateReader) NonceAt(ctx context.Context, url string, account common.Address, blockNumber *big.Int) (uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "NonceAt", ctx, url, account, blockNumber)
@@ -288,13 +289,13 @@ func (m *MockChainStateReader) NonceAt(ctx context.Context, url string, account 
 	return ret0, ret1
 }
 
-// NonceAt indicates an expected call of NonceAt
+// NonceAt indicates an expected call of NonceAt.
 func (mr *MockChainStateReaderMockRecorder) NonceAt(ctx, url, account, blockNumber interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NonceAt", reflect.TypeOf((*MockChainStateReader)(nil).NonceAt), ctx, url, account, blockNumber)
 }
 
-// PendingBalanceAt mocks base method
+// PendingBalanceAt mocks base method.
 func (m *MockChainStateReader) PendingBalanceAt(ctx context.Context, url string, account common.Address) (*big.Int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PendingBalanceAt", ctx, url, account)
@@ -303,13 +304,13 @@ func (m *MockChainStateReader) PendingBalanceAt(ctx context.Context, url string,
 	return ret0, ret1
 }
 
-// PendingBalanceAt indicates an expected call of PendingBalanceAt
+// PendingBalanceAt indicates an expected call of PendingBalanceAt.
 func (mr *MockChainStateReaderMockRecorder) PendingBalanceAt(ctx, url, account interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PendingBalanceAt", reflect.TypeOf((*MockChainStateReader)(nil).PendingBalanceAt), ctx, url, account)
 }
 
-// PendingStorageAt mocks base method
+// PendingStorageAt mocks base method.
 func (m *MockChainStateReader) PendingStorageAt(ctx context.Context, url string, account common.Address, key common.Hash) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PendingStorageAt", ctx, url, account, key)
@@ -318,13 +319,13 @@ func (m *MockChainStateReader) PendingStorageAt(ctx context.Context, url string,
 	return ret0, ret1
 }
 
-// PendingStorageAt indicates an expected call of PendingStorageAt
+// PendingStorageAt indicates an expected call of PendingStorageAt.
 func (mr *MockChainStateReaderMockRecorder) PendingStorageAt(ctx, url, account, key interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PendingStorageAt", reflect.TypeOf((*MockChainStateReader)(nil).PendingStorageAt), ctx, url, account, key)
 }
 
-// PendingCodeAt mocks base method
+// PendingCodeAt mocks base method.
 func (m *MockChainStateReader) PendingCodeAt(ctx context.Context, url string, account common.Address) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PendingCodeAt", ctx, url, account)
@@ -333,13 +334,13 @@ func (m *MockChainStateReader) PendingCodeAt(ctx context.Context, url string, ac
 	return ret0, ret1
 }
 
-// PendingCodeAt indicates an expected call of PendingCodeAt
+// PendingCodeAt indicates an expected call of PendingCodeAt.
 func (mr *MockChainStateReaderMockRecorder) PendingCodeAt(ctx, url, account interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PendingCodeAt", reflect.TypeOf((*MockChainStateReader)(nil).PendingCodeAt), ctx, url, account)
 }
 
-// PendingNonceAt mocks base method
+// PendingNonceAt mocks base method.
 func (m *MockChainStateReader) PendingNonceAt(ctx context.Context, url string, account common.Address) (uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PendingNonceAt", ctx, url, account)
@@ -348,36 +349,36 @@ func (m *MockChainStateReader) PendingNonceAt(ctx context.Context, url string, a
 	return ret0, ret1
 }
 
-// PendingNonceAt indicates an expected call of PendingNonceAt
+// PendingNonceAt indicates an expected call of PendingNonceAt.
 func (mr *MockChainStateReaderMockRecorder) PendingNonceAt(ctx, url, account interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PendingNonceAt", reflect.TypeOf((*MockChainStateReader)(nil).PendingNonceAt), ctx, url, account)
 }
 
-// MockContractCaller is a mock of ContractCaller interface
+// MockContractCaller is a mock of ContractCaller interface.
 type MockContractCaller struct {
 	ctrl     *gomock.Controller
 	recorder *MockContractCallerMockRecorder
 }
 
-// MockContractCallerMockRecorder is the mock recorder for MockContractCaller
+// MockContractCallerMockRecorder is the mock recorder for MockContractCaller.
 type MockContractCallerMockRecorder struct {
 	mock *MockContractCaller
 }
 
-// NewMockContractCaller creates a new mock instance
+// NewMockContractCaller creates a new mock instance.
 func NewMockContractCaller(ctrl *gomock.Controller) *MockContractCaller {
 	mock := &MockContractCaller{ctrl: ctrl}
 	mock.recorder = &MockContractCallerMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockContractCaller) EXPECT() *MockContractCallerMockRecorder {
 	return m.recorder
 }
 
-// CallContract mocks base method
+// CallContract mocks base method.
 func (m *MockContractCaller) CallContract(ctx context.Context, url string, msg *ethereum.CallMsg, blockNumber *big.Int) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CallContract", ctx, url, msg, blockNumber)
@@ -386,13 +387,13 @@ func (m *MockContractCaller) CallContract(ctx context.Context, url string, msg *
 	return ret0, ret1
 }
 
-// CallContract indicates an expected call of CallContract
+// CallContract indicates an expected call of CallContract.
 func (mr *MockContractCallerMockRecorder) CallContract(ctx, url, msg, blockNumber interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CallContract", reflect.TypeOf((*MockContractCaller)(nil).CallContract), ctx, url, msg, blockNumber)
 }
 
-// PendingCallContract mocks base method
+// PendingCallContract mocks base method.
 func (m *MockContractCaller) PendingCallContract(ctx context.Context, url string, msg *ethereum.CallMsg) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PendingCallContract", ctx, url, msg)
@@ -401,36 +402,36 @@ func (m *MockContractCaller) PendingCallContract(ctx context.Context, url string
 	return ret0, ret1
 }
 
-// PendingCallContract indicates an expected call of PendingCallContract
+// PendingCallContract indicates an expected call of PendingCallContract.
 func (mr *MockContractCallerMockRecorder) PendingCallContract(ctx, url, msg interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PendingCallContract", reflect.TypeOf((*MockContractCaller)(nil).PendingCallContract), ctx, url, msg)
 }
 
-// MockGasEstimator is a mock of GasEstimator interface
+// MockGasEstimator is a mock of GasEstimator interface.
 type MockGasEstimator struct {
 	ctrl     *gomock.Controller
 	recorder *MockGasEstimatorMockRecorder
 }
 
-// MockGasEstimatorMockRecorder is the mock recorder for MockGasEstimator
+// MockGasEstimatorMockRecorder is the mock recorder for MockGasEstimator.
 type MockGasEstimatorMockRecorder struct {
 	mock *MockGasEstimator
 }
 
-// NewMockGasEstimator creates a new mock instance
+// NewMockGasEstimator creates a new mock instance.
 func NewMockGasEstimator(ctrl *gomock.Controller) *MockGasEstimator {
 	mock := &MockGasEstimator{ctrl: ctrl}
 	mock.recorder = &MockGasEstimatorMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockGasEstimator) EXPECT() *MockGasEstimatorMockRecorder {
 	return m.recorder
 }
 
-// EstimateGas mocks base method
+// EstimateGas mocks base method.
 func (m *MockGasEstimator) EstimateGas(ctx context.Context, url string, msg *ethereum.CallMsg) (uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EstimateGas", ctx, url, msg)
@@ -439,36 +440,36 @@ func (m *MockGasEstimator) EstimateGas(ctx context.Context, url string, msg *eth
 	return ret0, ret1
 }
 
-// EstimateGas indicates an expected call of EstimateGas
+// EstimateGas indicates an expected call of EstimateGas.
 func (mr *MockGasEstimatorMockRecorder) EstimateGas(ctx, url, msg interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EstimateGas", reflect.TypeOf((*MockGasEstimator)(nil).EstimateGas), ctx, url, msg)
 }
 
-// MockGasPricer is a mock of GasPricer interface
+// MockGasPricer is a mock of GasPricer interface.
 type MockGasPricer struct {
 	ctrl     *gomock.Controller
 	recorder *MockGasPricerMockRecorder
 }
 
-// MockGasPricerMockRecorder is the mock recorder for MockGasPricer
+// MockGasPricerMockRecorder is the mock recorder for MockGasPricer.
 type MockGasPricerMockRecorder struct {
 	mock *MockGasPricer
 }
 
-// NewMockGasPricer creates a new mock instance
+// NewMockGasPricer creates a new mock instance.
 func NewMockGasPricer(ctrl *gomock.Controller) *MockGasPricer {
 	mock := &MockGasPricer{ctrl: ctrl}
 	mock.recorder = &MockGasPricerMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockGasPricer) EXPECT() *MockGasPricerMockRecorder {
 	return m.recorder
 }
 
-// SuggestGasPrice mocks base method
+// SuggestGasPrice mocks base method.
 func (m *MockGasPricer) SuggestGasPrice(ctx context.Context, url string) (*big.Int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SuggestGasPrice", ctx, url)
@@ -477,36 +478,36 @@ func (m *MockGasPricer) SuggestGasPrice(ctx context.Context, url string) (*big.I
 	return ret0, ret1
 }
 
-// SuggestGasPrice indicates an expected call of SuggestGasPrice
+// SuggestGasPrice indicates an expected call of SuggestGasPrice.
 func (mr *MockGasPricerMockRecorder) SuggestGasPrice(ctx, url interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SuggestGasPrice", reflect.TypeOf((*MockGasPricer)(nil).SuggestGasPrice), ctx, url)
 }
 
-// MockChainSyncReader is a mock of ChainSyncReader interface
+// MockChainSyncReader is a mock of ChainSyncReader interface.
 type MockChainSyncReader struct {
 	ctrl     *gomock.Controller
 	recorder *MockChainSyncReaderMockRecorder
 }
 
-// MockChainSyncReaderMockRecorder is the mock recorder for MockChainSyncReader
+// MockChainSyncReaderMockRecorder is the mock recorder for MockChainSyncReader.
 type MockChainSyncReaderMockRecorder struct {
 	mock *MockChainSyncReader
 }
 
-// NewMockChainSyncReader creates a new mock instance
+// NewMockChainSyncReader creates a new mock instance.
 func NewMockChainSyncReader(ctrl *gomock.Controller) *MockChainSyncReader {
 	mock := &MockChainSyncReader{ctrl: ctrl}
 	mock.recorder = &MockChainSyncReaderMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockChainSyncReader) EXPECT() *MockChainSyncReaderMockRecorder {
 	return m.recorder
 }
 
-// Network mocks base method
+// Network mocks base method.
 func (m *MockChainSyncReader) Network(ctx context.Context, url string) (*big.Int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Network", ctx, url)
@@ -515,13 +516,13 @@ func (m *MockChainSyncReader) Network(ctx context.Context, url string) (*big.Int
 	return ret0, ret1
 }
 
-// Network indicates an expected call of Network
+// Network indicates an expected call of Network.
 func (mr *MockChainSyncReaderMockRecorder) Network(ctx, url interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Network", reflect.TypeOf((*MockChainSyncReader)(nil).Network), ctx, url)
 }
 
-// SyncProgress mocks base method
+// SyncProgress mocks base method.
 func (m *MockChainSyncReader) SyncProgress(ctx context.Context, url string) (*ethereum.SyncProgress, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SyncProgress", ctx, url)
@@ -530,36 +531,36 @@ func (m *MockChainSyncReader) SyncProgress(ctx context.Context, url string) (*et
 	return ret0, ret1
 }
 
-// SyncProgress indicates an expected call of SyncProgress
+// SyncProgress indicates an expected call of SyncProgress.
 func (mr *MockChainSyncReaderMockRecorder) SyncProgress(ctx, url interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SyncProgress", reflect.TypeOf((*MockChainSyncReader)(nil).SyncProgress), ctx, url)
 }
 
-// MockClient is a mock of Client interface
+// MockClient is a mock of Client interface.
 type MockClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockClientMockRecorder
 }
 
-// MockClientMockRecorder is the mock recorder for MockClient
+// MockClientMockRecorder is the mock recorder for MockClient.
 type MockClientMockRecorder struct {
 	mock *MockClient
 }
 
-// NewMockClient creates a new mock instance
+// NewMockClient creates a new mock instance.
 func NewMockClient(ctrl *gomock.Controller) *MockClient {
 	mock := &MockClient{ctrl: ctrl}
 	mock.recorder = &MockClientMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockClient) EXPECT() *MockClientMockRecorder {
 	return m.recorder
 }
 
-// SendTransaction mocks base method
+// SendTransaction mocks base method.
 func (m *MockClient) SendTransaction(ctx context.Context, url string, args *types0.SendTxArgs) (common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendTransaction", ctx, url, args)
@@ -568,13 +569,13 @@ func (m *MockClient) SendTransaction(ctx context.Context, url string, args *type
 	return ret0, ret1
 }
 
-// SendTransaction indicates an expected call of SendTransaction
+// SendTransaction indicates an expected call of SendTransaction.
 func (mr *MockClientMockRecorder) SendTransaction(ctx, url, args interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendTransaction", reflect.TypeOf((*MockClient)(nil).SendTransaction), ctx, url, args)
 }
 
-// SendRawTransaction mocks base method
+// SendRawTransaction mocks base method.
 func (m *MockClient) SendRawTransaction(ctx context.Context, url, raw string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendRawTransaction", ctx, url, raw)
@@ -582,13 +583,13 @@ func (m *MockClient) SendRawTransaction(ctx context.Context, url, raw string) er
 	return ret0
 }
 
-// SendRawTransaction indicates an expected call of SendRawTransaction
+// SendRawTransaction indicates an expected call of SendRawTransaction.
 func (mr *MockClientMockRecorder) SendRawTransaction(ctx, url, raw interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendRawTransaction", reflect.TypeOf((*MockClient)(nil).SendRawTransaction), ctx, url, raw)
 }
 
-// SendQuorumRawPrivateTransaction mocks base method
+// SendQuorumRawPrivateTransaction mocks base method.
 func (m *MockClient) SendQuorumRawPrivateTransaction(ctx context.Context, url, signedTxHash string, privateFor []string) (common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendQuorumRawPrivateTransaction", ctx, url, signedTxHash, privateFor)
@@ -597,13 +598,13 @@ func (m *MockClient) SendQuorumRawPrivateTransaction(ctx context.Context, url, s
 	return ret0, ret1
 }
 
-// SendQuorumRawPrivateTransaction indicates an expected call of SendQuorumRawPrivateTransaction
+// SendQuorumRawPrivateTransaction indicates an expected call of SendQuorumRawPrivateTransaction.
 func (mr *MockClientMockRecorder) SendQuorumRawPrivateTransaction(ctx, url, signedTxHash, privateFor interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendQuorumRawPrivateTransaction", reflect.TypeOf((*MockClient)(nil).SendQuorumRawPrivateTransaction), ctx, url, signedTxHash, privateFor)
 }
 
-// SendRawPrivateTransaction mocks base method
+// SendRawPrivateTransaction mocks base method.
 func (m *MockClient) SendRawPrivateTransaction(ctx context.Context, url, raw string, args *types0.PrivateArgs) (common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendRawPrivateTransaction", ctx, url, raw, args)
@@ -612,13 +613,13 @@ func (m *MockClient) SendRawPrivateTransaction(ctx context.Context, url, raw str
 	return ret0, ret1
 }
 
-// SendRawPrivateTransaction indicates an expected call of SendRawPrivateTransaction
+// SendRawPrivateTransaction indicates an expected call of SendRawPrivateTransaction.
 func (mr *MockClientMockRecorder) SendRawPrivateTransaction(ctx, url, raw, args interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendRawPrivateTransaction", reflect.TypeOf((*MockClient)(nil).SendRawPrivateTransaction), ctx, url, raw, args)
 }
 
-// BlockByHash mocks base method
+// BlockByHash mocks base method.
 func (m *MockClient) BlockByHash(ctx context.Context, url string, hash common.Hash) (*types.Block, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BlockByHash", ctx, url, hash)
@@ -627,13 +628,13 @@ func (m *MockClient) BlockByHash(ctx context.Context, url string, hash common.Ha
 	return ret0, ret1
 }
 
-// BlockByHash indicates an expected call of BlockByHash
+// BlockByHash indicates an expected call of BlockByHash.
 func (mr *MockClientMockRecorder) BlockByHash(ctx, url, hash interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BlockByHash", reflect.TypeOf((*MockClient)(nil).BlockByHash), ctx, url, hash)
 }
 
-// BlockByNumber mocks base method
+// BlockByNumber mocks base method.
 func (m *MockClient) BlockByNumber(ctx context.Context, url string, number *big.Int) (*types.Block, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BlockByNumber", ctx, url, number)
@@ -642,13 +643,13 @@ func (m *MockClient) BlockByNumber(ctx context.Context, url string, number *big.
 	return ret0, ret1
 }
 
-// BlockByNumber indicates an expected call of BlockByNumber
+// BlockByNumber indicates an expected call of BlockByNumber.
 func (mr *MockClientMockRecorder) BlockByNumber(ctx, url, number interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BlockByNumber", reflect.TypeOf((*MockClient)(nil).BlockByNumber), ctx, url, number)
 }
 
-// HeaderByHash mocks base method
+// HeaderByHash mocks base method.
 func (m *MockClient) HeaderByHash(ctx context.Context, url string, hash common.Hash) (*types.Header, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HeaderByHash", ctx, url, hash)
@@ -657,13 +658,13 @@ func (m *MockClient) HeaderByHash(ctx context.Context, url string, hash common.H
 	return ret0, ret1
 }
 
-// HeaderByHash indicates an expected call of HeaderByHash
+// HeaderByHash indicates an expected call of HeaderByHash.
 func (mr *MockClientMockRecorder) HeaderByHash(ctx, url, hash interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HeaderByHash", reflect.TypeOf((*MockClient)(nil).HeaderByHash), ctx, url, hash)
 }
 
-// HeaderByNumber mocks base method
+// HeaderByNumber mocks base method.
 func (m *MockClient) HeaderByNumber(ctx context.Context, url string, number *big.Int) (*types.Header, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HeaderByNumber", ctx, url, number)
@@ -672,13 +673,13 @@ func (m *MockClient) HeaderByNumber(ctx context.Context, url string, number *big
 	return ret0, ret1
 }
 
-// HeaderByNumber indicates an expected call of HeaderByNumber
+// HeaderByNumber indicates an expected call of HeaderByNumber.
 func (mr *MockClientMockRecorder) HeaderByNumber(ctx, url, number interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HeaderByNumber", reflect.TypeOf((*MockClient)(nil).HeaderByNumber), ctx, url, number)
 }
 
-// TransactionByHash mocks base method
+// TransactionByHash mocks base method.
 func (m *MockClient) TransactionByHash(ctx context.Context, url string, hash common.Hash) (*types.Transaction, bool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TransactionByHash", ctx, url, hash)
@@ -688,28 +689,28 @@ func (m *MockClient) TransactionByHash(ctx context.Context, url string, hash com
 	return ret0, ret1, ret2
 }
 
-// TransactionByHash indicates an expected call of TransactionByHash
+// TransactionByHash indicates an expected call of TransactionByHash.
 func (mr *MockClientMockRecorder) TransactionByHash(ctx, url, hash interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TransactionByHash", reflect.TypeOf((*MockClient)(nil).TransactionByHash), ctx, url, hash)
 }
 
-// TransactionReceipt mocks base method
-func (m *MockClient) TransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*types.Receipt, error) {
+// TransactionReceipt mocks base method.
+func (m *MockClient) TransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*ethereum0.Receipt, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TransactionReceipt", ctx, url, txHash)
-	ret0, _ := ret[0].(*types.Receipt)
+	ret0, _ := ret[0].(*ethereum0.Receipt)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// TransactionReceipt indicates an expected call of TransactionReceipt
+// TransactionReceipt indicates an expected call of TransactionReceipt.
 func (mr *MockClientMockRecorder) TransactionReceipt(ctx, url, txHash interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TransactionReceipt", reflect.TypeOf((*MockClient)(nil).TransactionReceipt), ctx, url, txHash)
 }
 
-// BalanceAt mocks base method
+// BalanceAt mocks base method.
 func (m *MockClient) BalanceAt(ctx context.Context, url string, account common.Address, blockNumber *big.Int) (*big.Int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BalanceAt", ctx, url, account, blockNumber)
@@ -718,13 +719,13 @@ func (m *MockClient) BalanceAt(ctx context.Context, url string, account common.A
 	return ret0, ret1
 }
 
-// BalanceAt indicates an expected call of BalanceAt
+// BalanceAt indicates an expected call of BalanceAt.
 func (mr *MockClientMockRecorder) BalanceAt(ctx, url, account, blockNumber interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BalanceAt", reflect.TypeOf((*MockClient)(nil).BalanceAt), ctx, url, account, blockNumber)
 }
 
-// StorageAt mocks base method
+// StorageAt mocks base method.
 func (m *MockClient) StorageAt(ctx context.Context, url string, account common.Address, key common.Hash, blockNumber *big.Int) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "StorageAt", ctx, url, account, key, blockNumber)
@@ -733,13 +734,13 @@ func (m *MockClient) StorageAt(ctx context.Context, url string, account common.A
 	return ret0, ret1
 }
 
-// StorageAt indicates an expected call of StorageAt
+// StorageAt indicates an expected call of StorageAt.
 func (mr *MockClientMockRecorder) StorageAt(ctx, url, account, key, blockNumber interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StorageAt", reflect.TypeOf((*MockClient)(nil).StorageAt), ctx, url, account, key, blockNumber)
 }
 
-// CodeAt mocks base method
+// CodeAt mocks base method.
 func (m *MockClient) CodeAt(ctx context.Context, url string, account common.Address, blockNumber *big.Int) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CodeAt", ctx, url, account, blockNumber)
@@ -748,13 +749,13 @@ func (m *MockClient) CodeAt(ctx context.Context, url string, account common.Addr
 	return ret0, ret1
 }
 
-// CodeAt indicates an expected call of CodeAt
+// CodeAt indicates an expected call of CodeAt.
 func (mr *MockClientMockRecorder) CodeAt(ctx, url, account, blockNumber interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CodeAt", reflect.TypeOf((*MockClient)(nil).CodeAt), ctx, url, account, blockNumber)
 }
 
-// NonceAt mocks base method
+// NonceAt mocks base method.
 func (m *MockClient) NonceAt(ctx context.Context, url string, account common.Address, blockNumber *big.Int) (uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "NonceAt", ctx, url, account, blockNumber)
@@ -763,13 +764,13 @@ func (m *MockClient) NonceAt(ctx context.Context, url string, account common.Add
 	return ret0, ret1
 }
 
-// NonceAt indicates an expected call of NonceAt
+// NonceAt indicates an expected call of NonceAt.
 func (mr *MockClientMockRecorder) NonceAt(ctx, url, account, blockNumber interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NonceAt", reflect.TypeOf((*MockClient)(nil).NonceAt), ctx, url, account, blockNumber)
 }
 
-// PendingBalanceAt mocks base method
+// PendingBalanceAt mocks base method.
 func (m *MockClient) PendingBalanceAt(ctx context.Context, url string, account common.Address) (*big.Int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PendingBalanceAt", ctx, url, account)
@@ -778,13 +779,13 @@ func (m *MockClient) PendingBalanceAt(ctx context.Context, url string, account c
 	return ret0, ret1
 }
 
-// PendingBalanceAt indicates an expected call of PendingBalanceAt
+// PendingBalanceAt indicates an expected call of PendingBalanceAt.
 func (mr *MockClientMockRecorder) PendingBalanceAt(ctx, url, account interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PendingBalanceAt", reflect.TypeOf((*MockClient)(nil).PendingBalanceAt), ctx, url, account)
 }
 
-// PendingStorageAt mocks base method
+// PendingStorageAt mocks base method.
 func (m *MockClient) PendingStorageAt(ctx context.Context, url string, account common.Address, key common.Hash) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PendingStorageAt", ctx, url, account, key)
@@ -793,13 +794,13 @@ func (m *MockClient) PendingStorageAt(ctx context.Context, url string, account c
 	return ret0, ret1
 }
 
-// PendingStorageAt indicates an expected call of PendingStorageAt
+// PendingStorageAt indicates an expected call of PendingStorageAt.
 func (mr *MockClientMockRecorder) PendingStorageAt(ctx, url, account, key interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PendingStorageAt", reflect.TypeOf((*MockClient)(nil).PendingStorageAt), ctx, url, account, key)
 }
 
-// PendingCodeAt mocks base method
+// PendingCodeAt mocks base method.
 func (m *MockClient) PendingCodeAt(ctx context.Context, url string, account common.Address) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PendingCodeAt", ctx, url, account)
@@ -808,13 +809,13 @@ func (m *MockClient) PendingCodeAt(ctx context.Context, url string, account comm
 	return ret0, ret1
 }
 
-// PendingCodeAt indicates an expected call of PendingCodeAt
+// PendingCodeAt indicates an expected call of PendingCodeAt.
 func (mr *MockClientMockRecorder) PendingCodeAt(ctx, url, account interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PendingCodeAt", reflect.TypeOf((*MockClient)(nil).PendingCodeAt), ctx, url, account)
 }
 
-// PendingNonceAt mocks base method
+// PendingNonceAt mocks base method.
 func (m *MockClient) PendingNonceAt(ctx context.Context, url string, account common.Address) (uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PendingNonceAt", ctx, url, account)
@@ -823,13 +824,13 @@ func (m *MockClient) PendingNonceAt(ctx context.Context, url string, account com
 	return ret0, ret1
 }
 
-// PendingNonceAt indicates an expected call of PendingNonceAt
+// PendingNonceAt indicates an expected call of PendingNonceAt.
 func (mr *MockClientMockRecorder) PendingNonceAt(ctx, url, account interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PendingNonceAt", reflect.TypeOf((*MockClient)(nil).PendingNonceAt), ctx, url, account)
 }
 
-// CallContract mocks base method
+// CallContract mocks base method.
 func (m *MockClient) CallContract(ctx context.Context, url string, msg *ethereum.CallMsg, blockNumber *big.Int) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CallContract", ctx, url, msg, blockNumber)
@@ -838,13 +839,13 @@ func (m *MockClient) CallContract(ctx context.Context, url string, msg *ethereum
 	return ret0, ret1
 }
 
-// CallContract indicates an expected call of CallContract
+// CallContract indicates an expected call of CallContract.
 func (mr *MockClientMockRecorder) CallContract(ctx, url, msg, blockNumber interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CallContract", reflect.TypeOf((*MockClient)(nil).CallContract), ctx, url, msg, blockNumber)
 }
 
-// PendingCallContract mocks base method
+// PendingCallContract mocks base method.
 func (m *MockClient) PendingCallContract(ctx context.Context, url string, msg *ethereum.CallMsg) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PendingCallContract", ctx, url, msg)
@@ -853,13 +854,13 @@ func (m *MockClient) PendingCallContract(ctx context.Context, url string, msg *e
 	return ret0, ret1
 }
 
-// PendingCallContract indicates an expected call of PendingCallContract
+// PendingCallContract indicates an expected call of PendingCallContract.
 func (mr *MockClientMockRecorder) PendingCallContract(ctx, url, msg interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PendingCallContract", reflect.TypeOf((*MockClient)(nil).PendingCallContract), ctx, url, msg)
 }
 
-// EstimateGas mocks base method
+// EstimateGas mocks base method.
 func (m *MockClient) EstimateGas(ctx context.Context, url string, msg *ethereum.CallMsg) (uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EstimateGas", ctx, url, msg)
@@ -868,13 +869,13 @@ func (m *MockClient) EstimateGas(ctx context.Context, url string, msg *ethereum.
 	return ret0, ret1
 }
 
-// EstimateGas indicates an expected call of EstimateGas
+// EstimateGas indicates an expected call of EstimateGas.
 func (mr *MockClientMockRecorder) EstimateGas(ctx, url, msg interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EstimateGas", reflect.TypeOf((*MockClient)(nil).EstimateGas), ctx, url, msg)
 }
 
-// SuggestGasPrice mocks base method
+// SuggestGasPrice mocks base method.
 func (m *MockClient) SuggestGasPrice(ctx context.Context, url string) (*big.Int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SuggestGasPrice", ctx, url)
@@ -883,13 +884,13 @@ func (m *MockClient) SuggestGasPrice(ctx context.Context, url string) (*big.Int,
 	return ret0, ret1
 }
 
-// SuggestGasPrice indicates an expected call of SuggestGasPrice
+// SuggestGasPrice indicates an expected call of SuggestGasPrice.
 func (mr *MockClientMockRecorder) SuggestGasPrice(ctx, url interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SuggestGasPrice", reflect.TypeOf((*MockClient)(nil).SuggestGasPrice), ctx, url)
 }
 
-// Network mocks base method
+// Network mocks base method.
 func (m *MockClient) Network(ctx context.Context, url string) (*big.Int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Network", ctx, url)
@@ -898,13 +899,13 @@ func (m *MockClient) Network(ctx context.Context, url string) (*big.Int, error) 
 	return ret0, ret1
 }
 
-// Network indicates an expected call of Network
+// Network indicates an expected call of Network.
 func (mr *MockClientMockRecorder) Network(ctx, url interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Network", reflect.TypeOf((*MockClient)(nil).Network), ctx, url)
 }
 
-// SyncProgress mocks base method
+// SyncProgress mocks base method.
 func (m *MockClient) SyncProgress(ctx context.Context, url string) (*ethereum.SyncProgress, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SyncProgress", ctx, url)
@@ -913,7 +914,7 @@ func (m *MockClient) SyncProgress(ctx context.Context, url string) (*ethereum.Sy
 	return ret0, ret1
 }
 
-// SyncProgress indicates an expected call of SyncProgress
+// SyncProgress indicates an expected call of SyncProgress.
 func (mr *MockClientMockRecorder) SyncProgress(ctx, url interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SyncProgress", reflect.TypeOf((*MockClient)(nil).SyncProgress), ctx, url)

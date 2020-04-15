@@ -121,7 +121,8 @@ cmd="${cmd} \
 --genesis-file=/config/genesis.json \
 --min-gas-price=0 \
 --data-path=/opt/besu/data \
---node-private-key-file=/config/${NODE_NAME}/keys/key.priv"
+--node-private-key-file=/config/${NODE_NAME}/keys/key.priv \
+--revert-reason-enabled"
 
 echo ${cmd}
 eval $cmd

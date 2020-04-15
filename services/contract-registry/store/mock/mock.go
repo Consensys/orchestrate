@@ -13,30 +13,30 @@ import (
 	reflect "reflect"
 )
 
-// MockContractDataAgent is a mock of ContractDataAgent interface
+// MockContractDataAgent is a mock of ContractDataAgent interface.
 type MockContractDataAgent struct {
 	ctrl     *gomock.Controller
 	recorder *MockContractDataAgentMockRecorder
 }
 
-// MockContractDataAgentMockRecorder is the mock recorder for MockContractDataAgent
+// MockContractDataAgentMockRecorder is the mock recorder for MockContractDataAgent.
 type MockContractDataAgentMockRecorder struct {
 	mock *MockContractDataAgent
 }
 
-// NewMockContractDataAgent creates a new mock instance
+// NewMockContractDataAgent creates a new mock instance.
 func NewMockContractDataAgent(ctrl *gomock.Controller) *MockContractDataAgent {
 	mock := &MockContractDataAgent{ctrl: ctrl}
 	mock.recorder = &MockContractDataAgentMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockContractDataAgent) EXPECT() *MockContractDataAgentMockRecorder {
 	return m.recorder
 }
 
-// Insert mocks base method
+// Insert mocks base method.
 func (m *MockContractDataAgent) Insert(ctx context.Context, name, tagName, abiRaw, bytecode, deployedBytecode, codeHash string, methods *[]*models.MethodModel, events *[]*models.EventModel) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Insert", ctx, name, tagName, abiRaw, bytecode, deployedBytecode, codeHash, methods, events)
@@ -44,36 +44,36 @@ func (m *MockContractDataAgent) Insert(ctx context.Context, name, tagName, abiRa
 	return ret0
 }
 
-// Insert indicates an expected call of Insert
+// Insert indicates an expected call of Insert.
 func (mr *MockContractDataAgentMockRecorder) Insert(ctx, name, tagName, abiRaw, bytecode, deployedBytecode, codeHash, methods, events interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockContractDataAgent)(nil).Insert), ctx, name, tagName, abiRaw, bytecode, deployedBytecode, codeHash, methods, events)
 }
 
-// MockArtifactDataAgent is a mock of ArtifactDataAgent interface
+// MockArtifactDataAgent is a mock of ArtifactDataAgent interface.
 type MockArtifactDataAgent struct {
 	ctrl     *gomock.Controller
 	recorder *MockArtifactDataAgentMockRecorder
 }
 
-// MockArtifactDataAgentMockRecorder is the mock recorder for MockArtifactDataAgent
+// MockArtifactDataAgentMockRecorder is the mock recorder for MockArtifactDataAgent.
 type MockArtifactDataAgentMockRecorder struct {
 	mock *MockArtifactDataAgent
 }
 
-// NewMockArtifactDataAgent creates a new mock instance
+// NewMockArtifactDataAgent creates a new mock instance.
 func NewMockArtifactDataAgent(ctrl *gomock.Controller) *MockArtifactDataAgent {
 	mock := &MockArtifactDataAgent{ctrl: ctrl}
 	mock.recorder = &MockArtifactDataAgentMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockArtifactDataAgent) EXPECT() *MockArtifactDataAgentMockRecorder {
 	return m.recorder
 }
 
-// SelectOrInsert mocks base method
+// SelectOrInsert mocks base method.
 func (m *MockArtifactDataAgent) SelectOrInsert(ctx context.Context, artifact *models.ArtifactModel) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SelectOrInsert", ctx, artifact)
@@ -81,13 +81,13 @@ func (m *MockArtifactDataAgent) SelectOrInsert(ctx context.Context, artifact *mo
 	return ret0
 }
 
-// SelectOrInsert indicates an expected call of SelectOrInsert
+// SelectOrInsert indicates an expected call of SelectOrInsert.
 func (mr *MockArtifactDataAgentMockRecorder) SelectOrInsert(ctx, artifact interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SelectOrInsert", reflect.TypeOf((*MockArtifactDataAgent)(nil).SelectOrInsert), ctx, artifact)
 }
 
-// FindOneByNameAndTag mocks base method
+// FindOneByNameAndTag mocks base method.
 func (m *MockArtifactDataAgent) FindOneByNameAndTag(ctx context.Context, name, tag string) (*models.ArtifactModel, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindOneByNameAndTag", ctx, name, tag)
@@ -96,36 +96,36 @@ func (m *MockArtifactDataAgent) FindOneByNameAndTag(ctx context.Context, name, t
 	return ret0, ret1
 }
 
-// FindOneByNameAndTag indicates an expected call of FindOneByNameAndTag
+// FindOneByNameAndTag indicates an expected call of FindOneByNameAndTag.
 func (mr *MockArtifactDataAgentMockRecorder) FindOneByNameAndTag(ctx, name, tag interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByNameAndTag", reflect.TypeOf((*MockArtifactDataAgent)(nil).FindOneByNameAndTag), ctx, name, tag)
 }
 
-// MockCodeHashDataAgent is a mock of CodeHashDataAgent interface
+// MockCodeHashDataAgent is a mock of CodeHashDataAgent interface.
 type MockCodeHashDataAgent struct {
 	ctrl     *gomock.Controller
 	recorder *MockCodeHashDataAgentMockRecorder
 }
 
-// MockCodeHashDataAgentMockRecorder is the mock recorder for MockCodeHashDataAgent
+// MockCodeHashDataAgentMockRecorder is the mock recorder for MockCodeHashDataAgent.
 type MockCodeHashDataAgentMockRecorder struct {
 	mock *MockCodeHashDataAgent
 }
 
-// NewMockCodeHashDataAgent creates a new mock instance
+// NewMockCodeHashDataAgent creates a new mock instance.
 func NewMockCodeHashDataAgent(ctrl *gomock.Controller) *MockCodeHashDataAgent {
 	mock := &MockCodeHashDataAgent{ctrl: ctrl}
 	mock.recorder = &MockCodeHashDataAgentMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockCodeHashDataAgent) EXPECT() *MockCodeHashDataAgentMockRecorder {
 	return m.recorder
 }
 
-// Insert mocks base method
+// Insert mocks base method.
 func (m *MockCodeHashDataAgent) Insert(ctx context.Context, codehash *models.CodehashModel) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Insert", ctx, codehash)
@@ -133,36 +133,36 @@ func (m *MockCodeHashDataAgent) Insert(ctx context.Context, codehash *models.Cod
 	return ret0
 }
 
-// Insert indicates an expected call of Insert
+// Insert indicates an expected call of Insert.
 func (mr *MockCodeHashDataAgentMockRecorder) Insert(ctx, codehash interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockCodeHashDataAgent)(nil).Insert), ctx, codehash)
 }
 
-// MockEventDataAgent is a mock of EventDataAgent interface
+// MockEventDataAgent is a mock of EventDataAgent interface.
 type MockEventDataAgent struct {
 	ctrl     *gomock.Controller
 	recorder *MockEventDataAgentMockRecorder
 }
 
-// MockEventDataAgentMockRecorder is the mock recorder for MockEventDataAgent
+// MockEventDataAgentMockRecorder is the mock recorder for MockEventDataAgent.
 type MockEventDataAgentMockRecorder struct {
 	mock *MockEventDataAgent
 }
 
-// NewMockEventDataAgent creates a new mock instance
+// NewMockEventDataAgent creates a new mock instance.
 func NewMockEventDataAgent(ctrl *gomock.Controller) *MockEventDataAgent {
 	mock := &MockEventDataAgent{ctrl: ctrl}
 	mock.recorder = &MockEventDataAgentMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockEventDataAgent) EXPECT() *MockEventDataAgentMockRecorder {
 	return m.recorder
 }
 
-// InsertMultiple mocks base method
+// InsertMultiple mocks base method.
 func (m *MockEventDataAgent) InsertMultiple(ctx context.Context, events *[]*models.EventModel) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertMultiple", ctx, events)
@@ -170,13 +170,13 @@ func (m *MockEventDataAgent) InsertMultiple(ctx context.Context, events *[]*mode
 	return ret0
 }
 
-// InsertMultiple indicates an expected call of InsertMultiple
+// InsertMultiple indicates an expected call of InsertMultiple.
 func (mr *MockEventDataAgentMockRecorder) InsertMultiple(ctx, events interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertMultiple", reflect.TypeOf((*MockEventDataAgent)(nil).InsertMultiple), ctx, events)
 }
 
-// FindOneByAccountAndSigHash mocks base method
+// FindOneByAccountAndSigHash mocks base method.
 func (m *MockEventDataAgent) FindOneByAccountAndSigHash(ctx context.Context, account *common.AccountInstance, sighash string, indexedInputCount uint32) (*models.EventModel, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindOneByAccountAndSigHash", ctx, account, sighash, indexedInputCount)
@@ -185,13 +185,13 @@ func (m *MockEventDataAgent) FindOneByAccountAndSigHash(ctx context.Context, acc
 	return ret0, ret1
 }
 
-// FindOneByAccountAndSigHash indicates an expected call of FindOneByAccountAndSigHash
+// FindOneByAccountAndSigHash indicates an expected call of FindOneByAccountAndSigHash.
 func (mr *MockEventDataAgentMockRecorder) FindOneByAccountAndSigHash(ctx, account, sighash, indexedInputCount interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByAccountAndSigHash", reflect.TypeOf((*MockEventDataAgent)(nil).FindOneByAccountAndSigHash), ctx, account, sighash, indexedInputCount)
 }
 
-// FindDefaultBySigHash mocks base method
+// FindDefaultBySigHash mocks base method.
 func (m *MockEventDataAgent) FindDefaultBySigHash(ctx context.Context, sighash string, indexedInputCount uint32) ([]*models.EventModel, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindDefaultBySigHash", ctx, sighash, indexedInputCount)
@@ -200,36 +200,36 @@ func (m *MockEventDataAgent) FindDefaultBySigHash(ctx context.Context, sighash s
 	return ret0, ret1
 }
 
-// FindDefaultBySigHash indicates an expected call of FindDefaultBySigHash
+// FindDefaultBySigHash indicates an expected call of FindDefaultBySigHash.
 func (mr *MockEventDataAgentMockRecorder) FindDefaultBySigHash(ctx, sighash, indexedInputCount interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindDefaultBySigHash", reflect.TypeOf((*MockEventDataAgent)(nil).FindDefaultBySigHash), ctx, sighash, indexedInputCount)
 }
 
-// MockMethodDataAgent is a mock of MethodDataAgent interface
+// MockMethodDataAgent is a mock of MethodDataAgent interface.
 type MockMethodDataAgent struct {
 	ctrl     *gomock.Controller
 	recorder *MockMethodDataAgentMockRecorder
 }
 
-// MockMethodDataAgentMockRecorder is the mock recorder for MockMethodDataAgent
+// MockMethodDataAgentMockRecorder is the mock recorder for MockMethodDataAgent.
 type MockMethodDataAgentMockRecorder struct {
 	mock *MockMethodDataAgent
 }
 
-// NewMockMethodDataAgent creates a new mock instance
+// NewMockMethodDataAgent creates a new mock instance.
 func NewMockMethodDataAgent(ctrl *gomock.Controller) *MockMethodDataAgent {
 	mock := &MockMethodDataAgent{ctrl: ctrl}
 	mock.recorder = &MockMethodDataAgentMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockMethodDataAgent) EXPECT() *MockMethodDataAgentMockRecorder {
 	return m.recorder
 }
 
-// InsertMultiple mocks base method
+// InsertMultiple mocks base method.
 func (m *MockMethodDataAgent) InsertMultiple(ctx context.Context, methods *[]*models.MethodModel) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertMultiple", ctx, methods)
@@ -237,13 +237,13 @@ func (m *MockMethodDataAgent) InsertMultiple(ctx context.Context, methods *[]*mo
 	return ret0
 }
 
-// InsertMultiple indicates an expected call of InsertMultiple
+// InsertMultiple indicates an expected call of InsertMultiple.
 func (mr *MockMethodDataAgentMockRecorder) InsertMultiple(ctx, methods interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertMultiple", reflect.TypeOf((*MockMethodDataAgent)(nil).InsertMultiple), ctx, methods)
 }
 
-// FindOneByAccountAndSelector mocks base method
+// FindOneByAccountAndSelector mocks base method.
 func (m *MockMethodDataAgent) FindOneByAccountAndSelector(ctx context.Context, account *common.AccountInstance, selector []byte) (*models.MethodModel, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindOneByAccountAndSelector", ctx, account, selector)
@@ -252,13 +252,13 @@ func (m *MockMethodDataAgent) FindOneByAccountAndSelector(ctx context.Context, a
 	return ret0, ret1
 }
 
-// FindOneByAccountAndSelector indicates an expected call of FindOneByAccountAndSelector
+// FindOneByAccountAndSelector indicates an expected call of FindOneByAccountAndSelector.
 func (mr *MockMethodDataAgentMockRecorder) FindOneByAccountAndSelector(ctx, account, selector interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByAccountAndSelector", reflect.TypeOf((*MockMethodDataAgent)(nil).FindOneByAccountAndSelector), ctx, account, selector)
 }
 
-// FindDefaultBySelector mocks base method
+// FindDefaultBySelector mocks base method.
 func (m *MockMethodDataAgent) FindDefaultBySelector(ctx context.Context, selector []byte) ([]*models.MethodModel, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindDefaultBySelector", ctx, selector)
@@ -267,36 +267,36 @@ func (m *MockMethodDataAgent) FindDefaultBySelector(ctx context.Context, selecto
 	return ret0, ret1
 }
 
-// FindDefaultBySelector indicates an expected call of FindDefaultBySelector
+// FindDefaultBySelector indicates an expected call of FindDefaultBySelector.
 func (mr *MockMethodDataAgentMockRecorder) FindDefaultBySelector(ctx, selector interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindDefaultBySelector", reflect.TypeOf((*MockMethodDataAgent)(nil).FindDefaultBySelector), ctx, selector)
 }
 
-// MockRepositoryDataAgent is a mock of RepositoryDataAgent interface
+// MockRepositoryDataAgent is a mock of RepositoryDataAgent interface.
 type MockRepositoryDataAgent struct {
 	ctrl     *gomock.Controller
 	recorder *MockRepositoryDataAgentMockRecorder
 }
 
-// MockRepositoryDataAgentMockRecorder is the mock recorder for MockRepositoryDataAgent
+// MockRepositoryDataAgentMockRecorder is the mock recorder for MockRepositoryDataAgent.
 type MockRepositoryDataAgentMockRecorder struct {
 	mock *MockRepositoryDataAgent
 }
 
-// NewMockRepositoryDataAgent creates a new mock instance
+// NewMockRepositoryDataAgent creates a new mock instance.
 func NewMockRepositoryDataAgent(ctrl *gomock.Controller) *MockRepositoryDataAgent {
 	mock := &MockRepositoryDataAgent{ctrl: ctrl}
 	mock.recorder = &MockRepositoryDataAgentMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockRepositoryDataAgent) EXPECT() *MockRepositoryDataAgentMockRecorder {
 	return m.recorder
 }
 
-// SelectOrInsert mocks base method
+// SelectOrInsert mocks base method.
 func (m *MockRepositoryDataAgent) SelectOrInsert(ctx context.Context, repository *models.RepositoryModel) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SelectOrInsert", ctx, repository)
@@ -304,13 +304,13 @@ func (m *MockRepositoryDataAgent) SelectOrInsert(ctx context.Context, repository
 	return ret0
 }
 
-// SelectOrInsert indicates an expected call of SelectOrInsert
+// SelectOrInsert indicates an expected call of SelectOrInsert.
 func (mr *MockRepositoryDataAgentMockRecorder) SelectOrInsert(ctx, repository interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SelectOrInsert", reflect.TypeOf((*MockRepositoryDataAgent)(nil).SelectOrInsert), ctx, repository)
 }
 
-// FindAll mocks base method
+// FindAll mocks base method.
 func (m *MockRepositoryDataAgent) FindAll(ctx context.Context) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindAll", ctx)
@@ -319,36 +319,36 @@ func (m *MockRepositoryDataAgent) FindAll(ctx context.Context) ([]string, error)
 	return ret0, ret1
 }
 
-// FindAll indicates an expected call of FindAll
+// FindAll indicates an expected call of FindAll.
 func (mr *MockRepositoryDataAgentMockRecorder) FindAll(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockRepositoryDataAgent)(nil).FindAll), ctx)
 }
 
-// MockTagDataAgent is a mock of TagDataAgent interface
+// MockTagDataAgent is a mock of TagDataAgent interface.
 type MockTagDataAgent struct {
 	ctrl     *gomock.Controller
 	recorder *MockTagDataAgentMockRecorder
 }
 
-// MockTagDataAgentMockRecorder is the mock recorder for MockTagDataAgent
+// MockTagDataAgentMockRecorder is the mock recorder for MockTagDataAgent.
 type MockTagDataAgentMockRecorder struct {
 	mock *MockTagDataAgent
 }
 
-// NewMockTagDataAgent creates a new mock instance
+// NewMockTagDataAgent creates a new mock instance.
 func NewMockTagDataAgent(ctrl *gomock.Controller) *MockTagDataAgent {
 	mock := &MockTagDataAgent{ctrl: ctrl}
 	mock.recorder = &MockTagDataAgentMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockTagDataAgent) EXPECT() *MockTagDataAgentMockRecorder {
 	return m.recorder
 }
 
-// Insert mocks base method
+// Insert mocks base method.
 func (m *MockTagDataAgent) Insert(ctx context.Context, tag *models.TagModel) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Insert", ctx, tag)
@@ -356,13 +356,13 @@ func (m *MockTagDataAgent) Insert(ctx context.Context, tag *models.TagModel) err
 	return ret0
 }
 
-// Insert indicates an expected call of Insert
+// Insert indicates an expected call of Insert.
 func (mr *MockTagDataAgentMockRecorder) Insert(ctx, tag interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockTagDataAgent)(nil).Insert), ctx, tag)
 }
 
-// FindAllByName mocks base method
+// FindAllByName mocks base method.
 func (m *MockTagDataAgent) FindAllByName(ctx context.Context, name string) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindAllByName", ctx, name)
@@ -371,36 +371,36 @@ func (m *MockTagDataAgent) FindAllByName(ctx context.Context, name string) ([]st
 	return ret0, ret1
 }
 
-// FindAllByName indicates an expected call of FindAllByName
+// FindAllByName indicates an expected call of FindAllByName.
 func (mr *MockTagDataAgentMockRecorder) FindAllByName(ctx, name interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAllByName", reflect.TypeOf((*MockTagDataAgent)(nil).FindAllByName), ctx, name)
 }
 
-// MockBuilder is a mock of Builder interface
+// MockBuilder is a mock of Builder interface.
 type MockBuilder struct {
 	ctrl     *gomock.Controller
 	recorder *MockBuilderMockRecorder
 }
 
-// MockBuilderMockRecorder is the mock recorder for MockBuilder
+// MockBuilderMockRecorder is the mock recorder for MockBuilder.
 type MockBuilderMockRecorder struct {
 	mock *MockBuilder
 }
 
-// NewMockBuilder creates a new mock instance
+// NewMockBuilder creates a new mock instance.
 func NewMockBuilder(ctrl *gomock.Controller) *MockBuilder {
 	mock := &MockBuilder{ctrl: ctrl}
 	mock.recorder = &MockBuilderMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockBuilder) EXPECT() *MockBuilderMockRecorder {
 	return m.recorder
 }
 
-// Build mocks base method
+// Build mocks base method.
 func (m *MockBuilder) Build(ctx context.Context, conf *store.Config) (store.ContractDataAgent, store.RepositoryDataAgent, store.TagDataAgent, store.ArtifactDataAgent, store.MethodDataAgent, store.EventDataAgent, store.CodeHashDataAgent, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Build", ctx, conf)
@@ -415,7 +415,7 @@ func (m *MockBuilder) Build(ctx context.Context, conf *store.Config) (store.Cont
 	return ret0, ret1, ret2, ret3, ret4, ret5, ret6, ret7
 }
 
-// Build indicates an expected call of Build
+// Build indicates an expected call of Build.
 func (mr *MockBuilderMockRecorder) Build(ctx, conf interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Build", reflect.TypeOf((*MockBuilder)(nil).Build), ctx, conf)

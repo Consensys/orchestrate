@@ -47,6 +47,10 @@ func (p *Parser) ParseTxRequest(scenario string, headers, row *gherkin.TableRow)
 	for i, cell := range row.Cells {
 		header := headers.Cells[i].Value
 
+		if cell.Value == "" {
+			continue
+		}
+
 		// Retrieves alias (first from scenario local namespace then if not found from global namespace)
 		value, ok := p.Aliases.Get(scenario, cell.Value)
 		if !ok {

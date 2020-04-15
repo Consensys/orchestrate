@@ -14,6 +14,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	proto "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client/mock"
@@ -62,7 +63,7 @@ func (ec *MockChainLedgerReader) TransactionByHash(ctx context.Context, endpoint
 }
 
 // TransactionReceipt returns the receipt of a transaction by transaction hash.
-func (ec *MockChainLedgerReader) TransactionReceipt(ctx context.Context, endpoint string, txHash ethcommon.Hash) (*ethtypes.Receipt, error) {
+func (ec *MockChainLedgerReader) TransactionReceipt(ctx context.Context, endpoint string, txHash ethcommon.Hash) (*proto.Receipt, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
@@ -92,9 +93,9 @@ func TestTxAlreadySent(t *testing.T) {
 	ec := NewMockChainLedgerReader()
 	ctrl := gomock.NewController(t)
 	client := clientmock.NewMockEnvelopeStoreClient(ctrl)
-	client.EXPECT().LoadByID(gomock.Any(),gomock.AssignableToTypeOf(&svc.LoadByIDRequest{})).AnyTimes()
-	client.EXPECT().Store(gomock.Any(),gomock.AssignableToTypeOf(&svc.StoreRequest{})).Times(2)
-	client.EXPECT().SetStatus(gomock.Any(),gomock.AssignableToTypeOf(&svc.SetStatusRequest{})).Times(2)
+	client.EXPECT().LoadByID(gomock.Any(), gomock.AssignableToTypeOf(&svc.LoadByIDRequest{})).AnyTimes()
+	client.EXPECT().Store(gomock.Any(), gomock.AssignableToTypeOf(&svc.StoreRequest{})).Times(2)
+	client.EXPECT().SetStatus(gomock.Any(), gomock.AssignableToTypeOf(&svc.SetStatusRequest{})).Times(2)
 	mh := mockHandler{}
 
 	// Prepare a test handler combined with a mock handler to

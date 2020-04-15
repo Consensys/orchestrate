@@ -12,30 +12,30 @@ import (
 	reflect "reflect"
 )
 
-// MockFaucet is a mock of Faucet interface
+// MockFaucet is a mock of Faucet interface.
 type MockFaucet struct {
 	ctrl     *gomock.Controller
 	recorder *MockFaucetMockRecorder
 }
 
-// MockFaucetMockRecorder is the mock recorder for MockFaucet
+// MockFaucetMockRecorder is the mock recorder for MockFaucet.
 type MockFaucetMockRecorder struct {
 	mock *MockFaucet
 }
 
-// NewMockFaucet creates a new mock instance
+// NewMockFaucet creates a new mock instance.
 func NewMockFaucet(ctrl *gomock.Controller) *MockFaucet {
 	mock := &MockFaucet{ctrl: ctrl}
 	mock.recorder = &MockFaucetMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockFaucet) EXPECT() *MockFaucetMockRecorder {
 	return m.recorder
 }
 
-// Credit mocks base method
+// Credit mocks base method.
 func (m *MockFaucet) Credit(ctx context.Context, r *types.Request) (*big.Int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Credit", ctx, r)
@@ -44,7 +44,7 @@ func (m *MockFaucet) Credit(ctx context.Context, r *types.Request) (*big.Int, er
 	return ret0, ret1
 }
 
-// Credit indicates an expected call of Credit
+// Credit indicates an expected call of Credit.
 func (mr *MockFaucetMockRecorder) Credit(ctx, r interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Credit", reflect.TypeOf((*MockFaucet)(nil).Credit), ctx, r)

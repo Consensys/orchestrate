@@ -80,4 +80,7 @@ message Receipt {
 
     // QUANTITY - The total amount of gas used when this transaction was executed in the block.
     uint64 cumulative_gas_used = 13;
+
+    // DATA - Revert reason if the transaction failed
+    string revert_reason = 14;
 }

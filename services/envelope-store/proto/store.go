@@ -6,8 +6,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
-//go:generate mockgen -destination=../client/mock/mock.go -package=mock . EnvelopeStoreClient
-//go:generate mockgen -destination=../service/mock/mock.go -package=mock . EnvelopeStoreServer
+//go:generate mockgen -destination=../client/mock/grpc.go -package=mock . EnvelopeStoreClient
+//go:generate mockgen -destination=../service/controllers/mock/grpc.go -package=mock . EnvelopeStoreServer
 
 // HasBeenSent indicates whether a transaction has been sent
 func (info *StatusInfo) HasBeenSent() bool {

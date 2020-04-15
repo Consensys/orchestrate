@@ -10,30 +10,30 @@ import (
 	reflect "reflect"
 )
 
-// MockChecker is a mock of Checker interface
+// MockChecker is a mock of Checker interface.
 type MockChecker struct {
 	ctrl     *gomock.Controller
 	recorder *MockCheckerMockRecorder
 }
 
-// MockCheckerMockRecorder is the mock recorder for MockChecker
+// MockCheckerMockRecorder is the mock recorder for MockChecker.
 type MockCheckerMockRecorder struct {
 	mock *MockChecker
 }
 
-// NewMockChecker creates a new mock instance
+// NewMockChecker creates a new mock instance.
 func NewMockChecker(ctrl *gomock.Controller) *MockChecker {
 	mock := &MockChecker{ctrl: ctrl}
 	mock.recorder = &MockCheckerMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockChecker) EXPECT() *MockCheckerMockRecorder {
 	return m.recorder
 }
 
-// Check mocks base method
+// Check mocks base method.
 func (m *MockChecker) Check(ctx context.Context) (context.Context, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Check", ctx)
@@ -42,7 +42,7 @@ func (m *MockChecker) Check(ctx context.Context) (context.Context, error) {
 	return ret0, ret1
 }
 
-// Check indicates an expected call of Check
+// Check indicates an expected call of Check.
 func (mr *MockCheckerMockRecorder) Check(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Check", reflect.TypeOf((*MockChecker)(nil).Check), ctx)

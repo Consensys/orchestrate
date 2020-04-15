@@ -11,6 +11,7 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
 	ethclientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/utils"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session"
 	hook "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/hooks"
@@ -19,7 +20,7 @@ import (
 
 type fetchedBlock struct {
 	block    *ethtypes.Block
-	receipts []*ethtypes.Receipt
+	receipts []*types.Receipt
 }
 
 type EthClient interface {
@@ -231,7 +232,7 @@ func (s *Session) fetchBlock(ctx context.Context, blockPosition uint64) *Future 
 					err = e
 				}
 			case res := <-futureReceipt.Result():
-				block.receipts = append(block.receipts, res.(*ethtypes.Receipt))
+				block.receipts = append(block.receipts, res.(*types.Receipt))
 			}
 
 			// Close future

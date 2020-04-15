@@ -17,6 +17,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 	offset "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/offset/memory"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/offset/mock"
@@ -151,7 +152,7 @@ func (ec *EthClientV2) TransactionByHash(ctx context.Context, _ string, hash eth
 	return nil, false, errors.NotFoundError("tx not found")
 }
 
-func (ec *EthClientV2) TransactionReceipt(ctx context.Context, _ string, txHash ethcommon.Hash) (*ethtypes.Receipt, error) {
+func (ec *EthClientV2) TransactionReceipt(ctx context.Context, _ string, txHash ethcommon.Hash) (*types.Receipt, error) {
 	if err := ec.getError(ctx); err != nil {
 		return nil, err
 	}
@@ -160,7 +161,7 @@ func (ec *EthClientV2) TransactionReceipt(ctx context.Context, _ string, txHash 
 	defer ec.mux.RUnlock()
 
 	if tx, ok := ec.txs[txHash.Hex()]; ok {
-		return &ethtypes.Receipt{TxHash: tx.Hash()}, nil
+		return &types.Receipt{TxHash: tx.Hash().String()}, nil
 	}
 
 	return nil, errors.NotFoundError("receipt not found")
@@ -187,7 +188,7 @@ func (ec *EthClientV2) SyncProgress(ctx context.Context, _ string) (*eth.SyncPro
 type hookCall struct {
 	chain    *dynamic.Chain
 	block    *ethtypes.Block
-	receipts []*ethtypes.Receipt
+	receipts []*types.Receipt
 }
 
 type MockHook struct {
@@ -202,7 +203,7 @@ func NewMockHook() *MockHook {
 	}
 }
 
-func (hk *MockHook) AfterNewBlock(_ context.Context, chain *dynamic.Chain, block *ethtypes.Block, receipts []*ethtypes.Receipt) error {
+func (hk *MockHook) AfterNewBlock(_ context.Context, chain *dynamic.Chain, block *ethtypes.Block, receipts []*types.Receipt) error {
 	hk.Calls <- &hookCall{
 		chain:    chain,
 		block:    block,
@@ -260,7 +261,7 @@ func TestFetchReceipt(t *testing.T) {
 		Chain: &dynamic.Chain{},
 	}
 
-	// Unkwnon transaction
+	// Unknown transaction
 	future := sess.fetchReceipt(context.Background(), ethcommon.Hash{})
 	select {
 	case <-future.Err():
@@ -278,7 +279,7 @@ func TestFetchReceipt(t *testing.T) {
 	case err := <-future.Err():
 		t.Errorf("Future should not error but got %v", err)
 	case res := <-future.Result():
-		assert.Equal(t, "0xfbf12011cab2a6c12e1ee895495f2d1aa534b2dc8abcfc10fff88356e5b990fa", res.(*ethtypes.Receipt).TxHash.Hex(), "Receipt hash should be correct")
+		assert.Equal(t, "0xfbf12011cab2a6c12e1ee895495f2d1aa534b2dc8abcfc10fff88356e5b990fa", res.(*types.Receipt).TxHash, "Receipt hash should be correct")
 	}
 	future.Close()
 }

@@ -10,8 +10,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/store/models"
 )
 
-//go:generate mockgen -source=store_envelope.go -destination=mocks/store_envelope.go -package=mocks
-
 type StoreEnvelope interface {
 	Execute(ctx context.Context, tenantID string, envelopeItem *tx.TxEnvelope) (models.EnvelopeModel, error)
 }

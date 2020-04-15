@@ -14,30 +14,30 @@ import (
 	reflect "reflect"
 )
 
-// MockKeyStore is a mock of KeyStore interface
+// MockKeyStore is a mock of KeyStore interface.
 type MockKeyStore struct {
 	ctrl     *gomock.Controller
 	recorder *MockKeyStoreMockRecorder
 }
 
-// MockKeyStoreMockRecorder is the mock recorder for MockKeyStore
+// MockKeyStoreMockRecorder is the mock recorder for MockKeyStore.
 type MockKeyStoreMockRecorder struct {
 	mock *MockKeyStore
 }
 
-// NewMockKeyStore creates a new mock instance
+// NewMockKeyStore creates a new mock instance.
 func NewMockKeyStore(ctrl *gomock.Controller) *MockKeyStore {
 	mock := &MockKeyStore{ctrl: ctrl}
 	mock.recorder = &MockKeyStoreMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockKeyStore) EXPECT() *MockKeyStoreMockRecorder {
 	return m.recorder
 }
 
-// SignTx mocks base method
+// SignTx mocks base method.
 func (m *MockKeyStore) SignTx(ctx context.Context, chain *big.Int, a common.Address, tx *types.Transaction) ([]byte, *common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignTx", ctx, chain, a, tx)
@@ -47,13 +47,13 @@ func (m *MockKeyStore) SignTx(ctx context.Context, chain *big.Int, a common.Addr
 	return ret0, ret1, ret2
 }
 
-// SignTx indicates an expected call of SignTx
+// SignTx indicates an expected call of SignTx.
 func (mr *MockKeyStoreMockRecorder) SignTx(ctx, chain, a, tx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignTx", reflect.TypeOf((*MockKeyStore)(nil).SignTx), ctx, chain, a, tx)
 }
 
-// SignPrivateEEATx mocks base method
+// SignPrivateEEATx mocks base method.
 func (m *MockKeyStore) SignPrivateEEATx(ctx context.Context, chain *big.Int, a common.Address, tx *types.Transaction, privateArgs *types0.PrivateArgs) ([]byte, *common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignPrivateEEATx", ctx, chain, a, tx, privateArgs)
@@ -63,13 +63,13 @@ func (m *MockKeyStore) SignPrivateEEATx(ctx context.Context, chain *big.Int, a c
 	return ret0, ret1, ret2
 }
 
-// SignPrivateEEATx indicates an expected call of SignPrivateEEATx
+// SignPrivateEEATx indicates an expected call of SignPrivateEEATx.
 func (mr *MockKeyStoreMockRecorder) SignPrivateEEATx(ctx, chain, a, tx, privateArgs interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignPrivateEEATx", reflect.TypeOf((*MockKeyStore)(nil).SignPrivateEEATx), ctx, chain, a, tx, privateArgs)
 }
 
-// SignPrivateTesseraTx mocks base method
+// SignPrivateTesseraTx mocks base method.
 func (m *MockKeyStore) SignPrivateTesseraTx(ctx context.Context, chain *big.Int, a common.Address, tx *types.Transaction) ([]byte, *common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignPrivateTesseraTx", ctx, chain, a, tx)
@@ -79,13 +79,13 @@ func (m *MockKeyStore) SignPrivateTesseraTx(ctx context.Context, chain *big.Int,
 	return ret0, ret1, ret2
 }
 
-// SignPrivateTesseraTx indicates an expected call of SignPrivateTesseraTx
+// SignPrivateTesseraTx indicates an expected call of SignPrivateTesseraTx.
 func (mr *MockKeyStoreMockRecorder) SignPrivateTesseraTx(ctx, chain, a, tx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignPrivateTesseraTx", reflect.TypeOf((*MockKeyStore)(nil).SignPrivateTesseraTx), ctx, chain, a, tx)
 }
 
-// SignMsg mocks base method
+// SignMsg mocks base method.
 func (m *MockKeyStore) SignMsg(ctx context.Context, a common.Address, msg string) ([]byte, *common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignMsg", ctx, a, msg)
@@ -95,13 +95,13 @@ func (m *MockKeyStore) SignMsg(ctx context.Context, a common.Address, msg string
 	return ret0, ret1, ret2
 }
 
-// SignMsg indicates an expected call of SignMsg
+// SignMsg indicates an expected call of SignMsg.
 func (mr *MockKeyStoreMockRecorder) SignMsg(ctx, a, msg interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignMsg", reflect.TypeOf((*MockKeyStore)(nil).SignMsg), ctx, a, msg)
 }
 
-// SignRawHash mocks base method
+// SignRawHash mocks base method.
 func (m *MockKeyStore) SignRawHash(a common.Address, hash []byte) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignRawHash", a, hash)
@@ -110,13 +110,13 @@ func (m *MockKeyStore) SignRawHash(a common.Address, hash []byte) ([]byte, error
 	return ret0, ret1
 }
 
-// SignRawHash indicates an expected call of SignRawHash
+// SignRawHash indicates an expected call of SignRawHash.
 func (mr *MockKeyStoreMockRecorder) SignRawHash(a, hash interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignRawHash", reflect.TypeOf((*MockKeyStore)(nil).SignRawHash), a, hash)
 }
 
-// GenerateAccount mocks base method
+// GenerateAccount mocks base method.
 func (m *MockKeyStore) GenerateAccount(ctx context.Context) (*common.Address, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GenerateAccount", ctx)
@@ -125,13 +125,13 @@ func (m *MockKeyStore) GenerateAccount(ctx context.Context) (*common.Address, er
 	return ret0, ret1
 }
 
-// GenerateAccount indicates an expected call of GenerateAccount
+// GenerateAccount indicates an expected call of GenerateAccount.
 func (mr *MockKeyStoreMockRecorder) GenerateAccount(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenerateAccount", reflect.TypeOf((*MockKeyStore)(nil).GenerateAccount), ctx)
 }
 
-// ImportPrivateKey mocks base method
+// ImportPrivateKey mocks base method.
 func (m *MockKeyStore) ImportPrivateKey(ctx context.Context, priv string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ImportPrivateKey", ctx, priv)
@@ -139,7 +139,7 @@ func (m *MockKeyStore) ImportPrivateKey(ctx context.Context, priv string) error 
 	return ret0
 }
 
-// ImportPrivateKey indicates an expected call of ImportPrivateKey
+// ImportPrivateKey indicates an expected call of ImportPrivateKey.
 func (mr *MockKeyStoreMockRecorder) ImportPrivateKey(ctx, priv interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ImportPrivateKey", reflect.TypeOf((*MockKeyStore)(nil).ImportPrivateKey), ctx, priv)

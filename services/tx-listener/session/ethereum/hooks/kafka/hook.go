@@ -9,6 +9,7 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/containous/traefik/v2/pkg/log"
 	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/golang/protobuf/proto"
@@ -19,7 +20,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
 	ethclientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	svccontracts "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 	svcenvelopes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
@@ -47,14 +48,14 @@ func NewHook(conf *Config, registry svccontracts.ContractRegistryClient, ec ethc
 	}
 }
 
-func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *ethtypes.Block, receipts []*ethtypes.Receipt) error {
+func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *ethtypes.Block, receipts []*types.Receipt) error {
 	blockLogCtx := log.With(ctx, log.Str("block.number", block.Number().String()))
 	var evlps []*tx.TxResponse
 
 	for idx, r := range receipts {
 		b := tx.NewEnvelope()
 
-		receiptLogCtx := log.With(blockLogCtx, log.Str("receipt.txhash", r.TxHash.Hex()))
+		receiptLogCtx := log.With(blockLogCtx, log.Str("receipt.txhash", r.TxHash))
 
 		// Register deployed contract
 		err := hk.registerDeployedContract(receiptLogCtx, c, r, block)
@@ -63,11 +64,8 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 			return err
 		}
 
-		// Cast receipt in internal format
-		receipt := ethereum.FromGethReceipt(r)
-
 		// Load envelope from envelope store
-		req, err := hk.loadEnvelope(receiptLogCtx, c, receipt)
+		req, err := hk.loadEnvelope(receiptLogCtx, c, r)
 		isExternalTx := errors.IsNotFoundError(err)
 		if req != nil {
 			b, err = req.Envelope()
@@ -93,7 +91,7 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 		}
 
 		// Attach receipt to envelope
-		_ = b.SetReceipt(receipt.
+		_ = b.SetReceipt(r.
 			SetBlockHash(block.Hash()).
 			SetBlockNumber(block.NumberU64()).
 			SetTxIndex(uint64(idx)))
@@ -125,7 +123,7 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 	return nil
 }
 
-func (hk *Hook) decodeReceipt(ctx context.Context, c *dynamic.Chain, receipt *ethereum.Receipt) error {
+func (hk *Hook) decodeReceipt(ctx context.Context, c *dynamic.Chain, receipt *types.Receipt) error {
 	for _, l := range receipt.GetLogs() {
 		if len(l.GetTopics()) == 0 {
 			// This scenario is not supposed to happen
@@ -204,13 +202,13 @@ func GetAbi(e *ethAbi.Event) string {
 	return fmt.Sprintf("%v(%v)", e.Name, strings.Join(inputs, ","))
 }
 
-func (hk *Hook) registerDeployedContract(ctx context.Context, c *dynamic.Chain, receipt *ethtypes.Receipt, block *ethtypes.Block) error {
-	if receipt.ContractAddress.Hex() != "0x0000000000000000000000000000000000000000" {
-		log.FromContext(ctx).WithField("contract.address", receipt.ContractAddress.Hex()).Infof("new contract deployed")
+func (hk *Hook) registerDeployedContract(ctx context.Context, c *dynamic.Chain, receipt *types.Receipt, block *ethtypes.Block) error {
+	if receipt.ContractAddress != "" && receipt.ContractAddress != "0x0000000000000000000000000000000000000000" {
+		log.FromContext(ctx).WithField("contract.address", receipt.ContractAddress).Infof("new contract deployed")
 		code, err := hk.ec.CodeAt(
 			ethclientutils.RetryNotFoundError(ctx, true),
 			c.URL,
-			receipt.ContractAddress,
+			ethcommon.HexToAddress(receipt.ContractAddress),
 			block.Number(),
 		)
 		if err != nil {
@@ -221,7 +219,7 @@ func (hk *Hook) registerDeployedContract(ctx context.Context, c *dynamic.Chain, 
 			&svccontracts.SetAccountCodeHashRequest{
 				AccountInstance: &common.AccountInstance{
 					ChainId: c.ChainID.String(),
-					Account: receipt.ContractAddress.Hex(),
+					Account: receipt.ContractAddress,
 				},
 				CodeHash: crypto.Keccak256Hash(code).String(),
 			},
@@ -233,7 +231,7 @@ func (hk *Hook) registerDeployedContract(ctx context.Context, c *dynamic.Chain, 
 	return nil
 }
 
-func (hk *Hook) loadEnvelope(ctx context.Context, c *dynamic.Chain, receipt *ethereum.Receipt) (*tx.TxEnvelope, error) {
+func (hk *Hook) loadEnvelope(ctx context.Context, c *dynamic.Chain, receipt *types.Receipt) (*tx.TxEnvelope, error) {
 	resp, err := hk.store.LoadByTxHash(
 		ctx,
 		&svcenvelopes.LoadByTxHashRequest{

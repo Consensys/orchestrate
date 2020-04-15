@@ -1,29 +1,16 @@
 package ethereum
 
 import (
+	"bytes"
+	"encoding/json"
+	"errors"
+	"math/big"
+
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
-
-// FromGethReceipt creates a receipt from a Geth Receipt
-func FromGethReceipt(r *ethtypes.Receipt) *Receipt {
-	var logs []*Log
-	for _, log := range r.Logs {
-		logs = append(logs, FromGethLog(log))
-	}
-
-	return &Receipt{
-		TxHash:            r.TxHash.String(),
-		ContractAddress:   r.ContractAddress.String(),
-		PostState:         hexutil.Encode(r.PostState),
-		Status:            r.Status,
-		Bloom:             hexutil.Encode(r.Bloom.Bytes()),
-		Logs:              logs,
-		GasUsed:           r.GasUsed,
-		CumulativeGasUsed: r.CumulativeGasUsed,
-	}
-}
 
 // SetBlockNumber set block hash
 func (r *Receipt) SetBlockNumber(number uint64) *Receipt {
@@ -78,4 +65,89 @@ func (r *Receipt) GetContractAddr() ethcommon.Address {
 func (r *Receipt) GetTxHashPtr() *ethcommon.Hash {
 	hash := ethcommon.HexToHash(r.GetTxHash())
 	return &hash
+}
+
+// UnmarshalJSON unmarshal from JSON.
+func (r *Receipt) UnmarshalJSON(input []byte) error {
+	var dec struct {
+		PostState         *hexutil.Bytes     `json:"root"`
+		Status            *hexutil.Uint64    `json:"status"`
+		CumulativeGasUsed *hexutil.Uint64    `json:"cumulativeGasUsed" gencodec:"required"`
+		Bloom             *ethtypes.Bloom    `json:"logsBloom"         gencodec:"required"`
+		Logs              []*ethtypes.Log    `json:"logs"              gencodec:"required"`
+		TxHash            *ethcommon.Hash    `json:"transactionHash" gencodec:"required"`
+		ContractAddress   *ethcommon.Address `json:"contractAddress"`
+		GasUsed           *hexutil.Uint64    `json:"gasUsed" gencodec:"required"`
+		BlockHash         *ethcommon.Hash    `json:"blockHash,omitempty"`
+		BlockNumber       *hexutil.Big       `json:"blockNumber,omitempty"`
+		TransactionIndex  *hexutil.Uint      `json:"transactionIndex"`
+		RevertReason      string             `json:"revertReason"`
+	}
+	if err := json.Unmarshal(input, &dec); err != nil {
+		return err
+	}
+	if dec.PostState != nil {
+		r.PostState = hexutil.Encode(*dec.PostState)
+	}
+	if dec.Status != nil {
+		r.Status = uint64(*dec.Status)
+	}
+	if dec.CumulativeGasUsed == nil {
+		return errors.New("missing required field 'cumulativeGasUsed' for Receipt")
+	}
+	r.CumulativeGasUsed = uint64(*dec.CumulativeGasUsed)
+	if dec.Bloom == nil {
+		return errors.New("missing required field 'logsBloom' for Receipt")
+	}
+	r.Bloom = hexutil.Encode(dec.Bloom.Bytes())
+	if dec.Logs == nil {
+		return errors.New("missing required field 'logs' for Receipt")
+	}
+	for _, log := range dec.Logs {
+		r.Logs = append(r.Logs, FromGethLog(log))
+	}
+	if dec.TxHash == nil {
+		return errors.New("missing required field 'transactionHash' for Receipt")
+	}
+	r.TxHash = dec.TxHash.String()
+	if dec.ContractAddress != nil {
+		r.ContractAddress = dec.ContractAddress.String()
+	}
+	if dec.GasUsed == nil {
+		return errors.New("missing required field 'gasUsed' for Receipt")
+	}
+	r.GasUsed = uint64(*dec.GasUsed)
+	if dec.BlockHash != nil {
+		r.BlockHash = dec.BlockHash.String()
+	}
+	if dec.BlockNumber != nil {
+		r.BlockNumber = (*big.Int)(dec.BlockNumber).Uint64()
+	}
+	if dec.TransactionIndex != nil {
+		r.TxIndex = uint64(*dec.TransactionIndex)
+	}
+
+	if dec.RevertReason != "" {
+		message, err := unpackRevertReason(ethcommon.FromHex(dec.RevertReason))
+		if err == nil {
+			r.RevertReason = message
+		}
+	}
+	return nil
+}
+
+var (
+	errorSig     = []byte{0x08, 0xc3, 0x79, 0xa0} // Keccak256("Error(string)")[:4]
+	abiString, _ = abi.NewType("string", "", nil)
+)
+
+func unpackRevertReason(result []byte) (string, error) {
+	if len(result) < 4 || !bytes.Equal(result[:4], errorSig) {
+		return "", errors.New("TX result not of type Error(string)")
+	}
+	vs, err := abi.Arguments{{Type: abiString}}.UnpackValues(result[4:])
+	if err != nil {
+		return "", errors.New("unpacking revert reason")
+	}
+	return vs[0].(string), nil
 }

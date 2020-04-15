@@ -8,6 +8,7 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/types"
+	proto "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
 )
 
 //go:generate mockgen -source=ethclient.go -destination=mock/mock.go -package=mock
@@ -25,7 +26,7 @@ type TransactionSender interface {
 	// privateFor - is a list of public keys of Quorum nodes that can receive a private transaction
 	SendQuorumRawPrivateTransaction(ctx context.Context, url string, signedTxHash string, privateFor []string) (ethcommon.Hash, error)
 
-	// SendRawPrivateTransaction send a raw transaction to a Ethreum node supporting privacy with EEA privacy extensions
+	// SendRawPrivateTransaction send a raw transaction to a Ethereum node supporting privacy with EEA privacy extensions
 	SendRawPrivateTransaction(ctx context.Context, url string, raw string, args *types.PrivateArgs) (ethcommon.Hash, error)
 }
 
@@ -48,7 +49,7 @@ type ChainLedgerReader interface {
 	TransactionByHash(ctx context.Context, url string, hash ethcommon.Hash) (tx *ethtypes.Transaction, isPending bool, err error)
 
 	// TransactionReceipt returns the receipt of a transaction by transaction hash.
-	TransactionReceipt(ctx context.Context, url string, txHash ethcommon.Hash) (*ethtypes.Receipt, error)
+	TransactionReceipt(ctx context.Context, url string, txHash ethcommon.Hash) (*proto.Receipt, error)
 }
 
 // ChainStateReader is a service to access a blockchain state information

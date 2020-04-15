@@ -75,6 +75,6 @@ func Crafter(r svc.ContractRegistryClient, crafter abi.Crafter) engine.HandlerFu
 
 		_ = txctx.Envelope.SetData(data)
 
-		txctx.Logger.Tracef("crafter: tx data payload set")
+		txctx.Logger.Tracef("crafter: tx data payload set with %s", txctx.Envelope.GetData())
 	}
 }

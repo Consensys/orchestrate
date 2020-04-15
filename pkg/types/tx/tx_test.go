@@ -276,7 +276,7 @@ func TestRequestToBuilder(t *testing.T) {
 				},
 			},
 			nil,
-			errors.DataError("[42000@: invalid gasPrice - got error 42000@: invalid nonce - got error 42000@: invalid gasPrice - got error 42000@: invalid value - got error 42000@: invalid from - got error 42000@: invalid to - got error]"),
+			errors.DataError("[42000@: invalid gas - got error 42000@: invalid nonce - got error 42000@: invalid gasPrice - got error 42000@: invalid value - got error 42000@: invalid from - got error 42000@: invalid to - got error]"),
 		},
 		{
 			"invalid tx envelope",

@@ -22,6 +22,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/types"
+	proto "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
 )
 
 type ProcessResultFunc func(result json.RawMessage) error
@@ -367,7 +368,7 @@ func (ec *Client) TransactionByHash(ctx context.Context, endpoint string, hash e
 	return tx, extra.BlockNumber == nil, nil
 }
 
-func processReceiptResult(receipt **ethtypes.Receipt) ProcessResultFunc {
+func processReceiptResult(receipt **proto.Receipt) ProcessResultFunc {
 	return func(result json.RawMessage) error {
 		err := processResult(&receipt)(result)
 		if err != nil {
@@ -385,8 +386,8 @@ func processReceiptResult(receipt **ethtypes.Receipt) ProcessResultFunc {
 
 // TransactionReceipt returns the receipt of a transaction by transaction hash.
 // Note that the receipt is not available for pending transactions.
-func (ec *Client) TransactionReceipt(ctx context.Context, endpoint string, txHash ethcommon.Hash) (*ethtypes.Receipt, error) {
-	var r *ethtypes.Receipt
+func (ec *Client) TransactionReceipt(ctx context.Context, endpoint string, txHash ethcommon.Hash) (*proto.Receipt, error) {
+	var r *proto.Receipt
 	err := ec.Call(ctx, endpoint, processReceiptResult(&r), "eth_getTransactionReceipt", txHash)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
