@@ -13,6 +13,9 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store"
 )
 
+//go:generate swag init --dir . --generalInfo chain_registry.go --output ../../../public/swagger-specs/types/chain-registry
+//go:generate rm ../../../public/swagger-specs/types/chain-registry/docs.go ../../../public/swagger-specs/types/chain-registry/swagger.yaml
+
 // @title Chain Registry API
 // @version 2.0
 // @description PegaSys Orchestrate Chain Registry API. Enables dynamic management of chains

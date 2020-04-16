@@ -3,7 +3,8 @@ version: "3.7"
 x-default-variables: &default-variables
   CHAIN_REGISTRY_URL: ${CHAIN_REGISTRY_URL-http://chain-registry:8081}
   CONTRACT_REGISTRY_URL: ${CONTRACT_REGISTRY_URL-contract-registry:8080}
-  ENVELOPE_STORE_URL: ${ENVELOPE_STORE_URL-envelope-store:8080}
+  ENVELOPE_STORE_URL: ${ENVELOPE_STORE_URL-transaction-manager:8080}
+  TRANSACTION_SCHEDULER_URL: ${TRANSACTION_SCHEDULER_URL-http://transaction-scheduler:8081}
   CHAIN_REGISTRY_INIT: ${CHAIN_REGISTRY_INIT-}
   ETH_CLIENT_RETRY_MAX_ELAPSED_TIME: 5s
   LOG_LEVEL: ${LOG_LEVEL-debug}
@@ -50,6 +51,10 @@ x-contract-registry-common: &contract-registry-common
 x-envelope-store-common: &envelope-store-common
   ENVELOPE_STORE_TYPE: ${ENVELOPE_STORE_TYPE-}
   DB_HOST: postgres-envelope-store
+
+x-transaction-scheduler-common: &transaction-scheduler-common
+  CHAIN_REGISTRY_TYPE: ${TRANSACTION_SCHEDULER_TYPE-}
+  DB_HOST: postgres-transaction-scheduler
 
 services:
   chain-registry-migration-init:
@@ -145,6 +150,36 @@ services:
     depends_on:
       - envelope-store-migration
     command: envelope-store run
+
+  transaction-scheduler-migration-init:
+    <<: *container-common
+    environment:
+      <<: *default-variables
+      <<: *transaction-scheduler-common
+    restart: "no"
+    command: transaction-scheduler migrate init
+
+  transaction-scheduler-migration:
+    <<: *container-common
+    environment:
+      <<: *default-variables
+      <<: *transaction-scheduler-common
+    restart: "no"
+    depends_on:
+      - transaction-scheduler-migration-init
+    command: transaction-scheduler migrate up
+
+  transaction-scheduler:
+    <<: *container-common
+    ports:
+      - 8041:8081
+      - 8042:8082
+    environment:
+      <<: *default-variables
+      <<: *transaction-scheduler-common
+    depends_on:
+      - transaction-scheduler-migration
+    command: transaction-scheduler run
 
   tx-crafter:
     <<: *container-common

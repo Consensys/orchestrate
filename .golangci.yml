@@ -55,7 +55,6 @@ issues:
 
 run:
   deadline: 20m
-  concurrency: 2
   skip-dirs:
     - .gocache
     - /build

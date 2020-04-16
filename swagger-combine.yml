@@ -7,8 +7,8 @@ info:
     name: "✉ PegaSys Orchestrate"
     email: "support@pegasys.tech"
 externalDocs:
-    description: "📒 Documentation of PegaSys Orchestrate"
-    url: "https://docs.orchestrate.pegasys.tech/en/latest/"
+  description: "📒 Documentation of PegaSys Orchestrate"
+  url: "https://docs.orchestrate.pegasys.tech/en/latest/"
 apis:
   - url: 'public/swagger-specs/types/chain-registry/swagger.json'
     tags:
@@ -22,3 +22,7 @@ apis:
     tags:
       rename:
         ContractRegistry: "Contract Registry"
+  - url: 'public/swagger-specs/types/transaction-scheduler/swagger.json'
+    tags:
+      add:
+        - "Transaction Scheduler"

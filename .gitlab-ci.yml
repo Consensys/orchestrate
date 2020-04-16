@@ -116,14 +116,14 @@ integration:
   except:
     - tags
 
-lint:
-  <<: *go-setup
-  script:
-    - make lint-tools
-    - export GOGC=10
-    - make lint-ci
-  except:
-    - tags
+#lint:
+#  <<: *go-setup
+#  script:
+#    - make lint-tools
+#    - export GOGC=10
+#    - make lint-ci
+#  except:
+#    - tags
 
 race:
   <<: *go-setup

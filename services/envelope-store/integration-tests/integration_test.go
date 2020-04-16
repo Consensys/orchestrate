@@ -9,26 +9,26 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type envelopeStoreEnvTestSuite struct {
+type envelopeStoreTestSuite struct {
 	suite.Suite
 	env *IntegrationEnvironment
 }
 
-func (s *envelopeStoreEnvTestSuite) SetupSuite() {
+func (s *envelopeStoreTestSuite) SetupSuite() {
 	s.env.Start()
 }
 
-func (s *envelopeStoreEnvTestSuite) TearDownSuite() {
+func (s *envelopeStoreTestSuite) TearDownSuite() {
 	s.env.Teardown()
 }
 
-func TestEnvelopeStoreEnv_Init(t *testing.T) {
-	s := new(envelopeStoreEnvTestSuite)
+func TestEnvelopeStore(t *testing.T) {
+	s := new(envelopeStoreTestSuite)
 	s.env = NewIntegrationEnvironment(context.Background())
 	suite.Run(t, s)
 }
 
-func (s *envelopeStoreEnvTestSuite) TestEnvelopeStore_GRPC() {
+func (s *envelopeStoreTestSuite) TestEnvelopeStore_GRPC() {
 	grpcSuite := new(EnvelopeStoreTestSuite)
 	grpcSuite.env = s.env
 	grpcSuite.baseURL = "localhost:8080"

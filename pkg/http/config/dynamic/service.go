@@ -17,6 +17,7 @@ type Service struct {
 	Chains       *Chains       `json:"chains,omitempty" toml:"chains,omitempty" yaml:"chains,omitempty"`
 	Contracts    *Contracts    `json:"contracts,omitempty" toml:"contracts,omitempty" yaml:"contracts,omitempty"`
 	Envelopes    *Envelopes    `json:"envelopes,omitempty" toml:"envelopes,omitempty" yaml:"envelopes,omitempty"`
+	Transactions *Transactions `json:"transactions,omitempty" toml:"transactions,omitempty" yaml:"transactions,omitempty"`
 	Mock         *Mock         `json:"mock,omitempty" toml:"mock,omitempty" yaml:"mock,omitempty"`
 }
 
@@ -163,6 +164,10 @@ type Contracts struct{}
 // +k8s:deepcopy-gen=true
 
 type Envelopes struct{}
+
+// +k8s:deepcopy-gen=true
+
+type Transactions struct{}
 
 // +k8s:deepcopy-gen=true
 
