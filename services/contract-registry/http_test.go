@@ -12,6 +12,7 @@ import (
 	mockauth "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
+	metrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/generic"
 	mockregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/service/mock"
 )
 
@@ -31,6 +32,7 @@ func TestRouterBuilder(t *testing.T) {
 		jwt, key,
 		true,
 		s,
+		metrics.NewHTTP(),
 	)
 	require.NoError(t, err)
 

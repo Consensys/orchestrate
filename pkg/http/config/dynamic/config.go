@@ -58,27 +58,29 @@ func Merge(configurations map[string]interface{}) interface{} {
 			return nil
 		}
 
-		for serviceName, service := range conf.HTTP.Services {
-			srv := service.DeepCopy()
-			configuration.HTTP.Services[provider.QualifyName(providerName, serviceName)] = srv
-		}
-
-		for middlewareName, middleware := range conf.HTTP.Middlewares {
-			mid := middleware.DeepCopy()
-			configuration.HTTP.Middlewares[provider.QualifyName(providerName, middlewareName)] = mid
-		}
-
-		for routerName, router := range conf.HTTP.Routers {
-			rt := router.DeepCopy()
-			var midNames []string
-			for _, midName := range router.Middlewares {
-				midNames = append(midNames, provider.QualifyName(providerName, midName))
+		if conf.HTTP != nil {
+			for serviceName, service := range conf.HTTP.Services {
+				srv := service.DeepCopy()
+				configuration.HTTP.Services[provider.QualifyName(providerName, serviceName)] = srv
 			}
-			rt.Middlewares = midNames
 
-			rt.Service = provider.QualifyName(providerName, router.Service)
+			for middlewareName, middleware := range conf.HTTP.Middlewares {
+				mid := middleware.DeepCopy()
+				configuration.HTTP.Middlewares[provider.QualifyName(providerName, middlewareName)] = mid
+			}
 
-			configuration.HTTP.Routers[provider.QualifyName(providerName, routerName)] = rt
+			for routerName, router := range conf.HTTP.Routers {
+				rt := router.DeepCopy()
+				var midNames []string
+				for _, midName := range router.Middlewares {
+					midNames = append(midNames, provider.QualifyName(providerName, midName))
+				}
+				rt.Middlewares = midNames
+
+				rt.Service = provider.QualifyName(providerName, router.Service)
+
+				configuration.HTTP.Routers[provider.QualifyName(providerName, routerName)] = rt
+			}
 		}
 	}
 

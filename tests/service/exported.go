@@ -7,6 +7,7 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/containous/traefik/v2/pkg/log"
+	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	loader "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/loader/sarama"
@@ -108,6 +109,7 @@ func registerHandlers() {
 
 // Start starts application
 func Start(ctx context.Context) error {
+	var err error
 	startOnce.Do(func() {
 		// Create context for application
 		ctx, cancel = context.WithCancel(ctx)
@@ -123,8 +125,17 @@ func Start(ctx context.Context) error {
 		registerHandlers()
 
 		// Create appli to expose metrics
-		appli = worker.New(cfg)
-		_ = appli.Start(ctx)
+		appli, err = worker.New(cfg, prom.DefaultRegisterer)
+		if err != nil {
+			cancelComponents()
+			return
+		}
+
+		err = appli.Start(ctx)
+		if err != nil {
+			cancelComponents()
+			return
+		}
 
 		// Start consuming on every topics of interest
 		var topics []string
@@ -150,7 +161,7 @@ func Start(ctx context.Context) error {
 				"topics": topics,
 			}).Info("connecting")
 
-			err := broker.Consume(
+			err = broker.Consume(
 				ctx,
 				topics,
 				cg,
@@ -163,7 +174,7 @@ func Start(ctx context.Context) error {
 		}()
 	})
 	<-done
-	return nil
+	return err
 }
 
 type EmbeddingConsumerGroupHandler struct {

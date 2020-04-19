@@ -8,10 +8,12 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/config/static"
 	grpcauth "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/interceptor/auth"
 	grpclogrus "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/interceptor/logrus"
+	grpcmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/interceptor/metrics"
 	staticinterceptor "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/interceptor/static"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/server"
 	staticserver "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/server/static"
 	staticservice "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/service/static"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 	grpcservice "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/service/grpc"
 )
@@ -20,6 +22,7 @@ func NewGRPCBuilder(
 	service svc.ContractRegistryServer,
 	checker auth.Checker, multitenancy bool,
 	logger *logrus.Logger,
+	reg metrics.GRPCServer,
 ) (server.Builder, error) {
 	// Create GRPC server builder
 	builder := staticserver.NewBuilder()
@@ -37,6 +40,12 @@ func NewGRPCBuilder(
 	interceptorBuilder.AddBuilder(
 		reflect.TypeOf(&static.Logrus{}),
 		grpclogrus.NewBuilder(logger, logrus.Fields{"system": "grpc.internal"}),
+	)
+
+	// Add Builder for Metrics interceptor
+	interceptorBuilder.AddBuilder(
+		reflect.TypeOf(&static.Metrics{}),
+		grpcmetrics.NewBuilder(reg),
 	)
 
 	builder.Interceptor = interceptorBuilder

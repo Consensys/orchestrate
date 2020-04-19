@@ -1,10 +1,13 @@
 package chainregistry
 
 import (
+	"time"
+
+	prom "github.com/prometheus/client_golang/prometheus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
-	pkghttp "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	metrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/multi"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/chain-registry/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/service/configwatcher"
 	ctrl "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/service/controllers"
@@ -19,7 +22,15 @@ func newApplication(
 	dataAgents store.DataAgents,
 	ethClient ethclient.ChainLedgerReader,
 	jwt, key auth.Checker,
+	promRegisterer prom.Registerer,
 ) (*app.App, error) {
+	// Create metrics registry and register it on prometheus
+	reg := metrics.New(cfg.app.Metrics)
+	err := promRegisterer.Register(reg.Prometheus())
+
+	if err != nil {
+		return nil, err
+	}
 
 	getChainsUC := usecases.NewGetChains(dataAgents.Chain)
 
@@ -42,20 +53,17 @@ func newApplication(
 	)
 
 	builderCtrl := ctrl.NewBuilder(chainCtrl, faucetCtrl)
-	routerBuilder, err := http.NewHTTPRouterBuilder(builderCtrl, cfg.app.HTTP, jwt, key, cfg.multitenancy)
+	routerBuilder, err := http.NewHTTPRouterBuilder(builderCtrl, cfg.app.HTTP, jwt, key, cfg.multitenancy, reg.HTTP())
 	if err != nil {
 		return nil, err
 	}
 
-	// Create HTTP EntryPoints
-	httpEps := pkghttp.NewEntryPoints(
-		cfg.app.HTTP.EntryPoints,
-		routerBuilder,
-	)
-
-	watcherCfg := configwatcher.NewInternalConfig(cfg.app.HTTP, cfg.app.Watcher)
-	watcher := configwatcher.NewWatcher(getChainsUC, watcherCfg, httpEps)
-
 	// Create app
-	return app.New(watcher, httpEps, nil), nil
+	return app.New(
+		cfg.app,
+		configwatcher.NewProvider(getChainsUC, configwatcher.NewInternalConfig(cfg.app.HTTP, cfg.app.Watcher).DynamicCfg(), time.Second),
+		routerBuilder,
+		nil,
+		reg,
+	)
 }

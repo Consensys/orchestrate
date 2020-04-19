@@ -53,8 +53,16 @@ func TestNewInternalConfig(t *testing.T) {
 					Router: &traefikdynamic.Router{
 						EntryPoints: []string{"metrics"},
 						Service:     "healthcheck",
-						Priority:    math.MaxInt32,
+						Priority:    math.MaxInt32 - 1,
 						Rule:        "PathPrefix(`/`)",
+					},
+				},
+				"prometheus": {
+					Router: &traefikdynamic.Router{
+						EntryPoints: []string{"metrics"},
+						Service:     "prometheus",
+						Priority:    math.MaxInt32,
+						Rule:        "PathPrefix(`/metrics`)",
 					},
 				},
 			},
@@ -107,7 +115,10 @@ func TestNewInternalConfig(t *testing.T) {
 				"healthcheck": &dynamic.Service{
 					HealthCheck: &dynamic.HealthCheck{},
 				},
-				"swagger": &dynamic.Service{
+				"prometheus": {
+					Prometheus: &dynamic.Prometheus{},
+				},
+				"swagger": {
 					Swagger: &dynamic.Swagger{
 						SpecsFile: "./public/swagger-specs/types/chain-registry/swagger.json",
 					},

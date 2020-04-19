@@ -12,6 +12,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/dashboard"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/healthcheck"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/prometheus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/swagger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/accesslog"
 )
@@ -41,6 +42,7 @@ func NewInternalConfig(staticCfg *traefikstatic.Configuration) *dynamic.Configur
 		"./public/swagger-specs/types/contract-registry/registry.swagger.json",
 	)
 	healthcheck.AddDynamicConfig(cfg)
+	prometheus.AddDynamicConfig(cfg)
 	accesslog.AddDynamicConfig(cfg, "base-accesslog", staticCfg)
 
 	// Authentication middleware

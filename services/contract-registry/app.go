@@ -3,14 +3,12 @@ package contractregistry
 import (
 	"context"
 
+	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
+	metrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/multi"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/contract-registry/use-cases"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 	grpcservice "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/service/grpc"
@@ -23,52 +21,37 @@ func New(
 	multitenancy bool,
 	service svc.ContractRegistryServer,
 	logger *logrus.Logger,
+	registry prom.Registerer,
 ) (*app.App, error) {
+	// Create metrics registry and register it on prometheus
+	reg := metrics.New(cfg.Metrics)
+	err := registry.Register(reg.Prometheus())
+	if err != nil {
+		return nil, err
+	}
+
 	// Create GRPC builder
 	checker := auth.CombineCheckers(key, jwt)
-	grpcBuilder, err := NewGRPCBuilder(service, checker, multitenancy, logger)
+	grpcBuilder, err := NewGRPCBuilder(service, checker, multitenancy, logger, reg.GRPCServer())
 	if err != nil {
 		return nil, err
 	}
-
-	// Create GRPC entrypoint
-	server, err := grpcBuilder.Build(
-		context.Background(),
-		"",
-		NewGRPCStaticConfig(),
-	)
-	if err != nil {
-		return nil, err
-	}
-	grpcEp := grpc.NewEntryPoint(cfg.GRPC, server)
+	cfg.GRPC.Static = NewGRPCStaticConfig()
 
 	// Create HTTP Router builder
-	httpBuilder, err := NewHTTPBuilder(cfg.HTTP, jwt, key, multitenancy, service)
+	httpBuilder, err := NewHTTPBuilder(cfg.HTTP, jwt, key, multitenancy, service, reg.HTTP())
 	if err != nil {
 		return nil, err
 	}
 
-	// Create HTTP EntryPoints
-	httpEps := http.NewEntryPoints(
-		cfg.HTTP.EntryPoints,
-		httpBuilder,
-	)
-
-	// Create Configuration Watcher
-	// Create configuration listener switching HTTP Endpoints configuration
-	listeners := []func(context.Context, interface{}) error{
-		httpEps.Switch,
-	}
-
-	watcher := configwatcher.New(
-		cfg.Watcher,
-		NewProvider(cfg.HTTP),
-		dynamic.Merge,
-		listeners,
-	)
-
 	// Create app
-	return app.New(watcher, httpEps, grpcEp), nil
+	return app.New(
+		cfg,
+		NewProvider(cfg.HTTP),
+		httpBuilder,
+		grpcBuilder,
+		reg,
+	)
 }
 
 func NewService(pgmngr postgres.Manager, storeCfg *store.Config) (svc.ContractRegistryServer, error) {

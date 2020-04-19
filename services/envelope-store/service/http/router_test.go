@@ -13,6 +13,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
+	metrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/generic"
 	watcher "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/service/configwatcher"
 	mockstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/service/controllers/mock"
 )
@@ -33,6 +34,7 @@ func TestRouterBuilder(t *testing.T) {
 		cfg,
 		jwt, key,
 		true,
+		metrics.NewHTTP(),
 	)
 	require.NoError(t, err)
 

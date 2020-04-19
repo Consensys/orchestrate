@@ -2,13 +2,15 @@ package transactionscheduler
 
 import (
 	"context"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/controllers"
 
+	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
-	pkghttp "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	metrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/multi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/configwatcher"
@@ -23,8 +25,16 @@ func newApplication(
 	jwt, key auth.Checker,
 	logger *logrus.Logger,
 	chainRegistryClient client.ChainRegistryClient,
+	promRegisterer prom.Registerer,
 ) (*app.App, error) {
-	// TODO: Do all dependency injection in container.go
+	// Create metrics registry and register it on prometheus
+	reg := metrics.New(cfg.app.Metrics)
+	err := promRegisterer.Register(reg.Prometheus())
+
+	if err != nil {
+		return nil, err
+	}
+
 	// Create Data agents
 	pgmngr := postgres.GetManager()
 	dataAgents, err := store.Build(ctx, cfg.store, pgmngr)
@@ -37,20 +47,17 @@ func newApplication(
 	vals := validators.NewValidators(chainRegistryClient)
 	ucs := usecases.NewUseCases(dataAgents, vals)
 	ctrls := controllers.NewBuilder(ucs)
-	routerBuilder, err := service.NewHTTPBuilder(cfg.app.HTTP, jwt, key, cfg.multitenancy, ctrls)
+	routerBuilder, err := service.NewHTTPBuilder(cfg.app.HTTP, jwt, key, cfg.multitenancy, ctrls, reg.HTTP())
 	if err != nil {
 		return nil, err
 	}
 
-	// Create HTTP EntryPoints
-	httpEps := pkghttp.NewEntryPoints(
-		cfg.app.HTTP.EntryPoints,
-		routerBuilder,
-	)
-
-	watcherCfg := configwatcher.NewConfig(cfg.app.HTTP, cfg.app.Watcher)
-	watcher := configwatcher.NewWatcher(watcherCfg, httpEps)
-
 	// Create app
-	return app.New(watcher, httpEps, nil), nil
+	return app.New(
+		cfg.app,
+		configwatcher.NewProvider(configwatcher.NewConfig(cfg.app.HTTP, cfg.app.Watcher).DynamicCfg()),
+		routerBuilder,
+		nil,
+		reg,
+	)
 }

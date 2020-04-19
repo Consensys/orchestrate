@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
-
 	"github.com/containous/traefik/v2/pkg/log"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
+	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	pkgapp "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt"
@@ -44,6 +44,7 @@ func NewServer(ctx context.Context, cfg *Config) (*TransactionManagerServer, err
 		authkey.GlobalChecker(),
 		logrus.StandardLogger(),
 		client.GlobalClient(),
+		prom.DefaultRegisterer,
 	)
 
 	if err != nil {

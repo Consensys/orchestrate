@@ -28,8 +28,10 @@ type Builder struct {
 	Middleware middleware.Builder
 	Handler    handler.Builder
 	TLS        tls.Manager
+	Metrics    middleware.Builder
 
-	dashboard    handler.Builder
+	dashboard handler.Builder
+
 	accesslog    middleware.Builder
 	epaccesslogs map[string]func(http http.Handler) http.Handler
 
@@ -94,7 +96,10 @@ func (b *Builder) buildRouters(ctx context.Context, routers map[string]*router.R
 	}
 
 	for entryPointName, rtInfos := range infos.RouterInfosByEntryPoint(ctx, entryPointNames, isTLS) {
-		epCtx := log.With(ctx, log.Str("entrypoint", entryPointName))
+		epCtx := log.With(
+			httputil.WithEntryPoint(ctx, entryPointName),
+			log.Str("entrypoint", entryPointName),
+		)
 		log.FromContext(epCtx).WithField("tls", isTLS).Debugf("building entrypoint router")
 
 		mux, err := rules.NewRouter()
@@ -108,7 +113,10 @@ func (b *Builder) buildRouters(ctx context.Context, routers map[string]*router.R
 		}
 
 		for routerName, rtInfo := range rtInfos {
-			rtCtx := log.With(provider.WithName(epCtx, routerName), log.Str("router", routerName))
+			rtCtx := log.With(
+				httputil.WithRouter(provider.WithName(epCtx, routerName), routerName),
+				log.Str("router", routerName),
+			)
 			logger := log.FromContext(rtCtx)
 
 			logger.WithFields(logrus.Fields{
@@ -162,8 +170,10 @@ func (b *Builder) buildRouters(ctx context.Context, routers map[string]*router.R
 }
 
 func (b *Builder) buildHandler(ctx context.Context, routerName string, rtInfo *runtime.RouterInfo, infos *runtime.Infos, accessLog func(http.Handler) http.Handler) (http.Handler, error) {
+	hCtx := httputil.WithService(ctx, rtInfo.Service)
+
 	mid, respModifier, rvErr := b.buildMiddleware(
-		ctx,
+		hCtx,
 		routerName,
 		rtInfo,
 		infos,
@@ -171,7 +181,7 @@ func (b *Builder) buildHandler(ctx context.Context, routerName string, rtInfo *r
 	)
 
 	h, err := b.buildService(
-		ctx,
+		hCtx,
 		fmt.Sprintf("%v:%v", routerName, rtInfo.Service),
 		infos.Services[rtInfo.Service],
 		infos,
@@ -189,7 +199,8 @@ func (b *Builder) buildMiddleware(ctx context.Context, routerName string, rtInfo
 	var respModifiers []func(resp *http.Response) error
 	var rvErr error
 	for _, midName := range rtInfo.Middlewares {
-		logger := log.FromContext(ctx).WithField("middleware", midName)
+		midCtx := httputil.WithMiddleware(ctx, midName)
+		logger := log.FromContext(midCtx).WithField("middleware", midName)
 
 		if infos.Middlewares[midName] == nil {
 			rvErr = fmt.Errorf("middleware %q missing in dynamic configuration", midName)
@@ -209,7 +220,7 @@ func (b *Builder) buildMiddleware(ctx context.Context, routerName string, rtInfo
 		case infos.Middlewares[midName].Middleware.AccessLog != nil:
 			// Treat particular case of access logs
 			mid, _, err := b.accesslog.Build(
-				ctx,
+				midCtx,
 				midName,
 				infos.Middlewares[midName].Middleware.AccessLog,
 			)
@@ -229,7 +240,7 @@ func (b *Builder) buildMiddleware(ctx context.Context, routerName string, rtInfo
 			continue
 		case b.Middleware != nil:
 			mid, respModifier, err := b.Middleware.Build(
-				ctx,
+				midCtx,
 				fmt.Sprintf("%v:%v", routerName, midName),
 				infos.Middlewares[midName].Middleware,
 			)
@@ -255,6 +266,27 @@ func (b *Builder) buildMiddleware(ctx context.Context, routerName string, rtInfo
 	if accessLog != nil {
 		log.FromContext(ctx).Debugf("add entrypoint accesslog")
 		chain = alice.New(accessLog).Extend(chain)
+	}
+
+	// Add metrics middleware
+	if b.Metrics != nil {
+		mid, respModifier, err := b.Metrics.Build(
+			ctx,
+			fmt.Sprintf("%v:%v", routerName, "metrics"),
+			nil,
+		)
+		if err != nil {
+			log.FromContext(ctx).WithError(err).Error("could not build metrics middleware")
+			rvErr = err
+		} else {
+			if mid != nil {
+				chain = chain.Append(mid)
+			}
+
+			if respModifier != nil {
+				respModifiers = append(respModifiers, respModifier)
+			}
+		}
 	}
 
 	return chain.Then, httputil.CombineResponseModifiers(respModifiers...), rvErr

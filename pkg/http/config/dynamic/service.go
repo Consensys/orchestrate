@@ -13,6 +13,7 @@ type Service struct {
 	Swagger      *Swagger      `json:"swagger,omitempty" toml:"swagger,omitempty" yaml:"swagger,omitempty"`
 	ReverseProxy *ReverseProxy `json:"reverseProxy,omitempty" toml:"reverseProxy,omitempty" yaml:"reverseProxy,omitempty"`
 	HealthCheck  *HealthCheck  `json:"healthcheck,omitempty" toml:"healthcheck,omitempty" yaml:"healthcheck,omitempty"`
+	Prometheus   *Prometheus   `json:"prometheus,omitempty" toml:"prometheus,omitempty" yaml:"prometheus,omitempty"`
 	Dashboard    *Dashboard    `json:"dashboard,omitempty" toml:"dashboard,omitempty" yaml:"dashboard,omitempty"`
 	Chains       *Chains       `json:"chains,omitempty" toml:"chains,omitempty" yaml:"chains,omitempty"`
 	Contracts    *Contracts    `json:"contracts,omitempty" toml:"contracts,omitempty" yaml:"contracts,omitempty"`
@@ -148,6 +149,10 @@ type Swagger struct {
 // +k8s:deepcopy-gen=true
 
 type HealthCheck struct{}
+
+// +k8s:deepcopy-gen=true
+
+type Prometheus struct{}
 
 // +k8s:deepcopy-gen=true
 

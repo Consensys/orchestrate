@@ -17,10 +17,12 @@ import (
 	traefiktypes "github.com/containous/traefik/v2/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	metrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/generic"
 )
 
 func prepareEntryPoint(handler Handler) *EntryPoint {
 	ep := NewEntryPoint(
+		"test",
 		&traefikstatic.EntryPoint{
 			Address: "127.0.0.1:0",
 			Transport: &traefikstatic.EntryPointsTransport{
@@ -32,6 +34,7 @@ func prepareEntryPoint(handler Handler) *EntryPoint {
 			},
 		},
 		handler,
+		metrics.NewTCP(),
 	)
 
 	return ep

@@ -12,6 +12,7 @@ import (
 	"github.com/containous/traefik/v2/pkg/middlewares/forwardedheaders"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/switcher"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/router"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"golang.org/x/net/http2"
@@ -31,6 +32,7 @@ type EntryPoints struct {
 func NewEntryPoints(
 	epConfigs traefikstatic.EntryPoints,
 	rt router.Builder,
+	reg metrics.TCP,
 ) *EntryPoints {
 	s := &EntryPoints{
 		eps:    make(map[string]*EntryPoint),
@@ -54,7 +56,7 @@ func NewEntryPoints(
 		httpServer := newSwitchableServer(epConfig.Transport.RespondingTimeouts, true, middlewares...)
 		httpsServer := newSwitchableServer(epConfig.Transport.RespondingTimeouts, false, middlewares...)
 
-		s.eps[epName] = NewEntryPoint(epConfig, httpServer, httpsServer)
+		s.eps[epName] = NewEntryPoint(epName, epConfig, httpServer, httpsServer, reg)
 	}
 
 	return s
@@ -71,11 +73,11 @@ func (eps *EntryPoints) Addresses() map[string]string {
 func (eps *EntryPoints) ListenAndServe(ctx context.Context) error {
 	wg := &sync.WaitGroup{}
 	wg.Add(len(eps.eps))
-	for epName, ep := range eps.eps {
-		go func(epName string, ep *EntryPoint) {
-			_ = ep.ListenAndServe(log.With(ctx, log.Str("entrypoint", epName)))
+	for _, ep := range eps.eps {
+		go func(ep *EntryPoint) {
+			_ = ep.ListenAndServe(ctx)
 			wg.Done()
-		}(epName, ep)
+		}(ep)
 	}
 	wg.Wait()
 	return nil
@@ -145,7 +147,7 @@ type EntryPoint struct {
 	switcher *switchTCPHandler
 }
 
-func NewEntryPoint(ep *traefikstatic.EntryPoint, httpSrv, httpsSrv *switchableServer) *EntryPoint {
+func NewEntryPoint(name string, ep *traefikstatic.EntryPoint, httpSrv, httpsSrv *switchableServer, reg metrics.TCP) *EntryPoint {
 	tcpSwitcher := &switchTCPHandler{
 		switcher:       tcp.NewSwitcher(),
 		http:           httpSrv,
@@ -155,8 +157,12 @@ func NewEntryPoint(ep *traefikstatic.EntryPoint, httpSrv, httpsSrv *switchableSe
 	}
 
 	return &EntryPoint{
-		cfg:      ep,
-		tcp:      tcp.NewEntryPoint(ep, tcpSwitcher),
+		cfg: ep,
+		tcp: tcp.NewEntryPoint(
+			name,
+			ep, tcpSwitcher,
+			reg,
+		),
 		switcher: tcpSwitcher,
 	}
 }
@@ -166,16 +172,11 @@ func (ep *EntryPoint) Addr() string {
 }
 
 func (ep *EntryPoint) ListenAndServe(ctx context.Context) error {
-	l, err := tcp.Listen(ep.cfg.Address)
-	if err != nil {
-		return err
-	}
-
 	go func() {
 		_ = ep.switcher.ListenAndServe()
 	}()
 
-	return ep.tcp.Serve(ctx, l)
+	return ep.tcp.ListenAndServe(ctx)
 }
 
 func (ep *EntryPoint) Switch(rt *router.Router) error {

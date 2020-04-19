@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/containous/traefik/v2/pkg/log"
+	prom "github.com/prometheus/client_golang/prometheus"
 	pkgapp "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt"
 	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/key"
@@ -60,6 +61,7 @@ func NewServer(ctx context.Context, cfg *Config) (*EnvelopStoreServer, error) {
 		rpc.GlobalClient(),
 		authjwt.GlobalChecker(),
 		authkey.GlobalChecker(),
+		prom.DefaultRegisterer,
 	)
 
 	if err != nil {

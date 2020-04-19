@@ -23,10 +23,12 @@ func TestBuilder(t *testing.T) {
 	handlerBuilder := mhandler.NewMockBuilder(ctrlr)
 	dashboardBuilder := mhandler.NewMockBuilder(ctrlr)
 	accesslogBuilder := mmiddleware.NewMockBuilder(ctrlr)
+	metricsBuilder := mmiddleware.NewMockBuilder(ctrlr)
 
 	builder := NewBuilder(nil, nil)
 	builder.Middleware = midBuilder
 	builder.Handler = handlerBuilder
+	builder.Metrics = metricsBuilder
 	builder.accesslog = accesslogBuilder
 	builder.dashboard = dashboardBuilder
 
@@ -45,6 +47,10 @@ func TestBuilder(t *testing.T) {
 	accessLogMiddleware := mmiddleware.NewMockMiddleware(accessLogMockHandler)
 	accesslogBuilder.EXPECT().Build(gomock.Any(), gomock.Any(), gomock.Not(nil)).Return(accessLogMiddleware, nil, nil).Times(1)
 
+	metricsMockHandler := mhandler.NewMockHandler(ctrlr)
+	metricsMiddleware := mmiddleware.NewMockMiddleware(metricsMockHandler)
+	metricsBuilder.EXPECT().Build(gomock.Any(), gomock.Any(), gomock.Any()).Return(metricsMiddleware, nil, nil).Times(3)
+
 	routers, err := builder.Build(
 		context.Background(),
 		[]string{"ep-foo", "ep-bar"},
@@ -55,6 +61,7 @@ func TestBuilder(t *testing.T) {
 	// Call proxy
 	midMockHandler.EXPECT().ServeHTTP(gomock.Any(), gomock.Any())
 	proxyHandler.EXPECT().ServeHTTP(gomock.Any(), gomock.Any())
+	metricsMockHandler.EXPECT().ServeHTTP(gomock.Any(), gomock.Any())
 
 	req, _ := http.NewRequest(http.MethodGet, "http://proxy.com", nil)
 	rw := httptest.NewRecorder()
@@ -64,6 +71,7 @@ func TestBuilder(t *testing.T) {
 	accessLogMockHandler.EXPECT().ServeHTTP(gomock.Any(), gomock.Any()).Times(1)
 	midMockHandler.EXPECT().ServeHTTP(gomock.Any(), gomock.Any()).Times(1)
 	dashboardHandler.EXPECT().ServeHTTP(gomock.Any(), gomock.Any())
+	metricsMockHandler.EXPECT().ServeHTTP(gomock.Any(), gomock.Any()).Times(1)
 
 	req, _ = http.NewRequest(http.MethodGet, "http://dashboard.com", nil)
 	rw = httptest.NewRecorder()

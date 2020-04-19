@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
@@ -25,6 +26,7 @@ func TestApp(t *testing.T) {
 		false,
 		mockregistry.NewMockContractRegistryServer(ctlr),
 		logrus.New(),
+		prom.NewRegistry(),
 	)
 	assert.NoError(t, err)
 	assert.NotNil(t, appli, "App should have been created")

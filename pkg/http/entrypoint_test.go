@@ -1,5 +1,3 @@
-// +build unit
-
 package http
 
 import (
@@ -17,6 +15,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/router"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/router/static"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/generic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tls/generate"
 )
 
@@ -64,6 +63,7 @@ func TestEntryPoints(t *testing.T) {
 			},
 		},
 		static.NewBuilder(confs),
+		generic.NewTCP(),
 	)
 	_ = eps.Switch(context.Background(), nil)
 

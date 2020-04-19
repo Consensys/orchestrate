@@ -1,13 +1,11 @@
 package envelopestore
 
 import (
-	"context"
-
+	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth"
-	pkggrpc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc"
-	pkghttp "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	metrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/multi"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/service/configwatcher"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/service/grpc"
@@ -15,41 +13,39 @@ import (
 )
 
 func newApplication(
-	ctx context.Context,
 	cfg *Config,
 	jwt, key auth.Checker,
 	srv svc.EnvelopeStoreServer,
 	logger *logrus.Logger,
+	registry prom.Registerer,
 ) (*app.App, error) {
+	// Create metrics registry and register it on prometheus
+	reg := metrics.New(cfg.app.Metrics)
+	err := registry.Register(reg.Prometheus())
+	if err != nil {
+		return nil, err
+	}
+
 	// Create GRPC builder
 	checker := auth.CombineCheckers(key, jwt)
-	grpcBuilder, err := grpc.NewServerBuilder(srv, checker, cfg.multitenancy, logger)
+	grpcBuilder, err := grpc.NewServerBuilder(srv, checker, cfg.multitenancy, logger, reg.GRPCServer())
 	if err != nil {
 		return nil, err
 	}
-
-	// Create GRPC entrypoint
-	grpcServer, err := grpcBuilder.BuildServer(ctx, "", grpc.NewStaticConfig())
-	if err != nil {
-		return nil, err
-	}
-	grpcEp := pkggrpc.NewEntryPoint(cfg.app.GRPC, grpcServer)
+	cfg.app.GRPC.Static = grpc.NewStaticConfig()
 
 	// Create HTTP Router builder
-	routerBuilder, err := http.NewRouterBuilder(srv, cfg.app.HTTP, jwt, key, cfg.multitenancy)
+	routerBuilder, err := http.NewRouterBuilder(srv, cfg.app.HTTP, jwt, key, cfg.multitenancy, reg.HTTP())
 	if err != nil {
 		return nil, err
 	}
 
-	// Create HTTP EntryPoints
-	httpEps := pkghttp.NewEntryPoints(
-		cfg.app.HTTP.EntryPoints,
-		routerBuilder,
-	)
-
-	watcherCfg := configwatcher.NewConfig(cfg.app.HTTP, cfg.app.Watcher)
-	watcher := configwatcher.NewWatcher(watcherCfg, httpEps)
-
 	// Create app
-	return app.New(watcher, httpEps, grpcEp), nil
+	return app.New(
+		cfg.app,
+		configwatcher.NewProvider(configwatcher.NewConfig(cfg.app.HTTP, cfg.app.Watcher).DynamicCfg()),
+		routerBuilder,
+		grpcBuilder,
+		reg,
+	)
 }

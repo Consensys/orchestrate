@@ -11,8 +11,10 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware"
 	authmid "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/auth"
 	dynmid "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/dynamic"
+	metricsmid "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/router"
 	dynrouter "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/router/dynamic"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 	httpservice "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/service/http"
 )
@@ -22,6 +24,7 @@ func NewHTTPBuilder(
 	jwt, key auth.Checker,
 	multitenancy bool,
 	service svc.ContractRegistryServer,
+	reg metrics.HTTP,
 ) (router.Builder, error) {
 	builder := dynrouter.NewBuilder(staticCfg, nil)
 
@@ -37,6 +40,8 @@ func NewHTTPBuilder(
 	if err != nil {
 		return nil, err
 	}
+
+	builder.Metrics = metricsmid.NewBuilder(reg)
 
 	return builder, nil
 }

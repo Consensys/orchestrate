@@ -11,20 +11,22 @@ import (
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics"
 )
 
 // EntryPoint is a TCP server
 type EntryPoint struct {
+	name string
 	addr string
 
 	handler Handler
-
-	tracker *ConnTracker
 
 	lis *atomic.Value
 
 	timeouts  *traefikstatic.RespondingTimeouts
 	lifecycle *traefikstatic.LifeCycle
+
+	metrics metrics.TCP
 }
 
 type listenerValue struct {
@@ -32,15 +34,20 @@ type listenerValue struct {
 }
 
 // NewEntryPoint creates a new EntryPoint
-func NewEntryPoint(config *traefikstatic.EntryPoint, handler Handler) *EntryPoint {
+func NewEntryPoint(name string, config *traefikstatic.EntryPoint, handler Handler, reg metrics.TCP) *EntryPoint {
 	return &EntryPoint{
+		name:      name,
 		addr:      config.Address,
 		handler:   handler,
-		tracker:   NewConnTracker(),
 		timeouts:  config.Transport.RespondingTimeouts,
 		lifecycle: config.Transport.LifeCycle,
 		lis:       &atomic.Value{},
+		metrics:   reg,
 	}
+}
+
+func (e *EntryPoint) Name() string {
+	return e.name
 }
 
 func (e *EntryPoint) Addr() string {
@@ -59,19 +66,18 @@ func (e *EntryPoint) listener() net.Listener {
 	return nil
 }
 
+func (e *EntryPoint) with(ctx context.Context) context.Context {
+	return log.With(ctx, log.Str("entrypoint", e.name))
+}
+
 func (e *EntryPoint) Serve(ctx context.Context, l net.Listener) error {
-	logger := log.FromContext(ctx)
+	logger := log.FromContext(e.with(ctx))
 	logger.WithField("address", l.Addr()).Infof("start serving tcp entrypoint")
 
-	lis, ok := l.(KeepAliveListener)
-	if !ok {
-		lis = KeepAliveListener{l.(*net.TCPListener)}
-	}
-
-	e.lis.Store(&listenerValue{lis})
+	e.lis.Store(&listenerValue{l})
 
 	for {
-		conn, err := lis.Accept()
+		conn, err := l.Accept()
 		if err != nil {
 			logger.Error(err)
 			if netErr, ok := err.(net.Error); ok && netErr.Temporary() {
@@ -110,23 +116,28 @@ func (e *EntryPoint) Serve(ctx context.Context, l net.Listener) error {
 				}
 			}
 
-			e.handler.ServeTCP(NewTrackedConn(writeCloser, e.tracker))
+			e.handler.ServeTCP(writeCloser)
 		}()
 	}
 }
 
 // Serve handler provided on entrypoint
 func (e *EntryPoint) ListenAndServe(ctx context.Context) error {
-	listener, err := Listen(e.addr)
+	listener, err := Listen(
+		"tcp", e.addr,
+		KeepAliveOpt(3*time.Minute),
+		MetricsOpt(e.name, e.metrics),
+	)
 	if err != nil {
 		return err
 	}
+
 	return e.Serve(ctx, listener)
 }
 
 // Shutdown stops the TCP connections
 func (e *EntryPoint) Shutdown(ctx context.Context) error {
-	logger := log.FromContext(ctx)
+	logger := log.FromContext(e.with(ctx))
 	logger.Infof("shutting down tcp entrypoint...")
 
 	reqAcceptGraceTimeOut := time.Duration(e.lifecycle.RequestAcceptGraceTimeout)
@@ -149,14 +160,6 @@ func (e *EntryPoint) Shutdown(ctx context.Context) error {
 		}()
 	}
 
-	if e.tracker != nil {
-		wg.Add(1)
-		go func() {
-			_ = Shutdown(ctx, e.tracker)
-			wg.Done()
-		}()
-	}
-
 	wg.Wait()
 
 	lis := e.listener()
@@ -173,14 +176,6 @@ func (e *EntryPoint) Close() error {
 		wg.Add(1)
 		go func() {
 			_ = Close(handler)
-			wg.Done()
-		}()
-	}
-
-	if e.tracker != nil {
-		wg.Add(1)
-		go func() {
-			_ = Close(e.tracker)
 			wg.Done()
 		}()
 	}

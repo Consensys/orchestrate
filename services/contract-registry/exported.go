@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/containous/traefik/v2/pkg/log"
+	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
@@ -63,6 +64,7 @@ func Init(ctx context.Context) {
 			viper.GetBool(multitenancy.EnabledViperKey),
 			service,
 			logrus.StandardLogger(),
+			prom.DefaultRegisterer,
 		)
 		if err != nil {
 			log.FromContext(ctx).WithError(err).Fatalf("Could not create application")

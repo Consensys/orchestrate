@@ -9,6 +9,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/healthcheck"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/prometheus"
 	reflecthandler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/reflect"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/swagger"
 )
@@ -24,6 +25,7 @@ func NewBuilder() *Builder {
 
 	b.AddBuilder(reflect.TypeOf(&dynamic.HealthCheck{}), healthcheck.NewTraefikBuilder())
 	b.AddBuilder(reflect.TypeOf(&dynamic.Swagger{}), swagger.NewBuilder())
+	b.AddBuilder(reflect.TypeOf(&dynamic.Prometheus{}), prometheus.NewBuilder(nil))
 
 	return b
 }

@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/containous/traefik/v2/pkg/log"
+	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/loader/sarama"
@@ -92,6 +93,7 @@ func registerHandlers() {
 
 // Start starts application
 func Start(ctx context.Context) error {
+	var err error
 	startOnce.Do(func() {
 		// Create Configuration
 		cfg := app.NewConfig(viper.GetViper())
@@ -104,8 +106,15 @@ func Start(ctx context.Context) error {
 		registerHandlers()
 
 		// Create appli to expose metrics
-		appli = worker.New(cfg)
-		_ = appli.Start(ctx)
+		appli, err = worker.New(cfg, prom.DefaultRegisterer)
+		if err != nil {
+			return
+		}
+
+		err = appli.Start(ctx)
+		if err != nil {
+			return
+		}
 
 		// Start consuming on topic tx-sender
 		topics := []string{
@@ -119,7 +128,7 @@ func Start(ctx context.Context) error {
 				"topics": topics,
 			}).Info("connecting")
 
-			err := broker.Consume(
+			err = broker.Consume(
 				ctx,
 				topics,
 				broker.NewEngineConsumerGroupHandler(engine.GlobalEngine()),
@@ -136,7 +145,7 @@ func Start(ctx context.Context) error {
 
 func Stop(ctx context.Context) error {
 	cancel()
-	_ = appli.Stop(ctx)
+	err := appli.Stop(ctx)
 	<-done
-	return nil
+	return err
 }

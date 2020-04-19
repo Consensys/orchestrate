@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/containous/traefik/v2/pkg/log"
+	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	pkgapp "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt"
@@ -53,12 +54,12 @@ func NewServer(ctx context.Context, cfg *Config) (*EnvelopStoreServer, error) {
 	}
 
 	app, err := newApplication(
-		ctx,
 		cfg,
 		authjwt.GlobalChecker(),
 		authkey.GlobalChecker(),
 		srv,
 		logrus.StandardLogger(),
+		prom.DefaultRegisterer,
 	)
 
 	if err != nil {

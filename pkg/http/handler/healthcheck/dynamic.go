@@ -14,7 +14,7 @@ func AddDynamicConfig(cfg *dynamic.Configuration) {
 		Router: &traefikdynamic.Router{
 			EntryPoints: []string{http.DefaultMetricsEntryPoint},
 			Service:     "healthcheck",
-			Priority:    math.MaxInt32,
+			Priority:    math.MaxInt32 - 1,
 			Rule:        "PathPrefix(`/`)",
 		},
 	}

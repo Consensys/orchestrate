@@ -3,10 +3,10 @@
 package envelopestore
 
 import (
-	"context"
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
@@ -20,12 +20,12 @@ func TestApp(t *testing.T) {
 
 	cfg := NewConfigFromViper(viper.GetViper())
 	appli, err := newApplication(
-		context.Background(),
 		&cfg,
 		mockauth.NewMockChecker(ctlr),
 		mockauth.NewMockChecker(ctlr),
 		mockstore.NewMockEnvelopeStoreServer(ctlr),
 		logrus.New(),
+		prom.NewRegistry(),
 	)
 	assert.NoError(t, err)
 	assert.NotNil(t, appli, "App should have been created")

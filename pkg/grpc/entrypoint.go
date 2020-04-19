@@ -4,7 +4,7 @@ import (
 	"context"
 
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
-	"github.com/containous/traefik/v2/pkg/log"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"google.golang.org/grpc"
@@ -23,14 +23,18 @@ type EntryPoint struct {
 	server *grpc.Server
 }
 
-func NewEntryPoint(ep *traefikstatic.EntryPoint, server *grpc.Server) *EntryPoint {
+func NewEntryPoint(name string, ep *traefikstatic.EntryPoint, server *grpc.Server, reg metrics.TCP) *EntryPoint {
 	forwarder := tcp.NewForwarder(nil)
 	rt := &tcp.Router{}
 	rt.TCPForwarder(forwarder)
 
+	if name == "" {
+		name = DefaultGRPCEntryPoint
+	}
+
 	return &EntryPoint{
 		cfg:       ep,
-		tcp:       tcp.NewEntryPoint(ep, rt),
+		tcp:       tcp.NewEntryPoint(name, ep, rt, reg),
 		forwarder: forwarder,
 		server:    server,
 	}
@@ -40,19 +44,10 @@ func (ep *EntryPoint) Addr() string {
 	return ep.tcp.Addr()
 }
 
-func (ep *EntryPoint) with(ctx context.Context) context.Context {
-	return log.With(ctx, log.Str("entrypoint", DefaultGRPCEntryPoint))
-}
-
 func (ep *EntryPoint) ListenAndServe(ctx context.Context) error {
-	l, err := tcp.Listen(ep.cfg.Address)
-	if err != nil {
-		return err
-	}
-
 	utils.InParallel(
 		func() { _ = ep.server.Serve(ep.forwarder) },
-		func() { _ = ep.tcp.Serve(ep.with(ctx), l) },
+		func() { _ = ep.tcp.ListenAndServe(ctx) },
 	)
 
 	return nil
@@ -61,7 +56,7 @@ func (ep *EntryPoint) ListenAndServe(ctx context.Context) error {
 func (ep *EntryPoint) Shutdown(ctx context.Context) error {
 	utils.InParallel(
 		func() { ep.server.GracefulStop() },
-		func() { _ = tcp.Shutdown(ep.with(ctx), ep.tcp) },
+		func() { _ = tcp.Shutdown(ctx, ep.tcp) },
 	)
 	return nil
 }

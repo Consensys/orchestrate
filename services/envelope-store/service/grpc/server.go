@@ -7,14 +7,15 @@ import (
 	"github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/config/static"
-	"google.golang.org/grpc"
-
 	grpcauth "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/interceptor/auth"
 	grpclogrus "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/interceptor/logrus"
+	grpcmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/interceptor/metrics"
 	staticinterceptor "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/interceptor/static"
 	staticserver "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/server/static"
 	staticservice "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/service/static"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
+	"google.golang.org/grpc"
 )
 
 type ServerBuilder struct {
@@ -26,6 +27,7 @@ func NewServerBuilder(
 	checker auth.Checker,
 	multitenancy bool,
 	logger *logrus.Logger,
+	reg metrics.GRPCServer,
 ) (ServerBuilder, error) {
 	builder := staticserver.NewBuilder()
 
@@ -42,6 +44,12 @@ func NewServerBuilder(
 	interceptorBuilder.AddBuilder(
 		reflect.TypeOf(&static.Logrus{}),
 		grpclogrus.NewBuilder(logger, logrus.Fields{"system": "grpc.internal"}),
+	)
+
+	// Add Builder for Metrics interceptor
+	interceptorBuilder.AddBuilder(
+		reflect.TypeOf(&static.Metrics{}),
+		grpcmetrics.NewBuilder(reg),
 	)
 
 	builder.Interceptor = interceptorBuilder

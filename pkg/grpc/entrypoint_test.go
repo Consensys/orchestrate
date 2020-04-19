@@ -10,6 +10,7 @@ import (
 
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	"github.com/stretchr/testify/require"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/generic"
 	"google.golang.org/grpc"
 )
 
@@ -22,7 +23,7 @@ func TestEntryPoint(t *testing.T) {
 		},
 	}
 
-	ep := NewEntryPoint(cfg, grpc.NewServer())
+	ep := NewEntryPoint("", cfg, grpc.NewServer(), generic.NewTCP())
 	done := make(chan struct{})
 	go func() {
 		_ = ep.ListenAndServe(context.Background())

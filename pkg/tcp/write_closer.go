@@ -39,6 +39,12 @@ func writeCloser(conn net.Conn) (WriteCloser, error) {
 			return nil, err
 		}
 		return &writeCloserWrapper{writeCloser: underlying, Conn: typedConn}, nil
+	case *trackedConn:
+		underlying, err := writeCloser(typedConn.Conn)
+		if err != nil {
+			return nil, err
+		}
+		return &writeCloserWrapper{writeCloser: underlying, Conn: typedConn}, nil
 	case *net.TCPConn:
 		return typedConn, nil
 	default:

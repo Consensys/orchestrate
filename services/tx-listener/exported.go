@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 
+	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app/worker"
@@ -52,6 +53,7 @@ func Init(ctx context.Context) {
 
 // Start starts application
 func Start(ctx context.Context) error {
+	var err error
 	startOnce.Do(func() {
 		// Create Configuration
 		cfg := app.NewConfig(viper.GetViper())
@@ -60,8 +62,15 @@ func Start(ctx context.Context) error {
 		ctx, cancel = context.WithCancel(ctx)
 
 		// Create appli to expose metrics
-		appli = worker.New(cfg)
-		_ = appli.Start(ctx)
+		appli, err = worker.New(cfg, prom.DefaultRegisterer)
+		if err != nil {
+			return
+		}
+
+		err = appli.Start(ctx)
+		if err != nil {
+			return
+		}
 
 		apiKey := viper.GetString(authkey.APIKeyViperKey)
 		if apiKey != "" {
@@ -78,12 +87,12 @@ func Start(ctx context.Context) error {
 
 	})
 
-	return nil
+	return err
 }
 
 func Stop(ctx context.Context) error {
 	cancel()
-	_ = appli.Stop(ctx)
+	err := appli.Stop(ctx)
 	<-done
-	return nil
+	return err
 }

@@ -10,6 +10,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/dashboard"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/healthcheck"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/prometheus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/swagger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/accesslog"
 )
@@ -20,7 +21,7 @@ type Config struct {
 	dynamic *dynamic.Configuration
 }
 
-func NewConfig(staticCfg *traefikstatic.Configuration, watcherCfg *configwatcher.Config) Config {
+func NewConfig(staticCfg *traefikstatic.Configuration, watcherCfg *configwatcher.Config) *Config {
 	dynamicCfg := dynamic.NewConfig()
 
 	dashboard.AddDynamicConfig(dynamicCfg, []string{"base-accesslog"})
@@ -29,7 +30,9 @@ func NewConfig(staticCfg *traefikstatic.Configuration, watcherCfg *configwatcher
 		"./public/swagger-specs/types/transaction-scheduler/swagger.json",
 	)
 	healthcheck.AddDynamicConfig(dynamicCfg)
+	prometheus.AddDynamicConfig(dynamicCfg)
 	accesslog.AddDynamicConfig(dynamicCfg, "base-accesslog", staticCfg)
+
 	// Authentication middleware
 	dynamicCfg.HTTP.Middlewares["auth"] = &dynamic.Middleware{
 		Auth: &dynamic.Auth{},
@@ -51,7 +54,7 @@ func NewConfig(staticCfg *traefikstatic.Configuration, watcherCfg *configwatcher
 		Transactions: &dynamic.Transactions{},
 	}
 
-	return Config{
+	return &Config{
 		static:  staticCfg,
 		watcher: watcherCfg,
 		dynamic: dynamicCfg,

@@ -6,12 +6,19 @@ import (
 
 	"github.com/containous/traefik/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher/provider"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc"
+	grpcserver "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/server"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/router"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp"
 )
 
 type App struct {
+	cfg *Config
+
 	http *http.EntryPoints
 	grpc *grpc.EntryPoint
 
@@ -20,15 +27,55 @@ type App struct {
 	cancel func()
 
 	wg *sync.WaitGroup
+
+	metrics metrics.Registry
 }
 
-func New(watcher configwatcher.Watcher, httpEps *http.EntryPoints, grpcEp *grpc.EntryPoint) *App {
+func New(
+	cfg *Config,
+	prvdr provider.Provider,
+	httpBuilder router.Builder,
+	grpcBuilder grpcserver.Builder,
+	reg metrics.Registry,
+) (*App, error) {
+	// Create HTTP EntryPoints
+	httpEps := http.NewEntryPoints(cfg.HTTP.EntryPoints, httpBuilder, reg.TCP())
+
+	// Create watcher
+	watcher := configwatcher.New(
+		cfg.Watcher,
+		prvdr,
+		dynamic.Merge,
+		// Listeners
+		[]func(context.Context, interface{}) error{
+			httpEps.Switch,
+			func(_ context.Context, cfg interface{}) error {
+				if dynCfg, ok := cfg.(*dynamic.Configuration); ok {
+					return reg.HTTP().Switch(dynCfg)
+				}
+				return nil
+			},
+		},
+	)
+
+	var grpcEp *grpc.EntryPoint
+	if grpcBuilder != nil && cfg.GRPC != nil {
+		grpcServer, err := grpcBuilder.Build(context.Background(), "", cfg.GRPC.Static)
+		if err != nil {
+			return nil, err
+		}
+
+		grpcEp = grpc.NewEntryPoint("", cfg.GRPC.EntryPoint, grpcServer, reg.TCP())
+	}
+
 	return &App{
+		cfg:     cfg,
 		wg:      &sync.WaitGroup{},
 		watcher: watcher,
 		http:    httpEps,
 		grpc:    grpcEp,
-	}
+		metrics: reg,
+	}, nil
 }
 
 func (app *App) Start(ctx context.Context) error {
