@@ -5,6 +5,7 @@ package faucet
 import (
 	"context"
 	"fmt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	"math/big"
 	"reflect"
 	"testing"
@@ -16,7 +17,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	mockregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 	mockfaucet "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet/mock"
 	faucettypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
 )
@@ -31,7 +31,7 @@ const (
 	testIDFaucetError        = "error"
 )
 
-var testFaucets = []*types.Faucet{
+var testFaucets = []*models.Faucet{
 	{
 		UUID:            "testUUID",
 		Name:            "testName",

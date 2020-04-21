@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 )
 
@@ -21,11 +22,8 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		conf := NewConfig()
-		client = NewHTTPClient(
-			http.NewClient(),
-			conf,
-		)
+		conf := NewConfigFromViper(viper.GetViper())
+		client = NewHTTPClient(http.NewClient(), conf)
 
 		log.Infof("%s: client ready - url: %s", component, conf.URL)
 	})

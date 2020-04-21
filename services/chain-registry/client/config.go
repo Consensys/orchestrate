@@ -12,10 +12,6 @@ func init() {
 	_ = viper.BindEnv(ChainRegistryURLViperKey, chainRegistryURLEnv)
 }
 
-func Flags(f *pflag.FlagSet) {
-	ChainRegistryURL(f)
-}
-
 const (
 	chainRegistryURLFlag     = "chain-registry-url"
 	ChainRegistryURLViperKey = "chain.registry.url"
@@ -24,11 +20,9 @@ const (
 )
 
 // ChainRegistryURL register flag for the URL of the Chain Registry
-func ChainRegistryURL(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`URL of the Chain Registry
-Environment variable: %q`, chainRegistryURLEnv)
+func Flags(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`URL of the Chain Registry Environment variable: %q`, chainRegistryURLEnv)
 	f.String(chainRegistryURLFlag, chainRegistryURLDefault, desc)
-	viper.SetDefault(ChainRegistryURLViperKey, chainRegistryURLDefault)
 	_ = viper.BindPFlag(ChainRegistryURLViperKey, f.Lookup(chainRegistryURLFlag))
 }
 
@@ -36,8 +30,12 @@ type Config struct {
 	URL string
 }
 
-func NewConfig() *Config {
+func NewConfig(url string) *Config {
 	return &Config{
-		URL: viper.GetString(ChainRegistryURLViperKey),
+		URL: url,
 	}
+}
+
+func NewConfigFromViper(vipr *viper.Viper) *Config {
+	return NewConfig(vipr.GetString(ChainRegistryURLViperKey))
 }

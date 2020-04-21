@@ -4,6 +4,7 @@ package chaininjector
 
 import (
 	"fmt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	"math/big"
 	"reflect"
 	"testing"
@@ -17,7 +18,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
 
 const (
@@ -28,7 +28,7 @@ const (
 	testTenantID      = "testTenantID"
 )
 
-var testChain = &types.Chain{
+var testChain = &models.Chain{
 	UUID:                    testChainUUID,
 	Name:                    testChainName,
 	TenantID:                testTenantID,
@@ -39,7 +39,7 @@ var testChain = &types.Chain{
 	ListenerBackOffDuration: &(&struct{ x string }{"4s"}).x,
 }
 
-var testChainDefaultTenant = &types.Chain{
+var testChainDefaultTenant = &models.Chain{
 	UUID:                    testChainUUID,
 	Name:                    testChainName,
 	TenantID:                multitenancy.DefaultTenantIDName,
@@ -49,7 +49,7 @@ var testChainDefaultTenant = &types.Chain{
 	ListenerStartingBlock:   &(&struct{ x uint64 }{3}).x,
 	ListenerBackOffDuration: &(&struct{ x string }{"4s"}).x,
 }
-var MockChainsByName = map[string]map[string]*types.Chain{
+var MockChainsByName = map[string]map[string]*models.Chain{
 	testTenantID: {
 		testChainName: testChain,
 	},

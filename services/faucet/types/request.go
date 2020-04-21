@@ -1,11 +1,11 @@
 package types
 
 import (
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	"math/big"
 	"time"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	model "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
 
 // Envelope holds information for a Faucet Credit Envelope
@@ -27,7 +27,7 @@ type Faucet struct {
 	Creditor   ethcommon.Address
 }
 
-func NewFaucetsCandidates(storeFaucet []*model.Faucet) map[string]Faucet {
+func NewFaucetsCandidates(storeFaucet []*models.Faucet) map[string]Faucet {
 	eligibleFaucets := make(map[string]Faucet)
 
 	for _, f := range storeFaucet {

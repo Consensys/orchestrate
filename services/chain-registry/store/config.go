@@ -5,14 +5,12 @@ import (
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/pg"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/postgres"
 )
 
 func init() {
 	_ = viper.BindEnv(TypeViperKey, typeEnv)
 	viper.SetDefault(TypeViperKey, typeDefault)
-	_ = viper.BindEnv(InitViperKey, initEnv)
-	viper.SetDefault(InitViperKey, initDefault)
 }
 
 const (
@@ -38,25 +36,9 @@ Environment variable: %q`, availableTypes, typeEnv)
 	_ = viper.BindPFlag(TypeViperKey, f.Lookup(typeFlag))
 }
 
-var (
-	initFlag     = "chain-registry-init"
-	InitViperKey = "chain-registry.init"
-	initDefault  []string
-	initEnv      = "CHAIN_REGISTRY_INIT"
-)
-
-// Init register flag for the Chain Registry to define initialization state
-func InitRegistry(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Initialize Chain Registry
-Environment variable: %q`, initEnv)
-	f.StringSlice(initFlag, initDefault, desc)
-	_ = viper.BindPFlag(InitViperKey, f.Lookup(initFlag))
-}
-
 type Config struct {
 	Type     string
-	Postgres *pg.Config
-	Chains   []string
+	Postgres *postgres.Config
 }
 
 func DefaultConfig() *Config {
@@ -66,13 +48,11 @@ func DefaultConfig() *Config {
 func NewConfig(vipr *viper.Viper) *Config {
 	return &Config{
 		Type:     vipr.GetString(TypeViperKey),
-		Postgres: pg.NewConfig(vipr),
-		Chains:   vipr.GetStringSlice(InitViperKey),
+		Postgres: postgres.NewConfig(vipr),
 	}
 }
 
 func Flags(f *pflag.FlagSet) {
 	Type(f)
-	InitRegistry(f)
-	pg.Flags(f)
+	postgres.Flags(f)
 }

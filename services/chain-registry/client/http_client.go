@@ -6,17 +6,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/chain-registry/chains"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
+	chainsctrl "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/service/controllers/chains"
+	facuetsctrl "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/service/controllers/faucets"
 )
 
 type HTTPClient struct {
 	client *http.Client
-
 	config *Config
 }
 
@@ -27,7 +28,7 @@ func NewHTTPClient(h *http.Client, c *Config) *HTTPClient {
 	}
 }
 
-func (c *HTTPClient) GetChains(ctx context.Context) ([]*types.Chain, error) {
+func (c *HTTPClient) GetChains(ctx context.Context) ([]*models.Chain, error) {
 	reqURL := fmt.Sprintf("%v/chains", c.config.URL)
 
 	response, err := c.getRequest(ctx, reqURL)
@@ -36,7 +37,7 @@ func (c *HTTPClient) GetChains(ctx context.Context) ([]*types.Chain, error) {
 	}
 	defer closeResponse(response)
 
-	chainsResult := []*types.Chain{}
+	chainsResult := []*models.Chain{}
 	if err := json.NewDecoder(response.Body).Decode(&chainsResult); err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -44,7 +45,7 @@ func (c *HTTPClient) GetChains(ctx context.Context) ([]*types.Chain, error) {
 	return chainsResult, nil
 }
 
-func (c *HTTPClient) GetChainByName(ctx context.Context, chainName string) (*types.Chain, error) {
+func (c *HTTPClient) GetChainByName(ctx context.Context, chainName string) (*models.Chain, error) {
 	reqURL := fmt.Sprintf("%v/chains?name=%s", c.config.URL, chainName)
 
 	response, err := c.getRequest(ctx, reqURL)
@@ -53,7 +54,7 @@ func (c *HTTPClient) GetChainByName(ctx context.Context, chainName string) (*typ
 	}
 	defer closeResponse(response)
 
-	chainsResult := []*types.Chain{}
+	chainsResult := []*models.Chain{}
 	if err := json.NewDecoder(response.Body).Decode(&chainsResult); err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -65,7 +66,7 @@ func (c *HTTPClient) GetChainByName(ctx context.Context, chainName string) (*typ
 	return chainsResult[0], nil
 }
 
-func (c *HTTPClient) GetChainByUUID(ctx context.Context, chainUUID string) (*types.Chain, error) {
+func (c *HTTPClient) GetChainByUUID(ctx context.Context, chainUUID string) (*models.Chain, error) {
 	reqURL := fmt.Sprintf("%v/chains/%s", c.config.URL, chainUUID)
 
 	response, err := c.getRequest(ctx, reqURL)
@@ -74,7 +75,7 @@ func (c *HTTPClient) GetChainByUUID(ctx context.Context, chainUUID string) (*typ
 	}
 	defer closeResponse(response)
 
-	chain := &types.Chain{}
+	chain := &models.Chain{}
 	if err := json.NewDecoder(response.Body).Decode(chain); err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
@@ -82,11 +83,66 @@ func (c *HTTPClient) GetChainByUUID(ctx context.Context, chainUUID string) (*typ
 	return chain, nil
 }
 
+func (c *HTTPClient) DeleteChainByUUID(ctx context.Context, chainUUID string) error {
+	reqURL := fmt.Sprintf("%v/chains/%s", c.config.URL, chainUUID)
+
+	response, err := c.deleteRequest(ctx, reqURL)
+	if err != nil {
+		return err
+	}
+
+	defer closeResponse(response)
+
+	return nil
+}
+
+func (c *HTTPClient) RegisterChain(ctx context.Context, chain *models.Chain) (*models.Chain, error) {
+	reqURL := fmt.Sprintf("%v/chains", c.config.URL)
+
+	var fromBlock *string = nil
+	if chain.ListenerStartingBlock != nil {
+		fromBlock = &(&struct{ x string }{strconv.FormatUint(*chain.ListenerStartingBlock, 10)}).x
+	}
+
+	postReq := chainsctrl.PostRequest{
+		Name: chain.Name,
+		URLs: chain.URLs,
+		Listener: &chainsctrl.ListenerPostRequest{
+			BackOffDuration:   chain.ListenerBackOffDuration,
+			FromBlock:         fromBlock,
+			Depth:             chain.ListenerDepth,
+			ExternalTxEnabled: chain.ListenerExternalTxEnabled,
+		},
+	}
+
+	if len(chain.PrivateTxManagers) > 0 {
+		postReq.PrivateTxManager = &chainsctrl.PrivateTxManagerRequest{
+			URL:  &chain.PrivateTxManagers[0].URL,
+			Type: &chain.PrivateTxManagers[0].Type,
+		}
+	}
+
+	response, err := c.postRequest(ctx, reqURL, &postReq)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer closeResponse(response)
+
+	respChain := &models.Chain{}
+	if err := json.NewDecoder(response.Body).Decode(respChain); err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	return respChain, nil
+}
+
 func (c *HTTPClient) UpdateBlockPosition(ctx context.Context, chainUUID string, blockNumber uint64) error {
 	reqURL := fmt.Sprintf("%v/chains/%v", c.config.URL, chainUUID)
 
-	response, err := c.patchRequest(ctx, reqURL, &chains.PatchRequest{
-		Listener: &chains.ListenerPatchRequest{CurrentBlock: &blockNumber},
+	response, err := c.patchRequest(ctx, reqURL, &chainsctrl.PatchRequest{
+		Listener: &chainsctrl.ListenerPatchRequest{CurrentBlock: &blockNumber},
 	})
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(component)
@@ -94,6 +150,122 @@ func (c *HTTPClient) UpdateBlockPosition(ctx context.Context, chainUUID string, 
 	defer closeResponse(response)
 
 	return nil
+}
+
+func (c *HTTPClient) UpdateChainByUUID(ctx context.Context, chainUUID string, chain *models.Chain) error {
+	reqURL := fmt.Sprintf("%v/chains/%v", c.config.URL, chainUUID)
+
+	patchReq := chainsctrl.PatchRequest{
+		Name: chain.Name,
+		URLs: chain.URLs,
+		Listener: &chainsctrl.ListenerPatchRequest{
+			BackOffDuration:   chain.ListenerBackOffDuration,
+			Depth:             chain.ListenerDepth,
+			CurrentBlock:      chain.ListenerCurrentBlock,
+			ExternalTxEnabled: chain.ListenerExternalTxEnabled,
+		},
+	}
+
+	if len(chain.PrivateTxManagers) > 0 {
+		patchReq.PrivateTxManager = &chainsctrl.PrivateTxManagerRequest{
+			URL:  &chain.PrivateTxManagers[0].URL,
+			Type: &chain.PrivateTxManagers[0].Type,
+		}
+	}
+
+	response, err := c.patchRequest(ctx, reqURL, &patchReq)
+	if err != nil {
+		return errors.FromError(err).ExtendComponent(component)
+	}
+	defer closeResponse(response)
+
+	return nil
+}
+
+func (c *HTTPClient) GetFaucetByUUID(ctx context.Context, faucetUUID string) (*models.Faucet, error) {
+	reqURL := fmt.Sprintf("%v/faucets/%s", c.config.URL, faucetUUID)
+
+	response, err := c.getRequest(ctx, reqURL)
+	if err != nil {
+		return nil, err
+	}
+	defer closeResponse(response)
+
+	faucet := &models.Faucet{}
+	if err := json.NewDecoder(response.Body).Decode(faucet); err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	return faucet, nil
+}
+
+func (c *HTTPClient) DeleteFaucetByUUID(ctx context.Context, faucetUUID string) error {
+	reqURL := fmt.Sprintf("%v/faucets/%s", c.config.URL, faucetUUID)
+
+	response, err := c.deleteRequest(ctx, reqURL)
+	if err != nil {
+		return err
+	}
+
+	defer closeResponse(response)
+
+	return nil
+}
+
+func (c *HTTPClient) RegisterFaucet(ctx context.Context, faucet *models.Faucet) (*models.Faucet, error) {
+	reqURL := fmt.Sprintf("%v/faucets", c.config.URL)
+
+	postReq := facuetsctrl.PostRequest{
+		Name:            faucet.Name,
+		Amount:          faucet.Amount,
+		ChainRule:       faucet.ChainRule,
+		MaxBalance:      faucet.MaxBalance,
+		CreditorAccount: faucet.CreditorAccount,
+		Cooldown:        faucet.Cooldown,
+	}
+
+	response, err := c.postRequest(ctx, reqURL, &postReq)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer closeResponse(response)
+
+	resp := &models.Faucet{}
+	if err := json.NewDecoder(response.Body).Decode(resp); err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	return resp, nil
+}
+
+func (c *HTTPClient) UpdateFaucetByUUID(ctx context.Context, uuid string, faucet *models.Faucet) (*models.Faucet, error) {
+	reqURL := fmt.Sprintf("%v/faucets/%v", c.config.URL, uuid)
+
+	postReq := facuetsctrl.PatchRequest{
+		Name:            faucet.Name,
+		Amount:          faucet.Amount,
+		ChainRule:       faucet.ChainRule,
+		MaxBalance:      faucet.MaxBalance,
+		CreditorAccount: faucet.CreditorAccount,
+		Cooldown:        faucet.Cooldown,
+	}
+
+	response, err := c.patchRequest(ctx, reqURL, &postReq)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer closeResponse(response)
+
+	resp := &models.Faucet{}
+	if err := json.NewDecoder(response.Body).Decode(resp); err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	return resp, nil
 }
 
 func (c *HTTPClient) getRequest(ctx context.Context, reqURL string) (*http.Response, error) {
@@ -104,13 +276,52 @@ func (c *HTTPClient) getRequest(ctx context.Context, reqURL string) (*http.Respo
 	}
 
 	if r.StatusCode != http.StatusOK {
-		return nil, errors.FromError(fmt.Errorf("get request: %s failed with error %d", reqURL, r.StatusCode)).ExtendComponent(component)
+		if r.StatusCode == http.StatusNotFound {
+			return nil, errors.NotFoundError("Not found " + reqURL)
+		}
+
+		return nil, errors.FromError(fmt.Errorf("GET request: %s failed with error %d", reqURL, r.StatusCode)).ExtendComponent(component)
 	}
 
 	return r, nil
 }
 
-func (c *HTTPClient) patchRequest(ctx context.Context, reqURL string, patchRequest *chains.PatchRequest) (*http.Response, error) {
+func (c *HTTPClient) deleteRequest(ctx context.Context, reqURL string) (*http.Response, error) {
+	req, _ := http.NewRequestWithContext(ctx, http.MethodDelete, reqURL, nil)
+	r, err := c.client.Do(req)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	if r.StatusCode != http.StatusNoContent {
+		return nil, errors.FromError(fmt.Errorf("DELETE request: %s failed with error %d", reqURL, r.StatusCode)).ExtendComponent(component)
+	}
+
+	return r, nil
+}
+
+func (c *HTTPClient) postRequest(ctx context.Context, reqURL string, postRequest interface{}) (*http.Response, error) {
+	body := new(bytes.Buffer)
+	_ = json.NewEncoder(body).Encode(postRequest)
+
+	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, reqURL, body)
+	r, err := c.client.Do(req)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	if r.StatusCode != http.StatusOK {
+		if r.StatusCode == http.StatusBadRequest {
+			return nil, errors.DataError(body.String())
+		}
+
+		return nil, errors.FromError(fmt.Errorf("POST request: %s failed with error %d", reqURL, r.StatusCode)).ExtendComponent(component)
+	}
+
+	return r, nil
+}
+
+func (c *HTTPClient) patchRequest(ctx context.Context, reqURL string, patchRequest interface{}) (*http.Response, error) {
 	body := new(bytes.Buffer)
 	_ = json.NewEncoder(body).Encode(patchRequest)
 
@@ -121,7 +332,11 @@ func (c *HTTPClient) patchRequest(ctx context.Context, reqURL string, patchReque
 	}
 
 	if r.StatusCode != http.StatusOK {
-		return nil, errors.FromError(fmt.Errorf("patch request: %s failed with error %d", reqURL, r.StatusCode)).ExtendComponent(component)
+		if r.StatusCode == http.StatusBadRequest {
+			return nil, errors.DataError(body.String())
+		}
+
+		return nil, errors.FromError(fmt.Errorf("PATH request: %s failed with error %d", reqURL, r.StatusCode)).ExtendComponent(component)
 	}
 
 	return r, nil
@@ -133,7 +348,7 @@ func closeResponse(response *http.Response) {
 	}
 }
 
-func (c *HTTPClient) GetFaucetsByChainRule(ctx context.Context, chainRule string) ([]*types.Faucet, error) {
+func (c *HTTPClient) GetFaucetsByChainRule(ctx context.Context, chainRule string) ([]*models.Faucet, error) {
 	reqURL := fmt.Sprintf("%v/faucets?chain_rule=%s", c.config.URL, chainRule)
 
 	response, err := c.getRequest(ctx, reqURL)
@@ -142,7 +357,7 @@ func (c *HTTPClient) GetFaucetsByChainRule(ctx context.Context, chainRule string
 	}
 	defer closeResponse(response)
 
-	faucetsResult := []*types.Faucet{}
+	faucetsResult := []*models.Faucet{}
 	if err := json.NewDecoder(response.Body).Decode(&faucetsResult); err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}

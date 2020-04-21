@@ -13,7 +13,7 @@ import (
 
 func TestChainRegistryTarget(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	ChainRegistryURL(flgs)
+	Flags(flgs)
 	expected := "localhost:8081"
 	assert.Equal(t, expected, viper.GetString(ChainRegistryURLViperKey), "Default")
 

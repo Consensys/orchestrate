@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"html"
@@ -8,6 +9,9 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/containous/traefik/v2/pkg/log"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
+	ethclientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 
 	"github.com/go-playground/validator/v10"
@@ -71,4 +75,21 @@ func UnmarshalBody(body io.Reader, req interface{}) error {
 	}
 
 	return nil
+}
+
+func GetChainTip(ctx context.Context, ec ethclient.ChainLedgerReader, urls []string) (uint64, error) {
+	var tip uint64
+
+	// All URLs must be valid and we return the head of the latest one
+	for _, uri := range urls {
+		head, err := ec.HeaderByNumber(ethclientutils.RetryNotFoundError(ctx, true), uri, nil)
+		if err != nil {
+			log.FromContext(ctx).WithError(err).Errorf("failed to fetch chain tip for URL %s", uri)
+			return 0, err
+		}
+
+		tip = head.Number.Uint64()
+	}
+
+	return tip, nil
 }

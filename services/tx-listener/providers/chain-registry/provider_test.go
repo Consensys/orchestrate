@@ -5,6 +5,7 @@ package chainregistry
 import (
 	"context"
 	"fmt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	"testing"
 	"time"
 
@@ -12,7 +13,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 )
 
@@ -37,7 +37,7 @@ func (s *ProviderTestSuite) SetupTest() {
 }
 
 func (s *ProviderTestSuite) TestRun() {
-	mockChains := []*types.Chain{
+	mockChains := []*models.Chain{
 		{
 			UUID:                      "0d60a85e-0b90-4482-a14c-108aea2557aa",
 			Name:                      "chainName",
@@ -52,7 +52,7 @@ func (s *ProviderTestSuite) TestRun() {
 	}
 
 	gomock.InOrder(
-		mockChainRegistryClient.EXPECT().GetChains(gomock.Any()).Return([]*types.Chain{}, nil),
+		mockChainRegistryClient.EXPECT().GetChains(gomock.Any()).Return([]*models.Chain{}, nil),
 		mockChainRegistryClient.EXPECT().GetChains(gomock.Any()).Return(mockChains, nil).AnyTimes(),
 		mockChainRegistryClient.EXPECT().GetChains(gomock.Any()).Return(nil, fmt.Errorf("error")).AnyTimes(),
 	)

@@ -4,6 +4,7 @@ package client
 
 import (
 	"context"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -12,7 +13,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 )
 
 type ClientTestSuite struct {
@@ -20,12 +20,12 @@ type ClientTestSuite struct {
 	client *HTTPClient
 }
 
-var MockChainsSlice = []*types.Chain{
+var MockChainsSlice = []*models.Chain{
 	{
 		UUID:                    "test-chain",
 		Name:                    "test",
 		TenantID:                "test",
-		URLs:                    []string{"test"},
+		URLs:                    []string{"http://test1.com"},
 		ListenerDepth:           &(&struct{ x uint64 }{0}).x,
 		ListenerCurrentBlock:    &(&struct{ x uint64 }{10}).x,
 		ListenerStartingBlock:   &(&struct{ x uint64 }{0}).x,
@@ -35,7 +35,7 @@ var MockChainsSlice = []*types.Chain{
 		UUID:                    "test-chain1",
 		Name:                    "test1",
 		TenantID:                "test1",
-		URLs:                    []string{"test1"},
+		URLs:                    []string{"http://test1.com"},
 		ListenerDepth:           &(&struct{ x uint64 }{1}).x,
 		ListenerCurrentBlock:    &(&struct{ x uint64 }{1}).x,
 		ListenerStartingBlock:   &(&struct{ x uint64 }{1}).x,
@@ -47,7 +47,7 @@ func (s *ClientTestSuite) TestGetChainByUUID() {
 	testSuite := []struct {
 		server        func() *httptest.Server
 		input         string
-		testOutput    func(t *testing.T, output *types.Chain, err error)
+		testOutput    func(t *testing.T, output *models.Chain, err error)
 		expectedError bool
 	}{
 		{
@@ -60,7 +60,7 @@ func (s *ClientTestSuite) TestGetChainByUUID() {
 				)
 			},
 			MockChainsSlice[0].UUID,
-			func(t *testing.T, output *types.Chain, err error) {
+			func(t *testing.T, output *models.Chain, err error) {
 				assert.NoError(t, err, "should not get error")
 				assert.True(t, reflect.DeepEqual(output, MockChainsSlice[0]), "should be the same chain")
 			},
@@ -75,7 +75,7 @@ func (s *ClientTestSuite) TestGetChainByUUID() {
 				)
 			},
 			MockChainsSlice[0].UUID,
-			func(t *testing.T, output *types.Chain, err error) {
+			func(t *testing.T, output *models.Chain, err error) {
 				assert.Error(t, err, "should get error")
 				assert.Nil(t, output, "should be nil")
 			},
@@ -90,7 +90,7 @@ func (s *ClientTestSuite) TestGetChainByUUID() {
 				)
 			},
 			MockChainsSlice[0].UUID,
-			func(t *testing.T, output *types.Chain, err error) {
+			func(t *testing.T, output *models.Chain, err error) {
 				assert.Error(t, err, "should get error")
 				assert.Nil(t, output, "should be nil")
 			},
@@ -105,7 +105,7 @@ func (s *ClientTestSuite) TestGetChainByUUID() {
 				return h
 			},
 			MockChainsSlice[0].UUID,
-			func(t *testing.T, output *types.Chain, err error) {
+			func(t *testing.T, output *models.Chain, err error) {
 				assert.Error(t, err, "should get error")
 				assert.Nil(t, output, "should be nil")
 			},
@@ -130,7 +130,7 @@ func (s *ClientTestSuite) TestGetChainByName() {
 	testSuite := []struct {
 		server        func() *httptest.Server
 		input         string
-		testOutput    func(t *testing.T, output *types.Chain, err error)
+		testOutput    func(t *testing.T, output *models.Chain, err error)
 		expectedError bool
 	}{
 		{
@@ -143,7 +143,7 @@ func (s *ClientTestSuite) TestGetChainByName() {
 				)
 			},
 			MockChainsSlice[0].Name,
-			func(t *testing.T, output *types.Chain, err error) {
+			func(t *testing.T, output *models.Chain, err error) {
 				assert.NoError(t, err, "should not get error")
 				assert.True(t, reflect.DeepEqual(output, MockChainsSlice[0]), "should be the same chain")
 			},
@@ -158,7 +158,7 @@ func (s *ClientTestSuite) TestGetChainByName() {
 				)
 			},
 			MockChainsSlice[0].Name,
-			func(t *testing.T, output *types.Chain, err error) {
+			func(t *testing.T, output *models.Chain, err error) {
 				assert.Error(t, err, "should get error")
 				assert.Nil(t, output, "should be nil")
 			},
@@ -173,7 +173,7 @@ func (s *ClientTestSuite) TestGetChainByName() {
 				)
 			},
 			MockChainsSlice[0].Name,
-			func(t *testing.T, output *types.Chain, err error) {
+			func(t *testing.T, output *models.Chain, err error) {
 				assert.Error(t, err, "should get error")
 				assert.Nil(t, output, "should be nil")
 			},
@@ -188,7 +188,7 @@ func (s *ClientTestSuite) TestGetChainByName() {
 				return h
 			},
 			MockChainsSlice[0].Name,
-			func(t *testing.T, output *types.Chain, err error) {
+			func(t *testing.T, output *models.Chain, err error) {
 				assert.Error(t, err, "should get error")
 				assert.Nil(t, output, "should be nil")
 			},
@@ -198,13 +198,13 @@ func (s *ClientTestSuite) TestGetChainByName() {
 			func() *httptest.Server {
 				return httptest.NewServer(
 					http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-						r, _ := json.Marshal([]*types.Chain{})
+						r, _ := json.Marshal([]*models.Chain{})
 						_, _ = rw.Write(r)
 					}),
 				)
 			},
 			MockChainsSlice[0].Name,
-			func(t *testing.T, output *types.Chain, err error) {
+			func(t *testing.T, output *models.Chain, err error) {
 				assert.Error(t, err, "should get error")
 				assert.Nil(t, output, "should be nil")
 			},
@@ -228,7 +228,7 @@ func (s *ClientTestSuite) TestGetChainByName() {
 func (s *ClientTestSuite) TestGetChains() {
 	testSuite := []struct {
 		server        func() *httptest.Server
-		testOutput    func(t *testing.T, output []*types.Chain, err error)
+		testOutput    func(t *testing.T, output []*models.Chain, err error)
 		expectedError bool
 	}{
 		{
@@ -240,7 +240,7 @@ func (s *ClientTestSuite) TestGetChains() {
 					}),
 				)
 			},
-			func(t *testing.T, output []*types.Chain, err error) {
+			func(t *testing.T, output []*models.Chain, err error) {
 				assert.NoError(t, err, "should not get error")
 				assert.True(t, reflect.DeepEqual(output, MockChainsSlice), "should be the same chain")
 			},
@@ -254,7 +254,7 @@ func (s *ClientTestSuite) TestGetChains() {
 					}),
 				)
 			},
-			func(t *testing.T, output []*types.Chain, err error) {
+			func(t *testing.T, output []*models.Chain, err error) {
 				assert.Error(t, err, "should not get error")
 				assert.Nil(t, output, "should be nil")
 			},
@@ -268,7 +268,7 @@ func (s *ClientTestSuite) TestGetChains() {
 					}),
 				)
 			},
-			func(t *testing.T, output []*types.Chain, err error) {
+			func(t *testing.T, output []*models.Chain, err error) {
 				assert.Error(t, err, "should not get error")
 				assert.Nil(t, output, "should be nil")
 			},
@@ -282,7 +282,7 @@ func (s *ClientTestSuite) TestGetChains() {
 				h.Close()
 				return h
 			},
-			func(t *testing.T, output []*types.Chain, err error) {
+			func(t *testing.T, output []*models.Chain, err error) {
 				assert.Error(t, err, "should not get error")
 				assert.Nil(t, output, "should be nil")
 			},

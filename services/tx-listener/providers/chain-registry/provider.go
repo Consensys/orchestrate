@@ -3,6 +3,7 @@ package chainregistry
 import (
 	"context"
 	"fmt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
@@ -11,7 +12,6 @@ import (
 	"github.com/containous/traefik/v2/pkg/safe"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 )
 
@@ -53,7 +53,7 @@ loop:
 	for {
 		select {
 		case <-ticker.C:
-			var chains []*types.Chain
+			var chains []*models.Chain
 			chains, err = p.Client.GetChains(ctx)
 			if err != nil {
 				log.FromContext(logCtx).WithError(err).Errorf("failed to fetch chains from chain registry")
@@ -67,7 +67,7 @@ loop:
 	return
 }
 
-func (p *Provider) buildConfiguration(chains []*types.Chain) *dynamic.Message {
+func (p *Provider) buildConfiguration(chains []*models.Chain) *dynamic.Message {
 	msg := &dynamic.Message{
 		Provider: "chain-registry",
 		Configuration: &dynamic.Configuration{

@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/cobra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store"
 )
 
 func newRunCommand() *cobra.Command {
@@ -19,7 +18,7 @@ func newRunCommand() *cobra.Command {
 	}
 
 	// Chain registry store flags
-	store.Flags(runCmd.Flags())
+	chainregistry.Flags(runCmd.Flags())
 
 	return runCmd
 }

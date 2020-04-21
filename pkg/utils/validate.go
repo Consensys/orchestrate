@@ -50,9 +50,30 @@ func isValidMethodSig(fl validator.FieldLevel) bool {
 }
 
 func isDuration(fl validator.FieldLevel) bool {
-	if fl.Field().String() != "" {
+	if fl.Field().Type().String() == "*string" {
+		val := fl.Field().Interface().(*string)
+		if val != nil {
+			_, err := time.ParseDuration(*val)
+			if err != nil {
+				return false
+			}
+		}
+	} else if fl.Field().String() != "" {
 		_, err := time.ParseDuration(fl.Field().String())
 		if err != nil {
+			return false
+		}
+	}
+
+	return true
+}
+
+func isPrivateTxManagerType(fl validator.FieldLevel) bool {
+	if fl.Field().String() != "" {
+		switch fl.Field().String() {
+		case "Tessera", "Orion":
+			return true
+		default:
 			return false
 		}
 	}
@@ -71,6 +92,7 @@ func init() {
 	_ = validate.RegisterValidation("isHash", isHash)
 	_ = validate.RegisterValidation("isDuration", isDuration)
 	_ = validate.RegisterValidation("isValidMethodSig", isValidMethodSig)
+	_ = validate.RegisterValidation("isPrivateTxManagerType", isPrivateTxManagerType)
 }
 
 func GetValidator() *validator.Validate {
