@@ -42,8 +42,7 @@ func (h *controller) PostChain(rw http.ResponseWriter, request *http.Request) {
 
 func parsePostReqToChain(request *http.Request) (*models.Chain, error) {
 	chainRequest := &PostRequest{
-		Listener:          &ListenerPostRequest{},
-		PrivateTxManagers: []*PrivateTxManagerRequest{},
+		Listener: &ListenerPostRequest{},
 	}
 
 	err := utils.UnmarshalBody(request.Body, chainRequest)
@@ -72,11 +71,13 @@ func parsePostReqToChain(request *http.Request) (*models.Chain, error) {
 		ListenerExternalTxEnabled: chainRequest.Listener.ExternalTxEnabled,
 	}
 
-	for _, privTxManager := range chainRequest.PrivateTxManagers {
-		chain.PrivateTxManagers = append(chain.PrivateTxManagers, &models.PrivateTxManagerModel{
-			URL:  privTxManager.URL,
-			Type: privTxManager.Type,
-		})
+	if chainRequest.PrivateTxManager != nil {
+		chain.PrivateTxManagers = []*models.PrivateTxManagerModel{
+			{
+				URL:  chainRequest.PrivateTxManager.URL,
+				Type: chainRequest.PrivateTxManager.Type,
+			},
+		}
 	}
 
 	return &chain, nil

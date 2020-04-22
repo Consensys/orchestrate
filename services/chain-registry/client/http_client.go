@@ -115,11 +115,16 @@ func (c *HTTPClient) RegisterChain(ctx context.Context, chain *models.Chain) (*m
 		},
 	}
 
-	for _, privTxManager := range chain.PrivateTxManagers {
-		postReq.PrivateTxManagers = append(postReq.PrivateTxManagers, &chainsctrl.PrivateTxManagerRequest{
-			URL:  privTxManager.URL,
-			Type: privTxManager.Type,
-		})
+	if len(chain.PrivateTxManagers) > 1 {
+		err := errors.DataError("maximum one element in PrivateTxManagers is allowed")
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	if len(chain.PrivateTxManagers) > 0 {
+		postReq.PrivateTxManager = &chainsctrl.PrivateTxManagerRequest{
+			URL:  chain.PrivateTxManagers[0].URL,
+			Type: chain.PrivateTxManagers[0].Type,
+		}
 	}
 
 	response, err := c.postRequest(ctx, reqURL, &postReq)
@@ -166,11 +171,16 @@ func (c *HTTPClient) UpdateChainByUUID(ctx context.Context, chainUUID string, ch
 		},
 	}
 
-	for _, privTxManager := range chain.PrivateTxManagers {
-		patchReq.PrivateTxManagers = append(patchReq.PrivateTxManagers, &chainsctrl.PrivateTxManagerRequest{
-			URL:  privTxManager.URL,
-			Type: privTxManager.Type,
-		})
+	if len(chain.PrivateTxManagers) > 1 {
+		err := errors.DataError("maximum one element in PrivateTxManagers is allowed")
+		return errors.FromError(err).ExtendComponent(component)
+	}
+
+	if len(chain.PrivateTxManagers) > 0 {
+		patchReq.PrivateTxManager = &chainsctrl.PrivateTxManagerRequest{
+			URL:  chain.PrivateTxManagers[0].URL,
+			Type: chain.PrivateTxManagers[0].Type,
+		}
 	}
 
 	response, err := c.patchRequest(ctx, reqURL, &patchReq)

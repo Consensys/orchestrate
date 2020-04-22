@@ -136,7 +136,6 @@ func (s *HttpChainTestSuite) TestChainRegistry_TesseraChainHappyFlow() {
 	chainURL := "http://172.16.239.11:8545"
 	privTxManagerURL := "http://172.16.239.11:8545"
 	privTxManagerURLTwo := "http://172.16.239.11:9080"
-	privTxManagerURLThree := "http://172.16.239.11:9081"
 	var chainUUID string
 
 	s.T().Run("should register a new chain", func(t *testing.T) {
@@ -171,10 +170,6 @@ func (s *HttpChainTestSuite) TestChainRegistry_TesseraChainHappyFlow() {
 					URL:  privTxManagerURLTwo,
 					Type: utils.TesseraChainType,
 				},
-				{
-					URL:  privTxManagerURLThree,
-					Type: utils.TesseraChainType,
-				},
 			},
 		})
 
@@ -184,10 +179,9 @@ func (s *HttpChainTestSuite) TestChainRegistry_TesseraChainHappyFlow() {
 	s.T().Run("should fetch registered chain by UUID", func(t *testing.T) {
 		resp, err := s.client.GetChainByUUID(ctx, chainUUID)
 		assert.Nil(t, err)
-		assert.Equal(t, 2, len(resp.PrivateTxManagers), "should have two PrivateTxManagers")
-		if len(resp.PrivateTxManagers) == 2 {
+		assert.Equal(t, 1, len(resp.PrivateTxManagers), "should have two PrivateTxManagers")
+		if len(resp.PrivateTxManagers) == 1 {
 			assert.Equal(t, privTxManagerURLTwo, resp.PrivateTxManagers[0].URL)
-			assert.Equal(t, privTxManagerURLThree, resp.PrivateTxManagers[1].URL)
 		}
 	})
 
