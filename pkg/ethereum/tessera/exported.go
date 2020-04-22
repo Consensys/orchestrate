@@ -4,9 +4,10 @@ import (
 	"context"
 	"sync"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/spf13/viper"
-
-	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
 var (
@@ -14,40 +15,24 @@ var (
 	initOnce = &sync.Once{}
 )
 
-func Init(ctx context.Context) {
+func Init(_ context.Context) {
 	initOnce.Do(func() {
 		if client != nil {
 			return
 		}
 
-		client = NewEnclaveClient()
-		tesseraEndpoints := viper.GetStringMapString(URLsViperKey)
-		log.Infof("connecting to %d Tessera URLs", len(tesseraEndpoints))
+		newBackOff := func() backoff.BackOff { return utils.NewBackOff(utils.NewConfig(viper.GetViper())) }
 
-		for chainID, endpoint := range tesseraEndpoints {
-			log.Infof("adding Tessera client for endpoint '%s' for chain id %s", endpoint, chainID)
-
-			enclaveHTTPClient := CreateEnclaveHTTPEndpoint(endpoint)
-			client.AddClient(chainID, enclaveHTTPClient)
-
-			checkIfEndpointAccessible(chainID, endpoint)
-		}
+		client = NewTesseraClient(newBackOff, http.NewClient())
 	})
 }
 
-func checkIfEndpointAccessible(chainID, endpoint string) {
-	_, err := client.GetStatus(chainID)
-	if err != nil {
-		log.Errorf("status check failed for Tessera endpoint '%s' with error %s", endpoint, err)
-	}
-}
-
-// GlobalClient returns global Client
+// GlobalClient returns global Tessera HttpClient
 func GlobalClient() Client {
 	return client
 }
 
-// SetGlobalClient sets global Client
+// SetGlobalClient sets global Tessera HttpClient
 func SetGlobalMultiClient(ec Client) {
 	client = ec
 }

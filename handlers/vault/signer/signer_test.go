@@ -20,15 +20,10 @@ import (
 	ethereumHandlers "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/signer/ethereum"
 	tesseraHandlers "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/signer/tessera"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/tessera"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/types"
 )
 
 type MockTxSigner struct {
-	t *testing.T
-}
-
-type MockTesseraClient struct {
 	t *testing.T
 }
 
@@ -75,22 +70,6 @@ func (s *MockTxSigner) SignRawHash(_ ethcommon.Address, _ []byte) (rsv []byte, e
 
 func (s *MockTxSigner) ImportPrivateKey(_ context.Context, _ string) (err error) {
 	return fmt.Errorf("importPrivateKey not implemented")
-}
-
-func (tc *MockTesseraClient) AddClient(_ string, _ tessera.EnclaveEndpoint) {}
-
-func (tc *MockTesseraClient) StoreRaw(chainID string, _ []byte, _ string) (txHash []byte, err error) {
-	if chainID == "0" {
-		return []byte(``), fmt.Errorf("mock: store raw failed")
-	}
-	return hexutil.MustDecode("0xabcdef"), nil
-}
-
-func (tc *MockTesseraClient) GetStatus(chainID string) (status string, err error) {
-	if chainID == "0" {
-		return "", fmt.Errorf("mock: get status failed")
-	}
-	return "", nil
 }
 
 func makeSignerContext(i int) *engine.TxContext {
@@ -165,14 +144,12 @@ func makeSignerContext(i int) *engine.TxContext {
 }
 
 func TestSigner(t *testing.T) {
-
 	s := &MockTxSigner{t: t}
-	tc := &MockTesseraClient{t: t}
 
 	signer := TxSigner(
 		eeaHandlers.Signer(s),
 		ethereumHandlers.Signer(s),
-		tesseraHandlers.Signer(s, tc),
+		tesseraHandlers.Signer(s),
 	)
 
 	rounds := 25

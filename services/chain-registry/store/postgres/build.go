@@ -16,8 +16,8 @@ func NewBuilder(mngr postgres.Manager) *Builder {
 }
 
 func (b *Builder) Build(ctx context.Context, cfg *Config) (
-	*pgda.PGChainAgent, *pgda.PGFaucetAgent, *pgda.PGPrivateTxAgent, error) {
+	*pgda.PGChainAgent, *pgda.PGFaucetAgent, error) {
 	db := b.postgres.Connect(ctx, cfg.PG)
 
-	return pgda.NewPGChainAgent(db), pgda.NewPGFaucetAgent(db), pgda.NewPGPrivateTxManager(db), nil
+	return pgda.NewPGChainAgent(db), pgda.NewPGFaucetAgent(db), nil
 }

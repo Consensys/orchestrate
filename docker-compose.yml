@@ -195,7 +195,6 @@ services:
     environment:
       <<: *default-variables
       JAEGER_SERVICE_NAME: TX-SIGNER
-      TESSERA_URL: ${TESSERA_URL}
       SECRET_PKEY: ${SECRET_PKEY-}
       SECRET_STORE: ${SECRET_STORE-hashicorp}
     volumes:
@@ -230,7 +229,7 @@ services:
       CUCUMBER_FORMAT: "cucumber"
       AUTH_JWT_PRIVATE_KEY: ${AUTH_JWT_PRIVATE_KEY-}
       # Uncomment CUCUMBER_TAGS if only run features and scenarios with @public-tx or @account tags ("," = OR, "&&" = AND, "~" = NOT)
-      # CUCUMBER_TAGS: "@public-tx,@account"
+      # CUCUMBER_TAGS: "@private-tx"
     restart: "no"
     command: e2e run
     volumes:

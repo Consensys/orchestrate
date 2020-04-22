@@ -71,7 +71,7 @@ func isDuration(fl validator.FieldLevel) bool {
 func isPrivateTxManagerType(fl validator.FieldLevel) bool {
 	if fl.Field().String() != "" {
 		switch fl.Field().String() {
-		case "Tessera", "Orion":
+		case TesseraChainType, OrionChainType:
 			return true
 		default:
 			return false

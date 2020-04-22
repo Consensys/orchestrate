@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"strconv"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 
+	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	chainsctrl "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/service/controllers/chains"
 	facuetsctrl "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/service/controllers/faucets"
@@ -115,11 +115,11 @@ func (c *HTTPClient) RegisterChain(ctx context.Context, chain *models.Chain) (*m
 		},
 	}
 
-	if len(chain.PrivateTxManagers) > 0 {
-		postReq.PrivateTxManager = &chainsctrl.PrivateTxManagerRequest{
-			URL:  &chain.PrivateTxManagers[0].URL,
-			Type: &chain.PrivateTxManagers[0].Type,
-		}
+	for _, privTxManager := range chain.PrivateTxManagers {
+		postReq.PrivateTxManagers = append(postReq.PrivateTxManagers, &chainsctrl.PrivateTxManagerRequest{
+			URL:  privTxManager.URL,
+			Type: privTxManager.Type,
+		})
 	}
 
 	response, err := c.postRequest(ctx, reqURL, &postReq)
@@ -166,11 +166,11 @@ func (c *HTTPClient) UpdateChainByUUID(ctx context.Context, chainUUID string, ch
 		},
 	}
 
-	if len(chain.PrivateTxManagers) > 0 {
-		patchReq.PrivateTxManager = &chainsctrl.PrivateTxManagerRequest{
-			URL:  &chain.PrivateTxManagers[0].URL,
-			Type: &chain.PrivateTxManagers[0].Type,
-		}
+	for _, privTxManager := range chain.PrivateTxManagers {
+		patchReq.PrivateTxManagers = append(patchReq.PrivateTxManagers, &chainsctrl.PrivateTxManagerRequest{
+			URL:  privTxManager.URL,
+			Type: privTxManager.Type,
+		})
 	}
 
 	response, err := c.patchRequest(ctx, reqURL, &patchReq)

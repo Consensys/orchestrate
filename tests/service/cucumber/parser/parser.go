@@ -83,6 +83,8 @@ func (p *Parser) ParseTxRequest(scenario string, headers, row *gherkin.TableRow)
 			gherkinRequest[header] = tx.MethodMap[value]
 		case header == "to", header == "from":
 			gherkinRequest[header] = ethcommon.HexToAddress(value)
+		case header == "txHash":
+			gherkinRequest[header] = ethcommon.HexToHash(value)
 		case header == tenantIDHeader:
 			auth, err := p.JWTGenerator.GenerateAccessTokenWithTenantID(value, 24*time.Hour)
 			if err != nil {

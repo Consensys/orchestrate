@@ -6,10 +6,10 @@ import (
 
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/logger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt/generator"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	pkglog "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/logger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	e2e "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service"
@@ -24,13 +24,13 @@ func NewRunCommand() *cobra.Command {
 		Run:   run,
 		PreRun: func(cmd *cobra.Command, args []string) {
 			// This is executed before each run (included on children command run)
-			logger.InitLogger()
+			pkglog.InitLogger()
 		},
 	}
 
-	// Set logger flags
-	logger.LogLevel(runCmd.Flags())
-	logger.LogFormat(runCmd.Flags())
+	// Set pkglog flags
+	pkglog.LogLevel(runCmd.Flags())
+	pkglog.LogFormat(runCmd.Flags())
 
 	// Register Kafka flags
 	broker.InitKafkaFlags(runCmd.Flags())

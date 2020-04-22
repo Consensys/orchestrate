@@ -65,7 +65,7 @@ func NewInternalConfig(staticCfg *traefikstatic.Configuration, watcherCfg *confi
 	dynamicCfg.HTTP.Middlewares["strip-path"] = &dynamic.Middleware{
 		Middleware: &traefikdynamic.Middleware{
 			StripPrefixRegex: &traefikdynamic.StripPrefixRegex{
-				Regex: []string{"/.+"},
+				Regex: []string{`/(?:tessera/)?(?:[a-zA-Z\d-]*)/?`},
 			},
 		},
 	}
@@ -94,23 +94,13 @@ func newProxyConfig(chains []*models.Chain) *dynamic.Configuration {
 	cfg := dynamic.NewConfig()
 
 	for _, chain := range chains {
-		chainService := fmt.Sprintf("chain-%v", chain.UUID)
 		multitenancyMid := fmt.Sprintf("multitenancy-%v", chain.TenantID)
-
-		cfg.HTTP.Routers[chainService] = &dynamic.Router{
-			Router: &traefikdynamic.Router{
-				EntryPoints: []string{http.DefaultHTTPEntryPoint},
-				Priority:    math.MaxInt32,
-				Service:     chainService,
-				Rule:        fmt.Sprintf("Path(`/%s`)", chain.UUID),
-				Middlewares: []string{
-					"chain-proxy-accesslog@internal",
-					"auth@internal",
-					multitenancyMid,
-					"strip-path@internal",
-					"ratelimit@internal",
-				},
-			},
+		middlewares := []string{
+			"chain-proxy-accesslog@internal",
+			"auth@internal",
+			multitenancyMid,
+			"strip-path@internal",
+			"ratelimit@internal",
 		}
 
 		cfg.HTTP.Middlewares[multitenancyMid] = &dynamic.Middleware{
@@ -119,22 +109,76 @@ func newProxyConfig(chains []*models.Chain) *dynamic.Configuration {
 			},
 		}
 
-		servers := make([]*dynamic.Server, 0)
-		for _, chainURL := range chain.URLs {
-			servers = append(servers, &dynamic.Server{
-				URL: chainURL,
-			})
-		}
-
-		cfg.HTTP.Services[chainService] = &dynamic.Service{
-			ReverseProxy: &dynamic.ReverseProxy{
-				PassHostHeader: utils.Bool(false),
-				LoadBalancer: &dynamic.LoadBalancer{
-					Servers: servers,
-				},
-			},
-		}
+		appendChainServices(cfg, chain, middlewares)
+		appendTesseraPrivateTxServices(cfg, chain, middlewares)
 	}
 
 	return cfg
+}
+
+func appendChainServices(cfg *dynamic.Configuration, chain *models.Chain, middlewares []string) {
+	chainService := fmt.Sprintf("chain-%v", chain.UUID)
+
+	servers := make([]*dynamic.Server, 0)
+	for _, chainURL := range chain.URLs {
+		servers = append(servers, &dynamic.Server{
+			URL: chainURL,
+		})
+	}
+
+	cfg.HTTP.Routers[chainService] = &dynamic.Router{
+		Router: &traefikdynamic.Router{
+			EntryPoints: []string{http.DefaultHTTPEntryPoint},
+			Priority:    math.MaxInt32,
+			Service:     chainService,
+			Rule:        fmt.Sprintf("Path(`/%s`)", chain.UUID),
+			Middlewares: middlewares,
+		},
+	}
+
+	cfg.HTTP.Services[chainService] = &dynamic.Service{
+		ReverseProxy: &dynamic.ReverseProxy{
+			PassHostHeader: utils.Bool(false),
+			LoadBalancer: &dynamic.LoadBalancer{
+				Servers: servers,
+			},
+		},
+	}
+}
+
+func appendTesseraPrivateTxServices(cfg *dynamic.Configuration, chain *models.Chain, middlewares []string) {
+
+	servers := make([]*dynamic.Server, 0)
+	for _, privTxManager := range chain.PrivateTxManagers {
+		if privTxManager.Type == utils.TesseraChainType {
+			servers = append(servers, &dynamic.Server{
+				URL: privTxManager.URL,
+			})
+		}
+	}
+
+	// Not servers identified
+	if len(servers) == 0 {
+		return
+	}
+
+	chainService := fmt.Sprintf("tessera-chain-%v", chain.UUID)
+	cfg.HTTP.Routers[chainService] = &dynamic.Router{
+		Router: &traefikdynamic.Router{
+			EntryPoints: []string{http.DefaultHTTPEntryPoint},
+			Priority:    math.MaxInt32,
+			Service:     chainService,
+			Rule:        fmt.Sprintf("PathPrefix(`/tessera/%s`)", chain.UUID),
+			Middlewares: middlewares,
+		},
+	}
+
+	cfg.HTTP.Services[chainService] = &dynamic.Service{
+		ReverseProxy: &dynamic.ReverseProxy{
+			PassHostHeader: utils.Bool(false),
+			LoadBalancer: &dynamic.LoadBalancer{
+				Servers: servers,
+			},
+		},
+	}
 }

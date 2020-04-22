@@ -33,6 +33,9 @@ func (uc *updateChain) Execute(ctx context.Context, uuid, chainName string, chai
 		return errors.ConstraintViolatedError("update chain UUID is not allowed")
 	}
 
+	// We need to insert UUID for the new PrivateTxManagers if so
+	chain.SetPrivateTxManagersDefault()
+
 	var err error
 	if uuid != "" {
 		err = uc.chainAgent.UpdateChainByUUID(ctx, uuid, chain)

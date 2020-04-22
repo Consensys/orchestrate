@@ -47,7 +47,22 @@ func (ag *PGChainAgent) RegisterChain(ctx context.Context, chain *models.Chain) 
 		"tenant.id": chain.TenantID,
 		"name":      chain.Name,
 		"urls":      chain.URLs,
-	}).Infof("register chain")
+	}).Infof("registered chain")
+
+	for _, prixTxManager := range chain.PrivateTxManagers {
+		_, err := ag.db.ModelContext(ctx, prixTxManager).Insert()
+		if err != nil {
+			logger.WithError(err).Errorf("could not register priv tx manager")
+			return errors.PostgresConnectionError("error registering priv tx manager").ExtendComponent(chainComponentName)
+		}
+
+		logger.WithFields(logrus.Fields{
+			"uuid":       prixTxManager.UUID,
+			"chain.uuid": chain.UUID,
+			"type":       prixTxManager.Type,
+			"url":        prixTxManager.URL,
+		}).Infof("register private tx manager")
+	}
 
 	return nil
 }
@@ -56,6 +71,7 @@ func (ag *PGChainAgent) GetChains(ctx context.Context, filters map[string]string
 	var chains []*models.Chain
 
 	req := ag.db.ModelContext(ctx, &chains)
+
 	for k, v := range filters {
 		req.Where(fmt.Sprintf("%s = ?", k), v)
 	}
@@ -66,6 +82,17 @@ func (ag *PGChainAgent) GetChains(ctx context.Context, filters map[string]string
 		return nil, errors.PostgresConnectionError("error loading chains").ExtendComponent(chainComponentName)
 	}
 
+	for idx, c := range chains {
+		err = ag.db.ModelContext(ctx, &chains[idx].PrivateTxManagers).
+			Where(fmt.Sprintf(`chain_uuid = '%s'`, c.UUID)).
+			Select()
+
+		if err != nil {
+			log.FromContext(ctx).WithError(err).Errorf("could not load private tx managers")
+			return nil, errors.PostgresConnectionError("error loading chains").ExtendComponent(chainComponentName)
+		}
+	}
+
 	return chains, nil
 }
 
@@ -74,6 +101,7 @@ func (ag *PGChainAgent) GetChainsByTenant(ctx context.Context, filters map[strin
 
 	req := ag.db.ModelContext(ctx, &chains).
 		Where("tenant_id = ?", tenantID)
+
 	for k, v := range filters {
 		req.Where(fmt.Sprintf("%s = ?", k), v)
 	}
@@ -86,13 +114,25 @@ func (ag *PGChainAgent) GetChainsByTenant(ctx context.Context, filters map[strin
 		return nil, errors.PostgresConnectionError("error loading chains for tenant %v", tenantID).ExtendComponent(chainComponentName)
 	}
 
+	for idx, c := range chains {
+		err = ag.db.ModelContext(ctx, &chains[idx].PrivateTxManagers).
+			Where(fmt.Sprintf(`chain_uuid = '%s'`, c.UUID)).
+			Select()
+
+		if err != nil {
+			log.FromContext(ctx).WithError(err).Errorf("could not load private tx managers")
+			return nil, errors.PostgresConnectionError("error loading chains for tenant %v", tenantID).ExtendComponent(chainComponentName)
+		}
+	}
+
 	return chains, nil
 }
 
 func (ag *PGChainAgent) GetChainByUUID(ctx context.Context, uuid string) (*models.Chain, error) {
 	chain := &models.Chain{}
 
-	err := ag.db.ModelContext(ctx, chain).Where("uuid = ?", uuid).Select()
+	err := ag.db.ModelContext(ctx, chain).
+		Where("uuid = ?", uuid).Select()
 	if err != nil && err == pg.ErrNoRows {
 		return nil, errors.NotFoundError("chain %v does not exist", uuid).ExtendComponent(chainComponentName)
 	} else if err != nil {
@@ -102,13 +142,24 @@ func (ag *PGChainAgent) GetChainByUUID(ctx context.Context, uuid string) (*model
 		return nil, errors.PostgresConnectionError("error loading chain %v", uuid).ExtendComponent(chainComponentName)
 	}
 
+	err = ag.db.ModelContext(ctx, &chain.PrivateTxManagers).
+		Where(fmt.Sprintf(`chain_uuid = '%s'`, chain.UUID)).
+		Select()
+	if err != nil {
+		log.FromContext(ctx).WithError(err).Errorf("could not load private tx managers")
+		return nil, errors.PostgresConnectionError("error loading chain %v", uuid).ExtendComponent(chainComponentName)
+	}
+
 	return chain, nil
 }
 
 func (ag *PGChainAgent) GetChainByUUIDAndTenant(ctx context.Context, uuid, tenantID string) (*models.Chain, error) {
 	chain := &models.Chain{}
 
-	err := ag.db.ModelContext(ctx, chain).Where("uuid = ?", uuid).Where("tenant_id = ?", tenantID).Select()
+	err := ag.db.ModelContext(ctx, chain).
+		Where("uuid = ?", uuid).
+		Where("tenant_id = ?", tenantID).Select()
+
 	if err != nil && err == pg.ErrNoRows {
 		return nil, errors.NotFoundError("chain %v does not exist in tenant %v", uuid, tenantID).ExtendComponent(chainComponentName)
 	} else if err != nil {
@@ -116,6 +167,14 @@ func (ag *PGChainAgent) GetChainByUUIDAndTenant(ctx context.Context, uuid, tenan
 			WithField("chain.uuid", uuid).
 			WithField("tenant", tenantID).
 			WithError(err).Errorf("could not load chain")
+		return nil, errors.PostgresConnectionError("error loading chain %v in tenant %v", uuid, tenantID).ExtendComponent(chainComponentName)
+	}
+
+	err = ag.db.ModelContext(ctx, &chain.PrivateTxManagers).
+		Where(fmt.Sprintf(`chain_uuid = '%s'`, chain.UUID)).
+		Select()
+	if err != nil {
+		log.FromContext(ctx).WithError(err).Errorf("could not load private tx managers")
 		return nil, errors.PostgresConnectionError("error loading chain %v in tenant %v", uuid, tenantID).ExtendComponent(chainComponentName)
 	}
 
@@ -129,7 +188,10 @@ func (ag *PGChainAgent) UpdateChainByName(ctx context.Context, chainName string,
 		return errors.DataError(err.Error())
 	}
 
-	res, err := ag.db.ModelContext(ctx, chain).Where("name = ?", chainName).UpdateNotZero()
+	res, err := ag.db.ModelContext(ctx, chain).
+		Where("name = ?", chainName).
+		UpdateNotZero()
+
 	if err != nil {
 		errMessage := "Failed to update chain by name"
 		logger.WithError(err).Error(errMessage)
@@ -137,10 +199,17 @@ func (ag *PGChainAgent) UpdateChainByName(ctx context.Context, chainName string,
 	}
 
 	if res.RowsReturned() == 0 && res.RowsAffected() == 0 {
-
 		errMessage := "no chain found with tenant_id=%s and name=%s"
 		logger.WithError(err).Error(errMessage, chain.TenantID, chain.Name)
 		return errors.NotFoundError(errMessage, chain.TenantID, chain.Name).ExtendComponent(chainComponentName)
+	}
+
+	if len(chain.PrivateTxManagers) > 0 {
+		err = ag.updateChainPrivateTxManagers(ctx, chain.UUID, chain.PrivateTxManagers)
+		if err != nil {
+			logger.WithError(err).Error("cannot delete private tx managers")
+			return errors.NotFoundError("cannot delete private tx managers").ExtendComponent(chainComponentName)
+		}
 	}
 
 	return nil
@@ -154,7 +223,10 @@ func (ag *PGChainAgent) UpdateChainByUUID(ctx context.Context, uuid string, chai
 		return errors.DataError(err.Error())
 	}
 
-	res, err := ag.db.ModelContext(ctx, chain).Where("uuid = ?", uuid).UpdateNotZero()
+	res, err := ag.db.ModelContext(ctx, chain).
+		Where("uuid = ?", uuid).
+		UpdateNotZero()
+
 	if err != nil {
 		errMessage := "Failed to update chain by UUID"
 		log.FromContext(ctx).WithError(err).Error(errMessage)
@@ -167,13 +239,24 @@ func (ag *PGChainAgent) UpdateChainByUUID(ctx context.Context, uuid string, chai
 		return errors.NotFoundError(errMessage, chain.UUID).ExtendComponent(chainComponentName)
 	}
 
+	if len(chain.PrivateTxManagers) > 0 {
+		err = ag.updateChainPrivateTxManagers(ctx, uuid, chain.PrivateTxManagers)
+		if err != nil {
+			logger.WithError(err).Error("cannot delete private tx managers")
+			return errors.DataError("cannot delete private tx managers").ExtendComponent(chainComponentName)
+		}
+	}
+
 	return nil
 }
 
 func (ag *PGChainAgent) DeleteChainByUUID(ctx context.Context, uuid string) error {
 	chain := &models.Chain{}
 
-	res, err := ag.db.ModelContext(ctx, chain).Where("uuid = ?", uuid).Delete()
+	res, err := ag.db.ModelContext(ctx, chain).
+		Where("uuid = ?", uuid).
+		Delete()
+
 	if err != nil {
 		errMessage := "Failed to delete chain by UUID"
 		log.FromContext(ctx).WithError(err).Error(errMessage)
@@ -192,7 +275,11 @@ func (ag *PGChainAgent) DeleteChainByUUID(ctx context.Context, uuid string) erro
 func (ag *PGChainAgent) DeleteChainByUUIDAndTenant(ctx context.Context, uuid, tenantID string) error {
 	chain := &models.Chain{}
 
-	res, err := ag.db.ModelContext(ctx, chain).Where("uuid = ?", uuid).Where("tenant_id = ?", tenantID).Delete()
+	res, err := ag.db.ModelContext(ctx, chain).
+		Where("uuid = ?", uuid).
+		Where("tenant_id = ?", tenantID).
+		Delete()
+
 	if err != nil {
 		errMessage := "Failed to delete chain by UUID and tenant"
 		log.FromContext(ctx).WithError(err).Error(errMessage)
@@ -203,6 +290,40 @@ func (ag *PGChainAgent) DeleteChainByUUIDAndTenant(ctx context.Context, uuid, te
 		errMessage := "no chain found with uuid %s and tenant_id %s"
 		log.FromContext(ctx).WithError(err).Error(errMessage, uuid, tenantID)
 		return errors.NotFoundError(errMessage, uuid, tenantID).ExtendComponent(chainComponentName)
+	}
+
+	return nil
+}
+
+func (ag *PGChainAgent) updateChainPrivateTxManagers(ctx context.Context, chainUUID string, privateTxManagers []*models.PrivateTxManagerModel) error {
+	logger := log.FromContext(ctx)
+
+	// Remove previous PrivateTxManagers to perform an full update
+	_, err := ag.db.ModelContext(ctx, &models.PrivateTxManagerModel{}).
+		Where("chain_uuid = ?", chainUUID).
+		Delete()
+
+	if err != nil {
+		return err
+	}
+
+	logger.WithFields(logrus.Fields{
+		"chain.uuid": chainUUID,
+	}).Infof("removed privateTxManagers")
+
+	for _, prixTxManager := range privateTxManagers {
+		prixTxManager.ChainUUID = chainUUID
+		_, err := ag.db.ModelContext(ctx, prixTxManager).Insert()
+		if err != nil {
+			return err
+		}
+
+		logger.WithFields(logrus.Fields{
+			"uuid":       prixTxManager.UUID,
+			"chain.uuid": chainUUID,
+			"type":       prixTxManager.Type,
+			"url":        prixTxManager.URL,
+		}).Infof("registered private tx manager")
 	}
 
 	return nil

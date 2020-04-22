@@ -4,12 +4,15 @@ import (
 	"context"
 	"sync"
 
+	"github.com/spf13/viper"
+
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/tessera"
+	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 )
 
-const component = "handler.signer.tessera"
+const component = "handler.tessera"
 
 var (
 	handler  engine.HandlerFunc
@@ -23,12 +26,15 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		keystore.Init(ctx)
+		tessera.Init(ctx)
 
 		// Create Handler
-		handler = Signer(keystore.GlobalKeyStore())
+		handler = StoreRaw(
+			tessera.GlobalClient(),
+			viper.GetString(registry.ChainRegistryURLViperKey),
+		)
 
-		log.Infof("tessera signer: handler ready")
+		log.Infof("tessera: handler ready")
 	})
 }
 

@@ -36,7 +36,7 @@ func NewIntegrationEnvironment(ctx context.Context) *IntegrationEnvironment {
 
 	initChains := []string{`{"name":"geth","urls":["http://geth:8545"],"listenerStartingBlock":"0"}`,
 		`{"name":"besu","urls":["http://validator2:8545"],"listenerStartingBlock":"0"}`,
-		`{"name":"quorum","urls":["http://172.16.239.11:8545"],"listenerStartingBlock":"0"}`}
+		`{"name":"quorum","urls":["http://172.16.239.11:8545"],"listenerStartingBlock":"0","privateTxManagers":[{"url":"http://tessera1:9080","type":"Tessera"}]}`}
 	viper.SetDefault(chainregistry.InitViperKey, initChains)
 
 	return &IntegrationEnvironment{
@@ -77,15 +77,16 @@ func (env *IntegrationEnvironment) Start() error {
 
 func (env *IntegrationEnvironment) Teardown() {
 	log.WithoutContext().Infof("tearing test suite down")
-	err := chainregistry.Stop(env.ctx)
+
+	err := env.client.Down(env.ctx, postgresContainerID)
 	if err != nil {
-		log.WithoutContext().WithError(err).Errorf("could not stop chain-registry")
+		log.WithoutContext().WithError(err).Errorf("could not down postgres")
 		return
 	}
 
-	err = env.client.Down(env.ctx, postgresContainerID)
+	err = chainregistry.Stop(env.ctx)
 	if err != nil {
-		log.WithoutContext().WithError(err).Errorf("could not down postgres")
+		log.WithoutContext().WithError(err).Errorf("could not stop chain-registry")
 		return
 	}
 }

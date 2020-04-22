@@ -69,7 +69,7 @@ func TestNewInternalConfig(t *testing.T) {
 				"strip-path": &dynamic.Middleware{
 					Middleware: &traefikdynamic.Middleware{
 						StripPrefixRegex: &traefikdynamic.StripPrefixRegex{
-							Regex: []string{"/.+"},
+							Regex: []string{`/(?:tessera/)?(?:[a-zA-Z\d-]*)/?`},
 						},
 					},
 				},
@@ -121,15 +121,9 @@ func TestNewInternalConfig(t *testing.T) {
 			Format: "json",
 		},
 	}
-	
+
 	watcherCfg := &configwatcher.Config{}
 	cfg := NewInternalConfig(staticCfg, watcherCfg)
-
-	// str1, _ := json.Marshal(expectedCfg)
-	// t.Logf("%s", str1)
-	// 
-	// str2, _ := json.Marshal(cfg.DynamicCfg())
-	// t.Logf("%s", str2)
 
 	assert.True(t, reflect.DeepEqual(
 		cfg.DynamicCfg(), expectedCfg), "Configuration should be identical")
@@ -202,11 +196,16 @@ func TestNewChainsProxyConfig(t *testing.T) {
 				},
 				{
 					UUID:     "39240e9f-ae09-4e95-9fd0-a712035c8ad7",
-					Name:     "testChain2",
+					Name:     "testTesseraChain2",
 					TenantID: "testTenantId",
 					URLs: []string{
 						"http://testURL10.com",
-						"http://testURL20.com",
+					},
+					PrivateTxManagers: []*models.PrivateTxManagerModel{
+						&models.PrivateTxManagerModel{
+							URL:  "http://testURL10.com/tessera",
+							Type: utils.TesseraChainType,
+						},
 					},
 				},
 			},
@@ -241,6 +240,21 @@ func TestNewChainsProxyConfig(t *testing.T) {
 						},
 					},
 				}
+				cfg.HTTP.Routers["tessera-chain-39240e9f-ae09-4e95-9fd0-a712035c8ad7"] = &dynamic.Router{
+					Router: &traefikdynamic.Router{
+						EntryPoints: []string{"http"},
+						Priority:    math.MaxInt32,
+						Service:     "tessera-chain-39240e9f-ae09-4e95-9fd0-a712035c8ad7",
+						Rule:        "PathPrefix(`/tessera/39240e9f-ae09-4e95-9fd0-a712035c8ad7`)",
+						Middlewares: []string{
+							"chain-proxy-accesslog@internal",
+							"auth@internal",
+							"multitenancy-testTenantId",
+							"strip-path@internal",
+							"ratelimit@internal",
+						},
+					},
+				}
 
 				cfg.HTTP.Services["chain-0d60a85e-0b90-4482-a14c-108aea2557aa"] = &dynamic.Service{
 					ReverseProxy: &dynamic.ReverseProxy{
@@ -260,7 +274,17 @@ func TestNewChainsProxyConfig(t *testing.T) {
 						LoadBalancer: &dynamic.LoadBalancer{
 							Servers: []*dynamic.Server{
 								{URL: "http://testURL10.com"},
-								{URL: "http://testURL20.com"},
+							},
+						},
+					},
+				}
+
+				cfg.HTTP.Services["tessera-chain-39240e9f-ae09-4e95-9fd0-a712035c8ad7"] = &dynamic.Service{
+					ReverseProxy: &dynamic.ReverseProxy{
+						PassHostHeader: utils.Bool(false),
+						LoadBalancer: &dynamic.LoadBalancer{
+							Servers: []*dynamic.Server{
+								{URL: "http://testURL10.com/tessera"},
 							},
 						},
 					},
@@ -279,7 +303,6 @@ func TestNewChainsProxyConfig(t *testing.T) {
 	for i, test := range testSet {
 		cfg := newProxyConfig(test.chains)
 		expectedCfg := test.expectedCfg(dynamic.NewConfig())
-		t.Logf("%v", cfg)
 		assert.Equal(t, expectedCfg, cfg, "Chain-registry - Store (%d/%d): expected %v but got %v", i+1, len(testSet), expectedCfg, cfg)
 	}
 }

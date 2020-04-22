@@ -4,6 +4,10 @@ import (
 	"context"
 	"sync"
 
+	"github.com/cenkalti/backoff/v4"
+	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 )
@@ -12,7 +16,6 @@ const component = "ethclient.rpc"
 
 var (
 	client   *Client
-	config   *Config
 	initOnce = &sync.Once{}
 )
 
@@ -22,12 +25,9 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		if config == nil {
-			config = NewConfig()
-		}
-
+		newBackOff := func() backoff.BackOff { return utils.NewBackOff(utils.NewConfig(viper.GetViper())) }
 		// Set Client
-		client = NewClient(config, http.NewClient())
+		client = NewClient(newBackOff, http.NewClient())
 
 		log.Infof("%s: ready", component)
 

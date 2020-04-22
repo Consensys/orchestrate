@@ -8,6 +8,7 @@ import (
 	genuuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
 func TestIsValidChain(t *testing.T) {
@@ -24,6 +25,24 @@ func TestIsValidChain(t *testing.T) {
 			ListenerCurrentBlock:    &(&struct{ x uint64 }{1}).x,
 			ListenerStartingBlock:   &(&struct{ x uint64 }{1}).x,
 			ListenerBackOffDuration: &(&struct{ x string }{"2s"}).x,
+		},
+			true,
+		},
+		{&Chain{
+			UUID:                    genuuid.NewV4().String(),
+			Name:                    "test",
+			TenantID:                "test",
+			URLs:                    []string{"http://test.com", "http://test.net"},
+			ListenerDepth:           &(&struct{ x uint64 }{1}).x,
+			ListenerCurrentBlock:    &(&struct{ x uint64 }{1}).x,
+			ListenerStartingBlock:   &(&struct{ x uint64 }{1}).x,
+			ListenerBackOffDuration: &(&struct{ x string }{"2s"}).x,
+			PrivateTxManagers: []*PrivateTxManagerModel{
+				&PrivateTxManagerModel{
+					URL:  "http://test.com/private",
+					Type: utils.TesseraChainType,
+				},
+			},
 		},
 			true,
 		},
@@ -61,7 +80,7 @@ func TestIsValidChain(t *testing.T) {
 			false,
 		},
 		{&Chain{
-			UUID:                    genuuid.NewV4().String(),
+			UUID:                  genuuid.NewV4().String(),
 			Name:                  "test",
 			TenantID:              "test",
 			URLs:                  []string{"http://test.com", "http://test.net"},
@@ -92,6 +111,59 @@ func TestIsValidChain(t *testing.T) {
 			ListenerCurrentBlock:    &(&struct{ x uint64 }{1}).x,
 			ListenerStartingBlock:   &(&struct{ x uint64 }{1}).x,
 			ListenerBackOffDuration: &(&struct{ x string }{"2s"}).x,
+		},
+			false,
+		},
+		{&Chain{
+			UUID:                    genuuid.NewV4().String(),
+			Name:                    "test",
+			TenantID:                "test",
+			URLs:                    []string{"http://test.com", "http://test.net"},
+			ListenerDepth:           &(&struct{ x uint64 }{1}).x,
+			ListenerCurrentBlock:    &(&struct{ x uint64 }{1}).x,
+			ListenerStartingBlock:   &(&struct{ x uint64 }{1}).x,
+			ListenerBackOffDuration: &(&struct{ x string }{"2s"}).x,
+			PrivateTxManagers: []*PrivateTxManagerModel{
+				&PrivateTxManagerModel{
+					URL:  "^&$$",
+					Type: utils.TesseraChainType,
+				},
+			},
+		},
+			false,
+		},
+		{&Chain{
+			UUID:                    genuuid.NewV4().String(),
+			Name:                    "test",
+			TenantID:                "test",
+			URLs:                    []string{"http://test.com", "http://test.net"},
+			ListenerDepth:           &(&struct{ x uint64 }{1}).x,
+			ListenerCurrentBlock:    &(&struct{ x uint64 }{1}).x,
+			ListenerStartingBlock:   &(&struct{ x uint64 }{1}).x,
+			ListenerBackOffDuration: &(&struct{ x string }{"2s"}).x,
+			PrivateTxManagers: []*PrivateTxManagerModel{
+				&PrivateTxManagerModel{
+					URL:  "http://test.com/private",
+					Type: "TTTT",
+				},
+			},
+		},
+			false,
+		},
+		{&Chain{
+			UUID:                    genuuid.NewV4().String(),
+			Name:                    "test",
+			TenantID:                "test",
+			URLs:                    []string{"http://test.com", "http://test.net"},
+			ListenerDepth:           &(&struct{ x uint64 }{1}).x,
+			ListenerCurrentBlock:    &(&struct{ x uint64 }{1}).x,
+			ListenerStartingBlock:   &(&struct{ x uint64 }{1}).x,
+			ListenerBackOffDuration: &(&struct{ x string }{"2s"}).x,
+			PrivateTxManagers: []*PrivateTxManagerModel{
+				&PrivateTxManagerModel{
+					URL: "http://test.com/private",
+				},
+			},
 		},
 			false,
 		},

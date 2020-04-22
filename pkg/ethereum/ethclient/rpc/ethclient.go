@@ -34,31 +34,15 @@ type Client struct {
 	// Pool for backoffs
 	pool *sync.Pool
 
-	conf *Config
-
 	idCounter uint32
 }
 
-// NewBackOff creates a new Exponential backoff
-func NewBackOff(conf *Config) backoff.BackOff {
-	return &backoff.ExponentialBackOff{
-		InitialInterval:     conf.Retry.InitialInterval,
-		RandomizationFactor: conf.Retry.RandomizationFactor,
-		Multiplier:          conf.Retry.Multiplier,
-		MaxInterval:         conf.Retry.MaxInterval,
-		MaxElapsedTime:      conf.Retry.MaxElapsedTime,
-		Clock:               backoff.SystemClock,
-		Stop:                backoff.Stop,
-	}
-}
-
 // NewClient creates a new MultiClient
-func NewClient(conf *Config, client *http.Client) *Client {
+func NewClient(newBackOff func() backoff.BackOff, client *http.Client) *Client {
 	return &Client{
 		client: client,
-		conf:   conf,
 		pool: &sync.Pool{
-			New: func() interface{} { return NewBackOff(conf) },
+			New: func() interface{} { return newBackOff() },
 		},
 		idCounter: 0,
 	}

@@ -2,6 +2,10 @@ package logger
 
 import (
 	"fmt"
+	"strings"
+
+	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
+	traefiklog "github.com/containous/traefik/v2/pkg/log"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
@@ -59,5 +63,15 @@ func InitLogger() {
 	} else {
 		log.New()
 		log.SetLevel(logLevel)
+	}
+}
+
+func ConfigureLogger(staticCfg *traefikstatic.Configuration) {
+	if staticCfg.Log != nil && staticCfg.Log.Level != "" {
+		level, err := log.ParseLevel(strings.ToLower(staticCfg.Log.Level))
+		if err != nil {
+			traefiklog.WithoutContext().WithError(err).Errorf("Error getting level: %v", err)
+		}
+		log.SetLevel(level)
 	}
 }

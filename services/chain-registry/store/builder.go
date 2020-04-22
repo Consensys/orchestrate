@@ -30,11 +30,10 @@ func (b *builder) Build(ctx context.Context, conf *Config) (DataAgents, error) {
 	switch conf.Type {
 	case postgresType:
 		conf.Postgres.PG.ApplicationName = storeServiceName
-		chainAgent, fauceAgent, privateTxAgent, err := b.postgres.Build(logCtx, conf.Postgres)
+		chainAgent, fauceAgent, err := b.postgres.Build(logCtx, conf.Postgres)
 		return DataAgents{
-			Chain:     chainAgent,
-			Faucet:    fauceAgent,
-			PrivateTx: privateTxAgent,
+			Chain:  chainAgent,
+			Faucet: fauceAgent,
 		}, err
 	default:
 		return DataAgents{}, fmt.Errorf("invalid chain registry store type %q", conf.Type)

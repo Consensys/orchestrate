@@ -1,9 +1,10 @@
 package types
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	"math/big"
 	"time"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 )

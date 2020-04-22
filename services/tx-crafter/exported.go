@@ -19,12 +19,13 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/offset"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/opentracing"
 	producer "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/producer/tx-crafter"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/tessera"
 	injector "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/trace-injector"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app/worker"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	orchlog "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/log"
+	orchlog "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/logger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
@@ -87,6 +88,11 @@ func initHandlers(ctx context.Context) {
 		func() {
 			chaininjector.Init(ctx)
 		},
+
+		// Initialize Tessera client
+		func() {
+			tessera.Init(ctx)
+		},
 	)
 }
 
@@ -128,6 +134,7 @@ func registerHandlers() {
 	engine.Register(gaspricer.GlobalHandler())
 	engine.Register(gasestimator.GlobalHandler())
 	engine.Register(nonceattributor.GlobalHandler())
+	engine.Register(tessera.GlobalHandler())
 }
 
 // Start starts application

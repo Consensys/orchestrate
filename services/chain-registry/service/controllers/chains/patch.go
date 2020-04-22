@@ -49,8 +49,8 @@ func (h *controller) PatchChain(rw http.ResponseWriter, request *http.Request) {
 
 func parsePatchReqToChain(request *http.Request) (*models.Chain, error) {
 	chainRequest := &PatchRequest{
-		Listener:         &ListenerPatchRequest{},
-		PrivateTxManager: &PrivateTxManagerRequest{},
+		Listener:          &ListenerPatchRequest{},
+		PrivateTxManagers: []*PrivateTxManagerRequest{},
 	}
 
 	err := utils.UnmarshalBody(request.Body, chainRequest)
@@ -68,13 +68,11 @@ func parsePatchReqToChain(request *http.Request) (*models.Chain, error) {
 		ListenerExternalTxEnabled: chainRequest.Listener.ExternalTxEnabled,
 	}
 
-	if chainRequest.PrivateTxManager != nil && chainRequest.PrivateTxManager.URL != nil {
-		chain.PrivateTxManagers = []*models.PrivateTxManagerModel{
-			{
-				URL:  *chainRequest.PrivateTxManager.URL,
-				Type: *chainRequest.PrivateTxManager.Type,
-			},
-		}
+	for _, privTxManager := range chainRequest.PrivateTxManagers {
+		chain.PrivateTxManagers = append(chain.PrivateTxManagers, &models.PrivateTxManagerModel{
+			URL:  privTxManager.URL,
+			Type: privTxManager.Type,
+		})
 	}
 
 	return &chain, nil

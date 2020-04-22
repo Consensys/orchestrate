@@ -20,9 +20,9 @@ type Chain struct {
 	ListenerStartingBlock     *uint64                  `json:"listenerStartingBlock,string,omitempty"`
 	ListenerBackOffDuration   *string                  `json:"listenerBackOffDuration,omitempty" validate:"required_with=UUID,omitempty,isDuration"`
 	ListenerExternalTxEnabled *bool                    `json:"listenerExternalTxEnabled,omitempty"`
-	CreatedAt                 *time.Time               `json:"createdAt"`
+	CreatedAt                 *time.Time               `json:"createdAt" pg:"default:now()"`
 	UpdatedAt                 *time.Time               `json:"updatedAt,omitempty"`
-	PrivateTxManagers         []*PrivateTxManagerModel `json:"privateTxManagers,omitempty"`
+	PrivateTxManagers         []*PrivateTxManagerModel `json:"privateTxManagers,omitempty" pg:"-" validate:"omitempty,dive,required"`
 }
 
 func (c *Chain) IsValid() bool {
@@ -30,7 +30,7 @@ func (c *Chain) IsValid() bool {
 	return err == nil
 }
 
-//nolint:gocritic
+// nolint:gocritic
 func (c Chain) Validate(isNewChain bool) error {
 	// Remove UUID for chain updates so we do not validate required fields
 	if !isNewChain {
@@ -38,7 +38,11 @@ func (c Chain) Validate(isNewChain bool) error {
 	}
 
 	err := utils.GetValidator().Struct(c)
-	return err
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *Chain) SetDefault() {
@@ -66,5 +70,18 @@ func (c *Chain) SetDefault() {
 	if c.ListenerExternalTxEnabled == nil {
 		externalTxEnabled := false
 		c.ListenerExternalTxEnabled = &externalTxEnabled
+	}
+
+	c.SetPrivateTxManagersDefault()
+}
+
+func (c *Chain) SetPrivateTxManagersDefault() {
+	for idx, privTxManager := range c.PrivateTxManagers {
+		if privTxManager.ChainUUID == "" && c.UUID != "" {
+			c.PrivateTxManagers[idx].ChainUUID = c.UUID
+		}
+		if privTxManager.UUID == "" {
+			c.PrivateTxManagers[idx].UUID = genuuid.NewV4().String()
+		}
 	}
 }

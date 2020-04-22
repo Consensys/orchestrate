@@ -24,10 +24,11 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/types"
+	pkgUtils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
-var testConfig = &Config{
-	Retry: &RetryConfig{
+var testConfig = &pkgUtils.Config{
+	Retry: &pkgUtils.RetryConfig{
 		InitialInterval:     time.Millisecond,
 		RandomizationFactor: 0.5,
 		Multiplier:          1.5,
@@ -57,7 +58,8 @@ func (rt mockRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) 
 }
 
 func newClient() *Client {
-	ec := NewClient(testConfig, &http.Client{
+	newBackOff := func() backoff.BackOff { return pkgUtils.NewBackOff(testConfig) }
+	ec := NewClient(newBackOff, &http.Client{
 		Transport: mockRoundTripper{},
 	})
 	return ec

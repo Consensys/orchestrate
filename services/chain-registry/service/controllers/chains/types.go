@@ -1,12 +1,5 @@
 package chains
 
-type ChainPostRequest struct {
-	Name             string                   `json:"name" validate:"required"`
-	URLs             []string                 `json:"urls" validate:"min=1,unique,dive,url"`
-	Listener         *ListenerRequest         `json:"listener,omitempty"`
-	PrivateTxManager *PrivateTxManagerRequest `json:"privateTxManager"`
-}
-
 type ListenerRequest struct {
 	Depth             *uint64 `json:"depth,omitempty"`
 	FromBlock         *string `json:"fromBlock,omitempty"`
@@ -15,22 +8,15 @@ type ListenerRequest struct {
 }
 
 type PrivateTxManagerRequest struct {
-	URL  *string `json:"url" validate:"omitempty,url"`
-	Type *string `json:"type" validate:"omitempty,isPrivateTxManagerType"`
-}
-
-type ChainPatchRequest struct {
-	Name             string                   `json:"name,omitempty"`
-	URLs             []string                 `json:"urls,omitempty" validate:"unique,dive,url"`
-	Listener         *ListenerRequest         `json:"listener,omitempty"`
-	PrivateTxManager *PrivateTxManagerRequest `json:"privateTxManager,omitempty"`
+	URL  string `json:"url" validate:"omitempty,url"`
+	Type string `json:"type" validate:"omitempty,isPrivateTxManagerType"`
 }
 
 type PostRequest struct {
-	Name             string                   `json:"name" validate:"required"`
-	URLs             []string                 `json:"urls" pg:"urls,array" validate:"required,min=1,unique,dive,url"`
-	Listener         *ListenerPostRequest     `json:"listener,omitempty"`
-	PrivateTxManager *PrivateTxManagerRequest `json:"privateTxManager,omitempty"`
+	Name              string                     `json:"name" validate:"required"`
+	URLs              []string                   `json:"urls" pg:"urls,array" validate:"required,min=1,unique,dive,url"`
+	Listener          *ListenerPostRequest       `json:"listener,omitempty"`
+	PrivateTxManagers []*PrivateTxManagerRequest `json:"privateTxManagers,omitempty"`
 }
 
 type ListenerPostRequest struct {
@@ -41,10 +27,10 @@ type ListenerPostRequest struct {
 }
 
 type PatchRequest struct {
-	Name             string                   `json:"name,omitempty"`
-	URLs             []string                 `json:"urls,omitempty" pg:"urls,array" validate:"omitempty,min=1,unique,dive,url"`
-	Listener         *ListenerPatchRequest    `json:"listener,omitempty"`
-	PrivateTxManager *PrivateTxManagerRequest `json:"privateTxManager,omitempty"`
+	Name              string                     `json:"name,omitempty"`
+	URLs              []string                   `json:"urls,omitempty" pg:"urls,array" validate:"omitempty,min=1,unique,dive,url"`
+	Listener          *ListenerPatchRequest      `json:"listener,omitempty"`
+	PrivateTxManagers []*PrivateTxManagerRequest `json:"privateTxManagers,omitempty"`
 }
 
 type ListenerPatchRequest struct {

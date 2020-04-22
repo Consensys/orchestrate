@@ -7,7 +7,6 @@ import (
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/cobra"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/tessera"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	chnregclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore"
@@ -27,7 +26,6 @@ func newRunCommand() *cobra.Command {
 	hashicorp.InitFlags(runCmd.Flags())
 	keystore.InitFlags(runCmd.Flags())
 	secretstore.InitFlags(runCmd.Flags())
-	tessera.InitFlags(runCmd.Flags())
 
 	// Register Kafka flags
 	broker.InitKafkaFlags(runCmd.Flags())

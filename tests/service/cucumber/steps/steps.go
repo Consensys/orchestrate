@@ -4,6 +4,9 @@ import (
 	"encoding/hex"
 	"fmt"
 	gohttp "net/http"
+	"reflect"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Shopify/sarama"
@@ -287,6 +290,126 @@ func (sc *ScenarioContext) envelopeShouldBeInTopic(topic string) error {
 	return nil
 }
 
+func (sc *ScenarioContext) envelopesShouldContainTheFollowingErrors(table *gherkin.DataTable) error {
+	rowsEnvelopes := table.Rows[1:]
+
+	if len(rowsEnvelopes) != len(sc.trackers) {
+		return fmt.Errorf("expected as much errors as envelopes tracked")
+	}
+
+	for r, t := range sc.trackers {
+		row := rowsEnvelopes[r]
+		if len(row.Cells) != len(t.Current.Errors) {
+			return fmt.Errorf("(%d/%d) got %d errors but expected %d - got: %v", r+1, len(sc.trackers), len(t.Current.Errors), len(row.Cells), t.Current.Errors)
+		}
+		for i, err := range t.Current.Errors {
+			if !strings.Contains(err.Message, row.Cells[i].Value) {
+				return fmt.Errorf(
+					"(%d/%d) got '%s' error but expected '%s'", r+1, len(sc.trackers), err.Message, row.Cells[i].Value)
+			}
+		}
+	}
+	return nil
+}
+
+func (sc *ScenarioContext) envelopesShouldHaveTheFollowingValues(table *gherkin.DataTable) error {
+	header := table.Rows[0]
+	rowsEnvelopes := table.Rows[1:]
+	if len(rowsEnvelopes) != len(sc.trackers) {
+		return fmt.Errorf("expected as much rows as envelopes tracked")
+	}
+
+	for r, row := range rowsEnvelopes {
+		val := reflect.ValueOf(sc.trackers[r].Current).Elem()
+		for c, col := range row.Cells {
+			fieldName := header.Cells[c].Value
+			field, err := getField(fieldName, val)
+			if err != nil {
+				return err
+			}
+			if col.Value == "~" {
+				if isEqual("", field) {
+					return fmt.Errorf("(%d/%d) did not expected %s to be empty", r, len(rowsEnvelopes), fieldName)
+				}
+				continue
+			}
+			if isEqual(col.Value, field) {
+				return fmt.Errorf("(%d/%d) for %s expected %s but got %s", r, len(rowsEnvelopes), fieldName, col.Value, field.String())
+			}
+
+		}
+	}
+	return nil
+}
+
+func isEqual(s string, val reflect.Value) bool {
+	switch val.Kind() {
+	default:
+		if val.String() != s {
+			return false
+		}
+	case reflect.Int:
+		n, _ := strconv.ParseInt(s, 10, 64)
+		if val.Int() != n {
+			return false
+		}
+	case reflect.Uint:
+		n, _ := strconv.ParseUint(s, 10, 64)
+		if val.Uint() != n {
+			return false
+		}
+	case reflect.Float64:
+		n, _ := strconv.ParseFloat(s, 64)
+		if val.Float() != n {
+			return false
+		}
+	}
+	return true
+}
+
+func getField(fieldName string, val reflect.Value) (reflect.Value, error) {
+	fieldName = strings.Title(fieldName)
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+
+	if strings.Contains(fieldName, ".") {
+		keyValue := strings.Split(fieldName, ".")
+
+		field := val.FieldByName(keyValue[0])
+		if field.Kind() == reflect.Ptr {
+			field = field.Elem()
+		}
+
+		switch field.Kind() {
+		case reflect.Slice, reflect.Array:
+			i, _ := strconv.ParseInt(keyValue[1], 10, 64)
+			if int(i) < field.Len() {
+				return reflect.Value{}, fmt.Errorf("%s length is only %d could not reach %d", keyValue[0], field.Len(), i)
+			}
+			field = field.Index(int(i))
+		case reflect.Map:
+			field = field.MapIndex(reflect.ValueOf(strings.Title(keyValue[1])))
+		default:
+			field = field.FieldByName(keyValue[1])
+		}
+
+		if field.Kind() == reflect.Ptr {
+			field = field.Elem()
+		}
+
+		if len(keyValue) > 2 {
+			return getField(strings.Join(keyValue[2:], "."), field)
+		}
+
+		return field, nil
+	}
+
+	field := val.FieldByName(fieldName)
+
+	return field, nil
+}
+
 func (sc *ScenarioContext) envelopesShouldHavePayloadSet() error {
 	for i, t := range sc.trackers {
 		if t.Current.GetData() == "" {
@@ -394,4 +517,6 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^Envelopes should have raw and hash set$`, sc.envelopesShouldHaveRawAndHashSet)
 	s.Step(`^Envelopes should have from set$`, sc.envelopesShouldHaveFromSet)
 	s.Step(`^Envelopes should have log decoded$`, sc.envelopesShouldHaveLogDecoded)
+	s.Step(`^Envelopes should have the following fields:$`, sc.envelopesShouldHaveTheFollowingValues)
+	s.Step(`^Envelopes should have the following errors:$`, sc.envelopesShouldContainTheFollowingErrors)
 }

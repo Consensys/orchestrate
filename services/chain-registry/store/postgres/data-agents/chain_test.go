@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	pgTestUtils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/postgres/migrations"
 )
@@ -24,6 +25,7 @@ type ChainModelsTestSuite struct {
 func TestModelsChain(t *testing.T) {
 	s := new(ChainModelsTestSuite)
 	s.pg = pgTestUtils.NewPGTestHelper(migrations.Collection)
+	// t.Logf("Test Database: %s", s.pg.TestDBName)
 	suite.Run(t, s)
 }
 
@@ -44,7 +46,6 @@ func (s *ChainModelsTestSuite) TearDownSuite() {
 	s.pg.DropTestDB(s.T())
 }
 
-
 // ChainTestSuite is a test suite for ChainRegistry
 type ChainTestSuite struct {
 	suite.Suite
@@ -55,6 +56,8 @@ const (
 	chainName1    = "testChain1"
 	chainName2    = "testChain2"
 	chainName3    = "testChain3"
+	chainName4    = "testChain4"
+	chainName5    = "testChain5"
 	tenantID1     = "tenantID1"
 	tenantID2     = "tenantID2"
 	errorTenantID = "errorTenantID"
@@ -79,7 +82,23 @@ var tenantID1Chains = map[string]*models.Chain{
 		ListenerStartingBlock:   &(&struct{ x uint64 }{2}).x,
 		ListenerBackOffDuration: &(&struct{ x string }{"2s"}).x,
 	},
+	chainName4: {
+		Name:                    chainName4,
+		TenantID:                tenantID1,
+		URLs:                    []string{"http://testurlone.com"},
+		ListenerDepth:           &(&struct{ x uint64 }{1}).x,
+		ListenerCurrentBlock:    &(&struct{ x uint64 }{1}).x,
+		ListenerStartingBlock:   &(&struct{ x uint64 }{1}).x,
+		ListenerBackOffDuration: &(&struct{ x string }{"1s"}).x,
+		PrivateTxManagers: []*models.PrivateTxManagerModel{
+			{
+				URL:  "http://tessera:8090",
+				Type: utils.TesseraChainType,
+			},
+		},
+	},
 }
+
 var tenantID2Chains = map[string]*models.Chain{
 	chainName1: {
 		Name:                      chainName1,
@@ -118,7 +137,7 @@ var ChainsSample = map[string]map[string]*models.Chain{
 	tenantID2: tenantID2Chains,
 }
 
-func CompareChains(t *testing.T, chain1, chain2 *models.Chain) {
+func compareChains(t *testing.T, chain1, chain2 *models.Chain) {
 	assert.Equal(t, chain1.Name, chain2.Name, "Should get the same chain name")
 	assert.Equal(t, chain1.TenantID, chain2.TenantID, "Should get the same chain tenantID")
 	assert.Equal(t, chain1.URLs, chain2.URLs, "Should get the same chain URLs")
@@ -127,9 +146,24 @@ func CompareChains(t *testing.T, chain1, chain2 *models.Chain) {
 	assert.Equal(t, chain1.ListenerStartingBlock, chain2.ListenerStartingBlock, "Should get the same chain ListenerBlockPosition")
 	assert.Equal(t, chain1.ListenerBackOffDuration, chain2.ListenerBackOffDuration, "Should get the same chain ListenerBackOffDuration")
 	assert.Equal(t, chain1.ListenerExternalTxEnabled, chain2.ListenerExternalTxEnabled, "Should get the same chain ListenerExternalTxEnabled")
+	comparePrivTxManagers(t, chain1, chain2)
+
 }
 
-func (s *ChainTestSuite) TestRegisterChain() {
+func comparePrivTxManagers(t *testing.T, chain1, chain2 *models.Chain) {
+	if len(chain1.PrivateTxManagers) > 0 || len(chain2.PrivateTxManagers) > 0 {
+		assert.True(t, len(chain1.PrivateTxManagers) == len(chain2.PrivateTxManagers), "Should get same amount of PrivateTxManagers")
+		for idx, privTxManager := range chain1.PrivateTxManagers {
+			if len(chain2.PrivateTxManagers) <= idx {
+				continue
+			}
+			assert.Equal(t, privTxManager.URL, chain2.PrivateTxManagers[idx].URL, "Should get the same tx manager URL")
+			assert.Equal(t, privTxManager.Type, chain2.PrivateTxManagers[idx].Type, "Should get the same tx manager Type")
+		}
+	}
+}
+
+func (s *ChainTestSuite) TestRegisterChainUniquely() {
 	err := s.ChainAgent.RegisterChain(context.Background(), ChainsSample[tenantID1][chainName1])
 	assert.NoError(s.T(), err, "Should register chain properly")
 
@@ -196,6 +230,83 @@ func (s *ChainTestSuite) TestRegisterChainWithInvalidUrlsErr() {
 	assert.True(s.T(), errors.IsDataError(err), "Should be a DataError")
 }
 
+func (s *ChainTestSuite) TestRegisterChainWithInvalidTxManagerURLFieldErr() {
+	listenerDepth := uint64(2)
+	listenerCurrentBlock := uint64(2)
+	listenerStartingBlock := uint64(2)
+	listenerBackOffDuration := "2s"
+	chainError := &models.Chain{
+		Name:                    "chainNameErr",
+		TenantID:                "tenantID1",
+		ListenerDepth:           &listenerDepth,
+		ListenerCurrentBlock:    &listenerCurrentBlock,
+		ListenerStartingBlock:   &listenerStartingBlock,
+		ListenerBackOffDuration: &listenerBackOffDuration,
+		PrivateTxManagers: []*models.PrivateTxManagerModel{
+			&models.PrivateTxManagerModel{
+				URL:  "!%!%",
+				Type: utils.TesseraChainType,
+			},
+		},
+	}
+
+	chainError.SetDefault()
+	err := s.ChainAgent.RegisterChain(context.Background(), chainError)
+	assert.Error(s.T(), err, "Should get an error when a field is missing URLs")
+	assert.True(s.T(), errors.IsDataError(err), "Should be a DataError")
+}
+
+func (s *ChainTestSuite) TestRegisterChainWithInvalidTxManagerTypeFieldErr() {
+	listenerDepth := uint64(2)
+	listenerCurrentBlock := uint64(2)
+	listenerStartingBlock := uint64(2)
+	listenerBackOffDuration := "2s"
+	chainError := &models.Chain{
+		Name:                    "chainNameErr",
+		TenantID:                "tenantID1",
+		ListenerDepth:           &listenerDepth,
+		ListenerCurrentBlock:    &listenerCurrentBlock,
+		ListenerStartingBlock:   &listenerStartingBlock,
+		ListenerBackOffDuration: &listenerBackOffDuration,
+		PrivateTxManagers: []*models.PrivateTxManagerModel{
+			&models.PrivateTxManagerModel{
+				URL:  "127.0.0.1/tessera",
+				Type: "InvalidType",
+			},
+		},
+	}
+
+	chainError.SetDefault()
+	err := s.ChainAgent.RegisterChain(context.Background(), chainError)
+	assert.Error(s.T(), err, "Should get an error when a field is missing URLs")
+	assert.True(s.T(), errors.IsDataError(err), "Should be a DataError")
+}
+
+func (s *ChainTestSuite) TestRegisterChainWithoutTxManagerTypeFieldErr() {
+	listenerDepth := uint64(2)
+	listenerCurrentBlock := uint64(2)
+	listenerStartingBlock := uint64(2)
+	listenerBackOffDuration := "2s"
+	chainError := &models.Chain{
+		Name:                    "chainNameErr",
+		TenantID:                "tenantID1",
+		ListenerDepth:           &listenerDepth,
+		ListenerCurrentBlock:    &listenerCurrentBlock,
+		ListenerStartingBlock:   &listenerStartingBlock,
+		ListenerBackOffDuration: &listenerBackOffDuration,
+		PrivateTxManagers: []*models.PrivateTxManagerModel{
+			&models.PrivateTxManagerModel{
+				URL: "127.0.0.1/tessera",
+			},
+		},
+	}
+
+	chainError.SetDefault()
+	err := s.ChainAgent.RegisterChain(context.Background(), chainError)
+	assert.Error(s.T(), err, "Should get an error when a field is missing URLs")
+	assert.True(s.T(), errors.IsDataError(err), "Should be a DataError")
+}
+
 func (s *ChainTestSuite) TestRegisterChains() {
 	for _, chains := range ChainsSample {
 		for _, chain := range chains {
@@ -214,7 +325,7 @@ func (s *ChainTestSuite) TestGetChains() {
 	assert.Len(s.T(), chains, len(tenantID1Chains)+len(tenantID2Chains), "Should get the same number of chains")
 
 	for _, chain := range chains {
-		CompareChains(s.T(), chain, ChainsSample[chain.TenantID][chain.Name])
+		compareChains(s.T(), chain, ChainsSample[chain.TenantID][chain.Name])
 	}
 }
 
@@ -238,7 +349,7 @@ func (s *ChainTestSuite) TestGetChainByUUID() {
 	chain, err := s.ChainAgent.GetChainByUUID(context.Background(), chainUUID)
 	assert.NoError(s.T(), err, "Should get chain without errors")
 
-	CompareChains(s.T(), chain, ChainsSample[tenantID1][chainName1])
+	compareChains(s.T(), chain, ChainsSample[tenantID1][chainName1])
 }
 
 func (s *ChainTestSuite) TestGetChainByUUIDByTenant() {
@@ -261,7 +372,49 @@ func (s *ChainTestSuite) TestUpdateChainByUUID() {
 	assert.NoError(s.T(), err, "Should update chain without errors")
 
 	chain, _ := s.ChainAgent.GetChainByUUID(context.Background(), testChain.UUID)
-	CompareChains(s.T(), chain, testChain)
+	compareChains(s.T(), chain, testChain)
+}
+
+func (s *ChainTestSuite) TestUpdateTesseraChainByUUID() {
+	s.TestRegisterChains()
+
+	testChain := ChainsSample[tenantID1][chainName4]
+	testChain.PrivateTxManagers = []*models.PrivateTxManagerModel{
+		{
+			URL:  "http://tessera:8091",
+			Type: utils.TesseraChainType,
+		},
+	}
+	
+	testChain.SetDefault()
+	err := s.ChainAgent.UpdateChainByUUID(context.Background(), testChain.UUID, testChain)
+	assert.NoError(s.T(), err, "Should update chain without errors")
+
+	chain, _ := s.ChainAgent.GetChainByUUID(context.Background(), testChain.UUID)
+	comparePrivTxManagers(s.T(), chain, testChain)
+}
+
+func (s *ChainTestSuite) TestUpdateTesseraChainByName() {
+	s.TestRegisterChains()
+
+	testChain := ChainsSample[tenantID1][chainName4]
+	testChain.PrivateTxManagers = []*models.PrivateTxManagerModel{
+		{
+			URL:  "http://tessera:8092",
+			Type: utils.TesseraChainType,
+		},
+		{
+			URL:  "http://tessera:8093",
+			Type: utils.TesseraChainType,
+		},
+	}
+	
+	testChain.SetDefault()
+	err := s.ChainAgent.UpdateChainByName(context.Background(), testChain.Name, testChain)
+	assert.NoError(s.T(), err, "Should update chain without errors")
+
+	chain, _ := s.ChainAgent.GetChainByUUID(context.Background(), testChain.UUID)
+	comparePrivTxManagers(s.T(), chain, testChain)
 }
 
 func (s *ChainTestSuite) TestNotFoundTenantErrorUpdateChainByName() {

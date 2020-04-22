@@ -1,7 +1,8 @@
 package tessera
 
 import (
-	"github.com/ethereum/go-ethereum/common/hexutil"
+	"fmt"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/tessera"
@@ -10,8 +11,12 @@ import (
 // If we need to send a transaction to Tessera enclave we first need to send a transaction data to Tessera
 // to get a hash of this data. Then we need to replace data in a transaction object with a hash returned by
 // Tessera enclave. We then need to sign the updated transaction
-func txHashSetter(tesseraClient tessera.Client) engine.HandlerFunc {
+func StoreRaw(tesseraClient tessera.Client, chainRegistryURL string) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
+		if !txctx.Envelope.IsEthSendRawPrivateTransaction() || txctx.Envelope.GetEnclaveKey() != "" {
+			return
+		}
+
 		if txctx.Envelope.GetData() == "" {
 			err := errors.DataError("can not send transaction without data to Tessera").SetComponent(component)
 			txctx.Logger.WithError(err).Errorf("failed to get transaction hash from Tessera")
@@ -19,8 +24,10 @@ func txHashSetter(tesseraClient tessera.Client) engine.HandlerFunc {
 			return
 		}
 
-		txHash, err := tesseraClient.StoreRaw(
-			txctx.Envelope.GetChainIDString(),
+		proxyTessera := fmt.Sprintf("%s/tessera/%s", chainRegistryURL, txctx.Envelope.GetChainUUID())
+		enclaveKey, err := tesseraClient.StoreRaw(
+			txctx.Context(),
+			proxyTessera,
 			txctx.Envelope.MustGetDataBytes(),
 			txctx.Envelope.GetPrivateFrom(),
 		)
@@ -30,7 +37,7 @@ func txHashSetter(tesseraClient tessera.Client) engine.HandlerFunc {
 			return
 		}
 
-		_ = txctx.Envelope.SetData(txHash)
-		txctx.Logger.Debugf("Sent transaction body to 'storesaw' endpoint and get txHash to be signed: %s", hexutil.Encode(txHash))
+		_ = txctx.Envelope.SetEnclaveKey(enclaveKey)
+		txctx.Logger.Debugf("Sent transaction body to 'storeraw' endpoint and get txHash to be signed: %s", enclaveKey)
 	}
 }

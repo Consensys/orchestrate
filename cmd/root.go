@@ -11,9 +11,9 @@ import (
 	txsender "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/tx-sender"
 	txsigner "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/tx-signer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/logger"
 	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt"
 	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/key"
+	pkglog "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/logger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/jaeger"
 )
@@ -25,13 +25,13 @@ func NewCommand() *cobra.Command {
 		TraverseChildren: true,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			// This is executed before each run (included on children command run)
-			logger.InitLogger()
+			pkglog.InitLogger()
 		},
 	}
 
 	// Set Persistent flags
-	logger.LogLevel(rootCmd.PersistentFlags())
-	logger.LogFormat(rootCmd.PersistentFlags())
+	pkglog.LogLevel(rootCmd.PersistentFlags())
+	pkglog.LogFormat(rootCmd.PersistentFlags())
 
 	// Register OpenTracing flags
 	jaeger.InitFlags(rootCmd.PersistentFlags())

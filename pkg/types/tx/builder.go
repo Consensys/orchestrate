@@ -199,6 +199,14 @@ type Tx struct {
 
 func (e *Envelope) GetTransaction() (*ethtypes.Transaction, error) {
 	// TODO: Use custom validation with https://godoc.org/gopkg.in/go-playground/validator.v10#Validate.StructFiltered
+
+	var data []byte
+	if e.IsEthSendRawPrivateTransaction() {
+		data = e.MustGetEnclaveKeyBytes()
+	} else {
+		data = e.MustGetDataBytes()
+	}
+
 	nonce, err := e.GetNonceUint64()
 	if err != nil {
 		return nil, err
@@ -223,7 +231,7 @@ func (e *Envelope) GetTransaction() (*ethtypes.Transaction, error) {
 			value,
 			gas,
 			gasPrice,
-			e.MustGetDataBytes(),
+			data,
 		), nil
 	}
 
@@ -239,7 +247,7 @@ func (e *Envelope) GetTransaction() (*ethtypes.Transaction, error) {
 		value,
 		gas,
 		gasPrice,
-		e.MustGetDataBytes(),
+		data,
 	), nil
 }
 
@@ -726,6 +734,7 @@ type Private struct {
 	PrivateFrom    string   `validate:"omitempty,base64"`
 	PrivateTxType  string
 	PrivacyGroupID string
+	EnclaveKey     string
 }
 
 func (e *Envelope) GetPrivateFor() []string {
@@ -762,6 +771,23 @@ func (e *Envelope) GetPrivacyGroupID() string {
 	return e.PrivacyGroupID
 }
 
+func (e *Envelope) GetEnclaveKey() string {
+	return e.EnclaveKey
+}
+
+func (e *Envelope) MustGetEnclaveKeyBytes() []byte {
+	if e.EnclaveKey == "" {
+		return []byte{}
+	}
+	enclaveKey, _ := hexutil.Decode(e.EnclaveKey)
+	return enclaveKey
+}
+
+func (e *Envelope) SetEnclaveKey(enclaveKey string) *Envelope {
+	e.EnclaveKey = enclaveKey
+	return e
+}
+
 func (e *Envelope) TxRequest() *TxRequest {
 	req := &TxRequest{
 		Id:      e.ID,
@@ -782,8 +808,8 @@ func (e *Envelope) TxRequest() *TxRequest {
 			Raw:             e.GetRaw(),
 			PrivateFor:      e.GetPrivateFor(),
 			PrivateFrom:     e.GetPrivateFrom(),
-			PrivateTxType:   e.PrivateTxType,
-			PrivacyGroupId:  e.PrivacyGroupID,
+			PrivateTxType:   e.GetPrivateTxType(),
+			PrivacyGroupId:  e.GetPrivacyGroupID(),
 		},
 		ContextLabels: e.ContextLabels,
 	}
@@ -805,6 +831,9 @@ func (e *Envelope) fieldsToInternal() {
 	if e.GetChainUUID() != "" {
 		e.InternalLabels["chainUUID"] = e.GetChainUUID()
 	}
+	if e.GetEnclaveKey() != "" {
+		e.InternalLabels["enclaveKey"] = e.GetEnclaveKey()
+	}
 }
 
 func (e *Envelope) internalToFields() error {
@@ -816,6 +845,7 @@ func (e *Envelope) internalToFields() error {
 		return err
 	}
 	_ = e.SetChainUUID(e.InternalLabels["chainUUID"])
+	_ = e.SetEnclaveKey(e.InternalLabels["enclaveKey"])
 	return nil
 }
 

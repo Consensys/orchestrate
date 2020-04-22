@@ -7,7 +7,7 @@ import (
 	traefiktypes "github.com/containous/traefik/v2/pkg/types"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/logger"
 )
 
 func init() {

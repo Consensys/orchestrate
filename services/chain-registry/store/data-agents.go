@@ -9,9 +9,8 @@ import (
 //go:generate mockgen -source=data-agents.go -destination=mock/data-agents.go -package=mock
 
 type DataAgents struct {
-	Chain     ChainAgent
-	Faucet    FaucetAgent
-	PrivateTx PrivateTxAgent
+	Chain  ChainAgent
+	Faucet FaucetAgent
 }
 
 type ChainAgent interface {
@@ -41,8 +40,4 @@ type FaucetAgent interface {
 
 	DeleteFaucetByUUID(ctx context.Context, uuid string) error
 	DeleteFaucetByUUIDAndTenant(ctx context.Context, uuid string, tenantID string) error
-}
-
-type PrivateTxAgent interface {
-	InsertMultiple(ctx context.Context, privateTxManager *[]*models.PrivateTxManagerModel) error
 }
