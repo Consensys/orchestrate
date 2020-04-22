@@ -6,6 +6,7 @@ import (
 
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry"
 )
@@ -15,6 +16,9 @@ func newRunCommand() *cobra.Command {
 		Use:   "run",
 		Short: "Run application",
 		Run:   run,
+		PreRun: func(cmd *cobra.Command, args []string) {
+			utils.PreRunBindFlags(viper.GetViper(), cmd.Flags(), "chain-registry")
+		},
 	}
 
 	// Chain registry store flags

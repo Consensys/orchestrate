@@ -6,9 +6,9 @@ import (
 
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store"
 )
 
 func newRunCommand() *cobra.Command {
@@ -16,10 +16,13 @@ func newRunCommand() *cobra.Command {
 		Use:   "run",
 		Short: "Run application",
 		Run:   run,
+		PreRun: func(cmd *cobra.Command, args []string) {
+			utils.PreRunBindFlags(viper.GetViper(), cmd.Flags(), "contract-registry")
+		},
 	}
 
 	// Set flags
-	store.Flags(runCmd.Flags())
+	contractregistry.Flags(runCmd.Flags())
 
 	return runCmd
 }

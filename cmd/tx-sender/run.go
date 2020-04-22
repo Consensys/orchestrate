@@ -6,8 +6,10 @@ import (
 
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	noncechecker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/nonce/checker"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	chnregclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client"
@@ -21,6 +23,9 @@ func newRunCommand() *cobra.Command {
 		Use:   "run",
 		Short: "Run application",
 		Run:   run,
+		PreRun: func(cmd *cobra.Command, args []string) {
+			utils.PreRunBindFlags(viper.GetViper(), cmd.Flags(), "tx-sender")
+		},
 	}
 
 	// Register Kafka flags
@@ -38,6 +43,8 @@ func newRunCommand() *cobra.Command {
 	nonce.Type(runCmd.Flags())
 	redis.Flags(runCmd.Flags())
 	noncechecker.Flags(runCmd.Flags())
+	
+	http.MetricFlags(runCmd.Flags())
 
 	return runCmd
 }

@@ -1,63 +1,41 @@
 package contractregistry
 
-// import (
-// 	"context"
-// 	"fmt"
+import (
+	"fmt"
 
-// 	log "github.com/sirupsen/logrus"
-// 	"github.com/spf13/pflag"
-// 	"github.com/spf13/viper"
-// 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/service/controllers"
-// 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/abi"
-// 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
-// )
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store"
+)
 
-// const (
-// 	typeFlag     = "contract-registry-type"
-// 	typeViperKey = "contract-registry.type"
-// 	typeDefault  = postgresOpt
-// 	typeEnv      = "CONTRACT_REGISTRY_TYPE"
-// 	abiFlag      = "abi"
-// 	abiViperKey  = "abis"
-// 	abiEnv       = "ABI"
-// 	postgresOpt  = "postgres"
-// )
+func init() {
+	_ = viper.BindEnv(ABIViperKey, abiEnv)
+	viper.SetDefault(ABIViperKey, abiDefault)
+}
 
-// var abiDefault []string
+const (
+	abiFlag     = "abi"
+	ABIViperKey = "abis"
+	abiEnv      = "ABI"
+)
 
-// // bindTypeFlag register flag for the Contract Registry to select
-// func bindTypeFlag(flag *pflag.FlagSet) {
-// 	description := fmt.Sprintf(`Type of Contract Registry (one of %q) Environment variable: %q`, []string{postgresOpt}, typeEnv)
-// 	flag.String(typeFlag, typeDefault, description)
-// 	_ = viper.BindPFlag(typeViperKey, flag.Lookup(typeFlag))
-// }
 
-// // bindABIFlag register flag for ABI
-// func bindABIFlag(f *pflag.FlagSet) {
-// 	desc := fmt.Sprintf(`Smart Contract ABIs to register for crafting (expected format %v)
-// Environment variable: %q`, `<contract>:<abi>:<bytecode>:<deployedBytecode>`, abiEnv)
-// 	f.StringSlice(abiFlag, abiDefault, desc)
-// 	_ = viper.BindPFlag(abiViperKey, f.Lookup(abiFlag))
-// }
+var abiDefault []string
 
-// // initializeABIs Read ABIs from ABI viper configuration
-// func initializeABIs(ctx context.Context, contractRegistryController *controllers.ContractRegistryController) {
-// 	var contracts []*abi.Contract
-// 	for _, ABI := range viper.GetStringSlice(abiViperKey) {
-// 		c, err := abi.StringToContract(ABI)
-// 		if err != nil {
-// 			log.WithError(err).Fatalf("could not initialize contract-registry")
-// 			return
-// 		}
-// 		contracts = append(contracts, c)
-// 	}
+// bindABIFlag register flag for ABI
+func Type(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Smart Contract ABIs to register for crafting (expected format %v)
+Environment variable: %q`, `<contract>:<abi>:<bytecode>:<deployedBytecode>`, abiEnv)
+	f.StringSlice(abiFlag, abiDefault, desc)
+	_ = viper.BindPFlag(ABIViperKey, f.Lookup(abiFlag))
+}
 
-// 	// Register contracts
-// 	for _, contract := range contracts {
-// 		_, err := contractRegistryController.RegisterContract(ctx, &svc.RegisterContractRequest{Contract: contract})
-
-// 		if err != nil {
-// 			log.WithError(err).Fatalf("could not register ABI")
-// 		}
-// 	}
-// }
+// Flags register flags for Postgres database
+func Flags(f *pflag.FlagSet) {
+	Type(f)
+	store.Flags(f)
+	http.Flags(f)
+	grpc.Flags(f)
+}

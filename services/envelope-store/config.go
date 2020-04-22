@@ -1,8 +1,11 @@
 package envelopestore
 
 import (
+	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	pkgmultitenancy "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/store"
 )
@@ -26,4 +29,10 @@ func NewConfigFromViper(vipr *viper.Viper) Config {
 		store.NewConfig(vipr),
 		vipr.GetBool(pkgmultitenancy.EnabledViperKey),
 	)
+}
+
+func Flags(f *pflag.FlagSet) {
+	store.Flags(f)
+	http.Flags(f)
+	grpc.Flags(f)
 }

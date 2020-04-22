@@ -51,7 +51,7 @@ func Init(ctx context.Context) {
 		initDependencies(ctx)
 
 		// Create GRPC service
-		service, err := NewService(postgres.GetManager(), store.NewConfig(viper.GetViper()))
+		service, err := NewService(ctx, postgres.GetManager(), store.NewConfig(viper.GetViper()))
 		if err != nil {
 			log.WithoutContext().WithError(err).Fatalf("could not create contracts GRPC service")
 		}

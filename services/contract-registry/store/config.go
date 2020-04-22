@@ -24,7 +24,7 @@ var availableTypes = []string{
 const (
 	typeFlag     = "contract-registry-type"
 	TypeViperKey = "contracts.store-type"
-	typeDefault  = "postgres"
+	typeDefault  = postgresType
 	typeEnv      = "CONTRACT_REGISTRY_TYPE"
 )
 

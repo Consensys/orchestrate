@@ -3,6 +3,7 @@
 package http
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -17,69 +18,79 @@ func TestConfig(t *testing.T) {
 }
 
 func TestHostname(t *testing.T) {
-	name := "rest.hostname"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	Hostname(flgs)
-	expected := ""
-	if viper.GetString(name) != expected {
-		t.Errorf("Hostname #1: expected %q but got %q", expected, viper.GetString(name))
-	}
+	hostname(flgs)
+	assert.Equal(t, hostnameDefault, viper.GetString(hostnameViperKey))
 
-	_ = os.Setenv("REST_HOSTNAME", "localhost")
-	expected = "localhost"
-	if viper.GetString(name) != expected {
-		t.Errorf("Hostname #2: expected %q but got %q", expected, viper.GetString(name))
-	}
+	expected := "localhost"
+	_ = os.Setenv(hostnameEnv, expected)
+	assert.Equal(t, expected, viper.GetString(hostnameViperKey))
+	_ = os.Unsetenv(hostnameEnv)
 
+	expected = "127.0.0.1"
 	args := []string{
-		"--rest-hostname=127.0.0.1",
+		fmt.Sprintf("--%s=%s", hostnameFlag, expected),
 	}
 	err := flgs.Parse(args)
 	assert.NoError(t, err, "No error expected")
-
-	expected = "127.0.0.1"
-	if viper.GetString(name) != expected {
-		t.Errorf("Hostname #3: expected %q but got %q", expected, viper.GetString(name))
-	}
+	assert.Equal(t, expected, viper.GetString(hostnameViperKey))
 }
 
 func TestHTTPPort(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	Port(flgs)
-	assert.Equal(t, uint64(8081), viper.GetUint64("rest.port"), "Default Port should be correct")
-}
+	port(flgs)
+	assert.Equal(t, httpPortDefault, viper.GetInt(httpPortViperKey))
 
-func TestMetricsHostname(t *testing.T) {
-	name := "metrics.hostname"
-	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	MetricsHostname(flgs)
-	expected := ""
-	if viper.GetString(name) != expected {
-		t.Errorf("Metrics Hostname #1: expected %q but got %q", expected, viper.GetString(name))
-	}
+	expected := "9999"
+	_ = os.Setenv(httpPortEnv, expected)
+	assert.Equal(t, expected, viper.GetString(httpPortViperKey))
+	_ = os.Unsetenv(httpPortEnv)
 
-	_ = os.Setenv("METRICS_HOSTNAME", "localhost")
-	expected = "localhost"
-	if viper.GetString(name) != expected {
-		t.Errorf("Metrics Hostname #2: expected %q but got %q", expected, viper.GetString(name))
-	}
-
+	expected = "9989"
 	args := []string{
-		"--metrics-hostname=127.0.0.1",
+		fmt.Sprintf("--%s=%s", httpPortFlag, expected),
 	}
 	err := flgs.Parse(args)
 	assert.NoError(t, err, "No error expected")
+	assert.Equal(t, expected, viper.GetString(httpPortViperKey))
+}
+
+func TestMetricsHostname(t *testing.T) {
+	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
+	metricsHostname(flgs)
+	assert.Equal(t, metricsHostnameDefault, viper.GetString(metricsHostnameViperKey))
+
+	expected := "localhost"
+	_ = os.Setenv(metricsHostnameEnv, expected)
+	assert.Equal(t, expected, viper.GetString(metricsHostnameViperKey))
+	_ = os.Unsetenv(metricsHostnameEnv)
 
 	expected = "127.0.0.1"
-	if viper.GetString(name) != expected {
-		t.Errorf("Metrics Hostname #3: expected %q but got %q", expected, viper.GetString(name))
+	args := []string{
+		fmt.Sprintf("--%s=%s", metricsHostnameFlag, expected),
 	}
+	err := flgs.Parse(args)
+	assert.NoError(t, err, "No error expected")
+	assert.Equal(t, expected, viper.GetString(metricsHostnameViperKey))
 }
 
 func TestMetricsPort(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	MetricsPort(flgs)
-	assert.Equal(t, uint64(8082), viper.GetUint64("metrics.port"), "Default Port should be correct")
+	metricsPort(flgs)
+	assert.Equal(t, metricsPortDefault, viper.GetInt(metricsPortViperKey))
+
+	expectedOne := "9999"
+	_ = os.Setenv(metricsPortEnv, expectedOne)
+	assert.Equal(t, expectedOne, viper.GetString(metricsPortViperKey))
+	_ = os.Unsetenv(metricsPortEnv)
+
+	expectedTwo := "9989"
+	args := []string{
+		fmt.Sprintf("--%s=%s", metricsPortFlag, expectedTwo),
+	}
+	err := flgs.Parse(args)
+	assert.NoError(t, err, "No error expected")
+	assert.Equal(t, expectedTwo, viper.GetString(metricsPortViperKey))
 }
 
 func TestFlags(t *testing.T) {

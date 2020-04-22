@@ -6,7 +6,9 @@ import (
 
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	chnregclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
@@ -18,6 +20,9 @@ func newRunCommand() *cobra.Command {
 		Use:   "run",
 		Short: "Run application",
 		Run:   run,
+		PreRun: func(cmd *cobra.Command, args []string) {
+			utils.PreRunBindFlags(viper.GetViper(), cmd.Flags(), "tx-crafter")
+		},
 	}
 
 	// Register Kafka flags
@@ -30,6 +35,7 @@ func newRunCommand() *cobra.Command {
 
 	// Contract Registry
 	registryclient.ContractRegistryURL(runCmd.Flags())
+	http.MetricFlags(runCmd.Flags())
 
 	return runCmd
 }

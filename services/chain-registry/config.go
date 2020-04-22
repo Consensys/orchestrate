@@ -6,6 +6,8 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store"
 )
@@ -55,5 +57,7 @@ func NewConfigFromViper(vipr *viper.Viper) Config {
 
 func Flags(f *pflag.FlagSet) {
 	Type(f)
+	http.Flags(f)
 	store.Flags(f)
+	configwatcher.Flags(f)
 }

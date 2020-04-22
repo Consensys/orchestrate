@@ -9,8 +9,8 @@ import (
 )
 
 func init() {
-	_ = viper.BindEnv(TypeViperKey, typeEnv)
-	viper.SetDefault(TypeViperKey, typeDefault)
+	_ = viper.BindEnv(typeViperKey, typeEnv)
+	viper.SetDefault(typeViperKey, typeDefault)
 }
 
 const (
@@ -23,7 +23,7 @@ var availableTypes = []string{
 
 const (
 	typeFlag     = "chains-store-type"
-	TypeViperKey = "chains.registry.type"
+	typeViperKey = "chains.registry.type"
 	typeDefault  = postgresType
 	typeEnv      = "CHAIN_REGISTRY_TYPE"
 )
@@ -33,7 +33,7 @@ func Type(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Type of Chain Registry (one of %q)
 Environment variable: %q`, availableTypes, typeEnv)
 	f.String(typeFlag, typeDefault, desc)
-	_ = viper.BindPFlag(TypeViperKey, f.Lookup(typeFlag))
+	_ = viper.BindPFlag(typeViperKey, f.Lookup(typeFlag))
 }
 
 type Config struct {
@@ -47,7 +47,7 @@ func DefaultConfig() *Config {
 
 func NewConfig(vipr *viper.Viper) *Config {
 	return &Config{
-		Type:     vipr.GetString(TypeViperKey),
+		Type:     vipr.GetString(typeViperKey),
 		Postgres: postgres.NewConfig(vipr),
 	}
 }

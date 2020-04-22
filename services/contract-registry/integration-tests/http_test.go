@@ -29,6 +29,22 @@ func (s *contractRegistryHTTPTestSuite) SetupSuite() {
 	}
 }
 
+func (s *contractRegistryHTTPTestSuite) TestContractRegistry_InitABI() {
+
+	s.T().Run("should validate ENV contract are registered", func(t *testing.T) {
+		res := s.getContract(s.env.envContract.Id.Name, "")
+		assert.Equal(t, 200, res.StatusCode)
+
+		body := &registry.GetContractResponse{}
+		getValue(res, body)
+
+		assert.Equal(t, s.env.envContract.Id.Name, body.GetContract().GetName())
+		assert.Equal(t, "latest", body.GetContract().GetTag())
+		assert.Equal(t, s.env.envContract.Bytecode, body.GetContract().GetBytecode())
+		assert.Equal(t, s.env.envContract.DeployedBytecode, body.GetContract().GetDeployedBytecode())
+	})
+}
+
 func (s *contractRegistryHTTPTestSuite) TestContractRegistry_Validation() {
 	// TODO: Next test is returning 500
 	// s.T().Run("should fail with 400 if payload is invalid", func(t *testing.T) {

@@ -179,7 +179,7 @@ func (s *HttpChainTestSuite) TestChainRegistry_TesseraChainHappyFlow() {
 	s.T().Run("should fetch registered chain by UUID", func(t *testing.T) {
 		resp, err := s.client.GetChainByUUID(ctx, chainUUID)
 		assert.Nil(t, err)
-		assert.Equal(t, 1, len(resp.PrivateTxManagers), "should have two PrivateTxManagers")
+		assert.Equal(t, 1, len(resp.PrivateTxManagers))
 		if len(resp.PrivateTxManagers) == 1 {
 			assert.Equal(t, privTxManagerURLTwo, resp.PrivateTxManagers[0].URL)
 		}

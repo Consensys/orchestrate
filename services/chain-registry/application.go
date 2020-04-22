@@ -58,10 +58,11 @@ func newApplication(
 		return nil, err
 	}
 
+	dynCfg := configwatcher.NewInternalConfig(cfg.app.HTTP, cfg.app.Watcher).DynamicCfg()
 	// Create app
 	return app.New(
 		cfg.app,
-		configwatcher.NewProvider(getChainsUC, configwatcher.NewInternalConfig(cfg.app.HTTP, cfg.app.Watcher).DynamicCfg(), time.Second),
+		configwatcher.NewProvider(getChainsUC, dynCfg, time.Second),
 		routerBuilder,
 		nil,
 		reg,

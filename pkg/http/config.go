@@ -11,96 +11,102 @@ import (
 )
 
 func init() {
-	viper.SetDefault(HostnameViperKey, hostnameDefault)
-	_ = viper.BindEnv(HostnameViperKey, hostnameEnv)
-	viper.SetDefault(HTTPPortViperKey, httpPortDefault)
-	_ = viper.BindEnv(HTTPPortViperKey, httpPortEnv)
+	viper.SetDefault(hostnameViperKey, hostnameDefault)
+	_ = viper.BindEnv(hostnameViperKey, hostnameEnv)
 
-	viper.SetDefault(MetricsHostnameViperKey, metricsHostnameDefault)
-	_ = viper.BindEnv(MetricsHostnameViperKey, metricsHostnameEnv)
-	viper.SetDefault(MetricsPortViperKey, metricsPortDefault)
-	_ = viper.BindEnv(MetricsPortViperKey, metricsPortEnv)
+	viper.SetDefault(httpPortViperKey, httpPortDefault)
+	_ = viper.BindEnv(httpPortViperKey, httpPortEnv)
+
+	viper.SetDefault(metricsHostnameViperKey, metricsHostnameDefault)
+	_ = viper.BindEnv(metricsHostnameViperKey, metricsHostnameEnv)
+
+	viper.SetDefault(metricsPortViperKey, metricsPortDefault)
+	_ = viper.BindEnv(metricsPortViperKey, metricsPortEnv)
 }
 
 const (
 	hostnameFlag     = "rest-hostname"
-	HostnameViperKey = "rest.hostname"
+	hostnameViperKey = "rest.hostname"
 	hostnameDefault  = ""
 	hostnameEnv      = "REST_HOSTNAME"
 )
 
 // Hostname register a flag for HTTP server address
-func Hostname(f *pflag.FlagSet) {
+func hostname(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Hostname to expose REST services
 Environment variable: %q`, hostnameEnv)
 	f.String(hostnameFlag, hostnameDefault, desc)
-	_ = viper.BindPFlag(HostnameViperKey, f.Lookup(hostnameFlag))
+	_ = viper.BindPFlag(hostnameViperKey, f.Lookup(hostnameFlag))
 }
 
 const (
 	httpPortFlag     = "rest-port"
-	HTTPPortViperKey = "rest.port"
-	httpPortDefault  = uint(8081)
+	httpPortViperKey = "rest.port"
+	httpPortDefault  = 8081
 	httpPortEnv      = "REST_PORT"
 )
 
 // Port register a flag for HTTp server port
-func Port(f *pflag.FlagSet) {
+func port(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Port to expose REST services
 Environment variable: %q`, httpPortEnv)
 	f.Uint(httpPortFlag, httpPortDefault, desc)
-	_ = viper.BindPFlag(HTTPPortViperKey, f.Lookup(httpPortFlag))
+	_ = viper.BindPFlag(httpPortViperKey, f.Lookup(httpPortFlag))
 }
 
 const (
 	metricsHostnameFlag     = "metrics-hostname"
-	MetricsHostnameViperKey = "metrics.hostname"
+	metricsHostnameViperKey = "metrics.hostname"
 	metricsHostnameDefault  = ""
 	metricsHostnameEnv      = "METRICS_HOSTNAME"
 )
 
-// MetricsHostname register a flag for metrics server hostname
-func MetricsHostname(f *pflag.FlagSet) {
+// metricsHostname register a flag for metrics server hostname
+func metricsHostname(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Hostname to expose metrics services
 Environment variable: %q`, metricsHostnameEnv)
 	f.String(metricsHostnameFlag, metricsHostnameDefault, desc)
-	_ = viper.BindPFlag(MetricsHostnameViperKey, f.Lookup(metricsHostnameFlag))
+	_ = viper.BindPFlag(metricsHostnameViperKey, f.Lookup(metricsHostnameFlag))
 }
 
 const (
 	metricsPortFlag     = "metrics-port"
-	MetricsPortViperKey = "metrics.port"
-	metricsPortDefault  = uint(8082)
+	metricsPortViperKey = "metrics.port"
+	metricsPortDefault  = 8082
 	metricsPortEnv      = "METRICS_PORT"
 )
 
 // MetricsPort register a flag for metrics server port
-func MetricsPort(f *pflag.FlagSet) {
+func metricsPort(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Port to expose metrics services
 Environment variable: %q`, metricsPortEnv)
 	f.Uint(metricsPortFlag, metricsPortDefault, desc)
-	_ = viper.BindPFlag(MetricsPortViperKey, f.Lookup(metricsPortFlag))
+	_ = viper.BindPFlag(metricsPortViperKey, f.Lookup(metricsPortFlag))
 }
 
 func Flags(f *pflag.FlagSet) {
-	Hostname(f)
-	Port(f)
-	MetricsHostname(f)
-	MetricsPort(f)
+	hostname(f)
+	port(f)
+	MetricFlags(f)
 }
 
-func URL(hostname string, port uint) string {
+func MetricFlags(f *pflag.FlagSet) {
+	metricsHostname(f)
+	metricsPort(f)
+}
+
+func url(hostname string, port uint) string {
 	return fmt.Sprintf("%s:%d", hostname, port)
 }
 
 func NewEPsConfig(vipr *viper.Viper) traefikstatic.EntryPoints {
 	httpEp := &traefikstatic.EntryPoint{
-		Address: URL(vipr.GetString(HostnameViperKey), vipr.GetUint(HTTPPortViperKey)),
+		Address: url(vipr.GetString(hostnameViperKey), vipr.GetUint(httpPortViperKey)),
 	}
 	httpEp.SetDefaults()
 
 	metricsEp := &traefikstatic.EntryPoint{
-		Address: URL(vipr.GetString(MetricsHostnameViperKey), vipr.GetUint(MetricsPortViperKey)),
+		Address: url(vipr.GetString(metricsHostnameViperKey), vipr.GetUint(metricsPortViperKey)),
 	}
 	metricsEp.SetDefaults()
 

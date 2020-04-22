@@ -2,7 +2,9 @@ package integrationtests
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"regexp"
 	"time"
 
 	"github.com/containous/traefik/v2/pkg/log"
@@ -10,15 +12,19 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/config"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/postgres/migrations"
 )
 
 const postgresContainerID = "postgres-contract-registry"
 
+
 type IntegrationEnvironment struct {
-	client *docker.Client
-	pgmngr postgres.Manager
+	client      *docker.Client
+	pgmngr      postgres.Manager
+	envContract *abi.Contract
 }
 
 func NewIntegrationEnvironment() *IntegrationEnvironment {
@@ -28,6 +34,11 @@ func NewIntegrationEnvironment() *IntegrationEnvironment {
 		},
 	}
 
+	envContract := testutils.FakeContract()
+	var re = regexp.MustCompile(`\s+`)
+	abi := fmt.Sprintf("%s:%s:%s:%s", envContract.Id.Name, re.ReplaceAllString(envContract.Abi, ""), envContract.Bytecode, envContract.DeployedBytecode)
+	viper.SetDefault(contractregistry.ABIViperKey, abi)
+
 	client, err := docker.NewClient(composition)
 	if err != nil {
 		panic(err)
@@ -36,6 +47,7 @@ func NewIntegrationEnvironment() *IntegrationEnvironment {
 	return &IntegrationEnvironment{
 		client: client,
 		pgmngr: postgres.NewManager(),
+		envContract: envContract,
 	}
 }
 
