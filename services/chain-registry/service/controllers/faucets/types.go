@@ -1,6 +1,6 @@
 package faucets
 
-type FaucetPostRequest struct {
+type PostRequest struct {
 	Name            string `json:"name" validate:"required"`
 	ChainRule       string `json:"chainRule,omitempty" validate:"required"`
 	CreditorAccount string `json:"creditorAccount,omitempty" validate:"required,eth_addr"`
@@ -9,7 +9,7 @@ type FaucetPostRequest struct {
 	Cooldown        string `json:"cooldown,omitempty" validate:"required,isDuration"`
 }
 
-type FaucetPatchRequest struct {
+type PatchRequest struct {
 	Name            string `json:"name,omitempty" validate:"omitempty"`
 	ChainRule       string `json:"chainRule,omitempty" validate:"omitempty"`
 	CreditorAccount string `json:"creditorAccount,omitempty" validate:"omitempty,eth_addr"`

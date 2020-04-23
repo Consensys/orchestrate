@@ -326,7 +326,8 @@
                     "type": "string"
                 },
                 "currentBlock": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "depth": {
                     "type": "integer"
@@ -363,6 +364,12 @@
                 "name": {
                     "type": "string"
                 },
+                "privateTxManagers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/chains.PrivateTxManagerRequest"
+                    }
+                },
                 "urls": {
                     "type": "array",
                     "items": {
@@ -374,7 +381,8 @@
         "chains.PostRequest": {
             "type": "object",
             "required": [
-                "name"
+                "name",
+                "urls"
             ],
             "properties": {
                 "listener": {
@@ -384,11 +392,28 @@
                 "name": {
                     "type": "string"
                 },
+                "privateTxManagers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/chains.PrivateTxManagerRequest"
+                    }
+                },
                 "urls": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "chains.PrivateTxManagerRequest": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
                 }
             }
         },

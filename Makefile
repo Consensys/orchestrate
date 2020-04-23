@@ -57,7 +57,7 @@ gen-mocks:
 	@go generate -run mockgen ./...
 
 gen-swagger:
-	@go generate gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/chain-registry
+	@go generate gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/service/controllers
 	@go generate gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/controllers
 
 generate-deepcopy:

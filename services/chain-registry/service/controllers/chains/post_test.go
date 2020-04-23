@@ -46,6 +46,39 @@ var postChainTests = []HTTPRouteTests{
 		},
 	},
 	{
+		name:       "TestPostTesseraChain200",
+		chainAgent: UseMockChainRegistry,
+		httpMethod: http.MethodPost,
+		path:       "/chains",
+		body: func() []byte {
+			listenerDepth := uint64(1)
+			listenerFromBlock := "500"
+			listenerBackOffDuration := "1s"
+			listenerExternalTxEnabled := true
+
+			body, _ := json.Marshal(&PostRequest{
+				Name: "testName",
+				URLs: []string{"http://test.com"},
+				Listener: &ListenerPostRequest{
+					Depth:             &listenerDepth,
+					FromBlock:         &listenerFromBlock,
+					BackOffDuration:   &listenerBackOffDuration,
+					ExternalTxEnabled: &listenerExternalTxEnabled,
+				},
+				PrivateTxManager: &PrivateTxManagerRequest{
+					URL:  "http://tessera.com",
+					Type: "Tessera",
+				},
+			})
+			return body
+		},
+		expectedStatusCode:  http.StatusOK,
+		expectedContentType: expectedSuccessStatusContentType,
+		expectedBody: func() string {
+			return "{\"uuid\":\"uuid\",\"name\":\"testName\",\"tenantID\":\"_\",\"urls\":[\"http://test.com\"],\"listenerDepth\":1,\"listenerCurrentBlock\":\"500\",\"listenerStartingBlock\":\"500\",\"listenerBackOffDuration\":\"1s\",\"listenerExternalTxEnabled\":true,\"createdAt\":null,\"privateTxManagers\":[{\"UUID\":\"uuid\",\"ChainUUID\":\"uuid\",\"url\":\"http://tessera.com\",\"type\":\"Tessera\",\"CreatedAt\":null}]}\n"
+		},
+	},
+	{
 		name:       "TestPostChain200 Listener is Nil",
 		chainAgent: UseMockChainRegistry,
 		httpMethod: http.MethodPost,
@@ -168,6 +201,47 @@ var postChainTests = []HTTPRouteTests{
 		expectedStatusCode:  http.StatusInternalServerError,
 		expectedContentType: expectedErrorStatusContentType,
 		expectedBody:        func() string { return expectedInternalServerErrorBody },
+	},
+	{
+		name:                "TestPostChain400WrongBodyTessera",
+		chainAgent:          UseMockChainRegistry,
+		httpMethod:          http.MethodPost,
+		path:                "/chains",
+		body:                func() []byte { return []byte(`{"unknownField":"error"}`) },
+		expectedStatusCode:  http.StatusBadRequest,
+		expectedContentType: expectedErrorStatusContentType,
+		expectedBody:        func() string { return expectedUnknownBodyError },
+	},
+	{
+		name:       "TestPostTesseraChain500",
+		chainAgent: UseErrorChainRegistry,
+		httpMethod: http.MethodPost,
+		path:       "/chains",
+		body: func() []byte {
+			listenerDepth := uint64(1)
+			listenerFromBlock := "500"
+			listenerBackOffDuration := "1s"
+			listenerExternalTxEnabled := true
+
+			body, _ := json.Marshal(&PostRequest{
+				Name: "testName",
+				URLs: []string{"http://test.com"},
+				Listener: &ListenerPostRequest{
+					Depth:             &listenerDepth,
+					FromBlock:         &listenerFromBlock,
+					BackOffDuration:   &listenerBackOffDuration,
+					ExternalTxEnabled: &listenerExternalTxEnabled,
+				},
+				PrivateTxManager: &PrivateTxManagerRequest{
+					URL:  "http://tessera.com",
+					Type: "InvalidType",
+				},
+			})
+			return body
+		},
+		expectedStatusCode:  http.StatusBadRequest,
+		expectedContentType: expectedErrorStatusContentType,
+		expectedBody:        func() string { return expectedErrorInvalidManagerType },
 	},
 }
 

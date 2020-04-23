@@ -11,21 +11,12 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/chain-registry/utils"
 )
 
-type PostRequest struct {
-	Name            string `json:"name" validate:"required"`
-	ChainRule       string `json:"chainRule,omitempty" validate:"required"`
-	CreditorAccount string `json:"creditorAccount,omitempty" validate:"required,eth_addr"`
-	MaxBalance      string `json:"maxBalance,omitempty" validate:"required,isBig"`
-	Amount          string `json:"amount,omitempty" validate:"required,isBig"`
-	Cooldown        string `json:"cooldown,omitempty" validate:"required,isDuration"`
-}
-
 // @Summary Registers a new faucet
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body postRequest true "Faucet registration request"
+// @Param request body PostRequest true "Faucet registration request"
 // @Success 200
 // @Failure 400
 // @Failure 500

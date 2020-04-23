@@ -33,6 +33,8 @@ const (
 	expectedSuccessStatusSliceBody   = "[]\n"
 	expectedSuccessStatusContentType = "application/json"
 	expectedErrorStatusContentType   = "text/plain; charset=utf-8"
+	expectedErrorInvalidManagerType  = "{\"message\":\"42400@chain-registry.store.api: invalid body, with: field validation for 'Type' failed on the 'isPrivateTxManagerType' tag\"}\n"
+	expectedErrorInvalidManagerURL   = "{\"message\":\"42400@chain-registry.store.api: invalid body, with: field validation for 'URL' failed on the 'url' tag field validation for 'Type' failed on the 'isPrivateTxManagerType' tag\"}\n"
 	notFoundErrorFilter              = "notFoundError"
 )
 
@@ -85,7 +87,7 @@ func TestHTTPRouteTests(t *testing.T) {
 			})
 		}
 	}
-	
+
 	// Multi-tenant tests
 	testsSuiteMultitenant := [][]HTTPRouteTests{
 		deleteChainByUUIDTests,
@@ -138,6 +140,10 @@ func UseMockChainRegistry(t *testing.T) store.ChainAgent {
 	mockStore.EXPECT().RegisterChain(gomock.Any(), gomock.Any()).DoAndReturn(
 		func(ctx context.Context, chain *models.Chain) error {
 			chain.UUID = "uuid"
+			for idx, _ := range chain.PrivateTxManagers {
+				chain.PrivateTxManagers[idx].ChainUUID = "uuid"
+				chain.PrivateTxManagers[idx].UUID = "uuid"
+			}
 			return nil
 		},
 	).AnyTimes()

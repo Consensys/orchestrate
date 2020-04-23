@@ -24,6 +24,24 @@ var patchChainByUUIDTests = []HTTPRouteTests{
 		expectedBody:        func() string { return expectedSuccessStatusBody },
 	},
 	{
+		name:       "TestPatchTesseraChainByUUIDByID200",
+		chainAgent: UseMockChainRegistry,
+		httpMethod: http.MethodPatch,
+		path:       "/chains/1",
+		body: func() []byte {
+			body, _ := json.Marshal(&PatchRequest{
+				PrivateTxManager: &PrivateTxManagerRequest{
+					URL:  "http://tessera.url",
+					Type: "Tessera",
+				},
+			})
+			return body
+		},
+		expectedStatusCode:  http.StatusOK,
+		expectedContentType: expectedSuccessStatusContentType,
+		expectedBody:        func() string { return expectedSuccessStatusBody },
+	},
+	{
 		name:       "TestPatchChainByUUID400WithWrongURL",
 		chainAgent: UseMockChainRegistry,
 		httpMethod: http.MethodPatch,
@@ -81,5 +99,23 @@ var patchChainByUUIDTests = []HTTPRouteTests{
 		expectedStatusCode:  http.StatusInternalServerError,
 		expectedContentType: expectedErrorStatusContentType,
 		expectedBody:        func() string { return expectedInternalServerErrorBody },
+	},
+	{
+		name:       "TestPatchTesseraChainByUUIDByID400",
+		chainAgent: UseMockChainRegistry,
+		httpMethod: http.MethodPatch,
+		path:       "/chains/1",
+		body: func() []byte {
+			body, _ := json.Marshal(&PatchRequest{
+				PrivateTxManager: &PrivateTxManagerRequest{
+					URL:  "!%!%!",
+					Type: "http://tessera2.url",
+				},
+			})
+			return body
+		},
+		expectedStatusCode:  http.StatusBadRequest,
+		expectedContentType: expectedErrorStatusContentType,
+		expectedBody:        func() string { return expectedErrorInvalidManagerURL },
 	},
 }

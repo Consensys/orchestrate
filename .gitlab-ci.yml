@@ -271,14 +271,15 @@ release-e2e:
 
 .swagger-doc: &swagger-doc
   # template to build swagger doc
-  image: node:stretch-slim
+  image: node:12.16.2-stretch-slim
   stage: doc
   variables:
     # default target is "latest" directory
     API_DOC_VERSION: "latest"
   before_script:
-    - npm install swagger-combine -g
-    - npm install redoc-cli -g
+    - npm install swagger-combine@1.0.0
+    - npm install redoc-cli@0.9.7
+    - export PATH="$PATH:$(pwd)/node_modules/.bin"
     - mkdir -p public/${API_DOC_VERSION}
   script:
     *swagger-doc-common-scripts
