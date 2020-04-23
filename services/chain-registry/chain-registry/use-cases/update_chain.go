@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"context"
+	"time"
 
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/sirupsen/logrus"
@@ -35,6 +36,10 @@ func (uc *updateChain) Execute(ctx context.Context, uuid, chainName string, chai
 
 	// We need to insert UUID for the new PrivateTxManagers if so
 	chain.SetPrivateTxManagersDefault()
+
+	// @TODO: This is a provisional hack meanwhile task #PO-479 is implemented
+	updateAt := time.Now().UTC()
+	chain.UpdatedAt = &updateAt
 
 	var err error
 	if uuid != "" {

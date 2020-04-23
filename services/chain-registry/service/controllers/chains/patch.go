@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/chain-registry/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 )
@@ -61,7 +60,6 @@ func parsePatchReqToChain(request *http.Request) (*models.Chain, error) {
 	chain := models.Chain{
 		Name:                      chainRequest.Name,
 		URLs:                      chainRequest.URLs,
-		TenantID:                  multitenancy.TenantIDFromContext(request.Context()),
 		ListenerCurrentBlock:      chainRequest.Listener.CurrentBlock,
 		ListenerBackOffDuration:   chainRequest.Listener.BackOffDuration,
 		ListenerDepth:             chainRequest.Listener.Depth,
