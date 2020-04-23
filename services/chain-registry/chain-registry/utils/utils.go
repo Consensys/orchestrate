@@ -3,19 +3,14 @@ package utils
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"html"
-	"io"
 	"net/http"
 	"net/url"
 
 	"github.com/containous/traefik/v2/pkg/log"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
 	ethclientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
-
-	"github.com/go-playground/validator/v10"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
 const component = "chain-registry.store.api"
@@ -52,29 +47,6 @@ func HandleStoreError(rw http.ResponseWriter, err error) {
 func WriteError(rw http.ResponseWriter, msg string, code int) {
 	data, _ := json.Marshal(apiError{Message: msg})
 	http.Error(rw, string(data), code)
-}
-
-func UnmarshalBody(body io.Reader, req interface{}) error {
-	dec := json.NewDecoder(body)
-	dec.DisallowUnknownFields() // Force errors if unknown fields
-	err := dec.Decode(req)
-	if err != nil {
-		return errors.FromError(err).ExtendComponent(component)
-	}
-
-	err = utils.GetValidator().Struct(req)
-	if err != nil {
-		if ves, ok := err.(validator.ValidationErrors); ok {
-			var errorMessage string
-			for _, fe := range ves {
-				errorMessage += fmt.Sprintf(" field validation for '%s' failed on the '%s' tag", fe.Field(), fe.Tag())
-			}
-			return errors.InvalidParameterError("invalid body, with:%s", errorMessage).ExtendComponent(component)
-		}
-		return errors.FromError(fmt.Errorf("invalid body")).ExtendComponent(component)
-	}
-
-	return nil
 }
 
 func GetChainTip(ctx context.Context, ec ethclient.ChainLedgerReader, urls []string) (uint64, error) {

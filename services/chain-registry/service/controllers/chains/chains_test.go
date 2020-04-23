@@ -27,14 +27,14 @@ import (
 const (
 	expectedInternalServerErrorBody  = "{\"message\":\"test error\"}\n"
 	expectedNotFoundErrorBody        = "{\"message\":\"DB200@: not found error\"}\n"
-	expectedNotUniqueURLsError       = "{\"message\":\"42400@chain-registry.store.api: invalid body, with: field validation for 'URLs[0]' failed on the 'url' tag\"}\n"
-	expectedUnknownBodyError         = "{\"message\":\"FF000@chain-registry.store.api: json: unknown field \\\"unknownField\\\"\"}\n"
+	expectedNotUniqueURLsError       = "{\"message\":\"42400@encoding.json: invalid body, with: field validation for 'URLs[0]' failed on the 'url' tag\"}\n"
+	expectedUnknownBodyError         = "{\"message\":\"42300@encoding.json: json: unknown field \\\"unknownField\\\"\"}\n"
 	expectedSuccessStatusBody        = "{\"uuid\":\"\",\"name\":\"\",\"tenantID\":\"\",\"urls\":null,\"createdAt\":null}\n"
 	expectedSuccessStatusSliceBody   = "[]\n"
 	expectedSuccessStatusContentType = "application/json"
 	expectedErrorStatusContentType   = "text/plain; charset=utf-8"
-	expectedErrorInvalidManagerType  = "{\"message\":\"42400@chain-registry.store.api: invalid body, with: field validation for 'Type' failed on the 'isPrivateTxManagerType' tag\"}\n"
-	expectedErrorInvalidManagerURL   = "{\"message\":\"42400@chain-registry.store.api: invalid body, with: field validation for 'URL' failed on the 'url' tag field validation for 'Type' failed on the 'isPrivateTxManagerType' tag\"}\n"
+	expectedErrorInvalidManagerType  = "{\"message\":\"42400@encoding.json: invalid body, with: field validation for 'Type' failed on the 'isPrivateTxManagerType' tag\"}\n"
+	expectedErrorInvalidManagerURL   = "{\"message\":\"42400@encoding.json: invalid body, with: field validation for 'URL' failed on the 'url' tag field validation for 'Type' failed on the 'isPrivateTxManagerType' tag\"}\n"
 	notFoundErrorFilter              = "notFoundError"
 )
 

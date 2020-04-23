@@ -26,6 +26,7 @@ const (
 	GRPCConnection            = Connection + 4<<8 // gRPC Connection error (subclass 084XX)
 	RedisConnection           = Connection + 5<<8 // Redis Connection error (subclass 085XX)
 	PostgresConnection        = Connection + 6<<8 // Postgres Connection error (subclass 086XX)
+	ServiceConnection         = Connection + 7<<8 // Service Connection error (subclass 086XX)
 
 	// Authentication Errors (class 09XXX)
 	InvalidAuthentication uint64 = 9 << 12
@@ -191,6 +192,16 @@ func PostgresConnectionError(format string, a ...interface{}) *ierror.Error {
 // IsPostgresConnectionError indicate whether an error is a Postgres connection error
 func IsPostgresConnectionError(err error) bool {
 	return isErrorClass(FromError(err).GetCode(), PostgresConnection)
+}
+
+// ServiceConnectionError is raised when failing to connect to another service
+func ServiceConnectionError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(ServiceConnection, format, a...)
+}
+
+// IsServiceConnectionError indicate whether an error is a Service connection error
+func IsServiceConnectionError(err error) bool {
+	return isErrorClass(FromError(err).GetCode(), ServiceConnection)
 }
 
 // InvalidAuthenticationError is raised when access to an operation has been denied

@@ -2,6 +2,7 @@ package chains
 
 import (
 	"encoding/json"
+	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -52,7 +53,7 @@ func parsePatchReqToChain(request *http.Request) (*models.Chain, error) {
 		Listener: &ListenerPatchRequest{},
 	}
 
-	err := utils.UnmarshalBody(request.Body, chainRequest)
+	err := jsonutils.UnmarshalBody(request.Body, chainRequest)
 	if err != nil {
 		return nil, err
 	}

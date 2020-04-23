@@ -32,12 +32,13 @@ func (s *HttpChainTestSuite) TestChainRegistry_EnvChainImport() {
 	ctx := context.Background()
 	chainNameGeth := "geth"
 	chainUrlGeth := "http://geth:8545"
-	
+
 	chainNameBesu := "besu"
 	chainUrlBesu := "http://validator2:8545"
-	
+
 	chainNameQuorum := "quorum"
 	chainUrlQuorum := "http://172.16.239.11:8545"
+
 	chainQuorumPrivTxType := utils.TesseraChainType
 	chainQuorumPrivTxURL := "http://tessera1:9080"
 	
@@ -49,7 +50,7 @@ func (s *HttpChainTestSuite) TestChainRegistry_EnvChainImport() {
 			assert.Equal(t, chainUrlGeth, resp.URLs[0])	
 		}
 	})
-	
+
 	s.T().Run("should fetch env chain besu by name", func(t *testing.T) {
 		resp, err := s.client.GetChainByName(ctx, chainNameBesu)
 		assert.Nil(t, err)
@@ -58,7 +59,7 @@ func (s *HttpChainTestSuite) TestChainRegistry_EnvChainImport() {
 			assert.Equal(t, chainUrlBesu, resp.URLs[0])	
 		}
 	})
-	
+
 	s.T().Run("should fetch env chain quorum by name", func(t *testing.T) {
 		resp, err := s.client.GetChainByName(ctx, chainNameQuorum)
 		assert.Nil(t, err)
@@ -75,7 +76,7 @@ func (s *HttpChainTestSuite) TestChainRegistry_EnvChainImport() {
 		}
 	})
 }
- 
+
 func (s *HttpChainTestSuite) TestChainRegistry_ChainHappyFlow() {
 	ctx := context.Background()
 	chainName := fmt.Sprintf("TestChain%d", rand.Intn(1000))
@@ -120,13 +121,12 @@ func (s *HttpChainTestSuite) TestChainRegistry_ChainHappyFlow() {
 		assert.Equal(t, curBlockNumber, *resp.ListenerCurrentBlock)
 	})
 
-	s.T().Run("should deleted registered chain by UUID", func(t *testing.T) {
+	s.T().Run("should delete registered chain by UUID", func(t *testing.T) {
 		err := s.client.DeleteChainByUUID(ctx, chainUUID)
 		assert.Nil(t, err)
 
 		_, err = s.client.GetChainByUUID(ctx, chainUUID)
-		assert.NotNil(t, err)
-		assert.True(t, errors.IsNotFoundError(err), "should be DataErr, instead "+err.Error())
+		assert.True(t, errors.IsNotFoundError(err))
 	})
 }
 
@@ -209,7 +209,7 @@ func (s *HttpChainTestSuite) TestChainRegistry_ChainErrors() {
 		_, err := s.client.RegisterChain(ctx, &chain)
 
 		assert.NotNil(t, err)
-		assert.True(t, errors.IsDataError(err), "should be DataErr, instead "+err.Error())
+		assert.True(t, errors.IsDataError(err))
 	})
 
 	s.T().Run("should fail to register a new invalid chain", func(t *testing.T) {
@@ -221,7 +221,7 @@ func (s *HttpChainTestSuite) TestChainRegistry_ChainErrors() {
 		_, err := s.client.RegisterChain(ctx, &chain)
 
 		assert.NotNil(t, err)
-		assert.True(t, errors.IsDataError(err), "should be DataErr, instead "+err.Error())
+		assert.True(t, errors.IsDataError(err))
 	})
 
 	s.T().Run("should register a new chain", func(t *testing.T) {
@@ -243,7 +243,7 @@ func (s *HttpChainTestSuite) TestChainRegistry_ChainErrors() {
 		})
 
 		assert.NotNil(t, err)
-		assert.True(t, errors.IsDataError(err), "should be DataErr, instead "+err.Error())
+		assert.True(t, errors.IsDataError(err))
 	})
 
 	s.T().Run("should fail to update chain by UUID with invalid data", func(t *testing.T) {
@@ -252,7 +252,7 @@ func (s *HttpChainTestSuite) TestChainRegistry_ChainErrors() {
 		})
 
 		assert.NotNil(t, err)
-		assert.True(t, errors.IsDataError(err), "should be DataErr, instead "+err.Error())
+		assert.True(t, errors.IsDataError(err))
 	})
 
 	s.T().Run("should deleted registered chain by UUID", func(t *testing.T) {

@@ -2,17 +2,16 @@ package usecases
 
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/transactions"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/validators"
 )
 
-const Component = "use-cases"
-
 type UseCases struct {
-	CreateJobs jobs.CreateJobUseCase
+	SendTransaction transactions.SendTxUseCase
 }
 
-func NewUseCases(dataAgents *store.DataAgents) *UseCases {
+func NewUseCases(dataAgents *store.DataAgents, val *validators.Validators) *UseCases {
 	return &UseCases{
-		CreateJobs: jobs.NewCreateJob(dataAgents.TransactionJob),
+		SendTransaction: transactions.NewSendTx(dataAgents.TransactionRequest, val.TransactionValidator),
 	}
 }

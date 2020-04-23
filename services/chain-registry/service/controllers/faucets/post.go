@@ -2,6 +2,7 @@ package faucets
 
 import (
 	"encoding/json"
+	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"net/http"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
@@ -26,7 +27,7 @@ func (h *controller) PostFaucet(rw http.ResponseWriter, request *http.Request) {
 
 	faucetRequest := &PostRequest{}
 
-	err := utils.UnmarshalBody(request.Body, faucetRequest)
+	err := jsonutils.UnmarshalBody(request.Body, faucetRequest)
 	if err != nil {
 		utils.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return

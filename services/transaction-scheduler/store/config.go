@@ -25,12 +25,12 @@ const (
 	typeFlag     = "transaction-scheduler-type"
 	TypeViperKey = "transaction-scheduler.store.type"
 	typeDefault  = postgresType
-	typeEnv      = "TRANSACTION_MANAGER_TYPE"
+	typeEnv      = "TRANSACTION_SCHEDULER_TYPE"
 )
 
-// Type register flag for the Envelope Store to select
+// Type register flag for the Transaction scheduler to select
 func Type(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Type of Transaction scheduler API Store (one of %q)
+	desc := fmt.Sprintf(`Type of Transaction scheduler Store (one of %q)
 Environment variable: %q`, availableTypes, typeEnv)
 	f.String(typeFlag, typeDefault, desc)
 	_ = viper.BindPFlag(TypeViperKey, f.Lookup(typeFlag))

@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	dataagents "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/postgres/data-agents"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 )
 
@@ -16,7 +18,7 @@ func Build(ctx context.Context, cfg *Config, pgmngr postgres.Manager) (*DataAgen
 		db := pgmngr.Connect(ctx, cfg.Postgres.PG)
 
 		return &DataAgents{
-			TransactionRequest: db,
+			TransactionRequest: dataagents.NewPGTransactionRequest(db),
 		}, nil
 	default:
 		return &DataAgents{}, fmt.Errorf("invalid transaction scheduler store type %q", cfg.Type)

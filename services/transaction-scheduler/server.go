@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
+
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/sirupsen/logrus"
 	pkgapp "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
@@ -33,6 +35,7 @@ func NewServer(ctx context.Context, cfg *Config) (*TransactionManagerServer, err
 	// Initialize dependencies
 	authjwt.Init(ctx)
 	authkey.Init(ctx)
+	client.Init(ctx)
 
 	app, err := newApplication(
 		ctx,
@@ -40,6 +43,7 @@ func NewServer(ctx context.Context, cfg *Config) (*TransactionManagerServer, err
 		authjwt.GlobalChecker(),
 		authkey.GlobalChecker(),
 		logrus.StandardLogger(),
+		client.GlobalClient(),
 	)
 
 	if err != nil {

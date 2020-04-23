@@ -62,12 +62,11 @@ func (s *HttpFaucetTestSuite) TestChainRegistry_FaucetHappyFlow() {
 		assert.Equal(t, faucet.Name, faucetNameTwo)
 	})
 
-	s.T().Run("should deleted registered faucet by UUID", func(t *testing.T) {
+	s.T().Run("should delete registered faucet by UUID", func(t *testing.T) {
 		err := s.client.DeleteFaucetByUUID(ctx, faucetUUID)
 		assert.Nil(t, err)
 		
 		_, err = s.client.GetFaucetByUUID(ctx, faucetUUID)
-		assert.NotNil(t, err)
-		assert.True(t, errors.IsNotFoundError(err), "should be DataErr, instead "+err.Error())
+		assert.True(t, errors.IsNotFoundError(err))
 	})
 }

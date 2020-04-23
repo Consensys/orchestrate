@@ -3,8 +3,6 @@ package service
 import (
 	"reflect"
 
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
-
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
@@ -22,25 +20,25 @@ func NewHTTPBuilder(
 	staticCfg *traefikstatic.Configuration,
 	jwt, key auth.Checker,
 	multitenancy bool,
-	uc *usecases.UseCases,
+	ctrls *controllers.Builder,
 ) (router.Builder, error) {
 	builder := dynrouter.NewBuilder(staticCfg, nil)
 
 	// Create Service Builder
-	builder.Handler = newHandlerBuilder(uc)
+	builder.Handler = newHandlerBuilder(ctrls)
 	// Create Middleware Builder
 	builder.Middleware = newMiddlewareBuilder(jwt, key, multitenancy)
 
 	return builder, nil
 }
 
-func newHandlerBuilder(uc *usecases.UseCases) handler.Builder {
+func newHandlerBuilder(ctrls *controllers.Builder) handler.Builder {
 	builder := dynhandler.NewBuilder()
 
 	// Transaction API
 	builder.AddBuilder(
-		reflect.TypeOf(&dynamic.Chains{}),
-		controllers.NewBuilder(uc),
+		reflect.TypeOf(&dynamic.Transactions{}),
+		ctrls,
 	)
 
 	return builder

@@ -27,9 +27,16 @@ func (s *transactionSchedulerTestSuite) TearDownSuite() {
 	s.env.Teardown()
 }
 
+func (s *transactionSchedulerTestSuite) TestTransactionScheduler_Transactions() {
+	testSuite := new(TransactionsTestSuite)
+	testSuite.env = s.env
+	testSuite.baseURL = "http://localhost:8081/transactions"
+	suite.Run(s.T(), testSuite)
+}
+
 func (s *transactionSchedulerTestSuite) TestTransactionScheduler_Jobs() {
-	grpcSuite := new(JobsTestSuite)
-	grpcSuite.env = s.env
-	grpcSuite.baseURL = "localhost:8081/jobs"
-	suite.Run(s.T(), grpcSuite)
+	testSuite := new(JobsTestSuite)
+	testSuite.env = s.env
+	testSuite.baseURL = "http://localhost:8081/jobs"
+	suite.Run(s.T(), testSuite)
 }

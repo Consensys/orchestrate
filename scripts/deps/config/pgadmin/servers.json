@@ -35,6 +35,18 @@
             "PassFile": "/pgadmin4/password",
             "BGColor": "#3E5D6B",
             "FGColor": "#67C39B"
+        },
+        "4": {
+            "Name": "Transaction Scheduler",
+            "Group": "Orchestrate",
+            "Port": 5432,
+            "Username": "postgres",
+            "Host": "postgres-transaction-scheduler",
+            "SSLMode": "prefer",
+            "MaintenanceDB": "postgres",
+            "PassFile": "/pgadmin4/password",
+            "BGColor": "#3E5D6B",
+            "FGColor": "#67C39B"
         }
     }
 }

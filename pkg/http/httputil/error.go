@@ -3,6 +3,8 @@ package httputil
 import (
 	"encoding/json"
 	"net/http"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
 type ErrorResponse struct {
@@ -17,4 +19,17 @@ func WriteError(rw http.ResponseWriter, msg string, code int) {
 	}
 
 	http.Error(rw, string(data), code)
+}
+
+func WriteHTTPErrorResponse(rw http.ResponseWriter, err error) {
+	switch {
+	case errors.IsAlreadyExistsError(err):
+		WriteError(rw, err.Error(), http.StatusConflict)
+	case errors.IsNotFoundError(err):
+		WriteError(rw, err.Error(), http.StatusNotFound)
+	case errors.IsInvalidParameterError(err):
+		WriteError(rw, err.Error(), http.StatusUnprocessableEntity)
+	case err != nil:
+		WriteError(rw, "Internal server error. Please ask an admin for help or try again later", http.StatusInternalServerError)
+	}
 }

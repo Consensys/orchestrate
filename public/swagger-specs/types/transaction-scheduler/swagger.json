@@ -35,6 +35,30 @@
                     "500": {}
                 }
             }
+        },
+        "/transactions/send": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Creates and sends a new transaction",
+                "responses": {
+                    "200": {},
+                    "400": {},
+                    "404": {},
+                    "409": {},
+                    "422": {},
+                    "500": {}
+                }
+            }
         }
     },
     "securityDefinitions": {

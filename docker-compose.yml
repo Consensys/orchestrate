@@ -53,7 +53,7 @@ x-envelope-store-common: &envelope-store-common
   DB_HOST: postgres-envelope-store
 
 x-transaction-scheduler-common: &transaction-scheduler-common
-  CHAIN_REGISTRY_TYPE: ${TRANSACTION_SCHEDULER_TYPE-}
+  TRANSACTION_SCHEDULER_TYPE: ${TRANSACTION_SCHEDULER_TYPE-}
   DB_HOST: postgres-transaction-scheduler
 
 services:
