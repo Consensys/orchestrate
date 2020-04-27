@@ -14,6 +14,7 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/mock"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	crc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client/mock"
@@ -22,44 +23,6 @@ import (
 )
 
 type testKey string
-
-type MockChainStateReader struct {
-}
-
-func (ec *MockChainStateReader) BalanceAt(ctx context.Context, url string, account ethcommon.Address, blockNumber *big.Int) (*big.Int, error) {
-	return nil, nil
-}
-
-func (ec *MockChainStateReader) StorageAt(ctx context.Context, url string, account ethcommon.Address, key ethcommon.Hash, blockNumber *big.Int) ([]byte, error) {
-	return nil, nil
-}
-
-func (ec *MockChainStateReader) CodeAt(ctx context.Context, url string, account ethcommon.Address, blockNumber *big.Int) ([]byte, error) {
-	if err, ok := ctx.Value(testKey("codeAtError")).(error); ok {
-		return nil, err
-	}
-	return ethcommon.Hex2Bytes("0xabcd"), nil
-}
-
-func (ec *MockChainStateReader) NonceAt(ctx context.Context, url string, account ethcommon.Address, blockNumber *big.Int) (uint64, error) {
-	return 0, nil
-}
-
-func (ec *MockChainStateReader) PendingBalanceAt(ctx context.Context, url string, account ethcommon.Address) (*big.Int, error) {
-	return nil, nil
-}
-
-func (ec *MockChainStateReader) PendingStorageAt(ctx context.Context, url string, account ethcommon.Address, key ethcommon.Hash) ([]byte, error) {
-	return nil, nil
-}
-
-func (ec *MockChainStateReader) PendingCodeAt(ctx context.Context, url string, account ethcommon.Address) ([]byte, error) {
-	return nil, nil
-}
-
-func (ec *MockChainStateReader) PendingNonceAt(ctx context.Context, url string, account ethcommon.Address) (uint64, error) {
-	return 0, nil
-}
 
 func TestHook(t *testing.T) {
 	// Initialize hook
@@ -72,7 +35,14 @@ func TestHook(t *testing.T) {
 	registry := crc.NewMockContractRegistryClient(ctrl)
 	registry.EXPECT().SetAccountCodeHash(gomock.Any(), gomock.Any(), gomock.Any()).Return(&contractregistry.SetAccountCodeHashResponse{}, nil).AnyTimes()
 
-	ec := &MockChainStateReader{}
+	ec := mock.NewMockChainStateReader(ctrl)
+	ec.EXPECT().CodeAt(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(
+		func(ctx context.Context, _ string, _ ethcommon.Address, _ *big.Int) ([]byte, error) {
+			if err, ok := ctx.Value(testKey("codeAtError")).(error); ok {
+				return nil, err
+			}
+			return ethcommon.Hex2Bytes("0xabcd"), nil
+		}).AnyTimes()
 
 	producer := mocks.NewSyncProducer(t, nil)
 	hk := NewHook(conf, registry, ec, producer)

@@ -14,49 +14,17 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client/mock"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
 )
 
-type MockTxSender struct {
-	t *testing.T
-}
-
 const (
 	endpointNoError = "testURL"
 	endpointError   = "error"
 )
-
-func (s *MockTxSender) SendRawTransaction(ctx context.Context, endpoint, raw string) error {
-	if endpoint == endpointError {
-		return fmt.Errorf("mock: failed to send a raw transaction")
-	}
-	return nil
-}
-
-func (s *MockTxSender) SendTransaction(ctx context.Context, endpoint string, args *types.SendTxArgs) (ethcommon.Hash, error) {
-	if endpoint == endpointError {
-		return ethcommon.Hash{}, fmt.Errorf("mock: failed to send an unsigned transaction")
-	}
-	return ethcommon.HexToHash("0x" + RandString(32)), nil
-}
-
-func (s *MockTxSender) SendRawPrivateTransaction(ctx context.Context, endpoint, raw string, args *types.PrivateArgs) (ethcommon.Hash, error) {
-	if endpoint == endpointError {
-		return ethcommon.Hash{}, fmt.Errorf("mock: failed to send a raw private transaction")
-	}
-	return ethcommon.Hash{}, nil
-}
-
-func (s *MockTxSender) SendQuorumRawPrivateTransaction(ctx context.Context, endpoint, signedTxHash string, privateFor []string) (ethcommon.Hash, error) {
-	if endpoint == endpointError {
-		return ethcommon.Hash{}, fmt.Errorf("mock: failed to send a raw Tessera transaction")
-	}
-	return ethcommon.Hash{}, nil
-}
 
 var letterRunes = []rune("abcdef0123456789")
 
@@ -142,7 +110,6 @@ func makeSenderContext(i int) *engine.TxContext {
 }
 
 func TestSender(t *testing.T) {
-	s := MockTxSender{t: t}
 	ctrl := gomock.NewController(t)
 	client := clientmock.NewMockEnvelopeStoreClient(ctrl)
 	client.EXPECT().Store(gomock.Any(), gomock.AssignableToTypeOf(&svc.StoreRequest{}), gomock.Any()).Times(15)
@@ -151,7 +118,17 @@ func TestSender(t *testing.T) {
 		Times(15).Return(&svc.StoreResponse{
 		StatusInfo: &svc.StatusInfo{Status: svc.Status_PENDING},
 	}, nil)
-	sender := Sender(&s, client)
+
+	s := mock.NewMockTransactionSender(ctrl)
+	s.EXPECT().SendQuorumRawPrivateTransaction(gomock.Any(), gomock.Eq(endpointError), gomock.Any(), gomock.Any()).Return(ethcommon.Hash{}, fmt.Errorf("mock: failed to send a raw Tessera transaction")).AnyTimes()
+	s.EXPECT().SendQuorumRawPrivateTransaction(gomock.Any(), gomock.Not(gomock.Eq(endpointError)), gomock.Any(), gomock.Any()).Return(ethcommon.Hash{}, nil).AnyTimes()
+	s.EXPECT().SendRawPrivateTransaction(gomock.Any(), gomock.Eq(endpointError), gomock.Any()).Return(ethcommon.Hash{}, fmt.Errorf("mock: failed to send a raw private transaction")).AnyTimes()
+	s.EXPECT().SendRawPrivateTransaction(gomock.Any(), gomock.Not(gomock.Eq(endpointError)), gomock.Any()).Return(ethcommon.Hash{}, nil).AnyTimes()
+	s.EXPECT().SendTransaction(gomock.Any(), gomock.Eq(endpointError), gomock.Any()).Return(ethcommon.Hash{}, fmt.Errorf("mock: failed to send an unsigned transaction")).AnyTimes()
+	s.EXPECT().SendTransaction(gomock.Any(), gomock.Not(gomock.Eq(endpointError)), gomock.Any()).Return(ethcommon.HexToHash("0x"+RandString(32)), nil).AnyTimes()
+	s.EXPECT().SendRawTransaction(gomock.Any(), gomock.Eq(endpointError), gomock.Any()).Return(fmt.Errorf("mock: failed to send a raw transaction")).AnyTimes()
+	s.EXPECT().SendRawTransaction(gomock.Any(), gomock.Not(gomock.Eq(endpointError)), gomock.Any()).Return(nil).AnyTimes()
+	sender := Sender(s, client)
 
 	rounds := 15
 	outs := make(chan *engine.TxContext, rounds)

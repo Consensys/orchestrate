@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/nonce/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
@@ -66,7 +67,7 @@ func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFun
 				}
 
 				// Retrieve nonce from chain
-				pendingNonce, err := ec.PendingNonceAt(txctx.Context(), url, sender)
+				pendingNonce, err := utils.GetNonce(ec, txctx, url)
 				if err != nil {
 					e := txctx.AbortWithError(err).ExtendComponent(component)
 					txctx.Logger.WithError(e).Errorf("nonce: could not read nonce from chain")

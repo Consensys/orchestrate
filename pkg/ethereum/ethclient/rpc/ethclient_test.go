@@ -98,15 +98,7 @@ func TestDo(t *testing.T) {
 	assert.Error(t, err, "#1 do should return error")
 	assert.Contains(t, err.Error(), "test-error", "#1 Error message should be correct")
 
-	// Test 2: with Status Code 404
-	ctx = newContext(nil, 404, nil)
-	req, _ = http.NewRequestWithContext(ctx, http.MethodPost, "test-endpoint", nil)
-	_, err = ec.do(req)
-
-	assert.Error(t, err, "#2 do should return error")
-	assert.Contains(t, err.Error(), "Not Found", "#2 Error message should be correct")
-
-	// Test 3: with Status Code 201
+	// Test 2: with Status Code 201
 	ctx = newContext(nil, 201, nil)
 	req, _ = http.NewRequestWithContext(ctx, http.MethodPost, "test-endpoint", nil)
 	_, err = ec.do(req)
@@ -720,7 +712,7 @@ func TestSendRawPrivateTransaction(t *testing.T) {
 
 	// Test 1 with Error
 	ctx := newContext(fmt.Errorf("test-error"), 0, nil)
-	_, err := ec.SendRawPrivateTransaction(ctx, "test-endpoint", "", &types.PrivateArgs{})
+	_, err := ec.SendRawPrivateTransaction(ctx, "test-endpoint", "")
 	assert.Error(t, err, "#1 SendRawPrivateTransaction should  error")
 }
 

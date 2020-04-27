@@ -14,7 +14,7 @@ type PrivateArgs struct {
 	// Private Transaction Fields
 	PrivateFrom    string   `json:"privateFrom"`
 	PrivateFor     []string `json:"privateFor"`
-	PrivacyGroupId string   `json:"privacyGroupId"`
+	PrivacyGroupID string   `json:"privacyGroupId"`
 	PrivateTxType  string   `json:"restriction"`
 }
 
@@ -23,7 +23,7 @@ func Call2PrivateArgs(req *tx.Envelope) *PrivateArgs {
 	var privateArgs PrivateArgs
 	privateArgs.PrivateFrom = req.PrivateFrom
 	privateArgs.PrivateFor = req.PrivateFor
-	privateArgs.PrivacyGroupId = req.PrivacyGroupID
+	privateArgs.PrivacyGroupID = req.PrivacyGroupID
 	privateArgs.PrivateTxType = req.PrivateTxType
 	return &privateArgs
 }

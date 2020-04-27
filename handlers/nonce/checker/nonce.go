@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/nonce/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
@@ -82,7 +83,7 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 		} else {
 			// If no nonce is available (meaning that envelope being processed is the first one for the pair sender,chain)
 			// then we retrieve nonce from chain
-			pendingNonce, callErr := ec.PendingNonceAt(txctx.Context(), url, sender)
+			pendingNonce, callErr := utils.GetNonce(ec, txctx, url)
 			if callErr != nil {
 				_ = txctx.AbortWithError(errors.EthereumError("could not read nonce from chain - got %v", callErr)).ExtendComponent(component)
 				return
@@ -169,7 +170,7 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 		var errs []*ierror.Error
 		for _, err := range txctx.Envelope.GetErrors() {
 			// TODO: update EthClient to process and standardize nonce too low errors
-			if !strings.Contains(err.String(), "nonce too low") {
+			if !strings.Contains(err.String(), "nonce too low") && !strings.Contains(err.String(), "Nonce too low") && !strings.Contains(err.String(), "Incorrect nonce") {
 				errs = append(errs, err)
 				continue
 			}
@@ -187,7 +188,7 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 			}
 
 			// We recalibrate nonce from chain
-			pendingNonce, err := ec.PendingNonceAt(txctx.Context(), url, sender)
+			pendingNonce, err := utils.GetNonce(ec, txctx, url)
 			if err != nil {
 				_ = txctx.AbortWithError(errors.FromError(fmt.Errorf("could not read nonce from chain - got %v", err))).ExtendComponent(component)
 				return

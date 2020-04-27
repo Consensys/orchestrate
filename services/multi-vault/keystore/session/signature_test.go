@@ -20,10 +20,10 @@ func TestExecuteForEEATx(t *testing.T) {
 	multitenancy.Init(context.Background())
 	mock := memory.NewSecretStore(multitenancy.GlobalKeyBuilder())
 
-	mock.Store(context.Background(), "0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73", "8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63")
+	_ = mock.Store(context.Background(), "0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73", "8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63")
 	s := NewSigningSession(mock)
 
-	s.SetChain(big.NewInt(2018))
+	_ = s.SetChain(big.NewInt(2018))
 	a := common.HexToAddress("0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73")
 	_ = s.SetAccount(context.Background(), &a)
 
@@ -48,5 +48,4 @@ func TestExecuteForEEATx(t *testing.T) {
 	assert.Equal(t, expedtedSignedRlpEncoded, raw)
 	assert.Equal(t, expedtedHash, hash.Hex())
 	assert.NoError(t, err)
-
 }

@@ -81,6 +81,12 @@ type ChainStateReader interface {
 
 	// PendingNonceAt returns account nonce of the given account in the pending state.
 	PendingNonceAt(ctx context.Context, url string, account ethcommon.Address) (uint64, error)
+
+	// PrivEEANonce Returns the private transaction count for specified account and privacy group
+	PrivEEANonce(ctx context.Context, endpoint string, account ethcommon.Address, privateFrom string, privateFor []string) (uint64, error)
+
+	// PrivNonce Returns the private transaction count for specified account and privacy group
+	PrivNonce(ctx context.Context, endpoint string, account ethcommon.Address, privacyGroupID string) (uint64, error)
 }
 
 // ContractCaller is a service to perform contract calls

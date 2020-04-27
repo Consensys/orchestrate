@@ -91,6 +91,7 @@ func (ec *Client) call(req *http.Request, processResult ProcessResultFunc) error
 		return err
 	}
 
+	var respMsg JSONRpcMessage
 	if resp.Body != nil {
 		defer func() {
 			err := resp.Body.Close()
@@ -100,20 +101,19 @@ func (ec *Client) call(req *http.Request, processResult ProcessResultFunc) error
 					Warn("could not close request body")
 			}
 		}()
-	}
 
-	var respMsg JSONRpcMessage
-	if err := json.NewDecoder(resp.Body).Decode(&respMsg); err != nil {
-		return errors.EncodingError(err.Error())
+		if err := json.NewDecoder(resp.Body).Decode(&respMsg); err != nil {
+			return errors.EncodingError(err.Error())
+		}
 	}
 
 	switch {
 	case respMsg.Error != nil:
 		return ec.processEthError(respMsg.Error)
-	case resp.StatusCode < 200 || resp.StatusCode >= 300:
-		return errors.EthConnectionError("%v (code=%v): ", resp.Status, resp.StatusCode)
 	case len(respMsg.Result) == 0:
 		return errors.NotFoundError("not found")
+	case resp.StatusCode < 200 || resp.StatusCode >= 300:
+		return errors.EthConnectionError("%v (code=%v): ", resp.Status, resp.StatusCode)
 	default:
 		return processResult(respMsg.Result)
 	}
@@ -191,7 +191,7 @@ func (ec *Client) nextID() json.RawMessage {
 }
 
 func (ec *Client) processEthError(err *JSONError) error {
-	if strings.Contains(err.Message, "nonce too low") || strings.Contains(err.Message, "Nonce too low") {
+	if strings.Contains(err.Message, "nonce too low") || strings.Contains(err.Message, "Nonce too low") || strings.Contains(err.Message, "Incorrect nonce") {
 		return errors.NonceTooLowError("code: %d - message: %s", err.Code, err.Message)
 	}
 	return errors.EthereumError("code: %d - message: %s", err.Code, err.Message)
@@ -661,4 +661,24 @@ func (ec *Client) SendRawPrivateTransaction(ctx context.Context, endpoint, raw s
 		return ethcommon.Hash{}, errors.FromError(err).ExtendComponent(component)
 	}
 	return ethcommon.HexToHash(hash), nil
+}
+
+// PrivEEANonce Returns the private transaction count for specified account and privacy group
+func (ec *Client) PrivEEANonce(ctx context.Context, endpoint string, account ethcommon.Address, privateFrom string, privateFor []string) (uint64, error) {
+	var nonce hexutil.Uint64
+	err := ec.Call(ctx, endpoint, processResult(nonce), "priv_getEeaTransactionCount", account.Hex(), privateFrom, privateFor)
+	if err != nil {
+		return 0, errors.FromError(err).ExtendComponent(component)
+	}
+	return uint64(nonce), nil
+}
+
+// PrivNonce returns the private transaction count for the specified account and group of sender and recipients
+func (ec *Client) PrivNonce(ctx context.Context, endpoint string, account ethcommon.Address, privacyGroupID string) (uint64, error) {
+	var nonce hexutil.Uint64
+	err := ec.Call(ctx, endpoint, processResult(nonce), "priv_getTransactionCount", account.Hex(), privacyGroupID)
+	if err != nil {
+		return 0, errors.FromError(err).ExtendComponent(component)
+	}
+	return uint64(nonce), nil
 }

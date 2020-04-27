@@ -3,6 +3,7 @@ package tx
 import (
 	"fmt"
 	"math/big"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -16,6 +17,7 @@ import (
 	error1 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/error"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	"golang.org/x/crypto/sha3"
 )
 
 type Envelope struct {
@@ -108,6 +110,16 @@ func (e *Envelope) IsEeaSendPrivateTransaction() bool {
 	return e.Method == Method_EEA_SENDPRIVATETRANSACTION
 }
 
+// IsEthSendRawTransaction for Besu Orion with Privacy Group
+func (e *Envelope) IsEeaSendPrivateTransactionPrivacyGroup() bool {
+	return e.Method == Method_EEA_SENDPRIVATETRANSACTION && e.PrivacyGroupID != ""
+}
+
+// IsEthSendRawTransaction for Besu Orion with PrivateFor
+func (e *Envelope) IsEeaSendPrivateTransactionPrivateFor() bool {
+	return e.Method == Method_EEA_SENDPRIVATETRANSACTION && len(e.PrivateFor) > 0
+}
+
 func (e *Envelope) Carrier() opentracing.TextMapCarrier {
 	return e.ContextLabels
 }
@@ -176,8 +188,17 @@ func (e *Envelope) Validate() []error {
 	if err != nil {
 		return utils.HandleValidatorError(err.(validator.ValidationErrors))
 	}
+
+	if e.IsEeaSendPrivateTransaction() && len(e.GetPrivateFor()) > 0 && e.GetPrivacyGroupID() != "" {
+		return []error{errors.DataError("privacyGroupId and privateFor fields are mutually exclusive")}
+	}
+
+	if e.IsEeaSendPrivateTransaction() && len(e.GetPrivateFor()) == 0 && e.GetPrivacyGroupID() == "" {
+		return []error{errors.DataError("privacyGroupId or privateFor is missing")}
+	}
 	return nil
 }
+
 func (e *Envelope) GetContextLabelsValue(key string) string {
 	return e.ContextLabels[key]
 }
@@ -732,8 +753,8 @@ func (e *Envelope) ShortContract() string {
 type Private struct {
 	PrivateFor     []string `validate:"dive,base64"`
 	PrivateFrom    string   `validate:"omitempty,base64"`
-	PrivateTxType  string
-	PrivacyGroupID string
+	PrivateTxType  string   `validate:"omitempty,oneof=restricted unrestricted"`
+	PrivacyGroupID string   `validate:"omitempty,base64"`
 	EnclaveKey     string
 }
 
@@ -910,4 +931,20 @@ func (e *Envelope) loadPtrFields(gas, nonce, gasPrice, value, from, to string) [
 	}
 
 	return errs
+}
+
+func (e *Envelope) KafkaPartitionKey() string {
+	switch {
+	case e.IsEeaSendPrivateTransactionPrivacyGroup():
+		return fmt.Sprintf("%v@orion-%v@%v", e.GetFromString(), e.GetPrivacyGroupID(), e.GetChainID().String())
+	case e.IsEeaSendPrivateTransactionPrivateFor():
+		l := append(e.GetPrivateFor(), e.GetPrivateFrom())
+		sort.Strings(l)
+		h := sha3.NewLegacyKeccak256()
+		_, _ = h.Write([]byte(strings.Join(l, "-")))
+		key := h.Sum(nil)
+		return fmt.Sprintf("%v@orion-%v@%v", e.GetFromString(), hexutil.Encode(key), e.GetChainID().String())
+	default:
+		return fmt.Sprintf("%v@%v", e.GetFromString(), e.GetChainID().String())
+	}
 }

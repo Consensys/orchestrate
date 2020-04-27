@@ -624,3 +624,55 @@ func TestEnvelope_TxResponse(t *testing.T) {
 
 	assert.Equal(t, res, b.TxResponse(), "Should be equal")
 }
+
+func TestPrivateValidation(t *testing.T) {
+	b := NewEnvelope().
+		SetID("9f8708ad-8019-4533-9690-6495cc79a03c").
+		SetMethod(Method_EEA_SENDPRIVATETRANSACTION).
+		SetPrivateFor([]string{"kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M="}).
+		SetPrivacyGroupID("kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M=")
+
+	assert.Len(t, b.Validate(), 1)
+	if len(b.Validate()) == 1 {
+		assert.Equal(t, errors.DataError("privacyGroupId and privateFor fields are mutually exclusive"), b.Validate()[0])
+	}
+
+	b2 := NewEnvelope().
+		SetID("9f8708ad-8019-4533-9690-6495cc79a03c").
+		SetMethod(Method_EEA_SENDPRIVATETRANSACTION).
+		SetPrivacyGroupID("kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M=")
+
+	assert.Len(t, b2.Validate(), 0)
+
+	b3 := NewEnvelope().
+		SetID("9f8708ad-8019-4533-9690-6495cc79a03c").
+		SetMethod(Method_EEA_SENDPRIVATETRANSACTION).
+		SetPrivateFor([]string{"kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M="})
+
+	assert.Len(t, b3.Validate(), 0)
+}
+
+func TestKafkaPartitionKey(t *testing.T) {
+	b := NewEnvelope().
+		SetChainIDUint64(10).
+		MustSetFromString("0x1").
+		SetID("9f8708ad-8019-4533-9690-6495cc79a03c").
+		SetPrivacyGroupID("kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M=")
+	assert.Equal(t, "0x0000000000000000000000000000000000000001@10", b.KafkaPartitionKey())
+
+	b2 := NewEnvelope().
+		SetChainIDUint64(10).
+		MustSetFromString("0x1").
+		SetID("9f8708ad-8019-4533-9690-6495cc79a03c").
+		SetMethod(Method_EEA_SENDPRIVATETRANSACTION).
+		SetPrivacyGroupID("kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M=")
+	assert.Equal(t, "0x0000000000000000000000000000000000000001@orion-kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M=@10", b2.KafkaPartitionKey())
+
+	b3 := NewEnvelope().
+		SetChainIDUint64(10).
+		MustSetFromString("0x1").
+		SetID("9f8708ad-8019-4533-9690-6495cc79a03c").
+		SetMethod(Method_EEA_SENDPRIVATETRANSACTION).
+		SetPrivateFor([]string{"kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M="})
+	assert.Equal(t, "0x0000000000000000000000000000000000000001@orion-0x99a354df71e6fa9b2bcba07e6c4e004e34acad8d76f81e2f4f68b74a250075d1@10", b3.KafkaPartitionKey())
+}

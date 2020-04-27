@@ -8,7 +8,6 @@ import (
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
 // PrepareMsg prepare message to produce from TxContexts
@@ -28,7 +27,7 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 		}
 
 		// Set key for Kafka partitions
-		msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(txctx.Envelope.ChainID, txctx.Envelope.MustGetFromAddress()))
+		msg.Key = sarama.StringEncoder(txctx.In.Key())
 	case viper.GetString(broker.AccountGeneratorViperKey):
 		msg.Topic = viper.GetString(broker.AccountGeneratedViperKey)
 		p = txctx.Envelope.TxResponse()

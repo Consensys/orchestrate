@@ -29,7 +29,7 @@ func signTx(s keystore.KeyStore, txctx *engine.TxContext, sender ethcommon.Addre
 		&types.PrivateArgs{
 			PrivateFor:     txctx.Envelope.GetPrivateFor(),
 			PrivateFrom:    txctx.Envelope.GetPrivateFrom(),
-			PrivacyGroupId: txctx.Envelope.GetPrivacyGroupID(),
+			PrivacyGroupID: txctx.Envelope.GetPrivacyGroupID(),
 			PrivateTxType:  "restricted",
 		},
 	)

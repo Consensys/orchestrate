@@ -84,18 +84,18 @@ func (mr *MockTransactionSenderMockRecorder) SendQuorumRawPrivateTransaction(ctx
 }
 
 // SendRawPrivateTransaction mocks base method.
-func (m *MockTransactionSender) SendRawPrivateTransaction(ctx context.Context, url, raw string, args *types0.PrivateArgs) (common.Hash, error) {
+func (m *MockTransactionSender) SendRawPrivateTransaction(ctx context.Context, url, raw string) (common.Hash, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendRawPrivateTransaction", ctx, url, raw, args)
+	ret := m.ctrl.Call(m, "SendRawPrivateTransaction", ctx, url, raw)
 	ret0, _ := ret[0].(common.Hash)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SendRawPrivateTransaction indicates an expected call of SendRawPrivateTransaction.
-func (mr *MockTransactionSenderMockRecorder) SendRawPrivateTransaction(ctx, url, raw, args interface{}) *gomock.Call {
+func (mr *MockTransactionSenderMockRecorder) SendRawPrivateTransaction(ctx, url, raw interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendRawPrivateTransaction", reflect.TypeOf((*MockTransactionSender)(nil).SendRawPrivateTransaction), ctx, url, raw, args)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendRawPrivateTransaction", reflect.TypeOf((*MockTransactionSender)(nil).SendRawPrivateTransaction), ctx, url, raw)
 }
 
 // MockChainLedgerReader is a mock of ChainLedgerReader interface.
@@ -355,6 +355,36 @@ func (mr *MockChainStateReaderMockRecorder) PendingNonceAt(ctx, url, account int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PendingNonceAt", reflect.TypeOf((*MockChainStateReader)(nil).PendingNonceAt), ctx, url, account)
 }
 
+// PrivEEANonce mocks base method.
+func (m *MockChainStateReader) PrivEEANonce(ctx context.Context, endpoint string, account common.Address, privateFrom string, privateFor []string) (uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivEEANonce", ctx, endpoint, account, privateFrom, privateFor)
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivEEANonce indicates an expected call of PrivEEANonce.
+func (mr *MockChainStateReaderMockRecorder) PrivEEANonce(ctx, endpoint, account, privateFrom, privateFor interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivEEANonce", reflect.TypeOf((*MockChainStateReader)(nil).PrivEEANonce), ctx, endpoint, account, privateFrom, privateFor)
+}
+
+// PrivNonce mocks base method.
+func (m *MockChainStateReader) PrivNonce(ctx context.Context, endpoint string, account common.Address, privacyGroupID string) (uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivNonce", ctx, endpoint, account, privacyGroupID)
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivNonce indicates an expected call of PrivNonce.
+func (mr *MockChainStateReaderMockRecorder) PrivNonce(ctx, endpoint, account, privacyGroupID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivNonce", reflect.TypeOf((*MockChainStateReader)(nil).PrivNonce), ctx, endpoint, account, privacyGroupID)
+}
+
 // MockContractCaller is a mock of ContractCaller interface.
 type MockContractCaller struct {
 	ctrl     *gomock.Controller
@@ -605,18 +635,18 @@ func (mr *MockClientMockRecorder) SendQuorumRawPrivateTransaction(ctx, url, sign
 }
 
 // SendRawPrivateTransaction mocks base method.
-func (m *MockClient) SendRawPrivateTransaction(ctx context.Context, url, raw string, args *types0.PrivateArgs) (common.Hash, error) {
+func (m *MockClient) SendRawPrivateTransaction(ctx context.Context, url, raw string) (common.Hash, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendRawPrivateTransaction", ctx, url, raw, args)
+	ret := m.ctrl.Call(m, "SendRawPrivateTransaction", ctx, url, raw)
 	ret0, _ := ret[0].(common.Hash)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SendRawPrivateTransaction indicates an expected call of SendRawPrivateTransaction.
-func (mr *MockClientMockRecorder) SendRawPrivateTransaction(ctx, url, raw, args interface{}) *gomock.Call {
+func (mr *MockClientMockRecorder) SendRawPrivateTransaction(ctx, url, raw interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendRawPrivateTransaction", reflect.TypeOf((*MockClient)(nil).SendRawPrivateTransaction), ctx, url, raw, args)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendRawPrivateTransaction", reflect.TypeOf((*MockClient)(nil).SendRawPrivateTransaction), ctx, url, raw)
 }
 
 // BlockByHash mocks base method.
@@ -828,6 +858,36 @@ func (m *MockClient) PendingNonceAt(ctx context.Context, url string, account com
 func (mr *MockClientMockRecorder) PendingNonceAt(ctx, url, account interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PendingNonceAt", reflect.TypeOf((*MockClient)(nil).PendingNonceAt), ctx, url, account)
+}
+
+// PrivEEANonce mocks base method.
+func (m *MockClient) PrivEEANonce(ctx context.Context, endpoint string, account common.Address, privateFrom string, privateFor []string) (uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivEEANonce", ctx, endpoint, account, privateFrom, privateFor)
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivEEANonce indicates an expected call of PrivEEANonce.
+func (mr *MockClientMockRecorder) PrivEEANonce(ctx, endpoint, account, privateFrom, privateFor interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivEEANonce", reflect.TypeOf((*MockClient)(nil).PrivEEANonce), ctx, endpoint, account, privateFrom, privateFor)
+}
+
+// PrivNonce mocks base method.
+func (m *MockClient) PrivNonce(ctx context.Context, endpoint string, account common.Address, privacyGroupID string) (uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivNonce", ctx, endpoint, account, privacyGroupID)
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivNonce indicates an expected call of PrivNonce.
+func (mr *MockClientMockRecorder) PrivNonce(ctx, endpoint, account, privacyGroupID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivNonce", reflect.TypeOf((*MockClient)(nil).PrivNonce), ctx, endpoint, account, privacyGroupID)
 }
 
 // CallContract mocks base method.

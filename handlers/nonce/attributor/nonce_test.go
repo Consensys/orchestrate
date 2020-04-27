@@ -3,58 +3,21 @@
 package nonceattributor
 
 import (
-	"context"
 	"fmt"
-	"math/big"
 	"strings"
 	"testing"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/memory"
 )
 
-type MockChainStateReader struct{}
-
-func (r *MockChainStateReader) BalanceAt(_ context.Context, _ string, _ ethcommon.Address, _ *big.Int) (*big.Int, error) {
-	return big.NewInt(0), nil
-}
-
-func (r *MockChainStateReader) StorageAt(_ context.Context, _ string, _ ethcommon.Address, _ ethcommon.Hash, _ *big.Int) ([]byte, error) {
-	return []byte{}, nil
-}
-
-func (r *MockChainStateReader) CodeAt(_ context.Context, _ string, _ ethcommon.Address, _ *big.Int) ([]byte, error) {
-	return []byte{}, nil
-}
-
-func (r *MockChainStateReader) NonceAt(_ context.Context, _ string, _ ethcommon.Address, _ *big.Int) (uint64, error) {
-	return 0, nil
-}
-
-func (r *MockChainStateReader) PendingBalanceAt(_ context.Context, _ string, _ ethcommon.Address) (*big.Int, error) {
-	return big.NewInt(0), nil
-}
-
-func (r *MockChainStateReader) PendingStorageAt(_ context.Context, _ string, _ ethcommon.Address, _ ethcommon.Hash) ([]byte, error) {
-	return []byte{}, nil
-}
-
-func (r *MockChainStateReader) PendingCodeAt(_ context.Context, _ string, _ ethcommon.Address) ([]byte, error) {
-	return []byte{}, nil
-}
-
-func (r *MockChainStateReader) PendingNonceAt(_ context.Context, endpoint string, _ ethcommon.Address) (uint64, error) {
-	if endpoint == "0" {
-		// Simulate error
-		return 0, fmt.Errorf("unknown chain")
-	}
-
-	return 10, nil
-}
+const endpointError = "error"
 
 type MockNonceManager struct {
 	memory.NonceManager
@@ -122,7 +85,12 @@ func assertTxContext(t *testing.T, txctx *engine.TxContext) {
 func TestNonceHandler(t *testing.T) {
 	m := memory.NewNonceManager()
 	nm := &MockNonceManager{*m}
-	h := Nonce(nm, &MockChainStateReader{})
+	ctrl := gomock.NewController(t)
+	ec := mock.NewMockChainStateReader(ctrl)
+	ec.EXPECT().PendingNonceAt(gomock.Any(), gomock.Eq(endpointError), gomock.Any()).Return(uint64(0), fmt.Errorf("unknown chain")).AnyTimes()
+	ec.EXPECT().PendingNonceAt(gomock.Any(), gomock.Not(gomock.Eq(endpointError)), gomock.Any()).Return(uint64(10), nil).AnyTimes()
+
+	h := Nonce(nm, ec)
 
 	testKey1 := "key1"
 	// On 1st execution nonce should be 10 (as the mock client returns always return pending nonce 10)
@@ -152,7 +120,7 @@ func TestNonceHandler(t *testing.T) {
 	assertTxContext(t, txctx)
 
 	// NonceManager should error when unknown chain
-	txctx = makeNonceContext("0", "key", 0, 1)
+	txctx = makeNonceContext(endpointError, "key", 0, 1)
 	h(txctx)
 	assertTxContext(t, txctx)
 }

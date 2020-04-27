@@ -189,19 +189,18 @@ func privateTxHash(tx *ethtypes.Transaction, privateArgs *types.PrivateArgs, cha
 	})
 }
 
-func privateArgsEncoded(privateArgs *types.PrivateArgs) (interface{}, interface{}, error) {
-	if len(privateArgs.PrivateFor) > 0 && privateArgs.PrivacyGroupId != "" {
+func privateArgsEncoded(privateArgs *types.PrivateArgs) (privateFromEncoded, privateRecipientEncoded interface{}, err error) {
+	if len(privateArgs.PrivateFor) > 0 && privateArgs.PrivacyGroupID != "" {
 		return nil, nil, errors.DataError("privacyGroupId and privateFor fields are mutually exclusive")
 	}
 
-	privateFromEncoded, err := base64.StdEncoding.DecodeString(privateArgs.PrivateFrom)
+	privateFromEncoded, err = base64.StdEncoding.DecodeString(privateArgs.PrivateFrom)
 	if err != nil {
 		return nil, nil, errors.DataError("invalid base64 for privateFrom - got %v", err)
 	}
 
-	var privateRecipientEncoded interface{}
-	if privateArgs.PrivacyGroupId != "" {
-		privateRecipientEncoded, err = base64.StdEncoding.DecodeString(privateArgs.PrivacyGroupId)
+	if privateArgs.PrivacyGroupID != "" {
+		privateRecipientEncoded, err = base64.StdEncoding.DecodeString(privateArgs.PrivacyGroupID)
 		if err != nil {
 			return nil, nil, errors.DataError("invalid base64 for privacyGroupId - got %v", err)
 		}
