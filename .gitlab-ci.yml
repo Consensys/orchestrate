@@ -116,30 +116,18 @@ integration:
   except:
     - tags
 
-#lint:
-#  <<: *go-setup
-#  script:
-#    - make lint-tools
-#    - make lint-ci
-#  except:
-#    - tags
+lint:
+  <<: *go-setup
+  script:
+    - make lint-tools
+    - make lint-ci
+  except:
+    - tags
 
 race:
   <<: *go-setup
   script:
     - make race
-  except:
-    - tags
-
-gobuild:
-  <<: *go-setup
-  script:
-    - make gobuild
-    - make gobuild-e2e
-  cache:
-    key: "$CI_COMMIT_REF_SLUG"
-    paths:
-      - build/bin/
   except:
     - tags
 

@@ -33,11 +33,11 @@ mod-tidy: ## Run deps cleanup
 
 lint: ## Run linter to fix issues
 	@misspell -w $(GOFILES)
-	@golangci-lint run --fast --fix
+	@golangci-lint run --fix
 
 lint-ci: ## Check linting
 	@misspell -error $(GOFILES)
-	@golangci-lint run --fast
+	@golangci-lint run
 
 run-e2e: gobuild-e2e
 	@docker-compose up e2e
@@ -66,6 +66,7 @@ generate-deepcopy:
 # Tools
 lint-tools: ## Install linting tools
 	@GO111MODULE=off go get -u github.com/client9/misspell/cmd/misspell
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.25.0
 
 tools: lint-tools ## Install test tools
 	@GO111MODULE=off go get -u github.com/golang/mock/mockgen

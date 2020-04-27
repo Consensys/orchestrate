@@ -66,6 +66,3 @@ run:
     - ".*\\.pb(\\.gw)?\\.go$"
     - pkg/http/handler/dashboard/genstatic/gen.go
     - pkg/http/handler/swagger/genstatic/gen.go
-
-service:
-  golangci-lint-version: 1.23.x
