@@ -2,6 +2,7 @@ package session
 
 import (
 	"context"
+	"encoding/base64"
 	"math/big"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -106,7 +107,10 @@ func (sess *SigningSession) ExecuteForEEATx(tx *ethtypes.Transaction, privateArg
 		return []byte{}, nil, errors.CryptoOperationError(err.Error()).SetComponent(component)
 	}
 
-	hash := privateTxHash(tx, privateArgs, sess.chain)
+	hash, err := privateTxHash(tx, privateArgs, sess.chain)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	sig, err := ethcrypto.Sign(hash[:], sess.account.Priv())
 	if err != nil {
@@ -145,7 +149,7 @@ func (sess *SigningSession) ExecuteForTesseraTx(tx *ethtypes.Transaction) ([]byt
 	v, r, s := t.RawSignatureValues()
 	privateV := calculatePrivateV(v)
 
-	txHash := rlpHash([]interface{}{
+	txHash, err := rlpHash([]interface{}{
 		tx.Nonce(),
 		tx.GasPrice(),
 		tx.Gas(),
@@ -156,12 +160,20 @@ func (sess *SigningSession) ExecuteForTesseraTx(tx *ethtypes.Transaction) ([]byt
 		r,
 		s,
 	})
+	if err != nil {
+		return nil, nil, err
+	}
 
 	return signedRaw, &txHash, nil
 }
 
-func privateTxHash(tx *ethtypes.Transaction, privateArgs *types.PrivateArgs, chain *big.Int) ethcommon.Hash {
-	hash := rlpHash([]interface{}{
+func privateTxHash(tx *ethtypes.Transaction, privateArgs *types.PrivateArgs, chain *big.Int) (ethcommon.Hash, error) {
+	privateFromEncoded, privateRecipientEncoded, err := privateArgsEncoded(privateArgs)
+	if err != nil {
+		return ethcommon.Hash{}, err
+	}
+
+	return rlpHash([]interface{}{
 		tx.Nonce(),
 		tx.GasPrice(),
 		tx.Gas(),
@@ -171,15 +183,47 @@ func privateTxHash(tx *ethtypes.Transaction, privateArgs *types.PrivateArgs, cha
 		chain,
 		uint(0),
 		uint(0),
-		privateArgs.PrivateFrom,
-		privateArgs.PrivateFor,
+		privateFromEncoded,
+		privateRecipientEncoded,
 		privateArgs.PrivateTxType,
 	})
-	return hash
+}
+
+func privateArgsEncoded(privateArgs *types.PrivateArgs) (interface{}, interface{}, error) {
+	if len(privateArgs.PrivateFor) > 0 && privateArgs.PrivacyGroupId != "" {
+		return nil, nil, errors.DataError("privacyGroupId and privateFor fields are mutually exclusive")
+	}
+
+	privateFromEncoded, err := base64.StdEncoding.DecodeString(privateArgs.PrivateFrom)
+	if err != nil {
+		return nil, nil, errors.DataError("invalid base64 for privateFrom - got %v", err)
+	}
+
+	var privateRecipientEncoded interface{}
+	if privateArgs.PrivacyGroupId != "" {
+		privateRecipientEncoded, err = base64.StdEncoding.DecodeString(privateArgs.PrivacyGroupId)
+		if err != nil {
+			return nil, nil, errors.DataError("invalid base64 for privacyGroupId - got %v", err)
+		}
+	} else {
+		var privateForByteSlice [][]byte
+		for _, v := range privateArgs.PrivateFor {
+			b, err := base64.StdEncoding.DecodeString(v)
+			if err != nil {
+				return nil, nil, errors.DataError("invalid base64 for privateFor - got %v", err)
+			}
+			privateForByteSlice = append(privateForByteSlice, b)
+		}
+		privateRecipientEncoded = privateForByteSlice
+	}
+
+	return privateFromEncoded, privateRecipientEncoded, nil
 }
 
 func encodePrivateTx(tx *ethtypes.Transaction, privateArgs *types.PrivateArgs) []byte {
 	v, r, s := tx.RawSignatureValues()
+	privateFromEncoded, privateRecipientEncoded, _ := privateArgsEncoded(privateArgs)
+
 	rplEncoding, _ := rlpEncode([]interface{}{
 		tx.Nonce(),
 		tx.GasPrice(),
@@ -190,8 +234,8 @@ func encodePrivateTx(tx *ethtypes.Transaction, privateArgs *types.PrivateArgs) [
 		v,
 		r,
 		s,
-		privateArgs.PrivateFrom,
-		privateArgs.PrivateFor,
+		privateFromEncoded,
+		privateRecipientEncoded,
 		privateArgs.PrivateTxType,
 	})
 	return rplEncoding
@@ -204,11 +248,14 @@ func calculatePrivateV(v *big.Int) *big.Int {
 	return big.NewInt(38)
 }
 
-func rlpHash(object interface{}) (hash ethcommon.Hash) {
+func rlpHash(object interface{}) (hash ethcommon.Hash, err error) {
 	hashAlgo := sha3.NewLegacyKeccak256()
-	_ = rlp.Encode(hashAlgo, object)
+	err = rlp.Encode(hashAlgo, object)
+	if err != nil {
+		return ethcommon.Hash{}, err
+	}
 	hashAlgo.Sum(hash[:0])
-	return hash
+	return hash, nil
 }
 
 func rlpEncode(object interface{}) ([]byte, error) {

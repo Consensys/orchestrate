@@ -27,7 +27,7 @@ type TransactionSender interface {
 	SendQuorumRawPrivateTransaction(ctx context.Context, url string, signedTxHash string, privateFor []string) (ethcommon.Hash, error)
 
 	// SendRawPrivateTransaction send a raw transaction to a Ethereum node supporting privacy with EEA privacy extensions
-	SendRawPrivateTransaction(ctx context.Context, url string, raw string, args *types.PrivateArgs) (ethcommon.Hash, error)
+	SendRawPrivateTransaction(ctx context.Context, url string, raw string) (ethcommon.Hash, error)
 }
 
 // ChainLedgerReader is a service to access a blockchain ledger information

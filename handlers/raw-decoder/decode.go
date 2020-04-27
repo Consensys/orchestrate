@@ -12,6 +12,10 @@ const component = "handler.raw_decoder"
 func RawDecoder(txctx *engine.TxContext) {
 	var tx *types.Transaction
 
+	if txctx.Envelope.IsEeaSendPrivateTransaction() {
+		return
+	}
+
 	if txctx.Envelope.GetRaw() == "" {
 		_ = txctx.AbortWithError(errors.DataError("no raw filled - could not decode")).ExtendComponent(component)
 		return

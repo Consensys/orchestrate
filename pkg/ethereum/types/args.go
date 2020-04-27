@@ -12,9 +12,10 @@ import (
 // PrivateArgs are transaction arguments to provide to an Ethereum client supporting privacy (such as Quorum)
 type PrivateArgs struct {
 	// Private Transaction Fields
-	PrivateFrom   string   `json:"privateFrom"`
-	PrivateFor    []string `json:"privateFor"`
-	PrivateTxType string   `json:"restriction"`
+	PrivateFrom    string   `json:"privateFrom"`
+	PrivateFor     []string `json:"privateFor"`
+	PrivacyGroupId string   `json:"privacyGroupId"`
+	PrivateTxType  string   `json:"restriction"`
 }
 
 // Call2PrivateArgs creates PrivateArgs from a call object
@@ -22,6 +23,7 @@ func Call2PrivateArgs(req *tx.Envelope) *PrivateArgs {
 	var privateArgs PrivateArgs
 	privateArgs.PrivateFrom = req.PrivateFrom
 	privateArgs.PrivateFor = req.PrivateFor
+	privateArgs.PrivacyGroupId = req.PrivacyGroupID
 	privateArgs.PrivateTxType = req.PrivateTxType
 	return &privateArgs
 }

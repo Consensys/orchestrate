@@ -110,6 +110,8 @@ func (ec *Client) call(req *http.Request, processResult ProcessResultFunc) error
 	switch {
 	case respMsg.Error != nil:
 		return ec.processEthError(respMsg.Error)
+	case resp.StatusCode < 200 || resp.StatusCode >= 300:
+		return errors.EthConnectionError("%v (code=%v): ", resp.Status, resp.StatusCode)
 	case len(respMsg.Result) == 0:
 		return errors.NotFoundError("not found")
 	default:
@@ -117,6 +119,7 @@ func (ec *Client) call(req *http.Request, processResult ProcessResultFunc) error
 	}
 }
 
+// Similar struct a https://github.com/ethereum/go-ethereum/blob/master/rpc/json.go
 type JSONRpcMessage struct {
 	Version string          `json:"jsonrpc,omitempty"`
 	ID      json.RawMessage `json:"id,omitempty"`
@@ -179,10 +182,6 @@ func (ec *Client) do(req *http.Request) (*http.Response, error) {
 		return nil, errors.EthConnectionError(err.Error())
 	}
 
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return nil, errors.EthConnectionError("%v (code=%v)", resp.Status, resp.StatusCode)
-	}
-
 	return resp, nil
 }
 
@@ -193,9 +192,9 @@ func (ec *Client) nextID() json.RawMessage {
 
 func (ec *Client) processEthError(err *JSONError) error {
 	if strings.Contains(err.Message, "nonce too low") || strings.Contains(err.Message, "Nonce too low") {
-		return errors.NonceTooLowError(err.Message)
+		return errors.NonceTooLowError("code: %d - message: %s", err.Code, err.Message)
 	}
-	return errors.EthereumError(err.Message)
+	return errors.EthereumError("code: %d - message: %s", err.Code, err.Message)
 }
 
 type txExtraInfo struct {
@@ -653,7 +652,7 @@ func (ec *Client) SendQuorumRawPrivateTransaction(ctx context.Context, endpoint,
 }
 
 // SendRawPrivateTransaction send a raw transaction to an Ethereum node supporting EEA extension
-func (ec *Client) SendRawPrivateTransaction(ctx context.Context, endpoint, raw string, args *types.PrivateArgs) (ethcommon.Hash, error) {
+func (ec *Client) SendRawPrivateTransaction(ctx context.Context, endpoint, raw string) (ethcommon.Hash, error) {
 	// Send a raw signed transactions using EEA extension method
 	// Method documentation here: https://besu.hyperledger.org/en/stable/Reference/API-Methods/#eea_sendrawtransaction
 	var hash string

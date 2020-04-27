@@ -4,7 +4,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 )
 
@@ -16,7 +15,7 @@ func RawPrivateTxSender(ec ethclient.TransactionSender) engine.HandlerFunc {
 			return
 		}
 
-		if txctx.Envelope.Raw == "" {
+		if txctx.Envelope.GetRaw() == "" {
 			err := errors.DataError("no raw filled")
 			_ = txctx.AbortWithError(err).ExtendComponent(component)
 			return
@@ -25,8 +24,7 @@ func RawPrivateTxSender(ec ethclient.TransactionSender) engine.HandlerFunc {
 		txHash, err := ec.SendRawPrivateTransaction(
 			txctx.Context(),
 			url,
-			txctx.Envelope.Raw,
-			types.Call2PrivateArgs(txctx.Envelope),
+			txctx.Envelope.GetRaw(),
 		)
 		if err != nil {
 			e := txctx.AbortWithError(err).ExtendComponent(component)

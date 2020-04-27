@@ -329,12 +329,12 @@ func (sc *ScenarioContext) envelopesShouldHaveTheFollowingValues(table *gherkin.
 			}
 			if col.Value == "~" {
 				if isEqual("", field) {
-					return fmt.Errorf("(%d/%d) did not expected %s to be empty", r, len(rowsEnvelopes), fieldName)
+					return fmt.Errorf("(%d/%d) did not expected %s to be empty", r+1, len(rowsEnvelopes), fmt.Sprintf("%v", field))
 				}
 				continue
 			}
-			if isEqual(col.Value, field) {
-				return fmt.Errorf("(%d/%d) for %s expected %s but got %s", r, len(rowsEnvelopes), fieldName, col.Value, field.String())
+			if !isEqual(col.Value, field) {
+				return fmt.Errorf("(%d/%d) %s expected %s but got %s", r+1, len(rowsEnvelopes), fieldName, col.Value, fmt.Sprintf("%v", field))
 			}
 
 		}
@@ -344,23 +344,23 @@ func (sc *ScenarioContext) envelopesShouldHaveTheFollowingValues(table *gherkin.
 
 func isEqual(s string, val reflect.Value) bool {
 	switch val.Kind() {
-	default:
-		if val.String() != s {
-			return false
-		}
-	case reflect.Int:
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		n, _ := strconv.ParseInt(s, 10, 64)
 		if val.Int() != n {
 			return false
 		}
-	case reflect.Uint:
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		n, _ := strconv.ParseUint(s, 10, 64)
 		if val.Uint() != n {
 			return false
 		}
-	case reflect.Float64:
+	case reflect.Float32, reflect.Float64:
 		n, _ := strconv.ParseFloat(s, 64)
 		if val.Float() != n {
+			return false
+		}
+	default:
+		if val.String() != s {
 			return false
 		}
 	}
