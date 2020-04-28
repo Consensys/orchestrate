@@ -674,5 +674,5 @@ func TestKafkaPartitionKey(t *testing.T) {
 		SetID("9f8708ad-8019-4533-9690-6495cc79a03c").
 		SetMethod(Method_EEA_SENDPRIVATETRANSACTION).
 		SetPrivateFor([]string{"kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M="})
-	assert.Equal(t, "0x0000000000000000000000000000000000000001@orion-0x99a354df71e6fa9b2bcba07e6c4e004e34acad8d76f81e2f4f68b74a250075d1@10", b3.KafkaPartitionKey())
+	assert.Equal(t, "0x0000000000000000000000000000000000000001@orion-a3ce4ff3ac5af3264fd8ae06af53ed9e@10", b3.KafkaPartitionKey())
 }

@@ -666,7 +666,7 @@ func (ec *Client) SendRawPrivateTransaction(ctx context.Context, endpoint, raw s
 // PrivEEANonce Returns the private transaction count for specified account and privacy group
 func (ec *Client) PrivEEANonce(ctx context.Context, endpoint string, account ethcommon.Address, privateFrom string, privateFor []string) (uint64, error) {
 	var nonce hexutil.Uint64
-	err := ec.Call(ctx, endpoint, processResult(nonce), "priv_getEeaTransactionCount", account.Hex(), privateFrom, privateFor)
+	err := ec.Call(ctx, endpoint, processResult(&nonce), "priv_getEeaTransactionCount", account.Hex(), privateFrom, privateFor)
 	if err != nil {
 		return 0, errors.FromError(err).ExtendComponent(component)
 	}
@@ -676,7 +676,7 @@ func (ec *Client) PrivEEANonce(ctx context.Context, endpoint string, account eth
 // PrivNonce returns the private transaction count for the specified account and group of sender and recipients
 func (ec *Client) PrivNonce(ctx context.Context, endpoint string, account ethcommon.Address, privacyGroupID string) (uint64, error) {
 	var nonce hexutil.Uint64
-	err := ec.Call(ctx, endpoint, processResult(nonce), "priv_getTransactionCount", account.Hex(), privacyGroupID)
+	err := ec.Call(ctx, endpoint, processResult(&nonce), "priv_getTransactionCount", account.Hex(), privacyGroupID)
 	if err != nil {
 		return 0, errors.FromError(err).ExtendComponent(component)
 	}

@@ -1,6 +1,7 @@
 package tx
 
 import (
+	"crypto/md5"
 	"fmt"
 	"math/big"
 	"sort"
@@ -17,7 +18,6 @@ import (
 	error1 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/error"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
-	"golang.org/x/crypto/sha3"
 )
 
 type Envelope struct {
@@ -936,15 +936,14 @@ func (e *Envelope) loadPtrFields(gas, nonce, gasPrice, value, from, to string) [
 func (e *Envelope) KafkaPartitionKey() string {
 	switch {
 	case e.IsEeaSendPrivateTransactionPrivacyGroup():
-		return fmt.Sprintf("%v@orion-%v@%v", e.GetFromString(), e.GetPrivacyGroupID(), e.GetChainID().String())
+		return fmt.Sprintf("%v@orion-%v@%v", e.GetFromString(), e.GetPrivacyGroupID(), e.GetChainName())
 	case e.IsEeaSendPrivateTransactionPrivateFor():
 		l := append(e.GetPrivateFor(), e.GetPrivateFrom())
 		sort.Strings(l)
-		h := sha3.NewLegacyKeccak256()
+		h := md5.New()
 		_, _ = h.Write([]byte(strings.Join(l, "-")))
-		key := h.Sum(nil)
-		return fmt.Sprintf("%v@orion-%v@%v", e.GetFromString(), hexutil.Encode(key), e.GetChainID().String())
+		return fmt.Sprintf("%v@orion-%v@%v", e.GetFromString(), fmt.Sprintf("%x", h.Sum(nil)), e.GetChainName())
 	default:
-		return fmt.Sprintf("%v@%v", e.GetFromString(), e.GetChainID().String())
+		return fmt.Sprintf("%v@%v", e.GetFromString(), e.GetChainName())
 	}
 }

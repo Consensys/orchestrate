@@ -30,7 +30,7 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 		return err
 	}
 
-	msg.Key = sarama.StringEncoder(txctx.Envelope.KafkaPartitionKey())
+	msg.Key = sarama.StringEncoder(txctx.In.Key())
 	return nil
 }
 

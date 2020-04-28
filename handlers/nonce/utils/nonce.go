@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"fmt"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
 )
@@ -14,7 +12,6 @@ func GetNonce(ec ethclient.ChainStateReader, txctx *engine.TxContext, url string
 	case txctx.Envelope.IsEeaSendPrivateTransactionPrivateFor():
 		return ec.PrivEEANonce(txctx.Context(), url, txctx.Envelope.MustGetFromAddress(), txctx.Envelope.GetPrivateFrom(), txctx.Envelope.GetPrivateFor())
 	default:
-		fmt.Printf("Method %s \n", txctx.Envelope.Method)
 		return ec.PendingNonceAt(txctx.Context(), url, txctx.Envelope.MustGetFromAddress())
 	}
 }

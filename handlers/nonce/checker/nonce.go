@@ -237,7 +237,7 @@ func RecoveryStatusSetter(nm nonce.Sender, tracker *RecoveryTracker) engine.Hand
 			tracker.Recover(nonceKey)
 		}
 
-		if b, ok := txctx.Get("invalid.nonce").(bool); len(txctx.Envelope.GetErrors()) == 0 && (!ok || !b) {
+		if b, ok := txctx.Get("invalid.nonce").(bool); !ok || !b {
 			// Transaction has been processed properly
 			// Deactivate recovery if activated
 			tracker.Recovered(nonceKey)
