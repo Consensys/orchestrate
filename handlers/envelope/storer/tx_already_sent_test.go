@@ -67,6 +67,11 @@ func (ec *MockChainLedgerReader) TransactionReceipt(ctx context.Context, endpoin
 	return nil, fmt.Errorf("not implemented")
 }
 
+// TransactionReceipt returns the receipt of a transaction by transaction hash.
+func (ec *MockChainLedgerReader) PrivateTransactionReceipt(ctx context.Context, endpoint string, txHash ethcommon.Hash) (*proto.Receipt, error) {
+	return nil, fmt.Errorf("not implemented")
+}
+
 func makeContext(hash, id, endpoint string, expectedErrors int) *engine.TxContext {
 	txctx := engine.NewTxContext()
 	txctx.Reset()

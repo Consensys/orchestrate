@@ -37,6 +37,20 @@ type Client struct {
 	idCounter uint32
 }
 
+// Transaction Receipt
+type privateReceipt struct {
+	ContractAddress string       `json:"contractAddress,omitempty"`
+	From            string       `json:"from,omitempty"`
+	Output          string       `json:"output,omitempty"`
+	CommitmentHash  string       `json:"commitmentHash,omitempty"`
+	TransactionHash string       `json:"transactionHash,omitempty"`
+	PrivateFrom     string       `json:"privateFrom,omitempty"`
+	PrivateFor      []string     `json:"privateFor,omitempty"`
+	PrivacyGroupId  string       `json:"privacyGroupId,omitempty"`
+	Status          string       `json:"status,omitempty"`
+	Logs            []*proto.Log `json:"logs,omitempty"`
+}
+
 // NewClient creates a new MultiClient
 func NewClient(newBackOff func() backoff.BackOff, client *http.Client) *Client {
 	return &Client{
@@ -374,6 +388,22 @@ func processReceiptResult(receipt **proto.Receipt) ProcessResultFunc {
 	}
 }
 
+func processPrivateReceiptResult(receipt **privateReceipt) ProcessResultFunc {
+	return func(result json.RawMessage) error {
+		err := processResult(&receipt)(result)
+		if err != nil {
+			return err
+		}
+
+		if receipt == nil || *receipt == nil {
+			// Receipt was not found
+			return errors.NotFoundError("receipt not found")
+		}
+
+		return nil
+	}
+}
+
 // TransactionReceipt returns the receipt of a transaction by transaction hash.
 // Note that the receipt is not available for pending transactions.
 func (ec *Client) TransactionReceipt(ctx context.Context, endpoint string, txHash ethcommon.Hash) (*proto.Receipt, error) {
@@ -382,6 +412,34 @@ func (ec *Client) TransactionReceipt(ctx context.Context, endpoint string, txHas
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
+
+	return r, nil
+}
+
+// TransactionReceipt returns the receipt of a transaction by transaction hash.
+// Note that the receipt is not available for pending transactions.
+func (ec *Client) PrivateTransactionReceipt(ctx context.Context, endpoint string, txHash ethcommon.Hash) (*proto.Receipt, error) {
+	// https://besu.hyperledger.org/en/stable/Reference/API-Objects/#private-transaction-receipt-object
+	var pr *privateReceipt
+	err := ec.Call(ctx, endpoint, processPrivateReceiptResult(&pr), "priv_getTransactionReceipt", txHash)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	var r *proto.Receipt
+	err = ec.Call(ctx, endpoint, processReceiptResult(&r), "eth_getTransactionReceipt", txHash)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	// Once we have both receipts, we create a hybrid version as follow
+	r.Status, _ = hexutil.DecodeUint64(pr.Status)
+	r.Logs = pr.Logs
+	r.Output = pr.Output
+	r.TxHash = pr.TransactionHash
+	r.PrivateFrom = pr.PrivateFrom
+	r.PrivateFor = pr.PrivateFor
+	r.PrivacyGroupId = pr.PrivacyGroupId
 
 	return r, nil
 }

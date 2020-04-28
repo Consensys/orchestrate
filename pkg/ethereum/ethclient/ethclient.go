@@ -50,6 +50,9 @@ type ChainLedgerReader interface {
 
 	// TransactionReceipt returns the receipt of a transaction by transaction hash.
 	TransactionReceipt(ctx context.Context, url string, txHash ethcommon.Hash) (*proto.Receipt, error)
+
+	// TransactionReceipt returns the receipt of a transaction by transaction hash.
+	PrivateTransactionReceipt(ctx context.Context, url string, txHash ethcommon.Hash) (*proto.Receipt, error)
 }
 
 // ChainStateReader is a service to access a blockchain state information

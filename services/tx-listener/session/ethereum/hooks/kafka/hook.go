@@ -49,7 +49,7 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 
 	for _, e := range envelopes {
 
-		receiptLogCtx := log.With(blockLogCtx, log.Str("receipt.txhash", e.GetTxHash().String()))
+		receiptLogCtx := log.With(blockLogCtx, log.Str("receipt.txhash", e.MustGetTxHashValue().String()))
 
 		// Register deployed contract
 		err := hk.registerDeployedContract(receiptLogCtx, c, e.Receipt, block)

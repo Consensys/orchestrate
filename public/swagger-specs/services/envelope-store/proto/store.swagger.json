@@ -292,6 +292,25 @@
         "revert_reason": {
           "type": "string",
           "title": "DATA - Revert reason if the transaction failed"
+        },
+        "output": {
+          "type": "string",
+          "title": "DATA - RLP-encoded return value of a contract call for Orion Priv Tx \nProvisional till we migrate to TransactionManager Jobs"
+        },
+        "privateFrom": {
+          "type": "string",
+          "title": "DATA (32 bytes) - Orion public key of the sender.\ne.g A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+        },
+        "privateFor": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "DATA (32 bytes) - Orion public keys or privacy group ID of the recipients.\ne.g Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs="
+        },
+        "privacyGroupId": {
+          "type": "string",
+          "title": "DATA (32 bytes) - Orion public keys or privacy group ID of the recipients.\ne.g Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs="
         }
       },
       "title": "Transaction Receipt"

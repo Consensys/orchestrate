@@ -229,7 +229,7 @@ services:
       CUCUMBER_FORMAT: "cucumber"
       AUTH_JWT_PRIVATE_KEY: ${AUTH_JWT_PRIVATE_KEY-}
       # Uncomment CUCUMBER_TAGS if only run features and scenarios with @public-tx or @account tags ("," = OR, "&&" = AND, "~" = NOT)
-      # CUCUMBER_TAGS: "@private-tx"
+#      CUCUMBER_TAGS: "@besu"
     restart: "no"
     command: e2e run
     volumes:

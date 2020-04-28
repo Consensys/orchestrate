@@ -212,6 +212,21 @@ func (mr *MockChainLedgerReaderMockRecorder) TransactionReceipt(ctx, url, txHash
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TransactionReceipt", reflect.TypeOf((*MockChainLedgerReader)(nil).TransactionReceipt), ctx, url, txHash)
 }
 
+// PrivateTransactionReceipt mocks base method.
+func (m *MockChainLedgerReader) PrivateTransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*ethereum0.Receipt, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivateTransactionReceipt", ctx, url, txHash)
+	ret0, _ := ret[0].(*ethereum0.Receipt)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivateTransactionReceipt indicates an expected call of PrivateTransactionReceipt.
+func (mr *MockChainLedgerReaderMockRecorder) PrivateTransactionReceipt(ctx, url, txHash interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivateTransactionReceipt", reflect.TypeOf((*MockChainLedgerReader)(nil).PrivateTransactionReceipt), ctx, url, txHash)
+}
+
 // MockChainStateReader is a mock of ChainStateReader interface.
 type MockChainStateReader struct {
 	ctrl     *gomock.Controller
@@ -738,6 +753,21 @@ func (m *MockClient) TransactionReceipt(ctx context.Context, url string, txHash 
 func (mr *MockClientMockRecorder) TransactionReceipt(ctx, url, txHash interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TransactionReceipt", reflect.TypeOf((*MockClient)(nil).TransactionReceipt), ctx, url, txHash)
+}
+
+// PrivateTransactionReceipt mocks base method.
+func (m *MockClient) PrivateTransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*ethereum0.Receipt, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivateTransactionReceipt", ctx, url, txHash)
+	ret0, _ := ret[0].(*ethereum0.Receipt)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivateTransactionReceipt indicates an expected call of PrivateTransactionReceipt.
+func (mr *MockClientMockRecorder) PrivateTransactionReceipt(ctx, url, txHash interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivateTransactionReceipt", reflect.TypeOf((*MockClient)(nil).PrivateTransactionReceipt), ctx, url, txHash)
 }
 
 // BalanceAt mocks base method.

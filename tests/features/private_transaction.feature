@@ -35,8 +35,8 @@ Feature: Deploy private ERC20 contract
     Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields:
-      | receipt.status |
-      | 1              |
+      | receipt.status | receipt.output | receipt.privateFrom |
+      | 1              | ~              | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= |
 
   @quorum
   Scenario: Deploy private ERC20 contract with unknown chainName

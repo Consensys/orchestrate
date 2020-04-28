@@ -3,7 +3,7 @@
 # Exit on error
 set -Eeu
 
-for p in `find . -name *.proto`; do
+for p in `find . -name '*.proto' -not -path './vendor/*'`; do
     echo "# $p"
 
     protoc -I. \

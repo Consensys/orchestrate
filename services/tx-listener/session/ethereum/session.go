@@ -2,6 +2,7 @@ package ethereum
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 	"sync"
 	"time"
@@ -18,6 +19,10 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session"
 	hook "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/hooks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/offset"
+)
+
+const (
+	orionPrecompiledContractAddr = "0x000000000000000000000000000000000000007E"
 )
 
 type fetchedBlock struct {
@@ -242,6 +247,24 @@ func (s *Session) fetchBlock(ctx context.Context, blockPosition uint64) *Future 
 	})
 }
 
+func (s *Session) fetchEnvelope(ctx context.Context, txHash string) (envelope *tx.Envelope, err error) {
+	res, err := s.store.LoadByTxHash(ctx, &evlpstore.LoadByTxHashRequest{
+		ChainId: s.Chain.ChainID.String(),
+		TxHash:  txHash,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	envelope, err = res.GetEnvelope().Envelope()
+	if err != nil {
+		return nil, err
+	}
+
+	return envelope, nil
+}
+
 func (s *Session) fetchEnvelopes(ctx context.Context, transactions ethtypes.Transactions) (envelopeMap map[string]*tx.Envelope, err error) {
 	envelopeMap = make(map[string]*tx.Envelope)
 
@@ -276,12 +299,23 @@ func (s *Session) fetchEnvelopes(ctx context.Context, transactions ethtypes.Tran
 func (s *Session) fetchReceipts(ctx context.Context, transaction ethtypes.Transactions, envelopeMap map[string]*tx.Envelope) (futureEnvelopes []*Future) {
 	for _, blckTx := range transaction {
 		switch {
+		case isPrivTx(blckTx) && isInternalTx(envelopeMap, blckTx):
+			futureEnvelopes = append(futureEnvelopes, s.fetchPrivateReceipt(
+				ctx,
+				envelopeMap[blckTx.Hash().String()],
+				blckTx.Hash()))
+			continue
 		case isInternalTx(envelopeMap, blckTx):
 			futureEnvelopes = append(futureEnvelopes, s.fetchReceipt(
 				ctx,
 				envelopeMap[blckTx.Hash().String()],
 				blckTx.Hash()))
 			continue
+		case isPrivTx(blckTx) && s.Chain.Listener.ExternalTxEnabled:
+			futureEnvelopes = append(futureEnvelopes, s.fetchPrivateReceipt(
+				ctx,
+				tx.NewEnvelope(),
+				blckTx.Hash()))
 		case s.Chain.Listener.ExternalTxEnabled:
 			futureEnvelopes = append(futureEnvelopes, s.fetchReceipt(
 				ctx,
@@ -320,6 +354,11 @@ func isInternalTx(envelopeMap map[string]*tx.Envelope, transaction *ethtypes.Tra
 	return ok
 }
 
+func isPrivTx(transaction *ethtypes.Transaction) bool {
+	// A enclavekey tx has as To address the pre-deployed smart-contract
+	return transaction.To() != nil && transaction.To().String() == orionPrecompiledContractAddr
+}
+
 func (s *Session) fetchReceipt(ctx context.Context, envelope *tx.Envelope, txHash ethcommon.Hash) *Future {
 	return NewFuture(func() (interface{}, error) {
 		receipt, err := s.ec.TransactionReceipt(
@@ -333,6 +372,48 @@ func (s *Session) fetchReceipt(ctx context.Context, envelope *tx.Envelope, txHas
 		}
 
 		// Attach receipt to envelope
+		return envelope.SetReceipt(receipt.
+			SetBlockHash(ethcommon.HexToHash(receipt.GetBlockHash())).
+			SetBlockNumber(receipt.GetBlockNumber()).
+			SetTxIndex(receipt.TxIndex)), nil
+	})
+}
+
+func (s *Session) fetchPrivateReceipt(ctx context.Context, envelope *tx.Envelope, txHash ethcommon.Hash) *Future {
+	return NewFuture(func() (interface{}, error) {
+		if envelope == nil {
+			err := fmt.Errorf("envelope cannot be nil")
+			log.FromContext(ctx).
+				WithError(err).
+				Errorf("envelope cannot be nil")
+			return nil, err
+		}
+
+		// We fetch a hybrid version of
+		receipt, err := s.ec.PrivateTransactionReceipt(
+			ethclientutils.RetryNotFoundError(ctx, true),
+			s.Chain.URL,
+			txHash,
+		)
+
+		if err != nil {
+			log.FromContext(ctx).
+				WithError(err).
+				WithField("tx.hash", txHash.Hex()).
+				Errorf("failed to fetch private receipt")
+
+			return nil, err
+		}
+
+		log.FromContext(ctx).
+			WithField("TxHash", receipt.TxHash).
+			WithField("PrivateFrom", receipt.PrivateFrom).
+			WithField("PrivateFor", receipt.PrivateFor).
+			WithField("PrivacyGroupId", receipt.PrivacyGroupId).
+			WithField("Status", receipt.Status).
+			Debug("private Receipt fetched")
+
+		// Bind the hybrid receipt to the envelope
 		return envelope.SetReceipt(receipt.
 			SetBlockHash(ethcommon.HexToHash(receipt.GetBlockHash())).
 			SetBlockNumber(receipt.GetBlockNumber()).
