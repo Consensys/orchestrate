@@ -4,7 +4,6 @@ stages:
   - integration
   - e2e
   - build
-  - doc
   - release
 
 variables:
@@ -32,7 +31,8 @@ services:
   after_script:
     - docker logout $CI_REGISTRY
 
-.docker-compose-setup: &docker-compose-setup
+.docker-compose-e2e: &docker-compose-e2e
+  stage: e2e
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - apk update
@@ -42,10 +42,6 @@ services:
     - pip install docker-compose
   after_script:
     - docker logout $CI_REGISTRY
-
-.docker-compose-e2e: &docker-compose-e2e
-  stage: e2e
-  after_script:
     - make down
   cache:
     key: "$CI_COMMIT_REF_SLUG"
@@ -55,9 +51,10 @@ services:
     when: always
     paths:
       - build/report/
+  only:
+    - master
   except:
     - tags
-
 
 .build-orchestrate: &build-orchestrate
   # Build orchestrate image following http://label-schema.org/rc1/ label convention convention
@@ -131,24 +128,30 @@ race:
   except:
     - tags
 
+gobuild:
+  <<: *go-setup
+  script:
+    - make gobuild
+    - make gobuild-e2e
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - build/bin/
+  except:
+    - master
+
 test-e2e:
-  <<: *docker-compose-setup
   <<: *docker-compose-e2e
   script:
     - make up-ci
     - make e2e-ci
-  only:
-    - master
 
 test-multitenancy-e2e:
-  <<: *docker-compose-setup
   <<: *docker-compose-e2e
   script:
     - mv -f .env.multitenancy .env
     - make up-ci
     - make e2e-ci
-  only:
-    - master
 
 #Build orchestrate
 build-orchestrate-on-branch:
@@ -268,8 +271,9 @@ release-e2e:
     - npm install redoc-cli@0.9.7
     - export PATH="$PATH:$(pwd)/node_modules/.bin"
     - mkdir -p public/${API_DOC_VERSION}
-  script:
-    *swagger-doc-common-scripts
+  artifacts:
+    paths:
+      - public
   cache:
     paths:
       - public
@@ -277,6 +281,11 @@ release-e2e:
 swagger-doc-master:
   # build swagger doc for master
   <<: *swagger-doc
+  script:
+    - *swagger-doc-common-scripts
+
+    # create a redirect from home to latest
+    - sed -e "s~{{LATEST_VERSION_URL}}~${CI_PAGES_URL}/latest~" public/index.html.template > public/index.html
   only:
     refs:
       - master
@@ -292,6 +301,9 @@ swagger-doc-tags:
     # Create a redirect from stable to latest tagged version
     - mkdir -p public/stable
     - sed -e "s~{{LATEST_VERSION_URL}}~${CI_PAGES_URL}/${CI_COMMIT_TAG}~" public/index.html.template > public/stable/index.html
+
+    # create a redirect from home to latest
+    - sed -e "s~{{LATEST_VERSION_URL}}~${CI_PAGES_URL}/latest~" public/index.html.template > public/index.html
   only:
     refs:
       - tags
@@ -313,20 +325,3 @@ swagger-doc-tags:
 #  only:
 #    refs:
 #      - branches
-
-pages:
-  # Release static swagger doc on Gitlab pages
-  stage: release
-  script:
-    # create a redirect from home to latest
-    - sed -e "s~{{LATEST_VERSION_URL}}~${CI_PAGES_URL}/latest~" public/index.html.template > public/index.html
-  cache:
-    paths:
-      - public
-  artifacts:
-    paths:
-      - public
-  only:
-    refs:
-      - tags
-      - master
