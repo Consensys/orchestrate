@@ -6,14 +6,22 @@ import (
 	"testing"
 
 	"github.com/Shopify/sarama"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
 func TestPrepareMsg(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	m := mock.NewMockMsg(mockCtrl)
+	m.EXPECT().Key().Return([]byte(`test`)).AnyTimes()
+
 	// No error
 	txctx := engine.NewTxContext()
+	txctx.In = m
 	msg := &sarama.ProducerMessage{}
 	_ = PrepareMsg(txctx, msg)
 	assert.Equal(t, "topic-tx-signer", msg.Topic, "If no error out topic should be nonce")

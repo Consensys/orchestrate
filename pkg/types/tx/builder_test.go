@@ -654,25 +654,25 @@ func TestPrivateValidation(t *testing.T) {
 
 func TestKafkaPartitionKey(t *testing.T) {
 	b := NewEnvelope().
-		SetChainIDUint64(10).
+		SetChainName("testChain").
 		MustSetFromString("0x1").
 		SetID("9f8708ad-8019-4533-9690-6495cc79a03c").
 		SetPrivacyGroupID("kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M=")
-	assert.Equal(t, "0x0000000000000000000000000000000000000001@10", b.KafkaPartitionKey())
+	assert.Equal(t, "0x0000000000000000000000000000000000000001@testChain", b.KafkaPartitionKey())
 
 	b2 := NewEnvelope().
-		SetChainIDUint64(10).
+		SetChainName("testChain").
 		MustSetFromString("0x1").
 		SetID("9f8708ad-8019-4533-9690-6495cc79a03c").
 		SetMethod(Method_EEA_SENDPRIVATETRANSACTION).
 		SetPrivacyGroupID("kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M=")
-	assert.Equal(t, "0x0000000000000000000000000000000000000001@orion-kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M=@10", b2.KafkaPartitionKey())
+	assert.Equal(t, "0x0000000000000000000000000000000000000001@orion-kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M=@testChain", b2.KafkaPartitionKey())
 
 	b3 := NewEnvelope().
-		SetChainIDUint64(10).
+		SetChainName("testChain").
 		MustSetFromString("0x1").
 		SetID("9f8708ad-8019-4533-9690-6495cc79a03c").
 		SetMethod(Method_EEA_SENDPRIVATETRANSACTION).
 		SetPrivateFor([]string{"kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M="})
-	assert.Equal(t, "0x0000000000000000000000000000000000000001@orion-a3ce4ff3ac5af3264fd8ae06af53ed9e@10", b3.KafkaPartitionKey())
+	assert.Equal(t, "0x0000000000000000000000000000000000000001@orion-a3ce4ff3ac5af3264fd8ae06af53ed9e@testChain", b3.KafkaPartitionKey())
 }

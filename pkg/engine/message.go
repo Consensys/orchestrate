@@ -1,5 +1,7 @@
 package engine
 
+//go:generate mockgen -source=message.go -destination=mock/mock.go -package=mock
+
 // Msg is an abstract interface supported by any kind of message handled by the engine
 type Msg interface {
 	// Entrypoint returns an indication on where the message comes from

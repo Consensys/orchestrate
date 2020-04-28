@@ -46,7 +46,7 @@ type privateReceipt struct {
 	TransactionHash string       `json:"transactionHash,omitempty"`
 	PrivateFrom     string       `json:"privateFrom,omitempty"`
 	PrivateFor      []string     `json:"privateFor,omitempty"`
-	PrivacyGroupId  string       `json:"privacyGroupId,omitempty"`
+	PrivacyGroupID  string       `json:"privacyGroupId,omitempty"`
 	Status          string       `json:"status,omitempty"`
 	Logs            []*proto.Log `json:"logs,omitempty"`
 }
@@ -439,7 +439,7 @@ func (ec *Client) PrivateTransactionReceipt(ctx context.Context, endpoint string
 	r.TxHash = pr.TransactionHash
 	r.PrivateFrom = pr.PrivateFrom
 	r.PrivateFor = pr.PrivateFor
-	r.PrivacyGroupId = pr.PrivacyGroupId
+	r.PrivacyGroupId = pr.PrivacyGroupID
 
 	return r, nil
 }

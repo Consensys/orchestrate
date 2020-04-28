@@ -409,7 +409,7 @@ func (s *Session) fetchPrivateReceipt(ctx context.Context, envelope *tx.Envelope
 			WithField("TxHash", receipt.TxHash).
 			WithField("PrivateFrom", receipt.PrivateFrom).
 			WithField("PrivateFor", receipt.PrivateFor).
-			WithField("PrivacyGroupId", receipt.PrivacyGroupId).
+			WithField("PrivacyGroupID", receipt.PrivacyGroupId).
 			WithField("Status", receipt.Status).
 			Debug("private Receipt fetched")
 
