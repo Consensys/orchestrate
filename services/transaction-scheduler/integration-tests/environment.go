@@ -137,9 +137,15 @@ func (env *IntegrationEnvironment) Teardown() {
 }
 
 func (env *IntegrationEnvironment) migrate() error {
-	db := env.pgmngr.Connect(env.ctx, postgres.NewOptions(viper.GetViper()))
+	// Set database connection
+	opts, err := postgres.NewConfig(viper.GetViper()).PGOptions()
+	if err != nil {
+		return err
+	}
 
-	_, _, err := migrations.Run(db, "init")
+	db := env.pgmngr.Connect(env.ctx, opts)
+
+	_, _, err = migrations.Run(db, "init")
 	if err != nil {
 		return err
 	}

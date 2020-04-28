@@ -94,9 +94,14 @@ func (env *IntegrationEnvironment) Teardown() {
 }
 
 func (env *IntegrationEnvironment) migrate() error {
-	db := env.pgmngr.Connect(context.Background(), postgres.NewOptions(viper.GetViper()))
+	opts, err := postgres.NewConfig(viper.GetViper()).PGOptions()
+	if err != nil {
+		return err
+	}
 
-	_, _, err := migrations.Run(db, "init")
+	db := env.pgmngr.Connect(context.Background(), opts)
+
+	_, _, err = migrations.Run(db, "init")
 	if err != nil {
 		return err
 	}

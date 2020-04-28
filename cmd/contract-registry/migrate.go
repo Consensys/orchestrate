@@ -16,9 +16,14 @@ func newMigrateCmd() *cobra.Command {
 	migrateCmd := &cobra.Command{
 		Use:   "migrate",
 		Short: "Migrate database",
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			// Set database connection
-			db = pg.Connect(postgres.NewOptions(viper.GetViper()))
+			opts, err := postgres.NewConfig(viper.GetViper()).PGOptions()
+			if err != nil {
+				return err
+			}
+			db = pg.Connect(opts)
+			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			migrate(db)

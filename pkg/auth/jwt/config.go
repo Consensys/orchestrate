@@ -3,7 +3,6 @@ package jwt
 import (
 	"fmt"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
@@ -53,16 +52,15 @@ Environment variable: %q`, claimsNamespaceEnv)
 }
 
 type Config struct {
-	ClaimsNamespace string
-	Parser          *jwt.Parser
-	Key             jwt.Keyfunc
+	Certificate          []byte
+	ClaimsNamespace      string
+	SkipClaimsValidation bool
+	ValidMethods         []string
 }
 
-func NewConfig() *Config {
-	config := &Config{
-		ClaimsNamespace: viper.GetString(ClaimsNamespaceViperKey),
-		Parser:          &jwt.Parser{},
+func NewConfig(vipr *viper.Viper) *Config {
+	return &Config{
+		ClaimsNamespace: vipr.GetString(ClaimsNamespaceViperKey),
+		Certificate:     []byte(vipr.GetString(CertificateViperKey)),
 	}
-
-	return config
 }

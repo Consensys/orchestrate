@@ -29,18 +29,18 @@ func TestPGTransactionRequest(t *testing.T) {
 }
 
 func (s *txRequestTestSuite) SetupSuite() {
-	s.pg = pgTestUtils.NewPGTestHelper(migrations.Collection)
+	s.pg, _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
 	s.pg.InitTestDB(s.T())
 }
 
 func (s *txRequestTestSuite) SetupTest() {
-	s.pg.Upgrade(s.T())
+	s.pg.UpgradeTestDB(s.T())
 	s.scheduleDA = NewPGSchedule(s.pg.DB)
 	s.dataagent = NewPGTransactionRequest(s.pg.DB)
 }
 
 func (s *txRequestTestSuite) TearDownTest() {
-	s.pg.Downgrade(s.T())
+	s.pg.DowngradeTestDB(s.T())
 }
 
 func (s *txRequestTestSuite) TearDownSuite() {

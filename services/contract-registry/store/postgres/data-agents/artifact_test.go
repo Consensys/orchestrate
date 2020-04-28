@@ -31,19 +31,19 @@ func TestPGArtifact(t *testing.T) {
 }
 
 func (s *artifactTestSuite) SetupSuite() {
-	s.pg = pgTestUtils.NewPGTestHelper(migrations.Collection)
+	s.pg , _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
 	s.pg.InitTestDB(s.T())
 }
 
 func (s *artifactTestSuite) SetupTest() {
-	s.pg.Upgrade(s.T())
+	s.pg.UpgradeTestDB(s.T())
 	s.dataagent = NewPGArtifact(s.pg.DB)
 	s.tagDataAgent = NewPGTag(s.pg.DB)
 	s.repositoryDataAgent = NewPGRepository(s.pg.DB)
 }
 
 func (s *artifactTestSuite) TearDownTest() {
-	s.pg.Downgrade(s.T())
+	s.pg.DowngradeTestDB(s.T())
 }
 
 func (s *artifactTestSuite) TearDownSuite() {

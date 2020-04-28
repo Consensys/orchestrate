@@ -2,13 +2,10 @@ package jwt
 
 import (
 	"context"
-	"crypto/rsa"
 	"sync"
 
-	"github.com/dgrijalva/jwt-go"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/certificate"
 )
 
 var (
@@ -23,29 +20,16 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		conf := NewConfig()
-
-		//
-		rawCert := viper.GetString(CertificateViperKey)
-		if rawCert == "" {
+		conf := NewConfig(viper.GetViper())
+		if len(conf.Certificate) == 0 {
 			log.Infof("jwt: no certificate provided")
-		} else {
-			// Decode certificate provided in configuration
-			cert, err := certificate.DecodeStringToCertificate(rawCert)
-			if err != nil {
-				log.WithError(err).Fatalf("jwt: invalid certificate")
-			}
-
-			// Cast certificate into an RSA public key
-			pubKey, ok := cert.PublicKey.(*rsa.PublicKey)
-			if !ok {
-				log.Fatalf("jwt: certificate is not an RSA public key")
-			}
-
-			conf.Key = func(token *jwt.Token) (interface{}, error) { return pubKey, nil }
 		}
 
-		checker = New(conf)
+		var err error
+		checker, err = New(conf)
+		if err != nil {
+			log.WithError(err).Fatalf("jwt: could not create checker")
+		}
 	})
 }
 

@@ -22,11 +22,11 @@ func (s *MigrationsTestSuite) SetupSuite() {
 }
 
 func (s *MigrationsTestSuite) SetupTest() {
-	s.pg.Upgrade(s.T())
+	s.pg.UpgradeTestDB(s.T())
 }
 
 func (s *MigrationsTestSuite) TearDownTest() {
-	s.pg.Downgrade(s.T())
+	s.pg.DowngradeTestDB(s.T())
 }
 
 func (s *MigrationsTestSuite) TearDownSuite() {
@@ -67,6 +67,6 @@ func (s *MigrationsTestSuite) TestAddEnvelopeStoreColumns() {
 
 func TestMigrations(t *testing.T) {
 	s := new(MigrationsTestSuite)
-	s.pg = testutils.NewPGTestHelper(Collection)
+	s.pg , _ = testutils.NewPGTestHelper(nil, Collection)
 	suite.Run(t, s)
 }

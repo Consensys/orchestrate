@@ -1,17 +1,13 @@
-// +build unit
-
 package grpcauth
 
 import (
 	"context"
 	"testing"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/grpc-ecosystem/go-grpc-middleware/util/metautils"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth"
+	"github.com/stretchr/testify/require"
 	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/certificate"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"google.golang.org/grpc/metadata"
 )
@@ -22,127 +18,73 @@ var (
 	accessTokenUntrustedSigner        = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IlJFRTVSRUpETURFeFJrVTFNVGhDUTBGQ05rTXdSVEkyTVVSRk1qQXlOekUyTjBNMU1rWXpNZyJ9.eyJodHRwczovL2Rldi5hYmNjZC5jb20iOnsicm9sZXMiOlsiVHJhZGUgRXhlY3V0b3IiXSwibGVnYWxFbnRpdGllcyI6WzFdLCJsZWdhbEVudGl0eSI6MX0sImlzcyI6Imh0dHBzOi8vZGV2LWFiY2NkLmV1LmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw1ZDhjODFmMTRiMmZlYjBkNzA0YzVlMGYiLCJhdWQiOlsiYmVhdC1hdXRoMC1hcGkiLCJodHRwczovL2Rldi1hYmNjZC5ldS5hdXRoMC5jb20vdXNlcmluZm8iXSwiaWF0IjoxNTc1NTQxMjA1LCJleHAiOjE1NzU2Mjc2MDUsImF6cCI6ImVkQ3hvVlRPcFhCN2t0NmdpVFdoOG1CZ0pnTVdvTzJ2Iiwic2NvcGUiOiJvcGVuaWQgcHJvZmlsZSBlbWFpbCIsInBlcm1pc3Npb25zIjpbImNhOmNyZWF0ZSIsImNhOnVwZGF0ZSIsImNhOnZpZXdEZXRhaWxzIiwibGVnYWwtZW50aXR5OnJlYWQiLCJtYXN0ZXItZGF0YTpyZWFkIiwibm9taW5hdGlvbjpjcmVhdGUiLCJub21pbmF0aW9uOnVwZGF0ZSIsIm5vbWluYXRpb246dmlld0RldGFpbHMiLCJ2b3lhZ2U6Y3JlYXRlIiwidm95YWdlOnJlYWQiXX0.jJnJjTLHsElFU3O7xKuh7jL1ho9-Z7Jxco16hDxoRg_TFdOCN82wVeJHZbDjdLqjV0k4F05YWEmFWn7CEAmr43ndoprsAr3OfBnrjYKyJ4oqiguPAUakBqoLtaEE-AsxyQmCzZGwKXHtNMDIhh0vwHVASdHTwxiApumRWfEXzmu5pmOYwoTJ8vVSUVCCDG3hL6u4UxYdng30XlWgbn_Szlaq9sIoIllZOL8vn4hkkW98CQfjexpaYDjywVfbPD3-TSSznHiF6TvmogCttkb73hbJF246hq-guR0nfdQm1ivAUkzXcUOql6QtHvYgdrzw5xPOqNIMihFvIK8XRCZ_pw"
 	accessTokenWithoutTenantID        = "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiaHR0cHM6Ly9hdXRoMC5jb20vYXBpL3YyLyJdLCJleHAiOjE1NzkxNjc0NjksImh0dHA6Ly9vcmNoZXN0cmF0ZS5pbmZvIjp7InRlbmFudF9pZCI6IiIsInJvbGUiOiJ0ZXN0LXJvbGUifSwiaWF0IjoxNTc5MTYzODY5LCJpc3MiOiJPcmNoZXN0cmF0ZSIsImp0aSI6IjNkNDAyYWFlLTMwY2YtNDcxNy04MGRmLTg4ODE4OTJhOTUxOCIsIm5iZiI6MTU3OTE2Mzg2OSwic2NwIjpbInJlYWQ6dXNlcnMiLCJ1cGRhdGU6dXNlcnMiLCJjcmVhdGU6dXNlcnMiXSwic3ViIjoiZTJlLXRlc3QifQ.nTr2eY8mXXD6kqUnhx5pAydwUXnxpzPdZ9qqMcPaDEsNSJT_HJvYc11kut7VN_DVL3sFT6xo1auB40w96xh1TatYGYB3FmISfIbZ4XAjgkRzTB5uaf8eoi0DDnAQ3ycxVdmuKDapVW5gS9FQmoGOwcC_ojoQtQKUc3XyTiHAowurTKSre329EunCEj2dMSRBTEmg_vnWgGmgtpxOI9f4l1hrrQ3FAGbZobdVoqkTzLwVqo1GblxUioQGYPSy6okO6XPKL2G0P62iIJqClhNRQP0pZJHucJCipdZYaOLrBdepO7srIUt4gM3qXkkWohPDqOujdUoqUUtSq6C37rwGtA"
 	certificateOneLineOrchestrateTest = "MIIDYjCCAkoCCQC9pJWk7qdipjANBgkqhkiG9w0BAQsFADBzMQswCQYDVQQGEwJGUjEOMAwGA1UEBwwFUGFyaXMxEjAQBgNVBAoMCUNvbnNlblN5czEQMA4GA1UECwwHUGVnYVN5czEuMCwGA1UEAwwlZTJlLXRlc3RzLm9yY2hlc3RyYXRlLmNvbnNlbnN5cy5wYXJpczAeFw0xOTEyMjcxNjI5MTdaFw0yMDEyMjYxNjI5MTdaMHMxCzAJBgNVBAYTAkZSMQ4wDAYDVQQHDAVQYXJpczESMBAGA1UECgwJQ29uc2VuU3lzMRAwDgYDVQQLDAdQZWdhU3lzMS4wLAYDVQQDDCVlMmUtdGVzdHMub3JjaGVzdHJhdGUuY29uc2Vuc3lzLnBhcmlzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAo0NqWqI3TSi1uOBvCUquclWo4LcsYT21tNUXQ8YyqVYRSsiBv+ZKZBCjD8XklLPih40kFSe+r6DNca5/LH/okQIdc8nsQg+BLCkXeH2NFv+QYtPczAw4YhS6GVxJk3u9sfp8NavWBcQbD3MMDpehMOvhSl0zoP/ZlH6ErKHNtoQgUpPNVQGysNU21KpClmIDD/L1drsbq+rFiDrcVWaOLwGxr8SBd/0b4ngtcwH16RJaxcIXXT5AVia1CNdzmU5/AIg3OfgzvKn5AGrMZBsmGAiCyn4/P3PnuF81/WHukk5ETLnzOH+vC2elSmZ8y80HCGeqOiQ1rs66L936wX8cDwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQCNcTs3n/Ps+yIZDH7utxTOaqpDTCB10MzPmb22UAal89couIT6R0fAu14p/LTkxdb2STDySsQY2/Lv6rPdFToHGUI9ZYOTYW1GOWkt1EAao9BzdsoJVwmTON6QnOBKy/9RxlhWP+XSWVsY0te6KYzS7rQyzQoJQeeBNMpUnjiQji9kKi5j9rbVMdjIb4HlmYrcE95ps+oFkyJoA1HLVytAeOjJPXGToNlv3k2UPJzOFUM0ujWWeBTyHMCmZ4RhlrfzDNffY5dlW82USjc5dBlzRyZalXSjhcVhK4asUodomVntrvCShp/8C9LpbQZ+ugFNE8J6neStWrhpRU9/sBJx"
-	cert, _                           = certificate.DecodeStringToCertificate(certificateOneLineOrchestrateTest)
-	claimsNamespace                   = "http://orchestrate.info"
 )
 
 // TODO: adding tests with APIKey Header and TenantID header
 
 func TestAuth(t *testing.T) {
-	type args struct {
-		ctx               context.Context
-		multitenantEnable bool
-		certificate       string
-		tenantPath        string
-		checker           auth.Checker
-	}
-
 	tests := []struct {
 		name     string
-		args     args
+		cfg      *authjwt.Config
+		token    string
 		want     string
 		errCode  uint64
 		isValide bool
 	}{
 		{
 			"nominal case",
-			args{
-				setupContext(idToken),
-				true,
-				certificateOneLineOrchestrateTest,
-				claimsNamespace,
-				authjwt.New(&authjwt.Config{
-					ClaimsNamespace: claimsNamespace,
-					Parser:          &jwt.Parser{SkipClaimsValidation: true},
-					Key:             func(token *jwt.Token) (interface{}, error) { return cert.PublicKey, nil },
-				}),
+			&authjwt.Config{
+				SkipClaimsValidation: true,
+				Certificate:          []byte(certificateOneLineOrchestrateTest),
+				ClaimsNamespace:      "http://orchestrate.info",
 			},
+			idToken,
 			"b49ee1bc-f0fa-430d-89b2-a4fd0dc98906",
 			0,
 			true,
 		},
 		{
 			"expired filed",
-			args{
-				setupContext(idTokenExpired),
-				true,
-				certificateOneLineOrchestrateTest,
-				claimsNamespace,
-				authjwt.New(&authjwt.Config{
-					ClaimsNamespace: claimsNamespace,
-					Parser:          &jwt.Parser{},
-					Key:             func(token *jwt.Token) (interface{}, error) { return cert.PublicKey, nil },
-				}),
+			&authjwt.Config{
+				Certificate:     []byte(certificateOneLineOrchestrateTest),
+				ClaimsNamespace: "http://orchestrate.info",
 			},
+			idTokenExpired,
 			"",
 			errors.Unauthorized,
 			false,
 		},
 		{
 			"empty bearer",
-			args{
-				setupContext(""),
-				true,
-				certificateOneLineOrchestrateTest,
-				claimsNamespace,
-				authjwt.New(&authjwt.Config{
-					ClaimsNamespace: claimsNamespace,
-					Parser:          &jwt.Parser{},
-					Key:             func(token *jwt.Token) (interface{}, error) { return cert.PublicKey, nil },
-				}),
+			&authjwt.Config{
+				Certificate:     []byte(certificateOneLineOrchestrateTest),
+				ClaimsNamespace: "http://orchestrate.info",
 			},
 			"",
-			errors.Unauthorized,
-			false,
-		},
-
-		{
-			"no metadata into http ehader",
-			args{
-				context.Background(),
-				true,
-				certificateOneLineOrchestrateTest,
-				claimsNamespace,
-				authjwt.New(&authjwt.Config{
-					ClaimsNamespace: claimsNamespace,
-					Parser:          &jwt.Parser{},
-					Key:             func(token *jwt.Token) (interface{}, error) { return cert.PublicKey, nil },
-				}),
-			},
 			"",
 			errors.Unauthorized,
 			false,
 		},
 		{
 			"Untrusted Signer",
-			args{
-				setupContext(accessTokenUntrustedSigner),
-				true,
-				certificateOneLineOrchestrateTest,
-				claimsNamespace,
-				authjwt.New(&authjwt.Config{
-					ClaimsNamespace: claimsNamespace,
-					Parser:          &jwt.Parser{SkipClaimsValidation: true},
-					Key:             func(token *jwt.Token) (interface{}, error) { return cert.PublicKey, nil },
-				}),
+			&authjwt.Config{
+				Certificate:          []byte(certificateOneLineOrchestrateTest),
+				ClaimsNamespace:      "http://orchestrate.info",
+				SkipClaimsValidation: true,
 			},
+			accessTokenUntrustedSigner,
 			"",
 			errors.Unauthorized,
 			false,
 		},
 		{
 			"Token without TenantID",
-			args{
-				setupContext(accessTokenWithoutTenantID),
-				true,
-				certificateOneLineOrchestrateTest,
-				claimsNamespace,
-				authjwt.New(&authjwt.Config{
-					ClaimsNamespace: claimsNamespace,
-					Parser:          &jwt.Parser{SkipClaimsValidation: true},
-					Key:             func(token *jwt.Token) (interface{}, error) { return cert.PublicKey, nil },
-				}),
+			&authjwt.Config{
+				Certificate:          []byte(certificateOneLineOrchestrateTest),
+				ClaimsNamespace:      "http://orchestrate.info",
+				SkipClaimsValidation: true,
 			},
+			accessTokenWithoutTenantID,
 			"",
 			errors.PermissionDenied,
 			false,
@@ -150,8 +92,11 @@ func TestAuth(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			check := Auth(test.args.checker, true)
-			checkedCtx, err := check(test.args.ctx)
+			ctx := setupContext(test.token)
+			checker, err := authjwt.New(test.cfg)
+			require.NoError(t, err)
+			authFunc := Auth(checker, true)
+			checkedCtx, err := authFunc(ctx)
 			if !test.isValide {
 				assert.Error(t, err, "Auth should error")
 				assert.Equal(t, test.errCode, errors.FromError(err).Code, "Error should be correct")
@@ -167,6 +112,10 @@ func TestAuth(t *testing.T) {
 }
 
 func setupContext(tokenValue string) context.Context {
+	if tokenValue == "" {
+		return context.TODO()
+	}
+
 	md := metadata.Pairs("Authorization", tokenValue)
 	ctx := metautils.NiceMD(md).ToIncoming(context.TODO())
 

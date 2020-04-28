@@ -3,19 +3,14 @@ package generator
 import (
 	"context"
 	"crypto/rsa"
-	"crypto/x509"
-	"encoding/base64"
-	"encoding/pem"
-	"fmt"
-	"io/ioutil"
 	"time"
 
 	"github.com/ory/fosite"
 	"github.com/ory/fosite/handler/oauth2"
 	"github.com/ory/fosite/handler/openid"
 	fositejwt "github.com/ory/fosite/token/jwt"
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tls/certificate"
 )
 
 type JWTGenerator struct {
@@ -23,14 +18,15 @@ type JWTGenerator struct {
 	privateKey      *rsa.PrivateKey
 }
 
-func New(namespace, pemPrivateKey string) (*JWTGenerator, error) {
-	pkey, err := LoadRsaPrivateKeyFromVar(pemPrivateKey)
+func New(cfg *Config) (*JWTGenerator, error) {
+	cert, err := certificate.X509(cfg.KeyPair)
 	if err != nil {
 		return nil, err
 	}
+
 	return &JWTGenerator{
-		ClaimsNamespace: namespace,
-		privateKey:      pkey,
+		ClaimsNamespace: cfg.ClaimsNamespace,
+		privateKey:      cert.PrivateKey.(*rsa.PrivateKey),
 	}, nil
 }
 
@@ -98,63 +94,4 @@ func (j *JWTGenerator) GenerateIDToken(customClaims map[string]interface{}) (tok
 	idToken, err := jwtGenerator.GenerateIDToken(context.Background(), tokenRequest)
 
 	return idToken, err
-}
-
-// Try to load the clear private key from file, if not found, log error and generate a new RSA Private Key
-func LoadRSAPrivateKeyFromFile(rsaPrivateKeyLocation string) (*rsa.PrivateKey, error) {
-
-	priv, err := ioutil.ReadFile(rsaPrivateKeyLocation)
-	if err != nil {
-		log.WithError(err).Errorf("No RSA private key found")
-		return nil, err
-	}
-
-	privPem, _ := pem.Decode(priv)
-	if privPem.Type != "PRIVATE KEY" {
-		log.Errorf("RSA private key is of the wrong type: %s", privPem.Type)
-		return nil, err
-	}
-
-	privPemBytes := privPem.Bytes
-
-	var parsedKey interface{}
-	if parsedKey, err = x509.ParsePKCS1PrivateKey(privPemBytes); err != nil {
-		if parsedKey, err = x509.ParsePKCS8PrivateKey(privPemBytes); err != nil { // note this returns type `interface{}`
-			log.Errorf("Unable to parse RSA private key, generating a temp one: %s", err)
-			return nil, err
-		}
-	}
-
-	privateKey, ok := parsedKey.(*rsa.PrivateKey)
-	if !ok {
-		log.Errorf("Unable to parse RSA private key, generating a temp one: %s", err)
-		return nil, err
-	}
-
-	return privateKey, nil
-}
-
-func LoadRsaPrivateKeyFromVar(rawPrivateKey string) (*rsa.PrivateKey, error) {
-	decodedPrivateKey, err := base64.StdEncoding.DecodeString(rawPrivateKey)
-	if err != nil {
-		log.Errorf("Unable to Decode RSA private key")
-		return nil, err
-	}
-	// Parse the private key
-	var parsedKey interface{}
-	if parsedKey, err = x509.ParsePKCS1PrivateKey(decodedPrivateKey); err != nil {
-		if parsedKey, err = x509.ParsePKCS8PrivateKey(decodedPrivateKey); err != nil { // note this returns type `interface{}`
-			log.Errorf("Unable to parse RSA private key")
-			return nil, err
-		}
-	}
-
-	var privateKey *rsa.PrivateKey
-	var ok bool
-	privateKey, ok = parsedKey.(*rsa.PrivateKey)
-	if !ok {
-		log.Errorf("Unable to parse RSA private key, generating a temp one")
-		return nil, fmt.Errorf("invalid rsa private key")
-	}
-	return privateKey, nil
 }

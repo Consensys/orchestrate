@@ -30,17 +30,17 @@ func TestPGRepository(t *testing.T) {
 }
 
 func (s *repositoryTestSuite) SetupSuite() {
-	s.pg = pgTestUtils.NewPGTestHelper(migrations.Collection)
+	s.pg , _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
 	s.pg.InitTestDB(s.T())
 }
 
 func (s *repositoryTestSuite) SetupTest() {
-	s.pg.Upgrade(s.T())
+	s.pg.UpgradeTestDB(s.T())
 	s.dataagent = NewPGRepository(s.pg.DB)
 }
 
 func (s *repositoryTestSuite) TearDownTest() {
-	s.pg.Downgrade(s.T())
+	s.pg.DowngradeTestDB(s.T())
 }
 
 func (s *repositoryTestSuite) TearDownSuite() {

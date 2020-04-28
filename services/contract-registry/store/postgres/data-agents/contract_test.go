@@ -37,7 +37,7 @@ package dataagents
 // }
 
 // func (s *contractTestSuite) SetupSuite() {
-// 	s.pg = pgTestUtils.NewPGTestHelper(migrations.Collection)
+// 	s.pg , _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
 // 	s.pg.InitTestDB(s.T())
 // }
 
@@ -45,7 +45,7 @@ package dataagents
 // 	ctrl := gomock.NewController(s.T())
 // 	defer ctrl.Finish()
 
-// 	s.pg.Upgrade(s.T())
+// 	s.pg.UpgradeTestDB(s.T())
 
 // 	s.mockRepositoryDA = mocks.NewMockRepositoryDataAgent(ctrl)
 // 	s.mockArtifactDA = mocks.NewMockArtifactDataAgent(ctrl)
@@ -57,7 +57,7 @@ package dataagents
 // }
 
 // func (s *contractTestSuite) TearDownTest() {
-// 	s.pg.Downgrade(s.T())
+// 	s.pg.DowngradeTestDB(s.T())
 // }
 
 // func (s *contractTestSuite) TearDownSuite() {

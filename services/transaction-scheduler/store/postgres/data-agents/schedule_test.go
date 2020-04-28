@@ -6,6 +6,8 @@ package dataagents
 
 import (
 	"context"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	pgTestUtils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres/testutils"
@@ -13,7 +15,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/postgres/migrations"
-	"testing"
 )
 
 type scheduleTestSuite struct {
@@ -29,18 +30,18 @@ func TestPGSchedule(t *testing.T) {
 }
 
 func (s *scheduleTestSuite) SetupSuite() {
-	s.pg = pgTestUtils.NewPGTestHelper(migrations.Collection)
+	s.pg, _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
 	s.pg.InitTestDB(s.T())
 }
 
 func (s *scheduleTestSuite) SetupTest() {
-	s.pg.Upgrade(s.T())
+	s.pg.UpgradeTestDB(s.T())
 	s.jobDA = NewPGJob(s.pg.DB)
 	s.dataagent = NewPGSchedule(s.pg.DB)
 }
 
 func (s *scheduleTestSuite) TearDownTest() {
-	s.pg.Downgrade(s.T())
+	s.pg.DowngradeTestDB(s.T())
 }
 
 func (s *scheduleTestSuite) TearDownSuite() {

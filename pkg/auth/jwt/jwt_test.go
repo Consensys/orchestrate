@@ -1,17 +1,14 @@
-// +build unit
-
 package jwt
 
 import (
 	"context"
-	"crypto/rsa"
 	"fmt"
 	"testing"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/certificate"
 )
 
 // TODO: adding new tests to add coverage
@@ -40,25 +37,6 @@ const (
 	A1HLVytAeOjJPXGToNlv3k2UPJzOFUM0ujWWeBTyHMCmZ4RhlrfzDNffY5dlW82U
 	Sjc5dBlzRyZalXSjhcVhK4asUodomVntrvCShp/8C9LpbQZ+ugFNE8J6neStWrhp
 	RU9/sBJx`
-	certificateOrchestrateTest = `
-	MIIDBzCCAe+gAwIBAgIJCOOsj4KofbjsMA0GCSqGSIb3DQEBCwUAMCExHzAdBgNV
-	BAMTFmRldi1iZDZlM2psYy5hdXRoMC5jb20wHhcNMTkxMTI2MTYzODMwWhcNMzMw 
-	ODA0MTYzODMwWjAhMR8wHQYDVQQDExZkZXYtYmQ2ZTNqbGMuYXV0aDAuY29tMIIB 
-	IjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApWBAkbQrPMOeF7GFz9EhKbsU
-	FOg3WxVtPlvMtjkTtgxJe5ke5dxc2F9YeMB+1N+I2ozQa1ReCWAun4rGz4ovjxI4
-	PeUT0exFbI4oKd2bKOEd/IVGmabgUEm3FlSSq0jOEgu8JMpmGZIEGi3RMg8E1mAI
-	Jf5VwiIrCE6sP7IY9wrBaavmMdJ/i2a0gmjmPNqD8Y2bMi0fWW5frmGibMPEaddG
-	8/Daj3SMWo8N8nhW1VX3JyQcuA3Jxvsyj8aYudoCWIhbYSsdeVY3JmUnIcGZ7XVJ
-	H7COEwPmnxQ5uJAnqPfbItPMN9yzGqYxC4eC3UGzKJE5dfOcLCDJOe6AtKuxmwID
-	AQABo0IwQDAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBQxhyU5rj46P2H8VwI5
-	Rq/nwsHSNTAOBgNVHQ8BAf8EBAMCAoQwDQYJKoZIhvcNAQELBQADggEBAG4WbRfO
-	YeUNz637G5eFC3LMGa3bu+S/ln+NON3ZI49adCxcXElR8fIpXdtq/HzyZGcWfdo5
-	+sgaSKRAD4iWdEFtPkK840gIdFXf7lScSBo76uqiMvbw1xGbyNcsNbUppTM1Fmfr
-	J25CaMGG+9yd8gjBuHNLOmZXGkvo9et0ECKQEku9BunuGwIdWTaq5BTEufqby4sE
-	tv0ZwLgSwsooMRCMUIU2e/MM9wyD21Gc9Qp2v3/TI2282eVrIWunWE0WgMG0KlId
-	fFuGpGqJUfXjBVD+WAvV/E2lFraILs7sIp8U35hmJq4vG0kjG9B+JKHYswyLtnw+
-	3LVuAbUNiB5MLM4=`
-
 	certificateExpectedClientTestEnv = `-----BEGIN CERTIFICATE-----
 MIIDBzCCAe+gAwIBAgIJBCTenp/s9+rWMA0GCSqGSIb3DQEBCwUAMCExHzAdBgNV
 BAMTFmRldi1hYmNjZC5ldS5hdXRoMC5jb20wHhcNMTkwOTE1MTQyMjU2WhcNMzMw
@@ -81,80 +59,57 @@ gvimsav4koWYWME=
 )
 
 func TestJWT(t *testing.T) {
-	type fields struct {
-		Parser *jwt.Parser
-	}
-	type args struct {
-		rawToken                   string
-		certificateForValidation   string
-		claimsOrchestrateNamespace string
-	}
 	tests := []struct { //nolint:maligned // reason
 		name             string
-		fields           *fields
-		args             *args
+		cfg              *Config
+		token            string
 		signatureIsValid bool
 		errValue         uint32
 		isInvalid        bool
 	}{
 		{
 			"nominal usecase",
-			&fields{
-				Parser: &jwt.Parser{
-					SkipClaimsValidation: true,
-				},
+			&Config{
+				SkipClaimsValidation: true,
+				ClaimsNamespace:      "http://orchestrate.info",
+				Certificate:          []byte(certificateSuccessOrchestrateTest),
 			},
-			&args{
-				idTokenNominalUsecase,
-				certificateSuccessOrchestrateTest,
-				"http://orchestrate.info",
-			},
+			idTokenNominalUsecase,
 			true,
 			0,
 			false,
 		},
 		{
 			"signature is not valid",
-			&fields{
-				Parser: &jwt.Parser{
-					SkipClaimsValidation: true,
-				},
+			&Config{
+				SkipClaimsValidation: true,
+				ClaimsNamespace:      "http://orchestrate.info",
+				Certificate:          []byte(certificateExpectedClientTestEnv),
 			},
-			&args{
-				idToken,
-				certificateExpectedClientTestEnv,
-				"http://orchestrate.info",
-			},
+			idToken,
 			false,
 			jwt.ValidationErrorSignatureInvalid,
 			true,
 		},
 		{
 			"expired filed",
-			&fields{
-				Parser: &jwt.Parser{},
+			&Config{
+				ClaimsNamespace: "http://orchestrate.info",
+				Certificate:     []byte(certificateSuccessOrchestrateTest),
 			},
-			&args{
-				idTokenExpired,
-				certificateOrchestrateTest,
-				"http://orchestrate.info",
-			},
+			idTokenExpired,
 			false,
 			jwt.ValidationErrorExpired,
 			true,
 		},
 		{
 			"no tenant id",
-			&fields{
-				Parser: &jwt.Parser{
-					SkipClaimsValidation: true,
-				},
+			&Config{
+				SkipClaimsValidation: true,
+				ClaimsNamespace:      "http://tenant.info",
+				Certificate:          []byte(certificateSuccessOrchestrateTest),
 			},
-			&args{
-				idToken,
-				certificateOrchestrateTest,
-				"http://tenant.info/",
-			},
+			idToken,
 			true,
 			0,
 			true,
@@ -162,15 +117,10 @@ func TestJWT(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cert, _ := certificate.DecodeStringToCertificate(tt.args.certificateForValidation)
-			pubKey := cert.PublicKey.(*rsa.PublicKey)
-			checker := New(&Config{
-				Parser:          tt.fields.Parser,
-				Key:             func(token *jwt.Token) (interface{}, error) { return pubKey, nil },
-				ClaimsNamespace: tt.args.claimsOrchestrateNamespace,
-			})
+			checker, err := New(tt.cfg)
+			require.NoError(t, err)
 
-			ctx := authutils.WithAuthorization(context.Background(), fmt.Sprintf("Bearer %v", tt.args.rawToken))
+			ctx := authutils.WithAuthorization(context.Background(), fmt.Sprintf("Bearer %v", tt.token))
 			checkedCtx, err := checker.Check(ctx)
 			token := FromContext(checkedCtx)
 

@@ -29,19 +29,19 @@ func TestPGLog(t *testing.T) {
 }
 
 func (s *logTestSuite) SetupSuite() {
-	s.pg = pgTestUtils.NewPGTestHelper(migrations.Collection)
+	s.pg , _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
 	s.pg.InitTestDB(s.T())
 }
 
 func (s *logTestSuite) SetupTest() {
-	s.pg.Upgrade(s.T())
+	s.pg.UpgradeTestDB(s.T())
 	s.jobDA = NewPGJob(s.pg.DB)
 	s.scheduleDA = NewPGSchedule(s.pg.DB)
 	s.dataagent = NewPGLog(s.pg.DB)
 }
 
 func (s *logTestSuite) TearDownTest() {
-	s.pg.Downgrade(s.T())
+	s.pg.DowngradeTestDB(s.T())
 }
 
 func (s *logTestSuite) TearDownSuite() {

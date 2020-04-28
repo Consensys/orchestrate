@@ -5,6 +5,8 @@ import (
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tls/certificate"
 )
 
 func init() {
@@ -22,8 +24,23 @@ const (
 
 // PrivateKey register flag for Authentication service Certificate
 func PrivateKey(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Private Key who sign the JWT encoded in base64
+	desc := fmt.Sprintf(`Private key to sign generated JWT tokens
 Environment variable: %q`, privateKeyEnv)
 	f.String(privateKeyFlag, privateKeyDefault, desc)
 	_ = viper.BindPFlag(PrivateKeyViperKey, f.Lookup(privateKeyFlag))
+}
+
+type Config struct {
+	KeyPair         *certificate.KeyPair
+	ClaimsNamespace string
+}
+
+func NewConfig(vipr *viper.Viper) *Config {
+	return &Config{
+		KeyPair: &certificate.KeyPair{
+			Cert: []byte(vipr.GetString(jwt.CertificateViperKey)),
+			Key:  []byte(vipr.GetString(PrivateKeyViperKey)),
+		},
+		ClaimsNamespace: vipr.GetString(jwt.ClaimsNamespaceViperKey),
+	}
 }

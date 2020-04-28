@@ -21,13 +21,13 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/accesslog"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/router"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tls"
+	tlsmanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tls/manager"
 )
 
 type Builder struct {
 	Middleware middleware.Builder
 	Handler    handler.Builder
-	TLS        tls.Manager
+	TLS        tlsmanager.Manager
 	Metrics    middleware.Builder
 
 	dashboard handler.Builder

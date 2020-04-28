@@ -16,8 +16,11 @@ func Build(ctx context.Context, cfg *Config, pgmngr postgres.Manager) (interface
 	switch cfg.Type {
 	case postgresType:
 		cfg.Postgres.PG.ApplicationName = storeServiceName
-
-		return postgresStore.NewPGDB(pgmngr.Connect(ctx, cfg.Postgres.PG)), nil
+		opts, err := cfg.Postgres.PG.PGOptions()
+		if err != nil {
+			return nil, err
+		}
+		return postgresStore.NewPGDB(pgmngr.Connect(ctx, opts)), nil
 	default:
 		return nil, fmt.Errorf("invalid transaction scheduler store type %q", cfg.Type)
 	}

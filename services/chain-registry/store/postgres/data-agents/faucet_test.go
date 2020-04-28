@@ -15,7 +15,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/postgres/migrations"
 )
 
-
 type FaucetModelsTestSuite struct {
 	pg *pgTestUtils.PGTestHelper
 	FaucetTestSuite
@@ -23,7 +22,7 @@ type FaucetModelsTestSuite struct {
 
 func TestModelsFaucet(t *testing.T) {
 	s := new(FaucetModelsTestSuite)
-	s.pg = pgTestUtils.NewPGTestHelper(migrations.Collection)
+	s.pg, _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
 	suite.Run(t, s)
 }
 
@@ -33,17 +32,16 @@ func (s *FaucetModelsTestSuite) SetupSuite() {
 }
 
 func (s *FaucetModelsTestSuite) SetupTest() {
-	s.pg.Upgrade(s.T())
+	s.pg.UpgradeTestDB(s.T())
 }
 
 func (s *FaucetModelsTestSuite) TearDownTest() {
-	s.pg.Downgrade(s.T())
+	s.pg.DowngradeTestDB(s.T())
 }
 
 func (s *FaucetModelsTestSuite) TearDownSuite() {
 	s.pg.DropTestDB(s.T())
 }
-
 
 // FaucetTestSuite is a test suite for FaucetRegistry
 type FaucetTestSuite struct {

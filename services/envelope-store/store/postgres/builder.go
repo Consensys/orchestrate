@@ -16,7 +16,11 @@ func NewBuilder(mngr postgres.Manager) *Builder {
 }
 
 func (b *Builder) Build(ctx context.Context, cfg *Config) (*pgda.PGEnvelopeAgent, error) {
-	db := b.postgres.Connect(ctx, cfg.PG)
+	opts, err := cfg.PG.PGOptions()
+	if err != nil {
+		return nil, err
+	}
+	db := b.postgres.Connect(ctx, opts)
 
 	return pgda.NewPGEnvelope(db), nil
 }

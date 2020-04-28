@@ -37,18 +37,18 @@ func TestPGMethod(t *testing.T) {
 }
 
 func (s *methodTestSuite) SetupSuite() {
-	s.pg = pgTestUtils.NewPGTestHelper(migrations.Collection)
+	s.pg , _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
 	s.pg.InitTestDB(s.T())
 }
 
 func (s *methodTestSuite) SetupTest() {
-	s.pg.Upgrade(s.T())
+	s.pg.UpgradeTestDB(s.T())
 	s.codeHashDA = NewPGCodeHash(s.pg.DB)
 	s.dataagent = NewPGMethod(s.pg.DB)
 }
 
 func (s *methodTestSuite) TearDownTest() {
-	s.pg.Downgrade(s.T())
+	s.pg.DowngradeTestDB(s.T())
 }
 
 func (s *methodTestSuite) TearDownSuite() {

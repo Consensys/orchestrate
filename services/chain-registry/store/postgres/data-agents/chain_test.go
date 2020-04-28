@@ -24,7 +24,7 @@ type ChainModelsTestSuite struct {
 
 func TestModelsChain(t *testing.T) {
 	s := new(ChainModelsTestSuite)
-	s.pg = pgTestUtils.NewPGTestHelper(migrations.Collection)
+	s.pg , _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
 	// t.Logf("Test Database: %s", s.pg.TestDBName)
 	suite.Run(t, s)
 }
@@ -35,11 +35,11 @@ func (s *ChainModelsTestSuite) SetupSuite() {
 }
 
 func (s *ChainModelsTestSuite) SetupTest() {
-	s.pg.Upgrade(s.T())
+	s.pg.UpgradeTestDB(s.T())
 }
 
 func (s *ChainModelsTestSuite) TearDownTest() {
-	s.pg.Downgrade(s.T())
+	s.pg.DowngradeTestDB(s.T())
 }
 
 func (s *ChainModelsTestSuite) TearDownSuite() {

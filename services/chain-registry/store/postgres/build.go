@@ -17,7 +17,11 @@ func NewBuilder(mngr postgres.Manager) *Builder {
 
 func (b *Builder) Build(ctx context.Context, cfg *Config) (
 	*pgda.PGChainAgent, *pgda.PGFaucetAgent, error) {
-	db := b.postgres.Connect(ctx, cfg.PG)
+	opts, err := cfg.PG.PGOptions()
+	if err != nil {
+		return nil, nil, err
+	}
+	db := b.postgres.Connect(ctx, opts)
 
 	return pgda.NewPGChainAgent(db), pgda.NewPGFaucetAgent(db), nil
 }

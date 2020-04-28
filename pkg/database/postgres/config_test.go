@@ -1,17 +1,15 @@
-// +build unit
-
 package postgres
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 	"testing"
 
-	"github.com/go-pg/pg/v9"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	tlstestutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tls/testutils"
 )
 
 func TestPGFlags(t *testing.T) {
@@ -149,12 +147,24 @@ func TestDBPoolSize(t *testing.T) {
 }
 
 func TestNewOptions(t *testing.T) {
-	opts := NewOptions(viper.GetViper())
-	assert.Equal(t, opts, &pg.Options{
-		Addr:     fmt.Sprintf("%v:%v", viper.GetString("db.host"), viper.GetString("db.port")),
-		User:     viper.GetString("db.user"),
-		Password: viper.GetString("db.password"),
-		Database: viper.GetString("db.database"),
-		PoolSize: viper.GetInt("db.poolsize"),
-	})
+	vipr := viper.New()
+	vipr.Set(DBHostViperKey, "host-test")
+	vipr.Set(DBPortViperKey, 5432)
+	vipr.Set(DBDatabaseViperKey, "db-test")
+	vipr.Set(DBUserViperKey, "user-test")
+	vipr.Set(DBPasswordViperKey, "password")
+	vipr.Set(DBTLSCertViperKey, tlstestutils.OneLineRSACertPEMA)
+	vipr.Set(DBTLSKeyViperKey, tlstestutils.OneLineRSAKeyPEMA)
+	vipr.Set(DBTLSCAViperKey, tlstestutils.OneLineRSACertPEMB)
+
+	cfg := NewConfig(vipr)
+	opts, err := cfg.PGOptions()
+	require.NoError(t, err)
+	assert.Equal(t, "host-test:5432", opts.Addr)
+	assert.Equal(t, "db-test", opts.Database)
+	assert.Equal(t, "user-test", opts.User)
+	assert.Equal(t, "password", opts.Password)
+
+	require.NotNil(t, opts.TLSConfig, "TLS config should have been set")
+	require.NotNil(t, opts.TLSConfig.RootCAs, "CAs should have been set")
 }

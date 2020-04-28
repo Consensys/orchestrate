@@ -31,12 +31,12 @@ func TestPGTag(t *testing.T) {
 }
 
 func (s *tagTestSuite) SetupSuite() {
-	s.pg = pgTestUtils.NewPGTestHelper(migrations.Collection)
+	s.pg , _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
 	s.pg.InitTestDB(s.T())
 }
 
 func (s *tagTestSuite) SetupTest() {
-	s.pg.Upgrade(s.T())
+	s.pg.UpgradeTestDB(s.T())
 
 	s.repoDA = NewPGRepository(s.pg.DB)
 	s.artifactDA = NewPGArtifact(s.pg.DB)
@@ -45,7 +45,7 @@ func (s *tagTestSuite) SetupTest() {
 }
 
 func (s *tagTestSuite) TearDownTest() {
-	s.pg.Downgrade(s.T())
+	s.pg.DowngradeTestDB(s.T())
 }
 
 func (s *tagTestSuite) TearDownSuite() {

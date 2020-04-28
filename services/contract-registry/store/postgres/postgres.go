@@ -25,7 +25,11 @@ func (b *Builder) Build(ctx context.Context, cfg *Config) (
 	*dataagents.PGCodeHash,
 	error,
 ) {
-	db := b.postgres.Connect(ctx, cfg.PG)
+	opts, err := cfg.PG.PGOptions()
+	if err != nil {
+		return nil, nil, nil, nil, nil, nil, nil, err
+	}
+	db := b.postgres.Connect(ctx, opts)
 
 	repositories := dataagents.NewPGRepository(db)
 	artifacts := dataagents.NewPGArtifact(db)

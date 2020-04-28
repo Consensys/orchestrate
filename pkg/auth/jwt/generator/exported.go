@@ -4,8 +4,6 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -22,10 +20,7 @@ func Init(ctx context.Context) {
 			return
 		}
 		var err error
-		jwtGenerator, err = New(
-			viper.GetString(jwt.ClaimsNamespaceViperKey),
-			viper.GetString(PrivateKeyViperKey),
-		)
+		jwtGenerator, err = New(NewConfig(viper.GetViper()))
 		if err != nil {
 			log.WithError(err).Fatalf("jwt-generator: could not create jwtGenerator")
 		}

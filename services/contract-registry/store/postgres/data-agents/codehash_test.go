@@ -28,17 +28,17 @@ func TestPGCodeHash(t *testing.T) {
 }
 
 func (s *codeHashTestSuite) SetupSuite() {
-	s.pg = pgTestUtils.NewPGTestHelper(migrations.Collection)
+	s.pg , _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
 	s.pg.InitTestDB(s.T())
 }
 
 func (s *codeHashTestSuite) SetupTest() {
-	s.pg.Upgrade(s.T())
+	s.pg.UpgradeTestDB(s.T())
 	s.dataagent = NewPGCodeHash(s.pg.DB)
 }
 
 func (s *codeHashTestSuite) TearDownTest() {
-	s.pg.Downgrade(s.T())
+	s.pg.DowngradeTestDB(s.T())
 }
 
 func (s *codeHashTestSuite) TearDownSuite() {
