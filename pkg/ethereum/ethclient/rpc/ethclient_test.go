@@ -24,6 +24,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/types"
+	proto "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
 	pkgUtils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
@@ -40,17 +41,22 @@ var testConfig = &pkgUtils.Config{
 type mockRoundTripper struct{}
 
 func (rt mockRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	if err, ok := req.Context().Value(testCtxKey("resp.error")).(error); ok {
+	ctx := req.Context()
+	if preCtx, ok := ctx.Value(testCtxKey("pre_call")).(context.Context); ok {
+		ctx = preCtx
+	}
+
+	if err, ok := ctx.Value(testCtxKey("resp.error")).(error); ok {
 		return nil, err
 	}
 
 	resp := &http.Response{}
-	if statusCode, ok := req.Context().Value(testCtxKey("resp.statusCode")).(int); ok {
+	if statusCode, ok := ctx.Value(testCtxKey("resp.statusCode")).(int); ok {
 		resp.StatusCode = statusCode
 		resp.Status = http.StatusText(statusCode)
 	}
 
-	if body, ok := req.Context().Value(testCtxKey("resp.body")).(io.ReadCloser); ok {
+	if body, ok := ctx.Value(testCtxKey("resp.body")).(io.ReadCloser); ok {
 		resp.Body = body
 	}
 
@@ -452,6 +458,42 @@ func TestTransactionReceipt(t *testing.T) {
 	_, err = ec.TransactionReceipt(ctx, "test-endpoint", ethcommon.HexToHash(""))
 	assert.Error(t, err, "#4 TransactionReceipt should error")
 	assert.True(t, errors.IsNotFoundError(err), "#4 TransactionReceipt error should be not found")
+}
+
+func TestPrivateTransactionReceipt(t *testing.T) {
+	ec := newClient()
+
+	ethReceipt := &proto.Receipt{
+		Status:            1,
+		CumulativeGasUsed: 1000,
+		GasUsed:           111111,
+	}
+
+	privReceipt := &privateReceipt{
+		Status: "0x0",
+		Output: "0x12123",
+		Logs: []*proto.Log{
+			{
+				Address: ethcommon.BytesToAddress([]byte{0x11}).String(),
+				Topics:  []string{ethcommon.HexToHash("0x12123").String(), ethcommon.HexToHash("0x12123").String()},
+				Data: string([]byte{0x01, 0x00, 0xff}),
+			},
+			{
+				Address: ethcommon.BytesToAddress([]byte{0x01, 0x11}).String(),
+				Topics:  []string{ethcommon.HexToHash("0x12123").String(), ethcommon.HexToHash("0x12123").String()},
+				Data: string([]byte{0x01, 0x00, 0xff}),
+			},
+		},
+		PrivateFor:  []string{"PrivateFor"},
+		PrivateFrom: "PrivateFrom",
+	}
+
+	ctx := newContext(nil, 200, makeRespBody(privReceipt, ""))
+	ctx = context.WithValue(ctx, testCtxKey("pre_call"), 
+		newContext(nil, 200, makeRespBody(ethReceipt, "")))
+	ec.TransactionReceipt(ctx, "test-endpoint", ethcommon.HexToHash(""))
+	// assert.NoError(t, err, "TransactionReceipt should not  error")
+	// assert.Equal(t, ethReceipt.CumulativeGasUsed, receipt.CumulativeGasUsed, "TransactionReceipt receipt should have correct cumulative gas used")
 }
 
 func TestSyncProgress(t *testing.T) {
