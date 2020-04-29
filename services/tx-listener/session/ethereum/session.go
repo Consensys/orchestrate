@@ -314,12 +314,13 @@ func (s *Session) fetchReceipts(ctx context.Context, transaction ethtypes.Transa
 		case isPrivTx(blckTx) && s.Chain.Listener.ExternalTxEnabled:
 			futureEnvelopes = append(futureEnvelopes, s.fetchPrivateReceipt(
 				ctx,
-				tx.NewEnvelope(),
+				tx.NewEnvelope().SetTxHash(blckTx.Hash()),
 				blckTx.Hash()))
+			continue
 		case s.Chain.Listener.ExternalTxEnabled:
 			futureEnvelopes = append(futureEnvelopes, s.fetchReceipt(
 				ctx,
-				tx.NewEnvelope(),
+				tx.NewEnvelope().SetTxHash(blckTx.Hash()),
 				blckTx.Hash()))
 			continue
 		default:
@@ -370,7 +371,7 @@ func (s *Session) fetchReceipt(ctx context.Context, envelope *tx.Envelope, txHas
 			log.FromContext(ctx).WithError(err).WithField("tx.hash", txHash.Hex()).Errorf("failed to fetch receipt")
 			return nil, err
 		}
-
+		
 		// Attach receipt to envelope
 		return envelope.SetReceipt(receipt.
 			SetBlockHash(ethcommon.HexToHash(receipt.GetBlockHash())).
@@ -417,6 +418,7 @@ func (s *Session) fetchPrivateReceipt(ctx context.Context, envelope *tx.Envelope
 		return envelope.SetReceipt(receipt.
 			SetBlockHash(ethcommon.HexToHash(receipt.GetBlockHash())).
 			SetBlockNumber(receipt.GetBlockNumber()).
+			SetTxHash(txHash).
 			SetTxIndex(receipt.TxIndex)), nil
 	})
 }

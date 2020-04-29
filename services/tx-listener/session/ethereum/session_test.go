@@ -186,10 +186,10 @@ func (ec *EthClientV2) PrivateTransactionReceipt(ctx context.Context, _ string, 
 	ec.mux.RLock()
 	defer ec.mux.RUnlock()
 
-	if privTxHash, ok := ec.privTxs[txHash.Hex()]; ok {
+	if enclaveKey, ok := ec.privTxs[txHash.Hex()]; ok {
 		return &types.Receipt{
 			TxHash: txHash.Hex(),
-			Output: privTxHash,
+			Output: enclaveKey,
 		}, nil
 	}
 
@@ -415,18 +415,18 @@ func TestFetchBlockExternalTxDisabled(t *testing.T) {
 	future.Close()
 }
 
-func TestFetchBlockWithIntervalPrivTx(t *testing.T) {
+func TestFetchBlockWithIntervalPrivateTx(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	var testChainID int64 = 200
 	ec := NewEthClientV2(big.NewInt(testChainID))
 
 	// This is the hash of the priv tx 
-	privTxHash := "0xd0bef1115237cb96d5635a46027b1debb7cf6f19f68861b69261eb4674095cb0"
+	enclaveKey := "0xd0bef1115237cb96d5635a46027b1debb7cf6f19f68861b69261eb4674095cb0"
 	// This is the Tx generated when we store the enclavekey
-	enclaveKeyTx := ethtypes.NewTransaction(0, ethcommon.HexToAddress(orionPrecompiledContractAddr), nil, 0, nil, []byte(privTxHash))
+	markingTx := ethtypes.NewTransaction(0, ethcommon.HexToAddress(orionPrecompiledContractAddr), nil, 0, nil, []byte(enclaveKey))
 
 	ec.Mine(ethtypes.NewBlock(&ethtypes.Header{},
-		[]*ethtypes.Transaction{enclaveKeyTx},
+		[]*ethtypes.Transaction{markingTx},
 		[]*ethtypes.Header{},
 		[]*ethtypes.Receipt{},
 	))
@@ -444,7 +444,7 @@ func TestFetchBlockWithIntervalPrivTx(t *testing.T) {
 						},
 					},
 					InternalLabels: map[string]string{
-						"txHash": enclaveKeyTx.Hash().String(),
+						"txHash": markingTx.Hash().String(),
 					},
 				},
 		},
@@ -466,11 +466,54 @@ func TestFetchBlockWithIntervalPrivTx(t *testing.T) {
 		block := res.(*fetchedBlock)
 		assert.NotNil(t, block, "Result block should not be nil")
 		assert.Len(t, block.envelopes, 1, "Receipts should have been fetched properly")
-		assert.Equal(t, block.envelopes[0].TxHash.String(), enclaveKeyTx.Hash().String())
-		assert.Equal(t, block.envelopes[0].Receipt.Output, privTxHash)
+		assert.Equal(t, block.envelopes[0].TxHash.String(), markingTx.Hash().String())
+		assert.Equal(t, block.envelopes[0].Receipt.Output, enclaveKey)
 	}
 	future.Close()
 }
+
+func TestFetchBlockWithExternalPrivateTx(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	var testChainID int64 = 200
+	ec := NewEthClientV2(big.NewInt(testChainID))
+
+	// This is the hash of the priv tx 
+	enclaveKey := "0xd0bef1115237cb96d5635a46027b1debb7cf6f19f68861b69261eb4674095cb0"
+	// This is the Tx generated when we store the enclavekey
+	markingTx := ethtypes.NewTransaction(0, ethcommon.HexToAddress(orionPrecompiledContractAddr), nil, 0, nil, []byte(enclaveKey))
+
+	ec.Mine(ethtypes.NewBlock(&ethtypes.Header{},
+		[]*ethtypes.Transaction{markingTx},
+		[]*ethtypes.Header{},
+		[]*ethtypes.Receipt{},
+	))
+
+	store := clientmock.NewMockEnvelopeStoreClient(ctrl)
+
+	store.EXPECT().LoadByTxHashes(gomock.Any(), gomock.Any()).Return(&proto.LoadByTxHashesResponse{}, nil)
+
+	sess := &Session{
+		ec: ec,
+		Chain: &dynamic.Chain{
+			ChainID:  big.NewInt(testChainID),
+			Listener: &dynamic.Listener{ExternalTxEnabled: true}},
+		store: store,
+	}
+
+	future := sess.fetchBlock(context.Background(), 0)
+	select {
+	case err := <-future.Err():
+		t.Errorf("Future should not error but got %v", err)
+	case res := <-future.Result():
+		block := res.(*fetchedBlock)
+		assert.NotNil(t, block, "Result block should not be nil")
+		assert.Len(t, block.envelopes, 1, "Receipts should have been fetched properly")
+		assert.Equal(t, block.envelopes[0].TxHash.String(), markingTx.Hash().String())
+		assert.Equal(t, block.envelopes[0].Receipt.Output, enclaveKey)
+	}
+	future.Close()
+}
+
 
 func TestInit(t *testing.T) {
 	ctrl := gomock.NewController(t)
