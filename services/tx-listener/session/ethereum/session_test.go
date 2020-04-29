@@ -75,7 +75,6 @@ func (ec *EthClientV2) Mine(block *ethtypes.Block) {
 		ec.txs[tx.Hash().Hex()] = tx
 		if tx.To().String() == orionPrecompiledContractAddr {
 			ec.privTxs[tx.Hash().Hex()] = string(tx.Data())
-			// ec.txs[string(tx.Data())] = tx
 		}
 	}
 }
@@ -514,6 +513,46 @@ func TestFetchBlockWithExternalPrivateTx(t *testing.T) {
 	future.Close()
 }
 
+
+func TestIgnoreBlockWithExternalPrivateTx(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	var testChainID int64 = 200
+	ec := NewEthClientV2(big.NewInt(testChainID))
+
+	// This is the hash of the priv tx 
+	enclaveKey := "0xd0bef1115237cb96d5635a46027b1debb7cf6f19f68861b69261eb4674095cb0"
+	// This is the Tx generated when we store the enclavekey
+	markingTx := ethtypes.NewTransaction(0, ethcommon.HexToAddress(orionPrecompiledContractAddr), nil, 0, nil, []byte(enclaveKey))
+
+	ec.Mine(ethtypes.NewBlock(&ethtypes.Header{},
+		[]*ethtypes.Transaction{markingTx},
+		[]*ethtypes.Header{},
+		[]*ethtypes.Receipt{},
+	))
+
+	store := clientmock.NewMockEnvelopeStoreClient(ctrl)
+
+	store.EXPECT().LoadByTxHashes(gomock.Any(), gomock.Any()).Return(&proto.LoadByTxHashesResponse{}, nil)
+
+	sess := &Session{
+		ec: ec,
+		Chain: &dynamic.Chain{
+			ChainID:  big.NewInt(testChainID),
+			Listener: &dynamic.Listener{ExternalTxEnabled: false}},
+		store: store,
+	}
+
+	future := sess.fetchBlock(context.Background(), 0)
+	select {
+	case err := <-future.Err():
+		t.Errorf("Future should not error but got %v", err)
+	case res := <-future.Result():
+		block := res.(*fetchedBlock)
+		assert.NotNil(t, block, "Result block should not be nil")
+		assert.Len(t, block.envelopes, 0, "Receipts should not have any envelope")
+	}
+	future.Close()
+}
 
 func TestInit(t *testing.T) {
 	ctrl := gomock.NewController(t)

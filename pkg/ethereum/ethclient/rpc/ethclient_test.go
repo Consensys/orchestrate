@@ -39,10 +39,12 @@ var testConfig = &pkgUtils.Config{
 }
 
 type mockRoundTripper struct{}
+var skipPreCallRoundTrip bool
 
 func (rt mockRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	ctx := req.Context()
-	if preCtx, ok := ctx.Value(testCtxKey("pre_call")).(context.Context); ok {
+	if preCtx, ok := ctx.Value(testCtxKey("pre_call")).(context.Context); ok && !skipPreCallRoundTrip{
+		skipPreCallRoundTrip = true
 		ctx = preCtx
 	}
 
@@ -463,14 +465,28 @@ func TestTransactionReceipt(t *testing.T) {
 func TestPrivateTransactionReceipt(t *testing.T) {
 	ec := newClient()
 
-	ethReceipt := &proto.Receipt{
-		Status:            1,
+	ethReceipt := &ethtypes.Receipt{
+		Status:            0,
 		CumulativeGasUsed: 1000,
-		GasUsed:           111111,
+		Logs: []*ethtypes.Log{
+			{
+				Address: ethcommon.BytesToAddress([]byte{0x11}),
+				Topics:  []ethcommon.Hash{ethcommon.HexToHash("dead"), ethcommon.HexToHash("beef")},
+				Data:    []byte{0x01, 0x00, 0xff},
+			},
+			{
+				Address: ethcommon.BytesToAddress([]byte{0x01, 0x11}),
+				Topics:  []ethcommon.Hash{ethcommon.HexToHash("dead"), ethcommon.HexToHash("beef")},
+				Data:    []byte{0x01, 0x00, 0xff},
+			},
+		},
+		ContractAddress: ethcommon.BytesToAddress([]byte{0x01, 0x11, 0x11}),
+		GasUsed:         111111,
 	}
+	ethReceipt.Bloom = ethtypes.CreateBloom(ethtypes.Receipts{ethReceipt})
 
 	privReceipt := &privateReceipt{
-		Status: "0x0",
+		Status: "0x1",
 		Output: "0x12123",
 		Logs: []*proto.Log{
 			{
@@ -488,12 +504,15 @@ func TestPrivateTransactionReceipt(t *testing.T) {
 		PrivateFrom: "PrivateFrom",
 	}
 
-	ctx := newContext(nil, 200, makeRespBody(privReceipt, ""))
+	ctx := newContext(nil, 200, makeRespBody(newReceiptResp(ethReceipt), ""))
 	ctx = context.WithValue(ctx, testCtxKey("pre_call"), 
-		newContext(nil, 200, makeRespBody(ethReceipt, "")))
-	ec.TransactionReceipt(ctx, "test-endpoint", ethcommon.HexToHash(""))
-	// assert.NoError(t, err, "TransactionReceipt should not  error")
-	// assert.Equal(t, ethReceipt.CumulativeGasUsed, receipt.CumulativeGasUsed, "TransactionReceipt receipt should have correct cumulative gas used")
+		newContext(nil, 200, makeRespBody(privReceipt, "")))
+
+	receipt, err := ec.PrivateTransactionReceipt(ctx, "test-endpoint", ethcommon.HexToHash(""))
+	assert.NoError(t, err, "TransactionReceipt should not  error")
+	assert.Equal(t, ethReceipt.CumulativeGasUsed, receipt.CumulativeGasUsed, "TransactionReceipt receipt should have correct cumulative gas used")
+	assert.Equal(t, privReceipt.Output, receipt.Output, "TransactionReceipt receipt should have correct priv tx output")
+	assert.Equal(t, uint64(0x1), receipt.Status, "TransactionReceipt receipt should have correct priv tx status")
 }
 
 func TestSyncProgress(t *testing.T) {
