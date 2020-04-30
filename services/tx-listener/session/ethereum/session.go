@@ -247,24 +247,6 @@ func (s *Session) fetchBlock(ctx context.Context, blockPosition uint64) *Future 
 	})
 }
 
-func (s *Session) fetchEnvelope(ctx context.Context, txHash string) (envelope *tx.Envelope, err error) {
-	res, err := s.store.LoadByTxHash(ctx, &evlpstore.LoadByTxHashRequest{
-		ChainId: s.Chain.ChainID.String(),
-		TxHash:  txHash,
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	envelope, err = res.GetEnvelope().Envelope()
-	if err != nil {
-		return nil, err
-	}
-
-	return envelope, nil
-}
-
 func (s *Session) fetchEnvelopes(ctx context.Context, transactions ethtypes.Transactions) (envelopeMap map[string]*tx.Envelope, err error) {
 	envelopeMap = make(map[string]*tx.Envelope)
 
@@ -289,7 +271,11 @@ func (s *Session) fetchEnvelopes(ctx context.Context, transactions ethtypes.Tran
 			if er != nil {
 				return nil, er
 			}
-			envelopeMap[t.Envelope.GetTxHash()] = envelope
+
+			// Filter by the envelopes belonging to same session CHAIN_UUID
+			if envelope.ChainUUID == s.Chain.UUID {
+				envelopeMap[t.Envelope.GetTxHash()] = envelope
+			}
 		}
 	}
 
@@ -362,16 +348,27 @@ func isPrivTx(transaction *ethtypes.Transaction) bool {
 
 func (s *Session) fetchReceipt(ctx context.Context, envelope *tx.Envelope, txHash ethcommon.Hash) *Future {
 	return NewFuture(func() (interface{}, error) {
+		log.FromContext(ctx).
+			WithField("tx.hash", txHash.Hex()).
+			WithField("chainUUID", s.Chain.UUID).
+			Debug("fetching fetch receipt")
+
 		receipt, err := s.ec.TransactionReceipt(
 			ethclientutils.RetryNotFoundError(ctx, true),
 			s.Chain.URL,
 			txHash,
 		)
+
 		if err != nil {
-			log.FromContext(ctx).WithError(err).WithField("tx.hash", txHash.Hex()).Errorf("failed to fetch receipt")
+			log.FromContext(ctx).
+				WithError(err).
+				WithField("tx.hash", txHash.Hex()).
+				WithField("chainUUID", s.Chain.UUID).
+				Errorf("failed to fetch receipt")
+
 			return nil, err
 		}
-		
+
 		// Attach receipt to envelope
 		return envelope.SetReceipt(receipt.
 			SetBlockHash(ethcommon.HexToHash(receipt.GetBlockHash())).
@@ -390,6 +387,11 @@ func (s *Session) fetchPrivateReceipt(ctx context.Context, envelope *tx.Envelope
 			return nil, err
 		}
 
+		log.FromContext(ctx).
+			WithField("tx.hash", txHash.Hex()).
+			WithField("chainUUID", s.Chain.UUID).
+			Debug("private fetching fetch receipt")
+
 		// We fetch a hybrid version of
 		receipt, err := s.ec.PrivateTransactionReceipt(
 			ethclientutils.RetryNotFoundError(ctx, true),
@@ -401,6 +403,7 @@ func (s *Session) fetchPrivateReceipt(ctx context.Context, envelope *tx.Envelope
 			log.FromContext(ctx).
 				WithError(err).
 				WithField("tx.hash", txHash.Hex()).
+				WithField("chainUUID", s.Chain.UUID).
 				Errorf("failed to fetch private receipt")
 
 			return nil, err

@@ -332,7 +332,7 @@ func (sc *ScenarioContext) envelopesShouldHaveTheFollowingValues(table *gherkin.
 			}
 			if col.Value == "~" {
 				if isEqual("", field) {
-					return fmt.Errorf("(%d/%d) did not expected %s to be empty", r+1, len(rowsEnvelopes), fmt.Sprintf("%v", field))
+					return fmt.Errorf("(%d/%d) did not expected %s to be empty", r+1, len(rowsEnvelopes), fmt.Sprintf("%v", fieldName))
 				}
 				continue
 			}

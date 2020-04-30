@@ -39,11 +39,12 @@ var testConfig = &pkgUtils.Config{
 }
 
 type mockRoundTripper struct{}
+
 var skipPreCallRoundTrip bool
 
 func (rt mockRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	ctx := req.Context()
-	if preCtx, ok := ctx.Value(testCtxKey("pre_call")).(context.Context); ok && !skipPreCallRoundTrip{
+	if preCtx, ok := ctx.Value(testCtxKey("pre_call")).(context.Context); ok && !skipPreCallRoundTrip {
 		skipPreCallRoundTrip = true
 		ctx = preCtx
 	}
@@ -492,21 +493,22 @@ func TestPrivateTransactionReceipt(t *testing.T) {
 			{
 				Address: ethcommon.BytesToAddress([]byte{0x11}).String(),
 				Topics:  []string{ethcommon.HexToHash("0x12123").String(), ethcommon.HexToHash("0x12123").String()},
-				Data: string([]byte{0x01, 0x00, 0xff}),
+				Data:    string([]byte{0x01, 0x00, 0xff}),
 			},
 			{
 				Address: ethcommon.BytesToAddress([]byte{0x01, 0x11}).String(),
 				Topics:  []string{ethcommon.HexToHash("0x12123").String(), ethcommon.HexToHash("0x12123").String()},
-				Data: string([]byte{0x01, 0x00, 0xff}),
+				Data:    string([]byte{0x01, 0x00, 0xff}),
 			},
 		},
 		PrivateFor:  []string{"PrivateFor"},
 		PrivateFrom: "PrivateFrom",
 	}
 
-	ctx := newContext(nil, 200, makeRespBody(newReceiptResp(ethReceipt), ""))
-	ctx = context.WithValue(ctx, testCtxKey("pre_call"), 
-		newContext(nil, 200, makeRespBody(privReceipt, "")))
+	ctx := newContext(nil, 200, makeRespBody(privReceipt, ""))
+	// First tx receipt to fetch is the Public receipt
+	ctx = context.WithValue(ctx, testCtxKey("pre_call"),
+		newContext(nil, 200, makeRespBody(newReceiptResp(ethReceipt), "")))
 
 	receipt, err := ec.PrivateTransactionReceipt(ctx, "test-endpoint", ethcommon.HexToHash(""))
 	assert.NoError(t, err, "TransactionReceipt should not  error")

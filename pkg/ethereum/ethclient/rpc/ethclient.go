@@ -397,7 +397,7 @@ func processPrivateReceiptResult(receipt **privateReceipt) ProcessResultFunc {
 
 		if receipt == nil || *receipt == nil {
 			// Receipt was not found
-			return errors.NotFoundError("receipt not found")
+			return errors.NotFoundError("private receipt not found")
 		}
 
 		return nil
@@ -419,15 +419,18 @@ func (ec *Client) TransactionReceipt(ctx context.Context, endpoint string, txHas
 // TransactionReceipt returns the receipt of a transaction by transaction hash.
 // Note that the receipt is not available for pending transactions.
 func (ec *Client) PrivateTransactionReceipt(ctx context.Context, endpoint string, txHash ethcommon.Hash) (*proto.Receipt, error) {
-	// https://besu.hyperledger.org/en/stable/Reference/API-Objects/#private-transaction-receipt-object
-	var pr *privateReceipt
-	err := ec.Call(ctx, endpoint, processPrivateReceiptResult(&pr), "priv_getTransactionReceipt", txHash)
+	var r *proto.Receipt
+	err := ec.Call(ctx, endpoint, processReceiptResult(&r), "eth_getTransactionReceipt", txHash)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	var r *proto.Receipt
-	err = ec.Call(ctx, endpoint, processReceiptResult(&r), "eth_getTransactionReceipt", txHash)
+	// https://besu.hyperledger.org/en/stable/Reference/API-Objects/#private-transaction-receipt-object
+	// We do not need to retry for private Receipt as public receipt is available it means the private one
+	// is too as private chain are implemented with instant finality
+	var pr *privateReceipt
+	err = ec.Call(utils.RetryNotFoundError(ctx, false),
+		endpoint, processPrivateReceiptResult(&pr), "priv_getTransactionReceipt", txHash)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
