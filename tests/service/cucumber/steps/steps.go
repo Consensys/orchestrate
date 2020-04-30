@@ -363,7 +363,7 @@ func isEqual(s string, val reflect.Value) bool {
 			return false
 		}
 	default:
-		if val.String() != s && fmt.Sprintf("%v", val) != fmt.Sprintf("%s", s) {
+		if val.String() != s && fmt.Sprintf("%v", val) != s {
 			return false
 		}
 	}

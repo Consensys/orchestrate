@@ -28,6 +28,7 @@ func NewLoadEnvelopeByTxHashes(envelopeAgent store.EnvelopeAgent) LoadEnvelopeBy
 func (se *loadEnvelopeByTxHashes) Execute(ctx context.Context, tenantID, chainID string, txHashes []string) ([]*models.EnvelopeModel, error) {
 	logger := log.FromContext(ctx)
 
+	// TODO: Filter also by tenantID
 	envelopes, err := se.envelopeAgent.FindByTxHashes(ctx, txHashes)
 
 	if err != nil {

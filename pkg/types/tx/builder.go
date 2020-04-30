@@ -933,6 +933,11 @@ func (e *Envelope) loadPtrFields(gas, nonce, gasPrice, value, from, to string) [
 	return errs
 }
 
+// Attribute kafka partition keys to well attribute nonce
+// For a classic eth_sendRawTransaction transaction - @
+// For a eea_sendRawTransaction with a privacyGroupID - @orion-@
+// For a eea_sendRawTransaction with a privateFor - @orion-<hash(privateFor-privateFrom)>@
+// TODO: Change  to  (or <chainUUID)
 func (e *Envelope) KafkaPartitionKey() string {
 	switch {
 	case e.IsEeaSendPrivateTransactionPrivacyGroup():

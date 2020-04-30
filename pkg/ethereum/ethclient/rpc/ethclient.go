@@ -431,8 +431,10 @@ func (ec *Client) PrivateTransactionReceipt(ctx context.Context, endpoint string
 	var pr *privateReceipt
 	err = ec.Call(utils.RetryNotFoundError(ctx, false),
 		endpoint, processPrivateReceiptResult(&pr), "priv_getTransactionReceipt", txHash)
+
+	// In case of an error we still want to return the public receipt
 	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return r, errors.FromError(err).ExtendComponent(component)
 	}
 
 	// Once we have both receipts, we create a hybrid version as follow

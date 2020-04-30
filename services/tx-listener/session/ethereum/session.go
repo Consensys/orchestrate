@@ -390,23 +390,30 @@ func (s *Session) fetchPrivateReceipt(ctx context.Context, envelope *tx.Envelope
 		log.FromContext(ctx).
 			WithField("tx.hash", txHash.Hex()).
 			WithField("chainUUID", s.Chain.UUID).
-			Debug("private fetching fetch receipt")
+			Debug("fetching private receipt")
 
-		// We fetch a hybrid version of
 		receipt, err := s.ec.PrivateTransactionReceipt(
 			ethclientutils.RetryNotFoundError(ctx, true),
 			s.Chain.URL,
 			txHash,
 		)
 
-		if err != nil {
+		// We exit ONLY when we even failed to fetch the marking tx receipt, otherwise
+		// error is being appended to the envelope
+		if err != nil && receipt == nil {
 			log.FromContext(ctx).
 				WithError(err).
 				WithField("tx.hash", txHash.Hex()).
 				WithField("chainUUID", s.Chain.UUID).
-				Errorf("failed to fetch private receipt")
+				Error("failed to fetch receipt")
 
 			return nil, err
+		} else if err != nil {
+			log.FromContext(ctx).
+				WithError(err).
+				WithField("tx.hash", txHash.Hex()).
+				WithField("chainUUID", s.Chain.UUID).
+				Warn("failed to fetch private receipt")
 		}
 
 		log.FromContext(ctx).
