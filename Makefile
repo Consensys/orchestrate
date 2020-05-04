@@ -41,10 +41,11 @@ lint-ci: ## Check linting
 
 run-e2e: gobuild-e2e
 	@docker-compose up e2e
-	@docker-compose -f scripts/report/docker-compose.yml up
 
 e2e: run-e2e
+	@docker-compose -f scripts/report/docker-compose.yml up
 	@$(OPEN) build/report/report.html 2>/dev/null
+	@exit $(docker inspect orchestrategit_e2e_1 --format='{{.State.ExitCode}}')
 
 e2e-ci:
 	@docker-compose up e2e

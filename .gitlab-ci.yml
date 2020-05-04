@@ -137,14 +137,17 @@ gobuild:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
       - build/bin/
-  except:
+  only:
     - master
+  except:
+    - tags
 
 test-e2e:
   <<: *docker-compose-e2e
   script:
     - make up-ci
     - make e2e-ci
+    - exit $(docker inspect orchestrate_e2e_1 --format='{{.State.ExitCode}}')
 
 test-multitenancy-e2e:
   <<: *docker-compose-e2e
@@ -152,6 +155,7 @@ test-multitenancy-e2e:
     - mv -f .env.multitenancy .env
     - make up-ci
     - make e2e-ci
+    - exit $(docker inspect orchestrate_e2e_1 --format='{{.State.ExitCode}}')
 
 #Build orchestrate
 build-orchestrate-on-branch:
