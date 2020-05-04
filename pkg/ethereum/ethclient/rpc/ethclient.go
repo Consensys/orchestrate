@@ -63,26 +63,30 @@ func NewClient(newBackOff func() backoff.BackOff, client *http.Client) *Client {
 }
 
 func (ec *Client) Call(ctx context.Context, endpoint string, processResult func(result json.RawMessage) error, method string, args ...interface{}) error {
-	req, err := ec.newJSONRpcRequestWithContext(ctx, endpoint, method, args...)
-	if err != nil {
-		return err
-	}
-
-	bckoff := backoff.WithContext(ec.pool.Get().(backoff.BackOff), req.Context())
+	bckoff := backoff.WithContext(ec.pool.Get().(backoff.BackOff), ctx)
 	defer ec.pool.Put(bckoff)
 
-	return ec.callWithRetry(req, processResult, bckoff)
+	return ec.callWithRetry(ctx, func(context.Context) (*http.Request, error) {
+		return ec.newJSONRpcRequestWithContext(ctx, endpoint, method, args...)
+	}, processResult, bckoff)
 }
 
-func (ec *Client) callWithRetry(req *http.Request, processResult func(result json.RawMessage) error, bckoff backoff.BackOff) error {
+func (ec *Client) callWithRetry(ctx context.Context, reqBuilder func(context.Context) (*http.Request, error),
+	processResult func(result json.RawMessage) error, bckoff backoff.BackOff) error {
 	return backoff.RetryNotify(
 		func() error {
+			// Every request we generate a new object
+			req, err := reqBuilder(ctx)
+			if err != nil {
+				return backoff.Permanent(err)
+			}
+
 			e := ec.call(req, processResult)
 			switch {
 			case e == nil:
 				return nil
 			case errors.IsConnectionError(e),
-				errors.IsNotFoundError(e) && utils.ShouldRetryNotFoundError(req.Context()):
+				errors.IsNotFoundError(e) && utils.ShouldRetryNotFoundError(ctx):
 				return e
 			default:
 				return backoff.Permanent(e)
@@ -90,9 +94,7 @@ func (ec *Client) callWithRetry(req *http.Request, processResult func(result jso
 		},
 		bckoff,
 		func(e error, duration time.Duration) {
-			// Reset body before retrying
-			req.Body, _ = req.GetBody()
-			log.FromContext(req.Context()).
+			log.FromContext(ctx).
 				WithError(e).
 				Warnf("eth-client: JSON-RPC call failed, retrying in %v...", duration)
 		},
@@ -103,6 +105,10 @@ func (ec *Client) call(req *http.Request, processResult ProcessResultFunc) error
 	resp, err := ec.do(req)
 	if err != nil {
 		return err
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return errors.EthConnectionError("%v (code=%v): ", resp.Status, resp.StatusCode)
 	}
 
 	var respMsg JSONRpcMessage
@@ -126,8 +132,6 @@ func (ec *Client) call(req *http.Request, processResult ProcessResultFunc) error
 		return ec.processEthError(respMsg.Error)
 	case len(respMsg.Result) == 0:
 		return errors.NotFoundError("not found")
-	case resp.StatusCode < 200 || resp.StatusCode >= 300:
-		return errors.EthConnectionError("%v (code=%v): ", resp.Status, resp.StatusCode)
 	default:
 		return processResult(respMsg.Result)
 	}

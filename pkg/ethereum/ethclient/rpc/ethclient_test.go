@@ -21,6 +21,7 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/stretchr/testify/assert"
+	backoffmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/backoff/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/types"
@@ -135,53 +136,46 @@ func makeRespBody(result interface{}, errMsg string) io.ReadCloser {
 	return ioutil.NopCloser(bytes.NewReader(b))
 }
 
-type MockBackoff struct {
-	hasRetried bool
-}
-
-func (b *MockBackoff) Reset() {}
-
-func (b *MockBackoff) NextBackOff() time.Duration {
-	b.hasRetried = true
-	return backoff.Stop
-}
-
 func TestCallWithRetry(t *testing.T) {
 	ec := newClient()
 	var raw json.RawMessage
 
-	// Test 1: connection error
-	bckoff := &MockBackoff{}
-	ctx := newContext(fmt.Errorf("test-error"), 0, nil)
-	req, _ := ec.newJSONRpcRequestWithContext(ctx, "test-endpoint", "test_method")
-	err := ec.callWithRetry(req, processResult(&raw), bckoff)
+	// Test 1: Connection error, should retry
+	bckoff := &backoffmock.MockBackoff{}
+	ctx := newContext(fmt.Errorf("test-error"), 503, nil)
+	err := ec.callWithRetry(ctx, func(context.Context) (*http.Request, error) {
+		return ec.newJSONRpcRequestWithContext(ctx, "test-endpoint", "test_method")
+	}, processResult(&raw), bckoff)
 	assert.Error(t, err, "#1 TestCallWithRetry should  error")
-	assert.True(t, bckoff.hasRetried, "#1 Should have retried")
+	assert.True(t, bckoff.HasRetried(), "#1 Should have retried")
 
-	// Test 2: not found error
-	bckoff = &MockBackoff{}
-	ctx = newContext(nil, 200, makeRespBody([]byte{}, ""))
-	req, _ = ec.newJSONRpcRequestWithContext(ctx, "test-endpoint", "test_method")
-	err = ec.callWithRetry(req, processResult(&raw), bckoff)
-	assert.Error(t, err, "#2 TestCallWithRetry should  error")
-	assert.False(t, bckoff.hasRetried, "#2 Should not have retried")
-
-	// Test 3: not found error with retry context
-	bckoff = &MockBackoff{}
-	ctx = newContext(nil, 200, makeRespBody([]byte{}, ""))
+	// Test 2: not found error, should retry
+	bckoff = &backoffmock.MockBackoff{}
+	ctx = newContext(nil, 404, makeRespBody([]byte{}, ""))
 	ctx = utils.RetryNotFoundError(ctx, true)
-	req, _ = ec.newJSONRpcRequestWithContext(ctx, "test-endpoint", "test_method")
-	err = ec.callWithRetry(req, processResult(&raw), bckoff)
-	assert.Error(t, err, "#3 TestCallWithRetry should  error")
-	assert.True(t, bckoff.hasRetried, "#3 Should have retried")
+	err = ec.callWithRetry(ctx, func(context.Context) (*http.Request, error) {
+		return ec.newJSONRpcRequestWithContext(ctx, "test-endpoint", "test_method")
+	}, processResult(&raw), bckoff)
+	assert.Error(t, err, "#2 TestCallWithRetry should  error")
+	assert.True(t, bckoff.HasRetried(), "#2 Should have retried")
 
-	// Test 4: invalid response body
-	bckoff = &MockBackoff{}
+	// Test 3: invalid response body, should not retry
+	bckoff = &backoffmock.MockBackoff{}
 	ctx = newContext(nil, 200, makeRespBody([]byte(`"%@`), ""))
-	req, _ = ec.newJSONRpcRequestWithContext(ctx, "test-endpoint", "test_method")
-	err = ec.callWithRetry(req, processResult(&raw), bckoff)
+	err = ec.callWithRetry(ctx, func(context.Context) (*http.Request, error) {
+		return ec.newJSONRpcRequestWithContext(ctx, "test-endpoint", "test_method")
+	}, processResult(&raw), bckoff)
+	assert.Error(t, err, "#3 TestCallWithRetry should  error")
+	assert.False(t, bckoff.HasRetried(), "#3 Should not have retried")
+	
+	// Test 4: invalid response body with error status, should retry
+	bckoff = &backoffmock.MockBackoff{}
+	ctx = newContext(nil, 400, makeRespBody([]byte(`"%@`), ""))
+	err = ec.callWithRetry(ctx, func(context.Context) (*http.Request, error) {
+		return ec.newJSONRpcRequestWithContext(ctx, "test-endpoint", "test_method")
+	}, processResult(&raw), bckoff)
 	assert.Error(t, err, "#4 TestCallWithRetry should  error")
-	assert.False(t, bckoff.hasRetried, "#4 Should not have retried")
+	assert.True(t, bckoff.HasRetried(), "#4 Should have retried")
 }
 
 func TestBlockByHash(t *testing.T) {

@@ -7,9 +7,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/containous/traefik/v2/pkg/log"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
 	ethclientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
@@ -43,6 +45,7 @@ type Session struct {
 
 	hook    hook.Hook
 	offsets offset.Manager
+	bckOff  backoff.BackOff
 
 	// Listening session
 	trigger         chan struct{}
@@ -56,7 +59,29 @@ type Session struct {
 }
 
 func (s *Session) Run(ctx context.Context) error {
-	return s.run(ctx)
+	err := backoff.RetryNotify(
+		func() error {
+			err := s.run(ctx)
+			if err == context.DeadlineExceeded || err == context.Canceled {
+				log.FromContext(ctx).
+					WithError(err).
+					Info("exiting listener session...")
+				return backoff.Permanent(ctx.Err())
+			}
+
+			return err
+		},
+		s.bckOff,
+		func(err error, duration time.Duration) {
+			// Print the received error
+			log.FromContext(ctx).
+				WithError(err).
+				Warnf("error in session listener, rebooting in %v...", duration)
+		},
+	)
+
+	log.FromContext(ctx).Info("listener session exited")
+	return err
 }
 
 func (s *Session) run(ctx context.Context) (err error) {
@@ -82,31 +107,36 @@ func (s *Session) run(ctx context.Context) (err error) {
 		wg.Done()
 	}()
 
-	select {
 	// Wait for an error or for context to be canceled
+	select {
 	case err = <-s.errors:
-		if err != context.DeadlineExceeded && err != context.Canceled {
-			log.FromContext(ctx).WithError(err).Errorf("error while listening")
-			// If we get an error we cancel execution
-			cancel()
-		}
+		cancel()
+		break
 	case <-ctx.Done():
+		cancel()
+		break
 	}
 
-	// Drain errors
+	// We must drain channels before starting a new session
 	go func() {
-		for range s.errors {
+		for e := range s.errors {
+			log.FromContext(ctx).
+				WithError(e).
+				Error("error while listening")
 		}
 	}()
 
+	log.FromContext(ctx).Debug("waiting for go routines to complete....")
 	// Wait for goroutines to complete and close session
 	wg.Wait()
-	s.close()
 
-	return
+	s.close(ctx)
+	return err
 }
 
 func (s *Session) init(ctx context.Context) error {
+	log.FromContext(ctx).Debug("initializing session listener...")
+
 	err := s.initChainID(ctx)
 	if err != nil {
 		return err
@@ -116,6 +146,10 @@ func (s *Session) init(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+
+	s.trigger = make(chan struct{}, 1)
+	s.errors = make(chan error, 1)
+	s.fetchedBlocks = make(chan *Future, 20)
 
 	return nil
 }
@@ -147,12 +181,18 @@ func (s *Session) initPosition(ctx context.Context) error {
 }
 
 func (s *Session) listen(ctx context.Context) {
-	log.FromContext(ctx).WithField("block.start", s.blockPosition).Infof("start listening")
+	log.FromContext(ctx).
+		WithField("block.start", s.blockPosition).
+		Infof("starting fetch block listener")
+
 	ticker := time.NewTicker(s.Chain.Listener.Backoff)
 listeningLoop:
 	for {
 		select {
 		case <-ctx.Done():
+			log.FromContext(ctx).
+				WithField("block.stop", s.blockPosition).
+				Debug("stopping fetch block listener")
 			break listeningLoop
 		case <-s.trigger:
 			if (s.currentChainTip > 0) && s.blockPosition <= s.currentChainTip {
@@ -164,7 +204,6 @@ listeningLoop:
 				tip, err := s.getChainTip(ctx)
 				if err != nil {
 					s.errors <- err
-					break listeningLoop
 				} else if tip > s.currentChainTip {
 					s.currentChainTip = tip
 					s.trig()
@@ -179,11 +218,14 @@ listeningLoop:
 	ticker.Stop()
 	close(s.fetchedBlocks)
 
-	log.FromContext(ctx).WithField("block.stop", s.blockPosition).Infof("Stopped listening")
+	log.FromContext(ctx).
+		WithField("block.stop", s.blockPosition).
+		Infof("fetch block listener has been stopped")
 }
 
 func (s *Session) callHooks(ctx context.Context) {
 	var err error
+
 	for futureBlock := range s.fetchedBlocks {
 		select {
 		case res := <-futureBlock.Result():
@@ -201,6 +243,8 @@ func (s *Session) callHooks(ctx context.Context) {
 			s.errors <- err
 		}
 	}
+
+	log.FromContext(ctx).Debug("call hooks loop has been stopped")
 }
 
 func (s *Session) callHook(ctx context.Context, block *fetchedBlock) error {
@@ -220,10 +264,16 @@ func (s *Session) fetchBlock(ctx context.Context, blockPosition uint64) *Future 
 			s.Chain.URL,
 			big.NewInt(int64(blockPosition)),
 		)
+
 		if err != nil {
-			log.FromContext(ctx).WithError(err).WithField("block.number", blockPosition).Errorf("failed to fetch block")
-			return nil, err
+			log.FromContext(ctx).
+				WithError(err).
+				WithField("block.number", blockPosition).
+				Errorf("failed to fetch block")
+
+			return nil, errors.ConnectionError(err.Error())
 		}
+
 		block := &fetchedBlock{block: blck}
 
 		ctx = multitenancy.WithTenantID(ctx, s.Chain.TenantID)
@@ -459,7 +509,8 @@ func (s *Session) trig() {
 	}
 }
 
-func (s *Session) close() {
+func (s *Session) close(ctx context.Context) {
+	log.FromContext(ctx).Debug("closing listener session...")
 	close(s.errors)
 	close(s.trigger)
 }
@@ -487,13 +538,11 @@ func (b *SessionBuilder) NewSession(chain *dynamic.Chain) (session.Session, erro
 
 func (b *SessionBuilder) newSession(chain *dynamic.Chain) *Session {
 	return &Session{
-		Chain:         chain,
-		ec:            b.ec,
-		store:         b.store,
-		hook:          b.hook,
-		offsets:       b.offsets,
-		trigger:       make(chan struct{}, 1),
-		fetchedBlocks: make(chan *Future, 20),
-		errors:        make(chan error, 1),
+		Chain:   chain,
+		ec:      b.ec,
+		store:   b.store,
+		hook:    b.hook,
+		offsets: b.offsets,
+		bckOff:  backoff.NewConstantBackOff(2 * time.Second),
 	}
 }
