@@ -19,6 +19,9 @@ func Build(ctx context.Context, cfg *Config, pgmngr postgres.Manager) (*DataAgen
 
 		return &DataAgents{
 			TransactionRequest: dataagents.NewPGTransactionRequest(db),
+			ScheduleAgent:      dataagents.NewPGSchedule(db),
+			JobAgent:           dataagents.NewPGJob(db),
+			LogAgent:           dataagents.NewPGLog(db),
 		}, nil
 	default:
 		return &DataAgents{}, fmt.Errorf("invalid transaction scheduler store type %q", cfg.Type)

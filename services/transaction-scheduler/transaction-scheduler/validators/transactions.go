@@ -2,11 +2,13 @@ package validators
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/hex"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/utils"
 )
 
 //go:generate mockgen -source=transactions.go -destination=mocks/transactions.go -package=mocks
@@ -14,29 +16,38 @@ import (
 const txValidatorComponent = "transaction-validator"
 
 type TransactionValidator interface {
-	ValidateTx(ctx context.Context, txRequest *types.TransactionRequest) error
+	ValidateRequestHash(ctx context.Context, params interface{}, idempotencyKey string) (string, error)
 }
 
 // Transaction is a validator for transaction requests (business logic)
-type Transaction struct {
-	chainRegistryClient client.ChainRegistryClient
+type transactionValidator struct {
+	txRequestDA store.TransactionRequestAgent
 }
 
-// NewTransaction creates a new TransactionValidator
-func NewTransaction(chainRegistryClient client.ChainRegistryClient) TransactionValidator {
-	return &Transaction{chainRegistryClient: chainRegistryClient}
+// NewTransactionValidator creates a new TransactionValidator
+func NewTransactionValidator(txRequestDA store.TransactionRequestAgent) TransactionValidator {
+	return &transactionValidator{txRequestDA: txRequestDA}
 }
 
-// ValidateTx validates a transaction request
-func (validator *Transaction) ValidateTx(ctx context.Context, txRequest *types.TransactionRequest) error {
-	log.WithContext(ctx).WithField("tx", txRequest).Debug("validating transaction")
-
-	// TODO: Validation of args given methodSignature
-
-	_, err := validator.chainRegistryClient.GetChainByUUID(ctx, txRequest.ChainID)
+func (txValidator *transactionValidator) ValidateRequestHash(ctx context.Context, params interface{}, idempotencyKey string) (string, error) {
+	jsonParams, err := utils.ObjectToJSON(params)
 	if err != nil {
-		return errors.FromError(err).ExtendComponent(txValidatorComponent)
+		return "", errors.FromError(err).ExtendComponent(txValidatorComponent)
 	}
 
-	return nil
+	hash := md5.Sum([]byte(jsonParams))
+	requestHash := hex.EncodeToString(hash[:])
+
+	txRequestToCompare, err := txValidator.txRequestDA.FindOneByIdempotencyKey(ctx, idempotencyKey)
+	if err != nil && !errors.IsNotFoundError(err) {
+		return "", errors.FromError(err).ExtendComponent(txValidatorComponent)
+	}
+
+	if txRequestToCompare != nil && txRequestToCompare.RequestHash != requestHash {
+		errMessage := "a transaction request with the same idempotency key and different params already exists"
+		log.WithError(err).WithField("idempotency_key", idempotencyKey).Error(errMessage)
+		return "", errors.AlreadyExistsError(errMessage)
+	}
+
+	return requestHash, nil
 }

@@ -9,9 +9,8 @@ type TransactionRequest struct {
 
 	ID             int
 	IdempotencyKey string
-	Chain          string
-	Method         string
+	ScheduleID     int
+	RequestHash    string
 	Params         string
-	Labels         *map[string]string
 	CreatedAt      time.Time `pg:"default:now()"`
 }

@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"context"
 	"encoding/json"
 
 	log "github.com/sirupsen/logrus"
@@ -21,20 +20,16 @@ func ObjectToJSON(obj interface{}) (string, error) {
 	return string(b), nil
 }
 
-func FormatTxResponse(ctx context.Context, txRequestModel *models.TransactionRequest) (*types.TransactionResponse, error) {
+func FormatTxResponse(txRequestModel *models.TransactionRequest, scheduleResponse *types.ScheduleResponse) (*types.TransactionResponse, error) {
 	mapParams, err := jsonToMap(txRequestModel.Params)
 	if err != nil {
 		return nil, err
 	}
 
-	log.WithContext(ctx).Info("transaction created successfully")
 	return &types.TransactionResponse{
 		IdempotencyKey: txRequestModel.IdempotencyKey,
-		ChainID:        txRequestModel.Chain,
-		Labels:         txRequestModel.Labels,
-		Method:         txRequestModel.Method,
 		Params:         mapParams,
-		Schedule:       types.ScheduleResponse{},
+		Schedule:       *scheduleResponse,
 		CreatedAt:      txRequestModel.CreatedAt,
 	}, nil
 }

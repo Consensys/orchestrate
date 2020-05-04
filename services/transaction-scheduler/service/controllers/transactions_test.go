@@ -51,8 +51,6 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_Send() {
 	requestBytes, _ := json.Marshal(txRequest)
 	txResponse := &types.TransactionResponse{
 		IdempotencyKey: txRequest.IdempotencyKey,
-		ChainID:        txRequest.ChainID,
-		Method:         types.MethodSendRawTransaction,
 		Schedule:       types.ScheduleResponse{},
 	}
 

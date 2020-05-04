@@ -3,6 +3,9 @@ package transactions
 import (
 	"context"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/schedules"
+
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
@@ -22,23 +25,62 @@ type SendTxUseCase interface {
 
 // SendTx is a use case to create a new transaction request
 type SendTx struct {
-	txRequestDataAgent store.TransactionRequestAgent
-	validator          validators.TransactionValidator
+	createScheduleUseCase schedules.CreateScheduleUseCase
+	createJobUseCase      jobs.CreateJobUseCase
+	txRequestDataAgent    store.TransactionRequestAgent
+	validator             validators.TransactionValidator
 }
 
 // NewSendTx creates a new SendTxUseCase
-func NewSendTx(txRequestDataAgent store.TransactionRequestAgent, validator validators.TransactionValidator) SendTxUseCase {
+func NewSendTx(
+	txRequestDataAgent store.TransactionRequestAgent,
+	validator validators.TransactionValidator,
+	createScheduleUseCase schedules.CreateScheduleUseCase,
+	createJobUseCase jobs.CreateJobUseCase,
+) SendTxUseCase {
 	return &SendTx{
-		txRequestDataAgent: txRequestDataAgent,
-		validator:          validator,
+		createScheduleUseCase: createScheduleUseCase,
+		createJobUseCase:      createJobUseCase,
+		txRequestDataAgent:    txRequestDataAgent,
+		validator:             validator,
 	}
 }
 
 // Execute validates, creates and starts a new transaction
 func (usecase *SendTx) Execute(ctx context.Context, txRequest *types.TransactionRequest, tenantID string) (*types.TransactionResponse, error) {
-	log.WithContext(ctx).WithField("idempotency_key", txRequest.IdempotencyKey).Info("creating new transaction")
+	log.WithContext(ctx).WithField("idempotency_key", txRequest.IdempotencyKey).Debug("creating new transaction")
 
-	err := usecase.validator.ValidateTx(ctx, txRequest)
+	// TODO: Validation of args given methodSignature
+
+	requestHash, err := usecase.validator.ValidateRequestHash(ctx, txRequest.Params, txRequest.IdempotencyKey)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
+	}
+
+	// We create the schedule
+	scheduleRequest := &types.ScheduleRequest{ChainID: txRequest.ChainID}
+	scheduleResponse, scheduleID, err := usecase.createScheduleUseCase.Execute(ctx, scheduleRequest, tenantID)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
+	}
+
+	// We create the job as a public ETH transaction
+	// TODO: Craft "Data" field here with MethodSignature and Args
+	txData := ""
+	jobRequest := &types.JobRequest{
+		ScheduleID: scheduleID,
+		Type:       types.JobConstantinopleTransaction,
+		Labels:     txRequest.Labels,
+		Transaction: types.ETHTransaction{
+			From:     &txRequest.Params.From,
+			To:       &txRequest.Params.To,
+			Value:    txRequest.Params.Value,
+			GasPrice: txRequest.Params.GasPrice,
+			GasLimit: txRequest.Params.Gas,
+			Data:     &txData,
+		},
+	}
+	jobResponse, err := usecase.createJobUseCase.Execute(ctx, jobRequest)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
@@ -50,19 +92,23 @@ func (usecase *SendTx) Execute(ctx context.Context, txRequest *types.Transaction
 
 	txRequestModel := &models.TransactionRequest{
 		IdempotencyKey: txRequest.IdempotencyKey,
-		Chain:          txRequest.ChainID,
-		Method:         types.MethodSendRawTransaction,
+		ScheduleID:     scheduleID,
+		RequestHash:    requestHash,
 		Params:         jsonParams,
-		Labels:         txRequest.Labels,
 	}
-	err = usecase.txRequestDataAgent.Insert(ctx, txRequestModel)
+	err = usecase.txRequestDataAgent.SelectOrInsert(ctx, txRequestModel)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
 
-	// TODO: Create schedule (with use case) that also creates jobs
+	// TODO: Start necessary job and update the logs to STARTED
 
-	// TODO: Start job
+	scheduleResponse.Jobs = append([]*types.JobResponse{}, jobResponse)
+	txResponse, err := utils.FormatTxResponse(txRequestModel, scheduleResponse)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
+	}
 
-	return utils.FormatTxResponse(ctx, txRequestModel)
+	log.WithContext(ctx).WithField("idempotency_key", txRequestModel.IdempotencyKey).Info("contract transaction request created successfully")
+	return txResponse, nil
 }

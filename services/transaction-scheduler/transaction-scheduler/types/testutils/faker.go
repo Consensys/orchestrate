@@ -18,3 +18,14 @@ func FakeTransactionRequest() *types.TransactionRequest {
 		},
 	}
 }
+
+func FakeScheduleRequest() *types.ScheduleRequest {
+	return &types.ScheduleRequest{ChainID: uuid.NewV4().String()}
+}
+
+func FakeScheduleResponse() *types.ScheduleResponse {
+	return &types.ScheduleResponse{
+		UUID:    uuid.NewV4().String(),
+		ChainID: uuid.NewV4().String(),
+	}
+}

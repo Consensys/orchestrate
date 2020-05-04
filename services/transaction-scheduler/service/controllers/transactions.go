@@ -32,11 +32,11 @@ func (c *TransactionsController) Append(router *mux.Router) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Success 200 types.TransactionRequest
-// @Failure 400 error
-// @Failure 409 error
-// @Failure 422 error
-// @Failure 500 error
+// @Success 200
+// @Failure 400
+// @Failure 409
+// @Failure 422
+// @Failure 500
 // @Router /transactions/send [post]
 func (c *TransactionsController) Send(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")

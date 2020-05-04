@@ -1,0 +1,31 @@
+package types
+
+import "time"
+
+type JobRequest struct {
+	ScheduleID  int                `json:"requestID" validate:"required"`
+	Type        string             `json:"type" validate:"required"`
+	Labels      *map[string]string `json:"labels,omitempty"`
+	Transaction ETHTransaction     `json:"transaction" validate:"required"`
+}
+
+type ETHTransaction struct {
+	Hash           *string   `json:"hash,omitempty"`
+	From           *string   `json:"from,omitempty"`
+	To             *string   `json:"to,omitempty"`
+	Nonce          *string   `json:"nonce,omitempty"`
+	Value          *string   `json:"value,omitempty"`
+	GasPrice       *string   `json:"gasPrice,omitempty"`
+	GasLimit       *string   `json:"gasLimit,omitempty"`
+	Data           *string   `json:"data,omitempty"`
+	Raw            *string   `json:"raw,omitempty"`
+	PrivateFrom    *string   `json:"privateFrom,omitempty"`
+	PrivateFor     *[]string `json:"privateFor,omitempty"`
+	PrivacyGroupID *string   `json:"privacyGroupID,omitempty"`
+}
+
+type JobResponse struct {
+	UUID        string         `json:"uuid" validate:"required,uuid4"`
+	Transaction ETHTransaction `json:"transaction" validate:"required"`
+	CreatedAt   time.Time      `json:"createdAt"`
+}

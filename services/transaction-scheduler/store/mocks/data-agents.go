@@ -34,16 +34,142 @@ func (m *MockTransactionRequestAgent) EXPECT() *MockTransactionRequestAgentMockR
 	return m.recorder
 }
 
-// Insert mocks base method.
-func (m *MockTransactionRequestAgent) Insert(ctx context.Context, txRequest *models.TransactionRequest) error {
+// SelectOrInsert mocks base method.
+func (m *MockTransactionRequestAgent) SelectOrInsert(ctx context.Context, txRequest *models.TransactionRequest) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Insert", ctx, txRequest)
+	ret := m.ctrl.Call(m, "SelectOrInsert", ctx, txRequest)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SelectOrInsert indicates an expected call of SelectOrInsert.
+func (mr *MockTransactionRequestAgentMockRecorder) SelectOrInsert(ctx, txRequest interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SelectOrInsert", reflect.TypeOf((*MockTransactionRequestAgent)(nil).SelectOrInsert), ctx, txRequest)
+}
+
+// FindOneByIdempotencyKey mocks base method.
+func (m *MockTransactionRequestAgent) FindOneByIdempotencyKey(ctx context.Context, idempotencyKey string) (*models.TransactionRequest, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindOneByIdempotencyKey", ctx, idempotencyKey)
+	ret0, _ := ret[0].(*models.TransactionRequest)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindOneByIdempotencyKey indicates an expected call of FindOneByIdempotencyKey.
+func (mr *MockTransactionRequestAgentMockRecorder) FindOneByIdempotencyKey(ctx, idempotencyKey interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByIdempotencyKey", reflect.TypeOf((*MockTransactionRequestAgent)(nil).FindOneByIdempotencyKey), ctx, idempotencyKey)
+}
+
+// MockScheduleAgent is a mock of ScheduleAgent interface.
+type MockScheduleAgent struct {
+	ctrl     *gomock.Controller
+	recorder *MockScheduleAgentMockRecorder
+}
+
+// MockScheduleAgentMockRecorder is the mock recorder for MockScheduleAgent.
+type MockScheduleAgentMockRecorder struct {
+	mock *MockScheduleAgent
+}
+
+// NewMockScheduleAgent creates a new mock instance.
+func NewMockScheduleAgent(ctrl *gomock.Controller) *MockScheduleAgent {
+	mock := &MockScheduleAgent{ctrl: ctrl}
+	mock.recorder = &MockScheduleAgentMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockScheduleAgent) EXPECT() *MockScheduleAgentMockRecorder {
+	return m.recorder
+}
+
+// Insert mocks base method.
+func (m *MockScheduleAgent) Insert(ctx context.Context, schedule *models.Schedule) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Insert", ctx, schedule)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Insert indicates an expected call of Insert.
-func (mr *MockTransactionRequestAgentMockRecorder) Insert(ctx, txRequest interface{}) *gomock.Call {
+func (mr *MockScheduleAgentMockRecorder) Insert(ctx, schedule interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockTransactionRequestAgent)(nil).Insert), ctx, txRequest)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockScheduleAgent)(nil).Insert), ctx, schedule)
+}
+
+// MockJobAgent is a mock of JobAgent interface.
+type MockJobAgent struct {
+	ctrl     *gomock.Controller
+	recorder *MockJobAgentMockRecorder
+}
+
+// MockJobAgentMockRecorder is the mock recorder for MockJobAgent.
+type MockJobAgentMockRecorder struct {
+	mock *MockJobAgent
+}
+
+// NewMockJobAgent creates a new mock instance.
+func NewMockJobAgent(ctrl *gomock.Controller) *MockJobAgent {
+	mock := &MockJobAgent{ctrl: ctrl}
+	mock.recorder = &MockJobAgentMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockJobAgent) EXPECT() *MockJobAgentMockRecorder {
+	return m.recorder
+}
+
+// Insert mocks base method.
+func (m *MockJobAgent) Insert(ctx context.Context, job *models.Job) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Insert", ctx, job)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Insert indicates an expected call of Insert.
+func (mr *MockJobAgentMockRecorder) Insert(ctx, job interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockJobAgent)(nil).Insert), ctx, job)
+}
+
+// MockLogAgent is a mock of LogAgent interface.
+type MockLogAgent struct {
+	ctrl     *gomock.Controller
+	recorder *MockLogAgentMockRecorder
+}
+
+// MockLogAgentMockRecorder is the mock recorder for MockLogAgent.
+type MockLogAgentMockRecorder struct {
+	mock *MockLogAgent
+}
+
+// NewMockLogAgent creates a new mock instance.
+func NewMockLogAgent(ctrl *gomock.Controller) *MockLogAgent {
+	mock := &MockLogAgent{ctrl: ctrl}
+	mock.recorder = &MockLogAgentMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockLogAgent) EXPECT() *MockLogAgentMockRecorder {
+	return m.recorder
+}
+
+// Insert mocks base method.
+func (m *MockLogAgent) Insert(ctx context.Context, log *models.Log) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Insert", ctx, log)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Insert indicates an expected call of Insert.
+func (mr *MockLogAgentMockRecorder) Insert(ctx, log interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockLogAgent)(nil).Insert), ctx, log)
 }

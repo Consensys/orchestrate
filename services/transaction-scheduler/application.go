@@ -16,7 +16,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/configwatcher"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/validators"
 )
 
 func newApplication(
@@ -44,8 +43,7 @@ func newApplication(
 	}
 
 	// Create HTTP Router builder
-	vals := validators.NewValidators(chainRegistryClient)
-	ucs := usecases.NewUseCases(dataAgents, vals)
+	ucs := usecases.NewUseCases(dataAgents, chainRegistryClient)
 	ctrls := controllers.NewBuilder(ucs)
 	routerBuilder, err := service.NewHTTPBuilder(cfg.app.HTTP, jwt, key, cfg.multitenancy, ctrls, reg.HTTP())
 	if err != nil {

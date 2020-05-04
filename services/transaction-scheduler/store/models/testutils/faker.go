@@ -6,12 +6,43 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
 )
 
-func FakeTxRequest() *models.TransactionRequest {
+func FakeSchedule() *models.Schedule {
+	return &models.Schedule{
+		UUID:     uuid.NewV4().String(),
+		TenantID: "tenantID",
+		ChainID:  uuid.NewV4().String(),
+	}
+}
+
+func FakeTxRequest(scheduleID int) *models.TransactionRequest {
 	return &models.TransactionRequest{
 		IdempotencyKey: uuid.NewV4().String(),
-		Chain:          uuid.NewV4().String(),
-		Method:         types.MethodSendRawTransaction,
-		Params:         "{\"field0\":\"field0Value\"}",
-		Labels:         nil,
+		RequestHash:    "requestHash",
+		Params:         "{\"field0\": \"field0Value\"}",
+		ScheduleID:     scheduleID,
+	}
+}
+
+func FakeTransaction() *models.Transaction {
+	return &models.Transaction{
+		UUID: uuid.NewV4().String(),
+	}
+}
+
+func FakeJob(scheduleID int) *models.Job {
+	return &models.Job{
+		UUID:        uuid.NewV4().String(),
+		Type:        types.JobConstantinopleTransaction,
+		ScheduleID:  scheduleID,
+		Transaction: FakeTransaction(),
+		Logs:        []*models.Log{{Status: types.LogStatusCreated, Message: "created message"}},
+	}
+}
+
+func FakeLog(jobID int) *models.Log {
+	return &models.Log{
+		UUID:   uuid.NewV4().String(),
+		Status: types.LogStatusCreated,
+		JobID:  jobID,
 	}
 }

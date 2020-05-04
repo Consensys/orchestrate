@@ -10,10 +10,26 @@ import (
 
 type DataAgents struct {
 	TransactionRequest TransactionRequestAgent
+	ScheduleAgent      ScheduleAgent
+	JobAgent           JobAgent
+	LogAgent           LogAgent
 }
 
 // Interfaces data agents
 
 type TransactionRequestAgent interface {
-	Insert(ctx context.Context, txRequest *models.TransactionRequest) error
+	SelectOrInsert(ctx context.Context, txRequest *models.TransactionRequest) error
+	FindOneByIdempotencyKey(ctx context.Context, idempotencyKey string) (*models.TransactionRequest, error)
+}
+
+type ScheduleAgent interface {
+	Insert(ctx context.Context, schedule *models.Schedule) error
+}
+
+type JobAgent interface {
+	Insert(ctx context.Context, job *models.Job) error
+}
+
+type LogAgent interface {
+	Insert(ctx context.Context, log *models.Log) error
 }

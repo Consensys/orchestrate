@@ -55,14 +55,14 @@ func (s *MigrationsTestSuite) TestCreateRequestsTable() {
 	s.Assert().Equal(1, n, "Table should have been created")
 }
 
-func (s *MigrationsTestSuite) TestAddColumns() {
+func (s *MigrationsTestSuite) TestAddRequestsColumns() {
 	n, err := s.pg.DB.Model().
 		Table("information_schema.columns").
 		Where("table_name = '?'", pg.SafeQuery("requests")).
 		Count()
 
 	s.Assert().NoError(err, "Query failed")
-	s.Assert().Equal(7, n, "Requests table should have correct number of columns")
+	s.Assert().Equal(6, n, "Requests table should have correct number of columns")
 }
 
 func TestMigrations(t *testing.T) {

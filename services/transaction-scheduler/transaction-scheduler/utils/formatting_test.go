@@ -3,10 +3,10 @@
 package utils
 
 import (
-	"context"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
+	storetestutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
+	typestestutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types/testutils"
 	"testing"
 )
 
@@ -28,13 +28,12 @@ func TestUtils_ObjectToJSON(t *testing.T) {
 }
 
 func TestUtils_FormatTxResponse(t *testing.T) {
-	txRequest := testutils.FakeTxRequest()
+	txRequest := storetestutils.FakeTxRequest(1)
+	scheduleResponse := typestestutils.FakeScheduleResponse()
 
-	txResponse, _ := FormatTxResponse(context.Background(), txRequest)
+	txResponse, _ := FormatTxResponse(txRequest, scheduleResponse)
 
 	assert.Equal(t, txRequest.IdempotencyKey, txResponse.IdempotencyKey)
-	assert.Equal(t, txRequest.Chain, txResponse.ChainID)
-	assert.Equal(t, txRequest.Method, types.MethodSendRawTransaction)
 
 	jsonMap := make(map[string]interface{})
 	jsonMap["field0"] = "field0Value"

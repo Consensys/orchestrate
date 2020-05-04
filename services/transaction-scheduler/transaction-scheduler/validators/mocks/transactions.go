@@ -7,7 +7,6 @@ package mocks
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
 	reflect "reflect"
 )
 
@@ -34,16 +33,17 @@ func (m *MockTransactionValidator) EXPECT() *MockTransactionValidatorMockRecorde
 	return m.recorder
 }
 
-// ValidateTx mocks base method.
-func (m *MockTransactionValidator) ValidateTx(ctx context.Context, txRequest *types.TransactionRequest) error {
+// ValidateRequestHash mocks base method.
+func (m *MockTransactionValidator) ValidateRequestHash(ctx context.Context, params interface{}, idempotencyKey string) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ValidateTx", ctx, txRequest)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret := m.ctrl.Call(m, "ValidateRequestHash", ctx, params, idempotencyKey)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
-// ValidateTx indicates an expected call of ValidateTx.
-func (mr *MockTransactionValidatorMockRecorder) ValidateTx(ctx, txRequest interface{}) *gomock.Call {
+// ValidateRequestHash indicates an expected call of ValidateRequestHash.
+func (mr *MockTransactionValidatorMockRecorder) ValidateRequestHash(ctx, params, idempotencyKey interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateTx", reflect.TypeOf((*MockTransactionValidator)(nil).ValidateTx), ctx, txRequest)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateRequestHash", reflect.TypeOf((*MockTransactionValidator)(nil).ValidateRequestHash), ctx, params, idempotencyKey)
 }

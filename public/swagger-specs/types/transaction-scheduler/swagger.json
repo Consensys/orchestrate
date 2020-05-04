@@ -15,27 +15,6 @@
         "version": "2.0"
     },
     "paths": {
-        "/jobs": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    },
-                    {
-                        "JWTAuth": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Retrieves a list of all transaction jobs matching a filter",
-                "responses": {
-                    "200": {},
-                    "400": {},
-                    "500": {}
-                }
-            }
-        },
         "/transactions/send": {
             "post": {
                 "security": [
@@ -53,7 +32,6 @@
                 "responses": {
                     "200": {},
                     "400": {},
-                    "404": {},
                     "409": {},
                     "422": {},
                     "500": {}

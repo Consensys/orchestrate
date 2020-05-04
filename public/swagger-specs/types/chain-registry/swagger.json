@@ -326,8 +326,7 @@
                     "type": "string"
                 },
                 "currentBlock": {
-                    "type": "string",
-                    "example": "0"
+                    "type": "integer"
                 },
                 "depth": {
                     "type": "integer"
@@ -364,11 +363,9 @@
                 "name": {
                     "type": "string"
                 },
-                "privateTxManagers": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/chains.PrivateTxManagerRequest"
-                    }
+                "privateTxManager": {
+                    "type": "object",
+                    "$ref": "#/definitions/chains.PrivateTxManagerRequest"
                 },
                 "urls": {
                     "type": "array",
@@ -392,11 +389,9 @@
                 "name": {
                     "type": "string"
                 },
-                "privateTxManagers": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/chains.PrivateTxManagerRequest"
-                    }
+                "privateTxManager": {
+                    "type": "object",
+                    "$ref": "#/definitions/chains.PrivateTxManagerRequest"
                 },
                 "urls": {
                     "type": "array",
