@@ -130,6 +130,29 @@ func (s *ScenarioTestSuite) TestEnvelopeShouldBeInTopic() {
 	assert.Equal(s.T(), output, s.Context.trackers[0].Current, "Envelope on tracker should have been updated")
 }
 
+func (s *ScenarioTestSuite) TestNavJsonResponse() {
+	// Prepare trackers
+	rawResp := `[{"uuid":"a8750fc5-4786-4d24-b9fb-5690f6d7c3ac","name":"besu","tenantID":"_"}, {"uuid":"xxx-xxxx","name":"besu2","tenantID":"tenantId2"}]`
+
+	val, err := navJSONResponse("0.uuid", []byte(rawResp))
+	assert.NoError(s.T(), err, "navJSONResponse should not error")
+	assert.Equal(s.T(), "a8750fc5-4786-4d24-b9fb-5690f6d7c3ac", val)
+
+	val, err = navJSONResponse("0.tenantID", []byte(rawResp))
+	assert.NoError(s.T(), err, "navJSONResponse should not error")
+	assert.Equal(s.T(), "_", val)
+
+	val, err = navJSONResponse("1.name", []byte(rawResp))
+	assert.NoError(s.T(), err, "navJSONResponse should not error")
+	assert.Equal(s.T(), "besu2", val)
+
+	rawResp = `{"jsonrpc": "2.0","id": 1,"result": "5fn2sNAT11mNYDg9gRFeFD1JHmFhoz6Yqd8jsypeq3k="}`
+
+	val, err = navJSONResponse("result", []byte(rawResp))
+	assert.NoError(s.T(), err, "navJSONResponse should not error")
+	assert.Equal(s.T(), "5fn2sNAT11mNYDg9gRFeFD1JHmFhoz6Yqd8jsypeq3k=", val)
+}
+
 func TestScenarioTestSuite(t *testing.T) {
 	suite.Run(t, new(ScenarioTestSuite))
 }

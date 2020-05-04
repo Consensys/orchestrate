@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -190,7 +191,34 @@ func (sc *ScenarioContext) iStoreTheUUIDAs(alias string) (err error) {
 	if err = json.Unmarshal(bodyBytes, &data); err != nil {
 		return
 	}
-	sc.httpAliases.Set(sc.ID, alias, data.UUID)
+
+	sc.aliases.Set(sc.ID, alias, data.UUID)
+	return
+}
+
+func (sc *ScenarioContext) iStoreResponseFieldAs(navigation, alias string) (err error) {
+	defer func() {
+		closeErr := sc.httpResponse.Body.Close()
+		if closeErr != nil {
+			log.Error("could not properly close response body")
+		}
+	}()
+	if sc.httpResponse == nil {
+		return fmt.Errorf("no http response stored, cannot retrieve ChainID")
+	}
+
+	bodyBytes, err := ioutil.ReadAll(sc.httpResponse.Body)
+	if err != nil {
+		return
+	}
+
+	var val interface{}
+	val, err = navJSONResponse(navigation, bodyBytes)
+	if err != nil || val == nil {
+		return
+	}
+
+	sc.aliases.Set(sc.ID, alias, val.(string))
 	return
 }
 
@@ -198,9 +226,9 @@ var r = regexp.MustCompile("{{([^}]*)}}")
 
 func (sc *ScenarioContext) replaceEndpointAliases(endpoint string) (string, error) {
 	for _, alias := range r.FindAllStringSubmatch(endpoint, -1) {
-		v, ok := sc.httpAliases.Get(sc.ID, alias[1])
+		v, ok := sc.aliases.Get(sc.ID, alias[1])
 		if !ok {
-			v, ok = sc.httpAliases.Get(GenericNamespace, alias[1])
+			v, ok = sc.aliases.Get(GenericNamespace, alias[1])
 			if !ok {
 				return "", fmt.Errorf("could not replace alias %s", v)
 			}
@@ -208,6 +236,30 @@ func (sc *ScenarioContext) replaceEndpointAliases(endpoint string) (string, erro
 		endpoint = strings.Replace(endpoint, alias[0], v, 1)
 	}
 	return endpoint, nil
+}
+
+func navJSONResponse(nav string, bodyBytes []byte) (interface{}, error) {
+	var resp interface{}
+	if err := json.Unmarshal(bodyBytes, &resp); err != nil {
+		return "", err
+	}
+
+	var result interface{}
+	// Navigate throw the json response
+	navigation := strings.Split(nav, ".")
+	for _, navStep := range navigation {
+		if jdx, err := strconv.Atoi(navStep); err == nil {
+			respAcum := resp.([]interface{})
+			result = respAcum[jdx]
+			resp = result
+		} else {
+			respAcum := resp.(map[string]interface{})
+			result = respAcum[navStep]
+			resp = result
+		}
+	}
+
+	return result, nil
 }
 
 func initHTTP(s *godog.Suite, sc *ScenarioContext) {
@@ -219,6 +271,7 @@ func initHTTP(s *godog.Suite, sc *ScenarioContext) {
 	s.Step(`^I send "(GET|POST|PATCH|PUT|DELETE)" request to "([^"]*)"$`, sc.iSendRequestTo)
 	s.Step(`^I send "(GET|POST|PATCH|PUT|DELETE)" request to "([^"]*)" with json:$`, sc.iSendRequestToWithJSON)
 	s.Step(`^I store the UUID as "([^"]*)"`, sc.iStoreTheUUIDAs)
+	s.Step(`^I store response field "([^"]*)" as "([^"]*)"`, sc.iStoreResponseFieldAs)
 	s.Step(`^the response code should be (\d+)$`, sc.theResponseCodeShouldBe)
 	s.Step(`^the response should match json:$`, sc.theResponseShouldMatchJSON)
 }

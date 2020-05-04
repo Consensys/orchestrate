@@ -105,6 +105,10 @@ func (p *Parser) ParseTxRequest(scenario string, headers, row *gherkin.TableRow)
 	return envelope, nil
 }
 
+func (p *Parser) GetAliasRegistry() *AliasRegistry {
+	return p.Aliases
+}
+
 func parseMappingStringString(gherkinRequest map[string]interface{}, header, value string) error {
 	keyValue := strings.Split(header, ".")
 	if len(keyValue) != 2 {

@@ -3,6 +3,8 @@ package parser
 import (
 	"fmt"
 	"sync"
+
+	"github.com/containous/traefik/v2/pkg/log"
 )
 
 // AliasRegistry allows to store aliases
@@ -11,12 +13,15 @@ type AliasRegistry struct {
 	// aliases[key]value
 	mux      *sync.RWMutex
 	registry map[string]string
+	logger   log.Logger
 }
 
 func NewAliasRegistry() *AliasRegistry {
+	logger := log.WithoutContext()
 	return &AliasRegistry{
 		mux:      &sync.RWMutex{},
 		registry: make(map[string]string),
+		logger:   logger,
 	}
 }
 
@@ -40,6 +45,12 @@ func (r *AliasRegistry) Get(namespace, aka string) (string, bool) {
 func (r *AliasRegistry) Set(namespace, aka, value string) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
+
+	r.logger.
+		WithField("namespace", namespace).
+		WithField("aka", aka).
+		WithField("value", value).
+		Debugf("AliasRegistry value set")
 
 	r.registry[r.keyOf(namespace, aka)] = value
 }

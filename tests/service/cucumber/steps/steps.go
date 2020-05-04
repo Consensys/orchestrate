@@ -5,6 +5,7 @@ import (
 	"fmt"
 	gohttp "net/http"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -82,7 +83,7 @@ type ScenarioContext struct {
 	httpClient   *gohttp.Client
 	httpResponse *gohttp.Response
 
-	httpAliases *parser.AliasRegistry
+	aliases *parser.AliasRegistry
 
 	// RegistryClient
 	ContractRegistry registry.ContractRegistryClient
@@ -96,9 +97,9 @@ type ScenarioContext struct {
 }
 
 func setServiceURL(sc *ScenarioContext) {
-	sc.httpAliases.Set(GenericNamespace, "chain-registry", viper.GetString(chainregistry.ChainRegistryURLViperKey))
-	sc.httpAliases.Set(GenericNamespace, "contract-registry", viper.GetString(contractregistry.ContractRegistryURLViperKey))
-	sc.httpAliases.Set(GenericNamespace, "envelope-store", viper.GetString(envelopestore.EnvelopeStoreURLViperKey))
+	sc.aliases.Set(GenericNamespace, "chain-registry", viper.GetString(chainregistry.ChainRegistryURLViperKey))
+	sc.aliases.Set(GenericNamespace, "contract-registry", viper.GetString(contractregistry.ContractRegistryURLViperKey))
+	sc.aliases.Set(GenericNamespace, "envelope-store", viper.GetString(envelopestore.EnvelopeStoreURLViperKey))
 }
 
 func NewScenarioContext(
@@ -111,7 +112,7 @@ func NewScenarioContext(
 	sc := &ScenarioContext{
 		chanReg:          chanReg,
 		httpClient:       httpClient,
-		httpAliases:      parser.NewAliasRegistry(),
+		aliases:          p.GetAliasRegistry(),
 		ContractRegistry: contractRegistry,
 		producer:         producer,
 		parser:           p,
@@ -336,10 +337,21 @@ func (sc *ScenarioContext) envelopesShouldHaveTheFollowingValues(table *gherkin.
 				}
 				continue
 			}
+
+			var aliasRE = regexp.MustCompile(`{{(.*)}}`)
+			if aliasRE.MatchString(col.Value) {
+				alias := aliasRE.FindStringSubmatch(col.Value)[1]
+				val, _ := sc.aliases.Get(sc.ID, alias)
+				if !isEqual(val, field) {
+					return fmt.Errorf("(%d/%d) %s expected %s but got %s", r+1, len(rowsEnvelopes), fieldName, val, fmt.Sprintf("%v", field))
+				}
+
+				continue
+			}
+
 			if !isEqual(col.Value, field) {
 				return fmt.Errorf("(%d/%d) %s expected %s but got %s", r+1, len(rowsEnvelopes), fieldName, col.Value, fmt.Sprintf("%v", field))
 			}
-
 		}
 	}
 	return nil

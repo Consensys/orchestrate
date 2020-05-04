@@ -82,6 +82,45 @@ Feature: Deploy private ERC20 contract
       | 1              | ~              | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | [k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8=] |
       | 1              | ~              | A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo= | [k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8=] |
 
+  @besu
+  Scenario: Batch deploy private ERC20 for a privacy group
+    Given I register the following contract
+      | name        | artifacts        | tenantid                             |
+      | SimpleToken | SimpleToken.json | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+    When I send "GET" request to "{{chain-registry}}/chains?name=besu"
+    Then the response code should be 200
+    Then I store response field "0.uuid" as "besuUUID"
+    When I send "POST" request to "{{chain-registry}}/{{besuUUID}}" with json:
+      """
+{
+    "jsonrpc": "2.0",
+    "method": "priv_createPrivacyGroup",
+    "params": [
+        {
+            "addresses": [
+                "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
+                "Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs=",
+                "k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8="
+            ],
+            "name": "TestGroup",
+            "description": "TestGroup"
+        }
+    ],
+    "id": 1
+}
+      """
+    Then the response code should be 200
+    Then I store response field "result" as "TestPrivacyGroupId"
+    When I send envelopes to topic "tx.crafter"
+      | chainName | from                                       | contractName | methodSignature | privacyGroupID     | privateFrom                                  | method                     | tenantid                             |
+      | besu      | 0x93f7274c9059e601be4512f656b57b830e019e41 | SimpleToken  | constructor()   | TestPrivacyGroupId | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | EEA_SENDPRIVATETRANSACTION | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+    Then Envelopes should be in topic "tx.crafter"
+    Then Envelopes should be in topic "tx.signer"
+    Then Envelopes should be in topic "tx.sender"
+    Then Envelopes should be in topic "tx.decoded"
+    And Envelopes should have the following fields:
+      | receipt.status | receipt.output | receipt.privateFrom                          | receipt.privacyGroupId |
+      | 1              | ~              | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | {{TestPrivacyGroupId}} |
 
   @quorum
   Scenario: Deploy private ERC20 contract with unknown chainName
