@@ -22,6 +22,34 @@ Feature: Deploy private ERC20 contract
       | receipt.status |
       | 1              |
 
+  @quorum
+  Scenario: Deploy private ERC20 contract with unknown chainName
+    Given I register the following contract
+      | name        | artifacts        | tenantid                             |
+      | SimpleToken | SimpleToken.json | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+    When I send envelopes to topic "tx.crafter"
+      | chainName | from                                       | contractName | methodSignature | gas     | privateFor                                   | privateFrom                                  | method                        | tenantid                             |
+      | unknown   | 0x7E654d251Da770A068413677967F6d3Ea2FeA9E4 | SimpleToken  | constructor()   | 2000000 | QfeDAys9MPDs2XHExtc84jKGHxZg/aj52DTh0vtA3Xc= | BULeR8JyUWhiuuCMU/HLA0Q5pzkYT+cHII3ZKBey3Bo= | ETH_SENDRAWPRIVATETRANSACTION | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+    Then Envelopes should be in topic "tx.crafter"
+    Then Envelopes should be in topic "tx.recover"
+    And Envelopes should have the following errors:
+      | errors                           |
+      | no chain found with name unknown |
+
+  @quorum
+  Scenario: Deploy private ERC20 contract with unknown privateFrom
+    Given I register the following contract
+      | name        | artifacts        | tenantid                             |
+      | SimpleToken | SimpleToken.json | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+    When I send envelopes to topic "tx.crafter"
+      | chainName | from                                       | contractName | methodSignature | gas     | privateFor                                   | privateFrom  | method                        | tenantid                             |
+      | quorum    | 0x7E654d251Da770A068413677967F6d3Ea2FeA9E4 | SimpleToken  | constructor()   | 2000000 | QfeDAys9MPDs2XHExtc84jKGHxZg/aj52DTh0vtA3Xc= | dW5rbm93bg== | ETH_SENDRAWPRIVATETRANSACTION | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+    Then Envelopes should be in topic "tx.crafter"
+    Then Envelopes should be in topic "tx.recover"
+    And Envelopes should have the following errors:
+      | errors                                      |
+      | failed to send a request to Tessera enclave |
+
   @besu
   Scenario: Deploy private ERC20 contract with Besu and Orion
     Given I register the following contract
@@ -63,14 +91,14 @@ Feature: Deploy private ERC20 contract
   @besu
   Scenario: Batch deploy private ERC20 contract with Besu and Orion with different privateFrom
     Given I register the following contract
-      | name        | artifacts        | tenantid |
-      | SimpleToken | SimpleToken.json | _        |
+      | name        | artifacts        | tenantid                             |
+      | SimpleToken | SimpleToken.json | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
     When I send envelopes to topic "tx.crafter"
-      | chainName | from                                       | contractName | methodSignature | privateFor                                   | privateFrom                                  | method                     | tenantid |
-      | besu      | 0xffbba394def3ff1df0941c6429887107f58d4e9b | SimpleToken  | constructor()   | k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8= | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | EEA_SENDPRIVATETRANSACTION | _        |
-      | besu_1    | 0x6009608a02a7a15fd6689d6dad560c44e9ab61ff | SimpleToken  | constructor()   | k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8= | A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo= | EEA_SENDPRIVATETRANSACTION | _        |
-      | besu      | 0xff778b716fc07d98839f48ddb88d8be583beb684 | SimpleToken  | constructor()   | k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8= | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | EEA_SENDPRIVATETRANSACTION | _        |
-      | besu_1    | 0xf5956eb46b377ae41b41bda94e6270208d8202bb | SimpleToken  | constructor()   | k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8= | A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo= | EEA_SENDPRIVATETRANSACTION | _        |
+      | chainName | from                                       | contractName | methodSignature | privateFor                                   | privateFrom                                  | method                     | tenantid                             |
+      | besu      | 0xffbba394def3ff1df0941c6429887107f58d4e9b | SimpleToken  | constructor()   | k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8= | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | EEA_SENDPRIVATETRANSACTION | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+      | besu_1    | 0x6009608a02a7a15fd6689d6dad560c44e9ab61ff | SimpleToken  | constructor()   | k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8= | A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo= | EEA_SENDPRIVATETRANSACTION | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+      | besu      | 0xff778b716fc07d98839f48ddb88d8be583beb684 | SimpleToken  | constructor()   | k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8= | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | EEA_SENDPRIVATETRANSACTION | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+      | besu_1    | 0xf5956eb46b377ae41b41bda94e6270208d8202bb | SimpleToken  | constructor()   | k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8= | A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo= | EEA_SENDPRIVATETRANSACTION | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.signer"
     Then Envelopes should be in topic "tx.sender"
@@ -87,6 +115,7 @@ Feature: Deploy private ERC20 contract
     Given I register the following contract
       | name        | artifacts        | tenantid                             |
       | SimpleToken | SimpleToken.json | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+    Given I set authentication method "JWT" with "f30c452b-e5fb-4102-a45d-bc00a060bcc6"
     When I send "GET" request to "{{chain-registry}}/chains?name=besu"
     Then the response code should be 200
     Then I store response field "0.uuid" as "besuUUID"
@@ -121,31 +150,3 @@ Feature: Deploy private ERC20 contract
     And Envelopes should have the following fields:
       | receipt.status | receipt.output | receipt.privateFrom                          | receipt.privacyGroupId |
       | 1              | ~              | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | {{TestPrivacyGroupId}} |
-
-  @quorum
-  Scenario: Deploy private ERC20 contract with unknown chainName
-    Given I register the following contract
-      | name        | artifacts        | tenantid                             |
-      | SimpleToken | SimpleToken.json | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
-    When I send envelopes to topic "tx.crafter"
-      | chainName | from                                       | contractName | methodSignature | gas     | privateFor                                   | privateFrom                                  | method                        | tenantid                             |
-      | unknown   | 0x7E654d251Da770A068413677967F6d3Ea2FeA9E4 | SimpleToken  | constructor()   | 2000000 | QfeDAys9MPDs2XHExtc84jKGHxZg/aj52DTh0vtA3Xc= | BULeR8JyUWhiuuCMU/HLA0Q5pzkYT+cHII3ZKBey3Bo= | ETH_SENDRAWPRIVATETRANSACTION | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
-    Then Envelopes should be in topic "tx.crafter"
-    Then Envelopes should be in topic "tx.recover"
-    And Envelopes should have the following errors:
-      | errors                           |
-      | no chain found with name unknown |
-
-  @quorum
-  Scenario: Deploy private ERC20 contract with unknown privateFrom
-    Given I register the following contract
-      | name        | artifacts        | tenantid                             |
-      | SimpleToken | SimpleToken.json | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
-    When I send envelopes to topic "tx.crafter"
-      | chainName | from                                       | contractName | methodSignature | gas     | privateFor                                   | privateFrom  | method                        | tenantid                             |
-      | quorum    | 0x7E654d251Da770A068413677967F6d3Ea2FeA9E4 | SimpleToken  | constructor()   | 2000000 | QfeDAys9MPDs2XHExtc84jKGHxZg/aj52DTh0vtA3Xc= | dW5rbm93bg== | ETH_SENDRAWPRIVATETRANSACTION | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
-    Then Envelopes should be in topic "tx.crafter"
-    Then Envelopes should be in topic "tx.recover"
-    And Envelopes should have the following errors:
-      | errors                                      |
-      | failed to send a request to Tessera enclave |

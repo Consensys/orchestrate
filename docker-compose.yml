@@ -231,7 +231,6 @@ services:
       # Uncomment CUCUMBER_TAGS if only run features and scenarios with @public-tx or @account tags ("," = OR, "&&" = AND, "~" = NOT)
 #      CUCUMBER_TAGS: "@besu"
     restart: "no"
-    command: e2e run
     volumes:
       - ./build/bin/e2e:/bin/main
       - ./build/report:/report/output

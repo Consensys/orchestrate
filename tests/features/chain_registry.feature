@@ -101,7 +101,7 @@ Feature: chain registry
     When I send "GET" request to "{{chain-registry}}/chains/{{gethTempUUID}}"
     Then the response code should be 404
 
-  Scenario: Patch chain with API key
+  Scenario: Register chain with API key
     Given I set authentication method "API-Key" with "with-key"
     When I send "POST" request to "{{chain-registry}}/chains" with json:
       """
@@ -154,7 +154,7 @@ Feature: chain registry
     When I send "DELETE" request to "{{chain-registry}}/chains/{{gethTemp2UUID}}"
     Then the response code should be 204
 
-  Scenario: Patch chain with JWT
+  Scenario: Update chain with JWT
     Given I set authentication method "JWT" with "f30c452b-e5fb-4102-a45d-bc00a060bcc6"
     When I send "POST" request to "{{chain-registry}}/chains" with json:
       """
@@ -188,6 +188,7 @@ Feature: chain registry
     Then the response code should be 204
   
   Scenario: Fail to register chains with invalid values
+    Given I set authentication method "JWT" with "f30c452b-e5fb-4102-a45d-bc00a060bcc6"
     When I send "POST" request to "{{chain-registry}}/chains" with json:
       """
       {
