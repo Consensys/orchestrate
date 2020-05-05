@@ -107,14 +107,10 @@ func (ec *Client) call(req *http.Request, processResult ProcessResultFunc) error
 		return err
 	}
 
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return errors.EthConnectionError("%v (code=%v): ", resp.Status, resp.StatusCode)
-	}
-
 	var respMsg JSONRpcMessage
 	if resp.Body != nil {
 		defer func() {
-			err := resp.Body.Close()
+			err = resp.Body.Close()
 			if err != nil {
 				log.FromContext(req.Context()).
 					WithError(err).
@@ -122,16 +118,18 @@ func (ec *Client) call(req *http.Request, processResult ProcessResultFunc) error
 			}
 		}()
 
-		if err := json.NewDecoder(resp.Body).Decode(&respMsg); err != nil {
-			return errors.EncodingError(err.Error())
-		}
+		err = json.NewDecoder(resp.Body).Decode(&respMsg)
 	}
 
 	switch {
-	case respMsg.Error != nil:
+	case err == nil && respMsg.Error != nil:
 		return ec.processEthError(respMsg.Error)
-	case len(respMsg.Result) == 0:
+	case err == nil && len(respMsg.Result) == 0:
 		return errors.NotFoundError("not found")
+	case resp.StatusCode < 200 || resp.StatusCode >= 300:
+		return errors.EthConnectionError("%v (code=%v)", resp.Status, resp.StatusCode)
+	case err != nil:
+		return errors.EncodingError(err.Error())
 	default:
 		return processResult(respMsg.Result)
 	}

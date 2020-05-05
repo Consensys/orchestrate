@@ -167,7 +167,7 @@ func TestCallWithRetry(t *testing.T) {
 	}, processResult(&raw), bckoff)
 	assert.Error(t, err, "#3 TestCallWithRetry should  error")
 	assert.False(t, bckoff.HasRetried(), "#3 Should not have retried")
-	
+
 	// Test 4: invalid response body with error status, should retry
 	bckoff = &backoffmock.MockBackoff{}
 	ctx = newContext(nil, 400, makeRespBody([]byte(`"%@`), ""))
