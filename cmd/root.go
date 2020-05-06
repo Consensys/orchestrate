@@ -13,6 +13,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/utils"
 	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt"
 	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/key"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/jaeger"
@@ -48,6 +49,8 @@ func NewCommand() *cobra.Command {
 	multitenancy.Enabled(rootCmd.PersistentFlags())
 	authjwt.Flags(rootCmd.PersistentFlags())
 	authkey.APIKey(rootCmd.PersistentFlags())
+
+	http.MetricFlags(rootCmd.PersistentFlags())
 
 	return rootCmd
 }

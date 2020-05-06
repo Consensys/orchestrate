@@ -85,7 +85,6 @@ Environment variable: %q`, metricsPortEnv)
 func Flags(f *pflag.FlagSet) {
 	hostname(f)
 	port(f)
-	MetricFlags(f)
 }
 
 func MetricFlags(f *pflag.FlagSet) {

@@ -37,7 +37,8 @@ type Config struct {
 
 // Init register flag for the Chain Registry to define initialization state
 func Type(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Initialize Chain Registry Environment variable: %q`, initEnv)
+	desc := fmt.Sprintf(`Initialize Chain Registry
+Environment variable: %q`, initEnv)
 	f.StringSlice(initFlag, initDefault, desc)
 	_ = viper.BindPFlag(InitViperKey, f.Lookup(initFlag))
 }
