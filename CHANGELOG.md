@@ -2,17 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+
+## v2.1.0-rc1 (2020-05-06)
+
+### 🆕 Features
+* Add support for Quorum+Tessera private transactions by registering the Tessera node to the Chain Registry. Includes sending and listening of transactions
+* Add support for Besu+Orion private transactions. Includes sending of transactions and listening of public & private receipts.
+* Add support for Revert Reason when fetching receipt from Besu nodes.
+* Optimize receipt fetching from the chain when external transactions are disabled.
+
+### 🛠 Bug fixes
+* Fix a bug when listening sessions stopped in the tx-listener when the HTTP call to the node failed.
+
+
 ## v2.0.2 (2020-04-07)
 
 ### 🛠 Bug fixes
 * Fix a transaction crafting issue to able to craft uint and int arguments in decimal or hexadecimal 
 * Fix a contract registry issue to be able to register a contract without event
 
+
 ## v2.0.1 (2020-04-01)
 
 ### 🛠 Bug fixes
 * Fix a security issue where, if a user is authenticated, a transaction could be sent with any tenant.
 * Enable one way TLS communication to Kafka to allow connection to Azure Event Hub
+
 
 ## v2.0.0 (2020-03-11)
 
@@ -73,32 +88,30 @@ All notable changes to this project will be documented in this file.
  * Remove `/v1` prefix in the HTTP REST path for the `envelope-store` and the `chain-registry`
  * Instead of producing and consuming envelopes to Orchestrate, a user will produce `TxRequest` and only consume `TxResponse`
  
- 
+
 
 
 ## v1.2.2 (2020-01-09)
 
 ### 🛠 Bug fixes
-
 * Fix incorrect filtering on "name" argument on the GetTags method of the Contract Registry
+
 
 ## v1.2.1 (2019-12-23)
 
 ### 🛠 Bug fixes
-
 * Upgrade retry policy when getting `NotFoundError` on JSON-RPC request. In particular it allows the transaction listener to effectively handle Infura endpoint that have sync discrepancies.
+
 
 ## v1.2.0 (2019-12-13)
 
 ### 🆕 Features
-
 * Add new flag and environment variable `REDIS_EXPIRATION` to configure Redis entry expiration. It is useful for `tx-nonce` and `tx-sender` workers to expire keys and force a nonce recalibration from chain after inactivity of a sender
 * Add new flag and environment variable `NONCE_CHECKER_MAX_RECOVERY` to configure max number of nonce recoveries to perform on a given envelope on `tx-sender`
 * Nonce checker on `tx-sender` ignores envelopes with metadata entry `tx.mode` set to `raw`
 * Add new flag and environment variable `DISABLE_EXTERNAL_TX` in the tx-listener to filter transactions not sent through Orchestrate
 
 ### 🛠 Bug fixes
-
 * Fix connection issue when trying to connect to some Infura endpoints
 * On `envelopestore`, when storing a 2nd envelope with same `tx_hash` and `chain_id` but a distinct `metadata.id` overwrites the first one
 * Fix exposition of Swagger-UI in Docker images
@@ -117,7 +130,6 @@ All notable changes to this project will be documented in this file.
 ## v1.1.0 (2019-12-10)
 
 ### 🆕 Features
-
 * Add a new server for APIs services exposing a REST endpoint that will redirect queries to the gRPC endpoint and a swagger UI + documentation
 * Add the new flag `KAFKA_CONSUMER_MAX_WAIT_TIME` to configure the maximum waiting time to consume message if messages do not exceed the size`Consumer.Fetch.Min.Byte` (default=20ms)
 
@@ -141,11 +153,9 @@ All notable changes to this project will be documented in this file.
 
 
 ## 1.0.0 (2019-11-07)
-
 This is the first stable release of Orchestrate.
 
 ### 🆕 Features
-
 * **Transaction Management**, automatically manage transactions lifecycle
     * Transaction crafting: craft transactions and deploy contract based on the bytecode in the Contract Registry
     * Faucet: get accounts credited with Ether
@@ -160,9 +170,7 @@ This is the first stable release of Orchestrate.
 * Add Logging using Logrus, Prometheus metrics exporter and OpenTracing exporter capabilities
 
 ### ⚠ BREAKING CHANGES
-
 This is the list of breaking change with the Beta release. 
-
 * **config** Rename `JAEGER_DISABLED` to `JAEGER_ENABLED`
 * **config** Rename `GRPC_TARGET_CONTRACT_REGISTRY` to `CONTRACT_REGISTRY_URL`
 * **config** Rename `GRPC_TARGET_ENVELOPE_STORE` to `ENVELOPE_STORE_URL`
