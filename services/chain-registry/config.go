@@ -3,6 +3,8 @@ package chainregistry
 import (
 	"fmt"
 
+	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
+	"github.com/dgraph-io/ristretto"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
@@ -25,10 +27,12 @@ var (
 )
 
 type Config struct {
-	app          *app.Config
-	store        *store.Config
-	envChains    []string // Chains defined in ENV
-	multitenancy bool
+	App              *app.Config
+	Cache            *ristretto.Config
+	ServersTransport *traefikstatic.ServersTransport
+	Store            *store.Config
+	EnvChains        []string // Chains defined in ENV
+	Multitenancy     bool
 }
 
 // Init register flag for the Chain Registry to define initialization state
@@ -38,26 +42,27 @@ func Type(f *pflag.FlagSet) {
 	_ = viper.BindPFlag(InitViperKey, f.Lookup(initFlag))
 }
 
-func NewConfig(appCfg *app.Config, storeCfg *store.Config, chains []string, multi bool) Config {
-	return Config{
-		app:          appCfg,
-		store:        storeCfg,
-		envChains:    chains,
-		multitenancy: multi,
-	}
-}
-
-func NewConfigFromViper(vipr *viper.Viper) Config {
-	return NewConfig(app.NewConfig(vipr),
-		store.NewConfig(vipr),
-		viper.GetStringSlice(InitViperKey),
-		viper.GetBool(multitenancy.EnabledViperKey),
-	)
-}
-
 func Flags(f *pflag.FlagSet) {
 	Type(f)
 	http.Flags(f)
 	store.Flags(f)
 	configwatcher.Flags(f)
+}
+
+func NewConfig(vipr *viper.Viper) *Config {
+	return &Config{
+		App:   app.NewConfig(vipr),
+		Store: store.NewConfig(vipr),
+		Cache: &ristretto.Config{
+			NumCounters: 1e7,     // number of keys to track frequency of (10M).
+			MaxCost:     1 << 30, // maximum cost of cache (1GB).
+			BufferItems: 64,      // number of keys per Get buffer.
+		},
+		ServersTransport: &traefikstatic.ServersTransport{
+			MaxIdleConnsPerHost: 200,
+			InsecureSkipVerify:  true,
+		},
+		EnvChains:    viper.GetStringSlice(InitViperKey),
+		Multitenancy: viper.GetBool(multitenancy.EnabledViperKey),
+	}
 }

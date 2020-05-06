@@ -1,5 +1,3 @@
-// +build unit
-
 package dynamic
 
 import (
@@ -8,6 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
+	traefiktypes "github.com/containous/traefik/v2/pkg/types"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 	testutilsdynamic "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic/testutils"
@@ -25,7 +25,9 @@ func TestBuilder(t *testing.T) {
 	accesslogBuilder := mmiddleware.NewMockBuilder(ctrlr)
 	metricsBuilder := mmiddleware.NewMockBuilder(ctrlr)
 
-	builder := NewBuilder(nil, nil)
+	builder := NewBuilder(&traefikstatic.Configuration{
+		HostResolver: &traefiktypes.HostResolverConfig{},
+	}, nil)
 	builder.Middleware = midBuilder
 	builder.Handler = handlerBuilder
 	builder.Metrics = metricsBuilder

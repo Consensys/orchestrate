@@ -17,5 +17,4 @@ func AddDynamicConfig(cfg *dynamic.Configuration, midName string, staticCfg *tra
 			Format: logFormat,
 		},
 	}
-
 }

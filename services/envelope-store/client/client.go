@@ -14,18 +14,19 @@ import (
 const component = "envelope-store.client"
 
 type serviceName string
+
 type Client struct {
 	srv  svc.EnvelopeStoreClient
 	conn *gogrpc.ClientConn
 }
 
 func NewClient(ctx context.Context, cfg *Config) (*Client, error) {
-	ctxWithValue := context.WithValue(ctx, serviceName("service-name"), cfg.serviceName)
+	ctxWithValue := context.WithValue(ctx, serviceName("service-name"), cfg.ServiceName)
 	opentracing.Init(ctxWithValue)
 
 	conn, err := grpc.DialContextWithDefaultOptions(
 		ctx,
-		cfg.envelopeStoreURL,
+		cfg.URL,
 	)
 	if err != nil {
 		e := errors.FromError(err).ExtendComponent(component)
@@ -36,7 +37,7 @@ func NewClient(ctx context.Context, cfg *Config) (*Client, error) {
 	client := svc.NewEnvelopeStoreClient(conn)
 
 	log.WithFields(log.Fields{
-		"url": cfg.envelopeStoreURL,
+		"url": cfg.URL,
 	}).Infof("%s: client ready", component)
 
 	return &Client{

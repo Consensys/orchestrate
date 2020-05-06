@@ -4,14 +4,11 @@ import (
 	"context"
 	"sync"
 
-	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app/worker"
 	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/key"
 	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/rpc"
-	orchlog "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/logger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client"
 	registryprovider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/providers/chain-registry"
@@ -61,19 +58,13 @@ func Init(ctx context.Context) {
 func Start(ctx context.Context) error {
 	var err error
 	startOnce.Do(func() {
-		// Create Configuration
-		cfg := app.NewConfig(viper.GetViper())
-		orchlog.ConfigureLogger(cfg.HTTP)
-
 		ctx, cancel = context.WithCancel(ctx)
 
 		// Create appli to expose metrics
-		appli, err = worker.New(cfg, prom.DefaultRegisterer)
-		if err != nil {
-			return
-		}
-
-		err = appli.Start(ctx)
+		appli, err = app.New(
+			app.NewConfig(viper.GetViper()),
+			app.MetricsOpt(),
+		)
 		if err != nil {
 			return
 		}

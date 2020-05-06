@@ -7,16 +7,13 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/containous/traefik/v2/pkg/log"
-	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	loader "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/loader/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/offset"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app/worker"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	orchlog "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/logger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/handlers"
@@ -115,17 +112,17 @@ func Start(ctx context.Context) error {
 		ctx, cancel = context.WithCancel(ctx)
 		done = make(chan struct{})
 
-		// Create Configuration
-		cfg := app.NewConfig(viper.GetViper())
-		orchlog.ConfigureLogger(cfg.HTTP)
-
 		// Register all Handlers
 		compCtx, cancelComponents := context.WithCancel(context.Background())
+
 		initComponents(compCtx)
 		registerHandlers()
 
 		// Create appli to expose metrics
-		appli, err = worker.New(cfg, prom.DefaultRegisterer)
+		appli, err = app.New(
+			app.NewConfig(viper.GetViper()),
+			app.MetricsOpt(),
+		)
 		if err != nil {
 			cancelComponents()
 			return

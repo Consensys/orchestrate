@@ -6,16 +6,32 @@ import (
 
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
+	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt"
+	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/key"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/rpc"
 )
 
-var initOnce = &sync.Once{}
-var server *EnvelopStoreServer
+var (
+	initOnce = &sync.Once{}
+	appli    *app.App
+)
 
 func Init(ctx context.Context) {
-	cfg := NewConfigFromViper(viper.GetViper())
 	initOnce.Do(func() {
+		// Initialize dependencies
+		authjwt.Init(ctx)
+		authkey.Init(ctx)
+		rpc.Init(ctx)
+
 		var err error
-		server, err = NewServer(ctx, &cfg)
+		appli, err = New(
+			NewConfig(viper.GetViper()),
+			postgres.GetManager(),
+			rpc.GlobalClient(),
+			authjwt.GlobalChecker(), authkey.GlobalChecker(),
+		)
 		if err != nil {
 			log.FromContext(ctx).WithError(err).Fatalf("Could not create envelope store application")
 		}
@@ -24,10 +40,9 @@ func Init(ctx context.Context) {
 
 func Start(ctx context.Context) error {
 	Init(ctx)
-	return server.Start()
+	return appli.Start(ctx)
 }
 
 func Stop(ctx context.Context) error {
-	Init(ctx)
-	return server.Stop()
+	return appli.Stop(ctx)
 }

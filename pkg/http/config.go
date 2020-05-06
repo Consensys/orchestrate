@@ -4,10 +4,8 @@ import (
 	"fmt"
 
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
-	traefiktypes "github.com/containous/traefik/v2/pkg/types"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/logger"
 )
 
 func init() {
@@ -113,49 +111,5 @@ func NewEPsConfig(vipr *viper.Viper) traefikstatic.EntryPoints {
 	return traefikstatic.EntryPoints{
 		DefaultHTTPEntryPoint:    httpEp,
 		DefaultMetricsEntryPoint: metricsEp,
-	}
-}
-
-func NewConfig(vipr *viper.Viper) *traefikstatic.Configuration {
-	return &traefikstatic.Configuration{
-		EntryPoints: NewEPsConfig(vipr),
-		Metrics: &traefiktypes.Metrics{
-			Prometheus: &traefiktypes.Prometheus{
-				EntryPoint:           DefaultMetricsEntryPoint,
-				Buckets:              []float64{0.1, 0.3, 1.2, 5},
-				AddEntryPointsLabels: true,
-				AddServicesLabels:    true,
-			},
-		},
-		API: &traefikstatic.API{},
-		ServersTransport: &traefikstatic.ServersTransport{
-			MaxIdleConnsPerHost: 200,
-			InsecureSkipVerify:  true,
-		},
-		Log: &traefiktypes.TraefikLog{
-			Level:  vipr.GetString(logger.LogLevelViperKey),
-			Format: viperToTraefikLogFormat(vipr.GetString(logger.LogFormatViperKey)),
-		},
-		AccessLog: &traefiktypes.AccessLog{
-			Filters: &traefiktypes.AccessLogFilters{
-				StatusCodes: []string{"100-199", "400-428", "430-599"},
-			},
-			Format: viperToTraefikLogFormat(vipr.GetString(logger.LogFormatViperKey)),
-		},
-	}
-}
-
-func DefaultConfig() *traefikstatic.Configuration {
-	return NewConfig(viper.New())
-}
-
-func viperToTraefikLogFormat(format string) string {
-	switch format {
-	case "text":
-		return "common"
-	case "json":
-		return "json"
-	default:
-		return "json"
 	}
 }

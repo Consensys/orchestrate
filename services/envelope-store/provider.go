@@ -1,4 +1,4 @@
-package contractregistry
+package envelopestore
 
 import (
 	"math"
@@ -29,19 +29,19 @@ func NewInternalConfig() *dynamic.Configuration {
 	cfg := dynamic.NewConfig()
 
 	// Router to Chains API
-	cfg.HTTP.Routers["contracts"] = &dynamic.Router{
+	cfg.HTTP.Routers["envelopes"] = &dynamic.Router{
 		Router: &traefikdynamic.Router{
 			EntryPoints: []string{http.DefaultHTTPEntryPoint},
-			Service:     "contracts",
+			Service:     "envelopes",
 			Priority:    math.MaxInt32,
-			Rule:        "PathPrefix(`/contracts`)",
+			Rule:        "PathPrefix(`/envelopes`)",
 			Middlewares: []string{"base@logger-base", "auth@multitenancy"},
 		},
 	}
 
 	// Chains API
-	cfg.HTTP.Services["contracts"] = &dynamic.Service{
-		Contracts: &dynamic.Contracts{},
+	cfg.HTTP.Services["envelopes"] = &dynamic.Service{
+		Envelopes: &dynamic.Envelopes{},
 	}
 
 	return cfg

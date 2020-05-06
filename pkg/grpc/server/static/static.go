@@ -72,7 +72,7 @@ func (b *Builder) Build(ctx context.Context, name string, configuration interfac
 
 	// Create GRPC services
 	var register func(srv *grpc.Server)
-	if b.Service != nil {
+	if b.Service != nil && cfg.Services != nil {
 		registr, err := b.Service.Build(ctx, name, cfg.Services)
 		if err != nil {
 			return nil, err

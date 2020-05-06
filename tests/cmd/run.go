@@ -4,12 +4,12 @@ import (
 	"context"
 	"os"
 
-	"github.com/containous/traefik/v2/pkg/log"
+	traefiklog "github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/cobra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt/generator"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
-	pkglog "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/logger"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	e2e "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service"
@@ -22,15 +22,11 @@ func NewRunCommand() *cobra.Command {
 		Use:   "run",
 		Short: "Run application",
 		Run:   run,
-		PreRun: func(cmd *cobra.Command, args []string) {
-			// This is executed before each run (included on children command run)
-			pkglog.InitLogger()
-		},
 	}
 
 	// Set pkglog flags
-	pkglog.LogLevel(runCmd.Flags())
-	pkglog.LogFormat(runCmd.Flags())
+	log.Level(runCmd.Flags())
+	log.Format(runCmd.Flags())
 
 	// Register Kafka flags
 	broker.InitKafkaFlags(runCmd.Flags())
@@ -65,9 +61,9 @@ func run(_ *cobra.Command, _ []string) {
 	sig := utils.NewSignalListener(func(signal os.Signal) {
 		err := e2e.Stop(context.Background())
 		if err != nil {
-			log.WithoutContext().WithError(err).Errorf("Application did not shutdown properly")
+			traefiklog.WithoutContext().WithError(err).Errorf("Application did not shutdown properly")
 		} else {
-			log.WithoutContext().WithError(err).Errorf("Application gracefully closed")
+			traefiklog.WithoutContext().WithError(err).Errorf("Application gracefully closed")
 		}
 	})
 

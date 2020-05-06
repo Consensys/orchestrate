@@ -11,10 +11,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-
 func TestFlags(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	Type(flgs)
+	ABIs(flgs)
 
 	assert.Equal(t, abiDefault, viper.GetStringSlice(ABIViperKey), "")
 

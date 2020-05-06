@@ -34,24 +34,24 @@ func TestClientFlags(t *testing.T) {
 func TestClientDefaultConfig(t *testing.T) {
 	flgs := pflag.NewFlagSet("TestClientDefaultConfig", pflag.ContinueOnError)
 	Flags(flgs)
-	
+
 	cfg := NewConfigFromViper(viper.GetViper())
-	
-	assert.Equal(t, envelopeStoreURLDefault, cfg.envelopeStoreURL, "Default store url")
-	assert.Equal(t, "jaeger", cfg.serviceName, "Default service name")
+
+	assert.Equal(t, envelopeStoreURLDefault, cfg.URL, "Default store url")
+	assert.Equal(t, "jaeger", cfg.ServiceName, "Default service name")
 }
 
 func TestClientNewConfig(t *testing.T) {
 	flgs := pflag.NewFlagSet("TestClientNewConfig", pflag.ContinueOnError)
 	Flags(flgs)
-	
+
 	expectedStoreUrl := "flag-grpc-store:8080"
 	args := []string{
 		"--envelope-store-url=" + expectedStoreUrl,
 	}
 	err := flgs.Parse(args)
 	assert.Nil(t, err, "Parse Store flags should not error")
-	
+
 	cfg := NewConfigFromViper(viper.GetViper())
-	assert.Equal(t, expectedStoreUrl, cfg.envelopeStoreURL, "Default store url")
+	assert.Equal(t, expectedStoreUrl, cfg.URL, "Default store url")
 }

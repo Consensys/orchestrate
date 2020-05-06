@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	"github.com/containous/traefik/v2/pkg/log"
-	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	chaininjector "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/chain-injector"
@@ -20,10 +19,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/sender"
 	injector "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/trace-injector"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app/worker"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	orchlog "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/logger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
@@ -108,10 +105,6 @@ func registerHandlers() {
 func Start(ctx context.Context) error {
 	var err error
 	startOnce.Do(func() {
-		// Create Configuratino
-		cfg := app.NewConfig(viper.GetViper())
-		orchlog.ConfigureLogger(cfg.HTTP)
-
 		ctx, cancel = context.WithCancel(ctx)
 
 		// Register all Handlers
@@ -119,7 +112,10 @@ func Start(ctx context.Context) error {
 		registerHandlers()
 
 		// Create appli to expose metrics
-		appli, err = worker.New(cfg, prom.DefaultRegisterer)
+		appli, err = app.New(
+			app.NewConfig(viper.GetViper()),
+			app.MetricsOpt(),
+		)
 		if err != nil {
 			return
 		}

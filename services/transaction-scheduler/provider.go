@@ -1,4 +1,4 @@
-package contractregistry
+package transactionscheduler
 
 import (
 	"math"
@@ -29,19 +29,19 @@ func NewInternalConfig() *dynamic.Configuration {
 	cfg := dynamic.NewConfig()
 
 	// Router to Chains API
-	cfg.HTTP.Routers["contracts"] = &dynamic.Router{
+	cfg.HTTP.Routers["transactions"] = &dynamic.Router{
 		Router: &traefikdynamic.Router{
 			EntryPoints: []string{http.DefaultHTTPEntryPoint},
-			Service:     "contracts",
+			Service:     "transactions",
 			Priority:    math.MaxInt32,
-			Rule:        "PathPrefix(`/contracts`)",
+			Rule:        "PathPrefix(`/transactions`)",
 			Middlewares: []string{"base@logger-base", "auth@multitenancy"},
 		},
 	}
 
 	// Chains API
-	cfg.HTTP.Services["contracts"] = &dynamic.Service{
-		Contracts: &dynamic.Contracts{},
+	cfg.HTTP.Services["transactions"] = &dynamic.Service{
+		Transactions: &dynamic.Transactions{},
 	}
 
 	return cfg

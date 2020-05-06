@@ -38,16 +38,12 @@ type Builder struct {
 	reqdecorator *requestdecorator.RequestDecorator
 }
 
-func NewBuilder(cfg *traefikstatic.Configuration, epLogConfigs map[string]*traefiktypes.AccessLog) *Builder {
-	if cfg == nil {
-		cfg = &traefikstatic.Configuration{}
-	}
-
+func NewBuilder(staticCfg *traefikstatic.Configuration, epLogConfigs map[string]*traefiktypes.AccessLog) *Builder {
 	b := &Builder{
-		dashboard:    dashboard.NewBuilder(cfg),
+		dashboard:    dashboard.NewBuilder(staticCfg),
 		accesslog:    accesslog.NewBuilder(),
 		epaccesslogs: make(map[string]func(http http.Handler) http.Handler),
-		reqdecorator: requestdecorator.New(cfg.HostResolver),
+		reqdecorator: requestdecorator.New(staticCfg.HostResolver),
 	}
 
 	for epName, logConfig := range epLogConfigs {

@@ -1,4 +1,4 @@
-package contractregistry
+package transactionscheduler
 
 import (
 	"testing"
@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	mockauth "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
+	mockclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mock"
 )
 
 func TestApp(t *testing.T) {
@@ -24,6 +25,7 @@ func TestApp(t *testing.T) {
 		cfg,
 		postgres.GetManager(),
 		jwtChecker, keyChecker,
+		mockclient.NewMockChainRegistryClient(ctrlr),
 	)
 	assert.NoError(t, err, "Creating App should not error")
 }

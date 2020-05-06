@@ -4,6 +4,7 @@ import (
 	"context"
 
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/server"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
@@ -20,10 +21,11 @@ type EntryPoint struct {
 	tcp       *tcp.EntryPoint
 	forwarder *tcp.Forwarder
 
-	server *grpc.Server
+	builder server.Builder
+	server  *grpc.Server
 }
 
-func NewEntryPoint(name string, ep *traefikstatic.EntryPoint, server *grpc.Server, reg metrics.TCP) *EntryPoint {
+func NewEntryPoint(name string, ep *traefikstatic.EntryPoint, builder server.Builder, reg metrics.TCP) *EntryPoint {
 	forwarder := tcp.NewForwarder(nil)
 	rt := &tcp.Router{}
 	rt.TCPForwarder(forwarder)
@@ -36,12 +38,18 @@ func NewEntryPoint(name string, ep *traefikstatic.EntryPoint, server *grpc.Serve
 		cfg:       ep,
 		tcp:       tcp.NewEntryPoint(name, ep, rt, reg),
 		forwarder: forwarder,
-		server:    server,
+		builder:   builder,
 	}
 }
 
 func (ep *EntryPoint) Addr() string {
 	return ep.tcp.Addr()
+}
+
+func (ep *EntryPoint) BuildServer(ctx context.Context, configuration interface{}) error {
+	var err error
+	ep.server, err = ep.builder.Build(ctx, ep.tcp.Name(), configuration)
+	return err
 }
 
 func (ep *EntryPoint) ListenAndServe(ctx context.Context) error {

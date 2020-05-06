@@ -98,9 +98,13 @@ type ScenarioContext struct {
 
 func setServiceURL(sc *ScenarioContext) {
 	sc.aliases.Set(GenericNamespace, "chain-registry", viper.GetString(chainregistry.ChainRegistryURLViperKey))
-	// We should be using the HTTP endpoint, for the rest of calls we are using GRPC so we need to this hard-coded value
-	sc.aliases.Set(GenericNamespace, "contract-registry", "http://contract-registry:8081")
+	sc.aliases.Set(GenericNamespace, "chain-registry-metrics", viper.GetString(chainregistry.ChainRegistryMetricsURLViperKey))
+	sc.aliases.Set(GenericNamespace, "contract-registry", viper.GetString(contractregistry.ContractRegistryURLViperKey))
+	sc.aliases.Set(GenericNamespace, "contract-registry-metrics", viper.GetString(contractregistry.ContractRegistryMetricsURLViperKey))
+	sc.aliases.Set(GenericNamespace, "contract-registry-http", viper.GetString(contractregistry.ContractRegistryHTTPURLViperKey))
 	sc.aliases.Set(GenericNamespace, "envelope-store", viper.GetString(envelopestore.EnvelopeStoreURLViperKey))
+	sc.aliases.Set(GenericNamespace, "envelope-store-metrics", viper.GetString(envelopestore.EnvelopeStoreMetricsURLViperKey))
+	sc.aliases.Set(GenericNamespace, "envelope-store-http", viper.GetString(envelopestore.EnvelopeStoreHTTPURLViperKey))
 }
 
 func NewScenarioContext(

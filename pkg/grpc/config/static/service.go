@@ -7,6 +7,7 @@ import (
 type Services struct {
 	Contracts *Contracts
 	Envelopes *Envelopes
+	Mock      *Mock
 }
 
 func (i *Services) Field() (interface{}, error) {

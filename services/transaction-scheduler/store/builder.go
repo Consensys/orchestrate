@@ -4,25 +4,39 @@ import (
 	"context"
 	"fmt"
 
-	dataagents "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/postgres/data-agents"
-
+	"github.com/containous/traefik/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
+	pgstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/postgres"
 )
 
 const storeServiceName = "transaction-scheduler.store"
 
-func Build(ctx context.Context, cfg *Config, pgmngr postgres.Manager) (*DataAgents, error) {
+type Builder interface {
+	Build(context.Context, *Config) (*DataAgents, error)
+}
+
+func NewBuilder(pgmngr postgres.Manager) Builder {
+	return &builder{
+		postgres: pgstore.NewBuilder(pgmngr),
+	}
+}
+
+type builder struct {
+	postgres *pgstore.Builder
+}
+
+func (b *builder) Build(ctx context.Context, cfg *Config) (*DataAgents, error) {
+	logCtx := log.With(ctx, log.Str("store", storeServiceName))
 	switch cfg.Type {
 	case postgresType:
 		cfg.Postgres.PG.ApplicationName = storeServiceName
-		db := pgmngr.Connect(ctx, cfg.Postgres.PG)
-
+		schedules, jobs, logs, txRequests, err := b.postgres.Build(logCtx, cfg.Postgres)
 		return &DataAgents{
-			TransactionRequest: dataagents.NewPGTransactionRequest(db),
-			ScheduleAgent:      dataagents.NewPGSchedule(db),
-			JobAgent:           dataagents.NewPGJob(db),
-			LogAgent:           dataagents.NewPGLog(db),
-		}, nil
+			ScheduleAgent:      schedules,
+			JobAgent:           jobs,
+			LogAgent:           logs,
+			TransactionRequest: txRequests,
+		}, err
 	default:
 		return &DataAgents{}, fmt.Errorf("invalid transaction scheduler store type %q", cfg.Type)
 	}

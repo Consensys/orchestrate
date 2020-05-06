@@ -28,7 +28,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/headers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/httptrace"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/loadbalancer"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/multitenancy"
 	reflectmid "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/reflect"
 )
 
@@ -48,7 +47,6 @@ func NewBuilder() *Builder {
 	b.AddBuilder(reflect.TypeOf(&dynamic.Cors{}), &cors.Builder{})
 	b.AddBuilder(reflect.TypeOf(&dynamic.Headers{}), &headers.Builder{})
 	b.AddBuilder(reflect.TypeOf(&dynamic.LoadBalancer{}), &loadbalancer.Builder{})
-	b.AddBuilder(reflect.TypeOf(&dynamic.MultiTenancy{}), &multitenancy.Builder{})
 	b.AddBuilder(reflect.TypeOf(&dynamic.HTTPTrace{}), &httptrace.Builder{})
 
 	return b

@@ -2,19 +2,37 @@ package app
 
 import (
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
+	traefiktypes "github.com/containous/traefik/v2/pkg/types"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc"
 	grpcstatic "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/config/static"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/log"
 	metrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/multi"
 )
 
 type Config struct {
-	HTTP    *traefikstatic.Configuration
+	HTTP    *HTTP
 	GRPC    *GRPC
 	Watcher *configwatcher.Config
 	Metrics *metrics.Config
+	Log     *traefiktypes.TraefikLog
+}
+
+type HTTP struct {
+	EntryPoints  traefikstatic.EntryPoints        `description:"Entry points definition." json:"entryPoints,omitempty" toml:"entryPoints,omitempty" yaml:"entryPoints,omitempty" export:"true"`
+	HostResolver *traefiktypes.HostResolverConfig `description:"Enable CNAME Flattening." json:"hostResolver,omitempty" toml:"hostResolver,omitempty" yaml:"hostResolver,omitempty" label:"allowEmpty" export:"true"`
+}
+
+func (c *HTTP) TraefikStatic() *traefikstatic.Configuration {
+	return &traefikstatic.Configuration{
+		EntryPoints:  c.EntryPoints,
+		HostResolver: c.HostResolver,
+		API: &traefikstatic.API{
+			Dashboard: true,
+		},
+	}
 }
 
 type GRPC struct {
@@ -24,12 +42,15 @@ type GRPC struct {
 
 func NewConfig(vipr *viper.Viper) *Config {
 	return &Config{
-		HTTP: http.NewConfig(vipr),
+		HTTP: &HTTP{
+			EntryPoints: http.NewEPsConfig(vipr),
+		},
 		GRPC: &GRPC{
 			EntryPoint: grpc.NewConfig(vipr),
 		},
 		Watcher: configwatcher.NewConfig(vipr),
 		Metrics: metrics.NewConfig(vipr),
+		Log:     log.NewConfig(vipr),
 	}
 }
 

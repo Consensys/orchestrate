@@ -1,4 +1,4 @@
-package contractregistry
+package chainregistry
 
 import (
 	"testing"
@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	mockauth "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
+	mockethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/mock"
 )
 
 func TestApp(t *testing.T) {
@@ -16,6 +17,7 @@ func TestApp(t *testing.T) {
 
 	jwtChecker := mockauth.NewMockChecker(ctrlr)
 	keyChecker := mockauth.NewMockChecker(ctrlr)
+	ec := mockethclient.NewMockClient(ctrlr)
 
 	cfg := NewConfig(viper.New())
 	cfg.Store.Type = "postgres"
@@ -23,6 +25,7 @@ func TestApp(t *testing.T) {
 	_, err := New(
 		cfg,
 		postgres.GetManager(),
+		ec,
 		jwtChecker, keyChecker,
 	)
 	assert.NoError(t, err, "Creating App should not error")

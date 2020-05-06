@@ -14,6 +14,7 @@ type Interceptor struct {
 	Tracing  *Tracing  `json:"tracing,omitempty" toml:"tracing,omitempty" yaml:"tracing,omitempty"`
 	Tags     *Tags     `json:"tags,omitempty" toml:"tags,omitempty" yaml:"tags,omitempty"`
 	Error    *Error    `json:"error,omitempty" toml:"error,omitempty" yaml:"error,omitempty"`
+	Mock     *Mock     `json:"mock,omitempty" toml:"mock,omitempty" yaml:"mock,omitempty"`
 }
 
 func (i *Interceptor) Field() (interface{}, error) {
@@ -51,3 +52,7 @@ type Tags struct{}
 // +k8s:deepcopy-gen=true
 
 type Error struct{}
+
+// +k8s:deepcopy-gen=true
+
+type Mock struct{}

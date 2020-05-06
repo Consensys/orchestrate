@@ -12,11 +12,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestConfig(t *testing.T) {
-	cfg := DefaultConfig()
-	assert.NotNil(t, cfg)
-}
-
 func TestHostname(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	hostname(flgs)

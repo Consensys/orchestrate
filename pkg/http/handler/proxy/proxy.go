@@ -34,8 +34,8 @@ type Builder struct {
 	lb *loadbalancer.Builder
 }
 
-func NewBuilder(staticCfg *traefikstatic.Configuration, pool gohttputil.BufferPool) (*Builder, error) {
-	t, err := NewTransport(staticCfg.ServersTransport)
+func NewBuilder(transportCfg *traefikstatic.ServersTransport, pool gohttputil.BufferPool) (*Builder, error) {
+	t, err := NewTransport(transportCfg)
 	if err != nil {
 		return nil, err
 	}

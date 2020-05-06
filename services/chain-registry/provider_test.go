@@ -1,6 +1,4 @@
-// +build unit
-
-package configwatcher
+package chainregistry
 
 import (
 	"math"
@@ -9,10 +7,7 @@ import (
 	"time"
 
 	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
-	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
-	traefiktypes "github.com/containous/traefik/v2/pkg/types"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
@@ -28,61 +23,17 @@ func TestNewInternalConfig(t *testing.T) {
 						Service:     "chains",
 						Priority:    math.MaxInt32,
 						Rule:        "PathPrefix(`/chains`) || PathPrefix(`/faucets`)",
-						Middlewares: []string{"base-accesslog", "auth"},
-					},
-				},
-				"swagger": {
-					Router: &traefikdynamic.Router{
-						EntryPoints: []string{"http"},
-						Service:     "swagger",
-						Priority:    math.MaxInt32,
-						Rule:        "PathPrefix(`/swagger`)",
-						Middlewares: []string{"base-accesslog"},
-					},
-				},
-				"dashboard": {
-					Router: &traefikdynamic.Router{
-						EntryPoints: []string{"http"},
-						Service:     "dashboard",
-						Priority:    math.MaxInt32,
-						Rule:        "PathPrefix(`/api`) || PathPrefix(`/dashboard`)",
-						Middlewares: []string{"base-accesslog", "strip-api"},
-					},
-				},
-				"healthcheck": &dynamic.Router{
-					Router: &traefikdynamic.Router{
-						EntryPoints: []string{"metrics"},
-						Service:     "healthcheck",
-						Priority:    math.MaxInt32 - 1,
-						Rule:        "PathPrefix(`/`)",
-					},
-				},
-				"prometheus": {
-					Router: &traefikdynamic.Router{
-						EntryPoints: []string{"metrics"},
-						Service:     "prometheus",
-						Priority:    math.MaxInt32,
-						Rule:        "PathPrefix(`/metrics`)",
+						Middlewares: []string{"base@logger-base", "auth@multitenancy"},
 					},
 				},
 			},
 			Middlewares: map[string]*dynamic.Middleware{
-				"strip-api": &dynamic.Middleware{
-					Middleware: &traefikdynamic.Middleware{
-						StripPrefixRegex: &traefikdynamic.StripPrefixRegex{
-							Regex: []string{"/api"},
-						},
-					},
-				},
 				"strip-path": &dynamic.Middleware{
 					Middleware: &traefikdynamic.Middleware{
 						StripPrefixRegex: &traefikdynamic.StripPrefixRegex{
 							Regex: []string{`/(?:tessera/)?(?:[a-zA-Z\d-]*)/?`},
 						},
 					},
-				},
-				"auth": &dynamic.Middleware{
-					Auth: &dynamic.Auth{},
 				},
 				"ratelimit": &dynamic.Middleware{
 					RateLimit: &dynamic.RateLimit{
@@ -91,17 +42,11 @@ func TestNewInternalConfig(t *testing.T) {
 						Cooldown:     30 * time.Second,
 					},
 				},
-				"base-accesslog": &dynamic.Middleware{
-					AccessLog: &dynamic.AccessLog{
-						Format: "json",
-					},
-				},
 				"chain-proxy-accesslog": &dynamic.Middleware{
 					AccessLog: &dynamic.AccessLog{
 						Filters: &dynamic.AccessLogFilters{
 							StatusCodes: []string{"100-199", "400-428", "430-599"},
 						},
-						Format: "json",
 					},
 				},
 			},
@@ -109,35 +54,13 @@ func TestNewInternalConfig(t *testing.T) {
 				"chains": &dynamic.Service{
 					Chains: &dynamic.Chains{},
 				},
-				"dashboard": &dynamic.Service{
-					Dashboard: &dynamic.Dashboard{},
-				},
-				"healthcheck": &dynamic.Service{
-					HealthCheck: &dynamic.HealthCheck{},
-				},
-				"prometheus": {
-					Prometheus: &dynamic.Prometheus{},
-				},
-				"swagger": {
-					Swagger: &dynamic.Swagger{
-						SpecsFile: "./public/swagger-specs/types/chain-registry/swagger.json",
-					},
-				},
 			},
 		},
 	}
 
-	staticCfg := &traefikstatic.Configuration{
-		Log: &traefiktypes.TraefikLog{
-			Format: "json",
-		},
-	}
+	cfg := NewInternalConfig()
 
-	watcherCfg := &configwatcher.Config{}
-	cfg := NewInternalConfig(staticCfg, watcherCfg)
-
-	assert.True(t, reflect.DeepEqual(
-		cfg.DynamicCfg(), expectedCfg), "Configuration should be identical")
+	assert.True(t, reflect.DeepEqual(cfg, expectedCfg), "Configuration should be identical")
 }
 
 func TestNewChainsProxyConfig(t *testing.T) {
@@ -166,7 +89,7 @@ func TestNewChainsProxyConfig(t *testing.T) {
 						Rule:        "Path(`/0d60a85e-0b90-4482-a14c-108aea2557aa`)",
 						Middlewares: []string{
 							"chain-proxy-accesslog@internal",
-							"auth@internal",
+							"auth@multitenancy",
 							"multitenancy-testTenantId",
 							"strip-path@internal",
 							"ratelimit@internal",
@@ -229,7 +152,7 @@ func TestNewChainsProxyConfig(t *testing.T) {
 						Rule:        "Path(`/0d60a85e-0b90-4482-a14c-108aea2557aa`)",
 						Middlewares: []string{
 							"chain-proxy-accesslog@internal",
-							"auth@internal",
+							"auth@multitenancy",
 							"multitenancy-testTenantId",
 							"strip-path@internal",
 							"ratelimit@internal",
@@ -244,7 +167,7 @@ func TestNewChainsProxyConfig(t *testing.T) {
 						Rule:        "Path(`/39240e9f-ae09-4e95-9fd0-a712035c8ad7`)",
 						Middlewares: []string{
 							"chain-proxy-accesslog@internal",
-							"auth@internal",
+							"auth@multitenancy",
 							"multitenancy-testTenantId",
 							"strip-path@internal",
 							"ratelimit@internal",
@@ -259,7 +182,7 @@ func TestNewChainsProxyConfig(t *testing.T) {
 						Rule:        "PathPrefix(`/tessera/39240e9f-ae09-4e95-9fd0-a712035c8ad7`)",
 						Middlewares: []string{
 							"chain-proxy-accesslog@internal",
-							"auth@internal",
+							"auth@multitenancy",
 							"multitenancy-testTenantId",
 							"strip-path@internal",
 							"ratelimit@internal",
@@ -312,7 +235,7 @@ func TestNewChainsProxyConfig(t *testing.T) {
 	}
 
 	for i, test := range testSet {
-		cfg := newProxyConfig(test.chains)
+		cfg := NewProxyConfig(test.chains)
 		expectedCfg := test.expectedCfg(dynamic.NewConfig())
 		assert.Equal(t, expectedCfg, cfg, "Chain-registry - Store (%d/%d): expected %v but got %v", i+1, len(testSet), expectedCfg, cfg)
 	}

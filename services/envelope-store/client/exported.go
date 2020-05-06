@@ -16,7 +16,7 @@ func Init(ctx context.Context) {
 	cfg := NewConfigFromViper(viper.GetViper())
 	initOnce.Do(func() {
 		var err error
-		client, err = NewClient(ctx, &cfg)
+		client, err = NewClient(ctx, cfg)
 		if err != nil {
 			log.FromContext(ctx).WithError(err).Fatalf("Could not create envelope store client")
 		}

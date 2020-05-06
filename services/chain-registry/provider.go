@@ -1,46 +1,56 @@
-package configwatcher
+package chainregistry
 
 import (
+	"context"
 	"fmt"
 	"math"
 	"time"
 
 	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
-	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher/provider"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher/provider/aggregator"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher/provider/poll"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher/provider/static"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/dashboard"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/healthcheck"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/prometheus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/swagger"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/accesslog"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/chain-registry/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 )
 
-type Config struct {
-	static  *traefikstatic.Configuration
-	watcher *configwatcher.Config
-	dynamic *dynamic.Configuration
+const (
+	InternalProviderName = "internal"
+	ChainsProxyProvider  = "chains-proxy"
+)
+
+func NewProvider(
+	getChains usecases.GetChains,
+	refresh time.Duration,
+) provider.Provider {
+	prvdr := aggregator.New()
+	prvdr.AddProvider(NewInternalProvider())
+	prvdr.AddProvider(NewChainsProxyProvider(getChains, refresh))
+	return prvdr
 }
 
-func NewInternalConfig(staticCfg *traefikstatic.Configuration, watcherCfg *configwatcher.Config) *Config {
-	dynamicCfg := dynamic.NewConfig()
+func NewInternalProvider() provider.Provider {
+	return static.New(dynamic.NewMessage(InternalProviderName, NewInternalConfig()))
+}
 
-	dashboard.AddDynamicConfig(dynamicCfg, []string{"base-accesslog"})
-	swagger.AddDynamicConfig(dynamicCfg,
-		[]string{"base-accesslog"},
-		"./public/swagger-specs/types/chain-registry/swagger.json",
-	)
-	healthcheck.AddDynamicConfig(dynamicCfg)
-	prometheus.AddDynamicConfig(dynamicCfg)
-	accesslog.AddDynamicConfig(dynamicCfg, "base-accesslog", staticCfg)
+func NewChainsProxyProvider(getChains usecases.GetChains, refresh time.Duration) provider.Provider {
+	poller := func(ctx context.Context) (provider.Message, error) {
+		chains, err := getChains.Execute(ctx, "", nil)
+		if err != nil {
+			return nil, err
+		}
 
-	// Authentication middleware
-	dynamicCfg.HTTP.Middlewares["auth"] = &dynamic.Middleware{
-		Auth: &dynamic.Auth{},
+		return dynamic.NewMessage(ChainsProxyProvider, NewProxyConfig(chains)), nil
 	}
+	return poll.New(poller, refresh)
+}
+
+func NewInternalConfig() *dynamic.Configuration {
+	dynamicCfg := dynamic.NewConfig()
 
 	// Router to Chains API
 	dynamicCfg.HTTP.Routers["chains"] = &dynamic.Router{
@@ -49,7 +59,7 @@ func NewInternalConfig(staticCfg *traefikstatic.Configuration, watcherCfg *confi
 			Service:     "chains",
 			Priority:    math.MaxInt32,
 			Rule:        "PathPrefix(`/chains`) || PathPrefix(`/faucets`)",
-			Middlewares: []string{"base-accesslog", "auth"},
+			Middlewares: []string{"base@logger-base", "auth@multitenancy"},
 		},
 	}
 
@@ -58,9 +68,13 @@ func NewInternalConfig(staticCfg *traefikstatic.Configuration, watcherCfg *confi
 		Chains: &dynamic.Chains{},
 	}
 
-	accesslog.AddDynamicConfig(dynamicCfg, "chain-proxy-accesslog", staticCfg)
-	dynamicCfg.HTTP.Middlewares["chain-proxy-accesslog"].AccessLog.Filters = &dynamic.AccessLogFilters{
-		StatusCodes: []string{"100-199", "400-428", "430-599"},
+	// Log Middleware for Chains
+	dynamicCfg.HTTP.Middlewares["chain-proxy-accesslog"] = &dynamic.Middleware{
+		AccessLog: &dynamic.AccessLog{
+			Filters: &dynamic.AccessLogFilters{
+				StatusCodes: []string{"100-199", "400-428", "430-599"},
+			},
+		},
 	}
 
 	// Middleware used by Chain-Proxy
@@ -81,25 +95,17 @@ func NewInternalConfig(staticCfg *traefikstatic.Configuration, watcherCfg *confi
 		},
 	}
 
-	return &Config{
-		static:  staticCfg,
-		watcher: watcherCfg,
-		dynamic: dynamicCfg,
-	}
+	return dynamicCfg
 }
 
-func (c *Config) DynamicCfg() *dynamic.Configuration {
-	return c.dynamic
-}
-
-func newProxyConfig(chains []*models.Chain) *dynamic.Configuration {
+func NewProxyConfig(chains []*models.Chain) *dynamic.Configuration {
 	cfg := dynamic.NewConfig()
 
 	for _, chain := range chains {
 		multitenancyMid := fmt.Sprintf("multitenancy-%v", chain.TenantID)
 		middlewares := []string{
 			"chain-proxy-accesslog@internal",
-			"auth@internal",
+			"auth@multitenancy",
 			multitenancyMid,
 			"strip-path@internal",
 			"ratelimit@internal",
@@ -149,7 +155,6 @@ func appendChainServices(cfg *dynamic.Configuration, chain *models.Chain, middle
 }
 
 func appendTesseraPrivateTxServices(cfg *dynamic.Configuration, chain *models.Chain, middlewares []string) {
-
 	servers := make([]*dynamic.Server, 0)
 	for _, privTxManager := range chain.PrivateTxManagers {
 		if privTxManager.Type == utils.TesseraChainType {

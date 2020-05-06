@@ -11,9 +11,13 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
+//go:generate mockgen -source=configwatcher.go -destination=mock/mock.go -package=mock
+
+type Listener func(context.Context, interface{}) error
+
 type Watcher interface {
-	AddListener(listener func(context.Context, interface{}) error)
-	Run(ctx context.Context) error
+	AddListener(Listener)
+	Run(context.Context) error
 	Close() error
 }
 
@@ -56,7 +60,7 @@ func New(
 	}
 }
 
-func (w *watcher) AddListener(listener func(context.Context, interface{}) error) {
+func (w *watcher) AddListener(listener Listener) {
 	w.listeners = append(w.listeners, listener)
 }
 
