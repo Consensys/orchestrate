@@ -20,7 +20,7 @@ func ObjectToJSON(obj interface{}) (string, error) {
 	return string(b), nil
 }
 
-func FormatTxResponse(txRequestModel *models.TransactionRequest, scheduleResponse *types.ScheduleResponse) (*types.TransactionResponse, error) {
+func FormatTxResponse(txRequestModel *models.TransactionRequest) (*types.TransactionResponse, error) {
 	mapParams, err := jsonToMap(txRequestModel.Params)
 	if err != nil {
 		return nil, err
@@ -29,8 +29,12 @@ func FormatTxResponse(txRequestModel *models.TransactionRequest, scheduleRespons
 	return &types.TransactionResponse{
 		IdempotencyKey: txRequestModel.IdempotencyKey,
 		Params:         mapParams,
-		Schedule:       *scheduleResponse,
-		CreatedAt:      txRequestModel.CreatedAt,
+		Schedule: types.ScheduleResponse{
+			UUID:      txRequestModel.Schedule.UUID,
+			ChainID:   txRequestModel.Schedule.ChainID,
+			CreatedAt: txRequestModel.Schedule.CreatedAt,
+		},
+		CreatedAt: txRequestModel.CreatedAt,
 	}, nil
 }
 

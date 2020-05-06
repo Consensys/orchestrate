@@ -4,6 +4,8 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/Shopify/sarama"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
@@ -19,6 +21,8 @@ func New(
 	pgmngr postgres.Manager,
 	jwt, key auth.Checker,
 	chainRegistryClient client.ChainRegistryClient,
+	syncProducer sarama.SyncProducer,
+	txCrafterTopic string,
 ) (*app.App, error) {
 	// Create Data agents
 	storeBuilder := store.NewBuilder(pgmngr)
@@ -30,7 +34,7 @@ func New(
 	// Option for transaction handler
 	txSchedulerHandlerOpt := app.HandlerOpt(
 		reflect.TypeOf(&dynamic.Transactions{}),
-		controllers.NewBuilder(usecases.NewUseCases(dataAgents, chainRegistryClient)),
+		controllers.NewBuilder(usecases.NewUseCases(dataAgents, chainRegistryClient, syncProducer, txCrafterTopic)),
 	)
 
 	// Create app

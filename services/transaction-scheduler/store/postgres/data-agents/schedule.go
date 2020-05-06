@@ -3,7 +3,10 @@ package dataagents
 import (
 	"context"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+
 	uuid "github.com/satori/go.uuid"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 
@@ -25,5 +28,10 @@ func NewPGSchedule(db *pg.DB) *PGSchedule {
 // Insert Inserts a new schedule in DB
 func (agent *PGSchedule) Insert(ctx context.Context, schedule *models.Schedule) error {
 	schedule.UUID = uuid.NewV4().String()
-	return insert(ctx, agent.db.ModelContext(ctx, schedule), scheduleDAComponent)
+	err := postgres.Insert(ctx, agent.db, schedule)
+	if err != nil {
+		return errors.FromError(err).ExtendComponent(scheduleDAComponent)
+	}
+
+	return nil
 }

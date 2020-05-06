@@ -3,9 +3,9 @@ package types
 import "time"
 
 type BaseTransactionRequest struct {
-	IdempotencyKey string             `json:"idempotencyKey" validate:"required"`
-	ChainID        string             `json:"chainID" validate:"required,uuid4"`
-	Labels         *map[string]string `json:"labels,omitempty"`
+	IdempotencyKey string            `json:"idempotencyKey" validate:"required"`
+	ChainID        string            `json:"chainID" validate:"required,uuid4"`
+	Labels         map[string]string `json:"labels,omitempty"`
 }
 
 type TransactionRequest struct {
@@ -15,9 +15,9 @@ type TransactionRequest struct {
 type TransactionParams struct {
 	From            string             `json:"from" validate:"required,eth_addr"`
 	To              string             `json:"to" validate:"required,eth_addr"`
-	Value           *string            `json:"value,omitempty" validate:"omitempty,isBig"`
-	Gas             *string            `json:"gas,omitempty"`
-	GasPrice        *string            `json:"gasPrice,omitempty" validate:"omitempty,isBig"`
+	Value           string             `json:"value,omitempty" validate:"omitempty,isBig"`
+	Gas             string             `json:"gas,omitempty"`
+	GasPrice        string             `json:"gasPrice,omitempty" validate:"omitempty,isBig"`
 	MethodSignature string             `json:"methodSignature" validate:"required,isValidMethodSig"`
 	Args            *map[string]string `json:"args,omitempty"`
 }
@@ -76,7 +76,6 @@ type PrivateTransactionParams struct {
 
 type TransactionResponse struct {
 	IdempotencyKey string                 `json:"idempotencyKey" validate:"required"`
-	Labels         *map[string]string     `json:"labels,omitempty"`
 	Params         map[string]interface{} `json:"params"`
 	Schedule       ScheduleResponse       `json:"schedule"`
 	CreatedAt      time.Time              `json:"createdAt"`

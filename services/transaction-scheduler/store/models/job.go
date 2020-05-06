@@ -8,11 +8,17 @@ type Job struct {
 	ID            int
 	UUID          string
 	ScheduleID    int
-	Schedule      *Schedule `pg:"-"`
+	Schedule      *Schedule
 	Type          string
 	TransactionID int
-	Transaction   *Transaction `pg:"-"`
-	Logs          []*Log       `pg:"-"`
-	Labels        *map[string]string
+	Transaction   *Transaction
+	Logs          []*Log
+	Labels        map[string]string
 	CreatedAt     time.Time `pg:"default:now()"`
+}
+
+// GetStatus Computes the status of a Job by checking its logs
+func (job *Job) GetStatus() string {
+	// TODO: Order logs by createdAt when getting them from DB
+	return job.Logs[len(job.Logs)-1].Status
 }

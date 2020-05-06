@@ -10,6 +10,7 @@ type TransactionRequest struct {
 	ID             int
 	IdempotencyKey string
 	ScheduleID     int
+	Schedule       *Schedule
 	RequestHash    string
 	Params         string
 	CreatedAt      time.Time `pg:"default:now()"`

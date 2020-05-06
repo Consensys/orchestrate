@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
@@ -24,6 +26,7 @@ func Init(ctx context.Context) {
 		authjwt.Init(ctx)
 		authkey.Init(ctx)
 		client.Init(ctx)
+		sarama.InitSyncProducer(ctx)
 
 		var err error
 		appli, err = New(
@@ -31,6 +34,8 @@ func Init(ctx context.Context) {
 			postgres.GetManager(),
 			authjwt.GlobalChecker(), authkey.GlobalChecker(),
 			client.GlobalClient(),
+			sarama.GlobalSyncProducer(),
+			viper.GetString(sarama.TxCrafterViperKey),
 		)
 		if err != nil {
 			log.FromContext(ctx).WithError(err).Fatalf("Could not create envelope store application")

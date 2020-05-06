@@ -3,8 +3,11 @@ package dataagents
 import (
 	"context"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+
 	"github.com/go-pg/pg/v9"
 	uuid "github.com/satori/go.uuid"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 )
 
@@ -23,5 +26,10 @@ func NewPGLog(db *pg.DB) *PGLog {
 // Insert Inserts a new log in DB
 func (agent *PGLog) Insert(ctx context.Context, logModel *models.Log) error {
 	logModel.UUID = uuid.NewV4().String()
-	return insert(ctx, agent.db.ModelContext(ctx, logModel), logDAComponent)
+	err := postgres.Insert(ctx, agent.db, logModel)
+	if err != nil {
+		return errors.FromError(err).ExtendComponent(logDAComponent)
+	}
+
+	return nil
 }

@@ -8,18 +8,23 @@ import (
 
 func FakeSchedule() *models.Schedule {
 	return &models.Schedule{
-		UUID:     uuid.NewV4().String(),
 		TenantID: "tenantID",
 		ChainID:  uuid.NewV4().String(),
+		Jobs: []*models.Job{{
+			UUID:        uuid.NewV4().String(),
+			Type:        types.JobConstantinopleTransaction,
+			Transaction: FakeTransaction(),
+			Logs:        []*models.Log{{Status: types.LogStatusCreated, Message: "created message"}},
+		}},
 	}
 }
 
-func FakeTxRequest(scheduleID int) *models.TransactionRequest {
+func FakeTxRequest() *models.TransactionRequest {
 	return &models.TransactionRequest{
 		IdempotencyKey: uuid.NewV4().String(),
 		RequestHash:    "requestHash",
 		Params:         "{\"field0\": \"field0Value\"}",
-		ScheduleID:     scheduleID,
+		Schedule:       FakeSchedule(),
 	}
 }
 

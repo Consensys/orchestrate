@@ -49,14 +49,15 @@ func (s *transactionsControllerTestSuite) SetupTest() {
 func (s *transactionsControllerTestSuite) TestTransactionsController_Send() {
 	txRequest := testutils.FakeTransactionRequest()
 	requestBytes, _ := json.Marshal(txRequest)
-	txResponse := &types.TransactionResponse{
-		IdempotencyKey: txRequest.IdempotencyKey,
-		Schedule:       types.ScheduleResponse{},
-	}
 
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodPost, "/transactions/send", bytes.NewReader(requestBytes)).WithContext(s.ctx)
+		txResponse := &types.TransactionResponse{
+			IdempotencyKey: txRequest.IdempotencyKey,
+			Schedule:       types.ScheduleResponse{},
+		}
+
 		s.sendTransactionUseCase.EXPECT().Execute(s.ctx, txRequest, tenantId).Return(txResponse, nil).Times(1)
 
 		s.controller.Send(rw, httpRequest)
@@ -64,6 +65,18 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_Send() {
 		expectedBody, _ := utils.ObjectToJSON(txResponse)
 		assert.Equal(t, expectedBody+"\n", rw.Body.String())
 		assert.Equal(t, http.StatusAccepted, rw.Code)
+	})
+
+	s.T().Run("should fail with Bad request if invalid format", func(t *testing.T) {
+		txRequest := testutils.FakeTransactionRequest()
+		txRequest.IdempotencyKey = ""
+		requestBytes, _ := json.Marshal(txRequest)
+
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodPost, "/transactions/send", bytes.NewReader(requestBytes)).WithContext(s.ctx)
+
+		s.controller.Send(rw, httpRequest)
+		assert.Equal(t, http.StatusBadRequest, rw.Code)
 	})
 
 	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests

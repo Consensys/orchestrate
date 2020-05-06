@@ -137,6 +137,21 @@ func (mr *MockJobAgentMockRecorder) Insert(ctx, job interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockJobAgent)(nil).Insert), ctx, job)
 }
 
+// FindOneByUUID mocks base method.
+func (m *MockJobAgent) FindOneByUUID(ctx context.Context, jobUUID string) (*models.Job, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindOneByUUID", ctx, jobUUID)
+	ret0, _ := ret[0].(*models.Job)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindOneByUUID indicates an expected call of FindOneByUUID.
+func (mr *MockJobAgentMockRecorder) FindOneByUUID(ctx, jobUUID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByUUID", reflect.TypeOf((*MockJobAgent)(nil).FindOneByUUID), ctx, jobUUID)
+}
+
 // MockLogAgent is a mock of LogAgent interface.
 type MockLogAgent struct {
 	ctrl     *gomock.Controller

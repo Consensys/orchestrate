@@ -164,6 +164,11 @@ func KafkaConnectionError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(KafkaConnection, format, a...)
 }
 
+// IsKafkaConnectionError indicate whether an error is a KafkaConnection error
+func IsKafkaConnectionError(err error) bool {
+	return isErrorClass(FromError(err).GetCode(), KafkaConnection)
+}
+
 // HTTPConnectionError is raised when failing to connect over http
 func HTTPConnectionError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(HTTPConnection, format, a...)

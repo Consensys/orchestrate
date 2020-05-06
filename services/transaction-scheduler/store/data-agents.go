@@ -28,6 +28,7 @@ type ScheduleAgent interface {
 
 type JobAgent interface {
 	Insert(ctx context.Context, job *models.Job) error
+	FindOneByUUID(ctx context.Context, jobUUID string) (*models.Job, error)
 }
 
 type LogAgent interface {

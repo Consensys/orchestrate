@@ -19,7 +19,7 @@ type TransactionValidator interface {
 	ValidateRequestHash(ctx context.Context, params interface{}, idempotencyKey string) (string, error)
 }
 
-// Transaction is a validator for transaction requests (business logic)
+// transactionValidator is a validator for transaction requests (business logic)
 type transactionValidator struct {
 	txRequestDA store.TransactionRequestAgent
 }
@@ -30,6 +30,8 @@ func NewTransactionValidator(txRequestDA store.TransactionRequestAgent) Transact
 }
 
 func (txValidator *transactionValidator) ValidateRequestHash(ctx context.Context, params interface{}, idempotencyKey string) (string, error) {
+	log.WithContext(ctx).WithField("idempotency_key", idempotencyKey).Debug("validating idempotency key")
+
 	jsonParams, err := utils.ObjectToJSON(params)
 	if err != nil {
 		return "", errors.FromError(err).ExtendComponent(txValidatorComponent)

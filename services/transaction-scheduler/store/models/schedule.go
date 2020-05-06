@@ -9,5 +9,6 @@ type Schedule struct {
 	UUID      string
 	TenantID  string
 	ChainID   string
+	Jobs      []*Job
 	CreatedAt time.Time `pg:"default:now()"`
 }

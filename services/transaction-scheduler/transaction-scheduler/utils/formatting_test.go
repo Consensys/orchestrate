@@ -6,7 +6,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	storetestutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
-	typestestutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types/testutils"
 	"testing"
 )
 
@@ -28,10 +27,9 @@ func TestUtils_ObjectToJSON(t *testing.T) {
 }
 
 func TestUtils_FormatTxResponse(t *testing.T) {
-	txRequest := storetestutils.FakeTxRequest(1)
-	scheduleResponse := typestestutils.FakeScheduleResponse()
+	txRequest := storetestutils.FakeTxRequest()
 
-	txResponse, _ := FormatTxResponse(txRequest, scheduleResponse)
+	txResponse, _ := FormatTxResponse(txRequest)
 
 	assert.Equal(t, txRequest.IdempotencyKey, txResponse.IdempotencyKey)
 

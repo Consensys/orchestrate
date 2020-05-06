@@ -79,3 +79,38 @@ func (s *jobTestSuite) TestPGJob_Insert() {
 		s.pg.InitTestDB(t)
 	})
 }
+
+func (s *jobTestSuite) TestPGJob_FindOneByUUID() {
+	ctx := context.Background()
+	schedule := testutils.FakeSchedule()
+	_ = s.scheduleDA.Insert(ctx, schedule)
+	job := testutils.FakeJob(schedule.ID)
+	_ = s.dataagent.Insert(context.Background(), job)
+
+	s.T().Run("should get model successfully", func(t *testing.T) {
+		jobRetrieved, err := s.dataagent.FindOneByUUID(ctx, job.UUID)
+
+		assert.Nil(t, err)
+		assert.Equal(t, job.ID, jobRetrieved.ID)
+		assert.Equal(t, job.UUID, jobRetrieved.UUID)
+		assert.Equal(t, job.Transaction, jobRetrieved.Transaction)
+		assert.Equal(t, job.Logs, jobRetrieved.Logs)
+		assert.Equal(t, schedule.UUID, jobRetrieved.Schedule.UUID)
+	})
+
+	s.T().Run("should return NotFoundError if select fails", func(t *testing.T) {
+		_, err := s.dataagent.FindOneByUUID(ctx, "b6fe7a2a-1a4d-49ca-99d8-8a34aa495ef0")
+		assert.True(t, errors.IsNotFoundError(err))
+	})
+
+	s.T().Run("should return PostgresConnectionError if insert fails", func(t *testing.T) {
+		// We drop the DB to make the test fail
+		s.pg.DropTestDB(t)
+
+		_, err := s.dataagent.FindOneByUUID(ctx, job.UUID)
+		assert.True(t, errors.IsPostgresConnectionError(err))
+
+		// We bring it back up
+		s.pg.InitTestDB(t)
+	})
+}

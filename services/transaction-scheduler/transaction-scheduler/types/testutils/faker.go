@@ -13,8 +13,8 @@ func FakeTransactionRequest() *types.TransactionRequest {
 		},
 		Params: types.TransactionParams{
 			From:            "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
-			To:              "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
 			MethodSignature: "constructor()",
+			To:              "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
 		},
 	}
 }
@@ -27,5 +27,31 @@ func FakeScheduleResponse() *types.ScheduleResponse {
 	return &types.ScheduleResponse{
 		UUID:    uuid.NewV4().String(),
 		ChainID: uuid.NewV4().String(),
+	}
+}
+
+func FakeJobRequest() *types.JobRequest {
+	return &types.JobRequest{
+		ScheduleID:  1,
+		Type:        types.JobConstantinopleTransaction,
+		Labels:      nil,
+		Transaction: *FakeETHTransaction(),
+	}
+}
+
+func FakeJobResponse() *types.JobResponse {
+	return &types.JobResponse{
+		UUID:        uuid.NewV4().String(),
+		Transaction: *FakeETHTransaction(),
+		Status:      types.LogStatusCreated,
+	}
+}
+
+func FakeETHTransaction() *types.ETHTransaction {
+	return &types.ETHTransaction{
+		Hash: "0xhash",
+		From: "0xfrom",
+		To:   "0xto",
+		Data: "0xdede",
 	}
 }
