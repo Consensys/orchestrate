@@ -198,10 +198,9 @@ func (b *Builder) buildMiddleware(ctx context.Context, routerName string, rtInfo
 		midCtx := httputil.WithMiddleware(ctx, midName)
 		logger := log.FromContext(midCtx).WithField("middleware", midName)
 
+		// In case a services is missing one of the middleware configurationg we skip it usage and warning
 		if infos.Middlewares[midName] == nil {
-			rvErr = fmt.Errorf("middleware %q missing in dynamic configuration", midName)
-			logger.WithError(rvErr).Error("could not build middleware")
-			rtInfo.AddError(rvErr, true)
+			logger.Warnf("middleware %q missing in dynamic configuration", midName)
 			continue
 		}
 
