@@ -22,6 +22,7 @@ import (
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	svccontracts "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
+	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 )
 
@@ -30,16 +31,17 @@ type Hook struct {
 
 	registry svccontracts.ContractRegistryClient
 	ec       ethclient.ChainStateReader
-
 	producer sarama.SyncProducer
+	store    evlpstore.EnvelopeStoreClient
 }
 
-func NewHook(conf *Config, registry svccontracts.ContractRegistryClient, ec ethclient.ChainStateReader, producer sarama.SyncProducer) *Hook {
+func NewHook(conf *Config, registry svccontracts.ContractRegistryClient, ec ethclient.ChainStateReader, producer sarama.SyncProducer, store evlpstore.EnvelopeStoreClient) *Hook {
 	return &Hook{
 		conf:     conf,
 		registry: registry,
 		ec:       ec,
 		producer: producer,
+		store:    store,
 	}
 }
 
@@ -77,6 +79,24 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 	if err != nil {
 		log.FromContext(blockLogCtx).WithError(err).Errorf("failed to produce message")
 		return err
+	}
+
+	// Update transactions to "MINED"
+	for _, e := range evlps {
+		if e.Id == "" {
+			continue
+		}
+
+		_, err := hk.store.SetStatus(
+			ctx,
+			&evlpstore.SetStatusRequest{
+				Id:     e.Id,
+				Status: evlpstore.Status_MINED,
+			},
+		)
+		if err != nil {
+			log.FromContext(blockLogCtx).WithError(err).Warnf("failed to update status of %s to MINED", e.Id)
+		}
 	}
 
 	log.FromContext(blockLogCtx).Infof("block processed")

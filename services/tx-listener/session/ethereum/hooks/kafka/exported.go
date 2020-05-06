@@ -9,6 +9,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	crc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
+	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client"
 )
 
 var (
@@ -24,6 +25,8 @@ func initComponent(ctx context.Context) {
 		func() { crc.Init(ctx, viper.GetString(crc.ContractRegistryURLViperKey)) },
 		// Initialize Sync Producer
 		func() { broker.InitSyncProducer(ctx) },
+		// Initialize envelope store client
+		func() { storeclient.Init(ctx) },
 	)
 }
 
@@ -37,6 +40,7 @@ func Init(ctx context.Context) {
 			crc.GlobalClient(),
 			rpc.GlobalClient(),
 			broker.GlobalSyncProducer(),
+			storeclient.GlobalEnvelopeStoreClient(),
 		)
 	})
 }
