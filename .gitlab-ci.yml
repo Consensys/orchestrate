@@ -1,4 +1,5 @@
 ---
+
 stages:
   - test
   - integration
@@ -14,6 +15,18 @@ variables:
 
 services:
   - docker:18-dind
+
+.rules: &rules
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" # Execute hobs when a MR for master branch
+      when: on_success
+      allow_failure: false
+    - if: $CI_COMMIT_BRANCH == 'master'      # Execute jobs when a new commit is pushed to master branch
+      when: on_success
+      allow_failure: false
+    - if: $CI_COMMIT_TAG
+      when: never
+    - when: manual
 
 .go-setup: &go-setup
   image: golang:1.14
@@ -51,10 +64,6 @@ services:
     when: always
     paths:
       - build/report/
-  only:
-    - master
-  except:
-    - tags
 
 .build-orchestrate: &build-orchestrate
   # Build orchestrate image following http://label-schema.org/rc1/ label convention convention
@@ -89,6 +98,7 @@ services:
 
 test:
   <<: *go-setup
+  <<: *rules
   coverage: /^total:.*\s(\d+.\d+)%/
   services:
     - postgres:10.12-alpine
@@ -97,11 +107,10 @@ test:
     DB_HOST: "postgres"
   script:
     - make run-coverage
-  except:
-    - tags
 
 integration:
   <<: *go-setup
+  <<: *rules
   services:
     - docker:19.03.8-dind
   variables:
@@ -110,26 +119,23 @@ integration:
     DB_HOST: "docker"
   script:
     - make run-integration
-  except:
-    - tags
 
 lint:
   <<: *go-setup
+  <<: *rules
   script:
     - make lint-tools
     - make lint-ci
-  except:
-    - tags
 
 race:
   <<: *go-setup
+  <<: *rules
   script:
     - make race
-  except:
-    - tags
 
 gobuild:
   <<: *go-setup
+  <<: *rules
   script:
     - make gobuild
     - make gobuild-e2e
@@ -137,13 +143,10 @@ gobuild:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
       - build/bin/
-  only:
-    - master
-  except:
-    - tags
 
 test-e2e:
   <<: *docker-compose-e2e
+  <<: *rules
   script:
     - make up-ci
     - make e2e-ci
@@ -151,6 +154,7 @@ test-e2e:
 
 test-multitenancy-e2e:
   <<: *docker-compose-e2e
+  <<: *rules
   script:
     - mv -f .env.multitenancy .env
     - make up-ci
@@ -225,8 +229,6 @@ build-e2e-on-master:
     - *build-e2e
     - docker tag ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}/e2e:latest
     - docker push ${CI_REGISTRY_IMAGE}/e2e:latest
-  only:
-    - master
 
 build-e2e-on-tag:
   <<: *docker-setup
