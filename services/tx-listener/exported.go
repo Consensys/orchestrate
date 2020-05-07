@@ -76,12 +76,17 @@ func Start(ctx context.Context) error {
 		}
 
 		Init(ctx)
+
+		err = appli.Start(ctx)
+		if err != nil {
+			return
+		}
+
 		done = make(chan struct{})
 		go func() {
 			listener.Start(ctx)
 			close(done)
 		}()
-
 	})
 
 	return err
