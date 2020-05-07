@@ -55,7 +55,6 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 		err := hk.registerDeployedContract(receiptLogCtx, c, e.Receipt, block)
 		if err != nil {
 			log.FromContext(receiptLogCtx).WithError(err).Errorf("could not register deployed contract on registry")
-			return err
 		}
 
 		err = hk.decodeReceipt(receiptLogCtx, c, e.Receipt)
