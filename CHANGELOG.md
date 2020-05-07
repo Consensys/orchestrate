@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.1.0-rc2 (2020-05-07)
+
+### 🛠 Bug fixes
+* Fix a bug when the node thrown a `missing trie node` leading to and error in the tx-listener
+* Reactivate the metrics/liveness/readiness endpoint on the tx-listener
 
 ## v2.1.0-rc1 (2020-05-06)
 
