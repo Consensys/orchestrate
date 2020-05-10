@@ -229,6 +229,7 @@ func (s *HttpChainTestSuite) TestChainRegistry_ChainErrors() {
 			Name:                    chainName,
 			URLs:                    []string{"http://test1.com"},
 			ListenerBackOffDuration: &(&struct{ x string }{"1s"}).x,
+			ListenerStartingBlock:   &(&struct{ x uint64 }{1}).x,
 		}
 		resp, err := s.client.RegisterChain(ctx, &chain)
 
