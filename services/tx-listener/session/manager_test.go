@@ -40,7 +40,7 @@ func (s *MockSession) Run(ctx context.Context) error {
 }
 
 type MockBuilder struct {
-	mux      *sync.Mutex
+	mux      *sync.RWMutex
 	sessions map[string]*MockSession
 }
 
@@ -54,13 +54,13 @@ func (b *MockBuilder) NewSession(chain *dynamic.Chain) (Session, error) {
 
 func (b *MockBuilder) addSession(key string, sess *MockSession) {
 	b.mux.Lock()
+	defer b.mux.Unlock()  
 	b.sessions[key] = sess
-	b.mux.Unlock()
 }
 
 func (b *MockBuilder) getSession(key string) *MockSession {
-	b.mux.Lock()
-	defer b.mux.Unlock()
+	b.mux.RLock()
+	defer b.mux.RUnlock()
 	sess, ok := b.sessions[key]
 	if !ok {
 		panic("no session")
@@ -81,7 +81,7 @@ func (p *MockProvider) Run(ctx context.Context, _ chan<- *dynamic.Message) error
 func TestManager(t *testing.T) {
 	prvdr := &MockProvider{}
 	builder := &MockBuilder{
-		mux:      &sync.Mutex{},
+		mux:      &sync.RWMutex{},
 		sessions: make(map[string]*MockSession),
 	}
 	manager := NewManager(builder, prvdr)
@@ -151,7 +151,7 @@ func TestManager(t *testing.T) {
 func TestErrors(t *testing.T) {
 	provider := &MockProvider{}
 	builder := &MockBuilder{
-		mux:      &sync.Mutex{},
+		mux:      &sync.RWMutex{},
 		sessions: make(map[string]*MockSession),
 	}
 	manager := NewManager(builder, provider)
@@ -164,7 +164,7 @@ func TestErrors(t *testing.T) {
 func TestListenProvider(t *testing.T) {
 	provider := &MockProvider{}
 	builder := &MockBuilder{
-		mux:      &sync.Mutex{},
+		mux:      &sync.RWMutex{},
 		sessions: make(map[string]*MockSession),
 	}
 	manager := NewManager(builder, provider)
@@ -178,7 +178,7 @@ func TestListenProvider(t *testing.T) {
 func TestListenConfiguration(t *testing.T) {
 	provider := &MockProvider{}
 	builder := &MockBuilder{
-		mux:      &sync.Mutex{},
+		mux:      &sync.RWMutex{},
 		sessions: make(map[string]*MockSession),
 	}
 	manager := NewManager(builder, provider)
@@ -201,7 +201,7 @@ func TestListenConfiguration(t *testing.T) {
 func TestExecuteCommand(t *testing.T) {
 	provider := &MockProvider{}
 	builder := &MockBuilder{
-		mux:      &sync.Mutex{},
+		mux:      &sync.RWMutex{},
 		sessions: make(map[string]*MockSession),
 	}
 	manager := NewManager(builder, provider)
@@ -220,7 +220,7 @@ func TestExecuteCommand(t *testing.T) {
 func TestRunSession(t *testing.T) {
 	provider := &MockProvider{}
 	builder := &MockBuilder{
-		mux:      &sync.Mutex{},
+		mux:      &sync.RWMutex{},
 		sessions: make(map[string]*MockSession),
 	}
 	manager := NewManager(builder, provider)

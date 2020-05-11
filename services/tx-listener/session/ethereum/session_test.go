@@ -651,7 +651,7 @@ func TestRun(t *testing.T) {
 
 	select {
 	case err := <-errChan:
-		assert.NoError(t, err, "Session should not have error")
+		assert.Equal(t, context.Canceled, err)
 	case <-time.After(time.Second):
 		t.Errorf("TestRun: session should have completed")
 	}

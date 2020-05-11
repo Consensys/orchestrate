@@ -62,11 +62,15 @@ func (s *Session) Run(ctx context.Context) error {
 	err := backoff.RetryNotify(
 		func() error {
 			err := s.run(ctx)
-			if err == context.DeadlineExceeded || err == context.Canceled {
+			if err == context.DeadlineExceeded || err == context.Canceled || ctx.Err() != nil {
+				if err == nil {
+					err = ctx.Err()
+				}
+
 				log.FromContext(ctx).
 					WithError(err).
 					Info("exiting listener session...")
-				return backoff.Permanent(ctx.Err())
+				return backoff.Permanent(err)
 			}
 
 			return err

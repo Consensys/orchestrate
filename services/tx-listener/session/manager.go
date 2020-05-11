@@ -19,7 +19,7 @@ type cancelableSession struct {
 
 type Manager struct {
 	// Protect sessions mapping
-	mux      *sync.Mutex
+	mux      *sync.RWMutex
 	sessions map[string]*cancelableSession
 
 	// Wait Group to keep track of running sessions
@@ -42,7 +42,7 @@ type Manager struct {
 
 func NewManager(sessionBuilder Builder, prvdr provider.Provider) *Manager {
 	return &Manager{
-		mux:                  &sync.Mutex{},
+		mux:                  &sync.RWMutex{},
 		sessions:             make(map[string]*cancelableSession),
 		wg:                   &sync.WaitGroup{},
 		currentConfiguration: &dynamic.Configuration{},
@@ -181,19 +181,19 @@ func (m *Manager) stopSession(chain *dynamic.Chain) {
 
 func (m *Manager) addSession(key string, sess *cancelableSession) {
 	m.mux.Lock()
+	defer m.mux.Unlock()
 	m.sessions[key] = sess
-	m.mux.Unlock()
 }
 
 func (m *Manager) removeSession(key string) {
 	m.mux.Lock()
+	defer m.mux.Unlock()
 	delete(m.sessions, key)
-	m.mux.Unlock()
 }
 
 func (m *Manager) getSession(key string) (sess *cancelableSession, ok bool) {
-	m.mux.Lock()
+	m.mux.RLock()
+	defer m.mux.RUnlock()
 	sess, ok = m.sessions[key]
-	m.mux.Unlock()
 	return
 }
