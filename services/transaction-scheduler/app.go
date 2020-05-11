@@ -25,8 +25,7 @@ func New(
 	txCrafterTopic string,
 ) (*app.App, error) {
 	// Create Data agents
-	storeBuilder := store.NewBuilder(pgmngr)
-	dataAgents, err := storeBuilder.Build(context.Background(), cfg.Store)
+	db, err := store.Build(context.Background(), cfg.Store, pgmngr)
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +33,7 @@ func New(
 	// Option for transaction handler
 	txSchedulerHandlerOpt := app.HandlerOpt(
 		reflect.TypeOf(&dynamic.Transactions{}),
-		controllers.NewBuilder(usecases.NewUseCases(dataAgents, chainRegistryClient, syncProducer, txCrafterTopic)),
+		controllers.NewBuilder(usecases.NewUseCases(db, chainRegistryClient, syncProducer, txCrafterTopic)),
 	)
 
 	// Create app

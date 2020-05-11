@@ -15,6 +15,49 @@
         "version": "2.0"
     },
     "paths": {
+        "/schedules": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Creates a new schedule",
+                "responses": {
+                    "200": {},
+                    "400": {},
+                    "422": {},
+                    "500": {}
+                }
+            }
+        },
+        "/schedules/{uuid}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Creates a new schedule",
+                "responses": {
+                    "200": {},
+                    "404": {},
+                    "500": {}
+                }
+            }
+        },
         "/transactions/send": {
             "post": {
                 "security": [

@@ -8,11 +8,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
-type DB interface {
-	ModelContext(ctx context.Context, model ...interface{}) *orm.Query
-}
-
-func Insert(ctx context.Context, db DB, models ...interface{}) error {
+func Insert(ctx context.Context, db orm.DB, models ...interface{}) error {
 	_, err := db.ModelContext(ctx, models...).Insert()
 	if err != nil {
 		pgErr, ok := err.(pg.Error)

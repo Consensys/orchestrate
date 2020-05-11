@@ -5,9 +5,11 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/interfaces"
+
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/utils"
 )
 
@@ -17,16 +19,18 @@ const txValidatorComponent = "transaction-validator"
 
 type TransactionValidator interface {
 	ValidateRequestHash(ctx context.Context, params interface{}, idempotencyKey string) (string, error)
+	ValidateChainExists(ctx context.Context, chainUUID string) error
 }
 
 // transactionValidator is a validator for transaction requests (business logic)
 type transactionValidator struct {
-	txRequestDA store.TransactionRequestAgent
+	db                  interfaces.DB
+	chainRegistryClient client.ChainRegistryClient
 }
 
 // NewTransactionValidator creates a new TransactionValidator
-func NewTransactionValidator(txRequestDA store.TransactionRequestAgent) TransactionValidator {
-	return &transactionValidator{txRequestDA: txRequestDA}
+func NewTransactionValidator(db interfaces.DB, chainRegistryClient client.ChainRegistryClient) TransactionValidator {
+	return &transactionValidator{db: db, chainRegistryClient: chainRegistryClient}
 }
 
 func (txValidator *transactionValidator) ValidateRequestHash(ctx context.Context, params interface{}, idempotencyKey string) (string, error) {
@@ -40,7 +44,7 @@ func (txValidator *transactionValidator) ValidateRequestHash(ctx context.Context
 	hash := md5.Sum([]byte(jsonParams))
 	requestHash := hex.EncodeToString(hash[:])
 
-	txRequestToCompare, err := txValidator.txRequestDA.FindOneByIdempotencyKey(ctx, idempotencyKey)
+	txRequestToCompare, err := txValidator.db.TransactionRequest().FindOneByIdempotencyKey(ctx, idempotencyKey)
 	if err != nil && !errors.IsNotFoundError(err) {
 		return "", errors.FromError(err).ExtendComponent(txValidatorComponent)
 	}
@@ -52,4 +56,16 @@ func (txValidator *transactionValidator) ValidateRequestHash(ctx context.Context
 	}
 
 	return requestHash, nil
+}
+
+func (txValidator *transactionValidator) ValidateChainExists(ctx context.Context, chainUUID string) error {
+	// Validate that the chainUUID exists
+	_, err := txValidator.chainRegistryClient.GetChainByUUID(ctx, chainUUID)
+	if err != nil {
+		errMessage := "failed to get chain"
+		log.WithError(err).WithField("chain_uuid", chainUUID).Error(errMessage)
+		return errors.InvalidParameterError(errMessage)
+	}
+
+	return nil
 }

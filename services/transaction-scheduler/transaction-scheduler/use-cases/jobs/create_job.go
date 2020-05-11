@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/interfaces"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
 )
@@ -22,12 +22,12 @@ type CreateJobUseCase interface {
 
 // createJobUseCase is a use case to create a new transaction job
 type createJobUseCase struct {
-	jobDataAgent store.JobAgent
+	db interfaces.DB
 }
 
 // NewCreateJobUseCase creates a new CreateJobUseCase
-func NewCreateJobUseCase(jobDataAgent store.JobAgent) CreateJobUseCase {
-	return &createJobUseCase{jobDataAgent: jobDataAgent}
+func NewCreateJobUseCase(db interfaces.DB) CreateJobUseCase {
+	return &createJobUseCase{db: db}
 }
 
 // Execute validates and creates a new transaction job
@@ -39,6 +39,26 @@ func (uc *createJobUseCase) Execute(ctx context.Context, jobRequest *types.JobRe
 		errMessage := "failed to validate job request"
 		log.WithError(err).Error(errMessage)
 		return nil, errors.InvalidParameterError(errMessage).ExtendComponent(createJobComponent)
+	}
+
+	job, err := uc.saveJob(ctx, jobRequest)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
+	}
+
+	log.WithContext(ctx).WithField("job_uuid", job.UUID).Info("job created successfully")
+	return &types.JobResponse{
+		UUID:        job.UUID,
+		Transaction: jobRequest.Transaction,
+		Status:      job.GetStatus(),
+		CreatedAt:   job.CreatedAt,
+	}, nil
+}
+
+func (uc *createJobUseCase) saveJob(ctx context.Context, jobRequest *types.JobRequest) (*models.Job, error) {
+	dbtx, err := uc.db.Begin()
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
 	}
 
 	job := &models.Job{
@@ -59,21 +79,28 @@ func (uc *createJobUseCase) Execute(ctx context.Context, jobRequest *types.JobRe
 			PrivacyGroupID: jobRequest.Transaction.PrivacyGroupID,
 			Raw:            jobRequest.Transaction.Raw,
 		},
-		Logs: []*models.Log{{
-			Status:  types.LogStatusCreated,
-			Message: "Job created",
-		}},
 	}
-	err = uc.jobDataAgent.Insert(ctx, job)
+	err = dbtx.Job().Insert(ctx, job)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
 	}
 
-	log.WithContext(ctx).WithField("job_uuid", job.UUID).Info("job created successfully")
-	return &types.JobResponse{
-		UUID:        job.UUID,
-		Transaction: jobRequest.Transaction,
-		Status:      job.GetStatus(),
-		CreatedAt:   job.CreatedAt,
-	}, nil
+	logModel := &models.Log{
+		JobID:   job.ID,
+		Status:  types.JobStatusCreated,
+		Message: "Job created",
+	}
+
+	err = dbtx.Log().Insert(ctx, logModel)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
+	}
+
+	err = dbtx.Commit()
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
+	}
+
+	job.Logs = []*models.Log{logModel}
+	return job, nil
 }

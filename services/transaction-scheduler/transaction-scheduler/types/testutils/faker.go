@@ -9,24 +9,32 @@ func FakeTransactionRequest() *types.TransactionRequest {
 	return &types.TransactionRequest{
 		BaseTransactionRequest: types.BaseTransactionRequest{
 			IdempotencyKey: uuid.NewV4().String(),
-			ChainID:        uuid.NewV4().String(),
+			ChainUUID:      uuid.NewV4().String(),
 		},
 		Params: types.TransactionParams{
 			From:            "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
-			MethodSignature: "constructor()",
+			MethodSignature: "transfer()",
 			To:              "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
 		},
 	}
 }
 
+func FakeTransactionResponse() *types.TransactionResponse {
+	return &types.TransactionResponse{
+		IdempotencyKey: uuid.NewV4().String(),
+		Schedule:       FakeScheduleResponse(),
+	}
+}
+
 func FakeScheduleRequest() *types.ScheduleRequest {
-	return &types.ScheduleRequest{ChainID: uuid.NewV4().String()}
+	return &types.ScheduleRequest{ChainUUID: uuid.NewV4().String()}
 }
 
 func FakeScheduleResponse() *types.ScheduleResponse {
 	return &types.ScheduleResponse{
-		UUID:    uuid.NewV4().String(),
-		ChainID: uuid.NewV4().String(),
+		UUID:      uuid.NewV4().String(),
+		ChainUUID: uuid.NewV4().String(),
+		Jobs:      []*types.JobResponse{FakeJobResponse()},
 	}
 }
 
@@ -43,7 +51,7 @@ func FakeJobResponse() *types.JobResponse {
 	return &types.JobResponse{
 		UUID:        uuid.NewV4().String(),
 		Transaction: *FakeETHTransaction(),
-		Status:      types.LogStatusCreated,
+		Status:      types.JobStatusCreated,
 	}
 }
 

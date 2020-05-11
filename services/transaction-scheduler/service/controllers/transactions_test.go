@@ -11,7 +11,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/transactions/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/utils"
@@ -22,13 +21,12 @@ import (
 	"testing"
 )
 
-const tenantId = "tenantId"
-
 type transactionsControllerTestSuite struct {
 	suite.Suite
 	controller             *TransactionsController
 	sendTransactionUseCase *mocks.MockSendTxUseCase
 	ctx                    context.Context
+	tenantID               string
 }
 
 func TestTransactionsController(t *testing.T) {
@@ -41,7 +39,8 @@ func (s *transactionsControllerTestSuite) SetupTest() {
 	defer ctrl.Finish()
 
 	s.sendTransactionUseCase = mocks.NewMockSendTxUseCase(ctrl)
-	s.ctx = context.WithValue(context.Background(), multitenancy.TenantIDKey, tenantId)
+	s.tenantID = "tenantId"
+	s.ctx = context.WithValue(context.Background(), multitenancy.TenantIDKey, s.tenantID)
 
 	s.controller = NewTransactionsController(s.sendTransactionUseCase)
 }
@@ -53,12 +52,9 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_Send() {
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodPost, "/transactions/send", bytes.NewReader(requestBytes)).WithContext(s.ctx)
-		txResponse := &types.TransactionResponse{
-			IdempotencyKey: txRequest.IdempotencyKey,
-			Schedule:       types.ScheduleResponse{},
-		}
+		txResponse := testutils.FakeTransactionResponse()
 
-		s.sendTransactionUseCase.EXPECT().Execute(s.ctx, txRequest, tenantId).Return(txResponse, nil).Times(1)
+		s.sendTransactionUseCase.EXPECT().Execute(s.ctx, txRequest, s.tenantID).Return(txResponse, nil).Times(1)
 
 		s.controller.Send(rw, httpRequest)
 
@@ -80,12 +76,12 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_Send() {
 	})
 
 	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
-	s.T().Run("should fail with not found if use case fails with NotFoundError", func(t *testing.T) {
+	s.T().Run("should fail with 422 if use case fails with InvalidParameterError", func(t *testing.T) {
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodPost, "/transactions/send", bytes.NewReader(requestBytes)).WithContext(s.ctx)
-		s.sendTransactionUseCase.EXPECT().Execute(s.ctx, txRequest, tenantId).Return(nil, errors.NotFoundError("error")).Times(1)
+		s.sendTransactionUseCase.EXPECT().Execute(s.ctx, txRequest, s.tenantID).Return(nil, errors.InvalidParameterError("error")).Times(1)
 
 		s.controller.Send(rw, httpRequest)
-		assert.Equal(t, http.StatusNotFound, rw.Code)
+		assert.Equal(t, http.StatusUnprocessableEntity, rw.Code)
 	})
 }

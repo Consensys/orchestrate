@@ -7,6 +7,8 @@ import (
 	"regexp"
 	"time"
 
+	postgresDocker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/container/postgres"
+
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
@@ -29,7 +31,7 @@ type IntegrationEnvironment struct {
 func NewIntegrationEnvironment() *IntegrationEnvironment {
 	composition := &config.Composition{
 		Containers: map[string]*config.Container{
-			postgresContainerID: {Postgres: (&config.Postgres{}).SetDefault()},
+			postgresContainerID: {Postgres: (&postgresDocker.Config{}).SetDefault()},
 		},
 	}
 
@@ -52,7 +54,7 @@ func NewIntegrationEnvironment() *IntegrationEnvironment {
 
 func (env *IntegrationEnvironment) Start() {
 	// Start postgres database
-	err := env.client.Up(context.Background(), postgresContainerID)
+	err := env.client.Up(context.Background(), postgresContainerID, "")
 	if err != nil {
 		log.WithoutContext().WithError(err).Fatalf("could not up postgres")
 	}

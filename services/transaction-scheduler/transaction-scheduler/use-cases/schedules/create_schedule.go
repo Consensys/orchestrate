@@ -3,14 +3,15 @@ package schedules
 import (
 	"context"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/interfaces"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/validators"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
 )
 
@@ -24,15 +25,15 @@ type CreateScheduleUseCase interface {
 
 // createScheduleUseCase is a use case to create a new transaction schedule
 type createScheduleUseCase struct {
-	chainRegistryClient client.ChainRegistryClient
-	scheduleDataAgent   store.ScheduleAgent
+	validator validators.TransactionValidator
+	db        interfaces.DB
 }
 
 // NewCreateScheduleUseCase creates a new CreateScheduleUseCase
-func NewCreateScheduleUseCase(chainRegistryClient client.ChainRegistryClient, scheduleDataAgent store.ScheduleAgent) CreateScheduleUseCase {
+func NewCreateScheduleUseCase(validator validators.TransactionValidator, db interfaces.DB) CreateScheduleUseCase {
 	return &createScheduleUseCase{
-		chainRegistryClient: chainRegistryClient,
-		scheduleDataAgent:   scheduleDataAgent,
+		validator: validator,
+		db:        db,
 	}
 }
 
@@ -51,17 +52,16 @@ func (uc *createScheduleUseCase) Execute(
 		return nil, errors.InvalidParameterError(errMessage).ExtendComponent(createScheduleComponent)
 	}
 
-	// Validate that the chainUUID exists
-	_, err = uc.chainRegistryClient.GetChainByUUID(ctx, scheduleRequest.ChainID)
+	err = uc.validator.ValidateChainExists(ctx, scheduleRequest.ChainUUID)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createScheduleComponent)
 	}
 
 	schedule := &models.Schedule{
-		ChainID:  scheduleRequest.ChainID,
-		TenantID: tenantID,
+		ChainUUID: scheduleRequest.ChainUUID,
+		TenantID:  tenantID,
 	}
-	err = uc.scheduleDataAgent.Insert(ctx, schedule)
+	err = uc.db.Schedule().Insert(ctx, schedule)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createScheduleComponent)
 	}
@@ -69,7 +69,7 @@ func (uc *createScheduleUseCase) Execute(
 	log.WithContext(ctx).WithField("schedule_uuid", schedule.UUID).Info("schedule created successfully")
 	return &types.ScheduleResponse{
 		UUID:      schedule.UUID,
-		ChainID:   schedule.ChainID,
+		ChainUUID: schedule.ChainUUID,
 		CreatedAt: schedule.CreatedAt,
 	}, nil
 }

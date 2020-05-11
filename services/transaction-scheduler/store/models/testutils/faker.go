@@ -8,23 +8,27 @@ import (
 
 func FakeSchedule() *models.Schedule {
 	return &models.Schedule{
-		TenantID: "tenantID",
-		ChainID:  uuid.NewV4().String(),
+		TenantID:  "tenantID",
+		ChainUUID: uuid.NewV4().String(),
 		Jobs: []*models.Job{{
 			UUID:        uuid.NewV4().String(),
 			Type:        types.JobConstantinopleTransaction,
 			Transaction: FakeTransaction(),
-			Logs:        []*models.Log{{Status: types.LogStatusCreated, Message: "created message"}},
+			Logs:        []*models.Log{{Status: types.JobStatusCreated, Message: "created message"}},
 		}},
 	}
 }
 
-func FakeTxRequest() *models.TransactionRequest {
+func FakeTxRequest(scheduleID int) *models.TransactionRequest {
+	fakeSchedule := FakeSchedule()
+	fakeSchedule.ID = scheduleID
+
 	return &models.TransactionRequest{
 		IdempotencyKey: uuid.NewV4().String(),
 		RequestHash:    "requestHash",
 		Params:         "{\"field0\": \"field0Value\"}",
-		Schedule:       FakeSchedule(),
+		Schedule:       fakeSchedule,
+		ScheduleID:     scheduleID,
 	}
 }
 
@@ -40,14 +44,16 @@ func FakeJob(scheduleID int) *models.Job {
 		Type:        types.JobConstantinopleTransaction,
 		ScheduleID:  scheduleID,
 		Transaction: FakeTransaction(),
-		Logs:        []*models.Log{{Status: types.LogStatusCreated, Message: "created message"}},
+		Logs: []*models.Log{
+			{UUID: uuid.NewV4().String(), Status: types.JobStatusCreated, Message: "created message"},
+		},
 	}
 }
 
 func FakeLog(jobID int) *models.Log {
 	return &models.Log{
 		UUID:   uuid.NewV4().String(),
-		Status: types.LogStatusCreated,
+		Status: types.JobStatusCreated,
 		JobID:  jobID,
 	}
 }

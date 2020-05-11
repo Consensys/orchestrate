@@ -3,7 +3,9 @@ package dataagents
 import (
 	"context"
 
+	"github.com/go-pg/pg/v9/orm"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 
 	log "github.com/sirupsen/logrus"
 
@@ -17,53 +19,42 @@ const jobDAComponent = "data-agents.job"
 
 // PGJob is a job data agent for PostgreSQL
 type PGJob struct {
-	db *pg.DB
+	db orm.DB
 }
 
 // NewPGJob creates a new pgJob
-func NewPGJob(db *pg.DB) *PGJob {
+func NewPGJob(db orm.DB) *PGJob {
 	return &PGJob{db: db}
 }
 
 // Insert Inserts a new job in DB
 func (agent *PGJob) Insert(ctx context.Context, job *models.Job) error {
-	tx, err := agent.db.Begin()
-	if err != nil {
-		errMessage := "failed to create DB transaction for job"
-		log.WithError(err).Error(errMessage)
-		return errors.PostgresConnectionError(errMessage).ExtendComponent(jobDAComponent)
-	}
-
 	transaction := job.Transaction
-	transaction.UUID = uuid.NewV4().String()
-	err = postgres.Insert(ctx, tx, transaction)
+	job.Transaction.UUID = uuid.NewV4().String()
+	err := postgres.Insert(ctx, agent.db, transaction)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(jobDAComponent)
 	}
 
 	job.TransactionID = transaction.ID
 	job.UUID = uuid.NewV4().String()
-	err = postgres.Insert(ctx, tx, job)
+	err = postgres.Insert(ctx, agent.db, job)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(jobDAComponent)
 	}
 
-	for _, logModel := range job.Logs {
-		logModel.UUID = uuid.NewV4().String()
-		logModel.JobID = job.ID
-		err = postgres.Insert(ctx, tx, logModel)
-		if err != nil {
-			return errors.FromError(err).ExtendComponent(jobDAComponent)
-		}
-	}
-
-	return tx.Commit()
+	return nil
 }
 
 // FindOneByUUID gets a job by UUID
-func (agent *PGJob) FindOneByUUID(ctx context.Context, jobUUID string) (*models.Job, error) {
+func (agent *PGJob) FindOneByUUID(ctx context.Context, jobUUID, tenantID string) (*models.Job, error) {
 	job := &models.Job{}
 	logger := log.WithField("job_uuid", jobUUID)
+
+	query := agent.db.ModelContext(ctx, job).Where("job.uuid = ?", jobUUID)
+	if tenantID != multitenancy.DefaultTenantIDName {
+		query.Where("tenant_id = ?", tenantID)
+	}
 
 	err := agent.db.ModelContext(ctx, job).
 		Where("job.uuid = ?", jobUUID).

@@ -4,7 +4,7 @@ import "time"
 
 type BaseTransactionRequest struct {
 	IdempotencyKey string            `json:"idempotencyKey" validate:"required"`
-	ChainID        string            `json:"chainID" validate:"required,uuid4"`
+	ChainUUID      string            `json:"chainUUID" validate:"required,uuid4"`
 	Labels         map[string]string `json:"labels,omitempty"`
 }
 
@@ -77,6 +77,6 @@ type PrivateTransactionParams struct {
 type TransactionResponse struct {
 	IdempotencyKey string                 `json:"idempotencyKey" validate:"required"`
 	Params         map[string]interface{} `json:"params"`
-	Schedule       ScheduleResponse       `json:"schedule"`
+	Schedule       *ScheduleResponse      `json:"schedule"`
 	CreatedAt      time.Time              `json:"createdAt"`
 }

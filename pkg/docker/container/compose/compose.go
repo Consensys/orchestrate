@@ -5,6 +5,9 @@ import (
 	"fmt"
 	goreflect "reflect"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/container/kafka"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/container/zookeeper"
+
 	dockercontainer "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/config"
@@ -21,7 +24,9 @@ func New() *Compose {
 		reflect: reflect.New(),
 	}
 
-	generator.reflect.AddGenerator(goreflect.TypeOf(&config.Postgres{}), &postgres.Postgres{})
+	generator.reflect.AddGenerator(goreflect.TypeOf(&postgres.Config{}), &postgres.Postgres{})
+	generator.reflect.AddGenerator(goreflect.TypeOf(&zookeeper.Config{}), &zookeeper.Zookeeper{})
+	generator.reflect.AddGenerator(goreflect.TypeOf(&kafka.Config{}), &kafka.Kafka{})
 
 	return generator
 }

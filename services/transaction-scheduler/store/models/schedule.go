@@ -8,7 +8,7 @@ type Schedule struct {
 	ID        int
 	UUID      string
 	TenantID  string
-	ChainID   string
+	ChainUUID string
 	Jobs      []*Job
 	CreatedAt time.Time `pg:"default:now()"`
 }

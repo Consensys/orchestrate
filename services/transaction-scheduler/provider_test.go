@@ -19,7 +19,7 @@ func TestNewInternalConfig(t *testing.T) {
 						EntryPoints: []string{"http"},
 						Service:     "transactions",
 						Priority:    math.MaxInt32,
-						Rule:        "PathPrefix(`/transactions`)",
+						Rule:        "PathPrefix(`/transactions`) || PathPrefix(`/schedules`)",
 						Middlewares: []string{"base@logger-base", "auth@multitenancy"},
 					},
 				},

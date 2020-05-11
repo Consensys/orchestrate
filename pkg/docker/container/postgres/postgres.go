@@ -7,13 +7,35 @@ import (
 	dockercontainer "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/go-connections/nat"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/config"
 )
 
+const DefaultPostgresImage = "postgres:10.12-alpine"
+
 type Postgres struct{}
+type Config struct {
+	Image    string
+	Port     string
+	Password string
+}
+
+func (p *Config) SetDefault() *Config {
+	if p.Image == "" {
+		p.Image = DefaultPostgresImage
+	}
+
+	if p.Port == "" {
+		p.Port = "5432"
+	}
+
+	if p.Password == "" {
+		p.Password = "postgres"
+	}
+
+	return p
+}
 
 func (g *Postgres) GenerateContainerConfig(ctx context.Context, configuration interface{}) (*dockercontainer.Config, *dockercontainer.HostConfig, *network.NetworkingConfig, error) {
-	cfg, ok := configuration.(*config.Postgres)
+	cfg, ok := configuration.(*Config)
 	if !ok {
 		return nil, nil, nil, fmt.Errorf("invalid configuration type (expected %T but got %T)", cfg, configuration)
 	}

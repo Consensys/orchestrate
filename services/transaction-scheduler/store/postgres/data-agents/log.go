@@ -3,9 +3,9 @@ package dataagents
 import (
 	"context"
 
+	"github.com/go-pg/pg/v9/orm"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 
-	"github.com/go-pg/pg/v9"
 	uuid "github.com/satori/go.uuid"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
@@ -15,11 +15,11 @@ const logDAComponent = "data-agents.log"
 
 // PGLog is a log data agent for PostgreSQL
 type PGLog struct {
-	db *pg.DB
+	db orm.DB
 }
 
 // NewPGLog creates a new PGLog
-func NewPGLog(db *pg.DB) *PGLog {
+func NewPGLog(db orm.DB) *PGLog {
 	return &PGLog{db: db}
 }
 

@@ -38,7 +38,7 @@ func Init(ctx context.Context) {
 			viper.GetString(sarama.TxCrafterViperKey),
 		)
 		if err != nil {
-			log.FromContext(ctx).WithError(err).Fatalf("Could not create envelope store application")
+			log.FromContext(ctx).WithError(err).Fatalf("Could not create transaction scheduler application")
 		}
 	})
 }

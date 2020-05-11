@@ -51,7 +51,8 @@ func (b *Builder) Build(ctx context.Context, _ string, configuration interface{}
 
 	router := mux.NewRouter()
 	NewTransactionsController(b.usecases.SendTransaction).Append(router)
-	// TODO: Add schedules and jobs
+	NewSchedulesController(b.usecases.CreateSchedule, b.usecases.GetSchedule).Append(router)
+	// TODO: Add jobs
 
 	return router, nil
 }

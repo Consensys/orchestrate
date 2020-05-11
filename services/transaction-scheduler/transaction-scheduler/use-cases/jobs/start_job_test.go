@@ -9,7 +9,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/interfaces/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
 	"testing"
 )
@@ -21,8 +21,14 @@ func TestStartJob_Execute(t *testing.T) {
 	mockJobDA := mocks.NewMockJobAgent(ctrl)
 	mockLogDA := mocks.NewMockLogAgent(ctrl)
 	mockKafkaProducer := mocks2.NewSyncProducer(t, nil)
+	tenantID := "tenantID"
+
+	mockDB := mocks.NewMockDB(ctrl)
+	mockDB.EXPECT().Job().Return(mockJobDA).AnyTimes()
+	mockDB.EXPECT().Log().Return(mockLogDA).AnyTimes()
+
 	txCrafterTopic := "tx-crafter-topic"
-	usecase := NewStartJobUseCase(mockJobDA, mockLogDA, mockKafkaProducer, txCrafterTopic)
+	usecase := NewStartJobUseCase(mockDB, mockKafkaProducer, txCrafterTopic)
 	ctx := context.Background()
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
@@ -32,11 +38,11 @@ func TestStartJob_Execute(t *testing.T) {
 		job.Transaction.Sender = "0xfrom"
 		job.Schedule = testutils.FakeSchedule()
 
-		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID).Return(job, nil)
+		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, tenantID).Return(job, nil)
 		mockKafkaProducer.ExpectSendMessageAndSucceed()
 		mockLogDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
 
-		err := usecase.Execute(ctx, job.UUID)
+		err := usecase.Execute(ctx, job.UUID, tenantID)
 
 		assert.Nil(t, err)
 	})
@@ -46,9 +52,9 @@ func TestStartJob_Execute(t *testing.T) {
 		job.UUID = "6380e2b6-b828-43ee-abdc-de0f8d57dc5f"
 		expectedErr := errors.NotFoundError("error")
 
-		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID).Return(nil, expectedErr)
+		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, tenantID).Return(nil, expectedErr)
 
-		err := usecase.Execute(ctx, job.UUID)
+		err := usecase.Execute(ctx, job.UUID, tenantID)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(startJobComponent), err)
 	})
 
@@ -58,10 +64,10 @@ func TestStartJob_Execute(t *testing.T) {
 		job.Transaction.Sender = "0xfrom"
 		job.Schedule = testutils.FakeSchedule()
 
-		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID).Return(job, nil)
+		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, tenantID).Return(job, nil)
 		mockKafkaProducer.ExpectSendMessageAndFail(fmt.Errorf("error"))
 
-		err := usecase.Execute(ctx, job.UUID)
+		err := usecase.Execute(ctx, job.UUID, tenantID)
 		assert.True(t, errors.IsKafkaConnectionError(err))
 	})
 
@@ -72,11 +78,11 @@ func TestStartJob_Execute(t *testing.T) {
 		job.Schedule = testutils.FakeSchedule()
 		expectedErr := errors.PostgresConnectionError("error")
 
-		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID).Return(job, nil)
+		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, tenantID).Return(job, nil)
 		mockKafkaProducer.ExpectSendMessageAndSucceed()
 		mockLogDA.EXPECT().Insert(ctx, gomock.Any()).Return(expectedErr)
 
-		err := usecase.Execute(ctx, job.UUID)
+		err := usecase.Execute(ctx, job.UUID, tenantID)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(startJobComponent), err)
 	})
 }

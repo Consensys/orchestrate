@@ -335,6 +335,11 @@ func InvalidFormatError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(InvalidFormat, format, a...)
 }
 
+// IsInvalidFormatError indicate whether an error is an invalid format error
+func IsInvalidFormatError(err error) bool {
+	return isErrorClass(FromError(err).GetCode(), InvalidFormat)
+}
+
 // InvalidParameterError is raised when a provided parameter invalid
 func InvalidParameterError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(InvalidParameter, format, a...)

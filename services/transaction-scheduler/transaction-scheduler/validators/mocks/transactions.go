@@ -47,3 +47,17 @@ func (mr *MockTransactionValidatorMockRecorder) ValidateRequestHash(ctx, params,
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateRequestHash", reflect.TypeOf((*MockTransactionValidator)(nil).ValidateRequestHash), ctx, params, idempotencyKey)
 }
+
+// ValidateChainExists mocks base method.
+func (m *MockTransactionValidator) ValidateChainExists(ctx context.Context, chainUUID string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ValidateChainExists", ctx, chainUUID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ValidateChainExists indicates an expected call of ValidateChainExists.
+func (mr *MockTransactionValidatorMockRecorder) ValidateChainExists(ctx, chainUUID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateChainExists", reflect.TypeOf((*MockTransactionValidator)(nil).ValidateChainExists), ctx, chainUUID)
+}

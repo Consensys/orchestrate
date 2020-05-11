@@ -4,12 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/interfaces"
+
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
 )
@@ -19,37 +20,34 @@ import (
 const startJobComponent = "use-cases.start-job"
 
 type StartJobUseCase interface {
-	Execute(ctx context.Context, jobUUID string) error
+	Execute(ctx context.Context, jobUUID, tenantID string) error
 }
 
 // startJobUseCase is a use case to start a transaction job
 type startJobUseCase struct {
-	jobDataAgent   store.JobAgent
-	logDataAgent   store.LogAgent
+	db             interfaces.DB
 	kafkaProducer  sarama.SyncProducer
 	txCrafterTopic string
 }
 
 // NewStartJobUseCase creates a new StartJobUseCase
 func NewStartJobUseCase(
-	jobDataAgent store.JobAgent,
-	logDataAgent store.LogAgent,
+	db interfaces.DB,
 	kafkaProducer sarama.SyncProducer,
 	txCrafterTopic string,
 ) StartJobUseCase {
 	return &startJobUseCase{
-		jobDataAgent:   jobDataAgent,
-		logDataAgent:   logDataAgent,
+		db:             db,
 		kafkaProducer:  kafkaProducer,
 		txCrafterTopic: txCrafterTopic,
 	}
 }
 
 // Execute validates and creates a new transaction job
-func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string) error {
+func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID, tenantID string) error {
 	log.WithContext(ctx).WithField("job_uuid", jobUUID).Debug("starting job")
 
-	job, err := uc.jobDataAgent.FindOneByUUID(ctx, jobUUID)
+	job, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, tenantID)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}
@@ -65,7 +63,7 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string) error {
 	txEnvelope := &tx.TxEnvelope{
 		Msg: &tx.TxEnvelope_TxRequest{TxRequest: &tx.TxRequest{
 			Headers: nil, // TODO: Add the JWT token here? https://pegasys1.atlassian.net/browse/PO-544
-			Chain:   job.Schedule.ChainID,
+			Chain:   job.Schedule.ChainUUID,
 			Method:  method,
 			Params: &tx.Params{
 				From:           job.Transaction.Sender,
@@ -88,9 +86,9 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string) error {
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}
 
-	err = uc.logDataAgent.Insert(ctx, &models.Log{
+	err = uc.db.Log().Insert(ctx, &models.Log{
 		JobID:   job.ID,
-		Status:  types.LogStatusStarted,
+		Status:  types.JobStatusStarted,
 		Message: fmt.Sprintf("message sent to partition %v, offset %v and topic %v", partition, offset, uc.txCrafterTopic),
 	})
 	if err != nil {

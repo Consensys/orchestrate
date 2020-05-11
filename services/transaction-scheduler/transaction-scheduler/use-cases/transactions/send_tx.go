@@ -3,9 +3,10 @@ package transactions
 import (
 	"context"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/interfaces"
+
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs"
@@ -23,17 +24,17 @@ type SendTxUseCase interface {
 
 // sendTxUsecase is a use case to create a new transaction request
 type sendTxUsecase struct {
-	validator          validators.TransactionValidator
-	txRequestDataAgent store.TransactionRequestAgent
-	startJobUsecase    jobs.StartJobUseCase
+	validator       validators.TransactionValidator
+	db              interfaces.DB
+	startJobUsecase jobs.StartJobUseCase
 }
 
 // NewSendTxUseCase creates a new SendTxUseCase
-func NewSendTxUseCase(validator validators.TransactionValidator, txRequestDataAgent store.TransactionRequestAgent, startJobUsecase jobs.StartJobUseCase) SendTxUseCase {
+func NewSendTxUseCase(validator validators.TransactionValidator, db interfaces.DB, startJobUsecase jobs.StartJobUseCase) SendTxUseCase {
 	return &sendTxUsecase{
-		validator:          validator,
-		txRequestDataAgent: txRequestDataAgent,
-		startJobUsecase:    startJobUsecase,
+		validator:       validator,
+		db:              db,
+		startJobUsecase: startJobUsecase,
 	}
 }
 
@@ -47,6 +48,10 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *types.Transacti
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
+	err = uc.validator.ValidateChainExists(ctx, txRequest.ChainUUID)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
+	}
 
 	// TODO: Craft "Data" field here with MethodSignature and Args
 	txData := ""
@@ -56,38 +61,69 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *types.Transacti
 	}
 
 	// Create model and insert in DB
+	dbtx, err := uc.db.Begin()
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
+	}
+
+	schedule := &models.Schedule{
+		TenantID:  tenantID,
+		ChainUUID: txRequest.ChainUUID,
+	}
+	err = dbtx.Schedule().Insert(ctx, schedule)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
+	}
+
+	job := &models.Job{
+		ScheduleID: schedule.ID,
+		Type:       types.JobConstantinopleTransaction,
+		Transaction: &models.Transaction{
+			Sender:    txRequest.Params.From,
+			Recipient: txRequest.Params.To,
+			Value:     txRequest.Params.Value,
+			GasPrice:  txRequest.Params.GasPrice,
+			GasLimit:  txRequest.Params.Gas,
+			Data:      txData,
+		},
+		Labels: txRequest.Labels,
+	}
+	err = dbtx.Job().Insert(ctx, job)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
+	}
+	schedule.Jobs = []*models.Job{job}
+
+	logModel := &models.Log{
+		JobID:   job.ID,
+		Status:  types.JobStatusCreated,
+		Message: "Job created for contract transaction request",
+	}
+	err = dbtx.Log().Insert(ctx, logModel)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
+	}
+	job.Logs = []*models.Log{logModel}
+
 	txRequestModel := &models.TransactionRequest{
 		IdempotencyKey: txRequest.IdempotencyKey,
-		Schedule: &models.Schedule{
-			TenantID: tenantID,
-			ChainID:  txRequest.ChainID,
-			Jobs: []*models.Job{{
-				Type: types.JobConstantinopleTransaction,
-				Transaction: &models.Transaction{
-					Sender:    txRequest.Params.To,
-					Recipient: txRequest.Params.From,
-					Value:     txRequest.Params.Value,
-					GasPrice:  txRequest.Params.GasPrice,
-					GasLimit:  txRequest.Params.Gas,
-					Data:      txData,
-				},
-				Logs: []*models.Log{{
-					Status:  types.LogStatusCreated,
-					Message: "Job created for contract transaction request",
-				}},
-				Labels: txRequest.Labels,
-			}},
-		},
-		RequestHash: requestHash,
-		Params:      jsonParams,
+		ScheduleID:     schedule.ID,
+		Schedule:       schedule,
+		RequestHash:    requestHash,
+		Params:         jsonParams,
 	}
-	err = uc.txRequestDataAgent.SelectOrInsert(ctx, txRequestModel)
+	err = dbtx.TransactionRequest().SelectOrInsert(ctx, txRequestModel)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
+	}
+
+	err = dbtx.Commit()
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
 
 	// Start first job of the schedule
-	err = uc.startJobUsecase.Execute(ctx, txRequestModel.Schedule.Jobs[0].UUID)
+	err = uc.startJobUsecase.Execute(ctx, txRequestModel.Schedule.Jobs[0].UUID, tenantID)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}

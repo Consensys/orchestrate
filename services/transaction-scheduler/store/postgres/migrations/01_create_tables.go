@@ -33,7 +33,7 @@ CREATE TABLE schedules (
     id SERIAL PRIMARY KEY,
     uuid UUID NOT NULL,
 	tenant_id VARCHAR(66) NOT NULL,
-	chain_id UUID NOT NULL,
+	chain_uuid UUID NOT NULL,
 	created_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL, 
 	UNIQUE(uuid)
 );

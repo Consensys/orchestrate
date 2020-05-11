@@ -62,7 +62,7 @@ func (s *logTestSuite) TestPGLog_Insert() {
 
 		assert.Nil(t, err)
 		assert.NotNil(t, log.UUID)
-		assert.Equal(t, 2, log.ID) // 2 because one is inserted when creating the job
+		assert.Equal(t, 1, log.ID) // 2 because one is inserted when creating the job
 	})
 
 	s.T().Run("should return PostgresConnectionError if insert fails", func(t *testing.T) {

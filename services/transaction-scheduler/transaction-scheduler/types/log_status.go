@@ -1,6 +1,6 @@
 package types
 
 const (
-	LogStatusCreated = "CREATED"
-	LogStatusStarted = "STARTED"
+	JobStatusCreated = "CREATED"
+	JobStatusStarted = "STARTED"
 )

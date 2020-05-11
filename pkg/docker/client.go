@@ -6,6 +6,8 @@ import (
 	"io"
 	"os"
 
+	"github.com/docker/docker/api/types/network"
+
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/docker/docker/api/types"
 	dockercontainer "github.com/docker/docker/api/types/container"
@@ -40,7 +42,7 @@ func NewClient(composition *config.Composition) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) Up(ctx context.Context, name string) error {
+func (c *Client) Up(ctx context.Context, name, networkID string) error {
 	logger := log.FromContext(ctx).WithField("container", name)
 
 	containerCfg, hostCfg, networkCfg, err := c.generator.GenerateContainerConfig(ctx, c.composition.Containers[name])
@@ -60,7 +62,7 @@ func (c *Client) Up(ctx context.Context, name string) error {
 	}
 	_ = reader.Close()
 
-	logger.WithField("image", containerCfg.Image).Infof("pulled imaged")
+	logger.WithField("image", containerCfg.Image).Info("pulled imaged")
 
 	// Create Docker container
 	containerBody, err := c.cli.ContainerCreate(ctx, containerCfg, hostCfg, networkCfg, name)
@@ -69,12 +71,25 @@ func (c *Client) Up(ctx context.Context, name string) error {
 	}
 	c.containers[name] = containerBody
 
+	// Connect to network and assign the alias as the name of the container
+	if networkID != "" {
+		err = c.cli.NetworkConnect(ctx, networkID, containerBody.ID, &network.EndpointSettings{
+			Aliases:   []string{name},
+			NetworkID: networkID,
+		})
+		if err != nil {
+			return err
+		}
+
+		logger.WithField("network_id", networkID).Infof("container %v connected to network", name)
+	}
+
 	// Start docker container
 	if err := c.cli.ContainerStart(ctx, containerBody.ID, types.ContainerStartOptions{}); err != nil {
 		return err
 	}
 
-	logger.WithField("id", containerBody.ID).Infof("started container")
+	logger.WithField("id", containerBody.ID).Info("started container")
 
 	return nil
 }
@@ -115,6 +130,32 @@ func (c *Client) Down(ctx context.Context, name string) error {
 	}
 
 	logger.WithField("id", containerBody.ID).Infof("removed container")
+
+	return nil
+}
+
+func (c *Client) CreateNetwork(ctx context.Context, name string) (string, error) {
+	logger := log.FromContext(ctx).WithField("network_name", name)
+
+	createResponse, err := c.cli.NetworkCreate(ctx, name, types.NetworkCreate{Driver: "bridge"})
+	if err != nil {
+		return "", err
+	}
+
+	logger.WithField("id", createResponse.ID).Infof("created network")
+
+	return createResponse.ID, nil
+}
+
+func (c *Client) RemoveNetwork(ctx context.Context, networkID string) error {
+	logger := log.FromContext(ctx).WithField("network_id", networkID)
+
+	err := c.cli.NetworkRemove(ctx, networkID)
+	if err != nil {
+		return err
+	}
+
+	logger.WithField("network_id", networkID).Infof("removed network")
 
 	return nil
 }

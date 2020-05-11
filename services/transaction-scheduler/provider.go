@@ -28,18 +28,18 @@ func NewInternalProvider() provider.Provider {
 func NewInternalConfig() *dynamic.Configuration {
 	cfg := dynamic.NewConfig()
 
-	// Router to Chains API
+	// Router to Transactions API
 	cfg.HTTP.Routers["transactions"] = &dynamic.Router{
 		Router: &traefikdynamic.Router{
 			EntryPoints: []string{http.DefaultHTTPEntryPoint},
 			Service:     "transactions",
 			Priority:    math.MaxInt32,
-			Rule:        "PathPrefix(`/transactions`)",
+			Rule:        "PathPrefix(`/transactions`) || PathPrefix(`/schedules`)",
 			Middlewares: []string{"base@logger-base", "auth@multitenancy"},
 		},
 	}
 
-	// Chains API
+	// Transactions API
 	cfg.HTTP.Services["transactions"] = &dynamic.Service{
 		Transactions: &dynamic.Transactions{},
 	}

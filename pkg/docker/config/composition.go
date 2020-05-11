@@ -1,6 +1,9 @@
 package config
 
 import (
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/container/kafka"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/container/postgres"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/container/zookeeper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
@@ -9,33 +12,11 @@ type Composition struct {
 }
 
 type Container struct {
-	Postgres *Postgres
+	Postgres  *postgres.Config
+	Zookeeper *zookeeper.Config
+	Kafka     *kafka.Config
 }
 
 func (c *Container) Field() (interface{}, error) {
 	return utils.ExtractField(c)
-}
-
-const DefaultPostgresImage = "postgres:10.12-alpine"
-
-type Postgres struct {
-	Image    string
-	Port     string
-	Password string
-}
-
-func (p *Postgres) SetDefault() *Postgres {
-	if p.Image == "" {
-		p.Image = DefaultPostgresImage
-	}
-
-	if p.Port == "" {
-		p.Port = "5432"
-	}
-
-	if p.Password == "" {
-		p.Password = "postgres"
-	}
-
-	return p
 }

@@ -107,19 +107,16 @@ func (c *HTTPClient) GetChainByUUID(ctx context.Context, chainUUID string) (*mod
 
 		chain := &models.Chain{}
 		if err = json.NewDecoder(response.Body).Decode(chain); err != nil {
-			return nil, errors.FromError(err).ExtendComponent(component)
+			return nil, errors.ServiceConnectionError(failedToFetchErrorMessage)
 		}
 
 		return chain, nil
 	case http.StatusNotFound:
-		log.WithContext(ctx).WithError(err).WithField("chain_id", chainUUID).Error(notFoundErrorMessage)
-		return nil, errors.NotFoundError(notFoundErrorMessage)
+		return nil, errors.NotFoundError(notFoundErrorMessage).ExtendComponent(component)
 	case http.StatusBadRequest:
-		log.WithContext(ctx).WithError(err).WithField("chain_id", chainUUID).Error(invalidRequestErrorMessage)
-		return nil, errors.InvalidParameterError(invalidRequestErrorMessage)
+		return nil, errors.InvalidFormatError(invalidRequestErrorMessage).ExtendComponent(component)
 	default:
-		log.WithContext(ctx).WithError(err).WithField("chain_id", chainUUID).Error(failedToFetchErrorMessage)
-		return nil, errors.ServiceConnectionError(failedToFetchErrorMessage)
+		return nil, errors.ServiceConnectionError(failedToFetchErrorMessage).ExtendComponent(component)
 	}
 }
 

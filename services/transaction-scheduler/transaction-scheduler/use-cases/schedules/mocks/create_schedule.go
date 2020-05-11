@@ -35,13 +35,12 @@ func (m *MockCreateScheduleUseCase) EXPECT() *MockCreateScheduleUseCaseMockRecor
 }
 
 // Execute mocks base method.
-func (m *MockCreateScheduleUseCase) Execute(ctx context.Context, scheduleRequest *types.ScheduleRequest, tenantID string) (*types.ScheduleResponse, int, error) {
+func (m *MockCreateScheduleUseCase) Execute(ctx context.Context, scheduleRequest *types.ScheduleRequest, tenantID string) (*types.ScheduleResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, scheduleRequest, tenantID)
 	ret0, _ := ret[0].(*types.ScheduleResponse)
-	ret1, _ := ret[1].(int)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute.
