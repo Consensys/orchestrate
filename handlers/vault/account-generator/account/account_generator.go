@@ -3,7 +3,7 @@ package account
 import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/keystore"
 )
 
 // Generator creates and handler responsible to generate accounts
@@ -20,7 +20,7 @@ func Generator(s keystore.KeyStore) engine.HandlerFunc {
 			txctx.Logger.WithError(e).Errorf("keygen: could not generate account")
 		}
 
-		_ = txctx.Envelope.SetFrom(*add)
+		_ = txctx.Envelope.SetFrom(add)
 
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"keygen":  "completed a key gen request",

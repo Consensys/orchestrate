@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/onetimekey"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore"
@@ -27,12 +28,12 @@ func Init(ctx context.Context) {
 		utils.InParallel(
 			// Initialize keystore
 			func() { keystore.Init(ctx) },
+			// Initialize OneTimeKey Signer
+			func() { onetimekey.Init(ctx) },
 		)
 
 		// Create Handler
-		handler = Signer(
-			keystore.GlobalKeyStore(),
-		)
+		handler = Signer(keystore.GlobalKeyStore(), onetimekey.GlobalKeyStore())
 
 		log.Infof("eea signer: handler ready")
 	})
@@ -43,7 +44,7 @@ func SetGlobalHandler(h engine.HandlerFunc) {
 	handler = h
 }
 
-// GlobalHandler returns global Gas Estimator handler
+// GlobalKeyStore returns global Gas Estimator handler
 func GlobalHandler() engine.HandlerFunc {
 	return handler
 }

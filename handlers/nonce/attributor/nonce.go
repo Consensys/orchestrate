@@ -15,6 +15,19 @@ import (
 // Handler creates and return an handler for nonce
 func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
+		if txctx.Envelope.IsOneTimeKeySignature() {
+			txctx.Logger = txctx.Logger.WithFields(log.Fields{
+				"id":           txctx.Envelope.GetID(),
+				"chainID":      txctx.Envelope.GetChainIDString(),
+				"tx.nonce":     0,
+				"one-time-key": true,
+			})
+
+			// Set nonce
+			_ = txctx.Envelope.SetNonce(0)
+			return
+		}
+
 		// Retrieve chainID and sender address
 		sender, err := txctx.Envelope.GetFromAddress()
 		if err != nil {

@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/ethereum/go-ethereum"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
@@ -14,7 +15,12 @@ import (
 // EnvelopeToCallMsg enrich an ethereum.CallMsg with Envelope information
 func EnvelopeToCallMsg(b *tx.Envelope, call *ethereum.CallMsg) {
 	call.To = b.GetTo()
-	call.From = b.MustGetFromAddress()
+	if b.IsOneTimeKeySignature() {
+		// Generate a dummy eth address to enforce estimation
+		call.From = ethcommon.HexToAddress("0x1")
+	} else {
+		call.From = b.MustGetFromAddress()
+	}
 	call.Value = b.GetValue()
 	call.Data = b.MustGetDataBytes()
 }

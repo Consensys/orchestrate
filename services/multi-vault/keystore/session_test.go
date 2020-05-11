@@ -1,6 +1,6 @@
 // +build unit
 
-package base
+package keystore
 
 import (
 	"context"
@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/keystore"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/memory"
 )
@@ -67,7 +68,7 @@ func makeSignMsgInput(i int) (a ethcommon.Address, msg string) {
 // BaseKeyStoreTestSuite is a test suit for TraceStore
 type BaseKeyStoreTestSuite struct {
 	suite.Suite
-	Store *KeyStore
+	Store keystore.KeyStore
 }
 
 func (s *BaseKeyStoreTestSuite) SetupTest() {

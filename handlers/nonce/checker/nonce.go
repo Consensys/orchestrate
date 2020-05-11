@@ -48,6 +48,14 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 			return
 		}
 
+		if txctx.Envelope.IsOneTimeKeySignature() {
+			// If transaction has been generated externally we skip nonce check
+			txctx.Logger.WithFields(log.Fields{
+				"id": txctx.Envelope.GetID(),
+			}).Debugf("nonce: skip check for one-time-key signing")
+			return
+		}
+
 		// Retrieve chainID and sender address
 		sender, err := txctx.Envelope.GetFromAddress()
 		if err != nil {

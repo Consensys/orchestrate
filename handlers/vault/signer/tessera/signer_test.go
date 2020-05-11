@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore/mock"
+	ksmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/keystore/mock"
 )
 
 type output struct {
@@ -66,7 +66,7 @@ func TestSignTx(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	k := mock.NewMockKeyStore(mockCtrl)
+	k := ksmock.NewMockKeyStore(mockCtrl)
 	k.EXPECT().
 		SignPrivateTesseraTx(gomock.Any(), gomock.Any(), addressNoError, gomock.Any()).
 		Return(sigNoError, &hashNoError, nil).

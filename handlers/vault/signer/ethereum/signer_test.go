@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/keystore/mock"
 )
 
 type output struct {

@@ -60,8 +60,8 @@ func (s *MockTxSigner) SignMsg(_ context.Context, _ ethcommon.Address, _ string)
 	return []byte{}, nil, fmt.Errorf("signMsg not implemented")
 }
 
-func (s *MockTxSigner) GenerateAccount(_ context.Context) (add *ethcommon.Address, err error) {
-	return nil, fmt.Errorf("signMsg not implemented")
+func (s *MockTxSigner) GenerateAccount(_ context.Context) (add ethcommon.Address, err error) {
+	return ethcommon.Address{}, fmt.Errorf("signMsg not implemented")
 }
 
 func (s *MockTxSigner) SignRawHash(_ ethcommon.Address, _ []byte) (rsv []byte, err error) {
@@ -147,9 +147,9 @@ func TestSigner(t *testing.T) {
 	s := &MockTxSigner{t: t}
 
 	signer := TxSigner(
-		eeaHandlers.Signer(s),
-		ethereumHandlers.Signer(s),
-		tesseraHandlers.Signer(s),
+		eeaHandlers.Signer(s, s),
+		ethereumHandlers.Signer(s, s),
+		tesseraHandlers.Signer(s, s),
 	)
 
 	rounds := 25

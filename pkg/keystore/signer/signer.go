@@ -1,4 +1,4 @@
-package generic
+package signer
 
 import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -6,15 +6,15 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/keystore"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore"
 )
 
 // TransactionSignerFunc is a generic function interface that support signature with EEA, Tessera, and Ethereum
 type TransactionSignerFunc func(keystore.KeyStore, *engine.TxContext, ethcommon.Address, *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error)
 
 // GenerateSignerHandler creates a signer handler
-func GenerateSignerHandler(signerFunc TransactionSignerFunc, backend keystore.KeyStore, successMsg, errorMsg string) engine.HandlerFunc {
+func GenerateSignerHandler(signerFunc TransactionSignerFunc, vks, onetime keystore.KeyStore, successMsg, errorMsg string) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"chainID": txctx.Envelope.GetChainIDString(),
@@ -34,7 +34,17 @@ func GenerateSignerHandler(signerFunc TransactionSignerFunc, backend keystore.Ke
 			return
 		}
 
-		from, err := txctx.Envelope.GetFromAddress()
+		var backend keystore.KeyStore
+		var from ethcommon.Address
+		if txctx.Envelope.IsOneTimeKeySignature() {
+			backend = onetime
+			from, err = onetime.GenerateAccount(txctx.Context())
+			_ = txctx.Envelope.SetFrom(from)
+		} else {
+			backend = vks
+			from, err = txctx.Envelope.GetFromAddress()
+		}
+
 		if err != nil {
 			txctx.Logger.WithError(err).Errorf(errorMsg)
 			_ = txctx.AbortWithError(err)

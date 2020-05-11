@@ -81,8 +81,17 @@ func (p *Parser) ParseTxRequest(scenario string, headers, row *gherkin.TableRow)
 			gherkinRequest[header] = strings.Split(value, ",")
 		case header == "method":
 			gherkinRequest[header] = tx.MethodMap[value]
-		case header == "to", header == "from":
+		case header == "to":
 			gherkinRequest[header] = ethcommon.HexToAddress(value)
+		case header == "from":
+			if value == "*" {
+				err := parseMappingStringString(gherkinRequest, "contextLabels."+tx.OneTimeKeyLabel, tx.OneTimeKeyValue)
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				gherkinRequest[header] = ethcommon.HexToAddress(value)
+			}
 		case header == "txHash":
 			gherkinRequest[header] = ethcommon.HexToHash(value)
 		case header == tenantIDHeader:

@@ -5,10 +5,12 @@ package faucet
 import (
 	"context"
 	"fmt"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	"math/big"
 	"reflect"
 	"testing"
+
+	ethcommon "github.com/ethereum/go-ethereum/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
@@ -69,7 +71,8 @@ func TestFaucet(t *testing.T) {
 		{
 			"credit without chainUUID",
 			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Envelope.SetID(testIDNoError)
+				_ = txctx.Envelope.SetID(testIDNoError).
+					SetFrom(ethcommon.Address{})
 				txctx.WithContext(proxy.With(txctx.Context(), testURL))
 				return txctx
 			},
@@ -80,7 +83,10 @@ func TestFaucet(t *testing.T) {
 		{
 			"txctx with parentTxID context label",
 			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Envelope.SetChainUUID(testChainUUID).SetContextLabelsValue("faucet.parentTxID", "test")
+				_ = txctx.Envelope.
+					SetChainUUID(testChainUUID).
+					SetContextLabelsValue("faucet.parentTxID", "test").
+					SetFrom(ethcommon.Address{})
 				txctx.WithContext(proxy.With(txctx.Context(), testURL))
 				return txctx
 			},
@@ -91,7 +97,8 @@ func TestFaucet(t *testing.T) {
 		{
 			"txctx with error when get faucets",
 			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Envelope.SetChainUUID(testChainUUIDError)
+				_ = txctx.Envelope.SetChainUUID(testChainUUIDError).
+					SetFrom(ethcommon.Address{})
 				txctx.WithContext(proxy.With(txctx.Context(), testURL))
 				return txctx
 			},
@@ -103,7 +110,9 @@ func TestFaucet(t *testing.T) {
 		{
 			"credit with self credit error",
 			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Envelope.SetChainUUID(testChainUUID).SetID(testIDSelfCreditError)
+				_ = txctx.Envelope.SetChainUUID(testChainUUID).
+					SetID(testIDSelfCreditError).
+					SetFrom(ethcommon.Address{})
 				txctx.WithContext(proxy.With(txctx.Context(), testURL))
 				return txctx
 			},
@@ -114,7 +123,9 @@ func TestFaucet(t *testing.T) {
 		{
 			"credit with faucet warning error",
 			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Envelope.SetChainUUID(testChainUUID).SetID(testIDFaucetWarningError)
+				_ = txctx.Envelope.SetChainUUID(testChainUUID).
+					SetID(testIDFaucetWarningError).
+					SetFrom(ethcommon.Address{})
 				txctx.WithContext(proxy.With(txctx.Context(), testURL))
 				return txctx
 			},
@@ -125,7 +136,8 @@ func TestFaucet(t *testing.T) {
 		{
 			"credit with error",
 			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Envelope.SetChainUUID(testChainUUID).SetID(testIDFaucetError)
+				_ = txctx.Envelope.SetChainUUID(testChainUUID).
+					SetID(testIDFaucetError)
 				txctx.WithContext(proxy.With(txctx.Context(), testURL))
 				return txctx
 			},
@@ -169,6 +181,9 @@ func TestFaucet(t *testing.T) {
 			expectedTxctx.Logger = txctx.Logger
 			expectedTxctx = test.expectedTxctx(test.input(expectedTxctx))
 
+			if !reflect.DeepEqual(txctx, expectedTxctx) {
+				assert.True(t, reflect.DeepEqual(txctx, expectedTxctx), "Expected same input")
+			}
 			assert.True(t, reflect.DeepEqual(txctx, expectedTxctx), "Expected same input")
 		})
 	}

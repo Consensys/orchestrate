@@ -1,6 +1,6 @@
 // +build unit
 
-package generic
+package signer
 
 import (
 	"math/big"
@@ -8,11 +8,13 @@ import (
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/keystore"
+	ksmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/keystore/mock"
 )
 
 func mockSignerFunc(keystore.KeyStore, *engine.TxContext, ethcommon.Address, *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error) {
@@ -113,10 +115,14 @@ func makeSignerContext(i int) *engine.TxContext {
 }
 
 func TestGeneric(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	
 	// Just checking the signer is properly generated
 	handler := GenerateSignerHandler(
 		mockSignerFunc,
-		keystore.GlobalKeyStore(),
+		ksmock.NewMockKeyStore(ctrl),
+		ksmock.NewMockKeyStore(ctrl),
 		"A success message",
 		"An error message",
 	)

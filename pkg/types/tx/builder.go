@@ -20,6 +20,11 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
+const (
+	OneTimeKeyLabel = "txFrom"
+	OneTimeKeyValue = "one-time-key"
+)
+
 type Envelope struct {
 	ID            string `validate:"uuid4,required"`
 	Headers       map[string]string
@@ -118,6 +123,13 @@ func (e *Envelope) IsEeaSendPrivateTransactionPrivacyGroup() bool {
 // IsEthSendRawTransaction for Besu Orion with PrivateFor
 func (e *Envelope) IsEeaSendPrivateTransactionPrivateFor() bool {
 	return e.Method == Method_EEA_SENDPRIVATETRANSACTION && len(e.PrivateFor) > 0
+}
+
+func (e *Envelope) IsOneTimeKeySignature() bool {
+	if v, ok := e.ContextLabels[OneTimeKeyLabel]; ok {
+		return v == OneTimeKeyValue
+	}
+	return false
 }
 
 func (e *Envelope) Carrier() opentracing.TextMapCarrier {
