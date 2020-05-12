@@ -12,7 +12,8 @@ require (
 	github.com/c0va23/go-proxyprotocol v0.9.1
 	github.com/cenkalti/backoff/v4 v4.0.0
 	github.com/containous/traefik/v2 v2.2.0
-	github.com/cucumber/godog v0.8.1
+	github.com/cucumber/godog v0.9.1-0.20200505072415-0f354e867a10
+	github.com/cucumber/messages-go/v10 v10.0.3
 	github.com/dgraph-io/ristretto v0.0.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/docker/docker v1.13.1

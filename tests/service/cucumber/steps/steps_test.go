@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/Shopify/sarama/mocks"
-	"github.com/cucumber/godog/gherkin"
+	gherkin "github.com/cucumber/messages-go/v10"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -44,35 +44,29 @@ func (s *ScenarioTestSuite) SetupSuite() {
 
 func (s *ScenarioTestSuite) SetupTest() {
 	s.Context = NewScenarioContext(s.chanReg, s.httpClient, s.crc, s.producer, parser.New())
-	sc := &gherkin.Scenario{}
+	sc := &gherkin.Pickle{}
 	sc.Name = "test-scenario"
 	s.Context.init(sc)
 }
 
 func (s *ScenarioTestSuite) TestInitScenarioContext() {
-	scenario := &gherkin.Scenario{}
+	scenario := &gherkin.Pickle{}
 	scenario.Name = "test-1"
 	s.Context.init(scenario)
-	assert.Equal(s.T(), "test-1", s.Context.Definition.Name, "Context definition should have been set")
-	assert.NotEqual(s.T(), "", s.Context.ID, "UUID should have been set")
-
-	scenarioOutline := &gherkin.ScenarioOutline{}
-	scenarioOutline.Name = "test-2"
-	s.Context.init(scenarioOutline)
-	assert.Equal(s.T(), "test-2", s.Context.Definition.Name, "Context definition should have been set")
+	assert.Equal(s.T(), "test-1", s.Context.Pickle.Name, "Context definition should have been set")
 }
 
 func (s *ScenarioTestSuite) TestParseEnvelopes() {
-	table := &gherkin.DataTable{
-		Rows: []*gherkin.TableRow{
+	table := &gherkin.PickleStepArgument_PickleTable{
+		Rows: []*gherkin.PickleStepArgument_PickleTable_PickleTableRow{
 			{
-				Cells: []*gherkin.TableCell{
+				Cells: []*gherkin.PickleStepArgument_PickleTable_PickleTableRow_PickleTableCell{
 					{Value: "chainID"},
 					{Value: "from"},
 				},
 			},
 			{
-				Cells: []*gherkin.TableCell{
+				Cells: []*gherkin.PickleStepArgument_PickleTable_PickleTableRow_PickleTableCell{
 					{Value: "888"},
 					{Value: "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4"},
 				},
@@ -89,16 +83,16 @@ func (s *ScenarioTestSuite) TestParseEnvelopes() {
 }
 
 func (s *ScenarioTestSuite) TestISendEnvelopesToTopic() {
-	table := &gherkin.DataTable{
-		Rows: []*gherkin.TableRow{
+	table := &gherkin.PickleStepArgument_PickleTable{
+		Rows: []*gherkin.PickleStepArgument_PickleTable_PickleTableRow{
 			{
-				Cells: []*gherkin.TableCell{
+				Cells: []*gherkin.PickleStepArgument_PickleTable_PickleTableRow_PickleTableCell{
 					{Value: "chainID"},
 					{Value: "from"},
 				},
 			},
 			{
-				Cells: []*gherkin.TableCell{
+				Cells: []*gherkin.PickleStepArgument_PickleTable_PickleTableRow_PickleTableCell{
 					{Value: "888"},
 					{Value: "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4"},
 				},

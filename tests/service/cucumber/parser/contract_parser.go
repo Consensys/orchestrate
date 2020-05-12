@@ -8,7 +8,7 @@ import (
 	"path"
 	"time"
 
-	"github.com/cucumber/godog/gherkin"
+	gherkin "github.com/cucumber/messages-go/v10"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/abi"
@@ -25,7 +25,7 @@ type ContractSpec struct {
 	JWTToken string
 }
 
-func (p *Parser) ParseContracts(scenario string, table *gherkin.DataTable) ([]*ContractSpec, error) {
+func (p *Parser) ParseContracts(scenario string, table *gherkin.PickleStepArgument_PickleTable) ([]*ContractSpec, error) {
 	var contractSpecs []*ContractSpec
 	headers := table.Rows[0]
 	for _, row := range table.Rows[1:] {
@@ -39,7 +39,7 @@ func (p *Parser) ParseContracts(scenario string, table *gherkin.DataTable) ([]*C
 	return contractSpecs, nil
 }
 
-func (p *Parser) ParseContract(scenario string, headers, row *gherkin.TableRow, contractSpec *ContractSpec) error {
+func (p *Parser) ParseContract(_ string, headers, row *gherkin.PickleStepArgument_PickleTable_PickleTableRow, contractSpec *ContractSpec) error {
 	for i, cell := range row.Cells {
 		err := p.ParseContractCell(headers.Cells[i].Value, cell.Value, contractSpec)
 		if err != nil {

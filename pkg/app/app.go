@@ -51,7 +51,7 @@ type App struct {
 
 func New(cfg *Config, opts ...Option) (*App, error) {
 	// Create and configure logger
-	logger := logrus.New()
+	logger := logrus.StandardLogger()
 	err := log.ConfigureLogger(cfg.Log, logger)
 	if err != nil {
 		return nil, err

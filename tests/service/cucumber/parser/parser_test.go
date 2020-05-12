@@ -8,20 +8,20 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 
-	"github.com/cucumber/godog/gherkin"
+	gherkin "github.com/cucumber/messages-go/v10"
 )
 
 func TestParser_ParseTxRequest(t *testing.T) {
 
 	testSet := []struct {
 		name              string
-		rows              [][]*gherkin.TableCell
+		rows              [][]*gherkin.PickleStepArgument_PickleTable_PickleTableRow_PickleTableCell
 		expectedEnvelopes []*tx.Envelope
 		expectedError     error
 	}{
 		{
 			"test",
-			[][]*gherkin.TableCell{
+			[][]*gherkin.PickleStepArgument_PickleTable_PickleTableRow_PickleTableCell{
 				{
 					{Value: "method"},
 					{Value: "from"},
@@ -122,12 +122,12 @@ func TestParser_ParseTxRequest(t *testing.T) {
 
 			parser := New()
 
-			rows := make([]*gherkin.TableRow, 0)
+			rows := make([]*gherkin.PickleStepArgument_PickleTable_PickleTableRow, 0)
 			for _, row := range test.rows {
-				rows = append(rows, &gherkin.TableRow{Cells: row})
+				rows = append(rows, &gherkin.PickleStepArgument_PickleTable_PickleTableRow{Cells: row})
 			}
 
-			evlps, err := parser.ParseEnvelopes("test-1", &gherkin.DataTable{Rows: rows})
+			evlps, err := parser.ParseEnvelopes("test-1", &gherkin.PickleStepArgument_PickleTable{Rows: rows})
 			assert.Equal(t, test.expectedError, err)
 
 			for i := range evlps {

@@ -7,7 +7,7 @@ x-default-variables: &default-variables
   CONTRACT_REGISTRY_HTTP_URL: ${CONTRACT_REGISTRY_HTTP_URL-http://contract-registry:8081}
   CONTRACT_REGISTRY_METRICS_URL: ${CONTRACT_REGISTRY_METRICS_URL-http://contract-registry:8082}
   ENVELOPE_STORE_URL: ${ENVELOPE_STORE_URL-envelope-store:8080}
-  ENVELOPE_STORE_HTTP_URL: ${ENVELOPE_STORE_HTTP_URL-http://envelope-store:8081}  
+  ENVELOPE_STORE_HTTP_URL: ${ENVELOPE_STORE_HTTP_URL-http://envelope-store:8081}
   ENVELOPE_STORE_METRICS_URL: ${ENVELOPE_STORE_METRICS_URL-http://envelope-store:8082}
   TRANSACTION_SCHEDULER_URL: ${TRANSACTION_SCHEDULER_URL-http://transaction-scheduler:8081}
   CHAIN_REGISTRY_INIT: ${CHAIN_REGISTRY_INIT-}
@@ -232,6 +232,7 @@ services:
       CUCUMBER_OUTPUTPATH: "/report/output/report.json"
       CUCUMBER_PATHS: "/features"
       CUCUMBER_FORMAT: "cucumber"
+      CUCUMBER_CONCURRENCY: 10
       AUTH_JWT_PRIVATE_KEY: ${AUTH_JWT_PRIVATE_KEY-}
       # Uncomment CUCUMBER_TAGS if only run features and scenarios with @public-tx or @account tags ("," = OR, "&&" = AND, "~" = NOT)
 #      CUCUMBER_TAGS: "@besu"

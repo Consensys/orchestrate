@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cucumber/godog/gherkin"
+	gherkin "github.com/cucumber/messages-go/v10"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/mitchellh/mapstructure"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt/generator"
@@ -27,7 +27,7 @@ func New() *Parser {
 	}
 }
 
-func (p *Parser) ParseEnvelopes(scenario string, table *gherkin.DataTable) ([]*tx.Envelope, error) {
+func (p *Parser) ParseEnvelopes(scenario string, table *gherkin.PickleStepArgument_PickleTable) ([]*tx.Envelope, error) {
 	var envelopes []*tx.Envelope
 	headers := table.Rows[0]
 	for _, row := range table.Rows[1:] {
@@ -40,7 +40,7 @@ func (p *Parser) ParseEnvelopes(scenario string, table *gherkin.DataTable) ([]*t
 	return envelopes, nil
 }
 
-func (p *Parser) ParseTxRequest(scenario string, headers, row *gherkin.TableRow) (*tx.Envelope, error) {
+func (p *Parser) ParseTxRequest(scenario string, headers, row *gherkin.PickleStepArgument_PickleTable_PickleTableRow) (*tx.Envelope, error) {
 	envelope := tx.NewEnvelope()
 	gherkinRequest := make(map[string]interface{})
 

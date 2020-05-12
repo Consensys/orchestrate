@@ -4,14 +4,14 @@ import (
 	"context"
 
 	"github.com/cucumber/godog"
-	"github.com/cucumber/godog/gherkin"
+	gherkin "github.com/cucumber/messages-go/v10"
 	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
 	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 )
 
-func (sc *ScenarioContext) iRegisterTheFollowingContract(table *gherkin.DataTable) error {
+func (sc *ScenarioContext) iRegisterTheFollowingContract(table *gherkin.PickleStepArgument_PickleTable) error {
 	// Parse table
-	parseContracts, err := sc.parser.ParseContracts(sc.ID, table)
+	parseContracts, err := sc.parser.ParseContracts(sc.Pickle.Id, table)
 	if err != nil {
 		return err
 	}

@@ -12,17 +12,17 @@ import (
 	"time"
 
 	"github.com/cucumber/godog"
-	"github.com/cucumber/godog/gherkin"
+	gherkin "github.com/cucumber/messages-go/v10"
 	merror "github.com/hashicorp/go-multierror"
 	log "github.com/sirupsen/logrus"
 	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
 )
 
-func (sc *ScenarioContext) resetResponse(interface{}) {
+func (sc *ScenarioContext) resetResponse(*gherkin.Pickle) {
 	sc.httpResponse = &http.Response{}
 }
 
-func (sc *ScenarioContext) resetAuth(interface{}) {
+func (sc *ScenarioContext) resetAuth(*gherkin.Pickle) {
 	sc.authSetup = AuthSetup{}
 }
 
@@ -102,7 +102,7 @@ func (sc *ScenarioContext) iSendRequestTo(method, endpoint string) error {
 	return nil
 }
 
-func (sc *ScenarioContext) iSendRequestToWithJSON(method, endpoint string, body *gherkin.DocString) error {
+func (sc *ScenarioContext) iSendRequestToWithJSON(method, endpoint string, body *gherkin.PickleStepArgument_PickleDocString) error {
 	sc.resetResponse(nil)
 
 	endpoint, err := sc.replaceEndpointAliases(endpoint)
@@ -142,7 +142,7 @@ func (sc *ScenarioContext) theResponseCodeShouldBe(code int) error {
 	return nil
 }
 
-func (sc *ScenarioContext) theResponseShouldMatchJSON(expectedBytes *gherkin.DocString) (err error) {
+func (sc *ScenarioContext) theResponseShouldMatchJSON(expectedBytes *gherkin.PickleStepArgument_PickleDocString) (err error) {
 	var expected, body []byte
 	var data interface{}
 	if err = json.Unmarshal([]byte(expectedBytes.Content), &data); err != nil {
@@ -192,7 +192,7 @@ func (sc *ScenarioContext) iStoreTheUUIDAs(alias string) (err error) {
 		return
 	}
 
-	sc.aliases.Set(sc.ID, alias, data.UUID)
+	sc.aliases.Set(sc.Pickle.Id, alias, data.UUID)
 	return
 }
 
@@ -218,7 +218,7 @@ func (sc *ScenarioContext) iStoreResponseFieldAs(navigation, alias string) (err 
 		return
 	}
 
-	sc.aliases.Set(sc.ID, alias, val.(string))
+	sc.aliases.Set(sc.Pickle.Id, alias, val.(string))
 	return
 }
 
@@ -226,7 +226,7 @@ var r = regexp.MustCompile("{{([^}]*)}}")
 
 func (sc *ScenarioContext) replaceEndpointAliases(endpoint string) (string, error) {
 	for _, alias := range r.FindAllStringSubmatch(endpoint, -1) {
-		v, ok := sc.aliases.Get(sc.ID, alias[1])
+		v, ok := sc.aliases.Get(sc.Pickle.Id, alias[1])
 		if !ok {
 			v, ok = sc.aliases.Get(GenericNamespace, alias[1])
 			if !ok {

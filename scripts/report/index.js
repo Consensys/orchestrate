@@ -1,17 +1,20 @@
-var nodeenvconfiguration = require('node-env-configuration');
-var reporter = require('cucumber-html-reporter');
+const reporter = require('cucumber-html-reporter');
 
-var defaults = {
+const metadata = Object.keys(process.env)
+    .filter(key => key.split("_")[0] === "METADATA" && process.env[key] !== "")
+    .reduce((obj, key) => {
+        const name = key.split("_")[1]
+        obj[name] = process.env[key];
+        return obj;
+    }, {});
+
+const options = {
+    brandTitle: 'PegaSys Orchestrate end-to-end tests',
     theme: 'bootstrap',
     jsonFile: 'in/report.json',
     output: 'out/report.html',
     reportSuiteAsScenarios: true,
+    metadata
 };
-
-// see https://github.com/whynotsoluciones/node-env-configuration 
-var options = nodeenvconfiguration({
-    defaults: defaults,
-    prefix: 'report'
-});    
 
 reporter.generate(options);

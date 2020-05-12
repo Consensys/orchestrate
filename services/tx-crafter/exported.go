@@ -146,8 +146,6 @@ func Start(ctx context.Context) error {
 		registerHandlers()
 
 		// Create appli to expose metrics
-
-		// Create appli to expose metrics
 		appli, err = app.New(
 			app.NewConfig(viper.GetViper()),
 			app.MetricsOpt(),

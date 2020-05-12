@@ -1,7 +1,6 @@
 package steps
 
 import (
-	"encoding/hex"
 	"fmt"
 	gohttp "net/http"
 	"reflect"
@@ -12,7 +11,7 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/cucumber/godog"
-	"github.com/cucumber/godog/gherkin"
+	gherkin "github.com/cucumber/messages-go/v10"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -42,19 +41,6 @@ var TOPICS = [...]string{
 	"account.generated",
 }
 
-// NewID creates a 8 character long random id
-func NewID() string {
-	u := uuid.NewV4()
-	buf := make([]byte, 8)
-	hex.Encode(buf, u[0:4])
-	return string(buf)
-}
-
-// ScenarioID generates a random scenario UUID
-func ScenarioID(def *gherkin.ScenarioDefinition) string {
-	return fmt.Sprintf("|%v|-%v", fmt.Sprintf("%-20v", def.Name)[:20], NewID())
-}
-
 // AuthSetup is container for authentication context data
 type AuthSetup struct {
 	authMethod string
@@ -63,8 +49,7 @@ type AuthSetup struct {
 
 // ScenarioContext is container for scenario context data
 type ScenarioContext struct {
-	ID         string
-	Definition *gherkin.ScenarioDefinition
+	Pickle *gherkin.Pickle
 
 	// Parser to parse cucumber/gherkin entries
 	parser *parser.Parser
@@ -131,25 +116,17 @@ func NewScenarioContext(
 }
 
 // initScenarioContext initialize a scenario context - create a random scenario id - initialize a logger enrich with the scenario name - initialize envelope chan
-func (sc *ScenarioContext) init(s interface{}) {
-	// Extract scenario definition
-	switch t := s.(type) {
-	case *gherkin.Scenario:
-		sc.Definition = &t.ScenarioDefinition
-	case *gherkin.ScenarioOutline:
-		sc.Definition = &t.ScenarioDefinition
-	}
-
-	// Compute scenario UUID
-	sc.ID = ScenarioID(sc.Definition)
+func (sc *ScenarioContext) init(s *gherkin.Pickle) {
+	// Hook the Pickle to the scenario context
+	sc.Pickle = s
 
 	// Prepare default tracker
 	sc.defaultTracker = sc.newTracker(nil)
 
 	// Enrich logger
 	sc.logger = sc.logger.WithFields(log.Fields{
-		"scenario.name": sc.Definition.Name,
-		"scenario.id":   sc.ID,
+		"scenario.name": sc.Pickle.Name,
+		"scenario.id":   sc.Pickle.Id,
 	})
 }
 
@@ -174,9 +151,9 @@ func (sc *ScenarioContext) newTracker(e *tx.Envelope) *tracker.Tracker {
 
 		// Register channel on channel registry
 		if e != nil {
-			sc.chanReg.Register(LongKeyOf(topic, sc.ID, e.GetID()), ch)
+			sc.chanReg.Register(LongKeyOf(topic, sc.Pickle.Id, e.GetID()), ch)
 		} else {
-			sc.chanReg.Register(ShortKeyOf(topic, sc.ID), ch)
+			sc.chanReg.Register(ShortKeyOf(topic, sc.Pickle.Id), ch)
 		}
 	}
 
@@ -187,8 +164,8 @@ func (sc *ScenarioContext) setMetadata(e *tx.Envelope) {
 	// Prepare envelope metadata
 	_ = e.SetID(uuid.NewV4().String()).
 		SetContextLabelsValue("debug", "true").
-		SetContextLabelsValue("scenario.id", sc.ID).
-		SetContextLabelsValue("scenario.name", sc.Definition.Name)
+		SetContextLabelsValue("scenario.id", sc.Pickle.Id).
+		SetContextLabelsValue("scenario.name", sc.Pickle.Name)
 }
 
 func (sc *ScenarioContext) newTrackers(envelopes []*tx.Envelope) []*tracker.Tracker {
@@ -226,16 +203,16 @@ func (sc *ScenarioContext) sendEnvelope(topic string, e *tx.Envelope) error {
 
 	log.WithFields(log.Fields{
 		"id":            e.GetID(),
-		"scenario.id":   sc.ID,
-		"scenario.name": sc.Definition.Name,
+		"scenario.id":   sc.Pickle.Id,
+		"scenario.name": sc.Pickle.Name,
 	}).Debugf("scenario: envelope sent")
 
 	return nil
 }
 
-func (sc *ScenarioContext) iSendEnvelopesToTopic(topic string, table *gherkin.DataTable) error {
+func (sc *ScenarioContext) iSendEnvelopesToTopic(topic string, table *gherkin.PickleStepArgument_PickleTable) error {
 	// Parse table
-	envelopes, err := sc.parser.ParseEnvelopes(sc.ID, table)
+	envelopes, err := sc.parser.ParseEnvelopes(sc.Pickle.Id, table)
 	if err != nil {
 		return errors.DataError("could not parse tx request - got %v", err)
 	}
@@ -254,9 +231,9 @@ func (sc *ScenarioContext) iSendEnvelopesToTopic(topic string, table *gherkin.Da
 	return nil
 }
 
-func (sc *ScenarioContext) iHaveDeployedContract(alias string, table *gherkin.DataTable) error {
+func (sc *ScenarioContext) iHaveDeployedContract(alias string, table *gherkin.PickleStepArgument_PickleTable) error {
 	// Parse table
-	envelopes, err := sc.parser.ParseEnvelopes(sc.ID, table)
+	envelopes, err := sc.parser.ParseEnvelopes(sc.Pickle.Id, table)
 	if err != nil {
 		return err
 	}
@@ -265,7 +242,7 @@ func (sc *ScenarioContext) iHaveDeployedContract(alias string, table *gherkin.Da
 	trackers := sc.newTrackers(envelopes)
 
 	if len(trackers) != 1 {
-		return fmt.Errorf("%v: should deploy exactly 1 contract", sc.ID)
+		return fmt.Errorf("%v: should deploy exactly 1 contract", sc.Pickle.Id)
 	}
 
 	// Send envelope
@@ -277,14 +254,14 @@ func (sc *ScenarioContext) iHaveDeployedContract(alias string, table *gherkin.Da
 	// Catch envelope after it has been decoded
 	err = trackers[0].Load("tx.decoded", 30*time.Second)
 	if err != nil {
-		return fmt.Errorf("%v: no receipt for contract %q deployment", sc.ID, alias)
+		return fmt.Errorf("%v: no receipt for contract %q deployment", sc.Pickle.Id, alias)
 	}
 
 	// Alias contract address
 	if trackers[0].Current.GetReceipt().GetContractAddress() == "" {
-		return fmt.Errorf("%v: contract %q could not be deployed", sc.ID, alias)
+		return fmt.Errorf("%v: contract %q could not be deployed", sc.Pickle.Id, alias)
 	}
-	sc.parser.Aliases.Set(sc.ID, alias, trackers[0].Current.GetReceipt().GetContractAddress())
+	sc.parser.Aliases.Set(sc.Pickle.Id, alias, trackers[0].Current.GetReceipt().GetContractAddress())
 
 	return nil
 }
@@ -293,13 +270,13 @@ func (sc *ScenarioContext) envelopeShouldBeInTopic(topic string) error {
 	for i, t := range sc.trackers {
 		err := t.Load(topic, viper.GetDuration(CucumberTimeoutViperKey))
 		if err != nil {
-			return fmt.Errorf("%v: envelope n°%v not in topic %q", sc.ID, i, topic)
+			return fmt.Errorf("%v: envelope n°%v not in topic %q", sc.Pickle.Id, i, topic)
 		}
 	}
 	return nil
 }
 
-func (sc *ScenarioContext) envelopesShouldContainTheFollowingErrors(table *gherkin.DataTable) error {
+func (sc *ScenarioContext) envelopesShouldContainTheFollowingErrors(table *gherkin.PickleStepArgument_PickleTable) error {
 	rowsEnvelopes := table.Rows[1:]
 
 	if len(rowsEnvelopes) != len(sc.trackers) {
@@ -321,7 +298,7 @@ func (sc *ScenarioContext) envelopesShouldContainTheFollowingErrors(table *gherk
 	return nil
 }
 
-func (sc *ScenarioContext) envelopesShouldHaveTheFollowingValues(table *gherkin.DataTable) error {
+func (sc *ScenarioContext) envelopesShouldHaveTheFollowingValues(table *gherkin.PickleStepArgument_PickleTable) error {
 	header := table.Rows[0]
 	rowsEnvelopes := table.Rows[1:]
 	if len(rowsEnvelopes) != len(sc.trackers) {
@@ -346,7 +323,7 @@ func (sc *ScenarioContext) envelopesShouldHaveTheFollowingValues(table *gherkin.
 			var aliasRE = regexp.MustCompile(`{{(.*)}}`)
 			if aliasRE.MatchString(col.Value) {
 				alias := aliasRE.FindStringSubmatch(col.Value)[1]
-				val, _ := sc.aliases.Get(sc.ID, alias)
+				val, _ := sc.aliases.Get(sc.Pickle.Id, alias)
 				if !isEqual(val, field) {
 					return fmt.Errorf("(%d/%d) %s expected %s but got %s", r+1, len(rowsEnvelopes), fieldName, val, fmt.Sprintf("%v", field))
 				}
@@ -433,7 +410,7 @@ func getField(fieldName string, val reflect.Value) (reflect.Value, error) {
 func (sc *ScenarioContext) envelopesShouldHavePayloadSet() error {
 	for i, t := range sc.trackers {
 		if t.Current.GetData() == "" {
-			return fmt.Errorf("%v: payload not set envelope n°%v", sc.ID, i)
+			return fmt.Errorf("%v: payload not set envelope n°%v", sc.Pickle.Id, i)
 		}
 	}
 	return nil
@@ -456,7 +433,7 @@ func (sc *ScenarioContext) envelopesShouldHaveNonceSet() error {
 			nonces[chain][addr] = make(map[uint64]bool)
 		}
 		if _, ok := nonces[chain][addr][nonce]; ok {
-			return fmt.Errorf("%v: nonce %d attributed more than once", sc.ID, t.Current.Nonce)
+			return fmt.Errorf("%v: nonce %d attributed more than once", sc.Pickle.Id, t.Current.Nonce)
 		}
 		nonces[chain][addr][nonce] = true
 	}
@@ -467,11 +444,11 @@ func (sc *ScenarioContext) envelopesShouldHaveNonceSet() error {
 func (sc *ScenarioContext) envelopesShouldHaveRawAndHashSet() error {
 	for i, t := range sc.trackers {
 		if t.Current.Raw == "" {
-			return fmt.Errorf("%v: raw not set on envelope n°%v", sc.ID, i)
+			return fmt.Errorf("%v: raw not set on envelope n°%v", sc.Pickle.Id, i)
 		}
 
 		if t.Current.TxHash == nil {
-			return fmt.Errorf("%v: hash not set on envelope n°%v", sc.ID, i)
+			return fmt.Errorf("%v: hash not set on envelope n°%v", sc.Pickle.Id, i)
 		}
 	}
 	return nil
@@ -480,7 +457,7 @@ func (sc *ScenarioContext) envelopesShouldHaveRawAndHashSet() error {
 func (sc *ScenarioContext) envelopesShouldHaveFromSet() error {
 	for i, t := range sc.trackers {
 		if t.Current.From == nil {
-			return fmt.Errorf("%v: from not set on envelope n°%v", sc.ID, i)
+			return fmt.Errorf("%v: from not set on envelope n°%v", sc.Pickle.Id, i)
 		}
 	}
 	return nil
@@ -490,7 +467,7 @@ func (sc *ScenarioContext) envelopesShouldHaveLogDecoded() error {
 	for i, t := range sc.trackers {
 		for _, l := range t.Current.GetReceipt().GetLogs() {
 			if len(l.GetTopics()) > 0 && len(l.GetDecodedData()) == 0 {
-				return fmt.Errorf("%v: log have not been decoded on envelope n°%v", sc.ID, i)
+				return fmt.Errorf("%v: log have not been decoded on envelope n°%v", sc.Pickle.Id, i)
 			}
 		}
 	}
@@ -510,19 +487,19 @@ func FeatureContext(s *godog.Suite) {
 
 	s.BeforeScenario(sc.init)
 
-	s.BeforeStep(func(s *gherkin.Step) {
+	s.BeforeStep(func(s *gherkin.Pickle_PickleStep) {
 		log.WithFields(log.Fields{
 			"step.text":     s.Text,
-			"scenario.name": sc.Definition.Name,
-			"scenario.id":   sc.ID,
+			"scenario.name": sc.Pickle.Name,
+			"scenario.id":   sc.Pickle.Id,
 		}).Debugf("scenario: step starts")
 	})
-	s.AfterStep(func(s *gherkin.Step, err error) {
+	s.AfterStep(func(s *gherkin.Pickle_PickleStep, err error) {
 		log.WithError(err).
 			WithFields(log.Fields{
 				"step.text":     s.Text,
-				"scenario.name": sc.Definition.Name,
-				"scenario.id":   sc.ID,
+				"scenario.name": sc.Pickle.Name,
+				"scenario.id":   sc.Pickle.Id,
 			}).Debugf("scenario: step completed")
 	})
 
