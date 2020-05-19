@@ -34,12 +34,16 @@ import (
 // @name Authorization
 
 type Builder struct {
-	usecases *usecases.UseCases
+	txCtrl        *TransactionsController
+	schedulesCtrl *SchedulesController
+	jobsCtrl      *JobsController
 }
 
-func NewBuilder(uc *usecases.UseCases) *Builder {
+func NewBuilder(ucs usecases.UseCases) *Builder {
 	return &Builder{
-		usecases: uc,
+		txCtrl:        NewTransactionsController(ucs),
+		schedulesCtrl: NewSchedulesController(ucs),
+		jobsCtrl:      NewJobsController(ucs),
 	}
 }
 
@@ -50,9 +54,9 @@ func (b *Builder) Build(ctx context.Context, _ string, configuration interface{}
 	}
 
 	router := mux.NewRouter()
-	NewTransactionsController(b.usecases.SendTransaction).Append(router)
-	NewSchedulesController(b.usecases.CreateSchedule, b.usecases.GetSchedule).Append(router)
-	// TODO: Add jobs
+	b.txCtrl.Append(router)
+	b.schedulesCtrl.Append(router)
+	b.jobsCtrl.Append(router)
 
 	return router, nil
 }

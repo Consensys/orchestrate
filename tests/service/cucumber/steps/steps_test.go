@@ -3,7 +3,9 @@
 package steps
 
 import (
+	"io/ioutil"
 	gohttp "net/http"
+	"strings"
 	"testing"
 
 	"github.com/Shopify/sarama/mocks"
@@ -17,6 +19,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	crc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
+	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/chanregistry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/parser"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/tracker"
@@ -29,6 +32,7 @@ type ScenarioTestSuite struct {
 	producer   *mocks.SyncProducer
 	httpClient *gohttp.Client
 	crc        svc.ContractRegistryClient
+	txs        txscheduler.TransactionSchedulerClient
 }
 
 func (s *ScenarioTestSuite) SetupSuite() {
@@ -40,10 +44,11 @@ func (s *ScenarioTestSuite) SetupSuite() {
 	s.producer = mocks.NewSyncProducer(s.T(), nil)
 	s.httpClient = http.NewClient()
 	s.crc = crc.GlobalClient()
+	s.txs = txscheduler.GlobalClient()
 }
 
 func (s *ScenarioTestSuite) SetupTest() {
-	s.Context = NewScenarioContext(s.chanReg, s.httpClient, s.crc, s.producer, parser.New())
+	s.Context = NewScenarioContext(s.chanReg, s.httpClient, s.crc, s.txs, s.producer, parser.New())
 	sc := &gherkin.Pickle{}
 	sc.Name = "test-scenario"
 	s.Context.init(sc)
@@ -145,6 +150,36 @@ func (s *ScenarioTestSuite) TestNavJsonResponse() {
 	val, err = navJSONResponse("result", []byte(rawResp))
 	assert.NoError(s.T(), err, "navJSONResponse should not error")
 	assert.Equal(s.T(), "5fn2sNAT11mNYDg9gRFeFD1JHmFhoz6Yqd8jsypeq3k=", val)
+}
+
+func (s *ScenarioTestSuite) TestTheResponseShouldHave() {
+	table := &gherkin.PickleStepArgument_PickleTable{
+		Rows: []*gherkin.PickleStepArgument_PickleTable_PickleTableRow{
+			{
+				Cells: []*gherkin.PickleStepArgument_PickleTable_PickleTableRow_PickleTableCell{
+					{Value: "idempotencyKey"},
+					{Value: "params.from"},
+					{Value: "schedule.uuid"},
+					{Value: "schedule.jobs.0.uuid"},
+				},
+			},
+			{
+				Cells: []*gherkin.PickleStepArgument_PickleTable_PickleTableRow_PickleTableCell{
+					{Value: "test6"},
+					{Value: "0x93f7274c9059e601be4512f656b57b830e019e41"},
+					{Value: "~"},
+					{Value: "~"},
+				},
+			},
+		},
+	}
+
+	stringReader := strings.NewReader(`{"idempotencyKey":"test6","params":{"from":"0x93f7274c9059e601be4512f656b57b830e019e41","methodSignature":"constructor()","to":"0x93f7274c9059e601be4512f656b57b830e019e23"},"schedule":{"uuid":"e2ecf10a-7244-4307-bdea-e734a88d178c","chainUUID":"69bce69b-261d-4e87-8e7f-170bd3527922","jobs":[{"uuid":"48aee833-5d72-4efc-b994-1ae139286557","transaction":{"from":"0x93f7274c9059e601be4512f656b57b830e019e41","to":"0x93f7274c9059e601be4512f656b57b830e019e23"},"status":"STARTED","createdAt":"2020-05-16T20:22:59.304757Z"}],"createdAt":"2020-05-16T20:22:59.304757Z"},"createdAt":"2020-05-16T20:22:59.304757Z"}`)
+	s.Context.httpResponse = &gohttp.Response{
+		Body: ioutil.NopCloser(stringReader),
+	} 
+	err := s.Context.responseShouldHaveFields(table)
+	assert.NoError(s.T(), err)
 }
 
 func TestScenarioTestSuite(t *testing.T) {

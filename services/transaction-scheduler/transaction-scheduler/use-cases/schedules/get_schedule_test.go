@@ -7,8 +7,9 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/interfaces/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
+	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/orm/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/utils"
 	"testing"
 )
@@ -17,23 +18,18 @@ func TestGetSchedule_Execute(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockScheduleDA := mocks.NewMockScheduleAgent(ctrl)
-	mockJobDA := mocks.NewMockJobAgent(ctrl)
+	mockORM := mocks2.NewMockORM(ctrl)
 	mockDB := mocks.NewMockDB(ctrl)
 
-	mockDB.EXPECT().Schedule().Return(mockScheduleDA).AnyTimes()
-	mockDB.EXPECT().Job().Return(mockJobDA).AnyTimes()
-
-	usecase := NewGetScheduleUseCase(mockDB)
+	usecase := NewGetScheduleUseCase(mockDB, mockORM)
 	tenantID := "tenantID"
 	ctx := context.Background()
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
-		schedule := testutils.FakeSchedule()
+		schedule := testutils.FakeSchedule("")
 		expectedResponse := utils.FormatScheduleResponse(schedule)
 
-		mockScheduleDA.EXPECT().FindOneByUUID(ctx, schedule.UUID, tenantID).Return(schedule, nil)
-		mockJobDA.EXPECT().FindOneByUUID(ctx, schedule.Jobs[0].UUID, tenantID).Return(schedule.Jobs[0], nil) // Necessary because of data agent not fetching in cascade
+		mockORM.EXPECT().FetchScheduleByUUID(ctx, mockDB, schedule.UUID, tenantID).Return(schedule, nil)
 
 		scheduleResponse, err := usecase.Execute(ctx, schedule.UUID, tenantID)
 
@@ -45,22 +41,9 @@ func TestGetSchedule_Execute(t *testing.T) {
 		uuid := "uuid"
 		expectedErr := errors.NotFoundError("error")
 
-		mockScheduleDA.EXPECT().FindOneByUUID(ctx, uuid, tenantID).Return(nil, expectedErr)
+		mockORM.EXPECT().FetchScheduleByUUID(ctx, mockDB, uuid, tenantID).Return(nil, expectedErr)
 
 		scheduleResponse, err := usecase.Execute(ctx, uuid, tenantID)
-
-		assert.Nil(t, scheduleResponse)
-		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createScheduleComponent), err)
-	})
-
-	t.Run("should fail with same error if FindOne fails for jobs", func(t *testing.T) {
-		schedule := testutils.FakeSchedule()
-		expectedErr := errors.NotFoundError("error")
-
-		mockScheduleDA.EXPECT().FindOneByUUID(ctx, schedule.UUID, tenantID).Return(schedule, nil)
-		mockJobDA.EXPECT().FindOneByUUID(ctx, gomock.Any(), tenantID).Return(nil, expectedErr) // Necessary because of data agent not fetching in cascade
-
-		scheduleResponse, err := usecase.Execute(ctx, schedule.UUID, tenantID)
 
 		assert.Nil(t, scheduleResponse)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createScheduleComponent), err)

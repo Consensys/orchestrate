@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type Transaction struct {
 	tableName struct{} `pg:"transactions"` // nolint:unused,structcheck // reason

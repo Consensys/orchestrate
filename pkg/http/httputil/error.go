@@ -27,6 +27,8 @@ func WriteHTTPErrorResponse(rw http.ResponseWriter, err error) {
 		WriteError(rw, err.Error(), http.StatusConflict)
 	case errors.IsNotFoundError(err):
 		WriteError(rw, err.Error(), http.StatusNotFound)
+	case errors.IsInvalidAuthenticationError(err):
+		WriteError(rw, err.Error(), http.StatusUnauthorized)
 	case errors.IsInvalidParameterError(err):
 		WriteError(rw, err.Error(), http.StatusUnprocessableEntity)
 	case err != nil:

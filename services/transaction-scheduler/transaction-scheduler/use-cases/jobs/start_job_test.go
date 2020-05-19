@@ -9,7 +9,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/interfaces/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
 	"testing"
 )
@@ -36,7 +36,7 @@ func TestStartJob_Execute(t *testing.T) {
 		job.ID = 1
 		job.UUID = "6380e2b6-b828-43ee-abdc-de0f8d57dc5f"
 		job.Transaction.Sender = "0xfrom"
-		job.Schedule = testutils.FakeSchedule()
+		job.Schedule = testutils.FakeSchedule("")
 
 		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, tenantID).Return(job, nil)
 		mockKafkaProducer.ExpectSendMessageAndSucceed()
@@ -62,7 +62,7 @@ func TestStartJob_Execute(t *testing.T) {
 		job := testutils.FakeJob(1)
 		job.UUID = "6380e2b6-b828-43ee-abdc-de0f8d57dc5f"
 		job.Transaction.Sender = "0xfrom"
-		job.Schedule = testutils.FakeSchedule()
+		job.Schedule = testutils.FakeSchedule("")
 
 		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, tenantID).Return(job, nil)
 		mockKafkaProducer.ExpectSendMessageAndFail(fmt.Errorf("error"))
@@ -73,9 +73,12 @@ func TestStartJob_Execute(t *testing.T) {
 
 	t.Run("should fail with same error if Insert log fails", func(t *testing.T) {
 		job := testutils.FakeJob(1)
+		job.ID = 1
 		job.UUID = "6380e2b6-b828-43ee-abdc-de0f8d57dc5f"
 		job.Transaction.Sender = "0xfrom"
-		job.Schedule = testutils.FakeSchedule()
+		job.Transaction.ID = 1
+		job.Schedule = testutils.FakeSchedule("")
+		job.Schedule.ID = 1
 		expectedErr := errors.PostgresConnectionError("error")
 
 		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, tenantID).Return(job, nil)
@@ -85,4 +88,6 @@ func TestStartJob_Execute(t *testing.T) {
 		err := usecase.Execute(ctx, job.UUID, tenantID)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(startJobComponent), err)
 	})
+	
+	// @TODO Ensure tenantID is authorized to start the job
 }

@@ -6,8 +6,10 @@ package dataagents
 
 import (
 	"context"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"testing"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -19,10 +21,8 @@ import (
 
 type jobTestSuite struct {
 	suite.Suite
-	dataagent  *PGJob
-	scheduleDA *PGSchedule
-	logDA      *PGLog
-	pg         *pgTestUtils.PGTestHelper
+	agents *PGAgents
+	pg     *pgTestUtils.PGTestHelper
 }
 
 func TestPGJob(t *testing.T) {
@@ -37,9 +37,7 @@ func (s *jobTestSuite) SetupSuite() {
 
 func (s *jobTestSuite) SetupTest() {
 	s.pg.UpgradeTestDB(s.T())
-	s.scheduleDA = NewPGSchedule(s.pg.DB)
-	s.logDA = NewPGLog(s.pg.DB)
-	s.dataagent = NewPGJob(s.pg.DB)
+	s.agents = New(s.pg.DB)
 }
 
 func (s *jobTestSuite) TearDownTest() {
@@ -52,75 +50,167 @@ func (s *jobTestSuite) TearDownSuite() {
 
 func (s *jobTestSuite) TestPGJob_Insert() {
 	ctx := context.Background()
-	schedule := testutils.FakeSchedule()
-	_ = s.scheduleDA.Insert(ctx, schedule)
 
 	s.T().Run("should insert model successfully", func(t *testing.T) {
-		job := testutils.FakeJob(schedule.ID)
-		err := s.dataagent.Insert(context.Background(), job)
+		job := testutils.FakeJob(0)
+		err := insertJob(ctx, s.agents, job)
+		assert.Nil(s.T(), err)
 
 		assert.Nil(t, err)
-		assert.Equal(t, 1, job.ID)
-		assert.NotNil(t, job.UUID)
-		assert.Equal(t, 1, job.TransactionID)
-		assert.NotNil(t, job.Transaction.UUID)
-		assert.Equal(t, job.Transaction.ID, job.TransactionID)
+		assert.NotEmpty(t, job.ID)
+		assert.NotEmpty(t, job.Transaction.ID)
+		assert.NotEmpty(t, job.Schedule.ID)
+	})
+	
+	s.T().Run("should insert model without UUID successfully", func(t *testing.T) {
+		job := testutils.FakeJob(0)
+		job.UUID = ""
+		err := insertJob(ctx, s.agents, job)
+		assert.Nil(s.T(), err)
+
+		assert.Nil(t, err)
+		assert.NotEmpty(t, job.ID)
+		assert.NotEmpty(t, job.Transaction.ID)
+		assert.NotEmpty(t, job.Schedule.ID)
 	})
 
-	s.T().Run("should return PostgresConnectionError if insert fails", func(t *testing.T) {
-		// We drop the DB to make the test fail
-		s.pg.DropTestDB(t)
+	s.T().Run("should update model successfully", func(t *testing.T) {
+		job := testutils.FakeJob(0)
+		err := insertJob(ctx, s.agents, job)
+		assert.Nil(s.T(), err)
 
-		job := testutils.FakeJob(schedule.ID)
-		err := s.dataagent.Insert(context.Background(), job)
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.Nil(t, err)
+		assert.NotEmpty(t, job.ID)
+		assert.NotEmpty(t, job.Transaction.ID)
+		assert.NotEmpty(t, job.Schedule.ID)
+	})
+}
 
-		// We bring it back up
-		s.pg.InitTestDB(t)
+func (s *jobTestSuite) TestPGJob_Update() {
+	ctx := context.Background()
+	job := testutils.FakeJob(0)
+	err := insertJob(ctx, s.agents, job)
+	assert.Nil(s.T(), err)
+
+	s.T().Run("should update model successfully", func(t *testing.T) {
+		newTx := testutils.FakeTransaction()
+		newSchedule := testutils.FakeSchedule("_")
+		err := s.agents.Transaction().Insert(ctx, newTx)
+		assert.Nil(t, err)
+		err = s.agents.Schedule().Insert(ctx, newSchedule)
+		assert.Nil(t, err)
+
+		job.ScheduleID = &newSchedule.ID
+		job.TransactionID = &newTx.ID
+		err = s.agents.Job().Update(ctx, job)
+		assert.Nil(t, err)
+		assert.Equal(t, *job.TransactionID, newTx.ID)
+		assert.Equal(t, *job.ScheduleID, newSchedule.ID)
+	})
+
+	s.T().Run("should fail to update job with missing ID", func(t *testing.T) {
+		job.ID = 0
+		err = s.agents.Job().Update(ctx, job)
+		assert.True(t, errors.IsInvalidArgError(err))
 	})
 }
 
 func (s *jobTestSuite) TestPGJob_FindOneByUUID() {
 	ctx := context.Background()
 	tenantID := "tenantID"
-	schedule := testutils.FakeSchedule()
-	_ = s.scheduleDA.Insert(ctx, schedule)
-	job := testutils.FakeJob(schedule.ID)
-	_ = s.dataagent.Insert(context.Background(), job)
-	job.Logs[0].JobID = job.ID
-	_ = s.logDA.Insert(context.Background(), job.Logs[0])
+	job := testutils.FakeJob(0)
+	job.Schedule.TenantID = tenantID
+	err := insertJob(ctx, s.agents, job)
+	assert.Nil(s.T(), err)
 
 	s.T().Run("should get model successfully as tenant", func(t *testing.T) {
-		jobRetrieved, err := s.dataagent.FindOneByUUID(ctx, job.UUID, tenantID)
+		jobRetrieved, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, "_")
 
 		assert.Nil(t, err)
-		assert.Equal(t, job.ID, jobRetrieved.ID)
+		assert.NotEmpty(t, jobRetrieved.ID)
 		assert.Equal(t, job.UUID, jobRetrieved.UUID)
-		assert.Equal(t, job.Transaction, jobRetrieved.Transaction)
-		assert.Equal(t, job.Logs, jobRetrieved.Logs)
-		assert.Equal(t, schedule.UUID, jobRetrieved.Schedule.UUID)
+		assert.Equal(t, job.Transaction.UUID, jobRetrieved.Transaction.UUID)
+		assert.NotEmpty(t, jobRetrieved.Transaction.ID)
+		assert.Equal(t, job.Logs[0].UUID, jobRetrieved.Logs[0].UUID)
+		assert.NotEmpty(t, jobRetrieved.Logs[0].ID)
+		assert.Equal(t, job.Schedule.UUID, jobRetrieved.Schedule.UUID)
+		assert.Equal(t, job.Schedule.TenantID, jobRetrieved.Schedule.TenantID)
+		assert.NotEmpty(t, jobRetrieved.Schedule.ID)
+	})
+
+	s.T().Run("should get model successfully as tenant", func(t *testing.T) {
+		jobRetrieved, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, tenantID)
+
+		assert.Nil(t, err)
+		assert.NotEmpty(t, jobRetrieved.ID)
 	})
 
 	s.T().Run("should get model successfully as admin", func(t *testing.T) {
-		jobRetrieved, err := s.dataagent.FindOneByUUID(ctx, job.UUID, multitenancy.DefaultTenantIDName)
+		jobRetrieved, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, multitenancy.DefaultTenantIDName)
 
 		assert.Nil(t, err)
-		assert.Equal(t, job.ID, jobRetrieved.ID)
+		assert.NotEmpty(t, jobRetrieved.ID)
+		assert.Equal(t, job.UUID, jobRetrieved.UUID)
 	})
 
 	s.T().Run("should return NotFoundError if select fails", func(t *testing.T) {
-		_, err := s.dataagent.FindOneByUUID(ctx, "b6fe7a2a-1a4d-49ca-99d8-8a34aa495ef0", tenantID)
+		_, err := s.agents.Job().FindOneByUUID(ctx, "b6fe7a2a-1a4d-49ca-99d8-8a34aa495ef0", tenantID)
 		assert.True(t, errors.IsNotFoundError(err))
 	})
+}
 
+func (s *jobTestSuite) TestPGJob_ConnectionErr() {
+	ctx := context.Background()
+
+	// We drop the DB to make the test fail
+	s.pg.DropTestDB(s.T())
+	job := testutils.FakeJob(0)
 	s.T().Run("should return PostgresConnectionError if insert fails", func(t *testing.T) {
-		// We drop the DB to make the test fail
-		s.pg.DropTestDB(t)
-
-		_, err := s.dataagent.FindOneByUUID(ctx, job.UUID, tenantID)
+		err := s.agents.Job().Insert(ctx, job)
 		assert.True(t, errors.IsPostgresConnectionError(err))
-
-		// We bring it back up
-		s.pg.InitTestDB(t)
 	})
+
+	s.T().Run("should return PostgresConnectionError if update fails", func(t *testing.T) {
+		job.ID = 1
+		err := s.agents.Job().Update(ctx, job)
+		assert.True(t, errors.IsPostgresConnectionError(err))
+	})
+
+	s.T().Run("should return PostgresConnectionError if update fails", func(t *testing.T) {
+		_, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, job.Schedule.TenantID)
+		assert.True(t, errors.IsPostgresConnectionError(err))
+	})
+
+	// We bring it back up
+	s.pg.InitTestDB(s.T())
+}
+
+/**
+Persist Job entity and its related entities
+*/
+func insertJob(ctx context.Context, agents *PGAgents, job *models.Job) error {
+	if job.Schedule != nil {
+		if err := agents.Schedule().Insert(ctx, job.Schedule); err != nil {
+			return err
+		}
+	}
+
+	if job.Transaction != nil {
+		if err := agents.Transaction().Insert(ctx, job.Transaction); err != nil {
+			return err
+		}
+	}
+
+	if err := agents.Job().Insert(ctx, job); err != nil {
+		return err
+	}
+
+	for idx := range job.Logs {
+		job.Logs[idx].JobID = &job.ID
+		if err := agents.Log().Insert(ctx, job.Logs[idx]); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

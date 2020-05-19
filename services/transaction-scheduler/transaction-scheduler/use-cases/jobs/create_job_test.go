@@ -4,27 +4,34 @@ package jobs
 
 import (
 	"context"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/interfaces/mocks"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
+	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
+	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/orm/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types/testutils"
-	"testing"
 )
 
 func TestCreateJob_Execute(t *testing.T) {
+	ctx := context.Background()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockJobDA := mocks.NewMockJobAgent(ctrl)
-	mockLogDA := mocks.NewMockLogAgent(ctrl)
-	mockTx := mocks.NewMockTx(ctrl)
 	mockDB := mocks.NewMockDB(ctrl)
+	mockScheduleDA := mocks.NewMockScheduleAgent(ctrl)
+	mockORM := mocks2.NewMockORM(ctrl)
+	
 
-	usecase := NewCreateJobUseCase(mockDB)
-	ctx := context.Background()
+	mockDB.EXPECT().Schedule().Return(mockScheduleDA).AnyTimes()
+
+	usecase := NewCreateJobUseCase(mockDB, mockORM)
+	fakeSchedule := testutils2.FakeSchedule("")
+	fakeSchedule.ID = 1
+	tenantID := "tenantID"
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		jobRequest := testutils.FakeJobRequest()
@@ -34,20 +41,12 @@ func TestCreateJob_Execute(t *testing.T) {
 			Status:      types.JobStatusCreated,
 		}
 
-		mockDB.EXPECT().Begin().Return(mockTx, nil)
-		mockTx.EXPECT().Job().Return(mockJobDA)
-		mockTx.EXPECT().Log().Return(mockLogDA)
-		mockJobDA.EXPECT().Insert(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, job *models.Job) error {
-			job.UUID = "testJobUUID"
-			return nil
-		})
-		mockLogDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
-		mockTx.EXPECT().Commit().Return(nil)
+		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobRequest.ScheduleUUID, tenantID).Return(fakeSchedule, nil)
+		mockORM.EXPECT().InsertOrUpdateJob(gomock.Any(), gomock.Eq(mockDB), gomock.Any()).Return(nil)
 
-		jobResponse, err := usecase.Execute(context.Background(), jobRequest)
+		jobResponse, err := usecase.Execute(context.Background(), jobRequest, tenantID)
 
 		assert.Nil(t, err)
-		assert.Equal(t, expectedResponse.UUID, jobResponse.UUID)
 		assert.Equal(t, expectedResponse.Transaction, jobResponse.Transaction)
 		assert.Equal(t, expectedResponse.Status, jobResponse.Status)
 	})
@@ -56,66 +55,35 @@ func TestCreateJob_Execute(t *testing.T) {
 		jobRequest := testutils.FakeJobRequest()
 		jobRequest.Type = ""
 
-		jobResponse, err := usecase.Execute(ctx, jobRequest)
+		jobResponse, err := usecase.Execute(ctx, jobRequest, tenantID)
 		assert.True(t, errors.IsInvalidParameterError(err))
 		assert.Nil(t, jobResponse)
 	})
 
-	t.Run("should fail with same error if Begin fails", func(t *testing.T) {
+	t.Run("should fail with same error when schedule in not found", func(t *testing.T) {
 		jobRequest := testutils.FakeJobRequest()
-		expectedErr := errors.PostgresConnectionError("error")
+		expectedErr := errors.NotFoundError("scheduleNotFount")
 
-		mockDB.EXPECT().Begin().Return(nil, expectedErr)
+		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobRequest.ScheduleUUID, tenantID).Return(nil, expectedErr)
 
-		jobResponse, err := usecase.Execute(context.Background(), jobRequest)
+		jobResponse, err := usecase.Execute(context.Background(), jobRequest, tenantID)
 
 		assert.Nil(t, jobResponse)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createJobComponent), err)
 	})
 
-	t.Run("should fail with same error if Insert of job fails", func(t *testing.T) {
+	t.Run("should fail with same error if InsertOrUpdate fails", func(t *testing.T) {
 		jobRequest := testutils.FakeJobRequest()
 		expectedErr := errors.PostgresConnectionError("error")
 
-		mockDB.EXPECT().Begin().Return(mockTx, nil)
-		mockTx.EXPECT().Job().Return(mockJobDA)
-		mockJobDA.EXPECT().Insert(ctx, gomock.Any()).Return(expectedErr)
-		jobResponse, err := usecase.Execute(context.Background(), jobRequest)
+		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobRequest.ScheduleUUID, tenantID).Return(fakeSchedule, nil)
+		mockORM.EXPECT().InsertOrUpdateJob(gomock.Any(), gomock.Eq(mockDB), gomock.Any()).Return(expectedErr)
+
+		jobResponse, err := usecase.Execute(context.Background(), jobRequest, tenantID)
 
 		assert.Nil(t, jobResponse)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createJobComponent), err)
 	})
 
-	t.Run("should fail with same error if Insert of log fails", func(t *testing.T) {
-		jobRequest := testutils.FakeJobRequest()
-		expectedErr := errors.PostgresConnectionError("error")
-
-		mockDB.EXPECT().Begin().Return(mockTx, nil)
-		mockTx.EXPECT().Job().Return(mockJobDA)
-		mockTx.EXPECT().Log().Return(mockLogDA)
-		mockJobDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
-		mockLogDA.EXPECT().Insert(ctx, gomock.Any()).Return(expectedErr)
-
-		jobResponse, err := usecase.Execute(context.Background(), jobRequest)
-
-		assert.Nil(t, jobResponse)
-		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createJobComponent), err)
-	})
-
-	t.Run("should fail with same error if Commit fails", func(t *testing.T) {
-		jobRequest := testutils.FakeJobRequest()
-		expectedErr := errors.PostgresConnectionError("error")
-
-		mockDB.EXPECT().Begin().Return(mockTx, nil)
-		mockTx.EXPECT().Job().Return(mockJobDA)
-		mockTx.EXPECT().Log().Return(mockLogDA)
-		mockJobDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
-		mockLogDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
-		mockTx.EXPECT().Commit().Return(expectedErr)
-
-		jobResponse, err := usecase.Execute(context.Background(), jobRequest)
-
-		assert.Nil(t, jobResponse)
-		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createJobComponent), err)
-	})
+	// @TODO Ensure tenantID corresponds to schedule tenantID otherwise it throws NotAuth ERR 
 }

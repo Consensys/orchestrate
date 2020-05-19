@@ -18,7 +18,6 @@ Feature: Verify HTTP Endpoints
     Then the response code should be 200
 
 
-
   Scenario: Get Contract Registry Swagger
     When I send "GET" request to "{{contract-registry-http}}/swagger/"
     Then the response code should be 200
@@ -36,7 +35,6 @@ Feature: Verify HTTP Endpoints
     Then the response code should be 200
 
 
-
   Scenario: Get Envelope Store Swagger
     When I send "GET" request to "{{envelope-store-http}}/swagger/"
     Then the response code should be 200
@@ -51,4 +49,21 @@ Feature: Verify HTTP Endpoints
 
   Scenario: Get Envelope Store liveness
     When I send "GET" request to "{{envelope-store-metrics}}/live"
+    Then the response code should be 200
+
+    
+  Scenario: Get Transaction Scheduler Swagger
+    When I send "GET" request to "{{tx-scheduler-http}}/swagger/"
+    Then the response code should be 200
+
+  Scenario: Get Transaction Scheduler metrics
+    When I send "GET" request to "{{tx-scheduler-metrics}}/metrics"
+    Then the response code should be 200
+
+  Scenario: Get Transaction Scheduler readiness
+    When I send "GET" request to "{{tx-scheduler-metrics}}/ready"
+    Then the response code should be 200
+
+  Scenario: Get Transaction Scheduler liveness
+    When I send "GET" request to "{{tx-scheduler-metrics}}/live"
     Then the response code should be 200

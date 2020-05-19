@@ -4,13 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/interfaces"
-
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
 )
@@ -25,14 +24,14 @@ type StartJobUseCase interface {
 
 // startJobUseCase is a use case to start a transaction job
 type startJobUseCase struct {
-	db             interfaces.DB
+	db             store.DB
 	kafkaProducer  sarama.SyncProducer
 	txCrafterTopic string
 }
 
 // NewStartJobUseCase creates a new StartJobUseCase
 func NewStartJobUseCase(
-	db interfaces.DB,
+	db store.DB,
 	kafkaProducer sarama.SyncProducer,
 	txCrafterTopic string,
 ) StartJobUseCase {
@@ -45,57 +44,36 @@ func NewStartJobUseCase(
 
 // Execute validates and creates a new transaction job
 func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID, tenantID string) error {
-	log.WithContext(ctx).WithField("job_uuid", jobUUID).Debug("starting job")
+	logger := log.WithContext(ctx)
+
+	logger.
+		WithField("job_uuid", jobUUID).
+		Debugf("starting job")
 
 	job, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, tenantID)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}
 
-	var method tx.Method
-	switch job.Type {
-	case types.JobConstantinopleTransaction:
-		method = tx.Method_ETH_SENDRAWTRANSACTION
-	default:
-		method = tx.Method_ETH_SENDRAWTRANSACTION
-	}
-
-	txEnvelope := &tx.TxEnvelope{
-		Msg: &tx.TxEnvelope_TxRequest{TxRequest: &tx.TxRequest{
-			Headers: nil, // TODO: Add the JWT token here? https://pegasys1.atlassian.net/browse/PO-544
-			Chain:   job.Schedule.ChainUUID,
-			Method:  method,
-			Params: &tx.Params{
-				From:           job.Transaction.Sender,
-				To:             job.Transaction.Recipient,
-				Gas:            job.Transaction.GasLimit,
-				GasPrice:       job.Transaction.GasPrice,
-				Value:          job.Transaction.Value,
-				Nonce:          job.Transaction.Nonce,
-				Data:           job.Transaction.Data,
-				Raw:            job.Transaction.Raw,
-				PrivateFor:     job.Transaction.PrivateFor,
-				PrivateFrom:    job.Transaction.PrivateFrom,
-				PrivacyGroupId: job.Transaction.PrivacyGroupID,
-			},
-			ContextLabels: job.Labels,
-		}},
-	}
+	txEnvelope := buildEnvelope(job)
 	partition, offset, err := uc.sendMessage(ctx, txEnvelope)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}
 
-	err = uc.db.Log().Insert(ctx, &models.Log{
-		JobID:   job.ID,
+	jobLog := &models.Log{
+		JobID:   &job.ID,
 		Status:  types.JobStatusStarted,
 		Message: fmt.Sprintf("message sent to partition %v, offset %v and topic %v", partition, offset, uc.txCrafterTopic),
-	})
-	if err != nil {
+	}
+
+	if err = uc.db.Log().Insert(ctx, jobLog); err != nil {
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}
 
-	log.WithContext(ctx).WithField("job_uuid", jobUUID).Info("job started successfully")
+	logger.
+		WithField("job_uuid", jobUUID).
+		Info("job started successfully")
 	return nil
 }
 
@@ -124,4 +102,36 @@ func (uc *startJobUseCase) sendMessage(ctx context.Context, txEnvelope *tx.TxEnv
 	}
 
 	return partition, offset, err
+}
+
+func buildEnvelope(job *models.Job) *tx.TxEnvelope {
+	var method tx.Method
+	switch job.Type {
+	case types.JobConstantinopleTransaction:
+		method = tx.Method_ETH_SENDRAWTRANSACTION
+	default:
+		method = tx.Method_ETH_SENDRAWTRANSACTION
+	}
+
+	return &tx.TxEnvelope{
+		Msg: &tx.TxEnvelope_TxRequest{TxRequest: &tx.TxRequest{
+			Headers: nil, // TODO: Add the JWT token here? https://pegasys1.atlassian.net/browse/PO-544
+			Chain:   job.Schedule.ChainUUID,
+			Method:  method,
+			Params: &tx.Params{
+				From:           job.Transaction.Sender,
+				To:             job.Transaction.Recipient,
+				Gas:            job.Transaction.GasLimit,
+				GasPrice:       job.Transaction.GasPrice,
+				Value:          job.Transaction.Value,
+				Nonce:          job.Transaction.Nonce,
+				Data:           job.Transaction.Data,
+				Raw:            job.Transaction.Raw,
+				PrivateFor:     job.Transaction.PrivateFor,
+				PrivateFrom:    job.Transaction.PrivateFrom,
+				PrivacyGroupId: job.Transaction.PrivacyGroupID,
+			},
+			ContextLabels: job.Labels,
+		}},
+	}
 }

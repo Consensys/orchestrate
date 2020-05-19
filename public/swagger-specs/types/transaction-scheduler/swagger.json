@@ -15,7 +15,106 @@
         "version": "2.0"
     },
     "paths": {
+        "/jobs": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Search job list by provided filters",
+                "responses": {
+                    "200": {},
+                    "400": {},
+                    "500": {}
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Creates a new schedule",
+                "responses": {
+                    "200": {},
+                    "400": {},
+                    "500": {}
+                }
+            }
+        },
+        "/jobs/{uuid}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Fetch a job by its uuid",
+                "responses": {
+                    "200": {},
+                    "404": {},
+                    "500": {}
+                }
+            }
+        },
+        "/jobs/{uuid}/start": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "summary": "Creates a new schedule",
+                "responses": {
+                    "202": {},
+                    "404": {},
+                    "500": {}
+                }
+            }
+        },
+        "/jobs/{uuid}/transaction": {},
         "/schedules": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Creates a new schedule",
+                "responses": {
+                    "200": {},
+                    "404": {},
+                    "500": {}
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -58,7 +157,7 @@
                 }
             }
         },
-        "/transactions/send": {
+        "/transactions/{chainUUID}/send": {
             "post": {
                 "security": [
                     {
@@ -71,7 +170,7 @@
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Creates and sends a new transaction",
+                "summary": "Creates and sends a new contract transaction",
                 "responses": {
                     "200": {},
                     "400": {},

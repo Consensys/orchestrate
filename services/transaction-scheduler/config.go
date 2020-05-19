@@ -5,26 +5,26 @@ import (
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
-	multitenancy "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/multi"
 )
 
 type Config struct {
 	App          *app.Config
-	Store        *store.Config
+	Store        *multi.Config
 	Multitenancy bool
 }
 
 func NewConfig(vipr *viper.Viper) *Config {
 	return &Config{
 		App:          app.NewConfig(vipr),
-		Store:        store.NewConfig(vipr),
+		Store:        multi.NewConfig(vipr),
 		Multitenancy: viper.GetBool(multitenancy.EnabledViperKey),
 	}
 }
 
 // Flags register flags for Postgres database
 func Flags(f *pflag.FlagSet) {
-	store.Flags(f)
+	multi.Flags(f)
 	http.Flags(f)
 }

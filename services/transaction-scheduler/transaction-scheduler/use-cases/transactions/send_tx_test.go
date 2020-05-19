@@ -4,71 +4,101 @@ package transactions
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	"github.com/golang/mock/gomock"
+	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/interfaces/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
+	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
+	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
+	mocks4 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/orm/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/utils"
 	mocks3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/validators/mocks"
-	"testing"
-	"time"
 )
 
-func TestSendTx_Execute(t *testing.T) {
-	ctrl := gomock.NewController(t)
+type sendTxSuite struct {
+	suite.Suite
+	usecase     SendTxUseCase
+	DB          *mocks2.MockDB
+	DBTX        *mocks2.MockTx
+	ORM         *mocks4.MockORM
+	Validators  *mocks3.MockTransactionValidator
+	TxRequestDA *mocks2.MockTransactionRequestAgent
+	StartJobUC  *mocks.MockStartJobUseCase
+}
+
+func TestSendTx(t *testing.T) {
+	s := new(sendTxSuite)
+	suite.Run(t, s)
+}
+
+func (s *sendTxSuite) SetupTest() {
+	ctrl := gomock.NewController(s.T())
 	defer ctrl.Finish()
 
-	mockValidator := mocks3.NewMockTransactionValidator(ctrl)
-	mockTxRequestDA := mocks2.NewMockTransactionRequestAgent(ctrl)
-	mockScheduleDA := mocks2.NewMockScheduleAgent(ctrl)
-	mockJobDA := mocks2.NewMockJobAgent(ctrl)
-	mockLogDA := mocks2.NewMockLogAgent(ctrl)
-	mockTx := mocks2.NewMockTx(ctrl)
-	mockDB := mocks2.NewMockDB(ctrl)
+	s.DB = mocks2.NewMockDB(ctrl)
+	s.DBTX = mocks2.NewMockTx(ctrl)
+	s.ORM = mocks4.NewMockORM(ctrl)
+	s.Validators = mocks3.NewMockTransactionValidator(ctrl)
+	s.TxRequestDA = mocks2.NewMockTransactionRequestAgent(ctrl)
+	s.StartJobUC = mocks.NewMockStartJobUseCase(ctrl)
+	s.usecase = NewSendTxUseCase(s.Validators, s.DB, s.ORM, s.StartJobUC)
+}
 
-	mockTx.EXPECT().Schedule().Return(mockScheduleDA).AnyTimes()
-	mockTx.EXPECT().Job().Return(mockJobDA).AnyTimes()
-	mockTx.EXPECT().Log().Return(mockLogDA).AnyTimes()
-	mockTx.EXPECT().TransactionRequest().Return(mockTxRequestDA).AnyTimes()
-
-	mockStartJob := mocks.NewMockStartJobUseCase(ctrl)
-	tenantID := "tenantID"
-
-	usecase := NewSendTxUseCase(mockValidator, mockDB, mockStartJob)
+func (s *sendTxSuite) TestSendTx_Success() {
 	ctx := context.Background()
 
-	t.Run("should execute use case successfully", func(t *testing.T) {
-		timeNow := time.Now()
+	// We skip the test of DB transaction as it will be unit-tested at /pkg/database:ExecuteInDbTx()
+	s.DB.EXPECT().Begin().Return(s.DBTX, nil).AnyTimes()
+	s.DBTX.EXPECT().Begin().Return(s.DBTX, nil).AnyTimes()
+	s.DBTX.EXPECT().Commit().Return(nil).AnyTimes()
+	s.DBTX.EXPECT().Close().Return(nil).AnyTimes()
+
+	tenantID := "tenantID"
+	chainUUID := uuid.NewV4().String()
+
+	s.T().Run("should execute use case successfully", func(t *testing.T) {
 		txRequest := testutils.FakeTransactionRequest()
+		jsonParams, _ := utils.ObjectToJSON(txRequest.Params)
+		fakeSchedule := testutils2.FakeSchedule("tenantID")
+		fakeSchedule.ID = 666
+		fakeSchedule.ChainUUID = chainUUID
+		txRequestModel := &models.TransactionRequest{
+			IdempotencyKey: txRequest.IdempotencyKey,
+			ScheduleID:     &fakeSchedule.ID,
+			RequestHash:    "requestHash",
+			Params:         jsonParams,
+		}
 
-		mockValidator.EXPECT().ValidateRequestHash(ctx, txRequest.Params, txRequest.IdempotencyKey).Return("requestHash", nil)
-		mockValidator.EXPECT().ValidateChainExists(ctx, gomock.Any()).Return(nil)
-		mockDB.EXPECT().Begin().Return(mockTx, nil)
-		mockScheduleDA.EXPECT().Insert(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, schedule *models.Schedule) error {
-			schedule.ID = 1
-			schedule.UUID = "scheduleUUID"
-			return nil
-		})
-		mockJobDA.EXPECT().Insert(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, job *models.Job) error {
-			job.ID = 1
-			job.UUID = "jobUUID"
-			return nil
-		})
-		mockLogDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
-		mockTxRequestDA.EXPECT().SelectOrInsert(ctx, gomock.Any()).Return(nil)
-		mockTx.EXPECT().Commit().Return(nil)
-		mockStartJob.EXPECT().Execute(ctx, "jobUUID", tenantID).Return(nil)
+		s.Validators.EXPECT().ValidateRequestHash(ctx, chainUUID, txRequest.Params, txRequest.IdempotencyKey).
+			Return("requestHash", nil)
+		s.Validators.EXPECT().ValidateChainExists(ctx, gomock.Any()).Return(nil)
+		s.ORM.EXPECT().InsertOrUpdateJob(gomock.Any(), s.DBTX, gomock.Any()).DoAndReturn(
+			func(ctx context.Context, db store.DB, job *models.Job) error {
+				job.Schedule = fakeSchedule
+				return nil
+			})
+		s.DBTX.EXPECT().TransactionRequest().Return(s.TxRequestDA)
+		s.TxRequestDA.EXPECT().SelectOrInsert(ctx, gomock.Eq(txRequestModel)).Return(nil)
+		s.StartJobUC.EXPECT().Execute(ctx, gomock.Any(), gomock.Any()).Return(nil)
+		s.ORM.EXPECT().FetchScheduleByID(ctx, gomock.Eq(s.DB), gomock.Any()).Return(fakeSchedule, nil)
 
-		txResponse, err := usecase.Execute(ctx, txRequest, tenantID)
+		txResponse, err := s.usecase.Execute(ctx, txRequest, chainUUID, tenantID)
 
+		timeNow := time.Now()
 		expectedResponse := &types.TransactionResponse{
 			IdempotencyKey: txRequest.IdempotencyKey,
 			Schedule: &types.ScheduleResponse{
-				UUID:      "scheduleUUID",
-				ChainUUID: txRequest.ChainUUID,
+				UUID:      fakeSchedule.UUID,
+				ChainUUID: chainUUID,
 				CreatedAt: timeNow,
 			},
 			CreatedAt: timeNow,
@@ -77,186 +107,135 @@ func TestSendTx_Execute(t *testing.T) {
 		assert.Equal(t, expectedResponse.IdempotencyKey, txResponse.IdempotencyKey)
 		assert.Equal(t, expectedResponse.Schedule.UUID, txResponse.Schedule.UUID)
 		assert.Equal(t, expectedResponse.Schedule.ChainUUID, txResponse.Schedule.ChainUUID)
+		assert.Equal(t, types.JobStatusStarted, types.JobStatusStarted)
 		assert.Equal(t, expectedResponse.Schedule.CreatedAt, timeNow)
 		assert.Equal(t, expectedResponse.CreatedAt, timeNow)
 	})
+}
 
-	t.Run("should fail with same error if validator fails to validate request hash", func(t *testing.T) {
+func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
+	ctx := context.Background()
+	tenantID := "tenantID"
+	chainUUID := uuid.NewV4().String()
+	
+	s.T().Run("should fail with same error if validator fails to validate request hash", func(t *testing.T) {
 		txRequest := testutils.FakeTransactionRequest()
 		expectedErr := errors.InvalidParameterError("error")
-
-		mockValidator.EXPECT().ValidateRequestHash(ctx, gomock.Any(), gomock.Any()).Return("", expectedErr)
-
-		txResponse, err := usecase.Execute(ctx, txRequest, tenantID)
-
+	
+		s.Validators.EXPECT().ValidateRequestHash(ctx, gomock.Any(), gomock.Any(), gomock.Any()).Return("", expectedErr)
+	
+		txResponse, err := s.usecase.Execute(ctx, txRequest, chainUUID, tenantID)
+	
 		assert.Nil(t, txResponse)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendTxComponent), err)
 	})
 
-	t.Run("should fail with same error if validator fails to validate chain", func(t *testing.T) {
+	s.T().Run("should fail with same error if validator fails to validate chain", func(t *testing.T) {
 		txRequest := testutils.FakeTransactionRequest()
 		expectedErr := errors.InvalidParameterError("error")
-
-		mockValidator.EXPECT().ValidateRequestHash(ctx, gomock.Any(), gomock.Any()).Return("requestHash", nil)
-		mockValidator.EXPECT().ValidateChainExists(ctx, gomock.Any()).Return(expectedErr)
-
-		txResponse, err := usecase.Execute(ctx, txRequest, tenantID)
-
+	
+		s.Validators.EXPECT().ValidateRequestHash(ctx, gomock.Any(), gomock.Any(), gomock.Any()).
+			Return("requestHash", nil)
+		s.Validators.EXPECT().ValidateChainExists(ctx, gomock.Any()).Return(expectedErr)
+	
+		txResponse, err := s.usecase.Execute(ctx, txRequest, chainUUID, tenantID)
+	
 		assert.Nil(t, txResponse)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendTxComponent), err)
 	})
-
-	t.Run("should fail with same error if Begin fails", func(t *testing.T) {
+	
+	s.T().Run("should fail with same error if Begin fails", func(t *testing.T) {
 		txRequest := testutils.FakeTransactionRequest()
 		expectedErr := errors.PostgresConnectionError("error")
-
-		mockValidator.EXPECT().ValidateRequestHash(ctx, txRequest.Params, txRequest.IdempotencyKey).Return("requestHash", nil)
-		mockValidator.EXPECT().ValidateChainExists(ctx, gomock.Any()).Return(nil)
-		mockDB.EXPECT().Begin().Return(nil, expectedErr)
-
-		txResponse, err := usecase.Execute(ctx, txRequest, tenantID)
-
+	
+		s.Validators.EXPECT().ValidateRequestHash(ctx, chainUUID, txRequest.Params, txRequest.IdempotencyKey).
+			Return("requestHash", nil)
+		s.Validators.EXPECT().ValidateChainExists(ctx, gomock.Any()).Return(nil)
+		s.DB.EXPECT().Begin().Return(nil, expectedErr)
+	
+		txResponse, err := s.usecase.Execute(ctx, txRequest, chainUUID, tenantID)
+	
 		assert.Nil(t, txResponse)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendTxComponent), err)
 	})
-
-	t.Run("should fail with same error if Insert fails for schedules", func(t *testing.T) {
+	 
+	s.T().Run("should fail with same error if Insert Job fails", func(t *testing.T) {
 		txRequest := testutils.FakeTransactionRequest()
 		expectedErr := errors.PostgresConnectionError("error")
-
-		mockValidator.EXPECT().ValidateRequestHash(ctx, txRequest.Params, txRequest.IdempotencyKey).Return("requestHash", nil)
-		mockValidator.EXPECT().ValidateChainExists(ctx, gomock.Any()).Return(nil)
-		mockDB.EXPECT().Begin().Return(mockTx, nil)
-		mockScheduleDA.EXPECT().Insert(ctx, gomock.Any()).Return(expectedErr)
-
-		txResponse, err := usecase.Execute(ctx, txRequest, tenantID)
-
+	
+		s.Validators.EXPECT().ValidateRequestHash(ctx, chainUUID, txRequest.Params, txRequest.IdempotencyKey).
+			Return("requestHash", nil)
+		s.Validators.EXPECT().ValidateChainExists(ctx, gomock.Any()).Return(nil)
+		s.DB.EXPECT().Begin().Return(s.DBTX, nil)
+		s.DBTX.EXPECT().Rollback().Return(nil)
+		s.DBTX.EXPECT().Close().Return(nil)
+		s.ORM.EXPECT().InsertOrUpdateJob(gomock.Any(), gomock.Eq(s.DBTX), gomock.Any()).Return(expectedErr)
+	
+		txResponse, err := s.usecase.Execute(ctx, txRequest, chainUUID, tenantID)
+	
 		assert.Nil(t, txResponse)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendTxComponent), err)
 	})
-
-	t.Run("should fail with same error if Insert fails for jobs", func(t *testing.T) {
+	
+	s.T().Run("should fail with same error if Insert TxRequest fails", func(t *testing.T) {
 		txRequest := testutils.FakeTransactionRequest()
 		expectedErr := errors.PostgresConnectionError("error")
-
-		mockValidator.EXPECT().ValidateRequestHash(ctx, txRequest.Params, txRequest.IdempotencyKey).Return("requestHash", nil)
-		mockValidator.EXPECT().ValidateChainExists(ctx, gomock.Any()).Return(nil)
-		mockDB.EXPECT().Begin().Return(mockTx, nil)
-		mockScheduleDA.EXPECT().Insert(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, schedule *models.Schedule) error {
-			schedule.ID = 1
-			schedule.UUID = "scheduleUUID"
-			return nil
-		})
-		mockJobDA.EXPECT().Insert(ctx, gomock.Any()).Return(expectedErr)
-
-		txResponse, err := usecase.Execute(ctx, txRequest, tenantID)
-
+	
+		s.Validators.EXPECT().ValidateRequestHash(ctx, chainUUID, txRequest.Params, txRequest.IdempotencyKey).
+			Return("requestHash", nil)
+		s.Validators.EXPECT().ValidateChainExists(ctx, gomock.Any()).Return(nil)
+		s.DB.EXPECT().Begin().Return(s.DBTX, nil)
+		s.DBTX.EXPECT().Rollback().Return(nil)
+		s.DBTX.EXPECT().Close().Return(nil)
+		s.ORM.EXPECT().InsertOrUpdateJob(gomock.Any(), gomock.Eq(s.DBTX), gomock.Any()).Return(nil)
+		s.DBTX.EXPECT().TransactionRequest().Return(s.TxRequestDA)
+		s.TxRequestDA.EXPECT().SelectOrInsert(ctx, gomock.Any()).Return(expectedErr)
+	
+		txResponse, err := s.usecase.Execute(ctx, txRequest, chainUUID, tenantID)
+	
 		assert.Nil(t, txResponse)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendTxComponent), err)
 	})
-
-	t.Run("should fail with same error if Insert fails for logs", func(t *testing.T) {
-		txRequest := testutils.FakeTransactionRequest()
-		expectedErr := errors.PostgresConnectionError("error")
-
-		mockValidator.EXPECT().ValidateRequestHash(ctx, txRequest.Params, txRequest.IdempotencyKey).Return("requestHash", nil)
-		mockValidator.EXPECT().ValidateChainExists(ctx, gomock.Any()).Return(nil)
-		mockDB.EXPECT().Begin().Return(mockTx, nil)
-		mockScheduleDA.EXPECT().Insert(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, schedule *models.Schedule) error {
-			schedule.ID = 1
-			schedule.UUID = "scheduleUUID"
-			return nil
-		})
-		mockJobDA.EXPECT().Insert(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, job *models.Job) error {
-			job.ID = 1
-			job.UUID = "jobUUID"
-			return nil
-		})
-		mockLogDA.EXPECT().Insert(ctx, gomock.Any()).Return(expectedErr)
-
-		txResponse, err := usecase.Execute(ctx, txRequest, tenantID)
-
-		assert.Nil(t, txResponse)
-		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendTxComponent), err)
-	})
-
-	t.Run("should fail with same error if SelectOrInsert fails for tx request", func(t *testing.T) {
-		txRequest := testutils.FakeTransactionRequest()
-		expectedErr := errors.PostgresConnectionError("error")
-
-		mockValidator.EXPECT().ValidateRequestHash(ctx, txRequest.Params, txRequest.IdempotencyKey).Return("requestHash", nil)
-		mockValidator.EXPECT().ValidateChainExists(ctx, gomock.Any()).Return(nil)
-		mockDB.EXPECT().Begin().Return(mockTx, nil)
-		mockScheduleDA.EXPECT().Insert(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, schedule *models.Schedule) error {
-			schedule.ID = 1
-			schedule.UUID = "scheduleUUID"
-			return nil
-		})
-		mockJobDA.EXPECT().Insert(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, job *models.Job) error {
-			job.ID = 1
-			job.UUID = "jobUUID"
-			return nil
-		})
-		mockLogDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
-		mockTxRequestDA.EXPECT().SelectOrInsert(ctx, gomock.Any()).Return(expectedErr)
-
-		txResponse, err := usecase.Execute(ctx, txRequest, tenantID)
-
-		assert.Nil(t, txResponse)
-		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendTxComponent), err)
-	})
-
-	t.Run("should fail with same error if Commit fails", func(t *testing.T) {
+	
+	s.T().Run("should fail with same error if start job fails", func(t *testing.T) {
 		txRequest := testutils.FakeTransactionRequest()
 		expectedErr := errors.KafkaConnectionError("error")
-
-		mockValidator.EXPECT().ValidateRequestHash(ctx, txRequest.Params, txRequest.IdempotencyKey).Return("requestHash", nil)
-		mockValidator.EXPECT().ValidateChainExists(ctx, gomock.Any()).Return(nil)
-		mockDB.EXPECT().Begin().Return(mockTx, nil)
-		mockScheduleDA.EXPECT().Insert(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, schedule *models.Schedule) error {
-			schedule.ID = 1
-			schedule.UUID = "scheduleUUID"
-			return nil
-		})
-		mockJobDA.EXPECT().Insert(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, job *models.Job) error {
-			job.ID = 1
-			job.UUID = "jobUUID"
-			return nil
-		})
-		mockLogDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
-		mockTxRequestDA.EXPECT().SelectOrInsert(ctx, gomock.Any()).Return(nil)
-		mockTx.EXPECT().Commit().Return(expectedErr)
-
-		txResponse, err := usecase.Execute(ctx, txRequest, tenantID)
-
+	
+		s.Validators.EXPECT().ValidateRequestHash(ctx, chainUUID, txRequest.Params, txRequest.IdempotencyKey).Return("requestHash", nil)
+		s.Validators.EXPECT().ValidateChainExists(ctx, gomock.Any()).Return(nil)
+		s.DB.EXPECT().Begin().Return(s.DBTX, nil)
+		s.DBTX.EXPECT().Rollback().Return(nil)
+		s.DBTX.EXPECT().Close().Return(nil)
+		s.ORM.EXPECT().InsertOrUpdateJob(gomock.Any(), gomock.Eq(s.DBTX), gomock.Any()).Return(nil)
+		s.DBTX.EXPECT().TransactionRequest().Return(s.TxRequestDA)
+		s.TxRequestDA.EXPECT().SelectOrInsert(ctx, gomock.Any()).Return(expectedErr)
+		s.StartJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), gomock.Any()).Return(expectedErr)
+		// s.ORM.EXPECT().FetchScheduleByID(ctx, mockDB, fakeSchedule.ID).Return(fakeSchedule, nil)
+	
+		txResponse, err := s.usecase.Execute(ctx, txRequest, chainUUID, tenantID)
+	
 		assert.Nil(t, txResponse)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendTxComponent), err)
 	})
-
-	t.Run("should fail with same error if start job fails", func(t *testing.T) {
+	
+	s.T().Run("should fail with same error if start job fails", func(t *testing.T) {
 		txRequest := testutils.FakeTransactionRequest()
 		expectedErr := errors.KafkaConnectionError("error")
-
-		mockValidator.EXPECT().ValidateRequestHash(ctx, txRequest.Params, txRequest.IdempotencyKey).Return("requestHash", nil)
-		mockValidator.EXPECT().ValidateChainExists(ctx, gomock.Any()).Return(nil)
-		mockDB.EXPECT().Begin().Return(mockTx, nil)
-		mockScheduleDA.EXPECT().Insert(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, schedule *models.Schedule) error {
-			schedule.ID = 1
-			schedule.UUID = "scheduleUUID"
-			return nil
-		})
-		mockJobDA.EXPECT().Insert(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, job *models.Job) error {
-			job.ID = 1
-			job.UUID = "jobUUID"
-			return nil
-		})
-		mockLogDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
-		mockTxRequestDA.EXPECT().SelectOrInsert(ctx, gomock.Any()).Return(nil)
-		mockTx.EXPECT().Commit().Return(nil)
-		mockStartJob.EXPECT().Execute(ctx, "jobUUID", tenantID).Return(expectedErr)
-
-		txResponse, err := usecase.Execute(ctx, txRequest, tenantID)
-
+		fakeSchedule := testutils2.FakeSchedule("tenantID")
+	
+		s.Validators.EXPECT().ValidateRequestHash(ctx, chainUUID, txRequest.Params, txRequest.IdempotencyKey).Return("requestHash", nil)
+		s.Validators.EXPECT().ValidateChainExists(ctx, gomock.Any()).Return(nil)
+		s.DB.EXPECT().Begin().Return(s.DBTX, nil)
+		s.DBTX.EXPECT().Rollback().Return(nil)
+		s.DBTX.EXPECT().Close().Return(nil)
+		s.ORM.EXPECT().InsertOrUpdateJob(gomock.Any(), gomock.Eq(s.DBTX), gomock.Any()).Return(nil)
+		s.DBTX.EXPECT().TransactionRequest().Return(s.TxRequestDA)
+		s.TxRequestDA.EXPECT().SelectOrInsert(ctx, gomock.Any()).Return(expectedErr)
+		s.StartJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+		s.ORM.EXPECT().FetchScheduleByID(ctx, gomock.Any(), gomock.Any()).Return(fakeSchedule, nil)
+	
+		txResponse, err := s.usecase.Execute(ctx, txRequest, chainUUID, tenantID)
+	
 		assert.Nil(t, txResponse)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendTxComponent), err)
 	})

@@ -320,6 +320,10 @@ func InvalidArgError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(InvalidArg, format, a...)
 }
 
+func IsInvalidArgError(err error) bool {
+	return isErrorClass(FromError(err).GetCode(), InvalidArg)
+}
+
 // InvalidTopicsCountError is raised when topics count is in receipt
 func InvalidTopicsCountError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(InvalidTopicsCount, format, a...)

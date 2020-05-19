@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mock"
-	models2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
-	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/interfaces/mocks"
+	chainmodel "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -17,10 +17,14 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types/testutils"
 )
 
+const (
+	chainUUID = "chainUUID"
+)
+
 type transactionsTestSuite struct {
 	suite.Suite
 	validator               TransactionValidator
-	mockTxRequestDA         *mocks2.MockTransactionRequestAgent
+	mockTxRequestDA         *mocks.MockTransactionRequestAgent
 	mockChainRegistryClient *mock.MockChainRegistryClient
 }
 
@@ -33,8 +37,8 @@ func (s *transactionsTestSuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
 	defer ctrl.Finish()
 
-	mockDB := mocks2.NewMockDB(ctrl)
-	s.mockTxRequestDA = mocks2.NewMockTransactionRequestAgent(ctrl)
+	mockDB := mocks.NewMockDB(ctrl)
+	s.mockTxRequestDA = mocks.NewMockTransactionRequestAgent(ctrl)
 	mockDB.EXPECT().TransactionRequest().Return(s.mockTxRequestDA).AnyTimes()
 
 	s.mockChainRegistryClient = mock.NewMockChainRegistryClient(ctrl)
@@ -46,9 +50,9 @@ func (s *transactionsTestSuite) TestTransactionValidator_ValidateRequestHash() {
 
 	s.T().Run("should validate tx successfully and return the request hash if data agent returns not found", func(t *testing.T) {
 		s.mockTxRequestDA.EXPECT().FindOneByIdempotencyKey(gomock.Any(), txRequest.IdempotencyKey).Return(nil, errors.NotFoundError("error"))
-		expectedRequestHash := "2c9e0e4c6834e516fb99b0bdb00d4973"
+		expectedRequestHash := "d8055d499fcbb64b67a5eab35d5c8109"
 
-		requestHash, err := s.validator.ValidateRequestHash(context.Background(), txRequest.Params, txRequest.IdempotencyKey)
+		requestHash, err := s.validator.ValidateRequestHash(context.Background(), chainUUID, txRequest.Params, txRequest.IdempotencyKey)
 
 		assert.Nil(t, err)
 		assert.Equal(t, expectedRequestHash, requestHash)
@@ -57,7 +61,7 @@ func (s *transactionsTestSuite) TestTransactionValidator_ValidateRequestHash() {
 	s.T().Run("should return error if data agent fails", func(t *testing.T) {
 		s.mockTxRequestDA.EXPECT().FindOneByIdempotencyKey(gomock.Any(), txRequest.IdempotencyKey).Return(nil, errors.PostgresConnectionError("error"))
 
-		requestHash, err := s.validator.ValidateRequestHash(context.Background(), txRequest.Params, txRequest.IdempotencyKey)
+		requestHash, err := s.validator.ValidateRequestHash(context.Background(), chainUUID, txRequest.Params, txRequest.IdempotencyKey)
 
 		assert.Empty(t, requestHash)
 		assert.Equal(t, errors.PostgresConnectionError("error").ExtendComponent("transaction-validator"), err)
@@ -69,7 +73,7 @@ func (s *transactionsTestSuite) TestTransactionValidator_ValidateRequestHash() {
 			RequestHash:    "differentRequestHash",
 		}, nil)
 
-		requestHash, err := s.validator.ValidateRequestHash(context.Background(), txRequest.Params, txRequest.IdempotencyKey)
+		requestHash, err := s.validator.ValidateRequestHash(context.Background(), chainUUID, txRequest.Params, txRequest.IdempotencyKey)
 
 		assert.Empty(t, requestHash)
 		assert.True(t, errors.IsAlreadyExistsError(err))
@@ -77,10 +81,8 @@ func (s *transactionsTestSuite) TestTransactionValidator_ValidateRequestHash() {
 }
 
 func (s *transactionsTestSuite) TestTransactionValidator_ValidateChainExists() {
-	chainUUID := "chainUUID"
-
 	s.T().Run("should validate chain successfully", func(t *testing.T) {
-		s.mockChainRegistryClient.EXPECT().GetChainByUUID(gomock.Any(), chainUUID).Return(&models2.Chain{}, nil)
+		s.mockChainRegistryClient.EXPECT().GetChainByUUID(gomock.Any(), chainUUID).Return(&chainmodel.Chain{}, nil)
 		err := s.validator.ValidateChainExists(context.Background(), chainUUID)
 		assert.Nil(t, err)
 	})

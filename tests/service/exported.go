@@ -16,6 +16,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
+	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/handlers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/handlers/dispatcher"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber"
@@ -93,6 +94,10 @@ func initComponents(ctx context.Context) {
 		// Initialize the contractregistryClient
 		func() {
 			contractregistry.Init(ctx, viper.GetString(contractregistry.ContractRegistryURLViperKey))
+		},
+		// Initialize the contractregistryClient
+		func() {
+			txscheduler.Init(ctx)
 		},
 	)
 }

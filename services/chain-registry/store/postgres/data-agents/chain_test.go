@@ -25,7 +25,6 @@ type ChainModelsTestSuite struct {
 func TestModelsChain(t *testing.T) {
 	s := new(ChainModelsTestSuite)
 	s.pg , _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
-	// t.Logf("Test Database: %s", s.pg.TestDBName)
 	suite.Run(t, s)
 }
 

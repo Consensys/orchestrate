@@ -34,7 +34,7 @@ func NewInternalConfig() *dynamic.Configuration {
 			EntryPoints: []string{http.DefaultHTTPEntryPoint},
 			Service:     "transactions",
 			Priority:    math.MaxInt32,
-			Rule:        "PathPrefix(`/transactions`) || PathPrefix(`/schedules`)",
+			Rule:        "PathPrefix(`/transactions`) || PathPrefix(`/schedules`) || PathPrefix(`/jobs`)",
 			Middlewares: []string{"base@logger-base", "auth@multitenancy"},
 		},
 	}

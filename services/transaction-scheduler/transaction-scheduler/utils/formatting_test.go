@@ -13,7 +13,6 @@ func TestUtils_ObjectToJSON(t *testing.T) {
 	jsonStr, _ := ObjectToJSON(&types.TransactionRequest{
 		BaseTransactionRequest: types.BaseTransactionRequest{
 			IdempotencyKey: "myKey",
-			ChainUUID:      "myChain",
 		},
 		Params: types.TransactionParams{
 			From:            "from",
@@ -22,7 +21,7 @@ func TestUtils_ObjectToJSON(t *testing.T) {
 		},
 	})
 
-	expectedJSONStr := "{\"idempotencyKey\":\"myKey\",\"chainUUID\":\"myChain\",\"params\":{\"from\":\"from\",\"to\":\"to\",\"methodSignature\":\"constructor()\"}}"
+	expectedJSONStr := "{\"idempotencyKey\":\"myKey\",\"params\":{\"from\":\"from\",\"to\":\"to\",\"methodSignature\":\"constructor()\"}}"
 	assert.Equal(t, expectedJSONStr, jsonStr)
 }
 
@@ -39,7 +38,7 @@ func TestUtils_FormatTxResponse(t *testing.T) {
 }
 
 func TestUtils_FormatScheduleResponse(t *testing.T) {
-	schedule := storetestutils.FakeSchedule()
+	schedule := storetestutils.FakeSchedule("")
 
 	scheduleResponse := FormatScheduleResponse(schedule)
 

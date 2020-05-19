@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/interfaces"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -18,30 +18,33 @@ import (
 const txValidatorComponent = "transaction-validator"
 
 type TransactionValidator interface {
-	ValidateRequestHash(ctx context.Context, params interface{}, idempotencyKey string) (string, error)
+	ValidateRequestHash(ctx context.Context, chainUUID string, params interface{}, idempotencyKey string) (string, error)
 	ValidateChainExists(ctx context.Context, chainUUID string) error
 }
 
 // transactionValidator is a validator for transaction requests (business logic)
 type transactionValidator struct {
-	db                  interfaces.DB
+	db                  store.DB
 	chainRegistryClient client.ChainRegistryClient
 }
 
 // NewTransactionValidator creates a new TransactionValidator
-func NewTransactionValidator(db interfaces.DB, chainRegistryClient client.ChainRegistryClient) TransactionValidator {
+func NewTransactionValidator(db store.DB, chainRegistryClient client.ChainRegistryClient) TransactionValidator {
 	return &transactionValidator{db: db, chainRegistryClient: chainRegistryClient}
 }
 
-func (txValidator *transactionValidator) ValidateRequestHash(ctx context.Context, params interface{}, idempotencyKey string) (string, error) {
-	log.WithContext(ctx).WithField("idempotency_key", idempotencyKey).Debug("validating idempotency key")
+func (txValidator *transactionValidator) ValidateRequestHash(ctx context.Context, chainUUID string, params interface{}, idempotencyKey string) (string, error) {
+	log.WithContext(ctx).
+		WithField("idempotency_key", idempotencyKey).
+		WithField("chain_uuid", chainUUID).
+		Debug("validating idempotency key")
 
 	jsonParams, err := utils.ObjectToJSON(params)
 	if err != nil {
 		return "", errors.FromError(err).ExtendComponent(txValidatorComponent)
 	}
 
-	hash := md5.Sum([]byte(jsonParams))
+	hash := md5.Sum([]byte(jsonParams + chainUUID))
 	requestHash := hex.EncodeToString(hash[:])
 
 	txRequestToCompare, err := txValidator.db.TransactionRequest().FindOneByIdempotencyKey(ctx, idempotencyKey)
@@ -51,7 +54,9 @@ func (txValidator *transactionValidator) ValidateRequestHash(ctx context.Context
 
 	if txRequestToCompare != nil && txRequestToCompare.RequestHash != requestHash {
 		errMessage := "a transaction request with the same idempotency key and different params already exists"
-		log.WithError(err).WithField("idempotency_key", idempotencyKey).Error(errMessage)
+		log.WithError(err).
+			WithField("idempotency_key", idempotencyKey).
+			Error(errMessage)
 		return "", errors.AlreadyExistsError(errMessage)
 	}
 

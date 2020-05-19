@@ -15,11 +15,11 @@ func TestTransactionSchedulerTarget(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	Flags(flgs)
 	expected := txSchedulerURLDefault
-	assert.Equal(t, expected, viper.GetString(txSchedulerURLViperKey), "Default")
+	assert.Equal(t, expected, viper.GetString(TxSchedulerURLViperKey), "Default")
 
 	_ = os.Setenv(txSchedulerURLEnv, "env-transaction-scheduler")
 	expected = "env-transaction-scheduler"
-	assert.Equal(t, expected, viper.GetString(txSchedulerURLViperKey), "From Environment Variable")
+	assert.Equal(t, expected, viper.GetString(TxSchedulerURLViperKey), "From Environment Variable")
 	_ = os.Unsetenv(txSchedulerURLEnv)
 
 	args := []string{
@@ -28,11 +28,11 @@ func TestTransactionSchedulerTarget(t *testing.T) {
 	err := flgs.Parse(args)
 	assert.Nil(t, err, "Parse Transaction Scheduler flags should not error")
 	expected = "flag-transaction-scheduler"
-	assert.Equal(t, expected, viper.GetString(txSchedulerURLViperKey), "From Flag")
+	assert.Equal(t, expected, viper.GetString(TxSchedulerURLViperKey), "From Flag")
 }
 
 func TestFlags(t *testing.T) {
 	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	Flags(f)
-	assert.Equal(t, txSchedulerURLDefault, viper.GetString(txSchedulerURLViperKey), "Default")
+	assert.Equal(t, txSchedulerURLDefault, viper.GetString(TxSchedulerURLViperKey), "Default")
 }

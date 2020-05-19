@@ -3,10 +3,15 @@ package types
 import "time"
 
 type JobRequest struct {
-	ScheduleID  int               `json:"requestID" validate:"required"`
-	Type        string            `json:"type" validate:"required"`
+	ScheduleUUID string            `json:"scheduleUUID" validate:"required"`
+	Type         string            `json:"type" validate:"required"` //  @TODO validate Type is valid
+	Labels       map[string]string `json:"labels,omitempty"`
+	Transaction  ETHTransaction    `json:"transaction" validate:"required"`
+}
+
+type JobUpdateRequest struct {
 	Labels      map[string]string `json:"labels,omitempty"`
-	Transaction ETHTransaction    `json:"transaction" validate:"required"`
+	Transaction ETHTransaction    `json:"transaction"`
 }
 
 type ETHTransaction struct {

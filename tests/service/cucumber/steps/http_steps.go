@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -78,7 +79,7 @@ func (sc *ScenarioContext) iManageResponse(req *http.Request) error {
 func (sc *ScenarioContext) iSendRequestTo(method, endpoint string) error {
 	sc.resetResponse(nil)
 
-	endpoint, err := sc.replaceEndpointAliases(endpoint)
+	endpoint, err := sc.replaceAllMatchesAliases(endpoint)
 	if err != nil {
 		return err
 	}
@@ -105,12 +106,17 @@ func (sc *ScenarioContext) iSendRequestTo(method, endpoint string) error {
 func (sc *ScenarioContext) iSendRequestToWithJSON(method, endpoint string, body *gherkin.PickleStepArgument_PickleDocString) error {
 	sc.resetResponse(nil)
 
-	endpoint, err := sc.replaceEndpointAliases(endpoint)
+	endpoint, err := sc.replaceAllMatchesAliases(endpoint)
 	if err != nil {
 		return err
 	}
 
-	req, err := http.NewRequest(method, endpoint, bytes.NewBuffer([]byte(body.Content)))
+	reqBody, err := sc.replaceAllMatchesAliases(body.Content)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest(method, endpoint, bytes.NewBuffer([]byte(reqBody)))
 	if err != nil {
 		return err
 	}
@@ -169,26 +175,63 @@ func (sc *ScenarioContext) theResponseShouldMatchJSON(expectedBytes *gherkin.Pic
 	return
 }
 
-func (sc *ScenarioContext) iStoreTheUUIDAs(alias string) (err error) {
-	defer func() {
-		closeErr := sc.httpResponse.Body.Close()
-		if closeErr != nil {
-			log.Error("could not properly close response body")
-		}
-	}()
-	if sc.httpResponse == nil {
-		return fmt.Errorf("no http response stored, cannot retrieve ChainID")
-	}
+func (sc *ScenarioContext) responseShouldHaveFields(table *gherkin.PickleStepArgument_PickleTable) (err error) {
+	header := table.Rows[0]
+	rowResponse := table.Rows[1]
 
-	bodyBytes, err := ioutil.ReadAll(sc.httpResponse.Body)
+	body, err := ioutil.ReadAll(sc.httpResponse.Body)
 	if err != nil {
-		return
+		return fmt.Errorf("expected response code body to math field but it errored with %s", err.Error())
 	}
+	sc.httpResponse.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+
+	for c, col := range rowResponse.Cells {
+		fieldName := header.Cells[c].Value
+		respVal, err := navJSONResponse(fieldName, body)
+		if err != nil {
+			return err
+		}
+		if respVal == nil {
+			continue
+		}
+
+		field := reflect.ValueOf(respVal)
+		if col.Value == "~" {
+			if isEqual("", field) {
+				return fmt.Errorf("response did not expected %s to be empty", fmt.Sprintf("%v", fieldName))
+			}
+			continue
+		}
+
+		var aliasRE = regexp.MustCompile(`{{(.*)}}`)
+		if aliasRE.MatchString(col.Value) {
+			alias := aliasRE.FindStringSubmatch(col.Value)[1]
+			val, _ := sc.aliases.Get(sc.Pickle.Id, alias)
+			if !isEqual(val, field) {
+				return fmt.Errorf("response %s expected %s but got %s", fieldName, val, fmt.Sprintf("%v", field))
+			}
+
+			continue
+		}
+
+		if !isEqual(col.Value, field) {
+			return fmt.Errorf("response %s expected %s but got %s", fieldName, col.Value, fmt.Sprintf("%v", field))
+		}
+	}
+	return nil
+}
+
+func (sc *ScenarioContext) iStoreTheUUIDAs(alias string) (err error) {
+	body, err := ioutil.ReadAll(sc.httpResponse.Body)
+	if err != nil {
+		return fmt.Errorf("expected response code body to math field but it errored with %s", err.Error())
+	}
+	sc.httpResponse.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 
 	var data struct {
 		UUID string `json:"uuid"`
 	}
-	if err = json.Unmarshal(bodyBytes, &data); err != nil {
+	if err = json.Unmarshal(body, &data); err != nil {
 		return
 	}
 
@@ -197,23 +240,14 @@ func (sc *ScenarioContext) iStoreTheUUIDAs(alias string) (err error) {
 }
 
 func (sc *ScenarioContext) iStoreResponseFieldAs(navigation, alias string) (err error) {
-	defer func() {
-		closeErr := sc.httpResponse.Body.Close()
-		if closeErr != nil {
-			log.Error("could not properly close response body")
-		}
-	}()
-	if sc.httpResponse == nil {
-		return fmt.Errorf("no http response stored, cannot retrieve ChainID")
-	}
-
-	bodyBytes, err := ioutil.ReadAll(sc.httpResponse.Body)
+	body, err := ioutil.ReadAll(sc.httpResponse.Body)
 	if err != nil {
-		return
+		return fmt.Errorf("expected response code body to math field but it errored with %s", err.Error())
 	}
+	sc.httpResponse.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 
 	var val interface{}
-	val, err = navJSONResponse(navigation, bodyBytes)
+	val, err = navJSONResponse(navigation, body)
 	if err != nil || val == nil {
 		return
 	}
@@ -224,8 +258,8 @@ func (sc *ScenarioContext) iStoreResponseFieldAs(navigation, alias string) (err 
 
 var r = regexp.MustCompile("{{([^}]*)}}")
 
-func (sc *ScenarioContext) replaceEndpointAliases(endpoint string) (string, error) {
-	for _, alias := range r.FindAllStringSubmatch(endpoint, -1) {
+func (sc *ScenarioContext) replaceAllMatchesAliases(foo string) (string, error) {
+	for _, alias := range r.FindAllStringSubmatch(foo, -1) {
 		v, ok := sc.aliases.Get(sc.Pickle.Id, alias[1])
 		if !ok {
 			v, ok = sc.aliases.Get(GenericNamespace, alias[1])
@@ -233,9 +267,9 @@ func (sc *ScenarioContext) replaceEndpointAliases(endpoint string) (string, erro
 				return "", fmt.Errorf("could not replace alias %s", v)
 			}
 		}
-		endpoint = strings.Replace(endpoint, alias[0], v, 1)
+		foo = strings.Replace(foo, alias[0], v, 1)
 	}
-	return endpoint, nil
+	return foo, nil
 }
 
 func navJSONResponse(nav string, bodyBytes []byte) (interface{}, error) {
@@ -248,6 +282,9 @@ func navJSONResponse(nav string, bodyBytes []byte) (interface{}, error) {
 	// Navigate throw the json response
 	navigation := strings.Split(nav, ".")
 	for _, navStep := range navigation {
+		if resp == nil {
+			return "", fmt.Errorf("could not find response field '%s'", nav)
+		}
 		if jdx, err := strconv.Atoi(navStep); err == nil {
 			respAcum := resp.([]interface{})
 			result = respAcum[jdx]
@@ -274,4 +311,5 @@ func initHTTP(s *godog.Suite, sc *ScenarioContext) {
 	s.Step(`^I store response field "([^"]*)" as "([^"]*)"`, sc.iStoreResponseFieldAs)
 	s.Step(`^the response code should be (\d+)$`, sc.theResponseCodeShouldBe)
 	s.Step(`^the response should match json:$`, sc.theResponseShouldMatchJSON)
+	s.Step(`^Response should have the following fields:$`, sc.responseShouldHaveFields)
 }

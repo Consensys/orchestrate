@@ -35,16 +35,16 @@ func (m *MockSendTxUseCase) EXPECT() *MockSendTxUseCaseMockRecorder {
 }
 
 // Execute mocks base method.
-func (m *MockSendTxUseCase) Execute(ctx context.Context, txRequest *types.TransactionRequest, tenantID string) (*types.TransactionResponse, error) {
+func (m *MockSendTxUseCase) Execute(ctx context.Context, txRequest *types.TransactionRequest, chainUUID, tenantID string) (*types.TransactionResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, txRequest, tenantID)
+	ret := m.ctrl.Call(m, "Execute", ctx, txRequest, chainUUID, tenantID)
 	ret0, _ := ret[0].(*types.TransactionResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute.
-func (mr *MockSendTxUseCaseMockRecorder) Execute(ctx, txRequest, tenantID interface{}) *gomock.Call {
+func (mr *MockSendTxUseCaseMockRecorder) Execute(ctx, txRequest, chainUUID, tenantID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSendTxUseCase)(nil).Execute), ctx, txRequest, tenantID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSendTxUseCase)(nil).Execute), ctx, txRequest, chainUUID, tenantID)
 }

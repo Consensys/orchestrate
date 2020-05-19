@@ -1,16 +1,20 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
+)
 
 type Job struct {
 	tableName struct{} `pg:"jobs"` // nolint:unused,structcheck // reason
 
-	ID            int
+	ID            int `pg:"alias:id"`
 	UUID          string
-	ScheduleID    int
+	ScheduleID    *int `pg:"alias:schedule_id,notnull"`
 	Schedule      *Schedule
-	Type          string
-	TransactionID int
+	Type          string // @TODO Replace by enum
+	TransactionID *int   `pg:"alias:transaction_id,notnull"`
 	Transaction   *Transaction
 	Logs          []*Log
 	Labels        map[string]string
@@ -19,6 +23,14 @@ type Job struct {
 
 // GetStatus Computes the status of a Job by checking its logs
 func (job *Job) GetStatus() string {
-	// TODO: Order logs by createdAt when getting them from DB
-	return job.Logs[len(job.Logs)-1].Status
+	status := types.JobStatusCreated
+	var logCreatedAt *time.Time
+	for idx := range job.Logs {
+		if logCreatedAt == nil || job.Logs[idx].CreatedAt.After(*logCreatedAt) {
+			status = job.Logs[idx].Status
+			logCreatedAt = &job.Logs[idx].CreatedAt
+		}
+	}
+
+	return status
 }

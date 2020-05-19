@@ -9,7 +9,7 @@ type TransactionRequest struct {
 
 	ID             int
 	IdempotencyKey string
-	ScheduleID     int
+	ScheduleID     *int `pg:"alias:schedule_id,notnull"`
 	Schedule       *Schedule
 	RequestHash    string
 	Params         string

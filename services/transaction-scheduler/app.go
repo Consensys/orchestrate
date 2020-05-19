@@ -12,7 +12,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/controllers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/multi"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 )
 
@@ -25,15 +25,16 @@ func New(
 	txCrafterTopic string,
 ) (*app.App, error) {
 	// Create Data agents
-	db, err := store.Build(context.Background(), cfg.Store, pgmngr)
+	db, err := multi.Build(context.Background(), cfg.Store, pgmngr)
 	if err != nil {
 		return nil, err
 	}
 
+	ucs := usecases.NewUseCases(db, chainRegistryClient, syncProducer, txCrafterTopic)
 	// Option for transaction handler
 	txSchedulerHandlerOpt := app.HandlerOpt(
 		reflect.TypeOf(&dynamic.Transactions{}),
-		controllers.NewBuilder(usecases.NewUseCases(db, chainRegistryClient, syncProducer, txCrafterTopic)),
+		controllers.NewBuilder(ucs),
 	)
 
 	// Create app

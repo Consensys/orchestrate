@@ -35,16 +35,16 @@ func (m *MockCreateJobUseCase) EXPECT() *MockCreateJobUseCaseMockRecorder {
 }
 
 // Execute mocks base method.
-func (m *MockCreateJobUseCase) Execute(ctx context.Context, jobRequest *types.JobRequest) (*types.JobResponse, error) {
+func (m *MockCreateJobUseCase) Execute(ctx context.Context, jobRequest *types.JobRequest, tenantID string) (*types.JobResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, jobRequest)
+	ret := m.ctrl.Call(m, "Execute", ctx, jobRequest, tenantID)
 	ret0, _ := ret[0].(*types.JobResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute.
-func (mr *MockCreateJobUseCaseMockRecorder) Execute(ctx, jobRequest interface{}) *gomock.Call {
+func (mr *MockCreateJobUseCaseMockRecorder) Execute(ctx, jobRequest, tenantID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateJobUseCase)(nil).Execute), ctx, jobRequest)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateJobUseCase)(nil).Execute), ctx, jobRequest, tenantID)
 }

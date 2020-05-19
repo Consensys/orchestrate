@@ -33,6 +33,13 @@ func PatchRequest(ctx context.Context, client *http.Client, reqURL string, patch
 	return request(ctx, client, reqURL, http.MethodPatch, body)
 }
 
+func PutRequest(ctx context.Context, client *http.Client, reqURL string, putRequest interface{}) (*http.Response, error) {
+	body := new(bytes.Buffer)
+	_ = json.NewEncoder(body).Encode(putRequest)
+
+	return request(ctx, client, reqURL, http.MethodPut, body)
+}
+
 func CloseResponse(response *http.Response) {
 	if deferErr := response.Body.Close(); deferErr != nil {
 		log.WithError(deferErr).Errorf("could not close response body")

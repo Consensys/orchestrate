@@ -5,8 +5,9 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/interfaces"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
+	tsorm "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/orm"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/utils"
 )
 
@@ -20,34 +21,31 @@ type GetScheduleUseCase interface {
 
 // getScheduleUseCase is a use case to get a schedule
 type getScheduleUseCase struct {
-	db interfaces.DB
+	db  store.DB
+	orm tsorm.ORM
 }
 
 // NewGetScheduleUseCase creates a new GetScheduleUseCase
-func NewGetScheduleUseCase(db interfaces.DB) GetScheduleUseCase {
+func NewGetScheduleUseCase(db store.DB, orm tsorm.ORM) GetScheduleUseCase {
 	return &getScheduleUseCase{
-		db: db,
+		db:  db,
+		orm: orm,
 	}
 }
 
 // Execute gets a schedule
 func (uc *getScheduleUseCase) Execute(ctx context.Context, scheduleUUID, tenantID string) (*types.ScheduleResponse, error) {
-	log.WithContext(ctx).WithField("schedule_uuid", scheduleUUID).Debug("getting schedule")
+	log.WithContext(ctx).
+		WithField("schedule_uuid", scheduleUUID).
+		Debug("getting schedule")
 
-	schedule, err := uc.db.Schedule().FindOneByUUID(ctx, scheduleUUID, tenantID)
+	schedule, err := uc.orm.FetchScheduleByUUID(ctx, uc.db, scheduleUUID, tenantID)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(getScheduleComponent)
 	}
 
-	for i, job := range schedule.Jobs {
-		currJob, err := uc.db.Job().FindOneByUUID(ctx, job.UUID, tenantID)
-		if err != nil {
-			return nil, errors.FromError(err).ExtendComponent(getScheduleComponent)
-		}
-
-		schedule.Jobs[i] = currJob
-	}
-
-	log.WithContext(ctx).WithField("schedule_uuid", schedule.UUID).Info("schedule found successfully")
+	log.WithContext(ctx).
+		WithField("schedule_uuid", schedule.UUID).
+		Info("schedule found successfully")
 	return utils.FormatScheduleResponse(schedule), nil
 }

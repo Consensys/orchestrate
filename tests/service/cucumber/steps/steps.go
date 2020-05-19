@@ -24,6 +24,7 @@ import (
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
 	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 	envelopestore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client"
+	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/chanregistry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/parser"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/tracker"
@@ -73,6 +74,9 @@ type ScenarioContext struct {
 	// RegistryClient
 	ContractRegistry registry.ContractRegistryClient
 
+	// Transaction Schedule
+	TransactionScheduler txscheduler.TransactionSchedulerClient
+
 	// Producer to producer envelopes in topics
 	producer sarama.SyncProducer
 
@@ -90,24 +94,28 @@ func setServiceURL(sc *ScenarioContext) {
 	sc.aliases.Set(GenericNamespace, "envelope-store", viper.GetString(envelopestore.EnvelopeStoreURLViperKey))
 	sc.aliases.Set(GenericNamespace, "envelope-store-metrics", viper.GetString(envelopestore.EnvelopeStoreMetricsURLViperKey))
 	sc.aliases.Set(GenericNamespace, "envelope-store-http", viper.GetString(envelopestore.EnvelopeStoreHTTPURLViperKey))
+	sc.aliases.Set(GenericNamespace, "tx-scheduler-metrics", viper.GetString(txscheduler.TxSchedulerMetricsURLViperKey))
+	sc.aliases.Set(GenericNamespace, "tx-scheduler-http", viper.GetString(txscheduler.TxSchedulerURLViperKey))
 }
 
 func NewScenarioContext(
 	chanReg *chanregistry.ChanRegistry,
 	httpClient *gohttp.Client,
 	contractRegistry registry.ContractRegistryClient,
+	txScheduler txscheduler.TransactionSchedulerClient,
 	producer sarama.SyncProducer,
 	p *parser.Parser,
 ) *ScenarioContext {
 	sc := &ScenarioContext{
-		chanReg:          chanReg,
-		httpClient:       httpClient,
-		aliases:          p.GetAliasRegistry(),
-		ContractRegistry: contractRegistry,
-		producer:         producer,
-		parser:           p,
-		logger:           log.NewEntry(log.StandardLogger()),
-		authSetup:        AuthSetup{},
+		chanReg:              chanReg,
+		httpClient:           httpClient,
+		aliases:              p.GetAliasRegistry(),
+		ContractRegistry:     contractRegistry,
+		TransactionScheduler: txScheduler,
+		producer:             producer,
+		parser:               p,
+		logger:               log.NewEntry(log.StandardLogger()),
+		authSetup:            AuthSetup{},
 	}
 
 	setServiceURL(sc)
@@ -481,6 +489,7 @@ func FeatureContext(s *godog.Suite) {
 		chanregistry.GlobalChanRegistry(),
 		http.NewClient(),
 		contractregistry.GlobalClient(),
+		txscheduler.GlobalClient(),
 		broker.GlobalSyncProducer(),
 		parser.GlobalParser(),
 	)

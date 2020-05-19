@@ -34,18 +34,18 @@ func (m *MockTransactionValidator) EXPECT() *MockTransactionValidatorMockRecorde
 }
 
 // ValidateRequestHash mocks base method.
-func (m *MockTransactionValidator) ValidateRequestHash(ctx context.Context, params interface{}, idempotencyKey string) (string, error) {
+func (m *MockTransactionValidator) ValidateRequestHash(ctx context.Context, chainUUID string, params interface{}, idempotencyKey string) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ValidateRequestHash", ctx, params, idempotencyKey)
+	ret := m.ctrl.Call(m, "ValidateRequestHash", ctx, chainUUID, params, idempotencyKey)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ValidateRequestHash indicates an expected call of ValidateRequestHash.
-func (mr *MockTransactionValidatorMockRecorder) ValidateRequestHash(ctx, params, idempotencyKey interface{}) *gomock.Call {
+func (mr *MockTransactionValidatorMockRecorder) ValidateRequestHash(ctx, chainUUID, params, idempotencyKey interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateRequestHash", reflect.TypeOf((*MockTransactionValidator)(nil).ValidateRequestHash), ctx, params, idempotencyKey)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateRequestHash", reflect.TypeOf((*MockTransactionValidator)(nil).ValidateRequestHash), ctx, chainUUID, params, idempotencyKey)
 }
 
 // ValidateChainExists mocks base method.

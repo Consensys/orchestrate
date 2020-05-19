@@ -42,8 +42,8 @@ func FormatScheduleResponse(scheduleModel *models.Schedule) *types.ScheduleRespo
 		Jobs:      []*types.JobResponse{},
 	}
 
-	for _, job := range scheduleModel.Jobs {
-		scheduleResponse.Jobs = append(scheduleResponse.Jobs, FormatJobResponse(job))
+	for idx := range scheduleModel.Jobs {
+		scheduleResponse.Jobs = append(scheduleResponse.Jobs, FormatJobResponse(scheduleModel.Jobs[idx]))
 	}
 
 	return scheduleResponse

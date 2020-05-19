@@ -14,21 +14,20 @@ import (
 )
 
 type SchedulesController struct {
-	createScheduleUseCase schedules.CreateScheduleUseCase
-	getScheduleUseCase    schedules.GetScheduleUseCase
+	ucs schedules.UseCases
 }
 
-func NewSchedulesController(createScheduleUseCase schedules.CreateScheduleUseCase, getScheduleUseCase schedules.GetScheduleUseCase) *SchedulesController {
+func NewSchedulesController(useCases schedules.UseCases) *SchedulesController {
 	return &SchedulesController{
-		createScheduleUseCase: createScheduleUseCase,
-		getScheduleUseCase:    getScheduleUseCase,
+		ucs: useCases,
 	}
 }
 
 // Add routes to router
 func (c *SchedulesController) Append(router *mux.Router) {
-	router.Methods(http.MethodPost).Path("/schedules").HandlerFunc(c.Create)
-	router.Methods(http.MethodGet).Path("/schedules/{uuid}").HandlerFunc(c.Get)
+	router.Methods(http.MethodPost).Path("/schedules").HandlerFunc(c.create)
+	router.Methods(http.MethodGet).Path("/schedules/{uuid}").HandlerFunc(c.getOne)
+	router.Methods(http.MethodGet).Path("/schedules").HandlerFunc(c.get)
 }
 
 // @Summary Creates a new schedule
@@ -40,7 +39,7 @@ func (c *SchedulesController) Append(router *mux.Router) {
 // @Failure 422
 // @Failure 500
 // @Router /schedules [post]
-func (c *SchedulesController) Create(rw http.ResponseWriter, request *http.Request) {
+func (c *SchedulesController) create(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
@@ -51,7 +50,7 @@ func (c *SchedulesController) Create(rw http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	scheduleResponse, err := c.createScheduleUseCase.Execute(ctx, scheduleRequest, multitenancy.TenantIDFromContext(ctx))
+	scheduleResponse, err := c.ucs.CreateSchedule().Execute(ctx, scheduleRequest, multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -60,7 +59,7 @@ func (c *SchedulesController) Create(rw http.ResponseWriter, request *http.Reque
 	_ = json.NewEncoder(rw).Encode(scheduleResponse)
 }
 
-// @Summary Creates a new schedule
+// @Summary Fetch an schedule by its UUID
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
@@ -68,13 +67,34 @@ func (c *SchedulesController) Create(rw http.ResponseWriter, request *http.Reque
 // @Failure 404
 // @Failure 500
 // @Router /schedules/{uuid} [get]
-func (c *SchedulesController) Get(rw http.ResponseWriter, request *http.Request) {
+func (c *SchedulesController) getOne(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
 	uuid := mux.Vars(request)["uuid"]
 
-	scheduleResponse, err := c.getScheduleUseCase.Execute(ctx, uuid, multitenancy.TenantIDFromContext(ctx))
+	scheduleResponse, err := c.ucs.GetSchedule().Execute(ctx, uuid, multitenancy.TenantIDFromContext(ctx))
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	_ = json.NewEncoder(rw).Encode(scheduleResponse)
+}
+
+// @Summary Fetch a list of schedules
+// @Produce json
+// @Security ApiKeyAuth
+// @Security JWTAuth
+// @Success 200
+// @Failure 404
+// @Failure 500
+// @Router /schedules [get]
+func (c *SchedulesController) get(rw http.ResponseWriter, request *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	ctx := request.Context()
+
+	scheduleResponse, err := c.ucs.GetSchedules().Execute(ctx, multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return

@@ -6,21 +6,20 @@ package dataagents
 
 import (
 	"context"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	pgTestUtils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/postgres/migrations"
-	"testing"
 )
 
 type logTestSuite struct {
 	suite.Suite
-	dataagent  *PGLog
-	jobDA      *PGJob
-	scheduleDA *PGSchedule
-	pg         *pgTestUtils.PGTestHelper
+	agents *PGAgents
+	pg     *pgTestUtils.PGTestHelper
 }
 
 func TestPGLog(t *testing.T) {
@@ -35,9 +34,7 @@ func (s *logTestSuite) SetupSuite() {
 
 func (s *logTestSuite) SetupTest() {
 	s.pg.UpgradeTestDB(s.T())
-	s.jobDA = NewPGJob(s.pg.DB)
-	s.scheduleDA = NewPGSchedule(s.pg.DB)
-	s.dataagent = NewPGLog(s.pg.DB)
+	s.agents = New(s.pg.DB)
 }
 
 func (s *logTestSuite) TearDownTest() {
@@ -50,30 +47,46 @@ func (s *logTestSuite) TearDownSuite() {
 
 func (s *logTestSuite) TestPGLog_Insert() {
 	ctx := context.Background()
-	schedule := testutils.FakeSchedule()
-	_ = s.scheduleDA.Insert(ctx, schedule)
 
-	job := testutils.FakeJob(schedule.ID)
-	_ = s.jobDA.Insert(ctx, job)
+	job := testutils.FakeJob(0)
+	err := s.agents.Schedule().Insert(ctx, job.Schedule)
+	assert.Nil(s.T(), err)
+	err = s.agents.Transaction().Insert(ctx, job.Transaction)
+	assert.Nil(s.T(), err)
+	err = s.agents.Job().Insert(ctx, job)
+	assert.Nil(s.T(), err)
 
 	s.T().Run("should insert model successfully", func(t *testing.T) {
-		log := testutils.FakeLog(job.ID)
-		err := s.dataagent.Insert(context.Background(), log)
+		jobLog := testutils.FakeLog()
+		jobLog.JobID = &job.ID
+		err = s.agents.Log().Insert(ctx, jobLog)
 
 		assert.Nil(t, err)
-		assert.NotNil(t, log.UUID)
-		assert.Equal(t, 1, log.ID) // 2 because one is inserted when creating the job
+		assert.NotEmpty(t, jobLog.ID) // 2 because one is inserted when creating the job
 	})
 
+	s.T().Run("should insert model without UUID successfully", func(t *testing.T) {
+		jobLog := testutils.FakeLog()
+		jobLog.UUID = ""
+		jobLog.JobID = &job.ID
+		err = s.agents.Log().Insert(ctx, jobLog)
+
+		assert.Nil(t, err)
+		assert.NotEmpty(t, jobLog.ID) // 2 because one is inserted when creating the job
+	})
+}
+
+func (s *logTestSuite) TestPGLog_ConnectionErr() {
+	ctx := context.Background()
+
+	// We drop the DB to make the test fail
+	s.pg.DropTestDB(s.T())
+	job := testutils.FakeLog()
 	s.T().Run("should return PostgresConnectionError if insert fails", func(t *testing.T) {
-		// We drop the DB to make the test fail
-		s.pg.DropTestDB(t)
-
-		log := testutils.FakeLog(job.ID)
-		err := s.dataagent.Insert(context.Background(), log)
+		err := s.agents.Log().Insert(ctx, job)
 		assert.True(t, errors.IsPostgresConnectionError(err))
-
-		// We bring it back up
-		s.pg.InitTestDB(t)
 	})
+
+	// We bring it back up
+	s.pg.InitTestDB(s.T())
 }

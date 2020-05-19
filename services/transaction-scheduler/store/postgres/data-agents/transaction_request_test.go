@@ -12,15 +12,15 @@ import (
 	"github.com/stretchr/testify/suite"
 	pgTestUtils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/postgres/migrations"
 )
 
 type txRequestTestSuite struct {
 	suite.Suite
-	dataagent  *PGTransactionRequest
-	scheduleDA *PGSchedule
-	pg         *pgTestUtils.PGTestHelper
+	agents *PGAgents
+	pg     *pgTestUtils.PGTestHelper
 }
 
 func TestPGTransactionRequest(t *testing.T) {
@@ -35,8 +35,7 @@ func (s *txRequestTestSuite) SetupSuite() {
 
 func (s *txRequestTestSuite) SetupTest() {
 	s.pg.UpgradeTestDB(s.T())
-	s.scheduleDA = NewPGSchedule(s.pg.DB)
-	s.dataagent = NewPGTransactionRequest(s.pg.DB)
+	s.agents = New(s.pg.DB)
 }
 
 func (s *txRequestTestSuite) TearDownTest() {
@@ -49,72 +48,87 @@ func (s *txRequestTestSuite) TearDownSuite() {
 
 func (s *txRequestTestSuite) TestPGTransactionRequest_SelectOrInsert() {
 	ctx := context.Background()
-	schedule := testutils.FakeSchedule()
-	_ = s.scheduleDA.Insert(ctx, schedule)
 
 	s.T().Run("should insert model successfully", func(t *testing.T) {
-		txRequest := testutils.FakeTxRequest(schedule.ID)
-		err := s.dataagent.SelectOrInsert(ctx, txRequest)
+		txRequest := testutils.FakeTxRequest(0)
+		err := insertTxRequest(ctx, s.agents, txRequest)
 
 		assert.Nil(t, err)
-		assert.Equal(t, 1, txRequest.ID)
+		assert.NotEmpty(t, txRequest.ID)
+	})
+
+	s.T().Run("should insert model only using ScheduleID successfully", func(t *testing.T) {
+		txRequest := testutils.FakeTxRequest(0)
+		txRequest.ScheduleID = &(&struct{ x int }{1}).x
+		txRequest.Schedule = nil
+		err := s.agents.TransactionRequest().SelectOrInsert(ctx, txRequest)
+
+		assert.Nil(t, err)
+		assert.NotEmpty(t, txRequest.ID)
 	})
 
 	s.T().Run("Does nothing if idempotency key is already used and returns request", func(t *testing.T) {
-		txRequest0 := testutils.FakeTxRequest(schedule.ID)
-		err := s.dataagent.SelectOrInsert(ctx, txRequest0)
+		txRequest0 := testutils.FakeTxRequest(0)
+		err := insertTxRequest(ctx, s.agents, txRequest0)
 		assert.Nil(t, err)
 
-		txRequest1 := testutils.FakeTxRequest(schedule.ID)
+		txRequest1 := testutils.FakeTxRequest(0)
 		txRequest1.IdempotencyKey = txRequest0.IdempotencyKey
-		_ = s.dataagent.SelectOrInsert(ctx, txRequest1)
+		_ = s.agents.TransactionRequest().SelectOrInsert(ctx, txRequest1)
 
 		assert.Equal(t, txRequest0.IdempotencyKey, txRequest1.IdempotencyKey)
-	})
-
-	s.T().Run("should return PostgresConnectionError if insert fails", func(t *testing.T) {
-		// We drop the DB to make the test fail
-		s.pg.DropTestDB(t)
-
-		txRequest := testutils.FakeTxRequest(schedule.ID)
-		err := s.dataagent.SelectOrInsert(ctx, txRequest)
-		assert.True(t, errors.IsPostgresConnectionError(err))
-
-		// We bring it back up
-		s.pg.InitTestDB(t)
 	})
 }
 
 func (s *txRequestTestSuite) TestPGTransactionRequest_FindOneByIdempotencyKey() {
 	ctx := context.Background()
-	schedule := testutils.FakeSchedule()
-	_ = s.scheduleDA.Insert(ctx, schedule)
-
-	txRequest := testutils.FakeTxRequest(schedule.ID)
-	_ = s.dataagent.SelectOrInsert(ctx, txRequest)
+	txRequest := testutils.FakeTxRequest(0)
+	err := insertTxRequest(ctx, s.agents, txRequest)
+	assert.Nil(s.T(), err)
 
 	s.T().Run("should find request successfully", func(t *testing.T) {
-		txRequestRetrieved, err := s.dataagent.FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey)
+		txRequestRetrieved, err := s.agents.TransactionRequest().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey)
 
 		assert.Nil(t, err)
 		assert.Equal(t, txRequest.IdempotencyKey, txRequestRetrieved.IdempotencyKey)
-		assert.Equal(t, txRequest.Schedule.ID, txRequestRetrieved.Schedule.ID)
+		assert.Equal(t, txRequest.Schedule.UUID, txRequestRetrieved.Schedule.UUID)
 	})
 
 	s.T().Run("should return NotFoundError if request is not found", func(t *testing.T) {
-		_, err := s.dataagent.FindOneByIdempotencyKey(ctx, "notExisting")
+		_, err := s.agents.TransactionRequest().FindOneByIdempotencyKey(ctx, "notExisting")
 		assert.True(t, errors.IsNotFoundError(err))
 	})
+}
 
-	s.T().Run("should return PostgresConnectionError if find fails", func(t *testing.T) {
-		// We drop the DB to make the test fail
-		s.pg.DropTestDB(t)
+func (s *txRequestTestSuite) TestPGTransactionRequest_ConnectionErr() {
+	ctx := context.Background()
 
-		txRequestRetrieved, err := s.dataagent.FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey)
+	// We drop the DB to make the test fail
+	s.pg.DropTestDB(s.T())
+	txRequest := testutils.FakeTxRequest(0)
+
+	s.T().Run("should return PostgresConnectionError if insert fails", func(t *testing.T) {
+		err := insertTxRequest(ctx, s.agents, txRequest)
 		assert.True(t, errors.IsPostgresConnectionError(err))
-		assert.Nil(t, txRequestRetrieved)
-
-		// We bring it back up
-		s.pg.InitTestDB(t)
 	})
+	// 
+	s.T().Run("should return PostgresConnectionError if find fails", func(t *testing.T) {
+		_, err := s.agents.TransactionRequest().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey)
+		assert.True(t, errors.IsPostgresConnectionError(err))
+	})
+
+	// We bring it back up
+	s.pg.InitTestDB(s.T())
+}
+
+func insertTxRequest(ctx context.Context, agents *PGAgents, txReq *models.TransactionRequest) (error) {
+	if err := agents.Schedule().Insert(ctx, txReq.Schedule); err != nil {
+		return err
+	}
+
+	if err := agents.TransactionRequest().SelectOrInsert(ctx, txReq); err != nil {
+		return err
+	}
+
+	return nil
 }

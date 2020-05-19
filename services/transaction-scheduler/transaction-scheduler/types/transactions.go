@@ -4,8 +4,13 @@ import "time"
 
 type BaseTransactionRequest struct {
 	IdempotencyKey string            `json:"idempotencyKey" validate:"required"`
-	ChainUUID      string            `json:"chainUUID" validate:"required,uuid4"`
 	Labels         map[string]string `json:"labels,omitempty"`
+}
+
+type BaseTransactionParams struct {
+	Value    string `json:"value,omitempty" validate:"omitempty,isBig"`
+	Gas      string `json:"gas,omitempty"`
+	GasPrice string `json:"gasPrice,omitempty" validate:"omitempty,isBig"`
 }
 
 type TransactionRequest struct {
@@ -36,11 +41,9 @@ type TransferRequest struct {
 	Params TransferParams `json:"params" validate:"required"`
 }
 type TransferParams struct {
-	From     string  `json:"from" validate:"required,eth_addr"`
-	To       string  `json:"to" validate:"required,eth_addr"`
-	Value    string  `json:"value" validate:"isBig"`
-	Gas      *uint32 `json:"gas,omitempty"`
-	GasPrice *string `json:"gasPrice,omitempty" validate:"omitempty,isBig"`
+	BaseTransactionParams
+	From string `json:"from" validate:"required,eth_addr"`
+	To   string `json:"to" validate:"required,eth_addr"`
 }
 
 type DeployContractRequest struct {
@@ -48,10 +51,8 @@ type DeployContractRequest struct {
 	Params DeployContractParams `json:"params" validate:"required"`
 }
 type DeployContractParams struct {
+	BaseTransactionParams
 	From         string             `json:"from" validate:"required,eth_addr"`
-	Value        *string            `json:"value,omitempty" validate:"omitempty,isBig"`
-	Gas          *uint32            `json:"gas,omitempty"`
-	GasPrice     *string            `json:"gasPrice,omitempty" validate:"omitempty,isBig"`
 	ContractName string             `json:"contractName" validate:"required"`
 	ContractTag  *string            `json:"contractTag,omitempty"`
 	Args         *map[string]string `json:"args,omitempty"`
@@ -63,10 +64,9 @@ type PrivateTransactionRequest struct {
 	Params PrivateTransactionParams `json:"params" validate:"required"`
 }
 type PrivateTransactionParams struct {
+	BaseTransactionParams
 	From            string             `json:"from" validate:"required,eth_addr"`
 	To              string             `json:"to" validate:"required,eth_addr"`
-	Gas             *uint32            `json:"gas,omitempty"`
-	GasPrice        *string            `json:"gasPrice,omitempty" validate:"omitempty,isBig"`
 	MethodSignature string             `json:"methodSignature" validate:"required,isValidMethodSig"`
 	Args            *map[string]string `json:"args,omitempty"`
 	PrivateFrom     string             `json:"privateFrom" validate:"required,base64"`

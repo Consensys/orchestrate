@@ -3,15 +3,14 @@ package schedules
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/interfaces"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/validators"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
 )
 
@@ -26,11 +25,11 @@ type CreateScheduleUseCase interface {
 // createScheduleUseCase is a use case to create a new transaction schedule
 type createScheduleUseCase struct {
 	validator validators.TransactionValidator
-	db        interfaces.DB
+	db        store.DB
 }
 
 // NewCreateScheduleUseCase creates a new CreateScheduleUseCase
-func NewCreateScheduleUseCase(validator validators.TransactionValidator, db interfaces.DB) CreateScheduleUseCase {
+func NewCreateScheduleUseCase(validator validators.TransactionValidator, db store.DB) CreateScheduleUseCase {
 	return &createScheduleUseCase{
 		validator: validator,
 		db:        db,
@@ -61,6 +60,7 @@ func (uc *createScheduleUseCase) Execute(
 		ChainUUID: scheduleRequest.ChainUUID,
 		TenantID:  tenantID,
 	}
+
 	err = uc.db.Schedule().Insert(ctx, schedule)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createScheduleComponent)

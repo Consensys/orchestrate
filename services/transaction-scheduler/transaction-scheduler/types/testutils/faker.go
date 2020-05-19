@@ -9,7 +9,6 @@ func FakeTransactionRequest() *types.TransactionRequest {
 	return &types.TransactionRequest{
 		BaseTransactionRequest: types.BaseTransactionRequest{
 			IdempotencyKey: uuid.NewV4().String(),
-			ChainUUID:      uuid.NewV4().String(),
 		},
 		Params: types.TransactionParams{
 			From:            "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
@@ -40,8 +39,15 @@ func FakeScheduleResponse() *types.ScheduleResponse {
 
 func FakeJobRequest() *types.JobRequest {
 	return &types.JobRequest{
-		ScheduleID:  1,
-		Type:        types.JobConstantinopleTransaction,
+		ScheduleUUID: uuid.NewV4().String(),
+		Type:         types.JobConstantinopleTransaction,
+		Labels:       nil,
+		Transaction:  *FakeETHTransaction(),
+	}
+}
+
+func FakeJobUpdateRequest() *types.JobUpdateRequest {
+	return &types.JobUpdateRequest{
 		Labels:      nil,
 		Transaction: *FakeETHTransaction(),
 	}
