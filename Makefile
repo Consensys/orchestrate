@@ -61,7 +61,7 @@ gen-swagger:
 	@go generate gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/service/controllers
 	@go generate gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/controllers
 
-generate-deepcopy:
+gen-deepcopy:
 	@bash scripts/deepcopy/generate.sh
 
 # Tools

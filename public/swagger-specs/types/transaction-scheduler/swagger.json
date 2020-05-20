@@ -28,7 +28,7 @@
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Search job list by provided filters",
+                "summary": "Search jobs by provided filters",
                 "responses": {
                     "200": {},
                     "400": {},
@@ -47,7 +47,7 @@
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Creates a new schedule",
+                "summary": "Creates a new Job",
                 "responses": {
                     "200": {},
                     "400": {},
@@ -86,7 +86,7 @@
                         "JWTAuth": []
                     }
                 ],
-                "summary": "Creates a new schedule",
+                "summary": "Start a Job by its UUID",
                 "responses": {
                     "202": {},
                     "404": {},
@@ -94,7 +94,6 @@
                 }
             }
         },
-        "/jobs/{uuid}/transaction": {},
         "/schedules": {
             "get": {
                 "security": [
@@ -108,7 +107,7 @@
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Creates a new schedule",
+                "summary": "Fetch a list of schedules",
                 "responses": {
                     "200": {},
                     "404": {},
@@ -149,7 +148,7 @@
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Creates a new schedule",
+                "summary": "Fetch an schedule by its UUID",
                 "responses": {
                     "200": {},
                     "404": {},

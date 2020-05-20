@@ -2,13 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## v2.1.0-rc3 (Unreleased)
+## v2.1.0-rc3 (2020-05-20)
 
 ### 🆕 Features
-* Add support for TLS connection to Postgres. 
-* Add flags and environment variables:
+* Add support for One-time key signature.
+* Add support for TLS connection to Postgres. Add flags and environment variables:
     * `DB_TLS_CERT`: PEM certificate to connect to the database
-    * `DB_TLS_KEY`: PEM key to connect to the datase
+    * `DB_TLS_KEY`: PEM key to connect to the database
     * `DB_TLS_CA`: PEM trusted CA that issued certificate
    
 ## v2.1.0-rc2 (2020-05-07)
