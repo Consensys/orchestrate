@@ -40,6 +40,7 @@ services:
   image: docker:19
   stage: build
   before_script:
+    - export DOCKER_API_VERSION=1.39
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
   after_script:
     - docker logout $CI_REGISTRY
