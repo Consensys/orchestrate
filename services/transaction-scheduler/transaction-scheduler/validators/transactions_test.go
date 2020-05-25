@@ -7,6 +7,7 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mock"
 	chainmodel "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 
 	"github.com/golang/mock/gomock"
@@ -14,7 +15,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types/testutils"
 )
 
 const (
@@ -46,7 +46,7 @@ func (s *transactionsTestSuite) SetupTest() {
 }
 
 func (s *transactionsTestSuite) TestTransactionValidator_ValidateRequestHash() {
-	txRequest := testutils.FakeTransactionRequest()
+	txRequest := testutils.FakeSendTransactionRequest()
 
 	s.T().Run("should validate tx successfully and return the request hash if data agent returns not found", func(t *testing.T) {
 		s.mockTxRequestDA.EXPECT().FindOneByIdempotencyKey(gomock.Any(), txRequest.IdempotencyKey).Return(nil, errors.NotFoundError("error"))

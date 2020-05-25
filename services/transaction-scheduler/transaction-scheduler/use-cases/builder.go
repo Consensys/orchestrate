@@ -5,7 +5,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/orm"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/schedules"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/transactions"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/validators"
@@ -40,20 +39,24 @@ func NewUseCases(
 ) UseCases {
 	txValidator := validators.NewTransactionValidator(db, chainRegistryClient)
 
+	createScheduleUC := schedules.NewCreateScheduleUseCase(txValidator, db)
+	getScheduleUC := schedules.NewGetScheduleUseCase(db)
+	createJobUC := jobs.NewCreateJobUseCase(db)
 	startJobUC := jobs.NewStartJobUseCase(db, producer, txCrafterPartition)
 
 	return &useCases{
 		// Transaction
-		sendTransaction: transactions.NewSendTxUseCase(txValidator, db, orm.New(), startJobUC),
+		sendTransaction: transactions.NewSendTxUseCase(txValidator, db, startJobUC, createJobUC, createScheduleUC,
+			getScheduleUC),
 		// Schedules
-		createSchedule: schedules.NewCreateScheduleUseCase(txValidator, db),
-		getSchedule:    schedules.NewGetScheduleUseCase(db, orm.New()),
-		getSchedules:   schedules.NewGetSchedulesUseCase(db, orm.New()),
+		createSchedule: createScheduleUC,
+		getSchedule:    getScheduleUC,
+		getSchedules:   schedules.NewGetSchedulesUseCase(db),
 		// Jobs
-		createJob:  jobs.NewCreateJobUseCase(db, orm.New()),
+		createJob:  createJobUC,
 		getJob:     jobs.NewGetJobUseCase(db),
 		searchJobs: jobs.NewSearchJobsUseCase(db),
-		updateJob:  jobs.NewUpdateJobUseCase(db, orm.New()),
+		updateJob:  jobs.NewUpdateJobUseCase(db),
 		startJob:   startJobUC,
 	}
 }

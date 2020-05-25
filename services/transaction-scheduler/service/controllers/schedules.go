@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/schedules"
 
 	"github.com/gorilla/mux"
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
 )
 
 type SchedulesController struct {
@@ -43,20 +44,22 @@ func (c *SchedulesController) create(rw http.ResponseWriter, request *http.Reque
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	scheduleRequest := &types.ScheduleRequest{}
+	scheduleRequest := &types.CreateScheduleRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, scheduleRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	scheduleResponse, err := c.ucs.CreateSchedule().Execute(ctx, scheduleRequest, multitenancy.TenantIDFromContext(ctx))
+	schedule := formatters.FormatScheduleCreateRequest(scheduleRequest)
+	scheduleEntity, err := c.ucs.CreateSchedule().Execute(ctx, schedule, multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 
-	_ = json.NewEncoder(rw).Encode(scheduleResponse)
+	response := formatters.FormatScheduleResponse(scheduleEntity)
+	_ = json.NewEncoder(rw).Encode(response)
 }
 
 // @Summary Fetch an schedule by its UUID
@@ -73,13 +76,14 @@ func (c *SchedulesController) getOne(rw http.ResponseWriter, request *http.Reque
 
 	uuid := mux.Vars(request)["uuid"]
 
-	scheduleResponse, err := c.ucs.GetSchedule().Execute(ctx, uuid, multitenancy.TenantIDFromContext(ctx))
+	scheduleEntity, err := c.ucs.GetSchedule().Execute(ctx, uuid, multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 
-	_ = json.NewEncoder(rw).Encode(scheduleResponse)
+	response := formatters.FormatScheduleResponse(scheduleEntity)
+	_ = json.NewEncoder(rw).Encode(response)
 }
 
 // @Summary Fetch a list of schedules
@@ -94,11 +98,16 @@ func (c *SchedulesController) get(rw http.ResponseWriter, request *http.Request)
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	scheduleResponse, err := c.ucs.GetSchedules().Execute(ctx, multitenancy.TenantIDFromContext(ctx))
+	scheduleEntities, err := c.ucs.GetSchedules().Execute(ctx, multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 
-	_ = json.NewEncoder(rw).Encode(scheduleResponse)
+	response := []*types.ScheduleResponse{}
+	for _, scheduleEntity := range scheduleEntities {
+		response = append(response, formatters.FormatScheduleResponse(scheduleEntity))
+	}
+
+	_ = json.NewEncoder(rw).Encode(response)
 }

@@ -11,7 +11,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
 )
 
 func TestGetJob_Execute(t *testing.T) {
@@ -30,7 +30,7 @@ func TestGetJob_Execute(t *testing.T) {
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		job := testutils.FakeJob(0)
-		expectedResponse := utils.FormatJobResponse(job)
+		expectedResponse := parsers.NewJobEntityFromModels(job)
 		
 		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, tenantID).Return(job, nil)
 		jobResponse, err := usecase.Execute(ctx, job.UUID, tenantID)
@@ -42,11 +42,11 @@ func TestGetJob_Execute(t *testing.T) {
 	t.Run("should fail with same error if FindOneByUUID fails for job", func(t *testing.T) {
 		uuid := "uuid"
 		expectedErr := errors.NotFoundError("error")
-
+	
 		mockJobDA.EXPECT().FindOneByUUID(ctx, uuid, tenantID).Return(nil, expectedErr)
-
+	
 		response, err := usecase.Execute(ctx, uuid, tenantID)
-
+	
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createJobComponent), err)
 	})

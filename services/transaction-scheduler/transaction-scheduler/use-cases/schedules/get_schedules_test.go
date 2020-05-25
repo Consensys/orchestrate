@@ -1,7 +1,6 @@
 // +build unit
 
 package schedules
-
 import (
 	"context"
 	"testing"
@@ -11,39 +10,76 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
-	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/orm/mocks"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 )
 
 func TestGetSchedules_Execute(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockORM := mocks2.NewMockORM(ctrl)
 	mockDB := mocks.NewMockDB(ctrl)
+	mockScheduleDA := mocks.NewMockScheduleAgent(ctrl)
+	mockJobDA := mocks.NewMockJobAgent(ctrl)
 
-	usecase := NewGetSchedulesUseCase(mockDB, mockORM)
+	usecase := NewGetSchedulesUseCase(mockDB)
 	tenantID := "tenantID"
+	chainUUID := "ChainUUID"
 	ctx := context.Background()
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
-		schedule := testutils.FakeSchedule("")
-		expectedResponse := []*types.ScheduleResponse{utils.FormatScheduleResponse(schedule)}
+		scheduleEntity := testutils.FakeScheduleEntity(chainUUID)
+		scheduleModel := parsers.NewScheduleModelFromEntities(scheduleEntity, tenantID)
+		expectedResponse := []*entities.Schedule{parsers.NewScheduleEntityFromModels(scheduleModel)}
+		
+		mockDB.EXPECT().Schedule().Return(mockScheduleDA).Times(1)
+		mockDB.EXPECT().Job().Return(mockJobDA).Times(1)
+		
+		mockScheduleDA.EXPECT().
+			FindAll(gomock.Any(), tenantID).
+			Return([]*models.Schedule{scheduleModel}, nil)
 
-		mockORM.EXPECT().FetchAllSchedules(ctx, mockDB, tenantID).Return([]*models.Schedule{schedule}, nil)
+		mockJobDA.EXPECT().
+			FindOneByUUID(gomock.Any(), scheduleModel.Jobs[0].UUID, tenantID).
+			Return(scheduleModel.Jobs[0], nil)
 
-		scheduleResponse, err := usecase.Execute(ctx, tenantID)
+		schedulesResponse, err := usecase.Execute(ctx, tenantID)
 
 		assert.Nil(t, err)
-		assert.Equal(t, expectedResponse, scheduleResponse)
+		assert.Equal(t, expectedResponse, schedulesResponse)
 	})
 
 	t.Run("should fail with same error if FindAll fails for schedules", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 
-		mockORM.EXPECT().FetchAllSchedules(ctx, mockDB, tenantID).Return([]*models.Schedule{}, expectedErr)
+		mockDB.EXPECT().Schedule().Return(mockScheduleDA).Times(1)
+		
+		mockScheduleDA.EXPECT().
+			FindAll(gomock.Any(), tenantID).
+			Return(nil, expectedErr)
+
+		scheduleResponse, err := usecase.Execute(ctx, tenantID)
+
+		assert.Nil(t, scheduleResponse)
+		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createScheduleComponent), err)
+	})
+
+	t.Run("should fail with same error if FindOne fails for jobs", func(t *testing.T) {
+		expectedErr := errors.NotFoundError("error")
+		scheduleEntity := testutils.FakeScheduleEntity(chainUUID)
+		scheduleModel := parsers.NewScheduleModelFromEntities(scheduleEntity, tenantID)
+
+		mockDB.EXPECT().Schedule().Return(mockScheduleDA).Times(1)
+		mockDB.EXPECT().Job().Return(mockJobDA).Times(1)
+
+		mockScheduleDA.EXPECT().
+			FindAll(gomock.Any(), tenantID).
+			Return([]*models.Schedule{scheduleModel}, nil)
+		
+		mockJobDA.EXPECT().
+			FindOneByUUID(gomock.Any(), scheduleModel.Jobs[0].UUID, tenantID).
+			Return(scheduleModel.Jobs[0], expectedErr)
 
 		scheduleResponse, err := usecase.Execute(ctx, tenantID)
 

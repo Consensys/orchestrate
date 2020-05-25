@@ -29,23 +29,23 @@ CREATE TABLE transactions (
 	UNIQUE(hash)
 );
 
+CREATE TABLE transaction_requests (
+    id SERIAL PRIMARY KEY,
+    idempotency_key TEXT NOT NULL,
+	request_hash TEXT NOT NULL,
+    params jsonb NOT NULL,
+	created_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL, 
+	UNIQUE(idempotency_key)
+);
+
 CREATE TABLE schedules (
     id SERIAL PRIMARY KEY,
     uuid UUID NOT NULL,
 	tenant_id TEXT NOT NULL,
 	chain_uuid UUID NOT NULL,
+	transaction_request_id INTEGER REFERENCES transaction_requests(id),
 	created_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL, 
 	UNIQUE(uuid)
-);
-
-CREATE TABLE requests (
-    id SERIAL PRIMARY KEY,
-    idempotency_key TEXT NOT NULL,
-	request_hash TEXT NOT NULL,
-	schedule_id INTEGER NOT NULL REFERENCES schedules(id),
-    params jsonb NOT NULL,
-	created_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL, 
-	UNIQUE(idempotency_key)
 );
 
 CREATE TABLE jobs (
@@ -81,10 +81,10 @@ CREATE TABLE logs (
 func dropContextTable(db migrations.DB) error {
 	log.Debug("Dropping tables")
 	_, err := db.Exec(`
-DROP TABLE requests;
 DROP TABLE logs;
 DROP TABLE jobs;
 DROP TABLE schedules;
+DROP TABLE transaction_requests;
 DROP TABLE transactions;
 `)
 	if err != nil {

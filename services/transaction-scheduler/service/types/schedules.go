@@ -1,8 +1,10 @@
 package types
 
-import "time"
+import (
+	"time"
+)
 
-type ScheduleRequest struct {
+type CreateScheduleRequest struct {
 	ChainUUID string `json:"chainUUID" validate:"required,uuid4"`
 }
 

@@ -12,8 +12,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
 )
 
 func TestSearchJobs_Execute(t *testing.T) {
@@ -33,7 +33,7 @@ func TestSearchJobs_Execute(t *testing.T) {
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		jobs := []*models.Job{testutils.FakeJob(0)}
 		filters := make(map[string]string)
-		expectedResponse := []*types.JobResponse{utils.FormatJobResponse(jobs[0])}
+		expectedResponse := []*entities.Job{parsers.NewJobEntityFromModels(jobs[0])}
 		
 		mockJobDA.EXPECT().Search(ctx, filters, tenantID).Return(jobs, nil)
 		jobResponse, err := usecase.Execute(ctx, filters, tenantID)
@@ -51,6 +51,6 @@ func TestSearchJobs_Execute(t *testing.T) {
 		response, err := usecase.Execute(ctx, filters, tenantID)
 
 		assert.Nil(t, response)
-		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createJobComponent), err)
+		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(searchJobsComponent), err)
 	})
 }

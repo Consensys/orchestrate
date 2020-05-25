@@ -1,17 +1,26 @@
 package types
 
-import "time"
+import (
+	"time"
+)
 
-type JobRequest struct {
+type CreateJobRequest struct {
 	ScheduleUUID string            `json:"scheduleUUID" validate:"required"`
 	Type         string            `json:"type" validate:"required"` //  @TODO validate Type is valid
 	Labels       map[string]string `json:"labels,omitempty"`
 	Transaction  ETHTransaction    `json:"transaction" validate:"required"`
 }
 
-type JobUpdateRequest struct {
+type UpdateJobRequest struct {
 	Labels      map[string]string `json:"labels,omitempty"`
 	Transaction ETHTransaction    `json:"transaction"`
+}
+
+type JobResponse struct {
+	UUID        string         `json:"uuid" validate:"required,uuid4"`
+	Transaction ETHTransaction `json:"transaction" validate:"required"`
+	Status      string         `json:"status" validate:"required"`
+	CreatedAt   time.Time      `json:"createdAt"`
 }
 
 type ETHTransaction struct {
@@ -27,11 +36,4 @@ type ETHTransaction struct {
 	PrivateFrom    string   `json:"privateFrom,omitempty"`
 	PrivateFor     []string `json:"privateFor,omitempty"`
 	PrivacyGroupID string   `json:"privacyGroupID,omitempty"`
-}
-
-type JobResponse struct {
-	UUID        string         `json:"uuid" validate:"required,uuid4"`
-	Transaction ETHTransaction `json:"transaction" validate:"required"`
-	Status      string         `json:"status" validate:"required"`
-	CreatedAt   time.Time      `json:"createdAt"`
 }

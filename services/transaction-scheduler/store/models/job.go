@@ -2,8 +2,6 @@ package models
 
 import (
 	"time"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
 )
 
 type Job struct {
@@ -23,7 +21,7 @@ type Job struct {
 
 // GetStatus Computes the status of a Job by checking its logs
 func (job *Job) GetStatus() string {
-	status := types.JobStatusCreated
+	var status string
 	var logCreatedAt *time.Time
 	for idx := range job.Logs {
 		if logCreatedAt == nil || job.Logs[idx].CreatedAt.After(*logCreatedAt) {

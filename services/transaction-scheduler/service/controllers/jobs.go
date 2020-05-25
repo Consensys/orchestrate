@@ -8,7 +8,8 @@ import (
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs"
 )
 
@@ -46,13 +47,18 @@ func (c *JobsController) search(rw http.ResponseWriter, request *http.Request) {
 	// @TODO Read filters from URL
 	filters := make(map[string]string)
 
-	jobResponse, err := c.ucs.SearchJobs().Execute(ctx, filters, multitenancy.TenantIDFromContext(ctx))
+	jobRes, err := c.ucs.SearchJobs().Execute(ctx, filters, multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 
-	_ = json.NewEncoder(rw).Encode(jobResponse)
+	var response []*types.JobResponse
+	for _, jb := range jobRes {
+		response = append(response, formatters.FormatJobResponse(jb))
+	}
+
+	_ = json.NewEncoder(rw).Encode(response)
 }
 
 // @Summary Creates a new Job
@@ -67,20 +73,21 @@ func (c *JobsController) create(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	jobRequest := &types.JobRequest{}
+	jobRequest := &types.CreateJobRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, jobRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	jobResponse, err := c.ucs.CreateJob().Execute(ctx, jobRequest, multitenancy.TenantIDFromContext(ctx))
+	job := formatters.FormatJobCreateRequest(jobRequest)
+	jobRes, err := c.ucs.CreateJob().Execute(ctx, job, multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 
-	_ = json.NewEncoder(rw).Encode(jobResponse)
+	_ = json.NewEncoder(rw).Encode(formatters.FormatJobResponse(jobRes))
 }
 
 // @Summary Fetch a job by its uuid
@@ -97,13 +104,13 @@ func (c *JobsController) getOne(rw http.ResponseWriter, request *http.Request) {
 
 	uuid := mux.Vars(request)["uuid"]
 
-	jobResponse, err := c.ucs.GetJob().Execute(ctx, uuid, multitenancy.TenantIDFromContext(ctx))
+	jobRes, err := c.ucs.GetJob().Execute(ctx, uuid, multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 
-	_ = json.NewEncoder(rw).Encode(jobResponse)
+	_ = json.NewEncoder(rw).Encode(formatters.FormatJobResponse(jobRes))
 }
 
 // @Summary Start a Job by its UUID
@@ -139,19 +146,21 @@ func (c *JobsController) update(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	jobUUID := mux.Vars(request)["uuid"]
-	jobRequest := &types.JobUpdateRequest{}
+	jobRequest := &types.UpdateJobRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, jobRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	jobResponse, err := c.ucs.UpdateJob().Execute(ctx, jobUUID, jobRequest, multitenancy.TenantIDFromContext(ctx))
+	job := formatters.FormatJobUpdateRequest(jobRequest)
+	job.UUID = mux.Vars(request)["uuid"]
+	jobRes, err := c.ucs.UpdateJob().Execute(ctx, job, multitenancy.TenantIDFromContext(ctx))
+
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 
-	_ = json.NewEncoder(rw).Encode(jobResponse)
+	_ = json.NewEncoder(rw).Encode(formatters.FormatJobResponse(jobRes))
 }

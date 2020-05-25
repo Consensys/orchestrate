@@ -15,6 +15,7 @@ import (
 )
 
 func TestStartJob_Execute(t *testing.T) {
+	ctx := context.Background()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -29,7 +30,6 @@ func TestStartJob_Execute(t *testing.T) {
 
 	txCrafterTopic := "tx-crafter-topic"
 	usecase := NewStartJobUseCase(mockDB, mockKafkaProducer, txCrafterTopic)
-	ctx := context.Background()
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		job := testutils.FakeJob(1)

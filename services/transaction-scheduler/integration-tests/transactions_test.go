@@ -26,7 +26,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 	ctx := context.Background()
 
 	s.T().Run("should fail if payload is invalid", func(t *testing.T) {
-		txRequest := testutils.FakeTransactionRequest()
+		txRequest := testutils.FakeSendTransactionRequest()
 		txRequest.IdempotencyKey = ""
 
 		resp, err := s.client.SendTransaction(ctx, txRequest)
@@ -36,7 +36,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 	})
 
 	s.T().Run("should fail if idempotency key is identical but different params", func(t *testing.T) {
-		txRequest := testutils.FakeTransactionRequest()
+		txRequest := testutils.FakeSendTransactionRequest()
 
 		txResponse, err := s.client.SendTransaction(ctx, txRequest)
 		assert.Nil(t, err)
@@ -48,7 +48,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 	})
 
 	s.T().Run("should fail with 422 if chain does not exist", func(t *testing.T) {
-		txRequest := testutils.FakeTransactionRequest()
+		txRequest := testutils.FakeSendTransactionRequest()
 		txRequest.ChainUUID = uuid.NewV4().String()
 
 		resp, err := s.client.SendTransaction(ctx, txRequest)
@@ -62,7 +62,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 	ctx := context.Background()
 
 	s.T().Run("should send a transaction successfully to the transaction crafter topic", func(t *testing.T) {
-		txRequest := testutils.FakeTransactionRequest()
+		txRequest := testutils.FakeSendTransactionRequest()
 		expectedJsonParams, _ := utils.ObjectToJSON(txRequest.Params)
 		expectedParams, _ := utils.JSONToMap(expectedJsonParams)
 
@@ -84,7 +84,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 	})
 
 	s.T().Run("should succeed if payloads are the same and generate new schedule", func(t *testing.T) {
-		txRequest := testutils.FakeTransactionRequest()
+		txRequest := testutils.FakeSendTransactionRequest()
 
 		txResponse0, err := s.client.SendTransaction(ctx, txRequest)
 		assert.Nil(t, err)

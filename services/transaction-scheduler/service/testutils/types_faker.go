@@ -2,11 +2,12 @@ package testutils
 
 import (
 	uuid "github.com/satori/go.uuid"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
 
-func FakeTransactionRequest() *types.TransactionRequest {
-	return &types.TransactionRequest{
+func FakeSendTransactionRequest() *types.SendTransactionRequest {
+	return &types.SendTransactionRequest{
 		BaseTransactionRequest: types.BaseTransactionRequest{
 			IdempotencyKey: uuid.NewV4().String(),
 		},
@@ -25,8 +26,10 @@ func FakeTransactionResponse() *types.TransactionResponse {
 	}
 }
 
-func FakeScheduleRequest() *types.ScheduleRequest {
-	return &types.ScheduleRequest{ChainUUID: uuid.NewV4().String()}
+func FakeCreateScheduleRequest() *types.CreateScheduleRequest {
+	return &types.CreateScheduleRequest{
+		ChainUUID: uuid.NewV4().String(),
+	}
 }
 
 func FakeScheduleResponse() *types.ScheduleResponse {
@@ -37,17 +40,17 @@ func FakeScheduleResponse() *types.ScheduleResponse {
 	}
 }
 
-func FakeJobRequest() *types.JobRequest {
-	return &types.JobRequest{
+func FakeCreateJobRequest() *types.CreateJobRequest {
+	return &types.CreateJobRequest{
 		ScheduleUUID: uuid.NewV4().String(),
-		Type:         types.JobConstantinopleTransaction,
+		Type:         entities.JobConstantinopleTransaction,
 		Labels:       nil,
 		Transaction:  *FakeETHTransaction(),
 	}
 }
 
-func FakeJobUpdateRequest() *types.JobUpdateRequest {
-	return &types.JobUpdateRequest{
+func FakeJobUpdateRequest() *types.UpdateJobRequest {
+	return &types.UpdateJobRequest{
 		Labels:      nil,
 		Transaction: *FakeETHTransaction(),
 	}
@@ -57,7 +60,7 @@ func FakeJobResponse() *types.JobResponse {
 	return &types.JobResponse{
 		UUID:        uuid.NewV4().String(),
 		Transaction: *FakeETHTransaction(),
-		Status:      types.JobStatusCreated,
+		Status:      entities.JobStatusCreated,
 	}
 }
 

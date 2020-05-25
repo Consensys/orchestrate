@@ -9,7 +9,7 @@ import (
 	"github.com/containous/traefik/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/client-utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 )
 
 const (
@@ -30,8 +30,8 @@ func NewHTTPClient(h *http.Client, c *Config) TransactionSchedulerClient {
 	}
 }
 
-func (c *HTTPClient) SendTransaction(ctx context.Context, txRequest *types.TransactionRequest) (*types.TransactionResponse, error) {
-	reqURL := fmt.Sprintf("%v/transactions/send", c.config.URL)
+func (c *HTTPClient) SendTransaction(ctx context.Context, chainUUID string, txRequest *types.SendTransactionRequest) (*types.TransactionResponse, error) {
+	reqURL := fmt.Sprintf("%v/transactions/%s/send", c.config.URL, chainUUID)
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, txRequest)
 	if err != nil {
@@ -78,7 +78,7 @@ func (c *HTTPClient) GetSchedules(ctx context.Context) ([]*types.ScheduleRespons
 	return resp, err
 }
 
-func (c *HTTPClient) CreateSchedule(ctx context.Context, request *types.ScheduleRequest) (*types.ScheduleResponse, error) {
+func (c *HTTPClient) CreateSchedule(ctx context.Context, request *types.CreateScheduleRequest) (*types.ScheduleResponse, error) {
 	reqURL := fmt.Sprintf("%v/schedules", c.config.URL)
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
@@ -126,7 +126,7 @@ func (c *HTTPClient) GetJobs(ctx context.Context) ([]*types.JobResponse, error) 
 	return resp, err
 }
 
-func (c *HTTPClient) CreateJob(ctx context.Context, request *types.JobRequest) (*types.JobResponse, error) {
+func (c *HTTPClient) CreateJob(ctx context.Context, request *types.CreateJobRequest) (*types.JobResponse, error) {
 	reqURL := fmt.Sprintf("%v/jobs", c.config.URL)
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
@@ -142,7 +142,7 @@ func (c *HTTPClient) CreateJob(ctx context.Context, request *types.JobRequest) (
 	return resp, err
 }
 
-func (c *HTTPClient) UpdateJob(ctx context.Context, jobUUID string, request *types.JobUpdateRequest) (*types.JobResponse, error) {
+func (c *HTTPClient) UpdateJob(ctx context.Context, jobUUID string, request *types.UpdateJobRequest) (*types.JobResponse, error) {
 	reqURL := fmt.Sprintf("%v/jobs/%s", c.config.URL, jobUUID)
 
 	response, err := clientutils.PatchRequest(ctx, c.client, reqURL, request)

@@ -6,8 +6,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
 )
 
 //go:generate mockgen -source=get_job.go -destination=mocks/get_job.go -package=mocks
@@ -15,7 +15,7 @@ import (
 const getJobComponent = "use-cases.get-job"
 
 type GetJobUseCase interface {
-	Execute(ctx context.Context, jobUUID, tenantID string) (*types.JobResponse, error)
+	Execute(ctx context.Context, jobUUID, tenantID string) (*entities.Job, error)
 }
 
 // getJobUseCase is a use case to get a schedule
@@ -31,18 +31,19 @@ func NewGetJobUseCase(db store.DB) GetJobUseCase {
 }
 
 // Execute gets a schedule
-func (uc *getJobUseCase) Execute(ctx context.Context, jobUUID, tenantID string) (*types.JobResponse, error) {
+func (uc *getJobUseCase) Execute(ctx context.Context, jobUUID, tenantID string) (*entities.Job, error) {
 	log.WithContext(ctx).
 		WithField("job_uuid", jobUUID).
 		Debug("getting job")
 
-	job, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, tenantID)
+	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, tenantID)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(getJobComponent)
 	}
 
 	log.WithContext(ctx).
-		WithField("job_uuid", job.UUID).
+		WithField("job_uuid", jobUUID).
 		Info("job found successfully")
-	return utils.FormatJobResponse(job), nil
+
+	return parsers.NewJobEntityFromModels(jobModel), nil
 }

@@ -5,12 +5,12 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/utils"
 )
 
 //go:generate mockgen -source=transactions.go -destination=mocks/transactions.go -package=mocks
@@ -39,12 +39,12 @@ func (txValidator *transactionValidator) ValidateRequestHash(ctx context.Context
 		WithField("chain_uuid", chainUUID).
 		Debug("validating idempotency key")
 
-	jsonParams, err := utils.ObjectToJSON(params)
+	jsonParams, err := json.Marshal(params)
 	if err != nil {
 		return "", errors.FromError(err).ExtendComponent(txValidatorComponent)
 	}
 
-	hash := md5.Sum([]byte(jsonParams + chainUUID))
+	hash := md5.Sum([]byte(string(jsonParams) + chainUUID))
 	requestHash := hex.EncodeToString(hash[:])
 
 	txRequestToCompare, err := txValidator.db.TransactionRequest().FindOneByIdempotencyKey(ctx, idempotencyKey)

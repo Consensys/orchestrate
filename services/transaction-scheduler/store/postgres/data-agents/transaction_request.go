@@ -23,13 +23,10 @@ func NewPGTransactionRequest(db pg.DB) *PGTransactionRequest {
 
 // Insert Inserts a new transaction request in DB
 func (agent *PGTransactionRequest) SelectOrInsert(ctx context.Context, txRequest *models.TransactionRequest) error {
-	if txRequest.Schedule != nil && txRequest.ScheduleID == nil {
-		txRequest.ScheduleID = &txRequest.Schedule.ID
-	}
-
 	_, err := agent.db.ModelContext(ctx, txRequest).
 		Where("idempotency_key = ?idempotency_key").
-		OnConflict("ON CONSTRAINT requests_idempotency_key_key DO NOTHING").
+		OnConflict("ON CONSTRAINT transaction_requests_idempotency_key_key DO NOTHING").
+		Relation("Schedules").
 		SelectOrInsert()
 
 	if err != nil {
@@ -45,7 +42,7 @@ func (agent *PGTransactionRequest) FindOneByIdempotencyKey(ctx context.Context, 
 	txRequest := &models.TransactionRequest{}
 	query := agent.db.ModelContext(ctx, txRequest).
 		Where("idempotency_key = ?", idempotencyKey).
-		Relation("Schedule")
+		Relation("Schedules")
 
 	err := pg.SelectOne(ctx, query)
 	if err != nil {

@@ -11,9 +11,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types/testutils"
-	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/orm/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 )
 
 func TestUpdateJob_Execute(t *testing.T) {
@@ -22,54 +21,116 @@ func TestUpdateJob_Execute(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockDB := mocks.NewMockDB(ctrl)
+	mockDBTX := mocks.NewMockTx(ctrl)
+	mockTransactionDA := mocks.NewMockTransactionAgent(ctrl)
 	mockJobDA := mocks.NewMockJobAgent(ctrl)
-	mockORM := mocks2.NewMockORM(ctrl)
-	
+	mockLogDA := mocks.NewMockLogAgent(ctrl)
 
-	mockDB.EXPECT().Job().Return(mockJobDA).AnyTimes()
+	usecase := NewUpdateJobUseCase(mockDB)
 
-	usecase := NewUpdateJobUseCase(mockDB, mockORM)
 	tenantID := "tenantID"
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
-		job := testutils2.FakeJob(0)
-		jobRequest := testutils.FakeJobUpdateRequest()
-		expectedResponse := &types.JobResponse{
-			UUID:        job.UUID,
-			Transaction: jobRequest.Transaction,
-			Status:      types.JobStatusCreated,
-		}
+		jobEntity := testutils.FakeJobEntity()
+		jobModel := testutils2.FakeJob(0)
+		parsers.UpdateJobModelFromEntities(jobModel, jobEntity)
 
-		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, tenantID).Return(job, nil)
-		mockORM.EXPECT().InsertOrUpdateJob(gomock.Any(), gomock.Eq(mockDB), gomock.Any()).Return(nil)
+		mockDB.EXPECT().Job().Return(mockJobDA).Times(1)
+		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, tenantID).Return(jobModel, nil)
 
-		jobResponse, err := usecase.Execute(ctx, job.UUID, jobRequest, tenantID)
+		mockDB.EXPECT().Begin().Return(mockDBTX, nil).Times(1)
+		mockDBTX.EXPECT().Transaction().Return(mockTransactionDA).Times(1)
+		mockDBTX.EXPECT().Job().Return(mockJobDA).Times(1)
+		mockDBTX.EXPECT().Log().Return(mockLogDA).Times(1)
+		mockDBTX.EXPECT().Commit().Return(nil).Times(1)
+		mockDBTX.EXPECT().Close().Return(nil).Times(1)
+
+		mockTransactionDA.EXPECT().Update(gomock.Any(), jobModel.Transaction).Return(nil).Times(1)
+		mockJobDA.EXPECT().Update(gomock.Any(), jobModel).Return(nil).Times(1)
+		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil).Times(1)
+
+		_, err := usecase.Execute(context.Background(), jobEntity, tenantID)
 
 		assert.Nil(t, err)
-		assert.Equal(t, expectedResponse.Transaction, jobResponse.Transaction)
-		assert.Equal(t, expectedResponse.Status, jobResponse.Status)
 	})
-	
+
 	t.Run("should fail with the same error if find one fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
-		job := testutils2.FakeJob(0)
-		jobRequest := testutils.FakeJobUpdateRequest()
+		jobEntity := testutils.FakeJobEntity()
+		jobModel := testutils2.FakeJob(0)
+		parsers.UpdateJobModelFromEntities(jobModel, jobEntity)
 
-		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, tenantID).Return(job, expectedErr)
+		mockDB.EXPECT().Job().Return(mockJobDA).Times(1)
+		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, tenantID).Return(jobModel, expectedErr)
 
-		_, err := usecase.Execute(ctx, job.UUID, jobRequest, tenantID)
-		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createJobComponent), err)
+
+		_, err := usecase.Execute(context.Background(), jobEntity, tenantID)
+			assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(updateJobComponent), err)
 	})
 
-	 t.Run("should fail with the same error if insert or update job fails", func(t *testing.T) {
-		expectedErr := errors.PostgresConnectionError("error")
-		job := testutils2.FakeJob(0)
-		jobRequest := testutils.FakeJobUpdateRequest()
+	t.Run("should fail with the same error if update transaction fails", func(t *testing.T) {
+		expectedErr := errors.NotFoundError("error")
+		jobEntity := testutils.FakeJobEntity()
+		jobModel := testutils2.FakeJob(0)
+		parsers.UpdateJobModelFromEntities(jobModel, jobEntity)
 
-		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, tenantID).Return(job, nil)
-		mockORM.EXPECT().InsertOrUpdateJob(gomock.Any(), gomock.Eq(mockDB), gomock.Any()).Return(expectedErr)
+		mockDB.EXPECT().Job().Return(mockJobDA).Times(1)
+		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, tenantID).Return(jobModel, nil)
 
-		_, err := usecase.Execute(ctx, job.UUID, jobRequest, tenantID)
-		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createJobComponent), err)
+		mockDB.EXPECT().Begin().Return(mockDBTX, nil).Times(1)
+		mockDBTX.EXPECT().Transaction().Return(mockTransactionDA).Times(1)
+		mockDBTX.EXPECT().Rollback().Return(nil).Times(1)
+		mockDBTX.EXPECT().Close().Return(nil).Times(1)
+
+		mockTransactionDA.EXPECT().Update(gomock.Any(), jobModel.Transaction).Return(expectedErr).Times(1)
+
+		_, err := usecase.Execute(context.Background(), jobEntity, tenantID)
+			assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(updateJobComponent), err)
+	})
+
+	t.Run("should fail with the same error if update job fails", func(t *testing.T) {
+		expectedErr := errors.NotFoundError("error")
+		jobEntity := testutils.FakeJobEntity()
+		jobModel := testutils2.FakeJob(0)
+		parsers.UpdateJobModelFromEntities(jobModel, jobEntity)
+
+		mockDB.EXPECT().Job().Return(mockJobDA).Times(1)
+		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, tenantID).Return(jobModel, nil)
+
+		mockDB.EXPECT().Begin().Return(mockDBTX, nil).Times(1)
+		mockDBTX.EXPECT().Transaction().Return(mockTransactionDA).Times(1)
+		mockDBTX.EXPECT().Job().Return(mockJobDA).Times(1)
+		mockDBTX.EXPECT().Rollback().Return(nil).Times(1)
+		mockDBTX.EXPECT().Close().Return(nil).Times(1)
+
+		mockTransactionDA.EXPECT().Update(gomock.Any(), jobModel.Transaction).Return(nil).Times(1)
+		mockJobDA.EXPECT().Update(gomock.Any(), jobModel).Return(expectedErr).Times(1)
+
+		_, err := usecase.Execute(context.Background(), jobEntity, tenantID)
+			assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(updateJobComponent), err)
+	})
+
+	t.Run("should fail with the same error if update log fails", func(t *testing.T) {
+		expectedErr := errors.NotFoundError("error")
+		jobEntity := testutils.FakeJobEntity()
+		jobModel := testutils2.FakeJob(0)
+		parsers.UpdateJobModelFromEntities(jobModel, jobEntity)
+
+		mockDB.EXPECT().Job().Return(mockJobDA).Times(1)
+		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, tenantID).Return(jobModel, nil)
+
+		mockDB.EXPECT().Begin().Return(mockDBTX, nil).Times(1)
+		mockDBTX.EXPECT().Transaction().Return(mockTransactionDA).Times(1)
+		mockDBTX.EXPECT().Job().Return(mockJobDA).Times(1)
+		mockDBTX.EXPECT().Log().Return(mockLogDA).Times(1)
+		mockDBTX.EXPECT().Rollback().Return(nil).Times(1)
+		mockDBTX.EXPECT().Close().Return(nil).Times(1)
+
+		mockTransactionDA.EXPECT().Update(gomock.Any(), jobModel.Transaction).Return(nil).Times(1)
+		mockJobDA.EXPECT().Update(gomock.Any(), jobModel).Return(nil).Times(1)
+		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(expectedErr).Times(1)
+
+		_, err := usecase.Execute(context.Background(), jobEntity, tenantID)
+			assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(updateJobComponent), err)
 	})
 }

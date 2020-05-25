@@ -8,7 +8,8 @@ import (
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/transactions"
 
 	"github.com/gorilla/mux"
@@ -43,9 +44,7 @@ func (c *TransactionsController) Send(rw http.ResponseWriter, request *http.Requ
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	chainUUID := mux.Vars(request)["chainUUID"]
-
-	txRequest := &types.TransactionRequest{}
+	txRequest := &types.SendTransactionRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, txRequest)
 	if err != nil {
 		log.WithContext(ctx).WithError(err).Error("create transaction has failed")
@@ -53,14 +52,23 @@ func (c *TransactionsController) Send(rw http.ResponseWriter, request *http.Requ
 		return
 	}
 
+	chainUUID := mux.Vars(request)["chainUUID"]
 	tenantID := multitenancy.TenantIDFromContext(ctx)
-	transactionResponse, err := c.ucs.SendTransaction().Execute(ctx, txRequest, chainUUID, tenantID)
+	txReq := formatters.FormatSendTxRequest(txRequest, chainUUID)
+	txResponse, err := c.ucs.SendTransaction().Execute(ctx, txReq, tenantID)
 	if err != nil {
 		log.WithContext(ctx).WithError(err).Error("create transaction has failed")
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 
+	response, err := formatters.FormatTxResponse(txResponse)
+	if err != nil {
+		log.WithContext(ctx).WithError(err).Error("cannot format transaction response")
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
 	rw.WriteHeader(http.StatusAccepted)
-	_ = json.NewEncoder(rw).Encode(transactionResponse)
+	_ = json.NewEncoder(rw).Encode(response)
 }

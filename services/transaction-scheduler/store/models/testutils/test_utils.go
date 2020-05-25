@@ -6,7 +6,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
 
 func FakeSchedule(tenantID string) *models.Schedule {
@@ -19,9 +19,9 @@ func FakeSchedule(tenantID string) *models.Schedule {
 		ChainUUID: uuid.NewV4().String(),
 		Jobs: []*models.Job{{
 			UUID:        uuid.NewV4().String(),
-			Type:        types.JobConstantinopleTransaction,
+			Type:        entities.JobConstantinopleTransaction,
 			Transaction: FakeTransaction(),
-			Logs:        []*models.Log{{Status: types.JobStatusCreated, Message: "created message"}},
+			Logs:        []*models.Log{{Status: entities.JobStatusCreated, Message: "created message"}},
 		}},
 	}
 }
@@ -34,7 +34,7 @@ func FakeTxRequest(scheduleID int) *models.TransactionRequest {
 		IdempotencyKey: uuid.NewV4().String(),
 		RequestHash:    "requestHash",
 		Params:         "{\"field0\": \"field0Value\"}",
-		Schedule:       fakeSchedule,
+		Schedules:      []*models.Schedule{fakeSchedule},
 	}
 }
 
@@ -47,7 +47,7 @@ func FakeTransaction() *models.Transaction {
 func FakeJob(scheduleID int) *models.Job {
 	return &models.Job{
 		UUID: uuid.NewV4().String(),
-		Type: types.JobConstantinopleTransaction,
+		Type: entities.JobConstantinopleTransaction,
 		Schedule: &models.Schedule{
 			ID:        scheduleID,
 			TenantID:  "_",
@@ -56,7 +56,7 @@ func FakeJob(scheduleID int) *models.Job {
 		},
 		Transaction: FakeTransaction(),
 		Logs: []*models.Log{
-			{UUID: uuid.NewV4().String(), Status: types.JobStatusCreated, Message: "created message"},
+			{UUID: uuid.NewV4().String(), Status: entities.JobStatusCreated, Message: "created message"},
 		},
 	}
 }
@@ -64,7 +64,7 @@ func FakeJob(scheduleID int) *models.Job {
 func FakeLog() *models.Log {
 	return &models.Log{
 		UUID:      uuid.NewV4().String(),
-		Status:    types.JobStatusCreated,
+		Status:    entities.JobStatusCreated,
 		Job:       FakeJob(0),
 		CreatedAt: time.Now(),
 	}

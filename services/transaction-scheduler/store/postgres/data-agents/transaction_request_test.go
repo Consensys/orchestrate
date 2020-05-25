@@ -57,16 +57,6 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_SelectOrInsert() {
 		assert.NotEmpty(t, txRequest.ID)
 	})
 
-	s.T().Run("should insert model only using ScheduleID successfully", func(t *testing.T) {
-		txRequest := testutils.FakeTxRequest(0)
-		txRequest.ScheduleID = &(&struct{ x int }{1}).x
-		txRequest.Schedule = nil
-		err := s.agents.TransactionRequest().SelectOrInsert(ctx, txRequest)
-
-		assert.Nil(t, err)
-		assert.NotEmpty(t, txRequest.ID)
-	})
-
 	s.T().Run("Does nothing if idempotency key is already used and returns request", func(t *testing.T) {
 		txRequest0 := testutils.FakeTxRequest(0)
 		err := insertTxRequest(ctx, s.agents, txRequest0)
@@ -91,7 +81,7 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_FindOneByIdempotencyKey() 
 
 		assert.Nil(t, err)
 		assert.Equal(t, txRequest.IdempotencyKey, txRequestRetrieved.IdempotencyKey)
-		assert.Equal(t, txRequest.Schedule.UUID, txRequestRetrieved.Schedule.UUID)
+		assert.Equal(t, txRequest.Schedules[0].UUID, txRequestRetrieved.Schedules[0].UUID)
 	})
 
 	s.T().Run("should return NotFoundError if request is not found", func(t *testing.T) {
@@ -121,13 +111,16 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_ConnectionErr() {
 	s.pg.InitTestDB(s.T())
 }
 
-func insertTxRequest(ctx context.Context, agents *PGAgents, txReq *models.TransactionRequest) (error) {
-	if err := agents.Schedule().Insert(ctx, txReq.Schedule); err != nil {
+func insertTxRequest(ctx context.Context, agents *PGAgents, txReq *models.TransactionRequest) error {
+	if err := agents.TransactionRequest().SelectOrInsert(ctx, txReq); err != nil {
 		return err
 	}
 
-	if err := agents.TransactionRequest().SelectOrInsert(ctx, txReq); err != nil {
-		return err
+	for _, schedule := range txReq.Schedules {
+		schedule.TransactionRequestID = &txReq.ID
+		if err := agents.Schedule().Insert(ctx, schedule); err != nil {
+			return err
+		}
 	}
 
 	return nil

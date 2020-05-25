@@ -4,14 +4,16 @@ import (
 	"context"
 	"fmt"
 
+	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/proto"
+
 	"github.com/Shopify/sarama"
+	"github.com/gogo/protobuf/proto"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
 )
 
 //go:generate mockgen -source=start_job.go -destination=mocks/start_job.go -package=mocks
@@ -50,21 +52,26 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID, tenantID string
 		WithField("job_uuid", jobUUID).
 		Debugf("starting job")
 
-	job, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, tenantID)
+	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, tenantID)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}
 
-	txEnvelope := buildEnvelope(job)
+	txEnvelope := parsers.NewEnvelopeFromJobModel(jobModel)
 	partition, offset, err := uc.sendMessage(ctx, txEnvelope)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}
 
+	logger.
+		WithField("envelope_id", txEnvelope.GetID()).
+		Debugf("envelope sent to kafka")
+
 	jobLog := &models.Log{
-		JobID:   &job.ID,
-		Status:  types.JobStatusStarted,
-		Message: fmt.Sprintf("message sent to partition %v, offset %v and topic %v", partition, offset, uc.txCrafterTopic),
+		JobID:  &jobModel.ID,
+		Status: entities.JobStatusStarted,
+		Message: fmt.Sprintf("message sent to partition %v, offset %v and topic %v", partition, offset,
+			uc.txCrafterTopic),
 	}
 
 	if err = uc.db.Log().Insert(ctx, jobLog); err != nil {
@@ -74,13 +81,14 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID, tenantID string
 	logger.
 		WithField("job_uuid", jobUUID).
 		Info("job started successfully")
+
 	return nil
 }
 
-func (uc *startJobUseCase) sendMessage(ctx context.Context, txEnvelope *tx.TxEnvelope) (partition int32, offset int64, err error) {
+func (uc *startJobUseCase) sendMessage(ctx context.Context, txEnvelope proto.Message) (partition int32, offset int64, err error) {
 	log.WithContext(ctx).Debug("sending kafka message")
 
-	envelopeBytes, err := json.Marshal(txEnvelope)
+	envelopeBytes, err := encoding.Marshal(txEnvelope)
 	if err != nil {
 		errMessage := "failed to encode envelope"
 		log.WithContext(ctx).WithError(err).Error(errMessage)
@@ -102,36 +110,4 @@ func (uc *startJobUseCase) sendMessage(ctx context.Context, txEnvelope *tx.TxEnv
 	}
 
 	return partition, offset, err
-}
-
-func buildEnvelope(job *models.Job) *tx.TxEnvelope {
-	var method tx.Method
-	switch job.Type {
-	case types.JobConstantinopleTransaction:
-		method = tx.Method_ETH_SENDRAWTRANSACTION
-	default:
-		method = tx.Method_ETH_SENDRAWTRANSACTION
-	}
-
-	return &tx.TxEnvelope{
-		Msg: &tx.TxEnvelope_TxRequest{TxRequest: &tx.TxRequest{
-			Headers: nil, // TODO: Add the JWT token here? https://pegasys1.atlassian.net/browse/PO-544
-			Chain:   job.Schedule.ChainUUID,
-			Method:  method,
-			Params: &tx.Params{
-				From:           job.Transaction.Sender,
-				To:             job.Transaction.Recipient,
-				Gas:            job.Transaction.GasLimit,
-				GasPrice:       job.Transaction.GasPrice,
-				Value:          job.Transaction.Value,
-				Nonce:          job.Transaction.Nonce,
-				Data:           job.Transaction.Data,
-				Raw:            job.Transaction.Raw,
-				PrivateFor:     job.Transaction.PrivateFor,
-				PrivateFrom:    job.Transaction.PrivateFrom,
-				PrivacyGroupId: job.Transaction.PrivacyGroupID,
-			},
-			ContextLabels: job.Labels,
-		}},
-	}
 }

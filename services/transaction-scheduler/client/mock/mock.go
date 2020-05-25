@@ -7,7 +7,7 @@ package mock
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	reflect "reflect"
 )
 
@@ -35,18 +35,18 @@ func (m *MockTransactionClient) EXPECT() *MockTransactionClientMockRecorder {
 }
 
 // SendTransaction mocks base method.
-func (m *MockTransactionClient) SendTransaction(ctx context.Context, request *types.TransactionRequest) (*types.TransactionResponse, error) {
+func (m *MockTransactionClient) SendTransaction(ctx context.Context, chainUUID string, request *types.SendTransactionRequest) (*types.TransactionResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendTransaction", ctx, request)
+	ret := m.ctrl.Call(m, "SendTransaction", ctx, chainUUID, request)
 	ret0, _ := ret[0].(*types.TransactionResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SendTransaction indicates an expected call of SendTransaction.
-func (mr *MockTransactionClientMockRecorder) SendTransaction(ctx, request interface{}) *gomock.Call {
+func (mr *MockTransactionClientMockRecorder) SendTransaction(ctx, chainUUID, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendTransaction", reflect.TypeOf((*MockTransactionClient)(nil).SendTransaction), ctx, request)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendTransaction", reflect.TypeOf((*MockTransactionClient)(nil).SendTransaction), ctx, chainUUID, request)
 }
 
 // MockScheduleClient is a mock of ScheduleClient interface.
@@ -103,7 +103,7 @@ func (mr *MockScheduleClientMockRecorder) GetSchedules(ctx interface{}) *gomock.
 }
 
 // CreateSchedule mocks base method.
-func (m *MockScheduleClient) CreateSchedule(ctx context.Context, request *types.ScheduleRequest) (*types.ScheduleResponse, error) {
+func (m *MockScheduleClient) CreateSchedule(ctx context.Context, request *types.CreateScheduleRequest) (*types.ScheduleResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateSchedule", ctx, request)
 	ret0, _ := ret[0].(*types.ScheduleResponse)
@@ -171,7 +171,7 @@ func (mr *MockJobClientMockRecorder) GetJobs(ctx interface{}) *gomock.Call {
 }
 
 // CreateJob mocks base method.
-func (m *MockJobClient) CreateJob(ctx context.Context, request *types.JobRequest) (*types.JobResponse, error) {
+func (m *MockJobClient) CreateJob(ctx context.Context, request *types.CreateJobRequest) (*types.JobResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateJob", ctx, request)
 	ret0, _ := ret[0].(*types.JobResponse)
@@ -186,7 +186,7 @@ func (mr *MockJobClientMockRecorder) CreateJob(ctx, request interface{}) *gomock
 }
 
 // UpdateJob mocks base method.
-func (m *MockJobClient) UpdateJob(ctx context.Context, jobUUID string, request *types.JobUpdateRequest) (*types.JobResponse, error) {
+func (m *MockJobClient) UpdateJob(ctx context.Context, jobUUID string, request *types.UpdateJobRequest) (*types.JobResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateJob", ctx, jobUUID, request)
 	ret0, _ := ret[0].(*types.JobResponse)
@@ -238,18 +238,18 @@ func (m *MockTransactionSchedulerClient) EXPECT() *MockTransactionSchedulerClien
 }
 
 // SendTransaction mocks base method.
-func (m *MockTransactionSchedulerClient) SendTransaction(ctx context.Context, request *types.TransactionRequest) (*types.TransactionResponse, error) {
+func (m *MockTransactionSchedulerClient) SendTransaction(ctx context.Context, chainUUID string, request *types.SendTransactionRequest) (*types.TransactionResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendTransaction", ctx, request)
+	ret := m.ctrl.Call(m, "SendTransaction", ctx, chainUUID, request)
 	ret0, _ := ret[0].(*types.TransactionResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SendTransaction indicates an expected call of SendTransaction.
-func (mr *MockTransactionSchedulerClientMockRecorder) SendTransaction(ctx, request interface{}) *gomock.Call {
+func (mr *MockTransactionSchedulerClientMockRecorder) SendTransaction(ctx, chainUUID, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendTransaction", reflect.TypeOf((*MockTransactionSchedulerClient)(nil).SendTransaction), ctx, request)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendTransaction", reflect.TypeOf((*MockTransactionSchedulerClient)(nil).SendTransaction), ctx, chainUUID, request)
 }
 
 // GetSchedule mocks base method.
@@ -283,7 +283,7 @@ func (mr *MockTransactionSchedulerClientMockRecorder) GetSchedules(ctx interface
 }
 
 // CreateSchedule mocks base method.
-func (m *MockTransactionSchedulerClient) CreateSchedule(ctx context.Context, request *types.ScheduleRequest) (*types.ScheduleResponse, error) {
+func (m *MockTransactionSchedulerClient) CreateSchedule(ctx context.Context, request *types.CreateScheduleRequest) (*types.ScheduleResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateSchedule", ctx, request)
 	ret0, _ := ret[0].(*types.ScheduleResponse)
@@ -328,7 +328,7 @@ func (mr *MockTransactionSchedulerClientMockRecorder) GetJobs(ctx interface{}) *
 }
 
 // CreateJob mocks base method.
-func (m *MockTransactionSchedulerClient) CreateJob(ctx context.Context, request *types.JobRequest) (*types.JobResponse, error) {
+func (m *MockTransactionSchedulerClient) CreateJob(ctx context.Context, request *types.CreateJobRequest) (*types.JobResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateJob", ctx, request)
 	ret0, _ := ret[0].(*types.JobResponse)
@@ -343,7 +343,7 @@ func (mr *MockTransactionSchedulerClientMockRecorder) CreateJob(ctx, request int
 }
 
 // UpdateJob mocks base method.
-func (m *MockTransactionSchedulerClient) UpdateJob(ctx context.Context, jobUUID string, request *types.JobUpdateRequest) (*types.JobResponse, error) {
+func (m *MockTransactionSchedulerClient) UpdateJob(ctx context.Context, jobUUID string, request *types.UpdateJobRequest) (*types.JobResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateJob", ctx, jobUUID, request)
 	ret0, _ := ret[0].(*types.JobResponse)

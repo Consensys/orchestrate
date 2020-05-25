@@ -11,9 +11,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
-	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/orm/mocks"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/types/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 )
 
 func TestCreateJob_Execute(t *testing.T) {
@@ -22,68 +21,129 @@ func TestCreateJob_Execute(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockDB := mocks.NewMockDB(ctrl)
+	mockDBTX := mocks.NewMockTx(ctrl)
 	mockScheduleDA := mocks.NewMockScheduleAgent(ctrl)
-	mockORM := mocks2.NewMockORM(ctrl)
-	
+	mockTransactionDA := mocks.NewMockTransactionAgent(ctrl)
+	mockJobDA := mocks.NewMockJobAgent(ctrl)
+	mockLogDA := mocks.NewMockLogAgent(ctrl)
 
-	mockDB.EXPECT().Schedule().Return(mockScheduleDA).AnyTimes()
+	usecase := NewCreateJobUseCase(mockDB)
 
-	usecase := NewCreateJobUseCase(mockDB, mockORM)
-	fakeSchedule := testutils2.FakeSchedule("")
-	fakeSchedule.ID = 1
 	tenantID := "tenantID"
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
-		jobRequest := testutils.FakeJobRequest()
-		expectedResponse := &types.JobResponse{
-			UUID:        "testJobUUID",
-			Transaction: jobRequest.Transaction,
-			Status:      types.JobStatusCreated,
-		}
+		jobEntity := testutils.FakeJobEntity()
+		fakeSchedule := testutils2.FakeSchedule(tenantID)
+		fakeSchedule.ID = 1
+		fakeSchedule.UUID = jobEntity.ScheduleUUID
+		jobModel := parsers.NewJobModelFromEntities(jobEntity, &fakeSchedule.ID)
 
-		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobRequest.ScheduleUUID, tenantID).Return(fakeSchedule, nil)
-		mockORM.EXPECT().InsertOrUpdateJob(gomock.Any(), gomock.Eq(mockDB), gomock.Any()).Return(nil)
+		mockDB.EXPECT().Schedule().Return(mockScheduleDA).Times(1)
+		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobEntity.ScheduleUUID, tenantID).Return(fakeSchedule, nil)
 
-		jobResponse, err := usecase.Execute(context.Background(), jobRequest, tenantID)
+		mockDB.EXPECT().Begin().Return(mockDBTX, nil).Times(1)
+		mockDBTX.EXPECT().Transaction().Return(mockTransactionDA).Times(1)
+		mockDBTX.EXPECT().Job().Return(mockJobDA).Times(1)
+		mockDBTX.EXPECT().Log().Return(mockLogDA).Times(1)
+		mockDBTX.EXPECT().Commit().Return(nil).Times(1)
+		mockDBTX.EXPECT().Close().Return(nil).Times(1)
+
+		mockTransactionDA.EXPECT().Insert(gomock.Any(), jobModel.Transaction).Return(nil).Times(1)
+		mockJobDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil).Times(1)
+		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil).Times(1)
+
+		_, err := usecase.Execute(context.Background(), jobEntity, tenantID)
 
 		assert.Nil(t, err)
-		assert.Equal(t, expectedResponse.Transaction, jobResponse.Transaction)
-		assert.Equal(t, expectedResponse.Status, jobResponse.Status)
 	})
 
-	t.Run("should fail with InvalidParameterError error if it fails to validate request", func(t *testing.T) {
-		jobRequest := testutils.FakeJobRequest()
-		jobRequest.Type = ""
+	t.Run("should fail with same error if cannot fetch selected ScheduleUUID", func(t *testing.T) {
+		expectedErr := errors.NotFoundError("error")
 
-		jobResponse, err := usecase.Execute(ctx, jobRequest, tenantID)
-		assert.True(t, errors.IsInvalidParameterError(err))
-		assert.Nil(t, jobResponse)
-	})
+		jobEntity := testutils.FakeJobEntity()
+		fakeSchedule := testutils2.FakeSchedule(tenantID)
+		fakeSchedule.ID = 1
+		fakeSchedule.UUID = jobEntity.ScheduleUUID
 
-	t.Run("should fail with same error when schedule in not found", func(t *testing.T) {
-		jobRequest := testutils.FakeJobRequest()
-		expectedErr := errors.NotFoundError("scheduleNotFount")
+		mockDB.EXPECT().Schedule().Return(mockScheduleDA).Times(1)
+		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobEntity.ScheduleUUID, tenantID).Return(nil, expectedErr)
 
-		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobRequest.ScheduleUUID, tenantID).Return(nil, expectedErr)
-
-		jobResponse, err := usecase.Execute(context.Background(), jobRequest, tenantID)
-
-		assert.Nil(t, jobResponse)
+		_, err := usecase.Execute(context.Background(), jobEntity, tenantID)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createJobComponent), err)
 	})
 
-	t.Run("should fail with same error if InsertOrUpdate fails", func(t *testing.T) {
-		jobRequest := testutils.FakeJobRequest()
+	t.Run("should fail with same error if cannot insert a Transaction fails", func(t *testing.T) {
 		expectedErr := errors.PostgresConnectionError("error")
+		jobEntity := testutils.FakeJobEntity()
+		fakeSchedule := testutils2.FakeSchedule(tenantID)
+		fakeSchedule.ID = 1
+		fakeSchedule.UUID = jobEntity.ScheduleUUID
+		jobModel := parsers.NewJobModelFromEntities(jobEntity, &fakeSchedule.ID)
 
-		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobRequest.ScheduleUUID, tenantID).Return(fakeSchedule, nil)
-		mockORM.EXPECT().InsertOrUpdateJob(gomock.Any(), gomock.Eq(mockDB), gomock.Any()).Return(expectedErr)
+		mockDB.EXPECT().Schedule().Return(mockScheduleDA).Times(1)
+		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobEntity.ScheduleUUID, tenantID).Return(fakeSchedule, nil)
 
-		jobResponse, err := usecase.Execute(context.Background(), jobRequest, tenantID)
+		mockDB.EXPECT().Begin().Return(mockDBTX, nil).Times(1)
+		mockDBTX.EXPECT().Transaction().Return(mockTransactionDA).Times(1)
+		mockDBTX.EXPECT().Rollback().Return(nil).Times(1)
+		mockDBTX.EXPECT().Close().Return(nil).Times(1)
 
-		assert.Nil(t, jobResponse)
+		mockTransactionDA.EXPECT().Insert(gomock.Any(), jobModel.Transaction).Return(expectedErr).Times(1)
+
+		_, err := usecase.Execute(context.Background(), jobEntity, tenantID)
+
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createJobComponent), err)
 	})
 
-	// @TODO Ensure tenantID corresponds to schedule tenantID otherwise it throws NotAuth ERR 
+	t.Run("should fail with same error if cannot insert a Job fails", func(t *testing.T) {
+		expectedErr := errors.PostgresConnectionError("error")
+		jobEntity := testutils.FakeJobEntity()
+		fakeSchedule := testutils2.FakeSchedule(tenantID)
+		fakeSchedule.ID = 1
+		fakeSchedule.UUID = jobEntity.ScheduleUUID
+		jobModel := parsers.NewJobModelFromEntities(jobEntity, &fakeSchedule.ID)
+
+		mockDB.EXPECT().Schedule().Return(mockScheduleDA).Times(1)
+		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobEntity.ScheduleUUID, tenantID).Return(fakeSchedule, nil)
+
+		mockDB.EXPECT().Begin().Return(mockDBTX, nil).Times(1)
+		mockDBTX.EXPECT().Transaction().Return(mockTransactionDA).Times(1)
+		mockDBTX.EXPECT().Job().Return(mockJobDA).Times(1)
+		mockDBTX.EXPECT().Rollback().Return(nil).Times(1)
+		mockDBTX.EXPECT().Close().Return(nil).Times(1)
+
+		mockTransactionDA.EXPECT().Insert(gomock.Any(), jobModel.Transaction).Return(nil).Times(1)
+		mockJobDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(expectedErr).Times(1)
+
+		_, err := usecase.Execute(context.Background(), jobEntity, tenantID)
+
+		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createJobComponent), err)
+	})
+
+	t.Run("should fail with same error if cannot insert a Log fails", func(t *testing.T) {
+		expectedErr := errors.PostgresConnectionError("error")
+		jobEntity := testutils.FakeJobEntity()
+		fakeSchedule := testutils2.FakeSchedule(tenantID)
+		fakeSchedule.ID = 1
+		fakeSchedule.UUID = jobEntity.ScheduleUUID
+		jobModel := parsers.NewJobModelFromEntities(jobEntity, &fakeSchedule.ID)
+
+		mockDB.EXPECT().Schedule().Return(mockScheduleDA).Times(1)
+		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobEntity.ScheduleUUID, tenantID).Return(fakeSchedule, nil)
+
+		mockDB.EXPECT().Begin().Return(mockDBTX, nil).Times(1)
+		mockDBTX.EXPECT().Transaction().Return(mockTransactionDA).Times(1)
+		mockDBTX.EXPECT().Job().Return(mockJobDA).Times(1)
+		mockDBTX.EXPECT().Log().Return(mockLogDA).Times(1)
+		mockDBTX.EXPECT().Rollback().Return(nil).Times(1)
+		mockDBTX.EXPECT().Close().Return(nil).Times(1)
+
+		mockTransactionDA.EXPECT().Insert(gomock.Any(), jobModel.Transaction).Return(nil).Times(1)
+		mockJobDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil).Times(1)
+		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(expectedErr).Times(1)
+
+		_, err := usecase.Execute(context.Background(), jobEntity, tenantID)
+
+		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createJobComponent), err)
+	})
 }

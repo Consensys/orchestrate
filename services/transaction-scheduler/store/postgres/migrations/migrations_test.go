@@ -48,7 +48,7 @@ func (s *MigrationsTestSuite) TestMigrationVersion() {
 func (s *MigrationsTestSuite) TestCreateRequestsTable() {
 	n, err := s.pg.DB.Model().
 		Table("pg_catalog.pg_tables").
-		Where("tablename = '?'", pg.SafeQuery("requests")).
+		Where("tablename = '?'", pg.SafeQuery("transaction_requests")).
 		Count()
 
 	s.Assert().NoError(err, "Query failed")
@@ -58,15 +58,15 @@ func (s *MigrationsTestSuite) TestCreateRequestsTable() {
 func (s *MigrationsTestSuite) TestAddRequestsColumns() {
 	n, err := s.pg.DB.Model().
 		Table("information_schema.columns").
-		Where("table_name = '?'", pg.SafeQuery("requests")).
+		Where("table_name = '?'", pg.SafeQuery("transaction_requests")).
 		Count()
 
 	s.Assert().NoError(err, "Query failed")
-	s.Assert().Equal(6, n, "Requests table should have correct number of columns")
+	s.Assert().Equal(5, n, "Requests table should have correct number of columns")
 }
 
 func TestMigrations(t *testing.T) {
 	s := new(MigrationsTestSuite)
-	s.pg , _ = testutils.NewPGTestHelper(nil, Collection)
+	s.pg, _ = testutils.NewPGTestHelper(nil, Collection)
 	suite.Run(t, s)
 }
