@@ -19,3 +19,7 @@ Feature: Send transfer transaction
     And Envelopes should have raw and hash set
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have log decoded
+    And Envelopes should have the following fields:
+      | receipt.status | chainName
+      | 1              | besu
+      | 1              | geth

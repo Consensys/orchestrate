@@ -82,7 +82,8 @@ func (m *TxResponse) Envelope() (*Envelope, error) {
 		SetHeaders(m.GetHeaders()).
 		SetContextLabels(m.GetContextLabels()).
 		AppendErrors(m.GetErrors()).
-		SetReceipt(m.GetReceipt())
+		SetReceipt(m.GetReceipt()).
+		SetChainName(m.GetChain())
 
 	if m.GetTransaction() != nil {
 		_ = envelope.
