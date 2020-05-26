@@ -19,6 +19,7 @@ func NewTransactionModelFromEntities(tx *entities.Transaction) *models.Transacti
 		PrivateFor:     tx.PrivateFor,
 		PrivacyGroupID: tx.PrivacyGroupID,
 		Raw:            tx.Raw,
+		CreatedAt:      tx.CreatedAt,
 	}
 }
 
@@ -36,6 +37,7 @@ func NewTransactionEntityFromModels(tx *models.Transaction) *entities.Transactio
 		PrivateFor:     tx.PrivateFor,
 		PrivacyGroupID: tx.PrivacyGroupID,
 		Raw:            tx.Raw,
+		CreatedAt:      tx.CreatedAt,
 	}
 }
 

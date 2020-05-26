@@ -12,6 +12,7 @@ import (
 func NewTxRequestModelFromEntities(txRequest *entities.TxRequest, requestHash, tenantID string) (*models.TransactionRequest, error) {
 	scheduleModel := &models.Schedule{
 		TenantID:  tenantID,
+		UUID:      txRequest.Schedule.UUID,
 		ChainUUID: txRequest.Schedule.ChainUUID,
 	}
 
@@ -25,6 +26,7 @@ func NewTxRequestModelFromEntities(txRequest *entities.TxRequest, requestHash, t
 		RequestHash:    requestHash,
 		Params:         string(jsonParams),
 		Schedules:      []*models.Schedule{scheduleModel},
+		CreatedAt:      txRequest.CreatedAt,
 	}
 
 	return txRequestModel, nil

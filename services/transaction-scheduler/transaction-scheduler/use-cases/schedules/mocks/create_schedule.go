@@ -7,7 +7,9 @@ package mocks
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
+	store "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
+	schedules "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/schedules"
 	reflect "reflect"
 )
 
@@ -35,16 +37,30 @@ func (m *MockCreateScheduleUseCase) EXPECT() *MockCreateScheduleUseCaseMockRecor
 }
 
 // Execute mocks base method.
-func (m *MockCreateScheduleUseCase) Execute(ctx context.Context, scheduleRequest *entities.Schedule, tenantID string) (*entities.Schedule, error) {
+func (m *MockCreateScheduleUseCase) Execute(ctx context.Context, schedule *entities.Schedule, tenantID string) (*entities.Schedule, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, scheduleRequest, tenantID)
+	ret := m.ctrl.Call(m, "Execute", ctx, schedule, tenantID)
 	ret0, _ := ret[0].(*entities.Schedule)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute.
-func (mr *MockCreateScheduleUseCaseMockRecorder) Execute(ctx, scheduleRequest, tenantID interface{}) *gomock.Call {
+func (mr *MockCreateScheduleUseCaseMockRecorder) Execute(ctx, schedule, tenantID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateScheduleUseCase)(nil).Execute), ctx, scheduleRequest, tenantID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateScheduleUseCase)(nil).Execute), ctx, schedule, tenantID)
+}
+
+// WithDBTransaction mocks base method.
+func (m *MockCreateScheduleUseCase) WithDBTransaction(dbtx store.Tx) schedules.CreateScheduleUseCase {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WithDBTransaction", dbtx)
+	ret0, _ := ret[0].(schedules.CreateScheduleUseCase)
+	return ret0
+}
+
+// WithDBTransaction indicates an expected call of WithDBTransaction.
+func (mr *MockCreateScheduleUseCaseMockRecorder) WithDBTransaction(dbtx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithDBTransaction", reflect.TypeOf((*MockCreateScheduleUseCase)(nil).WithDBTransaction), dbtx)
 }

@@ -45,7 +45,7 @@ func FakeTransaction() *models.Transaction {
 }
 
 func FakeJob(scheduleID int) *models.Job {
-	return &models.Job{
+	job := &models.Job{
 		UUID: uuid.NewV4().String(),
 		Type: entities.JobConstantinopleTransaction,
 		Schedule: &models.Schedule{
@@ -58,7 +58,14 @@ func FakeJob(scheduleID int) *models.Job {
 		Logs: []*models.Log{
 			{UUID: uuid.NewV4().String(), Status: entities.JobStatusCreated, Message: "created message"},
 		},
+		CreatedAt: time.Now(),
 	}
+
+	if scheduleID != 0 {
+		job.ScheduleID = &scheduleID
+	}
+
+	return job
 }
 
 func FakeLog() *models.Log {

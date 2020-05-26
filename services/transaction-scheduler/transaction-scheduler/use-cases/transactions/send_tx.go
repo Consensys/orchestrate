@@ -4,6 +4,7 @@ import (
 	"context"
 
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
@@ -70,30 +71,40 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
 
-	// @TODO Execute everything within a single DB Tx
 	// Step 2: Insert Schedule + Job + Transaction + TxRequest atomically
-	err = uc.db.TransactionRequest().SelectOrInsert(ctx, txRequestModel)
-	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
-	}
+	err = database.ExecuteInDBTx(uc.db, func(dbtx database.Tx) error {
+		der := dbtx.(store.Tx).TransactionRequest().SelectOrInsert(ctx, txRequestModel)
+		if der != nil {
+			return der
+		}
 
-	txRequest.Schedule, err = uc.createScheduleUC.Execute(ctx, txRequest.Schedule, tenantID)
+		txRequest.Schedule, der = uc.createScheduleUC.
+			WithDBTransaction(dbtx.(store.Tx)).
+			Execute(ctx, txRequest.Schedule, tenantID)
+		if der != nil {
+			return der
+		}
+
+		sendTxJob, der := parsers.NewJobEntityFromSendTxRequest(txRequest)
+		if der != nil {
+			return der
+		}
+
+		txRequest.Schedule.Jobs[0], der = uc.createJobUC.
+			WithDBTransaction(dbtx.(store.Tx)).
+			Execute(ctx, sendTxJob, tenantID)
+		if der != nil {
+			return der
+		}
+
+		return nil
+	})
+
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
 
 	scheduleUUID := txRequest.Schedule.UUID
-	sendTxJob, err := parsers.NewJobEntityFromSendTxRequest(txRequest)
-	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
-	}
-
-	txRequest.Schedule.Jobs[0], err = uc.createJobUC.Execute(ctx, sendTxJob, tenantID)
-	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
-	}
-
-	// UNTIL HERE IN A ATOMIC EXECUTION
 
 	// Step 3: Start first job of the schedule
 	jobUUID := txRequest.Schedule.Jobs[0].UUID

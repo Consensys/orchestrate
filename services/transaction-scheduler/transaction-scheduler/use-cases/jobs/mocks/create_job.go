@@ -7,7 +7,9 @@ package mocks
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
+	store "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
+	jobs "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs"
 	reflect "reflect"
 )
 
@@ -47,4 +49,18 @@ func (m *MockCreateJobUseCase) Execute(ctx context.Context, job *entities.Job, t
 func (mr *MockCreateJobUseCaseMockRecorder) Execute(ctx, job, tenantID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateJobUseCase)(nil).Execute), ctx, job, tenantID)
+}
+
+// WithDBTransaction mocks base method.
+func (m *MockCreateJobUseCase) WithDBTransaction(dbtx store.Tx) jobs.CreateJobUseCase {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WithDBTransaction", dbtx)
+	ret0, _ := ret[0].(jobs.CreateJobUseCase)
+	return ret0
+}
+
+// WithDBTransaction indicates an expected call of WithDBTransaction.
+func (mr *MockCreateJobUseCaseMockRecorder) WithDBTransaction(dbtx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithDBTransaction", reflect.TypeOf((*MockCreateJobUseCase)(nil).WithDBTransaction), dbtx)
 }

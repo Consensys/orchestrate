@@ -18,6 +18,7 @@ const createJobComponent = "use-cases.create-job"
 
 type CreateJobUseCase interface {
 	Execute(ctx context.Context, job *entities.Job, tenantID string) (*entities.Job, error)
+	WithDBTransaction(dbtx store.Tx) CreateJobUseCase
 }
 
 // createJobUseCase is a use case to create a new transaction job
@@ -30,6 +31,11 @@ func NewCreateJobUseCase(db store.DB) CreateJobUseCase {
 	return &createJobUseCase{
 		db: db,
 	}
+}
+
+func (uc createJobUseCase) WithDBTransaction(dbtx store.Tx) CreateJobUseCase {
+	uc.db = dbtx
+	return &uc
 }
 
 // Execute validates and creates a new transaction job

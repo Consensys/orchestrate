@@ -18,6 +18,7 @@ const createScheduleComponent = "use-cases.create-schedule"
 
 type CreateScheduleUseCase interface {
 	Execute(ctx context.Context, schedule *entities.Schedule, tenantID string) (*entities.Schedule, error)
+	WithDBTransaction(dbtx store.Tx) CreateScheduleUseCase
 }
 
 // createScheduleUseCase is a use case to create a new transaction schedule
@@ -32,6 +33,11 @@ func NewCreateScheduleUseCase(validator validators.TransactionValidator, db stor
 		validator: validator,
 		db:        db,
 	}
+}
+
+func (uc createScheduleUseCase) WithDBTransaction(dbtx store.Tx) CreateScheduleUseCase {
+	uc.db = dbtx
+	return &uc
 }
 
 // Execute validates and creates a new transaction schedule

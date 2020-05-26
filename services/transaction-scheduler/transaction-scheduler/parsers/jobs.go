@@ -12,6 +12,14 @@ func NewJobModelFromEntities(job *entities.Job, scheduleID *int) *models.Job {
 		Type:       job.Type,
 		Labels:     job.Labels,
 		ScheduleID: scheduleID,
+		Schedule: &models.Schedule{
+			UUID: job.ScheduleUUID,
+		},
+		CreatedAt: job.CreatedAt,
+	}
+
+	if scheduleID != nil {
+		jobModel.Schedule.ID = *scheduleID
 	}
 
 	if job.Transaction != nil {
@@ -32,6 +40,7 @@ func NewJobEntityFromModels(jobModel *models.Job) *entities.Job {
 		Status:    status,
 		CreatedAt: jobModel.CreatedAt,
 		Labels:    jobModel.Labels,
+		Type:      jobModel.Type,
 	}
 
 	if jobModel.Schedule != nil {
