@@ -116,6 +116,9 @@ message TxResponse {
 
     ethereum.Transaction transaction = 4;
     ethereum.Receipt receipt = 5;
+    // Name of the Chain as registered on the chain registry
+    // e.g. 1 for mainnet, 3 for Ropsten
+    string chain = 7;
 
     repeated error.Error errors = 6;
 }

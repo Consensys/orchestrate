@@ -549,6 +549,10 @@
         "receipt": {
           "$ref": "#/definitions/ethereumReceipt"
         },
+        "chain": {
+          "type": "string",
+          "title": "Name of the Chain as registered on the chain registry\ne.g. 1 for mainnet, 3 for Ropsten"
+        },
         "errors": {
           "type": "array",
           "items": {

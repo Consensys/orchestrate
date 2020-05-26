@@ -914,6 +914,7 @@ func (e *Envelope) TxResponse() *TxResponse {
 			Raw:      e.GetRaw(),
 			TxHash:   e.GetTxHashString(),
 		},
+		Chain:   e.GetChainName(),
 		Receipt: e.Receipt,
 		Errors:  e.Errors,
 	}

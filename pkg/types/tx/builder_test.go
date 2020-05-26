@@ -563,6 +563,7 @@ func TestEnvelope_TxEnvelopeAsRequest(t *testing.T) {
 					Raw:      "0x02",
 					TxHash:   "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
 				},
+				Chain: "chainName",
 				Errors: []*ierror.Error{
 					{Message: "testError", Code: 270336},
 				},
@@ -618,6 +619,7 @@ func TestEnvelope_TxResponse(t *testing.T) {
 			Raw:      "0x02",
 			TxHash:   "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
 		},
+		Chain:   "chainName",
 		Receipt: b.Receipt,
 		Errors:  b.Errors,
 	}

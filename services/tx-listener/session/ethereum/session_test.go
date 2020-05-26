@@ -483,6 +483,7 @@ func TestFetchBlockWithExternalPrivateTx(t *testing.T) {
 	enclaveKey := "0xd0bef1115237cb96d5635a46027b1debb7cf6f19f68861b69261eb4674095cb0"
 	// This is the Tx generated when we store the enclavekey
 	markingTx := ethtypes.NewTransaction(0, ethcommon.HexToAddress(orionPrecompiledContractAddr), nil, 0, nil, []byte(enclaveKey))
+	chainName := "chainName"
 
 	ec.Mine(ethtypes.NewBlock(&ethtypes.Header{},
 		[]*ethtypes.Transaction{markingTx},
@@ -498,6 +499,7 @@ func TestFetchBlockWithExternalPrivateTx(t *testing.T) {
 		ec: ec,
 		Chain: &dynamic.Chain{
 			ChainID:  big.NewInt(testChainID),
+			Name:     chainName,
 			Listener: &dynamic.Listener{ExternalTxEnabled: true}},
 		store: store,
 	}
@@ -512,6 +514,7 @@ func TestFetchBlockWithExternalPrivateTx(t *testing.T) {
 		assert.Len(t, block.envelopes, 1, "Receipts should have been fetched properly")
 		assert.Equal(t, block.envelopes[0].TxHash.String(), markingTx.Hash().String())
 		assert.Equal(t, block.envelopes[0].Receipt.Output, enclaveKey)
+		assert.Equal(t, block.envelopes[0].ChainName, chainName)
 	}
 	future.Close()
 }
@@ -694,7 +697,7 @@ func TestSessionRestartAfterError(t *testing.T) {
 
 	// Start session
 	bckOff := &backoffmock.MockIntervalBackoff{}
-	sess.bckOff = bckOff 
+	sess.bckOff = bckOff
 	exitErr := make(chan error)
 	go func() {
 		exitErr <- sess.Run(context.Background())
@@ -758,7 +761,7 @@ func TestSessionStopsAfterInterrupt(t *testing.T) {
 	case <-exitErr:
 		assert.False(t, bckoff.HasRetried(), "Should have retried")
 	// Inject hook error
-	case <-time.After(2* time.Second):
+	case <-time.After(2 * time.Second):
 		assert.Error(t, fmt.Errorf("should have finished"))
 	}
 }

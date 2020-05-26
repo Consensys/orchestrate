@@ -354,13 +354,13 @@ func (s *Session) fetchReceipts(ctx context.Context, transaction ethtypes.Transa
 		case isPrivTx(blckTx) && s.Chain.Listener.ExternalTxEnabled:
 			futureEnvelopes = append(futureEnvelopes, s.fetchPrivateReceipt(
 				ctx,
-				tx.NewEnvelope().SetTxHash(blckTx.Hash()),
+				tx.NewEnvelope().SetTxHash(blckTx.Hash()).SetChainName(s.Chain.Name),
 				blckTx.Hash()))
 			continue
 		case s.Chain.Listener.ExternalTxEnabled:
 			futureEnvelopes = append(futureEnvelopes, s.fetchReceipt(
 				ctx,
-				tx.NewEnvelope().SetTxHash(blckTx.Hash()),
+				tx.NewEnvelope().SetTxHash(blckTx.Hash()).SetChainName(s.Chain.Name),
 				blckTx.Hash()))
 			continue
 		default:
