@@ -118,6 +118,8 @@ integration:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
     DB_HOST: "docker"
+    KAFKA_HOST: "docker"
+    KAFKA_URL: "docker:9092"
   script:
     - make run-integration
 

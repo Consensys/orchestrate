@@ -65,11 +65,6 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
 
-	err = uc.validator.ValidateChainExists(ctx, txRequest.Schedule.ChainUUID)
-	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
-	}
-
 	txRequestModel, err := parsers.NewTxRequestModelFromEntities(txRequest, requestHash, tenantID)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
@@ -100,14 +95,14 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 
 	// UNTIL HERE IN A ATOMIC EXECUTION
 
-	// Step4: Start first job of the schedule
+	// Step 3: Start first job of the schedule
 	jobUUID := txRequest.Schedule.Jobs[0].UUID
 	err = uc.startJobUC.Execute(ctx, jobUUID, tenantID)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
 
-	// Step5: Load latest Schedule status from DB
+	// Step 4: Load latest Schedule status from DB
 	txRequest.Schedule, err = uc.getScheduleUC.Execute(ctx, scheduleUUID, tenantID)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)

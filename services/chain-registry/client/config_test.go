@@ -17,10 +17,10 @@ func TestChainRegistryTarget(t *testing.T) {
 	expected := chainRegistryURLDefault
 	assert.Equal(t, expected, viper.GetString(ChainRegistryURLViperKey), "Default")
 
-	_ = os.Setenv(chainRegistryURLEnv, "env-chain-registry")
+	_ = os.Setenv(ChainRegistryURLEnv, "env-chain-registry")
 	expected = "env-chain-registry"
 	assert.Equal(t, expected, viper.GetString(ChainRegistryURLViperKey), "From Environment Variable")
-	_ = os.Unsetenv(chainRegistryURLEnv)
+	_ = os.Unsetenv(ChainRegistryURLEnv)
 
 	args := []string{
 		"--chain-registry-url=flag-chain-registry",

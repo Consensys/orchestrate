@@ -7,7 +7,6 @@ import (
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/proto"
 
 	"github.com/Shopify/sarama"
-	"github.com/gogo/protobuf/proto"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
@@ -57,15 +56,10 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID, tenantID string
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}
 
-	txEnvelope := parsers.NewEnvelopeFromJobModel(jobModel)
-	partition, offset, err := uc.sendMessage(ctx, txEnvelope)
+	partition, offset, err := uc.sendMessage(ctx, jobModel)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}
-
-	logger.
-		WithField("envelope_id", txEnvelope.GetID()).
-		Debugf("envelope sent to kafka")
 
 	jobLog := &models.Log{
 		JobID:  &jobModel.ID,
@@ -85,8 +79,10 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID, tenantID string
 	return nil
 }
 
-func (uc *startJobUseCase) sendMessage(ctx context.Context, txEnvelope proto.Message) (partition int32, offset int64, err error) {
+func (uc *startJobUseCase) sendMessage(ctx context.Context, jobModel *models.Job) (partition int32, offset int64, err error) {
 	log.WithContext(ctx).Debug("sending kafka message")
+
+	txEnvelope := parsers.NewEnvelopeFromJobModel(jobModel)
 
 	envelopeBytes, err := encoding.Marshal(txEnvelope)
 	if err != nil {
@@ -109,5 +105,6 @@ func (uc *startJobUseCase) sendMessage(ctx context.Context, txEnvelope proto.Mes
 		return 0, 0, errors.KafkaConnectionError(errMessage).ExtendComponent(startJobComponent)
 	}
 
+	log.WithField("envelope_id", txEnvelope.GetID()).Debug("envelope sent to kafka")
 	return partition, offset, err
 }

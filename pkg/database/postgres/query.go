@@ -25,7 +25,9 @@ func Insert(ctx context.Context, db DB, models ...interface{}) *ierror.Error {
 			return errors.PostgresConnectionError(errMsg)
 		}
 
-		return errors.PostgresConnectionError("error executing insert")
+		errMsg := "error executing insert"
+		logger.WithError(err).Error(errMsg)
+		return errors.PostgresConnectionError(errMsg)
 	}
 
 	return nil
@@ -46,7 +48,9 @@ func Update(ctx context.Context, db DB, models ...interface{}) *ierror.Error {
 			return errors.PostgresConnectionError(errMsg)
 		}
 
-		return errors.PostgresConnectionError("error executing insert")
+		errMsg := "error executing update"
+		logger.WithError(err).Error(errMsg)
+		return errors.PostgresConnectionError(errMsg)
 	}
 	return nil
 }
@@ -56,12 +60,10 @@ func Select(ctx context.Context, q *orm.Query) *ierror.Error {
 
 	err := q.Context(ctx).Select()
 	if err != nil && err == pg.ErrNoRows {
-		errMsg := "entities cannot be found"
-		logger.WithError(err).Error(errMsg)
-		return errors.NotFoundError(errMsg)
+		return errors.NotFoundError("entities cannot be found")
 	} else if err != nil {
 		errMsg := "could not load entities"
-		logger.WithError(err).Errorf(errMsg)
+		logger.WithError(err).Error(errMsg)
 		return errors.PostgresConnectionError(errMsg)
 	}
 
@@ -70,17 +72,13 @@ func Select(ctx context.Context, q *orm.Query) *ierror.Error {
 
 func SelectOne(ctx context.Context, q *orm.Query) *ierror.Error {
 	logger := log.WithContext(ctx)
-
 	err := q.Context(ctx).First()
 	if err != nil && err == pg.ErrNoRows {
-		errMsg := "entity does not exist"
-		logger.WithError(err).Error(errMsg)
-		return errors.NotFoundError(errMsg)
+		return errors.NotFoundError("entity does not exist")
 	} else if err != nil {
 		errMsg := "could not load entity"
-		logger.WithError(err).Errorf(errMsg)
+		logger.WithError(err).Error(errMsg)
 		return errors.PostgresConnectionError(errMsg)
 	}
-
 	return nil
 }

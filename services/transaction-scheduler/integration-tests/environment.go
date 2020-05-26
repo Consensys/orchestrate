@@ -3,26 +3,38 @@ package integrationtests
 import (
 	"context"
 	"net/http"
+	"os"
 	"time"
 
-	kafkaDocker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/container/kafka"
-	postgresDocker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/container/postgres"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/container/zookeeper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
+	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt"
+	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/key"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	httputils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	transactionscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler"
+	"gopkg.in/h2non/gock.v1"
 
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/config"
+	kafkaDocker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/container/kafka"
+	postgresDocker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/container/postgres"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/container/zookeeper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/postgres/migrations"
 )
 
 const postgresContainerID = "postgres-transaction-scheduler"
 const kafkaContainerID = "kafka-transaction-scheduler"
 const zookeeperContainerID = "zookeeper-transaction-scheduler"
+const kafkaHostEnvName = "KAFKA_HOST"
+const txCrafterTopic = "transaction-scheduler-integration-crafter-topic"
+const ChainRegistryURL = "http://chain-registry:8081"
 
 type IntegrationEnvironment struct {
+	app       *app.App
 	client    *docker.Client
 	pgmngr    postgres.Manager
 	ctx       context.Context
@@ -35,8 +47,9 @@ func NewIntegrationEnvironment(ctx context.Context) *IntegrationEnvironment {
 			postgresContainerID:  {Postgres: (&postgresDocker.Config{}).SetDefault()},
 			zookeeperContainerID: {Zookeeper: (&zookeeper.Config{}).SetDefault()},
 			kafkaContainerID: {Kafka: (&kafkaDocker.Config{
-				ZookeeperHostname: zookeeperContainerID,
-				KafkaHostname:     kafkaContainerID,
+				ZookeeperHostname:     zookeeperContainerID,
+				KafkaInternalHostname: kafkaContainerID,
+				KafkaExternalHostname: os.Getenv(kafkaHostEnvName),
 			}).SetDefault()},
 		},
 	}
@@ -54,36 +67,35 @@ func NewIntegrationEnvironment(ctx context.Context) *IntegrationEnvironment {
 }
 
 func (env *IntegrationEnvironment) Start() {
-	ctx := context.Background()
-
 	// Start kafka
-	networkID, err := env.client.CreateNetwork(ctx, "transaction-scheduler")
+	networkID, err := env.client.CreateNetwork(env.ctx, "transaction-scheduler")
 	if err != nil {
 		log.WithoutContext().WithError(err).Fatalf("could not create network")
 		return
 	}
 	env.networkID = networkID
 
-	err = env.client.Up(ctx, zookeeperContainerID, networkID)
+	err = env.client.Up(env.ctx, zookeeperContainerID, networkID)
 	if err != nil {
 		log.WithoutContext().WithError(err).Fatalf("could not up kafka")
 		return
 	}
-	time.Sleep(10 * time.Second)
-	err = env.client.Up(ctx, kafkaContainerID, networkID)
+	time.Sleep(2 * time.Second)
+
+	err = env.client.Up(env.ctx, kafkaContainerID, networkID)
 	if err != nil {
 		log.WithoutContext().WithError(err).Fatalf("could not up kafka")
 		return
 	}
-	time.Sleep(20 * time.Second)
+	time.Sleep(2 * time.Second)
 
 	// Start postgres database
-	err = env.client.Up(ctx, postgresContainerID, networkID)
+	err = env.client.Up(env.ctx, postgresContainerID, networkID)
 	if err != nil {
 		log.WithoutContext().WithError(err).Fatalf("could not up postgres")
 		return
 	}
-	time.Sleep(10 * time.Second)
+	time.Sleep(2 * time.Second)
 
 	// Migrate database
 	err = env.migrate()
@@ -93,19 +105,23 @@ func (env *IntegrationEnvironment) Start() {
 	}
 
 	// Start transaction scheduler
-	err = transactionscheduler.Start(env.ctx)
+	txSchedulerApp, err := initService(env.ctx)
+	if err != nil {
+		panic(err)
+	}
+	env.app = txSchedulerApp
+	err = env.app.Start(env.ctx)
 	if err != nil {
 		log.WithoutContext().WithError(err).Fatalf("could not start transaction-scheduler")
 		return
 	}
 
 	env.waitForService()
-	log.WithoutContext().Infof("transaction-scheduler ready")
 }
 
 func (env *IntegrationEnvironment) Teardown() {
 	log.WithoutContext().Infof("tearing test suite down")
-	err := transactionscheduler.Stop(env.ctx)
+	err := env.app.Stop(env.ctx)
 	if err != nil {
 		log.WithoutContext().WithError(err).Errorf("could not stop transaction-scheduler")
 		return
@@ -172,4 +188,26 @@ func (env *IntegrationEnvironment) waitForService() {
 
 		time.Sleep(2 * time.Second)
 	}
+}
+
+func initService(ctx context.Context) (*app.App, error) {
+	// Initialize dependencies
+	authjwt.Init(ctx)
+	authkey.Init(ctx)
+	sarama.InitSyncProducer(ctx)
+
+	// We mock the calls to the chain registry
+	conf := client.NewConfig("http://chain-registry:8081")
+	httpClient := httputils.NewClient()
+	gock.InterceptClient(httpClient)
+	chainRegistryClient := client.NewHTTPClient(httpClient, conf)
+
+	return transactionscheduler.New(
+		transactionscheduler.NewConfig(viper.GetViper()),
+		postgres.GetManager(),
+		authjwt.GlobalChecker(), authkey.GlobalChecker(),
+		chainRegistryClient,
+		sarama.GlobalSyncProducer(),
+		txCrafterTopic,
+	)
 }

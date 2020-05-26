@@ -114,10 +114,11 @@ func InitClient(ctx context.Context) {
 		}
 
 		// Create sarama client
+		hostnames := viper.GetStringSlice(KafkaURLViperKey)
 		var err error
-		client, err = NewClient(viper.GetStringSlice(KafkaURLViperKey), config)
+		client, err = NewClient(hostnames, config)
 		if err != nil {
-			log.WithError(err).Fatalf("sarama: could not to start client")
+			log.WithError(err).Fatalf("sarama: could not to start client at host %v", hostnames)
 		}
 
 		// Retrieve and log connected brokers
@@ -125,7 +126,7 @@ func InitClient(ctx context.Context) {
 		for _, v := range client.Brokers() {
 			brokers[v.ID()] = v.Addr()
 		}
-		log.Infof("sarama: client ready (connected to brokers: %v)", brokers)
+		log.Infof("sarama: client ready (connected to brokers: %v) at host %v", brokers, hostnames)
 
 		// Close when context is canceled
 		go func() {

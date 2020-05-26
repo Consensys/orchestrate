@@ -13,11 +13,12 @@ const DefaultKafkaImage = "confluentinc/cp-kafka:5.3.0"
 
 type Kafka struct{}
 type Config struct {
-	Image               string
-	Port                string
-	ZookeeperClientPort string
-	ZookeeperHostname   string
-	KafkaHostname       string
+	Image                 string
+	Port                  string
+	ZookeeperClientPort   string
+	ZookeeperHostname     string
+	KafkaInternalHostname string
+	KafkaExternalHostname string
 }
 
 func (p *Config) SetDefault() *Config {
@@ -37,8 +38,12 @@ func (p *Config) SetDefault() *Config {
 		p.ZookeeperHostname = "zookeeper"
 	}
 
-	if p.KafkaHostname == "" {
-		p.KafkaHostname = "kafka"
+	if p.KafkaInternalHostname == "" {
+		p.KafkaInternalHostname = "kafka"
+	}
+
+	if p.KafkaExternalHostname == "" {
+		p.KafkaExternalHostname = "localhost"
 	}
 
 	return p
@@ -56,7 +61,7 @@ func (k *Kafka) GenerateContainerConfig(_ context.Context, configuration interfa
 			"KAFKA_BROKER_ID=1",
 			fmt.Sprintf("KAFKA_ZOOKEEPER_CONNECT=%v:%v", cfg.ZookeeperHostname, cfg.ZookeeperClientPort),
 			"KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1",
-			fmt.Sprintf("KAFKA_ADVERTISED_LISTENERS=INTERNAL://%v:29092,EXTERNAL://localhost:%v", cfg.KafkaHostname, cfg.Port),
+			fmt.Sprintf("KAFKA_ADVERTISED_LISTENERS=INTERNAL://%v:29092,EXTERNAL://%v:%v", cfg.KafkaInternalHostname, cfg.KafkaExternalHostname, cfg.Port),
 			"KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT",
 			"KAFKA_INTER_BROKER_LISTENER_NAME=INTERNAL",
 		},

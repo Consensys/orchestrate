@@ -70,10 +70,6 @@ func (s *sendTxSuite) TestSendTx_Success() {
 			ValidateRequestHash(ctx, chainUUID, txRequest.Params, txRequest.IdempotencyKey).
 			Return(requestHash, nil)
 
-		s.Validators.EXPECT().
-			ValidateChainExists(ctx, chainUUID).
-			Return(nil)
-
 		s.DB.EXPECT().TransactionRequest().
 			Return(s.TxRequestDA).Times(1)
 
@@ -125,28 +121,6 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		s.Validators.EXPECT().
 			ValidateRequestHash(gomock.Any(), chainUUID, txRequest.Params, txRequest.IdempotencyKey).
 			Return(requestHash, expectedErr)
-		
-
-		response, err := s.usecase.Execute(ctx, txRequest, tenantID)
-		assert.Nil(t, response)
-		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendTxComponent), err)
-	})
-	
-	s.T().Run("should fail with same error if validator fails to validate chain exists", func(t *testing.T) {
-		expectedErr := errors.InvalidParameterError("error")
-		txRequest := testutils.FakeTxRequestEntity()
-		txRequest.Schedule.ChainUUID = chainUUID
-		txRequest.Schedule.UUID = scheduleUUID
-		txRequest.Schedule.Jobs[0].UUID = jobUUID
-
-		s.Validators.EXPECT().
-			ValidateRequestHash(gomock.Any(), chainUUID, txRequest.Params, txRequest.IdempotencyKey).
-			Return(requestHash, nil)
-		
-		s.Validators.EXPECT().
-			ValidateChainExists(ctx, chainUUID).
-			Return(expectedErr)
-		
 
 		response, err := s.usecase.Execute(ctx, txRequest, tenantID)
 		assert.Nil(t, response)
@@ -163,10 +137,6 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		s.Validators.EXPECT().
 			ValidateRequestHash(gomock.Any(), chainUUID, txRequest.Params, txRequest.IdempotencyKey).
 			Return(requestHash, nil)
-		
-		s.Validators.EXPECT().
-			ValidateChainExists(ctx, chainUUID).
-			Return(nil)
 		
 		s.DB.EXPECT().TransactionRequest().
 			Return(s.TxRequestDA).Times(1)
@@ -190,10 +160,6 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		s.Validators.EXPECT().
 			ValidateRequestHash(gomock.Any(), chainUUID, txRequest.Params, txRequest.IdempotencyKey).
 			Return(requestHash, nil)
-		
-		s.Validators.EXPECT().
-			ValidateChainExists(ctx, chainUUID).
-			Return(nil)
 		
 		s.DB.EXPECT().TransactionRequest().
 			Return(s.TxRequestDA).Times(1)
@@ -222,10 +188,6 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		s.Validators.EXPECT().
 			ValidateRequestHash(gomock.Any(), chainUUID, txRequest.Params, txRequest.IdempotencyKey).
 			Return(requestHash, nil)
-		
-		s.Validators.EXPECT().
-			ValidateChainExists(ctx, chainUUID).
-			Return(nil)
 		
 		s.DB.EXPECT().TransactionRequest().
 			Return(s.TxRequestDA).Times(1)
@@ -258,10 +220,6 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		s.Validators.EXPECT().
 			ValidateRequestHash(gomock.Any(), chainUUID, txRequest.Params, txRequest.IdempotencyKey).
 			Return(requestHash, nil)
-		
-		s.Validators.EXPECT().
-			ValidateChainExists(ctx, chainUUID).
-			Return(nil)
 		
 		s.DB.EXPECT().TransactionRequest().
 			Return(s.TxRequestDA).Times(1)
@@ -298,10 +256,6 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		s.Validators.EXPECT().
 			ValidateRequestHash(gomock.Any(), chainUUID, txRequest.Params, txRequest.IdempotencyKey).
 			Return(requestHash, nil)
-		
-		s.Validators.EXPECT().
-			ValidateChainExists(ctx, chainUUID).
-			Return(nil)
 		
 		s.DB.EXPECT().TransactionRequest().
 			Return(s.TxRequestDA).Times(1)

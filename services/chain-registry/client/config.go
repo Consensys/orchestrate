@@ -9,7 +9,7 @@ import (
 
 func init() {
 	viper.SetDefault(ChainRegistryURLViperKey, chainRegistryURLDefault)
-	_ = viper.BindEnv(ChainRegistryURLViperKey, chainRegistryURLEnv)
+	_ = viper.BindEnv(ChainRegistryURLViperKey, ChainRegistryURLEnv)
 	viper.SetDefault(ChainRegistryMetricsURLViperKey, chainRegistryMetricsURLDefault)
 	_ = viper.BindEnv(ChainRegistryMetricsURLViperKey, chainRegistryMetricsURLEnv)
 }
@@ -18,13 +18,13 @@ const (
 	chainRegistryURLFlag     = "chain-registry-url"
 	ChainRegistryURLViperKey = "chain.registry.url"
 	chainRegistryURLDefault  = "localhost:8081"
-	chainRegistryURLEnv      = "CHAIN_REGISTRY_URL"
+	ChainRegistryURLEnv      = "CHAIN_REGISTRY_URL"
 )
 
 // ChainRegistryURL register flag for the URL of the Chain Registry
 func URL(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`URL of the Chain Registry HTTP endpoint. 
-Environment variable: %q`, chainRegistryURLEnv)
+Environment variable: %q`, ChainRegistryURLEnv)
 	f.String(chainRegistryURLFlag, chainRegistryURLDefault, desc)
 	_ = viper.BindPFlag(ChainRegistryURLViperKey, f.Lookup(chainRegistryURLFlag))
 }

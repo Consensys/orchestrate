@@ -15,11 +15,11 @@ type txSchedulerTestSuite struct {
 }
 
 func (s *txSchedulerTestSuite) SetupSuite() {
-	// s.env.Start()
+	s.env.Start()
 }
 
 func (s *txSchedulerTestSuite) TearDownSuite() {
-	// s.env.Teardown()
+	s.env.Teardown()
 }
 
 func TestTxScheduler(t *testing.T) {

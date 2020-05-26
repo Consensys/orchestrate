@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	log "github.com/sirupsen/logrus"
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
@@ -47,7 +46,6 @@ func (c *TransactionsController) Send(rw http.ResponseWriter, request *http.Requ
 	txRequest := &types.SendTransactionRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, txRequest)
 	if err != nil {
-		log.WithContext(ctx).WithError(err).Error("create transaction has failed")
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -57,14 +55,12 @@ func (c *TransactionsController) Send(rw http.ResponseWriter, request *http.Requ
 	txReq := formatters.FormatSendTxRequest(txRequest, chainUUID)
 	txResponse, err := c.ucs.SendTransaction().Execute(ctx, txReq, tenantID)
 	if err != nil {
-		log.WithContext(ctx).WithError(err).Error("create transaction has failed")
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 
 	response, err := formatters.FormatTxResponse(txResponse)
 	if err != nil {
-		log.WithContext(ctx).WithError(err).Error("cannot format transaction response")
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}

@@ -43,7 +43,11 @@ func (c *HTTPClient) SendTransaction(ctx context.Context, chainUUID string, txRe
 
 	resp := &types.TransactionResponse{}
 	err = parseResponse(ctx, response, resp)
-	return resp, err
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
 }
 
 func (c *HTTPClient) GetSchedule(ctx context.Context, scheduleUUID string) (*types.ScheduleResponse, error) {
@@ -198,7 +202,7 @@ func parseResponse(ctx context.Context, response *http.Response, resp interface{
 		log.FromContext(ctx).Error(errMessage)
 		return errors.InvalidParameterError(errMessage)
 	case http.StatusNotFound:
-		errMessage := "not found entity"
+		errMessage := "entity not found"
 		log.FromContext(ctx).Error(errMessage)
 		return errors.NotFoundError(errMessage)
 	default:
