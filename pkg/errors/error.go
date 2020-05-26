@@ -43,3 +43,19 @@ func isErrorClass(code, base uint64) bool {
 	//  - (code^base)&(base&15<<8) compute difference between 3rd nibble in case base 3rd nibble is non zero (bits 9 to 12)
 	return (code^base)&(255<<12+15<<8&base) == 0
 }
+
+func CombineErrors(errs ...error) error {
+	var err error
+	for _, e := range errs {
+		if e == nil {
+			continue
+		}
+
+		if err == nil {
+			err = e
+		} else {
+			err = fmt.Errorf("%v; %v", e, err)
+		}
+	}
+	return err
+}

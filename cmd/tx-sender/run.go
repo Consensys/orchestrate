@@ -47,21 +47,31 @@ func newRunCommand() *cobra.Command {
 }
 
 func run(_ *cobra.Command, _ []string) {
-	_ = txsender.Start(context.Background())
-
-	done := make(chan struct{})
+	rootCtx, cancel := context.WithCancel(context.Background())
+	// Start microservice
+	go func() {
+		done, err := txsender.Start(rootCtx)
+		if err != nil {
+			log.WithoutContext().WithError(err).Errorf("Microservice started with an error")
+			close(done)
+		}
+		<-done
+		cancel()
+	}()
 
 	// Process signals
 	sig := utils.NewSignalListener(func(signal os.Signal) {
-		err := txsender.Stop(context.Background())
-		if err != nil {
-			log.WithoutContext().WithError(err).Errorf("Application did not shutdown properly")
-		} else {
-			log.WithoutContext().WithError(err).Infof("Application gracefully closed")
-		}
-		close(done)
+		cancel()
 	})
-	<-done
+
+	// Stop when get context canceled
+	<-rootCtx.Done()
+	err := txsender.Stop(rootCtx)
+	if err != nil {
+		log.WithoutContext().WithError(err).Errorf("Microservice did not shutdown properly")
+	} else {
+		log.WithoutContext().Infof("Microservice gracefully closed")
+	}
 
 	sig.Close()
 }

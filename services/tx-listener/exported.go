@@ -22,7 +22,6 @@ var (
 	initOnce  = &sync.Once{}
 	startOnce = &sync.Once{}
 	done      chan struct{}
-	cancel    func()
 )
 
 func initDependencies(ctx context.Context) {
@@ -55,10 +54,11 @@ func Init(ctx context.Context) {
 }
 
 // Start starts application
-func Start(ctx context.Context) error {
+func Start(ctx context.Context) (chan struct{}, error) {
 	var err error
 	startOnce.Do(func() {
-		ctx, cancel = context.WithCancel(ctx)
+		// Chan to notify that sub-go routines stopped
+		done = make(chan struct{})
 
 		// Create appli to expose metrics
 		appli, err = app.New(
@@ -82,19 +82,16 @@ func Start(ctx context.Context) error {
 			return
 		}
 
-		done = make(chan struct{})
 		go func() {
 			listener.Start(ctx)
 			close(done)
 		}()
 	})
 
-	return err
+	return done, err
 }
 
 func Stop(ctx context.Context) error {
-	cancel()
-	err := appli.Stop(ctx)
 	<-done
-	return err
+	return appli.Stop(ctx)
 }

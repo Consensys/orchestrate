@@ -11,6 +11,7 @@ import (
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
 const component = "broker.sarama"
@@ -127,15 +128,6 @@ func InitClient(ctx context.Context) {
 			brokers[v.ID()] = v.Addr()
 		}
 		log.Infof("sarama: client ready (connected to brokers: %v) at host %v", brokers, hostnames)
-
-		// Close when context is canceled
-		go func() {
-			<-ctx.Done()
-			closeErr := client.Close()
-			if closeErr != nil {
-				log.WithError(closeErr).Warn("could not close client")
-			}
-		}()
 	})
 }
 
@@ -166,15 +158,6 @@ func InitSyncProducer(ctx context.Context) {
 			log.WithError(err).Fatalf("sarama: could not create producer")
 		}
 		log.Infof("sarama: producer ready")
-
-		// Close when context is canceled
-		go func() {
-			<-ctx.Done()
-			closeErr := producer.Close()
-			if closeErr != nil {
-				log.WithError(closeErr).Warn("could not close client")
-			}
-		}()
 	})
 }
 
@@ -207,15 +190,6 @@ func InitConsumerGroup(ctx context.Context) {
 		log.WithFields(log.Fields{
 			"group": viper.GetString(KafkaGroupViperKey),
 		}).Infof("sarama: consumer group ready")
-
-		// Close when context is canceled
-		go func() {
-			<-ctx.Done()
-			closeErr := group.Close()
-			if closeErr != nil {
-				log.WithError(closeErr).Warn("could not close client")
-			}
-		}()
 	})
 }
 
@@ -244,4 +218,23 @@ consumeLoop:
 		}
 	}
 	return nil
+}
+
+func Stop(_ context.Context) error {
+	var closeProducerErr, closeConsumerGroupErr error
+	wg := &sync.WaitGroup{}
+	wg.Add(2)
+	go func() {
+		closeProducerErr = producer.Close()
+		wg.Done()
+	}()
+	go func() {
+		closeConsumerGroupErr = group.Close()
+		wg.Done()
+	}()
+
+	wg.Wait()
+
+	closeClientErr := client.Close()
+	return errors.CombineErrors(closeProducerErr, closeConsumerGroupErr, closeClientErr)
 }

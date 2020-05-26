@@ -39,21 +39,32 @@ func newRunCommand() *cobra.Command {
 }
 
 func run(_ *cobra.Command, _ []string) {
-	_ = txcrafter.Start(context.Background())
+	rootCtx, cancel := context.WithCancel(context.Background())
 
-	done := make(chan struct{})
+	// Start microservice
+	go func() {
+		done, err := txcrafter.Start(rootCtx)
+		if err != nil {
+			log.WithoutContext().WithError(err).Errorf("Microservice started with an error")
+			close(done)
+		}
+		<-done
+		cancel()
+	}()
 
 	// Process signals
 	sig := utils.NewSignalListener(func(signal os.Signal) {
-		err := txcrafter.Stop(context.Background())
-		if err != nil {
-			log.WithoutContext().WithError(err).Errorf("Application did not shutdown properly")
-		} else {
-			log.WithoutContext().WithError(err).Infof("Application gracefully closed")
-		}
-		close(done)
+		cancel()
 	})
-	<-done
+
+	// Stop when get context canceled
+	<-rootCtx.Done()
+	err := txcrafter.Stop(rootCtx)
+	if err != nil {
+		log.WithoutContext().WithError(err).Errorf("Microservice did not shutdown properly")
+	} else {
+		log.WithoutContext().Infof("Microservice gracefully closed")
+	}
 
 	sig.Close()
 }

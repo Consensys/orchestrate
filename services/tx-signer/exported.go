@@ -18,6 +18,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
@@ -26,7 +27,6 @@ var (
 	appli     *app.App
 	startOnce = &sync.Once{}
 	done      chan struct{}
-	cancel    func()
 )
 
 type serviceName string
@@ -89,10 +89,11 @@ func registerHandlers() {
 }
 
 // Start starts application
-func Start(ctx context.Context) error {
+func Start(ctx context.Context) (chan struct{}, error) {
 	var err error
 	startOnce.Do(func() {
-		ctx, cancel = context.WithCancel(ctx)
+		// Chan to notify that sub-go routines stopped
+		done = make(chan struct{})
 
 		// Register all Handlers
 		initComponents(ctx)
@@ -118,30 +119,26 @@ func Start(ctx context.Context) error {
 			viper.GetString(broker.AccountGeneratorViperKey),
 		}
 
-		done = make(chan struct{})
 		go func() {
 			log.FromContext(ctx).WithFields(logrus.Fields{
 				"topics": topics,
 			}).Info("connecting")
 
-			err = broker.Consume(
+			errConsume := broker.Consume(
 				ctx,
 				topics,
 				broker.NewEngineConsumerGroupHandler(engine.GlobalEngine()),
 			)
-			if err != nil {
-				log.FromContext(ctx).WithError(err).Error("error on consumer")
+			if errConsume != nil {
+				log.FromContext(ctx).WithError(errConsume).Error("error on consumer")
 			}
 			close(done)
 		}()
 	})
-
-	return nil
+	return done, err
 }
 
 func Stop(ctx context.Context) error {
-	cancel()
-	err := appli.Stop(ctx)
 	<-done
-	return err
+	return errors.CombineErrors(broker.Stop(ctx), appli.Stop(ctx))
 }

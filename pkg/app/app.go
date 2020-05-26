@@ -10,6 +10,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher/provider"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher/provider/aggregator"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc"
 	grpcinterceptor "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/interceptor/static"
 	grpcserver "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/server"
@@ -217,34 +218,29 @@ func (app *App) Stop(ctx context.Context) error {
 	app.cancel()
 
 	app.wg.Add(2)
+	var errHTTP error
 	go func() {
 		if app.http != nil {
-			_ = tcp.Shutdown(ctx, app.http)
-			_ = tcp.Close(app.http)
+			errHTTP = errors.CombineErrors(tcp.Shutdown(ctx, app.http), tcp.Close(app.http))
 		}
 		app.wg.Done()
 	}()
 
+	var errGRPC error
 	go func() {
 		if app.grpc != nil {
-			_ = tcp.Shutdown(ctx, app.grpc)
-			_ = tcp.Close(app.grpc)
+			errGRPC = errors.CombineErrors(tcp.Shutdown(ctx, app.grpc), tcp.Close(app.grpc))
 		}
 		app.wg.Done()
 	}()
 
-	closed := make(chan struct{})
-	go func() {
-		app.wg.Wait()
-		close(closed)
-	}()
+	app.wg.Wait()
 
-	select {
-	case <-closed:
-		traefiklog.FromContext(ctx).Infof("gracefully shutted down application")
-		return nil // completed normally
-	case <-ctx.Done():
-		traefiklog.FromContext(ctx).WithError(ctx.Err()).Errorf("app did not shut down gracefully")
-		return ctx.Err() // timed out
+	if err := errors.CombineErrors(errHTTP, errGRPC); err != nil {
+		traefiklog.FromContext(ctx).WithError(err).Errorf("application did not shut down gracefully")
+		return err // timed out
 	}
+
+	traefiklog.FromContext(ctx).Infof("gracefully shutted down application")
+	return nil // completed normally
 }
