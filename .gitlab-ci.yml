@@ -9,12 +9,13 @@ stages:
 
 variables:
   DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
   GOPATH: ${CI_PROJECT_DIR}/.gocache
   ARTIFACT_DOWNLOAD_ATTEMPTS: 5
   RESTORE_CACHE_ATTEMPTS: 5
 
 services:
-  - docker:18-dind
+  - docker:19.03-dind
 
 .rules: &rules
   rules:
@@ -37,7 +38,7 @@ services:
     - export PATH="${PATH}:${GOPATH}/bin:${GOROOT}/bin"
 
 .docker-setup: &docker-setup
-  image: docker:19
+  image: docker:19.03
   stage: build
   before_script:
     - export DOCKER_API_VERSION=1.39
@@ -113,7 +114,7 @@ integration:
   <<: *go-setup
   <<: *rules
   services:
-    - docker:19.03.8-dind
+    - docker:19.03-dind
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
@@ -197,7 +198,7 @@ build-orchestrate-on-tag:
       - tags
 
 release-orchestrate:
-  image: docker:19
+  image: docker:19.03
   stage: release
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
@@ -245,7 +246,7 @@ build-e2e-on-tag:
       - tags
 
 release-e2e:
-  image: docker:19
+  image: docker:19.03
   stage: release
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY

@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   portainer:
-    image: portainer/portainer
+    image: portainer/portainer:1.23.1
     command: -H unix:///var/run/docker.sock
     restart: unless-stopped
     ports:
@@ -13,7 +13,7 @@ services:
       - portainer_data:/data
 
   pgadmin:
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:4.21
     environment:
       PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
       PGADMIN_DEFAULT_PASSWORD: admin

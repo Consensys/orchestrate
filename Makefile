@@ -66,12 +66,12 @@ gen-deepcopy:
 
 # Tools
 lint-tools: ## Install linting tools
-	@GO111MODULE=off go get -u github.com/client9/misspell/cmd/misspell
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.25.0
+	@GO111MODULE=on go get github.com/client9/misspell/cmd/misspell@v0.3.4
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.25.0
 
 tools: lint-tools ## Install test tools
-	@GO111MODULE=off go get -u github.com/golang/mock/mockgen
-	@GO111MODULE=off go get -u github.com/swaggo/swag/cmd/swag
+	@GO111MODULE=on go get github.com/golang/mock/mockgen@v1.4.3
+	@GO111MODULE=on go get github.com/swaggo/swag/cmd/swag@v1.6.6
 
 # Help
 help: ## Display this help screen
