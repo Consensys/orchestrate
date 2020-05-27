@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ### 🛠 Bug fixes
 * Add chain information into SDK tx-response
-* Fix a casting issue on strings in the tx-listener when a log with an indexed string is emitted
+* Fix a casting issue on indexed strings in the events decoded by the tx-listener
 * Properly exit workers when a critical failure happens
 
 ## v2.1.0-rc3 (2020-05-20)
