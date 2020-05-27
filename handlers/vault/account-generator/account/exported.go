@@ -41,7 +41,7 @@ func SetGlobalHandler(h engine.HandlerFunc) {
 	handler = h
 }
 
-// GlobalHandler returns global Gas Estimator handler
+// GlobalHandler returns global Account Generator handler
 func GlobalHandler() engine.HandlerFunc {
 	return handler
 }

@@ -23,10 +23,7 @@ func ChainUUIDHandler(r registry.ChainRegistryClient, chainRegistryURL string) e
 func ChainUUIDHandlerWithoutAbort(r registry.ChainRegistryClient, chainRegistryURL string) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		err := chainUUIDInjector(txctx, r, chainRegistryURL)
-		if err != nil {
-			_ = txctx.Error(err).ExtendComponent(component)
-			return
-		}
+		txctx.Logger.Warn(err)
 	}
 }
 

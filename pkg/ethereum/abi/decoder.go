@@ -1,6 +1,7 @@
 package abi
 
 import (
+	"encoding/hex"
 	"fmt"
 	"math/big"
 	"reflect"
@@ -20,7 +21,13 @@ import (
 func FormatIndexedArg(t *abi.Type, arg ethcommon.Hash) (string, error) {
 	switch t.T {
 	case abi.BoolTy, abi.StringTy:
-		return fmt.Sprintf("%v", arg), nil
+		// remove 0x and leading zeros
+		str := strings.TrimLeft(arg.Hex()[2:], "0")
+		if len(str)%2 == 1 {
+			str = fmt.Sprintf("0%s", str)
+		}
+		s, err := hex.DecodeString(str)
+		return string(s), err
 	case abi.IntTy, abi.UintTy:
 		num := new(big.Int).SetBytes(arg[:])
 		return fmt.Sprintf("%v", num), nil
@@ -70,7 +77,6 @@ func GetElemType(t *abi.Type) (abi.Type, error) {
 
 // FormatNonIndexedArrayArg transforms a data to string
 func FormatNonIndexedArrayArg(t *abi.Type, arg interface{}) (string, error) {
-
 	elemType, _ := GetElemType(t)
 
 	var arrayArgString []string

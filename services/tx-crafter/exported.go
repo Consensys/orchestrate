@@ -32,7 +32,7 @@ import (
 var (
 	appli     *app.App
 	startOnce = &sync.Once{}
-	done      chan struct{}
+	cerr      chan error
 )
 
 type serviceName string
@@ -136,11 +136,11 @@ func registerHandlers() {
 }
 
 // Start starts application
-func Start(ctx context.Context) (chan struct{}, error) {
+func Start(ctx context.Context) chan error {
 	var err error
 	startOnce.Do(func() {
 		// Chan to notify that sub-go routines stopped
-		done = make(chan struct{})
+		cerr = make(chan error, 1)
 
 		// Register all Handlers
 		initComponents(ctx)
@@ -152,11 +152,15 @@ func Start(ctx context.Context) (chan struct{}, error) {
 			app.MetricsOpt(),
 		)
 		if err != nil {
+			cerr <- err
+			close(cerr)
 			return
 		}
 
 		err = appli.Start(ctx)
 		if err != nil {
+			cerr <- err
+			close(cerr)
 			return
 		}
 
@@ -170,21 +174,26 @@ func Start(ctx context.Context) (chan struct{}, error) {
 				"topics": topics,
 			}).Info("connecting")
 
-			errConsume := broker.Consume(
+			err := broker.Consume(
 				ctx,
 				topics,
 				broker.NewEngineConsumerGroupHandler(engine.GlobalEngine()),
 			)
-			if errConsume != nil {
-				log.FromContext(ctx).WithError(errConsume).Error("error on consumer")
+			if err != nil {
+				log.FromContext(ctx).WithError(err).Error("error on consumer")
+				cerr <- err
 			}
-			close(done)
+			close(cerr)
 		}()
 	})
-	return done, err
+	return cerr
 }
 
 func Stop(ctx context.Context) error {
-	<-done
-	return errors.CombineErrors(broker.Stop(ctx), appli.Stop(ctx))
+	<-cerr
+	err := broker.Stop(ctx)
+	if appli != nil {
+		return errors.CombineErrors(err, appli.Stop(ctx))
+	}
+	return err
 }

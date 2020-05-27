@@ -50,12 +50,9 @@ func run(_ *cobra.Command, _ []string) {
 	rootCtx, cancel := context.WithCancel(context.Background())
 	// Start microservice
 	go func() {
-		done, err := txsender.Start(rootCtx)
-		if err != nil {
-			log.WithoutContext().WithError(err).Errorf("Microservice started with an error")
-			close(done)
+		if err := <-txsender.Start(rootCtx); err != nil {
+			log.WithoutContext().WithError(err).Errorf("Microservice raised an error")
 		}
-		<-done
 		cancel()
 	}()
 

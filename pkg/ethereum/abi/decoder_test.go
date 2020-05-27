@@ -29,6 +29,11 @@ func TestFormatIndexedArg(t *testing.T) {
 		expectedOutput string
 	}{
 		{
+			"string",
+			ethcommon.BytesToHash([]byte("test")),
+			"test",
+		},
+		{
 			"address",
 			ethcommon.HexToHash("0x0000000000000000000000008dd688660ec0babd0b8a2f2de3232645f73cc5eb"),
 			"0x8dd688660ec0BaBD0B8a2f2DE3232645F73cC5eb",

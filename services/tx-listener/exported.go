@@ -21,7 +21,7 @@ var (
 	appli     *app.App
 	initOnce  = &sync.Once{}
 	startOnce = &sync.Once{}
-	done      chan struct{}
+	cerr      chan error
 )
 
 func initDependencies(ctx context.Context) {
@@ -54,11 +54,11 @@ func Init(ctx context.Context) {
 }
 
 // Start starts application
-func Start(ctx context.Context) (chan struct{}, error) {
+func Start(ctx context.Context) chan error {
 	var err error
 	startOnce.Do(func() {
 		// Chan to notify that sub-go routines stopped
-		done = make(chan struct{})
+		cerr = make(chan error, 1)
 
 		// Create appli to expose metrics
 		appli, err = app.New(
@@ -66,6 +66,8 @@ func Start(ctx context.Context) (chan struct{}, error) {
 			app.MetricsOpt(),
 		)
 		if err != nil {
+			cerr <- err
+			close(cerr)
 			return
 		}
 
@@ -79,19 +81,24 @@ func Start(ctx context.Context) (chan struct{}, error) {
 
 		err = appli.Start(ctx)
 		if err != nil {
+			cerr <- err
+			close(cerr)
 			return
 		}
 
 		go func() {
 			listener.Start(ctx)
-			close(done)
+			close(cerr)
 		}()
 	})
 
-	return done, err
+	return cerr
 }
 
 func Stop(ctx context.Context) error {
-	<-done
-	return appli.Stop(ctx)
+	<-cerr
+	if appli != nil {
+		return appli.Stop(ctx)
+	}
+	return nil
 }

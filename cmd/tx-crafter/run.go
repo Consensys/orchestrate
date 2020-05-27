@@ -43,12 +43,9 @@ func run(_ *cobra.Command, _ []string) {
 
 	// Start microservice
 	go func() {
-		done, err := txcrafter.Start(rootCtx)
-		if err != nil {
-			log.WithoutContext().WithError(err).Errorf("Microservice started with an error")
-			close(done)
+		if err := <-txcrafter.Start(rootCtx); err != nil {
+			log.WithoutContext().WithError(err).Errorf("Microservice raised an error")
 		}
-		<-done
 		cancel()
 	}()
 
