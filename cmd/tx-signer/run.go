@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	chnregclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore"
@@ -16,6 +17,8 @@ import (
 	txsigner "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer"
 )
 
+var cmdErr error
+
 func newRunCommand() *cobra.Command {
 	runCmd := &cobra.Command{
 		Use:   "run",
@@ -23,6 +26,11 @@ func newRunCommand() *cobra.Command {
 		Run:   run,
 		PreRun: func(cmd *cobra.Command, args []string) {
 			utils.PreRunBindFlags(viper.GetViper(), cmd.Flags(), "tx-signer")
+		},
+		PostRun: func(cmd *cobra.Command, args []string) {
+			if err := errors.CombineErrors(cmdErr, cmd.Context().Err()); err != nil {
+				os.Exit(1)
+			}
 		},
 	}
 
@@ -45,11 +53,14 @@ func newRunCommand() *cobra.Command {
 	return runCmd
 }
 
-func run(_ *cobra.Command, _ []string) {
-	rootCtx, cancel := context.WithCancel(context.Background())
+func run(cmd *cobra.Command, _ []string) {
+	ctx, cancel := context.WithCancel(cmd.Context())
+	logger := log.FromContext(ctx)
+
 	// Start microservice
 	go func() {
-		if err := <-txsigner.Start(rootCtx); err != nil {
+		if err := <-txsigner.Start(ctx); err != nil {
+			cmdErr = errors.CombineErrors(cmdErr, err)
 			log.WithoutContext().WithError(err).Errorf("Microservice raised an error")
 		}
 		cancel()
@@ -61,12 +72,13 @@ func run(_ *cobra.Command, _ []string) {
 	})
 
 	// Stop when get context canceled
-	<-rootCtx.Done()
-	err := txsigner.Stop(rootCtx)
+	<-ctx.Done()
+	err := txsigner.Stop(ctx)
 	if err != nil {
-		log.WithoutContext().WithError(err).Errorf("Microservice did not shutdown properly")
+		cmdErr = errors.CombineErrors(cmdErr, err)
+		logger.WithError(err).Errorf("Microservice did not shutdown properly")
 	} else {
-		log.WithoutContext().Infof("Microservice gracefully closed")
+		logger.Infof("Microservice gracefully closed")
 	}
 
 	sig.Close()

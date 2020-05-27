@@ -1,15 +1,17 @@
 package envelopestore
 
 import (
-	"context"
 	"os"
 
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	envelopestore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store"
 )
+
+var cmdErr error
 
 func newRunCommand() *cobra.Command {
 	runCmd := &cobra.Command{
@@ -19,6 +21,11 @@ func newRunCommand() *cobra.Command {
 		PreRun: func(cmd *cobra.Command, args []string) {
 			utils.PreRunBindFlags(viper.GetViper(), cmd.Flags(), "envelope-store")
 		},
+		PostRun: func(cmd *cobra.Command, args []string) {
+			if err := errors.CombineErrors(cmdErr, cmd.Context().Err()); err != nil {
+				os.Exit(1)
+			}
+		},
 	}
 
 	// EnvelopeStore flag
@@ -27,18 +34,21 @@ func newRunCommand() *cobra.Command {
 	return runCmd
 }
 
-func run(_ *cobra.Command, _ []string) {
-	_ = envelopestore.Start(context.Background())
+func run(cmd *cobra.Command, _ []string) {
+	ctx := cmd.Context()
+	logger := log.FromContext(ctx)
+	_ = envelopestore.Start(ctx)
 
 	done := make(chan struct{})
 
 	// Process signals
 	sig := utils.NewSignalListener(func(signal os.Signal) {
-		err := envelopestore.Stop(context.Background())
+		err := envelopestore.Stop(ctx)
 		if err != nil {
-			log.WithoutContext().WithError(err).Errorf("Application did not shutdown properly")
+			cmdErr = errors.CombineErrors(cmdErr, err)
+			logger.WithError(err).Errorf("Application did not shutdown properly")
 		} else {
-			log.WithoutContext().WithError(err).Infof("Application gracefully closed")
+			logger.WithError(err).Infof("Application gracefully closed")
 		}
 		close(done)
 	})
