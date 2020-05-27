@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/proto"
+	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
@@ -83,18 +83,23 @@ func (uc *startJobUseCase) sendMessage(ctx context.Context, jobModel *models.Job
 	log.WithContext(ctx).Debug("sending kafka message")
 
 	txEnvelope := parsers.NewEnvelopeFromJobModel(jobModel)
+	evlp, err := txEnvelope.Envelope()
+	if err != nil {
+		errMessage := "failed to craft envelope"
+		log.WithContext(ctx).WithError(err).Error(errMessage)
+		return 0, 0, errors.InvalidParameterError(errMessage)
+	}
+	msg := &sarama.ProducerMessage{
+		Topic:   uc.txCrafterTopic,
+		Key:     sarama.StringEncoder(evlp.KafkaPartitionKey()),
+		Headers: nil, // TODO: Add the JWT token here? https://pegasys1.atlassian.net/browse/PO-544
+	}
 
-	envelopeBytes, err := encoding.Marshal(txEnvelope)
+	err = encoding.Marshal(txEnvelope, msg)
 	if err != nil {
 		errMessage := "failed to encode envelope"
 		log.WithContext(ctx).WithError(err).Error(errMessage)
 		return 0, 0, errors.InvalidParameterError(errMessage)
-	}
-
-	msg := &sarama.ProducerMessage{
-		Topic:   uc.txCrafterTopic,
-		Value:   sarama.ByteEncoder(envelopeBytes),
-		Headers: nil, // TODO: Add the JWT token here? https://pegasys1.atlassian.net/browse/PO-544
 	}
 
 	// Send message

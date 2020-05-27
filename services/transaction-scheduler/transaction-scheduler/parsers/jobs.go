@@ -72,11 +72,10 @@ func NewEnvelopeFromJobModel(job *models.Job) *tx.TxEnvelope {
 		method = tx.Method_ETH_SENDRAWTRANSACTION
 	}
 
-	return &tx.TxEnvelope{
+	txEnvelope := &tx.TxEnvelope{
 		Msg: &tx.TxEnvelope_TxRequest{TxRequest: &tx.TxRequest{
 			Id:      job.UUID,
 			Headers: nil, // TODO: Add the JWT token here? https://pegasys1.atlassian.net/browse/PO-544
-			Chain:   job.Schedule.ChainUUID,
 			Method:  method,
 			Params: &tx.Params{
 				From:           job.Transaction.Sender,
@@ -93,5 +92,9 @@ func NewEnvelopeFromJobModel(job *models.Job) *tx.TxEnvelope {
 			},
 			ContextLabels: job.Labels,
 		}},
+		InternalLabels: make(map[string]string),
 	}
+	txEnvelope.SetChainUUID(job.Schedule.ChainUUID)
+
+	return txEnvelope
 }

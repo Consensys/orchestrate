@@ -28,23 +28,27 @@ func ChainUUIDHandlerWithoutAbort(r registry.ChainRegistryClient, chainRegistryU
 }
 
 func chainUUIDInjector(txctx *engine.TxContext, r registry.ChainRegistryClient, chainRegistryURL string) error {
-	// Check if chain exist
-	if txctx.Envelope.GetChainName() == "" {
-		return errors.DataError("no chain name found")
+	chainUUID := txctx.Envelope.GetChainUUID()
+	chainName := txctx.Envelope.GetChainName()
+
+	if chainUUID == "" && chainName == "" {
+		return errors.DataError("no chain found")
 	}
 
-	if txctx.Envelope.GetChainUUID() == "" {
-		chain, err := r.GetChainByName(txctx.Context(), txctx.Envelope.GetChainName())
+	if chainUUID == "" {
+		chain, err := r.GetChainByName(txctx.Context(), chainName)
 		if err != nil {
 			return errors.FromError(err)
 		}
 
-		// chainUUIDInjector chain UUID from chain registry
-		_ = txctx.Envelope.SetChainUUID(chain.UUID)
+		chainUUID = chain.UUID
+		_ = txctx.Envelope.SetChainUUID(chainUUID)
+	} else {
+		_ = txctx.Envelope.SetChainUUID(chainUUID)
 	}
 
 	// chainUUIDInjector chain proxy path as /chainUUID
-	proxyURL := fmt.Sprintf("%s/%s", chainRegistryURL, txctx.Envelope.GetChainUUID())
+	proxyURL := fmt.Sprintf("%s/%s", chainRegistryURL, chainUUID)
 	txctx.WithContext(proxy.With(txctx.Context(), proxyURL))
 	return nil
 }

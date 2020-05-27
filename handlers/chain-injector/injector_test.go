@@ -85,7 +85,7 @@ func TestChainInjector(t *testing.T) {
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Envelope.AppendError(errors.DataError("no chain name found").ExtendComponent(component))
+				_ = txctx.Envelope.AppendError(errors.DataError("no chain found").ExtendComponent(component))
 				return txctx
 			},
 		},

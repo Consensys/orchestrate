@@ -28,7 +28,7 @@ func TestParsersJob_NewEntityFromModel(t *testing.T) {
 	jobEntity := NewJobEntityFromModels(jobModel)
 	finalJobModel := NewJobModelFromEntities(jobEntity, jobModel.ScheduleID)
 	finalJobModel.Schedule = jobModel.Schedule
-	
+
 	assert.Equal(t, finalJobModel.ScheduleID, jobModel.ScheduleID)
 	assert.Equal(t, finalJobModel.UUID, jobModel.UUID)
 	assert.Equal(t, finalJobModel.Type, jobModel.Type)
@@ -39,10 +39,10 @@ func TestParsersJob_NewEntityFromModel(t *testing.T) {
 func TestParsersJob_NewEnvelopeFromModel(t *testing.T) {
 	jobModel := testutils.FakeJob(1)
 	txEnvelope := NewEnvelopeFromJobModel(jobModel)
-	
+
 	txRequest := txEnvelope.GetTxRequest()
 	assert.Equal(t, tx.Method_ETH_SENDRAWTRANSACTION, txRequest.Method)
-	assert.Equal(t, jobModel.Schedule.ChainUUID, txRequest.Chain)
+	assert.Equal(t, jobModel.Schedule.ChainUUID, txEnvelope.GetChainUUID())
 	assert.Equal(t, jobModel.Transaction.Sender, txRequest.Params.From)
 	assert.Equal(t, jobModel.Transaction.Recipient, txRequest.Params.To)
 	assert.Equal(t, jobModel.Transaction.Data, txRequest.Params.Data)
