@@ -1,7 +1,6 @@
 package abi
 
 import (
-	"encoding/hex"
 	"fmt"
 	"math/big"
 	"reflect"
@@ -20,14 +19,17 @@ import (
 // FormatIndexedArg transforms a data to string
 func FormatIndexedArg(t *abi.Type, arg ethcommon.Hash) (string, error) {
 	switch t.T {
-	case abi.BoolTy, abi.StringTy:
-		// remove 0x and leading zeros
-		str := strings.TrimLeft(arg.Hex()[2:], "0")
-		if len(str)%2 == 1 {
-			str = fmt.Sprintf("0%s", str)
+	case abi.StringTy:
+		return arg.Hex()[2:], nil
+	case abi.BoolTy:
+		switch arg.Hex()[len(arg.Hex())-1] {
+		case '1':
+			return trueStr, nil
+		case '0':
+			return falseStr, nil
+		default:
+			return "", errors.DataCorruptedError("%s is not a boolean", arg)
 		}
-		s, err := hex.DecodeString(str)
-		return string(s), err
 	case abi.IntTy, abi.UintTy:
 		num := new(big.Int).SetBytes(arg[:])
 		return fmt.Sprintf("%v", num), nil

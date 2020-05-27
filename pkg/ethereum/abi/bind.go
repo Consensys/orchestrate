@@ -13,6 +13,9 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
+const trueStr = "true"
+const falseStr = "false"
+
 // BindArgs cast string arguments into expected go-ethereum types
 func BindArgs(arguments *ethabi.Arguments, args ...string) ([]interface{}, error) {
 	if arguments.LengthNonIndexed() != len(args) {
@@ -99,9 +102,9 @@ func BindArg(t *ethabi.Type, arg string) (interface{}, error) {
 
 	case ethabi.BoolTy:
 		switch arg {
-		case "0x1", "true", "1":
+		case "0x1", trueStr, "1":
 			return true, nil
-		case "0x0", "false", "0":
+		case "0x0", falseStr, "0":
 			return false, nil
 		default:
 			return nil, errors.InvalidArgError("invalid boolean %q (expected one of %q)", arg, []string{"0x0", "false", "0", "0x1", "true", "1"})
