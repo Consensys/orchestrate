@@ -10,12 +10,6 @@ type Job struct {
 	Type         string
 	Labels       map[string]string
 	Status       string
-	Transaction  *Transaction
+	Transaction  *ETHTransaction
 	CreatedAt    time.Time
 }
-
-// type JobFilter struct {
-// 	UUID     string
-// 	Filters  map[string]string
-// 	TenantID string
-// }

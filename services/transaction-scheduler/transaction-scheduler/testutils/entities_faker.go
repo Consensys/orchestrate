@@ -32,16 +32,21 @@ func FakeScheduleEntity(chainUUID string) *entities.Schedule {
 	}
 }
 
-func FakeTransactionEntity() *entities.Transaction {
-	return &entities.Transaction{
-		Hash:      "Hash",
-		From:      "From",
-		To:        "To",
-		Nonce:     "Nonce",
-		Value:     "Value",
-		GasPrice:  "GasPrice",
-		GasLimit:  "GasLimit",
-		CreatedAt: time.Now(),
+func FakeTransactionEntity() *entities.ETHTransaction {
+	return &entities.ETHTransaction{
+		From:           "From",
+		To:             "To",
+		Nonce:          "Nonce",
+		Value:          "Value",
+		GasPrice:       "GasPrice",
+		GasLimit:       "GasLimit",
+		Data:           "Data",
+		Raw:            "Raw",
+		PrivateFrom:    "PrivateFrom",
+		PrivateFor:     []string{"val1", "val2"},
+		PrivacyGroupID: "PrivacyGroupID",
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now(),
 	}
 }
 
@@ -56,15 +61,19 @@ func FakeTxRequestEntity() *entities.TxRequest {
 
 func FakeTxRequestParams() *entities.TxRequestParams {
 	return &entities.TxRequestParams{
-		From:            &(&struct{ x string }{"From"}).x,
-		To:              &(&struct{ x string }{"To"}).x,
-		Value:           &(&struct{ x string }{"Value"}).x,
-		GasPrice:        &(&struct{ x string }{"GasPrice"}).x,
-		GasLimit:        &(&struct{ x string }{"GasLimit"}).x,
-		MethodSignature: &(&struct{ x string }{"constructor(string,string)"}).x,
+		From:            "From",
+		To:              "To",
+		Value:           "Value",
+		GasPrice:        "GasPrice",
+		GasLimit:        "GasLimit",
+		MethodSignature: "constructor(string,string)",
 		Args:            []string{"val1", "val2"},
-		Raw:             &(&struct{ x string }{"Raw"}).x,
-		ContractName:    &(&struct{ x string }{"ContractName"}).x,
-		ContractTag:     &(&struct{ x string }{"ContractTag"}).x,
+		Raw:             "Raw",
+		ContractName:    "ContractName",
+		ContractTag:     "ContractTag",
+		Nonce:           "1",
+		PrivateFrom:     "PrivateFrom",
+		PrivateFor:      []string{"val1", "val2"},
+		PrivacyGroupID:  "PrivacyGroupID",
 	}
 }

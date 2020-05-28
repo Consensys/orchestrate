@@ -8,7 +8,7 @@ import (
 func FormatJobResponse(job *entities.Job) *types.JobResponse {
 	jobResponse := &types.JobResponse{
 		UUID: job.UUID,
-		Transaction: types.ETHTransaction{
+		Transaction: &entities.ETHTransaction{
 			Hash:           job.Transaction.Hash,
 			From:           job.Transaction.From,
 			To:             job.Transaction.To,
@@ -21,6 +21,8 @@ func FormatJobResponse(job *entities.Job) *types.JobResponse {
 			PrivateFrom:    job.Transaction.PrivateFrom,
 			PrivateFor:     job.Transaction.PrivateFor,
 			PrivacyGroupID: job.Transaction.PrivacyGroupID,
+			CreatedAt:      job.Transaction.CreatedAt,
+			UpdatedAt:      job.Transaction.UpdatedAt,
 		},
 		Status:    job.Status,
 		CreatedAt: job.CreatedAt,
@@ -34,7 +36,7 @@ func FormatJobCreateRequest(request *types.CreateJobRequest) *entities.Job {
 		Type:         request.Type,
 		Labels:       request.Labels,
 		ScheduleUUID: request.ScheduleUUID,
-		Transaction:  formatTxRequest(&request.Transaction),
+		Transaction:  request.Transaction,
 	}
 
 	return job
@@ -43,25 +45,8 @@ func FormatJobCreateRequest(request *types.CreateJobRequest) *entities.Job {
 func FormatJobUpdateRequest(request *types.UpdateJobRequest) *entities.Job {
 	job := &entities.Job{
 		Labels:      request.Labels,
-		Transaction: formatTxRequest(&request.Transaction),
+		Transaction: request.Transaction,
 	}
 
 	return job
-}
-
-func formatTxRequest(tx *types.ETHTransaction) *entities.Transaction {
-	return &entities.Transaction{
-		Hash:           tx.Hash,
-		From:           tx.From,
-		To:             tx.To,
-		Nonce:          tx.Nonce,
-		Value:          tx.Value,
-		GasPrice:       tx.GasPrice,
-		GasLimit:       tx.GasLimit,
-		Data:           tx.Data,
-		PrivateFrom:    tx.PrivateFrom,
-		PrivateFor:     tx.PrivateFor,
-		PrivacyGroupID: tx.PrivacyGroupID,
-		Raw:            tx.Raw,
-	}
 }

@@ -5,6 +5,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 )
 
 func FakeSendTransactionRequest() *types.SendTransactionRequest {
@@ -46,30 +47,21 @@ func FakeCreateJobRequest() *types.CreateJobRequest {
 		ScheduleUUID: uuid.NewV4().String(),
 		Type:         tx.JobEthereumTransaction,
 		Labels:       nil,
-		Transaction:  *FakeETHTransaction(),
+		Transaction:  testutils.FakeTransactionEntity(),
 	}
 }
 
 func FakeJobUpdateRequest() *types.UpdateJobRequest {
 	return &types.UpdateJobRequest{
 		Labels:      nil,
-		Transaction: *FakeETHTransaction(),
+		Transaction: testutils.FakeTransactionEntity(),
 	}
 }
 
 func FakeJobResponse() *types.JobResponse {
 	return &types.JobResponse{
 		UUID:        uuid.NewV4().String(),
-		Transaction: *FakeETHTransaction(),
+		Transaction: testutils.FakeTransactionEntity(),
 		Status:      entities.JobStatusCreated,
-	}
-}
-
-func FakeETHTransaction() *types.ETHTransaction {
-	return &types.ETHTransaction{
-		Hash: "0xhash",
-		From: "0xfrom",
-		To:   "0xto",
-		Data: "0xdede",
 	}
 }

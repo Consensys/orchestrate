@@ -82,7 +82,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_Send() {
 
 		s.router.ServeHTTP(rw, httpRequest)
 
-		response, _ := formatters.FormatTxResponse(txRequestEntityResp)
+		response := formatters.FormatTxResponse(txRequestEntityResp)
 		expectedBody, _ := json.Marshal(response)
 		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
 		assert.Equal(t, http.StatusAccepted, rw.Code)
@@ -104,7 +104,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_Send() {
 	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
 	s.T().Run("should fail with 422 if use case fails with InvalidParameterError", func(t *testing.T) {
 		rw := httptest.NewRecorder()
-		httpRequest := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/transactions/%s/send", s.chainUUID), 
+		httpRequest := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/transactions/%s/send", s.chainUUID),
 			bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
@@ -112,7 +112,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_Send() {
 			Execute(gomock.Any(), txRequestEntity, s.tenantID).
 			Return(nil, errors.InvalidParameterError("error")).
 			Times(1)
-	
+
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusUnprocessableEntity, rw.Code)
 	})

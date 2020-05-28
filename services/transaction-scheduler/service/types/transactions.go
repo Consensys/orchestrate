@@ -2,13 +2,15 @@ package types
 
 import (
 	"time"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
 
 type TransactionResponse struct {
-	IdempotencyKey string                 `json:"idempotencyKey" validate:"required"`
-	Params         map[string]interface{} `json:"params"`
-	Schedule       *ScheduleResponse      `json:"schedule"`
-	CreatedAt      time.Time              `json:"createdAt"`
+	IdempotencyKey string                    `json:"idempotencyKey" validate:"required"`
+	Params         *entities.TxRequestParams `json:"params"`
+	Schedule       *ScheduleResponse         `json:"schedule"`
+	CreatedAt      time.Time                 `json:"createdAt"`
 }
 
 type BaseTransactionRequest struct {
@@ -75,7 +77,7 @@ type DeployContractParams struct {
 	BaseTransactionParams
 	From         string   `json:"from" validate:"required,eth_addr"`
 	ContractName string   `json:"contractName" validate:"required"`
-	ContractTag  *string  `json:"contractTag,omitempty"`
+	ContractTag  string   `json:"contractTag,omitempty"`
 	Args         []string `json:"args,omitempty"`
 }
 
@@ -87,5 +89,5 @@ type PrivateTransactionParams struct {
 	Args            []string `json:"args,omitempty"`
 	PrivateFrom     string   `json:"privateFrom" validate:"required,base64"`
 	PrivateFor      []string `json:"privateFor" validate:"required,dive,base64"`
-	PrivacyGroupID  *string  `json:"privacyGroupId,omitempty"`
+	PrivacyGroupID  string   `json:"privacyGroupId,omitempty"`
 }

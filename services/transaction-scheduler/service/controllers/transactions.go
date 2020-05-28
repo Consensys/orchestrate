@@ -59,12 +59,6 @@ func (c *TransactionsController) Send(rw http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	response, err := formatters.FormatTxResponse(txResponse)
-	if err != nil {
-		httputil.WriteHTTPErrorResponse(rw, err)
-		return
-	}
-
 	rw.WriteHeader(http.StatusAccepted)
-	_ = json.NewEncoder(rw).Encode(response)
+	_ = json.NewEncoder(rw).Encode(formatters.FormatTxResponse(txResponse))
 }

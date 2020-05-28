@@ -37,11 +37,12 @@ func TestParsersTransaction_UpdateTransactionModel(t *testing.T) {
 	txModel := testutils.FakeTransaction()
 	txEntity := testutils2.FakeTransactionEntity()
 	UpdateTransactionModelFromEntities(txModel, txEntity)
-	
+
 	expectedTxModel := NewTransactionModelFromEntities(txEntity)
 	expectedTxModel.UUID = txModel.UUID
 	expectedTxModel.CreatedAt = txModel.CreatedAt
-	
+	expectedTxModel.UpdatedAt = txModel.UpdatedAt
+
 	expectedJSON, _ := json.Marshal(txModel)
 	actualJOSN, _ := json.Marshal(expectedTxModel)
 	assert.Equal(t, string(expectedJSON), string(actualJOSN))

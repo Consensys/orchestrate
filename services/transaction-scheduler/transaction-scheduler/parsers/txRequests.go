@@ -1,11 +1,7 @@
 package parsers
 
 import (
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
@@ -33,44 +29,24 @@ func NewTxRequestModelFromEntities(txRequest *entities.TxRequest, requestHash, t
 	return txRequestModel, nil
 }
 
-func NewJobEntityFromSendTxRequest(txRequest *entities.TxRequest) (*entities.Job, error) {
-	txEntity := &entities.Transaction{}
-
-	if txRequest.Params.From == nil {
-		return nil, errors.InvalidArgError("missing required param '%s'", "From")
+func NewJobEntityFromTxRequest(txRequest *entities.TxRequest, jobType string) *entities.Job {
+	txEntity := &entities.ETHTransaction{
+		From:           txRequest.Params.From,
+		To:             txRequest.Params.To,
+		Nonce:          txRequest.Params.Nonce,
+		Value:          txRequest.Params.Value,
+		GasPrice:       txRequest.Params.GasPrice,
+		GasLimit:       txRequest.Params.GasLimit,
+		Raw:            txRequest.Params.Raw,
+		PrivateFrom:    txRequest.Params.PrivateFrom,
+		PrivateFor:     txRequest.Params.PrivateFor,
+		PrivacyGroupID: txRequest.Params.PrivacyGroupID,
 	}
-	if txRequest.Params.To == nil {
-		return nil, errors.InvalidArgError("missing required param '%s'", "To")
-	}
-
-	txEntity.From = *txRequest.Params.From
-	txEntity.To = *txRequest.Params.To
-	if txRequest.Params.Value != nil {
-		txEntity.Value = *txRequest.Params.Value
-	}
-	if txRequest.Params.GasPrice != nil {
-		txEntity.GasPrice = *txRequest.Params.GasPrice
-	}
-	if txRequest.Params.GasLimit != nil {
-		txEntity.GasLimit = *txRequest.Params.GasLimit
-	}
-
-	if txRequest.Params.MethodSignature == nil {
-		return nil, errors.InvalidArgError("missing required param '%s'", "MethodSignature")
-	}
-
-	crafter := abi.BaseCrafter{}
-	txDataBytes, err := crafter.CraftCall(*txRequest.Params.MethodSignature, txRequest.Params.Args...)
-	if err != nil {
-		return nil, err
-	}
-
-	txEntity.Data = hexutil.Encode(txDataBytes)
 
 	return &entities.Job{
 		ScheduleUUID: txRequest.Schedule.UUID,
-		Type:         tx.JobEthereumTransaction,
+		Type:         jobType,
 		Labels:       txRequest.Labels,
 		Transaction:  txEntity,
-	}, nil
+	}
 }

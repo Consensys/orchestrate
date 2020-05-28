@@ -11,9 +11,3 @@ type Schedule struct {
 	TxRequest *TxRequest
 	CreatedAt time.Time
 }
-
-// type ScheduleFilter struct {
-// 	UUID      string
-// 	ChainUUID string
-// 	TenantID  string
-// }

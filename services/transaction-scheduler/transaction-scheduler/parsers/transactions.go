@@ -5,7 +5,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
 
-func NewTransactionModelFromEntities(tx *entities.Transaction) *models.Transaction {
+func NewTransactionModelFromEntities(tx *entities.ETHTransaction) *models.Transaction {
 	return &models.Transaction{
 		Hash:           tx.Hash,
 		Sender:         tx.From,
@@ -15,16 +15,17 @@ func NewTransactionModelFromEntities(tx *entities.Transaction) *models.Transacti
 		GasPrice:       tx.GasPrice,
 		GasLimit:       tx.GasLimit,
 		Data:           tx.Data,
+		Raw:            tx.Raw,
 		PrivateFrom:    tx.PrivateFrom,
 		PrivateFor:     tx.PrivateFor,
 		PrivacyGroupID: tx.PrivacyGroupID,
-		Raw:            tx.Raw,
 		CreatedAt:      tx.CreatedAt,
+		UpdatedAt:      tx.UpdatedAt,
 	}
 }
 
-func NewTransactionEntityFromModels(tx *models.Transaction) *entities.Transaction {
-	return &entities.Transaction{
+func NewTransactionEntityFromModels(tx *models.Transaction) *entities.ETHTransaction {
+	return &entities.ETHTransaction{
 		Hash:           tx.Hash,
 		From:           tx.Sender,
 		To:             tx.Recipient,
@@ -38,10 +39,11 @@ func NewTransactionEntityFromModels(tx *models.Transaction) *entities.Transactio
 		PrivacyGroupID: tx.PrivacyGroupID,
 		Raw:            tx.Raw,
 		CreatedAt:      tx.CreatedAt,
+		UpdatedAt:      tx.UpdatedAt,
 	}
 }
 
-func UpdateTransactionModelFromEntities(txModel *models.Transaction, tx *entities.Transaction) {
+func UpdateTransactionModelFromEntities(txModel *models.Transaction, tx *entities.ETHTransaction) {
 	if tx.Hash != "" {
 		txModel.Hash = tx.Hash
 	}

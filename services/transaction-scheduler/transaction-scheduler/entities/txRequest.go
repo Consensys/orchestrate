@@ -4,13 +4,6 @@ import (
 	"time"
 )
 
-const (
-	MethodSendRawTransaction        = "ETH_SENDRAWTRANSACTION"        // Classic ETH
-	MethodSendPrivateTransaction    = "ETH_SENDPRIVATETRANSACTION"    // Quorum Constellation
-	MethodSendRawPrivateTransaction = "ETH_SENDRAWPRIVATETRANSACTION" // Quorum Tessera
-	MethodEEASendPrivateTransaction = "EEA_SENDPRIVATETRANSACTION"    // Besu Orion
-)
-
 type TxRequest struct {
 	IdempotencyKey string
 	Schedule       *Schedule
@@ -20,14 +13,18 @@ type TxRequest struct {
 }
 
 type TxRequestParams struct {
-	From            *string
-	To              *string
-	Value           *string
-	GasPrice        *string
-	GasLimit        *string
-	MethodSignature *string
-	Args            []string
-	Raw             *string
-	ContractName    *string
-	ContractTag     *string
+	From            string   `json:"from,omitempty"`
+	To              string   `json:"to,omitempty"`
+	Value           string   `json:"value,omitempty"`
+	GasPrice        string   `json:"gasPrice,omitempty"`
+	GasLimit        string   `json:"gas,omitempty"`
+	MethodSignature string   `json:"methodSignature,omitempty"`
+	Args            []string `json:"args,omitempty"`
+	Raw             string   `json:"raw,omitempty"`
+	ContractName    string   `json:"contractName,omitempty"`
+	ContractTag     string   `json:"contractTag,omitempty"`
+	Nonce           string   `json:"nonce,omitempty"`
+	PrivateFrom     string   `json:"privateFrom,omitempty"`
+	PrivateFor      []string `json:"privateFor,omitempty"`
+	PrivacyGroupID  string   `json:"privacyGroupdID,omitempty"`
 }
