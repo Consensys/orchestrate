@@ -3,6 +3,8 @@ package testutils
 import (
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
+
 	uuid "github.com/satori/go.uuid"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
@@ -11,7 +13,7 @@ func FakeJobEntity() *entities.Job {
 	return &entities.Job{
 		UUID:         uuid.NewV4().String(),
 		ScheduleUUID: uuid.NewV4().String(),
-		Type:         entities.JobConstantinopleTransaction,
+		Type:         tx.JobEthereumTransaction,
 		Status:       entities.JobStatusCreated,
 		CreatedAt:    time.Now(),
 		Transaction:  FakeTransactionEntity(),

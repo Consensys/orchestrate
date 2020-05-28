@@ -64,19 +64,11 @@ func UpdateJobModelFromEntities(jobModel *models.Job, job *entities.Job) {
 }
 
 func NewEnvelopeFromJobModel(job *models.Job) *tx.TxEnvelope {
-	var method tx.Method
-	switch job.Type {
-	case entities.JobConstantinopleTransaction:
-		method = tx.Method_ETH_SENDRAWTRANSACTION
-	default:
-		method = tx.Method_ETH_SENDRAWTRANSACTION
-	}
-
 	txEnvelope := &tx.TxEnvelope{
 		Msg: &tx.TxEnvelope_TxRequest{TxRequest: &tx.TxRequest{
 			Id:      job.UUID,
+			JobType: tx.JobTypeMap[job.Type],
 			Headers: nil, // TODO: Add the JWT token here? https://pegasys1.atlassian.net/browse/PO-544
-			Method:  method,
 			Params: &tx.Params{
 				From:           job.Transaction.Sender,
 				To:             job.Transaction.Recipient,

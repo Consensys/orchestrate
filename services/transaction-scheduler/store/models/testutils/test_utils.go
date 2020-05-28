@@ -3,6 +3,8 @@ package testutils
 import (
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
+
 	uuid "github.com/satori/go.uuid"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
@@ -19,7 +21,7 @@ func FakeSchedule(tenantID string) *models.Schedule {
 		ChainUUID: uuid.NewV4().String(),
 		Jobs: []*models.Job{{
 			UUID:        uuid.NewV4().String(),
-			Type:        entities.JobConstantinopleTransaction,
+			Type:        tx.JobEthereumTransaction,
 			Transaction: FakeTransaction(),
 			Logs:        []*models.Log{{Status: entities.JobStatusCreated, Message: "created message"}},
 		}},
@@ -47,7 +49,7 @@ func FakeTransaction() *models.Transaction {
 func FakeJob(scheduleID int) *models.Job {
 	job := &models.Job{
 		UUID: uuid.NewV4().String(),
-		Type: entities.JobConstantinopleTransaction,
+		Type: tx.JobEthereumTransaction,
 		Schedule: &models.Schedule{
 			ID:        scheduleID,
 			TenantID:  "_",

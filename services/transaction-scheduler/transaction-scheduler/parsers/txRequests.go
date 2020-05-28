@@ -5,6 +5,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
@@ -68,7 +69,7 @@ func NewJobEntityFromSendTxRequest(txRequest *entities.TxRequest) (*entities.Job
 
 	return &entities.Job{
 		ScheduleUUID: txRequest.Schedule.UUID,
-		Type:         entities.JobConstantinopleTransaction,
+		Type:         tx.JobEthereumTransaction,
 		Labels:       txRequest.Labels,
 		Transaction:  txEntity,
 	}, nil

@@ -15,6 +15,24 @@ var MethodMap = map[string]Method{
 	"EEA_SENDPRIVATETRANSACTION":    Method_EEA_SENDPRIVATETRANSACTION,
 }
 
+const (
+	JobEthereumTransaction       = "eth://ethereum/transaction"       // Classic public Ethereum transaction
+	JobEthereumRawTransaction    = "eth://ethereum/rawTransaction"    // Classic raw transaction
+	JobOrionMarkingTransaction   = "eth://orion/markingTransaction"   // Besu public transaction
+	JobOrionEEATransaction       = "eth://orion/eeaTransaction"       // Besu private tx for Orion
+	JobTesseraPublicTransaction  = "eth://tessera/publicTransaction"  // Tessera public transaction
+	JobTesseraPrivateTransaction = "eth://tessera/privateTransaction" // Tessera private transaction
+)
+
+var JobTypeMap = map[string]JobType{
+	JobEthereumTransaction:       JobType_ETH_TX,
+	JobEthereumRawTransaction:    JobType_ETH_RAW_TX,
+	JobOrionMarkingTransaction:   JobType_ETH_ORION_MARKING_TX,
+	JobOrionEEATransaction:       JobType_ETH_ORION_EEA_TX,
+	JobTesseraPublicTransaction:  JobType_ETH_TESSERA_PUBLIC_TX,
+	JobTesseraPrivateTransaction: JobType_ETH_TESSERA_PRIVATE_TX,
+}
+
 func (m *TxEnvelope) Envelope() (*Envelope, error) {
 	var b *Envelope
 

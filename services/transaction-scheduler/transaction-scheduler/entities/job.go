@@ -4,10 +4,6 @@ import (
 	"time"
 )
 
-const (
-	JobConstantinopleTransaction = "eth://constantinople/transaction" // Classic public Ethereum transaction
-)
-
 type Job struct {
 	UUID         string
 	ScheduleUUID string

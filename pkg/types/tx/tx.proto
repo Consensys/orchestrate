@@ -28,6 +28,9 @@ message TxRequest {
 
     // [option]
     map<string, string> context_labels = 6;
+
+    // Type of the job
+    JobType jobType = 7;
 }
 
 message TxEnvelope {
@@ -51,6 +54,15 @@ enum Method {
 
     // Besu Orion
     EEA_SENDPRIVATETRANSACTION = 3;
+}
+
+enum JobType {
+    ETH_TX = 0;
+    ETH_RAW_TX = 1;
+    ETH_ORION_MARKING_TX = 2;
+    ETH_ORION_EEA_TX = 3;
+    ETH_TESSERA_PUBLIC_TX = 4;
+    ETH_TESSERA_PRIVATE_TX = 5;
 }
 
 message Params {

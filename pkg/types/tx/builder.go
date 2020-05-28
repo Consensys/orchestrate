@@ -30,6 +30,7 @@ type Envelope struct {
 	Headers       map[string]string
 	ContextLabels map[string]string
 	Method
+	JobType
 	Tx             `mapstructure:",squash"`
 	Chain          `mapstructure:",squash"`
 	Contract       `mapstructure:",squash"`
@@ -97,7 +98,7 @@ func (e *Envelope) SetMethod(method Method) *Envelope {
 
 // IsEthSendRawTransaction for a classic Ethereum transaction
 func (e *Envelope) IsEthSendRawTransaction() bool {
-	return e.Method == Method_ETH_SENDRAWTRANSACTION
+	return e.JobType == JobType_ETH_RAW_TX || e.Method == Method_ETH_SENDRAWTRANSACTION
 }
 
 // IsEthSendPrivateTransaction for Quorum Constellation
@@ -107,22 +108,22 @@ func (e *Envelope) IsEthSendPrivateTransaction() bool {
 
 // IsEthSendRawPrivateTransaction for Quorum Tessera
 func (e *Envelope) IsEthSendRawPrivateTransaction() bool {
-	return e.Method == Method_ETH_SENDRAWPRIVATETRANSACTION
+	return e.JobType == JobType_ETH_TESSERA_PRIVATE_TX || e.Method == Method_ETH_SENDRAWPRIVATETRANSACTION
 }
 
 // IsEthSendRawTransaction for Besu Orion
 func (e *Envelope) IsEeaSendPrivateTransaction() bool {
-	return e.Method == Method_EEA_SENDPRIVATETRANSACTION
+	return e.JobType == JobType_ETH_ORION_EEA_TX || e.Method == Method_EEA_SENDPRIVATETRANSACTION
 }
 
 // IsEthSendRawTransaction for Besu Orion with Privacy Group
 func (e *Envelope) IsEeaSendPrivateTransactionPrivacyGroup() bool {
-	return e.Method == Method_EEA_SENDPRIVATETRANSACTION && e.PrivacyGroupID != ""
+	return (e.JobType == JobType_ETH_ORION_EEA_TX && e.PrivacyGroupID != "") || (e.Method == Method_EEA_SENDPRIVATETRANSACTION && e.PrivacyGroupID != "")
 }
 
 // IsEthSendRawTransaction for Besu Orion with PrivateFor
 func (e *Envelope) IsEeaSendPrivateTransactionPrivateFor() bool {
-	return e.Method == Method_EEA_SENDPRIVATETRANSACTION && len(e.PrivateFor) > 0
+	return (e.JobType == JobType_ETH_ORION_EEA_TX && len(e.PrivateFor) > 0) || (e.Method == Method_EEA_SENDPRIVATETRANSACTION && len(e.PrivateFor) > 0)
 }
 
 func (e *Envelope) IsOneTimeKeySignature() bool {

@@ -2,6 +2,7 @@ package formatters
 
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
@@ -13,7 +14,7 @@ func FormatSendTxRequest(txRequest *types.SendTransactionRequest, chainUUID stri
 		Schedule: &entities.Schedule{
 			ChainUUID: chainUUID,
 			Jobs: []*entities.Job{{
-				Type: entities.JobConstantinopleTransaction,
+				Type: tx.JobEthereumTransaction,
 			}},
 		},
 		Params: &entities.TxRequestParams{
