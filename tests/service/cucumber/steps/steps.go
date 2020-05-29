@@ -136,14 +136,12 @@ func (sc *ScenarioContext) init(s *gherkin.Pickle) {
 		"scenario.name": sc.Pickle.Name,
 		"scenario.id":   sc.Pickle.Id,
 	})
+
+	sc.logger.Debug("new scenario initialized")
+	sc.aliases.Set(sc.Pickle.Id, "SCENARIO_ID", sc.Pickle.Id)
 }
 
 func (sc *ScenarioContext) newTracker(e *tx.Envelope) *tracker.Tracker {
-	if e != nil {
-		sc.setMetadata(e)
-	}
-	// Set envelope metadata so it can be tracked
-
 	// Create tracker and attach envelope
 	t := tracker.NewTracker()
 	t.Current = e
@@ -159,6 +157,11 @@ func (sc *ScenarioContext) newTracker(e *tx.Envelope) *tracker.Tracker {
 
 		// Register channel on channel registry
 		if e != nil {
+			log.WithFields(log.Fields{
+				"id":          e.GetID(),
+				"scenario.id": sc.Pickle.Id,
+				"topic":       topic,
+			}).Debugf("registered new envelope")
 			sc.chanReg.Register(LongKeyOf(topic, sc.Pickle.Id, e.GetID()), ch)
 		} else {
 			sc.chanReg.Register(ShortKeyOf(topic, sc.Pickle.Id), ch)
@@ -169,9 +172,10 @@ func (sc *ScenarioContext) newTracker(e *tx.Envelope) *tracker.Tracker {
 }
 
 func (sc *ScenarioContext) setMetadata(e *tx.Envelope) {
+	_ = e.SetID(uuid.NewV4().String())
+
 	// Prepare envelope metadata
-	_ = e.SetID(uuid.NewV4().String()).
-		SetContextLabelsValue("debug", "true").
+	_ = e.SetContextLabelsValue("debug", "true").
 		SetContextLabelsValue("scenario.id", sc.Pickle.Id).
 		SetContextLabelsValue("scenario.name", sc.Pickle.Name)
 }
@@ -181,6 +185,7 @@ func (sc *ScenarioContext) newTrackers(envelopes []*tx.Envelope) []*tracker.Trac
 	var trackers []*tracker.Tracker
 	for _, e := range envelopes {
 		// Create a tracker
+		sc.setMetadata(e)
 		trackers = append(trackers, sc.newTracker(e))
 	}
 
@@ -235,6 +240,25 @@ func (sc *ScenarioContext) iSendEnvelopesToTopic(topic string, table *gherkin.Pi
 			return errors.InternalError("could not send tx request - got %v", err)
 		}
 	}
+
+	return nil
+}
+
+func (sc *ScenarioContext) registerEnvelopeTracker(value string) error {
+	envelopeID, ok := sc.aliases.Get(sc.Pickle.Id, value)
+	if !ok {
+		envelopeID, ok = sc.aliases.Get("global", value)
+		if !ok {
+			envelopeID = value
+		}
+	}
+
+	evlp := tx.NewEnvelope()
+	_ = evlp.SetID(envelopeID).
+		SetContextLabelsValue("debug", "true").
+		SetContextLabelsValue("scenario.id", sc.Pickle.Id)
+
+	sc.setTrackers(append(sc.trackers, sc.newTracker(evlp)))
 
 	return nil
 }
@@ -517,6 +541,7 @@ func FeatureContext(s *godog.Suite) {
 
 	s.Step(`^I have deployed contract "([^"]*)"$`, sc.iHaveDeployedContract)
 	s.Step(`^I send envelopes to topic "([^"]*)"$`, sc.iSendEnvelopesToTopic)
+	s.Step(`^Register new envelope tracker "([^"]*)"$`, sc.registerEnvelopeTracker)
 	s.Step(`^Envelopes should be in topic "([^"]*)"$`, sc.envelopeShouldBeInTopic)
 	s.Step(`^Envelopes should have payload set$`, sc.envelopesShouldHavePayloadSet)
 	s.Step(`^Envelopes should have nonce set$`, sc.envelopesShouldHaveNonceSet)

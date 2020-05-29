@@ -21,6 +21,7 @@ type UpdateJobRequest struct {
 type JobResponse struct {
 	UUID        string                   `json:"uuid" validate:"required,uuid4"`
 	Transaction *entities.ETHTransaction `json:"transaction" validate:"required"`
+	Labels      map[string]string        `json:"labels" validate:"required"`
 	Status      string                   `json:"status" validate:"required"`
 	CreatedAt   time.Time                `json:"createdAt"`
 }

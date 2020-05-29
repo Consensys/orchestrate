@@ -24,6 +24,7 @@ func FormatJobResponse(job *entities.Job) *types.JobResponse {
 			CreatedAt:      job.Transaction.CreatedAt,
 			UpdatedAt:      job.Transaction.UpdatedAt,
 		},
+		Labels:    job.Labels,
 		Status:    job.Status,
 		CreatedAt: job.CreatedAt,
 	}

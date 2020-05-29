@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
+	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
 
 	"github.com/Shopify/sarama"
@@ -82,17 +84,20 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID, tenantID string
 func (uc *startJobUseCase) sendMessage(ctx context.Context, jobModel *models.Job) (partition int32, offset int64, err error) {
 	log.WithContext(ctx).Debug("sending kafka message")
 
-	txEnvelope := parsers.NewEnvelopeFromJobModel(jobModel)
+	txEnvelope := parsers.NewEnvelopeFromJobModel(jobModel, map[string]string{
+		multitenancy.AuthorizationMetadata: authutils.AuthorizationFromContext(ctx),
+	})
+
 	evlp, err := txEnvelope.Envelope()
 	if err != nil {
 		errMessage := "failed to craft envelope"
 		log.WithContext(ctx).WithError(err).Error(errMessage)
 		return 0, 0, errors.InvalidParameterError(errMessage)
 	}
+
 	msg := &sarama.ProducerMessage{
-		Topic:   uc.txCrafterTopic,
-		Key:     sarama.StringEncoder(evlp.KafkaPartitionKey()),
-		Headers: nil, // TODO: Add the JWT token here? https://pegasys1.atlassian.net/browse/PO-544
+		Topic: uc.txCrafterTopic,
+		Key:   sarama.StringEncoder(evlp.KafkaPartitionKey()),
 	}
 
 	err = encoding.Marshal(txEnvelope, msg)

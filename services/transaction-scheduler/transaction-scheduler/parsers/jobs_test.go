@@ -38,7 +38,10 @@ func TestParsersJob_NewEntityFromModel(t *testing.T) {
 
 func TestParsersJob_NewEnvelopeFromModel(t *testing.T) {
 	jobModel := testutils.FakeJob(1)
-	txEnvelope := NewEnvelopeFromJobModel(jobModel)
+	headers := map[string]string{
+		"Authorization": "Bearer MyToken",
+	}
+	txEnvelope := NewEnvelopeFromJobModel(jobModel, headers)
 
 	txRequest := txEnvelope.GetTxRequest()
 	assert.Equal(t, tx.JobType_ETH_TX, txRequest.JobType)
@@ -52,4 +55,5 @@ func TestParsersJob_NewEnvelopeFromModel(t *testing.T) {
 	assert.Equal(t, jobModel.Transaction.PrivateFor, txRequest.Params.PrivateFor)
 	assert.Equal(t, jobModel.Transaction.PrivateFrom, txRequest.Params.PrivateFrom)
 	assert.Equal(t, jobModel.Transaction.PrivacyGroupID, txRequest.Params.PrivacyGroupId)
+	assert.Equal(t, headers, txRequest.Headers)
 }

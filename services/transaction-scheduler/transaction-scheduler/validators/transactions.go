@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 
@@ -20,6 +21,7 @@ const txValidatorComponent = "transaction-validator"
 type TransactionValidator interface {
 	ValidateRequestHash(ctx context.Context, chainUUID string, params interface{}, idempotencyKey string) (string, error)
 	ValidateChainExists(ctx context.Context, chainUUID string) error
+	ValidateMethodSignature(methodSignature string, args []string) ([]byte, error)
 }
 
 // transactionValidator is a validator for transaction requests (business logic)
@@ -73,4 +75,21 @@ func (txValidator *transactionValidator) ValidateChainExists(ctx context.Context
 	}
 
 	return nil
+}
+
+func (txValidator *transactionValidator) ValidateMethodSignature(method string, args []string) ([]byte, error) {
+	crafter := abi.BaseCrafter{}
+	txData, err := crafter.CraftCall(method, args...)
+
+	if err != nil {
+		errMessage := "invalid method signature"
+		log.WithError(err).
+			WithField("method", method).
+			WithField("args", args).
+			Error(errMessage)
+
+		return nil, errors.InvalidArgError(errMessage)
+	}
+
+	return txData, nil
 }

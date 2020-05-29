@@ -59,16 +59,19 @@ func UpdateJobModelFromEntities(jobModel *models.Job, job *entities.Job) {
 	// 	jobModel.Labels[k] = v
 	// }
 	// @TODO: Decide whether or not we should do a full replace (code above)
-	jobModel.Labels = job.Labels
+	if job.Labels != nil && len(job.Labels) > 0 {
+		jobModel.Labels = job.Labels
+	}
+
 	UpdateTransactionModelFromEntities(jobModel.Transaction, job.Transaction)
 }
 
-func NewEnvelopeFromJobModel(job *models.Job) *tx.TxEnvelope {
+func NewEnvelopeFromJobModel(job *models.Job, headers map[string]string) *tx.TxEnvelope {
 	txEnvelope := &tx.TxEnvelope{
 		Msg: &tx.TxEnvelope_TxRequest{TxRequest: &tx.TxRequest{
 			Id:      job.UUID,
 			JobType: tx.JobTypeMap[job.Type],
-			Headers: nil, // TODO: Add the JWT token here? https://pegasys1.atlassian.net/browse/PO-544
+			Headers: headers,
 			Params: &tx.Params{
 				From:           job.Transaction.Sender,
 				To:             job.Transaction.Recipient,

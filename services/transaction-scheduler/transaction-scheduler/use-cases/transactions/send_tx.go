@@ -9,7 +9,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
@@ -68,12 +67,18 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
 
-	// Step 2: Insert Schedule + Job + ETHTransaction + TxRequest atomically
+	txDataBytes, err := uc.validator.ValidateMethodSignature(txRequest.Params.MethodSignature, txRequest.Params.Args)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
+	}
+
+	// Step 2: Insert Schedule + Job + Transaction + TxRequest atomically
 	err = database.ExecuteInDBTx(uc.db, func(dbtx database.Tx) error {
 		txRequestModel, der := parsers.NewTxRequestModelFromEntities(txRequest, requestHash, tenantID)
 		if der != nil {
 			return der
 		}
+
 		der = dbtx.(store.Tx).TransactionRequest().SelectOrInsert(ctx, txRequestModel)
 		if der != nil {
 			return der
@@ -89,11 +94,6 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 
 		// Craft "Data" field
 		sendTxJob := parsers.NewJobEntityFromTxRequest(txRequest, tx.JobEthereumTransaction)
-		crafter := abi.BaseCrafter{}
-		txDataBytes, der := crafter.CraftCall(txRequest.Params.MethodSignature, txRequest.Params.Args...)
-		if der != nil {
-			return der
-		}
 		sendTxJob.Transaction.Data = hexutil.Encode(txDataBytes)
 
 		job, der := uc.createJobUC.

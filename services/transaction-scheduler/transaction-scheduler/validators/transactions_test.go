@@ -93,3 +93,16 @@ func (s *transactionsTestSuite) TestTransactionValidator_ValidateChainExists() {
 		assert.True(t, errors.IsInvalidParameterError(err))
 	})
 }
+
+func (s *transactionsTestSuite) TestTransactionValidator_ValidateMethodSignature() {
+	s.T().Run("should validate method signature successfully", func(t *testing.T) {
+		txData, err := s.validator.ValidateMethodSignature("constructor(string,string)", []string{"val1", "val2"})
+		assert.Nil(t, err)
+		assert.NotEmpty(t, txData)
+	})
+
+	s.T().Run("should fail with InvalidParameterError if ChainRegistryClient fails", func(t *testing.T) {
+		_, err := s.validator.ValidateMethodSignature("constructor(string,string)", []string{"val1"})
+		assert.True(t, errors.IsInvalidArgError(err))
+	})
+}
