@@ -233,9 +233,16 @@ func (s *Session) callHooks(ctx context.Context) {
 	for futureBlock := range s.fetchedBlocks {
 		select {
 		case res := <-futureBlock.Result():
+			// We MUST drain array chan and ignore blocks after an error happened
+			if err != nil {
+				log.FromContext(ctx).
+					WithField("block number", res.(*fetchedBlock).block.NumberU64()).
+					Warn("ignoring fetched block")
+				continue
+			}
 			err = s.callHook(ctx, res.(*fetchedBlock))
 		case e := <-futureBlock.Err():
-			if err == nil {
+			if err == nil && e != nil {
 				err = e
 			}
 		}

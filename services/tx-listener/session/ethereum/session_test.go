@@ -223,8 +223,9 @@ type hookCall struct {
 }
 
 type MockHook struct {
-	Calls  chan *hookCall
-	Errors chan error
+	Calls       chan *hookCall
+	Errors      chan error
+	FailOnBlock *uint64
 }
 
 func NewMockHook() *MockHook {
@@ -239,6 +240,11 @@ func (hk *MockHook) AfterNewBlock(_ context.Context, chain *dynamic.Chain, block
 		chain:     chain,
 		block:     block,
 		envelopes: envelopes,
+	}
+
+	if hk.FailOnBlock != nil && block.NumberU64() == *hk.FailOnBlock {
+		time.Sleep(100 * time.Millisecond) // Simulate processing delay
+		return fmt.Errorf("fail on block %d", block.NumberU64())
 	}
 
 	select {
@@ -764,6 +770,71 @@ func TestSessionStopsAfterInterrupt(t *testing.T) {
 	case <-time.After(2 * time.Second):
 		assert.Error(t, fmt.Errorf("should have finished"))
 	}
+}
+
+func TestSessionRestoreOnFailedBlock(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	hk := NewMockHook()
+	hk.FailOnBlock = &(&struct{ x uint64 }{1}).x
+	offsets := mock.NewMockManager(ctrl)
+
+	offsets.EXPECT().GetLastBlockNumber(gomock.Any(), gomock.Any()).Return(uint64(0), nil).AnyTimes()
+	// It never should move offset forward
+	offsets.EXPECT().SetLastBlockNumber(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(0)
+
+	// New session starting on block one
+	chain := &dynamic.Chain{
+		ChainID: big.NewInt(1),
+		UUID:    "test-chain",
+		URL:     "http://test.com",
+		Listener: &dynamic.Listener{
+			StartingBlock: 1,
+			CurrentBlock:  1,
+			Backoff:       10 * time.Millisecond,
+		},
+	}
+
+	// Initialize MockLedgerReader with 1st mined block
+	ec := mockEthClient.NewMockClient(ctrl)
+	ec.EXPECT().Network(gomock.Any(), gomock.Eq(chain.URL)).Return(big.NewInt(1), nil).AnyTimes()
+
+	for _, idx := range []int64{1, 2, 3, 4, 5} {
+		ec.EXPECT().BlockByNumber(gomock.Any(), gomock.Eq(chain.URL), big.NewInt(idx)).
+			Return(ethtypes.NewBlock(&ethtypes.Header{Number: big.NewInt(idx)},
+				[]*ethtypes.Transaction{},
+				[]*ethtypes.Header{},
+				[]*ethtypes.Receipt{},
+			), nil).AnyTimes()
+		ec.EXPECT().HeaderByNumber(gomock.Any(), gomock.Eq(chain.URL), gomock.Any()).Return(&ethtypes.Header{
+			Number: big.NewInt(idx),
+		}, nil).AnyTimes()
+	}
+
+	// Create builder
+	store := clientmock.NewMockEnvelopeStoreClient(ctrl)
+	store.EXPECT().LoadByTxHashes(gomock.Any(), gomock.Any()).Return(&proto.LoadByTxHashesResponse{}, nil).AnyTimes()
+
+	builder := NewSessionBuilder(hk, offsets, ec, store)
+
+	bckoff := &backoffmock.MockIntervalBackoff{}
+	sess := builder.newSession(chain)
+	sess.bckOff = bckoff
+
+	// Start session
+	exitErr := make(chan error)
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		exitErr <- sess.Run(ctx)
+	}()
+
+	select {
+	case err := <-exitErr:
+		assert.Error(t, err, "Session should not have exited")
+	case <-time.After(2 * time.Second):
+	}
+
+	cancel()
 }
 
 func envelopeModelToStoreResponse(envelope *models.EnvelopeModel) (*proto.StoreResponse, error) {
