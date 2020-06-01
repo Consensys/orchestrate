@@ -36,10 +36,16 @@ func isBig(fl validator.FieldLevel) bool {
 
 func isHash(fl validator.FieldLevel) bool {
 	if fl.Field().String() != "" {
-		hash, err := hexutil.Decode(fl.Field().String())
-		if err != nil || len(hash) != ethcommon.HashLength {
-			return false
-		}
+		return IsHash(fl.Field().String())
+	}
+
+	return true
+}
+
+func IsHash(input string) bool {
+	hash, err := hexutil.Decode(input)
+	if err != nil || len(hash) != ethcommon.HashLength {
+		return false
 	}
 
 	return true

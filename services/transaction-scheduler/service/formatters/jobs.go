@@ -1,6 +1,12 @@
 package formatters
 
 import (
+	"net/http"
+	"strings"
+
+	"github.com/ethereum/go-ethereum/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
@@ -50,4 +56,23 @@ func FormatJobUpdateRequest(request *types.UpdateJobRequest) *entities.Job {
 	}
 
 	return job
+}
+
+func FormatJobFilterRequest(req *http.Request) (*entities.JobFilters, error) {
+	filters := &entities.JobFilters{}
+
+	qTxHashes := req.URL.Query().Get("tx_hashes")
+	if qTxHashes != "" {
+		for _, txHash := range strings.Split(qTxHashes, ",") {
+			txHashT := strings.TrimSpace(txHash)
+			if !utils.IsHash(txHashT) {
+				err := errors.InvalidFormatError("invalid tx hash strings: %v", txHashT)
+				return nil, err
+			}
+
+			filters.TxHashes = append(filters.TxHashes, common.HexToHash(txHashT))
+		}
+	}
+
+	return filters, nil
 }

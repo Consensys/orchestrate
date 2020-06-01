@@ -6,6 +6,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -31,11 +32,16 @@ func TestSearchJobs_Execute(t *testing.T) {
 	tenantID := "tenantID"
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
+		txHash := common.HexToHash("0x1")
 		jobs := []*models.Job{testutils.FakeJob(0)}
-		filters := make(map[string]string)
+		filters := &entities.JobFilters{
+			TxHashes: []common.Hash{txHash},
+		}
 		expectedResponse := []*entities.Job{parsers.NewJobEntityFromModels(jobs[0])}
 		
-		mockJobDA.EXPECT().Search(ctx, filters, tenantID).Return(jobs, nil)
+		mockJobDA.EXPECT().
+			Search(ctx, tenantID, gomock.Eq([]string{txHash.String()})).
+			Return(jobs, nil)
 		jobResponse, err := usecase.Execute(ctx, filters, tenantID)
 
 		assert.Nil(t, err)
@@ -43,10 +49,10 @@ func TestSearchJobs_Execute(t *testing.T) {
 	})
 
 	t.Run("should fail with same error if search fails for jobs", func(t *testing.T) {
-		filters := make(map[string]string, 0)
+		filters := &entities.JobFilters{}
 		expectedErr := errors.NotFoundError("error")
 
-		mockJobDA.EXPECT().Search(ctx, filters, tenantID).Return(nil, expectedErr)
+		mockJobDA.EXPECT().Search(ctx, tenantID, gomock.Any()).Return(nil, expectedErr)
 
 		response, err := usecase.Execute(ctx, filters, tenantID)
 

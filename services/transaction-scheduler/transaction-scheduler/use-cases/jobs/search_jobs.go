@@ -15,7 +15,7 @@ import (
 const searchJobsComponent = "use-cases.search-jobs"
 
 type SearchJobsUseCase interface {
-	Execute(ctx context.Context, filters map[string]string, tenantID string) ([]*entities.Job, error)
+	Execute(ctx context.Context, filters *entities.JobFilters, tenantID string) ([]*entities.Job, error)
 }
 
 // searchJobsUseCase is a use case to get a schedule
@@ -31,12 +31,17 @@ func NewSearchJobsUseCase(db store.DB) SearchJobsUseCase {
 }
 
 // Execute gets a schedule
-func (uc *searchJobsUseCase) Execute(ctx context.Context, filters map[string]string, tenantID string) ([]*entities.Job, error) {
+func (uc *searchJobsUseCase) Execute(ctx context.Context, filters *entities.JobFilters, tenantID string) ([]*entities.Job, error) {
 	log.WithContext(ctx).
 		WithField("filters", filters).
 		Debug("search jobs")
 
-	jobModels, err := uc.db.Job().Search(ctx, filters, tenantID)
+	txHashesFilter := []string{}
+	for _, hash := range filters.TxHashes {
+		txHashesFilter = append(txHashesFilter, hash.String())
+	}
+
+	jobModels, err := uc.db.Job().Search(ctx, tenantID, txHashesFilter)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(searchJobsComponent)
 	}

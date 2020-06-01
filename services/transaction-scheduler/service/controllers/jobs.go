@@ -44,8 +44,11 @@ func (c *JobsController) search(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	// @TODO Read filters from URL
-	filters := make(map[string]string)
+	filters, err := formatters.FormatJobFilterRequest(request)
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	jobRes, err := c.ucs.SearchJobs().Execute(ctx, filters, multitenancy.TenantIDFromContext(ctx))
 	if err != nil {

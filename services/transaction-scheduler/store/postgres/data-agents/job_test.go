@@ -8,6 +8,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/ethereum/go-ethereum/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 
@@ -156,6 +157,48 @@ func (s *jobTestSuite) TestPGJob_FindOneByUUID() {
 	s.T().Run("should return NotFoundError if select fails", func(t *testing.T) {
 		_, err := s.agents.Job().FindOneByUUID(ctx, "b6fe7a2a-1a4d-49ca-99d8-8a34aa495ef0", tenantID)
 		assert.True(t, errors.IsNotFoundError(err))
+	})
+}
+
+func (s *jobTestSuite) TestPGJob_Search() {
+	ctx := context.Background()
+	tenantID := "tenantID"
+	
+	jobOne := testutils.FakeJob(0)
+	txHashOne := common.HexToHash("0x1")
+	jobOne.Transaction.Hash = txHashOne.String()
+	jobOne.Schedule.TenantID = tenantID
+	err := insertJob(ctx, s.agents, jobOne)
+	assert.Nil(s.T(), err)
+	
+	jobTwo := testutils.FakeJob(0)
+	txHashTwo := common.HexToHash("0x2")
+	jobTwo.Transaction.Hash = txHashTwo.String()
+	jobTwo.Schedule.TenantID = tenantID
+	err = insertJob(ctx, s.agents, jobTwo)
+	assert.Nil(s.T(), err)
+	
+
+	s.T().Run("should find model successfully", func(t *testing.T) {
+		retrivedJobs, err := s.agents.Job().Search(ctx, tenantID, []string{txHashOne.String()})
+
+		assert.Nil(t, err)
+		assert.NotEmpty(t, retrivedJobs[0].ID)
+		assert.Equal(t, jobOne.UUID, retrivedJobs[0].UUID)
+		assert.Equal(t, jobOne.Transaction.UUID, retrivedJobs[0].Transaction.UUID)
+		assert.Equal(t, txHashOne.String(), retrivedJobs[0].Transaction.Hash)
+	})
+	
+	s.T().Run("should not find any model", func(t *testing.T) {
+		retrivedJobs, err := s.agents.Job().Search(ctx, tenantID, []string{"0x3"})
+		assert.Nil(t, err)
+		assert.Empty(t, retrivedJobs)
+	})
+	
+	s.T().Run("should find every inserted model successfully", func(t *testing.T) {
+		retrivedJobs, err := s.agents.Job().Search(ctx, tenantID, nil)
+		assert.Nil(t, err)
+		assert.Equal(t, len(retrivedJobs), 2)
 	})
 }
 

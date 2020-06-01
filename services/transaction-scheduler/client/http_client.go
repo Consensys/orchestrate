@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/containous/traefik/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -120,6 +121,26 @@ func (c *HTTPClient) GetJobs(ctx context.Context) ([]*types.JobResponse, error) 
 	response, err := clientutils.GetRequest(ctx, c.client, reqURL)
 	if err != nil {
 		errMessage := "error while getting jobs"
+		log.FromContext(ctx).WithError(err).Error(errMessage)
+		return nil, errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+	}
+	defer clientutils.CloseResponse(response)
+
+	resp := []*types.JobResponse{}
+	err = parseResponse(ctx, response, &resp)
+	return resp, err
+}
+
+func (c *HTTPClient) SearchJob(ctx context.Context, txHashes []string) ([]*types.JobResponse, error) {
+	reqURL := fmt.Sprintf("%v/jobs", c.config.URL)
+
+	if len(txHashes) > 0 {
+		reqURL = fmt.Sprintf("%s?tx_hashes=%s", reqURL, strings.Join(txHashes, ","))
+	}
+
+	response, err := clientutils.GetRequest(ctx, c.client, reqURL)
+	if err != nil {
+		errMessage := "error while searching jobs"
 		log.FromContext(ctx).WithError(err).Error(errMessage)
 		return nil, errors.ServiceConnectionError(errMessage).ExtendComponent(component)
 	}

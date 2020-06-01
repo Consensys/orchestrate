@@ -5,10 +5,13 @@ package controllers
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
@@ -177,13 +180,14 @@ func (s *jobsCtrlTestSuite) TestJobsController_GetOne() {
 func (s *jobsCtrlTestSuite) TestJobsController_Search() {
 	s.T().Run("should execute search jobs successfully", func(t *testing.T) {
 		rw := httptest.NewRecorder()
+		filters := &entities.JobFilters{}
 		httpRequest := httptest.
 			NewRequest(http.MethodGet, "/jobs", nil).
 			WithContext(s.ctx)
 		jobEntities := []*entities.Job{testutils2.FakeJobEntity()}
 
 		s.searchJobUC.EXPECT().
-			Execute(gomock.Any(), map[string]string{}, s.tenantID).
+			Execute(gomock.Any(), filters, s.tenantID).
 			Return(jobEntities, nil).
 			Times(1)
 
@@ -195,17 +199,66 @@ func (s *jobsCtrlTestSuite) TestJobsController_Search() {
 		assert.Equal(t, http.StatusOK, rw.Code)
 	})
 
+	s.T().Run("should execute search jobs by tx_hashes successfully", func(t *testing.T) {
+		rw := httptest.NewRecorder()
+		filters := &entities.JobFilters{
+			TxHashes: []common.Hash{
+				common.HexToHash("0x1"),
+				common.HexToHash("0x2"),
+			},
+		}
+		url := fmt.Sprintf("/jobs?tx_hashes=%s", strings.Join([]string{
+			common.HexToHash("0x1").String(),
+			common.HexToHash("0x2").String(),
+		}, ","))
+
+		httpRequest := httptest.
+			NewRequest(http.MethodGet, url, nil).
+			WithContext(s.ctx)
+		jobEntities := []*entities.Job{testutils2.FakeJobEntity()}
+
+		s.searchJobUC.EXPECT().
+			Execute(gomock.Any(), filters, s.tenantID).
+			Return(jobEntities, nil).
+			Times(1)
+
+		s.router.ServeHTTP(rw, httpRequest)
+
+		response := []*types.JobResponse{formatters.FormatJobResponse(jobEntities[0])}
+		expectedBody, _ := json.Marshal(response)
+		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
+		assert.Equal(t, http.StatusOK, rw.Code)
+	})
+	
+	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
+	s.T().Run("should fail with 422 if use case fails on invalid tx hashes as input", func(t *testing.T) {
+		rw := httptest.NewRecorder()
+		url := fmt.Sprintf("/jobs?tx_hashes=%s", strings.Join([]string{
+			"InvalidHash",
+			common.HexToHash("0x2").String(),
+		}, ","))
+
+		httpRequest := httptest.
+			NewRequest(http.MethodGet, url, bytes.NewReader(nil)).
+			WithContext(s.ctx)
+	
+		s.router.ServeHTTP(rw, httpRequest)
+		assert.Equal(t, http.StatusBadRequest, rw.Code)
+	})
+	
 	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
 	s.T().Run("should fail with 422 if use case fails with NotFoundError", func(t *testing.T) {
 		rw := httptest.NewRecorder()
+		filters := &entities.JobFilters{}
 		httpRequest := httptest.
 			NewRequest(http.MethodGet, "/jobs", bytes.NewReader(nil)).
 			WithContext(s.ctx)
+	
 		s.searchJobUC.EXPECT().
-			Execute(gomock.Any(), map[string]string{}, s.tenantID).
+			Execute(gomock.Any(), filters, s.tenantID).
 			Return(nil, errors.InvalidParameterError("error")).
 			Times(1)
-
+	
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusUnprocessableEntity, rw.Code)
 	})

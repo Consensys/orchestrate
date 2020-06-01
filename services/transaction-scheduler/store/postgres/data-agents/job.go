@@ -2,8 +2,8 @@ package dataagents
 
 import (
 	"context"
-	"fmt"
 
+	gopg "github.com/go-pg/pg/v9"
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 
@@ -90,7 +90,7 @@ func (agent *PGJob) FindOneByUUID(ctx context.Context, jobUUID, tenantID string)
 	return job, nil
 }
 
-func (agent *PGJob) Search(ctx context.Context, filters map[string]string, tenantID string) ([]*models.Job, error) {
+func (agent *PGJob) Search(ctx context.Context, tenantID string, txHashes []string) ([]*models.Job, error) {
 	jobs := []*models.Job{}
 
 	query := agent.db.ModelContext(ctx, &jobs).
@@ -98,8 +98,8 @@ func (agent *PGJob) Search(ctx context.Context, filters map[string]string, tenan
 		Relation("Schedule").
 		Relation("Logs")
 
-	for attr, value := range filters {
-		query = query.Where(fmt.Sprintf("job.%s = ?", attr), value)
+	if len(txHashes) > 0 {
+		query = query.Where("transaction.hash in (?)", gopg.In(txHashes))
 	}
 
 	if tenantID != multitenancy.DefaultTenantIDName {

@@ -2,6 +2,8 @@ package entities
 
 import (
 	"time"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 type Job struct {
@@ -12,4 +14,8 @@ type Job struct {
 	Status       string
 	Transaction  *ETHTransaction
 	CreatedAt    time.Time
+}
+
+type JobFilters struct {
+	TxHashes []common.Hash
 }
