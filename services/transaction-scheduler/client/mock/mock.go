@@ -214,6 +214,21 @@ func (mr *MockJobClientMockRecorder) StartJob(ctx, jobUUID interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StartJob", reflect.TypeOf((*MockJobClient)(nil).StartJob), ctx, jobUUID)
 }
 
+// SearchJob mocks base method.
+func (m *MockJobClient) SearchJob(ctx context.Context, txHashes []string) ([]*types.JobResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchJob", ctx, txHashes)
+	ret0, _ := ret[0].([]*types.JobResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchJob indicates an expected call of SearchJob.
+func (mr *MockJobClientMockRecorder) SearchJob(ctx, txHashes interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchJob", reflect.TypeOf((*MockJobClient)(nil).SearchJob), ctx, txHashes)
+}
+
 // MockTransactionSchedulerClient is a mock of TransactionSchedulerClient interface.
 type MockTransactionSchedulerClient struct {
 	ctrl     *gomock.Controller
@@ -369,4 +384,19 @@ func (m *MockTransactionSchedulerClient) StartJob(ctx context.Context, jobUUID s
 func (mr *MockTransactionSchedulerClientMockRecorder) StartJob(ctx, jobUUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StartJob", reflect.TypeOf((*MockTransactionSchedulerClient)(nil).StartJob), ctx, jobUUID)
+}
+
+// SearchJob mocks base method.
+func (m *MockTransactionSchedulerClient) SearchJob(ctx context.Context, txHashes []string) ([]*types.JobResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchJob", ctx, txHashes)
+	ret0, _ := ret[0].([]*types.JobResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchJob indicates an expected call of SearchJob.
+func (mr *MockTransactionSchedulerClientMockRecorder) SearchJob(ctx, txHashes interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchJob", reflect.TypeOf((*MockTransactionSchedulerClient)(nil).SearchJob), ctx, txHashes)
 }

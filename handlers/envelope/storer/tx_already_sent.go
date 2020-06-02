@@ -7,6 +7,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
 
 // TxAlreadySent implements an handler that controls whether transaction associated to envelope
@@ -19,55 +21,113 @@ import (
 // 1. Store envelope on Envelope store
 // 2. Send transaction to blockchain
 // 3. Set envelope status
-func TxAlreadySent(ec ethclient.ChainLedgerReader, s svc.EnvelopeStoreClient) engine.HandlerFunc {
+func TxAlreadySent(ec ethclient.ChainLedgerReader, s svc.EnvelopeStoreClient, txSchedulerClient client.TransactionSchedulerClient) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		tenantID := multitenancy.TenantIDFromContext(txctx.Context())
-		txctx.Logger.Tracef("from TxAlreadySent => TenantID value: %s", tenantID)
-		// Load possibly already sent envelope
-		resp, err := s.LoadByID(
-			txctx.Context(),
-			&svc.LoadByIDRequest{
-				Id: txctx.Envelope.GetID(),
-			},
-		)
-		if err != nil && !errors.IsNotFoundError(err) {
-			// Connection to store is broken
-			e := txctx.AbortWithError(err).ExtendComponent(component)
-			txctx.Logger.WithError(e).Errorf("store: envelope store failed to store envelope")
+		// TODO: Remove this if when envelope store is removed
+		if txctx.Envelope.GetJobUUID() != "" {
+			checkTxInScheduler(txctx, ec, txSchedulerClient)
+		} else {
+			checkTxInStore(txctx, ec, s)
+		}
+	}
+}
+
+func checkTxInScheduler(txctx *engine.TxContext, ec ethclient.ChainLedgerReader, txSchedulerClient client.TransactionSchedulerClient) {
+	txctx.Logger.Tracef("from TxAlreadySent => TenantID value: %s", multitenancy.TenantIDFromContext(txctx.Context()))
+
+	// Load possibly already sent envelope
+	job, err := txSchedulerClient.GetJob(txctx.Context(), txctx.Envelope.GetJobUUID())
+	if err != nil && !errors.IsNotFoundError(err) {
+		// Connection to tx scheduler is broken
+		e := txctx.AbortWithError(err).ExtendComponent(component)
+		txctx.Logger.WithError(e).Errorf("transaction scheduler: failed to get job")
+		return
+	}
+
+	// Tx has already been updated
+	if job.Status == entities.JobStatusPending {
+		txctx.Logger.Warnf("transaction scheduler: transaction has already been updated")
+		url, err := proxy.GetURL(txctx)
+		if err != nil {
 			return
 		}
 
-		// Tx has already been stored
-		if resp.GetStatusInfo().HasBeenSent() {
-			txctx.Logger.Warnf("store: transaction has already been stored")
-			url, err := proxy.GetURL(txctx)
-			if err != nil {
-				return
-			}
-
-			// We make sure that transaction has not already been sent
-			// by querying the chain
-			tx, _, err := ec.TransactionByHash(
-				txctx.Context(),
-				url,
-				resp.GetEnvelope().TxHash(),
-			)
-
-			if err != nil {
-				// Connection to Ethereum node is broken
-				e := txctx.AbortWithError(err).ExtendComponent(component)
-				txctx.Logger.WithError(e).Errorf("store: connection to Ethereum client is broken")
-				return
-			}
-
-			if tx != nil {
-				// Transaction has already been sent so we abort execution
-				txctx.Logger.Warnf("store: transaction has already been sent")
-				txctx.Abort()
-				return
-			}
+		// We make sure that transaction has not already been sent to the ETH node by querying to chain
+		tx, _, err := ec.TransactionByHash(
+			txctx.Context(),
+			url,
+			job.Transaction.GetHash(),
+		)
+		if err != nil {
+			// Connection to Ethereum node is broken
+			e := txctx.AbortWithError(err).ExtendComponent(component)
+			txctx.Logger.WithError(e).Errorf("transaction scheduler: connection to Ethereum client is broken")
+			return
 		}
 
-		txctx.Logger.Debugf("store: transaction has not been sent")
+		if tx != nil {
+			// Transaction has already been sent so we abort execution
+			txctx.Logger.Warnf("transaction scheduler: transaction has already been sent but status was not set")
+			txctx.Abort()
+			return
+		}
+	} else if job.Status == entities.JobStatusMined || job.Status == entities.JobStatusSent {
+		// Transaction has already been sent so we abort execution
+		txctx.Logger.Warnf("transaction scheduler: transaction has already been sent")
+		txctx.Abort()
+		return
 	}
+
+	txctx.Logger.Debugf("transaction scheduler: transaction has not been sent")
+}
+
+func checkTxInStore(txctx *engine.TxContext, ec ethclient.ChainLedgerReader, s svc.EnvelopeStoreClient) {
+	tenantID := multitenancy.TenantIDFromContext(txctx.Context())
+	txctx.Logger.Tracef("from TxAlreadySent => TenantID value: %s", tenantID)
+	// Load possibly already sent envelope
+	resp, err := s.LoadByID(
+		txctx.Context(),
+		&svc.LoadByIDRequest{
+			Id: txctx.Envelope.GetID(),
+		},
+	)
+	if err != nil && !errors.IsNotFoundError(err) {
+		// Connection to store is broken
+		e := txctx.AbortWithError(err).ExtendComponent(component)
+		txctx.Logger.WithError(e).Errorf("store: envelope store failed to store envelope")
+		return
+	}
+
+	// Tx has already been stored
+	if resp.GetStatusInfo().HasBeenSent() {
+		txctx.Logger.Warnf("store: transaction has already been stored")
+		url, err := proxy.GetURL(txctx)
+		if err != nil {
+			return
+		}
+
+		// We make sure that transaction has not already been sent
+		// by querying the chain
+		tx, _, err := ec.TransactionByHash(
+			txctx.Context(),
+			url,
+			resp.GetEnvelope().TxHash(),
+		)
+
+		if err != nil {
+			// Connection to Ethereum node is broken
+			e := txctx.AbortWithError(err).ExtendComponent(component)
+			txctx.Logger.WithError(e).Errorf("store: connection to Ethereum client is broken")
+			return
+		}
+
+		if tx != nil {
+			// Transaction has already been sent so we abort execution
+			txctx.Logger.Warnf("store: transaction has already been sent")
+			txctx.Abort()
+			return
+		}
+	}
+
+	txctx.Logger.Debugf("store: transaction has not been sent")
 }

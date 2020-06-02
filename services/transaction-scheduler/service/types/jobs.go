@@ -15,7 +15,8 @@ type CreateJobRequest struct {
 
 type UpdateJobRequest struct {
 	Labels      map[string]string        `json:"labels,omitempty"`
-	Transaction *entities.ETHTransaction `json:"transaction"`
+	Transaction *entities.ETHTransaction `json:"transaction,omitempty"`
+	Status      string                   `json:"status,omitempty"`
 }
 
 type JobResponse struct {

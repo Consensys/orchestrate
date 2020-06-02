@@ -5,6 +5,7 @@ package storer
 import (
 	"context"
 	"fmt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
 	"math/big"
 	"testing"
 
@@ -97,16 +98,17 @@ func (h *mockHandler) Handle(txctx *engine.TxContext) {
 func TestTxAlreadySent(t *testing.T) {
 	ec := NewMockChainLedgerReader()
 	ctrl := gomock.NewController(t)
-	client := clientmock.NewMockEnvelopeStoreClient(ctrl)
-	client.EXPECT().LoadByID(gomock.Any(), gomock.AssignableToTypeOf(&svc.LoadByIDRequest{})).AnyTimes()
-	client.EXPECT().Store(gomock.Any(), gomock.AssignableToTypeOf(&svc.StoreRequest{})).Times(2)
-	client.EXPECT().SetStatus(gomock.Any(), gomock.AssignableToTypeOf(&svc.SetStatusRequest{})).Times(2)
+	storeClient := clientmock.NewMockEnvelopeStoreClient(ctrl)
+	txSchedulerClient := mock.NewMockTransactionSchedulerClient(ctrl)
+	storeClient.EXPECT().LoadByID(gomock.Any(), gomock.AssignableToTypeOf(&svc.LoadByIDRequest{})).AnyTimes()
+	storeClient.EXPECT().Store(gomock.Any(), gomock.AssignableToTypeOf(&svc.StoreRequest{})).Times(2)
+	storeClient.EXPECT().SetStatus(gomock.Any(), gomock.AssignableToTypeOf(&svc.SetStatusRequest{})).Times(2)
 	mh := mockHandler{}
 
 	// Prepare a test handler combined with a mock handler to
 	// control abort are occurring as expected
 	handler := engine.CombineHandlers(
-		TxAlreadySent(ec, client),
+		TxAlreadySent(ec, storeClient, txSchedulerClient),
 		mh.Handle,
 	)
 
@@ -123,14 +125,14 @@ func TestTxAlreadySent(t *testing.T) {
 
 	// Store envelope, do not send transaction and set envelope status before handing context
 	b := tx.NewEnvelope().SetID("2").SetChainID(big.NewInt(8)).SetTxHash(ethcommon.HexToHash("0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b"))
-	_, _ = client.Store(
+	_, _ = storeClient.Store(
 		context.Background(),
 		&svc.StoreRequest{
 			Envelope: b.TxEnvelopeAsRequest(),
 		},
 	)
 	ec.SendTx("0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b")
-	_, _ = client.SetStatus(
+	_, _ = storeClient.SetStatus(
 		context.Background(),
 		&svc.SetStatusRequest{
 			Id:     "2",
@@ -149,13 +151,13 @@ func TestTxAlreadySent(t *testing.T) {
 
 	// Store envelope, does not send transaction and set envelope status before handing context
 	b = tx.NewEnvelope().SetID("3").SetChainID(big.NewInt(8)).SetTxHash(ethcommon.HexToHash("0x60a417c21da71cea33821071e99871fa2c23ad8103b889cf8a459b0b5320fd46"))
-	_, _ = client.Store(
+	_, _ = storeClient.Store(
 		context.Background(),
 		&svc.StoreRequest{
 			Envelope: b.TxEnvelopeAsRequest(),
 		},
 	)
-	_, _ = client.SetStatus(
+	_, _ = storeClient.SetStatus(
 		context.Background(),
 		&svc.SetStatusRequest{
 			Id:     "3",
@@ -171,5 +173,4 @@ func TestTxAlreadySent(t *testing.T) {
 	handler(txctx)
 	assertCtx(t, txctx)
 	assert.Equal(t, 3, mh.callCount, "Mock handler should have been executed")
-
 }

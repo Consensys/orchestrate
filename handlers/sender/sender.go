@@ -7,12 +7,13 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 )
 
 // Sender creates sender handler
-func Sender(ec ethclient.TransactionSender, s svc.EnvelopeStoreClient) engine.HandlerFunc {
+func Sender(ec ethclient.TransactionSender, s svc.EnvelopeStoreClient, txSchedulerClient client.TransactionSchedulerClient) engine.HandlerFunc {
 	// Declare a set of handlers that will be forked by Sender handler
-	rawTxStore := storer.RawTxStore(s)
+	rawTxStore := storer.RawTxStore(s, txSchedulerClient)
 	UnsignedTxStore := storer.UnsignedTxStore(s)
 
 	rawTxSender := engine.CombineHandlers(

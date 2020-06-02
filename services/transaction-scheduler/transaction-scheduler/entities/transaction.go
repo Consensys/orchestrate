@@ -1,6 +1,10 @@
 package entities
 
-import "time"
+import (
+	"time"
+
+	"github.com/ethereum/go-ethereum/common"
+)
 
 type ETHTransaction struct {
 	Hash           string    `json:"hash,omitempty"`
@@ -17,4 +21,8 @@ type ETHTransaction struct {
 	PrivacyGroupID string    `json:"privacyGroupID,omitempty"`
 	CreatedAt      time.Time `json:"createdAt,omitempty"`
 	UpdatedAt      time.Time `json:"updatedAt,omitempty"`
+}
+
+func (t *ETHTransaction) GetHash() common.Hash {
+	return common.HexToHash(t.Hash)
 }

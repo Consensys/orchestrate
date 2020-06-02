@@ -313,8 +313,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_Update() {
 		jobEntityReq.UUID = jobEntityRes.UUID
 		s.updateJobUC.EXPECT().
 			Execute(gomock.Any(), gomock.Any(), s.tenantID).
-			Return(jobEntityRes, nil).
-			Times(1)
+			Return(jobEntityRes, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 

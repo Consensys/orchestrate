@@ -53,6 +53,7 @@ func FormatJobUpdateRequest(request *types.UpdateJobRequest) *entities.Job {
 	job := &entities.Job{
 		Labels:      request.Labels,
 		Transaction: request.Transaction,
+		Status:      request.Status,
 	}
 
 	return job

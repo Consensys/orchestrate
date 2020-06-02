@@ -70,6 +70,7 @@ func NewEnvelopeFromJobModel(job *models.Job, headers map[string]string) *tx.TxE
 	txEnvelope := &tx.TxEnvelope{
 		Msg: &tx.TxEnvelope_TxRequest{TxRequest: &tx.TxRequest{
 			Id:      job.UUID,
+			JobUUID: job.UUID,
 			JobType: tx.JobTypeMap[job.Type],
 			Headers: headers,
 			Params: &tx.Params{

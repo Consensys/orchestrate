@@ -97,7 +97,7 @@ func initComponents(ctx context.Context) {
 		},
 		// Initialize the contractregistryClient
 		func() {
-			txscheduler.Init(ctx)
+			txscheduler.Init()
 		},
 	)
 }

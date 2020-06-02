@@ -1,7 +1,6 @@
 package client
 
 import (
-	"context"
 	"sync"
 
 	log "github.com/sirupsen/logrus"
@@ -16,7 +15,7 @@ var (
 	initOnce = &sync.Once{}
 )
 
-func Init(ctx context.Context) {
+func Init() {
 	initOnce.Do(func() {
 		if client != nil {
 			return
@@ -32,9 +31,4 @@ func Init(ctx context.Context) {
 // GlobalChainRegistryClient return the chain registry
 func GlobalClient() TransactionSchedulerClient {
 	return client
-}
-
-// SetGlobalChainRegistryClient set a the chain registry client
-func SetGlobalClient(c TransactionSchedulerClient) {
-	client = c
 }

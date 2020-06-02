@@ -2,7 +2,6 @@ package jobs
 
 import (
 	"context"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database"
@@ -45,30 +44,37 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, tena
 		return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
 	}
 
-	parsers.UpdateJobModelFromEntities(jobModel, job)
-	jobLogModel := &models.Log{
-		JobID:     &jobModel.ID,
-		Status:    jobModel.GetStatus(),
-		Message:   "Job updated",
-		CreatedAt: time.Now(),
-	}
-	jobModel.Logs = append(jobModel.Logs, jobLogModel)
-
 	err = database.ExecuteInDBTx(uc.db, func(tx database.Tx) error {
-		if der := tx.(store.Tx).Transaction().Update(ctx, jobModel.Transaction); der != nil {
-			return der
+		// We are not forced to update the transaction
+		if job.Transaction != nil {
+			parsers.UpdateJobModelFromEntities(jobModel, job)
+			if der := tx.(store.Tx).Transaction().Update(ctx, jobModel.Transaction); der != nil {
+				return der
+			}
+			if der := tx.(store.Tx).Job().Update(ctx, jobModel); der != nil {
+				return der
+			}
 		}
 
-		if der := tx.(store.Tx).Job().Update(ctx, jobModel); der != nil {
-			return der
-		}
-
-		if der := tx.(store.Tx).Log().Insert(ctx, jobLogModel); der != nil {
-			return der
+		// We are not forced to update the status
+		if job.Status != "" {
+			jobLogModel := &models.Log{
+				JobID:   &jobModel.ID,
+				Status:  job.Status,
+				Message: "Job updated",
+			}
+			if der := tx.(store.Tx).Log().Insert(ctx, jobLogModel); der != nil {
+				return der
+			}
 		}
 
 		return nil
 	})
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
+	}
+
+	jobModel, err = uc.db.Job().FindOneByUUID(ctx, job.UUID, tenantID)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
 	}

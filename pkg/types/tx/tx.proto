@@ -31,6 +31,10 @@ message TxRequest {
 
     // Type of the job
     JobType jobType = 7;
+
+    // TODO: Remove this field when envelope store is removed
+    // ID of the Job
+    string jobUUID = 8;
 }
 
 message TxEnvelope {

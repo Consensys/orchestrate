@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
+
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/envelope/storer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
@@ -28,15 +30,18 @@ func Init(ctx context.Context) {
 		// Initialize Context store
 		storeclient.Init(ctx)
 
+		// Initialize Tx Scheduler client
+		txscheduler.Init()
+
 		// Initialize Ethereum client
 		ethclient.Init(ctx)
 
 		// Create Handler
 		handler = engine.CombineHandlers(
 			// Idempotency gate
-			storer.TxAlreadySent(ethclient.GlobalClient(), storeclient.GlobalEnvelopeStoreClient()),
+			storer.TxAlreadySent(ethclient.GlobalClient(), storeclient.GlobalEnvelopeStoreClient(), txscheduler.GlobalClient()),
 			// Sender
-			Sender(ethclient.GlobalClient(), storeclient.GlobalEnvelopeStoreClient()),
+			Sender(ethclient.GlobalClient(), storeclient.GlobalEnvelopeStoreClient(), txscheduler.GlobalClient()),
 		)
 
 		log.Infof("sender: handler ready")

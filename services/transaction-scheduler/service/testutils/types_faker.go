@@ -55,6 +55,7 @@ func FakeJobUpdateRequest() *types.UpdateJobRequest {
 	return &types.UpdateJobRequest{
 		Labels:      nil,
 		Transaction: testutils.FakeTransactionEntity(),
+		Status:      entities.JobStatusPending,
 	}
 }
 

@@ -5,6 +5,7 @@ package sender
 import (
 	"context"
 	"fmt"
+	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
 	"math/rand"
 	"sync"
 	"testing"
@@ -112,6 +113,7 @@ func makeSenderContext(i int) *engine.TxContext {
 func TestSender(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	client := clientmock.NewMockEnvelopeStoreClient(ctrl)
+	txSchedulerClient := mock2.NewMockTransactionSchedulerClient(ctrl)
 	client.EXPECT().Store(gomock.Any(), gomock.AssignableToTypeOf(&svc.StoreRequest{}), gomock.Any()).Times(15)
 	client.EXPECT().SetStatus(gomock.Any(), gomock.AssignableToTypeOf(&svc.SetStatusRequest{})).Times(15)
 	client.EXPECT().LoadByID(gomock.Any(), gomock.AssignableToTypeOf(&svc.LoadByIDRequest{})).
@@ -128,7 +130,7 @@ func TestSender(t *testing.T) {
 	s.EXPECT().SendTransaction(gomock.Any(), gomock.Not(gomock.Eq(endpointError)), gomock.Any()).Return(ethcommon.HexToHash("0x"+RandString(32)), nil).AnyTimes()
 	s.EXPECT().SendRawTransaction(gomock.Any(), gomock.Eq(endpointError), gomock.Any()).Return(fmt.Errorf("mock: failed to send a raw transaction")).AnyTimes()
 	s.EXPECT().SendRawTransaction(gomock.Any(), gomock.Not(gomock.Eq(endpointError)), gomock.Any()).Return(nil).AnyTimes()
-	sender := Sender(s, client)
+	sender := Sender(s, client, txSchedulerClient)
 
 	rounds := 15
 	outs := make(chan *engine.TxContext, rounds)

@@ -31,6 +31,7 @@ type Envelope struct {
 	ContextLabels map[string]string
 	Method
 	JobType
+	JobUUID        string // TODO: Remove this field and use "ID" as JobUUID, this is needed only as when envelope store exists
 	Tx             `mapstructure:",squash"`
 	Chain          `mapstructure:",squash"`
 	Contract       `mapstructure:",squash"`
@@ -822,12 +823,32 @@ func (e *Envelope) SetEnclaveKey(enclaveKey string) *Envelope {
 	return e
 }
 
+func (e *Envelope) SetJobUUID(jobUUID string) *Envelope {
+	e.JobUUID = jobUUID
+	return e
+}
+
+func (e *Envelope) GetJobUUID() string {
+	return e.JobUUID
+}
+
+func (e *Envelope) SetJobType(jobType JobType) *Envelope {
+	e.JobType = jobType
+	return e
+}
+
+func (e *Envelope) GetJobTypeString() string {
+	return e.JobType.String()
+}
+
 func (e *Envelope) TxRequest() *TxRequest {
 	req := &TxRequest{
 		Id:      e.ID,
 		Headers: e.Headers,
 		Chain:   e.GetChainName(),
 		Method:  e.Method,
+		JobType: e.JobType,
+		JobUUID: e.JobUUID,
 		Params: &Params{
 			From:            e.GetFromString(),
 			To:              e.GetToString(),
@@ -867,6 +888,9 @@ func (e *Envelope) fieldsToInternal() {
 	}
 	if e.GetEnclaveKey() != "" {
 		e.InternalLabels["enclaveKey"] = e.GetEnclaveKey()
+	}
+	if e.GetJobUUID() != "" {
+		e.InternalLabels["jobUUID"] = e.GetJobUUID()
 	}
 }
 

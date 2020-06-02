@@ -88,6 +88,4 @@ func TestStartJob_Execute(t *testing.T) {
 		err := usecase.Execute(ctx, job.UUID, tenantID)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(startJobComponent), err)
 	})
-
-	// @TODO Ensure tenantID is authorized to start the job
 }
