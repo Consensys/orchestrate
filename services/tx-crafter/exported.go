@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	txupdater "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/tx_updater"
+
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -73,10 +75,17 @@ func initHandlers(ctx context.Context) {
 		func() {
 			gaspricer.Init(ctx)
 		},
+
 		// Initialize Nonce Attributor
 		func() {
 			nonceattributor.Init(ctx)
 		},
+
+		// Initialize Updater
+		func() {
+			txupdater.Init()
+		},
+
 		// Initialize Producer
 		func() {
 			producer.Init(ctx)
@@ -121,6 +130,7 @@ func registerHandlers() {
 	engine.Register(sarama.Loader)
 	engine.Register(offset.Marker)
 	engine.Register(opentracing.GlobalHandler())
+	engine.Register(txupdater.GlobalHandler())
 	engine.Register(producer.GlobalHandler())
 	engine.Register(injector.GlobalHandler())
 	engine.Register(multitenancy.GlobalHandler())

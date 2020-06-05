@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	txupdater "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/tx_updater"
+
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -54,6 +56,8 @@ func initHandlers(ctx context.Context) {
 		func() { sender.Init(ctx) },
 		// Initialize nonce manager
 		func() { noncechecker.Init(ctx) },
+		// Initialize Tx Updater
+		func() { txupdater.Init() },
 		// Initialize producer
 		func() { producer.Init(ctx) },
 		// Initialize GetBigChainID injector
@@ -91,6 +95,7 @@ func registerHandlers() {
 
 	// Recovery Status Setter surrounds the producer
 	// c.f. docstring RecoveryStatusSetter handler
+	engine.Register(txupdater.GlobalHandler())
 	engine.Register(producer.GlobalHandler())
 	engine.Register(chaininjector.GlobalHandler())
 	engine.Register(rawdecoder.RawDecoder)
