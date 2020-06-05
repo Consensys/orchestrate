@@ -70,7 +70,7 @@ func (k *Kafka) GenerateContainerConfig(_ context.Context, configuration interfa
 			"KAFKA_BROKER_ID=1",
 			fmt.Sprintf("KAFKA_ZOOKEEPER_CONNECT=%v:%v", cfg.ZookeeperHostname, cfg.ZookeeperClientPort),
 			"KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1",
-			fmt.Sprintf("KAFKA_LISTENERS=INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092"),
+			"KAFKA_LISTENERS=INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092",
 			fmt.Sprintf("KAFKA_ADVERTISED_LISTENERS=INTERNAL://%v:29092,EXTERNAL://%v", cfg.KafkaInternalHostname, cfg.KafkaExternalHostname),
 			"KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT",
 			"KAFKA_INTER_BROKER_LISTENER_NAME=INTERNAL",

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.1.0 (2020-06-05)
+
+The stable release is here!
+
+### 🛠 Bug fixes
+* Fix a bug that may lead to skipping a block if an error occurred while processing the block
+
 
 ## v2.1.0-rc4 (2020-05-27)
 
