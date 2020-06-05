@@ -4,7 +4,6 @@ package storer
 
 import (
 	"fmt"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
@@ -84,11 +83,11 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 
 	t.Run("should update the status successfully to PENDING and then SENT", func(t *testing.T) {
 		txctx := engine.NewTxContext()
-		_ = txctx.Envelope.SetJobUUID("test").SetJobType(tx.JobTypeMap[tx.JobEthereumTransaction])
+		_ = txctx.Envelope.SetID("test").SetContextLabelsValue("jobUUID", "test")
 		txctx.Logger = log.NewEntry(log.New())
 
 		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), &types.UpdateJobRequest{
+			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
 				Transaction: &entities.ETHTransaction{
 					Hash:           txctx.Envelope.GetTxHashString(),
 					From:           txctx.Envelope.GetFromString(),
@@ -106,7 +105,7 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 			}).
 			Return(&types.JobResponse{}, nil)
 		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), &types.UpdateJobRequest{
+			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
 				Status: entities.JobStatusSent,
 			}).
 			Return(&types.JobResponse{}, nil)
@@ -119,11 +118,11 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 
 	t.Run("should abort if update fails on PENDING", func(t *testing.T) {
 		txctx := engine.NewTxContext()
-		_ = txctx.Envelope.SetJobUUID("test").SetJobType(tx.JobTypeMap[tx.JobEthereumTransaction])
+		_ = txctx.Envelope.SetID("test").SetContextLabelsValue("jobUUID", "test")
 		txctx.Logger = log.NewEntry(log.New())
 
 		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), gomock.AssignableToTypeOf(&types.UpdateJobRequest{})).
+			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), gomock.AssignableToTypeOf(&types.UpdateJobRequest{})).
 			Return(nil, fmt.Errorf("error"))
 
 		h := RawTxStore(registry, schedulerClient)
@@ -134,14 +133,14 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 
 	t.Run("should return if update fails on SENT", func(t *testing.T) {
 		txctx := engine.NewTxContext()
-		_ = txctx.Envelope.SetJobUUID("test").SetJobType(tx.JobTypeMap[tx.JobEthereumTransaction])
+		_ = txctx.Envelope.SetID("test").SetContextLabelsValue("jobUUID", "test")
 		txctx.Logger = log.NewEntry(log.New())
 
 		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), gomock.Any()).
+			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), gomock.Any()).
 			Return(&types.JobResponse{}, nil)
 		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), &types.UpdateJobRequest{
+			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
 				Status: entities.JobStatusSent,
 			}).
 			Return(nil, fmt.Errorf("error"))
@@ -152,15 +151,15 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 
 	t.Run("should set status to RECOVERING if txctx contains errors", func(t *testing.T) {
 		txctx := engine.NewTxContext()
-		_ = txctx.Envelope.SetJobUUID("test").SetJobType(tx.JobTypeMap[tx.JobEthereumTransaction])
+		_ = txctx.Envelope.SetID("test").SetContextLabelsValue("jobUUID", "test")
 		txctx.Logger = log.NewEntry(log.New())
 		_ = txctx.AbortWithError(fmt.Errorf("error"))
 
 		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), gomock.Any()).
+			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), gomock.Any()).
 			Return(&types.JobResponse{}, nil)
 		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), &types.UpdateJobRequest{
+			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
 				Status: entities.JobStatusRecovering,
 			}).
 			Return(&types.JobResponse{}, nil)
@@ -171,15 +170,15 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 
 	t.Run("should return if update fails on RECOVERING", func(t *testing.T) {
 		txctx := engine.NewTxContext()
-		_ = txctx.Envelope.SetJobUUID("test").SetJobType(tx.JobTypeMap[tx.JobEthereumTransaction])
+		_ = txctx.Envelope.SetID("test").SetContextLabelsValue("jobUUID", "test")
 		txctx.Logger = log.NewEntry(log.New())
 		_ = txctx.AbortWithError(fmt.Errorf("error"))
 
 		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), gomock.Any()).
+			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), gomock.Any()).
 			Return(&types.JobResponse{}, nil)
 		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), &types.UpdateJobRequest{
+			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
 				Status: entities.JobStatusRecovering,
 			}).
 			Return(nil, fmt.Errorf("error"))

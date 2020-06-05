@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
+
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/key"
@@ -31,6 +33,7 @@ func initDependencies(ctx context.Context) {
 		func() { registryoffset.Init(ctx) },
 		func() { rpc.Init(ctx) },
 		func() { storeclient.Init(ctx) },
+		func() { txscheduler.Init() },
 	)
 }
 
@@ -49,6 +52,7 @@ func Init(ctx context.Context) {
 			registryoffset.GlobalManager(),
 			rpc.GlobalClient(),
 			storeclient.GlobalEnvelopeStoreClient(),
+			txscheduler.GlobalClient(),
 		)
 	})
 }

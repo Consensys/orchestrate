@@ -3,7 +3,7 @@ package entities
 import (
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 type ETHTransaction struct {
@@ -23,6 +23,6 @@ type ETHTransaction struct {
 	UpdatedAt      time.Time `json:"updatedAt,omitempty"`
 }
 
-func (t *ETHTransaction) GetHash() common.Hash {
-	return common.HexToHash(t.Hash)
+func (t *ETHTransaction) GetHash() ethcommon.Hash {
+	return ethcommon.HexToHash(t.Hash)
 }

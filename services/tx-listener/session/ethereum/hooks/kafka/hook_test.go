@@ -5,9 +5,6 @@ package kafka
 import (
 	"context"
 	"fmt"
-	"math/big"
-	"testing"
-
 	"github.com/Shopify/sarama/mocks"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
@@ -21,7 +18,10 @@ import (
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
+	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
+	"math/big"
+	"testing"
 )
 
 type testKey string
@@ -37,32 +37,33 @@ var blockEnc = ethcommon.FromHex("0xf90600f90218a0e19f046955d37c5e23c2857cbeb602
 
 var block ethtypes.Block
 var _ = rlp.DecodeBytes(blockEnc, &block)
-var envelopes = []*tx.Envelope{tx.NewEnvelope().
-	SetID("e7308042-e07c-4405-9a1a-867268715f76").
-	MustSetTxHashString("0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b").
-	SetReceipt(&types.Receipt{
-		TxHash:          "0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b",
-		ContractAddress: "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C",
-		Logs: []*types.Log{
-			{
-				TxHash:  "0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b",
-				Address: "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C",
-				Topics: []string{
-					"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
-					"0x000000000000000000000000ba826fec90cefdf6706858e5fbafcb27a290fbe0",
-					"0x0000000000000000000000004aee792a88edda29932254099b9d1e06d537883f",
-				},
-				Data:        "0x000000000000000000000000000000000000000000000001a055690d9db80000",
-				BlockNumber: block.Number().Uint64(),
-				BlockHash:   block.Hash().Hex(),
-				TxIndex:     0,
-				Index:       0,
-				Removed:     false,
-			},
-		},
-	})}
 
-func Test_AfterNewBlock(t *testing.T) {
+func Test_AfterNewBlockEnvelope(t *testing.T) {
+	var envelopes = []*tx.Envelope{tx.NewEnvelope().
+		SetID("e7308042-e07c-4405-9a1a-867268715f76").
+		MustSetTxHashString("0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b").
+		SetReceipt(&types.Receipt{
+			TxHash:          "0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b",
+			ContractAddress: "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C",
+			Logs: []*types.Log{
+				{
+					TxHash:  "0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b",
+					Address: "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C",
+					Topics: []string{
+						"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+						"0x000000000000000000000000ba826fec90cefdf6706858e5fbafcb27a290fbe0",
+						"0x0000000000000000000000004aee792a88edda29932254099b9d1e06d537883f",
+					},
+					Data:        "0x000000000000000000000000000000000000000000000001a055690d9db80000",
+					BlockNumber: block.Number().Uint64(),
+					BlockHash:   block.Hash().Hex(),
+					TxIndex:     0,
+					Index:       0,
+					Removed:     false,
+				},
+			},
+		})}
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -74,6 +75,7 @@ func Test_AfterNewBlock(t *testing.T) {
 	registry := crc.NewMockContractRegistryClient(ctrl)
 	ec := mock.NewMockChainStateReader(ctrl)
 	store := clientmock.NewMockEnvelopeStoreClient(ctrl)
+	txScheduler := mock2.NewMockTransactionSchedulerClient(ctrl)
 
 	t.Run("should process after new block successfully", func(t *testing.T) {
 		producer := mocks.NewSyncProducer(t, nil)
@@ -84,7 +86,7 @@ func Test_AfterNewBlock(t *testing.T) {
 		ec.EXPECT().CodeAt(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(ethcommon.Hex2Bytes("0xabcd"), nil)
 		store.EXPECT().SetStatus(gomock.Any(), gomock.Any()).Return(&proto.StatusResponse{}, nil)
 
-		hk := NewHook(conf, registry, ec, producer, store)
+		hk := NewHook(conf, registry, ec, producer, store, txScheduler)
 
 		var block ethtypes.Block
 		err := rlp.DecodeBytes(blockEnc, &block)
@@ -94,8 +96,8 @@ func Test_AfterNewBlock(t *testing.T) {
 		_ = copy(envlps, envelopes)
 		producer.ExpectSendMessageAndSucceed()
 
-		err = hk.AfterNewBlock(context.Background(), c, &block, envlps)
-		assert.NoError(t, err, "AfterNewBlock should not error")
+		err = hk.AfterNewBlockEnvelope(context.Background(), c, &block, envlps)
+		assert.NoError(t, err, "AfterNewBlockEnvelope should not error")
 
 		expectedDecodedData := map[string]string{
 			"tokens": "30000000000000000000",
@@ -108,21 +110,23 @@ func Test_AfterNewBlock(t *testing.T) {
 
 	t.Run("should fail if it could not to produce message into kafka", func(t *testing.T) {
 		producer := mocks.NewSyncProducer(t, nil)
+		txScheduler := mock2.NewMockTransactionSchedulerClient(ctrl)
+
 		registry.EXPECT().SetAccountCodeHash(gomock.Any(), gomock.Any(), gomock.Any()).Return(&contractregistry.SetAccountCodeHashResponse{}, nil)
 		registry.EXPECT().GetEventsBySigHash(gomock.Any(), gomock.Any(), gomock.Any()).Return(&contractregistry.GetEventsBySigHashResponse{
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
 		ec.EXPECT().CodeAt(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(ethcommon.Hex2Bytes("0xabcd"), nil)
 
-		hk := NewHook(conf, registry, ec, producer, store)
+		hk := NewHook(conf, registry, ec, producer, store, txScheduler)
 
 		envlps := make([]*tx.Envelope, len(envelopes))
 		_ = copy(envlps, envelopes)
 		producer.ExpectSendMessageAndFail(fmt.Errorf("test-producer-error"))
 
-		err := hk.AfterNewBlock(context.Background(), c, &block, envlps)
-		assert.Error(t, err, "AfterNewBlock should error")
-		assert.Equal(t, "test-producer-error", err.Error(), "#3 AfterNewBlock error message should be correct")
+		err := hk.AfterNewBlockEnvelope(context.Background(), c, &block, envlps)
+		assert.Error(t, err, "AfterNewBlockEnvelope should error")
+		assert.Equal(t, "test-producer-error", err.Error(), "#3 AfterNewBlockEnvelope error message should be correct")
 	})
 
 	t.Run("should not fail if it could not get events from contract registry", func(t *testing.T) {
@@ -132,14 +136,14 @@ func Test_AfterNewBlock(t *testing.T) {
 		ec.EXPECT().CodeAt(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(ethcommon.Hex2Bytes("0xabcd"), nil)
 		store.EXPECT().SetStatus(gomock.Any(), gomock.Any()).Return(&proto.StatusResponse{}, nil)
 
-		hk := NewHook(conf, registry, ec, producer, store)
+		hk := NewHook(conf, registry, ec, producer, store, txScheduler)
 
 		envlps := make([]*tx.Envelope, len(envelopes))
 		_ = copy(envlps, envelopes)
 		producer.ExpectSendMessageAndSucceed()
 
-		err := hk.AfterNewBlock(context.Background(), c, &block, envlps)
-		assert.NoError(t, err, "AfterNewBlock should not error")
+		err := hk.AfterNewBlockEnvelope(context.Background(), c, &block, envlps)
+		assert.NoError(t, err, "AfterNewBlockEnvelope should not error")
 	})
 
 	t.Run("should not fail if get an error in 'CodeAt' in registerDeployedContract", func(t *testing.T) {
@@ -150,15 +154,15 @@ func Test_AfterNewBlock(t *testing.T) {
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
 
-		hk := NewHook(conf, registry, ec, producer, store)
+		hk := NewHook(conf, registry, ec, producer, store, txScheduler)
 
 		envlps := make([]*tx.Envelope, len(envelopes))
 		_ = copy(envlps, envelopes)
 		producer.ExpectSendMessageAndSucceed()
 
 		ctx := context.WithValue(context.Background(), testKey("codeAtError"), fmt.Errorf("error CodeAt"))
-		err := hk.AfterNewBlock(ctx, c, &block, envlps)
-		assert.NoError(t, err, "AfterNewBlock should not error")
+		err := hk.AfterNewBlockEnvelope(ctx, c, &block, envlps)
+		assert.NoError(t, err, "AfterNewBlockEnvelope should not error")
 	})
 
 	t.Run("should not fail if get an error in 'SetAccountCodeHash' in registerDeployedContract", func(t *testing.T) {
@@ -170,14 +174,14 @@ func Test_AfterNewBlock(t *testing.T) {
 		store.EXPECT().SetStatus(gomock.Any(), gomock.Any()).Return(&proto.StatusResponse{}, nil)
 		ec.EXPECT().CodeAt(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(ethcommon.Hex2Bytes("0xabcd"), nil)
 
-		hk := NewHook(conf, registry, ec, producer, store)
+		hk := NewHook(conf, registry, ec, producer, store, txScheduler)
 
 		envlps := make([]*tx.Envelope, len(envelopes))
 		_ = copy(envlps, envelopes)
 		producer.ExpectSendMessageAndSucceed()
 
-		err := hk.AfterNewBlock(context.Background(), c, &block, envlps)
-		assert.NoError(t, err, "AfterNewBlock should not error")
+		err := hk.AfterNewBlockEnvelope(context.Background(), c, &block, envlps)
+		assert.NoError(t, err, "AfterNewBlockEnvelope should not error")
 	})
 
 	t.Run("should not fail if get an error in 'SetStatus'", func(t *testing.T) {
@@ -189,14 +193,14 @@ func Test_AfterNewBlock(t *testing.T) {
 		store.EXPECT().SetStatus(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("SetStatus"))
 		ec.EXPECT().CodeAt(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(ethcommon.Hex2Bytes("0xabcd"), nil)
 
-		hk := NewHook(conf, registry, ec, producer, store)
+		hk := NewHook(conf, registry, ec, producer, store, txScheduler)
 
 		envlps := make([]*tx.Envelope, len(envelopes))
 		_ = copy(envlps, envelopes)
 		producer.ExpectSendMessageAndSucceed()
 
-		err := hk.AfterNewBlock(context.Background(), c, &block, envlps)
-		assert.NoError(t, err, "AfterNewBlock should not error")
+		err := hk.AfterNewBlockEnvelope(context.Background(), c, &block, envlps)
+		assert.NoError(t, err, "AfterNewBlockEnvelope should not error")
 	})
 }
 
@@ -213,13 +217,14 @@ func Test_DecodeReceipt(t *testing.T) {
 	ec := mock.NewMockChainStateReader(ctrl)
 	store := clientmock.NewMockEnvelopeStoreClient(ctrl)
 	producer := mocks.NewSyncProducer(t, nil)
+	txScheduler := mock2.NewMockTransactionSchedulerClient(ctrl)
 
 	t.Run("should decode receipt successfully", func(t *testing.T) {
 		registry.EXPECT().GetEventsBySigHash(gomock.Any(), gomock.Any(), gomock.Any()).Return(&contractregistry.GetEventsBySigHashResponse{
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
 
-		hk := NewHook(conf, registry, ec, producer, store)
+		hk := NewHook(conf, registry, ec, producer, store, txScheduler)
 
 		r := &types.Receipt{
 			TxHash:          "0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b",
@@ -259,7 +264,7 @@ func Test_DecodeReceipt(t *testing.T) {
 			Event: "not json event",
 		}, nil)
 
-		hk := NewHook(conf, registry, ec, producer, store)
+		hk := NewHook(conf, registry, ec, producer, store, txScheduler)
 
 		r := &types.Receipt{
 			TxHash:          "0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b",
@@ -295,7 +300,7 @@ func Test_DecodeReceipt(t *testing.T) {
 			},
 		}, nil)
 
-		hk := NewHook(conf, registry, ec, producer, store)
+		hk := NewHook(conf, registry, ec, producer, store, txScheduler)
 
 		r := &types.Receipt{
 			TxHash:          "0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b",
@@ -338,7 +343,7 @@ func Test_DecodeReceipt(t *testing.T) {
 			},
 		}, nil)
 
-		hk := NewHook(conf, registry, ec, producer, store)
+		hk := NewHook(conf, registry, ec, producer, store, txScheduler)
 
 		r := &types.Receipt{
 			TxHash:          "0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b",
@@ -374,7 +379,7 @@ func Test_DecodeReceipt(t *testing.T) {
 			},
 		}, nil)
 
-		hk := NewHook(conf, registry, ec, producer, store)
+		hk := NewHook(conf, registry, ec, producer, store, txScheduler)
 
 		r := &types.Receipt{
 			TxHash:          "0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b",
@@ -403,7 +408,7 @@ func Test_DecodeReceipt(t *testing.T) {
 	})
 
 	t.Run("should get an error when there are no topics", func(t *testing.T) {
-		hk := NewHook(conf, registry, ec, producer, store)
+		hk := NewHook(conf, registry, ec, producer, store, txScheduler)
 
 		r := &types.Receipt{
 			TxHash:          "0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b",

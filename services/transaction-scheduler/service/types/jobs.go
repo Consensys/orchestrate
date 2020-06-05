@@ -19,8 +19,10 @@ type UpdateJobRequest struct {
 	Status      string                   `json:"status,omitempty"`
 }
 
+// TODO: Needed ? Can be replaced by []entities.Job ?
 type JobResponse struct {
 	UUID        string                   `json:"uuid" validate:"required,uuid4"`
+	ChainUUID   string                   `json:"chainUUID" validate:"required,uuid4"`
 	Transaction *entities.ETHTransaction `json:"transaction" validate:"required"`
 	Labels      map[string]string        `json:"labels" validate:"required"`
 	Status      string                   `json:"status" validate:"required"`

@@ -9,6 +9,7 @@ import (
 	types "github.com/ethereum/go-ethereum/core/types"
 	gomock "github.com/golang/mock/gomock"
 	tx "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
+	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 	dynamic "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 	reflect "reflect"
 )
@@ -36,16 +37,30 @@ func (m *MockHook) EXPECT() *MockHookMockRecorder {
 	return m.recorder
 }
 
-// AfterNewBlock mocks base method.
-func (m *MockHook) AfterNewBlock(ctx context.Context, chain *dynamic.Chain, block *types.Block, envelopes []*tx.Envelope) error {
+// AfterNewBlockEnvelope mocks base method.
+func (m *MockHook) AfterNewBlockEnvelope(ctx context.Context, chain *dynamic.Chain, block *types.Block, envelopes []*tx.Envelope) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AfterNewBlock", ctx, chain, block, envelopes)
+	ret := m.ctrl.Call(m, "AfterNewBlockEnvelope", ctx, chain, block, envelopes)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AfterNewBlockEnvelope indicates an expected call of AfterNewBlockEnvelope.
+func (mr *MockHookMockRecorder) AfterNewBlockEnvelope(ctx, chain, block, envelopes interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AfterNewBlockEnvelope", reflect.TypeOf((*MockHook)(nil).AfterNewBlockEnvelope), ctx, chain, block, envelopes)
+}
+
+// AfterNewBlock mocks base method.
+func (m *MockHook) AfterNewBlock(ctx context.Context, chain *dynamic.Chain, block *types.Block, jobs []*entities.Job) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AfterNewBlock", ctx, chain, block, jobs)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // AfterNewBlock indicates an expected call of AfterNewBlock.
-func (mr *MockHookMockRecorder) AfterNewBlock(ctx, chain, block, envelopes interface{}) *gomock.Call {
+func (mr *MockHookMockRecorder) AfterNewBlock(ctx, chain, block, jobs interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AfterNewBlock", reflect.TypeOf((*MockHook)(nil).AfterNewBlock), ctx, chain, block, envelopes)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AfterNewBlock", reflect.TypeOf((*MockHook)(nil).AfterNewBlock), ctx, chain, block, jobs)
 }

@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
+
 	"github.com/spf13/viper"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/rpc"
@@ -27,6 +29,8 @@ func initComponent(ctx context.Context) {
 		func() { broker.InitSyncProducer(ctx) },
 		// Initialize envelope store client
 		func() { storeclient.Init(ctx) },
+		// Initialize transaction scheduler client
+		func() { txscheduler.Init() },
 	)
 }
 
@@ -41,6 +45,7 @@ func Init(ctx context.Context) {
 			rpc.GlobalClient(),
 			broker.GlobalSyncProducer(),
 			storeclient.GlobalEnvelopeStoreClient(),
+			txscheduler.GlobalClient(),
 		)
 	})
 }

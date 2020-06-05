@@ -60,7 +60,6 @@ func (m *TxEnvelope) Envelope() (*Envelope, error) {
 func (m *TxRequest) Envelope() (*Envelope, error) {
 	envelope := NewEnvelope().
 		SetID(m.GetId()).
-		SetJobUUID(m.GetJobUUID()).
 		SetHeaders(m.GetHeaders()).
 		SetContextLabels(m.GetContextLabels()).
 		SetMethod(m.GetMethod()).

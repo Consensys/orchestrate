@@ -46,7 +46,6 @@ func TestParsersJob_NewEnvelopeFromModel(t *testing.T) {
 	txRequest := txEnvelope.GetTxRequest()
 	assert.Equal(t, jobModel.Schedule.ChainUUID, txEnvelope.GetChainUUID())
 	assert.Equal(t, jobModel.UUID, txEnvelope.GetID())
-	assert.Equal(t, jobModel.UUID, txRequest.GetJobUUID())
 	assert.Equal(t, tx.JobTypeMap[jobModel.Type], txRequest.GetJobType())
 	assert.Equal(t, jobModel.Transaction.Sender, txRequest.Params.GetFrom())
 	assert.Equal(t, jobModel.Transaction.Recipient, txRequest.Params.GetTo())

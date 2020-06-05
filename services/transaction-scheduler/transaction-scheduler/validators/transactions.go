@@ -88,7 +88,7 @@ func (txValidator *transactionValidator) ValidateMethodSignature(method string, 
 			WithField("args", args).
 			Error(errMessage)
 
-		return nil, errors.InvalidArgError(errMessage)
+		return nil, errors.InvalidParameterError(errMessage)
 	}
 
 	return txData, nil

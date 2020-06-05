@@ -6,6 +6,11 @@ import (
 	"fmt"
 	"strings"
 
+	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/error"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
+	schedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
+
 	"github.com/Shopify/sarama"
 	"github.com/containous/traefik/v2/pkg/log"
 	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
@@ -29,28 +34,37 @@ import (
 type Hook struct {
 	conf *Config
 
-	registry svccontracts.ContractRegistryClient
-	ec       ethclient.ChainStateReader
-	producer sarama.SyncProducer
-	store    evlpstore.EnvelopeStoreClient
+	registry          svccontracts.ContractRegistryClient
+	ec                ethclient.ChainStateReader
+	producer          sarama.SyncProducer
+	store             evlpstore.EnvelopeStoreClient
+	txSchedulerClient client.TransactionSchedulerClient
 }
 
-func NewHook(conf *Config, registry svccontracts.ContractRegistryClient, ec ethclient.ChainStateReader, producer sarama.SyncProducer, store evlpstore.EnvelopeStoreClient) *Hook {
+func NewHook(
+	conf *Config,
+	registry svccontracts.ContractRegistryClient,
+	ec ethclient.ChainStateReader,
+	producer sarama.SyncProducer,
+	store evlpstore.EnvelopeStoreClient,
+	txSchedulerClient client.TransactionSchedulerClient,
+) *Hook {
 	return &Hook{
-		conf:     conf,
-		registry: registry,
-		ec:       ec,
-		producer: producer,
-		store:    store,
+		conf:              conf,
+		registry:          registry,
+		ec:                ec,
+		producer:          producer,
+		store:             store,
+		txSchedulerClient: txSchedulerClient,
 	}
 }
 
-func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *ethtypes.Block, envelopes []*tx.Envelope) error {
+// TODO: Remove
+func (hk *Hook) AfterNewBlockEnvelope(ctx context.Context, c *dynamic.Chain, block *ethtypes.Block, envelopes []*tx.Envelope) error {
 	blockLogCtx := log.With(ctx, log.Str("block.number", block.Number().String()))
-	var evlps []*tx.TxResponse
+	var txResponses []*tx.TxResponse
 
 	for _, e := range envelopes {
-
 		receiptLogCtx := log.With(blockLogCtx, log.Str("receipt.txhash", e.MustGetTxHashValue().String()))
 
 		// Register deployed contract
@@ -64,11 +78,11 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 			e.Errors = append(e.Errors, errors.FromError(err))
 		}
 
-		evlps = append(evlps, e.TxResponse())
+		txResponses = append(txResponses, e.TxResponse())
 	}
 
 	// Prepare messages to be produced
-	msgs, err := hk.prepareEnvelopeMsgs(evlps, hk.conf.OutTopic, c.UUID)
+	msgs, err := hk.prepareEnvelopeMsgs(txResponses, hk.conf.OutTopic, c.UUID)
 	if err != nil {
 		log.FromContext(blockLogCtx).WithError(err).Errorf("failed to prepare messages")
 		return err
@@ -82,24 +96,100 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 	}
 
 	// Update transactions to "MINED"
-	for _, e := range evlps {
-		if e.Id == "" {
+	for _, txResponse := range txResponses {
+		if txResponse.Id == "" {
 			continue
 		}
 
 		_, err := hk.store.SetStatus(
 			ctx,
 			&evlpstore.SetStatusRequest{
-				Id:     e.Id,
+				Id:     txResponse.Id,
 				Status: evlpstore.Status_MINED,
 			},
 		)
 		if err != nil {
-			log.FromContext(blockLogCtx).WithError(err).Warnf("failed to update status of %s to MINED", e.Id)
+			log.FromContext(blockLogCtx).WithError(err).Warnf("failed to update status of %s to MINED", txResponse.Id)
 		}
 	}
 
-	log.FromContext(blockLogCtx).Infof("block processed")
+	log.FromContext(blockLogCtx).Infof("block %v processed", block.NumberU64())
+
+	return nil
+}
+
+func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *ethtypes.Block, jobs []*entities.Job) error {
+	blockLogCtx := log.With(ctx, log.Str("block.number", block.Number().String()))
+	var txResponses []*tx.TxResponse
+
+	for _, job := range jobs {
+		receiptLogCtx := log.With(blockLogCtx, log.Str("receipt.txhash", job.Receipt.TxHash))
+
+		// Register deployed contract
+		err := hk.registerDeployedContract(receiptLogCtx, c, job.Receipt, block)
+		if err != nil {
+			log.FromContext(receiptLogCtx).WithError(err).Errorf("could not register deployed contract on registry")
+		}
+
+		txResponse := &tx.TxResponse{
+			Id:            job.UUID,
+			ContextLabels: job.Labels,
+			Transaction: &types.Transaction{
+				From:     job.Transaction.From,
+				Nonce:    job.Transaction.Nonce,
+				To:       job.Transaction.To,
+				Value:    job.Transaction.Value,
+				Gas:      job.Transaction.GasLimit,
+				GasPrice: job.Transaction.GasPrice,
+				Data:     job.Transaction.Data,
+				Raw:      job.Transaction.Raw,
+				TxHash:   job.Transaction.Hash,
+			},
+			Receipt: job.Receipt,
+			Chain:   job.ChainUUID,
+		}
+
+		err = hk.decodeReceipt(receiptLogCtx, c, txResponse.Receipt)
+		if err != nil {
+			txResponse.Errors = []*ierror.Error{errors.FromError(err)}
+		}
+
+		txResponses = append(txResponses, txResponse)
+	}
+
+	// Prepare messages to be produced
+	msgs, err := hk.prepareEnvelopeMsgs(txResponses, hk.conf.OutTopic, c.UUID)
+	if err != nil {
+		log.FromContext(blockLogCtx).WithError(err).Errorf("failed to prepare messages")
+		return err
+	}
+
+	// Produce messages in Apache Kafka
+	err = hk.produce(msgs)
+	if err != nil {
+		log.FromContext(blockLogCtx).WithError(err).Errorf("failed to produce message")
+		return err
+	}
+
+	// Update transactions to "MINED"
+	for _, txResponse := range txResponses {
+		if txResponse.Id == "" {
+			continue
+		}
+
+		_, err := hk.txSchedulerClient.UpdateJob(
+			ctx,
+			txResponse.GetId(),
+			&schedulertypes.UpdateJobRequest{
+				Status: entities.JobStatusMined,
+			},
+		)
+		if err != nil {
+			log.FromContext(blockLogCtx).WithError(err).Warnf("failed to update status of %s to MINED", txResponse.Id)
+		}
+	}
+
+	log.FromContext(blockLogCtx).Infof("block %v processed", block.NumberU64())
 
 	return nil
 }

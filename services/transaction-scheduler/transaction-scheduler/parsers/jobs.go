@@ -45,6 +45,7 @@ func NewJobEntityFromModels(jobModel *models.Job) *entities.Job {
 
 	if jobModel.Schedule != nil {
 		job.ScheduleUUID = jobModel.Schedule.UUID
+		job.ChainUUID = jobModel.Schedule.ChainUUID
 	}
 
 	if jobModel.Transaction != nil {
@@ -67,11 +68,14 @@ func UpdateJobModelFromEntities(jobModel *models.Job, job *entities.Job) {
 }
 
 func NewEnvelopeFromJobModel(job *models.Job, headers map[string]string) *tx.TxEnvelope {
+	contextLabels := job.Labels
+	if contextLabels != nil {
+		contextLabels["jobUUID"] = job.UUID
+	}
+
 	txEnvelope := &tx.TxEnvelope{
 		Msg: &tx.TxEnvelope_TxRequest{TxRequest: &tx.TxRequest{
 			Id:      job.UUID,
-			JobUUID: job.UUID,
-			JobType: tx.JobTypeMap[job.Type],
 			Headers: headers,
 			Params: &tx.Params{
 				From:           job.Transaction.Sender,
@@ -86,7 +90,8 @@ func NewEnvelopeFromJobModel(job *models.Job, headers map[string]string) *tx.TxE
 				PrivateFrom:    job.Transaction.PrivateFrom,
 				PrivacyGroupId: job.Transaction.PrivacyGroupID,
 			},
-			ContextLabels: job.Labels,
+			ContextLabels: contextLabels,
+			JobType:       tx.JobTypeMap[job.Type],
 		}},
 		InternalLabels: make(map[string]string),
 	}

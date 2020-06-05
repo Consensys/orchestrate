@@ -103,6 +103,6 @@ func (s *transactionsTestSuite) TestTransactionValidator_ValidateMethodSignature
 
 	s.T().Run("should fail with InvalidParameterError if ChainRegistryClient fails", func(t *testing.T) {
 		_, err := s.validator.ValidateMethodSignature("constructor(string,string)", []string{"val1"})
-		assert.True(t, errors.IsInvalidArgError(err))
+		assert.True(t, errors.IsInvalidParameterError(err))
 	})
 }

@@ -12,8 +12,9 @@ import (
 )
 
 func FormatJobResponse(job *entities.Job) *types.JobResponse {
-	jobResponse := &types.JobResponse{
-		UUID: job.UUID,
+	return &types.JobResponse{
+		UUID:      job.UUID,
+		ChainUUID: job.ChainUUID,
 		Transaction: &entities.ETHTransaction{
 			Hash:           job.Transaction.Hash,
 			From:           job.Transaction.From,
@@ -34,29 +35,23 @@ func FormatJobResponse(job *entities.Job) *types.JobResponse {
 		Status:    job.Status,
 		CreatedAt: job.CreatedAt,
 	}
-
-	return jobResponse
 }
 
 func FormatJobCreateRequest(request *types.CreateJobRequest) *entities.Job {
-	job := &entities.Job{
+	return &entities.Job{
 		Type:         request.Type,
 		Labels:       request.Labels,
 		ScheduleUUID: request.ScheduleUUID,
 		Transaction:  request.Transaction,
 	}
-
-	return job
 }
 
 func FormatJobUpdateRequest(request *types.UpdateJobRequest) *entities.Job {
-	job := &entities.Job{
+	return &entities.Job{
 		Labels:      request.Labels,
 		Transaction: request.Transaction,
 		Status:      request.Status,
 	}
-
-	return job
 }
 
 func FormatJobFilterRequest(req *http.Request) (*entities.JobFilters, error) {

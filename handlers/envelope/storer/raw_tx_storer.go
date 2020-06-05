@@ -12,7 +12,7 @@ import (
 func RawTxStore(store svc.EnvelopeStoreClient, txSchedulerClient client.TransactionSchedulerClient) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		// TODO: Remove if statement when envelope store is removed
-		if txctx.Envelope.GetJobUUID() != "" {
+		if txctx.Envelope.ContextLabels["jobUUID"] != "" {
 			updateTxInScheduler(txctx, txSchedulerClient)
 		} else {
 			updateTxInStore(txctx, store)
@@ -25,7 +25,7 @@ func updateTxInScheduler(txctx *engine.TxContext, txSchedulerClient client.Trans
 
 	_, err := txSchedulerClient.UpdateJob(
 		txctx.Context(),
-		txctx.Envelope.GetJobUUID(),
+		txctx.Envelope.GetID(),
 		&types.UpdateJobRequest{
 			Transaction: &entities.ETHTransaction{
 				Hash:           txctx.Envelope.GetTxHashString(),
@@ -56,7 +56,7 @@ func updateTxInScheduler(txctx *engine.TxContext, txSchedulerClient client.Trans
 	if len(txctx.Envelope.GetErrors()) != 0 {
 		_, storeErr := txSchedulerClient.UpdateJob(
 			txctx.Context(),
-			txctx.Envelope.GetJobUUID(),
+			txctx.Envelope.GetID(),
 			&types.UpdateJobRequest{
 				Status: entities.JobStatusRecovering,
 			},
@@ -71,7 +71,7 @@ func updateTxInScheduler(txctx *engine.TxContext, txSchedulerClient client.Trans
 	// Transaction has been properly sent so we set status to `sent`
 	_, err = txSchedulerClient.UpdateJob(
 		txctx.Context(),
-		txctx.Envelope.GetJobUUID(),
+		txctx.Envelope.GetID(),
 		&types.UpdateJobRequest{
 			Status: entities.JobStatusSent,
 		},

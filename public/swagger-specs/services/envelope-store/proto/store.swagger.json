@@ -535,10 +535,6 @@
         "jobType": {
           "$ref": "#/definitions/txJobType",
           "title": "Type of the job"
-        },
-        "jobUUID": {
-          "type": "string",
-          "title": "TODO: Remove this field when envelope store is removed\nID of the Job"
         }
       }
     },

@@ -24,7 +24,7 @@ import (
 func TxAlreadySent(ec ethclient.ChainLedgerReader, s svc.EnvelopeStoreClient, txSchedulerClient client.TransactionSchedulerClient) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		// TODO: Remove this if when envelope store is removed
-		if txctx.Envelope.GetJobUUID() != "" {
+		if txctx.Envelope.ContextLabels["jobUUID"] != "" {
 			checkTxInScheduler(txctx, ec, txSchedulerClient)
 		} else {
 			checkTxInStore(txctx, ec, s)
@@ -36,7 +36,7 @@ func checkTxInScheduler(txctx *engine.TxContext, ec ethclient.ChainLedgerReader,
 	txctx.Logger.Tracef("from TxAlreadySent => TenantID value: %s", multitenancy.TenantIDFromContext(txctx.Context()))
 
 	// Load possibly already sent envelope
-	job, err := txSchedulerClient.GetJob(txctx.Context(), txctx.Envelope.GetJobUUID())
+	job, err := txSchedulerClient.GetJob(txctx.Context(), txctx.Envelope.GetID())
 	if err != nil && !errors.IsNotFoundError(err) {
 		// Connection to tx scheduler is broken
 		e := txctx.AbortWithError(err).ExtendComponent(component)
