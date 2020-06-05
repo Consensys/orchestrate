@@ -3,35 +3,72 @@ package integrationtests
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"regexp"
+	"strconv"
 	"time"
 
-	postgresDocker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/container/postgres"
-
 	"github.com/containous/traefik/v2/pkg/log"
+	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/config"
+	postgresDocker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/container/postgres"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc"
+	httputils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	integrationtest "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/integration-test"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/postgres/migrations"
+	"k8s.io/apimachinery/pkg/util/rand"
 )
 
 const postgresContainerID = "postgres-contract-registry"
+
+var envPGHostPort string
+var envHTTPPort string
+var envGRPCPort string
+var envMetricsPort string
 
 type IntegrationEnvironment struct {
 	client      *docker.Client
 	pgmngr      postgres.Manager
 	envContract *abi.Contract
+	logger      log.Logger
+	baseHTTP    string
+	baseGRPC    string
 }
 
-func NewIntegrationEnvironment() *IntegrationEnvironment {
+func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, error) {
+	logger := log.FromContext(ctx)
+	envPGHostPort = strconv.Itoa(rand.IntnRange(10000, 15235))
+	envHTTPPort = strconv.Itoa(rand.IntnRange(20000, 28080))
+	envGRPCPort = strconv.Itoa(rand.IntnRange(30000, 38080))
+	envMetricsPort = strconv.Itoa(rand.IntnRange(40000, 48082))
+
+	// Initialize environment flags
+	flgs := pflag.NewFlagSet("transaction-scheduler-integration-test", pflag.ContinueOnError)
+	postgres.DBPort(flgs)
+	httputils.MetricFlags(flgs)
+	httputils.Flags(flgs)
+	grpc.Flags(flgs)
+	args := []string{
+		"--metrics-port=" + envMetricsPort,
+		"--rest-port=" + envHTTPPort,
+		"--grpc-port=" + envGRPCPort,
+		"--db-port=" + envPGHostPort,
+	}
+
+	err := flgs.Parse(args)
+	if err != nil {
+		logger.WithError(err).Error("cannot parse environment flags")
+		return nil, err
+	}
+
 	composition := &config.Composition{
 		Containers: map[string]*config.Container{
-			postgresContainerID: {Postgres: (&postgresDocker.Config{}).SetDefault()},
+			postgresContainerID: {Postgres: postgresDocker.NewDefault().SetHostPort(envPGHostPort)},
 		},
 	}
 
@@ -42,64 +79,77 @@ func NewIntegrationEnvironment() *IntegrationEnvironment {
 
 	client, err := docker.NewClient(composition)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	return &IntegrationEnvironment{
 		client:      client,
 		pgmngr:      postgres.NewManager(),
 		envContract: envContract,
-	}
+		logger:      logger,
+		baseHTTP:    "http://localhost:" + envHTTPPort,
+		baseGRPC:    "localhost:" + envGRPCPort,
+	}, nil
 }
 
-func (env *IntegrationEnvironment) Start() {
+func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 	// Start postgres database
-	err := env.client.Up(context.Background(), postgresContainerID, "")
+	err := env.client.Up(ctx, postgresContainerID, "")
 	if err != nil {
-		log.WithoutContext().WithError(err).Fatalf("could not up postgres")
+		env.logger.WithError(err).Error("could not up postgres")
+		return err
 	}
-	// Wait 10 seconds for postgres database to be up
-	time.Sleep(10 * time.Second)
+
+	err = env.client.WaitTillIsReady(ctx, postgresContainerID, 10*time.Second)
+	if err != nil {
+		env.logger.WithError(err).Error("could not start postgres")
+		return err
+	}
 
 	// Migrate database
-	err = env.migrate()
+	err = env.migrate(ctx)
 	if err != nil {
-		log.WithoutContext().WithError(err).Fatalf("could not migrate postgres")
+		env.logger.WithError(err).Error("could not migrate postgres")
+		return err
 	}
 
 	// Start contract registry
-	err = contractregistry.Start(context.Background())
+	err = contractregistry.Start(ctx)
 	if err != nil {
-		// TODO: we should probably not panic here
-		log.WithoutContext().WithError(err).Fatalf("could not start contract-registry")
+		env.logger.WithError(err).Error("could not start contract-registry")
+		return err
 	}
 
-	env.waitForService()
-	log.WithoutContext().Infof("contract-registry ready")
+	integrationtest.WaitForServiceReady(ctx,
+		fmt.Sprintf("http://localhost:%s/ready", envMetricsPort),
+		"contract-registry",
+		10*time.Second)
+
+	env.logger.Infof("contract-registry ready")
+
+	return nil
 }
 
-func (env *IntegrationEnvironment) Teardown() {
-	log.WithoutContext().Infof("tearing test suite down")
-	err := contractregistry.Stop(context.Background())
+func (env *IntegrationEnvironment) Teardown(ctx context.Context) {
+	env.logger.Infof("tearing test suite down")
+	err := contractregistry.Stop(ctx)
 	if err != nil {
-		// TODO: we should probably not panic here
-		log.WithoutContext().WithError(err).Errorf("could not stop contract-registry")
+		env.logger.Errorf("could not stop contract-registry")
 	}
 
-	err = env.client.Down(context.Background(), postgresContainerID)
+	err = env.client.Down(ctx, postgresContainerID)
 	if err != nil {
-		// TODO: we should probably not panic here
-		log.WithoutContext().WithError(err).Errorf("could not down postgres")
+		env.logger.WithError(err).Errorf("could not down postgres")
 	}
 }
 
-func (env *IntegrationEnvironment) migrate() error {
+func (env *IntegrationEnvironment) migrate(ctx context.Context) error {
 	opts, err := postgres.NewConfig(viper.GetViper()).PGOptions()
 	if err != nil {
 		return err
 	}
 
-	db := env.pgmngr.Connect(context.Background(), opts)
+	db := env.pgmngr.Connect(ctx, opts)
 
 	_, _, err = migrations.Run(db, "init")
 	if err != nil {
@@ -117,15 +167,4 @@ func (env *IntegrationEnvironment) migrate() error {
 	}
 
 	return nil
-}
-
-func (env *IntegrationEnvironment) waitForService() {
-	for {
-		resp, _ := http.Get("http://localhost:8082/ready")
-		if resp != nil && resp.StatusCode == 200 {
-			return
-		}
-
-		time.Sleep(2 * time.Second)
-	}
 }

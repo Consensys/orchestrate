@@ -3,6 +3,7 @@ package zookeeper
 import (
 	"context"
 	"fmt"
+	"time"
 
 	dockercontainer "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
@@ -10,6 +11,8 @@ import (
 )
 
 const DefaultZookeeperImage = "confluentinc/cp-zookeeper:5.3.0"
+const defaultHostPort = ""
+const DefaultZookeeperClientPort = "32181"
 
 type Zookeeper struct{}
 type Config struct {
@@ -17,16 +20,16 @@ type Config struct {
 	Port  string
 }
 
-func (p *Config) SetDefault() *Config {
-	if p.Image == "" {
-		p.Image = DefaultZookeeperImage
+func NewDefault() *Config {
+	return &Config{
+		Image: DefaultZookeeperImage,
+		Port:  defaultHostPort,
 	}
+}
 
-	if p.Port == "" {
-		p.Port = "2181"
-	}
-
-	return p
+func (c *Config) SetHostPort(port string) *Config {
+	c.Port = port
+	return c
 }
 
 func (k *Zookeeper) GenerateContainerConfig(ctx context.Context, configuration interface{}) (*dockercontainer.Config, *dockercontainer.HostConfig, *network.NetworkingConfig, error) {
@@ -38,7 +41,7 @@ func (k *Zookeeper) GenerateContainerConfig(ctx context.Context, configuration i
 	containerCfg := &dockercontainer.Config{
 		Image: cfg.Image,
 		Env: []string{
-			"ZOOKEEPER_CLIENT_PORT=32181",
+			"ZOOKEEPER_CLIENT_PORT=" + DefaultZookeeperClientPort,
 			"ZOOKEEPER_TICK_TIME=2000",
 			"ALLOW_ANONYMOUS_LOGIN=yes",
 		},
@@ -47,11 +50,20 @@ func (k *Zookeeper) GenerateContainerConfig(ctx context.Context, configuration i
 		},
 	}
 
-	hostConfig := &dockercontainer.HostConfig{
-		PortBindings: nat.PortMap{
+	hostConfig := &dockercontainer.HostConfig{}
+	if cfg.Port != "" {
+		hostConfig.PortBindings = nat.PortMap{
 			"2181/tcp": []nat.PortBinding{{HostIP: "0.0.0.0", HostPort: cfg.Port}},
-		},
+		}
 	}
 
 	return containerCfg, hostConfig, nil, nil
+}
+
+func (k *Zookeeper) WaitForService(configuration interface{}, timeout time.Duration) error {
+	cfg, ok := configuration.(*Config)
+	if !ok {
+		return fmt.Errorf("invalid configuration type (expected %T but got %T)", cfg, configuration)
+	}
+	return nil
 }

@@ -82,7 +82,7 @@ func (s *ExportedTestSuite) TestInitClient() {
 	viper.Set(KafkaURLViperKey, []string{
 		seedBroker.Addr(),
 	})
-	InitClient(context.Background())
+	_ = InitClient(context.Background())
 	assert.NotNil(s.T(), GlobalClient(), "Client should have been set")
 }
 
@@ -98,7 +98,8 @@ func (s *ExportedTestSuite) TestInitSyncProducer() {
 	viper.Set(KafkaURLViperKey, []string{
 		seedBroker.Addr(),
 	})
-	InitClient(context.Background())
+
+	_ = InitClient(context.Background())
 
 	InitSyncProducer(context.Background())
 

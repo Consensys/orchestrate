@@ -14,7 +14,7 @@ import (
 func TestTransactionSchedulerTarget(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	Flags(flgs)
-	expected := txSchedulerURLDefault
+	expected := TxSchedulerURLDefault
 	assert.Equal(t, expected, viper.GetString(TxSchedulerURLViperKey), "Default")
 
 	_ = os.Setenv(txSchedulerURLEnv, "env-transaction-scheduler")
@@ -34,5 +34,5 @@ func TestTransactionSchedulerTarget(t *testing.T) {
 func TestFlags(t *testing.T) {
 	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	Flags(f)
-	assert.Equal(t, txSchedulerURLDefault, viper.GetString(TxSchedulerURLViperKey), "Default")
+	assert.Equal(t, TxSchedulerURLDefault, viper.GetString(TxSchedulerURLViperKey), "Default")
 }

@@ -3,15 +3,22 @@ package kafka
 import (
 	"context"
 	"fmt"
+	"time"
 
 	dockercontainer "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/go-connections/nat"
+	log "github.com/sirupsen/logrus"
+	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/container/zookeeper"
 )
 
 const DefaultKafkaImage = "confluentinc/cp-kafka:5.3.0"
+const DefaultExternalHostname = "localhost:9092"
 
-type Kafka struct{}
+type Kafka struct {
+}
+
 type Config struct {
 	Image                 string
 	Port                  string
@@ -21,32 +28,34 @@ type Config struct {
 	KafkaExternalHostname string
 }
 
-func (p *Config) SetDefault() *Config {
-	if p.Image == "" {
-		p.Image = DefaultKafkaImage
+func NewDefault() *Config {
+	return &Config{
+		Image:                 DefaultKafkaImage,
+		ZookeeperClientPort:   zookeeper.DefaultZookeeperClientPort,
+		ZookeeperHostname:     "zookeeper",
+		KafkaInternalHostname: "kafka",
+		KafkaExternalHostname: DefaultExternalHostname,
 	}
+}
 
-	if p.Port == "" {
-		p.Port = "9092"
-	}
+func (cfg *Config) SetHostPort(port string) *Config {
+	cfg.Port = port
+	return cfg
+}
 
-	if p.ZookeeperClientPort == "" {
-		p.ZookeeperClientPort = "32181"
-	}
+func (cfg *Config) SetZookeeperHostname(host string) *Config {
+	cfg.ZookeeperHostname = host
+	return cfg
+}
 
-	if p.ZookeeperHostname == "" {
-		p.ZookeeperHostname = "zookeeper"
-	}
+func (cfg *Config) SetKafkaInternalHostname(name string) *Config {
+	cfg.KafkaInternalHostname = name
+	return cfg
+}
 
-	if p.KafkaInternalHostname == "" {
-		p.KafkaInternalHostname = "kafka"
-	}
-
-	if p.KafkaExternalHostname == "" {
-		p.KafkaExternalHostname = "localhost"
-	}
-
-	return p
+func (cfg *Config) SetKafkaExternalHostname(name string) *Config {
+	cfg.KafkaExternalHostname = name
+	return cfg
 }
 
 func (k *Kafka) GenerateContainerConfig(_ context.Context, configuration interface{}) (*dockercontainer.Config, *dockercontainer.HostConfig, *network.NetworkingConfig, error) {
@@ -61,20 +70,67 @@ func (k *Kafka) GenerateContainerConfig(_ context.Context, configuration interfa
 			"KAFKA_BROKER_ID=1",
 			fmt.Sprintf("KAFKA_ZOOKEEPER_CONNECT=%v:%v", cfg.ZookeeperHostname, cfg.ZookeeperClientPort),
 			"KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1",
-			fmt.Sprintf("KAFKA_ADVERTISED_LISTENERS=INTERNAL://%v:29092,EXTERNAL://%v:%v", cfg.KafkaInternalHostname, cfg.KafkaExternalHostname, cfg.Port),
+			fmt.Sprintf("KAFKA_LISTENERS=INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092"),
+			fmt.Sprintf("KAFKA_ADVERTISED_LISTENERS=INTERNAL://%v:29092,EXTERNAL://%v", cfg.KafkaInternalHostname, cfg.KafkaExternalHostname),
 			"KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT",
 			"KAFKA_INTER_BROKER_LISTENER_NAME=INTERNAL",
 		},
 		ExposedPorts: nat.PortSet{
-			"9092/tcp": struct{}{},
+			"9092/tcp":  struct{}{},
+			"29092/tcp": struct{}{},
 		},
 	}
 
-	hostConfig := &dockercontainer.HostConfig{
-		PortBindings: nat.PortMap{
+	hostConfig := &dockercontainer.HostConfig{}
+	if cfg.Port != "" {
+		hostConfig.PortBindings = nat.PortMap{
 			"9092/tcp": []nat.PortBinding{{HostIP: "0.0.0.0", HostPort: cfg.Port}},
-		},
+		}
 	}
 
 	return containerCfg, hostConfig, nil, nil
+}
+
+func (k *Kafka) WaitForService(configuration interface{}, timeout time.Duration) error {
+	cfg, ok := configuration.(*Config)
+	if !ok {
+		return fmt.Errorf("invalid configuration type (expected %T but got %T)", cfg, configuration)
+	}
+
+	saramaCfg, _ := pkgsarama.NewSaramaConfig()
+	addrs := []string{cfg.KafkaExternalHostname}
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	retryT := time.NewTicker(time.Second)
+	defer retryT.Stop()
+
+	var cerr error
+waitForServiceLoop:
+	for {
+		select {
+		case <-ctx.Done():
+			cerr = ctx.Err()
+			break waitForServiceLoop
+		case <-retryT.C:
+			client, err := pkgsarama.NewClient(addrs, saramaCfg)
+			switch {
+			case err != nil:
+				log.WithContext(ctx).
+					WithError(err).
+					Warnf("waiting for kafka service to start: %s", cfg.KafkaExternalHostname)
+			case len(client.Brokers()) < 1:
+				err := fmt.Errorf("not available brokers")
+				log.WithContext(ctx).
+					WithError(err).
+					Warnf("waiting for kafka service to start: %s", cfg.KafkaExternalHostname)
+			default:
+				log.WithContext(ctx).Infof("kafka container service is ready")
+				break waitForServiceLoop
+			}
+		}
+	}
+
+	return cerr
 }

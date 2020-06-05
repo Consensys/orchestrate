@@ -10,7 +10,7 @@ import (
 func init() {
 	// Kafka general parameters
 	viper.SetDefault(KafkaURLViperKey, kafkaURLDefault)
-	_ = viper.BindEnv(KafkaURLViperKey, kafkaURLEnv)
+	_ = viper.BindEnv(KafkaURLViperKey, KafkaURLEnv)
 	viper.SetDefault(KafkaGroupViperKey, kafkaGroupDefault)
 	_ = viper.BindEnv(KafkaGroupViperKey, kafkaGroupEnv)
 
@@ -92,13 +92,13 @@ var (
 	kafkaURLFlag     = "kafka-url"
 	KafkaURLViperKey = "kafka.url"
 	kafkaURLDefault  = []string{"localhost:9092"}
-	kafkaURLEnv      = "KAFKA_URL"
+	KafkaURLEnv      = "KAFKA_URL"
 )
 
 // KafkaURL register flag for Kafka server
 func KafkaURL(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`URL (addresses) of Kafka server(s) to connect to.
-Environment variable: %q`, kafkaURLEnv)
+Environment variable: %q`, KafkaURLEnv)
 	f.StringSlice(kafkaURLFlag, kafkaURLDefault, desc)
 	_ = viper.BindPFlag(KafkaURLViperKey, f.Lookup(kafkaURLFlag))
 }

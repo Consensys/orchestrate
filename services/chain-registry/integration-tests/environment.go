@@ -2,32 +2,63 @@ package integrationtests
 
 import (
 	"context"
-	"net/http"
+	"fmt"
+	"strconv"
 	"time"
 
-	postgresDocker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/container/postgres"
-
 	"github.com/containous/traefik/v2/pkg/log"
+	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/config"
+	postgresDocker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/container/postgres"
+	httputils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	integrationtest "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/integration-test"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/postgres/migrations"
+	"k8s.io/apimachinery/pkg/util/rand"
 )
 
 const postgresContainerID = "postgres-chain-registry"
 
+var envPGHostPort string
+var envHTTPPort string
+var envMetricsPort string
+
 type IntegrationEnvironment struct {
-	client *docker.Client
-	pgmngr postgres.Manager
-	ctx    context.Context
+	client  *docker.Client
+	pgmngr  postgres.Manager
+	logger  log.Logger
+	baseURL string
 }
 
-func NewIntegrationEnvironment(ctx context.Context) *IntegrationEnvironment {
+func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, error) {
+	logger := log.FromContext(ctx)
+	envPGHostPort = strconv.Itoa(rand.IntnRange(10000, 15235))
+	envHTTPPort = strconv.Itoa(rand.IntnRange(20000, 28080))
+	envMetricsPort = strconv.Itoa(rand.IntnRange(30000, 38082))
+
+	// Initialize environment flags
+	flgs := pflag.NewFlagSet("transaction-scheduler-integration-test", pflag.ContinueOnError)
+	postgres.DBPort(flgs)
+	httputils.MetricFlags(flgs)
+	httputils.Flags(flgs)
+	args := []string{
+		"--metrics-port=" + envMetricsPort,
+		"--rest-port=" + envHTTPPort,
+		"--db-port=" + envPGHostPort,
+	}
+
+	err := flgs.Parse(args)
+	if err != nil {
+		logger.WithError(err).Error("cannot parse environment flags")
+		return nil, err
+	}
+
 	composition := &config.Composition{
 		Containers: map[string]*config.Container{
-			postgresContainerID: {Postgres: (&postgresDocker.Config{}).SetDefault()},
+			postgresContainerID: {Postgres: postgresDocker.NewDefault().SetHostPort(envPGHostPort)},
 		},
 	}
 
@@ -42,65 +73,73 @@ func NewIntegrationEnvironment(ctx context.Context) *IntegrationEnvironment {
 	viper.SetDefault(chainregistry.InitViperKey, initChains)
 
 	return &IntegrationEnvironment{
-		client: dockerClient,
-		pgmngr: postgres.NewManager(),
-		ctx:    ctx,
-	}
+		client:  dockerClient,
+		pgmngr:  postgres.NewManager(),
+		logger:  logger,
+		baseURL: "http://localhost:" + envHTTPPort,
+	}, nil
 }
 
-func (env *IntegrationEnvironment) Start() error {
+func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 	// Start postgres database
-	err := env.client.Up(context.Background(), postgresContainerID, "")
+	err := env.client.Up(ctx, postgresContainerID, "")
 	if err != nil {
-		log.WithoutContext().WithError(err).Fatalf("could not up postgres")
+		env.logger.WithError(err).Error("could not up postgres")
 		return err
 	}
-	// Wait 10 seconds for postgres database to be up
-	time.Sleep(10 * time.Second)
+	err = env.client.WaitTillIsReady(ctx, postgresContainerID, 10*time.Second)
+	if err != nil {
+		env.logger.WithError(err).Error("could not start postgres")
+		return err
+	}
 
 	// Migrate database
-	err = env.migrate()
+	err = env.migrate(ctx)
 	if err != nil {
-		log.WithoutContext().WithError(err).Fatalf("could not migrate postgres")
+		env.logger.WithError(err).Error("could not migrate postgres")
 		return err
 	}
 
 	// Start chain registry API
-	err = chainregistry.Start(env.ctx)
+	err = chainregistry.Start(ctx)
 	if err != nil {
-		log.WithoutContext().WithError(err).Fatalf("could not start chain-registry")
+		env.logger.WithError(err).Error("could not start chain-registry")
 		return err
 	}
 
-	env.waitForService()
+	integrationtest.WaitForServiceReady(ctx,
+		fmt.Sprintf("http://localhost:%s/ready", envMetricsPort),
+		"chain-registry",
+		10*time.Second)
+
 	log.WithoutContext().Infof("chain-registry ready")
 	return nil
 }
 
-func (env *IntegrationEnvironment) Teardown() {
+func (env *IntegrationEnvironment) Teardown(ctx context.Context) {
 	log.WithoutContext().Infof("tearing test suite down")
 
-	err := env.client.Down(env.ctx, postgresContainerID)
+	err := env.client.Down(ctx, postgresContainerID)
 	if err != nil {
-		log.WithoutContext().WithError(err).Errorf("could not down postgres")
+		env.logger.WithError(err).Errorf("could not down postgres")
 		return
 	}
 
-	err = chainregistry.Stop(env.ctx)
+	err = chainregistry.Stop(ctx)
 	if err != nil {
-		log.WithoutContext().WithError(err).Errorf("could not stop chain-registry")
+		env.logger.WithError(err).Errorf("could not stop chain-registry")
 		return
 	}
 }
 
-func (env *IntegrationEnvironment) migrate() error {
+func (env *IntegrationEnvironment) migrate(ctx context.Context) error {
 	// Set database connection
 	opts, err := postgres.NewConfig(viper.GetViper()).PGOptions()
 	if err != nil {
 		return err
 	}
 
-	db := env.pgmngr.Connect(env.ctx, opts)
+	db := env.pgmngr.Connect(ctx, opts)
 
 	_, _, err = migrations.Run(db, "init")
 	if err != nil {
@@ -118,15 +157,4 @@ func (env *IntegrationEnvironment) migrate() error {
 	}
 
 	return nil
-}
-
-func (env *IntegrationEnvironment) waitForService() {
-	for {
-		resp, _ := http.Get("http://localhost:8082/ready")
-		if resp != nil && resp.StatusCode == 200 {
-			return
-		}
-
-		time.Sleep(2 * time.Second)
-	}
 }

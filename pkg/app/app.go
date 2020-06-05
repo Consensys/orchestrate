@@ -48,6 +48,8 @@ type App struct {
 	cancel func()
 
 	wg *sync.WaitGroup
+
+	isReady bool
 }
 
 func New(cfg *Config, opts ...Option) (*App, error) {
@@ -185,7 +187,7 @@ func (app *App) Start(ctx context.Context) error {
 
 	traefiklog.FromContext(ctx).Infof("starting app...")
 
-	cancelableCtx, cancel := context.WithCancel(context.Background())
+	cancelableCtx, cancel := context.WithCancel(ctx)
 	app.cancel = cancel
 
 	app.wg.Add(3)
@@ -210,6 +212,7 @@ func (app *App) Start(ctx context.Context) error {
 		app.wg.Done()
 	}()
 
+	app.isReady = true
 	return nil
 }
 
@@ -243,4 +246,8 @@ func (app *App) Stop(ctx context.Context) error {
 
 	traefiklog.FromContext(ctx).Infof("gracefully shutted down application")
 	return nil // completed normally
+}
+
+func (app *App) IsReady() bool {
+	return app.isReady
 }

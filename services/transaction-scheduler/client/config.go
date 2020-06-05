@@ -8,23 +8,23 @@ import (
 )
 
 func init() {
-	viper.SetDefault(TxSchedulerURLViperKey, txSchedulerURLDefault)
+	viper.SetDefault(TxSchedulerURLViperKey, TxSchedulerURLDefault)
 	_ = viper.BindEnv(TxSchedulerURLViperKey, txSchedulerURLEnv)
-	viper.SetDefault(TxSchedulerMetricsURLViperKey, txSchedulerMetricsURLDefault)
+	viper.SetDefault(TxSchedulerMetricsURLViperKey, TxSchedulerMetricsURLDefault)
 	_ = viper.BindEnv(TxSchedulerMetricsURLViperKey, txSchedulerMetricsURLEnv)
 }
 
 const (
 	txSchedulerURLFlag     = "transaction-scheduler-url"
 	TxSchedulerURLViperKey = "transaction.scheduler.url"
-	txSchedulerURLDefault  = "localhost:8081"
+	TxSchedulerURLDefault  = "localhost:8081"
 	txSchedulerURLEnv      = "TRANSACTION_SCHEDULER_URL"
 )
 
 const (
 	txSchedulerMetricsURLFlag     = "transaction.scheduler-metrics-url"
 	TxSchedulerMetricsURLViperKey = "transaction.scheduler.metrics.url"
-	txSchedulerMetricsURLDefault  = "localhost:8082"
+	TxSchedulerMetricsURLDefault  = "localhost:8082"
 	txSchedulerMetricsURLEnv      = "TRANSACTION_SCHEDULER_METRICS_URL"
 )
 
@@ -32,7 +32,7 @@ const (
 func URL(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`URL of the Transaction Scheduler HTTP endpoint. 
 Environment variable: %q`, txSchedulerURLEnv)
-	f.String(txSchedulerURLFlag, txSchedulerURLDefault, desc)
+	f.String(txSchedulerURLFlag, TxSchedulerURLDefault, desc)
 	_ = viper.BindPFlag(TxSchedulerURLViperKey, f.Lookup(txSchedulerURLFlag))
 }
 
@@ -40,7 +40,7 @@ Environment variable: %q`, txSchedulerURLEnv)
 func MetricsURL(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`URL of the Transaction Scheduler Metrics endpoint.
 Environment variable: %q`, txSchedulerMetricsURLEnv)
-	f.String(txSchedulerMetricsURLFlag, txSchedulerMetricsURLDefault, desc)
+	f.String(txSchedulerMetricsURLFlag, TxSchedulerMetricsURLDefault, desc)
 	_ = viper.BindPFlag(TxSchedulerMetricsURLViperKey, f.Lookup(txSchedulerMetricsURLFlag))
 }
 func Flags(f *pflag.FlagSet) {

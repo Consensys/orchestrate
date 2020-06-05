@@ -6,7 +6,6 @@ import (
 	"crypto/x509"
 	"io/ioutil"
 	"sync"
-	"time"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
@@ -61,33 +60,11 @@ func NewTLSConfig(clientCertFilePath, clientKeyFilePath, caCertFilePath string) 
 // InitConfig initialize global Sarama configuration
 func InitConfig() {
 	// Init config
-	config = sarama.NewConfig()
-	config.Version = sarama.V1_0_0_0
-	config.Consumer.Return.Errors = true
-	config.Producer.Return.Errors = true
-	config.Producer.Return.Successes = true
-	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
-	config.Consumer.MaxWaitTime = time.Duration(viper.GetInt64(kafkaConsumerMaxWaitTimeViperKey)) * time.Millisecond
-
-	config.Net.SASL.Enable = viper.GetBool(kafkaSASLEnabledViperKey)
-	config.Net.SASL.Mechanism = sarama.SASLMechanism(viper.GetString(kafkaSASLMechanismViperKey))
-	config.Net.SASL.Handshake = viper.GetBool(kafkaSASLHandshakeViperKey)
-	config.Net.SASL.User = viper.GetString(kafkaSASLUserViperKey)
-	config.Net.SASL.Password = viper.GetString(kafkaSASLPasswordViperKey)
-	config.Net.SASL.SCRAMAuthzID = viper.GetString(kafkaSASLSCRAMAuthzIDViperKey)
-
-	config.Net.TLS.Enable = viper.GetBool(kafkaTLSEnableViperKey)
-	if config.Net.TLS.Enable {
-		tlsConfig, err := NewTLSConfig(
-			viper.GetString(kafkaTLSClientCertFilePathViperKey),
-			viper.GetString(kafkaTLSClientKeyFilePathViperKey),
-			viper.GetString(kafkaTLSCACertFilePathViperKey),
-		)
-		// Fatal if get error from NewTLSConfig
-		if err != nil {
-			log.Fatalf("sarama: cannot init TLS configuration for Kafka - got error: %q)", err)
-		}
-		config.Net.TLS.Config = tlsConfig
+	var err error
+	config, err = NewSaramaConfig()
+	if err != nil {
+		log.Fatalf("sarama: cannot init TLS configuration for Kafka - got error: %q)", err)
+		return
 	}
 }
 
@@ -103,7 +80,7 @@ func SetGlobalConfig(cfg *sarama.Config) {
 
 // InitClient initialize Sarama Client
 // It bases on viper configuration to get Kafka address
-func InitClient(ctx context.Context) {
+func InitClient(ctx context.Context) (err error) {
 	initClientOnce.Do(func() {
 		if client != nil {
 			return
@@ -116,10 +93,10 @@ func InitClient(ctx context.Context) {
 
 		// Create sarama client
 		hostnames := viper.GetStringSlice(KafkaURLViperKey)
-		var err error
 		client, err = NewClient(hostnames, config)
 		if err != nil {
 			log.WithError(err).Fatalf("sarama: could not to start client at host %v", hostnames)
+			return
 		}
 
 		// Retrieve and log connected brokers
@@ -129,6 +106,8 @@ func InitClient(ctx context.Context) {
 		}
 		log.Infof("sarama: client ready (connected to brokers: %v) at host %v", brokers, hostnames)
 	})
+
+	return nil
 }
 
 // GlobalClient returns Sarama global client
@@ -149,13 +128,21 @@ func InitSyncProducer(ctx context.Context) {
 		}
 
 		// Initialize client
-		InitClient(ctx)
+		err := InitClient(ctx)
+		if err != nil {
+			return
+		}
+
+		if client == nil {
+			log.WithError(err).Fatalf("sarama: client is not initialize")
+			return
+		}
 
 		// Create sarama sync producer
-		var err error
 		producer, err = NewSyncProducerFromClient(client)
 		if err != nil {
 			log.WithError(err).Fatalf("sarama: could not create producer")
+			return
 		}
 		log.Infof("sarama: producer ready")
 	})
@@ -179,13 +166,16 @@ func InitConsumerGroup(ctx context.Context) {
 		}
 
 		// Initialize Client
-		InitClient(ctx)
+		err := InitClient(ctx)
+		if err != nil {
+			return
+		}
 
 		// Create group
-		var err error
 		group, err = NewConsumerGroupFromClient(viper.GetString(KafkaGroupViperKey), client)
 		if err != nil {
 			log.WithError(err).Fatalf("sarama: could not create consumer group")
+			return
 		}
 		log.WithFields(log.Fields{
 			"group": viper.GetString(KafkaGroupViperKey),

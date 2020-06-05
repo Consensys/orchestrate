@@ -3,35 +3,43 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"time"
 
 	dockercontainer "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/go-connections/nat"
+	"github.com/go-pg/pg/v9"
+	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 )
 
 const DefaultPostgresImage = "postgres:10.12-alpine"
 
+const defaultPassword = "postgres"
+const defaultHostPort = "5432"
+
 type Postgres struct{}
+
 type Config struct {
 	Image    string
 	Port     string
 	Password string
 }
 
-func (p *Config) SetDefault() *Config {
-	if p.Image == "" {
-		p.Image = DefaultPostgresImage
+func NewDefault() *Config {
+	cfg := &Config{
+		Image:    DefaultPostgresImage,
+		Port:     defaultHostPort,
+		Password: defaultPassword,
 	}
 
-	if p.Port == "" {
-		p.Port = "5432"
-	}
+	return cfg
+}
 
-	if p.Password == "" {
-		p.Password = "postgres"
-	}
-
-	return p
+func (c *Config) SetHostPort(port string) *Config {
+	c.Port = port
+	return c
 }
 
 func (g *Postgres) GenerateContainerConfig(ctx context.Context, configuration interface{}) (*dockercontainer.Config, *dockercontainer.HostConfig, *network.NetworkingConfig, error) {
@@ -50,11 +58,49 @@ func (g *Postgres) GenerateContainerConfig(ctx context.Context, configuration in
 		},
 	}
 
-	hostConfig := &dockercontainer.HostConfig{
-		PortBindings: nat.PortMap{
+	hostConfig := &dockercontainer.HostConfig{}
+	if cfg.Port != "" {
+		hostConfig.PortBindings = nat.PortMap{
 			"5432/tcp": []nat.PortBinding{{HostIP: "0.0.0.0", HostPort: cfg.Port}},
-		},
+		}
 	}
 
 	return containerCfg, hostConfig, nil, nil
+}
+
+func (g *Postgres) WaitForService(configuration interface{}, timeout time.Duration) error {
+	cfg, ok := configuration.(*Config)
+	if !ok {
+		return fmt.Errorf("invalid configuration type (expected %T but got %T)", cfg, configuration)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	pgCfg, _ := postgres.NewConfig(viper.GetViper()).PGOptions()
+	db := pg.Connect(pgCfg)
+	defer db.Close()
+
+	retryT := time.NewTicker(time.Second)
+	defer retryT.Stop()
+
+	var cerr error
+waitForServiceLoop:
+	for {
+		select {
+		case <-ctx.Done():
+			cerr = ctx.Err()
+			break waitForServiceLoop
+		case <-retryT.C:
+			_, err := db.Exec("SELECT 1")
+			if err != nil {
+				log.WithContext(ctx).WithError(err).Warnf("waiting for PostgreSQL service to start")
+			} else {
+				log.WithContext(ctx).Infof("PostgreSQL container service is ready")
+				break waitForServiceLoop
+			}
+		}
+	}
+
+	return cerr
 }

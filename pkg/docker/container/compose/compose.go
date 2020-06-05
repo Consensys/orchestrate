@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	goreflect "reflect"
+	"time"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/container/kafka"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/container/zookeeper"
@@ -20,15 +21,15 @@ type Compose struct {
 }
 
 func New() *Compose {
-	generator := &Compose{
+	factory := &Compose{
 		reflect: reflect.New(),
 	}
 
-	generator.reflect.AddGenerator(goreflect.TypeOf(&postgres.Config{}), &postgres.Postgres{})
-	generator.reflect.AddGenerator(goreflect.TypeOf(&zookeeper.Config{}), &zookeeper.Zookeeper{})
-	generator.reflect.AddGenerator(goreflect.TypeOf(&kafka.Config{}), &kafka.Kafka{})
+	factory.reflect.AddGenerator(goreflect.TypeOf(&postgres.Config{}), &postgres.Postgres{})
+	factory.reflect.AddGenerator(goreflect.TypeOf(&zookeeper.Config{}), &zookeeper.Zookeeper{})
+	factory.reflect.AddGenerator(goreflect.TypeOf(&kafka.Config{}), &kafka.Kafka{})
 
-	return generator
+	return factory
 }
 
 func (gen *Compose) GenerateContainerConfig(ctx context.Context, configuration interface{}) (*dockercontainer.Config, *dockercontainer.HostConfig, *network.NetworkingConfig, error) {
@@ -43,4 +44,18 @@ func (gen *Compose) GenerateContainerConfig(ctx context.Context, configuration i
 	}
 
 	return gen.reflect.GenerateContainerConfig(ctx, field)
+}
+
+func (gen *Compose) WaitForService(configuration interface{}, timeout time.Duration) error {
+	cfg, ok := configuration.(*config.Container)
+	if !ok {
+		return fmt.Errorf("invalid configuration type (expected %T but got %T)", cfg, configuration)
+	}
+
+	field, err := cfg.Field()
+	if err != nil {
+		return err
+	}
+
+	return gen.reflect.WaitForService(field, timeout)
 }
