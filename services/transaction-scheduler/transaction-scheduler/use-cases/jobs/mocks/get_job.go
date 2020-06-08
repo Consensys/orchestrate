@@ -7,7 +7,7 @@ package mocks
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	reflect "reflect"
 )
 
@@ -35,10 +35,10 @@ func (m *MockGetJobUseCase) EXPECT() *MockGetJobUseCaseMockRecorder {
 }
 
 // Execute mocks base method.
-func (m *MockGetJobUseCase) Execute(ctx context.Context, jobUUID, tenantID string) (*entities.Job, error) {
+func (m *MockGetJobUseCase) Execute(ctx context.Context, jobUUID, tenantID string) (*types.Job, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, jobUUID, tenantID)
-	ret0, _ := ret[0].(*entities.Job)
+	ret0, _ := ret[0].(*types.Job)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

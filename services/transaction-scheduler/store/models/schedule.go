@@ -10,7 +10,6 @@ type Schedule struct {
 	ID                   int `pg:"alias:id"`
 	UUID                 string
 	TenantID             string `pg:"alias:tenant_id"`
-	ChainUUID            string
 	Jobs                 []*Job
 	TransactionRequestID *int
 	TransactionRequest   *TransactionRequest

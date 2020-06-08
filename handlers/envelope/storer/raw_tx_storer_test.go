@@ -4,9 +4,9 @@ package storer
 
 import (
 	"fmt"
+	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 	"math/big"
 	"testing"
 
@@ -88,7 +88,7 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 
 		schedulerClient.EXPECT().
 			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
-				Transaction: &entities.ETHTransaction{
+				Transaction: &types2.ETHTransaction{
 					Hash:           txctx.Envelope.GetTxHashString(),
 					From:           txctx.Envelope.GetFromString(),
 					To:             txctx.Envelope.GetToString(),
@@ -101,12 +101,12 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 					PrivateFor:     txctx.Envelope.GetPrivateFor(),
 					PrivacyGroupID: txctx.Envelope.GetPrivacyGroupID(),
 				},
-				Status: entities.JobStatusPending,
+				Status: types2.StatusPending,
 			}).
 			Return(&types.JobResponse{}, nil)
 		schedulerClient.EXPECT().
 			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
-				Status: entities.JobStatusSent,
+				Status: types2.StatusSent,
 			}).
 			Return(&types.JobResponse{}, nil)
 
@@ -141,7 +141,7 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 			Return(&types.JobResponse{}, nil)
 		schedulerClient.EXPECT().
 			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
-				Status: entities.JobStatusSent,
+				Status: types2.StatusSent,
 			}).
 			Return(nil, fmt.Errorf("error"))
 
@@ -160,7 +160,7 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 			Return(&types.JobResponse{}, nil)
 		schedulerClient.EXPECT().
 			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
-				Status: entities.JobStatusRecovering,
+				Status: types2.StatusRecovering,
 			}).
 			Return(&types.JobResponse{}, nil)
 
@@ -179,7 +179,7 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 			Return(&types.JobResponse{}, nil)
 		schedulerClient.EXPECT().
 			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
-				Status: entities.JobStatusRecovering,
+				Status: types2.StatusRecovering,
 			}).
 			Return(nil, fmt.Errorf("error"))
 

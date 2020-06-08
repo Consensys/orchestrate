@@ -3,12 +3,11 @@ package testutils
 import (
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 
 	uuid "github.com/satori/go.uuid"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
 
 func FakeSchedule(tenantID string) *models.Schedule {
@@ -16,14 +15,14 @@ func FakeSchedule(tenantID string) *models.Schedule {
 		tenantID = multitenancy.DefaultTenantIDName
 	}
 	return &models.Schedule{
-		TenantID:  tenantID,
-		UUID:      uuid.NewV4().String(),
-		ChainUUID: uuid.NewV4().String(),
+		TenantID: tenantID,
+		UUID:     uuid.NewV4().String(),
 		Jobs: []*models.Job{{
 			UUID:        uuid.NewV4().String(),
-			Type:        tx.JobEthereumTransaction,
+			ChainUUID:   uuid.NewV4().String(),
+			Type:        types.EthereumTransaction,
 			Transaction: FakeTransaction(),
-			Logs:        []*models.Log{{Status: entities.JobStatusCreated, Message: "created message"}},
+			Logs:        []*models.Log{{Status: types.StatusCreated, Message: "created message"}},
 		}},
 	}
 }
@@ -46,19 +45,19 @@ func FakeTransaction() *models.Transaction {
 	}
 }
 
-func FakeJob(scheduleID int) *models.Job {
+func FakeJobModel(scheduleID int) *models.Job {
 	job := &models.Job{
-		UUID: uuid.NewV4().String(),
-		Type: tx.JobEthereumTransaction,
+		UUID:      uuid.NewV4().String(),
+		ChainUUID: uuid.NewV4().String(),
+		Type:      types.EthereumTransaction,
 		Schedule: &models.Schedule{
-			ID:        scheduleID,
-			TenantID:  "_",
-			UUID:      uuid.NewV4().String(),
-			ChainUUID: uuid.NewV4().String(),
+			ID:       scheduleID,
+			TenantID: "_",
+			UUID:     uuid.NewV4().String(),
 		},
 		Transaction: FakeTransaction(),
 		Logs: []*models.Log{
-			{UUID: uuid.NewV4().String(), Status: entities.JobStatusCreated, Message: "created message"},
+			{UUID: uuid.NewV4().String(), Status: types.StatusCreated, Message: "created message"},
 		},
 		CreatedAt: time.Now(),
 	}
@@ -73,8 +72,8 @@ func FakeJob(scheduleID int) *models.Job {
 func FakeLog() *models.Log {
 	return &models.Log{
 		UUID:      uuid.NewV4().String(),
-		Status:    entities.JobStatusCreated,
-		Job:       FakeJob(0),
+		Status:    types.StatusCreated,
+		Job:       FakeJobModel(0),
 		CreatedAt: time.Now(),
 	}
 }

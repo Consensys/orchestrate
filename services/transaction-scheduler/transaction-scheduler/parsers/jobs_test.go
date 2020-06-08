@@ -3,6 +3,7 @@
 package parsers
 
 import (
+	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"testing"
 
@@ -10,21 +11,19 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
-	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 )
 
 func TestParsersJob_NewModelFromEntity(t *testing.T) {
-	jobEntity := testutils2.FakeJobEntity()
-	jobModel := NewJobModelFromEntities(jobEntity, nil)
-	finalJobEntity := NewJobEntityFromModels(jobModel)
+	jobEntity := testutils2.FakeJob()
+	finalJobEntity := NewJobEntityFromModels(NewJobModelFromEntities(jobEntity, nil))
 
 	expectedJSON, _ := json.Marshal(jobEntity)
-	actualJOSN, _ := json.Marshal(finalJobEntity)
-	assert.Equal(t, string(expectedJSON), string(actualJOSN))
+	actualJSON, _ := json.Marshal(finalJobEntity)
+	assert.Equal(t, string(expectedJSON), string(actualJSON))
 }
 
 func TestParsersJob_NewEntityFromModel(t *testing.T) {
-	jobModel := testutils.FakeJob(1)
+	jobModel := testutils.FakeJobModel(1)
 	jobEntity := NewJobEntityFromModels(jobModel)
 	finalJobModel := NewJobModelFromEntities(jobEntity, jobModel.ScheduleID)
 	finalJobModel.Schedule = jobModel.Schedule
@@ -37,14 +36,14 @@ func TestParsersJob_NewEntityFromModel(t *testing.T) {
 }
 
 func TestParsersJob_NewEnvelopeFromModel(t *testing.T) {
-	jobModel := testutils.FakeJob(1)
+	jobModel := testutils.FakeJobModel(1)
 	headers := map[string]string{
 		"Authorization": "Bearer MyToken",
 	}
 	txEnvelope := NewEnvelopeFromJobModel(jobModel, headers)
 
 	txRequest := txEnvelope.GetTxRequest()
-	assert.Equal(t, jobModel.Schedule.ChainUUID, txEnvelope.GetChainUUID())
+	assert.Equal(t, jobModel.ChainUUID, txEnvelope.GetChainUUID())
 	assert.Equal(t, jobModel.UUID, txEnvelope.GetID())
 	assert.Equal(t, tx.JobTypeMap[jobModel.Type], txRequest.GetJobType())
 	assert.Equal(t, jobModel.Transaction.Sender, txRequest.Params.GetFrom())

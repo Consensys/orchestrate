@@ -39,9 +39,9 @@ func NewUseCases(
 ) UseCases {
 	txValidator := validators.NewTransactionValidator(db, chainRegistryClient)
 
-	createScheduleUC := schedules.NewCreateScheduleUseCase(txValidator, db)
+	createScheduleUC := schedules.NewCreateScheduleUseCase(db)
 	getScheduleUC := schedules.NewGetScheduleUseCase(db)
-	createJobUC := jobs.NewCreateJobUseCase(db)
+	createJobUC := jobs.NewCreateJobUseCase(db, txValidator)
 	startJobUC := jobs.NewStartJobUseCase(db, producer, txCrafterPartition)
 
 	return &useCases{

@@ -4,6 +4,8 @@ import (
 	"math/big"
 	"regexp"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
@@ -15,22 +17,13 @@ var MethodMap = map[string]Method{
 	"EEA_SENDPRIVATETRANSACTION":    Method_EEA_SENDPRIVATETRANSACTION,
 }
 
-const (
-	JobEthereumTransaction       = "eth://ethereum/transaction"       // Classic public Ethereum transaction
-	JobEthereumRawTransaction    = "eth://ethereum/rawTransaction"    // Classic raw transaction
-	JobOrionMarkingTransaction   = "eth://orion/markingTransaction"   // Besu public transaction
-	JobOrionEEATransaction       = "eth://orion/eeaTransaction"       // Besu private tx for Orion
-	JobTesseraPublicTransaction  = "eth://tessera/publicTransaction"  // Tessera public transaction
-	JobTesseraPrivateTransaction = "eth://tessera/privateTransaction" // Tessera private transaction
-)
-
 var JobTypeMap = map[string]JobType{
-	JobEthereumTransaction:       JobType_ETH_TX,
-	JobEthereumRawTransaction:    JobType_ETH_RAW_TX,
-	JobOrionMarkingTransaction:   JobType_ETH_ORION_MARKING_TX,
-	JobOrionEEATransaction:       JobType_ETH_ORION_EEA_TX,
-	JobTesseraPublicTransaction:  JobType_ETH_TESSERA_PUBLIC_TX,
-	JobTesseraPrivateTransaction: JobType_ETH_TESSERA_PRIVATE_TX,
+	types.EthereumTransaction:       JobType_ETH_TX,
+	types.EthereumRawTransaction:    JobType_ETH_RAW_TX,
+	types.OrionMarkingTransaction:   JobType_ETH_ORION_MARKING_TX,
+	types.OrionEEATransaction:       JobType_ETH_ORION_EEA_TX,
+	types.TesseraPublicTransaction:  JobType_ETH_TESSERA_PUBLIC_TX,
+	types.TesseraPrivateTransaction: JobType_ETH_TESSERA_PRIVATE_TX,
 }
 
 func (m *TxEnvelope) Envelope() (*Envelope, error) {

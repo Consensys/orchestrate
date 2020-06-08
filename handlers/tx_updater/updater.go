@@ -2,9 +2,9 @@ package txupdater
 
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
 
 const component = "handler.tx-updater"
@@ -18,7 +18,7 @@ func TransactionUpdater(txSchedulerClient txscheduler.TransactionSchedulerClient
 		if txctx.Envelope.ContextLabels["jobUUID"] != "" {
 			if !txctx.Envelope.OnlyWarnings() {
 				_, err := txSchedulerClient.UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
-					Status: entities.JobStatusFailed,
+					Status: types2.StatusFailed,
 				})
 
 				if err != nil {

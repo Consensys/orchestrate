@@ -5,24 +5,15 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
 
-func FormatScheduleResponse(scheduleModel *entities.Schedule) *types.ScheduleResponse {
+func FormatScheduleResponse(schedule *entities.Schedule) *types.ScheduleResponse {
 	scheduleResponse := &types.ScheduleResponse{
-		UUID:      scheduleModel.UUID,
-		ChainUUID: scheduleModel.ChainUUID,
-		CreatedAt: scheduleModel.CreatedAt,
+		UUID:      schedule.UUID,
+		CreatedAt: schedule.CreatedAt,
 		Jobs:      []*types.JobResponse{},
 	}
 
-	for idx := range scheduleModel.Jobs {
-		scheduleResponse.Jobs = append(scheduleResponse.Jobs, FormatJobResponse(scheduleModel.Jobs[idx]))
-	}
-
-	return scheduleResponse
-}
-
-func FormatScheduleCreateRequest(request *types.CreateScheduleRequest) *entities.Schedule {
-	scheduleResponse := &entities.Schedule{
-		ChainUUID: request.ChainUUID,
+	for idx := range schedule.Jobs {
+		scheduleResponse.Jobs = append(scheduleResponse.Jobs, FormatJobResponse(schedule.Jobs[idx]))
 	}
 
 	return scheduleResponse

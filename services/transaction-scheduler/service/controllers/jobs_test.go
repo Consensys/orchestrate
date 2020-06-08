@@ -6,6 +6,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	testutils3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -23,7 +25,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
-	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs/mocks"
 )
@@ -42,24 +43,24 @@ type jobsCtrlTestSuite struct {
 
 var _ jobs.UseCases = &jobsCtrlTestSuite{}
 
-func (t jobsCtrlTestSuite) CreateJob() jobs.CreateJobUseCase {
-	return t.createJobUC
+func (s jobsCtrlTestSuite) CreateJob() jobs.CreateJobUseCase {
+	return s.createJobUC
 }
 
-func (t jobsCtrlTestSuite) GetJob() jobs.GetJobUseCase {
-	return t.getJobUC
+func (s jobsCtrlTestSuite) GetJob() jobs.GetJobUseCase {
+	return s.getJobUC
 }
 
-func (t jobsCtrlTestSuite) StartJob() jobs.StartJobUseCase {
-	return t.startJobUC
+func (s jobsCtrlTestSuite) StartJob() jobs.StartJobUseCase {
+	return s.startJobUC
 }
 
-func (t jobsCtrlTestSuite) UpdateJob() jobs.UpdateJobUseCase {
-	return t.updateJobUC
+func (s jobsCtrlTestSuite) UpdateJob() jobs.UpdateJobUseCase {
+	return s.updateJobUC
 }
 
-func (t jobsCtrlTestSuite) SearchJobs() jobs.SearchJobsUseCase {
-	return t.searchJobUC
+func (s jobsCtrlTestSuite) SearchJobs() jobs.SearchJobsUseCase {
+	return s.searchJobUC
 }
 
 func TestJobsController(t *testing.T) {
@@ -87,7 +88,7 @@ func (s *jobsCtrlTestSuite) SetupTest() {
 func (s *jobsCtrlTestSuite) TestJobsController_Create() {
 	s.T().Run("should execute create job request successfully", func(t *testing.T) {
 		jobRequest := testutils.FakeCreateJobRequest()
-		jobEntityRes := testutils2.FakeJobEntity()
+		jobEntityRes := testutils3.FakeJob()
 		requestBytes, _ := json.Marshal(jobRequest)
 		rw := httptest.NewRecorder()
 
@@ -147,7 +148,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_GetOne() {
 		httpRequest := httptest.
 			NewRequest(http.MethodGet, "/jobs/jobUUID", nil).
 			WithContext(s.ctx)
-		jobEntityRes := testutils2.FakeJobEntity()
+		jobEntityRes := testutils3.FakeJob()
 
 		s.getJobUC.EXPECT().
 			Execute(gomock.Any(), "jobUUID", s.tenantID).
@@ -184,7 +185,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_Search() {
 		httpRequest := httptest.
 			NewRequest(http.MethodGet, "/jobs", nil).
 			WithContext(s.ctx)
-		jobEntities := []*entities.Job{testutils2.FakeJobEntity()}
+		jobEntities := []*types2.Job{testutils3.FakeJob()}
 
 		s.searchJobUC.EXPECT().
 			Execute(gomock.Any(), filters, s.tenantID).
@@ -215,7 +216,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_Search() {
 		httpRequest := httptest.
 			NewRequest(http.MethodGet, url, nil).
 			WithContext(s.ctx)
-		jobEntities := []*entities.Job{testutils2.FakeJobEntity()}
+		jobEntities := []*types2.Job{testutils3.FakeJob()}
 
 		s.searchJobUC.EXPECT().
 			Execute(gomock.Any(), filters, s.tenantID).
@@ -229,7 +230,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_Search() {
 		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
 		assert.Equal(t, http.StatusOK, rw.Code)
 	})
-	
+
 	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
 	s.T().Run("should fail with 422 if use case fails on invalid tx hashes as input", func(t *testing.T) {
 		rw := httptest.NewRecorder()
@@ -241,11 +242,11 @@ func (s *jobsCtrlTestSuite) TestJobsController_Search() {
 		httpRequest := httptest.
 			NewRequest(http.MethodGet, url, bytes.NewReader(nil)).
 			WithContext(s.ctx)
-	
+
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusBadRequest, rw.Code)
 	})
-	
+
 	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
 	s.T().Run("should fail with 422 if use case fails with NotFoundError", func(t *testing.T) {
 		rw := httptest.NewRecorder()
@@ -253,12 +254,12 @@ func (s *jobsCtrlTestSuite) TestJobsController_Search() {
 		httpRequest := httptest.
 			NewRequest(http.MethodGet, "/jobs", bytes.NewReader(nil)).
 			WithContext(s.ctx)
-	
+
 		s.searchJobUC.EXPECT().
 			Execute(gomock.Any(), filters, s.tenantID).
 			Return(nil, errors.InvalidParameterError("error")).
 			Times(1)
-	
+
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusUnprocessableEntity, rw.Code)
 	})
@@ -302,7 +303,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_Update() {
 	s.T().Run("should execute update a job request successfully", func(t *testing.T) {
 		rw := httptest.NewRecorder()
 		jobRequest := testutils.FakeJobUpdateRequest()
-		jobEntityRes := testutils2.FakeJobEntity()
+		jobEntityRes := testutils3.FakeJob()
 
 		requestBytes, _ := json.Marshal(jobRequest)
 		httpRequest := httptest.
@@ -312,7 +313,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_Update() {
 		jobEntityReq := formatters.FormatJobUpdateRequest(jobRequest)
 		jobEntityReq.UUID = jobEntityRes.UUID
 		s.updateJobUC.EXPECT().
-			Execute(gomock.Any(), gomock.Any(), s.tenantID).
+			Execute(gomock.Any(), gomock.Any(), jobRequest.Status, s.tenantID).
 			Return(jobEntityRes, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)

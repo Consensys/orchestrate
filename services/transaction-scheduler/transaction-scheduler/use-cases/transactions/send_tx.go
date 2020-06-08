@@ -3,12 +3,11 @@ package transactions
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
-
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
@@ -22,7 +21,7 @@ import (
 const sendTxComponent = "use-cases.send-tx"
 
 type SendTxUseCase interface {
-	Execute(ctx context.Context, txRequest *entities.TxRequest, tenantID string) (*entities.TxRequest, error)
+	Execute(ctx context.Context, txRequest *entities.TxRequest, chainUUID, tenantID string) (*entities.TxRequest, error)
 }
 
 // sendTxUsecase is a use case to create a new transaction request
@@ -54,7 +53,7 @@ func NewSendTxUseCase(validator validators.TransactionValidator,
 }
 
 // Execute validates, creates and starts a new contract transaction
-func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequest, tenantID string) (*entities.TxRequest, error) {
+func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequest, chainUUID, tenantID string) (*entities.TxRequest, error) {
 	logger := log.WithContext(ctx)
 
 	logger.
@@ -62,7 +61,7 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 		Debug("creating new transaction")
 
 	// Step 1: Validate RequestHash
-	requestHash, err := uc.validator.ValidateRequestHash(ctx, txRequest.Schedule.ChainUUID, txRequest.Params, txRequest.IdempotencyKey)
+	requestHash, err := uc.validator.ValidateRequestHash(ctx, chainUUID, txRequest.Params, txRequest.IdempotencyKey)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
@@ -74,7 +73,7 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 
 	// Step 2: Insert Schedule + Job + Transaction + TxRequest atomically
 	err = database.ExecuteInDBTx(uc.db, func(dbtx database.Tx) error {
-		txRequestModel, der := parsers.NewTxRequestModelFromEntities(txRequest, requestHash, tenantID)
+		txRequestModel, der := parsers.NewTxRequestModelFromEntities(txRequest, requestHash)
 		if der != nil {
 			return der
 		}
@@ -85,25 +84,21 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 		}
 		txRequest.CreatedAt = txRequestModel.CreatedAt
 
-		txRequest.Schedule, der = uc.createScheduleUC.
-			WithDBTransaction(dbtx.(store.Tx)).
-			Execute(ctx, txRequest.Schedule, tenantID)
+		txRequest.Schedule, der = uc.createScheduleUC.WithDBTransaction(dbtx.(store.Tx)).Execute(ctx, &entities.Schedule{}, tenantID)
 		if der != nil {
 			return der
 		}
 
 		// Craft "Data" field
-		sendTxJob := parsers.NewJobEntityFromTxRequest(txRequest, tx.JobEthereumTransaction)
+		sendTxJob := parsers.NewJobEntityFromTxRequest(txRequest, types.EthereumTransaction, chainUUID)
 		sendTxJob.Transaction.Data = hexutil.Encode(txDataBytes)
 
-		job, der := uc.createJobUC.
-			WithDBTransaction(dbtx.(store.Tx)).
-			Execute(ctx, sendTxJob, tenantID)
+		job, der := uc.createJobUC.WithDBTransaction(dbtx.(store.Tx)).Execute(ctx, sendTxJob, tenantID)
 		if der != nil {
 			return der
 		}
 
-		txRequest.Schedule.Jobs = []*entities.Job{job}
+		txRequest.Schedule.Jobs = []*types.Job{job}
 
 		return nil
 	})

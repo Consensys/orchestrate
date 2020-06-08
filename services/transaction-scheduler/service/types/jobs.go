@@ -3,28 +3,30 @@ package types
 import (
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 )
 
 type CreateJobRequest struct {
-	ScheduleUUID string                   `json:"scheduleUUID" validate:"required"`
-	Type         string                   `json:"type" validate:"required"` //  @TODO validate Type is valid
-	Labels       map[string]string        `json:"labels,omitempty"`
-	Transaction  *entities.ETHTransaction `json:"transaction" validate:"required"`
+	ScheduleUUID string                `json:"scheduleUUID" validate:"required,uuid4"`
+	ChainUUID    string                `json:"chainUUID" validate:"required,uuid4"`
+	Type         string                `json:"type" validate:"required"` //  @TODO validate Type is valid
+	Labels       map[string]string     `json:"labels,omitempty"`
+	Transaction  *types.ETHTransaction `json:"transaction" validate:"required"`
 }
 
 type UpdateJobRequest struct {
-	Labels      map[string]string        `json:"labels,omitempty"`
-	Transaction *entities.ETHTransaction `json:"transaction,omitempty"`
-	Status      string                   `json:"status,omitempty"`
+	Labels      map[string]string     `json:"labels,omitempty"`
+	Transaction *types.ETHTransaction `json:"transaction,omitempty"`
+	Status      string                `json:"status,omitempty"`
 }
 
-// TODO: Needed ? Can be replaced by []entities.Job ?
 type JobResponse struct {
-	UUID        string                   `json:"uuid" validate:"required,uuid4"`
-	ChainUUID   string                   `json:"chainUUID" validate:"required,uuid4"`
-	Transaction *entities.ETHTransaction `json:"transaction" validate:"required"`
-	Labels      map[string]string        `json:"labels" validate:"required"`
-	Status      string                   `json:"status" validate:"required"`
-	CreatedAt   time.Time                `json:"createdAt"`
+	UUID        string                `json:"uuid"`
+	ChainUUID   string                `json:"chainUUID"`
+	Transaction *types.ETHTransaction `json:"transaction"`
+	Logs        []*types.Log          `json:"logs"`
+	Labels      map[string]string     `json:"labels"`
+	Status      string                `json:"status"`
+	Type        string                `json:"type"`
+	CreatedAt   time.Time             `json:"createdAt"`
 }

@@ -2,10 +2,9 @@ package testutils
 
 import (
 	uuid "github.com/satori/go.uuid"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
+	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 )
 
 func FakeSendTransactionRequest() *types.SendTransactionRequest {
@@ -21,48 +20,32 @@ func FakeSendTransactionRequest() *types.SendTransactionRequest {
 	}
 }
 
-func FakeTransactionResponse() *types.TransactionResponse {
-	return &types.TransactionResponse{
-		IdempotencyKey: uuid.NewV4().String(),
-		Schedule:       FakeScheduleResponse(),
-	}
-}
-
 func FakeCreateScheduleRequest() *types.CreateScheduleRequest {
-	return &types.CreateScheduleRequest{
-		ChainUUID: uuid.NewV4().String(),
-	}
-}
-
-func FakeScheduleResponse() *types.ScheduleResponse {
-	return &types.ScheduleResponse{
-		UUID:      uuid.NewV4().String(),
-		ChainUUID: uuid.NewV4().String(),
-		Jobs:      []*types.JobResponse{FakeJobResponse()},
-	}
+	return &types.CreateScheduleRequest{}
 }
 
 func FakeCreateJobRequest() *types.CreateJobRequest {
 	return &types.CreateJobRequest{
 		ScheduleUUID: uuid.NewV4().String(),
-		Type:         tx.JobEthereumTransaction,
+		ChainUUID:    uuid.NewV4().String(),
+		Type:         types2.EthereumTransaction,
 		Labels:       nil,
-		Transaction:  testutils.FakeTransactionEntity(),
+		Transaction:  testutils2.FakeETHTransaction(),
 	}
 }
 
 func FakeJobUpdateRequest() *types.UpdateJobRequest {
 	return &types.UpdateJobRequest{
 		Labels:      nil,
-		Transaction: testutils.FakeTransactionEntity(),
-		Status:      entities.JobStatusPending,
+		Transaction: testutils2.FakeETHTransaction(),
+		Status:      types2.StatusPending,
 	}
 }
 
 func FakeJobResponse() *types.JobResponse {
 	return &types.JobResponse{
 		UUID:        uuid.NewV4().String(),
-		Transaction: testutils.FakeTransactionEntity(),
-		Status:      entities.JobStatusCreated,
+		Transaction: testutils2.FakeETHTransaction(),
+		Status:      types2.StatusCreated,
 	}
 }

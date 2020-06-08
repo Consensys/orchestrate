@@ -1,18 +1,16 @@
 package formatters
 
 import (
+	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
 
-func FormatSendTxRequest(txRequest *types.SendTransactionRequest, chainUUID string) *entities.TxRequest {
+func FormatSendTxRequest(txRequest *types.SendTransactionRequest) *entities.TxRequest {
 	return &entities.TxRequest{
 		IdempotencyKey: txRequest.IdempotencyKey,
 		Labels:         txRequest.Labels,
-		Schedule: &entities.Schedule{
-			ChainUUID: chainUUID,
-		},
-		Params: &entities.TxRequestParams{
+		Params: &types2.ETHTransactionParams{
 			From:            txRequest.Params.From,
 			To:              txRequest.Params.To,
 			Value:           txRequest.Params.Value,

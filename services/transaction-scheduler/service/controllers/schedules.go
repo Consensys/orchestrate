@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/schedules"
@@ -51,8 +53,7 @@ func (c *SchedulesController) create(rw http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	schedule := formatters.FormatScheduleCreateRequest(scheduleRequest)
-	scheduleEntity, err := c.ucs.CreateSchedule().Execute(ctx, schedule, multitenancy.TenantIDFromContext(ctx))
+	scheduleEntity, err := c.ucs.CreateSchedule().Execute(ctx, &entities.Schedule{}, multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -104,7 +105,7 @@ func (c *SchedulesController) get(rw http.ResponseWriter, request *http.Request)
 		return
 	}
 
-	response := []*types.ScheduleResponse{}
+	var response []*types.ScheduleResponse
 	for _, scheduleEntity := range scheduleEntities {
 		response = append(response, formatters.FormatScheduleResponse(scheduleEntity))
 	}

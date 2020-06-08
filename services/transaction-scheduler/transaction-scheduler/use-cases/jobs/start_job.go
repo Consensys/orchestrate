@@ -7,13 +7,13 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
 	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
 )
 
@@ -33,11 +33,7 @@ type startJobUseCase struct {
 }
 
 // NewStartJobUseCase creates a new StartJobUseCase
-func NewStartJobUseCase(
-	db store.DB,
-	kafkaProducer sarama.SyncProducer,
-	txCrafterTopic string,
-) StartJobUseCase {
+func NewStartJobUseCase(db store.DB, kafkaProducer sarama.SyncProducer, txCrafterTopic string) StartJobUseCase {
 	return &startJobUseCase{
 		db:             db,
 		kafkaProducer:  kafkaProducer,
@@ -45,7 +41,7 @@ func NewStartJobUseCase(
 	}
 }
 
-// Execute validates and creates a new transaction job
+// Execute sends a job to the Kafka topic
 func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID, tenantID string) error {
 	logger := log.WithContext(ctx)
 
@@ -65,7 +61,7 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID, tenantID string
 
 	jobLog := &models.Log{
 		JobID:  &jobModel.ID,
-		Status: entities.JobStatusStarted,
+		Status: types.StatusStarted,
 		Message: fmt.Sprintf("message sent to partition %v, offset %v and topic %v", partition, offset,
 			uc.txCrafterTopic),
 	}

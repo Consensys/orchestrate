@@ -26,8 +26,8 @@ Feature: Transaction Scheduler
     Then I store response field "schedule.jobs.0.uuid" as "jobUUID"
     Then Register new envelope tracker "jobUUID"
     And Response should have the following fields:
-      | idempotencyKey | params.methodSignature | schedule.uuid | schedule.chainUUID | schedule.jobs.0.uuid | schedule.jobs[0].status
-      | test10         | constructor()          | ~             | {{besuUUID}}       | ~                    | STARTED
+      | idempotencyKey | params.methodSignature | schedule.uuid | schedule.jobs.0.uuid | schedule.jobs[0].status
+      | test10         | constructor()          | ~             | ~                    | STARTED
 
 
   Scenario: New JOB started step by step
@@ -37,9 +37,7 @@ Feature: Transaction Scheduler
     Then I store response field "0.uuid" as "besuUUID"
     When I send "POST" request to "{{tx-scheduler-http}}/schedules" with json:
       """
-{
-    "chainUUID": "{{besuUUID}}"
-}
+{}
       """
     Then the response code should be 200
     Then I store response field "uuid" as "scheduleUUID"
@@ -47,6 +45,7 @@ Feature: Transaction Scheduler
       """
 {
 	"scheduleUUID": "{{scheduleUUID}}",
+	"chainUUID": "{{besuUUID}}",
 	"type": "ETH_SENDRAWTRANSACTION",
     "transaction": {
         "from": "0x93f7274c9059e601be4512f656b57b830e019e41",
@@ -57,8 +56,8 @@ Feature: Transaction Scheduler
     Then the response code should be 200
     Then I store response field "uuid" as "jobUUID"
     And Response should have the following fields:
-      | uuid | transaction.from                           | transaction.to                             | status
-      | ~    | 0x93f7274c9059e601be4512f656b57b830e019e41 | 0x93f7274c9059e601be4512f656b57b830e019e42 | CREATED
+      | uuid | chainUUID    | transaction.from                           | transaction.to                             | status
+      | ~    | {{besuUUID}} | 0x93f7274c9059e601be4512f656b57b830e019e41 | 0x93f7274c9059e601be4512f656b57b830e019e42 | CREATED
     When I send "PATCH" request to "{{tx-scheduler-http}}/jobs/{{jobUUID}}" with json:
       """
 {
@@ -68,7 +67,8 @@ Feature: Transaction Scheduler
     },
     "labels": {
     	"scenario.id": "{{SCENARIO_ID}}"
-    }
+    },
+    "status": "PENDING"
 }
       """
     Then the response code should be 200
@@ -78,4 +78,4 @@ Feature: Transaction Scheduler
     Then the response code should be 200
     And Response should have the following fields:
       | uuid | transaction.from                           | transaction.to                             | status
-      | ~    | 0x6009608a02a7a15fd6689d6dad560c44e9ab61ff | 0x93f7274c9059e601be4512f656b57b830e019e44 | STARTED
+      | ~    | 0x6009608a02a7a15fd6689d6dad560c44e9ab61ff | 0x93f7274c9059e601be4512f656b57b830e019e44 | PENDING

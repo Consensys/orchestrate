@@ -3,12 +3,14 @@ package jobs
 import (
 	"context"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/validators"
+
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
 )
 
@@ -17,19 +19,21 @@ import (
 const createJobComponent = "use-cases.create-job"
 
 type CreateJobUseCase interface {
-	Execute(ctx context.Context, job *entities.Job, tenantID string) (*entities.Job, error)
+	Execute(ctx context.Context, jobEntity *types.Job, tenantID string) (*types.Job, error)
 	WithDBTransaction(dbtx store.Tx) CreateJobUseCase
 }
 
 // createJobUseCase is a use case to create a new transaction job
 type createJobUseCase struct {
-	db store.DB
+	validator validators.TransactionValidator
+	db        store.DB
 }
 
 // NewCreateJobUseCase creates a new CreateJobUseCase
-func NewCreateJobUseCase(db store.DB) CreateJobUseCase {
+func NewCreateJobUseCase(db store.DB, validator validators.TransactionValidator) CreateJobUseCase {
 	return &createJobUseCase{
-		db: db,
+		validator: validator,
+		db:        db,
 	}
 }
 
@@ -39,21 +43,25 @@ func (uc createJobUseCase) WithDBTransaction(dbtx store.Tx) CreateJobUseCase {
 }
 
 // Execute validates and creates a new transaction job
-func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tenantID string) (*entities.Job, error) {
+func (uc *createJobUseCase) Execute(ctx context.Context, jobEntity *types.Job, tenantID string) (*types.Job, error) {
 	log.WithContext(ctx).
-		WithField("schedule_id", job.ScheduleUUID).
+		WithField("chain_uuid", jobEntity.ChainUUID).
+		WithField("schedule_id", jobEntity.ScheduleUUID).
 		WithField("tenant_id", tenantID).
 		Debug("creating new job")
 
-	schedule, err := uc.db.Schedule().FindOneByUUID(ctx, job.ScheduleUUID, tenantID)
+	if err := uc.validator.ValidateChainExists(ctx, jobEntity.ChainUUID); err != nil {
+		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
+	}
+
+	schedule, err := uc.db.Schedule().FindOneByUUID(ctx, jobEntity.ScheduleUUID, tenantID)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
 	}
 
-	jobModel := parsers.NewJobModelFromEntities(job, &schedule.ID)
-	jobModel.Schedule = schedule
+	jobModel := parsers.NewJobModelFromEntities(jobEntity, &schedule.ID)
 	jobModel.Logs = append(jobModel.Logs, &models.Log{
-		Status:  entities.JobStatusCreated,
+		Status:  types.StatusCreated,
 		Message: "Job created",
 	})
 

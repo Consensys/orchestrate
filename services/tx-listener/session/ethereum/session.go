@@ -7,8 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/containous/traefik/v2/pkg/log"
@@ -20,6 +19,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session"
 	hook "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/hooks"
@@ -33,7 +33,7 @@ const (
 type fetchedBlock struct {
 	block     *ethtypes.Block
 	envelopes []*tx.Envelope // TODO: Remove when envelope store is removed
-	jobs      []*entities.Job
+	jobs      []*types.Job
 }
 
 type EthClient interface {
@@ -362,8 +362,8 @@ func (s *Session) fetchEnvelopes(ctx context.Context, transactions ethtypes.Tran
 	return envelopeMap, nil
 }
 
-func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transactions) (map[string]*entities.Job, error) {
-	jobMap := make(map[string]*entities.Job)
+func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transactions) (map[string]*types.Job, error) {
+	jobMap := make(map[string]*types.Job)
 
 	if len(transactions) > 0 {
 		var txHashes []string
@@ -378,13 +378,11 @@ func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transacti
 		for _, jobResponse := range jobResponses {
 			// Filter by the jobs belonging to same session CHAIN_UUID
 			if jobResponse.ChainUUID == s.Chain.UUID {
-				jobMap[jobResponse.Transaction.Hash] = &entities.Job{
+				jobMap[jobResponse.Transaction.Hash] = &types.Job{
 					UUID:        jobResponse.UUID,
 					ChainUUID:   jobResponse.ChainUUID,
 					Labels:      jobResponse.Labels,
-					Status:      jobResponse.Status,
 					Transaction: jobResponse.Transaction,
-					CreatedAt:   jobResponse.CreatedAt,
 				}
 			}
 		}
@@ -419,7 +417,7 @@ func (s *Session) fetchReceiptsEnvelope(ctx context.Context, transaction ethtype
 	return futureEnvelopes
 }
 
-func (s *Session) fetchReceipts(ctx context.Context, transaction ethtypes.Transactions, jobMap map[string]*entities.Job) []*Future {
+func (s *Session) fetchReceipts(ctx context.Context, transaction ethtypes.Transactions, jobMap map[string]*types.Job) []*Future {
 	var futureJobs []*Future
 
 	for _, blckTx := range transaction {
@@ -431,18 +429,18 @@ func (s *Session) fetchReceipts(ctx context.Context, transaction ethtypes.Transa
 			futureJobs = append(futureJobs, s.fetchReceipt(ctx, jobMap[blckTx.Hash().String()], blckTx.Hash()))
 			continue
 		case isPrivTx(blckTx) && s.Chain.Listener.ExternalTxEnabled:
-			job := &entities.Job{
+			job := &types.Job{
 				ChainUUID: s.Chain.UUID,
-				Transaction: &entities.ETHTransaction{
+				Transaction: &types.ETHTransaction{
 					Hash: blckTx.Hash().Hex(),
 				},
 			}
 			futureJobs = append(futureJobs, s.fetchPrivateReceipt(ctx, job, blckTx.Hash()))
 			continue
 		case s.Chain.Listener.ExternalTxEnabled:
-			job := &entities.Job{
+			job := &types.Job{
 				ChainUUID: s.Chain.UUID,
-				Transaction: &entities.ETHTransaction{
+				Transaction: &types.ETHTransaction{
 					Hash: blckTx.Hash().Hex(),
 				},
 			}
@@ -477,7 +475,7 @@ func awaitReceiptsEnvelopes(futureEnvelopes []*Future) (envelopes []*tx.Envelope
 	return envelopes, nil
 }
 
-func awaitReceipts(futureJobs []*Future) (jobs []*entities.Job, err error) {
+func awaitReceipts(futureJobs []*Future) (jobs []*types.Job, err error) {
 	for _, futureJob := range futureJobs {
 		select {
 		case e := <-futureJob.Err():
@@ -485,7 +483,7 @@ func awaitReceipts(futureJobs []*Future) (jobs []*entities.Job, err error) {
 				err = e
 			}
 		case res := <-futureJob.Result():
-			jobs = append(jobs, res.(*entities.Job))
+			jobs = append(jobs, res.(*types.Job))
 		}
 
 		// Close future
@@ -504,7 +502,7 @@ func isInternalTxEnvelope(envelopeMap map[string]*tx.Envelope, transaction *etht
 	return ok
 }
 
-func isInternalTx(jobMap map[string]*entities.Job, transaction *ethtypes.Transaction) bool {
+func isInternalTx(jobMap map[string]*types.Job, transaction *ethtypes.Transaction) bool {
 	_, ok := jobMap[transaction.Hash().String()]
 	return ok
 }
@@ -546,7 +544,7 @@ func (s *Session) fetchReceiptEnvelope(ctx context.Context, envelope *tx.Envelop
 	})
 }
 
-func (s *Session) fetchReceipt(ctx context.Context, job *entities.Job, txHash ethcommon.Hash) *Future {
+func (s *Session) fetchReceipt(ctx context.Context, job *types.Job, txHash ethcommon.Hash) *Future {
 	return NewFuture(func() (interface{}, error) {
 		logger := log.FromContext(ctx).
 			WithField("tx.hash", txHash.Hex()).
@@ -632,7 +630,7 @@ func (s *Session) fetchPrivateReceiptEnvelope(ctx context.Context, envelope *tx.
 	})
 }
 
-func (s *Session) fetchPrivateReceipt(ctx context.Context, job *entities.Job, txHash ethcommon.Hash) *Future {
+func (s *Session) fetchPrivateReceipt(ctx context.Context, job *types.Job, txHash ethcommon.Hash) *Future {
 	return NewFuture(func() (interface{}, error) {
 		logger := log.FromContext(ctx).
 			WithField("tx.hash", txHash.Hex()).

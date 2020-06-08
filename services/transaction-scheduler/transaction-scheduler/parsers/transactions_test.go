@@ -3,17 +3,17 @@
 package parsers
 
 import (
+	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
-	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 )
 
 func TestParsersTransaction_NewModelFromEntity(t *testing.T) {
-	txEntity := testutils2.FakeTransactionEntity()
+	txEntity := testutils2.FakeETHTransaction()
 	txModel := NewTransactionModelFromEntities(txEntity)
 	finalTxEntity := NewTransactionEntityFromModels(txModel)
 
@@ -35,7 +35,7 @@ func TestParsersTransaction_NewEntityFromModel(t *testing.T) {
 
 func TestParsersTransaction_UpdateTransactionModel(t *testing.T) {
 	txModel := testutils.FakeTransaction()
-	txEntity := testutils2.FakeTransactionEntity()
+	txEntity := testutils2.FakeETHTransaction()
 	UpdateTransactionModelFromEntities(txModel, txEntity)
 
 	expectedTxModel := NewTransactionModelFromEntities(txEntity)

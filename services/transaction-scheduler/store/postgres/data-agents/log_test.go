@@ -48,7 +48,7 @@ func (s *logTestSuite) TearDownSuite() {
 func (s *logTestSuite) TestPGLog_Insert() {
 	ctx := context.Background()
 
-	job := testutils.FakeJob(0)
+	job := testutils.FakeJobModel(0)
 	err := s.agents.Schedule().Insert(ctx, job.Schedule)
 	assert.Nil(s.T(), err)
 	err = s.agents.Transaction().Insert(ctx, job.Transaction)

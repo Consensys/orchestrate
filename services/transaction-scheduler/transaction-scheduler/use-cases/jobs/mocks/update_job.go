@@ -7,7 +7,7 @@ package mocks
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	reflect "reflect"
 )
 
@@ -35,16 +35,16 @@ func (m *MockUpdateJobUseCase) EXPECT() *MockUpdateJobUseCaseMockRecorder {
 }
 
 // Execute mocks base method.
-func (m *MockUpdateJobUseCase) Execute(ctx context.Context, job *entities.Job, tenantID string) (*entities.Job, error) {
+func (m *MockUpdateJobUseCase) Execute(ctx context.Context, jobEntity *types.Job, newStatus, tenantID string) (*types.Job, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, job, tenantID)
-	ret0, _ := ret[0].(*entities.Job)
+	ret := m.ctrl.Call(m, "Execute", ctx, jobEntity, newStatus, tenantID)
+	ret0, _ := ret[0].(*types.Job)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute.
-func (mr *MockUpdateJobUseCaseMockRecorder) Execute(ctx, job, tenantID interface{}) *gomock.Call {
+func (mr *MockUpdateJobUseCaseMockRecorder) Execute(ctx, jobEntity, newStatus, tenantID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockUpdateJobUseCase)(nil).Execute), ctx, job, tenantID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockUpdateJobUseCase)(nil).Execute), ctx, jobEntity, newStatus, tenantID)
 }

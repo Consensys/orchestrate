@@ -5,6 +5,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
@@ -15,7 +16,7 @@ import (
 const searchJobsComponent = "use-cases.search-jobs"
 
 type SearchJobsUseCase interface {
-	Execute(ctx context.Context, filters *entities.JobFilters, tenantID string) ([]*entities.Job, error)
+	Execute(ctx context.Context, filters *entities.JobFilters, tenantID string) ([]*types.Job, error)
 }
 
 // searchJobsUseCase is a use case to get a schedule
@@ -31,12 +32,12 @@ func NewSearchJobsUseCase(db store.DB) SearchJobsUseCase {
 }
 
 // Execute gets a schedule
-func (uc *searchJobsUseCase) Execute(ctx context.Context, filters *entities.JobFilters, tenantID string) ([]*entities.Job, error) {
+func (uc *searchJobsUseCase) Execute(ctx context.Context, filters *entities.JobFilters, tenantID string) ([]*types.Job, error) {
 	log.WithContext(ctx).
 		WithField("filters", filters).
 		Debug("search jobs")
 
-	txHashesFilter := []string{}
+	var txHashesFilter []string
 	for _, hash := range filters.TxHashes {
 		txHashesFilter = append(txHashesFilter, hash.String())
 	}
@@ -46,7 +47,7 @@ func (uc *searchJobsUseCase) Execute(ctx context.Context, filters *entities.JobF
 		return nil, errors.FromError(err).ExtendComponent(searchJobsComponent)
 	}
 
-	resp := []*entities.Job{}
+	var resp []*types.Job
 	for _, jb := range jobModels {
 		resp = append(resp, parsers.NewJobEntityFromModels(jb))
 	}

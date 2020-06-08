@@ -63,7 +63,7 @@ func (s *transactionsControllerTestSuite) SetupTest() {
 func (s *transactionsControllerTestSuite) TestTransactionsController_Send() {
 	txRequest := testutils.FakeSendTransactionRequest()
 	requestBytes, _ := json.Marshal(txRequest)
-	txRequestEntity := formatters.FormatSendTxRequest(txRequest, s.chainUUID)
+	txRequestEntity := formatters.FormatSendTxRequest(txRequest)
 
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		rw := httptest.NewRecorder()
@@ -76,7 +76,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_Send() {
 		txRequestEntityResp := testutils2.FakeTxRequestEntity()
 
 		s.sendTransactionUseCase.EXPECT().
-			Execute(gomock.Any(), txRequestEntity, s.tenantID).
+			Execute(gomock.Any(), txRequestEntity, s.chainUUID, s.tenantID).
 			Return(txRequestEntityResp, nil).
 			Times(1)
 
@@ -109,7 +109,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_Send() {
 			WithContext(s.ctx)
 
 		s.sendTransactionUseCase.EXPECT().
-			Execute(gomock.Any(), txRequestEntity, s.tenantID).
+			Execute(gomock.Any(), txRequestEntity, s.chainUUID, s.tenantID).
 			Return(nil, errors.InvalidParameterError("error")).
 			Times(1)
 

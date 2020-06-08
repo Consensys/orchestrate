@@ -4,7 +4,8 @@ package jobs
 
 import (
 	"context"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	testutils3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -13,7 +14,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 )
 
 func TestUpdateJob_Execute(t *testing.T) {
@@ -39,12 +39,11 @@ func TestUpdateJob_Execute(t *testing.T) {
 	usecase := NewUpdateJobUseCase(mockDB)
 
 	tenantID := "tenantID"
-	newStatus := entities.JobStatusPending
+	newStatus := types.StatusPending
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
-		jobEntity := testutils.FakeJobEntity()
-		jobEntity.Status = newStatus
-		jobModel := testutils2.FakeJob(0)
+		jobEntity := testutils3.FakeJob()
+		jobModel := testutils2.FakeJobModel(0)
 		parsers.UpdateJobModelFromEntities(jobModel, jobEntity)
 
 		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, tenantID).Return(jobModel, nil).Times(2)
@@ -52,89 +51,81 @@ func TestUpdateJob_Execute(t *testing.T) {
 		mockJobDA.EXPECT().Update(gomock.Any(), jobModel).Return(nil)
 		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
 
-		_, err := usecase.Execute(context.Background(), jobEntity, tenantID)
+		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, tenantID)
 
 		assert.Nil(t, err)
 	})
 
 	t.Run("should execute use case successfully if transaction is empty", func(t *testing.T) {
-		jobEntity := testutils.FakeJobEntity()
+		jobEntity := testutils3.FakeJob()
 		jobEntity.Transaction = nil
-		jobEntity.Status = newStatus
-		jobModel := testutils2.FakeJob(0)
+		jobModel := testutils2.FakeJobModel(0)
 
 		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, tenantID).Return(jobModel, nil).Times(2)
 		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
 
-		job, err := usecase.Execute(context.Background(), jobEntity, tenantID)
+		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, tenantID)
 
 		assert.Nil(t, err)
-		assert.Equal(t, job.Status, jobModel.GetStatus())
 	})
 
 	t.Run("should execute use case successfully if status is empty", func(t *testing.T) {
-		jobEntity := testutils.FakeJobEntity()
-		jobEntity.Status = ""
-		jobModel := testutils2.FakeJob(0)
+		jobEntity := testutils3.FakeJob()
+		jobModel := testutils2.FakeJobModel(0)
 		parsers.UpdateJobModelFromEntities(jobModel, jobEntity)
 
 		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, tenantID).Return(jobModel, nil).Times(2)
 		mockTransactionDA.EXPECT().Update(gomock.Any(), jobModel.Transaction).Return(nil)
 		mockJobDA.EXPECT().Update(gomock.Any(), jobModel).Return(nil)
 
-		job, err := usecase.Execute(context.Background(), jobEntity, tenantID)
+		_, err := usecase.Execute(context.Background(), jobEntity, "", tenantID)
 
 		assert.Nil(t, err)
-		assert.Equal(t, job.Status, jobModel.GetStatus())
 	})
 
 	t.Run("should fail with the same error if find one fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
-		jobEntity := testutils.FakeJobEntity()
-		jobEntity.Status = newStatus
-		jobModel := testutils2.FakeJob(0)
+		jobEntity := testutils3.FakeJob()
+		jobModel := testutils2.FakeJobModel(0)
 		parsers.UpdateJobModelFromEntities(jobModel, jobEntity)
 
 		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, tenantID).Return(jobModel, expectedErr)
 
-		_, err := usecase.Execute(context.Background(), jobEntity, tenantID)
+		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, tenantID)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(updateJobComponent), err)
 	})
 
 	t.Run("should fail with the same error if update transaction fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
-		jobEntity := testutils.FakeJobEntity()
-		jobEntity.Status = newStatus
-		jobModel := testutils2.FakeJob(0)
+		jobEntity := testutils3.FakeJob()
+		jobModel := testutils2.FakeJobModel(0)
 		parsers.UpdateJobModelFromEntities(jobModel, jobEntity)
 
 		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, tenantID).Return(jobModel, nil)
 		mockTransactionDA.EXPECT().Update(gomock.Any(), jobModel.Transaction).Return(expectedErr)
 
-		_, err := usecase.Execute(context.Background(), jobEntity, tenantID)
+		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, tenantID)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(updateJobComponent), err)
 	})
 
 	t.Run("should fail with the same error if update job fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
-		jobEntity := testutils.FakeJobEntity()
-		jobEntity.Status = newStatus
-		jobModel := testutils2.FakeJob(0)
+		jobEntity := testutils3.FakeJob()
+		jobModel := testutils2.FakeJobModel(0)
 		parsers.UpdateJobModelFromEntities(jobModel, jobEntity)
 
 		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, tenantID).Return(jobModel, nil)
 		mockTransactionDA.EXPECT().Update(gomock.Any(), jobModel.Transaction).Return(nil)
 		mockJobDA.EXPECT().Update(gomock.Any(), jobModel).Return(expectedErr)
 
-		_, err := usecase.Execute(context.Background(), jobEntity, tenantID)
+		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, tenantID)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(updateJobComponent), err)
 	})
 
 	t.Run("should fail with the same error if insert log fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
-		jobEntity := testutils.FakeJobEntity()
-		jobEntity.Status = newStatus
-		jobModel := testutils2.FakeJob(0)
+		jobEntity := testutils3.FakeJob()
+		jobModel := testutils2.FakeJobModel(0)
 		parsers.UpdateJobModelFromEntities(jobModel, jobEntity)
 
 		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, tenantID).Return(jobModel, nil)
@@ -142,15 +133,14 @@ func TestUpdateJob_Execute(t *testing.T) {
 		mockJobDA.EXPECT().Update(gomock.Any(), jobModel).Return(nil)
 		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(expectedErr)
 
-		_, err := usecase.Execute(context.Background(), jobEntity, tenantID)
+		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, tenantID)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(updateJobComponent), err)
 	})
 
 	t.Run("should fail with the same error if find one fails on the second call", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
-		jobEntity := testutils.FakeJobEntity()
-		jobEntity.Status = newStatus
-		jobModel := testutils2.FakeJob(0)
+		jobEntity := testutils3.FakeJob()
+		jobModel := testutils2.FakeJobModel(0)
 		parsers.UpdateJobModelFromEntities(jobModel, jobEntity)
 
 		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, tenantID).Return(jobModel, nil)
@@ -159,7 +149,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, tenantID).Return(nil, expectedErr)
 
-		_, err := usecase.Execute(context.Background(), jobEntity, tenantID)
+		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, tenantID)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(updateJobComponent), err)
 	})
 }

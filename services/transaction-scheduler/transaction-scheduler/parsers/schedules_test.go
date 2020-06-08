@@ -5,7 +5,6 @@ package parsers
 import (
 	"testing"
 
-	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
 
@@ -14,9 +13,8 @@ import (
 )
 
 func TestParsersSchedule_NewModelFromEntity(t *testing.T) {
-	chainUUID := uuid.NewV4().String()
 	tenantID := "_"
-	scheduleEntity := testutils2.FakeScheduleEntity(chainUUID)
+	scheduleEntity := testutils2.FakeScheduleEntity()
 	scheduleModel := NewScheduleModelFromEntities(scheduleEntity, tenantID)
 	finalScheduleEntity := NewScheduleEntityFromModels(scheduleModel)
 
@@ -30,10 +28,9 @@ func TestParsersSchedule_NewEntityFromModel(t *testing.T) {
 	scheduleModel := testutils.FakeSchedule(tenantID)
 	scheduleEntity := NewScheduleEntityFromModels(scheduleModel)
 	finalScheduleModel := NewScheduleModelFromEntities(scheduleEntity, tenantID)
-	
+
 	assert.Equal(t, finalScheduleModel.UUID, scheduleModel.UUID)
 	assert.Equal(t, finalScheduleModel.TenantID, scheduleModel.TenantID)
-	assert.Equal(t, finalScheduleModel.ChainUUID, scheduleModel.ChainUUID)
 	assert.Equal(t, finalScheduleModel.CreatedAt, scheduleModel.CreatedAt)
 	assert.Equal(t, finalScheduleModel.Jobs[0].UUID, scheduleModel.Jobs[0].UUID)
 	assert.Equal(t, finalScheduleModel.Jobs[0].Type, scheduleModel.Jobs[0].Type)

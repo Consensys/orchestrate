@@ -42,7 +42,6 @@ CREATE TABLE schedules (
     id SERIAL PRIMARY KEY,
     uuid UUID NOT NULL,
 	tenant_id TEXT NOT NULL,
-	chain_uuid UUID NOT NULL,
 	transaction_request_id INTEGER REFERENCES transaction_requests(id),
 	created_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL, 
 	UNIQUE(uuid)
@@ -51,6 +50,7 @@ CREATE TABLE schedules (
 CREATE TABLE jobs (
     id SERIAL PRIMARY KEY,
     uuid UUID NOT NULL,
+	chain_uuid UUID NOT NULL,
 	schedule_id INTEGER NOT NULL REFERENCES schedules,
     type TEXT NOT NULL,
     transaction_id INTEGER NOT NULL REFERENCES transactions(id),

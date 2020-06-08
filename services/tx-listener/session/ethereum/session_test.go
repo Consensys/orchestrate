@@ -6,15 +6,11 @@ package ethereum
 import (
 	"context"
 	"fmt"
+	types3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"math/big"
 	"sync"
 	"testing"
 	"time"
-
-	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/testutils"
-	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 
 	eth "github.com/ethereum/go-ethereum"
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -29,6 +25,9 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
+	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/testutils"
+	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 	offset "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/offset/memory"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/offset/mock"
@@ -225,7 +224,7 @@ type hookCall struct {
 	chain     *dynamic.Chain
 	block     *ethtypes.Block
 	envelopes []*tx.Envelope
-	jobs      []*entities.Job
+	jobs      []*types3.Job
 }
 
 type MockHook struct {
@@ -261,7 +260,7 @@ func (hk *MockHook) AfterNewBlockEnvelope(_ context.Context, chain *dynamic.Chai
 	}
 }
 
-func (hk *MockHook) AfterNewBlock(_ context.Context, chain *dynamic.Chain, block *ethtypes.Block, jobs []*entities.Job) error {
+func (hk *MockHook) AfterNewBlock(_ context.Context, chain *dynamic.Chain, block *ethtypes.Block, jobs []*types3.Job) error {
 	hk.Calls <- &hookCall{
 		chain: chain,
 		block: block,

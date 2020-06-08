@@ -52,8 +52,8 @@ func (c *TransactionsController) Send(rw http.ResponseWriter, request *http.Requ
 
 	chainUUID := mux.Vars(request)["chainUUID"]
 	tenantID := multitenancy.TenantIDFromContext(ctx)
-	txReq := formatters.FormatSendTxRequest(txRequest, chainUUID)
-	txResponse, err := c.ucs.SendTransaction().Execute(ctx, txReq, tenantID)
+	txReq := formatters.FormatSendTxRequest(txRequest)
+	txResponse, err := c.ucs.SendTransaction().Execute(ctx, txReq, chainUUID, tenantID)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return

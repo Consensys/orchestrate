@@ -3,7 +3,7 @@
 package parsers
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -13,24 +13,23 @@ import (
 
 func TestParsersTxRequest_NewModelFromEntity(t *testing.T) {
 	reqHash := "reqHash"
-	tenantID := "_"
 	txReqEntity := testutils2.FakeTxRequestEntity()
-	txReqModel, _ := NewTxRequestModelFromEntities(txReqEntity, reqHash, tenantID)
+	txReqModel, _ := NewTxRequestModelFromEntities(txReqEntity, reqHash)
 
 	paramsBytes, _ := json.Marshal(txReqEntity.Params)
 	assert.Equal(t, txReqEntity.IdempotencyKey, txReqModel.IdempotencyKey)
 	assert.Equal(t, txReqEntity.CreatedAt, txReqModel.CreatedAt)
 	assert.Equal(t, string(paramsBytes), txReqModel.Params)
-	assert.Equal(t, txReqEntity.Schedule.UUID, txReqModel.Schedules[0].UUID)
-	assert.Equal(t, txReqEntity.Schedule.ChainUUID, txReqModel.Schedules[0].ChainUUID)
 }
 
 func TestParsersTxRequest_NewJobEntityFromSendTx(t *testing.T) {
 	txReqEntity := testutils2.FakeTxRequestEntity()
-	job := NewJobEntityFromTxRequest(txReqEntity, tx.JobEthereumTransaction)
+	chainUUID := "chainUUID"
+	job := NewJobEntityFromTxRequest(txReqEntity, types.EthereumTransaction, chainUUID)
 
 	assert.Equal(t, job.ScheduleUUID, txReqEntity.Schedule.UUID)
-	assert.Equal(t, job.Type, tx.JobEthereumTransaction)
+	assert.Equal(t, job.ChainUUID, chainUUID)
+	assert.Equal(t, job.Type, types.EthereumTransaction)
 	assert.Equal(t, job.Labels, txReqEntity.Labels)
 
 	assert.Equal(t, job.Transaction.From, txReqEntity.Params.From)

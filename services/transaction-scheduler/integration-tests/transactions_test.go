@@ -9,10 +9,10 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 	"gopkg.in/h2non/gock.v1"
 	"testing"
 )
@@ -87,7 +87,6 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		}
 		assert.Equal(t, txRequest.IdempotencyKey, txResponse.IdempotencyKey)
 		assert.NotEmpty(t, txResponse.Schedule.UUID)
-		assert.Equal(t, chainUUID, txResponse.Schedule.ChainUUID)
 
 		scheduleResponse, err := s.client.GetSchedule(ctx, txResponse.Schedule.UUID)
 		if err != nil {
@@ -95,7 +94,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 			return
 		}
 		assert.NotEmpty(t, scheduleResponse.Jobs[0].UUID)
-		assert.Equal(t, entities.JobStatusStarted, scheduleResponse.Jobs[0].Status)
+		assert.Equal(t, types.StatusStarted, scheduleResponse.Jobs[0].Status)
 		assert.Equal(t, txRequest.Params.From, scheduleResponse.Jobs[0].Transaction.From)
 		assert.Equal(t, txRequest.Params.To, scheduleResponse.Jobs[0].Transaction.To)
 

@@ -29,7 +29,7 @@ func TestGetJob_Execute(t *testing.T) {
 	tenantID := "tenantID"
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
-		job := testutils.FakeJob(0)
+		job := testutils.FakeJobModel(0)
 		expectedResponse := parsers.NewJobEntityFromModels(job)
 		
 		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, tenantID).Return(job, nil)

@@ -3,14 +3,14 @@ package types
 import (
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 )
 
 type TransactionResponse struct {
-	IdempotencyKey string                    `json:"idempotencyKey" validate:"required"`
-	Params         *entities.TxRequestParams `json:"params"`
-	Schedule       *ScheduleResponse         `json:"schedule"`
-	CreatedAt      time.Time                 `json:"createdAt"`
+	IdempotencyKey string                      `json:"idempotencyKey"`
+	Params         *types.ETHTransactionParams `json:"params"`
+	Schedule       *ScheduleResponse           `json:"schedule"`
+	CreatedAt      time.Time                   `json:"createdAt"`
 }
 
 type BaseTransactionRequest struct {

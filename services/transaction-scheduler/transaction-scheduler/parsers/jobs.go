@@ -1,20 +1,22 @@
 package parsers
 
 import (
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
 
-func NewJobModelFromEntities(job *entities.Job, scheduleID *int) *models.Job {
+func NewJobModelFromEntities(job *types.Job, scheduleID *int) *models.Job {
 	jobModel := &models.Job{
 		UUID:       job.UUID,
+		ChainUUID:  job.ChainUUID,
 		Type:       job.Type,
 		Labels:     job.Labels,
 		ScheduleID: scheduleID,
 		Schedule: &models.Schedule{
 			UUID: job.ScheduleUUID,
 		},
+		Logs:      []*models.Log{},
 		CreatedAt: job.CreatedAt,
 	}
 
@@ -26,36 +28,39 @@ func NewJobModelFromEntities(job *entities.Job, scheduleID *int) *models.Job {
 		jobModel.Transaction = NewTransactionModelFromEntities(job.Transaction)
 	}
 
+	for _, log := range job.Logs {
+		jobModel.Logs = append(jobModel.Logs, NewLogModelFromEntity(log))
+	}
+
 	return jobModel
 }
 
-func NewJobEntityFromModels(jobModel *models.Job) *entities.Job {
-	status := jobModel.GetStatus()
-	if status == "" {
-		status = entities.JobStatusCreated
-	}
-
-	job := &entities.Job{
+func NewJobEntityFromModels(jobModel *models.Job) *types.Job {
+	job := &types.Job{
 		UUID:      jobModel.UUID,
-		Status:    status,
-		CreatedAt: jobModel.CreatedAt,
-		Labels:    jobModel.Labels,
+		ChainUUID: jobModel.ChainUUID,
 		Type:      jobModel.Type,
+		Labels:    jobModel.Labels,
+		CreatedAt: jobModel.CreatedAt,
+		Logs:      []*types.Log{},
 	}
 
 	if jobModel.Schedule != nil {
 		job.ScheduleUUID = jobModel.Schedule.UUID
-		job.ChainUUID = jobModel.Schedule.ChainUUID
 	}
 
 	if jobModel.Transaction != nil {
 		job.Transaction = NewTransactionEntityFromModels(jobModel.Transaction)
 	}
 
+	for _, logModel := range jobModel.Logs {
+		job.Logs = append(job.Logs, NewLogEntityFromModels(logModel))
+	}
+
 	return job
 }
 
-func UpdateJobModelFromEntities(jobModel *models.Job, job *entities.Job) {
+func UpdateJobModelFromEntities(jobModel *models.Job, job *types.Job) {
 	// for k, v := range job.Labels {
 	// 	jobModel.Labels[k] = v
 	// }
@@ -95,7 +100,7 @@ func NewEnvelopeFromJobModel(job *models.Job, headers map[string]string) *tx.TxE
 		}},
 		InternalLabels: make(map[string]string),
 	}
-	txEnvelope.SetChainUUID(job.Schedule.ChainUUID)
+	txEnvelope.SetChainUUID(job.ChainUUID)
 
 	return txEnvelope
 }

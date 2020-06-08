@@ -55,7 +55,7 @@ func (s *scheduleTestSuite) TestPGSchedule_Insert() {
 		assert.Nil(t, err)
 		assert.NotEmpty(t, schedule.ID)
 	})
-	
+
 	s.T().Run("should insert model without UUID successfully", func(t *testing.T) {
 		schedule := testutils.FakeSchedule("")
 		err := s.agents.Schedule().Insert(context.Background(), schedule)
@@ -157,7 +157,7 @@ func (s *scheduleTestSuite) TestPGSchedule_ConnectionErr() {
 		_, err := s.agents.Schedule().FindOneByUUID(ctx, schedule.UUID, "_")
 		assert.True(t, errors.IsPostgresConnectionError(err))
 	})
-	
+
 	s.T().Run("should return PostgresConnectionError if fetchAll fails", func(t *testing.T) {
 		_, err := s.agents.Schedule().FindAll(ctx, "_")
 		assert.True(t, errors.IsPostgresConnectionError(err))
@@ -170,7 +170,6 @@ func (s *scheduleTestSuite) TestPGSchedule_ConnectionErr() {
 func assertEqualSchedule(t *testing.T, expected, actual *models.Schedule) {
 	assert.NotEmpty(t, actual.ID)
 	assert.Equal(t, expected.UUID, actual.UUID)
-	assert.Equal(t, expected.ChainUUID, actual.ChainUUID)
 	assert.Equal(t, expected.CreatedAt, actual.CreatedAt)
 	assert.Equal(t, len(expected.Jobs), len(actual.Jobs))
 	if len(expected.Jobs) == len(actual.Jobs) {

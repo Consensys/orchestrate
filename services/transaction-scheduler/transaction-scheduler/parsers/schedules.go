@@ -8,7 +8,6 @@ import (
 func NewScheduleEntityFromModels(scheduleModel *models.Schedule) *entities.Schedule {
 	schedule := &entities.Schedule{
 		UUID:      scheduleModel.UUID,
-		ChainUUID: scheduleModel.ChainUUID,
 		CreatedAt: scheduleModel.CreatedAt,
 	}
 
@@ -21,9 +20,8 @@ func NewScheduleEntityFromModels(scheduleModel *models.Schedule) *entities.Sched
 
 func NewScheduleModelFromEntities(schedule *entities.Schedule, tenantID string) *models.Schedule {
 	scheduleModel := &models.Schedule{
-		UUID:      schedule.UUID,
-		ChainUUID: schedule.ChainUUID,
-		TenantID:  tenantID,
+		UUID:     schedule.UUID,
+		TenantID: tenantID,
 	}
 
 	if schedule.TxRequest != nil {

@@ -32,7 +32,7 @@ func TestPGJob(t *testing.T) {
 }
 
 func (s *jobTestSuite) SetupSuite() {
-	s.pg , _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
+	s.pg, _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
 	s.pg.InitTestDB(s.T())
 }
 
@@ -53,7 +53,7 @@ func (s *jobTestSuite) TestPGJob_Insert() {
 	ctx := context.Background()
 
 	s.T().Run("should insert model successfully", func(t *testing.T) {
-		job := testutils.FakeJob(0)
+		job := testutils.FakeJobModel(0)
 		err := insertJob(ctx, s.agents, job)
 		assert.Nil(s.T(), err)
 
@@ -62,9 +62,9 @@ func (s *jobTestSuite) TestPGJob_Insert() {
 		assert.NotEmpty(t, job.Transaction.ID)
 		assert.NotEmpty(t, job.Schedule.ID)
 	})
-	
+
 	s.T().Run("should insert model without UUID successfully", func(t *testing.T) {
-		job := testutils.FakeJob(0)
+		job := testutils.FakeJobModel(0)
 		job.UUID = ""
 		err := insertJob(ctx, s.agents, job)
 		assert.Nil(s.T(), err)
@@ -76,7 +76,7 @@ func (s *jobTestSuite) TestPGJob_Insert() {
 	})
 
 	s.T().Run("should update model successfully", func(t *testing.T) {
-		job := testutils.FakeJob(0)
+		job := testutils.FakeJobModel(0)
 		err := insertJob(ctx, s.agents, job)
 		assert.Nil(s.T(), err)
 
@@ -89,7 +89,7 @@ func (s *jobTestSuite) TestPGJob_Insert() {
 
 func (s *jobTestSuite) TestPGJob_Update() {
 	ctx := context.Background()
-	job := testutils.FakeJob(0)
+	job := testutils.FakeJobModel(0)
 	err := insertJob(ctx, s.agents, job)
 	assert.Nil(s.T(), err)
 
@@ -119,7 +119,7 @@ func (s *jobTestSuite) TestPGJob_Update() {
 func (s *jobTestSuite) TestPGJob_FindOneByUUID() {
 	ctx := context.Background()
 	tenantID := "tenantID"
-	job := testutils.FakeJob(0)
+	job := testutils.FakeJobModel(0)
 	job.Schedule.TenantID = tenantID
 	err := insertJob(ctx, s.agents, job)
 	assert.Nil(s.T(), err)
@@ -163,21 +163,20 @@ func (s *jobTestSuite) TestPGJob_FindOneByUUID() {
 func (s *jobTestSuite) TestPGJob_Search() {
 	ctx := context.Background()
 	tenantID := "tenantID"
-	
-	jobOne := testutils.FakeJob(0)
+
+	jobOne := testutils.FakeJobModel(0)
 	txHashOne := common.HexToHash("0x1")
 	jobOne.Transaction.Hash = txHashOne.String()
 	jobOne.Schedule.TenantID = tenantID
 	err := insertJob(ctx, s.agents, jobOne)
 	assert.Nil(s.T(), err)
-	
-	jobTwo := testutils.FakeJob(0)
+
+	jobTwo := testutils.FakeJobModel(0)
 	txHashTwo := common.HexToHash("0x2")
 	jobTwo.Transaction.Hash = txHashTwo.String()
 	jobTwo.Schedule.TenantID = tenantID
 	err = insertJob(ctx, s.agents, jobTwo)
 	assert.Nil(s.T(), err)
-	
 
 	s.T().Run("should find model successfully", func(t *testing.T) {
 		retrivedJobs, err := s.agents.Job().Search(ctx, tenantID, []string{txHashOne.String()})
@@ -187,14 +186,15 @@ func (s *jobTestSuite) TestPGJob_Search() {
 		assert.Equal(t, jobOne.UUID, retrivedJobs[0].UUID)
 		assert.Equal(t, jobOne.Transaction.UUID, retrivedJobs[0].Transaction.UUID)
 		assert.Equal(t, txHashOne.String(), retrivedJobs[0].Transaction.Hash)
+		assert.Equal(t, len(jobOne.Logs), len(retrivedJobs[0].Logs))
 	})
-	
+
 	s.T().Run("should not find any model", func(t *testing.T) {
 		retrivedJobs, err := s.agents.Job().Search(ctx, tenantID, []string{"0x3"})
 		assert.Nil(t, err)
 		assert.Empty(t, retrivedJobs)
 	})
-	
+
 	s.T().Run("should find every inserted model successfully", func(t *testing.T) {
 		retrivedJobs, err := s.agents.Job().Search(ctx, tenantID, nil)
 		assert.Nil(t, err)
@@ -207,7 +207,7 @@ func (s *jobTestSuite) TestPGJob_ConnectionErr() {
 
 	// We drop the DB to make the test fail
 	s.pg.DropTestDB(s.T())
-	job := testutils.FakeJob(0)
+	job := testutils.FakeJobModel(0)
 	s.T().Run("should return PostgresConnectionError if insert fails", func(t *testing.T) {
 		err := s.agents.Job().Insert(ctx, job)
 		assert.True(t, errors.IsPostgresConnectionError(err))

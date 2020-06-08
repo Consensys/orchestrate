@@ -20,9 +20,9 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
+	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/schedules"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/schedules/mocks"
-	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 )
 
 type schedulesCtrlTestSuite struct {
@@ -71,7 +71,6 @@ func (s *schedulesCtrlTestSuite) SetupTest() {
 
 func (s *schedulesCtrlTestSuite) TestScheduleController_Create() {
 	scheduleRequest := testutils.FakeCreateScheduleRequest()
-	scheduleEntity := formatters.FormatScheduleCreateRequest(scheduleRequest)
 	requestBytes, _ := json.Marshal(scheduleRequest)
 
 	s.T().Run("should execute request successfully", func(t *testing.T) {
@@ -79,11 +78,11 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_Create() {
 		httpRequest := httptest.
 			NewRequest(http.MethodPost, "/schedules", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
-		
-		scheduleEntityResp := testutils2.FakeScheduleEntity(scheduleRequest.ChainUUID)
+
+		scheduleEntityResp := testutils2.FakeScheduleEntity()
 
 		s.createScheduleUC.EXPECT().
-			Execute(gomock.Any(), scheduleEntity, s.tenantID).
+			Execute(gomock.Any(), &entities.Schedule{}, s.tenantID).
 			Return(scheduleEntityResp, nil).
 			Times(1)
 
@@ -95,20 +94,6 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_Create() {
 		assert.Equal(t, http.StatusOK, rw.Code)
 	})
 
-	s.T().Run("should fail with Bad request if invalid format", func(t *testing.T) {
-		scheduleRequest := testutils.FakeCreateScheduleRequest()
-		scheduleRequest.ChainUUID = ""
-		requestBytes, _ := json.Marshal(scheduleRequest)
-
-		rw := httptest.NewRecorder()
-		httpRequest := httptest.
-			NewRequest(http.MethodPost, "/schedules", bytes.NewReader(requestBytes)).
-			WithContext(s.ctx)
-
-		s.router.ServeHTTP(rw, httpRequest)
-		assert.Equal(t, http.StatusBadRequest, rw.Code)
-	})
-
 	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
 	s.T().Run("should fail with 422 if use case fails with InvalidParameterError", func(t *testing.T) {
 		rw := httptest.NewRecorder()
@@ -117,7 +102,7 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_Create() {
 			WithContext(s.ctx)
 
 		s.createScheduleUC.EXPECT().
-			Execute(gomock.Any(), scheduleEntity, s.tenantID).
+			Execute(gomock.Any(), &entities.Schedule{}, s.tenantID).
 			Return(nil, errors.InvalidParameterError("error")).
 			Times(1)
 
@@ -126,12 +111,11 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_Create() {
 	})
 }
 
-
 func (s *schedulesCtrlTestSuite) TestScheduleController_GetOne() {
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodGet, "/schedules/scheduleUUID", nil).WithContext(s.ctx)
-		scheduleEntityResp := testutils2.FakeScheduleEntity("ChainUUID")
+		scheduleEntityResp := testutils2.FakeScheduleEntity()
 
 		s.getScheduleUC.EXPECT().
 			Execute(gomock.Any(), "scheduleUUID", s.tenantID).
@@ -165,7 +149,7 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_GetAll() {
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodGet, "/schedules", nil).WithContext(s.ctx)
-		schedulesEntities := []*entities.Schedule{testutils2.FakeScheduleEntity("chainUUID")}
+		schedulesEntities := []*entities.Schedule{testutils2.FakeScheduleEntity()}
 
 		s.getSchedulesUC.EXPECT().
 			Execute(gomock.Any(), s.tenantID).

@@ -32,7 +32,7 @@ func TestStartJob_Execute(t *testing.T) {
 	usecase := NewStartJobUseCase(mockDB, mockKafkaProducer, txCrafterTopic)
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
-		job := testutils.FakeJob(1)
+		job := testutils.FakeJobModel(1)
 		job.ID = 1
 		job.UUID = "6380e2b6-b828-43ee-abdc-de0f8d57dc5f"
 		job.Transaction.Sender = "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
@@ -48,7 +48,7 @@ func TestStartJob_Execute(t *testing.T) {
 	})
 
 	t.Run("should fail with same error if FindOne fails", func(t *testing.T) {
-		job := testutils.FakeJob(1)
+		job := testutils.FakeJobModel(1)
 		job.UUID = "6380e2b6-b828-43ee-abdc-de0f8d57dc5f"
 		expectedErr := errors.NotFoundError("error")
 
@@ -59,7 +59,7 @@ func TestStartJob_Execute(t *testing.T) {
 	})
 
 	t.Run("should fail with KafkaConnectionError if Produce fails", func(t *testing.T) {
-		job := testutils.FakeJob(1)
+		job := testutils.FakeJobModel(1)
 		job.UUID = "6380e2b6-b828-43ee-abdc-de0f8d57dc5f"
 		job.Transaction.Sender = "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
 		job.Schedule = testutils.FakeSchedule("")
@@ -72,7 +72,7 @@ func TestStartJob_Execute(t *testing.T) {
 	})
 
 	t.Run("should fail with same error if Insert log fails", func(t *testing.T) {
-		job := testutils.FakeJob(1)
+		job := testutils.FakeJobModel(1)
 		job.ID = 1
 		job.UUID = "6380e2b6-b828-43ee-abdc-de0f8d57dc5f"
 		job.Transaction.Sender = "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
