@@ -33,6 +33,7 @@ x-default-variables: &default-variables
   KAFKA_SASL_PASSWORD: ${KAFKA_SASL_PASSWORD-}
   KAFKA_TLS_ENABLED: ${KAFKA_TLS_ENABLED-false}
   KAFKA_TLS_INSECURE_SKIP_VERIFY: ${KAFKA_TLS_INSECURE_SKIP_VERIFY-false}
+  TX_SCHEDULER_ENABLED: ${TX_SCHEDULER_ENABLED-false}
 
 x-container-common: &container-common
   image: golang:1.14

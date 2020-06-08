@@ -6,11 +6,14 @@ package ethereum
 import (
 	"context"
 	"fmt"
-	types3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"math/big"
+	"os"
 	"sync"
 	"testing"
 	"time"
+
+	types3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	transactionscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler"
 
 	eth "github.com/ethereum/go-ethereum"
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -301,6 +304,8 @@ func TestGetChainTip(t *testing.T) {
 }
 
 func TestFetchReceipt(t *testing.T) {
+	_ = os.Setenv(transactionscheduler.TxSchedulerEnabledKey, "true")
+
 	ctrl := gomock.NewController(t)
 	ec := NewEthClientV2(big.NewInt(1))
 
@@ -345,6 +350,8 @@ func TestFetchReceipt(t *testing.T) {
 }
 
 func TestFetchBlock(t *testing.T) {
+	_ = os.Setenv(transactionscheduler.TxSchedulerEnabledKey, "true")
+
 	ctrl := gomock.NewController(t)
 	ec := NewEthClientV2(big.NewInt(1))
 
@@ -383,6 +390,8 @@ func TestFetchBlock(t *testing.T) {
 }
 
 func TestFetchBlockExternalTxDisabled(t *testing.T) {
+	_ = os.Setenv(transactionscheduler.TxSchedulerEnabledKey, "true")
+
 	ctrl := gomock.NewController(t)
 	ec := NewEthClientV2(big.NewInt(1))
 
@@ -448,6 +457,8 @@ func TestFetchBlockExternalTxDisabled(t *testing.T) {
 }
 
 func TestFetchBlockWithIntervalPrivateTx(t *testing.T) {
+	_ = os.Setenv(transactionscheduler.TxSchedulerEnabledKey, "true")
+
 	ctrl := gomock.NewController(t)
 	var testChainID int64 = 200
 	ec := NewEthClientV2(big.NewInt(testChainID))
@@ -506,6 +517,8 @@ func TestFetchBlockWithIntervalPrivateTx(t *testing.T) {
 }
 
 func TestFetchBlockWithExternalPrivateTx(t *testing.T) {
+	_ = os.Setenv(transactionscheduler.TxSchedulerEnabledKey, "true")
+
 	ctrl := gomock.NewController(t)
 	var testChainID int64 = 200
 	ec := NewEthClientV2(big.NewInt(testChainID))
@@ -555,6 +568,8 @@ func TestFetchBlockWithExternalPrivateTx(t *testing.T) {
 }
 
 func TestIgnoreBlockWithExternalPrivateTx(t *testing.T) {
+	_ = os.Setenv(transactionscheduler.TxSchedulerEnabledKey, "true")
+
 	ctrl := gomock.NewController(t)
 	var testChainID int64 = 200
 	ec := NewEthClientV2(big.NewInt(testChainID))

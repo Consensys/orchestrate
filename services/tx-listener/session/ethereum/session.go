@@ -4,8 +4,11 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"os"
 	"sync"
 	"time"
+
+	transactionscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 
@@ -365,6 +368,11 @@ func (s *Session) fetchEnvelopes(ctx context.Context, transactions ethtypes.Tran
 func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transactions) (map[string]*types.Job, error) {
 	jobMap := make(map[string]*types.Job)
 
+	// TODO: Remove feature toggle when tx scheduler is released
+	if os.Getenv(transactionscheduler.TxSchedulerEnabledKey) != "true" {
+		return jobMap, nil
+	}
+
 	if len(transactions) > 0 {
 		var txHashes []string
 		for _, t := range transactions {
@@ -386,6 +394,7 @@ func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transacti
 				}
 			}
 		}
+
 	}
 
 	return jobMap, nil

@@ -15,6 +15,8 @@ type Config struct {
 	Multitenancy bool
 }
 
+const TxSchedulerEnabledKey = "TX_SCHEDULER_ENABLED"
+
 func NewConfig(vipr *viper.Viper) *Config {
 	return &Config{
 		App:          app.NewConfig(vipr),

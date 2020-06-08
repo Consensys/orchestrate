@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.1.1 (2020-05-27)
+
+### 🛠 Bug fixes
+* Fixes a bug where the tx-listener fails to reach the transaction scheduler MS if it is not deployed.
+
 ## v2.1.0 (2020-06-05)
 
 The stable release is here!
