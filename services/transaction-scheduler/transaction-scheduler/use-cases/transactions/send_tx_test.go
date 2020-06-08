@@ -4,6 +4,7 @@ package transactions
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -11,7 +12,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs/mocks"
 	mocks4 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/schedules/mocks"
@@ -52,64 +56,39 @@ func (s *sendTxSuite) SetupTest() {
 }
 
 func (s *sendTxSuite) TestSendTx_Success() {
-	ctx := context.Background()
-
-	tenantID := "tenantID"
-	requestHash := "requestHash"
-	chainUUID := uuid.NewV4().String()
 	jobUUID := uuid.NewV4().String()
 	scheduleUUID := uuid.NewV4().String()
 
-	s.T().Run("should execute use case successfully", func(t *testing.T) {
+	s.T().Run("should execute send successfully a public tx", func(t *testing.T) {
 		txRequest := testutils.FakeTxRequestEntity()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
+	
+		response, err := successfulTestExecution(s, txRequest, types.EthereumTransaction)
+		assert.Nil(t, err)
+		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
+		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
+	})
 
-		s.Validators.EXPECT().
-			ValidateRequestHash(ctx, chainUUID, txRequest.Params, txRequest.IdempotencyKey).
-			Return(requestHash, nil)
+	s.T().Run("should execute send successfully a orion tx", func(t *testing.T) {
+		txRequest := testutils.FakeOrionTxRequestEntity()
+		txRequest.Schedule.UUID = scheduleUUID
+		txRequest.Schedule.Jobs[0].UUID = jobUUID
+		txRequest.Params.Protocol = utils.OrionChainType
 
-		s.Validators.EXPECT().
-			ValidateMethodSignature(txRequest.Params.MethodSignature, txRequest.Params.Args).
-			Return([]byte{}, nil)
+		response, err := successfulTestExecution(s, txRequest, types.OrionEEATransaction)
+		assert.Nil(t, err)
+		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
+		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
+	})
 
-		s.DB.EXPECT().Begin().Return(s.DBTX, nil).Times(1)
-		s.DBTX.EXPECT().Commit().Return(nil).Times(1)
-		s.DBTX.EXPECT().Close().Return(nil).Times(1)
+	s.T().Run("should execute send successfully a tessera tx", func(t *testing.T) {
+		txRequest := testutils.FakeTesseraTxRequestEntity()
+		txRequest.Schedule.UUID = scheduleUUID
+		txRequest.Schedule.Jobs[0].UUID = jobUUID
+		txRequest.Params.Protocol = utils.TesseraChainType
 
-		s.DBTX.EXPECT().TransactionRequest().
-			Return(s.TxRequestDA).Times(1)
-
-		s.TxRequestDA.EXPECT().
-			SelectOrInsert(ctx, gomock.Any()).
-			Return(nil)
-
-		s.CreateScheduleUC.EXPECT().
-			WithDBTransaction(s.DBTX).
-			Return(s.CreateScheduleUC)
-
-		s.CreateScheduleUC.EXPECT().
-			Execute(gomock.Any(), gomock.Any(), tenantID).
-			Return(txRequest.Schedule, nil)
-
-		s.CreateJobUC.EXPECT().
-			WithDBTransaction(s.DBTX).
-			Return(s.CreateJobUC)
-
-		s.CreateJobUC.EXPECT().
-			Execute(gomock.Any(), gomock.Any(), tenantID).
-			Return(txRequest.Schedule.Jobs[0], nil)
-
-		s.StartJobUC.EXPECT().
-			Execute(ctx, jobUUID, tenantID).
-			Return(nil)
-
-		s.GetScheduleUC.EXPECT().
-			Execute(ctx, scheduleUUID, tenantID).
-			Return(txRequest.Schedule, nil)
-
-		response, err := s.usecase.Execute(ctx, txRequest, chainUUID, tenantID)
-
+		response, err := successfulTestExecution(s, txRequest, types.TesseraPrivateTransaction)
 		assert.Nil(t, err)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
@@ -158,6 +137,26 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendTxComponent), err)
+	})
+
+	s.T().Run("should fail with if txRequest is invalid", func(t *testing.T) {
+		txRequest := testutils.FakeOrionTxRequestEntity()
+		txRequest.Schedule.UUID = scheduleUUID
+		txRequest.Schedule.Jobs[0].UUID = jobUUID
+		txRequest.Params.PrivateFrom = ""
+
+		s.Validators.EXPECT().
+			ValidateRequestHash(gomock.Any(), chainUUID, txRequest.Params, txRequest.IdempotencyKey).
+			Return(requestHash, nil)
+
+		s.Validators.EXPECT().
+			ValidateMethodSignature(txRequest.Params.MethodSignature, txRequest.Params.Args).
+			Return([]byte{}, nil)
+
+		response, err := s.usecase.Execute(ctx, txRequest, chainUUID, tenantID)
+
+		assert.Nil(t, response)
+		assert.True(t, errors.IsInvalidParameterError(err))
 	})
 
 	s.T().Run("should fail with same error if select or insert txRequest fails", func(t *testing.T) {
@@ -383,4 +382,63 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendTxComponent), err)
 	})
+}
+
+func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, jobType string) (*entities.TxRequest, error) {
+	ctx := context.Background()
+	tenantID := "tenantID"
+	requestHash := "requestHash"
+	chainUUID := uuid.NewV4().String()
+	scheduleUUID := txRequest.Schedule.UUID
+	jobUUID := txRequest.Schedule.Jobs[0].UUID
+
+	s.Validators.EXPECT().
+		ValidateRequestHash(ctx, chainUUID, txRequest.Params, txRequest.IdempotencyKey).
+		Return(requestHash, nil)
+
+	s.Validators.EXPECT().
+		ValidateMethodSignature(txRequest.Params.MethodSignature, txRequest.Params.Args).
+		Return([]byte{}, nil)
+
+	s.DB.EXPECT().Begin().Return(s.DBTX, nil).Times(1)
+	s.DBTX.EXPECT().Commit().Return(nil).Times(1)
+	s.DBTX.EXPECT().Close().Return(nil).Times(1)
+
+	s.DBTX.EXPECT().TransactionRequest().
+		Return(s.TxRequestDA).Times(1)
+
+	s.TxRequestDA.EXPECT().
+		SelectOrInsert(ctx, gomock.Any()).
+		Return(nil)
+
+	s.CreateScheduleUC.EXPECT().
+		WithDBTransaction(s.DBTX).
+		Return(s.CreateScheduleUC)
+
+	s.CreateScheduleUC.EXPECT().
+		Execute(gomock.Any(), gomock.Any(), tenantID).
+		Return(txRequest.Schedule, nil)
+
+	s.CreateJobUC.EXPECT().
+		WithDBTransaction(s.DBTX).
+		Return(s.CreateJobUC)
+
+	s.CreateJobUC.EXPECT().
+		Execute(gomock.Any(), gomock.Any(), tenantID).
+		DoAndReturn(func(ctx context.Context, jobEntity *types.Job, tenantID string) (*types.Job, error) {
+			if jobEntity.Type != jobType {
+				return nil, fmt.Errorf("invalid job type")
+			}
+			return txRequest.Schedule.Jobs[0], nil
+		})
+
+	s.StartJobUC.EXPECT().
+		Execute(ctx, jobUUID, tenantID).
+		Return(nil)
+
+	s.GetScheduleUC.EXPECT().
+		Execute(ctx, scheduleUUID, tenantID).
+		Return(txRequest.Schedule, nil)
+
+	return s.usecase.Execute(ctx, txRequest, chainUUID, tenantID)
 }

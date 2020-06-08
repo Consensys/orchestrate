@@ -14,19 +14,23 @@ func TransactionUpdater(txSchedulerClient txscheduler.TransactionSchedulerClient
 	return func(txctx *engine.TxContext) {
 		txctx.Next()
 
-		// TODO: Remove this if when envelope store is removed
-		if txctx.Envelope.ContextLabels["jobUUID"] != "" {
-			if !txctx.Envelope.OnlyWarnings() {
-				_, err := txSchedulerClient.UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
-					Status: types2.StatusFailed,
-				})
+		// TODO: Remove next statement once envelope store is removed
+		if txctx.Envelope.ContextLabels["jobUUID"] == "" {
+			return
+		}
 
-				if err != nil {
-					e := txctx.AbortWithError(err).ExtendComponent(component)
-					txctx.Logger.WithError(e).Errorf("tx updater: could not update transaction status")
-					return
-				}
-			}
+		if txctx.Envelope.OnlyWarnings() {
+			return
+		}
+
+		_, err := txSchedulerClient.UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
+			Status: types2.StatusFailed,
+		})
+
+		if err != nil {
+			e := txctx.AbortWithError(err).ExtendComponent(component)
+			txctx.Logger.WithError(e).Errorf("tx updater: could not update transaction status")
+			return
 		}
 	}
 }

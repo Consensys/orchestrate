@@ -56,6 +56,14 @@ func (s *txTestSuite) TestPGTransaction_Insert() {
 		assert.NotEmpty(t, tx.ID)
 	})
 
+	s.T().Run("should insert private tx model successfully", func(t *testing.T) {
+		tx := testutils.FakePrivateTx()
+		err := s.agents.Transaction().Insert(ctx, tx)
+
+		assert.Nil(t, err)
+		assert.NotEmpty(t, tx.ID)
+	})
+
 	s.T().Run("should insert model without UUID successfully", func(t *testing.T) {
 		tx := testutils.FakeTransaction()
 		tx.UUID = ""

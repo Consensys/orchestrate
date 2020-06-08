@@ -21,6 +21,7 @@ func Sender(ec ethclient.TransactionSender, s svc.EnvelopeStoreClient, txSchedul
 		RawTxSender(ec),
 	)
 
+	// Orion private tx
 	rawPrivateTxSender := engine.CombineHandlers(
 		UnsignedTxStore,
 		RawPrivateTxSender(ec),

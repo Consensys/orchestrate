@@ -60,14 +60,19 @@ func (s *transactionsControllerTestSuite) SetupTest() {
 	s.controller.Append(s.router)
 }
 
-func (s *transactionsControllerTestSuite) TestTransactionsController_Send() {
-	txRequest := testutils.FakeSendTransactionRequest()
-	requestBytes, _ := json.Marshal(txRequest)
-	txRequestEntity := formatters.FormatSendTxRequest(txRequest)
+func (s *transactionsControllerTestSuite) TestTransactionsController_SendEthPublic() {
 
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		rw := httptest.NewRecorder()
 		urlPath := fmt.Sprintf("/transactions/%v/send", s.chainUUID)
+
+		txRequest := testutils.FakeSendTransactionRequest()
+		requestBytes, err := json.Marshal(txRequest)
+		if err != nil {
+			return
+		}
+		txRequestEntity := formatters.FormatSendTxRequest(txRequest)
+	
 		httpRequest := httptest.
 			NewRequest(http.MethodPost, urlPath, bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
@@ -88,32 +93,53 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_Send() {
 		assert.Equal(t, http.StatusAccepted, rw.Code)
 	})
 
-	s.T().Run("should fail with Bad request if invalid format", func(t *testing.T) {
-		txRequest := testutils.FakeSendTransactionRequest()
-		txRequest.IdempotencyKey = ""
-		requestBytes, _ := json.Marshal(txRequest)
-
-		rw := httptest.NewRecorder()
-		httpRequest := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/transactions/%s/send", s.chainUUID),
-			bytes.NewReader(requestBytes)).WithContext(s.ctx)
-
-		s.router.ServeHTTP(rw, httpRequest)
-		assert.Equal(t, http.StatusBadRequest, rw.Code)
-	})
-
 	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
 	s.T().Run("should fail with 422 if use case fails with InvalidParameterError", func(t *testing.T) {
+		txRequest := testutils.FakeSendTransactionRequest()
+		requestBytes, _ := json.Marshal(txRequest)
+		txRequestEntity := formatters.FormatSendTxRequest(txRequest)
+	
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/transactions/%s/send", s.chainUUID),
 			bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
-
+	
 		s.sendTransactionUseCase.EXPECT().
 			Execute(gomock.Any(), txRequestEntity, s.chainUUID, s.tenantID).
 			Return(nil, errors.InvalidParameterError("error")).
 			Times(1)
-
+	
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusUnprocessableEntity, rw.Code)
+	})
+}
+
+func (s *transactionsControllerTestSuite) TestTransactionsController_SendInvalidTx() {
+
+	s.T().Run("should fail with Bad request if invalid format", func(t *testing.T) {
+		txRequest := testutils.FakeSendTransactionRequest()
+		txRequest.IdempotencyKey = ""
+		requestBytes, _ := json.Marshal(txRequest)
+	
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/transactions/%s/send", s.chainUUID),
+			bytes.NewReader(requestBytes)).WithContext(s.ctx)
+	
+		s.router.ServeHTTP(rw, httpRequest)
+		assert.Equal(t, http.StatusBadRequest, rw.Code)
+	})
+
+	s.T().Run("should fail with 400 if request fails with InvalidParameterError", func(t *testing.T) {
+		rw := httptest.NewRecorder()
+		txRequest := testutils.FakeSendTesseraRequest()
+		txRequest.Params.PrivateFrom = ""
+		requestBytes, _ := json.Marshal(txRequest)
+
+		httpRequest := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/transactions/%s/send", s.chainUUID),
+			bytes.NewReader(requestBytes)).
+			WithContext(s.ctx)
+
+		s.router.ServeHTTP(rw, httpRequest)
+		assert.Equal(t, http.StatusBadRequest, rw.Code)
 	})
 }

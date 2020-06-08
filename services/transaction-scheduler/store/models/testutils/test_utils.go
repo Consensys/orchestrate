@@ -45,6 +45,13 @@ func FakeTransaction() *models.Transaction {
 	}
 }
 
+func FakePrivateTx() *models.Transaction {
+	tx := FakeTransaction()
+	tx.PrivateFrom = "ROAZBWtSacxXQrOe3FGAqJDyJjFePR5ce4TSIzmJ0Bc="
+	tx.PrivateFor = []string{"ROAZBWtSacxXQrOe3FGAqJDyJjFePR5ce4TSIzmJ0Bd=", "ROAZBWtSacxXQrOe3FGAqJDyJjFePR5ce4TSIzmJ0Be="}
+	return tx
+}
+
 func FakeJobModel(scheduleID int) *models.Job {
 	job := &models.Job{
 		UUID:      uuid.NewV4().String(),

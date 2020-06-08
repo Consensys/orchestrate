@@ -100,6 +100,60 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 
 		// TODO: Consume Kafka message and check format
 	})
+	
+	s.T().Run("should send a tessera transaction successfully to the transaction crafter topic", func(t *testing.T) {
+		defer gock.Off()
+		gock.New(ChainRegistryURL).Get("/chains/" + chainUUID).Reply(200).JSON(&models.Chain{})
+		txRequest := testutils.FakeSendTesseraRequest()
+
+		txResponse, err := s.client.SendTransaction(ctx, chainUUID, txRequest)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+		assert.Equal(t, txRequest.IdempotencyKey, txResponse.IdempotencyKey)
+		assert.NotEmpty(t, txResponse.Schedule.UUID)
+
+		scheduleResponse, err := s.client.GetSchedule(ctx, txResponse.Schedule.UUID)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+		assert.NotEmpty(t, scheduleResponse.Jobs[0].UUID)
+		assert.Equal(t, types.StatusStarted, scheduleResponse.Jobs[0].Status)
+		assert.Equal(t, txRequest.Params.From, scheduleResponse.Jobs[0].Transaction.From)
+		assert.Equal(t, txRequest.Params.To, scheduleResponse.Jobs[0].Transaction.To)
+		assert.Equal(t, types.TesseraPrivateTransaction, scheduleResponse.Jobs[0].Type)
+
+		// TODO: Consume Kafka message and check format
+	})
+	
+	s.T().Run("should send a orion transaction successfully to the transaction crafter topic", func(t *testing.T) {
+		defer gock.Off()
+		gock.New(ChainRegistryURL).Get("/chains/" + chainUUID).Reply(200).JSON(&models.Chain{})
+		txRequest := testutils.FakeSendOrionRequest()
+
+		txResponse, err := s.client.SendTransaction(ctx, chainUUID, txRequest)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+		assert.Equal(t, txRequest.IdempotencyKey, txResponse.IdempotencyKey)
+		assert.NotEmpty(t, txResponse.Schedule.UUID)
+
+		scheduleResponse, err := s.client.GetSchedule(ctx, txResponse.Schedule.UUID)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+		assert.NotEmpty(t, scheduleResponse.Jobs[0].UUID)
+		assert.Equal(t, types.StatusStarted, scheduleResponse.Jobs[0].Status)
+		assert.Equal(t, txRequest.Params.From, scheduleResponse.Jobs[0].Transaction.From)
+		assert.Equal(t, txRequest.Params.To, scheduleResponse.Jobs[0].Transaction.To)
+		assert.Equal(t, types.OrionEEATransaction, scheduleResponse.Jobs[0].Type)
+
+		// TODO: Consume Kafka message and check format
+	})
 
 	s.T().Run("should succeed if payloads are the same and generate new schedule", func(t *testing.T) {
 		defer gock.Off()

@@ -30,3 +30,21 @@ func FakeTxRequestEntity() *entities.TxRequest {
 		CreatedAt:      time.Now(),
 	}
 }
+
+func FakeTesseraTxRequestEntity() *entities.TxRequest {
+	return &entities.TxRequest{
+		Schedule:       FakeScheduleEntity(),
+		IdempotencyKey: "IdempotencyKey",
+		Params:         testutils.FakeTesseraTransactionParams(),
+		CreatedAt:      time.Now(),
+	}
+}
+
+func FakeOrionTxRequestEntity() *entities.TxRequest {
+	return &entities.TxRequest{
+		Schedule:       FakeScheduleEntity(),
+		IdempotencyKey: "IdempotencyKey",
+		Params:         testutils.FakeOrionTransactionParams(),
+		CreatedAt:      time.Now(),
+	}
+}

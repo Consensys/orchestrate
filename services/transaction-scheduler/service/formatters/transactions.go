@@ -1,7 +1,7 @@
 package formatters
 
 import (
-	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	pkgtypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
@@ -10,14 +10,15 @@ func FormatSendTxRequest(txRequest *types.SendTransactionRequest) *entities.TxRe
 	return &entities.TxRequest{
 		IdempotencyKey: txRequest.IdempotencyKey,
 		Labels:         txRequest.Labels,
-		Params: &types2.ETHTransactionParams{
-			From:            txRequest.Params.From,
-			To:              txRequest.Params.To,
-			Value:           txRequest.Params.Value,
-			GasPrice:        txRequest.Params.GasPrice,
-			GasLimit:        txRequest.Params.Gas,
-			MethodSignature: txRequest.Params.MethodSignature,
-			Args:            txRequest.Params.Args,
+		Params: &pkgtypes.ETHTransactionParams{
+			From:                     txRequest.Params.From,
+			To:                       txRequest.Params.To,
+			Value:                    txRequest.Params.Value,
+			GasPrice:                 txRequest.Params.GasPrice,
+			GasLimit:                 txRequest.Params.Gas,
+			MethodSignature:          txRequest.Params.MethodSignature,
+			Args:                     txRequest.Params.Args,
+			PrivateTransactionParams: txRequest.Params.PrivateTransactionParams,
 		},
 	}
 }

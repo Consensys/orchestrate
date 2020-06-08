@@ -30,6 +30,7 @@ func NewTxListener(
 		ethereum.NewSessionBuilder(hk, offsets, ec, store, txSchedulerClient),
 		prvdr,
 	)
+
 	return &TxListener{
 		manager: manager,
 	}

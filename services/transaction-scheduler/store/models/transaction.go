@@ -19,7 +19,7 @@ type Transaction struct {
 	Data           string
 	Raw            string
 	PrivateFrom    string
-	PrivateFor     []string
+	PrivateFor     []string `pg:",array"`
 	PrivacyGroupID string
 	CreatedAt      time.Time `pg:"default:now()"`
 	UpdatedAt      time.Time `pg:"default:now()"`

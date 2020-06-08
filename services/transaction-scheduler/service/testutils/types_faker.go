@@ -4,6 +4,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 )
 
@@ -16,6 +17,42 @@ func FakeSendTransactionRequest() *types.SendTransactionRequest {
 			From:            "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
 			MethodSignature: "transfer()",
 			To:              "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
+		},
+	}
+}
+
+func FakeSendTesseraRequest() *types.SendTransactionRequest {
+	return &types.SendTransactionRequest{
+		BaseTransactionRequest: types.BaseTransactionRequest{
+			IdempotencyKey: uuid.NewV4().String(),
+		},
+		Params: types.TransactionParams{
+			From:            "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
+			MethodSignature: "transfer()",
+			To:              "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
+			PrivateTransactionParams: types2.PrivateTransactionParams{
+				Protocol:    utils.TesseraChainType,
+				PrivateFrom: "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
+				PrivateFor:  []string{"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="},
+			},
+		},
+	}
+}
+
+func FakeSendOrionRequest() *types.SendTransactionRequest {
+	return &types.SendTransactionRequest{
+		BaseTransactionRequest: types.BaseTransactionRequest{
+			IdempotencyKey: uuid.NewV4().String(),
+		},
+		Params: types.TransactionParams{
+			From:            "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
+			MethodSignature: "transfer()",
+			To:              "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
+			PrivateTransactionParams: types2.PrivateTransactionParams{
+				Protocol:       utils.OrionChainType,
+				PrivateFrom:    "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
+				PrivacyGroupID: "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
+			},
 		},
 	}
 }

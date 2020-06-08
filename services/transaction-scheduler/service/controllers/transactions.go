@@ -44,8 +44,12 @@ func (c *TransactionsController) Send(rw http.ResponseWriter, request *http.Requ
 	ctx := request.Context()
 
 	txRequest := &types.SendTransactionRequest{}
-	err := jsonutils.UnmarshalBody(request.Body, txRequest)
-	if err != nil {
+	if err := jsonutils.UnmarshalBody(request.Body, txRequest); err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := txRequest.Params.PrivateTransactionParams.Validate(); err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -53,6 +57,7 @@ func (c *TransactionsController) Send(rw http.ResponseWriter, request *http.Requ
 	chainUUID := mux.Vars(request)["chainUUID"]
 	tenantID := multitenancy.TenantIDFromContext(ctx)
 	txReq := formatters.FormatSendTxRequest(txRequest)
+
 	txResponse, err := c.ucs.SendTransaction().Execute(ctx, txReq, chainUUID, tenantID)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)

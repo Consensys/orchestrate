@@ -383,6 +383,7 @@ func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transacti
 		if err != nil {
 			return nil, err
 		}
+
 		for _, jobResponse := range jobResponses {
 			// Filter by the jobs belonging to same session CHAIN_UUID
 			if jobResponse.ChainUUID == s.Chain.UUID {

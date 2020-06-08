@@ -39,12 +39,6 @@ type DeployContractRequest struct {
 	Params DeployContractParams `json:"params" validate:"required"`
 }
 
-type PrivateTxRequest struct {
-	BaseTransactionRequest
-	Method string                   `json:"method" validate:"required"`
-	Params PrivateTransactionParams `json:"params" validate:"required"`
-}
-
 /**
 Transaction Request Param Types
 */
@@ -61,6 +55,7 @@ type TransactionParams struct {
 	To              string   `json:"to" validate:"required,eth_addr"`
 	MethodSignature string   `json:"methodSignature" validate:"required,isValidMethodSig"`
 	Args            []string `json:"args,omitempty"`
+	types.PrivateTransactionParams
 }
 
 type RawTransactionParams struct {
@@ -79,15 +74,4 @@ type DeployContractParams struct {
 	ContractName string   `json:"contractName" validate:"required"`
 	ContractTag  string   `json:"contractTag,omitempty"`
 	Args         []string `json:"args,omitempty"`
-}
-
-type PrivateTransactionParams struct {
-	BaseTransactionParams
-	From            string   `json:"from" validate:"required,eth_addr"`
-	To              string   `json:"to" validate:"required,eth_addr"`
-	MethodSignature string   `json:"methodSignature" validate:"required,isValidMethodSig"`
-	Args            []string `json:"args,omitempty"`
-	PrivateFrom     string   `json:"privateFrom" validate:"required,base64"`
-	PrivateFor      []string `json:"privateFor" validate:"required,dive,base64"`
-	PrivacyGroupID  string   `json:"privacyGroupId,omitempty"`
 }
