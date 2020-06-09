@@ -205,6 +205,25 @@ service ContractRegistry {
         };
     }
 
+    // Returns a list of all method signatures matching the method name
+    rpc GetMethodSignatures (GetMethodSignaturesRequest) returns (GetMethodSignaturesResponse) {
+        option (google.api.http) = {
+            get: "/contracts/{contractId.name}/{contractId.tag}/method-signatures"
+        };
+        option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+            responses: {
+                key: "500"
+                value: {
+                    description: "Internal Server Error"
+                    examples: {
+                        key: "application/json"
+                        value: '{ "error": "could not load contract (pg: no rows in result set)", "code": 2, "message": "could not load contract (pg: no rows in result set)", "details": [ { "@type": "type.googleapis.com/error.Error", "message": "could not load contract (pg: no rows in result set)", "code": "897024", "component": "contract-registry.pg" } ] }'
+                    }
+                }
+            }
+        };
+    }
+
     // Retrieve methods using 4 bytes unique selector
     rpc GetMethodsBySelector (GetMethodsBySelectorRequest) returns (GetMethodsBySelectorResponse);
     // Retrieve events using hash of signature
@@ -326,4 +345,14 @@ message SetAccountCodeHashRequest {
     string codeHash = 2;
 }
 message SetAccountCodeHashResponse {
+}
+
+message GetMethodSignaturesRequest {
+    abi.ContractId contractId = 1;
+
+    string methodName = 2;
+}
+
+message GetMethodSignaturesResponse {
+    repeated string signatures = 1;
 }

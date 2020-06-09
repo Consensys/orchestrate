@@ -386,6 +386,77 @@
         ]
       }
     },
+    "/contracts/{contractId.name}/{contractId.tag}/method-signatures": {
+      "get": {
+        "summary": "Returns a list of all method signatures matching the method name",
+        "operationId": "GetMethodSignatures",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/contractregistryGetMethodSignaturesResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {},
+            "examples": {
+              "application/json": {
+                "error": "could not load contract (pg: no rows in result set)",
+                "code": 2,
+                "message": "could not load contract (pg: no rows in result set)",
+                "details": [
+                  {
+                    "@type": "type.googleapis.com/error.Error",
+                    "message": "could not load contract (pg: no rows in result set)",
+                    "code": "897024",
+                    "component": "contract-registry.pg"
+                  }
+                ]
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "contractId.name",
+            "description": "Name of contract\ne.g. \"ERC20\"",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contractId.tag",
+            "description": "Contract tag\ne.g \"v2.1.3\"",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contractId.registry",
+            "description": "Registry of contract\ne.g. \"registry.consensys.net/orchestrate\".",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "methodName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ContractRegistry"
+        ]
+      }
+    },
     "/contracts/{name}": {
       "get": {
         "summary": "Returns a list of all tags associated to a contract",
@@ -596,6 +667,17 @@
             "type": "string"
           },
           "title": "Contains the ABIs of the potential event(s) if the deployed contract is not known"
+        }
+      }
+    },
+    "contractregistryGetMethodSignaturesResponse": {
+      "type": "object",
+      "properties": {
+        "signatures": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },

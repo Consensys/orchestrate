@@ -138,6 +138,30 @@ func (s *contractRegistryGRPCTestSuite) TestContractRegistry_Get() {
 		assert.Nil(t, err)
 		assert.Equal(t, resp.GetDeployedBytecode(), contract0.GetDeployedBytecode())
 	})
+
+	s.T().Run("should get a contract constructor and contract methods", func(t *testing.T) {
+		resp0, err := s.grpcClient.GetMethodSignatures(ctx, &registry.GetMethodSignaturesRequest{
+			ContractId: &abi.ContractId{
+				Name: contract0.GetName(),
+				Tag:  contract0.GetTag(),
+			},
+			MethodName: "constructor",
+		})
+
+		assert.Nil(t, err)
+		assert.Equal(t, resp0.GetSignatures()[0], "constructor(uint256)")
+
+		resp1, err := s.grpcClient.GetMethodSignatures(ctx, &registry.GetMethodSignaturesRequest{
+			ContractId: &abi.ContractId{
+				Name: contract0.GetName(),
+				Tag:  contract0.GetTag(),
+			},
+			MethodName: "transfer",
+		})
+
+		assert.Nil(t, err)
+		assert.Equal(t, resp1.GetSignatures()[0], "transfer(address,uint256)")
+	})
 }
 
 func (s *contractRegistryGRPCTestSuite) registerContract(contract *abi.Contract) (*registry.RegisterContractResponse, error) {

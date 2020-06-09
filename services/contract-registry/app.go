@@ -29,15 +29,17 @@ func New(
 	}
 
 	registerContractUC := usecases.NewRegisterContract(contractDA)
+	getContractUC := usecases.NewGetContract(artifactDA)
 
 	srv := grpcservice.New(
 		registerContractUC,
-		usecases.NewGetContract(artifactDA),
+		getContractUC,
 		usecases.NewGetMethods(methodDA),
 		usecases.NewGetEvents(eventDA),
 		usecases.NewGetCatalog(repositoryDA),
 		usecases.NewGetTags(tagDA),
 		usecases.NewSetCodeHash(codeHashDA),
+		usecases.NewGetMethodSignatures(getContractUC),
 	)
 
 	contractServiceOpt := app.ServiceOpt(

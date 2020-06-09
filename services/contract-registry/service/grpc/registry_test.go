@@ -20,14 +20,15 @@ import (
 
 type testSuite struct {
 	suite.Suite
-	controller                  *ContractRegistry
-	mockRegisterContractUseCase *mocks.MockRegisterContractUseCase
-	mockGetUseCase              *mocks.MockGetContractUseCase
-	mockGetMethodsUseCase       *mocks.MockGetMethodsUseCase
-	mockGetEventsUseCase        *mocks.MockGetEventsUseCase
-	mockGetCatalogUseCase       *mocks.MockGetCatalogUseCase
-	mockGetTagsUseCase          *mocks.MockGetTagsUseCase
-	mockSetCodeHashUseCase      *mocks.MockSetCodeHashUseCase
+	controller                     *ContractRegistry
+	mockRegisterContractUseCase    *mocks.MockRegisterContractUseCase
+	mockGetUseCase                 *mocks.MockGetContractUseCase
+	mockGetMethodsUseCase          *mocks.MockGetMethodsUseCase
+	mockGetEventsUseCase           *mocks.MockGetEventsUseCase
+	mockGetCatalogUseCase          *mocks.MockGetCatalogUseCase
+	mockGetTagsUseCase             *mocks.MockGetTagsUseCase
+	mockSetCodeHashUseCase         *mocks.MockSetCodeHashUseCase
+	mockGetMethodSignaturesUseCase *mocks.MockGetMethodSignaturesUseCase
 }
 
 var errUseCase = fmt.Errorf("error")
@@ -49,6 +50,7 @@ func (s *testSuite) SetupTest() {
 	s.mockGetCatalogUseCase = mocks.NewMockGetCatalogUseCase(ctrl)
 	s.mockGetTagsUseCase = mocks.NewMockGetTagsUseCase(ctrl)
 	s.mockSetCodeHashUseCase = mocks.NewMockSetCodeHashUseCase(ctrl)
+	s.mockGetMethodSignaturesUseCase = mocks.NewMockGetMethodSignaturesUseCase(ctrl)
 
 	s.controller = New(
 		s.mockRegisterContractUseCase,
@@ -58,6 +60,7 @@ func (s *testSuite) SetupTest() {
 		s.mockGetCatalogUseCase,
 		s.mockGetTagsUseCase,
 		s.mockSetCodeHashUseCase,
+		s.mockGetMethodSignaturesUseCase,
 	)
 }
 
@@ -341,6 +344,38 @@ func (s *testSuite) TestContractRegistryController_SetAccountCodeHash() {
 		s.mockSetCodeHashUseCase.EXPECT().Execute(context.Background(), request.GetAccountInstance(), request.GetCodeHash()).Return(errUseCase)
 
 		response, err := s.controller.SetAccountCodeHash(context.Background(), request)
+
+		assert.Nil(t, response, nil)
+		assert.Equal(t, errors.FromError(errUseCase).ExtendComponent(component), err)
+	})
+}
+
+func (s *testSuite) TestContractRegistryController_GetMethodSignatures() {
+	request := &svc.GetMethodSignaturesRequest{
+		ContractId: contract.Id,
+		MethodName: "constructor",
+	}
+
+	s.T().Run("should execute request successfully", func(t *testing.T) {
+		signatures := []string{"methodSig0()", "methodSig1()"}
+		s.mockGetMethodSignaturesUseCase.
+			EXPECT().
+			Execute(context.Background(), request.GetContractId(), request.GetMethodName()).
+			Return(signatures, nil)
+
+		response, err := s.controller.GetMethodSignatures(context.Background(), request)
+
+		assert.Nil(t, err)
+		assert.Equal(t, signatures, response.GetSignatures())
+	})
+
+	s.T().Run("should fail if use case fails", func(t *testing.T) {
+		s.mockGetMethodSignaturesUseCase.
+			EXPECT().
+			Execute(context.Background(), request.GetContractId(), request.GetMethodName()).
+			Return(nil, errUseCase)
+
+		response, err := s.controller.GetMethodSignatures(context.Background(), request)
 
 		assert.Nil(t, response, nil)
 		assert.Equal(t, errors.FromError(errUseCase).ExtendComponent(component), err)

@@ -154,6 +154,21 @@ func (mr *MockContractRegistryServerMockRecorder) GetEventsBySigHash(arg0, arg1 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEventsBySigHash", reflect.TypeOf((*MockContractRegistryServer)(nil).GetEventsBySigHash), arg0, arg1)
 }
 
+// GetMethodSignatures mocks base method.
+func (m *MockContractRegistryServer) GetMethodSignatures(arg0 context.Context, arg1 *proto.GetMethodSignaturesRequest) (*proto.GetMethodSignaturesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMethodSignatures", arg0, arg1)
+	ret0, _ := ret[0].(*proto.GetMethodSignaturesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetMethodSignatures indicates an expected call of GetMethodSignatures.
+func (mr *MockContractRegistryServerMockRecorder) GetMethodSignatures(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMethodSignatures", reflect.TypeOf((*MockContractRegistryServer)(nil).GetMethodSignatures), arg0, arg1)
+}
+
 // GetMethodsBySelector mocks base method.
 func (m *MockContractRegistryServer) GetMethodsBySelector(arg0 context.Context, arg1 *proto.GetMethodsBySelectorRequest) (*proto.GetMethodsBySelectorResponse, error) {
 	m.ctrl.T.Helper()

@@ -31,13 +31,14 @@ const component = "contract-registry.controllers.registry"
 
 // ContractRegistryController is a contract registry handler
 type ContractRegistry struct {
-	registerUseCase    usecases.RegisterContractUseCase
-	getUseCase         usecases.GetContractUseCase
-	getMethodsUseCase  usecases.GetMethodsUseCase
-	getEventsUseCase   usecases.GetEventsUseCase
-	getCatalogUseCase  usecases.GetCatalogUseCase
-	getTagsUseCase     usecases.GetTagsUseCase
-	setCodeHashUseCase usecases.SetCodeHashUseCase
+	registerUseCase            usecases.RegisterContractUseCase
+	getUseCase                 usecases.GetContractUseCase
+	getMethodsUseCase          usecases.GetMethodsUseCase
+	getEventsUseCase           usecases.GetEventsUseCase
+	getCatalogUseCase          usecases.GetCatalogUseCase
+	getTagsUseCase             usecases.GetTagsUseCase
+	setCodeHashUseCase         usecases.SetCodeHashUseCase
+	getMethodSignaturesUseCase usecases.GetMethodSignaturesUseCase
 }
 
 // New creates a new contract registry
@@ -49,15 +50,17 @@ func New(
 	getCatalogUseCase usecases.GetCatalogUseCase,
 	getTagsUseCase usecases.GetTagsUseCase,
 	setCodeHashUseCase usecases.SetCodeHashUseCase,
+	getMethodSignaturesUseCase usecases.GetMethodSignaturesUseCase,
 ) *ContractRegistry {
 	return &ContractRegistry{
-		registerUseCase:    registerContractUseCase,
-		getUseCase:         getUseCase,
-		getMethodsUseCase:  getMethodsUseCase,
-		getEventsUseCase:   getEventsUseCase,
-		getCatalogUseCase:  getCatalogUseCase,
-		getTagsUseCase:     getTagsUseCase,
-		setCodeHashUseCase: setCodeHashUseCase,
+		registerUseCase:            registerContractUseCase,
+		getUseCase:                 getUseCase,
+		getMethodsUseCase:          getMethodsUseCase,
+		getEventsUseCase:           getEventsUseCase,
+		getCatalogUseCase:          getCatalogUseCase,
+		getTagsUseCase:             getTagsUseCase,
+		setCodeHashUseCase:         setCodeHashUseCase,
+		getMethodSignaturesUseCase: getMethodSignaturesUseCase,
 	}
 }
 
@@ -180,4 +183,16 @@ func (registry *ContractRegistry) SetAccountCodeHash(ctx context.Context, req *s
 	}
 
 	return &svc.SetAccountCodeHashResponse{}, nil
+}
+
+// SetAccountCodeHash set the codehash of a contract address for a given chain
+func (registry *ContractRegistry) GetMethodSignatures(ctx context.Context, req *svc.GetMethodSignaturesRequest) (*svc.GetMethodSignaturesResponse, error) {
+	signatures, err := registry.getMethodSignaturesUseCase.Execute(ctx, req.GetContractId(), req.GetMethodName())
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	return &svc.GetMethodSignaturesResponse{
+		Signatures: signatures,
+	}, nil
 }
