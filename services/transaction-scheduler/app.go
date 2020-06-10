@@ -4,6 +4,8 @@ import (
 	"context"
 	"reflect"
 
+	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
+
 	"github.com/Shopify/sarama"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
@@ -21,6 +23,7 @@ func New(
 	pgmngr postgres.Manager,
 	jwt, key auth.Checker,
 	chainRegistryClient client.ChainRegistryClient,
+	contractRegistryClient contractregistry.ContractRegistryClient,
 	syncProducer sarama.SyncProducer,
 	txCrafterTopic string,
 ) (*app.App, error) {
@@ -30,7 +33,7 @@ func New(
 		return nil, err
 	}
 
-	ucs := usecases.NewUseCases(db, chainRegistryClient, syncProducer, txCrafterTopic)
+	ucs := usecases.NewUseCases(db, chainRegistryClient, contractRegistryClient, syncProducer, txCrafterTopic)
 	// Option for transaction handler
 	txSchedulerHandlerOpt := app.HandlerOpt(
 		reflect.TypeOf(&dynamic.Transactions{}),

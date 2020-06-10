@@ -27,16 +27,21 @@ import (
 
 type transactionsControllerTestSuite struct {
 	suite.Suite
-	controller             *TransactionsController
-	router                 *mux.Router
-	sendTransactionUseCase *mocks.MockSendTxUseCase
-	ctx                    context.Context
-	tenantID               string
-	chainUUID              string
+	controller            *TransactionsController
+	router                *mux.Router
+	sendContractTxUseCase *mocks.MockSendContractTxUseCase
+	sendDeployTxUseCase   *mocks.MockSendDeployTxUseCase
+	ctx                   context.Context
+	tenantID              string
+	chainUUID             string
 }
 
-func (s *transactionsControllerTestSuite) SendTransaction() transactions.SendTxUseCase {
-	return s.sendTransactionUseCase
+func (s *transactionsControllerTestSuite) SendContractTransaction() transactions.SendContractTxUseCase {
+	return s.sendContractTxUseCase
+}
+
+func (s *transactionsControllerTestSuite) SendDeployTransaction() transactions.SendDeployTxUseCase {
+	return s.sendDeployTxUseCase
 }
 
 var _ transactions.UseCases = &transactionsControllerTestSuite{}
@@ -50,7 +55,8 @@ func (s *transactionsControllerTestSuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
 	defer ctrl.Finish()
 
-	s.sendTransactionUseCase = mocks.NewMockSendTxUseCase(ctrl)
+	s.sendContractTxUseCase = mocks.NewMockSendContractTxUseCase(ctrl)
+	s.sendDeployTxUseCase = mocks.NewMockSendDeployTxUseCase(ctrl)
 	s.tenantID = "tenantId"
 	s.chainUUID = uuid.NewV4().String()
 	s.ctx = context.WithValue(context.Background(), multitenancy.TenantIDKey, s.tenantID)
@@ -60,7 +66,7 @@ func (s *transactionsControllerTestSuite) SetupTest() {
 	s.controller.Append(s.router)
 }
 
-func (s *transactionsControllerTestSuite) TestTransactionsController_SendEthPublic() {
+func (s *transactionsControllerTestSuite) TestTransactionsController_Send() {
 
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		rw := httptest.NewRecorder()
@@ -72,7 +78,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_SendEthPubl
 			return
 		}
 		txRequestEntity := formatters.FormatSendTxRequest(txRequest)
-	
+
 		httpRequest := httptest.
 			NewRequest(http.MethodPost, urlPath, bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
@@ -80,7 +86,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_SendEthPubl
 		testutils2.FakeTxRequestEntity()
 		txRequestEntityResp := testutils2.FakeTxRequestEntity()
 
-		s.sendTransactionUseCase.EXPECT().
+		s.sendContractTxUseCase.EXPECT().
 			Execute(gomock.Any(), txRequestEntity, s.chainUUID, s.tenantID).
 			Return(txRequestEntityResp, nil).
 			Times(1)
@@ -98,38 +104,35 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_SendEthPubl
 		txRequest := testutils.FakeSendTransactionRequest()
 		requestBytes, _ := json.Marshal(txRequest)
 		txRequestEntity := formatters.FormatSendTxRequest(txRequest)
-	
+
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/transactions/%s/send", s.chainUUID),
 			bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
-	
-		s.sendTransactionUseCase.EXPECT().
+
+		s.sendContractTxUseCase.EXPECT().
 			Execute(gomock.Any(), txRequestEntity, s.chainUUID, s.tenantID).
 			Return(nil, errors.InvalidParameterError("error")).
 			Times(1)
-	
+
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusUnprocessableEntity, rw.Code)
 	})
-}
-
-func (s *transactionsControllerTestSuite) TestTransactionsController_SendInvalidTx() {
 
 	s.T().Run("should fail with Bad request if invalid format", func(t *testing.T) {
 		txRequest := testutils.FakeSendTransactionRequest()
 		txRequest.IdempotencyKey = ""
 		requestBytes, _ := json.Marshal(txRequest)
-	
+
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/transactions/%s/send", s.chainUUID),
 			bytes.NewReader(requestBytes)).WithContext(s.ctx)
-	
+
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusBadRequest, rw.Code)
 	})
 
-	s.T().Run("should fail with 400 if request fails with InvalidParameterError", func(t *testing.T) {
+	s.T().Run("should fail with 400 if request fails with InvalidParameterError for private txs", func(t *testing.T) {
 		rw := httptest.NewRecorder()
 		txRequest := testutils.FakeSendTesseraRequest()
 		txRequest.Params.PrivateFrom = ""
@@ -138,6 +141,74 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_SendInvalid
 		httpRequest := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/transactions/%s/send", s.chainUUID),
 			bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
+
+		s.router.ServeHTTP(rw, httpRequest)
+		assert.Equal(t, http.StatusBadRequest, rw.Code)
+	})
+}
+
+func (s *transactionsControllerTestSuite) TestTransactionsController_Deploy() {
+	urlPath := fmt.Sprintf("/transactions/%v/deploy-contract", s.chainUUID)
+
+	s.T().Run("should execute request successfully", func(t *testing.T) {
+		rw := httptest.NewRecorder()
+
+		txRequest := testutils.FakeDeployContractRequest()
+		requestBytes, _ := json.Marshal(txRequest)
+		txRequestEntity := formatters.FormatDeployContractRequest(txRequest)
+
+		httpRequest := httptest.NewRequest(http.MethodPost, urlPath, bytes.NewReader(requestBytes)).WithContext(s.ctx)
+
+		txRequestEntityResp := testutils2.FakeTxRequestEntity()
+
+		s.sendDeployTxUseCase.EXPECT().
+			Execute(gomock.Any(), txRequestEntity, s.chainUUID, s.tenantID).
+			Return(txRequestEntityResp, nil)
+
+		s.router.ServeHTTP(rw, httpRequest)
+
+		response := formatters.FormatTxResponse(txRequestEntityResp)
+		expectedBody, _ := json.Marshal(response)
+		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
+		assert.Equal(t, http.StatusAccepted, rw.Code)
+	})
+
+	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
+	s.T().Run("should fail with 422 if use case fails with InvalidParameterError", func(t *testing.T) {
+		txRequest := testutils.FakeDeployContractRequest()
+		requestBytes, _ := json.Marshal(txRequest)
+		txRequestEntity := formatters.FormatDeployContractRequest(txRequest)
+
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodPost, urlPath, bytes.NewReader(requestBytes)).WithContext(s.ctx)
+
+		s.sendDeployTxUseCase.EXPECT().
+			Execute(gomock.Any(), txRequestEntity, s.chainUUID, s.tenantID).
+			Return(nil, errors.InvalidParameterError("error"))
+
+		s.router.ServeHTTP(rw, httpRequest)
+		assert.Equal(t, http.StatusUnprocessableEntity, rw.Code)
+	})
+
+	s.T().Run("should fail with Bad request if invalid format", func(t *testing.T) {
+		txRequest := testutils.FakeDeployContractRequest()
+		txRequest.IdempotencyKey = ""
+		requestBytes, _ := json.Marshal(txRequest)
+
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodPost, urlPath, bytes.NewReader(requestBytes)).WithContext(s.ctx)
+
+		s.router.ServeHTTP(rw, httpRequest)
+		assert.Equal(t, http.StatusBadRequest, rw.Code)
+	})
+
+	s.T().Run("should fail with 400 if request fails with InvalidParameterError for private txs", func(t *testing.T) {
+		rw := httptest.NewRecorder()
+		txRequest := testutils.FakeDeployContractRequest()
+		txRequest.Params.PrivateFrom = "PrivateFrom"
+		requestBytes, _ := json.Marshal(txRequest)
+
+		httpRequest := httptest.NewRequest(http.MethodPost, urlPath, bytes.NewReader(requestBytes)).WithContext(s.ctx)
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusBadRequest, rw.Code)

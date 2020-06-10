@@ -3,6 +3,7 @@ package usecases
 import (
 	"github.com/Shopify/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
+	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/schedules"
@@ -18,7 +19,8 @@ type UseCases interface {
 
 type useCases struct {
 	// Transaction
-	sendTransaction transactions.SendTxUseCase
+	sendContractTransaction transactions.SendContractTxUseCase
+	sendDeployTransaction   transactions.SendDeployTxUseCase
 	// Schedule
 	createSchedule schedules.CreateScheduleUseCase
 	getSchedule    schedules.GetScheduleUseCase
@@ -34,20 +36,22 @@ type useCases struct {
 func NewUseCases(
 	db store.DB,
 	chainRegistryClient client.ChainRegistryClient,
+	contractRegistryClient contractregistry.ContractRegistryClient,
 	producer sarama.SyncProducer,
 	txCrafterPartition string,
 ) UseCases {
-	txValidator := validators.NewTransactionValidator(db, chainRegistryClient)
+	txValidator := validators.NewTransactionValidator(db, chainRegistryClient, contractRegistryClient)
 
 	createScheduleUC := schedules.NewCreateScheduleUseCase(db)
 	getScheduleUC := schedules.NewGetScheduleUseCase(db)
 	createJobUC := jobs.NewCreateJobUseCase(db, txValidator)
 	startJobUC := jobs.NewStartJobUseCase(db, producer, txCrafterPartition)
+	sendTxUC := transactions.NewSendTxUseCase(txValidator, db, startJobUC, createJobUC, createScheduleUC, getScheduleUC)
 
 	return &useCases{
 		// Transaction
-		sendTransaction: transactions.NewSendTxUseCase(txValidator, db, startJobUC, createJobUC, createScheduleUC,
-			getScheduleUC),
+		sendContractTransaction: transactions.NewSendContractTxUseCase(txValidator, sendTxUC),
+		sendDeployTransaction:   transactions.NewSendDeployTxUseCase(txValidator, sendTxUC),
 		// Schedules
 		createSchedule: createScheduleUC,
 		getSchedule:    getScheduleUC,
@@ -61,8 +65,12 @@ func NewUseCases(
 	}
 }
 
-func (u *useCases) SendTransaction() transactions.SendTxUseCase {
-	return u.sendTransaction
+func (u *useCases) SendContractTransaction() transactions.SendContractTxUseCase {
+	return u.sendContractTransaction
+}
+
+func (u *useCases) SendDeployTransaction() transactions.SendDeployTxUseCase {
+	return u.sendDeployTransaction
 }
 
 func (u *useCases) CreateSchedule() schedules.CreateScheduleUseCase {

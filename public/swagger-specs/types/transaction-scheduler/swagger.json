@@ -68,10 +68,29 @@
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Fetch a job by its uuid",
+                "summary": "Fetch a job by uuid",
                 "responses": {
                     "200": {},
                     "404": {},
+                    "500": {}
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Update job by UUID",
+                "responses": {
+                    "200": {},
+                    "400": {},
                     "500": {}
                 }
             }
@@ -86,7 +105,7 @@
                         "JWTAuth": []
                     }
                 ],
-                "summary": "Start a Job by its UUID",
+                "summary": "Start a Job by UUID",
                 "responses": {
                     "202": {},
                     "404": {},
@@ -152,6 +171,29 @@
                 "responses": {
                     "200": {},
                     "404": {},
+                    "500": {}
+                }
+            }
+        },
+        "/transactions/{chainUUID}/deploy-contract": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Creates and sends a new contract deployment transaction",
+                "responses": {
+                    "200": {},
+                    "400": {},
+                    "409": {},
+                    "422": {},
                     "500": {}
                 }
             }

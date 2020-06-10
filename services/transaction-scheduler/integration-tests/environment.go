@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt"
 	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/key"
@@ -255,11 +257,15 @@ func newTransactionSchedulerApp(ctx context.Context) (*app.App, error) {
 	gock.InterceptClient(httpClient)
 	chainRegistryClient := chainClient.NewHTTPClient(httpClient, conf)
 
+	// TODO: Intercept GRPC calls
+	contractregistry.Init(ctx, viper.GetString(contractregistry.ContractRegistryURLViperKey))
+
 	return transactionscheduler.New(
 		transactionscheduler.NewConfig(viper.GetViper()),
 		postgres.GetManager(),
 		authjwt.GlobalChecker(), authkey.GlobalChecker(),
 		chainRegistryClient,
+		contractregistry.GlobalClient(),
 		sarama.GlobalSyncProducer(),
 		txCrafterTopic,
 	)

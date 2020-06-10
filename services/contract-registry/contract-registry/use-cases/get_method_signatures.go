@@ -35,7 +35,7 @@ func NewGetMethodSignatures(getContractUseCase GetContractUseCase) *GetMethodSig
 // Execute validates and registers a new contract in DB
 func (uc *GetMethodSignatures) Execute(ctx context.Context, id *abi.ContractId, methodName string) ([]string, error) {
 	logger := log.WithContext(ctx).WithField("contract", id).WithField("method_name", methodName)
-	logger.Debug("getting method signature")
+	logger.Debug("getting method signatures")
 
 	contract, err := uc.getContractUseCase.Execute(ctx, id)
 	if err != nil {

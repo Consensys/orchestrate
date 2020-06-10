@@ -23,6 +23,23 @@ func FormatSendTxRequest(txRequest *types.SendTransactionRequest) *entities.TxRe
 	}
 }
 
+func FormatDeployContractRequest(txRequest *types.DeployContractRequest) *entities.TxRequest {
+	return &entities.TxRequest{
+		IdempotencyKey: txRequest.IdempotencyKey,
+		Labels:         txRequest.Labels,
+		Params: &pkgtypes.ETHTransactionParams{
+			From:                     txRequest.Params.From,
+			Value:                    txRequest.Params.Value,
+			GasPrice:                 txRequest.Params.GasPrice,
+			GasLimit:                 txRequest.Params.Gas,
+			Args:                     txRequest.Params.Args,
+			ContractName:             txRequest.Params.ContractName,
+			ContractTag:              txRequest.Params.ContractTag,
+			PrivateTransactionParams: txRequest.Params.PrivateTransactionParams,
+		},
+	}
+}
+
 func FormatTxResponse(txRequest *entities.TxRequest) *types.TransactionResponse {
 	return &types.TransactionResponse{
 		IdempotencyKey: txRequest.IdempotencyKey,

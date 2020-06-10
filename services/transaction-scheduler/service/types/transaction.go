@@ -74,4 +74,5 @@ type DeployContractParams struct {
 	ContractName string   `json:"contractName" validate:"required"`
 	ContractTag  string   `json:"contractTag,omitempty"`
 	Args         []string `json:"args,omitempty"`
+	types.PrivateTransactionParams
 }

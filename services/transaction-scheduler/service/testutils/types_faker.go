@@ -21,6 +21,19 @@ func FakeSendTransactionRequest() *types.SendTransactionRequest {
 	}
 }
 
+func FakeDeployContractRequest() *types.DeployContractRequest {
+	return &types.DeployContractRequest{
+		BaseTransactionRequest: types.BaseTransactionRequest{
+			IdempotencyKey: uuid.NewV4().String(),
+		},
+		Params: types.DeployContractParams{
+			From:         "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
+			ContractName: "MyContract",
+			ContractTag:  "v1.0.0",
+		},
+	}
+}
+
 func FakeSendTesseraRequest() *types.SendTransactionRequest {
 	return &types.SendTransactionRequest{
 		BaseTransactionRequest: types.BaseTransactionRequest{

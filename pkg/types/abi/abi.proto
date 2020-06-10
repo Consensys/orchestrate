@@ -38,6 +38,9 @@ message Contract {
 
     // Contract deployed bytecode (optional)
     string deployedBytecode = 6;
+
+    // Constructor of the contract
+    Method constructor = 7;
 }
 
 // Method

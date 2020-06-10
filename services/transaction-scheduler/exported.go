@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 
 	"github.com/containous/traefik/v2/pkg/log"
@@ -27,6 +29,7 @@ func Init(ctx context.Context) {
 		authkey.Init(ctx)
 		client.Init(ctx)
 		sarama.InitSyncProducer(ctx)
+		contractregistry.Init(ctx, viper.GetString(contractregistry.ContractRegistryURLViperKey))
 
 		var err error
 		appli, err = New(
@@ -34,6 +37,7 @@ func Init(ctx context.Context) {
 			postgres.GetManager(),
 			authjwt.GlobalChecker(), authkey.GlobalChecker(),
 			client.GlobalClient(),
+			contractregistry.GlobalClient(),
 			sarama.GlobalSyncProducer(),
 			viper.GetString(sarama.TxCrafterViperKey),
 		)

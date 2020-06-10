@@ -291,6 +291,10 @@ func FakeContract() *abi.Contract {
 		},
 		Abi:              contractABI,
 		Bytecode:         bytecode,
+		Methods:          []*abi.Method{},
 		DeployedBytecode: deployedBytecdode,
+		Constructor: &abi.Method{
+			Signature: "(uint256)",
+		},
 	}
 }

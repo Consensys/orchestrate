@@ -7,6 +7,8 @@ package mocks
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 	reflect "reflect"
 )
 
@@ -31,6 +33,20 @@ func NewMockTransactionValidator(ctrl *gomock.Controller) *MockTransactionValida
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockTransactionValidator) EXPECT() *MockTransactionValidatorMockRecorder {
 	return m.recorder
+}
+
+// ValidateFields mocks base method.
+func (m *MockTransactionValidator) ValidateFields(ctx context.Context, txRequest *entities.TxRequest) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ValidateFields", ctx, txRequest)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ValidateFields indicates an expected call of ValidateFields.
+func (mr *MockTransactionValidatorMockRecorder) ValidateFields(ctx, txRequest interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateFields", reflect.TypeOf((*MockTransactionValidator)(nil).ValidateFields), ctx, txRequest)
 }
 
 // ValidateRequestHash mocks base method.
@@ -63,10 +79,10 @@ func (mr *MockTransactionValidatorMockRecorder) ValidateChainExists(ctx, chainUU
 }
 
 // ValidateMethodSignature mocks base method.
-func (m *MockTransactionValidator) ValidateMethodSignature(methodSignature string, args []string) ([]byte, error) {
+func (m *MockTransactionValidator) ValidateMethodSignature(methodSignature string, args []string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ValidateMethodSignature", methodSignature, args)
-	ret0, _ := ret[0].([]byte)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -75,4 +91,19 @@ func (m *MockTransactionValidator) ValidateMethodSignature(methodSignature strin
 func (mr *MockTransactionValidatorMockRecorder) ValidateMethodSignature(methodSignature, args interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateMethodSignature", reflect.TypeOf((*MockTransactionValidator)(nil).ValidateMethodSignature), methodSignature, args)
+}
+
+// ValidateContract mocks base method.
+func (m *MockTransactionValidator) ValidateContract(ctx context.Context, params *types.ETHTransactionParams) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ValidateContract", ctx, params)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ValidateContract indicates an expected call of ValidateContract.
+func (mr *MockTransactionValidatorMockRecorder) ValidateContract(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateContract", reflect.TypeOf((*MockTransactionValidator)(nil).ValidateContract), ctx, params)
 }

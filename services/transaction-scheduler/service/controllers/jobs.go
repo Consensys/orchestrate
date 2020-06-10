@@ -93,7 +93,7 @@ func (c *JobsController) create(rw http.ResponseWriter, request *http.Request) {
 	_ = json.NewEncoder(rw).Encode(formatters.FormatJobResponse(jobRes))
 }
 
-// @Summary Fetch a job by its uuid
+// @Summary Fetch a job by uuid
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
@@ -116,7 +116,7 @@ func (c *JobsController) getOne(rw http.ResponseWriter, request *http.Request) {
 	_ = json.NewEncoder(rw).Encode(formatters.FormatJobResponse(jobRes))
 }
 
-// @Summary Start a Job by its UUID
+// @Summary Start a Job by UUID
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Success 202
@@ -144,7 +144,7 @@ func (c *JobsController) start(rw http.ResponseWriter, request *http.Request) {
 // @Success 200
 // @Failure 400
 // @Failure 500
-// @Router /jobs/{uuid} [path]
+// @Router /jobs/{uuid} [patch]
 func (c *JobsController) update(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()

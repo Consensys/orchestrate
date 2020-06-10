@@ -5,6 +5,12 @@ import (
 	"fmt"
 	"testing"
 
+	abi2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/abi"
+	testutils3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
+	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client/mock"
+	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
+	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mock"
 	chainmodel "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/testutils"
@@ -23,9 +29,10 @@ const (
 
 type transactionsTestSuite struct {
 	suite.Suite
-	validator               TransactionValidator
-	mockTxRequestDA         *mocks.MockTransactionRequestAgent
-	mockChainRegistryClient *mock.MockChainRegistryClient
+	validator                  TransactionValidator
+	mockTxRequestDA            *mocks.MockTransactionRequestAgent
+	mockChainRegistryClient    *mock.MockChainRegistryClient
+	mockContractRegistryClient *mock2.MockContractRegistryClient
 }
 
 func TestTransactionValidator(t *testing.T) {
@@ -39,10 +46,12 @@ func (s *transactionsTestSuite) SetupTest() {
 
 	mockDB := mocks.NewMockDB(ctrl)
 	s.mockTxRequestDA = mocks.NewMockTransactionRequestAgent(ctrl)
+	s.mockChainRegistryClient = mock.NewMockChainRegistryClient(ctrl)
+	s.mockContractRegistryClient = mock2.NewMockContractRegistryClient(ctrl)
+
 	mockDB.EXPECT().TransactionRequest().Return(s.mockTxRequestDA).AnyTimes()
 
-	s.mockChainRegistryClient = mock.NewMockChainRegistryClient(ctrl)
-	s.validator = NewTransactionValidator(mockDB, s.mockChainRegistryClient)
+	s.validator = NewTransactionValidator(mockDB, s.mockChainRegistryClient, s.mockContractRegistryClient)
 }
 
 func (s *transactionsTestSuite) TestTransactionValidator_ValidateRequestHash() {
@@ -96,13 +105,80 @@ func (s *transactionsTestSuite) TestTransactionValidator_ValidateChainExists() {
 
 func (s *transactionsTestSuite) TestTransactionValidator_ValidateMethodSignature() {
 	s.T().Run("should validate method signature successfully", func(t *testing.T) {
-		txData, err := s.validator.ValidateMethodSignature("constructor(string,string)", []string{"val1", "val2"})
+		txData, err := s.validator.ValidateMethodSignature("method(string,uint256)", []string{"val1", "15"})
 		assert.Nil(t, err)
 		assert.NotEmpty(t, txData)
 	})
 
 	s.T().Run("should fail with InvalidParameterError if ChainRegistryClient fails", func(t *testing.T) {
-		_, err := s.validator.ValidateMethodSignature("constructor(string,string)", []string{"val1"})
+		_, err := s.validator.ValidateMethodSignature("method(string,uint256)", []string{"val1"})
+		assert.True(t, errors.IsInvalidParameterError(err))
+	})
+}
+
+func (s *transactionsTestSuite) TestTransactionValidator_ValidateContract() {
+	ctx := context.Background()
+
+	s.T().Run("should validate contract successfully", func(t *testing.T) {
+		txRequest := testutils2.FakeTxRequestEntity()
+		txRequest.Params.Args = []string{"300"}
+		contract := testutils3.FakeContract()
+
+		s.mockContractRegistryClient.EXPECT().GetContract(ctx, &contractregistry.GetContractRequest{
+			ContractId: &abi2.ContractId{
+				Name: txRequest.Params.ContractName,
+				Tag:  txRequest.Params.ContractTag,
+			},
+		}).Return(&contractregistry.GetContractResponse{
+			Contract: contract,
+		}, nil)
+
+		txData, err := s.validator.ValidateContract(ctx, txRequest.Params)
+		assert.Nil(t, err)
+		assert.NotEmpty(t, txData)
+	})
+
+	s.T().Run("should fail with InvalidParameterError if ContractRegistryClient fails", func(t *testing.T) {
+		txRequest := testutils2.FakeTxRequestEntity()
+		txRequest.Params.Args = []string{"300"}
+		expectedErr := fmt.Errorf("error")
+
+		s.mockContractRegistryClient.EXPECT().GetContract(ctx, gomock.Any()).Return(nil, expectedErr)
+
+		txData, err := s.validator.ValidateContract(ctx, txRequest.Params)
+
+		assert.Empty(t, txData)
+		assert.True(t, errors.IsInvalidParameterError(err))
+	})
+
+	s.T().Run("should fail with DataCorruptedError if bytecode decoding fails", func(t *testing.T) {
+		txRequest := testutils2.FakeTxRequestEntity()
+		txRequest.Params.Args = []string{"300"}
+		contract := testutils3.FakeContract()
+		contract.Bytecode = "Invalid bytecode"
+
+		s.mockContractRegistryClient.EXPECT().GetContract(ctx, gomock.Any()).Return(&contractregistry.GetContractResponse{
+			Contract: contract,
+		}, nil)
+
+		txData, err := s.validator.ValidateContract(ctx, txRequest.Params)
+
+		assert.Empty(t, txData)
+		assert.True(t, errors.IsDataCorruptedError(err))
+	})
+
+	s.T().Run("should fail with InvalidParameterError if invalid args", func(t *testing.T) {
+		txRequest := testutils2.FakeTxRequestEntity()
+		txRequest.Params.Args = []string{"InvalidArg"}
+		contract := testutils3.FakeContract()
+
+		s.mockContractRegistryClient.EXPECT().GetContract(ctx, gomock.Any()).Return(&contractregistry.GetContractResponse{
+			Contract: contract,
+		}, nil)
+
+		txData, err := s.validator.ValidateContract(ctx, txRequest.Params)
+
+		assert.Empty(t, txData)
 		assert.True(t, errors.IsInvalidParameterError(err))
 	})
 }

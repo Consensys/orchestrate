@@ -31,7 +31,7 @@ func FakeETHTransactionParams() *types.ETHTransactionParams {
 		Value:           "1",
 		GasPrice:        "0",
 		GasLimit:        "0",
-		MethodSignature: "constructor(string,string)",
+		MethodSignature: "method(string,string)",
 		Args:            []string{"val1", "val2"},
 		Raw:             "0123456",
 		ContractName:    "ContractName",

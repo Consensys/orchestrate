@@ -3,6 +3,8 @@ package transactionscheduler
 import (
 	"testing"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client/mock"
+
 	"github.com/Shopify/sarama/mocks"
 
 	"github.com/golang/mock/gomock"
@@ -14,11 +16,11 @@ import (
 )
 
 func TestApp(t *testing.T) {
-	ctrlr := gomock.NewController(t)
-	defer ctrlr.Finish()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-	jwtChecker := mockauth.NewMockChecker(ctrlr)
-	keyChecker := mockauth.NewMockChecker(ctrlr)
+	jwtChecker := mockauth.NewMockChecker(ctrl)
+	keyChecker := mockauth.NewMockChecker(ctrl)
 	mockSyncProducer := mocks.NewSyncProducer(t, nil)
 
 	cfg := NewConfig(viper.New())
@@ -28,7 +30,8 @@ func TestApp(t *testing.T) {
 		cfg,
 		postgres.GetManager(),
 		jwtChecker, keyChecker,
-		mockclient.NewMockChainRegistryClient(ctrlr),
+		mockclient.NewMockChainRegistryClient(ctrl),
+		mock.NewMockContractRegistryClient(ctrl),
 		mockSyncProducer,
 		"tx-crafter-topic",
 	)

@@ -34,8 +34,12 @@ func TestGetContract_Execute(t *testing.T) {
 
 		response, err := usecase.Execute(context.Background(), contract.GetId())
 
-		assert.Equal(t, response, contract)
 		assert.Nil(t, err)
+		assert.Equal(t, contract.GetBytecode(), response.GetBytecode())
+		assert.Equal(t, contract.GetDeployedBytecode(), response.GetDeployedBytecode())
+		assert.Equal(t, contract.GetAbi(), response.GetAbi())
+		assert.Equal(t, contract.GetConstructor(), response.GetConstructor())
+		assert.Len(t, response.GetMethods(), 11)
 	})
 
 	t.Run("should fail if fails to extract contract name and tag", func(t *testing.T) {

@@ -1,5 +1,6 @@
 package transactions
 
 type UseCases interface {
-	SendTransaction() SendTxUseCase
+	SendContractTransaction() SendContractTxUseCase
+	SendDeployTransaction() SendDeployTxUseCase
 }

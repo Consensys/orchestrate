@@ -27,6 +27,7 @@ func NewTransactionsController(useCases transactions.UseCases) *TransactionsCont
 // Add routes to router
 func (c *TransactionsController) Append(router *mux.Router) {
 	router.Methods(http.MethodPost).Path("/transactions/{chainUUID}/send").HandlerFunc(c.Send)
+	router.Methods(http.MethodPost).Path("/transactions/{chainUUID}/deploy-contract").HandlerFunc(c.DeployContract)
 }
 
 // @Summary Creates and sends a new contract transaction
@@ -58,7 +59,46 @@ func (c *TransactionsController) Send(rw http.ResponseWriter, request *http.Requ
 	tenantID := multitenancy.TenantIDFromContext(ctx)
 	txReq := formatters.FormatSendTxRequest(txRequest)
 
-	txResponse, err := c.ucs.SendTransaction().Execute(ctx, txReq, chainUUID, tenantID)
+	txResponse, err := c.ucs.SendContractTransaction().Execute(ctx, txReq, chainUUID, tenantID)
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	rw.WriteHeader(http.StatusAccepted)
+	_ = json.NewEncoder(rw).Encode(formatters.FormatTxResponse(txResponse))
+}
+
+// @Summary Creates and sends a new contract deployment transaction
+// @Produce json
+// @Security ApiKeyAuth
+// @Security JWTAuth
+// @Success 200
+// @Failure 400
+// @Failure 409
+// @Failure 422
+// @Failure 500
+// @Router /transactions/{chainUUID}/deploy-contract [post]
+func (c *TransactionsController) DeployContract(rw http.ResponseWriter, request *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	ctx := request.Context()
+
+	txRequest := &types.DeployContractRequest{}
+	if err := jsonutils.UnmarshalBody(request.Body, txRequest); err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := txRequest.Params.PrivateTransactionParams.Validate(); err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	chainUUID := mux.Vars(request)["chainUUID"]
+	tenantID := multitenancy.TenantIDFromContext(ctx)
+	txReq := formatters.FormatDeployContractRequest(txRequest)
+
+	txResponse, err := c.ucs.SendDeployTransaction().Execute(ctx, txReq, chainUUID, tenantID)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
