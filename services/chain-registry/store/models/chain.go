@@ -50,7 +50,7 @@ func (c *Chain) SetDefault() {
 		c.UUID = uuid.Must(uuid.NewV4()).String()
 	}
 	if c.TenantID == "" {
-		c.TenantID = multitenancy.DefaultTenantIDName
+		c.TenantID = multitenancy.DefaultTenant
 	}
 	if c.ListenerDepth == nil {
 		depth := uint64(0)

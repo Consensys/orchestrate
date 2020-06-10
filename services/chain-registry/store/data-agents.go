@@ -16,28 +16,26 @@ type DataAgents struct {
 type ChainAgent interface {
 	RegisterChain(ctx context.Context, chain *models.Chain) error
 
-	GetChains(ctx context.Context, filters map[string]string) ([]*models.Chain, error)
-	GetChainsByTenant(ctx context.Context, filters map[string]string, tenantID string) ([]*models.Chain, error)
-	GetChainByUUID(ctx context.Context, uuid string) (*models.Chain, error)
+	GetChains(ctx context.Context, tenants []string, filters map[string]string) ([]*models.Chain, error)
+	GetChain(ctx context.Context, uuid string, tenants []string) (*models.Chain, error)
+	UpdateChain(ctx context.Context, uuid string, tenants []string, chain *models.Chain) error
+	UpdateChainByName(ctx context.Context, name string, tenants []string, chain *models.Chain) error
+	DeleteChain(ctx context.Context, uuid string, tenants []string) error
+
+	GetChainsByTenant(ctx context.Context, filters map[string]string, tenants []string) ([]*models.Chain, error)
 	GetChainByUUIDAndTenant(ctx context.Context, uuid string, tenantID string) (*models.Chain, error)
-
-	UpdateChainByName(ctx context.Context, name string, chain *models.Chain) error
-	UpdateChainByUUID(ctx context.Context, uuid string, chain *models.Chain) error
-
-	DeleteChainByUUID(ctx context.Context, uuid string) error
 	DeleteChainByUUIDAndTenant(ctx context.Context, uuid string, tenantID string) error
 }
 
 type FaucetAgent interface {
 	RegisterFaucet(ctx context.Context, faucet *models.Faucet) error
 
-	GetFaucets(ctx context.Context, filters map[string]string) ([]*models.Faucet, error)
-	GetFaucetsByTenant(ctx context.Context, filters map[string]string, tenantID string) ([]*models.Faucet, error)
-	GetFaucetByUUID(ctx context.Context, uuid string) (*models.Faucet, error)
+	GetFaucets(ctx context.Context, tenants []string, filters map[string]string) ([]*models.Faucet, error)
+	GetFaucet(ctx context.Context, uuid string, tenants []string) (*models.Faucet, error)
+	UpdateFaucet(ctx context.Context, uuid string, tenants []string, faucet *models.Faucet) error
+	DeleteFaucet(ctx context.Context, uuid string, tenants []string) error
+
+	GetFaucetsByTenant(ctx context.Context, filters map[string]string, tenants []string) ([]*models.Faucet, error)
 	GetFaucetByUUIDAndTenant(ctx context.Context, uuid string, tenantID string) (*models.Faucet, error)
-
-	UpdateFaucetByUUID(ctx context.Context, uuid string, faucet *models.Faucet) error
-
-	DeleteFaucetByUUID(ctx context.Context, uuid string) error
 	DeleteFaucetByUUIDAndTenant(ctx context.Context, uuid string, tenantID string) error
 }

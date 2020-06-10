@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 
 	"github.com/stretchr/testify/assert"
@@ -124,8 +123,8 @@ func (s *jobTestSuite) TestPGJob_FindOneByUUID() {
 	err := insertJob(ctx, s.agents, job)
 	assert.Nil(s.T(), err)
 
-	s.T().Run("should get model successfully as tenant", func(t *testing.T) {
-		jobRetrieved, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, "_")
+	s.T().Run("should get model successfully as empty tenant", func(t *testing.T) {
+		jobRetrieved, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, "")
 
 		assert.Nil(t, err)
 		assert.NotEmpty(t, jobRetrieved.ID)
@@ -144,14 +143,6 @@ func (s *jobTestSuite) TestPGJob_FindOneByUUID() {
 
 		assert.Nil(t, err)
 		assert.NotEmpty(t, jobRetrieved.ID)
-	})
-
-	s.T().Run("should get model successfully as admin", func(t *testing.T) {
-		jobRetrieved, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, multitenancy.DefaultTenantIDName)
-
-		assert.Nil(t, err)
-		assert.NotEmpty(t, jobRetrieved.ID)
-		assert.Equal(t, job.UUID, jobRetrieved.UUID)
 	})
 
 	s.T().Run("should return NotFoundError if select fails", func(t *testing.T) {

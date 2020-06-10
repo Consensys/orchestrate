@@ -32,13 +32,8 @@ func (h *controller) PostFaucet(rw http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	tenantID := multitenancy.TenantIDFromContext(request.Context())
-	if tenantID == "" {
-		tenantID = multitenancy.DefaultTenantIDName
-	}
-
 	faucet := parsePostRequestToFaucet(faucetRequest)
-	faucet.TenantID = tenantID
+	faucet.TenantID = multitenancy.TenantIDFromContext(request.Context())
 
 	err = h.registerFaucet.Execute(request.Context(), faucet)
 	if err != nil {

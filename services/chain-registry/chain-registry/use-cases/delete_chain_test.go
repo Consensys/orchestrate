@@ -18,9 +18,9 @@ func TestDeleteChain_ByUUID(t *testing.T) {
 	deleteChainUC := NewDeleteChain(chainAgent)
 	chainUUID := uuid.Must(uuid.NewV4()).String()
 
-	chainAgent.EXPECT().DeleteChainByUUID(gomock.Any(), gomock.Eq(chainUUID)).Times(1)
+	chainAgent.EXPECT().DeleteChain(gomock.Any(), gomock.Eq(chainUUID), []string{}).Times(1)
 
-	err := deleteChainUC.Execute(context.Background(), chainUUID, "")
+	err := deleteChainUC.Execute(context.Background(), chainUUID, []string{})
 	assert.Nil(t, err)
 }
 
@@ -33,8 +33,8 @@ func TestDeleteChain_ByUUIDAndTenantID(t *testing.T) {
 	chainUUID := uuid.Must(uuid.NewV4()).String()
 	tenantID := "tenantID_1"
 
-	chainAgent.EXPECT().DeleteChainByUUIDAndTenant(gomock.Any(), gomock.Eq(chainUUID), gomock.Eq(tenantID)).Times(1)
+	chainAgent.EXPECT().DeleteChain(gomock.Any(), gomock.Eq(chainUUID), []string{tenantID}).Times(1)
 
-	err := deleteChainUC.Execute(context.Background(), chainUUID, tenantID)
+	err := deleteChainUC.Execute(context.Background(), chainUUID, []string{tenantID})
 	assert.Nil(t, err)
 }

@@ -45,11 +45,11 @@ func (m *MultiTenant) Handler(h http.Handler) http.Handler {
 			return
 		}
 
-		tenantID := multitenancy.TenantIDFromContext(req.Context())
-		if m.tenantID != tenantID {
+		tenants := multitenancy.AllowedTenantsFromContext(req.Context())
+		if !multitenancy.IsAllowed(m.tenantID, tenants) {
 			log.FromContext(req.Context()).
 				WithField("expected", m.tenantID).
-				WithField("received", tenantID).
+				WithField("received", tenants).
 				Debugf("invalid tenant id")
 			m.serveNotFound(rw)
 		} else {

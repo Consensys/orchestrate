@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/cucumber/godog"
 	gherkin "github.com/cucumber/messages-go/v10"
@@ -242,6 +243,17 @@ func (sc *ScenarioContext) iStoreResponseFieldAs(navigation, alias string) (err 
 	return
 }
 
+func (sc *ScenarioContext) iSleep(s string) error {
+	d, err := time.ParseDuration(s)
+	if err != nil {
+		return err
+	}
+
+	time.Sleep(d)
+
+	return nil
+}
+
 func navJSONResponse(nav string, bodyBytes []byte) (interface{}, error) {
 	var resp interface{}
 	if err := json.Unmarshal(bodyBytes, &resp); err != nil {
@@ -281,4 +293,5 @@ func initHTTP(s *godog.ScenarioContext, sc *ScenarioContext) {
 	s.Step(`^the response should match json:$`, sc.theResponseShouldMatchJSON)
 	s.Step(`^Response should have the following fields$`, sc.preProcessTableStep(sc.responseShouldHaveFields))
 	s.Step(`^I set the headers$`, sc.preProcessTableStep(sc.iSetTheHeaders))
+	s.Step(`^I sleep "([^"]*)"$`, sc.iSleep)
 }

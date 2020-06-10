@@ -2,12 +2,15 @@ package postgres
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/error"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
 func Insert(ctx context.Context, db DB, models ...interface{}) *ierror.Error {
@@ -81,4 +84,23 @@ func SelectOne(ctx context.Context, q *orm.Query) *ierror.Error {
 		return errors.PostgresConnectionError(errMsg)
 	}
 	return nil
+}
+
+func WhereFilters(query *orm.Query, filters map[string]string) *orm.Query {
+	for k, v := range filters {
+		query.Where(fmt.Sprintf("%s = ?", k), v)
+	}
+	return query
+}
+
+func WhereAllowedTenants(query *orm.Query, tenants []string) *orm.Query {
+	if len(tenants) == 0 {
+		return query
+	}
+
+	if utils.ContainsString(tenants, multitenancy.Wildcard) {
+		return query
+	}
+
+	return query.Where("tenant_id IN (?)", pg.In(tenants))
 }

@@ -11,6 +11,7 @@ require (
 	github.com/aws/aws-sdk-go v1.29.33
 	github.com/c0va23/go-proxyprotocol v0.9.1
 	github.com/cenkalti/backoff/v4 v4.0.0
+	github.com/containous/mux v0.0.0-20200408164629-f779179d490a // indirect
 	github.com/containous/traefik/v2 v2.2.0
 	github.com/cucumber/godog v0.10.1-0.20200625081220-c7d739336b87
 	github.com/cucumber/messages-go/v10 v10.0.3

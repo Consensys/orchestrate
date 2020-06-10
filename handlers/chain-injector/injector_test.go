@@ -42,7 +42,7 @@ var testChain = &models.Chain{
 var testChainDefaultTenant = &models.Chain{
 	UUID:                    testChainUUID,
 	Name:                    testChainName,
-	TenantID:                multitenancy.DefaultTenantIDName,
+	TenantID:                multitenancy.DefaultTenant,
 	URLs:                    []string{"http://test.com"},
 	ListenerDepth:           &(&struct{ x uint64 }{1}).x,
 	ListenerCurrentBlock:    &(&struct{ x uint64 }{2}).x,
@@ -53,7 +53,7 @@ var MockChainsByName = map[string]map[string]*models.Chain{
 	testTenantID: {
 		testChainName: testChain,
 	},
-	multitenancy.DefaultTenantIDName: {
+	multitenancy.DefaultTenant: {
 		testChainName: testChainDefaultTenant,
 	},
 }
@@ -81,7 +81,7 @@ func TestChainInjector(t *testing.T) {
 		{
 			"Without chainUUID and chainName filled",
 			func(txctx *engine.TxContext) *engine.TxContext {
-				txctx.WithContext(multitenancy.WithTenantID(txctx.Context(), multitenancy.DefaultTenantIDName))
+				txctx.WithContext(multitenancy.WithTenantID(txctx.Context(), multitenancy.DefaultTenant))
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {

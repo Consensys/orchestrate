@@ -7,6 +7,7 @@ import (
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/go-pg/pg/v9"
 	"github.com/gofrs/uuid"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 )
@@ -39,15 +40,13 @@ func (ag *PGFaucetAgent) RegisterFaucet(ctx context.Context, faucet *models.Fauc
 	return nil
 }
 
-func (ag *PGFaucetAgent) GetFaucets(ctx context.Context, filters map[string]string) ([]*models.Faucet, error) {
+func (ag *PGFaucetAgent) GetFaucets(ctx context.Context, tenants []string, filters map[string]string) ([]*models.Faucet, error) {
 	faucets := make([]*models.Faucet, 0)
 
-	req := ag.db.ModelContext(ctx, &faucets)
-	for k, v := range filters {
-		req.Where(fmt.Sprintf("%s = ?", k), v)
-	}
-
-	err := req.Select()
+	err := postgres.WhereFilters(
+		postgres.WhereAllowedTenants(ag.db.ModelContext(ctx, &faucets), tenants),
+		filters,
+	).Select()
 	if err != nil {
 		errMessage := "Failed to get faucets"
 		log.FromContext(ctx).WithError(err).Error(errMessage)
@@ -57,29 +56,35 @@ func (ag *PGFaucetAgent) GetFaucets(ctx context.Context, filters map[string]stri
 	return faucets, nil
 }
 
-func (ag *PGFaucetAgent) GetFaucetsByTenant(ctx context.Context, filters map[string]string, tenantID string) ([]*models.Faucet, error) {
+func (ag *PGFaucetAgent) GetFaucetsByTenant(ctx context.Context, filters map[string]string, tenants []string) ([]*models.Faucet, error) {
 	faucets := make([]*models.Faucet, 0)
 
-	req := ag.db.ModelContext(ctx, &faucets).
-		Where("tenant_id = ?", tenantID)
+	req := ag.db.ModelContext(ctx, &faucets)
+
+	if len(tenants) > 0 {
+		req = req.Where("tenant_id IN (?)", pg.In(tenants))
+	}
+
 	for k, v := range filters {
 		req.Where(fmt.Sprintf("%s = ?", k), v)
 	}
 
 	err := req.Select()
 	if err != nil {
-		errMessage := "Failed to get faucets for tenant ID %s"
-		log.FromContext(ctx).WithError(err).Error(errMessage, tenantID)
-		return nil, errors.PostgresConnectionError(errMessage, tenantID).ExtendComponent(faucetComponentName)
+		errMessage := "Failed to get faucets for tenants %v"
+		log.FromContext(ctx).WithError(err).Error(errMessage, tenants)
+		return nil, errors.PostgresConnectionError(errMessage, tenants).ExtendComponent(faucetComponentName)
 	}
 
 	return faucets, nil
 }
 
-func (ag *PGFaucetAgent) GetFaucetByUUID(ctx context.Context, faucetUUID string) (*models.Faucet, error) {
+func (ag *PGFaucetAgent) GetFaucet(ctx context.Context, faucetUUID string, tenants []string) (*models.Faucet, error) {
 	faucet := &models.Faucet{}
 
-	err := ag.db.ModelContext(ctx, faucet).Where("uuid = ?", faucetUUID).Select()
+	err := postgres.WhereAllowedTenants(ag.db.ModelContext(ctx, faucet), tenants).
+		Where("uuid = ?", faucetUUID).
+		Select()
 	if err != nil && err == pg.ErrNoRows {
 		errMessage := "could not load faucet with chainUUID: %s"
 		log.FromContext(ctx).WithError(err).Debugf(errMessage, faucetUUID)
@@ -110,8 +115,8 @@ func (ag *PGFaucetAgent) GetFaucetByUUIDAndTenant(ctx context.Context, faucetUUI
 	return faucet, nil
 }
 
-func (ag *PGFaucetAgent) UpdateFaucetByUUID(ctx context.Context, faucetUUID string, faucet *models.Faucet) error {
-	res, err := ag.db.ModelContext(ctx, faucet).
+func (ag *PGFaucetAgent) UpdateFaucet(ctx context.Context, faucetUUID string, tenants []string, faucet *models.Faucet) error {
+	res, err := postgres.WhereAllowedTenants(ag.db.ModelContext(ctx, faucet), tenants).
 		Where("uuid = ?", faucetUUID).
 		UpdateNotZero()
 
@@ -130,10 +135,12 @@ func (ag *PGFaucetAgent) UpdateFaucetByUUID(ctx context.Context, faucetUUID stri
 	return nil
 }
 
-func (ag *PGFaucetAgent) DeleteFaucetByUUID(ctx context.Context, faucetUUID string) error {
+func (ag *PGFaucetAgent) DeleteFaucet(ctx context.Context, faucetUUID string, tenants []string) error {
 	faucet := &models.Faucet{}
 
-	res, err := ag.db.ModelContext(ctx, faucet).Where("uuid = ?", faucetUUID).Delete()
+	res, err := postgres.WhereAllowedTenants(ag.db.ModelContext(ctx, faucet), tenants).
+		Where("uuid = ?", faucetUUID).
+		Delete()
 	if err != nil {
 		errMessage := "Failed to delete faucet by UUID"
 		log.FromContext(ctx).WithError(err).Error(errMessage)

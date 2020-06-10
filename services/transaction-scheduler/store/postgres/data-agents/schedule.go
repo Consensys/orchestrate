@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 
 	"github.com/gofrs/uuid"
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
@@ -66,7 +65,7 @@ func (agent *PGSchedule) FindOneByUUID(ctx context.Context, scheduleUUID, tenant
 		Relation("Jobs").
 		Where("schedule.uuid = ?", scheduleUUID)
 
-	if tenantID != multitenancy.DefaultTenantIDName {
+	if tenantID != "" {
 		query = query.Where("schedule.tenant_id = ?", tenantID)
 	}
 
@@ -84,7 +83,7 @@ func (agent *PGSchedule) FindAll(ctx context.Context, tenantID string) ([]*model
 	query := agent.db.ModelContext(ctx, &schedules).
 		Relation("Jobs")
 
-	if tenantID != multitenancy.DefaultTenantIDName {
+	if tenantID != "" {
 		query = query.Where("schedule.tenant_id = ?", tenantID)
 	}
 

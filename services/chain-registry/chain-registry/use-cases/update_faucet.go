@@ -11,7 +11,7 @@ import (
 )
 
 type UpdateFaucet interface {
-	Execute(ctx context.Context, uuid string, faucet *models.Faucet) error
+	Execute(ctx context.Context, uuid string, tenants []string, faucet *models.Faucet) error
 }
 
 // RegisterContract is a use case to register a new contract
@@ -26,14 +26,14 @@ func NewUpdateFaucet(faucetAgent store.FaucetAgent) UpdateFaucet {
 	}
 }
 
-func (uc *updateFaucet) Execute(ctx context.Context, uuid string, faucet *models.Faucet) error {
+func (uc *updateFaucet) Execute(ctx context.Context, uuid string, tenants []string, faucet *models.Faucet) error {
 	logger := log.FromContext(ctx)
 
 	if faucet.UUID != "" && faucet.UUID != uuid {
 		return errors.ConstraintViolatedError("update faucet UUID is not allowed")
 	}
 
-	err := uc.faucetAgent.UpdateFaucetByUUID(ctx, uuid, faucet)
+	err := uc.faucetAgent.UpdateFaucet(ctx, uuid, tenants, faucet)
 	if err != nil {
 		return err
 	}

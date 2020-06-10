@@ -5,12 +5,11 @@ import (
 
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store"
 )
 
 type DeleteFaucet interface {
-	Execute(ctx context.Context, uuid, tenantID string) error
+	Execute(ctx context.Context, uuid string, tenants []string) error
 }
 
 // RegisterContract is a use case to register a new contract
@@ -25,19 +24,14 @@ func NewDeleteFaucet(faucetAgent store.FaucetAgent) DeleteFaucet {
 	}
 }
 
-func (uc *deleteFaucet) Execute(ctx context.Context, uuid, tenantID string) error {
+func (uc *deleteFaucet) Execute(ctx context.Context, uuid string, tenants []string) error {
 	logger := log.FromContext(ctx)
 
-	var err error
-	if tenantID == "" || tenantID == multitenancy.DefaultTenantIDName {
-		err = uc.faucetAgent.DeleteFaucetByUUID(ctx, uuid)
-	} else {
-		err = uc.faucetAgent.DeleteFaucetByUUIDAndTenant(ctx, uuid, tenantID)
-	}
+	err := uc.faucetAgent.DeleteFaucet(ctx, uuid, tenants)
 
 	logger.WithFields(logrus.Fields{
-		"faucet.uuid":   uuid,
-		"faucet.tenant": tenantID,
+		"uuid":    uuid,
+		"tenants": tenants,
 	}).Infof("deleted faucet")
 
 	return err

@@ -179,7 +179,7 @@ func TestChain_SetDefaultIfNil(t *testing.T) {
 	chain.SetDefault()
 
 	assert.NotNil(t, chain.UUID, "Should not be empty")
-	assert.Equal(t, multitenancy.DefaultTenantIDName, chain.TenantID, "Should not be empty")
+	assert.Equal(t, multitenancy.DefaultTenant, chain.TenantID, "Should not be empty")
 	assert.Equal(t, uint64(0), *chain.ListenerDepth, "Should not be empty")
 	assert.Equal(t, uint64(0), *chain.ListenerCurrentBlock, "Should not be empty")
 	assert.Equal(t, uint64(0), *chain.ListenerStartingBlock, "Should not be empty")

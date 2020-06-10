@@ -140,7 +140,7 @@ func UseMockChainRegistry(t *testing.T) store.ChainAgent {
 	mockStore.EXPECT().RegisterChain(gomock.Any(), gomock.Any()).DoAndReturn(
 		func(ctx context.Context, chain *models.Chain) error {
 			chain.UUID = "uuid"
-			for idx, _ := range chain.PrivateTxManagers {
+			for idx := range chain.PrivateTxManagers {
 				chain.PrivateTxManagers[idx].ChainUUID = "uuid"
 				chain.PrivateTxManagers[idx].UUID = "uuid"
 			}
@@ -148,17 +148,17 @@ func UseMockChainRegistry(t *testing.T) store.ChainAgent {
 		},
 	).AnyTimes()
 
-	mockStore.EXPECT().GetChains(gomock.Any(), gomock.Any()).Return([]*models.Chain{}, nil).AnyTimes()
+	mockStore.EXPECT().GetChains(gomock.Any(), gomock.Any(), gomock.Any()).Return([]*models.Chain{}, nil).AnyTimes()
 	mockStore.EXPECT().GetChainsByTenant(gomock.Any(), gomock.Any(), gomock.Any()).Return([]*models.Chain{}, nil).AnyTimes()
 
-	mockStore.EXPECT().GetChainByUUID(gomock.Any(), gomock.Any()).Return(&models.Chain{}, nil).AnyTimes()
-	mockStore.EXPECT().GetChainByUUIDAndTenant(gomock.Any(), gomock.Any(), gomock.Any()).Return(&models.Chain{}, nil).AnyTimes()
+	mockStore.EXPECT().GetChain(gomock.Any(), gomock.Any(), gomock.Any()).Return(&models.Chain{}, nil).AnyTimes()
+	mockStore.EXPECT().GetChain(gomock.Any(), gomock.Any(), gomock.Any()).Return(&models.Chain{}, nil).AnyTimes()
 
-	mockStore.EXPECT().UpdateChainByName(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
-	mockStore.EXPECT().UpdateChainByUUID(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	mockStore.EXPECT().UpdateChainByName(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	mockStore.EXPECT().UpdateChain(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
 
-	mockStore.EXPECT().DeleteChainByUUID(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
-	mockStore.EXPECT().DeleteChainByUUIDAndTenant(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	mockStore.EXPECT().DeleteChain(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	mockStore.EXPECT().DeleteChain(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
 
 	return mockStore
 }
@@ -173,36 +173,36 @@ func UseErrorChainRegistry(t *testing.T) store.ChainAgent {
 
 	mockStore.EXPECT().RegisterChain(gomock.Any(), gomock.Any()).Return(errTest).AnyTimes()
 
-	mockStore.EXPECT().GetChains(gomock.Any(), gomock.Any()).Return(nil, errTest).AnyTimes()
-	mockStore.EXPECT().GetChainsByTenant(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, errTest).AnyTimes()
+	mockStore.EXPECT().GetChains(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, errTest).AnyTimes()
+	mockStore.EXPECT().GetChains(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, errTest).AnyTimes()
 
-	mockStore.EXPECT().GetChainByUUID(gomock.Any(), gomock.Eq("0")).Return(nil, errNotFound).AnyTimes()
-	mockStore.EXPECT().GetChainByUUIDAndTenant(gomock.Any(), gomock.Eq("0"), gomock.Any()).Return(nil, errNotFound).AnyTimes()
+	mockStore.EXPECT().GetChain(gomock.Any(), gomock.Eq("0"), gomock.Any()).Return(nil, errNotFound).AnyTimes()
+	mockStore.EXPECT().GetChain(gomock.Any(), gomock.Eq("0"), gomock.Any()).Return(nil, errNotFound).AnyTimes()
 
-	mockStore.EXPECT().GetChainByUUID(gomock.Any(), gomock.Not(gomock.Eq("0"))).Return(nil, errTest).AnyTimes()
-	mockStore.EXPECT().GetChainByUUIDAndTenant(gomock.Any(), gomock.Not(gomock.Eq("0")), gomock.Any()).Return(nil, errTest).AnyTimes()
+	mockStore.EXPECT().GetChain(gomock.Any(), gomock.Not(gomock.Eq("0")), gomock.Any()).Return(nil, errTest).AnyTimes()
+	mockStore.EXPECT().GetChain(gomock.Any(), gomock.Not(gomock.Eq("0")), gomock.Any()).Return(nil, errTest).AnyTimes()
 
-	mockStore.EXPECT().UpdateChainByName(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(
-		func(_ context.Context, name string, chain *models.Chain) error {
+	mockStore.EXPECT().UpdateChainByName(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(
+		func(_ context.Context, name string, tenants []string, chain *models.Chain) error {
 			if name == notFoundErrorFilter {
 				return errNotFound
 			}
 			return errTest
 		}).AnyTimes()
 
-	mockStore.EXPECT().UpdateChainByUUID(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(
-		func(_ context.Context, uuid string, chain *models.Chain) error {
+	mockStore.EXPECT().UpdateChain(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(
+		func(_ context.Context, uuid string, tenants []string, chain *models.Chain) error {
 			if uuid == "0" {
 				return errNotFound
 			}
 			return errTest
 		}).AnyTimes()
 
-	mockStore.EXPECT().DeleteChainByUUID(gomock.Any(), gomock.Eq("0")).Return(errNotFound).AnyTimes()
-	mockStore.EXPECT().DeleteChainByUUIDAndTenant(gomock.Any(), gomock.Eq("0"), gomock.Any()).Return(errNotFound).AnyTimes()
+	mockStore.EXPECT().DeleteChain(gomock.Any(), gomock.Eq("0"), gomock.Any()).Return(errNotFound).AnyTimes()
+	mockStore.EXPECT().DeleteChain(gomock.Any(), gomock.Eq("0"), gomock.Any()).Return(errNotFound).AnyTimes()
 
-	mockStore.EXPECT().DeleteChainByUUID(gomock.Any(), gomock.Not(gomock.Eq("0"))).Return(errTest).AnyTimes()
-	mockStore.EXPECT().DeleteChainByUUIDAndTenant(gomock.Any(), gomock.Not(gomock.Eq("0")), gomock.Any()).Return(errTest).AnyTimes()
+	mockStore.EXPECT().DeleteChain(gomock.Any(), gomock.Not(gomock.Eq("0")), gomock.Any()).Return(errTest).AnyTimes()
+	mockStore.EXPECT().DeleteChain(gomock.Any(), gomock.Not(gomock.Eq("0")), gomock.Any()).Return(errTest).AnyTimes()
 
 	return mockStore
 }

@@ -9,6 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
@@ -44,6 +45,10 @@ func (uc createJobUseCase) WithDBTransaction(dbtx store.Tx) CreateJobUseCase {
 
 // Execute validates and creates a new transaction job
 func (uc *createJobUseCase) Execute(ctx context.Context, jobEntity *types.Job, tenantID string) (*types.Job, error) {
+	if tenantID == "" {
+		tenantID = multitenancy.DefaultTenant
+	}
+
 	log.WithContext(ctx).
 		WithField("chain_uuid", jobEntity.ChainUUID).
 		WithField("schedule_id", jobEntity.ScheduleUUID).

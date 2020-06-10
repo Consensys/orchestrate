@@ -23,8 +23,11 @@ func (h *controller) GetChains(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
 	filters := utils.ToFilters(request.URL.Query())
-	tenantID := multitenancy.TenantIDFromContext(request.Context())
-	chains, err := h.getChainsUC.Execute(request.Context(), tenantID, filters)
+	chains, err := h.getChainsUC.Execute(
+		request.Context(),
+		multitenancy.AllowedTenantsFromContext(request.Context()),
+		filters,
+	)
 
 	if err != nil {
 		utils.HandleStoreError(rw, err)
@@ -50,10 +53,12 @@ func (h *controller) GetChains(rw http.ResponseWriter, request *http.Request) {
 // @Router /chains/{uuid} [get]
 func (h *controller) GetChain(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
-	uuid := mux.Vars(request)["uuid"]
 
-	tenantID := multitenancy.TenantIDFromContext(request.Context())
-	chain, err := h.getChainUC.Execute(request.Context(), uuid, tenantID)
+	chain, err := h.getChainUC.Execute(
+		request.Context(),
+		mux.Vars(request)["uuid"],
+		multitenancy.AllowedTenantsFromContext(request.Context()),
+	)
 
 	if err != nil {
 		utils.HandleStoreError(rw, err)

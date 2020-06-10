@@ -28,6 +28,7 @@ func NewRegisterFaucet(faucetAgent store.FaucetAgent) RegisterFaucet {
 func (uc *registerFaucet) Execute(ctx context.Context, faucet *models.Faucet) error {
 	logger := log.FromContext(ctx)
 
+	faucet.SetDefault()
 	err := uc.faucetAgent.RegisterFaucet(ctx, faucet)
 	if err != nil {
 		return err

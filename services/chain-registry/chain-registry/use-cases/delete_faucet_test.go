@@ -18,9 +18,9 @@ func TestDeleteFaucet_ByUUID(t *testing.T) {
 	registerFaucetUC := NewDeleteFaucet(deleteAgent)
 	faucetUUID := uuid.Must(uuid.NewV4()).String()
 
-	deleteAgent.EXPECT().DeleteFaucetByUUID(gomock.Any(), gomock.Eq(faucetUUID)).Times(1)
+	deleteAgent.EXPECT().DeleteFaucet(gomock.Any(), gomock.Eq(faucetUUID), []string{}).Times(1)
 
-	err := registerFaucetUC.Execute(context.Background(), faucetUUID, "")
+	err := registerFaucetUC.Execute(context.Background(), faucetUUID, []string{})
 	assert.Nil(t, err)
 }
 
@@ -33,8 +33,8 @@ func TestDeleteFaucet_ByUUIDAndTenantID(t *testing.T) {
 	faucetUUID := uuid.Must(uuid.NewV4()).String()
 	tenantID := "tenantID_2"
 
-	faucetAgent.EXPECT().DeleteFaucetByUUIDAndTenant(gomock.Any(), gomock.Eq(faucetUUID), gomock.Eq(tenantID)).Times(1)
+	faucetAgent.EXPECT().DeleteFaucet(gomock.Any(), gomock.Eq(faucetUUID), []string{tenantID}).Times(1)
 
-	err := deleteFaucetUC.Execute(context.Background(), faucetUUID, tenantID)
+	err := deleteFaucetUC.Execute(context.Background(), faucetUUID, []string{tenantID})
 	assert.Nil(t, err)
 }

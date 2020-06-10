@@ -34,13 +34,12 @@ func (h *controller) PatchFaucet(rw http.ResponseWriter, request *http.Request) 
 	}
 
 	faucet := parsePatchRequestToFaucet(faucetRequest)
-	tenantID := multitenancy.TenantIDFromContext(request.Context())
-	if tenantID != "" {
-		faucet.TenantID = tenantID
-	}
 
-	uuid := mux.Vars(request)["uuid"]
-	err = h.updateFaucet.Execute(request.Context(), uuid, faucet)
+	err = h.updateFaucet.Execute(
+		request.Context(),
+		mux.Vars(request)["uuid"],
+		multitenancy.AllowedTenantsFromContext(request.Context()),
+		faucet)
 	if err != nil {
 		utils.HandleStoreError(rw, err)
 		return

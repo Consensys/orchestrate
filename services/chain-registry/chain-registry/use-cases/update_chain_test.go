@@ -25,9 +25,9 @@ func TestUpdateChain_ByUUID(t *testing.T) {
 		URLs: []string{"http://geth:8545"},
 	}
 
-	chainAgent.EXPECT().UpdateChainByUUID(gomock.Any(), gomock.Eq(chainUUID), gomock.Eq(chain)).Times(1)
+	chainAgent.EXPECT().UpdateChain(gomock.Any(), gomock.Eq(chainUUID), []string{}, gomock.Eq(chain)).Times(1)
 
-	err := updateChainUC.Execute(context.Background(), chainUUID, "", chain)
+	err := updateChainUC.Execute(context.Background(), chainUUID, "", []string{}, chain)
 	assert.Nil(t, err)
 }
 
@@ -43,9 +43,9 @@ func TestUpdateChain_ByName(t *testing.T) {
 		URLs: []string{"http://geth:8545"},
 	}
 
-	chainAgent.EXPECT().UpdateChainByName(gomock.Any(), gomock.Eq(chaninName), gomock.Eq(chain)).Times(1)
+	chainAgent.EXPECT().UpdateChainByName(gomock.Any(), gomock.Eq(chaninName), []string{}, gomock.Eq(chain)).Times(1)
 
-	err := updateChainUC.Execute(context.Background(), "", chaninName, chain)
+	err := updateChainUC.Execute(context.Background(), "", chaninName, []string{}, chain)
 	assert.Nil(t, err)
 }
 
@@ -63,7 +63,7 @@ func TestUpdateChain_NotAllowUUIDUpdate(t *testing.T) {
 		URLs: []string{"http://geth:8545"},
 	}
 
-	err := updateChainUC.Execute(context.Background(), chainUUID, "", chain)
+	err := updateChainUC.Execute(context.Background(), chainUUID, "", []string{}, chain)
 	assert.NotNil(t, err)
 	assert.True(t, errors.IsConstraintViolatedError(err), "should be IsConstraintViolatedError")
 }

@@ -58,9 +58,6 @@ func (r *Registry) Set(value interface{}, aka ...string) bool {
 func setMap(path string, value interface{}, m map[string]interface{}) bool {
 	key := strings.Split(path, ".")
 	if len(key) == 1 {
-		if _, ok := m[path]; ok {
-			return false
-		}
 		m[path] = value
 		return true
 	}

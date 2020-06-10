@@ -84,15 +84,24 @@ func (checker *JWT) Check(ctx context.Context) (context.Context, error) {
 		return ctx, errors.UnauthorizedError("invalid Access Token")
 	}
 
-	// Extract multitenancy UUID from token
-	tenantID := token.Claims.(*Claims).Orchestrate.TenantID
-	if tenantID == "" {
-		return ctx, errors.PermissionDeniedError("tenant missing in UUID / Access Token")
+	ctx = With(ctx, token)
+
+	// Manage multitenancy
+	tenantID, err := multitenancy.TenantID(
+		token.Claims.(*Claims).Orchestrate.TenantID,
+		multitenancy.TenantIDFromContext(ctx),
+	)
+	if err != nil {
+		return ctx, err
 	}
 
-	ctx = With(ctx, token)
-	ctx = multitenancy.WithTenantID(ctx, tenantID)
+	allowedTenants := multitenancy.AllowedTenants(
+		token.Claims.(*Claims).Orchestrate.TenantID,
+		multitenancy.TenantIDFromContext(ctx),
+	)
 
-	// Enrich context with JWT token
+	ctx = multitenancy.WithTenantID(ctx, tenantID)
+	ctx = multitenancy.WithAllowedTenants(ctx, allowedTenants)
+
 	return ctx, nil
 }

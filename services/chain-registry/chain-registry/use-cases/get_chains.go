@@ -3,13 +3,12 @@ package usecases
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 )
 
 type GetChains interface {
-	Execute(ctx context.Context, tenantID string, filters map[string]string) ([]*models.Chain, error)
+	Execute(ctx context.Context, tenant []string, filters map[string]string) ([]*models.Chain, error)
 }
 
 // RegisterContract is a use case to register a new contract
@@ -24,15 +23,6 @@ func NewGetChains(chainAgent store.ChainAgent) GetChains {
 	}
 }
 
-func (uc *getChains) Execute(ctx context.Context, tenantID string, filters map[string]string) ([]*models.Chain, error) {
-	var chains []*models.Chain
-	var err error
-
-	if tenantID == "" || tenantID == multitenancy.DefaultTenantIDName {
-		chains, err = uc.chainAgent.GetChains(ctx, filters)
-	} else {
-		chains, err = uc.chainAgent.GetChainsByTenant(ctx, filters, tenantID)
-	}
-
-	return chains, err
+func (uc *getChains) Execute(ctx context.Context, tenants []string, filters map[string]string) ([]*models.Chain, error) {
+	return uc.chainAgent.GetChains(ctx, tenants, filters)
 }

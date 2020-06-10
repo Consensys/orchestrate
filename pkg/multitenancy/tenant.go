@@ -18,11 +18,12 @@ func New(multiTenancyEnabled bool) *KeyBuilder {
 }
 
 func (k *KeyBuilder) BuildKey(ctx context.Context, key string) (string, error) {
-	if !k.multitenancy {
-		return key, nil
+	tenant := TenantIDFromContext(ctx)
+	if tenant == "" {
+		tenant = "_"
 	}
 
-	return TenantIDFromContext(ctx) + key, nil
+	return tenant + key, nil
 }
 
 func SplitTenant(key string) (context.Context, string, error) {

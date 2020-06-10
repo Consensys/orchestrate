@@ -13,6 +13,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher/provider/static"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/chain-registry/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
@@ -39,7 +40,7 @@ func NewInternalProvider() provider.Provider {
 
 func NewChainsProxyProvider(getChains usecases.GetChains, refresh time.Duration) provider.Provider {
 	poller := func(ctx context.Context) (provider.Message, error) {
-		chains, err := getChains.Execute(ctx, "", nil)
+		chains, err := getChains.Execute(ctx, []string{multitenancy.Wildcard}, nil)
 		if err != nil {
 			return nil, err
 		}

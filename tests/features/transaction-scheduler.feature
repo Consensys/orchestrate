@@ -41,6 +41,7 @@ Feature: Transaction Scheduler
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
+      | X-Tenant-ID   | {{tenant1.tenantID}}     |
     When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
       """
 {}

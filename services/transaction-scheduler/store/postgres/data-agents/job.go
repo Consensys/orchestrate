@@ -5,7 +5,6 @@ import (
 
 	gopg "github.com/go-pg/pg/v9"
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 
 	"github.com/gofrs/uuid"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -78,7 +77,7 @@ func (agent *PGJob) FindOneByUUID(ctx context.Context, jobUUID, tenantID string)
 		Relation("Schedule").
 		Relation("Logs")
 
-	if tenantID != multitenancy.DefaultTenantIDName {
+	if tenantID != "" {
 		query.Where("schedule.tenant_id = ?", tenantID)
 	}
 
@@ -106,7 +105,7 @@ func (agent *PGJob) Search(ctx context.Context, tenantID string, txHashes []stri
 		query = query.Where("job.chain_uuid = ?", chainUUID)
 	}
 
-	if tenantID != multitenancy.DefaultTenantIDName {
+	if tenantID != "" {
 		query.Where("schedule.tenant_id = ?", tenantID)
 	}
 

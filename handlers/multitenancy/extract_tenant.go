@@ -9,7 +9,10 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 )
 
-const AuthorizationMetadata = "Authorization"
+const (
+	AuthorizationMetadata = "Authorization"
+	TenantIDMetadata      = "X-Tenant-ID"
+)
 
 // ExtractTenant handler operate:
 // - check if the multi-tenancy is enable
@@ -27,9 +30,11 @@ func ExtractTenant(checker auth.Checker) engine.HandlerFunc {
 
 		// Extract credentials from envelope metadata
 		authorization := txctx.Envelope.GetHeadersValue(AuthorizationMetadata)
+		tenantID := txctx.Envelope.GetHeadersValue(TenantIDMetadata)
+		authCtx := multitenancy.WithTenantID(authutils.WithAuthorization(txctx.Context(), authorization), tenantID)
 
 		// Control authentication
-		checkedCtx, err := checker.Check(authutils.WithAuthorization(txctx.Context(), authorization))
+		checkedCtx, err := checker.Check(authCtx)
 		if err != nil {
 			e := txctx.AbortWithError(errors.UnauthorizedError(
 				err.Error(),

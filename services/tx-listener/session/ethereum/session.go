@@ -8,10 +8,6 @@ import (
 	"sync"
 	"time"
 
-	transactionscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
-
 	"github.com/cenkalti/backoff/v4"
 	"github.com/containous/traefik/v2/pkg/log"
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -20,8 +16,10 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
 	ethclientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
+	transactionscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session"
@@ -67,6 +65,7 @@ type Session struct {
 }
 
 func (s *Session) Run(ctx context.Context) error {
+	ctx = multitenancy.WithTenantID(ctx, s.Chain.TenantID)
 	err := backoff.RetryNotify(
 		func() error {
 			err := s.run(ctx)

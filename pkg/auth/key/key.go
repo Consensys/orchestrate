@@ -5,6 +5,7 @@ import (
 
 	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 )
 
 // Key is a Checker for API Key authentication
@@ -35,6 +36,22 @@ func (checker *Key) Check(ctx context.Context) (context.Context, error) {
 		return ctx, errors.UnauthorizedError("invalid API key")
 	}
 
-	// Grant all privileges to context
+	// Manage multitenancy
+	tenantID, err := multitenancy.TenantID(
+		multitenancy.Wildcard,
+		multitenancy.TenantIDFromContext(ctx),
+	)
+	if err != nil {
+		return ctx, err
+	}
+
+	allowedTenants := multitenancy.AllowedTenants(
+		multitenancy.Wildcard,
+		multitenancy.TenantIDFromContext(ctx),
+	)
+
+	ctx = multitenancy.WithTenantID(ctx, tenantID)
+	ctx = multitenancy.WithAllowedTenants(ctx, allowedTenants)
+
 	return authutils.GrantAllPrivileges(ctx), nil
 }

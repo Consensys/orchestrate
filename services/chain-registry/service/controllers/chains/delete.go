@@ -19,10 +19,11 @@ import (
 // @Failure 500
 // @Router /chains/{uuid} [delete]
 func (h *controller) DeleteChain(rw http.ResponseWriter, request *http.Request) {
-	uuid := mux.Vars(request)["uuid"]
-
-	tenantID := multitenancy.TenantIDFromContext(request.Context())
-	err := h.deleteChainUC.Execute(request.Context(), uuid, tenantID)
+	err := h.deleteChainUC.Execute(
+		request.Context(),
+		mux.Vars(request)["uuid"],
+		multitenancy.AllowedTenantsFromContext(request.Context()),
+	)
 
 	if err != nil {
 		utils.HandleStoreError(rw, err)

@@ -32,7 +32,7 @@ func Auth(checker auth.Checker, multitenancyEnabled bool) grpc_auth.AuthFunc {
 
 			return checkedCtx, nil
 		}
-		ctx = multitenancy.WithTenantID(ctx, multitenancy.DefaultTenantIDName)
+		ctx = multitenancy.WithTenantID(ctx, multitenancy.DefaultTenant)
 		return ctx, nil
 	}
 }

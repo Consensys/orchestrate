@@ -24,7 +24,7 @@ type ChainModelsTestSuite struct {
 
 func TestModelsChain(t *testing.T) {
 	s := new(ChainModelsTestSuite)
-	s.pg , _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
+	s.pg, _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
 	suite.Run(t, s)
 }
 
@@ -319,7 +319,7 @@ func (s *ChainTestSuite) TestRegisterChains() {
 func (s *ChainTestSuite) TestGetChains() {
 	s.TestRegisterChains()
 
-	chains, err := s.ChainAgent.GetChains(context.Background(), nil)
+	chains, err := s.ChainAgent.GetChains(context.Background(), nil, nil)
 	assert.NoError(s.T(), err, "Should get chains without errors")
 	assert.Len(s.T(), chains, len(tenantID1Chains)+len(tenantID2Chains), "Should get the same number of chains")
 
@@ -331,7 +331,7 @@ func (s *ChainTestSuite) TestGetChains() {
 func (s *ChainTestSuite) TestGetChainsByTenant() {
 	s.TestRegisterChains()
 
-	chains, err := s.ChainAgent.GetChainsByTenant(context.Background(), nil, tenantID1)
+	chains, err := s.ChainAgent.GetChains(context.Background(), []string{tenantID1}, nil)
 	assert.NoError(s.T(), err, "Should get chains without errors")
 	assert.Len(s.T(), chains, len(tenantID1Chains), "Should get the same number of chains for tenantID1")
 
@@ -340,41 +340,41 @@ func (s *ChainTestSuite) TestGetChainsByTenant() {
 	}
 }
 
-func (s *ChainTestSuite) TestGetChainByUUID() {
+func (s *ChainTestSuite) TestGetChain() {
 	s.TestRegisterChains()
 
 	chainUUID := ChainsSample[tenantID1][chainName1].UUID
 
-	chain, err := s.ChainAgent.GetChainByUUID(context.Background(), chainUUID)
+	chain, err := s.ChainAgent.GetChain(context.Background(), chainUUID, nil)
 	assert.NoError(s.T(), err, "Should get chain without errors")
 
 	compareChains(s.T(), chain, ChainsSample[tenantID1][chainName1])
 }
 
-func (s *ChainTestSuite) TestGetChainByUUIDByTenant() {
+func (s *ChainTestSuite) TestGetChainWithTenants() {
 	s.TestRegisterChains()
 
 	chainUUID := ChainsSample[tenantID1][chainName1].UUID
 
-	chain, err := s.ChainAgent.GetChainByUUIDAndTenant(context.Background(), chainUUID, tenantID1)
+	chain, err := s.ChainAgent.GetChain(context.Background(), chainUUID, []string{tenantID1})
 	assert.NoError(s.T(), err, "Should get chain without errors")
 
 	assert.Equal(s.T(), tenantID1, chain.TenantID)
 }
 
-func (s *ChainTestSuite) TestUpdateChainByUUID() {
+func (s *ChainTestSuite) TestNotFoundTenantErrorUpdateChain() {
 	s.TestRegisterChains()
 
 	testChain := ChainsSample[tenantID1][chainName2]
 	testChain.URLs = []string{"http://testurlone.com"}
-	err := s.ChainAgent.UpdateChainByUUID(context.Background(), testChain.UUID, testChain)
+	err := s.ChainAgent.UpdateChain(context.Background(), testChain.UUID, nil, testChain)
 	assert.NoError(s.T(), err, "Should update chain without errors")
 
-	chain, _ := s.ChainAgent.GetChainByUUID(context.Background(), testChain.UUID)
+	chain, _ := s.ChainAgent.GetChain(context.Background(), testChain.UUID, nil)
 	compareChains(s.T(), chain, testChain)
 }
 
-func (s *ChainTestSuite) TestUpdateTesseraChainByUUID() {
+func (s *ChainTestSuite) TestUpdateTesseraChain() {
 	s.TestRegisterChains()
 
 	testChain := ChainsSample[tenantID1][chainName4]
@@ -384,12 +384,12 @@ func (s *ChainTestSuite) TestUpdateTesseraChainByUUID() {
 			Type: utils.TesseraChainType,
 		},
 	}
-	
+
 	testChain.SetDefault()
-	err := s.ChainAgent.UpdateChainByUUID(context.Background(), testChain.UUID, testChain)
+	err := s.ChainAgent.UpdateChain(context.Background(), testChain.UUID, []string{}, testChain)
 	assert.NoError(s.T(), err, "Should update chain without errors")
 
-	chain, _ := s.ChainAgent.GetChainByUUID(context.Background(), testChain.UUID)
+	chain, _ := s.ChainAgent.GetChain(context.Background(), testChain.UUID, []string{})
 	comparePrivTxManagers(s.T(), chain, testChain)
 }
 
@@ -407,19 +407,19 @@ func (s *ChainTestSuite) TestUpdateTesseraChainByName() {
 			Type: utils.TesseraChainType,
 		},
 	}
-	
+
 	testChain.SetDefault()
-	err := s.ChainAgent.UpdateChainByName(context.Background(), testChain.Name, testChain)
+	err := s.ChainAgent.UpdateChainByName(context.Background(), testChain.Name, nil, testChain)
 	assert.NoError(s.T(), err, "Should update chain without errors")
 
-	chain, _ := s.ChainAgent.GetChainByUUID(context.Background(), testChain.UUID)
+	chain, _ := s.ChainAgent.GetChain(context.Background(), testChain.UUID, nil)
 	comparePrivTxManagers(s.T(), chain, testChain)
 }
 
 func (s *ChainTestSuite) TestNotFoundTenantErrorUpdateChainByName() {
 	testChain := ChainsSample[tenantID1][chainName2]
 	testChain.URLs = []string{"http://testurlone.com"}
-	err := s.ChainAgent.UpdateChainByName(context.Background(), testChain.Name, testChain)
+	err := s.ChainAgent.UpdateChainByName(context.Background(), testChain.Name, nil, testChain)
 	assert.Error(s.T(), err, "Should get chain without errors")
 }
 
@@ -431,7 +431,7 @@ func (s *ChainTestSuite) TestNotFoundNameErrorUpdateChainByName() {
 		TenantID: errorTenantID,
 		URLs:     []string{"http://testurlone.com"},
 	}
-	err := s.ChainAgent.UpdateChainByName(context.Background(), testChain.Name, testChain)
+	err := s.ChainAgent.UpdateChainByName(context.Background(), testChain.Name, nil, testChain)
 	assert.Error(s.T(), err, "Should get chain without errors")
 }
 
@@ -442,16 +442,16 @@ func (s *ChainTestSuite) TestErrorNotFoundUpdateChainByUUID() {
 		UUID: "0d60a85e-0b90-4482-a14c-108aea2557aa",
 		URLs: []string{"http://testurlone.com"},
 	}
-	err := s.ChainAgent.UpdateChainByUUID(context.Background(), testChain.UUID, testChain)
+	err := s.ChainAgent.UpdateChain(context.Background(), testChain.UUID, nil, testChain)
 	assert.Error(s.T(), err, "Should update chain with errors")
 }
 
-func (s *ChainTestSuite) TestDeleteChainByUUID() {
+func (s *ChainTestSuite) TestDeleteChain() {
 	s.TestRegisterChains()
 
 	chainUUID := ChainsSample[tenantID1][chainName1].UUID
 
-	err := s.ChainAgent.DeleteChainByUUID(context.Background(), chainUUID)
+	err := s.ChainAgent.DeleteChain(context.Background(), chainUUID, nil)
 	assert.NoError(s.T(), err, "Should delete chain without errors")
 }
 
@@ -460,7 +460,7 @@ func (s *ChainTestSuite) TestDeleteChainByUUIDByTenant() {
 
 	chainUUID := ChainsSample[tenantID1][chainName1].UUID
 
-	err := s.ChainAgent.DeleteChainByUUIDAndTenant(context.Background(), chainUUID, tenantID1)
+	err := s.ChainAgent.DeleteChain(context.Background(), chainUUID, []string{tenantID1})
 	assert.NoError(s.T(), err, "Should delete chain without errors")
 }
 
@@ -470,13 +470,13 @@ func (s *ChainTestSuite) TestErrorNotFoundDeleteChainByUUIDAndTenant() {
 	// tenantID2 in the context but we try to delete the chainUUID of tenantID1
 	chainUUID := ChainsSample[tenantID1][chainName1].UUID
 
-	err := s.ChainAgent.DeleteChainByUUIDAndTenant(context.Background(), chainUUID, tenantID2)
+	err := s.ChainAgent.DeleteChain(context.Background(), chainUUID, []string{tenantID2})
 	assert.Error(s.T(), err, "Should delete chain with errors")
 }
 
 func (s *ChainTestSuite) TestErrorNotFoundDeleteChainByUUID() {
 	s.TestRegisterChains()
 
-	err := s.ChainAgent.DeleteChainByUUID(context.Background(), "0d60a85e-0b90-4482-a14c-108aea2557aa")
+	err := s.ChainAgent.DeleteChain(context.Background(), "0d60a85e-0b90-4482-a14c-108aea2557aa", nil)
 	assert.Error(s.T(), err, "Should delete chain with errors")
 }

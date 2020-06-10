@@ -23,9 +23,9 @@ func TestGetChain_ByUUID(t *testing.T) {
 		UUID: chainUUID,
 		Name: "testChain",
 	}
-	chainAgent.EXPECT().GetChainByUUID(gomock.Any(), gomock.Eq(chainUUID)).Return(expectedChain, nil).Times(1)
+	chainAgent.EXPECT().GetChain(gomock.Any(), gomock.Eq(chainUUID), []string{}).Return(expectedChain, nil).Times(1)
 
-	actualChain, err := getChainUC.Execute(context.Background(), chainUUID, "")
+	actualChain, err := getChainUC.Execute(context.Background(), chainUUID, []string{})
 	assert.Nil(t, err)
 	assert.Equal(t, expectedChain, actualChain)
 }
@@ -44,9 +44,9 @@ func TestGetChain_ByUUIDAndTenantID(t *testing.T) {
 		TenantID: tenantID,
 		Name:     "testChain",
 	}
-	chainAgent.EXPECT().GetChainByUUIDAndTenant(gomock.Any(), gomock.Eq(chainUUID), tenantID).Return(expectedChain, nil).Times(1)
+	chainAgent.EXPECT().GetChain(gomock.Any(), gomock.Eq(chainUUID), []string{tenantID}).Return(expectedChain, nil).Times(1)
 
-	actualChain, err := getChainUC.Execute(context.Background(), chainUUID, tenantID)
+	actualChain, err := getChainUC.Execute(context.Background(), chainUUID, []string{tenantID})
 	assert.Nil(t, err)
 	assert.Equal(t, expectedChain, actualChain)
 }

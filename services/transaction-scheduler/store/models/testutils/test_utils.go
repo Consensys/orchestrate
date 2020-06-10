@@ -14,7 +14,7 @@ import (
 
 func FakeSchedule(tenantID string) *models.Schedule {
 	if tenantID == "" {
-		tenantID = multitenancy.DefaultTenantIDName
+		tenantID = multitenancy.DefaultTenant
 	}
 	return &models.Schedule{
 		TenantID: tenantID,

@@ -6,6 +6,7 @@ import (
 
 	"github.com/gorilla/mux"
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/chain-registry/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 )
@@ -32,13 +33,14 @@ func (h *controller) PatchChain(rw http.ResponseWriter, request *http.Request) {
 	}
 
 	chainUUID := mux.Vars(request)["uuid"]
-	err = h.updateChainUC.Execute(request.Context(), chainUUID, "", chain)
+	tenants := multitenancy.AllowedTenantsFromContext(request.Context())
+	err = h.updateChainUC.Execute(request.Context(), chainUUID, "", tenants, chain)
 	if err != nil {
 		utils.HandleStoreError(rw, err)
 		return
 	}
 
-	chain, err = h.getChainUC.Execute(request.Context(), chainUUID, "")
+	chain, err = h.getChainUC.Execute(request.Context(), chainUUID, tenants)
 	if err != nil {
 		utils.HandleStoreError(rw, err)
 		return

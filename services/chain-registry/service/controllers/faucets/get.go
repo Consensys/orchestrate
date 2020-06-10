@@ -22,9 +22,11 @@ import (
 func (h *controller) GetFaucets(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
-	filters := utils.ToFilters(request.URL.Query())
-	tenantID := multitenancy.TenantIDFromContext(request.Context())
-	faucets, err := h.getFaucetsUC.Execute(request.Context(), tenantID, filters)
+	faucets, err := h.getFaucetsUC.Execute(
+		request.Context(),
+		multitenancy.AllowedTenantsFromContext(request.Context()),
+		utils.ToFilters(request.URL.Query()),
+	)
 
 	if err != nil {
 		utils.HandleStoreError(rw, err)
@@ -48,10 +50,12 @@ func (h *controller) GetFaucets(rw http.ResponseWriter, request *http.Request) {
 // @Router /faucets/{uuid} [get]
 func (h *controller) GetFaucet(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
-	uuid := mux.Vars(request)["uuid"]
 
-	tenantID := multitenancy.TenantIDFromContext(request.Context())
-	faucet, err := h.getFaucetUC.Execute(request.Context(), uuid, tenantID)
+	faucet, err := h.getFaucetUC.Execute(
+		request.Context(),
+		mux.Vars(request)["uuid"],
+		multitenancy.AllowedTenantsFromContext(request.Context()),
+	)
 
 	if err != nil {
 		utils.HandleStoreError(rw, err)

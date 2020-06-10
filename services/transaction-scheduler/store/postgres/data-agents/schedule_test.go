@@ -12,7 +12,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	pgTestUtils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/postgres/migrations"
@@ -80,13 +79,6 @@ func (s *scheduleTestSuite) TestPGSchedule_FindOneByUUID() {
 		assertEqualSchedule(t, schedule, scheduleRetrieved)
 	})
 
-	s.T().Run("should get model successfully as admin", func(t *testing.T) {
-		jobRetrieved, err := s.agents.Schedule().FindOneByUUID(ctx, schedule.UUID, multitenancy.DefaultTenantIDName)
-
-		assert.Nil(t, err)
-		assert.Equal(t, schedule.Jobs[0].ID, jobRetrieved.ID)
-	})
-
 	s.T().Run("should return NotFoundError if select fails", func(t *testing.T) {
 		_, err := s.agents.Schedule().FindOneByUUID(ctx, "b6fe7a2a-1a4d-49ca-99d8-8a34aa495ef0", tenantID)
 		assert.True(t, errors.IsNotFoundError(err))
@@ -113,16 +105,6 @@ func (s *scheduleTestSuite) TestPGSchedule_FindAll() {
 		err = insertSchedule(ctx, s.agents, schedule)
 		assert.Nil(s.T(), err)
 	}
-
-	s.T().Run("should get model successfully as admin", func(t *testing.T) {
-		schedulesRetrieved, err := s.agents.Schedule().FindAll(ctx, multitenancy.DefaultTenantIDName)
-
-		assert.Nil(t, err)
-		assert.Equal(t, 3, len(schedulesRetrieved))
-		for idx, scheduleRetrieved := range schedulesRetrieved {
-			assertEqualSchedule(t, schedules[idx], scheduleRetrieved)
-		}
-	})
 
 	s.T().Run("should get model successfully as tenant", func(t *testing.T) {
 		schedulesRetrieved, err := s.agents.Schedule().FindAll(ctx, tenantID)

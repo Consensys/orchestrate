@@ -154,7 +154,7 @@ func (s *FaucetTestSuite) TestRegisterFaucets() {
 func (s *FaucetTestSuite) TestGetFaucets() {
 	s.TestRegisterFaucets()
 
-	faucets, err := s.FaucetAgent.GetFaucets(context.Background(), nil)
+	faucets, err := s.FaucetAgent.GetFaucets(context.Background(), nil, nil)
 	assert.NoError(s.T(), err, "Should get faucets without errors")
 	assert.Len(s.T(), faucets, len(tenantID1Faucets)+len(tenantID2Faucets), "Should get the same number of faucets")
 
@@ -166,7 +166,7 @@ func (s *FaucetTestSuite) TestGetFaucets() {
 func (s *FaucetTestSuite) TestGetFaucetsByTenant() {
 	s.TestRegisterFaucets()
 
-	faucets, err := s.FaucetAgent.GetFaucetsByTenant(context.Background(), nil, tenantID1)
+	faucets, err := s.FaucetAgent.GetFaucets(context.Background(), []string{tenantID1}, nil)
 	assert.NoError(s.T(), err, "Should get faucets without errors")
 	assert.Len(s.T(), faucets, len(tenantID1Faucets), "Should get the same number of faucets for tenantID1")
 
@@ -180,7 +180,7 @@ func (s *FaucetTestSuite) TestGetFaucetByUUID() {
 
 	faucetUUID := FaucetsSample[tenantID1][faucetName1].UUID
 
-	faucet, err := s.FaucetAgent.GetFaucetByUUID(context.Background(), faucetUUID)
+	faucet, err := s.FaucetAgent.GetFaucet(context.Background(), faucetUUID, nil)
 	assert.NoError(s.T(), err, "Should get faucet without errors")
 
 	CompareFaucets(s.T(), faucet, FaucetsSample[tenantID1][faucetName1])
@@ -191,7 +191,7 @@ func (s *FaucetTestSuite) TestGetFaucetByUUIDByTenant() {
 
 	faucetUUID := FaucetsSample[tenantID1][faucetName1].UUID
 
-	faucet, err := s.FaucetAgent.GetFaucetByUUIDAndTenant(context.Background(), faucetUUID, tenantID1)
+	faucet, err := s.FaucetAgent.GetFaucet(context.Background(), faucetUUID, []string{tenantID1})
 	assert.NoError(s.T(), err, "Should get faucet without errors")
 
 	assert.Equal(s.T(), tenantID1, faucet.TenantID)
@@ -202,10 +202,10 @@ func (s *FaucetTestSuite) TestUpdateFaucetByUUID() {
 
 	testFaucet := FaucetsSample[tenantID1][faucetName2]
 	testFaucet.ChainRule = "private"
-	err := s.FaucetAgent.UpdateFaucetByUUID(context.Background(), testFaucet.UUID, testFaucet)
+	err := s.FaucetAgent.UpdateFaucet(context.Background(), testFaucet.UUID, nil, testFaucet)
 	assert.NoError(s.T(), err, "Should update faucet without errors")
 
-	faucet, _ := s.FaucetAgent.GetFaucetByUUID(context.Background(), testFaucet.UUID)
+	faucet, _ := s.FaucetAgent.GetFaucet(context.Background(), testFaucet.UUID, nil)
 	CompareFaucets(s.T(), faucet, testFaucet)
 }
 
@@ -216,7 +216,7 @@ func (s *FaucetTestSuite) TestErrorNotFoundUpdateFaucetByUUID() {
 		UUID:      "0d60a85e-0b90-4482-a14c-108aea2557aa",
 		ChainRule: "private",
 	}
-	err := s.FaucetAgent.UpdateFaucetByUUID(context.Background(), testFaucet.UUID, testFaucet)
+	err := s.FaucetAgent.UpdateFaucet(context.Background(), testFaucet.UUID, nil, testFaucet)
 	assert.Error(s.T(), err, "Should update faucet with errors")
 }
 
@@ -225,7 +225,7 @@ func (s *FaucetTestSuite) TestDeleteFaucetByUUID() {
 
 	faucetUUID := FaucetsSample[tenantID1][faucetName1].UUID
 
-	err := s.FaucetAgent.DeleteFaucetByUUID(context.Background(), faucetUUID)
+	err := s.FaucetAgent.DeleteFaucet(context.Background(), faucetUUID, nil)
 	assert.NoError(s.T(), err, "Should delete faucet without errors")
 }
 
@@ -234,7 +234,7 @@ func (s *FaucetTestSuite) TestDeleteFaucetByUUIDByTenant() {
 
 	faucetUUID := FaucetsSample[tenantID1][faucetName1].UUID
 
-	err := s.FaucetAgent.DeleteFaucetByUUIDAndTenant(context.Background(), faucetUUID, tenantID1)
+	err := s.FaucetAgent.DeleteFaucet(context.Background(), faucetUUID, []string{tenantID1})
 	assert.NoError(s.T(), err, "Should delete faucet without errors")
 }
 
@@ -244,13 +244,13 @@ func (s *FaucetTestSuite) TestErrorNotFoundDeleteFaucetByUUIDAndTenant() {
 	// tenantID2 in the context but we try to delete the faucetUUID of tenantID1
 	faucetUUID := FaucetsSample[tenantID1][faucetName1].UUID
 
-	err := s.FaucetAgent.DeleteFaucetByUUIDAndTenant(context.Background(), faucetUUID, tenantID2)
+	err := s.FaucetAgent.DeleteFaucet(context.Background(), faucetUUID, []string{tenantID2})
 	assert.Error(s.T(), err, "Should delete faucet with errors")
 }
 
 func (s *FaucetTestSuite) TestErrorNotFoundDeleteFaucetByUUID() {
 	s.TestRegisterFaucets()
 
-	err := s.FaucetAgent.DeleteFaucetByUUID(context.Background(), "0d60a85e-0b90-4482-a14c-108aea2557aa")
+	err := s.FaucetAgent.DeleteFaucet(context.Background(), "0d60a85e-0b90-4482-a14c-108aea2557aa", nil)
 	assert.Error(s.T(), err, "Should delete faucet with errors")
 }

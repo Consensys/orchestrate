@@ -12,7 +12,7 @@ import (
 )
 
 type UpdateChain interface {
-	Execute(ctx context.Context, uuid, chainName string, chain *models.Chain) error
+	Execute(ctx context.Context, uuid, chainName string, tenants []string, chain *models.Chain) error
 }
 
 // RegisterContract is a use case to register a new contract
@@ -27,7 +27,7 @@ func NewUpdateChain(chainAgent store.ChainAgent) UpdateChain {
 	}
 }
 
-func (uc *updateChain) Execute(ctx context.Context, uuid, chainName string, chain *models.Chain) error {
+func (uc *updateChain) Execute(ctx context.Context, uuid, chainName string, tenants []string, chain *models.Chain) error {
 	logger := log.FromContext(ctx)
 
 	if chain.UUID != "" && chain.UUID != uuid {
@@ -43,9 +43,9 @@ func (uc *updateChain) Execute(ctx context.Context, uuid, chainName string, chai
 
 	var err error
 	if uuid != "" {
-		err = uc.chainAgent.UpdateChainByUUID(ctx, uuid, chain)
+		err = uc.chainAgent.UpdateChain(ctx, uuid, tenants, chain)
 	} else if chainName != "" {
-		err = uc.chainAgent.UpdateChainByName(ctx, chainName, chain)
+		err = uc.chainAgent.UpdateChainByName(ctx, chainName, tenants, chain)
 	}
 
 	if err != nil {
@@ -55,7 +55,7 @@ func (uc *updateChain) Execute(ctx context.Context, uuid, chainName string, chai
 	logger.WithFields(logrus.Fields{
 		"chainName": chain.Name,
 		"chainUUID": chain.UUID,
-		"tenantID":  chain.TenantID,
+		"tenantIDs": tenants,
 	}).Infof("updated chain from configuration")
 
 	return nil
