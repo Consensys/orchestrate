@@ -55,12 +55,15 @@ func makeCrafterContext(i int) *engine.TxContext {
 	case 2:
 		_ = ctx.Envelope.
 			SetMethodSignature("increment(uint256)").
+			MustSetToString("0xto").
 			SetArgs([]string{"0xab"})
 		ctx.Set("errors", 0)
 		ctx.Set("result", "0x7cf5dab000000000000000000000000000000000000000000000000000000000000000ab")
 	case 3:
 		_ = ctx.Envelope.
-			SetMethodSignature("testMethod()")
+			SetMethodSignature("testMethod()").
+			MustSetToString("0xto")
+
 		ctx.Set("errors", 1)
 		ctx.Set("result", "")
 	case 4:
@@ -88,6 +91,7 @@ func makeCrafterContext(i int) *engine.TxContext {
 		_ = ctx.Envelope.
 			SetContractName("known").
 			SetMethodSignature("constructor()").
+			MustSetToString("0xto").
 			SetArgs([]string{"0xabcd"})
 		ctx.Set("errors", 1)
 		ctx.Set("result", "")

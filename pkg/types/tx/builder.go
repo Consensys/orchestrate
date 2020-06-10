@@ -258,7 +258,7 @@ func (e *Envelope) GetTransaction() (*ethtypes.Transaction, error) {
 		return nil, err
 	}
 
-	if e.IsConstructor() {
+	if e.IsContractCreation() {
 		// Create contract deployment transaction
 		return ethtypes.NewContractCreation(
 			nonce,
@@ -714,9 +714,9 @@ func (e *Envelope) GetContractID() *abi.ContractId {
 	}
 }
 
-// IsConstructor indicate whether the method refers to a deployment
-func (e *Envelope) IsConstructor() bool {
-	return e.MustGetMethodName() == "constructor"
+// IsContractCreation indicate whether the transaction is a contract deployment
+func (e *Envelope) IsContractCreation() bool {
+	return e.GetTo() == nil
 }
 
 // Short returns a short string representation of contract information

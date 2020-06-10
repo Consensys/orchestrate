@@ -396,9 +396,9 @@ func TestEnvelope_ChainUUID(t *testing.T) {
 }
 
 func TestEnvelope_Contract(t *testing.T) {
-	b := NewEnvelope().SetContractName("testContractName").SetContractTag("testContractTag")
+	b := NewEnvelope().SetContractName("testContractName").SetContractTag("testContractTag").MustSetToString("0xto")
 	assert.Equal(t, &abi.ContractId{Name: "testContractName", Tag: "testContractTag"}, b.GetContractID(), "Should be equal")
-	assert.False(t, b.IsConstructor())
+	assert.False(t, b.IsContractCreation())
 
 	assert.Equal(t, "testContractName[testContractTag]", b.ShortContract(), "Should be equal")
 
@@ -410,14 +410,14 @@ func TestEnvelope_Contract(t *testing.T) {
 }
 
 func TestEnvelope_MethodSignature(t *testing.T) {
-	b := NewEnvelope().SetContractName("testContractName").SetContractTag("testContractTag")
+	b := NewEnvelope().SetContractName("testContractName").SetContractTag("testContractTag").MustSetToString("0xto")
 	assert.Equal(t, &abi.ContractId{Name: "testContractName", Tag: "testContractTag"}, b.GetContractID(), "Should be equal")
-	assert.False(t, b.IsConstructor())
+	assert.False(t, b.IsContractCreation())
 
 	assert.Equal(t, "testContractName[testContractTag]", b.ShortContract(), "Should be equal")
 
-	b.MethodSignature = "constructor()"
-	assert.True(t, b.IsConstructor())
+	b.To = nil
+	assert.True(t, b.IsContractCreation())
 
 }
 

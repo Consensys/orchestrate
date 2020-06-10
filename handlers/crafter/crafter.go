@@ -23,7 +23,7 @@ func Crafter(r svc.ContractRegistryClient, crafter abi.Crafter) engine.HandlerFu
 		})
 
 		var data []byte
-		if txctx.Envelope.IsConstructor() {
+		if txctx.Envelope.IsContractCreation() {
 			// Load contract from contract registry
 			resp, err := r.GetContractBytecode(
 				txctx.Context(),
