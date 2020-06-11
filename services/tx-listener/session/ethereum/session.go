@@ -419,6 +419,18 @@ func (s *Session) fetchReceiptsEnvelope(ctx context.Context, transaction ethtype
 				envelopeMap[blckTx.Hash().String()],
 				blckTx.Hash()))
 			continue
+		case isPrivTx(blckTx) && s.Chain.Listener.ExternalTxEnabled:
+			futureEnvelopes = append(futureEnvelopes, s.fetchPrivateReceiptEnvelope(
+				ctx,
+				tx.NewEnvelope().SetTxHash(blckTx.Hash()).SetChainName(s.Chain.Name),
+				blckTx.Hash()))
+			continue
+		case s.Chain.Listener.ExternalTxEnabled:
+			futureEnvelopes = append(futureEnvelopes, s.fetchReceiptEnvelope(
+				ctx,
+				tx.NewEnvelope().SetTxHash(blckTx.Hash()).SetChainName(s.Chain.Name),
+				blckTx.Hash()))
+			continue
 		default:
 			continue
 		}
@@ -437,24 +449,6 @@ func (s *Session) fetchReceipts(ctx context.Context, transaction ethtypes.Transa
 			continue
 		case isInternalTx(jobMap, blckTx):
 			futureJobs = append(futureJobs, s.fetchReceipt(ctx, jobMap[blckTx.Hash().String()], blckTx.Hash()))
-			continue
-		case isPrivTx(blckTx) && s.Chain.Listener.ExternalTxEnabled:
-			job := &types.Job{
-				ChainUUID: s.Chain.UUID,
-				Transaction: &types.ETHTransaction{
-					Hash: blckTx.Hash().Hex(),
-				},
-			}
-			futureJobs = append(futureJobs, s.fetchPrivateReceipt(ctx, job, blckTx.Hash()))
-			continue
-		case s.Chain.Listener.ExternalTxEnabled:
-			job := &types.Job{
-				ChainUUID: s.Chain.UUID,
-				Transaction: &types.ETHTransaction{
-					Hash: blckTx.Hash().Hex(),
-				},
-			}
-			futureJobs = append(futureJobs, s.fetchReceipt(ctx, job, blckTx.Hash()))
 			continue
 		default:
 			continue

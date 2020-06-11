@@ -146,7 +146,7 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 				TxHash:   job.Transaction.Hash,
 			},
 			Receipt: job.Receipt,
-			Chain:   job.ChainUUID,
+			Chain:   job.ChainUUID, // TODO: Return same chain received in the request
 		}
 
 		err = hk.decodeReceipt(receiptLogCtx, c, txResponse.Receipt)

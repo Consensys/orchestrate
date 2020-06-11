@@ -383,8 +383,8 @@ func TestFetchBlock(t *testing.T) {
 		block := res.(*fetchedBlock)
 		assert.NotNil(t, block, "Result block should not be nil")
 		assert.Equal(t, "0xff4f5cd9a03569e8e6d32af4726d1b9ea1a248f69a04307f76896a24fe7be09d", block.block.Hash().Hex(), "Block hash should be correct(")
-		assert.Len(t, block.envelopes, 0, "Receipts should have been fetched properly")
-		assert.Len(t, block.jobs, 9, "Receipts should have been fetched properly")
+		assert.Len(t, block.envelopes, 9, "Receipts should have been fetched properly")
+		assert.Len(t, block.jobs, 0, "Receipts should have been fetched properly")
 	}
 	future.Close()
 }
@@ -558,11 +558,11 @@ func TestFetchBlockWithExternalPrivateTx(t *testing.T) {
 	case res := <-future.Result():
 		block := res.(*fetchedBlock)
 		assert.NotNil(t, block, "Result block should not be nil")
-		assert.Len(t, block.envelopes, 0, "Receipts should have been fetched properly")
-		assert.Len(t, block.jobs, 1, "Receipts should have been fetched properly")
-		assert.Equal(t, block.jobs[0].Transaction.Hash, markingTx.Hash().String())
-		assert.Equal(t, block.jobs[0].Receipt.Output, enclaveKey)
-		assert.Equal(t, block.jobs[0].ChainUUID, chainUUID)
+		assert.Len(t, block.envelopes, 1, "Receipts should have been fetched properly")
+		assert.Equal(t, block.envelopes[0].GetTxHash().String(), markingTx.Hash().String())
+		assert.Equal(t, block.envelopes[0].GetReceipt().GetOutput(), enclaveKey)
+		assert.Equal(t, block.envelopes[0].GetChainName(), chainName)
+		assert.Len(t, block.jobs, 0, "Receipts should have been fetched properly")
 	}
 	future.Close()
 }
