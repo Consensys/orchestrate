@@ -21,6 +21,17 @@ func FakeSendTransactionRequest() *types.SendTransactionRequest {
 	}
 }
 
+func FakeSendRawTransactionRequest() *types.RawTransactionRequest {
+	return &types.RawTransactionRequest{
+		BaseTransactionRequest: types.BaseTransactionRequest{
+			IdempotencyKey: uuid.NewV4().String(),
+		},
+		Params: types.RawTransactionParams{
+			Raw: "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
+		},
+	}
+}
+
 func FakeDeployContractRequest() *types.DeployContractRequest {
 	return &types.DeployContractRequest{
 		BaseTransactionRequest: types.BaseTransactionRequest{

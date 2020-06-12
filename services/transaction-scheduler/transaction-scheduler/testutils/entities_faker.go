@@ -31,6 +31,15 @@ func FakeTxRequestEntity() *entities.TxRequest {
 	}
 }
 
+func FakeRawTxRequestEntity() *entities.TxRequest {
+	return &entities.TxRequest{
+		Schedule:       FakeScheduleEntity(),
+		IdempotencyKey: "IdempotencyKey",
+		Params:         testutils.FakeRawTransactionParams(),
+		CreatedAt:      time.Now(),
+	}
+}
+
 func FakeTesseraTxRequestEntity() *entities.TxRequest {
 	return &entities.TxRequest{
 		Schedule:       FakeScheduleEntity(),

@@ -30,7 +30,6 @@ type TransferRequest struct {
 
 type RawTransactionRequest struct {
 	BaseTransactionRequest
-	Method string               `json:"method" validate:"required"`
 	Params RawTransactionParams `json:"params" validate:"required"`
 }
 

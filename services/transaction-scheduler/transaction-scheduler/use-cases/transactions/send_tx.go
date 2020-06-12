@@ -136,6 +136,8 @@ func generateJobType(txRequest *entities.TxRequest) string {
 		return types.OrionEEATransaction
 	case txRequest.Params.Protocol == utils.TesseraChainType:
 		return types.TesseraPrivateTransaction
+	case txRequest.Params.Raw != "":
+		return types.EthereumRawTransaction
 	default:
 		return types.EthereumTransaction
 	}

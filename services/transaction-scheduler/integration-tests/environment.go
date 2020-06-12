@@ -8,15 +8,15 @@ import (
 	"strings"
 	"time"
 
-	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt"
 	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/key"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	httputils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	integrationtest "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/integration-test"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/integration-test/mocks"
 	chainClient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
+	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 	transactionscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler"
 	"gopkg.in/h2non/gock.v1"
 	"k8s.io/apimachinery/pkg/util/rand"
@@ -36,7 +36,6 @@ import (
 const postgresContainerID = "postgres-transaction-scheduler"
 const kafkaContainerID = "kafka-transaction-scheduler"
 const zookeeperContainerID = "zookeeper-transaction-scheduler"
-const txCrafterTopic = "transaction-scheduler-integration-crafter-topic"
 const ChainRegistryURL = "http://chain-registry:8081"
 const networkName = "transaction-scheduler"
 
@@ -46,11 +45,12 @@ var envHTTPPort string
 var envMetricsPort string
 
 type IntegrationEnvironment struct {
-	logger  log.Logger
-	app     *app.App
-	client  *docker.Client
-	pgmngr  postgres.Manager
-	baseURL string
+	logger                        log.Logger
+	app                           *app.App
+	client                        *docker.Client
+	pgmngr                        postgres.Manager
+	baseURL                       string
+	contractRegistryResponseFaker *mocks.ContractRegistryFaker
 }
 
 func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, error) {
@@ -166,8 +166,11 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 		return err
 	}
 
+	env.contractRegistryResponseFaker = &mocks.ContractRegistryFaker{}
 	// Start transaction scheduler
-	env.app, err = newTransactionSchedulerApp(ctx)
+	env.app, err = newTransactionSchedulerApp(ctx,
+		mocks.NewContractRegistryClientMock(env.contractRegistryResponseFaker))
+
 	if err != nil {
 		env.logger.WithError(err).Error("could initialize transaction scheduler app")
 		return err
@@ -245,7 +248,7 @@ func (env *IntegrationEnvironment) migrate(ctx context.Context) error {
 	return nil
 }
 
-func newTransactionSchedulerApp(ctx context.Context) (*app.App, error) {
+func newTransactionSchedulerApp(ctx context.Context, contractRegistryClient contractregistry.ContractRegistryClient) (*app.App, error) {
 	// Initialize dependencies
 	authjwt.Init(ctx)
 	authkey.Init(ctx)
@@ -257,16 +260,13 @@ func newTransactionSchedulerApp(ctx context.Context) (*app.App, error) {
 	gock.InterceptClient(httpClient)
 	chainRegistryClient := chainClient.NewHTTPClient(httpClient, conf)
 
-	// TODO: Intercept GRPC calls
-	contractregistry.Init(ctx, viper.GetString(contractregistry.ContractRegistryURLViperKey))
-
 	return transactionscheduler.New(
 		transactionscheduler.NewConfig(viper.GetViper()),
 		postgres.GetManager(),
 		authjwt.GlobalChecker(), authkey.GlobalChecker(),
 		chainRegistryClient,
-		contractregistry.GlobalClient(),
+		contractRegistryClient,
 		sarama.GlobalSyncProducer(),
-		txCrafterTopic,
+		sarama.NewKafkaTopicConfig(viper.GetViper()),
 	)
 }

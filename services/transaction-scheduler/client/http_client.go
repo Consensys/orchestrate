@@ -31,12 +31,52 @@ func NewHTTPClient(h *http.Client, c *Config) TransactionSchedulerClient {
 	}
 }
 
-func (c *HTTPClient) SendTransaction(ctx context.Context, chainUUID string, txRequest *types.SendTransactionRequest) (*types.TransactionResponse, error) {
+func (c *HTTPClient) SendContractTransaction(ctx context.Context, chainUUID string, txRequest *types.SendTransactionRequest) (*types.TransactionResponse, error) {
 	reqURL := fmt.Sprintf("%v/transactions/%s/send", c.config.URL, chainUUID)
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, txRequest)
 	if err != nil {
 		errMessage := "error while sending transaction"
+		log.FromContext(ctx).WithError(err).Error(errMessage)
+		return nil, errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+	}
+	defer clientutils.CloseResponse(response)
+
+	resp := &types.TransactionResponse{}
+	err = parseResponse(ctx, response, resp)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func (c *HTTPClient) SendDeployTransaction(ctx context.Context, chainUUID string, txRequest *types.DeployContractRequest) (*types.TransactionResponse, error) {
+	reqURL := fmt.Sprintf("%v/transactions/%s/deploy-contract", c.config.URL, chainUUID)
+
+	response, err := clientutils.PostRequest(ctx, c.client, reqURL, txRequest)
+	if err != nil {
+		errMessage := "error while sending deploy contract transaction"
+		log.FromContext(ctx).WithError(err).Error(errMessage)
+		return nil, errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+	}
+	defer clientutils.CloseResponse(response)
+
+	resp := &types.TransactionResponse{}
+	err = parseResponse(ctx, response, resp)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func (c *HTTPClient) SendRawTransaction(ctx context.Context, chainUUID string, txRequest *types.RawTransactionRequest) (*types.TransactionResponse, error) {
+	reqURL := fmt.Sprintf("%v/transactions/%s/send-raw", c.config.URL, chainUUID)
+
+	response, err := clientutils.PostRequest(ctx, c.client, reqURL, txRequest)
+	if err != nil {
+		errMessage := "error while sending raw transaction"
 		log.FromContext(ctx).WithError(err).Error(errMessage)
 		return nil, errors.ServiceConnectionError(errMessage).ExtendComponent(component)
 	}

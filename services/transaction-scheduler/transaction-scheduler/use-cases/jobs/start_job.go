@@ -6,6 +6,7 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
 	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
+	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 
@@ -27,17 +28,17 @@ type StartJobUseCase interface {
 
 // startJobUseCase is a use case to start a transaction job
 type startJobUseCase struct {
-	db             store.DB
-	kafkaProducer  sarama.SyncProducer
-	txCrafterTopic string
+	db            store.DB
+	kafkaProducer sarama.SyncProducer
+	topicsCfg     *pkgsarama.KafkaTopicConfig
 }
 
 // NewStartJobUseCase creates a new StartJobUseCase
-func NewStartJobUseCase(db store.DB, kafkaProducer sarama.SyncProducer, txCrafterTopic string) StartJobUseCase {
+func NewStartJobUseCase(db store.DB, kafkaProducer sarama.SyncProducer, topicsCfg *pkgsarama.KafkaTopicConfig) StartJobUseCase {
 	return &startJobUseCase{
-		db:             db,
-		kafkaProducer:  kafkaProducer,
-		txCrafterTopic: txCrafterTopic,
+		db:            db,
+		kafkaProducer: kafkaProducer,
+		topicsCfg:     topicsCfg,
 	}
 }
 
@@ -54,16 +55,23 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID, tenantID string
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}
 
-	partition, offset, err := uc.sendMessage(ctx, jobModel)
+	var msgTopic string
+	switch {
+	case jobModel.Type == types.EthereumRawTransaction:
+		msgTopic = uc.topicsCfg.Sender
+	default:
+		msgTopic = uc.topicsCfg.Crafter
+	}
+
+	partition, offset, err := uc.sendMessage(ctx, jobModel, msgTopic)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}
 
 	jobLog := &models.Log{
-		JobID:  &jobModel.ID,
-		Status: types.StatusStarted,
-		Message: fmt.Sprintf("message sent to partition %v, offset %v and topic %v", partition, offset,
-			uc.txCrafterTopic),
+		JobID:   &jobModel.ID,
+		Status:  types.StatusStarted,
+		Message: fmt.Sprintf("message sent to partition %v, offset %v and topic %v", partition, offset, msgTopic),
 	}
 
 	if err = uc.db.Log().Insert(ctx, jobLog); err != nil {
@@ -77,7 +85,7 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID, tenantID string
 	return nil
 }
 
-func (uc *startJobUseCase) sendMessage(ctx context.Context, jobModel *models.Job) (partition int32, offset int64, err error) {
+func (uc *startJobUseCase) sendMessage(ctx context.Context, jobModel *models.Job, topic string) (partition int32, offset int64, err error) {
 	log.WithContext(ctx).Debug("sending kafka message")
 
 	txEnvelope := parsers.NewEnvelopeFromJobModel(jobModel, map[string]string{
@@ -92,7 +100,7 @@ func (uc *startJobUseCase) sendMessage(ctx context.Context, jobModel *models.Job
 	}
 
 	msg := &sarama.ProducerMessage{
-		Topic: uc.txCrafterTopic,
+		Topic: topic,
 		Key:   sarama.StringEncoder(evlp.KafkaPartitionKey()),
 	}
 

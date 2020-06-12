@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"github.com/Shopify/sarama"
+	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
@@ -21,6 +22,7 @@ type useCases struct {
 	// Transaction
 	sendContractTransaction transactions.SendContractTxUseCase
 	sendDeployTransaction   transactions.SendDeployTxUseCase
+	sendTransaction         transactions.SendTxUseCase
 	// Schedule
 	createSchedule schedules.CreateScheduleUseCase
 	getSchedule    schedules.GetScheduleUseCase
@@ -38,20 +40,22 @@ func NewUseCases(
 	chainRegistryClient client.ChainRegistryClient,
 	contractRegistryClient contractregistry.ContractRegistryClient,
 	producer sarama.SyncProducer,
-	txCrafterPartition string,
+	topicsCfg *pkgsarama.KafkaTopicConfig,
 ) UseCases {
 	txValidator := validators.NewTransactionValidator(db, chainRegistryClient, contractRegistryClient)
 
 	createScheduleUC := schedules.NewCreateScheduleUseCase(db)
 	getScheduleUC := schedules.NewGetScheduleUseCase(db)
 	createJobUC := jobs.NewCreateJobUseCase(db, txValidator)
-	startJobUC := jobs.NewStartJobUseCase(db, producer, txCrafterPartition)
+	startJobUC := jobs.NewStartJobUseCase(db, producer, topicsCfg)
+
 	sendTxUC := transactions.NewSendTxUseCase(txValidator, db, startJobUC, createJobUC, createScheduleUC, getScheduleUC)
 
 	return &useCases{
 		// Transaction
 		sendContractTransaction: transactions.NewSendContractTxUseCase(txValidator, sendTxUC),
 		sendDeployTransaction:   transactions.NewSendDeployTxUseCase(txValidator, sendTxUC),
+		sendTransaction:         sendTxUC,
 		// Schedules
 		createSchedule: createScheduleUC,
 		getSchedule:    getScheduleUC,
@@ -71,6 +75,10 @@ func (u *useCases) SendContractTransaction() transactions.SendContractTxUseCase 
 
 func (u *useCases) SendDeployTransaction() transactions.SendDeployTxUseCase {
 	return u.sendDeployTransaction
+}
+
+func (u *useCases) SendTransaction() transactions.SendTxUseCase {
+	return u.sendTransaction
 }
 
 func (u *useCases) CreateSchedule() schedules.CreateScheduleUseCase {

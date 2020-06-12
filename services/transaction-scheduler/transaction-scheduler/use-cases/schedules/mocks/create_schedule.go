@@ -13,30 +13,30 @@ import (
 	reflect "reflect"
 )
 
-// MockCreateScheduleUseCase is a mock of CreateScheduleUseCase interface.
+// MockCreateScheduleUseCase is a mock of CreateScheduleUseCase interface
 type MockCreateScheduleUseCase struct {
 	ctrl     *gomock.Controller
 	recorder *MockCreateScheduleUseCaseMockRecorder
 }
 
-// MockCreateScheduleUseCaseMockRecorder is the mock recorder for MockCreateScheduleUseCase.
+// MockCreateScheduleUseCaseMockRecorder is the mock recorder for MockCreateScheduleUseCase
 type MockCreateScheduleUseCaseMockRecorder struct {
 	mock *MockCreateScheduleUseCase
 }
 
-// NewMockCreateScheduleUseCase creates a new mock instance.
+// NewMockCreateScheduleUseCase creates a new mock instance
 func NewMockCreateScheduleUseCase(ctrl *gomock.Controller) *MockCreateScheduleUseCase {
 	mock := &MockCreateScheduleUseCase{ctrl: ctrl}
 	mock.recorder = &MockCreateScheduleUseCaseMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockCreateScheduleUseCase) EXPECT() *MockCreateScheduleUseCaseMockRecorder {
 	return m.recorder
 }
 
-// Execute mocks base method.
+// Execute mocks base method
 func (m *MockCreateScheduleUseCase) Execute(ctx context.Context, schedule *entities.Schedule, tenantID string) (*entities.Schedule, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, schedule, tenantID)
@@ -45,13 +45,13 @@ func (m *MockCreateScheduleUseCase) Execute(ctx context.Context, schedule *entit
 	return ret0, ret1
 }
 
-// Execute indicates an expected call of Execute.
+// Execute indicates an expected call of Execute
 func (mr *MockCreateScheduleUseCaseMockRecorder) Execute(ctx, schedule, tenantID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateScheduleUseCase)(nil).Execute), ctx, schedule, tenantID)
 }
 
-// WithDBTransaction mocks base method.
+// WithDBTransaction mocks base method
 func (m *MockCreateScheduleUseCase) WithDBTransaction(dbtx store.Tx) schedules.CreateScheduleUseCase {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "WithDBTransaction", dbtx)
@@ -59,7 +59,7 @@ func (m *MockCreateScheduleUseCase) WithDBTransaction(dbtx store.Tx) schedules.C
 	return ret0
 }
 
-// WithDBTransaction indicates an expected call of WithDBTransaction.
+// WithDBTransaction indicates an expected call of WithDBTransaction
 func (mr *MockCreateScheduleUseCaseMockRecorder) WithDBTransaction(dbtx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithDBTransaction", reflect.TypeOf((*MockCreateScheduleUseCase)(nil).WithDBTransaction), dbtx)

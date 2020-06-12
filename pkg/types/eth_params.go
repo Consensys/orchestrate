@@ -6,14 +6,14 @@ import (
 )
 
 type ETHTransactionParams struct {
-	From            string   `json:"from,omitempty" validate:"required,eth_addr"`
+	From            string   `json:"from,omitempty" validate:"omitempty,eth_addr"`
 	To              string   `json:"to,omitempty" validate:"omitempty,eth_addr"`
 	Value           string   `json:"value,omitempty" validate:"omitempty,numeric"`
 	GasPrice        string   `json:"gasPrice,omitempty"`
 	GasLimit        string   `json:"gas,omitempty"`
 	MethodSignature string   `json:"methodSignature,omitempty"`
 	Args            []string `json:"args,omitempty"`
-	Raw             string   `json:"raw,omitempty" validate:"omitempty"`
+	Raw             string   `json:"raw,omitempty" validate:"omitempty,isHex"`
 	ContractName    string   `json:"contractName,omitempty"`
 	ContractTag     string   `json:"contractTag,omitempty"`
 	Nonce           string   `json:"nonce,omitempty" validate:"omitempty,numeric"`

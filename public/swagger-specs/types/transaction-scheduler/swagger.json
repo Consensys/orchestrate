@@ -220,6 +220,29 @@
                     "500": {}
                 }
             }
+        },
+        "/transactions/{chainUUID}/send-raw": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Creates and sends a raw transaction",
+                "responses": {
+                    "200": {},
+                    "400": {},
+                    "409": {},
+                    "422": {},
+                    "500": {}
+                }
+            }
         }
     },
     "securityDefinitions": {

@@ -39,7 +39,7 @@ func Init(ctx context.Context) {
 			client.GlobalClient(),
 			contractregistry.GlobalClient(),
 			sarama.GlobalSyncProducer(),
-			viper.GetString(sarama.TxCrafterViperKey),
+			sarama.NewKafkaTopicConfig(viper.GetViper()),
 		)
 		if err != nil {
 			log.FromContext(ctx).WithError(err).Fatalf("Could not create transaction scheduler application")

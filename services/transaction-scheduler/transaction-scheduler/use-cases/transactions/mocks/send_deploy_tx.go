@@ -11,30 +11,30 @@ import (
 	reflect "reflect"
 )
 
-// MockSendDeployTxUseCase is a mock of SendDeployTxUseCase interface.
+// MockSendDeployTxUseCase is a mock of SendDeployTxUseCase interface
 type MockSendDeployTxUseCase struct {
 	ctrl     *gomock.Controller
 	recorder *MockSendDeployTxUseCaseMockRecorder
 }
 
-// MockSendDeployTxUseCaseMockRecorder is the mock recorder for MockSendDeployTxUseCase.
+// MockSendDeployTxUseCaseMockRecorder is the mock recorder for MockSendDeployTxUseCase
 type MockSendDeployTxUseCaseMockRecorder struct {
 	mock *MockSendDeployTxUseCase
 }
 
-// NewMockSendDeployTxUseCase creates a new mock instance.
+// NewMockSendDeployTxUseCase creates a new mock instance
 func NewMockSendDeployTxUseCase(ctrl *gomock.Controller) *MockSendDeployTxUseCase {
 	mock := &MockSendDeployTxUseCase{ctrl: ctrl}
 	mock.recorder = &MockSendDeployTxUseCaseMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockSendDeployTxUseCase) EXPECT() *MockSendDeployTxUseCaseMockRecorder {
 	return m.recorder
 }
 
-// Execute mocks base method.
+// Execute mocks base method
 func (m *MockSendDeployTxUseCase) Execute(ctx context.Context, txRequest *entities.TxRequest, chainUUID, tenantID string) (*entities.TxRequest, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, txRequest, chainUUID, tenantID)
@@ -43,7 +43,7 @@ func (m *MockSendDeployTxUseCase) Execute(ctx context.Context, txRequest *entiti
 	return ret0, ret1
 }
 
-// Execute indicates an expected call of Execute.
+// Execute indicates an expected call of Execute
 func (mr *MockSendDeployTxUseCaseMockRecorder) Execute(ctx, txRequest, chainUUID, tenantID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSendDeployTxUseCase)(nil).Execute), ctx, txRequest, chainUUID, tenantID)

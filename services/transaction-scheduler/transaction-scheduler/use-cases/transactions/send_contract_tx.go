@@ -23,7 +23,7 @@ type sendContractTxUsecase struct {
 	sendTxUseCase SendTxUseCase
 }
 
-// NewSendContractTxUseCase creates a new SendContractTxUseCase
+// NewSendContractTxUseCase creates a n¬ew SendContractTxUseCase
 func NewSendContractTxUseCase(validator validators.TransactionValidator, sendTxUseCase SendTxUseCase) SendContractTxUseCase {
 	return &sendContractTxUsecase{
 		validator:     validator,
@@ -34,7 +34,8 @@ func NewSendContractTxUseCase(validator validators.TransactionValidator, sendTxU
 // Execute validates, creates and starts a new contract transaction
 func (uc *sendContractTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequest, chainUUID, tenantID string) (*entities.TxRequest, error) {
 	logger := log.WithContext(ctx)
-	logger.WithField("idempotency_key", txRequest.IdempotencyKey).Debug("creating new contract transaction")
+	logger.WithField("idempotency_key", txRequest.IdempotencyKey).
+		Debug("creating new contract transaction")
 
 	txData, err := uc.validator.ValidateMethodSignature(txRequest.Params.MethodSignature, txRequest.Params.Args)
 	if err != nil {

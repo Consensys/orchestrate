@@ -3,6 +3,7 @@ package transactionscheduler
 import (
 	"testing"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client/mock"
 
 	"github.com/Shopify/sarama/mocks"
@@ -26,6 +27,7 @@ func TestApp(t *testing.T) {
 	cfg := NewConfig(viper.New())
 	cfg.Store.Type = "postgres"
 
+	kCfg := sarama.NewKafkaTopicConfig(viper.New())
 	_, err := New(
 		cfg,
 		postgres.GetManager(),
@@ -33,7 +35,7 @@ func TestApp(t *testing.T) {
 		mockclient.NewMockChainRegistryClient(ctrl),
 		mock.NewMockContractRegistryClient(ctrl),
 		mockSyncProducer,
-		"tx-crafter-topic",
+		kCfg,
 	)
 	assert.NoError(t, err, "Creating App should not error")
 }

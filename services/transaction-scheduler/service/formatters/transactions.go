@@ -40,6 +40,16 @@ func FormatDeployContractRequest(txRequest *types.DeployContractRequest) *entiti
 	}
 }
 
+func FormatSendRawRequest(txRequest *types.RawTransactionRequest) *entities.TxRequest {
+	return &entities.TxRequest{
+		IdempotencyKey: txRequest.IdempotencyKey,
+		Labels:         txRequest.Labels,
+		Params: &pkgtypes.ETHTransactionParams{
+			Raw: txRequest.Params.Raw,
+		},
+	}
+}
+
 func FormatTxResponse(txRequest *entities.TxRequest) *types.TransactionResponse {
 	return &types.TransactionResponse{
 		IdempotencyKey: txRequest.IdempotencyKey,

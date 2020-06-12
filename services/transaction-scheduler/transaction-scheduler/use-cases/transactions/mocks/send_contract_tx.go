@@ -11,30 +11,30 @@ import (
 	reflect "reflect"
 )
 
-// MockSendContractTxUseCase is a mock of SendContractTxUseCase interface.
+// MockSendContractTxUseCase is a mock of SendContractTxUseCase interface
 type MockSendContractTxUseCase struct {
 	ctrl     *gomock.Controller
 	recorder *MockSendContractTxUseCaseMockRecorder
 }
 
-// MockSendContractTxUseCaseMockRecorder is the mock recorder for MockSendContractTxUseCase.
+// MockSendContractTxUseCaseMockRecorder is the mock recorder for MockSendContractTxUseCase
 type MockSendContractTxUseCaseMockRecorder struct {
 	mock *MockSendContractTxUseCase
 }
 
-// NewMockSendContractTxUseCase creates a new mock instance.
+// NewMockSendContractTxUseCase creates a new mock instance
 func NewMockSendContractTxUseCase(ctrl *gomock.Controller) *MockSendContractTxUseCase {
 	mock := &MockSendContractTxUseCase{ctrl: ctrl}
 	mock.recorder = &MockSendContractTxUseCaseMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockSendContractTxUseCase) EXPECT() *MockSendContractTxUseCaseMockRecorder {
 	return m.recorder
 }
 
-// Execute mocks base method.
+// Execute mocks base method
 func (m *MockSendContractTxUseCase) Execute(ctx context.Context, txRequest *entities.TxRequest, chainUUID, tenantID string) (*entities.TxRequest, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, txRequest, chainUUID, tenantID)
@@ -43,7 +43,7 @@ func (m *MockSendContractTxUseCase) Execute(ctx context.Context, txRequest *enti
 	return ret0, ret1
 }
 
-// Execute indicates an expected call of Execute.
+// Execute indicates an expected call of Execute
 func (mr *MockSendContractTxUseCaseMockRecorder) Execute(ctx, txRequest, chainUUID, tenantID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSendContractTxUseCase)(nil).Execute), ctx, txRequest, chainUUID, tenantID)

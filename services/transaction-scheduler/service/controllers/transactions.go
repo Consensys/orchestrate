@@ -27,6 +27,7 @@ func NewTransactionsController(useCases transactions.UseCases) *TransactionsCont
 // Add routes to router
 func (c *TransactionsController) Append(router *mux.Router) {
 	router.Methods(http.MethodPost).Path("/transactions/{chainUUID}/send").HandlerFunc(c.Send)
+	router.Methods(http.MethodPost).Path("/transactions/{chainUUID}/send-raw").HandlerFunc(c.SendRaw)
 	router.Methods(http.MethodPost).Path("/transactions/{chainUUID}/deploy-contract").HandlerFunc(c.DeployContract)
 }
 
@@ -99,6 +100,40 @@ func (c *TransactionsController) DeployContract(rw http.ResponseWriter, request 
 	txReq := formatters.FormatDeployContractRequest(txRequest)
 
 	txResponse, err := c.ucs.SendDeployTransaction().Execute(ctx, txReq, chainUUID, tenantID)
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	rw.WriteHeader(http.StatusAccepted)
+	_ = json.NewEncoder(rw).Encode(formatters.FormatTxResponse(txResponse))
+}
+
+// @Summary Creates and sends a raw transaction
+// @Produce json
+// @Security ApiKeyAuth
+// @Security JWTAuth
+// @Success 200
+// @Failure 400
+// @Failure 409
+// @Failure 422
+// @Failure 500
+// @Router /transactions/{chainUUID}/send-raw [post]
+func (c *TransactionsController) SendRaw(rw http.ResponseWriter, request *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	ctx := request.Context()
+
+	txRequest := &types.RawTransactionRequest{}
+	err := jsonutils.UnmarshalBody(request.Body, txRequest)
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	chainUUID := mux.Vars(request)["chainUUID"]
+	tenantID := multitenancy.TenantIDFromContext(ctx)
+	txReq := formatters.FormatSendRawRequest(txRequest)
+	txResponse, err := c.ucs.SendTransaction().Execute(ctx, txReq, "", chainUUID, tenantID)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return

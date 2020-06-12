@@ -33,7 +33,6 @@ func FakeETHTransactionParams() *types.ETHTransactionParams {
 		GasLimit:        "0",
 		MethodSignature: "method(string,string)",
 		Args:            []string{"val1", "val2"},
-		Raw:             "0123456",
 		ContractName:    "ContractName",
 		ContractTag:     "ContractTag",
 		Nonce:           "1",
@@ -53,6 +52,15 @@ func FakeOrionTransactionParams() *types.ETHTransactionParams {
 	tx := FakeETHTransactionParams()
 	tx.PrivateFrom = "ROAZBWtSacxXQrOe3FGAqJDyJjFePR5ce4TSIzmJ0Be="
 	tx.PrivacyGroupID = "ROAZBWtSacxXQrOe3FGAqJDyJjFePR5ce4TSIzmJ0Bf="
+	tx.Protocol = types.OrionEEATransaction
+
+	return tx
+}
+
+func FakeRawTransactionParams() *types.ETHTransactionParams {
+	tx := FakeETHTransactionParams()
+	tx.PrivateFrom = "ROAZBWtSacxXQrOe3FGAqJDyJjFePR5ce4TSIzmJ0Ba="
+	tx.Raw = "0xABCDE012312312"
 	tx.Protocol = types.OrionEEATransaction
 
 	return tx

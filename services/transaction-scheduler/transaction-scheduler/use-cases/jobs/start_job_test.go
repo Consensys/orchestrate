@@ -7,7 +7,9 @@ import (
 	"fmt"
 	mocks2 "github.com/Shopify/sarama/mocks"
 	"github.com/golang/mock/gomock"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
@@ -28,8 +30,7 @@ func TestStartJob_Execute(t *testing.T) {
 	mockDB.EXPECT().Job().Return(mockJobDA).AnyTimes()
 	mockDB.EXPECT().Log().Return(mockLogDA).AnyTimes()
 
-	txCrafterTopic := "tx-crafter-topic"
-	usecase := NewStartJobUseCase(mockDB, mockKafkaProducer, txCrafterTopic)
+	usecase := NewStartJobUseCase(mockDB, mockKafkaProducer, sarama.NewKafkaTopicConfig(viper.GetViper()))
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		job := testutils.FakeJobModel(1)

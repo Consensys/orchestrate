@@ -4,6 +4,7 @@ import (
 	"context"
 	"reflect"
 
+	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 
 	"github.com/Shopify/sarama"
@@ -25,7 +26,7 @@ func New(
 	chainRegistryClient client.ChainRegistryClient,
 	contractRegistryClient contractregistry.ContractRegistryClient,
 	syncProducer sarama.SyncProducer,
-	txCrafterTopic string,
+	topicCfg *pkgsarama.KafkaTopicConfig,
 ) (*app.App, error) {
 	// Create Data agents
 	db, err := multi.Build(context.Background(), cfg.Store, pgmngr)
@@ -33,7 +34,7 @@ func New(
 		return nil, err
 	}
 
-	ucs := usecases.NewUseCases(db, chainRegistryClient, contractRegistryClient, syncProducer, txCrafterTopic)
+	ucs := usecases.NewUseCases(db, chainRegistryClient, contractRegistryClient, syncProducer, topicCfg)
 	// Option for transaction handler
 	txSchedulerHandlerOpt := app.HandlerOpt(
 		reflect.TypeOf(&dynamic.Transactions{}),

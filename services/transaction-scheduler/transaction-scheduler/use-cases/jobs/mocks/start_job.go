@@ -10,30 +10,30 @@ import (
 	reflect "reflect"
 )
 
-// MockStartJobUseCase is a mock of StartJobUseCase interface.
+// MockStartJobUseCase is a mock of StartJobUseCase interface
 type MockStartJobUseCase struct {
 	ctrl     *gomock.Controller
 	recorder *MockStartJobUseCaseMockRecorder
 }
 
-// MockStartJobUseCaseMockRecorder is the mock recorder for MockStartJobUseCase.
+// MockStartJobUseCaseMockRecorder is the mock recorder for MockStartJobUseCase
 type MockStartJobUseCaseMockRecorder struct {
 	mock *MockStartJobUseCase
 }
 
-// NewMockStartJobUseCase creates a new mock instance.
+// NewMockStartJobUseCase creates a new mock instance
 func NewMockStartJobUseCase(ctrl *gomock.Controller) *MockStartJobUseCase {
 	mock := &MockStartJobUseCase{ctrl: ctrl}
 	mock.recorder = &MockStartJobUseCaseMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockStartJobUseCase) EXPECT() *MockStartJobUseCaseMockRecorder {
 	return m.recorder
 }
 
-// Execute mocks base method.
+// Execute mocks base method
 func (m *MockStartJobUseCase) Execute(ctx context.Context, jobUUID, tenantID string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, jobUUID, tenantID)
@@ -41,7 +41,7 @@ func (m *MockStartJobUseCase) Execute(ctx context.Context, jobUUID, tenantID str
 	return ret0
 }
 
-// Execute indicates an expected call of Execute.
+// Execute indicates an expected call of Execute
 func (mr *MockStartJobUseCaseMockRecorder) Execute(ctx, jobUUID, tenantID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockStartJobUseCase)(nil).Execute), ctx, jobUUID, tenantID)
