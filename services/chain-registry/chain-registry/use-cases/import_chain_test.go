@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/gofrs/uuid"
 	"github.com/golang/mock/gomock"
-	genuuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	mockethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/mock"
 	mockstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/mock"
@@ -22,14 +22,14 @@ func TestImportChain_FetchHead(t *testing.T) {
 	ethClient := mockethclient.NewMockChainLedgerReader(mockCtrl)
 
 	importChainUC := NewImportChain(chainAgent, ethClient)
-	uuid := genuuid.NewV4().String()
-	importChainJSON := fmt.Sprintf(`{"uuid":"%s", "name":"geth","urls":["http://geth:8545"]}`, uuid)
+	chainUUID := uuid.Must(uuid.NewV4()).String()
+	importChainJSON := fmt.Sprintf(`{"uuid":"%s", "name":"geth","urls":["http://geth:8545"]}`, chainUUID)
 
 	ethClient.EXPECT().HeaderByNumber(gomock.Any(), gomock.Eq("http://geth:8545"), nil).
 		Return(&ethtypes.Header{Number: big.NewInt(666)}, nil).Times(1)
 
 	expectedChain := &models.Chain{
-		UUID:                  uuid,
+		UUID:                  chainUUID,
 		Name:                  "geth",
 		URLs:                  []string{"http://geth:8545"},
 		ListenerStartingBlock: &(&struct{ x uint64 }{666}).x,
@@ -48,11 +48,11 @@ func TestImportChain_NotFetchHead(t *testing.T) {
 	ethClient := mockethclient.NewMockChainLedgerReader(mockCtrl)
 
 	importChainUC := NewImportChain(chainAgent, ethClient)
-	uuid := genuuid.NewV4().String()
-	importChainJSON := fmt.Sprintf(`{"uuid":"%s", "name":"geth","urls":["http://geth:8545"],"listenerStartingBlock":"666"}`, uuid)
+	chainUUID := uuid.Must(uuid.NewV4()).String()
+	importChainJSON := fmt.Sprintf(`{"uuid":"%s", "name":"geth","urls":["http://geth:8545"],"listenerStartingBlock":"666"}`, chainUUID)
 
 	expectedChain := &models.Chain{
-		UUID:                  uuid,
+		UUID:                  chainUUID,
 		Name:                  "geth",
 		URLs:                  []string{"http://geth:8545"},
 		ListenerStartingBlock: &(&struct{ x uint64 }{666}).x,

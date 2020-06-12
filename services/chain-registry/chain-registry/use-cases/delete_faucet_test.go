@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/gofrs/uuid"
 	"github.com/golang/mock/gomock"
-	genuuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	mockstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/mock"
 )
@@ -16,11 +16,11 @@ func TestDeleteFaucet_ByUUID(t *testing.T) {
 	deleteAgent := mockstore.NewMockFaucetAgent(mockCtrl)
 
 	registerFaucetUC := NewDeleteFaucet(deleteAgent)
-	uuid := genuuid.NewV4().String()
+	faucetUUID := uuid.Must(uuid.NewV4()).String()
 
-	deleteAgent.EXPECT().DeleteFaucetByUUID(gomock.Any(), gomock.Eq(uuid)).Times(1)
+	deleteAgent.EXPECT().DeleteFaucetByUUID(gomock.Any(), gomock.Eq(faucetUUID)).Times(1)
 
-	err := registerFaucetUC.Execute(context.Background(), uuid, "")
+	err := registerFaucetUC.Execute(context.Background(), faucetUUID, "")
 	assert.Nil(t, err)
 }
 
@@ -30,11 +30,11 @@ func TestDeleteFaucet_ByUUIDAndTenantID(t *testing.T) {
 	faucetAgent := mockstore.NewMockFaucetAgent(mockCtrl)
 
 	deleteFaucetUC := NewDeleteFaucet(faucetAgent)
-	uuid := genuuid.NewV4().String()
+	faucetUUID := uuid.Must(uuid.NewV4()).String()
 	tenantID := "tenantID_2"
 
-	faucetAgent.EXPECT().DeleteFaucetByUUIDAndTenant(gomock.Any(), gomock.Eq(uuid), gomock.Eq(tenantID)).Times(1)
+	faucetAgent.EXPECT().DeleteFaucetByUUIDAndTenant(gomock.Any(), gomock.Eq(faucetUUID), gomock.Eq(tenantID)).Times(1)
 
-	err := deleteFaucetUC.Execute(context.Background(), uuid, tenantID)
+	err := deleteFaucetUC.Execute(context.Background(), faucetUUID, tenantID)
 	assert.Nil(t, err)
 }

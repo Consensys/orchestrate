@@ -4,7 +4,7 @@ import (
 	"math/big"
 	"time"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 )
 
 type Message struct {
@@ -38,7 +38,7 @@ type Chain struct {
 
 func (n *Chain) SetDefault() {
 	if n.UUID == "" {
-		n.UUID = uuid.NewV4().String()
+		n.UUID = uuid.Must(uuid.NewV4()).String()
 	}
 
 	if n.Listener == nil {

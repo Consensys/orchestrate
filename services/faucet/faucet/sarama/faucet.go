@@ -6,7 +6,7 @@ import (
 	"reflect"
 
 	"github.com/Shopify/sarama"
-	uuid "github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
@@ -34,7 +34,7 @@ func NewFaucet(p sarama.SyncProducer) *Faucet {
 func (f *Faucet) prepareMsg(ctx context.Context, r *types.Request, elected string, msg *sarama.ProducerMessage) error {
 	// Create Trace for Crediting message
 	b := tx.NewEnvelope().
-		SetID(uuid.NewV4().String()).
+		SetID(uuid.Must(uuid.NewV4()).String()).
 		SetChainName(r.ChainName).
 		SetFrom(r.FaucetsCandidates[elected].Creditor).
 		SetValue(r.FaucetsCandidates[elected].Amount).

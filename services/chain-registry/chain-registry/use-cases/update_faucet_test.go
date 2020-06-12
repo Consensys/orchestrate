@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/gofrs/uuid"
 	"github.com/golang/mock/gomock"
-	genuuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	mockstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/mock"
@@ -18,15 +18,15 @@ func TestUpdateFaucet_ByUUID(t *testing.T) {
 	faucetAgent := mockstore.NewMockFaucetAgent(mockCtrl)
 
 	updateChainUC := NewUpdateFaucet(faucetAgent)
-	uuid := genuuid.NewV4().String()
+	faucetUUID := uuid.Must(uuid.NewV4()).String()
 
 	faucet := &models.Faucet{
 		Name: "faucetName",
 	}
 
-	faucetAgent.EXPECT().UpdateFaucetByUUID(gomock.Any(), gomock.Eq(uuid), gomock.Eq(faucet)).Times(1)
+	faucetAgent.EXPECT().UpdateFaucetByUUID(gomock.Any(), gomock.Eq(faucetUUID), gomock.Eq(faucet)).Times(1)
 
-	err := updateChainUC.Execute(context.Background(), uuid, faucet)
+	err := updateChainUC.Execute(context.Background(), faucetUUID, faucet)
 	assert.Nil(t, err)
 }
 
@@ -36,14 +36,14 @@ func TestUpdateFaucet_FailUpdateUUID(t *testing.T) {
 	faucetAgent := mockstore.NewMockFaucetAgent(mockCtrl)
 
 	updateChainUC := NewUpdateFaucet(faucetAgent)
-	uuid := genuuid.NewV4().String()
+	faucetUUID := uuid.Must(uuid.NewV4()).String()
 
 	faucet := &models.Faucet{
-		UUID: genuuid.NewV4().String(),
+		UUID: uuid.Must(uuid.NewV4()).String(),
 		Name: "faucetName",
 	}
 
-	err := updateChainUC.Execute(context.Background(), uuid, faucet)
+	err := updateChainUC.Execute(context.Background(), faucetUUID, faucet)
 	assert.NotNil(t, err)
 	assert.True(t, errors.IsConstraintViolatedError(err), "should be IsConstraintViolatedError")
 }

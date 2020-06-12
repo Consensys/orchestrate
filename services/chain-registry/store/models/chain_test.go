@@ -5,7 +5,7 @@ package models
 import (
 	"testing"
 
-	genuuid "github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
@@ -17,7 +17,7 @@ func TestIsValidChain(t *testing.T) {
 		isValid bool
 	}{
 		{&Chain{
-			UUID:                    genuuid.NewV4().String(),
+			UUID:                    uuid.Must(uuid.NewV4()).String(),
 			Name:                    "test",
 			TenantID:                "test",
 			URLs:                    []string{"http://test.com", "http://test.net"},
@@ -29,7 +29,7 @@ func TestIsValidChain(t *testing.T) {
 			true,
 		},
 		{&Chain{
-			UUID:                    genuuid.NewV4().String(),
+			UUID:                    uuid.Must(uuid.NewV4()).String(),
 			Name:                    "test",
 			TenantID:                "test",
 			URLs:                    []string{"http://test.com", "http://test.net"},
@@ -47,7 +47,7 @@ func TestIsValidChain(t *testing.T) {
 			true,
 		},
 		{&Chain{
-			UUID:                    genuuid.NewV4().String(),
+			UUID:                    uuid.Must(uuid.NewV4()).String(),
 			TenantID:                "test",
 			URLs:                    []string{"http://test.com", "http://test.net"},
 			ListenerDepth:           &(&struct{ x uint64 }{1}).x,
@@ -58,7 +58,7 @@ func TestIsValidChain(t *testing.T) {
 			false,
 		},
 		{&Chain{
-			UUID:                    genuuid.NewV4().String(),
+			UUID:                    uuid.Must(uuid.NewV4()).String(),
 			Name:                    "test",
 			URLs:                    []string{},
 			ListenerDepth:           &(&struct{ x uint64 }{1}).x,
@@ -69,7 +69,7 @@ func TestIsValidChain(t *testing.T) {
 			false,
 		},
 		{&Chain{
-			UUID:                    genuuid.NewV4().String(),
+			UUID:                    uuid.Must(uuid.NewV4()).String(),
 			Name:                    "test",
 			TenantID:                "test",
 			ListenerDepth:           &(&struct{ x uint64 }{1}).x,
@@ -80,7 +80,7 @@ func TestIsValidChain(t *testing.T) {
 			false,
 		},
 		{&Chain{
-			UUID:                  genuuid.NewV4().String(),
+			UUID:                  uuid.Must(uuid.NewV4()).String(),
 			Name:                  "test",
 			TenantID:              "test",
 			URLs:                  []string{"http://test.com", "http://test.net"},
@@ -91,7 +91,7 @@ func TestIsValidChain(t *testing.T) {
 			false,
 		},
 		{&Chain{
-			UUID:                    genuuid.NewV4().String(),
+			UUID:                    uuid.Must(uuid.NewV4()).String(),
 			Name:                    "test",
 			TenantID:                "test",
 			URLs:                    []string{"http://test.com", "http://test.net"},
@@ -103,7 +103,7 @@ func TestIsValidChain(t *testing.T) {
 			false,
 		},
 		{&Chain{
-			UUID:                    genuuid.NewV4().String(),
+			UUID:                    uuid.Must(uuid.NewV4()).String(),
 			Name:                    "test",
 			TenantID:                "test",
 			URLs:                    []string{"%%%"},
@@ -115,7 +115,7 @@ func TestIsValidChain(t *testing.T) {
 			false,
 		},
 		{&Chain{
-			UUID:                    genuuid.NewV4().String(),
+			UUID:                    uuid.Must(uuid.NewV4()).String(),
 			Name:                    "test",
 			TenantID:                "test",
 			URLs:                    []string{"http://test.com", "http://test.net"},
@@ -133,7 +133,7 @@ func TestIsValidChain(t *testing.T) {
 			false,
 		},
 		{&Chain{
-			UUID:                    genuuid.NewV4().String(),
+			UUID:                    uuid.Must(uuid.NewV4()).String(),
 			Name:                    "test",
 			TenantID:                "test",
 			URLs:                    []string{"http://test.com", "http://test.net"},
@@ -151,7 +151,7 @@ func TestIsValidChain(t *testing.T) {
 			false,
 		},
 		{&Chain{
-			UUID:                    genuuid.NewV4().String(),
+			UUID:                    uuid.Must(uuid.NewV4()).String(),
 			Name:                    "test",
 			TenantID:                "test",
 			URLs:                    []string{"http://test.com", "http://test.net"},

@@ -7,12 +7,12 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
 
 func FakeScheduleEntity() *entities.Schedule {
-	scheduleUUID := uuid.NewV4().String()
+	scheduleUUID := uuid.Must(uuid.NewV4()).String()
 	job := testutils.FakeJob()
 	job.ScheduleUUID = scheduleUUID
 

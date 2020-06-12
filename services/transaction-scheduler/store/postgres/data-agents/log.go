@@ -5,7 +5,7 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 )
@@ -25,7 +25,7 @@ func NewPGLog(db pg.DB) *PGLog {
 // Insert Inserts a new log in DB
 func (agent *PGLog) Insert(ctx context.Context, logModel *models.Log) error {
 	if logModel.UUID == "" {
-		logModel.UUID = uuid.NewV4().String()
+		logModel.UUID = uuid.Must(uuid.NewV4()).String()
 	}
 
 	if logModel.JobID == nil && logModel.Job != nil {

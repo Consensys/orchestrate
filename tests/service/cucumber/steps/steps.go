@@ -12,7 +12,7 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/cucumber/godog"
 	gherkin "github.com/cucumber/messages-go/v10"
-	uuid "github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
@@ -172,7 +172,7 @@ func (sc *ScenarioContext) newTracker(e *tx.Envelope) *tracker.Tracker {
 }
 
 func (sc *ScenarioContext) setMetadata(e *tx.Envelope) {
-	_ = e.SetID(uuid.NewV4().String())
+	_ = e.SetID(uuid.Must(uuid.NewV4()).String())
 
 	// Prepare envelope metadata
 	_ = e.SetContextLabelsValue("debug", "true").

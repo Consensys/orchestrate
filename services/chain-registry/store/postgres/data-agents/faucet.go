@@ -6,7 +6,7 @@ import (
 
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/go-pg/pg/v9"
-	genuuid "github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 )
@@ -27,7 +27,7 @@ func NewPGFaucetAgent(
 
 func (ag *PGFaucetAgent) RegisterFaucet(ctx context.Context, faucet *models.Faucet) error {
 	if faucet.UUID == "" {
-		faucet.UUID = genuuid.NewV4().String()
+		faucet.UUID = uuid.Must(uuid.NewV4()).String()
 	}
 	_, err := ag.db.ModelContext(ctx, faucet).Insert()
 	if err != nil {
@@ -76,14 +76,14 @@ func (ag *PGFaucetAgent) GetFaucetsByTenant(ctx context.Context, filters map[str
 	return faucets, nil
 }
 
-func (ag *PGFaucetAgent) GetFaucetByUUID(ctx context.Context, uuid string) (*models.Faucet, error) {
+func (ag *PGFaucetAgent) GetFaucetByUUID(ctx context.Context, faucetUUID string) (*models.Faucet, error) {
 	faucet := &models.Faucet{}
 
-	err := ag.db.ModelContext(ctx, faucet).Where("uuid = ?", uuid).Select()
+	err := ag.db.ModelContext(ctx, faucet).Where("uuid = ?", faucetUUID).Select()
 	if err != nil && err == pg.ErrNoRows {
 		errMessage := "could not load faucet with chainUUID: %s"
-		log.FromContext(ctx).WithError(err).Debugf(errMessage, uuid)
-		return nil, errors.NotFoundError(errMessage, uuid).ExtendComponent(faucetComponentName)
+		log.FromContext(ctx).WithError(err).Debugf(errMessage, faucetUUID)
+		return nil, errors.NotFoundError(errMessage, faucetUUID).ExtendComponent(faucetComponentName)
 	} else if err != nil {
 		errMessage := "Failed to get faucet"
 		log.FromContext(ctx).WithError(err).Error(errMessage)
@@ -93,14 +93,14 @@ func (ag *PGFaucetAgent) GetFaucetByUUID(ctx context.Context, uuid string) (*mod
 	return faucet, nil
 }
 
-func (ag *PGFaucetAgent) GetFaucetByUUIDAndTenant(ctx context.Context, uuid, tenantID string) (*models.Faucet, error) {
+func (ag *PGFaucetAgent) GetFaucetByUUIDAndTenant(ctx context.Context, faucetUUID, tenantID string) (*models.Faucet, error) {
 	faucet := &models.Faucet{}
 
-	err := ag.db.ModelContext(ctx, faucet).Where("uuid = ?", uuid).Where("tenant_id = ?", tenantID).Select()
+	err := ag.db.ModelContext(ctx, faucet).Where("uuid = ?", faucetUUID).Where("tenant_id = ?", tenantID).Select()
 	if err != nil && err == pg.ErrNoRows {
 		errMessage := "could not load faucet with chainUUID: %s and tenant: %s"
-		log.FromContext(ctx).WithError(err).Debugf(errMessage, uuid, tenantID)
-		return nil, errors.NotFoundError(errMessage, uuid, tenantID).ExtendComponent(faucetComponentName)
+		log.FromContext(ctx).WithError(err).Debugf(errMessage, faucetUUID, tenantID)
+		return nil, errors.NotFoundError(errMessage, faucetUUID, tenantID).ExtendComponent(faucetComponentName)
 	} else if err != nil {
 		errMessage := "Failed to get faucet from DB"
 		log.FromContext(ctx).WithError(err).Error(errMessage)
@@ -110,9 +110,9 @@ func (ag *PGFaucetAgent) GetFaucetByUUIDAndTenant(ctx context.Context, uuid, ten
 	return faucet, nil
 }
 
-func (ag *PGFaucetAgent) UpdateFaucetByUUID(ctx context.Context, uuid string, faucet *models.Faucet) error {
+func (ag *PGFaucetAgent) UpdateFaucetByUUID(ctx context.Context, faucetUUID string, faucet *models.Faucet) error {
 	res, err := ag.db.ModelContext(ctx, faucet).
-		Where("uuid = ?", uuid).
+		Where("uuid = ?", faucetUUID).
 		UpdateNotZero()
 
 	if err != nil {
@@ -130,10 +130,10 @@ func (ag *PGFaucetAgent) UpdateFaucetByUUID(ctx context.Context, uuid string, fa
 	return nil
 }
 
-func (ag *PGFaucetAgent) DeleteFaucetByUUID(ctx context.Context, uuid string) error {
+func (ag *PGFaucetAgent) DeleteFaucetByUUID(ctx context.Context, faucetUUID string) error {
 	faucet := &models.Faucet{}
 
-	res, err := ag.db.ModelContext(ctx, faucet).Where("uuid = ?", uuid).Delete()
+	res, err := ag.db.ModelContext(ctx, faucet).Where("uuid = ?", faucetUUID).Delete()
 	if err != nil {
 		errMessage := "Failed to delete faucet by UUID"
 		log.FromContext(ctx).WithError(err).Error(errMessage)
@@ -142,18 +142,18 @@ func (ag *PGFaucetAgent) DeleteFaucetByUUID(ctx context.Context, uuid string) er
 
 	if res.RowsReturned() == 0 && res.RowsAffected() == 0 {
 		errMessage := "no faucet found with chainUUID: %s"
-		log.FromContext(ctx).WithError(err).Error(errMessage, uuid)
-		return errors.NotFoundError(errMessage, uuid).ExtendComponent(faucetComponentName)
+		log.FromContext(ctx).WithError(err).Error(errMessage, faucetUUID)
+		return errors.NotFoundError(errMessage, faucetUUID).ExtendComponent(faucetComponentName)
 	}
 
 	return nil
 }
 
-func (ag *PGFaucetAgent) DeleteFaucetByUUIDAndTenant(ctx context.Context, uuid, tenantID string) error {
+func (ag *PGFaucetAgent) DeleteFaucetByUUIDAndTenant(ctx context.Context, faucetUUID, tenantID string) error {
 	faucet := &models.Faucet{}
 
 	res, err := ag.db.ModelContext(ctx, faucet).
-		Where("uuid = ?", uuid).
+		Where("uuid = ?", faucetUUID).
 		Where("tenant_id = ?", tenantID).Delete()
 	if err != nil {
 		errMessage := "Failed to delete faucet by UUID and tenant"
@@ -163,8 +163,8 @@ func (ag *PGFaucetAgent) DeleteFaucetByUUIDAndTenant(ctx context.Context, uuid, 
 
 	if res.RowsReturned() == 0 && res.RowsAffected() == 0 {
 		errMessage := "no faucet found with uuid %s and tenant_id %s"
-		log.FromContext(ctx).WithError(err).Error(errMessage, uuid, tenantID)
-		return errors.NotFoundError(errMessage, uuid, tenantID).ExtendComponent(faucetComponentName)
+		log.FromContext(ctx).WithError(err).Error(errMessage, faucetUUID, tenantID)
+		return errors.NotFoundError(errMessage, faucetUUID, tenantID).ExtendComponent(faucetComponentName)
 	}
 
 	return nil

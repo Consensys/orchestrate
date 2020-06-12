@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/gofrs/uuid"
 	"github.com/golang/mock/gomock"
-	genuuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	mockstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
@@ -17,12 +17,11 @@ func TestGetFaucets_ByUUID(t *testing.T) {
 	faucetAgent := mockstore.NewMockFaucetAgent(mockCtrl)
 
 	getFaucetsUC := NewGetFaucets(faucetAgent)
-	uuid := genuuid.NewV4().String()
 
 	filters := make(map[string]string)
 	expectedFaucet := []*models.Faucet{
-		&models.Faucet{
-			UUID: uuid,
+		{
+			UUID: uuid.Must(uuid.NewV4()).String(),
 			Name: "testFaucet",
 		},
 	}
@@ -39,13 +38,12 @@ func TestGetFaucets_ByUUIDAndTenantID(t *testing.T) {
 	faucetAgent := mockstore.NewMockFaucetAgent(mockCtrl)
 
 	getFaucetsUC := NewGetFaucets(faucetAgent)
-	uuid := genuuid.NewV4().String()
 	tenantID := "tenantID_6"
 
 	filters := make(map[string]string)
 	expectedFaucet := []*models.Faucet{
-		&models.Faucet{
-			UUID:     uuid,
+		{
+			UUID:     uuid.Must(uuid.NewV4()).String(),
 			TenantID: tenantID,
 			Name:     "testFaucet",
 		},

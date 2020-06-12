@@ -6,7 +6,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -35,7 +35,7 @@ func (s *txSchedulerTransactionTestSuite) SetupSuite() {
 
 func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() {
 	ctx := context.Background()
-	chainUUID := uuid.NewV4().String()
+	chainUUID := uuid.Must(uuid.NewV4()).String()
 
 	s.T().Run("should fail if payload is invalid", func(t *testing.T) {
 		defer gock.Off()
@@ -76,7 +76,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 
 func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions() {
 	ctx := context.Background()
-	chainUUID := uuid.NewV4().String()
+	chainUUID := uuid.Must(uuid.NewV4()).String()
 
 	s.T().Run("should send a transaction successfully to the transaction crafter topic", func(t *testing.T) {
 		defer gock.Off()

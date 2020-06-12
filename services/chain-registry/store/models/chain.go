@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	genuuid "github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
@@ -47,7 +47,7 @@ func (c Chain) Validate(isNewChain bool) error {
 
 func (c *Chain) SetDefault() {
 	if c.UUID == "" {
-		c.UUID = genuuid.NewV4().String()
+		c.UUID = uuid.Must(uuid.NewV4()).String()
 	}
 	if c.TenantID == "" {
 		c.TenantID = multitenancy.DefaultTenantIDName
@@ -81,7 +81,7 @@ func (c *Chain) SetPrivateTxManagersDefault() {
 			c.PrivateTxManagers[idx].ChainUUID = c.UUID
 		}
 		if privTxManager.UUID == "" {
-			c.PrivateTxManagers[idx].UUID = genuuid.NewV4().String()
+			c.PrivateTxManagers[idx].UUID = uuid.Must(uuid.NewV4()).String()
 		}
 	}
 }

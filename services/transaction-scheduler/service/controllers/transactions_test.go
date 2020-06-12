@@ -10,9 +10,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gofrs/uuid"
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
-	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
@@ -64,7 +64,7 @@ func (s *transactionsControllerTestSuite) SetupTest() {
 	s.sendDeployTxUseCase = mocks.NewMockSendDeployTxUseCase(ctrl)
 	s.sendTxUseCase = mocks.NewMockSendTxUseCase(ctrl)
 	s.tenantID = "tenantId"
-	s.chainUUID = uuid.NewV4().String()
+	s.chainUUID = uuid.Must(uuid.NewV4()).String()
 	s.ctx = context.WithValue(context.Background(), multitenancy.TenantIDKey, s.tenantID)
 
 	s.router = mux.NewRouter()

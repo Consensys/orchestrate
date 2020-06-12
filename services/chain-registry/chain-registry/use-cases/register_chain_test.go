@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/gofrs/uuid"
 	"github.com/golang/mock/gomock"
-	genuuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	mockethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/mock"
 	mockstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/mock"
@@ -21,13 +21,13 @@ func TestRegisterChain_FetchHead(t *testing.T) {
 	ethClient := mockethclient.NewMockChainLedgerReader(mockCtrl)
 
 	registerChainUC := NewRegisterChain(chainAgent, ethClient)
-	uuid := genuuid.NewV4().String()
+	chainUUID := uuid.Must(uuid.NewV4()).String()
 
 	ethClient.EXPECT().HeaderByNumber(gomock.Any(), gomock.Eq("http://geth:8545"), nil).
 		Return(&ethtypes.Header{Number: big.NewInt(666)}, nil).Times(1)
 
 	chain := &models.Chain{
-		UUID: uuid,
+		UUID: chainUUID,
 		Name: "geth",
 		URLs: []string{"http://geth:8545"},
 	}
@@ -49,10 +49,10 @@ func TestRegisterChain_NotFetchHead(t *testing.T) {
 	ethClient := mockethclient.NewMockChainLedgerReader(mockCtrl)
 
 	registerChainUC := NewRegisterChain(chainAgent, ethClient)
-	uuid := genuuid.NewV4().String()
+	chainUUID := uuid.Must(uuid.NewV4()).String()
 
 	chain := &models.Chain{
-		UUID:                  uuid,
+		UUID:                  chainUUID,
 		Name:                  "geth",
 		URLs:                  []string{"http://geth:8545"},
 		ListenerStartingBlock: &(&struct{ x uint64 }{666}).x,

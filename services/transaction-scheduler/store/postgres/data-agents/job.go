@@ -7,7 +7,7 @@ import (
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 )
@@ -27,7 +27,7 @@ func NewPGJob(db pg.DB) *PGJob {
 // Insert Inserts a new job in DB
 func (agent *PGJob) Insert(ctx context.Context, job *models.Job) error {
 	if job.UUID == "" {
-		job.UUID = uuid.NewV4().String()
+		job.UUID = uuid.Must(uuid.NewV4()).String()
 	}
 
 	if job.Transaction != nil && job.TransactionID == nil {

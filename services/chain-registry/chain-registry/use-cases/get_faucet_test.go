@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/gofrs/uuid"
 	"github.com/golang/mock/gomock"
-	genuuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	mockstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
@@ -17,15 +17,15 @@ func TestGetFaucet_ByUUID(t *testing.T) {
 	faucetAgent := mockstore.NewMockFaucetAgent(mockCtrl)
 
 	getFaucetUC := NewGetFaucet(faucetAgent)
-	uuid := genuuid.NewV4().String()
+	faucetUUID := uuid.Must(uuid.NewV4()).String()
 
 	expectedFaucet := &models.Faucet{
-		UUID: uuid,
+		UUID: faucetUUID,
 		Name: "testFaucet",
 	}
-	faucetAgent.EXPECT().GetFaucetByUUID(gomock.Any(), gomock.Eq(uuid)).Return(expectedFaucet, nil).Times(1)
+	faucetAgent.EXPECT().GetFaucetByUUID(gomock.Any(), gomock.Eq(faucetUUID)).Return(expectedFaucet, nil).Times(1)
 
-	actualFaucet, err := getFaucetUC.Execute(context.Background(), uuid, "")
+	actualFaucet, err := getFaucetUC.Execute(context.Background(), faucetUUID, "")
 	assert.Nil(t, err)
 	assert.Equal(t, expectedFaucet, actualFaucet)
 }
@@ -36,17 +36,17 @@ func TestGetFaucet_ByUUIDAndTenantID(t *testing.T) {
 	faucetAgent := mockstore.NewMockFaucetAgent(mockCtrl)
 
 	getFaucetUC := NewGetFaucet(faucetAgent)
-	uuid := genuuid.NewV4().String()
+	faucetUUID := uuid.Must(uuid.NewV4()).String()
 	tenantID := "tenantID_5"
 
 	expectedFaucet := &models.Faucet{
-		UUID:     uuid,
+		UUID:     faucetUUID,
 		TenantID: tenantID,
 		Name:     "testFaucet",
 	}
-	faucetAgent.EXPECT().GetFaucetByUUIDAndTenant(gomock.Any(), gomock.Eq(uuid), tenantID).Return(expectedFaucet, nil).Times(1)
+	faucetAgent.EXPECT().GetFaucetByUUIDAndTenant(gomock.Any(), gomock.Eq(faucetUUID), tenantID).Return(expectedFaucet, nil).Times(1)
 
-	actualFaucet, err := getFaucetUC.Execute(context.Background(), uuid, tenantID)
+	actualFaucet, err := getFaucetUC.Execute(context.Background(), faucetUUID, tenantID)
 	assert.Nil(t, err)
 	assert.Equal(t, expectedFaucet, actualFaucet)
 }

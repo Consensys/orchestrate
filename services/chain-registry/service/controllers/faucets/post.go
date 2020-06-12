@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/chain-registry/utils"
@@ -51,7 +51,7 @@ func (h *controller) PostFaucet(rw http.ResponseWriter, request *http.Request) {
 
 func parsePostRequestToFaucet(request *PostRequest) *models.Faucet {
 	return &models.Faucet{
-		UUID:            uuid.NewV4().String(),
+		UUID:            uuid.Must(uuid.NewV4()).String(),
 		Name:            request.Name,
 		ChainRule:       request.ChainRule,
 		CreditorAccount: request.CreditorAccount,

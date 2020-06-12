@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/Shopify/sarama"
-	uuid "github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 )
 
 // ConsumerGroup is a mock implementation of a sarama.ConsumerGroup
@@ -133,7 +133,7 @@ type ConsumerGroupSession struct {
 func NewConsumerGroupSession(ctx context.Context, group string, claims map[string][]int32) *ConsumerGroupSession {
 	return &ConsumerGroupSession{
 		generationID: nextGenerationID(group),
-		memberID:     fmt.Sprintf("%v-%v", "mock", uuid.NewV4().String()),
+		memberID:     fmt.Sprintf("%v-%v", "mock", uuid.Must(uuid.NewV4()).String()),
 		mux:          &sync.Mutex{},
 		MarkedOffset: make(map[string]map[int32][]*MarkedOffset),
 		claims:       claims,

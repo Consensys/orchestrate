@@ -1,7 +1,7 @@
 package testutils
 
 import (
-	uuid "github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
@@ -11,7 +11,7 @@ import (
 func FakeSendTransactionRequest() *types.SendTransactionRequest {
 	return &types.SendTransactionRequest{
 		BaseTransactionRequest: types.BaseTransactionRequest{
-			IdempotencyKey: uuid.NewV4().String(),
+			IdempotencyKey: uuid.Must(uuid.NewV4()).String(),
 		},
 		Params: types.TransactionParams{
 			From:            "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
@@ -24,7 +24,7 @@ func FakeSendTransactionRequest() *types.SendTransactionRequest {
 func FakeSendRawTransactionRequest() *types.RawTransactionRequest {
 	return &types.RawTransactionRequest{
 		BaseTransactionRequest: types.BaseTransactionRequest{
-			IdempotencyKey: uuid.NewV4().String(),
+			IdempotencyKey: uuid.Must(uuid.NewV4()).String(),
 		},
 		Params: types.RawTransactionParams{
 			Raw: "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
@@ -35,7 +35,7 @@ func FakeSendRawTransactionRequest() *types.RawTransactionRequest {
 func FakeDeployContractRequest() *types.DeployContractRequest {
 	return &types.DeployContractRequest{
 		BaseTransactionRequest: types.BaseTransactionRequest{
-			IdempotencyKey: uuid.NewV4().String(),
+			IdempotencyKey: uuid.Must(uuid.NewV4()).String(),
 		},
 		Params: types.DeployContractParams{
 			From:         "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
@@ -48,7 +48,7 @@ func FakeDeployContractRequest() *types.DeployContractRequest {
 func FakeSendTesseraRequest() *types.SendTransactionRequest {
 	return &types.SendTransactionRequest{
 		BaseTransactionRequest: types.BaseTransactionRequest{
-			IdempotencyKey: uuid.NewV4().String(),
+			IdempotencyKey: uuid.Must(uuid.NewV4()).String(),
 		},
 		Params: types.TransactionParams{
 			From:            "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
@@ -66,7 +66,7 @@ func FakeSendTesseraRequest() *types.SendTransactionRequest {
 func FakeSendOrionRequest() *types.SendTransactionRequest {
 	return &types.SendTransactionRequest{
 		BaseTransactionRequest: types.BaseTransactionRequest{
-			IdempotencyKey: uuid.NewV4().String(),
+			IdempotencyKey: uuid.Must(uuid.NewV4()).String(),
 		},
 		Params: types.TransactionParams{
 			From:            "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
@@ -87,8 +87,8 @@ func FakeCreateScheduleRequest() *types.CreateScheduleRequest {
 
 func FakeCreateJobRequest() *types.CreateJobRequest {
 	return &types.CreateJobRequest{
-		ScheduleUUID: uuid.NewV4().String(),
-		ChainUUID:    uuid.NewV4().String(),
+		ScheduleUUID: uuid.Must(uuid.NewV4()).String(),
+		ChainUUID:    uuid.Must(uuid.NewV4()).String(),
 		Type:         types2.EthereumTransaction,
 		Labels:       nil,
 		Transaction:  testutils2.FakeETHTransaction(),
@@ -105,7 +105,7 @@ func FakeJobUpdateRequest() *types.UpdateJobRequest {
 
 func FakeJobResponse() *types.JobResponse {
 	return &types.JobResponse{
-		UUID:        uuid.NewV4().String(),
+		UUID:        uuid.Must(uuid.NewV4()).String(),
 		Transaction: testutils2.FakeETHTransaction(),
 		Status:      types2.StatusCreated,
 	}

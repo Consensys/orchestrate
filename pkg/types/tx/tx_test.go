@@ -11,13 +11,13 @@ import (
 	error1 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/error"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestEnvelope(t *testing.T) {
 	envelope := &TxRequest{
-		Id:     uuid.NewV4().String(),
+		Id:     uuid.Must(uuid.NewV4()).String(),
 		Method: Method_ETH_SENDRAWTRANSACTION,
 		Chain:  "testChain",
 		Params: &Params{

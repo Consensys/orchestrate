@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	uuid "github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/abi"
@@ -27,7 +27,7 @@ func TestNewEnvelope(t *testing.T) {
 }
 
 func TestEnvelope_SetID(t *testing.T) {
-	id := uuid.NewV4().String()
+	id := uuid.Must(uuid.NewV4()).String()
 	b := NewEnvelope().SetID(id)
 	assert.Equal(t, id, b.GetID(), "Should be equal")
 }

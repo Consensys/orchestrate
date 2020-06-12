@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/gofrs/uuid"
 	"github.com/golang/mock/gomock"
-	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -56,8 +56,8 @@ func (s *sendTxSuite) SetupTest() {
 }
 
 func (s *sendTxSuite) TestSendTx_Success() {
-	jobUUID := uuid.NewV4().String()
-	scheduleUUID := uuid.NewV4().String()
+	jobUUID := uuid.Must(uuid.NewV4()).String()
+	scheduleUUID := uuid.Must(uuid.NewV4()).String()
 
 	s.T().Run("should execute send successfully a public tx", func(t *testing.T) {
 		txRequest := testutils.FakeTxRequestEntity()
@@ -93,12 +93,12 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
 	})
-	
+
 	s.T().Run("should execute send successfully a raw tx", func(t *testing.T) {
 		txRequest := testutils.FakeRawTxRequestEntity()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
-	
+
 		response, err := successfulTestExecution(s, txRequest, types.EthereumRawTransaction)
 		assert.Nil(t, err)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
@@ -111,9 +111,9 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 
 	tenantID := "tenantID"
 	requestHash := "requestHash"
-	chainUUID := uuid.NewV4().String()
-	jobUUID := uuid.NewV4().String()
-	scheduleUUID := uuid.NewV4().String()
+	chainUUID := uuid.Must(uuid.NewV4()).String()
+	jobUUID := uuid.Must(uuid.NewV4()).String()
+	scheduleUUID := uuid.Must(uuid.NewV4()).String()
 	txData := ""
 
 	s.T().Run("should fail with same error if validator fails to validate fields", func(t *testing.T) {
@@ -140,7 +140,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		s.Validators.EXPECT().
 			ValidateFields(gomock.Any(), txRequest).
 			Return(nil)
-		
+
 		s.Validators.EXPECT().
 			ValidateRequestHash(gomock.Any(), chainUUID, txRequest.Params, txRequest.IdempotencyKey).
 			Return(requestHash, expectedErr)
@@ -330,11 +330,11 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		s.Validators.EXPECT().
 			ValidateFields(gomock.Any(), txRequest).
 			Return(nil)
-		
+
 		s.Validators.EXPECT().
 			ValidateRequestHash(gomock.Any(), chainUUID, txRequest.Params, txRequest.IdempotencyKey).
 			Return(requestHash, nil)
-		
+
 		s.DB.EXPECT().Begin().Return(s.DBTX, nil)
 		s.DBTX.EXPECT().Commit().Return(nil)
 		s.DBTX.EXPECT().Close().Return(nil)
@@ -381,14 +381,14 @@ func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, jobT
 	ctx := context.Background()
 	tenantID := "tenantID"
 	requestHash := "requestHash"
-	chainUUID := uuid.NewV4().String()
+	chainUUID := uuid.Must(uuid.NewV4()).String()
 	scheduleUUID := txRequest.Schedule.UUID
 	jobUUID := txRequest.Schedule.Jobs[0].UUID
 	txData := ""
 
 	s.Validators.EXPECT().
-			ValidateFields(gomock.Any(), txRequest).
-			Return(nil)
+		ValidateFields(gomock.Any(), txRequest).
+		Return(nil)
 
 	s.Validators.EXPECT().
 		ValidateRequestHash(ctx, chainUUID, txRequest.Params, txRequest.IdempotencyKey).

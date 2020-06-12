@@ -25,6 +25,7 @@ require (
 	github.com/go-pg/migrations/v7 v7.1.9
 	github.com/go-pg/pg/v9 v9.1.5
 	github.com/go-playground/validator/v10 v10.2.0
+	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/golang/mock v1.4.3
 	github.com/golang/protobuf v1.3.5
 	github.com/gomodule/redigo v2.0.0+incompatible
@@ -48,7 +49,6 @@ require (
 	github.com/prometheus/client_golang v1.5.1
 	github.com/prometheus/client_model v0.2.0
 	github.com/rs/cors v1.7.0
-	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.5.0
 	github.com/spf13/cobra v0.0.6
 	github.com/spf13/pflag v1.0.5
