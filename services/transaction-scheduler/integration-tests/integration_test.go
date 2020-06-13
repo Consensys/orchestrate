@@ -4,10 +4,12 @@ package integrationtests
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
 	integrationtest "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/integration-test"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
 type txSchedulerTestSuite struct {
@@ -39,11 +41,20 @@ func (s *txSchedulerTestSuite) TearDownSuite() {
 
 func TestTxScheduler(t *testing.T) {
 	s := new(txSchedulerTestSuite)
-	s.env, s.err = NewIntegrationEnvironment(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	s.env, s.err = NewIntegrationEnvironment(ctx)
 	if s.err != nil {
-		t.Fail()
+		t.Errorf(s.err.Error())
 		return
 	}
+
+	sig := utils.NewSignalListener(func(signal os.Signal) {
+		cancel()
+	})
+
+	defer sig.Close()
 
 	suite.Run(t, s)
 }

@@ -119,6 +119,8 @@ func (uc *startJobUseCase) sendMessage(ctx context.Context, jobModel *models.Job
 		return 0, 0, errors.KafkaConnectionError(errMessage).ExtendComponent(startJobComponent)
 	}
 
-	log.WithField("envelope_id", txEnvelope.GetID()).Debug("envelope sent to kafka")
+	log.WithField("envelope_id", txEnvelope.GetID()).
+		WithField("job_type", evlp.GetJobTypeString()).
+		Debug("envelope sent to kafka")
 	return partition, offset, err
 }

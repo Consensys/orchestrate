@@ -41,6 +41,19 @@ func (r *ChanRegistry) HasChan(key string) bool {
 	return ok
 }
 
+// HasChan returns whether a channel is registered for the given key
+func (r *ChanRegistry) GetChan(key string) chan *tx.Envelope {
+	r.mux.RLock()
+	defer r.mux.RUnlock()
+
+	ch, ok := r.chans[key]
+	if !ok {
+		return nil
+	}
+
+	return ch
+}
+
 // Send envelope to channel registered for key
 func (r *ChanRegistry) Send(key string, e *tx.Envelope) error {
 	r.mux.RLock()

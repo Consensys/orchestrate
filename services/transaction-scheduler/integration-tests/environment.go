@@ -45,12 +45,15 @@ var envHTTPPort string
 var envMetricsPort string
 
 type IntegrationEnvironment struct {
+	ctx                           context.Context
 	logger                        log.Logger
 	app                           *app.App
 	client                        *docker.Client
+	consumer                      *integrationtest.KafkaConsumer
 	pgmngr                        postgres.Manager
 	baseURL                       string
 	contractRegistryResponseFaker *mocks.ContractRegistryFaker
+	kafkaTopicConfig              *sarama.KafkaTopicConfig
 }
 
 func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, error) {
@@ -113,6 +116,7 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 	}
 
 	return &IntegrationEnvironment{
+		ctx:     ctx,
 		logger:  logger,
 		client:  dockerClient,
 		pgmngr:  postgres.NewManager(),
@@ -166,16 +170,32 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 		return err
 	}
 
+	env.kafkaTopicConfig = sarama.NewKafkaTopicConfig(viper.GetViper())
 	env.contractRegistryResponseFaker = &mocks.ContractRegistryFaker{}
 	// Start transaction scheduler
 	env.app, err = newTransactionSchedulerApp(ctx,
-		mocks.NewContractRegistryClientMock(env.contractRegistryResponseFaker))
-
+		mocks.NewContractRegistryClientMock(env.contractRegistryResponseFaker),
+		env.kafkaTopicConfig)
 	if err != nil {
 		env.logger.WithError(err).Error("could initialize transaction scheduler app")
 		return err
 	}
 
+	// Start kafka consumer
+	env.consumer, err = integrationtest.NewKafkaTestConsumer(ctx, "tx-scheduler-group", sarama.GlobalClient(),
+		[]string{env.kafkaTopicConfig.Crafter, env.kafkaTopicConfig.Sender})
+	if err != nil {
+		env.logger.WithError(err).Error("could initialize kafka")
+		return err
+	}
+
+	err = env.consumer.Start(context.Background())
+	if err != nil {
+		env.logger.WithError(err).Error("could not run kafka consumer")
+		return err
+	}
+
+	// Start tx-scheduler app
 	err = env.app.Start(ctx)
 	if err != nil {
 		env.logger.WithError(err).Error("could not start transaction-scheduler")
@@ -248,7 +268,9 @@ func (env *IntegrationEnvironment) migrate(ctx context.Context) error {
 	return nil
 }
 
-func newTransactionSchedulerApp(ctx context.Context, contractRegistryClient contractregistry.ContractRegistryClient) (*app.App, error) {
+func newTransactionSchedulerApp(ctx context.Context,
+	contractRegistryClient contractregistry.ContractRegistryClient,
+	topicCfg *sarama.KafkaTopicConfig) (*app.App, error) {
 	// Initialize dependencies
 	authjwt.Init(ctx)
 	authkey.Init(ctx)
@@ -267,6 +289,6 @@ func newTransactionSchedulerApp(ctx context.Context, contractRegistryClient cont
 		chainRegistryClient,
 		contractRegistryClient,
 		sarama.GlobalSyncProducer(),
-		sarama.NewKafkaTopicConfig(viper.GetViper()),
+		topicCfg,
 	)
 }

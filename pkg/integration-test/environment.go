@@ -1,4 +1,4 @@
-package integration_test
+package integrationtest
 
 import (
 	"context"
@@ -9,11 +9,11 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
-type IntegrationTestSuiteEnv interface {
+type TestSuiteEnv interface {
 	Start(ctx context.Context) error
 }
 
-func StartEnvironment(env IntegrationTestSuiteEnv) (gerr error) {
+func StartEnvironment(env TestSuiteEnv) (gerr error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 

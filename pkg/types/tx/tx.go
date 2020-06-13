@@ -56,6 +56,7 @@ func (m *TxRequest) Envelope() (*Envelope, error) {
 		SetHeaders(m.GetHeaders()).
 		SetContextLabels(m.GetContextLabels()).
 		SetMethod(m.GetMethod()).
+		SetJobType(m.GetJobType()).
 		SetChainName(m.GetChain())
 
 	if m.GetParams() != nil {
