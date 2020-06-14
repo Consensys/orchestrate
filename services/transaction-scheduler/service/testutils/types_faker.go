@@ -8,10 +8,11 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 )
 
-func FakeSendTransactionRequest() *types.SendTransactionRequest {
+func FakeSendTransactionRequest(chainName string) *types.SendTransactionRequest {
 	return &types.SendTransactionRequest{
 		BaseTransactionRequest: types.BaseTransactionRequest{
 			IdempotencyKey: uuid.Must(uuid.NewV4()).String(),
+			ChainName:      chainName,
 		},
 		Params: types.TransactionParams{
 			From:            "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
@@ -21,10 +22,11 @@ func FakeSendTransactionRequest() *types.SendTransactionRequest {
 	}
 }
 
-func FakeSendRawTransactionRequest() *types.RawTransactionRequest {
+func FakeSendRawTransactionRequest(chainName string) *types.RawTransactionRequest {
 	return &types.RawTransactionRequest{
 		BaseTransactionRequest: types.BaseTransactionRequest{
 			IdempotencyKey: uuid.Must(uuid.NewV4()).String(),
+			ChainName:      chainName,
 		},
 		Params: types.RawTransactionParams{
 			Raw: "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
@@ -32,10 +34,11 @@ func FakeSendRawTransactionRequest() *types.RawTransactionRequest {
 	}
 }
 
-func FakeDeployContractRequest() *types.DeployContractRequest {
+func FakeDeployContractRequest(chainName string) *types.DeployContractRequest {
 	return &types.DeployContractRequest{
 		BaseTransactionRequest: types.BaseTransactionRequest{
 			IdempotencyKey: uuid.Must(uuid.NewV4()).String(),
+			ChainName:      chainName,
 		},
 		Params: types.DeployContractParams{
 			From:         "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
@@ -45,10 +48,11 @@ func FakeDeployContractRequest() *types.DeployContractRequest {
 	}
 }
 
-func FakeSendTesseraRequest() *types.SendTransactionRequest {
+func FakeSendTesseraRequest(chainName string) *types.SendTransactionRequest {
 	return &types.SendTransactionRequest{
 		BaseTransactionRequest: types.BaseTransactionRequest{
 			IdempotencyKey: uuid.Must(uuid.NewV4()).String(),
+			ChainName:      chainName,
 		},
 		Params: types.TransactionParams{
 			From:            "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
@@ -63,10 +67,11 @@ func FakeSendTesseraRequest() *types.SendTransactionRequest {
 	}
 }
 
-func FakeSendOrionRequest() *types.SendTransactionRequest {
+func FakeSendOrionRequest(chainName string) *types.SendTransactionRequest {
 	return &types.SendTransactionRequest{
 		BaseTransactionRequest: types.BaseTransactionRequest{
 			IdempotencyKey: uuid.Must(uuid.NewV4()).String(),
+			ChainName:      chainName,
 		},
 		Params: types.TransactionParams{
 			From:            "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",

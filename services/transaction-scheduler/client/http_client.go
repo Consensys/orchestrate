@@ -31,8 +31,8 @@ func NewHTTPClient(h *http.Client, c *Config) TransactionSchedulerClient {
 	}
 }
 
-func (c *HTTPClient) SendContractTransaction(ctx context.Context, chainUUID string, txRequest *types.SendTransactionRequest) (*types.TransactionResponse, error) {
-	reqURL := fmt.Sprintf("%v/transactions/%s/send", c.config.URL, chainUUID)
+func (c *HTTPClient) SendContractTransaction(ctx context.Context, txRequest *types.SendTransactionRequest) (*types.TransactionResponse, error) {
+	reqURL := fmt.Sprintf("%v/transactions/send", c.config.URL)
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, txRequest)
 	if err != nil {
@@ -51,8 +51,8 @@ func (c *HTTPClient) SendContractTransaction(ctx context.Context, chainUUID stri
 	return resp, nil
 }
 
-func (c *HTTPClient) SendDeployTransaction(ctx context.Context, chainUUID string, txRequest *types.DeployContractRequest) (*types.TransactionResponse, error) {
-	reqURL := fmt.Sprintf("%v/transactions/%s/deploy-contract", c.config.URL, chainUUID)
+func (c *HTTPClient) SendDeployTransaction(ctx context.Context, txRequest *types.DeployContractRequest) (*types.TransactionResponse, error) {
+	reqURL := fmt.Sprintf("%v/transactions/deploy-contract", c.config.URL)
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, txRequest)
 	if err != nil {
@@ -71,8 +71,8 @@ func (c *HTTPClient) SendDeployTransaction(ctx context.Context, chainUUID string
 	return resp, nil
 }
 
-func (c *HTTPClient) SendRawTransaction(ctx context.Context, chainUUID string, txRequest *types.RawTransactionRequest) (*types.TransactionResponse, error) {
-	reqURL := fmt.Sprintf("%v/transactions/%s/send-raw", c.config.URL, chainUUID)
+func (c *HTTPClient) SendRawTransaction(ctx context.Context, txRequest *types.RawTransactionRequest) (*types.TransactionResponse, error) {
+	reqURL := fmt.Sprintf("%v/transactions/send-raw", c.config.URL)
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, txRequest)
 	if err != nil {

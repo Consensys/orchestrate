@@ -175,7 +175,7 @@
                 }
             }
         },
-        "/transactions/{chainUUID}/deploy-contract": {
+        "/transactions/deploy-contract": {
             "post": {
                 "security": [
                     {
@@ -198,7 +198,7 @@
                 }
             }
         },
-        "/transactions/{chainUUID}/send": {
+        "/transactions/send": {
             "post": {
                 "security": [
                     {
@@ -221,7 +221,7 @@
                 }
             }
         },
-        "/transactions/{chainUUID}/send-raw": {
+        "/transactions/send-raw": {
             "post": {
                 "security": [
                     {

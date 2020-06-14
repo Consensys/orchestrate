@@ -9,9 +9,9 @@ import (
 //go:generate mockgen -source=client.go -destination=mock/mock.go -package=mock
 
 type TransactionClient interface {
-	SendContractTransaction(ctx context.Context, chainUUID string, request *types.SendTransactionRequest) (*types.TransactionResponse, error)
-	SendDeployTransaction(ctx context.Context, chainUUID string, request *types.DeployContractRequest) (*types.TransactionResponse, error)
-	SendRawTransaction(ctx context.Context, chainUUID string, request *types.RawTransactionRequest) (*types.TransactionResponse, error)
+	SendContractTransaction(ctx context.Context, request *types.SendTransactionRequest) (*types.TransactionResponse, error)
+	SendDeployTransaction(ctx context.Context, request *types.DeployContractRequest) (*types.TransactionResponse, error)
+	SendRawTransaction(ctx context.Context, request *types.RawTransactionRequest) (*types.TransactionResponse, error)
 }
 
 type ScheduleClient interface {

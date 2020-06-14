@@ -9,26 +9,29 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/chains"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/transactions"
 
 	"github.com/gorilla/mux"
 )
 
 type TransactionsController struct {
-	ucs transactions.UseCases
+	txUcs    transactions.UseCases
+	chainUcs chains.UseCases
 }
 
-func NewTransactionsController(useCases transactions.UseCases) *TransactionsController {
+func NewTransactionsController(txUcs transactions.UseCases, chainUcs chains.UseCases) *TransactionsController {
 	return &TransactionsController{
-		ucs: useCases,
+		txUcs:    txUcs,
+		chainUcs: chainUcs,
 	}
 }
 
 // Add routes to router
 func (c *TransactionsController) Append(router *mux.Router) {
-	router.Methods(http.MethodPost).Path("/transactions/{chainUUID}/send").HandlerFunc(c.Send)
-	router.Methods(http.MethodPost).Path("/transactions/{chainUUID}/send-raw").HandlerFunc(c.SendRaw)
-	router.Methods(http.MethodPost).Path("/transactions/{chainUUID}/deploy-contract").HandlerFunc(c.DeployContract)
+	router.Methods(http.MethodPost).Path("/transactions/send").HandlerFunc(c.Send)
+	router.Methods(http.MethodPost).Path("/transactions/send-raw").HandlerFunc(c.SendRaw)
+	router.Methods(http.MethodPost).Path("/transactions/deploy-contract").HandlerFunc(c.DeployContract)
 }
 
 // @Summary Creates and sends a new contract transaction
@@ -40,7 +43,7 @@ func (c *TransactionsController) Append(router *mux.Router) {
 // @Failure 409
 // @Failure 422
 // @Failure 500
-// @Router /transactions/{chainUUID}/send [post]
+// @Router /transactions/send [post]
 func (c *TransactionsController) Send(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
@@ -56,18 +59,23 @@ func (c *TransactionsController) Send(rw http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	chainUUID := mux.Vars(request)["chainUUID"]
 	tenantID := multitenancy.TenantIDFromContext(ctx)
 	txReq := formatters.FormatSendTxRequest(txRequest)
 
-	txResponse, err := c.ucs.SendContractTransaction().Execute(ctx, txReq, chainUUID, tenantID)
+	chain, err := c.chainUcs.GetChainByName().Execute(ctx, txRequest.ChainName, tenantID)
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	txResponse, err := c.txUcs.SendContractTransaction().Execute(ctx, txReq, chain.UUID, tenantID)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 
 	rw.WriteHeader(http.StatusAccepted)
-	_ = json.NewEncoder(rw).Encode(formatters.FormatTxResponse(txResponse))
+	_ = json.NewEncoder(rw).Encode(formatters.FormatTxResponse(txResponse, chain.Name))
 }
 
 // @Summary Creates and sends a new contract deployment transaction
@@ -79,7 +87,7 @@ func (c *TransactionsController) Send(rw http.ResponseWriter, request *http.Requ
 // @Failure 409
 // @Failure 422
 // @Failure 500
-// @Router /transactions/{chainUUID}/deploy-contract [post]
+// @Router /transactions/deploy-contract [post]
 func (c *TransactionsController) DeployContract(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
@@ -95,18 +103,23 @@ func (c *TransactionsController) DeployContract(rw http.ResponseWriter, request 
 		return
 	}
 
-	chainUUID := mux.Vars(request)["chainUUID"]
 	tenantID := multitenancy.TenantIDFromContext(ctx)
 	txReq := formatters.FormatDeployContractRequest(txRequest)
 
-	txResponse, err := c.ucs.SendDeployTransaction().Execute(ctx, txReq, chainUUID, tenantID)
+	chain, err := c.chainUcs.GetChainByName().Execute(ctx, txRequest.ChainName, tenantID)
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	txResponse, err := c.txUcs.SendDeployTransaction().Execute(ctx, txReq, chain.UUID, tenantID)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 
 	rw.WriteHeader(http.StatusAccepted)
-	_ = json.NewEncoder(rw).Encode(formatters.FormatTxResponse(txResponse))
+	_ = json.NewEncoder(rw).Encode(formatters.FormatTxResponse(txResponse, chain.Name))
 }
 
 // @Summary Creates and sends a raw transaction
@@ -118,7 +131,7 @@ func (c *TransactionsController) DeployContract(rw http.ResponseWriter, request 
 // @Failure 409
 // @Failure 422
 // @Failure 500
-// @Router /transactions/{chainUUID}/send-raw [post]
+// @Router /transactions/send-raw [post]
 func (c *TransactionsController) SendRaw(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
@@ -130,15 +143,21 @@ func (c *TransactionsController) SendRaw(rw http.ResponseWriter, request *http.R
 		return
 	}
 
-	chainUUID := mux.Vars(request)["chainUUID"]
 	tenantID := multitenancy.TenantIDFromContext(ctx)
 	txReq := formatters.FormatSendRawRequest(txRequest)
-	txResponse, err := c.ucs.SendTransaction().Execute(ctx, txReq, "", chainUUID, tenantID)
+
+	chain, err := c.chainUcs.GetChainByName().Execute(ctx, txRequest.ChainName, tenantID)
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	txResponse, err := c.txUcs.SendTransaction().Execute(ctx, txReq, "", chain.UUID, tenantID)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 
 	rw.WriteHeader(http.StatusAccepted)
-	_ = json.NewEncoder(rw).Encode(formatters.FormatTxResponse(txResponse))
+	_ = json.NewEncoder(rw).Encode(formatters.FormatTxResponse(txResponse, chain.Name))
 }

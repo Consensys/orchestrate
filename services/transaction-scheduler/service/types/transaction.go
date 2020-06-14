@@ -9,12 +9,14 @@ import (
 type TransactionResponse struct {
 	IdempotencyKey string                      `json:"idempotencyKey"`
 	Params         *types.ETHTransactionParams `json:"params"`
+	ChainName      string                      `json:"chain"`
 	Schedule       *ScheduleResponse           `json:"schedule"`
 	CreatedAt      time.Time                   `json:"createdAt"`
 }
 
 type BaseTransactionRequest struct {
 	IdempotencyKey string            `json:"idempotencyKey" validate:"required"`
+	ChainName      string            `json:"chain" validate:"required"`
 	Labels         map[string]string `json:"labels,omitempty"`
 }
 

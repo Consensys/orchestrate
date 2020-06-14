@@ -35,48 +35,48 @@ func (m *MockTransactionClient) EXPECT() *MockTransactionClientMockRecorder {
 }
 
 // SendContractTransaction mocks base method
-func (m *MockTransactionClient) SendContractTransaction(ctx context.Context, chainUUID string, request *types.SendTransactionRequest) (*types.TransactionResponse, error) {
+func (m *MockTransactionClient) SendContractTransaction(ctx context.Context, request *types.SendTransactionRequest) (*types.TransactionResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendContractTransaction", ctx, chainUUID, request)
+	ret := m.ctrl.Call(m, "SendContractTransaction", ctx, request)
 	ret0, _ := ret[0].(*types.TransactionResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SendContractTransaction indicates an expected call of SendContractTransaction
-func (mr *MockTransactionClientMockRecorder) SendContractTransaction(ctx, chainUUID, request interface{}) *gomock.Call {
+func (mr *MockTransactionClientMockRecorder) SendContractTransaction(ctx, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendContractTransaction", reflect.TypeOf((*MockTransactionClient)(nil).SendContractTransaction), ctx, chainUUID, request)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendContractTransaction", reflect.TypeOf((*MockTransactionClient)(nil).SendContractTransaction), ctx, request)
 }
 
 // SendDeployTransaction mocks base method
-func (m *MockTransactionClient) SendDeployTransaction(ctx context.Context, chainUUID string, request *types.DeployContractRequest) (*types.TransactionResponse, error) {
+func (m *MockTransactionClient) SendDeployTransaction(ctx context.Context, request *types.DeployContractRequest) (*types.TransactionResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendDeployTransaction", ctx, chainUUID, request)
+	ret := m.ctrl.Call(m, "SendDeployTransaction", ctx, request)
 	ret0, _ := ret[0].(*types.TransactionResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SendDeployTransaction indicates an expected call of SendDeployTransaction
-func (mr *MockTransactionClientMockRecorder) SendDeployTransaction(ctx, chainUUID, request interface{}) *gomock.Call {
+func (mr *MockTransactionClientMockRecorder) SendDeployTransaction(ctx, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendDeployTransaction", reflect.TypeOf((*MockTransactionClient)(nil).SendDeployTransaction), ctx, chainUUID, request)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendDeployTransaction", reflect.TypeOf((*MockTransactionClient)(nil).SendDeployTransaction), ctx, request)
 }
 
 // SendRawTransaction mocks base method
-func (m *MockTransactionClient) SendRawTransaction(ctx context.Context, chainUUID string, request *types.RawTransactionRequest) (*types.TransactionResponse, error) {
+func (m *MockTransactionClient) SendRawTransaction(ctx context.Context, request *types.RawTransactionRequest) (*types.TransactionResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendRawTransaction", ctx, chainUUID, request)
+	ret := m.ctrl.Call(m, "SendRawTransaction", ctx, request)
 	ret0, _ := ret[0].(*types.TransactionResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SendRawTransaction indicates an expected call of SendRawTransaction
-func (mr *MockTransactionClientMockRecorder) SendRawTransaction(ctx, chainUUID, request interface{}) *gomock.Call {
+func (mr *MockTransactionClientMockRecorder) SendRawTransaction(ctx, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendRawTransaction", reflect.TypeOf((*MockTransactionClient)(nil).SendRawTransaction), ctx, chainUUID, request)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendRawTransaction", reflect.TypeOf((*MockTransactionClient)(nil).SendRawTransaction), ctx, request)
 }
 
 // MockScheduleClient is a mock of ScheduleClient interface
@@ -283,48 +283,48 @@ func (m *MockTransactionSchedulerClient) EXPECT() *MockTransactionSchedulerClien
 }
 
 // SendContractTransaction mocks base method
-func (m *MockTransactionSchedulerClient) SendContractTransaction(ctx context.Context, chainUUID string, request *types.SendTransactionRequest) (*types.TransactionResponse, error) {
+func (m *MockTransactionSchedulerClient) SendContractTransaction(ctx context.Context, request *types.SendTransactionRequest) (*types.TransactionResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendContractTransaction", ctx, chainUUID, request)
+	ret := m.ctrl.Call(m, "SendContractTransaction", ctx, request)
 	ret0, _ := ret[0].(*types.TransactionResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SendContractTransaction indicates an expected call of SendContractTransaction
-func (mr *MockTransactionSchedulerClientMockRecorder) SendContractTransaction(ctx, chainUUID, request interface{}) *gomock.Call {
+func (mr *MockTransactionSchedulerClientMockRecorder) SendContractTransaction(ctx, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendContractTransaction", reflect.TypeOf((*MockTransactionSchedulerClient)(nil).SendContractTransaction), ctx, chainUUID, request)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendContractTransaction", reflect.TypeOf((*MockTransactionSchedulerClient)(nil).SendContractTransaction), ctx, request)
 }
 
 // SendDeployTransaction mocks base method
-func (m *MockTransactionSchedulerClient) SendDeployTransaction(ctx context.Context, chainUUID string, request *types.DeployContractRequest) (*types.TransactionResponse, error) {
+func (m *MockTransactionSchedulerClient) SendDeployTransaction(ctx context.Context, request *types.DeployContractRequest) (*types.TransactionResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendDeployTransaction", ctx, chainUUID, request)
+	ret := m.ctrl.Call(m, "SendDeployTransaction", ctx, request)
 	ret0, _ := ret[0].(*types.TransactionResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SendDeployTransaction indicates an expected call of SendDeployTransaction
-func (mr *MockTransactionSchedulerClientMockRecorder) SendDeployTransaction(ctx, chainUUID, request interface{}) *gomock.Call {
+func (mr *MockTransactionSchedulerClientMockRecorder) SendDeployTransaction(ctx, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendDeployTransaction", reflect.TypeOf((*MockTransactionSchedulerClient)(nil).SendDeployTransaction), ctx, chainUUID, request)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendDeployTransaction", reflect.TypeOf((*MockTransactionSchedulerClient)(nil).SendDeployTransaction), ctx, request)
 }
 
 // SendRawTransaction mocks base method
-func (m *MockTransactionSchedulerClient) SendRawTransaction(ctx context.Context, chainUUID string, request *types.RawTransactionRequest) (*types.TransactionResponse, error) {
+func (m *MockTransactionSchedulerClient) SendRawTransaction(ctx context.Context, request *types.RawTransactionRequest) (*types.TransactionResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendRawTransaction", ctx, chainUUID, request)
+	ret := m.ctrl.Call(m, "SendRawTransaction", ctx, request)
 	ret0, _ := ret[0].(*types.TransactionResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SendRawTransaction indicates an expected call of SendRawTransaction
-func (mr *MockTransactionSchedulerClientMockRecorder) SendRawTransaction(ctx, chainUUID, request interface{}) *gomock.Call {
+func (mr *MockTransactionSchedulerClientMockRecorder) SendRawTransaction(ctx, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendRawTransaction", reflect.TypeOf((*MockTransactionSchedulerClient)(nil).SendRawTransaction), ctx, chainUUID, request)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendRawTransaction", reflect.TypeOf((*MockTransactionSchedulerClient)(nil).SendRawTransaction), ctx, request)
 }
 
 // GetSchedule mocks base method

@@ -55,7 +55,7 @@ func (s *transactionsTestSuite) SetupTest() {
 }
 
 func (s *transactionsTestSuite) TestTransactionValidator_ValidateRequestHash() {
-	txRequest := testutils.FakeSendTransactionRequest()
+	txRequest := testutils.FakeSendTransactionRequest("chainName")
 
 	s.T().Run("should validate tx successfully and return the request hash if data agent returns not found", func(t *testing.T) {
 		s.mockTxRequestDA.EXPECT().FindOneByIdempotencyKey(gomock.Any(), txRequest.IdempotencyKey).Return(nil, errors.NotFoundError("error"))

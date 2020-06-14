@@ -5,13 +5,11 @@ Feature: Transaction Scheduler
 
   Scenario: Send contract transaction and start a job
     Given I set authentication method "JWT" with "f30c452b-e5fb-4102-a45d-bc00a060bcc6"
-    When I send "GET" request to "{{chain-registry}}/chains?name=besu"
-    Then the response code should be 200
-    Then I store response field "0.uuid" as "besuUUID"
-    When I send "POST" request to "{{tx-scheduler-http}}/transactions/{{besuUUID}}/send" with json:
+    When I send "POST" request to "{{tx-scheduler-http}}/transactions/send" with json:
       """
 {
     "idempotencyKey": "test10",
+    "chain": "besu",
     "params": {
         "from": "0x93f7274c9059e601be4512f656b57b830e019e41",
         "to": "0x93f7274c9059e601be4512f656b57b830e019e23",

@@ -50,10 +50,11 @@ func FormatSendRawRequest(txRequest *types.RawTransactionRequest) *entities.TxRe
 	}
 }
 
-func FormatTxResponse(txRequest *entities.TxRequest) *types.TransactionResponse {
+func FormatTxResponse(txRequest *entities.TxRequest, chainName string) *types.TransactionResponse {
 	return &types.TransactionResponse{
 		IdempotencyKey: txRequest.IdempotencyKey,
 		Params:         txRequest.Params,
+		ChainName:      chainName,
 		Schedule:       FormatScheduleResponse(txRequest.Schedule),
 		CreatedAt:      txRequest.CreatedAt,
 	}

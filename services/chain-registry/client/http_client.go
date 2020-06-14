@@ -77,7 +77,7 @@ func (c *HTTPClient) GetChainByName(ctx context.Context, chainName string) (*mod
 		}
 
 		if len(chainsResult) == 0 {
-			return nil, errors.FromError(fmt.Errorf("no chain found with name %s", chainName)).ExtendComponent(component)
+			return nil, errors.NotFoundError("no chain found with name %s", chainName).ExtendComponent(component)
 		}
 
 		return chainsResult[0], nil

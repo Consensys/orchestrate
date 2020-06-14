@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	pkgtypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 
 	"github.com/ethereum/go-ethereum/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -13,11 +13,11 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
 
-func FormatJobResponse(job *types2.Job) *types.JobResponse {
+func FormatJobResponse(job *pkgtypes.Job) *types.JobResponse {
 	return &types.JobResponse{
 		UUID:      job.UUID,
 		ChainUUID: job.ChainUUID,
-		Transaction: &types2.ETHTransaction{
+		Transaction: &pkgtypes.ETHTransaction{
 			Hash:           job.Transaction.Hash,
 			From:           job.Transaction.From,
 			To:             job.Transaction.To,
@@ -41,8 +41,8 @@ func FormatJobResponse(job *types2.Job) *types.JobResponse {
 	}
 }
 
-func FormatJobCreateRequest(request *types.CreateJobRequest) *types2.Job {
-	return &types2.Job{
+func FormatJobCreateRequest(request *types.CreateJobRequest) *pkgtypes.Job {
+	return &pkgtypes.Job{
 		Type:         request.Type,
 		Labels:       request.Labels,
 		ScheduleUUID: request.ScheduleUUID,
@@ -51,8 +51,8 @@ func FormatJobCreateRequest(request *types.CreateJobRequest) *types2.Job {
 	}
 }
 
-func FormatJobUpdateRequest(request *types.UpdateJobRequest) *types2.Job {
-	return &types2.Job{
+func FormatJobUpdateRequest(request *types.UpdateJobRequest) *pkgtypes.Job {
+	return &pkgtypes.Job{
 		Labels:      request.Labels,
 		Transaction: request.Transaction,
 	}
