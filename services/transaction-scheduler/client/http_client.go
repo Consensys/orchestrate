@@ -191,11 +191,20 @@ func (c *HTTPClient) GetJobs(ctx context.Context) ([]*types.JobResponse, error) 
 	return resp, err
 }
 
-func (c *HTTPClient) SearchJob(ctx context.Context, txHashes []string) ([]*types.JobResponse, error) {
+func (c *HTTPClient) SearchJob(ctx context.Context, txHashes []string, chainUUID string) ([]*types.JobResponse, error) {
 	reqURL := fmt.Sprintf("%v/jobs", c.config.URL)
 
+	qParams := []string{}
 	if len(txHashes) > 0 {
-		reqURL = fmt.Sprintf("%s?tx_hashes=%s", reqURL, strings.Join(txHashes, ","))
+		qParams = append(qParams, "tx_hashes="+strings.Join(txHashes, ","))
+	}
+
+	if chainUUID != "" {
+		qParams = append(qParams, "chain_uuid="+chainUUID)
+	}
+
+	if len(qParams) > 0 {
+		reqURL = reqURL + "?" + strings.Join(qParams, "&")
 	}
 
 	response, err := clientutils.GetRequest(ctx, c.client, reqURL)

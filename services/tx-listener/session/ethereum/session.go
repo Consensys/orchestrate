@@ -379,20 +379,18 @@ func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transacti
 			txHashes = append(txHashes, t.Hash().String())
 		}
 
-		jobResponses, err := s.txSchedulerClient.SearchJob(ctx, txHashes)
+		jobResponses, err := s.txSchedulerClient.SearchJob(ctx, txHashes, s.Chain.UUID)
 		if err != nil {
 			return nil, err
 		}
 
 		for _, jobResponse := range jobResponses {
 			// Filter by the jobs belonging to same session CHAIN_UUID
-			if jobResponse.ChainUUID == s.Chain.UUID {
-				jobMap[jobResponse.Transaction.Hash] = &types.Job{
-					UUID:        jobResponse.UUID,
-					ChainUUID:   jobResponse.ChainUUID,
-					Labels:      jobResponse.Labels,
-					Transaction: jobResponse.Transaction,
-				}
+			jobMap[jobResponse.Transaction.Hash] = &types.Job{
+				UUID:        jobResponse.UUID,
+				ChainUUID:   jobResponse.ChainUUID,
+				Labels:      jobResponse.Labels,
+				Transaction: jobResponse.Transaction,
 			}
 		}
 

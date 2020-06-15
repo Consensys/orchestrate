@@ -260,18 +260,18 @@ func (mr *MockJobClientMockRecorder) StartJob(ctx, jobUUID interface{}) *gomock.
 }
 
 // SearchJob mocks base method
-func (m *MockJobClient) SearchJob(ctx context.Context, txHashes []string) ([]*types.JobResponse, error) {
+func (m *MockJobClient) SearchJob(ctx context.Context, txHashes []string, chainUUID string) ([]*types.JobResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SearchJob", ctx, txHashes)
+	ret := m.ctrl.Call(m, "SearchJob", ctx, txHashes, chainUUID)
 	ret0, _ := ret[0].([]*types.JobResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SearchJob indicates an expected call of SearchJob
-func (mr *MockJobClientMockRecorder) SearchJob(ctx, txHashes interface{}) *gomock.Call {
+func (mr *MockJobClientMockRecorder) SearchJob(ctx, txHashes, chainUUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchJob", reflect.TypeOf((*MockJobClient)(nil).SearchJob), ctx, txHashes)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchJob", reflect.TypeOf((*MockJobClient)(nil).SearchJob), ctx, txHashes, chainUUID)
 }
 
 // MockTransactionSchedulerClient is a mock of TransactionSchedulerClient interface
@@ -477,16 +477,16 @@ func (mr *MockTransactionSchedulerClientMockRecorder) StartJob(ctx, jobUUID inte
 }
 
 // SearchJob mocks base method
-func (m *MockTransactionSchedulerClient) SearchJob(ctx context.Context, txHashes []string) ([]*types.JobResponse, error) {
+func (m *MockTransactionSchedulerClient) SearchJob(ctx context.Context, txHashes []string, chainUUID string) ([]*types.JobResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SearchJob", ctx, txHashes)
+	ret := m.ctrl.Call(m, "SearchJob", ctx, txHashes, chainUUID)
 	ret0, _ := ret[0].([]*types.JobResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SearchJob indicates an expected call of SearchJob
-func (mr *MockTransactionSchedulerClientMockRecorder) SearchJob(ctx, txHashes interface{}) *gomock.Call {
+func (mr *MockTransactionSchedulerClientMockRecorder) SearchJob(ctx, txHashes, chainUUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchJob", reflect.TypeOf((*MockTransactionSchedulerClient)(nil).SearchJob), ctx, txHashes)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchJob", reflect.TypeOf((*MockTransactionSchedulerClient)(nil).SearchJob), ctx, txHashes, chainUUID)
 }

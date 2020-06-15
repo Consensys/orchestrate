@@ -6,8 +6,6 @@ import (
 
 	pkgtypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 
-	"github.com/ethereum/go-ethereum/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
@@ -63,15 +61,16 @@ func FormatJobFilterRequest(req *http.Request) (*entities.JobFilters, error) {
 
 	qTxHashes := req.URL.Query().Get("tx_hashes")
 	if qTxHashes != "" {
-		for _, txHash := range strings.Split(qTxHashes, ",") {
-			txHashT := strings.TrimSpace(txHash)
-			if !utils.IsHash(txHashT) {
-				err := errors.InvalidFormatError("invalid tx hash strings: %v", txHashT)
-				return nil, err
-			}
+		filters.TxHashes = strings.Split(qTxHashes, ",")
+	}
 
-			filters.TxHashes = append(filters.TxHashes, common.HexToHash(txHashT))
-		}
+	qChainUUID := req.URL.Query().Get("chain_uuid")
+	if qChainUUID != "" {
+		filters.ChainUUID = qChainUUID
+	}
+
+	if err := utils.GetValidator().Struct(filters); err != nil {
+		return nil, err
 	}
 
 	return filters, nil

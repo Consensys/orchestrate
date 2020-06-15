@@ -1,9 +1,6 @@
 package entities
 
-import (
-	"github.com/ethereum/go-ethereum/common"
-)
-
 type JobFilters struct {
-	TxHashes []common.Hash
+	TxHashes  []string `validate:"omitempty,unique,dive,isHash"`
+	ChainUUID string   `validate:"omitempty,uuid"`
 }

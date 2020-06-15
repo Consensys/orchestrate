@@ -203,9 +203,9 @@ func (s *jobsCtrlTestSuite) TestJobsController_Search() {
 	s.T().Run("should execute search jobs by tx_hashes successfully", func(t *testing.T) {
 		rw := httptest.NewRecorder()
 		filters := &entities.JobFilters{
-			TxHashes: []common.Hash{
-				common.HexToHash("0x1"),
-				common.HexToHash("0x2"),
+			TxHashes: []string{
+				common.HexToHash("0x1").String(),
+				common.HexToHash("0x2").String(),
 			},
 		}
 		url := fmt.Sprintf("/jobs?tx_hashes=%s", strings.Join([]string{

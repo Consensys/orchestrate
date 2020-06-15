@@ -6,6 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
@@ -37,12 +38,11 @@ func (uc *searchJobsUseCase) Execute(ctx context.Context, filters *entities.JobF
 		WithField("filters", filters).
 		Debug("search jobs")
 
-	var txHashesFilter []string
-	for _, hash := range filters.TxHashes {
-		txHashesFilter = append(txHashesFilter, hash.String())
+	if err := utils.GetValidator().Struct(filters); err != nil {
+		return nil, errors.InvalidParameterError(err.Error()).ExtendComponent(searchJobsComponent)
 	}
 
-	jobModels, err := uc.db.Job().Search(ctx, tenantID, txHashesFilter)
+	jobModels, err := uc.db.Job().Search(ctx, tenantID, filters.TxHashes, filters.ChainUUID)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(searchJobsComponent)
 	}

@@ -90,7 +90,7 @@ func (agent *PGJob) FindOneByUUID(ctx context.Context, jobUUID, tenantID string)
 	return job, nil
 }
 
-func (agent *PGJob) Search(ctx context.Context, tenantID string, txHashes []string) ([]*models.Job, error) {
+func (agent *PGJob) Search(ctx context.Context, tenantID string, txHashes []string, chainUUID string) ([]*models.Job, error) {
 	jobs := []*models.Job{}
 
 	query := agent.db.ModelContext(ctx, &jobs).
@@ -100,6 +100,10 @@ func (agent *PGJob) Search(ctx context.Context, tenantID string, txHashes []stri
 
 	if len(txHashes) > 0 {
 		query = query.Where("transaction.hash in (?)", gopg.In(txHashes))
+	}
+
+	if chainUUID != "" {
+		query = query.Where("job.chain_uuid = ?", chainUUID)
 	}
 
 	if tenantID != multitenancy.DefaultTenantIDName {
