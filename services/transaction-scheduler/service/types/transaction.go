@@ -15,9 +15,8 @@ type TransactionResponse struct {
 }
 
 type BaseTransactionRequest struct {
-	IdempotencyKey string            `json:"idempotencyKey" validate:"required"`
-	ChainName      string            `json:"chain" validate:"required"`
-	Labels         map[string]string `json:"labels,omitempty"`
+	ChainName string            `json:"chain" validate:"required"`
+	Labels    map[string]string `json:"labels,omitempty"`
 }
 
 type SendTransactionRequest struct {

@@ -6,9 +6,9 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
 
-func FormatSendTxRequest(txRequest *types.SendTransactionRequest) *entities.TxRequest {
+func FormatSendTxRequest(txRequest *types.SendTransactionRequest, idempotencyKey string) *entities.TxRequest {
 	return &entities.TxRequest{
-		IdempotencyKey: txRequest.IdempotencyKey,
+		IdempotencyKey: idempotencyKey,
 		Labels:         txRequest.Labels,
 		Params: &pkgtypes.ETHTransactionParams{
 			From:                     txRequest.Params.From,
@@ -23,9 +23,9 @@ func FormatSendTxRequest(txRequest *types.SendTransactionRequest) *entities.TxRe
 	}
 }
 
-func FormatDeployContractRequest(txRequest *types.DeployContractRequest) *entities.TxRequest {
+func FormatDeployContractRequest(txRequest *types.DeployContractRequest, idempotencyKey string) *entities.TxRequest {
 	return &entities.TxRequest{
-		IdempotencyKey: txRequest.IdempotencyKey,
+		IdempotencyKey: idempotencyKey,
 		Labels:         txRequest.Labels,
 		Params: &pkgtypes.ETHTransactionParams{
 			From:                     txRequest.Params.From,
@@ -40,9 +40,9 @@ func FormatDeployContractRequest(txRequest *types.DeployContractRequest) *entiti
 	}
 }
 
-func FormatSendRawRequest(txRequest *types.RawTransactionRequest) *entities.TxRequest {
+func FormatSendRawRequest(txRequest *types.RawTransactionRequest, idempotencyKey string) *entities.TxRequest {
 	return &entities.TxRequest{
-		IdempotencyKey: txRequest.IdempotencyKey,
+		IdempotencyKey: idempotencyKey,
 		Labels:         txRequest.Labels,
 		Params: &pkgtypes.ETHTransactionParams{
 			Raw: txRequest.Params.Raw,
@@ -50,9 +50,9 @@ func FormatSendRawRequest(txRequest *types.RawTransactionRequest) *entities.TxRe
 	}
 }
 
-func FormatSendTransferRequest(txRequest *types.TransferRequest) *entities.TxRequest {
+func FormatSendTransferRequest(txRequest *types.TransferRequest, idempotencyKey string) *entities.TxRequest {
 	return &entities.TxRequest{
-		IdempotencyKey: txRequest.IdempotencyKey,
+		IdempotencyKey: idempotencyKey,
 		Labels:         txRequest.Labels,
 		Params: &pkgtypes.ETHTransactionParams{
 			From:     txRequest.Params.From,

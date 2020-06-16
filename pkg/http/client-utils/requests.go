@@ -11,6 +11,10 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
+const (
+	RequestHeaderKey = "request-headers"
+)
+
 func GetRequest(ctx context.Context, client *http.Client, reqURL string) (*http.Response, error) {
 	return request(ctx, client, reqURL, http.MethodGet, nil)
 }
@@ -48,6 +52,12 @@ func CloseResponse(response *http.Response) {
 
 func request(ctx context.Context, client *http.Client, reqURL, method string, body io.Reader) (*http.Response, error) {
 	req, _ := http.NewRequestWithContext(ctx, method, reqURL, body)
+	if ctx.Value(RequestHeaderKey) != nil {
+		for key, val := range ctx.Value(RequestHeaderKey).(map[string]string) {
+			req.Header.Set(key, val)
+		}
+	}
+
 	r, err := client.Do(req)
 	if err != nil {
 		return nil, errors.FromError(err)

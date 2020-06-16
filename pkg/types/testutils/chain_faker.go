@@ -9,7 +9,7 @@ import (
 func FakeChain() *types.Chain {
 	return &types.Chain{
 		UUID:     uuid.Must(uuid.NewV4()).String(),
-		Name:     "FakeChain",
+		Name:     "FakeChainName",
 		TenantID: "_",
 	}
 }

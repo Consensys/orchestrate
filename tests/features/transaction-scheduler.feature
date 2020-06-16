@@ -8,7 +8,6 @@ Feature: Transaction Scheduler
     When I send "POST" request to "{{tx-scheduler-http}}/transactions/send" with json:
       """
 {
-    "idempotencyKey": "test10",
     "chain": "besu",
     "params": {
         "from": "0x93f7274c9059e601be4512f656b57b830e019e41",
@@ -24,8 +23,8 @@ Feature: Transaction Scheduler
     Then I store response field "schedule.jobs.0.uuid" as "jobUUID"
     Then Register new envelope tracker "jobUUID"
     And Response should have the following fields:
-      | idempotencyKey | params.methodSignature | schedule.uuid | schedule.jobs.0.uuid | schedule.jobs[0].status
-      | test10         | constructor()          | ~             | ~                    | STARTED
+      | params.methodSignature | schedule.uuid | schedule.jobs.0.uuid | schedule.jobs[0].status
+      | constructor()          | ~             | ~                    | STARTED
 
 
   Scenario: New JOB started step by step

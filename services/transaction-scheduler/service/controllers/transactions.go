@@ -7,12 +7,17 @@ import (
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/chains"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/transactions"
 
 	"github.com/gorilla/mux"
+)
+
+const (
+	IdempotencyKeyHeader = "X-Idempotency-Key"
 )
 
 type TransactionsController struct {
@@ -29,10 +34,24 @@ func NewTransactionsController(txUcs transactions.UseCases, chainUcs chains.UseC
 
 // Add routes to router
 func (c *TransactionsController) Append(router *mux.Router) {
-	router.Methods(http.MethodPost).Path("/transactions/send").HandlerFunc(c.Send)
-	router.Methods(http.MethodPost).Path("/transactions/send-raw").HandlerFunc(c.SendRaw)
-	router.Methods(http.MethodPost).Path("/transactions/send-transfer").HandlerFunc(c.SendTransfer)
-	router.Methods(http.MethodPost).Path("/transactions/deploy-contract").HandlerFunc(c.DeployContract)
+	router.Methods(http.MethodPost).Path("/transactions/send").
+		Handler(idempotencyKeyMiddleware(http.HandlerFunc(c.Send)))
+	router.Methods(http.MethodPost).Path("/transactions/send-raw").
+		Handler(idempotencyKeyMiddleware(http.HandlerFunc(c.SendRaw)))
+	router.Methods(http.MethodPost).Path("/transactions/send-transfer").
+		Handler(idempotencyKeyMiddleware(http.HandlerFunc(c.SendTransfer)))
+	router.Methods(http.MethodPost).Path("/transactions/deploy-contract").
+		Handler(idempotencyKeyMiddleware(http.HandlerFunc(c.DeployContract)))
+}
+
+func idempotencyKeyMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get(IdempotencyKeyHeader) == "" {
+			r.Header.Set(IdempotencyKeyHeader, utils.RandomString(16))
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
 
 // @Summary Creates and sends a new contract transaction
@@ -61,7 +80,7 @@ func (c *TransactionsController) Send(rw http.ResponseWriter, request *http.Requ
 	}
 
 	tenantID := multitenancy.TenantIDFromContext(ctx)
-	txReq := formatters.FormatSendTxRequest(txRequest)
+	txReq := formatters.FormatSendTxRequest(txRequest, request.Header.Get(IdempotencyKeyHeader))
 
 	chain, err := c.chainUcs.GetChainByName().Execute(ctx, txRequest.ChainName, tenantID)
 	if err != nil {
@@ -105,7 +124,7 @@ func (c *TransactionsController) DeployContract(rw http.ResponseWriter, request 
 	}
 
 	tenantID := multitenancy.TenantIDFromContext(ctx)
-	txReq := formatters.FormatDeployContractRequest(txRequest)
+	txReq := formatters.FormatDeployContractRequest(txRequest, request.Header.Get(IdempotencyKeyHeader))
 
 	chain, err := c.chainUcs.GetChainByName().Execute(ctx, txRequest.ChainName, tenantID)
 	if err != nil {
@@ -145,7 +164,7 @@ func (c *TransactionsController) SendRaw(rw http.ResponseWriter, request *http.R
 	}
 
 	tenantID := multitenancy.TenantIDFromContext(ctx)
-	txReq := formatters.FormatSendRawRequest(txRequest)
+	txReq := formatters.FormatSendRawRequest(txRequest, request.Header.Get(IdempotencyKeyHeader))
 
 	chain, err := c.chainUcs.GetChainByName().Execute(ctx, txRequest.ChainName, tenantID)
 	if err != nil {
@@ -185,7 +204,7 @@ func (c *TransactionsController) SendTransfer(rw http.ResponseWriter, request *h
 	}
 
 	tenantID := multitenancy.TenantIDFromContext(ctx)
-	txReq := formatters.FormatSendTransferRequest(txRequest)
+	txReq := formatters.FormatSendTransferRequest(txRequest, request.Header.Get(IdempotencyKeyHeader))
 
 	chain, err := c.chainUcs.GetChainByName().Execute(ctx, txRequest.ChainName, tenantID)
 	if err != nil {
