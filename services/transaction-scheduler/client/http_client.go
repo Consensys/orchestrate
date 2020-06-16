@@ -91,6 +91,26 @@ func (c *HTTPClient) SendRawTransaction(ctx context.Context, txRequest *types.Ra
 	return resp, nil
 }
 
+func (c *HTTPClient) SendTransferTransaction(ctx context.Context, txRequest *types.TransferRequest) (*types.TransactionResponse, error) {
+	reqURL := fmt.Sprintf("%v/transactions/send-transfer", c.config.URL)
+
+	response, err := clientutils.PostRequest(ctx, c.client, reqURL, txRequest)
+	if err != nil {
+		errMessage := "error while sending transfer transaction"
+		log.FromContext(ctx).WithError(err).Error(errMessage)
+		return nil, errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+	}
+	defer clientutils.CloseResponse(response)
+
+	resp := &types.TransactionResponse{}
+	err = parseResponse(ctx, response, resp)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
 func (c *HTTPClient) GetSchedule(ctx context.Context, scheduleUUID string) (*types.ScheduleResponse, error) {
 	reqURL := fmt.Sprintf("%v/schedules/%v", c.config.URL, scheduleUUID)
 

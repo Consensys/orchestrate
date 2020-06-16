@@ -250,15 +250,14 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_SendRaw() {
 		txRequest := testutils.FakeSendRawTransactionRequest(s.chain.Name)
 		requestBytes, err := json.Marshal(txRequest)
 		if err != nil {
+			assert.Fail(t, err.Error())
 			return
 		}
-		// txRequestEntity := formatters.FormatSendRawRequest(txRequest)
 
 		httpRequest := httptest.
 			NewRequest(http.MethodPost, "/transactions/send-raw", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		testutils2.FakeTxRequestEntity()
 		txRequestEntityResp := testutils2.FakeTxRequestEntity()
 
 		s.getChainByNameUseCase.EXPECT().
@@ -309,6 +308,102 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_SendRaw() {
 		httpRequest := httptest.NewRequest(http.MethodPost, "/transactions/send-raw",
 			bytes.NewReader(requestBytes)).WithContext(s.ctx)
 
+		s.router.ServeHTTP(rw, httpRequest)
+		assert.Equal(t, http.StatusBadRequest, rw.Code)
+	})
+}
+
+
+func (s *transactionsControllerTestSuite) TestTransactionsController_SendTransferTx() {
+
+	s.T().Run("should execute request successfully", func(t *testing.T) {
+		rw := httptest.NewRecorder()
+
+		txRequest := testutils.FakeSendTransferTransactionRequest(s.chain.Name)
+		requestBytes, err := json.Marshal(txRequest)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+
+		httpRequest := httptest.
+			NewRequest(http.MethodPost, "/transactions/send-transfer", bytes.NewReader(requestBytes)).
+			WithContext(s.ctx)
+
+		txRequestEntityResp := testutils2.FakeTransferTxRequestEntity()
+
+		s.getChainByNameUseCase.EXPECT().
+			Execute(gomock.Any(), s.chain.Name, s.tenantID).
+			Return(s.chain, nil)
+
+		s.sendTxUseCase.EXPECT().
+			Execute(gomock.Any(), gomock.Any(), "", s.chain.UUID, s.tenantID).
+			Return(txRequestEntityResp, nil)
+
+		s.router.ServeHTTP(rw, httpRequest)
+
+		response := formatters.FormatTxResponse(txRequestEntityResp, s.chain.Name)
+		expectedBody, _ := json.Marshal(response)
+		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
+		assert.Equal(t, http.StatusAccepted, rw.Code)
+	})
+	
+	s.T().Run("should fail with 422 if use case fails with NotFound chain", func(t *testing.T) {
+		rw := httptest.NewRecorder()
+
+		txRequest := testutils.FakeSendTransferTransactionRequest(s.chain.Name)
+		requestBytes, err := json.Marshal(txRequest)
+		if err != nil {
+			assert.NoError(t, err)
+			return
+		}
+
+		httpRequest := httptest.
+			NewRequest(http.MethodPost, "/transactions/send-transfer", bytes.NewReader(requestBytes)).
+			WithContext(s.ctx)
+
+		s.getChainByNameUseCase.EXPECT().
+			Execute(gomock.Any(), s.chain.Name, s.tenantID).
+			Return(s.chain, errors.InvalidParameterError("error"))
+
+		s.router.ServeHTTP(rw, httpRequest)
+
+		assert.Equal(t, http.StatusUnprocessableEntity, rw.Code)
+	})
+	
+	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
+	s.T().Run("should fail with 422 if use case fails with InvalidParameterError", func(t *testing.T) {
+		txRequest := testutils.FakeSendTransferTransactionRequest(s.chain.Name)
+		requestBytes, _ := json.Marshal(txRequest)
+		txRequestEntity := formatters.FormatSendTransferRequest(txRequest)
+	
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodPost, "/transactions/send-transfer",
+			bytes.NewReader(requestBytes)).
+			WithContext(s.ctx)
+		
+		s.getChainByNameUseCase.EXPECT().
+			Execute(gomock.Any(), s.chain.Name, s.tenantID).
+			Return(s.chain, nil)
+	
+		s.sendTxUseCase.EXPECT().
+			Execute(gomock.Any(), txRequestEntity, "", s.chain.UUID, s.tenantID).
+			Return(nil, errors.InvalidParameterError("error"))
+	
+		s.router.ServeHTTP(rw, httpRequest)
+		assert.Equal(t, http.StatusUnprocessableEntity, rw.Code)
+	})
+	
+	s.T().Run("should fail with Bad request if invalid format", func(t *testing.T) {
+		txRequest := testutils.FakeSendTransferTransactionRequest(s.chain.Name)
+		txRequest.IdempotencyKey = ""
+		requestBytes, _ := json.Marshal(txRequest)
+	
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodPost, "/transactions/send-transfer",
+			bytes.NewReader(requestBytes)).
+			WithContext(s.ctx)
+	
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusBadRequest, rw.Code)
 	})

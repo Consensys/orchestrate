@@ -291,6 +291,42 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, tx.JobTypeMap[types.EthereumRawTransaction].String(), evlp.GetJobTypeString())
 	})
 	
+	s.T().Run("should send a transfer transaction successfully to the transaction sender topic", func(t *testing.T) {
+		defer gock.Off()
+		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
+		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
+		txRequest := testutils.FakeSendTransferTransactionRequest(chain.Name)
+
+		txResponse, err := s.client.SendTransferTransaction(ctx, txRequest)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+		assert.Equal(t, txRequest.IdempotencyKey, txResponse.IdempotencyKey)
+		assert.NotEmpty(t, txResponse.Schedule.UUID)
+
+		scheduleResponse, err := s.client.GetSchedule(ctx, txResponse.Schedule.UUID)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+		assert.NotEmpty(t, scheduleResponse.Jobs[0].UUID)
+		assert.Equal(t, types.StatusStarted, scheduleResponse.Jobs[0].Status)
+		assert.Equal(t, txRequest.Params.Value, scheduleResponse.Jobs[0].Transaction.Value)
+		assert.Equal(t, txRequest.Params.To, scheduleResponse.Jobs[0].Transaction.To)
+		assert.Equal(t, txRequest.Params.From, scheduleResponse.Jobs[0].Transaction.From)
+		assert.Equal(t, types.EthereumTransaction, scheduleResponse.Jobs[0].Type)
+
+		evlp, err := s.env.consumer.WaitForEnvelope(scheduleResponse.Jobs[0].UUID, 
+			s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+		assert.Equal(t, scheduleResponse.Jobs[0].UUID, evlp.GetID())
+		assert.Equal(t, tx.JobTypeMap[types.EthereumTransaction].String(), evlp.GetJobTypeString())
+	})
+	
 	s.T().Run("should succeed if payloads are the same and generate new schedule", func(t *testing.T) {
 		defer gock.Off()
 		txRequest := testutils.FakeSendTransactionRequest(chain.Name)

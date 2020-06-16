@@ -34,6 +34,20 @@ func FakeSendRawTransactionRequest(chainName string) *types.RawTransactionReques
 	}
 }
 
+func FakeSendTransferTransactionRequest(chainName string) *types.TransferRequest {
+	return &types.TransferRequest{
+		BaseTransactionRequest: types.BaseTransactionRequest{
+			IdempotencyKey: uuid.Must(uuid.NewV4()).String(),
+			ChainName:      chainName,
+		},
+		Params: types.TransferParams{
+			From:  "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
+			Value: "1000000000000000000",
+			To:    "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
+		},
+	}
+}
+
 func FakeDeployContractRequest(chainName string) *types.DeployContractRequest {
 	return &types.DeployContractRequest{
 		BaseTransactionRequest: types.BaseTransactionRequest{

@@ -50,6 +50,20 @@ func FormatSendRawRequest(txRequest *types.RawTransactionRequest) *entities.TxRe
 	}
 }
 
+func FormatSendTransferRequest(txRequest *types.TransferRequest) *entities.TxRequest {
+	return &entities.TxRequest{
+		IdempotencyKey: txRequest.IdempotencyKey,
+		Labels:         txRequest.Labels,
+		Params: &pkgtypes.ETHTransactionParams{
+			From:     txRequest.Params.From,
+			To:       txRequest.Params.To,
+			Value:    txRequest.Params.Value,
+			GasPrice: txRequest.Params.GasPrice,
+			GasLimit: txRequest.Params.Gas,
+		},
+	}
+}
+
 func FormatTxResponse(txRequest *entities.TxRequest, chainName string) *types.TransactionResponse {
 	return &types.TransactionResponse{
 		IdempotencyKey: txRequest.IdempotencyKey,

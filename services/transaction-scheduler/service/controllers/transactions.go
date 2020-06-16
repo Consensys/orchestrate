@@ -31,6 +31,7 @@ func NewTransactionsController(txUcs transactions.UseCases, chainUcs chains.UseC
 func (c *TransactionsController) Append(router *mux.Router) {
 	router.Methods(http.MethodPost).Path("/transactions/send").HandlerFunc(c.Send)
 	router.Methods(http.MethodPost).Path("/transactions/send-raw").HandlerFunc(c.SendRaw)
+	router.Methods(http.MethodPost).Path("/transactions/send-transfer").HandlerFunc(c.SendTransfer)
 	router.Methods(http.MethodPost).Path("/transactions/deploy-contract").HandlerFunc(c.DeployContract)
 }
 
@@ -145,6 +146,46 @@ func (c *TransactionsController) SendRaw(rw http.ResponseWriter, request *http.R
 
 	tenantID := multitenancy.TenantIDFromContext(ctx)
 	txReq := formatters.FormatSendRawRequest(txRequest)
+
+	chain, err := c.chainUcs.GetChainByName().Execute(ctx, txRequest.ChainName, tenantID)
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	txResponse, err := c.txUcs.SendTransaction().Execute(ctx, txReq, "", chain.UUID, tenantID)
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	rw.WriteHeader(http.StatusAccepted)
+	_ = json.NewEncoder(rw).Encode(formatters.FormatTxResponse(txResponse, chain.Name))
+}
+
+// @Summary Creates and sends a transfer transaction
+// @Produce json
+// @Security ApiKeyAuth
+// @Security JWTAuth
+// @Success 200
+// @Failure 400
+// @Failure 409
+// @Failure 422
+// @Failure 500
+// @Router /transactions/send-transfer [post]
+func (c *TransactionsController) SendTransfer(rw http.ResponseWriter, request *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	ctx := request.Context()
+
+	txRequest := &types.TransferRequest{}
+	err := jsonutils.UnmarshalBody(request.Body, txRequest)
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	tenantID := multitenancy.TenantIDFromContext(ctx)
+	txReq := formatters.FormatSendTransferRequest(txRequest)
 
 	chain, err := c.chainUcs.GetChainByName().Execute(ctx, txRequest.ChainName, tenantID)
 	if err != nil {

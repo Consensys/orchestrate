@@ -79,6 +79,21 @@ func (mr *MockTransactionClientMockRecorder) SendRawTransaction(ctx, request int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendRawTransaction", reflect.TypeOf((*MockTransactionClient)(nil).SendRawTransaction), ctx, request)
 }
 
+// SendTransferTransaction mocks base method
+func (m *MockTransactionClient) SendTransferTransaction(ctx context.Context, request *types.TransferRequest) (*types.TransactionResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SendTransferTransaction", ctx, request)
+	ret0, _ := ret[0].(*types.TransactionResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SendTransferTransaction indicates an expected call of SendTransferTransaction
+func (mr *MockTransactionClientMockRecorder) SendTransferTransaction(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendTransferTransaction", reflect.TypeOf((*MockTransactionClient)(nil).SendTransferTransaction), ctx, request)
+}
+
 // MockScheduleClient is a mock of ScheduleClient interface
 type MockScheduleClient struct {
 	ctrl     *gomock.Controller
@@ -325,6 +340,21 @@ func (m *MockTransactionSchedulerClient) SendRawTransaction(ctx context.Context,
 func (mr *MockTransactionSchedulerClientMockRecorder) SendRawTransaction(ctx, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendRawTransaction", reflect.TypeOf((*MockTransactionSchedulerClient)(nil).SendRawTransaction), ctx, request)
+}
+
+// SendTransferTransaction mocks base method
+func (m *MockTransactionSchedulerClient) SendTransferTransaction(ctx context.Context, request *types.TransferRequest) (*types.TransactionResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SendTransferTransaction", ctx, request)
+	ret0, _ := ret[0].(*types.TransactionResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SendTransferTransaction indicates an expected call of SendTransferTransaction
+func (mr *MockTransactionSchedulerClientMockRecorder) SendTransferTransaction(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendTransferTransaction", reflect.TypeOf((*MockTransactionSchedulerClient)(nil).SendTransferTransaction), ctx, request)
 }
 
 // GetSchedule mocks base method

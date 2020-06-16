@@ -58,10 +58,15 @@ func FakeOrionTransactionParams() *types.ETHTransactionParams {
 }
 
 func FakeRawTransactionParams() *types.ETHTransactionParams {
-	tx := FakeETHTransactionParams()
-	tx.PrivateFrom = "ROAZBWtSacxXQrOe3FGAqJDyJjFePR5ce4TSIzmJ0Ba="
-	tx.Raw = "0xABCDE012312312"
-	tx.Protocol = types.OrionEEATransaction
+	return &types.ETHTransactionParams{
+		Raw: "0xABCDE012312312",
+	}
+}
 
-	return tx
+func FakeTransferTransactionParams() *types.ETHTransactionParams {
+	return &types.ETHTransactionParams{
+		From:  "0x7357589f8e367c2C31F51242fB77B350A11830FA",
+		To:    "0x7357589f8e367c2C31F51242fB77B350A11830FB",
+		Value: "10000000000",
+	}
 }

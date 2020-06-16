@@ -65,8 +65,9 @@ type RawTransactionParams struct {
 
 type TransferParams struct {
 	BaseTransactionParams
-	From string `json:"from" validate:"required,eth_addr"`
-	To   string `json:"to" validate:"required,eth_addr"`
+	From  string `json:"from" validate:"required,eth_addr"`
+	To    string `json:"to" validate:"required,eth_addr"`
+	Value string `json:"value" validate:"required,isBig"`
 }
 
 type DeployContractParams struct {
