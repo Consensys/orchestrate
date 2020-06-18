@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 rm -rf /opt/besu/database

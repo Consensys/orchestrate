@@ -17,7 +17,7 @@ RUN curl -u $BINTRAY_USER_NAME:$BINTRAY_PASSWORD -L https://dl.bintray.com/conse
 RUN tar zxvf pegasys-plus.tar.gz || true
 RUN mv /pegasys-plus-$PPLUS_VERSION/plugins/* /pegasys-plus/plugins || true
 
-FROM hyperledger/besu:develop
+FROM hyperledger/besu:1.4
 
 COPY --from=builder /pegasys-plus/plugins /opt/besu/pegasys-plus/plugins
 

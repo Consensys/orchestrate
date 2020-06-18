@@ -2,7 +2,7 @@
 version: '3.4'
 
 x-orion-common: &orion-common
-  image: pegasyseng/orion:develop
+  image: pegasyseng/orion:1.5
   entrypoint: ["bash", "orion.sh"]
   networks:
     - orchestrate

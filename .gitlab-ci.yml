@@ -49,14 +49,12 @@ services:
 .docker-compose-e2e: &docker-compose-e2e
   stage: e2e
   before_script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - apk update
-    - apk upgrade
-    - apk add python python-dev py-pip libffi-dev openssl-dev libc-dev make bash jq curl build-base
-    - pip install --upgrade pip
-    - pip install docker-compose
+    - apk add make bash jq curl build-base
+    - apk add --no-cache py3-pip python3
+    - apk add --no-cache --virtual build-dependencies python3-dev libffi-dev openssl-dev gcc libc-dev
+    - pip3 install docker-compose==1.26.0
   after_script:
-    - docker logout $CI_REGISTRY
     - make down
   cache:
     key: "$CI_COMMIT_REF_SLUG"
