@@ -85,7 +85,7 @@ func NewEnvelopeFromJobModel(job *models.Job, headers map[string]string) *tx.TxE
 			Params: &tx.Params{
 				From:           job.Transaction.Sender,
 				To:             job.Transaction.Recipient,
-				Gas:            job.Transaction.GasLimit,
+				Gas:            job.Transaction.Gas,
 				GasPrice:       job.Transaction.GasPrice,
 				Value:          job.Transaction.Value,
 				Nonce:          job.Transaction.Nonce,

@@ -35,7 +35,7 @@ func NewJobEntityFromTxRequest(txRequest *entities.TxRequest, jobType, chainUUID
 			Nonce:          txRequest.Params.Nonce,
 			Value:          txRequest.Params.Value,
 			GasPrice:       txRequest.Params.GasPrice,
-			GasLimit:       txRequest.Params.GasLimit,
+			Gas:            txRequest.Params.Gas,
 			Raw:            txRequest.Params.Raw,
 			PrivateFrom:    txRequest.Params.PrivateFrom,
 			PrivateFor:     txRequest.Params.PrivateFor,

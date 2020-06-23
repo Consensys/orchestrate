@@ -52,7 +52,7 @@ func TestParsersJob_NewEnvelopeFromModel(t *testing.T) {
 	assert.Equal(t, jobModel.Transaction.Nonce, txRequest.Params.GetNonce())
 	assert.Equal(t, jobModel.Transaction.Raw, txRequest.Params.GetRaw())
 	assert.Equal(t, jobModel.Transaction.GasPrice, txRequest.Params.GetGasPrice())
-	assert.Equal(t, jobModel.Transaction.GasLimit, txRequest.Params.GetGas())
+	assert.Equal(t, jobModel.Transaction.Gas, txRequest.Params.GetGas())
 	assert.Equal(t, jobModel.Transaction.PrivateFor, txRequest.Params.GetPrivateFor())
 	assert.Equal(t, jobModel.Transaction.PrivateFrom, txRequest.Params.GetPrivateFrom())
 	assert.Equal(t, jobModel.Transaction.PrivacyGroupID, txRequest.Params.GetPrivacyGroupId())

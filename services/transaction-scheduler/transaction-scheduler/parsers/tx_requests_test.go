@@ -36,7 +36,7 @@ func TestParsersTxRequest_NewJobEntityFromSendTx(t *testing.T) {
 	assert.Equal(t, job.Transaction.To, txReqEntity.Params.To)
 	assert.Equal(t, job.Transaction.Value, txReqEntity.Params.Value)
 	assert.Equal(t, job.Transaction.GasPrice, txReqEntity.Params.GasPrice)
-	assert.Equal(t, job.Transaction.GasLimit, txReqEntity.Params.GasLimit)
+	assert.Equal(t, job.Transaction.Gas, txReqEntity.Params.Gas)
 	assert.Equal(t, job.Transaction.Raw, txReqEntity.Params.Raw)
 	assert.Equal(t, job.Transaction.PrivateFrom, txReqEntity.Params.PrivateFrom)
 	assert.Equal(t, job.Transaction.PrivateFor, txReqEntity.Params.PrivateFor)

@@ -95,7 +95,7 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 					Nonce:          txctx.Envelope.GetNonceString(),
 					Value:          txctx.Envelope.GetValueString(),
 					GasPrice:       txctx.Envelope.GetGasPriceString(),
-					GasLimit:       txctx.Envelope.GetGasString(),
+					Gas:       txctx.Envelope.GetGasString(),
 					Raw:            txctx.Envelope.GetRaw(),
 					PrivateFrom:    txctx.Envelope.GetPrivateFrom(),
 					PrivateFor:     txctx.Envelope.GetPrivateFor(),

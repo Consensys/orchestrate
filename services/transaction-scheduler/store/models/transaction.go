@@ -15,7 +15,7 @@ type Transaction struct {
 	Nonce          string
 	Value          string
 	GasPrice       string
-	GasLimit       string
+	Gas            string
 	Data           string
 	Raw            string
 	PrivateFrom    string

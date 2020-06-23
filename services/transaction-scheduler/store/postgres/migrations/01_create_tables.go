@@ -17,7 +17,7 @@ CREATE TABLE transactions (
 	nonce INTEGER,
 	value BIGINT,
 	gas_price BIGINT,
-	gas_limit INTEGER,
+	gas INTEGER,
 	data TEXT,
 	raw TEXT,
 	private_from TEXT,

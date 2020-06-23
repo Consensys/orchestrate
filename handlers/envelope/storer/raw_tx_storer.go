@@ -34,7 +34,7 @@ func updateTxInScheduler(txctx *engine.TxContext, txSchedulerClient client.Trans
 				Nonce:          txctx.Envelope.GetNonceString(),
 				Value:          txctx.Envelope.GetValueString(),
 				GasPrice:       txctx.Envelope.GetGasPriceString(),
-				GasLimit:       txctx.Envelope.GetGasString(),
+				Gas:            txctx.Envelope.GetGasString(),
 				Raw:            txctx.Envelope.GetRaw(),
 				PrivateFrom:    txctx.Envelope.GetPrivateFrom(),
 				PrivateFor:     txctx.Envelope.GetPrivateFor(),

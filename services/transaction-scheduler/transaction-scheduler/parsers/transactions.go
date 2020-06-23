@@ -13,7 +13,7 @@ func NewTransactionModelFromEntities(tx *types.ETHTransaction) *models.Transacti
 		Nonce:          tx.Nonce,
 		Value:          tx.Value,
 		GasPrice:       tx.GasPrice,
-		GasLimit:       tx.GasLimit,
+		Gas:            tx.Gas,
 		Data:           tx.Data,
 		Raw:            tx.Raw,
 		PrivateFrom:    tx.PrivateFrom,
@@ -32,7 +32,7 @@ func NewTransactionEntityFromModels(tx *models.Transaction) *types.ETHTransactio
 		Nonce:          tx.Nonce,
 		Value:          tx.Value,
 		GasPrice:       tx.GasPrice,
-		GasLimit:       tx.GasLimit,
+		Gas:            tx.Gas,
 		Data:           tx.Data,
 		PrivateFrom:    tx.PrivateFrom,
 		PrivateFor:     tx.PrivateFor,
@@ -62,8 +62,8 @@ func UpdateTransactionModelFromEntities(txModel *models.Transaction, tx *types.E
 	if tx.GasPrice != "" {
 		txModel.GasPrice = tx.GasPrice
 	}
-	if tx.GasLimit != "" {
-		txModel.GasLimit = tx.GasLimit
+	if tx.Gas != "" {
+		txModel.Gas = tx.Gas
 	}
 	if tx.Data != "" {
 		txModel.Data = tx.Data

@@ -22,7 +22,7 @@ func FormatJobResponse(job *pkgtypes.Job) *types.JobResponse {
 			Nonce:          job.Transaction.Nonce,
 			Value:          job.Transaction.Value,
 			GasPrice:       job.Transaction.GasPrice,
-			GasLimit:       job.Transaction.GasLimit,
+			Gas:            job.Transaction.Gas,
 			Data:           job.Transaction.Data,
 			Raw:            job.Transaction.Raw,
 			PrivateFrom:    job.Transaction.PrivateFrom,

@@ -15,7 +15,7 @@ func FormatSendTxRequest(txRequest *types.SendTransactionRequest, idempotencyKey
 			To:                       txRequest.Params.To,
 			Value:                    txRequest.Params.Value,
 			GasPrice:                 txRequest.Params.GasPrice,
-			GasLimit:                 txRequest.Params.Gas,
+			Gas:                      txRequest.Params.Gas,
 			MethodSignature:          txRequest.Params.MethodSignature,
 			Args:                     txRequest.Params.Args,
 			PrivateTransactionParams: txRequest.Params.PrivateTransactionParams,
@@ -31,7 +31,7 @@ func FormatDeployContractRequest(txRequest *types.DeployContractRequest, idempot
 			From:                     txRequest.Params.From,
 			Value:                    txRequest.Params.Value,
 			GasPrice:                 txRequest.Params.GasPrice,
-			GasLimit:                 txRequest.Params.Gas,
+			Gas:                      txRequest.Params.Gas,
 			Args:                     txRequest.Params.Args,
 			ContractName:             txRequest.Params.ContractName,
 			ContractTag:              txRequest.Params.ContractTag,
@@ -59,7 +59,7 @@ func FormatSendTransferRequest(txRequest *types.TransferRequest, idempotencyKey 
 			To:       txRequest.Params.To,
 			Value:    txRequest.Params.Value,
 			GasPrice: txRequest.Params.GasPrice,
-			GasLimit: txRequest.Params.Gas,
+			Gas:      txRequest.Params.Gas,
 		},
 	}
 }

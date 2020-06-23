@@ -139,7 +139,7 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 				Nonce:    job.Transaction.Nonce,
 				To:       job.Transaction.To,
 				Value:    job.Transaction.Value,
-				Gas:      job.Transaction.GasLimit,
+				Gas:      job.Transaction.Gas,
 				GasPrice: job.Transaction.GasPrice,
 				Data:     job.Transaction.Data,
 				Raw:      job.Transaction.Raw,

@@ -13,7 +13,7 @@ type ETHTransaction struct {
 	Nonce          string    `json:"nonce,omitempty"`
 	Value          string    `json:"value,omitempty"`
 	GasPrice       string    `json:"gasPrice,omitempty"`
-	GasLimit       string    `json:"gasLimit,omitempty"`
+	Gas            string    `json:"gas,omitempty"`
 	Data           string    `json:"data,omitempty"`
 	Raw            string    `json:"raw,omitempty"`
 	PrivateFrom    string    `json:"privateFrom,omitempty"`
