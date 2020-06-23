@@ -29,6 +29,8 @@ func init() {
 	_ = viper.BindEnv(DBTLSKeyViperKey, dbTLSKeyEnv)
 	viper.SetDefault(DBTLSCAViperKey, dbTLSCADefault)
 	_ = viper.BindEnv(DBTLSCAViperKey, dbTLSCAEnv)
+	viper.SetDefault(DBTLSSSLModeViperKey, dbTLSSSLModeDefault)
+	_ = viper.BindEnv(DBTLSSSLModeViperKey, dbTLSSSLModeEnv)
 }
 
 // PGFlags register flags for Postgres database
@@ -39,6 +41,7 @@ func PGFlags(f *pflag.FlagSet) {
 	DBHost(f)
 	DBPort(f)
 	DBPoolSize(f)
+	DBTLSSSLMode(f)
 	DBTLSCert(f)
 	DBTLSKey(f)
 	DBTLSCA(f)
@@ -135,6 +138,35 @@ Environment variable: %q`, dbPoolSizeEnv)
 }
 
 const (
+	requireSSLMode    = "require"
+	disableSSLMode    = "disable"
+	verifyCASSLMode   = "verify-ca"
+	verifyFullSSLMode = "verify-full"
+)
+
+var availableSSLModes = []string{
+	requireSSLMode,
+	disableSSLMode,
+	verifyCASSLMode,
+	verifyFullSSLMode,
+}
+
+const (
+	dbTLSSSLModeFlag     = "db-sslmode"
+	DBTLSSSLModeViperKey = "db.tls.sslmode"
+	dbTLSSSLModeDefault  = disableSSLMode
+	dbTLSSSLModeEnv      = "DB_TLS_SSLMODE"
+)
+
+// DBTLSSSLMode register flag for TLS SSL mode used to connect to the database
+func DBTLSSSLMode(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`TLS SSL mode to connect to database (one of %q)
+Environment variable: %q`, dbTLSSSLModeEnv, availableSSLModes)
+	f.String(dbTLSSSLModeFlag, dbTLSSSLModeDefault, desc)
+	_ = viper.BindPFlag(DBTLSSSLModeViperKey, f.Lookup(dbTLSSSLModeFlag))
+}
+
+const (
 	dbTLSCertFlag     = "db-tls-cert"
 	DBTLSCertViperKey = "db.tls.cert"
 	dbTLSCertDefault  = ""
@@ -180,18 +212,20 @@ Environment variable: %q`, dbTLSCAEnv)
 }
 
 type Config struct {
-	Addr            string
+	Host            string
+	Port            string
 	User            string
 	Password        string
 	Database        string
 	PoolSize        int
 	TLS             *tls.Option
 	ApplicationName string
+	SSLMode         string
 }
 
 func (cfg *Config) PGOptions() (*pg.Options, error) {
 	opt := &pg.Options{
-		Addr:            cfg.Addr,
+		Addr:            fmt.Sprintf("%v:%v", cfg.Host, cfg.Port),
 		User:            cfg.User,
 		Password:        cfg.Password,
 		Database:        cfg.Database,
@@ -199,14 +233,16 @@ func (cfg *Config) PGOptions() (*pg.Options, error) {
 		ApplicationName: cfg.ApplicationName,
 	}
 
-	if cfg.TLS != nil {
-		tlsConfig, err := tls.NewConfig(cfg.TLS)
-		if err != nil {
-			return nil, err
-		}
-
-		opt.TLSConfig = tlsConfig
+	dialer, err := NewTLSDialer(cfg)
+	if err != nil {
+		return nil, err
 	}
+
+	if dialer == nil {
+		return opt, nil
+	}
+
+	opt.Dialer = dialer.DialContext
 
 	return opt, nil
 }
@@ -214,16 +250,18 @@ func (cfg *Config) PGOptions() (*pg.Options, error) {
 // NewONewConfigNewConfigptions creates new postgres options
 func NewConfig(vipr *viper.Viper) *Config {
 	cfg := &Config{
-		Addr:     fmt.Sprintf("%v:%v", vipr.GetString(DBHostViperKey), vipr.GetString(DBPortViperKey)),
+		Host:     vipr.GetString(DBHostViperKey),
+		Port:     vipr.GetString(DBPortViperKey),
 		User:     vipr.GetString(DBUserViperKey),
 		Password: vipr.GetString(DBPasswordViperKey),
 		Database: vipr.GetString(DBDatabaseViperKey),
 		PoolSize: vipr.GetInt(DBPoolSizeViperKey),
+		SSLMode:  vipr.GetString(DBTLSSSLModeViperKey),
+		TLS:      &tls.Option{},
 	}
 
 	if vipr.GetString(DBTLSCertViperKey) != "" {
 		cfg.TLS = &tls.Option{
-			ServerName: vipr.GetString(DBHostViperKey),
 			Certificates: []*certificate.KeyPair{
 				&certificate.KeyPair{
 					Cert: []byte(vipr.GetString(DBTLSCertViperKey)),
@@ -231,11 +269,11 @@ func NewConfig(vipr *viper.Viper) *Config {
 				},
 			},
 		}
+	}
 
-		if vipr.GetString(DBTLSCAViperKey) != "" {
-			cfg.TLS.CAs = [][]byte{
-				[]byte(vipr.GetString(DBTLSCAViperKey)),
-			}
+	if vipr.GetString(DBTLSCAViperKey) != "" {
+		cfg.TLS.CAs = [][]byte{
+			[]byte(vipr.GetString(DBTLSCAViperKey)),
 		}
 	}
 

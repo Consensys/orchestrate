@@ -153,6 +153,7 @@ func TestNewOptions(t *testing.T) {
 	vipr.Set(DBDatabaseViperKey, "db-test")
 	vipr.Set(DBUserViperKey, "user-test")
 	vipr.Set(DBPasswordViperKey, "password")
+	vipr.Set(DBTLSSSLModeViperKey, "verify-full")
 	vipr.Set(DBTLSCertViperKey, tlstestutils.OneLineRSACertPEMA)
 	vipr.Set(DBTLSKeyViperKey, tlstestutils.OneLineRSAKeyPEMA)
 	vipr.Set(DBTLSCAViperKey, tlstestutils.OneLineRSACertPEMB)
@@ -164,7 +165,4 @@ func TestNewOptions(t *testing.T) {
 	assert.Equal(t, "db-test", opts.Database)
 	assert.Equal(t, "user-test", opts.User)
 	assert.Equal(t, "password", opts.Password)
-
-	require.NotNil(t, opts.TLSConfig, "TLS config should have been set")
-	require.NotNil(t, opts.TLSConfig.RootCAs, "CAs should have been set")
 }

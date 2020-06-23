@@ -34,6 +34,10 @@ x-default-variables: &default-variables
   KAFKA_TLS_ENABLED: ${KAFKA_TLS_ENABLED-false}
   KAFKA_TLS_INSECURE_SKIP_VERIFY: ${KAFKA_TLS_INSECURE_SKIP_VERIFY-false}
   TX_SCHEDULER_ENABLED: ${TX_SCHEDULER_ENABLED-false}
+  DB_TLS_SSLMODE: ${DB_TLS_SSLMODE-}
+  DB_TLS_CERT: ${DB_TLS_CERT-}
+  DB_TLS_KEY: ${DB_TLS_KEY-}
+  DB_TLS_CA: ${DB_TLS_CA-}
 
 x-container-common: &container-common
   image: golang:1.14

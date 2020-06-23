@@ -1,0 +1,158 @@
+package postgres
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/spf13/viper"
+)
+
+// openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out cert.pem
+const (
+	selfSignedCert = `-----BEGIN CERTIFICATE-----
+MIIEITCCAwmgAwIBAgIUGNyq9HKQm00CQzF+et2ZDGh3D9MwDQYJKoZIhvcNAQEL
+BQAwgZ8xCzAJBgNVBAYTAkZSMRYwFAYDVQQIDA1JbGUgZGUgRnJhbmNlMQ4wDAYD
+VQQHDAVQYXJpczESMBAGA1UECgwJQ29uc2VuU3lzMRAwDgYDVQQLDAdQZWdhU3lz
+MRQwEgYDVQQDDAtPcmNoZXN0cmF0ZTEsMCoGCSqGSIb3DQEJARYdbmljb2xhcy5t
+YXVyaWNlQGNvbnNlbnN5cy5uZXQwHhcNMjAwNjIzMTAwODAzWhcNMzAwNjIxMTAw
+ODAzWjCBnzELMAkGA1UEBhMCRlIxFjAUBgNVBAgMDUlsZSBkZSBGcmFuY2UxDjAM
+BgNVBAcMBVBhcmlzMRIwEAYDVQQKDAlDb25zZW5TeXMxEDAOBgNVBAsMB1BlZ2FT
+eXMxFDASBgNVBAMMC09yY2hlc3RyYXRlMSwwKgYJKoZIhvcNAQkBFh1uaWNvbGFz
+Lm1hdXJpY2VAY29uc2Vuc3lzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCC
+AQoCggEBAMxtE1YOJKfOxDl+ozr0AU4HOArJnI7ANW8mGppHh4svM/tsCxjNB6Yv
+O5lizi6EVCNAJ1zU/LxrT5DKwZ1ea+Xhx7ho3AP6r6/DO7AniNaFQ2xthLGA+7NT
+0Rosoh9XPUTqTH/5ORysRsYJTZWg/n0gkJILfVak4ZikWxxObcN0P9pdCvQt/cJn
+JGc1mDmsRWXAUoD2GPGlPtD1qymoJHveXm68KMdQ+FcOmUQu6uukgufJIjCl25jz
+OqkK7NV62L+BQG9sOtQRifSvs4o9vLV9kGD+lyZrtq/3heMKx8ubH2+yDNOhWDt1
+Xk7O22357qQLd7m420EubF8ysYFs+ycCAwEAAaNTMFEwHQYDVR0OBBYEFAksM90S
+dg5hp84soUb5hJOT8YM4MB8GA1UdIwQYMBaAFAksM90Sdg5hp84soUb5hJOT8YM4
+MA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAEHAVQKAvJLjOHFR
++MQdzZ5Z7iTkfMDh7PedyyKVWrghgJByvtjCgsJGDeaqR3zjzxL76lPYOXZ7atuk
+Oio+B9W4Af/HmCaRXKwI+cqsVus8q5nj02QTOZG7AxhHA6Mz0UAUf6+yqIdbTDnA
+ENcru9PLFyh2lNdN7ml4vBhoW1BLaBrA3R2ZZaL8/uhvmvdj8j317KaI3FaKqolv
+qqw88SCtqifSjns+SRYw7x57GzhGFLETmdWeGPPL8ydfITne6ci67ZSRcwv+dI5Y
+YUevQNiaWCc8rUxcDndVgvfR6MkLOk1UlLj6ve83SajAKGfBfoZoV0kue138F8yP
+QXYSx/U=
+-----END CERTIFICATE-----
+`
+	selfSignedKey = `-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDMbRNWDiSnzsQ5
+fqM69AFOBzgKyZyOwDVvJhqaR4eLLzP7bAsYzQemLzuZYs4uhFQjQCdc1Py8a0+Q
+ysGdXmvl4ce4aNwD+q+vwzuwJ4jWhUNsbYSxgPuzU9EaLKIfVz1E6kx/+TkcrEbG
+CU2VoP59IJCSC31WpOGYpFscTm3DdD/aXQr0Lf3CZyRnNZg5rEVlwFKA9hjxpT7Q
+9aspqCR73l5uvCjHUPhXDplELurrpILnySIwpduY8zqpCuzVeti/gUBvbDrUEYn0
+r7OKPby1fZBg/pcma7av94XjCsfLmx9vsgzToVg7dV5Ozttt+e6kC3e5uNtBLmxf
+MrGBbPsnAgMBAAECggEBAKM27zpE/oUwc8DH2EGIccY/w0HxqFrdIYyFqrXFKHY7
+ENDLeayqflHz4izcE2xWYOroHMVklAlH0HX1PFKOAa2/73rP1eIjc8PsJ6rEVd+Y
+9LUMV+Z06gFKiWfRfPty5sswGjYO4MeA0NzqrpQpvyZeKq9AFylnaWs6xje6cq6a
+ojJnb+Yi6HXwmTPylj2+ZwGvTNu4bFwZRAwutB09a4PMvVWRhPwgy8SYe3rII4S/
+EkATSVnAVZ9OfDoOAZIv6sP6s8+SL4m7RLY6tKrpam7SYK3fouQGDAO3SXQmymQB
+LXz2Hj+4qusFvjsmaQW5L8Qg5W3UlVuP+r0lO9jzLxECgYEA+4yqsKMzPUNccpbn
+qydwhe6b7ZupEbW+8Sin2XV9om/Nf713UVr+yzqmbvUikSqoPIe8n/wpv+N7N/PR
+h4t61BBipIA1HmxB5dYqyMNTSTIvZs+2MEdz8TyA/UM0Z5sZPDv2EQ5a0lBeFTzv
+w0Cf+rHbEY6QAJMmmBLuDCxBdz8CgYEA0Ar5fj543OrjB8gxk/eouYLD5s+e8CYL
+8g2Qs/tsNKbQe+RO5JNthVmj4zvx5ThQxLQktbBH/xRoPozhKAi2UWOgQujAlvLG
+EHYPA2XfaXytSie8QyNIOS3qKEOzX0VMNuH5CTOIgpBHLodNj7NDUBwBxBYaKoAN
+2vm/GuiIKhkCgYBew2pWKtUVwjekj4bs6mmweuhRBfAWVOJ+1TMOb/2JYRcIhWba
+xi3wf8LNUBnamDhSvUvo9UUBHgCAXqDTsE7wbs/KauYX9O6KWDk78qGAlKBY2e0n
+mPNrsMBjKJsoYLyL/YbAfCjozA/1bkRgyQq7lZ8SqSNEpCrI5XC6Mz3iXwKBgAGG
+4xfjG337l1j6Rirg2XMrG4b5JSB8FwBayyIXCU9Fnigan92bm2UsKEDFstvM0wLu
+k4pl1dFwc+dpn0ls7vGf+pAjJy60b3G1fBy5Ra9/g8IUkpQnkSMiTCKphIqBdrK8
+a9h+cVUL/AnCYnZYiXjwC69FvkFrmS5vQNDQvhcZAoGAXJ5fwsp5xnHXeSEoevl5
+RJxLmPOzsccwibk8IiRDg8+sEybyGlx5LvnNS+/ZmKjNlvtTaTT08TwB4viXZbeU
+F8yCGWci9u83+kj7ba1ALrVC69hbkCbnXDVx+jfcjVKRZ3dVlfG5TC3ce6cLWJ8J
+dBoajublP9NJObc7hcrR06A=
+-----END PRIVATE KEY-----
+`
+
+	baltimoreCyberTrustRoot = `-----BEGIN CERTIFICATE-----
+MIIDdzCCAl+gAwIBAgIEAgAAuTANBgkqhkiG9w0BAQUFADBaMQswCQYDVQQGEwJJ
+RTESMBAGA1UEChMJQmFsdGltb3JlMRMwEQYDVQQLEwpDeWJlclRydXN0MSIwIAYD
+VQQDExlCYWx0aW1vcmUgQ3liZXJUcnVzdCBSb290MB4XDTAwMDUxMjE4NDYwMFoX
+DTI1MDUxMjIzNTkwMFowWjELMAkGA1UEBhMCSUUxEjAQBgNVBAoTCUJhbHRpbW9y
+ZTETMBEGA1UECxMKQ3liZXJUcnVzdDEiMCAGA1UEAxMZQmFsdGltb3JlIEN5YmVy
+VHJ1c3QgUm9vdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKMEuyKr
+mD1X6CZymrV51Cni4eiVgLGw41uOKymaZN+hXe2wCQVt2yguzmKiYv60iNoS6zjr
+IZ3AQSsBUnuId9Mcj8e6uYi1agnnc+gRQKfRzMpijS3ljwumUNKoUMMo6vWrJYeK
+mpYcqWe4PwzV9/lSEy/CG9VwcPCPwBLKBsua4dnKM3p31vjsufFoREJIE9LAwqSu
+XmD+tqYF/LTdB1kC1FkYmGP1pWPgkAx9XbIGevOF6uvUA65ehD5f/xXtabz5OTZy
+dc93Uk3zyZAsuT3lySNTPx8kmCFcB5kpvcY67Oduhjprl3RjM71oGDHweI12v/ye
+jl0qhqdNkNwnGjkCAwEAAaNFMEMwHQYDVR0OBBYEFOWdWTCCR1jMrPoIVDaGezq1
+BE3wMBIGA1UdEwEB/wQIMAYBAf8CAQMwDgYDVR0PAQH/BAQDAgEGMA0GCSqGSIb3
+DQEBBQUAA4IBAQCFDF2O5G9RaEIFoN27TyclhAO992T9Ldcw46QQF+vaKSm2eT92
+9hkTI7gQCvlYpNRhcL0EYWoSihfVCr3FvDB81ukMJY2GQE/szKN+OMY3EU/t3Wgx
+jkzSswF07r51XgdIGn9w/xZchMB5hbgF/X++ZRGjD8ACtPhSNzkE1akxehi/oCr0
+Epn3o0WC4zxe9Z2etciefC7IpJ5OCBRLbf1wbWsaY71k5h+3zvDyny67G7fyUIhz
+ksLi4xaNmjICq44Y3ekQEe5+NauQrz4wlHrQMz2nZQ/1/I6eYs9HRCwBXbsdtTLS
+R9I4LtD+gdwyah617jzV/OeBHRnDJELqYzmp
+-----END CERTIFICATE-----
+`
+	letsEncryptAuthorityX3 = //nolint
+	`-----BEGIN CERTIFICATE-----
+MIIEkjCCA3qgAwIBAgIQCgFBQgAAAVOFc2oLheynCDANBgkqhkiG9w0BAQsFADA/
+MSQwIgYDVQQKExtEaWdpdGFsIFNpZ25hdHVyZSBUcnVzdCBDby4xFzAVBgNVBAMT
+DkRTVCBSb290IENBIFgzMB4XDTE2MDMxNzE2NDA0NloXDTIxMDMxNzE2NDA0Nlow
+SjELMAkGA1UEBhMCVVMxFjAUBgNVBAoTDUxldCdzIEVuY3J5cHQxIzAhBgNVBAMT
+GkxldCdzIEVuY3J5cHQgQXV0aG9yaXR5IFgzMIIBIjANBgkqhkiG9w0BAQEFAAOC
+AQ8AMIIBCgKCAQEAnNMM8FrlLke3cl03g7NoYzDq1zUmGSXhvb418XCSL7e4S0EF
+q6meNQhY7LEqxGiHC6PjdeTm86dicbp5gWAf15Gan/PQeGdxyGkOlZHP/uaZ6WA8
+SMx+yk13EiSdRxta67nsHjcAHJyse6cF6s5K671B5TaYucv9bTyWaN8jKkKQDIZ0
+Z8h/pZq4UmEUEz9l6YKHy9v6Dlb2honzhT+Xhq+w3Brvaw2VFn3EK6BlspkENnWA
+a6xK8xuQSXgvopZPKiAlKQTGdMDQMc2PMTiVFrqoM7hD8bEfwzB/onkxEz0tNvjj
+/PIzark5McWvxI0NHWQWM6r6hCm21AvA2H3DkwIDAQABo4IBfTCCAXkwEgYDVR0T
+AQH/BAgwBgEB/wIBADAOBgNVHQ8BAf8EBAMCAYYwfwYIKwYBBQUHAQEEczBxMDIG
+CCsGAQUFBzABhiZodHRwOi8vaXNyZy50cnVzdGlkLm9jc3AuaWRlbnRydXN0LmNv
+bTA7BggrBgEFBQcwAoYvaHR0cDovL2FwcHMuaWRlbnRydXN0LmNvbS9yb290cy9k
+c3Ryb290Y2F4My5wN2MwHwYDVR0jBBgwFoAUxKexpHsscfrb4UuQdf/EFWCFiRAw
+VAYDVR0gBE0wSzAIBgZngQwBAgEwPwYLKwYBBAGC3xMBAQEwMDAuBggrBgEFBQcC
+ARYiaHR0cDovL2Nwcy5yb290LXgxLmxldHNlbmNyeXB0Lm9yZzA8BgNVHR8ENTAz
+MDGgL6AthitodHRwOi8vY3JsLmlkZW50cnVzdC5jb20vRFNUUk9PVENBWDNDUkwu
+Y3JsMB0GA1UdDgQWBBSoSmpjBH3duubRObemRWXv86jsoTANBgkqhkiG9w0BAQsF
+AAOCAQEA3TPXEfNjWDjdGBX7CVW+dla5cEilaUcne8IkCJLxWh9KEik3JHRRHGJo
+uM2VcGfl96S8TihRzZvoroed6ti6WqEBmtzw3Wodatg+VyOeph4EYpr/1wXKtx8/
+wApIvJSwtmVi4MFU5aMqrSDE6ea73Mj2tcMyo5jMd6jmeWUHK8so/joWUoHOUgwu
+X4Po1QYz+3dszkDqMp4fklxBwXRsW10KXzPMTZ+sOPAveyxindmjkW8lGy+QsRlG
+PfZ+G6Z6h7mjem0Y+iWlkYcV4PIWL1iwBi8saCbGS5jN2p8M+X+Q7UNKEkROb3N6
+KOqkqm57TH2H3eDJAkSnh6/DNFu0Qg==
+-----END CERTIFICATE-----
+`
+)
+
+type Table struct {
+	tableName struct{} `pg:"pg_catalog.pg_tables"` // nolint:unused,structcheck // reason
+
+	Schemaname string `json:"schemaname"`
+	Tablename  string
+}
+
+func ExampleNewConfig() {
+	vipr := viper.New()
+	vipr.Set(DBHostViperKey, "<to be replaced>")
+	vipr.Set(DBPortViperKey, "<to be replaced>")
+	vipr.Set(DBUserViperKey, "<to be replaced>")
+	vipr.Set(DBPasswordViperKey, "<to be replaced>")
+	vipr.Set(DBDatabaseViperKey, "<to be replaced>")
+	vipr.Set(DBTLSSSLModeViperKey, "verify-full")
+	vipr.Set(DBTLSCertViperKey, selfSignedCert)
+	vipr.Set(DBTLSKeyViperKey, selfSignedKey)
+	vipr.Set(DBTLSCAViperKey, baltimoreCyberTrustRoot)
+
+	opts, err := NewConfig(vipr).PGOptions()
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		return
+	}
+
+	db := GetManager().Connect(context.Background(), opts)
+
+	var tables []Table
+	err = db.ModelContext(context.Background(), &tables).Select()
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		return
+	}
+
+	for i, table := range tables {
+		fmt.Printf("tables #%v: %v %v\n", i, table.Schemaname, table.Tablename)
+	}
+}
