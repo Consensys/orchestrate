@@ -9,9 +9,11 @@ import (
 )
 
 func Run(cancel context.CancelFunc, opt *godog.Options) {
-	status := godog.RunWithOptions("tests", func(s *godog.Suite) {
-		steps.FeatureContext(s)
-	}, *opt)
+	status := godog.TestSuite{
+		Name:                "tests",
+		ScenarioInitializer: steps.InitializeScenario,
+		Options:             opt,
+	}.Run()
 
 	// godog status:
 	//  0 - success

@@ -140,7 +140,6 @@ func (c *HTTPClient) RegisterChain(ctx context.Context, chain *models.Chain) (*m
 	if chain.ListenerStartingBlock != nil {
 		fromBlock = &(&struct{ x string }{strconv.FormatUint(*chain.ListenerStartingBlock, 10)}).x
 	}
-
 	postReq := chainsctrl.PostRequest{
 		Name: chain.Name,
 		URLs: chain.URLs,

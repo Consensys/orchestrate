@@ -342,7 +342,7 @@ func processTxResult(tx **ethtypes.Transaction, extra **txExtraInfo) ProcessResu
 
 		if len(raw) == 0 {
 			// Block was not found
-			return errors.NotFoundError("transaction not found")
+			return errors.NotFoundError("transaction not found in the body of the response")
 		}
 
 		if err := encoding.Unmarshal(raw, tx); err != nil {

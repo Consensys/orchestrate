@@ -10,58 +10,42 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/cucumber/godog"
 	gherkin "github.com/cucumber/messages-go/v10"
 	merror "github.com/hashicorp/go-multierror"
 	log "github.com/sirupsen/logrus"
-	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/utils"
 )
 
 func (sc *ScenarioContext) resetResponse(*gherkin.Pickle) {
 	sc.httpResponse = &http.Response{}
 }
 
-func (sc *ScenarioContext) resetAuth(*gherkin.Pickle) {
-	sc.authSetup = AuthSetup{}
-}
-
-func (sc *ScenarioContext) iSetAuth(authMethod, value string) error {
-	switch authMethod {
-	case "API-Key":
-		log.Tracef("API Key Set")
-		sc.authSetup.authMethod = authutils.APIKeyHeader
-		sc.authSetup.authData = value
-		return nil
-	case "JWT":
-		log.Tracef("JWT Set")
-		sc.authSetup.authMethod = authutils.AuthorizationHeader
-		sc.authSetup.authData = value
-		return nil
-	default:
-		sc.logger.Trace("No authentication set for the request")
-		return nil
-	}
-}
-
-func (sc *ScenarioContext) iInjectAuth(req *http.Request) error {
-	switch sc.authSetup.authMethod {
-	case authutils.APIKeyHeader:
-		log.Tracef("API Key Set")
-		req.Header.Add(authutils.APIKeyHeader, sc.authSetup.authData)
-	case authutils.AuthorizationHeader:
-		log.Tracef("JWT")
-		authorization, err := sc.parser.JWTGenerator.GenerateAccessTokenWithTenantID(sc.authSetup.authData, 24*time.Hour)
-		if err != nil {
-			return err
+func (sc *ScenarioContext) iSetTheHeaders(table *gherkin.PickleStepArgument_PickleTable) error {
+	headers := make(map[string]string)
+	for _, v := range table.Rows[1:] {
+		if len(v.Cells) != 2 {
+			return errors.DataError("headers should be a 2 column table with key/value only")
 		}
-		log.Tracef("Auth JWT token: %s", authorization)
-		req.Header.Add(authutils.AuthorizationHeader, "Bearer "+authorization)
-	default:
-		req.Header.Del(authutils.AuthorizationHeader)
-		req.Header.Del(authutils.APIKeyHeader)
+		headers[v.Cells[0].GetValue()] = v.Cells[1].GetValue()
 	}
+	sc.aliases.Set(headers, sc.Pickle.Id, "HTTP.Headers")
+
+	return nil
+}
+
+func (sc *ScenarioContext) iInjectHeaders(req *http.Request) error {
+	headers, ok := sc.aliases.Get(sc.Pickle.Id, "HTTP.Headers")
+	if !ok {
+		return nil
+	}
+
+	for k, v := range headers.(map[string]string) {
+		req.Header.Add(k, v)
+	}
+
 	return nil
 }
 
@@ -79,7 +63,7 @@ func (sc *ScenarioContext) iManageResponse(req *http.Request) error {
 func (sc *ScenarioContext) iSendRequestTo(method, endpoint string) error {
 	sc.resetResponse(nil)
 
-	endpoint, err := sc.replaceAllMatchesAliases(endpoint)
+	endpoint, err := sc.replace(endpoint)
 	if err != nil {
 		return err
 	}
@@ -89,7 +73,7 @@ func (sc *ScenarioContext) iSendRequestTo(method, endpoint string) error {
 		return err
 	}
 
-	err = sc.iInjectAuth(req)
+	err = sc.iInjectHeaders(req)
 	if err != nil {
 		return err
 	}
@@ -106,12 +90,12 @@ func (sc *ScenarioContext) iSendRequestTo(method, endpoint string) error {
 func (sc *ScenarioContext) iSendRequestToWithJSON(method, endpoint string, body *gherkin.PickleStepArgument_PickleDocString) error {
 	sc.resetResponse(nil)
 
-	endpoint, err := sc.replaceAllMatchesAliases(endpoint)
+	endpoint, err := sc.replace(endpoint)
 	if err != nil {
 		return err
 	}
 
-	reqBody, err := sc.replaceAllMatchesAliases(body.Content)
+	reqBody, err := sc.replace(body.Content)
 	if err != nil {
 		return err
 	}
@@ -123,7 +107,7 @@ func (sc *ScenarioContext) iSendRequestToWithJSON(method, endpoint string, body 
 		return err
 	}
 
-	err = sc.iInjectAuth(req)
+	err = sc.iInjectHeaders(req)
 	if err != nil {
 		return err
 	}
@@ -199,7 +183,7 @@ func (sc *ScenarioContext) responseShouldHaveFields(table *gherkin.PickleStepArg
 
 		field := reflect.ValueOf(respVal)
 		if col.Value == "~" {
-			if isEqual("", field) {
+			if utils.IsEqual("", field) {
 				return fmt.Errorf("response did not expected %s to be empty", fmt.Sprintf("%v", fieldName))
 			}
 			continue
@@ -209,14 +193,14 @@ func (sc *ScenarioContext) responseShouldHaveFields(table *gherkin.PickleStepArg
 		if aliasRE.MatchString(col.Value) {
 			alias := aliasRE.FindStringSubmatch(col.Value)[1]
 			val, _ := sc.aliases.Get(sc.Pickle.Id, alias)
-			if !isEqual(val, field) {
+			if !utils.IsEqual(val.(string), field) {
 				return fmt.Errorf("response %s expected %s but got %s", fieldName, val, fmt.Sprintf("%v", field))
 			}
 
 			continue
 		}
 
-		if !isEqual(col.Value, field) {
+		if !utils.IsEqual(col.Value, field) {
 			return fmt.Errorf("response %s expected %s but got %s", fieldName, col.Value, fmt.Sprintf("%v", field))
 		}
 	}
@@ -237,7 +221,7 @@ func (sc *ScenarioContext) iStoreTheUUIDAs(alias string) (err error) {
 		return
 	}
 
-	sc.aliases.Set(sc.Pickle.Id, alias, data.UUID)
+	sc.aliases.Set(data.UUID, sc.Pickle.Id, alias)
 	return
 }
 
@@ -254,24 +238,8 @@ func (sc *ScenarioContext) iStoreResponseFieldAs(navigation, alias string) (err 
 		return
 	}
 
-	sc.aliases.Set(sc.Pickle.Id, alias, val.(string))
+	sc.aliases.Set(val.(string), sc.Pickle.Id, alias)
 	return
-}
-
-var r = regexp.MustCompile("{{([^}]*)}}")
-
-func (sc *ScenarioContext) replaceAllMatchesAliases(foo string) (string, error) {
-	for _, alias := range r.FindAllStringSubmatch(foo, -1) {
-		v, ok := sc.aliases.Get(sc.Pickle.Id, alias[1])
-		if !ok {
-			v, ok = sc.aliases.Get(GenericNamespace, alias[1])
-			if !ok {
-				return "", fmt.Errorf("could not replace alias %s", v)
-			}
-		}
-		foo = strings.Replace(foo, alias[0], v, 1)
-	}
-	return foo, nil
 }
 
 func navJSONResponse(nav string, bodyBytes []byte) (interface{}, error) {
@@ -301,17 +269,16 @@ func navJSONResponse(nav string, bodyBytes []byte) (interface{}, error) {
 	return result, nil
 }
 
-func initHTTP(s *godog.Suite, sc *ScenarioContext) {
+func initHTTP(s *godog.ScenarioContext, sc *ScenarioContext) {
 
 	s.BeforeScenario(sc.resetResponse)
-	s.BeforeScenario(sc.resetAuth)
 
-	s.Step(`^I set authentication method "(API-Key|JWT)" with "([^"]*)"$`, sc.iSetAuth)
 	s.Step(`^I send "(GET|POST|PATCH|PUT|DELETE)" request to "([^"]*)"$`, sc.iSendRequestTo)
 	s.Step(`^I send "(GET|POST|PATCH|PUT|DELETE)" request to "([^"]*)" with json:$`, sc.iSendRequestToWithJSON)
 	s.Step(`^I store the UUID as "([^"]*)"`, sc.iStoreTheUUIDAs)
 	s.Step(`^I store response field "([^"]*)" as "([^"]*)"`, sc.iStoreResponseFieldAs)
 	s.Step(`^the response code should be (\d+)$`, sc.theResponseCodeShouldBe)
 	s.Step(`^the response should match json:$`, sc.theResponseShouldMatchJSON)
-	s.Step(`^Response should have the following fields:$`, sc.responseShouldHaveFields)
+	s.Step(`^Response should have the following fields$`, sc.preProcessTableStep(sc.responseShouldHaveFields))
+	s.Step(`^I set the headers$`, sc.preProcessTableStep(sc.iSetTheHeaders))
 }

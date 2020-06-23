@@ -1,6 +1,6 @@
 // +build unit
 
-package parser
+package alias
 
 import (
 	"testing"
@@ -10,9 +10,9 @@ import (
 
 func TestAliasRegistry(t *testing.T) {
 	reg := NewAliasRegistry()
-	reg.Set("namespace-test-1", "foo", "test-foo")
-	reg.Set("namespace-test-1", "bar", "test-bar-1")
-	reg.Set("namespace-test-2", "bar", "test-bar-2")
+	reg.Set("test-foo", "namespace-test-1", "foo")
+	reg.Set("test-bar-1", "namespace-test-1", "bar")
+	reg.Set("test-bar-2", "namespace-test-2", "bar")
 
 	alias, _ := reg.Get("namespace-test-1", "foo")
 	assert.Equal(t, "test-foo", alias, "#1 Alias should have been registered")

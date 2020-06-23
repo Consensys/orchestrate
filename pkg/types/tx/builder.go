@@ -49,6 +49,22 @@ func NewEnvelope() *Envelope {
 	}
 }
 
+func (e *Envelope) SafeEnvelope() *Envelope {
+	if e.Headers == nil {
+		e.Headers = make(map[string]string)
+	}
+	if e.ContextLabels == nil {
+		e.ContextLabels = make(map[string]string)
+	}
+	if e.Errors == nil {
+		e.Errors = make([]*error1.Error, 0)
+	}
+	if e.InternalLabels == nil {
+		e.InternalLabels = make(map[string]string)
+	}
+	return e
+}
+
 func (e *Envelope) GetID() string {
 	return e.ID
 }
@@ -958,10 +974,10 @@ func (e *Envelope) loadPtrFields(gas, nonce, gasPrice, value, from, to string) [
 }
 
 // Attribute kafka partition keys to well attribute nonce
-// For a classic eth_sendRawTransaction transaction - @
-// For a eea_sendRawTransaction with a privacyGroupID - @orion-@
-// For a eea_sendRawTransaction with a privateFor - @orion-<hash(privateFor-privateFrom)>@
-// TODO: Change  to  (or <chainUUID)
+// For a classic eth_sendRawTransaction transaction - <from>@<chainName>
+// For a eea_sendRawTransaction with a privacyGroupID - <from>@orion-<privacyGroupID>@<chainName>
+// For a eea_sendRawTransaction with a privateFor - <from>@orion-<hash(privateFor-privateFrom)>@<chainName>
+// TODO: Change <chainName> to <chainUUID> when needed
 func (e *Envelope) KafkaPartitionKey() string {
 	switch {
 	case e.IsEeaSendPrivateTransactionPrivacyGroup():

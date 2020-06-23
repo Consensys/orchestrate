@@ -1,4 +1,4 @@
-package parser
+package utils
 
 import (
 	"encoding/json"
@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"time"
 
 	gherkin "github.com/cucumber/messages-go/v10"
 	log "github.com/sirupsen/logrus"
@@ -25,12 +24,12 @@ type ContractSpec struct {
 	JWTToken string
 }
 
-func (p *Parser) ParseContracts(scenario string, table *gherkin.PickleStepArgument_PickleTable) ([]*ContractSpec, error) {
+func ParseContracts(table *gherkin.PickleStepArgument_PickleTable) ([]*ContractSpec, error) {
 	var contractSpecs []*ContractSpec
 	headers := table.Rows[0]
 	for _, row := range table.Rows[1:] {
 		contractSpec := &ContractSpec{Contract: &abi.Contract{}}
-		err := p.ParseContract(scenario, headers, row, contractSpec)
+		err := ParseContract(headers, row, contractSpec)
 		if err != nil {
 			return nil, err
 		}
@@ -39,9 +38,9 @@ func (p *Parser) ParseContracts(scenario string, table *gherkin.PickleStepArgume
 	return contractSpecs, nil
 }
 
-func (p *Parser) ParseContract(_ string, headers, row *gherkin.PickleStepArgument_PickleTable_PickleTableRow, contractSpec *ContractSpec) error {
+func ParseContract(headers, row *gherkin.PickleStepArgument_PickleTable_PickleTableRow, contractSpec *ContractSpec) error {
 	for i, cell := range row.Cells {
-		err := p.ParseContractCell(headers.Cells[i].Value, cell.Value, contractSpec)
+		err := ParseContractCell(headers.Cells[i].Value, cell.Value, contractSpec)
 		if err != nil {
 			return err
 		}
@@ -49,10 +48,10 @@ func (p *Parser) ParseContract(_ string, headers, row *gherkin.PickleStepArgumen
 	return nil
 }
 
-func (p *Parser) ParseContractCell(header, cell string, contractSpec *ContractSpec) error {
+func ParseContractCell(header, cell string, contractSpec *ContractSpec) error {
 	switch header {
 	case "artifacts":
-		raw, err := p.openArtifact(cell)
+		raw, err := openArtifact(cell)
 		if err != nil {
 			return err
 		}
@@ -79,19 +78,15 @@ func (p *Parser) ParseContractCell(header, cell string, contractSpec *ContractSp
 			contractSpec.Contract.Id = &abi.ContractId{}
 		}
 		contractSpec.Contract.Id.Tag = cell
-	case tenantIDHeader:
-		var err error
-		contractSpec.JWTToken, err = p.JWTGenerator.GenerateAccessTokenWithTenantID(cell, 24*time.Hour)
-		if err != nil {
-			return err
-		}
+	case "Headers.Authorization":
+		contractSpec.JWTToken = cell
 	default:
 		return fmt.Errorf("unknown field %q", header)
 	}
 	return nil
 }
 
-func (p *Parser) openArtifact(fileName string) ([]byte, error) {
+func openArtifact(fileName string) ([]byte, error) {
 	// Loop over all cucumber folders to possibly find file
 	// <cucumber_folder>/artifacts/<fileName>
 	for _, v := range viper.GetStringSlice("cucumber.paths") {

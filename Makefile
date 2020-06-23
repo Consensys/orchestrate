@@ -195,3 +195,20 @@ pgadmin:
 
 down-pgadmin:
 	@docker-compose -f scripts/deps/docker-compose-tools.yml rm --force -s -v pgadmin
+
+efk:
+	@docker-compose -f scripts/deps/docker-compose-efk.yml up -d
+
+down-efk:
+	@docker-compose -f scripts/deps/docker-compose-efk.yml down
+
+ifeq (restart,$(firstword $(MAKECMDGOALS)))
+  CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+  ifeq ($(CMD_ARGS),)
+  	CMD_ARGS := $(CMD_RUN)
+  endif
+  $(eval $(CMD_ARGS):;@:)
+endif
+
+restart: gobuild
+	@docker-compose restart $(CMD_ARGS)

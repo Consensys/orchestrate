@@ -12,7 +12,7 @@ require (
 	github.com/c0va23/go-proxyprotocol v0.9.1
 	github.com/cenkalti/backoff/v4 v4.0.0
 	github.com/containous/traefik/v2 v2.2.0
-	github.com/cucumber/godog v0.9.1-0.20200505072415-0f354e867a10
+	github.com/cucumber/godog v0.9.1-0.20200621192213-1033ce083bed
 	github.com/cucumber/messages-go/v10 v10.0.3
 	github.com/dgraph-io/ristretto v0.0.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -41,6 +41,7 @@ require (
 	github.com/julien-marchand/healthcheck v0.1.0
 	github.com/justinas/alice v1.2.0
 	github.com/magiconair/properties v1.8.1
+	github.com/mitchellh/copystructure v1.0.0
 	github.com/mitchellh/mapstructure v1.2.2
 	github.com/nmvalera/striped-mutex v0.1.0
 	github.com/opentracing/opentracing-go v1.1.0
@@ -53,7 +54,7 @@ require (
 	github.com/spf13/cobra v0.0.6
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.6.2
-	github.com/stretchr/testify v1.5.1
+	github.com/stretchr/testify v1.6.1
 	github.com/uber/jaeger-client-go v2.22.1+incompatible
 	github.com/uber/jaeger-lib v2.2.0+incompatible
 	github.com/unrolled/secure v1.0.7

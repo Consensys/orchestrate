@@ -12,6 +12,7 @@ const component = "handler.raw_decoder"
 func RawDecoder(txctx *engine.TxContext) {
 	var tx *types.Transaction
 
+	// TODO: Able to decode Raw EeaSendPrivateTransactions
 	if txctx.Envelope.IsEeaSendPrivateTransaction() {
 		return
 	}

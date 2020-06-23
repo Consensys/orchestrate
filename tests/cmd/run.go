@@ -14,6 +14,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	e2e "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/alias"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/steps"
 )
 
@@ -40,6 +41,7 @@ func NewRunCommand() *cobra.Command {
 	// Register Cucumber flag
 	cucumber.InitFlags(runCmd.Flags())
 	steps.InitFlags(runCmd.Flags())
+	alias.InitFlags(runCmd.Flags())
 
 	// Register Multi-Tenancy flags
 	multitenancy.Enabled(runCmd.Flags())

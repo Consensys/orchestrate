@@ -1,4 +1,4 @@
-package parser
+package alias
 
 import (
 	"fmt"
@@ -10,6 +10,11 @@ import (
 func init() {
 	viper.SetDefault(cucumberAliasesViperKey, cucumberAliasesDefault)
 	_ = viper.BindEnv(cucumberAliasesViperKey, cucumberAliasesEnv)
+}
+
+// InitFlags register Aliases flags
+func InitFlags(f *pflag.FlagSet) {
+	Aliases(f)
 }
 
 var (

@@ -15,12 +15,11 @@ import (
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
-	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
-	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/handlers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/handlers/dispatcher"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/steps"
+	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/utils"
 )
 
 var (
@@ -38,12 +37,7 @@ func LongKeyOf(topics map[string]string) dispatcher.KeyOfFunc {
 			return "", fmt.Errorf("unknown message entrypoint")
 		}
 
-		scenario := txctx.Envelope.GetContextLabelsValue("scenario.id")
-		if scenario == "" {
-			return "", fmt.Errorf("message has no test scenario")
-		}
-
-		return steps.LongKeyOf(topic, scenario, txctx.Envelope.GetID()), nil
+		return utils2.LongKeyOf(topic, txctx.Envelope.GetID()), nil
 	}
 }
 
@@ -59,7 +53,7 @@ func ShortKeyOf(topics map[string]string) dispatcher.KeyOfFunc {
 			return "", fmt.Errorf("message has no test scenario")
 		}
 
-		return steps.ShortKeyOf(topic, scenario), nil
+		return utils2.ShortKeyOf(topic, scenario), nil
 	}
 }
 
@@ -90,14 +84,6 @@ func initComponents(ctx context.Context) {
 		// Initialize cucumber handlers
 		func() {
 			cucumber.Init(ctx)
-		},
-		// Initialize the contractregistryClient
-		func() {
-			contractregistry.Init(ctx, viper.GetString(contractregistry.ContractRegistryURLViperKey))
-		},
-		// Initialize the contractregistryClient
-		func() {
-			txscheduler.Init()
 		},
 	)
 }

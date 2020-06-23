@@ -15,7 +15,6 @@ import (
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
 )
 
@@ -34,7 +33,6 @@ func NewFaucet(p sarama.SyncProducer) *Faucet {
 func (f *Faucet) prepareMsg(ctx context.Context, r *types.Request, elected string, msg *sarama.ProducerMessage) error {
 	// Create Trace for Crediting message
 	b := tx.NewEnvelope().
-		SetID(uuid.Must(uuid.NewV4()).String()).
 		SetChainName(r.ChainName).
 		SetFrom(r.FaucetsCandidates[elected].Creditor).
 		SetValue(r.FaucetsCandidates[elected].Amount).
@@ -42,6 +40,12 @@ func (f *Faucet) prepareMsg(ctx context.Context, r *types.Request, elected strin
 		SetChainID(r.ChainID).
 		SetChainUUID(r.ChainUUID).
 		SetContextLabelsValue("faucet.parentTxID", r.ParentTxID)
+
+	if r.ChildTxID != "" {
+		_ = b.SetID(r.ChildTxID)
+	} else {
+		_ = b.SetID(uuid.Must(uuid.NewV4()).String())
+	}
 
 	if authToken := authutils.AuthorizationFromContext(ctx); authToken != "" {
 		_ = b.SetHeadersValue(multitenancy.AuthorizationMetadata, authToken)
@@ -58,7 +62,7 @@ func (f *Faucet) prepareMsg(ctx context.Context, r *types.Request, elected strin
 
 	// Message should be sent to crafter topic
 	msg.Topic = viper.GetString(broker.TxCrafterViperKey)
-	msg.Key = sarama.StringEncoder(utils.ToChainAccountKey(r.ChainID, r.FaucetsCandidates[elected].Creditor))
+	msg.Key = sarama.StringEncoder(b.KafkaPartitionKey())
 
 	return nil
 }

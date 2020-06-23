@@ -44,5 +44,8 @@ func run(_ *cobra.Command, _ []string) {
 	if err != nil {
 		log.WithError(err).Fatalf("jwt-generator: could not generate JWT token")
 	}
-	log.WithField("jwt", jwt).Infof("jwt-generator: token generated")
+	log.WithFields(log.Fields{
+		"jwt":      jwt,
+		"tenantID": tenant,
+	}).Infof("jwt-generator: token generated")
 }

@@ -9,6 +9,6 @@ import (
 )
 
 func TestInitFlags(t *testing.T) {
-	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
+	flgs := pflag.NewFlagSet("stepTable", pflag.ContinueOnError)
 	InitFlags(flgs)
 }

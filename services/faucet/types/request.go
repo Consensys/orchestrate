@@ -12,6 +12,7 @@ import (
 // Envelope holds information for a Faucet Credit Envelope
 type Request struct {
 	ParentTxID        string
+	ChildTxID         string
 	ChainID           *big.Int
 	ChainURL          string
 	ChainName         string

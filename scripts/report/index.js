@@ -6,7 +6,7 @@ const metadata = Object.keys(process.env)
         const name = key.split("_")[1]
         obj[name] = process.env[key];
         return obj;
-    }, {});
+    }, { alias: process.env.CUCUMBER_ALIAS });
 
 const options = {
     brandTitle: 'PegaSys Orchestrate end-to-end tests',
