@@ -19,6 +19,7 @@ func TestParsersTxRequest_NewModelFromEntity(t *testing.T) {
 	paramsBytes, _ := json.Marshal(txReqEntity.Params)
 	assert.Equal(t, txReqEntity.IdempotencyKey, txReqModel.IdempotencyKey)
 	assert.Equal(t, txReqEntity.CreatedAt, txReqModel.CreatedAt)
+	assert.Equal(t, txReqEntity.UUID, txReqModel.UUID)
 	assert.Equal(t, string(paramsBytes), txReqModel.Params)
 }
 

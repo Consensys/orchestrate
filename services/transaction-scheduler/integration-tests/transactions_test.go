@@ -131,6 +131,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 
 		assert.Equal(t, IdempotencyKey, txResponse.IdempotencyKey)
 		assert.Equal(t, txRequest.ChainName, chain.Name)
+		assert.NotEmpty(t, txResponse.UUID)
 		assert.NotEmpty(t, txResponse.Schedule.UUID)
 
 		scheduleResponse, err := s.client.GetSchedule(ctx, txResponse.Schedule.UUID)

@@ -66,6 +66,7 @@ func FormatSendTransferRequest(txRequest *types.TransferRequest, idempotencyKey 
 
 func FormatTxResponse(txRequest *entities.TxRequest, chainName string) *types.TransactionResponse {
 	return &types.TransactionResponse{
+		UUID:           txRequest.UUID,
 		IdempotencyKey: txRequest.IdempotencyKey,
 		Params:         txRequest.Params,
 		ChainName:      chainName,

@@ -8,6 +8,7 @@ type TransactionRequest struct {
 	tableName struct{} `pg:"transaction_requests"` // nolint:unused,structcheck // reason
 
 	ID             int
+	UUID           string
 	IdempotencyKey string
 	Schedules      []*Schedule
 	RequestHash    string

@@ -3,6 +3,8 @@ package testutils
 import (
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 
 	"github.com/gofrs/uuid"
@@ -32,7 +34,8 @@ func FakeTxRequest(scheduleID int) *models.TransactionRequest {
 	fakeSchedule.ID = scheduleID
 
 	return &models.TransactionRequest{
-		IdempotencyKey: uuid.Must(uuid.NewV4()).String(),
+		UUID:           uuid.Must(uuid.NewV4()).String(),
+		IdempotencyKey: utils.RandomString(16),
 		RequestHash:    "requestHash",
 		Params:         "{\"field0\": \"field0Value\"}",
 		Schedules:      []*models.Schedule{fakeSchedule},

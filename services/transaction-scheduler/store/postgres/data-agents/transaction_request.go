@@ -3,6 +3,8 @@ package dataagents
 import (
 	"context"
 
+	"github.com/gofrs/uuid"
+
 	log "github.com/sirupsen/logrus"
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -23,6 +25,10 @@ func NewPGTransactionRequest(db pg.DB) *PGTransactionRequest {
 
 // Insert Inserts a new transaction request in DB
 func (agent *PGTransactionRequest) SelectOrInsert(ctx context.Context, txRequest *models.TransactionRequest) error {
+	if txRequest.UUID == "" {
+		txRequest.UUID = uuid.Must(uuid.NewV4()).String()
+	}
+
 	_, err := agent.db.ModelContext(ctx, txRequest).
 		Where("idempotency_key = ?idempotency_key").
 		OnConflict("ON CONSTRAINT transaction_requests_idempotency_key_key DO NOTHING").

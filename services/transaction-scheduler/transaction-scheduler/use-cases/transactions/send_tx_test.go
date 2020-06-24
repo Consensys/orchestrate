@@ -66,6 +66,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 
 		response, err := successfulTestExecution(s, txRequest, types.EthereumTransaction)
 		assert.Nil(t, err)
+		assert.Equal(t, txRequest.UUID, response.UUID)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
 	})

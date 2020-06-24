@@ -80,6 +80,7 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 			return der
 		}
 		txRequest.CreatedAt = txRequestModel.CreatedAt
+		txRequest.UUID = txRequestModel.UUID
 
 		txRequest.Schedule, der = uc.createScheduleUC.
 			WithDBTransaction(dbtx.(store.Tx)).

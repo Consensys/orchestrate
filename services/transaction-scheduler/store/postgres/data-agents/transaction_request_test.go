@@ -49,12 +49,25 @@ func (s *txRequestTestSuite) TearDownSuite() {
 func (s *txRequestTestSuite) TestPGTransactionRequest_SelectOrInsert() {
 	ctx := context.Background()
 
-	s.T().Run("should insert model successfully", func(t *testing.T) {
+	s.T().Run("should insert model successfully if uuid is not defined", func(t *testing.T) {
 		txRequest := testutils.FakeTxRequest(0)
+		txRequest.UUID = ""
 		err := insertTxRequest(ctx, s.agents, txRequest)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, txRequest.ID)
+		assert.NotEmpty(t, txRequest.UUID)
+	})
+
+	s.T().Run("should insert model successfully if uuid is already set", func(t *testing.T) {
+		txRequest := testutils.FakeTxRequest(0)
+		uuid := txRequest.UUID
+
+		err := insertTxRequest(ctx, s.agents, txRequest)
+
+		assert.NoError(t, err)
+		assert.NotEmpty(t, txRequest.ID)
+		assert.Equal(t, uuid, txRequest.UUID)
 	})
 
 	s.T().Run("Does nothing if idempotency key is already used and returns request", func(t *testing.T) {

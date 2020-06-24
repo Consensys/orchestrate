@@ -14,6 +14,7 @@ func NewTxRequestModelFromEntities(txRequest *entities.TxRequest, requestHash st
 	}
 
 	txRequestModel := &models.TransactionRequest{
+		UUID:           txRequest.UUID,
 		IdempotencyKey: txRequest.IdempotencyKey,
 		RequestHash:    requestHash,
 		Params:         string(jsonParams),

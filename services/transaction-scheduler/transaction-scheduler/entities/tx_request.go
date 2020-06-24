@@ -7,6 +7,7 @@ import (
 )
 
 type TxRequest struct {
+	UUID           string
 	IdempotencyKey string
 	Schedule       *Schedule
 	Params         *types.ETHTransactionParams

@@ -31,10 +31,12 @@ CREATE TABLE transactions (
 
 CREATE TABLE transaction_requests (
     id SERIAL PRIMARY KEY,
+    uuid UUID NOT NULL,
     idempotency_key TEXT NOT NULL,
 	request_hash TEXT NOT NULL,
     params jsonb NOT NULL,
-	created_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL, 
+	created_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL,
+    UNIQUE(uuid),
 	UNIQUE(idempotency_key)
 );
 
