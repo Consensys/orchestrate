@@ -11,30 +11,30 @@ import (
 	reflect "reflect"
 )
 
-// MockGetEventsUseCase is a mock of GetEventsUseCase interface.
+// MockGetEventsUseCase is a mock of GetEventsUseCase interface
 type MockGetEventsUseCase struct {
 	ctrl     *gomock.Controller
 	recorder *MockGetEventsUseCaseMockRecorder
 }
 
-// MockGetEventsUseCaseMockRecorder is the mock recorder for MockGetEventsUseCase.
+// MockGetEventsUseCaseMockRecorder is the mock recorder for MockGetEventsUseCase
 type MockGetEventsUseCaseMockRecorder struct {
 	mock *MockGetEventsUseCase
 }
 
-// NewMockGetEventsUseCase creates a new mock instance.
+// NewMockGetEventsUseCase creates a new mock instance
 func NewMockGetEventsUseCase(ctrl *gomock.Controller) *MockGetEventsUseCase {
 	mock := &MockGetEventsUseCase{ctrl: ctrl}
 	mock.recorder = &MockGetEventsUseCaseMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockGetEventsUseCase) EXPECT() *MockGetEventsUseCaseMockRecorder {
 	return m.recorder
 }
 
-// Execute mocks base method.
+// Execute mocks base method
 func (m *MockGetEventsUseCase) Execute(ctx context.Context, account *common.AccountInstance, sighash string, indexedInputCount uint32) (string, []string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, account, sighash, indexedInputCount)
@@ -44,7 +44,7 @@ func (m *MockGetEventsUseCase) Execute(ctx context.Context, account *common.Acco
 	return ret0, ret1, ret2
 }
 
-// Execute indicates an expected call of Execute.
+// Execute indicates an expected call of Execute
 func (mr *MockGetEventsUseCaseMockRecorder) Execute(ctx, account, sighash, indexedInputCount interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetEventsUseCase)(nil).Execute), ctx, account, sighash, indexedInputCount)

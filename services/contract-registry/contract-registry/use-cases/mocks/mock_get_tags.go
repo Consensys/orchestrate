@@ -10,30 +10,30 @@ import (
 	reflect "reflect"
 )
 
-// MockGetTagsUseCase is a mock of GetTagsUseCase interface.
+// MockGetTagsUseCase is a mock of GetTagsUseCase interface
 type MockGetTagsUseCase struct {
 	ctrl     *gomock.Controller
 	recorder *MockGetTagsUseCaseMockRecorder
 }
 
-// MockGetTagsUseCaseMockRecorder is the mock recorder for MockGetTagsUseCase.
+// MockGetTagsUseCaseMockRecorder is the mock recorder for MockGetTagsUseCase
 type MockGetTagsUseCaseMockRecorder struct {
 	mock *MockGetTagsUseCase
 }
 
-// NewMockGetTagsUseCase creates a new mock instance.
+// NewMockGetTagsUseCase creates a new mock instance
 func NewMockGetTagsUseCase(ctrl *gomock.Controller) *MockGetTagsUseCase {
 	mock := &MockGetTagsUseCase{ctrl: ctrl}
 	mock.recorder = &MockGetTagsUseCaseMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockGetTagsUseCase) EXPECT() *MockGetTagsUseCaseMockRecorder {
 	return m.recorder
 }
 
-// Execute mocks base method.
+// Execute mocks base method
 func (m *MockGetTagsUseCase) Execute(ctx context.Context, name string) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, name)
@@ -42,7 +42,7 @@ func (m *MockGetTagsUseCase) Execute(ctx context.Context, name string) ([]string
 	return ret0, ret1
 }
 
-// Execute indicates an expected call of Execute.
+// Execute indicates an expected call of Execute
 func (mr *MockGetTagsUseCaseMockRecorder) Execute(ctx, name interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetTagsUseCase)(nil).Execute), ctx, name)

@@ -7,34 +7,34 @@ package mocks
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	reflect "reflect"
 )
 
-// MockUpdateJobUseCase is a mock of UpdateJobUseCase interface.
+// MockUpdateJobUseCase is a mock of UpdateJobUseCase interface
 type MockUpdateJobUseCase struct {
 	ctrl     *gomock.Controller
 	recorder *MockUpdateJobUseCaseMockRecorder
 }
 
-// MockUpdateJobUseCaseMockRecorder is the mock recorder for MockUpdateJobUseCase.
+// MockUpdateJobUseCaseMockRecorder is the mock recorder for MockUpdateJobUseCase
 type MockUpdateJobUseCaseMockRecorder struct {
 	mock *MockUpdateJobUseCase
 }
 
-// NewMockUpdateJobUseCase creates a new mock instance.
+// NewMockUpdateJobUseCase creates a new mock instance
 func NewMockUpdateJobUseCase(ctrl *gomock.Controller) *MockUpdateJobUseCase {
 	mock := &MockUpdateJobUseCase{ctrl: ctrl}
 	mock.recorder = &MockUpdateJobUseCaseMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockUpdateJobUseCase) EXPECT() *MockUpdateJobUseCaseMockRecorder {
 	return m.recorder
 }
 
-// Execute mocks base method.
+// Execute mocks base method
 func (m *MockUpdateJobUseCase) Execute(ctx context.Context, jobEntity *types.Job, newStatus, tenantID string) (*types.Job, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, jobEntity, newStatus, tenantID)
@@ -43,7 +43,7 @@ func (m *MockUpdateJobUseCase) Execute(ctx context.Context, jobEntity *types.Job
 	return ret0, ret1
 }
 
-// Execute indicates an expected call of Execute.
+// Execute indicates an expected call of Execute
 func (mr *MockUpdateJobUseCaseMockRecorder) Execute(ctx, jobEntity, newStatus, tenantID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockUpdateJobUseCase)(nil).Execute), ctx, jobEntity, newStatus, tenantID)

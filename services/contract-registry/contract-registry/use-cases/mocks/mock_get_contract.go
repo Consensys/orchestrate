@@ -11,30 +11,30 @@ import (
 	reflect "reflect"
 )
 
-// MockGetContractUseCase is a mock of GetContractUseCase interface.
+// MockGetContractUseCase is a mock of GetContractUseCase interface
 type MockGetContractUseCase struct {
 	ctrl     *gomock.Controller
 	recorder *MockGetContractUseCaseMockRecorder
 }
 
-// MockGetContractUseCaseMockRecorder is the mock recorder for MockGetContractUseCase.
+// MockGetContractUseCaseMockRecorder is the mock recorder for MockGetContractUseCase
 type MockGetContractUseCaseMockRecorder struct {
 	mock *MockGetContractUseCase
 }
 
-// NewMockGetContractUseCase creates a new mock instance.
+// NewMockGetContractUseCase creates a new mock instance
 func NewMockGetContractUseCase(ctrl *gomock.Controller) *MockGetContractUseCase {
 	mock := &MockGetContractUseCase{ctrl: ctrl}
 	mock.recorder = &MockGetContractUseCaseMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockGetContractUseCase) EXPECT() *MockGetContractUseCaseMockRecorder {
 	return m.recorder
 }
 
-// Execute mocks base method.
+// Execute mocks base method
 func (m *MockGetContractUseCase) Execute(ctx context.Context, id *abi.ContractId) (*abi.Contract, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, id)
@@ -43,7 +43,7 @@ func (m *MockGetContractUseCase) Execute(ctx context.Context, id *abi.ContractId
 	return ret0, ret1
 }
 
-// Execute indicates an expected call of Execute.
+// Execute indicates an expected call of Execute
 func (mr *MockGetContractUseCaseMockRecorder) Execute(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetContractUseCase)(nil).Execute), ctx, id)

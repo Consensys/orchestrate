@@ -52,7 +52,7 @@ e2e-ci:
 	@docker-compose -f scripts/report/docker-compose.yml up
 	@exit $(docker inspect orchestrate_e2e_1 --format='{{.State.ExitCode}}')
 
-clean: mod-tidy lint protobuf gen-swagger gen-mocks ## Run all clean-up tasks
+clean: protobuf gen-swagger gen-mocks mod-tidy lint coverage ## Run all clean-up tasks
 
 gen-mocks:
 	@go generate -run mockgen ./...

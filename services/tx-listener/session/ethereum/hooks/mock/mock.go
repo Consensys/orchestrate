@@ -8,36 +8,36 @@ import (
 	context "context"
 	types "github.com/ethereum/go-ethereum/core/types"
 	gomock "github.com/golang/mock/gomock"
-	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	types0 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	tx "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	dynamic "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 	reflect "reflect"
 )
 
-// MockHook is a mock of Hook interface.
+// MockHook is a mock of Hook interface
 type MockHook struct {
 	ctrl     *gomock.Controller
 	recorder *MockHookMockRecorder
 }
 
-// MockHookMockRecorder is the mock recorder for MockHook.
+// MockHookMockRecorder is the mock recorder for MockHook
 type MockHookMockRecorder struct {
 	mock *MockHook
 }
 
-// NewMockHook creates a new mock instance.
+// NewMockHook creates a new mock instance
 func NewMockHook(ctrl *gomock.Controller) *MockHook {
 	mock := &MockHook{ctrl: ctrl}
 	mock.recorder = &MockHookMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockHook) EXPECT() *MockHookMockRecorder {
 	return m.recorder
 }
 
-// AfterNewBlockEnvelope mocks base method.
+// AfterNewBlockEnvelope mocks base method
 func (m *MockHook) AfterNewBlockEnvelope(ctx context.Context, chain *dynamic.Chain, block *types.Block, envelopes []*tx.Envelope) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AfterNewBlockEnvelope", ctx, chain, block, envelopes)
@@ -45,21 +45,21 @@ func (m *MockHook) AfterNewBlockEnvelope(ctx context.Context, chain *dynamic.Cha
 	return ret0
 }
 
-// AfterNewBlockEnvelope indicates an expected call of AfterNewBlockEnvelope.
+// AfterNewBlockEnvelope indicates an expected call of AfterNewBlockEnvelope
 func (mr *MockHookMockRecorder) AfterNewBlockEnvelope(ctx, chain, block, envelopes interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AfterNewBlockEnvelope", reflect.TypeOf((*MockHook)(nil).AfterNewBlockEnvelope), ctx, chain, block, envelopes)
 }
 
-// AfterNewBlock mocks base method.
-func (m *MockHook) AfterNewBlock(ctx context.Context, chain *dynamic.Chain, block *types.Block, jobs []*types2.Job) error {
+// AfterNewBlock mocks base method
+func (m *MockHook) AfterNewBlock(ctx context.Context, chain *dynamic.Chain, block *types.Block, jobs []*types0.Job) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AfterNewBlock", ctx, chain, block, jobs)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// AfterNewBlock indicates an expected call of AfterNewBlock.
+// AfterNewBlock indicates an expected call of AfterNewBlock
 func (mr *MockHookMockRecorder) AfterNewBlock(ctx, chain, block, jobs interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AfterNewBlock", reflect.TypeOf((*MockHook)(nil).AfterNewBlock), ctx, chain, block, jobs)

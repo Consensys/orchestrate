@@ -11,30 +11,30 @@ import (
 	reflect "reflect"
 )
 
-// MockChainClient is a mock of ChainClient interface.
+// MockChainClient is a mock of ChainClient interface
 type MockChainClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockChainClientMockRecorder
 }
 
-// MockChainClientMockRecorder is the mock recorder for MockChainClient.
+// MockChainClientMockRecorder is the mock recorder for MockChainClient
 type MockChainClientMockRecorder struct {
 	mock *MockChainClient
 }
 
-// NewMockChainClient creates a new mock instance.
+// NewMockChainClient creates a new mock instance
 func NewMockChainClient(ctrl *gomock.Controller) *MockChainClient {
 	mock := &MockChainClient{ctrl: ctrl}
 	mock.recorder = &MockChainClientMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockChainClient) EXPECT() *MockChainClientMockRecorder {
 	return m.recorder
 }
 
-// GetChains mocks base method.
+// GetChains mocks base method
 func (m *MockChainClient) GetChains(ctx context.Context) ([]*models.Chain, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetChains", ctx)
@@ -43,13 +43,13 @@ func (m *MockChainClient) GetChains(ctx context.Context) ([]*models.Chain, error
 	return ret0, ret1
 }
 
-// GetChains indicates an expected call of GetChains.
+// GetChains indicates an expected call of GetChains
 func (mr *MockChainClientMockRecorder) GetChains(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChains", reflect.TypeOf((*MockChainClient)(nil).GetChains), ctx)
 }
 
-// GetChainByName mocks base method.
+// GetChainByName mocks base method
 func (m *MockChainClient) GetChainByName(ctx context.Context, chainName string) (*models.Chain, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetChainByName", ctx, chainName)
@@ -58,13 +58,13 @@ func (m *MockChainClient) GetChainByName(ctx context.Context, chainName string) 
 	return ret0, ret1
 }
 
-// GetChainByName indicates an expected call of GetChainByName.
+// GetChainByName indicates an expected call of GetChainByName
 func (mr *MockChainClientMockRecorder) GetChainByName(ctx, chainName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChainByName", reflect.TypeOf((*MockChainClient)(nil).GetChainByName), ctx, chainName)
 }
 
-// GetChainByUUID mocks base method.
+// GetChainByUUID mocks base method
 func (m *MockChainClient) GetChainByUUID(ctx context.Context, chainUUID string) (*models.Chain, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetChainByUUID", ctx, chainUUID)
@@ -73,13 +73,13 @@ func (m *MockChainClient) GetChainByUUID(ctx context.Context, chainUUID string) 
 	return ret0, ret1
 }
 
-// GetChainByUUID indicates an expected call of GetChainByUUID.
+// GetChainByUUID indicates an expected call of GetChainByUUID
 func (mr *MockChainClientMockRecorder) GetChainByUUID(ctx, chainUUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChainByUUID", reflect.TypeOf((*MockChainClient)(nil).GetChainByUUID), ctx, chainUUID)
 }
 
-// DeleteChainByUUID mocks base method.
+// DeleteChainByUUID mocks base method
 func (m *MockChainClient) DeleteChainByUUID(ctx context.Context, chainUUID string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteChainByUUID", ctx, chainUUID)
@@ -87,13 +87,13 @@ func (m *MockChainClient) DeleteChainByUUID(ctx context.Context, chainUUID strin
 	return ret0
 }
 
-// DeleteChainByUUID indicates an expected call of DeleteChainByUUID.
+// DeleteChainByUUID indicates an expected call of DeleteChainByUUID
 func (mr *MockChainClientMockRecorder) DeleteChainByUUID(ctx, chainUUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteChainByUUID", reflect.TypeOf((*MockChainClient)(nil).DeleteChainByUUID), ctx, chainUUID)
 }
 
-// RegisterChain mocks base method.
+// RegisterChain mocks base method
 func (m *MockChainClient) RegisterChain(ctx context.Context, chain *models.Chain) (*models.Chain, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterChain", ctx, chain)
@@ -102,13 +102,13 @@ func (m *MockChainClient) RegisterChain(ctx context.Context, chain *models.Chain
 	return ret0, ret1
 }
 
-// RegisterChain indicates an expected call of RegisterChain.
+// RegisterChain indicates an expected call of RegisterChain
 func (mr *MockChainClientMockRecorder) RegisterChain(ctx, chain interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterChain", reflect.TypeOf((*MockChainClient)(nil).RegisterChain), ctx, chain)
 }
 
-// UpdateBlockPosition mocks base method.
+// UpdateBlockPosition mocks base method
 func (m *MockChainClient) UpdateBlockPosition(ctx context.Context, chainUUID string, blockNumber uint64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateBlockPosition", ctx, chainUUID, blockNumber)
@@ -116,13 +116,13 @@ func (m *MockChainClient) UpdateBlockPosition(ctx context.Context, chainUUID str
 	return ret0
 }
 
-// UpdateBlockPosition indicates an expected call of UpdateBlockPosition.
+// UpdateBlockPosition indicates an expected call of UpdateBlockPosition
 func (mr *MockChainClientMockRecorder) UpdateBlockPosition(ctx, chainUUID, blockNumber interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateBlockPosition", reflect.TypeOf((*MockChainClient)(nil).UpdateBlockPosition), ctx, chainUUID, blockNumber)
 }
 
-// UpdateChainByUUID mocks base method.
+// UpdateChainByUUID mocks base method
 func (m *MockChainClient) UpdateChainByUUID(ctx context.Context, chainUUID string, chain *models.Chain) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateChainByUUID", ctx, chainUUID, chain)
@@ -130,36 +130,36 @@ func (m *MockChainClient) UpdateChainByUUID(ctx context.Context, chainUUID strin
 	return ret0
 }
 
-// UpdateChainByUUID indicates an expected call of UpdateChainByUUID.
+// UpdateChainByUUID indicates an expected call of UpdateChainByUUID
 func (mr *MockChainClientMockRecorder) UpdateChainByUUID(ctx, chainUUID, chain interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateChainByUUID", reflect.TypeOf((*MockChainClient)(nil).UpdateChainByUUID), ctx, chainUUID, chain)
 }
 
-// MockFaucetClient is a mock of FaucetClient interface.
+// MockFaucetClient is a mock of FaucetClient interface
 type MockFaucetClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockFaucetClientMockRecorder
 }
 
-// MockFaucetClientMockRecorder is the mock recorder for MockFaucetClient.
+// MockFaucetClientMockRecorder is the mock recorder for MockFaucetClient
 type MockFaucetClientMockRecorder struct {
 	mock *MockFaucetClient
 }
 
-// NewMockFaucetClient creates a new mock instance.
+// NewMockFaucetClient creates a new mock instance
 func NewMockFaucetClient(ctrl *gomock.Controller) *MockFaucetClient {
 	mock := &MockFaucetClient{ctrl: ctrl}
 	mock.recorder = &MockFaucetClientMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockFaucetClient) EXPECT() *MockFaucetClientMockRecorder {
 	return m.recorder
 }
 
-// RegisterFaucet mocks base method.
+// RegisterFaucet mocks base method
 func (m *MockFaucetClient) RegisterFaucet(ctx context.Context, faucet *models.Faucet) (*models.Faucet, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterFaucet", ctx, faucet)
@@ -168,13 +168,13 @@ func (m *MockFaucetClient) RegisterFaucet(ctx context.Context, faucet *models.Fa
 	return ret0, ret1
 }
 
-// RegisterFaucet indicates an expected call of RegisterFaucet.
+// RegisterFaucet indicates an expected call of RegisterFaucet
 func (mr *MockFaucetClientMockRecorder) RegisterFaucet(ctx, faucet interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterFaucet", reflect.TypeOf((*MockFaucetClient)(nil).RegisterFaucet), ctx, faucet)
 }
 
-// UpdateFaucetByUUID mocks base method.
+// UpdateFaucetByUUID mocks base method
 func (m *MockFaucetClient) UpdateFaucetByUUID(ctx context.Context, uuid string, faucet *models.Faucet) (*models.Faucet, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateFaucetByUUID", ctx, uuid, faucet)
@@ -183,13 +183,13 @@ func (m *MockFaucetClient) UpdateFaucetByUUID(ctx context.Context, uuid string, 
 	return ret0, ret1
 }
 
-// UpdateFaucetByUUID indicates an expected call of UpdateFaucetByUUID.
+// UpdateFaucetByUUID indicates an expected call of UpdateFaucetByUUID
 func (mr *MockFaucetClientMockRecorder) UpdateFaucetByUUID(ctx, uuid, faucet interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFaucetByUUID", reflect.TypeOf((*MockFaucetClient)(nil).UpdateFaucetByUUID), ctx, uuid, faucet)
 }
 
-// GetFaucetByUUID mocks base method.
+// GetFaucetByUUID mocks base method
 func (m *MockFaucetClient) GetFaucetByUUID(ctx context.Context, faucetUUID string) (*models.Faucet, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetFaucetByUUID", ctx, faucetUUID)
@@ -198,13 +198,13 @@ func (m *MockFaucetClient) GetFaucetByUUID(ctx context.Context, faucetUUID strin
 	return ret0, ret1
 }
 
-// GetFaucetByUUID indicates an expected call of GetFaucetByUUID.
+// GetFaucetByUUID indicates an expected call of GetFaucetByUUID
 func (mr *MockFaucetClientMockRecorder) GetFaucetByUUID(ctx, faucetUUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFaucetByUUID", reflect.TypeOf((*MockFaucetClient)(nil).GetFaucetByUUID), ctx, faucetUUID)
 }
 
-// DeleteFaucetByUUID mocks base method.
+// DeleteFaucetByUUID mocks base method
 func (m *MockFaucetClient) DeleteFaucetByUUID(ctx context.Context, faucetUUID string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteFaucetByUUID", ctx, faucetUUID)
@@ -212,13 +212,13 @@ func (m *MockFaucetClient) DeleteFaucetByUUID(ctx context.Context, faucetUUID st
 	return ret0
 }
 
-// DeleteFaucetByUUID indicates an expected call of DeleteFaucetByUUID.
+// DeleteFaucetByUUID indicates an expected call of DeleteFaucetByUUID
 func (mr *MockFaucetClientMockRecorder) DeleteFaucetByUUID(ctx, faucetUUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFaucetByUUID", reflect.TypeOf((*MockFaucetClient)(nil).DeleteFaucetByUUID), ctx, faucetUUID)
 }
 
-// GetFaucetsByChainRule mocks base method.
+// GetFaucetsByChainRule mocks base method
 func (m *MockFaucetClient) GetFaucetsByChainRule(ctx context.Context, chainRule string) ([]*models.Faucet, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetFaucetsByChainRule", ctx, chainRule)
@@ -227,36 +227,36 @@ func (m *MockFaucetClient) GetFaucetsByChainRule(ctx context.Context, chainRule 
 	return ret0, ret1
 }
 
-// GetFaucetsByChainRule indicates an expected call of GetFaucetsByChainRule.
+// GetFaucetsByChainRule indicates an expected call of GetFaucetsByChainRule
 func (mr *MockFaucetClientMockRecorder) GetFaucetsByChainRule(ctx, chainRule interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFaucetsByChainRule", reflect.TypeOf((*MockFaucetClient)(nil).GetFaucetsByChainRule), ctx, chainRule)
 }
 
-// MockChainRegistryClient is a mock of ChainRegistryClient interface.
+// MockChainRegistryClient is a mock of ChainRegistryClient interface
 type MockChainRegistryClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockChainRegistryClientMockRecorder
 }
 
-// MockChainRegistryClientMockRecorder is the mock recorder for MockChainRegistryClient.
+// MockChainRegistryClientMockRecorder is the mock recorder for MockChainRegistryClient
 type MockChainRegistryClientMockRecorder struct {
 	mock *MockChainRegistryClient
 }
 
-// NewMockChainRegistryClient creates a new mock instance.
+// NewMockChainRegistryClient creates a new mock instance
 func NewMockChainRegistryClient(ctrl *gomock.Controller) *MockChainRegistryClient {
 	mock := &MockChainRegistryClient{ctrl: ctrl}
 	mock.recorder = &MockChainRegistryClientMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockChainRegistryClient) EXPECT() *MockChainRegistryClientMockRecorder {
 	return m.recorder
 }
 
-// GetChains mocks base method.
+// GetChains mocks base method
 func (m *MockChainRegistryClient) GetChains(ctx context.Context) ([]*models.Chain, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetChains", ctx)
@@ -265,13 +265,13 @@ func (m *MockChainRegistryClient) GetChains(ctx context.Context) ([]*models.Chai
 	return ret0, ret1
 }
 
-// GetChains indicates an expected call of GetChains.
+// GetChains indicates an expected call of GetChains
 func (mr *MockChainRegistryClientMockRecorder) GetChains(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChains", reflect.TypeOf((*MockChainRegistryClient)(nil).GetChains), ctx)
 }
 
-// GetChainByName mocks base method.
+// GetChainByName mocks base method
 func (m *MockChainRegistryClient) GetChainByName(ctx context.Context, chainName string) (*models.Chain, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetChainByName", ctx, chainName)
@@ -280,13 +280,13 @@ func (m *MockChainRegistryClient) GetChainByName(ctx context.Context, chainName 
 	return ret0, ret1
 }
 
-// GetChainByName indicates an expected call of GetChainByName.
+// GetChainByName indicates an expected call of GetChainByName
 func (mr *MockChainRegistryClientMockRecorder) GetChainByName(ctx, chainName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChainByName", reflect.TypeOf((*MockChainRegistryClient)(nil).GetChainByName), ctx, chainName)
 }
 
-// GetChainByUUID mocks base method.
+// GetChainByUUID mocks base method
 func (m *MockChainRegistryClient) GetChainByUUID(ctx context.Context, chainUUID string) (*models.Chain, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetChainByUUID", ctx, chainUUID)
@@ -295,13 +295,13 @@ func (m *MockChainRegistryClient) GetChainByUUID(ctx context.Context, chainUUID 
 	return ret0, ret1
 }
 
-// GetChainByUUID indicates an expected call of GetChainByUUID.
+// GetChainByUUID indicates an expected call of GetChainByUUID
 func (mr *MockChainRegistryClientMockRecorder) GetChainByUUID(ctx, chainUUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChainByUUID", reflect.TypeOf((*MockChainRegistryClient)(nil).GetChainByUUID), ctx, chainUUID)
 }
 
-// DeleteChainByUUID mocks base method.
+// DeleteChainByUUID mocks base method
 func (m *MockChainRegistryClient) DeleteChainByUUID(ctx context.Context, chainUUID string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteChainByUUID", ctx, chainUUID)
@@ -309,13 +309,13 @@ func (m *MockChainRegistryClient) DeleteChainByUUID(ctx context.Context, chainUU
 	return ret0
 }
 
-// DeleteChainByUUID indicates an expected call of DeleteChainByUUID.
+// DeleteChainByUUID indicates an expected call of DeleteChainByUUID
 func (mr *MockChainRegistryClientMockRecorder) DeleteChainByUUID(ctx, chainUUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteChainByUUID", reflect.TypeOf((*MockChainRegistryClient)(nil).DeleteChainByUUID), ctx, chainUUID)
 }
 
-// RegisterChain mocks base method.
+// RegisterChain mocks base method
 func (m *MockChainRegistryClient) RegisterChain(ctx context.Context, chain *models.Chain) (*models.Chain, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterChain", ctx, chain)
@@ -324,13 +324,13 @@ func (m *MockChainRegistryClient) RegisterChain(ctx context.Context, chain *mode
 	return ret0, ret1
 }
 
-// RegisterChain indicates an expected call of RegisterChain.
+// RegisterChain indicates an expected call of RegisterChain
 func (mr *MockChainRegistryClientMockRecorder) RegisterChain(ctx, chain interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterChain", reflect.TypeOf((*MockChainRegistryClient)(nil).RegisterChain), ctx, chain)
 }
 
-// UpdateBlockPosition mocks base method.
+// UpdateBlockPosition mocks base method
 func (m *MockChainRegistryClient) UpdateBlockPosition(ctx context.Context, chainUUID string, blockNumber uint64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateBlockPosition", ctx, chainUUID, blockNumber)
@@ -338,13 +338,13 @@ func (m *MockChainRegistryClient) UpdateBlockPosition(ctx context.Context, chain
 	return ret0
 }
 
-// UpdateBlockPosition indicates an expected call of UpdateBlockPosition.
+// UpdateBlockPosition indicates an expected call of UpdateBlockPosition
 func (mr *MockChainRegistryClientMockRecorder) UpdateBlockPosition(ctx, chainUUID, blockNumber interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateBlockPosition", reflect.TypeOf((*MockChainRegistryClient)(nil).UpdateBlockPosition), ctx, chainUUID, blockNumber)
 }
 
-// UpdateChainByUUID mocks base method.
+// UpdateChainByUUID mocks base method
 func (m *MockChainRegistryClient) UpdateChainByUUID(ctx context.Context, chainUUID string, chain *models.Chain) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateChainByUUID", ctx, chainUUID, chain)
@@ -352,13 +352,13 @@ func (m *MockChainRegistryClient) UpdateChainByUUID(ctx context.Context, chainUU
 	return ret0
 }
 
-// UpdateChainByUUID indicates an expected call of UpdateChainByUUID.
+// UpdateChainByUUID indicates an expected call of UpdateChainByUUID
 func (mr *MockChainRegistryClientMockRecorder) UpdateChainByUUID(ctx, chainUUID, chain interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateChainByUUID", reflect.TypeOf((*MockChainRegistryClient)(nil).UpdateChainByUUID), ctx, chainUUID, chain)
 }
 
-// RegisterFaucet mocks base method.
+// RegisterFaucet mocks base method
 func (m *MockChainRegistryClient) RegisterFaucet(ctx context.Context, faucet *models.Faucet) (*models.Faucet, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterFaucet", ctx, faucet)
@@ -367,13 +367,13 @@ func (m *MockChainRegistryClient) RegisterFaucet(ctx context.Context, faucet *mo
 	return ret0, ret1
 }
 
-// RegisterFaucet indicates an expected call of RegisterFaucet.
+// RegisterFaucet indicates an expected call of RegisterFaucet
 func (mr *MockChainRegistryClientMockRecorder) RegisterFaucet(ctx, faucet interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterFaucet", reflect.TypeOf((*MockChainRegistryClient)(nil).RegisterFaucet), ctx, faucet)
 }
 
-// UpdateFaucetByUUID mocks base method.
+// UpdateFaucetByUUID mocks base method
 func (m *MockChainRegistryClient) UpdateFaucetByUUID(ctx context.Context, uuid string, faucet *models.Faucet) (*models.Faucet, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateFaucetByUUID", ctx, uuid, faucet)
@@ -382,13 +382,13 @@ func (m *MockChainRegistryClient) UpdateFaucetByUUID(ctx context.Context, uuid s
 	return ret0, ret1
 }
 
-// UpdateFaucetByUUID indicates an expected call of UpdateFaucetByUUID.
+// UpdateFaucetByUUID indicates an expected call of UpdateFaucetByUUID
 func (mr *MockChainRegistryClientMockRecorder) UpdateFaucetByUUID(ctx, uuid, faucet interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFaucetByUUID", reflect.TypeOf((*MockChainRegistryClient)(nil).UpdateFaucetByUUID), ctx, uuid, faucet)
 }
 
-// GetFaucetByUUID mocks base method.
+// GetFaucetByUUID mocks base method
 func (m *MockChainRegistryClient) GetFaucetByUUID(ctx context.Context, faucetUUID string) (*models.Faucet, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetFaucetByUUID", ctx, faucetUUID)
@@ -397,13 +397,13 @@ func (m *MockChainRegistryClient) GetFaucetByUUID(ctx context.Context, faucetUUI
 	return ret0, ret1
 }
 
-// GetFaucetByUUID indicates an expected call of GetFaucetByUUID.
+// GetFaucetByUUID indicates an expected call of GetFaucetByUUID
 func (mr *MockChainRegistryClientMockRecorder) GetFaucetByUUID(ctx, faucetUUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFaucetByUUID", reflect.TypeOf((*MockChainRegistryClient)(nil).GetFaucetByUUID), ctx, faucetUUID)
 }
 
-// DeleteFaucetByUUID mocks base method.
+// DeleteFaucetByUUID mocks base method
 func (m *MockChainRegistryClient) DeleteFaucetByUUID(ctx context.Context, faucetUUID string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteFaucetByUUID", ctx, faucetUUID)
@@ -411,13 +411,13 @@ func (m *MockChainRegistryClient) DeleteFaucetByUUID(ctx context.Context, faucet
 	return ret0
 }
 
-// DeleteFaucetByUUID indicates an expected call of DeleteFaucetByUUID.
+// DeleteFaucetByUUID indicates an expected call of DeleteFaucetByUUID
 func (mr *MockChainRegistryClientMockRecorder) DeleteFaucetByUUID(ctx, faucetUUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFaucetByUUID", reflect.TypeOf((*MockChainRegistryClient)(nil).DeleteFaucetByUUID), ctx, faucetUUID)
 }
 
-// GetFaucetsByChainRule mocks base method.
+// GetFaucetsByChainRule mocks base method
 func (m *MockChainRegistryClient) GetFaucetsByChainRule(ctx context.Context, chainRule string) ([]*models.Faucet, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetFaucetsByChainRule", ctx, chainRule)
@@ -426,7 +426,7 @@ func (m *MockChainRegistryClient) GetFaucetsByChainRule(ctx context.Context, cha
 	return ret0, ret1
 }
 
-// GetFaucetsByChainRule indicates an expected call of GetFaucetsByChainRule.
+// GetFaucetsByChainRule indicates an expected call of GetFaucetsByChainRule
 func (mr *MockChainRegistryClientMockRecorder) GetFaucetsByChainRule(ctx, chainRule interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFaucetsByChainRule", reflect.TypeOf((*MockChainRegistryClient)(nil).GetFaucetsByChainRule), ctx, chainRule)

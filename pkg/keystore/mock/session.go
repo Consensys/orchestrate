@@ -17,30 +17,30 @@ import (
 	reflect "reflect"
 )
 
-// MockSigningSession is a mock of SigningSession interface.
+// MockSigningSession is a mock of SigningSession interface
 type MockSigningSession struct {
 	ctrl     *gomock.Controller
 	recorder *MockSigningSessionMockRecorder
 }
 
-// MockSigningSessionMockRecorder is the mock recorder for MockSigningSession.
+// MockSigningSessionMockRecorder is the mock recorder for MockSigningSession
 type MockSigningSessionMockRecorder struct {
 	mock *MockSigningSession
 }
 
-// NewMockSigningSession creates a new mock instance.
+// NewMockSigningSession creates a new mock instance
 func NewMockSigningSession(ctrl *gomock.Controller) *MockSigningSession {
 	mock := &MockSigningSession{ctrl: ctrl}
 	mock.recorder = &MockSigningSessionMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockSigningSession) EXPECT() *MockSigningSessionMockRecorder {
 	return m.recorder
 }
 
-// SetAccount mocks base method.
+// SetAccount mocks base method
 func (m *MockSigningSession) SetAccount(account account.Account) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetAccount", account)
@@ -48,13 +48,13 @@ func (m *MockSigningSession) SetAccount(account account.Account) error {
 	return ret0
 }
 
-// SetAccount indicates an expected call of SetAccount.
+// SetAccount indicates an expected call of SetAccount
 func (mr *MockSigningSessionMockRecorder) SetAccount(account interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAccount", reflect.TypeOf((*MockSigningSession)(nil).SetAccount), account)
 }
 
-// SetChain mocks base method.
+// SetChain mocks base method
 func (m *MockSigningSession) SetChain(arg0 *big.Int) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetChain", arg0)
@@ -62,13 +62,13 @@ func (m *MockSigningSession) SetChain(arg0 *big.Int) error {
 	return ret0
 }
 
-// SetChain indicates an expected call of SetChain.
+// SetChain indicates an expected call of SetChain
 func (mr *MockSigningSessionMockRecorder) SetChain(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetChain", reflect.TypeOf((*MockSigningSession)(nil).SetChain), arg0)
 }
 
-// ExecuteForTx mocks base method.
+// ExecuteForTx mocks base method
 func (m *MockSigningSession) ExecuteForTx(arg0 *types.Transaction) ([]byte, *common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ExecuteForTx", arg0)
@@ -78,13 +78,13 @@ func (m *MockSigningSession) ExecuteForTx(arg0 *types.Transaction) ([]byte, *com
 	return ret0, ret1, ret2
 }
 
-// ExecuteForTx indicates an expected call of ExecuteForTx.
+// ExecuteForTx indicates an expected call of ExecuteForTx
 func (mr *MockSigningSessionMockRecorder) ExecuteForTx(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExecuteForTx", reflect.TypeOf((*MockSigningSession)(nil).ExecuteForTx), arg0)
 }
 
-// ExecuteForMsg mocks base method.
+// ExecuteForMsg mocks base method
 func (m *MockSigningSession) ExecuteForMsg(arg0 []byte, arg1 crypto.DSA) ([]byte, *common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ExecuteForMsg", arg0, arg1)
@@ -94,13 +94,13 @@ func (m *MockSigningSession) ExecuteForMsg(arg0 []byte, arg1 crypto.DSA) ([]byte
 	return ret0, ret1, ret2
 }
 
-// ExecuteForMsg indicates an expected call of ExecuteForMsg.
+// ExecuteForMsg indicates an expected call of ExecuteForMsg
 func (mr *MockSigningSessionMockRecorder) ExecuteForMsg(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExecuteForMsg", reflect.TypeOf((*MockSigningSession)(nil).ExecuteForMsg), arg0, arg1)
 }
 
-// ExecuteForTesseraTx mocks base method.
+// ExecuteForTesseraTx mocks base method
 func (m *MockSigningSession) ExecuteForTesseraTx(arg0 *types.Transaction) ([]byte, *common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ExecuteForTesseraTx", arg0)
@@ -110,13 +110,13 @@ func (m *MockSigningSession) ExecuteForTesseraTx(arg0 *types.Transaction) ([]byt
 	return ret0, ret1, ret2
 }
 
-// ExecuteForTesseraTx indicates an expected call of ExecuteForTesseraTx.
+// ExecuteForTesseraTx indicates an expected call of ExecuteForTesseraTx
 func (mr *MockSigningSessionMockRecorder) ExecuteForTesseraTx(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExecuteForTesseraTx", reflect.TypeOf((*MockSigningSession)(nil).ExecuteForTesseraTx), arg0)
 }
 
-// ExecuteForEEATx mocks base method.
+// ExecuteForEEATx mocks base method
 func (m *MockSigningSession) ExecuteForEEATx(arg0 *types.Transaction, arg1 *types0.PrivateArgs) ([]byte, *common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ExecuteForEEATx", arg0, arg1)
@@ -126,36 +126,36 @@ func (m *MockSigningSession) ExecuteForEEATx(arg0 *types.Transaction, arg1 *type
 	return ret0, ret1, ret2
 }
 
-// ExecuteForEEATx indicates an expected call of ExecuteForEEATx.
+// ExecuteForEEATx indicates an expected call of ExecuteForEEATx
 func (mr *MockSigningSessionMockRecorder) ExecuteForEEATx(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExecuteForEEATx", reflect.TypeOf((*MockSigningSession)(nil).ExecuteForEEATx), arg0, arg1)
 }
 
-// MockAccountManager is a mock of AccountManager interface.
+// MockAccountManager is a mock of AccountManager interface
 type MockAccountManager struct {
 	ctrl     *gomock.Controller
 	recorder *MockAccountManagerMockRecorder
 }
 
-// MockAccountManagerMockRecorder is the mock recorder for MockAccountManager.
+// MockAccountManagerMockRecorder is the mock recorder for MockAccountManager
 type MockAccountManagerMockRecorder struct {
 	mock *MockAccountManager
 }
 
-// NewMockAccountManager creates a new mock instance.
+// NewMockAccountManager creates a new mock instance
 func NewMockAccountManager(ctrl *gomock.Controller) *MockAccountManager {
 	mock := &MockAccountManager{ctrl: ctrl}
 	mock.recorder = &MockAccountManagerMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockAccountManager) EXPECT() *MockAccountManagerMockRecorder {
 	return m.recorder
 }
 
-// SigningSession mocks base method.
+// SigningSession mocks base method
 func (m *MockAccountManager) SigningSession(arg0 context.Context, arg1 common.Address) (session.SigningSession, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SigningSession", arg0, arg1)
@@ -164,13 +164,13 @@ func (m *MockAccountManager) SigningSession(arg0 context.Context, arg1 common.Ad
 	return ret0, ret1
 }
 
-// SigningSession indicates an expected call of SigningSession.
+// SigningSession indicates an expected call of SigningSession
 func (mr *MockAccountManagerMockRecorder) SigningSession(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SigningSession", reflect.TypeOf((*MockAccountManager)(nil).SigningSession), arg0, arg1)
 }
 
-// ImportPrivateKey mocks base method.
+// ImportPrivateKey mocks base method
 func (m *MockAccountManager) ImportPrivateKey(arg0 context.Context, arg1 string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ImportPrivateKey", arg0, arg1)
@@ -178,13 +178,13 @@ func (m *MockAccountManager) ImportPrivateKey(arg0 context.Context, arg1 string)
 	return ret0
 }
 
-// ImportPrivateKey indicates an expected call of ImportPrivateKey.
+// ImportPrivateKey indicates an expected call of ImportPrivateKey
 func (mr *MockAccountManagerMockRecorder) ImportPrivateKey(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ImportPrivateKey", reflect.TypeOf((*MockAccountManager)(nil).ImportPrivateKey), arg0, arg1)
 }
 
-// GenerateAccount mocks base method.
+// GenerateAccount mocks base method
 func (m *MockAccountManager) GenerateAccount(arg0 context.Context) (common.Address, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GenerateAccount", arg0)
@@ -193,7 +193,7 @@ func (m *MockAccountManager) GenerateAccount(arg0 context.Context) (common.Addre
 	return ret0, ret1
 }
 
-// GenerateAccount indicates an expected call of GenerateAccount.
+// GenerateAccount indicates an expected call of GenerateAccount
 func (mr *MockAccountManagerMockRecorder) GenerateAccount(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenerateAccount", reflect.TypeOf((*MockAccountManager)(nil).GenerateAccount), arg0)

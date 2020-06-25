@@ -12,30 +12,30 @@ import (
 	reflect "reflect"
 )
 
-// MockContractRegistryClient is a mock of ContractRegistryClient interface.
+// MockContractRegistryClient is a mock of ContractRegistryClient interface
 type MockContractRegistryClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockContractRegistryClientMockRecorder
 }
 
-// MockContractRegistryClientMockRecorder is the mock recorder for MockContractRegistryClient.
+// MockContractRegistryClientMockRecorder is the mock recorder for MockContractRegistryClient
 type MockContractRegistryClientMockRecorder struct {
 	mock *MockContractRegistryClient
 }
 
-// NewMockContractRegistryClient creates a new mock instance.
+// NewMockContractRegistryClient creates a new mock instance
 func NewMockContractRegistryClient(ctrl *gomock.Controller) *MockContractRegistryClient {
 	mock := &MockContractRegistryClient{ctrl: ctrl}
 	mock.recorder = &MockContractRegistryClientMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockContractRegistryClient) EXPECT() *MockContractRegistryClientMockRecorder {
 	return m.recorder
 }
 
-// DeleteArtifact mocks base method.
+// DeleteArtifact mocks base method
 func (m *MockContractRegistryClient) DeleteArtifact(arg0 context.Context, arg1 *proto.DeleteArtifactRequest, arg2 ...grpc.CallOption) (*proto.DeleteArtifactResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
@@ -48,14 +48,14 @@ func (m *MockContractRegistryClient) DeleteArtifact(arg0 context.Context, arg1 *
 	return ret0, ret1
 }
 
-// DeleteArtifact indicates an expected call of DeleteArtifact.
+// DeleteArtifact indicates an expected call of DeleteArtifact
 func (mr *MockContractRegistryClientMockRecorder) DeleteArtifact(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteArtifact", reflect.TypeOf((*MockContractRegistryClient)(nil).DeleteArtifact), varargs...)
 }
 
-// DeregisterContract mocks base method.
+// DeregisterContract mocks base method
 func (m *MockContractRegistryClient) DeregisterContract(arg0 context.Context, arg1 *proto.DeregisterContractRequest, arg2 ...grpc.CallOption) (*proto.DeregisterContractResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
@@ -68,14 +68,14 @@ func (m *MockContractRegistryClient) DeregisterContract(arg0 context.Context, ar
 	return ret0, ret1
 }
 
-// DeregisterContract indicates an expected call of DeregisterContract.
+// DeregisterContract indicates an expected call of DeregisterContract
 func (mr *MockContractRegistryClientMockRecorder) DeregisterContract(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeregisterContract", reflect.TypeOf((*MockContractRegistryClient)(nil).DeregisterContract), varargs...)
 }
 
-// GetCatalog mocks base method.
+// GetCatalog mocks base method
 func (m *MockContractRegistryClient) GetCatalog(arg0 context.Context, arg1 *proto.GetCatalogRequest, arg2 ...grpc.CallOption) (*proto.GetCatalogResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
@@ -88,14 +88,14 @@ func (m *MockContractRegistryClient) GetCatalog(arg0 context.Context, arg1 *prot
 	return ret0, ret1
 }
 
-// GetCatalog indicates an expected call of GetCatalog.
+// GetCatalog indicates an expected call of GetCatalog
 func (mr *MockContractRegistryClientMockRecorder) GetCatalog(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCatalog", reflect.TypeOf((*MockContractRegistryClient)(nil).GetCatalog), varargs...)
 }
 
-// GetContract mocks base method.
+// GetContract mocks base method
 func (m *MockContractRegistryClient) GetContract(arg0 context.Context, arg1 *proto.GetContractRequest, arg2 ...grpc.CallOption) (*proto.GetContractResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
@@ -108,14 +108,14 @@ func (m *MockContractRegistryClient) GetContract(arg0 context.Context, arg1 *pro
 	return ret0, ret1
 }
 
-// GetContract indicates an expected call of GetContract.
+// GetContract indicates an expected call of GetContract
 func (mr *MockContractRegistryClientMockRecorder) GetContract(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContract", reflect.TypeOf((*MockContractRegistryClient)(nil).GetContract), varargs...)
 }
 
-// GetContractABI mocks base method.
+// GetContractABI mocks base method
 func (m *MockContractRegistryClient) GetContractABI(arg0 context.Context, arg1 *proto.GetContractRequest, arg2 ...grpc.CallOption) (*proto.GetContractABIResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
@@ -128,14 +128,14 @@ func (m *MockContractRegistryClient) GetContractABI(arg0 context.Context, arg1 *
 	return ret0, ret1
 }
 
-// GetContractABI indicates an expected call of GetContractABI.
+// GetContractABI indicates an expected call of GetContractABI
 func (mr *MockContractRegistryClientMockRecorder) GetContractABI(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContractABI", reflect.TypeOf((*MockContractRegistryClient)(nil).GetContractABI), varargs...)
 }
 
-// GetContractBytecode mocks base method.
+// GetContractBytecode mocks base method
 func (m *MockContractRegistryClient) GetContractBytecode(arg0 context.Context, arg1 *proto.GetContractRequest, arg2 ...grpc.CallOption) (*proto.GetContractBytecodeResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
@@ -148,14 +148,14 @@ func (m *MockContractRegistryClient) GetContractBytecode(arg0 context.Context, a
 	return ret0, ret1
 }
 
-// GetContractBytecode indicates an expected call of GetContractBytecode.
+// GetContractBytecode indicates an expected call of GetContractBytecode
 func (mr *MockContractRegistryClientMockRecorder) GetContractBytecode(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContractBytecode", reflect.TypeOf((*MockContractRegistryClient)(nil).GetContractBytecode), varargs...)
 }
 
-// GetContractDeployedBytecode mocks base method.
+// GetContractDeployedBytecode mocks base method
 func (m *MockContractRegistryClient) GetContractDeployedBytecode(arg0 context.Context, arg1 *proto.GetContractRequest, arg2 ...grpc.CallOption) (*proto.GetContractDeployedBytecodeResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
@@ -168,14 +168,14 @@ func (m *MockContractRegistryClient) GetContractDeployedBytecode(arg0 context.Co
 	return ret0, ret1
 }
 
-// GetContractDeployedBytecode indicates an expected call of GetContractDeployedBytecode.
+// GetContractDeployedBytecode indicates an expected call of GetContractDeployedBytecode
 func (mr *MockContractRegistryClientMockRecorder) GetContractDeployedBytecode(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContractDeployedBytecode", reflect.TypeOf((*MockContractRegistryClient)(nil).GetContractDeployedBytecode), varargs...)
 }
 
-// GetEventsBySigHash mocks base method.
+// GetEventsBySigHash mocks base method
 func (m *MockContractRegistryClient) GetEventsBySigHash(arg0 context.Context, arg1 *proto.GetEventsBySigHashRequest, arg2 ...grpc.CallOption) (*proto.GetEventsBySigHashResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
@@ -188,14 +188,14 @@ func (m *MockContractRegistryClient) GetEventsBySigHash(arg0 context.Context, ar
 	return ret0, ret1
 }
 
-// GetEventsBySigHash indicates an expected call of GetEventsBySigHash.
+// GetEventsBySigHash indicates an expected call of GetEventsBySigHash
 func (mr *MockContractRegistryClientMockRecorder) GetEventsBySigHash(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEventsBySigHash", reflect.TypeOf((*MockContractRegistryClient)(nil).GetEventsBySigHash), varargs...)
 }
 
-// GetMethodSignatures mocks base method.
+// GetMethodSignatures mocks base method
 func (m *MockContractRegistryClient) GetMethodSignatures(arg0 context.Context, arg1 *proto.GetMethodSignaturesRequest, arg2 ...grpc.CallOption) (*proto.GetMethodSignaturesResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
@@ -208,14 +208,14 @@ func (m *MockContractRegistryClient) GetMethodSignatures(arg0 context.Context, a
 	return ret0, ret1
 }
 
-// GetMethodSignatures indicates an expected call of GetMethodSignatures.
+// GetMethodSignatures indicates an expected call of GetMethodSignatures
 func (mr *MockContractRegistryClientMockRecorder) GetMethodSignatures(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMethodSignatures", reflect.TypeOf((*MockContractRegistryClient)(nil).GetMethodSignatures), varargs...)
 }
 
-// GetMethodsBySelector mocks base method.
+// GetMethodsBySelector mocks base method
 func (m *MockContractRegistryClient) GetMethodsBySelector(arg0 context.Context, arg1 *proto.GetMethodsBySelectorRequest, arg2 ...grpc.CallOption) (*proto.GetMethodsBySelectorResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
@@ -228,14 +228,14 @@ func (m *MockContractRegistryClient) GetMethodsBySelector(arg0 context.Context, 
 	return ret0, ret1
 }
 
-// GetMethodsBySelector indicates an expected call of GetMethodsBySelector.
+// GetMethodsBySelector indicates an expected call of GetMethodsBySelector
 func (mr *MockContractRegistryClientMockRecorder) GetMethodsBySelector(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMethodsBySelector", reflect.TypeOf((*MockContractRegistryClient)(nil).GetMethodsBySelector), varargs...)
 }
 
-// GetTags mocks base method.
+// GetTags mocks base method
 func (m *MockContractRegistryClient) GetTags(arg0 context.Context, arg1 *proto.GetTagsRequest, arg2 ...grpc.CallOption) (*proto.GetTagsResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
@@ -248,14 +248,14 @@ func (m *MockContractRegistryClient) GetTags(arg0 context.Context, arg1 *proto.G
 	return ret0, ret1
 }
 
-// GetTags indicates an expected call of GetTags.
+// GetTags indicates an expected call of GetTags
 func (mr *MockContractRegistryClientMockRecorder) GetTags(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTags", reflect.TypeOf((*MockContractRegistryClient)(nil).GetTags), varargs...)
 }
 
-// RegisterContract mocks base method.
+// RegisterContract mocks base method
 func (m *MockContractRegistryClient) RegisterContract(arg0 context.Context, arg1 *proto.RegisterContractRequest, arg2 ...grpc.CallOption) (*proto.RegisterContractResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
@@ -268,14 +268,14 @@ func (m *MockContractRegistryClient) RegisterContract(arg0 context.Context, arg1
 	return ret0, ret1
 }
 
-// RegisterContract indicates an expected call of RegisterContract.
+// RegisterContract indicates an expected call of RegisterContract
 func (mr *MockContractRegistryClientMockRecorder) RegisterContract(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterContract", reflect.TypeOf((*MockContractRegistryClient)(nil).RegisterContract), varargs...)
 }
 
-// SetAccountCodeHash mocks base method.
+// SetAccountCodeHash mocks base method
 func (m *MockContractRegistryClient) SetAccountCodeHash(arg0 context.Context, arg1 *proto.SetAccountCodeHashRequest, arg2 ...grpc.CallOption) (*proto.SetAccountCodeHashResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
@@ -288,7 +288,7 @@ func (m *MockContractRegistryClient) SetAccountCodeHash(arg0 context.Context, ar
 	return ret0, ret1
 }
 
-// SetAccountCodeHash indicates an expected call of SetAccountCodeHash.
+// SetAccountCodeHash indicates an expected call of SetAccountCodeHash
 func (mr *MockContractRegistryClientMockRecorder) SetAccountCodeHash(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)

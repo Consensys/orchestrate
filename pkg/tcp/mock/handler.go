@@ -10,36 +10,36 @@ import (
 	reflect "reflect"
 )
 
-// MockHandler is a mock of Handler interface.
+// MockHandler is a mock of Handler interface
 type MockHandler struct {
 	ctrl     *gomock.Controller
 	recorder *MockHandlerMockRecorder
 }
 
-// MockHandlerMockRecorder is the mock recorder for MockHandler.
+// MockHandlerMockRecorder is the mock recorder for MockHandler
 type MockHandlerMockRecorder struct {
 	mock *MockHandler
 }
 
-// NewMockHandler creates a new mock instance.
+// NewMockHandler creates a new mock instance
 func NewMockHandler(ctrl *gomock.Controller) *MockHandler {
 	mock := &MockHandler{ctrl: ctrl}
 	mock.recorder = &MockHandlerMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockHandler) EXPECT() *MockHandlerMockRecorder {
 	return m.recorder
 }
 
-// ServeTCP mocks base method.
+// ServeTCP mocks base method
 func (m *MockHandler) ServeTCP(conn tcp.WriteCloser) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "ServeTCP", conn)
 }
 
-// ServeTCP indicates an expected call of ServeTCP.
+// ServeTCP indicates an expected call of ServeTCP
 func (mr *MockHandlerMockRecorder) ServeTCP(conn interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServeTCP", reflect.TypeOf((*MockHandler)(nil).ServeTCP), conn)

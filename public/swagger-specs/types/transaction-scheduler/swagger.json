@@ -243,6 +243,29 @@
                     "500": {}
                 }
             }
+        },
+        "/transactions/send-transfer": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Creates and sends a transfer transaction",
+                "responses": {
+                    "200": {},
+                    "400": {},
+                    "409": {},
+                    "422": {},
+                    "500": {}
+                }
+            }
         }
     },
     "securityDefinitions": {

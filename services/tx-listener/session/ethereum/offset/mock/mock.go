@@ -11,30 +11,30 @@ import (
 	reflect "reflect"
 )
 
-// MockManager is a mock of Manager interface.
+// MockManager is a mock of Manager interface
 type MockManager struct {
 	ctrl     *gomock.Controller
 	recorder *MockManagerMockRecorder
 }
 
-// MockManagerMockRecorder is the mock recorder for MockManager.
+// MockManagerMockRecorder is the mock recorder for MockManager
 type MockManagerMockRecorder struct {
 	mock *MockManager
 }
 
-// NewMockManager creates a new mock instance.
+// NewMockManager creates a new mock instance
 func NewMockManager(ctrl *gomock.Controller) *MockManager {
 	mock := &MockManager{ctrl: ctrl}
 	mock.recorder = &MockManagerMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockManager) EXPECT() *MockManagerMockRecorder {
 	return m.recorder
 }
 
-// GetLastBlockNumber mocks base method.
+// GetLastBlockNumber mocks base method
 func (m *MockManager) GetLastBlockNumber(ctx context.Context, chain *dynamic.Chain) (uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetLastBlockNumber", ctx, chain)
@@ -43,13 +43,13 @@ func (m *MockManager) GetLastBlockNumber(ctx context.Context, chain *dynamic.Cha
 	return ret0, ret1
 }
 
-// GetLastBlockNumber indicates an expected call of GetLastBlockNumber.
+// GetLastBlockNumber indicates an expected call of GetLastBlockNumber
 func (mr *MockManagerMockRecorder) GetLastBlockNumber(ctx, chain interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLastBlockNumber", reflect.TypeOf((*MockManager)(nil).GetLastBlockNumber), ctx, chain)
 }
 
-// SetLastBlockNumber mocks base method.
+// SetLastBlockNumber mocks base method
 func (m *MockManager) SetLastBlockNumber(ctx context.Context, chain *dynamic.Chain, blockNumber uint64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetLastBlockNumber", ctx, chain, blockNumber)
@@ -57,13 +57,13 @@ func (m *MockManager) SetLastBlockNumber(ctx context.Context, chain *dynamic.Cha
 	return ret0
 }
 
-// SetLastBlockNumber indicates an expected call of SetLastBlockNumber.
+// SetLastBlockNumber indicates an expected call of SetLastBlockNumber
 func (mr *MockManagerMockRecorder) SetLastBlockNumber(ctx, chain, blockNumber interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetLastBlockNumber", reflect.TypeOf((*MockManager)(nil).SetLastBlockNumber), ctx, chain, blockNumber)
 }
 
-// GetLastTxIndex mocks base method.
+// GetLastTxIndex mocks base method
 func (m *MockManager) GetLastTxIndex(ctx context.Context, chain *dynamic.Chain, blockNumber uint64) (uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetLastTxIndex", ctx, chain, blockNumber)
@@ -72,13 +72,13 @@ func (m *MockManager) GetLastTxIndex(ctx context.Context, chain *dynamic.Chain, 
 	return ret0, ret1
 }
 
-// GetLastTxIndex indicates an expected call of GetLastTxIndex.
+// GetLastTxIndex indicates an expected call of GetLastTxIndex
 func (mr *MockManagerMockRecorder) GetLastTxIndex(ctx, chain, blockNumber interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLastTxIndex", reflect.TypeOf((*MockManager)(nil).GetLastTxIndex), ctx, chain, blockNumber)
 }
 
-// SetLastTxIndex mocks base method.
+// SetLastTxIndex mocks base method
 func (m *MockManager) SetLastTxIndex(ctx context.Context, chain *dynamic.Chain, blockNumber, txIndex uint64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetLastTxIndex", ctx, chain, blockNumber, txIndex)
@@ -86,7 +86,7 @@ func (m *MockManager) SetLastTxIndex(ctx context.Context, chain *dynamic.Chain, 
 	return ret0
 }
 
-// SetLastTxIndex indicates an expected call of SetLastTxIndex.
+// SetLastTxIndex indicates an expected call of SetLastTxIndex
 func (mr *MockManagerMockRecorder) SetLastTxIndex(ctx, chain, blockNumber, txIndex interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetLastTxIndex", reflect.TypeOf((*MockManager)(nil).SetLastTxIndex), ctx, chain, blockNumber, txIndex)

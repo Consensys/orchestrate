@@ -10,30 +10,30 @@ import (
 	reflect "reflect"
 )
 
-// MockGetCatalogUseCase is a mock of GetCatalogUseCase interface.
+// MockGetCatalogUseCase is a mock of GetCatalogUseCase interface
 type MockGetCatalogUseCase struct {
 	ctrl     *gomock.Controller
 	recorder *MockGetCatalogUseCaseMockRecorder
 }
 
-// MockGetCatalogUseCaseMockRecorder is the mock recorder for MockGetCatalogUseCase.
+// MockGetCatalogUseCaseMockRecorder is the mock recorder for MockGetCatalogUseCase
 type MockGetCatalogUseCaseMockRecorder struct {
 	mock *MockGetCatalogUseCase
 }
 
-// NewMockGetCatalogUseCase creates a new mock instance.
+// NewMockGetCatalogUseCase creates a new mock instance
 func NewMockGetCatalogUseCase(ctrl *gomock.Controller) *MockGetCatalogUseCase {
 	mock := &MockGetCatalogUseCase{ctrl: ctrl}
 	mock.recorder = &MockGetCatalogUseCaseMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockGetCatalogUseCase) EXPECT() *MockGetCatalogUseCaseMockRecorder {
 	return m.recorder
 }
 
-// Execute mocks base method.
+// Execute mocks base method
 func (m *MockGetCatalogUseCase) Execute(ctx context.Context) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx)
@@ -42,7 +42,7 @@ func (m *MockGetCatalogUseCase) Execute(ctx context.Context) ([]string, error) {
 	return ret0, ret1
 }
 
-// Execute indicates an expected call of Execute.
+// Execute indicates an expected call of Execute
 func (mr *MockGetCatalogUseCaseMockRecorder) Execute(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetCatalogUseCase)(nil).Execute), ctx)

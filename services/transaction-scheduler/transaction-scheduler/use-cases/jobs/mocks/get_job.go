@@ -7,34 +7,34 @@ package mocks
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	reflect "reflect"
 )
 
-// MockGetJobUseCase is a mock of GetJobUseCase interface.
+// MockGetJobUseCase is a mock of GetJobUseCase interface
 type MockGetJobUseCase struct {
 	ctrl     *gomock.Controller
 	recorder *MockGetJobUseCaseMockRecorder
 }
 
-// MockGetJobUseCaseMockRecorder is the mock recorder for MockGetJobUseCase.
+// MockGetJobUseCaseMockRecorder is the mock recorder for MockGetJobUseCase
 type MockGetJobUseCaseMockRecorder struct {
 	mock *MockGetJobUseCase
 }
 
-// NewMockGetJobUseCase creates a new mock instance.
+// NewMockGetJobUseCase creates a new mock instance
 func NewMockGetJobUseCase(ctrl *gomock.Controller) *MockGetJobUseCase {
 	mock := &MockGetJobUseCase{ctrl: ctrl}
 	mock.recorder = &MockGetJobUseCaseMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockGetJobUseCase) EXPECT() *MockGetJobUseCaseMockRecorder {
 	return m.recorder
 }
 
-// Execute mocks base method.
+// Execute mocks base method
 func (m *MockGetJobUseCase) Execute(ctx context.Context, jobUUID, tenantID string) (*types.Job, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, jobUUID, tenantID)
@@ -43,7 +43,7 @@ func (m *MockGetJobUseCase) Execute(ctx context.Context, jobUUID, tenantID strin
 	return ret0, ret1
 }
 
-// Execute indicates an expected call of Execute.
+// Execute indicates an expected call of Execute
 func (mr *MockGetJobUseCaseMockRecorder) Execute(ctx, jobUUID, tenantID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetJobUseCase)(nil).Execute), ctx, jobUUID, tenantID)

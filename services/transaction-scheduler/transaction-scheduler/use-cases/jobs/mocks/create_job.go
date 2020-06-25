@@ -7,36 +7,36 @@ package mocks
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	store "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	jobs "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs"
 	reflect "reflect"
 )
 
-// MockCreateJobUseCase is a mock of CreateJobUseCase interface.
+// MockCreateJobUseCase is a mock of CreateJobUseCase interface
 type MockCreateJobUseCase struct {
 	ctrl     *gomock.Controller
 	recorder *MockCreateJobUseCaseMockRecorder
 }
 
-// MockCreateJobUseCaseMockRecorder is the mock recorder for MockCreateJobUseCase.
+// MockCreateJobUseCaseMockRecorder is the mock recorder for MockCreateJobUseCase
 type MockCreateJobUseCaseMockRecorder struct {
 	mock *MockCreateJobUseCase
 }
 
-// NewMockCreateJobUseCase creates a new mock instance.
+// NewMockCreateJobUseCase creates a new mock instance
 func NewMockCreateJobUseCase(ctrl *gomock.Controller) *MockCreateJobUseCase {
 	mock := &MockCreateJobUseCase{ctrl: ctrl}
 	mock.recorder = &MockCreateJobUseCaseMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockCreateJobUseCase) EXPECT() *MockCreateJobUseCaseMockRecorder {
 	return m.recorder
 }
 
-// Execute mocks base method.
+// Execute mocks base method
 func (m *MockCreateJobUseCase) Execute(ctx context.Context, jobEntity *types.Job, tenantID string) (*types.Job, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, jobEntity, tenantID)
@@ -45,13 +45,13 @@ func (m *MockCreateJobUseCase) Execute(ctx context.Context, jobEntity *types.Job
 	return ret0, ret1
 }
 
-// Execute indicates an expected call of Execute.
+// Execute indicates an expected call of Execute
 func (mr *MockCreateJobUseCaseMockRecorder) Execute(ctx, jobEntity, tenantID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateJobUseCase)(nil).Execute), ctx, jobEntity, tenantID)
 }
 
-// WithDBTransaction mocks base method.
+// WithDBTransaction mocks base method
 func (m *MockCreateJobUseCase) WithDBTransaction(dbtx store.Tx) jobs.CreateJobUseCase {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "WithDBTransaction", dbtx)
@@ -59,7 +59,7 @@ func (m *MockCreateJobUseCase) WithDBTransaction(dbtx store.Tx) jobs.CreateJobUs
 	return ret0
 }
 
-// WithDBTransaction indicates an expected call of WithDBTransaction.
+// WithDBTransaction indicates an expected call of WithDBTransaction
 func (mr *MockCreateJobUseCaseMockRecorder) WithDBTransaction(dbtx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithDBTransaction", reflect.TypeOf((*MockCreateJobUseCase)(nil).WithDBTransaction), dbtx)

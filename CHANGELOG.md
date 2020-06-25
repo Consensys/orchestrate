@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.2.0-beta1 (2020-06-25)
+
+### 🆕 Features
+* Add support for 4 configuration modes for TLS connection to Postgres databases. Add flag and environment variable `DB_TLS_SSLMODE` that can be: `disable`, `require`, `verify-ca`, `verify-full`. 
+
+
 ## v2.1.1 (2020-05-27)
 
 ### 🛠 Bug fixes

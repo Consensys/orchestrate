@@ -11,30 +11,30 @@ import (
 	reflect "reflect"
 )
 
-// MockGetScheduleUseCase is a mock of GetScheduleUseCase interface.
+// MockGetScheduleUseCase is a mock of GetScheduleUseCase interface
 type MockGetScheduleUseCase struct {
 	ctrl     *gomock.Controller
 	recorder *MockGetScheduleUseCaseMockRecorder
 }
 
-// MockGetScheduleUseCaseMockRecorder is the mock recorder for MockGetScheduleUseCase.
+// MockGetScheduleUseCaseMockRecorder is the mock recorder for MockGetScheduleUseCase
 type MockGetScheduleUseCaseMockRecorder struct {
 	mock *MockGetScheduleUseCase
 }
 
-// NewMockGetScheduleUseCase creates a new mock instance.
+// NewMockGetScheduleUseCase creates a new mock instance
 func NewMockGetScheduleUseCase(ctrl *gomock.Controller) *MockGetScheduleUseCase {
 	mock := &MockGetScheduleUseCase{ctrl: ctrl}
 	mock.recorder = &MockGetScheduleUseCaseMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockGetScheduleUseCase) EXPECT() *MockGetScheduleUseCaseMockRecorder {
 	return m.recorder
 }
 
-// Execute mocks base method.
+// Execute mocks base method
 func (m *MockGetScheduleUseCase) Execute(ctx context.Context, scheduleUUID, tenantID string) (*entities.Schedule, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, scheduleUUID, tenantID)
@@ -43,7 +43,7 @@ func (m *MockGetScheduleUseCase) Execute(ctx context.Context, scheduleUUID, tena
 	return ret0, ret1
 }
 
-// Execute indicates an expected call of Execute.
+// Execute indicates an expected call of Execute
 func (mr *MockGetScheduleUseCaseMockRecorder) Execute(ctx, scheduleUUID, tenantID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetScheduleUseCase)(nil).Execute), ctx, scheduleUUID, tenantID)

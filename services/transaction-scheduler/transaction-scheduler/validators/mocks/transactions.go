@@ -12,30 +12,30 @@ import (
 	reflect "reflect"
 )
 
-// MockTransactionValidator is a mock of TransactionValidator interface.
+// MockTransactionValidator is a mock of TransactionValidator interface
 type MockTransactionValidator struct {
 	ctrl     *gomock.Controller
 	recorder *MockTransactionValidatorMockRecorder
 }
 
-// MockTransactionValidatorMockRecorder is the mock recorder for MockTransactionValidator.
+// MockTransactionValidatorMockRecorder is the mock recorder for MockTransactionValidator
 type MockTransactionValidatorMockRecorder struct {
 	mock *MockTransactionValidator
 }
 
-// NewMockTransactionValidator creates a new mock instance.
+// NewMockTransactionValidator creates a new mock instance
 func NewMockTransactionValidator(ctrl *gomock.Controller) *MockTransactionValidator {
 	mock := &MockTransactionValidator{ctrl: ctrl}
 	mock.recorder = &MockTransactionValidatorMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockTransactionValidator) EXPECT() *MockTransactionValidatorMockRecorder {
 	return m.recorder
 }
 
-// ValidateFields mocks base method.
+// ValidateFields mocks base method
 func (m *MockTransactionValidator) ValidateFields(ctx context.Context, txRequest *entities.TxRequest) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ValidateFields", ctx, txRequest)
@@ -43,13 +43,13 @@ func (m *MockTransactionValidator) ValidateFields(ctx context.Context, txRequest
 	return ret0
 }
 
-// ValidateFields indicates an expected call of ValidateFields.
+// ValidateFields indicates an expected call of ValidateFields
 func (mr *MockTransactionValidatorMockRecorder) ValidateFields(ctx, txRequest interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateFields", reflect.TypeOf((*MockTransactionValidator)(nil).ValidateFields), ctx, txRequest)
 }
 
-// ValidateRequestHash mocks base method.
+// ValidateRequestHash mocks base method
 func (m *MockTransactionValidator) ValidateRequestHash(ctx context.Context, chainUUID string, params interface{}, idempotencyKey string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ValidateRequestHash", ctx, chainUUID, params, idempotencyKey)
@@ -58,13 +58,13 @@ func (m *MockTransactionValidator) ValidateRequestHash(ctx context.Context, chai
 	return ret0, ret1
 }
 
-// ValidateRequestHash indicates an expected call of ValidateRequestHash.
+// ValidateRequestHash indicates an expected call of ValidateRequestHash
 func (mr *MockTransactionValidatorMockRecorder) ValidateRequestHash(ctx, chainUUID, params, idempotencyKey interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateRequestHash", reflect.TypeOf((*MockTransactionValidator)(nil).ValidateRequestHash), ctx, chainUUID, params, idempotencyKey)
 }
 
-// ValidateChainExists mocks base method.
+// ValidateChainExists mocks base method
 func (m *MockTransactionValidator) ValidateChainExists(ctx context.Context, chainUUID string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ValidateChainExists", ctx, chainUUID)
@@ -72,13 +72,13 @@ func (m *MockTransactionValidator) ValidateChainExists(ctx context.Context, chai
 	return ret0
 }
 
-// ValidateChainExists indicates an expected call of ValidateChainExists.
+// ValidateChainExists indicates an expected call of ValidateChainExists
 func (mr *MockTransactionValidatorMockRecorder) ValidateChainExists(ctx, chainUUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateChainExists", reflect.TypeOf((*MockTransactionValidator)(nil).ValidateChainExists), ctx, chainUUID)
 }
 
-// ValidateMethodSignature mocks base method.
+// ValidateMethodSignature mocks base method
 func (m *MockTransactionValidator) ValidateMethodSignature(methodSignature string, args []string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ValidateMethodSignature", methodSignature, args)
@@ -87,13 +87,13 @@ func (m *MockTransactionValidator) ValidateMethodSignature(methodSignature strin
 	return ret0, ret1
 }
 
-// ValidateMethodSignature indicates an expected call of ValidateMethodSignature.
+// ValidateMethodSignature indicates an expected call of ValidateMethodSignature
 func (mr *MockTransactionValidatorMockRecorder) ValidateMethodSignature(methodSignature, args interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateMethodSignature", reflect.TypeOf((*MockTransactionValidator)(nil).ValidateMethodSignature), methodSignature, args)
 }
 
-// ValidateContract mocks base method.
+// ValidateContract mocks base method
 func (m *MockTransactionValidator) ValidateContract(ctx context.Context, params *types.ETHTransactionParams) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ValidateContract", ctx, params)
@@ -102,7 +102,7 @@ func (m *MockTransactionValidator) ValidateContract(ctx context.Context, params 
 	return ret0, ret1
 }
 
-// ValidateContract indicates an expected call of ValidateContract.
+// ValidateContract indicates an expected call of ValidateContract
 func (mr *MockTransactionValidatorMockRecorder) ValidateContract(ctx, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateContract", reflect.TypeOf((*MockTransactionValidator)(nil).ValidateContract), ctx, params)

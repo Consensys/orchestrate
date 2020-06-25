@@ -11,42 +11,42 @@ import (
 	reflect "reflect"
 )
 
-// MockWatcher is a mock of Watcher interface.
+// MockWatcher is a mock of Watcher interface
 type MockWatcher struct {
 	ctrl     *gomock.Controller
 	recorder *MockWatcherMockRecorder
 }
 
-// MockWatcherMockRecorder is the mock recorder for MockWatcher.
+// MockWatcherMockRecorder is the mock recorder for MockWatcher
 type MockWatcherMockRecorder struct {
 	mock *MockWatcher
 }
 
-// NewMockWatcher creates a new mock instance.
+// NewMockWatcher creates a new mock instance
 func NewMockWatcher(ctrl *gomock.Controller) *MockWatcher {
 	mock := &MockWatcher{ctrl: ctrl}
 	mock.recorder = &MockWatcherMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockWatcher) EXPECT() *MockWatcherMockRecorder {
 	return m.recorder
 }
 
-// AddListener mocks base method.
+// AddListener mocks base method
 func (m *MockWatcher) AddListener(arg0 configwatcher.Listener) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "AddListener", arg0)
 }
 
-// AddListener indicates an expected call of AddListener.
+// AddListener indicates an expected call of AddListener
 func (mr *MockWatcherMockRecorder) AddListener(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddListener", reflect.TypeOf((*MockWatcher)(nil).AddListener), arg0)
 }
 
-// Run mocks base method.
+// Run mocks base method
 func (m *MockWatcher) Run(arg0 context.Context) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Run", arg0)
@@ -54,13 +54,13 @@ func (m *MockWatcher) Run(arg0 context.Context) error {
 	return ret0
 }
 
-// Run indicates an expected call of Run.
+// Run indicates an expected call of Run
 func (mr *MockWatcherMockRecorder) Run(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Run", reflect.TypeOf((*MockWatcher)(nil).Run), arg0)
 }
 
-// Close mocks base method.
+// Close mocks base method
 func (m *MockWatcher) Close() error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Close")
@@ -68,7 +68,7 @@ func (m *MockWatcher) Close() error {
 	return ret0
 }
 
-// Close indicates an expected call of Close.
+// Close indicates an expected call of Close
 func (mr *MockWatcherMockRecorder) Close() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockWatcher)(nil).Close))

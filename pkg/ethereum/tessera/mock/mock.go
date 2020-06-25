@@ -10,30 +10,30 @@ import (
 	reflect "reflect"
 )
 
-// MockClient is a mock of Client interface.
+// MockClient is a mock of Client interface
 type MockClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockClientMockRecorder
 }
 
-// MockClientMockRecorder is the mock recorder for MockClient.
+// MockClientMockRecorder is the mock recorder for MockClient
 type MockClientMockRecorder struct {
 	mock *MockClient
 }
 
-// NewMockClient creates a new mock instance.
+// NewMockClient creates a new mock instance
 func NewMockClient(ctrl *gomock.Controller) *MockClient {
 	mock := &MockClient{ctrl: ctrl}
 	mock.recorder = &MockClientMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockClient) EXPECT() *MockClientMockRecorder {
 	return m.recorder
 }
 
-// GetStatus mocks base method.
+// GetStatus mocks base method
 func (m *MockClient) GetStatus(arg0 context.Context, arg1 string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetStatus", arg0, arg1)
@@ -42,13 +42,13 @@ func (m *MockClient) GetStatus(arg0 context.Context, arg1 string) (string, error
 	return ret0, ret1
 }
 
-// GetStatus indicates an expected call of GetStatus.
+// GetStatus indicates an expected call of GetStatus
 func (mr *MockClientMockRecorder) GetStatus(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStatus", reflect.TypeOf((*MockClient)(nil).GetStatus), arg0, arg1)
 }
 
-// StoreRaw mocks base method.
+// StoreRaw mocks base method
 func (m *MockClient) StoreRaw(arg0 context.Context, arg1 string, arg2 []byte, arg3 string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "StoreRaw", arg0, arg1, arg2, arg3)
@@ -57,7 +57,7 @@ func (m *MockClient) StoreRaw(arg0 context.Context, arg1 string, arg2 []byte, ar
 	return ret0, ret1
 }
 
-// StoreRaw indicates an expected call of StoreRaw.
+// StoreRaw indicates an expected call of StoreRaw
 func (mr *MockClientMockRecorder) StoreRaw(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StoreRaw", reflect.TypeOf((*MockClient)(nil).StoreRaw), arg0, arg1, arg2, arg3)
