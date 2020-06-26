@@ -49,7 +49,7 @@ func New(
 		app.MetricsOpt(),
 		app.LoggerMiddlewareOpt("base"),
 		app.LoggerInterceptorOpt(),
-		app.SwaggerOpt("./public/swagger-specs/types/envelope-store/store.swagger.json", "base@logger-base"),
+		app.SwaggerOpt("./public/swagger-specs/services/envelope-store/proto/store.swagger.json", "base@logger-base"),
 		envelopeServiceOpt,
 		envelopeHandlerOpt,
 		app.ProviderOpt(NewProvider()),

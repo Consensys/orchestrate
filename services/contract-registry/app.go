@@ -57,7 +57,7 @@ func New(
 		app.MultiTenancyOpt("auth", jwt, key, cfg.Multitenancy),
 		app.MetricsOpt(),
 		app.LoggerOpt("base"),
-		app.SwaggerOpt("./public/swagger-specs/types/contract-registry/registry.swagger.json", "base@logger-base"),
+		app.SwaggerOpt("./public/swagger-specs/services/contract-registry/proto/registry.swagger.json", "base@logger-base"),
 		contractServiceOpt,
 		contractHandlerOpt,
 		app.ProviderOpt(NewProvider()),
