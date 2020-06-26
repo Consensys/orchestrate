@@ -19,7 +19,7 @@ func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFun
 			txctx.Logger = txctx.Logger.WithFields(log.Fields{
 				"id":           txctx.Envelope.GetID(),
 				"chainID":      txctx.Envelope.GetChainIDString(),
-				"tx.nonce":     0,
+				"nonce":        0,
 				"one-time-key": true,
 			})
 
@@ -44,7 +44,7 @@ func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFun
 		// Nonce to attribute to tx
 		var n uint64
 		// Compute nonce key for nonce manager processing
-		nonceKey := string(txctx.In.Key())
+		nonceKey := txctx.Envelope.PartitionKey()
 
 		// First check if signal for recovering nonce
 		if v := txctx.Envelope.GetInternalLabelsValue("nonce.recovering.expected"); v != "" {
@@ -96,7 +96,7 @@ func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFun
 		// Set nonce
 		_ = txctx.Envelope.SetNonce(n)
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"tx.nonce": n,
+			"nonce": n,
 		})
 
 		// Execute pending handlers

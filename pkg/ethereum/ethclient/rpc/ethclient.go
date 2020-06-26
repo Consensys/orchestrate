@@ -152,10 +152,11 @@ type JSONError struct {
 }
 
 func (ec *Client) newJSONRpcMessage(method string, args ...interface{}) (*JSONRpcMessage, error) {
+	id := ec.nextID()
 	msg := &JSONRpcMessage{
 		Method:  method,
 		Version: "2.0",
-		ID:      ec.nextID(),
+		ID:      id,
 	}
 	if args != nil {
 		var err error

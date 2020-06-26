@@ -36,8 +36,8 @@ func (uc *deleteChain) Execute(ctx context.Context, uuid, tenantID string) error
 	}
 
 	logger.WithFields(logrus.Fields{
-		"chain.uuid":   uuid,
-		"chain.tenant": tenantID,
+		"chainUUID": uuid,
+		"tenantID":  tenantID,
 	}).Infof("deleted chain")
 
 	return err

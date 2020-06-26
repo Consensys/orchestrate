@@ -28,6 +28,14 @@ services:
     networks:
       - orchestrate
 
+  redisinsight:
+    image: redislabs/redisinsight:1.6.0
+    ports:
+      - 8001:8001
+    volumes: []
+    #- redisinsight:/db
+    networks:
+      - orchestrate
 
 volumes:
   portainer_data:

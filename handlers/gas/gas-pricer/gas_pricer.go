@@ -31,7 +31,7 @@ func Pricer(p ethclient.GasPricer) engine.HandlerFunc {
 
 		// Enrich logger
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"tx.gasPrice": txctx.Envelope.GetGasPriceString(),
+			"gasPrice": txctx.Envelope.GetGasPriceString(),
 		})
 	}
 }

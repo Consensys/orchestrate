@@ -35,7 +35,7 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 	}
 
 	// Set message Key
-	msg.Key = sarama.StringEncoder(txctx.In.Key())
+	msg.Key = sarama.StringEncoder(txctx.Envelope.PartitionKey())
 	return nil
 }
 

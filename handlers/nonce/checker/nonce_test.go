@@ -25,7 +25,7 @@ type MockNonceManager struct {
 }
 
 func (nm *MockNonceManager) GetLastSent(key string) (value uint64, ok bool, err error) {
-	if strings.Contains(key, "error-on-get") {
+	if strings.Contains(key, "@400") {
 		// Simulate error
 		return 0, false, fmt.Errorf("could not get nonce")
 	}
@@ -33,7 +33,7 @@ func (nm *MockNonceManager) GetLastSent(key string) (value uint64, ok bool, err 
 }
 
 func (nm *MockNonceManager) SetLastSent(key string, value uint64) error {
-	if strings.Contains(key, "error-on-set") {
+	if strings.Contains(key, "@404") {
 		// Simulate error
 		return fmt.Errorf("could not set nonce")
 	}
@@ -82,7 +82,7 @@ func (h *header) Set(_, _ string)     {}
 
 func makeContext(
 	endpoint,
-	key string,
+	chainID string,
 	invalid bool,
 	nonce, expectedNonceInMetadata uint64,
 	expectedRecoveryCount, expectedErrorCount int,
@@ -91,8 +91,7 @@ func makeContext(
 	txctx := engine.NewTxContext()
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
-	_ = txctx.Envelope.SetFrom(ethcommon.HexToAddress("0x1")).SetNonce(nonce)
-	txctx.In = mockMsg(key)
+	_ = txctx.Envelope.SetFrom(ethcommon.HexToAddress("0x1")).SetNonce(nonce).SetChainIDString(chainID)
 	txctx.WithContext(proxy.With(txctx.Context(), endpoint))
 
 	txctx.Set("expectedErrorCount", expectedErrorCount)
@@ -162,7 +161,7 @@ func TestChecker(t *testing.T) {
 		MockSenderHandler,
 	)
 
-	testKey1 := "key1"
+	testKey1 := "42"
 	// On 1st execution envelope with nonce 10 should be valid (as the mock client returns always return pending nonce 10)
 	txctx := makeContext("testURL", testKey1, false, 10, 0, 0, 0, "")
 	h(txctx)
@@ -183,7 +182,7 @@ func TestChecker(t *testing.T) {
 	txctx = makeContext("testURL", testKey1, true, 14, 12, 1, 0, "")
 	h(txctx)
 	assertTxContext(t, txctx)
-	recovering := tracker.Recovering(testKey1) > 0
+	recovering := tracker.Recovering(txctx.Envelope.PartitionKey()) > 0
 	assert.True(t, recovering, "NonceManager should be recovering")
 
 	// On 5th execution envelope with nonce 15 should be too high
@@ -197,7 +196,7 @@ func TestChecker(t *testing.T) {
 	txctx = makeContext("testURL", testKey1, false, 12, 0, 0, 0, "")
 	h(txctx)
 	assertTxContext(t, txctx)
-	recovering = tracker.Recovering(testKey1) > 0
+	recovering = tracker.Recovering(txctx.Envelope.PartitionKey()) > 0
 	assert.False(t, recovering, "NonceManager should have stopped recovering")
 
 	// On 7th execution envelope with nonce 14 but raw mode should be valid
@@ -206,21 +205,21 @@ func TestChecker(t *testing.T) {
 
 	h(txctx)
 	assertTxContext(t, txctx)
-	recovering = tracker.Recovering(testKey1) > 0
+	recovering = tracker.Recovering(txctx.Envelope.PartitionKey()) > 0
 	assert.False(t, recovering, "NonceManager should not be recovering")
 
 	// Execution with invalid chain
-	txctx = makeContext(endpointError, "key2", false, 10, 0, 0, 1, "")
+	txctx = makeContext(endpointError, "12", false, 10, 0, 0, 1, "")
 	h(txctx)
 	assertTxContext(t, txctx)
 
 	// Execution with error on nonce manager
-	txctx = makeContext("testURL", "key-error-on-get", false, 10, 0, 0, 1, "")
+	txctx = makeContext("testURL", "400", false, 10, 0, 0, 1, "")
 	h(txctx)
 	assertTxContext(t, txctx)
 
 	// Execution with error on nonce manager
-	txctx = makeContext("testURL", "key-error-on-set", false, 10, 0, 0, 0, "")
+	txctx = makeContext("testURL", "404", false, 10, 0, 0, 0, "")
 	h(txctx)
 	assertTxContext(t, txctx)
 
@@ -228,7 +227,7 @@ func TestChecker(t *testing.T) {
 	txctx = makeContext("testURL", testKey1, true, 13, 0, 1, 0, "json-rpc: nonce too low")
 	h(txctx)
 	assertTxContext(t, txctx)
-	v, _, _ := nm.GetLastSent(testKey1)
+	v, _, _ := nm.GetLastSent(txctx.Envelope.PartitionKey())
 	assert.Equal(t, uint64(9), v, "Nonce should have been re-initialized")
 
 	// Execution with recovery count exceeded

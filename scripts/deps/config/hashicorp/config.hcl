@@ -11,3 +11,5 @@ default_lease_ttl   = "168h",
 max_lease_ttl       = "720h"
 
 log_level = "Debug"
+
+ui = true

@@ -122,10 +122,10 @@ func (m *Manager) executeCommand(ctx context.Context, command *Command) {
 		m.runSession(ctx, command.Chain)
 	default:
 		log.WithoutContext().WithFields(logrus.Fields{
-			"type":           command.Type,
-			"chain.uuid":     command.Chain.UUID,
-			"chain.tenantId": command.Chain.TenantID,
-			"chain.name":     command.Chain.Name,
+			"type":      command.Type,
+			"chainUUID": command.Chain.UUID,
+			"tenantID":  command.Chain.TenantID,
+			"chainName": command.Chain.Name,
 		}).Errorf("Unknown command")
 	}
 }

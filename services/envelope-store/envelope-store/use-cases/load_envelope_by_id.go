@@ -39,8 +39,8 @@ func (se *loadEnvelopeByID) Execute(ctx context.Context, tenantID, envelopeID st
 		logger.
 			WithError(err).
 			WithFields(logrus.Fields{
-				"envelope.id": envelopeID,
-				"tenant":      tenantID,
+				"id":       envelopeID,
+				"tenantID": tenantID,
 			}).
 			Debugf("could not load envelope")
 		if err == pg.ErrNoRows {

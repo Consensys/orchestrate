@@ -30,7 +30,7 @@ func (sc *ScenarioContext) sendEnvelope(topic string, e *tx.Envelope) error {
 	// Prepare message to be sent
 	msg := &sarama.ProducerMessage{
 		Topic: viper.GetString(fmt.Sprintf("topic.%v", topic)),
-		Key:   sarama.StringEncoder(e.KafkaPartitionKey()),
+		Key:   sarama.StringEncoder(e.PartitionKey()),
 	}
 
 	err := encoding.Marshal(e.TxEnvelopeAsRequest(), msg)

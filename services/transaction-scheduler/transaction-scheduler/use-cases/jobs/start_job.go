@@ -101,7 +101,7 @@ func (uc *startJobUseCase) sendMessage(ctx context.Context, jobModel *models.Job
 
 	msg := &sarama.ProducerMessage{
 		Topic: topic,
-		Key:   sarama.StringEncoder(evlp.KafkaPartitionKey()),
+		Key:   sarama.StringEncoder(evlp.PartitionKey()),
 	}
 
 	err = encoding.Marshal(txEnvelope, msg)

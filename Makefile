@@ -200,7 +200,7 @@ efk:
 	@docker-compose -f scripts/deps/docker-compose-efk.yml up -d
 
 down-efk:
-	@docker-compose -f scripts/deps/docker-compose-efk.yml down
+	@docker-compose -f scripts/deps/docker-compose-efk.yml down --volumes --timeout 0
 
 ifeq (restart,$(firstword $(MAKECMDGOALS)))
   CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
@@ -211,4 +211,14 @@ ifeq (restart,$(firstword $(MAKECMDGOALS)))
 endif
 
 restart: gobuild
-	@docker-compose restart $(CMD_ARGS)
+	@docker-compose stop $(CMD_ARGS) && docker-compose start $(CMD_ARGS)
+
+redisinsight:
+	@docker-compose -f scripts/deps/docker-compose-tools.yml up -d redisinsight
+
+down-redisinsight:
+	@docker-compose -f scripts/deps/docker-compose-tools.yml rm --force -s -v redisinsight
+
+up-all: efk pgadmin redisinsight up
+
+down-all: down-efk down-pgadmin down-redisinsight down

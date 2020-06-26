@@ -43,8 +43,8 @@ func (ag *PGChainAgent) RegisterChain(ctx context.Context, chain *models.Chain) 
 	}
 
 	logger.WithFields(logrus.Fields{
-		"uuid":      chain.UUID,
-		"tenant.id": chain.TenantID,
+		"chainUUID": chain.UUID,
+		"tenantID":  chain.TenantID,
 		"name":      chain.Name,
 		"urls":      chain.URLs,
 	}).Infof("registered chain")
@@ -57,10 +57,10 @@ func (ag *PGChainAgent) RegisterChain(ctx context.Context, chain *models.Chain) 
 		}
 
 		logger.WithFields(logrus.Fields{
-			"uuid":       prixTxManager.UUID,
-			"chain.uuid": chain.UUID,
-			"type":       prixTxManager.Type,
-			"url":        prixTxManager.URL,
+			"uuid":      prixTxManager.UUID,
+			"chainUUID": chain.UUID,
+			"type":      prixTxManager.Type,
+			"url":       prixTxManager.URL,
 		}).Infof("register private tx manager")
 	}
 
@@ -109,7 +109,7 @@ func (ag *PGChainAgent) GetChainsByTenant(ctx context.Context, filters map[strin
 	err := req.Select()
 	if err != nil {
 		log.FromContext(ctx).
-			WithField("tenant", tenantID).
+			WithField("tenantID", tenantID).
 			WithError(err).Errorf("could not load chains")
 		return nil, errors.PostgresConnectionError("error loading chains for tenant %v", tenantID).ExtendComponent(chainComponentName)
 	}
@@ -137,7 +137,7 @@ func (ag *PGChainAgent) GetChainByUUID(ctx context.Context, uuid string) (*model
 		return nil, errors.NotFoundError("chain %v does not exist", uuid).ExtendComponent(chainComponentName)
 	} else if err != nil {
 		log.FromContext(ctx).
-			WithField("chain.uuid", uuid).
+			WithField("chainUUID", uuid).
 			WithError(err).Errorf("could not load chain")
 		return nil, errors.PostgresConnectionError("error loading chain %v", uuid).ExtendComponent(chainComponentName)
 	}
@@ -164,8 +164,8 @@ func (ag *PGChainAgent) GetChainByUUIDAndTenant(ctx context.Context, uuid, tenan
 		return nil, errors.NotFoundError("chain %v does not exist in tenant %v", uuid, tenantID).ExtendComponent(chainComponentName)
 	} else if err != nil {
 		log.FromContext(ctx).
-			WithField("chain.uuid", uuid).
-			WithField("tenant", tenantID).
+			WithField("chainUUID", uuid).
+			WithField("tenantID", tenantID).
 			WithError(err).Errorf("could not load chain")
 		return nil, errors.PostgresConnectionError("error loading chain %v in tenant %v", uuid, tenantID).ExtendComponent(chainComponentName)
 	}
@@ -308,7 +308,7 @@ func (ag *PGChainAgent) updateChainPrivateTxManagers(ctx context.Context, chainU
 	}
 
 	logger.WithFields(logrus.Fields{
-		"chain.uuid": chainUUID,
+		"chainUUID": chainUUID,
 	}).Infof("removed privateTxManagers")
 
 	for _, prixTxManager := range privateTxManagers {
@@ -319,10 +319,10 @@ func (ag *PGChainAgent) updateChainPrivateTxManagers(ctx context.Context, chainU
 		}
 
 		logger.WithFields(logrus.Fields{
-			"uuid":       prixTxManager.UUID,
-			"chain.uuid": chainUUID,
-			"type":       prixTxManager.Type,
-			"url":        prixTxManager.URL,
+			"uuid":      prixTxManager.UUID,
+			"chainUUIS": chainUUID,
+			"type":      prixTxManager.Type,
+			"url":       prixTxManager.URL,
 		}).Infof("registered private tx manager")
 	}
 

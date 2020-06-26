@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.2.0-beta2 (unreleased)
+
+### 🛠 Bug fixes
+* Fixes a bug of nonce management when registering multiple chains of the same network but using an identical account for transactions 
+
 ## v2.2.0-beta1 (2020-06-25)
 
 ### 🆕 Features

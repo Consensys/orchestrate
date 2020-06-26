@@ -244,7 +244,7 @@ func (s *Session) callHooks(ctx context.Context) {
 			// We MUST drain array chan and ignore blocks after an error happened
 			if err != nil {
 				log.FromContext(ctx).
-					WithField("block number", res.(*fetchedBlock).block.NumberU64()).
+					WithField("blockNumber", res.(*fetchedBlock).block.NumberU64()).
 					Warn("ignoring fetched block")
 				continue
 			}
@@ -518,7 +518,7 @@ func isPrivTx(transaction *ethtypes.Transaction) bool {
 func (s *Session) fetchReceiptEnvelope(ctx context.Context, envelope *tx.Envelope, txHash ethcommon.Hash) *Future {
 	return NewFuture(func() (interface{}, error) {
 		log.FromContext(ctx).
-			WithField("tx.hash", txHash.Hex()).
+			WithField("txHash", txHash.Hex()).
 			WithField("chainUUID", s.Chain.UUID).
 			Debug("fetching fetch receipt")
 
@@ -531,7 +531,7 @@ func (s *Session) fetchReceiptEnvelope(ctx context.Context, envelope *tx.Envelop
 		if err != nil {
 			log.FromContext(ctx).
 				WithError(err).
-				WithField("tx.hash", txHash.Hex()).
+				WithField("txHash", txHash.Hex()).
 				WithField("chainUUID", s.Chain.UUID).
 				Errorf("failed to fetch receipt")
 
@@ -549,7 +549,7 @@ func (s *Session) fetchReceiptEnvelope(ctx context.Context, envelope *tx.Envelop
 func (s *Session) fetchReceipt(ctx context.Context, job *types.Job, txHash ethcommon.Hash) *Future {
 	return NewFuture(func() (interface{}, error) {
 		logger := log.FromContext(ctx).
-			WithField("tx.hash", txHash.Hex()).
+			WithField("txHash", txHash.Hex()).
 			WithField("chainUUID", s.Chain.UUID)
 
 		logger.Debug("fetching fetch receipt")
@@ -587,7 +587,7 @@ func (s *Session) fetchPrivateReceiptEnvelope(ctx context.Context, envelope *tx.
 		}
 
 		log.FromContext(ctx).
-			WithField("tx.hash", txHash.Hex()).
+			WithField("txHash", txHash.Hex()).
 			WithField("chainUUID", s.Chain.UUID).
 			Debug("fetching private receipt")
 
@@ -602,7 +602,7 @@ func (s *Session) fetchPrivateReceiptEnvelope(ctx context.Context, envelope *tx.
 		if err != nil && receipt == nil {
 			log.FromContext(ctx).
 				WithError(err).
-				WithField("tx.hash", txHash.Hex()).
+				WithField("txHash", txHash.Hex()).
 				WithField("chainUUID", s.Chain.UUID).
 				Error("failed to fetch receipt")
 
@@ -610,17 +610,17 @@ func (s *Session) fetchPrivateReceiptEnvelope(ctx context.Context, envelope *tx.
 		} else if err != nil {
 			log.FromContext(ctx).
 				WithError(err).
-				WithField("tx.hash", txHash.Hex()).
+				WithField("txHash", txHash.Hex()).
 				WithField("chainUUID", s.Chain.UUID).
 				Warn("failed to fetch private receipt")
 		}
 
 		log.FromContext(ctx).
-			WithField("TxHash", receipt.TxHash).
-			WithField("PrivateFrom", receipt.PrivateFrom).
-			WithField("PrivateFor", receipt.PrivateFor).
-			WithField("PrivacyGroupID", receipt.PrivacyGroupId).
-			WithField("Status", receipt.Status).
+			WithField("txHash", receipt.TxHash).
+			WithField("privateFrom", receipt.PrivateFrom).
+			WithField("privateFor", receipt.PrivateFor).
+			WithField("privacyGroupID", receipt.PrivacyGroupId).
+			WithField("status", receipt.Status).
 			Debug("private Receipt fetched")
 
 		// Bind the hybrid receipt to the envelope
@@ -635,7 +635,7 @@ func (s *Session) fetchPrivateReceiptEnvelope(ctx context.Context, envelope *tx.
 func (s *Session) fetchPrivateReceipt(ctx context.Context, job *types.Job, txHash ethcommon.Hash) *Future {
 	return NewFuture(func() (interface{}, error) {
 		logger := log.FromContext(ctx).
-			WithField("tx.hash", txHash.Hex()).
+			WithField("txHash", txHash.Hex()).
 			WithField("chainUUID", s.Chain.UUID)
 
 		logger.Debug("fetching private receipt")
@@ -654,17 +654,17 @@ func (s *Session) fetchPrivateReceipt(ctx context.Context, job *types.Job, txHas
 		} else if err != nil {
 			log.FromContext(ctx).
 				WithError(err).
-				WithField("tx.hash", txHash.Hex()).
+				WithField("txHash", txHash.Hex()).
 				WithField("chainUUID", s.Chain.UUID).
 				Warn("failed to fetch private receipt")
 		}
 
 		logger.
-			WithField("TxHash", receipt.TxHash).
-			WithField("PrivateFrom", receipt.PrivateFrom).
-			WithField("PrivateFor", receipt.PrivateFor).
-			WithField("PrivacyGroupID", receipt.PrivacyGroupId).
-			WithField("Status", receipt.Status).
+			WithField("txHash", receipt.TxHash).
+			WithField("privateFrom", receipt.PrivateFrom).
+			WithField("privateFor", receipt.PrivateFor).
+			WithField("privacyGroupID", receipt.PrivacyGroupId).
+			WithField("status", receipt.Status).
 			Debug("private Receipt fetched")
 
 		// Bind the hybrid receipt to the envelope

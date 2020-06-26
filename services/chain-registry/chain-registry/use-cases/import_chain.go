@@ -61,9 +61,9 @@ func (uc *importChain) Execute(ctx context.Context, chainEncodeJSON string) erro
 	}
 
 	logger.WithFields(logrus.Fields{
-		"chain.name":   chain.Name,
-		"chain.uuid":   chain.UUID,
-		"chain.tenant": chain.TenantID,
+		"chainName": chain.Name,
+		"chainUUID": chain.UUID,
+		"tenantID":  chain.TenantID,
 	}).Infof("imported chain from configuration")
 
 	return nil

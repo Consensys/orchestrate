@@ -24,8 +24,8 @@ x-besu-common: &besu-common
     - ./config:/config
 
 x-besu-env-common: &besu-env-common
-  RPC_HTTP_API: WEB3,ETH,NET,EEA,PRIV,ADMIN,PERM,ibft
-  RPC_WS_API: WEB3,ETH,NET,EEA,PRIV,ADMIN,PERM,ibft
+  RPC_HTTP_API: WEB3,ETH,NET,EEA,PRIV,ADMIN,PERM,TXPOOL,ibft
+  RPC_WS_API: WEB3,ETH,NET,EEA,PRIV,ADMIN,PERM,TXPOOL,ibft
   METRICS: 1
   LOG4J_CONFIGURATION_FILE: /config/log-config.xml
 

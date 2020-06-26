@@ -40,8 +40,8 @@ func (se *setEnvelopeStatus) Execute(ctx context.Context, tenantID, envelopeID, 
 		logger.
 			WithError(err).
 			WithFields(logrus.Fields{
-				"envelope.id": envelopeID,
-				"tenant":      tenantID,
+				"id":       envelopeID,
+				"tenantID": tenantID,
 			}).
 			Debugf("could not load envelope")
 		if err == pg.ErrNoRows {
@@ -60,9 +60,9 @@ func (se *setEnvelopeStatus) Execute(ctx context.Context, tenantID, envelopeID, 
 
 	log.FromContext(ctx).
 		WithFields(logrus.Fields{
-			"status":      envelope.Status,
-			"tenant":      envelope.TenantID,
-			"envelope.id": envelope.EnvelopeID,
+			"status":   envelope.Status,
+			"tenantID": envelope.TenantID,
+			"id":       envelope.EnvelopeID,
 		}).
 		Infof("envelope updated")
 

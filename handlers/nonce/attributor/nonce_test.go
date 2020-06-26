@@ -24,7 +24,7 @@ type MockNonceManager struct {
 }
 
 func (nm *MockNonceManager) GetLastAttributed(key string) (value uint64, ok bool, err error) {
-	if strings.Contains(key, "error-on-get") {
+	if strings.Contains(key, "400") {
 		// Simulate error
 		return 0, false, fmt.Errorf("could not get nonce")
 	}
@@ -32,7 +32,7 @@ func (nm *MockNonceManager) GetLastAttributed(key string) (value uint64, ok bool
 }
 
 func (nm *MockNonceManager) SetLastAttributed(key string, value uint64) error {
-	if strings.Contains(key, "error-on-set") {
+	if strings.Contains(key, "404") {
 		// Simulate error
 		return fmt.Errorf("could not set nonce")
 	}
@@ -63,12 +63,11 @@ func (h *header) Del(_ string)        {}
 func (h *header) Get(_ string) string { return "" }
 func (h *header) Set(_, _ string)     {}
 
-func makeNonceContext(endpoint, key string, expectedNonce uint64, expectedErrorCount int) *engine.TxContext {
+func makeNonceContext(endpoint, chainID string, expectedNonce uint64, expectedErrorCount int) *engine.TxContext {
 	txctx := engine.NewTxContext()
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
-	txctx.In = mockMsg(key)
-	_ = txctx.Envelope.SetFrom(ethcommon.HexToAddress("0x1"))
+	_ = txctx.Envelope.SetFrom(ethcommon.HexToAddress("0x1")).SetChainIDString(chainID)
 	txctx.WithContext(proxy.With(txctx.Context(), endpoint))
 
 	txctx.Set("expectedErrorCount", expectedErrorCount)
@@ -92,7 +91,7 @@ func TestNonceHandler(t *testing.T) {
 
 	h := Nonce(nm, ec)
 
-	testKey1 := "key1"
+	testKey1 := "42"
 	// On 1st execution nonce should be 10 (as the mock client returns always return pending nonce 10)
 	txctx := makeNonceContext("1", testKey1, 10, 0)
 	h(txctx)
@@ -110,12 +109,12 @@ func TestNonceHandler(t *testing.T) {
 	assertTxContext(t, txctx)
 
 	// NonceManager should trigger an error get
-	txctx = makeNonceContext("1", "key-error-on-get", 0, 1)
+	txctx = makeNonceContext("1", "400", 0, 1)
 	h(txctx)
 	assertTxContext(t, txctx)
 
 	// NonceManager should trigger an error on set
-	txctx = makeNonceContext("1", "key-error-on-set", 10, 0)
+	txctx = makeNonceContext("1", "404", 10, 0)
 	h(txctx)
 	assertTxContext(t, txctx)
 

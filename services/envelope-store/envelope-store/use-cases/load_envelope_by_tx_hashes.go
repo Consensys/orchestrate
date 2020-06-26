@@ -35,9 +35,9 @@ func (se *loadEnvelopeByTxHashes) Execute(ctx context.Context, tenantID, chainID
 		logger.
 			WithError(err).
 			WithFields(logrus.Fields{
-				"chain.id":  chainID,
-				"tx.hashes": txHashes,
-				"tenant":    tenantID,
+				"chainID":  chainID,
+				"txHashes": txHashes,
+				"tenantID": tenantID,
 			}).
 			Debugf("could not load envelopes")
 		if err == pg.ErrNoRows {

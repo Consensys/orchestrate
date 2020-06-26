@@ -49,9 +49,9 @@ func (uc *registerChain) Execute(ctx context.Context, chain *models.Chain) error
 	}
 
 	logger.WithFields(logrus.Fields{
-		"chain.name":   chain.Name,
-		"chain.uuid":   chain.UUID,
-		"chain.tenant": chain.TenantID,
+		"chainName": chain.Name,
+		"chainUUID": chain.UUID,
+		"tenantID":  chain.TenantID,
 	}).Infof("registered a new chain")
 
 	return nil

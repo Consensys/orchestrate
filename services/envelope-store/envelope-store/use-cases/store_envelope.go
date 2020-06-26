@@ -47,10 +47,10 @@ func (se *storeEnvelope) Execute(ctx context.Context, tenantID string, envelopeT
 
 	log.FromContext(ctx).
 		WithFields(logrus.Fields{
-			"chain.id":    envelope.ChainID,
-			"tx.hash":     envelope.TxHash,
-			"tenant":      envelope.TenantID,
-			"envelope.id": envelope.EnvelopeID,
+			"chainID":  envelope.ChainID,
+			"txHash":   envelope.TxHash,
+			"tenantID": envelope.TenantID,
+			"id":       envelope.EnvelopeID,
 		}).
 		Infof("envelope stored")
 

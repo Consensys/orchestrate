@@ -62,7 +62,7 @@ func (f *Faucet) prepareMsg(ctx context.Context, r *types.Request, elected strin
 
 	// Message should be sent to crafter topic
 	msg.Topic = viper.GetString(broker.TxCrafterViperKey)
-	msg.Key = sarama.StringEncoder(b.KafkaPartitionKey())
+	msg.Key = sarama.StringEncoder(b.PartitionKey())
 
 	return nil
 }

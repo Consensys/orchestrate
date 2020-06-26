@@ -973,22 +973,29 @@ func (e *Envelope) loadPtrFields(gas, nonce, gasPrice, value, from, to string) [
 	return errs
 }
 
-// Attribute kafka partition keys to well attribute nonce
-// For a classic eth_sendRawTransaction transaction - <from>@<chainName>
-// For a eea_sendRawTransaction with a privacyGroupID - <from>@orion-<privacyGroupID>@<chainName>
-// For a eea_sendRawTransaction with a privateFor - <from>@orion-<hash(privateFor-privateFrom)>@<chainName>
-// TODO: Change <chainName> to <chainUUID> when needed
-func (e *Envelope) KafkaPartitionKey() string {
+// Attribute kafka partition and redis keys to well attribute nonce
+// For a classic eth_sendRawTransaction transaction - <from>@<chainID>
+// For a eea_sendRawTransaction with a privacyGroupID - <from>@orion-<privacyGroupID>@<chainID>
+// For a eea_sendRawTransaction with a privateFor - <from>@orion-<hash(privateFor-privateFrom)>@<chainID>
+func (e *Envelope) PartitionKey() string {
+	// TODO: to remove when the tx scheduler will be the only entrypoint of Orchestrate
+	var chainKey string
+	if e.GetChainID() != nil {
+		chainKey = e.GetChainID().String()
+	} else {
+		chainKey = e.GetChainName()
+	}
+
 	switch {
 	case e.IsEeaSendPrivateTransactionPrivacyGroup():
-		return fmt.Sprintf("%v@orion-%v@%v", e.GetFromString(), e.GetPrivacyGroupID(), e.GetChainName())
+		return fmt.Sprintf("%v@orion-%v@%v", e.GetFromString(), e.GetPrivacyGroupID(), chainKey)
 	case e.IsEeaSendPrivateTransactionPrivateFor():
 		l := append(e.GetPrivateFor(), e.GetPrivateFrom())
 		sort.Strings(l)
 		h := md5.New()
 		_, _ = h.Write([]byte(strings.Join(l, "-")))
-		return fmt.Sprintf("%v@orion-%v@%v", e.GetFromString(), fmt.Sprintf("%x", h.Sum(nil)), e.GetChainName())
+		return fmt.Sprintf("%v@orion-%v@%v", e.GetFromString(), fmt.Sprintf("%x", h.Sum(nil)), chainKey)
 	default:
-		return fmt.Sprintf("%v@%v", e.GetFromString(), e.GetChainName())
+		return fmt.Sprintf("%v@%v", e.GetFromString(), chainKey)
 	}
 }

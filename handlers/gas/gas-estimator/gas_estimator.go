@@ -58,14 +58,14 @@ func Estimator(p ethclient.GasEstimator) engine.HandlerFunc {
 
 			// Enrich logger
 			txctx.Logger = txctx.Logger.WithFields(log.Fields{
-				"tx.gas": g,
+				"gas": g,
 			})
 			txctx.Logger.Debugf("gas-estimator: gas limit set")
 		}
 
 		// Enrich logger
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"tx.gas": txctx.Envelope.MustGetGasUint64(),
+			"gas": txctx.Envelope.MustGetGasUint64(),
 		})
 	}
 }

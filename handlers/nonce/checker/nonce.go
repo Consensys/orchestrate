@@ -70,7 +70,7 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 		})
 
 		// Retrieves nonce key for nonce manager processing
-		nonceKey := string(txctx.In.Key())
+		nonceKey := txctx.Envelope.PartitionKey()
 		var expectedNonce uint64
 
 		// Retrieve last sent nonce from nonce manager
@@ -238,7 +238,7 @@ func RecoveryStatusSetter(nm nonce.Sender, tracker *RecoveryTracker) engine.Hand
 		txctx.Next()
 
 		// Compute nonce key
-		nonceKey := string(txctx.In.Key())
+		nonceKey := txctx.Envelope.PartitionKey()
 
 		// If are recovering we increment count
 		if nonceRecoveringExpected := txctx.Envelope.GetInternalLabelsValue("nonce.recovering.expected"); nonceRecoveringExpected != "" {

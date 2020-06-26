@@ -104,6 +104,8 @@ services:
     volumes:
       - ./config/hashicorp/config.hcl:/vault/config.hcl:ro
     entrypoint: vault server -config=/vault
+    ports:
+      - 8200:8200
 
   vault-init:
     <<: *container-common
