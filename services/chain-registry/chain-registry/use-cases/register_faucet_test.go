@@ -24,5 +24,5 @@ func TestRegisterFaucet(t *testing.T) {
 	faucetAgent.EXPECT().RegisterFaucet(gomock.Any(), gomock.Eq(faucet)).Times(1)
 
 	err := registerFaucetUC.Execute(context.Background(), faucet)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }

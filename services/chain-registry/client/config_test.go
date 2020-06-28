@@ -26,7 +26,7 @@ func TestChainRegistryTarget(t *testing.T) {
 		"--chain-registry-url=flag-chain-registry",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err, "Parse Chain Registry flags should not error")
+	assert.NoError(t, err, "Parse Chain Registry flags should not error")
 	expected = "flag-chain-registry"
 	assert.Equal(t, expected, viper.GetString(ChainRegistryURLViperKey), "From Flag")
 }

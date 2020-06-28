@@ -27,7 +27,7 @@ func TestGetCatalog_Execute(t *testing.T) {
 		response, err := usecase.Execute(context.Background())
 
 		assert.Equal(t, response, names)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	t.Run("should fail if data agent fails", func(t *testing.T) {

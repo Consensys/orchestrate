@@ -4,9 +4,10 @@ package jobs
 
 import (
 	"context"
+	"testing"
+
 	"github.com/gofrs/uuid"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
-	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
@@ -39,7 +40,7 @@ func TestSearchJobs_Execute(t *testing.T) {
 		jobs := []*models.Job{testutils.FakeJobModel(0)}
 		chainUUID := uuid.Must(uuid.NewV4()).String()
 		filters := &entities.JobFilters{
-			TxHashes: []string{txHash.String()},
+			TxHashes:  []string{txHash.String()},
 			ChainUUID: chainUUID,
 		}
 
@@ -47,7 +48,7 @@ func TestSearchJobs_Execute(t *testing.T) {
 		mockJobDA.EXPECT().Search(ctx, tenantID, []string{txHash.String()}, chainUUID).Return(jobs, nil)
 		jobResponse, err := usecase.Execute(ctx, filters, tenantID)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, expectedResponse, jobResponse)
 	})
 
@@ -62,7 +63,7 @@ func TestSearchJobs_Execute(t *testing.T) {
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(searchJobsComponent), err)
 	})
-	
+
 	t.Run("should fail with invalid parameter in case invalid txHashes", func(t *testing.T) {
 		filters := &entities.JobFilters{
 			TxHashes: []string{"axasad"},
@@ -72,7 +73,7 @@ func TestSearchJobs_Execute(t *testing.T) {
 
 		assert.True(t, errors.IsInvalidParameterError(err))
 	})
-	
+
 	t.Run("should fail with invalid parameter in case invalid chainUUID", func(t *testing.T) {
 		filters := &entities.JobFilters{
 			ChainUUID: "axasad",

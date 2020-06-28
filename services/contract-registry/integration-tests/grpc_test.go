@@ -66,7 +66,7 @@ func (s *contractRegistryGRPCTestSuite) TestContractRegistry_Register() {
 				Tag:  contract.GetTag(),
 			},
 		})
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, resp.GetContract().GetName(), contract.GetName())
 		assert.Equal(t, resp.GetContract().GetTag(), contract.GetTag())
 	})
@@ -82,7 +82,7 @@ func (s *contractRegistryGRPCTestSuite) TestContractRegistry_Register() {
 				Tag:  contract.GetTag(),
 			},
 		})
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, resp.GetContract().GetName(), contract.GetName())
 		assert.Equal(t, resp.GetContract().GetTag(), "latest")
 	})
@@ -99,21 +99,21 @@ func (s *contractRegistryGRPCTestSuite) TestContractRegistry_Get() {
 
 	s.T().Run("should get all contracts", func(t *testing.T) {
 		_, err := s.grpcClient.GetCatalog(ctx, &registry.GetCatalogRequest{})
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	s.T().Run("should get all tags of a contract", func(t *testing.T) {
 		resp, err := s.grpcClient.GetTags(ctx, &registry.GetTagsRequest{
 			Name: contract0.GetName(),
 		})
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, resp.GetTags(), []string{"v1.0.0"})
 	})
 
 	s.T().Run("should get a contract", func(t *testing.T) {
 		resp, err := s.grpcClient.GetContract(ctx, s.getContractRequest(contract0.GetName(), contract0.GetTag()))
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, resp.GetContract().GetName(), contract0.GetName())
 		assert.Equal(t, resp.GetContract().GetTag(), contract0.GetTag())
 		assert.Equal(t, resp.GetContract().GetBytecode(), contract0.GetBytecode())
@@ -123,19 +123,19 @@ func (s *contractRegistryGRPCTestSuite) TestContractRegistry_Get() {
 
 	s.T().Run("should get a contract abi", func(t *testing.T) {
 		resp, err := s.grpcClient.GetContractABI(ctx, s.getContractRequest(contract0.GetName(), contract0.GetTag()))
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, resp.GetAbi(), contract0.GetAbi())
 	})
 
 	s.T().Run("should get a contract bytecode", func(t *testing.T) {
 		resp, err := s.grpcClient.GetContractBytecode(ctx, s.getContractRequest(contract0.GetName(), contract0.GetTag()))
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, resp.GetBytecode(), contract0.GetBytecode())
 	})
 
 	s.T().Run("should get a contract deployed bytecode", func(t *testing.T) {
 		resp, err := s.grpcClient.GetContractDeployedBytecode(ctx, s.getContractRequest(contract0.GetName(), contract0.GetTag()))
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, resp.GetDeployedBytecode(), contract0.GetDeployedBytecode())
 	})
 
@@ -148,7 +148,7 @@ func (s *contractRegistryGRPCTestSuite) TestContractRegistry_Get() {
 			MethodName: "constructor",
 		})
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, resp0.GetSignatures()[0], "constructor(uint256)")
 
 		resp1, err := s.grpcClient.GetMethodSignatures(ctx, &registry.GetMethodSignaturesRequest{
@@ -159,7 +159,7 @@ func (s *contractRegistryGRPCTestSuite) TestContractRegistry_Get() {
 			MethodName: "transfer",
 		})
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, resp1.GetSignatures()[0], "transfer(address,uint256)")
 	})
 }

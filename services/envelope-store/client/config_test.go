@@ -26,7 +26,7 @@ func TestClientFlags(t *testing.T) {
 		"--envelope-store-url=flag-grpc-store",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err, "Parse Store flags should not error")
+	assert.NoError(t, err, "Parse Store flags should not error")
 	expected = "flag-grpc-store"
 	assert.Equal(t, expected, viper.GetString(EnvelopeStoreURLViperKey), "From Flag")
 }
@@ -50,7 +50,7 @@ func TestClientNewConfig(t *testing.T) {
 		"--envelope-store-url=" + expectedStoreUrl,
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err, "Parse Store flags should not error")
+	assert.NoError(t, err, "Parse Store flags should not error")
 
 	cfg := NewConfigFromViper(viper.GetViper())
 	assert.Equal(t, expectedStoreUrl, cfg.URL, "Default store url")

@@ -5,6 +5,8 @@ package jobs
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	mocks2 "github.com/Shopify/sarama/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/spf13/viper"
@@ -13,7 +15,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
-	"testing"
 )
 
 func TestStartJob_Execute(t *testing.T) {
@@ -45,7 +46,7 @@ func TestStartJob_Execute(t *testing.T) {
 
 		err := usecase.Execute(ctx, job.UUID, tenantID)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	t.Run("should fail with same error if FindOne fails", func(t *testing.T) {

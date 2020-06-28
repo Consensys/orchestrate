@@ -27,7 +27,7 @@ func TestProvidersThrottleDuration(t *testing.T) {
 		"--providers-throttle-duration=3s",
 	}
 	err := f.Parse(args)
-	assert.Nil(t, err, "Parse Chain Registry flags should not error")
+	assert.NoError(t, err, "Parse Chain Registry flags should not error")
 	expected, _ = time.ParseDuration("3s")
 	assert.Equal(t, expected, viper.GetDuration(ProvidersThrottleDurationViperKey), "From Flag")
 }

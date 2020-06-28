@@ -25,28 +25,28 @@ func TestGetJob_Execute(t *testing.T) {
 
 	mockDB.EXPECT().Job().Return(mockJobDA).AnyTimes()
 	usecase := NewGetJobUseCase(mockDB)
-	
+
 	tenantID := "tenantID"
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		job := testutils.FakeJobModel(0)
 		expectedResponse := parsers.NewJobEntityFromModels(job)
-		
+
 		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, tenantID).Return(job, nil)
 		jobResponse, err := usecase.Execute(ctx, job.UUID, tenantID)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, expectedResponse, jobResponse)
 	})
 
 	t.Run("should fail with same error if FindOneByUUID fails for job", func(t *testing.T) {
 		uuid := "uuid"
 		expectedErr := errors.NotFoundError("error")
-	
+
 		mockJobDA.EXPECT().FindOneByUUID(ctx, uuid, tenantID).Return(nil, expectedErr)
-	
+
 		response, err := usecase.Execute(ctx, uuid, tenantID)
-	
+
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createJobComponent), err)
 	})

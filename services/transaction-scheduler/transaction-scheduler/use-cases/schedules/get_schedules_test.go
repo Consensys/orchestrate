@@ -1,6 +1,7 @@
 // +build unit
 
 package schedules
+
 import (
 	"context"
 	"testing"
@@ -31,10 +32,10 @@ func TestGetSchedules_Execute(t *testing.T) {
 		scheduleEntity := testutils.FakeScheduleEntity()
 		scheduleModel := parsers.NewScheduleModelFromEntities(scheduleEntity, tenantID)
 		expectedResponse := []*entities.Schedule{parsers.NewScheduleEntityFromModels(scheduleModel)}
-		
+
 		mockDB.EXPECT().Schedule().Return(mockScheduleDA).Times(1)
 		mockDB.EXPECT().Job().Return(mockJobDA).Times(1)
-		
+
 		mockScheduleDA.EXPECT().
 			FindAll(gomock.Any(), tenantID).
 			Return([]*models.Schedule{scheduleModel}, nil)
@@ -45,7 +46,7 @@ func TestGetSchedules_Execute(t *testing.T) {
 
 		schedulesResponse, err := usecase.Execute(ctx, tenantID)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, expectedResponse, schedulesResponse)
 	})
 
@@ -53,7 +54,7 @@ func TestGetSchedules_Execute(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 
 		mockDB.EXPECT().Schedule().Return(mockScheduleDA).Times(1)
-		
+
 		mockScheduleDA.EXPECT().
 			FindAll(gomock.Any(), tenantID).
 			Return(nil, expectedErr)
@@ -75,7 +76,7 @@ func TestGetSchedules_Execute(t *testing.T) {
 		mockScheduleDA.EXPECT().
 			FindAll(gomock.Any(), tenantID).
 			Return([]*models.Schedule{scheduleModel}, nil)
-		
+
 		mockJobDA.EXPECT().
 			FindOneByUUID(gomock.Any(), scheduleModel.Jobs[0].UUID, tenantID).
 			Return(scheduleModel.Jobs[0], expectedErr)

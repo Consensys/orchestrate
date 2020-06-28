@@ -63,7 +63,7 @@ func (s *transactionsTestSuite) TestTransactionValidator_ValidateRequestHash() {
 
 		requestHash, err := s.validator.ValidateRequestHash(context.Background(), chainUUID, txRequest.Params, idempotencyKey)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, expectedRequestHash, requestHash)
 	})
 
@@ -93,7 +93,7 @@ func (s *transactionsTestSuite) TestTransactionValidator_ValidateChainExists() {
 	s.T().Run("should validate chain successfully", func(t *testing.T) {
 		s.mockChainRegistryClient.EXPECT().GetChainByUUID(gomock.Any(), chainUUID).Return(&chainmodel.Chain{}, nil)
 		err := s.validator.ValidateChainExists(context.Background(), chainUUID)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	s.T().Run("should fail with InvalidParameterError if ChainRegistryClient fails", func(t *testing.T) {
@@ -106,7 +106,7 @@ func (s *transactionsTestSuite) TestTransactionValidator_ValidateChainExists() {
 func (s *transactionsTestSuite) TestTransactionValidator_ValidateMethodSignature() {
 	s.T().Run("should validate method signature successfully", func(t *testing.T) {
 		txData, err := s.validator.ValidateMethodSignature("method(string,uint256)", []string{"val1", "15"})
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, txData)
 	})
 
@@ -134,7 +134,7 @@ func (s *transactionsTestSuite) TestTransactionValidator_ValidateContract() {
 		}, nil)
 
 		txData, err := s.validator.ValidateContract(ctx, txRequest.Params)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, txData)
 	})
 

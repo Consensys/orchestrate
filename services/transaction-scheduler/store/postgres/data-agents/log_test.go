@@ -28,7 +28,7 @@ func TestPGLog(t *testing.T) {
 }
 
 func (s *logTestSuite) SetupSuite() {
-	s.pg , _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
+	s.pg, _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
 	s.pg.InitTestDB(s.T())
 }
 
@@ -50,18 +50,18 @@ func (s *logTestSuite) TestPGLog_Insert() {
 
 	job := testutils.FakeJobModel(0)
 	err := s.agents.Schedule().Insert(ctx, job.Schedule)
-	assert.Nil(s.T(), err)
+	assert.NoError(s.T(), err)
 	err = s.agents.Transaction().Insert(ctx, job.Transaction)
-	assert.Nil(s.T(), err)
+	assert.NoError(s.T(), err)
 	err = s.agents.Job().Insert(ctx, job)
-	assert.Nil(s.T(), err)
+	assert.NoError(s.T(), err)
 
 	s.T().Run("should insert model successfully", func(t *testing.T) {
 		jobLog := testutils.FakeLog()
 		jobLog.JobID = &job.ID
 		err = s.agents.Log().Insert(ctx, jobLog)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, jobLog.ID) // 2 because one is inserted when creating the job
 	})
 
@@ -71,7 +71,7 @@ func (s *logTestSuite) TestPGLog_Insert() {
 		jobLog.JobID = &job.ID
 		err = s.agents.Log().Insert(ctx, jobLog)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, jobLog.ID) // 2 because one is inserted when creating the job
 	})
 }

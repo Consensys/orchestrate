@@ -31,7 +31,7 @@ func TestPGTag(t *testing.T) {
 }
 
 func (s *tagTestSuite) SetupSuite() {
-	s.pg , _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
+	s.pg, _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
 	s.pg.InitTestDB(s.T())
 }
 
@@ -56,7 +56,7 @@ func (s *tagTestSuite) TestPGTag_Insert() {
 	s.T().Run("should insert model successfully", func(t *testing.T) {
 		tag, err := s.insertTag(context.Background(), "contract", "tag")
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, 1, tag.ID)
 	})
 
@@ -67,7 +67,7 @@ func (s *tagTestSuite) TestPGTag_Insert() {
 		tag, err := s.insertTag(ctx, "contract", "tag")
 		_ = tx.Commit()
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, tag.ID)
 	})
 
@@ -104,7 +104,7 @@ func (s *tagTestSuite) TestPGRepository_FindAllByName() {
 
 		assert.Equal(t, 1, len(tags))
 		assert.Equal(t, "tag", tags[0])
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	s.T().Run("should return PostgresConnectionError if select fails", func(t *testing.T) {

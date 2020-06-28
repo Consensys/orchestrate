@@ -27,7 +27,7 @@ func TestProviderRefreshInterval(t *testing.T) {
 		"--tx-listener-provider-refresh-interval=36s",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	expected = 36 * time.Second
 	assert.Equal(t, expected, viper.GetDuration(ProviderRefreshIntervalViperKey), "From Flag")

@@ -73,7 +73,7 @@ func (s *testSuite) TestContractRegistryController_RegisterContract() {
 		response, err := s.controller.RegisterContract(context.Background(), request)
 
 		assert.Equal(t, &svc.RegisterContractResponse{}, response)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	s.T().Run("should fail if use case fails", func(t *testing.T) {
@@ -98,7 +98,7 @@ func (s *testSuite) TestContractRegistryController_GetContract() {
 		response, err := s.controller.GetContract(context.Background(), request)
 
 		assert.Equal(t, &svc.GetContractResponse{Contract: contract}, response)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	s.T().Run("should fail if use case fails", func(t *testing.T) {
@@ -123,7 +123,7 @@ func (s *testSuite) TestContractRegistryController_GetContractABI() {
 		response, err := s.controller.GetContractABI(context.Background(), request)
 
 		assert.Equal(t, &svc.GetContractABIResponse{Abi: contract.GetAbi()}, response)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	s.T().Run("should fail if use case fails", func(t *testing.T) {
@@ -148,7 +148,7 @@ func (s *testSuite) TestContractRegistryController_GetContractBytecode() {
 		response, err := s.controller.GetContractBytecode(context.Background(), request)
 
 		assert.Equal(t, &svc.GetContractBytecodeResponse{Bytecode: contract.GetBytecode()}, response)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	s.T().Run("should fail if use case fails", func(t *testing.T) {
@@ -173,7 +173,7 @@ func (s *testSuite) TestContractRegistryController_GetContractDeployedBytecode()
 		response, err := s.controller.GetContractDeployedBytecode(context.Background(), request)
 
 		assert.Equal(t, &svc.GetContractDeployedBytecodeResponse{DeployedBytecode: contract.GetDeployedBytecode()}, response)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	s.T().Run("should fail if use case fails", func(t *testing.T) {
@@ -197,7 +197,7 @@ func (s *testSuite) TestContractRegistryController_GetCatalog() {
 		response, err := s.controller.GetCatalog(context.Background(), request)
 
 		assert.Equal(t, &svc.GetCatalogResponse{Names: names}, response)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	s.T().Run("should fail if use case fails", func(t *testing.T) {
@@ -220,7 +220,7 @@ func (s *testSuite) TestContractRegistryController_GetTags() {
 		response, err := s.controller.GetTags(context.Background(), request)
 
 		assert.Equal(t, &svc.GetTagsResponse{Tags: tags}, response)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	s.T().Run("should fail if use case fails", func(t *testing.T) {
@@ -247,7 +247,7 @@ func (s *testSuite) TestContractRegistryController_GetMethodsBySelector() {
 		response, err := s.controller.GetMethodsBySelector(context.Background(), request)
 
 		assert.Equal(t, &svc.GetMethodsBySelectorResponse{Method: responseABI}, response)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	s.T().Run("should execute request successfully if ABI is empty", func(t *testing.T) {
@@ -258,7 +258,7 @@ func (s *testSuite) TestContractRegistryController_GetMethodsBySelector() {
 		response, err := s.controller.GetMethodsBySelector(context.Background(), request)
 
 		assert.Equal(t, &svc.GetMethodsBySelectorResponse{DefaultMethods: methodsABI}, response)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	s.T().Run("should fail if use case fails", func(t *testing.T) {
@@ -291,7 +291,7 @@ func (s *testSuite) TestContractRegistryController_GetEventsBySigHash() {
 		response, err := s.controller.GetEventsBySigHash(context.Background(), request)
 
 		assert.Equal(t, &svc.GetEventsBySigHashResponse{Event: responseABI}, response)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	s.T().Run("should execute request successfully if ABI is empty", func(t *testing.T) {
@@ -307,7 +307,7 @@ func (s *testSuite) TestContractRegistryController_GetEventsBySigHash() {
 		response, err := s.controller.GetEventsBySigHash(context.Background(), request)
 
 		assert.Equal(t, &svc.GetEventsBySigHashResponse{DefaultEvents: eventsABI}, response)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	s.T().Run("should fail if use case fails", func(t *testing.T) {
@@ -337,7 +337,7 @@ func (s *testSuite) TestContractRegistryController_SetAccountCodeHash() {
 		response, err := s.controller.SetAccountCodeHash(context.Background(), request)
 
 		assert.Equal(t, &svc.SetAccountCodeHashResponse{}, response)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	s.T().Run("should fail if use case fails", func(t *testing.T) {
@@ -365,7 +365,7 @@ func (s *testSuite) TestContractRegistryController_GetMethodSignatures() {
 
 		response, err := s.controller.GetMethodSignatures(context.Background(), request)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, signatures, response.GetSignatures())
 	})
 

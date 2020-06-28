@@ -54,9 +54,9 @@ func (s *jobTestSuite) TestPGJob_Insert() {
 	s.T().Run("should insert model successfully", func(t *testing.T) {
 		job := testutils.FakeJobModel(0)
 		err := insertJob(ctx, s.agents, job)
-		assert.Nil(s.T(), err)
+		assert.NoError(s.T(), err)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, job.ID)
 		assert.NotEmpty(t, job.Transaction.ID)
 		assert.NotEmpty(t, job.Schedule.ID)
@@ -66,9 +66,9 @@ func (s *jobTestSuite) TestPGJob_Insert() {
 		job := testutils.FakeJobModel(0)
 		job.UUID = ""
 		err := insertJob(ctx, s.agents, job)
-		assert.Nil(s.T(), err)
+		assert.NoError(s.T(), err)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, job.ID)
 		assert.NotEmpty(t, job.Transaction.ID)
 		assert.NotEmpty(t, job.Schedule.ID)
@@ -77,9 +77,9 @@ func (s *jobTestSuite) TestPGJob_Insert() {
 	s.T().Run("should update model successfully", func(t *testing.T) {
 		job := testutils.FakeJobModel(0)
 		err := insertJob(ctx, s.agents, job)
-		assert.Nil(s.T(), err)
+		assert.NoError(s.T(), err)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, job.ID)
 		assert.NotEmpty(t, job.Transaction.ID)
 		assert.NotEmpty(t, job.Schedule.ID)
@@ -90,20 +90,20 @@ func (s *jobTestSuite) TestPGJob_Update() {
 	ctx := context.Background()
 	job := testutils.FakeJobModel(0)
 	err := insertJob(ctx, s.agents, job)
-	assert.Nil(s.T(), err)
+	assert.NoError(s.T(), err)
 
 	s.T().Run("should update model successfully", func(t *testing.T) {
 		newTx := testutils.FakeTransaction()
 		newSchedule := testutils.FakeSchedule("_")
 		err := s.agents.Transaction().Insert(ctx, newTx)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		err = s.agents.Schedule().Insert(ctx, newSchedule)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 
 		job.ScheduleID = &newSchedule.ID
 		job.TransactionID = &newTx.ID
 		err = s.agents.Job().Update(ctx, job)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, *job.TransactionID, newTx.ID)
 		assert.Equal(t, *job.ScheduleID, newSchedule.ID)
 	})
@@ -121,12 +121,12 @@ func (s *jobTestSuite) TestPGJob_FindOneByUUID() {
 	job := testutils.FakeJobModel(0)
 	job.Schedule.TenantID = tenantID
 	err := insertJob(ctx, s.agents, job)
-	assert.Nil(s.T(), err)
+	assert.NoError(s.T(), err)
 
 	s.T().Run("should get model successfully as empty tenant", func(t *testing.T) {
 		jobRetrieved, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, "")
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, jobRetrieved.ID)
 		assert.Equal(t, job.UUID, jobRetrieved.UUID)
 		assert.Equal(t, job.Transaction.UUID, jobRetrieved.Transaction.UUID)
@@ -141,7 +141,7 @@ func (s *jobTestSuite) TestPGJob_FindOneByUUID() {
 	s.T().Run("should get model successfully as tenant", func(t *testing.T) {
 		jobRetrieved, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, tenantID)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, jobRetrieved.ID)
 	})
 
@@ -160,7 +160,7 @@ func (s *jobTestSuite) TestPGJob_Search() {
 	jobOne.Transaction.Hash = txHashOne.String()
 	jobOne.Schedule.TenantID = tenantID
 	err := insertJob(ctx, s.agents, jobOne)
-	assert.Nil(s.T(), err)
+	assert.NoError(s.T(), err)
 
 	jobTwo := testutils.FakeJobModel(0)
 	txHashTwo := common.HexToHash("0x2")
@@ -168,12 +168,12 @@ func (s *jobTestSuite) TestPGJob_Search() {
 	jobTwo.Transaction.Hash = txHashTwo.String()
 	jobTwo.Schedule.TenantID = tenantID
 	err = insertJob(ctx, s.agents, jobTwo)
-	assert.Nil(s.T(), err)
+	assert.NoError(s.T(), err)
 
 	s.T().Run("should find model successfully", func(t *testing.T) {
 		retrivedJobs, err := s.agents.Job().Search(ctx, tenantID, []string{txHashOne.String()}, jobOne.ChainUUID)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, retrivedJobs[0].ID)
 		assert.Equal(t, jobOne.UUID, retrivedJobs[0].UUID)
 		assert.Equal(t, jobOne.Transaction.UUID, retrivedJobs[0].Transaction.UUID)
@@ -183,13 +183,13 @@ func (s *jobTestSuite) TestPGJob_Search() {
 
 	s.T().Run("should not find any model", func(t *testing.T) {
 		retrivedJobs, err := s.agents.Job().Search(ctx, tenantID, []string{"0x3"}, jobOne.ChainUUID)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Empty(t, retrivedJobs)
 	})
 
 	s.T().Run("should find every inserted model successfully", func(t *testing.T) {
 		retrivedJobs, err := s.agents.Job().Search(ctx, tenantID, nil, jobOne.ChainUUID)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, len(retrivedJobs), 2)
 	})
 }

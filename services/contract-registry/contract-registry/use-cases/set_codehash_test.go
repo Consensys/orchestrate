@@ -34,7 +34,7 @@ func TestSetCodeHash_Execute(t *testing.T) {
 
 		err := usecase.Execute(context.Background(), account, codeHash)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	t.Run("should fail if data agent fails", func(t *testing.T) {

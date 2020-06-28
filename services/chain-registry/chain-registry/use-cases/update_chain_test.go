@@ -28,7 +28,7 @@ func TestUpdateChain_ByUUID(t *testing.T) {
 	chainAgent.EXPECT().UpdateChain(gomock.Any(), gomock.Eq(chainUUID), []string{}, gomock.Eq(chain)).Times(1)
 
 	err := updateChainUC.Execute(context.Background(), chainUUID, "", []string{}, chain)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }
 
 func TestUpdateChain_ByName(t *testing.T) {
@@ -46,7 +46,7 @@ func TestUpdateChain_ByName(t *testing.T) {
 	chainAgent.EXPECT().UpdateChainByName(gomock.Any(), gomock.Eq(chaninName), []string{}, gomock.Eq(chain)).Times(1)
 
 	err := updateChainUC.Execute(context.Background(), "", chaninName, []string{}, chain)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }
 
 func TestUpdateChain_NotAllowUUIDUpdate(t *testing.T) {
@@ -64,6 +64,6 @@ func TestUpdateChain_NotAllowUUIDUpdate(t *testing.T) {
 	}
 
 	err := updateChainUC.Execute(context.Background(), chainUUID, "", []string{}, chain)
-	assert.NotNil(t, err)
+	assert.Error(t, err)
 	assert.True(t, errors.IsConstraintViolatedError(err), "should be IsConstraintViolatedError")
 }

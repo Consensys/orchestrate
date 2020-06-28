@@ -41,38 +41,38 @@ func (s *HttpChainTestSuite) TestChainRegistry_EnvChainImport() {
 
 	chainQuorumPrivTxType := utils.TesseraChainType
 	chainQuorumPrivTxURL := "http://tessera1:9080"
-	
+
 	s.T().Run("should fetch env chain geth by name", func(t *testing.T) {
 		resp, err := s.client.GetChainByName(ctx, chainNameGeth)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, 1, len(resp.URLs), "should be one URLs")
 		if len(resp.URLs) == 1 {
-			assert.Equal(t, chainUrlGeth, resp.URLs[0])	
+			assert.Equal(t, chainUrlGeth, resp.URLs[0])
 		}
 	})
 
 	s.T().Run("should fetch env chain besu by name", func(t *testing.T) {
 		resp, err := s.client.GetChainByName(ctx, chainNameBesu)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, 1, len(resp.URLs), "should be one URLs")
 		if len(resp.URLs) == 1 {
-			assert.Equal(t, chainUrlBesu, resp.URLs[0])	
+			assert.Equal(t, chainUrlBesu, resp.URLs[0])
 		}
 	})
 
 	s.T().Run("should fetch env chain quorum by name", func(t *testing.T) {
 		resp, err := s.client.GetChainByName(ctx, chainNameQuorum)
-		assert.Nil(t, err)
-		
+		assert.NoError(t, err)
+
 		assert.Equal(t, 1, len(resp.URLs), "should be one URLs")
 		if len(resp.URLs) == 1 {
-			assert.Equal(t, chainUrlQuorum, resp.URLs[0])	
+			assert.Equal(t, chainUrlQuorum, resp.URLs[0])
 		}
 
 		assert.Equal(t, 1, len(resp.PrivateTxManagers), "should be one PrivateTxManagers")
 		if len(resp.PrivateTxManagers) == 1 {
-			assert.Equal(t, chainQuorumPrivTxURL, resp.PrivateTxManagers[0].URL)	
-			assert.Equal(t, chainQuorumPrivTxType, resp.PrivateTxManagers[0].Type)	
+			assert.Equal(t, chainQuorumPrivTxURL, resp.PrivateTxManagers[0].URL)
+			assert.Equal(t, chainQuorumPrivTxType, resp.PrivateTxManagers[0].Type)
 		}
 	})
 }
@@ -95,14 +95,14 @@ func (s *HttpChainTestSuite) TestChainRegistry_ChainHappyFlow() {
 		}
 		resp, err := s.client.RegisterChain(ctx, &chain)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, resp.UUID)
 		chainUUID = resp.UUID
 	})
 
 	s.T().Run("should fetch registered chain by name", func(t *testing.T) {
 		resp, err := s.client.GetChainByName(ctx, chainName)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, chainURL, resp.URLs[0])
 	})
 
@@ -111,19 +111,19 @@ func (s *HttpChainTestSuite) TestChainRegistry_ChainHappyFlow() {
 			ListenerCurrentBlock: &curBlockNumber,
 		})
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	s.T().Run("should fetch registered chain by UUID", func(t *testing.T) {
 		resp, err := s.client.GetChainByUUID(ctx, chainUUID)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, chainURL, resp.URLs[0])
 		assert.Equal(t, curBlockNumber, *resp.ListenerCurrentBlock)
 	})
 
 	s.T().Run("should delete registered chain by UUID", func(t *testing.T) {
 		err := s.client.DeleteChainByUUID(ctx, chainUUID)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 
 		_, err = s.client.GetChainByUUID(ctx, chainUUID)
 		assert.True(t, errors.IsNotFoundError(err))
@@ -152,14 +152,14 @@ func (s *HttpChainTestSuite) TestChainRegistry_TesseraChainHappyFlow() {
 		}
 		resp, err := s.client.RegisterChain(ctx, &chain)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, resp.UUID)
 		chainUUID = resp.UUID
 	})
 
 	s.T().Run("should fetch registered chain by name", func(t *testing.T) {
 		resp, err := s.client.GetChainByName(ctx, chainName)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, privTxManagerURL, resp.PrivateTxManagers[0].URL)
 	})
 
@@ -173,12 +173,12 @@ func (s *HttpChainTestSuite) TestChainRegistry_TesseraChainHappyFlow() {
 			},
 		})
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	s.T().Run("should fetch registered chain by UUID", func(t *testing.T) {
 		resp, err := s.client.GetChainByUUID(ctx, chainUUID)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, 1, len(resp.PrivateTxManagers))
 		if len(resp.PrivateTxManagers) == 1 {
 			assert.Equal(t, privTxManagerURLTwo, resp.PrivateTxManagers[0].URL)
@@ -187,10 +187,10 @@ func (s *HttpChainTestSuite) TestChainRegistry_TesseraChainHappyFlow() {
 
 	s.T().Run("should deleted registered chain by UUID", func(t *testing.T) {
 		err := s.client.DeleteChainByUUID(ctx, chainUUID)
-		assert.Nil(t, err)
-	
+		assert.NoError(t, err)
+
 		_, err = s.client.GetChainByUUID(ctx, chainUUID)
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 		assert.True(t, errors.IsNotFoundError(err), "should be DataErr, instead "+err.Error())
 	})
 }
@@ -208,7 +208,7 @@ func (s *HttpChainTestSuite) TestChainRegistry_ChainErrors() {
 		}
 		_, err := s.client.RegisterChain(ctx, &chain)
 
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 		assert.True(t, errors.IsDataError(err))
 	})
 
@@ -220,7 +220,7 @@ func (s *HttpChainTestSuite) TestChainRegistry_ChainErrors() {
 		}
 		_, err := s.client.RegisterChain(ctx, &chain)
 
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 		assert.True(t, errors.IsDataError(err))
 	})
 
@@ -233,7 +233,7 @@ func (s *HttpChainTestSuite) TestChainRegistry_ChainErrors() {
 		}
 		resp, err := s.client.RegisterChain(ctx, &chain)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, resp.UUID)
 		chainUUID = resp.UUID
 	})
@@ -243,7 +243,7 @@ func (s *HttpChainTestSuite) TestChainRegistry_ChainErrors() {
 			ListenerBackOffDuration: &(&struct{ x string }{"1000"}).x,
 		})
 
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 		assert.True(t, errors.IsDataError(err))
 	})
 
@@ -252,16 +252,16 @@ func (s *HttpChainTestSuite) TestChainRegistry_ChainErrors() {
 			URLs: []string{"$%^^"},
 		})
 
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 		assert.True(t, errors.IsDataError(err))
 	})
 
 	s.T().Run("should deleted registered chain by UUID", func(t *testing.T) {
 		err := s.client.DeleteChainByUUID(ctx, chainUUID)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 
 		_, err = s.client.GetChainByUUID(ctx, chainUUID)
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 	})
 }
 
@@ -277,14 +277,14 @@ func (s *HttpChainTestSuite) TestChainRegistry_TesseraChainErrs() {
 			ListenerStartingBlock: &(&struct{ x uint64 }{1}).x,
 			PrivateTxManagers: []*models.PrivateTxManagerModel{
 				{
-					URL: "http://127.0.0.1:9080",
+					URL:  "http://127.0.0.1:9080",
 					Type: "InvalidType",
 				},
 			},
 		}
 		_, err := s.client.RegisterChain(ctx, &chain)
 
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 		assert.True(t, errors.IsDataError(err), "should be DataErr, instead "+err.Error())
 	})
 
@@ -301,7 +301,7 @@ func (s *HttpChainTestSuite) TestChainRegistry_TesseraChainErrs() {
 		}
 		_, err := s.client.RegisterChain(ctx, &chain)
 
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 		assert.True(t, errors.IsDataError(err), "should be DataErr, instead "+err.Error())
 	})
 
@@ -312,14 +312,14 @@ func (s *HttpChainTestSuite) TestChainRegistry_TesseraChainErrs() {
 			ListenerStartingBlock: &(&struct{ x uint64 }{1}).x,
 			PrivateTxManagers: []*models.PrivateTxManagerModel{
 				{
-					URL: "http://127.0.0.1:9080",
+					URL:  "http://127.0.0.1:9080",
 					Type: utils.TesseraChainType,
 				},
 			},
 		}
 		resp, err := s.client.RegisterChain(ctx, &chain)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, resp.UUID)
 		chainUUID = resp.UUID
 	})
@@ -333,15 +333,15 @@ func (s *HttpChainTestSuite) TestChainRegistry_TesseraChainErrs() {
 			},
 		})
 
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 		assert.True(t, errors.IsDataError(err), "should be DataErr, instead "+err.Error())
 	})
 
 	s.T().Run("should deleted registered chain by UUID", func(t *testing.T) {
 		err := s.client.DeleteChainByUUID(ctx, chainUUID)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 
 		_, err = s.client.GetChainByUUID(ctx, chainUUID)
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 	})
 }

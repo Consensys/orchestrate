@@ -168,7 +168,7 @@ func TestEnvelope_From(t *testing.T) {
 
 	addr, err := b.GetFromAddress()
 	assert.Equal(t, from, addr, "Should be equal")
-	assert.Nil(t, err, "Should be nil")
+	assert.NoError(t, err, "Should be nil")
 
 	assert.Equal(t, from, b.MustGetFromAddress(), "Should be equal")
 	assert.Equal(t, "0x0000000000000000000000000000000000000001", b.GetFromString(), "Should be equal")
@@ -194,7 +194,7 @@ func TestEnvelope_To(t *testing.T) {
 
 	addr, err := b.GetToAddress()
 	assert.Equal(t, from, addr, "Should be equal")
-	assert.Nil(t, err, "Should be nil")
+	assert.NoError(t, err, "Should be nil")
 
 	assert.Equal(t, from, b.MustGetToAddress(), "Should be equal")
 	assert.Equal(t, "0x0000000000000000000000000000000000000001", b.GetToString(), "Should be equal")

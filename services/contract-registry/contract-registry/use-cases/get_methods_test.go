@@ -34,7 +34,7 @@ func TestGetMethods_Execute(t *testing.T) {
 
 		assert.Equal(t, responseABI, method.ABI)
 		assert.Nil(t, eventsABI)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	t.Run("should fail if data agent returns connection error", func(t *testing.T) {
@@ -56,7 +56,7 @@ func TestGetMethods_Execute(t *testing.T) {
 
 		assert.Equal(t, eventsABI, []string{method.ABI, method.ABI})
 		assert.Empty(t, responseABI)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	t.Run("should fail if data agent returns error on find default", func(t *testing.T) {

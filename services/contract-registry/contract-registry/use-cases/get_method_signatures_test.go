@@ -5,10 +5,11 @@ package usecases
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/contract-registry/use-cases/mocks"
-	"testing"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -30,7 +31,7 @@ func TestGetMethodSignatures_Execute(t *testing.T) {
 
 		signatures, err := usecase.Execute(ctx, contract.Id, "transfer")
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, signatures[0], "transfer(address,uint256)")
 	})
 
@@ -41,7 +42,7 @@ func TestGetMethodSignatures_Execute(t *testing.T) {
 
 		signatures, err := usecase.Execute(ctx, contract.Id, constructorMethodName)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, signatures[0], "constructor(uint256)")
 	})
 
@@ -52,7 +53,7 @@ func TestGetMethodSignatures_Execute(t *testing.T) {
 
 		signatures, err := usecase.Execute(ctx, contract.Id, "inexistentMethod")
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Empty(t, signatures)
 	})
 

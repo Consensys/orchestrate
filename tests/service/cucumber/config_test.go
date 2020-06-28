@@ -233,7 +233,7 @@ func TestPaths(t *testing.T) {
 		"--cucumber-paths=test4",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	expected = []string{
 		"test3",
 		"test4",
@@ -260,7 +260,7 @@ func TestOutputPath(t *testing.T) {
 		"--cucumber-outputpath=test",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	expected = "test"
 	assert.Equal(t, expected, viper.GetString(OutputPathViperKey), "Changing flags should change OutputPath")
 }

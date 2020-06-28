@@ -29,7 +29,7 @@ func TestGetChains_ByUUID(t *testing.T) {
 	chainAgent.EXPECT().GetChains(gomock.Any(), []string{}, gomock.Eq(filters)).Return(expectedChain, nil).Times(1)
 
 	actualChains, err := getChainsUC.Execute(context.Background(), []string{}, filters)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, expectedChain, actualChains)
 }
 
@@ -53,6 +53,6 @@ func TestGetChains_ByUUIDAndTenantID(t *testing.T) {
 	chainAgent.EXPECT().GetChains(gomock.Any(), []string{tenantID}, gomock.Eq(filters)).Return(expectedChain, nil).Times(1)
 
 	actualChains, err := getChainsUC.Execute(context.Background(), []string{tenantID}, filters)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, expectedChain, actualChains)
 }

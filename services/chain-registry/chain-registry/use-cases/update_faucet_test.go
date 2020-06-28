@@ -27,7 +27,7 @@ func TestUpdateFaucet_ByUUID(t *testing.T) {
 	faucetAgent.EXPECT().UpdateFaucet(gomock.Any(), gomock.Eq(faucetUUID), []string{}, gomock.Eq(faucet)).Times(1)
 
 	err := updateChainUC.Execute(context.Background(), faucetUUID, []string{}, faucet)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }
 
 func TestUpdateFaucet_FailUpdateUUID(t *testing.T) {
@@ -44,6 +44,6 @@ func TestUpdateFaucet_FailUpdateUUID(t *testing.T) {
 	}
 
 	err := updateChainUC.Execute(context.Background(), faucetUUID, []string{}, faucet)
-	assert.NotNil(t, err)
+	assert.Error(t, err)
 	assert.True(t, errors.IsConstraintViolatedError(err), "should be IsConstraintViolatedError")
 }

@@ -30,7 +30,7 @@ func TestPGRepository(t *testing.T) {
 }
 
 func (s *repositoryTestSuite) SetupSuite() {
-	s.pg , _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
+	s.pg, _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
 	s.pg.InitTestDB(s.T())
 }
 
@@ -54,7 +54,7 @@ func (s *repositoryTestSuite) TestPGRepository_SelectOrInsertTx() {
 		}
 		err := s.dataagent.SelectOrInsert(context.Background(), repo)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, 1, repo.ID)
 	})
 
@@ -68,7 +68,7 @@ func (s *repositoryTestSuite) TestPGRepository_SelectOrInsertTx() {
 		err := s.dataagent.SelectOrInsert(ctx, repo)
 		_ = tx.Commit()
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, repo.ID)
 	})
 
@@ -95,7 +95,7 @@ func (s *repositoryTestSuite) TestPGRepository_FindAll() {
 		names, err := s.dataagent.FindAll(context.Background())
 
 		assert.Equal(t, 5, len(names))
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	s.T().Run("should return PostgresConnectionError if select fails", func(t *testing.T) {

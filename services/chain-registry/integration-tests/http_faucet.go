@@ -44,28 +44,28 @@ func (s *HttpFaucetTestSuite) TestChainRegistry_FaucetHappyFlow() {
 		}
 		resp, err := s.client.RegisterFaucet(ctx, &faucet)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, resp.UUID)
 		faucetUUID = resp.UUID
 	})
 
 	s.T().Run("should update registered faucet by UUID", func(t *testing.T) {
 		faucet := &models.Faucet{
-			Name:            faucetNameTwo,
+			Name: faucetNameTwo,
 		}
-		
+
 		_, err := s.client.UpdateFaucetByUUID(ctx, faucetUUID, faucet)
-		assert.Nil(t, err)
-		
+		assert.NoError(t, err)
+
 		faucet, err = s.client.GetFaucetByUUID(ctx, faucetUUID)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, faucet.Name, faucetNameTwo)
 	})
 
 	s.T().Run("should delete registered faucet by UUID", func(t *testing.T) {
 		err := s.client.DeleteFaucetByUUID(ctx, faucetUUID)
-		assert.Nil(t, err)
-		
+		assert.NoError(t, err)
+
 		_, err = s.client.GetFaucetByUUID(ctx, faucetUUID)
 		assert.True(t, errors.IsNotFoundError(err))
 	})

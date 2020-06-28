@@ -51,7 +51,7 @@ func (s *scheduleTestSuite) TestPGSchedule_Insert() {
 		schedule := testutils.FakeSchedule("")
 		err := s.agents.Schedule().Insert(context.Background(), schedule)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, schedule.ID)
 	})
 
@@ -59,7 +59,7 @@ func (s *scheduleTestSuite) TestPGSchedule_Insert() {
 		schedule := testutils.FakeSchedule("")
 		err := s.agents.Schedule().Insert(context.Background(), schedule)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, schedule.UUID)
 		assert.NotEmpty(t, schedule.ID)
 	})
@@ -70,12 +70,12 @@ func (s *scheduleTestSuite) TestPGSchedule_FindOneByUUID() {
 	tenantID := "tenantID"
 	schedule := testutils.FakeSchedule(tenantID)
 	err := insertSchedule(ctx, s.agents, schedule)
-	assert.Nil(s.T(), err)
+	assert.NoError(s.T(), err)
 
 	s.T().Run("should get model successfully as tenant", func(t *testing.T) {
 		scheduleRetrieved, err := s.agents.Schedule().FindOneByUUID(ctx, schedule.UUID, tenantID)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assertEqualSchedule(t, schedule, scheduleRetrieved)
 	})
 
@@ -103,13 +103,13 @@ func (s *scheduleTestSuite) TestPGSchedule_FindAll() {
 	var err error
 	for _, schedule := range schedules {
 		err = insertSchedule(ctx, s.agents, schedule)
-		assert.Nil(s.T(), err)
+		assert.NoError(s.T(), err)
 	}
 
 	s.T().Run("should get model successfully as tenant", func(t *testing.T) {
 		schedulesRetrieved, err := s.agents.Schedule().FindAll(ctx, tenantID)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, 2, len(schedulesRetrieved))
 		for idx, scheduleRetrieved := range schedulesRetrieved {
 			assertEqualSchedule(t, schedules[idx], scheduleRetrieved)
@@ -118,7 +118,7 @@ func (s *scheduleTestSuite) TestPGSchedule_FindAll() {
 
 	s.T().Run("should return NotFoundError if select fails", func(t *testing.T) {
 		schedules, err := s.agents.Schedule().FindAll(ctx, "randomID")
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Empty(t, schedules)
 	})
 }

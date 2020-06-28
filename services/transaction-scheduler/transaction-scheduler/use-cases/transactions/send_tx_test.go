@@ -66,7 +66,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
 		response, err := successfulTestExecution(s, txRequest, types.EthereumTransaction)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, txRequest.UUID, response.UUID)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
@@ -79,7 +79,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		txRequest.Params.Protocol = utils.OrionChainType
 
 		response, err := successfulTestExecution(s, txRequest, types.OrionEEATransaction)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
 	})
@@ -91,7 +91,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		txRequest.Params.Protocol = utils.TesseraChainType
 
 		response, err := successfulTestExecution(s, txRequest, types.TesseraPrivateTransaction)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
 	})
@@ -102,7 +102,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
 		response, err := successfulTestExecution(s, txRequest, types.EthereumRawTransaction)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
 	})

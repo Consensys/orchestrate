@@ -40,7 +40,7 @@ func TestCreateSchedule_Execute(t *testing.T) {
 
 		scheduleResponse, err := usecase.Execute(ctx, scheduleEntity, tenantID)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, scheduleEntity.UUID, scheduleResponse.UUID)
 	})
 

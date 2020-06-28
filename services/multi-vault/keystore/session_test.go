@@ -106,7 +106,7 @@ func (s *BaseKeyStoreTestSuite) TestSignTx() {
 func (s *BaseKeyStoreTestSuite) TestSignMsg() {
 	for _, priv := range testPKeys {
 		err := s.Store.ImportPrivateKey(context.Background(), priv.prv)
-		assert.Nil(s.T(), err)
+		assert.NoError(s.T(), err)
 	}
 
 	// Feed input channel and then close it
@@ -114,17 +114,17 @@ func (s *BaseKeyStoreTestSuite) TestSignMsg() {
 	for i := 0; i < rounds; i++ {
 		address, msg := makeSignMsgInput(i)
 		signature, hash, err := s.Store.SignMsg(context.Background(), address, msg)
-		assert.Nil(s.T(), err, "The msg has not been signed")
+		assert.NoError(s.T(), err, "The msg has not been signed")
 
 		recoveredAddress, err := ethereum.EcRecover(*hash, signature)
-		assert.Nil(s.T(), err)
+		assert.NoError(s.T(), err)
 		assert.Equal(s.T(), address, recoveredAddress)
 	}
 }
 
 func (s *BaseKeyStoreTestSuite) TestGenerateAccount() {
 	_, err := s.Store.GenerateAccount(context.Background())
-	assert.Nil(s.T(), err, "Account should be generated")
+	assert.NoError(s.T(), err, "Account should be generated")
 }
 
 func TestKeyStore(t *testing.T) {

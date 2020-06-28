@@ -26,7 +26,7 @@ func TestTransactionSchedulerTarget(t *testing.T) {
 		"--transaction-scheduler-url=flag-transaction-scheduler",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err, "Parse Transaction Scheduler flags should not error")
+	assert.NoError(t, err, "Parse Transaction Scheduler flags should not error")
 	expected = "flag-transaction-scheduler"
 	assert.Equal(t, expected, viper.GetString(TxSchedulerURLViperKey), "From Flag")
 }

@@ -26,7 +26,7 @@ func TestGRPCContractRegistryTarget(t *testing.T) {
 		"--contract-registry-url=flag-grpc-contract-registry",
 	}
 	err := flgs.Parse(args)
-	assert.Nil(t, err, "Parse Contract Registry flags should not error")
+	assert.NoError(t, err, "Parse Contract Registry flags should not error")
 	expected = "flag-grpc-contract-registry"
 	assert.Equal(t, expected, viper.GetString(ContractRegistryURLViperKey), "From Flag")
 }

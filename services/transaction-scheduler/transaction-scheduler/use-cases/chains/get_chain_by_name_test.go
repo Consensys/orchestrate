@@ -33,11 +33,11 @@ func TestGetJob_Execute(t *testing.T) {
 		chainRegistryClient.EXPECT().
 			GetChainByName(gomock.Any(), chainModel.Name).
 			Return(chainModel, nil)
-		
+
 		response, err := usecase.Execute(ctx, chainModel.Name, chainModel.TenantID)
 
 		expectedRes := parsers.NewChainFromModels(chainModel)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, expectedRes, response)
 	})
 

@@ -52,7 +52,7 @@ func (s *txTestSuite) TestPGTransaction_Insert() {
 		tx := testutils.FakeTransaction()
 		err := s.agents.Transaction().Insert(ctx, tx)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, tx.ID)
 	})
 
@@ -60,7 +60,7 @@ func (s *txTestSuite) TestPGTransaction_Insert() {
 		tx := testutils.FakePrivateTx()
 		err := s.agents.Transaction().Insert(ctx, tx)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, tx.ID)
 	})
 
@@ -69,7 +69,7 @@ func (s *txTestSuite) TestPGTransaction_Insert() {
 		tx.UUID = ""
 		err := s.agents.Transaction().Insert(ctx, tx)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, tx.ID)
 	})
 }
@@ -79,13 +79,13 @@ func (s *txTestSuite) TestPGTransaction_Update() {
 
 	tx := testutils.FakeTransaction()
 	err := s.agents.Transaction().Insert(ctx, tx)
-	assert.Nil(s.T(), err)
+	assert.NoError(s.T(), err)
 
 	s.T().Run("should update model successfully", func(t *testing.T) {
 		tx.Hash = "NewHash"
 		err := s.agents.Transaction().Update(ctx, tx)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, tx.Hash, "NewHash")
 	})
 }
@@ -101,7 +101,7 @@ func (s *txTestSuite) TestPGTransaction_ConnectionErr() {
 		err := s.agents.Transaction().Insert(ctx, tx)
 		assert.True(t, errors.IsPostgresConnectionError(err))
 	})
-	// 
+	//
 	s.T().Run("should return PostgresConnectionError if update fails", func(t *testing.T) {
 		tx.ID = 1
 		err := s.agents.Transaction().Update(ctx, tx)

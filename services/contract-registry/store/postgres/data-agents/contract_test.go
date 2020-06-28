@@ -101,7 +101,7 @@ package dataagents
 // 			&events,
 // 		)
 
-// 		assert.Nil(t, err)
+// 		assert.NoError(t, err)
 // 	})
 
 // 	s.T().Run("should insert contract with empty methods successfully", func(t *testing.T) {
@@ -124,7 +124,7 @@ package dataagents
 // 			&emptyEvents,
 // 		)
 
-// 		assert.Nil(t, err)
+// 		assert.NoError(t, err)
 // 	})
 
 // 	s.T().Run("should fail if repository data agent fails", func(t *testing.T) {

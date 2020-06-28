@@ -71,7 +71,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
 		txResponse, err := s.client.SendContractTransaction(rctx, txRequest)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)

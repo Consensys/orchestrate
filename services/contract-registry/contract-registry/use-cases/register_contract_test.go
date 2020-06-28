@@ -39,19 +39,19 @@ func TestRegisterContract_Execute(t *testing.T) {
 
 		err := usecase.Execute(context.Background(), contract)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	t.Run("should fail if it fails to extract artifacts", func(t *testing.T) {
 		err := usecase.Execute(context.Background(), nil)
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 	})
 
 	t.Run("should fail if it fails to name and tag", func(t *testing.T) {
 		contract := testutils.FakeContract()
 		contract.Id = nil
 		err := usecase.Execute(context.Background(), contract)
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 	})
 
 	t.Run("should fail with InvalidArg error if it fails to decode bytecode", func(t *testing.T) {
@@ -76,6 +76,6 @@ func TestRegisterContract_Execute(t *testing.T) {
 			gomock.Any()).Return(fmt.Errorf("error"))
 
 		err := usecase.Execute(context.Background(), contract)
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 	})
 }

@@ -31,7 +31,7 @@ func TestPGEvent(t *testing.T) {
 }
 
 func (s *eventTestSuite) SetupSuite() {
-	s.pg , _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
+	s.pg, _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
 	s.pg.InitTestDB(s.T())
 }
 
@@ -67,7 +67,7 @@ func (s *eventTestSuite) TestPGEvent_InsertMultipleTx() {
 		}
 		err := s.dataagent.InsertMultiple(context.Background(), &events)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, 1, events[0].ID)
 		assert.Equal(t, 2, events[1].ID)
 	})
@@ -87,7 +87,7 @@ func (s *eventTestSuite) TestPGEvent_InsertMultipleTx() {
 		err := s.dataagent.InsertMultiple(ctx, &events)
 		_ = tx.Commit()
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, events[0].ID)
 	})
 
@@ -121,7 +121,7 @@ func (s *eventTestSuite) TestPGEvent_FindOneByAccountAndSigHash() {
 			Account: "address",
 		}, "sigHash", 0)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, event.ABI, "ABI")
 	})
 
@@ -154,7 +154,7 @@ func (s *eventTestSuite) TestPGEvent_FindDefaultBySigHash() {
 
 		defaultEvents, err := s.dataagent.FindDefaultBySigHash(context.Background(), "sigHash", 0)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Len(t, defaultEvents, 1)
 	})
 

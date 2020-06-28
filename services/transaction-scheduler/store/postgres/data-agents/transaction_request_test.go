@@ -76,7 +76,7 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_SelectOrInsert() {
 	s.T().Run("Does nothing if idempotency key is already used and returns request", func(t *testing.T) {
 		txRequest0 := testutils.FakeTxRequest(0)
 		err := insertTxRequest(ctx, s.agents, txRequest0)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 
 		txRequest1 := testutils.FakeTxRequest(0)
 		txRequest1.IdempotencyKey = txRequest0.IdempotencyKey
@@ -90,12 +90,12 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_FindOneByIdempotencyKey() 
 	ctx := context.Background()
 	txRequest := testutils.FakeTxRequest(0)
 	err := insertTxRequest(ctx, s.agents, txRequest)
-	assert.Nil(s.T(), err)
+	assert.NoError(s.T(), err)
 
 	s.T().Run("should find request successfully", func(t *testing.T) {
 		txRequestRetrieved, err := s.agents.TransactionRequest().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, txRequest.IdempotencyKey, txRequestRetrieved.IdempotencyKey)
 		assert.Equal(t, txRequest.Schedules[0].UUID, txRequestRetrieved.Schedules[0].UUID)
 	})

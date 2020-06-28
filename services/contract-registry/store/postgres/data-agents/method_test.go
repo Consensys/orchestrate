@@ -37,7 +37,7 @@ func TestPGMethod(t *testing.T) {
 }
 
 func (s *methodTestSuite) SetupSuite() {
-	s.pg , _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
+	s.pg, _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
 	s.pg.InitTestDB(s.T())
 }
 
@@ -75,7 +75,7 @@ func (s *methodTestSuite) TestPGMethod_InsertMultipleTx() {
 		}
 		err := s.dataagent.InsertMultiple(context.Background(), &methods)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, 1, methods[0].ID)
 		assert.Equal(t, 2, methods[1].ID)
 	})
@@ -94,7 +94,7 @@ func (s *methodTestSuite) TestPGMethod_InsertMultipleTx() {
 		err := s.dataagent.InsertMultiple(ctx, &methods)
 		_ = tx.Commit()
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.NotEmpty(t, methods[0].ID)
 	})
 
@@ -127,7 +127,7 @@ func (s *methodTestSuite) TestPGMethod_FindOneByAccountAndSelector() {
 			ChainId: "chainId",
 			Account: "address",
 		}, selector)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, method.ABI, "ABI")
 
 		selector1 := crypto.Keccak256([]byte(methodSig1))[:4]
@@ -135,7 +135,7 @@ func (s *methodTestSuite) TestPGMethod_FindOneByAccountAndSelector() {
 			ChainId: "chainId",
 			Account: "address",
 		}, selector1)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, method.ABI, "ABI1")
 	})
 
@@ -171,7 +171,7 @@ func (s *methodTestSuite) TestPGMethod_FindDefaultBySelector() {
 		selector := crypto.Keccak256([]byte(methodSig0))[:4]
 		defaultEvents, err := s.dataagent.FindDefaultBySelector(context.Background(), selector)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Len(t, defaultEvents, 1)
 	})
 

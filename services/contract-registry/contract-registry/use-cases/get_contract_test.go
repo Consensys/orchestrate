@@ -34,7 +34,7 @@ func TestGetContract_Execute(t *testing.T) {
 
 		response, err := usecase.Execute(context.Background(), contract.GetId())
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, contract.GetBytecode(), response.GetBytecode())
 		assert.Equal(t, contract.GetDeployedBytecode(), response.GetDeployedBytecode())
 		assert.Equal(t, contract.GetAbi(), response.GetAbi())
@@ -46,7 +46,7 @@ func TestGetContract_Execute(t *testing.T) {
 		response, err := usecase.Execute(context.Background(), nil)
 
 		assert.Nil(t, response)
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 	})
 
 	t.Run("should fail if data agent fails", func(t *testing.T) {

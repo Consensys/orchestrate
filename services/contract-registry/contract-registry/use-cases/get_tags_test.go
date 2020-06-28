@@ -28,7 +28,7 @@ func TestGetTags_Execute(t *testing.T) {
 		response, err := usecase.Execute(context.Background(), contractName)
 
 		assert.Equal(t, response, tags)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	t.Run("should fail if data agent fails", func(t *testing.T) {

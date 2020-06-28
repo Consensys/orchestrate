@@ -28,7 +28,7 @@ func TestPGCodeHash(t *testing.T) {
 }
 
 func (s *codeHashTestSuite) SetupSuite() {
-	s.pg , _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
+	s.pg, _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
 	s.pg.InitTestDB(s.T())
 }
 
@@ -54,7 +54,7 @@ func (s *codeHashTestSuite) TestPGArtifact_Insert() {
 		}
 		err := s.dataagent.Insert(context.Background(), codehash)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, codehash.ID, 1)
 	})
 

@@ -100,7 +100,7 @@ func (s *errorInterceptorsSuite) TestPingErrorSuccess() {
 		s.SimpleCtx(),
 		&testproto.PingRequest{Value: "success"},
 	)
-	assert.Nil(s.T(), err, "Error should be nil on success")
+	assert.NoError(s.T(), err, "Error should be nil on success")
 }
 
 func (s *errorInterceptorsSuite) TestPingErrorInternal() {

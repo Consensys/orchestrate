@@ -38,7 +38,7 @@ func TestImportChain_FetchHead(t *testing.T) {
 	chainAgent.EXPECT().RegisterChain(gomock.Any(), gomock.Eq(expectedChain))
 
 	err := importChainUC.Execute(context.Background(), importChainJSON)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }
 
 func TestImportChain_NotFetchHead(t *testing.T) {
@@ -61,5 +61,5 @@ func TestImportChain_NotFetchHead(t *testing.T) {
 	chainAgent.EXPECT().RegisterChain(gomock.Any(), gomock.Eq(expectedChain))
 
 	err := importChainUC.Execute(context.Background(), importChainJSON)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }

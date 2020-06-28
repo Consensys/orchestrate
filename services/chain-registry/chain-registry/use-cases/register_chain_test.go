@@ -39,7 +39,7 @@ func TestRegisterChain_FetchHead(t *testing.T) {
 	chainAgent.EXPECT().RegisterChain(gomock.Any(), gomock.Eq(&expectedChain))
 
 	err := registerChainUC.Execute(context.Background(), chain)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }
 
 func TestRegisterChain_NotFetchHead(t *testing.T) {
@@ -64,5 +64,5 @@ func TestRegisterChain_NotFetchHead(t *testing.T) {
 	chainAgent.EXPECT().RegisterChain(gomock.Any(), gomock.Eq(&expectedChain))
 
 	err := registerChainUC.Execute(context.Background(), chain)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }

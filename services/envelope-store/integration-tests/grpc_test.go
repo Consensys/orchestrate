@@ -48,7 +48,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_StoreEnvelope() {
 			TxHashes: []string{testTxHash},
 		})
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		if resp != nil {
 			assert.Len(t, resp.Responses, 0)
 		}
@@ -71,7 +71,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_StoreEnvelope() {
 			Envelope: b.TxEnvelopeAsRequest(),
 		})
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, svc.Status_STORED, resp.GetStatusInfo().GetStatus(), "Store default status should be correct")
 		assert.True(t, time.Since(resp.GetStatusInfo().StoredAtTime()) < 200*time.Millisecond, "Store stored date should be close")
 	})
@@ -81,7 +81,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_StoreEnvelope() {
 			Id: testEnvelopeUUID,
 		})
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, big.NewInt(testChainID).String(), resp.GetEnvelope().GetChainID(), "ChainID should be the expected")
 		assert.Equal(t, testTxHash, resp.GetEnvelope().GetTxHash(), "TxHash should be the expected")
 	})
@@ -92,7 +92,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_StoreEnvelope() {
 			TxHash:  testTxHash,
 		})
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, testEnvelopeUUID, resp.GetEnvelope().GetID(), "UUID should be the expected")
 	})
 
@@ -102,7 +102,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_StoreEnvelope() {
 			TxHashes: []string{testTxHash},
 		})
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		if resp != nil {
 			assert.Len(t, resp.Responses, 1)
 			assert.Equal(t, testEnvelopeUUID, resp.Responses[0].GetEnvelope().GetID(), "UUID should be the expected")
@@ -128,7 +128,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_NotFoundAssertion() {
 			TxHash:  "0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a88e534136104b5447a211",
 		})
 
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 		assert.True(t, errors.IsNotFoundError(err), "should be NotFoundError")
 	})
 
@@ -137,7 +137,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_NotFoundAssertion() {
 			Id: "a0ee-bc99-9c0b-4ef8-bb6d-acde-bd38-0a12",
 		})
 
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 		assert.True(t, errors.IsNotFoundError(err), "should be NotFoundError")
 	})
 
@@ -147,7 +147,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_NotFoundAssertion() {
 			Status: svc.Status_PENDING,
 		})
 
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 		assert.True(t, errors.IsNotFoundError(err), "should be NotFoundError")
 	})
 
@@ -168,7 +168,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_NotFoundAssertion() {
 			Envelope: b.TxEnvelopeAsRequest(),
 		})
 
-		assert.NotNil(t, err)
+		assert.Error(t, err)
 		assert.True(t, errors.IsInternalError(err), "should be InternalError")
 	})
 }
@@ -196,7 +196,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_SetStatus() {
 			Envelope: b.TxEnvelopeAsRequest(),
 		})
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, svc.Status_STORED, resp.GetStatusInfo().GetStatus(), "Store default status should be correct")
 		assert.True(t, time.Since(resp.GetStatusInfo().StoredAtTime()) < 200*time.Millisecond, "Store stored date should be close")
 	})
@@ -207,7 +207,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_SetStatus() {
 			Status: svc.Status_PENDING,
 		})
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, svc.Status_PENDING, resp.GetStatusInfo().GetStatus(), "SetStatus status should be PENDING")
 		assert.True(t, time.Since(resp.GetStatusInfo().SentAtTime()) < 200*time.Millisecond, "Store pending date should be close")
 	})
@@ -218,7 +218,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_SetStatus() {
 			Status: svc.Status_ERROR,
 		})
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, svc.Status_ERROR, resp.GetStatusInfo().GetStatus(), "SetStatus status should be PENDING")
 		assert.True(t, time.Since(resp.GetStatusInfo().SentAtTime()) < 200*time.Millisecond, "Store pending date should be close")
 	})
@@ -229,7 +229,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_SetStatus() {
 			Status: svc.Status_MINED,
 		})
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, svc.Status_MINED, resp.GetStatusInfo().GetStatus(), "SetStatus status should be PENDING")
 		assert.True(t, time.Since(resp.GetStatusInfo().SentAtTime()) < 200*time.Millisecond, "Store pending date should be close")
 	})
@@ -239,7 +239,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_SetStatus() {
 			Id: testEnvelopeUUID,
 		})
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, svc.Status_MINED, resp.GetStatusInfo().GetStatus(), "LoadByID status should be MINED")
 		assert.True(t, resp.GetStatusInfo().SentAtTime().Sub(resp.GetStatusInfo().StoredAtTime()) > 0, "Stored should be older than sent date")
 	})
@@ -271,7 +271,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_EnvelopeStoreUpdate() {
 			Envelope: b.TxEnvelopeAsRequest(),
 		})
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, svc.Status_STORED, resp.GetStatusInfo().GetStatus(), "Store default status should be correct")
 		assert.True(t, time.Since(resp.GetStatusInfo().StoredAtTime()) < 200*time.Millisecond, "Store stored date should be close")
 	})
@@ -284,7 +284,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_EnvelopeStoreUpdate() {
 			Envelope: b.TxEnvelopeAsRequest(),
 		})
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, svc.Status_STORED, resp.GetStatusInfo().GetStatus(), "Store status should have been reset to stored")
 		assert.Equal(t, testTxHashNew, resp.GetEnvelope().GetTxHash(), "Store hash should have been updated")
 		assert.True(t, time.Since(resp.GetStatusInfo().StoredAtTime()) < 200*time.Millisecond, "Store stored date should be close")
@@ -299,7 +299,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_EnvelopeStoreUpdate() {
 			Status: svc.Status_PENDING,
 		})
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, svc.Status_PENDING, resp.GetStatusInfo().GetStatus(), "SetStatus status should be PENDING")
 		assert.True(t, time.Since(resp.GetStatusInfo().SentAtTime()) < 200*time.Millisecond, "Store pending date should be close")
 	})
@@ -310,7 +310,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_EnvelopeStoreUpdate() {
 			TxHash:  testTxHashNew,
 		})
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, testEnvelopeUUID, resp.GetEnvelope().GetID(), "UUID should be the expected")
 	})
 
@@ -322,7 +322,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_EnvelopeStoreUpdate() {
 			Envelope: b.TxEnvelopeAsRequest(),
 		})
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, svc.Status_STORED, resp.GetStatusInfo().GetStatus(), "Store status should have been reset to stored")
 		assert.Equal(t, testTxHashNew, resp.GetEnvelope().GetTxHash(), "Store hash should have been updated")
 	})
@@ -332,7 +332,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_EnvelopeStoreUpdate() {
 			Id: testEnvelopeUUIDNew,
 		})
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, testTxHashNew, resp.GetEnvelope().GetTxHash(), "TxHash should be the expected")
 	})
 }
@@ -352,7 +352,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_GetPending() {
 			_, err := s.client.Store(ctx, &svc.StoreRequest{
 				Envelope: b.TxEnvelopeAsRequest(),
 			})
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 
 			// We simulate some exec time between each store
 			time.Sleep(testStoreInterval)
@@ -363,7 +363,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_GetPending() {
 					Id:     envelopeID,
 					Status: svc.Status_PENDING,
 				})
-				assert.Nil(t, err)
+				assert.NoError(t, err)
 			}
 		}
 	})
@@ -372,7 +372,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_GetPending() {
 		resp, err := s.client.LoadPending(ctx, &svc.LoadPendingRequest{
 			Duration: utils.DurationToPDuration(0),
 		})
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Len(t, resp.GetResponses(), 3, "Count of envelope pending incorrect")
 	})
 
@@ -380,7 +380,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_GetPending() {
 		resp, err := s.client.LoadPending(ctx, &svc.LoadPendingRequest{
 			Duration: utils.DurationToPDuration(testStoreInterval * 3),
 		})
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Len(t, resp.GetResponses(), 2, "Count of envelope pending incorrect")
 	})
 
@@ -388,7 +388,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_GetPending() {
 		resp, err := s.client.LoadPending(ctx, &svc.LoadPendingRequest{
 			Duration: utils.DurationToPDuration(testStoreInterval * 5),
 		})
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Len(t, resp.GetResponses(), 1, "Count of envelope pending incorrect")
 	})
 
@@ -396,7 +396,7 @@ func (s *EnvelopeStoreTestSuite) TestEnvelopeStore_GetPending() {
 		resp, err := s.client.LoadPending(ctx, &svc.LoadPendingRequest{
 			Duration: utils.DurationToPDuration(testStoreInterval * 7),
 		})
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Len(t, resp.GetResponses(), 0, "Count of envelope pending incorrect")
 	})
 }

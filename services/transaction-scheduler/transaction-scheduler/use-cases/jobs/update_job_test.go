@@ -4,9 +4,10 @@ package jobs
 
 import (
 	"context"
+	"testing"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	testutils3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
-	"testing"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -53,7 +54,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 
 		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, tenantID)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	t.Run("should execute use case successfully if transaction is empty", func(t *testing.T) {
@@ -66,7 +67,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 
 		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, tenantID)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	t.Run("should execute use case successfully if status is empty", func(t *testing.T) {
@@ -80,7 +81,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 
 		_, err := usecase.Execute(context.Background(), jobEntity, "", tenantID)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	t.Run("should fail with the same error if find one fails", func(t *testing.T) {

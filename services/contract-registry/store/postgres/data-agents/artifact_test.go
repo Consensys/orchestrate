@@ -31,7 +31,7 @@ func TestPGArtifact(t *testing.T) {
 }
 
 func (s *artifactTestSuite) SetupSuite() {
-	s.pg , _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
+	s.pg, _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
 	s.pg.InitTestDB(s.T())
 }
 
@@ -60,7 +60,7 @@ func (s *artifactTestSuite) TestPGArtifact_SelectOrInsertTx() {
 		}
 		err := s.dataagent.SelectOrInsert(context.Background(), artifact)
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, artifact.ID, 1)
 	})
 
@@ -77,7 +77,7 @@ func (s *artifactTestSuite) TestPGArtifact_SelectOrInsertTx() {
 		err := s.dataagent.SelectOrInsert(ctx, artifact)
 		_ = tx.Commit()
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, artifact.ID, 1)
 	})
 
@@ -111,7 +111,7 @@ func (s *artifactTestSuite) TestPGArtifact_FindOneByNameAndTag() {
 
 		artifact, err := s.dataagent.FindOneByNameAndTag(context.Background(), "myContract", "tag")
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, 1, artifact.ID)
 	})
 
