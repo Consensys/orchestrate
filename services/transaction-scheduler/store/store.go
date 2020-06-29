@@ -40,11 +40,11 @@ type Tx interface {
 type TransactionRequestAgent interface {
 	SelectOrInsert(ctx context.Context, txRequest *models.TransactionRequest) error
 	FindOneByIdempotencyKey(ctx context.Context, idempotencyKey string) (*models.TransactionRequest, error)
+	FindOneByUUID(ctx context.Context, uuid, tenantID string) (*models.TransactionRequest, error)
 }
 
 type ScheduleAgent interface {
 	Insert(ctx context.Context, schedule *models.Schedule) error
-	FindOneByID(ctx context.Context, ID int) (*models.Schedule, error)
 	FindOneByUUID(ctx context.Context, uuid, tenantID string) (*models.Schedule, error)
 	FindAll(ctx context.Context, tenantID string) ([]*models.Schedule, error)
 }

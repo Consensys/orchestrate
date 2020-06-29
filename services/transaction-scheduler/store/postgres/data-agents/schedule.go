@@ -42,22 +42,6 @@ func (agent *PGSchedule) Insert(ctx context.Context, schedule *models.Schedule) 
 }
 
 // FindOneByUUID Finds a schedule in DB
-func (agent *PGSchedule) FindOneByID(ctx context.Context, id int) (*models.Schedule, error) {
-	schedule := &models.Schedule{}
-
-	q := agent.db.ModelContext(ctx, schedule).
-		Relation("Jobs").
-		Where("schedule.id = ?", id)
-
-	err := pg.SelectOne(ctx, q)
-	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(scheduleDAComponent)
-	}
-
-	return schedule, nil
-}
-
-// FindOneByUUID Finds a schedule in DB
 func (agent *PGSchedule) FindOneByUUID(ctx context.Context, scheduleUUID, tenantID string) (*models.Schedule, error) {
 	schedule := &models.Schedule{}
 

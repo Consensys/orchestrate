@@ -52,7 +52,27 @@ func (agent *PGTransactionRequest) FindOneByIdempotencyKey(ctx context.Context, 
 
 	err := pg.SelectOne(ctx, query)
 	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(jobDAComponent)
+		return nil, errors.FromError(err).ExtendComponent(txRequestDAComponent)
+	}
+
+	return txRequest, nil
+}
+
+func (agent *PGTransactionRequest) FindOneByUUID(ctx context.Context, txRequestUUID, tenantID string) (*models.TransactionRequest, error) {
+	txRequest := &models.TransactionRequest{}
+	query := agent.db.ModelContext(ctx, txRequest).
+		Where("transaction_request.uuid = ?", txRequestUUID).
+		Join("JOIN schedules AS s").
+		JoinOn("s.transaction_request_id = transaction_request.id").
+		Relation("Schedules")
+
+	if tenantID != "" {
+		query.JoinOn("s.tenant_id = ?", tenantID)
+	}
+
+	err := pg.SelectOne(ctx, query)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(txRequestDAComponent)
 	}
 
 	return txRequest, nil

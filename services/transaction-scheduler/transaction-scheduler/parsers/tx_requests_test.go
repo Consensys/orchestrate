@@ -7,20 +7,18 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 )
 
 func TestParsersTxRequest_NewModelFromEntity(t *testing.T) {
 	reqHash := "reqHash"
 	txReqEntity := testutils2.FakeTxRequestEntity()
-	txReqModel, _ := NewTxRequestModelFromEntities(txReqEntity, reqHash)
+	txReqModel := NewTxRequestModelFromEntities(txReqEntity, reqHash)
 
-	paramsBytes, _ := json.Marshal(txReqEntity.Params)
 	assert.Equal(t, txReqEntity.IdempotencyKey, txReqModel.IdempotencyKey)
 	assert.Equal(t, txReqEntity.CreatedAt, txReqModel.CreatedAt)
 	assert.Equal(t, txReqEntity.UUID, txReqModel.UUID)
-	assert.Equal(t, string(paramsBytes), txReqModel.Params)
+	assert.Equal(t, txReqEntity.Params, txReqModel.Params)
 }
 
 func TestParsersTxRequest_NewJobEntityFromSendTx(t *testing.T) {

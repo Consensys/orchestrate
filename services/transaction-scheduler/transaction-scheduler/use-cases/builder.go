@@ -25,6 +25,7 @@ type useCases struct {
 	sendContractTransaction transactions.SendContractTxUseCase
 	sendDeployTransaction   transactions.SendDeployTxUseCase
 	sendTransaction         transactions.SendTxUseCase
+	getTransaction          transactions.GetTxUseCase
 	// Schedule
 	createSchedule schedules.CreateScheduleUseCase
 	getSchedule    schedules.GetScheduleUseCase
@@ -52,14 +53,16 @@ func NewUseCases(
 	getScheduleUC := schedules.NewGetScheduleUseCase(db)
 	createJobUC := jobs.NewCreateJobUseCase(db, txValidator)
 	startJobUC := jobs.NewStartJobUseCase(db, producer, topicsCfg)
+	getTransactionUC := transactions.NewGetTxUseCase(db, getScheduleUC)
 
-	sendTxUC := transactions.NewSendTxUseCase(txValidator, db, startJobUC, createJobUC, createScheduleUC, getScheduleUC)
+	sendTxUC := transactions.NewSendTxUseCase(txValidator, db, startJobUC, createJobUC, createScheduleUC, getTransactionUC)
 
 	return &useCases{
 		// Transaction
 		sendContractTransaction: transactions.NewSendContractTxUseCase(txValidator, sendTxUC),
 		sendDeployTransaction:   transactions.NewSendDeployTxUseCase(txValidator, sendTxUC),
 		sendTransaction:         sendTxUC,
+		getTransaction:          getTransactionUC,
 		// Schedules
 		createSchedule: createScheduleUC,
 		getSchedule:    getScheduleUC,
@@ -85,6 +88,10 @@ func (u *useCases) SendDeployTransaction() transactions.SendDeployTxUseCase {
 
 func (u *useCases) SendTransaction() transactions.SendTxUseCase {
 	return u.sendTransaction
+}
+
+func (u *useCases) GetTransaction() transactions.GetTxUseCase {
+	return u.getTransaction
 }
 
 func (u *useCases) CreateSchedule() schedules.CreateScheduleUseCase {

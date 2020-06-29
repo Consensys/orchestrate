@@ -31,7 +31,7 @@ type sendTxUsecase struct {
 	startJobUC       jobs.StartJobUseCase
 	createJobUC      jobs.CreateJobUseCase
 	createScheduleUC schedules.CreateScheduleUseCase
-	getScheduleUC    schedules.GetScheduleUseCase
+	getTxUC          GetTxUseCase
 }
 
 // NewSendTxUseCase creates a new SendTxUseCase
@@ -40,7 +40,7 @@ func NewSendTxUseCase(validator validators.TransactionValidator,
 	startJobUseCase jobs.StartJobUseCase,
 	createJobUC jobs.CreateJobUseCase,
 	createScheduleUC schedules.CreateScheduleUseCase,
-	getScheduleUC schedules.GetScheduleUseCase,
+	getTxUC GetTxUseCase,
 ) SendTxUseCase {
 	return &sendTxUsecase{
 		validator:        validator,
@@ -48,14 +48,14 @@ func NewSendTxUseCase(validator validators.TransactionValidator,
 		startJobUC:       startJobUseCase,
 		createJobUC:      createJobUC,
 		createScheduleUC: createScheduleUC,
-		getScheduleUC:    getScheduleUC,
+		getTxUC:          getTxUC,
 	}
 }
 
 // Execute validates, creates and starts a new transaction
 func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequest, txData, chainUUID, tenantID string) (*entities.TxRequest, error) {
-	logger := log.WithContext(ctx)
-	logger.WithField("idempotency_key", txRequest.IdempotencyKey).Debug("creating new transaction")
+	logger := log.WithContext(ctx).WithField("idempotency_key", txRequest.IdempotencyKey)
+	logger.Debug("creating new transaction")
 
 	// Step 1: Validation
 	err := uc.validator.ValidateFields(ctx, txRequest)
@@ -70,21 +70,17 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 
 	// Step 2: Insert Schedule + Job + Transaction + TxRequest atomically
 	err = database.ExecuteInDBTx(uc.db, func(dbtx database.Tx) error {
-		txRequestModel, der := parsers.NewTxRequestModelFromEntities(txRequest, requestHash)
-		if der != nil {
-			return der
-		}
+		txRequestModel := parsers.NewTxRequestModelFromEntities(txRequest, requestHash)
 
-		der = dbtx.(store.Tx).TransactionRequest().SelectOrInsert(ctx, txRequestModel)
+		der := dbtx.(store.Tx).TransactionRequest().SelectOrInsert(ctx, txRequestModel)
 		if der != nil {
 			return der
 		}
-		txRequest.CreatedAt = txRequestModel.CreatedAt
 		txRequest.UUID = txRequestModel.UUID
 
 		txRequest.Schedule, der = uc.createScheduleUC.
 			WithDBTransaction(dbtx.(store.Tx)).
-			Execute(ctx, &entities.Schedule{}, tenantID)
+			Execute(ctx, &entities.Schedule{TxRequest: txRequest}, tenantID)
 
 		if der != nil {
 			return der
@@ -109,7 +105,6 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 	}
 
 	// Step 3: Start first job of the schedule
-	scheduleUUID := txRequest.Schedule.UUID
 	jobUUID := txRequest.Schedule.Jobs[0].UUID
 	err = uc.startJobUC.Execute(ctx, jobUUID, tenantID)
 	if err != nil {
@@ -117,17 +112,12 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 	}
 
 	// Step 4: Load latest Schedule status from DB
-	txRequest.Schedule, err = uc.getScheduleUC.Execute(ctx, scheduleUUID, tenantID)
+	txRequest, err = uc.getTxUC.Execute(ctx, txRequest.UUID, tenantID)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
 
-	logger.
-		WithField("idempotency_key", txRequest.IdempotencyKey).
-		WithField("schedule_uuid", scheduleUUID).
-		WithField("job_uuid", jobUUID).
-		Info("contract transaction request created successfully")
-
+	logger.WithField("uuid", txRequest.UUID).Info("contract transaction request created successfully")
 	return txRequest, nil
 }
 

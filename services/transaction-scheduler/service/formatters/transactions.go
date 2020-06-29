@@ -64,12 +64,11 @@ func FormatSendTransferRequest(txRequest *types.TransferRequest, idempotencyKey 
 	}
 }
 
-func FormatTxResponse(txRequest *entities.TxRequest, chainName string) *types.TransactionResponse {
+func FormatTxResponse(txRequest *entities.TxRequest) *types.TransactionResponse {
 	return &types.TransactionResponse{
 		UUID:           txRequest.UUID,
 		IdempotencyKey: txRequest.IdempotencyKey,
 		Params:         txRequest.Params,
-		ChainName:      chainName,
 		Schedule:       FormatScheduleResponse(txRequest.Schedule),
 		CreatedAt:      txRequest.CreatedAt,
 	}

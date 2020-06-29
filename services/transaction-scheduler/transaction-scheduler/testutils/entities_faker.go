@@ -24,6 +24,7 @@ func FakeScheduleEntity() *entities.Schedule {
 
 func FakeTxRequestEntity() *entities.TxRequest {
 	return &entities.TxRequest{
+		UUID:           uuid.Must(uuid.NewV4()).String(),
 		Schedule:       FakeScheduleEntity(),
 		IdempotencyKey: "IdempotencyKey",
 		Params:         testutils.FakeETHTransactionParams(),
@@ -33,6 +34,7 @@ func FakeTxRequestEntity() *entities.TxRequest {
 
 func FakeRawTxRequestEntity() *entities.TxRequest {
 	return &entities.TxRequest{
+		UUID:           uuid.Must(uuid.NewV4()).String(),
 		Schedule:       FakeScheduleEntity(),
 		IdempotencyKey: "IdempotencyKey",
 		Params:         testutils.FakeRawTransactionParams(),
@@ -42,6 +44,7 @@ func FakeRawTxRequestEntity() *entities.TxRequest {
 
 func FakeTransferTxRequestEntity() *entities.TxRequest {
 	return &entities.TxRequest{
+		UUID:           uuid.Must(uuid.NewV4()).String(),
 		Schedule:       FakeScheduleEntity(),
 		IdempotencyKey: "IdempotencyKey",
 		Params:         testutils.FakeTransferTransactionParams(),
@@ -51,6 +54,7 @@ func FakeTransferTxRequestEntity() *entities.TxRequest {
 
 func FakeTesseraTxRequestEntity() *entities.TxRequest {
 	return &entities.TxRequest{
+		UUID:           uuid.Must(uuid.NewV4()).String(),
 		Schedule:       FakeScheduleEntity(),
 		IdempotencyKey: "IdempotencyKey",
 		Params:         testutils.FakeTesseraTransactionParams(),
@@ -60,6 +64,7 @@ func FakeTesseraTxRequestEntity() *entities.TxRequest {
 
 func FakeOrionTxRequestEntity() *entities.TxRequest {
 	return &entities.TxRequest{
+		UUID:           uuid.Must(uuid.NewV4()).String(),
 		Schedule:       FakeScheduleEntity(),
 		IdempotencyKey: "IdempotencyKey",
 		Params:         testutils.FakeOrionTransactionParams(),

@@ -35,6 +35,7 @@ type transactionsControllerTestSuite struct {
 	sendContractTxUseCase *mocks.MockSendContractTxUseCase
 	sendDeployTxUseCase   *mocks.MockSendDeployTxUseCase
 	sendTxUseCase         *mocks.MockSendTxUseCase
+	getTxUseCase          *mocks.MockGetTxUseCase
 	getChainByNameUseCase *mocks2.MockGetChainByNameUseCase
 	ctx                   context.Context
 	tenantID              string
@@ -51,6 +52,10 @@ func (s *transactionsControllerTestSuite) SendDeployTransaction() transactions.S
 
 func (s *transactionsControllerTestSuite) SendTransaction() transactions.SendTxUseCase {
 	return s.sendTxUseCase
+}
+
+func (s *transactionsControllerTestSuite) GetTransaction() transactions.GetTxUseCase {
+	return s.getTxUseCase
 }
 
 func (s *transactionsControllerTestSuite) GetChainByName() chains.GetChainByNameUseCase {
@@ -71,6 +76,7 @@ func (s *transactionsControllerTestSuite) SetupTest() {
 	s.sendContractTxUseCase = mocks.NewMockSendContractTxUseCase(ctrl)
 	s.sendDeployTxUseCase = mocks.NewMockSendDeployTxUseCase(ctrl)
 	s.sendTxUseCase = mocks.NewMockSendTxUseCase(ctrl)
+	s.getTxUseCase = mocks.NewMockGetTxUseCase(ctrl)
 	s.getChainByNameUseCase = mocks2.NewMockGetChainByNameUseCase(ctrl)
 	s.tenantID = "tenantId"
 	s.chain = testutils3.FakeChain()
@@ -81,7 +87,7 @@ func (s *transactionsControllerTestSuite) SetupTest() {
 	s.controller.Append(s.router)
 }
 
-func (s *transactionsControllerTestSuite) TestTransactionsController_Send() {
+func (s *transactionsControllerTestSuite) TestTransactionsController_send() {
 	urlPath := "/transactions/send"
 	idempotencyKey := "idempotencyKey"
 
@@ -111,7 +117,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_Send() {
 
 		s.router.ServeHTTP(rw, httpRequest)
 
-		response := formatters.FormatTxResponse(txRequestEntityResp, s.chain.Name)
+		response := formatters.FormatTxResponse(txRequestEntityResp)
 		expectedBody, _ := json.Marshal(response)
 		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
 		assert.Equal(t, http.StatusAccepted, rw.Code)
@@ -148,7 +154,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_Send() {
 
 		s.router.ServeHTTP(rw, httpRequest)
 
-		_ = formatters.FormatTxResponse(txRequestEntityResp, s.chain.Name)
+		_ = formatters.FormatTxResponse(txRequestEntityResp)
 		assert.Equal(t, http.StatusAccepted, rw.Code)
 	})
 
@@ -219,7 +225,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_Send() {
 	})
 }
 
-func (s *transactionsControllerTestSuite) TestTransactionsController_Deploy() {
+func (s *transactionsControllerTestSuite) TestTransactionsController_deploy() {
 	urlPath := "/transactions/deploy-contract"
 	idempotencyKey := "idempotencyKey"
 
@@ -245,7 +251,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_Deploy() {
 
 		s.router.ServeHTTP(rw, httpRequest)
 
-		response := formatters.FormatTxResponse(txRequestEntityResp, s.chain.Name)
+		response := formatters.FormatTxResponse(txRequestEntityResp)
 		expectedBody, _ := json.Marshal(response)
 		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
 		assert.Equal(t, http.StatusAccepted, rw.Code)
@@ -296,7 +302,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_Deploy() {
 	})
 }
 
-func (s *transactionsControllerTestSuite) TestTransactionsController_SendRaw() {
+func (s *transactionsControllerTestSuite) TestTransactionsController_sendRaw() {
 	urlPath := "/transactions/send-raw"
 	idempotencyKey := "idempotencyKey"
 
@@ -326,7 +332,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_SendRaw() {
 
 		s.router.ServeHTTP(rw, httpRequest)
 
-		response := formatters.FormatTxResponse(txRequestEntityResp, s.chain.Name)
+		response := formatters.FormatTxResponse(txRequestEntityResp)
 		expectedBody, _ := json.Marshal(response)
 		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
 		assert.Equal(t, http.StatusAccepted, rw.Code)
@@ -368,8 +374,8 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_SendRaw() {
 	})
 }
 
-func (s *transactionsControllerTestSuite) TestTransactionsController_SendTransferTx() {
-	urlPath := "/transactions/send-transfer"
+func (s *transactionsControllerTestSuite) TestTransactionsController_transfer() {
+	urlPath := "/transactions/transfer"
 	idempotencyKey := "idempotencyKey"
 
 	s.T().Run("should execute request successfully", func(t *testing.T) {
@@ -398,7 +404,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_SendTransfe
 
 		s.router.ServeHTTP(rw, httpRequest)
 
-		response := formatters.FormatTxResponse(txRequestEntityResp, s.chain.Name)
+		response := formatters.FormatTxResponse(txRequestEntityResp)
 		expectedBody, _ := json.Marshal(response)
 		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
 		assert.Equal(t, http.StatusAccepted, rw.Code)
@@ -455,11 +461,39 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_SendTransfe
 		requestBytes, _ := json.Marshal(txRequest)
 
 		rw := httptest.NewRecorder()
-		httpRequest := httptest.NewRequest(http.MethodPost, "/transactions/send-transfer",
-			bytes.NewReader(requestBytes)).
-			WithContext(s.ctx)
+		httpRequest := httptest.NewRequest(http.MethodPost, urlPath, bytes.NewReader(requestBytes)).WithContext(s.ctx)
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusBadRequest, rw.Code)
+	})
+}
+
+func (s *transactionsControllerTestSuite) TestTransactionsController_getOne() {
+	uuid := "uuid"
+	urlPath := "/transactions/" + uuid
+
+	s.T().Run("should execute request successfully", func(t *testing.T) {
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodGet, urlPath, nil).WithContext(s.ctx)
+		txRequest := testutils2.FakeTransferTxRequestEntity()
+
+		s.getTxUseCase.EXPECT().Execute(gomock.Any(), uuid, s.tenantID).Return(txRequest, nil)
+
+		s.router.ServeHTTP(rw, httpRequest)
+
+		response := formatters.FormatTxResponse(txRequest)
+		expectedBody, _ := json.Marshal(response)
+		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
+		assert.Equal(t, http.StatusOK, rw.Code)
+	})
+
+	s.T().Run("should fail with 404 if NotFoundError is returned", func(t *testing.T) {
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodGet, urlPath, nil).WithContext(s.ctx)
+
+		s.getTxUseCase.EXPECT().Execute(gomock.Any(), uuid, s.tenantID).Return(nil, errors.NotFoundError(""))
+
+		s.router.ServeHTTP(rw, httpRequest)
+		assert.Equal(t, http.StatusNotFound, rw.Code)
 	})
 }

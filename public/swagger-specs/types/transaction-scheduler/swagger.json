@@ -244,7 +244,7 @@
                 }
             }
         },
-        "/transactions/send-transfer": {
+        "/transactions/transfer": {
             "post": {
                 "security": [
                     {
@@ -263,6 +263,27 @@
                     "400": {},
                     "409": {},
                     "422": {},
+                    "500": {}
+                }
+            }
+        },
+        "/transactions/{uuid}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Gets a transaction request by uuid",
+                "responses": {
+                    "200": {},
+                    "404": {},
                     "500": {}
                 }
             }

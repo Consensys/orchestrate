@@ -27,6 +27,7 @@ func NewScheduleModelFromEntities(schedule *entities.Schedule, tenantID string) 
 	if schedule.TxRequest != nil {
 		scheduleModel.TransactionRequest = &models.TransactionRequest{
 			IdempotencyKey: schedule.TxRequest.IdempotencyKey,
+			UUID:           schedule.TxRequest.UUID,
 		}
 	}
 

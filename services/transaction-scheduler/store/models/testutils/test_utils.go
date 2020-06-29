@@ -3,6 +3,8 @@ package testutils
 import (
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
@@ -37,7 +39,7 @@ func FakeTxRequest(scheduleID int) *models.TransactionRequest {
 		UUID:           uuid.Must(uuid.NewV4()).String(),
 		IdempotencyKey: utils.RandomString(16),
 		RequestHash:    "requestHash",
-		Params:         "{\"field0\": \"field0Value\"}",
+		Params:         testutils.FakeETHTransactionParams(),
 		Schedules:      []*models.Schedule{fakeSchedule},
 	}
 }

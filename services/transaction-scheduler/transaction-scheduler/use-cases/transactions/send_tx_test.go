@@ -5,6 +5,7 @@ package transactions
 import (
 	"context"
 	"fmt"
+	mocks5 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/transactions/mocks"
 	"testing"
 
 	"github.com/gofrs/uuid"
@@ -32,7 +33,7 @@ type sendTxSuite struct {
 	StartJobUC       *mocks.MockStartJobUseCase
 	CreateJobUC      *mocks.MockCreateJobUseCase
 	CreateScheduleUC *mocks4.MockCreateScheduleUseCase
-	GetScheduleUC    *mocks4.MockGetScheduleUseCase
+	GetTxUC          *mocks5.MockGetTxUseCase
 }
 
 func TestSendTx(t *testing.T) {
@@ -51,8 +52,8 @@ func (s *sendTxSuite) SetupTest() {
 	s.StartJobUC = mocks.NewMockStartJobUseCase(ctrl)
 	s.CreateJobUC = mocks.NewMockCreateJobUseCase(ctrl)
 	s.CreateScheduleUC = mocks4.NewMockCreateScheduleUseCase(ctrl)
-	s.GetScheduleUC = mocks4.NewMockGetScheduleUseCase(ctrl)
-	s.usecase = NewSendTxUseCase(s.Validators, s.DB, s.StartJobUC, s.CreateJobUC, s.CreateScheduleUC, s.GetScheduleUC)
+	s.GetTxUC = mocks5.NewMockGetTxUseCase(ctrl)
+	s.usecase = NewSendTxUseCase(s.Validators, s.DB, s.StartJobUC, s.CreateJobUC, s.CreateScheduleUC, s.GetTxUC)
 }
 
 func (s *sendTxSuite) TestSendTx_Success() {
@@ -367,9 +368,9 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 			Execute(ctx, jobUUID, tenantID).
 			Return(nil)
 
-		s.GetScheduleUC.EXPECT().
-			Execute(ctx, scheduleUUID, tenantID).
-			Return(txRequest.Schedule, expectedErr)
+		s.GetTxUC.EXPECT().
+			Execute(ctx, txRequest.UUID, tenantID).
+			Return(txRequest, expectedErr)
 
 		response, err := s.usecase.Execute(ctx, txRequest, txData, chainUUID, tenantID)
 
@@ -383,7 +384,6 @@ func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, jobT
 	tenantID := "tenantID"
 	requestHash := "requestHash"
 	chainUUID := uuid.Must(uuid.NewV4()).String()
-	scheduleUUID := txRequest.Schedule.UUID
 	jobUUID := txRequest.Schedule.Jobs[0].UUID
 	txData := ""
 
@@ -431,9 +431,9 @@ func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, jobT
 		Execute(ctx, jobUUID, tenantID).
 		Return(nil)
 
-	s.GetScheduleUC.EXPECT().
-		Execute(ctx, scheduleUUID, tenantID).
-		Return(txRequest.Schedule, nil)
+	s.GetTxUC.EXPECT().
+		Execute(ctx, txRequest.UUID, tenantID).
+		Return(txRequest, nil)
 
 	return s.usecase.Execute(ctx, txRequest, txData, chainUUID, tenantID)
 }

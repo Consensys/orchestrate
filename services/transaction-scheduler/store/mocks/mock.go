@@ -495,6 +495,21 @@ func (mr *MockTransactionRequestAgentMockRecorder) FindOneByIdempotencyKey(ctx, 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByIdempotencyKey", reflect.TypeOf((*MockTransactionRequestAgent)(nil).FindOneByIdempotencyKey), ctx, idempotencyKey)
 }
 
+// FindOneByUUID mocks base method
+func (m *MockTransactionRequestAgent) FindOneByUUID(ctx context.Context, uuid, tenantID string) (*models.TransactionRequest, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindOneByUUID", ctx, uuid, tenantID)
+	ret0, _ := ret[0].(*models.TransactionRequest)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindOneByUUID indicates an expected call of FindOneByUUID
+func (mr *MockTransactionRequestAgentMockRecorder) FindOneByUUID(ctx, uuid, tenantID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByUUID", reflect.TypeOf((*MockTransactionRequestAgent)(nil).FindOneByUUID), ctx, uuid, tenantID)
+}
+
 // MockScheduleAgent is a mock of ScheduleAgent interface
 type MockScheduleAgent struct {
 	ctrl     *gomock.Controller
@@ -530,21 +545,6 @@ func (m *MockScheduleAgent) Insert(ctx context.Context, schedule *models.Schedul
 func (mr *MockScheduleAgentMockRecorder) Insert(ctx, schedule interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockScheduleAgent)(nil).Insert), ctx, schedule)
-}
-
-// FindOneByID mocks base method
-func (m *MockScheduleAgent) FindOneByID(ctx context.Context, ID int) (*models.Schedule, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindOneByID", ctx, ID)
-	ret0, _ := ret[0].(*models.Schedule)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindOneByID indicates an expected call of FindOneByID
-func (mr *MockScheduleAgentMockRecorder) FindOneByID(ctx, ID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByID", reflect.TypeOf((*MockScheduleAgent)(nil).FindOneByID), ctx, ID)
 }
 
 // FindOneByUUID mocks base method

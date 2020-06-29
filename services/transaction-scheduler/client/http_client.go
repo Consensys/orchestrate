@@ -92,7 +92,7 @@ func (c *HTTPClient) SendRawTransaction(ctx context.Context, txRequest *types.Ra
 }
 
 func (c *HTTPClient) SendTransferTransaction(ctx context.Context, txRequest *types.TransferRequest) (*types.TransactionResponse, error) {
-	reqURL := fmt.Sprintf("%v/transactions/send-transfer", c.config.URL)
+	reqURL := fmt.Sprintf("%v/transactions/transfer", c.config.URL)
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, txRequest)
 	if err != nil {
@@ -109,6 +109,23 @@ func (c *HTTPClient) SendTransferTransaction(ctx context.Context, txRequest *typ
 	}
 
 	return resp, nil
+}
+
+func (c *HTTPClient) GetTxRequest(ctx context.Context, txRequestUUID string) (*types.TransactionResponse, error) {
+	reqURL := fmt.Sprintf("%v/transactions/%v", c.config.URL, txRequestUUID)
+
+	response, err := clientutils.GetRequest(ctx, c.client, reqURL)
+	if err != nil {
+		errMessage := "error while getting transaction request"
+		log.FromContext(ctx).WithError(err).Error(errMessage)
+		return nil, errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+	}
+	defer clientutils.CloseResponse(response)
+
+	resp := &types.TransactionResponse{}
+	err = parseResponse(ctx, response, resp)
+
+	return resp, err
 }
 
 func (c *HTTPClient) GetSchedule(ctx context.Context, scheduleUUID string) (*types.ScheduleResponse, error) {

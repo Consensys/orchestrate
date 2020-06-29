@@ -10,7 +10,6 @@ type TransactionResponse struct {
 	UUID           string                      `json:"uuid"`
 	IdempotencyKey string                      `json:"idempotencyKey"`
 	Params         *types.ETHTransactionParams `json:"params"`
-	ChainName      string                      `json:"chain"`
 	Schedule       *ScheduleResponse           `json:"schedule"`
 	CreatedAt      time.Time                   `json:"createdAt"`
 }

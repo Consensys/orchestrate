@@ -35,13 +35,15 @@ func NewTransactionsController(txUcs transactions.UseCases, chainUcs chains.UseC
 // Add routes to router
 func (c *TransactionsController) Append(router *mux.Router) {
 	router.Methods(http.MethodPost).Path("/transactions/send").
-		Handler(idempotencyKeyMiddleware(http.HandlerFunc(c.Send)))
+		Handler(idempotencyKeyMiddleware(http.HandlerFunc(c.send)))
 	router.Methods(http.MethodPost).Path("/transactions/send-raw").
-		Handler(idempotencyKeyMiddleware(http.HandlerFunc(c.SendRaw)))
-	router.Methods(http.MethodPost).Path("/transactions/send-transfer").
-		Handler(idempotencyKeyMiddleware(http.HandlerFunc(c.SendTransfer)))
+		Handler(idempotencyKeyMiddleware(http.HandlerFunc(c.sendRaw)))
+	router.Methods(http.MethodPost).Path("/transactions/transfer").
+		Handler(idempotencyKeyMiddleware(http.HandlerFunc(c.transfer)))
 	router.Methods(http.MethodPost).Path("/transactions/deploy-contract").
-		Handler(idempotencyKeyMiddleware(http.HandlerFunc(c.DeployContract)))
+		Handler(idempotencyKeyMiddleware(http.HandlerFunc(c.deployContract)))
+	router.Methods(http.MethodGet).Path("/transactions/{uuid}").
+		Handler(http.HandlerFunc(c.getOne))
 }
 
 func idempotencyKeyMiddleware(next http.Handler) http.Handler {
@@ -64,7 +66,7 @@ func idempotencyKeyMiddleware(next http.Handler) http.Handler {
 // @Failure 422
 // @Failure 500
 // @Router /transactions/send [post]
-func (c *TransactionsController) Send(rw http.ResponseWriter, request *http.Request) {
+func (c *TransactionsController) send(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
@@ -95,7 +97,7 @@ func (c *TransactionsController) Send(rw http.ResponseWriter, request *http.Requ
 	}
 
 	rw.WriteHeader(http.StatusAccepted)
-	_ = json.NewEncoder(rw).Encode(formatters.FormatTxResponse(txResponse, chain.Name))
+	_ = json.NewEncoder(rw).Encode(formatters.FormatTxResponse(txResponse))
 }
 
 // @Summary Creates and sends a new contract deployment transaction
@@ -108,7 +110,7 @@ func (c *TransactionsController) Send(rw http.ResponseWriter, request *http.Requ
 // @Failure 422
 // @Failure 500
 // @Router /transactions/deploy-contract [post]
-func (c *TransactionsController) DeployContract(rw http.ResponseWriter, request *http.Request) {
+func (c *TransactionsController) deployContract(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
@@ -139,7 +141,7 @@ func (c *TransactionsController) DeployContract(rw http.ResponseWriter, request 
 	}
 
 	rw.WriteHeader(http.StatusAccepted)
-	_ = json.NewEncoder(rw).Encode(formatters.FormatTxResponse(txResponse, chain.Name))
+	_ = json.NewEncoder(rw).Encode(formatters.FormatTxResponse(txResponse))
 }
 
 // @Summary Creates and sends a raw transaction
@@ -152,7 +154,7 @@ func (c *TransactionsController) DeployContract(rw http.ResponseWriter, request 
 // @Failure 422
 // @Failure 500
 // @Router /transactions/send-raw [post]
-func (c *TransactionsController) SendRaw(rw http.ResponseWriter, request *http.Request) {
+func (c *TransactionsController) sendRaw(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
@@ -179,7 +181,7 @@ func (c *TransactionsController) SendRaw(rw http.ResponseWriter, request *http.R
 	}
 
 	rw.WriteHeader(http.StatusAccepted)
-	_ = json.NewEncoder(rw).Encode(formatters.FormatTxResponse(txResponse, chain.Name))
+	_ = json.NewEncoder(rw).Encode(formatters.FormatTxResponse(txResponse))
 }
 
 // @Summary Creates and sends a transfer transaction
@@ -191,8 +193,8 @@ func (c *TransactionsController) SendRaw(rw http.ResponseWriter, request *http.R
 // @Failure 409
 // @Failure 422
 // @Failure 500
-// @Router /transactions/send-transfer [post]
-func (c *TransactionsController) SendTransfer(rw http.ResponseWriter, request *http.Request) {
+// @Router /transactions/transfer [post]
+func (c *TransactionsController) transfer(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
@@ -219,5 +221,29 @@ func (c *TransactionsController) SendTransfer(rw http.ResponseWriter, request *h
 	}
 
 	rw.WriteHeader(http.StatusAccepted)
-	_ = json.NewEncoder(rw).Encode(formatters.FormatTxResponse(txResponse, chain.Name))
+	_ = json.NewEncoder(rw).Encode(formatters.FormatTxResponse(txResponse))
+}
+
+// @Summary Gets a transaction request by uuid
+// @Produce json
+// @Security ApiKeyAuth
+// @Security JWTAuth
+// @Success 200
+// @Failure 404
+// @Failure 500
+// @Router /transactions/{uuid} [post]
+func (c *TransactionsController) getOne(rw http.ResponseWriter, request *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	ctx := request.Context()
+
+	uuid := mux.Vars(request)["uuid"]
+	tenantID := multitenancy.TenantIDFromContext(ctx)
+
+	txRequest, err := c.txUcs.GetTransaction().Execute(ctx, uuid, tenantID)
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	_ = json.NewEncoder(rw).Encode(formatters.FormatTxResponse(txRequest))
 }

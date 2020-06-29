@@ -94,6 +94,21 @@ func (mr *MockTransactionClientMockRecorder) SendTransferTransaction(ctx, reques
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendTransferTransaction", reflect.TypeOf((*MockTransactionClient)(nil).SendTransferTransaction), ctx, request)
 }
 
+// GetTxRequest mocks base method
+func (m *MockTransactionClient) GetTxRequest(ctx context.Context, txRequestUUID string) (*types.TransactionResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTxRequest", ctx, txRequestUUID)
+	ret0, _ := ret[0].(*types.TransactionResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTxRequest indicates an expected call of GetTxRequest
+func (mr *MockTransactionClientMockRecorder) GetTxRequest(ctx, txRequestUUID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTxRequest", reflect.TypeOf((*MockTransactionClient)(nil).GetTxRequest), ctx, txRequestUUID)
+}
+
 // MockScheduleClient is a mock of ScheduleClient interface
 type MockScheduleClient struct {
 	ctrl     *gomock.Controller
@@ -355,6 +370,21 @@ func (m *MockTransactionSchedulerClient) SendTransferTransaction(ctx context.Con
 func (mr *MockTransactionSchedulerClientMockRecorder) SendTransferTransaction(ctx, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendTransferTransaction", reflect.TypeOf((*MockTransactionSchedulerClient)(nil).SendTransferTransaction), ctx, request)
+}
+
+// GetTxRequest mocks base method
+func (m *MockTransactionSchedulerClient) GetTxRequest(ctx context.Context, txRequestUUID string) (*types.TransactionResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTxRequest", ctx, txRequestUUID)
+	ret0, _ := ret[0].(*types.TransactionResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTxRequest indicates an expected call of GetTxRequest
+func (mr *MockTransactionSchedulerClientMockRecorder) GetTxRequest(ctx, txRequestUUID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTxRequest", reflect.TypeOf((*MockTransactionSchedulerClient)(nil).GetTxRequest), ctx, txRequestUUID)
 }
 
 // GetSchedule mocks base method

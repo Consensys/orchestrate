@@ -1,27 +1,19 @@
 package parsers
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
 
-func NewTxRequestModelFromEntities(txRequest *entities.TxRequest, requestHash string) (*models.TransactionRequest, error) {
-	jsonParams, err := json.Marshal(txRequest.Params)
-	if err != nil {
-		return nil, err
-	}
-
-	txRequestModel := &models.TransactionRequest{
+func NewTxRequestModelFromEntities(txRequest *entities.TxRequest, requestHash string) *models.TransactionRequest {
+	return &models.TransactionRequest{
 		UUID:           txRequest.UUID,
 		IdempotencyKey: txRequest.IdempotencyKey,
 		RequestHash:    requestHash,
-		Params:         string(jsonParams),
+		Params:         txRequest.Params,
 		CreatedAt:      txRequest.CreatedAt,
 	}
-
-	return txRequestModel, nil
 }
 
 func NewJobEntityFromTxRequest(txRequest *entities.TxRequest, jobType, chainUUID string) *types.Job {

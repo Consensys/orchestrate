@@ -13,6 +13,7 @@ type TransactionClient interface {
 	SendDeployTransaction(ctx context.Context, request *types.DeployContractRequest) (*types.TransactionResponse, error)
 	SendRawTransaction(ctx context.Context, request *types.RawTransactionRequest) (*types.TransactionResponse, error)
 	SendTransferTransaction(ctx context.Context, request *types.TransferRequest) (*types.TransactionResponse, error)
+	GetTxRequest(ctx context.Context, txRequestUUID string) (*types.TransactionResponse, error)
 }
 
 type ScheduleClient interface {

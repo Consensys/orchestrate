@@ -6,7 +6,10 @@ package dataagents
 
 import (
 	"context"
+	"fmt"
 	"testing"
+
+	"github.com/gofrs/uuid"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -61,13 +64,13 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_SelectOrInsert() {
 
 	s.T().Run("should insert model successfully if uuid is already set", func(t *testing.T) {
 		txRequest := testutils.FakeTxRequest(0)
-		uuid := txRequest.UUID
+		txRequestUUID := txRequest.UUID
 
 		err := insertTxRequest(ctx, s.agents, txRequest)
 
 		assert.NoError(t, err)
 		assert.NotEmpty(t, txRequest.ID)
-		assert.Equal(t, uuid, txRequest.UUID)
+		assert.Equal(t, txRequestUUID, txRequest.UUID)
 	})
 
 	s.T().Run("Does nothing if idempotency key is already used and returns request", func(t *testing.T) {
@@ -103,6 +106,33 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_FindOneByIdempotencyKey() 
 	})
 }
 
+func (s *txRequestTestSuite) TestPGTransactionRequest_FindOneByUUID() {
+	ctx := context.Background()
+	txRequest := testutils.FakeTxRequest(0)
+	err := insertTxRequest(ctx, s.agents, txRequest)
+	assert.Nil(s.T(), err)
+
+	s.T().Run("should find request successfully for empty tenant", func(t *testing.T) {
+		txRequestRetrieved, err := s.agents.TransactionRequest().FindOneByUUID(ctx, txRequest.UUID, "")
+
+		fmt.Println(txRequestRetrieved)
+
+		assert.NoError(t, err)
+		assert.Equal(t, txRequest.UUID, txRequestRetrieved.UUID)
+		assert.Equal(t, txRequest.Schedules[0].UUID, txRequestRetrieved.Schedules[0].UUID)
+	})
+
+	s.T().Run("should return NotFoundError if uuid is not found", func(t *testing.T) {
+		_, err := s.agents.TransactionRequest().FindOneByUUID(ctx, uuid.Must(uuid.NewV4()).String(), txRequest.Schedules[0].TenantID)
+		assert.True(t, errors.IsNotFoundError(err))
+	})
+
+	s.T().Run("should return NotFoundError if tenant is not found", func(t *testing.T) {
+		_, err := s.agents.TransactionRequest().FindOneByUUID(ctx, txRequest.UUID, "notExisting")
+		assert.True(t, errors.IsNotFoundError(err))
+	})
+}
+
 func (s *txRequestTestSuite) TestPGTransactionRequest_ConnectionErr() {
 	ctx := context.Background()
 
@@ -114,7 +144,7 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_ConnectionErr() {
 		err := insertTxRequest(ctx, s.agents, txRequest)
 		assert.True(t, errors.IsPostgresConnectionError(err))
 	})
-	// 
+	//
 	s.T().Run("should return PostgresConnectionError if find fails", func(t *testing.T) {
 		_, err := s.agents.TransactionRequest().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey)
 		assert.True(t, errors.IsPostgresConnectionError(err))
