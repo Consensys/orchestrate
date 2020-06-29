@@ -51,10 +51,10 @@ type BaseTransactionParams struct {
 
 type TransactionParams struct {
 	BaseTransactionParams
-	From            string   `json:"from" validate:"required,eth_addr"`
-	To              string   `json:"to" validate:"required,eth_addr"`
-	MethodSignature string   `json:"methodSignature" validate:"required,isValidMethodSig"`
-	Args            []string `json:"args,omitempty"`
+	From            string        `json:"from" validate:"required,eth_addr"`
+	To              string        `json:"to" validate:"required,eth_addr"`
+	MethodSignature string        `json:"methodSignature" validate:"required,isValidMethodSig"`
+	Args            []interface{} `json:"args,omitempty"`
 	types.PrivateTransactionParams
 }
 
@@ -71,9 +71,9 @@ type TransferParams struct {
 
 type DeployContractParams struct {
 	BaseTransactionParams
-	From         string   `json:"from" validate:"required,eth_addr"`
-	ContractName string   `json:"contractName" validate:"required"`
-	ContractTag  string   `json:"contractTag,omitempty"`
-	Args         []string `json:"args,omitempty"`
+	From         string        `json:"from" validate:"required,eth_addr"`
+	ContractName string        `json:"contractName" validate:"required"`
+	ContractTag  string        `json:"contractTag,omitempty"`
+	Args         []interface{} `json:"args,omitempty"`
 	types.PrivateTransactionParams
 }

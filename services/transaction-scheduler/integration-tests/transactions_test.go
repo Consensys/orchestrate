@@ -244,7 +244,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
 		txRequest := testutils.FakeDeployContractRequest(chain.Name)
-		txRequest.Params.Args = []string{"123"} // FakeContract arguments
+		txRequest.Params.Args = testutils2.ParseIArray(123) // FakeContract arguments
 
 		s.env.contractRegistryResponseFaker.GetContract = func() (*proto.GetContractResponse, error) {
 			return &proto.GetContractResponse{

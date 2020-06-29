@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"math/rand"
 )
 
@@ -21,4 +22,12 @@ func RandomString(n int) string {
 		b[i] = letter[rand.Intn(len(letter))]
 	}
 	return string(b)
+}
+
+func ParseIArrayToStringArray(ints []interface{}) (strings []string) {
+	strings = make([]string, len(ints))
+	for i := range ints {
+		strings[i] = fmt.Sprint(ints[i])
+	}
+	return
 }

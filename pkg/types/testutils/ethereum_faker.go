@@ -6,6 +6,12 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 )
 
+func ParseIArray(args ...interface{}) (ret []interface{}) {
+	ret = make([]interface{}, len(args))
+	copy(ret, args)
+	return
+}
+
 func FakeETHTransaction() *types.ETHTransaction {
 	return &types.ETHTransaction{
 		From:           "From",
@@ -32,7 +38,7 @@ func FakeETHTransactionParams() *types.ETHTransactionParams {
 		GasPrice:        "0",
 		Gas:             "0",
 		MethodSignature: "method(string,string)",
-		Args:            []string{"val1", "val2"},
+		Args:            ParseIArray("val1", "val2"),
 		ContractName:    "ContractName",
 		ContractTag:     "ContractTag",
 		Nonce:           "1",

@@ -7,19 +7,17 @@ import (
 	"fmt"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	abi2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
-	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
+	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
-
-	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
 
 //go:generate mockgen -source=transactions.go -destination=mocks/transactions.go -package=mocks
@@ -30,7 +28,7 @@ type TransactionValidator interface {
 	ValidateFields(ctx context.Context, txRequest *entities.TxRequest) error
 	ValidateRequestHash(ctx context.Context, chainUUID string, params interface{}, idempotencyKey string) (string, error)
 	ValidateChainExists(ctx context.Context, chainUUID string) error
-	ValidateMethodSignature(methodSignature string, args []string) (string, error)
+	ValidateMethodSignature(methodSignature string, args []interface{}) (string, error)
 	ValidateContract(ctx context.Context, params *types.ETHTransactionParams) (string, error)
 }
 
@@ -110,9 +108,9 @@ func (txValidator *transactionValidator) ValidateChainExists(ctx context.Context
 	return nil
 }
 
-func (txValidator *transactionValidator) ValidateMethodSignature(method string, args []string) (string, error) {
+func (txValidator *transactionValidator) ValidateMethodSignature(method string, args []interface{}) (string, error) {
 	crafter := abi.BaseCrafter{}
-	txDataBytes, err := crafter.CraftCall(method, args...)
+	txDataBytes, err := crafter.CraftCall(method, utils.ParseIArrayToStringArray(args)...)
 
 	if err != nil {
 		errMessage := "invalid method signature"
@@ -158,7 +156,7 @@ func (txValidator *transactionValidator) ValidateContract(ctx context.Context, p
 	// Craft constructor method signature
 	constructorSignature := fmt.Sprintf("constructor%s", response.Contract.Constructor.Signature)
 	crafter := abi.BaseCrafter{}
-	txDataBytes, err := crafter.CraftConstructor(bytecode, constructorSignature, params.Args...)
+	txDataBytes, err := crafter.CraftConstructor(bytecode, constructorSignature, utils.ParseIArrayToStringArray(params.Args)...)
 	if err != nil {
 		errMessage := "invalid arguments for constructor method signature"
 		log.WithError(err).Error(errMessage)

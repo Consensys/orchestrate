@@ -105,13 +105,23 @@ func (s *transactionsTestSuite) TestTransactionValidator_ValidateChainExists() {
 
 func (s *transactionsTestSuite) TestTransactionValidator_ValidateMethodSignature() {
 	s.T().Run("should validate method signature successfully", func(t *testing.T) {
-		txData, err := s.validator.ValidateMethodSignature("method(string,uint256)", []string{"val1", "15"})
+		txData, err := s.validator.ValidateMethodSignature(
+			"method(bool,bool,string,string,uint256,uint256)",
+			testutils3.ParseIArray("true", "false", "val1", "false", "15", "0"))
 		assert.NoError(t, err)
 		assert.NotEmpty(t, txData)
+
+		txData2, err := s.validator.ValidateMethodSignature(
+			"method(bool,bool,string,string,uint256,uint256)",
+			testutils3.ParseIArray(true, false, "val1", "false", 15, 0))
+		assert.NoError(t, err)
+		assert.NotEmpty(t, txData)
+
+		assert.Equal(t, txData, txData2)
 	})
 
 	s.T().Run("should fail with InvalidParameterError if ChainRegistryClient fails", func(t *testing.T) {
-		_, err := s.validator.ValidateMethodSignature("method(string,uint256)", []string{"val1"})
+		_, err := s.validator.ValidateMethodSignature("method(string,uint256)", testutils3.ParseIArray("val1"))
 		assert.True(t, errors.IsInvalidParameterError(err))
 	})
 }
@@ -121,7 +131,7 @@ func (s *transactionsTestSuite) TestTransactionValidator_ValidateContract() {
 
 	s.T().Run("should validate contract successfully", func(t *testing.T) {
 		txRequest := testutils2.FakeTxRequestEntity()
-		txRequest.Params.Args = []string{"300"}
+		txRequest.Params.Args = testutils3.ParseIArray("300")
 		contract := testutils3.FakeContract()
 
 		s.mockContractRegistryClient.EXPECT().GetContract(ctx, &contractregistry.GetContractRequest{
@@ -140,7 +150,7 @@ func (s *transactionsTestSuite) TestTransactionValidator_ValidateContract() {
 
 	s.T().Run("should fail with InvalidParameterError if ContractRegistryClient fails", func(t *testing.T) {
 		txRequest := testutils2.FakeTxRequestEntity()
-		txRequest.Params.Args = []string{"300"}
+		txRequest.Params.Args = testutils3.ParseIArray("300")
 		expectedErr := fmt.Errorf("error")
 
 		s.mockContractRegistryClient.EXPECT().GetContract(ctx, gomock.Any()).Return(nil, expectedErr)
@@ -153,7 +163,7 @@ func (s *transactionsTestSuite) TestTransactionValidator_ValidateContract() {
 
 	s.T().Run("should fail with DataCorruptedError if bytecode decoding fails", func(t *testing.T) {
 		txRequest := testutils2.FakeTxRequestEntity()
-		txRequest.Params.Args = []string{"300"}
+		txRequest.Params.Args = testutils3.ParseIArray("300")
 		contract := testutils3.FakeContract()
 		contract.Bytecode = "Invalid bytecode"
 
@@ -169,7 +179,7 @@ func (s *transactionsTestSuite) TestTransactionValidator_ValidateContract() {
 
 	s.T().Run("should fail with InvalidParameterError if invalid args", func(t *testing.T) {
 		txRequest := testutils2.FakeTxRequestEntity()
-		txRequest.Params.Args = []string{"InvalidArg"}
+		txRequest.Params.Args = testutils3.ParseIArray("InvalidArg")
 		contract := testutils3.FakeContract()
 
 		s.mockContractRegistryClient.EXPECT().GetContract(ctx, gomock.Any()).Return(&contractregistry.GetContractResponse{

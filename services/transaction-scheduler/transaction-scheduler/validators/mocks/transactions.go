@@ -79,7 +79,7 @@ func (mr *MockTransactionValidatorMockRecorder) ValidateChainExists(ctx, chainUU
 }
 
 // ValidateMethodSignature mocks base method
-func (m *MockTransactionValidator) ValidateMethodSignature(methodSignature string, args []string) (string, error) {
+func (m *MockTransactionValidator) ValidateMethodSignature(methodSignature string, args []interface{}) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ValidateMethodSignature", methodSignature, args)
 	ret0, _ := ret[0].(string)
