@@ -5,4 +5,5 @@ type UseCases interface {
 	SendDeployTransaction() SendDeployTxUseCase
 	SendTransaction() SendTxUseCase
 	GetTransaction() GetTxUseCase
+	SearchTransactions() SearchTransactionsUseCase
 }

@@ -3,6 +3,8 @@ package store
 import (
 	"context"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 	"google.golang.org/grpc"
@@ -41,6 +43,7 @@ type TransactionRequestAgent interface {
 	SelectOrInsert(ctx context.Context, txRequest *models.TransactionRequest) error
 	FindOneByIdempotencyKey(ctx context.Context, idempotencyKey string) (*models.TransactionRequest, error)
 	FindOneByUUID(ctx context.Context, uuid, tenantID string) (*models.TransactionRequest, error)
+	Search(ctx context.Context, tenantID string, filters *entities.TransactionFilters) ([]*models.TransactionRequest, error)
 }
 
 type ScheduleAgent interface {

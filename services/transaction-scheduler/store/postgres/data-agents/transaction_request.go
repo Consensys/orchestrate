@@ -3,6 +3,9 @@ package dataagents
 import (
 	"context"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
+
+	gopg "github.com/go-pg/pg/v9"
 	"github.com/gofrs/uuid"
 
 	log "github.com/sirupsen/logrus"
@@ -76,4 +79,25 @@ func (agent *PGTransactionRequest) FindOneByUUID(ctx context.Context, txRequestU
 	}
 
 	return txRequest, nil
+}
+
+func (agent *PGTransactionRequest) Search(ctx context.Context, tenantID string, filters *entities.TransactionFilters) ([]*models.TransactionRequest, error) {
+	var txRequests []*models.TransactionRequest
+
+	query := agent.db.ModelContext(ctx, &txRequests).Relation("Schedules")
+
+	if len(filters.IdempotencyKeys) > 0 {
+		query = query.Where("transaction_request.idempotency_key in (?)", gopg.In(filters.IdempotencyKeys))
+	}
+
+	if tenantID != "" {
+		query.Join("JOIN schedules AS s").JoinOn("s.tenant_id = ?", tenantID)
+	}
+
+	err := pg.Select(ctx, query)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(txRequestDAComponent)
+	}
+
+	return txRequests, nil
 }

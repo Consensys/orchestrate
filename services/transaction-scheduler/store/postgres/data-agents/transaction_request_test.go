@@ -6,7 +6,7 @@ package dataagents
 
 import (
 	"context"
-	"fmt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 	"testing"
 
 	"github.com/gofrs/uuid"
@@ -115,8 +115,6 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_FindOneByUUID() {
 	s.T().Run("should find request successfully for empty tenant", func(t *testing.T) {
 		txRequestRetrieved, err := s.agents.TransactionRequest().FindOneByUUID(ctx, txRequest.UUID, "")
 
-		fmt.Println(txRequestRetrieved)
-
 		assert.NoError(t, err)
 		assert.Equal(t, txRequest.UUID, txRequestRetrieved.UUID)
 		assert.Equal(t, txRequest.Schedules[0].UUID, txRequestRetrieved.Schedules[0].UUID)
@@ -133,6 +131,52 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_FindOneByUUID() {
 	})
 }
 
+func (s *txRequestTestSuite) TestPGTransactionRequest_Search() {
+	ctx := context.Background()
+	txRequest := testutils.FakeTxRequest(0)
+	err := insertTxRequest(ctx, s.agents, txRequest)
+	assert.Nil(s.T(), err)
+
+	s.T().Run("should find requests successfully", func(t *testing.T) {
+		filter := &entities.TransactionFilters{}
+		txRequestsRetrieved, err := s.agents.TransactionRequest().Search(ctx, "", filter)
+
+		assert.NoError(t, err)
+		assert.Len(t, txRequestsRetrieved, 1)
+		assert.Equal(t, txRequest.UUID, txRequestsRetrieved[0].UUID)
+	})
+
+	s.T().Run("should find requests successfully by idempotency keys", func(t *testing.T) {
+		filter := &entities.TransactionFilters{
+			IdempotencyKeys: []string{txRequest.IdempotencyKey},
+		}
+		txRequestsRetrieved, err := s.agents.TransactionRequest().Search(ctx, "", filter)
+
+		assert.NoError(t, err)
+		assert.Len(t, txRequestsRetrieved, 1)
+		assert.Equal(t, txRequest.UUID, txRequestsRetrieved[0].UUID)
+	})
+
+	s.T().Run("should return empty array if nothing found in filter", func(t *testing.T) {
+		filter := &entities.TransactionFilters{
+			IdempotencyKeys: []string{"notExisting"},
+		}
+
+		result, err := s.agents.TransactionRequest().Search(ctx, "", filter)
+
+		assert.NoError(t, err)
+		assert.Empty(t, result)
+	})
+
+	s.T().Run("should return empty array if tenant is not found", func(t *testing.T) {
+		filter := &entities.TransactionFilters{}
+		result, err := s.agents.TransactionRequest().Search(ctx, "notExisting", filter)
+
+		assert.NoError(t, err)
+		assert.Empty(t, result)
+	})
+}
+
 func (s *txRequestTestSuite) TestPGTransactionRequest_ConnectionErr() {
 	ctx := context.Background()
 
@@ -144,9 +188,19 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_ConnectionErr() {
 		err := insertTxRequest(ctx, s.agents, txRequest)
 		assert.True(t, errors.IsPostgresConnectionError(err))
 	})
-	//
+
 	s.T().Run("should return PostgresConnectionError if find fails", func(t *testing.T) {
 		_, err := s.agents.TransactionRequest().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey)
+		assert.True(t, errors.IsPostgresConnectionError(err))
+	})
+
+	s.T().Run("should return PostgresConnectionError if find fails", func(t *testing.T) {
+		_, err := s.agents.TransactionRequest().FindOneByUUID(ctx, txRequest.UUID, "")
+		assert.True(t, errors.IsPostgresConnectionError(err))
+	})
+
+	s.T().Run("should return PostgresConnectionError if find fails", func(t *testing.T) {
+		_, err := s.agents.TransactionRequest().Search(ctx, "tenant", &entities.TransactionFilters{})
 		assert.True(t, errors.IsPostgresConnectionError(err))
 	})
 

@@ -44,6 +44,8 @@ func (c *TransactionsController) Append(router *mux.Router) {
 		Handler(idempotencyKeyMiddleware(http.HandlerFunc(c.deployContract)))
 	router.Methods(http.MethodGet).Path("/transactions/{uuid}").
 		Handler(http.HandlerFunc(c.getOne))
+	router.Methods(http.MethodGet).Path("/transactions").
+		Handler(http.HandlerFunc(c.search))
 }
 
 func idempotencyKeyMiddleware(next http.Handler) http.Handler {
@@ -231,7 +233,7 @@ func (c *TransactionsController) transfer(rw http.ResponseWriter, request *http.
 // @Success 200
 // @Failure 404
 // @Failure 500
-// @Router /transactions/{uuid} [post]
+// @Router /transactions/{uuid} [get]
 func (c *TransactionsController) getOne(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
@@ -246,4 +248,36 @@ func (c *TransactionsController) getOne(rw http.ResponseWriter, request *http.Re
 	}
 
 	_ = json.NewEncoder(rw).Encode(formatters.FormatTxResponse(txRequest))
+}
+
+// @Summary Searches transaction requests by filter
+// @Produce json
+// @Security ApiKeyAuth
+// @Security JWTAuth
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Router /transactions [get]
+func (c *TransactionsController) search(rw http.ResponseWriter, request *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	ctx := request.Context()
+
+	filters, err := formatters.FormatTransactionsFilterRequest(request)
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	txRequests, err := c.txUcs.SearchTransactions().Execute(ctx, filters, multitenancy.TenantIDFromContext(ctx))
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	var responses []*types.TransactionResponse
+	for _, txRequest := range txRequests {
+		responses = append(responses, formatters.FormatTxResponse(txRequest))
+	}
+
+	_ = json.NewEncoder(rw).Encode(responses)
 }

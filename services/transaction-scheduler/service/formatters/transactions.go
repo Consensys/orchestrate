@@ -1,7 +1,11 @@
 package formatters
 
 import (
+	"net/http"
+	"strings"
+
 	pkgtypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
@@ -72,4 +76,19 @@ func FormatTxResponse(txRequest *entities.TxRequest) *types.TransactionResponse 
 		Schedule:       FormatScheduleResponse(txRequest.Schedule),
 		CreatedAt:      txRequest.CreatedAt,
 	}
+}
+
+func FormatTransactionsFilterRequest(req *http.Request) (*entities.TransactionFilters, error) {
+	filters := &entities.TransactionFilters{}
+
+	qIdempotencyKeys := req.URL.Query().Get("idempotency_keys")
+	if qIdempotencyKeys != "" {
+		filters.IdempotencyKeys = strings.Split(qIdempotencyKeys, ",")
+	}
+
+	if err := utils.GetValidator().Struct(filters); err != nil {
+		return nil, err
+	}
+
+	return filters, nil
 }

@@ -5,6 +5,8 @@ package controllers
 import (
 	"bytes"
 	"context"
+	"fmt"
+	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -36,6 +38,7 @@ type transactionsControllerTestSuite struct {
 	sendDeployTxUseCase   *mocks.MockSendDeployTxUseCase
 	sendTxUseCase         *mocks.MockSendTxUseCase
 	getTxUseCase          *mocks.MockGetTxUseCase
+	searchTxsUsecase      *mocks.MockSearchTransactionsUseCase
 	getChainByNameUseCase *mocks2.MockGetChainByNameUseCase
 	ctx                   context.Context
 	tenantID              string
@@ -58,6 +61,10 @@ func (s *transactionsControllerTestSuite) GetTransaction() transactions.GetTxUse
 	return s.getTxUseCase
 }
 
+func (s *transactionsControllerTestSuite) SearchTransactions() transactions.SearchTransactionsUseCase {
+	return s.searchTxsUsecase
+}
+
 func (s *transactionsControllerTestSuite) GetChainByName() chains.GetChainByNameUseCase {
 	return s.getChainByNameUseCase
 }
@@ -77,6 +84,7 @@ func (s *transactionsControllerTestSuite) SetupTest() {
 	s.sendDeployTxUseCase = mocks.NewMockSendDeployTxUseCase(ctrl)
 	s.sendTxUseCase = mocks.NewMockSendTxUseCase(ctrl)
 	s.getTxUseCase = mocks.NewMockGetTxUseCase(ctrl)
+	s.searchTxsUsecase = mocks.NewMockSearchTransactionsUseCase(ctrl)
 	s.getChainByNameUseCase = mocks2.NewMockGetChainByNameUseCase(ctrl)
 	s.tenantID = "tenantId"
 	s.chain = testutils3.FakeChain()
@@ -495,5 +503,48 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_getOne() {
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusNotFound, rw.Code)
+	})
+}
+
+func (s *transactionsControllerTestSuite) TestTransactionsController_search() {
+	urlPath := "/transactions"
+
+	s.T().Run("should execute request successfully", func(t *testing.T) {
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodGet, urlPath+"?idempotency_keys=mykey,mykey1", nil).WithContext(s.ctx)
+		txRequest := testutils2.FakeTransferTxRequestEntity()
+		expectedFilers := &entities.TransactionFilters{
+			IdempotencyKeys: []string{"mykey", "mykey1"},
+		}
+
+		s.searchTxsUsecase.EXPECT().Execute(gomock.Any(), expectedFilers, s.tenantID).Return([]*entities.TxRequest{txRequest}, nil)
+
+		s.router.ServeHTTP(rw, httpRequest)
+
+		response := []*types2.TransactionResponse{formatters.FormatTxResponse(txRequest)}
+		expectedBody, _ := json.Marshal(response)
+		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
+		assert.Equal(t, http.StatusOK, rw.Code)
+	})
+
+	s.T().Run("should fail with 400 if filer is malformed", func(t *testing.T) {
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodGet, urlPath+"?idempotency_keys=mykey,mykey", nil).WithContext(s.ctx)
+
+		s.router.ServeHTTP(rw, httpRequest)
+		assert.Equal(t, http.StatusBadRequest, rw.Code)
+	})
+
+	s.T().Run("should fail with 500 if use case fails", func(t *testing.T) {
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodGet, urlPath+"?idempotency_keys=mykey,mykey1", nil).WithContext(s.ctx)
+		expectedFilers := &entities.TransactionFilters{
+			IdempotencyKeys: []string{"mykey", "mykey1"},
+		}
+
+		s.searchTxsUsecase.EXPECT().Execute(gomock.Any(), expectedFilers, s.tenantID).Return(nil, fmt.Errorf(""))
+
+		s.router.ServeHTTP(rw, httpRequest)
+		assert.Equal(t, http.StatusInternalServerError, rw.Code)
 	})
 }

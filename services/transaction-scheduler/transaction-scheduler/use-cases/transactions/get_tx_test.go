@@ -16,7 +16,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 )
 
-func TestGetJob_Execute(t *testing.T) {
+func TestGetTx_Execute(t *testing.T) {
 	ctx := context.Background()
 
 	ctrl := gomock.NewController(t)

@@ -26,6 +26,7 @@ type useCases struct {
 	sendDeployTransaction   transactions.SendDeployTxUseCase
 	sendTransaction         transactions.SendTxUseCase
 	getTransaction          transactions.GetTxUseCase
+	searchTransactions      transactions.SearchTransactionsUseCase
 	// Schedule
 	createSchedule schedules.CreateScheduleUseCase
 	getSchedule    schedules.GetScheduleUseCase
@@ -63,6 +64,7 @@ func NewUseCases(
 		sendDeployTransaction:   transactions.NewSendDeployTxUseCase(txValidator, sendTxUC),
 		sendTransaction:         sendTxUC,
 		getTransaction:          getTransactionUC,
+		searchTransactions:      transactions.NewSearchTransactionsUseCase(db, getTransactionUC),
 		// Schedules
 		createSchedule: createScheduleUC,
 		getSchedule:    getScheduleUC,
@@ -92,6 +94,10 @@ func (u *useCases) SendTransaction() transactions.SendTxUseCase {
 
 func (u *useCases) GetTransaction() transactions.GetTxUseCase {
 	return u.getTransaction
+}
+
+func (u *useCases) SearchTransactions() transactions.SearchTransactionsUseCase {
+	return u.searchTransactions
 }
 
 func (u *useCases) CreateSchedule() schedules.CreateScheduleUseCase {

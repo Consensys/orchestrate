@@ -10,6 +10,7 @@ import (
 	database "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database"
 	store "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
+	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 	grpc "google.golang.org/grpc"
 	reflect "reflect"
 )
@@ -508,6 +509,21 @@ func (m *MockTransactionRequestAgent) FindOneByUUID(ctx context.Context, uuid, t
 func (mr *MockTransactionRequestAgentMockRecorder) FindOneByUUID(ctx, uuid, tenantID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByUUID", reflect.TypeOf((*MockTransactionRequestAgent)(nil).FindOneByUUID), ctx, uuid, tenantID)
+}
+
+// Search mocks base method
+func (m *MockTransactionRequestAgent) Search(ctx context.Context, tenantID string, filters *entities.TransactionFilters) ([]*models.TransactionRequest, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Search", ctx, tenantID, filters)
+	ret0, _ := ret[0].([]*models.TransactionRequest)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Search indicates an expected call of Search
+func (mr *MockTransactionRequestAgentMockRecorder) Search(ctx, tenantID, filters interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockTransactionRequestAgent)(nil).Search), ctx, tenantID, filters)
 }
 
 // MockScheduleAgent is a mock of ScheduleAgent interface
