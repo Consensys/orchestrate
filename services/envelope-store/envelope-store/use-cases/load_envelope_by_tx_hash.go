@@ -12,7 +12,7 @@ import (
 )
 
 type LoadEnvelopeByTxHash interface {
-	Execute(ctx context.Context, tenantID, chainID string, txHash string) (*models.EnvelopeModel, error)
+	Execute(ctx context.Context, tenants []string, chainID string, txHash string) (*models.EnvelopeModel, error)
 }
 
 // RegisterContract is a use case to register a new contract
@@ -27,22 +27,21 @@ func NewLoadEnvelopeByTxHash(envelopeAgent store.EnvelopeAgent) LoadEnvelopeByTx
 	}
 }
 
-func (se *loadEnvelopeByTxHash) Execute(ctx context.Context, tenantID, chainID, txHash string) (*models.EnvelopeModel, error) {
+func (se *loadEnvelopeByTxHash) Execute(ctx context.Context, tenants []string, chainID, txHash string) (*models.EnvelopeModel, error) {
 	logger := log.FromContext(ctx)
 
 	envelope, err := se.envelopeAgent.FindByFieldSet(ctx, map[string]string{
-		"chain_id":  chainID,
-		"tx_hash":   txHash,
-		"tenant_id": tenantID,
-	})
+		"chain_id": chainID,
+		"tx_hash":  txHash,
+	}, tenants)
 
 	if err != nil {
 		logger.
 			WithError(err).
 			WithFields(logrus.Fields{
-				"chainID":  chainID,
-				"txHash":   txHash,
-				"tenantID": tenantID,
+				"chainID": chainID,
+				"txHash":  txHash,
+				"tenants": tenants,
 			}).
 			Debugf("could not load envelope")
 		if err == pg.ErrNoRows {

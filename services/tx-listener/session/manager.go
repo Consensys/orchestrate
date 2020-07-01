@@ -85,6 +85,8 @@ func (m *Manager) run(ctx context.Context) {
 
 func (m *Manager) listenProvider(ctx context.Context) {
 	log.FromContext(ctx).Infof("Starting provider %T", m.provider)
+	// Listener MUST BE allowed to fetch chains from every tenant
+	ctx = multitenancy.WithTenantID(ctx, multitenancy.Wildcard)
 	err := m.provider.Run(ctx, m.msgInput)
 	if err != nil {
 		log.FromContext(ctx).WithError(err).Errorf("error while listening provider")

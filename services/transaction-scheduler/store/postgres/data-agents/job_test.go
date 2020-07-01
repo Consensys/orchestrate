@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 
 	"github.com/stretchr/testify/assert"
@@ -124,7 +125,7 @@ func (s *jobTestSuite) TestPGJob_FindOneByUUID() {
 	assert.NoError(s.T(), err)
 
 	s.T().Run("should get model successfully as empty tenant", func(t *testing.T) {
-		jobRetrieved, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, "")
+		jobRetrieved, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, []string{multitenancy.Wildcard})
 
 		assert.NoError(t, err)
 		assert.NotEmpty(t, jobRetrieved.ID)
@@ -139,14 +140,14 @@ func (s *jobTestSuite) TestPGJob_FindOneByUUID() {
 	})
 
 	s.T().Run("should get model successfully as tenant", func(t *testing.T) {
-		jobRetrieved, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, tenantID)
+		jobRetrieved, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, []string{tenantID})
 
 		assert.NoError(t, err)
 		assert.NotEmpty(t, jobRetrieved.ID)
 	})
 
 	s.T().Run("should return NotFoundError if select fails", func(t *testing.T) {
-		_, err := s.agents.Job().FindOneByUUID(ctx, "b6fe7a2a-1a4d-49ca-99d8-8a34aa495ef0", tenantID)
+		_, err := s.agents.Job().FindOneByUUID(ctx, "b6fe7a2a-1a4d-49ca-99d8-8a34aa495ef0", []string{tenantID})
 		assert.True(t, errors.IsNotFoundError(err))
 	})
 }
@@ -171,7 +172,7 @@ func (s *jobTestSuite) TestPGJob_Search() {
 	assert.NoError(s.T(), err)
 
 	s.T().Run("should find model successfully", func(t *testing.T) {
-		retrivedJobs, err := s.agents.Job().Search(ctx, tenantID, []string{txHashOne.String()}, jobOne.ChainUUID)
+		retrivedJobs, err := s.agents.Job().Search(ctx, []string{txHashOne.String()}, jobOne.ChainUUID, []string{tenantID})
 
 		assert.NoError(t, err)
 		assert.NotEmpty(t, retrivedJobs[0].ID)
@@ -182,13 +183,13 @@ func (s *jobTestSuite) TestPGJob_Search() {
 	})
 
 	s.T().Run("should not find any model", func(t *testing.T) {
-		retrivedJobs, err := s.agents.Job().Search(ctx, tenantID, []string{"0x3"}, jobOne.ChainUUID)
+		retrivedJobs, err := s.agents.Job().Search(ctx, []string{"0x3"}, jobOne.ChainUUID, []string{tenantID})
 		assert.NoError(t, err)
 		assert.Empty(t, retrivedJobs)
 	})
 
 	s.T().Run("should find every inserted model successfully", func(t *testing.T) {
-		retrivedJobs, err := s.agents.Job().Search(ctx, tenantID, nil, jobOne.ChainUUID)
+		retrivedJobs, err := s.agents.Job().Search(ctx, nil, jobOne.ChainUUID, []string{tenantID})
 		assert.NoError(t, err)
 		assert.Equal(t, len(retrivedJobs), 2)
 	})
@@ -212,7 +213,7 @@ func (s *jobTestSuite) TestPGJob_ConnectionErr() {
 	})
 
 	s.T().Run("should return PostgresConnectionError if update fails", func(t *testing.T) {
-		_, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, job.Schedule.TenantID)
+		_, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, []string{job.Schedule.TenantID})
 		assert.True(t, errors.IsPostgresConnectionError(err))
 	})
 

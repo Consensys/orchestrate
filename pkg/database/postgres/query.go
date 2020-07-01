@@ -93,7 +93,11 @@ func WhereFilters(query *orm.Query, filters map[string]string) *orm.Query {
 	return query
 }
 
-func WhereAllowedTenants(query *orm.Query, tenants []string) *orm.Query {
+func WhereAllowedTenantsDefault(query *orm.Query, tenants []string) *orm.Query {
+	return WhereAllowedTenants(query, "tenant_id", tenants)
+}
+
+func WhereAllowedTenants(query *orm.Query, field string, tenants []string) *orm.Query {
 	if len(tenants) == 0 {
 		return query
 	}
@@ -102,5 +106,5 @@ func WhereAllowedTenants(query *orm.Query, tenants []string) *orm.Query {
 		return query
 	}
 
-	return query.Where("tenant_id IN (?)", pg.In(tenants))
+	return query.Where(fmt.Sprintf("%s IN (?)", field), pg.In(tenants))
 }

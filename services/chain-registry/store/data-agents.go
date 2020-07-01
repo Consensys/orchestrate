@@ -21,10 +21,6 @@ type ChainAgent interface {
 	UpdateChain(ctx context.Context, uuid string, tenants []string, chain *models.Chain) error
 	UpdateChainByName(ctx context.Context, name string, tenants []string, chain *models.Chain) error
 	DeleteChain(ctx context.Context, uuid string, tenants []string) error
-
-	GetChainsByTenant(ctx context.Context, filters map[string]string, tenants []string) ([]*models.Chain, error)
-	GetChainByUUIDAndTenant(ctx context.Context, uuid string, tenantID string) (*models.Chain, error)
-	DeleteChainByUUIDAndTenant(ctx context.Context, uuid string, tenantID string) error
 }
 
 type FaucetAgent interface {
@@ -34,8 +30,4 @@ type FaucetAgent interface {
 	GetFaucet(ctx context.Context, uuid string, tenants []string) (*models.Faucet, error)
 	UpdateFaucet(ctx context.Context, uuid string, tenants []string, faucet *models.Faucet) error
 	DeleteFaucet(ctx context.Context, uuid string, tenants []string) error
-
-	GetFaucetsByTenant(ctx context.Context, filters map[string]string, tenants []string) ([]*models.Faucet, error)
-	GetFaucetByUUIDAndTenant(ctx context.Context, uuid string, tenantID string) (*models.Faucet, error)
-	DeleteFaucetByUUIDAndTenant(ctx context.Context, uuid string, tenantID string) error
 }

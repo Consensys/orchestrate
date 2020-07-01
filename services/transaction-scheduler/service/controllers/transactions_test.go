@@ -89,6 +89,7 @@ func (s *transactionsControllerTestSuite) SetupTest() {
 	s.tenantID = "tenantId"
 	s.chain = testutils3.FakeChain()
 	s.ctx = context.WithValue(context.Background(), multitenancy.TenantIDKey, s.tenantID)
+	s.ctx = context.WithValue(s.ctx, multitenancy.AllowedTenantsKey, []string{s.tenantID})
 
 	s.router = mux.NewRouter()
 	s.controller = NewTransactionsController(s, s)
@@ -115,7 +116,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_send() {
 		txRequestEntityResp := testutils2.FakeTxRequestEntity()
 
 		s.getChainByNameUseCase.EXPECT().
-			Execute(gomock.Any(), s.chain.Name, s.tenantID).
+			Execute(gomock.Any(), s.chain.Name, []string{s.tenantID}).
 			Return(s.chain, nil)
 
 		txRequestEntity := formatters.FormatSendTxRequest(txRequest, idempotencyKey)
@@ -147,7 +148,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_send() {
 		txRequestEntityResp := testutils2.FakeTxRequestEntity()
 
 		s.getChainByNameUseCase.EXPECT().
-			Execute(gomock.Any(), s.chain.Name, s.tenantID).
+			Execute(gomock.Any(), s.chain.Name, []string{s.tenantID}).
 			Return(s.chain, nil)
 
 		s.sendContractTxUseCase.EXPECT().
@@ -176,7 +177,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_send() {
 			WithContext(s.ctx)
 
 		s.getChainByNameUseCase.EXPECT().
-			Execute(gomock.Any(), s.chain.Name, s.tenantID).
+			Execute(gomock.Any(), s.chain.Name, []string{s.tenantID}).
 			Return(nil, errors.InvalidParameterError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -194,7 +195,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_send() {
 			WithContext(s.ctx)
 
 		s.getChainByNameUseCase.EXPECT().
-			Execute(gomock.Any(), s.chain.Name, s.tenantID).
+			Execute(gomock.Any(), s.chain.Name, []string{s.tenantID}).
 			Return(s.chain, nil)
 
 		s.sendContractTxUseCase.EXPECT().
@@ -249,7 +250,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_deploy() {
 		txRequestEntityResp := testutils2.FakeTxRequestEntity()
 
 		s.getChainByNameUseCase.EXPECT().
-			Execute(gomock.Any(), s.chain.Name, s.tenantID).
+			Execute(gomock.Any(), s.chain.Name, []string{s.tenantID}).
 			Return(s.chain, nil)
 
 		txRequestEntity := formatters.FormatDeployContractRequest(txRequest, idempotencyKey)
@@ -274,7 +275,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_deploy() {
 		httpRequest := httptest.NewRequest(http.MethodPost, urlPath, bytes.NewReader(requestBytes)).WithContext(s.ctx)
 
 		s.getChainByNameUseCase.EXPECT().
-			Execute(gomock.Any(), s.chain.Name, s.tenantID).
+			Execute(gomock.Any(), s.chain.Name, []string{s.tenantID}).
 			Return(s.chain, nil)
 
 		s.sendDeployTxUseCase.EXPECT().
@@ -330,7 +331,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_sendRaw() {
 		txRequestEntityResp := testutils2.FakeTxRequestEntity()
 
 		s.getChainByNameUseCase.EXPECT().
-			Execute(gomock.Any(), s.chain.Name, s.tenantID).
+			Execute(gomock.Any(), s.chain.Name, []string{s.tenantID}).
 			Return(s.chain, nil)
 
 		txRequestEntity := formatters.FormatSendRawRequest(txRequest, idempotencyKey)
@@ -357,7 +358,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_sendRaw() {
 			WithContext(s.ctx)
 
 		s.getChainByNameUseCase.EXPECT().
-			Execute(gomock.Any(), s.chain.Name, s.tenantID).
+			Execute(gomock.Any(), s.chain.Name, []string{s.tenantID}).
 			Return(s.chain, nil)
 
 		s.sendTxUseCase.EXPECT().
@@ -402,7 +403,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_transfer() 
 		txRequestEntityResp := testutils2.FakeTransferTxRequestEntity()
 
 		s.getChainByNameUseCase.EXPECT().
-			Execute(gomock.Any(), s.chain.Name, s.tenantID).
+			Execute(gomock.Any(), s.chain.Name, []string{s.tenantID}).
 			Return(s.chain, nil)
 
 		txRequestEntity := formatters.FormatSendTransferRequest(txRequest, idempotencyKey)
@@ -433,7 +434,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_transfer() 
 			WithContext(s.ctx)
 
 		s.getChainByNameUseCase.EXPECT().
-			Execute(gomock.Any(), s.chain.Name, s.tenantID).
+			Execute(gomock.Any(), s.chain.Name, []string{s.tenantID}).
 			Return(s.chain, errors.InvalidParameterError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -452,7 +453,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_transfer() 
 			WithContext(s.ctx)
 
 		s.getChainByNameUseCase.EXPECT().
-			Execute(gomock.Any(), s.chain.Name, s.tenantID).
+			Execute(gomock.Any(), s.chain.Name, []string{s.tenantID}).
 			Return(s.chain, nil)
 
 		s.sendTxUseCase.EXPECT().
@@ -485,7 +486,8 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_getOne() {
 		httpRequest := httptest.NewRequest(http.MethodGet, urlPath, nil).WithContext(s.ctx)
 		txRequest := testutils2.FakeTransferTxRequestEntity()
 
-		s.getTxUseCase.EXPECT().Execute(gomock.Any(), uuid, s.tenantID).Return(txRequest, nil)
+		s.getTxUseCase.EXPECT().Execute(gomock.Any(), uuid, []string{s.tenantID}).
+			Return(txRequest, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -499,7 +501,8 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_getOne() {
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodGet, urlPath, nil).WithContext(s.ctx)
 
-		s.getTxUseCase.EXPECT().Execute(gomock.Any(), uuid, s.tenantID).Return(nil, errors.NotFoundError(""))
+		s.getTxUseCase.EXPECT().Execute(gomock.Any(), uuid, []string{s.tenantID}).
+			Return(nil, errors.NotFoundError(""))
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusNotFound, rw.Code)
@@ -517,7 +520,8 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_search() {
 			IdempotencyKeys: []string{"mykey", "mykey1"},
 		}
 
-		s.searchTxsUsecase.EXPECT().Execute(gomock.Any(), expectedFilers, s.tenantID).Return([]*entities.TxRequest{txRequest}, nil)
+		s.searchTxsUsecase.EXPECT().Execute(gomock.Any(), expectedFilers, []string{s.tenantID}).
+			Return([]*entities.TxRequest{txRequest}, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -542,7 +546,8 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_search() {
 			IdempotencyKeys: []string{"mykey", "mykey1"},
 		}
 
-		s.searchTxsUsecase.EXPECT().Execute(gomock.Any(), expectedFilers, s.tenantID).Return(nil, fmt.Errorf(""))
+		s.searchTxsUsecase.EXPECT().Execute(gomock.Any(), expectedFilers, []string{s.tenantID}).
+			Return(nil, fmt.Errorf(""))
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusInternalServerError, rw.Code)

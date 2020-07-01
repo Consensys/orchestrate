@@ -77,7 +77,7 @@ func (c *SchedulesController) getOne(rw http.ResponseWriter, request *http.Reque
 
 	uuid := mux.Vars(request)["uuid"]
 
-	scheduleEntity, err := c.ucs.GetSchedule().Execute(ctx, uuid, multitenancy.TenantIDFromContext(ctx))
+	scheduleEntity, err := c.ucs.GetSchedule().Execute(ctx, uuid, multitenancy.AllowedTenantsFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -99,7 +99,7 @@ func (c *SchedulesController) get(rw http.ResponseWriter, request *http.Request)
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	scheduleEntities, err := c.ucs.GetSchedules().Execute(ctx, multitenancy.TenantIDFromContext(ctx))
+	scheduleEntities, err := c.ucs.GetSchedules().Execute(ctx, multitenancy.AllowedTenantsFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return

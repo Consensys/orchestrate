@@ -63,6 +63,7 @@ func (s *schedulesCtrlTestSuite) SetupTest() {
 	s.getScheduleUC = mocks.NewMockGetScheduleUseCase(ctrl)
 	s.getSchedulesUC = mocks.NewMockGetSchedulesUseCase(ctrl)
 	s.ctx = context.WithValue(context.Background(), multitenancy.TenantIDKey, s.tenantID)
+	s.ctx = context.WithValue(s.ctx, multitenancy.AllowedTenantsKey, []string{s.tenantID})
 	s.router = mux.NewRouter()
 
 	controller := NewSchedulesController(s)
@@ -118,7 +119,7 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_GetOne() {
 		scheduleEntityResp := testutils2.FakeScheduleEntity()
 
 		s.getScheduleUC.EXPECT().
-			Execute(gomock.Any(), "scheduleUUID", s.tenantID).
+			Execute(gomock.Any(), "scheduleUUID", []string{s.tenantID}).
 			Return(scheduleEntityResp, nil).Times(1)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -136,7 +137,7 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_GetOne() {
 			WithContext(s.ctx)
 
 		s.getScheduleUC.EXPECT().
-			Execute(gomock.Any(), "scheduleUUID", s.tenantID).
+			Execute(gomock.Any(), "scheduleUUID", []string{s.tenantID}).
 			Return(nil, errors.NotFoundError("error")).
 			Times(1)
 
@@ -152,7 +153,7 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_GetAll() {
 		schedulesEntities := []*entities.Schedule{testutils2.FakeScheduleEntity()}
 
 		s.getSchedulesUC.EXPECT().
-			Execute(gomock.Any(), s.tenantID).
+			Execute(gomock.Any(), []string{s.tenantID}).
 			Return(schedulesEntities, nil).
 			Times(1)
 		s.router.ServeHTTP(rw, httpRequest)
@@ -170,7 +171,7 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_GetAll() {
 			NewRequest(http.MethodGet, "/schedules/scheduleUUID", bytes.NewReader(nil)).
 			WithContext(s.ctx)
 		s.getScheduleUC.EXPECT().
-			Execute(gomock.Any(), "scheduleUUID", s.tenantID).
+			Execute(gomock.Any(), "scheduleUUID", []string{s.tenantID}).
 			Return(nil, errors.NotFoundError("error")).
 			Times(1)
 

@@ -11,7 +11,7 @@ import (
 )
 
 type LoadPendingEnvelopes interface {
-	Execute(ctx context.Context, sentBeforeAt time.Time) ([]*models.EnvelopeModel, error)
+	Execute(ctx context.Context, sentBeforeAt time.Time, tenants []string) ([]*models.EnvelopeModel, error)
 }
 
 // RegisterContract is a use case to register a new contract
@@ -26,10 +26,10 @@ func NewLoadPendingEnvelopes(envelopeAgent store.EnvelopeAgent) LoadPendingEnvel
 	}
 }
 
-func (se *loadPendingEnvelopes) Execute(ctx context.Context, sentBeforeAt time.Time) ([]*models.EnvelopeModel, error) {
+func (se *loadPendingEnvelopes) Execute(ctx context.Context, sentBeforeAt time.Time, tenants []string) ([]*models.EnvelopeModel, error) {
 	logger := log.FromContext(ctx)
 
-	envelopes, err := se.envelopeAgent.FindPending(ctx, sentBeforeAt)
+	envelopes, err := se.envelopeAgent.FindPending(ctx, sentBeforeAt, tenants)
 	if err != nil {
 		logger.
 			WithError(err).

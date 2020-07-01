@@ -95,7 +95,7 @@ export MULTI_TENANCY_ENABLED=1
 
 We will also need to define a set of ENV VARIABLES. First we indicate the namespace use within the generate token to store the tenant_id:
 ```bash
-export AUTH_JWT_CLAIMS_NAMESPACE="orchestrate.namespace"
+export AUTH_JWT_CLAIMS_NAMESPACE="orchestrate.info"
 ```
 
 and define the server certificates to encode and verify generate token:

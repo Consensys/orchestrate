@@ -15,7 +15,7 @@ import (
 const searchTxsComponent = "use-cases.search-txs"
 
 type SearchTransactionsUseCase interface {
-	Execute(ctx context.Context, filters *entities.TransactionFilters, tenantID string) ([]*entities.TxRequest, error)
+	Execute(ctx context.Context, filters *entities.TransactionFilters, tenants []string) ([]*entities.TxRequest, error)
 }
 
 // searchTransactionsUseCase is a use case to get transaction requests by filter (or all)
@@ -33,21 +33,21 @@ func NewSearchTransactionsUseCase(db store.DB, getTxUseCase GetTxUseCase) Search
 }
 
 // Execute gets a transaction requests by filter (or all)
-func (uc *searchTransactionsUseCase) Execute(ctx context.Context, filters *entities.TransactionFilters, tenantID string) ([]*entities.TxRequest, error) {
+func (uc *searchTransactionsUseCase) Execute(ctx context.Context, filters *entities.TransactionFilters, tenants []string) ([]*entities.TxRequest, error) {
 	log.WithContext(ctx).WithField("filters", filters).Debug("search transaction requests")
 
 	if err := utils.GetValidator().Struct(filters); err != nil {
 		return nil, errors.InvalidParameterError(err.Error()).ExtendComponent(searchTxsComponent)
 	}
 
-	txRequestModels, err := uc.db.TransactionRequest().Search(ctx, tenantID, filters)
+	txRequestModels, err := uc.db.TransactionRequest().Search(ctx, filters, tenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(searchTxsComponent)
 	}
 
 	var txRequests []*entities.TxRequest
 	for _, txRequestModel := range txRequestModels {
-		txRequest, err := uc.getTxUseCase.Execute(ctx, txRequestModel.UUID, tenantID)
+		txRequest, err := uc.getTxUseCase.Execute(ctx, txRequestModel.UUID, tenants)
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(searchTxsComponent)
 		}

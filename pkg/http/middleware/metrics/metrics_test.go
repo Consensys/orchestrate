@@ -42,17 +42,17 @@ func TestMetrics(t *testing.T) {
 	mockHTTP.EXPECT().OpenConnsGauge().Return(openConnsGauge)
 
 	reqsCounter.EXPECT().
-		With("entrypoint", "entrypoint-test", "service", "service-test", "tenant_id", "", "method", "GET", "protocol", "http", "code", "200").
+		With("entrypoint", "entrypoint-test", "service", "service-test", "tenant_id", multitenancy.DefaultTenant, "method", "GET", "protocol", "http", "code", "200").
 		Return(reqsCounter)
 	reqsCounter.EXPECT().Add(float64(1))
 
 	reqLatencyHistogram.EXPECT().
-		With("entrypoint", "entrypoint-test", "service", "service-test", "tenant_id", "", "method", "GET", "protocol", "http", "code", "200").
+		With("entrypoint", "entrypoint-test", "service", "service-test", "tenant_id", multitenancy.DefaultTenant, "method", "GET", "protocol", "http", "code", "200").
 		Return(reqLatencyHistogram)
 	reqLatencyHistogram.EXPECT().Observe(gomock.Any())
 
 	openConnsGauge.EXPECT().
-		With("entrypoint", "entrypoint-test", "service", "service-test", "tenant_id", "", "method", "GET", "protocol", "http").
+		With("entrypoint", "entrypoint-test", "service", "service-test", "tenant_id", multitenancy.DefaultTenant, "method", "GET", "protocol", "http").
 		Return(openConnsGauge)
 	openConnsGauge1 := openConnsGauge.EXPECT().Add(float64(1))
 	openConnsGauge.EXPECT().Add(float64(-1)).After(openConnsGauge1)

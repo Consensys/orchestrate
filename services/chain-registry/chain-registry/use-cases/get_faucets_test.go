@@ -25,7 +25,7 @@ func TestGetFaucets_ByUUID(t *testing.T) {
 			Name: "testFaucet",
 		},
 	}
-	faucetAgent.EXPECT().GetFaucetsByTenant(gomock.Any(), gomock.Eq(filters), []string{}).Return(expectedFaucet, nil).Times(1)
+	faucetAgent.EXPECT().GetFaucets(gomock.Any(), []string{}, gomock.Eq(filters)).Return(expectedFaucet, nil).Times(1)
 
 	actualFaucets, err := getFaucetsUC.Execute(context.Background(), []string{}, filters)
 	assert.NoError(t, err)
@@ -48,7 +48,7 @@ func TestGetFaucets_ByUUIDAndTenantID(t *testing.T) {
 			Name:     "testFaucet",
 		},
 	}
-	faucetAgent.EXPECT().GetFaucetsByTenant(gomock.Any(), gomock.Eq(filters), []string{tenantID}).Return(expectedFaucet, nil).Times(1)
+	faucetAgent.EXPECT().GetFaucets(gomock.Any(), []string{tenantID}, gomock.Eq(filters)).Return(expectedFaucet, nil).Times(1)
 
 	actualFaucets, err := getFaucetsUC.Execute(context.Background(), []string{tenantID}, filters)
 	assert.NoError(t, err)

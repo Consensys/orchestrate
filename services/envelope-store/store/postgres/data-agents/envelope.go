@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/go-pg/pg/v9"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/store/models"
 )
@@ -53,44 +54,47 @@ func (ag *PGEnvelopeAgent) InsertDoUpdateOnUniTx(ctx context.Context, envelope *
 	return nil
 }
 
-func (ag *PGEnvelopeAgent) FindByFieldSet(ctx context.Context, fields map[string]string) (*models.EnvelopeModel, error) {
+func (ag *PGEnvelopeAgent) FindByFieldSet(ctx context.Context, fields map[string]string, tenantIDs []string) (*models.EnvelopeModel, error) {
 	envelope := &models.EnvelopeModel{}
 	q := ag.db.ModelContext(ctx, envelope)
 	for key, val := range fields {
 		q = q.Where(key+" = ?", val)
 	}
 
-	err := q.Select()
+	err := postgres.WhereAllowedTenantsDefault(q, tenantIDs).Select()
 	return envelope, err
 }
 
-func (ag *PGEnvelopeAgent) FindPending(ctx context.Context, sentBeforeAt time.Time) ([]*models.EnvelopeModel, error) {
+func (ag *PGEnvelopeAgent) FindPending(ctx context.Context, sentBeforeAt time.Time, tenantIDs []string) ([]*models.EnvelopeModel, error) {
 	var envelopes []*models.EnvelopeModel
-	err := ag.db.ModelContext(ctx, &envelopes).
+	q := ag.db.ModelContext(ctx, &envelopes).
 		Where("status = 'pending'").
-		Where("sent_at < ?", sentBeforeAt).
-		Select()
+		Where("sent_at < ?", sentBeforeAt)
+
+	err := postgres.WhereAllowedTenantsDefault(q, tenantIDs).Select()
 
 	return envelopes, err
 }
 
-func (ag *PGEnvelopeAgent) FindByTxHashes(ctx context.Context, hashes []string) ([]*models.EnvelopeModel, error) {
+func (ag *PGEnvelopeAgent) FindByTxHashes(ctx context.Context, hashes, tenantIDs []string) ([]*models.EnvelopeModel, error) {
 	var envelopes []*models.EnvelopeModel
 	if len(hashes) == 0 {
 		return envelopes, errors.InvalidArgError("empty hashes list provided")
 	}
-	err := ag.db.ModelContext(ctx, &envelopes).
-		Where("tx_hash in (?)", pg.In(hashes)).
-		Select()
+	q := ag.db.ModelContext(ctx, &envelopes).
+		Where("tx_hash in (?)", pg.In(hashes))
+
+	err := postgres.WhereAllowedTenantsDefault(q, tenantIDs).Select()
 
 	return envelopes, err
 }
 
-func (ag *PGEnvelopeAgent) UpdateStatus(ctx context.Context, envelope *models.EnvelopeModel) error {
-	_, err := ag.db.ModelContext(ctx, envelope).
+func (ag *PGEnvelopeAgent) UpdateStatus(ctx context.Context, envelope *models.EnvelopeModel, tenantIDs []string) error {
+	q := ag.db.ModelContext(ctx, envelope).
 		Set("status = ?status").
-		Where("envelope_id = ?", envelope.EnvelopeID).
-		Where("tenant_id = ?", envelope.TenantID).
+		Where("envelope_id = ?", envelope.EnvelopeID)
+
+	_, err := postgres.WhereAllowedTenantsDefault(q, tenantIDs).
 		Returning("*").
 		Update()
 

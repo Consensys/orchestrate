@@ -53,7 +53,7 @@ func (s *GRPCService) Store(ctx context.Context, req *svc.StoreRequest) (*svc.St
 func (s *GRPCService) LoadByID(ctx context.Context, req *svc.LoadByIDRequest) (*svc.StoreResponse, error) {
 	envelope, err := s.loadEnvelopeByIDUseCase.Execute(
 		ctx,
-		multitenancy.TenantIDFromContext(ctx),
+		multitenancy.AllowedTenantsFromContext(ctx),
 		req.GetId(),
 	)
 	if err != nil {
@@ -71,7 +71,7 @@ func (s *GRPCService) LoadByID(ctx context.Context, req *svc.LoadByIDRequest) (*
 func (s *GRPCService) LoadByTxHash(ctx context.Context, req *svc.LoadByTxHashRequest) (*svc.StoreResponse, error) {
 	envelope, err := s.loadEnvelopeByTxHashUseCase.Execute(
 		ctx,
-		multitenancy.TenantIDFromContext(ctx),
+		multitenancy.AllowedTenantsFromContext(ctx),
 		req.GetChainId(),
 		req.GetTxHash(),
 	)
@@ -90,7 +90,7 @@ func (s *GRPCService) LoadByTxHash(ctx context.Context, req *svc.LoadByTxHashReq
 func (s *GRPCService) LoadByTxHashes(ctx context.Context, req *svc.LoadByTxHashesRequest) (*svc.LoadByTxHashesResponse, error) {
 	envelopes, err := s.loadEnvelopeByTxHashesUseCase.Execute(
 		ctx,
-		multitenancy.TenantIDFromContext(ctx),
+		multitenancy.AllowedTenantsFromContext(ctx),
 		req.GetChainId(),
 		req.GetTxHashes(),
 	)
@@ -111,7 +111,7 @@ func (s *GRPCService) LoadByTxHashes(ctx context.Context, req *svc.LoadByTxHashe
 func (s *GRPCService) SetStatus(ctx context.Context, req *svc.SetStatusRequest) (*svc.StatusResponse, error) {
 	envelope, err := s.setEnvelopesStatusUseCase.Execute(
 		ctx,
-		multitenancy.TenantIDFromContext(ctx),
+		multitenancy.AllowedTenantsFromContext(ctx),
 		req.GetId(),
 		req.GetStatus().String(),
 	)
@@ -128,6 +128,7 @@ func (s *GRPCService) LoadPending(ctx context.Context, req *svc.LoadPendingReque
 	envelopes, err := s.loadPendingEnvelopesUseCase.Execute(
 		ctx,
 		time.Now().Add(-utils.PDurationToDuration(req.GetDuration())),
+		multitenancy.AllowedTenantsFromContext(ctx),
 	)
 
 	if err != nil {

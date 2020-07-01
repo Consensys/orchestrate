@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	mockmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"google.golang.org/grpc"
 )
 
@@ -44,21 +45,21 @@ func (s *errorInterceptorsSuite) TestPing() {
 	startedCounter := mockmetrics.NewMockCounter(s.ctrlr)
 	s.registry.EXPECT().StartedCounter().Return(startedCounter)
 	startedCounter.EXPECT().
-		With("tenant_id", "", "service", "mwitkow.testproto.TestService", "type", "unary", "method", "Ping").
+		With("tenant_id", multitenancy.DefaultTenant, "service", "mwitkow.testproto.TestService", "type", "unary", "method", "Ping").
 		Return(startedCounter)
 	startedCounter.EXPECT().Add(float64(1))
 
 	handledCounter := mockmetrics.NewMockCounter(s.ctrlr)
 	s.registry.EXPECT().HandledCounter().Return(handledCounter)
 	handledCounter.EXPECT().
-		With("tenant_id", "", "service", "mwitkow.testproto.TestService", "type", "unary", "method", "Ping", "code", "OK").
+		With("tenant_id", multitenancy.DefaultTenant, "service", "mwitkow.testproto.TestService", "type", "unary", "method", "Ping", "code", "OK").
 		Return(handledCounter)
 	handledCounter.EXPECT().Add(float64(1))
 
 	handledHistogram := mockmetrics.NewMockHistogram(s.ctrlr)
 	s.registry.EXPECT().HandledDurationHistogram().Return(handledHistogram)
 	handledHistogram.EXPECT().
-		With("tenant_id", "", "service", "mwitkow.testproto.TestService", "type", "unary", "method", "Ping", "code", "OK").
+		With("tenant_id", multitenancy.DefaultTenant, "service", "mwitkow.testproto.TestService", "type", "unary", "method", "Ping", "code", "OK").
 		Return(handledHistogram)
 	handledHistogram.EXPECT().Observe(gomock.Any())
 
@@ -74,35 +75,35 @@ func (s *errorInterceptorsSuite) TestPingList() {
 	startedCounter := mockmetrics.NewMockCounter(s.ctrlr)
 	s.registry.EXPECT().StartedCounter().Return(startedCounter)
 	startedCounter.EXPECT().
-		With("tenant_id", "", "service", "mwitkow.testproto.TestService", "type", "server_stream", "method", "PingList").
+		With("tenant_id", multitenancy.DefaultTenant, "service", "mwitkow.testproto.TestService", "type", "server_stream", "method", "PingList").
 		Return(startedCounter)
 	startedCounter.EXPECT().Add(float64(1))
 
 	handledCounter := mockmetrics.NewMockCounter(s.ctrlr)
 	s.registry.EXPECT().HandledCounter().Return(handledCounter)
 	handledCounter.EXPECT().
-		With("tenant_id", "", "service", "mwitkow.testproto.TestService", "type", "server_stream", "method", "PingList", "code", "OK").
+		With("tenant_id", multitenancy.DefaultTenant, "service", "mwitkow.testproto.TestService", "type", "server_stream", "method", "PingList", "code", "OK").
 		Return(handledCounter)
 	handledCounter.EXPECT().Add(float64(1))
 
 	handledHistogram := mockmetrics.NewMockHistogram(s.ctrlr)
 	s.registry.EXPECT().HandledDurationHistogram().Return(handledHistogram)
 	handledHistogram.EXPECT().
-		With("tenant_id", "", "service", "mwitkow.testproto.TestService", "type", "server_stream", "method", "PingList", "code", "OK").
+		With("tenant_id", multitenancy.DefaultTenant, "service", "mwitkow.testproto.TestService", "type", "server_stream", "method", "PingList", "code", "OK").
 		Return(handledHistogram)
 	handledHistogram.EXPECT().Observe(gomock.Any())
 
 	receivedMsgCounter := mockmetrics.NewMockCounter(s.ctrlr)
 	s.registry.EXPECT().StreamMsgReceivedCounter().Return(receivedMsgCounter)
 	receivedMsgCounter.EXPECT().
-		With("tenant_id", "", "service", "mwitkow.testproto.TestService", "type", "server_stream", "method", "PingList").
+		With("tenant_id", multitenancy.DefaultTenant, "service", "mwitkow.testproto.TestService", "type", "server_stream", "method", "PingList").
 		Return(receivedMsgCounter)
 	receivedMsgCounter.EXPECT().Add(float64(1))
 
 	sentMsgCounter := mockmetrics.NewMockCounter(s.ctrlr)
 	s.registry.EXPECT().StreamMsgSentCounter().Return(sentMsgCounter)
 	sentMsgCounter.EXPECT().
-		With("tenant_id", "", "service", "mwitkow.testproto.TestService", "type", "server_stream", "method", "PingList").
+		With("tenant_id", multitenancy.DefaultTenant, "service", "mwitkow.testproto.TestService", "type", "server_stream", "method", "PingList").
 		Return(sentMsgCounter)
 	sentMsgCounter.EXPECT().Add(float64(1)).Times(100)
 
@@ -117,35 +118,35 @@ func (s *errorInterceptorsSuite) TestPingStream() {
 	startedCounter := mockmetrics.NewMockCounter(s.ctrlr)
 	s.registry.EXPECT().StartedCounter().Return(startedCounter)
 	startedCounter.EXPECT().
-		With("tenant_id", "", "service", "mwitkow.testproto.TestService", "type", "bidi_stream", "method", "PingStream").
+		With("tenant_id", multitenancy.DefaultTenant, "service", "mwitkow.testproto.TestService", "type", "bidi_stream", "method", "PingStream").
 		Return(startedCounter)
 	startedCounter.EXPECT().Add(float64(1))
 
 	handledCounter := mockmetrics.NewMockCounter(s.ctrlr)
 	s.registry.EXPECT().HandledCounter().Return(handledCounter)
 	handledCounter.EXPECT().
-		With("tenant_id", "", "service", "mwitkow.testproto.TestService", "type", "bidi_stream", "method", "PingStream", "code", "OK").
+		With("tenant_id", multitenancy.DefaultTenant, "service", "mwitkow.testproto.TestService", "type", "bidi_stream", "method", "PingStream", "code", "OK").
 		Return(handledCounter)
 	handledCounter.EXPECT().Add(float64(1))
 
 	handledHistogram := mockmetrics.NewMockHistogram(s.ctrlr)
 	s.registry.EXPECT().HandledDurationHistogram().Return(handledHistogram)
 	handledHistogram.EXPECT().
-		With("tenant_id", "", "service", "mwitkow.testproto.TestService", "type", "bidi_stream", "method", "PingStream", "code", "OK").
+		With("tenant_id", multitenancy.DefaultTenant, "service", "mwitkow.testproto.TestService", "type", "bidi_stream", "method", "PingStream", "code", "OK").
 		Return(handledHistogram)
 	handledHistogram.EXPECT().Observe(gomock.Any())
 
 	receivedMsgCounter := mockmetrics.NewMockCounter(s.ctrlr)
 	s.registry.EXPECT().StreamMsgReceivedCounter().Return(receivedMsgCounter)
 	receivedMsgCounter.EXPECT().
-		With("tenant_id", "", "service", "mwitkow.testproto.TestService", "type", "bidi_stream", "method", "PingStream").
+		With("tenant_id", multitenancy.DefaultTenant, "service", "mwitkow.testproto.TestService", "type", "bidi_stream", "method", "PingStream").
 		Return(receivedMsgCounter)
 	receivedMsgCounter.EXPECT().Add(float64(1)).Times(5)
 
 	sentMsgCounter := mockmetrics.NewMockCounter(s.ctrlr)
 	s.registry.EXPECT().StreamMsgSentCounter().Return(sentMsgCounter)
 	sentMsgCounter.EXPECT().
-		With("tenant_id", "", "service", "mwitkow.testproto.TestService", "type", "bidi_stream", "method", "PingStream").
+		With("tenant_id", multitenancy.DefaultTenant, "service", "mwitkow.testproto.TestService", "type", "bidi_stream", "method", "PingStream").
 		Return(sentMsgCounter)
 	sentMsgCounter.EXPECT().Add(float64(1)).Times(5)
 

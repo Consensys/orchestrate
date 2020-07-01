@@ -50,7 +50,7 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID, tenantID string
 		WithField("job_uuid", jobUUID).
 		Debugf("starting job")
 
-	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, tenantID)
+	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, []string{tenantID})
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}

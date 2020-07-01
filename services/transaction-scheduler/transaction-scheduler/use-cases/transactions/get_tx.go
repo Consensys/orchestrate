@@ -18,7 +18,7 @@ import (
 const getTxComponent = "use-cases.get-tx"
 
 type GetTxUseCase interface {
-	Execute(ctx context.Context, txRequestUUID, tenantID string) (*entities.TxRequest, error)
+	Execute(ctx context.Context, txRequestUUID string, tenants []string) (*entities.TxRequest, error)
 }
 
 // getTxUseCase is a use case to get a transaction request
@@ -36,11 +36,11 @@ func NewGetTxUseCase(db store.DB, getScheduleUsecase schedules.GetScheduleUseCas
 }
 
 // Execute gets a transaction request
-func (uc *getTxUseCase) Execute(ctx context.Context, txRequestUUID, tenantID string) (*entities.TxRequest, error) {
+func (uc *getTxUseCase) Execute(ctx context.Context, txRequestUUID string, tenants []string) (*entities.TxRequest, error) {
 	logger := log.WithContext(ctx).WithField("tx_request_uuid", txRequestUUID)
 	logger.Debug("getting transaction request")
 
-	txRequestModel, err := uc.db.TransactionRequest().FindOneByUUID(ctx, txRequestUUID, tenantID)
+	txRequestModel, err := uc.db.TransactionRequest().FindOneByUUID(ctx, txRequestUUID, tenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(getTxComponent)
 	}
@@ -57,7 +57,7 @@ func (uc *getTxUseCase) Execute(ctx context.Context, txRequestUUID, tenantID str
 		Params:         txRequestModel.Params,
 		CreatedAt:      txRequestModel.CreatedAt,
 	}
-	txRequest.Schedule, err = uc.getScheduleUsecase.Execute(ctx, txRequestModel.Schedules[0].UUID, tenantID)
+	txRequest.Schedule, err = uc.getScheduleUsecase.Execute(ctx, txRequestModel.Schedules[0].UUID, tenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(getTxComponent)
 	}

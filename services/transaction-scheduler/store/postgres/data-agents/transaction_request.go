@@ -61,7 +61,7 @@ func (agent *PGTransactionRequest) FindOneByIdempotencyKey(ctx context.Context, 
 	return txRequest, nil
 }
 
-func (agent *PGTransactionRequest) FindOneByUUID(ctx context.Context, txRequestUUID, tenantID string) (*models.TransactionRequest, error) {
+func (agent *PGTransactionRequest) FindOneByUUID(ctx context.Context, txRequestUUID string, tenants []string) (*models.TransactionRequest, error) {
 	txRequest := &models.TransactionRequest{}
 	query := agent.db.ModelContext(ctx, txRequest).
 		Where("transaction_request.uuid = ?", txRequestUUID).
@@ -69,9 +69,7 @@ func (agent *PGTransactionRequest) FindOneByUUID(ctx context.Context, txRequestU
 		JoinOn("s.transaction_request_id = transaction_request.id").
 		Relation("Schedules")
 
-	if tenantID != "" {
-		query.JoinOn("s.tenant_id = ?", tenantID)
-	}
+	query = pg.WhereAllowedTenants(query, "s.tenant_id", tenants)
 
 	err := pg.SelectOne(ctx, query)
 	if err != nil {
@@ -81,18 +79,19 @@ func (agent *PGTransactionRequest) FindOneByUUID(ctx context.Context, txRequestU
 	return txRequest, nil
 }
 
-func (agent *PGTransactionRequest) Search(ctx context.Context, tenantID string, filters *entities.TransactionFilters) ([]*models.TransactionRequest, error) {
+func (agent *PGTransactionRequest) Search(ctx context.Context, filters *entities.TransactionFilters, tenants []string) ([]*models.TransactionRequest, error) {
 	var txRequests []*models.TransactionRequest
 
-	query := agent.db.ModelContext(ctx, &txRequests).Relation("Schedules")
+	query := agent.db.ModelContext(ctx, &txRequests).Relation("Schedules").
+		Join("JOIN schedules AS s").
+		JoinOn("s.transaction_request_id = transaction_request.id").
+		Relation("Schedules")
 
 	if len(filters.IdempotencyKeys) > 0 {
 		query = query.Where("transaction_request.idempotency_key in (?)", gopg.In(filters.IdempotencyKeys))
 	}
 
-	if tenantID != "" {
-		query.Join("JOIN schedules AS s").JoinOn("s.tenant_id = ?", tenantID)
-	}
+	query = pg.WhereAllowedTenants(query, "s.tenant_id", tenants)
 
 	err := pg.Select(ctx, query)
 	if err != nil {

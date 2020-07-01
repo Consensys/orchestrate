@@ -224,6 +224,10 @@ func UnauthorizedError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(Unauthorized, format, a...)
 }
 
+func IsUnauthorizedError(err error) bool {
+	return isErrorClass(FromError(err).GetCode(), Unauthorized)
+}
+
 // PermissionDeniedError is raised when authentication credentials are invalid
 func PermissionDeniedError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(PermissionDenied, format, a...)

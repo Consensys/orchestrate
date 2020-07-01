@@ -35,12 +35,12 @@ func TestGetTx_Execute(t *testing.T) {
 		txRequest := testutils.FakeTxRequest(0)
 		schedule := testutils2.FakeScheduleEntity()
 
-		mockTransactionRequestDA.EXPECT().FindOneByUUID(ctx, txRequest.UUID, tenantID).Return(txRequest, nil)
-		mockGetScheduleUC.EXPECT().Execute(ctx, txRequest.Schedules[0].UUID, tenantID).Return(schedule, nil)
+		mockTransactionRequestDA.EXPECT().FindOneByUUID(ctx, txRequest.UUID, []string{tenantID}).Return(txRequest, nil)
+		mockGetScheduleUC.EXPECT().Execute(ctx, txRequest.Schedules[0].UUID, []string{tenantID}).Return(schedule, nil)
 
-		result, err := usecase.Execute(ctx, txRequest.UUID, tenantID)
+		result, err := usecase.Execute(ctx, txRequest.UUID, []string{tenantID})
 
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, txRequest.UUID, result.UUID)
 		assert.Equal(t, txRequest.IdempotencyKey, result.IdempotencyKey)
 		assert.Equal(t, txRequest.CreatedAt, result.CreatedAt)
@@ -52,9 +52,9 @@ func TestGetTx_Execute(t *testing.T) {
 		uuid := "uuid"
 		expectedErr := errors.NotFoundError("error")
 
-		mockTransactionRequestDA.EXPECT().FindOneByUUID(ctx, uuid, tenantID).Return(nil, expectedErr)
+		mockTransactionRequestDA.EXPECT().FindOneByUUID(ctx, uuid, []string{tenantID}).Return(nil, expectedErr)
 
-		response, err := usecase.Execute(ctx, uuid, tenantID)
+		response, err := usecase.Execute(ctx, uuid, []string{tenantID})
 
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(getTxComponent), err)
@@ -64,10 +64,10 @@ func TestGetTx_Execute(t *testing.T) {
 		txRequest := testutils.FakeTxRequest(0)
 		expectedErr := fmt.Errorf("error")
 
-		mockTransactionRequestDA.EXPECT().FindOneByUUID(ctx, txRequest.UUID, tenantID).Return(txRequest, nil)
-		mockGetScheduleUC.EXPECT().Execute(ctx, txRequest.Schedules[0].UUID, tenantID).Return(nil, expectedErr)
+		mockTransactionRequestDA.EXPECT().FindOneByUUID(ctx, txRequest.UUID, []string{tenantID}).Return(txRequest, nil)
+		mockGetScheduleUC.EXPECT().Execute(ctx, txRequest.Schedules[0].UUID, []string{tenantID}).Return(nil, expectedErr)
 
-		response, err := usecase.Execute(ctx, txRequest.UUID, tenantID)
+		response, err := usecase.Execute(ctx, txRequest.UUID, []string{tenantID})
 
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(getTxComponent), err)

@@ -12,7 +12,7 @@ import (
 )
 
 type LoadEnvelopeByTxHashes interface {
-	Execute(ctx context.Context, tenantID, chainID string, txHashes []string) ([]*models.EnvelopeModel, error)
+	Execute(ctx context.Context, tenants []string, chainID string, txHashes []string) ([]*models.EnvelopeModel, error)
 }
 
 type loadEnvelopeByTxHashes struct {
@@ -25,11 +25,10 @@ func NewLoadEnvelopeByTxHashes(envelopeAgent store.EnvelopeAgent) LoadEnvelopeBy
 	}
 }
 
-func (se *loadEnvelopeByTxHashes) Execute(ctx context.Context, tenantID, chainID string, txHashes []string) ([]*models.EnvelopeModel, error) {
+func (se *loadEnvelopeByTxHashes) Execute(ctx context.Context, tenants []string, chainID string, txHashes []string) ([]*models.EnvelopeModel, error) {
 	logger := log.FromContext(ctx)
 
-	// TODO: Filter also by tenantID
-	envelopes, err := se.envelopeAgent.FindByTxHashes(ctx, txHashes)
+	envelopes, err := se.envelopeAgent.FindByTxHashes(ctx, txHashes, tenants)
 
 	if err != nil {
 		logger.
@@ -37,7 +36,7 @@ func (se *loadEnvelopeByTxHashes) Execute(ctx context.Context, tenantID, chainID
 			WithFields(logrus.Fields{
 				"chainID":  chainID,
 				"txHashes": txHashes,
-				"tenantID": tenantID,
+				"tenants":  tenants,
 			}).
 			Debugf("could not load envelopes")
 		if err == pg.ErrNoRows {

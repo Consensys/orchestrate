@@ -60,6 +60,7 @@ func (agent *PGJob) Update(ctx context.Context, job *models.Job) error {
 
 	agent.db.ModelContext(ctx, job)
 	err := pg.Update(ctx, agent.db, job)
+
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(jobDAComponent)
 	}
@@ -68,7 +69,7 @@ func (agent *PGJob) Update(ctx context.Context, job *models.Job) error {
 }
 
 // FindOneByUUID gets a job by UUID
-func (agent *PGJob) FindOneByUUID(ctx context.Context, jobUUID, tenantID string) (*models.Job, error) {
+func (agent *PGJob) FindOneByUUID(ctx context.Context, jobUUID string, tenants []string) (*models.Job, error) {
 	job := &models.Job{}
 
 	query := agent.db.ModelContext(ctx, job).
@@ -77,9 +78,7 @@ func (agent *PGJob) FindOneByUUID(ctx context.Context, jobUUID, tenantID string)
 		Relation("Schedule").
 		Relation("Logs")
 
-	if tenantID != "" {
-		query.Where("schedule.tenant_id = ?", tenantID)
-	}
+	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants)
 
 	err := pg.Select(ctx, query)
 	if err != nil {
@@ -89,7 +88,7 @@ func (agent *PGJob) FindOneByUUID(ctx context.Context, jobUUID, tenantID string)
 	return job, nil
 }
 
-func (agent *PGJob) Search(ctx context.Context, tenantID string, txHashes []string, chainUUID string) ([]*models.Job, error) {
+func (agent *PGJob) Search(ctx context.Context, txHashes []string, chainUUID string, tenants []string) ([]*models.Job, error) {
 	jobs := []*models.Job{}
 
 	query := agent.db.ModelContext(ctx, &jobs).
@@ -105,9 +104,7 @@ func (agent *PGJob) Search(ctx context.Context, tenantID string, txHashes []stri
 		query = query.Where("job.chain_uuid = ?", chainUUID)
 	}
 
-	if tenantID != "" {
-		query.Where("schedule.tenant_id = ?", tenantID)
-	}
+	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants)
 
 	err := pg.Select(ctx, query)
 	if err != nil {

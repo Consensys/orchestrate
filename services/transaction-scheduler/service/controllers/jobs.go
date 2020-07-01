@@ -50,7 +50,7 @@ func (c *JobsController) search(rw http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	jobRes, err := c.ucs.SearchJobs().Execute(ctx, filters, multitenancy.TenantIDFromContext(ctx))
+	jobRes, err := c.ucs.SearchJobs().Execute(ctx, filters, multitenancy.AllowedTenantsFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -107,7 +107,7 @@ func (c *JobsController) getOne(rw http.ResponseWriter, request *http.Request) {
 
 	uuid := mux.Vars(request)["uuid"]
 
-	jobRes, err := c.ucs.GetJob().Execute(ctx, uuid, multitenancy.TenantIDFromContext(ctx))
+	jobRes, err := c.ucs.GetJob().Execute(ctx, uuid, multitenancy.AllowedTenantsFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -158,7 +158,7 @@ func (c *JobsController) update(rw http.ResponseWriter, request *http.Request) {
 
 	job := formatters.FormatJobUpdateRequest(jobRequest)
 	job.UUID = mux.Vars(request)["uuid"]
-	jobRes, err := c.ucs.UpdateJob().Execute(ctx, job, jobRequest.Status, multitenancy.TenantIDFromContext(ctx))
+	jobRes, err := c.ucs.UpdateJob().Execute(ctx, job, jobRequest.Status, multitenancy.AllowedTenantsFromContext(ctx))
 
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)

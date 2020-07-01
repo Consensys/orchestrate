@@ -75,6 +75,7 @@ func (a *Auth) Handler(h http.Handler) http.Handler {
 				// Bypass JWT authentication
 				log.FromContext(checkedCtx).
 					WithField("tenant_id", multitenancy.TenantIDFromContext(checkedCtx)).
+					WithField("allowed_tenants", multitenancy.AllowedTenantsFromContext(checkedCtx)).
 					Debugf("authentication succeeded (API-Key)")
 				a.serveNext(rw, req.WithContext(checkedCtx), h)
 				return
@@ -86,6 +87,7 @@ func (a *Auth) Handler(h http.Handler) http.Handler {
 				// JWT Authentication succeeded
 				log.FromContext(checkedCtx).
 					WithField("tenant_id", multitenancy.TenantIDFromContext(checkedCtx)).
+					WithField("allowed_tenants", multitenancy.AllowedTenantsFromContext(checkedCtx)).
 					Debugf("authentication succeeded (JWT)")
 
 				a.serveNext(rw, req.WithContext(checkedCtx), h)

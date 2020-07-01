@@ -45,8 +45,8 @@ func TestSearchJobs_Execute(t *testing.T) {
 		}
 
 		expectedResponse := []*types.Job{parsers.NewJobEntityFromModels(jobs[0])}
-		mockJobDA.EXPECT().Search(ctx, tenantID, []string{txHash.String()}, chainUUID).Return(jobs, nil)
-		jobResponse, err := usecase.Execute(ctx, filters, tenantID)
+		mockJobDA.EXPECT().Search(ctx, []string{txHash.String()}, chainUUID, []string{tenantID}).Return(jobs, nil)
+		jobResponse, err := usecase.Execute(ctx, filters, []string{tenantID})
 
 		assert.NoError(t, err)
 		assert.Equal(t, expectedResponse, jobResponse)
@@ -56,9 +56,9 @@ func TestSearchJobs_Execute(t *testing.T) {
 		filters := &entities.JobFilters{}
 		expectedErr := errors.NotFoundError("error")
 
-		mockJobDA.EXPECT().Search(ctx, tenantID, gomock.Any(), gomock.Any()).Return(nil, expectedErr)
+		mockJobDA.EXPECT().Search(ctx, gomock.Any(), gomock.Any(), []string{tenantID}).Return(nil, expectedErr)
 
-		response, err := usecase.Execute(ctx, filters, tenantID)
+		response, err := usecase.Execute(ctx, filters, []string{tenantID})
 
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(searchJobsComponent), err)
@@ -69,7 +69,7 @@ func TestSearchJobs_Execute(t *testing.T) {
 			TxHashes: []string{"axasad"},
 		}
 
-		_, err := usecase.Execute(ctx, filters, tenantID)
+		_, err := usecase.Execute(ctx, filters, []string{tenantID})
 
 		assert.True(t, errors.IsInvalidParameterError(err))
 	})
@@ -79,7 +79,7 @@ func TestSearchJobs_Execute(t *testing.T) {
 			ChainUUID: "axasad",
 		}
 
-		_, err := usecase.Execute(ctx, filters, tenantID)
+		_, err := usecase.Execute(ctx, filters, []string{tenantID})
 
 		assert.True(t, errors.IsInvalidParameterError(err))
 	})

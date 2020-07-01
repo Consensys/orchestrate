@@ -35,16 +35,16 @@ func (m *MockGetChainByNameUseCase) EXPECT() *MockGetChainByNameUseCaseMockRecor
 }
 
 // Execute mocks base method
-func (m *MockGetChainByNameUseCase) Execute(ctx context.Context, chainName, tenantID string) (*types.Chain, error) {
+func (m *MockGetChainByNameUseCase) Execute(ctx context.Context, chainName string, tenants []string) (*types.Chain, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, chainName, tenantID)
+	ret := m.ctrl.Call(m, "Execute", ctx, chainName, tenants)
 	ret0, _ := ret[0].(*types.Chain)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockGetChainByNameUseCaseMockRecorder) Execute(ctx, chainName, tenantID interface{}) *gomock.Call {
+func (mr *MockGetChainByNameUseCaseMockRecorder) Execute(ctx, chainName, tenants interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetChainByNameUseCase)(nil).Execute), ctx, chainName, tenantID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetChainByNameUseCase)(nil).Execute), ctx, chainName, tenants)
 }

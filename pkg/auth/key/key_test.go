@@ -19,7 +19,7 @@ func TestKey(t *testing.T) {
 	checkedCtx, err := c.Check(ctx)
 	assert.NoError(t, err, "#1 Check should be valid")
 	assert.Equal(t, multitenancy.DefaultTenant, multitenancy.TenantIDFromContext(checkedCtx), "#1 Impersonated tenant should be valid")
-	assert.Equal(t, []string{"*"}, multitenancy.AllowedTenantsFromContext(checkedCtx), "#1 Allowed tenants should be valid")
+	assert.Equal(t, []string{multitenancy.Wildcard}, multitenancy.AllowedTenantsFromContext(checkedCtx), "#1 Allowed tenants should be valid")
 
 	ctx = authutils.WithAPIKey(context.Background(), "test-key-invalid")
 	_, err = c.Check(ctx)

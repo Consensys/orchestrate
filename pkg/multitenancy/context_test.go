@@ -10,7 +10,7 @@ import (
 )
 
 func TestWithTenantID(t *testing.T) {
-	assert.Equal(t, "", TenantIDFromContext(context.Background()))
+	assert.Equal(t, DefaultTenant, TenantIDFromContext(context.Background()))
 	ctx := WithTenantID(context.Background(), "test-tenant")
 	assert.Equal(t, "test-tenant", TenantIDFromContext(ctx))
 }

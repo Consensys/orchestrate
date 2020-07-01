@@ -2,10 +2,12 @@ package jobs
 
 import (
 	"context"
+	"fmt"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
@@ -17,7 +19,7 @@ import (
 const updateJobComponent = "use-cases.update-job"
 
 type UpdateJobUseCase interface {
-	Execute(ctx context.Context, jobEntity *types.Job, newStatus, tenantID string) (*types.Job, error)
+	Execute(ctx context.Context, jobEntity *types.Job, newStatus string, tenants []string) (*types.Job, error)
 }
 
 // updateJobUseCase is a use case to create a new transaction job
@@ -33,15 +35,26 @@ func NewUpdateJobUseCase(db store.DB) UpdateJobUseCase {
 }
 
 // Execute validates and creates a new transaction job
-func (uc *updateJobUseCase) Execute(ctx context.Context, jobEntity *types.Job, newStatus, tenantID string) (*types.Job, error) {
+func (uc *updateJobUseCase) Execute(ctx context.Context, jobEntity *types.Job, newStatus string, tenants []string) (*types.Job, error) {
 	log.WithContext(ctx).
-		WithField("tenant_id", tenantID).
+		WithField("tenants", tenants).
 		WithField("job_uuid", jobEntity.UUID).
 		Debug("update job")
 
-	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobEntity.UUID, tenantID)
+	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobEntity.UUID, tenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
+	}
+
+	isAuth := false
+	for _, tenantID := range tenants {
+		if tenantID == multitenancy.Wildcard || tenantID == jobModel.Schedule.TenantID {
+			isAuth = true
+		}
+	}
+
+	if !isAuth {
+		return nil, errors.UnauthorizedError(fmt.Sprintf("unauthorized access to update job %s", jobModel.UUID))
 	}
 
 	err = database.ExecuteInDBTx(uc.db, func(tx database.Tx) error {
@@ -74,7 +87,7 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, jobEntity *types.Job, n
 		return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
 	}
 
-	jobModel, err = uc.db.Job().FindOneByUUID(ctx, jobEntity.UUID, tenantID)
+	jobModel, err = uc.db.Job().FindOneByUUID(ctx, jobEntity.UUID, tenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
 	}

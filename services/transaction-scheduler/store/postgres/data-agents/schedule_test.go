@@ -73,19 +73,19 @@ func (s *scheduleTestSuite) TestPGSchedule_FindOneByUUID() {
 	assert.NoError(s.T(), err)
 
 	s.T().Run("should get model successfully as tenant", func(t *testing.T) {
-		scheduleRetrieved, err := s.agents.Schedule().FindOneByUUID(ctx, schedule.UUID, tenantID)
+		scheduleRetrieved, err := s.agents.Schedule().FindOneByUUID(ctx, schedule.UUID, []string{tenantID})
 
 		assert.NoError(t, err)
 		assertEqualSchedule(t, schedule, scheduleRetrieved)
 	})
 
 	s.T().Run("should return NotFoundError if select fails", func(t *testing.T) {
-		_, err := s.agents.Schedule().FindOneByUUID(ctx, "b6fe7a2a-1a4d-49ca-99d8-8a34aa495ef0", tenantID)
+		_, err := s.agents.Schedule().FindOneByUUID(ctx, "b6fe7a2a-1a4d-49ca-99d8-8a34aa495ef0", []string{tenantID})
 		assert.True(t, errors.IsNotFoundError(err))
 	})
 
 	s.T().Run("should return NotFoundError if select fails", func(t *testing.T) {
-		_, err := s.agents.Schedule().FindOneByUUID(ctx, "b6fe7a2a-1a4d-49ca-99d8-8a34aa495ef0", "randomID")
+		_, err := s.agents.Schedule().FindOneByUUID(ctx, "b6fe7a2a-1a4d-49ca-99d8-8a34aa495ef0", []string{"randomID"})
 		assert.True(t, errors.IsNotFoundError(err))
 	})
 }
@@ -107,7 +107,7 @@ func (s *scheduleTestSuite) TestPGSchedule_FindAll() {
 	}
 
 	s.T().Run("should get model successfully as tenant", func(t *testing.T) {
-		schedulesRetrieved, err := s.agents.Schedule().FindAll(ctx, tenantID)
+		schedulesRetrieved, err := s.agents.Schedule().FindAll(ctx, []string{tenantID})
 
 		assert.NoError(t, err)
 		assert.Equal(t, 2, len(schedulesRetrieved))
@@ -117,7 +117,7 @@ func (s *scheduleTestSuite) TestPGSchedule_FindAll() {
 	})
 
 	s.T().Run("should return NotFoundError if select fails", func(t *testing.T) {
-		schedules, err := s.agents.Schedule().FindAll(ctx, "randomID")
+		schedules, err := s.agents.Schedule().FindAll(ctx, []string{"randomID"})
 		assert.NoError(t, err)
 		assert.Empty(t, schedules)
 	})
@@ -136,12 +136,12 @@ func (s *scheduleTestSuite) TestPGSchedule_ConnectionErr() {
 	})
 
 	s.T().Run("should return PostgresConnectionError if fetch fails", func(t *testing.T) {
-		_, err := s.agents.Schedule().FindOneByUUID(ctx, schedule.UUID, "_")
+		_, err := s.agents.Schedule().FindOneByUUID(ctx, schedule.UUID, []string{"_"})
 		assert.True(t, errors.IsPostgresConnectionError(err))
 	})
 
 	s.T().Run("should return PostgresConnectionError if fetchAll fails", func(t *testing.T) {
-		_, err := s.agents.Schedule().FindAll(ctx, "_")
+		_, err := s.agents.Schedule().FindAll(ctx, []string{"_"})
 		assert.True(t, errors.IsPostgresConnectionError(err))
 	})
 

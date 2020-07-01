@@ -42,21 +42,21 @@ type Tx interface {
 type TransactionRequestAgent interface {
 	SelectOrInsert(ctx context.Context, txRequest *models.TransactionRequest) error
 	FindOneByIdempotencyKey(ctx context.Context, idempotencyKey string) (*models.TransactionRequest, error)
-	FindOneByUUID(ctx context.Context, uuid, tenantID string) (*models.TransactionRequest, error)
-	Search(ctx context.Context, tenantID string, filters *entities.TransactionFilters) ([]*models.TransactionRequest, error)
+	FindOneByUUID(ctx context.Context, uuid string, tenants []string) (*models.TransactionRequest, error)
+	Search(ctx context.Context, filters *entities.TransactionFilters, tenants []string) ([]*models.TransactionRequest, error)
 }
 
 type ScheduleAgent interface {
 	Insert(ctx context.Context, schedule *models.Schedule) error
-	FindOneByUUID(ctx context.Context, uuid, tenantID string) (*models.Schedule, error)
-	FindAll(ctx context.Context, tenantID string) ([]*models.Schedule, error)
+	FindOneByUUID(ctx context.Context, uuid string, tenants []string) (*models.Schedule, error)
+	FindAll(ctx context.Context, tenants []string) ([]*models.Schedule, error)
 }
 
 type JobAgent interface {
 	Insert(ctx context.Context, job *models.Job) error
 	Update(ctx context.Context, job *models.Job) error
-	FindOneByUUID(ctx context.Context, uuid, tenantID string) (*models.Job, error)
-	Search(ctx context.Context, tenantID string, txHashes []string, chainUUID string) ([]*models.Job, error)
+	FindOneByUUID(ctx context.Context, uuid string, tenants []string) (*models.Job, error)
+	Search(ctx context.Context, txHashes []string, chainUUID string, tenants []string) ([]*models.Job, error)
 }
 
 type LogAgent interface {

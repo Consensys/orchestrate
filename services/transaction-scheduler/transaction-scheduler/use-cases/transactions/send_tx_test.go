@@ -369,7 +369,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 			Return(nil)
 
 		s.GetTxUC.EXPECT().
-			Execute(ctx, txRequest.UUID, tenantID).
+			Execute(ctx, txRequest.UUID, []string{tenantID}).
 			Return(txRequest, expectedErr)
 
 		response, err := s.usecase.Execute(ctx, txRequest, txData, chainUUID, tenantID)
@@ -432,7 +432,7 @@ func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, jobT
 		Return(nil)
 
 	s.GetTxUC.EXPECT().
-		Execute(ctx, txRequest.UUID, tenantID).
+		Execute(ctx, txRequest.UUID, []string{tenantID}).
 		Return(txRequest, nil)
 
 	return s.usecase.Execute(ctx, txRequest, txData, chainUUID, tenantID)

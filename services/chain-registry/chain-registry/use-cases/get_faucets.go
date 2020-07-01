@@ -24,5 +24,5 @@ func NewGetFaucets(faucetAgent store.FaucetAgent) GetFaucets {
 }
 
 func (uc *getFaucets) Execute(ctx context.Context, tenants []string, filters map[string]string) ([]*models.Faucet, error) {
-	return uc.faucetAgent.GetFaucetsByTenant(ctx, filters, tenants)
+	return uc.faucetAgent.GetFaucets(ctx, tenants, filters)
 }

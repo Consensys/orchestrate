@@ -13,7 +13,7 @@ import (
 )
 
 type SetEnvelopeStatus interface {
-	Execute(ctx context.Context, tenantID string, envelopeID string, nextStatus string) (*models.EnvelopeModel, error)
+	Execute(ctx context.Context, tenants []string, envelopeID string, nextStatus string) (*models.EnvelopeModel, error)
 }
 
 // RegisterContract is a use case to register a new contract
@@ -28,20 +28,19 @@ func NewSetEnvelopeStatus(envelopeAgent store.EnvelopeAgent) SetEnvelopeStatus {
 	}
 }
 
-func (se *setEnvelopeStatus) Execute(ctx context.Context, tenantID, envelopeID, nextStatus string) (*models.EnvelopeModel, error) {
+func (se *setEnvelopeStatus) Execute(ctx context.Context, tenants []string, envelopeID, nextStatus string) (*models.EnvelopeModel, error) {
 	logger := log.FromContext(ctx)
 
 	envelope, err := se.envelopeAgent.FindByFieldSet(ctx, map[string]string{
 		"envelope_id": envelopeID,
-		"tenant_id":   tenantID,
-	})
+	}, tenants)
 
 	if err != nil {
 		logger.
 			WithError(err).
 			WithFields(logrus.Fields{
-				"id":       envelopeID,
-				"tenantID": tenantID,
+				"id":      envelopeID,
+				"tenants": tenants,
 			}).
 			Debugf("could not load envelope")
 		if err == pg.ErrNoRows {
@@ -52,7 +51,7 @@ func (se *setEnvelopeStatus) Execute(ctx context.Context, tenantID, envelopeID, 
 
 	envelope.Status = strings.ToLower(nextStatus)
 
-	err = se.envelopeAgent.UpdateStatus(ctx, envelope)
+	err = se.envelopeAgent.UpdateStatus(ctx, envelope, tenants)
 	if err != nil {
 		logger.WithError(err).Errorf("could not update envelope")
 		return nil, err

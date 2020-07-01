@@ -6,6 +6,7 @@ package dataagents
 
 import (
 	"context"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 	"testing"
 
@@ -113,7 +114,7 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_FindOneByUUID() {
 	assert.Nil(s.T(), err)
 
 	s.T().Run("should find request successfully for empty tenant", func(t *testing.T) {
-		txRequestRetrieved, err := s.agents.TransactionRequest().FindOneByUUID(ctx, txRequest.UUID, "")
+		txRequestRetrieved, err := s.agents.TransactionRequest().FindOneByUUID(ctx, txRequest.UUID, []string{multitenancy.Wildcard})
 
 		assert.NoError(t, err)
 		assert.Equal(t, txRequest.UUID, txRequestRetrieved.UUID)
@@ -121,12 +122,12 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_FindOneByUUID() {
 	})
 
 	s.T().Run("should return NotFoundError if uuid is not found", func(t *testing.T) {
-		_, err := s.agents.TransactionRequest().FindOneByUUID(ctx, uuid.Must(uuid.NewV4()).String(), txRequest.Schedules[0].TenantID)
+		_, err := s.agents.TransactionRequest().FindOneByUUID(ctx, uuid.Must(uuid.NewV4()).String(), []string{txRequest.Schedules[0].TenantID})
 		assert.True(t, errors.IsNotFoundError(err))
 	})
 
 	s.T().Run("should return NotFoundError if tenant is not found", func(t *testing.T) {
-		_, err := s.agents.TransactionRequest().FindOneByUUID(ctx, txRequest.UUID, "notExisting")
+		_, err := s.agents.TransactionRequest().FindOneByUUID(ctx, txRequest.UUID, []string{"notExisting"})
 		assert.True(t, errors.IsNotFoundError(err))
 	})
 }
@@ -139,7 +140,7 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_Search() {
 
 	s.T().Run("should find requests successfully", func(t *testing.T) {
 		filter := &entities.TransactionFilters{}
-		txRequestsRetrieved, err := s.agents.TransactionRequest().Search(ctx, "", filter)
+		txRequestsRetrieved, err := s.agents.TransactionRequest().Search(ctx, filter, []string{multitenancy.Wildcard})
 
 		assert.NoError(t, err)
 		assert.Len(t, txRequestsRetrieved, 1)
@@ -150,7 +151,7 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_Search() {
 		filter := &entities.TransactionFilters{
 			IdempotencyKeys: []string{txRequest.IdempotencyKey},
 		}
-		txRequestsRetrieved, err := s.agents.TransactionRequest().Search(ctx, "", filter)
+		txRequestsRetrieved, err := s.agents.TransactionRequest().Search(ctx, filter, []string{multitenancy.Wildcard})
 
 		assert.NoError(t, err)
 		assert.Len(t, txRequestsRetrieved, 1)
@@ -162,7 +163,7 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_Search() {
 			IdempotencyKeys: []string{"notExisting"},
 		}
 
-		result, err := s.agents.TransactionRequest().Search(ctx, "", filter)
+		result, err := s.agents.TransactionRequest().Search(ctx, filter, []string{multitenancy.Wildcard})
 
 		assert.NoError(t, err)
 		assert.Empty(t, result)
@@ -170,7 +171,7 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_Search() {
 
 	s.T().Run("should return empty array if tenant is not found", func(t *testing.T) {
 		filter := &entities.TransactionFilters{}
-		result, err := s.agents.TransactionRequest().Search(ctx, "notExisting", filter)
+		result, err := s.agents.TransactionRequest().Search(ctx, filter, []string{"NotExistingTenant"})
 
 		assert.NoError(t, err)
 		assert.Empty(t, result)
@@ -195,12 +196,12 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_ConnectionErr() {
 	})
 
 	s.T().Run("should return PostgresConnectionError if find fails", func(t *testing.T) {
-		_, err := s.agents.TransactionRequest().FindOneByUUID(ctx, txRequest.UUID, "")
+		_, err := s.agents.TransactionRequest().FindOneByUUID(ctx, txRequest.UUID, []string{multitenancy.Wildcard})
 		assert.True(t, errors.IsPostgresConnectionError(err))
 	})
 
 	s.T().Run("should return PostgresConnectionError if find fails", func(t *testing.T) {
-		_, err := s.agents.TransactionRequest().Search(ctx, "tenant", &entities.TransactionFilters{})
+		_, err := s.agents.TransactionRequest().Search(ctx, &entities.TransactionFilters{}, []string{"tenant"})
 		assert.True(t, errors.IsPostgresConnectionError(err))
 	})
 

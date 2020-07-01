@@ -33,8 +33,8 @@ func TestGetJob_Execute(t *testing.T) {
 		chainRegistryClient.EXPECT().
 			GetChainByName(gomock.Any(), chainModel.Name).
 			Return(chainModel, nil)
-
-		response, err := usecase.Execute(ctx, chainModel.Name, chainModel.TenantID)
+		
+		response, err := usecase.Execute(ctx, chainModel.Name, []string{chainModel.TenantID})
 
 		expectedRes := parsers.NewChainFromModels(chainModel)
 		assert.NoError(t, err)
@@ -48,7 +48,7 @@ func TestGetJob_Execute(t *testing.T) {
 			GetChainByName(gomock.Any(), chainModel.Name).
 			Return(nil, expectedErr)
 
-		response, err := usecase.Execute(ctx, chainModel.Name, chainModel.TenantID)
+		response, err := usecase.Execute(ctx, chainModel.Name, []string{chainModel.TenantID})
 
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(getChainByNameComponent), err)
@@ -61,7 +61,7 @@ func TestGetJob_Execute(t *testing.T) {
 			GetChainByName(gomock.Any(), chainModel.Name).
 			Return(nil, expectedErr)
 
-		response, err := usecase.Execute(ctx, chainModel.Name, chainModel.TenantID)
+		response, err := usecase.Execute(ctx, chainModel.Name, []string{chainModel.TenantID})
 
 		assert.Nil(t, response)
 		assert.True(t, errors.IsInvalidParameterError(err))

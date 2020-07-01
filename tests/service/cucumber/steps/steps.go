@@ -102,7 +102,6 @@ func (sc *ScenarioContext) init(s *gherkin.Pickle) {
 	// Hook the Pickle to the scenario context
 	sc.Pickle = s
 	sc.aliases.Set(sc.Pickle.Id, sc.Pickle.Id, "scenarioID")
-	sc.aliases.Set(uuid.Must(uuid.NewV4()).String(), sc.Pickle.Id, "scenarioUID")
 
 	// Prepare default tracker
 	sc.defaultTracker = sc.newTracker(nil)

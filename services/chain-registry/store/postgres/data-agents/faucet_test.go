@@ -163,18 +163,6 @@ func (s *FaucetTestSuite) TestGetFaucets() {
 	}
 }
 
-func (s *FaucetTestSuite) TestGetFaucetsByTenant() {
-	s.TestRegisterFaucets()
-
-	faucets, err := s.FaucetAgent.GetFaucets(context.Background(), []string{tenantID1}, nil)
-	assert.NoError(s.T(), err, "Should get faucets without errors")
-	assert.Len(s.T(), faucets, len(tenantID1Faucets), "Should get the same number of faucets for tenantID1")
-
-	for _, faucet := range faucets {
-		assert.Equal(s.T(), tenantID1, faucet.TenantID)
-	}
-}
-
 func (s *FaucetTestSuite) TestGetFaucetByUUID() {
 	s.TestRegisterFaucets()
 

@@ -186,7 +186,7 @@ func TestJWT(t *testing.T) {
 			"",
 			true,
 			"_",
-			[]string{"*"},
+			[]string{multitenancy.Wildcard},
 		},
 		{
 			"JWT * accessing foo tenant",

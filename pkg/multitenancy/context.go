@@ -16,9 +16,18 @@ func WithTenantID(ctx context.Context, tenantID string) context.Context {
 	return context.WithValue(ctx, TenantIDKey, tenantID)
 }
 
+func TenantIDValue(ctx context.Context) (string, bool) {
+	tenantID, ok := ctx.Value(TenantIDKey).(string)
+	return tenantID, ok
+}
+
 func TenantIDFromContext(ctx context.Context) string {
-	tenantID, _ := ctx.Value(TenantIDKey).(string)
-	return tenantID
+	tenantID, ok := TenantIDValue(ctx)
+	if ok {
+		return tenantID
+	}
+
+	return DefaultTenant
 }
 
 func WithAllowedTenants(ctx context.Context, tenants []string) context.Context {

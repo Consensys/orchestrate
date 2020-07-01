@@ -56,7 +56,6 @@ const (
 	chainName2    = "testChain2"
 	chainName3    = "testChain3"
 	chainName4    = "testChain4"
-	chainName5    = "testChain5"
 	tenantID1     = "tenantID1"
 	tenantID2     = "tenantID2"
 	errorTenantID = "errorTenantID"
@@ -325,18 +324,6 @@ func (s *ChainTestSuite) TestGetChains() {
 
 	for _, chain := range chains {
 		compareChains(s.T(), chain, ChainsSample[chain.TenantID][chain.Name])
-	}
-}
-
-func (s *ChainTestSuite) TestGetChainsByTenant() {
-	s.TestRegisterChains()
-
-	chains, err := s.ChainAgent.GetChains(context.Background(), []string{tenantID1}, nil)
-	assert.NoError(s.T(), err, "Should get chains without errors")
-	assert.Len(s.T(), chains, len(tenantID1Chains), "Should get the same number of chains for tenantID1")
-
-	for _, chain := range chains {
-		assert.Equal(s.T(), tenantID1, chain.TenantID)
 	}
 }
 

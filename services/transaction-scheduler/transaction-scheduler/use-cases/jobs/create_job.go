@@ -59,7 +59,7 @@ func (uc *createJobUseCase) Execute(ctx context.Context, jobEntity *types.Job, t
 		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
 	}
 
-	schedule, err := uc.db.Schedule().FindOneByUUID(ctx, jobEntity.ScheduleUUID, tenantID)
+	schedule, err := uc.db.Schedule().FindOneByUUID(ctx, jobEntity.ScheduleUUID, []string{tenantID})
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
 	}

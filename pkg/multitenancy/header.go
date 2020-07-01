@@ -8,8 +8,8 @@ import (
 const TenantIDHeader = "X-Tenant-ID"
 
 func AddTenantIDHeader(req *http.Request) {
-	tenantID := TenantIDFromContext(req.Context())
-	if tenantID != "" {
+	tenantID, ok := TenantIDValue(req.Context())
+	if ok {
 		req.Header.Add(TenantIDHeader, tenantID)
 	}
 }

@@ -36,16 +36,16 @@ func (m *MockSearchJobsUseCase) EXPECT() *MockSearchJobsUseCaseMockRecorder {
 }
 
 // Execute mocks base method
-func (m *MockSearchJobsUseCase) Execute(ctx context.Context, filters *entities.JobFilters, tenantID string) ([]*types.Job, error) {
+func (m *MockSearchJobsUseCase) Execute(ctx context.Context, filters *entities.JobFilters, tenants []string) ([]*types.Job, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, filters, tenantID)
+	ret := m.ctrl.Call(m, "Execute", ctx, filters, tenants)
 	ret0, _ := ret[0].([]*types.Job)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockSearchJobsUseCaseMockRecorder) Execute(ctx, filters, tenantID interface{}) *gomock.Call {
+func (mr *MockSearchJobsUseCaseMockRecorder) Execute(ctx, filters, tenants interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSearchJobsUseCase)(nil).Execute), ctx, filters, tenantID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSearchJobsUseCase)(nil).Execute), ctx, filters, tenants)
 }

@@ -149,7 +149,6 @@ func UseMockChainRegistry(t *testing.T) store.ChainAgent {
 	).AnyTimes()
 
 	mockStore.EXPECT().GetChains(gomock.Any(), gomock.Any(), gomock.Any()).Return([]*models.Chain{}, nil).AnyTimes()
-	mockStore.EXPECT().GetChainsByTenant(gomock.Any(), gomock.Any(), gomock.Any()).Return([]*models.Chain{}, nil).AnyTimes()
 
 	mockStore.EXPECT().GetChain(gomock.Any(), gomock.Any(), gomock.Any()).Return(&models.Chain{}, nil).AnyTimes()
 	mockStore.EXPECT().GetChain(gomock.Any(), gomock.Any(), gomock.Any()).Return(&models.Chain{}, nil).AnyTimes()

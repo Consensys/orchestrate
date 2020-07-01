@@ -12,7 +12,7 @@ Feature: Chain-Proxy Authentication
     When I send "POST" request to "{{global.chain-registry}}/chains" with json:
       """
       {
-        "name": "geth-foo-{{scenarioUID}}",
+        "name": "geth-foo-{{scenarioID}}",
         "urls": {{global.nodes.geth.URLs}}
       }
       """
@@ -26,7 +26,7 @@ Feature: Chain-Proxy Authentication
     When I send "POST" request to "{{global.chain-registry}}/chains" with json:
       """
       {
-        "name": "geth-default-{{scenarioUID}}",
+        "name": "geth-default-{{scenarioID}}",
         "urls": {{global.nodes.geth.URLs}}
       }
       """

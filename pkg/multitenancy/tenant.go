@@ -20,7 +20,7 @@ func New(multiTenancyEnabled bool) *KeyBuilder {
 func (k *KeyBuilder) BuildKey(ctx context.Context, key string) (string, error) {
 	tenant := TenantIDFromContext(ctx)
 	if tenant == "" {
-		tenant = "_"
+		tenant = DefaultTenant
 	}
 
 	return tenant + key, nil

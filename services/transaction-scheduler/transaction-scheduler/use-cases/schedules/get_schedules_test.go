@@ -37,14 +37,14 @@ func TestGetSchedules_Execute(t *testing.T) {
 		mockDB.EXPECT().Job().Return(mockJobDA).Times(1)
 
 		mockScheduleDA.EXPECT().
-			FindAll(gomock.Any(), tenantID).
+			FindAll(gomock.Any(), []string{tenantID}).
 			Return([]*models.Schedule{scheduleModel}, nil)
 
 		mockJobDA.EXPECT().
-			FindOneByUUID(gomock.Any(), scheduleModel.Jobs[0].UUID, tenantID).
+			FindOneByUUID(gomock.Any(), scheduleModel.Jobs[0].UUID, []string{tenantID}).
 			Return(scheduleModel.Jobs[0], nil)
 
-		schedulesResponse, err := usecase.Execute(ctx, tenantID)
+		schedulesResponse, err := usecase.Execute(ctx, []string{tenantID})
 
 		assert.NoError(t, err)
 		assert.Equal(t, expectedResponse, schedulesResponse)
@@ -56,10 +56,10 @@ func TestGetSchedules_Execute(t *testing.T) {
 		mockDB.EXPECT().Schedule().Return(mockScheduleDA).Times(1)
 
 		mockScheduleDA.EXPECT().
-			FindAll(gomock.Any(), tenantID).
+			FindAll(gomock.Any(), []string{tenantID}).
 			Return(nil, expectedErr)
 
-		scheduleResponse, err := usecase.Execute(ctx, tenantID)
+		scheduleResponse, err := usecase.Execute(ctx, []string{tenantID})
 
 		assert.Nil(t, scheduleResponse)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createScheduleComponent), err)
@@ -74,14 +74,14 @@ func TestGetSchedules_Execute(t *testing.T) {
 		mockDB.EXPECT().Job().Return(mockJobDA).Times(1)
 
 		mockScheduleDA.EXPECT().
-			FindAll(gomock.Any(), tenantID).
+			FindAll(gomock.Any(), []string{tenantID}).
 			Return([]*models.Schedule{scheduleModel}, nil)
 
 		mockJobDA.EXPECT().
-			FindOneByUUID(gomock.Any(), scheduleModel.Jobs[0].UUID, tenantID).
+			FindOneByUUID(gomock.Any(), scheduleModel.Jobs[0].UUID, []string{tenantID}).
 			Return(scheduleModel.Jobs[0], expectedErr)
 
-		scheduleResponse, err := usecase.Execute(ctx, tenantID)
+		scheduleResponse, err := usecase.Execute(ctx, []string{tenantID})
 
 		assert.Nil(t, scheduleResponse)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createScheduleComponent), err)

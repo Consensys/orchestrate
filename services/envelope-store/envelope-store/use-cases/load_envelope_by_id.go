@@ -12,7 +12,7 @@ import (
 )
 
 type LoadEnvelopeByID interface {
-	Execute(ctx context.Context, tenantID string, envelopeID string) (*models.EnvelopeModel, error)
+	Execute(ctx context.Context, tenants []string, envelopeID string) (*models.EnvelopeModel, error)
 }
 
 // RegisterContract is a use case to register a new contract
@@ -27,20 +27,19 @@ func NewLoadEnvelopeByID(envelopeAgent store.EnvelopeAgent) LoadEnvelopeByID {
 	}
 }
 
-func (se *loadEnvelopeByID) Execute(ctx context.Context, tenantID, envelopeID string) (*models.EnvelopeModel, error) {
+func (se *loadEnvelopeByID) Execute(ctx context.Context, tenants []string, envelopeID string) (*models.EnvelopeModel, error) {
 	logger := log.FromContext(ctx)
 
 	envelope, err := se.envelopeAgent.FindByFieldSet(ctx, map[string]string{
 		"envelope_id": envelopeID,
-		"tenant_id":   tenantID,
-	})
+	}, tenants)
 
 	if err != nil {
 		logger.
 			WithError(err).
 			WithFields(logrus.Fields{
-				"id":       envelopeID,
-				"tenantID": tenantID,
+				"envelope_id": envelopeID,
+				"tenantID":    tenants,
 			}).
 			Debugf("could not load envelope")
 		if err == pg.ErrNoRows {

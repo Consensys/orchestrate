@@ -7,7 +7,7 @@ Feature: Chain-Registry Authentication
     When I send "POST" request to "{{global.chain-registry}}/chains" with json:
       """
       {
-        "name": "geth-{{scenarioUID}}",
+        "name": "geth-{{scenarioID}}",
         "urls": {{global.nodes.geth.URLs}}
       }
       """
@@ -18,7 +18,7 @@ Feature: Chain-Registry Authentication
     When I send "PATCH" request to "{{global.chain-registry}}/chains/{{chainUID}}" with json:
       """
       {
-        "name": "geth-new-{{scenarioUID}}"
+        "name": "geth-new-{{scenarioID}}"
       }
       """
     Then the response code should be 200
@@ -32,7 +32,7 @@ Feature: Chain-Registry Authentication
     When I send "POST" request to "{{global.chain-registry}}/chains" with json:
       """
       {
-        "name": "geth-{{scenarioUID}}",
+        "name": "geth-{{scenarioID}}",
         "urls": {{global.nodes.geth.URLs}}
       }
       """
@@ -46,7 +46,7 @@ Feature: Chain-Registry Authentication
     When I send "PATCH" request to "{{global.chain-registry}}/chains/{{chainUID}}" with json:
       """
       {
-        "name": "geth-new-{{scenarioUID}}"
+        "name": "geth-new-{{scenarioID}}"
       }
       """
     Then the response code should be 401
@@ -68,7 +68,7 @@ Feature: Chain-Registry Authentication
     When I send "POST" request to "{{global.chain-registry}}/chains" with json:
       """
       {
-        "name": "geth-{{scenarioUID}}",
+        "name": "geth-{{scenarioID}}",
         "urls": {{global.nodes.geth.URLs}}
       }
       """
@@ -79,7 +79,7 @@ Feature: Chain-Registry Authentication
     When I send "PATCH" request to "{{global.chain-registry}}/chains/{{chainUID}}" with json:
       """
       {
-        "name": "geth-new-{{scenarioUID}}"
+        "name": "geth-new-{{scenarioID}}"
       }
       """
     Then the response code should be 200
@@ -94,7 +94,7 @@ Feature: Chain-Registry Authentication
     When I send "POST" request to "{{global.chain-registry}}/chains" with json:
       """
       {
-        "name": "geth-{{scenarioUID}}",
+        "name": "geth-{{scenarioID}}",
         "urls": {{global.nodes.geth.URLs}}
       }
       """
@@ -109,7 +109,7 @@ Feature: Chain-Registry Authentication
     When I send "PATCH" request to "{{global.chain-registry}}/chains/{{chainUID}}" with json:
       """
       {
-        "name": "geth-new-{{scenarioUID}}"
+        "name": "geth-new-{{scenarioID}}"
       }
       """
     Then the response code should be 404
@@ -127,14 +127,14 @@ Feature: Chain-Registry Authentication
   Scenario: JWT token and X-Tenant-ID unset
     Given I have the following tenants
       | alias   | tenantID                 |
-      | tenant1 |   foo-{{scenarioUID}}    |
+      | tenant1 |   foo-{{scenarioID}}    |
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
     When I send "POST" request to "{{global.chain-registry}}/chains" with json:
       """
       {
-        "name": "geth-{{scenarioUID}}",
+        "name": "geth-{{scenarioID}}",
         "urls": {{global.nodes.geth.URLs}}
       }
       """
@@ -145,7 +145,7 @@ Feature: Chain-Registry Authentication
     When I send "PATCH" request to "{{global.chain-registry}}/chains/{{chainUID}}" with json:
       """
       {
-        "name": "geth-new-{{scenarioUID}}"
+        "name": "geth-new-{{scenarioID}}"
       }
       """
     Then the response code should be 200
@@ -155,7 +155,7 @@ Feature: Chain-Registry Authentication
   Scenario: JWT token
     Given I have the following tenants
       | alias   | tenantID                 |
-      | tenant1 |   foo-{{scenarioUID}}    |
+      | tenant1 |   foo-{{scenarioID}}    |
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
@@ -163,7 +163,7 @@ Feature: Chain-Registry Authentication
     When I send "POST" request to "{{global.chain-registry}}/chains" with json:
       """
       {
-        "name": "geth-{{scenarioUID}}",
+        "name": "geth-{{scenarioID}}",
         "urls": {{global.nodes.geth.URLs}}
       }
       """
@@ -174,7 +174,7 @@ Feature: Chain-Registry Authentication
     When I send "PATCH" request to "{{global.chain-registry}}/chains/{{chainUID}}" with json:
       """
       {
-        "name": "geth-new-{{scenarioUID}}"
+        "name": "geth-new-{{scenarioID}}"
       }
       """
     Then the response code should be 200
@@ -184,8 +184,8 @@ Feature: Chain-Registry Authentication
   Scenario: Invalid JWT token
     Given I have the following tenants
       | alias   | tenantID                 |
-      | tenant1 |   foo-{{scenarioUID}}    |
-      | tenant2 |   bar-{{scenarioUID}}    |
+      | tenant1 |   foo-{{scenarioID}}    |
+      | tenant2 |   bar-{{scenarioID}}    |
       | tenant3 |   *                      |
     Given I set the headers
       | Key           | Value                    |
@@ -193,7 +193,7 @@ Feature: Chain-Registry Authentication
     When I send "POST" request to "{{global.chain-registry}}/chains" with json:
       """
       {
-        "name": "geth-{{scenarioUID}}",
+        "name": "geth-{{scenarioID}}",
         "urls": {{global.nodes.geth.URLs}}
       }
       """
@@ -207,7 +207,7 @@ Feature: Chain-Registry Authentication
     When I send "PATCH" request to "{{global.chain-registry}}/chains/{{chainUID}}" with json:
       """
       {
-        "name": "geth-new-{{scenarioUID}}"
+        "name": "geth-new-{{scenarioID}}"
       }
       """
     Then the response code should be 404
@@ -224,7 +224,7 @@ Feature: Chain-Registry Authentication
   Scenario: Wildcard * JWT token
     Given I have the following tenants
       | alias   | tenantID                 |
-      | tenant1 |   foo-{{scenarioUID}}    |
+      | tenant1 |   foo-{{scenarioID}}    |
       | tenant2 |   *   |
     Given I set the headers
       | Key           | Value                    |
@@ -232,7 +232,7 @@ Feature: Chain-Registry Authentication
     When I send "POST" request to "{{global.chain-registry}}/chains" with json:
       """
       {
-        "name": "geth-{{scenarioUID}}",
+        "name": "geth-{{scenarioID}}",
         "urls": {{global.nodes.geth.URLs}}
       }
       """
@@ -246,7 +246,7 @@ Feature: Chain-Registry Authentication
     When I send "PATCH" request to "{{global.chain-registry}}/chains/{{chainUID}}" with json:
       """
       {
-        "name": "geth-new-{{scenarioUID}}"
+        "name": "geth-new-{{scenarioID}}"
       }
       """
     Then the response code should be 200

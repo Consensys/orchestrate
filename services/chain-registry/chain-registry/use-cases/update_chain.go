@@ -55,7 +55,7 @@ func (uc *updateChain) Execute(ctx context.Context, uuid, chainName string, tena
 	logger.WithFields(logrus.Fields{
 		"chainName": chain.Name,
 		"chainUUID": chain.UUID,
-		"tenantIDs": tenants,
+		"tenants":   tenants,
 	}).Infof("updated chain from configuration")
 
 	return nil

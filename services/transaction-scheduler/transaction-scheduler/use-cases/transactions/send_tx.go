@@ -112,7 +112,7 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 	}
 
 	// Step 4: Load latest Schedule status from DB
-	txRequest, err = uc.getTxUC.Execute(ctx, txRequest.UUID, tenantID)
+	txRequest, err = uc.getTxUC.Execute(ctx, txRequest.UUID, []string{tenantID})
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}

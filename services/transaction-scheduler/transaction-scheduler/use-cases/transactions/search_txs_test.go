@@ -39,11 +39,11 @@ func TestSearchTxs_Execute(t *testing.T) {
 		txRequest0 := testutils2.FakeTxRequestEntity()
 		txRequest1 := testutils2.FakeTxRequestEntity()
 
-		mockTransactionRequestDA.EXPECT().Search(ctx, tenantID, filter).Return(txRequestModels, nil)
-		mockGetTxUC.EXPECT().Execute(ctx, txRequestModels[0].UUID, tenantID).Return(txRequest0, nil)
-		mockGetTxUC.EXPECT().Execute(ctx, txRequestModels[1].UUID, tenantID).Return(txRequest1, nil)
+		mockTransactionRequestDA.EXPECT().Search(ctx, filter, []string{tenantID}).Return(txRequestModels, nil)
+		mockGetTxUC.EXPECT().Execute(ctx, txRequestModels[0].UUID, []string{tenantID}).Return(txRequest0, nil)
+		mockGetTxUC.EXPECT().Execute(ctx, txRequestModels[1].UUID, []string{tenantID}).Return(txRequest1, nil)
 
-		result, err := usecase.Execute(ctx, filter, tenantID)
+		result, err := usecase.Execute(ctx, filter, []string{tenantID})
 
 		assert.Nil(t, err)
 
@@ -61,9 +61,9 @@ func TestSearchTxs_Execute(t *testing.T) {
 	t.Run("should fail with same error if Search fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 
-		mockTransactionRequestDA.EXPECT().Search(ctx, tenantID, filter).Return(nil, expectedErr)
+		mockTransactionRequestDA.EXPECT().Search(ctx, filter, []string{tenantID}).Return(nil, expectedErr)
 
-		response, err := usecase.Execute(ctx, filter, tenantID)
+		response, err := usecase.Execute(ctx, filter, []string{tenantID})
 
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(searchTxsComponent), err)
@@ -73,10 +73,10 @@ func TestSearchTxs_Execute(t *testing.T) {
 		txRequestModels := []*models.TransactionRequest{testutils.FakeTxRequest(0)}
 		expectedErr := fmt.Errorf("error")
 
-		mockTransactionRequestDA.EXPECT().Search(ctx, tenantID, filter).Return(txRequestModels, nil)
-		mockGetTxUC.EXPECT().Execute(ctx, txRequestModels[0].UUID, tenantID).Return(nil, expectedErr)
+		mockTransactionRequestDA.EXPECT().Search(ctx, filter, []string{tenantID}).Return(txRequestModels, nil)
+		mockGetTxUC.EXPECT().Execute(ctx, txRequestModels[0].UUID, []string{tenantID}).Return(nil, expectedErr)
 
-		response, err := usecase.Execute(ctx, filter, tenantID)
+		response, err := usecase.Execute(ctx, filter, []string{tenantID})
 
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(searchTxsComponent), err)

@@ -16,7 +16,7 @@ import (
 const getSchedulesComponent = "use-cases.get-schedules"
 
 type GetSchedulesUseCase interface {
-	Execute(ctx context.Context, tenantID string) ([]*entities.Schedule, error)
+	Execute(ctx context.Context, tenants []string) ([]*entities.Schedule, error)
 }
 
 // getScheduleUseCase is a use case to get a schedule
@@ -32,18 +32,18 @@ func NewGetSchedulesUseCase(db store.DB) GetSchedulesUseCase {
 }
 
 // Execute gets a schedule
-func (uc *getSchedulesUseCase) Execute(ctx context.Context, tenantID string) ([]*entities.Schedule, error) {
+func (uc *getSchedulesUseCase) Execute(ctx context.Context, tenants []string) ([]*entities.Schedule, error) {
 	log.WithContext(ctx).
-		WithField("schedule.tenantID", tenantID).
+		WithField("schedule.tenants", tenants).
 		Debug("getting schedule")
 
-	scheduleModels, err := fetchAllSchedule(ctx, uc.db, tenantID)
+	scheduleModels, err := fetchAllSchedule(ctx, uc.db, tenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(getSchedulesComponent)
 	}
 
 	log.WithContext(ctx).
-		WithField("schedule.tenantID", tenantID).
+		WithField("schedule.tenants", tenants).
 		Info("schedule found successfully")
 
 	resp := []*entities.Schedule{}
@@ -54,15 +54,15 @@ func (uc *getSchedulesUseCase) Execute(ctx context.Context, tenantID string) ([]
 	return resp, nil
 }
 
-func fetchAllSchedule(ctx context.Context, db store.DB, tenantID string) ([]*models.Schedule, error) {
-	schedules, err := db.Schedule().FindAll(ctx, tenantID)
+func fetchAllSchedule(ctx context.Context, db store.DB, tenants []string) ([]*models.Schedule, error) {
+	schedules, err := db.Schedule().FindAll(ctx, tenants)
 	if err != nil {
 		return nil, err
 	}
 
 	for idx, schedule := range schedules {
 		for jdx, job := range schedule.Jobs {
-			schedules[idx].Jobs[jdx], err = db.Job().FindOneByUUID(ctx, job.UUID, tenantID)
+			schedules[idx].Jobs[jdx], err = db.Job().FindOneByUUID(ctx, job.UUID, tenants)
 			if err != nil {
 				return nil, err
 			}

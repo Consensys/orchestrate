@@ -39,7 +39,7 @@ Environment variable: %q`, certificateEnv)
 const (
 	claimsNamespaceFlag     = "auth-jwt-claims-namespace"
 	ClaimsNamespaceViperKey = "auth.jwt.claims.namespace"
-	claimsNamespaceDefault  = "http://tenant.info"
+	claimsNamespaceDefault  = "orchestrate.info"
 	claimsNamespaceEnv      = "AUTH_JWT_CLAIMS_NAMESPACE"
 )
 

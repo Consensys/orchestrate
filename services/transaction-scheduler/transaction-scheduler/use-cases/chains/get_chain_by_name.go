@@ -2,6 +2,7 @@ package chains
 
 import (
 	"context"
+	"fmt"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -15,7 +16,7 @@ import (
 const getChainByNameComponent = "use-cases.get-chain-by-name"
 
 type GetChainByNameUseCase interface {
-	Execute(ctx context.Context, chainName, tenantID string) (*types.Chain, error)
+	Execute(ctx context.Context, chainName string, tenants []string) (*types.Chain, error)
 }
 
 // GetChainByNameUseCase is a use case to get a job
@@ -31,7 +32,7 @@ func NewGetChainByNameUseCase(chainRegistryClient client.ChainRegistryClient) Ge
 }
 
 // Execute gets a job
-func (uc *getChainByNameUseCase) Execute(ctx context.Context, chainName, tenantID string) (*types.Chain, error) {
+func (uc *getChainByNameUseCase) Execute(ctx context.Context, chainName string, tenants []string) (*types.Chain, error) {
 	log.WithContext(ctx).
 		WithField("chain_name", chainName).
 		Debug("getting chain")
@@ -46,7 +47,14 @@ func (uc *getChainByNameUseCase) Execute(ctx context.Context, chainName, tenantI
 		return nil, errors.FromError(err).ExtendComponent(getChainByNameComponent)
 	}
 
-	// TODO: validate tenantID once #180 is done ()
+	var isAuth bool
+	for _, tenantID := range tenants {
+		isAuth = isAuth || tenantID == chain.TenantID
+	}
+
+	if !isAuth {
+		return nil, errors.UnauthorizedError(fmt.Sprintf("not authorized chain '%s'", chainName)).ExtendComponent(getChainByNameComponent)
+	}
 
 	return parsers.NewChainFromModels(chain), nil
 }

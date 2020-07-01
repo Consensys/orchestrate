@@ -120,50 +120,6 @@ func (mr *MockChainAgentMockRecorder) DeleteChain(ctx, uuid, tenants interface{}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteChain", reflect.TypeOf((*MockChainAgent)(nil).DeleteChain), ctx, uuid, tenants)
 }
 
-// GetChainsByTenant mocks base method
-func (m *MockChainAgent) GetChainsByTenant(ctx context.Context, filters map[string]string, tenants []string) ([]*models.Chain, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetChainsByTenant", ctx, filters, tenants)
-	ret0, _ := ret[0].([]*models.Chain)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetChainsByTenant indicates an expected call of GetChainsByTenant
-func (mr *MockChainAgentMockRecorder) GetChainsByTenant(ctx, filters, tenants interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChainsByTenant", reflect.TypeOf((*MockChainAgent)(nil).GetChainsByTenant), ctx, filters, tenants)
-}
-
-// GetChainByUUIDAndTenant mocks base method
-func (m *MockChainAgent) GetChainByUUIDAndTenant(ctx context.Context, uuid, tenantID string) (*models.Chain, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetChainByUUIDAndTenant", ctx, uuid, tenantID)
-	ret0, _ := ret[0].(*models.Chain)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetChainByUUIDAndTenant indicates an expected call of GetChainByUUIDAndTenant
-func (mr *MockChainAgentMockRecorder) GetChainByUUIDAndTenant(ctx, uuid, tenantID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChainByUUIDAndTenant", reflect.TypeOf((*MockChainAgent)(nil).GetChainByUUIDAndTenant), ctx, uuid, tenantID)
-}
-
-// DeleteChainByUUIDAndTenant mocks base method
-func (m *MockChainAgent) DeleteChainByUUIDAndTenant(ctx context.Context, uuid, tenantID string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteChainByUUIDAndTenant", ctx, uuid, tenantID)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// DeleteChainByUUIDAndTenant indicates an expected call of DeleteChainByUUIDAndTenant
-func (mr *MockChainAgentMockRecorder) DeleteChainByUUIDAndTenant(ctx, uuid, tenantID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteChainByUUIDAndTenant", reflect.TypeOf((*MockChainAgent)(nil).DeleteChainByUUIDAndTenant), ctx, uuid, tenantID)
-}
-
 // MockFaucetAgent is a mock of FaucetAgent interface
 type MockFaucetAgent struct {
 	ctrl     *gomock.Controller
@@ -257,48 +213,4 @@ func (m *MockFaucetAgent) DeleteFaucet(ctx context.Context, uuid string, tenants
 func (mr *MockFaucetAgentMockRecorder) DeleteFaucet(ctx, uuid, tenants interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFaucet", reflect.TypeOf((*MockFaucetAgent)(nil).DeleteFaucet), ctx, uuid, tenants)
-}
-
-// GetFaucetsByTenant mocks base method
-func (m *MockFaucetAgent) GetFaucetsByTenant(ctx context.Context, filters map[string]string, tenants []string) ([]*models.Faucet, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetFaucetsByTenant", ctx, filters, tenants)
-	ret0, _ := ret[0].([]*models.Faucet)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetFaucetsByTenant indicates an expected call of GetFaucetsByTenant
-func (mr *MockFaucetAgentMockRecorder) GetFaucetsByTenant(ctx, filters, tenants interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFaucetsByTenant", reflect.TypeOf((*MockFaucetAgent)(nil).GetFaucetsByTenant), ctx, filters, tenants)
-}
-
-// GetFaucetByUUIDAndTenant mocks base method
-func (m *MockFaucetAgent) GetFaucetByUUIDAndTenant(ctx context.Context, uuid, tenantID string) (*models.Faucet, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetFaucetByUUIDAndTenant", ctx, uuid, tenantID)
-	ret0, _ := ret[0].(*models.Faucet)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetFaucetByUUIDAndTenant indicates an expected call of GetFaucetByUUIDAndTenant
-func (mr *MockFaucetAgentMockRecorder) GetFaucetByUUIDAndTenant(ctx, uuid, tenantID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFaucetByUUIDAndTenant", reflect.TypeOf((*MockFaucetAgent)(nil).GetFaucetByUUIDAndTenant), ctx, uuid, tenantID)
-}
-
-// DeleteFaucetByUUIDAndTenant mocks base method
-func (m *MockFaucetAgent) DeleteFaucetByUUIDAndTenant(ctx context.Context, uuid, tenantID string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteFaucetByUUIDAndTenant", ctx, uuid, tenantID)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// DeleteFaucetByUUIDAndTenant indicates an expected call of DeleteFaucetByUUIDAndTenant
-func (mr *MockFaucetAgentMockRecorder) DeleteFaucetByUUIDAndTenant(ctx, uuid, tenantID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFaucetByUUIDAndTenant", reflect.TypeOf((*MockFaucetAgent)(nil).DeleteFaucetByUUIDAndTenant), ctx, uuid, tenantID)
 }
