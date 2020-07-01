@@ -175,6 +175,27 @@
                 }
             }
         },
+        "/transactions": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Searches transaction requests by filter",
+                "responses": {
+                    "200": {},
+                    "400": {},
+                    "500": {}
+                }
+            }
+        },
         "/transactions/deploy-contract": {
             "post": {
                 "security": [
@@ -268,7 +289,7 @@
             }
         },
         "/transactions/{uuid}": {
-            "post": {
+            "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []

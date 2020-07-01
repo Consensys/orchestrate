@@ -2,10 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
-## v2.2.0-beta2 (unreleased)
+## v2.2.0-rc1 (2020-07-01)
+
+### 🆕 Features
+* Add support for wildcard authentication, allowing operators to perform any API (especially useful for chains) operations by providing both:
+  * a JWT with a tenant_id="*"
+  * an HTTP header containing the targeted tenant_id
 
 ### 🛠 Bug fixes
-* Fixes a bug of nonce management when registering multiple chains of the same network but using an identical account for transactions 
+* Fix a bug of nonce management when registering multiple chains of the same network but using an identical account for transactions 
 
 ## v2.2.0-beta1 (2020-06-25)
 
@@ -16,7 +21,7 @@ All notable changes to this project will be documented in this file.
 ## v2.1.1 (2020-05-27)
 
 ### 🛠 Bug fixes
-* Fixes a bug where the tx-listener fails to reach the transaction scheduler MS if it is not deployed.
+* Fix a bug where the tx-listener fails to reach the transaction scheduler MS if it is not deployed.
 
 ## v2.1.0 (2020-06-05)
 
