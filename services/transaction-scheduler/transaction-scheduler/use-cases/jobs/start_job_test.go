@@ -12,7 +12,9 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
 )
@@ -41,7 +43,52 @@ func TestStartJob_Execute(t *testing.T) {
 		job.Schedule = testutils.FakeSchedule("")
 
 		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, []string{tenantID}).Return(job, nil)
-		mockKafkaProducer.ExpectSendMessageAndSucceed()
+		mockKafkaProducer.ExpectSendMessageWithCheckerFunctionAndSucceed(func(val []byte) error {
+			txEnvelope := &tx.TxEnvelope{}
+			err := encoding.Unmarshal(val, txEnvelope)
+			if err != nil {
+				return err
+			}
+			envelope, err := txEnvelope.Envelope()
+			if err != nil {
+				return err
+			}
+
+			assert.Equal(t, envelope.GetID(), job.UUID)
+			assert.False(t, envelope.IsOneTimeKeySignature())
+			return nil
+		})
+		mockLogDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
+
+		err := usecase.Execute(ctx, job.UUID, tenantID)
+
+		assert.NoError(t, err)
+	})
+	
+	t.Run("should execute use case with one-time-key successfully", func(t *testing.T) {
+		job := testutils.FakeJobModel(1)
+		job.ID = 1
+		job.UUID = "6380e2b6-b828-43ee-abdc-de0f8d57dc5f"
+		job.Transaction.Sender = "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
+		job.Schedule = testutils.FakeSchedule("")
+		job.Labels = map[string]string{tx.TxFromLabel: tx.TxFromOneTimeKey}
+
+		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, []string{tenantID}).Return(job, nil)
+		mockKafkaProducer.ExpectSendMessageWithCheckerFunctionAndSucceed(func(val []byte) error {
+			txEnvelope := &tx.TxEnvelope{}
+			err := encoding.Unmarshal(val, txEnvelope)
+			if err != nil {
+				return err
+			}
+			envelope, err := txEnvelope.Envelope()
+			if err != nil {
+				return err
+			}
+
+			assert.Equal(t, envelope.GetID(), job.UUID)
+			assert.True(t, envelope.IsOneTimeKeySignature())
+			return nil
+		})
 		mockLogDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
 
 		err := usecase.Execute(ctx, job.UUID, tenantID)

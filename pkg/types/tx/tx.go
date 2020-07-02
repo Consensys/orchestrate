@@ -130,33 +130,38 @@ func (p *Params) GetParsedContract() (contractName, contractTag string, err erro
 }
 
 func (m *TxEnvelope) GetChainID() string {
-	return m.InternalLabels["chainID"]
+	return m.InternalLabels[ChainIDLabel]
 }
 
 func (m *TxEnvelope) SetChainID(chainID *big.Int) *TxEnvelope {
-	m.InternalLabels["chainID"] = chainID.String()
+	m.InternalLabels[ChainIDLabel] = chainID.String()
 	return m
 }
 
 func (m *TxEnvelope) SetChainUUID(chainUUID string) *TxEnvelope {
-	m.InternalLabels["chainUUID"] = chainUUID
+	m.InternalLabels[ChainUUIDLabel] = chainUUID
+	return m
+}
+
+func (m *TxEnvelope) EnableTxFromOneTimeKey() *TxEnvelope {
+	m.InternalLabels[TxFromLabel] = TxFromOneTimeKey
 	return m
 }
 
 func (m *TxEnvelope) GetChainUUID() string {
-	return m.InternalLabels["chainUUID"]
+	return m.InternalLabels[ChainUUIDLabel]
 }
 
 func (m *TxEnvelope) GetTxHash() string {
-	return m.InternalLabels["txHash"]
+	return m.InternalLabels[TxHashLabel]
 }
 
 func (m *TxEnvelope) TxHash() ethcommon.Hash {
-	return ethcommon.HexToHash(m.InternalLabels["txHash"])
+	return ethcommon.HexToHash(m.InternalLabels[TxHashLabel])
 }
 
 func (m *TxEnvelope) SetTxHash(txHash string) *TxEnvelope {
-	m.InternalLabels["txHash"] = txHash
+	m.InternalLabels[TxHashLabel] = txHash
 	return m
 }
 

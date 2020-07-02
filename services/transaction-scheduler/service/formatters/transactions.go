@@ -11,7 +11,7 @@ import (
 )
 
 func FormatSendTxRequest(txRequest *types.SendTransactionRequest, idempotencyKey string) *entities.TxRequest {
-	return &entities.TxRequest{
+	txReq := &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,
 		Labels:         txRequest.Labels,
 		Params: &pkgtypes.ETHTransactionParams{
@@ -25,10 +25,18 @@ func FormatSendTxRequest(txRequest *types.SendTransactionRequest, idempotencyKey
 			PrivateTransactionParams: txRequest.Params.PrivateTransactionParams,
 		},
 	}
+
+	if txRequest.Params.OneTimeKey {
+		txReq.Annotations = &pkgtypes.Annotations{
+			OneTimeKey: txRequest.Params.OneTimeKey,
+		}
+	}
+
+	return txReq
 }
 
 func FormatDeployContractRequest(txRequest *types.DeployContractRequest, idempotencyKey string) *entities.TxRequest {
-	return &entities.TxRequest{
+	txReq := &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,
 		Labels:         txRequest.Labels,
 		Params: &pkgtypes.ETHTransactionParams{
@@ -42,6 +50,14 @@ func FormatDeployContractRequest(txRequest *types.DeployContractRequest, idempot
 			PrivateTransactionParams: txRequest.Params.PrivateTransactionParams,
 		},
 	}
+
+	if txRequest.Params.OneTimeKey {
+		txReq.Annotations = &pkgtypes.Annotations{
+			OneTimeKey: txRequest.Params.OneTimeKey,
+		}
+	}
+
+	return txReq
 }
 
 func FormatSendRawRequest(txRequest *types.RawTransactionRequest, idempotencyKey string) *entities.TxRequest {

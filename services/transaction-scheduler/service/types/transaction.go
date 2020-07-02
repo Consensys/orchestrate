@@ -49,12 +49,15 @@ type BaseTransactionParams struct {
 	GasPrice string `json:"gasPrice,omitempty" validate:"omitempty,isBig"`
 }
 
+// go validator does not support mutually exclusive parameters for now
+// See more https://github.com/go-playground/validator/issues/608
 type TransactionParams struct {
 	BaseTransactionParams
-	From            string        `json:"from" validate:"required,eth_addr"`
+	From            string        `json:"from" validate:"required_without=OneTimeKey,omitempty,eth_addr"`
 	To              string        `json:"to" validate:"required,eth_addr"`
 	MethodSignature string        `json:"methodSignature" validate:"required,isValidMethodSig"`
 	Args            []interface{} `json:"args,omitempty"`
+	OneTimeKey      bool          `json:"oneTimeKey,omitempty"`
 	types.PrivateTransactionParams
 }
 
@@ -71,9 +74,10 @@ type TransferParams struct {
 
 type DeployContractParams struct {
 	BaseTransactionParams
-	From         string        `json:"from" validate:"required,eth_addr"`
+	From         string        `json:"from" validate:"required_without=OneTimeKey,omitempty,eth_addr"`
 	ContractName string        `json:"contractName" validate:"required"`
 	ContractTag  string        `json:"contractTag,omitempty"`
 	Args         []interface{} `json:"args,omitempty"`
+	OneTimeKey   bool          `json:"oneTimeKey,omitempty"`
 	types.PrivateTransactionParams
 }

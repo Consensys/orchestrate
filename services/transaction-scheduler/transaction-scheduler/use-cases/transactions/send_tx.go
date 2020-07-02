@@ -86,7 +86,6 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 			return der
 		}
 
-		// Set "Data" field
 		sendTxJob := parsers.NewJobEntityFromTxRequest(txRequest, generateJobType(txRequest), chainUUID)
 		sendTxJob.Transaction.Data = txData
 

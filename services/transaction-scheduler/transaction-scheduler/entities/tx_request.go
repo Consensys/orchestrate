@@ -12,5 +12,6 @@ type TxRequest struct {
 	Schedule       *Schedule
 	Params         *types.ETHTransactionParams
 	Labels         map[string]string
+	Annotations    *types.Annotations
 	CreatedAt      time.Time
 }

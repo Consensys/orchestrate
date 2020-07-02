@@ -104,6 +104,7 @@ func FakeCreateJobRequest() *types.CreateJobRequest {
 		ChainUUID:    uuid.Must(uuid.NewV4()).String(),
 		Type:         types2.EthereumTransaction,
 		Labels:       nil,
+		Annotations:  nil,
 		Transaction:  testutils2.FakeETHTransaction(),
 	}
 }

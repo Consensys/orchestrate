@@ -6,7 +6,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	pkgtypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	testutils3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"net/http"
 	"net/http/httptest"
@@ -90,6 +90,9 @@ func (s *jobsCtrlTestSuite) SetupTest() {
 func (s *jobsCtrlTestSuite) TestJobsController_Create() {
 	s.T().Run("should execute create job request successfully", func(t *testing.T) {
 		jobRequest := testutils.FakeCreateJobRequest()
+		jobRequest.Annotations = &pkgtypes.Annotations{
+			OneTimeKey: true,
+		}
 		jobEntityRes := testutils3.FakeJob()
 		requestBytes, _ := json.Marshal(jobRequest)
 		rw := httptest.NewRecorder()
@@ -187,7 +190,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_Search() {
 		httpRequest := httptest.
 			NewRequest(http.MethodGet, "/jobs", nil).
 			WithContext(s.ctx)
-		jobEntities := []*types2.Job{testutils3.FakeJob()}
+		jobEntities := []*pkgtypes.Job{testutils3.FakeJob()}
 
 		s.searchJobUC.EXPECT().
 			Execute(gomock.Any(), filters, []string{s.tenantID}).
@@ -218,7 +221,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_Search() {
 		httpRequest := httptest.
 			NewRequest(http.MethodGet, url, nil).
 			WithContext(s.ctx)
-		jobEntities := []*types2.Job{testutils3.FakeJob()}
+		jobEntities := []*pkgtypes.Job{testutils3.FakeJob()}
 
 		s.searchJobUC.EXPECT().
 			Execute(gomock.Any(), filters, []string{s.tenantID}).
@@ -305,6 +308,9 @@ func (s *jobsCtrlTestSuite) TestJobsController_Update() {
 	s.T().Run("should execute update a job request successfully", func(t *testing.T) {
 		rw := httptest.NewRecorder()
 		jobRequest := testutils.FakeJobUpdateRequest()
+		jobRequest.Annotations = &pkgtypes.Annotations{
+			OneTimeKey: true,
+		}
 		jobEntityRes := testutils3.FakeJob()
 
 		requestBytes, _ := json.Marshal(jobRequest)

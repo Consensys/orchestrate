@@ -63,6 +63,12 @@ func (txValidator *transactionValidator) ValidateFields(ctx context.Context, txR
 		return errors.InvalidParameterError(err.Error()).ExtendComponent(txValidatorComponent)
 	}
 
+	if txRequest.Annotations != nil && txRequest.Annotations.OneTimeKey && txRequest.Params.From != "" {
+		errMessage := "from account cannot be included when OneTimeKey is enabled"
+		logger.Error(errMessage)
+		return errors.InvalidParameterError(errMessage).ExtendComponent(txValidatorComponent)
+	}
+
 	return nil
 }
 

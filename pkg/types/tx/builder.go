@@ -20,11 +20,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
-const (
-	OneTimeKeyLabel = "txFrom"
-	OneTimeKeyValue = "one-time-key"
-)
-
 type Envelope struct {
 	ID            string `validate:"uuid4,required"`
 	Headers       map[string]string
@@ -143,9 +138,15 @@ func (e *Envelope) IsEeaSendPrivateTransactionPrivateFor() bool {
 }
 
 func (e *Envelope) IsOneTimeKeySignature() bool {
-	if v, ok := e.ContextLabels[OneTimeKeyLabel]; ok {
-		return v == OneTimeKeyValue
+	// @TODO Delete contextLabels alternative once issue #51 is done
+	if v, ok := e.ContextLabels[TxFromLabel]; ok {
+		return v == TxFromOneTimeKey
 	}
+
+	if v, ok := e.InternalLabels[TxFromLabel]; ok {
+		return v == TxFromOneTimeKey
+	}
+
 	return false
 }
 
@@ -883,29 +884,29 @@ func (e *Envelope) fieldsToInternal() {
 	}
 
 	if e.GetChainID() != nil {
-		e.InternalLabels["chainID"] = e.GetChainIDString()
+		e.InternalLabels[ChainIDLabel] = e.GetChainIDString()
 	}
 	if e.GetTxHash() != nil {
-		e.InternalLabels["txHash"] = e.GetTxHashString()
+		e.InternalLabels[TxHashLabel] = e.GetTxHashString()
 	}
 	if e.GetChainUUID() != "" {
-		e.InternalLabels["chainUUID"] = e.GetChainUUID()
+		e.InternalLabels[ChainUUIDLabel] = e.GetChainUUID()
 	}
 	if e.GetEnclaveKey() != "" {
-		e.InternalLabels["enclaveKey"] = e.GetEnclaveKey()
+		e.InternalLabels[EnclaveKeyLabel] = e.GetEnclaveKey()
 	}
 }
 
 func (e *Envelope) internalToFields() error {
-	hash, ok := e.InternalLabels["txHash"]
+	hash, ok := e.InternalLabels[TxHashLabel]
 	if err := e.SetTxHashString(hash); err != nil && ok {
 		return err
 	}
-	if err := e.SetChainIDString(e.InternalLabels["chainID"]); err != nil {
+	if err := e.SetChainIDString(e.InternalLabels[ChainIDLabel]); err != nil {
 		return err
 	}
-	_ = e.SetChainUUID(e.InternalLabels["chainUUID"])
-	_ = e.SetEnclaveKey(e.InternalLabels["enclaveKey"])
+	_ = e.SetChainUUID(e.InternalLabels[ChainUUIDLabel])
+	_ = e.SetEnclaveKey(e.InternalLabels[EnclaveKeyLabel])
 	return nil
 }
 

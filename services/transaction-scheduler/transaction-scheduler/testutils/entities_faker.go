@@ -29,6 +29,7 @@ func FakeTxRequestEntity() *entities.TxRequest {
 		IdempotencyKey: "IdempotencyKey",
 		Params:         testutils.FakeETHTransactionParams(),
 		CreatedAt:      time.Now(),
+		Annotations:    &types.Annotations{},
 	}
 }
 

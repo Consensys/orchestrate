@@ -540,9 +540,9 @@ func TestEnvelope_TxEnvelopeAsRequest(t *testing.T) {
 			},
 		},
 		InternalLabels: map[string]string{
-			"chainID":   "1",
-			"txHash":    "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
-			"chainUUID": "testChainUUID",
+			ChainIDLabel:   "1",
+			TxHashLabel:    "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
+			ChainUUIDLabel: "testChainUUID",
 		},
 	}
 
@@ -570,9 +570,9 @@ func TestEnvelope_TxEnvelopeAsRequest(t *testing.T) {
 			},
 		},
 		InternalLabels: map[string]string{
-			"chainID":   "1",
-			"txHash":    "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
-			"chainUUID": "testChainUUID",
+			ChainIDLabel:   "1",
+			TxHashLabel:    "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
+			ChainUUIDLabel: "testChainUUID",
 		},
 	}
 

@@ -12,6 +12,7 @@ type Job struct {
 	ScheduleUUID string
 	Type         string
 	Labels       map[string]string
+	Annotations  *Annotations
 	Transaction  *ETHTransaction
 	Receipt      *ethereum.Receipt
 	Logs         []*Log

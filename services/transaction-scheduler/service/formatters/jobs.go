@@ -31,11 +31,12 @@ func FormatJobResponse(job *pkgtypes.Job) *types.JobResponse {
 			CreatedAt:      job.Transaction.CreatedAt,
 			UpdatedAt:      job.Transaction.UpdatedAt,
 		},
-		Logs:      job.Logs,
-		Labels:    job.Labels,
-		Type:      job.Type,
-		Status:    job.GetStatus(),
-		CreatedAt: job.CreatedAt,
+		Logs:        job.Logs,
+		Labels:      job.Labels,
+		Annotations: job.Annotations,
+		Type:        job.Type,
+		Status:      job.GetStatus(),
+		CreatedAt:   job.CreatedAt,
 	}
 }
 
@@ -43,6 +44,7 @@ func FormatJobCreateRequest(request *types.CreateJobRequest) *pkgtypes.Job {
 	return &pkgtypes.Job{
 		Type:         request.Type,
 		Labels:       request.Labels,
+		Annotations:  request.Annotations,
 		ScheduleUUID: request.ScheduleUUID,
 		ChainUUID:    request.ChainUUID,
 		Transaction:  request.Transaction,
@@ -52,6 +54,7 @@ func FormatJobCreateRequest(request *types.CreateJobRequest) *pkgtypes.Job {
 func FormatJobUpdateRequest(request *types.UpdateJobRequest) *pkgtypes.Job {
 	return &pkgtypes.Job{
 		Labels:      request.Labels,
+		Annotations: request.Annotations,
 		Transaction: request.Transaction,
 	}
 }

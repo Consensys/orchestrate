@@ -22,6 +22,7 @@ func NewJobEntityFromTxRequest(txRequest *entities.TxRequest, jobType, chainUUID
 		ChainUUID:    chainUUID,
 		Type:         jobType,
 		Labels:       txRequest.Labels,
+		Annotations:  txRequest.Annotations,
 		Transaction: &types.ETHTransaction{
 			From:           txRequest.Params.From,
 			To:             txRequest.Params.To,

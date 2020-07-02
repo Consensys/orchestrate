@@ -106,6 +106,21 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
 	})
+
+	s.T().Run("should execute send successfully a oneTimeKey tx", func(t *testing.T) {
+		txRequest := testutils.FakeTxRequestEntity()
+		txRequest.Schedule.UUID = scheduleUUID
+		txRequest.Schedule.Jobs[0].UUID = jobUUID
+		txRequest.Params.From = ""
+		txRequest.Annotations.OneTimeKey = true
+
+		response, err := successfulTestExecution(s, txRequest, types.EthereumTransaction)
+		assert.NoError(t, err)
+		assert.Equal(t, txRequest.UUID, response.UUID)
+		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
+		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
+		assert.True(t, response.Schedule.Jobs[0].Annotations.OneTimeKey)
+	})
 }
 
 func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
@@ -131,6 +146,22 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		response, err := s.usecase.Execute(ctx, txRequest, txData, chainUUID, tenantID)
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendTxComponent), err)
+	})
+	
+	s.T().Run("should fail with InvalidParameter error if from account and OneTimeKey is enabled", func(t *testing.T) {
+		expectedErr := errors.InvalidParameterError("error")
+		txRequest := testutils.FakeTxRequestEntity()
+		txRequest.Schedule.UUID = scheduleUUID
+		txRequest.Schedule.Jobs[0].UUID = jobUUID
+		txRequest.Annotations.OneTimeKey = true
+
+		s.Validators.EXPECT().
+			ValidateFields(gomock.Any(), txRequest).
+			Return(expectedErr)
+
+		response, err := s.usecase.Execute(ctx, txRequest, txData, chainUUID, tenantID)
+		assert.Nil(t, response)
+		assert.True(t, errors.IsInvalidParameterError(err))
 	})
 
 	s.T().Run("should fail with same error if validator fails to validate request hash", func(t *testing.T) {
@@ -424,7 +455,9 @@ func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, jobT
 			if jobEntity.Type != jobType {
 				return nil, fmt.Errorf("invalid job type")
 			}
-			return txRequest.Schedule.Jobs[0], nil
+
+			jobEntity.UUID = txRequest.Schedule.Jobs[0].UUID
+			return jobEntity, nil
 		})
 
 	s.StartJobUC.EXPECT().

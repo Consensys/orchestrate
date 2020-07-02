@@ -389,6 +389,7 @@ func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transacti
 				UUID:        jobResponse.UUID,
 				ChainUUID:   jobResponse.ChainUUID,
 				Labels:      jobResponse.Labels,
+				Annotations: jobResponse.Annotations,
 				Transaction: jobResponse.Transaction,
 			}
 		}

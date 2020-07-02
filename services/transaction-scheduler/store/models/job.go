@@ -2,6 +2,8 @@ package models
 
 import (
 	"time"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 )
 
 type Job struct {
@@ -17,5 +19,6 @@ type Job struct {
 	Transaction   *Transaction
 	Logs          []*Log
 	Labels        map[string]string
+	Annotations   *types.Annotations
 	CreatedAt     time.Time `pg:"default:now()"`
 }

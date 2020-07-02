@@ -81,7 +81,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 		assert.True(t, errors.IsConflictedError(err))
 	})
 
-	s.T().Run("should fail with 422 if chain does not exist", func(t *testing.T) {
+	s.T().Run("should fail with 422 if chains cannot be fetched", func(t *testing.T) {
 		defer gock.Off()
 		gock.New(ChainRegistryURL).Get("/chains").Reply(404)
 		txRequest := testutils.FakeSendTransactionRequest(chain.Name)
@@ -92,11 +92,24 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 		assert.True(t, errors.IsInvalidParameterError(err))
 	})
 
-	s.T().Run("should fail with 422 if chain does not exist", func(t *testing.T) {
+	s.T().Run("should fail with 422 if chainUUID does not exist", func(t *testing.T) {
 		defer gock.Off()
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(404)
 		txRequest := testutils.FakeSendTransactionRequest(chain.Name)
+
+		resp, err := s.client.SendContractTransaction(ctx, txRequest)
+
+		assert.Nil(t, resp)
+		assert.True(t, errors.IsInvalidParameterError(err))
+	})
+
+	s.T().Run("should fail with 422 if from account is set and oneTimeKeyEnabled", func(t *testing.T) {
+		defer gock.Off()
+		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
+		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200)
+		txRequest := testutils.FakeSendTransactionRequest(chain.Name)
+		txRequest.Params.OneTimeKey = true
 
 		resp, err := s.client.SendContractTransaction(ctx, txRequest)
 
@@ -119,6 +132,8 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
 		txRequest := testutils.FakeSendTransactionRequest(chain.Name)
+		txRequest.Params.From = ""
+		txRequest.Params.OneTimeKey = true
 		IdempotencyKey := utils.RandomString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: IdempotencyKey,
@@ -154,6 +169,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 			return
 		}
 		assert.Equal(t, job.UUID, evlp.GetID())
+		assert.True(t, evlp.IsOneTimeKeySignature())
 		assert.Equal(t, tx.JobTypeMap[types.EthereumTransaction].String(), evlp.GetJobTypeString())
 	})
 
@@ -196,6 +212,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 			return
 		}
 		assert.Equal(t, job.UUID, evlp.GetID())
+		assert.False(t, evlp.IsOneTimeKeySignature())
 		assert.Equal(t, tx.JobTypeMap[types.TesseraPrivateTransaction].String(), evlp.GetJobTypeString())
 	})
 

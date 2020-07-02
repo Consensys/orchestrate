@@ -72,9 +72,9 @@ func TestRequestToBuilder(t *testing.T) {
 					},
 				},
 				InternalLabels: map[string]string{
-					"chainID":   "1",
-					"txHash":    "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
-					"chainUUID": "testChainUUID",
+					ChainIDLabel:   "1",
+					TxHashLabel:    "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
+					ChainUUIDLabel: "testChainUUID",
 				},
 			},
 			&Envelope{
@@ -109,9 +109,9 @@ func TestRequestToBuilder(t *testing.T) {
 				ID:            "14483d15-d3bf-4aa0-a1ba-1244ba9ef2a6",
 				ContextLabels: map[string]string{"testContextLabelsKey": "testContextLabelsValue"},
 				InternalLabels: map[string]string{
-					"chainID":   "1",
-					"txHash":    "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
-					"chainUUID": "testChainUUID",
+					ChainIDLabel:   "1",
+					TxHashLabel:    "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
+					ChainUUIDLabel: "testChainUUID",
 				},
 				Errors: make([]*error1.Error, 0),
 			},
@@ -144,8 +144,8 @@ func TestRequestToBuilder(t *testing.T) {
 					},
 				},
 				InternalLabels: map[string]string{
-					"chainID":   "1",
-					"chainUUID": "testChainUUID",
+					ChainIDLabel:   "1",
+					ChainUUIDLabel: "testChainUUID",
 				},
 			},
 			nil,
@@ -178,8 +178,8 @@ func TestRequestToBuilder(t *testing.T) {
 					},
 				},
 				InternalLabels: map[string]string{
-					"chainID":   "@",
-					"chainUUID": "@",
+					ChainIDLabel:   "@",
+					ChainUUIDLabel: "@",
 				},
 			},
 			nil,
@@ -210,9 +210,9 @@ func TestRequestToBuilder(t *testing.T) {
 					},
 				},
 				InternalLabels: map[string]string{
-					"chainID":   "1",
-					"txHash":    "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
-					"chainUUID": "testChainUUID",
+					ChainIDLabel:   "1",
+					TxHashLabel:    "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
+					ChainUUIDLabel: "testChainUUID",
 				},
 			},
 			&Envelope{
@@ -235,9 +235,9 @@ func TestRequestToBuilder(t *testing.T) {
 				ID:            "14483d15-d3bf-4aa0-a1ba-1244ba9ef2a6",
 				ContextLabels: map[string]string{"testContextLabelsKey": "testContextLabelsValue"},
 				InternalLabels: map[string]string{
-					"chainID":   "1",
-					"txHash":    "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
-					"chainUUID": "testChainUUID",
+					ChainIDLabel:   "1",
+					TxHashLabel:    "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
+					ChainUUIDLabel: "testChainUUID",
 				},
 				Errors: []*error1.Error{
 					{Message: "testError", Code: 10, Component: "testComponent"},
@@ -270,9 +270,9 @@ func TestRequestToBuilder(t *testing.T) {
 					},
 				},
 				InternalLabels: map[string]string{
-					"chainID":   "1",
-					"txHash":    "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
-					"chainUUID": "testChainUUID",
+					ChainIDLabel:   "1",
+					TxHashLabel:    "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
+					ChainUUIDLabel: "testChainUUID",
 				},
 			},
 			nil,
@@ -282,9 +282,9 @@ func TestRequestToBuilder(t *testing.T) {
 			"invalid tx envelope",
 			&TxEnvelope{
 				InternalLabels: map[string]string{
-					"chainID":   "1",
-					"txHash":    "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
-					"chainUUID": "testChainUUID",
+					ChainIDLabel:   "1",
+					TxHashLabel:    "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
+					ChainUUIDLabel: "testChainUUID",
 				},
 			},
 			nil,

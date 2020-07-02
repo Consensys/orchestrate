@@ -8,11 +8,12 @@ import (
 
 func NewJobModelFromEntities(job *types.Job, scheduleID *int) *models.Job {
 	jobModel := &models.Job{
-		UUID:       job.UUID,
-		ChainUUID:  job.ChainUUID,
-		Type:       job.Type,
-		Labels:     job.Labels,
-		ScheduleID: scheduleID,
+		UUID:        job.UUID,
+		ChainUUID:   job.ChainUUID,
+		Type:        job.Type,
+		Labels:      job.Labels,
+		Annotations: job.Annotations,
+		ScheduleID:  scheduleID,
 		Schedule: &models.Schedule{
 			UUID: job.ScheduleUUID,
 		},
@@ -37,12 +38,13 @@ func NewJobModelFromEntities(job *types.Job, scheduleID *int) *models.Job {
 
 func NewJobEntityFromModels(jobModel *models.Job) *types.Job {
 	job := &types.Job{
-		UUID:      jobModel.UUID,
-		ChainUUID: jobModel.ChainUUID,
-		Type:      jobModel.Type,
-		Labels:    jobModel.Labels,
-		CreatedAt: jobModel.CreatedAt,
-		Logs:      []*types.Log{},
+		UUID:        jobModel.UUID,
+		ChainUUID:   jobModel.ChainUUID,
+		Type:        jobModel.Type,
+		Labels:      jobModel.Labels,
+		CreatedAt:   jobModel.CreatedAt,
+		Annotations: jobModel.Annotations,
+		Logs:        []*types.Log{},
 	}
 
 	if jobModel.Schedule != nil {
@@ -69,14 +71,19 @@ func UpdateJobModelFromEntities(jobModel *models.Job, job *types.Job) {
 		jobModel.Labels = job.Labels
 	}
 
+	if job.Annotations != nil {
+		jobModel.Annotations = job.Annotations
+	}
+
 	UpdateTransactionModelFromEntities(jobModel.Transaction, job.Transaction)
 }
 
 func NewEnvelopeFromJobModel(job *models.Job, headers map[string]string) *tx.TxEnvelope {
 	contextLabels := job.Labels
-	if contextLabels != nil {
-		contextLabels["jobUUID"] = job.UUID
+	if contextLabels == nil {
+		contextLabels = map[string]string{}
 	}
+	contextLabels["jobUUID"] = job.UUID
 
 	txEnvelope := &tx.TxEnvelope{
 		Msg: &tx.TxEnvelope_TxRequest{TxRequest: &tx.TxRequest{
@@ -100,7 +107,11 @@ func NewEnvelopeFromJobModel(job *models.Job, headers map[string]string) *tx.TxE
 		}},
 		InternalLabels: make(map[string]string),
 	}
+
 	txEnvelope.SetChainUUID(job.ChainUUID)
+	if job.Annotations != nil && job.Annotations.OneTimeKey {
+		txEnvelope.EnableTxFromOneTimeKey()
+	}
 
 	return txEnvelope
 }
