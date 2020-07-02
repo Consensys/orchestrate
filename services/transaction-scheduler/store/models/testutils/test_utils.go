@@ -40,7 +40,7 @@ func FakeTxRequest(scheduleID int) *models.TransactionRequest {
 		IdempotencyKey: utils.RandomString(16),
 		RequestHash:    "requestHash",
 		Params:         testutils.FakeETHTransactionParams(),
-		Schedules:      []*models.Schedule{fakeSchedule},
+		Schedule:       fakeSchedule,
 	}
 }
 

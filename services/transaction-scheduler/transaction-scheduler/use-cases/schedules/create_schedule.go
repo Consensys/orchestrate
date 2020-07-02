@@ -5,7 +5,6 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
@@ -39,32 +38,15 @@ func (uc createScheduleUseCase) WithDBTransaction(dbtx store.Tx) CreateScheduleU
 
 // Execute validates and creates a new transaction schedule
 func (uc *createScheduleUseCase) Execute(ctx context.Context, schedule *entities.Schedule, tenantID string) (*entities.Schedule, error) {
-	if tenantID == "" {
-		tenantID = multitenancy.DefaultTenant
-	}
-
 	log.WithContext(ctx).Debug("creating new schedule")
 
 	scheduleModel := parsers.NewScheduleModelFromEntities(schedule, tenantID)
-
-	if scheduleModel.TransactionRequest != nil && scheduleModel.TransactionRequest.IdempotencyKey != "" {
-		txRequest, err := uc.db.TransactionRequest().
-			FindOneByIdempotencyKey(ctx, scheduleModel.TransactionRequest.IdempotencyKey)
-
-		if err != nil {
-			return nil, errors.FromError(err).ExtendComponent(createScheduleComponent)
-		}
-
-		scheduleModel.TransactionRequestID = &txRequest.ID
-	}
 
 	if err := uc.db.Schedule().Insert(ctx, scheduleModel); err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createScheduleComponent)
 	}
 
-	log.WithContext(ctx).
-		WithField("schedule_uuid", scheduleModel.UUID).
-		Info("schedule created successfully")
+	log.WithContext(ctx).WithField("schedule_uuid", scheduleModel.UUID).Info("schedule created successfully")
 
 	return parsers.NewScheduleEntityFromModels(scheduleModel), nil
 }

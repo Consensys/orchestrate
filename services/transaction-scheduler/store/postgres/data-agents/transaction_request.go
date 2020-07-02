@@ -27,17 +27,16 @@ func NewPGTransactionRequest(db pg.DB) *PGTransactionRequest {
 }
 
 // Insert Inserts a new transaction request in DB
-func (agent *PGTransactionRequest) SelectOrInsert(ctx context.Context, txRequest *models.TransactionRequest) error {
+func (agent *PGTransactionRequest) Insert(ctx context.Context, txRequest *models.TransactionRequest) error {
 	if txRequest.UUID == "" {
 		txRequest.UUID = uuid.Must(uuid.NewV4()).String()
 	}
 
-	_, err := agent.db.ModelContext(ctx, txRequest).
-		Where("idempotency_key = ?idempotency_key").
-		OnConflict("ON CONSTRAINT transaction_requests_idempotency_key_key DO NOTHING").
-		Relation("Schedules").
-		SelectOrInsert()
+	if txRequest.Schedule != nil && txRequest.ScheduleID == nil {
+		txRequest.ScheduleID = &txRequest.Schedule.ID
+	}
 
+	err := pg.Insert(ctx, agent.db, txRequest)
 	if err != nil {
 		errMessage := "error executing selectOrInsert"
 		log.WithError(err).Error(errMessage)
@@ -51,7 +50,7 @@ func (agent *PGTransactionRequest) FindOneByIdempotencyKey(ctx context.Context, 
 	txRequest := &models.TransactionRequest{}
 	query := agent.db.ModelContext(ctx, txRequest).
 		Where("idempotency_key = ?", idempotencyKey).
-		Relation("Schedules")
+		Relation("Schedule")
 
 	err := pg.SelectOne(ctx, query)
 	if err != nil {
@@ -65,11 +64,9 @@ func (agent *PGTransactionRequest) FindOneByUUID(ctx context.Context, txRequestU
 	txRequest := &models.TransactionRequest{}
 	query := agent.db.ModelContext(ctx, txRequest).
 		Where("transaction_request.uuid = ?", txRequestUUID).
-		Join("JOIN schedules AS s").
-		JoinOn("s.transaction_request_id = transaction_request.id").
-		Relation("Schedules")
+		Relation("Schedule")
 
-	query = pg.WhereAllowedTenants(query, "s.tenant_id", tenants)
+	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants)
 
 	err := pg.SelectOne(ctx, query)
 	if err != nil {
@@ -82,16 +79,13 @@ func (agent *PGTransactionRequest) FindOneByUUID(ctx context.Context, txRequestU
 func (agent *PGTransactionRequest) Search(ctx context.Context, filters *entities.TransactionFilters, tenants []string) ([]*models.TransactionRequest, error) {
 	var txRequests []*models.TransactionRequest
 
-	query := agent.db.ModelContext(ctx, &txRequests).Relation("Schedules").
-		Join("JOIN schedules AS s").
-		JoinOn("s.transaction_request_id = transaction_request.id").
-		Relation("Schedules")
+	query := agent.db.ModelContext(ctx, &txRequests).Relation("Schedule")
 
 	if len(filters.IdempotencyKeys) > 0 {
 		query = query.Where("transaction_request.idempotency_key in (?)", gopg.In(filters.IdempotencyKeys))
 	}
 
-	query = pg.WhereAllowedTenants(query, "s.tenant_id", tenants)
+	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants)
 
 	err := pg.Select(ctx, query)
 	if err != nil {

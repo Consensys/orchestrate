@@ -9,7 +9,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
@@ -20,7 +19,7 @@ import (
 const createJobComponent = "use-cases.create-job"
 
 type CreateJobUseCase interface {
-	Execute(ctx context.Context, jobEntity *types.Job, tenantID string) (*types.Job, error)
+	Execute(ctx context.Context, jobEntity *types.Job, tenants []string) (*types.Job, error)
 	WithDBTransaction(dbtx store.Tx) CreateJobUseCase
 }
 
@@ -44,22 +43,18 @@ func (uc createJobUseCase) WithDBTransaction(dbtx store.Tx) CreateJobUseCase {
 }
 
 // Execute validates and creates a new transaction job
-func (uc *createJobUseCase) Execute(ctx context.Context, jobEntity *types.Job, tenantID string) (*types.Job, error) {
-	if tenantID == "" {
-		tenantID = multitenancy.DefaultTenant
-	}
-
+func (uc *createJobUseCase) Execute(ctx context.Context, jobEntity *types.Job, tenants []string) (*types.Job, error) {
 	log.WithContext(ctx).
 		WithField("chain_uuid", jobEntity.ChainUUID).
 		WithField("schedule_id", jobEntity.ScheduleUUID).
-		WithField("tenant_id", tenantID).
+		WithField("tenants", tenants).
 		Debug("creating new job")
 
 	if err := uc.validator.ValidateChainExists(ctx, jobEntity.ChainUUID); err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
 	}
 
-	schedule, err := uc.db.Schedule().FindOneByUUID(ctx, jobEntity.ScheduleUUID, []string{tenantID})
+	schedule, err := uc.db.Schedule().FindOneByUUID(ctx, jobEntity.ScheduleUUID, tenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
 	}

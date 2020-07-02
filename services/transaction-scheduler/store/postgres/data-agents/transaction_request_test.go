@@ -50,7 +50,7 @@ func (s *txRequestTestSuite) TearDownSuite() {
 	s.pg.DropTestDB(s.T())
 }
 
-func (s *txRequestTestSuite) TestPGTransactionRequest_SelectOrInsert() {
+func (s *txRequestTestSuite) TestPGTransactionRequest_Insert() {
 	ctx := context.Background()
 
 	s.T().Run("should insert model successfully if uuid is not defined", func(t *testing.T) {
@@ -73,18 +73,6 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_SelectOrInsert() {
 		assert.NotEmpty(t, txRequest.ID)
 		assert.Equal(t, txRequestUUID, txRequest.UUID)
 	})
-
-	s.T().Run("Does nothing if idempotency key is already used and returns request", func(t *testing.T) {
-		txRequest0 := testutils.FakeTxRequest(0)
-		err := insertTxRequest(ctx, s.agents, txRequest0)
-		assert.NoError(t, err)
-
-		txRequest1 := testutils.FakeTxRequest(0)
-		txRequest1.IdempotencyKey = txRequest0.IdempotencyKey
-		_ = s.agents.TransactionRequest().SelectOrInsert(ctx, txRequest1)
-
-		assert.Equal(t, txRequest0.IdempotencyKey, txRequest1.IdempotencyKey)
-	})
 }
 
 func (s *txRequestTestSuite) TestPGTransactionRequest_FindOneByIdempotencyKey() {
@@ -98,7 +86,7 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_FindOneByIdempotencyKey() 
 
 		assert.NoError(t, err)
 		assert.Equal(t, txRequest.IdempotencyKey, txRequestRetrieved.IdempotencyKey)
-		assert.Equal(t, txRequest.Schedules[0].UUID, txRequestRetrieved.Schedules[0].UUID)
+		assert.Equal(t, txRequest.Schedule.UUID, txRequestRetrieved.Schedule.UUID)
 	})
 
 	s.T().Run("should return NotFoundError if request is not found", func(t *testing.T) {
@@ -118,11 +106,19 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_FindOneByUUID() {
 
 		assert.NoError(t, err)
 		assert.Equal(t, txRequest.UUID, txRequestRetrieved.UUID)
-		assert.Equal(t, txRequest.Schedules[0].UUID, txRequestRetrieved.Schedules[0].UUID)
+		assert.Equal(t, txRequest.Schedule.UUID, txRequestRetrieved.Schedule.UUID)
+	})
+
+	s.T().Run("should find request successfully for default tenant", func(t *testing.T) {
+		txRequestRetrieved, err := s.agents.TransactionRequest().FindOneByUUID(ctx, txRequest.UUID, []string{multitenancy.DefaultTenant})
+
+		assert.NoError(t, err)
+		assert.Equal(t, txRequest.UUID, txRequestRetrieved.UUID)
+		assert.Equal(t, txRequest.Schedule.UUID, txRequestRetrieved.Schedule.UUID)
 	})
 
 	s.T().Run("should return NotFoundError if uuid is not found", func(t *testing.T) {
-		_, err := s.agents.TransactionRequest().FindOneByUUID(ctx, uuid.Must(uuid.NewV4()).String(), []string{txRequest.Schedules[0].TenantID})
+		_, err := s.agents.TransactionRequest().FindOneByUUID(ctx, uuid.Must(uuid.NewV4()).String(), []string{txRequest.Schedule.TenantID})
 		assert.True(t, errors.IsNotFoundError(err))
 	})
 
@@ -210,15 +206,13 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_ConnectionErr() {
 }
 
 func insertTxRequest(ctx context.Context, agents *PGAgents, txReq *models.TransactionRequest) error {
-	if err := agents.TransactionRequest().SelectOrInsert(ctx, txReq); err != nil {
+	if err := agents.Schedule().Insert(ctx, txReq.Schedule); err != nil {
 		return err
 	}
 
-	for _, schedule := range txReq.Schedules {
-		schedule.TransactionRequestID = &txReq.ID
-		if err := agents.Schedule().Insert(ctx, schedule); err != nil {
-			return err
-		}
+	txReq.ScheduleID = &txReq.Schedule.ID
+	if err := agents.TransactionRequest().Insert(ctx, txReq); err != nil {
+		return err
 	}
 
 	return nil

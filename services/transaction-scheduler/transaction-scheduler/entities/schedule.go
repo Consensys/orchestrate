@@ -9,6 +9,5 @@ import (
 type Schedule struct {
 	UUID      string
 	Jobs      []*types.Job
-	TxRequest *TxRequest
 	CreatedAt time.Time
 }

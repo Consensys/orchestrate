@@ -12,7 +12,8 @@ type TransactionRequest struct {
 	ID             int
 	UUID           string
 	IdempotencyKey string
-	Schedules      []*Schedule
+	ScheduleID     *int
+	Schedule       *Schedule
 	RequestHash    string
 	Params         *types.ETHTransactionParams // This will be automatically transformed in JSON by go-pg (and vice-versa)
 	CreatedAt      time.Time                   `pg:"default:now()"`

@@ -6,12 +6,13 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
 
-func NewTxRequestModelFromEntities(txRequest *entities.TxRequest, requestHash string) *models.TransactionRequest {
+func NewTxRequestModelFromEntities(txRequest *entities.TxRequest, requestHash string, scheduleID int) *models.TransactionRequest {
 	return &models.TransactionRequest{
 		UUID:           txRequest.UUID,
 		IdempotencyKey: txRequest.IdempotencyKey,
 		RequestHash:    requestHash,
 		Params:         txRequest.Params,
+		ScheduleID:     &scheduleID,
 		CreatedAt:      txRequest.CreatedAt,
 	}
 }

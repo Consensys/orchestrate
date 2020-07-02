@@ -467,18 +467,18 @@ func (m *MockTransactionRequestAgent) EXPECT() *MockTransactionRequestAgentMockR
 	return m.recorder
 }
 
-// SelectOrInsert mocks base method
-func (m *MockTransactionRequestAgent) SelectOrInsert(ctx context.Context, txRequest *models.TransactionRequest) error {
+// Insert mocks base method
+func (m *MockTransactionRequestAgent) Insert(ctx context.Context, txRequest *models.TransactionRequest) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SelectOrInsert", ctx, txRequest)
+	ret := m.ctrl.Call(m, "Insert", ctx, txRequest)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// SelectOrInsert indicates an expected call of SelectOrInsert
-func (mr *MockTransactionRequestAgentMockRecorder) SelectOrInsert(ctx, txRequest interface{}) *gomock.Call {
+// Insert indicates an expected call of Insert
+func (mr *MockTransactionRequestAgentMockRecorder) Insert(ctx, txRequest interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SelectOrInsert", reflect.TypeOf((*MockTransactionRequestAgent)(nil).SelectOrInsert), ctx, txRequest)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockTransactionRequestAgent)(nil).Insert), ctx, txRequest)
 }
 
 // FindOneByIdempotencyKey mocks base method

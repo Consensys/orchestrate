@@ -4,20 +4,20 @@ package integrationtests
 
 import (
 	"context"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/client-utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/controllers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/testutils"
@@ -216,7 +216,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, tx.JobTypeMap[types.TesseraPrivateTransaction].String(), evlp.GetJobTypeString())
 	})
 
-	s.T().Run("should send a orion transaction successfully to the transaction crafter topic", func(t *testing.T) {
+	s.T().Run("should send an orion transaction successfully to the transaction crafter topic", func(t *testing.T) {
 		defer gock.Off()
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
@@ -383,13 +383,15 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, tx.JobTypeMap[types.EthereumTransaction].String(), evlp.GetJobTypeString())
 	})
 
-	s.T().Run("should succeed if payloads are the same and generate new schedule", func(t *testing.T) {
+	s.T().Run("should succeed if payloads and idempotency key are the same and return same schedule", func(t *testing.T) {
 		defer gock.Off()
 		txRequest := testutils.FakeSendTransactionRequest(chain.Name)
+		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
+			controllers.IdempotencyKeyHeader: utils.RandomString(16),
+		})
 
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
-		txResponse0, err := s.client.SendContractTransaction(ctx, txRequest)
+		// Kill Kafka on first call so data is added in DB and status is CREATED but does not get updated to STARTED
+		err := s.env.client.Stop(rctx, kafkaContainerID)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
@@ -397,12 +399,33 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
-		txResponse1, err := s.client.SendContractTransaction(ctx, txRequest)
+		_, err = s.client.SendContractTransaction(rctx, txRequest)
+		assert.Error(t, err)
+
+		s.restartKafka(rctx)
+
+		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
+		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
+		txResponse, err := s.client.SendContractTransaction(rctx, txRequest)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-
-		assert.NotEqual(t, txResponse0.Schedule.UUID, txResponse1.Schedule.UUID)
+		job := txResponse.Schedule.Jobs[0]
+		assert.Equal(t, types.StatusStarted, job.Status)
 	})
+}
+
+func (s *txSchedulerTransactionTestSuite) restartKafka(ctx context.Context) {
+	// Bring Kafka Up and resend so the transaction is sent successfully
+	err := s.env.client.Start(ctx, kafkaContainerID)
+	if err != nil {
+		s.env.logger.WithError(err).Error("could not restart kafka")
+		return
+	}
+	err = s.env.client.WaitTillIsReady(ctx, kafkaContainerID, 20*time.Second)
+	if err != nil {
+		s.env.logger.WithError(err).Error("could not start transaction-scheduler")
+		return
+	}
 }

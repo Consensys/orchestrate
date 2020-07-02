@@ -103,6 +103,24 @@ func (c *Client) Up(ctx context.Context, name, networkName string) error {
 	return nil
 }
 
+func (c *Client) Start(ctx context.Context, name string) error {
+	logger := log.FromContext(ctx).WithField("container", name)
+
+	containerBody, err := c.getContainer(name)
+	if err != nil {
+		return nil
+	}
+
+	// Start docker container
+	if err := c.cli.ContainerStart(ctx, containerBody.ID, types.ContainerStartOptions{}); err != nil {
+		return err
+	}
+
+	logger.WithField("id", containerBody.ID).Infof("started container")
+
+	return nil
+}
+
 func (c *Client) Stop(ctx context.Context, name string) error {
 	logger := log.FromContext(ctx).WithField("container", name)
 

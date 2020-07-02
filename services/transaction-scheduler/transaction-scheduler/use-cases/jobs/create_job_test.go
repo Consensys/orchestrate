@@ -41,6 +41,7 @@ func TestCreateJob_Execute(t *testing.T) {
 	usecase := NewCreateJobUseCase(mockDB, mockTxValidator)
 
 	tenantID := "tenantID"
+	tenants := []string{tenantID}
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		jobEntity := testutils3.FakeJob()
@@ -50,12 +51,12 @@ func TestCreateJob_Execute(t *testing.T) {
 		jobModel := parsers.NewJobModelFromEntities(jobEntity, &fakeSchedule.ID)
 
 		mockTxValidator.EXPECT().ValidateChainExists(ctx, jobEntity.ChainUUID).Return(nil)
-		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobEntity.ScheduleUUID, []string{tenantID}).Return(fakeSchedule, nil)
+		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobEntity.ScheduleUUID, tenants).Return(fakeSchedule, nil)
 		mockTransactionDA.EXPECT().Insert(gomock.Any(), jobModel.Transaction).Return(nil)
 		mockJobDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
 		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
 
-		_, err := usecase.Execute(context.Background(), jobEntity, tenantID)
+		_, err := usecase.Execute(context.Background(), jobEntity, tenants)
 
 		assert.NoError(t, err)
 	})
@@ -66,7 +67,7 @@ func TestCreateJob_Execute(t *testing.T) {
 
 		mockTxValidator.EXPECT().ValidateChainExists(ctx, jobEntity.ChainUUID).Return(expectedErr)
 
-		_, err := usecase.Execute(context.Background(), jobEntity, tenantID)
+		_, err := usecase.Execute(context.Background(), jobEntity, tenants)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createJobComponent), err)
 	})
 
@@ -79,9 +80,9 @@ func TestCreateJob_Execute(t *testing.T) {
 		fakeSchedule.UUID = jobEntity.ScheduleUUID
 
 		mockTxValidator.EXPECT().ValidateChainExists(ctx, jobEntity.ChainUUID).Return(nil)
-		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobEntity.ScheduleUUID, []string{tenantID}).Return(nil, expectedErr)
+		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobEntity.ScheduleUUID, tenants).Return(nil, expectedErr)
 
-		_, err := usecase.Execute(context.Background(), jobEntity, tenantID)
+		_, err := usecase.Execute(context.Background(), jobEntity, tenants)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createJobComponent), err)
 	})
 
@@ -94,10 +95,10 @@ func TestCreateJob_Execute(t *testing.T) {
 		jobModel := parsers.NewJobModelFromEntities(jobEntity, &fakeSchedule.ID)
 
 		mockTxValidator.EXPECT().ValidateChainExists(ctx, jobEntity.ChainUUID).Return(nil)
-		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobEntity.ScheduleUUID, []string{tenantID}).Return(fakeSchedule, nil)
+		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobEntity.ScheduleUUID, tenants).Return(fakeSchedule, nil)
 		mockTransactionDA.EXPECT().Insert(gomock.Any(), jobModel.Transaction).Return(expectedErr)
 
-		_, err := usecase.Execute(context.Background(), jobEntity, tenantID)
+		_, err := usecase.Execute(context.Background(), jobEntity, tenants)
 
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createJobComponent), err)
 	})
@@ -111,11 +112,11 @@ func TestCreateJob_Execute(t *testing.T) {
 		jobModel := parsers.NewJobModelFromEntities(jobEntity, &fakeSchedule.ID)
 
 		mockTxValidator.EXPECT().ValidateChainExists(ctx, jobEntity.ChainUUID).Return(nil)
-		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobEntity.ScheduleUUID, []string{tenantID}).Return(fakeSchedule, nil)
+		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobEntity.ScheduleUUID, tenants).Return(fakeSchedule, nil)
 		mockTransactionDA.EXPECT().Insert(gomock.Any(), jobModel.Transaction).Return(nil)
 		mockJobDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(expectedErr)
 
-		_, err := usecase.Execute(context.Background(), jobEntity, tenantID)
+		_, err := usecase.Execute(context.Background(), jobEntity, tenants)
 
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createJobComponent), err)
 	})
@@ -129,12 +130,12 @@ func TestCreateJob_Execute(t *testing.T) {
 		jobModel := parsers.NewJobModelFromEntities(jobEntity, &fakeSchedule.ID)
 
 		mockTxValidator.EXPECT().ValidateChainExists(ctx, jobEntity.ChainUUID).Return(nil)
-		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobEntity.ScheduleUUID, []string{tenantID}).Return(fakeSchedule, nil)
+		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobEntity.ScheduleUUID, tenants).Return(fakeSchedule, nil)
 		mockTransactionDA.EXPECT().Insert(gomock.Any(), jobModel.Transaction).Return(nil)
 		mockJobDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
 		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(expectedErr)
 
-		_, err := usecase.Execute(context.Background(), jobEntity, tenantID)
+		_, err := usecase.Execute(context.Background(), jobEntity, tenants)
 
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createJobComponent), err)
 	})

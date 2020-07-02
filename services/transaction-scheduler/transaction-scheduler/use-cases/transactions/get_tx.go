@@ -2,7 +2,6 @@ package transactions
 
 import (
 	"context"
-	"sort"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/schedules"
 
@@ -45,19 +44,13 @@ func (uc *getTxUseCase) Execute(ctx context.Context, txRequestUUID string, tenan
 		return nil, errors.FromError(err).ExtendComponent(getTxComponent)
 	}
 
-	// Sort schedules by timestamp as we want to retrieve the last one, here it's sorted in decreasing time
-	// So txRequestModel.Schedules[0] is the latest
-	sort.SliceStable(txRequestModel.Schedules, func(i, j int) bool {
-		return txRequestModel.Schedules[i].CreatedAt.After(txRequestModel.Schedules[j].CreatedAt)
-	})
-
 	txRequest := &entities.TxRequest{
 		UUID:           txRequestModel.UUID,
 		IdempotencyKey: txRequestModel.IdempotencyKey,
 		Params:         txRequestModel.Params,
 		CreatedAt:      txRequestModel.CreatedAt,
 	}
-	txRequest.Schedule, err = uc.getScheduleUsecase.Execute(ctx, txRequestModel.Schedules[0].UUID, tenants)
+	txRequest.Schedule, err = uc.getScheduleUsecase.Execute(ctx, txRequestModel.Schedule.UUID, tenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(getTxComponent)
 	}

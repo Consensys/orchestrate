@@ -84,7 +84,7 @@ func (c *JobsController) create(rw http.ResponseWriter, request *http.Request) {
 	}
 
 	job := formatters.FormatJobCreateRequest(jobRequest)
-	jobRes, err := c.ucs.CreateJob().Execute(ctx, job, multitenancy.TenantIDFromContext(ctx))
+	jobRes, err := c.ucs.CreateJob().Execute(ctx, job, multitenancy.AllowedTenantsFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -128,7 +128,7 @@ func (c *JobsController) start(rw http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 
 	jobUUID := mux.Vars(request)["uuid"]
-	err := c.ucs.StartJob().Execute(ctx, jobUUID, multitenancy.TenantIDFromContext(ctx))
+	err := c.ucs.StartJob().Execute(ctx, jobUUID, multitenancy.AllowedTenantsFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return

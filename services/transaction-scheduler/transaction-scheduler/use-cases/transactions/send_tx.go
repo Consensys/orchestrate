@@ -2,6 +2,10 @@ package transactions
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database"
@@ -63,51 +67,25 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
 
-	requestHash, err := uc.validator.ValidateRequestHash(ctx, chainUUID, txRequest.Params, txRequest.IdempotencyKey)
+	requestHash, err := generateRequestHash(chainUUID, txRequest.Params)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
+	}
+	fmt.Println(requestHash)
+
+	// Step 2: Insert Schedule + Job + Transaction + TxRequest atomically OR get tx request if it exists
+	txRequest, err = uc.selectOrInsertTxRequest(ctx, txRequest, txData, requestHash, chainUUID, tenantID)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
 
-	// Step 2: Insert Schedule + Job + Transaction + TxRequest atomically
-	err = database.ExecuteInDBTx(uc.db, func(dbtx database.Tx) error {
-		txRequestModel := parsers.NewTxRequestModelFromEntities(txRequest, requestHash)
-
-		der := dbtx.(store.Tx).TransactionRequest().SelectOrInsert(ctx, txRequestModel)
-		if der != nil {
-			return der
+	// Step 3: Start first job of the schedule if status is CREATED
+	job := txRequest.Schedule.Jobs[0]
+	if job.GetStatus() == types.StatusCreated {
+		err = uc.startJobUC.Execute(ctx, job.UUID, []string{tenantID})
+		if err != nil {
+			return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 		}
-		txRequest.UUID = txRequestModel.UUID
-
-		txRequest.Schedule, der = uc.createScheduleUC.
-			WithDBTransaction(dbtx.(store.Tx)).
-			Execute(ctx, &entities.Schedule{TxRequest: txRequest}, tenantID)
-
-		if der != nil {
-			return der
-		}
-
-		sendTxJob := parsers.NewJobEntityFromTxRequest(txRequest, generateJobType(txRequest), chainUUID)
-		sendTxJob.Transaction.Data = txData
-
-		job, der := uc.createJobUC.WithDBTransaction(dbtx.(store.Tx)).Execute(ctx, sendTxJob, tenantID)
-		if der != nil {
-			return der
-		}
-
-		txRequest.Schedule.Jobs = []*types.Job{job}
-
-		return nil
-	})
-
-	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
-	}
-
-	// Step 3: Start first job of the schedule
-	jobUUID := txRequest.Schedule.Jobs[0].UUID
-	err = uc.startJobUC.Execute(ctx, jobUUID, tenantID)
-	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
 
 	// Step 4: Load latest Schedule status from DB
@@ -118,6 +96,76 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 
 	logger.WithField("uuid", txRequest.UUID).Info("contract transaction request created successfully")
 	return txRequest, nil
+}
+
+func (uc *sendTxUsecase) selectOrInsertTxRequest(
+	ctx context.Context,
+	txRequest *entities.TxRequest,
+	txData, requestHash, chainUUID, tenantID string,
+) (*entities.TxRequest, error) {
+	txRequestModel, err := uc.db.TransactionRequest().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey)
+	switch {
+	case errors.IsNotFoundError(err):
+		return uc.insertNewTxRequest(ctx, txRequest, txData, requestHash, chainUUID, tenantID)
+	case err != nil:
+		return nil, err
+	case txRequestModel != nil && txRequestModel.RequestHash != requestHash:
+		errMessage := "a transaction request with the same idempotency key and different params already exists"
+		log.WithError(err).WithField("idempotency_key", txRequestModel.IdempotencyKey).Error(errMessage)
+		return nil, errors.AlreadyExistsError(errMessage)
+	default:
+		return uc.getTxUC.Execute(ctx, txRequestModel.UUID, []string{tenantID})
+	}
+}
+
+func (uc *sendTxUsecase) insertNewTxRequest(
+	ctx context.Context,
+	txRequest *entities.TxRequest,
+	txData, requestHash, chainUUID, tenantID string,
+) (*entities.TxRequest, error) {
+	err := database.ExecuteInDBTx(uc.db, func(dbtx database.Tx) error {
+		schedule, der := uc.createScheduleUC.WithDBTransaction(dbtx.(store.Tx)).Execute(ctx, &entities.Schedule{}, tenantID)
+		if der != nil {
+			return der
+		}
+		txRequest.Schedule = schedule
+
+		scheduleModel, der := dbtx.(store.Tx).Schedule().FindOneByUUID(ctx, txRequest.Schedule.UUID, []string{tenantID})
+		if der != nil {
+			return der
+		}
+
+		txRequestModel := parsers.NewTxRequestModelFromEntities(txRequest, requestHash, scheduleModel.ID)
+		der = dbtx.(store.Tx).TransactionRequest().Insert(ctx, txRequestModel)
+		if der != nil {
+			return der
+		}
+		txRequest.UUID = txRequestModel.UUID
+
+		sendTxJob := parsers.NewJobEntityFromTxRequest(txRequest, generateJobType(txRequest), chainUUID)
+		sendTxJob.Transaction.Data = txData
+
+		job, der := uc.createJobUC.WithDBTransaction(dbtx.(store.Tx)).Execute(ctx, sendTxJob, []string{tenantID})
+		if der != nil {
+			return der
+		}
+
+		txRequest.Schedule.Jobs = []*types.Job{job}
+
+		return nil
+	})
+
+	return txRequest, err
+}
+
+func generateRequestHash(chainUUID string, params interface{}) (string, error) {
+	jsonParams, err := json.Marshal(params)
+	if err != nil {
+		return "", err
+	}
+
+	hash := md5.Sum([]byte(string(jsonParams) + chainUUID))
+	return hex.EncodeToString(hash[:]), nil
 }
 
 func generateJobType(txRequest *entities.TxRequest) string {

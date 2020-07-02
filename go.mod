@@ -55,6 +55,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.6.2
 	github.com/stretchr/testify v1.6.1
+	github.com/swaggo/swag v1.6.7 // indirect
 	github.com/uber/jaeger-client-go v2.22.1+incompatible
 	github.com/uber/jaeger-lib v2.2.0+incompatible
 	github.com/unrolled/secure v1.0.7

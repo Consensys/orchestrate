@@ -1,3 +1,5 @@
+// +build unit
+
 package validators
 
 import (
@@ -13,14 +15,12 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mock"
 	chainmodel "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 )
 
 const (
@@ -52,41 +52,6 @@ func (s *transactionsTestSuite) SetupTest() {
 	mockDB.EXPECT().TransactionRequest().Return(s.mockTxRequestDA).AnyTimes()
 
 	s.validator = NewTransactionValidator(mockDB, s.mockChainRegistryClient, s.mockContractRegistryClient)
-}
-
-func (s *transactionsTestSuite) TestTransactionValidator_ValidateRequestHash() {
-	txRequest := testutils.FakeSendTransactionRequest("chainName")
-	idempotencyKey := "testIdempotencyKey"
-	s.T().Run("should validate tx successfully and return the request hash if data agent returns not found", func(t *testing.T) {
-		s.mockTxRequestDA.EXPECT().FindOneByIdempotencyKey(gomock.Any(), idempotencyKey).Return(nil, errors.NotFoundError("error"))
-		expectedRequestHash := "d8055d499fcbb64b67a5eab35d5c8109"
-
-		requestHash, err := s.validator.ValidateRequestHash(context.Background(), chainUUID, txRequest.Params, idempotencyKey)
-
-		assert.NoError(t, err)
-		assert.Equal(t, expectedRequestHash, requestHash)
-	})
-
-	s.T().Run("should return error if data agent fails", func(t *testing.T) {
-		s.mockTxRequestDA.EXPECT().FindOneByIdempotencyKey(gomock.Any(), idempotencyKey).Return(nil, errors.PostgresConnectionError("error"))
-
-		requestHash, err := s.validator.ValidateRequestHash(context.Background(), chainUUID, txRequest.Params, idempotencyKey)
-
-		assert.Empty(t, requestHash)
-		assert.Equal(t, errors.PostgresConnectionError("error").ExtendComponent("transaction-validator"), err)
-	})
-
-	s.T().Run("should return AlreadyExistsError if data agent returns a request a different request hash", func(t *testing.T) {
-		s.mockTxRequestDA.EXPECT().FindOneByIdempotencyKey(gomock.Any(), idempotencyKey).Return(&models.TransactionRequest{
-			IdempotencyKey: idempotencyKey,
-			RequestHash:    "differentRequestHash",
-		}, nil)
-
-		requestHash, err := s.validator.ValidateRequestHash(context.Background(), chainUUID, txRequest.Params, idempotencyKey)
-
-		assert.Empty(t, requestHash)
-		assert.True(t, errors.IsAlreadyExistsError(err))
-	})
 }
 
 func (s *transactionsTestSuite) TestTransactionValidator_ValidateChainExists() {

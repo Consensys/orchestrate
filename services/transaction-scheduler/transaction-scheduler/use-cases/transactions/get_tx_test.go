@@ -25,7 +25,7 @@ func TestGetTx_Execute(t *testing.T) {
 	mockDB := mocks.NewMockDB(ctrl)
 	mockTransactionRequestDA := mocks.NewMockTransactionRequestAgent(ctrl)
 	mockGetScheduleUC := mocks2.NewMockGetScheduleUseCase(ctrl)
-	tenantID := "tenantID"
+	tenants := []string{"tenantID"}
 
 	mockDB.EXPECT().TransactionRequest().Return(mockTransactionRequestDA).AnyTimes()
 
@@ -35,10 +35,10 @@ func TestGetTx_Execute(t *testing.T) {
 		txRequest := testutils.FakeTxRequest(0)
 		schedule := testutils2.FakeScheduleEntity()
 
-		mockTransactionRequestDA.EXPECT().FindOneByUUID(ctx, txRequest.UUID, []string{tenantID}).Return(txRequest, nil)
-		mockGetScheduleUC.EXPECT().Execute(ctx, txRequest.Schedules[0].UUID, []string{tenantID}).Return(schedule, nil)
+		mockTransactionRequestDA.EXPECT().FindOneByUUID(ctx, txRequest.UUID, tenants).Return(txRequest, nil)
+		mockGetScheduleUC.EXPECT().Execute(ctx, txRequest.Schedule.UUID, tenants).Return(schedule, nil)
 
-		result, err := usecase.Execute(ctx, txRequest.UUID, []string{tenantID})
+		result, err := usecase.Execute(ctx, txRequest.UUID, tenants)
 
 		assert.NoError(t, err)
 		assert.Equal(t, txRequest.UUID, result.UUID)
@@ -52,9 +52,9 @@ func TestGetTx_Execute(t *testing.T) {
 		uuid := "uuid"
 		expectedErr := errors.NotFoundError("error")
 
-		mockTransactionRequestDA.EXPECT().FindOneByUUID(ctx, uuid, []string{tenantID}).Return(nil, expectedErr)
+		mockTransactionRequestDA.EXPECT().FindOneByUUID(ctx, uuid, tenants).Return(nil, expectedErr)
 
-		response, err := usecase.Execute(ctx, uuid, []string{tenantID})
+		response, err := usecase.Execute(ctx, uuid, tenants)
 
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(getTxComponent), err)
@@ -64,10 +64,10 @@ func TestGetTx_Execute(t *testing.T) {
 		txRequest := testutils.FakeTxRequest(0)
 		expectedErr := fmt.Errorf("error")
 
-		mockTransactionRequestDA.EXPECT().FindOneByUUID(ctx, txRequest.UUID, []string{tenantID}).Return(txRequest, nil)
-		mockGetScheduleUC.EXPECT().Execute(ctx, txRequest.Schedules[0].UUID, []string{tenantID}).Return(nil, expectedErr)
+		mockTransactionRequestDA.EXPECT().FindOneByUUID(ctx, txRequest.UUID, tenants).Return(txRequest, nil)
+		mockGetScheduleUC.EXPECT().Execute(ctx, txRequest.Schedule.UUID, tenants).Return(nil, expectedErr)
 
-		response, err := usecase.Execute(ctx, txRequest.UUID, []string{tenantID})
+		response, err := usecase.Execute(ctx, txRequest.UUID, tenants)
 
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(getTxComponent), err)

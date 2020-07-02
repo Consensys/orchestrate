@@ -24,13 +24,6 @@ func NewScheduleModelFromEntities(schedule *entities.Schedule, tenantID string) 
 		TenantID: tenantID,
 	}
 
-	if schedule.TxRequest != nil {
-		scheduleModel.TransactionRequest = &models.TransactionRequest{
-			IdempotencyKey: schedule.TxRequest.IdempotencyKey,
-			UUID:           schedule.TxRequest.UUID,
-		}
-	}
-
 	for _, job := range schedule.Jobs {
 		scheduleModel.Jobs = append(scheduleModel.Jobs, NewJobModelFromEntities(job, &scheduleModel.ID))
 	}

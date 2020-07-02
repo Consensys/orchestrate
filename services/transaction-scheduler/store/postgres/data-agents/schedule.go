@@ -29,10 +29,6 @@ func (agent *PGSchedule) Insert(ctx context.Context, schedule *models.Schedule) 
 		schedule.UUID = uuid.Must(uuid.NewV4()).String()
 	}
 
-	if schedule.TransactionRequest != nil && schedule.TransactionRequestID == nil {
-		schedule.TransactionRequestID = &schedule.TransactionRequest.ID
-	}
-
 	err := pg.Insert(ctx, agent.db, schedule)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(scheduleDAComponent)

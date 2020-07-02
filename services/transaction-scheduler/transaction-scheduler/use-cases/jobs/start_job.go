@@ -23,7 +23,7 @@ import (
 const startJobComponent = "use-cases.start-job"
 
 type StartJobUseCase interface {
-	Execute(ctx context.Context, jobUUID, tenantID string) error
+	Execute(ctx context.Context, jobUUID string, tenants []string) error
 }
 
 // startJobUseCase is a use case to start a transaction job
@@ -43,14 +43,14 @@ func NewStartJobUseCase(db store.DB, kafkaProducer sarama.SyncProducer, topicsCf
 }
 
 // Execute sends a job to the Kafka topic
-func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID, tenantID string) error {
+func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants []string) error {
 	logger := log.WithContext(ctx)
 
 	logger.
 		WithField("job_uuid", jobUUID).
 		Debugf("starting job")
 
-	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, []string{tenantID})
+	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, tenants)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}

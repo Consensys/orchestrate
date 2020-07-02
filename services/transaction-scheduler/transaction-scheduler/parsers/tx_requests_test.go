@@ -10,15 +10,17 @@ import (
 	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 )
 
-func TestParsersTxRequest_NewModelFromEntity(t *testing.T) {
+func TestParsersTxRequest_NewTxRequestModelFromEntities(t *testing.T) {
 	reqHash := "reqHash"
+	expectedScheduleID := 1
 	txReqEntity := testutils2.FakeTxRequestEntity()
-	txReqModel := NewTxRequestModelFromEntities(txReqEntity, reqHash)
+	txReqModel := NewTxRequestModelFromEntities(txReqEntity, reqHash, expectedScheduleID)
 
 	assert.Equal(t, txReqEntity.IdempotencyKey, txReqModel.IdempotencyKey)
 	assert.Equal(t, txReqEntity.CreatedAt, txReqModel.CreatedAt)
 	assert.Equal(t, txReqEntity.UUID, txReqModel.UUID)
 	assert.Equal(t, txReqEntity.Params, txReqModel.Params)
+	assert.Equal(t, &expectedScheduleID, txReqModel.ScheduleID)
 }
 
 func TestParsersTxRequest_NewJobEntityFromSendTx(t *testing.T) {
