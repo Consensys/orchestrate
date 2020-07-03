@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/memory"
 )
@@ -91,7 +92,11 @@ func makeContext(
 	txctx := engine.NewTxContext()
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
-	_ = txctx.Envelope.SetFrom(ethcommon.HexToAddress("0x1")).SetNonce(nonce).SetChainIDString(chainID)
+	_ = txctx.Envelope.
+		SetFrom(ethcommon.HexToAddress("0x1")).
+		SetNonce(nonce).
+		SetChainIDString(chainID)
+	
 	txctx.WithContext(proxy.With(txctx.Context(), endpoint))
 
 	txctx.Set("expectedErrorCount", expectedErrorCount)
@@ -202,7 +207,15 @@ func TestChecker(t *testing.T) {
 	// On 7th execution envelope with nonce 14 but raw mode should be valid
 	txctx = makeContext("testURL", testKey1, false, 14, 0, 0, 0, "")
 	_ = txctx.Envelope.SetContextLabelsValue("txMode", "raw")
+	h(txctx)
+	assertTxContext(t, txctx)
+	recovering = tracker.Recovering(txctx.Envelope.PartitionKey()) > 0
+	assert.False(t, recovering, "NonceManager should not be recovering")
 
+	// On 8th execution envelope with nonce 14 but raw mode should be valid
+	txctx = makeContext("testURL", testKey1, false, 15, 0, 0, 0, "")
+	txctx.Envelope.ContextLabels["jobUUID"] = "randomUUID"
+	_ = txctx.Envelope.SetJobType(tx.JobType_ETH_RAW_TX)
 	h(txctx)
 	assertTxContext(t, txctx)
 	recovering = tracker.Recovering(txctx.Envelope.PartitionKey()) > 0

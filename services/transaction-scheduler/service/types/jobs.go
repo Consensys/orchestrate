@@ -29,7 +29,7 @@ type JobResponse struct {
 	ScheduleUUID string                `json:"scheduleUUID"`
 	Transaction  *types.ETHTransaction `json:"transaction"`
 	Logs         []*types.Log          `json:"logs"`
-	Labels       map[string]string     `json:"labels"`
+	Labels       map[string]string     `json:"labels,omitempty"`
 	Annotations  *types.Annotations    `json:"annotations,omitempty"`
 	Status       string                `json:"status"`
 	Type         string                `json:"type"`
