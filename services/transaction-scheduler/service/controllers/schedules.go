@@ -53,7 +53,7 @@ func (c *SchedulesController) create(rw http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	scheduleEntity, err := c.ucs.CreateSchedule().Execute(ctx, &entities.Schedule{}, multitenancy.TenantIDFromContext(ctx))
+	scheduleEntity, err := c.ucs.CreateSchedule().Execute(ctx, &entities.Schedule{TenantID: multitenancy.TenantIDFromContext(ctx)})
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return

@@ -1,6 +1,8 @@
 package storer
 
 import (
+	"fmt"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
@@ -59,6 +61,12 @@ func updateTxInScheduler(txctx *engine.TxContext, txSchedulerClient client.Trans
 			txctx.Envelope.GetID(),
 			&types.UpdateJobRequest{
 				Status: types2.StatusRecovering,
+				Message: fmt.Sprintf(
+					"transaction attempt with nonce %v and sender %v failed with error: %v",
+					txctx.Envelope.GetNonceString(),
+					txctx.Envelope.GetFromString(),
+					txctx.Envelope.Error(),
+				),
 			},
 		)
 		if storeErr != nil {

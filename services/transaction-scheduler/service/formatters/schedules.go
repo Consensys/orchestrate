@@ -8,6 +8,7 @@ import (
 func FormatScheduleResponse(schedule *entities.Schedule) *types.ScheduleResponse {
 	scheduleResponse := &types.ScheduleResponse{
 		UUID:      schedule.UUID,
+		TenantID:  schedule.TenantID,
 		CreatedAt: schedule.CreatedAt,
 		Jobs:      []*types.JobResponse{},
 	}

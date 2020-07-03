@@ -95,7 +95,7 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 					Nonce:          txctx.Envelope.GetNonceString(),
 					Value:          txctx.Envelope.GetValueString(),
 					GasPrice:       txctx.Envelope.GetGasPriceString(),
-					Gas:       txctx.Envelope.GetGasString(),
+					Gas:            txctx.Envelope.GetGasString(),
 					Raw:            txctx.Envelope.GetRaw(),
 					PrivateFrom:    txctx.Envelope.GetPrivateFrom(),
 					PrivateFor:     txctx.Envelope.GetPrivateFor(),
@@ -161,6 +161,12 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 		schedulerClient.EXPECT().
 			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
 				Status: types2.StatusRecovering,
+				Message: fmt.Sprintf(
+					"transaction attempt with nonce %v and sender %v failed with error: %v",
+					txctx.Envelope.GetNonceString(),
+					txctx.Envelope.GetFromString(),
+					txctx.Envelope.Error(),
+				),
 			}).
 			Return(&types.JobResponse{}, nil)
 
@@ -180,6 +186,12 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 		schedulerClient.EXPECT().
 			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
 				Status: types2.StatusRecovering,
+				Message: fmt.Sprintf(
+					"transaction attempt with nonce %v and sender %v failed with error: %v",
+					txctx.Envelope.GetNonceString(),
+					txctx.Envelope.GetFromString(),
+					txctx.Envelope.Error(),
+				),
 			}).
 			Return(nil, fmt.Errorf("error"))
 

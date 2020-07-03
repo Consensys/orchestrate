@@ -2,7 +2,6 @@ package jobs
 
 import (
 	"context"
-	"fmt"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
 	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
@@ -69,9 +68,8 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants 
 	}
 
 	jobLog := &models.Log{
-		JobID:   &jobModel.ID,
-		Status:  types.StatusStarted,
-		Message: fmt.Sprintf("message sent to partition %v, offset %v and topic %v", partition, offset, msgTopic),
+		JobID:  &jobModel.ID,
+		Status: types.StatusStarted,
 	}
 
 	if err = uc.db.Log().Insert(ctx, jobLog); err != nil {
@@ -80,6 +78,8 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants 
 
 	logger.
 		WithField("job_uuid", jobUUID).
+		WithField("partition", partition).
+		WithField("offset", offset).
 		Info("job started successfully")
 
 	return nil

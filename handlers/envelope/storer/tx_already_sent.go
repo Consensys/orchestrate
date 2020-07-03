@@ -53,11 +53,7 @@ func checkTxInScheduler(txctx *engine.TxContext, ec ethclient.ChainLedgerReader,
 		}
 
 		// We make sure that transaction has not already been sent to the ETH node by querying to chain
-		tx, _, err := ec.TransactionByHash(
-			txctx.Context(),
-			url,
-			job.Transaction.GetHash(),
-		)
+		tx, _, err := ec.TransactionByHash(txctx.Context(), url, job.Transaction.GetHash())
 		if err != nil {
 			// Connection to Ethereum node is broken
 			e := txctx.AbortWithError(err).ExtendComponent(component)
@@ -71,7 +67,7 @@ func checkTxInScheduler(txctx *engine.TxContext, ec ethclient.ChainLedgerReader,
 			txctx.Abort()
 			return
 		}
-	} else if job.Status == types.StatusMined || job.Status == types.StatusSent {
+	} else if job.Status == types.StatusRecovering || job.Status == types.StatusMined || job.Status == types.StatusSent {
 		// Transaction has already been sent so we abort execution
 		txctx.Logger.Warnf("transaction scheduler: transaction has already been sent")
 		txctx.Abort()

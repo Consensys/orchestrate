@@ -13,8 +13,9 @@ import (
 
 func FormatJobResponse(job *pkgtypes.Job) *types.JobResponse {
 	return &types.JobResponse{
-		UUID:      job.UUID,
-		ChainUUID: job.ChainUUID,
+		UUID:         job.UUID,
+		ChainUUID:    job.ChainUUID,
+		ScheduleUUID: job.ScheduleUUID,
 		Transaction: &pkgtypes.ETHTransaction{
 			Hash:           job.Transaction.Hash,
 			From:           job.Transaction.From,

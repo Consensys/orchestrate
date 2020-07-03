@@ -8,6 +8,7 @@ import (
 func NewScheduleEntityFromModels(scheduleModel *models.Schedule) *entities.Schedule {
 	schedule := &entities.Schedule{
 		UUID:      scheduleModel.UUID,
+		TenantID:  scheduleModel.TenantID,
 		CreatedAt: scheduleModel.CreatedAt,
 	}
 
@@ -18,10 +19,10 @@ func NewScheduleEntityFromModels(scheduleModel *models.Schedule) *entities.Sched
 	return schedule
 }
 
-func NewScheduleModelFromEntities(schedule *entities.Schedule, tenantID string) *models.Schedule {
+func NewScheduleModelFromEntities(schedule *entities.Schedule) *models.Schedule {
 	scheduleModel := &models.Schedule{
 		UUID:     schedule.UUID,
-		TenantID: tenantID,
+		TenantID: schedule.TenantID,
 	}
 
 	for _, job := range schedule.Jobs {

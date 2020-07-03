@@ -124,7 +124,7 @@ func (uc *sendTxUsecase) insertNewTxRequest(
 	txData, requestHash, chainUUID, tenantID string,
 ) (*entities.TxRequest, error) {
 	err := database.ExecuteInDBTx(uc.db, func(dbtx database.Tx) error {
-		schedule, der := uc.createScheduleUC.WithDBTransaction(dbtx.(store.Tx)).Execute(ctx, &entities.Schedule{}, tenantID)
+		schedule, der := uc.createScheduleUC.WithDBTransaction(dbtx.(store.Tx)).Execute(ctx, &entities.Schedule{TenantID: tenantID})
 		if der != nil {
 			return der
 		}

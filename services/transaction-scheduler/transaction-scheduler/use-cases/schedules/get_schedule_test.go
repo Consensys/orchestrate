@@ -28,7 +28,7 @@ func TestGetSchedule_Execute(t *testing.T) {
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		scheduleEntity := testutils.FakeScheduleEntity()
-		scheduleModel := parsers.NewScheduleModelFromEntities(scheduleEntity, tenantID)
+		scheduleModel := parsers.NewScheduleModelFromEntities(scheduleEntity)
 		expectedResponse := parsers.NewScheduleEntityFromModels(scheduleModel)
 
 		mockDB.EXPECT().Schedule().Return(mockScheduleDA).Times(1)
@@ -53,18 +53,18 @@ func TestGetSchedule_Execute(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 
 		mockDB.EXPECT().Schedule().Return(mockScheduleDA)
-	
+
 		mockScheduleDA.EXPECT().FindOneByUUID(gomock.Any(), scheduleEntity.UUID, []string{tenantID}).Return(nil, expectedErr)
-	
+
 		scheduleResponse, err := usecase.Execute(ctx, scheduleEntity.UUID, []string{tenantID})
-	
+
 		assert.Nil(t, scheduleResponse)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createScheduleComponent), err)
 	})
 
 	t.Run("should fail with same error if FindOne fails for jobs", func(t *testing.T) {
 		scheduleEntity := testutils.FakeScheduleEntity()
-		scheduleModel := parsers.NewScheduleModelFromEntities(scheduleEntity, tenantID)
+		scheduleModel := parsers.NewScheduleModelFromEntities(scheduleEntity)
 		expectedErr := errors.NotFoundError("error")
 
 		mockDB.EXPECT().Schedule().Return(mockScheduleDA)
@@ -76,9 +76,9 @@ func TestGetSchedule_Execute(t *testing.T) {
 		mockJobDA.EXPECT().
 			FindOneByUUID(gomock.Any(), scheduleModel.Jobs[0].UUID, []string{tenantID}).
 			Return(nil, expectedErr)
-	
+
 		scheduleResponse, err := usecase.Execute(ctx, scheduleEntity.UUID, []string{tenantID})
-	
+
 		assert.Nil(t, scheduleResponse)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createScheduleComponent), err)
 	})

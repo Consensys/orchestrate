@@ -20,7 +20,6 @@ func TestCreateSchedule_Execute(t *testing.T) {
 
 	mockScheduleDA := mocks.NewMockScheduleAgent(ctrl)
 	mockDB := mocks.NewMockDB(ctrl)
-	tenantID := "tenantID"
 
 	mockDB.EXPECT().Schedule().Return(mockScheduleDA).AnyTimes()
 
@@ -38,7 +37,7 @@ func TestCreateSchedule_Execute(t *testing.T) {
 				return nil
 			})
 
-		scheduleResponse, err := usecase.Execute(ctx, scheduleEntity, tenantID)
+		scheduleResponse, err := usecase.Execute(ctx, scheduleEntity)
 
 		assert.NoError(t, err)
 		assert.Equal(t, scheduleEntity.UUID, scheduleResponse.UUID)
@@ -50,7 +49,7 @@ func TestCreateSchedule_Execute(t *testing.T) {
 
 		mockScheduleDA.EXPECT().Insert(ctx, gomock.Any()).Return(expectedErr)
 
-		scheduleResponse, err := usecase.Execute(ctx, scheduleEntity, tenantID)
+		scheduleResponse, err := usecase.Execute(ctx, scheduleEntity)
 		assert.Nil(t, scheduleResponse)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createScheduleComponent), err)
 	})

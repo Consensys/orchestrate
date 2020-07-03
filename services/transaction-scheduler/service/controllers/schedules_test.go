@@ -83,9 +83,8 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_Create() {
 		scheduleEntityResp := testutils2.FakeScheduleEntity()
 
 		s.createScheduleUC.EXPECT().
-			Execute(gomock.Any(), &entities.Schedule{}, s.tenantID).
-			Return(scheduleEntityResp, nil).
-			Times(1)
+			Execute(gomock.Any(), &entities.Schedule{TenantID: s.tenantID}).
+			Return(scheduleEntityResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -103,7 +102,7 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_Create() {
 			WithContext(s.ctx)
 
 		s.createScheduleUC.EXPECT().
-			Execute(gomock.Any(), &entities.Schedule{}, s.tenantID).
+			Execute(gomock.Any(), &entities.Schedule{TenantID: s.tenantID}).
 			Return(nil, errors.InvalidParameterError("error")).
 			Times(1)
 
@@ -120,7 +119,7 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_GetOne() {
 
 		s.getScheduleUC.EXPECT().
 			Execute(gomock.Any(), "scheduleUUID", []string{s.tenantID}).
-			Return(scheduleEntityResp, nil).Times(1)
+			Return(scheduleEntityResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -138,8 +137,7 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_GetOne() {
 
 		s.getScheduleUC.EXPECT().
 			Execute(gomock.Any(), "scheduleUUID", []string{s.tenantID}).
-			Return(nil, errors.NotFoundError("error")).
-			Times(1)
+			Return(nil, errors.NotFoundError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusNotFound, rw.Code)
@@ -152,10 +150,8 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_GetAll() {
 		httpRequest := httptest.NewRequest(http.MethodGet, "/schedules", nil).WithContext(s.ctx)
 		schedulesEntities := []*entities.Schedule{testutils2.FakeScheduleEntity()}
 
-		s.getSchedulesUC.EXPECT().
-			Execute(gomock.Any(), []string{s.tenantID}).
-			Return(schedulesEntities, nil).
-			Times(1)
+		s.getSchedulesUC.EXPECT().Execute(gomock.Any(), []string{s.tenantID}).Return(schedulesEntities, nil)
+
 		s.router.ServeHTTP(rw, httpRequest)
 
 		response := []*types.ScheduleResponse{formatters.FormatScheduleResponse(schedulesEntities[0])}
@@ -172,8 +168,7 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_GetAll() {
 			WithContext(s.ctx)
 		s.getScheduleUC.EXPECT().
 			Execute(gomock.Any(), "scheduleUUID", []string{s.tenantID}).
-			Return(nil, errors.NotFoundError("error")).
-			Times(1)
+			Return(nil, errors.NotFoundError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusNotFound, rw.Code)

@@ -37,18 +37,18 @@ func (m *MockCreateScheduleUseCase) EXPECT() *MockCreateScheduleUseCaseMockRecor
 }
 
 // Execute mocks base method
-func (m *MockCreateScheduleUseCase) Execute(ctx context.Context, schedule *entities.Schedule, tenantID string) (*entities.Schedule, error) {
+func (m *MockCreateScheduleUseCase) Execute(ctx context.Context, schedule *entities.Schedule) (*entities.Schedule, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, schedule, tenantID)
+	ret := m.ctrl.Call(m, "Execute", ctx, schedule)
 	ret0, _ := ret[0].(*entities.Schedule)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockCreateScheduleUseCaseMockRecorder) Execute(ctx, schedule, tenantID interface{}) *gomock.Call {
+func (mr *MockCreateScheduleUseCaseMockRecorder) Execute(ctx, schedule interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateScheduleUseCase)(nil).Execute), ctx, schedule, tenantID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateScheduleUseCase)(nil).Execute), ctx, schedule)
 }
 
 // WithDBTransaction mocks base method

@@ -35,7 +35,8 @@ func TestTransactionUpdater(t *testing.T) {
 
 		schedulerClient.EXPECT().
 			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
-				Status: types2.StatusFailed,
+				Status:  types2.StatusFailed,
+				Message: txctx.Envelope.Error(),
 			}).
 			Return(&types.JobResponse{}, nil)
 

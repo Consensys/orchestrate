@@ -30,7 +30,7 @@ func TestGetSchedules_Execute(t *testing.T) {
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		scheduleEntity := testutils.FakeScheduleEntity()
-		scheduleModel := parsers.NewScheduleModelFromEntities(scheduleEntity, tenantID)
+		scheduleModel := parsers.NewScheduleModelFromEntities(scheduleEntity)
 		expectedResponse := []*entities.Schedule{parsers.NewScheduleEntityFromModels(scheduleModel)}
 
 		mockDB.EXPECT().Schedule().Return(mockScheduleDA).Times(1)
@@ -68,7 +68,7 @@ func TestGetSchedules_Execute(t *testing.T) {
 	t.Run("should fail with same error if FindOne fails for jobs", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 		scheduleEntity := testutils.FakeScheduleEntity()
-		scheduleModel := parsers.NewScheduleModelFromEntities(scheduleEntity, tenantID)
+		scheduleModel := parsers.NewScheduleModelFromEntities(scheduleEntity)
 
 		mockDB.EXPECT().Schedule().Return(mockScheduleDA).Times(1)
 		mockDB.EXPECT().Job().Return(mockJobDA).Times(1)

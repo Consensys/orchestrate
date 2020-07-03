@@ -13,9 +13,8 @@ import (
 )
 
 func TestParsersSchedule_NewModelFromEntity(t *testing.T) {
-	tenantID := "_"
 	scheduleEntity := testutils2.FakeScheduleEntity()
-	scheduleModel := NewScheduleModelFromEntities(scheduleEntity, tenantID)
+	scheduleModel := NewScheduleModelFromEntities(scheduleEntity)
 	finalScheduleEntity := NewScheduleEntityFromModels(scheduleModel)
 
 	expectedJSON, _ := json.Marshal(scheduleEntity)
@@ -27,7 +26,7 @@ func TestParsersSchedule_NewEntityFromModel(t *testing.T) {
 	tenantID := "_"
 	scheduleModel := testutils.FakeSchedule(tenantID)
 	scheduleEntity := NewScheduleEntityFromModels(scheduleModel)
-	finalScheduleModel := NewScheduleModelFromEntities(scheduleEntity, tenantID)
+	finalScheduleModel := NewScheduleModelFromEntities(scheduleEntity)
 
 	assert.Equal(t, finalScheduleModel.UUID, scheduleModel.UUID)
 	assert.Equal(t, finalScheduleModel.TenantID, scheduleModel.TenantID)

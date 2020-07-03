@@ -61,8 +61,7 @@ func (uc *createJobUseCase) Execute(ctx context.Context, jobEntity *types.Job, t
 
 	jobModel := parsers.NewJobModelFromEntities(jobEntity, &schedule.ID)
 	jobModel.Logs = append(jobModel.Logs, &models.Log{
-		Status:  types.StatusCreated,
-		Message: "Job created",
+		Status: types.StatusCreated,
 	})
 
 	err = database.ExecuteInDBTx(uc.db, func(tx database.Tx) error {

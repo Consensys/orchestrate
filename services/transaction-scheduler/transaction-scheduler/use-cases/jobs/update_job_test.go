@@ -42,6 +42,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 
 	tenantID := "tenantID"
 	newStatus := types.StatusPending
+	logMessage := "message"
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		jobEntity := testutils3.FakeJob()
@@ -54,7 +55,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		mockJobDA.EXPECT().Update(gomock.Any(), jobModel).Return(nil)
 		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
 
-		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, []string{tenantID})
+		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, logMessage, []string{tenantID})
 
 		assert.NoError(t, err)
 	})
@@ -69,7 +70,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 			Return(jobModel, nil).Times(2)
 		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
 
-		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, []string{tenantID})
+		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, logMessage, []string{tenantID})
 
 		assert.NoError(t, err)
 	})
@@ -84,7 +85,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		mockTransactionDA.EXPECT().Update(gomock.Any(), jobModel.Transaction).Return(nil)
 		mockJobDA.EXPECT().Update(gomock.Any(), jobModel).Return(nil)
 
-		_, err := usecase.Execute(context.Background(), jobEntity, "", []string{multitenancy.Wildcard})
+		_, err := usecase.Execute(context.Background(), jobEntity, "", logMessage, []string{multitenancy.Wildcard})
 
 		assert.NoError(t, err)
 	})
@@ -98,7 +99,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 
 		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), jobEntity.UUID, []string{tenantID}).Return(jobModel, expectedErr)
 
-		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, []string{tenantID})
+		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, logMessage, []string{tenantID})
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(updateJobComponent), err)
 	})
 
@@ -112,7 +113,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), gomock.Any(), []string{tenantID}).Return(jobModel, nil)
 		mockTransactionDA.EXPECT().Update(gomock.Any(), jobModel.Transaction).Return(expectedErr)
 
-		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, []string{tenantID})
+		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, logMessage, []string{tenantID})
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(updateJobComponent), err)
 	})
 
@@ -124,7 +125,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 
 		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), gomock.Any(), []string{"notAllowedTenant"}).Return(jobModel, nil)
 
-		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, []string{"notAllowedTenant"})
+		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, logMessage, []string{"notAllowedTenant"})
 		assert.True(t, errors.IsUnauthorizedError(err))
 	})
 
@@ -139,7 +140,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		mockTransactionDA.EXPECT().Update(gomock.Any(), jobModel.Transaction).Return(nil)
 		mockJobDA.EXPECT().Update(gomock.Any(), jobModel).Return(expectedErr)
 
-		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, []string{tenantID})
+		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, logMessage, []string{tenantID})
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(updateJobComponent), err)
 	})
 
@@ -155,7 +156,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		mockJobDA.EXPECT().Update(gomock.Any(), jobModel).Return(nil)
 		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(expectedErr)
 
-		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, []string{tenantID})
+		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, logMessage, []string{tenantID})
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(updateJobComponent), err)
 	})
 
@@ -172,7 +173,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, []string{tenantID}).Return(nil, expectedErr)
 
-		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, []string{tenantID})
+		_, err := usecase.Execute(context.Background(), jobEntity, newStatus, logMessage, []string{tenantID})
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(updateJobComponent), err)
 	})
 }

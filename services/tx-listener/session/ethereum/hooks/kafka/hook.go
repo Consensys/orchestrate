@@ -146,7 +146,7 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 				TxHash:   job.Transaction.Hash,
 			},
 			Receipt: job.Receipt,
-			Chain:   job.ChainUUID, // TODO: Return same chain received in the request
+			Chain:   c.Name,
 		}
 
 		err = hk.decodeReceipt(receiptLogCtx, c, txResponse.Receipt)
@@ -181,7 +181,8 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 			ctx,
 			txResponse.GetId(),
 			&schedulertypes.UpdateJobRequest{
-				Status: types2.StatusMined,
+				Status:  types2.StatusMined,
+				Message: fmt.Sprintf("Transaction mined in block %v", block.NumberU64()),
 			},
 		)
 		if err != nil {

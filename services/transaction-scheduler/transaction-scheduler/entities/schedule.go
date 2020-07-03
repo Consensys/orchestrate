@@ -8,6 +8,7 @@ import (
 
 type Schedule struct {
 	UUID      string
+	TenantID  string
 	Jobs      []*types.Job
 	CreatedAt time.Time
 }

@@ -19,7 +19,7 @@ import (
 const updateJobComponent = "use-cases.update-job"
 
 type UpdateJobUseCase interface {
-	Execute(ctx context.Context, jobEntity *types.Job, newStatus string, tenants []string) (*types.Job, error)
+	Execute(ctx context.Context, jobEntity *types.Job, newStatus, logMessage string, tenants []string) (*types.Job, error)
 }
 
 // updateJobUseCase is a use case to create a new transaction job
@@ -35,7 +35,7 @@ func NewUpdateJobUseCase(db store.DB) UpdateJobUseCase {
 }
 
 // Execute validates and creates a new transaction job
-func (uc *updateJobUseCase) Execute(ctx context.Context, jobEntity *types.Job, newStatus string, tenants []string) (*types.Job, error) {
+func (uc *updateJobUseCase) Execute(ctx context.Context, jobEntity *types.Job, newStatus, logMessage string, tenants []string) (*types.Job, error) {
 	log.WithContext(ctx).
 		WithField("tenants", tenants).
 		WithField("job_uuid", jobEntity.UUID).
@@ -74,7 +74,7 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, jobEntity *types.Job, n
 			jobLogModel := &models.Log{
 				JobID:   &jobModel.ID,
 				Status:  newStatus,
-				Message: "Job updated",
+				Message: logMessage,
 			}
 			if der := tx.(store.Tx).Log().Insert(ctx, jobLogModel); der != nil {
 				return der

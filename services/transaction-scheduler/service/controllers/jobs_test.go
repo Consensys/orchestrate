@@ -293,7 +293,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_Update() {
 
 		jobEntityReq := formatters.FormatJobUpdateRequest(jobRequest)
 		jobEntityReq.UUID = jobEntityRes.UUID
-		s.updateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), jobRequest.Status, s.tenants).Return(jobEntityRes, nil)
+		s.updateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), jobRequest.Status, "", s.tenants).Return(jobEntityRes, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 

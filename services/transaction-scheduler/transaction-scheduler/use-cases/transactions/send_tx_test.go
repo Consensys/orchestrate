@@ -271,7 +271,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 
 		s.Validators.EXPECT().ValidateFields(gomock.Any(), txRequest).Return(nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey).Return(nil, errors.NotFoundError(""))
-		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any(), tenantID).Return(txRequest.Schedule, expectedErr)
+		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(txRequest.Schedule, expectedErr)
 
 		response, err := s.usecase.Execute(ctx, txRequest, txData, chainUUID, tenantID)
 
@@ -287,7 +287,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 
 		s.Validators.EXPECT().ValidateFields(gomock.Any(), txRequest).Return(nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey).Return(nil, errors.NotFoundError(""))
-		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any(), tenantID).Return(txRequest.Schedule, nil)
+		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(txRequest.Schedule, nil)
 		s.ScheduleDA.EXPECT().FindOneByUUID(ctx, txRequest.Schedule.UUID, tenants).Return(nil, expectedErr)
 
 		response, err := s.usecase.Execute(ctx, txRequest, txData, chainUUID, tenantID)
@@ -304,7 +304,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 
 		s.Validators.EXPECT().ValidateFields(gomock.Any(), txRequest).Return(nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey).Return(nil, errors.NotFoundError(""))
-		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any(), tenantID).Return(txRequest.Schedule, nil)
+		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(txRequest.Schedule, nil)
 		s.ScheduleDA.EXPECT().FindOneByUUID(ctx, txRequest.Schedule.UUID, tenants).Return(scheduleModel, nil)
 		s.TxRequestDA.EXPECT().Insert(ctx, gomock.Any()).Return(expectedErr)
 
@@ -323,7 +323,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 
 		s.Validators.EXPECT().ValidateFields(gomock.Any(), txRequest).Return(nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey).Return(nil, errors.NotFoundError(""))
-		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any(), tenantID).Return(txRequest.Schedule, nil)
+		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(txRequest.Schedule, nil)
 		s.ScheduleDA.EXPECT().FindOneByUUID(ctx, txRequest.Schedule.UUID, tenants).Return(scheduleModel, nil)
 		s.TxRequestDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
 		s.CreateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), tenants).Return(txRequest.Schedule.Jobs[0], expectedErr)
@@ -343,7 +343,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 
 		s.Validators.EXPECT().ValidateFields(gomock.Any(), txRequest).Return(nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey).Return(nil, errors.NotFoundError(""))
-		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any(), tenantID).Return(txRequest.Schedule, nil)
+		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(txRequest.Schedule, nil)
 		s.ScheduleDA.EXPECT().FindOneByUUID(ctx, txRequest.Schedule.UUID, tenants).Return(scheduleModel, nil)
 		s.TxRequestDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
 		s.CreateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), tenants).Return(txRequest.Schedule.Jobs[0], nil)
@@ -364,7 +364,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 
 		s.Validators.EXPECT().ValidateFields(gomock.Any(), txRequest).Return(nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey).Return(nil, errors.NotFoundError(""))
-		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any(), tenantID).Return(txRequest.Schedule, nil)
+		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(txRequest.Schedule, nil)
 		s.ScheduleDA.EXPECT().FindOneByUUID(ctx, txRequest.Schedule.UUID, tenants).Return(scheduleModel, nil)
 		s.TxRequestDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
 		s.CreateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), tenants).Return(txRequest.Schedule.Jobs[0], nil)
@@ -389,7 +389,7 @@ func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, jobT
 
 	s.Validators.EXPECT().ValidateFields(gomock.Any(), txRequest).Return(nil)
 	s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey).Return(nil, errors.NotFoundError(""))
-	s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any(), tenantID).Return(txRequest.Schedule, nil)
+	s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(txRequest.Schedule, nil)
 	s.ScheduleDA.EXPECT().FindOneByUUID(ctx, txRequest.Schedule.UUID, tenants).Return(scheduleModel, nil)
 	s.TxRequestDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
 	s.CreateJobUC.EXPECT().

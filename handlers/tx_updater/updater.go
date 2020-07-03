@@ -14,7 +14,7 @@ func TransactionUpdater(txSchedulerClient txscheduler.TransactionSchedulerClient
 	return func(txctx *engine.TxContext) {
 		txctx.Next()
 
-		// TODO: Remove next statement once envelope store is removed
+		// TODO: Remove statement once envelope store is removed
 		if txctx.Envelope.ContextLabels["jobUUID"] == "" {
 			return
 		}
@@ -23,8 +23,11 @@ func TransactionUpdater(txSchedulerClient txscheduler.TransactionSchedulerClient
 			return
 		}
 
+		// TODO: Improvement of the log message will be done when we move to clean architecture
+		// TODO: because at the moment it is difficult to know what error messages need to be sent to users and which ones not.
 		_, err := txSchedulerClient.UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
-			Status: types2.StatusFailed,
+			Status:  types2.StatusFailed,
+			Message: txctx.Envelope.Error(),
 		})
 
 		if err != nil {

@@ -15,7 +15,7 @@ import (
 const createScheduleComponent = "use-cases.create-schedule"
 
 type CreateScheduleUseCase interface {
-	Execute(ctx context.Context, schedule *entities.Schedule, tenantID string) (*entities.Schedule, error)
+	Execute(ctx context.Context, schedule *entities.Schedule) (*entities.Schedule, error)
 	WithDBTransaction(dbtx store.Tx) CreateScheduleUseCase
 }
 
@@ -37,10 +37,10 @@ func (uc createScheduleUseCase) WithDBTransaction(dbtx store.Tx) CreateScheduleU
 }
 
 // Execute validates and creates a new transaction schedule
-func (uc *createScheduleUseCase) Execute(ctx context.Context, schedule *entities.Schedule, tenantID string) (*entities.Schedule, error) {
+func (uc *createScheduleUseCase) Execute(ctx context.Context, schedule *entities.Schedule) (*entities.Schedule, error) {
 	log.WithContext(ctx).Debug("creating new schedule")
 
-	scheduleModel := parsers.NewScheduleModelFromEntities(schedule, tenantID)
+	scheduleModel := parsers.NewScheduleModelFromEntities(schedule)
 
 	if err := uc.db.Schedule().Insert(ctx, scheduleModel); err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createScheduleComponent)

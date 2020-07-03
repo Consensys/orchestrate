@@ -20,16 +20,18 @@ type UpdateJobRequest struct {
 	Annotations *types.Annotations    `json:"annotations,omitempty"`
 	Transaction *types.ETHTransaction `json:"transaction,omitempty"`
 	Status      string                `json:"status,omitempty"`
+	Message     string                `json:"message,omitempty"`
 }
 
 type JobResponse struct {
-	UUID        string                `json:"uuid"`
-	ChainUUID   string                `json:"chainUUID"`
-	Transaction *types.ETHTransaction `json:"transaction"`
-	Logs        []*types.Log          `json:"logs"`
-	Labels      map[string]string     `json:"labels"`
-	Annotations *types.Annotations    `json:"annotations,omitempty"`
-	Status      string                `json:"status"`
-	Type        string                `json:"type"`
-	CreatedAt   time.Time             `json:"createdAt"`
+	UUID         string                `json:"uuid"`
+	ChainUUID    string                `json:"chainUUID"`
+	ScheduleUUID string                `json:"scheduleUUID"`
+	Transaction  *types.ETHTransaction `json:"transaction"`
+	Logs         []*types.Log          `json:"logs"`
+	Labels       map[string]string     `json:"labels"`
+	Annotations  *types.Annotations    `json:"annotations,omitempty"`
+	Status       string                `json:"status"`
+	Type         string                `json:"type"`
+	CreatedAt    time.Time             `json:"createdAt"`
 }
