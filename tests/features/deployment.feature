@@ -14,7 +14,7 @@ Feature: Deploy ERC20 contract
     And I register the following faucets
       | Name                       | ChainRule     | CreditorAccount                         | MaxBalance          | Amount              | Cooldown | Headers.Authorization    |
       | besu-faucet-{{scenarioID}} | {{besu.UUID}} | {{global.nodes.besu.fundedAccounts[0]}} | 1000000000000000000 | 1000000000000000000 | 1s       | Bearer {{tenant1.token}} |
-      | geth-faucet-{{scenarioID}} | {{geth.UUID}} | {{global.nodes.geth.fundedAccounts[1]}} | 1000000000000000000 | 1000000000000000000 | 1s       | Bearer {{tenant1.token}} |
+      | geth-faucet-{{scenarioID}} | {{geth.UUID}} | {{global.nodes.geth.fundedAccounts[0]}} | 1000000000000000000 | 1000000000000000000 | 1s       | Bearer {{tenant1.token}} |
     And I have created the following accounts
       | alias    | ChainName           | ContextLabels.faucetChildTxID | Headers.Authorization    |
       | account1 | besu-{{scenarioID}} | {{random.uuid}}               | Bearer {{tenant1.token}} |

@@ -81,20 +81,6 @@ func (hk *Hook) AfterNewBlockEnvelope(ctx context.Context, c *dynamic.Chain, blo
 		txResponses = append(txResponses, e.TxResponse())
 	}
 
-	// Prepare messages to be produced
-	msgs, err := hk.prepareEnvelopeMsgs(txResponses, hk.conf.OutTopic, c.UUID)
-	if err != nil {
-		log.FromContext(blockLogCtx).WithError(err).Errorf("failed to prepare messages")
-		return err
-	}
-
-	// Produce messages in Apache Kafka
-	err = hk.produce(msgs)
-	if err != nil {
-		log.FromContext(blockLogCtx).WithError(err).Errorf("failed to produce message")
-		return err
-	}
-
 	// Update transactions to "MINED"
 	for _, txResponse := range txResponses {
 		if txResponse.Id == "" {
@@ -111,6 +97,20 @@ func (hk *Hook) AfterNewBlockEnvelope(ctx context.Context, c *dynamic.Chain, blo
 		if err != nil {
 			log.FromContext(blockLogCtx).WithError(err).Warnf("failed to update status of %s to MINED", txResponse.Id)
 		}
+	}
+
+	// Prepare messages to be produced
+	msgs, err := hk.prepareEnvelopeMsgs(txResponses, hk.conf.OutTopic, c.UUID)
+	if err != nil {
+		log.FromContext(blockLogCtx).WithError(err).Errorf("failed to prepare messages")
+		return err
+	}
+
+	// Produce messages in Apache Kafka
+	err = hk.produce(msgs)
+	if err != nil {
+		log.FromContext(blockLogCtx).WithError(err).Errorf("failed to produce message")
+		return err
 	}
 
 	log.FromContext(blockLogCtx).Infof("block %v processed", block.NumberU64())
@@ -157,20 +157,6 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 		txResponses = append(txResponses, txResponse)
 	}
 
-	// Prepare messages to be produced
-	msgs, err := hk.prepareEnvelopeMsgs(txResponses, hk.conf.OutTopic, c.UUID)
-	if err != nil {
-		log.FromContext(blockLogCtx).WithError(err).Errorf("failed to prepare messages")
-		return err
-	}
-
-	// Produce messages in Apache Kafka
-	err = hk.produce(msgs)
-	if err != nil {
-		log.FromContext(blockLogCtx).WithError(err).Errorf("failed to produce message")
-		return err
-	}
-
 	// Update transactions to "MINED"
 	for _, txResponse := range txResponses {
 		if txResponse.Id == "" {
@@ -188,6 +174,20 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 		if err != nil {
 			log.FromContext(blockLogCtx).WithError(err).Warnf("failed to update status of %s to MINED", txResponse.Id)
 		}
+	}
+
+	// Prepare messages to be produced
+	msgs, err := hk.prepareEnvelopeMsgs(txResponses, hk.conf.OutTopic, c.UUID)
+	if err != nil {
+		log.FromContext(blockLogCtx).WithError(err).Errorf("failed to prepare messages")
+		return err
+	}
+
+	// Produce messages in Apache Kafka
+	err = hk.produce(msgs)
+	if err != nil {
+		log.FromContext(blockLogCtx).WithError(err).Errorf("failed to produce message")
+		return err
 	}
 
 	log.FromContext(blockLogCtx).Infof("block %v processed", block.NumberU64())

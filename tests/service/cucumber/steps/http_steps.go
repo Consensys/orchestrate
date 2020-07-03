@@ -7,9 +7,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"reflect"
-	"regexp"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/cucumber/godog"
@@ -171,38 +168,20 @@ func (sc *ScenarioContext) responseShouldHaveFields(table *gherkin.PickleStepArg
 		return fmt.Errorf("expected response code body to math field but it errored with %s", err.Error())
 	}
 	sc.httpResponse.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+	var resp interface{}
+	if err := json.Unmarshal(body, &resp); err != nil {
+		return err
+	}
 
 	for c, col := range rowResponse.Cells {
 		fieldName := header.Cells[c].Value
-		respVal, err := navJSONResponse(fieldName, body)
+		field, err := utils.GetField(fieldName, reflect.ValueOf(resp))
 		if err != nil {
 			return err
 		}
-		if respVal == nil {
-			continue
-		}
 
-		field := reflect.ValueOf(respVal)
-		if col.Value == "~" {
-			if utils.IsEqual("", field) {
-				return fmt.Errorf("response did not expected %s to be empty", fmt.Sprintf("%v", fieldName))
-			}
-			continue
-		}
-
-		var aliasRE = regexp.MustCompile(`{{(.*)}}`)
-		if aliasRE.MatchString(col.Value) {
-			alias := aliasRE.FindStringSubmatch(col.Value)[1]
-			val, _ := sc.aliases.Get(sc.Pickle.Id, alias)
-			if !utils.IsEqual(val.(string), field) {
-				return fmt.Errorf("response %s expected %s but got %s", fieldName, val, fmt.Sprintf("%v", field))
-			}
-
-			continue
-		}
-
-		if !utils.IsEqual(col.Value, field) {
-			return fmt.Errorf("response %s expected %s but got %s", fieldName, col.Value, fmt.Sprintf("%v", field))
+		if err := utils.CmpField(field, col.Value); err != nil {
+			return fmt.Errorf("(%d/%d) %v %v", c+1, len(rowResponse.Cells), fieldName, err)
 		}
 	}
 	return nil
@@ -226,21 +205,30 @@ func (sc *ScenarioContext) iStoreTheUUIDAs(alias string) (err error) {
 	return
 }
 
-func (sc *ScenarioContext) iStoreResponseFieldAs(navigation, alias string) (err error) {
+func (sc *ScenarioContext) iRegisterTheFollowingResponseFields(table *gherkin.PickleStepArgument_PickleTable) (err error) {
 	body, err := ioutil.ReadAll(sc.httpResponse.Body)
 	if err != nil {
 		return fmt.Errorf("expected response code body to math field but it errored with %s", err.Error())
 	}
 	sc.httpResponse.Body = ioutil.NopCloser(bytes.NewBuffer(body))
-
-	var val interface{}
-	val, err = navJSONResponse(navigation, body)
-	if err != nil || val == nil {
-		return
+	var resp interface{}
+	if err := json.Unmarshal(body, &resp); err != nil {
+		return err
 	}
 
-	sc.aliases.Set(val.(string), sc.Pickle.Id, alias)
-	return
+	aliasTable := utils.ExtractTable(table, []string{aliasHeaderValue})
+	for i, row := range aliasTable.Rows[1:] {
+
+		alias := row.Cells[0].Value
+		bodyPath := table.Rows[i+1].Cells[0].Value
+		val, err := utils.GetField(bodyPath, reflect.ValueOf(resp))
+		if err != nil {
+			return err
+		}
+		sc.aliases.Set(val, sc.Pickle.Id, alias)
+	}
+
+	return nil
 }
 
 func (sc *ScenarioContext) iSleep(s string) error {
@@ -254,33 +242,6 @@ func (sc *ScenarioContext) iSleep(s string) error {
 	return nil
 }
 
-func navJSONResponse(nav string, bodyBytes []byte) (interface{}, error) {
-	var resp interface{}
-	if err := json.Unmarshal(bodyBytes, &resp); err != nil {
-		return "", err
-	}
-
-	var result interface{}
-	// Navigate throw the json response
-	navigation := strings.Split(nav, ".")
-	for _, navStep := range navigation {
-		if resp == nil {
-			return "", fmt.Errorf("could not find response field '%s'", nav)
-		}
-		if jdx, err := strconv.Atoi(navStep); err == nil {
-			respAcum := resp.([]interface{})
-			result = respAcum[jdx]
-			resp = result
-		} else {
-			respAcum := resp.(map[string]interface{})
-			result = respAcum[navStep]
-			resp = result
-		}
-	}
-
-	return result, nil
-}
-
 func initHTTP(s *godog.ScenarioContext, sc *ScenarioContext) {
 
 	s.BeforeScenario(sc.resetResponse)
@@ -288,7 +249,7 @@ func initHTTP(s *godog.ScenarioContext, sc *ScenarioContext) {
 	s.Step(`^I send "(GET|POST|PATCH|PUT|DELETE)" request to "([^"]*)"$`, sc.iSendRequestTo)
 	s.Step(`^I send "(GET|POST|PATCH|PUT|DELETE)" request to "([^"]*)" with json:$`, sc.iSendRequestToWithJSON)
 	s.Step(`^I store the UUID as "([^"]*)"`, sc.iStoreTheUUIDAs)
-	s.Step(`^I store response field "([^"]*)" as "([^"]*)"`, sc.iStoreResponseFieldAs)
+	s.Step(`^I register the following response fields$`, sc.preProcessTableStep(sc.iRegisterTheFollowingResponseFields))
 	s.Step(`^the response code should be (\d+)$`, sc.theResponseCodeShouldBe)
 	s.Step(`^the response should match json:$`, sc.theResponseShouldMatchJSON)
 	s.Step(`^Response should have the following fields$`, sc.preProcessTableStep(sc.responseShouldHaveFields))

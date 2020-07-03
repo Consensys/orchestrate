@@ -44,7 +44,8 @@ func (f *Faucet) prepareMsg(ctx context.Context, r *types.Request, elected strin
 	if r.ChildTxID != "" {
 		_ = b.SetID(r.ChildTxID)
 	} else {
-		_ = b.SetID(uuid.Must(uuid.NewV4()).String())
+		r.ChildTxID = uuid.Must(uuid.NewV4()).String()
+		_ = b.SetID(r.ChildTxID)
 	}
 
 	if authToken := authutils.AuthorizationFromContext(ctx); authToken != "" {
@@ -94,7 +95,9 @@ func (f *Faucet) Credit(ctx context.Context, r *types.Request) (*big.Int, error)
 		"kafka.out.partition": partition,
 		"kafka.out.offset":    offset,
 		"kafka.out.topic":     msg.Topic,
-	}).Tracef("faucet: message produced")
+		"id":                  r.ChildTxID,
+		"parentTxID":          r.ParentTxID,
+	}).Info("faucet: message produced")
 
 	return r.FaucetsCandidates[r.ElectedFaucet].Amount, nil
 }

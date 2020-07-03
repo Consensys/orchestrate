@@ -117,6 +117,7 @@ func Test_AfterNewBlockEnvelope(t *testing.T) {
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
 		ec.EXPECT().CodeAt(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(ethcommon.Hex2Bytes("0xabcd"), nil)
+		store.EXPECT().SetStatus(gomock.Any(), gomock.Any()).Return(&proto.StatusResponse{}, nil)
 
 		hk := NewHook(conf, registry, ec, producer, store, txScheduler)
 

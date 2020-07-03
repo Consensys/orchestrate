@@ -44,6 +44,7 @@ func getField(fieldPath string, val reflect.Value) (reflect.Value, error) {
 		val = val.Elem()
 	}
 
+	// if field is an array or slice
 	sliceMatch := regexSlice.FindAllStringSubmatch(fieldPath, -1)
 	if len(sliceMatch) > 0 {
 		key = fieldPath
@@ -79,9 +80,8 @@ func getField(fieldPath string, val reflect.Value) (reflect.Value, error) {
 		}
 	}
 
-	// Only keep big.int as ptr
-	if val.Kind() == reflect.Ptr && val.Type() != reflect.TypeOf(&big.Int{}) {
-		val = val.Elem()
+	if val.Kind() == reflect.Invalid {
+		return reflect.Value{}, errors.DataError("Could not get '%s' the field does not exist", fieldPath)
 	}
 
 	return val, nil
@@ -132,7 +132,25 @@ func ExtractTable(srcTable *gherkin.PickleStepArgument_PickleTable, fields []str
 	return newTable
 }
 
-func IsEqual(s string, val reflect.Value) bool {
+func CmpField(field reflect.Value, value string) error {
+	switch value {
+	case "~":
+		if isEmpty(field) {
+			return fmt.Errorf("did not expected to be empty")
+		}
+	case "-":
+		if !isEmpty(field) {
+			return fmt.Errorf("expected to be empty but got %v", field)
+		}
+	default:
+		if !isEqual(value, field) {
+			return fmt.Errorf("expected '%value' but got '%v'", value, field)
+		}
+	}
+	return nil
+}
+
+func isEqual(s string, val reflect.Value) bool {
 	switch val.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		n, err := strconv.ParseInt(s, 10, 64)
@@ -170,4 +188,26 @@ func IsEqual(s string, val reflect.Value) bool {
 		}
 	}
 	return true
+}
+
+func isEmpty(val reflect.Value) bool {
+	switch val.Kind() {
+	case reflect.Ptr:
+		return val.IsNil()
+	case reflect.String:
+		return val.String() == ""
+	default:
+		switch val.Type() {
+		case reflect.TypeOf(common.Address{}):
+			if val.Interface().(common.Address) == (common.Address{}) {
+				return true
+			}
+		case reflect.TypeOf(common.Hash{}):
+			if val.Interface().(common.Hash) != (common.Hash{}) {
+				return true
+			}
+		}
+
+	}
+	return false
 }

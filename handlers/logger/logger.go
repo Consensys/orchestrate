@@ -21,9 +21,9 @@ func Logger(level string) engine.HandlerFunc {
 
 		txctx.Next()
 
-		txctx.Logger.
+		txctx.Logger = txctx.Logger.
 			WithFields(log.Fields{
-				"latency": time.Since(start),
+				"latency": fmt.Sprintf("%vms", time.Since(start).Milliseconds()),
 			})
 
 		switch {

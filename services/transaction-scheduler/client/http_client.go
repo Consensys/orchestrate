@@ -232,7 +232,7 @@ func (c *HTTPClient) SearchJob(ctx context.Context, txHashes []string, chainUUID
 	}
 	defer clientutils.CloseResponse(response)
 
-	resp := []*types.JobResponse{}
+	var resp []*types.JobResponse
 	err = parseResponse(ctx, response, &resp)
 	return resp, err
 }

@@ -30,6 +30,12 @@ func Loader(txctx *engine.TxContext) {
 	default:
 		loadTxRequest(txctx)
 	}
+
+	if txctx.Envelope != nil {
+		txctx.Logger = txctx.Logger.WithFields(log.Fields{
+			"id": txctx.Envelope.GetID(),
+		})
+	}
 }
 
 func loadTxEnvelope(txctx *engine.TxContext) {

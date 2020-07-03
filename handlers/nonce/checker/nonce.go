@@ -42,17 +42,13 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 	return func(txctx *engine.TxContext) {
 		if mode := txctx.Envelope.GetContextLabelsValue("txMode"); mode == "raw" {
 			// If transaction has been generated externally we skip nonce check
-			txctx.Logger.WithFields(log.Fields{
-				"id": txctx.Envelope.GetID(),
-			}).Debugf("nonce: skip check for raw transaction")
+			txctx.Logger.Debugf("nonce: skip check for raw transaction")
 			return
 		}
 
 		if txctx.Envelope.IsOneTimeKeySignature() {
 			// If transaction has been generated externally we skip nonce check
-			txctx.Logger.WithFields(log.Fields{
-				"id": txctx.Envelope.GetID(),
-			}).Debugf("nonce: skip check for one-time-key signing")
+			txctx.Logger.Debugf("nonce: skip check for one-time-key signing")
 			return
 		}
 
@@ -66,7 +62,6 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"from":    sender.Hex(),
 			"chainID": txctx.Envelope.GetChainIDString(),
-			"id":      txctx.Envelope.GetID(),
 		})
 
 		// Retrieves nonce key for nonce manager processing

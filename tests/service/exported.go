@@ -41,6 +41,21 @@ func LongKeyOf(topics map[string]string) dispatcher.KeyOfFunc {
 	}
 }
 
+func LabelKey(topics map[string]string) dispatcher.KeyOfFunc {
+	return func(txctx *engine.TxContext) (string, error) {
+		topic, ok := topics[txctx.In.Entrypoint()]
+		if !ok {
+			return "", fmt.Errorf("unknown message entrypoint")
+		}
+
+		id := txctx.Envelope.GetContextLabelsValue("id")
+		if id == "" {
+			return "", fmt.Errorf("message has no id in context labels")
+		}
+		return utils2.LongKeyOf(topic, id), nil
+	}
+}
+
 func ShortKeyOf(topics map[string]string) dispatcher.KeyOfFunc {
 	return func(txtcx *engine.TxContext) (string, error) {
 		topic, ok := topics[txtcx.In.Entrypoint()]
@@ -77,6 +92,7 @@ func initComponents(ctx context.Context) {
 			}
 			dispatcher.SetKeyOfFuncs(
 				LongKeyOf(topics),
+				LabelKey(topics),
 				ShortKeyOf(topics),
 			)
 			handlers.Init(ctx)

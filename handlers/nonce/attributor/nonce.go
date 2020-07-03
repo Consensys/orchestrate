@@ -17,7 +17,6 @@ func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFun
 	return func(txctx *engine.TxContext) {
 		if txctx.Envelope.IsOneTimeKeySignature() {
 			txctx.Logger = txctx.Logger.WithFields(log.Fields{
-				"id":           txctx.Envelope.GetID(),
 				"chainID":      txctx.Envelope.GetChainIDString(),
 				"nonce":        0,
 				"one-time-key": true,
@@ -38,7 +37,6 @@ func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFun
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"from":    sender.Hex(),
 			"chainID": txctx.Envelope.GetChainIDString(),
-			"id":      txctx.Envelope.GetID(),
 		})
 
 		// Nonce to attribute to tx

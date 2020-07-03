@@ -156,7 +156,11 @@ func (sc *ScenarioContext) envelopeShouldBeInTopic(topic string) error {
 	for i, t := range sc.trackers {
 		err := t.Load(topic, viper.GetDuration(CucumberTimeoutViperKey))
 		if err != nil {
-			return fmt.Errorf("%v: envelope n°%v not in topic %q", sc.Pickle.Id, i, topic)
+			e := t.Load("tx.recover", time.Millisecond)
+			if e != nil {
+				return fmt.Errorf("%v: envelope n°%v not in topic %q neither in %q", sc.Pickle.Id, i, topic, "tx.recover")
+			}
+			return fmt.Errorf("%v: envelope n°%v not in topic %q but found in %q - envelope.Errors %q", sc.Pickle.Id, i, topic, "tx.recover", t.Current.Error())
 		}
 	}
 	return nil
@@ -177,16 +181,9 @@ func (sc *ScenarioContext) envelopesShouldHaveTheFollowingValues(table *gherkin.
 			if err != nil {
 				return err
 			}
-			if col.Value == "~" {
-				// TODO: not always working - create an IsEmpty function instead
-				if utils.IsEqual("", field) {
-					return fmt.Errorf("(%d/%d) did not expected %v to be empty", r+1, len(rows), fieldName)
-				}
-				continue
-			}
 
-			if !utils.IsEqual(col.Value, field) {
-				return fmt.Errorf("(%d/%d) for '%s' expected '%s' but got '%v'", r+1, len(rows), fieldName, col.Value, field)
+			if err := utils.CmpField(field, col.Value); err != nil {
+				return fmt.Errorf("(%d/%d) %v %v", r+1, len(rows), fieldName, err)
 			}
 		}
 	}
@@ -411,30 +408,32 @@ func (sc *ScenarioContext) replaceAliases(table *gherkin.PickleStepArgument_Pick
 	return nil
 }
 
-func (sc *ScenarioContext) iWait(duration string) error {
-	d, err := time.ParseDuration(duration)
-	if err != nil {
-		return err
+func (sc *ScenarioContext) iRegisterTheFollowingAliasAs(table *gherkin.PickleStepArgument_PickleTable) error {
+	aliasTable := utils.ExtractTable(table, []string{aliasHeaderValue})
+	for i, row := range aliasTable.Rows[1:] {
+		alias := row.Cells[0].Value
+		value := table.Rows[i+1].Cells[0].Value
+		ok := sc.aliases.Set(value, sc.Pickle.Id, alias)
+		if !ok {
+			return errors.DataError("could not register alias")
+		}
 	}
-	time.Sleep(d)
 	return nil
 }
 
-func (sc *ScenarioContext) iRegisterTheFollowingAliasAs(alias, value string) error {
-	alias, err := sc.replace(alias)
-	if err != nil {
-		return err
+func (sc *ScenarioContext) iTrackTheFollowingEnvelope(table *gherkin.PickleStepArgument_PickleTable) error {
+	if len(table.Rows[0].Cells) != 1 {
+		return errors.DataError("invalid table")
 	}
 
-	value, err = sc.replace(value)
-	if err != nil {
-		return err
+	var childEnvelopes []*tx.Envelope
+	for _, r := range table.Rows[1:] {
+		if r.Cells[0].Value != "" {
+			childEnvelopes = append(childEnvelopes, tx.NewEnvelope().SetID(r.Cells[0].Value))
+		}
 	}
+	sc.setTrackers(sc.newTrackers(childEnvelopes))
 
-	ok := sc.aliases.Set(value, sc.Pickle.Id, alias)
-	if !ok {
-		return errors.DataError("could not register alias")
-	}
 	return nil
 }
 
@@ -442,9 +441,9 @@ func initEnvelopeSteps(s *godog.ScenarioContext, sc *ScenarioContext) {
 	s.Step(`^I register the following chains$`, sc.preProcessTableStep(sc.iRegisterTheFollowingChains))
 	s.Step(`^I register the following faucets$`, sc.preProcessTableStep(sc.iRegisterTheFollowingFaucets))
 	s.Step(`^I have the following tenants$`, sc.iHaveTheFollowingTenant)
-	s.Step(`^I wait "([^"]*)"$`, sc.iWait)
-	s.Step(`^I register the following alias "([^"]*)" as "([^"]*)"$`, sc.iRegisterTheFollowingAliasAs)
+	s.Step(`^I register the following alias$`, sc.preProcessTableStep(sc.iRegisterTheFollowingAliasAs))
 	s.Step(`^I have created the following accounts$`, sc.preProcessTableStep(sc.iHaveCreatedTheFollowingAccounts))
+	s.Step(`^I track the following envelopes$`, sc.preProcessTableStep(sc.iTrackTheFollowingEnvelope))
 	s.Step(`^I have deployed the following contracts$`, sc.iHaveDeployedTheFollowingContracts)
 	s.Step(`^I send envelopes to topic "([^"]*)"$`, sc.iSendEnvelopesToTopic)
 	s.Step(`^Register new envelope tracker "([^"]*)"$`, sc.registerEnvelopeTracker)

@@ -95,8 +95,8 @@ func registerHandlers() {
 
 	// Recovery Status Setter surrounds the producer
 	// c.f. docstring RecoveryStatusSetter handler
-	engine.Register(txupdater.GlobalHandler())
 	engine.Register(producer.GlobalHandler())
+	engine.Register(txupdater.GlobalHandler())
 	engine.Register(chaininjector.GlobalHandler())
 	engine.Register(rawdecoder.RawDecoder)
 	engine.Register(noncechecker.GlobalRecoveryStatusSetter())

@@ -40,7 +40,6 @@ func Sender(ec ethclient.TransactionSender, s svc.EnvelopeStoreClient, txSchedul
 	return func(txctx *engine.TxContext) {
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"chainID": txctx.Envelope.GetChainIDString(),
-			"id":      txctx.Envelope.GetID(),
 			"raw":     txctx.Envelope.GetShortRaw(),
 			"txHash":  txctx.Envelope.GetTxHashString(),
 			"from":    txctx.Envelope.GetFromString(),

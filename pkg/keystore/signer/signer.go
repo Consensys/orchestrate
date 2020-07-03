@@ -19,7 +19,6 @@ func GenerateSignerHandler(signerFunc TransactionSignerFunc, vks, onetime keysto
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"chainID": txctx.Envelope.GetChainIDString(),
 			"from":    txctx.Envelope.GetFromString(),
-			"id":      txctx.Envelope.GetID(),
 		})
 
 		if txctx.Envelope.GetRaw() != "" {

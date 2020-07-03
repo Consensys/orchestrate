@@ -145,7 +145,7 @@ Feature: Deploy private ERC20 contract
     Given I register the following chains
       | alias | Name                | URLs                       | Headers.Authorization    |
       | besu  | besu-{{scenarioID}} | {{global.nodes.besu.URLs}} | Bearer {{tenant1.token}} |
-    And I wait "1.5s"
+    And I sleep "1.5s"
     And I have created the following accounts
       | alias    | Headers.Authorization    |
       | account1 | Bearer {{tenant1.token}} |
@@ -172,7 +172,9 @@ Feature: Deploy private ERC20 contract
 }
       """
     Then the response code should be 200
-    Then I store response field "result" as "privacyGroupId"
+    Then I register the following response fields
+      | alias          | path   |
+      | privacyGroupId | result |
     When I send envelopes to topic "tx.crafter"
       | ID              | ChainName           | From         | ContractName | MethodSignature | PrivacyGroupID     | PrivateFrom                                  | Method | Headers.Authorization    |
       | {{random.uuid}} | besu-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | {{privacyGroupId}} | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | 3      | Bearer {{tenant1.token}} |

@@ -1,5 +1,4 @@
 @chain-registry
-@test
 Feature: Chain registry
 
   Scenario: get chain data with API key

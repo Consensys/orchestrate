@@ -11,7 +11,6 @@ func Generator(s keystore.KeyStore) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"keygen": "got a keygen request",
-			"id":     txctx.Envelope.GetID(),
 		})
 
 		add, err := s.GenerateAccount(txctx.Context())

@@ -1,7 +1,19 @@
-filebeat.inputs:
-  - type: container
-    paths:
-      - '/var/lib/docker/containers/*/*.log'
+filebeat.config:
+  modules:
+    path: ${path.config}/modules.d/*.yml
+    reload.enabled: false
+
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      templates:
+        - condition:
+            contains:
+              docker.container.labels.filebeat: "true"
+          config:
+            - type: docker
+              containers.ids:
+                - "${data.docker.container.id}"
 
 processors:
   - add_docker_metadata:
@@ -18,5 +30,4 @@ output.elasticsearch:
   indices:
     - index: "filebeat-%{[agent.version]}-%{+yyyy.MM.dd}"
 
-logging.json: true
 logging.metrics.enabled: false

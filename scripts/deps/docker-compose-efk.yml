@@ -19,7 +19,7 @@ services:
   filebeat:
     image: docker.elastic.co/beats/filebeat:7.8.0
     user: root
-    command: ./filebeat -e -c filebeat.yml -strict.perms=false
+    command: ./filebeat -e -c filebeat.yml -strict.perms=false -v -e -d autodiscover,docker
     volumes:
       - ./config/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - /var/lib/docker:/var/lib/docker:ro
