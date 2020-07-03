@@ -47,7 +47,7 @@ func New(
 		app.MultiTenancyOpt("auth", jwt, key, cfg.Multitenancy),
 		app.MetricsOpt(),
 		app.LoggerMiddlewareOpt("base"),
-		app.SwaggerOpt("./public/swagger-specs/types/transaction-scheduler/swagger.json", "base@logger-base"),
+		app.SwaggerOpt("./public/swagger-specs/services/transaction-scheduler/swagger.json", "base@logger-base"),
 		txSchedulerHandlerOpt,
 		app.ProviderOpt(NewProvider()),
 	)

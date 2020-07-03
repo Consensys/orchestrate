@@ -11,8 +11,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
 )
 
-//go:generate swag init --dir . --generalInfo builder.go --output ../../../../public/swagger-specs/types/transaction-scheduler
-//go:generate rm ../../../../public/swagger-specs/types/transaction-scheduler/docs.go ../../../../public/swagger-specs/types/transaction-scheduler/swagger.yaml
+//go:generate swag init --dir . --generalInfo builder.go --output ../../../../public/swagger-specs/services/transaction-scheduler
+//go:generate rm ../../../../public/swagger-specs/services/transaction-scheduler/docs.go ../../../../public/swagger-specs/services/transaction-scheduler/swagger.yaml
 
 // @title Transaction Scheduler API
 // @version 2.0

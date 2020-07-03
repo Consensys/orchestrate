@@ -82,7 +82,7 @@ func New(
 		app.MetricsOpt(),
 		app.LoggerMiddlewareOpt("base"),
 		rateLimitOpt,
-		app.SwaggerOpt("./public/swagger-specs/types/chain-registry/swagger.json", "base@logger-base"),
+		app.SwaggerOpt("./public/swagger-specs/services/chain-registry/swagger.json", "base@logger-base"),
 		chainHandlerOpt,
 		reverseProxyOpt,
 		app.ProviderOpt(
