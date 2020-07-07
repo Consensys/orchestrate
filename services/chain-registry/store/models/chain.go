@@ -15,6 +15,7 @@ type Chain struct {
 	Name                      string                   `json:"name" validate:"required_with=UUID"`
 	TenantID                  string                   `json:"tenantID" validate:"required_with=UUID"`
 	URLs                      []string                 `json:"urls" pg:"urls,array" validate:"required_with=UUID,unique,dive,url"`
+	ChainID                   string                   `json:"chainID" validate:"required_with=UUID"`
 	ListenerDepth             *uint64                  `json:"listenerDepth,omitempty"`
 	ListenerCurrentBlock      *uint64                  `json:"listenerCurrentBlock,string,omitempty"`
 	ListenerStartingBlock     *uint64                  `json:"listenerStartingBlock,string,omitempty"`

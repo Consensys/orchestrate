@@ -65,6 +65,7 @@ var tenantID1Chains = map[string]*models.Chain{
 	chainName1: {
 		Name:                    chainName1,
 		TenantID:                tenantID1,
+		ChainID:                 "666",
 		URLs:                    []string{"http://testurlone.com", "http://testurltwo.com"},
 		ListenerDepth:           &(&struct{ x uint64 }{1}).x,
 		ListenerCurrentBlock:    &(&struct{ x uint64 }{1}).x,
@@ -74,6 +75,7 @@ var tenantID1Chains = map[string]*models.Chain{
 	chainName2: {
 		Name:                    chainName2,
 		TenantID:                tenantID1,
+		ChainID:                 "666",
 		URLs:                    []string{"http://localhost:8545", "https://localhost:443"},
 		ListenerDepth:           &(&struct{ x uint64 }{2}).x,
 		ListenerCurrentBlock:    &(&struct{ x uint64 }{2}).x,
@@ -83,6 +85,7 @@ var tenantID1Chains = map[string]*models.Chain{
 	chainName4: {
 		Name:                    chainName4,
 		TenantID:                tenantID1,
+		ChainID:                 "666",
 		URLs:                    []string{"http://testurlone.com"},
 		ListenerDepth:           &(&struct{ x uint64 }{1}).x,
 		ListenerCurrentBlock:    &(&struct{ x uint64 }{1}).x,
@@ -101,6 +104,7 @@ var tenantID2Chains = map[string]*models.Chain{
 	chainName1: {
 		Name:                      chainName1,
 		TenantID:                  tenantID2,
+		ChainID:                   "666",
 		URLs:                      []string{"http://testurlone.com", "http://testurltwo.com"},
 		ListenerDepth:             &(&struct{ x uint64 }{1}).x,
 		ListenerCurrentBlock:      &(&struct{ x uint64 }{1}).x,
@@ -111,6 +115,7 @@ var tenantID2Chains = map[string]*models.Chain{
 	chainName2: {
 		Name:                      chainName2,
 		TenantID:                  tenantID2,
+		ChainID:                   "666",
 		URLs:                      []string{"http://testurlone.com", "http://testurltwo.com"},
 		ListenerDepth:             &(&struct{ x uint64 }{2}).x,
 		ListenerCurrentBlock:      &(&struct{ x uint64 }{2}).x,
@@ -121,6 +126,7 @@ var tenantID2Chains = map[string]*models.Chain{
 	chainName3: {
 		Name:                      chainName3,
 		TenantID:                  tenantID2,
+		ChainID:                   "666",
 		URLs:                      []string{"http://testurlone.com", "http://testurltwo.com"},
 		ListenerDepth:             &(&struct{ x uint64 }{3}).x,
 		ListenerCurrentBlock:      &(&struct{ x uint64 }{3}).x,
@@ -177,6 +183,7 @@ func (s *ChainTestSuite) TestRegisterChainWithMissingURLsFieldErr() {
 	chainError := &models.Chain{
 		Name:                    "chainNameErr",
 		TenantID:                "tenantID1",
+		ChainID:                 "666",
 		ListenerDepth:           &listenerDepth,
 		ListenerCurrentBlock:    &listenerCurrentBlock,
 		ListenerStartingBlock:   &listenerStartingBlock,
@@ -196,6 +203,7 @@ func (s *ChainTestSuite) TestRegisterChainWithInvalidBackOffDurationErr() {
 	chainError := &models.Chain{
 		Name:                    "chainNameErr",
 		TenantID:                "tenantID1",
+		ChainID:                 "666",
 		URLs:                    []string{"http://testurlthree.com"},
 		ListenerDepth:           &listenerDepth,
 		ListenerCurrentBlock:    &listenerCurrentBlock,
@@ -216,6 +224,7 @@ func (s *ChainTestSuite) TestRegisterChainWithInvalidUrlsErr() {
 	chainError := &models.Chain{
 		Name:                    "chainNameErr",
 		TenantID:                "tenantID1",
+		ChainID:                 "666",
 		URLs:                    []string{"%!1231"},
 		ListenerDepth:           &listenerDepth,
 		ListenerCurrentBlock:    &listenerCurrentBlock,
@@ -236,6 +245,7 @@ func (s *ChainTestSuite) TestRegisterChainWithInvalidTxManagerURLFieldErr() {
 	chainError := &models.Chain{
 		Name:                    "chainNameErr",
 		TenantID:                "tenantID1",
+		ChainID:                 "666",
 		ListenerDepth:           &listenerDepth,
 		ListenerCurrentBlock:    &listenerCurrentBlock,
 		ListenerStartingBlock:   &listenerStartingBlock,
@@ -262,6 +272,7 @@ func (s *ChainTestSuite) TestRegisterChainWithInvalidTxManagerTypeFieldErr() {
 	chainError := &models.Chain{
 		Name:                    "chainNameErr",
 		TenantID:                "tenantID1",
+		ChainID:                 "666",
 		ListenerDepth:           &listenerDepth,
 		ListenerCurrentBlock:    &listenerCurrentBlock,
 		ListenerStartingBlock:   &listenerStartingBlock,
@@ -288,6 +299,7 @@ func (s *ChainTestSuite) TestRegisterChainWithoutTxManagerTypeFieldErr() {
 	chainError := &models.Chain{
 		Name:                    "chainNameErr",
 		TenantID:                "tenantID1",
+		ChainID:                 "666",
 		ListenerDepth:           &listenerDepth,
 		ListenerCurrentBlock:    &listenerCurrentBlock,
 		ListenerStartingBlock:   &listenerStartingBlock,

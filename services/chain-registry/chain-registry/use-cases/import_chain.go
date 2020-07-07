@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"strings"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
@@ -13,6 +15,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 )
 
+const importChainComponent = "use-cases.import-chain"
+
 type ImportChain interface {
 	Execute(ctx context.Context, chainEncodeJSON string) error
 }
@@ -20,11 +24,11 @@ type ImportChain interface {
 // RegisterContract is a use case to register a new contract
 type importChain struct {
 	chainAgent store.ChainAgent
-	ethClient  ethclient.ChainLedgerReader
+	ethClient  ethclient.Client
 }
 
 // NewGetCatalog creates a new GetCatalog
-func NewImportChain(chainAgent store.ChainAgent, ec ethclient.ChainLedgerReader) ImportChain {
+func NewImportChain(chainAgent store.ChainAgent, ec ethclient.Client) ImportChain {
 	return &importChain{
 		chainAgent: chainAgent,
 		ethClient:  ec,
@@ -42,22 +46,28 @@ func (uc *importChain) Execute(ctx context.Context, chainEncodeJSON string) erro
 		return err
 	}
 
+	// Verifies URLs are valid and get chain ID
+	err = utils.VerifyURLs(ctx, uc.ethClient, chain.URLs)
+	if err != nil {
+		return errors.FromError(err).ExtendComponent(importChainComponent)
+	}
+
+	chainID, err := utils.GetChainID(ctx, uc.ethClient, chain.URLs)
+	if err != nil {
+		return errors.FromError(err).ExtendComponent(importChainComponent)
+	}
+	chain.ChainID = chainID.String()
+
 	// In case of not staring block, we use latest
 	if chain.ListenerStartingBlock == nil {
-		var head uint64
-		head, err = utils.GetChainTip(ctx, uc.ethClient, chain.URLs)
-		if err != nil {
-			logger.WithError(err).Errorf("could not import chain head block. Default 0")
-			head = 0
-		}
-
+		head := utils.GetChainTip(ctx, uc.ethClient, chain.URLs)
 		chain.ListenerStartingBlock = &head
 	}
 
 	chain.SetDefault()
 	err = uc.chainAgent.RegisterChain(ctx, chain)
 	if err != nil {
-		return err
+		return errors.FromError(err).ExtendComponent(importChainComponent)
 	}
 
 	logger.WithFields(logrus.Fields{

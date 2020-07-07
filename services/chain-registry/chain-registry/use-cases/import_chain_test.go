@@ -7,59 +7,74 @@ import (
 	"testing"
 
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/gofrs/uuid"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	mockethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/mock"
 	mockstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 )
 
-func TestImportChain_FetchHead(t *testing.T) {
+func TestImportChain_Execute(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	chainAgent := mockstore.NewMockChainAgent(mockCtrl)
-	ethClient := mockethclient.NewMockChainLedgerReader(mockCtrl)
+	ethClient := mockethclient.NewMockClient(mockCtrl)
 
-	importChainUC := NewImportChain(chainAgent, ethClient)
-	chainUUID := uuid.Must(uuid.NewV4()).String()
-	importChainJSON := fmt.Sprintf(`{"uuid":"%s", "name":"geth","urls":["http://geth:8545"]}`, chainUUID)
+	ctx := context.Background()
+	chainID := big.NewInt(666)
+	chainTip := big.NewInt(888)
+	urls := []string{"http://geth1:8545", "http://geth2:8545"}
+	importChainJSON := `{"name":"geth","urls":["http://geth1:8545", "http://geth2:8545"]}`
 
-	ethClient.EXPECT().HeaderByNumber(gomock.Any(), gomock.Eq("http://geth:8545"), nil).
-		Return(&ethtypes.Header{Number: big.NewInt(666)}, nil).Times(1)
+	registerChainUC := NewImportChain(chainAgent, ethClient)
 
-	expectedChain := &models.Chain{
-		UUID:                  chainUUID,
-		Name:                  "geth",
-		URLs:                  []string{"http://geth:8545"},
-		ListenerStartingBlock: &(&struct{ x uint64 }{666}).x,
-	}
-	expectedChain.SetDefault()
-	chainAgent.EXPECT().RegisterChain(gomock.Any(), gomock.Eq(expectedChain))
+	t.Run("should execute use case successfully and fetch chain tip", func(t *testing.T) {
+		ethClient.EXPECT().Network(gomock.Any(), urls[0]).Return(chainID, nil)
+		ethClient.EXPECT().Network(gomock.Any(), urls[1]).Return(chainID, nil)
+		ethClient.EXPECT().Network(gomock.Any(), urls[0]).Return(chainID, nil)
+		ethClient.EXPECT().HeaderByNumber(gomock.Any(), urls[0], nil).Return(&ethtypes.Header{Number: chainTip}, nil)
+		chainAgent.EXPECT().RegisterChain(ctx, gomock.Any()).Return(nil)
 
-	err := importChainUC.Execute(context.Background(), importChainJSON)
-	assert.NoError(t, err)
-}
+		err := registerChainUC.Execute(ctx, importChainJSON)
 
-func TestImportChain_NotFetchHead(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	chainAgent := mockstore.NewMockChainAgent(mockCtrl)
-	ethClient := mockethclient.NewMockChainLedgerReader(mockCtrl)
+		assert.NoError(t, err)
+	})
 
-	importChainUC := NewImportChain(chainAgent, ethClient)
-	chainUUID := uuid.Must(uuid.NewV4()).String()
-	importChainJSON := fmt.Sprintf(`{"uuid":"%s", "name":"geth","urls":["http://geth:8545"],"listenerStartingBlock":"666"}`, chainUUID)
+	t.Run("should execute use case successfully at defined starting block", func(t *testing.T) {
+		chainJSON := `{"name":"geth","urls":["http://geth1:8545", "http://geth2:8545"], "listenerStartingBlock": "888"}`
 
-	expectedChain := &models.Chain{
-		UUID:                  chainUUID,
-		Name:                  "geth",
-		URLs:                  []string{"http://geth:8545"},
-		ListenerStartingBlock: &(&struct{ x uint64 }{666}).x,
-	}
-	expectedChain.SetDefault()
-	chainAgent.EXPECT().RegisterChain(gomock.Any(), gomock.Eq(expectedChain))
+		ethClient.EXPECT().Network(gomock.Any(), urls[0]).Return(chainID, nil)
+		ethClient.EXPECT().Network(gomock.Any(), urls[1]).Return(chainID, nil)
+		ethClient.EXPECT().Network(gomock.Any(), urls[0]).Return(chainID, nil)
+		chainAgent.EXPECT().RegisterChain(ctx, gomock.Any()).Return(nil)
 
-	err := importChainUC.Execute(context.Background(), importChainJSON)
-	assert.NoError(t, err)
+		err := registerChainUC.Execute(ctx, chainJSON)
+
+		assert.NoError(t, err)
+	})
+
+	t.Run("should fail with same error if Network fails", func(t *testing.T) {
+		expectedErr := fmt.Errorf("error")
+
+		ethClient.EXPECT().Network(gomock.Any(), urls[0]).Return(nil, expectedErr)
+
+		err := registerChainUC.Execute(ctx, importChainJSON)
+
+		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(importChainComponent), err)
+	})
+
+	t.Run("should fail with same error if data agent fails", func(t *testing.T) {
+		expectedErr := fmt.Errorf("error")
+
+		ethClient.EXPECT().Network(gomock.Any(), urls[0]).Return(chainID, nil)
+		ethClient.EXPECT().Network(gomock.Any(), urls[1]).Return(chainID, nil)
+		ethClient.EXPECT().Network(gomock.Any(), urls[0]).Return(chainID, nil)
+		ethClient.EXPECT().HeaderByNumber(gomock.Any(), urls[0], nil).Return(&ethtypes.Header{Number: chainTip}, nil)
+		chainAgent.EXPECT().RegisterChain(ctx, gomock.Any()).Return(expectedErr)
+
+		err := registerChainUC.Execute(ctx, importChainJSON)
+
+		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(importChainComponent), err)
+	})
 }

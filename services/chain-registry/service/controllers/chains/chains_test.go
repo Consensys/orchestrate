@@ -29,7 +29,7 @@ const (
 	expectedNotFoundErrorBody        = "{\"message\":\"DB200@: not found error\"}\n"
 	expectedNotUniqueURLsError       = "{\"message\":\"42400@encoding.json: invalid body, with: field validation for 'URLs[0]' failed on the 'url' tag\"}\n"
 	expectedUnknownBodyError         = "{\"message\":\"42300@encoding.json: json: unknown field \\\"unknownField\\\"\"}\n"
-	expectedSuccessStatusBody        = "{\"uuid\":\"\",\"name\":\"\",\"tenantID\":\"\",\"urls\":null,\"createdAt\":null}\n"
+	expectedSuccessStatusBody        = "{\"uuid\":\"\",\"name\":\"\",\"tenantID\":\"\",\"urls\":null,\"chainID\":\"\",\"createdAt\":null}\n"
 	expectedSuccessStatusSliceBody   = "[]\n"
 	expectedSuccessStatusContentType = "application/json"
 	expectedErrorStatusContentType   = "text/plain; charset=utf-8"
@@ -206,11 +206,12 @@ func UseErrorChainRegistry(t *testing.T) store.ChainAgent {
 	return mockStore
 }
 
-func UseEthClient(t *testing.T) *mockethclient.MockChainLedgerReader {
+func UseEthClient(t *testing.T) *mockethclient.MockClient {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockEthClient := mockethclient.NewMockChainLedgerReader(mockCtrl)
+	mockEthClient := mockethclient.NewMockClient(mockCtrl)
 
+	mockEthClient.EXPECT().Network(gomock.Any(), gomock.Any()).Return(big.NewInt(888), nil).AnyTimes()
 	mockEthClient.EXPECT().HeaderByNumber(gomock.Any(), gomock.Any(), gomock.Any()).Return(&ethtypes.Header{Number: big.NewInt(666)}, nil).AnyTimes()
 
 	return mockEthClient

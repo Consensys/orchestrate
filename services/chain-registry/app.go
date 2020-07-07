@@ -23,7 +23,7 @@ import (
 func New(
 	cfg *Config,
 	pgmngr postgres.Manager,
-	ec ethclient.ChainLedgerReader,
+	ec ethclient.Client,
 	jwt, key auth.Checker,
 ) (*app.App, error) {
 	//

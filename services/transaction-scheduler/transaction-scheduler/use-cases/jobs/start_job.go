@@ -43,11 +43,8 @@ func NewStartJobUseCase(db store.DB, kafkaProducer sarama.SyncProducer, topicsCf
 
 // Execute sends a job to the Kafka topic
 func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants []string) error {
-	logger := log.WithContext(ctx)
-
-	logger.
-		WithField("job_uuid", jobUUID).
-		Debugf("starting job")
+	logger := log.WithContext(ctx).WithField("job_uuid", jobUUID)
+	logger.Debug("starting job")
 
 	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, tenants)
 	if err != nil {
@@ -76,11 +73,7 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants 
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}
 
-	logger.
-		WithField("job_uuid", jobUUID).
-		WithField("partition", partition).
-		WithField("offset", offset).
-		Info("job started successfully")
+	logger.WithField("partition", partition).WithField("offset", offset).Info("job started successfully")
 
 	return nil
 }

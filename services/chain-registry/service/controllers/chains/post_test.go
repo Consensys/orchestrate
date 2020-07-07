@@ -9,8 +9,8 @@ import (
 
 const (
 	name                     = "testName"
-	defaultResult            = "{\"uuid\":\"uuid\",\"name\":\"testName\",\"tenantID\":\"_\",\"urls\":[\"http://test.com\"],\"listenerDepth\":0,\"listenerCurrentBlock\":\"666\",\"listenerStartingBlock\":\"666\",\"listenerBackOffDuration\":\"1s\",\"listenerExternalTxEnabled\":false,\"createdAt\":null}\n"
-	defaultMultitenantResult = "{\"uuid\":\"uuid\",\"name\":\"testName\",\"tenantID\":\"tenantID\",\"urls\":[\"http://test.com\"],\"listenerDepth\":0,\"listenerCurrentBlock\":\"666\",\"listenerStartingBlock\":\"666\",\"listenerBackOffDuration\":\"1s\",\"listenerExternalTxEnabled\":false,\"createdAt\":null}\n"
+	defaultResult            = "{\"uuid\":\"uuid\",\"name\":\"testName\",\"tenantID\":\"_\",\"urls\":[\"http://test.com\"],\"chainID\":\"888\",\"listenerDepth\":0,\"listenerCurrentBlock\":\"666\",\"listenerStartingBlock\":\"666\",\"listenerBackOffDuration\":\"1s\",\"listenerExternalTxEnabled\":false,\"createdAt\":null}\n"
+	defaultMultitenantResult = "{\"uuid\":\"uuid\",\"name\":\"testName\",\"tenantID\":\"tenantID\",\"urls\":[\"http://test.com\"],\"chainID\":\"888\",\"listenerDepth\":0,\"listenerCurrentBlock\":\"666\",\"listenerStartingBlock\":\"666\",\"listenerBackOffDuration\":\"1s\",\"listenerExternalTxEnabled\":false,\"createdAt\":null}\n"
 )
 
 var urls = []string{"http://test.com"}
@@ -23,7 +23,7 @@ var postChainTests = []HTTPRouteTests{
 		path:       "/chains",
 		body: func() []byte {
 			listenerDepth := uint64(1)
-			listenerFromBlock := "500"
+			listenerFromBlock := "666"
 			listenerBackOffDuration := "1s"
 			listenerExternalTxEnabled := true
 
@@ -42,7 +42,7 @@ var postChainTests = []HTTPRouteTests{
 		expectedStatusCode:  http.StatusOK,
 		expectedContentType: expectedSuccessStatusContentType,
 		expectedBody: func() string {
-			return "{\"uuid\":\"uuid\",\"name\":\"testName\",\"tenantID\":\"_\",\"urls\":[\"http://test.com\"],\"listenerDepth\":1,\"listenerCurrentBlock\":\"500\",\"listenerStartingBlock\":\"500\",\"listenerBackOffDuration\":\"1s\",\"listenerExternalTxEnabled\":true,\"createdAt\":null}\n"
+			return "{\"uuid\":\"uuid\",\"name\":\"testName\",\"tenantID\":\"_\",\"urls\":[\"http://test.com\"],\"chainID\":\"888\",\"listenerDepth\":1,\"listenerCurrentBlock\":\"666\",\"listenerStartingBlock\":\"666\",\"listenerBackOffDuration\":\"1s\",\"listenerExternalTxEnabled\":true,\"createdAt\":null}\n"
 		},
 	},
 	{
@@ -75,7 +75,7 @@ var postChainTests = []HTTPRouteTests{
 		expectedStatusCode:  http.StatusOK,
 		expectedContentType: expectedSuccessStatusContentType,
 		expectedBody: func() string {
-			return "{\"uuid\":\"uuid\",\"name\":\"testName\",\"tenantID\":\"_\",\"urls\":[\"http://test.com\"],\"listenerDepth\":1,\"listenerCurrentBlock\":\"500\",\"listenerStartingBlock\":\"500\",\"listenerBackOffDuration\":\"1s\",\"listenerExternalTxEnabled\":true,\"createdAt\":null,\"privateTxManagers\":[{\"UUID\":\"uuid\",\"ChainUUID\":\"uuid\",\"url\":\"http://tessera.com\",\"type\":\"Tessera\",\"CreatedAt\":null}]}\n"
+			return "{\"uuid\":\"uuid\",\"name\":\"testName\",\"tenantID\":\"_\",\"urls\":[\"http://test.com\"],\"chainID\":\"888\",\"listenerDepth\":1,\"listenerCurrentBlock\":\"500\",\"listenerStartingBlock\":\"500\",\"listenerBackOffDuration\":\"1s\",\"listenerExternalTxEnabled\":true,\"createdAt\":null,\"privateTxManagers\":[{\"UUID\":\"uuid\",\"ChainUUID\":\"uuid\",\"url\":\"http://tessera.com\",\"type\":\"Tessera\",\"CreatedAt\":null}]}\n"
 		},
 	},
 	{
@@ -200,7 +200,7 @@ var postChainTests = []HTTPRouteTests{
 		},
 		expectedStatusCode:  http.StatusInternalServerError,
 		expectedContentType: expectedErrorStatusContentType,
-		expectedBody:        func() string { return expectedInternalServerErrorBody },
+		expectedBody:        func() string { return "{\"message\":\"FF000@use-cases.register-chain: test error\"}\n" },
 	},
 	{
 		name:                "TestPostChain400WrongBodyTessera",
@@ -247,7 +247,7 @@ var postChainTests = []HTTPRouteTests{
 
 var postChainTestsMultitenant = []HTTPRouteTests{
 	{
-		name:       "TestPostChain200",
+		name:       "TestPostChain200Multitenant",
 		chainAgent: UseMockChainRegistry,
 		httpMethod: http.MethodPost,
 		path:       "/chains",
