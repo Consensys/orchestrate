@@ -18,12 +18,12 @@ func NewTxRequestModelFromEntities(txRequest *entities.TxRequest, requestHash st
 }
 
 func NewJobEntityFromTxRequest(txRequest *entities.TxRequest, jobType, chainUUID string) *types.Job {
-	return &types.Job{
+	job := &types.Job{
 		ScheduleUUID: txRequest.Schedule.UUID,
 		ChainUUID:    chainUUID,
 		Type:         jobType,
 		Labels:       txRequest.Labels,
-		Annotations:  txRequest.Annotations,
+		Annotations:  &types.Annotations{},
 		Transaction: &types.ETHTransaction{
 			From:           txRequest.Params.From,
 			To:             txRequest.Params.To,
@@ -37,4 +37,10 @@ func NewJobEntityFromTxRequest(txRequest *entities.TxRequest, jobType, chainUUID
 			PrivacyGroupID: txRequest.Params.PrivacyGroupID,
 		},
 	}
+
+	if txRequest.Annotations != nil {
+		job.Annotations = txRequest.Annotations
+	}
+
+	return job
 }

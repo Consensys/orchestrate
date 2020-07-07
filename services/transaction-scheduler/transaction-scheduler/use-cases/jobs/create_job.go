@@ -19,7 +19,7 @@ import (
 const createJobComponent = "use-cases.create-job"
 
 type CreateJobUseCase interface {
-	Execute(ctx context.Context, jobEntity *types.Job, tenants []string) (*types.Job, error)
+	Execute(ctx context.Context, job *types.Job, tenants []string) (*types.Job, error)
 	WithDBTransaction(dbtx store.Tx) CreateJobUseCase
 }
 
@@ -43,23 +43,25 @@ func (uc createJobUseCase) WithDBTransaction(dbtx store.Tx) CreateJobUseCase {
 }
 
 // Execute validates and creates a new transaction job
-func (uc *createJobUseCase) Execute(ctx context.Context, jobEntity *types.Job, tenants []string) (*types.Job, error) {
+func (uc *createJobUseCase) Execute(ctx context.Context, job *types.Job, tenants []string) (*types.Job, error) {
 	log.WithContext(ctx).
-		WithField("chain_uuid", jobEntity.ChainUUID).
-		WithField("schedule_id", jobEntity.ScheduleUUID).
+		WithField("chain_uuid", job.ChainUUID).
+		WithField("schedule_id", job.ScheduleUUID).
 		WithField("tenants", tenants).
 		Debug("creating new job")
 
-	if err := uc.validator.ValidateChainExists(ctx, jobEntity.ChainUUID); err != nil {
+	chainID, err := uc.validator.ValidateChainExists(ctx, job.ChainUUID)
+	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
 	}
+	job.Annotations.ChainID = chainID
 
-	schedule, err := uc.db.Schedule().FindOneByUUID(ctx, jobEntity.ScheduleUUID, tenants)
+	schedule, err := uc.db.Schedule().FindOneByUUID(ctx, job.ScheduleUUID, tenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
 	}
 
-	jobModel := parsers.NewJobModelFromEntities(jobEntity, &schedule.ID)
+	jobModel := parsers.NewJobModelFromEntities(job, &schedule.ID)
 	jobModel.Logs = append(jobModel.Logs, &models.Log{
 		Status: types.StatusCreated,
 	})

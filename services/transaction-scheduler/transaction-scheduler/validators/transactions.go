@@ -23,7 +23,7 @@ const txValidatorComponent = "transaction-validator"
 
 type TransactionValidator interface {
 	ValidateFields(ctx context.Context, txRequest *entities.TxRequest) error
-	ValidateChainExists(ctx context.Context, chainUUID string) error
+	ValidateChainExists(ctx context.Context, chainUUID string) (string, error)
 	ValidateMethodSignature(methodSignature string, args []interface{}) (string, error)
 	ValidateContract(ctx context.Context, params *types.ETHTransactionParams) (string, error)
 }
@@ -68,16 +68,16 @@ func (txValidator *transactionValidator) ValidateFields(ctx context.Context, txR
 	return nil
 }
 
-func (txValidator *transactionValidator) ValidateChainExists(ctx context.Context, chainUUID string) error {
+func (txValidator *transactionValidator) ValidateChainExists(ctx context.Context, chainUUID string) (string, error) {
 	// Validate that the chainUUID exists
-	_, err := txValidator.chainRegistryClient.GetChainByUUID(ctx, chainUUID)
+	chain, err := txValidator.chainRegistryClient.GetChainByUUID(ctx, chainUUID)
 	if err != nil {
 		errMessage := "failed to get chain"
 		log.WithError(err).WithField("chain_uuid", chainUUID).Error(errMessage)
-		return errors.InvalidParameterError(errMessage)
+		return "", errors.InvalidParameterError(errMessage)
 	}
 
-	return nil
+	return chain.ChainID, nil
 }
 
 func (txValidator *transactionValidator) ValidateMethodSignature(method string, args []interface{}) (string, error) {

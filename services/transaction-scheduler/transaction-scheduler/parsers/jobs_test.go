@@ -58,6 +58,7 @@ func TestParsersJob_NewEnvelopeFromModel(t *testing.T) {
 	assert.Equal(t, jobModel.Transaction.PrivateFor, txRequest.Params.GetPrivateFor())
 	assert.Equal(t, jobModel.Transaction.PrivateFrom, txRequest.Params.GetPrivateFrom())
 	assert.Equal(t, jobModel.Transaction.PrivacyGroupID, txRequest.Params.GetPrivacyGroupId())
+	assert.Equal(t, jobModel.Annotations.ChainID, txEnvelope.GetChainID())
 }
 
 func TestParsersJob_NewEnvelopeFromModelOneTimeKey(t *testing.T) {

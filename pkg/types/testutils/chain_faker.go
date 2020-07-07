@@ -12,5 +12,6 @@ func FakeChain() *types.Chain {
 		UUID:     uuid.Must(uuid.NewV4()).String(),
 		Name:     "FakeChainName",
 		TenantID: multitenancy.DefaultTenant,
+		ChainID:  "888",
 	}
 }

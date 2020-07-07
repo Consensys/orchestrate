@@ -1,6 +1,8 @@
 package parsers
 
 import (
+	"math/big"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
@@ -109,7 +111,12 @@ func NewEnvelopeFromJobModel(job *models.Job, headers map[string]string) *tx.TxE
 	}
 
 	txEnvelope.SetChainUUID(job.ChainUUID)
-	if job.Annotations != nil && job.Annotations.OneTimeKey {
+
+	chainID := new(big.Int)
+	chainID.SetString(job.Annotations.ChainID, 10)
+	txEnvelope.SetChainID(chainID)
+
+	if job.Annotations.OneTimeKey {
 		txEnvelope.EnableTxFromOneTimeKey()
 	}
 

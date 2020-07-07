@@ -14,6 +14,7 @@ func FakeJob() *types.Job {
 		ScheduleUUID: uuid.Must(uuid.NewV4()).String(),
 		ChainUUID:    uuid.Must(uuid.NewV4()).String(),
 		Type:         types.EthereumTransaction,
+		Annotations:  &types.Annotations{ChainID: "888"},
 		Logs:         []*types.Log{FakeLog()},
 		CreatedAt:    time.Now(),
 		Transaction:  FakeETHTransaction(),

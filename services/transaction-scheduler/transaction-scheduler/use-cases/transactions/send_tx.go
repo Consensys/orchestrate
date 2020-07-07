@@ -5,7 +5,6 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database"
@@ -71,7 +70,6 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
-	fmt.Println(requestHash)
 
 	// Step 2: Insert Schedule + Job + Transaction + TxRequest atomically OR get tx request if it exists
 	txRequest, err = uc.selectOrInsertTxRequest(ctx, txRequest, txData, requestHash, chainUUID, tenantID)

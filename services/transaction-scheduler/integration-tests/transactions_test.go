@@ -4,6 +4,7 @@ package integrationtests
 
 import (
 	"context"
+	"fmt"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
@@ -125,6 +126,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		Name:     chain.Name,
 		UUID:     chain.UUID,
 		TenantID: chain.TenantID,
+		ChainID:  chain.ChainID,
 	}
 
 	s.T().Run("should send a transaction successfully to the transaction crafter topic", func(t *testing.T) {
@@ -162,8 +164,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, txRequest.Params.To, job.Transaction.To)
 		assert.Equal(t, types.EthereumTransaction, job.Type)
 
-		evlp, err := s.env.consumer.WaitForEnvelope(job.UUID,
-			s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
+		evlp, err := s.env.consumer.WaitForEnvelope(job.UUID, s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
@@ -171,6 +172,8 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, job.UUID, evlp.GetID())
 		assert.True(t, evlp.IsOneTimeKeySignature())
 		assert.Equal(t, tx.JobTypeMap[types.EthereumTransaction].String(), evlp.GetJobTypeString())
+		assert.Equal(t, evlp.GetChainIDString(), chainModel.ChainID)
+		assert.Equal(t, evlp.PartitionKey(), fmt.Sprintf("%v@%v", txRequest.Params.From, chainModel.ChainID))
 	})
 
 	s.T().Run("should send a tessera transaction successfully to the transaction crafter topic", func(t *testing.T) {

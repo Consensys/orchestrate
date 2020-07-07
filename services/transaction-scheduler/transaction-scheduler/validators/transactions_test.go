@@ -5,6 +5,7 @@ package validators
 import (
 	"context"
 	"fmt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	"testing"
 
 	abi2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/abi"
@@ -14,7 +15,6 @@ import (
 	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mock"
-	chainmodel "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 
 	"github.com/golang/mock/gomock"
@@ -55,15 +55,20 @@ func (s *transactionsTestSuite) SetupTest() {
 }
 
 func (s *transactionsTestSuite) TestTransactionValidator_ValidateChainExists() {
+	chainModel := &models.Chain{ChainID: "888"}
+
 	s.T().Run("should validate chain successfully", func(t *testing.T) {
-		s.mockChainRegistryClient.EXPECT().GetChainByUUID(gomock.Any(), chainUUID).Return(&chainmodel.Chain{}, nil)
-		err := s.validator.ValidateChainExists(context.Background(), chainUUID)
+		s.mockChainRegistryClient.EXPECT().GetChainByUUID(gomock.Any(), chainUUID).Return(chainModel, nil)
+		chainID, err := s.validator.ValidateChainExists(context.Background(), chainUUID)
+
 		assert.NoError(t, err)
+		assert.Equal(t, chainID, chainModel.ChainID)
 	})
 
 	s.T().Run("should fail with InvalidParameterError if ChainRegistryClient fails", func(t *testing.T) {
 		s.mockChainRegistryClient.EXPECT().GetChainByUUID(gomock.Any(), chainUUID).Return(nil, fmt.Errorf("error"))
-		err := s.validator.ValidateChainExists(context.Background(), chainUUID)
+		_, err := s.validator.ValidateChainExists(context.Background(), chainUUID)
+
 		assert.True(t, errors.IsInvalidParameterError(err))
 	})
 }

@@ -71,6 +71,9 @@ func FakeJobModel(scheduleID int) *models.Job {
 		Logs: []*models.Log{
 			{UUID: uuid.Must(uuid.NewV4()).String(), Status: types.StatusCreated, Message: "created message"},
 		},
+		Annotations: &types.Annotations{
+			ChainID: "888",
+		},
 		CreatedAt: time.Now(),
 	}
 

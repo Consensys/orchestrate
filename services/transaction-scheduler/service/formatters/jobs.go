@@ -42,14 +42,20 @@ func FormatJobResponse(job *pkgtypes.Job) *types.JobResponse {
 }
 
 func FormatJobCreateRequest(request *types.CreateJobRequest) *pkgtypes.Job {
-	return &pkgtypes.Job{
+	job := &pkgtypes.Job{
 		Type:         request.Type,
 		Labels:       request.Labels,
-		Annotations:  request.Annotations,
+		Annotations:  &pkgtypes.Annotations{},
 		ScheduleUUID: request.ScheduleUUID,
 		ChainUUID:    request.ChainUUID,
 		Transaction:  request.Transaction,
 	}
+
+	if request.Annotations != nil {
+		job.Annotations = request.Annotations
+	}
+
+	return job
 }
 
 func FormatJobUpdateRequest(request *types.UpdateJobRequest) *pkgtypes.Job {

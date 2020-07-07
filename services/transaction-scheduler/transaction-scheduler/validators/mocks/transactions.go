@@ -50,11 +50,12 @@ func (mr *MockTransactionValidatorMockRecorder) ValidateFields(ctx, txRequest in
 }
 
 // ValidateChainExists mocks base method
-func (m *MockTransactionValidator) ValidateChainExists(ctx context.Context, chainUUID string) error {
+func (m *MockTransactionValidator) ValidateChainExists(ctx context.Context, chainUUID string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ValidateChainExists", ctx, chainUUID)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // ValidateChainExists indicates an expected call of ValidateChainExists
