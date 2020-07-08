@@ -24,10 +24,10 @@ import (
 func TxAlreadySent(ec ethclient.ChainLedgerReader, s svc.EnvelopeStoreClient, txSchedulerClient client.TransactionSchedulerClient) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		// TODO: Remove this if when envelope store is removed
-		if txctx.Envelope.ContextLabels["jobUUID"] != "" {
-			checkTxInScheduler(txctx, ec, txSchedulerClient)
-		} else {
+		if txctx.Envelope.BelongToEnvelopeStore() {
 			checkTxInStore(txctx, ec, s)
+		} else {
+			checkTxInScheduler(txctx, ec, txSchedulerClient)
 		}
 	}
 }

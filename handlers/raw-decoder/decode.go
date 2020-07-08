@@ -34,10 +34,7 @@ func RawDecoder(txctx *engine.TxContext) {
 		return
 	}
 
-	// @TODO: remove first condition once envelope-store is removed
-	if mode := txctx.Envelope.GetContextLabelsValue("txMode"); mode == "raw" ||
-		(txctx.Envelope.ContextLabels["jobUUID"] != "" &&
-			(txctx.Envelope.IsEthSendRawTransaction() || txctx.Envelope.IsEthSendRawPrivateTransaction())) {
+	if txctx.Envelope.IsRawTransaction() {
 		_ = txctx.Envelope.
 			SetFrom(msg.From()).
 			SetData(tx.Data()).

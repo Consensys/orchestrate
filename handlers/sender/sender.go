@@ -14,7 +14,7 @@ import (
 func Sender(ec ethclient.TransactionSender, s svc.EnvelopeStoreClient, txSchedulerClient client.TransactionSchedulerClient) engine.HandlerFunc {
 	// Declare a set of handlers that will be forked by Sender handler
 	rawTxStore := storer.RawTxStore(s, txSchedulerClient)
-	UnsignedTxStore := storer.UnsignedTxStore(s)
+	UnsignedTxStore := storer.UnsignedTxStore(s, txSchedulerClient)
 
 	rawTxSender := engine.CombineHandlers(
 		rawTxStore,
@@ -46,7 +46,7 @@ func Sender(ec ethclient.TransactionSender, s svc.EnvelopeStoreClient, txSchedul
 		})
 
 		switch {
-		case txctx.Envelope.IsEthSendRawTransaction():
+		case txctx.Envelope.IsEthSendRawTransaction() || txctx.Envelope.IsEthSendTransaction():
 			rawTxSender(txctx)
 		case txctx.Envelope.IsEthSendPrivateTransaction():
 			unsignedTxSender(txctx)
@@ -55,11 +55,21 @@ func Sender(ec ethclient.TransactionSender, s svc.EnvelopeStoreClient, txSchedul
 		case txctx.Envelope.IsEeaSendPrivateTransaction():
 			rawPrivateTxSender(txctx)
 		default:
-			err := errors.DataError(
-				"invalid private protocol %q",
-				txctx.Envelope.Method.String(),
-			).SetComponent(component)
-			txctx.Logger.WithError(err).Errorf("sender: could not send private transaction")
+			var err error
+			// @TODO Remove once envelope store is deleted
+			if txctx.Envelope.BelongToEnvelopeStore() {
+				err = errors.DataError(
+					"invalid transaction protocol %q",
+					txctx.Envelope.Method.String(),
+				).SetComponent(component)
+			} else {
+				err = errors.DataError(
+					"invalid job type %q",
+					txctx.Envelope.JobType.String(),
+				).SetComponent(component)
+			}
+
+			txctx.Logger.WithError(err).Errorf("sender: could not send transaction")
 			_ = txctx.AbortWithError(err)
 		}
 	}

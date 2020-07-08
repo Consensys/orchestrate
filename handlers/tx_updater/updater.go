@@ -15,7 +15,7 @@ func TransactionUpdater(txSchedulerClient txscheduler.TransactionSchedulerClient
 		txctx.Next()
 
 		// TODO: Remove statement once envelope store is removed
-		if txctx.Envelope.ContextLabels["jobUUID"] == "" {
+		if txctx.Envelope.BelongToEnvelopeStore() {
 			return
 		}
 

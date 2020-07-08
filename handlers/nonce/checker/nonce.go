@@ -40,21 +40,12 @@ func controlRecoveryCount(txctx *engine.TxContext, conf *Configuration) error {
 // It makes sure that transactions with invalid nonce are not processed
 func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader, tracker *RecoveryTracker) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		if txctx.Envelope.ContextLabels["jobUUID"] != "" {
-			if txctx.Envelope.IsEthSendRawTransaction() || txctx.Envelope.IsEthSendRawPrivateTransaction() {
-				// If transaction has been generated externally we skip nonce check
-				txctx.Logger.WithFields(log.Fields{
-					"id": txctx.Envelope.GetID(),
-				}).Debugf("nonce: skip check for raw transaction")
-				return
-			}
-		} else {
-			// @TODO Delete once envelope-store is removed
-			if mode := txctx.Envelope.GetContextLabelsValue("txMode"); mode == "raw" {
-				// If transaction has been generated externally we skip nonce check
-				txctx.Logger.Debugf("nonce: skip check for raw transaction")
-				return
-			}
+		if txctx.Envelope.IsRawTransaction() {
+			// If transaction has been generated externally we skip nonce check
+			txctx.Logger.WithFields(log.Fields{
+				"id": txctx.Envelope.GetID(),
+			}).Debugf("nonce: skip check for raw transaction")
+			return
 		}
 
 		if txctx.Envelope.IsOneTimeKeySignature() {

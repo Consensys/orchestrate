@@ -33,6 +33,7 @@ func RawPrivateTxSender(ec ethclient.TransactionSender) engine.HandlerFunc {
 		}
 
 		// Transaction has been properly sent so we set tx hash on Envelope
+		txctx.Logger.WithField("txHash", txHash.String()).Debugf("sender: updating txHash")
 		_ = txctx.Envelope.SetTxHash(txHash)
 	}
 }

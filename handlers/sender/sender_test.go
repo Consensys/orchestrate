@@ -94,7 +94,7 @@ func makeSenderContext(i int) *engine.TxContext {
 		// 	// Cannot send a transaction with unknown protocol type
 		txctx.WithContext(proxy.With(txctx.Context(), endpointError))
 		_ = txctx.Envelope.SetID(RandString(10)).SetMethod(123).MustSetFromString("0x1").SetRawString(txRaw)
-		txctx.Set("error", "invalid private protocol \"123\"")
+		txctx.Set("error", "invalid transaction protocol \"123\"")
 		txctx.Set("status", "")
 	case 8:
 		// Cannot send a signed private transaction with Constellation protocol

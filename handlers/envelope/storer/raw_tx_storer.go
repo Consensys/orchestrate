@@ -14,16 +14,16 @@ import (
 func RawTxStore(store svc.EnvelopeStoreClient, txSchedulerClient client.TransactionSchedulerClient) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		// TODO: Remove if statement when envelope store is removed
-		if txctx.Envelope.ContextLabels["jobUUID"] != "" {
-			updateTxInScheduler(txctx, txSchedulerClient)
+		if txctx.Envelope.BelongToEnvelopeStore() {
+			rawTxStoreInEnvelopeStore(txctx, store)
 		} else {
-			updateTxInStore(txctx, store)
+			rawTxStoreInTxScheduler(txctx, txSchedulerClient)
 		}
 	}
 }
 
-func updateTxInScheduler(txctx *engine.TxContext, txSchedulerClient client.TransactionSchedulerClient) {
-	txctx.Logger.Debug("updating transaction")
+func rawTxStoreInTxScheduler(txctx *engine.TxContext, txSchedulerClient client.TransactionSchedulerClient) {
+	txctx.Logger.Debug("transaction scheduler: updating transaction to PENDING")
 
 	_, err := txSchedulerClient.UpdateJob(
 		txctx.Context(),
@@ -45,6 +45,7 @@ func updateTxInScheduler(txctx *engine.TxContext, txSchedulerClient client.Trans
 			Status: types2.StatusPending,
 		},
 	)
+
 	if err != nil {
 		e := txctx.AbortWithError(err).ExtendComponent(component)
 		txctx.Logger.WithError(e).Errorf("transaction scheduler: failed to update transaction")
@@ -56,6 +57,7 @@ func updateTxInScheduler(txctx *engine.TxContext, txSchedulerClient client.Trans
 
 	// If an error occurred when executing pending handlers
 	if len(txctx.Envelope.GetErrors()) != 0 {
+		txctx.Logger.Debug("transaction scheduler: updating transaction to RECOVERING")
 		_, storeErr := txSchedulerClient.UpdateJob(
 			txctx.Context(),
 			txctx.Envelope.GetID(),
@@ -76,6 +78,7 @@ func updateTxInScheduler(txctx *engine.TxContext, txSchedulerClient client.Trans
 		return
 	}
 
+	txctx.Logger.Debug("transaction scheduler: updating transaction to SENT")
 	// Transaction has been properly sent so we set status to `sent`
 	_, err = txSchedulerClient.UpdateJob(
 		txctx.Context(),
@@ -91,7 +94,7 @@ func updateTxInScheduler(txctx *engine.TxContext, txSchedulerClient client.Trans
 	}
 }
 
-func updateTxInStore(txctx *engine.TxContext, store svc.EnvelopeStoreClient) {
+func rawTxStoreInEnvelopeStore(txctx *engine.TxContext, store svc.EnvelopeStoreClient) {
 	// Store envelope
 	_, err := store.Store(
 		txctx.Context(),
@@ -112,6 +115,7 @@ func updateTxInStore(txctx *engine.TxContext, store svc.EnvelopeStoreClient) {
 	// If an error occurred when executing pending handlers
 	if len(txctx.Envelope.GetErrors()) != 0 {
 		// We update status in storage
+		txctx.Logger.Debug("store: updating transaction to ERROR")
 		_, storeErr := store.SetStatus(
 			txctx.Context(),
 			&svc.SetStatusRequest{
@@ -128,6 +132,7 @@ func updateTxInStore(txctx *engine.TxContext, store svc.EnvelopeStoreClient) {
 	}
 
 	// Transaction has been properly sent so we set status to `pending`
+	txctx.Logger.Debug("store: updating transaction to PENDING")
 	_, err = store.SetStatus(
 		txctx.Context(),
 		&svc.SetStatusRequest{
@@ -138,7 +143,7 @@ func updateTxInStore(txctx *engine.TxContext, store svc.EnvelopeStoreClient) {
 	if err != nil {
 		// Connection to store is broken
 		e := errors.FromError(err).ExtendComponent(component)
-		txctx.Logger.WithError(e).Errorf("sender: failed to set envelope status")
+		txctx.Logger.WithError(e).Errorf("store: failed to set envelope status")
 		return
 	}
 }
