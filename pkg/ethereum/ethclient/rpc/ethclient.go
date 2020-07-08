@@ -442,6 +442,7 @@ func (ec *Client) PrivateTransactionReceipt(ctx context.Context, endpoint string
 
 	// Once we have both receipts, we create a hybrid version as follow
 	r.Status, _ = hexutil.DecodeUint64(pr.Status)
+	r.ContractAddress = pr.ContractAddress
 	r.Logs = pr.Logs
 	r.Output = pr.Output
 	r.TxHash = pr.TransactionHash

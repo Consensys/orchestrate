@@ -483,6 +483,7 @@ func TestPrivateTransactionReceipt(t *testing.T) {
 	privReceipt := &privateReceipt{
 		Status: "0x1",
 		Output: "0x12123",
+		ContractAddress: "0xContractAddr",
 		Logs: []*proto.Log{
 			{
 				Address: ethcommon.BytesToAddress([]byte{0x11}).String(),
@@ -508,6 +509,7 @@ func TestPrivateTransactionReceipt(t *testing.T) {
 	assert.NoError(t, err, "TransactionReceipt should not  error")
 	assert.Equal(t, ethReceipt.CumulativeGasUsed, receipt.CumulativeGasUsed, "TransactionReceipt receipt should have correct cumulative gas used")
 	assert.Equal(t, privReceipt.Output, receipt.Output, "TransactionReceipt receipt should have correct priv tx output")
+	assert.Equal(t, privReceipt.ContractAddress, receipt.ContractAddress, "TransactionReceipt receipt should have correct priv contract addr")
 	assert.Equal(t, uint64(0x1), receipt.Status, "TransactionReceipt receipt should have correct priv tx status")
 }
 
