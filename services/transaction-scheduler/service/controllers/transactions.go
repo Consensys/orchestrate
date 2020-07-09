@@ -59,14 +59,20 @@ func idempotencyKeyMiddleware(next http.Handler) http.Handler {
 }
 
 // @Summary Creates and sends a new contract transaction
+// @Description Creates and executes a new smart contract transaction request
+// @Description The transaction can be private (Tessera, Orion).
+// @Description The transaction can be a One Time Key transaction in 0 gas private networks
+// @Tags Transactions
+// @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Success 200
-// @Failure 400
-// @Failure 409
-// @Failure 422
-// @Failure 500
+// @Param request body types.SendTransactionRequest true "Contract transaction request"
+// @Success 202 {object} types.TransactionResponse "Created contract transaction request"
+// @Failure 400 {string} error "Invalid request"
+// @Failure 409 {string} error "Already existing transaction"
+// @Failure 422 {string} error "Unprocessable parameters were sent"
+// @Failure 500 {string} error "Internal server error"
 // @Router /transactions/send [post]
 func (c *TransactionsController) send(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -103,15 +109,21 @@ func (c *TransactionsController) send(rw http.ResponseWriter, request *http.Requ
 	_ = json.NewEncoder(rw).Encode(formatters.FormatTxResponse(txResponse))
 }
 
-// @Summary Creates and sends a new contract deployment transaction
+// @Summary Creates and sends a new contract deployment
+// @Description Creates and executes a new contract deployment request
+// @Description The transaction can be private (Tessera, Orion).
+// @Description The transaction can be a One Time Key transaction in 0 gas private networks
+// @Tags Transactions
+// @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Success 200
-// @Failure 400
-// @Failure 409
-// @Failure 422
-// @Failure 500
+// @Param request body types.DeployContractRequest true "Deployment transaction request"
+// @Success 202 {object} types.TransactionResponse "Created deployment transaction request"
+// @Failure 400 {string} error "Invalid request"
+// @Failure 409 {string} error "Already existing transaction"
+// @Failure 422 {string} error "Unprocessable parameters were sent"
+// @Failure 500 {string} error "Internal server error"
 // @Router /transactions/deploy-contract [post]
 func (c *TransactionsController) deployContract(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -149,14 +161,18 @@ func (c *TransactionsController) deployContract(rw http.ResponseWriter, request 
 }
 
 // @Summary Creates and sends a raw transaction
+// @Description Creates and executes a new raw transaction request
+// @Tags Transactions
+// @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Success 200
-// @Failure 400
-// @Failure 409
-// @Failure 422
-// @Failure 500
+// @Param request body types.RawTransactionRequest true "Raw transaction request"
+// @Success 202 {object} types.TransactionResponse "Created raw transaction request"
+// @Failure 400 {string} error "Invalid request"
+// @Failure 409 {string} error "Already existing transaction"
+// @Failure 422 {string} error "Unprocessable parameters were sent"
+// @Failure 500 {string} error "Internal server error"
 // @Router /transactions/send-raw [post]
 func (c *TransactionsController) sendRaw(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -190,14 +206,18 @@ func (c *TransactionsController) sendRaw(rw http.ResponseWriter, request *http.R
 }
 
 // @Summary Creates and sends a transfer transaction
+// @Description Creates and executes a new transfer request
+// @Tags Transactions
+// @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Success 200
-// @Failure 400
-// @Failure 409
-// @Failure 422
-// @Failure 500
+// @Param request body types.RawTransactionRequest true "Transfer transaction request"
+// @Success 202 {object} types.TransactionResponse "Created transfer transaction request"
+// @Failure 400 {string} error "Invalid request"
+// @Failure 409 {string} error "Already existing transaction"
+// @Failure 422 {string} error "Unprocessable parameters were sent"
+// @Failure 500 {string} error "Internal server error"
 // @Router /transactions/transfer [post]
 func (c *TransactionsController) transfer(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -230,13 +250,16 @@ func (c *TransactionsController) transfer(rw http.ResponseWriter, request *http.
 	_ = json.NewEncoder(rw).Encode(formatters.FormatTxResponse(txResponse))
 }
 
-// @Summary Gets a transaction request by uuid
+// @Summary Fetch a transaction request by uuid
+// @Description Fetch a single transaction request by uuid
+// @Tags Transactions
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Success 200
-// @Failure 404
-// @Failure 500
+// @Param uuid path string true "UUID of the transaction request"
+// @Success 200 {object} types.TransactionResponse "Transaction request found"
+// @Failure 404 {string} error "Transaction request not found"
+// @Failure 500 {string} error "Internal server error"
 // @Router /transactions/{uuid} [get]
 func (c *TransactionsController) getOne(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -253,13 +276,17 @@ func (c *TransactionsController) getOne(rw http.ResponseWriter, request *http.Re
 	_ = json.NewEncoder(rw).Encode(formatters.FormatTxResponse(txRequest))
 }
 
-// @Summary Searches transaction requests by filter
+// @Summary Search transaction requests by provided filters
+// @Description Get a list of filtered transaction requests
+// @Tags Transactions
+// @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Success 200
-// @Failure 400
-// @Failure 500
+// @Param idempotency_keys query []string false "List of idempotency keys" collectionFormat(csv)
+// @Success 200 {array} types.TransactionResponse "List of transaction requests found"
+// @Failure 400 {string} error "Invalid filter in the request"
+// @Failure 500 {string} error "Internal server error"
 // @Router /transactions [get]
 func (c *TransactionsController) search(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")

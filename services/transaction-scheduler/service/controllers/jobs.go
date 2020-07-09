@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
+
 	"github.com/gorilla/mux"
+
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs"
 )
 
@@ -33,12 +35,17 @@ func (c *JobsController) Append(router *mux.Router) {
 }
 
 // @Summary Search jobs by provided filters
+// @Description Get a list of filtered jobs
+// @Tags Jobs
+// @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Success 200
-// @Failure 400
-// @Failure 500
+// @Param tx_hashes query []string false "List of transaction hashes" collectionFormat(csv)
+// @Param chain_uuid query string false "Chain UUID"
+// @Success 200 {array} types.JobResponse "List of jobs found"
+// @Failure 400 {string} error "Invalid filter in the request"
+// @Failure 500 {string} error "Internal server error"
 // @Router /jobs [get]
 func (c *JobsController) search(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -65,12 +72,17 @@ func (c *JobsController) search(rw http.ResponseWriter, request *http.Request) {
 }
 
 // @Summary Creates a new Job
+// @Description Creates a new job as part of an already created schedule
+// @Tags Jobs
+// @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Success 200
-// @Failure 400
-// @Failure 500
+// @Param request body types.CreateJobRequest true "Job creation request"
+// @Success 200 {object} types.JobResponse "Created job"
+// @Failure 400 {string} error "Invalid request"
+// @Failure 422 {string} error "Unprocessable parameters were sent"
+// @Failure 500 {string} error "Internal server error"
 // @Router /jobs [post]
 func (c *JobsController) create(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -94,12 +106,15 @@ func (c *JobsController) create(rw http.ResponseWriter, request *http.Request) {
 }
 
 // @Summary Fetch a job by uuid
+// @Description Fetch a single job by uuid
+// @Tags Jobs
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Success 200
-// @Failure 404
-// @Failure 500
+// @Param uuid path string true "UUID of the job"
+// @Success 200 {object} types.JobResponse "Job found"
+// @Failure 404 {string} error "Job not found"
+// @Failure 500 {string} error "Internal server error"
 // @Router /jobs/{uuid} [get]
 func (c *JobsController) getOne(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -117,11 +132,15 @@ func (c *JobsController) getOne(rw http.ResponseWriter, request *http.Request) {
 }
 
 // @Summary Start a Job by UUID
+// @Description Starts a specific job by UUID, effectively executing the transaction asynchronously
+// @Tags Jobs
+// @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
+// @Param uuid path string true "UUID of the job"
 // @Success 202
-// @Failure 404
-// @Failure 500
+// @Failure 404 {string} error "Job not found"
+// @Failure 500 {string} error "Internal server error"
 // @Router /jobs/{uuid}/start [put]
 func (c *JobsController) start(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -138,12 +157,18 @@ func (c *JobsController) start(rw http.ResponseWriter, request *http.Request) {
 }
 
 // @Summary Update job by UUID
+// @Description Low-level endpoint to update a specific job by UUID
+// @Tags Jobs
+// @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Success 200
-// @Failure 400
-// @Failure 500
+// @Param request body types.UpdateJobRequest true "Job update request"
+// @Success 200 {object} types.JobResponse "Job found"
+// @Failure 400 {string} error "Invalid request"
+// @Failure 404 {string} error "Job not found"
+// @Failure 422 {string} error "Unprocessable parameters were sent"
+// @Failure 500 {string} error "Internal server error"
 // @Router /jobs/{uuid} [patch]
 func (c *JobsController) update(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")

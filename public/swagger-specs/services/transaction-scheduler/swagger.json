@@ -25,14 +25,57 @@
                         "JWTAuth": []
                     }
                 ],
+                "description": "Get a list of filtered jobs",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Jobs"
+                ],
                 "summary": "Search jobs by provided filters",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "List of transaction hashes",
+                        "name": "tx_hashes",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Chain UUID",
+                        "name": "chain_uuid",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
-                    "200": {},
-                    "400": {},
-                    "500": {}
+                    "200": {
+                        "description": "List of jobs found",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/types.JobResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid filter in the request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
                 }
             },
             "post": {
@@ -44,14 +87,53 @@
                         "JWTAuth": []
                     }
                 ],
+                "description": "Creates a new job as part of an already created schedule",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Jobs"
+                ],
                 "summary": "Creates a new Job",
+                "parameters": [
+                    {
+                        "description": "Job creation request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.CreateJobRequest"
+                        }
+                    }
+                ],
                 "responses": {
-                    "200": {},
-                    "400": {},
-                    "500": {}
+                    "200": {
+                        "description": "Created job",
+                        "schema": {
+                            "$ref": "#/definitions/types.JobResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable parameters were sent",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
@@ -65,14 +147,42 @@
                         "JWTAuth": []
                     }
                 ],
+                "description": "Fetch a single job by uuid",
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Jobs"
+                ],
                 "summary": "Fetch a job by uuid",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UUID of the job",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
-                    "200": {},
-                    "404": {},
-                    "500": {}
+                    "200": {
+                        "description": "Job found",
+                        "schema": {
+                            "$ref": "#/definitions/types.JobResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Job not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
                 }
             },
             "patch": {
@@ -84,14 +194,59 @@
                         "JWTAuth": []
                     }
                 ],
+                "description": "Low-level endpoint to update a specific job by UUID",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Jobs"
+                ],
                 "summary": "Update job by UUID",
+                "parameters": [
+                    {
+                        "description": "Job update request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.UpdateJobRequest"
+                        }
+                    }
+                ],
                 "responses": {
-                    "200": {},
-                    "400": {},
-                    "500": {}
+                    "200": {
+                        "description": "Job found",
+                        "schema": {
+                            "$ref": "#/definitions/types.JobResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Job not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable parameters were sent",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
@@ -105,11 +260,37 @@
                         "JWTAuth": []
                     }
                 ],
+                "description": "Low-level endpoint to start a specific job by UUID, effectively executing the transaction",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Jobs"
+                ],
                 "summary": "Start a Job by UUID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UUID of the job",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "202": {},
-                    "404": {},
-                    "500": {}
+                    "404": {
+                        "description": "Job not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
@@ -123,14 +304,30 @@
                         "JWTAuth": []
                     }
                 ],
+                "description": "Get all schedules",
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Fetch a list of schedules",
+                "tags": [
+                    "Schedules"
+                ],
+                "summary": "Get all schedules",
                 "responses": {
-                    "200": {},
-                    "404": {},
-                    "500": {}
+                    "200": {
+                        "description": "List of schedules found",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/types.ScheduleResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
                 }
             },
             "post": {
@@ -142,15 +339,53 @@
                         "JWTAuth": []
                     }
                 ],
+                "description": "Creates a new schedule",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Creates a new schedule",
+                "tags": [
+                    "Schedules"
+                ],
+                "summary": "Creates a new Schedule",
+                "parameters": [
+                    {
+                        "description": "Schedule creation request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.CreateScheduleRequest"
+                        }
+                    }
+                ],
                 "responses": {
-                    "200": {},
-                    "400": {},
-                    "422": {},
-                    "500": {}
+                    "200": {
+                        "description": "Created schedule",
+                        "schema": {
+                            "$ref": "#/definitions/types.ScheduleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable parameters were sent",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
@@ -164,14 +399,42 @@
                         "JWTAuth": []
                     }
                 ],
+                "description": "Fetch a single schedule by uuid",
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Fetch an schedule by its UUID",
+                "tags": [
+                    "Schedules"
+                ],
+                "summary": "Fetch a schedule by uuid",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UUID of the schedule",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
-                    "200": {},
-                    "404": {},
-                    "500": {}
+                    "200": {
+                        "description": "Schedule found",
+                        "schema": {
+                            "$ref": "#/definitions/types.ScheduleResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Schedule not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
@@ -185,14 +448,51 @@
                         "JWTAuth": []
                     }
                 ],
+                "description": "Get a list of filtered transaction requests",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Searches transaction requests by filter",
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Search transaction requests by provided filters",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "List of idempotency keys",
+                        "name": "idempotency_keys",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
-                    "200": {},
-                    "400": {},
-                    "500": {}
+                    "200": {
+                        "description": "List of transaction requests found",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/types.TransactionResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid filter in the request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
@@ -206,16 +506,59 @@
                         "JWTAuth": []
                     }
                 ],
+                "description": "Creates a new contract deployment request, schedule and job and starts executing the schedule.\nThe transaction can be private (Tessera, Orion).\nThe transaction can be a One Time Key transaction in 0 gas private networks",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Creates and sends a new contract deployment transaction",
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Creates and sends a new contract deployment",
+                "parameters": [
+                    {
+                        "description": "Deployment transaction request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.DeployContractRequest"
+                        }
+                    }
+                ],
                 "responses": {
-                    "200": {},
-                    "400": {},
-                    "409": {},
-                    "422": {},
-                    "500": {}
+                    "202": {
+                        "description": "Created deployment transaction request",
+                        "schema": {
+                            "$ref": "#/definitions/types.TransactionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "Already existing transaction",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable parameters were sent",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
@@ -229,16 +572,59 @@
                         "JWTAuth": []
                     }
                 ],
+                "description": "Creates a new contract transaction request, schedule and job and starts executing the schedule.\nThe transaction can be private (Tessera, Orion).\nThe transaction can be a One Time Key transaction in 0 gas private networks",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Transactions"
+                ],
                 "summary": "Creates and sends a new contract transaction",
+                "parameters": [
+                    {
+                        "description": "Contract transaction request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.SendTransactionRequest"
+                        }
+                    }
+                ],
                 "responses": {
-                    "200": {},
-                    "400": {},
-                    "409": {},
-                    "422": {},
-                    "500": {}
+                    "202": {
+                        "description": "Created contract transaction request",
+                        "schema": {
+                            "$ref": "#/definitions/types.TransactionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "Already existing transaction",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable parameters were sent",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
@@ -252,16 +638,59 @@
                         "JWTAuth": []
                     }
                 ],
+                "description": "Creates a new raw transaction request, schedule and job and starts executing the schedule.",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Transactions"
+                ],
                 "summary": "Creates and sends a raw transaction",
+                "parameters": [
+                    {
+                        "description": "Raw transaction request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.RawTransactionRequest"
+                        }
+                    }
+                ],
                 "responses": {
-                    "200": {},
-                    "400": {},
-                    "409": {},
-                    "422": {},
-                    "500": {}
+                    "202": {
+                        "description": "Created raw transaction request",
+                        "schema": {
+                            "$ref": "#/definitions/types.TransactionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "Already existing transaction",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable parameters were sent",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
@@ -275,16 +704,59 @@
                         "JWTAuth": []
                     }
                 ],
+                "description": "Creates a new transfer transaction request, schedule and job and starts executing the schedule.",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Transactions"
+                ],
                 "summary": "Creates and sends a transfer transaction",
+                "parameters": [
+                    {
+                        "description": "Transfer transaction request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.RawTransactionRequest"
+                        }
+                    }
+                ],
                 "responses": {
-                    "200": {},
-                    "400": {},
-                    "409": {},
-                    "422": {},
-                    "500": {}
+                    "202": {
+                        "description": "Created transfer transaction request",
+                        "schema": {
+                            "$ref": "#/definitions/types.TransactionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "Already existing transaction",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable parameters were sent",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
@@ -298,14 +770,214 @@
                         "JWTAuth": []
                     }
                 ],
+                "description": "Fetch a single transaction request by uuid",
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Gets a transaction request by uuid",
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Fetch a transaction request by uuid",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UUID of the transaction request",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
-                    "200": {},
-                    "404": {},
-                    "500": {}
+                    "200": {
+                        "description": "Transaction request found",
+                        "schema": {
+                            "$ref": "#/definitions/types.TransactionResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Transaction request not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "types.CreateJobRequest": {
+            "type": "object",
+            "required": [
+                "chainUUID",
+                "scheduleUUID",
+                "transaction",
+                "type"
+            ],
+            "properties": {
+                "annotations": {
+                    "type": "string"
+                },
+                "chainUUID": {
+                    "type": "string"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "scheduleUUID": {
+                    "type": "string"
+                },
+                "transaction": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.CreateScheduleRequest": {
+            "type": "object"
+        },
+        "types.DeployContractRequest": {
+            "type": "object",
+            "required": [
+                "params"
+            ],
+            "properties": {
+                "params": {
+                    "type": "DeployContractParams"
+                }
+            }
+        },
+        "types.JobResponse": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "string"
+                },
+                "chainUUID": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "logs": {
+                    "type": "string"
+                },
+                "scheduleUUID": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "transaction": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.RawTransactionRequest": {
+            "type": "object",
+            "required": [
+                "params"
+            ],
+            "properties": {
+                "params": {
+                    "type": "RawTransactionParams"
+                }
+            }
+        },
+        "types.ScheduleResponse": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "jobs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.JobResponse"
+                    }
+                },
+                "tenantID": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.SendTransactionRequest": {
+            "type": "object",
+            "required": [
+                "params"
+            ],
+            "properties": {
+                "params": {
+                    "type": "TransactionParams"
+                }
+            }
+        },
+        "types.TransactionResponse": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "idempotencyKey": {
+                    "type": "string"
+                },
+                "params": {
+                    "type": "string"
+                },
+                "schedule": {
+                    "type": "object",
+                    "$ref": "#/definitions/types.ScheduleResponse"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.UpdateJobRequest": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "string"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "transaction": {
+                    "type": "string"
                 }
             }
         }
@@ -321,5 +993,19 @@
             "name": "Authorization",
             "in": "header"
         }
-    }
+    },
+    "tags": [
+        {
+            "description": "Transactions endpoint enabling dynamic management of transactions",
+            "name": "Transactions"
+        },
+        {
+            "description": "Schedules are ordered list of jobs executed in a predefined sequence",
+            "name": "Schedules"
+        },
+        {
+            "description": "Jobs represent a single transaction flow executed on the Blockchain network",
+            "name": "Jobs"
+        }
+    ]
 }

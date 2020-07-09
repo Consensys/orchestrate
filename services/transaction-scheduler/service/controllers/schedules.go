@@ -30,17 +30,21 @@ func NewSchedulesController(useCases schedules.UseCases) *SchedulesController {
 func (c *SchedulesController) Append(router *mux.Router) {
 	router.Methods(http.MethodPost).Path("/schedules").HandlerFunc(c.create)
 	router.Methods(http.MethodGet).Path("/schedules/{uuid}").HandlerFunc(c.getOne)
-	router.Methods(http.MethodGet).Path("/schedules").HandlerFunc(c.get)
+	router.Methods(http.MethodGet).Path("/schedules").HandlerFunc(c.getAll)
 }
 
-// @Summary Creates a new schedule
+// @Summary Creates a new Schedule
+// @Description Creates a new schedule
+// @Tags Schedules
+// @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Success 200
-// @Failure 400
-// @Failure 422
-// @Failure 500
+// @Param request body types.CreateScheduleRequest true "Schedule creation request"
+// @Success 200 {object} types.ScheduleResponse "Created schedule"
+// @Failure 400 {string} error "Invalid request"
+// @Failure 422 {string} error "Unprocessable parameters were sent"
+// @Failure 500 {string} error "Internal server error"
 // @Router /schedules [post]
 func (c *SchedulesController) create(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -63,13 +67,16 @@ func (c *SchedulesController) create(rw http.ResponseWriter, request *http.Reque
 	_ = json.NewEncoder(rw).Encode(response)
 }
 
-// @Summary Fetch an schedule by its UUID
+// @Summary Fetch a schedule by uuid
+// @Description Fetch a single schedule by uuid
+// @Tags Schedules
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Success 200
-// @Failure 404
-// @Failure 500
+// @Param uuid path string true "UUID of the schedule"
+// @Success 200 {object} types.ScheduleResponse "Schedule found"
+// @Failure 404 {string} error "Schedule not found"
+// @Failure 500 {string} error "Internal server error"
 // @Router /schedules/{uuid} [get]
 func (c *SchedulesController) getOne(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -87,15 +94,16 @@ func (c *SchedulesController) getOne(rw http.ResponseWriter, request *http.Reque
 	_ = json.NewEncoder(rw).Encode(response)
 }
 
-// @Summary Fetch a list of schedules
+// @Summary Get all schedules
+// @Description Get all schedules
+// @Tags Schedules
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Success 200
-// @Failure 404
-// @Failure 500
+// @Success 200 {array} types.ScheduleResponse "List of schedules found"
+// @Failure 500 {string} error "Internal server error"
 // @Router /schedules [get]
-func (c *SchedulesController) get(rw http.ResponseWriter, request *http.Request) {
+func (c *SchedulesController) getAll(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
