@@ -150,6 +150,7 @@ test-e2e:
   <<: *docker-compose-e2e
   <<: *rules
   script:
+    - mv -f .env.ci .env
     - make up-ci
     - make e2e-ci
     - exit $(docker inspect orchestrate_e2e_1 --format='{{.State.ExitCode}}')
