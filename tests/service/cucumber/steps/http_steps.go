@@ -216,7 +216,7 @@ func (sc *ScenarioContext) iRegisterTheFollowingResponseFields(table *gherkin.Pi
 		return err
 	}
 
-	aliasTable := utils.ExtractTable(table, []string{aliasHeaderValue})
+	aliasTable := utils.ExtractColumns(table, []string{aliasHeaderValue})
 	for i, row := range aliasTable.Rows[1:] {
 
 		alias := row.Cells[0].Value

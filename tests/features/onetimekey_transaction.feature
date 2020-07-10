@@ -5,8 +5,8 @@ Feature: One time key signature
 
   Background:
     Given I have the following tenants
-      | alias   | tenantID                             |
-      | tenant1 | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+      | alias   | tenantID        |
+      | tenant1 | {{random.uuid}} |
     And I register the following contracts
       | name        | artifacts        | Headers.Authorization    |
       | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |

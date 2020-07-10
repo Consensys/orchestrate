@@ -1,17 +1,19 @@
 package utils
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"context"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 )
 
-func GetNonce(ec ethclient.ChainStateReader, txctx *engine.TxContext, url string) (uint64, error) {
+func GetNonce(ctx context.Context, ec ethclient.ChainStateReader, e *tx.Envelope, url string) (uint64, error) {
 	switch {
-	case txctx.Envelope.IsEeaSendPrivateTransactionPrivacyGroup():
-		return ec.PrivNonce(txctx.Context(), url, txctx.Envelope.MustGetFromAddress(), txctx.Envelope.GetPrivacyGroupID())
-	case txctx.Envelope.IsEeaSendPrivateTransactionPrivateFor():
-		return ec.PrivEEANonce(txctx.Context(), url, txctx.Envelope.MustGetFromAddress(), txctx.Envelope.GetPrivateFrom(), txctx.Envelope.GetPrivateFor())
+	case e.IsEeaSendPrivateTransactionPrivacyGroup():
+		return ec.PrivNonce(ctx, url, e.MustGetFromAddress(), e.GetPrivacyGroupID())
+	case e.IsEeaSendPrivateTransactionPrivateFor():
+		return ec.PrivEEANonce(ctx, url, e.MustGetFromAddress(), e.GetPrivateFrom(), e.GetPrivateFor())
 	default:
-		return ec.PendingNonceAt(txctx.Context(), url, txctx.Envelope.MustGetFromAddress())
+		return ec.PendingNonceAt(ctx, url, e.MustGetFromAddress())
 	}
 }

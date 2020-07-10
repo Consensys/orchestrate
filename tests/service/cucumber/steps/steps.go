@@ -11,11 +11,15 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt/generator"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
 	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce"
+	noncememory "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/memory"
 	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/chanregistry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/alias"
@@ -69,6 +73,10 @@ type ScenarioContext struct {
 
 	jwtGenerator *generator.JWTGenerator
 
+	ec ethclient.Client
+
+	nonceManager nonce.Manager
+
 	TearDownFunc []func()
 }
 
@@ -81,6 +89,8 @@ func NewScenarioContext(
 	producer sarama.SyncProducer,
 	aliasesReg *alias.Registry,
 	jwtGenerator *generator.JWTGenerator,
+	ec ethclient.Client,
+	nonceManager nonce.Manager,
 ) *ScenarioContext {
 	sc := &ScenarioContext{
 		chanReg:              chanReg,
@@ -92,6 +102,8 @@ func NewScenarioContext(
 		producer:             producer,
 		logger:               log.NewEntry(log.StandardLogger()),
 		jwtGenerator:         jwtGenerator,
+		ec:                   ec,
+		nonceManager:         nonceManager,
 	}
 
 	return sc
@@ -200,6 +212,8 @@ func InitializeScenario(s *godog.ScenarioContext) {
 		broker.GlobalSyncProducer(),
 		alias.GlobalAliasRegistry(),
 		generator.GlobalJWTGenerator(),
+		rpc.GlobalClient(),
+		noncememory.GlobalNonceManager(),
 	)
 
 	s.BeforeScenario(sc.init)

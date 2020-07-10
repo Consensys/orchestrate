@@ -5,20 +5,42 @@ Feature: Invalid Nonce
 
   Background:
     Given I have the following tenants
-      | alias   | tenantID                             |
-      | tenant1 | f30c452b-e5fb-4102-a45d-bc00a060bcc6 |
+      | alias   | tenantID        |
+      | tenant1 | {{random.uuid}} |
     And I register the following contracts
       | name        | artifacts        | Headers.Authorization    |
       | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
     And I register the following chains
       | alias | Name                | URLs                       | Headers.Authorization    |
       | besu  | besu-{{scenarioID}} | {{global.nodes.besu.URLs}} | Bearer {{tenant1.token}} |
-    And I register the following faucets
-      | Name                       | ChainRule     | CreditorAccount                         | MaxBalance          | Amount              | Cooldown | Headers.Authorization    |
-      | besu-faucet-{{scenarioID}} | {{besu.UUID}} | {{global.nodes.besu.fundedAccounts[0]}} | 1000000000000000000 | 1000000000000000000 | 1s       | Bearer {{tenant1.token}} |
     And I have created the following accounts
-      | alias    | ID              | ChainName           | ContextLabels.faucetChildTxID | Headers.Authorization    |
-      | account1 | {{random.uuid}} | besu-{{scenarioID}} | {{random.uuid}}               | Bearer {{tenant1.token}} |
+      | alias    | ID              | Headers.Authorization    |
+      | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
+    Given I sign the following transactions
+      | alias     | ID              | Value              | Gas   | To           | privateKey                                 | ChainUUID     | Headers.Authorization    |
+      | txFaucet1 | {{random.uuid}} | 100000000000000000 | 21000 | {{account1}} | {{global.nodes.besu.fundedPrivateKeys[0]}} | {{besu.UUID}} | Bearer {{tenant1.token}} |
+    Then I track the following envelopes
+      | ID               |
+      | {{txFaucet1.ID}} |
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+      | Content-Type  | application/json         |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/send-raw" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "raw": "{{txFaucet1.Raw}}"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{txFaucet1.ID}}"
+    }
+}
+      """
+    Then the response code should be 202
+    Then Envelopes should be in topic "tx.decoded"
 
   Scenario: Nonce Too High
     When I send envelopes to topic "tx.signer"

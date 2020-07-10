@@ -78,7 +78,7 @@ func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFun
 				}
 
 				// Retrieve nonce from chain
-				pendingNonce, err := utils.GetNonce(ec, txctx, url)
+				pendingNonce, err := utils.GetNonce(txctx.Context(), ec, txctx.Envelope, url)
 				if err != nil {
 					e := txctx.AbortWithError(err).ExtendComponent(component)
 					txctx.Logger.WithError(e).Errorf("nonce: could not read nonce from chain")

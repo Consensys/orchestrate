@@ -3,6 +3,7 @@ package steps
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"reflect"
 	"regexp"
 	"strings"
@@ -15,12 +16,16 @@ import (
 	"github.com/gofrs/uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	nonceUtils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/nonce/utils"
 	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/account"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/keystore/session"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/alias"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/utils"
 )
 
@@ -208,20 +213,20 @@ func (sc *ScenarioContext) iHaveTheFollowingTenant(table *gherkin.PickleStepArgu
 	headers := table.Rows[0]
 	for _, row := range table.Rows[1:] {
 		tenantMap := make(map[string]interface{})
-		var alias string
+		var a string
 		var tenantID string
 
 		for i, cell := range row.Cells {
 			switch v := headers.Cells[i].Value; {
 			case v == aliasHeaderValue:
-				alias = cell.Value
+				a = cell.Value
 			case v == "tenantID":
 				tenantID = cell.Value
 			default:
 				tenantMap[v] = cell.Value
 			}
 		}
-		if alias == "" {
+		if a == "" {
 			return errors.DataError("need an alias")
 		}
 		if tenantID == "" {
@@ -233,17 +238,18 @@ func (sc *ScenarioContext) iHaveTheFollowingTenant(table *gherkin.PickleStepArgu
 		}
 		tenantMap["token"] = token
 		tenantMap["tenantID"] = tenantID
-		sc.aliases.Set(tenantMap, sc.Pickle.Id, alias)
+		sc.aliases.Set(tenantMap, sc.Pickle.Id, a)
 	}
 
 	return nil
 }
 
 func (sc *ScenarioContext) iHaveCreatedTheFollowingAccounts(table *gherkin.PickleStepArgument_PickleTable) error {
-	aliasTable := utils.ExtractTable(table, []string{aliasHeaderValue})
+	aliasTable := utils.ExtractColumns(table, []string{aliasHeaderValue})
 	if aliasTable == nil {
 		return errors.DataError("alias column is mandatory")
 	}
+
 	envelopes, err := utils.ParseEnvelope(table)
 	if err != nil {
 		return err
@@ -270,13 +276,13 @@ func (sc *ScenarioContext) iHaveCreatedTheFollowingAccounts(table *gherkin.Pickl
 
 	// Catch envelope after it has been decoded
 	for i, t := range trackers {
-		alias := aliasTable.Rows[i+1].Cells[0].Value
+		a := aliasTable.Rows[i+1].Cells[0].Value
 		if t.Load("account.generated", 30*time.Second) != nil {
-			return errors.DataError("could not generate account for %s - got %v", alias, err)
+			return errors.DataError("could not generate account for %s - got %v", a, err)
 		} else if t.Current.GetFrom() == nil {
 			return errors.DataError("no address found")
 		}
-		sc.aliases.Set(t.Current.GetFrom().Hex(), sc.Pickle.Id, alias)
+		sc.aliases.Set(t.Current.GetFrom().Hex(), sc.Pickle.Id, a)
 	}
 
 	// Check that accounts has been funded
@@ -287,8 +293,8 @@ func (sc *ScenarioContext) iHaveCreatedTheFollowingAccounts(table *gherkin.Pickl
 
 	for i, t := range sc.trackers {
 		if t.Current.Receipt.Status != 1 {
-			alias, _ := sc.aliases.Get(sc.Pickle.Id, aliasTable.Rows[i+1].Cells[0].Value)
-			return errors.EthereumError("Account '%s' has been created but not funded", alias)
+			a, _ := sc.aliases.Get(sc.Pickle.Id, aliasTable.Rows[i+1].Cells[0].Value)
+			return errors.EthereumError("Account '%s' has been created but not funded", a)
 		}
 	}
 
@@ -298,9 +304,10 @@ func (sc *ScenarioContext) iHaveCreatedTheFollowingAccounts(table *gherkin.Pickl
 }
 
 func (sc *ScenarioContext) iRegisterTheFollowingChains(table *gherkin.PickleStepArgument_PickleTable) error {
-	tokenTable := utils.ExtractTable(table, []string{"Headers.Authorization"})
-	aliasTable := utils.ExtractTable(table, []string{aliasHeaderValue})
-
+	utilsCols := utils.ExtractColumns(table, []string{aliasHeaderValue, "Headers.Authorization"})
+	if utilsCols == nil {
+		return errors.DataError("One of the following columns is missing %q", utilsCols)
+	}
 	interfaceSlices, err := utils.ParseTable(models.Chain{}, table)
 	if err != nil {
 		return err
@@ -315,7 +322,7 @@ func (sc *ScenarioContext) iRegisterTheFollowingChains(table *gherkin.PickleStep
 	}
 
 	for i, chain := range interfaceSlices {
-		token := tokenTable.Rows[i+1].Cells[0].Value
+		token := utilsCols.Rows[i+1].Cells[1].Value
 
 		res, err := sc.ChainRegistry.RegisterChain(authutils.WithAuthorization(context.Background(), token), chain.(*models.Chain))
 		if err != nil {
@@ -323,18 +330,15 @@ func (sc *ScenarioContext) iRegisterTheFollowingChains(table *gherkin.PickleStep
 		}
 		sc.TearDownFunc = append(sc.TearDownFunc, f(res.UUID, token))
 
-		// If aliases
-		if aliasTable != nil {
-			alias := aliasTable.Rows[i+1].Cells[0].Value
-			sc.aliases.Set(res, sc.Pickle.Id, alias)
-		}
+		// set aliases
+		sc.aliases.Set(res, sc.Pickle.Id, utilsCols.Rows[i+1].Cells[0].Value)
 	}
 
 	return nil
 }
 
 func (sc *ScenarioContext) iRegisterTheFollowingFaucets(table *gherkin.PickleStepArgument_PickleTable) error {
-	tokenTable := utils.ExtractTable(table, []string{"Headers.Authorization"})
+	tokenTable := utils.ExtractColumns(table, []string{"Headers.Authorization"})
 	interfaceSlices, err := utils.ParseTable(models.Faucet{}, table)
 
 	if err != nil {
@@ -365,19 +369,29 @@ func (sc *ScenarioContext) iRegisterTheFollowingFaucets(table *gherkin.PickleSte
 var r = regexp.MustCompile("{{([^}]*)}}")
 
 func (sc *ScenarioContext) replace(s string) (string, error) {
-	for _, alias := range r.FindAllStringSubmatch(s, -1) {
-		aka := []string{alias[1]}
-		if strings.HasPrefix(alias[1], "random.uuid") {
-			s = strings.Replace(s, alias[0], uuid.Must(uuid.NewV4()).String(), 1)
+	for _, matchedAlias := range r.FindAllStringSubmatch(s, -1) {
+		aka := []string{matchedAlias[1]}
+		if strings.HasPrefix(matchedAlias[1], "random.") {
+			random := strings.Split(matchedAlias[1], ".")
+			switch random[1] {
+			case "uuid":
+				s = strings.Replace(s, matchedAlias[0], uuid.Must(uuid.NewV4()).String(), 1)
+			case "account":
+				w := account.NewAccount()
+				_ = w.Generate()
+				s = strings.Replace(s, matchedAlias[0], w.Address().Hex(), 1)
+			case "int":
+				s = strings.Replace(s, matchedAlias[0], fmt.Sprintf("%d", rand.Int()), 1)
+			}
 			continue
 		}
 
-		if !strings.HasPrefix(alias[1], "global.") {
+		if !strings.HasPrefix(matchedAlias[1], "global.") {
 			aka = append([]string{sc.Pickle.Id}, aka...)
 		}
 		v, ok := sc.aliases.Get(aka...)
 		if !ok {
-			return "", fmt.Errorf("could not replace alias '%s'", alias[1])
+			return "", fmt.Errorf("could not replace alias '%s'", matchedAlias[1])
 		}
 
 		val := reflect.ValueOf(v)
@@ -390,7 +404,7 @@ func (sc *ScenarioContext) replace(s string) (string, error) {
 		default:
 			str = fmt.Sprintf("%v", v)
 		}
-		s = strings.Replace(s, alias[0], str, 1)
+		s = strings.Replace(s, matchedAlias[0], str, 1)
 	}
 	return s, nil
 }
@@ -409,11 +423,15 @@ func (sc *ScenarioContext) replaceAliases(table *gherkin.PickleStepArgument_Pick
 }
 
 func (sc *ScenarioContext) iRegisterTheFollowingAliasAs(table *gherkin.PickleStepArgument_PickleTable) error {
-	aliasTable := utils.ExtractTable(table, []string{aliasHeaderValue})
+	aliasTable := utils.ExtractColumns(table, []string{aliasHeaderValue})
+	if aliasTable == nil {
+		return errors.DataError("alias column is mandatory")
+	}
+
 	for i, row := range aliasTable.Rows[1:] {
-		alias := row.Cells[0].Value
+		a := row.Cells[0].Value
 		value := table.Rows[i+1].Cells[0].Value
-		ok := sc.aliases.Set(value, sc.Pickle.Id, alias)
+		ok := sc.aliases.Set(value, sc.Pickle.Id, a)
 		if !ok {
 			return errors.DataError("could not register alias")
 		}
@@ -421,18 +439,124 @@ func (sc *ScenarioContext) iRegisterTheFollowingAliasAs(table *gherkin.PickleSte
 	return nil
 }
 
-func (sc *ScenarioContext) iTrackTheFollowingEnvelope(table *gherkin.PickleStepArgument_PickleTable) error {
+func (sc *ScenarioContext) iTrackTheFollowingEnvelopes(table *gherkin.PickleStepArgument_PickleTable) error {
 	if len(table.Rows[0].Cells) != 1 {
 		return errors.DataError("invalid table")
 	}
 
-	var childEnvelopes []*tx.Envelope
+	var envelopes []*tx.Envelope
 	for _, r := range table.Rows[1:] {
 		if r.Cells[0].Value != "" {
-			childEnvelopes = append(childEnvelopes, tx.NewEnvelope().SetID(r.Cells[0].Value))
+			envelopes = append(envelopes, tx.NewEnvelope().SetID(r.Cells[0].Value))
 		}
 	}
-	sc.setTrackers(sc.newTrackers(childEnvelopes))
+	sc.setTrackers(sc.newTrackers(envelopes))
+
+	return nil
+}
+
+func (sc *ScenarioContext) iSignTheFollowingTransactions(table *gherkin.PickleStepArgument_PickleTable) error {
+	helpersColumns := []string{aliasHeaderValue, "privateKey", "Headers.Authorization"}
+	helpersTable := utils.ExtractColumns(table, helpersColumns)
+	if helpersTable == nil {
+		return errors.DataError("One of the following columns is missing %q", helpersColumns)
+	}
+
+	envelopes, err := utils.ParseEnvelope(table)
+	if err != nil {
+		return err
+	}
+
+	// Sign tx for each envelopes
+	for i, e := range envelopes {
+		err := sc.craftAndSignEnvelope(
+			authutils.WithAuthorization(context.Background(), helpersTable.Rows[i+1].Cells[2].Value),
+			e,
+			helpersTable.Rows[i+1].Cells[1].Value,
+		)
+		if err != nil {
+			return nil
+		}
+		sc.aliases.Set(e, sc.Pickle.Id, helpersTable.Rows[i+1].Cells[0].Value)
+	}
+
+	return nil
+}
+
+func (sc *ScenarioContext) craftAndSignEnvelope(ctx context.Context, e *tx.Envelope, privKey string) error {
+	a := account.NewAccount()
+	err := a.FromPrivateKey(privKey)
+	if err != nil {
+		return nil
+	}
+
+	chainRegistry, ok := sc.aliases.Get(alias.GlobalAka, "chain-registry")
+	if !ok {
+		return errors.DataError("Could not find the chain registry endpoint")
+	}
+	endpoint := fmt.Sprintf("%s/%s", chainRegistry.(string), e.GetChainUUID())
+	if e.GetChainID() == nil && e.GetChainUUID() != "" {
+		chainID, errNetwork := sc.ec.Network(ctx, endpoint)
+		if errNetwork != nil {
+			return errNetwork
+		}
+		_ = e.SetChainID(chainID)
+	}
+
+	s := session.NewSigningSession()
+	err = s.SetChain(e.GetChainID())
+	if err != nil {
+		return err
+	}
+	err = s.SetAccount(a)
+	if err != nil {
+		return err
+	}
+	_ = e.SetFrom(a.Address())
+
+	if e.GetNonce() == nil {
+		nonceKey := e.PartitionKey()
+		lastAttributed, ok, errNonce := sc.nonceManager.GetLastAttributed(nonceKey)
+		if errNonce != nil {
+			return errNonce
+		}
+		var n uint64
+		if !ok {
+			pendingNonce, errNonce := nonceUtils.GetNonce(ctx, sc.ec, e, endpoint)
+			if errNonce != nil {
+				return errNonce
+			}
+			n = pendingNonce
+		} else {
+			n = lastAttributed + 1
+		}
+		_ = e.SetNonce(n)
+		err = sc.nonceManager.SetLastAttributed(nonceKey, n)
+		if err != nil {
+			return err
+		}
+	}
+
+	if e.GetGasPrice() == nil {
+		gasPrice, errGasPrice := sc.ec.SuggestGasPrice(ctx, endpoint)
+		if errGasPrice != nil {
+			return errGasPrice
+		}
+		_ = e.SetGasPrice(gasPrice)
+	}
+
+	t, err := e.GetTransaction()
+	if err != nil {
+		return err
+	}
+
+	// TODO able to sign private tx
+	raw, hash, err := s.ExecuteForTx(t)
+	if err != nil {
+		return err
+	}
+
+	_ = e.SetRaw(raw).SetTxHash(*hash)
 
 	return nil
 }
@@ -440,13 +564,14 @@ func (sc *ScenarioContext) iTrackTheFollowingEnvelope(table *gherkin.PickleStepA
 func initEnvelopeSteps(s *godog.ScenarioContext, sc *ScenarioContext) {
 	s.Step(`^I register the following chains$`, sc.preProcessTableStep(sc.iRegisterTheFollowingChains))
 	s.Step(`^I register the following faucets$`, sc.preProcessTableStep(sc.iRegisterTheFollowingFaucets))
-	s.Step(`^I have the following tenants$`, sc.iHaveTheFollowingTenant)
+	s.Step(`^I have the following tenants$`, sc.preProcessTableStep(sc.iHaveTheFollowingTenant))
 	s.Step(`^I register the following alias$`, sc.preProcessTableStep(sc.iRegisterTheFollowingAliasAs))
 	s.Step(`^I have created the following accounts$`, sc.preProcessTableStep(sc.iHaveCreatedTheFollowingAccounts))
-	s.Step(`^I track the following envelopes$`, sc.preProcessTableStep(sc.iTrackTheFollowingEnvelope))
+	s.Step(`^I track the following envelopes$`, sc.preProcessTableStep(sc.iTrackTheFollowingEnvelopes))
 	s.Step(`^I have deployed the following contracts$`, sc.iHaveDeployedTheFollowingContracts)
 	s.Step(`^I send envelopes to topic "([^"]*)"$`, sc.iSendEnvelopesToTopic)
 	s.Step(`^Register new envelope tracker "([^"]*)"$`, sc.registerEnvelopeTracker)
 	s.Step(`^Envelopes should be in topic "([^"]*)"$`, sc.envelopeShouldBeInTopic)
 	s.Step(`^Envelopes should have the following fields$`, sc.preProcessTableStep(sc.envelopesShouldHaveTheFollowingValues))
+	s.Step(`^I sign the following transactions$`, sc.preProcessTableStep(sc.iSignTheFollowingTransactions))
 }

@@ -13,7 +13,7 @@ import (
 	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 )
 
-const globalAka = "global"
+const GlobalAka = "global"
 
 var (
 	aliases  *Registry
@@ -65,9 +65,9 @@ func importGlobalAlias(rawAliases string) {
 		global[k] = v
 	}
 
-	aliases.Set(global, globalAka)
+	aliases.Set(global, GlobalAka)
 	log.WithFields(log.Fields{
-		"aka":   globalAka,
+		"aka":   GlobalAka,
 		"value": global,
 	}).Infof("parser: global alias registered")
 }

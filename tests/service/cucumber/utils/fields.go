@@ -5,6 +5,7 @@ import (
 	"math/big"
 	"reflect"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -91,41 +92,43 @@ func RemoveCell(s []*gherkin.PickleStepArgument_PickleTable_PickleTableRow_Pickl
 	return append(s[:index], s[index+1:]...)
 }
 
-func ExtractTable(srcTable *gherkin.PickleStepArgument_PickleTable, fields []string) *gherkin.PickleStepArgument_PickleTable {
-	isField := make(map[string]bool)
-	for _, field := range fields {
-		isField[field] = true
-	}
+func ExtractColumns(srcTable *gherkin.PickleStepArgument_PickleTable, fields []string) *gherkin.PickleStepArgument_PickleTable {
 	newTable := &gherkin.PickleStepArgument_PickleTable{
-		Rows: []*gherkin.PickleStepArgument_PickleTable_PickleTableRow{{}},
+		Rows: []*gherkin.PickleStepArgument_PickleTable_PickleTableRow{},
 	}
 
-	// Find indexed of fields to be extracted in the headers and remove the fields in the original srcTable
 	headers := srcTable.Rows[0]
-	fieldIndex := make(map[int]bool)
-	for i, h := range headers.Cells {
-		if isField[h.Value] {
-			fieldIndex[i] = true
-			newTable.Rows[0].Cells = append(newTable.Rows[0].Cells, &gherkin.PickleStepArgument_PickleTable_PickleTableRow_PickleTableCell{
-				Value: h.Value,
-			})
-			headers.Cells = RemoveCell(headers.Cells, i)
+	var fieldIndex []int
+	for _, field := range fields {
+		for i, h := range headers.Cells {
+			if h.Value == field {
+				fieldIndex = append(fieldIndex, i)
+			}
 		}
 	}
 
-	if len(fieldIndex) == 0 {
+	if len(fieldIndex) != len(fields) {
 		return nil
 	}
 
-	// Copy values in the new srcTable and remove the cell in the original srcTable
-	for _, r := range srcTable.Rows[1:] {
+	// Copy values in the new srcTable
+	for _, r := range srcTable.Rows {
 		newRow := &gherkin.PickleStepArgument_PickleTable_PickleTableRow{}
 		newTable.Rows = append(newTable.Rows, newRow)
-		for i := range fieldIndex {
+		for _, v := range fieldIndex {
 			newRow.Cells = append(newRow.Cells, &gherkin.PickleStepArgument_PickleTable_PickleTableRow_PickleTableCell{
-				Value: r.Cells[i].Value,
+				Value: r.Cells[v].Value,
 			})
-			r.Cells = RemoveCell(r.Cells, i)
+		}
+	}
+
+	// Remove the cell in the original srcTable
+	sort.Ints(fieldIndex)
+	for _, r := range srcTable.Rows {
+		var j int
+		for _, v := range fieldIndex {
+			r.Cells = RemoveCell(r.Cells, v-j)
+			j++
 		}
 	}
 
@@ -144,7 +147,7 @@ func CmpField(field reflect.Value, value string) error {
 		}
 	default:
 		if !isEqual(value, field) {
-			return fmt.Errorf("expected '%value' but got '%v'", value, field)
+			return fmt.Errorf("expected '%v' but got '%v'", value, field)
 		}
 	}
 	return nil

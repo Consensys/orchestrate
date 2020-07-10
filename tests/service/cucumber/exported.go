@@ -52,10 +52,10 @@ func Init(ctx context.Context) {
 
 func listTagCucumber() (tags string) {
 	externalTag := viper.GetString(TagsViperKey)
-	if externalTag != "" && !viper.GetBool(multitenancy.EnabledViperKey) {
-		tags = externalTag + " && ~@multi-tenancy"
+	if externalTag != "" {
+		tags = externalTag
 	} else if !viper.GetBool(multitenancy.EnabledViperKey) {
-		tags = " ~@multi-tenancy"
+		tags = "~@multi-tenancy"
 	}
 
 	return tags

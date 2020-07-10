@@ -88,7 +88,7 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 		} else {
 			// If no nonce is available (meaning that envelope being processed is the first one for the pair sender,chain)
 			// then we retrieve nonce from chain
-			pendingNonce, callErr := utils.GetNonce(ec, txctx, url)
+			pendingNonce, callErr := utils.GetNonce(txctx.Context(), ec, txctx.Envelope, url)
 			if callErr != nil {
 				_ = txctx.AbortWithError(errors.EthereumError("could not read nonce from chain - got %v", callErr)).ExtendComponent(component)
 				return
@@ -193,7 +193,7 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 			}
 
 			// We recalibrate nonce from chain
-			pendingNonce, err := utils.GetNonce(ec, txctx, url)
+			pendingNonce, err := utils.GetNonce(txctx.Context(), ec, txctx.Envelope, url)
 			if err != nil {
 				_ = txctx.AbortWithError(errors.FromError(fmt.Errorf("could not read nonce from chain - got %v", err))).ExtendComponent(component)
 				return
