@@ -40,7 +40,8 @@ func controlRecoveryCount(txctx *engine.TxContext, conf *Configuration) error {
 // It makes sure that transactions with invalid nonce are not processed
 func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader, tracker *RecoveryTracker) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		if txctx.Envelope.IsRawTransaction() {
+		// We only use RawDecoder when user has sent a Ethereum Raw transaction, ignore the rest
+		if txctx.Envelope.HasTxModeRawTransaction() || txctx.Envelope.JobType == tx.JobType_ETH_RAW_TX {
 			// If transaction has been generated externally we skip nonce check
 			txctx.Logger.WithFields(log.Fields{
 				"id": txctx.Envelope.GetID(),

@@ -74,7 +74,9 @@ func checkTxInScheduler(txctx *engine.TxContext, ec ethclient.ChainLedgerReader,
 		return
 	}
 
-	txctx.Logger.Debugf("transaction scheduler: transaction has not been sent")
+	txctx.Logger.
+		WithField("txHash", txctx.Envelope.TxHash.String()).
+		Debugf("transaction scheduler: transaction has not been sent")
 }
 
 func checkTxInStore(txctx *engine.TxContext, ec ethclient.ChainLedgerReader, s svc.EnvelopeStoreClient) {

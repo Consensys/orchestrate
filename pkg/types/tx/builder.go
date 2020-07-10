@@ -107,15 +107,15 @@ func (e *Envelope) SetMethod(method Method) *Envelope {
 	return e
 }
 
-func (e *Envelope) IsRawTransaction() bool {
-	// @TODO Remove once envelope store is deleted
+// @TODO Remove once envelope store is deleted
+func (e *Envelope) HasTxModeRawTransaction() bool {
 	if e.BelongToEnvelopeStore() {
 		if mode := e.GetContextLabelsValue("txMode"); mode == "raw" {
 			return true
 		}
 	}
 
-	return e.JobType == JobType_ETH_RAW_TX || e.JobType == JobType_ETH_TESSERA_PRIVATE_TX
+	return false
 }
 
 // @TODO Remove once envelope store is deleted

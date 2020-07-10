@@ -38,6 +38,6 @@ func StoreRaw(tesseraClient tessera.Client, chainRegistryURL string) engine.Hand
 		}
 
 		_ = txctx.Envelope.SetEnclaveKey(enclaveKey)
-		txctx.Logger.Debugf("Sent transaction body to 'storeraw' endpoint and get txHash to be signed: %s", enclaveKey)
+		txctx.Logger.Debugf("Sent transaction body to 'storeraw' endpoint to be signed: %s", enclaveKey)
 	}
 }

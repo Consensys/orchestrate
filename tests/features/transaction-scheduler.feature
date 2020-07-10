@@ -8,6 +8,7 @@ Feature: Transaction Scheduler
       | alias   | tenantID        |
       | tenant1 | {{random.uuid}} |
 
+  @besu
   Scenario: Send contract transaction and start a job
     # Prepare Orchestrate and Blockchain state
     And I register the following contracts
@@ -108,6 +109,7 @@ Feature: Transaction Scheduler
       | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status | logs[4].status |
       | MINED  | CREATED        | STARTED        | PENDING        | SENT           | MINED          |
 
+  @besu
   Scenario: Send contract transaction with unknown from address
     And I register the following contracts
       | name        | artifacts        | Headers.Authorization    |
@@ -168,6 +170,7 @@ Feature: Transaction Scheduler
       | status | logs[0].status | logs[1].status | logs[2].status |
       | FAILED | CREATED        | STARTED        | FAILED         |
 
+  @besu
   Scenario: New JOB started step by step
     And I register the following contracts
       | name        | artifacts        | Headers.Authorization    |
@@ -260,78 +263,7 @@ Feature: Transaction Scheduler
       | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status | logs[4].status |
       | MINED  | CREATED        | STARTED        | PENDING        | SENT           | MINED          |
 
-#  TODO: Uncomment it when it will work
-#  Scenario: Send a private deploy contract transaction
-#    And I register the following contracts
-#      | name        | artifacts        | Headers.Authorization    |
-#      | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
-#    Given I register the following chains
-#      | alias  | Name                  | URLs                         | PrivateTxManagers                         | Headers.Authorization    |
-#      | quorum | quorum-{{scenarioID}} | {{global.nodes.quorum.URLs}} | {{global.nodes.quorum.PrivateTxManagers}} | Bearer {{tenant1.token}} |
-#    And I have created the following accounts
-#      | alias    | ID              | Headers.Authorization    |
-#      | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
-#    Given I register the following alias
-#      | alias              | value           |
-#      | deployContractTxID | {{random.uuid}} |
-#    Then I track the following envelopes
-#      | ID                     |
-#      | {{deployContractTxID}} |
-#    Given I set the headers
-#      | Key           | Value                    |
-#      | Authorization | Bearer {{tenant1.token}} |
-#      | Content-Type  | application/json         |
-#    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
-#  """
-#{
-#    "chain": "quorum-{{scenarioID}}",
-#    "params": {
-#        "from": "{{account1}}",
-#        "protocol": "Tessera",
-#        "privateFrom": "BULeR8JyUWhiuuCMU/HLA0Q5pzkYT+cHII3ZKBey3Bo=",
-#        "privateFor": ["QfeDAys9MPDs2XHExtc84jKGHxZg/aj52DTh0vtA3Xc="],
-#        "contractName": "SimpleToken"
-#    },
-#    "labels": {
-#    	"scenario.id": "{{scenarioID}}",
-#    	"id": "{{deployContractTxID}}"
-#    }
-#}
-#      """
-#    Then the response code should be 202
-#    And Response should have the following fields
-#      | schedule.uuid | schedule.jobs[0].uuid | schedule.jobs[0].status |
-#      | ~             | ~                     | STARTED                 |
-#    Then I register the following response fields
-#      | alias   | path                  |
-#      | jobUUID | schedule.jobs[0].uuid |
-#    Then Envelopes should be in topic "tx.crafter"
-#    And Envelopes should have the following fields
-#      | ID          |
-#      | {{jobUUID}} |
-#    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobUUID}}"
-#    Then the response code should be 200
-#    And Response should have the following fields
-#      | status  |
-#      | STARTED |
-#    Then Envelopes should be in topic "tx.signer"
-#    And Envelopes should have the following fields
-#      | ID          | Nonce | Data | Gas | GasPrice | From         |
-#      | {{jobUUID}} | ~     | ~    | ~   | ~        | {{account1}} |
-#    Then Envelopes should be in topic "tx.sender"
-#    And Envelopes should have the following fields
-#      | Raw | TxHash |
-#      | ~   | ~      |
-#    Then Envelopes should be in topic "tx.decoded"
-#    And Envelopes should have the following fields
-#      | Receipt.Status | Receipt.Logs[0].Event             |
-#      | 1              | Transfer(address,address,uint256) |
-#    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobUUID}}"
-#    Then the response code should be 200
-#    And Response should have the following fields
-#      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status | logs[4].status |
-#      | MINED  | CREATED        | STARTED        | PENDING        | SENT           | MINED          |
-
+  @besu
   Scenario: Send deploy contract transaction
     And I register the following contracts
       | name        | artifacts        | Headers.Authorization    |
@@ -425,6 +357,7 @@ Feature: Transaction Scheduler
       | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status | logs[4].status |
       | MINED  | CREATED        | STARTED        | PENDING        | SENT           | MINED          |
 
+  @besu
   Scenario: Send transfer transaction
     And I register the following chains
       | alias | Name                | URLs                       | Headers.Authorization    |
@@ -533,6 +466,7 @@ Feature: Transaction Scheduler
       | result |
       | 0x3039 |
 
+  @besu
   Scenario: Send raw transaction
     Given I have the following tenants
       | alias   |
@@ -598,3 +532,149 @@ Feature: Transaction Scheduler
     And Response should have the following fields
       | result |
       | 0x2710 |
+
+  @besu
+  @private-tx
+  Scenario: Send a private Orion deploy contract transaction
+    And I register the following contracts
+      | name        | artifacts        | Headers.Authorization    |
+      | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
+    Given I register the following chains
+      | alias | Name                | URLs                       | Headers.Authorization    |
+      | besu  | besu-{{scenarioID}} | {{global.nodes.besu.URLs}} | Bearer {{tenant1.token}} |
+    And I have created the following accounts
+      | alias    | ID              | Headers.Authorization    |
+      | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
+    Given I register the following alias
+      | alias              | value           |
+      | deployContractTxID | {{random.uuid}} |
+    Then I track the following envelopes
+      | ID                     |
+      | {{deployContractTxID}} |
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+      | Content-Type  | application/json         |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "from": "{{account1}}",
+        "protocol": "Orion",
+        "privateFrom": "Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs=",
+        "privateFor": ["k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8="],
+        "contractName": "SimpleToken"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{deployContractTxID}}"
+    }
+}
+      """
+    Then the response code should be 202
+    And Response should have the following fields
+      | schedule.uuid | schedule.jobs[0].uuid | schedule.jobs[0].status |
+      | ~             | ~                     | STARTED                 |
+    Then I register the following response fields
+      | alias   | path                  |
+      | jobUUID | schedule.jobs[0].uuid |
+    Then Envelopes should be in topic "tx.crafter"
+    And Envelopes should have the following fields
+      | ID          |
+      | {{jobUUID}} |
+    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobUUID}}"
+    Then the response code should be 200
+    And Response should have the following fields
+      | status  |
+      | STARTED |
+    Then Envelopes should be in topic "tx.signer"
+    And Envelopes should have the following fields
+      | ID          | Nonce | Data | Gas | GasPrice | From         |
+      | {{jobUUID}} | ~     | ~    | ~   | ~        | {{account1}} |
+    Then Envelopes should be in topic "tx.sender"
+    And Envelopes should have the following fields
+      | Raw | TxHash |
+      | ~   | ~      |
+    Then Envelopes should be in topic "tx.decoded"
+    And Envelopes should have the following fields
+      | Receipt.Status | Receipt.Logs[0].Event             |
+      | 1              | Transfer(address,address,uint256) |
+    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobUUID}}"
+    Then the response code should be 200
+    And Response should have the following fields
+      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
+      | MINED  | CREATED        | STARTED        | SENT           | MINED          |
+
+  @quorum
+  @private-tx
+  Scenario: Send a private Tessera deploy contract transaction
+    And I register the following contracts
+      | name        | artifacts        | Headers.Authorization    |
+      | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
+    Given I register the following chains
+      | alias  | Name                  | URLs                         | PrivateTxManagers                         | Headers.Authorization    |
+      | quorum | quorum-{{scenarioID}} | {{global.nodes.quorum.URLs}} | {{global.nodes.quorum.PrivateTxManagers}} | Bearer {{tenant1.token}} |
+    And I have created the following accounts
+      | alias    | ID              | Headers.Authorization    |
+      | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
+    Given I register the following alias
+      | alias              | value           |
+      | deployContractTxID | {{random.uuid}} |
+    Then I track the following envelopes
+      | ID                     |
+      | {{deployContractTxID}} |
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+      | Content-Type  | application/json         |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "quorum-{{scenarioID}}",
+    "params": {
+        "from": "{{account1}}",
+        "protocol": "Tessera",
+        "privateFrom": "BULeR8JyUWhiuuCMU/HLA0Q5pzkYT+cHII3ZKBey3Bo=",
+        "privateFor": ["QfeDAys9MPDs2XHExtc84jKGHxZg/aj52DTh0vtA3Xc="],
+        "contractName": "SimpleToken"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{deployContractTxID}}"
+    }
+}
+      """
+    Then the response code should be 202
+    And Response should have the following fields
+      | schedule.uuid | schedule.jobs[0].uuid | schedule.jobs[0].status |
+      | ~             | ~                     | STARTED                 |
+    Then I register the following response fields
+      | alias   | path                  |
+      | jobUUID | schedule.jobs[0].uuid |
+    Then Envelopes should be in topic "tx.crafter"
+    And Envelopes should have the following fields
+      | ID          |
+      | {{jobUUID}} |
+    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobUUID}}"
+    Then the response code should be 200
+    And Response should have the following fields
+      | status  |
+      | STARTED |
+    Then Envelopes should be in topic "tx.signer"
+    And Envelopes should have the following fields
+      | ID          | Nonce | Data | Gas | GasPrice | From         |
+      | {{jobUUID}} | ~     | ~    | ~   | ~        | {{account1}} |
+    Then Envelopes should be in topic "tx.sender"
+    And Envelopes should have the following fields
+      | Raw | TxHash |
+      | ~   | ~      |
+    Then Envelopes should be in topic "tx.decoded"
+    And Envelopes should have the following fields
+      | Receipt.Status | Receipt.Logs[0].Event             |
+      | 1              | Transfer(address,address,uint256) |
+    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobUUID}}"
+    Then the response code should be 200
+    And Response should have the following fields
+      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status | logs[4].status |
+      | MINED  | CREATED        | STARTED        | PENDING        | SENT           | MINED          |

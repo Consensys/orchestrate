@@ -26,6 +26,7 @@ func RawTxSender(ec ethclient.TransactionSender) engine.HandlerFunc {
 			url,
 			txctx.Envelope.GetRaw(),
 		)
+
 		if err != nil {
 			e := txctx.AbortWithError(err).ExtendComponent(component)
 			txctx.Logger.WithError(e).Errorf("sender: failed to send raw transaction")

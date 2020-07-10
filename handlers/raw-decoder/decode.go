@@ -5,6 +5,7 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	tx2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 )
 
 const component = "handler.raw_decoder"
@@ -12,8 +13,8 @@ const component = "handler.raw_decoder"
 func RawDecoder(txctx *engine.TxContext) {
 	var tx *types.Transaction
 
-	// TODO: Able to decode Raw EeaSendPrivateTransactions
-	if txctx.Envelope.IsEeaSendPrivateTransaction() {
+	// We only use RawDecoder when user has sent a Ethereum Raw transaction, ignore the rest
+	if !(txctx.Envelope.HasTxModeRawTransaction() || txctx.Envelope.JobType == tx2.JobType_ETH_RAW_TX) {
 		return
 	}
 
@@ -34,19 +35,17 @@ func RawDecoder(txctx *engine.TxContext) {
 		return
 	}
 
-	if txctx.Envelope.IsRawTransaction() {
-		_ = txctx.Envelope.
-			SetFrom(msg.From()).
-			SetData(tx.Data()).
-			SetGas(tx.Gas()).
-			SetGasPrice(tx.GasPrice()).
-			SetValue(tx.Value()).
-			SetNonce(tx.Nonce()).
-			SetTxHash(tx.Hash())
+	_ = txctx.Envelope.
+		SetFrom(msg.From()).
+		SetData(tx.Data()).
+		SetGas(tx.Gas()).
+		SetGasPrice(tx.GasPrice()).
+		SetValue(tx.Value()).
+		SetNonce(tx.Nonce()).
+		SetTxHash(tx.Hash())
 
-		// If not contract creation
-		if tx.To() != nil {
-			_ = txctx.Envelope.SetTo(*tx.To())
-		}
+	// If not contract creation
+	if tx.To() != nil {
+		_ = txctx.Envelope.SetTo(*tx.To())
 	}
 }

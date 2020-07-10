@@ -22,15 +22,23 @@ func TesseraRawPrivateTxSender(ec ethclient.TransactionSender) engine.HandlerFun
 			return
 		}
 
-		_, err = ec.SendQuorumRawPrivateTransaction(
+		txHash, err := ec.SendQuorumRawPrivateTransaction(
 			txctx.Context(),
 			url,
 			txctx.Envelope.Raw,
 			types.Call2PrivateArgs(txctx.Envelope).PrivateFor,
 		)
+
 		if err != nil {
 			e := txctx.AbortWithError(err).ExtendComponent(component)
 			txctx.Logger.WithError(e).Errorf("sender: failed to send quorum raw private transaction")
+			return
+		}
+
+		if txHash.String() != txctx.Envelope.TxHash.String() {
+			err := errors.DataError("invalid generate txHash. Expected %s, got %s",
+				txctx.Envelope.TxHash.String(), txHash.String())
+			_ = txctx.AbortWithError(err).ExtendComponent(component)
 			return
 		}
 	}
