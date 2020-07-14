@@ -106,7 +106,7 @@ func TestUnsignedTxStore_TxScheduler(t *testing.T) {
 	storeClient := clientmock.NewMockEnvelopeStoreClient(mockCtrl)
 	schedulerClient := mock.NewMockTransactionSchedulerClient(mockCtrl)
 
-	t.Run("should update the status successfully to SENT", func(t *testing.T) {
+	t.Run("should update the status successfully to PENDING", func(t *testing.T) {
 		txctx := engine.NewTxContext()
 		_ = txctx.Envelope.SetID("test").SetContextLabelsValue("jobUUID", "test")
 		txctx.Logger = log.NewEntry(log.New())
@@ -126,7 +126,7 @@ func TestUnsignedTxStore_TxScheduler(t *testing.T) {
 					PrivateFor:     txctx.Envelope.GetPrivateFor(),
 					PrivacyGroupID: txctx.Envelope.GetPrivacyGroupID(),
 				},
-				Status: types.StatusSent,
+				Status: types.StatusPending,
 			}).Return(&types.JobResponse{}, nil)
 
 		h := UnsignedTxStore(storeClient, schedulerClient)

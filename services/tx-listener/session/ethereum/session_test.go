@@ -6,12 +6,13 @@ package ethereum
 import (
 	"context"
 	"fmt"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"math/big"
 	"os"
 	"sync"
 	"testing"
 	"time"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 
 	"github.com/gofrs/uuid"
 	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
@@ -379,7 +380,7 @@ func TestFetchBlock(t *testing.T) {
 	txScheduler := mock2.NewMockTransactionSchedulerClient(ctrl)
 
 	store.EXPECT().LoadByTxHashes(gomock.Any(), gomock.Any()).Return(&proto.LoadByTxHashesResponse{}, nil)
-	txScheduler.EXPECT().SearchJob(gomock.Any(), testTxHashes, teshChainUUID).
+	txScheduler.EXPECT().SearchJob(gomock.Any(), testTxHashes, teshChainUUID, types2.StatusPending).
 		Return([]*types2.JobResponse{testutils.FakeJobResponse()}, nil)
 
 	sess := &Session{
@@ -450,7 +451,7 @@ func TestFetchBlockExternalTxDisabled(t *testing.T) {
 		},
 	}, nil)
 
-	txScheduler.EXPECT().SearchJob(gomock.Any(), testTxHashes, gomock.Any()).Return([]*types2.JobResponse{}, nil)
+	txScheduler.EXPECT().SearchJob(gomock.Any(), testTxHashes, gomock.Any(), types2.StatusPending).Return([]*types2.JobResponse{}, nil)
 
 	sess := &Session{
 		ec: ec,
@@ -515,7 +516,7 @@ func TestFetchBlockWithIntervalPrivateTx(t *testing.T) {
 			},
 		}}, nil)
 	txScheduler.EXPECT().
-		SearchJob(gomock.Any(), []string{"0x745abff2aebce9410449b9ea471e6dbb830215c80cae2f35dab826b3792126bb"}, gomock.Any()).
+		SearchJob(gomock.Any(), []string{"0x745abff2aebce9410449b9ea471e6dbb830215c80cae2f35dab826b3792126bb"}, gomock.Any(), types2.StatusPending).
 		Return([]*types2.JobResponse{}, nil)
 
 	sess := &Session{
@@ -567,7 +568,7 @@ func TestFetchBlockWithExternalPrivateTx(t *testing.T) {
 
 	store.EXPECT().LoadByTxHashes(gomock.Any(), gomock.Any()).Return(&proto.LoadByTxHashesResponse{}, nil)
 	txScheduler.EXPECT().
-		SearchJob(gomock.Any(), []string{"0x745abff2aebce9410449b9ea471e6dbb830215c80cae2f35dab826b3792126bb"}, chainUUID).
+		SearchJob(gomock.Any(), []string{"0x745abff2aebce9410449b9ea471e6dbb830215c80cae2f35dab826b3792126bb"}, chainUUID, types2.StatusPending).
 		Return([]*types2.JobResponse{}, nil)
 
 	sess := &Session{
@@ -620,7 +621,7 @@ func TestIgnoreBlockWithExternalPrivateTx(t *testing.T) {
 	txScheduler := mock2.NewMockTransactionSchedulerClient(ctrl)
 
 	store.EXPECT().LoadByTxHashes(gomock.Any(), gomock.Any()).Return(&proto.LoadByTxHashesResponse{}, nil)
-	txScheduler.EXPECT().SearchJob(gomock.Any(), gomock.Any(), gomock.Any()).Return([]*types2.JobResponse{}, nil)
+	txScheduler.EXPECT().SearchJob(gomock.Any(), gomock.Any(), gomock.Any(), types2.StatusPending).Return([]*types2.JobResponse{}, nil)
 
 	sess := &Session{
 		ec: ec,

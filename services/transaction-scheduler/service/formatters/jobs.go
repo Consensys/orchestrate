@@ -78,6 +78,11 @@ func FormatJobFilterRequest(req *http.Request) (*entities.JobFilters, error) {
 		filters.ChainUUID = qChainUUID
 	}
 
+	qStatus := req.URL.Query().Get("status")
+	if qStatus != "" {
+		filters.Status = qStatus
+	}
+
 	if err := utils.GetValidator().Struct(filters); err != nil {
 		return nil, err
 	}

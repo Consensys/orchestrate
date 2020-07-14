@@ -24,6 +24,8 @@ func RawTxStore(store svc.EnvelopeStoreClient, txSchedulerClient client.Transact
 func rawTxStoreInTxScheduler(txctx *engine.TxContext, txSchedulerClient client.TransactionSchedulerClient) {
 	txctx.Logger.Debug("transaction scheduler: updating transaction to PENDING")
 
+	computedTxHash := txctx.Envelope.GetTxHashString()
+
 	_, err := txSchedulerClient.UpdateJob(
 		txctx.Context(),
 		txctx.Envelope.GetID(),
@@ -44,7 +46,6 @@ func rawTxStoreInTxScheduler(txctx *engine.TxContext, txSchedulerClient client.T
 			Status: types.StatusPending,
 		},
 	)
-
 	if err != nil {
 		e := txctx.AbortWithError(err).ExtendComponent(component)
 		txctx.Logger.WithError(e).Errorf("transaction scheduler: failed to update transaction")
@@ -57,7 +58,7 @@ func rawTxStoreInTxScheduler(txctx *engine.TxContext, txSchedulerClient client.T
 	// If an error occurred when executing pending handlers
 	if len(txctx.Envelope.GetErrors()) != 0 {
 		txctx.Logger.Debug("transaction scheduler: updating transaction to RECOVERING")
-		_, storeErr := txSchedulerClient.UpdateJob(
+		_, updateErr := txSchedulerClient.UpdateJob(
 			txctx.Context(),
 			txctx.Envelope.GetID(),
 			&types.UpdateJobRequest{
@@ -70,27 +71,22 @@ func rawTxStoreInTxScheduler(txctx *engine.TxContext, txSchedulerClient client.T
 				),
 			},
 		)
-		if storeErr != nil {
-			e := errors.FromError(storeErr).ExtendComponent(component)
+		if updateErr != nil {
+			e := errors.FromError(updateErr).ExtendComponent(component)
 			txctx.Logger.WithError(e).Errorf("transaction scheduler: failed to set transaction status for recovering")
 		}
 		return
 	}
 
-	txctx.Logger.Debug("transaction scheduler: updating transaction to SENT")
-	// Transaction has been properly sent so we set status to `sent`
-	_, err = txSchedulerClient.UpdateJob(
-		txctx.Context(),
-		txctx.Envelope.GetID(),
-		&types.UpdateJobRequest{
-			Status: types.StatusSent,
-		},
-	)
-	if err != nil {
-		e := errors.FromError(err).ExtendComponent(component)
-		txctx.Logger.WithError(e).Errorf("transaction scheduler: failed to set transaction status")
+	retrievedTxHash := txctx.Envelope.GetTxHashString()
+	if computedTxHash != retrievedTxHash {
+		errMessage := fmt.Sprintf("computed tx hash %s and retrieved tx hash %s do not match", computedTxHash, retrievedTxHash)
+		e := txctx.AbortWithError(errors.InvalidParameterError(errMessage)).ExtendComponent(component)
+		txctx.Logger.WithError(e).Error(errMessage)
 		return
 	}
+
+	txctx.Logger.Info("transaction successfully sent to the Blockchain node")
 }
 
 func rawTxStoreInEnvelopeStore(txctx *engine.TxContext, store svc.EnvelopeStoreClient) {

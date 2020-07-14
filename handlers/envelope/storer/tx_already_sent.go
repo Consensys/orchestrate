@@ -67,7 +67,7 @@ func checkTxInScheduler(txctx *engine.TxContext, ec ethclient.ChainLedgerReader,
 			txctx.Abort()
 			return
 		}
-	} else if job.Status == types.StatusRecovering || job.Status == types.StatusMined || job.Status == types.StatusSent {
+	} else if job.Status == types.StatusRecovering || job.Status == types.StatusMined {
 		// Transaction has already been sent so we abort execution
 		txctx.Logger.Warnf("transaction scheduler: transaction has already been sent")
 		txctx.Abort()

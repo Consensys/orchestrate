@@ -56,7 +56,7 @@ type JobAgent interface {
 	Insert(ctx context.Context, job *models.Job) error
 	Update(ctx context.Context, job *models.Job) error
 	FindOneByUUID(ctx context.Context, uuid string, tenants []string) (*models.Job, error)
-	Search(ctx context.Context, txHashes []string, chainUUID string, tenants []string) ([]*models.Job, error)
+	Search(ctx context.Context, filters *entities.JobFilters, tenants []string) ([]*models.Job, error)
 }
 
 type LogAgent interface {

@@ -25,8 +25,7 @@ CREATE TABLE transactions (
 	privacy_group_id TEXT,
 	created_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL, 
 	updated_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL,
-	UNIQUE(uuid),
-	UNIQUE(hash)
+	UNIQUE(uuid)
 );
 
 CREATE TABLE schedules (

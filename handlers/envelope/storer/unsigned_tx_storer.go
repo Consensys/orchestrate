@@ -29,7 +29,7 @@ func unsignedTxStoreInTxScheduler(txctx *engine.TxContext, txSchedulerClient cli
 	}
 
 	// Transaction hash is generated after the transaction is sent
-	txctx.Logger.Debug("transaction scheduler: updating transaction to SENT")
+	txctx.Logger.Debug("transaction scheduler: updating transaction to PENDING")
 	_, err := txSchedulerClient.UpdateJob(
 		txctx.Context(),
 		txctx.Envelope.GetID(),
@@ -47,7 +47,7 @@ func unsignedTxStoreInTxScheduler(txctx *engine.TxContext, txSchedulerClient cli
 				PrivateFor:     txctx.Envelope.GetPrivateFor(),
 				PrivacyGroupID: txctx.Envelope.GetPrivacyGroupID(),
 			},
-			Status: types.StatusSent,
+			Status: types.StatusPending,
 		},
 	)
 

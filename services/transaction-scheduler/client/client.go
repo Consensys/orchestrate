@@ -28,7 +28,7 @@ type JobClient interface {
 	CreateJob(ctx context.Context, request *types.CreateJobRequest) (*types.JobResponse, error)
 	UpdateJob(ctx context.Context, jobUUID string, request *types.UpdateJobRequest) (*types.JobResponse, error)
 	StartJob(ctx context.Context, jobUUID string) error
-	SearchJob(ctx context.Context, txHashes []string, chainUUID string) ([]*types.JobResponse, error)
+	SearchJob(ctx context.Context, txHashes []string, chainUUID, status string) ([]*types.JobResponse, error)
 }
 
 type TransactionSchedulerClient interface {

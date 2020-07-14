@@ -378,7 +378,8 @@ func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transacti
 			txHashes = append(txHashes, t.Hash().String())
 		}
 
-		jobResponses, err := s.txSchedulerClient.SearchJob(ctx, txHashes, s.Chain.UUID)
+		// By design, we will receive 0 or 1 job per tx_hash in the filter because we filter by status PENDING
+		jobResponses, err := s.txSchedulerClient.SearchJob(ctx, txHashes, s.Chain.UUID, types.StatusPending)
 		if err != nil {
 			return nil, err
 		}

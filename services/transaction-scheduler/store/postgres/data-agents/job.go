@@ -3,6 +3,8 @@ package dataagents
 import (
 	"context"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
+
 	gopg "github.com/go-pg/pg/v9"
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 
@@ -88,20 +90,29 @@ func (agent *PGJob) FindOneByUUID(ctx context.Context, jobUUID string, tenants [
 	return job, nil
 }
 
-func (agent *PGJob) Search(ctx context.Context, txHashes []string, chainUUID string, tenants []string) ([]*models.Job, error) {
-	jobs := []*models.Job{}
+func (agent *PGJob) Search(ctx context.Context, filters *entities.JobFilters, tenants []string) ([]*models.Job, error) {
+	var jobs []*models.Job
 
 	query := agent.db.ModelContext(ctx, &jobs).
 		Relation("Transaction").
 		Relation("Schedule").
 		Relation("Logs")
 
-	if len(txHashes) > 0 {
-		query = query.Where("transaction.hash in (?)", gopg.In(txHashes))
+	if len(filters.TxHashes) > 0 {
+		query = query.Where("transaction.hash in (?)", gopg.In(filters.TxHashes))
 	}
 
-	if chainUUID != "" {
-		query = query.Where("job.chain_uuid = ?", chainUUID)
+	if filters.ChainUUID != "" {
+		query = query.Where("job.chain_uuid = ?", filters.ChainUUID)
+	}
+
+	if filters.Status != "" {
+		query = query.
+			Join("LEFT JOIN logs as log").
+			JoinOn("log.job_id = job.id").
+			Join("LEFT JOIN logs as tmpl").
+			JoinOn("tmpl.job_id = job.id AND log.created_at < tmpl.created_at").
+			Where("tmpl.id is null AND log.status = ?", filters.Status)
 	}
 
 	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants)

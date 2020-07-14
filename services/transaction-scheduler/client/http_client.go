@@ -156,7 +156,7 @@ func (c *HTTPClient) GetSchedules(ctx context.Context) ([]*types.ScheduleRespons
 	}
 	defer clientutils.CloseResponse(response)
 
-	resp := []*types.ScheduleResponse{}
+	var resp []*types.ScheduleResponse
 	err = parseResponse(ctx, response, &resp)
 	return resp, err
 }
@@ -204,21 +204,25 @@ func (c *HTTPClient) GetJobs(ctx context.Context) ([]*types.JobResponse, error) 
 	}
 	defer clientutils.CloseResponse(response)
 
-	resp := []*types.JobResponse{}
+	var resp []*types.JobResponse
 	err = parseResponse(ctx, response, &resp)
 	return resp, err
 }
 
-func (c *HTTPClient) SearchJob(ctx context.Context, txHashes []string, chainUUID string) ([]*types.JobResponse, error) {
+func (c *HTTPClient) SearchJob(ctx context.Context, txHashes []string, chainUUID, status string) ([]*types.JobResponse, error) {
 	reqURL := fmt.Sprintf("%v/jobs", c.config.URL)
 
-	qParams := []string{}
+	var qParams []string
 	if len(txHashes) > 0 {
 		qParams = append(qParams, "tx_hashes="+strings.Join(txHashes, ","))
 	}
 
 	if chainUUID != "" {
 		qParams = append(qParams, "chain_uuid="+chainUUID)
+	}
+
+	if status != "" {
+		qParams = append(qParams, "status="+status)
 	}
 
 	if len(qParams) > 0 {

@@ -660,18 +660,18 @@ func (mr *MockJobAgentMockRecorder) FindOneByUUID(ctx, uuid, tenants interface{}
 }
 
 // Search mocks base method
-func (m *MockJobAgent) Search(ctx context.Context, txHashes []string, chainUUID string, tenants []string) ([]*models.Job, error) {
+func (m *MockJobAgent) Search(ctx context.Context, filters *entities.JobFilters, tenants []string) ([]*models.Job, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Search", ctx, txHashes, chainUUID, tenants)
+	ret := m.ctrl.Call(m, "Search", ctx, filters, tenants)
 	ret0, _ := ret[0].([]*models.Job)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Search indicates an expected call of Search
-func (mr *MockJobAgentMockRecorder) Search(ctx, txHashes, chainUUID, tenants interface{}) *gomock.Call {
+func (mr *MockJobAgentMockRecorder) Search(ctx, filters, tenants interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockJobAgent)(nil).Search), ctx, txHashes, chainUUID, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockJobAgent)(nil).Search), ctx, filters, tenants)
 }
 
 // MockLogAgent is a mock of LogAgent interface

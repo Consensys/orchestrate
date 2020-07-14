@@ -3,6 +3,7 @@
 package storer
 
 import (
+	"context"
 	"fmt"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
@@ -80,7 +81,7 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 	registry := clientmock.NewMockEnvelopeStoreClient(mockCtrl)
 	schedulerClient := mock.NewMockTransactionSchedulerClient(mockCtrl)
 
-	t.Run("should update the status successfully to PENDING and then SENT", func(t *testing.T) {
+	t.Run("should update the status successfully to PENDING", func(t *testing.T) {
 		txctx := engine.NewTxContext()
 		_ = txctx.Envelope.SetID("test").SetContextLabelsValue("jobUUID", "test")
 		txctx.Logger = log.NewEntry(log.New())
@@ -103,11 +104,6 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 				Status: types.StatusPending,
 			}).
 			Return(&types.JobResponse{}, nil)
-		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
-				Status: types.StatusSent,
-			}).
-			Return(&types.JobResponse{}, nil)
 
 		h := RawTxStore(registry, schedulerClient)
 		h(txctx)
@@ -128,24 +124,6 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 		h(txctx)
 
 		assert.Len(t, txctx.Envelope.GetErrors(), 1)
-	})
-
-	t.Run("should return if update fails on SENT", func(t *testing.T) {
-		txctx := engine.NewTxContext()
-		_ = txctx.Envelope.SetID("test").SetContextLabelsValue("jobUUID", "test")
-		txctx.Logger = log.NewEntry(log.New())
-
-		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), gomock.Any()).
-			Return(&types.JobResponse{}, nil)
-		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
-				Status: types.StatusSent,
-			}).
-			Return(nil, fmt.Errorf("error"))
-
-		h := RawTxStore(registry, schedulerClient)
-		h(txctx)
 	})
 
 	t.Run("should set status to RECOVERING if txctx contains errors", func(t *testing.T) {
@@ -196,5 +174,23 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 
 		h := RawTxStore(registry, schedulerClient)
 		h(txctx)
+	})
+
+	t.Run("should fail if computed tx hash is different than retrieved hash", func(t *testing.T) {
+		txctx := engine.NewTxContext()
+		_ = txctx.Envelope.SetID("test").SetContextLabelsValue("jobUUID", "test").MustSetTxHashString("0x1")
+		txctx.Logger = log.NewEntry(log.New())
+
+		schedulerClient.EXPECT().
+			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), gomock.Any()).
+			DoAndReturn(func(ctx context.Context, jobUUID string, request *types.UpdateJobRequest) (*types.JobResponse, error) {
+				_ = txctx.Envelope.MustSetTxHashString("0x2")
+				return &types.JobResponse{}, nil
+			})
+
+		h := RawTxStore(registry, schedulerClient)
+		h(txctx)
+
+		assert.Len(t, txctx.Envelope.Errors, 1)
 	})
 }

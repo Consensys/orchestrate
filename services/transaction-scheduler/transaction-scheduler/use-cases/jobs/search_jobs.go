@@ -34,27 +34,22 @@ func NewSearchJobsUseCase(db store.DB) SearchJobsUseCase {
 
 // Execute gets a schedule
 func (uc *searchJobsUseCase) Execute(ctx context.Context, filters *entities.JobFilters, tenants []string) ([]*types.Job, error) {
-	log.WithContext(ctx).
-		WithField("filters", filters).
-		Debug("search jobs")
+	log.WithContext(ctx).WithField("filters", filters).Debug("search jobs")
 
 	if err := utils.GetValidator().Struct(filters); err != nil {
 		return nil, errors.InvalidParameterError(err.Error()).ExtendComponent(searchJobsComponent)
 	}
 
-	jobModels, err := uc.db.Job().Search(ctx, filters.TxHashes, filters.ChainUUID, tenants)
+	jobModels, err := uc.db.Job().Search(ctx, filters, tenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(searchJobsComponent)
 	}
 
 	var resp []*types.Job
-	for _, jb := range jobModels {
-		resp = append(resp, parsers.NewJobEntityFromModels(jb))
+	for _, jobModel := range jobModels {
+		resp = append(resp, parsers.NewJobEntityFromModels(jobModel))
 	}
 
-	log.WithContext(ctx).
-		WithField("filters", filters).
-		Info("jobs found successfully")
-
+	log.WithContext(ctx).WithField("filters", filters).Info("jobs found successfully")
 	return resp, nil
 }

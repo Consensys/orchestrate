@@ -4,10 +4,9 @@ package jobs
 
 import (
 	"context"
-	"testing"
-
 	"github.com/gofrs/uuid"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
@@ -45,7 +44,7 @@ func TestSearchJobs_Execute(t *testing.T) {
 		}
 
 		expectedResponse := []*types.Job{parsers.NewJobEntityFromModels(jobs[0])}
-		mockJobDA.EXPECT().Search(ctx, []string{txHash.String()}, chainUUID, []string{tenantID}).Return(jobs, nil)
+		mockJobDA.EXPECT().Search(ctx, filters, []string{tenantID}).Return(jobs, nil)
 		jobResponse, err := usecase.Execute(ctx, filters, []string{tenantID})
 
 		assert.NoError(t, err)
@@ -56,7 +55,7 @@ func TestSearchJobs_Execute(t *testing.T) {
 		filters := &entities.JobFilters{}
 		expectedErr := errors.NotFoundError("error")
 
-		mockJobDA.EXPECT().Search(ctx, gomock.Any(), gomock.Any(), []string{tenantID}).Return(nil, expectedErr)
+		mockJobDA.EXPECT().Search(ctx, filters, []string{tenantID}).Return(nil, expectedErr)
 
 		response, err := usecase.Execute(ctx, filters, []string{tenantID})
 

@@ -6,6 +6,9 @@ package dataagents
 
 import (
 	"context"
+	"github.com/gofrs/uuid"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -168,30 +171,67 @@ func (s *jobTestSuite) TestPGJob_Search() {
 	jobTwo.ChainUUID = jobOne.ChainUUID
 	jobTwo.Transaction.Hash = txHashTwo.String()
 	jobTwo.Schedule.TenantID = tenantID
+	jobTwo.Logs[0].Status = types.StatusPending
 	err = insertJob(ctx, s.agents, jobTwo)
 	assert.NoError(s.T(), err)
 
 	s.T().Run("should find model successfully", func(t *testing.T) {
-		retrivedJobs, err := s.agents.Job().Search(ctx, []string{txHashOne.String()}, jobOne.ChainUUID, []string{tenantID})
+		filters := &entities.JobFilters{
+			TxHashes:  []string{txHashOne.String()},
+			ChainUUID: jobOne.ChainUUID,
+		}
+
+		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{tenantID})
 
 		assert.NoError(t, err)
-		assert.NotEmpty(t, retrivedJobs[0].ID)
-		assert.Equal(t, jobOne.UUID, retrivedJobs[0].UUID)
-		assert.Equal(t, jobOne.Transaction.UUID, retrivedJobs[0].Transaction.UUID)
-		assert.Equal(t, txHashOne.String(), retrivedJobs[0].Transaction.Hash)
-		assert.Equal(t, len(jobOne.Logs), len(retrivedJobs[0].Logs))
+		assert.NotEmpty(t, retrievedJobs[0].ID)
+		assert.Equal(t, jobOne.UUID, retrievedJobs[0].UUID)
+		assert.Equal(t, jobOne.Transaction.UUID, retrievedJobs[0].Transaction.UUID)
+		assert.Equal(t, txHashOne.String(), retrievedJobs[0].Transaction.Hash)
+		assert.Equal(t, len(jobOne.Logs), len(retrievedJobs[0].Logs))
 	})
 
-	s.T().Run("should not find any model", func(t *testing.T) {
-		retrivedJobs, err := s.agents.Job().Search(ctx, []string{"0x3"}, jobOne.ChainUUID, []string{tenantID})
+	s.T().Run("should find models successfully by status", func(t *testing.T) {
+		filters := &entities.JobFilters{
+			Status: types.StatusCreated,
+		}
+
+		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{tenantID})
+
 		assert.NoError(t, err)
-		assert.Empty(t, retrivedJobs)
+		assert.Len(t, retrievedJobs, 1)
+		assert.Equal(t, retrievedJobs[0].UUID, jobOne.UUID)
+		assert.Equal(t, len(jobOne.Logs), len(retrievedJobs[0].Logs))
+	})
+
+	s.T().Run("should not find any model by txHashes", func(t *testing.T) {
+		filters := &entities.JobFilters{
+			TxHashes:  []string{"0x3"},
+			ChainUUID: jobOne.ChainUUID,
+		}
+
+		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{tenantID})
+		assert.NoError(t, err)
+		assert.Empty(t, retrievedJobs)
+	})
+
+	s.T().Run("should not find any model by chainUUID", func(t *testing.T) {
+		filters := &entities.JobFilters{
+			TxHashes:  []string{txHashOne.String()},
+			ChainUUID: uuid.Must(uuid.NewV4()).String(),
+		}
+
+		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{tenantID})
+		assert.NoError(t, err)
+		assert.Empty(t, retrievedJobs)
 	})
 
 	s.T().Run("should find every inserted model successfully", func(t *testing.T) {
-		retrivedJobs, err := s.agents.Job().Search(ctx, nil, jobOne.ChainUUID, []string{tenantID})
+		filters := &entities.JobFilters{}
+		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{tenantID})
+
 		assert.NoError(t, err)
-		assert.Equal(t, len(retrivedJobs), 2)
+		assert.Equal(t, len(retrievedJobs), 2)
 	})
 }
 
