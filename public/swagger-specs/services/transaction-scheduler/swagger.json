@@ -12,7 +12,7 @@
             "name": "Apache 2.0",
             "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
         },
-        "version": "2.0"
+        "version": "1.0"
     },
     "paths": {
         "/jobs": {
@@ -56,12 +56,30 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "List of jobs found",
+                        "description": "List of Jobs found",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/types.JobResponse"
-                            }
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.JobResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "annotations": {
+                                            "$ref": "#/definitions/types.Annotations"
+                                        },
+                                        "logs": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/types.Log"
+                                            }
+                                        },
+                                        "transaction": {
+                                            "$ref": "#/definitions/types.ETHTransaction"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -105,15 +123,51 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/types.CreateJobRequest"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.CreateJobRequest"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "annotations": {
+                                            "$ref": "#/definitions/types.Annotations"
+                                        },
+                                        "transaction": {
+                                            "$ref": "#/definitions/types.ETHTransaction"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Created job",
+                        "description": "Created Job",
                         "schema": {
-                            "$ref": "#/definitions/types.JobResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.JobResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "annotations": {
+                                            "$ref": "#/definitions/types.Annotations"
+                                        },
+                                        "logs": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/types.Log"
+                                            }
+                                        },
+                                        "transaction": {
+                                            "$ref": "#/definitions/types.ETHTransaction"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -168,7 +222,28 @@
                     "200": {
                         "description": "Job found",
                         "schema": {
-                            "$ref": "#/definitions/types.JobResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.JobResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "annotations": {
+                                            "$ref": "#/definitions/types.Annotations"
+                                        },
+                                        "logs": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/types.Log"
+                                            }
+                                        },
+                                        "transaction": {
+                                            "$ref": "#/definitions/types.ETHTransaction"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "404": {
@@ -212,7 +287,22 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/types.UpdateJobRequest"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.UpdateJobRequest"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "annotations": {
+                                            "$ref": "#/definitions/types.Annotations"
+                                        },
+                                        "transaction": {
+                                            "$ref": "#/definitions/types.ETHTransaction"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 ],
@@ -220,7 +310,28 @@
                     "200": {
                         "description": "Job found",
                         "schema": {
-                            "$ref": "#/definitions/types.JobResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.JobResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "annotations": {
+                                            "$ref": "#/definitions/types.Annotations"
+                                        },
+                                        "logs": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/types.Log"
+                                            }
+                                        },
+                                        "transaction": {
+                                            "$ref": "#/definitions/types.ETHTransaction"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -260,7 +371,7 @@
                         "JWTAuth": []
                     }
                 ],
-                "description": "Low-level endpoint to start a specific job by UUID, effectively executing the transaction",
+                "description": "Starts a specific job by UUID, effectively executing the transaction asynchronously",
                 "produces": [
                     "application/json"
                 ],
@@ -318,7 +429,22 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/types.ScheduleResponse"
+                                "allOf": [
+                                    {
+                                        "$ref": "#/definitions/types.ScheduleResponse"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "jobs": {
+                                                "type": "array",
+                                                "items": {
+                                                    "$ref": "#/definitions/types.JobResponse"
+                                                }
+                                            }
+                                        }
+                                    }
+                                ]
                             }
                         }
                     },
@@ -365,7 +491,22 @@
                     "200": {
                         "description": "Created schedule",
                         "schema": {
-                            "$ref": "#/definitions/types.ScheduleResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.ScheduleResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "jobs": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/types.JobResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -420,7 +561,22 @@
                     "200": {
                         "description": "Schedule found",
                         "schema": {
-                            "$ref": "#/definitions/types.ScheduleResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.ScheduleResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "jobs": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/types.JobResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "404": {
@@ -477,20 +633,35 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/types.TransactionResponse"
+                                "allOf": [
+                                    {
+                                        "$ref": "#/definitions/types.TransactionResponse"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "params": {
+                                                "$ref": "#/definitions/types.ETHTransactionParams"
+                                            },
+                                            "schedule": {
+                                                "$ref": "#/definitions/types.ScheduleResponse"
+                                            }
+                                        }
+                                    }
+                                ]
                             }
                         }
                     },
                     "400": {
                         "description": "Invalid filter in the request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     }
                 }
@@ -506,7 +677,7 @@
                         "JWTAuth": []
                     }
                 ],
-                "description": "Creates a new contract deployment request, schedule and job and starts executing the schedule.\nThe transaction can be private (Tessera, Orion).\nThe transaction can be a One Time Key transaction in 0 gas private networks",
+                "description": "Creates and executes a new contract deployment request\nThe transaction can be private (Tessera, Orion).\nThe transaction can be a One Time Key transaction in 0 gas private networks",
                 "consumes": [
                     "application/json"
                 ],
@@ -524,7 +695,19 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/types.DeployContractRequest"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.DeployContractRequest"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "params": {
+                                            "$ref": "#/definitions/types.DeployContractParams"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 ],
@@ -532,7 +715,22 @@
                     "202": {
                         "description": "Created deployment transaction request",
                         "schema": {
-                            "$ref": "#/definitions/types.TransactionResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.TransactionResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "params": {
+                                            "$ref": "#/definitions/types.ETHTransactionParams"
+                                        },
+                                        "schedule": {
+                                            "$ref": "#/definitions/types.ScheduleResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -572,7 +770,7 @@
                         "JWTAuth": []
                     }
                 ],
-                "description": "Creates a new contract transaction request, schedule and job and starts executing the schedule.\nThe transaction can be private (Tessera, Orion).\nThe transaction can be a One Time Key transaction in 0 gas private networks",
+                "description": "Creates and executes a new smart contract transaction request\nThe transaction can be private (Tessera, Orion).\nThe transaction can be a One Time Key transaction in 0 gas private networks",
                 "consumes": [
                     "application/json"
                 ],
@@ -590,7 +788,19 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/types.SendTransactionRequest"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.SendTransactionRequest"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "params": {
+                                            "$ref": "#/definitions/types.TransactionParams"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 ],
@@ -598,7 +808,22 @@
                     "202": {
                         "description": "Created contract transaction request",
                         "schema": {
-                            "$ref": "#/definitions/types.TransactionResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.TransactionResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "params": {
+                                            "$ref": "#/definitions/types.ETHTransactionParams"
+                                        },
+                                        "schedule": {
+                                            "$ref": "#/definitions/types.ScheduleResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -638,7 +863,7 @@
                         "JWTAuth": []
                     }
                 ],
-                "description": "Creates a new raw transaction request, schedule and job and starts executing the schedule.",
+                "description": "Creates and executes a new raw transaction request",
                 "consumes": [
                     "application/json"
                 ],
@@ -656,7 +881,19 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/types.RawTransactionRequest"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.RawTransactionRequest"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "params": {
+                                            "$ref": "#/definitions/types.RawTransactionParams"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 ],
@@ -664,7 +901,22 @@
                     "202": {
                         "description": "Created raw transaction request",
                         "schema": {
-                            "$ref": "#/definitions/types.TransactionResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.TransactionResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "params": {
+                                            "$ref": "#/definitions/types.ETHTransactionParams"
+                                        },
+                                        "schedule": {
+                                            "$ref": "#/definitions/types.ScheduleResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -704,7 +956,7 @@
                         "JWTAuth": []
                     }
                 ],
-                "description": "Creates a new transfer transaction request, schedule and job and starts executing the schedule.",
+                "description": "Creates and executes a new transfer request",
                 "consumes": [
                     "application/json"
                 ],
@@ -722,7 +974,19 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/types.RawTransactionRequest"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.TransferRequest"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "params": {
+                                            "$ref": "#/definitions/types.TransferParams"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 ],
@@ -730,7 +994,22 @@
                     "202": {
                         "description": "Created transfer transaction request",
                         "schema": {
-                            "$ref": "#/definitions/types.TransactionResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.TransactionResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "params": {
+                                            "$ref": "#/definitions/types.ETHTransactionParams"
+                                        },
+                                        "schedule": {
+                                            "$ref": "#/definitions/types.ScheduleResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -791,7 +1070,22 @@
                     "200": {
                         "description": "Transaction request found",
                         "schema": {
-                            "$ref": "#/definitions/types.TransactionResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.TransactionResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "params": {
+                                            "$ref": "#/definitions/types.ETHTransactionParams"
+                                        },
+                                        "schedule": {
+                                            "$ref": "#/definitions/types.ScheduleResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "404": {
@@ -811,6 +1105,27 @@
         }
     },
     "definitions": {
+        "httputil.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.Annotations": {
+            "type": "object",
+            "properties": {
+                "chainID": {
+                    "type": "string",
+                    "example": "1 (mainnet)"
+                },
+                "oneTimeKey": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
         "types.CreateJobRequest": {
             "type": "object",
             "required": [
@@ -821,10 +1136,12 @@
             ],
             "properties": {
                 "annotations": {
-                    "type": "string"
+                    "type": "object",
+                    "$ref": "#/definitions/types.Annotations"
                 },
                 "chainUUID": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
                 },
                 "labels": {
                     "type": "object",
@@ -833,18 +1150,63 @@
                     }
                 },
                 "scheduleUUID": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
                 },
                 "transaction": {
-                    "type": "string"
+                    "type": "object",
+                    "$ref": "#/definitions/types.ETHTransaction"
                 },
                 "type": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "eth://ethereum/transaction"
                 }
             }
         },
         "types.CreateScheduleRequest": {
             "type": "object"
+        },
+        "types.DeployContractParams": {
+            "type": "object",
+            "required": [
+                "contractName"
+            ],
+            "properties": {
+                "args": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
+                "contractName": {
+                    "type": "string",
+                    "example": "MyContract"
+                },
+                "contractTag": {
+                    "type": "string",
+                    "example": "v1.1.0"
+                },
+                "from": {
+                    "type": "string",
+                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "gas": {
+                    "type": "string",
+                    "example": "21000"
+                },
+                "gasPrice": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                },
+                "oneTimeKey": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "value": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                }
+            }
         },
         "types.DeployContractRequest": {
             "type": "object",
@@ -853,7 +1215,126 @@
             ],
             "properties": {
                 "params": {
-                    "type": "DeployContractParams"
+                    "type": "object",
+                    "$ref": "#/definitions/types.DeployContractParams"
+                }
+            }
+        },
+        "types.ETHTransaction": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
+                },
+                "data": {
+                    "type": "string",
+                    "example": "0xfe378324abcde723"
+                },
+                "from": {
+                    "type": "string",
+                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "gas": {
+                    "type": "string",
+                    "example": "21000"
+                },
+                "gasPrice": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                },
+                "hash": {
+                    "type": "string",
+                    "example": "0xd41551c714c8ec769d2edad9adc250ae955d263da161bf59142b7500eea6715e"
+                },
+                "nonce": {
+                    "type": "string",
+                    "example": "1"
+                },
+                "privacyGroupID": {
+                    "type": "string",
+                    "example": "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                },
+                "privateFor": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
+                        "B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                    ]
+                },
+                "privateFrom": {
+                    "type": "string",
+                    "example": "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                },
+                "raw": {
+                    "type": "string",
+                    "example": "0xfe378324abcde723"
+                },
+                "to": {
+                    "type": "string",
+                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "updatedAt": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
+                },
+                "value": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                }
+            }
+        },
+        "types.ETHTransactionParams": {
+            "type": "object",
+            "properties": {
+                "args": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
+                "contractName": {
+                    "type": "string",
+                    "example": "MyContract"
+                },
+                "contractTag": {
+                    "type": "string",
+                    "example": "v1.1.0"
+                },
+                "from": {
+                    "type": "string",
+                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "gas": {
+                    "type": "string",
+                    "example": "21000"
+                },
+                "gasPrice": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                },
+                "methodSignature": {
+                    "type": "string",
+                    "example": "transfer(address,uint256)"
+                },
+                "nonce": {
+                    "type": "string",
+                    "example": "1"
+                },
+                "raw": {
+                    "type": "string",
+                    "example": "0xfe378324abcde723"
+                },
+                "to": {
+                    "type": "string",
+                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "value": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
                 }
             }
         },
@@ -861,13 +1342,16 @@
             "type": "object",
             "properties": {
                 "annotations": {
-                    "type": "string"
+                    "type": "object",
+                    "$ref": "#/definitions/types.Annotations"
                 },
                 "chainUUID": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
                 },
                 "createdAt": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
                 },
                 "labels": {
                     "type": "object",
@@ -876,22 +1360,59 @@
                     }
                 },
                 "logs": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.Log"
+                    }
                 },
                 "scheduleUUID": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
                 },
                 "status": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "MINED"
                 },
                 "transaction": {
-                    "type": "string"
+                    "type": "object",
+                    "$ref": "#/definitions/types.ETHTransaction"
                 },
                 "type": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "eth://ethereum/transaction"
                 },
                 "uuid": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                }
+            }
+        },
+        "types.Log": {
+            "type": "object",
+            "properties": {
+                "at": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Log message"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "MINED"
+                }
+            }
+        },
+        "types.RawTransactionParams": {
+            "type": "object",
+            "required": [
+                "raw"
+            ],
+            "properties": {
+                "raw": {
+                    "type": "string",
+                    "example": "0xfe378324abcde723..."
                 }
             }
         },
@@ -902,7 +1423,8 @@
             ],
             "properties": {
                 "params": {
-                    "type": "RawTransactionParams"
+                    "type": "object",
+                    "$ref": "#/definitions/types.RawTransactionParams"
                 }
             }
         },
@@ -910,7 +1432,8 @@
             "type": "object",
             "properties": {
                 "createdAt": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
                 },
                 "jobs": {
                     "type": "array",
@@ -919,10 +1442,12 @@
                     }
                 },
                 "tenantID": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "tenant_id"
                 },
                 "uuid": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
                 }
             }
         },
@@ -933,7 +1458,51 @@
             ],
             "properties": {
                 "params": {
-                    "type": "TransactionParams"
+                    "type": "object",
+                    "$ref": "#/definitions/types.TransactionParams"
+                }
+            }
+        },
+        "types.TransactionParams": {
+            "type": "object",
+            "required": [
+                "methodSignature",
+                "to"
+            ],
+            "properties": {
+                "args": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
+                "from": {
+                    "type": "string",
+                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "gas": {
+                    "type": "string",
+                    "example": "21000"
+                },
+                "gasPrice": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                },
+                "methodSignature": {
+                    "type": "string",
+                    "example": "transfer(address,uint256)"
+                },
+                "oneTimeKey": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "to": {
+                    "type": "string",
+                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "value": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
                 }
             }
         },
@@ -941,20 +1510,66 @@
             "type": "object",
             "properties": {
                 "createdAt": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
                 },
                 "idempotencyKey": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "myIdempotencyKey"
                 },
                 "params": {
-                    "type": "string"
+                    "type": "object",
+                    "$ref": "#/definitions/types.ETHTransactionParams"
                 },
                 "schedule": {
                     "type": "object",
                     "$ref": "#/definitions/types.ScheduleResponse"
                 },
                 "uuid": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                }
+            }
+        },
+        "types.TransferParams": {
+            "type": "object",
+            "required": [
+                "from",
+                "to",
+                "value"
+            ],
+            "properties": {
+                "from": {
+                    "type": "string",
+                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "gas": {
+                    "type": "string",
+                    "example": "21000"
+                },
+                "gasPrice": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                },
+                "to": {
+                    "type": "string",
+                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "value": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                }
+            }
+        },
+        "types.TransferRequest": {
+            "type": "object",
+            "required": [
+                "params"
+            ],
+            "properties": {
+                "params": {
+                    "type": "object",
+                    "$ref": "#/definitions/types.TransferParams"
                 }
             }
         },
@@ -962,7 +1577,8 @@
             "type": "object",
             "properties": {
                 "annotations": {
-                    "type": "string"
+                    "type": "object",
+                    "$ref": "#/definitions/types.Annotations"
                 },
                 "labels": {
                     "type": "object",
@@ -971,13 +1587,16 @@
                     }
                 },
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Update message"
                 },
                 "status": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "MINED"
                 },
                 "transaction": {
-                    "type": "string"
+                    "type": "object",
+                    "$ref": "#/definitions/types.ETHTransaction"
                 }
             }
         }
@@ -996,11 +1615,11 @@
     },
     "tags": [
         {
-            "description": "Transactions endpoint enabling dynamic management of transactions",
+            "description": "Transaction requests are an abstraction over schedules and jobs representing one or more transactions executed on the Blockchain network",
             "name": "Transactions"
         },
         {
-            "description": "Schedules are ordered list of jobs executed in a predefined sequence",
+            "description": "Schedules are ordered lists of jobs executed in a predefined sequence",
             "name": "Schedules"
         },
         {

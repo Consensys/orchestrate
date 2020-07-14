@@ -2,10 +2,8 @@ package testutils
 
 import (
 	"github.com/gofrs/uuid"
-	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
-	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 )
 
 func FakeSendTransactionRequest(chainName string) *types.SendTransactionRequest {
@@ -67,7 +65,7 @@ func FakeSendTesseraRequest(chainName string) *types.SendTransactionRequest {
 			From:            "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
 			MethodSignature: "transfer()",
 			To:              "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
-			PrivateTransactionParams: types2.PrivateTransactionParams{
+			PrivateTransactionParams: types.PrivateTransactionParams{
 				Protocol:    utils.TesseraChainType,
 				PrivateFrom: "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
 				PrivateFor:  []string{"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="},
@@ -85,7 +83,7 @@ func FakeSendOrionRequest(chainName string) *types.SendTransactionRequest {
 			From:            "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
 			MethodSignature: "transfer()",
 			To:              "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
-			PrivateTransactionParams: types2.PrivateTransactionParams{
+			PrivateTransactionParams: types.PrivateTransactionParams{
 				Protocol:       utils.OrionChainType,
 				PrivateFrom:    "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
 				PrivacyGroupID: "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
@@ -102,25 +100,25 @@ func FakeCreateJobRequest() *types.CreateJobRequest {
 	return &types.CreateJobRequest{
 		ScheduleUUID: uuid.Must(uuid.NewV4()).String(),
 		ChainUUID:    uuid.Must(uuid.NewV4()).String(),
-		Type:         types2.EthereumTransaction,
+		Type:         types.EthereumTransaction,
 		Labels:       nil,
 		Annotations:  nil,
-		Transaction:  testutils2.FakeETHTransaction(),
+		Transaction:  FakeETHTransaction(),
 	}
 }
 
 func FakeJobUpdateRequest() *types.UpdateJobRequest {
 	return &types.UpdateJobRequest{
 		Labels:      nil,
-		Transaction: testutils2.FakeETHTransaction(),
-		Status:      types2.StatusPending,
+		Transaction: FakeETHTransaction(),
+		Status:      types.StatusPending,
 	}
 }
 
 func FakeJobResponse() *types.JobResponse {
 	return &types.JobResponse{
 		UUID:        uuid.Must(uuid.NewV4()).String(),
-		Transaction: testutils2.FakeETHTransaction(),
-		Status:      types2.StatusCreated,
+		Transaction: FakeETHTransaction(),
+		Status:      types.StatusCreated,
 	}
 }

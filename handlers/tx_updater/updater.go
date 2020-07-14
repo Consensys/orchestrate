@@ -2,9 +2,8 @@ package txupdater
 
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 )
 
 const component = "handler.tx-updater"
@@ -26,7 +25,7 @@ func TransactionUpdater(txSchedulerClient txscheduler.TransactionSchedulerClient
 		// TODO: Improvement of the log message will be done when we move to clean architecture
 		// TODO: because at the moment it is difficult to know what error messages need to be sent to users and which ones not.
 		_, err := txSchedulerClient.UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
-			Status:  types2.StatusFailed,
+			Status:  types.StatusFailed,
 			Message: txctx.Envelope.Error(),
 		})
 

@@ -4,19 +4,18 @@ import (
 	"net/http"
 	"strings"
 
-	pkgtypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
 
-func FormatJobResponse(job *pkgtypes.Job) *types.JobResponse {
+func FormatJobResponse(job *types.Job) *types.JobResponse {
 	return &types.JobResponse{
 		UUID:         job.UUID,
 		ChainUUID:    job.ChainUUID,
 		ScheduleUUID: job.ScheduleUUID,
-		Transaction: &pkgtypes.ETHTransaction{
+		Transaction: &types.ETHTransaction{
 			Hash:           job.Transaction.Hash,
 			From:           job.Transaction.From,
 			To:             job.Transaction.To,
@@ -41,11 +40,11 @@ func FormatJobResponse(job *pkgtypes.Job) *types.JobResponse {
 	}
 }
 
-func FormatJobCreateRequest(request *types.CreateJobRequest) *pkgtypes.Job {
-	job := &pkgtypes.Job{
+func FormatJobCreateRequest(request *types.CreateJobRequest) *types.Job {
+	job := &types.Job{
 		Type:         request.Type,
 		Labels:       request.Labels,
-		Annotations:  &pkgtypes.Annotations{},
+		Annotations:  &types.Annotations{},
 		ScheduleUUID: request.ScheduleUUID,
 		ChainUUID:    request.ChainUUID,
 		Transaction:  request.Transaction,
@@ -58,8 +57,8 @@ func FormatJobCreateRequest(request *types.CreateJobRequest) *pkgtypes.Job {
 	return job
 }
 
-func FormatJobUpdateRequest(request *types.UpdateJobRequest) *pkgtypes.Job {
-	return &pkgtypes.Job{
+func FormatJobUpdateRequest(request *types.UpdateJobRequest) *types.Job {
+	return &types.Job{
 		Labels:      request.Labels,
 		Annotations: request.Annotations,
 		Transaction: request.Transaction,

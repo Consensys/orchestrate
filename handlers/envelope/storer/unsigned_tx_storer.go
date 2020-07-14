@@ -3,10 +3,9 @@ package storer
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 )
 
 func UnsignedTxStore(store svc.EnvelopeStoreClient, txSchedulerClient client.TransactionSchedulerClient) engine.HandlerFunc {
@@ -35,7 +34,7 @@ func unsignedTxStoreInTxScheduler(txctx *engine.TxContext, txSchedulerClient cli
 		txctx.Context(),
 		txctx.Envelope.GetID(),
 		&types.UpdateJobRequest{
-			Transaction: &types2.ETHTransaction{
+			Transaction: &types.ETHTransaction{
 				Hash:           txctx.Envelope.GetTxHashString(),
 				From:           txctx.Envelope.GetFromString(),
 				To:             txctx.Envelope.GetToString(),
@@ -48,7 +47,7 @@ func unsignedTxStoreInTxScheduler(txctx *engine.TxContext, txSchedulerClient cli
 				PrivateFor:     txctx.Envelope.GetPrivateFor(),
 				PrivacyGroupID: txctx.Envelope.GetPrivacyGroupID(),
 			},
-			Status: types2.StatusSent,
+			Status: types.StatusSent,
 		},
 	)
 

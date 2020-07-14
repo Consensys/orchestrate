@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -19,9 +18,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
-	testutils3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/chains"
@@ -87,7 +85,7 @@ func (s *transactionsControllerTestSuite) SetupTest() {
 	s.searchTxsUsecase = mocks.NewMockSearchTransactionsUseCase(ctrl)
 	s.getChainByNameUseCase = mocks2.NewMockGetChainByNameUseCase(ctrl)
 	s.tenantID = "tenantId"
-	s.chain = testutils3.FakeChain()
+	s.chain = testutils.FakeChain()
 	s.ctx = context.WithValue(context.Background(), multitenancy.TenantIDKey, s.tenantID)
 	s.ctx = context.WithValue(s.ctx, multitenancy.AllowedTenantsKey, []string{s.tenantID})
 
@@ -525,7 +523,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_search() {
 
 		s.router.ServeHTTP(rw, httpRequest)
 
-		response := []*types2.TransactionResponse{formatters.FormatTxResponse(txRequest)}
+		response := []*types.TransactionResponse{formatters.FormatTxResponse(txRequest)}
 		expectedBody, _ := json.Marshal(response)
 		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
 		assert.Equal(t, http.StatusOK, rw.Code)

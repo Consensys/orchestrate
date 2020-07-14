@@ -4,9 +4,8 @@ package storer
 
 import (
 	"fmt"
-	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"math/big"
 	"testing"
 
@@ -88,7 +87,7 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 
 		schedulerClient.EXPECT().
 			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
-				Transaction: &types2.ETHTransaction{
+				Transaction: &types.ETHTransaction{
 					Hash:           txctx.Envelope.GetTxHashString(),
 					From:           txctx.Envelope.GetFromString(),
 					To:             txctx.Envelope.GetToString(),
@@ -101,12 +100,12 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 					PrivateFor:     txctx.Envelope.GetPrivateFor(),
 					PrivacyGroupID: txctx.Envelope.GetPrivacyGroupID(),
 				},
-				Status: types2.StatusPending,
+				Status: types.StatusPending,
 			}).
 			Return(&types.JobResponse{}, nil)
 		schedulerClient.EXPECT().
 			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
-				Status: types2.StatusSent,
+				Status: types.StatusSent,
 			}).
 			Return(&types.JobResponse{}, nil)
 
@@ -141,7 +140,7 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 			Return(&types.JobResponse{}, nil)
 		schedulerClient.EXPECT().
 			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
-				Status: types2.StatusSent,
+				Status: types.StatusSent,
 			}).
 			Return(nil, fmt.Errorf("error"))
 
@@ -160,7 +159,7 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 			Return(&types.JobResponse{}, nil)
 		schedulerClient.EXPECT().
 			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
-				Status: types2.StatusRecovering,
+				Status: types.StatusRecovering,
 				Message: fmt.Sprintf(
 					"transaction attempt with nonce %v and sender %v failed with error: %v",
 					txctx.Envelope.GetNonceString(),
@@ -185,7 +184,7 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 			Return(&types.JobResponse{}, nil)
 		schedulerClient.EXPECT().
 			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
-				Status: types2.StatusRecovering,
+				Status: types.StatusRecovering,
 				Message: fmt.Sprintf(
 					"transaction attempt with nonce %v and sender %v failed with error: %v",
 					txctx.Envelope.GetNonceString(),

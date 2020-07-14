@@ -5,6 +5,8 @@ package controllers
 import (
 	"bytes"
 	"context"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -17,10 +19,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
-	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/schedules"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/schedules/mocks"
 )
@@ -71,7 +71,7 @@ func (s *schedulesCtrlTestSuite) SetupTest() {
 }
 
 func (s *schedulesCtrlTestSuite) TestScheduleController_Create() {
-	scheduleRequest := testutils.FakeCreateScheduleRequest()
+	scheduleRequest := testutils2.FakeCreateScheduleRequest()
 	requestBytes, _ := json.Marshal(scheduleRequest)
 
 	s.T().Run("should execute request successfully", func(t *testing.T) {
@@ -80,7 +80,7 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_Create() {
 			NewRequest(http.MethodPost, "/schedules", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		scheduleEntityResp := testutils2.FakeScheduleEntity()
+		scheduleEntityResp := testutils.FakeScheduleEntity()
 
 		s.createScheduleUC.EXPECT().
 			Execute(gomock.Any(), &entities.Schedule{TenantID: s.tenantID}).
@@ -115,7 +115,7 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_GetOne() {
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodGet, "/schedules/scheduleUUID", nil).WithContext(s.ctx)
-		scheduleEntityResp := testutils2.FakeScheduleEntity()
+		scheduleEntityResp := testutils.FakeScheduleEntity()
 
 		s.getScheduleUC.EXPECT().
 			Execute(gomock.Any(), "scheduleUUID", []string{s.tenantID}).
@@ -148,7 +148,7 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_GetAll() {
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodGet, "/schedules", nil).WithContext(s.ctx)
-		schedulesEntities := []*entities.Schedule{testutils2.FakeScheduleEntity()}
+		schedulesEntities := []*entities.Schedule{testutils.FakeScheduleEntity()}
 
 		s.getSchedulesUC.EXPECT().Execute(gomock.Any(), []string{s.tenantID}).Return(schedulesEntities, nil)
 

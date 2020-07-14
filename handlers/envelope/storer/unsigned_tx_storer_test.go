@@ -12,10 +12,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"golang.org/x/net/context"
 )
 
@@ -114,7 +113,7 @@ func TestUnsignedTxStore_TxScheduler(t *testing.T) {
 
 		schedulerClient.EXPECT().
 			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
-				Transaction: &types2.ETHTransaction{
+				Transaction: &types.ETHTransaction{
 					Hash:           txctx.Envelope.GetTxHashString(),
 					From:           txctx.Envelope.GetFromString(),
 					To:             txctx.Envelope.GetToString(),
@@ -127,7 +126,7 @@ func TestUnsignedTxStore_TxScheduler(t *testing.T) {
 					PrivateFor:     txctx.Envelope.GetPrivateFor(),
 					PrivacyGroupID: txctx.Envelope.GetPrivacyGroupID(),
 				},
-				Status: types2.StatusSent,
+				Status: types.StatusSent,
 			}).Return(&types.JobResponse{}, nil)
 
 		h := UnsignedTxStore(storeClient, schedulerClient)
@@ -140,14 +139,14 @@ func TestUnsignedTxStore_TxScheduler(t *testing.T) {
 		txctx := engine.NewTxContext()
 		_ = txctx.Envelope.SetID("test").SetContextLabelsValue("jobUUID", "test")
 		txctx.Logger = log.NewEntry(log.New())
-	
+
 		schedulerClient.EXPECT().
 			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), gomock.AssignableToTypeOf(&types.UpdateJobRequest{})).
 			Return(nil, fmt.Errorf("error"))
-	
+
 		h := UnsignedTxStore(storeClient, schedulerClient)
 		h(txctx)
-	
+
 		assert.Len(t, txctx.Envelope.GetErrors(), 1)
 	})
 }

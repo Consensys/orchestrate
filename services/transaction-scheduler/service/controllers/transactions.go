@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/chains"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/transactions"
 
@@ -67,8 +68,8 @@ func idempotencyKeyMiddleware(next http.Handler) http.Handler {
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body types.SendTransactionRequest true "Contract transaction request"
-// @Success 202 {object} types.TransactionResponse "Created contract transaction request"
+// @Param request body types.SendTransactionRequest{params=types.TransactionParams} true "Contract transaction request"
+// @Success 202 {object} types.TransactionResponse{params=types.ETHTransactionParams,schedule=types.ScheduleResponse} "Created contract transaction request"
 // @Failure 400 {string} error "Invalid request"
 // @Failure 409 {string} error "Already existing transaction"
 // @Failure 422 {string} error "Unprocessable parameters were sent"
@@ -118,8 +119,8 @@ func (c *TransactionsController) send(rw http.ResponseWriter, request *http.Requ
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body types.DeployContractRequest true "Deployment transaction request"
-// @Success 202 {object} types.TransactionResponse "Created deployment transaction request"
+// @Param request body types.DeployContractRequest{params=types.DeployContractParams} true "Deployment transaction request"
+// @Success 202 {object} types.TransactionResponse{params=types.ETHTransactionParams,schedule=types.ScheduleResponse} "Created deployment transaction request"
 // @Failure 400 {string} error "Invalid request"
 // @Failure 409 {string} error "Already existing transaction"
 // @Failure 422 {string} error "Unprocessable parameters were sent"
@@ -167,8 +168,8 @@ func (c *TransactionsController) deployContract(rw http.ResponseWriter, request 
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body types.RawTransactionRequest true "Raw transaction request"
-// @Success 202 {object} types.TransactionResponse "Created raw transaction request"
+// @Param request body types.RawTransactionRequest{params=types.RawTransactionParams} true "Raw transaction request"
+// @Success 202 {object} types.TransactionResponse{params=types.ETHTransactionParams,schedule=types.ScheduleResponse} "Created raw transaction request"
 // @Failure 400 {string} error "Invalid request"
 // @Failure 409 {string} error "Already existing transaction"
 // @Failure 422 {string} error "Unprocessable parameters were sent"
@@ -212,8 +213,8 @@ func (c *TransactionsController) sendRaw(rw http.ResponseWriter, request *http.R
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body types.RawTransactionRequest true "Transfer transaction request"
-// @Success 202 {object} types.TransactionResponse "Created transfer transaction request"
+// @Param request body types.TransferRequest{params=types.TransferParams} true "Transfer transaction request"
+// @Success 202 {object} types.TransactionResponse{params=types.ETHTransactionParams,schedule=types.ScheduleResponse} "Created transfer transaction request"
 // @Failure 400 {string} error "Invalid request"
 // @Failure 409 {string} error "Already existing transaction"
 // @Failure 422 {string} error "Unprocessable parameters were sent"
@@ -257,7 +258,7 @@ func (c *TransactionsController) transfer(rw http.ResponseWriter, request *http.
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param uuid path string true "UUID of the transaction request"
-// @Success 200 {object} types.TransactionResponse "Transaction request found"
+// @Success 200 {object} types.TransactionResponse{params=types.ETHTransactionParams,schedule=types.ScheduleResponse} "Transaction request found"
 // @Failure 404 {string} error "Transaction request not found"
 // @Failure 500 {string} error "Internal server error"
 // @Router /transactions/{uuid} [get]
@@ -284,9 +285,9 @@ func (c *TransactionsController) getOne(rw http.ResponseWriter, request *http.Re
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param idempotency_keys query []string false "List of idempotency keys" collectionFormat(csv)
-// @Success 200 {array} types.TransactionResponse "List of transaction requests found"
-// @Failure 400 {string} error "Invalid filter in the request"
-// @Failure 500 {string} error "Internal server error"
+// @Success 200 {array} types.TransactionResponse{params=types.ETHTransactionParams,schedule=types.ScheduleResponse} "List of transaction requests found"
+// @Failure 400 {object} httputil.ErrorResponse "Invalid filter in the request"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /transactions [get]
 func (c *TransactionsController) search(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	pkgtypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 
 	"github.com/Shopify/sarama"
 	"github.com/containous/traefik/v2/pkg/log"
@@ -27,7 +27,6 @@ import (
 	svccontracts "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
-	schedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 )
 
@@ -118,7 +117,7 @@ func (hk *Hook) AfterNewBlockEnvelope(ctx context.Context, c *dynamic.Chain, blo
 	return nil
 }
 
-func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *ethtypes.Block, jobs []*types2.Job) error {
+func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *ethtypes.Block, jobs []*pkgtypes.Job) error {
 	blockLogCtx := log.With(ctx, log.Str("block.number", block.Number().String()))
 	var txResponses []*tx.TxResponse
 
@@ -166,8 +165,8 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 		_, err := hk.txSchedulerClient.UpdateJob(
 			ctx,
 			txResponse.GetId(),
-			&schedulertypes.UpdateJobRequest{
-				Status:  types2.StatusMined,
+			&pkgtypes.UpdateJobRequest{
+				Status:  pkgtypes.StatusMined,
 				Message: fmt.Sprintf("Transaction mined in block %v", block.NumberU64()),
 			},
 		)

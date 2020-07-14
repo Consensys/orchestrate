@@ -16,12 +16,11 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/client-utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
-	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/controllers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/testutils"
 	"gopkg.in/h2non/gock.v1"
 )
 
@@ -44,7 +43,7 @@ func (s *txSchedulerTransactionTestSuite) SetupSuite() {
 
 func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() {
 	ctx := context.Background()
-	chain := testutils2.FakeChain()
+	chain := testutils.FakeChain()
 	chainModel := &models.Chain{
 		Name:     chain.Name,
 		UUID:     chain.UUID,
@@ -121,7 +120,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 
 func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions() {
 	ctx := context.Background()
-	chain := testutils2.FakeChain()
+	chain := testutils.FakeChain()
 	chainModel := &models.Chain{
 		Name:     chain.Name,
 		UUID:     chain.UUID,
@@ -264,11 +263,11 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
 		txRequest := testutils.FakeDeployContractRequest(chain.Name)
-		txRequest.Params.Args = testutils2.ParseIArray(123) // FakeContract arguments
+		txRequest.Params.Args = testutils.ParseIArray(123) // FakeContract arguments
 
 		s.env.contractRegistryResponseFaker.GetContract = func() (*proto.GetContractResponse, error) {
 			return &proto.GetContractResponse{
-				Contract: testutils2.FakeContract(),
+				Contract: testutils.FakeContract(),
 			}, nil
 		}
 		txResponse, err := s.client.SendDeployTransaction(ctx, txRequest)

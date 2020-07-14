@@ -6,8 +6,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	pkgtypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
-	testutils3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -22,8 +22,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs/mocks"
@@ -90,10 +88,10 @@ func (s *jobsCtrlTestSuite) SetupTest() {
 func (s *jobsCtrlTestSuite) TestJobsController_Create() {
 	s.T().Run("should execute create job request successfully", func(t *testing.T) {
 		jobRequest := testutils.FakeCreateJobRequest()
-		jobRequest.Annotations = &pkgtypes.Annotations{
+		jobRequest.Annotations = &types.Annotations{
 			OneTimeKey: true,
 		}
-		jobEntityRes := testutils3.FakeJob()
+		jobEntityRes := testutils.FakeJob()
 		requestBytes, _ := json.Marshal(jobRequest)
 		rw := httptest.NewRecorder()
 
@@ -147,7 +145,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_GetOne() {
 		httpRequest := httptest.
 			NewRequest(http.MethodGet, "/jobs/jobUUID", nil).
 			WithContext(s.ctx)
-		jobEntityRes := testutils3.FakeJob()
+		jobEntityRes := testutils.FakeJob()
 
 		s.getJobUC.EXPECT().Execute(gomock.Any(), "jobUUID", s.tenants).Return(jobEntityRes, nil)
 
@@ -178,7 +176,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_Search() {
 		httpRequest := httptest.
 			NewRequest(http.MethodGet, "/jobs", nil).
 			WithContext(s.ctx)
-		jobEntities := []*pkgtypes.Job{testutils3.FakeJob()}
+		jobEntities := []*types.Job{testutils.FakeJob()}
 
 		s.searchJobUC.EXPECT().Execute(gomock.Any(), filters, s.tenants).Return(jobEntities, nil)
 
@@ -206,7 +204,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_Search() {
 		httpRequest := httptest.
 			NewRequest(http.MethodGet, url, nil).
 			WithContext(s.ctx)
-		jobEntities := []*pkgtypes.Job{testutils3.FakeJob()}
+		jobEntities := []*types.Job{testutils.FakeJob()}
 
 		s.searchJobUC.EXPECT().Execute(gomock.Any(), filters, s.tenants).Return(jobEntities, nil)
 
@@ -281,10 +279,10 @@ func (s *jobsCtrlTestSuite) TestJobsController_Update() {
 	s.T().Run("should execute update a job request successfully", func(t *testing.T) {
 		rw := httptest.NewRecorder()
 		jobRequest := testutils.FakeJobUpdateRequest()
-		jobRequest.Annotations = &pkgtypes.Annotations{
+		jobRequest.Annotations = &types.Annotations{
 			OneTimeKey: true,
 		}
-		jobEntityRes := testutils3.FakeJob()
+		jobEntityRes := testutils.FakeJob()
 
 		requestBytes, _ := json.Marshal(jobRequest)
 		httpRequest := httptest.

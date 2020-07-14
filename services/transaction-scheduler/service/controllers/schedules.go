@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/schedules"
 
 	"github.com/gorilla/mux"
@@ -41,7 +42,7 @@ func (c *SchedulesController) Append(router *mux.Router) {
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param request body types.CreateScheduleRequest true "Schedule creation request"
-// @Success 200 {object} types.ScheduleResponse "Created schedule"
+// @Success 200 {object} types.ScheduleResponse{jobs=[]types.JobResponse} "Created schedule"
 // @Failure 400 {string} error "Invalid request"
 // @Failure 422 {string} error "Unprocessable parameters were sent"
 // @Failure 500 {string} error "Internal server error"
@@ -74,7 +75,7 @@ func (c *SchedulesController) create(rw http.ResponseWriter, request *http.Reque
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param uuid path string true "UUID of the schedule"
-// @Success 200 {object} types.ScheduleResponse "Schedule found"
+// @Success 200 {object} types.ScheduleResponse{jobs=[]types.JobResponse} "Schedule found"
 // @Failure 404 {string} error "Schedule not found"
 // @Failure 500 {string} error "Internal server error"
 // @Router /schedules/{uuid} [get]
@@ -100,7 +101,7 @@ func (c *SchedulesController) getOne(rw http.ResponseWriter, request *http.Reque
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Success 200 {array} types.ScheduleResponse "List of schedules found"
+// @Success 200 {array} types.ScheduleResponse{jobs=[]types.JobResponse} "List of schedules found"
 // @Failure 500 {string} error "Internal server error"
 // @Router /schedules [get]
 func (c *SchedulesController) getAll(rw http.ResponseWriter, request *http.Request) {

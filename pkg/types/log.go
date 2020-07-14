@@ -3,7 +3,7 @@ package types
 import "time"
 
 type Log struct {
-	Status    string    `json:"status"`
-	Message   string    `json:"message,omitempty"`
-	CreatedAt time.Time `json:"createdAt"`
+	Status    string    `json:"status" example:"MINED"`
+	Message   string    `json:"message,omitempty" example:"Log message"`
+	CreatedAt time.Time `json:"at" example:"2020-07-09T12:35:42.115395Z"`
 }

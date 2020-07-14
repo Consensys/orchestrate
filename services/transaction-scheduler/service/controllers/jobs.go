@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 
 	"github.com/gorilla/mux"
 
@@ -43,7 +43,7 @@ func (c *JobsController) Append(router *mux.Router) {
 // @Security JWTAuth
 // @Param tx_hashes query []string false "List of transaction hashes" collectionFormat(csv)
 // @Param chain_uuid query string false "Chain UUID"
-// @Success 200 {array} types.JobResponse "List of jobs found"
+// @Success 200 {object} types.JobResponse{annotations=types.Annotations,transaction=types.ETHTransaction,logs=[]types.Log} "List of Jobs found"
 // @Failure 400 {string} error "Invalid filter in the request"
 // @Failure 500 {string} error "Internal server error"
 // @Router /jobs [get]
@@ -78,8 +78,8 @@ func (c *JobsController) search(rw http.ResponseWriter, request *http.Request) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body types.CreateJobRequest true "Job creation request"
-// @Success 200 {object} types.JobResponse "Created job"
+// @Param request body types.CreateJobRequest{annotations=types.Annotations,transaction=types.ETHTransaction} true "Job creation request"
+// @Success 200 {object} types.JobResponse{annotations=types.Annotations,transaction=types.ETHTransaction,logs=[]types.Log} "Created Job"
 // @Failure 400 {string} error "Invalid request"
 // @Failure 422 {string} error "Unprocessable parameters were sent"
 // @Failure 500 {string} error "Internal server error"
@@ -112,7 +112,7 @@ func (c *JobsController) create(rw http.ResponseWriter, request *http.Request) {
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param uuid path string true "UUID of the job"
-// @Success 200 {object} types.JobResponse "Job found"
+// @Success 200 {object} types.JobResponse{annotations=types.Annotations,transaction=types.ETHTransaction,logs=[]types.Log} "Job found"
 // @Failure 404 {string} error "Job not found"
 // @Failure 500 {string} error "Internal server error"
 // @Router /jobs/{uuid} [get]
@@ -163,8 +163,8 @@ func (c *JobsController) start(rw http.ResponseWriter, request *http.Request) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body types.UpdateJobRequest true "Job update request"
-// @Success 200 {object} types.JobResponse "Job found"
+// @Param request body types.UpdateJobRequest{annotations=types.Annotations,transaction=types.ETHTransaction} true "Job update request"
+// @Success 200 {object} types.JobResponse{annotations=types.Annotations,transaction=types.ETHTransaction,logs=[]types.Log} "Job found"
 // @Failure 400 {string} error "Invalid request"
 // @Failure 404 {string} error "Job not found"
 // @Failure 422 {string} error "Unprocessable parameters were sent"

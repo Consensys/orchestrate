@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strings"
 
-	pkgtypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
 
@@ -14,7 +14,7 @@ func FormatSendTxRequest(txRequest *types.SendTransactionRequest, idempotencyKey
 	txReq := &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,
 		Labels:         txRequest.Labels,
-		Params: &pkgtypes.ETHTransactionParams{
+		Params: &types.ETHTransactionParams{
 			From:                     txRequest.Params.From,
 			To:                       txRequest.Params.To,
 			Value:                    txRequest.Params.Value,
@@ -27,7 +27,7 @@ func FormatSendTxRequest(txRequest *types.SendTransactionRequest, idempotencyKey
 	}
 
 	if txRequest.Params.OneTimeKey {
-		txReq.Annotations = &pkgtypes.Annotations{
+		txReq.Annotations = &types.Annotations{
 			OneTimeKey: txRequest.Params.OneTimeKey,
 		}
 	}
@@ -39,7 +39,7 @@ func FormatDeployContractRequest(txRequest *types.DeployContractRequest, idempot
 	txReq := &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,
 		Labels:         txRequest.Labels,
-		Params: &pkgtypes.ETHTransactionParams{
+		Params: &types.ETHTransactionParams{
 			From:                     txRequest.Params.From,
 			Value:                    txRequest.Params.Value,
 			GasPrice:                 txRequest.Params.GasPrice,
@@ -52,7 +52,7 @@ func FormatDeployContractRequest(txRequest *types.DeployContractRequest, idempot
 	}
 
 	if txRequest.Params.OneTimeKey {
-		txReq.Annotations = &pkgtypes.Annotations{
+		txReq.Annotations = &types.Annotations{
 			OneTimeKey: txRequest.Params.OneTimeKey,
 		}
 	}
@@ -64,7 +64,7 @@ func FormatSendRawRequest(txRequest *types.RawTransactionRequest, idempotencyKey
 	return &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,
 		Labels:         txRequest.Labels,
-		Params: &pkgtypes.ETHTransactionParams{
+		Params: &types.ETHTransactionParams{
 			Raw: txRequest.Params.Raw,
 		},
 	}
@@ -74,7 +74,7 @@ func FormatSendTransferRequest(txRequest *types.TransferRequest, idempotencyKey 
 	return &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,
 		Labels:         txRequest.Labels,
-		Params: &pkgtypes.ETHTransactionParams{
+		Params: &types.ETHTransactionParams{
 			From:     txRequest.Params.From,
 			To:       txRequest.Params.To,
 			Value:    txRequest.Params.Value,

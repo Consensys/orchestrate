@@ -6,25 +6,25 @@ import (
 )
 
 type ETHTransactionParams struct {
-	From            string        `json:"from,omitempty" validate:"omitempty,eth_addr"`
-	To              string        `json:"to,omitempty" validate:"omitempty,eth_addr"`
-	Value           string        `json:"value,omitempty" validate:"omitempty,numeric"`
-	GasPrice        string        `json:"gasPrice,omitempty"`
-	Gas             string        `json:"gas,omitempty"`
-	MethodSignature string        `json:"methodSignature,omitempty"`
+	From            string        `json:"from,omitempty" validate:"omitempty,eth_addr" example:"0x1abae27a0cbfb02945720425d3b80c7e09728534"`
+	To              string        `json:"to,omitempty" validate:"omitempty,eth_addr" example:"0x1abae27a0cbfb02945720425d3b80c7e09728534"`
+	Value           string        `json:"value,omitempty" validate:"omitempty,numeric" example:"71500000 (wei)"`
+	GasPrice        string        `json:"gasPrice,omitempty" example:"71500000 (wei)"`
+	Gas             string        `json:"gas,omitempty" example:"21000"`
+	MethodSignature string        `json:"methodSignature,omitempty" example:"transfer(address,uint256)"`
 	Args            []interface{} `json:"args,omitempty"`
-	Raw             string        `json:"raw,omitempty" validate:"omitempty,isHex"`
-	ContractName    string        `json:"contractName,omitempty"`
-	ContractTag     string        `json:"contractTag,omitempty"`
-	Nonce           string        `json:"nonce,omitempty" validate:"omitempty,numeric"`
+	Raw             string        `json:"raw,omitempty" validate:"omitempty,isHex" example:"0xfe378324abcde723"`
+	ContractName    string        `json:"contractName,omitempty" example:"MyContract"`
+	ContractTag     string        `json:"contractTag,omitempty" example:"v1.1.0"`
+	Nonce           string        `json:"nonce,omitempty" validate:"omitempty,numeric" example:"1"`
 	PrivateTransactionParams
 }
 
 type PrivateTransactionParams struct {
-	Protocol       string   `json:"protocol,omitempty" validate:"omitempty,isPrivateTxManagerType"`
-	PrivateFrom    string   `json:"privateFrom,omitempty" validate:"omitempty,base64"`
-	PrivateFor     []string `json:"privateFor,omitempty" validate:"omitempty,min=1,unique,dive,base64"`
-	PrivacyGroupID string   `json:"privacyGroupId,omitempty" validate:"omitempty,base64"`
+	Protocol       string   `json:"protocol,omitempty" validate:"omitempty,isPrivateTxManagerType" example:"Tessera"`
+	PrivateFrom    string   `json:"privateFrom,omitempty" validate:"omitempty,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
+	PrivateFor     []string `json:"privateFor,omitempty" validate:"omitempty,min=1,unique,dive,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=,B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
+	PrivacyGroupID string   `json:"privacyGroupId,omitempty" validate:"omitempty,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
 }
 
 func (tx *PrivateTransactionParams) Validate() error {

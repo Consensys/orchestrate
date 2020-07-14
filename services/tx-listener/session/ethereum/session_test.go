@@ -6,6 +6,7 @@ package ethereum
 import (
 	"context"
 	"fmt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"math/big"
 	"os"
 	"sync"
@@ -13,7 +14,7 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
-	types3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	transactionscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler"
 
 	eth "github.com/ethereum/go-ethereum"
@@ -30,8 +31,6 @@ import (
 	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
 	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/testutils"
-	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 	offset "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/offset/memory"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/offset/mock"
@@ -240,7 +239,7 @@ type hookCall struct {
 	chain     *dynamic.Chain
 	block     *ethtypes.Block
 	envelopes []*tx.Envelope
-	jobs      []*types3.Job
+	jobs      []*types2.Job
 }
 
 type MockHook struct {
@@ -276,7 +275,7 @@ func (hk *MockHook) AfterNewBlockEnvelope(_ context.Context, chain *dynamic.Chai
 	}
 }
 
-func (hk *MockHook) AfterNewBlock(_ context.Context, chain *dynamic.Chain, block *ethtypes.Block, jobs []*types3.Job) error {
+func (hk *MockHook) AfterNewBlock(_ context.Context, chain *dynamic.Chain, block *ethtypes.Block, jobs []*types2.Job) error {
 	hk.Calls <- &hookCall{
 		chain: chain,
 		block: block,
@@ -454,8 +453,8 @@ func TestFetchBlockExternalTxDisabled(t *testing.T) {
 	txScheduler.EXPECT().SearchJob(gomock.Any(), testTxHashes, gomock.Any()).Return([]*types2.JobResponse{}, nil)
 
 	sess := &Session{
-		ec:                ec,
-		Chain:             &dynamic.Chain{
+		ec: ec,
+		Chain: &dynamic.Chain{
 			Listener: &dynamic.Listener{ExternalTxEnabled: false},
 		},
 		store:             store,
@@ -471,7 +470,7 @@ func TestFetchBlockExternalTxDisabled(t *testing.T) {
 	case res := <-future.Result():
 		block := res.(*fetchedBlock)
 		assert.NotNil(t, block, "Result block should not be nil")
-		assert.Equal(t, "0xff4f5cd9a03569e8e6d32af4726d1b9ea1a248f69a04307f76896a24fe7be09d", 
+		assert.Equal(t, "0xff4f5cd9a03569e8e6d32af4726d1b9ea1a248f69a04307f76896a24fe7be09d",
 			block.block.Hash().Hex(), "Block hash should be correct(")
 		assert.Len(t, block.envelopes, 2, "Receipts should have been fetched properly")
 		assert.Len(t, block.jobs, 0, "Receipts should have been fetched properly")
@@ -487,7 +486,7 @@ func TestFetchBlockWithIntervalPrivateTx(t *testing.T) {
 	ec := NewEthClientV2(big.NewInt(testChainID))
 
 	// This is the Tx generated when we store the enclavekey
-	markingTx := ethtypes.NewTransaction(0, ethcommon.HexToAddress(orionPrecompiledContractAddr), nil, 
+	markingTx := ethtypes.NewTransaction(0, ethcommon.HexToAddress(orionPrecompiledContractAddr), nil,
 		0, nil, []byte(enclaveKey))
 
 	ec.Mine(ethtypes.NewBlock(&ethtypes.Header{},
@@ -608,7 +607,7 @@ func TestIgnoreBlockWithExternalPrivateTx(t *testing.T) {
 	ec := NewEthClientV2(big.NewInt(testChainID))
 
 	// This is the Tx generated when we store the enclavekey
-	markingTx := ethtypes.NewTransaction(0, ethcommon.HexToAddress(orionPrecompiledContractAddr), nil, 
+	markingTx := ethtypes.NewTransaction(0, ethcommon.HexToAddress(orionPrecompiledContractAddr), nil,
 		0, nil, []byte(enclaveKey))
 
 	ec.Mine(ethtypes.NewBlock(&ethtypes.Header{},
