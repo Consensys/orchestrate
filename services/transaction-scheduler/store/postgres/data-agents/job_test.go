@@ -123,11 +123,12 @@ func (s *jobTestSuite) TestPGJob_FindOneByUUID() {
 	ctx := context.Background()
 	tenantID := "tenantID"
 	job := testutils.FakeJobModel(0)
+	job.Logs = append(job.Logs, &models.Log{UUID: uuid.Must(uuid.NewV4()).String(), Status: types.StatusStarted, Message: "created message"})
 	job.Schedule.TenantID = tenantID
 	err := insertJob(ctx, s.agents, job)
 	assert.NoError(s.T(), err)
 
-	s.T().Run("should get model successfully as empty tenant", func(t *testing.T) {
+	s.T().Run("should get model successfully as empty  with sorted logs", func(t *testing.T) {
 		jobRetrieved, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, []string{multitenancy.Wildcard})
 
 		assert.NoError(t, err)
@@ -136,6 +137,7 @@ func (s *jobTestSuite) TestPGJob_FindOneByUUID() {
 		assert.Equal(t, job.Transaction.UUID, jobRetrieved.Transaction.UUID)
 		assert.NotEmpty(t, jobRetrieved.Transaction.ID)
 		assert.Equal(t, job.Logs[0].UUID, jobRetrieved.Logs[0].UUID)
+		assert.Equal(t, job.Logs[1].UUID, jobRetrieved.Logs[1].UUID)
 		assert.NotEmpty(t, jobRetrieved.Logs[0].ID)
 		assert.Equal(t, job.Schedule.UUID, jobRetrieved.Schedule.UUID)
 		assert.Equal(t, job.Schedule.TenantID, jobRetrieved.Schedule.TenantID)
@@ -160,6 +162,7 @@ func (s *jobTestSuite) TestPGJob_Search() {
 	tenantID := "tenantID"
 
 	jobOne := testutils.FakeJobModel(0)
+	jobOne.Logs = append(jobOne.Logs, &models.Log{UUID: uuid.Must(uuid.NewV4()).String(), Status: types.StatusStarted, Message: "created message"})
 	txHashOne := common.HexToHash("0x1")
 	jobOne.Transaction.Hash = txHashOne.String()
 	jobOne.Schedule.TenantID = tenantID
@@ -189,6 +192,9 @@ func (s *jobTestSuite) TestPGJob_Search() {
 		assert.Equal(t, jobOne.Transaction.UUID, retrievedJobs[0].Transaction.UUID)
 		assert.Equal(t, txHashOne.String(), retrievedJobs[0].Transaction.Hash)
 		assert.Equal(t, len(jobOne.Logs), len(retrievedJobs[0].Logs))
+		// Verify order
+		assert.Equal(t, jobOne.Logs[0].UUID, retrievedJobs[0].Logs[0].UUID)
+		assert.Equal(t, jobOne.Logs[1].UUID, retrievedJobs[0].Logs[1].UUID)
 	})
 
 	s.T().Run("should find models successfully by status", func(t *testing.T) {

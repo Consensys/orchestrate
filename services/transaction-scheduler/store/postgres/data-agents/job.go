@@ -80,7 +80,7 @@ func (agent *PGJob) FindOneByUUID(ctx context.Context, jobUUID string, tenants [
 		Relation("Schedule").
 		Relation("Logs")
 
-	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants)
+	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants).Order("job.id ASC", "log.id ASC")
 
 	err := pg.Select(ctx, query)
 	if err != nil {
@@ -115,7 +115,7 @@ func (agent *PGJob) Search(ctx context.Context, filters *entities.JobFilters, te
 			Where("tmpl.id is null AND log.status = ?", filters.Status)
 	}
 
-	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants)
+	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants).Order("job.id ASC", "log.id ASC")
 
 	err := pg.Select(ctx, query)
 	if err != nil {
