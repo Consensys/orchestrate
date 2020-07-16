@@ -11,6 +11,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/store"
 )
 
+const EnvelopeStoreEnabledKey = "ENVELOPE_STORE_ENABLED"
+
 func Flags(f *pflag.FlagSet) {
 	store.Flags(f)
 	http.Flags(f)

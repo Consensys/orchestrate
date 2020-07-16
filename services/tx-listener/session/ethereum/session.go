@@ -8,6 +8,8 @@ import (
 	"sync"
 	"time"
 
+	transactionscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler"
+
 	"github.com/cenkalti/backoff/v4"
 	"github.com/containous/traefik/v2/pkg/log"
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -18,8 +20,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
+	envelopestore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store"
 	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
-	transactionscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session"
@@ -309,25 +311,31 @@ func (s *Session) fetchBlock(ctx context.Context, blockPosition uint64) *Future 
 
 		ctx = multitenancy.WithTenantID(ctx, s.Chain.TenantID)
 
-		envelopeMap, err := s.fetchEnvelopes(ctx, blck.Transactions())
-		if err != nil {
-			return nil, err
-		}
-		jobMap, err := s.fetchJobs(ctx, blck.Transactions())
-		if err != nil {
-			return nil, err
+		// TODO: Remove feature toggle when tx scheduler is released
+		if os.Getenv(envelopestore.EnvelopeStoreEnabledKey) == "true" {
+			envelopeMap, err := s.fetchEnvelopes(ctx, blck.Transactions())
+			if err != nil {
+				return nil, err
+			}
+
+			futureEnvelopes := s.fetchReceiptsEnvelope(ctx, blck.Transactions(), envelopeMap)
+			block.envelopes, err = awaitReceiptsEnvelopes(futureEnvelopes)
+			if err != nil {
+				return nil, err
+			}
 		}
 
-		futureEnvelopes := s.fetchReceiptsEnvelope(ctx, blck.Transactions(), envelopeMap)
-		futureJobs := s.fetchReceipts(ctx, blck.Transactions(), jobMap)
+		if os.Getenv(transactionscheduler.TxSchedulerEnabledKey) == "true" {
+			jobMap, err := s.fetchJobs(ctx, blck.Transactions())
+			if err != nil {
+				return nil, err
+			}
 
-		block.envelopes, err = awaitReceiptsEnvelopes(futureEnvelopes)
-		if err != nil {
-			return nil, err
-		}
-		block.jobs, err = awaitReceipts(futureJobs)
-		if err != nil {
-			return nil, err
+			futureJobs := s.fetchReceipts(ctx, blck.Transactions(), jobMap)
+			block.jobs, err = awaitReceipts(futureJobs)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		return block, nil
@@ -373,11 +381,6 @@ func (s *Session) fetchEnvelopes(ctx context.Context, transactions ethtypes.Tran
 
 func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transactions) (map[string]*types.Job, error) {
 	jobMap := make(map[string]*types.Job)
-
-	// TODO: Remove feature toggle when tx scheduler is released
-	if os.Getenv(transactionscheduler.TxSchedulerEnabledKey) != "true" {
-		return jobMap, nil
-	}
 
 	if len(transactions) > 0 {
 		var txHashes []string

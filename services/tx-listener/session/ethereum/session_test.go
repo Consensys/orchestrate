@@ -6,6 +6,7 @@ package ethereum
 import (
 	"context"
 	"fmt"
+	envelopestore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store"
 	"math/big"
 	"os"
 	"sync"
@@ -26,12 +27,12 @@ import (
 	backoffmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/backoff/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	mockEthClient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/mock"
+	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
 	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
-	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 	offset "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/offset/memory"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/offset/mock"
@@ -326,6 +327,7 @@ func TestGetChainTip(t *testing.T) {
 }
 
 func TestFetchReceipt(t *testing.T) {
+	_ = os.Setenv(envelopestore.EnvelopeStoreEnabledKey, "true")
 	_ = os.Setenv(transactionscheduler.TxSchedulerEnabledKey, "true")
 
 	ctrl := gomock.NewController(t)
@@ -373,6 +375,7 @@ func TestFetchReceipt(t *testing.T) {
 }
 
 func TestFetchBlock(t *testing.T) {
+	_ = os.Setenv(envelopestore.EnvelopeStoreEnabledKey, "true")
 	_ = os.Setenv(transactionscheduler.TxSchedulerEnabledKey, "true")
 
 	ctrl := gomock.NewController(t)
@@ -416,6 +419,7 @@ func TestFetchBlock(t *testing.T) {
 }
 
 func TestFetchBlockExternalTxDisabled(t *testing.T) {
+	_ = os.Setenv(envelopestore.EnvelopeStoreEnabledKey, "true")
 	_ = os.Setenv(transactionscheduler.TxSchedulerEnabledKey, "true")
 
 	ctrl := gomock.NewController(t)
@@ -489,6 +493,7 @@ func TestFetchBlockExternalTxDisabled(t *testing.T) {
 }
 
 func TestFetchBlockWithIntervalPrivateTx(t *testing.T) {
+	_ = os.Setenv(envelopestore.EnvelopeStoreEnabledKey, "true")
 	_ = os.Setenv(transactionscheduler.TxSchedulerEnabledKey, "true")
 
 	ctrl := gomock.NewController(t)
@@ -555,6 +560,7 @@ func TestFetchBlockWithIntervalPrivateTx(t *testing.T) {
 }
 
 func TestFetchBlockWithExternalPrivateTx(t *testing.T) {
+	_ = os.Setenv(envelopestore.EnvelopeStoreEnabledKey, "true")
 	_ = os.Setenv(transactionscheduler.TxSchedulerEnabledKey, "true")
 
 	ctrl := gomock.NewController(t)
@@ -612,6 +618,7 @@ func TestFetchBlockWithExternalPrivateTx(t *testing.T) {
 }
 
 func TestIgnoreBlockWithExternalPrivateTx(t *testing.T) {
+	_ = os.Setenv(envelopestore.EnvelopeStoreEnabledKey, "true")
 	_ = os.Setenv(transactionscheduler.TxSchedulerEnabledKey, "true")
 
 	ctrl := gomock.NewController(t)
