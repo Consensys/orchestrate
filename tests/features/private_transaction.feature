@@ -14,14 +14,14 @@ Feature: Deploy private ERC20 contract
   @quorum
   Scenario: Deploy private ERC20 contract with Quorum and Tessera
     Given I register the following chains
-      | alias  | Name                  | URLs                         | PrivateTxManagers                         | Headers.Authorization    |
-      | quorum | quorum-{{scenarioID}} | {{global.nodes.quorum.URLs}} | {{global.nodes.quorum.PrivateTxManagers}} | Bearer {{tenant1.token}} |
+      | alias  | Name                    | URLs                           | PrivateTxManagers                           | Headers.Authorization    |
+      | quorum | quorum_1-{{scenarioID}} | {{global.nodes.quorum_1.URLs}} | {{global.nodes.quorum_1.PrivateTxManagers}} | Bearer {{tenant1.token}} |
     And I have created the following accounts
       | alias    | Headers.Authorization    |
       | account1 | Bearer {{tenant1.token}} |
     And I send envelopes to topic "tx.crafter"
-      | ID              | ChainName             | From         | ContractName | MethodSignature | Gas     | PrivateFor                                       | PrivateFrom                                  | Method | Headers.Authorization    |
-      | {{random.uuid}} | quorum-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | 2000000 | ["QfeDAys9MPDs2XHExtc84jKGHxZg/aj52DTh0vtA3Xc="] | BULeR8JyUWhiuuCMU/HLA0Q5pzkYT+cHII3ZKBey3Bo= | 2      | Bearer {{tenant1.token}} |
+      | ID              | ChainName               | From         | ContractName | MethodSignature | Gas     | PrivateFor                                   | PrivateFrom                              | Method | Headers.Authorization    |
+      | {{random.uuid}} | quorum_1-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | 2000000 | ["{{global.nodes.quorum_2.privateAddress}}"] | {{global.nodes.quorum_1.privateAddress}} | 2      | Bearer {{tenant1.token}} |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.signer"
     And Envelopes should have the following fields
@@ -39,8 +39,8 @@ Feature: Deploy private ERC20 contract
       | alias    | Headers.Authorization    |
       | account1 | Bearer {{tenant1.token}} |
     When I send envelopes to topic "tx.crafter"
-      | ID              | ChainName | From         | ContractName | MethodSignature | Gas     | PrivateFor                                       | PrivateFrom                                  | Method | Headers.Authorization    |
-      | {{random.uuid}} | unknown   | {{account1}} | SimpleToken  | constructor()   | 2000000 | ["QfeDAys9MPDs2XHExtc84jKGHxZg/aj52DTh0vtA3Xc="] | BULeR8JyUWhiuuCMU/HLA0Q5pzkYT+cHII3ZKBey3Bo= | 2      | Bearer {{tenant1.token}} |
+      | ID              | ChainName | From         | ContractName | MethodSignature | Gas     | PrivateFor                                   | PrivateFrom                              | Method | Headers.Authorization    |
+      | {{random.uuid}} | unknown   | {{account1}} | SimpleToken  | constructor()   | 2000000 | ["{{global.nodes.quorum_2.privateAddress}}"] | {{global.nodes.quorum_1.privateAddress}} | 2      | Bearer {{tenant1.token}} |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.recover"
     And Envelopes should have the following fields
@@ -50,14 +50,14 @@ Feature: Deploy private ERC20 contract
   @quorum
   Scenario: Deploy private ERC20 contract with unknown PrivateFrom
     Given I register the following chains
-      | alias  | Name                  | URLs                         | PrivateTxManagers                         | Headers.Authorization    |
-      | quorum | quorum-{{scenarioID}} | {{global.nodes.quorum.URLs}} | {{global.nodes.quorum.PrivateTxManagers}} | Bearer {{tenant1.token}} |
+      | alias  | Name                    | URLs                           | PrivateTxManagers                           | Headers.Authorization    |
+      | quorum | quorum_1-{{scenarioID}} | {{global.nodes.quorum_1.URLs}} | {{global.nodes.quorum_1.PrivateTxManagers}} | Bearer {{tenant1.token}} |
     And I have created the following accounts
       | alias    | Headers.Authorization    |
       | account1 | Bearer {{tenant1.token}} |
     When I send envelopes to topic "tx.crafter"
-      | ID              | ChainName             | From         | ContractName | MethodSignature | Gas     | PrivateFor                                       | PrivateFrom  | Method | Headers.Authorization    |
-      | {{random.uuid}} | quorum-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | 2000000 | ["QfeDAys9MPDs2XHExtc84jKGHxZg/aj52DTh0vtA3Xc="] | dW5rbm93bg== | 2      | Bearer {{tenant1.token}} |
+      | ID              | ChainName               | From         | ContractName | MethodSignature | Gas     | PrivateFor                                   | PrivateFrom  | Method | Headers.Authorization    |
+      | {{random.uuid}} | quorum_1-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | 2000000 | ["{{global.nodes.quorum_2.privateAddress}}"] | dW5rbm93bg== | 2      | Bearer {{tenant1.token}} |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.recover"
     And Envelopes should have the following fields
@@ -67,27 +67,27 @@ Feature: Deploy private ERC20 contract
   @besu
   Scenario: Deploy private ERC20 contract with Besu and Orion
     Given I register the following chains
-      | alias | Name                | URLs                       | Headers.Authorization    |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu.URLs}} | Bearer {{tenant1.token}} |
+      | alias | Name                  | URLs                         | Headers.Authorization    |
+      | besu  | besu_1-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
     And I have created the following accounts
       | alias    | Headers.Authorization    |
       | account1 | Bearer {{tenant1.token}} |
     When I send envelopes to topic "tx.crafter"
-      | ID              | ChainName           | From         | ContractName | MethodSignature | PrivateFor                                       | PrivateFrom                                  | Method | Headers.Authorization    |
-      | {{random.uuid}} | besu-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | ["A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="] | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | 3      | Bearer {{tenant1.token}} |
+      | ID              | ChainName             | From         | ContractName | MethodSignature | PrivateFor                                 | PrivateFrom                            | Method | Headers.Authorization    |
+      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | ["{{global.nodes.besu_2.privateAddress}}"] | {{global.nodes.besu_1.privateAddress}} | 3      | Bearer {{tenant1.token}} |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.signer"
     Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
-      | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                          | Receipt.PrivateFor                               |
-      | 1              | ~              | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | ["A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="] |
+      | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                    | Receipt.PrivateFor                         |
+      | 1              | ~              | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_2.privateAddress}}"] |
 
   @besu
   Scenario: Batch deploy private ERC20 contract with Besu and Orion with different PrivateFor
     Given I register the following chains
-      | alias | Name                | URLs                       | Headers.Authorization    |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu.URLs}} | Bearer {{tenant1.token}} |
+      | alias | Name                  | URLs                         | Headers.Authorization    |
+      | besu  | besu_1-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
     And I have created the following accounts
       | alias    | Headers.Authorization    |
       | account1 | Bearer {{tenant1.token}} |
@@ -95,28 +95,28 @@ Feature: Deploy private ERC20 contract
       | account3 | Bearer {{tenant1.token}} |
       | account4 | Bearer {{tenant1.token}} |
     When I send envelopes to topic "tx.crafter"
-      | ID              | ChainName           | From         | ContractName | MethodSignature | PrivateFor                                       | PrivateFrom                                  | Method | Headers.Authorization    |
-      | {{random.uuid}} | besu-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | ["A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="] | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | 3      | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | besu-{{scenarioID}} | {{account2}} | SimpleToken  | constructor()   | ["k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8="] | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | 3      | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | besu-{{scenarioID}} | {{account3}} | SimpleToken  | constructor()   | ["A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="] | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | 3      | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | besu-{{scenarioID}} | {{account4}} | SimpleToken  | constructor()   | ["k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8="] | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | 3      | Bearer {{tenant1.token}} |
+      | ID              | ChainName             | From         | ContractName | MethodSignature | PrivateFor                                 | PrivateFrom                            | Method | Headers.Authorization    |
+      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | ["{{global.nodes.besu_2.privateAddress}}"] | {{global.nodes.besu_1.privateAddress}} | 3      | Bearer {{tenant1.token}} |
+      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account2}} | SimpleToken  | constructor()   | ["{{global.nodes.besu_3.privateAddress}}"] | {{global.nodes.besu_1.privateAddress}} | 3      | Bearer {{tenant1.token}} |
+      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account3}} | SimpleToken  | constructor()   | ["{{global.nodes.besu_2.privateAddress}}"] | {{global.nodes.besu_1.privateAddress}} | 3      | Bearer {{tenant1.token}} |
+      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account4}} | SimpleToken  | constructor()   | ["{{global.nodes.besu_3.privateAddress}}"] | {{global.nodes.besu_1.privateAddress}} | 3      | Bearer {{tenant1.token}} |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.signer"
     Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
-      | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                          | Receipt.PrivateFor                               |
-      | 1              | ~              | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | ["A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="] |
-      | 1              | ~              | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | ["k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8="] |
-      | 1              | ~              | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | ["A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="] |
-      | 1              | ~              | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | ["k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8="] |
+      | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                          | Receipt.PrivateFor                           |
+      | 1              | ~              | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_2.privateAddress}}"] |
+      | 1              | ~              | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_3.privateAddress}}"]   |
+      | 1              | ~              | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_2.privateAddress}}"] |
+      | 1              | ~              | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_3.privateAddress}}"]   |
 
   @besu
   Scenario: Batch deploy private ERC20 contract with Besu and Orion with different PrivateFrom
     Given I register the following chains
       | alias  | Name                  | URLs                         | Headers.Authorization    |
-      | besu   | besu-{{scenarioID}}   | {{global.nodes.besu.URLs}}   | Bearer {{tenant1.token}} |
       | besu_1 | besu_1-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
+      | besu_2 | besu_2-{{scenarioID}} | {{global.nodes.besu_2.URLs}} | Bearer {{tenant1.token}} |
     And I have created the following accounts
       | alias    | Headers.Authorization    |
       | account1 | Bearer {{tenant1.token}} |
@@ -124,27 +124,27 @@ Feature: Deploy private ERC20 contract
       | account3 | Bearer {{tenant1.token}} |
       | account4 | Bearer {{tenant1.token}} |
     When I send envelopes to topic "tx.crafter"
-      | ID              | ChainName             | From         | ContractName | MethodSignature | PrivateFor                                       | PrivateFrom                                  | Method | Headers.Authorization    |
-      | {{random.uuid}} | besu-{{scenarioID}}   | {{account1}} | SimpleToken  | constructor()   | ["k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8="] | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | 3      | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account2}} | SimpleToken  | constructor()   | ["k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8="] | A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo= | 3      | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | besu-{{scenarioID}}   | {{account3}} | SimpleToken  | constructor()   | ["k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8="] | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | 3      | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account4}} | SimpleToken  | constructor()   | ["k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8="] | A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo= | 3      | Bearer {{tenant1.token}} |
+      | ID              | ChainName             | From         | ContractName | MethodSignature | PrivateFor                                 | PrivateFrom                            | Method | Headers.Authorization    |
+      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | ["{{global.nodes.besu_3.privateAddress}}"] | {{global.nodes.besu_1.privateAddress}} | 3      | Bearer {{tenant1.token}} |
+      | {{random.uuid}} | besu_2-{{scenarioID}} | {{account2}} | SimpleToken  | constructor()   | ["{{global.nodes.besu_3.privateAddress}}"] | {{global.nodes.besu_2.privateAddress}} | 3      | Bearer {{tenant1.token}} |
+      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account3}} | SimpleToken  | constructor()   | ["{{global.nodes.besu_3.privateAddress}}"] | {{global.nodes.besu_1.privateAddress}} | 3      | Bearer {{tenant1.token}} |
+      | {{random.uuid}} | besu_2-{{scenarioID}} | {{account4}} | SimpleToken  | constructor()   | ["{{global.nodes.besu_3.privateAddress}}"] | {{global.nodes.besu_2.privateAddress}} | 3      | Bearer {{tenant1.token}} |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.signer"
     Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
-      | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                          | Receipt.PrivateFor                               |
-      | 1              | ~              | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | ["k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8="] |
-      | 1              | ~              | A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo= | ["k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8="] |
-      | 1              | ~              | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | ["k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8="] |
-      | 1              | ~              | A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo= | ["k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8="] |
+      | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                    | Receipt.PrivateFor                         |
+      | 1              | ~              | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_3.privateAddress}}"] |
+      | 1              | ~              | {{global.nodes.besu_2.privateAddress}} | ["{{global.nodes.besu_3.privateAddress}}"] |
+      | 1              | ~              | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_3.privateAddress}}"] |
+      | 1              | ~              | {{global.nodes.besu_2.privateAddress}} | ["{{global.nodes.besu_3.privateAddress}}"] |
 
   @besu
   Scenario: Batch deploy private ERC20 for a privacy group
     Given I register the following chains
-      | alias | Name                | URLs                       | Headers.Authorization    |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu.URLs}} | Bearer {{tenant1.token}} |
+      | alias | Name                  | URLs                         | Headers.Authorization    |
+      | besu  | besu_1-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
     And I sleep "1.5s"
     And I have created the following accounts
       | alias    | Headers.Authorization    |
@@ -160,9 +160,9 @@ Feature: Deploy private ERC20 contract
     "params": [
         {
             "addresses": [
-                "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
-                "Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs=",
-                "k2zXEin4Ip/qBGlRkJejnGWdP9cjkK+DAvKNW31L2C8="
+                "{{global.nodes.besu_1.privateAddress}}",
+                "{{global.nodes.besu_2.privateAddress}}",
+                "{{global.nodes.besu_3.privateAddress}}"
             ],
             "name": "TestGroup",
             "description": "TestGroup"
@@ -176,12 +176,12 @@ Feature: Deploy private ERC20 contract
       | alias          | path   |
       | privacyGroupId | result |
     When I send envelopes to topic "tx.crafter"
-      | ID              | ChainName           | From         | ContractName | MethodSignature | PrivacyGroupID     | PrivateFrom                                  | Method | Headers.Authorization    |
-      | {{random.uuid}} | besu-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | {{privacyGroupId}} | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | 3      | Bearer {{tenant1.token}} |
+      | ID              | ChainName             | From         | ContractName | MethodSignature | PrivacyGroupID     | PrivateFrom                            | Method | Headers.Authorization    |
+      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | {{privacyGroupId}} | {{global.nodes.besu_1.privateAddress}} | 3      | Bearer {{tenant1.token}} |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.signer"
     Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
-      | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                          | Receipt.PrivacyGroupId |
-      | 1              | ~              | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | {{privacyGroupId}}     |
+      | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                    | Receipt.PrivacyGroupId |
+      | 1              | ~              | {{global.nodes.besu_1.privateAddress}} | {{privacyGroupId}}     |

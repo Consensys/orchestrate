@@ -11,17 +11,17 @@ Feature: Multiple transactions
       | name        | artifacts        | Headers.Authorization    |
       | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
     And I register the following chains
-      | alias | Name                | URLs                       | Headers.Authorization    |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu.URLs}} | Bearer {{tenant1.token}} |
-      | geth  | geth-{{scenarioID}} | {{global.nodes.geth.URLs}} | Bearer {{tenant1.token}} |
+      | alias | Name                  | URLs                         | Headers.Authorization    |
+      | besu  | besu_1-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
+      | geth  | geth-{{scenarioID}}   | {{global.nodes.geth.URLs}}   | Bearer {{tenant1.token}} |
     And I have created the following accounts
       | alias    | ID              | Headers.Authorization    |
       | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
       | account2 | {{random.uuid}} | Bearer {{tenant1.token}} |
     Given I sign the following transactions
-      | alias     | ID              | Value              | Gas   | To           | privateKey                                 | ChainUUID     | Headers.Authorization    |
-      | txFaucet1 | {{random.uuid}} | 100000000000000000 | 21000 | {{account1}} | {{global.nodes.besu.fundedPrivateKeys[0]}} | {{besu.UUID}} | Bearer {{tenant1.token}} |
-      | txFaucet2 | {{random.uuid}} | 100000000000000000 | 21000 | {{account2}} | {{global.nodes.geth.fundedPrivateKeys[0]}} | {{geth.UUID}} | Bearer {{tenant1.token}} |
+      | alias     | ID              | Value              | Gas   | To           | privateKey                                   | ChainUUID     | Headers.Authorization    |
+      | txFaucet1 | {{random.uuid}} | 100000000000000000 | 21000 | {{account1}} | {{global.nodes.besu_1.fundedPrivateKeys[0]}} | {{besu.UUID}} | Bearer {{tenant1.token}} |
+      | txFaucet2 | {{random.uuid}} | 100000000000000000 | 21000 | {{account2}} | {{global.nodes.geth.fundedPrivateKeys[0]}}   | {{geth.UUID}} | Bearer {{tenant1.token}} |
     Then I track the following envelopes
       | ID               |
       | {{txFaucet1.ID}} |
@@ -33,7 +33,7 @@ Feature: Multiple transactions
     When I send "POST" request to "{{global.tx-scheduler}}/transactions/send-raw" with json:
   """
 {
-    "chain": "besu-{{scenarioID}}",
+    "chain": "besu_1-{{scenarioID}}",
     "params": {
         "raw": "{{txFaucet1.Raw}}"
     },
@@ -60,19 +60,19 @@ Feature: Multiple transactions
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
     And I have deployed the following contracts
-      | alias      | ChainName           | From         | ContractName | MethodSignature | Gas     | Headers.Authorization    |
-      | token-besu | besu-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | 2000000 | Bearer {{tenant1.token}} |
-      | token-geth | geth-{{scenarioID}} | {{account2}} | SimpleToken  | constructor()   | 3000000 | Bearer {{tenant1.token}} |
+      | alias      | ChainName             | From         | ContractName | MethodSignature | Gas     | Headers.Authorization    |
+      | token-besu | besu_1-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | 2000000 | Bearer {{tenant1.token}} |
+      | token-geth | geth-{{scenarioID}}   | {{account2}} | SimpleToken  | constructor()   | 3000000 | Bearer {{tenant1.token}} |
 
   Scenario: Send contract transactions
     When I send envelopes to topic "tx.crafter"
-      | ID              | ChainName           | From         | To             | MethodSignature           | Gas    | Args                                                 | Headers.Authorization    |
-      | {{random.uuid}} | besu-{{scenarioID}} | {{account1}} | {{token-besu}} | transfer(address,uint256) |        | ["0xdbb881a51CD4023E4400CEF3ef73046743f08da3","1"]   | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | besu-{{scenarioID}} | {{account1}} | {{token-besu}} | transfer(address,uint256) |        | ["0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff","0x2"] | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | besu-{{scenarioID}} | {{account1}} | {{token-besu}} | transfer(address,uint256) | 100000 | ["0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff","0x8"] | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | geth-{{scenarioID}} | {{account2}} | {{token-geth}} | transfer(address,uint256) |        | ["0xdbb881a51CD4023E4400CEF3ef73046743f08da3","0x1"] | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | geth-{{scenarioID}} | {{account2}} | {{token-geth}} | transfer(address,uint256) |        | ["0x6009608a02a7a15fd6689d6dad560c44e9ab61ff","0x2"] | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | geth-{{scenarioID}} | {{account2}} | {{token-geth}} | transfer(address,uint256) |        | ["0x6009608a02a7a15fd6689d6dad560c44e9ab61ff","2"]   | Bearer {{tenant1.token}} |
+      | ID              | ChainName             | From         | To             | MethodSignature           | Gas    | Args                                                 | Headers.Authorization    |
+      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account1}} | {{token-besu}} | transfer(address,uint256) |        | ["0xdbb881a51CD4023E4400CEF3ef73046743f08da3","1"]   | Bearer {{tenant1.token}} |
+      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account1}} | {{token-besu}} | transfer(address,uint256) |        | ["0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff","0x2"] | Bearer {{tenant1.token}} |
+      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account1}} | {{token-besu}} | transfer(address,uint256) | 100000 | ["0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff","0x8"] | Bearer {{tenant1.token}} |
+      | {{random.uuid}} | geth-{{scenarioID}}   | {{account2}} | {{token-geth}} | transfer(address,uint256) |        | ["0xdbb881a51CD4023E4400CEF3ef73046743f08da3","0x1"] | Bearer {{tenant1.token}} |
+      | {{random.uuid}} | geth-{{scenarioID}}   | {{account2}} | {{token-geth}} | transfer(address,uint256) |        | ["0x6009608a02a7a15fd6689d6dad560c44e9ab61ff","0x2"] | Bearer {{tenant1.token}} |
+      | {{random.uuid}} | geth-{{scenarioID}}   | {{account2}} | {{token-geth}} | transfer(address,uint256) |        | ["0x6009608a02a7a15fd6689d6dad560c44e9ab61ff","2"]   | Bearer {{tenant1.token}} |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.signer"
     And Envelopes should have the following fields
@@ -107,8 +107,8 @@ Feature: Multiple transactions
       | alias     | value              |
       | recipient | {{random.account}} |
     When I send envelopes to topic "tx.crafter"
-      | ID              | ChainName           | From         | To            | Value     | Headers.Authorization    |
-      | {{random.uuid}} | besu-{{scenarioID}} | {{account1}} | {{recipient}} | 100000000 | Bearer {{tenant1.token}} |
+      | ID              | ChainName             | From         | To            | Value     | Headers.Authorization    |
+      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account1}} | {{recipient}} | 100000000 | Bearer {{tenant1.token}} |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.signer"
     And Envelopes should have the following fields

@@ -11,14 +11,14 @@ Feature: Invalid Nonce
       | name        | artifacts        | Headers.Authorization    |
       | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
     And I register the following chains
-      | alias | Name                | URLs                       | Headers.Authorization    |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu.URLs}} | Bearer {{tenant1.token}} |
+      | alias  | Name                  | URLs                         | Headers.Authorization    |
+      | besu_1 | besu_1-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
     And I have created the following accounts
       | alias    | ID              | Headers.Authorization    |
       | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
     Given I sign the following transactions
-      | alias     | ID              | Value              | Gas   | To           | privateKey                                 | ChainUUID     | Headers.Authorization    |
-      | txFaucet1 | {{random.uuid}} | 100000000000000000 | 21000 | {{account1}} | {{global.nodes.besu.fundedPrivateKeys[0]}} | {{besu.UUID}} | Bearer {{tenant1.token}} |
+      | alias     | ID              | Value              | Gas   | To           | privateKey                                   | ChainUUID     | Headers.Authorization    |
+      | txFaucet1 | {{random.uuid}} | 100000000000000000 | 21000 | {{account1}} | {{global.nodes.besu_1.fundedPrivateKeys[0]}} | {{besu_1.UUID}} | Bearer {{tenant1.token}} |
     Then I track the following envelopes
       | ID               |
       | {{txFaucet1.ID}} |
@@ -29,7 +29,7 @@ Feature: Invalid Nonce
     When I send "POST" request to "{{global.tx-scheduler}}/transactions/send-raw" with json:
   """
 {
-    "chain": "besu-{{scenarioID}}",
+    "chain": "besu_1-{{scenarioID}}",
     "params": {
         "raw": "{{txFaucet1.Raw}}"
     },
@@ -44,10 +44,10 @@ Feature: Invalid Nonce
 
   Scenario: Nonce Too High
     When I send envelopes to topic "tx.signer"
-      | ID              | ChainName           | From         | To                                         | Nonce   | GasPrice   | Gas   | Headers.Authorization    |
-      | {{random.uuid}} | besu-{{scenarioID}} | {{account1}} | 0x0000000000000000000000000000000000000000 | 1000000 | 1000000000 | 21000 | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | besu-{{scenarioID}} | {{account1}} | 0x0000000000000000000000000000000000000000 | 1000001 | 1000000000 | 21000 | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | besu-{{scenarioID}} | {{account1}} | 0x0000000000000000000000000000000000000000 | 1000002 | 1000000000 | 21000 | Bearer {{tenant1.token}} |
+      | ID              | ChainName             | From         | To                                         | Nonce   | GasPrice   | Gas   | Headers.Authorization    |
+      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account1}} | 0x0000000000000000000000000000000000000000 | 1000000 | 1000000000 | 21000 | Bearer {{tenant1.token}} |
+      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account1}} | 0x0000000000000000000000000000000000000000 | 1000001 | 1000000000 | 21000 | Bearer {{tenant1.token}} |
+      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account1}} | 0x0000000000000000000000000000000000000000 | 1000002 | 1000000000 | 21000 | Bearer {{tenant1.token}} |
     Then Envelopes should be in topic "tx.signer"
     And Envelopes should have the following fields
       | Nonce   |
@@ -72,11 +72,11 @@ Feature: Invalid Nonce
 
   Scenario: Nonce Too Low
     Given I have deployed the following contracts
-      | alias      | ChainName           | From         | ContractName | MethodSignature | Gas     | Headers.Authorization    |
-      | besu-token | besu-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | 2000000 | Bearer {{tenant1.token}} |
+      | alias      | ChainName             | From         | ContractName | MethodSignature | Gas     | Headers.Authorization    |
+      | besu-token | besu_1-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | 2000000 | Bearer {{tenant1.token}} |
     When I send envelopes to topic "tx.signer"
-      | ID              | ChainName           | From         | To                                         | Nonce | GasPrice   | Gas   | Headers.Authorization    |
-      | {{random.uuid}} | besu-{{scenarioID}} | {{account1}} | 0x0000000000000000000000000000000000000000 | 0     | 1000000000 | 21000 | Bearer {{tenant1.token}} |
+      | ID              | ChainName             | From         | To                                         | Nonce | GasPrice   | Gas   | Headers.Authorization    |
+      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account1}} | 0x0000000000000000000000000000000000000000 | 0     | 1000000000 | 21000 | Bearer {{tenant1.token}} |
     Then Envelopes should be in topic "tx.signer"
     Then Envelopes should be in topic "tx.sender"
     And Envelopes should have the following fields
@@ -93,14 +93,14 @@ Feature: Invalid Nonce
   Scenario: Chaotic nonce
     # Next deployment purpose is to increase account nonce to at least 1
     Given I have deployed the following contracts
-      | alias      | ChainName           | From         | ContractName | MethodSignature | Gas     | Headers.Authorization    |
-      | besu-token | besu-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | 2000000 | Bearer {{tenant1.token}} |
+      | alias      | ChainName             | From         | ContractName | MethodSignature | Gas     | Headers.Authorization    |
+      | besu-token | besu_1-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | 2000000 | Bearer {{tenant1.token}} |
     When I send envelopes to topic "tx.signer"
-      | ID              | ChainName           | From         | To                                         | Nonce   | GasPrice   | Gas   | Headers.Authorization    |
-      | {{random.uuid}} | besu-{{scenarioID}} | {{account1}} | 0x0000000000000000000000000000000000000000 | 1000002 | 1000000000 | 21000 | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | besu-{{scenarioID}} | {{account1}} | 0x0000000000000000000000000000000000000000 | 1000000 | 1000000000 | 21000 | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | besu-{{scenarioID}} | {{account1}} | 0x0000000000000000000000000000000000000000 | 0       | 1000000000 | 21000 | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | besu-{{scenarioID}} | {{account1}} | 0x0000000000000000000000000000000000000000 | 1000001 | 1000000000 | 21000 | Bearer {{tenant1.token}} |
+      | ID              | ChainName             | From         | To                                         | Nonce   | GasPrice   | Gas   | Headers.Authorization    |
+      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account1}} | 0x0000000000000000000000000000000000000000 | 1000002 | 1000000000 | 21000 | Bearer {{tenant1.token}} |
+      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account1}} | 0x0000000000000000000000000000000000000000 | 1000000 | 1000000000 | 21000 | Bearer {{tenant1.token}} |
+      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account1}} | 0x0000000000000000000000000000000000000000 | 0       | 1000000000 | 21000 | Bearer {{tenant1.token}} |
+      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account1}} | 0x0000000000000000000000000000000000000000 | 1000001 | 1000000000 | 21000 | Bearer {{tenant1.token}} |
     Then Envelopes should be in topic "tx.signer"
     Then Envelopes should be in topic "tx.sender"
     And Envelopes should have the following fields
@@ -124,10 +124,10 @@ Feature: Invalid Nonce
   Scenario: Nonce too high with private transaction
     # TODO: Able to parse enums like METHOD - shoud be able to pass ETH_SENDRAWTRANSACTION instead of 1
     When I send envelopes to topic "tx.signer"
-      | ID              | ChainName           | From         | To                                         | Nonce   | GasPrice | Gas   | PrivateFor                                       | PrivateFrom                                  | Method | Headers.Authorization    |
-      | {{random.uuid}} | besu-{{scenarioID}} | {{account1}} | 0x0000000000000000000000000000000000000000 | 1000000 | 0        | 30000 | ["A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="] | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | 3      | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | besu-{{scenarioID}} | {{account1}} | 0x0000000000000000000000000000000000000000 | 1000001 | 0        | 30000 | ["A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="] | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | 3      | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | besu-{{scenarioID}} | {{account1}} | 0x0000000000000000000000000000000000000000 | 1000002 | 0        | 30000 | ["A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="] | Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs= | 3      | Bearer {{tenant1.token}} |
+      | ID              | ChainName             | From         | To                                         | Nonce   | GasPrice | Gas   | PrivateFor                                 | PrivateFrom                            | Method | Headers.Authorization    |
+      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account1}} | 0x0000000000000000000000000000000000000000 | 1000000 | 0        | 30000 | ["{{global.nodes.besu_2.privateAddress}}"] | {{global.nodes.besu_1.privateAddress}} | 3      | Bearer {{tenant1.token}} |
+      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account1}} | 0x0000000000000000000000000000000000000000 | 1000001 | 0        | 30000 | ["{{global.nodes.besu_2.privateAddress}}"] | {{global.nodes.besu_1.privateAddress}} | 3      | Bearer {{tenant1.token}} |
+      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account1}} | 0x0000000000000000000000000000000000000000 | 1000002 | 0        | 30000 | ["{{global.nodes.besu_2.privateAddress}}"] | {{global.nodes.besu_1.privateAddress}} | 3      | Bearer {{tenant1.token}} |
     Then Envelopes should be in topic "tx.signer"
     Then Envelopes should be in topic "tx.sender"
     And Envelopes should have the following fields

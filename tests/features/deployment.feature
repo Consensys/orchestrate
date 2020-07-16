@@ -8,17 +8,17 @@ Feature: Deploy ERC20 contract
       | alias   | tenantID        |
       | tenant1 | {{random.uuid}} |
     And I register the following chains
-      | alias | Name                | URLs                       | Headers.Authorization    |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu.URLs}} | Bearer {{tenant1.token}} |
-      | geth  | geth-{{scenarioID}} | {{global.nodes.geth.URLs}} | Bearer {{tenant1.token}} |
+      | alias  | Name                  | URLs                         | Headers.Authorization    |
+      | besu_1 | besu_1-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
+      | geth   | geth-{{scenarioID}}   | {{global.nodes.geth.URLs}}   | Bearer {{tenant1.token}} |
     And I have created the following accounts
       | alias    | ID              | Headers.Authorization    |
       | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
       | account2 | {{random.uuid}} | Bearer {{tenant1.token}} |
     Given I sign the following transactions
-      | alias     | ID              | Value              | Gas   | To           | privateKey                                 | ChainUUID     | Headers.Authorization    |
-      | txFaucet1 | {{random.uuid}} | 100000000000000000 | 21000 | {{account1}} | {{global.nodes.besu.fundedPrivateKeys[0]}} | {{besu.UUID}} | Bearer {{tenant1.token}} |
-      | txFaucet2 | {{random.uuid}} | 100000000000000000 | 21000 | {{account2}} | {{global.nodes.geth.fundedPrivateKeys[0]}} | {{geth.UUID}} | Bearer {{tenant1.token}} |
+      | alias     | ID              | Value              | Gas   | To           | privateKey                                   | ChainUUID       | Headers.Authorization    |
+      | txFaucet1 | {{random.uuid}} | 100000000000000000 | 21000 | {{account1}} | {{global.nodes.besu_1.fundedPrivateKeys[0]}} | {{besu_1.UUID}} | Bearer {{tenant1.token}} |
+      | txFaucet2 | {{random.uuid}} | 100000000000000000 | 21000 | {{account2}} | {{global.nodes.geth.fundedPrivateKeys[0]}}   | {{geth.UUID}}   | Bearer {{tenant1.token}} |
     Then I track the following envelopes
       | ID               |
       | {{txFaucet1.ID}} |
@@ -30,7 +30,7 @@ Feature: Deploy ERC20 contract
     When I send "POST" request to "{{global.tx-scheduler}}/transactions/send-raw" with json:
   """
 {
-    "chain": "besu-{{scenarioID}}",
+    "chain": "besu_1-{{scenarioID}}",
     "params": {
         "raw": "{{txFaucet1.Raw}}"
     },
@@ -62,9 +62,9 @@ Feature: Deploy ERC20 contract
 
   Scenario: Deploy ERC20
     When I send envelopes to topic "tx.crafter"
-      | ID              | ChainName           | From         | ContractName | MethodSignature | Gas     | Headers.Authorization    |
-      | {{random.uuid}} | besu-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | 2000000 | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | geth-{{scenarioID}} | {{account2}} | SimpleToken  | constructor()   | 2000000 | Bearer {{tenant1.token}} |
+      | ID              | ChainName             | From         | ContractName | MethodSignature | Gas     | Headers.Authorization    |
+      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | 2000000 | Bearer {{tenant1.token}} |
+      | {{random.uuid}} | geth-{{scenarioID}}   | {{account2}} | SimpleToken  | constructor()   | 2000000 | Bearer {{tenant1.token}} |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.signer"
     Then Envelopes should be in topic "tx.sender"
