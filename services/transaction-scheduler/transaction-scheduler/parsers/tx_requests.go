@@ -10,6 +10,7 @@ func NewTxRequestModelFromEntities(txRequest *entities.TxRequest, requestHash st
 	return &models.TransactionRequest{
 		UUID:           txRequest.UUID,
 		IdempotencyKey: txRequest.IdempotencyKey,
+		ChainName:      txRequest.ChainName,
 		RequestHash:    requestHash,
 		Params:         txRequest.Params,
 		ScheduleID:     &scheduleID,

@@ -12,6 +12,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mock"
+	models2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
@@ -27,16 +29,17 @@ import (
 
 type sendTxSuite struct {
 	suite.Suite
-	usecase          SendTxUseCase
-	DB               *mocks2.MockDB
-	DBTX             *mocks2.MockTx
-	Validators       *mocks3.MockTransactionValidator
-	TxRequestDA      *mocks2.MockTransactionRequestAgent
-	ScheduleDA       *mocks2.MockScheduleAgent
-	StartJobUC       *mocks.MockStartJobUseCase
-	CreateJobUC      *mocks.MockCreateJobUseCase
-	CreateScheduleUC *mocks4.MockCreateScheduleUseCase
-	GetTxUC          *mocks5.MockGetTxUseCase
+	usecase             SendTxUseCase
+	DB                  *mocks2.MockDB
+	DBTX                *mocks2.MockTx
+	Validators          *mocks3.MockTransactionValidator
+	ChainRegistryClient *mock.MockChainRegistryClient
+	TxRequestDA         *mocks2.MockTransactionRequestAgent
+	ScheduleDA          *mocks2.MockScheduleAgent
+	StartJobUC          *mocks.MockStartJobUseCase
+	CreateJobUC         *mocks.MockCreateJobUseCase
+	CreateScheduleUC    *mocks4.MockCreateScheduleUseCase
+	GetTxUC             *mocks5.MockGetTxUseCase
 }
 
 func TestSendTx(t *testing.T) {
@@ -57,6 +60,7 @@ func (s *sendTxSuite) SetupTest() {
 	s.CreateJobUC = mocks.NewMockCreateJobUseCase(ctrl)
 	s.CreateScheduleUC = mocks4.NewMockCreateScheduleUseCase(ctrl)
 	s.GetTxUC = mocks5.NewMockGetTxUseCase(ctrl)
+	s.ChainRegistryClient = mock.NewMockChainRegistryClient(ctrl)
 
 	s.DB.EXPECT().Begin().Return(s.DBTX, nil).AnyTimes()
 	s.DB.EXPECT().TransactionRequest().Return(s.TxRequestDA).AnyTimes()
@@ -68,7 +72,7 @@ func (s *sendTxSuite) SetupTest() {
 	s.CreateScheduleUC.EXPECT().WithDBTransaction(s.DBTX).Return(s.CreateScheduleUC).AnyTimes()
 	s.CreateJobUC.EXPECT().WithDBTransaction(s.DBTX).Return(s.CreateJobUC).AnyTimes()
 
-	s.usecase = NewSendTxUseCase(s.Validators, s.DB, s.StartJobUC, s.CreateJobUC, s.CreateScheduleUC, s.GetTxUC)
+	s.usecase = NewSendTxUseCase(s.Validators, s.DB, s.ChainRegistryClient, s.StartJobUC, s.CreateJobUC, s.CreateScheduleUC, s.GetTxUC)
 }
 
 func (s *sendTxSuite) TestSendTx_Success() {
@@ -129,19 +133,20 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		ctx := context.Background()
 		tenantID := "tenantID"
 		tenants := []string{tenantID}
-		chainUUID := "32da9731-0fb8-4235-a4cc-35070ffe5bf0"
+		chain := &models2.Chain{UUID: "32da9731-0fb8-4235-a4cc-35070ffe5bf0"}
 		jobUUID := txRequest.Schedule.Jobs[0].UUID
 		txData := ""
 		txRequestModel := testutils2.FakeTxRequest(0)
 		txRequestModel.RequestHash = "ea2d3e36db863014fdfaf49a88c31f1d"
 
+		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
 		s.Validators.EXPECT().ValidateFields(gomock.Any(), txRequest).Return(nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey).Return(txRequestModel, nil)
 		s.GetTxUC.EXPECT().Execute(ctx, txRequestModel.UUID, tenants).Return(txRequest, nil)
 		s.StartJobUC.EXPECT().Execute(ctx, jobUUID, tenants).Return(nil)
 		s.GetTxUC.EXPECT().Execute(ctx, txRequest.UUID, tenants).Return(txRequest, nil)
 
-		response, err := s.usecase.Execute(ctx, txRequest, txData, chainUUID, tenantID)
+		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
 
 		assert.NoError(t, err)
 		assert.Equal(t, txRequest.UUID, response.UUID)
@@ -161,17 +166,18 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		ctx := context.Background()
 		tenantID := "tenantID"
 		tenants := []string{tenantID}
-		chainUUID := "32da9731-0fb8-4235-a4cc-35070ffe5bf0"
+		chain := &models2.Chain{UUID: "32da9731-0fb8-4235-a4cc-35070ffe5bf0"}
 		txData := ""
 		txRequestModel := testutils2.FakeTxRequest(0)
 		txRequestModel.RequestHash = "ea2d3e36db863014fdfaf49a88c31f1d"
 
+		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
 		s.Validators.EXPECT().ValidateFields(gomock.Any(), txRequest).Return(nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey).Return(txRequestModel, nil)
 		s.GetTxUC.EXPECT().Execute(ctx, txRequestModel.UUID, tenants).Return(txRequest, nil)
 		s.GetTxUC.EXPECT().Execute(ctx, txRequest.UUID, tenants).Return(txRequest, nil)
 
-		response, err := s.usecase.Execute(ctx, txRequest, txData, chainUUID, tenantID)
+		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
 		assert.NoError(t, err)
 		assert.Equal(t, txRequest.UUID, response.UUID)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
@@ -199,10 +205,36 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 
 	tenantID := "tenantID"
 	tenants := []string{tenantID}
-	chainUUID := uuid.Must(uuid.NewV4()).String()
+	chain := &models2.Chain{UUID: "32da9731-0fb8-4235-a4cc-35070ffe5bf0"}
 	jobUUID := uuid.Must(uuid.NewV4()).String()
 	scheduleUUID := uuid.Must(uuid.NewV4()).String()
 	txData := ""
+
+	s.T().Run("should fail with same error if chain registry client fails", func(t *testing.T) {
+		expectedErr := fmt.Errorf("error")
+		txRequest := testutils.FakeTxRequestEntity()
+		txRequest.Schedule.UUID = scheduleUUID
+		txRequest.Schedule.Jobs[0].UUID = jobUUID
+
+		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(nil, expectedErr)
+
+		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
+		assert.Nil(t, response)
+		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendTxComponent), err)
+	})
+
+	s.T().Run("should fail with InvalidParameterError if chain registry client fails with NotFoundError", func(t *testing.T) {
+		expectedErr := errors.NotFoundError("error")
+		txRequest := testutils.FakeTxRequestEntity()
+		txRequest.Schedule.UUID = scheduleUUID
+		txRequest.Schedule.Jobs[0].UUID = jobUUID
+
+		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(nil, expectedErr)
+
+		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
+		assert.Nil(t, response)
+		assert.True(t, errors.IsInvalidParameterError(err))
+	})
 
 	s.T().Run("should fail with same error if validator fails to validate fields", func(t *testing.T) {
 		expectedErr := errors.InvalidParameterError("error")
@@ -210,9 +242,10 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
+		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
 		s.Validators.EXPECT().ValidateFields(gomock.Any(), txRequest).Return(expectedErr)
 
-		response, err := s.usecase.Execute(ctx, txRequest, txData, chainUUID, tenantID)
+		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendTxComponent), err)
 	})
@@ -224,11 +257,10 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 		txRequest.Annotations.OneTimeKey = true
 
-		s.Validators.EXPECT().
-			ValidateFields(gomock.Any(), txRequest).
-			Return(expectedErr)
+		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
+		s.Validators.EXPECT().ValidateFields(gomock.Any(), txRequest).Return(expectedErr)
 
-		response, err := s.usecase.Execute(ctx, txRequest, txData, chainUUID, tenantID)
+		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
 		assert.Nil(t, response)
 		assert.True(t, errors.IsInvalidParameterError(err))
 	})
@@ -239,10 +271,11 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
+		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
 		s.Validators.EXPECT().ValidateFields(gomock.Any(), txRequest).Return(nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey).Return(nil, expectedErr)
 
-		response, err := s.usecase.Execute(ctx, txRequest, txData, chainUUID, tenantID)
+		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendTxComponent), err)
 	})
@@ -253,12 +286,13 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
+		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
 		s.Validators.EXPECT().ValidateFields(gomock.Any(), txRequest).Return(nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey).Return(&models.TransactionRequest{
 			RequestHash: "differentRequestHash",
 		}, nil)
 
-		response, err := s.usecase.Execute(ctx, txRequest, txData, chainUUID, tenantID)
+		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendTxComponent), err)
 	})
@@ -269,11 +303,12 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
+		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
 		s.Validators.EXPECT().ValidateFields(gomock.Any(), txRequest).Return(nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey).Return(nil, errors.NotFoundError(""))
 		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(txRequest.Schedule, expectedErr)
 
-		response, err := s.usecase.Execute(ctx, txRequest, txData, chainUUID, tenantID)
+		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
 
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendTxComponent), err)
@@ -285,12 +320,13 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
+		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
 		s.Validators.EXPECT().ValidateFields(gomock.Any(), txRequest).Return(nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey).Return(nil, errors.NotFoundError(""))
 		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(txRequest.Schedule, nil)
 		s.ScheduleDA.EXPECT().FindOneByUUID(ctx, txRequest.Schedule.UUID, tenants).Return(nil, expectedErr)
 
-		response, err := s.usecase.Execute(ctx, txRequest, txData, chainUUID, tenantID)
+		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendTxComponent), err)
 	})
@@ -302,13 +338,14 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 		scheduleModel := testutils2.FakeSchedule(tenants[0])
 
+		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
 		s.Validators.EXPECT().ValidateFields(gomock.Any(), txRequest).Return(nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey).Return(nil, errors.NotFoundError(""))
 		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(txRequest.Schedule, nil)
 		s.ScheduleDA.EXPECT().FindOneByUUID(ctx, txRequest.Schedule.UUID, tenants).Return(scheduleModel, nil)
 		s.TxRequestDA.EXPECT().Insert(ctx, gomock.Any()).Return(expectedErr)
 
-		response, err := s.usecase.Execute(ctx, txRequest, txData, chainUUID, tenantID)
+		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendTxComponent), err)
 	})
@@ -321,6 +358,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		txData = ""
 		scheduleModel := testutils2.FakeSchedule(tenants[0])
 
+		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
 		s.Validators.EXPECT().ValidateFields(gomock.Any(), txRequest).Return(nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey).Return(nil, errors.NotFoundError(""))
 		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(txRequest.Schedule, nil)
@@ -328,7 +366,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		s.TxRequestDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
 		s.CreateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), tenants).Return(txRequest.Schedule.Jobs[0], expectedErr)
 
-		response, err := s.usecase.Execute(ctx, txRequest, txData, chainUUID, tenantID)
+		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
 
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendTxComponent), err)
@@ -341,6 +379,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 		scheduleModel := testutils2.FakeSchedule(tenants[0])
 
+		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
 		s.Validators.EXPECT().ValidateFields(gomock.Any(), txRequest).Return(nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey).Return(nil, errors.NotFoundError(""))
 		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(txRequest.Schedule, nil)
@@ -349,7 +388,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		s.CreateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), tenants).Return(txRequest.Schedule.Jobs[0], nil)
 		s.StartJobUC.EXPECT().Execute(ctx, jobUUID, tenants).Return(expectedErr)
 
-		response, err := s.usecase.Execute(ctx, txRequest, txData, chainUUID, tenantID)
+		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
 
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendTxComponent), err)
@@ -362,6 +401,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 		scheduleModel := testutils2.FakeSchedule(tenants[0])
 
+		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
 		s.Validators.EXPECT().ValidateFields(gomock.Any(), txRequest).Return(nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey).Return(nil, errors.NotFoundError(""))
 		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(txRequest.Schedule, nil)
@@ -371,7 +411,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		s.StartJobUC.EXPECT().Execute(ctx, jobUUID, tenants).Return(nil)
 		s.GetTxUC.EXPECT().Execute(ctx, txRequest.UUID, tenants).Return(nil, expectedErr)
 
-		response, err := s.usecase.Execute(ctx, txRequest, txData, chainUUID, tenantID)
+		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
 
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendTxComponent), err)
@@ -382,11 +422,12 @@ func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, jobT
 	ctx := context.Background()
 	tenantID := "tenantID"
 	tenants := []string{"tenantID"}
-	chainUUID := "32da9731-0fb8-4235-a4cc-35070ffe5bf0"
+	chain := &models2.Chain{UUID: "32da9731-0fb8-4235-a4cc-35070ffe5bf0"}
 	jobUUID := txRequest.Schedule.Jobs[0].UUID
 	txData := ""
 	scheduleModel := testutils2.FakeSchedule(tenants[0])
 
+	s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
 	s.Validators.EXPECT().ValidateFields(gomock.Any(), txRequest).Return(nil)
 	s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey).Return(nil, errors.NotFoundError(""))
 	s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(txRequest.Schedule, nil)
@@ -405,5 +446,5 @@ func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, jobT
 	s.StartJobUC.EXPECT().Execute(ctx, jobUUID, tenants).Return(nil)
 	s.GetTxUC.EXPECT().Execute(ctx, txRequest.UUID, tenants).Return(txRequest, nil)
 
-	return s.usecase.Execute(ctx, txRequest, txData, chainUUID, tenantID)
+	return s.usecase.Execute(ctx, txRequest, txData, tenantID)
 }

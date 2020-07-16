@@ -40,6 +40,7 @@ CREATE TABLE transaction_requests (
     id SERIAL PRIMARY KEY,
     uuid UUID NOT NULL,
     idempotency_key TEXT NOT NULL,
+	chain_name TEXT NOT NULL,
 	request_hash TEXT NOT NULL,
     params jsonb NOT NULL,
 	schedule_id INTEGER REFERENCES schedules(id),

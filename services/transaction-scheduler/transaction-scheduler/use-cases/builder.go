@@ -6,7 +6,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/chains"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/schedules"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/transactions"
@@ -17,7 +16,6 @@ type UseCases interface {
 	transactions.UseCases
 	schedules.UseCases
 	jobs.UseCases
-	chains.UseCases
 }
 
 type useCases struct {
@@ -37,8 +35,6 @@ type useCases struct {
 	startJob   jobs.StartJobUseCase
 	updateJob  jobs.UpdateJobUseCase
 	searchJobs jobs.SearchJobsUseCase
-	// Chains
-	getChainByName chains.GetChainByNameUseCase
 }
 
 func NewUseCases(
@@ -56,7 +52,7 @@ func NewUseCases(
 	startJobUC := jobs.NewStartJobUseCase(db, producer, topicsCfg)
 	getTransactionUC := transactions.NewGetTxUseCase(db, getScheduleUC)
 
-	sendTxUC := transactions.NewSendTxUseCase(txValidator, db, startJobUC, createJobUC, createScheduleUC, getTransactionUC)
+	sendTxUC := transactions.NewSendTxUseCase(txValidator, db, chainRegistryClient, startJobUC, createJobUC, createScheduleUC, getTransactionUC)
 
 	return &useCases{
 		// Transaction
@@ -75,8 +71,6 @@ func NewUseCases(
 		searchJobs: jobs.NewSearchJobsUseCase(db),
 		updateJob:  jobs.NewUpdateJobUseCase(db),
 		startJob:   startJobUC,
-		// Chains
-		getChainByName: chains.NewGetChainByNameUseCase(chainRegistryClient),
 	}
 }
 
@@ -130,8 +124,4 @@ func (u *useCases) UpdateJob() jobs.UpdateJobUseCase {
 
 func (u *useCases) SearchJobs() jobs.SearchJobsUseCase {
 	return u.searchJobs
-}
-
-func (u *useCases) GetChainByName() chains.GetChainByNameUseCase {
-	return u.getChainByName
 }

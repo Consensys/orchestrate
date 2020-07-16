@@ -14,7 +14,7 @@ import (
 const sendContractTxComponent = "use-cases.send-contract-tx"
 
 type SendContractTxUseCase interface {
-	Execute(ctx context.Context, txRequest *entities.TxRequest, chainUUID, tenantID string) (*entities.TxRequest, error)
+	Execute(ctx context.Context, txRequest *entities.TxRequest, tenantID string) (*entities.TxRequest, error)
 }
 
 // sendTxUsecase is a use case to create a new contract transaction
@@ -32,7 +32,7 @@ func NewSendContractTxUseCase(validator validators.TransactionValidator, sendTxU
 }
 
 // Execute validates, creates and starts a new contract transaction
-func (uc *sendContractTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequest, chainUUID, tenantID string) (*entities.TxRequest, error) {
+func (uc *sendContractTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequest, tenantID string) (*entities.TxRequest, error) {
 	logger := log.WithContext(ctx)
 	logger.WithField("idempotency_key", txRequest.IdempotencyKey).
 		Debug("creating new contract transaction")
@@ -42,5 +42,5 @@ func (uc *sendContractTxUsecase) Execute(ctx context.Context, txRequest *entitie
 		return nil, errors.FromError(err).ExtendComponent(sendContractTxComponent)
 	}
 
-	return uc.sendTxUseCase.Execute(ctx, txRequest, txData, chainUUID, tenantID)
+	return uc.sendTxUseCase.Execute(ctx, txRequest, txData, tenantID)
 }

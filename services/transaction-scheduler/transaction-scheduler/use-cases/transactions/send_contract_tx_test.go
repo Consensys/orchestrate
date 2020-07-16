@@ -23,7 +23,6 @@ func TestSendContractTx_Execute(t *testing.T) {
 	mockSendTxUC := mocks2.NewMockSendTxUseCase(ctrl)
 
 	ctx := context.Background()
-	chainUUID := "chainUUID"
 	tenantID := "tenantID"
 	txRequest := testutils.FakeTxRequestEntity()
 
@@ -34,9 +33,9 @@ func TestSendContractTx_Execute(t *testing.T) {
 		txRequestResponse := testutils.FakeTxRequestEntity()
 
 		mockValidator.EXPECT().ValidateMethodSignature(txRequest.Params.MethodSignature, txRequest.Params.Args).Return(txData, nil)
-		mockSendTxUC.EXPECT().Execute(ctx, txRequest, txData, chainUUID, tenantID).Return(txRequestResponse, nil)
+		mockSendTxUC.EXPECT().Execute(ctx, txRequest, txData, tenantID).Return(txRequestResponse, nil)
 
-		response, err := usecase.Execute(ctx, txRequest, chainUUID, tenantID)
+		response, err := usecase.Execute(ctx, txRequest, tenantID)
 
 		assert.NoError(t, err)
 		assert.Equal(t, txRequestResponse, response)
@@ -47,7 +46,7 @@ func TestSendContractTx_Execute(t *testing.T) {
 
 		mockValidator.EXPECT().ValidateMethodSignature(txRequest.Params.MethodSignature, txRequest.Params.Args).Return("", expectedErr)
 
-		response, err := usecase.Execute(ctx, txRequest, chainUUID, tenantID)
+		response, err := usecase.Execute(ctx, txRequest, tenantID)
 
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendContractTxComponent), err)
@@ -58,9 +57,9 @@ func TestSendContractTx_Execute(t *testing.T) {
 		expectedErr := fmt.Errorf("error")
 
 		mockValidator.EXPECT().ValidateMethodSignature(txRequest.Params.MethodSignature, txRequest.Params.Args).Return(txData, nil)
-		mockSendTxUC.EXPECT().Execute(ctx, txRequest, txData, chainUUID, tenantID).Return(nil, expectedErr)
+		mockSendTxUC.EXPECT().Execute(ctx, txRequest, txData, tenantID).Return(nil, expectedErr)
 
-		response, err := usecase.Execute(ctx, txRequest, chainUUID, tenantID)
+		response, err := usecase.Execute(ctx, txRequest, tenantID)
 
 		assert.Nil(t, response)
 		assert.Equal(t, expectedErr, err)

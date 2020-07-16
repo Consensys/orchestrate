@@ -5,6 +5,9 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
+
+	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database"
@@ -24,44 +27,54 @@ import (
 const sendTxComponent = "use-cases.send-tx"
 
 type SendTxUseCase interface {
-	Execute(ctx context.Context, txRequest *entities.TxRequest, txData, chainUUID, tenantID string) (*entities.TxRequest, error)
+	Execute(ctx context.Context, txRequest *entities.TxRequest, txData, tenantID string) (*entities.TxRequest, error)
 }
 
 // sendTxUsecase is a use case to create a new transaction
 type sendTxUsecase struct {
-	validator        validators.TransactionValidator
-	db               store.DB
-	startJobUC       jobs.StartJobUseCase
-	createJobUC      jobs.CreateJobUseCase
-	createScheduleUC schedules.CreateScheduleUseCase
-	getTxUC          GetTxUseCase
+	validator           validators.TransactionValidator
+	db                  store.DB
+	chainRegistryCLient chainregistry.ChainRegistryClient
+	startJobUC          jobs.StartJobUseCase
+	createJobUC         jobs.CreateJobUseCase
+	createScheduleUC    schedules.CreateScheduleUseCase
+	getTxUC             GetTxUseCase
 }
 
 // NewSendTxUseCase creates a new SendTxUseCase
-func NewSendTxUseCase(validator validators.TransactionValidator,
+func NewSendTxUseCase(
+	validator validators.TransactionValidator,
 	db store.DB,
+	chainRegistryCLient chainregistry.ChainRegistryClient,
 	startJobUseCase jobs.StartJobUseCase,
 	createJobUC jobs.CreateJobUseCase,
 	createScheduleUC schedules.CreateScheduleUseCase,
 	getTxUC GetTxUseCase,
 ) SendTxUseCase {
 	return &sendTxUsecase{
-		validator:        validator,
-		db:               db,
-		startJobUC:       startJobUseCase,
-		createJobUC:      createJobUC,
-		createScheduleUC: createScheduleUC,
-		getTxUC:          getTxUC,
+		validator:           validator,
+		db:                  db,
+		chainRegistryCLient: chainRegistryCLient,
+		startJobUC:          startJobUseCase,
+		createJobUC:         createJobUC,
+		createScheduleUC:    createScheduleUC,
+		getTxUC:             getTxUC,
 	}
 }
 
 // Execute validates, creates and starts a new transaction
-func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequest, txData, chainUUID, tenantID string) (*entities.TxRequest, error) {
+func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequest, txData, tenantID string) (*entities.TxRequest, error) {
 	logger := log.WithContext(ctx).WithField("idempotency_key", txRequest.IdempotencyKey)
 	logger.Debug("creating new transaction")
 
-	// Step 1: Validation
-	err := uc.validator.ValidateFields(ctx, txRequest)
+	// Step 1: Get chainUUID from chain registry
+	chainUUID, err := uc.getChainUUID(ctx, txRequest.ChainName)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
+	}
+
+	// Step 2: Validation
+	err = uc.validator.ValidateFields(ctx, txRequest)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
@@ -71,13 +84,13 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
 
-	// Step 2: Insert Schedule + Job + Transaction + TxRequest atomically OR get tx request if it exists
+	// Step 3: Insert Schedule + Job + Transaction + TxRequest atomically OR get tx request if it exists
 	txRequest, err = uc.selectOrInsertTxRequest(ctx, txRequest, txData, requestHash, chainUUID, tenantID)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
 
-	// Step 3: Start first job of the schedule if status is CREATED
+	// Step 4: Start first job of the schedule if status is CREATED
 	job := txRequest.Schedule.Jobs[0]
 	if job.GetStatus() == types.StatusCreated {
 		err = uc.startJobUC.Execute(ctx, job.UUID, []string{tenantID})
@@ -86,7 +99,7 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 		}
 	}
 
-	// Step 4: Load latest Schedule status from DB
+	// Step 5: Load latest Schedule status from DB
 	txRequest, err = uc.getTxUC.Execute(ctx, txRequest.UUID, []string{tenantID})
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
@@ -94,6 +107,20 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 
 	logger.WithField("uuid", txRequest.UUID).Info("contract transaction request created successfully")
 	return txRequest, nil
+}
+
+func (uc *sendTxUsecase) getChainUUID(ctx context.Context, chainName string) (string, error) {
+	chain, err := uc.chainRegistryCLient.GetChainByName(ctx, chainName)
+	if err != nil {
+		errMessage := fmt.Sprintf("cannot load '%s' chain", chainName)
+		log.WithContext(ctx).WithError(err).Error(errMessage)
+		if errors.IsNotFoundError(err) {
+			return "", errors.InvalidParameterError(errMessage)
+		}
+		return "", errors.FromError(err)
+	}
+
+	return chain.UUID, nil
 }
 
 func (uc *sendTxUsecase) selectOrInsertTxRequest(

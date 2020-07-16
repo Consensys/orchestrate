@@ -50,7 +50,7 @@ type Builder struct {
 
 func NewBuilder(ucs usecases.UseCases) *Builder {
 	return &Builder{
-		txCtrl:        NewTransactionsController(ucs, ucs),
+		txCtrl:        NewTransactionsController(ucs),
 		schedulesCtrl: NewSchedulesController(ucs),
 		jobsCtrl:      NewJobsController(ucs),
 	}

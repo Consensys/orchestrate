@@ -52,7 +52,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 
 	s.T().Run("should fail if payload is invalid", func(t *testing.T) {
 		defer gock.Off()
-		txRequest := testutils.FakeSendTransactionRequest(chain.Name)
+		txRequest := testutils.FakeSendTransactionRequest()
 		txRequest.ChainName = ""
 
 		resp, err := s.client.SendContractTransaction(ctx, txRequest)
@@ -63,7 +63,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 
 	s.T().Run("should fail if idempotency key is identical but different params", func(t *testing.T) {
 		defer gock.Off()
-		txRequest := testutils.FakeSendTransactionRequest(chain.Name)
+		txRequest := testutils.FakeSendTransactionRequest()
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: utils.RandomString(16),
 		})
@@ -84,7 +84,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 	s.T().Run("should fail with 422 if chains cannot be fetched", func(t *testing.T) {
 		defer gock.Off()
 		gock.New(ChainRegistryURL).Get("/chains").Reply(404)
-		txRequest := testutils.FakeSendTransactionRequest(chain.Name)
+		txRequest := testutils.FakeSendTransactionRequest()
 
 		resp, err := s.client.SendContractTransaction(ctx, txRequest)
 
@@ -96,7 +96,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 		defer gock.Off()
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(404)
-		txRequest := testutils.FakeSendTransactionRequest(chain.Name)
+		txRequest := testutils.FakeSendTransactionRequest()
 
 		resp, err := s.client.SendContractTransaction(ctx, txRequest)
 
@@ -108,7 +108,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 		defer gock.Off()
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200)
-		txRequest := testutils.FakeSendTransactionRequest(chain.Name)
+		txRequest := testutils.FakeSendTransactionRequest()
 		txRequest.Params.OneTimeKey = true
 
 		resp, err := s.client.SendContractTransaction(ctx, txRequest)
@@ -132,7 +132,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		defer gock.Off()
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
-		txRequest := testutils.FakeSendTransactionRequest(chain.Name)
+		txRequest := testutils.FakeSendTransactionRequest()
 		txRequest.Params.From = ""
 		txRequest.Params.OneTimeKey = true
 		IdempotencyKey := utils.RandomString(16)
@@ -179,7 +179,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		defer gock.Off()
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
-		txRequest := testutils.FakeSendTesseraRequest(chain.Name)
+		txRequest := testutils.FakeSendTesseraRequest()
 		IdempotencyKey := utils.RandomString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: IdempotencyKey,
@@ -222,7 +222,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		defer gock.Off()
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
-		txRequest := testutils.FakeSendOrionRequest(chain.Name)
+		txRequest := testutils.FakeSendOrionRequest()
 
 		txResponse, err := s.client.SendContractTransaction(ctx, txRequest)
 		if err != nil {
@@ -262,7 +262,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		defer gock.Off()
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
-		txRequest := testutils.FakeDeployContractRequest(chain.Name)
+		txRequest := testutils.FakeDeployContractRequest()
 		txRequest.Params.Args = testutils.ParseIArray(123) // FakeContract arguments
 
 		s.env.contractRegistryResponseFaker.GetContract = func() (*proto.GetContractResponse, error) {
@@ -307,7 +307,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		defer gock.Off()
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
-		txRequest := testutils.FakeSendRawTransactionRequest(chain.Name)
+		txRequest := testutils.FakeSendRawTransactionRequest()
 
 		IdempotencyKey := utils.RandomString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
@@ -349,7 +349,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		defer gock.Off()
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
-		txRequest := testutils.FakeSendTransferTransactionRequest(chain.Name)
+		txRequest := testutils.FakeSendTransferTransactionRequest()
 
 		txResponse, err := s.client.SendTransferTransaction(ctx, txRequest)
 		if err != nil {
@@ -387,7 +387,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 
 	s.T().Run("should succeed if payloads and idempotency key are the same and return same schedule", func(t *testing.T) {
 		defer gock.Off()
-		txRequest := testutils.FakeSendTransactionRequest(chain.Name)
+		txRequest := testutils.FakeSendTransactionRequest()
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: utils.RandomString(16),
 		})

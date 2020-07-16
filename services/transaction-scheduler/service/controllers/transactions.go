@@ -11,7 +11,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/chains"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/transactions"
 
 	"github.com/gorilla/mux"
@@ -22,14 +21,12 @@ const (
 )
 
 type TransactionsController struct {
-	txUcs    transactions.UseCases
-	chainUcs chains.UseCases
+	ucs transactions.UseCases
 }
 
-func NewTransactionsController(txUcs transactions.UseCases, chainUcs chains.UseCases) *TransactionsController {
+func NewTransactionsController(ucs transactions.UseCases) *TransactionsController {
 	return &TransactionsController{
-		txUcs:    txUcs,
-		chainUcs: chainUcs,
+		ucs: ucs,
 	}
 }
 
@@ -90,17 +87,8 @@ func (c *TransactionsController) send(rw http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	tenantID := multitenancy.TenantIDFromContext(ctx)
 	txReq := formatters.FormatSendTxRequest(txRequest, request.Header.Get(IdempotencyKeyHeader))
-
-	chain, err := c.chainUcs.GetChainByName().Execute(ctx, txRequest.ChainName,
-		multitenancy.AllowedTenantsFromContext(ctx))
-	if err != nil {
-		httputil.WriteHTTPErrorResponse(rw, err)
-		return
-	}
-
-	txResponse, err := c.txUcs.SendContractTransaction().Execute(ctx, txReq, chain.UUID, tenantID)
+	txResponse, err := c.ucs.SendContractTransaction().Execute(ctx, txReq, multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -142,16 +130,7 @@ func (c *TransactionsController) deployContract(rw http.ResponseWriter, request 
 	}
 
 	txReq := formatters.FormatDeployContractRequest(txRequest, request.Header.Get(IdempotencyKeyHeader))
-
-	chain, err := c.chainUcs.GetChainByName().Execute(ctx, txRequest.ChainName,
-		multitenancy.AllowedTenantsFromContext(ctx))
-	if err != nil {
-		httputil.WriteHTTPErrorResponse(rw, err)
-		return
-	}
-
-	txResponse, err := c.txUcs.SendDeployTransaction().Execute(ctx, txReq, chain.UUID,
-		multitenancy.TenantIDFromContext(ctx))
+	txResponse, err := c.ucs.SendDeployTransaction().Execute(ctx, txReq, multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -187,16 +166,7 @@ func (c *TransactionsController) sendRaw(rw http.ResponseWriter, request *http.R
 	}
 
 	txReq := formatters.FormatSendRawRequest(txRequest, request.Header.Get(IdempotencyKeyHeader))
-
-	chain, err := c.chainUcs.GetChainByName().Execute(ctx, txRequest.ChainName,
-		multitenancy.AllowedTenantsFromContext(ctx))
-	if err != nil {
-		httputil.WriteHTTPErrorResponse(rw, err)
-		return
-	}
-
-	txResponse, err := c.txUcs.SendTransaction().Execute(ctx, txReq, "", chain.UUID,
-		multitenancy.TenantIDFromContext(ctx))
+	txResponse, err := c.ucs.SendTransaction().Execute(ctx, txReq, "", multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -232,16 +202,7 @@ func (c *TransactionsController) transfer(rw http.ResponseWriter, request *http.
 	}
 
 	txReq := formatters.FormatSendTransferRequest(txRequest, request.Header.Get(IdempotencyKeyHeader))
-
-	chain, err := c.chainUcs.GetChainByName().Execute(ctx, txRequest.ChainName,
-		multitenancy.AllowedTenantsFromContext(ctx))
-	if err != nil {
-		httputil.WriteHTTPErrorResponse(rw, err)
-		return
-	}
-
-	txResponse, err := c.txUcs.SendTransaction().Execute(ctx, txReq, "", chain.UUID,
-		multitenancy.TenantIDFromContext(ctx))
+	txResponse, err := c.ucs.SendTransaction().Execute(ctx, txReq, "", multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -268,7 +229,7 @@ func (c *TransactionsController) getOne(rw http.ResponseWriter, request *http.Re
 
 	uuid := mux.Vars(request)["uuid"]
 
-	txRequest, err := c.txUcs.GetTransaction().Execute(ctx, uuid, multitenancy.AllowedTenantsFromContext(ctx))
+	txRequest, err := c.ucs.GetTransaction().Execute(ctx, uuid, multitenancy.AllowedTenantsFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -299,7 +260,7 @@ func (c *TransactionsController) search(rw http.ResponseWriter, request *http.Re
 		return
 	}
 
-	txRequests, err := c.txUcs.SearchTransactions().Execute(ctx, filters, multitenancy.AllowedTenantsFromContext(ctx))
+	txRequests, err := c.ucs.SearchTransactions().Execute(ctx, filters, multitenancy.AllowedTenantsFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return

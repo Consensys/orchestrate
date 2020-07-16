@@ -6,10 +6,10 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
-func FakeSendTransactionRequest(chainName string) *types.SendTransactionRequest {
+func FakeSendTransactionRequest() *types.SendTransactionRequest {
 	return &types.SendTransactionRequest{
 		BaseTransactionRequest: types.BaseTransactionRequest{
-			ChainName: chainName,
+			ChainName: "chainName",
 		},
 		Params: types.TransactionParams{
 			From:            "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
@@ -19,10 +19,10 @@ func FakeSendTransactionRequest(chainName string) *types.SendTransactionRequest 
 	}
 }
 
-func FakeSendRawTransactionRequest(chainName string) *types.RawTransactionRequest {
+func FakeSendRawTransactionRequest() *types.RawTransactionRequest {
 	return &types.RawTransactionRequest{
 		BaseTransactionRequest: types.BaseTransactionRequest{
-			ChainName: chainName,
+			ChainName: "chainName",
 		},
 		Params: types.RawTransactionParams{
 			Raw: "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
@@ -30,10 +30,10 @@ func FakeSendRawTransactionRequest(chainName string) *types.RawTransactionReques
 	}
 }
 
-func FakeSendTransferTransactionRequest(chainName string) *types.TransferRequest {
+func FakeSendTransferTransactionRequest() *types.TransferRequest {
 	return &types.TransferRequest{
 		BaseTransactionRequest: types.BaseTransactionRequest{
-			ChainName: chainName,
+			ChainName: "chainName",
 		},
 		Params: types.TransferParams{
 			From:  "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
@@ -43,10 +43,10 @@ func FakeSendTransferTransactionRequest(chainName string) *types.TransferRequest
 	}
 }
 
-func FakeDeployContractRequest(chainName string) *types.DeployContractRequest {
+func FakeDeployContractRequest() *types.DeployContractRequest {
 	return &types.DeployContractRequest{
 		BaseTransactionRequest: types.BaseTransactionRequest{
-			ChainName: chainName,
+			ChainName: "chainName",
 		},
 		Params: types.DeployContractParams{
 			From:         "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
@@ -56,10 +56,10 @@ func FakeDeployContractRequest(chainName string) *types.DeployContractRequest {
 	}
 }
 
-func FakeSendTesseraRequest(chainName string) *types.SendTransactionRequest {
+func FakeSendTesseraRequest() *types.SendTransactionRequest {
 	return &types.SendTransactionRequest{
 		BaseTransactionRequest: types.BaseTransactionRequest{
-			ChainName: chainName,
+			ChainName: "chainName",
 		},
 		Params: types.TransactionParams{
 			From:            "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
@@ -74,10 +74,10 @@ func FakeSendTesseraRequest(chainName string) *types.SendTransactionRequest {
 	}
 }
 
-func FakeSendOrionRequest(chainName string) *types.SendTransactionRequest {
+func FakeSendOrionRequest() *types.SendTransactionRequest {
 	return &types.SendTransactionRequest{
 		BaseTransactionRequest: types.BaseTransactionRequest{
-			ChainName: chainName,
+			ChainName: "chainName",
 		},
 		Params: types.TransactionParams{
 			From:            "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",

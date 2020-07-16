@@ -13,6 +13,7 @@ import (
 func FormatSendTxRequest(txRequest *types.SendTransactionRequest, idempotencyKey string) *entities.TxRequest {
 	txReq := &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,
+		ChainName:      txRequest.ChainName,
 		Labels:         txRequest.Labels,
 		Params: &types.ETHTransactionParams{
 			From:                     txRequest.Params.From,
@@ -38,6 +39,7 @@ func FormatSendTxRequest(txRequest *types.SendTransactionRequest, idempotencyKey
 func FormatDeployContractRequest(txRequest *types.DeployContractRequest, idempotencyKey string) *entities.TxRequest {
 	txReq := &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,
+		ChainName:      txRequest.ChainName,
 		Labels:         txRequest.Labels,
 		Params: &types.ETHTransactionParams{
 			From:                     txRequest.Params.From,
@@ -63,6 +65,7 @@ func FormatDeployContractRequest(txRequest *types.DeployContractRequest, idempot
 func FormatSendRawRequest(txRequest *types.RawTransactionRequest, idempotencyKey string) *entities.TxRequest {
 	return &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,
+		ChainName:      txRequest.ChainName,
 		Labels:         txRequest.Labels,
 		Params: &types.ETHTransactionParams{
 			Raw: txRequest.Params.Raw,
@@ -73,6 +76,7 @@ func FormatSendRawRequest(txRequest *types.RawTransactionRequest, idempotencyKey
 func FormatSendTransferRequest(txRequest *types.TransferRequest, idempotencyKey string) *entities.TxRequest {
 	return &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,
+		ChainName:      txRequest.ChainName,
 		Labels:         txRequest.Labels,
 		Params: &types.ETHTransactionParams{
 			From:     txRequest.Params.From,
@@ -88,6 +92,7 @@ func FormatTxResponse(txRequest *entities.TxRequest) *types.TransactionResponse 
 	return &types.TransactionResponse{
 		UUID:           txRequest.UUID,
 		IdempotencyKey: txRequest.IdempotencyKey,
+		ChainName:      txRequest.ChainName,
 		Params:         txRequest.Params,
 		Schedule:       FormatScheduleResponse(txRequest.Schedule),
 		CreatedAt:      txRequest.CreatedAt,

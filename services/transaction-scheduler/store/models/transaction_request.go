@@ -12,6 +12,7 @@ type TransactionRequest struct {
 	ID             int
 	UUID           string
 	IdempotencyKey string
+	ChainName      string
 	ScheduleID     *int
 	Schedule       *Schedule
 	RequestHash    string

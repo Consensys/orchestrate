@@ -43,6 +43,7 @@ func TestGetTx_Execute(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, txRequest.UUID, result.UUID)
 		assert.Equal(t, txRequest.IdempotencyKey, result.IdempotencyKey)
+		assert.Equal(t, txRequest.ChainName, result.ChainName)
 		assert.Equal(t, txRequest.CreatedAt, result.CreatedAt)
 		assert.Equal(t, txRequest.Params, result.Params)
 		assert.Equal(t, schedule, result.Schedule)

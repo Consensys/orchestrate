@@ -14,7 +14,7 @@ import (
 const sendDeployTxComponent = "use-cases.send-deploy-tx"
 
 type SendDeployTxUseCase interface {
-	Execute(ctx context.Context, txRequest *entities.TxRequest, chainUUID, tenantID string) (*entities.TxRequest, error)
+	Execute(ctx context.Context, txRequest *entities.TxRequest, tenantID string) (*entities.TxRequest, error)
 }
 
 // sendDeployTxUsecase is a use case to create a new contract deployment transaction
@@ -32,7 +32,7 @@ func NewSendDeployTxUseCase(validator validators.TransactionValidator, sendTxUse
 }
 
 // Execute validates, creates and starts a new contract deployment transaction
-func (uc *sendDeployTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequest, chainUUID, tenantID string) (*entities.TxRequest, error) {
+func (uc *sendDeployTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequest, tenantID string) (*entities.TxRequest, error) {
 	logger := log.WithContext(ctx)
 	logger.WithField("idempotency_key", txRequest.IdempotencyKey).Debug("creating new deployment transaction")
 
@@ -41,5 +41,5 @@ func (uc *sendDeployTxUsecase) Execute(ctx context.Context, txRequest *entities.
 		return nil, errors.FromError(err).ExtendComponent(sendDeployTxComponent)
 	}
 
-	return uc.sendTxUseCase.Execute(ctx, txRequest, txData, chainUUID, tenantID)
+	return uc.sendTxUseCase.Execute(ctx, txRequest, txData, tenantID)
 }

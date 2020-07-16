@@ -47,6 +47,7 @@ func (uc *getTxUseCase) Execute(ctx context.Context, txRequestUUID string, tenan
 	txRequest := &entities.TxRequest{
 		UUID:           txRequestModel.UUID,
 		IdempotencyKey: txRequestModel.IdempotencyKey,
+		ChainName:      txRequestModel.ChainName,
 		Params:         txRequestModel.Params,
 		CreatedAt:      txRequestModel.CreatedAt,
 	}
