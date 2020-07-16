@@ -37,7 +37,9 @@ func Init(ctx context.Context) {
 
 		// Create Handler
 		handler = engine.CombineHandlers(
-			TxSigner(eea.GlobalHandler(), ethereum.GlobalHandler(), tessera.GlobalHandler()),
+			TxSigner(ethereum.GlobalHandler(),
+				eea.GlobalHandler(),
+				tessera.GlobalHandler()),
 		)
 
 		log.Infof("signer: handler ready")

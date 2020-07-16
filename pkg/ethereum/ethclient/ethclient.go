@@ -19,7 +19,7 @@ type TransactionSender interface {
 	SendTransaction(ctx context.Context, url string, args *types.SendTxArgs) (ethcommon.Hash, error)
 
 	// SendRawTransaction allows to send a raw transaction
-	SendRawTransaction(ctx context.Context, url string, raw string) error
+	SendRawTransaction(ctx context.Context, url string, raw string) (ethcommon.Hash, error)
 
 	// SendQuorumRawPrivateTransaction sends a raw signed transaction to a Quorum node
 	// signedTxHash - is a hash returned by Quorum and then signed by a client
@@ -28,6 +28,9 @@ type TransactionSender interface {
 
 	// SendRawPrivateTransaction send a raw transaction to a Ethereum node supporting privacy with EEA privacy extensions
 	SendRawPrivateTransaction(ctx context.Context, url string, raw string) (ethcommon.Hash, error)
+
+	// PrivDistributeRawTransaction Returns the enclaveKey of sent private transaction
+	PrivDistributeRawTransaction(ctx context.Context, endpoint, raw string) (ethcommon.Hash, error)
 }
 
 // ChainLedgerReader is a service to access a blockchain ledger information
@@ -53,6 +56,9 @@ type ChainLedgerReader interface {
 
 	// TransactionReceipt returns the receipt of a transaction by transaction hash.
 	PrivateTransactionReceipt(ctx context.Context, url string, txHash ethcommon.Hash) (*proto.Receipt, error)
+
+	// EEAPrivPrecompiledContractAddr Returns the private precompiled contract address of Besu/Orion
+	EEAPrivPrecompiledContractAddr(ctx context.Context, endpoint string) (ethcommon.Address, error)
 }
 
 // ChainStateReader is a service to access a blockchain state information

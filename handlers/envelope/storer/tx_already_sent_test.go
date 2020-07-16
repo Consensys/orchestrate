@@ -75,6 +75,11 @@ func (ec *MockChainLedgerReader) PrivateTransactionReceipt(ctx context.Context, 
 	return nil, fmt.Errorf("not implemented")
 }
 
+// EEAPrivPrecompiledContractAddr Returns the private precompiled contract address of Besu/Orion
+func (ec *MockChainLedgerReader) EEAPrivPrecompiledContractAddr(ctx context.Context, endpoint string) (ethcommon.Address, error) {
+	return ethcommon.Address{}, fmt.Errorf("not implemented")
+}
+
 func makeContext(hash, id, endpoint string, expectedErrors int) *engine.TxContext {
 	txctx := engine.NewTxContext()
 	txctx.Reset()

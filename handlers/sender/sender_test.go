@@ -3,11 +3,7 @@
 package sender
 
 import (
-	"context"
 	"fmt"
-	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
-	"math/rand"
-	"sync"
 	"testing"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -15,155 +11,393 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/mock"
+	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client/mock"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
+	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
 )
 
 const (
-	endpointNoError = "testURL"
-	endpointError   = "error"
+	chainRegistryUrl = "chainRegistryUrl"
 )
 
-var letterRunes = []rune("abcdef0123456789")
-
-func RandString(n int) string {
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = letterRunes[rand.Intn(len(letterRunes))]
-	}
-	return string(b)
+type updateStatusMatcher struct {
+	x *types.UpdateJobRequest
 }
 
-func makeSenderContext(i int) *engine.TxContext {
-	txctx := engine.NewTxContext()
-	txctx.Reset()
-	txctx.Logger = log.NewEntry(log.StandardLogger())
-	txRaw := "0xabde4f3a"
-	txHash := "0x" + RandString(64)
-	switch i % 8 {
-	case 0:
-		// Valid send base transaction
-		txctx.WithContext(proxy.With(txctx.Context(), endpointNoError))
-		_ = txctx.Envelope.
-			SetID(RandString(10)).
-			SetTxHash(ethcommon.HexToHash(txHash)).
-			SetRawString(txRaw)
-		txctx.Set("status", "PENDING")
-	case 1:
-		// Invalid send base transaction
-		txctx.WithContext(proxy.With(txctx.Context(), endpointError))
-		_ = txctx.Envelope.
-			SetID(RandString(10)).
-			SetTxHash(ethcommon.HexToHash(txHash)).
-			SetRawString(txRaw)
-		txctx.Set("error", "mock: failed to send a raw transaction")
-		txctx.Set("status", "ERROR")
-	case 2:
-		//
-		txctx.WithContext(proxy.With(txctx.Context(), endpointNoError))
-		_ = txctx.Envelope.SetID(RandString(10)).SetRawString(txRaw)
-		txctx.Set("status", "PENDING")
-	case 3:
-		// Cannot send a public transaction
-		txctx.WithContext(proxy.With(txctx.Context(), endpointError))
-		_ = txctx.Envelope.SetID(RandString(10))
-		txctx.Set("error", "no raw filled")
-		txctx.Set("status", "")
-	case 4:
-		// Cannot send a Besu Orion transaction
-		txctx.WithContext(proxy.With(txctx.Context(), endpointError))
-		_ = txctx.Envelope.SetID(RandString(10)).SetMethod(tx.Method_EEA_SENDPRIVATETRANSACTION).SetRawString(txRaw)
-		txctx.Set("error", "mock: failed to send a raw private transaction")
-		txctx.Set("status", "")
-	case 5:
-		// Cannot send a Quorum Tessera transaction
-		txctx.WithContext(proxy.With(txctx.Context(), endpointError))
-		_ = txctx.Envelope.SetID(RandString(10)).SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION).MustSetFromString("0x1").SetPrivateFor([]string{"test"}).SetRawString(txRaw)
-		txctx.Set("error", "mock: failed to send a raw Tessera transaction")
-		txctx.Set("status", "ERROR")
-	case 6:
-		// Cannot send a Quorum Constellation transaction
-		txctx.WithContext(proxy.With(txctx.Context(), endpointError))
-		_ = txctx.Envelope.SetID(RandString(10)).SetMethod(tx.Method_ETH_SENDPRIVATETRANSACTION).MustSetFromString("0x1").SetRawString(txRaw)
-		txctx.Set("error", "mock: failed to send an unsigned transaction")
-		txctx.Set("status", "")
-	case 7:
-		// 	// Cannot send a transaction with unknown protocol type
-		txctx.WithContext(proxy.With(txctx.Context(), endpointError))
-		_ = txctx.Envelope.SetID(RandString(10)).SetMethod(123).MustSetFromString("0x1").SetRawString(txRaw)
-		txctx.Set("error", "invalid transaction protocol \"123\"")
-		txctx.Set("status", "")
-	case 8:
-		// Cannot send a signed private transaction with Constellation protocol
-		txctx.WithContext(proxy.With(txctx.Context(), endpointError))
-		_ = txctx.Envelope.
-			SetID(RandString(10)).
-			SetMethod(tx.Method_ETH_SENDPRIVATETRANSACTION).
-			SetTxHash(ethcommon.HexToHash(txHash)).
-			SetRawString(txRaw)
-		txctx.Set("error", "mock: failed to send an unsigned transaction")
-		txctx.Set("status", "")
+func gomockUpdateStatusMatcher(x *types.UpdateJobRequest) updateStatusMatcher {
+	return updateStatusMatcher{
+		x: x,
 	}
+}
+
+func (e updateStatusMatcher) Matches(x interface{}) bool {
+	if xt, ok := x.(*types.UpdateJobRequest); ok {
+		return e.x.Status == xt.Status
+	}
+	return false
+}
+
+func (e updateStatusMatcher) String() string {
+	return e.x.Status
+}
+
+func newTxCtx(eId, txHash, txRaw string) *engine.TxContext {
+	txctx := engine.NewTxContext()
+	txctx.Logger = log.NewEntry(log.StandardLogger())
+	txctx.WithContext(proxy.With(txctx.Context(), chainRegistryUrl))
+	_ = txctx.Envelope.SetID(eId).SetTxHash(ethcommon.HexToHash(txHash)).SetRawString(txRaw)
+
 	return txctx
 }
 
-func TestSender(t *testing.T) {
+// @TODO: Remove along with envelope-store MS
+func TestSender_EnvelopeStore(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	client := clientmock.NewMockEnvelopeStoreClient(ctrl)
-	txSchedulerClient := mock2.NewMockTransactionSchedulerClient(ctrl)
-	client.EXPECT().Store(gomock.Any(), gomock.AssignableToTypeOf(&svc.StoreRequest{}), gomock.Any()).Times(15)
-	client.EXPECT().SetStatus(gomock.Any(), gomock.AssignableToTypeOf(&svc.SetStatusRequest{})).Times(15)
-	client.EXPECT().LoadByID(gomock.Any(), gomock.AssignableToTypeOf(&svc.LoadByIDRequest{})).
-		Times(15).Return(&svc.StoreResponse{
-		StatusInfo: &svc.StatusInfo{Status: svc.Status_PENDING},
-	}, nil)
+	defer ctrl.Finish()
 
-	s := mock.NewMockTransactionSender(ctrl)
-	s.EXPECT().SendQuorumRawPrivateTransaction(gomock.Any(), gomock.Eq(endpointError), gomock.Any(), gomock.Any()).Return(ethcommon.Hash{}, fmt.Errorf("mock: failed to send a raw Tessera transaction")).AnyTimes()
-	s.EXPECT().SendQuorumRawPrivateTransaction(gomock.Any(), gomock.Not(gomock.Eq(endpointError)), gomock.Any(), gomock.Any()).Return(ethcommon.Hash{}, nil).AnyTimes()
-	s.EXPECT().SendRawPrivateTransaction(gomock.Any(), gomock.Eq(endpointError), gomock.Any()).Return(ethcommon.Hash{}, fmt.Errorf("mock: failed to send a raw private transaction")).AnyTimes()
-	s.EXPECT().SendRawPrivateTransaction(gomock.Any(), gomock.Not(gomock.Eq(endpointError)), gomock.Any()).Return(ethcommon.Hash{}, nil).AnyTimes()
-	s.EXPECT().SendTransaction(gomock.Any(), gomock.Eq(endpointError), gomock.Any()).Return(ethcommon.Hash{}, fmt.Errorf("mock: failed to send an unsigned transaction")).AnyTimes()
-	s.EXPECT().SendTransaction(gomock.Any(), gomock.Not(gomock.Eq(endpointError)), gomock.Any()).Return(ethcommon.HexToHash("0x"+RandString(32)), nil).AnyTimes()
-	s.EXPECT().SendRawTransaction(gomock.Any(), gomock.Eq(endpointError), gomock.Any()).Return(fmt.Errorf("mock: failed to send a raw transaction")).AnyTimes()
-	s.EXPECT().SendRawTransaction(gomock.Any(), gomock.Not(gomock.Eq(endpointError)), gomock.Any()).Return(nil).AnyTimes()
-	sender := Sender(s, client, txSchedulerClient)
+	// ctx := context.Background()
+	envelopeId := utils.RandomString(12)
+	txHash := "0x" + utils.RandHexString(64)
+	txRaw := "0x" + utils.RandHexString(10)
 
-	rounds := 15
-	outs := make(chan *engine.TxContext, rounds)
-	wg := &sync.WaitGroup{}
-	for i := 0; i < rounds; i++ {
-		wg.Add(1)
-		txctx := makeSenderContext(i)
+	storeClient := clientmock.NewMockEnvelopeStoreClient(ctrl)
+	schedulerClient := mock2.NewMockTransactionSchedulerClient(ctrl)
 
-		go func(txctx *engine.TxContext) {
-			defer wg.Done()
-			sender(txctx)
-			outs <- txctx
-		}(txctx)
-	}
-	wg.Wait()
-	close(outs)
+	ec := mock.NewMockTransactionSender(ctrl)
+	sender := Sender(ec, storeClient, schedulerClient)
 
-	assert.Len(t, outs, rounds, "Marker: expected correct out count")
+	t.Run("should execute raw transaction successfully", func(t *testing.T) {
+		txctx := newTxCtx(envelopeId, txHash, txRaw)
+		_ = txctx.Envelope.SetMethod(tx.Method_ETH_SENDRAWTRANSACTION)
 
-	for out := range outs {
-		resp, _ := client.LoadByID(
-			context.Background(),
-			&svc.LoadByIDRequest{
-				Id: out.Envelope.GetID(),
-			},
+		ec.EXPECT().SendRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).
+			Return(ethcommon.HexToHash(txHash), nil)
+		storeClient.EXPECT().Store(txctx.Context(), gomock.AssignableToTypeOf(&svc.StoreRequest{}))
+		storeClient.EXPECT().SetStatus(txctx.Context(), &svc.SetStatusRequest{
+			Id:     envelopeId,
+			Status: svc.Status_PENDING,
+		})
+
+		sender(txctx)
+	})
+
+	t.Run("should execute Tessera private transaction successfully", func(t *testing.T) {
+		txctx := newTxCtx(envelopeId, txHash, txRaw)
+		_ = txctx.Envelope.
+			SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION).
+			SetPrivateFor([]string{"SetPrivateFor=="}).
+			SetPrivateFrom("privateFrom==")
+
+		ec.EXPECT().SendQuorumRawPrivateTransaction(txctx.Context(), chainRegistryUrl, txRaw,
+			types2.Call2PrivateArgs(txctx.Envelope).PrivateFor).
+			Return(ethcommon.HexToHash(txHash), nil)
+		storeClient.EXPECT().Store(txctx.Context(), gomock.AssignableToTypeOf(&svc.StoreRequest{}))
+		storeClient.EXPECT().SetStatus(txctx.Context(), &svc.SetStatusRequest{
+			Id:     envelopeId,
+			Status: svc.Status_PENDING,
+		})
+
+		sender(txctx)
+	})
+
+	t.Run("should execute EEA private transaction successfully", func(t *testing.T) {
+		txctx := newTxCtx(envelopeId, txHash, txRaw)
+		_ = txctx.Envelope.
+			SetMethod(tx.Method_EEA_SENDPRIVATETRANSACTION).
+			SetPrivacyGroupID("PrivGroupId==").
+			SetPrivateFrom("privateFrom==")
+
+		ec.EXPECT().SendRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).
+			Return(ethcommon.HexToHash(txHash), nil)
+
+		storeClient.EXPECT().Store(txctx.Context(), gomock.AssignableToTypeOf(&svc.StoreRequest{}))
+		storeClient.EXPECT().SetStatus(txctx.Context(), &svc.SetStatusRequest{
+			Id:     envelopeId,
+			Status: svc.Status_PENDING,
+		})
+
+		sender(txctx)
+	})
+
+	t.Run("should fail execute raw transaction", func(t *testing.T) {
+		txctx := newTxCtx(envelopeId, txHash, txRaw)
+		_ = txctx.Envelope.SetMethod(tx.Method_ETH_SENDRAWTRANSACTION)
+		err := fmt.Errorf("failed to send a raw transaction")
+
+		ec.EXPECT().SendRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).
+			Return(ethcommon.Hash{}, err)
+		storeClient.EXPECT().Store(txctx.Context(), gomock.AssignableToTypeOf(&svc.StoreRequest{}))
+		storeClient.EXPECT().SetStatus(txctx.Context(), &svc.SetStatusRequest{
+			Id:     envelopeId,
+			Status: svc.Status_ERROR,
+		})
+
+		sender(txctx)
+	})
+}
+
+func TestSender_TxScheduler_RawTransaction(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	envelopeId := utils.RandomString(12)
+	txHash := "0x" + utils.RandHexString(64)
+	txRaw := "0x" + utils.RandHexString(10)
+
+	storeClient := clientmock.NewMockEnvelopeStoreClient(ctrl)
+	schedulerClient := mock2.NewMockTransactionSchedulerClient(ctrl)
+
+	ec := mock.NewMockTransactionSender(ctrl)
+	sender := Sender(ec, storeClient, schedulerClient)
+
+	t.Run("should execute raw transaction", func(t *testing.T) {
+		txctx := newTxCtx(envelopeId, txHash, txRaw)
+		_ = txctx.Envelope.
+			SetContextLabelsValue("jobUUID", "jobUUID").
+			SetJobType(tx.JobType_ETH_RAW_TX)
+
+		ec.EXPECT().SendRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).
+			Return(ethcommon.HexToHash(txHash), nil)
+
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
+			&types.UpdateJobRequest{
+				Status: types.StatusPending,
+			}))
+
+		sender(txctx)
+	})
+
+	t.Run("should fail execute raw transaction", func(t *testing.T) {
+		txctx := newTxCtx(envelopeId, txHash, txRaw)
+		_ = txctx.Envelope.
+			SetContextLabelsValue("jobUUID", "jobUUID").
+			SetJobType(tx.JobType_ETH_RAW_TX)
+		err := fmt.Errorf("failed to send a raw transaction")
+
+		ec.EXPECT().SendRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).
+			Return(ethcommon.Hash{}, err)
+
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
+			&types.UpdateJobRequest{
+				Status: types.StatusPending,
+			}))
+
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId,
+			gomockUpdateStatusMatcher(&types.UpdateJobRequest{
+				Status: types.StatusRecovering,
+			}))
+
+		sender(txctx)
+		
+		errs := txctx.Envelope.GetErrors()
+		assert.NotEmpty(t, errs)
+	})
+
+	t.Run("should fail when txHash does not match", func(t *testing.T) {
+		txctx := newTxCtx(envelopeId, txHash, txRaw)
+		_ = txctx.Envelope.
+			SetContextLabelsValue("jobUUID", "jobUUID").
+			SetJobType(tx.JobType_ETH_RAW_TX)
+
+		txHash2 := "0x" + utils.RandHexString(64)
+		ec.EXPECT().SendRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).
+			Return(ethcommon.HexToHash(txHash2), nil)
+
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
+			&types.UpdateJobRequest{
+				Status: types.StatusPending,
+			}))
+
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(&types.UpdateJobRequest{
+			Status: types.StatusRecovering,
+		}))
+
+		sender(txctx)
+		
+		errs := txctx.Envelope.GetErrors()
+		assert.NotEmpty(t, errs)
+		assert.True(t, errors.IsInternalError(errs[0]))
+	})
+}
+
+func TestSender_TxScheduler_TesseraTx(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	// ctx := context.Background()
+	envelopeId := utils.RandomString(12)
+	txHash := "0x" + utils.RandHexString(64)
+	txRaw := "0x" + utils.RandHexString(10)
+
+	storeClient := clientmock.NewMockEnvelopeStoreClient(ctrl)
+	schedulerClient := mock2.NewMockTransactionSchedulerClient(ctrl)
+
+	ec := mock.NewMockTransactionSender(ctrl)
+	sender := Sender(ec, storeClient, schedulerClient)
+
+	t.Run("should execute Tessera private transaction successfully", func(t *testing.T) {
+		txctx := newTxCtx(envelopeId, txHash, txRaw)
+		_ = txctx.Envelope.
+			SetContextLabelsValue("jobUUID", "jobUUID").
+			SetJobType(tx.JobType_ETH_TESSERA_PRIVATE_TX).
+			SetPrivateFor([]string{"SetPrivateFor=="}).
+			SetPrivateFrom("privateFrom==")
+
+		ec.EXPECT().SendQuorumRawPrivateTransaction(txctx.Context(), chainRegistryUrl, txRaw,
+			types2.Call2PrivateArgs(txctx.Envelope).PrivateFor).
+			Return(ethcommon.HexToHash(txHash), nil)
+
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
+			&types.UpdateJobRequest{
+				Status: types.StatusPending,
+			}),
 		)
 
-		expectedError := out.Get("error")
-		if expectedError != nil {
-			assert.Equal(t, expectedError.(string), out.Envelope.Errors[0].Message, "")
-		} else {
-			assert.Equal(t, out.Get("status").(string), resp.GetStatusInfo().GetStatus().String(), "Incorrect envelope status")
-			assert.Len(t, out.Envelope.Errors, 0, "")
-		}
-	}
+		sender(txctx)
+	})
+
+	t.Run("should fail to execute Tessera with missing PrivateFor", func(t *testing.T) {
+		txctx := newTxCtx(envelopeId, txHash, txRaw)
+		_ = txctx.Envelope.
+			SetContextLabelsValue("jobUUID", "jobUUID").
+			SetJobType(tx.JobType_ETH_TESSERA_PRIVATE_TX).
+			SetPrivateFrom("privateFrom==")
+
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
+			&types.UpdateJobRequest{
+				Status: types.StatusPending,
+			}),
+		)
+
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(&types.UpdateJobRequest{
+			Status: types.StatusRecovering,
+		}))
+
+		sender(txctx)
+
+		errs := txctx.Envelope.GetErrors()
+		assert.NotEmpty(t, errs)
+		assert.True(t, errors.IsDataError(errs[0]))
+	})
+	
+	t.Run("should fail to execute Tessera with missing PrivateFor", func(t *testing.T) {
+		txctx := newTxCtx(envelopeId, txHash, txRaw)
+		_ = txctx.Envelope.
+			SetContextLabelsValue("jobUUID", "jobUUID").
+			SetJobType(tx.JobType_ETH_TESSERA_PRIVATE_TX).
+			SetPrivateFor([]string{"SetPrivateFor=="}).
+			SetPrivateFrom("privateFrom==")
+
+		ec.EXPECT().SendQuorumRawPrivateTransaction(txctx.Context(), chainRegistryUrl, txRaw,
+			types2.Call2PrivateArgs(txctx.Envelope).PrivateFor).
+			Return(ethcommon.HexToHash("0x0"), nil)
+
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
+			&types.UpdateJobRequest{
+				Status: types.StatusPending,
+			}),
+		)
+
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(&types.UpdateJobRequest{
+			Status: types.StatusRecovering,
+		}))
+
+		sender(txctx)
+
+		errs := txctx.Envelope.GetErrors()
+		assert.NotEmpty(t, errs)
+		assert.True(t, errors.IsInternalError(errs[0]))
+	})
+}
+
+func TestSender_TxScheduler_EEAPrivateTransaction(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	// ctx := context.Background()
+	envelopeId := utils.RandomString(12)
+	txHash := "0x" + utils.RandHexString(64)
+	txRaw := "0x" + utils.RandHexString(10)
+
+	storeClient := clientmock.NewMockEnvelopeStoreClient(ctrl)
+	schedulerClient := mock2.NewMockTransactionSchedulerClient(ctrl)
+
+	ec := mock.NewMockTransactionSender(ctrl)
+	sender := Sender(ec, storeClient, schedulerClient)
+
+	t.Run("should execute eea private transaction", func(t *testing.T) {
+		txctx := newTxCtx(envelopeId, txHash, txRaw)
+		_ = txctx.Envelope.
+			SetContextLabelsValue("jobUUID", "jobUUID").
+			SetJobType(tx.JobType_ETH_ORION_EEA_TX)
+
+		ec.EXPECT().SendRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).
+			Return(ethcommon.HexToHash(txHash), nil)
+
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
+			&types.UpdateJobRequest{
+				Status: types.StatusPending,
+			}))
+
+		sender(txctx)
+	})
+
+	t.Run("should fail execute raw transaction", func(t *testing.T) {
+		txctx := newTxCtx(envelopeId, txHash, txRaw)
+		_ = txctx.Envelope.
+			SetContextLabelsValue("jobUUID", "jobUUID").
+			SetJobType(tx.JobType_ETH_ORION_EEA_TX)
+		err := fmt.Errorf("failed to send a raw transaction")
+
+		ec.EXPECT().SendRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).
+			Return(ethcommon.Hash{}, err)
+
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
+			&types.UpdateJobRequest{
+				Status: types.StatusPending,
+			}))
+
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId,
+			gomockUpdateStatusMatcher(&types.UpdateJobRequest{
+				Status: types.StatusRecovering,
+			}))
+
+		sender(txctx)
+		
+		errs := txctx.Envelope.GetErrors()
+		assert.NotEmpty(t, errs)
+	})
+
+	t.Run("should fail when txHash does not match", func(t *testing.T) {
+		txctx := newTxCtx(envelopeId, txHash, txRaw)
+		_ = txctx.Envelope.
+			SetContextLabelsValue("jobUUID", "jobUUID").
+			SetJobType(tx.JobType_ETH_ORION_EEA_TX)
+
+		txHash2 := "0x" + utils.RandHexString(64)
+		ec.EXPECT().SendRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).
+			Return(ethcommon.HexToHash(txHash2), nil)
+
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
+			&types.UpdateJobRequest{
+				Status: types.StatusPending,
+			}))
+
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(&types.UpdateJobRequest{
+			Status: types.StatusRecovering,
+		}))
+
+		sender(txctx)
+		
+		errs := txctx.Envelope.GetErrors()
+		assert.NotEmpty(t, errs)
+		assert.True(t, errors.IsInternalError(errs[0]))
+	})
 }

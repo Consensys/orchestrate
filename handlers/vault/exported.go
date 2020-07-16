@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	chaininjector "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/chain-injector"
-
 	generator "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/account-generator"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/signer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"

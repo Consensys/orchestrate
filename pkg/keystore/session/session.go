@@ -6,7 +6,7 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/rlp"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/rlp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/account"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/types"
@@ -65,7 +65,7 @@ func (sess *signingSession) ExecuteForTx(tx *ethtypes.Transaction) ([]byte, *eth
 	}
 
 	// Set raw transaction
-	signedRaw, err := rlp.EncodeToBytes(t)
+	signedRaw, err := rlp.Encode(t)
 	if err != nil {
 		return []byte{}, nil, errors.CryptoOperationError(err.Error()).SetComponent(component)
 	}
@@ -87,7 +87,7 @@ func (sess *signingSession) ExecuteForMsg(msg []byte, dsa crypto.DSA) ([]byte, *
 }
 
 // ExecuteForEEATx : once all the element of the session have been set,
-// it assigns the signed transaction and the txhash
+// it assigns the signed transaction and the private TxHash
 // Calculates a transaction hash for sending private transactions for EEA extension
 func (sess *signingSession) ExecuteForEEATx(tx *ethtypes.Transaction, privateArgs *types.PrivateArgs) ([]byte, *ethcommon.Hash, error) {
 	// Should sign using the EIP155 signer
@@ -127,18 +127,17 @@ func (sess *signingSession) ExecuteForTesseraTx(tx *ethtypes.Transaction) ([]byt
 	}
 
 	// Get raw signed transaction
-	signedRaw, err := rlp.EncodeToBytes(t)
+	signedRaw, err := rlp.Encode(t)
 	if err != nil {
 		return []byte{}, nil, errors.CryptoOperationError(err.Error()).SetComponent(component)
 	}
 
-	// TODO: This does not match a hash returned by Tessera
 	// Tessera transactions should be deterministic and we should be able to generate them locally
 
 	v, r, s := t.RawSignatureValues()
 	privateV := calculatePrivateV(v)
 
-	txHash, err := rlpHash([]interface{}{
+	txHash, err := rlp.Hash([]interface{}{
 		tx.Nonce(),
 		tx.GasPrice(),
 		tx.Gas(),

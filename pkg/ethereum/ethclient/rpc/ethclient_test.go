@@ -734,17 +734,17 @@ func TestSendRawTransaction(t *testing.T) {
 
 	// Test 1 with Error
 	ctx := newContext(fmt.Errorf("test-error"), 0, nil)
-	err := ec.SendRawTransaction(ctx, "test-endpoint", "")
+	_, err := ec.SendRawTransaction(ctx, "test-endpoint", "")
 	assert.Error(t, err, "#1 SendRawTransaction should  error")
 
-	// Test 2 without error
-	ctx = newContext(nil, 200, makeRespBody("", ""))
-	err = ec.SendRawTransaction(ctx, "test-endpoint", "")
+	// Test 2 without errorrandString
+	ctx = newContext(nil, 200, makeRespBody("0x" + pkgUtils.RandHexString(64), ""))
+	_, err = ec.SendRawTransaction(ctx, "test-endpoint", "")
 	assert.NoError(t, err, "#2 SendRawTransaction should not error")
 
 	// Test 3 with Nonce Too Low error
 	ctx = newContext(nil, 200, makeRespBody("", "Nonce too low"))
-	err = ec.SendRawTransaction(ctx, "test-endpoint", "")
+	_, err = ec.SendRawTransaction(ctx, "test-endpoint", "")
 	assert.Error(t, err, "#2 SendRawTransaction should not error")
 }
 

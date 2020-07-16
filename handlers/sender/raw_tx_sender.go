@@ -21,7 +21,7 @@ func RawTxSender(ec ethclient.TransactionSender) engine.HandlerFunc {
 			return
 		}
 
-		err = ec.SendRawTransaction(
+		txHash, err := ec.SendRawTransaction(
 			txctx.Context(),
 			url,
 			txctx.Envelope.GetRaw(),
@@ -30,6 +30,13 @@ func RawTxSender(ec ethclient.TransactionSender) engine.HandlerFunc {
 		if err != nil {
 			e := txctx.AbortWithError(err).ExtendComponent(component)
 			txctx.Logger.WithError(e).Errorf("sender: failed to send raw transaction")
+			return
+		}
+
+		if txHash.String() != txctx.Envelope.TxHash.String() {
+			err := errors.InternalError("invalid transaction Hash. Expected %s, got %s",
+				txctx.Envelope.TxHash.String(), txHash.String())
+			_ = txctx.AbortWithError(err).ExtendComponent(component)
 			return
 		}
 	}

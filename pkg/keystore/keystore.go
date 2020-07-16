@@ -52,17 +52,18 @@ func (ks *keystore) SignPrivateEEATx(ctx context.Context, netChain *big.Int, add
 	if err != nil {
 		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
 	}
+
 	err = sess.SetChain(netChain)
 	if err != nil {
 		return []byte{}, nil, errors.FromError(err).ExtendComponent(component)
 	}
 
 	// Run signing session
-	Raw, Hash, err := sess.ExecuteForEEATx(tx, privateArgs)
+	PrivRaw, EnclaveKey, err := sess.ExecuteForEEATx(tx, privateArgs)
 	if err != nil {
 		return []byte{}, nil, err
 	}
-	return Raw, Hash, nil
+	return PrivRaw, EnclaveKey, nil
 }
 
 // SignPrivateTesseraTx signs a private transaction using Tessera

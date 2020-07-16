@@ -3,17 +3,21 @@
 package eea
 
 import (
-	"fmt"
-	"reflect"
 	"testing"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/golang/mock/gomock"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/keystore/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 )
 
 type output struct {
@@ -22,70 +26,152 @@ type output struct {
 	err  error
 }
 
-var addressNoError = ethcommon.HexToAddress("0x1")
-var hashNoError = ethcommon.HexToHash("0x1")
-var sigNoError = []byte{1}
+const (
+	chainRegistryUrl = "chainRegistryUrl"
+	chainID          = 666
+)
 
-var addressError = ethcommon.HexToAddress("0x2")
-var hashError = ethcommon.HexToHash("0x2")
-var sigError = []byte{2}
+func newTxCtx(eId, txHash, txRaw, sender string) *engine.TxContext {
+	txctx := engine.NewTxContext()
+	txctx.Logger = log.NewEntry(log.StandardLogger())
+	txctx.WithContext(proxy.With(txctx.Context(), chainRegistryUrl))
+	_ = txctx.Envelope.SetID(eId).
+		SetTxHash(ethcommon.HexToHash(txHash)).
+		SetChainIDUint64(chainID).
+		SetRawString(txRaw)
+	_ = txctx.Envelope.SetFromString(sender)
+	return txctx
+}
 
-func TestSignTx(t *testing.T) {
-	testSet := []struct {
-		name           string
-		txctx          func(txctx *engine.TxContext) *engine.TxContext
-		sender         ethcommon.Address
-		expectedOutput output
-	}{
-		{
-			"signTx without error",
-			func(txctx *engine.TxContext) *engine.TxContext {
-				return txctx
-			},
-			addressNoError,
-			output{
-				sig:  sigNoError,
-				hash: &hashNoError,
-				err:  nil,
-			},
-		},
-		{
-			"signTx with error",
-			func(txctx *engine.TxContext) *engine.TxContext {
-				return txctx
-			},
-			addressError,
-			output{
-				sig:  sigError,
-				hash: &hashError,
-				err:  errors.FromError(fmt.Errorf("error")).ExtendComponent(component),
-			},
-		},
-	}
+func TestSender_EnvelopeStore(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	tx := ethtypes.NewContractCreation(0, nil, 0, nil, []byte{})
+	envelopeId := utils.RandomString(12)
+	txHash := ethcommon.HexToHash("0x" + utils.RandHexString(64))
+	enlaveKey := ethcommon.HexToHash("0x" + utils.RandHexString(64))
+	txRaw := ethcommon.HexToHash("0x" + utils.RandHexString(10))
+	privTxRaw := "0x" + utils.RandHexString(10)
+	txSender := ethcommon.HexToAddress("0x" + utils.RandHexString(32))
+	precompiledContractAddr := ethcommon.HexToAddress("0x" + utils.RandHexString(32))
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	k := mock.NewMockKeyStore(mockCtrl)
-	k.EXPECT().
-		SignPrivateEEATx(gomock.Any(), gomock.Any(), addressNoError, gomock.Any(), gomock.Any()).
-		Return(sigNoError, &hashNoError, nil).
-		AnyTimes()
-	k.EXPECT().
-		SignPrivateEEATx(gomock.Any(), gomock.Any(), addressError, gomock.Any(), gomock.Any()).
-		Return(sigError, &hashError, fmt.Errorf("error")).
-		AnyTimes()
+	ec := mock2.NewMockClient(mockCtrl)
+	signTx := generateSignTx(ec)
 
-	for _, test := range testSet {
-		test := test
-		t.Run(test.name, func(t *testing.T) {
-			t.Parallel()
+	t.Run("should execute eea signer successfully", func(t *testing.T) {
+		txctx := newTxCtx(envelopeId, txHash.String(), txRaw.String(), txSender.String())
+		k.EXPECT().
+			SignPrivateEEATx(txctx.Context(), gomock.Any(), txSender, tx,
+				gomock.AssignableToTypeOf(&types.PrivateArgs{})).
+			Return([]byte(privTxRaw), &enlaveKey, nil)
 
-			txctx := engine.NewTxContext()
-			sig, hash, err := signTx(k, test.txctx(txctx), test.sender, &ethtypes.Transaction{})
+		ec.EXPECT().PrivDistributeRawTransaction(txctx.Context(), chainRegistryUrl, hexutil.Encode([]byte(privTxRaw))).
+			Return(enlaveKey, nil)
 
-			assert.True(t, reflect.DeepEqual(test.expectedOutput.sig, sig), "Expected same sig")
-			assert.True(t, reflect.DeepEqual(test.expectedOutput.hash, hash), "Expected same hash")
-			assert.Equal(t, test.expectedOutput.err, err, "Expected same error")
-		})
-	}
+		ec.EXPECT().EEAPrivPrecompiledContractAddr(txctx.Context(), chainRegistryUrl).
+			Return(precompiledContractAddr, nil)
+
+		markingTx := ethtypes.NewTransaction(
+			tx.Nonce(),
+			precompiledContractAddr,
+			tx.Value(),
+			tx.Gas(),
+			tx.GasPrice(),
+			enlaveKey.Bytes(),
+		)
+
+		k.EXPECT().
+			SignTx(txctx.Context(), gomock.Any(), txSender, markingTx).
+			Return(txRaw.Bytes(), &txHash, nil)
+
+		sig, hash, err := signTx(k, txctx, txSender, tx)
+
+		assert.Equal(t, sig, txRaw.Bytes())
+		assert.Equal(t, &txHash, hash)
+		assert.Nil(t, err)
+	})
+	
+	t.Run("should fail to execute eea signer if SignPrivateEEATx fails", func(t *testing.T) {
+		expectedErr := errors.InternalError("Error")
+		txctx := newTxCtx(envelopeId, txHash.String(), txRaw.String(), txSender.String())
+
+		k.EXPECT().
+			SignPrivateEEATx(txctx.Context(), gomock.Any(), txSender, tx,
+				gomock.AssignableToTypeOf(&types.PrivateArgs{})).
+			Return([]byte(privTxRaw), &enlaveKey, expectedErr)
+		
+
+		_, _, err := signTx(k, txctx, txSender, tx)
+
+		assert.NotNil(t, err)
+		assert.Equal(t, errors.FromError(err).ExtendComponent(component), expectedErr)
+	})
+	
+	t.Run("should fail to execute eea signer if PrivDistributeRawTransaction fails", func(t *testing.T) {
+		expectedErr := errors.InternalError("Error")
+		txctx := newTxCtx(envelopeId, txHash.String(), txRaw.String(), txSender.String())
+
+		k.EXPECT().
+			SignPrivateEEATx(txctx.Context(), gomock.Any(), txSender, tx,
+				gomock.AssignableToTypeOf(&types.PrivateArgs{})).
+			Return([]byte(privTxRaw), &enlaveKey, nil)
+		
+		ec.EXPECT().PrivDistributeRawTransaction(txctx.Context(), chainRegistryUrl, hexutil.Encode([]byte(privTxRaw))).
+			Return(enlaveKey, expectedErr)
+
+		_, _, err := signTx(k, txctx, txSender, tx)
+
+		assert.NotNil(t, err)
+		assert.Equal(t, errors.CryptoOperationError(expectedErr.Error()).ExtendComponent(component), err)
+	})
+	
+	t.Run("should fail to execute eea signer if EEAPrivPrecompiledContractAddr fails", func(t *testing.T) {
+		expectedErr := errors.InternalError("Error")
+		txctx := newTxCtx(envelopeId, txHash.String(), txRaw.String(), txSender.String())
+
+		k.EXPECT().
+			SignPrivateEEATx(txctx.Context(), gomock.Any(), txSender, tx,
+				gomock.AssignableToTypeOf(&types.PrivateArgs{})).
+			Return([]byte(privTxRaw), &enlaveKey, nil)
+		
+		ec.EXPECT().PrivDistributeRawTransaction(txctx.Context(), chainRegistryUrl, hexutil.Encode([]byte(privTxRaw))).
+			Return(enlaveKey, nil)
+		
+		ec.EXPECT().EEAPrivPrecompiledContractAddr(txctx.Context(), chainRegistryUrl).
+			Return(precompiledContractAddr, expectedErr)
+
+		_, _, err := signTx(k, txctx, txSender, tx)
+
+		assert.NotNil(t, err)
+		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(component), err)
+	})
+	
+	t.Run("should fail to execute eea signer if EEAPrivPrecompiledContractAddr fails", func(t *testing.T) {
+		expectedErr := errors.InternalError("Error")
+		txctx := newTxCtx(envelopeId, txHash.String(), txRaw.String(), txSender.String())
+
+		k.EXPECT().
+			SignPrivateEEATx(txctx.Context(), gomock.Any(), txSender, tx,
+				gomock.AssignableToTypeOf(&types.PrivateArgs{})).
+			Return([]byte(privTxRaw), &enlaveKey, nil)
+		
+		ec.EXPECT().PrivDistributeRawTransaction(txctx.Context(), chainRegistryUrl, hexutil.Encode([]byte(privTxRaw))).
+			Return(enlaveKey, nil)
+		
+		ec.EXPECT().EEAPrivPrecompiledContractAddr(txctx.Context(), chainRegistryUrl).
+			Return(precompiledContractAddr, nil)
+		
+		k.EXPECT().
+			SignTx(txctx.Context(), gomock.Any(), txSender, gomock.Any()).
+			Return(txRaw.Bytes(), &txHash, expectedErr)
+
+		_, _, err := signTx(k, txctx, txSender, tx)
+
+		assert.NotNil(t, err)
+		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(component), err)
+	})
 }

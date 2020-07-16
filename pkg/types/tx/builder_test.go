@@ -79,26 +79,21 @@ func TestEnvelope_SetMethod(t *testing.T) {
 func TestEnvelope_IsMethod(t *testing.T) {
 	b := NewEnvelope()
 	assert.True(t, b.IsEthSendRawTransaction(), "Should be equal")
-	assert.False(t, b.IsEthSendPrivateTransaction(), "Should be equal")
-	assert.False(t, b.IsEthSendRawPrivateTransaction(), "Should be equal")
 	assert.False(t, b.IsEeaSendPrivateTransaction(), "Should be equal")
 
 	_ = b.SetMethod(Method_ETH_SENDPRIVATETRANSACTION)
 	assert.False(t, b.IsEthSendRawTransaction(), "Should be equal")
 	assert.True(t, b.IsEthSendPrivateTransaction(), "Should be equal")
 	assert.False(t, b.IsEthSendRawPrivateTransaction(), "Should be equal")
-	assert.False(t, b.IsEeaSendPrivateTransaction(), "Should be equal")
 
 	_ = b.SetMethod(Method_ETH_SENDRAWPRIVATETRANSACTION)
 	assert.False(t, b.IsEthSendRawTransaction(), "Should be equal")
 	assert.False(t, b.IsEthSendPrivateTransaction(), "Should be equal")
-	assert.True(t, b.IsEthSendRawPrivateTransaction(), "Should be equal")
 	assert.False(t, b.IsEeaSendPrivateTransaction(), "Should be equal")
 
 	_ = b.SetMethod(Method_EEA_SENDPRIVATETRANSACTION)
 	assert.False(t, b.IsEthSendRawTransaction(), "Should be equal")
 	assert.False(t, b.IsEthSendPrivateTransaction(), "Should be equal")
-	assert.False(t, b.IsEthSendRawPrivateTransaction(), "Should be equal")
 	assert.True(t, b.IsEeaSendPrivateTransaction(), "Should be equal")
 }
 

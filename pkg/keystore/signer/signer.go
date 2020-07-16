@@ -65,6 +65,7 @@ func GenerateSignerHandler(signerFunc TransactionSignerFunc, vks, onetime keysto
 			"raw":    utils.ShortString(hexutil.Encode(raw), 10),
 			"txHash": h.Hex(),
 		})
+
 		txctx.Logger.Debugf(successMsg)
 	}
 }

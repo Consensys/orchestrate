@@ -36,7 +36,7 @@ func TesseraRawPrivateTxSender(ec ethclient.TransactionSender) engine.HandlerFun
 		}
 
 		if txHash.String() != txctx.Envelope.TxHash.String() {
-			err := errors.DataError("invalid generate txHash. Expected %s, got %s",
+			err := errors.InternalError("invalid transaction hash. Expected %s, got %s",
 				txctx.Envelope.TxHash.String(), txHash.String())
 			_ = txctx.AbortWithError(err).ExtendComponent(component)
 			return

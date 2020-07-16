@@ -4,8 +4,6 @@ import (
 	"context"
 	"sync"
 
-	txupdater "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/tx_updater"
-
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -23,6 +21,7 @@ import (
 	producer "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/producer/tx-crafter"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/tessera"
 	injector "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/trace-injector"
+	txupdater "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/tx_updater"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"

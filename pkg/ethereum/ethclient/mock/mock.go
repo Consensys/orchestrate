@@ -55,11 +55,12 @@ func (mr *MockTransactionSenderMockRecorder) SendTransaction(ctx, url, args inte
 }
 
 // SendRawTransaction mocks base method
-func (m *MockTransactionSender) SendRawTransaction(ctx context.Context, url, raw string) error {
+func (m *MockTransactionSender) SendRawTransaction(ctx context.Context, url, raw string) (common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendRawTransaction", ctx, url, raw)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(common.Hash)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // SendRawTransaction indicates an expected call of SendRawTransaction
@@ -96,6 +97,21 @@ func (m *MockTransactionSender) SendRawPrivateTransaction(ctx context.Context, u
 func (mr *MockTransactionSenderMockRecorder) SendRawPrivateTransaction(ctx, url, raw interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendRawPrivateTransaction", reflect.TypeOf((*MockTransactionSender)(nil).SendRawPrivateTransaction), ctx, url, raw)
+}
+
+// PrivDistributeRawTransaction mocks base method
+func (m *MockTransactionSender) PrivDistributeRawTransaction(ctx context.Context, endpoint, raw string) (common.Hash, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivDistributeRawTransaction", ctx, endpoint, raw)
+	ret0, _ := ret[0].(common.Hash)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivDistributeRawTransaction indicates an expected call of PrivDistributeRawTransaction
+func (mr *MockTransactionSenderMockRecorder) PrivDistributeRawTransaction(ctx, endpoint, raw interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivDistributeRawTransaction", reflect.TypeOf((*MockTransactionSender)(nil).PrivDistributeRawTransaction), ctx, endpoint, raw)
 }
 
 // MockChainLedgerReader is a mock of ChainLedgerReader interface
@@ -225,6 +241,21 @@ func (m *MockChainLedgerReader) PrivateTransactionReceipt(ctx context.Context, u
 func (mr *MockChainLedgerReaderMockRecorder) PrivateTransactionReceipt(ctx, url, txHash interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivateTransactionReceipt", reflect.TypeOf((*MockChainLedgerReader)(nil).PrivateTransactionReceipt), ctx, url, txHash)
+}
+
+// EEAPrivPrecompiledContractAddr mocks base method
+func (m *MockChainLedgerReader) EEAPrivPrecompiledContractAddr(ctx context.Context, endpoint string) (common.Address, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EEAPrivPrecompiledContractAddr", ctx, endpoint)
+	ret0, _ := ret[0].(common.Address)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EEAPrivPrecompiledContractAddr indicates an expected call of EEAPrivPrecompiledContractAddr
+func (mr *MockChainLedgerReaderMockRecorder) EEAPrivPrecompiledContractAddr(ctx, endpoint interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EEAPrivPrecompiledContractAddr", reflect.TypeOf((*MockChainLedgerReader)(nil).EEAPrivPrecompiledContractAddr), ctx, endpoint)
 }
 
 // MockChainStateReader is a mock of ChainStateReader interface
@@ -621,11 +652,12 @@ func (mr *MockClientMockRecorder) SendTransaction(ctx, url, args interface{}) *g
 }
 
 // SendRawTransaction mocks base method
-func (m *MockClient) SendRawTransaction(ctx context.Context, url, raw string) error {
+func (m *MockClient) SendRawTransaction(ctx context.Context, url, raw string) (common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendRawTransaction", ctx, url, raw)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(common.Hash)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // SendRawTransaction indicates an expected call of SendRawTransaction
@@ -662,6 +694,21 @@ func (m *MockClient) SendRawPrivateTransaction(ctx context.Context, url, raw str
 func (mr *MockClientMockRecorder) SendRawPrivateTransaction(ctx, url, raw interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendRawPrivateTransaction", reflect.TypeOf((*MockClient)(nil).SendRawPrivateTransaction), ctx, url, raw)
+}
+
+// PrivDistributeRawTransaction mocks base method
+func (m *MockClient) PrivDistributeRawTransaction(ctx context.Context, endpoint, raw string) (common.Hash, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivDistributeRawTransaction", ctx, endpoint, raw)
+	ret0, _ := ret[0].(common.Hash)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivDistributeRawTransaction indicates an expected call of PrivDistributeRawTransaction
+func (mr *MockClientMockRecorder) PrivDistributeRawTransaction(ctx, endpoint, raw interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivDistributeRawTransaction", reflect.TypeOf((*MockClient)(nil).PrivDistributeRawTransaction), ctx, endpoint, raw)
 }
 
 // BlockByHash mocks base method
@@ -768,6 +815,21 @@ func (m *MockClient) PrivateTransactionReceipt(ctx context.Context, url string, 
 func (mr *MockClientMockRecorder) PrivateTransactionReceipt(ctx, url, txHash interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivateTransactionReceipt", reflect.TypeOf((*MockClient)(nil).PrivateTransactionReceipt), ctx, url, txHash)
+}
+
+// EEAPrivPrecompiledContractAddr mocks base method
+func (m *MockClient) EEAPrivPrecompiledContractAddr(ctx context.Context, endpoint string) (common.Address, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EEAPrivPrecompiledContractAddr", ctx, endpoint)
+	ret0, _ := ret[0].(common.Address)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EEAPrivPrecompiledContractAddr indicates an expected call of EEAPrivPrecompiledContractAddr
+func (mr *MockClientMockRecorder) EEAPrivPrecompiledContractAddr(ctx, endpoint interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EEAPrivPrecompiledContractAddr", reflect.TypeOf((*MockClient)(nil).EEAPrivPrecompiledContractAddr), ctx, endpoint)
 }
 
 // BalanceAt mocks base method

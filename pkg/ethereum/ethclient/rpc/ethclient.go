@@ -689,12 +689,12 @@ func toCallArg(msg *eth.CallMsg) interface{} {
 }
 
 // SendRawTransaction allows to send a raw transaction
-func (ec *Client) SendRawTransaction(ctx context.Context, endpoint, raw string) error {
-	err := ec.Call(ctx, endpoint, processResult(nil), "eth_sendRawTransaction", raw)
+func (ec *Client) SendRawTransaction(ctx context.Context, endpoint, raw string) (txHash ethcommon.Hash, err error) {
+	err = ec.Call(ctx, endpoint, processResult(&txHash), "eth_sendRawTransaction", raw)
 	if err != nil {
-		return errors.FromError(err).ExtendComponent(component)
+		return ethcommon.Hash{}, errors.FromError(err).ExtendComponent(component)
 	}
-	return nil
+	return txHash, nil
 }
 
 // SendTransaction send transaction to an Ethereum node
@@ -748,4 +748,23 @@ func (ec *Client) PrivNonce(ctx context.Context, endpoint string, account ethcom
 		return 0, errors.FromError(err).ExtendComponent(component)
 	}
 	return uint64(nonce), nil
+}
+
+// Distributes a signed, RLP encoded private transaction.
+// https://besu.hyperledger.org/en/stable/Reference/API-Methods/#priv_distributerawtransaction
+func (ec *Client) PrivDistributeRawTransaction(ctx context.Context, endpoint, raw string) (txHash ethcommon.Hash, err error) {
+	err = ec.Call(ctx, endpoint, processResult(&txHash), "priv_distributeRawTransaction", raw)
+	if err != nil {
+		return ethcommon.Hash{}, errors.FromError(err).ExtendComponent(component)
+	}
+	return txHash, nil
+}
+
+func (ec *Client) EEAPrivPrecompiledContractAddr(ctx context.Context, endpoint string) (ethcommon.Address, error) {
+	var hash string
+	err := ec.Call(ctx, endpoint, processResult(&hash), "priv_getPrivacyPrecompileAddress")
+	if err != nil {
+		return ethcommon.Address{}, errors.FromError(err).ExtendComponent(component)
+	}
+	return ethcommon.HexToAddress(hash), nil
 }

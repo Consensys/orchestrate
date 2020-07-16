@@ -6,10 +6,9 @@ import (
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/rlp"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/rlp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/types"
-	"golang.org/x/crypto/sha3"
 )
 
 func privateTxHash(tx *ethtypes.Transaction, privateArgs *types.PrivateArgs, chain *big.Int) (ethcommon.Hash, error) {
@@ -18,7 +17,7 @@ func privateTxHash(tx *ethtypes.Transaction, privateArgs *types.PrivateArgs, cha
 		return ethcommon.Hash{}, err
 	}
 
-	return rlpHash([]interface{}{
+	return rlp.Hash([]interface{}{
 		tx.Nonce(),
 		tx.GasPrice(),
 		tx.Gas(),
@@ -68,7 +67,7 @@ func encodePrivateTx(tx *ethtypes.Transaction, privateArgs *types.PrivateArgs) [
 	v, r, s := tx.RawSignatureValues()
 	privateFromEncoded, privateRecipientEncoded, _ := privateArgsEncoded(privateArgs)
 
-	rplEncoding, _ := rlpEncode([]interface{}{
+	rplEncoding, _ := rlp.Encode([]interface{}{
 		tx.Nonce(),
 		tx.GasPrice(),
 		tx.Gas(),
@@ -90,18 +89,4 @@ func calculatePrivateV(v *big.Int) *big.Int {
 		return big.NewInt(37)
 	}
 	return big.NewInt(38)
-}
-
-func rlpHash(object interface{}) (hash ethcommon.Hash, err error) {
-	hashAlgo := sha3.NewLegacyKeccak256()
-	err = rlp.Encode(hashAlgo, object)
-	if err != nil {
-		return ethcommon.Hash{}, err
-	}
-	hashAlgo.Sum(hash[:0])
-	return hash, nil
-}
-
-func rlpEncode(object interface{}) ([]byte, error) {
-	return rlp.EncodeToBytes(object)
 }

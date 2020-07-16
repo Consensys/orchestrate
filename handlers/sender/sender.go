@@ -14,27 +14,15 @@ import (
 func Sender(ec ethclient.TransactionSender, s svc.EnvelopeStoreClient, txSchedulerClient client.TransactionSchedulerClient) engine.HandlerFunc {
 	// Declare a set of handlers that will be forked by Sender handler
 	rawTxStore := storer.RawTxStore(s, txSchedulerClient)
-	UnsignedTxStore := storer.UnsignedTxStore(s, txSchedulerClient)
 
 	rawTxSender := engine.CombineHandlers(
 		rawTxStore,
 		RawTxSender(ec),
 	)
 
-	// Orion private tx
-	rawPrivateTxSender := engine.CombineHandlers(
-		UnsignedTxStore,
-		RawPrivateTxSender(ec),
-	)
-
 	tesseraRawPrivateTxSender := engine.CombineHandlers(
 		rawTxStore,
 		TesseraRawPrivateTxSender(ec),
-	)
-
-	unsignedTxSender := engine.CombineHandlers(
-		UnsignedTxStore,
-		UnsignedTxSender(ec),
 	)
 
 	return func(txctx *engine.TxContext) {
@@ -48,12 +36,10 @@ func Sender(ec ethclient.TransactionSender, s svc.EnvelopeStoreClient, txSchedul
 		switch {
 		case txctx.Envelope.IsEthSendRawTransaction() || txctx.Envelope.IsEthSendTransaction():
 			rawTxSender(txctx)
-		case txctx.Envelope.IsEthSendPrivateTransaction():
-			unsignedTxSender(txctx)
 		case txctx.Envelope.IsEthSendRawPrivateTransaction():
 			tesseraRawPrivateTxSender(txctx)
 		case txctx.Envelope.IsEeaSendPrivateTransaction():
-			rawPrivateTxSender(txctx)
+			rawTxSender(txctx)
 		default:
 			var err error
 			// @TODO Remove once envelope store is deleted

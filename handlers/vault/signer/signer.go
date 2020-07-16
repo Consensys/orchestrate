@@ -8,7 +8,7 @@ import (
 // TxSigner creates a signer handler
 //
 // It is a fork handler that allow signing for either eea, tessera or public ethereum
-func TxSigner(eeaSigner, publicEthereumSigner, tesseraSigner engine.HandlerFunc) engine.HandlerFunc {
+func TxSigner(publicEthereumSigner, eeaSigner, tesseraSigner engine.HandlerFunc) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		if txctx.Envelope.GetChainID() == nil {
 			err := errors.DataError("cannot sign transaction without chainID").SetComponent(component)
@@ -18,8 +18,6 @@ func TxSigner(eeaSigner, publicEthereumSigner, tesseraSigner engine.HandlerFunc)
 		}
 
 		switch {
-		case txctx.Envelope.IsEthSendPrivateTransaction():
-			// Do nothing as the ethereum node is going to perform the signature
 		case txctx.Envelope.IsEthSendRawPrivateTransaction():
 			// Sign for Tessera
 			tesseraSigner(txctx)

@@ -27,10 +27,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/offset"
 )
 
-const (
-	orionPrecompiledContractAddr = "0x000000000000000000000000000000000000007E"
-)
-
 type fetchedBlock struct {
 	block     *ethtypes.Block
 	envelopes []*tx.Envelope // TODO: Remove when envelope store is removed
@@ -54,9 +50,10 @@ type Session struct {
 	bckOff  backoff.BackOff
 
 	// Listening session
-	trigger         chan struct{}
-	blockPosition   uint64
-	currentChainTip uint64
+	trigger                        chan struct{}
+	blockPosition                  uint64
+	eeaPrivPrecompiledContractAddr string
+	currentChainTip                uint64
 
 	// Channel stacking blocks waiting for receipts to be fetched
 	fetchedBlocks chan *Future
@@ -158,6 +155,8 @@ func (s *Session) init(ctx context.Context) error {
 		return err
 	}
 
+	s.initEEAPrivPrecompiledContractAddr(ctx)
+
 	s.trigger = make(chan struct{}, 1)
 	s.errors = make(chan error, 1)
 	s.fetchedBlocks = make(chan *Future, 20)
@@ -172,6 +171,14 @@ func (s *Session) initChainID(ctx context.Context) error {
 	}
 	s.Chain.ChainID = chain
 	return nil
+}
+
+func (s *Session) initEEAPrivPrecompiledContractAddr(ctx context.Context) {
+	// We ignore the error as this only compiles on networks with { eea:1.0, priv:1.0}
+	addr, err := s.ec.EEAPrivPrecompiledContractAddr(ctx, s.Chain.URL)
+	if err == nil {
+		s.eeaPrivPrecompiledContractAddr = addr.String()
+	}
 }
 
 func (s *Session) initPosition(ctx context.Context) error {
@@ -406,7 +413,7 @@ func (s *Session) fetchReceiptsEnvelope(ctx context.Context, transaction ethtype
 
 	for _, blckTx := range transaction {
 		switch {
-		case isPrivTx(blckTx) && isInternalTxEnvelope(envelopeMap, blckTx):
+		case isEEAPrivTx(blckTx, s.eeaPrivPrecompiledContractAddr) && isInternalTxEnvelope(envelopeMap, blckTx):
 			futureEnvelopes = append(futureEnvelopes, s.fetchPrivateReceiptEnvelope(
 				ctx,
 				envelopeMap[blckTx.Hash().String()],
@@ -418,7 +425,7 @@ func (s *Session) fetchReceiptsEnvelope(ctx context.Context, transaction ethtype
 				envelopeMap[blckTx.Hash().String()],
 				blckTx.Hash()))
 			continue
-		case isPrivTx(blckTx) && s.Chain.Listener.ExternalTxEnabled:
+		case isEEAPrivTx(blckTx, s.eeaPrivPrecompiledContractAddr) && s.Chain.Listener.ExternalTxEnabled:
 			futureEnvelopes = append(futureEnvelopes, s.fetchPrivateReceiptEnvelope(
 				ctx,
 				tx.NewEnvelope().SetTxHash(blckTx.Hash()).SetChainName(s.Chain.Name),
@@ -443,7 +450,7 @@ func (s *Session) fetchReceipts(ctx context.Context, transaction ethtypes.Transa
 
 	for _, blckTx := range transaction {
 		switch {
-		case isPrivTx(blckTx) && isInternalTx(jobMap, blckTx):
+		case isEEAPrivTx(blckTx, s.eeaPrivPrecompiledContractAddr) && isInternalTx(jobMap, blckTx):
 			futureJobs = append(futureJobs, s.fetchPrivateReceipt(ctx, jobMap[blckTx.Hash().String()], blckTx.Hash()))
 			continue
 		case isInternalTx(jobMap, blckTx):
@@ -510,9 +517,12 @@ func isInternalTx(jobMap map[string]*types.Job, transaction *ethtypes.Transactio
 	return ok
 }
 
-func isPrivTx(transaction *ethtypes.Transaction) bool {
+func isEEAPrivTx(transaction *ethtypes.Transaction, eeaPrivPrecompiledContractAddr string) bool {
+	if eeaPrivPrecompiledContractAddr == "" {
+		return false
+	}
 	// A enclavekey tx has as To address the pre-deployed smart-contract
-	return transaction.To() != nil && transaction.To().String() == orionPrecompiledContractAddr
+	return transaction.To() != nil && transaction.To().String() == eeaPrivPrecompiledContractAddr
 }
 
 // TODO: To be removed
