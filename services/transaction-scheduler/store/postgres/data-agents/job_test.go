@@ -128,7 +128,7 @@ func (s *jobTestSuite) TestPGJob_FindOneByUUID() {
 	err := insertJob(ctx, s.agents, job)
 	assert.NoError(s.T(), err)
 
-	s.T().Run("should get model successfully as empty  with sorted logs", func(t *testing.T) {
+	s.T().Run("should get model successfully with sorted logs", func(t *testing.T) {
 		jobRetrieved, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, []string{multitenancy.Wildcard})
 
 		assert.NoError(t, err)
@@ -199,15 +199,15 @@ func (s *jobTestSuite) TestPGJob_Search() {
 
 	s.T().Run("should find models successfully by status", func(t *testing.T) {
 		filters := &entities.JobFilters{
-			Status: types.StatusCreated,
+			Status: types.StatusPending,
 		}
 
 		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{tenantID})
 
 		assert.NoError(t, err)
 		assert.Len(t, retrievedJobs, 1)
-		assert.Equal(t, retrievedJobs[0].UUID, jobOne.UUID)
-		assert.Equal(t, len(jobOne.Logs), len(retrievedJobs[0].Logs))
+		assert.Equal(t, retrievedJobs[0].UUID, jobTwo.UUID)
+		assert.Equal(t, len(jobTwo.Logs), len(retrievedJobs[0].Logs))
 	})
 
 	s.T().Run("should not find any model by txHashes", func(t *testing.T) {

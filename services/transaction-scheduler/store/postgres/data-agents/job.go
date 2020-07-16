@@ -3,6 +3,8 @@ package dataagents
 import (
 	"context"
 
+	"github.com/go-pg/pg/v9/orm"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 
 	gopg "github.com/go-pg/pg/v9"
@@ -78,9 +80,11 @@ func (agent *PGJob) FindOneByUUID(ctx context.Context, jobUUID string, tenants [
 		Where("job.uuid = ?", jobUUID).
 		Relation("Transaction").
 		Relation("Schedule").
-		Relation("Logs")
+		Relation("Logs", func(q *orm.Query) (*orm.Query, error) {
+			return q.Order("id ASC"), nil
+		})
 
-	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants).Order("job.id ASC", "log.id ASC")
+	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants).Order("id ASC")
 
 	err := pg.Select(ctx, query)
 	if err != nil {
@@ -96,7 +100,9 @@ func (agent *PGJob) Search(ctx context.Context, filters *entities.JobFilters, te
 	query := agent.db.ModelContext(ctx, &jobs).
 		Relation("Transaction").
 		Relation("Schedule").
-		Relation("Logs")
+		Relation("Logs", func(q *orm.Query) (*orm.Query, error) {
+			return q.Order("id ASC"), nil
+		})
 
 	if len(filters.TxHashes) > 0 {
 		query = query.Where("transaction.hash in (?)", gopg.In(filters.TxHashes))
@@ -115,7 +121,7 @@ func (agent *PGJob) Search(ctx context.Context, filters *entities.JobFilters, te
 			Where("tmpl.id is null AND log.status = ?", filters.Status)
 	}
 
-	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants).Order("job.id ASC", "log.id ASC")
+	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants).Order("id ASC")
 
 	err := pg.Select(ctx, query)
 	if err != nil {
