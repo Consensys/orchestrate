@@ -4,8 +4,9 @@ import (
 	"context"
 	"sync"
 
+	faucetscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet/scheduler"
+
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet/sarama"
 )
 
 var (
@@ -21,10 +22,10 @@ func Init(ctx context.Context) {
 		}
 
 		// Initialize Sarama Faucet
-		sarama.Init(ctx)
+		faucetscheduler.Init()
 
 		// Set Faucet
-		fct = sarama.GlobalFaucet()
+		fct = faucetscheduler.GlobalFaucet()
 	})
 }
 

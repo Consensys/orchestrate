@@ -275,7 +275,7 @@ func (c *HTTPClient) UpdateJob(ctx context.Context, jobUUID string, request *typ
 }
 
 func (c *HTTPClient) StartJob(ctx context.Context, jobUUID string) error {
-	reqURL := fmt.Sprintf("%v/jobs/%s", c.config.URL, jobUUID)
+	reqURL := fmt.Sprintf("%v/jobs/%s/start", c.config.URL, jobUUID)
 
 	response, err := clientutils.PutRequest(ctx, c.client, reqURL, nil)
 	if err != nil {

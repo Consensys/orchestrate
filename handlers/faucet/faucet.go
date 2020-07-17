@@ -34,11 +34,13 @@ func Faucet(fct faucet.Faucet, faucetClient client.FaucetClient) engine.HandlerF
 		}
 
 		req := &faucettypes.Request{
+			ScheduleUUID:      txctx.Envelope.GetContextLabelsValue("scheduleUUID"),
 			ParentTxID:        txctx.Envelope.GetID(),
 			ChildTxID:         txctx.Envelope.GetContextLabelsValue("faucetChildTxID"),
 			ChainID:           txctx.Envelope.GetChainID(),
 			ChainURL:          url,
 			ChainName:         txctx.Envelope.GetChainName(),
+			ChainUUID:         txctx.Envelope.GetChainUUID(),
 			Beneficiary:       txctx.Envelope.MustGetFromAddress(),
 			FaucetsCandidates: faucettypes.NewFaucetsCandidates(faucets),
 		}

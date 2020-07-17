@@ -86,6 +86,7 @@ func NewEnvelopeFromJobModel(job *models.Job, headers map[string]string) *tx.TxE
 		contextLabels = map[string]string{}
 	}
 	contextLabels["jobUUID"] = job.UUID
+	contextLabels["scheduleUUID"] = job.Schedule.UUID
 
 	txEnvelope := &tx.TxEnvelope{
 		Msg: &tx.TxEnvelope_TxRequest{TxRequest: &tx.TxRequest{

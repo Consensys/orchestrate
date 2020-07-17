@@ -11,8 +11,10 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
+type key string
+
 const (
-	RequestHeaderKey = "request-headers"
+	RequestHeaderKey key = "request-headers"
 )
 
 func GetRequest(ctx context.Context, client *http.Client, reqURL string) (*http.Response, error) {
