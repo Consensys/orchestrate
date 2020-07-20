@@ -92,7 +92,7 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 
 	// Step 4: Start first job of the schedule if status is CREATED
 	job := txRequest.Schedule.Jobs[0]
-	if job.GetStatus() == types.StatusCreated {
+	if job.GetStatus() == utils.StatusCreated {
 		err = uc.startJobUC.Execute(ctx, job.UUID, []string{tenantID})
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
@@ -196,12 +196,12 @@ func generateRequestHash(chainUUID string, params interface{}) (string, error) {
 func generateJobType(txRequest *entities.TxRequest) string {
 	switch {
 	case txRequest.Params.Protocol == utils.OrionChainType:
-		return types.OrionEEATransaction
+		return utils.OrionEEATransaction
 	case txRequest.Params.Protocol == utils.TesseraChainType:
-		return types.TesseraPrivateTransaction
+		return utils.TesseraPrivateTransaction
 	case txRequest.Params.Raw != "":
-		return types.EthereumRawTransaction
+		return utils.EthereumRawTransaction
 	default:
-		return types.EthereumTransaction
+		return utils.EthereumTransaction
 	}
 }

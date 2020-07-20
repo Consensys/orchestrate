@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+
 	pkgtypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 
 	"github.com/Shopify/sarama"
@@ -166,7 +168,7 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 			ctx,
 			txResponse.GetId(),
 			&pkgtypes.UpdateJobRequest{
-				Status:  pkgtypes.StatusMined,
+				Status:  utils.StatusMined,
 				Message: fmt.Sprintf("Transaction mined in block %v", block.NumberU64()),
 			},
 		)

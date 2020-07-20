@@ -3,6 +3,8 @@ package storer
 import (
 	"fmt"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
@@ -42,7 +44,7 @@ func rawTxStoreInTxScheduler(txctx *engine.TxContext, txSchedulerClient client.T
 				PrivateFor:     txctx.Envelope.GetPrivateFor(),
 				PrivacyGroupID: txctx.Envelope.GetPrivacyGroupID(),
 			},
-			Status: types.StatusPending,
+			Status: utils.StatusPending,
 		},
 	)
 
@@ -62,7 +64,7 @@ func rawTxStoreInTxScheduler(txctx *engine.TxContext, txSchedulerClient client.T
 			txctx.Context(),
 			txctx.Envelope.GetID(),
 			&types.UpdateJobRequest{
-				Status: types.StatusRecovering,
+				Status: utils.StatusRecovering,
 				Message: fmt.Sprintf(
 					"transaction attempt with nonce %v and sender %v failed with error: %v",
 					txctx.Envelope.GetNonceString(),
@@ -90,7 +92,7 @@ func rawTxStoreInTxScheduler(txctx *engine.TxContext, txSchedulerClient client.T
 				Transaction: &types.ETHTransaction{
 					Hash: retrievedTxHash,
 				},
-				Status:  types.StatusWarning,
+				Status:  utils.StatusWarning,
 				Message: errMessage,
 			},
 		)

@@ -3,6 +3,8 @@ package jobs
 import (
 	"context"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/validators"
 
@@ -63,7 +65,7 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *types.Job, tenants
 
 	jobModel := parsers.NewJobModelFromEntities(job, &schedule.ID)
 	jobModel.Logs = append(jobModel.Logs, &models.Log{
-		Status: types.StatusCreated,
+		Status: utils.StatusCreated,
 	})
 
 	err = database.ExecuteInDBTx(uc.db, func(tx database.Tx) error {

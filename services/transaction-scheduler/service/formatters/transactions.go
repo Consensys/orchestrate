@@ -11,7 +11,7 @@ import (
 )
 
 func FormatSendTxRequest(txRequest *types.SendTransactionRequest, idempotencyKey string) *entities.TxRequest {
-	txReq := &entities.TxRequest{
+	return &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,
 		ChainName:      txRequest.ChainName,
 		Labels:         txRequest.Labels,
@@ -25,19 +25,15 @@ func FormatSendTxRequest(txRequest *types.SendTransactionRequest, idempotencyKey
 			Args:                     txRequest.Params.Args,
 			PrivateTransactionParams: txRequest.Params.PrivateTransactionParams,
 		},
-	}
-
-	if txRequest.Params.OneTimeKey {
-		txReq.Annotations = &types.Annotations{
+		Annotations: &types.Annotations{
 			OneTimeKey: txRequest.Params.OneTimeKey,
-		}
+			Priority:   txRequest.Params.Priority,
+		},
 	}
-
-	return txReq
 }
 
 func FormatDeployContractRequest(txRequest *types.DeployContractRequest, idempotencyKey string) *entities.TxRequest {
-	txReq := &entities.TxRequest{
+	return &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,
 		ChainName:      txRequest.ChainName,
 		Labels:         txRequest.Labels,
@@ -51,15 +47,11 @@ func FormatDeployContractRequest(txRequest *types.DeployContractRequest, idempot
 			ContractTag:              txRequest.Params.ContractTag,
 			PrivateTransactionParams: txRequest.Params.PrivateTransactionParams,
 		},
-	}
-
-	if txRequest.Params.OneTimeKey {
-		txReq.Annotations = &types.Annotations{
+		Annotations: &types.Annotations{
 			OneTimeKey: txRequest.Params.OneTimeKey,
-		}
+			Priority:   txRequest.Params.Priority,
+		},
 	}
-
-	return txReq
 }
 
 func FormatSendRawRequest(txRequest *types.RawTransactionRequest, idempotencyKey string) *entities.TxRequest {
@@ -84,6 +76,9 @@ func FormatSendTransferRequest(txRequest *types.TransferRequest, idempotencyKey 
 			Value:    txRequest.Params.Value,
 			GasPrice: txRequest.Params.GasPrice,
 			Gas:      txRequest.Params.Gas,
+		},
+		Annotations: &types.Annotations{
+			Priority: txRequest.Params.Priority,
 		},
 	}
 }

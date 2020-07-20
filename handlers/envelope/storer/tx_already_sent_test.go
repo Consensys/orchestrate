@@ -12,10 +12,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	proto "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client/mock"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
@@ -197,7 +197,7 @@ func TestTxAlreadySent_TxScheduler(t *testing.T) {
 		txctx := makeContext("0x7a34cbb73c02aa3309c343e9e9b35f2a992aaa623c2ec2524816f476c63d2efa", "1", "8", 0)
 		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", txctx.Envelope.GetID())
 		jobResponse := testutils.FakeJobResponse()
-		jobResponse.Status = types.StatusCreated
+		jobResponse.Status = utils.StatusCreated
 
 		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetID()).Return(jobResponse, nil)
 
@@ -210,7 +210,7 @@ func TestTxAlreadySent_TxScheduler(t *testing.T) {
 		txctx := makeContext("0x7a34cbb73c02aa3309c343e9e9b35f2a992aaa623c2ec2524816f476c63d2efa", "1", "8", 0)
 		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", txctx.Envelope.GetID())
 		jobResponse := testutils.FakeJobResponse()
-		jobResponse.Status = types.StatusStarted
+		jobResponse.Status = utils.StatusStarted
 
 		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetID()).Return(jobResponse, nil)
 
@@ -223,7 +223,7 @@ func TestTxAlreadySent_TxScheduler(t *testing.T) {
 		txctx := makeContext("0x7a34cbb73c02aa3309c343e9e9b35f2a992aaa623c2ec2524816f476c63d2efa", "1", "8", 0)
 		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", txctx.Envelope.GetID())
 		jobResponse := testutils.FakeJobResponse()
-		jobResponse.Status = types.StatusRecovering
+		jobResponse.Status = utils.StatusRecovering
 
 		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetID()).Return(jobResponse, nil)
 
@@ -236,7 +236,7 @@ func TestTxAlreadySent_TxScheduler(t *testing.T) {
 		txctx := makeContext("0x7a34cbb73c02aa3309c343e9e9b35f2a992aaa623c2ec2524816f476c63d2efa", "1", "8", 0)
 		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", txctx.Envelope.GetID())
 		jobResponse := testutils.FakeJobResponse()
-		jobResponse.Status = types.StatusFailed
+		jobResponse.Status = utils.StatusFailed
 
 		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetID()).Return(jobResponse, nil)
 
@@ -249,7 +249,7 @@ func TestTxAlreadySent_TxScheduler(t *testing.T) {
 		txctx := makeContext("0x7a34cbb73c02aa3309c343e9e9b35f2a992aaa623c2ec2524816f476c63d2efa", "1", "8", 0)
 		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", txctx.Envelope.GetID())
 		jobResponse := testutils.FakeJobResponse()
-		jobResponse.Status = types.StatusFailed
+		jobResponse.Status = utils.StatusFailed
 
 		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetID()).Return(jobResponse, nil)
 
@@ -262,7 +262,7 @@ func TestTxAlreadySent_TxScheduler(t *testing.T) {
 		txctx := makeContext("0x7a34cbb73c02aa3309c343e9e9b35f2a992aaa623c2ec2524816f476c63d2efa", "1", "8", 0)
 		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", txctx.Envelope.GetID())
 		jobResponse := testutils.FakeJobResponse()
-		jobResponse.Status = types.StatusFailed
+		jobResponse.Status = utils.StatusFailed
 
 		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetID()).Return(jobResponse, nil)
 
@@ -275,7 +275,7 @@ func TestTxAlreadySent_TxScheduler(t *testing.T) {
 		txctx := makeContext("0x7a34cbb73c02aa3309c343e9e9b35f2a992aaa623c2ec2524816f476c63d2efa", "1", "8", 0)
 		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", txctx.Envelope.GetID())
 		jobResponse := testutils.FakeJobResponse()
-		jobResponse.Status = types.StatusPending
+		jobResponse.Status = utils.StatusPending
 
 		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetID()).Return(jobResponse, nil)
 		mockChainLedgerReader.EXPECT().
@@ -291,7 +291,7 @@ func TestTxAlreadySent_TxScheduler(t *testing.T) {
 		txctx := makeContext("0x7a34cbb73c02aa3309c343e9e9b35f2a992aaa623c2ec2524816f476c63d2efa", "1", "8", 0)
 		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", txctx.Envelope.GetID())
 		jobResponse := testutils.FakeJobResponse()
-		jobResponse.Status = types.StatusPending
+		jobResponse.Status = utils.StatusPending
 
 		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetID()).Return(jobResponse, nil)
 		mockChainLedgerReader.EXPECT().
@@ -307,7 +307,7 @@ func TestTxAlreadySent_TxScheduler(t *testing.T) {
 		txctx := makeContext("0x7a34cbb73c02aa3309c343e9e9b35f2a992aaa623c2ec2524816f476c63d2efa", "1", "8", 0)
 		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", txctx.Envelope.GetID())
 		jobResponse := testutils.FakeJobResponse()
-		jobResponse.Status = types.StatusPending
+		jobResponse.Status = utils.StatusPending
 
 		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetID()).Return(jobResponse, nil)
 		mockChainLedgerReader.EXPECT().

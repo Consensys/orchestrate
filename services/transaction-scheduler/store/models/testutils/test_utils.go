@@ -24,9 +24,9 @@ func FakeSchedule(tenantID string) *models.Schedule {
 		Jobs: []*models.Job{{
 			UUID:        uuid.Must(uuid.NewV4()).String(),
 			ChainUUID:   uuid.Must(uuid.NewV4()).String(),
-			Type:        types.EthereumTransaction,
+			Type:        utils.EthereumTransaction,
 			Transaction: FakeTransaction(),
-			Logs:        []*models.Log{{Status: types.StatusCreated, Message: "created message"}},
+			Logs:        []*models.Log{{Status: utils.StatusCreated, Message: "created message"}},
 		}},
 	}
 }
@@ -62,7 +62,7 @@ func FakeJobModel(scheduleID int) *models.Job {
 	job := &models.Job{
 		UUID:      uuid.Must(uuid.NewV4()).String(),
 		ChainUUID: uuid.Must(uuid.NewV4()).String(),
-		Type:      types.EthereumTransaction,
+		Type:      utils.EthereumTransaction,
 		Schedule: &models.Schedule{
 			ID:       scheduleID,
 			TenantID: "_",
@@ -70,7 +70,7 @@ func FakeJobModel(scheduleID int) *models.Job {
 		},
 		Transaction: FakeTransaction(),
 		Logs: []*models.Log{
-			{UUID: uuid.Must(uuid.NewV4()).String(), Status: types.StatusCreated, Message: "created message"},
+			{UUID: uuid.Must(uuid.NewV4()).String(), Status: utils.StatusCreated, Message: "created message"},
 		},
 		Annotations: &types.Annotations{
 			ChainID: "888",
@@ -88,7 +88,7 @@ func FakeJobModel(scheduleID int) *models.Job {
 func FakeLog() *models.Log {
 	return &models.Log{
 		UUID:      uuid.Must(uuid.NewV4()).String(),
-		Status:    types.StatusCreated,
+		Status:    utils.StatusCreated,
 		Job:       FakeJobModel(0),
 		CreatedAt: time.Now(),
 	}

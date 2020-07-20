@@ -87,6 +87,51 @@ func isPrivateTxManagerType(fl validator.FieldLevel) bool {
 	return true
 }
 
+func isPriority(fl validator.FieldLevel) bool {
+	if fl.Field().String() != "" {
+		switch fl.Field().String() {
+		case PriorityVeryLow, PriorityLow, PriorityMedium, PriorityHigh, PriorityVeryHigh:
+			return true
+		default:
+			return false
+		}
+	}
+
+	return true
+}
+
+func isJobType(fl validator.FieldLevel) bool {
+	if fl.Field().String() != "" {
+		switch fl.Field().String() {
+		case
+			EthereumTransaction,
+			EthereumRawTransaction,
+			OrionEEATransaction,
+			OrionMarkingTransaction,
+			TesseraPrivateTransaction,
+			TesseraPublicTransaction:
+			return true
+		default:
+			return false
+		}
+	}
+
+	return true
+}
+
+func isJobStatus(fl validator.FieldLevel) bool {
+	if fl.Field().String() != "" {
+		switch fl.Field().String() {
+		case StatusCreated, StatusStarted, StatusPending, StatusRecovering, StatusWarning, StatusMined, StatusFailed:
+			return true
+		default:
+			return false
+		}
+	}
+
+	return true
+}
+
 func init() {
 	if validate != nil {
 		return
@@ -99,6 +144,9 @@ func init() {
 	_ = validate.RegisterValidation("isDuration", isDuration)
 	_ = validate.RegisterValidation("isValidMethodSig", isValidMethodSig)
 	_ = validate.RegisterValidation("isPrivateTxManagerType", isPrivateTxManagerType)
+	_ = validate.RegisterValidation("isPriority", isPriority)
+	_ = validate.RegisterValidation("isJobType", isJobType)
+	_ = validate.RegisterValidation("isJobStatus", isJobStatus)
 }
 
 func GetValidator() *validator.Validate {

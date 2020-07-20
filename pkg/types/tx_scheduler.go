@@ -5,7 +5,7 @@ import "time"
 type CreateJobRequest struct {
 	ScheduleUUID string            `json:"scheduleUUID" validate:"required,uuid4" example:"b4374e6f-b28a-4bad-b4fe-bda36eaf849c"`
 	ChainUUID    string            `json:"chainUUID" validate:"required,uuid4" example:"b4374e6f-b28a-4bad-b4fe-bda36eaf849c"`
-	Type         string            `json:"type" validate:"required" example:"eth://ethereum/transaction"` //  @TODO validate Type is valid
+	Type         string            `json:"type" validate:"required,isJobType" example:"eth://ethereum/transaction"` //  @TODO validate Type is valid
 	Labels       map[string]string `json:"labels,omitempty"`
 	Annotations  *Annotations      `json:"annotations,omitempty"`
 	Transaction  *ETHTransaction   `json:"transaction" validate:"required"`
@@ -15,7 +15,7 @@ type UpdateJobRequest struct {
 	Labels      map[string]string `json:"labels,omitempty"`
 	Annotations *Annotations      `json:"annotations,omitempty"`
 	Transaction *ETHTransaction   `json:"transaction,omitempty"`
-	Status      string            `json:"status,omitempty" example:"MINED"`
+	Status      string            `json:"status,omitempty" validate:"isJobStatus" example:"MINED"`
 	Message     string            `json:"message,omitempty" example:"Update message"`
 }
 
@@ -57,6 +57,7 @@ type TransactionParams struct {
 	MethodSignature string        `json:"methodSignature" validate:"required,isValidMethodSig" example:"transfer(address,uint256)"`
 	Args            []interface{} `json:"args,omitempty"`
 	OneTimeKey      bool          `json:"oneTimeKey,omitempty" example:"true"`
+	Priority        string        `json:"priority,omitempty" validate:"isPriority" example:"very-high" `
 	PrivateTransactionParams
 }
 type SendTransactionRequest struct {
@@ -70,6 +71,7 @@ type TransferParams struct {
 	GasPrice string `json:"gasPrice,omitempty" validate:"omitempty,isBig" example:"71500000 (wei)"`
 	From     string `json:"from" validate:"required,eth_addr" example:"0x1abae27a0cbfb02945720425d3b80c7e09728534"`
 	To       string `json:"to" validate:"required,eth_addr" example:"0x1abae27a0cbfb02945720425d3b80c7e09728534"`
+	Priority string `json:"priority,omitempty" validate:"isPriority" example:"very-high" `
 }
 type TransferRequest struct {
 	BaseTransactionRequest
@@ -93,6 +95,7 @@ type DeployContractParams struct {
 	ContractTag  string        `json:"contractTag,omitempty" example:"v1.1.0"`
 	Args         []interface{} `json:"args,omitempty"`
 	OneTimeKey   bool          `json:"oneTimeKey,omitempty" example:"true"`
+	Priority     string        `json:"priority,omitempty" validate:"isPriority" example:"very-high" `
 	PrivateTransactionParams
 }
 type DeployContractRequest struct {

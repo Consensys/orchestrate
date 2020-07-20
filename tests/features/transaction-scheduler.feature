@@ -207,7 +207,7 @@ Feature: Transaction Scheduler
 {
 	"scheduleUUID": "{{scheduleUUID}}",
 	"chainUUID": "{{besu_1.UUID}}",
-	"type": "ETH_SENDRAWTRANSACTION",
+	"type": "eth://ethereum/transaction",
     "transaction": {
         "from": "0x93f7274c9059e601be4512f656b57b830e019e41",
         "to": "0x93f7274c9059e601be4512f656b57b830e019e42"

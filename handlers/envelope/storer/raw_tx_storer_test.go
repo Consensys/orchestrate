@@ -5,6 +5,7 @@ package storer
 import (
 	"context"
 	"fmt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"math/big"
 	"testing"
 
@@ -102,7 +103,7 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 					PrivateFor:     txctx.Envelope.GetPrivateFor(),
 					PrivacyGroupID: txctx.Envelope.GetPrivacyGroupID(),
 				},
-				Status: types.StatusPending,
+				Status: utils.StatusPending,
 			}).
 			Return(&types.JobResponse{}, nil)
 
@@ -122,7 +123,7 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 			Transaction: &types.ETHTransaction{
 				Hash: "0xe41551c714c8ec769d2edad9adc250ae955d263da161bf59142b7500eea6715e",
 			},
-			Status:  types.StatusWarning,
+			Status:  utils.StatusWarning,
 			Message: "expected transaction hash 0xd41551c714c8ec769d2edad9adc250ae955d263da161bf59142b7500eea6715e, but got 0xe41551c714c8ec769d2edad9adc250ae955d263da161bf59142b7500eea6715e. Overriding",
 		}
 
@@ -165,7 +166,7 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 			Return(&types.JobResponse{}, nil)
 		schedulerClient.EXPECT().
 			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
-				Status: types.StatusRecovering,
+				Status: utils.StatusRecovering,
 				Message: fmt.Sprintf(
 					"transaction attempt with nonce %v and sender %v failed with error: %v",
 					txctx.Envelope.GetNonceString(),
@@ -190,7 +191,7 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 			Return(&types.JobResponse{}, nil)
 		schedulerClient.EXPECT().
 			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
-				Status: types.StatusRecovering,
+				Status: utils.StatusRecovering,
 				Message: fmt.Sprintf(
 					"transaction attempt with nonce %v and sender %v failed with error: %v",
 					txctx.Envelope.GetNonceString(),

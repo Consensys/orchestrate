@@ -8,6 +8,8 @@ import (
 	"sync"
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+
 	transactionscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler"
 
 	"github.com/cenkalti/backoff/v4"
@@ -389,7 +391,7 @@ func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transacti
 		}
 
 		// By design, we will receive 0 or 1 job per tx_hash in the filter because we filter by status PENDING
-		jobResponses, err := s.txSchedulerClient.SearchJob(ctx, txHashes, s.Chain.UUID, types.StatusPending)
+		jobResponses, err := s.txSchedulerClient.SearchJob(ctx, txHashes, s.Chain.UUID, utils.StatusPending)
 		if err != nil {
 			return nil, err
 		}

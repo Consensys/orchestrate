@@ -8,6 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
 	"testing"
 )
@@ -34,7 +35,7 @@ func TestTransactionUpdater(t *testing.T) {
 
 		schedulerClient.EXPECT().
 			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
-				Status:  types.StatusFailed,
+				Status:  utils.StatusFailed,
 				Message: txctx.Envelope.Error(),
 			}).
 			Return(&types.JobResponse{}, nil)

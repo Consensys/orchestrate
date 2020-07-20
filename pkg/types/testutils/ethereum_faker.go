@@ -3,6 +3,8 @@ package testutils
 import (
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 )
 
@@ -49,7 +51,7 @@ func FakeTesseraTransactionParams() *types.ETHTransactionParams {
 	tx := FakeETHTransactionParams()
 	tx.PrivateFrom = "ROAZBWtSacxXQrOe3FGAqJDyJjFePR5ce4TSIzmJ0Bc="
 	tx.PrivateFor = []string{"ROAZBWtSacxXQrOe3FGAqJDyJjFePR5ce4TSIzmJ0Bd="}
-	tx.Protocol = types.TesseraPrivateTransaction
+	tx.Protocol = utils.TesseraPrivateTransaction
 
 	return tx
 }
@@ -58,7 +60,7 @@ func FakeOrionTransactionParams() *types.ETHTransactionParams {
 	tx := FakeETHTransactionParams()
 	tx.PrivateFrom = "ROAZBWtSacxXQrOe3FGAqJDyJjFePR5ce4TSIzmJ0Be="
 	tx.PrivacyGroupID = "ROAZBWtSacxXQrOe3FGAqJDyJjFePR5ce4TSIzmJ0Bf="
-	tx.Protocol = types.OrionEEATransaction
+	tx.Protocol = utils.OrionEEATransaction
 
 	return tx
 }

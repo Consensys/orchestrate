@@ -168,7 +168,7 @@ func TestSender_TxScheduler_RawTransaction(t *testing.T) {
 
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
 			&types.UpdateJobRequest{
-				Status: types.StatusPending,
+				Status: utils.StatusPending,
 			}))
 
 		sender(txctx)
@@ -186,12 +186,12 @@ func TestSender_TxScheduler_RawTransaction(t *testing.T) {
 
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
 			&types.UpdateJobRequest{
-				Status: types.StatusPending,
+				Status: utils.StatusPending,
 			}))
 
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId,
 			gomockUpdateStatusMatcher(&types.UpdateJobRequest{
-				Status: types.StatusRecovering,
+				Status: utils.StatusRecovering,
 			}))
 
 		sender(txctx)
@@ -230,7 +230,7 @@ func TestSender_TxScheduler_TesseraTx(t *testing.T) {
 
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
 			&types.UpdateJobRequest{
-				Status: types.StatusPending,
+				Status: utils.StatusPending,
 			}),
 		)
 
@@ -246,12 +246,12 @@ func TestSender_TxScheduler_TesseraTx(t *testing.T) {
 
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
 			&types.UpdateJobRequest{
-				Status: types.StatusPending,
+				Status: utils.StatusPending,
 			}),
 		)
 
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(&types.UpdateJobRequest{
-			Status: types.StatusRecovering,
+			Status: utils.StatusRecovering,
 		}))
 
 		sender(txctx)
@@ -288,7 +288,7 @@ func TestSender_TxScheduler_EEAPrivateTransaction(t *testing.T) {
 
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
 			&types.UpdateJobRequest{
-				Status: types.StatusPending,
+				Status: utils.StatusPending,
 			}))
 
 		sender(txctx)
@@ -306,12 +306,12 @@ func TestSender_TxScheduler_EEAPrivateTransaction(t *testing.T) {
 
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
 			&types.UpdateJobRequest{
-				Status: types.StatusPending,
+				Status: utils.StatusPending,
 			}))
 
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId,
 			gomockUpdateStatusMatcher(&types.UpdateJobRequest{
-				Status: types.StatusRecovering,
+				Status: utils.StatusRecovering,
 			}))
 
 		sender(txctx)

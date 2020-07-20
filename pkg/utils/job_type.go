@@ -1,4 +1,4 @@
-package types
+package utils
 
 const (
 	EthereumTransaction       = "eth://ethereum/transaction"       // Classic public Ethereum transaction

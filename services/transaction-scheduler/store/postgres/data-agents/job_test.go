@@ -7,7 +7,7 @@ package dataagents
 import (
 	"context"
 	"github.com/gofrs/uuid"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 	"testing"
 
@@ -123,7 +123,7 @@ func (s *jobTestSuite) TestPGJob_FindOneByUUID() {
 	ctx := context.Background()
 	tenantID := "tenantID"
 	job := testutils.FakeJobModel(0)
-	job.Logs = append(job.Logs, &models.Log{UUID: uuid.Must(uuid.NewV4()).String(), Status: types.StatusStarted, Message: "created message"})
+	job.Logs = append(job.Logs, &models.Log{UUID: uuid.Must(uuid.NewV4()).String(), Status: utils.StatusStarted, Message: "created message"})
 	job.Schedule.TenantID = tenantID
 	err := insertJob(ctx, s.agents, job)
 	assert.NoError(s.T(), err)
@@ -162,7 +162,7 @@ func (s *jobTestSuite) TestPGJob_Search() {
 	tenantID := "tenantID"
 
 	jobOne := testutils.FakeJobModel(0)
-	jobOne.Logs = append(jobOne.Logs, &models.Log{UUID: uuid.Must(uuid.NewV4()).String(), Status: types.StatusStarted, Message: "created message"})
+	jobOne.Logs = append(jobOne.Logs, &models.Log{UUID: uuid.Must(uuid.NewV4()).String(), Status: utils.StatusStarted, Message: "created message"})
 	txHashOne := common.HexToHash("0x1")
 	jobOne.Transaction.Hash = txHashOne.String()
 	jobOne.Schedule.TenantID = tenantID
@@ -174,7 +174,7 @@ func (s *jobTestSuite) TestPGJob_Search() {
 	jobTwo.ChainUUID = jobOne.ChainUUID
 	jobTwo.Transaction.Hash = txHashTwo.String()
 	jobTwo.Schedule.TenantID = tenantID
-	jobTwo.Logs[0].Status = types.StatusPending
+	jobTwo.Logs[0].Status = utils.StatusPending
 	err = insertJob(ctx, s.agents, jobTwo)
 	assert.NoError(s.T(), err)
 
@@ -199,7 +199,7 @@ func (s *jobTestSuite) TestPGJob_Search() {
 
 	s.T().Run("should find models successfully by status", func(t *testing.T) {
 		filters := &entities.JobFilters{
-			Status: types.StatusPending,
+			Status: utils.StatusPending,
 		}
 
 		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{tenantID})

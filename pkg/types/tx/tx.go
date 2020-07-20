@@ -4,7 +4,7 @@ import (
 	"math/big"
 	"regexp"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -18,12 +18,12 @@ var MethodMap = map[string]Method{
 }
 
 var JobTypeMap = map[string]JobType{
-	types.EthereumTransaction:       JobType_ETH_TX,
-	types.EthereumRawTransaction:    JobType_ETH_RAW_TX,
-	types.OrionMarkingTransaction:   JobType_ETH_ORION_MARKING_TX,
-	types.OrionEEATransaction:       JobType_ETH_ORION_EEA_TX,
-	types.TesseraPublicTransaction:  JobType_ETH_TESSERA_PUBLIC_TX,
-	types.TesseraPrivateTransaction: JobType_ETH_TESSERA_PRIVATE_TX,
+	utils.EthereumTransaction:       JobType_ETH_TX,
+	utils.EthereumRawTransaction:    JobType_ETH_RAW_TX,
+	utils.OrionMarkingTransaction:   JobType_ETH_ORION_MARKING_TX,
+	utils.OrionEEATransaction:       JobType_ETH_ORION_EEA_TX,
+	utils.TesseraPublicTransaction:  JobType_ETH_TESSERA_PUBLIC_TX,
+	utils.TesseraPrivateTransaction: JobType_ETH_TESSERA_PRIVATE_TX,
 }
 
 func (m *TxEnvelope) Envelope() (*Envelope, error) {

@@ -4,10 +4,10 @@ package jobs
 
 import (
 	"context"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"testing"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	testutils3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 
 	"github.com/golang/mock/gomock"
@@ -41,7 +41,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 	usecase := NewUpdateJobUseCase(mockDB)
 
 	tenantID := "tenantID"
-	newStatus := types.StatusPending
+	newStatus := utils.StatusPending
 	logMessage := "message"
 
 	t.Run("should execute use case successfully", func(t *testing.T) {

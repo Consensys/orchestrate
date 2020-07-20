@@ -5,6 +5,8 @@ import (
 	"math/big"
 	"reflect"
 
+	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
 	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/client-utils"
@@ -76,7 +78,7 @@ func (f *Faucet) Credit(ctx context.Context, r *types.Request) (*big.Int, error)
 		jobRequest := &types2.CreateJobRequest{
 			ScheduleUUID: r.ScheduleUUID,
 			ChainUUID:    r.ChainUUID,
-			Type:         types2.EthereumTransaction,
+			Type:         utils2.EthereumTransaction,
 			Labels: map[string]string{
 				"parentJobUUID": r.ParentTxID,
 			},

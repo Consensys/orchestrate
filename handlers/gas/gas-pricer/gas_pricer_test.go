@@ -3,82 +3,116 @@
 package gaspricer
 
 import (
-	"context"
-	"math/big"
-	"testing"
-
+	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
+	"math/big"
+	"testing"
 )
 
-type MockGasPricer struct {
-	t *testing.T
-}
-
-func (e *MockGasPricer) SuggestGasPrice(ctx context.Context, endpoint string) (*big.Int, error) {
-	if endpoint == "error" {
-		return big.NewInt(0), errors.ConnectionError("could not estimate gas")
-	}
-	return big.NewInt(10), nil
-}
-
-func makeGasPricerContext(i int) *engine.TxContext {
-	txctx := engine.NewTxContext()
-	txctx.Reset()
-	txctx.Logger = log.NewEntry(log.StandardLogger())
-
-	var nilBigInt *big.Int
-	switch i % 3 {
-	case 0:
-		txctx.WithContext(proxy.With(txctx.Context(), "error"))
-		txctx.Set("errors", 1)
-		txctx.Set("result", nilBigInt)
-	case 1:
-		txctx.WithContext(proxy.With(txctx.Context(), "testURL"))
-		txctx.Set("errors", 0)
-		txctx.Set("result", big.NewInt(10))
-	case 2:
-		gp := big.NewInt(10)
-		_ = txctx.Envelope.SetGasPrice(gp)
-		txctx.Set("errors", 0)
-		txctx.Set("result", gp)
-	}
-	return txctx
-}
-
-type PricerTestSuite struct {
-	testutils.HandlerTestSuite
-}
-
-func (s *PricerTestSuite) SetupSuite() {
-	s.Handler = Pricer(&MockGasPricer{t: s.T()})
-}
-
-func (s *PricerTestSuite) TestEstimator() {
-	rounds := 100
-	var txctxs []*engine.TxContext
-	for i := 0; i < rounds; i++ {
-		txctxs = append(txctxs, makeGasPricerContext(i))
-	}
-
-	// Handle contexts
-	s.Handle(txctxs)
-
-	for _, txctx := range txctxs {
-		assert.Len(s.T(), txctx.Envelope.Errors, txctx.Get("errors").(int), "Expected right count of errors")
-		for _, err := range txctx.Envelope.Errors {
-			assert.Equal(s.T(), "handler.gas-pricer", err.GetComponent(), "Error should  component should have been set")
-			assert.True(s.T(), errors.IsConnectionError(err), "Error should  be correct")
-		}
-		assert.Equal(s.T(), txctx.Get("result").(*big.Int), txctx.Envelope.GetGasPrice(), "Expected correct Gas price")
-	}
-}
-
 func TestPricer(t *testing.T) {
-	suite.Run(t, new(PricerTestSuite))
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockEthClient := mock.NewMockGasPricer(ctrl)
+	pricer := Pricer(mockEthClient)
+
+	t.Run("should do nothing if gasPrice is set", func(t *testing.T) {
+		txctx := engine.NewTxContext()
+		txctx.Reset()
+		txctx.Logger = log.NewEntry(log.StandardLogger())
+		txctx.WithContext(proxy.With(txctx.Context(), "URL"))
+		_ = txctx.Envelope.SetGasPriceString("1000000")
+
+		pricer(txctx)
+
+		assert.Equal(t, txctx.Envelope.GetGasPriceString(), "1000000")
+	})
+
+	t.Run("should set gas price with no coefficient if priority not specified", func(t *testing.T) {
+		txctx := engine.NewTxContext()
+		txctx.Reset()
+		txctx.Logger = log.NewEntry(log.StandardLogger())
+		txctx.WithContext(proxy.With(txctx.Context(), "URL"))
+
+		mockEthClient.EXPECT().SuggestGasPrice(txctx.Context(), "URL").Return(big.NewInt(10), nil)
+
+		pricer(txctx)
+
+		assert.Equal(t, txctx.Envelope.GetGasPriceString(), "10")
+	})
+
+	t.Run("should set gas price with coefficient 0.6 if priority is very low", func(t *testing.T) {
+		txctx := engine.NewTxContext()
+		txctx.Reset()
+		txctx.Logger = log.NewEntry(log.StandardLogger())
+		txctx.WithContext(proxy.With(txctx.Context(), "URL"))
+		_ = txctx.Envelope.SetContextLabelsValue("priority", utils.PriorityVeryLow)
+
+		mockEthClient.EXPECT().SuggestGasPrice(txctx.Context(), "URL").Return(big.NewInt(10), nil)
+
+		pricer(txctx)
+
+		assert.Equal(t, txctx.Envelope.GetGasPriceString(), "6")
+	})
+
+	t.Run("should set gas price with coefficient 0.8 if priority is low", func(t *testing.T) {
+		txctx := engine.NewTxContext()
+		txctx.Reset()
+		txctx.Logger = log.NewEntry(log.StandardLogger())
+		txctx.WithContext(proxy.With(txctx.Context(), "URL"))
+		_ = txctx.Envelope.SetContextLabelsValue("priority", utils.PriorityLow)
+
+		mockEthClient.EXPECT().SuggestGasPrice(txctx.Context(), "URL").Return(big.NewInt(10), nil)
+
+		pricer(txctx)
+
+		assert.Equal(t, txctx.Envelope.GetGasPriceString(), "8")
+	})
+
+	t.Run("should set gas price with coefficient 1 if priority is medium", func(t *testing.T) {
+		txctx := engine.NewTxContext()
+		txctx.Reset()
+		txctx.Logger = log.NewEntry(log.StandardLogger())
+		txctx.WithContext(proxy.With(txctx.Context(), "URL"))
+		_ = txctx.Envelope.SetContextLabelsValue("priority", utils.PriorityMedium)
+
+		mockEthClient.EXPECT().SuggestGasPrice(txctx.Context(), "URL").Return(big.NewInt(10), nil)
+
+		pricer(txctx)
+
+		assert.Equal(t, txctx.Envelope.GetGasPriceString(), "10")
+	})
+
+	t.Run("should set gas price with coefficient 1.2 if priority is high", func(t *testing.T) {
+		txctx := engine.NewTxContext()
+		txctx.Reset()
+		txctx.Logger = log.NewEntry(log.StandardLogger())
+		txctx.WithContext(proxy.With(txctx.Context(), "URL"))
+		_ = txctx.Envelope.SetContextLabelsValue("priority", utils.PriorityHigh)
+
+		mockEthClient.EXPECT().SuggestGasPrice(txctx.Context(), "URL").Return(big.NewInt(10), nil)
+
+		pricer(txctx)
+
+		assert.Equal(t, txctx.Envelope.GetGasPriceString(), "12")
+	})
+
+	t.Run("should set gas price with coefficient 1.4 if priority is very high", func(t *testing.T) {
+		txctx := engine.NewTxContext()
+		txctx.Reset()
+		txctx.Logger = log.NewEntry(log.StandardLogger())
+		txctx.WithContext(proxy.With(txctx.Context(), "URL"))
+		_ = txctx.Envelope.SetContextLabelsValue("priority", utils.PriorityVeryHigh)
+
+		mockEthClient.EXPECT().SuggestGasPrice(txctx.Context(), "URL").Return(big.NewInt(10), nil)
+
+		pricer(txctx)
+
+		assert.Equal(t, txctx.Envelope.GetGasPriceString(), "14")
+	})
 }

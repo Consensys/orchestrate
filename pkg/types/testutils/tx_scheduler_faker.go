@@ -100,7 +100,7 @@ func FakeCreateJobRequest() *types.CreateJobRequest {
 	return &types.CreateJobRequest{
 		ScheduleUUID: uuid.Must(uuid.NewV4()).String(),
 		ChainUUID:    uuid.Must(uuid.NewV4()).String(),
-		Type:         types.EthereumTransaction,
+		Type:         utils.EthereumTransaction,
 		Labels:       nil,
 		Annotations:  nil,
 		Transaction:  FakeETHTransaction(),
@@ -111,7 +111,7 @@ func FakeJobUpdateRequest() *types.UpdateJobRequest {
 	return &types.UpdateJobRequest{
 		Labels:      nil,
 		Transaction: FakeETHTransaction(),
-		Status:      types.StatusPending,
+		Status:      utils.StatusPending,
 	}
 }
 
@@ -119,6 +119,6 @@ func FakeJobResponse() *types.JobResponse {
 	return &types.JobResponse{
 		UUID:        uuid.Must(uuid.NewV4()).String(),
 		Transaction: FakeETHTransaction(),
-		Status:      types.StatusCreated,
+		Status:      utils.StatusCreated,
 	}
 }

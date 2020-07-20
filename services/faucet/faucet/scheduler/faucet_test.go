@@ -13,6 +13,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/client-utils"
 	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
 	"math/big"
@@ -51,7 +52,7 @@ func TestCredit(t *testing.T) {
 		expectedCreateJobRequest := &types2.CreateJobRequest{
 			ScheduleUUID: request.ScheduleUUID,
 			ChainUUID:    request.ChainUUID,
-			Type:         types2.EthereumTransaction,
+			Type:         utils2.EthereumTransaction,
 			Labels: map[string]string{
 				"parentJobUUID": request.ParentTxID,
 			},
@@ -83,7 +84,7 @@ func TestCredit(t *testing.T) {
 		expectedCreateJobRequest := &types2.CreateJobRequest{
 			ScheduleUUID: request.ScheduleUUID,
 			ChainUUID:    request.ChainUUID,
-			Type:         types2.EthereumTransaction,
+			Type:         utils2.EthereumTransaction,
 			Labels: map[string]string{
 				"parentJobUUID": request.ParentTxID,
 			},

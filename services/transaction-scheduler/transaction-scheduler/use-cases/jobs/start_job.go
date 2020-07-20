@@ -3,14 +3,14 @@ package jobs
 import (
 	"context"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+
+	"github.com/Shopify/sarama"
+	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
 	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
 	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
-
-	"github.com/Shopify/sarama"
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
@@ -53,7 +53,7 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants 
 
 	var msgTopic string
 	switch {
-	case jobModel.Type == types.EthereumRawTransaction:
+	case jobModel.Type == utils.EthereumRawTransaction:
 		msgTopic = uc.topicsCfg.Sender
 	default:
 		msgTopic = uc.topicsCfg.Crafter
@@ -66,7 +66,7 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants 
 
 	jobLog := &models.Log{
 		JobID:  &jobModel.ID,
-		Status: types.StatusStarted,
+		Status: utils.StatusStarted,
 	}
 
 	if err = uc.db.Log().Insert(ctx, jobLog); err != nil {

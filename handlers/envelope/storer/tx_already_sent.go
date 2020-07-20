@@ -5,7 +5,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
@@ -45,7 +45,7 @@ func checkTxInScheduler(txctx *engine.TxContext, ec ethclient.ChainLedgerReader,
 	}
 
 	// Tx has already been updated
-	if job.Status == types.StatusPending {
+	if job.Status == utils.StatusPending {
 		txctx.Logger.Warnf("transaction scheduler: transaction has already been updated")
 		url, err := proxy.GetURL(txctx)
 		if err != nil {
@@ -67,7 +67,7 @@ func checkTxInScheduler(txctx *engine.TxContext, ec ethclient.ChainLedgerReader,
 			txctx.Abort()
 			return
 		}
-	} else if job.Status == types.StatusRecovering || job.Status == types.StatusMined {
+	} else if job.Status == utils.StatusRecovering || job.Status == utils.StatusMined {
 		// Transaction has already been sent so we abort execution
 		txctx.Logger.Warnf("transaction scheduler: transaction has already been sent")
 		txctx.Abort()

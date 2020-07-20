@@ -84,7 +84,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
-		response, err := successfulTestExecution(s, txRequest, types.EthereumTransaction)
+		response, err := successfulTestExecution(s, txRequest, utils.EthereumTransaction)
 		assert.NoError(t, err)
 		assert.Equal(t, txRequest.UUID, response.UUID)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
@@ -97,7 +97,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 		txRequest.Params.Protocol = utils.OrionChainType
 
-		response, err := successfulTestExecution(s, txRequest, types.OrionEEATransaction)
+		response, err := successfulTestExecution(s, txRequest, utils.OrionEEATransaction)
 		assert.NoError(t, err)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
@@ -109,7 +109,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 		txRequest.Params.Protocol = utils.TesseraChainType
 
-		response, err := successfulTestExecution(s, txRequest, types.TesseraPrivateTransaction)
+		response, err := successfulTestExecution(s, txRequest, utils.TesseraPrivateTransaction)
 		assert.NoError(t, err)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
@@ -120,7 +120,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
-		response, err := successfulTestExecution(s, txRequest, types.EthereumRawTransaction)
+		response, err := successfulTestExecution(s, txRequest, utils.EthereumRawTransaction)
 		assert.NoError(t, err)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
@@ -159,7 +159,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 		txRequest.Schedule.Jobs[0].Logs = append(txRequest.Schedule.Jobs[0].Logs, &types.Log{
-			Status:    types.StatusStarted,
+			Status:    utils.StatusStarted,
 			Message:   "already started, do not resend",
 			CreatedAt: time.Now(),
 		})
@@ -191,7 +191,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		txRequest.Params.From = ""
 		txRequest.Annotations.OneTimeKey = true
 
-		response, err := successfulTestExecution(s, txRequest, types.EthereumTransaction)
+		response, err := successfulTestExecution(s, txRequest, utils.EthereumTransaction)
 		assert.NoError(t, err)
 		assert.Equal(t, txRequest.UUID, response.UUID)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
