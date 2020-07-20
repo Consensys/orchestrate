@@ -24,12 +24,13 @@ func RawTxStore(store svc.EnvelopeStoreClient, txSchedulerClient client.Transact
 func rawTxStoreInTxScheduler(txctx *engine.TxContext, txSchedulerClient client.TransactionSchedulerClient) {
 	txctx.Logger.Debug("transaction scheduler: updating transaction to PENDING")
 
+	computedTxHash := txctx.Envelope.GetTxHashString()
 	_, err := txSchedulerClient.UpdateJob(
 		txctx.Context(),
 		txctx.Envelope.GetID(),
 		&types.UpdateJobRequest{
 			Transaction: &types.ETHTransaction{
-				Hash:           txctx.Envelope.GetTxHashString(),
+				Hash:           computedTxHash,
 				From:           txctx.Envelope.GetFromString(),
 				To:             txctx.Envelope.GetToString(),
 				Nonce:          txctx.Envelope.GetNonceString(),
@@ -75,6 +76,28 @@ func rawTxStoreInTxScheduler(txctx *engine.TxContext, txSchedulerClient client.T
 			txctx.Logger.WithError(e).Errorf("transaction scheduler: failed to set transaction status for recovering")
 		}
 		return
+	}
+
+	retrievedTxHash := txctx.Envelope.GetTxHashString()
+	if computedTxHash != retrievedTxHash {
+		errMessage := fmt.Sprintf("expected transaction hash %s, but got %s. Overriding", computedTxHash, retrievedTxHash)
+		txctx.Logger.Errorf("errMessage")
+
+		_, updateErr := txSchedulerClient.UpdateJob(
+			txctx.Context(),
+			txctx.Envelope.GetID(),
+			&types.UpdateJobRequest{
+				Transaction: &types.ETHTransaction{
+					Hash: retrievedTxHash,
+				},
+				Status:  types.StatusWarning,
+				Message: errMessage,
+			},
+		)
+		if updateErr != nil {
+			e := errors.FromError(updateErr).ExtendComponent(component)
+			txctx.Logger.WithError(e).Errorf("transaction scheduler: failed to set transaction status for recovering")
+		}
 	}
 
 	txctx.Logger.Info("transaction successfully sent to the Blockchain node")

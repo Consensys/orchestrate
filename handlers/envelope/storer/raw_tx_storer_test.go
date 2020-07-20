@@ -3,6 +3,7 @@
 package storer
 
 import (
+	"context"
 	"fmt"
 	"math/big"
 	"testing"
@@ -107,6 +108,33 @@ func TestRawTxStore_TxScheduler(t *testing.T) {
 
 		h := RawTxStore(registry, schedulerClient)
 		h(txctx)
+
+		assert.Empty(t, txctx.Envelope.Error())
+	})
+
+	t.Run("should override txHash if hash retrieved is different", func(t *testing.T) {
+		txctx := engine.NewTxContext()
+		_ = txctx.Envelope.SetID("test").SetContextLabelsValue("jobUUID", "test")
+		_ = txctx.Envelope.SetTxHashString("0xd41551c714c8ec769d2edad9adc250ae955d263da161bf59142b7500eea6715e")
+		txctx.Logger = log.NewEntry(log.New())
+
+		expectedJobUpdate := &types.UpdateJobRequest{
+			Transaction: &types.ETHTransaction{
+				Hash: "0xe41551c714c8ec769d2edad9adc250ae955d263da161bf59142b7500eea6715e",
+			},
+			Status:  types.StatusWarning,
+			Message: "expected transaction hash 0xd41551c714c8ec769d2edad9adc250ae955d263da161bf59142b7500eea6715e, but got 0xe41551c714c8ec769d2edad9adc250ae955d263da161bf59142b7500eea6715e. Overriding",
+		}
+
+		schedulerClient.EXPECT().
+			UpdateJob(txctx.Context(), gomock.Any(), gomock.Any()).
+			DoAndReturn(func(ctx context.Context, jobUUID string, request *types.UpdateJobRequest) (*types.JobResponse, error) {
+				_ = txctx.Envelope.SetTxHashString("0xe41551c714c8ec769d2edad9adc250ae955d263da161bf59142b7500eea6715e")
+				return nil, nil
+			})
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), txctx.Envelope.GetID(), expectedJobUpdate).Return(&types.JobResponse{}, nil)
+
+		RawTxStore(registry, schedulerClient)(txctx)
 
 		assert.Empty(t, txctx.Envelope.Error())
 	})

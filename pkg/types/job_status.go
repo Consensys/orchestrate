@@ -5,6 +5,7 @@ const (
 	StatusStarted    = "STARTED"
 	StatusPending    = "PENDING"
 	StatusRecovering = "RECOVERING"
+	StatusWarning    = "WARNING"
 	StatusFailed     = "FAILED"
 	StatusMined      = "MINED"
 )

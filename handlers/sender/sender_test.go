@@ -195,35 +195,9 @@ func TestSender_TxScheduler_RawTransaction(t *testing.T) {
 			}))
 
 		sender(txctx)
-		
+
 		errs := txctx.Envelope.GetErrors()
 		assert.NotEmpty(t, errs)
-	})
-
-	t.Run("should fail when txHash does not match", func(t *testing.T) {
-		txctx := newTxCtx(envelopeId, txHash, txRaw)
-		_ = txctx.Envelope.
-			SetContextLabelsValue("jobUUID", "jobUUID").
-			SetJobType(tx.JobType_ETH_RAW_TX)
-
-		txHash2 := "0x" + utils.RandHexString(64)
-		ec.EXPECT().SendRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).
-			Return(ethcommon.HexToHash(txHash2), nil)
-
-		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
-			&types.UpdateJobRequest{
-				Status: types.StatusPending,
-			}))
-
-		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(&types.UpdateJobRequest{
-			Status: types.StatusRecovering,
-		}))
-
-		sender(txctx)
-		
-		errs := txctx.Envelope.GetErrors()
-		assert.NotEmpty(t, errs)
-		assert.True(t, errors.IsInternalError(errs[0]))
 	})
 }
 
@@ -286,35 +260,6 @@ func TestSender_TxScheduler_TesseraTx(t *testing.T) {
 		assert.NotEmpty(t, errs)
 		assert.True(t, errors.IsDataError(errs[0]))
 	})
-	
-	t.Run("should fail to execute Tessera with missing PrivateFor", func(t *testing.T) {
-		txctx := newTxCtx(envelopeId, txHash, txRaw)
-		_ = txctx.Envelope.
-			SetContextLabelsValue("jobUUID", "jobUUID").
-			SetJobType(tx.JobType_ETH_TESSERA_PRIVATE_TX).
-			SetPrivateFor([]string{"SetPrivateFor=="}).
-			SetPrivateFrom("privateFrom==")
-
-		ec.EXPECT().SendQuorumRawPrivateTransaction(txctx.Context(), chainRegistryUrl, txRaw,
-			types2.Call2PrivateArgs(txctx.Envelope).PrivateFor).
-			Return(ethcommon.HexToHash("0x0"), nil)
-
-		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
-			&types.UpdateJobRequest{
-				Status: types.StatusPending,
-			}),
-		)
-
-		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(&types.UpdateJobRequest{
-			Status: types.StatusRecovering,
-		}))
-
-		sender(txctx)
-
-		errs := txctx.Envelope.GetErrors()
-		assert.NotEmpty(t, errs)
-		assert.True(t, errors.IsInternalError(errs[0]))
-	})
 }
 
 func TestSender_TxScheduler_EEAPrivateTransaction(t *testing.T) {
@@ -370,34 +315,8 @@ func TestSender_TxScheduler_EEAPrivateTransaction(t *testing.T) {
 			}))
 
 		sender(txctx)
-		
+
 		errs := txctx.Envelope.GetErrors()
 		assert.NotEmpty(t, errs)
-	})
-
-	t.Run("should fail when txHash does not match", func(t *testing.T) {
-		txctx := newTxCtx(envelopeId, txHash, txRaw)
-		_ = txctx.Envelope.
-			SetContextLabelsValue("jobUUID", "jobUUID").
-			SetJobType(tx.JobType_ETH_ORION_EEA_TX)
-
-		txHash2 := "0x" + utils.RandHexString(64)
-		ec.EXPECT().SendRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).
-			Return(ethcommon.HexToHash(txHash2), nil)
-
-		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
-			&types.UpdateJobRequest{
-				Status: types.StatusPending,
-			}))
-
-		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(&types.UpdateJobRequest{
-			Status: types.StatusRecovering,
-		}))
-
-		sender(txctx)
-		
-		errs := txctx.Envelope.GetErrors()
-		assert.NotEmpty(t, errs)
-		assert.True(t, errors.IsInternalError(errs[0]))
 	})
 }
