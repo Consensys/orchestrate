@@ -18,7 +18,6 @@ func TestApp(t *testing.T) {
 	keyChecker := mockauth.NewMockChecker(ctrlr)
 
 	cfg := NewConfig(viper.New())
-	cfg.Store.Type = "postgres"
 
 	_, err := New(
 		cfg,

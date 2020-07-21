@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/containous/traefik/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
@@ -90,11 +89,6 @@ func (b *builder) Build(ctx context.Context, conf *Config) (
 	error,
 ) {
 	logCtx := log.With(ctx, log.Str("store", StoreName))
-	switch conf.Type {
-	case postgresType:
-		conf.Postgres.PG.ApplicationName = StoreName
-		return b.postgres.Build(logCtx, conf.Postgres)
-	default:
-		return nil, nil, nil, nil, nil, nil, nil, fmt.Errorf("invalid contract registry store type %q", conf.Type)
-	}
+	conf.Postgres.PG.ApplicationName = StoreName
+	return b.postgres.Build(logCtx, conf.Postgres)
 }
