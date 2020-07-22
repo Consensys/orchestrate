@@ -46,11 +46,13 @@ func (agent *PGTransactionRequest) Insert(ctx context.Context, txRequest *models
 	return nil
 }
 
-func (agent *PGTransactionRequest) FindOneByIdempotencyKey(ctx context.Context, idempotencyKey string) (*models.TransactionRequest, error) {
+func (agent *PGTransactionRequest) FindOneByIdempotencyKey(ctx context.Context, idempotencyKey, tenantID string) (*models.TransactionRequest, error) {
 	txRequest := &models.TransactionRequest{}
 	query := agent.db.ModelContext(ctx, txRequest).
 		Where("idempotency_key = ?", idempotencyKey).
 		Relation("Schedule")
+
+	query = query.Where("schedule.tenant_id = ?", tenantID)
 
 	err := pg.SelectOne(ctx, query)
 	if err != nil {

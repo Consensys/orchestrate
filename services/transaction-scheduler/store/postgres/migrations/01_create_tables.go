@@ -45,8 +45,7 @@ CREATE TABLE transaction_requests (
     params jsonb NOT NULL,
 	schedule_id INTEGER REFERENCES schedules(id),
 	created_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL,
-    UNIQUE(uuid),
-	UNIQUE(idempotency_key)
+    UNIQUE(uuid)
 );
 
 CREATE TABLE jobs (

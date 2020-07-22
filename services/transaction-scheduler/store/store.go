@@ -41,7 +41,7 @@ type Tx interface {
 // Interfaces data agents
 type TransactionRequestAgent interface {
 	Insert(ctx context.Context, txRequest *models.TransactionRequest) error
-	FindOneByIdempotencyKey(ctx context.Context, idempotencyKey string) (*models.TransactionRequest, error)
+	FindOneByIdempotencyKey(ctx context.Context, idempotencyKey string, tenantID string) (*models.TransactionRequest, error)
 	FindOneByUUID(ctx context.Context, uuid string, tenants []string) (*models.TransactionRequest, error)
 	Search(ctx context.Context, filters *entities.TransactionFilters, tenants []string) ([]*models.TransactionRequest, error)
 }

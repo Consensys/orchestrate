@@ -82,7 +82,8 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_FindOneByIdempotencyKey() 
 	assert.NoError(s.T(), err)
 
 	s.T().Run("should find request successfully", func(t *testing.T) {
-		txRequestRetrieved, err := s.agents.TransactionRequest().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey)
+		txRequestRetrieved, err := s.agents.TransactionRequest().
+			FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey, txRequest.Schedule.TenantID)
 
 		assert.NoError(t, err)
 		assert.Equal(t, txRequest.IdempotencyKey, txRequestRetrieved.IdempotencyKey)
@@ -90,7 +91,12 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_FindOneByIdempotencyKey() 
 	})
 
 	s.T().Run("should return NotFoundError if request is not found", func(t *testing.T) {
-		_, err := s.agents.TransactionRequest().FindOneByIdempotencyKey(ctx, "notExisting")
+		_, err := s.agents.TransactionRequest().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey, "randomTenant")
+		assert.True(t, errors.IsNotFoundError(err))
+	})
+
+	s.T().Run("should return NotFoundError if request is not found", func(t *testing.T) {
+		_, err := s.agents.TransactionRequest().FindOneByIdempotencyKey(ctx, "notExisting", txRequest.Schedule.TenantID)
 		assert.True(t, errors.IsNotFoundError(err))
 	})
 }
@@ -187,7 +193,7 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_ConnectionErr() {
 	})
 
 	s.T().Run("should return PostgresConnectionError if find fails", func(t *testing.T) {
-		_, err := s.agents.TransactionRequest().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey)
+		_, err := s.agents.TransactionRequest().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey, txRequest.Schedule.TenantID)
 		assert.True(t, errors.IsPostgresConnectionError(err))
 	})
 

@@ -482,18 +482,18 @@ func (mr *MockTransactionRequestAgentMockRecorder) Insert(ctx, txRequest interfa
 }
 
 // FindOneByIdempotencyKey mocks base method
-func (m *MockTransactionRequestAgent) FindOneByIdempotencyKey(ctx context.Context, idempotencyKey string) (*models.TransactionRequest, error) {
+func (m *MockTransactionRequestAgent) FindOneByIdempotencyKey(ctx context.Context, idempotencyKey, tenantID string) (*models.TransactionRequest, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindOneByIdempotencyKey", ctx, idempotencyKey)
+	ret := m.ctrl.Call(m, "FindOneByIdempotencyKey", ctx, idempotencyKey, tenantID)
 	ret0, _ := ret[0].(*models.TransactionRequest)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindOneByIdempotencyKey indicates an expected call of FindOneByIdempotencyKey
-func (mr *MockTransactionRequestAgentMockRecorder) FindOneByIdempotencyKey(ctx, idempotencyKey interface{}) *gomock.Call {
+func (mr *MockTransactionRequestAgentMockRecorder) FindOneByIdempotencyKey(ctx, idempotencyKey, tenantID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByIdempotencyKey", reflect.TypeOf((*MockTransactionRequestAgent)(nil).FindOneByIdempotencyKey), ctx, idempotencyKey)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByIdempotencyKey", reflect.TypeOf((*MockTransactionRequestAgent)(nil).FindOneByIdempotencyKey), ctx, idempotencyKey, tenantID)
 }
 
 // FindOneByUUID mocks base method
