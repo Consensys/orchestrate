@@ -40,7 +40,7 @@ require (
 	github.com/hashicorp/vault/api v1.0.5-0.20200117231345-460d63e36490
 	github.com/julien-marchand/healthcheck v0.1.0
 	github.com/justinas/alice v1.2.0
-	github.com/magiconair/properties v1.8.1
+	github.com/magiconair/properties v1.8.1 // indirect
 	github.com/mitchellh/copystructure v1.0.0
 	github.com/mitchellh/mapstructure v1.2.2
 	github.com/nmvalera/striped-mutex v0.1.0

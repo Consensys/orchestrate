@@ -40,7 +40,7 @@ lint-ci: ## Check linting
 	@golangci-lint run
 
 run-e2e: gobuild-e2e
-	@docker-compose up e2e
+	@docker-compose up -V e2e
 
 e2e: run-e2e
 	@docker-compose -f scripts/report/docker-compose.yml up

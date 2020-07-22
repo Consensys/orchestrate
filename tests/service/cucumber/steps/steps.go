@@ -137,24 +137,26 @@ func (sc *ScenarioContext) newTracker(e *tx.Envelope) *tracker.Tracker {
 
 	// Initialize output channels on tracker and register channels on channel registry
 	for _, topic := range TOPICS {
+		var ckey string
+		if e != nil {
+			ckey = utils.LongKeyOf(topic, e.GetID())
+		} else {
+			ckey = utils.ShortKeyOf(topic, sc.Pickle.Id)
+		}
+
 		// Create channel
 		// TODO: make chan size configurable
-		ch := make(chan *tx.Envelope, 30)
+		var ch = make(chan *tx.Envelope, 30)
+		// Register channel on channel registry
+		log.WithFields(log.Fields{
+			"id":          ckey,
+			"scenario.id": sc.Pickle.Id,
+			"topic":       topic,
+		}).Debugf("tracker: registered new envelope channel")
+		sc.chanReg.Register(ckey, ch)
 
 		// Add channel as a tracker output
 		t.AddOutput(topic, ch)
-
-		// Register channel on channel registry
-		if e != nil {
-			log.WithFields(log.Fields{
-				"id":          e.GetID(),
-				"scenario.id": sc.Pickle.Id,
-				"topic":       topic,
-			}).Debugf("registered new envelope")
-			sc.chanReg.Register(utils.LongKeyOf(topic, e.GetID()), ch)
-		} else {
-			sc.chanReg.Register(utils.ShortKeyOf(topic, sc.Pickle.Id), ch)
-		}
 	}
 
 	return t

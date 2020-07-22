@@ -110,6 +110,8 @@ func (sc *ScenarioContext) iSendRequestToWithJSON(method, endpoint string, body 
 		return err
 	}
 
+	req.Header.Add("Content-Type", "application/json")
+
 	err = sc.iManageResponse(req)
 	if err != nil {
 		err = merror.Append(err, fmt.Errorf("when sending %s request on %s", method, endpoint))

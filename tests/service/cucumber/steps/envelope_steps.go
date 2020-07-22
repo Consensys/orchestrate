@@ -31,6 +31,8 @@ import (
 
 const aliasHeaderValue = "alias"
 
+var aliasRegex = regexp.MustCompile("{{([^}]*)}}")
+
 func (sc *ScenarioContext) sendEnvelope(topic string, e *tx.Envelope) error {
 	// Prepare message to be sent
 	msg := &sarama.ProducerMessage{
@@ -102,61 +104,6 @@ func (sc *ScenarioContext) registerEnvelopeTracker(value string) error {
 	return nil
 }
 
-func (sc *ScenarioContext) iHaveDeployedTheFollowingContracts(table *gherkin.PickleStepArgument_PickleTable) error {
-	header := table.Rows[0]
-	var index int
-	for i, h := range header.Cells {
-		if h.Value == aliasHeaderValue {
-			index = i
-			break
-		}
-	}
-	copy(header.Cells[index:], header.Cells[index+1:])
-	header.Cells[len(header.Cells)-1] = nil // or the zero value of T
-	header.Cells = header.Cells[:len(header.Cells)-1]
-
-	rows := table.Rows[1:]
-	aliases := make([]string, len(rows))
-	for i, r := range rows {
-		if r.Cells[index].Value == "" {
-			return errors.DataError("alias is missing")
-		}
-		aliases[i] = r.Cells[index].Value
-		copy(r.Cells[index:], r.Cells[index+1:])
-		r.Cells[len(r.Cells)-1] = nil // or the zero value of T
-		r.Cells = r.Cells[:len(r.Cells)-1]
-	}
-
-	// Parse table
-	if err := sc.replaceAliases(table); err != nil {
-		return err
-	}
-	envelopes, err := utils.ParseEnvelope(table)
-	if err != nil {
-		return err
-	}
-
-	// Set trackers
-	trackers := sc.newTrackers(envelopes)
-
-	for _, t := range trackers {
-		err := sc.sendEnvelope("tx.crafter", t.Current)
-		if err != nil {
-			return errors.InternalError("could not send tx request - got %v", err)
-		}
-	}
-
-	// Catch envelope after it has been decoded
-	for i, t := range trackers {
-		err := t.Load("tx.decoded", 30*time.Second)
-		if err != nil {
-			return errors.DataError("could not generate account for %s - got %v", aliases[i], err)
-		}
-		sc.aliases.Set(t.Current.GetReceipt().GetContractAddress(), sc.Pickle.Id, aliases[i])
-	}
-	return nil
-}
-
 func (sc *ScenarioContext) envelopeShouldBeInTopic(topic string) error {
 	for i, t := range sc.trackers {
 		err := t.Load(topic, viper.GetDuration(CucumberTimeoutViperKey))
@@ -180,6 +127,8 @@ func (sc *ScenarioContext) envelopesShouldHaveTheFollowingValues(table *gherkin.
 
 	for r, row := range rows {
 		val := reflect.ValueOf(sc.trackers[r].Current).Elem()
+		sEvlp, err := json.Marshal(*sc.trackers[r].Current)
+		log.WithError(err).Debugf("Marshaled envelope: %s", sEvlp)
 		for c, col := range row.Cells {
 			fieldName := header.Cells[c].Value
 			field, err := utils.GetField(fieldName, val)
@@ -192,6 +141,48 @@ func (sc *ScenarioContext) envelopesShouldHaveTheFollowingValues(table *gherkin.
 			}
 		}
 	}
+
+	return nil
+}
+
+func (sc *ScenarioContext) iRegisterTheFollowingEnvelopeFields(table *gherkin.PickleStepArgument_PickleTable) (err error) {
+
+	evlps := make(map[string]*tx.Envelope)
+	for _, tracker := range sc.trackers {
+		evlp := tracker.Current
+		evlps[evlp.GetID()] = evlp
+		evlps[evlp.GetContextLabelsValue("id")] = evlp
+	}
+
+	header := table.Rows[0]
+	rows := table.Rows[1:]
+	for idx, h := range []string{"id", "alias", "path"} {
+		if header.Cells[idx].Value != h {
+			return fmt.Errorf("invalid first column table header: expected '%s', found '%s'", h, header.Cells[idx].Value)
+		}
+	}
+
+	for i, row := range rows {
+		evlpID := row.Cells[0].Value
+		if aliasRegex.MatchString(evlpID) {
+			evlpID = aliasRegex.FindString(evlpID)
+		}
+
+		evlp, ok := evlps[evlpID]
+		if !ok {
+			return fmt.Errorf("envelope %s is not found: %q", evlpID, row)
+		}
+
+		a := row.Cells[1].Value
+		bodyPath := table.Rows[i+1].Cells[2].Value
+		val, err := utils.GetField(bodyPath, reflect.ValueOf(evlp))
+		if err != nil {
+			return err
+		}
+
+		sc.aliases.Set(val, sc.Pickle.Id, a)
+	}
+
 	return nil
 }
 
@@ -258,7 +249,8 @@ func (sc *ScenarioContext) iHaveCreatedTheFollowingAccounts(table *gherkin.Pickl
 	var childEnvelopes []*tx.Envelope
 	for _, e := range envelopes {
 		if childTxID := e.GetContextLabelsValue("faucetChildTxID"); childTxID != "" {
-			childEnvelopes = append(childEnvelopes, tx.NewEnvelope().SetID(childTxID))
+			childEvlp := tx.NewEnvelope().SetID(childTxID).SetContextLabelsValue("id", childTxID)
+			childEnvelopes = append(childEnvelopes, childEvlp)
 		}
 	}
 
@@ -276,13 +268,13 @@ func (sc *ScenarioContext) iHaveCreatedTheFollowingAccounts(table *gherkin.Pickl
 
 	// Catch envelope after it has been decoded
 	for i, t := range trackers {
-		a := aliasTable.Rows[i+1].Cells[0].Value
+		accAlias := aliasTable.Rows[i+1].Cells[0].Value
 		if t.Load("account.generated", 30*time.Second) != nil {
-			return errors.DataError("could not generate account for %s - got %v", a, err)
+			return errors.DataError("could not generate account for %s - got %v", accAlias, err)
 		} else if t.Current.GetFrom() == nil {
 			return errors.DataError("no address found")
 		}
-		sc.aliases.Set(t.Current.GetFrom().Hex(), sc.Pickle.Id, a)
+		sc.aliases.Set(t.Current.GetFrom().Hex(), sc.Pickle.Id, accAlias)
 	}
 
 	// Check that accounts has been funded
@@ -366,10 +358,8 @@ func (sc *ScenarioContext) iRegisterTheFollowingFaucets(table *gherkin.PickleSte
 	return nil
 }
 
-var r = regexp.MustCompile("{{([^}]*)}}")
-
 func (sc *ScenarioContext) replace(s string) (string, error) {
-	for _, matchedAlias := range r.FindAllStringSubmatch(s, -1) {
+	for _, matchedAlias := range aliasRegex.FindAllStringSubmatch(s, -1) {
 		aka := []string{matchedAlias[1]}
 		if strings.HasPrefix(matchedAlias[1], "random.") {
 			random := strings.Split(matchedAlias[1], ".")
@@ -568,10 +558,10 @@ func initEnvelopeSteps(s *godog.ScenarioContext, sc *ScenarioContext) {
 	s.Step(`^I register the following alias$`, sc.preProcessTableStep(sc.iRegisterTheFollowingAliasAs))
 	s.Step(`^I have created the following accounts$`, sc.preProcessTableStep(sc.iHaveCreatedTheFollowingAccounts))
 	s.Step(`^I track the following envelopes$`, sc.preProcessTableStep(sc.iTrackTheFollowingEnvelopes))
-	s.Step(`^I have deployed the following contracts$`, sc.iHaveDeployedTheFollowingContracts)
 	s.Step(`^I send envelopes to topic "([^"]*)"$`, sc.iSendEnvelopesToTopic)
 	s.Step(`^Register new envelope tracker "([^"]*)"$`, sc.registerEnvelopeTracker)
 	s.Step(`^Envelopes should be in topic "([^"]*)"$`, sc.envelopeShouldBeInTopic)
 	s.Step(`^Envelopes should have the following fields$`, sc.preProcessTableStep(sc.envelopesShouldHaveTheFollowingValues))
+	s.Step(`^I register the following envelope fields$`, sc.preProcessTableStep(sc.iRegisterTheFollowingEnvelopeFields))
 	s.Step(`^I sign the following transactions$`, sc.preProcessTableStep(sc.iSignTheFollowingTransactions))
 }

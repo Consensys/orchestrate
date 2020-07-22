@@ -110,6 +110,7 @@ func TestCredit(t *testing.T) {
 		requestChainName := &types.Request{
 			ScheduleUUID: "scheduleUUID",
 			ParentTxID:   "parentJobUUID",
+			ChildTxID:    "ChildTxID",
 			ChainUUID:    "chainUUID",
 			Beneficiary:  common.HexToAddress("0x1"),
 			FaucetsCandidates: map[string]types.Faucet{
@@ -126,6 +127,7 @@ func TestCredit(t *testing.T) {
 				ChainName: requestChainName.ChainName,
 				Labels: map[string]string{
 					"parentJobUUID": requestChainName.ParentTxID,
+					"id": requestChainName.ChildTxID,
 				},
 			},
 			Params: types2.TransferParams{
@@ -135,7 +137,7 @@ func TestCredit(t *testing.T) {
 			},
 		}
 
-		mockTxSchedulerClient.EXPECT().SendTransferTransaction(ctx, expectedTransferRequest).Return(&types2.TransactionResponse{
+		mockTxSchedulerClient.EXPECT().SendTransferTransaction(gomock.Any(), expectedTransferRequest).Return(&types2.TransactionResponse{
 			UUID: "uuid",
 		}, nil)
 

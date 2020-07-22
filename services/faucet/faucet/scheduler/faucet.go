@@ -57,6 +57,7 @@ func (f *Faucet) Credit(ctx context.Context, r *types.Request) (*big.Int, error)
 			BaseTransactionRequest: types2.BaseTransactionRequest{
 				ChainName: r.ChainName,
 				Labels: map[string]string{
+					"id":            r.ChildTxID,
 					"parentJobUUID": r.ParentTxID,
 				}},
 			Params: types2.TransferParams{

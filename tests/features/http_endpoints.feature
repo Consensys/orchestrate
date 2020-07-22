@@ -43,27 +43,27 @@ Feature: Verify HTTP Endpoints
     Then the response code should be 200
 
 
-  Scenario: Get Envelope Store Swagger
-    When I send "GET" request to "{{global.envelope-store-http}}/swagger/"
-    Then the response code should be 200
+#  Scenario: Get Envelope Store Swagger
+#    When I send "GET" request to "{{global.envelope-store-http}}/swagger/"
+#    Then the response code should be 200
+#
+#  Scenario: Get Envelope Store Swagger spec
+#    When I send "GET" request to "{{global.envelope-store-http}}/swagger/swagger.json"
+#    Then the response code should be 200
+#
+#  Scenario: Get Envelope Store metrics
+#    When I send "GET" request to "{{global.envelope-store-metrics}}/metrics"
+#    Then the response code should be 200
+#
+#  Scenario: Get Envelope Store readiness
+#    When I send "GET" request to "{{global.envelope-store-metrics}}/ready"
+#    Then the response code should be 200
+#
+#  Scenario: Get Envelope Store liveness
+#    When I send "GET" request to "{{global.envelope-store-metrics}}/live"
+#    Then the response code should be 200
 
-  Scenario: Get Envelope Store Swagger spec
-    When I send "GET" request to "{{global.envelope-store-http}}/swagger/swagger.json"
-    Then the response code should be 200
 
-  Scenario: Get Envelope Store metrics
-    When I send "GET" request to "{{global.envelope-store-metrics}}/metrics"
-    Then the response code should be 200
-
-  Scenario: Get Envelope Store readiness
-    When I send "GET" request to "{{global.envelope-store-metrics}}/ready"
-    Then the response code should be 200
-
-  Scenario: Get Envelope Store liveness
-    When I send "GET" request to "{{global.envelope-store-metrics}}/live"
-    Then the response code should be 200
-
-    
   Scenario: Get Transaction Scheduler Swagger
     When I send "GET" request to "{{global.tx-scheduler}}/swagger/"
     Then the response code should be 200

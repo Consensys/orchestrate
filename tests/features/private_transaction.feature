@@ -1,27 +1,58 @@
 @private-tx
 Feature: Deploy private ERC20 contract
   As an external developer
-  I want to deploy a private contract
+  I want to deploy a private contract using transaction scheduler
 
   Background:
     Given I have the following tenants
       | alias   | tenantID        |
       | tenant1 | {{random.uuid}} |
-    And I register the following contracts
-      | name        | artifacts        | Headers.Authorization    |
-      | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
-
-  @quorum
-  Scenario: Deploy private ERC20 contract with Quorum and Tessera
-    Given I register the following chains
-      | alias  | Name                    | URLs                           | PrivateTxManagers                           | Headers.Authorization    |
-      | quorum | quorum_1-{{scenarioID}} | {{global.nodes.quorum_1.URLs}} | {{global.nodes.quorum_1.PrivateTxManagers}} | Bearer {{tenant1.token}} |
     And I have created the following accounts
       | alias    | Headers.Authorization    |
       | account1 | Bearer {{tenant1.token}} |
-    And I send envelopes to topic "tx.crafter"
-      | ID              | ChainName               | From         | ContractName | MethodSignature | Gas     | PrivateFor                                   | PrivateFrom                              | Method | Headers.Authorization    |
-      | {{random.uuid}} | quorum_1-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | 2000000 | ["{{global.nodes.quorum_2.privateAddress}}"] | {{global.nodes.quorum_1.privateAddress}} | 2      | Bearer {{tenant1.token}} |
+      | account2 | Bearer {{tenant1.token}} |
+      | account3 | Bearer {{tenant1.token}} |
+      | account4 | Bearer {{tenant1.token}} |
+    And I register the following contracts
+      | name        | artifacts        | Headers.Authorization    |
+      | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
+    And I register the following chains
+      | alias  | Name                  | URLs                           | PrivateTxManagers                           | Headers.Authorization    |
+      | quorum | quorum-{{scenarioID}} | {{global.nodes.quorum_1.URLs}} | {{global.nodes.quorum_1.PrivateTxManagers}} | Bearer {{tenant1.token}} |
+    And I register the following chains
+      | alias | Name                  | URLs                         | Headers.Authorization    |
+      | besu  | besu-{{scenarioID}}   | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
+      | besu2 | besu_2-{{scenarioID}} | {{global.nodes.besu_2.URLs}} | Bearer {{tenant1.token}} |
+
+  @quorum
+  Scenario: Deploy private ERC20 contract with Quorum and Tessera
+    Given I register the following alias
+      | alias                    | value           |
+      | quorumDeployContractTxID | {{random.uuid}} |
+    Then I track the following envelopes
+      | ID                           |
+      | {{quorumDeployContractTxID}} |
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "quorum-{{scenarioID}}",
+    "params": {
+        "from": "{{account1}}",
+        "protocol": "Tessera",
+        "privateFrom": "{{global.nodes.quorum_1.privateAddress}}",
+        "privateFor": ["{{global.nodes.quorum_2.privateAddress}}"],
+        "contractName": "SimpleToken"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{quorumDeployContractTxID}}"
+    }
+}
+      """
+    Then the response code should be 202
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.signer"
     And Envelopes should have the following fields
@@ -30,108 +61,281 @@ Feature: Deploy private ERC20 contract
     Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
-      | Receipt.Status |
-      | 1              |
+      | Receipt.Status | Receipt.ContractAddress |
+      | 1              | ~                       |
 
-  @quorum
   Scenario: Deploy private ERC20 contract with unknown ChainName
-    Given I have created the following accounts
-      | alias    | Headers.Authorization    |
-      | account1 | Bearer {{tenant1.token}} |
-    When I send envelopes to topic "tx.crafter"
-      | ID              | ChainName | From         | ContractName | MethodSignature | Gas     | PrivateFor                                   | PrivateFrom                              | Method | Headers.Authorization    |
-      | {{random.uuid}} | unknown   | {{account1}} | SimpleToken  | constructor()   | 2000000 | ["{{global.nodes.quorum_2.privateAddress}}"] | {{global.nodes.quorum_1.privateAddress}} | 2      | Bearer {{tenant1.token}} |
-    Then Envelopes should be in topic "tx.crafter"
-    Then Envelopes should be in topic "tx.recover"
-    And Envelopes should have the following fields
-      | Errors[0].Message                |
-      | no chain found with name unknown |
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "UnknownChain",
+    "params": {
+        "from": "{{account1}}",
+        "protocol": "Tessera",
+        "privateFrom": "{{global.nodes.quorum_1.privateAddress}}",
+        "privateFor": ["{{global.nodes.quorum_2.privateAddress}}"],
+        "contractName": "SimpleToken"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}"
+    }
+}
+      """
+    Then the response code should be 422
+    And Response should have the following fields
+      | message                                                   |
+      | 42400@use-cases.send-tx: cannot load 'UnknownChain' chain |
 
-  @quorum
-  Scenario: Deploy private ERC20 contract with unknown PrivateFrom
-    Given I register the following chains
-      | alias  | Name                    | URLs                           | PrivateTxManagers                           | Headers.Authorization    |
-      | quorum | quorum_1-{{scenarioID}} | {{global.nodes.quorum_1.URLs}} | {{global.nodes.quorum_1.PrivateTxManagers}} | Bearer {{tenant1.token}} |
-    And I have created the following accounts
-      | alias    | Headers.Authorization    |
-      | account1 | Bearer {{tenant1.token}} |
-    When I send envelopes to topic "tx.crafter"
-      | ID              | ChainName               | From         | ContractName | MethodSignature | Gas     | PrivateFor                                   | PrivateFrom  | Method | Headers.Authorization    |
-      | {{random.uuid}} | quorum_1-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | 2000000 | ["{{global.nodes.quorum_2.privateAddress}}"] | dW5rbm93bg== | 2      | Bearer {{tenant1.token}} |
-    Then Envelopes should be in topic "tx.crafter"
-    Then Envelopes should be in topic "tx.recover"
-    And Envelopes should have the following fields
-      | Errors[0].Message                                                                                                                         |
-      | failed to send a request to Tessera enclave: 08200@: request to '{{global.chain-registry}}/tessera/{{quorum.UUID}}/storeraw' failed - 400 |
+  Scenario: Deploy private ERC20 contract with unknown PrivateFor
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "quorum-{{scenarioID}}",
+    "params": {
+        "from": "{{account1}}",
+        "protocol": "Tessera",
+        "privateFrom": "{{global.nodes.quorum_1.privateAddress}}",
+        "contractName": "SimpleToken"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}"
+    }
+}
+      """
+    Then the response code should be 400
+    And Response should have the following fields
+      | message                                                               |
+      | 42400@: fields 'privacyGroupId' and 'privateFor' cannot be both empty |
 
   @besu
   Scenario: Deploy private ERC20 contract with Besu and Orion
-    Given I register the following chains
-      | alias | Name                  | URLs                         | Headers.Authorization    |
-      | besu  | besu_1-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
-    And I have created the following accounts
-      | alias    | Headers.Authorization    |
-      | account1 | Bearer {{tenant1.token}} |
-    When I send envelopes to topic "tx.crafter"
-      | ID              | ChainName             | From         | ContractName | MethodSignature | PrivateFor                                 | PrivateFrom                            | Method | Headers.Authorization    |
-      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | ["{{global.nodes.besu_2.privateAddress}}"] | {{global.nodes.besu_1.privateAddress}} | 3      | Bearer {{tenant1.token}} |
+    Given I register the following alias
+      | alias                  | value           |
+      | besuDeployContractTxID | {{random.uuid}} |
+    Then I track the following envelopes
+      | ID                         |
+      | {{besuDeployContractTxID}} |
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "from": "{{account2}}",
+        "protocol": "Orion",
+        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+        "privateFor": ["{{global.nodes.besu_2.privateAddress}}"],
+        "contractName": "SimpleToken"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{besuDeployContractTxID}}"
+    }
+}
+      """
+    Then the response code should be 202
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.signer"
     Then Envelopes should be in topic "tx.sender"
+    Then Envelopes should be in topic "tx.decoded"
+    And Envelopes should have the following fields
+      | Receipt.Status | Receipt.Output | Receipt.ContractAddress | Receipt.PrivateFrom                    | Receipt.PrivateFor                         |
+      | 1              | ~              | ~                       | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_2.privateAddress}}"] |
+
+  @besu
+  Scenario: Batch deploy private ERC20 contract with Besu and Orion with different PrivateFor
+    Given I register the following alias
+      | alias                       | value           |
+      | besuDeployContractTxOneID   | {{random.uuid}} |
+      | besuDeployContractTxTwoID   | {{random.uuid}} |
+      | besuDeployContractTxThreeID | {{random.uuid}} |
+      | besuDeployContractTxFourID  | {{random.uuid}} |
+    Then I track the following envelopes
+      | ID                              |
+      | {{besuDeployContractTxOneID}}   |
+      | {{besuDeployContractTxTwoID}}   |
+      | {{besuDeployContractTxThreeID}} |
+      | {{besuDeployContractTxFourID}}  |
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "from": "{{account1}}",
+        "protocol": "Orion",
+        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+        "privateFor": ["{{global.nodes.besu_2.privateAddress}}"],
+        "contractName": "SimpleToken"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{besuDeployContractTxOneID}}"
+    }
+}
+      """
+    Then the response code should be 202
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "from": "{{account2}}",
+        "protocol": "Orion",
+        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+        "privateFor": ["{{global.nodes.besu_3.privateAddress}}"],
+        "contractName": "SimpleToken"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{besuDeployContractTxTwoID}}"
+    }
+}
+      """
+    Then the response code should be 202
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "from": "{{account3}}",
+        "protocol": "Orion",
+        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+        "privateFor": ["{{global.nodes.besu_2.privateAddress}}"],
+        "contractName": "SimpleToken"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{besuDeployContractTxThreeID}}"
+    }
+}
+      """
+    Then the response code should be 202
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "from": "{{account4}}",
+        "protocol": "Orion",
+        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+        "privateFor": ["{{global.nodes.besu_3.privateAddress}}"],
+        "contractName": "SimpleToken"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{besuDeployContractTxFourID}}"
+    }
+}
+      """
+    Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                    | Receipt.PrivateFor                         |
       | 1              | ~              | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_2.privateAddress}}"] |
-
-  @besu
-  Scenario: Batch deploy private ERC20 contract with Besu and Orion with different PrivateFor
-    Given I register the following chains
-      | alias | Name                  | URLs                         | Headers.Authorization    |
-      | besu  | besu_1-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
-    And I have created the following accounts
-      | alias    | Headers.Authorization    |
-      | account1 | Bearer {{tenant1.token}} |
-      | account2 | Bearer {{tenant1.token}} |
-      | account3 | Bearer {{tenant1.token}} |
-      | account4 | Bearer {{tenant1.token}} |
-    When I send envelopes to topic "tx.crafter"
-      | ID              | ChainName             | From         | ContractName | MethodSignature | PrivateFor                                 | PrivateFrom                            | Method | Headers.Authorization    |
-      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | ["{{global.nodes.besu_2.privateAddress}}"] | {{global.nodes.besu_1.privateAddress}} | 3      | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account2}} | SimpleToken  | constructor()   | ["{{global.nodes.besu_3.privateAddress}}"] | {{global.nodes.besu_1.privateAddress}} | 3      | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account3}} | SimpleToken  | constructor()   | ["{{global.nodes.besu_2.privateAddress}}"] | {{global.nodes.besu_1.privateAddress}} | 3      | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account4}} | SimpleToken  | constructor()   | ["{{global.nodes.besu_3.privateAddress}}"] | {{global.nodes.besu_1.privateAddress}} | 3      | Bearer {{tenant1.token}} |
-    Then Envelopes should be in topic "tx.crafter"
-    Then Envelopes should be in topic "tx.signer"
-    Then Envelopes should be in topic "tx.sender"
-    Then Envelopes should be in topic "tx.decoded"
-    And Envelopes should have the following fields
-      | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                          | Receipt.PrivateFor                           |
+      | 1              | ~              | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_3.privateAddress}}"] |
       | 1              | ~              | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_2.privateAddress}}"] |
-      | 1              | ~              | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_3.privateAddress}}"]   |
-      | 1              | ~              | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_2.privateAddress}}"] |
-      | 1              | ~              | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_3.privateAddress}}"]   |
+      | 1              | ~              | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_3.privateAddress}}"] |
 
   @besu
   Scenario: Batch deploy private ERC20 contract with Besu and Orion with different PrivateFrom
-    Given I register the following chains
-      | alias  | Name                  | URLs                         | Headers.Authorization    |
-      | besu_1 | besu_1-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
-      | besu_2 | besu_2-{{scenarioID}} | {{global.nodes.besu_2.URLs}} | Bearer {{tenant1.token}} |
-    And I have created the following accounts
-      | alias    | Headers.Authorization    |
-      | account1 | Bearer {{tenant1.token}} |
-      | account2 | Bearer {{tenant1.token}} |
-      | account3 | Bearer {{tenant1.token}} |
-      | account4 | Bearer {{tenant1.token}} |
-    When I send envelopes to topic "tx.crafter"
-      | ID              | ChainName             | From         | ContractName | MethodSignature | PrivateFor                                 | PrivateFrom                            | Method | Headers.Authorization    |
-      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | ["{{global.nodes.besu_3.privateAddress}}"] | {{global.nodes.besu_1.privateAddress}} | 3      | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | besu_2-{{scenarioID}} | {{account2}} | SimpleToken  | constructor()   | ["{{global.nodes.besu_3.privateAddress}}"] | {{global.nodes.besu_2.privateAddress}} | 3      | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account3}} | SimpleToken  | constructor()   | ["{{global.nodes.besu_3.privateAddress}}"] | {{global.nodes.besu_1.privateAddress}} | 3      | Bearer {{tenant1.token}} |
-      | {{random.uuid}} | besu_2-{{scenarioID}} | {{account4}} | SimpleToken  | constructor()   | ["{{global.nodes.besu_3.privateAddress}}"] | {{global.nodes.besu_2.privateAddress}} | 3      | Bearer {{tenant1.token}} |
-    Then Envelopes should be in topic "tx.crafter"
-    Then Envelopes should be in topic "tx.signer"
-    Then Envelopes should be in topic "tx.sender"
+    Given I register the following alias
+      | alias                       | value           |
+      | besuDeployContractTxOneID   | {{random.uuid}} |
+      | besuDeployContractTxTwoID   | {{random.uuid}} |
+      | besuDeployContractTxThreeID | {{random.uuid}} |
+      | besuDeployContractTxFourID  | {{random.uuid}} |
+    Then I track the following envelopes
+      | ID                              |
+      | {{besuDeployContractTxOneID}}   |
+      | {{besuDeployContractTxTwoID}}   |
+      | {{besuDeployContractTxThreeID}} |
+      | {{besuDeployContractTxFourID}}  |
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "from": "{{account1}}",
+        "protocol": "Orion",
+        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+        "privateFor": ["{{global.nodes.besu_3.privateAddress}}"],
+        "contractName": "SimpleToken"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{besuDeployContractTxOneID}}"
+    }
+}
+      """
+    Then the response code should be 202
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "besu_2-{{scenarioID}}",
+    "params": {
+        "from": "{{account2}}",
+        "protocol": "Orion",
+        "privateFrom": "{{global.nodes.besu_2.privateAddress}}",
+        "privateFor": ["{{global.nodes.besu_3.privateAddress}}"],
+        "contractName": "SimpleToken"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{besuDeployContractTxTwoID}}"
+    }
+}
+      """
+    Then the response code should be 202
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "from": "{{account3}}",
+        "protocol": "Orion",
+        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+        "privateFor": ["{{global.nodes.besu_3.privateAddress}}"],
+        "contractName": "SimpleToken"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{besuDeployContractTxThreeID}}"
+    }
+}
+      """
+    Then the response code should be 202
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "besu_2-{{scenarioID}}",
+    "params": {
+        "from": "{{account4}}",
+        "protocol": "Orion",
+        "privateFrom": "{{global.nodes.besu_2.privateAddress}}",
+        "privateFor": ["{{global.nodes.besu_3.privateAddress}}"],
+        "contractName": "SimpleToken"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{besuDeployContractTxFourID}}"
+    }
+}
+      """
+    Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                    | Receipt.PrivateFor                         |
@@ -142,16 +346,10 @@ Feature: Deploy private ERC20 contract
 
   @besu
   Scenario: Batch deploy private ERC20 for a privacy group
-    Given I register the following chains
-      | alias | Name                  | URLs                         | Headers.Authorization    |
-      | besu  | besu_1-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
-    And I sleep "1.5s"
-    And I have created the following accounts
-      | alias    | Headers.Authorization    |
-      | account1 | Bearer {{tenant1.token}} |
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
+    Given I sleep "2s"
     When I send "POST" request to "{{global.chain-registry}}/{{besu.UUID}}" with json:
       """
 {
@@ -175,13 +373,67 @@ Feature: Deploy private ERC20 contract
     Then I register the following response fields
       | alias          | path   |
       | privacyGroupId | result |
-    When I send envelopes to topic "tx.crafter"
-      | ID              | ChainName             | From         | ContractName | MethodSignature | PrivacyGroupID     | PrivateFrom                            | Method | Headers.Authorization    |
-      | {{random.uuid}} | besu_1-{{scenarioID}} | {{account1}} | SimpleToken  | constructor()   | {{privacyGroupId}} | {{global.nodes.besu_1.privateAddress}} | 3      | Bearer {{tenant1.token}} |
-    Then Envelopes should be in topic "tx.crafter"
-    Then Envelopes should be in topic "tx.signer"
-    Then Envelopes should be in topic "tx.sender"
+    Given I register the following alias
+      | alias                       | value           |
+      | besuDeployContractTxGroupID | {{random.uuid}} |
+    Then I track the following envelopes
+      | ID                              |
+      | {{besuDeployContractTxGroupID}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "from": "{{account1}}",
+        "protocol": "Orion",
+        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+        "privacyGroupId": "{{privacyGroupId}}",
+        "contractName": "SimpleToken"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{besuDeployContractTxGroupID}}"
+    }
+}
+      """
+    Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                    | Receipt.PrivacyGroupId |
       | 1              | ~              | {{global.nodes.besu_1.privateAddress}} | {{privacyGroupId}}     |
+
+
+  @besu
+  @oneTimeKey
+  Scenario: Deploy private ERC20 with one-time-key
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    Given I register the following alias
+      | alias                     | value           |
+      | besuDeployContractTxOTKID | {{random.uuid}} |
+    Then I track the following envelopes
+      | ID                            |
+      | {{besuDeployContractTxOTKID}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "oneTimeKey": true,
+        "protocol": "Orion",
+        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+        "privateFor": ["{{global.nodes.besu_3.privateAddress}}"],
+        "contractName": "SimpleToken"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{besuDeployContractTxOTKID}}"
+    }
+}
+      """
+    Then the response code should be 202
+    Then Envelopes should be in topic "tx.decoded"
+    And Envelopes should have the following fields
+      | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                    |
+      | 1              | ~              | {{global.nodes.besu_1.privateAddress}} |

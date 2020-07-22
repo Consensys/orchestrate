@@ -2,6 +2,7 @@ package tracker
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
@@ -13,20 +14,27 @@ type Tracker struct {
 
 	// Envelope that can be diagnosed (last one retrieved from an out channel)
 	Current *tx.Envelope
+
+	mux *sync.RWMutex
 }
 
 func NewTracker() *Tracker {
 	t := &Tracker{
 		output: make(map[string]chan *tx.Envelope),
+		mux:    &sync.RWMutex{},
 	}
 	return t
 }
 
 func (t *Tracker) AddOutput(key string, ch chan *tx.Envelope) {
+	t.mux.Lock()
+	defer t.mux.Unlock()
 	t.output[key] = ch
 }
 
 func (t *Tracker) get(key string, timeout time.Duration) (*tx.Envelope, error) {
+	t.mux.RLock()
+	defer t.mux.RUnlock()
 	ch, ok := t.output[key]
 	if !ok {
 		return nil, fmt.Errorf("output %q not tracked", key)

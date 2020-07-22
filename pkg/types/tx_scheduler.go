@@ -60,6 +60,7 @@ type TransactionParams struct {
 	Priority        string        `json:"priority,omitempty" validate:"isPriority" example:"very-high" `
 	PrivateTransactionParams
 }
+
 type SendTransactionRequest struct {
 	BaseTransactionRequest
 	Params TransactionParams `json:"params" validate:"required"`
