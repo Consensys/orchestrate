@@ -167,3 +167,95 @@ Feature: Send transfer transaction
     And Response should have the following fields
       | result     |
       | 0x17d78400 |
+
+  Scenario: Fail to send transfer transaction with missing value
+    Given I register the following alias
+      | alias | value              |
+      | to1   | {{random.account}} |
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/transfer" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "from": "{{account1}}",
+        "to": "{{to1}}"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}"
+    }
+}
+      """
+    Then the response code should be 400
+    And Response should have the following fields
+      | message                                                                                            |
+      | 42400@encoding.json: invalid body, with: field validation for 'Value' failed on the 'required' tag |
+
+  Scenario: Fail to send transfer transaction with missing To
+    Given I register the following alias
+      | alias | value              |
+      | to1   | {{random.account}} |
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/transfer" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "from": "{{account1}}",
+        "value": "400000000"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}"
+    }
+}
+      """
+    Then the response code should be 400
+    And Response should have the following fields
+      | message                                                                                         |
+      | 42400@encoding.json: invalid body, with: field validation for 'To' failed on the 'required' tag |
+
+  Scenario: Fail to send transfer transaction with missing private-key
+    Given I register the following alias
+      | alias           | value              |
+      | to1             | {{random.account}} |
+      | transferTxOneID | {{random.uuid}}    |
+      | account3        | {{random.account}} |
+    Then I track the following envelopes
+      | ID                  |
+      | {{transferTxOneID}} |
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/transfer" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "from": "{{account3}}",
+        "to": "{{to1}}",
+        "value": "0"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{transferTxOneID}}"
+    }
+}
+      """
+    Then the response code should be 202
+    Then I register the following response fields
+      | alias      | path                  |
+      | jobOneUUID | schedule.jobs[0].uuid |
+    Then Envelopes should be in topic "tx.crafter"
+    Then Envelopes should be in topic "tx.recover"
+    And Envelopes should have the following fields
+      | Errors.0.Message                  |
+      | no key for account "{{account3}}" |
+    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobOneUUID}}"
+    Then the response code should be 200
+    And Response should have the following fields
+      | status | logs[0].status | logs[1].status | logs[2].status |
+      | FAILED | CREATED        | STARTED        | FAILED         |

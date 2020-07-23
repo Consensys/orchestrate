@@ -80,7 +80,7 @@ func initComponents(ctx context.Context) {
 		},
 		// Initialize ConsumerGroup
 		func() {
-			viper.Set(broker.KafkaGroupViperKey, "group-e2e")
+			viper.Set(broker.KafkaGroupViperKey, fmt.Sprintf("group-e2e-%s", utils.RandomString(10)))
 			broker.InitConsumerGroup(ctx)
 		},
 		// Initialize Handlers

@@ -305,7 +305,7 @@ Feature: Send contract transactions
         "oneTimeKey": true,
         "to": "{{counterContractAddr}}",
         "methodSignature": "increment(uint256)",
-        "args": ["1"]
+        "args": [1]
     },
     "labels": {
     	"scenario.id": "{{scenarioID}}",
@@ -314,7 +314,135 @@ Feature: Send contract transactions
 }
       """
     Then the response code should be 202
+    Then I register the following response fields
+      | alias      | path                  |
+      | jobOTKUUID | schedule.jobs[0].uuid |
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.Logs[0].Event        | Receipt.Logs[0].DecodedData.from |
       | 1              | Incremented(address,uint256) | ~                                |
+    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobOTKUUID}}"
+    Then the response code should be 200
+    And Response should have the following fields
+      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
+      | MINED  | CREATED        | STARTED        | PENDING        | MINED          |
+
+
+  Scenario: Fail to send contract transactions with invalid args
+    Given I register the following alias
+      | alias             | value           |
+      | counterDeployTxID | {{random.uuid}} |
+    Then I track the following envelopes
+      | ID                    |
+      | {{counterDeployTxID}} |
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "from": "{{account1}}",
+        "contractName": "Counter"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{counterDeployTxID}}"
+    }
+}
+      """
+    Then the response code should be 202
+    Then Envelopes should be in topic "tx.decoded"
+    And I register the following envelope fields
+      | id                    | alias               | path                    |
+      | {{counterDeployTxID}} | counterContractAddr | Receipt.ContractAddress |
+    Given I register the following alias
+      | alias    | value           |
+      | sendTxID | {{random.uuid}} |
+    Then I track the following envelopes
+      | ID           |
+      | {{sendTxID}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/send" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "from": "{{account1}}",
+        "to": "{{counterContractAddr}}",
+        "methodSignature": "increment(uint256)",
+        "args": ["string"]
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{sendTxID}}"
+    }
+}
+      """
+    Then the response code should be 422
+    And Response should have the following fields
+      | message                                                    |
+      | 42400@use-cases.send-contract-tx: invalid method signature |
+
+  Scenario: Fail to send contract transactions with invalid methodSignature
+    Given I register the following alias
+      | alias             | value           |
+      | counterDeployTxID | {{random.uuid}} |
+    Then I track the following envelopes
+      | ID                    |
+      | {{counterDeployTxID}} |
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "from": "{{account1}}",
+        "contractName": "Counter"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{counterDeployTxID}}"
+    }
+}
+      """
+    Then the response code should be 202
+    Then Envelopes should be in topic "tx.decoded"
+    And I register the following envelope fields
+      | id                    | alias               | path                    |
+      | {{counterDeployTxID}} | counterContractAddr | Receipt.ContractAddress |
+    Given I register the following alias
+      | alias    | value           |
+      | sendTxID | {{random.uuid}} |
+    Then I track the following envelopes
+      | ID           |
+      | {{sendTxID}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/send" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "from": "{{account1}}",
+        "to": "{{counterContractAddr}}",
+        "methodSignature": "increment(uint256,uint256,uint256)",
+        "args": [1,2,"3"]
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{sendTxID}}"
+    }
+}
+      """
+    Then the response code should be 202
+    Then I register the following response fields
+      | alias         | path                  |
+      | jobFailedUUID | schedule.jobs[0].uuid |
+    Then Envelopes should be in topic "tx.crafter"
+    Then Envelopes should be in topic "tx.recover"
+    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobFailedUUID}}"
+    Then the response code should be 200
+    And Response should have the following fields
+      | status | logs[0].status | logs[1].status | logs[2].status |
+      | FAILED | CREATED        | STARTED        | FAILED         |

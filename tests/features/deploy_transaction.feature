@@ -168,3 +168,111 @@ Feature: Deploy ERC20 contract
     And Response should have the following fields
       | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
       | MINED  | CREATED        | STARTED        | PENDING        | MINED          |
+
+  Scenario: Fail to deploy ERC20 with too low gas
+    Given I register the following contracts
+      | name        | artifacts        | Headers.Authorization    |
+      | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
+    Given I register the following alias
+      | alias            | value           |
+      | besuContractTxID | {{random.uuid}} |
+    Then I track the following envelopes
+      | ID                   |
+      | {{besuContractTxID}} |
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "contractName": "SimpleToken",
+        "oneTimeKey": true,
+        "gas": "1"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{besuContractTxID}}"
+    }
+}
+      """
+    Then the response code should be 202
+    Then I register the following response fields
+      | alias      | path                  |
+      | jobOTKUUID | schedule.jobs[0].uuid |
+    Then Envelopes should be in topic "tx.crafter"
+    Then Envelopes should be in topic "tx.recover"
+    And Envelopes should have the following fields
+      | Errors.0.Message                                        |
+      | code: -32003 - message: Intrinsic gas exceeds gas limit |
+    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobOTKUUID}}"
+    Then the response code should be 200
+    And Response should have the following fields
+      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status | logs[4].status |
+      | FAILED | CREATED        | STARTED        | PENDING        | RECOVERING     | FAILED         |
+
+  Scenario: Fail to deploy ERC20 with invalid contract tag
+    Given I register the following contracts
+      | name        | artifacts        | Headers.Authorization    |
+      | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
+    Given I register the following alias
+      | alias            | value           |
+      | besuContractTxID | {{random.uuid}} |
+    Then I track the following envelopes
+      | ID                   |
+      | {{besuContractTxID}} |
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "contractName": "SimpleToken",
+        "contractTag": "invalid",
+        "oneTimeKey": true
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{besuContractTxID}}"
+    }
+}
+      """
+    Then the response code should be 422
+    And Response should have the following fields
+      | message                                                                        |
+      | 42400@use-cases.send-deploy-tx.transaction-validator: failed to fetch contract |
+
+
+  Scenario: Fail to deploy ERC20 with missing contractName
+    Given I register the following contracts
+      | name        | artifacts        | Headers.Authorization    |
+      | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
+    Given I register the following alias
+      | alias            | value           |
+      | besuContractTxID | {{random.uuid}} |
+    Then I track the following envelopes
+      | ID                   |
+      | {{besuContractTxID}} |
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "from": "{{account1}}"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{besuContractTxID}}"
+    }
+}
+      """
+    Then the response code should be 400
+    And Response should have the following fields
+      | message                                                                                                   |
+      | 42400@encoding.json: invalid body, with: field validation for 'ContractName' failed on the 'required' tag |

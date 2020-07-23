@@ -21,6 +21,7 @@ func GetField(fieldPath string, val reflect.Value) (reflect.Value, error) {
 	if val.Kind() == reflect.Ptr {
 		val = val.Elem()
 	}
+
 	if strings.Contains(fieldPath, ".") {
 		keyValue := strings.Split(fieldPath, ".")
 
@@ -59,6 +60,13 @@ func getField(fieldPath string, val reflect.Value) (reflect.Value, error) {
 	switch val.Kind() {
 	case reflect.Map:
 		val = val.MapIndex(reflect.ValueOf(key))
+	case reflect.Array:
+	case reflect.Slice:
+		i, err := strconv.Atoi(key)
+		if err != nil {
+			return reflect.Value{}, err
+		}
+		val = val.Index(i)
 	default:
 		val = val.FieldByName(key)
 	}

@@ -1,5 +1,5 @@
 @private-tx
-Feature: Deploy private ERC20 contract
+Feature: Private transactions
   As an external developer
   I want to deploy a private contract using transaction scheduler
 
@@ -7,6 +7,7 @@ Feature: Deploy private ERC20 contract
     Given I have the following tenants
       | alias   | tenantID        |
       | tenant1 | {{random.uuid}} |
+#      | tenant2 | {{random.uuid}} |
     And I have created the following accounts
       | alias    | Headers.Authorization    |
       | account1 | Bearer {{tenant1.token}} |
@@ -20,9 +21,9 @@ Feature: Deploy private ERC20 contract
       | alias  | Name                  | URLs                           | PrivateTxManagers                           | Headers.Authorization    |
       | quorum | quorum-{{scenarioID}} | {{global.nodes.quorum_1.URLs}} | {{global.nodes.quorum_1.PrivateTxManagers}} | Bearer {{tenant1.token}} |
     And I register the following chains
-      | alias | Name                  | URLs                         | Headers.Authorization    |
-      | besu  | besu-{{scenarioID}}   | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
-      | besu2 | besu_2-{{scenarioID}} | {{global.nodes.besu_2.URLs}} | Bearer {{tenant1.token}} |
+      | alias  | Name                  | URLs                         | Headers.Authorization    |
+      | besu   | besu-{{scenarioID}}   | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
+      | besu_2 | besu_2-{{scenarioID}} | {{global.nodes.besu_2.URLs}} | Bearer {{tenant1.token}} |
 
   @quorum
   Scenario: Deploy private ERC20 contract with Quorum and Tessera
@@ -64,7 +65,7 @@ Feature: Deploy private ERC20 contract
       | Receipt.Status | Receipt.ContractAddress |
       | 1              | ~                       |
 
-  Scenario: Deploy private ERC20 contract with unknown ChainName
+  Scenario: Fail to deploy private ERC20 contract with unknown ChainName
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
@@ -89,7 +90,7 @@ Feature: Deploy private ERC20 contract
       | message                                                   |
       | 42400@use-cases.send-tx: cannot load 'UnknownChain' chain |
 
-  Scenario: Deploy private ERC20 contract with unknown PrivateFor
+  Scenario: Fail to deploy private ERC20 contract with unknown PrivateFor
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
@@ -112,6 +113,31 @@ Feature: Deploy private ERC20 contract
     And Response should have the following fields
       | message                                                               |
       | 42400@: fields 'privacyGroupId' and 'privateFor' cannot be both empty |
+
+  Scenario: Fail to deploy private ERC20 contract with not authorized chain
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "quorum_2-{{scenarioID}}",
+    "params": {
+        "from": "{{account1}}",
+        "protocol": "Tessera",
+        "privateFrom": "{{global.nodes.quorum_1.privateAddress}}",
+        "privateFor": ["{{global.nodes.quorum_2.privateAddress}}"],
+        "contractName": "SimpleToken"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}"
+    }
+}
+      """
+    Then the response code should be 422
+    And Response should have the following fields
+      | message                                                              |
+      | 42400@use-cases.send-tx: cannot load 'quorum_2-{{scenarioID}}' chain |
 
   @besu
   Scenario: Deploy private ERC20 contract with Besu and Orion
@@ -345,7 +371,7 @@ Feature: Deploy private ERC20 contract
       | 1              | ~              | {{global.nodes.besu_2.privateAddress}} | ["{{global.nodes.besu_3.privateAddress}}"] |
 
   @besu
-  Scenario: Batch deploy private ERC20 for a privacy group
+  Scenario: Deploy private ERC20 for a privacy group
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
@@ -404,6 +430,128 @@ Feature: Deploy private ERC20 contract
 
 
   @besu
+  Scenario: Deploy private ERC20 for a privacy group
+    Given I register the following alias
+      | alias               | value           |
+      | privacyGroupNameOne | {{random.uuid}} |
+    Then I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    Then I sleep "2s"
+    When I send "POST" request to "{{global.chain-registry}}/{{besu.UUID}}" with json:
+      """
+{
+    "jsonrpc": "2.0",
+    "method": "priv_createPrivacyGroup",
+    "params": [
+        {
+            "addresses": [
+                "{{global.nodes.besu_1.privateAddress}}",
+                "{{global.nodes.besu_2.privateAddress}}",
+                "{{global.nodes.besu_3.privateAddress}}"
+            ],
+            "name": "{{privacyGroupNameOne}}",
+            "description": "TestGroup"
+        }
+    ],
+    "id": 1
+}
+      """
+    Then the response code should be 200
+    Then I register the following response fields
+      | alias          | path   |
+      | privacyGroupId | result |
+    Given I register the following alias
+      | alias                       | value           |
+      | besuDeployContractTxGroupID | {{random.uuid}} |
+    Then I track the following envelopes
+      | ID                              |
+      | {{besuDeployContractTxGroupID}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "from": "{{account1}}",
+        "protocol": "Orion",
+        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+        "privacyGroupId": "{{privacyGroupId}}",
+        "contractName": "SimpleToken"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{besuDeployContractTxGroupID}}"
+    }
+}
+      """
+    Then the response code should be 202
+    Then Envelopes should be in topic "tx.decoded"
+    And Envelopes should have the following fields
+      | Receipt.Status | Receipt.Output | Receipt.ContractAddress | Receipt.PrivateFrom                    | Receipt.PrivacyGroupId |
+      | 1              | ~              | ~                       | {{global.nodes.besu_1.privateAddress}} | {{privacyGroupId}}     |
+
+  @besu
+  Scenario: Fail to deploy private ERC20 with a privacy group and privateFor
+    Given I register the following alias
+      | alias               | value           |
+      | privacyGroupNameTwo | {{random.uuid}} |
+    Then I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    Then I sleep "2s"
+    When I send "POST" request to "{{global.chain-registry}}/{{besu.UUID}}" with json:
+      """
+{
+    "jsonrpc": "2.0",
+    "method": "priv_createPrivacyGroup",
+    "params": [
+        {
+            "addresses": [
+                "{{global.nodes.besu_1.privateAddress}}",
+                "{{global.nodes.besu_2.privateAddress}}",
+                "{{global.nodes.besu_3.privateAddress}}"
+            ],
+            "name": "{{privacyGroupNameTwo}}",
+            "description": "TestGroup"
+        }
+    ],
+    "id": 1
+}
+      """
+    Then the response code should be 200
+    Then I register the following response fields
+      | alias          | path   |
+      | privacyGroupId | result |
+    Given I register the following alias
+      | alias                       | value           |
+      | besuDeployContractTxGroupID | {{random.uuid}} |
+    Then I track the following envelopes
+      | ID                              |
+      | {{besuDeployContractTxGroupID}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "from": "{{account1}}",
+        "protocol": "Orion",
+        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+        "privacyGroupId": "{{privacyGroupId}}",
+        "privateFor": ["{{global.nodes.besu_3.privateAddress}}"],
+        "contractName": "SimpleToken"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{besuDeployContractTxGroupID}}"
+    }
+}
+      """
+    Then the response code should be 400
+    And Response should have the following fields
+      | message                                                                 |
+      | 42400@: fields 'privacyGroupId' and 'privateFor' are mutually exclusive |
+
+  @besu
   @oneTimeKey
   Scenario: Deploy private ERC20 with one-time-key
     Given I set the headers
@@ -435,5 +583,5 @@ Feature: Deploy private ERC20 contract
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
-      | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                    |
-      | 1              | ~              | {{global.nodes.besu_1.privateAddress}} |
+      | Receipt.Status | Receipt.Output | Receipt.ContractAddress | Receipt.PrivateFrom                    |
+      | 1              | ~              | ~                       | {{global.nodes.besu_1.privateAddress}} |

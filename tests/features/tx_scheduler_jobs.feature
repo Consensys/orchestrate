@@ -1,5 +1,5 @@
 @tx-scheduler
-Feature: Transaction Scheduler
+Feature: Transaction Scheduler Jobs
   As an external developer
   I want to send use transaction scheduler API to interact with the registered chains
 
