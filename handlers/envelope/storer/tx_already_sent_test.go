@@ -47,7 +47,6 @@ func TestTxAlreadySent(t *testing.T) {
 
 	t.Run("Envelope should be sent if status is CREATED", func(t *testing.T) {
 		txctx := makeContext("0x7a34cbb73c02aa3309c343e9e9b35f2a992aaa623c2ec2524816f476c63d2efa", "1", "8", 0)
-		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", txctx.Envelope.GetID())
 		jobResponse := testutils.FakeJobResponse()
 		jobResponse.Status = utils.StatusCreated
 
@@ -60,7 +59,6 @@ func TestTxAlreadySent(t *testing.T) {
 
 	t.Run("Envelope should be sent if status is STARTED", func(t *testing.T) {
 		txctx := makeContext("0x7a34cbb73c02aa3309c343e9e9b35f2a992aaa623c2ec2524816f476c63d2efa", "1", "8", 0)
-		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", txctx.Envelope.GetID())
 		jobResponse := testutils.FakeJobResponse()
 		jobResponse.Status = utils.StatusStarted
 
@@ -73,7 +71,6 @@ func TestTxAlreadySent(t *testing.T) {
 
 	t.Run("Envelope should be sent if status is RECOVERING", func(t *testing.T) {
 		txctx := makeContext("0x7a34cbb73c02aa3309c343e9e9b35f2a992aaa623c2ec2524816f476c63d2efa", "1", "8", 0)
-		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", txctx.Envelope.GetID())
 		jobResponse := testutils.FakeJobResponse()
 		jobResponse.Status = utils.StatusRecovering
 
@@ -86,7 +83,6 @@ func TestTxAlreadySent(t *testing.T) {
 
 	t.Run("should abort if status is FAILED", func(t *testing.T) {
 		txctx := makeContext("0x7a34cbb73c02aa3309c343e9e9b35f2a992aaa623c2ec2524816f476c63d2efa", "1", "8", 0)
-		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", txctx.Envelope.GetID())
 		jobResponse := testutils.FakeJobResponse()
 		jobResponse.Status = utils.StatusFailed
 
@@ -99,7 +95,6 @@ func TestTxAlreadySent(t *testing.T) {
 
 	t.Run("should abort if status is MINED", func(t *testing.T) {
 		txctx := makeContext("0x7a34cbb73c02aa3309c343e9e9b35f2a992aaa623c2ec2524816f476c63d2efa", "1", "8", 0)
-		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", txctx.Envelope.GetID())
 		jobResponse := testutils.FakeJobResponse()
 		jobResponse.Status = utils.StatusFailed
 
@@ -112,7 +107,6 @@ func TestTxAlreadySent(t *testing.T) {
 
 	t.Run("should abort if status is MINED", func(t *testing.T) {
 		txctx := makeContext("0x7a34cbb73c02aa3309c343e9e9b35f2a992aaa623c2ec2524816f476c63d2efa", "1", "8", 0)
-		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", txctx.Envelope.GetID())
 		jobResponse := testutils.FakeJobResponse()
 		jobResponse.Status = utils.StatusFailed
 
@@ -125,7 +119,6 @@ func TestTxAlreadySent(t *testing.T) {
 
 	t.Run("should get status from node if status is PENDING and succeed if not found", func(t *testing.T) {
 		txctx := makeContext("0x7a34cbb73c02aa3309c343e9e9b35f2a992aaa623c2ec2524816f476c63d2efa", "1", "8", 0)
-		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", txctx.Envelope.GetID())
 		jobResponse := testutils.FakeJobResponse()
 		jobResponse.Status = utils.StatusPending
 
@@ -141,7 +134,6 @@ func TestTxAlreadySent(t *testing.T) {
 
 	t.Run("should abort if error returned from node", func(t *testing.T) {
 		txctx := makeContext("0x7a34cbb73c02aa3309c343e9e9b35f2a992aaa623c2ec2524816f476c63d2efa", "1", "8", 0)
-		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", txctx.Envelope.GetID())
 		jobResponse := testutils.FakeJobResponse()
 		jobResponse.Status = utils.StatusPending
 
@@ -157,7 +149,6 @@ func TestTxAlreadySent(t *testing.T) {
 
 	t.Run("should abort if tx found", func(t *testing.T) {
 		txctx := makeContext("0x7a34cbb73c02aa3309c343e9e9b35f2a992aaa623c2ec2524816f476c63d2efa", "1", "8", 0)
-		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", txctx.Envelope.GetID())
 		jobResponse := testutils.FakeJobResponse()
 		jobResponse.Status = utils.StatusPending
 

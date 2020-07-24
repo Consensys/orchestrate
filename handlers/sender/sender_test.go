@@ -68,7 +68,7 @@ func TestSender_RawTransaction(t *testing.T) {
 
 	t.Run("should execute raw transaction", func(t *testing.T) {
 		txctx := newTxCtx(envelopeId, txHash, txRaw)
-		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", "jobUUID").SetJobType(tx.JobType_ETH_RAW_TX)
+		_ = txctx.Envelope.SetJobType(tx.JobType_ETH_RAW_TX)
 
 		ec.EXPECT().SendRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).Return(ethcommon.HexToHash(txHash), nil)
 
@@ -82,9 +82,7 @@ func TestSender_RawTransaction(t *testing.T) {
 
 	t.Run("should fail execute raw transaction", func(t *testing.T) {
 		txctx := newTxCtx(envelopeId, txHash, txRaw)
-		_ = txctx.Envelope.
-			SetContextLabelsValue("jobUUID", "jobUUID").
-			SetJobType(tx.JobType_ETH_RAW_TX)
+		_ = txctx.Envelope.SetJobType(tx.JobType_ETH_RAW_TX)
 		err := fmt.Errorf("failed to send a raw transaction")
 
 		ec.EXPECT().SendRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).
@@ -123,7 +121,6 @@ func TestSender_TesseraTx(t *testing.T) {
 	t.Run("should execute Tessera private transaction successfully", func(t *testing.T) {
 		txctx := newTxCtx(envelopeId, txHash, txRaw)
 		_ = txctx.Envelope.
-			SetContextLabelsValue("jobUUID", "jobUUID").
 			SetJobType(tx.JobType_ETH_TESSERA_PRIVATE_TX).
 			SetPrivateFor([]string{"SetPrivateFor=="}).
 			SetPrivateFrom("privateFrom==")
@@ -144,7 +141,6 @@ func TestSender_TesseraTx(t *testing.T) {
 	t.Run("should fail to execute Tessera with missing PrivateFor", func(t *testing.T) {
 		txctx := newTxCtx(envelopeId, txHash, txRaw)
 		_ = txctx.Envelope.
-			SetContextLabelsValue("jobUUID", "jobUUID").
 			SetJobType(tx.JobType_ETH_TESSERA_PRIVATE_TX).
 			SetPrivateFrom("privateFrom==")
 
@@ -183,7 +179,6 @@ func TestSender_EEAPrivateTransaction(t *testing.T) {
 	t.Run("should execute eea private transaction", func(t *testing.T) {
 		txctx := newTxCtx(envelopeId, txHash, txRaw)
 		_ = txctx.Envelope.
-			SetContextLabelsValue("jobUUID", "jobUUID").
 			SetJobType(tx.JobType_ETH_ORION_EEA_TX)
 
 		ec.EXPECT().SendRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).
@@ -200,7 +195,6 @@ func TestSender_EEAPrivateTransaction(t *testing.T) {
 	t.Run("should fail execute raw transaction", func(t *testing.T) {
 		txctx := newTxCtx(envelopeId, txHash, txRaw)
 		_ = txctx.Envelope.
-			SetContextLabelsValue("jobUUID", "jobUUID").
 			SetJobType(tx.JobType_ETH_ORION_EEA_TX)
 		err := fmt.Errorf("failed to send a raw transaction")
 

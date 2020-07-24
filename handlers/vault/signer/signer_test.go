@@ -62,8 +62,7 @@ func TestSender(t *testing.T) {
 
 	t.Run("should execute raw transaction successfully", func(t *testing.T) {
 		txctx := newTxCtx(envelopeId, txSender.String())
-		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", "jobUUID").
-			SetJobType(tx.JobType_ETH_RAW_TX)
+		_ = txctx.Envelope.SetJobType(tx.JobType_ETH_RAW_TX)
 
 		ks.EXPECT().SignTx(txctx.Context(), gomock.Any(), txSender, gomock.AssignableToTypeOf(&ethtypes.Transaction{})).
 			Return(txRaw.Bytes(), &txHash, nil)
@@ -78,8 +77,7 @@ func TestSender(t *testing.T) {
 	t.Run("should fail to execute raw transaction successfully", func(t *testing.T) {
 		expectedErr := errors.InternalError("Error")
 		txctx := newTxCtx(envelopeId, txSender.String())
-		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", "jobUUID").
-			SetJobType(tx.JobType_ETH_RAW_TX)
+		_ = txctx.Envelope.SetJobType(tx.JobType_ETH_RAW_TX)
 
 		ks.EXPECT().SignTx(txctx.Context(), gomock.Any(), txSender, gomock.AssignableToTypeOf(&ethtypes.Transaction{})).
 			Return(txRaw.Bytes(), &txHash, expectedErr)
@@ -92,8 +90,7 @@ func TestSender(t *testing.T) {
 
 	t.Run("should execute tessera transaction successfully", func(t *testing.T) {
 		txctx := newTxCtx(envelopeId, txSender.String())
-		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", "jobUUID").
-			SetJobType(tx.JobType_ETH_TESSERA_PRIVATE_TX)
+		_ = txctx.Envelope.SetJobType(tx.JobType_ETH_TESSERA_PRIVATE_TX)
 
 		ks.EXPECT().SignPrivateTesseraTx(txctx.Context(), gomock.Any(), txSender, gomock.AssignableToTypeOf(&ethtypes.Transaction{})).
 			Return(txRaw.Bytes(), &txHash, nil)
@@ -108,8 +105,7 @@ func TestSender(t *testing.T) {
 	t.Run("should fail to execute tessera transaction successfully", func(t *testing.T) {
 		expectedErr := errors.InternalError("Error")
 		txctx := newTxCtx(envelopeId, txSender.String())
-		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", "jobUUID").
-			SetJobType(tx.JobType_ETH_TESSERA_PRIVATE_TX)
+		_ = txctx.Envelope.SetJobType(tx.JobType_ETH_TESSERA_PRIVATE_TX)
 
 		ks.EXPECT().SignPrivateTesseraTx(txctx.Context(), gomock.Any(), txSender, gomock.AssignableToTypeOf(&ethtypes.Transaction{})).
 			Return(txRaw.Bytes(), &txHash, expectedErr)
@@ -122,8 +118,7 @@ func TestSender(t *testing.T) {
 
 	t.Run("should execute eea transaction successfully", func(t *testing.T) {
 		txctx := newTxCtx(envelopeId, txSender.String())
-		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", "jobUUID").
-			SetJobType(tx.JobType_ETH_ORION_EEA_TX)
+		_ = txctx.Envelope.SetJobType(tx.JobType_ETH_ORION_EEA_TX)
 
 		ks.EXPECT().SignPrivateEEATx(txctx.Context(), gomock.Any(), txSender,
 			gomock.AssignableToTypeOf(&ethtypes.Transaction{}), gomock.AssignableToTypeOf(&types.PrivateArgs{})).
@@ -149,8 +144,7 @@ func TestSender(t *testing.T) {
 	t.Run("should fail to execute eea transaction successfully", func(t *testing.T) {
 		expectedErr := errors.InternalError("Error")
 		txctx := newTxCtx(envelopeId, txSender.String())
-		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", "jobUUID").
-			SetJobType(tx.JobType_ETH_ORION_EEA_TX)
+		_ = txctx.Envelope.SetJobType(tx.JobType_ETH_ORION_EEA_TX)
 
 		ks.EXPECT().SignPrivateEEATx(txctx.Context(), gomock.Any(), txSender,
 			gomock.AssignableToTypeOf(&ethtypes.Transaction{}), gomock.AssignableToTypeOf(&types.PrivateArgs{})).

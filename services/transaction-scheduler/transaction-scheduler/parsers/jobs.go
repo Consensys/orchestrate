@@ -85,7 +85,6 @@ func NewEnvelopeFromJobModel(job *models.Job, headers map[string]string) *tx.TxE
 	if contextLabels == nil {
 		contextLabels = map[string]string{}
 	}
-	contextLabels["jobUUID"] = job.UUID
 	contextLabels["scheduleUUID"] = job.Schedule.UUID
 	contextLabels["priority"] = job.Annotations.Priority
 

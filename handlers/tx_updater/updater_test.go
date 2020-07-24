@@ -20,7 +20,7 @@ func TestTransactionUpdater(t *testing.T) {
 
 	t.Run("should do nothing if the tx does not contain errors", func(t *testing.T) {
 		txctx := engine.NewTxContext()
-		_ = txctx.Envelope.SetID("test").SetContextLabelsValue("jobUUID", "test")
+		_ = txctx.Envelope.SetID("test")
 		txctx.Logger = log.NewEntry(log.New())
 
 		h := TransactionUpdater(schedulerClient)
@@ -29,7 +29,7 @@ func TestTransactionUpdater(t *testing.T) {
 
 	t.Run("should update the status successfully to FAILED if envelope contains errors", func(t *testing.T) {
 		txctx := engine.NewTxContext()
-		_ = txctx.Envelope.SetID("test").SetContextLabelsValue("jobUUID", "test")
+		_ = txctx.Envelope.SetID("test")
 		_ = txctx.AbortWithError(fmt.Errorf("error"))
 		txctx.Logger = log.NewEntry(log.New())
 

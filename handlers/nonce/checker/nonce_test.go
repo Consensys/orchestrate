@@ -206,7 +206,6 @@ func TestChecker(t *testing.T) {
 
 	// On 7th execution envelope with nonce 14 but raw mode should be valid
 	txctx = makeContext("testURL", testKey1, false, 15, 0, 0, 0, "")
-	txctx.Envelope.ContextLabels["jobUUID"] = "randomUUID"
 	_ = txctx.Envelope.SetJobType(tx.JobType_ETH_RAW_TX)
 	h(txctx)
 	assertTxContext(t, txctx)
