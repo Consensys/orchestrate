@@ -10,7 +10,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/envelope/storer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
-	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client"
 )
 
 const component = "handler.sender"
@@ -27,9 +26,6 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		// Initialize Context store
-		storeclient.Init(ctx)
-
 		// Initialize Tx Scheduler client
 		txscheduler.Init()
 
@@ -39,9 +35,9 @@ func Init(ctx context.Context) {
 		// Create Handler
 		handler = engine.CombineHandlers(
 			// Idempotency gate
-			storer.TxAlreadySent(ethclient.GlobalClient(), storeclient.GlobalEnvelopeStoreClient(), txscheduler.GlobalClient()),
+			storer.TxAlreadySent(ethclient.GlobalClient(), txscheduler.GlobalClient()),
 			// Sender
-			Sender(ethclient.GlobalClient(), storeclient.GlobalEnvelopeStoreClient(), txscheduler.GlobalClient()),
+			Sender(ethclient.GlobalClient(), txscheduler.GlobalClient()),
 		)
 
 		log.Infof("sender: handler ready")

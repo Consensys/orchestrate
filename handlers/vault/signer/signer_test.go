@@ -24,13 +24,9 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 )
 
-type MockTxSigner struct {
-	t *testing.T
-}
-
 const (
 	chainRegistryUrl = "chainRegistryUrl"
-	chainID = 666
+	chainID          = 666
 )
 
 func newTxCtx(eId, sender string) *engine.TxContext {
@@ -46,81 +42,7 @@ func newTxCtx(eId, sender string) *engine.TxContext {
 	return txctx
 }
 
-// @TODO Remove along with envelope-store
-func TestSender_EnvelopeStore(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	envelopeId := utils.RandomString(12)
-	txHash := ethcommon.HexToHash("0x" + utils.RandHexString(64))
-	txRaw := ethcommon.HexToHash("0x" + utils.RandHexString(10))
-	txSender := ethcommon.HexToAddress("0x" + utils.RandHexString(32))
-	contractAddr := ethcommon.HexToAddress("0x" + utils.RandHexString(32))
-
-	ec := mock.NewMockClient(ctrl)
-	ks := mock3.NewMockKeyStore(ctrl)
-	signer := TxSigner(
-		ethereumHandlers.Signer(ks, ks),
-		eeaHandlers.Signer(ks, ks, ec),
-		tesseraHandlers.Signer(ks, ks),
-	)
-
-	t.Run("should execute raw transaction successfully", func(t *testing.T) {
-		txctx := newTxCtx(envelopeId, txSender.String())
-		_ = txctx.Envelope.SetMethod(tx.Method_ETH_SENDRAWTRANSACTION)
-
-		ks.EXPECT().SignTx(txctx.Context(), gomock.Any(), txSender, gomock.AssignableToTypeOf(&ethtypes.Transaction{})).
-			Return(txRaw.Bytes(), &txHash, nil)
-
-		signer(txctx)
-
-		assert.Empty(t, txctx.Envelope.GetErrors())
-		assert.Equal(t, txctx.Envelope.GetRaw(), txRaw.Hex())
-		assert.Equal(t, txctx.Envelope.GetTxHash(), &txHash)
-	})
-	
-	t.Run("should execute tessera transaction successfully", func(t *testing.T) {
-		txctx := newTxCtx(envelopeId, txSender.String())
-		_ = txctx.Envelope.SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION)
-
-		ks.EXPECT().SignPrivateTesseraTx(txctx.Context(), gomock.Any(), txSender, gomock.AssignableToTypeOf(&ethtypes.Transaction{})).
-			Return(txRaw.Bytes(), &txHash, nil)
-
-		signer(txctx)
-
-		assert.Empty(t, txctx.Envelope.GetErrors())
-		assert.Equal(t, txctx.Envelope.GetRaw(), txRaw.Hex())
-		assert.Equal(t, txctx.Envelope.GetTxHash(), &txHash)
-	})
-	
-	t.Run("should execute eea transaction successfully", func(t *testing.T) {
-		txctx := newTxCtx(envelopeId, txSender.String())
-		_ = txctx.Envelope.SetMethod(tx.Method_EEA_SENDPRIVATETRANSACTION)
-
-		ks.EXPECT().SignPrivateEEATx(txctx.Context(), gomock.Any(), txSender,
-			gomock.AssignableToTypeOf(&ethtypes.Transaction{}), gomock.AssignableToTypeOf(&types.PrivateArgs{})).
-			Return(txRaw.Bytes(), &txHash, nil)
-		
-		ec.EXPECT().PrivDistributeRawTransaction(txctx.Context(), chainRegistryUrl, gomock.Any()).
-			Return(txHash, nil)
-		
-		ec.EXPECT().EEAPrivPrecompiledContractAddr(txctx.Context(), chainRegistryUrl).
-			Return(contractAddr, nil)
-		
-		ks.EXPECT().
-			SignTx(txctx.Context(), gomock.Any(), txSender, gomock.Any()).
-			Return(txRaw.Bytes(), &txHash, nil)
-
-		signer(txctx)
-
-		assert.Empty(t, txctx.Envelope.GetErrors())
-		assert.Equal(t, txctx.Envelope.GetRaw(), txRaw.Hex())
-		assert.Equal(t, txctx.Envelope.GetTxHash(), &txHash)
-	})
-}
-
-
-func TestSender_TxScheduler(t *testing.T) {
+func TestSender(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -152,7 +74,7 @@ func TestSender_TxScheduler(t *testing.T) {
 		assert.Equal(t, txctx.Envelope.GetRaw(), txRaw.Hex())
 		assert.Equal(t, txctx.Envelope.GetTxHash(), &txHash)
 	})
-	
+
 	t.Run("should fail to execute raw transaction successfully", func(t *testing.T) {
 		expectedErr := errors.InternalError("Error")
 		txctx := newTxCtx(envelopeId, txSender.String())
@@ -167,7 +89,7 @@ func TestSender_TxScheduler(t *testing.T) {
 		assert.NotEmpty(t, txctx.Envelope.GetErrors())
 		assert.Equal(t, expectedErr, txctx.Envelope.GetErrors()[0])
 	})
-	
+
 	t.Run("should execute tessera transaction successfully", func(t *testing.T) {
 		txctx := newTxCtx(envelopeId, txSender.String())
 		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", "jobUUID").
@@ -182,8 +104,7 @@ func TestSender_TxScheduler(t *testing.T) {
 		assert.Equal(t, txctx.Envelope.GetRaw(), txRaw.Hex())
 		assert.Equal(t, txctx.Envelope.GetTxHash(), &txHash)
 	})
-	
-	
+
 	t.Run("should fail to execute tessera transaction successfully", func(t *testing.T) {
 		expectedErr := errors.InternalError("Error")
 		txctx := newTxCtx(envelopeId, txSender.String())
@@ -198,7 +119,7 @@ func TestSender_TxScheduler(t *testing.T) {
 		assert.NotEmpty(t, txctx.Envelope.GetErrors())
 		assert.Equal(t, expectedErr, txctx.Envelope.GetErrors()[0])
 	})
-	
+
 	t.Run("should execute eea transaction successfully", func(t *testing.T) {
 		txctx := newTxCtx(envelopeId, txSender.String())
 		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", "jobUUID").
@@ -207,13 +128,13 @@ func TestSender_TxScheduler(t *testing.T) {
 		ks.EXPECT().SignPrivateEEATx(txctx.Context(), gomock.Any(), txSender,
 			gomock.AssignableToTypeOf(&ethtypes.Transaction{}), gomock.AssignableToTypeOf(&types.PrivateArgs{})).
 			Return(txRaw.Bytes(), &txHash, nil)
-		
+
 		ec.EXPECT().PrivDistributeRawTransaction(txctx.Context(), chainRegistryUrl, gomock.Any()).
 			Return(txHash, nil)
-		
+
 		ec.EXPECT().EEAPrivPrecompiledContractAddr(txctx.Context(), chainRegistryUrl).
 			Return(contractAddr, nil)
-		
+
 		ks.EXPECT().
 			SignTx(txctx.Context(), gomock.Any(), txSender, gomock.Any()).
 			Return(txRaw.Bytes(), &txHash, nil)
@@ -224,7 +145,7 @@ func TestSender_TxScheduler(t *testing.T) {
 		assert.Equal(t, txctx.Envelope.GetRaw(), txRaw.Hex())
 		assert.Equal(t, txctx.Envelope.GetTxHash(), &txHash)
 	})
-	
+
 	t.Run("should fail to execute eea transaction successfully", func(t *testing.T) {
 		expectedErr := errors.InternalError("Error")
 		txctx := newTxCtx(envelopeId, txSender.String())

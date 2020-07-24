@@ -17,9 +17,8 @@ import (
 
 func TestEnvelope(t *testing.T) {
 	envelope := &TxRequest{
-		Id:     uuid.Must(uuid.NewV4()).String(),
-		Method: Method_ETH_SENDRAWTRANSACTION,
-		Chain:  "testChain",
+		Id:    uuid.Must(uuid.NewV4()).String(),
+		Chain: "testChain",
 		Params: &Params{
 			From:            "0x7e654d251da770a068413677967f6d3ea2fea9e4",
 			To:              "0xdbb881a51cd4023e4400cef3ef73046743f08da3",
@@ -51,7 +50,6 @@ func TestRequestToBuilder(t *testing.T) {
 					TxRequest: &TxRequest{
 						Headers: map[string]string{"testHeader1Key": "testHeader1Value"},
 						Chain:   "testChainName",
-						Method:  Method_ETH_SENDPRIVATETRANSACTION,
 						Params: &Params{
 							From:            "0x7e654d251da770a068413677967f6d3ea2fea9e4",
 							To:              "0xdbb881a51cd4023e4400cef3ef73046743f08da3",
@@ -79,7 +77,6 @@ func TestRequestToBuilder(t *testing.T) {
 			},
 			&Envelope{
 				Headers: map[string]string{"testHeader1Key": "testHeader1Value"},
-				Method:  Method_ETH_SENDPRIVATETRANSACTION,
 				Chain: Chain{
 					ChainName: "testChainName",
 					ChainUUID: "testChainUUID",
@@ -124,7 +121,6 @@ func TestRequestToBuilder(t *testing.T) {
 					TxRequest: &TxRequest{
 						Headers: map[string]string{"testHeader1Key": "testHeader1Value"},
 						Chain:   "testChainName",
-						Method:  Method_ETH_SENDPRIVATETRANSACTION,
 						Params: &Params{
 							From:            "0x7e654d251da770a068413677967f6d3ea2fea9e4",
 							To:              "0xdbb881a51cd4023e4400cef3ef73046743f08da3",
@@ -158,7 +154,6 @@ func TestRequestToBuilder(t *testing.T) {
 					TxRequest: &TxRequest{
 						Headers: map[string]string{"testHeader1Key": "testHeader1Value"},
 						Chain:   "testChainName",
-						Method:  Method_ETH_SENDPRIVATETRANSACTION,
 						Params: &Params{
 							From:            "0x7e654d251da770a068413677967f6d3ea2fea9e4",
 							To:              "0xdbb881a51cd4023e4400cef3ef73046743f08da3",

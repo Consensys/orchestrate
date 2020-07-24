@@ -14,10 +14,6 @@ apis:
     tags:
       add:
         - "Chain Registry"
-  - url: 'public/swagger-specs/services/envelope-store/proto/store.swagger.json'
-    tags:
-      rename:
-        EnvelopeStore: "Envelope Store"
   - url: 'public/swagger-specs/services/contract-registry/proto/registry.swagger.json'
     tags:
       rename:

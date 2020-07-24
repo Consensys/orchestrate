@@ -90,6 +90,7 @@ func (p *Provider) buildConfiguration(ctx context.Context, chains []*models.Chai
 			TenantID: chain.TenantID,
 			Name:     chain.Name,
 			URL:      fmt.Sprintf("%v/%v", p.conf.ChainRegistryURL, chain.UUID),
+			ChainID:  chain.ChainID,
 			Listener: &dynamic.Listener{
 				StartingBlock:     *chain.ListenerStartingBlock,
 				CurrentBlock:      *chain.ListenerCurrentBlock,

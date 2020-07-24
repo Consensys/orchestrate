@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/viper"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
-	envelopestore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client"
 	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 )
 
@@ -52,9 +51,6 @@ func importGlobalAlias(rawAliases string) {
 		"contract-registry":         viper.GetString(contractregistry.ContractRegistryURLViperKey),
 		"contract-registry-metrics": viper.GetString(contractregistry.ContractRegistryMetricsURLViperKey),
 		"contract-registry-http":    viper.GetString(contractregistry.ContractRegistryHTTPURLViperKey),
-		"envelope-store":            viper.GetString(envelopestore.EnvelopeStoreURLViperKey),
-		"envelope-store-metrics":    viper.GetString(envelopestore.EnvelopeStoreMetricsURLViperKey),
-		"envelope-store-http":       viper.GetString(envelopestore.EnvelopeStoreHTTPURLViperKey),
 		"tx-scheduler":              viper.GetString(txscheduler.TxSchedulerURLViperKey),
 		"tx-scheduler-metrics":      viper.GetString(txscheduler.TxSchedulerMetricsURLViperKey),
 	}

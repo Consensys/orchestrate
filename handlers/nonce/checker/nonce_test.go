@@ -205,14 +205,6 @@ func TestChecker(t *testing.T) {
 	assert.False(t, recovering, "NonceManager should have stopped recovering")
 
 	// On 7th execution envelope with nonce 14 but raw mode should be valid
-	txctx = makeContext("testURL", testKey1, false, 14, 0, 0, 0, "")
-	_ = txctx.Envelope.SetContextLabelsValue("txMode", "raw")
-	h(txctx)
-	assertTxContext(t, txctx)
-	recovering = tracker.Recovering(txctx.Envelope.PartitionKey()) > 0
-	assert.False(t, recovering, "NonceManager should not be recovering")
-
-	// On 8th execution envelope with nonce 14 but raw mode should be valid
 	txctx = makeContext("testURL", testKey1, false, 15, 0, 0, 0, "")
 	txctx.Envelope.ContextLabels["jobUUID"] = "randomUUID"
 	_ = txctx.Envelope.SetJobType(tx.JobType_ETH_RAW_TX)

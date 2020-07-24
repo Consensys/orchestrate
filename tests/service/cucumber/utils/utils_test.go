@@ -243,7 +243,7 @@ func TestParseEnvelope(t *testing.T) {
 			},
 			[]*tx.Envelope{
 				tx.NewEnvelope().
-					SetMethod(tx.Method_ETH_SENDRAWTRANSACTION).
+					SetJobType(tx.JobType_ETH_TX).
 					MustSetFromString("0x7e654d251da770a068413677967f6d3ea2fea9e4").
 					MustSetToString("0xe3F5351F8da45aE9150441E3Af21906CCe4cBbc0").
 					SetGas(1).

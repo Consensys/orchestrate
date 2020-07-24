@@ -74,7 +74,7 @@ Above command is going to initialize one of each of the orchestrate service usin
 orchestrate apis are launched in the following ports:
 - CHAIN_API_HOST: `localhost:8011`, `localhost:8012`
 - CONTRACT_REGISTRY_API_HOST: `localhost:8020`, `localhost:8021`, `localhost:8022`
-- ENVELOPE_STORE_API_HOST: `localhost:8030`, `localhost:8031`, `localhost:8032`
+- TRANSACTION_SCHEDULER_API_HOST: `localhost:8031`, `localhost:8032`
 
 **Logging**
 To monitor orchestrate logs we can do as follow:

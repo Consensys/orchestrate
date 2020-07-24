@@ -98,104 +98,41 @@ func (e *Envelope) GetReceipt() *ethereum.Receipt {
 	return e.Receipt
 }
 
-func (e *Envelope) GetMethod() Method {
-	return e.Method
-}
-
-func (e *Envelope) SetMethod(method Method) *Envelope {
-	e.Method = method
-	return e
-}
-
-// @TODO Remove once envelope store is deleted
-func (e *Envelope) HasTxModeRawTransaction() bool {
-	if e.BelongToEnvelopeStore() {
-		if mode := e.GetContextLabelsValue("txMode"); mode == "raw" {
-			return true
-		}
-	}
-
-	return false
-}
-
-// @TODO Remove once envelope store is deleted
-func (e *Envelope) BelongToEnvelopeStore() bool {
-	return e.ContextLabels["jobUUID"] == ""
-}
-
 func (e *Envelope) IsEthSendTransaction() bool {
-	// @TODO Remove once envelope store is deleted
-	if e.BelongToEnvelopeStore() {
-		return false
-	}
-
 	return e.JobType == JobType_ETH_TX
 }
 
 // IsEthSendRawTransaction for a classic Ethereum transaction
 func (e *Envelope) IsEthSendRawTransaction() bool {
-	// @TODO Remove once envelope store is deleted
-	if e.BelongToEnvelopeStore() {
-		return e.Method == Method_ETH_SENDRAWTRANSACTION
-	}
-
 	return e.JobType == JobType_ETH_RAW_TX
 }
 
 // IsEthSendPrivateTransaction for Quorum Constellation
 func (e *Envelope) IsEthSendPrivateTransaction() bool {
-	// @TODO Remove once envelope store is deleted
-	if e.BelongToEnvelopeStore() {
-		return e.Method == Method_ETH_SENDPRIVATETRANSACTION
-	}
 	return e.JobType == JobType_ETH_TESSERA_PUBLIC_TX
 }
 
 // IsEthSendRawPrivateTransaction for Quorum Tessera
 func (e *Envelope) IsEthSendRawPrivateTransaction() bool {
-	// @TODO Remove once envelope store is deleted
-	if e.BelongToEnvelopeStore() {
-		return e.Method == Method_ETH_SENDRAWPRIVATETRANSACTION
-	}
 	return e.JobType == JobType_ETH_TESSERA_PRIVATE_TX
 }
 
 // IsEthSendRawTransaction for Besu Orion
 func (e *Envelope) IsEeaSendPrivateTransaction() bool {
-	// @TODO Remove once envelope store is deleted
-	if e.BelongToEnvelopeStore() {
-		return e.Method == Method_EEA_SENDPRIVATETRANSACTION
-	}
 	return e.JobType == JobType_ETH_ORION_EEA_TX
 }
 
 // IsEthSendRawTransaction for Besu Orion with Privacy Group
 func (e *Envelope) IsEeaSendPrivateTransactionPrivacyGroup() bool {
-	// @TODO Remove once envelope store is deleted
-	if e.BelongToEnvelopeStore() {
-		return e.Method == Method_EEA_SENDPRIVATETRANSACTION && e.PrivacyGroupID != ""
-	}
 	return e.JobType == JobType_ETH_ORION_EEA_TX && e.PrivacyGroupID != ""
 }
 
 // IsEthSendRawTransaction for Besu Orion with PrivateFor
 func (e *Envelope) IsEeaSendPrivateTransactionPrivateFor() bool {
-	// @TODO Remove once envelope store is deleted
-	if e.BelongToEnvelopeStore() {
-		return e.Method == Method_EEA_SENDPRIVATETRANSACTION && len(e.PrivateFor) > 0
-	}
 	return e.JobType == JobType_ETH_ORION_EEA_TX && len(e.PrivateFor) > 0
 }
 
 func (e *Envelope) IsOneTimeKeySignature() bool {
-	// @TODO Remove once envelope store is deleted
-	if e.BelongToEnvelopeStore() {
-		if v, ok := e.ContextLabels[TxFromLabel]; ok {
-			return v == TxFromOneTimeKey
-		}
-		return false
-	}
-
 	if v, ok := e.InternalLabels[TxFromLabel]; ok {
 		return v == TxFromOneTimeKey
 	}

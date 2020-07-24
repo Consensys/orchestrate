@@ -14,11 +14,6 @@ func TransactionUpdater(txSchedulerClient txscheduler.TransactionSchedulerClient
 	return func(txctx *engine.TxContext) {
 		txctx.Next()
 
-		// TODO: Remove statement once envelope store is removed
-		if txctx.Envelope.BelongToEnvelopeStore() {
-			return
-		}
-
 		if txctx.Envelope.OnlyWarnings() {
 			return
 		}

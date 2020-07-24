@@ -10,13 +10,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
-var MethodMap = map[string]Method{
-	"ETH_SENDRAWTRANSACTION":        Method_ETH_SENDRAWTRANSACTION,
-	"ETH_SENDPRIVATETRANSACTION":    Method_ETH_SENDPRIVATETRANSACTION,
-	"ETH_SENDRAWPRIVATETRANSACTION": Method_ETH_SENDRAWPRIVATETRANSACTION,
-	"EEA_SENDPRIVATETRANSACTION":    Method_EEA_SENDPRIVATETRANSACTION,
-}
-
 var JobTypeMap = map[string]JobType{
 	utils.EthereumTransaction:       JobType_ETH_TX,
 	utils.EthereumRawTransaction:    JobType_ETH_RAW_TX,
@@ -55,7 +48,6 @@ func (m *TxRequest) Envelope() (*Envelope, error) {
 		SetID(m.GetId()).
 		SetHeaders(m.GetHeaders()).
 		SetContextLabels(m.GetContextLabels()).
-		SetMethod(m.GetMethod()).
 		SetJobType(m.GetJobType()).
 		SetChainName(m.GetChain())
 

@@ -6,14 +6,13 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
-	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 )
 
 // Sender creates sender handler
-func Sender(ec ethclient.TransactionSender, s svc.EnvelopeStoreClient, txSchedulerClient client.TransactionSchedulerClient) engine.HandlerFunc {
+func Sender(ec ethclient.TransactionSender, txSchedulerClient client.TransactionSchedulerClient) engine.HandlerFunc {
 	// Declare a set of handlers that will be forked by Sender handler
-	rawTxStore := storer.RawTxStore(s, txSchedulerClient)
+	rawTxStore := storer.RawTxStore(txSchedulerClient)
 
 	rawTxSender := engine.CombineHandlers(
 		rawTxStore,
@@ -41,20 +40,7 @@ func Sender(ec ethclient.TransactionSender, s svc.EnvelopeStoreClient, txSchedul
 		case txctx.Envelope.IsEeaSendPrivateTransaction():
 			rawTxSender(txctx)
 		default:
-			var err error
-			// @TODO Remove once envelope store is deleted
-			if txctx.Envelope.BelongToEnvelopeStore() {
-				err = errors.DataError(
-					"invalid transaction protocol %q",
-					txctx.Envelope.Method.String(),
-				).SetComponent(component)
-			} else {
-				err = errors.DataError(
-					"invalid job type %q",
-					txctx.Envelope.JobType.String(),
-				).SetComponent(component)
-			}
-
+			err := errors.DataError("invalid job type %q", txctx.Envelope.JobType.String()).SetComponent(component)
 			txctx.Logger.WithError(err).Errorf("sender: could not send transaction")
 			_ = txctx.AbortWithError(err)
 		}

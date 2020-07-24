@@ -36,7 +36,7 @@ func TestStoreRaw(t *testing.T) {
 			"storeraw without error",
 			func(txctx *engine.TxContext) *engine.TxContext {
 				_ = txctx.Envelope.
-					SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION).
+					SetJobType(tx.JobType_ETH_TESSERA_PRIVATE_TX).
 					SetData([]byte{11, 22}).
 					SetPrivateFrom(testPrivateFrom)
 				return txctx
@@ -50,7 +50,7 @@ func TestStoreRaw(t *testing.T) {
 			"error without data filled",
 			func(txctx *engine.TxContext) *engine.TxContext {
 				_ = txctx.Envelope.
-					SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION).
+					SetJobType(tx.JobType_ETH_TESSERA_PRIVATE_TX).
 					SetPrivateFrom(testPrivateFrom)
 				return txctx
 			},
@@ -64,7 +64,7 @@ func TestStoreRaw(t *testing.T) {
 			"error in storeraw client",
 			func(txctx *engine.TxContext) *engine.TxContext {
 				_ = txctx.Envelope.
-					SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION).
+					SetJobType(tx.JobType_ETH_TESSERA_PRIVATE_TX).
 					SetData([]byte{11, 22}).
 					SetPrivateFrom(testPrivateFromError)
 				return txctx

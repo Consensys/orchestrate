@@ -1,4 +1,5 @@
 // +build unit
+// +build !race
 
 package session
 
@@ -46,7 +47,7 @@ type MockBuilder struct {
 
 func (b *MockBuilder) NewSession(chain *dynamic.Chain) (Session, error) {
 	if chain.UUID == keyError {
-		return nil, fmt.Errorf("test")
+		return nil, fmt.Errorf("error")
 	}
 
 	return b.getSession(chain.UUID), nil
@@ -54,7 +55,7 @@ func (b *MockBuilder) NewSession(chain *dynamic.Chain) (Session, error) {
 
 func (b *MockBuilder) addSession(key string, sess *MockSession) {
 	b.mux.Lock()
-	defer b.mux.Unlock()  
+	defer b.mux.Unlock()
 	b.sessions[key] = sess
 }
 

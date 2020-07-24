@@ -1,7 +1,6 @@
 package dynamic
 
 import (
-	"math/big"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -29,11 +28,9 @@ type Chain struct {
 	TenantID string
 	Name     string
 	URL      string
-	ChainID  *big.Int
-
+	ChainID  string
 	Listener *Listener
-
-	Active bool
+	Active   bool
 }
 
 func (n *Chain) SetDefault() {

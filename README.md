@@ -83,7 +83,7 @@ Error codes are `uint64` that maps to five hex character code
 
 [Contract Registry OpenAPI](http://localhost:8021/swagger)
 
-[Envelope Store OpenAPI](http://localhost:8031/swagger)
+[Transaction Scheduler OpenAPI](http://localhost:8031/swagger)
 
 ### Tools
 

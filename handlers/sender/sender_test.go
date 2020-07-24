@@ -18,14 +18,10 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
-	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client/mock"
-	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
 	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
 )
 
-const (
-	chainRegistryUrl = "chainRegistryUrl"
-)
+const chainRegistryUrl = "chainRegistryUrl"
 
 type updateStatusMatcher struct {
 	x *types.UpdateJobRequest
@@ -57,93 +53,7 @@ func newTxCtx(eId, txHash, txRaw string) *engine.TxContext {
 	return txctx
 }
 
-// @TODO: Remove along with envelope-store MS
-func TestSender_EnvelopeStore(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	// ctx := context.Background()
-	envelopeId := utils.RandomString(12)
-	txHash := "0x" + utils.RandHexString(64)
-	txRaw := "0x" + utils.RandHexString(10)
-
-	storeClient := clientmock.NewMockEnvelopeStoreClient(ctrl)
-	schedulerClient := mock2.NewMockTransactionSchedulerClient(ctrl)
-
-	ec := mock.NewMockTransactionSender(ctrl)
-	sender := Sender(ec, storeClient, schedulerClient)
-
-	t.Run("should execute raw transaction successfully", func(t *testing.T) {
-		txctx := newTxCtx(envelopeId, txHash, txRaw)
-		_ = txctx.Envelope.SetMethod(tx.Method_ETH_SENDRAWTRANSACTION)
-
-		ec.EXPECT().SendRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).
-			Return(ethcommon.HexToHash(txHash), nil)
-		storeClient.EXPECT().Store(txctx.Context(), gomock.AssignableToTypeOf(&svc.StoreRequest{}))
-		storeClient.EXPECT().SetStatus(txctx.Context(), &svc.SetStatusRequest{
-			Id:     envelopeId,
-			Status: svc.Status_PENDING,
-		})
-
-		sender(txctx)
-	})
-
-	t.Run("should execute Tessera private transaction successfully", func(t *testing.T) {
-		txctx := newTxCtx(envelopeId, txHash, txRaw)
-		_ = txctx.Envelope.
-			SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION).
-			SetPrivateFor([]string{"SetPrivateFor=="}).
-			SetPrivateFrom("privateFrom==")
-
-		ec.EXPECT().SendQuorumRawPrivateTransaction(txctx.Context(), chainRegistryUrl, txRaw,
-			types2.Call2PrivateArgs(txctx.Envelope).PrivateFor).
-			Return(ethcommon.HexToHash(txHash), nil)
-		storeClient.EXPECT().Store(txctx.Context(), gomock.AssignableToTypeOf(&svc.StoreRequest{}))
-		storeClient.EXPECT().SetStatus(txctx.Context(), &svc.SetStatusRequest{
-			Id:     envelopeId,
-			Status: svc.Status_PENDING,
-		})
-
-		sender(txctx)
-	})
-
-	t.Run("should execute EEA private transaction successfully", func(t *testing.T) {
-		txctx := newTxCtx(envelopeId, txHash, txRaw)
-		_ = txctx.Envelope.
-			SetMethod(tx.Method_EEA_SENDPRIVATETRANSACTION).
-			SetPrivacyGroupID("PrivGroupId==").
-			SetPrivateFrom("privateFrom==")
-
-		ec.EXPECT().SendRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).
-			Return(ethcommon.HexToHash(txHash), nil)
-
-		storeClient.EXPECT().Store(txctx.Context(), gomock.AssignableToTypeOf(&svc.StoreRequest{}))
-		storeClient.EXPECT().SetStatus(txctx.Context(), &svc.SetStatusRequest{
-			Id:     envelopeId,
-			Status: svc.Status_PENDING,
-		})
-
-		sender(txctx)
-	})
-
-	t.Run("should fail execute raw transaction", func(t *testing.T) {
-		txctx := newTxCtx(envelopeId, txHash, txRaw)
-		_ = txctx.Envelope.SetMethod(tx.Method_ETH_SENDRAWTRANSACTION)
-		err := fmt.Errorf("failed to send a raw transaction")
-
-		ec.EXPECT().SendRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).
-			Return(ethcommon.Hash{}, err)
-		storeClient.EXPECT().Store(txctx.Context(), gomock.AssignableToTypeOf(&svc.StoreRequest{}))
-		storeClient.EXPECT().SetStatus(txctx.Context(), &svc.SetStatusRequest{
-			Id:     envelopeId,
-			Status: svc.Status_ERROR,
-		})
-
-		sender(txctx)
-	})
-}
-
-func TestSender_TxScheduler_RawTransaction(t *testing.T) {
+func TestSender_RawTransaction(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -151,20 +61,16 @@ func TestSender_TxScheduler_RawTransaction(t *testing.T) {
 	txHash := "0x" + utils.RandHexString(64)
 	txRaw := "0x" + utils.RandHexString(10)
 
-	storeClient := clientmock.NewMockEnvelopeStoreClient(ctrl)
 	schedulerClient := mock2.NewMockTransactionSchedulerClient(ctrl)
 
 	ec := mock.NewMockTransactionSender(ctrl)
-	sender := Sender(ec, storeClient, schedulerClient)
+	sender := Sender(ec, schedulerClient)
 
 	t.Run("should execute raw transaction", func(t *testing.T) {
 		txctx := newTxCtx(envelopeId, txHash, txRaw)
-		_ = txctx.Envelope.
-			SetContextLabelsValue("jobUUID", "jobUUID").
-			SetJobType(tx.JobType_ETH_RAW_TX)
+		_ = txctx.Envelope.SetContextLabelsValue("jobUUID", "jobUUID").SetJobType(tx.JobType_ETH_RAW_TX)
 
-		ec.EXPECT().SendRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).
-			Return(ethcommon.HexToHash(txHash), nil)
+		ec.EXPECT().SendRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).Return(ethcommon.HexToHash(txHash), nil)
 
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
 			&types.UpdateJobRequest{
@@ -189,10 +95,9 @@ func TestSender_TxScheduler_RawTransaction(t *testing.T) {
 				Status: utils.StatusPending,
 			}))
 
-		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId,
-			gomockUpdateStatusMatcher(&types.UpdateJobRequest{
-				Status: utils.StatusRecovering,
-			}))
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(&types.UpdateJobRequest{
+			Status: utils.StatusRecovering,
+		}))
 
 		sender(txctx)
 
@@ -201,7 +106,7 @@ func TestSender_TxScheduler_RawTransaction(t *testing.T) {
 	})
 }
 
-func TestSender_TxScheduler_TesseraTx(t *testing.T) {
+func TestSender_TesseraTx(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -210,11 +115,10 @@ func TestSender_TxScheduler_TesseraTx(t *testing.T) {
 	txHash := "0x" + utils.RandHexString(64)
 	txRaw := "0x" + utils.RandHexString(10)
 
-	storeClient := clientmock.NewMockEnvelopeStoreClient(ctrl)
 	schedulerClient := mock2.NewMockTransactionSchedulerClient(ctrl)
 
 	ec := mock.NewMockTransactionSender(ctrl)
-	sender := Sender(ec, storeClient, schedulerClient)
+	sender := Sender(ec, schedulerClient)
 
 	t.Run("should execute Tessera private transaction successfully", func(t *testing.T) {
 		txctx := newTxCtx(envelopeId, txHash, txRaw)
@@ -262,7 +166,7 @@ func TestSender_TxScheduler_TesseraTx(t *testing.T) {
 	})
 }
 
-func TestSender_TxScheduler_EEAPrivateTransaction(t *testing.T) {
+func TestSender_EEAPrivateTransaction(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -271,11 +175,10 @@ func TestSender_TxScheduler_EEAPrivateTransaction(t *testing.T) {
 	txHash := "0x" + utils.RandHexString(64)
 	txRaw := "0x" + utils.RandHexString(10)
 
-	storeClient := clientmock.NewMockEnvelopeStoreClient(ctrl)
 	schedulerClient := mock2.NewMockTransactionSchedulerClient(ctrl)
 
 	ec := mock.NewMockTransactionSender(ctrl)
-	sender := Sender(ec, storeClient, schedulerClient)
+	sender := Sender(ec, schedulerClient)
 
 	t.Run("should execute eea private transaction", func(t *testing.T) {
 		txctx := newTxCtx(envelopeId, txHash, txRaw)

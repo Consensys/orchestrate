@@ -12,7 +12,7 @@
             "name": "Apache 2.0",
             "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
         },
-        "version": "1.0"
+        "version": "2.0"
     },
     "paths": {
         "/jobs": {
@@ -1123,6 +1123,10 @@
                 "oneTimeKey": {
                     "type": "boolean",
                     "example": true
+                },
+                "priority": {
+                    "type": "string",
+                    "example": "very-high"
                 }
             }
         },
@@ -1201,6 +1205,10 @@
                 "oneTimeKey": {
                     "type": "boolean",
                     "example": true
+                },
+                "priority": {
+                    "type": "string",
+                    "example": "very-high"
                 },
                 "value": {
                     "type": "string",
@@ -1496,6 +1504,10 @@
                     "type": "boolean",
                     "example": true
                 },
+                "priority": {
+                    "type": "string",
+                    "example": "very-high"
+                },
                 "to": {
                     "type": "string",
                     "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
@@ -1509,6 +1521,10 @@
         "types.TransactionResponse": {
             "type": "object",
             "properties": {
+                "chain": {
+                    "type": "string",
+                    "example": "myChain"
+                },
                 "createdAt": {
                     "type": "string",
                     "example": "2020-07-09T12:35:42.115395Z"
@@ -1550,6 +1566,10 @@
                 "gasPrice": {
                     "type": "string",
                     "example": "71500000 (wei)"
+                },
+                "priority": {
+                    "type": "string",
+                    "example": "very-high"
                 },
                 "to": {
                     "type": "string",

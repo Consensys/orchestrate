@@ -12,9 +12,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/keystore"
 	ksmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/keystore/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 )
 
 func mockSignerFunc(keystore.KeyStore, *engine.TxContext, ethcommon.Address, *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error) {
@@ -71,7 +71,7 @@ func makeSignerContext(i int) *engine.TxContext {
 		_ = txctx.Envelope.
 			SetChainIDUint64(10).
 			MustSetDataString("0").
-			SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION).
+			SetJobType(tx.JobType_ETH_TESSERA_PRIVATE_TX).
 			SetNonce(10).
 			SetValue(big.NewInt(100)).
 			MustSetToString("0x1").
@@ -81,7 +81,7 @@ func makeSignerContext(i int) *engine.TxContext {
 	case 5:
 		_ = txctx.Envelope.
 			SetChainIDUint64(10).
-			SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION).
+			SetJobType(tx.JobType_ETH_TESSERA_PRIVATE_TX).
 			SetNonce(10).
 			MustSetRawString(alreadySignedTx).
 			SetValue(big.NewInt(100)).
@@ -93,7 +93,7 @@ func makeSignerContext(i int) *engine.TxContext {
 		_ = txctx.Envelope.
 			SetChainIDUint64(0).
 			MustSetRawString("0").
-			SetMethod(tx.Method_ETH_SENDRAWPRIVATETRANSACTION).
+			SetJobType(tx.JobType_ETH_TESSERA_PRIVATE_TX).
 			SetNonce(10).
 			SetValue(big.NewInt(100)).
 			MustSetToString("0x1").
@@ -103,7 +103,7 @@ func makeSignerContext(i int) *engine.TxContext {
 	case 7:
 		_ = txctx.Envelope.
 			SetChainIDUint64(0).
-			SetMethod(tx.Method_EEA_SENDPRIVATETRANSACTION).
+			SetJobType(tx.JobType_ETH_ORION_EEA_TX).
 			SetNonce(10).
 			SetValue(big.NewInt(100)).
 			MustSetToString("0x1").
@@ -117,7 +117,7 @@ func makeSignerContext(i int) *engine.TxContext {
 func TestGeneric(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	
+
 	// Just checking the signer is properly generated
 	handler := GenerateSignerHandler(
 		mockSignerFunc,

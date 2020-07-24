@@ -33,7 +33,7 @@ func Init(ctx context.Context) {
 			authjwt.GlobalChecker(), authkey.GlobalChecker(),
 		)
 		if err != nil {
-			log.FromContext(ctx).WithError(err).Fatalf("Could not create envelope store application")
+			log.FromContext(ctx).WithError(err).Fatalf("Could not create chain registry application")
 		}
 	})
 }

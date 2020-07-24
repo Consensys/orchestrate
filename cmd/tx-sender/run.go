@@ -12,7 +12,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	chnregclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
-	storeclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/redis"
 	txsender "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-sender"
@@ -42,9 +41,6 @@ func newRunCommand() *cobra.Command {
 
 	// Chain Registry
 	chnregclient.Flags(runCmd.Flags())
-
-	// Register StoreGRPC flags
-	storeclient.Flags(runCmd.Flags())
 
 	// Register Nonce Manager flags
 	nonce.Type(runCmd.Flags())

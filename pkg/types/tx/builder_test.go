@@ -66,37 +66,6 @@ func TestEnvelope_SetReceipt(t *testing.T) {
 
 }
 
-func TestEnvelope_GetMethod(t *testing.T) {
-	b := NewEnvelope()
-	assert.Equal(t, b.GetMethod(), Method_ETH_SENDRAWTRANSACTION, "Should be equal")
-}
-
-func TestEnvelope_SetMethod(t *testing.T) {
-	b := NewEnvelope().SetMethod(Method_EEA_SENDPRIVATETRANSACTION)
-	assert.Equal(t, b.GetMethod(), Method_EEA_SENDPRIVATETRANSACTION, "Should be equal")
-}
-
-func TestEnvelope_IsMethod(t *testing.T) {
-	b := NewEnvelope()
-	assert.True(t, b.IsEthSendRawTransaction(), "Should be equal")
-	assert.False(t, b.IsEeaSendPrivateTransaction(), "Should be equal")
-
-	_ = b.SetMethod(Method_ETH_SENDPRIVATETRANSACTION)
-	assert.False(t, b.IsEthSendRawTransaction(), "Should be equal")
-	assert.True(t, b.IsEthSendPrivateTransaction(), "Should be equal")
-	assert.False(t, b.IsEthSendRawPrivateTransaction(), "Should be equal")
-
-	_ = b.SetMethod(Method_ETH_SENDRAWPRIVATETRANSACTION)
-	assert.False(t, b.IsEthSendRawTransaction(), "Should be equal")
-	assert.False(t, b.IsEthSendPrivateTransaction(), "Should be equal")
-	assert.False(t, b.IsEeaSendPrivateTransaction(), "Should be equal")
-
-	_ = b.SetMethod(Method_EEA_SENDPRIVATETRANSACTION)
-	assert.False(t, b.IsEthSendRawTransaction(), "Should be equal")
-	assert.False(t, b.IsEthSendPrivateTransaction(), "Should be equal")
-	assert.True(t, b.IsEeaSendPrivateTransaction(), "Should be equal")
-}
-
 func TestEnvelope_Carrier(t *testing.T) {
 	b := NewEnvelope()
 	assert.NotNil(t, b.Carrier(), "Should be equal")
@@ -130,8 +99,8 @@ func TestEnvelope_Validate(t *testing.T) {
 		SetID("testID").
 		SetHeadersValue("testHeaderKey", "testHeaderValue").
 		SetChainName("chainName").
-		SetMethod(Method_EEA_SENDPRIVATETRANSACTION).
 		MustSetFromString("0x1").
+		SetJobType(JobType_ETH_TX).
 		MustSetToString("0x2").
 		SetGas(11).
 		SetGasPrice(big.NewInt(12)).
@@ -436,7 +405,6 @@ func TestEnvelope_TxRequest(t *testing.T) {
 		SetID("testID").
 		SetHeadersValue("testHeaderKey", "testHeaderValue").
 		SetChainName("chainName").
-		SetMethod(Method_EEA_SENDPRIVATETRANSACTION).
 		MustSetFromString("0x1").
 		MustSetToString("0x2").
 		SetGas(11).
@@ -457,7 +425,6 @@ func TestEnvelope_TxRequest(t *testing.T) {
 		Id:      "testID",
 		Headers: map[string]string{"testHeaderKey": "testHeaderValue"},
 		Chain:   "chainName",
-		Method:  Method_EEA_SENDPRIVATETRANSACTION,
 		Params: &Params{
 			From:            "0x0000000000000000000000000000000000000001",
 			To:              "0x0000000000000000000000000000000000000002",
@@ -488,7 +455,6 @@ func TestEnvelope_TxEnvelopeAsRequest(t *testing.T) {
 		SetChainID(big.NewInt(1)).
 		SetChainName("chainName").
 		SetChainUUID("testChainUUID").
-		SetMethod(Method_EEA_SENDPRIVATETRANSACTION).
 		MustSetFromString("0x1").
 		MustSetToString("0x2").
 		SetGas(11).
@@ -513,7 +479,6 @@ func TestEnvelope_TxEnvelopeAsRequest(t *testing.T) {
 				Id:      "testID",
 				Headers: map[string]string{"testHeaderKey": "testHeaderValue"},
 				Chain:   "chainName",
-				Method:  Method_EEA_SENDPRIVATETRANSACTION,
 				Params: &Params{
 					From:            "0x0000000000000000000000000000000000000001",
 					To:              "0x0000000000000000000000000000000000000002",
@@ -580,7 +545,6 @@ func TestEnvelope_TxResponse(t *testing.T) {
 		SetID("testID").
 		SetHeadersValue("testHeaderKey", "testHeaderValue").
 		SetChainName("chainName").
-		SetMethod(Method_EEA_SENDPRIVATETRANSACTION).
 		MustSetFromString("0x1").
 		MustSetToString("0x2").
 		SetGas(11).
@@ -625,7 +589,7 @@ func TestEnvelope_TxResponse(t *testing.T) {
 func TestPrivateValidation(t *testing.T) {
 	b := NewEnvelope().
 		SetID("9f8708ad-8019-4533-9690-6495cc79a03c").
-		SetMethod(Method_EEA_SENDPRIVATETRANSACTION).
+		SetJobType(JobType_ETH_ORION_EEA_TX).
 		SetPrivateFor([]string{"kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M="}).
 		SetPrivacyGroupID("kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M=")
 
@@ -636,14 +600,14 @@ func TestPrivateValidation(t *testing.T) {
 
 	b2 := NewEnvelope().
 		SetID("9f8708ad-8019-4533-9690-6495cc79a03c").
-		SetMethod(Method_EEA_SENDPRIVATETRANSACTION).
+		SetJobType(JobType_ETH_TESSERA_PRIVATE_TX).
 		SetPrivacyGroupID("kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M=")
 
 	assert.Len(t, b2.Validate(), 0)
 
 	b3 := NewEnvelope().
 		SetID("9f8708ad-8019-4533-9690-6495cc79a03c").
-		SetMethod(Method_EEA_SENDPRIVATETRANSACTION).
+		SetJobType(JobType_ETH_TESSERA_PRIVATE_TX).
 		SetPrivateFor([]string{"kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M="})
 
 	assert.Len(t, b3.Validate(), 0)
@@ -663,7 +627,7 @@ func TestPartitionKey(t *testing.T) {
 		SetChainName("testChain").
 		MustSetFromString("0x1").
 		SetID("9f8708ad-8019-4533-9690-6495cc79a03c").
-		SetMethod(Method_EEA_SENDPRIVATETRANSACTION).
+		SetJobType(JobType_ETH_ORION_EEA_TX).
 		SetPrivacyGroupID("kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M=")
 	assert.Equal(t, "0x0000000000000000000000000000000000000001@orion-kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M=@11", b2.PartitionKey())
 
@@ -672,7 +636,7 @@ func TestPartitionKey(t *testing.T) {
 		SetChainName("testChain").
 		MustSetFromString("0x1").
 		SetID("9f8708ad-8019-4533-9690-6495cc79a03c").
-		SetMethod(Method_EEA_SENDPRIVATETRANSACTION).
+		SetJobType(JobType_ETH_ORION_EEA_TX).
 		SetPrivateFor([]string{"kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M="})
 	assert.Equal(t, "0x0000000000000000000000000000000000000001@orion-a3ce4ff3ac5af3264fd8ae06af53ed9e@12", b3.PartitionKey())
 }

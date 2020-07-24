@@ -77,15 +77,6 @@ services:
     ports:
       - 5432
 
-  postgres-envelope-store:
-    <<: *container-common
-    <<: *postgres-common
-    image: postgres:10.12-alpine
-    volumes:
-      - db-data-envelope-store:/var/lib/postgresql/data
-    ports:
-      - 5432
-
   postgres-transaction-scheduler:
     <<: *container-common
     <<: *postgres-common
@@ -140,8 +131,6 @@ volumes:
   db-data-chain-registry:
     driver: local
   db-data-contract-registry:
-    driver: local
-  db-data-envelope-store:
     driver: local
   db-data-transaction-scheduler:
     driver: local

@@ -6,9 +6,6 @@ x-default-variables: &default-variables
   CONTRACT_REGISTRY_URL: ${CONTRACT_REGISTRY_URL-contract-registry:8080}
   CONTRACT_REGISTRY_HTTP_URL: ${CONTRACT_REGISTRY_HTTP_URL-http://contract-registry:8081}
   CONTRACT_REGISTRY_METRICS_URL: ${CONTRACT_REGISTRY_METRICS_URL-http://contract-registry:8082}
-  ENVELOPE_STORE_URL: ${ENVELOPE_STORE_URL-envelope-store:8080}
-  ENVELOPE_STORE_HTTP_URL: ${ENVELOPE_STORE_HTTP_URL-http://envelope-store:8081}
-  ENVELOPE_STORE_METRICS_URL: ${ENVELOPE_STORE_METRICS_URL-http://envelope-store:8082}
   TRANSACTION_SCHEDULER_URL: ${TRANSACTION_SCHEDULER_URL-http://transaction-scheduler:8081}
   TRANSACTION_SCHEDULER_METRICS_URL: ${TRANSACTION_SCHEDULER_URL-http://transaction-scheduler:8082}
   CHAIN_REGISTRY_INIT: ${CHAIN_REGISTRY_INIT-}
@@ -33,8 +30,6 @@ x-default-variables: &default-variables
   KAFKA_SASL_PASSWORD: ${KAFKA_SASL_PASSWORD-}
   KAFKA_TLS_ENABLED: ${KAFKA_TLS_ENABLED-false}
   KAFKA_TLS_INSECURE_SKIP_VERIFY: ${KAFKA_TLS_INSECURE_SKIP_VERIFY-false}
-  TX_SCHEDULER_ENABLED: ${TX_SCHEDULER_ENABLED-true}
-  ENVELOPE_STORE_ENABLED: ${ENVELOPE_STORE_ENABLED-true}
   DB_TLS_SSLMODE: ${DB_TLS_SSLMODE-}
   DB_TLS_CERT: ${DB_TLS_CERT-}
   DB_TLS_KEY: ${DB_TLS_KEY-}
@@ -61,10 +56,6 @@ x-chain-registry-common: &chain-registry-common
 x-contract-registry-common: &contract-registry-common
   CONTRACT_REGISTRY_TYPE: ${CONTRACT_REGISTRY_TYPE-}
   DB_HOST: postgres-contract-registry
-
-x-envelope-store-common: &envelope-store-common
-  ENVELOPE_STORE_TYPE: ${ENVELOPE_STORE_TYPE-}
-  DB_HOST: postgres-envelope-store
 
 x-transaction-scheduler-common: &transaction-scheduler-common
   TRANSACTION_SCHEDULER_TYPE: ${TRANSACTION_SCHEDULER_TYPE-}
@@ -136,37 +127,6 @@ services:
       - contract-registry-migration
     command: contract-registry run
 
-  envelope-store-migration-init:
-    <<: *container-common
-    environment:
-      <<: *default-variables
-      <<: *envelope-store-common
-    restart: "no"
-    command: envelope-store migrate init
-
-  envelope-store-migration:
-    <<: *container-common
-    environment:
-      <<: *default-variables
-      <<: *envelope-store-common
-    restart: "no"
-    depends_on:
-      - envelope-store-migration-init
-    command: envelope-store migrate up
-
-  envelope-store:
-    <<: *container-common
-    ports:
-      - 8030:8080
-      - 8031:8081
-      - 8032:8082
-    environment:
-      <<: *default-variables
-      <<: *envelope-store-common
-    depends_on:
-      - envelope-store-migration
-    command: envelope-store run
-
   transaction-scheduler-migration-init:
     <<: *container-common
     environment:
@@ -188,13 +148,15 @@ services:
   transaction-scheduler:
     <<: *container-common
     ports:
-      - 8041:8081
-      - 8042:8082
+      - 8031:8081
+      - 8032:8082
     environment:
       <<: *default-variables
       <<: *transaction-scheduler-common
     depends_on:
       - transaction-scheduler-migration
+      - contract-registry
+      - chain-registry
     command: transaction-scheduler run
 
   tx-crafter:
@@ -204,6 +166,7 @@ services:
       JAEGER_SERVICE_NAME: TX-CRAFTER
     depends_on:
       - contract-registry
+      - transaction-scheduler
     command: tx-crafter run
 
   tx-signer:
@@ -223,6 +186,8 @@ services:
     environment:
       <<: *default-variables
       JAEGER_SERVICE_NAME: TX-SENDER
+    depends_on: 
+      - transaction-scheduler
     command: tx-sender run
 
   tx-listener:
@@ -232,7 +197,7 @@ services:
       LISTENER_START_DEFAULT: latest
       JAEGER_SERVICE_NAME: TX-LISTENER
     depends_on:
-      - envelope-store
+      - transaction-scheduler
       - chain-registry
     command: tx-listener run
 

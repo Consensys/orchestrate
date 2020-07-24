@@ -6,6 +6,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 )
 
+//go:generate mockgen -source=provider.go -destination=mock/provider.go -package=mock
+
 // Provider defines methods of a provider.
 type Provider interface {
 	// Run starts the provider to provide configuration to the tx-listener

@@ -1,9 +1,9 @@
 GOFILES := $(shell find . -name '*.go' -not -path "./vendor/*" | grep -v pkg/http/handler/dashboard/genstatic/gen.go | grep -v pkg/http/handler/swagger/genstatic/gen.go | egrep -v "^\./\.go" | grep -v _test.go)
 PACKAGES ?= $(shell go list ./... | grep -Fv -e e2e -e examples -e genstatic -e mock )
-CMD_RUN = tx-crafter tx-signer tx-sender tx-listener contract-registry chain-registry envelope-store transaction-scheduler
-CMD_PERSISTENT = redis postgres-chain-registry postgres-contract-registry postgres-envelope-store postgres-transaction-scheduler vault-init vault jaeger
+CMD_RUN = tx-crafter tx-signer tx-sender tx-listener contract-registry chain-registry transaction-scheduler
+CMD_PERSISTENT = redis postgres-chain-registry postgres-contract-registry postgres-transaction-scheduler vault-init vault jaeger
 CMD_KAFKA = zookeeper kafka
-CMD_MIGRATE = contract-registry envelope-store chain-registry transaction-scheduler
+CMD_MIGRATE = contract-registry chain-registry transaction-scheduler
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)

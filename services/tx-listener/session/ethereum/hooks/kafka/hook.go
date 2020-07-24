@@ -27,7 +27,6 @@ import (
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	svccontracts "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
-	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 )
@@ -38,7 +37,6 @@ type Hook struct {
 	registry          svccontracts.ContractRegistryClient
 	ec                ethclient.ChainStateReader
 	producer          sarama.SyncProducer
-	store             evlpstore.EnvelopeStoreClient
 	txSchedulerClient client.TransactionSchedulerClient
 }
 
@@ -47,7 +45,6 @@ func NewHook(
 	registry svccontracts.ContractRegistryClient,
 	ec ethclient.ChainStateReader,
 	producer sarama.SyncProducer,
-	store evlpstore.EnvelopeStoreClient,
 	txSchedulerClient client.TransactionSchedulerClient,
 ) *Hook {
 	return &Hook{
@@ -55,68 +52,8 @@ func NewHook(
 		registry:          registry,
 		ec:                ec,
 		producer:          producer,
-		store:             store,
 		txSchedulerClient: txSchedulerClient,
 	}
-}
-
-// TODO: Remove
-func (hk *Hook) AfterNewBlockEnvelope(ctx context.Context, c *dynamic.Chain, block *ethtypes.Block, envelopes []*tx.Envelope) error {
-	blockLogCtx := log.With(ctx, log.Str("block.number", block.Number().String()))
-	var txResponses []*tx.TxResponse
-
-	for _, e := range envelopes {
-		receiptLogCtx := log.With(blockLogCtx, log.Str("receipt.txhash", e.MustGetTxHashValue().String()))
-
-		// Register deployed contract
-		err := hk.registerDeployedContract(receiptLogCtx, c, e.Receipt, block)
-		if err != nil {
-			log.FromContext(receiptLogCtx).WithError(err).Errorf("could not register deployed contract on registry")
-		}
-
-		err = hk.decodeReceipt(receiptLogCtx, c, e.Receipt)
-		if err != nil {
-			e.Errors = append(e.Errors, errors.FromError(err))
-		}
-
-		txResponses = append(txResponses, e.TxResponse())
-	}
-
-	// Update transactions to "MINED"
-	for _, txResponse := range txResponses {
-		if txResponse.Id == "" {
-			continue
-		}
-
-		_, err := hk.store.SetStatus(
-			ctx,
-			&evlpstore.SetStatusRequest{
-				Id:     txResponse.Id,
-				Status: evlpstore.Status_MINED,
-			},
-		)
-		if err != nil {
-			log.FromContext(blockLogCtx).WithError(err).Warnf("failed to update status of %s to MINED", txResponse.Id)
-		}
-	}
-
-	// Prepare messages to be produced
-	msgs, err := hk.prepareEnvelopeMsgs(txResponses, hk.conf.OutTopic, c.UUID)
-	if err != nil {
-		log.FromContext(blockLogCtx).WithError(err).Errorf("failed to prepare messages")
-		return err
-	}
-
-	// Produce messages in Apache Kafka
-	err = hk.produce(msgs)
-	if err != nil {
-		log.FromContext(blockLogCtx).WithError(err).Errorf("failed to produce message")
-		return err
-	}
-
-	log.FromContext(blockLogCtx).Infof("block %v processed", block.NumberU64())
-
-	return nil
 }
 
 func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *ethtypes.Block, jobs []*pkgtypes.Job) error {
@@ -209,7 +146,7 @@ func (hk *Hook) decodeReceipt(ctx context.Context, c *dynamic.Chain, receipt *ty
 			&svccontracts.GetEventsBySigHashRequest{
 				SigHash: l.Topics[0],
 				AccountInstance: &common.AccountInstance{
-					ChainId: c.ChainID.String(),
+					ChainId: c.ChainID,
 					Account: l.GetAddress(),
 				},
 				IndexedInputCount: uint32(len(l.Topics) - 1),
@@ -291,7 +228,7 @@ func (hk *Hook) registerDeployedContract(ctx context.Context, c *dynamic.Chain, 
 		_, err = hk.registry.SetAccountCodeHash(ctx,
 			&svccontracts.SetAccountCodeHashRequest{
 				AccountInstance: &common.AccountInstance{
-					ChainId: c.ChainID.String(),
+					ChainId: c.ChainID,
 					Account: receipt.ContractAddress,
 				},
 				CodeHash: crypto.Keccak256Hash(code).String(),

@@ -3,10 +3,11 @@ package txlistener
 import (
 	"context"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 
 	"github.com/containous/traefik/v2/pkg/log"
-	evlpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/envelope-store/proto"
 	provider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/providers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum"
@@ -22,12 +23,11 @@ func NewTxListener(
 	prvdr provider.Provider,
 	hk hook.Hook,
 	offsets offset.Manager,
-	ec ethereum.EthClient,
-	store evlpstore.EnvelopeStoreClient,
+	ec ethclient.Client,
 	txSchedulerClient client.TransactionSchedulerClient,
 ) *TxListener {
 	manager := session.NewManager(
-		ethereum.NewSessionBuilder(hk, offsets, ec, store, txSchedulerClient),
+		ethereum.NewSessionBuilder(hk, offsets, ec, txSchedulerClient),
 		prvdr,
 	)
 

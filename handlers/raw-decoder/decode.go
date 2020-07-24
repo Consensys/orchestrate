@@ -5,7 +5,6 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	tx2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 )
 
 const component = "handler.raw_decoder"
@@ -14,7 +13,7 @@ func RawDecoder(txctx *engine.TxContext) {
 	var tx *types.Transaction
 
 	// We only use RawDecoder when user has sent a Ethereum Raw transaction, ignore the rest
-	if !(txctx.Envelope.HasTxModeRawTransaction() || txctx.Envelope.JobType == tx2.JobType_ETH_RAW_TX) {
+	if !txctx.Envelope.IsEthSendRawTransaction() {
 		return
 	}
 

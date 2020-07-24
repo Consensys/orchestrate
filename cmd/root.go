@@ -4,7 +4,6 @@ import (
 	"github.com/spf13/cobra"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/chain-registry"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/contract-registry"
-	envelopestore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/envelope-store"
 	transactionscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/transaction-scheduler"
 	txcrafter "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/tx-crafter"
 	txlistener "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/cmd/tx-listener"
@@ -39,10 +38,8 @@ func NewCommand() *cobra.Command {
 	rootCmd.AddCommand(txsender.NewRootCommand())
 	rootCmd.AddCommand(txlistener.NewRootCommand())
 	rootCmd.AddCommand(contractregistry.NewRootCommand())
-	rootCmd.AddCommand(envelopestore.NewRootCommand())
 	rootCmd.AddCommand(transactionscheduler.NewRootCommand())
 	rootCmd.AddCommand(chainregistry.NewRootCommand())
-	rootCmd.AddCommand(envelopestore.NewRootCommand())
 	rootCmd.AddCommand(utils.NewRootCommand())
 
 	// Register Multi-Tenancy flags
