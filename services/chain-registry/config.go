@@ -36,7 +36,7 @@ type Config struct {
 }
 
 // Init register flag for the Chain Registry to define initialization state
-func Type(f *pflag.FlagSet) {
+func InitialConfig(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Initialize Chain Registry
 Environment variable: %q`, initEnv)
 	f.StringSlice(initFlag, initDefault, desc)
@@ -44,7 +44,7 @@ Environment variable: %q`, initEnv)
 }
 
 func Flags(f *pflag.FlagSet) {
-	Type(f)
+	InitialConfig(f)
 	http.Flags(f)
 	store.Flags(f)
 	configwatcher.Flags(f)

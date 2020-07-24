@@ -12,6 +12,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	chnregclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
+	txschedulerclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	txlistener "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener"
 	provider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/providers/chain-registry"
 )
@@ -40,6 +41,7 @@ func newRunCommand() *cobra.Command {
 	provider.Flags(runCmd.Flags())
 	chnregclient.Flags(runCmd.Flags())
 	registryclient.ContractRegistryURL(runCmd.Flags())
+	txschedulerclient.Flags(runCmd.Flags())
 
 	return runCmd
 }

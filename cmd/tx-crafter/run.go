@@ -12,6 +12,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	chnregclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
+	txschedulerclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	txcrafter "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-crafter"
 )
 
@@ -37,11 +38,10 @@ func newRunCommand() *cobra.Command {
 	broker.KafkaTopicTxCrafter(runCmd.Flags())
 	broker.KafkaTopicTxRecover(runCmd.Flags())
 
-	// Chain Registry
+	// Internal API clients
 	chnregclient.Flags(runCmd.Flags())
-
-	// Contract Registry
 	registryclient.ContractRegistryURL(runCmd.Flags())
+	txschedulerclient.Flags(runCmd.Flags())
 
 	return runCmd
 }

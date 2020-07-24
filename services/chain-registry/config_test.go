@@ -11,7 +11,7 @@ import (
 
 func TestInitRegistry(t *testing.T) {
 	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	Type(f)
+	InitialConfig(f)
 
 	var expected []string
 	assert.Equal(t, expected, viper.GetStringSlice(InitViperKey), "Default")

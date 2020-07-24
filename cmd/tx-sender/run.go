@@ -14,6 +14,7 @@ import (
 	chnregclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/redis"
+	txschedulerclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	txsender "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-sender"
 )
 
@@ -39,8 +40,9 @@ func newRunCommand() *cobra.Command {
 	broker.KafkaTopicTxSender(runCmd.Flags())
 	broker.KafkaTopicTxRecover(runCmd.Flags())
 
-	// Chain Registry
+	// Internal API clients
 	chnregclient.Flags(runCmd.Flags())
+	txschedulerclient.Flags(runCmd.Flags())
 
 	// Register Nonce Manager flags
 	nonce.Type(runCmd.Flags())

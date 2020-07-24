@@ -194,7 +194,6 @@ services:
     <<: *container-common
     environment:
       <<: *default-variables
-      LISTENER_START_DEFAULT: latest
       JAEGER_SERVICE_NAME: TX-LISTENER
     depends_on:
       - transaction-scheduler

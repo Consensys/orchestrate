@@ -14,6 +14,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/hashicorp"
+	txschedulerclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	txsigner "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer"
 )
 
@@ -47,8 +48,9 @@ func newRunCommand() *cobra.Command {
 	broker.KafkaTopicAccountGenerated(runCmd.Flags())
 	broker.KafkaTopicTxRecover(runCmd.Flags())
 
-	// Chain Registry
+	// Internal API clients
 	chnregclient.Flags(runCmd.Flags())
+	txschedulerclient.Flags(runCmd.Flags())
 
 	return runCmd
 }

@@ -30,7 +30,6 @@ func newRunCommand() *cobra.Command {
 
 	// Transaction scheduler flags
 	transactionscheduler.Flags(runCmd.Flags())
-
 	return runCmd
 }
 
