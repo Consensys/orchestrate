@@ -6,17 +6,16 @@ import (
 	"net/http"
 
 	"github.com/containous/traefik/v2/pkg/log"
-	"github.com/containous/traefik/v2/pkg/middlewares/accesslog"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
 )
 
 type Builder struct {
-	handlers map[string]*accesslog.Handler
+	handlers map[string]*Handler
 }
 
 func NewBuilder() *Builder {
 	b := &Builder{
-		handlers: make(map[string]*accesslog.Handler),
+		handlers: make(map[string]*Handler),
 	}
 
 	return b
@@ -35,7 +34,7 @@ func (b *Builder) Build(ctx context.Context, name string, configuration interfac
 			WithField("type", fmt.Sprintf("%T", configuration)).
 			Debugf("building middleware")
 
-		h, err = accesslog.NewHandler(cfg.ToTraefikType())
+		h, err = NewHandler(cfg.ToTraefikType())
 		if err != nil {
 			return nil, nil, err
 		}

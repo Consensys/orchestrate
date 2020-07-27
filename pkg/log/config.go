@@ -25,6 +25,14 @@ const (
 	levelEnv      = "LOG_LEVEL"
 )
 
+var ECSJsonFormatter = &logrus.JSONFormatter{
+	FieldMap: logrus.FieldMap{
+		logrus.FieldKeyTime:  "@timestamp",
+		logrus.FieldKeyLevel: "log.level",
+		logrus.FieldKeyMsg:   "message",
+	},
+}
+
 // Level register flag for Level
 func Level(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Log level (one of %q).
@@ -82,13 +90,13 @@ func ConfigureLogger(cfg *traefiktypes.TraefikLog, logger *logrus.Logger) error 
 		// Set Formatter
 		switch cfg.Format {
 		case "json":
-			logger.SetFormatter(&logrus.JSONFormatter{})
+			logrus.SetFormatter(ECSJsonFormatter)
 		default:
 			logger.SetFormatter(&logrus.TextFormatter{})
 		}
 
 		// TODO: implement internal mechanism for extracting logger for context
-		// here we are modifiying a global variable so ConfigureLogger should be called once
+		// here we are modifying a global variable so ConfigureLogger should be called once
 		traefiklog.SetLogger(logger)
 	}
 

@@ -11,6 +11,7 @@ require (
 	github.com/aws/aws-sdk-go v1.29.33
 	github.com/c0va23/go-proxyprotocol v0.9.1
 	github.com/cenkalti/backoff/v4 v4.0.0
+	github.com/containous/alice v0.0.0-20181107144136-d83ebdd94cbd
 	github.com/containous/traefik/v2 v2.2.0
 	github.com/cucumber/godog v0.10.1-0.20200625081220-c7d739336b87
 	github.com/cucumber/messages-go/v10 v10.0.3
@@ -40,7 +41,6 @@ require (
 	github.com/hashicorp/vault/api v1.0.5-0.20200117231345-460d63e36490
 	github.com/julien-marchand/healthcheck v0.1.0
 	github.com/justinas/alice v1.2.0
-	github.com/magiconair/properties v1.8.1 // indirect
 	github.com/mitchellh/copystructure v1.0.0
 	github.com/mitchellh/mapstructure v1.2.2
 	github.com/nmvalera/striped-mutex v0.1.0
@@ -55,7 +55,6 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.6.2
 	github.com/stretchr/testify v1.6.1
-	github.com/swaggo/swag v1.6.7 // indirect
 	github.com/uber/jaeger-client-go v2.22.1+incompatible
 	github.com/uber/jaeger-lib v2.2.0+incompatible
 	github.com/unrolled/secure v1.0.7

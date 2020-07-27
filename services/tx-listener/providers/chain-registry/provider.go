@@ -80,8 +80,8 @@ func (p *Provider) buildConfiguration(ctx context.Context, chains []*models.Chai
 		duration, err := time.ParseDuration(*chain.ListenerBackOffDuration)
 		if err != nil {
 			log.FromContext(ctx).WithFields(logrus.Fields{
-				"TenantID": chain.TenantID,
-				"Name":     chain.Name,
+				"tenant.id":  chain.TenantID,
+				"chain.name": chain.Name,
 			}).Errorf("cannot parse duration: %s", *chain.ListenerBackOffDuration)
 		}
 

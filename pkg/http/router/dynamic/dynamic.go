@@ -116,10 +116,10 @@ func (b *Builder) buildRouters(ctx context.Context, routers map[string]*router.R
 			logger := log.FromContext(rtCtx)
 
 			logger.WithFields(logrus.Fields{
-				"rule":        rtInfo.Router.Rule,
-				"middlewares": rtInfo.Router.Middlewares,
-				"service":     rtInfo.Router.Service,
-				"priority":    rtInfo.Router.Priority,
+				"rule.name":    rtInfo.Router.Rule,
+				"middlewares":  rtInfo.Router.Middlewares,
+				"service.name": rtInfo.Router.Service,
+				"priority":     rtInfo.Router.Priority,
 			}).Debugf("building route")
 
 			var h http.Handler
@@ -288,7 +288,7 @@ func (b *Builder) buildMiddleware(ctx context.Context, routerName string, rtInfo
 }
 
 func (b *Builder) buildService(ctx context.Context, serviceName string, srvInfo *runtime.ServiceInfo, infos *runtime.Infos, respModifier func(*http.Response) error) (http.Handler, error) {
-	logger := log.FromContext(ctx).WithField("service", serviceName)
+	logger := log.FromContext(ctx).WithField("service.name", serviceName)
 
 	switch {
 	case srvInfo.Service.Dashboard != nil:

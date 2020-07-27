@@ -51,6 +51,7 @@ func (b *Builder) Build(ctx context.Context, name string, configuration interfac
 	// Append logger option (it is used to deactivate heavy roundrobin logs at Debug Level)
 	lbLogger := logrus.New()
 	lbLogger.SetLevel(logrus.InfoLevel)
+	lbLogger.SetFormatter(logrus.StandardLogger().Formatter)
 	options = append(options, roundrobin.RoundRobinLogger(lbLogger))
 
 	// Append Sticky option

@@ -89,8 +89,8 @@ func (e *EntryPoint) Serve(ctx context.Context, l net.Listener) error {
 
 		// TODO: switch this to Trace when updating logger interface
 		logger.WithFields(logrus.Fields{
-			"addr.remote": conn.RemoteAddr(),
-			"addr.local":  conn.LocalAddr(),
+			"destination.address": conn.RemoteAddr(),
+			"destination.source":  conn.LocalAddr(),
 		}).Debugf("accepted tcp connection %v", conn)
 
 		writeCloser, err := writeCloser(conn)

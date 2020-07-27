@@ -55,7 +55,6 @@ e2e-ci:
 clean: protobuf gen-swagger gen-mocks mod-tidy lint coverage ## Run all clean-up tasks
 
 gen-mocks:
-	@mockgen --version
 	@go generate -run mockgen ./...
 
 gen-swagger:

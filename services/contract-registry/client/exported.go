@@ -31,7 +31,7 @@ func Init(ctx context.Context, contractRegistryURL string) {
 		}
 
 		log.WithFields(log.Fields{
-			"url": contractRegistryURL,
+			"url.full": contractRegistryURL,
 		}).Infof("%s: client ready", component)
 	})
 }
