@@ -39,7 +39,7 @@ func TestPricer(t *testing.T) {
 		txctx.Logger = log.NewEntry(log.StandardLogger())
 		txctx.WithContext(proxy.With(txctx.Context(), "URL"))
 
-		mockEthClient.EXPECT().SuggestGasPrice(txctx.Context(), "URL").Return(big.NewInt(10), nil)
+		mockEthClient.EXPECT().SuggestGasPrice(gomock.Any(), "URL").Return(big.NewInt(10), nil)
 
 		pricer(txctx)
 
@@ -53,7 +53,7 @@ func TestPricer(t *testing.T) {
 		txctx.WithContext(proxy.With(txctx.Context(), "URL"))
 		_ = txctx.Envelope.SetContextLabelsValue("priority", utils.PriorityVeryLow)
 
-		mockEthClient.EXPECT().SuggestGasPrice(txctx.Context(), "URL").Return(big.NewInt(10), nil)
+		mockEthClient.EXPECT().SuggestGasPrice(gomock.Any(), "URL").Return(big.NewInt(10), nil)
 
 		pricer(txctx)
 
@@ -67,7 +67,7 @@ func TestPricer(t *testing.T) {
 		txctx.WithContext(proxy.With(txctx.Context(), "URL"))
 		_ = txctx.Envelope.SetContextLabelsValue("priority", utils.PriorityLow)
 
-		mockEthClient.EXPECT().SuggestGasPrice(txctx.Context(), "URL").Return(big.NewInt(10), nil)
+		mockEthClient.EXPECT().SuggestGasPrice(gomock.Any(), "URL").Return(big.NewInt(10), nil)
 
 		pricer(txctx)
 
@@ -81,7 +81,7 @@ func TestPricer(t *testing.T) {
 		txctx.WithContext(proxy.With(txctx.Context(), "URL"))
 		_ = txctx.Envelope.SetContextLabelsValue("priority", utils.PriorityMedium)
 
-		mockEthClient.EXPECT().SuggestGasPrice(txctx.Context(), "URL").Return(big.NewInt(10), nil)
+		mockEthClient.EXPECT().SuggestGasPrice(gomock.Any(), "URL").Return(big.NewInt(10), nil)
 
 		pricer(txctx)
 
@@ -95,7 +95,7 @@ func TestPricer(t *testing.T) {
 		txctx.WithContext(proxy.With(txctx.Context(), "URL"))
 		_ = txctx.Envelope.SetContextLabelsValue("priority", utils.PriorityHigh)
 
-		mockEthClient.EXPECT().SuggestGasPrice(txctx.Context(), "URL").Return(big.NewInt(10), nil)
+		mockEthClient.EXPECT().SuggestGasPrice(gomock.Any(), "URL").Return(big.NewInt(10), nil)
 
 		pricer(txctx)
 
@@ -109,7 +109,7 @@ func TestPricer(t *testing.T) {
 		txctx.WithContext(proxy.With(txctx.Context(), "URL"))
 		_ = txctx.Envelope.SetContextLabelsValue("priority", utils.PriorityVeryHigh)
 
-		mockEthClient.EXPECT().SuggestGasPrice(txctx.Context(), "URL").Return(big.NewInt(10), nil)
+		mockEthClient.EXPECT().SuggestGasPrice(gomock.Any(), "URL").Return(big.NewInt(10), nil)
 
 		pricer(txctx)
 

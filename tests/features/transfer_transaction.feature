@@ -54,6 +54,7 @@ Feature: Send transfer transaction
 }
       """
     Then the response code should be 202
+    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
 
 

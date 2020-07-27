@@ -1,7 +1,9 @@
 package gaspricer
 
 import (
+	"context"
 	"math/big"
+	"time"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 
@@ -14,6 +16,7 @@ import (
 // Pricer creates a handler that set a Gas Price
 func Pricer(p ethclient.GasPricer) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
+		txctx.Logger.WithField("envelope_id", txctx.Envelope.GetID()).Debugf("pricer handler starts")
 		if txctx.Envelope.GasPrice == nil {
 			url, err := proxy.GetURL(txctx)
 			if err != nil {
@@ -21,7 +24,10 @@ func Pricer(p ethclient.GasPricer) engine.HandlerFunc {
 			}
 
 			// Envelope a gas price suggestion
-			p, err := p.SuggestGasPrice(txctx.Context(), url)
+			ctx, cancel := context.WithTimeout(txctx.Context(), time.Second*10)
+			defer cancel()
+
+			p, err := p.SuggestGasPrice(ctx, url)
 			if err != nil {
 				e := txctx.AbortWithError(err).ExtendComponent(component)
 				txctx.Logger.WithError(e).Errorf("gas-pricer: could not suggest gas price")

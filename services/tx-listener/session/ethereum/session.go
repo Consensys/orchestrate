@@ -313,6 +313,11 @@ func (s *Session) fetchBlock(ctx context.Context, blockPosition uint64) *Future 
 
 		ctx = multitenancy.WithTenantID(ctx, s.Chain.TenantID)
 
+		for _, tx := range blck.Transactions() {
+			log.FromContext(ctx).WithField("txHash", tx.Hash().String()).
+				WithField("block", blck.Nonce()).Debug("found transaction in block")
+		}
+
 		jobMap, err := s.fetchJobs(ctx, blck.Transactions())
 		if err != nil {
 			return nil, err
@@ -330,27 +335,31 @@ func (s *Session) fetchBlock(ctx context.Context, blockPosition uint64) *Future 
 func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transactions) (map[string]*types.Job, error) {
 	jobMap := make(map[string]*types.Job)
 
-	if len(transactions) > 0 {
-		var txHashes []string
-		for _, t := range transactions {
-			txHashes = append(txHashes, t.Hash().String())
-		}
+	if len(transactions) == 0 {
+		return jobMap, nil
+	}
+	var txHashes []string
+	for _, t := range transactions {
+		txHashes = append(txHashes, t.Hash().String())
+	}
 
-		// By design, we will receive 0 or 1 job per tx_hash in the filter because we filter by status PENDING
-		jobResponses, err := s.txSchedulerClient.SearchJob(ctx, txHashes, s.Chain.UUID, utils.StatusPending)
-		if err != nil {
-			return nil, err
-		}
+	// By design, we will receive 0 or 1 job per tx_hash in the filter because we filter by status PENDING
+	jobResponses, err := s.txSchedulerClient.SearchJob(ctx, txHashes, s.Chain.UUID, utils.StatusPending)
+	if err != nil {
+		return nil, err
+	}
 
-		for _, jobResponse := range jobResponses {
-			// Filter by the jobs belonging to same session CHAIN_UUID
-			jobMap[jobResponse.Transaction.Hash] = &types.Job{
-				UUID:        jobResponse.UUID,
-				ChainUUID:   jobResponse.ChainUUID,
-				Labels:      jobResponse.Labels,
-				Annotations: jobResponse.Annotations,
-				Transaction: jobResponse.Transaction,
-			}
+	for _, jobResponse := range jobResponses {
+		log.FromContext(ctx).WithField("txHash", jobResponse.Transaction.Hash).
+			WithField("jobUUID", jobResponse.UUID).Debug("transaction was matched to job")
+
+		// Filter by the jobs belonging to same session CHAIN_UUID
+		jobMap[jobResponse.Transaction.Hash] = &types.Job{
+			UUID:        jobResponse.UUID,
+			ChainUUID:   jobResponse.ChainUUID,
+			Labels:      jobResponse.Labels,
+			Annotations: jobResponse.Annotations,
+			Transaction: jobResponse.Transaction,
 		}
 	}
 

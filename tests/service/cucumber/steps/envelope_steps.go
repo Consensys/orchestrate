@@ -305,7 +305,7 @@ func (sc *ScenarioContext) iRegisterTheFollowingChains(table *gherkin.PickleStep
 		return err
 	}
 
-	f := func(uuid, token string) func() {
+	onTearDown := func(uuid, token string) func() {
 		return func() {
 			_ = sc.ChainRegistry.DeleteChainByUUID(
 				authutils.WithAuthorization(context.Background(), token),
@@ -320,7 +320,7 @@ func (sc *ScenarioContext) iRegisterTheFollowingChains(table *gherkin.PickleStep
 		if err != nil {
 			return err
 		}
-		sc.TearDownFunc = append(sc.TearDownFunc, f(res.UUID, token))
+		sc.TearDownFunc = append(sc.TearDownFunc, onTearDown(res.UUID, token))
 
 		// set aliases
 		sc.aliases.Set(res, sc.Pickle.Id, utilsCols.Rows[i+1].Cells[0].Value)

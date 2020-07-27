@@ -265,6 +265,7 @@ Feature: Private transactions
 }
       """
     Then the response code should be 202
+    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                    | Receipt.PrivateFor                         |
@@ -362,6 +363,7 @@ Feature: Private transactions
 }
       """
     Then the response code should be 202
+    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                    | Receipt.PrivateFor                         |
@@ -423,6 +425,7 @@ Feature: Private transactions
 }
       """
     Then the response code should be 202
+    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                    | Receipt.PrivacyGroupId |
@@ -485,6 +488,7 @@ Feature: Private transactions
 }
       """
     Then the response code should be 202
+    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.Output | Receipt.ContractAddress | Receipt.PrivateFrom                    | Receipt.PrivacyGroupId |
@@ -581,6 +585,7 @@ Feature: Private transactions
 }
       """
     Then the response code should be 202
+    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.Output | Receipt.ContractAddress | Receipt.PrivateFrom                    |

@@ -73,6 +73,7 @@ Feature: Invalid Nonce
 }
       """
     Then the response code should be 202
+    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
 
   Scenario: Nonce Too High
@@ -230,6 +231,7 @@ Feature: Invalid Nonce
       | {{txOneJobUUID}} |
     When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txOneJobUUID}}/start"
     Then the response code should be 202
+    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Nonce | To      |
@@ -269,119 +271,6 @@ Feature: Invalid Nonce
     And Envelopes should have the following fields
       | Receipt.Status | Nonce | To      |
       | 1              | 1     | {{to2}} |
-
-  
-    Scenario: Nonce Too High
-    Given I register the following alias
-      | alias | value              |
-      | to1   | {{random.account}} |
-    Then I set the headers
-      | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
-      """
-{}
-      """
-    Then the response code should be 200
-    Then I register the following response fields
-      | alias           | path |
-      | scheduleOneUUID | uuid |
-    When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
-  """
-{
-    "scheduleUUID": "{{scheduleOneUUID}}",
-	"chainUUID": "{{besu.UUID}}",
-    "type": "eth://ethereum/transaction",
-    "transaction": {
-        "from": "{{account1}}",
-        "to": "{{to1}}",
-        "value": "100000",
-        "nonce": "1000000",
-        "gas": "21000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}"
-    }
-}
-      """
-    Then the response code should be 200
-    Then I register the following response fields
-      | alias        | path |
-      | txOneJobUUID | uuid |
-    When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
-  """
-{
-    "scheduleUUID": "{{scheduleOneUUID}}",
-	"chainUUID": "{{besu.UUID}}",
-    "type": "eth://ethereum/transaction",
-    "transaction": {
-        "from": "{{account1}}",
-        "to": "{{to1}}",
-        "value": "100000",
-        "nonce": "1000001",
-        "gas": "21000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}"
-    }
-}
-      """
-    Then the response code should be 200
-    Then I register the following response fields
-      | alias        | path |
-      | txTwoJobUUID | uuid |
-    When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
-  """
-{
-    "scheduleUUID": "{{scheduleOneUUID}}",
-	"chainUUID": "{{besu.UUID}}",
-    "type": "eth://ethereum/transaction",
-    "transaction": {
-        "from": "{{account1}}",
-        "to": "{{to1}}",
-        "value": "100000",
-        "nonce": "1000002",
-        "gas": "21000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}"
-    }
-}
-      """
-    Then the response code should be 200
-    Then I register the following response fields
-      | alias          | path |
-      | txThreeJobUUID | uuid |
-    Then I track the following envelopes
-      | ID                 |
-      | {{txOneJobUUID}}   |
-      | {{txTwoJobUUID}}   |
-      | {{txThreeJobUUID}} |
-    When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txOneJobUUID}}/start"
-    Then the response code should be 202
-    When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txTwoJobUUID}}/start"
-    Then the response code should be 202
-    When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txThreeJobUUID}}/start"
-    Then the response code should be 202
-    Then Envelopes should be in topic "tx.crafter"
-    Then Envelopes should be in topic "tx.signer"
-    And Envelopes should have the following fields
-      | Nonce   |
-      | 1000000 |
-      | 1000001 |
-      | 1000002 |
-    Then Envelopes should be in topic "tx.sender"
-    And Envelopes should have the following fields
-      | Nonce   |
-      | 1000000 |
-      | 1000001 |
-      | 1000002 |
-    Then Envelopes should be in topic "tx.decoded"
-    And Envelopes should have the following fields
-      | Receipt.Status | Nonce |
-      | 1              | 0     |
-      | 1              | 1     |
-      | 1              | 2     |
 
 
   Scenario: Chaotic nonce

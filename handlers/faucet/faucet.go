@@ -13,6 +13,8 @@ import (
 // Faucet creates a Faucet handler
 func Faucet(fct faucet.Faucet, faucetClient client.FaucetClient) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
+		txctx.Logger.WithField("envelope_id", txctx.Envelope.GetID()).Debugf("faucet handler starts")
+
 		if txctx.Envelope.GetChainUUID() == "" || txctx.Envelope.GetContextLabelsValue("faucet.parentTxID") != "" ||
 			txctx.Envelope.GetFromString() == "" {
 			return

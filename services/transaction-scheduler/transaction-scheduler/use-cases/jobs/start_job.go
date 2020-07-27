@@ -59,17 +59,27 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants 
 		msgTopic = uc.topicsCfg.Crafter
 	}
 
-	partition, offset, err := uc.sendMessage(ctx, jobModel, msgTopic)
-	if err != nil {
-		return errors.FromError(err).ExtendComponent(startJobComponent)
-	}
-
 	jobLog := &models.Log{
 		JobID:  &jobModel.ID,
 		Status: utils.StatusStarted,
 	}
 
-	if err = uc.db.Log().Insert(ctx, jobLog); err != nil {
+	dbtx, err := uc.db.Begin()
+	if err != nil {
+		return errors.FromError(err).ExtendComponent(startJobComponent)
+	}
+
+	if err = dbtx.(store.Tx).Log().Insert(ctx, jobLog); err != nil {
+		return errors.FromError(err).ExtendComponent(startJobComponent)
+	}
+
+	partition, offset, err := uc.sendMessage(ctx, jobModel, msgTopic)
+	if err != nil {
+		_ = dbtx.Rollback()
+		return errors.FromError(err).ExtendComponent(startJobComponent)
+	}
+
+	if err := dbtx.Commit(); err != nil {
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}
 

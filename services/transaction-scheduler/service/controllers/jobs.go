@@ -183,7 +183,8 @@ func (c *JobsController) update(rw http.ResponseWriter, request *http.Request) {
 
 	job := formatters.FormatJobUpdateRequest(jobRequest)
 	job.UUID = mux.Vars(request)["uuid"]
-	jobRes, err := c.ucs.UpdateJob().Execute(ctx, job, jobRequest.Status, jobRequest.Message, multitenancy.AllowedTenantsFromContext(ctx))
+	jobRes, err := c.ucs.UpdateJob().Execute(ctx, job, jobRequest.Status, jobRequest.Message,
+		multitenancy.AllowedTenantsFromContext(ctx))
 
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)

@@ -27,12 +27,16 @@ func TestStartJob_Execute(t *testing.T) {
 
 	mockJobDA := mocks.NewMockJobAgent(ctrl)
 	mockLogDA := mocks.NewMockLogAgent(ctrl)
+	mockDBTX := mocks.NewMockTx(ctrl)
 	mockKafkaProducer := mocks2.NewSyncProducer(t, nil)
 	tenants := []string{"tenantID"}
 
 	mockDB := mocks.NewMockDB(ctrl)
+	mockDB.EXPECT().Begin().Return(mockDBTX, nil).AnyTimes()
+
 	mockDB.EXPECT().Job().Return(mockJobDA).AnyTimes()
-	mockDB.EXPECT().Log().Return(mockLogDA).AnyTimes()
+	mockDB.EXPECT().Job().Return(mockJobDA).AnyTimes()
+	mockDBTX.EXPECT().Log().Return(mockLogDA).AnyTimes()
 
 	usecase := NewStartJobUseCase(mockDB, mockKafkaProducer, sarama.NewKafkaTopicConfig(viper.GetViper()))
 
@@ -60,7 +64,7 @@ func TestStartJob_Execute(t *testing.T) {
 			return nil
 		})
 		mockLogDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
-
+		mockDBTX.EXPECT().Commit().Return(nil)
 		err := usecase.Execute(ctx, job.UUID, tenants)
 
 		assert.NoError(t, err)
@@ -72,9 +76,9 @@ func TestStartJob_Execute(t *testing.T) {
 		job.UUID = "6380e2b6-b828-43ee-abdc-de0f8d57dc5f"
 		job.Transaction.Sender = "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
 		job.Schedule = testutils.FakeSchedule("")
-		job.Annotations = &types.Annotations {
+		job.Annotations = &types.Annotations{
 			OneTimeKey: true,
-		} 
+		}
 
 		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, tenants).Return(job, nil)
 		mockKafkaProducer.ExpectSendMessageWithCheckerFunctionAndSucceed(func(val []byte) error {
@@ -93,7 +97,7 @@ func TestStartJob_Execute(t *testing.T) {
 			return nil
 		})
 		mockLogDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
-
+		mockDBTX.EXPECT().Commit().Return(nil)
 		err := usecase.Execute(ctx, job.UUID, tenants)
 
 		assert.NoError(t, err)
@@ -110,19 +114,6 @@ func TestStartJob_Execute(t *testing.T) {
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(startJobComponent), err)
 	})
 
-	t.Run("should fail with KafkaConnectionError if Produce fails", func(t *testing.T) {
-		job := testutils.FakeJobModel(1)
-		job.UUID = "6380e2b6-b828-43ee-abdc-de0f8d57dc5f"
-		job.Transaction.Sender = "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
-		job.Schedule = testutils.FakeSchedule("")
-
-		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, tenants).Return(job, nil)
-		mockKafkaProducer.ExpectSendMessageAndFail(fmt.Errorf("error"))
-
-		err := usecase.Execute(ctx, job.UUID, tenants)
-		assert.True(t, errors.IsKafkaConnectionError(err))
-	})
-
 	t.Run("should fail with same error if Insert log fails", func(t *testing.T) {
 		job := testutils.FakeJobModel(1)
 		job.ID = 1
@@ -134,10 +125,23 @@ func TestStartJob_Execute(t *testing.T) {
 		expectedErr := errors.PostgresConnectionError("error")
 
 		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, tenants).Return(job, nil)
-		mockKafkaProducer.ExpectSendMessageAndSucceed()
 		mockLogDA.EXPECT().Insert(ctx, gomock.Any()).Return(expectedErr)
 
 		err := usecase.Execute(ctx, job.UUID, tenants)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(startJobComponent), err)
+	})
+
+	t.Run("should fail with KafkaConnectionError if Produce fails", func(t *testing.T) {
+		job := testutils.FakeJobModel(1)
+		job.UUID = "6380e2b6-b828-43ee-abdc-de0f8d57dc5f"
+		job.Transaction.Sender = "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
+		job.Schedule = testutils.FakeSchedule("")
+
+		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, tenants).Return(job, nil)
+		mockLogDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
+		mockKafkaProducer.ExpectSendMessageAndFail(fmt.Errorf("error"))
+		mockDBTX.EXPECT().Rollback().Return(nil)
+		err := usecase.Execute(ctx, job.UUID, tenants)
+		assert.True(t, errors.IsKafkaConnectionError(err))
 	})
 }

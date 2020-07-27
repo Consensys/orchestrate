@@ -54,6 +54,7 @@ Feature: Deploy ERC20 contract
 }
       """
     Then the response code should be 202
+    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
 
   Scenario: Deploy ERC20
@@ -159,6 +160,7 @@ Feature: Deploy ERC20 contract
     Then I register the following response fields
       | alias      | path                  |
       | jobOTKUUID | schedule.jobs[0].uuid |
+    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.ContractAddress |

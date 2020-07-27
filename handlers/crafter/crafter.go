@@ -12,6 +12,8 @@ import (
 // Crafter creates a crafter handler
 func Crafter(r svc.ContractRegistryClient, crafter abi.Crafter) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
+		txctx.Logger.WithField("envelope_id", txctx.Envelope.GetID()).Debugf("crafter handler starts")
+
 		if txctx.Envelope.GetData() != "" || txctx.Envelope.GetMethodSignature() == "" {
 			// If transaction has already been crafted there is nothing to do
 			return

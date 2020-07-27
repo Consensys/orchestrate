@@ -58,6 +58,7 @@ Feature: Send contract transactions
 }
       """
     Then the response code should be 202
+    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status |
@@ -287,6 +288,7 @@ Feature: Send contract transactions
 }
       """
     Then the response code should be 202
+    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And I register the following envelope fields
       | id                    | alias               | path                    |
@@ -317,6 +319,7 @@ Feature: Send contract transactions
     Then I register the following response fields
       | alias      | path                  |
       | jobOTKUUID | schedule.jobs[0].uuid |
+    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.Logs[0].Event        | Receipt.Logs[0].DecodedData.from |
@@ -353,6 +356,7 @@ Feature: Send contract transactions
 }
       """
     Then the response code should be 202
+    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And I register the following envelope fields
       | id                    | alias               | path                    |
@@ -409,6 +413,7 @@ Feature: Send contract transactions
 }
       """
     Then the response code should be 202
+    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And I register the following envelope fields
       | id                    | alias               | path                    |

@@ -32,6 +32,7 @@ func Estimator(p ethclient.GasEstimator) engine.HandlerFunc {
 	}
 
 	return func(txctx *engine.TxContext) {
+		txctx.Logger.WithField("envelope_id", txctx.Envelope.GetID()).Debugf("gas estimator handler starts")
 
 		if txctx.Envelope.GetGas() == nil {
 			// Retrieve re-cycled CallMsg

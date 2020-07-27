@@ -13,6 +13,7 @@ import (
 // Tessera enclave. We then need to sign the updated transaction
 func StoreRaw(tesseraClient tessera.Client, chainRegistryURL string) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
+		txctx.Logger.WithField("envelope_id", txctx.Envelope.GetID()).Debugf("tessera handler starts")
 		if !txctx.Envelope.IsEthSendRawPrivateTransaction() || txctx.Envelope.GetEnclaveKey() != "" {
 			return
 		}

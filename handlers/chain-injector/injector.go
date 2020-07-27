@@ -58,6 +58,7 @@ func chainUUIDInjector(txctx *engine.TxContext, r registry.ChainRegistryClient, 
 // ChainIDInjectorHandler enrich the envelope with the chain UUID retrieved from the chain proxy
 func ChainIDInjectorHandler(ec ethclient.ChainSyncReader) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
+		txctx.Logger.WithField("envelope_id", txctx.Envelope.GetID()).Debugf("chainID injector handler starts")
 		if txctx.Envelope.GetChainID() != nil {
 			return
 		}

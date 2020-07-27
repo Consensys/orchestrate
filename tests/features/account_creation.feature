@@ -49,6 +49,7 @@ Feature: Generate account
 }
       """
     Then the response code should be 202
+    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And I register the following faucets
       | Name                       | ChainRule     | CreditorAccount | MaxBalance       | Amount           | Cooldown | Headers.Authorization    |

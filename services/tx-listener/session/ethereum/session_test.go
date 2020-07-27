@@ -1,3 +1,6 @@
+// +build unit
+// +build !race
+
 package ethereum
 
 import (
