@@ -124,12 +124,12 @@ func (e *Envelope) IsEeaSendPrivateTransaction() bool {
 
 // IsEthSendRawTransaction for Besu Orion with Privacy Group
 func (e *Envelope) IsEeaSendPrivateTransactionPrivacyGroup() bool {
-	return e.JobType == JobType_ETH_ORION_EEA_TX && e.PrivacyGroupID != ""
+	return e.IsEeaSendPrivateTransaction() && e.PrivacyGroupID != ""
 }
 
 // IsEthSendRawTransaction for Besu Orion with PrivateFor
 func (e *Envelope) IsEeaSendPrivateTransactionPrivateFor() bool {
-	return e.JobType == JobType_ETH_ORION_EEA_TX && len(e.PrivateFor) > 0
+	return e.IsEeaSendPrivateTransaction() && len(e.PrivateFor) > 0
 }
 
 func (e *Envelope) IsOneTimeKeySignature() bool {
@@ -460,6 +460,22 @@ func (e *Envelope) SetNonceString(nonce string) error {
 func (e *Envelope) SetNonce(nonce uint64) *Envelope {
 	e.Nonce = &(&struct{ x uint64 }{nonce}).x
 	return e
+}
+
+// Store the nonce of the marking tx
+// @TODO Remove once Orion tx is spit into two jobs
+//  https://app.zenhub.com/workspaces/orchestrate-5ea70772b186e10067f57842/issues/pegasyseng/orchestrate/253
+func (e *Envelope) SetEEAMarkingTxNonce(nonce uint64) *Envelope {
+	return e.SetInternalLabelsValue("eeaMarkingTxNonce", strconv.FormatUint(nonce, 10))
+}
+
+func (e *Envelope) GetEEAMarkingNonce() (uint64, error) {
+	n := e.GetInternalLabelsValue("eeaMarkingTxNonce")
+	i, err := strconv.ParseUint(n, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	return i, nil
 }
 
 // GASPRICE

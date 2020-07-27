@@ -37,6 +37,7 @@ func newTxCtx(eId, sender string) *engine.TxContext {
 		SetChainIDUint64(chainID).
 		SetGas(0).
 		SetGasPrice(big.NewInt(0)).
+		SetEEAMarkingTxNonce(0).
 		SetNonce(0)
 	_ = txctx.Envelope.SetFromString(sender)
 	return txctx

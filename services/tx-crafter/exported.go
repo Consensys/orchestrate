@@ -141,6 +141,7 @@ func registerHandlers() {
 	engine.Register(gaspricer.GlobalHandler())
 	engine.Register(gasestimator.GlobalHandler())
 	engine.Register(nonceattributor.GlobalHandler())
+	engine.Register(nonceattributor.GlobalEEAHandler())
 	engine.Register(tessera.GlobalHandler())
 }
 

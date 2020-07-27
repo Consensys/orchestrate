@@ -98,6 +98,8 @@ func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFun
 			"nonce": n,
 		})
 
+		txctx.Logger.Debugf("eea_nonce: handler completed")
+
 		// Execute pending handlers
 		txctx.Next()
 

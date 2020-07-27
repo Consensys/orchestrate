@@ -13,8 +13,9 @@ import (
 const component = "handler.nonce.attributor"
 
 var (
-	handler  engine.HandlerFunc
-	initOnce = &sync.Once{}
+	handler    engine.HandlerFunc
+	eeaHandler engine.HandlerFunc
+	initOnce   = &sync.Once{}
 )
 
 // Init initialize Nonce Handler
@@ -33,6 +34,10 @@ func Init(ctx context.Context) {
 		// Create Nonce handler
 		handler = Nonce(nonce.GlobalManager(), ethclient.GlobalClient())
 
+		// @TODO Remove once Orion tx is spit into two jobs
+		//  https://app.zenhub.com/workspaces/orchestrate-5ea70772b186e10067f57842/issues/pegasyseng/orchestrate/253
+		eeaHandler = EEANonce(nonce.GlobalManager(), ethclient.GlobalClient())
+
 		log.Infof("%s: handler ready", component)
 	})
 }
@@ -45,4 +50,9 @@ func SetGlobalHandler(h engine.HandlerFunc) {
 // GlobalHandler returns global Faucet handler
 func GlobalHandler() engine.HandlerFunc {
 	return handler
+}
+
+// GlobalHandler returns global Faucet handler
+func GlobalEEAHandler() engine.HandlerFunc {
+	return eeaHandler
 }

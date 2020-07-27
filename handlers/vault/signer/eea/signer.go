@@ -29,7 +29,7 @@ func Signer(k, onetime keystore.KeyStore, ec ethclient.Client) engine.HandlerFun
 func generateSignTx(ec ethclient.Client) signer.TransactionSignerFunc {
 	return func(vault keystore.KeyStore, txctx *engine.TxContext, sender ethcommon.Address, t *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error) {
 		// Step 1: Sign Private Transaction
-		privRaw, expectedEnclaveKey, err := vault.SignPrivateEEATx(
+		privRaw, _, err := vault.SignPrivateEEATx(
 			txctx.Context(),
 			txctx.Envelope.GetChainID(),
 			sender,
@@ -58,10 +58,8 @@ func generateSignTx(ec ethclient.Client) signer.TransactionSignerFunc {
 		}
 		_ = txctx.Envelope.SetEnclaveKey(enclaveKey.Hex())
 
-		if expectedEnclaveKey.String() != enclaveKey.String() {
-			txctx.Logger.Warnf("signer: invalid enclaveKey. Expected %s, got %s", expectedEnclaveKey.String(),
-				enclaveKey.String())
-		}
+		txctx.Logger.WithField("enclavekey", enclaveKey.String()).WithField("nonce", t.Nonce()).
+			Warnf("signer: private tx was sent")
 
 		// Step3: Sign marking transaction
 		privPContractAddr, err := ec.EEAPrivPrecompiledContractAddr(txctx.Context(), url)
@@ -69,8 +67,13 @@ func generateSignTx(ec ethclient.Client) signer.TransactionSignerFunc {
 			return nil, nil, errors.FromError(err).ExtendComponent(component)
 		}
 
+		markingTxNonce, err := txctx.Envelope.GetEEAMarkingNonce()
+		if err != nil {
+			return nil, nil, errors.FromError(err).ExtendComponent(component)
+		}
+
 		markingTx := ethtypes.NewTransaction(
-			t.Nonce(),
+			markingTxNonce,
 			privPContractAddr,
 			t.Value(),
 			t.Gas(),

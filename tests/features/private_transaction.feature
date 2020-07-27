@@ -7,7 +7,6 @@ Feature: Private transactions
     Given I have the following tenants
       | alias   | tenantID        |
       | tenant1 | {{random.uuid}} |
-#      | tenant2 | {{random.uuid}} |
     And I have created the following accounts
       | alias    | Headers.Authorization    |
       | account1 | Bearer {{tenant1.token}} |
@@ -90,6 +89,67 @@ Feature: Private transactions
       | message                                                   |
       | 42400@use-cases.send-tx: cannot load 'UnknownChain' chain |
 
+  @quorum
+  Scenario: Force not correlative nonce for private and public txs in Quorum/Tessera
+    Given I register the following alias
+      | alias                           | value           |
+      | publicQuorumDeployContractTxID  | {{random.uuid}} |
+      | privateQuorumDeployContractTxID | {{random.uuid}} |
+    Then I track the following envelopes
+      | ID                                 |
+      | {{publicQuorumDeployContractTxID}} |
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "quorum-{{scenarioID}}",
+    "params": {
+        "from": "{{account1}}",
+        "contractName": "SimpleToken"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{publicQuorumDeployContractTxID}}"
+    }
+}
+      """
+    Then the response code should be 202
+    Then Envelopes should be in topic "tx.sender"
+    Then Envelopes should be in topic "tx.decoded"
+    Then I track the following envelopes
+      | ID                                  |
+      | {{privateQuorumDeployContractTxID}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "quorum-{{scenarioID}}",
+    "params": {
+        "from": "{{account1}}",
+        "protocol": "Tessera",
+        "privateFrom": "{{global.nodes.quorum_1.privateAddress}}",
+        "privateFor": ["{{global.nodes.quorum_2.privateAddress}}"],
+        "contractName": "SimpleToken"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{privateQuorumDeployContractTxID}}"
+    }
+}
+      """
+    Then the response code should be 202
+    Then Envelopes should be in topic "tx.signer"
+    And Envelopes should have the following fields
+      | InternalLabels.enclaveKey |
+      | ~                         |
+    Then Envelopes should be in topic "tx.sender"
+    Then Envelopes should be in topic "tx.decoded"
+    And Envelopes should have the following fields
+      | Receipt.Status | Receipt.ContractAddress |
+      | 1              | ~                       |
+
+  @quorum
   Scenario: Fail to deploy private ERC20 contract with unknown PrivateFor
     Given I set the headers
       | Key           | Value                    |
@@ -114,6 +174,7 @@ Feature: Private transactions
       | message                                                               |
       | 42400@: fields 'privacyGroupId' and 'privateFor' cannot be both empty |
 
+  @quorum
   Scenario: Fail to deploy private ERC20 contract with not authorized chain
     Given I set the headers
       | Key           | Value                    |
@@ -590,3 +651,62 @@ Feature: Private transactions
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.Output | Receipt.ContractAddress | Receipt.PrivateFrom                    |
       | 1              | ~              | ~                       | {{global.nodes.besu_1.privateAddress}} |
+
+  @besu
+  Scenario: Force not correlative nonce for private and public txs
+    Given I register the following alias
+      | alias                         | value           |
+      | publicBesuDeployContractTxID  | {{random.uuid}} |
+      | privateBesuDeployContractTxID | {{random.uuid}} |
+    Then I track the following envelopes
+      | ID                               |
+      | {{publicBesuDeployContractTxID}} |
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "from": "{{account1}}",
+        "contractName": "SimpleToken"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{publicBesuDeployContractTxID}}"
+    }
+}
+      """
+    Then the response code should be 202
+    Then Envelopes should be in topic "tx.sender"
+    Then Envelopes should be in topic "tx.decoded"
+    And Envelopes should have the following fields
+      | Receipt.Status | Receipt.ContractAddress |
+      | 1              | ~                       |
+    Then I track the following envelopes
+      | ID                                |
+      | {{privateBesuDeployContractTxID}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "from": "{{account1}}",
+        "protocol": "Orion",
+        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+        "privateFor": ["{{global.nodes.besu_2.privateAddress}}","{{global.nodes.besu_3.privateAddress}}"],
+        "contractName": "SimpleToken"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{privateBesuDeployContractTxID}}"
+    }
+}
+      """
+    Then the response code should be 202
+    Then Envelopes should be in topic "tx.sender"
+    Then Envelopes should be in topic "tx.decoded"
+    And Envelopes should have the following fields
+      | Receipt.Status | Receipt.Output | Receipt.ContractAddress | Receipt.PrivateFrom                    | Receipt.PrivateFor                         |
+      | 1              | ~              | ~                       | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_2.privateAddress}}"] |

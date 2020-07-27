@@ -38,6 +38,7 @@ func newTxCtx(eId, txHash, txRaw, sender string) *engine.TxContext {
 	_ = txctx.Envelope.SetID(eId).
 		SetTxHash(ethcommon.HexToHash(txHash)).
 		SetChainIDUint64(chainID).
+		SetEEAMarkingTxNonce(0).
 		SetRawString(txRaw)
 	_ = txctx.Envelope.SetFromString(sender)
 	return txctx
@@ -75,8 +76,9 @@ func TestSender_EnvelopeStore(t *testing.T) {
 		ec.EXPECT().EEAPrivPrecompiledContractAddr(txctx.Context(), chainRegistryUrl).
 			Return(precompiledContractAddr, nil)
 
+		markingTxNonce, _ := txctx.Envelope.GetEEAMarkingNonce()
 		markingTx := ethtypes.NewTransaction(
-			tx.Nonce(),
+			markingTxNonce,
 			precompiledContractAddr,
 			tx.Value(),
 			tx.Gas(),
@@ -90,11 +92,11 @@ func TestSender_EnvelopeStore(t *testing.T) {
 
 		sig, hash, err := signTx(k, txctx, txSender, tx)
 
+		assert.Nil(t, err)
 		assert.Equal(t, sig, txRaw.Bytes())
 		assert.Equal(t, &txHash, hash)
-		assert.Nil(t, err)
 	})
-	
+
 	t.Run("should fail to execute eea signer if SignPrivateEEATx fails", func(t *testing.T) {
 		expectedErr := errors.InternalError("Error")
 		txctx := newTxCtx(envelopeId, txHash.String(), txRaw.String(), txSender.String())
@@ -103,14 +105,13 @@ func TestSender_EnvelopeStore(t *testing.T) {
 			SignPrivateEEATx(txctx.Context(), gomock.Any(), txSender, tx,
 				gomock.AssignableToTypeOf(&types.PrivateArgs{})).
 			Return([]byte(privTxRaw), &enlaveKey, expectedErr)
-		
 
 		_, _, err := signTx(k, txctx, txSender, tx)
 
 		assert.NotNil(t, err)
 		assert.Equal(t, errors.FromError(err).ExtendComponent(component), expectedErr)
 	})
-	
+
 	t.Run("should fail to execute eea signer if PrivDistributeRawTransaction fails", func(t *testing.T) {
 		expectedErr := errors.InternalError("Error")
 		txctx := newTxCtx(envelopeId, txHash.String(), txRaw.String(), txSender.String())
@@ -119,7 +120,7 @@ func TestSender_EnvelopeStore(t *testing.T) {
 			SignPrivateEEATx(txctx.Context(), gomock.Any(), txSender, tx,
 				gomock.AssignableToTypeOf(&types.PrivateArgs{})).
 			Return([]byte(privTxRaw), &enlaveKey, nil)
-		
+
 		ec.EXPECT().PrivDistributeRawTransaction(txctx.Context(), chainRegistryUrl, hexutil.Encode([]byte(privTxRaw))).
 			Return(enlaveKey, expectedErr)
 
@@ -128,7 +129,7 @@ func TestSender_EnvelopeStore(t *testing.T) {
 		assert.NotNil(t, err)
 		assert.Equal(t, errors.CryptoOperationError(expectedErr.Error()).ExtendComponent(component), err)
 	})
-	
+
 	t.Run("should fail to execute eea signer if EEAPrivPrecompiledContractAddr fails", func(t *testing.T) {
 		expectedErr := errors.InternalError("Error")
 		txctx := newTxCtx(envelopeId, txHash.String(), txRaw.String(), txSender.String())
@@ -137,10 +138,10 @@ func TestSender_EnvelopeStore(t *testing.T) {
 			SignPrivateEEATx(txctx.Context(), gomock.Any(), txSender, tx,
 				gomock.AssignableToTypeOf(&types.PrivateArgs{})).
 			Return([]byte(privTxRaw), &enlaveKey, nil)
-		
+
 		ec.EXPECT().PrivDistributeRawTransaction(txctx.Context(), chainRegistryUrl, hexutil.Encode([]byte(privTxRaw))).
 			Return(enlaveKey, nil)
-		
+
 		ec.EXPECT().EEAPrivPrecompiledContractAddr(txctx.Context(), chainRegistryUrl).
 			Return(precompiledContractAddr, expectedErr)
 
@@ -149,7 +150,7 @@ func TestSender_EnvelopeStore(t *testing.T) {
 		assert.NotNil(t, err)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(component), err)
 	})
-	
+
 	t.Run("should fail to execute eea signer if EEAPrivPrecompiledContractAddr fails", func(t *testing.T) {
 		expectedErr := errors.InternalError("Error")
 		txctx := newTxCtx(envelopeId, txHash.String(), txRaw.String(), txSender.String())
@@ -158,13 +159,13 @@ func TestSender_EnvelopeStore(t *testing.T) {
 			SignPrivateEEATx(txctx.Context(), gomock.Any(), txSender, tx,
 				gomock.AssignableToTypeOf(&types.PrivateArgs{})).
 			Return([]byte(privTxRaw), &enlaveKey, nil)
-		
+
 		ec.EXPECT().PrivDistributeRawTransaction(txctx.Context(), chainRegistryUrl, hexutil.Encode([]byte(privTxRaw))).
 			Return(enlaveKey, nil)
-		
+
 		ec.EXPECT().EEAPrivPrecompiledContractAddr(txctx.Context(), chainRegistryUrl).
 			Return(precompiledContractAddr, nil)
-		
+
 		k.EXPECT().
 			SignTx(txctx.Context(), gomock.Any(), txSender, gomock.Any()).
 			Return(txRaw.Bytes(), &txHash, expectedErr)
