@@ -89,8 +89,13 @@ func EEANonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.Handler
 	}
 }
 
-// IMPORTANT: This nonce key matches the key value returned by tx.Envelope.PartitionKey() for public transaction jobs
 func calcNonceKey(e *tx.Envelope) string {
-	chainKey := e.GetChainID().String()
-	return fmt.Sprintf("%v@%v", e.GetFromString(), chainKey)
+	var chainKey string
+	if e.GetChainID() != nil {
+		chainKey = e.GetChainID().String()
+	} else {
+		chainKey = e.GetChainName()
+	}
+
+	return fmt.Sprintf("%v@eea-%v", e.GetFromString(), chainKey)
 }
