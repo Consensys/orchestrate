@@ -44,8 +44,8 @@ func (c *JobsController) Append(router *mux.Router) {
 // @Param tx_hashes query []string false "List of transaction hashes" collectionFormat(csv)
 // @Param chain_uuid query string false "Chain UUID"
 // @Success 200 {object} types.JobResponse{annotations=types.Annotations,transaction=types.ETHTransaction,logs=[]types.Log} "List of Jobs found"
-// @Failure 400 {string} error "Invalid filter in the request"
-// @Failure 500 {string} error "Internal server error"
+// @Failure 400 {string} httputil.ErrorResponse "Invalid filter in the request"
+// @Failure 500 {string} httputil.ErrorResponse "Internal server error"
 // @Router /jobs [get]
 func (c *JobsController) search(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -80,9 +80,9 @@ func (c *JobsController) search(rw http.ResponseWriter, request *http.Request) {
 // @Security JWTAuth
 // @Param request body types.CreateJobRequest{annotations=types.Annotations,transaction=types.ETHTransaction} true "Job creation request"
 // @Success 200 {object} types.JobResponse{annotations=types.Annotations,transaction=types.ETHTransaction,logs=[]types.Log} "Created Job"
-// @Failure 400 {string} error "Invalid request"
-// @Failure 422 {string} error "Unprocessable parameters were sent"
-// @Failure 500 {string} error "Internal server error"
+// @Failure 400 {string} httputil.ErrorResponse "Invalid request"
+// @Failure 422 {string} httputil.ErrorResponse "Unprocessable parameters were sent"
+// @Failure 500 {string} httputil.ErrorResponse "Internal server error"
 // @Router /jobs [post]
 func (c *JobsController) create(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -113,8 +113,8 @@ func (c *JobsController) create(rw http.ResponseWriter, request *http.Request) {
 // @Security JWTAuth
 // @Param uuid path string true "UUID of the job"
 // @Success 200 {object} types.JobResponse{annotations=types.Annotations,transaction=types.ETHTransaction,logs=[]types.Log} "Job found"
-// @Failure 404 {string} error "Job not found"
-// @Failure 500 {string} error "Internal server error"
+// @Failure 404 {string} httputil.ErrorResponse "Job not found"
+// @Failure 500 {string} httputil.ErrorResponse "Internal server error"
 // @Router /jobs/{uuid} [get]
 func (c *JobsController) getOne(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -139,8 +139,8 @@ func (c *JobsController) getOne(rw http.ResponseWriter, request *http.Request) {
 // @Security JWTAuth
 // @Param uuid path string true "UUID of the job"
 // @Success 202
-// @Failure 404 {string} error "Job not found"
-// @Failure 500 {string} error "Internal server error"
+// @Failure 404 {string} httputil.ErrorResponse "Job not found"
+// @Failure 500 {string} httputil.ErrorResponse "Internal server error"
 // @Router /jobs/{uuid}/start [put]
 func (c *JobsController) start(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -157,7 +157,8 @@ func (c *JobsController) start(rw http.ResponseWriter, request *http.Request) {
 }
 
 // @Summary Update job by UUID
-// @Description Low-level endpoint to update a specific job by UUID
+// @Description Update a specific job by UUID
+// @Description WARNING: Reserved for advanced users. Orchestrate does not recommend using this endpoint.
 // @Tags Jobs
 // @Accept json
 // @Produce json
@@ -165,10 +166,10 @@ func (c *JobsController) start(rw http.ResponseWriter, request *http.Request) {
 // @Security JWTAuth
 // @Param request body types.UpdateJobRequest{annotations=types.Annotations,transaction=types.ETHTransaction} true "Job update request"
 // @Success 200 {object} types.JobResponse{annotations=types.Annotations,transaction=types.ETHTransaction,logs=[]types.Log} "Job found"
-// @Failure 400 {string} error "Invalid request"
-// @Failure 404 {string} error "Job not found"
-// @Failure 422 {string} error "Unprocessable parameters were sent"
-// @Failure 500 {string} error "Internal server error"
+// @Failure 400 {string} httputil.ErrorResponse "Invalid request"
+// @Failure 404 {string} httputil.ErrorResponse "Job not found"
+// @Failure 409 {string} httputil.ErrorResponse "Job in invalid state for the given status update"
+// @Failure 500 {string} httputil.ErrorResponse "Internal server error"
 // @Router /jobs/{uuid} [patch]
 func (c *JobsController) update(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")

@@ -59,7 +59,7 @@ func TestTxScheduler(t *testing.T) {
 	suite.Run(t, s)
 }
 
-func (s *txSchedulerTestSuite) TestTxScheduler_Transaction() {
+func (s *txSchedulerTestSuite) TestTxScheduler_Transactions() {
 	if s.err != nil {
 		s.env.logger.Warn("skipping test...")
 		return

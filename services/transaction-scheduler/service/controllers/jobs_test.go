@@ -302,13 +302,18 @@ func (s *jobsCtrlTestSuite) TestJobsController_Update() {
 	})
 
 	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
-	s.T().Run("should fail with 422 if use case fails with NotFoundError", func(t *testing.T) {
+	s.T().Run("should fail with 409 if use case fails with InvalidStateError", func(t *testing.T) {
+		jobRequest := testutils.FakeJobUpdateRequest()
+		requestBytes, _ := json.Marshal(jobRequest)
+
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.
-			NewRequest(http.MethodPatch, "/jobs/jobUUID", bytes.NewReader(nil)).
+			NewRequest(http.MethodPatch, "/jobs/jobUUID", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
+		s.updateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), gomock.Any(), "", s.tenants).Return(nil, errors.InvalidStateError("error"))
+
 		s.router.ServeHTTP(rw, httpRequest)
-		assert.Equal(t, http.StatusBadRequest, rw.Code)
+		assert.Equal(t, http.StatusConflict, rw.Code)
 	})
 }

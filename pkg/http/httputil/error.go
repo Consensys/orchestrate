@@ -8,7 +8,7 @@ import (
 )
 
 type ErrorResponse struct {
-	Message string `json:"message"`
+	Message string `json:"message" example:"error message"`
 }
 
 func WriteError(rw http.ResponseWriter, msg string, code int) {
@@ -23,11 +23,11 @@ func WriteError(rw http.ResponseWriter, msg string, code int) {
 
 func WriteHTTPErrorResponse(rw http.ResponseWriter, err error) {
 	switch {
-	case errors.IsAlreadyExistsError(err):
+	case errors.IsAlreadyExistsError(err), errors.IsInvalidStateError(err):
 		WriteError(rw, err.Error(), http.StatusConflict)
 	case errors.IsNotFoundError(err):
 		WriteError(rw, err.Error(), http.StatusNotFound)
-	case errors.IsInvalidAuthenticationError(err):
+	case errors.IsInvalidAuthenticationError(err), errors.IsUnauthorizedError(err):
 		WriteError(rw, err.Error(), http.StatusUnauthorized)
 	case errors.IsInvalidParameterError(err):
 		WriteError(rw, err.Error(), http.StatusUnprocessableEntity)

@@ -64,22 +64,6 @@ func NewJobEntityFromModels(jobModel *models.Job) *types.Job {
 	return job
 }
 
-func UpdateJobModelFromEntities(jobModel *models.Job, job *types.Job) {
-	// for k, v := range job.Labels {
-	// 	jobModel.Labels[k] = v
-	// }
-	// @TODO: Decide whether or not we should do a full replace (code above)
-	if job.Labels != nil && len(job.Labels) > 0 {
-		jobModel.Labels = job.Labels
-	}
-
-	if job.Annotations != nil {
-		jobModel.Annotations = job.Annotations
-	}
-
-	UpdateTransactionModelFromEntities(jobModel.Transaction, job.Transaction)
-}
-
 func NewEnvelopeFromJobModel(job *models.Job, headers map[string]string) *tx.TxEnvelope {
 	contextLabels := job.Labels
 	if contextLabels == nil {

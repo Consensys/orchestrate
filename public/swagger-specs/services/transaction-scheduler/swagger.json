@@ -269,7 +269,7 @@
                         "JWTAuth": []
                     }
                 ],
-                "description": "Low-level endpoint to update a specific job by UUID",
+                "description": "Update a specific job by UUID\nWARNING: Reserved for advanced users. Orchestrate does not recommend using this endpoint.",
                 "consumes": [
                     "application/json"
                 ],
@@ -346,8 +346,8 @@
                             "type": "string"
                         }
                     },
-                    "422": {
-                        "description": "Unprocessable parameters were sent",
+                    "409": {
+                        "description": "Job in invalid state for the given status update",
                         "schema": {
                             "type": "string"
                         }
@@ -1109,7 +1109,8 @@
             "type": "object",
             "properties": {
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "error message"
                 }
             }
         },
@@ -1230,6 +1231,10 @@
         },
         "types.ETHTransaction": {
             "type": "object",
+            "required": [
+                "data",
+                "raw"
+            ],
             "properties": {
                 "createdAt": {
                     "type": "string",
