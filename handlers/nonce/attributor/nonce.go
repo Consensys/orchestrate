@@ -95,7 +95,8 @@ func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFun
 		// Set nonce
 		_ = txctx.Envelope.SetNonce(n)
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"nonce": n,
+			"nonce":     n,
+			"nonce_key": nonceKey,
 		})
 
 		// Execute pending handlers

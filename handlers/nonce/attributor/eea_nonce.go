@@ -35,44 +35,59 @@ func EEANonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.Handler
 		// Compute nonce key for nonce manager processing
 		nonceKey := calcNonceKey(txctx.Envelope)
 
-		// No signal for nonce recovery
-		// Retrieve last attributed nonce from nonce manager
-		lastAttributed, ok, err := nm.GetLastAttributed(nonceKey)
-		if err != nil {
-			e := txctx.AbortWithError(err).ExtendComponent(component)
-			txctx.Logger.WithError(e).Errorf("eea_nonce: could not load last attributed nonce")
-			return
-		}
-
-		// If no nonce is available in nonce manager
-		// we calibrate by querying chain
-		if !ok {
-			txctx.Logger.Debugf("eea_nonce: calibrating nonce from chain")
+		if v := txctx.Envelope.GetInternalLabelsValue("nonce.recovering.expected"); v != "" {
 			url, err := proxy.GetURL(txctx)
 			if err != nil {
 				return
 			}
 
-			// Retrieve nonce from chain
-			pendingNonce, err := ec.PendingNonceAt(txctx.Context(), url, txctx.Envelope.MustGetFromAddress())
+			expectedNonce, err := ec.PendingNonceAt(txctx.Context(), url, txctx.Envelope.MustGetFromAddress())
 			if err != nil {
 				e := txctx.AbortWithError(err).ExtendComponent(component)
-				txctx.Logger.WithError(e).Errorf("eea_nonce: could not read nonce from chain")
+				txctx.Logger.WithError(e).Errorf("eea_nonce: calibrating nonce from chain after recovering")
 				return
 			}
 
-			n = pendingNonce
+			n = expectedNonce
 		} else {
-			n = lastAttributed + 1
+			// No signal for nonce recovery
+			// Retrieve last attributed nonce from nonce manager
+			lastAttributed, ok, err := nm.GetLastAttributed(nonceKey)
+			if err != nil {
+				e := txctx.AbortWithError(err).ExtendComponent(component)
+				txctx.Logger.WithError(e).Errorf("eea_nonce: could not load last attributed nonce")
+				return
+			}
+
+			// If no nonce is available in nonce manager
+			// we calibrate by querying chain
+			if !ok {
+				txctx.Logger.Debugf("eea_nonce: calibrating nonce from chain")
+				url, err := proxy.GetURL(txctx)
+				if err != nil {
+					return
+				}
+
+				// Retrieve nonce from chain
+				pendingNonce, err := ec.PendingNonceAt(txctx.Context(), url, txctx.Envelope.MustGetFromAddress())
+				if err != nil {
+					e := txctx.AbortWithError(err).ExtendComponent(component)
+					txctx.Logger.WithError(e).Errorf("eea_nonce: could not read nonce from chain")
+					return
+				}
+
+				n = pendingNonce
+			} else {
+				n = lastAttributed + 1
+			}
 		}
 
 		// Set nonce
 		_ = txctx.Envelope.SetEEAMarkingTxNonce(n)
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"eea_nonce": n,
+			"eea_nonce":     n,
+			"eea_nonce_key": nonceKey,
 		})
-
-		txctx.Logger.Debugf("eea_nonce: handler completed")
 
 		// Execute pending handlers
 		txctx.Next()
@@ -97,5 +112,5 @@ func calcNonceKey(e *tx.Envelope) string {
 		chainKey = e.GetChainName()
 	}
 
-	return fmt.Sprintf("%v@eea-%v", e.GetFromString(), chainKey)
+	return fmt.Sprintf("%v@%v", e.GetFromString(), chainKey)
 }
