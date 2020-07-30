@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
-
 	"github.com/gorilla/mux"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 )
 
 //go:generate swag init --dir . --generalInfo builder.go --output ../../../../public/swagger-specs/services/transaction-scheduler

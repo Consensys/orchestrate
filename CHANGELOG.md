@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.3.0-rc1 (2020-07-29)
+
+### 🆕 Features
+* Add the new `tx-scheduler` API microservice. The new API:
+  * replaces the `envelope-store` and serves the same internal purpose
+  * is the new API that is used to POST every transactions (they are no longer sent on the tx-crafter Kafka topic).
+    * POST `/transactions/deploy-contract`: Creates and sends a new contract deployment. Supports one-time key & private transactions.
+    * POST `​/transactions​/send`: Creates and sends a new contract transaction. Supports one-time key & private transactions.
+    * POST `/transactions​/send-raw`: Creates and sends a raw transaction
+    * POST ​`/transactions​/transfer`: Creates and sends a transfer transaction
+  * exposes GET endpoints to fetch transaction details
+    * GET ​`/transactions`: Search transaction requests by provided filters
+    * GET `​/transactions​/{uuid}`: Fetch a transaction request by uuid
+* Added support for Transaction priority. Users can now specify the gas priority of the transaction (`very-high`, `high`, `medium`, `low`, `very-low`), the transaction Gas Price will be adjusted automatically based on network activity.
+* Update internal logger to follow [Elastic Common Schema](https://www.elastic.co/guide/en/ecs/current/index.html) when using logs in JSON format
+
+### ⚠ BREAKING CHANGES
+* `envelope-store` has been removed. Users should new push 
+
+## v2.2.0 (2020-07-15)
+
+No changes
+
 ## v2.2.0-rc1 (2020-07-01)
 
 ### 🆕 Features
