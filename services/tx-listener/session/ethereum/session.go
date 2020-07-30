@@ -25,6 +25,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/offset"
 )
 
+const MaxTxHashesLength = 30
+
 type Session struct {
 	Chain             *dynamic.Chain
 	ec                ethclient.Client
@@ -338,28 +340,39 @@ func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transacti
 	if len(transactions) == 0 {
 		return jobMap, nil
 	}
-	var txHashes []string
-	for _, t := range transactions {
-		txHashes = append(txHashes, t.Hash().String())
-	}
 
-	// By design, we will receive 0 or 1 job per tx_hash in the filter because we filter by status PENDING
-	jobResponses, err := s.txSchedulerClient.SearchJob(ctx, txHashes, s.Chain.UUID, utils.StatusPending)
-	if err != nil {
-		return nil, err
-	}
+	for i := 0; i < transactions.Len(); i += MaxTxHashesLength {
+		size := i + MaxTxHashesLength
+		if size > transactions.Len() {
+			size = transactions.Len()
+		}
+		currTransactions := transactions[i:size]
+		var txHashes []string
+		for _, t := range currTransactions {
+			txHashes = append(txHashes, t.Hash().String())
+		}
 
-	for _, jobResponse := range jobResponses {
-		log.FromContext(ctx).WithField("txHash", jobResponse.Transaction.Hash).
-			WithField("jobUUID", jobResponse.UUID).Debug("transaction was matched to job")
+		// By design, we will receive 0 or 1 job per tx_hash in the filter because we filter by status PENDING
+		jobResponses, err := s.txSchedulerClient.SearchJob(ctx, txHashes, s.Chain.UUID, utils.StatusPending)
+		if err != nil {
+			return nil, err
+		}
 
-		// Filter by the jobs belonging to same session CHAIN_UUID
-		jobMap[jobResponse.Transaction.Hash] = &types.Job{
-			UUID:        jobResponse.UUID,
-			ChainUUID:   jobResponse.ChainUUID,
-			Labels:      jobResponse.Labels,
-			Annotations: jobResponse.Annotations,
-			Transaction: jobResponse.Transaction,
+		for _, jobResponse := range jobResponses {
+			log.FromContext(ctx).WithField("txHash", jobResponse.Transaction.Hash).
+				WithField("jobUUID", jobResponse.UUID).Debug("transaction was matched to job")
+
+			// Filter by the jobs belonging to same session CHAIN_UUID
+			jobMap[jobResponse.Transaction.Hash] = &types.Job{
+				UUID:         jobResponse.UUID,
+				ChainUUID:    jobResponse.ChainUUID,
+				ScheduleUUID: jobResponse.ScheduleUUID,
+				Type:         jobResponse.Type,
+				Labels:       jobResponse.Labels,
+				Annotations:  jobResponse.Annotations,
+				Transaction:  jobResponse.Transaction,
+				CreatedAt:    jobResponse.CreatedAt,
+			}
 		}
 	}
 

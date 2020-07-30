@@ -88,6 +88,70 @@ func TestSession_Run(t *testing.T) {
 		}
 	})
 
+	t.Run("should process block successfully with internal txs in batches", func(t *testing.T) {
+		cancellableCtx, cancel := context.WithCancel(ctx)
+
+		// Generate 70 txs that will be processed in 3 batches of 30, 30 and 10
+		var txHashes []string
+		var txs []*types.Transaction
+		for i := 0; i < 70; i++ {
+			tx := types.NewTransaction(
+				0,
+				common.HexToAddress(toAddress),
+				big.NewInt(10000),
+				uint64(21000),
+				big.NewInt(20000),
+				[]byte{},
+			)
+
+			txHashes = append(txHashes, txHash)
+			txs = append(txs, tx)
+		}
+
+		block := types.NewBlock(&types.Header{Number: blockPosition}, txs, []*types.Header{}, []*types.Receipt{})
+		chain := newFakeChain()
+		session := NewSession(chain, mockEthClient, mockTxScheduler, mockHook, mockOffsetManager)
+		backoff := &backoffmock.MockIntervalBackoff{}
+		session.bckOff = backoff
+
+		mockOffsetManager.EXPECT().GetLastBlockNumber(gomock.Any(), chain).Return(blockPosition.Uint64(), nil)
+		mockEthClient.EXPECT().EEAPrivPrecompiledContractAddr(gomock.Any(), chain.URL).Return(common.HexToAddress(eeaPrivPrecompiledContractAddr), nil)
+		mockEthClient.EXPECT().HeaderByNumber(gomock.Any(), chain.URL, nil).Return(&types.Header{
+			Number: newBlockPosition,
+		}, nil).AnyTimes()
+		mockEthClient.EXPECT().BlockByNumber(gomock.Any(), chain.URL, newBlockPosition).Return(block, nil)
+		mockTxScheduler.EXPECT().
+			SearchJob(gomock.Any(), txHashes[0:MaxTxHashesLength], chain.UUID, utils.StatusPending).
+			Return([]*types2.JobResponse{}, nil)
+		mockTxScheduler.EXPECT().
+			SearchJob(gomock.Any(), txHashes[MaxTxHashesLength:MaxTxHashesLength * 2], chain.UUID, utils.StatusPending).
+			Return([]*types2.JobResponse{}, nil)
+		mockTxScheduler.EXPECT().
+			SearchJob(gomock.Any(), txHashes[MaxTxHashesLength * 2:70], chain.UUID, utils.StatusPending).
+			Return([]*types2.JobResponse{}, nil)
+		mockHook.EXPECT().AfterNewBlock(gomock.Any(), chain, block, gomock.Any()).Return(nil)
+		mockOffsetManager.EXPECT().SetLastBlockNumber(gomock.Any(), gomock.Any(),gomock.Any()).Return(nil)
+
+		// Start session
+		exitErr := make(chan error)
+		go func() {
+			exitErr <- session.Run(cancellableCtx)
+		}()
+
+		go func() {
+			<-time.After(200 * time.Microsecond)
+			cancel()
+		}()
+
+		select {
+		case <-exitErr:
+			assert.False(t, backoff.HasRetried())
+		// Inject hook error
+		case <-time.After(1 * time.Second):
+			assert.Fail(t, "should have finished")
+		}
+	})
+
 	t.Run("should process block successfully with internal private txs", func(t *testing.T) {
 		cancellableCtx, cancel := context.WithCancel(ctx)
 		jobResponse := testutils.FakeJobResponse()
