@@ -16,25 +16,24 @@ Feature: Transaction Scheduler Jobs
     And I have created the following accounts
       | alias    | ID              | Headers.Authorization    |
       | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
-    Given I sign the following transactions
-      | alias     | ID              | Value              | Gas   | To           | privateKey                                   | ChainUUID     | Headers.Authorization    |
-      | txFaucet1 | {{random.uuid}} | 100000000000000000 | 21000 | {{account1}} | {{global.nodes.besu_1.fundedPrivateKeys[0]}} | {{besu.UUID}} | Bearer {{tenant1.token}} |
     Then I track the following envelopes
-      | ID               |
-      | {{txFaucet1.ID}} |
+      | ID                  |
+      | faucet-{{account1}} |
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/send-raw" with json:
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/transfer" with json:
   """
 {
     "chain": "besu-{{scenarioID}}",
     "params": {
-        "raw": "{{txFaucet1.Raw}}"
+      "from": "{{global.nodes.besu_1.fundedPublicKeys[0]}}",
+      "to": "{{account1}}",
+      "value": "100000000000000000"
     },
     "labels": {
     	"scenario.id": "{{scenarioID}}",
-    	"id": "{{txFaucet1.ID}}"
+    	"id": "faucet-{{account1}}"
     }
 }
       """
@@ -51,7 +50,6 @@ Feature: Transaction Scheduler Jobs
     Then  I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-      | X-Tenant-ID   | {{tenant1.tenantID}}     |
     When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
       """
 {}

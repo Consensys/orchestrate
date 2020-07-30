@@ -43,16 +43,19 @@ func (s *SecretStore) Store(ctx context.Context, rawKey, value string) error {
 }
 
 // Load secret
-func (s *SecretStore) Load(ctx context.Context, rawKey string) (value string, ok bool, err error) {
-	key, err := s.KeyBuilder.BuildKey(ctx, rawKey)
-	if err != nil {
-		return "", false, err.(*ierror.Error).ExtendComponent(component)
+func (s *SecretStore) Load(ctx context.Context, rawKey string) (value string, ok bool, e error) {
+	allowedTenantIDs := multitenancy.AllowedTenantsFromContext(ctx)
+
+	for _, tenant := range allowedTenantIDs {
+		key := s.KeyBuilder.BuildKeyWithTenant(tenant, rawKey)
+
+		v, ok := s.secrets.Load(key)
+		if ok {
+			return v.(string), true, nil
+		}
 	}
-	v, ok := s.secrets.Load(key)
-	if !ok {
-		return "", false, nil
-	}
-	return v.(string), true, nil
+
+	return "", false, nil
 }
 
 // Delete secret

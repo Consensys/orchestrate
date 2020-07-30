@@ -115,16 +115,21 @@ func (store *SecretStore) Store(ctx context.Context, rawKey, value string) error
 }
 
 // Load reads in the vault
-func (store *SecretStore) Load(ctx context.Context, rawKey string) (value string, ok bool, err error) {
-	key, err := store.KeyBuilder.BuildKey(ctx, rawKey)
-	if err != nil {
-		return "", false, errors.FromError(err).ExtendComponent(component)
+func (store *SecretStore) Load(ctx context.Context, rawKey string) (value string, ok bool, e error) {
+	allowedTenantIDs := multitenancy.AllowedTenantsFromContext(ctx)
+
+	for _, tenant := range allowedTenantIDs {
+		key := store.KeyBuilder.BuildKeyWithTenant(tenant, rawKey)
+
+		v, ok, err := store.Client.Logical.Read(key)
+		if err != nil {
+			e = errors.ConnectionError(err.Error()).ExtendComponent(component)
+		} else if ok {
+			return v, ok, nil
+		}
 	}
-	value, ok, err = store.Client.Logical.Read(key)
-	if err != nil {
-		return "", false, errors.ConnectionError(err.Error()).ExtendComponent(component)
-	}
-	return value, ok, err
+
+	return "", false, e
 }
 
 // Delete removes a path in the vault

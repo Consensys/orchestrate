@@ -89,26 +89,25 @@ func (s *SecretStore) List() ([]string, error) {
 }
 
 // Load the secret value from the secret manager of AWS
-func (s *SecretStore) Load(ctx context.Context, rawKey string) (value string, ok bool, err error) {
-	if s.client == nil {
-		return "", false, errors.InternalError("client not set").SetComponent(component)
+func (s *SecretStore) Load(ctx context.Context, rawKey string) (value string, ok bool, e error) {
+	allowedTenantIDs := multitenancy.AllowedTenantsFromContext(ctx)
+
+	for _, tenant := range allowedTenantIDs {
+		key := s.KeyBuilder.BuildKeyWithTenant(tenant, rawKey)
+		input := secretsmanager.GetSecretValueInput{
+			SecretId:     aws.String(key),
+			VersionStage: aws.String("AWSCURRENT"),
+		}
+
+		res, err := s.client.GetSecretValue(&input)
+		if err != nil {
+			e = FromAWSError(err).SetComponent(component)
+		} else {
+			return *res.SecretString, true, nil
+		}
 	}
 
-	key, err := s.KeyBuilder.BuildKey(ctx, rawKey)
-	if err != nil {
-		return "", false, err.(*ierror.Error).ExtendComponent(component)
-	}
-	input := secretsmanager.GetSecretValueInput{
-		SecretId:     aws.String(key),
-		VersionStage: aws.String("AWSCURRENT"),
-	}
-
-	res, err := s.client.GetSecretValue(&input)
-	if err != nil {
-		return "", false, FromAWSError(err).SetComponent(component)
-	}
-
-	return *res.SecretString, true, nil
+	return "", false, e
 }
 
 func (s *SecretStore) create(key, value string) (err error) {

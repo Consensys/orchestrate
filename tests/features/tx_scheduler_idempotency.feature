@@ -31,7 +31,6 @@ Feature: Transaction Scheduler Idempotency
     Then  I set the headers
       | Key               | Value                    |
       | Authorization     | Bearer {{tenant1.token}} |
-      | X-Tenant-ID       | {{tenant1.tenantID}}     |
       | X-Idempotency-Key | {{idempotencykey}}       |
     When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
   """
@@ -51,7 +50,6 @@ Feature: Transaction Scheduler Idempotency
     Then  I set the headers
       | Key               | Value                    |
       | Authorization     | Bearer {{tenant1.token}} |
-      | X-Tenant-ID       | {{tenant1.tenantID}}     |
       | X-Idempotency-Key | {{idempotencykey}}       |
     When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
   """
@@ -88,7 +86,6 @@ Feature: Transaction Scheduler Idempotency
     Then  I set the headers
       | Key               | Value                    |
       | Authorization     | Bearer {{tenant1.token}} |
-      | X-Tenant-ID       | {{tenant1.tenantID}}     |
       | X-Idempotency-Key | {{idempotencykey}}       |
     When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
   """
@@ -108,7 +105,6 @@ Feature: Transaction Scheduler Idempotency
     Then  I set the headers
       | Key               | Value                    |
       | Authorization     | Bearer {{tenant1.token}} |
-      | X-Tenant-ID       | {{tenant1.tenantID}}     |
       | X-Idempotency-Key | {{idempotencykey}}       |
     When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
   """
