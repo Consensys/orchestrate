@@ -110,7 +110,7 @@ func (sc *ScenarioContext) envelopeShouldBeInTopic(topic string) error {
 		if err != nil {
 			e := t.Load("tx.recover", time.Millisecond)
 			if e != nil {
-				return fmt.Errorf("%v: envelope n°%v not in topic %q neither in %q", sc.Pickle.Id, i, topic, "tx.recover")
+				return fmt.Errorf("%v: envelope n°%v neither in topic %q nor in %q", sc.Pickle.Id, i, topic, "tx.recover")
 			}
 			return fmt.Errorf("%v: envelope n°%v not in topic %q but found in %q - envelope.Errors %q", sc.Pickle.Id, i, topic, "tx.recover", t.Current.Error())
 		}

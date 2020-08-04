@@ -51,7 +51,7 @@ func TxAlreadySent(ec ethclient.ChainLedgerReader, txSchedulerClient client.Tran
 				txctx.Abort()
 				return
 			}
-		} else if job.Status == utils.StatusRecovering || job.Status == utils.StatusMined {
+		} else if job.Status == utils.StatusMined {
 			// Transaction has already been sent so we abort execution
 			txctx.Logger.Warnf("transaction scheduler: transaction has already been sent")
 			txctx.Abort()
