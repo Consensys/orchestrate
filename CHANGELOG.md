@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.3.0-rc2 (2020-07-29)
+
+### 🛠 Bug fixes
+* Flawful chain registry migration `3_add_chain_id_column.go`
+* Issue with transaction in RECOVERING status 
+
 ## v2.3.0-rc1 (2020-07-29)
 
 ### 🆕 Features
