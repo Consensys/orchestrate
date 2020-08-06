@@ -6,6 +6,7 @@ stages:
   - e2e
   - build
   - release
+  - doc
 
 variables:
   DOCKER_DRIVER: overlay2
@@ -19,7 +20,7 @@ services:
 
 .rules: &rules
   rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" # Execute hobs when a MR for master branch
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" # Execute jobs when a MR for master branch
       when: on_success
       allow_failure: false
     - if: $CI_COMMIT_BRANCH == 'master'      # Execute jobs when a new commit is pushed to master branch
@@ -262,75 +263,40 @@ release-e2e:
       - tags
   when: manual
 
-# Swagger API doc generation
-.swagger-doc-common-scripts: &swagger-doc-common-scripts
-  - swagger-combine swagger-combine.yml -o combined-schema.json
-  - redoc-cli bundle combined-schema.json
-  - mv redoc-static.html public/${API_DOC_VERSION}/index.html
-
-.swagger-doc: &swagger-doc
-  # template to build swagger doc
+# IMPORTANT: this job name can't be changed!
+# It has to be "pages" for GitlabCI to recognize it.
+# see https://docs.gitlab.com/ee/user/project/pages/introduction.html#gitlab-pages-requirements
+pages:
+  # Release static swagger doc for latest version on Gitlab pages
   image: node:12.16.2-stretch-slim
-  stage: build
-  variables:
-    # default target is "latest" directory
-    API_DOC_VERSION: "latest"
+  # must be on the last stage to make sure the doc is updated only if everything passed
+  stage: doc
   before_script:
-    - npm install swagger-combine@1.0.0
-    - npm install redoc-cli@0.9.7
+    - npm install swagger-combine@1.1.2
+    - npm install redoc-cli@0.9.10
     - export PATH="$PATH:$(pwd)/node_modules/.bin"
-    - mkdir -p public/${API_DOC_VERSION}
+    - mkdir -p public/latest
+  script:
+    # replace version placeholder in combine template before running it
+    - sed -e "s~{{API_VERSION}}~latest - ${CI_COMMIT_SHORT_SHA}~" swagger-combine.yml.template > swagger-combine.yml
+    # combine specs
+    - swagger-combine swagger-combine.yml -o combined-schema.json
+    # generate doc using ReDoc
+    - redoc-cli bundle combined-schema.json
+    # copy html file to the right folder and name it index for online access with dir path only
+    # keep this in prevision of having multiple versions and also now because of compatibility
+    # with previous urls already indexed by search engines
+    - mv redoc-static.html public/latest/index.html
+    # create a redirect from home to latest for people landing on root
+    - sed -e "s~{{LATEST_VERSION_URL}}~${CI_PAGES_URL}/latest~" public/index.html.template > public/index.html
   artifacts:
+    when: always
     paths:
       - public
-  cache:
-    paths:
-      - public
-
-swagger-doc-master:
-  # build swagger doc for master
-  <<: *swagger-doc
-  script:
-    - *swagger-doc-common-scripts
-
-    # create a redirect from home to latest
-    - sed -e "s~{{LATEST_VERSION_URL}}~${CI_PAGES_URL}/latest~" public/index.html.template > public/index.html
+    # no need to keep the artifact more than required to check for an issue
+    expire_in: 1 day
   only:
     refs:
+      # only publish latest version so only run on master.
+      # publishing on other branches/tags would override doc site and mix docs in a very bad way :(
       - master
-
-swagger-doc-tags:
-  # build swagger doc for tagged versions
-  variables:
-    API_DOC_VERSION: $CI_COMMIT_TAG
-    DEFAULT_API_DOC_VERSION_REDIRECT: $CI_COMMIT_TAG
-  <<: *swagger-doc
-  script:
-    - *swagger-doc-common-scripts
-    # Create a redirect from stable to latest tagged version
-    - mkdir -p public/stable
-    - sed -e "s~{{LATEST_VERSION_URL}}~${CI_PAGES_URL}/${CI_COMMIT_TAG}~" public/index.html.template > public/stable/index.html
-
-    # create a redirect from home to latest
-    - sed -e "s~{{LATEST_VERSION_URL}}~${CI_PAGES_URL}/latest~" public/index.html.template > public/index.html
-  only:
-    refs:
-      - tags
-
-#swagger-doc-branches:
-#  # build swagger doc for branches, not to be published on pages, only artifact available on Gitlab
-#  variables:
-#    API_DOC_VERSION: $CI_COMMIT_BRANCH
-#  <<: *swagger-doc
-#  script:
-#    - *swagger-doc-common-scripts
-#    # Create a redirect from stable to latest branch version, only for testing as this artifact is not published
-#    - mkdir -p public/stable
-#    - sed -e "s~{{LATEST_VERSION_URL}}~${CI_PAGES_URL}/${CI_COMMIT_BRANCH}~" public/index.html.template > public/stable/index.html
-#  artifacts:
-#    paths:
-#      - public
-#    expire_in: 1 day
-#  only:
-#    refs:
-#      - branches
