@@ -28,6 +28,7 @@ func FormatSendTxRequest(txRequest *types.SendTransactionRequest, idempotencyKey
 		Annotations: &types.Annotations{
 			OneTimeKey: txRequest.Params.OneTimeKey,
 			Priority:   txRequest.Params.Priority,
+			Retry:      txRequest.Params.Retry,
 		},
 	}
 }
@@ -50,17 +51,25 @@ func FormatDeployContractRequest(txRequest *types.DeployContractRequest, idempot
 		Annotations: &types.Annotations{
 			OneTimeKey: txRequest.Params.OneTimeKey,
 			Priority:   txRequest.Params.Priority,
+			Retry:      txRequest.Params.Retry,
 		},
 	}
 }
 
 func FormatSendRawRequest(txRequest *types.RawTransactionRequest, idempotencyKey string) *entities.TxRequest {
+	var retry *types.GasPriceRetryParams
+	if r := txRequest.Params.Retry; r != nil {
+		retry = &types.GasPriceRetryParams{BaseRetryParams: types.BaseRetryParams{Interval: r.Interval}}
+	}
 	return &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,
 		ChainName:      txRequest.ChainName,
 		Labels:         txRequest.Labels,
 		Params: &types.ETHTransactionParams{
 			Raw: txRequest.Params.Raw,
+		},
+		Annotations: &types.Annotations{
+			Retry: retry,
 		},
 	}
 }
@@ -79,6 +88,7 @@ func FormatSendTransferRequest(txRequest *types.TransferRequest, idempotencyKey 
 		},
 		Annotations: &types.Annotations{
 			Priority: txRequest.Params.Priority,
+			Retry:    txRequest.Params.Retry,
 		},
 	}
 }

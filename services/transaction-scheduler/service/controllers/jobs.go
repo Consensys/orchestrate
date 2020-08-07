@@ -93,6 +93,11 @@ func (c *JobsController) create(rw http.ResponseWriter, request *http.Request) {
 		return
 	}
 
+	if err = jobRequest.Annotations.Validate(); err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	job := formatters.FormatJobCreateRequest(jobRequest)
 	jobRes, err := c.ucs.CreateJob().Execute(ctx, job, multitenancy.AllowedTenantsFromContext(ctx))
 	if err != nil {
@@ -176,6 +181,11 @@ func (c *JobsController) update(rw http.ResponseWriter, request *http.Request) {
 	jobRequest := &types.UpdateJobRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, jobRequest)
 	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err = jobRequest.Annotations.Validate(); err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}

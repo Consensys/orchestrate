@@ -80,7 +80,7 @@ func (c *TransactionsController) send(rw http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	if err := txRequest.Params.PrivateTransactionParams.Validate(); err != nil {
+	if err := txRequest.Params.Validate(); err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -122,7 +122,7 @@ func (c *TransactionsController) deployContract(rw http.ResponseWriter, request 
 		return
 	}
 
-	if err := txRequest.Params.PrivateTransactionParams.Validate(); err != nil {
+	if err := txRequest.Params.Validate(); err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -195,6 +195,11 @@ func (c *TransactionsController) transfer(rw http.ResponseWriter, request *http.
 	txRequest := &types.TransferRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, txRequest)
 	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err = txRequest.Params.Validate(); err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}

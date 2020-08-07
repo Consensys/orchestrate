@@ -123,6 +123,27 @@ func (s *jobsCtrlTestSuite) TestJobsController_Create() {
 		assert.Equal(t, http.StatusBadRequest, rw.Code)
 	})
 
+	s.T().Run("should fail with Bad request if invalid format (retry)", func(t *testing.T) {
+		jobRequest := testutils.FakeCreateJobRequest()
+		jobRequest.Annotations = &types.Annotations{
+			Retry: &types.GasPriceRetryParams{
+				BaseRetryParams:        types.BaseRetryParams{Interval: "1m"},
+				GasPriceIncrementLevel: "low",
+				GasPriceIncrement:      1.1,
+				GasPriceLimit:          1.4,
+			},
+		}
+		requestBytes, _ := json.Marshal(jobRequest)
+
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.
+			NewRequest(http.MethodPost, "/jobs", bytes.NewReader(requestBytes)).
+			WithContext(s.ctx)
+
+		s.router.ServeHTTP(rw, httpRequest)
+		assert.Equal(t, http.StatusBadRequest, rw.Code)
+	})
+
 	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
 	s.T().Run("should fail with 422 if use case fails with InvalidParameterError", func(t *testing.T) {
 		rw := httptest.NewRecorder()
