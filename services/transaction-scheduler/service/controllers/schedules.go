@@ -33,7 +33,6 @@ func (c *SchedulesController) Append(router *mux.Router) {
 
 // @Summary Creates a new Schedule
 // @Description Creates a new schedule
-// @Tags Schedules
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -67,7 +66,6 @@ func (c *SchedulesController) create(rw http.ResponseWriter, request *http.Reque
 
 // @Summary Fetch a schedule by uuid
 // @Description Fetch a single schedule by uuid
-// @Tags Schedules
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
@@ -94,7 +92,6 @@ func (c *SchedulesController) getOne(rw http.ResponseWriter, request *http.Reque
 
 // @Summary Get all schedules
 // @Description Get all schedules
-// @Tags Schedules
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth

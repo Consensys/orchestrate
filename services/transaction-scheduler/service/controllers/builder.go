@@ -15,20 +15,14 @@ import (
 
 // @title Transaction Scheduler API
 // @version 2.0
-// @description PegaSys Orchestrate Transaction API. Enables dynamic management of transactions
+// @description PegaSys Orchestrate Transaction API. Enables dynamic management of transactions.
+// @description Transaction requests are an abstraction over schedules and jobs representing one or more transactions executed on the Blockchain network
+// @description Schedules are ordered lists of jobs executed in a predefined sequence
+// @description Jobs represent a single transaction flow executed on the Blockchain network
 
 // @contact.name Contact PegaSys Orchestrate
 // @contact.url https://pegasys.tech/contact/
 // @contact.email support@pegasys.tech
-
-// @tag.name Transactions
-// @tag.description Transaction requests are an abstraction over schedules and jobs representing one or more transactions executed on the Blockchain network
-
-// @tag.name Schedules
-// @tag.description Schedules are ordered lists of jobs executed in a predefined sequence
-
-// @tag.name Jobs
-// @tag.description Jobs represent a single transaction flow executed on the Blockchain network
 
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html

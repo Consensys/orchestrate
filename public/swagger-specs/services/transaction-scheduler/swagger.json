@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "PegaSys Orchestrate Transaction API. Enables dynamic management of transactions",
+        "description": "PegaSys Orchestrate Transaction API. Enables dynamic management of transactions.\nTransaction requests are an abstraction over schedules and jobs representing one or more transactions executed on the Blockchain network\nSchedules are ordered lists of jobs executed in a predefined sequence\nJobs represent a single transaction flow executed on the Blockchain network",
         "title": "Transaction Scheduler API",
         "contact": {
             "name": "Contact PegaSys Orchestrate",
@@ -31,9 +31,6 @@
                 ],
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "Jobs"
                 ],
                 "summary": "Search jobs by provided filters",
                 "parameters": [
@@ -111,9 +108,6 @@
                 ],
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "Jobs"
                 ],
                 "summary": "Creates a new Job",
                 "parameters": [
@@ -205,9 +199,6 @@
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "Jobs"
-                ],
                 "summary": "Fetch a job by uuid",
                 "parameters": [
                     {
@@ -275,9 +266,6 @@
                 ],
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "Jobs"
                 ],
                 "summary": "Update job by UUID",
                 "parameters": [
@@ -375,9 +363,6 @@
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "Jobs"
-                ],
                 "summary": "Start a Job by UUID",
                 "parameters": [
                     {
@@ -418,9 +403,6 @@
                 "description": "Get all schedules",
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "Schedules"
                 ],
                 "summary": "Get all schedules",
                 "responses": {
@@ -471,9 +453,6 @@
                 ],
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "Schedules"
                 ],
                 "summary": "Creates a new Schedule",
                 "parameters": [
@@ -544,9 +523,6 @@
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "Schedules"
-                ],
                 "summary": "Fetch a schedule by uuid",
                 "parameters": [
                     {
@@ -610,9 +586,6 @@
                 ],
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "Transactions"
                 ],
                 "summary": "Search transaction requests by provided filters",
                 "parameters": [
@@ -683,9 +656,6 @@
                 ],
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "Transactions"
                 ],
                 "summary": "Creates and sends a new contract deployment",
                 "parameters": [
@@ -777,9 +747,6 @@
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "Transactions"
-                ],
                 "summary": "Creates and sends a new contract transaction",
                 "parameters": [
                     {
@@ -869,9 +836,6 @@
                 ],
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "Transactions"
                 ],
                 "summary": "Creates and sends a raw transaction",
                 "parameters": [
@@ -963,9 +927,6 @@
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "Transactions"
-                ],
                 "summary": "Creates and sends a transfer transaction",
                 "parameters": [
                     {
@@ -1053,9 +1014,6 @@
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "Transactions"
-                ],
                 "summary": "Fetch a transaction request by uuid",
                 "parameters": [
                     {
@@ -1128,6 +1086,9 @@
                 "priority": {
                     "type": "string",
                     "example": "very-high"
+                },
+                "retry": {
+                    "type": "GasPriceRetryParams"
                 }
             }
         },
@@ -1211,6 +1172,9 @@
                     "type": "string",
                     "example": "very-high"
                 },
+                "retry": {
+                    "type": "GasPriceRetryParams"
+                },
                 "value": {
                     "type": "string",
                     "example": "71500000 (wei)"
@@ -1231,10 +1195,6 @@
         },
         "types.ETHTransaction": {
             "type": "object",
-            "required": [
-                "data",
-                "raw"
-            ],
             "properties": {
                 "createdAt": {
                     "type": "string",
@@ -1426,6 +1386,9 @@
                 "raw": {
                     "type": "string",
                     "example": "0xfe378324abcde723..."
+                },
+                "retry": {
+                    "type": "BaseRetryParams"
                 }
             }
         },
@@ -1513,6 +1476,9 @@
                     "type": "string",
                     "example": "very-high"
                 },
+                "retry": {
+                    "type": "GasPriceRetryParams"
+                },
                 "to": {
                     "type": "string",
                     "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
@@ -1576,6 +1542,9 @@
                     "type": "string",
                     "example": "very-high"
                 },
+                "retry": {
+                    "type": "GasPriceRetryParams"
+                },
                 "to": {
                     "type": "string",
                     "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
@@ -1637,19 +1606,5 @@
             "name": "Authorization",
             "in": "header"
         }
-    },
-    "tags": [
-        {
-            "description": "Transaction requests are an abstraction over schedules and jobs representing one or more transactions executed on the Blockchain network",
-            "name": "Transactions"
-        },
-        {
-            "description": "Schedules are ordered lists of jobs executed in a predefined sequence",
-            "name": "Schedules"
-        },
-        {
-            "description": "Jobs represent a single transaction flow executed on the Blockchain network",
-            "name": "Jobs"
-        }
-    ]
+    }
 }
