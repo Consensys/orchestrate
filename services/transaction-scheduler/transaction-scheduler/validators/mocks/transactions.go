@@ -8,7 +8,6 @@ import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
-	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 	reflect "reflect"
 )
 
@@ -33,20 +32,6 @@ func NewMockTransactionValidator(ctrl *gomock.Controller) *MockTransactionValida
 // EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockTransactionValidator) EXPECT() *MockTransactionValidatorMockRecorder {
 	return m.recorder
-}
-
-// ValidateFields mocks base method
-func (m *MockTransactionValidator) ValidateFields(ctx context.Context, txRequest *entities.TxRequest) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ValidateFields", ctx, txRequest)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// ValidateFields indicates an expected call of ValidateFields
-func (mr *MockTransactionValidatorMockRecorder) ValidateFields(ctx, txRequest interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateFields", reflect.TypeOf((*MockTransactionValidator)(nil).ValidateFields), ctx, txRequest)
 }
 
 // ValidateChainExists mocks base method

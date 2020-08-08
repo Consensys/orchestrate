@@ -113,7 +113,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 		resp, err := s.client.SendContractTransaction(ctx, txRequest)
 
 		assert.Nil(t, resp)
-		assert.True(t, errors.IsInvalidParameterError(err))
+		assert.True(t, errors.IsInvalidFormatError(err))
 	})
 }
 

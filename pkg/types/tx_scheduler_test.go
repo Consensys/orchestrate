@@ -14,7 +14,7 @@ func TestTransactionParams_BasicSuccessful(t *testing.T) {
 		MethodSignature: "Constructor()",
 	}
 
-	err := utils.GetValidator().Struct(params)
+	err := params.Validate()
 	assert.NoError(t, err)
 }
 
@@ -46,11 +46,6 @@ func TestTransactionParams_Validation(t *testing.T) {
 		expectedError bool
 	}{
 		{
-			"No Error",
-			nil,
-			false,
-		},
-		{
 			"Validator error",
 			&TransactionParams{
 				Value: "error",
@@ -60,10 +55,8 @@ func TestTransactionParams_Validation(t *testing.T) {
 		{
 			"PrivateParams error",
 			&TransactionParams{
-				PrivateTransactionParams: PrivateTransactionParams{
-					PrivateFor:     []string{"test"},
-					PrivacyGroupID: "test",
-				},
+				PrivateFor:     []string{"test"},
+				PrivacyGroupID: "test",
 			},
 			true,
 		},
@@ -100,11 +93,6 @@ func TestDeployContractParams_Validation(t *testing.T) {
 		expectedError bool
 	}{
 		{
-			"No Error",
-			nil,
-			false,
-		},
-		{
 			"Validator error",
 			&DeployContractParams{
 				Value: "error",
@@ -114,10 +102,8 @@ func TestDeployContractParams_Validation(t *testing.T) {
 		{
 			"PrivateParams error",
 			&DeployContractParams{
-				PrivateTransactionParams: PrivateTransactionParams{
-					PrivateFor:     []string{"test"},
-					PrivacyGroupID: "test",
-				},
+				PrivateFor:     []string{"test"},
+				PrivacyGroupID: "test",
 			},
 			true,
 		},
@@ -153,11 +139,6 @@ func TestTransferParams_Validation(t *testing.T) {
 		params        *TransferParams
 		expectedError bool
 	}{
-		{
-			"No Error",
-			nil,
-			false,
-		},
 		{
 			"Validator error",
 			&TransferParams{
@@ -240,18 +221,14 @@ func TestRetryParams_Validation(t *testing.T) {
 		{
 			"Error GasPriceIncrement, GasPriceLimit not filled",
 			GasPriceRetryParams{
-				BaseRetryParams: BaseRetryParams{
-					Interval: "1m",
-				},
+				Interval: "1m",
 			},
 			true,
 		},
 		{
 			"Error GasPriceLimit not filled",
 			GasPriceRetryParams{
-				BaseRetryParams: BaseRetryParams{
-					Interval: "1m",
-				},
+				Interval:          "1m",
 				GasPriceIncrement: 1.1,
 			},
 			true,
@@ -259,9 +236,7 @@ func TestRetryParams_Validation(t *testing.T) {
 		{
 			"Error GasPriceIncrement or GasPriceIncrementLevel not filled",
 			GasPriceRetryParams{
-				BaseRetryParams: BaseRetryParams{
-					Interval: "1m",
-				},
+				Interval:      "1m",
 				GasPriceLimit: 1.1,
 			},
 			true,
@@ -298,9 +273,7 @@ func TestRetryParams_Validation(t *testing.T) {
 		{
 			"No error all fields are filled",
 			GasPriceRetryParams{
-				BaseRetryParams: BaseRetryParams{
-					Interval: "1m",
-				},
+				Interval:          "1m",
 				GasPriceIncrement: 1.1,
 				GasPriceLimit:     1.2,
 			},
@@ -309,9 +282,7 @@ func TestRetryParams_Validation(t *testing.T) {
 		{
 			"No error all fields are filled",
 			GasPriceRetryParams{
-				BaseRetryParams: BaseRetryParams{
-					Interval: "1m",
-				},
+				Interval:               "1m",
 				GasPriceIncrementLevel: "medium",
 				GasPriceLimit:          1.2,
 			},
@@ -320,9 +291,7 @@ func TestRetryParams_Validation(t *testing.T) {
 		{
 			"Error Interval is not a duration",
 			GasPriceRetryParams{
-				BaseRetryParams: BaseRetryParams{
-					Interval: "1_m",
-				},
+				Interval:          "1_m",
 				GasPriceIncrement: 1.1,
 				GasPriceLimit:     1.2,
 			},
@@ -331,9 +300,7 @@ func TestRetryParams_Validation(t *testing.T) {
 		{
 			"Error GasPriceIncrement > GasPriceLimit",
 			GasPriceRetryParams{
-				BaseRetryParams: BaseRetryParams{
-					Interval: "1m",
-				},
+				Interval:          "1m",
 				GasPriceIncrement: 1.3,
 				GasPriceLimit:     1.2,
 			},
@@ -342,9 +309,7 @@ func TestRetryParams_Validation(t *testing.T) {
 		{
 			"Error invalid GasPriceIncrementLevel",
 			GasPriceRetryParams{
-				BaseRetryParams: BaseRetryParams{
-					Interval: "1m",
-				},
+				Interval:               "1m",
 				GasPriceIncrementLevel: "l0w",
 				GasPriceLimit:          1.2,
 			},
@@ -353,9 +318,7 @@ func TestRetryParams_Validation(t *testing.T) {
 		{
 			"Error mutual exclusion between GasPriceIncrement and GasPriceIncrementLevel",
 			GasPriceRetryParams{
-				BaseRetryParams: BaseRetryParams{
-					Interval: "1m",
-				},
+				Interval:               "1m",
 				GasPriceIncrementLevel: "low",
 				GasPriceIncrement:      1.3,
 				GasPriceLimit:          1.2,
@@ -365,9 +328,7 @@ func TestRetryParams_Validation(t *testing.T) {
 		{
 			"No error when GasPriceIncrement = GasPriceLimit",
 			GasPriceRetryParams{
-				BaseRetryParams: BaseRetryParams{
-					Interval: "1m",
-				},
+				Interval:          "1m",
 				GasPriceIncrement: 1.1,
 				GasPriceLimit:     1.1,
 			},

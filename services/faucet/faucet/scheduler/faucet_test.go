@@ -123,12 +123,10 @@ func TestCredit(t *testing.T) {
 			ChainName:     "chainName",
 		}
 		expectedTransferRequest := &types2.TransferRequest{
-			BaseTransactionRequest: types2.BaseTransactionRequest{
-				ChainName: requestChainName.ChainName,
-				Labels: map[string]string{
-					"parentJobUUID": requestChainName.ParentTxID,
-					"id": requestChainName.ChildTxID,
-				},
+			ChainName: requestChainName.ChainName,
+			Labels: map[string]string{
+				"parentJobUUID": requestChainName.ParentTxID,
+				"id":            requestChainName.ChildTxID,
 			},
 			Params: types2.TransferParams{
 				Value: requestChainName.FaucetsCandidates[request.ElectedFaucet].Amount.String(),

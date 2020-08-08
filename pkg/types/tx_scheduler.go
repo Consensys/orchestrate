@@ -4,13 +4,14 @@ import (
 	"time"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
 type CreateJobRequest struct {
 	ScheduleUUID string            `json:"scheduleUUID" validate:"required,uuid4" example:"b4374e6f-b28a-4bad-b4fe-bda36eaf849c"`
 	ChainUUID    string            `json:"chainUUID" validate:"required,uuid4" example:"b4374e6f-b28a-4bad-b4fe-bda36eaf849c"`
-	Type         string            `json:"type" validate:"required,isJobType" example:"eth://ethereum/transaction"` //  @TODO validate Type is valid
+	Type         string            `json:"type" validate:"required,isJobType" example:"eth://ethereum/transaction"`
 	Labels       map[string]string `json:"labels,omitempty"`
 	Annotations  *Annotations      `json:"annotations,omitempty"`
 	Transaction  *ETHTransaction   `json:"transaction" validate:"required"`
@@ -46,11 +47,6 @@ type ScheduleResponse struct {
 	CreatedAt time.Time      `json:"createdAt" example:"2020-07-09T12:35:42.115395Z"`
 }
 
-type BaseTransactionRequest struct {
-	ChainName string            `json:"chain" validate:"required" example:"myChain"`
-	Labels    map[string]string `json:"labels,omitempty"`
-}
-
 // go validator does not support mutually exclusive parameters for now
 // See more https://github.com/go-playground/validator/issues/608
 type TransactionParams struct {
@@ -63,35 +59,39 @@ type TransactionParams struct {
 	Args            []interface{}        `json:"args,omitempty"`
 	OneTimeKey      bool                 `json:"oneTimeKey,omitempty" example:"true"`
 	Priority        string               `json:"priority,omitempty" validate:"isPriority" example:"very-high" `
-	Retry           *GasPriceRetryParams `json:"retry,omitempty"`
-	PrivateTransactionParams
+	Retry           *GasPriceRetryParams `json:"retryPolicy,omitempty"`
+	Protocol        string               `json:"protocol,omitempty" validate:"omitempty,isPrivateTxManagerType" example:"Tessera"`
+	PrivateFrom     string               `json:"privateFrom,omitempty" validate:"omitempty,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
+	PrivateFor      []string             `json:"privateFor,omitempty" validate:"omitempty,min=1,unique,dive,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=,B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
+	PrivacyGroupID  string               `json:"privacyGroupId,omitempty" validate:"omitempty,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
 }
 
-func (t *TransactionParams) Validate() error {
-	if t == nil {
-		return nil
-	}
-
-	if err := utils.GetValidator().Struct(t); err != nil {
+func (params *TransactionParams) Validate() error {
+	if err := utils.GetValidator().Struct(params); err != nil {
 		return err
 	}
 
-	if err := t.PrivateTransactionParams.Validate(); err != nil {
-		return err
-	}
-
-	if t.Retry != nil {
-		if err := t.Retry.Validate(); err != nil {
+	if params.Retry != nil {
+		if err := params.Retry.Validate(); err != nil {
 			return err
 		}
+	}
+
+	if params.OneTimeKey && params.From != "" {
+		return errors.InvalidParameterError("from account cannot be included when OneTimeKey is enabled")
+	}
+
+	if params.PrivateFrom != "" {
+		return validatePrivateTxParams(params.Protocol, params.PrivacyGroupID, params.PrivateFor)
 	}
 
 	return nil
 }
 
 type SendTransactionRequest struct {
-	BaseTransactionRequest
-	Params TransactionParams `json:"params" validate:"required"`
+	ChainName string            `json:"chain" validate:"required" example:"myChain"`
+	Labels    map[string]string `json:"labels,omitempty"`
+	Params    TransactionParams `json:"params" validate:"required"`
 }
 
 type TransferParams struct {
@@ -104,17 +104,13 @@ type TransferParams struct {
 	Retry    *GasPriceRetryParams `json:"retry,omitempty"`
 }
 
-func (t *TransferParams) Validate() error {
-	if t == nil {
-		return nil
-	}
-
-	if err := utils.GetValidator().Struct(t); err != nil {
+func (params *TransferParams) Validate() error {
+	if err := utils.GetValidator().Struct(params); err != nil {
 		return err
 	}
 
-	if t.Retry != nil {
-		if err := t.Retry.Validate(); err != nil {
+	if params.Retry != nil {
+		if err := params.Retry.Validate(); err != nil {
 			return err
 		}
 	}
@@ -123,63 +119,65 @@ func (t *TransferParams) Validate() error {
 }
 
 type TransferRequest struct {
-	BaseTransactionRequest
-	Params TransferParams `json:"params" validate:"required"`
+	ChainName string            `json:"chain" validate:"required" example:"myChain"`
+	Labels    map[string]string `json:"labels,omitempty"`
+	Params    TransferParams    `json:"params" validate:"required"`
 }
 
 type RawTransactionParams struct {
-	Raw   string           `json:"raw" validate:"required,isHex" example:"0xfe378324abcde723..."`
-	Retry *BaseRetryParams `json:"retry,omitempty"`
-}
-
-type BaseRetryParams struct {
-	Interval string `json:"interval,omitempty" validate:"omitempty,isDuration" example:"2m"`
+	Raw   string               `json:"raw" validate:"required,isHex" example:"0xfe378324abcde723..."`
+	Retry *IntervalRetryParams `json:"retryPolicy,omitempty"`
 }
 
 type RawTransactionRequest struct {
-	BaseTransactionRequest
-	Params RawTransactionParams `json:"params" validate:"required"`
+	ChainName string               `json:"chain" validate:"required" example:"myChain"`
+	Labels    map[string]string    `json:"labels,omitempty"`
+	Params    RawTransactionParams `json:"params" validate:"required"`
 }
 
 type DeployContractParams struct {
-	Value        string               `json:"value,omitempty" validate:"omitempty,isBig" example:"71500000 (wei)"`
-	Gas          string               `json:"gas,omitempty" example:"21000"`
-	GasPrice     string               `json:"gasPrice,omitempty" validate:"omitempty,isBig" example:"71500000 (wei)"`
-	From         string               `json:"from" validate:"required_without=OneTimeKey,omitempty,eth_addr" example:"0x1abae27a0cbfb02945720425d3b80c7e09728534"`
-	ContractName string               `json:"contractName" validate:"required" example:"MyContract"`
-	ContractTag  string               `json:"contractTag,omitempty" example:"v1.1.0"`
-	Args         []interface{}        `json:"args,omitempty"`
-	OneTimeKey   bool                 `json:"oneTimeKey,omitempty" example:"true"`
-	Priority     string               `json:"priority,omitempty" validate:"isPriority" example:"very-high" `
-	Retry        *GasPriceRetryParams `json:"retry,omitempty"`
-	PrivateTransactionParams
+	Value          string               `json:"value,omitempty" validate:"omitempty,isBig" example:"71500000 (wei)"`
+	Gas            string               `json:"gas,omitempty" example:"21000"`
+	GasPrice       string               `json:"gasPrice,omitempty" validate:"omitempty,isBig" example:"71500000 (wei)"`
+	From           string               `json:"from" validate:"required_without=OneTimeKey,omitempty,eth_addr" example:"0x1abae27a0cbfb02945720425d3b80c7e09728534"`
+	ContractName   string               `json:"contractName" validate:"required" example:"MyContract"`
+	ContractTag    string               `json:"contractTag,omitempty" example:"v1.1.0"`
+	Args           []interface{}        `json:"args,omitempty"`
+	OneTimeKey     bool                 `json:"oneTimeKey,omitempty" example:"true"`
+	Priority       string               `json:"priority,omitempty" validate:"isPriority" example:"very-high" `
+	Retry          *GasPriceRetryParams `json:"retryPolicy,omitempty"`
+	Protocol       string               `json:"protocol,omitempty" validate:"omitempty,isPrivateTxManagerType" example:"Tessera"`
+	PrivateFrom    string               `json:"privateFrom,omitempty" validate:"omitempty,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
+	PrivateFor     []string             `json:"privateFor,omitempty" validate:"omitempty,min=1,unique,dive,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=,B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
+	PrivacyGroupID string               `json:"privacyGroupId,omitempty" validate:"omitempty,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
 }
 
-func (d *DeployContractParams) Validate() error {
-	if d == nil {
-		return nil
-	}
-
-	if err := utils.GetValidator().Struct(d); err != nil {
+func (params *DeployContractParams) Validate() error {
+	if err := utils.GetValidator().Struct(params); err != nil {
 		return err
 	}
 
-	if err := d.PrivateTransactionParams.Validate(); err != nil {
-		return err
-	}
-
-	if d.Retry != nil {
-		if err := d.Retry.Validate(); err != nil {
+	if params.Retry != nil {
+		if err := params.Retry.Validate(); err != nil {
 			return err
 		}
+	}
+
+	if params.OneTimeKey && params.From != "" {
+		return errors.InvalidParameterError("from account cannot be included when OneTimeKey is enabled")
+	}
+
+	if params.PrivateFrom != "" {
+		return validatePrivateTxParams(params.Protocol, params.PrivacyGroupID, params.PrivateFor)
 	}
 
 	return nil
 }
 
 type DeployContractRequest struct {
-	BaseTransactionRequest
-	Params DeployContractParams `json:"params" validate:"required"`
+	ChainName string               `json:"chain" validate:"required" example:"myChain"`
+	Labels    map[string]string    `json:"labels,omitempty"`
+	Params    DeployContractParams `json:"params" validate:"required"`
 }
 
 type TransactionResponse struct {
@@ -189,35 +187,4 @@ type TransactionResponse struct {
 	Params         *ETHTransactionParams `json:"params"`
 	Schedule       *ScheduleResponse     `json:"schedule"`
 	CreatedAt      time.Time             `json:"createdAt" example:"2020-07-09T12:35:42.115395Z"`
-}
-
-type GasPriceRetryParams struct {
-	BaseRetryParams
-	GasPriceIncrementLevel string  `json:"gasPriceIncrementLevel,omitempty" validate:"omitempty,oneof=none very-low low medium high very-high" example:"medium"`
-	GasPriceIncrement      float64 `json:"gasPriceIncrement,omitempty" validate:"omitempty,eqfield=GasPriceLimit|ltcsfield=GasPriceLimit" example:"1.05 for (5%)"`
-	GasPriceLimit          float64 `json:"gasPriceLimit,omitempty" validate:"required_with=GasPriceIncrementLevel GasPriceIncrement,omitempty" example:"1.2 for (20%)"`
-}
-
-func (g *GasPriceRetryParams) Validate() error {
-	if g == nil {
-		return nil
-	}
-
-	if err := utils.GetValidator().Struct(g); err != nil {
-		return err
-	}
-
-	if g.GasPriceIncrement > 0 && g.GasPriceIncrementLevel != "" {
-		return errors.InvalidParameterError("fields 'gasPriceIncrement' and 'gasPriceIncrementLevel' are mutually exclusive")
-	}
-
-	if (g.Interval != "" || g.GasPriceLimit > 0) && (g.GasPriceIncrement == 0 && g.GasPriceIncrementLevel == "") {
-		return errors.InvalidParameterError("fields 'gasPriceIncrement' and 'gasPriceIncrementLevel' cannot be both empty")
-	}
-
-	if (g.Interval != "" && g.GasPriceLimit == 0) || (g.Interval == "" && g.GasPriceLimit > 0) {
-		return errors.InvalidParameterError("fields 'Interval' and 'GasPriceLimit' are both required")
-	}
-
-	return nil
 }

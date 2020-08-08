@@ -14,7 +14,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
 
 //go:generate mockgen -source=transactions.go -destination=mocks/transactions.go -package=mocks
@@ -22,7 +21,6 @@ import (
 const txValidatorComponent = "transaction-validator"
 
 type TransactionValidator interface {
-	ValidateFields(ctx context.Context, txRequest *entities.TxRequest) error
 	ValidateChainExists(ctx context.Context, chainUUID string) (string, error)
 	ValidateMethodSignature(methodSignature string, args []interface{}) (string, error)
 	ValidateContract(ctx context.Context, params *types.ETHTransactionParams) (string, error)
@@ -42,30 +40,6 @@ func NewTransactionValidator(
 	contractRegistryClient contractregistry.ContractRegistryClient,
 ) TransactionValidator {
 	return &transactionValidator{db: db, chainRegistryClient: chainRegistryClient, contractRegistryClient: contractRegistryClient}
-}
-
-func (txValidator *transactionValidator) ValidateFields(ctx context.Context, txRequest *entities.TxRequest) error {
-	logger := log.WithContext(ctx)
-
-	if err := utils.GetValidator().Struct(txRequest); err != nil {
-		errMessage := err.Error()
-		logger.WithError(err).Error(errMessage)
-		return errors.InvalidParameterError(errMessage).ExtendComponent(txValidatorComponent)
-	}
-
-	if err := txRequest.Params.PrivateTransactionParams.Validate(); err != nil {
-		errMessage := err.Error()
-		logger.WithError(err).Error(errMessage)
-		return errors.InvalidParameterError(err.Error()).ExtendComponent(txValidatorComponent)
-	}
-
-	if txRequest.Annotations != nil && txRequest.Annotations.OneTimeKey && txRequest.Params.From != "" {
-		errMessage := "from account cannot be included when OneTimeKey is enabled"
-		logger.Error(errMessage)
-		return errors.InvalidParameterError(errMessage).ExtendComponent(txValidatorComponent)
-	}
-
-	return nil
 }
 
 func (txValidator *transactionValidator) ValidateChainExists(ctx context.Context, chainUUID string) (string, error) {

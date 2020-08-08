@@ -40,9 +40,9 @@ func (c *JobsController) Append(router *mux.Router) {
 // @Security JWTAuth
 // @Param tx_hashes query []string false "List of transaction hashes" collectionFormat(csv)
 // @Param chain_uuid query string false "Chain UUID"
-// @Success 200 {object} types.JobResponse{annotations=types.Annotations,transaction=types.ETHTransaction,logs=[]types.Log} "List of Jobs found"
-// @Failure 400 {string} httputil.ErrorResponse "Invalid filter in the request"
-// @Failure 500 {string} httputil.ErrorResponse "Internal server error"
+// @Success 200 {object} types.JobResponse{annotations=types.Annotations{retryPolicy=types.GasPriceRetryParams},transaction=types.ETHTransaction,logs=[]types.Log} "List of Jobs found"
+// @Failure 400 {object} httputil.ErrorResponse "Invalid filter in the request"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /jobs [get]
 func (c *JobsController) search(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -75,10 +75,10 @@ func (c *JobsController) search(rw http.ResponseWriter, request *http.Request) {
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param request body types.CreateJobRequest{annotations=types.Annotations,transaction=types.ETHTransaction} true "Job creation request"
-// @Success 200 {object} types.JobResponse{annotations=types.Annotations,transaction=types.ETHTransaction,logs=[]types.Log} "Created Job"
-// @Failure 400 {string} httputil.ErrorResponse "Invalid request"
-// @Failure 422 {string} httputil.ErrorResponse "Unprocessable parameters were sent"
-// @Failure 500 {string} httputil.ErrorResponse "Internal server error"
+// @Success 200 {object} types.JobResponse "Created Job"
+// @Failure 400 {object} httputil.ErrorResponse "Invalid request"
+// @Failure 422 {object} httputil.ErrorResponse "Unprocessable parameters were sent"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /jobs [post]
 func (c *JobsController) create(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -112,9 +112,9 @@ func (c *JobsController) create(rw http.ResponseWriter, request *http.Request) {
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param uuid path string true "UUID of the job"
-// @Success 200 {object} types.JobResponse{annotations=types.Annotations,transaction=types.ETHTransaction,logs=[]types.Log} "Job found"
-// @Failure 404 {string} httputil.ErrorResponse "Job not found"
-// @Failure 500 {string} httputil.ErrorResponse "Internal server error"
+// @Success 200 {object} types.JobResponse "Job found"
+// @Failure 404 {object} httputil.ErrorResponse "Job not found"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /jobs/{uuid} [get]
 func (c *JobsController) getOne(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -138,8 +138,8 @@ func (c *JobsController) getOne(rw http.ResponseWriter, request *http.Request) {
 // @Security JWTAuth
 // @Param uuid path string true "UUID of the job"
 // @Success 202
-// @Failure 404 {string} httputil.ErrorResponse "Job not found"
-// @Failure 500 {string} httputil.ErrorResponse "Internal server error"
+// @Failure 404 {object} httputil.ErrorResponse "Job not found"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /jobs/{uuid}/start [put]
 func (c *JobsController) start(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -163,11 +163,11 @@ func (c *JobsController) start(rw http.ResponseWriter, request *http.Request) {
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param request body types.UpdateJobRequest{annotations=types.Annotations,transaction=types.ETHTransaction} true "Job update request"
-// @Success 200 {object} types.JobResponse{annotations=types.Annotations,transaction=types.ETHTransaction,logs=[]types.Log} "Job found"
-// @Failure 400 {string} httputil.ErrorResponse "Invalid request"
-// @Failure 404 {string} httputil.ErrorResponse "Job not found"
-// @Failure 409 {string} httputil.ErrorResponse "Job in invalid state for the given status update"
-// @Failure 500 {string} httputil.ErrorResponse "Internal server error"
+// @Success 200 {object} types.JobResponse "Job found"
+// @Failure 400 {object} httputil.ErrorResponse "Invalid request"
+// @Failure 404 {object} httputil.ErrorResponse "Job not found"
+// @Failure 409 {object} httputil.ErrorResponse "Job in invalid state for the given status update"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /jobs/{uuid} [patch]
 func (c *JobsController) update(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")

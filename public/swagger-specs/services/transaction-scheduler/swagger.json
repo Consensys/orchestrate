@@ -63,7 +63,19 @@
                                     "type": "object",
                                     "properties": {
                                         "annotations": {
-                                            "$ref": "#/definitions/types.Annotations"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/types.Annotations"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "retryPolicy": {
+                                                            "$ref": "#/definitions/types.GasPriceRetryParams"
+                                                        }
+                                                    }
+                                                }
+                                            ]
                                         },
                                         "logs": {
                                             "type": "array",
@@ -82,13 +94,13 @@
                     "400": {
                         "description": "Invalid filter in the request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     }
                 }
@@ -140,46 +152,25 @@
                     "200": {
                         "description": "Created Job",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/types.JobResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "annotations": {
-                                            "$ref": "#/definitions/types.Annotations"
-                                        },
-                                        "logs": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/types.Log"
-                                            }
-                                        },
-                                        "transaction": {
-                                            "$ref": "#/definitions/types.ETHTransaction"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/types.JobResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "422": {
                         "description": "Unprocessable parameters were sent",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     }
                 }
@@ -213,40 +204,19 @@
                     "200": {
                         "description": "Job found",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/types.JobResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "annotations": {
-                                            "$ref": "#/definitions/types.Annotations"
-                                        },
-                                        "logs": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/types.Log"
-                                            }
-                                        },
-                                        "transaction": {
-                                            "$ref": "#/definitions/types.ETHTransaction"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/types.JobResponse"
                         }
                     },
                     "404": {
                         "description": "Job not found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     }
                 }
@@ -298,52 +268,31 @@
                     "200": {
                         "description": "Job found",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/types.JobResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "annotations": {
-                                            "$ref": "#/definitions/types.Annotations"
-                                        },
-                                        "logs": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/types.Log"
-                                            }
-                                        },
-                                        "transaction": {
-                                            "$ref": "#/definitions/types.ETHTransaction"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/types.JobResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Job not found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Job in invalid state for the given status update",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     }
                 }
@@ -378,13 +327,13 @@
                     "404": {
                         "description": "Job not found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     }
                 }
@@ -411,29 +360,14 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "allOf": [
-                                    {
-                                        "$ref": "#/definitions/types.ScheduleResponse"
-                                    },
-                                    {
-                                        "type": "object",
-                                        "properties": {
-                                            "jobs": {
-                                                "type": "array",
-                                                "items": {
-                                                    "$ref": "#/definitions/types.JobResponse"
-                                                }
-                                            }
-                                        }
-                                    }
-                                ]
+                                "$ref": "#/definitions/types.ScheduleResponse"
                             }
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     }
                 }
@@ -491,19 +425,19 @@
                     "400": {
                         "description": "Invalid request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "422": {
                         "description": "Unprocessable parameters were sent",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     }
                 }
@@ -537,34 +471,19 @@
                     "200": {
                         "description": "Schedule found",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/types.ScheduleResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "jobs": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/types.JobResponse"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/types.ScheduleResponse"
                         }
                     },
                     "404": {
                         "description": "Schedule not found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     }
                 }
@@ -673,7 +592,19 @@
                                     "type": "object",
                                     "properties": {
                                         "params": {
-                                            "$ref": "#/definitions/types.DeployContractParams"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/types.DeployContractParams"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "retryPolicy": {
+                                                            "$ref": "#/definitions/types.GasPriceRetryParams"
+                                                        }
+                                                    }
+                                                }
+                                            ]
                                         }
                                     }
                                 }
@@ -706,25 +637,25 @@
                     "400": {
                         "description": "Invalid request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Already existing transaction",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "422": {
                         "description": "Unprocessable parameters were sent",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     }
                 }
@@ -763,7 +694,19 @@
                                     "type": "object",
                                     "properties": {
                                         "params": {
-                                            "$ref": "#/definitions/types.TransactionParams"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/types.TransactionParams"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "retryPolicy": {
+                                                            "$ref": "#/definitions/types.GasPriceRetryParams"
+                                                        }
+                                                    }
+                                                }
+                                            ]
                                         }
                                     }
                                 }
@@ -796,25 +739,25 @@
                     "400": {
                         "description": "Invalid request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Already existing transaction",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "422": {
                         "description": "Unprocessable parameters were sent",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     }
                 }
@@ -853,7 +796,19 @@
                                     "type": "object",
                                     "properties": {
                                         "params": {
-                                            "$ref": "#/definitions/types.RawTransactionParams"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/types.RawTransactionParams"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "retryPolicy": {
+                                                            "$ref": "#/definitions/types.IntervalRetryParams"
+                                                        }
+                                                    }
+                                                }
+                                            ]
                                         }
                                     }
                                 }
@@ -886,25 +841,25 @@
                     "400": {
                         "description": "Invalid request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Already existing transaction",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "422": {
                         "description": "Unprocessable parameters were sent",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     }
                 }
@@ -943,7 +898,19 @@
                                     "type": "object",
                                     "properties": {
                                         "params": {
-                                            "$ref": "#/definitions/types.TransferParams"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/types.TransferParams"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "retryPolicy": {
+                                                            "$ref": "#/definitions/types.GasPriceRetryParams"
+                                                        }
+                                                    }
+                                                }
+                                            ]
                                         }
                                     }
                                 }
@@ -976,25 +943,25 @@
                     "400": {
                         "description": "Invalid request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Already existing transaction",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "422": {
                         "description": "Unprocessable parameters were sent",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     }
                 }
@@ -1049,13 +1016,13 @@
                     "404": {
                         "description": "Transaction request not found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httputil.ErrorResponse"
                         }
                     }
                 }
@@ -1087,8 +1054,9 @@
                     "type": "string",
                     "example": "very-high"
                 },
-                "retry": {
-                    "type": "GasPriceRetryParams"
+                "retryPolicy": {
+                    "type": "object",
+                    "$ref": "#/definitions/types.GasPriceRetryParams"
                 }
             }
         },
@@ -1172,8 +1140,31 @@
                     "type": "string",
                     "example": "very-high"
                 },
-                "retry": {
-                    "type": "GasPriceRetryParams"
+                "privacyGroupId": {
+                    "type": "string",
+                    "example": "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                },
+                "privateFor": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
+                        "B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                    ]
+                },
+                "privateFrom": {
+                    "type": "string",
+                    "example": "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                },
+                "protocol": {
+                    "type": "string",
+                    "example": "Tessera"
+                },
+                "retryPolicy": {
+                    "type": "object",
+                    "$ref": "#/definitions/types.GasPriceRetryParams"
                 },
                 "value": {
                     "type": "string",
@@ -1184,9 +1175,20 @@
         "types.DeployContractRequest": {
             "type": "object",
             "required": [
+                "chain",
                 "params"
             ],
             "properties": {
+                "chain": {
+                    "type": "string",
+                    "example": "myChain"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "params": {
                     "type": "object",
                     "$ref": "#/definitions/types.DeployContractParams"
@@ -1297,6 +1299,28 @@
                     "type": "string",
                     "example": "1"
                 },
+                "privacyGroupId": {
+                    "type": "string",
+                    "example": "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                },
+                "privateFor": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
+                        "B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                    ]
+                },
+                "privateFrom": {
+                    "type": "string",
+                    "example": "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                },
+                "protocol": {
+                    "type": "string",
+                    "example": "Tessera"
+                },
                 "raw": {
                     "type": "string",
                     "example": "0xfe378324abcde723"
@@ -1308,6 +1332,36 @@
                 "value": {
                     "type": "string",
                     "example": "71500000 (wei)"
+                }
+            }
+        },
+        "types.GasPriceRetryParams": {
+            "type": "object",
+            "properties": {
+                "gasPriceIncrement": {
+                    "type": "number",
+                    "example": 1.05
+                },
+                "gasPriceIncrementLevel": {
+                    "type": "string",
+                    "example": "medium"
+                },
+                "gasPriceLimit": {
+                    "type": "number",
+                    "example": 1.2
+                },
+                "interval": {
+                    "type": "string",
+                    "example": "2m"
+                }
+            }
+        },
+        "types.IntervalRetryParams": {
+            "type": "object",
+            "properties": {
+                "interval": {
+                    "type": "string",
+                    "example": "2m"
                 }
             }
         },
@@ -1387,17 +1441,29 @@
                     "type": "string",
                     "example": "0xfe378324abcde723..."
                 },
-                "retry": {
-                    "type": "BaseRetryParams"
+                "retryPolicy": {
+                    "type": "object",
+                    "$ref": "#/definitions/types.IntervalRetryParams"
                 }
             }
         },
         "types.RawTransactionRequest": {
             "type": "object",
             "required": [
+                "chain",
                 "params"
             ],
             "properties": {
+                "chain": {
+                    "type": "string",
+                    "example": "myChain"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "params": {
                     "type": "object",
                     "$ref": "#/definitions/types.RawTransactionParams"
@@ -1430,9 +1496,20 @@
         "types.SendTransactionRequest": {
             "type": "object",
             "required": [
+                "chain",
                 "params"
             ],
             "properties": {
+                "chain": {
+                    "type": "string",
+                    "example": "myChain"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "params": {
                     "type": "object",
                     "$ref": "#/definitions/types.TransactionParams"
@@ -1476,8 +1553,31 @@
                     "type": "string",
                     "example": "very-high"
                 },
-                "retry": {
-                    "type": "GasPriceRetryParams"
+                "privacyGroupId": {
+                    "type": "string",
+                    "example": "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                },
+                "privateFor": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
+                        "B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                    ]
+                },
+                "privateFrom": {
+                    "type": "string",
+                    "example": "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                },
+                "protocol": {
+                    "type": "string",
+                    "example": "Tessera"
+                },
+                "retryPolicy": {
+                    "type": "object",
+                    "$ref": "#/definitions/types.GasPriceRetryParams"
                 },
                 "to": {
                     "type": "string",
@@ -1543,7 +1643,8 @@
                     "example": "very-high"
                 },
                 "retry": {
-                    "type": "GasPriceRetryParams"
+                    "type": "object",
+                    "$ref": "#/definitions/types.GasPriceRetryParams"
                 },
                 "to": {
                     "type": "string",
@@ -1558,9 +1659,20 @@
         "types.TransferRequest": {
             "type": "object",
             "required": [
+                "chain",
                 "params"
             ],
             "properties": {
+                "chain": {
+                    "type": "string",
+                    "example": "myChain"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "params": {
                     "type": "object",
                     "$ref": "#/definitions/types.TransferParams"

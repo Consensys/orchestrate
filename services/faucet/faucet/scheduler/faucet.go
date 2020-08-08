@@ -54,12 +54,11 @@ func (f *Faucet) Credit(ctx context.Context, r *types.Request) (*big.Int, error)
 	// If we have a chainName, we are funding an account generated in the signer
 	if r.ChainName != "" {
 		transferRequest := &types2.TransferRequest{
-			BaseTransactionRequest: types2.BaseTransactionRequest{
-				ChainName: r.ChainName,
-				Labels: map[string]string{
-					"id":            r.ChildTxID,
-					"parentJobUUID": r.ParentTxID,
-				}},
+			ChainName: r.ChainName,
+			Labels: map[string]string{
+				"id":            r.ChildTxID,
+				"parentJobUUID": r.ParentTxID,
+			},
 			Params: types2.TransferParams{
 				Value: faucet.Amount.String(),
 				From:  faucet.Creditor.String(),

@@ -16,14 +16,17 @@ func FormatSendTxRequest(txRequest *types.SendTransactionRequest, idempotencyKey
 		ChainName:      txRequest.ChainName,
 		Labels:         txRequest.Labels,
 		Params: &types.ETHTransactionParams{
-			From:                     txRequest.Params.From,
-			To:                       txRequest.Params.To,
-			Value:                    txRequest.Params.Value,
-			GasPrice:                 txRequest.Params.GasPrice,
-			Gas:                      txRequest.Params.Gas,
-			MethodSignature:          txRequest.Params.MethodSignature,
-			Args:                     txRequest.Params.Args,
-			PrivateTransactionParams: txRequest.Params.PrivateTransactionParams,
+			From:            txRequest.Params.From,
+			To:              txRequest.Params.To,
+			Value:           txRequest.Params.Value,
+			GasPrice:        txRequest.Params.GasPrice,
+			Gas:             txRequest.Params.Gas,
+			MethodSignature: txRequest.Params.MethodSignature,
+			Args:            txRequest.Params.Args,
+			Protocol:        txRequest.Params.Protocol,
+			PrivateFrom:     txRequest.Params.PrivateFrom,
+			PrivateFor:      txRequest.Params.PrivateFor,
+			PrivacyGroupID:  txRequest.Params.PrivacyGroupID,
 		},
 		Annotations: &types.Annotations{
 			OneTimeKey: txRequest.Params.OneTimeKey,
@@ -39,14 +42,17 @@ func FormatDeployContractRequest(txRequest *types.DeployContractRequest, idempot
 		ChainName:      txRequest.ChainName,
 		Labels:         txRequest.Labels,
 		Params: &types.ETHTransactionParams{
-			From:                     txRequest.Params.From,
-			Value:                    txRequest.Params.Value,
-			GasPrice:                 txRequest.Params.GasPrice,
-			Gas:                      txRequest.Params.Gas,
-			Args:                     txRequest.Params.Args,
-			ContractName:             txRequest.Params.ContractName,
-			ContractTag:              txRequest.Params.ContractTag,
-			PrivateTransactionParams: txRequest.Params.PrivateTransactionParams,
+			From:           txRequest.Params.From,
+			Value:          txRequest.Params.Value,
+			GasPrice:       txRequest.Params.GasPrice,
+			Gas:            txRequest.Params.Gas,
+			Args:           txRequest.Params.Args,
+			ContractName:   txRequest.Params.ContractName,
+			ContractTag:    txRequest.Params.ContractTag,
+			Protocol:       txRequest.Params.Protocol,
+			PrivateFrom:    txRequest.Params.PrivateFrom,
+			PrivateFor:     txRequest.Params.PrivateFor,
+			PrivacyGroupID: txRequest.Params.PrivacyGroupID,
 		},
 		Annotations: &types.Annotations{
 			OneTimeKey: txRequest.Params.OneTimeKey,
@@ -59,7 +65,7 @@ func FormatDeployContractRequest(txRequest *types.DeployContractRequest, idempot
 func FormatSendRawRequest(txRequest *types.RawTransactionRequest, idempotencyKey string) *entities.TxRequest {
 	var retry *types.GasPriceRetryParams
 	if r := txRequest.Params.Retry; r != nil {
-		retry = &types.GasPriceRetryParams{BaseRetryParams: types.BaseRetryParams{Interval: r.Interval}}
+		retry = &types.GasPriceRetryParams{Interval: r.Interval}
 	}
 	return &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,

@@ -8,9 +8,7 @@ import (
 
 func FakeSendTransactionRequest() *types.SendTransactionRequest {
 	return &types.SendTransactionRequest{
-		BaseTransactionRequest: types.BaseTransactionRequest{
-			ChainName: "chainName",
-		},
+		ChainName: "chainName",
 		Params: types.TransactionParams{
 			From:            "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
 			MethodSignature: "transfer()",
@@ -21,9 +19,7 @@ func FakeSendTransactionRequest() *types.SendTransactionRequest {
 
 func FakeSendRawTransactionRequest() *types.RawTransactionRequest {
 	return &types.RawTransactionRequest{
-		BaseTransactionRequest: types.BaseTransactionRequest{
-			ChainName: "chainName",
-		},
+		ChainName: "chainName",
 		Params: types.RawTransactionParams{
 			Raw: "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
 		},
@@ -32,9 +28,7 @@ func FakeSendRawTransactionRequest() *types.RawTransactionRequest {
 
 func FakeSendTransferTransactionRequest() *types.TransferRequest {
 	return &types.TransferRequest{
-		BaseTransactionRequest: types.BaseTransactionRequest{
-			ChainName: "chainName",
-		},
+		ChainName: "chainName",
 		Params: types.TransferParams{
 			From:  "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
 			Value: "1000000000000000000",
@@ -45,9 +39,7 @@ func FakeSendTransferTransactionRequest() *types.TransferRequest {
 
 func FakeDeployContractRequest() *types.DeployContractRequest {
 	return &types.DeployContractRequest{
-		BaseTransactionRequest: types.BaseTransactionRequest{
-			ChainName: "chainName",
-		},
+		ChainName: "chainName",
 		Params: types.DeployContractParams{
 			From:         "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
 			ContractName: "MyContract",
@@ -58,36 +50,28 @@ func FakeDeployContractRequest() *types.DeployContractRequest {
 
 func FakeSendTesseraRequest() *types.SendTransactionRequest {
 	return &types.SendTransactionRequest{
-		BaseTransactionRequest: types.BaseTransactionRequest{
-			ChainName: "chainName",
-		},
+		ChainName: "chainName",
 		Params: types.TransactionParams{
 			From:            "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
 			MethodSignature: "transfer()",
 			To:              "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
-			PrivateTransactionParams: types.PrivateTransactionParams{
-				Protocol:    utils.TesseraChainType,
-				PrivateFrom: "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
-				PrivateFor:  []string{"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="},
-			},
+			Protocol:        utils.TesseraChainType,
+			PrivateFrom:     "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
+			PrivateFor:      []string{"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="},
 		},
 	}
 }
 
 func FakeSendOrionRequest() *types.SendTransactionRequest {
 	return &types.SendTransactionRequest{
-		BaseTransactionRequest: types.BaseTransactionRequest{
-			ChainName: "chainName",
-		},
+		ChainName: "chainName",
 		Params: types.TransactionParams{
 			From:            "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
 			MethodSignature: "transfer()",
 			To:              "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
-			PrivateTransactionParams: types.PrivateTransactionParams{
-				Protocol:       utils.OrionChainType,
-				PrivateFrom:    "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
-				PrivacyGroupID: "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
-			},
+			Protocol:        utils.OrionChainType,
+			PrivateFrom:     "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
+			PrivacyGroupID:  "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
 		},
 	}
 }

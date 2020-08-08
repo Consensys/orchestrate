@@ -132,6 +132,19 @@ func isJobStatus(fl validator.FieldLevel) bool {
 	return true
 }
 
+func isGasIncrementLevel(fl validator.FieldLevel) bool {
+	if fl.Field().String() != "" {
+		switch fl.Field().String() {
+		case GasIncrementNone, GasIncrementVeryLow, GasIncrementLow, GasIncrementMedium, GasIncrementHigh, GasIncrementVeryHigh:
+			return true
+		default:
+			return false
+		}
+	}
+
+	return true
+}
+
 func init() {
 	if validate != nil {
 		return
@@ -147,6 +160,7 @@ func init() {
 	_ = validate.RegisterValidation("isPriority", isPriority)
 	_ = validate.RegisterValidation("isJobType", isJobType)
 	_ = validate.RegisterValidation("isJobStatus", isJobStatus)
+	_ = validate.RegisterValidation("isGasIncrementLevel", isGasIncrementLevel)
 }
 
 func GetValidator() *validator.Validate {

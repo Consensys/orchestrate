@@ -17,34 +17,34 @@ type ETHTransactionParams struct {
 	ContractName    string        `json:"contractName,omitempty" example:"MyContract"`
 	ContractTag     string        `json:"contractTag,omitempty" example:"v1.1.0"`
 	Nonce           string        `json:"nonce,omitempty" validate:"omitempty,numeric" example:"1"`
-	PrivateTransactionParams
+	Protocol        string        `json:"protocol,omitempty" validate:"omitempty,isPrivateTxManagerType" example:"Tessera"`
+	PrivateFrom     string        `json:"privateFrom,omitempty" validate:"omitempty,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
+	PrivateFor      []string      `json:"privateFor,omitempty" validate:"omitempty,min=1,unique,dive,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=,B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
+	PrivacyGroupID  string        `json:"privacyGroupId,omitempty" validate:"omitempty,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
 }
 
-type PrivateTransactionParams struct {
-	Protocol       string   `json:"protocol,omitempty" validate:"omitempty,isPrivateTxManagerType" example:"Tessera"`
-	PrivateFrom    string   `json:"privateFrom,omitempty" validate:"omitempty,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
-	PrivateFor     []string `json:"privateFor,omitempty" validate:"omitempty,min=1,unique,dive,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=,B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
-	PrivacyGroupID string   `json:"privacyGroupId,omitempty" validate:"omitempty,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
-}
-
-func (tx *PrivateTransactionParams) Validate() error {
-	if err := utils.GetValidator().Struct(tx); err != nil {
+func (params *ETHTransactionParams) Validate() error {
+	if err := utils.GetValidator().Struct(params); err != nil {
 		return err
 	}
 
-	if tx.Protocol == "" {
-		return nil
+	if params.PrivateFrom != "" {
+		return validatePrivateTxParams(params.Protocol, params.PrivacyGroupID, params.PrivateFor)
 	}
 
-	if tx.PrivateFrom == "" {
-		return errors.InvalidParameterError("fields 'privateFrom' cannot be empty")
+	return nil
+}
+
+func validatePrivateTxParams(protocol, privacyGroupID string, privateFor []string) error {
+	if protocol == "" {
+		return errors.InvalidParameterError("field 'protocol' cannot be empty")
 	}
 
-	if len(tx.PrivateFor) == 0 && tx.PrivacyGroupID == "" {
-		return errors.InvalidParameterError("fields 'privacyGroupId' and 'privateFor' cannot be both empty")
+	if privacyGroupID == "" && len(privateFor) == 0 {
+		return errors.InvalidParameterError("fields 'privacyGroupId' and 'privateFor' cannot both be empty")
 	}
 
-	if len(tx.PrivateFor) > 0 && tx.PrivacyGroupID != "" {
+	if len(privateFor) > 0 && privacyGroupID != "" {
 		return errors.InvalidParameterError("fields 'privacyGroupId' and 'privateFor' are mutually exclusive")
 	}
 

@@ -175,41 +175,6 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_send() {
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusBadRequest, rw.Code)
 	})
-
-	s.T().Run("should fail with 400 if request fails with InvalidParameterError for private txs", func(t *testing.T) {
-		rw := httptest.NewRecorder()
-		txRequest := testutils.FakeSendTesseraRequest()
-		txRequest.Params.PrivateFrom = ""
-		requestBytes, _ := json.Marshal(txRequest)
-
-		httpRequest := httptest.NewRequest(http.MethodPost, urlPath,
-			bytes.NewReader(requestBytes)).
-			WithContext(s.ctx)
-
-		s.router.ServeHTTP(rw, httpRequest)
-		assert.Equal(t, http.StatusBadRequest, rw.Code)
-	})
-
-	s.T().Run("should fail with Bad request if invalid format (retry)", func(t *testing.T) {
-		rw := httptest.NewRecorder()
-		txRequest := testutils.FakeSendTesseraRequest()
-		txRequest.Params.Retry = &types.GasPriceRetryParams{
-			BaseRetryParams: types.BaseRetryParams{
-				Interval: "1m",
-			},
-			GasPriceIncrementLevel: "low",
-			GasPriceIncrement:      1.1,
-			GasPriceLimit:          1.4,
-		}
-		requestBytes, _ := json.Marshal(txRequest)
-
-		httpRequest := httptest.NewRequest(http.MethodPost, urlPath,
-			bytes.NewReader(requestBytes)).
-			WithContext(s.ctx)
-
-		s.router.ServeHTTP(rw, httpRequest)
-		assert.Equal(t, http.StatusBadRequest, rw.Code)
-	})
 }
 
 func (s *transactionsControllerTestSuite) TestTransactionsController_deploy() {
@@ -261,39 +226,6 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_deploy() {
 
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodPost, urlPath, bytes.NewReader(requestBytes)).WithContext(s.ctx)
-
-		s.router.ServeHTTP(rw, httpRequest)
-		assert.Equal(t, http.StatusBadRequest, rw.Code)
-	})
-
-	s.T().Run("should fail with 400 if request fails with InvalidParameterError for private txs", func(t *testing.T) {
-		rw := httptest.NewRecorder()
-		txRequest := testutils.FakeDeployContractRequest()
-		txRequest.Params.PrivateFrom = "PrivateFrom"
-		requestBytes, _ := json.Marshal(txRequest)
-
-		httpRequest := httptest.NewRequest(http.MethodPost, urlPath, bytes.NewReader(requestBytes)).WithContext(s.ctx)
-
-		s.router.ServeHTTP(rw, httpRequest)
-		assert.Equal(t, http.StatusBadRequest, rw.Code)
-	})
-
-	s.T().Run("should fail with Bad request if invalid format (retry)", func(t *testing.T) {
-		rw := httptest.NewRecorder()
-		txRequest := testutils.FakeDeployContractRequest()
-		txRequest.Params.Retry = &types.GasPriceRetryParams{
-			BaseRetryParams: types.BaseRetryParams{
-				Interval: "1m",
-			},
-			GasPriceIncrementLevel: "low",
-			GasPriceIncrement:      1.1,
-			GasPriceLimit:          1.4,
-		}
-		requestBytes, _ := json.Marshal(txRequest)
-
-		httpRequest := httptest.NewRequest(http.MethodPost, urlPath,
-			bytes.NewReader(requestBytes)).
-			WithContext(s.ctx)
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusBadRequest, rw.Code)
@@ -359,20 +291,6 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_sendRaw() {
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusBadRequest, rw.Code)
 	})
-
-	s.T().Run("should fail with Bad request if invalid format (retry)", func(t *testing.T) {
-		txRequest := testutils.FakeSendRawTransactionRequest()
-		txRequest.Params.Retry = &types.BaseRetryParams{
-			Interval: "1Om",
-		}
-		requestBytes, _ := json.Marshal(txRequest)
-
-		rw := httptest.NewRecorder()
-		httpRequest := httptest.NewRequest(http.MethodPost, urlPath, bytes.NewReader(requestBytes)).WithContext(s.ctx)
-
-		s.router.ServeHTTP(rw, httpRequest)
-		assert.Equal(t, http.StatusBadRequest, rw.Code)
-	})
 }
 
 func (s *transactionsControllerTestSuite) TestTransactionsController_transfer() {
@@ -426,25 +344,6 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_transfer() 
 	s.T().Run("should fail with Bad request if invalid format", func(t *testing.T) {
 		txRequest := testutils.FakeSendTransferTransactionRequest()
 		txRequest.ChainName = ""
-		requestBytes, _ := json.Marshal(txRequest)
-
-		rw := httptest.NewRecorder()
-		httpRequest := httptest.NewRequest(http.MethodPost, urlPath, bytes.NewReader(requestBytes)).WithContext(s.ctx)
-
-		s.router.ServeHTTP(rw, httpRequest)
-		assert.Equal(t, http.StatusBadRequest, rw.Code)
-	})
-
-	s.T().Run("should fail with Bad request if invalid format (retry)", func(t *testing.T) {
-		txRequest := testutils.FakeSendTransferTransactionRequest()
-		txRequest.Params.Retry = &types.GasPriceRetryParams{
-			BaseRetryParams: types.BaseRetryParams{
-				Interval: "1m",
-			},
-			GasPriceIncrementLevel: "low",
-			GasPriceIncrement:      1.1,
-			GasPriceLimit:          1.4,
-		}
 		requestBytes, _ := json.Marshal(txRequest)
 
 		rw := httptest.NewRecorder()

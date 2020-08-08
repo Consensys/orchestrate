@@ -73,12 +73,7 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
 
-	// Step 2: Validation
-	err = uc.validator.ValidateFields(ctx, txRequest)
-	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
-	}
-
+	// Step 2: Generate request hash
 	requestHash, err := generateRequestHash(chainUUID, txRequest.Params)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)

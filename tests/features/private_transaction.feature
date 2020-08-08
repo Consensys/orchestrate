@@ -172,7 +172,7 @@ Feature: Private transactions
     Then the response code should be 400
     And Response should have the following fields
       | message                                                               |
-      | 42400@: fields 'privacyGroupId' and 'privateFor' cannot be both empty |
+      | 42400@: fields 'privacyGroupId' and 'privateFor' cannot both be empty |
 
   @quorum
   Scenario: Fail to deploy private ERC20 contract with not authorized chain

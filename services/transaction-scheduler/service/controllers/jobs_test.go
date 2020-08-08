@@ -127,7 +127,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_Create() {
 		jobRequest := testutils.FakeCreateJobRequest()
 		jobRequest.Annotations = &types.Annotations{
 			Retry: &types.GasPriceRetryParams{
-				BaseRetryParams:        types.BaseRetryParams{Interval: "1m"},
+				Interval:               "1m",
 				GasPriceIncrementLevel: "low",
 				GasPriceIncrement:      1.1,
 				GasPriceLimit:          1.4,
