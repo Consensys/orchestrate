@@ -20,9 +20,7 @@ import (
 )
 
 var rpcCachedMethods = map[string]bool{
-	"eth_getBlockByNumber":      true,
-	"eth_getBlockNumber":        true,
-	"eth_getTransactionReceipt": true,
+	"eth_getBlockByNumber": true,
 }
 
 func httpCacheRequest(req *http.Request) (c bool, k string, err error) {
