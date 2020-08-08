@@ -2,8 +2,10 @@ package chainregistry
 
 import (
 	"fmt"
+	"time"
 
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
+	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/dgraph-io/ristretto"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -16,6 +18,7 @@ import (
 
 func init() {
 	_ = viper.BindEnv(InitViperKey, initEnv)
+	_ = viper.BindEnv(ChainRegistryCacheViperKey, chainRegistryCacheEnv)
 	viper.SetDefault(InitViperKey, initDefault)
 }
 
@@ -26,9 +29,16 @@ var (
 	initEnv      = "CHAIN_REGISTRY_INIT"
 )
 
+var (
+	chainRegistryCacheFlag     = "chain-registry-cache"
+	ChainRegistryCacheViperKey = "chain-registry.cache"
+	chainRegistryCacheEnv      = "CHAIN_REGISTRY_CACHE"
+)
+
 type Config struct {
 	App              *app.Config
 	Cache            *ristretto.Config
+	ProxyCacheTTL    *time.Duration
 	ServersTransport *traefikstatic.ServersTransport
 	Store            *store.Config
 	EnvChains        []string // Chains defined in ENV
@@ -36,22 +46,27 @@ type Config struct {
 }
 
 // Init register flag for the Chain Registry to define initialization state
-func InitialConfig(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Initialize Chain Registry
+func cmdFlags(f *pflag.FlagSet) {
+	initDesc := fmt.Sprintf(`Initialize Chain Registry
 Environment variable: %q`, initEnv)
-	f.StringSlice(initFlag, initDefault, desc)
+	f.StringSlice(initFlag, initDefault, initDesc)
 	_ = viper.BindPFlag(InitViperKey, f.Lookup(initFlag))
+
+	cacheDesc := fmt.Sprintf(`Chain Registry Proxy Cache TTL in miliseconds(Disabled by default)
+Environment variable: %q`, chainRegistryCacheEnv)
+	f.Int(chainRegistryCacheFlag, 0, cacheDesc)
+	_ = viper.BindPFlag(ChainRegistryCacheViperKey, f.Lookup(chainRegistryCacheFlag))
 }
 
 func Flags(f *pflag.FlagSet) {
-	InitialConfig(f)
+	cmdFlags(f)
 	http.Flags(f)
 	store.Flags(f)
 	configwatcher.Flags(f)
 }
 
 func NewConfig(vipr *viper.Viper) *Config {
-	return &Config{
+	cfg := &Config{
 		App:   app.NewConfig(vipr),
 		Store: store.NewConfig(vipr),
 		Cache: &ristretto.Config{
@@ -66,4 +81,13 @@ func NewConfig(vipr *viper.Viper) *Config {
 		EnvChains:    viper.GetStringSlice(InitViperKey),
 		Multitenancy: viper.GetBool(multitenancy.EnabledViperKey),
 	}
+
+	cacheStr := viper.GetInt(ChainRegistryCacheViperKey)
+	if cacheStr != 0 {
+		d := time.Duration(cacheStr) * time.Millisecond
+		cfg.ProxyCacheTTL = &d
+		log.WithoutContext().Info("chain registry proxy cache is enabled.")
+	}
+
+	return cfg
 }

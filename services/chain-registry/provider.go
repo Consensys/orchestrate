@@ -27,10 +27,11 @@ const (
 func NewProvider(
 	getChains usecases.GetChains,
 	refresh time.Duration,
+	proxyCacheTTL *time.Duration,
 ) provider.Provider {
 	prvdr := aggregator.New()
 	prvdr.AddProvider(NewInternalProvider())
-	prvdr.AddProvider(NewChainsProxyProvider(getChains, refresh))
+	prvdr.AddProvider(NewChainsProxyProvider(getChains, refresh, proxyCacheTTL))
 	return prvdr
 }
 
@@ -38,14 +39,14 @@ func NewInternalProvider() provider.Provider {
 	return static.New(dynamic.NewMessage(InternalProviderName, NewInternalConfig()))
 }
 
-func NewChainsProxyProvider(getChains usecases.GetChains, refresh time.Duration) provider.Provider {
+func NewChainsProxyProvider(getChains usecases.GetChains, refresh time.Duration, proxyCacheTTL *time.Duration) provider.Provider {
 	poller := func(ctx context.Context) (provider.Message, error) {
 		chains, err := getChains.Execute(ctx, []string{multitenancy.Wildcard}, nil)
 		if err != nil {
 			return nil, err
 		}
 
-		return dynamic.NewMessage(ChainsProxyProvider, NewProxyConfig(chains)), nil
+		return dynamic.NewMessage(ChainsProxyProvider, NewProxyConfig(chains, proxyCacheTTL)), nil
 	}
 	return poll.New(poller, refresh)
 }
@@ -99,7 +100,7 @@ func NewInternalConfig() *dynamic.Configuration {
 	return dynamicCfg
 }
 
-func NewProxyConfig(chains []*models.Chain) *dynamic.Configuration {
+func NewProxyConfig(chains []*models.Chain, proxyCacheTTL *time.Duration) *dynamic.Configuration {
 	cfg := dynamic.NewConfig()
 
 	for _, chain := range chains {
@@ -109,7 +110,6 @@ func NewProxyConfig(chains []*models.Chain) *dynamic.Configuration {
 			"auth@multitenancy",
 			multitenancyMid,
 			"strip-path@internal",
-			"ratelimit@internal",
 		}
 
 		cfg.HTTP.Middlewares[multitenancyMid] = &dynamic.Middleware{
@@ -117,6 +117,18 @@ func NewProxyConfig(chains []*models.Chain) *dynamic.Configuration {
 				Tenant: chain.TenantID,
 			},
 		}
+
+		if proxyCacheTTL != nil {
+			middlewares = append(middlewares, "http-cache")
+			cfg.HTTP.Middlewares["http-cache"] = &dynamic.Middleware{
+				HTTPCache: &dynamic.HTTPCache{
+					TTL:       *proxyCacheTTL,
+					KeySuffix: httpCacheGenerateChainKey(chain),
+				},
+			}
+		}
+
+		middlewares = append(middlewares, "ratelimit@internal")
 
 		appendChainServices(cfg, chain, middlewares)
 		appendTesseraPrivateTxServices(cfg, chain, middlewares)

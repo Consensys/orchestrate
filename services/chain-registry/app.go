@@ -12,6 +12,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/proxy"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/httpcache"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/ratelimit"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/chain-registry/use-cases"
 	ctrl "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/service/controllers"
@@ -65,14 +66,22 @@ func New(
 		proxyBuilder,
 	)
 
-	// RateLimit Middleware
 	cache, err := ristretto.NewCache(cfg.Cache)
 	if err != nil {
 		return nil, err
 	}
+
+	// RateLimit Middleware
 	rateLimitOpt := app.MiddlewareOpt(
 		reflect.TypeOf(&dynamic.RateLimit{}),
 		ratelimit.NewBuilder(ratelimit.NewManager(cache)),
+	)
+
+	// // @TODO: allow user to enable or disable cache, set ttl duration
+	// // HTTPCache Middleware
+	httpCacheOpt := app.MiddlewareOpt(
+		reflect.TypeOf(&dynamic.HTTPCache{}),
+		httpcache.NewBuilder(cache, httpCacheRequest),
 	)
 
 	// Create appli to expose metrics
@@ -84,9 +93,10 @@ func New(
 		rateLimitOpt,
 		app.SwaggerOpt("./public/swagger-specs/services/chain-registry/swagger.json", "base@logger-base"),
 		chainHandlerOpt,
+		httpCacheOpt,
 		reverseProxyOpt,
 		app.ProviderOpt(
-			NewProvider(usecases.NewGetChains(dataAgents.Chain), time.Second),
+			NewProvider(usecases.NewGetChains(dataAgents.Chain), time.Second, cfg.ProxyCacheTTL),
 		),
 	)
 	if err != nil {

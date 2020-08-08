@@ -326,8 +326,7 @@
                     "type": "string"
                 },
                 "currentBlock": {
-                    "type": "string",
-                    "example": "0"
+                    "type": "integer"
                 },
                 "depth": {
                     "type": "integer"

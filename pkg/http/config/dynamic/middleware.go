@@ -20,6 +20,7 @@ type Middleware struct {
 	LoadBalancer *LoadBalancer `json:"loadBalancer,omitempty" toml:"loadBalancer,omitempty" yaml:"loadBalancer,omitempty"`
 	RateLimit    *RateLimit    `json:"rateLimit,omitempty" toml:"rateLimit,omitempty" yaml:"rateLimit,omitempty"`
 	HTTPTrace    *HTTPTrace    `json:"httpTrace,omitempty" toml:"httpTrace,omitempty" yaml:"httpTrace,omitempty"`
+	HTTPCache    *HTTPCache    `json:"httpCache,omitempty" toml:"httpCache,omitempty" yaml:"httpCache,omitempty"`
 	Mock         *Mock         `json:"mock,omitempty" toml:"mock,omitempty" yaml:"mock,omitempty"`
 	AccessLog    *AccessLog    `json:"accessLog,omitempty" toml:"accessLog,omitempty" yaml:"accessLog,omitempty"`
 }
@@ -155,6 +156,13 @@ type RateLimit struct {
 	DefaultDelay time.Duration `json:"defaultDelay,omitempty" toml:"defaultDelay,omitempty" yaml:"defaultDelay,omitempty" label:"-"`
 	Cooldown     time.Duration `json:"cooldown,omitempty" toml:"cooldown,omitempty" yaml:"cooldown,omitempty" label:"-"`
 	Limits       []float64     `json:"limits,omitempty" toml:"limits,omitempty" yaml:"limits,omitempty" label:"-"`
+}
+
+// +k8s:deepcopy-gen=true
+
+type HTTPCache struct {
+	TTL       time.Duration `json:"ttl,omitempty" toml:"ttl,omitempty" yaml:"ttl,omitempty" label:"-"`
+	KeySuffix string        `json:"key_suffix,omitempty" toml:"key_suffix,omitempty" yaml:"key_suffix,omitempty" label:"-"`
 }
 
 // +k8s:deepcopy-gen=true

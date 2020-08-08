@@ -35,7 +35,7 @@ type PatchRequest struct {
 
 type ListenerPatchRequest struct {
 	Depth             *uint64 `json:"depth,omitempty"`
-	CurrentBlock      *uint64 `json:"currentBlock,string,omitempty"`
+	CurrentBlock      *uint64 `json:"currentBlock,omitempty"`
 	BackOffDuration   *string `json:"backOffDuration,omitempty" validate:"omitempty,isDuration"`
 	ExternalTxEnabled *bool   `json:"externalTxEnabled,omitempty"`
 }

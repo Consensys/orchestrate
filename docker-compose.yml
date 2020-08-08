@@ -89,6 +89,7 @@ services:
       <<: *default-variables
       <<: *chain-registry-common
       CHAIN_REGISTRY_INIT: ${CHAIN_REGISTRY_INIT-}
+      CHAIN_REGISTRY_CACHE: ${CHAIN_REGISTRY_CACHE-1000}
     depends_on:
       - chain-registry-migration
     command: chain-registry run
@@ -207,7 +208,7 @@ services:
       CUCUMBER_OUTPUTPATH: "/report/output/report.json"
       CUCUMBER_PATHS: "/features"
       CUCUMBER_FORMAT: "cucumber"
-      CUCUMBER_CONCURRENCY: ${CUCUMBER_CONCURRENCY-10}
+      CUCUMBER_CONCURRENCY: ${CUCUMBER_CONCURRENCY-1}
       CUCUMBER_ALIAS: ${CUCUMBER_ALIAS-}
       AUTH_JWT_PRIVATE_KEY: ${AUTH_JWT_PRIVATE_KEY-}
 #      CUCUMBER_STEPS_TIMEOUT: ${CUCUMBER_STEPS_TIMEOUT-500}

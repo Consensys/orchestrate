@@ -25,7 +25,7 @@ All notable changes to this project will be documented in this file.
 * Update internal logger to follow [Elastic Common Schema](https://www.elastic.co/guide/en/ecs/current/index.html) when using logs in JSON format
 
 ### ⚠ BREAKING CHANGES
-* `envelope-store` has been removed. Users should new push 
+* `envelope-store` has been removed. Users should not push anymore 
 
 ## v2.2.0 (2020-07-15)
 

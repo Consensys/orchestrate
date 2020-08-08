@@ -189,6 +189,22 @@ func (sc *ScenarioContext) responseShouldHaveFields(table *gherkin.PickleStepArg
 	return nil
 }
 
+func (sc *ScenarioContext) responseShouldHaveHeaders(table *gherkin.PickleStepArgument_PickleTable) (err error) {
+	header := table.Rows[0]
+	rowResponse := table.Rows[1]
+
+	headers := sc.httpResponse.Header
+	for c, col := range rowResponse.Cells {
+		headerName := header.Cells[c].Value
+		field := headers.Get(headerName)
+		if err := utils.CmpField(reflect.ValueOf(field), col.Value); err != nil {
+			return fmt.Errorf("(%d/%d) %v %v", c+1, len(rowResponse.Cells), headerName, err)
+		}
+	}
+
+	return nil
+}
+
 func (sc *ScenarioContext) iStoreTheUUIDAs(alias string) (err error) {
 	body, err := ioutil.ReadAll(sc.httpResponse.Body)
 	if err != nil {
@@ -255,6 +271,7 @@ func initHTTP(s *godog.ScenarioContext, sc *ScenarioContext) {
 	s.Step(`^the response code should be (\d+)$`, sc.theResponseCodeShouldBe)
 	s.Step(`^the response should match json:$`, sc.theResponseShouldMatchJSON)
 	s.Step(`^Response should have the following fields$`, sc.preProcessTableStep(sc.responseShouldHaveFields))
+	s.Step(`^Response should have the following headers$`, sc.preProcessTableStep(sc.responseShouldHaveHeaders))
 	s.Step(`^I set the headers$`, sc.preProcessTableStep(sc.iSetTheHeaders))
 	s.Step(`^I sleep "([^"]*)"$`, sc.iSleep)
 }
