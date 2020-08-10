@@ -36,7 +36,7 @@ func NewUpdateJobUseCase(db store.DB) UpdateJobUseCase {
 // Execute validates and creates a new transaction job
 func (uc *updateJobUseCase) Execute(ctx context.Context, job *types.Job, nextStatus, logMessage string, tenants []string) (*types.Job, error) {
 	logger := log.WithContext(ctx).WithField("tenants", tenants).WithField("job_uuid", job.UUID)
-	logger.Debug("update job")
+	logger.Debug("updating job entity")
 
 	jobModel, err := uc.db.Job().FindOneByUUID(ctx, job.UUID, tenants)
 	if err != nil {

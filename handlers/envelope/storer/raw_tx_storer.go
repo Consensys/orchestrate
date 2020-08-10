@@ -34,8 +34,7 @@ func RawTxStore(txSchedulerClient client.TransactionSchedulerClient) engine.Hand
 					PrivacyGroupID: txctx.Envelope.GetPrivacyGroupID(),
 				},
 				Status: utils.StatusPending,
-			},
-		)
+			})
 
 		if err != nil {
 			e := txctx.AbortWithError(err).ExtendComponent(component)
@@ -60,8 +59,8 @@ func RawTxStore(txSchedulerClient client.TransactionSchedulerClient) engine.Hand
 						txctx.Envelope.GetFromString(),
 						txctx.Envelope.Error(),
 					),
-				},
-			)
+				})
+
 			if updateErr != nil {
 				e := errors.FromError(updateErr).ExtendComponent(component)
 				txctx.Logger.WithError(e).Errorf("transaction scheduler: failed to set transaction status for recovering")
@@ -83,8 +82,8 @@ func RawTxStore(txSchedulerClient client.TransactionSchedulerClient) engine.Hand
 					},
 					Status:  utils.StatusWarning,
 					Message: errMessage,
-				},
-			)
+				})
+
 			if updateErr != nil {
 				e := errors.FromError(updateErr).ExtendComponent(component)
 				txctx.Logger.WithError(e).Errorf("transaction scheduler: failed to set transaction status for recovering")

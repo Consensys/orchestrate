@@ -20,7 +20,7 @@ Feature: Send contract transactions
       | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
       | account2 | {{random.uuid}} | Bearer {{tenant1.token}} |
     Then I track the following envelopes
-      | ID               |
+      | ID                  |
       | faucet-{{account1}} |
       | faucet-{{account2}} |
     Given I set the headers
@@ -385,8 +385,8 @@ Feature: Send contract transactions
       """
     Then the response code should be 422
     And Response should have the following fields
-      | message                                                    |
-      | 42400@use-cases.send-contract-tx: invalid method signature |
+      | code   | message |
+      | 271360 | ~       |
 
   Scenario: Fail to send contract transactions with invalid methodSignature
     Given I register the following alias

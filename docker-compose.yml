@@ -89,7 +89,7 @@ services:
       <<: *default-variables
       <<: *chain-registry-common
       CHAIN_REGISTRY_INIT: ${CHAIN_REGISTRY_INIT-}
-      CHAIN_REGISTRY_CACHE: ${CHAIN_REGISTRY_CACHE-1000}
+      CHAIN_REGISTRY_CACHE: ${CHAIN_REGISTRY_CACHE-}
     depends_on:
       - chain-registry-migration
     command: chain-registry run

@@ -164,7 +164,7 @@ func (params *DeployContractParams) Validate() error {
 	}
 
 	if params.OneTimeKey && params.From != "" {
-		return errors.InvalidParameterError("from account cannot be included when OneTimeKey is enabled")
+		return errors.InvalidParameterError("transaction from account and OneTimeKey annotation are mutually exclusive")
 	}
 
 	if params.PrivateFrom != "" {

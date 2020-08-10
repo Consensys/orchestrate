@@ -244,8 +244,8 @@ Feature: Deploy ERC20 contract
       """
     Then the response code should be 422
     And Response should have the following fields
-      | message                                                                        |
-      | 42400@use-cases.send-deploy-tx.transaction-validator: failed to fetch contract |
+      | code   | message |
+      | 271360 | ~       |
 
 
   Scenario: Fail to deploy ERC20 with missing contractName
@@ -276,5 +276,5 @@ Feature: Deploy ERC20 contract
       """
     Then the response code should be 400
     And Response should have the following fields
-      | message                                                                                                   |
-      | 42400@encoding.json: invalid body, with: field validation for 'ContractName' failed on the 'required' tag |
+      | code   | message |
+      | 271104 | ~       |

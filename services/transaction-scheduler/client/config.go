@@ -2,7 +2,9 @@ package client
 
 import (
 	"fmt"
+	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
@@ -28,6 +30,8 @@ const (
 	txSchedulerMetricsURLEnv      = "TRANSACTION_SCHEDULER_METRICS_URL"
 )
 
+var defaultClientBackOff = backoff.WithMaxRetries(backoff.NewConstantBackOff(time.Second), 0)
+
 // ChainRegistryURL register flag for the URL of the Chain Registry
 func URL(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`URL of the Transaction Scheduler HTTP endpoint. 
@@ -48,17 +52,27 @@ func Flags(f *pflag.FlagSet) {
 }
 
 type Config struct {
-	URL string
+	URL     string
+	backOff backoff.BackOff
 }
 
-func NewConfig(url string) *Config {
+func NewConfig(url string, backOff backoff.BackOff) *Config {
+	if backOff == nil {
+		backOff = defaultClientBackOff
+	}
 	return &Config{
-		URL: url,
+		URL:     url,
+		backOff: backOff,
 	}
 }
 
-func NewConfigFromViper(vipr *viper.Viper) *Config {
+func NewConfigFromViper(vipr *viper.Viper, backOff backoff.BackOff) *Config {
+	if backOff == nil {
+		backOff = defaultClientBackOff
+	}
+
 	return &Config{
-		URL: vipr.GetString(TxSchedulerURLViperKey),
+		URL:     vipr.GetString(TxSchedulerURLViperKey),
+		backOff: backOff,
 	}
 }

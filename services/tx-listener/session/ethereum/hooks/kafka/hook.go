@@ -107,8 +107,8 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 			&pkgtypes.UpdateJobRequest{
 				Status:  utils.StatusMined,
 				Message: fmt.Sprintf("Transaction mined in block %v", block.NumberU64()),
-			},
-		)
+			})
+
 		if err != nil {
 			log.FromContext(blockLogCtx).WithError(err).Warnf("failed to update status of %s to MINED", txResponse.Id)
 		}

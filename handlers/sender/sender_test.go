@@ -132,8 +132,7 @@ func TestSender_TesseraTx(t *testing.T) {
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
 			&types.UpdateJobRequest{
 				Status: utils.StatusPending,
-			}),
-		)
+			}))
 
 		sender(txctx)
 	})
@@ -147,8 +146,7 @@ func TestSender_TesseraTx(t *testing.T) {
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
 			&types.UpdateJobRequest{
 				Status: utils.StatusPending,
-			}),
-		)
+			}))
 
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(&types.UpdateJobRequest{
 			Status: utils.StatusRecovering,

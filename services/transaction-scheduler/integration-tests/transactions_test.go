@@ -36,7 +36,7 @@ type txSchedulerTransactionTestSuite struct {
 }
 
 func (s *txSchedulerTransactionTestSuite) SetupSuite() {
-	conf := client.NewConfig(s.baseURL)
+	conf := client.NewConfig(s.baseURL, nil)
 	s.client = client.NewHTTPClient(http.NewClient(), conf)
 }
 
@@ -54,9 +54,8 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 		txRequest := testutils.FakeSendTransactionRequest()
 		txRequest.ChainName = ""
 
-		resp, err := s.client.SendContractTransaction(ctx, txRequest)
+		_, err := s.client.SendContractTransaction(ctx, txRequest)
 
-		assert.Nil(t, resp)
 		assert.True(t, errors.IsInvalidFormatError(err))
 	})
 
@@ -69,15 +68,14 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
-		txResponse, err := s.client.SendContractTransaction(rctx, txRequest)
+		_, err := s.client.SendContractTransaction(rctx, txRequest)
 		assert.NoError(t, err)
 
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
 		txRequest.Params.MethodSignature = "differentMethodSignature()"
-		txResponse, err = s.client.SendContractTransaction(rctx, txRequest)
-		assert.Nil(t, txResponse)
-		assert.True(t, errors.IsConflictedError(err))
+		_, err = s.client.SendContractTransaction(rctx, txRequest)
+		assert.True(t, errors.IsConstraintViolatedError(err))
 	})
 
 	s.T().Run("should fail with 422 if chains cannot be fetched", func(t *testing.T) {
@@ -85,9 +83,8 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 		gock.New(ChainRegistryURL).Get("/chains").Reply(404)
 		txRequest := testutils.FakeSendTransactionRequest()
 
-		resp, err := s.client.SendContractTransaction(ctx, txRequest)
+		_, err := s.client.SendContractTransaction(ctx, txRequest)
 
-		assert.Nil(t, resp)
 		assert.True(t, errors.IsInvalidParameterError(err))
 	})
 
@@ -97,9 +94,8 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(404)
 		txRequest := testutils.FakeSendTransactionRequest()
 
-		resp, err := s.client.SendContractTransaction(ctx, txRequest)
+		_, err := s.client.SendContractTransaction(ctx, txRequest)
 
-		assert.Nil(t, resp)
 		assert.True(t, errors.IsInvalidParameterError(err))
 	})
 
@@ -110,9 +106,8 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 		txRequest := testutils.FakeSendTransactionRequest()
 		txRequest.Params.OneTimeKey = true
 
-		resp, err := s.client.SendContractTransaction(ctx, txRequest)
+		_, err := s.client.SendContractTransaction(ctx, txRequest)
 
-		assert.Nil(t, resp)
 		assert.True(t, errors.IsInvalidFormatError(err))
 	})
 }

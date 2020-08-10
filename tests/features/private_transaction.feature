@@ -86,8 +86,8 @@ Feature: Private transactions
       """
     Then the response code should be 422
     And Response should have the following fields
-      | message                                                   |
-      | 42400@use-cases.send-tx: cannot load 'UnknownChain' chain |
+      | code   | message |
+      | 271360 | ~       |
 
   @quorum
   Scenario: Force not correlative nonce for private and public txs in Quorum/Tessera
@@ -171,8 +171,8 @@ Feature: Private transactions
       """
     Then the response code should be 400
     And Response should have the following fields
-      | message                                                               |
-      | 42400@: fields 'privacyGroupId' and 'privateFor' cannot both be empty |
+      | code   | message |
+      | 271104 | ~       |
 
   @quorum
   Scenario: Fail to deploy private ERC20 contract with not authorized chain
@@ -197,8 +197,8 @@ Feature: Private transactions
       """
     Then the response code should be 422
     And Response should have the following fields
-      | message                                                              |
-      | 42400@use-cases.send-tx: cannot load 'quorum_2-{{scenarioID}}' chain |
+      | code   | message |
+      | 271360 | ~       |
 
   @besu
   Scenario: Deploy private ERC20 contract with Besu and Orion
@@ -613,8 +613,8 @@ Feature: Private transactions
       """
     Then the response code should be 400
     And Response should have the following fields
-      | message                                                                 |
-      | 42400@: fields 'privacyGroupId' and 'privateFor' are mutually exclusive |
+      | code   | message |
+      | 271104 | ~       |
 
   @besu
   @oneTimeKey

@@ -7,31 +7,53 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
+var internalErrMsg = "Internal server error. Please ask an admin for help or try again later"
+
 type ErrorResponse struct {
-	Message string `json:"message" example:"error message"`
+	Message string `json:"message" example:"invalid status update for the current job state"`
+	Code    uint64 `json:"code,omitempty" example:"24000"`
 }
 
+// @deprecated: Migrate every usage of it to WriteHTTPErrorResponse
 func WriteError(rw http.ResponseWriter, msg string, code int) {
-	data, err := json.Marshal(ErrorResponse{Message: msg})
-	if err != nil {
-		http.Error(rw, msg, code)
-		return
+	var err error
+	switch code {
+	case http.StatusBadRequest:
+		err = errors.InvalidFormatError(msg)
+	case http.StatusConflict:
+		err = errors.ConflictedError(msg)
+	case http.StatusUnprocessableEntity:
+		err = errors.InvalidParameterError(msg)
+	case http.StatusNotFound:
+		err = errors.NotFoundError(msg)
+	default:
+		err = errors.InternalError(msg)
 	}
 
-	http.Error(rw, string(data), code)
+	writeErrorResponse(rw, code, err)
 }
 
 func WriteHTTPErrorResponse(rw http.ResponseWriter, err error) {
 	switch {
 	case errors.IsAlreadyExistsError(err), errors.IsInvalidStateError(err):
-		WriteError(rw, err.Error(), http.StatusConflict)
+		writeErrorResponse(rw, http.StatusConflict, err)
 	case errors.IsNotFoundError(err):
-		WriteError(rw, err.Error(), http.StatusNotFound)
+		writeErrorResponse(rw, http.StatusNotFound, err)
 	case errors.IsInvalidAuthenticationError(err), errors.IsUnauthorizedError(err):
-		WriteError(rw, err.Error(), http.StatusUnauthorized)
+		writeErrorResponse(rw, http.StatusUnauthorized, err)
 	case errors.IsInvalidParameterError(err):
-		WriteError(rw, err.Error(), http.StatusUnprocessableEntity)
+		writeErrorResponse(rw, http.StatusUnprocessableEntity, err)
 	case err != nil:
-		WriteError(rw, "Internal server error. Please ask an admin for help or try again later", http.StatusInternalServerError)
+		writeErrorResponse(rw, http.StatusInternalServerError, errors.InternalError(internalErrMsg))
 	}
+}
+
+func writeErrorResponse(rw http.ResponseWriter, status int, err error) {
+	msg, e := json.Marshal(ErrorResponse{Message: err.Error(), Code: errors.FromError(err).GetCode()})
+	if e != nil {
+		http.Error(rw, e.Error(), status)
+		return
+	}
+
+	http.Error(rw, string(msg), status)
 }

@@ -5,8 +5,9 @@ package storer
 import (
 	"context"
 	"fmt"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"testing"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
@@ -71,7 +72,8 @@ func TestRawTxStore(t *testing.T) {
 				_ = txctx.Envelope.SetTxHashString("0xe41551c714c8ec769d2edad9adc250ae955d263da161bf59142b7500eea6715e")
 				return nil, nil
 			})
-		schedulerClient.EXPECT().UpdateJob(txctx.Context(), txctx.Envelope.GetID(), expectedJobUpdate).Return(&types.JobResponse{}, nil)
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), txctx.Envelope.GetID(), expectedJobUpdate).
+			Return(&types.JobResponse{}, nil)
 
 		RawTxStore(schedulerClient)(txctx)
 
@@ -125,6 +127,7 @@ func TestRawTxStore(t *testing.T) {
 		schedulerClient.EXPECT().
 			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), gomock.Any()).
 			Return(&types.JobResponse{}, nil)
+
 		schedulerClient.EXPECT().
 			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
 				Status: utils.StatusRecovering,

@@ -191,8 +191,8 @@ Feature: Send transfer transaction
       """
     Then the response code should be 400
     And Response should have the following fields
-      | message                                                                                            |
-      | 42400@encoding.json: invalid body, with: field validation for 'Value' failed on the 'required' tag |
+      | code   | message |
+      | 271104 | ~       |
 
   Scenario: Fail to send transfer transaction with missing To
     Given I register the following alias
@@ -216,8 +216,8 @@ Feature: Send transfer transaction
       """
     Then the response code should be 400
     And Response should have the following fields
-      | message                                                                                         |
-      | 42400@encoding.json: invalid body, with: field validation for 'To' failed on the 'required' tag |
+      | code   | message |
+      | 271104 | ~       |
 
   Scenario: Fail to send transfer transaction with missing private-key
     Given I register the following alias
