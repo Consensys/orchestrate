@@ -30,9 +30,17 @@ services:
       when: never
     - when: manual
 
+.go-cache:
+  before_script:
+    - mkdir -p ${GOPATH}
+  cache:
+    paths:
+      - ${GOPATH}/pkg/mod/
+
 .go-setup: &go-setup
   image: golang:1.14
   stage: test
+  extends: .go-cache
   before_script:
     # Set GOPATH
     - mkdir -p ${GOPATH}
@@ -97,6 +105,38 @@ services:
   # Push images
   - docker push ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA}
 
+.build-pages: &build-pages
+  # Release static swagger doc for latest version on Gitlab pages
+  image: node:12.16.2-stretch-slim
+  before_script:
+#    - |
+#      if [ -z "$CI_COMMIT_TAG" ]; then
+#        exit 1
+#      elif [[ $CI_COMMIT_TAG == *"-rc"* ]]; then
+#        DOC_VERSION="latest"
+#      else
+#        DOC_VERSION="stable"
+#      fi
+    - DOC_VERSION="latest"
+    - npm install swagger-combine@1.1.2
+    - npm install redoc-cli@0.9.10
+    - export PATH="$PATH:$(pwd)/node_modules/.bin"
+    - mkdir -p "public/${DOC_VERSION}"
+    - rm -rf "public/${DOC_VERSION}/*";
+  script:
+    # replace version placeholder in combine template before running it
+    - sed -e "s~{{API_VERSION}}~${DOC_VERSION} - ${CI_COMMIT_SHORT_SHA}~" swagger-combine.yml.template > swagger-combine.yml
+    # combine specs
+    - swagger-combine swagger-combine.yml -o combined-schema.json
+    # generate doc using ReDoc
+    - redoc-cli bundle combined-schema.json
+    # copy html file to the right folder and name it index for online access with dir path only
+    # keep this in prevision of having multiple versions and also now because of compatibility
+    # with previous urls already indexed by search engines
+    - mv redoc-static.html public/${DOC_VERSION}/index.html
+    # create a redirect from home to latest for people landing on root
+    - sed -e "s~{{LATEST_VERSION_URL}}~${CI_PAGES_URL}/latest~" public/index.html.template > public/index.html
+      
 test:
   <<: *go-setup
   <<: *rules
@@ -267,36 +307,18 @@ release-e2e:
 # It has to be "pages" for GitlabCI to recognize it.
 # see https://docs.gitlab.com/ee/user/project/pages/introduction.html#gitlab-pages-requirements
 pages:
-  # Release static swagger doc for latest version on Gitlab pages
-  image: node:12.16.2-stretch-slim
+  <<: *build-pages
   # must be on the last stage to make sure the doc is updated only if everything passed
   stage: doc
-  before_script:
-    - npm install swagger-combine@1.1.2
-    - npm install redoc-cli@0.9.10
-    - export PATH="$PATH:$(pwd)/node_modules/.bin"
-    - mkdir -p public/latest
-  script:
-    # replace version placeholder in combine template before running it
-    - sed -e "s~{{API_VERSION}}~latest - ${CI_COMMIT_SHORT_SHA}~" swagger-combine.yml.template > swagger-combine.yml
-    # combine specs
-    - swagger-combine swagger-combine.yml -o combined-schema.json
-    # generate doc using ReDoc
-    - redoc-cli bundle combined-schema.json
-    # copy html file to the right folder and name it index for online access with dir path only
-    # keep this in prevision of having multiple versions and also now because of compatibility
-    # with previous urls already indexed by search engines
-    - mv redoc-static.html public/latest/index.html
-    # create a redirect from home to latest for people landing on root
-    - sed -e "s~{{LATEST_VERSION_URL}}~${CI_PAGES_URL}/latest~" public/index.html.template > public/index.html
+#  cache:
+#    paths:
+#      - public
   artifacts:
     when: always
     paths:
-      - public
+      - public/${DOC_VERSION}
     # no need to keep the artifact more than required to check for an issue
     expire_in: 1 day
   only:
     refs:
-      # only publish latest version so only run on master.
-      # publishing on other branches/tags would override doc site and mix docs in a very bad way :(
-      - master
+      - tags
