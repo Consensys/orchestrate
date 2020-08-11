@@ -35,10 +35,10 @@ func (m *MockCacheManager) EXPECT() *MockCacheManagerMockRecorder {
 }
 
 // Get mocks base method
-func (m *MockCacheManager) Get(arg0 context.Context, arg1 string) (interface{}, bool) {
+func (m *MockCacheManager) Get(arg0 context.Context, arg1 string) ([]byte, bool) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", arg0, arg1)
-	ret0, _ := ret[0].(interface{})
+	ret0, _ := ret[0].([]byte)
 	ret1, _ := ret[1].(bool)
 	return ret0, ret1
 }
@@ -50,7 +50,7 @@ func (mr *MockCacheManagerMockRecorder) Get(arg0, arg1 interface{}) *gomock.Call
 }
 
 // Set mocks base method
-func (m *MockCacheManager) Set(arg0 context.Context, arg1 string, arg2 interface{}) bool {
+func (m *MockCacheManager) Set(arg0 context.Context, arg1 string, arg2 []byte) bool {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Set", arg0, arg1, arg2)
 	ret0, _ := ret[0].(bool)

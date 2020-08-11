@@ -174,7 +174,7 @@ func (ag *PGChainAgent) UpdateChain(ctx context.Context, uuid string, tenants []
 
 	if res.RowsReturned() == 0 && res.RowsAffected() == 0 {
 		errMessage := "no chain found with uuid %s for update"
-		log.FromContext(ctx).WithError(err).Error(errMessage, uuid)
+		log.FromContext(ctx).WithError(err).Errorf(errMessage, uuid)
 		return errors.NotFoundError(errMessage, uuid).ExtendComponent(chainComponentName)
 	}
 

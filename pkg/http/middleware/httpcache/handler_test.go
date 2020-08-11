@@ -23,7 +23,7 @@ func TestSetCacheFlow_Successful(t *testing.T) {
 	mockHandler := mockhandler.NewMockHandler(ctrl)
 	cManager := mocks.NewMockCacheManager(ctrl)
 
-	httpCache := newHTTPCache(cManager, generateKey, keySuffix)
+	httpCache := newHTTPCache(cManager, testCacheRequest, testCacheResponse, keySuffix)
 	h := httpCache.Handler(mockHandler)
 
 	rw := httptest.NewRecorder()
@@ -47,7 +47,7 @@ func TestGetCacheFlow_Successful(t *testing.T) {
 	mockHandler := mockhandler.NewMockHandler(ctrl)
 	cManager := mocks.NewMockCacheManager(ctrl)
 
-	httpCache := newHTTPCache(cManager, generateKey, keySuffix)
+	httpCache := newHTTPCache(cManager, testCacheRequest, testCacheResponse, keySuffix)
 	h := httpCache.Handler(mockHandler)
 
 	rw := httptest.NewRecorder()
@@ -73,6 +73,10 @@ func TestGetCacheFlow_Successful(t *testing.T) {
 	assert.Equal(t, rBody, []byte("responseBody"))
 }
 
-func generateKey(_ *http.Request) (isCached bool, key string, err error) {
+func testCacheRequest(_ *http.Request) (isCached bool, key string, err error) {
 	return true, generatedKey, nil
+}
+
+func testCacheResponse(_ *http.Response) bool {
+	return true
 }

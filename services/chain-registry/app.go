@@ -77,11 +77,10 @@ func New(
 		ratelimit.NewBuilder(ratelimit.NewManager(cache)),
 	)
 
-	// // @TODO: allow user to enable or disable cache, set ttl duration
-	// // HTTPCache Middleware
+	// HTTPCache Middleware
 	httpCacheOpt := app.MiddlewareOpt(
 		reflect.TypeOf(&dynamic.HTTPCache{}),
-		httpcache.NewBuilder(cache, httpCacheRequest),
+		httpcache.NewBuilder(cache, httpCacheRequest, httpCacheResponse),
 	)
 
 	// Create appli to expose metrics

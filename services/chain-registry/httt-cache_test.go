@@ -23,7 +23,7 @@ func TestHTTPCacheRequest_Valid(t *testing.T) {
 	c, k, err := httpCacheRequest(req)
 	assert.NoError(t, err)
 	assert.True(t, c)
-	assert.Equal(t, "_5bae17322d783d8c5b250e981229a714", k)
+	assert.Equal(t, "_-eth_getBlockByNumber([\"0x0\",\"false\"])", k)
 }
 
 func TestHTTPCacheRequest_IgnoreReqType(t *testing.T) {

@@ -3,15 +3,14 @@ package httpcache
 import (
 	"context"
 	"time"
-	"unsafe"
 
 	"github.com/dgraph-io/ristretto"
 )
 
 //go:generate mockgen -source=manager.go -destination=mocks/manager.go -package=mocks
 type CacheManager interface {
-	Get(context.Context, string) (interface{}, bool)
-	Set(context.Context, string, interface{}) bool
+	Get(context.Context, string) ([]byte, bool)
+	Set(context.Context, string, []byte) bool
 	TTL() time.Duration
 }
 
@@ -30,16 +29,15 @@ func newManager(
 	}
 }
 
-func (cca *cacheManager) Get(_ context.Context, key string) (interface{}, bool) {
+func (cca *cacheManager) Get(_ context.Context, key string) ([]byte, bool) {
 	if v, ok := cca.c.Get(key); ok {
-		return v, true
+		return v.([]byte), true
 	}
 	return nil, false
 }
 
-func (cca *cacheManager) Set(_ context.Context, key string, value interface{}) bool {
-	cost := unsafe.Sizeof(value)
-	return cca.c.SetWithTTL(key, value, int64(cost), cca.ttl)
+func (cca *cacheManager) Set(_ context.Context, key string, value []byte) bool {
+	return cca.c.SetWithTTL(key, value, int64(len(value)), cca.ttl)
 }
 
 func (cca *cacheManager) TTL() time.Duration {

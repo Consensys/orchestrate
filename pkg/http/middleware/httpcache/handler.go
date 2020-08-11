@@ -12,17 +12,20 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
 )
 
+type CacheRequest func(req *http.Request) (isCached bool, key string, err error)
+type CacheResponse func(res *http.Response) bool
+
 type Builder struct {
-	cache   *ristretto.Cache
-	cReqKey CacheRequest
+	cache    *ristretto.Cache
+	cacheReq CacheRequest
+	cacheRes CacheResponse
 }
 
-type CacheRequest func(req *http.Request) (isCached bool, key string, err error)
-
-func NewBuilder(cache *ristretto.Cache, fReq CacheRequest) *Builder {
+func NewBuilder(cache *ristretto.Cache, cacheReq CacheRequest, cacheRes CacheResponse) *Builder {
 	return &Builder{
-		cache:   cache,
-		cReqKey: fReq,
+		cache:    cache,
+		cacheReq: cacheReq,
+		cacheRes: cacheRes,
 	}
 }
 
@@ -34,20 +37,22 @@ func (b *Builder) Build(_ context.Context, _ string, configuration interface{}) 
 
 	cManager := newManager(b.cache, cfg.TTL)
 
-	m := newHTTPCache(cManager, b.cReqKey, cfg.KeySuffix)
+	m := newHTTPCache(cManager, b.cacheReq, b.cacheRes, cfg.KeySuffix)
 	return m.Handler, nil, nil
 }
 
 type HTTPCache struct {
 	cManager CacheManager
-	cReqKey  CacheRequest
+	cacheReq CacheRequest
+	cacheRes CacheResponse
 	cSuffix  string
 }
 
-func newHTTPCache(cManager CacheManager, cReqKey CacheRequest, cSuffix string) *HTTPCache {
+func newHTTPCache(cManager CacheManager, cacheReq CacheRequest, cacheRes CacheResponse, cSuffix string) *HTTPCache {
 	return &HTTPCache{
 		cManager: cManager,
-		cReqKey:  cReqKey,
+		cacheReq: cacheReq,
+		cacheRes: cacheRes,
 		cSuffix:  cSuffix,
 	}
 }
@@ -68,7 +73,7 @@ func (cm *HTTPCache) Handler(h http.Handler) http.Handler {
 		cacheKey := fmt.Sprintf("%s-%s", cacheKeyBase, cm.cSuffix)
 		b, ok := cm.cManager.Get(req.Context(), cacheKey)
 		if ok {
-			res, err := bytesToResponse((b.([]byte)))
+			res, err := bytesToResponse(b)
 			if err != nil {
 				log.WithContext(req.Context()).WithError(err).Error("HTTPCache: errors were found")
 			} else {
@@ -82,7 +87,7 @@ func (cm *HTTPCache) Handler(h http.Handler) http.Handler {
 				}
 
 				log.WithContext(req.Context()).WithField("key", cacheKey).
-					Debugf("HTTPCache: response fetch from cache")
+					Debugf("HTTPCache: response fetched from cache")
 
 				return
 			}
@@ -92,9 +97,9 @@ func (cm *HTTPCache) Handler(h http.Handler) http.Handler {
 		rwRecoder := httptest.NewRecorder()
 		h.ServeHTTP(rwRecoder, req)
 
-		// Extract response content a write it into response
+		// Extract response content a write it into response, only successful responses are cached
 		result := rwRecoder.Result()
-		if result.StatusCode == 200 {
+		if cm.cacheResponse(result) {
 			r := newResponse(rwRecoder.Body.Bytes(), result.Header, result.StatusCode)
 			b, err := r.toBytes()
 			if err != nil {
@@ -103,6 +108,11 @@ func (cm *HTTPCache) Handler(h http.Handler) http.Handler {
 			}
 
 			cm.cManager.Set(req.Context(), cacheKey, b)
+			log.WithContext(req.Context()).WithField("key", cacheKey).
+				Debugf("HTTPCache: response is cached for %dms", cm.cManager.TTL().Milliseconds())
+		} else {
+			log.WithContext(req.Context()).WithField("key", cacheKey).
+				Debugf("HTTPCache: response ignored")
 		}
 
 		for k, v := range result.Header {
@@ -113,9 +123,6 @@ func (cm *HTTPCache) Handler(h http.Handler) http.Handler {
 		if _, err := rw.Write(rwRecoder.Body.Bytes()); err != nil {
 			log.WithContext(req.Context()).WithError(err).Error("HTTPCache: errors were found")
 		}
-
-		log.WithContext(req.Context()).WithField("key", cacheKey).
-			Debugf("HTTPCache: caching response for %dms", cm.cManager.TTL().Milliseconds())
 	})
 }
 
@@ -124,5 +131,14 @@ func (cm *HTTPCache) cacheRequest(req *http.Request) (c bool, k string, err erro
 		return false, "", nil
 	}
 
-	return cm.cReqKey(req)
+	return cm.cacheReq(req)
+}
+
+func (cm *HTTPCache) cacheResponse(res *http.Response) bool {
+	if res.StatusCode != 200 {
+		log.WithField("status", res.StatusCode).Debugf("HTTPCache: skip not 200 responses")
+		return false
+	}
+
+	return cm.cacheRes(res)
 }

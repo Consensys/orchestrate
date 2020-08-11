@@ -3,12 +3,11 @@ package chainregistry
 import (
 	"bytes"
 	"context"
-	"crypto/md5"
-	"encoding/hex"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"sort"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
@@ -20,7 +19,8 @@ import (
 )
 
 var rpcCachedMethods = map[string]bool{
-	"eth_getBlockByNumber": true,
+	"eth_getBlockByNumber":      true,
+	"eth_getTransactionReceipt": true,
 }
 
 func httpCacheRequest(req *http.Request) (c bool, k string, err error) {
@@ -51,37 +51,55 @@ func httpCacheRequest(req *http.Request) (c bool, k string, err error) {
 	if _, ok := rpcCachedMethods[msg.Method]; !ok {
 		log.WithContext(req.Context()).Debugf("HTTPCache: RPC method is ignored: %s", msg.Method)
 		return false, "", nil
-	}
-
-	cacheKey, err := httpCacheGenerateKey(req.Context(), &msg)
-	if err != nil {
-		log.WithContext(req.Context()).WithError(err).Debugf("HTTPCache: cannot generate cache key")
+	} else if msg.Method == "eth_getBlockByNumber" && strings.Contains(string(msg.Params), "latest") {
+		log.WithContext(req.Context()).Debugf("HTTPCache: call to the 'latest' block is ignored")
 		return false, "", nil
 	}
+
+	cacheKey := httpCacheGenerateKey(req.Context(), &msg)
 
 	return true, cacheKey, nil
 }
 
-func httpCacheGenerateKey(ctx context.Context, msg *rpc.JSONRpcMessage) (string, error) {
-	jsonParams, err := json.Marshal(msg.Params)
+func httpCacheResponse(req *http.Response) bool {
+	var msg rpc.JSONRpcMessage
+	err := json.UnmarshalBody(req.Body, &msg)
 	if err != nil {
-		return "", err
+		log.WithError(err).Debugf("HTTPCache: cannot decode response")
+		return false
 	}
 
-	hash := md5.Sum([]byte(string(jsonParams) + msg.Method))
+	if msg.Error != nil {
+		log.WithField("error", msg.Error.Message).Debugf("HTTPCache: skip RPC error responses")
+		return false
+	}
 
-	key := fmt.Sprintf("%s%s", multitenancy.TenantIDFromContext(ctx), hex.EncodeToString(hash[:]))
-	return key, nil
+	if len(msg.Result) == 0 {
+		log.Debugf("HTTPCache: skip RPC empty response results")
+		return false
+	}
+
+	return true
+}
+
+func httpCacheGenerateKey(ctx context.Context, msg *rpc.JSONRpcMessage) string {
+	return fmt.Sprintf("%s-%s(%s)", multitenancy.TenantIDFromContext(ctx), msg.Method, string(msg.Params))
 }
 
 func httpCacheGenerateChainKey(chain *models.Chain) string {
+	// Order urls to identify common chain definitions
 	sort.Sort(utils.Alphabetic(chain.URLs))
-	urls, err := json.Marshal(chain.URLs)
-	// We do not intend to fail in case of an marshaling issue, instead we use ChainID as backup key
-	if err != nil {
-		return chain.ChainID
+
+	var urls = strings.Join(chain.URLs, "_")
+
+	var privURLs []string
+	for _, p := range chain.PrivateTxManagers {
+		privURLs = append(privURLs, p.URL)
 	}
 
-	hash := md5.Sum(urls)
-	return hex.EncodeToString(hash[:])
+	if len(privURLs) > 0 {
+		urls = urls + "_" + strings.Join(privURLs, "_")
+	}
+
+	return urls
 }

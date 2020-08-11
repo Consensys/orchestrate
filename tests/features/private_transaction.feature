@@ -64,6 +64,7 @@ Feature: Private transactions
       | Receipt.Status | Receipt.ContractAddress |
       | 1              | ~                       |
 
+  @quorum
   Scenario: Fail to deploy private ERC20 contract with unknown ChainName
     Given I set the headers
       | Key           | Value                    |
