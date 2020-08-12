@@ -2,13 +2,11 @@ package transactionscheduler
 
 import (
 	"context"
-	"sync"
 
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 
-	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt"
@@ -17,41 +15,62 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 )
 
-var (
-	initOnce = &sync.Once{}
-	appli    *app.App
-)
-
-func Init(ctx context.Context) {
-	initOnce.Do(func() {
-		// Initialize dependencies
-		authjwt.Init(ctx)
-		authkey.Init(ctx)
-		client.Init(ctx)
-		sarama.InitSyncProducer(ctx)
-		contractregistry.Init(ctx, viper.GetString(contractregistry.ContractRegistryURLViperKey))
-
-		var err error
-		appli, err = New(
-			NewConfig(viper.GetViper()),
-			postgres.GetManager(),
-			authjwt.GlobalChecker(), authkey.GlobalChecker(),
-			client.GlobalClient(),
-			contractregistry.GlobalClient(),
-			sarama.GlobalSyncProducer(),
-			sarama.NewKafkaTopicConfig(viper.GetViper()),
-		)
-		if err != nil {
-			log.FromContext(ctx).WithError(err).Fatalf("Could not create transaction scheduler application")
-		}
-	})
+type TxScheduler struct {
+	TxSchedulerAPI app.Service
+	TxSentryDaemon app.Daemon
 }
 
-func Start(ctx context.Context) error {
-	Init(ctx)
-	return appli.Start(ctx)
+func NewTxScheduler(ctx context.Context) (*TxScheduler, error) {
+	// Initialize dependencies
+	authjwt.Init(ctx)
+	authkey.Init(ctx)
+	client.Init(ctx)
+	sarama.InitSyncProducer(ctx)
+	contractregistry.Init(ctx, viper.GetString(contractregistry.ContractRegistryURLViperKey))
+
+	config := NewConfig(viper.GetViper())
+	pgmngr := postgres.GetManager()
+
+	txSchedulerApp, err := NewTxSchedulerApp(
+		config,
+		pgmngr,
+		authjwt.GlobalChecker(), authkey.GlobalChecker(),
+		client.GlobalClient(),
+		contractregistry.GlobalClient(),
+		sarama.GlobalSyncProducer(),
+		sarama.NewKafkaTopicConfig(viper.GetViper()),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	txSentryDaemon, err := NewTxSentryDaemon(pgmngr, config)
+	if err != nil {
+		return nil, err
+	}
+
+	return &TxScheduler{
+		TxSchedulerAPI: txSchedulerApp,
+		TxSentryDaemon: txSentryDaemon,
+	}, nil
 }
 
-func Stop(ctx context.Context) error {
-	return appli.Stop(ctx)
+func (txScheduler *TxScheduler) StartSentry(ctx context.Context) chan error {
+	return txScheduler.TxSentryDaemon.Start(ctx)
+}
+
+func (txScheduler *TxScheduler) StartScheduler(ctx context.Context) error {
+	return txScheduler.TxSchedulerAPI.Start(ctx)
+}
+
+func (txScheduler *TxScheduler) StopSentry(ctx context.Context) {
+	txScheduler.TxSentryDaemon.Stop(ctx)
+}
+
+func (txScheduler *TxScheduler) StopScheduler(ctx context.Context) error {
+	return txScheduler.TxSchedulerAPI.Stop(ctx)
+}
+
+func (txScheduler *TxScheduler) IsReady() bool {
+	return txScheduler.TxSentryDaemon.IsReady() && txScheduler.TxSchedulerAPI.IsReady()
 }

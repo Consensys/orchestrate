@@ -19,7 +19,7 @@ func newRunCommand() *cobra.Command {
 		Short: "Run application",
 		Run:   run,
 		PreRun: func(cmd *cobra.Command, args []string) {
-			utils.PreRunBindFlags(viper.GetViper(), cmd.Flags(), "transaction-manager")
+			utils.PreRunBindFlags(viper.GetViper(), cmd.Flags(), "transaction-scheduler")
 		},
 		PostRun: func(cmd *cobra.Command, args []string) {
 			if err := errors.CombineErrors(cmdErr, cmd.Context().Err()); err != nil {
@@ -29,7 +29,9 @@ func newRunCommand() *cobra.Command {
 	}
 
 	// Transaction scheduler flags
-	transactionscheduler.Flags(runCmd.Flags())
+	transactionscheduler.TxSchedulerFlags(runCmd.Flags())
+	transactionscheduler.TxSentryFlags(runCmd.Flags())
+
 	return runCmd
 }
 
@@ -37,22 +39,37 @@ func run(cmd *cobra.Command, _ []string) {
 	ctx := cmd.Context()
 	logger := log.FromContext(ctx)
 
-	_ = transactionscheduler.Start(ctx)
+	txScheduler, err := transactionscheduler.NewTxScheduler(ctx)
+	if err != nil {
+		logger.WithError(err).Error("failed to initialize tx-scheduler")
+	}
 
 	done := make(chan struct{})
+	sentryErrorChan := txScheduler.StartSentry(ctx)
+	err = txScheduler.StartScheduler(ctx)
+	if err != nil {
+		cmdErr = errors.CombineErrors(cmdErr, err)
+		logger.WithError(err).Error("could not start transaction-scheduler API")
+		close(done)
+	}
 
 	// Process signals
-	sig := utils.NewSignalListener(func(signal os.Signal) {
-		err := transactionscheduler.Stop(ctx)
-		if err != nil {
-			cmdErr = errors.CombineErrors(cmdErr, err)
-			logger.WithError(err).Errorf("Application did not shutdown properly")
-		} else {
-			logger.WithError(err).Infof("Application gracefully closed")
-		}
-		close(done)
-	})
-	<-done
+	sig := utils.NewSignalListener(func(signal os.Signal) { close(done) })
+
+	select {
+	case sentryErr := <-sentryErrorChan:
+		cmdErr = errors.CombineErrors(cmdErr, sentryErr)
+	case <-done:
+	}
 
 	sig.Close()
+
+	err = txScheduler.StopScheduler(ctx)
+	if err != nil {
+		cmdErr = errors.CombineErrors(cmdErr, err)
+		logger.WithError(err).Error("could not stop transaction-scheduler API")
+	}
+	txScheduler.StopSentry(ctx)
+
+	logger.Info("transaction scheduler and all its services successfully stopped")
 }

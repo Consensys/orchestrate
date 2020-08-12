@@ -1,0 +1,59 @@
+package schedules
+
+import (
+	"context"
+
+	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
+)
+
+//go:generate mockgen -source=search_schedules.go -destination=mocks/search_schedules.go -package=mocks
+
+const searchSchedulesComponent = "use-cases.search-schedules"
+
+type SearchSchedulesUseCase interface {
+	Execute(ctx context.Context, tenants []string) ([]*entities.Schedule, error)
+}
+
+// searchSchedulesUseCase is a use case to search schedules
+type searchSchedulesUseCase struct {
+	db store.DB
+}
+
+// NewSearchSchedulesUseCase creates a new SearchSchedulesUseCase
+func NewSearchSchedulesUseCase(db store.DB) SearchSchedulesUseCase {
+	return &searchSchedulesUseCase{
+		db: db,
+	}
+}
+
+// Execute search schedules
+func (uc *searchSchedulesUseCase) Execute(ctx context.Context, tenants []string) ([]*entities.Schedule, error) {
+	logger := log.WithContext(ctx).WithField("tenants", tenants)
+	logger.Debug("getting schedules")
+
+	scheduleModels, err := uc.db.Schedule().FindAll(ctx, tenants)
+	if err != nil {
+		return nil, err
+	}
+
+	for idx, scheduleModel := range scheduleModels {
+		for jdx, job := range scheduleModel.Jobs {
+			scheduleModels[idx].Jobs[jdx], err = uc.db.Job().FindOneByUUID(ctx, job.UUID, tenants)
+			if err != nil {
+				return nil, errors.FromError(err).ExtendComponent(searchSchedulesComponent)
+			}
+		}
+	}
+
+	var resp []*entities.Schedule
+	for _, s := range scheduleModels {
+		resp = append(resp, parsers.NewScheduleEntityFromModels(s))
+	}
+
+	logger.Info("schedules found successfully")
+	return resp, nil
+}

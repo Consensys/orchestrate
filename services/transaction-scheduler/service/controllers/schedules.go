@@ -102,7 +102,7 @@ func (c *SchedulesController) getAll(rw http.ResponseWriter, request *http.Reque
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	scheduleEntities, err := c.ucs.GetSchedules().Execute(ctx, multitenancy.AllowedTenantsFromContext(ctx))
+	scheduleEntities, err := c.ucs.SearchSchedules().Execute(ctx, multitenancy.AllowedTenantsFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return

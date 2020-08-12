@@ -58,6 +58,7 @@ CREATE TABLE jobs (
 	labels jsonb,
 	annotations jsonb,
 	created_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL,
+	updated_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL,
 	UNIQUE(uuid)
 );
 
@@ -70,6 +71,19 @@ CREATE TABLE logs (
 	created_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL,
 	UNIQUE(uuid)
 );
+
+CREATE OR REPLACE FUNCTION updated() RETURNS TRIGGER AS 
+	$$
+	BEGIN
+		NEW.updated_at = (now() at time zone 'utc');
+		RETURN NEW;
+	END;
+	$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER job_trigger
+	BEFORE UPDATE ON jobs
+	FOR EACH ROW 
+	EXECUTE PROCEDURE updated();
 `)
 	if err != nil {
 		log.WithError(err).Error("Could not create tables")
@@ -83,11 +97,15 @@ CREATE TABLE logs (
 func dropContextTable(db migrations.DB) error {
 	log.Debug("Dropping tables")
 	_, err := db.Exec(`
+DROP TRIGGER job_trigger ON jobs;
+
 DROP TABLE logs;
 DROP TABLE jobs;
 DROP TABLE transaction_requests;
 DROP TABLE schedules;
 DROP TABLE transactions;
+
+DROP FUNCTION updated();
 `)
 	if err != nil {
 		log.WithError(err).Error("Could not drop tables")

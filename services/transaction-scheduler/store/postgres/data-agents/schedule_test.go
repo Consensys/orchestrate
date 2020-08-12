@@ -6,8 +6,6 @@ package dataagents
 
 import (
 	"context"
-	"testing"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	pgTestUtils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres/testutils"
@@ -15,6 +13,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/postgres/migrations"
+	"testing"
 )
 
 type scheduleTestSuite struct {
@@ -106,7 +105,7 @@ func (s *scheduleTestSuite) TestPGSchedule_FindAll() {
 		assert.NoError(s.T(), err)
 	}
 
-	s.T().Run("should get model successfully as tenant", func(t *testing.T) {
+	s.T().Run("should get models successfully as tenant", func(t *testing.T) {
 		schedulesRetrieved, err := s.agents.Schedule().FindAll(ctx, []string{tenantID})
 
 		assert.NoError(t, err)
@@ -116,7 +115,7 @@ func (s *scheduleTestSuite) TestPGSchedule_FindAll() {
 		}
 	})
 
-	s.T().Run("should return NotFoundError if select fails", func(t *testing.T) {
+	s.T().Run("should return empty array if nothing is found", func(t *testing.T) {
 		schedules, err := s.agents.Schedule().FindAll(ctx, []string{"randomID"})
 		assert.NoError(t, err)
 		assert.Empty(t, schedules)
@@ -130,17 +129,17 @@ func (s *scheduleTestSuite) TestPGSchedule_ConnectionErr() {
 	s.pg.DropTestDB(s.T())
 	schedule := testutils.FakeSchedule("")
 
-	s.T().Run("should return PostgresConnectionError if insert fails", func(t *testing.T) {
+	s.T().Run("should return PostgresConnectionError if Insert fails", func(t *testing.T) {
 		err := s.agents.Schedule().Insert(ctx, schedule)
 		assert.True(t, errors.IsPostgresConnectionError(err))
 	})
 
-	s.T().Run("should return PostgresConnectionError if fetch fails", func(t *testing.T) {
+	s.T().Run("should return PostgresConnectionError if FindOneByUUID fails", func(t *testing.T) {
 		_, err := s.agents.Schedule().FindOneByUUID(ctx, schedule.UUID, []string{"_"})
 		assert.True(t, errors.IsPostgresConnectionError(err))
 	})
 
-	s.T().Run("should return PostgresConnectionError if fetchAll fails", func(t *testing.T) {
+	s.T().Run("should return PostgresConnectionError if FindAll fails", func(t *testing.T) {
 		_, err := s.agents.Schedule().FindAll(ctx, []string{"_"})
 		assert.True(t, errors.IsPostgresConnectionError(err))
 	})
@@ -155,7 +154,7 @@ func assertEqualSchedule(t *testing.T, expected, actual *models.Schedule) {
 	assert.Equal(t, expected.CreatedAt, actual.CreatedAt)
 	assert.Equal(t, len(expected.Jobs), len(actual.Jobs))
 	if len(expected.Jobs) == len(actual.Jobs) {
-		for idx, _ := range expected.Jobs {
+		for idx := range expected.Jobs {
 			assert.NotEmpty(t, actual.Jobs[idx].ID)
 			assert.Equal(t, expected.Jobs[idx].UUID, actual.Jobs[idx].UUID)
 			assert.Equal(t, expected.Jobs[idx].Type, actual.Jobs[idx].Type)

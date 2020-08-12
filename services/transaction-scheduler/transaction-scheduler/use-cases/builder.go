@@ -26,9 +26,9 @@ type useCases struct {
 	getTransaction          transactions.GetTxUseCase
 	searchTransactions      transactions.SearchTransactionsUseCase
 	// Schedule
-	createSchedule schedules.CreateScheduleUseCase
-	getSchedule    schedules.GetScheduleUseCase
-	getSchedules   schedules.GetSchedulesUseCase
+	createSchedule  schedules.CreateScheduleUseCase
+	getSchedule     schedules.GetScheduleUseCase
+	searchSchedules schedules.SearchSchedulesUseCase
 	// Jobs
 	createJob  jobs.CreateJobUseCase
 	getJob     jobs.GetJobUseCase
@@ -62,9 +62,9 @@ func NewUseCases(
 		getTransaction:          getTransactionUC,
 		searchTransactions:      transactions.NewSearchTransactionsUseCase(db, getTransactionUC),
 		// Schedules
-		createSchedule: createScheduleUC,
-		getSchedule:    getScheduleUC,
-		getSchedules:   schedules.NewGetSchedulesUseCase(db),
+		createSchedule:  createScheduleUC,
+		getSchedule:     getScheduleUC,
+		searchSchedules: schedules.NewSearchSchedulesUseCase(db),
 		// Jobs
 		createJob:  createJobUC,
 		getJob:     jobs.NewGetJobUseCase(db),
@@ -102,8 +102,8 @@ func (u *useCases) GetSchedule() schedules.GetScheduleUseCase {
 	return u.getSchedule
 }
 
-func (u *useCases) GetSchedules() schedules.GetSchedulesUseCase {
-	return u.getSchedules
+func (u *useCases) SearchSchedules() schedules.SearchSchedulesUseCase {
+	return u.searchSchedules
 }
 
 func (u *useCases) CreateJob() jobs.CreateJobUseCase {

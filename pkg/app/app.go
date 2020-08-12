@@ -29,6 +29,18 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp"
 )
 
+type Daemon interface {
+	Start(ctx context.Context) chan error
+	Stop(ctx context.Context)
+	IsReady() bool
+}
+
+type Service interface {
+	Start(ctx context.Context) error
+	Stop(ctx context.Context) error
+	IsReady() bool
+}
+
 type App struct {
 	cfg *Config
 

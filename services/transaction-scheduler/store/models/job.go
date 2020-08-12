@@ -21,4 +21,5 @@ type Job struct {
 	Labels        map[string]string
 	Annotations   *types.Annotations
 	CreatedAt     time.Time `pg:"default:now()"`
+	UpdatedAt     time.Time `pg:"default:now()"`
 }

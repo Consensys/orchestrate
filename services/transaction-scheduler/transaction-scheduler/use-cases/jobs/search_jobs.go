@@ -20,7 +20,7 @@ type SearchJobsUseCase interface {
 	Execute(ctx context.Context, filters *entities.JobFilters, tenants []string) ([]*types.Job, error)
 }
 
-// searchJobsUseCase is a use case to get a schedule
+// searchJobsUseCase is a use case to search jobs
 type searchJobsUseCase struct {
 	db store.DB
 }
@@ -32,7 +32,7 @@ func NewSearchJobsUseCase(db store.DB) SearchJobsUseCase {
 	}
 }
 
-// Execute gets a schedule
+// Execute search jobs
 func (uc *searchJobsUseCase) Execute(ctx context.Context, filters *entities.JobFilters, tenants []string) ([]*types.Job, error) {
 	log.WithContext(ctx).WithField("filters", filters).Debug("search jobs")
 
@@ -50,6 +50,7 @@ func (uc *searchJobsUseCase) Execute(ctx context.Context, filters *entities.JobF
 		resp = append(resp, parsers.NewJobEntityFromModels(jobModel))
 	}
 
-	log.WithContext(ctx).WithField("filters", filters).Info("jobs found successfully")
+	// Debug as search jobs is constantly called by tx-listener and tx-sentry
+	log.WithContext(ctx).Debug("jobs found successfully")
 	return resp, nil
 }

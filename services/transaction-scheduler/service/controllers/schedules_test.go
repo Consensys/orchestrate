@@ -27,12 +27,12 @@ import (
 
 type schedulesCtrlTestSuite struct {
 	suite.Suite
-	createScheduleUC *mocks.MockCreateScheduleUseCase
-	getScheduleUC    *mocks.MockGetScheduleUseCase
-	getSchedulesUC   *mocks.MockGetSchedulesUseCase
-	ctx              context.Context
-	tenantID         string
-	router           *mux.Router
+	createScheduleUC  *mocks.MockCreateScheduleUseCase
+	getScheduleUC     *mocks.MockGetScheduleUseCase
+	searchSchedulesUC *mocks.MockSearchSchedulesUseCase
+	ctx               context.Context
+	tenantID          string
+	router            *mux.Router
 }
 
 func (s *schedulesCtrlTestSuite) CreateSchedule() schedules.CreateScheduleUseCase {
@@ -43,8 +43,8 @@ func (s *schedulesCtrlTestSuite) GetSchedule() schedules.GetScheduleUseCase {
 	return s.getScheduleUC
 }
 
-func (s *schedulesCtrlTestSuite) GetSchedules() schedules.GetSchedulesUseCase {
-	return s.getSchedulesUC
+func (s *schedulesCtrlTestSuite) SearchSchedules() schedules.SearchSchedulesUseCase {
+	return s.searchSchedulesUC
 }
 
 var _ schedules.UseCases = &schedulesCtrlTestSuite{}
@@ -61,7 +61,7 @@ func (s *schedulesCtrlTestSuite) SetupTest() {
 	s.tenantID = "tenantID"
 	s.createScheduleUC = mocks.NewMockCreateScheduleUseCase(ctrl)
 	s.getScheduleUC = mocks.NewMockGetScheduleUseCase(ctrl)
-	s.getSchedulesUC = mocks.NewMockGetSchedulesUseCase(ctrl)
+	s.searchSchedulesUC = mocks.NewMockSearchSchedulesUseCase(ctrl)
 	s.ctx = context.WithValue(context.Background(), multitenancy.TenantIDKey, s.tenantID)
 	s.ctx = context.WithValue(s.ctx, multitenancy.AllowedTenantsKey, []string{s.tenantID})
 	s.router = mux.NewRouter()
@@ -150,7 +150,7 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_GetAll() {
 		httpRequest := httptest.NewRequest(http.MethodGet, "/schedules", nil).WithContext(s.ctx)
 		schedulesEntities := []*entities.Schedule{testutils.FakeScheduleEntity()}
 
-		s.getSchedulesUC.EXPECT().Execute(gomock.Any(), []string{s.tenantID}).Return(schedulesEntities, nil)
+		s.searchSchedulesUC.EXPECT().Execute(gomock.Any(), []string{s.tenantID}).Return(schedulesEntities, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 

@@ -53,7 +53,6 @@ func TestTxScheduler(t *testing.T) {
 	sig := utils.NewSignalListener(func(signal os.Signal) {
 		cancel()
 	})
-
 	defer sig.Close()
 
 	suite.Run(t, s)
@@ -68,5 +67,16 @@ func (s *txSchedulerTestSuite) TestTxScheduler_Transactions() {
 	testSuite := new(txSchedulerTransactionTestSuite)
 	testSuite.env = s.env
 	testSuite.baseURL = s.env.baseURL
+	suite.Run(s.T(), testSuite)
+}
+
+func (s *txSchedulerTestSuite) TestTxSentry() {
+	if s.err != nil {
+		s.env.logger.Warn("skipping test...")
+		return
+	}
+
+	testSuite := new(txSentryTestSuite)
+	testSuite.env = s.env
 	suite.Run(s.T(), testSuite)
 }

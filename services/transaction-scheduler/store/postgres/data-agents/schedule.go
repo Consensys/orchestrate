@@ -3,10 +3,10 @@ package dataagents
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-
+	"github.com/go-pg/pg/v9/orm"
 	"github.com/gofrs/uuid"
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 )
@@ -54,12 +54,14 @@ func (agent *PGSchedule) FindOneByUUID(ctx context.Context, scheduleUUID string,
 	return schedule, nil
 }
 
-// FindOneByUUID Finds a schedule in DB
+// Search Finds schedules in DB
 func (agent *PGSchedule) FindAll(ctx context.Context, tenants []string) ([]*models.Schedule, error) {
-	schedules := []*models.Schedule{}
+	var schedules []*models.Schedule
 
 	query := agent.db.ModelContext(ctx, &schedules).
-		Relation("Jobs")
+		Relation("Jobs", func(q *orm.Query) (*orm.Query, error) {
+			return q.Order("id ASC"), nil
+		})
 
 	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants)
 

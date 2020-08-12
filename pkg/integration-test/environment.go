@@ -19,7 +19,7 @@ func StartEnvironment(env TestSuiteEnv) (gerr error) {
 
 	// We do not exit in Fatal errors
 	log.StandardLogger().ExitFunc = func(code int) {
-		gerr = fmt.Errorf("fatal error has been occurred")
+		gerr = fmt.Errorf("fatal error has occurred")
 		cancel()
 	}
 	defer func() {

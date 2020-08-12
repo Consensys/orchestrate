@@ -21,6 +21,7 @@ func NewJobModelFromEntities(job *types.Job, scheduleID *int) *models.Job {
 		},
 		Logs:      []*models.Log{},
 		CreatedAt: job.CreatedAt,
+		UpdatedAt: job.UpdatedAt,
 	}
 
 	if scheduleID != nil {
@@ -44,9 +45,10 @@ func NewJobEntityFromModels(jobModel *models.Job) *types.Job {
 		ChainUUID:   jobModel.ChainUUID,
 		Type:        jobModel.Type,
 		Labels:      jobModel.Labels,
-		CreatedAt:   jobModel.CreatedAt,
 		Annotations: jobModel.Annotations,
 		Logs:        []*types.Log{},
+		CreatedAt:   jobModel.CreatedAt,
+		UpdatedAt:   jobModel.UpdatedAt,
 	}
 
 	if jobModel.Schedule != nil {

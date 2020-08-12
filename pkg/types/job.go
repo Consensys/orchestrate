@@ -17,6 +17,7 @@ type Job struct {
 	Receipt      *ethereum.Receipt
 	Logs         []*Log
 	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 // GetStatus Computes the status of a Job by checking its logs

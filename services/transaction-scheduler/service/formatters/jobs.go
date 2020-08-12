@@ -37,6 +37,7 @@ func FormatJobResponse(job *types.Job) *types.JobResponse {
 		Type:        job.Type,
 		Status:      job.GetStatus(),
 		CreatedAt:   job.CreatedAt,
+		UpdatedAt:   job.UpdatedAt,
 	}
 }
 

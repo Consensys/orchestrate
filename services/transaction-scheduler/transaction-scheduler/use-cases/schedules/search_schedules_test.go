@@ -16,7 +16,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 )
 
-func TestGetSchedules_Execute(t *testing.T) {
+func TestSearchSchedules_Execute(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -24,7 +24,7 @@ func TestGetSchedules_Execute(t *testing.T) {
 	mockScheduleDA := mocks.NewMockScheduleAgent(ctrl)
 	mockJobDA := mocks.NewMockJobAgent(ctrl)
 
-	usecase := NewGetSchedulesUseCase(mockDB)
+	usecase := NewSearchSchedulesUseCase(mockDB)
 	tenantID := "tenantID"
 	ctx := context.Background()
 

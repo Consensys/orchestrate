@@ -36,6 +36,7 @@ type JobResponse struct {
 	Status       string            `json:"status" example:"MINED"`
 	Type         string            `json:"type" example:"eth://ethereum/transaction"`
 	CreatedAt    time.Time         `json:"createdAt" example:"2020-07-09T12:35:42.115395Z"`
+	UpdatedAt    time.Time         `json:"updatedAt" example:"2020-07-09T12:35:42.115395Z"`
 }
 
 type CreateScheduleRequest struct{}

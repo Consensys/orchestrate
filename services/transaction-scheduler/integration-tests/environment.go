@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt"
 	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/key"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
@@ -47,7 +46,7 @@ var envMetricsPort string
 type IntegrationEnvironment struct {
 	ctx                           context.Context
 	logger                        log.Logger
-	app                           *app.App
+	txScheduler                   *transactionscheduler.TxScheduler
 	client                        *docker.Client
 	consumer                      *integrationtest.KafkaConsumer
 	pgmngr                        postgres.Manager
@@ -172,12 +171,12 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 
 	env.kafkaTopicConfig = sarama.NewKafkaTopicConfig(viper.GetViper())
 	env.contractRegistryResponseFaker = &mocks.ContractRegistryFaker{}
-	// Start transaction scheduler
-	env.app, err = newTransactionSchedulerApp(ctx,
+
+	env.txScheduler, err = newTransactionScheduler(ctx,
 		mocks.NewContractRegistryClientMock(env.contractRegistryResponseFaker),
 		env.kafkaTopicConfig)
 	if err != nil {
-		env.logger.WithError(err).Error("could initialize transaction scheduler app")
+		env.logger.WithError(err).Error("could initialize transaction scheduler")
 		return err
 	}
 
@@ -188,7 +187,6 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 		env.logger.WithError(err).Error("could initialize kafka")
 		return err
 	}
-
 	err = env.consumer.Start(context.Background())
 	if err != nil {
 		env.logger.WithError(err).Error("could not run kafka consumer")
@@ -196,30 +194,35 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 	}
 
 	// Start tx-scheduler app
-	err = env.app.Start(ctx)
+	_ = env.txScheduler.StartSentry(ctx)
+	err = env.txScheduler.StartScheduler(ctx)
 	if err != nil {
-		env.logger.WithError(err).Error("could not start transaction-scheduler")
+		env.logger.WithError(err).Error("could not start transaction-scheduler API")
+		// We stop sentry if scheduler fails
+		env.txScheduler.StopSentry(ctx)
 		return err
 	}
 
-	integrationtest.WaitForServiceReady(ctx,
+	integrationtest.WaitForServiceReady(
+		ctx,
 		fmt.Sprintf("http://localhost:%s/ready", envMetricsPort),
 		"transaction-scheduler",
-		10*time.Second)
+		10*time.Second,
+	)
 
 	return nil
 }
 
 func (env *IntegrationEnvironment) Teardown(ctx context.Context) {
 	env.logger.Infof("tearing test suite down")
-	if env.app != nil && env.app.IsReady() {
-		err := env.app.Stop(ctx)
-		if err != nil {
-			env.logger.WithError(err).Errorf("could not stop transaction-scheduler")
-		}
-	}
 
-	err := env.client.Down(ctx, postgresContainerID)
+	err := env.txScheduler.StopScheduler(ctx)
+	if err != nil {
+		env.logger.WithError(err).Error("could not stop transaction-scheduler API")
+	}
+	env.txScheduler.StopSentry(ctx)
+
+	err = env.client.Down(ctx, postgresContainerID)
 	if err != nil {
 		env.logger.WithError(err).Errorf("could not down postgres")
 	}
@@ -268,9 +271,11 @@ func (env *IntegrationEnvironment) migrate(ctx context.Context) error {
 	return nil
 }
 
-func newTransactionSchedulerApp(ctx context.Context,
+func newTransactionScheduler(
+	ctx context.Context,
 	contractRegistryClient contractregistry.ContractRegistryClient,
-	topicCfg *sarama.KafkaTopicConfig) (*app.App, error) {
+	topicCfg *sarama.KafkaTopicConfig,
+) (*transactionscheduler.TxScheduler, error) {
 	// Initialize dependencies
 	authjwt.Init(ctx)
 	authkey.Init(ctx)
@@ -282,13 +287,29 @@ func newTransactionSchedulerApp(ctx context.Context,
 	gock.InterceptClient(httpClient)
 	chainRegistryClient := chainClient.NewHTTPClient(httpClient, conf)
 
-	return transactionscheduler.New(
-		transactionscheduler.NewConfig(viper.GetViper()),
-		postgres.GetManager(),
+	pgmngr := postgres.GetManager()
+	txSchedulerConfig := transactionscheduler.NewConfig(viper.GetViper())
+
+	txSchedulerApp, err := transactionscheduler.NewTxSchedulerApp(
+		txSchedulerConfig,
+		pgmngr,
 		authjwt.GlobalChecker(), authkey.GlobalChecker(),
 		chainRegistryClient,
 		contractRegistryClient,
 		sarama.GlobalSyncProducer(),
 		topicCfg,
 	)
+	if err != nil {
+		return nil, err
+	}
+
+	txSentryDaemon, err := transactionscheduler.NewTxSentryDaemon(pgmngr, txSchedulerConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return &transactionscheduler.TxScheduler{
+		TxSchedulerAPI: txSchedulerApp,
+		TxSentryDaemon: txSentryDaemon,
+	}, nil
 }

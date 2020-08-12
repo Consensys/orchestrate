@@ -121,7 +121,9 @@ func (agent *PGJob) Search(ctx context.Context, filters *entities.JobFilters, te
 			Where("tmpl.id is null AND log.status = ?", filters.Status)
 	}
 
-	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants).Order("id ASC")
+	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants).
+		Where("job.updated_at > ?", filters.UpdatedAfter). // No need to check this filter as the zero value is 1/1/0001 0h:0m:0s
+		Order("id ASC")
 
 	err := pg.Select(ctx, query)
 	if err != nil {

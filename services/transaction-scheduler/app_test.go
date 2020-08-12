@@ -1,3 +1,5 @@
+// +build unit
+
 package transactionscheduler
 
 import (
@@ -28,7 +30,7 @@ func TestApp(t *testing.T) {
 	cfg.Store.Type = "postgres"
 
 	kCfg := sarama.NewKafkaTopicConfig(viper.New())
-	_, err := New(
+	_, err := NewTxSchedulerApp(
 		cfg,
 		postgres.GetManager(),
 		jwtChecker, keyChecker,
