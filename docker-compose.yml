@@ -169,6 +169,17 @@ services:
       - transaction-scheduler
     command: tx-crafter run
 
+  tx-signer-init:
+    build: ./scripts/deps/config/hashicorp
+    environment:
+      VAULT_ADDR: ${VAULT_ADDR-http://vault:8200}
+    networks:
+      - orchestrate
+    volumes:
+      - vault-token:/vault/token
+      - ./scripts/deps/config/hashicorp/renew.sh:/renew.sh
+    command: sh /renew.sh
+
   tx-signer:
     <<: *container-common
     environment:
@@ -177,8 +188,10 @@ services:
       SECRET_PKEY: ${SECRET_PKEY-}
       SECRET_STORE: ${SECRET_STORE-hashicorp}
     volumes:
-      - vault-token:/vault/token:ro
+      - vault-token:/vault/token
       - ./build/bin/orchestrate:/bin/main
+    depends_on:
+      - tx-signer-init
     command: tx-signer run
 
   tx-sender:
@@ -186,7 +199,7 @@ services:
     environment:
       <<: *default-variables
       JAEGER_SERVICE_NAME: TX-SENDER
-    depends_on: 
+    depends_on:
       - transaction-scheduler
     command: tx-sender run
 
@@ -237,4 +250,4 @@ networks:
       name: deps_orchestrate
   quorum:
     external:
-      name: quorum_quorum-tessera
+      name: deps_quorum-tessera

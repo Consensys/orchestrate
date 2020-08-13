@@ -27,7 +27,7 @@ func Init(ctx context.Context) {
 
 		vault, err := NewSecretStore(ConfigFromViper(), multitenancy.GlobalKeyBuilder())
 		if err != nil {
-			log.Fatalf("Key Store: Cannot init hashicorp vault got error: %q", err)
+			log.Fatalf("KeyStore: Cannot init hashicorp vault got error: %q", err)
 		}
 
 		// Set store

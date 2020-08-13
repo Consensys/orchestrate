@@ -123,7 +123,7 @@ func (v *Hashicorp) SetTokenFromConfig(c *Config) error {
 	// Immediately delete the file after it was read
 	err = os.Remove(c.TokenFilePath)
 	if err != nil {
-		log.WithError(err).Errorf("could not delete token file")
+		log.WithError(err).Warn("could not delete token file")
 	}
 
 	decoded := strings.TrimSuffix(string(encoded), "\n") // Remove the newline if it exists

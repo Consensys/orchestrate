@@ -272,11 +272,8 @@ services:
 
 networks:
   quorum-tessera:
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-      - subnet: 172.16.239.0/24
+    external:
+      name: deps_quorum-tessera
   orchestrate:
     external:
       name: deps_orchestrate

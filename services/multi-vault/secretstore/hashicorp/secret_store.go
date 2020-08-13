@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"sync"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -22,15 +21,14 @@ type SecretStore struct {
 
 // NewSecretStore construct a new HashiCorp vault given a configfile or nil
 func NewSecretStore(config *Config, keyBuilder *multitenancy.KeyBuilder) (*SecretStore, error) {
-
 	hash, err := NewVaultClient(config)
 	if err != nil {
-		log.Fatalf("Could not start vault: %v", err)
+		return nil, errors.InternalError("HashiCorp: Could not start vault: %v", err)
 	}
 
 	err = hash.SetTokenFromConfig(config)
 	if err != nil {
-		log.Fatalf("Could not start vault: %v", err)
+		return nil, errors.InternalError("HashiCorp: Could not start vault: %v", err)
 	}
 
 	store := &SecretStore{
@@ -39,54 +37,57 @@ func NewSecretStore(config *Config, keyBuilder *multitenancy.KeyBuilder) (*Secre
 		KeyBuilder: keyBuilder,
 	}
 
-	store.ManageToken()
+	err = store.ManageToken()
+	if err != nil {
+		return nil, err
+	}
+
 	return store, nil
 }
 
 // ManageToken starts a loop that will renew the token automatically
-func (store *SecretStore) ManageToken() {
+func (store *SecretStore) ManageToken() error {
 	secret, err := store.Client.Auth().Token().LookupSelf()
 	if err != nil {
-		log.Fatalf("Initial token lookup failed: %v", err)
+		return errors.InternalError("HashiCorp: Initial token lookup failed: %v", err)
 	}
 
-	vaultTTL64, err := secret.Data["ttl"].(json.Number).Int64()
+	log.Infof("HashiCorp: Token data %q", secret.Data)
+	tokenTTL64, err := secret.Data["creation_ttl"].(json.Number).Int64()
 	if err != nil {
-		log.Fatalf("Could not read vault ttl: %v", err)
+		return errors.InternalError("HashiCorp: Could not read vault creation ttl: %v", err)
 	}
 
-	vaultTokenTTL := int(vaultTTL64)
-	if vaultTokenTTL < 1 {
-		// case where the tokenTTL is infinite
-		return
+	if int(tokenTTL64) == 0 {
+		log.Info("HashiCorp: token does never expire(root token)")
+		return nil
 	}
 
-	log.Debugf("Vault TTL: %v", vaultTokenTTL)
-	log.Debugf("64: %v", vaultTTL64)
-
-	timeToWait := time.Duration(
-		int(float64(
-			vaultTokenTTL,
-		)*0.75), // We wait 75% of the TTL to refresh
-	) * time.Second
-
-	ticker := time.NewTicker(timeToWait)
-	log.Debugf("time to wait: %v", timeToWait)
+	tokenExpireIn64, err := secret.Data["ttl"].(json.Number).Int64()
+	if err != nil {
+		return errors.InternalError("HashiCorp: Could not read vault ttl: %v", err)
+	}
+	log.Debugf("HashiCorp: Vault token expires in %d seconds", tokenExpireIn64)
 
 	store.rtl = &RenewTokenLoop{
-		TTL:    vaultTokenTTL,
-		ticker: ticker,
-		Quit:   make(chan bool, 1),
-		Hash:   store,
-
+		TTL:               int(tokenExpireIn64),
+		Quit:              make(chan bool, 1),
+		Hash:              store,
 		RtlTimeRetry:      2,
 		RtlMaxNumberRetry: 3,
 	}
 
 	err = store.rtl.Refresh()
 	if err != nil {
-		log.Fatalf("Initial token refresh failed: %v", err)
+		return errors.InternalError("HashiCorp: Initial token refresh failed: %v", err)
 	}
+
+	log.Info("HashiCorp: Initial token refresh succeeded")
+
+	// Start refresh token loop
+	store.rtl.Run()
+
+	return nil
 }
 
 // Store writes in the vault
@@ -104,7 +105,7 @@ func (store *SecretStore) Store(ctx context.Context, rawKey, value string) error
 		if storedValue == value {
 			return nil
 		}
-		return errors.AlreadyExistsError("A different secret already exists for key: %v", key).ExtendComponent(component)
+		return errors.AlreadyExistsError("HashiCorp: A different secret already exists for key: %v", key).ExtendComponent(component)
 	}
 
 	err = store.Client.Logical.Write(key, value)

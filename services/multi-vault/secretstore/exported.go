@@ -37,6 +37,7 @@ func Init(ctx context.Context) {
 			secretStore = memory.GlobalStore()
 
 		case hashicorpOpt:
+
 			// Create an HashiCorp Vault object
 			hashicorp.Init(ctx)
 			secretStore = hashicorp.GlobalStore()
@@ -48,10 +49,10 @@ func Init(ctx context.Context) {
 
 		default:
 			// Key Store type should be one of "memory", "hashicorp"
-			log.Fatalf("Secret Store: Invalid Store type %q", viper.GetString(secretStoreViperKey))
+			log.Fatalf("SecretStore: Invalid Store type %q", viper.GetString(secretStoreViperKey))
 		}
 
-		log.Infof("Secret Store: %q ready", viper.GetString(secretStoreViperKey))
+		log.Infof("SecretStore: %q ready", viper.GetString(secretStoreViperKey))
 	})
 }
 
