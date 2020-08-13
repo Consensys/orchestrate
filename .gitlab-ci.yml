@@ -28,7 +28,8 @@ services:
       allow_failure: false
     - if: $CI_COMMIT_TAG
       when: never
-    - when: manual
+    - if: $CI_COMMIT_BRANCH != "master"
+      when: manual
 
 .go-cache:
   before_script:
@@ -109,14 +110,14 @@ services:
   # Release static swagger doc for latest version on Gitlab pages
   image: node:12.16.2-stretch-slim
   before_script:
-#    - |
-#      if [ -z "$CI_COMMIT_TAG" ]; then
-#        exit 1
-#      elif [[ $CI_COMMIT_TAG == *"-rc"* ]]; then
-#        DOC_VERSION="latest"
-#      else
-#        DOC_VERSION="stable"
-#      fi
+    #    - |
+    #      if [ -z "$CI_COMMIT_TAG" ]; then
+    #        exit 1
+    #      elif [[ $CI_COMMIT_TAG == *"-rc"* ]]; then
+    #        DOC_VERSION="latest"
+    #      else
+    #        DOC_VERSION="stable"
+    #      fi
     - DOC_VERSION="latest"
     - npm install swagger-combine@1.1.2
     - npm install redoc-cli@0.9.10
@@ -136,7 +137,7 @@ services:
     - mv redoc-static.html public/${DOC_VERSION}/index.html
     # create a redirect from home to latest for people landing on root
     - sed -e "s~{{LATEST_VERSION_URL}}~${CI_PAGES_URL}/latest~" public/index.html.template > public/index.html
-      
+
 test:
   <<: *go-setup
   <<: *rules
@@ -273,6 +274,9 @@ build-e2e-on-master:
     - *build-e2e
     - docker tag ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}/e2e:latest
     - docker push ${CI_REGISTRY_IMAGE}/e2e:latest
+  only:
+    refs:
+      - master
 
 build-e2e-on-tag:
   <<: *docker-setup
@@ -310,9 +314,9 @@ pages:
   <<: *build-pages
   # must be on the last stage to make sure the doc is updated only if everything passed
   stage: doc
-#  cache:
-#    paths:
-#      - public
+  #  cache:
+  #    paths:
+  #      - public
   artifacts:
     when: always
     paths:
