@@ -10,10 +10,11 @@ import (
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/sender/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
@@ -63,7 +64,7 @@ func TestSender_RawTransaction(t *testing.T) {
 
 	schedulerClient := mock2.NewMockTransactionSchedulerClient(ctrl)
 
-	ec := mock.NewMockTransactionSender(ctrl)
+	ec := mocks.NewMockEthClient(ctrl)
 	sender := Sender(ec, schedulerClient)
 
 	t.Run("should execute raw transaction", func(t *testing.T) {
@@ -115,13 +116,43 @@ func TestSender_TesseraTx(t *testing.T) {
 
 	schedulerClient := mock2.NewMockTransactionSchedulerClient(ctrl)
 
-	ec := mock.NewMockTransactionSender(ctrl)
+	ec := mocks.NewMockEthClient(ctrl)
 	sender := Sender(ec, schedulerClient)
 
 	t.Run("should execute Tessera private transaction successfully", func(t *testing.T) {
+		nextJobUUID := "nextJobUUID"
 		txctx := newTxCtx(envelopeId, txHash, txRaw)
 		_ = txctx.Envelope.
 			SetJobType(tx.JobType_ETH_TESSERA_PRIVATE_TX).
+			SetPrivateFor([]string{"SetPrivateFor=="}).
+			SetPrivateFrom("privateFrom==").
+			SetNextJobUUID(nextJobUUID).
+			SetDataString("0x0123")
+
+		ec.EXPECT().StoreRaw(txctx.Context(), chainRegistryUrl+"/tessera/",
+			txctx.Envelope.MustGetDataBytes(), txctx.Envelope.GetPrivateFrom()).
+			Return(txHash, nil)
+
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
+			&txschedulertypes.UpdateJobRequest{
+				Status: utils.StatusPending,
+			}))
+		
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
+			&txschedulertypes.UpdateJobRequest{
+				Status: utils.StatusStored,
+				Transaction: &entities.ETHTransaction{
+					EnclaveKey: txHash,
+				},
+			}))
+		
+		sender(txctx)
+	})
+
+	t.Run("should execute Tessera Marking transaction successfully", func(t *testing.T) {
+		txctx := newTxCtx(envelopeId, txHash, txRaw)
+		_ = txctx.Envelope.
+			SetJobType(tx.JobType_ETH_TESSERA_MARKING_TX).
 			SetPrivateFor([]string{"SetPrivateFor=="}).
 			SetPrivateFrom("privateFrom==")
 
@@ -137,10 +168,10 @@ func TestSender_TesseraTx(t *testing.T) {
 		sender(txctx)
 	})
 
-	t.Run("should fail to execute Tessera with missing PrivateFor", func(t *testing.T) {
+	t.Run("should fail to execute Tessera Marking transaction with missing PrivateFor", func(t *testing.T) {
 		txctx := newTxCtx(envelopeId, txHash, txRaw)
 		_ = txctx.Envelope.
-			SetJobType(tx.JobType_ETH_TESSERA_PRIVATE_TX).
+			SetJobType(tx.JobType_ETH_TESSERA_MARKING_TX).
 			SetPrivateFrom("privateFrom==")
 
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
@@ -171,16 +202,14 @@ func TestSender_EEAPrivateTransaction(t *testing.T) {
 
 	schedulerClient := mock2.NewMockTransactionSchedulerClient(ctrl)
 
-	ec := mock.NewMockTransactionSender(ctrl)
+	ec := mocks.NewMockEthClient(ctrl)
 	sender := Sender(ec, schedulerClient)
 
-	t.Run("should execute eea private transaction", func(t *testing.T) {
+	t.Run("should execute eea marking transaction", func(t *testing.T) {
 		txctx := newTxCtx(envelopeId, txHash, txRaw)
-		_ = txctx.Envelope.
-			SetJobType(tx.JobType_ETH_ORION_EEA_TX)
+		_ = txctx.Envelope.SetJobType(tx.JobType_ETH_ORION_MARKING_TX)
 
-		ec.EXPECT().SendRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).
-			Return(ethcommon.HexToHash(txHash), nil)
+		ec.EXPECT().SendRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).Return(ethcommon.HexToHash(txHash), nil)
 
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
 			&txschedulertypes.UpdateJobRequest{
@@ -189,14 +218,43 @@ func TestSender_EEAPrivateTransaction(t *testing.T) {
 
 		sender(txctx)
 	})
+	t.Run("should execute eea private transaction", func(t *testing.T) {
+		nextJobUUID := "nextJobUUID"
+		txctx := newTxCtx(envelopeId, txHash, txRaw)
+		_ = txctx.Envelope.
+			SetJobType(tx.JobType_ETH_ORION_EEA_TX).
+			SetPrivateFor([]string{"SetPrivateFor=="}).
+			SetNextJobUUID(nextJobUUID).
+			SetDataString("0x0123")
+
+		ec.EXPECT().PrivDistributeRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).
+			Return(ethcommon.HexToHash(txHash), nil)
+
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
+			&txschedulertypes.UpdateJobRequest{
+				Status: utils.StatusPending,
+			}))
+		
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
+			&txschedulertypes.UpdateJobRequest{
+				Status: utils.StatusStored,
+				Transaction: &entities.ETHTransaction{
+					Hash: txHash,
+				},
+			}))
+
+		sender(txctx)
+	})
 
 	t.Run("should fail execute raw transaction", func(t *testing.T) {
 		txctx := newTxCtx(envelopeId, txHash, txRaw)
 		_ = txctx.Envelope.
-			SetJobType(tx.JobType_ETH_ORION_EEA_TX)
+			SetJobType(tx.JobType_ETH_ORION_EEA_TX).
+			SetPrivateFor([]string{"SetPrivateFor=="}).
+			SetDataString("0x0123")
 		err := fmt.Errorf("failed to send a raw transaction")
 
-		ec.EXPECT().SendRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).
+		ec.EXPECT().PrivDistributeRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).
 			Return(ethcommon.Hash{}, err)
 
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(

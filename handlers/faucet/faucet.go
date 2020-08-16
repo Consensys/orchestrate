@@ -36,7 +36,7 @@ func Faucet(fct faucet.Faucet, faucetClient client.FaucetClient) engine.HandlerF
 		}
 
 		req := &faucettypes.Request{
-			ScheduleUUID:      txctx.Envelope.GetContextLabelsValue("scheduleUUID"),
+			ScheduleUUID:      txctx.Envelope.GetScheduleUUID(),
 			ParentTxID:        txctx.Envelope.GetID(),
 			ChildTxID:         txctx.Envelope.GetContextLabelsValue("faucetChildTxID"),
 			ChainID:           txctx.Envelope.GetChainID(),

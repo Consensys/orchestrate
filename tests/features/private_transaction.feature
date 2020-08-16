@@ -29,6 +29,7 @@ Feature: Private transactions
     Given I register the following alias
       | alias                    | value           |
       | quorumDeployContractTxID | {{random.uuid}} |
+      | quorumSentTxContractTxID | {{random.uuid}} |
     Then I track the following envelopes
       | ID                           |
       | {{quorumDeployContractTxID}} |
@@ -53,16 +54,57 @@ Feature: Private transactions
 }
       """
     Then the response code should be 202
+    Then I register the following response fields
+      | alias           | path                  |
+      | jobPrivTxOne    | schedule.jobs[0].uuid |
+      | jobMarkingTxOne | schedule.jobs[1].uuid |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.signer"
-    And Envelopes should have the following fields
-      | InternalLabels.enclaveKey |
-      | ~                         |
     Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.ContractAddress |
       | 1              | ~                       |
+    And I register the following envelope fields
+      | id                  | alias               | path                    |
+      | {{jobMarkingTxOne}} | counterContractAddr | Receipt.ContractAddress |
+    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobPrivTxOne}}"
+    Then the response code should be 200
+    And Response should have the following fields
+      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
+      | STORED | CREATED        | STARTED        | PENDING        | STORED         |
+    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobMarkingTxOne}}"
+    Then the response code should be 200
+    And Response should have the following fields
+      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
+      | MINED  | CREATED        | STARTED        | PENDING        | MINED          |
+    Then I track the following envelopes
+      | ID                           |
+      | {{quorumSentTxContractTxID}} |
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/send" with json:
+  """
+{
+    "chain": "quorum-{{scenarioID}}",
+    "params": {
+        "from": "{{account1}}",
+        "to": "{{counterContractAddr}}",
+        "methodSignature": "transfer(address,uint256)",
+        "args": ["0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff","0x2"],
+        "protocol": "Tessera",
+        "privateFrom": "{{global.nodes.quorum_1.privateAddress}}",
+        "privateFor": ["{{global.nodes.quorum_2.privateAddress}}"]
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{quorumSentTxContractTxID}}"
+    }
+}
+      """
+    Then the response code should be 202
+    Then Envelopes should be in topic "tx.decoded"
 
   @quorum
   Scenario: Fail to deploy private ERC20 contract with unknown ChainName
@@ -141,9 +183,6 @@ Feature: Private transactions
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.signer"
-    And Envelopes should have the following fields
-      | InternalLabels.enclaveKey |
-      | ~                         |
     Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
@@ -206,6 +245,7 @@ Feature: Private transactions
     Given I register the following alias
       | alias                  | value           |
       | besuDeployContractTxID | {{random.uuid}} |
+      | besuSentTxContractTxID | {{random.uuid}} |
     Then I track the following envelopes
       | ID                         |
       | {{besuDeployContractTxID}} |
@@ -230,6 +270,10 @@ Feature: Private transactions
 }
       """
     Then the response code should be 202
+    Then I register the following response fields
+      | alias           | path                  |
+      | jobPrivTxTwo    | schedule.jobs[0].uuid |
+      | jobMarkingTxTwo | schedule.jobs[1].uuid |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.signer"
     Then Envelopes should be in topic "tx.sender"
@@ -237,6 +281,49 @@ Feature: Private transactions
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.Output | Receipt.ContractAddress | Receipt.PrivateFrom                    | Receipt.PrivateFor                         |
       | 1              | ~              | ~                       | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_2.privateAddress}}"] |
+    And I register the following envelope fields
+      | id                  | alias               | path                    |
+      | {{jobMarkingTxTwo}} | counterContractAddr | Receipt.ContractAddress |
+    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobPrivTxTwo}}"
+    Then the response code should be 200
+    And Response should have the following fields
+      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status | transaction.from |
+      | STORED | CREATED        | STARTED        | PENDING        | STORED         | {{account2}}     |
+    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobMarkingTxTwo}}"
+    Then the response code should be 200
+    And Response should have the following fields
+      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status | annotations.oneTimeKey |
+      | MINED  | CREATED        | STARTED        | PENDING        | MINED          | true                   |
+    Then I track the following envelopes
+      | ID                         |
+      | {{besuSentTxContractTxID}} |
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/send" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "from": "{{account2}}",
+        "to": "{{counterContractAddr}}",
+        "methodSignature": "transfer(address,uint256)",
+        "args": ["0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff","0x2"],
+        "protocol": "Orion",
+        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+        "privateFor": ["{{global.nodes.besu_2.privateAddress}}"]
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{besuSentTxContractTxID}}"
+    }
+}
+      """
+    Then the response code should be 202
+    Then Envelopes should be in topic "tx.decoded"
+    And Envelopes should have the following fields
+      | Receipt.Status |
+      | 1              |
 
   @besu
   Scenario: Batch deploy private ERC20 contract with Besu and Orion with different PrivateFor
@@ -711,3 +798,77 @@ Feature: Private transactions
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.Output | Receipt.ContractAddress | Receipt.PrivateFrom                    | Receipt.PrivateFor                         |
       | 1              | ~              | ~                       | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_2.privateAddress}}"] |
+
+  @besu
+  Scenario: Private Transaction using Job and too high nonce
+    Given I register the following alias
+      | alias | value              |
+      | to1   | {{random.account}} |
+    Then I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
+      """
+{}
+      """
+    Then the response code should be 200
+    Then I register the following response fields
+      | alias           | path |
+      | scheduleOneUUID | uuid |
+    When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
+  """
+{
+    "scheduleUUID": "{{scheduleOneUUID}}",
+	"chainUUID": "{{besu.UUID}}",
+    "type": "eth://orion/markingTransaction",
+    "transaction": {
+        "from": "{{account1}}"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}"
+    }
+}
+      """
+    Then the response code should be 200
+    Then I register the following response fields
+      | alias              | path |
+      | txMarkingTxJobUUID | uuid |
+    When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
+  """
+{
+    "scheduleUUID": "{{scheduleOneUUID}}",
+	"chainUUID": "{{besu.UUID}}",
+	"nextJobUUID": "{{txMarkingTxJobUUID}}",
+    "type": "eth://orion/eeaTransaction",
+    "transaction": {
+        "from": "{{account1}}",
+        "to": "{{to1}}",
+        "nonce": "1000001",
+        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+        "privateFor": ["{{global.nodes.besu_2.privateAddress}}"]
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}"
+    }
+}
+      """
+    Then the response code should be 200
+    Then I register the following response fields
+      | alias         | path |
+      | txPrivJobUUID | uuid |
+    Then I track the following envelopes
+      | ID                     |
+      | {{txMarkingTxJobUUID}} |
+    When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txPrivJobUUID}}/start"
+    Then the response code should be 202
+    Then Envelopes should be in topic "tx.crafter"
+    Then Envelopes should be in topic "tx.sender"
+    Then Envelopes should be in topic "tx.decoded"
+    And Envelopes should have the following fields
+      | Receipt.Status |
+      | 1              |
+    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{txPrivJobUUID}}"
+    Then the response code should be 200
+    And Response should have the following fields
+      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status | transaction.nonce |
+      | STORED | CREATED        | STARTED        | PENDING        | STORED         | 0                 |

@@ -19,6 +19,7 @@ func NewTransactionModelFromEntities(tx *entities.ETHTransaction) *models.Transa
 		PrivateFrom:    tx.PrivateFrom,
 		PrivateFor:     tx.PrivateFor,
 		PrivacyGroupID: tx.PrivacyGroupID,
+		EnclaveKey:     tx.EnclaveKey,
 		CreatedAt:      tx.CreatedAt,
 		UpdatedAt:      tx.UpdatedAt,
 	}
@@ -37,6 +38,7 @@ func NewTransactionEntityFromModels(tx *models.Transaction) *entities.ETHTransac
 		PrivateFrom:    tx.PrivateFrom,
 		PrivateFor:     tx.PrivateFor,
 		PrivacyGroupID: tx.PrivacyGroupID,
+		EnclaveKey:     tx.EnclaveKey,
 		Raw:            tx.Raw,
 		CreatedAt:      tx.CreatedAt,
 		UpdatedAt:      tx.UpdatedAt,
@@ -79,6 +81,9 @@ func UpdateTransactionModelFromEntities(txModel *models.Transaction, tx *entitie
 	}
 	if tx.PrivacyGroupID != "" {
 		txModel.PrivacyGroupID = tx.PrivacyGroupID
+	}
+	if tx.EnclaveKey != "" {
+		txModel.EnclaveKey = tx.EnclaveKey
 	}
 	if tx.Raw != "" {
 		txModel.Raw = tx.Raw

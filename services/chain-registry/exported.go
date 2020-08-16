@@ -10,7 +10,7 @@ import (
 	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt"
 	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/key"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/rpc"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/rpc"
 )
 
 var (
@@ -23,13 +23,13 @@ func Init(ctx context.Context) {
 		// Initialize dependencies
 		authjwt.Init(ctx)
 		authkey.Init(ctx)
-		rpc.Init(ctx)
+		ethclient.Init(ctx)
 
 		var err error
 		appli, err = New(
 			NewConfig(viper.GetViper()),
 			postgres.GetManager(),
-			rpc.GlobalClient(),
+			ethclient.GlobalClient(),
 			authjwt.GlobalChecker(), authkey.GlobalChecker(),
 		)
 		if err != nil {

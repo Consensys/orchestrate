@@ -4,16 +4,16 @@ import (
 	"strconv"
 
 	log "github.com/sirupsen/logrus"
+	hnonce "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/nonce"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/nonce/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce"
 )
 
 // Handler creates and return an handler for nonce
-func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFunc {
+func Nonce(nm nonce.Attributor, ec hnonce.EthClient) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		txctx.Logger.WithField("envelope_id", txctx.Envelope.GetID()).Debugf("nonce handler starts")
 		if txctx.Envelope.IsOneTimeKeySignature() {
@@ -24,6 +24,11 @@ func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFun
 			})
 
 			// Set nonce
+			_ = txctx.Envelope.SetNonce(0)
+			return
+		}
+
+		if txctx.Envelope.IsEthSendTesseraPrivateTransaction() {
 			_ = txctx.Envelope.SetNonce(0)
 			return
 		}
@@ -79,11 +84,21 @@ func Nonce(nm nonce.Attributor, ec ethclient.ChainStateReader) engine.HandlerFun
 				}
 
 				// Retrieve nonce from chain
-				pendingNonce, err := utils.GetNonce(txctx.Context(), ec, txctx.Envelope, url)
-				if err != nil {
-					e := txctx.AbortWithError(err).ExtendComponent(component)
-					txctx.Logger.WithError(e).Errorf("nonce: could not read nonce from chain")
-					return
+				var pendingNonce uint64
+				if txctx.Envelope.IsEeaSendPrivateTransaction() {
+					pendingNonce, err = utils.EEAGetNonce(txctx.Context(), ec, txctx.Envelope, url)
+					if err != nil {
+						e := txctx.AbortWithError(err).ExtendComponent(component)
+						txctx.Logger.WithError(e).Errorf("nonce: could not read private eea nonce from chain")
+						return
+					}
+				} else {
+					pendingNonce, err = utils.GetNonce(txctx.Context(), ec, txctx.Envelope, url)
+					if err != nil {
+						e := txctx.AbortWithError(err).ExtendComponent(component)
+						txctx.Logger.WithError(e).Errorf("nonce: could not read nonce from chain")
+						return
+					}
 				}
 
 				n = pendingNonce

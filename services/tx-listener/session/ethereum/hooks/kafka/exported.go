@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/viper"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/rpc"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	crc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
 )
@@ -21,7 +21,7 @@ var (
 func initComponent(ctx context.Context) {
 	utils.InParallel(
 		// Initialize Ethereum Client
-		func() { rpc.Init(ctx) },
+		func() { ethclient.Init(ctx) },
 		// Initialize Contract Registry Client
 		func() { crc.Init(ctx, viper.GetString(crc.ContractRegistryURLViperKey)) },
 		// Initialize Sync Producer
@@ -39,7 +39,7 @@ func Init(ctx context.Context) {
 		hook = NewHook(
 			NewConfig(),
 			crc.GlobalClient(),
-			rpc.GlobalClient(),
+			ethclient.GlobalClient(),
 			broker.GlobalSyncProducer(),
 			txscheduler.GlobalClient(),
 		)

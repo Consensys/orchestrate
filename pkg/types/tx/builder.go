@@ -107,17 +107,21 @@ func (e *Envelope) IsEthSendRawTransaction() bool {
 	return e.JobType == JobType_ETH_RAW_TX
 }
 
-// IsEthSendPrivateTransaction for Quorum Constellation
-func (e *Envelope) IsEthSendPrivateTransaction() bool {
-	return e.JobType == JobType_ETH_TESSERA_PUBLIC_TX
+// IsEthSendTesseraMarkingTransaction for Quorum Constellation
+func (e *Envelope) IsEthSendTesseraMarkingTransaction() bool {
+	return e.JobType == JobType_ETH_TESSERA_MARKING_TX
 }
 
-// IsEthSendRawPrivateTransaction for Quorum Tessera
-func (e *Envelope) IsEthSendRawPrivateTransaction() bool {
+// IsEthSendTesseraPrivateTransaction for Quorum Tessera
+func (e *Envelope) IsEthSendTesseraPrivateTransaction() bool {
 	return e.JobType == JobType_ETH_TESSERA_PRIVATE_TX
 }
 
 // IsEthSendRawTransaction for Besu Orion
+func (e *Envelope) IsEeaSendMarkingTransaction() bool {
+	return e.JobType == JobType_ETH_ORION_MARKING_TX
+}
+
 func (e *Envelope) IsEeaSendPrivateTransaction() bool {
 	return e.JobType == JobType_ETH_ORION_EEA_TX
 }
@@ -241,13 +245,7 @@ type Tx struct {
 func (e *Envelope) GetTransaction() (*ethtypes.Transaction, error) {
 	// TODO: Use custom validation with https://godoc.org/gopkg.in/go-playground/validator.v10#Validate.StructFiltered
 
-	var data []byte
-	if e.IsEthSendRawPrivateTransaction() {
-		data = e.MustGetEnclaveKeyBytes()
-	} else {
-		data = e.MustGetDataBytes()
-	}
-
+	data := e.MustGetDataBytes()
 	nonce, err := e.GetNonceUint64()
 	if err != nil {
 		return nil, err
@@ -256,10 +254,16 @@ func (e *Envelope) GetTransaction() (*ethtypes.Transaction, error) {
 	if value == nil || err != nil {
 		_ = e.SetValue(big.NewInt(0))
 	}
+
 	gas, err := e.GetGasUint64()
 	if err != nil {
-		return nil, err
+		if e.IsEeaSendPrivateTransaction() {
+			gas = 0
+		} else {
+			return nil, err
+		}
 	}
+
 	gasPrice, err := e.GetGasPriceBig()
 	if err != nil {
 		return nil, err
@@ -460,22 +464,6 @@ func (e *Envelope) SetNonceString(nonce string) error {
 func (e *Envelope) SetNonce(nonce uint64) *Envelope {
 	e.Nonce = &(&struct{ x uint64 }{nonce}).x
 	return e
-}
-
-// Store the nonce of the marking tx
-// @TODO Remove once Orion tx is spit into two jobs
-//  https://app.zenhub.com/workspaces/orchestrate-5ea70772b186e10067f57842/issues/pegasyseng/orchestrate/253
-func (e *Envelope) SetEEAMarkingTxNonce(nonce uint64) *Envelope {
-	return e.SetInternalLabelsValue("eeaMarkingTxNonce", strconv.FormatUint(nonce, 10))
-}
-
-func (e *Envelope) GetEEAMarkingNonce() (uint64, error) {
-	n := e.GetInternalLabelsValue("eeaMarkingTxNonce")
-	i, err := strconv.ParseUint(n, 10, 64)
-	if err != nil {
-		return 0, err
-	}
-	return i, nil
 }
 
 // GASPRICE
@@ -791,7 +779,6 @@ type Private struct {
 	PrivateFrom    string   `validate:"omitempty,base64"`
 	PrivateTxType  string   `validate:"omitempty,oneof=restricted unrestricted"`
 	PrivacyGroupID string   `validate:"omitempty,base64"`
-	EnclaveKey     string
 }
 
 func (e *Envelope) GetPrivateFor() []string {
@@ -829,19 +816,11 @@ func (e *Envelope) GetPrivacyGroupID() string {
 }
 
 func (e *Envelope) GetEnclaveKey() string {
-	return e.EnclaveKey
-}
-
-func (e *Envelope) MustGetEnclaveKeyBytes() []byte {
-	if e.EnclaveKey == "" {
-		return []byte{}
-	}
-	enclaveKey, _ := hexutil.Decode(e.EnclaveKey)
-	return enclaveKey
+	return e.InternalLabels[EnclaveKeyLabel]
 }
 
 func (e *Envelope) SetEnclaveKey(enclaveKey string) *Envelope {
-	e.EnclaveKey = enclaveKey
+	e.InternalLabels[EnclaveKeyLabel] = enclaveKey
 	return e
 }
 
@@ -852,6 +831,19 @@ func (e *Envelope) SetJobType(jobType JobType) *Envelope {
 
 func (e *Envelope) GetJobTypeString() string {
 	return e.JobType.String()
+}
+
+func (e *Envelope) GetScheduleUUID() string {
+	return e.ContextLabels[ScheduleUUIDLabel]
+}
+
+func (e *Envelope) GetNextJobUUID() string {
+	return e.ContextLabels[NextJobUUIDLabel]
+}
+
+func (e *Envelope) SetNextJobUUID(uuid string) *Envelope {
+	e.ContextLabels[NextJobUUIDLabel] = uuid
+	return e
 }
 
 func (e *Envelope) TxRequest() *TxRequest {
@@ -898,9 +890,6 @@ func (e *Envelope) fieldsToInternal() {
 	if e.GetChainUUID() != "" {
 		e.InternalLabels[ChainUUIDLabel] = e.GetChainUUID()
 	}
-	if e.GetEnclaveKey() != "" {
-		e.InternalLabels[EnclaveKeyLabel] = e.GetEnclaveKey()
-	}
 }
 
 func (e *Envelope) internalToFields() error {
@@ -912,7 +901,6 @@ func (e *Envelope) internalToFields() error {
 		return err
 	}
 	_ = e.SetChainUUID(e.InternalLabels[ChainUUIDLabel])
-	_ = e.SetEnclaveKey(e.InternalLabels[EnclaveKeyLabel])
 	return nil
 }
 

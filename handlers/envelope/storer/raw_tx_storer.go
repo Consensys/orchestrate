@@ -70,20 +70,53 @@ func RawTxStore(txSchedulerClient client.TransactionSchedulerClient) engine.Hand
 			return
 		}
 
-		retrievedTxHash := txctx.Envelope.GetTxHashString()
-		if computedTxHash != retrievedTxHash {
-			errMessage := fmt.Sprintf("expected transaction hash %s, but got %s. Overriding", computedTxHash, retrievedTxHash)
-			txctx.Logger.Errorf("errMessage")
+		txHash := txctx.Envelope.GetTxHashString()
+		switch {
+		case txctx.Envelope.IsEeaSendPrivateTransaction():
+			txctx.Logger.Debug("sender: updating eea private transaction")
+			_, updateErr := txSchedulerClient.UpdateJob(
+				txctx.Context(),
+				txctx.Envelope.GetID(),
+				&txschedulertypes.UpdateJobRequest{
+					Status: utils.StatusStored,
+					Transaction: &entities.ETHTransaction{
+						Hash: txHash,
+					},
+				})
+			if updateErr != nil {
+				e := errors.FromError(updateErr).ExtendComponent(component)
+				txctx.Logger.WithError(e).Errorf("sender: transaction scheduler failed to set eea marking tx data")
+				return
+			}
+		case txctx.Envelope.IsEthSendTesseraPrivateTransaction():
+			txctx.Logger.Debug("sender: updating tessera private transaction")
+			_, updateErr := txSchedulerClient.UpdateJob(
+				txctx.Context(),
+				txctx.Envelope.GetID(),
+				&txschedulertypes.UpdateJobRequest{
+					Status: utils.StatusStored,
+					Transaction: &entities.ETHTransaction{
+						EnclaveKey: txctx.Envelope.GetEnclaveKey(),
+					},
+				})
+			if updateErr != nil {
+				e := errors.FromError(updateErr).ExtendComponent(component)
+				txctx.Logger.WithError(e).Errorf("sender: transaction scheduler failed to set tessera marking tx data")
+				return
+			}
+		case computedTxHash != txHash:
+			warnMessage := fmt.Sprintf("expected transaction hash %s, but got %s. Overriding", computedTxHash, txHash)
+			txctx.Logger.Warnf(warnMessage)
 
 			_, updateErr := txSchedulerClient.UpdateJob(
 				txctx.Context(),
 				txctx.Envelope.GetID(),
 				&txschedulertypes.UpdateJobRequest{
 					Transaction: &entities.ETHTransaction{
-						Hash: retrievedTxHash,
+						Hash: txHash,
 					},
 					Status:  utils.StatusWarning,
-					Message: errMessage,
+					Message: warnMessage,
 				})
 
 			if updateErr != nil {

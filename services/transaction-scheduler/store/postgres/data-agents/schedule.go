@@ -42,7 +42,9 @@ func (agent *PGSchedule) FindOneByUUID(ctx context.Context, scheduleUUID string,
 	schedule := &models.Schedule{}
 
 	query := agent.db.ModelContext(ctx, schedule).
-		Relation("Jobs").
+		Relation("Jobs", func(q *orm.Query) (*orm.Query, error) {
+			return q.Order("id ASC"), nil
+		}).
 		Where("schedule.uuid = ?", scheduleUUID)
 
 	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants)

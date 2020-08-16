@@ -11,8 +11,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt/generator"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/rpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient"
+	rpcClient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
@@ -214,7 +214,7 @@ func InitializeScenario(s *godog.ScenarioContext) {
 		broker.GlobalSyncProducer(),
 		alias.GlobalAliasRegistry(),
 		generator.GlobalJWTGenerator(),
-		rpc.GlobalClient(),
+		rpcClient.GlobalClient(),
 		noncememory.GlobalNonceManager(),
 	)
 

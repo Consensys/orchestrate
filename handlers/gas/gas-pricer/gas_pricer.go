@@ -5,11 +5,12 @@ import (
 	"math/big"
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 )
 
@@ -35,7 +36,7 @@ func Pricer(p ethclient.GasPricer) engine.HandlerFunc {
 			}
 
 			// Set gas price
-			_ = txctx.Envelope.SetGasPrice(applyPriorityCoefficient(p, txctx.Envelope.ContextLabels["priority"]))
+			_ = txctx.Envelope.SetGasPrice(applyPriorityCoefficient(p, txctx.Envelope.GetContextLabelsValue(tx.PriorityLabel)))
 			txctx.Logger.Debugf("gas-pricer: gas price set")
 		}
 

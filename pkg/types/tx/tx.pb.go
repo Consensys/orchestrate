@@ -4,11 +4,12 @@
 package tx
 
 import (
-	fmt "fmt"
-	proto "github.com/golang/protobuf/proto"
+	"fmt"
+	"math"
+
+	"github.com/golang/protobuf/proto"
 	error1 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/error"
-	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
-	math "math"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -64,7 +65,7 @@ const (
 	JobType_ETH_RAW_TX             JobType = 1
 	JobType_ETH_ORION_MARKING_TX   JobType = 2
 	JobType_ETH_ORION_EEA_TX       JobType = 3
-	JobType_ETH_TESSERA_PUBLIC_TX  JobType = 4
+	JobType_ETH_TESSERA_MARKING_TX JobType = 4
 	JobType_ETH_TESSERA_PRIVATE_TX JobType = 5
 )
 
@@ -73,7 +74,7 @@ var JobType_name = map[int32]string{
 	1: "ETH_RAW_TX",
 	2: "ETH_ORION_MARKING_TX",
 	3: "ETH_ORION_EEA_TX",
-	4: "ETH_TESSERA_PUBLIC_TX",
+	4: "ETH_TESSERA_MARKING_TX",
 	5: "ETH_TESSERA_PRIVATE_TX",
 }
 
@@ -82,7 +83,7 @@ var JobType_value = map[string]int32{
 	"ETH_RAW_TX":             1,
 	"ETH_ORION_MARKING_TX":   2,
 	"ETH_ORION_EEA_TX":       3,
-	"ETH_TESSERA_PUBLIC_TX":  4,
+	"ETH_TESSERA_MARKING_TX":  4,
 	"ETH_TESSERA_PRIVATE_TX": 5,
 }
 

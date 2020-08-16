@@ -7,7 +7,7 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 )
@@ -34,39 +34,46 @@ func Estimator(p ethclient.GasEstimator) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		txctx.Logger.WithField("envelope_id", txctx.Envelope.GetID()).Debugf("gas estimator handler starts")
 
-		if txctx.Envelope.GetGas() == nil {
-			// Retrieve re-cycled CallMsg
-			call := pool.Get().(*ethereum.CallMsg)
-			defer pool.Put(call)
+		if txctx.Envelope.IsEeaSendPrivateTransaction() {
+			txctx.Logger.Debugf("gas-estimator: ignore gas calculation for eea private transaction")
+			return
+		}
 
-			// Estimate gas
-			EnvelopeToCallMsg(txctx.Envelope, call)
-
-			url, err := proxy.GetURL(txctx)
-			if err != nil {
-				return
-			}
-
-			g, err := p.EstimateGas(txctx.Context(), url, call)
-			if err != nil {
-				e := txctx.AbortWithError(err).ExtendComponent(component)
-				txctx.Logger.WithError(e).Errorf("gas-estimator: could not estimate gas limit")
-				return
-			}
-
-			// Set gas limit on context
-			_ = txctx.Envelope.SetGas(g)
-
+		if txctx.Envelope.GetGas() != nil {
 			// Enrich logger
 			txctx.Logger = txctx.Logger.WithFields(log.Fields{
-				"gas": g,
+				"gas": txctx.Envelope.MustGetGasUint64(),
 			})
-			txctx.Logger.Debugf("gas-estimator: gas limit set")
+			return
 		}
+
+		// Retrieve re-cycled CallMsg
+		call := pool.Get().(*ethereum.CallMsg)
+		defer pool.Put(call)
+
+		// Estimate gas
+		EnvelopeToCallMsg(txctx.Envelope, call)
+
+		url, err := proxy.GetURL(txctx)
+		if err != nil {
+			return
+		}
+
+		g, err := p.EstimateGas(txctx.Context(), url, call)
+		if err != nil {
+			e := txctx.AbortWithError(err).ExtendComponent(component)
+			txctx.Logger.WithError(e).Errorf("gas-estimator: could not estimate gas limit")
+			return
+		}
+
+		// Set gas limit on context
+		_ = txctx.Envelope.SetGas(g)
 
 		// Enrich logger
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"gas": txctx.Envelope.MustGetGasUint64(),
+			"gas": g,
 		})
+
+		txctx.Logger.Debugf("gas-estimator: gas limit set")
 	}
 }

@@ -11,11 +11,11 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/rpc"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/utils"
 )
 
 func TestHTTPCacheRequest_Valid(t *testing.T) {
-	msg := rpc.JSONRpcMessage{
+	msg := ethclient.JSONRpcMessage{
 		Method: "eth_getTransactionReceipt",
 	}
 	msg.Params, _ = json.Marshal([]string{"0x7d231ca6a5fc03f5365b3d62dcfe372ed5c13ac7014d016b52ed72094919556c"})
@@ -31,7 +31,7 @@ func TestHTTPCacheRequest_Valid(t *testing.T) {
 }
 
 func TestHTTPCacheRequest_ValidWithCustomTTL(t *testing.T) {
-	msg := rpc.JSONRpcMessage{
+	msg := ethclient.JSONRpcMessage{
 		Method: "eth_getBlockByNumber",
 	}
 	msg.Params, _ = json.Marshal([]string{"latest"})
@@ -55,7 +55,7 @@ func TestHTTPCacheRequest_IgnoreReqType(t *testing.T) {
 }
 
 func TestHTTPCacheRequest_IgnoreRPCMethod(t *testing.T) {
-	msg := rpc.JSONRpcMessage{
+	msg := ethclient.JSONRpcMessage{
 		Method: "eth_getTransactionCount",
 	}
 

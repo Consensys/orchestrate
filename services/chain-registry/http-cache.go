@@ -13,7 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/rpc"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/contract-registry/utils"
 )
@@ -41,7 +41,7 @@ func httpCacheRequest(req *http.Request) (c bool, k string, ttl time.Duration, e
 	// And now set a new body, which will simulate the same data we read
 	req.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 
-	var msg rpc.JSONRpcMessage
+	var msg ethclient.JSONRpcMessage
 	err = json.Unmarshal(body, &msg)
 	// In case request does not correspond to one of expected call RPC call, we ignore
 	if err != nil {
@@ -64,7 +64,7 @@ func httpCacheRequest(req *http.Request) (c bool, k string, ttl time.Duration, e
 }
 
 func httpCacheResponse(resp *http.Response) bool {
-	var msg rpc.JSONRpcMessage
+	var msg ethclient.JSONRpcMessage
 	err := json.UnmarshalBody(resp.Body, &msg)
 	if err != nil {
 		log.WithError(err).Debugf("HTTPCache: cannot decode response")
@@ -84,7 +84,7 @@ func httpCacheResponse(resp *http.Response) bool {
 	return true
 }
 
-func httpCacheGenerateKey(_ context.Context, msg *rpc.JSONRpcMessage) string {
+func httpCacheGenerateKey(_ context.Context, msg *ethclient.JSONRpcMessage) string {
 	return fmt.Sprintf("%s(%s)", msg.Method, string(msg.Params))
 }
 

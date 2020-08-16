@@ -30,11 +30,12 @@ type useCases struct {
 	getSchedule     schedules.GetScheduleUseCase
 	searchSchedules schedules.SearchSchedulesUseCase
 	// Jobs
-	createJob  jobs.CreateJobUseCase
-	getJob     jobs.GetJobUseCase
-	startJob   jobs.StartJobUseCase
-	updateJob  jobs.UpdateJobUseCase
-	searchJobs jobs.SearchJobsUseCase
+	createJob    jobs.CreateJobUseCase
+	getJob       jobs.GetJobUseCase
+	startJob     jobs.StartJobUseCase
+	startNextJob jobs.StartNextJobUseCase
+	updateJob    jobs.UpdateJobUseCase
+	searchJobs   jobs.SearchJobsUseCase
 }
 
 func NewUseCases(
@@ -50,6 +51,7 @@ func NewUseCases(
 	getScheduleUC := schedules.NewGetScheduleUseCase(db)
 	createJobUC := jobs.NewCreateJobUseCase(db, txValidator)
 	startJobUC := jobs.NewStartJobUseCase(db, producer, topicsCfg)
+	startNextJobUC := jobs.NewStartNextJobUseCase(db, startJobUC)
 	getTransactionUC := transactions.NewGetTxUseCase(db, getScheduleUC)
 
 	sendTxUC := transactions.NewSendTxUseCase(txValidator, db, chainRegistryClient, startJobUC, createJobUC, createScheduleUC, getTransactionUC)
@@ -66,11 +68,12 @@ func NewUseCases(
 		getSchedule:     getScheduleUC,
 		searchSchedules: schedules.NewSearchSchedulesUseCase(db),
 		// Jobs
-		createJob:  createJobUC,
-		getJob:     jobs.NewGetJobUseCase(db),
-		searchJobs: jobs.NewSearchJobsUseCase(db),
-		updateJob:  jobs.NewUpdateJobUseCase(db),
-		startJob:   startJobUC,
+		createJob:    createJobUC,
+		getJob:       jobs.NewGetJobUseCase(db),
+		searchJobs:   jobs.NewSearchJobsUseCase(db),
+		updateJob:    jobs.NewUpdateJobUseCase(db, startNextJobUC),
+		startJob:     startJobUC,
+		startNextJob: startNextJobUC,
 	}
 }
 
@@ -124,4 +127,8 @@ func (u *useCases) UpdateJob() jobs.UpdateJobUseCase {
 
 func (u *useCases) SearchJobs() jobs.SearchJobsUseCase {
 	return u.searchJobs
+}
+
+func (u *useCases) StartNextJob() jobs.StartNextJobUseCase {
+	return u.startNextJob
 }

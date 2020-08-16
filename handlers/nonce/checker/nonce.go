@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
+	hnonce "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/nonce"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/nonce/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
 	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/error"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
@@ -38,7 +38,7 @@ func controlRecoveryCount(txctx *engine.TxContext, conf *Configuration) error {
 
 // Checker creates an handler responsible to check transaction nonce value
 // It makes sure that transactions with invalid nonce are not processed
-func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader, tracker *RecoveryTracker) engine.HandlerFunc {
+func Checker(conf *Configuration, nm nonce.Sender, ec hnonce.EthClient, tracker *RecoveryTracker) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		// We only use RawDecoder when user has sent a Ethereum Raw transaction, ignore the rest
 		if txctx.Envelope.IsEthSendRawTransaction() {
@@ -52,6 +52,12 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 		if txctx.Envelope.IsOneTimeKeySignature() {
 			// If transaction has been generated externally we skip nonce check
 			txctx.Logger.Debugf("nonce: skip check for one-time-key signing")
+			return
+		}
+
+		if txctx.Envelope.IsEthSendTesseraPrivateTransaction() {
+			// If transaction has been generated externally we skip nonce check
+			txctx.Logger.Debugf("nonce: skip check for tessera private transaction signing")
 			return
 		}
 
@@ -89,11 +95,19 @@ func Checker(conf *Configuration, nm nonce.Sender, ec ethclient.ChainStateReader
 		} else {
 			// If no nonce is available (meaning that envelope being processed is the first one for the pair sender,chain)
 			// then we retrieve nonce from chain
-			pendingNonce, callErr := utils.GetNonce(txctx.Context(), ec, txctx.Envelope, url)
+			var pendingNonce uint64
+			var callErr error
+			if txctx.Envelope.IsEeaSendPrivateTransaction() {
+				pendingNonce, callErr = utils.EEAGetNonce(txctx.Context(), ec, txctx.Envelope, url)
+			} else {
+				pendingNonce, callErr = utils.GetNonce(txctx.Context(), ec, txctx.Envelope, url)
+			}
+
 			if callErr != nil {
 				_ = txctx.AbortWithError(errors.EthereumError("could not read nonce from chain - got %v", callErr)).ExtendComponent(component)
 				return
 			}
+
 			txctx.Logger.WithFields(log.Fields{
 				"nonce.pending": pendingNonce,
 			}).Debugf("nonce: calibrating nonce from chain")

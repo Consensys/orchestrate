@@ -17,10 +17,10 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	mock3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/mocks"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	mock3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/mock"
 	mock4 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/hooks/mock"
@@ -42,7 +42,7 @@ func TestSession_Run(t *testing.T) {
 
 	mockHook := mock.NewMockHook(ctrl)
 	mockOffsetManager := mock2.NewMockManager(ctrl)
-	mockEthClient := mock3.NewMockClient(ctrl)
+	mockEthClient := mock3.NewMockEthClient(ctrl)
 	mockTxScheduler := mock4.NewMockTransactionSchedulerClient(ctrl)
 
 	t.Run("should process block successfully with internal txs", func(t *testing.T) {

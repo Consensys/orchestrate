@@ -15,7 +15,7 @@ var JobTypeMap = map[string]JobType{
 	utils.EthereumRawTransaction:    JobType_ETH_RAW_TX,
 	utils.OrionMarkingTransaction:   JobType_ETH_ORION_MARKING_TX,
 	utils.OrionEEATransaction:       JobType_ETH_ORION_EEA_TX,
-	utils.TesseraPublicTransaction:  JobType_ETH_TESSERA_PUBLIC_TX,
+	utils.TesseraMarkingTransaction: JobType_ETH_TESSERA_MARKING_TX,
 	utils.TesseraPrivateTransaction: JobType_ETH_TESSERA_PRIVATE_TX,
 }
 

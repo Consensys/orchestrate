@@ -23,6 +23,7 @@ CREATE TABLE transactions (
 	private_from TEXT,
 	private_for TEXT [],
 	privacy_group_id TEXT,
+	enclave_key TEXT,
 	created_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL, 
 	updated_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL,
 	UNIQUE(uuid)
@@ -53,6 +54,7 @@ CREATE TABLE jobs (
     uuid UUID NOT NULL,
 	chain_uuid UUID NOT NULL,
 	schedule_id INTEGER NOT NULL REFERENCES schedules,
+	next_job_uuid UUID,
     type TEXT NOT NULL,
     transaction_id INTEGER NOT NULL REFERENCES transactions(id),
 	labels jsonb,

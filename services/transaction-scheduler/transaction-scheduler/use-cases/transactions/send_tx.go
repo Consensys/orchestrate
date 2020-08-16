@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/gofrs/uuid"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
@@ -100,7 +101,7 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
 
-	logger.WithField("uuid", txRequest.UUID).Info("contract transaction request created successfully")
+	logger.WithField("uuid", txRequest.UUID).Info("send transaction request created successfully")
 	return txRequest, nil
 }
 
@@ -162,15 +163,26 @@ func (uc *sendTxUsecase) insertNewTxRequest(
 		}
 		txRequest.UUID = txRequestModel.UUID
 
-		sendTxJob := parsers.NewJobEntityFromTxRequest(txRequest, generateJobType(txRequest), chainUUID)
-		sendTxJob.Transaction.Data = txData
+		sendTxJobs := parsers.NewJobEntitiesFromTxRequest(txRequest, chainUUID, txData)
+		txRequest.Schedule.Jobs = make([]*entities.Job, len(sendTxJobs))
+		var nextJobUUID string
+		for idx, txJob := range sendTxJobs {
+			if nextJobUUID != "" {
+				txJob.UUID = nextJobUUID
+			}
 
-		job, der := uc.createJobUC.WithDBTransaction(dbtx.(store.Tx)).Execute(ctx, sendTxJob, []string{tenantID})
-		if der != nil {
-			return der
+			if idx < len(sendTxJobs)-1 {
+				nextJobUUID = uuid.Must(uuid.NewV4()).String()
+				txJob.NextJobUUID = nextJobUUID
+			}
+
+			job, der := uc.createJobUC.WithDBTransaction(dbtx.(store.Tx)).Execute(ctx, txJob, []string{tenantID})
+			if der != nil {
+				return der
+			}
+
+			txRequest.Schedule.Jobs[idx] = job
 		}
-
-		txRequest.Schedule.Jobs = []*entities.Job{job}
 
 		return nil
 	})
@@ -186,17 +198,4 @@ func generateRequestHash(chainUUID string, params interface{}) (string, error) {
 
 	hash := md5.Sum([]byte(string(jsonParams) + chainUUID))
 	return hex.EncodeToString(hash[:]), nil
-}
-
-func generateJobType(txRequest *entities.TxRequest) string {
-	switch {
-	case txRequest.Params.Protocol == utils.OrionChainType:
-		return utils.OrionEEATransaction
-	case txRequest.Params.Protocol == utils.TesseraChainType:
-		return utils.TesseraPrivateTransaction
-	case txRequest.Params.Raw != "":
-		return utils.EthereumRawTransaction
-	default:
-		return utils.EthereumTransaction
-	}
 }

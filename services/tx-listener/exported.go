@@ -10,7 +10,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/key"
 	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/rpc"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	registryprovider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/providers/chain-registry"
 	kafkahook "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/hooks/kafka"
@@ -30,7 +30,7 @@ func initDependencies(ctx context.Context) {
 		func() { registryprovider.Init(ctx) },
 		func() { kafkahook.Init(ctx) },
 		func() { registryoffset.Init(ctx) },
-		func() { rpc.Init(ctx) },
+		func() { ethclient.Init(ctx) },
 		func() { txscheduler.Init() },
 	)
 }
@@ -48,7 +48,7 @@ func Init(ctx context.Context) {
 			registryprovider.GlobalProvider(),
 			kafkahook.GlobalHook(),
 			registryoffset.GlobalManager(),
-			rpc.GlobalClient(),
+			ethclient.GlobalClient(),
 			txscheduler.GlobalClient(),
 		)
 	})

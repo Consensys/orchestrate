@@ -4,15 +4,34 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 )
 
 // Crafter creates a crafter handler
-func Crafter(r svc.ContractRegistryClient, crafter abi.Crafter) engine.HandlerFunc {
+func Crafter(r svc.ContractRegistryClient, crafter abi.Crafter, ec ethclient.EEAChainStateReader) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		txctx.Logger.WithField("envelope_id", txctx.Envelope.GetID()).Debugf("crafter handler starts")
+
+		if txctx.Envelope.IsEeaSendMarkingTransaction() {
+			url, err := proxy.GetURL(txctx)
+			if err != nil {
+				e := txctx.AbortWithError(err).ExtendComponent(component)
+				txctx.Logger.WithError(e).Error("crafter: could not fetch envelope proxy url")
+				return
+			}
+			privPContractAddr, err := ec.EEAPrivPrecompiledContractAddr(txctx.Context(), url)
+			if err != nil {
+				e := txctx.AbortWithError(err).ExtendComponent(component)
+				txctx.Logger.WithError(e).Error("crafter: could not fetch eea precompiled contract address")
+				return
+			}
+
+			_ = txctx.Envelope.SetTo(privPContractAddr)
+		}
 
 		if txctx.Envelope.GetData() != "" || txctx.Envelope.GetMethodSignature() == "" {
 			// If transaction has already been crafted there is nothing to do
@@ -76,7 +95,6 @@ func Crafter(r svc.ContractRegistryClient, crafter abi.Crafter) engine.HandlerFu
 		})
 
 		_ = txctx.Envelope.SetData(data)
-
 		txctx.Logger.Tracef("crafter: tx data payload set with %s", txctx.Envelope.GetData())
 	}
 }

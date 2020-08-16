@@ -161,7 +161,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 	s.T().Run("should send a tessera transaction successfully to the transaction crafter topic", func(t *testing.T) {
 		defer gock.Off()
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
+		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
 		txRequest := testutils.FakeSendTesseraRequest()
 		IdempotencyKey := utils.RandomString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
@@ -180,33 +180,42 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 			assert.Fail(t, err.Error())
 			return
 		}
-		job := txResponseGET.Schedule.Jobs[0]
-
+		
 		assert.NotEmpty(t, txResponseGET.Schedule.UUID)
-		assert.NotEmpty(t, job.UUID)
-		assert.Equal(t, job.ChainUUID, chain.UUID)
-		assert.Equal(t, utils.StatusStarted, job.Status)
-		assert.Equal(t, txRequest.Params.From, job.Transaction.From)
-		assert.Equal(t, txRequest.Params.To, job.Transaction.To)
-		assert.Equal(t, utils.TesseraPrivateTransaction, job.Type)
+		assert.Len(t, txResponseGET.Schedule.Jobs, 2)
+		
+		privTxJob := txResponseGET.Schedule.Jobs[0]
+		assert.NotEmpty(t, privTxJob.UUID)
+		assert.Equal(t, privTxJob.ChainUUID, chain.UUID)
+		assert.Equal(t, utils.StatusStarted, privTxJob.Status)
+		assert.Equal(t, txRequest.Params.From, privTxJob.Transaction.From)
+		assert.Equal(t, txRequest.Params.To, privTxJob.Transaction.To)
+		assert.Equal(t, utils.TesseraPrivateTransaction, privTxJob.Type)
+		
+		markingTxJob := txResponseGET.Schedule.Jobs[1]
+		assert.NotEmpty(t, markingTxJob.UUID)
+		assert.Equal(t, markingTxJob.ChainUUID, chain.UUID)
+		assert.Equal(t, utils.StatusCreated, markingTxJob.Status)
+		assert.Equal(t, utils.TesseraMarkingTransaction, markingTxJob.Type)
 
-		evlp, err := s.env.consumer.WaitForEnvelope(job.UUID,
+		privTxEvlp, err := s.env.consumer.WaitForEnvelope(privTxJob.UUID,
 			s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-		assert.Equal(t, job.UUID, evlp.GetID())
-		assert.False(t, evlp.IsOneTimeKeySignature())
-		assert.Equal(t, tx.JobTypeMap[utils.TesseraPrivateTransaction].String(), evlp.GetJobTypeString())
+		
+		assert.Equal(t, privTxJob.UUID, privTxEvlp.GetID())
+		assert.False(t, privTxEvlp.IsOneTimeKeySignature())
+		assert.Equal(t, tx.JobTypeMap[utils.TesseraPrivateTransaction].String(), privTxEvlp.GetJobTypeString())
 	})
 
 	s.T().Run("should send an orion transaction successfully to the transaction crafter topic", func(t *testing.T) {
 		defer gock.Off()
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
+		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
 		txRequest := testutils.FakeSendOrionRequest()
-
+	
 		txResponse, err := s.client.SendContractTransaction(ctx, txRequest)
 		if err != nil {
 			assert.Fail(t, err.Error())
@@ -214,31 +223,39 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		}
 		assert.NotEmpty(t, txResponse.UUID)
 		assert.NotEmpty(t, txResponse.IdempotencyKey)
-
+	
 		txResponseGET, err := s.client.GetTxRequest(ctx, txResponse.UUID)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-
-		job := txResponseGET.Schedule.Jobs[0]
-
+	
 		assert.NotEmpty(t, txResponseGET.Schedule.UUID)
-		assert.NotEmpty(t, job.UUID)
-		assert.Equal(t, job.ChainUUID, chain.UUID)
-		assert.Equal(t, utils.StatusStarted, job.Status)
-		assert.Equal(t, txRequest.Params.From, job.Transaction.From)
-		assert.Equal(t, txRequest.Params.To, job.Transaction.To)
-		assert.Equal(t, utils.OrionEEATransaction, job.Type)
+		assert.Len(t, txResponseGET.Schedule.Jobs, 2)
 
-		evlp, err := s.env.consumer.WaitForEnvelope(job.UUID,
+		privTxJob := txResponseGET.Schedule.Jobs[0]
+		assert.NotEmpty(t, privTxJob.UUID)
+		assert.Equal(t, privTxJob.ChainUUID, chain.UUID)
+		assert.Equal(t, utils.StatusStarted, privTxJob.Status)
+		assert.Equal(t, txRequest.Params.From, privTxJob.Transaction.From)
+		assert.Equal(t, txRequest.Params.To, privTxJob.Transaction.To)
+		assert.Equal(t, utils.OrionEEATransaction, privTxJob.Type)
+		
+		markingTxJob := txResponseGET.Schedule.Jobs[1]
+		assert.NotEmpty(t, markingTxJob.UUID)
+		assert.Equal(t, markingTxJob.ChainUUID, chain.UUID)
+		assert.Equal(t, utils.StatusCreated, markingTxJob.Status)
+		assert.Equal(t, utils.OrionMarkingTransaction, markingTxJob.Type)
+	
+		privTxEvlp, err := s.env.consumer.WaitForEnvelope(privTxJob.UUID,
 			s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-		assert.Equal(t, job.UUID, evlp.GetID())
-		assert.Equal(t, tx.JobTypeMap[utils.OrionEEATransaction].String(), evlp.GetJobTypeString())
+		
+		assert.Equal(t, privTxJob.UUID, privTxEvlp.GetID())
+		assert.Equal(t, tx.JobTypeMap[utils.OrionEEATransaction].String(), privTxEvlp.GetJobTypeString())
 	})
 
 	s.T().Run("should send a deploy contract successfully to the transaction crafter topic", func(t *testing.T) {

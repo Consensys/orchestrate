@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt/generator"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/rpc"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/rpc"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
 	noncememory "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/memory"
@@ -23,5 +23,5 @@ func Init(ctx context.Context) {
 	contractregistry.Init(ctx, viper.GetString(contractregistry.ContractRegistryURLViperKey))
 	txscheduler.Init()
 	noncememory.Init(ctx)
-	rpc.Init(ctx)
+	ethclient.Init(ctx)
 }

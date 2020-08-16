@@ -17,7 +17,10 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
 )
 
-//go:generate mockgen -source=create_job.go -destination=mocks/create_job.go -package=mocks
+// IMPORTANT: Mock is created in a separated folder because of cycle deps
+// https://app.zenhub.com/workspaces/orchestrate-5ea70772b186e10067f57842/issues/pegasyseng/orchestrate/296
+
+//go:generate mockgen -source=create_job.go -destination=mocks2/create_job.go -package=mocks
 
 const createJobComponent = "use-cases.create-job"
 

@@ -18,6 +18,7 @@ func FormatJobResponse(job *entities.Job) *types.JobResponse {
 		UUID:         job.UUID,
 		ChainUUID:    job.ChainUUID,
 		ScheduleUUID: job.ScheduleUUID,
+		NextJobUUID:  job.NextJobUUID,
 		Transaction:  *job.Transaction,
 		Logs:         job.Logs,
 		Labels:       job.Labels,
@@ -42,6 +43,7 @@ func FormatJobCreateRequest(request *types.CreateJobRequest, defaultRetryInterva
 	return &entities.Job{
 		ChainUUID:    request.ChainUUID,
 		ScheduleUUID: request.ScheduleUUID,
+		NextJobUUID:  request.NextJobUUID,
 		Type:         request.Type,
 		Labels:       request.Labels,
 		InternalData: formatAnnotations(&request.Annotations, defaultRetryInterval),

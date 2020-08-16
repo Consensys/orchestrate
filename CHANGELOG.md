@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## v2.3.0-rc3 (Pending)
 
+### 🆕 Features
+* Private transactions (Tessera/Orion) are performed in two separate jobs
+
 ### 🛠 Bug fixes
 * HashiCorp client token renewal 
 * Replace BIGINT by STRING in DB for transaction params 

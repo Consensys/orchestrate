@@ -12,7 +12,8 @@ type Job struct {
 	ID            int `pg:"alias:id"`
 	UUID          string
 	ChainUUID     string
-	ScheduleID    *int `pg:"alias:schedule_id,notnull"`
+	NextJobUUID   string `pg:"alias:next_job_uuid"`
+	ScheduleID    *int   `pg:"alias:schedule_id,notnull"`
 	Schedule      *Schedule
 	Type          string
 	TransactionID *int `pg:"alias:transaction_id,notnull"`

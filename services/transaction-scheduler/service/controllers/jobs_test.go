@@ -6,14 +6,16 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
-	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
+	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
+	mocks6 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs/mocks2"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
@@ -30,9 +32,10 @@ import (
 
 type jobsCtrlTestSuite struct {
 	suite.Suite
-	createJobUC          *mocks.MockCreateJobUseCase
+	createJobUC          *mocks6.MockCreateJobUseCase
 	getJobUC             *mocks.MockGetJobUseCase
 	startJobUC           *mocks.MockStartJobUseCase
+	startNextJobUC       *mocks.MockStartNextJobUseCase
 	updateJobUC          *mocks.MockUpdateJobUseCase
 	searchJobUC          *mocks.MockSearchJobsUseCase
 	defaultRetryInterval time.Duration
@@ -55,6 +58,10 @@ func (s jobsCtrlTestSuite) StartJob() jobs.StartJobUseCase {
 	return s.startJobUC
 }
 
+func (s jobsCtrlTestSuite) StartNextJob() jobs.StartNextJobUseCase {
+	return s.startNextJobUC
+}
+
 func (s jobsCtrlTestSuite) UpdateJob() jobs.UpdateJobUseCase {
 	return s.updateJobUC
 }
@@ -73,7 +80,7 @@ func (s *jobsCtrlTestSuite) SetupTest() {
 	defer ctrl.Finish()
 
 	s.tenants = []string{"tenantID"}
-	s.createJobUC = mocks.NewMockCreateJobUseCase(ctrl)
+	s.createJobUC = mocks6.NewMockCreateJobUseCase(ctrl)
 	s.getJobUC = mocks.NewMockGetJobUseCase(ctrl)
 	s.startJobUC = mocks.NewMockStartJobUseCase(ctrl)
 	s.updateJobUC = mocks.NewMockUpdateJobUseCase(ctrl)

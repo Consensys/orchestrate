@@ -24,13 +24,15 @@ type UpdateJobUseCase interface {
 
 // updateJobUseCase is a use case to create a new transaction job
 type updateJobUseCase struct {
-	db store.DB
+	db                  store.DB
+	startNextJobUseCase StartNextJobUseCase
 }
 
 // NewUpdateJobUseCase creates a new UpdateJobUseCase
-func NewUpdateJobUseCase(db store.DB) UpdateJobUseCase {
+func NewUpdateJobUseCase(db store.DB, startJobUC StartNextJobUseCase) UpdateJobUseCase {
 	return &updateJobUseCase{
-		db: db,
+		db:                  db,
+		startNextJobUseCase: startJobUC,
 	}
 }
 
@@ -46,10 +48,17 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 
 	retrievedJob := parsers.NewJobEntityFromModels(jobModel)
 	status := retrievedJob.GetStatus()
-	if status == utils.StatusMined || status == utils.StatusFailed {
-		errMessage := "job cannot be updated in the current state"
+	if status == utils.StatusMined || status == utils.StatusFailed || status == utils.StatusStored {
+		errMessage := "job status is final, cannot be updated"
 		logger.WithField("status", status).Error(errMessage)
 		return nil, errors.InvalidParameterError(errMessage).ExtendComponent(updateJobComponent)
+	}
+
+	// We are not forced to update the status
+	if nextStatus != "" && !canUpdateStatus(nextStatus, status) {
+		errMessage := "invalid status update for the current job state"
+		logger.WithField("status", status).WithField("next_status", nextStatus).Error(errMessage)
+		return nil, errors.InvalidStateError(errMessage).ExtendComponent(updateJobComponent)
 	}
 
 	err = database.ExecuteInDBTx(uc.db, func(tx database.Tx) error {
@@ -68,12 +77,6 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 
 		// We are not forced to update the status
 		if nextStatus != "" {
-			if !canUpdateStatus(nextStatus, status) {
-				errMessage := "invalid status update for the current job state"
-				logger.WithField("status", status).WithField("next_status", nextStatus).Error(errMessage)
-				return errors.InvalidStateError(errMessage)
-			}
-
 			jobLogModel := &models.Log{
 				JobID:   &jobModel.ID,
 				Status:  nextStatus,
@@ -86,8 +89,18 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 
 		return nil
 	})
+
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
+	}
+
+	if (nextStatus == utils.StatusMined || nextStatus == utils.StatusStored) && retrievedJob.NextJobUUID != "" {
+		err = uc.startNextJobUseCase.Execute(ctx, retrievedJob.UUID, tenants)
+		if err != nil {
+			logger.WithField("next_job_uuid", retrievedJob.NextJobUUID).WithError(err).
+				Error("fail to start next job")
+			return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
+		}
 	}
 
 	jobModel, err = uc.db.Job().FindOneByUUID(ctx, job.UUID, tenants)
@@ -116,7 +129,7 @@ func canUpdateStatus(nextStatus, status string) bool {
 		return status == utils.StatusCreated
 	case utils.StatusPending:
 		return status == utils.StatusStarted || status == utils.StatusRecovering
-	case utils.StatusRecovering, utils.StatusMined:
+	case utils.StatusRecovering, utils.StatusMined, utils.StatusStored:
 		return status == utils.StatusPending
 	case utils.StatusFailed:
 		return status == utils.StatusStarted || status == utils.StatusRecovering || status == utils.StatusPending

@@ -297,7 +297,6 @@ func (c *HTTPClient) UpdateJob(ctx context.Context, jobUUID string, request *typ
 
 func (c *HTTPClient) StartJob(ctx context.Context, jobUUID string) error {
 	reqURL := fmt.Sprintf("%v/jobs/%s/start", c.config.URL, jobUUID)
-	resp := &types.JobResponse{}
 
 	return callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.PutRequest(ctx, c.client, reqURL, nil)
@@ -308,7 +307,7 @@ func (c *HTTPClient) StartJob(ctx context.Context, jobUUID string) error {
 		}
 
 		defer clientutils.CloseResponse(response)
-		return parseResponse(ctx, response, resp)
+		return nil
 	})
 }
 

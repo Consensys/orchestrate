@@ -109,7 +109,7 @@ func isJobType(fl validator.FieldLevel) bool {
 			OrionEEATransaction,
 			OrionMarkingTransaction,
 			TesseraPrivateTransaction,
-			TesseraPublicTransaction:
+			TesseraMarkingTransaction:
 			return true
 		default:
 			return false
@@ -122,7 +122,7 @@ func isJobType(fl validator.FieldLevel) bool {
 func isJobStatus(fl validator.FieldLevel) bool {
 	if fl.Field().String() != "" {
 		switch fl.Field().String() {
-		case StatusCreated, StatusStarted, StatusPending, StatusRecovering, StatusWarning, StatusMined, StatusFailed:
+		case StatusCreated, StatusStarted, StatusPending, StatusRecovering, StatusWarning, StatusMined, StatusFailed, StatusStored:
 			return true
 		default:
 			return false

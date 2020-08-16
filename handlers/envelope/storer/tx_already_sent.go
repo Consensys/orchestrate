@@ -3,7 +3,7 @@ package storer
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
@@ -58,8 +58,13 @@ func TxAlreadySent(ec ethclient.ChainLedgerReader, txSchedulerClient client.Tran
 			return
 		}
 
+		var txHash string
+		if txctx.Envelope.TxHash != nil {
+			txHash = txctx.Envelope.TxHash.String()
+		}
+
 		txctx.Logger.
-			WithField("txHash", txctx.Envelope.TxHash.String()).
+			WithField("txHash", txHash).
 			Debugf("transaction scheduler: transaction has not been sent")
 	}
 }

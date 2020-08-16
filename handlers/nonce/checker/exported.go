@@ -6,7 +6,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce"
 )
 
@@ -31,8 +31,10 @@ func Init(ctx context.Context) {
 		tracker := NewRecoveryTracker()
 
 		conf := NewConfig()
+
+		ec := ethclient.GlobalClient()
 		if checker == nil {
-			checker = Checker(conf, nonce.GlobalManager(), ethclient.GlobalClient(), tracker)
+			checker = Checker(conf, nonce.GlobalManager(), ec, tracker)
 		}
 
 		if recStatusSetter == nil {

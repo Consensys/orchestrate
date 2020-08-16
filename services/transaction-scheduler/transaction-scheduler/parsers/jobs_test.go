@@ -3,8 +3,9 @@
 package parsers
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	"testing"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 
 	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
@@ -32,6 +33,7 @@ func TestParsersJob_NewEntityFromModel(t *testing.T) {
 
 	assert.Equal(t, finalJobModel.ScheduleID, jobModel.ScheduleID)
 	assert.Equal(t, finalJobModel.UUID, jobModel.UUID)
+	assert.Equal(t, finalJobModel.NextJobUUID, jobModel.NextJobUUID)
 	assert.Equal(t, finalJobModel.Type, jobModel.Type)
 	assert.Equal(t, finalJobModel.Labels, jobModel.Labels)
 	assert.Equal(t, finalJobModel.CreatedAt, jobModel.CreatedAt)
@@ -46,7 +48,6 @@ func TestParsersJob_NewEnvelopeFromModel(t *testing.T) {
 
 	txRequest := txEnvelope.GetTxRequest()
 	assert.Equal(t, jobModel.ChainUUID, txEnvelope.GetChainUUID())
-	assert.Equal(t, jobModel.UUID, txEnvelope.GetID())
 	assert.Equal(t, tx.JobTypeMap[jobModel.Type], txRequest.GetJobType())
 	assert.Equal(t, jobModel.Transaction.Sender, txRequest.Params.GetFrom())
 	assert.Equal(t, jobModel.Transaction.Recipient, txRequest.Params.GetTo())

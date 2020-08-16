@@ -19,7 +19,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/offset"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/opentracing"
 	producer "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/producer/tx-crafter"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/tessera"
 	injector "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/trace-injector"
 	txupdater "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/tx_updater"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
@@ -94,11 +93,6 @@ func initHandlers(ctx context.Context) {
 		func() {
 			chaininjector.Init(ctx)
 		},
-
-		// Initialize Tessera client
-		func() {
-			tessera.Init(ctx)
-		},
 	)
 }
 
@@ -141,8 +135,6 @@ func registerHandlers() {
 	engine.Register(gaspricer.GlobalHandler())
 	engine.Register(gasestimator.GlobalHandler())
 	engine.Register(nonceattributor.GlobalHandler())
-	engine.Register(nonceattributor.GlobalEEAHandler())
-	engine.Register(tessera.GlobalHandler())
 }
 
 // Start starts application

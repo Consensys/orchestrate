@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-pg/migrations/v7"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/rpc"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/chain-registry/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 )
@@ -72,8 +72,8 @@ ALTER TABLE chains
 func init() { Collection.MustRegisterTx(addChainIDColumn, dropChainIDColumn) }
 
 func updateChainIDs(ctx context.Context, db migrations.DB) error {
-	rpc.Init(ctx)
-	ec := rpc.GlobalClient()
+	ethclient.Init(ctx)
+	ec := ethclient.GlobalClient()
 
 	log.Debugf("fetching chainIDs from rpc nodes")
 

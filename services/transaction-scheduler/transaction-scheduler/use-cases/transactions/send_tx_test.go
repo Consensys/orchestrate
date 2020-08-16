@@ -5,6 +5,9 @@ package transactions
 import (
 	"context"
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/gofrs/uuid"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -19,11 +22,10 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs/mocks"
+	mocks6 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs/mocks2"
 	mocks4 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/schedules/mocks"
 	mocks5 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/transactions/mocks"
 	mocks3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/validators/mocks"
-	"testing"
-	"time"
 )
 
 type sendTxSuite struct {
@@ -36,7 +38,7 @@ type sendTxSuite struct {
 	TxRequestDA         *mocks2.MockTransactionRequestAgent
 	ScheduleDA          *mocks2.MockScheduleAgent
 	StartJobUC          *mocks.MockStartJobUseCase
-	CreateJobUC         *mocks.MockCreateJobUseCase
+	CreateJobUC         *mocks6.MockCreateJobUseCase
 	CreateScheduleUC    *mocks4.MockCreateScheduleUseCase
 	GetTxUC             *mocks5.MockGetTxUseCase
 }
@@ -56,7 +58,7 @@ func (s *sendTxSuite) SetupTest() {
 	s.TxRequestDA = mocks2.NewMockTransactionRequestAgent(ctrl)
 	s.ScheduleDA = mocks2.NewMockScheduleAgent(ctrl)
 	s.StartJobUC = mocks.NewMockStartJobUseCase(ctrl)
-	s.CreateJobUC = mocks.NewMockCreateJobUseCase(ctrl)
+	s.CreateJobUC = mocks6.NewMockCreateJobUseCase(ctrl)
 	s.CreateScheduleUC = mocks4.NewMockCreateScheduleUseCase(ctrl)
 	s.GetTxUC = mocks5.NewMockGetTxUseCase(ctrl)
 	s.ChainRegistryClient = mock.NewMockChainRegistryClient(ctrl)
@@ -96,7 +98,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 		txRequest.Params.Protocol = utils.OrionChainType
 
-		response, err := successfulTestExecution(s, txRequest, utils.OrionEEATransaction)
+		response, err := successfulTestExecution(s, txRequest, utils.OrionEEATransaction, utils.OrionMarkingTransaction)
 		assert.NoError(t, err)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
@@ -108,7 +110,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 		txRequest.Params.Protocol = utils.TesseraChainType
 
-		response, err := successfulTestExecution(s, txRequest, utils.TesseraPrivateTransaction)
+		response, err := successfulTestExecution(s, txRequest, utils.TesseraPrivateTransaction, utils.TesseraMarkingTransaction)
 		assert.NoError(t, err)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
@@ -378,7 +380,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 	})
 }
 
-func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, jobType string) (*entities.TxRequest, error) {
+func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, jobTypes ...string) (*entities.TxRequest, error) {
 	ctx := context.Background()
 	tenantID := "tenantID"
 	tenants := []string{"tenantID"}
@@ -386,6 +388,7 @@ func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, jobT
 	jobUUID := txRequest.Schedule.Jobs[0].UUID
 	txData := ""
 	scheduleModel := testutils2.FakeSchedule(tenants[0])
+	jobIdx := 0
 
 	s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
 	s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey, tenantID).Return(nil, errors.NotFoundError(""))
@@ -395,13 +398,14 @@ func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, jobT
 	s.CreateJobUC.EXPECT().
 		Execute(gomock.Any(), gomock.Any(), tenants).
 		DoAndReturn(func(ctx context.Context, jobEntity *entities.Job, tenants []string) (*entities.Job, error) {
-			if jobEntity.Type != jobType {
-				return nil, fmt.Errorf("invalid job type")
+			if jobEntity.Type != jobTypes[jobIdx] {
+				return nil, fmt.Errorf("invalid job type. Got %s, expected %s", jobEntity.Type, jobTypes[jobIdx])
 			}
 
-			jobEntity.UUID = txRequest.Schedule.Jobs[0].UUID
+			jobEntity.UUID = jobUUID
+			jobIdx = jobIdx + 1
 			return jobEntity, nil
-		})
+		}).Times(len(jobTypes))
 	s.StartJobUC.EXPECT().Execute(ctx, jobUUID, tenants).Return(nil)
 	s.GetTxUC.EXPECT().Execute(ctx, txRequest.UUID, tenants).Return(txRequest, nil)
 

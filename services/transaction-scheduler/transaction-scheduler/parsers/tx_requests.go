@@ -2,6 +2,7 @@ package parsers
 
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 )
 
@@ -17,24 +18,53 @@ func NewTxRequestModelFromEntities(txRequest *entities.TxRequest, requestHash st
 	}
 }
 
-func NewJobEntityFromTxRequest(txRequest *entities.TxRequest, jobType, chainUUID string) *entities.Job {
+func NewJobEntitiesFromTxRequest(txRequest *entities.TxRequest, chainUUID, txData string) []*entities.Job {
+	jobs := []*entities.Job{}
+	switch {
+	case txRequest.Params.Protocol == utils.OrionChainType:
+		privTxJob := newJobEntityFromTxRequest(txRequest, newEthTransactionFromParams(txRequest.Params, txData), utils.OrionEEATransaction, chainUUID)
+		markingTxJob := newJobEntityFromTxRequest(txRequest, &entities.ETHTransaction{}, utils.OrionMarkingTransaction, chainUUID)
+		markingTxJob.InternalData.OneTimeKey = true
+		jobs = append(jobs, privTxJob, markingTxJob)
+	case txRequest.Params.Protocol == utils.TesseraChainType:
+		privTxJob := newJobEntityFromTxRequest(txRequest, newEthTransactionFromParams(txRequest.Params, txData), utils.TesseraPrivateTransaction, chainUUID)
+		markingTxJob := newJobEntityFromTxRequest(txRequest, &entities.ETHTransaction{From: txRequest.Params.From, PrivateFor: txRequest.Params.PrivateFor}, utils.TesseraMarkingTransaction, chainUUID)
+		jobs = append(jobs, privTxJob, markingTxJob)
+	case txRequest.Params.Raw != "":
+		jobs = append(jobs, newJobEntityFromTxRequest(txRequest, newEthTransactionFromParams(txRequest.Params, txData),
+			utils.EthereumRawTransaction, chainUUID))
+	default:
+		jobs = append(jobs, newJobEntityFromTxRequest(txRequest, newEthTransactionFromParams(txRequest.Params, txData),
+			utils.EthereumTransaction, chainUUID))
+	}
+
+	return jobs
+}
+
+func newEthTransactionFromParams(params *entities.ETHTransactionParams, txData string) *entities.ETHTransaction {
+	return &entities.ETHTransaction{
+		From:           params.From,
+		To:             params.To,
+		Nonce:          params.Nonce,
+		Value:          params.Value,
+		GasPrice:       params.GasPrice,
+		Gas:            params.Gas,
+		Raw:            params.Raw,
+		Data:           txData,
+		PrivateFrom:    params.PrivateFrom,
+		PrivateFor:     params.PrivateFor,
+		PrivacyGroupID: params.PrivacyGroupID,
+	}
+}
+
+func newJobEntityFromTxRequest(txRequest *entities.TxRequest, ethTx *entities.ETHTransaction, jobType, chainUUID string) *entities.Job {
+	internalData := *txRequest.InternalData
 	return &entities.Job{
 		ScheduleUUID: txRequest.Schedule.UUID,
 		ChainUUID:    chainUUID,
 		Type:         jobType,
 		Labels:       txRequest.Labels,
-		InternalData: txRequest.InternalData,
-		Transaction: &entities.ETHTransaction{
-			From:           txRequest.Params.From,
-			To:             txRequest.Params.To,
-			Nonce:          txRequest.Params.Nonce,
-			Value:          txRequest.Params.Value,
-			GasPrice:       txRequest.Params.GasPrice,
-			Gas:            txRequest.Params.Gas,
-			Raw:            txRequest.Params.Raw,
-			PrivateFrom:    txRequest.Params.PrivateFrom,
-			PrivateFor:     txRequest.Params.PrivateFor,
-			PrivacyGroupID: txRequest.Params.PrivacyGroupID,
-		},
+		InternalData: &internalData,
+		Transaction:  ethTx,
 	}
 }

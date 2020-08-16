@@ -3,9 +3,10 @@
 package parsers
 
 import (
+	"testing"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -26,8 +27,10 @@ func TestParsersTxRequest_NewTxRequestModelFromEntities(t *testing.T) {
 func TestParsersTxRequest_NewJobEntityFromSendTx(t *testing.T) {
 	txReqEntity := testutils.FakeTxRequest()
 	chainUUID := "chainUUID"
-	job := NewJobEntityFromTxRequest(txReqEntity, utils.EthereumTransaction, chainUUID)
-
+	jobs := NewJobEntitiesFromTxRequest(txReqEntity, chainUUID ,"0xDATA")
+	assert.Len(t, jobs, 1)
+	
+	job := jobs[0]
 	assert.Equal(t, job.ScheduleUUID, txReqEntity.Schedule.UUID)
 	assert.Equal(t, job.ChainUUID, chainUUID)
 	assert.Equal(t, job.Type, utils.EthereumTransaction)
@@ -42,4 +45,47 @@ func TestParsersTxRequest_NewJobEntityFromSendTx(t *testing.T) {
 	assert.Equal(t, job.Transaction.PrivateFrom, txReqEntity.Params.PrivateFrom)
 	assert.Equal(t, job.Transaction.PrivateFor, txReqEntity.Params.PrivateFor)
 	assert.Equal(t, job.Transaction.PrivacyGroupID, txReqEntity.Params.PrivacyGroupID)
+}
+
+
+func TestParsersTxRequest_NewOrionJobEntityFromSendTx(t *testing.T) {
+	txReqEntity := testutils.FakeTxRequest()
+	txReqEntity.Params.Protocol = utils.OrionChainType
+	chainUUID := "chainUUID"
+	jobs := NewJobEntitiesFromTxRequest(txReqEntity, chainUUID ,"0xDATA")
+	assert.Len(t, jobs, 2)
+
+	privJob := jobs[0]
+	assert.Equal(t, privJob.Type, utils.OrionEEATransaction)
+	assert.False(t, privJob.InternalData.OneTimeKey)
+	
+	markingJob := jobs[1]
+	assert.Equal(t, markingJob.ScheduleUUID, txReqEntity.Schedule.UUID)
+	assert.Equal(t, markingJob.ChainUUID, chainUUID)
+	assert.Equal(t, markingJob.Type, utils.OrionMarkingTransaction)
+	assert.Equal(t, markingJob.Labels, txReqEntity.Labels)
+	assert.True(t, markingJob.InternalData.OneTimeKey)
+}
+
+
+func TestParsersTxRequest_NewTesseraJobEntityFromSendTx(t *testing.T) {
+	txReqEntity := testutils.FakeTxRequest()
+	txReqEntity.Params.Protocol = utils.TesseraChainType
+	txReqEntity.Params.PrivateFor = []string{"0xPrivateFor"}
+	chainUUID := "chainUUID"
+	jobs := NewJobEntitiesFromTxRequest(txReqEntity, chainUUID ,"0xDATA")
+	assert.Len(t, jobs, 2)
+
+	privJob := jobs[0]
+	assert.Equal(t, privJob.Type, utils.TesseraPrivateTransaction)
+	assert.False(t, privJob.InternalData.OneTimeKey)
+
+	markingJob := jobs[1]
+	assert.Equal(t, markingJob.ScheduleUUID, txReqEntity.Schedule.UUID)
+	assert.Equal(t, markingJob.ChainUUID, chainUUID)
+	assert.Equal(t, markingJob.Type, utils.TesseraMarkingTransaction)
+	assert.Equal(t, markingJob.Transaction.PrivateFor, txReqEntity.Params.PrivateFor)
+	assert.Equal(t, markingJob.Labels, txReqEntity.Labels)
+	assert.Equal(t, markingJob.InternalData.OneTimeKey, txReqEntity.InternalData.OneTimeKey)
+	assert.Equal(t, markingJob.Transaction.From, txReqEntity.Params.From)
 }

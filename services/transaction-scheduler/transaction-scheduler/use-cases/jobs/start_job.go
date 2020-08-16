@@ -51,6 +51,13 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants 
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}
 
+	jobEntity := parsers.NewJobEntityFromModels(jobModel)
+	if !canUpdateStatus(utils.StatusStarted, jobEntity.GetStatus()) {
+		errMessage := "cannot start job at the current status"
+		logger.WithField("status", jobEntity.GetStatus()).WithField("next_status", utils.StatusStarted).Error(errMessage)
+		return errors.InvalidStateError(errMessage)
+	}
+
 	var msgTopic string
 	switch {
 	case jobModel.Type == utils.EthereumRawTransaction:

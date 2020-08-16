@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"testing"
 
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
@@ -13,8 +14,10 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 	clientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client/mock"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 )
@@ -104,14 +107,16 @@ func makeCrafterContext(i int) *engine.TxContext {
 type CrafterTestSuite struct {
 	testutils.HandlerTestSuite
 	contractRegistry *clientmock.MockContractRegistryClient
+	ec               *mock.MockEEAChainStateReader
 }
 
 func (s *CrafterTestSuite) SetupSuite() {
 	ctrl := gomock.NewController(s.T())
 	defer ctrl.Finish()
 	s.contractRegistry = clientmock.NewMockContractRegistryClient(ctrl)
+	s.ec = mock.NewMockEEAChainStateReader(ctrl)
 
-	s.Handler = Crafter(s.contractRegistry, &MockCrafter{})
+	s.Handler = Crafter(s.contractRegistry, &MockCrafter{}, s.ec)
 }
 
 func (s *CrafterTestSuite) TestCrafter() {
@@ -134,6 +139,38 @@ func (s *CrafterTestSuite) TestCrafter() {
 		assert.Len(s.T(), txctx.Envelope.Errors, txctx.Get("errors").(int), "%d/%d - Expected right count of errors", i, len(txctxs), txctx.Envelope.Args)
 		assert.Equal(s.T(), txctx.Get("result").(string), txctx.Envelope.GetData(), "%d/%d - Expected correct payload", i, len(txctxs), txctx.Envelope.Args)
 	}
+}
+
+func (s *CrafterTestSuite) TestCrafter_EEAPrecompiledContract() {
+	s.T().Run("should get EEAPrivPrecompiledContractAddr without errors", func(t *testing.T) {
+		addr := ethcommon.HexToAddress("0x1")
+		var txctx = engine.NewTxContext()
+		txctx.Reset()
+		txctx = txctx.WithContext(proxy.With(txctx.Context(), "chainUrl"))
+		txctx.Logger = log.NewEntry(log.StandardLogger())
+		txctx.Envelope = tx.NewEnvelope().SetJobType(tx.JobType_ETH_ORION_MARKING_TX)
+
+		s.ec.EXPECT().EEAPrivPrecompiledContractAddr(gomock.Eq(txctx.Context()), gomock.Any()).
+			Return(addr, nil)
+		// Handle contexts
+		s.Handle([]*engine.TxContext{txctx})
+		assert.Equal(s.T(), txctx.Envelope.GetTo().String(), addr.String())
+	})
+	
+	s.T().Run("should get EEAPrivPrecompiledContractAddr with errors", func(t *testing.T) {
+		err := fmt.Errorf("failed to fetch precompiled contract")
+		var txctx = engine.NewTxContext()
+		txctx.Reset()
+		txctx = txctx.WithContext(proxy.With(txctx.Context(), "chainUrl"))
+		txctx.Logger = log.NewEntry(log.StandardLogger())
+		txctx.Envelope = tx.NewEnvelope().SetJobType(tx.JobType_ETH_ORION_MARKING_TX)
+
+		s.ec.EXPECT().EEAPrivPrecompiledContractAddr(gomock.Eq(txctx.Context()), gomock.Any()).
+			Return(ethcommon.Address{}, err)
+		// Handle contexts
+		s.Handle([]*engine.TxContext{txctx})
+		assert.Len(s.T(), txctx.Envelope.Errors, 1)
+	})
 }
 
 func TestCrafter(t *testing.T) {

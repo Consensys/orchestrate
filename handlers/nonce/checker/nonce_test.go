@@ -12,8 +12,8 @@ import (
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/nonce/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/memory"
@@ -96,7 +96,7 @@ func makeContext(
 		SetFrom(ethcommon.HexToAddress("0x1")).
 		SetNonce(nonce).
 		SetChainIDString(chainID)
-	
+
 	txctx.WithContext(proxy.With(txctx.Context(), endpoint))
 
 	txctx.Set("expectedErrorCount", expectedErrorCount)
@@ -156,7 +156,7 @@ func TestChecker(t *testing.T) {
 		MaxRecovery: 5,
 	}
 	ctrl := gomock.NewController(t)
-	ec := mock.NewMockChainStateReader(ctrl)
+	ec := mocks.NewMockEthClient(ctrl)
 	ec.EXPECT().PendingNonceAt(gomock.Any(), gomock.Eq(endpointError), gomock.Any()).Return(uint64(0), fmt.Errorf("unknown chain")).AnyTimes()
 	ec.EXPECT().PendingNonceAt(gomock.Any(), gomock.Not(gomock.Eq(endpointError)), gomock.Any()).Return(uint64(10), nil).AnyTimes()
 
@@ -166,25 +166,25 @@ func TestChecker(t *testing.T) {
 		MockSenderHandler,
 	)
 
-	testKey1 := "42"
+	chainID1 := "42"
 	// On 1st execution envelope with nonce 10 should be valid (as the mock client returns always return pending nonce 10)
-	txctx := makeContext("testURL", testKey1, false, 10, 0, 0, 0, "")
+	txctx := makeContext("testURL", chainID1, false, 10, 0, 0, 0, "")
 	h(txctx)
 	assertTxContext(t, txctx)
 
 	// On 2nd execution envelope with nonce 11 should be valid nonce manager should have incremented last sent
-	txctx = makeContext("testURL", testKey1, false, 11, 0, 0, 0, "")
+	txctx = makeContext("testURL", chainID1, false, 11, 0, 0, 0, "")
 	h(txctx)
 	assertTxContext(t, txctx)
 
 	// On 3rd execution envelope with nonce 10 should be too low
-	txctx = makeContext("testURL", testKey1, true, 10, 0, 1, 0, "")
+	txctx = makeContext("testURL", chainID1, true, 10, 0, 1, 0, "")
 	h(txctx)
 	assertTxContext(t, txctx)
 
 	// On 4th execution envelope with nonce 14 should be too high
 	// Checker should signal in metadata
-	txctx = makeContext("testURL", testKey1, true, 14, 12, 1, 0, "")
+	txctx = makeContext("testURL", chainID1, true, 14, 12, 1, 0, "")
 	h(txctx)
 	assertTxContext(t, txctx)
 	recovering := tracker.Recovering(txctx.Envelope.PartitionKey()) > 0
@@ -192,20 +192,20 @@ func TestChecker(t *testing.T) {
 
 	// On 5th execution envelope with nonce 15 should be too high
 	// Checker should not signal in metadata
-	txctx = makeContext("testURL", testKey1, true, 15, 0, 3, 0, "")
+	txctx = makeContext("testURL", chainID1, true, 15, 0, 3, 0, "")
 	_ = txctx.Envelope.SetInternalLabelsValue("nonce.recovering.count", fmt.Sprintf("%v", 2))
 	h(txctx)
 	assertTxContext(t, txctx)
 
 	// On 6th execution envelope with nonce 12 be valid
-	txctx = makeContext("testURL", testKey1, false, 12, 0, 0, 0, "")
+	txctx = makeContext("testURL", chainID1, false, 12, 0, 0, 0, "")
 	h(txctx)
 	assertTxContext(t, txctx)
 	recovering = tracker.Recovering(txctx.Envelope.PartitionKey()) > 0
 	assert.False(t, recovering, "NonceManager should have stopped recovering")
 
 	// On 7th execution envelope with nonce 14 but raw mode should be valid
-	txctx = makeContext("testURL", testKey1, false, 15, 0, 0, 0, "")
+	txctx = makeContext("testURL", chainID1, false, 15, 0, 0, 0, "")
 	_ = txctx.Envelope.SetJobType(tx.JobType_ETH_RAW_TX)
 	h(txctx)
 	assertTxContext(t, txctx)
@@ -228,15 +228,72 @@ func TestChecker(t *testing.T) {
 	assertTxContext(t, txctx)
 
 	// Execution with nonce too low on send
-	txctx = makeContext("testURL", testKey1, true, 13, 0, 1, 0, "json-rpc: nonce too low")
+	txctx = makeContext("testURL", chainID1, true, 13, 0, 1, 0, "json-rpc: nonce too low")
 	h(txctx)
 	assertTxContext(t, txctx)
 	v, _, _ := nm.GetLastSent(txctx.Envelope.PartitionKey())
 	assert.Equal(t, uint64(9), v, "Nonce should have been re-initialized")
 
 	// Execution with recovery count exceeded
-	txctx = makeContext("testURL", testKey1, false, 13, 0, 10, 1, "")
+	txctx = makeContext("testURL", chainID1, false, 13, 0, 10, 1, "")
 	_ = txctx.Envelope.SetInternalLabelsValue("nonce.recovering.count", fmt.Sprintf("%v", 10))
 	h(txctx)
 	assertTxContext(t, txctx)
+}
+
+func TestChecker_EEA(t *testing.T) {
+	m := memory.NewNonceManager()
+	nm := &MockNonceManager{*m}
+	tracker := NewRecoveryTracker()
+	conf := &Configuration{
+		MaxRecovery: 5,
+	}
+	ctrl := gomock.NewController(t)
+	ec := mocks.NewMockEthClient(ctrl)
+
+	h := engine.CombineHandlers(
+		RecoveryStatusSetter(nm, tracker),
+		Checker(conf, nm, ec, tracker),
+		MockSenderHandler,
+	)
+
+	t.Run("envelope for EEA private tx job and privateGroupID should be valid", func(t *testing.T) {
+		// On 1nd execution envelope with nonce 0 should be fetch from the chain
+		txctx := makeContext("testURL", "111", false, 0, 0, 0, 0, "")
+		_ = txctx.Envelope.SetJobType(tx.JobType_ETH_ORION_EEA_TX).SetPrivacyGroupID("privateGroupID")
+		ec.EXPECT().PrivNonce(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(uint64(0), nil)
+		h(txctx)
+		assertTxContext(t, txctx)
+		
+		// On 2nd execution envelope with nonce 1 should be valid from  incremented last sent
+		txctx = makeContext("testURL", "111", false, 1, 0, 0, 0, "")
+		_ = txctx.Envelope.SetJobType(tx.JobType_ETH_ORION_EEA_TX).SetPrivacyGroupID("privateGroupID")
+		assertTxContext(t, txctx)
+	})
+	
+	t.Run("envelope for EEA private tx job and privateGroupID should be invalid", func(t *testing.T) {
+		// On 1nd execution envelope with nonce 0 should be fetch from the chain
+		txctx := makeContext("testURL", "112", true, 0, 0, 1, 0, "")
+		_ = txctx.Envelope.SetJobType(tx.JobType_ETH_ORION_EEA_TX).SetPrivacyGroupID("privateGroupID")
+		ec.EXPECT().PrivNonce(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(uint64(1), nil)
+		h(txctx)
+		assertTxContext(t, txctx)
+	})
+	
+	t.Run("envelope for EEA private tx job and privateGroupID should be valid", func(t *testing.T) {
+		// On 1nd execution envelope with nonce 0 should be fetch from the chain
+		txctx := makeContext("testURL", "111", false, 0, 0, 0, 0, "")
+		_ = txctx.Envelope.SetJobType(tx.JobType_ETH_ORION_EEA_TX).SetPrivateFor([]string{"PrivateFor"})
+		ec.EXPECT().PrivEEANonce(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(uint64(0), nil)
+		h(txctx)
+		assertTxContext(t, txctx)
+		
+		// On 2nd execution envelope with nonce 1 should be valid from  incremented last sent
+		txctx = makeContext("testURL", "111", false, 1, 0, 0, 0, "")
+		_ = txctx.Envelope.SetJobType(tx.JobType_ETH_ORION_EEA_TX).SetPrivateFor([]string{"PrivateFor"})
+		assertTxContext(t, txctx)
+	})
 }

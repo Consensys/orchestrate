@@ -56,6 +56,8 @@ func initHandlers(ctx context.Context) {
 		func() { sender.Init(ctx) },
 		// Initialize nonce manager
 		func() { noncechecker.Init(ctx) },
+		// Initialize injector manager
+		func() { injector.Init(ctx) },
 		// Initialize Tx Updater
 		func() { txupdater.Init() },
 		// Initialize producer
@@ -102,7 +104,6 @@ func registerHandlers() {
 	engine.Register(noncechecker.GlobalRecoveryStatusSetter())
 	engine.Register(injector.GlobalHandler())
 	engine.Register(noncechecker.GlobalChecker())
-
 	engine.Register(sender.GlobalHandler())
 }
 

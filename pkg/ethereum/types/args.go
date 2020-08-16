@@ -49,37 +49,6 @@ type SendTxArgs struct {
 	PrivateArgs
 }
 
-// Envelope2SendTxArgs creates SendTxArgs from an Envelope
-func Envelope2SendTxArgs(req *tx.Envelope) (*SendTxArgs, error) {
-	from, err := req.GetFromAddress()
-	if err != nil {
-		return nil, err
-	}
-
-	args := SendTxArgs{
-		From:        from,
-		GasPrice:    (*hexutil.Big)(req.GetGasPrice()),
-		Value:       (*hexutil.Big)(req.GetValue()),
-		Data:        hexutil.Bytes(req.Data),
-		Input:       hexutil.Bytes(req.Data),
-		PrivateArgs: *(Call2PrivateArgs(req)),
-	}
-
-	if req.Gas != nil {
-		args.Gas = (*hexutil.Uint64)(req.Gas)
-	}
-
-	if req.Nonce != nil {
-		args.Nonce = (*hexutil.Uint64)(req.Gas)
-	}
-
-	if req.To != nil {
-		args.To = req.GetTo()
-	}
-
-	return &args, nil
-}
-
 // CallArgs contains parameters for contract calls.
 type CallArgs struct {
 	From     ethcommon.Address  // the sender of the 'transaction'

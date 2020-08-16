@@ -9,7 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/envelope/storer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/rpc"
 )
 
 const component = "handler.sender"
@@ -32,12 +32,14 @@ func Init(ctx context.Context) {
 		// Initialize Ethereum client
 		ethclient.Init(ctx)
 
+		ec := ethclient.GlobalClient()
+
 		// Create Handler
 		handler = engine.CombineHandlers(
 			// Idempotency gate
-			storer.TxAlreadySent(ethclient.GlobalClient(), txscheduler.GlobalClient()),
+			storer.TxAlreadySent(ec, txscheduler.GlobalClient()),
 			// Sender
-			Sender(ethclient.GlobalClient(), txscheduler.GlobalClient()),
+			Sender(ec, txscheduler.GlobalClient()),
 		)
 
 		log.Infof("sender: handler ready")

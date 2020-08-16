@@ -7,12 +7,10 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/onetimekey"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore"
 )
-
-const component = "handler.signer.eea"
 
 var (
 	handler  engine.HandlerFunc
@@ -36,7 +34,7 @@ func Init(ctx context.Context) {
 		)
 
 		// Create Handler
-		handler = Signer(keystore.GlobalKeyStore(), onetimekey.GlobalKeyStore(), ethclient.GlobalClient())
+		handler = Signer(keystore.GlobalKeyStore(), onetimekey.GlobalKeyStore())
 
 		log.Infof("eea signer: handler ready")
 	})

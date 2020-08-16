@@ -10,6 +10,7 @@ type JobResponse struct {
 	UUID         string                  `json:"uuid" example:"b4374e6f-b28a-4bad-b4fe-bda36eaf849c"`
 	ChainUUID    string                  `json:"chainUUID" example:"b4374e6f-b28a-4bad-b4fe-bda36eaf849c"`
 	ScheduleUUID string                  `json:"scheduleUUID" example:"b4374e6f-b28a-4bad-b4fe-bda36eaf849c"`
+	NextJobUUID  string                  `json:"nextJobUUID,omitempty" example:"b4374e6f-b28a-4bad-b4fe-bda36eaf849c"`
 	Transaction  entities.ETHTransaction `json:"transaction"`
 	Logs         []*entities.Log         `json:"logs"`
 	Labels       map[string]string       `json:"labels,omitempty"`

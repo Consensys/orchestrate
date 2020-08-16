@@ -123,6 +123,7 @@ func (s *jobTestSuite) TestPGJob_FindOneByUUID() {
 	ctx := context.Background()
 	tenantID := "tenantID"
 	job := testutils.FakeJobModel(0)
+	job.NextJobUUID = uuid.Must(uuid.NewV4()).String()
 	job.Logs = append(job.Logs, &models.Log{UUID: uuid.Must(uuid.NewV4()).String(), Status: utils.StatusStarted, Message: "created message"})
 	job.Schedule.TenantID = tenantID
 	err := insertJob(ctx, s.agents, job)
@@ -134,6 +135,7 @@ func (s *jobTestSuite) TestPGJob_FindOneByUUID() {
 		assert.NoError(t, err)
 		assert.NotEmpty(t, jobRetrieved.ID)
 		assert.Equal(t, job.UUID, jobRetrieved.UUID)
+		assert.Equal(t, job.NextJobUUID, jobRetrieved.NextJobUUID)
 		assert.Equal(t, job.Transaction.UUID, jobRetrieved.Transaction.UUID)
 		assert.NotEmpty(t, jobRetrieved.Transaction.ID)
 		assert.Equal(t, job.Logs[0].UUID, jobRetrieved.Logs[0].UUID)

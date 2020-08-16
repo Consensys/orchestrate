@@ -8,6 +8,7 @@ import (
 
 type Job struct {
 	UUID         string
+	NextJobUUID  string
 	ChainUUID    string
 	ScheduleUUID string
 	Type         string

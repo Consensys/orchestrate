@@ -18,7 +18,10 @@ func TxSigner(publicEthereumSigner, eeaSigner, tesseraSigner engine.HandlerFunc)
 		}
 
 		switch {
-		case txctx.Envelope.IsEthSendRawPrivateTransaction():
+		case txctx.Envelope.IsEthSendTesseraPrivateTransaction():
+			// StoreRaw transaction does not require to be signed
+			return
+		case txctx.Envelope.IsEthSendTesseraMarkingTransaction():
 			// Sign for Tessera
 			tesseraSigner(txctx)
 		case txctx.Envelope.IsEeaSendPrivateTransaction():

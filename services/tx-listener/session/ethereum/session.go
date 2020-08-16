@@ -17,8 +17,7 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
-	ethclientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/utils"
+	ethclientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
@@ -30,7 +29,7 @@ const MaxTxHashesLength = 30
 
 type Session struct {
 	Chain             *dynamic.Chain
-	ec                ethclient.Client
+	ec                EthClient
 	txSchedulerClient client.TransactionSchedulerClient
 	hook              hook.Hook
 	offsets           offset.Manager
@@ -47,7 +46,7 @@ type Session struct {
 
 func NewSession(
 	chain *dynamic.Chain,
-	ec ethclient.Client,
+	ec EthClient,
 	txSchedulerClient client.TransactionSchedulerClient,
 	callHook hook.Hook,
 	offsets offset.Manager,
@@ -63,17 +62,16 @@ func NewSession(
 }
 
 type SessionBuilder struct {
-	hook    hook.Hook
-	offsets offset.Manager
-
-	ec                ethclient.Client
+	hook              hook.Hook
+	offsets           offset.Manager
+	ec                EthClient
 	txSchedulerClient client.TransactionSchedulerClient
 }
 
 func NewSessionBuilder(
 	hk hook.Hook,
 	offsets offset.Manager,
-	ec ethclient.Client,
+	ec EthClient,
 	txSchedulerClient client.TransactionSchedulerClient,
 ) *SessionBuilder {
 	return &SessionBuilder{
