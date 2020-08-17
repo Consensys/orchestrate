@@ -7,7 +7,7 @@ package mocks
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	reflect "reflect"
 )
 
@@ -35,7 +35,7 @@ func (m *MockSessionManager) EXPECT() *MockSessionManagerMockRecorder {
 }
 
 // AddSession mocks base method
-func (m *MockSessionManager) AddSession(ctx context.Context, job *types.Job) error {
+func (m *MockSessionManager) AddSession(ctx context.Context, job *entities.Job) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddSession", ctx, job)
 	ret0, _ := ret[0].(error)

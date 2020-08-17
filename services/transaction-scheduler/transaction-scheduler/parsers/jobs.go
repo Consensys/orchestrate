@@ -3,19 +3,20 @@ package parsers
 import (
 	"math/big"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 )
 
-func NewJobModelFromEntities(job *types.Job, scheduleID *int) *models.Job {
+func NewJobModelFromEntities(job *entities.Job, scheduleID *int) *models.Job {
 	jobModel := &models.Job{
-		UUID:        job.UUID,
-		ChainUUID:   job.ChainUUID,
-		Type:        job.Type,
-		Labels:      job.Labels,
-		Annotations: job.Annotations,
-		ScheduleID:  scheduleID,
+		UUID:         job.UUID,
+		ChainUUID:    job.ChainUUID,
+		Type:         job.Type,
+		Labels:       job.Labels,
+		InternalData: job.InternalData,
+		ScheduleID:   scheduleID,
 		Schedule: &models.Schedule{
 			UUID: job.ScheduleUUID,
 		},
@@ -39,16 +40,16 @@ func NewJobModelFromEntities(job *types.Job, scheduleID *int) *models.Job {
 	return jobModel
 }
 
-func NewJobEntityFromModels(jobModel *models.Job) *types.Job {
-	job := &types.Job{
-		UUID:        jobModel.UUID,
-		ChainUUID:   jobModel.ChainUUID,
-		Type:        jobModel.Type,
-		Labels:      jobModel.Labels,
-		Annotations: jobModel.Annotations,
-		Logs:        []*types.Log{},
-		CreatedAt:   jobModel.CreatedAt,
-		UpdatedAt:   jobModel.UpdatedAt,
+func NewJobEntityFromModels(jobModel *models.Job) *entities.Job {
+	job := &entities.Job{
+		UUID:         jobModel.UUID,
+		ChainUUID:    jobModel.ChainUUID,
+		Type:         jobModel.Type,
+		Labels:       jobModel.Labels,
+		InternalData: jobModel.InternalData,
+		Logs:         []*entities.Log{},
+		CreatedAt:    jobModel.CreatedAt,
+		UpdatedAt:    jobModel.UpdatedAt,
 	}
 
 	if jobModel.Schedule != nil {
@@ -72,7 +73,7 @@ func NewEnvelopeFromJobModel(job *models.Job, headers map[string]string) *tx.TxE
 		contextLabels = map[string]string{}
 	}
 	contextLabels["scheduleUUID"] = job.Schedule.UUID
-	contextLabels["priority"] = job.Annotations.Priority
+	contextLabels["priority"] = job.InternalData.Priority
 
 	txEnvelope := &tx.TxEnvelope{
 		Msg: &tx.TxEnvelope_TxRequest{TxRequest: &tx.TxRequest{
@@ -100,10 +101,10 @@ func NewEnvelopeFromJobModel(job *models.Job, headers map[string]string) *tx.TxE
 	txEnvelope.SetChainUUID(job.ChainUUID)
 
 	chainID := new(big.Int)
-	chainID.SetString(job.Annotations.ChainID, 10)
+	chainID.SetString(job.InternalData.ChainID, 10)
 	txEnvelope.SetChainID(chainID)
 
-	if job.Annotations.OneTimeKey {
+	if job.InternalData.OneTimeKey {
 		txEnvelope.EnableTxFromOneTimeKey()
 	}
 

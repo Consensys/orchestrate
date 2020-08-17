@@ -21,18 +21,18 @@ const (
 	sentryRefreshIntervalDefault  = 10 * time.Second
 	sentryRefreshIntervalEnv      = "TX_SENTRY_REFRESH_INTERVAL"
 
-	sentryPendingDurationFlag     = "tx-sentry-pending-duration"
-	sentryPendingDurationViperKey = "tx-sentry.pending-duration"
-	sentryPendingDurationDefault  = 2 * time.Minute
-	sentryPendingDurationEnv      = "TX_SENTRY_PENDING_DURATION"
+	sentryRetryIntervalFlag     = "tx-sentry-retry-interval"
+	sentryRetryIntervalViperKey = "tx-sentry.retry-interval"
+	sentryRetryIntervalDefault  = 2 * time.Minute
+	sentryRetryIntervalEnv      = "TX_SENTRY_RETRY_INTERVAL"
 )
 
 func init() {
 	viper.SetDefault(sentryRefreshIntervalViperKey, sentryRefreshIntervalDefault)
 	_ = viper.BindEnv(sentryRefreshIntervalViperKey, sentryRefreshIntervalEnv)
 
-	viper.SetDefault(sentryPendingDurationViperKey, sentryPendingDurationDefault)
-	_ = viper.BindEnv(sentryPendingDurationViperKey, sentryPendingDurationEnv)
+	viper.SetDefault(sentryRetryIntervalViperKey, sentryRetryIntervalDefault)
+	_ = viper.BindEnv(sentryRetryIntervalViperKey, sentryRetryIntervalEnv)
 }
 
 // TxSchedulerFlags register flags for tx scheduler
@@ -56,9 +56,9 @@ func TxSentryFlags(f *pflag.FlagSet) {
 	f.Duration(sentryRefreshIntervalFlag, sentryRefreshIntervalDefault, refreshIntervalDesc)
 	_ = viper.BindPFlag(sentryRefreshIntervalViperKey, f.Lookup(sentryRefreshIntervalFlag))
 
-	pendingDurationDesc := fmt.Sprintf(`Amount of time a pending schedule needs to be considered for retry. Environment variable: %q`, sentryPendingDurationEnv)
-	f.Duration(sentryPendingDurationFlag, sentryPendingDurationDefault, pendingDurationDesc)
-	_ = viper.BindPFlag(sentryPendingDurationViperKey, f.Lookup(sentryPendingDurationFlag))
+	pendingDurationDesc := fmt.Sprintf(`Amount of time a pending schedule needs to be considered for retry. Environment variable: %q`, sentryRetryIntervalEnv)
+	f.Duration(sentryRetryIntervalFlag, sentryRetryIntervalDefault, pendingDurationDesc)
+	_ = viper.BindPFlag(sentryRetryIntervalViperKey, f.Lookup(sentryRetryIntervalFlag))
 }
 
 type Config struct {
@@ -79,12 +79,12 @@ func NewConfig(vipr *viper.Viper) *Config {
 
 type SentryConfig struct {
 	RefreshInterval time.Duration
-	PendingDuration time.Duration
+	RetryInterval   time.Duration
 }
 
 func NewSentryConfig(vipr *viper.Viper) *SentryConfig {
 	return &SentryConfig{
 		RefreshInterval: vipr.GetDuration(sentryRefreshIntervalViperKey),
-		PendingDuration: vipr.GetDuration(sentryPendingDurationViperKey),
+		RetryInterval:   vipr.GetDuration(sentryRetryIntervalViperKey),
 	}
 }

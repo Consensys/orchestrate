@@ -3,11 +3,11 @@ package testutils
 import (
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 
 	"github.com/gofrs/uuid"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
@@ -72,7 +72,7 @@ func FakeJobModel(scheduleID int) *models.Job {
 		Logs: []*models.Log{
 			{UUID: uuid.Must(uuid.NewV4()).String(), Status: utils.StatusCreated, Message: "created message"},
 		},
-		Annotations: &types.Annotations{
+		InternalData: &entities.InternalData{
 			ChainID: "888",
 		},
 		CreatedAt: time.Now(),

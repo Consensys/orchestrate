@@ -43,11 +43,6 @@ func (s *txSchedulerTransactionTestSuite) SetupSuite() {
 func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() {
 	ctx := context.Background()
 	chain := testutils.FakeChain()
-	chainModel := &models.Chain{
-		Name:     chain.Name,
-		UUID:     chain.UUID,
-		TenantID: chain.TenantID,
-	}
 
 	s.T().Run("should fail if payload is invalid", func(t *testing.T) {
 		defer gock.Off()
@@ -66,13 +61,13 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 			controllers.IdempotencyKeyHeader: utils.RandomString(16),
 		})
 
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
+		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
 		_, err := s.client.SendContractTransaction(rctx, txRequest)
 		assert.NoError(t, err)
 
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
+		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
 		txRequest.Params.MethodSignature = "differentMethodSignature()"
 		_, err = s.client.SendContractTransaction(rctx, txRequest)
 		assert.True(t, errors.IsConstraintViolatedError(err))
@@ -90,7 +85,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 
 	s.T().Run("should fail with 422 if chainUUID does not exist", func(t *testing.T) {
 		defer gock.Off()
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
+		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(404)
 		txRequest := testutils.FakeSendTransactionRequest()
 
@@ -101,10 +96,10 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 
 	s.T().Run("should fail with 422 if from account is set and oneTimeKeyEnabled", func(t *testing.T) {
 		defer gock.Off()
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
+		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200)
 		txRequest := testutils.FakeSendTransactionRequest()
-		txRequest.Params.OneTimeKey = true
+		txRequest.Params.Annotations.OneTimeKey = true
 
 		_, err := s.client.SendContractTransaction(ctx, txRequest)
 
@@ -115,20 +110,14 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions() {
 	ctx := context.Background()
 	chain := testutils.FakeChain()
-	chainModel := &models.Chain{
-		Name:     chain.Name,
-		UUID:     chain.UUID,
-		TenantID: chain.TenantID,
-		ChainID:  chain.ChainID,
-	}
 
 	s.T().Run("should send a transaction successfully to the transaction crafter topic", func(t *testing.T) {
 		defer gock.Off()
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
+		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
 		txRequest := testutils.FakeSendTransactionRequest()
 		txRequest.Params.From = ""
-		txRequest.Params.OneTimeKey = true
+		txRequest.Params.Annotations.OneTimeKey = true
 		IdempotencyKey := utils.RandomString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: IdempotencyKey,
@@ -165,14 +154,14 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, job.UUID, evlp.GetID())
 		assert.True(t, evlp.IsOneTimeKeySignature())
 		assert.Equal(t, tx.JobTypeMap[utils.EthereumTransaction].String(), evlp.GetJobTypeString())
-		assert.Equal(t, evlp.GetChainIDString(), chainModel.ChainID)
-		assert.Equal(t, evlp.PartitionKey(), fmt.Sprintf("%v@%v", txRequest.Params.From, chainModel.ChainID))
+		assert.Equal(t, evlp.GetChainIDString(), chain.ChainID)
+		assert.Equal(t, evlp.PartitionKey(), fmt.Sprintf("%v@%v", txRequest.Params.From, chain.ChainID))
 	})
 
 	s.T().Run("should send a tessera transaction successfully to the transaction crafter topic", func(t *testing.T) {
 		defer gock.Off()
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
+		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
 		txRequest := testutils.FakeSendTesseraRequest()
 		IdempotencyKey := utils.RandomString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
@@ -214,8 +203,8 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 
 	s.T().Run("should send an orion transaction successfully to the transaction crafter topic", func(t *testing.T) {
 		defer gock.Off()
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
+		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
 		txRequest := testutils.FakeSendOrionRequest()
 
 		txResponse, err := s.client.SendContractTransaction(ctx, txRequest)
@@ -254,8 +243,8 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 
 	s.T().Run("should send a deploy contract successfully to the transaction crafter topic", func(t *testing.T) {
 		defer gock.Off()
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
+		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
 		txRequest := testutils.FakeDeployContractRequest()
 		txRequest.Params.Args = testutils.ParseIArray(123) // FakeContract arguments
 
@@ -299,8 +288,8 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 
 	s.T().Run("should send a raw transaction successfully to the transaction sender topic", func(t *testing.T) {
 		defer gock.Off()
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
+		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
 		txRequest := testutils.FakeSendRawTransactionRequest()
 
 		IdempotencyKey := utils.RandomString(16)
@@ -341,8 +330,8 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 
 	s.T().Run("should send a transfer transaction successfully to the transaction sender topic", func(t *testing.T) {
 		defer gock.Off()
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
+		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
 		txRequest := testutils.FakeSendTransferTransactionRequest()
 
 		txResponse, err := s.client.SendTransferTransaction(ctx, txRequest)
@@ -393,15 +382,15 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 			return
 		}
 
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
+		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
 		_, err = s.client.SendContractTransaction(rctx, txRequest)
 		assert.Error(t, err)
 
 		s.restartKafka(rctx)
 
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainModel})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chainModel)
+		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
 		txResponse, err := s.client.SendContractTransaction(rctx, txRequest)
 		if err != nil {
 			assert.Fail(t, err.Error())

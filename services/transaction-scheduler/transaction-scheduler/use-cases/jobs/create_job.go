@@ -3,9 +3,10 @@ package jobs
 import (
 	"context"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/validators"
 
 	log "github.com/sirupsen/logrus"
@@ -21,7 +22,7 @@ import (
 const createJobComponent = "use-cases.create-job"
 
 type CreateJobUseCase interface {
-	Execute(ctx context.Context, job *types.Job, tenants []string) (*types.Job, error)
+	Execute(ctx context.Context, job *entities.Job, tenants []string) (*entities.Job, error)
 	WithDBTransaction(dbtx store.Tx) CreateJobUseCase
 }
 
@@ -45,7 +46,7 @@ func (uc createJobUseCase) WithDBTransaction(dbtx store.Tx) CreateJobUseCase {
 }
 
 // Execute validates and creates a new transaction job
-func (uc *createJobUseCase) Execute(ctx context.Context, job *types.Job, tenants []string) (*types.Job, error) {
+func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tenants []string) (*entities.Job, error) {
 	log.WithContext(ctx).
 		WithField("chain_uuid", job.ChainUUID).
 		WithField("schedule_id", job.ScheduleUUID).
@@ -56,7 +57,7 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *types.Job, tenants
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
 	}
-	job.Annotations.ChainID = chainID
+	job.InternalData.ChainID = chainID
 
 	schedule, err := uc.db.Schedule().FindOneByUUID(ctx, job.ScheduleUUID, tenants)
 	if err != nil {

@@ -5,6 +5,7 @@ package kafka
 import (
 	"context"
 	"fmt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	"testing"
 
 	"github.com/Shopify/sarama/mocks"
@@ -14,9 +15,9 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/mock"
-	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	crc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client/mock"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
@@ -61,7 +62,7 @@ func Test_AfterNewBlock(t *testing.T) {
 			},
 		},
 	}
-	var fakeJobs = []*types2.Job{testutils.FakeJob()}
+	var fakeJobs = []*entities.Job{testutils.FakeJob()}
 	fakeJobs[0].Receipt = receipt
 
 	registry := crc.NewMockContractRegistryClient(ctrl)
@@ -80,10 +81,10 @@ func Test_AfterNewBlock(t *testing.T) {
 		registry.EXPECT().GetEventsBySigHash(gomock.Any(), gomock.Any(), gomock.Any()).Return(&contractregistry.GetEventsBySigHashResponse{
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
-		txScheduler.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &types2.UpdateJobRequest{
+		txScheduler.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
 			Status:  utils.StatusMined,
 			Message: fmt.Sprintf("Transaction mined in block %v", block.NumberU64()),
-		}).Return(&types2.JobResponse{}, nil)
+		}).Return(&txschedulertypes.JobResponse{}, nil)
 		producer.ExpectSendMessageAndSucceed()
 
 		expectedDecodedData := map[string]string{
@@ -110,10 +111,10 @@ func Test_AfterNewBlock(t *testing.T) {
 		registry.EXPECT().GetEventsBySigHash(gomock.Any(), gomock.Any(), gomock.Any()).Return(&contractregistry.GetEventsBySigHashResponse{
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
-		txScheduler.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &types2.UpdateJobRequest{
+		txScheduler.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
 			Status:  utils.StatusMined,
 			Message: fmt.Sprintf("Transaction mined in block %v", block.NumberU64()),
-		}).Return(&types2.JobResponse{}, nil)
+		}).Return(&txschedulertypes.JobResponse{}, nil)
 		producer.ExpectSendMessageAndSucceed()
 
 		hk := NewHook(conf, registry, ec, producer, txScheduler)
@@ -128,10 +129,10 @@ func Test_AfterNewBlock(t *testing.T) {
 		registry.EXPECT().GetEventsBySigHash(gomock.Any(), gomock.Any(), gomock.Any()).Return(&contractregistry.GetEventsBySigHashResponse{
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
-		txScheduler.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &types2.UpdateJobRequest{
+		txScheduler.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
 			Status:  utils.StatusMined,
 			Message: fmt.Sprintf("Transaction mined in block %v", block.NumberU64()),
-		}).Return(&types2.JobResponse{}, nil)
+		}).Return(&txschedulertypes.JobResponse{}, nil)
 		producer.ExpectSendMessageAndSucceed()
 
 		hk := NewHook(conf, registry, ec, producer, txScheduler)
@@ -144,10 +145,10 @@ func Test_AfterNewBlock(t *testing.T) {
 		ec.EXPECT().CodeAt(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(ethcommon.Hex2Bytes("0xabcd"), nil)
 		registry.EXPECT().SetAccountCodeHash(gomock.Any(), gomock.Any(), gomock.Any()).Return(&contractregistry.SetAccountCodeHashResponse{}, nil)
 		registry.EXPECT().GetEventsBySigHash(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error GetEventsBySigHash"))
-		txScheduler.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &types2.UpdateJobRequest{
+		txScheduler.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
 			Status:  utils.StatusMined,
 			Message: fmt.Sprintf("Transaction mined in block %v", block.NumberU64()),
-		}).Return(&types2.JobResponse{}, nil)
+		}).Return(&txschedulertypes.JobResponse{}, nil)
 		producer.ExpectSendMessageAndSucceed()
 
 		hk := NewHook(conf, registry, ec, producer, txScheduler)
@@ -162,7 +163,7 @@ func Test_AfterNewBlock(t *testing.T) {
 		registry.EXPECT().GetEventsBySigHash(gomock.Any(), gomock.Any(), gomock.Any()).Return(&contractregistry.GetEventsBySigHashResponse{
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
-		txScheduler.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &types2.UpdateJobRequest{
+		txScheduler.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
 			Status:  utils.StatusMined,
 			Message: fmt.Sprintf("Transaction mined in block %v", block.NumberU64()),
 		}).Return(nil, fmt.Errorf("error"))
@@ -182,10 +183,10 @@ func Test_AfterNewBlock(t *testing.T) {
 		registry.EXPECT().GetEventsBySigHash(gomock.Any(), gomock.Any(), gomock.Any()).Return(&contractregistry.GetEventsBySigHashResponse{
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
-		txScheduler.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &types2.UpdateJobRequest{
+		txScheduler.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
 			Status:  utils.StatusMined,
 			Message: fmt.Sprintf("Transaction mined in block %v", block.NumberU64()),
-		}).Return(&types2.JobResponse{}, nil)
+		}).Return(&txschedulertypes.JobResponse{}, nil)
 		producer.ExpectSendMessageAndFail(expectedErr)
 
 		hk := NewHook(conf, registry, ec, producer, txScheduler)

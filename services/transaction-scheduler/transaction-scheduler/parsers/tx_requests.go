@@ -1,9 +1,8 @@
 package parsers
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
 
 func NewTxRequestModelFromEntities(txRequest *entities.TxRequest, requestHash string, scheduleID int) *models.TransactionRequest {
@@ -18,14 +17,14 @@ func NewTxRequestModelFromEntities(txRequest *entities.TxRequest, requestHash st
 	}
 }
 
-func NewJobEntityFromTxRequest(txRequest *entities.TxRequest, jobType, chainUUID string) *types.Job {
-	job := &types.Job{
+func NewJobEntityFromTxRequest(txRequest *entities.TxRequest, jobType, chainUUID string) *entities.Job {
+	return &entities.Job{
 		ScheduleUUID: txRequest.Schedule.UUID,
 		ChainUUID:    chainUUID,
 		Type:         jobType,
 		Labels:       txRequest.Labels,
-		Annotations:  &types.Annotations{},
-		Transaction: &types.ETHTransaction{
+		InternalData: txRequest.InternalData,
+		Transaction: &entities.ETHTransaction{
 			From:           txRequest.Params.From,
 			To:             txRequest.Params.To,
 			Nonce:          txRequest.Params.Nonce,
@@ -38,10 +37,4 @@ func NewJobEntityFromTxRequest(txRequest *entities.TxRequest, jobType, chainUUID
 			PrivacyGroupID: txRequest.Params.PrivacyGroupID,
 		},
 	}
-
-	if txRequest.Annotations != nil {
-		job.Annotations = txRequest.Annotations
-	}
-
-	return job
 }

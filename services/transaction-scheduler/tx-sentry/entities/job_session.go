@@ -3,10 +3,10 @@ package entities
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 )
 
 type JobSession struct {
-	Job    *types.Job
+	Job    *entities.Job
 	Cancel context.CancelFunc
 }

@@ -4,11 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	abi2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
@@ -23,7 +24,7 @@ const txValidatorComponent = "transaction-validator"
 type TransactionValidator interface {
 	ValidateChainExists(ctx context.Context, chainUUID string) (string, error)
 	ValidateMethodSignature(methodSignature string, args []interface{}) (string, error)
-	ValidateContract(ctx context.Context, params *types.ETHTransactionParams) (string, error)
+	ValidateContract(ctx context.Context, params *entities.ETHTransactionParams) (string, error)
 }
 
 // transactionValidator is a validator for transaction requests (business logic)
@@ -71,7 +72,7 @@ func (txValidator *transactionValidator) ValidateMethodSignature(method string, 
 	return hexutil.Encode(txDataBytes), nil
 }
 
-func (txValidator *transactionValidator) ValidateContract(ctx context.Context, params *types.ETHTransactionParams) (string, error) {
+func (txValidator *transactionValidator) ValidateContract(ctx context.Context, params *entities.ETHTransactionParams) (string, error) {
 	logger := log.WithContext(ctx).WithField("contract_name", params.ContractName).WithField("contract_tag", params.ContractTag)
 	logger.Debug("validating contract")
 

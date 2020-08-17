@@ -3,99 +3,94 @@ package formatters
 import (
 	"net/http"
 	"strings"
+	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
 
-func FormatSendTxRequest(txRequest *types.SendTransactionRequest, idempotencyKey string) *entities.TxRequest {
+func FormatSendTxRequest(sendTxRequest *types.SendTransactionRequest, idempotencyKey string, defaultRetryInterval time.Duration) *entities.TxRequest {
 	return &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,
-		ChainName:      txRequest.ChainName,
-		Labels:         txRequest.Labels,
-		Params: &types.ETHTransactionParams{
-			From:            txRequest.Params.From,
-			To:              txRequest.Params.To,
-			Value:           txRequest.Params.Value,
-			GasPrice:        txRequest.Params.GasPrice,
-			Gas:             txRequest.Params.Gas,
-			MethodSignature: txRequest.Params.MethodSignature,
-			Args:            txRequest.Params.Args,
-			Protocol:        txRequest.Params.Protocol,
-			PrivateFrom:     txRequest.Params.PrivateFrom,
-			PrivateFor:      txRequest.Params.PrivateFor,
-			PrivacyGroupID:  txRequest.Params.PrivacyGroupID,
+		ChainName:      sendTxRequest.ChainName,
+		Labels:         sendTxRequest.Labels,
+		Params: &entities.ETHTransactionParams{
+			From:            sendTxRequest.Params.From,
+			To:              sendTxRequest.Params.To,
+			Value:           sendTxRequest.Params.Value,
+			GasPrice:        sendTxRequest.Params.GasPrice,
+			Gas:             sendTxRequest.Params.Gas,
+			MethodSignature: sendTxRequest.Params.MethodSignature,
+			Args:            sendTxRequest.Params.Args,
+			Protocol:        sendTxRequest.Params.Protocol,
+			PrivateFrom:     sendTxRequest.Params.PrivateFrom,
+			PrivateFor:      sendTxRequest.Params.PrivateFor,
+			PrivacyGroupID:  sendTxRequest.Params.PrivacyGroupID,
 		},
-		Annotations: &types.Annotations{
-			OneTimeKey: txRequest.Params.OneTimeKey,
-			Priority:   txRequest.Params.Priority,
-			Retry:      txRequest.Params.Retry,
-		},
+		InternalData: formatAnnotations(&sendTxRequest.Params.Annotations, defaultRetryInterval),
 	}
 }
 
-func FormatDeployContractRequest(txRequest *types.DeployContractRequest, idempotencyKey string) *entities.TxRequest {
+func FormatDeployContractRequest(deployRequest *types.DeployContractRequest, idempotencyKey string, defaultRetryInterval time.Duration) *entities.TxRequest {
 	return &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,
-		ChainName:      txRequest.ChainName,
-		Labels:         txRequest.Labels,
-		Params: &types.ETHTransactionParams{
-			From:           txRequest.Params.From,
-			Value:          txRequest.Params.Value,
-			GasPrice:       txRequest.Params.GasPrice,
-			Gas:            txRequest.Params.Gas,
-			Args:           txRequest.Params.Args,
-			ContractName:   txRequest.Params.ContractName,
-			ContractTag:    txRequest.Params.ContractTag,
-			Protocol:       txRequest.Params.Protocol,
-			PrivateFrom:    txRequest.Params.PrivateFrom,
-			PrivateFor:     txRequest.Params.PrivateFor,
-			PrivacyGroupID: txRequest.Params.PrivacyGroupID,
+		ChainName:      deployRequest.ChainName,
+		Labels:         deployRequest.Labels,
+		Params: &entities.ETHTransactionParams{
+			From:           deployRequest.Params.From,
+			Value:          deployRequest.Params.Value,
+			GasPrice:       deployRequest.Params.GasPrice,
+			Gas:            deployRequest.Params.Gas,
+			Args:           deployRequest.Params.Args,
+			ContractName:   deployRequest.Params.ContractName,
+			ContractTag:    deployRequest.Params.ContractTag,
+			Protocol:       deployRequest.Params.Protocol,
+			PrivateFrom:    deployRequest.Params.PrivateFrom,
+			PrivateFor:     deployRequest.Params.PrivateFor,
+			PrivacyGroupID: deployRequest.Params.PrivacyGroupID,
 		},
-		Annotations: &types.Annotations{
-			OneTimeKey: txRequest.Params.OneTimeKey,
-			Priority:   txRequest.Params.Priority,
-			Retry:      txRequest.Params.Retry,
-		},
+		InternalData: formatAnnotations(&deployRequest.Params.Annotations, defaultRetryInterval),
 	}
 }
 
-func FormatSendRawRequest(txRequest *types.RawTransactionRequest, idempotencyKey string) *entities.TxRequest {
-	var retry *types.GasPriceRetryParams
-	if r := txRequest.Params.Retry; r != nil {
-		retry = &types.GasPriceRetryParams{Interval: r.Interval}
+func FormatSendRawRequest(rawTxRequest *types.RawTransactionRequest, idempotencyKey string, defaultRetryInterval time.Duration) *entities.TxRequest {
+	// Do not use InternalData directly as we only want to expose the RetryInterval param
+	annotations := &types.Annotations{
+		RetryPolicy: types.GasPriceRetryParams{
+			Interval: rawTxRequest.Params.RetryPolicy.Interval,
+		},
 	}
 	return &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,
-		ChainName:      txRequest.ChainName,
-		Labels:         txRequest.Labels,
-		Params: &types.ETHTransactionParams{
-			Raw: txRequest.Params.Raw,
+		ChainName:      rawTxRequest.ChainName,
+		Labels:         rawTxRequest.Labels,
+		Params: &entities.ETHTransactionParams{
+			Raw: rawTxRequest.Params.Raw,
 		},
-		Annotations: &types.Annotations{
-			Retry: retry,
-		},
+		InternalData: formatAnnotations(annotations, defaultRetryInterval),
 	}
 }
 
-func FormatSendTransferRequest(txRequest *types.TransferRequest, idempotencyKey string) *entities.TxRequest {
+func FormatTransferRequest(transferRequest *types.TransferRequest, idempotencyKey string, defaultRetryInterval time.Duration) *entities.TxRequest {
+	// Do not use InternalData directly as we do not want to expose the OneTimeKey param
+	annotations := &types.Annotations{
+		Priority:    transferRequest.Params.Priority,
+		RetryPolicy: transferRequest.Params.RetryPolicy,
+	}
 	return &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,
-		ChainName:      txRequest.ChainName,
-		Labels:         txRequest.Labels,
-		Params: &types.ETHTransactionParams{
-			From:     txRequest.Params.From,
-			To:       txRequest.Params.To,
-			Value:    txRequest.Params.Value,
-			GasPrice: txRequest.Params.GasPrice,
-			Gas:      txRequest.Params.Gas,
+		ChainName:      transferRequest.ChainName,
+		Labels:         transferRequest.Labels,
+		Params: &entities.ETHTransactionParams{
+			From:     transferRequest.Params.From,
+			To:       transferRequest.Params.To,
+			Value:    transferRequest.Params.Value,
+			GasPrice: transferRequest.Params.GasPrice,
+			Gas:      transferRequest.Params.Gas,
 		},
-		Annotations: &types.Annotations{
-			Priority: txRequest.Params.Priority,
-			Retry:    txRequest.Params.Retry,
-		},
+		InternalData: formatAnnotations(annotations, defaultRetryInterval),
 	}
 }
 

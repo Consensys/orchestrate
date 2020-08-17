@@ -6,6 +6,8 @@ import (
 	"sync"
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
@@ -18,7 +20,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient"
 	ethclientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 	hook "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/hooks"
@@ -89,7 +90,7 @@ func (b *SessionBuilder) NewSession(chain *dynamic.Chain) (session.Session, erro
 
 type fetchedBlock struct {
 	block *ethtypes.Block
-	jobs  []*types.Job
+	jobs  []*entities.Job
 }
 
 func (s *Session) Run(ctx context.Context) error {
@@ -334,8 +335,8 @@ func (s *Session) fetchBlock(ctx context.Context, blockPosition uint64) *Future 
 	})
 }
 
-func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transactions) (map[string]*types.Job, error) {
-	jobMap := make(map[string]*types.Job)
+func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transactions) (map[string]*entities.Job, error) {
+	jobMap := make(map[string]*entities.Job)
 
 	if len(transactions) == 0 {
 		return jobMap, nil
@@ -363,14 +364,13 @@ func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transacti
 				WithField("jobUUID", jobResponse.UUID).Debug("transaction was matched to job")
 
 			// Filter by the jobs belonging to same session CHAIN_UUID
-			jobMap[jobResponse.Transaction.Hash] = &types.Job{
+			jobMap[jobResponse.Transaction.Hash] = &entities.Job{
 				UUID:         jobResponse.UUID,
 				ChainUUID:    jobResponse.ChainUUID,
 				ScheduleUUID: jobResponse.ScheduleUUID,
 				Type:         jobResponse.Type,
 				Labels:       jobResponse.Labels,
-				Annotations:  jobResponse.Annotations,
-				Transaction:  jobResponse.Transaction,
+				Transaction:  &jobResponse.Transaction,
 				CreatedAt:    jobResponse.CreatedAt,
 			}
 		}
@@ -379,7 +379,7 @@ func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transacti
 	return jobMap, nil
 }
 
-func (s *Session) fetchReceipts(ctx context.Context, transactions ethtypes.Transactions, jobMap map[string]*types.Job) []*Future {
+func (s *Session) fetchReceipts(ctx context.Context, transactions ethtypes.Transactions, jobMap map[string]*entities.Job) []*Future {
 	var futureJobs []*Future
 
 	for _, blckTx := range transactions {
@@ -391,11 +391,11 @@ func (s *Session) fetchReceipts(ctx context.Context, transactions ethtypes.Trans
 			futureJobs = append(futureJobs, s.fetchReceipt(ctx, jobMap[blckTx.Hash().String()], blckTx.Hash()))
 			continue
 		case isEEAPrivTx(blckTx, s.eeaPrivPrecompiledContractAddr) && s.Chain.Listener.ExternalTxEnabled:
-			job := &types.Job{ChainUUID: s.Chain.UUID, Transaction: &types.ETHTransaction{Hash: blckTx.Hash().Hex()}}
+			job := &entities.Job{ChainUUID: s.Chain.UUID, Transaction: &entities.ETHTransaction{Hash: blckTx.Hash().Hex()}}
 			futureJobs = append(futureJobs, s.fetchPrivateReceipt(ctx, job, blckTx.Hash()))
 			continue
 		case s.Chain.Listener.ExternalTxEnabled:
-			job := &types.Job{ChainUUID: s.Chain.UUID, Transaction: &types.ETHTransaction{Hash: blckTx.Hash().Hex()}}
+			job := &entities.Job{ChainUUID: s.Chain.UUID, Transaction: &entities.ETHTransaction{Hash: blckTx.Hash().Hex()}}
 			futureJobs = append(futureJobs, s.fetchReceipt(ctx, job, blckTx.Hash()))
 			continue
 		default:
@@ -406,7 +406,7 @@ func (s *Session) fetchReceipts(ctx context.Context, transactions ethtypes.Trans
 	return futureJobs
 }
 
-func awaitReceipts(futureJobs []*Future) (jobs []*types.Job, err error) {
+func awaitReceipts(futureJobs []*Future) (jobs []*entities.Job, err error) {
 	for _, futureJob := range futureJobs {
 		select {
 		case e := <-futureJob.Err():
@@ -414,7 +414,7 @@ func awaitReceipts(futureJobs []*Future) (jobs []*types.Job, err error) {
 				err = e
 			}
 		case res := <-futureJob.Result():
-			jobs = append(jobs, res.(*types.Job))
+			jobs = append(jobs, res.(*entities.Job))
 		}
 
 		// Close future
@@ -427,7 +427,7 @@ func awaitReceipts(futureJobs []*Future) (jobs []*types.Job, err error) {
 	return jobs, nil
 }
 
-func isInternalTx(jobMap map[string]*types.Job, transaction *ethtypes.Transaction) bool {
+func isInternalTx(jobMap map[string]*entities.Job, transaction *ethtypes.Transaction) bool {
 	_, ok := jobMap[transaction.Hash().String()]
 	return ok
 }
@@ -440,7 +440,7 @@ func isEEAPrivTx(transaction *ethtypes.Transaction, eeaPrivPrecompiledContractAd
 	return transaction.To() != nil && transaction.To().String() == eeaPrivPrecompiledContractAddr
 }
 
-func (s *Session) fetchReceipt(ctx context.Context, job *types.Job, txHash ethcommon.Hash) *Future {
+func (s *Session) fetchReceipt(ctx context.Context, job *entities.Job, txHash ethcommon.Hash) *Future {
 	return NewFuture(func() (interface{}, error) {
 		logger := log.FromContext(ctx).
 			WithField("txHash", txHash.Hex()).
@@ -468,7 +468,7 @@ func (s *Session) fetchReceipt(ctx context.Context, job *types.Job, txHash ethco
 	})
 }
 
-func (s *Session) fetchPrivateReceipt(ctx context.Context, job *types.Job, txHash ethcommon.Hash) *Future {
+func (s *Session) fetchPrivateReceipt(ctx context.Context, job *entities.Job, txHash ethcommon.Hash) *Future {
 	return NewFuture(func() (interface{}, error) {
 		logger := log.FromContext(ctx).
 			WithField("txHash", txHash.Hex()).

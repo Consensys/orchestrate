@@ -3,17 +3,17 @@
 package parsers
 
 import (
+	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
-	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 )
 
 func TestParsersSchedule_NewModelFromEntity(t *testing.T) {
-	scheduleEntity := testutils2.FakeScheduleEntity()
+	scheduleEntity := testutils2.FakeSchedule()
 	scheduleModel := NewScheduleModelFromEntities(scheduleEntity)
 	finalScheduleEntity := NewScheduleEntityFromModels(scheduleModel)
 

@@ -5,7 +5,7 @@ package jobs
 import (
 	"context"
 	"github.com/gofrs/uuid"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -15,7 +15,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
 )
 
@@ -43,7 +42,7 @@ func TestSearchJobs_Execute(t *testing.T) {
 			ChainUUID: chainUUID,
 		}
 
-		expectedResponse := []*types.Job{parsers.NewJobEntityFromModels(jobs[0])}
+		expectedResponse := []*entities.Job{parsers.NewJobEntityFromModels(jobs[0])}
 		mockJobDA.EXPECT().Search(ctx, filters, []string{tenantID}).Return(jobs, nil)
 		jobResponse, err := usecase.Execute(ctx, filters, []string{tenantID})
 

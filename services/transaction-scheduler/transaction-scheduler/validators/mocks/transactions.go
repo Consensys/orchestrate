@@ -7,7 +7,7 @@ package mocks
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	reflect "reflect"
 )
 
@@ -65,7 +65,7 @@ func (mr *MockTransactionValidatorMockRecorder) ValidateMethodSignature(methodSi
 }
 
 // ValidateContract mocks base method
-func (m *MockTransactionValidator) ValidateContract(ctx context.Context, params *types.ETHTransactionParams) (string, error) {
+func (m *MockTransactionValidator) ValidateContract(ctx context.Context, params *entities.ETHTransactionParams) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ValidateContract", ctx, params)
 	ret0, _ := ret[0].(string)

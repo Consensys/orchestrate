@@ -6,9 +6,11 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
@@ -17,11 +19,9 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
-	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/transactions"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/transactions/mocks"
 )
@@ -37,6 +37,7 @@ type transactionsControllerTestSuite struct {
 	searchTxsUsecase      *mocks.MockSearchTransactionsUseCase
 	ctx                   context.Context
 	tenantID              string
+	defaultRetryInterval  time.Duration
 }
 
 func (s *transactionsControllerTestSuite) SendContractTransaction() transactions.SendContractTxUseCase {
@@ -76,11 +77,12 @@ func (s *transactionsControllerTestSuite) SetupTest() {
 	s.getTxUseCase = mocks.NewMockGetTxUseCase(ctrl)
 	s.searchTxsUsecase = mocks.NewMockSearchTransactionsUseCase(ctrl)
 	s.tenantID = "tenantId"
+	s.defaultRetryInterval = time.Second * 2
 	s.ctx = context.WithValue(context.Background(), multitenancy.TenantIDKey, s.tenantID)
 	s.ctx = context.WithValue(s.ctx, multitenancy.AllowedTenantsKey, []string{s.tenantID})
 
 	s.router = mux.NewRouter()
-	s.controller = NewTransactionsController(s)
+	s.controller = NewTransactionsController(s, s.defaultRetryInterval)
 	s.controller.Append(s.router)
 }
 
@@ -100,10 +102,10 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_send() {
 		httpRequest := httptest.NewRequest(http.MethodPost, urlPath, bytes.NewReader(requestBytes)).WithContext(s.ctx)
 		httpRequest.Header.Set(IdempotencyKeyHeader, idempotencyKey)
 
-		testutils2.FakeTxRequestEntity()
-		txRequestEntityResp := testutils2.FakeTxRequestEntity()
+		testutils.FakeTxRequest()
+		txRequestEntityResp := testutils.FakeTxRequest()
 
-		txRequestEntity := formatters.FormatSendTxRequest(txRequest, idempotencyKey)
+		txRequestEntity := formatters.FormatSendTxRequest(txRequest, idempotencyKey, s.defaultRetryInterval)
 		s.sendContractTxUseCase.EXPECT().Execute(gomock.Any(), txRequestEntity, s.tenantID).Return(txRequestEntityResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -126,8 +128,8 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_send() {
 
 		httpRequest := httptest.NewRequest(http.MethodPost, urlPath, bytes.NewReader(requestBytes)).WithContext(s.ctx)
 
-		testutils2.FakeTxRequestEntity()
-		txRequestEntityResp := testutils2.FakeTxRequestEntity()
+		testutils.FakeTxRequest()
+		txRequestEntityResp := testutils.FakeTxRequest()
 
 		s.sendContractTxUseCase.EXPECT().
 			Execute(gomock.Any(), gomock.Any(), s.tenantID).
@@ -190,9 +192,9 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_deploy() {
 		httpRequest := httptest.NewRequest(http.MethodPost, urlPath, bytes.NewReader(requestBytes)).WithContext(s.ctx)
 		httpRequest.Header.Set(IdempotencyKeyHeader, idempotencyKey)
 
-		txRequestEntityResp := testutils2.FakeTxRequestEntity()
+		txRequestEntityResp := testutils.FakeTxRequest()
 
-		txRequestEntity := formatters.FormatDeployContractRequest(txRequest, idempotencyKey)
+		txRequestEntity := formatters.FormatDeployContractRequest(txRequest, idempotencyKey, s.defaultRetryInterval)
 		s.sendDeployTxUseCase.EXPECT().Execute(gomock.Any(), txRequestEntity, s.tenantID).Return(txRequestEntityResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -249,9 +251,9 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_sendRaw() {
 		httpRequest := httptest.NewRequest(http.MethodPost, urlPath, bytes.NewReader(requestBytes)).WithContext(s.ctx)
 		httpRequest.Header.Set(IdempotencyKeyHeader, idempotencyKey)
 
-		txRequestEntityResp := testutils2.FakeTxRequestEntity()
+		txRequestEntityResp := testutils.FakeTxRequest()
 
-		txRequestEntity := formatters.FormatSendRawRequest(txRequest, idempotencyKey)
+		txRequestEntity := formatters.FormatSendRawRequest(txRequest, idempotencyKey, s.defaultRetryInterval)
 		s.sendTxUseCase.EXPECT().Execute(gomock.Any(), txRequestEntity, "", s.tenantID).Return(txRequestEntityResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -310,9 +312,9 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_transfer() 
 		httpRequest := httptest.NewRequest(http.MethodPost, urlPath, bytes.NewReader(requestBytes)).WithContext(s.ctx)
 		httpRequest.Header.Set(IdempotencyKeyHeader, idempotencyKey)
 
-		txRequestEntityResp := testutils2.FakeTransferTxRequestEntity()
+		txRequestEntityResp := testutils.FakeTransferTxRequest()
 
-		txRequestEntity := formatters.FormatSendTransferRequest(txRequest, idempotencyKey)
+		txRequestEntity := formatters.FormatTransferRequest(txRequest, idempotencyKey, s.defaultRetryInterval)
 		s.sendTxUseCase.EXPECT().Execute(gomock.Any(), txRequestEntity, "", s.tenantID).Return(txRequestEntityResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -361,7 +363,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_getOne() {
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodGet, urlPath, nil).WithContext(s.ctx)
-		txRequest := testutils2.FakeTransferTxRequestEntity()
+		txRequest := testutils.FakeTransferTxRequest()
 
 		s.getTxUseCase.EXPECT().Execute(gomock.Any(), uuid, []string{s.tenantID}).
 			Return(txRequest, nil)
@@ -392,7 +394,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_search() {
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodGet, urlPath+"?idempotency_keys=mykey,mykey1", nil).WithContext(s.ctx)
-		txRequest := testutils2.FakeTransferTxRequestEntity()
+		txRequest := testutils.FakeTransferTxRequest()
 		expectedFilers := &entities.TransactionFilters{
 			IdempotencyKeys: []string{"mykey", "mykey1"},
 		}
@@ -402,7 +404,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_search() {
 
 		s.router.ServeHTTP(rw, httpRequest)
 
-		response := []*types.TransactionResponse{formatters.FormatTxResponse(txRequest)}
+		response := []*txschedulertypes.TransactionResponse{formatters.FormatTxResponse(txRequest)}
 		expectedBody, _ := json.Marshal(response)
 		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
 		assert.Equal(t, http.StatusOK, rw.Code)

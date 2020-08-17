@@ -3,9 +3,9 @@
 package parsers
 
 import (
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 
@@ -58,12 +58,12 @@ func TestParsersJob_NewEnvelopeFromModel(t *testing.T) {
 	assert.Equal(t, jobModel.Transaction.PrivateFor, txRequest.Params.GetPrivateFor())
 	assert.Equal(t, jobModel.Transaction.PrivateFrom, txRequest.Params.GetPrivateFrom())
 	assert.Equal(t, jobModel.Transaction.PrivacyGroupID, txRequest.Params.GetPrivacyGroupId())
-	assert.Equal(t, jobModel.Annotations.ChainID, txEnvelope.GetChainID())
+	assert.Equal(t, jobModel.InternalData.ChainID, txEnvelope.GetChainID())
 }
 
 func TestParsersJob_NewEnvelopeFromModelOneTimeKey(t *testing.T) {
 	jobModel := testutils.FakeJobModel(1)
-	jobModel.Annotations = &types.Annotations{
+	jobModel.InternalData = &entities.InternalData{
 		OneTimeKey: true,
 	}
 

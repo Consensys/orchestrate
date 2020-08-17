@@ -3,9 +3,9 @@ package testutils
 import (
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
 func ParseIArray(args ...interface{}) (ret []interface{}) {
@@ -14,8 +14,8 @@ func ParseIArray(args ...interface{}) (ret []interface{}) {
 	return
 }
 
-func FakeETHTransaction() *types.ETHTransaction {
-	return &types.ETHTransaction{
+func FakeETHTransaction() *entities.ETHTransaction {
+	return &entities.ETHTransaction{
 		From:           "0x1abae27a0cbfb02945720425d3b80c7e09728534",
 		To:             "0x4fed1fc4144c223ae3c1553be203cdfcbd38c581",
 		Nonce:          "1",
@@ -32,8 +32,8 @@ func FakeETHTransaction() *types.ETHTransaction {
 	}
 }
 
-func FakeETHTransactionParams() *types.ETHTransactionParams {
-	return &types.ETHTransactionParams{
+func FakeETHTransactionParams() *entities.ETHTransactionParams {
+	return &entities.ETHTransactionParams{
 		From:            "0x7357589f8e367c2C31F51242fB77B350A11830F3",
 		To:              "0x7357589f8e367c2C31F51242fB77B350A11830F2",
 		Value:           "1",
@@ -47,7 +47,7 @@ func FakeETHTransactionParams() *types.ETHTransactionParams {
 	}
 }
 
-func FakeTesseraTransactionParams() *types.ETHTransactionParams {
+func FakeTesseraTransactionParams() *entities.ETHTransactionParams {
 	tx := FakeETHTransactionParams()
 	tx.PrivateFrom = "ROAZBWtSacxXQrOe3FGAqJDyJjFePR5ce4TSIzmJ0Bc="
 	tx.PrivateFor = []string{"ROAZBWtSacxXQrOe3FGAqJDyJjFePR5ce4TSIzmJ0Bd="}
@@ -56,7 +56,7 @@ func FakeTesseraTransactionParams() *types.ETHTransactionParams {
 	return tx
 }
 
-func FakeOrionTransactionParams() *types.ETHTransactionParams {
+func FakeOrionTransactionParams() *entities.ETHTransactionParams {
 	tx := FakeETHTransactionParams()
 	tx.PrivateFrom = "ROAZBWtSacxXQrOe3FGAqJDyJjFePR5ce4TSIzmJ0Be="
 	tx.PrivacyGroupID = "ROAZBWtSacxXQrOe3FGAqJDyJjFePR5ce4TSIzmJ0Bf="
@@ -65,14 +65,14 @@ func FakeOrionTransactionParams() *types.ETHTransactionParams {
 	return tx
 }
 
-func FakeRawTransactionParams() *types.ETHTransactionParams {
-	return &types.ETHTransactionParams{
+func FakeRawTransactionParams() *entities.ETHTransactionParams {
+	return &entities.ETHTransactionParams{
 		Raw: "0xABCDE012312312",
 	}
 }
 
-func FakeTransferTransactionParams() *types.ETHTransactionParams {
-	return &types.ETHTransactionParams{
+func FakeTransferTransactionParams() *entities.ETHTransactionParams {
+	return &entities.ETHTransactionParams{
 		From:  "0x7357589f8e367c2C31F51242fB77B350A11830FA",
 		To:    "0x7357589f8e367c2C31F51242fB77B350A11830FB",
 		Value: "10000000000",

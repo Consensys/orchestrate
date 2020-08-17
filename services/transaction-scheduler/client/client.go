@@ -3,7 +3,7 @@ package client
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
 )
 
 //go:generate mockgen -source=client.go -destination=mock/mock.go -package=mock

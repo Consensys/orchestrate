@@ -1,69 +1,76 @@
 package formatters
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 )
 
-func FormatJobResponse(job *types.Job) *types.JobResponse {
+func FormatJobResponse(job *entities.Job) *types.JobResponse {
 	return &types.JobResponse{
 		UUID:         job.UUID,
 		ChainUUID:    job.ChainUUID,
 		ScheduleUUID: job.ScheduleUUID,
-		Transaction: &types.ETHTransaction{
-			Hash:           job.Transaction.Hash,
-			From:           job.Transaction.From,
-			To:             job.Transaction.To,
-			Nonce:          job.Transaction.Nonce,
-			Value:          job.Transaction.Value,
-			GasPrice:       job.Transaction.GasPrice,
-			Gas:            job.Transaction.Gas,
-			Data:           job.Transaction.Data,
-			Raw:            job.Transaction.Raw,
-			PrivateFrom:    job.Transaction.PrivateFrom,
-			PrivateFor:     job.Transaction.PrivateFor,
-			PrivacyGroupID: job.Transaction.PrivacyGroupID,
-			CreatedAt:      job.Transaction.CreatedAt,
-			UpdatedAt:      job.Transaction.UpdatedAt,
+		Transaction:  *job.Transaction,
+		Logs:         job.Logs,
+		Labels:       job.Labels,
+		Annotations: types.Annotations{
+			OneTimeKey: job.InternalData.OneTimeKey,
+			Priority:   job.InternalData.Priority,
+			RetryPolicy: types.GasPriceRetryParams{
+				Interval:       fmt.Sprintf("%vs", job.InternalData.RetryInterval.Seconds()),
+				IncrementLevel: job.InternalData.GasPriceIncrementLevel,
+				Increment:      job.InternalData.GasPriceIncrement,
+				Limit:          job.InternalData.GasPriceLimit,
+			},
 		},
-		Logs:        job.Logs,
-		Labels:      job.Labels,
-		Annotations: job.Annotations,
-		Type:        job.Type,
-		Status:      job.GetStatus(),
-		CreatedAt:   job.CreatedAt,
-		UpdatedAt:   job.UpdatedAt,
+		Type:      job.Type,
+		Status:    job.GetStatus(),
+		CreatedAt: job.CreatedAt,
+		UpdatedAt: job.UpdatedAt,
 	}
 }
 
-func FormatJobCreateRequest(request *types.CreateJobRequest) *types.Job {
-	job := &types.Job{
+func FormatJobCreateRequest(request *types.CreateJobRequest, defaultRetryInterval time.Duration) *entities.Job {
+	return &entities.Job{
+		ChainUUID:    request.ChainUUID,
+		ScheduleUUID: request.ScheduleUUID,
 		Type:         request.Type,
 		Labels:       request.Labels,
-		Annotations:  &types.Annotations{},
-		ScheduleUUID: request.ScheduleUUID,
-		ChainUUID:    request.ChainUUID,
-		Transaction:  request.Transaction,
+		InternalData: formatAnnotations(&request.Annotations, defaultRetryInterval),
+		Transaction:  &request.Transaction,
+	}
+}
+
+func FormatJobUpdateRequest(request *types.UpdateJobRequest) *entities.Job {
+	job := &entities.Job{
+		Labels:      request.Labels,
+		Transaction: request.Transaction,
 	}
 
 	if request.Annotations != nil {
-		job.Annotations = request.Annotations
+		job.InternalData = &entities.InternalData{
+			OneTimeKey:             request.Annotations.OneTimeKey,
+			Priority:               request.Annotations.Priority,
+			GasPriceIncrementLevel: request.Annotations.RetryPolicy.IncrementLevel,
+			GasPriceIncrement:      request.Annotations.RetryPolicy.Increment,
+			GasPriceLimit:          request.Annotations.RetryPolicy.Limit,
+		}
+
+		if request.Annotations.RetryPolicy.Interval != "" {
+			// we can skip the error check as at this point we know the interval is a duration as it already passed validation
+			job.InternalData.RetryInterval, _ = time.ParseDuration(request.Annotations.RetryPolicy.Interval)
+		}
 	}
 
 	return job
-}
-
-func FormatJobUpdateRequest(request *types.UpdateJobRequest) *types.Job {
-	return &types.Job{
-		Labels:      request.Labels,
-		Annotations: request.Annotations,
-		Transaction: request.Transaction,
-	}
 }
 
 func FormatJobFilterRequest(req *http.Request) (*entities.JobFilters, error) {
@@ -89,4 +96,27 @@ func FormatJobFilterRequest(req *http.Request) (*entities.JobFilters, error) {
 	}
 
 	return filters, nil
+}
+
+func formatAnnotations(annotations *types.Annotations, defaultRetryInterval time.Duration) *entities.InternalData {
+	internalData := &entities.InternalData{
+		OneTimeKey:             annotations.OneTimeKey,
+		Priority:               annotations.Priority,
+		GasPriceIncrementLevel: annotations.RetryPolicy.IncrementLevel,
+		GasPriceIncrement:      annotations.RetryPolicy.Increment,
+		GasPriceLimit:          annotations.RetryPolicy.Limit,
+	}
+
+	if annotations.RetryPolicy.Interval == "" {
+		internalData.RetryInterval = defaultRetryInterval
+	} else {
+		// we can skip the error check as at this point we know the interval is a duration as it already passed validation
+		internalData.RetryInterval, _ = time.ParseDuration(annotations.RetryPolicy.Interval)
+	}
+
+	if internalData.Priority == "" {
+		internalData.Priority = utils.PriorityMedium
+	}
+
+	return internalData
 }

@@ -4,6 +4,8 @@ package schedules
 
 import (
 	"context"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -11,9 +13,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 )
 
 func TestSearchSchedules_Execute(t *testing.T) {
@@ -29,7 +29,7 @@ func TestSearchSchedules_Execute(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
-		scheduleEntity := testutils.FakeScheduleEntity()
+		scheduleEntity := testutils.FakeSchedule()
 		scheduleModel := parsers.NewScheduleModelFromEntities(scheduleEntity)
 		expectedResponse := []*entities.Schedule{parsers.NewScheduleEntityFromModels(scheduleModel)}
 
@@ -67,7 +67,7 @@ func TestSearchSchedules_Execute(t *testing.T) {
 
 	t.Run("should fail with same error if FindOne fails for jobs", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
-		scheduleEntity := testutils.FakeScheduleEntity()
+		scheduleEntity := testutils.FakeSchedule()
 		scheduleModel := parsers.NewScheduleModelFromEntities(scheduleEntity)
 
 		mockDB.EXPECT().Schedule().Return(mockScheduleDA).Times(1)

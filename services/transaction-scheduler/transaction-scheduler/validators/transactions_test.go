@@ -10,11 +10,9 @@ import (
 
 	abi2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/abi"
 	testutils3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mock"
 	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client/mock"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
-	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 
 	"github.com/golang/mock/gomock"
@@ -100,7 +98,7 @@ func (s *transactionsTestSuite) TestTransactionValidator_ValidateContract() {
 	ctx := context.Background()
 
 	s.T().Run("should validate contract successfully", func(t *testing.T) {
-		txRequest := testutils2.FakeTxRequestEntity()
+		txRequest := testutils3.FakeTxRequest()
 		txRequest.Params.Args = testutils3.ParseIArray("300")
 		contract := testutils3.FakeContract()
 
@@ -119,7 +117,7 @@ func (s *transactionsTestSuite) TestTransactionValidator_ValidateContract() {
 	})
 
 	s.T().Run("should fail with InvalidParameterError if ContractRegistryClient fails", func(t *testing.T) {
-		txRequest := testutils2.FakeTxRequestEntity()
+		txRequest := testutils3.FakeTxRequest()
 		txRequest.Params.Args = testutils3.ParseIArray("300")
 		expectedErr := fmt.Errorf("error")
 
@@ -132,7 +130,7 @@ func (s *transactionsTestSuite) TestTransactionValidator_ValidateContract() {
 	})
 
 	s.T().Run("should fail with DataCorruptedError if bytecode decoding fails", func(t *testing.T) {
-		txRequest := testutils2.FakeTxRequestEntity()
+		txRequest := testutils3.FakeTxRequest()
 		txRequest.Params.Args = testutils3.ParseIArray("300")
 		contract := testutils3.FakeContract()
 		contract.Bytecode = "Invalid bytecode"
@@ -148,7 +146,7 @@ func (s *transactionsTestSuite) TestTransactionValidator_ValidateContract() {
 	})
 
 	s.T().Run("should fail with InvalidParameterError if invalid args", func(t *testing.T) {
-		txRequest := testutils2.FakeTxRequestEntity()
+		txRequest := testutils3.FakeTxRequest()
 		txRequest.Params.Args = testutils3.ParseIArray("InvalidArg")
 		contract := testutils3.FakeContract()
 

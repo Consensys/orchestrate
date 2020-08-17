@@ -3,12 +3,13 @@ package controllers
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/transactions"
@@ -19,12 +20,14 @@ const (
 )
 
 type TransactionsController struct {
-	ucs transactions.UseCases
+	ucs                  transactions.UseCases
+	defaultRetryInterval time.Duration
 }
 
-func NewTransactionsController(ucs transactions.UseCases) *TransactionsController {
+func NewTransactionsController(ucs transactions.UseCases, defaultRetryInterval time.Duration) *TransactionsController {
 	return &TransactionsController{
-		ucs: ucs,
+		ucs:                  ucs,
+		defaultRetryInterval: defaultRetryInterval,
 	}
 }
 
@@ -84,7 +87,7 @@ func (c *TransactionsController) send(rw http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	txReq := formatters.FormatSendTxRequest(txRequest, request.Header.Get(IdempotencyKeyHeader))
+	txReq := formatters.FormatSendTxRequest(txRequest, request.Header.Get(IdempotencyKeyHeader), c.defaultRetryInterval)
 	txResponse, err := c.ucs.SendContractTransaction().Execute(ctx, txReq, multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
@@ -125,7 +128,7 @@ func (c *TransactionsController) deployContract(rw http.ResponseWriter, request 
 		return
 	}
 
-	txReq := formatters.FormatDeployContractRequest(txRequest, request.Header.Get(IdempotencyKeyHeader))
+	txReq := formatters.FormatDeployContractRequest(txRequest, request.Header.Get(IdempotencyKeyHeader), c.defaultRetryInterval)
 	txResponse, err := c.ucs.SendDeployTransaction().Execute(ctx, txReq, multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
@@ -160,7 +163,7 @@ func (c *TransactionsController) sendRaw(rw http.ResponseWriter, request *http.R
 		return
 	}
 
-	txReq := formatters.FormatSendRawRequest(txRequest, request.Header.Get(IdempotencyKeyHeader))
+	txReq := formatters.FormatSendRawRequest(txRequest, request.Header.Get(IdempotencyKeyHeader), c.defaultRetryInterval)
 	txResponse, err := c.ucs.SendTransaction().Execute(ctx, txReq, "", multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
@@ -200,7 +203,7 @@ func (c *TransactionsController) transfer(rw http.ResponseWriter, request *http.
 		return
 	}
 
-	txReq := formatters.FormatSendTransferRequest(txRequest, request.Header.Get(IdempotencyKeyHeader))
+	txReq := formatters.FormatTransferRequest(txRequest, request.Header.Get(IdempotencyKeyHeader), c.defaultRetryInterval)
 	txResponse, err := c.ucs.SendTransaction().Execute(ctx, txReq, "", multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)

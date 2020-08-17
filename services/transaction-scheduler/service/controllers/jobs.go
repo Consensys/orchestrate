@@ -3,23 +3,27 @@ package controllers
 import (
 	"encoding/json"
 	"net/http"
+	"time"
+
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
 
 	"github.com/gorilla/mux"
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs"
 )
 
 type JobsController struct {
-	ucs jobs.UseCases
+	ucs                  jobs.UseCases
+	defaultRetryInterval time.Duration
 }
 
-func NewJobsController(useCases jobs.UseCases) *JobsController {
+func NewJobsController(useCases jobs.UseCases, defaultRetryInterval time.Duration) *JobsController {
 	return &JobsController{
-		ucs: useCases,
+		ucs:                  useCases,
+		defaultRetryInterval: defaultRetryInterval,
 	}
 }
 
@@ -40,7 +44,7 @@ func (c *JobsController) Append(router *mux.Router) {
 // @Security JWTAuth
 // @Param tx_hashes query []string false "List of transaction hashes" collectionFormat(csv)
 // @Param chain_uuid query string false "Chain UUID"
-// @Success 200 {object} types.JobResponse{annotations=types.Annotations{retryPolicy=types.GasPriceRetryParams},transaction=types.ETHTransaction,logs=[]types.Log} "List of Jobs found"
+// @Success 200 {object} types.JobResponse{annotations=types.InternalData{retryPolicy=types.GasPriceRetryParams},transaction=types.ETHTransaction,logs=[]types.Log} "List of Jobs found"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid filter in the request"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /jobs [get]
@@ -74,7 +78,7 @@ func (c *JobsController) search(rw http.ResponseWriter, request *http.Request) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body types.CreateJobRequest{annotations=types.Annotations,transaction=types.ETHTransaction} true "Job creation request"
+// @Param request body types.CreateJobRequest{annotations=types.InternalData,transaction=types.ETHTransaction} true "Job creation request"
 // @Success 200 {object} types.JobResponse "Created Job"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 422 {object} httputil.ErrorResponse "Unprocessable parameters were sent"
@@ -96,7 +100,7 @@ func (c *JobsController) create(rw http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	job := formatters.FormatJobCreateRequest(jobRequest)
+	job := formatters.FormatJobCreateRequest(jobRequest, c.defaultRetryInterval)
 	jobRes, err := c.ucs.CreateJob().Execute(ctx, job, multitenancy.AllowedTenantsFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
@@ -162,7 +166,7 @@ func (c *JobsController) start(rw http.ResponseWriter, request *http.Request) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body types.UpdateJobRequest{annotations=types.Annotations,transaction=types.ETHTransaction} true "Job update request"
+// @Param request body types.UpdateJobRequest{annotations=types.InternalData,transaction=types.ETHTransaction} true "Job update request"
 // @Success 200 {object} types.JobResponse "Job found"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 404 {object} httputil.ErrorResponse "Job not found"
@@ -176,11 +180,6 @@ func (c *JobsController) update(rw http.ResponseWriter, request *http.Request) {
 	jobRequest := &types.UpdateJobRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, jobRequest)
 	if err != nil {
-		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	if err = jobRequest.Annotations.Validate(); err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}

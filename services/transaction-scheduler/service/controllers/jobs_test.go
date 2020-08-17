@@ -6,12 +6,14 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
+	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
@@ -22,21 +24,21 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs/mocks"
 )
 
 type jobsCtrlTestSuite struct {
 	suite.Suite
-	createJobUC *mocks.MockCreateJobUseCase
-	getJobUC    *mocks.MockGetJobUseCase
-	startJobUC  *mocks.MockStartJobUseCase
-	updateJobUC *mocks.MockUpdateJobUseCase
-	searchJobUC *mocks.MockSearchJobsUseCase
-	ctx         context.Context
-	tenants     []string
-	router      *mux.Router
+	createJobUC          *mocks.MockCreateJobUseCase
+	getJobUC             *mocks.MockGetJobUseCase
+	startJobUC           *mocks.MockStartJobUseCase
+	updateJobUC          *mocks.MockUpdateJobUseCase
+	searchJobUC          *mocks.MockSearchJobsUseCase
+	defaultRetryInterval time.Duration
+	ctx                  context.Context
+	tenants              []string
+	router               *mux.Router
 }
 
 var _ jobs.UseCases = &jobsCtrlTestSuite{}
@@ -76,19 +78,20 @@ func (s *jobsCtrlTestSuite) SetupTest() {
 	s.startJobUC = mocks.NewMockStartJobUseCase(ctrl)
 	s.updateJobUC = mocks.NewMockUpdateJobUseCase(ctrl)
 	s.searchJobUC = mocks.NewMockSearchJobsUseCase(ctrl)
+	s.defaultRetryInterval = time.Second * 2
 	s.ctx = context.Background()
 	s.ctx = context.WithValue(s.ctx, multitenancy.TenantIDKey, s.tenants[0])
 	s.ctx = context.WithValue(s.ctx, multitenancy.AllowedTenantsKey, s.tenants)
 	s.router = mux.NewRouter()
 
-	controller := NewJobsController(s)
+	controller := NewJobsController(s, s.defaultRetryInterval)
 	controller.Append(s.router)
 }
 
 func (s *jobsCtrlTestSuite) TestJobsController_Create() {
 	s.T().Run("should execute create job request successfully", func(t *testing.T) {
 		jobRequest := testutils.FakeCreateJobRequest()
-		jobRequest.Annotations = &types.Annotations{
+		jobRequest.Annotations = txschedulertypes.Annotations{
 			OneTimeKey: true,
 		}
 		jobEntityRes := testutils.FakeJob()
@@ -125,12 +128,12 @@ func (s *jobsCtrlTestSuite) TestJobsController_Create() {
 
 	s.T().Run("should fail with Bad request if invalid format (retry)", func(t *testing.T) {
 		jobRequest := testutils.FakeCreateJobRequest()
-		jobRequest.Annotations = &types.Annotations{
-			Retry: &types.GasPriceRetryParams{
-				Interval:               "1m",
-				GasPriceIncrementLevel: "low",
-				GasPriceIncrement:      1.1,
-				GasPriceLimit:          1.4,
+		jobRequest.Annotations = txschedulertypes.Annotations{
+			RetryPolicy: txschedulertypes.GasPriceRetryParams{
+				Interval:       "1m",
+				IncrementLevel: "low",
+				Increment:      1.1,
+				Limit:          1.4,
 			},
 		}
 		requestBytes, _ := json.Marshal(jobRequest)
@@ -194,16 +197,14 @@ func (s *jobsCtrlTestSuite) TestJobsController_Search() {
 	s.T().Run("should execute search jobs successfully", func(t *testing.T) {
 		rw := httptest.NewRecorder()
 		filters := &entities.JobFilters{}
-		httpRequest := httptest.
-			NewRequest(http.MethodGet, "/jobs", nil).
-			WithContext(s.ctx)
-		jobEntities := []*types.Job{testutils.FakeJob()}
+		httpRequest := httptest.NewRequest(http.MethodGet, "/jobs", nil).WithContext(s.ctx)
+		jobEntities := []*entities.Job{testutils.FakeJob()}
 
 		s.searchJobUC.EXPECT().Execute(gomock.Any(), filters, s.tenants).Return(jobEntities, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
-		response := []*types.JobResponse{formatters.FormatJobResponse(jobEntities[0])}
+		response := []*txschedulertypes.JobResponse{formatters.FormatJobResponse(jobEntities[0])}
 		expectedBody, _ := json.Marshal(response)
 		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
 		assert.Equal(t, http.StatusOK, rw.Code)
@@ -211,12 +212,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_Search() {
 
 	s.T().Run("should execute search jobs by tx_hashes successfully", func(t *testing.T) {
 		rw := httptest.NewRecorder()
-		filters := &entities.JobFilters{
-			TxHashes: []string{
-				common.HexToHash("0x1").String(),
-				common.HexToHash("0x2").String(),
-			},
-		}
+		filters := &entities.JobFilters{TxHashes: []string{common.HexToHash("0x1").String(), common.HexToHash("0x2").String()}}
 		url := fmt.Sprintf("/jobs?tx_hashes=%s", strings.Join([]string{
 			common.HexToHash("0x1").String(),
 			common.HexToHash("0x2").String(),
@@ -225,13 +221,13 @@ func (s *jobsCtrlTestSuite) TestJobsController_Search() {
 		httpRequest := httptest.
 			NewRequest(http.MethodGet, url, nil).
 			WithContext(s.ctx)
-		jobEntities := []*types.Job{testutils.FakeJob()}
+		jobEntities := []*entities.Job{testutils.FakeJob()}
 
 		s.searchJobUC.EXPECT().Execute(gomock.Any(), filters, s.tenants).Return(jobEntities, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
-		response := []*types.JobResponse{formatters.FormatJobResponse(jobEntities[0])}
+		response := []*txschedulertypes.JobResponse{formatters.FormatJobResponse(jobEntities[0])}
 		expectedBody, _ := json.Marshal(response)
 		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
 		assert.Equal(t, http.StatusOK, rw.Code)
@@ -300,9 +296,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_Update() {
 	s.T().Run("should execute update a job request successfully", func(t *testing.T) {
 		rw := httptest.NewRecorder()
 		jobRequest := testutils.FakeJobUpdateRequest()
-		jobRequest.Annotations = &types.Annotations{
-			OneTimeKey: true,
-		}
+		jobRequest.Annotations = &txschedulertypes.Annotations{OneTimeKey: true}
 		jobEntityRes := testutils.FakeJob()
 
 		requestBytes, _ := json.Marshal(jobRequest)

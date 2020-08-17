@@ -2,8 +2,6 @@ package entities
 
 import (
 	"time"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 )
 
 type TxRequest struct {
@@ -11,8 +9,8 @@ type TxRequest struct {
 	IdempotencyKey string
 	ChainName      string
 	Schedule       *Schedule
-	Params         *types.ETHTransactionParams
+	Params         *ETHTransactionParams
 	Labels         map[string]string
-	Annotations    *types.Annotations
+	InternalData   *InternalData
 	CreatedAt      time.Time
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/listeners/mocks"
 	"testing"
@@ -36,7 +36,7 @@ func TestJobsListener(t *testing.T) {
 		job0 := testutils.FakeJob()
 		job1 := testutils.FakeJob()
 
-		searchJobUC.EXPECT().Execute(ctx, gomock.Any(), []string{multitenancy.Wildcard}).Return([]*types.Job{job0, job1}, nil).Times(5)
+		searchJobUC.EXPECT().Execute(ctx, gomock.Any(), []string{multitenancy.Wildcard}).Return([]*entities.Job{job0, job1}, nil).Times(5)
 		mockSessionManager.EXPECT().AddSession(ctx, job0).Return(nil).Times(5)
 		mockSessionManager.EXPECT().AddSession(ctx, job1).Return(nil).Times(5)
 
@@ -78,7 +78,7 @@ func TestJobsListener(t *testing.T) {
 		ctx := context.Background() // context background making sure the context cannot be cancelled
 		job := testutils.FakeJob()
 
-		searchJobUC.EXPECT().Execute(ctx, gomock.Any(), gomock.Any()).Return([]*types.Job{job}, nil)
+		searchJobUC.EXPECT().Execute(ctx, gomock.Any(), gomock.Any()).Return([]*entities.Job{job}, nil)
 		mockSessionManager.EXPECT().AddSession(ctx, job).Return(fmt.Errorf("error"))
 
 		cerr := listener.Listen(ctx)

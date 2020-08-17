@@ -3,10 +3,11 @@ package jobs
 import (
 	"context"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
@@ -18,7 +19,7 @@ import (
 const updateJobComponent = "use-cases.update-job"
 
 type UpdateJobUseCase interface {
-	Execute(ctx context.Context, jobEntity *types.Job, nextStatus, logMessage string, tenants []string) (*types.Job, error)
+	Execute(ctx context.Context, jobEntity *entities.Job, nextStatus, logMessage string, tenants []string) (*entities.Job, error)
 }
 
 // updateJobUseCase is a use case to create a new transaction job
@@ -34,7 +35,7 @@ func NewUpdateJobUseCase(db store.DB) UpdateJobUseCase {
 }
 
 // Execute validates and creates a new transaction job
-func (uc *updateJobUseCase) Execute(ctx context.Context, job *types.Job, nextStatus, logMessage string, tenants []string) (*types.Job, error) {
+func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, nextStatus, logMessage string, tenants []string) (*entities.Job, error) {
 	logger := log.WithContext(ctx).WithField("tenants", tenants).WithField("job_uuid", job.UUID)
 	logger.Debug("updating job entity")
 
@@ -98,12 +99,12 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *types.Job, nextSta
 	return parsers.NewJobEntityFromModels(jobModel), nil
 }
 
-func updateJobModel(jobModel *models.Job, job *types.Job) {
+func updateJobModel(jobModel *models.Job, job *entities.Job) {
 	if len(job.Labels) > 0 {
 		jobModel.Labels = job.Labels
 	}
-	if job.Annotations != nil {
-		jobModel.Annotations = job.Annotations
+	if job.InternalData != nil {
+		jobModel.InternalData = job.InternalData
 	}
 }
 

@@ -1,11 +1,11 @@
 package parsers
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 )
 
-func NewTransactionModelFromEntities(tx *types.ETHTransaction) *models.Transaction {
+func NewTransactionModelFromEntities(tx *entities.ETHTransaction) *models.Transaction {
 	return &models.Transaction{
 		Hash:           tx.Hash,
 		Sender:         tx.From,
@@ -24,8 +24,8 @@ func NewTransactionModelFromEntities(tx *types.ETHTransaction) *models.Transacti
 	}
 }
 
-func NewTransactionEntityFromModels(tx *models.Transaction) *types.ETHTransaction {
-	return &types.ETHTransaction{
+func NewTransactionEntityFromModels(tx *models.Transaction) *entities.ETHTransaction {
+	return &entities.ETHTransaction{
 		Hash:           tx.Hash,
 		From:           tx.Sender,
 		To:             tx.Recipient,
@@ -43,7 +43,7 @@ func NewTransactionEntityFromModels(tx *models.Transaction) *types.ETHTransactio
 	}
 }
 
-func UpdateTransactionModelFromEntities(txModel *models.Transaction, tx *types.ETHTransaction) {
+func UpdateTransactionModelFromEntities(txModel *models.Transaction, tx *entities.ETHTransaction) {
 	if tx.Hash != "" {
 		txModel.Hash = tx.Hash
 	}

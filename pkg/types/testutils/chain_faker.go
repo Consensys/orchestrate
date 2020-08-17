@@ -1,16 +1,16 @@
 package testutils
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
-
 	"github.com/gofrs/uuid"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 )
 
-func FakeChain() *types.Chain {
-	return &types.Chain{
+// TODO: To be refactored properly when chain registry types are refactored into types, entities and models
+func FakeChain() *models.Chain {
+	return &models.Chain{
+		Name:     "chainName",
 		UUID:     uuid.Must(uuid.NewV4()).String(),
-		Name:     "FakeChainName",
 		TenantID: multitenancy.DefaultTenant,
 		ChainID:  "888",
 	}

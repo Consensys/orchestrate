@@ -3,11 +3,13 @@ package storer
 import (
 	"fmt"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 )
 
@@ -19,8 +21,8 @@ func RawTxStore(txSchedulerClient client.TransactionSchedulerClient) engine.Hand
 		_, err := txSchedulerClient.UpdateJob(
 			txctx.Context(),
 			txctx.Envelope.GetID(),
-			&types.UpdateJobRequest{
-				Transaction: &types.ETHTransaction{
+			&txschedulertypes.UpdateJobRequest{
+				Transaction: &entities.ETHTransaction{
 					Hash:           computedTxHash,
 					From:           txctx.Envelope.GetFromString(),
 					To:             txctx.Envelope.GetToString(),
@@ -51,7 +53,7 @@ func RawTxStore(txSchedulerClient client.TransactionSchedulerClient) engine.Hand
 			_, updateErr := txSchedulerClient.UpdateJob(
 				txctx.Context(),
 				txctx.Envelope.GetID(),
-				&types.UpdateJobRequest{
+				&txschedulertypes.UpdateJobRequest{
 					Status: utils.StatusRecovering,
 					Message: fmt.Sprintf(
 						"transaction attempt with nonce %v and sender %v failed with error: %v",
@@ -76,8 +78,8 @@ func RawTxStore(txSchedulerClient client.TransactionSchedulerClient) engine.Hand
 			_, updateErr := txSchedulerClient.UpdateJob(
 				txctx.Context(),
 				txctx.Envelope.GetID(),
-				&types.UpdateJobRequest{
-					Transaction: &types.ETHTransaction{
+				&txschedulertypes.UpdateJobRequest{
+					Transaction: &entities.ETHTransaction{
 						Hash: retrievedTxHash,
 					},
 					Status:  utils.StatusWarning,

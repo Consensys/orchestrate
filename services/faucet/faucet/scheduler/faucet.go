@@ -5,12 +5,14 @@ import (
 	"math/big"
 	"reflect"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
+
 	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
 	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/client-utils"
-	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 
 	log "github.com/sirupsen/logrus"
@@ -53,13 +55,13 @@ func (f *Faucet) Credit(ctx context.Context, r *types.Request) (*big.Int, error)
 
 	// If we have a chainName, we are funding an account generated in the signer
 	if r.ChainName != "" {
-		transferRequest := &types2.TransferRequest{
+		transferRequest := &txschedulertypes.TransferRequest{
 			ChainName: r.ChainName,
 			Labels: map[string]string{
 				"id":            r.ChildTxID,
 				"parentJobUUID": r.ParentTxID,
 			},
-			Params: types2.TransferParams{
+			Params: txschedulertypes.TransferParams{
 				Value: faucet.Amount.String(),
 				From:  faucet.Creditor.String(),
 				To:    r.Beneficiary.String(),
@@ -75,14 +77,14 @@ func (f *Faucet) Credit(ctx context.Context, r *types.Request) (*big.Int, error)
 		log.WithField("tx_uuid", txResponse.UUID).Info("faucet: transfer transaction sent successfully for account generation")
 	} else {
 		// Create new job
-		jobRequest := &types2.CreateJobRequest{
+		jobRequest := &txschedulertypes.CreateJobRequest{
 			ScheduleUUID: r.ScheduleUUID,
 			ChainUUID:    r.ChainUUID,
 			Type:         utils2.EthereumTransaction,
 			Labels: map[string]string{
 				"parentJobUUID": r.ParentTxID,
 			},
-			Transaction: &types2.ETHTransaction{
+			Transaction: entities.ETHTransaction{
 				From:  faucet.Creditor.String(),
 				To:    r.Beneficiary.String(),
 				Value: faucet.Amount.String(),

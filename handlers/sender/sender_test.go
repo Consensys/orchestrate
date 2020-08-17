@@ -13,9 +13,9 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/mock"
-	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
@@ -24,17 +24,17 @@ import (
 const chainRegistryUrl = "chainRegistryUrl"
 
 type updateStatusMatcher struct {
-	x *types.UpdateJobRequest
+	x *txschedulertypes.UpdateJobRequest
 }
 
-func gomockUpdateStatusMatcher(x *types.UpdateJobRequest) updateStatusMatcher {
+func gomockUpdateStatusMatcher(x *txschedulertypes.UpdateJobRequest) updateStatusMatcher {
 	return updateStatusMatcher{
 		x: x,
 	}
 }
 
 func (e updateStatusMatcher) Matches(x interface{}) bool {
-	if xt, ok := x.(*types.UpdateJobRequest); ok {
+	if xt, ok := x.(*txschedulertypes.UpdateJobRequest); ok {
 		return e.x.Status == xt.Status
 	}
 	return false
@@ -73,7 +73,7 @@ func TestSender_RawTransaction(t *testing.T) {
 		ec.EXPECT().SendRawTransaction(txctx.Context(), chainRegistryUrl, txRaw).Return(ethcommon.HexToHash(txHash), nil)
 
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
-			&types.UpdateJobRequest{
+			&txschedulertypes.UpdateJobRequest{
 				Status: utils.StatusPending,
 			}))
 
@@ -89,11 +89,11 @@ func TestSender_RawTransaction(t *testing.T) {
 			Return(ethcommon.Hash{}, err)
 
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
-			&types.UpdateJobRequest{
+			&txschedulertypes.UpdateJobRequest{
 				Status: utils.StatusPending,
 			}))
 
-		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(&types.UpdateJobRequest{
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(&txschedulertypes.UpdateJobRequest{
 			Status: utils.StatusRecovering,
 		}))
 
@@ -126,11 +126,11 @@ func TestSender_TesseraTx(t *testing.T) {
 			SetPrivateFrom("privateFrom==")
 
 		ec.EXPECT().SendQuorumRawPrivateTransaction(txctx.Context(), chainRegistryUrl, txRaw,
-			types2.Call2PrivateArgs(txctx.Envelope).PrivateFor).
+			types.Call2PrivateArgs(txctx.Envelope).PrivateFor).
 			Return(ethcommon.HexToHash(txHash), nil)
 
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
-			&types.UpdateJobRequest{
+			&txschedulertypes.UpdateJobRequest{
 				Status: utils.StatusPending,
 			}))
 
@@ -144,11 +144,11 @@ func TestSender_TesseraTx(t *testing.T) {
 			SetPrivateFrom("privateFrom==")
 
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
-			&types.UpdateJobRequest{
+			&txschedulertypes.UpdateJobRequest{
 				Status: utils.StatusPending,
 			}))
 
-		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(&types.UpdateJobRequest{
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(&txschedulertypes.UpdateJobRequest{
 			Status: utils.StatusRecovering,
 		}))
 
@@ -183,7 +183,7 @@ func TestSender_EEAPrivateTransaction(t *testing.T) {
 			Return(ethcommon.HexToHash(txHash), nil)
 
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
-			&types.UpdateJobRequest{
+			&txschedulertypes.UpdateJobRequest{
 				Status: utils.StatusPending,
 			}))
 
@@ -200,12 +200,12 @@ func TestSender_EEAPrivateTransaction(t *testing.T) {
 			Return(ethcommon.Hash{}, err)
 
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
-			&types.UpdateJobRequest{
+			&txschedulertypes.UpdateJobRequest{
 				Status: utils.StatusPending,
 			}))
 
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId,
-			gomockUpdateStatusMatcher(&types.UpdateJobRequest{
+			gomockUpdateStatusMatcher(&txschedulertypes.UpdateJobRequest{
 				Status: utils.StatusRecovering,
 			}))
 

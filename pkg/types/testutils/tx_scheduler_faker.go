@@ -2,7 +2,7 @@ package testutils
 
 import (
 	"github.com/gofrs/uuid"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
@@ -85,15 +85,12 @@ func FakeCreateJobRequest() *types.CreateJobRequest {
 		ScheduleUUID: uuid.Must(uuid.NewV4()).String(),
 		ChainUUID:    uuid.Must(uuid.NewV4()).String(),
 		Type:         utils.EthereumTransaction,
-		Labels:       nil,
-		Annotations:  nil,
-		Transaction:  FakeETHTransaction(),
+		Transaction:  *FakeETHTransaction(),
 	}
 }
 
 func FakeJobUpdateRequest() *types.UpdateJobRequest {
 	return &types.UpdateJobRequest{
-		Labels:      nil,
 		Transaction: FakeETHTransaction(),
 		Status:      utils.StatusPending,
 	}
@@ -102,7 +99,7 @@ func FakeJobUpdateRequest() *types.UpdateJobRequest {
 func FakeJobResponse() *types.JobResponse {
 	return &types.JobResponse{
 		UUID:        uuid.Must(uuid.NewV4()).String(),
-		Transaction: FakeETHTransaction(),
+		Transaction: *FakeETHTransaction(),
 		Status:      utils.StatusCreated,
 	}
 }

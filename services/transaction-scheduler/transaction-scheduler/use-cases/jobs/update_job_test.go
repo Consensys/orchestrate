@@ -51,7 +51,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, []string{tenantID}).Return(jobModel, nil).Times(2)
 		mockTransactionDA.EXPECT().Update(ctx, jobModel.Transaction).Return(nil)
 		mockJobDA.EXPECT().Update(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, jobModelUpdate *models.Job) error {
-			assert.Equal(t, jobModelUpdate.Annotations, jobEntity.Annotations)
+			assert.Equal(t, jobModelUpdate.InternalData, jobEntity.InternalData)
 			assert.Equal(t, jobModelUpdate.Labels, jobEntity.Labels)
 			jobModel.ID = 1
 			return nil
@@ -75,7 +75,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 
 		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, []string{tenantID}).Return(jobModel, nil).Times(2)
 		mockJobDA.EXPECT().Update(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, jobModelUpdate *models.Job) error {
-			assert.Equal(t, jobModelUpdate.Annotations, jobEntity.Annotations)
+			assert.Equal(t, jobModelUpdate.InternalData, jobEntity.InternalData)
 			assert.Equal(t, jobModelUpdate.Labels, jobEntity.Labels)
 			jobModel.ID = 1
 			return nil
@@ -99,7 +99,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, []string{tenantID}).Return(jobModel, nil).Times(2)
 		mockTransactionDA.EXPECT().Update(ctx, jobModel.Transaction).Return(nil)
 		mockJobDA.EXPECT().Update(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, jobModelUpdate *models.Job) error {
-			assert.Equal(t, jobModelUpdate.Annotations, jobEntity.Annotations)
+			assert.Equal(t, jobModelUpdate.InternalData, jobEntity.InternalData)
 			assert.Equal(t, jobModelUpdate.Labels, jobEntity.Labels)
 			jobModel.ID = 1
 			return nil

@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 )
 
 type TransactionRequest struct {
@@ -16,6 +16,6 @@ type TransactionRequest struct {
 	ScheduleID     *int
 	Schedule       *Schedule
 	RequestHash    string
-	Params         *types.ETHTransactionParams // This will be automatically transformed in JSON by go-pg (and vice-versa)
-	CreatedAt      time.Time                   `pg:"default:now()"`
+	Params         *entities.ETHTransactionParams // This will be automatically transformed in JSON by go-pg (and vice-versa)
+	CreatedAt      time.Time                      `pg:"default:now()"`
 }

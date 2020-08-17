@@ -5,12 +5,12 @@ package transactions
 import (
 	"context"
 	"fmt"
+	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"testing"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/transactions/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/validators/mocks"
 )
@@ -24,7 +24,7 @@ func TestSendDeployTx_Execute(t *testing.T) {
 
 	ctx := context.Background()
 	tenantID := "tenantID"
-	txRequest := testutils.FakeTxRequestEntity()
+	txRequest := testutils2.FakeTxRequest()
 	txRequest.Params.ContractTag = "contractTag"
 	txRequest.Params.ContractName = "contractName"
 
@@ -32,7 +32,7 @@ func TestSendDeployTx_Execute(t *testing.T) {
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		txData := "txData"
-		txRequestResponse := testutils.FakeTxRequestEntity()
+		txRequestResponse := testutils2.FakeTxRequest()
 
 		mockValidator.EXPECT().ValidateContract(ctx, txRequest.Params).Return(txData, nil)
 		mockSendTxUC.EXPECT().Execute(ctx, txRequest, txData, tenantID).Return(txRequestResponse, nil)

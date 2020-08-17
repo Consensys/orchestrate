@@ -5,11 +5,12 @@ package storer
 import (
 	"context"
 	"fmt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	"testing"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
 
 	"github.com/golang/mock/gomock"
@@ -29,8 +30,8 @@ func TestRawTxStore(t *testing.T) {
 		txctx.Logger = log.NewEntry(log.New())
 
 		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
-				Transaction: &types.ETHTransaction{
+			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &txschedulertypes.UpdateJobRequest{
+				Transaction: &entities.ETHTransaction{
 					Hash:           txctx.Envelope.GetTxHashString(),
 					From:           txctx.Envelope.GetFromString(),
 					To:             txctx.Envelope.GetToString(),
@@ -45,7 +46,7 @@ func TestRawTxStore(t *testing.T) {
 				},
 				Status: utils.StatusPending,
 			}).
-			Return(&types.JobResponse{}, nil)
+			Return(&txschedulertypes.JobResponse{}, nil)
 
 		RawTxStore(schedulerClient)(txctx)
 
@@ -58,8 +59,8 @@ func TestRawTxStore(t *testing.T) {
 		_ = txctx.Envelope.SetTxHashString("0xd41551c714c8ec769d2edad9adc250ae955d263da161bf59142b7500eea6715e")
 		txctx.Logger = log.NewEntry(log.New())
 
-		expectedJobUpdate := &types.UpdateJobRequest{
-			Transaction: &types.ETHTransaction{
+		expectedJobUpdate := &txschedulertypes.UpdateJobRequest{
+			Transaction: &entities.ETHTransaction{
 				Hash: "0xe41551c714c8ec769d2edad9adc250ae955d263da161bf59142b7500eea6715e",
 			},
 			Status:  utils.StatusWarning,
@@ -68,12 +69,12 @@ func TestRawTxStore(t *testing.T) {
 
 		schedulerClient.EXPECT().
 			UpdateJob(txctx.Context(), gomock.Any(), gomock.Any()).
-			DoAndReturn(func(ctx context.Context, jobUUID string, request *types.UpdateJobRequest) (*types.JobResponse, error) {
+			DoAndReturn(func(ctx context.Context, jobUUID string, request *txschedulertypes.UpdateJobRequest) (*txschedulertypes.JobResponse, error) {
 				_ = txctx.Envelope.SetTxHashString("0xe41551c714c8ec769d2edad9adc250ae955d263da161bf59142b7500eea6715e")
 				return nil, nil
 			})
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), txctx.Envelope.GetID(), expectedJobUpdate).
-			Return(&types.JobResponse{}, nil)
+			Return(&txschedulertypes.JobResponse{}, nil)
 
 		RawTxStore(schedulerClient)(txctx)
 
@@ -86,7 +87,7 @@ func TestRawTxStore(t *testing.T) {
 		txctx.Logger = log.NewEntry(log.New())
 
 		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), gomock.AssignableToTypeOf(&types.UpdateJobRequest{})).
+			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), gomock.AssignableToTypeOf(&txschedulertypes.UpdateJobRequest{})).
 			Return(nil, fmt.Errorf("error"))
 
 		RawTxStore(schedulerClient)(txctx)
@@ -102,9 +103,9 @@ func TestRawTxStore(t *testing.T) {
 
 		schedulerClient.EXPECT().
 			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), gomock.Any()).
-			Return(&types.JobResponse{}, nil)
+			Return(&txschedulertypes.JobResponse{}, nil)
 		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
+			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &txschedulertypes.UpdateJobRequest{
 				Status: utils.StatusRecovering,
 				Message: fmt.Sprintf(
 					"transaction attempt with nonce %v and sender %v failed with error: %v",
@@ -113,7 +114,7 @@ func TestRawTxStore(t *testing.T) {
 					txctx.Envelope.Error(),
 				),
 			}).
-			Return(&types.JobResponse{}, nil)
+			Return(&txschedulertypes.JobResponse{}, nil)
 
 		RawTxStore(schedulerClient)(txctx)
 	})
@@ -126,10 +127,10 @@ func TestRawTxStore(t *testing.T) {
 
 		schedulerClient.EXPECT().
 			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), gomock.Any()).
-			Return(&types.JobResponse{}, nil)
+			Return(&txschedulertypes.JobResponse{}, nil)
 
 		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
+			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &txschedulertypes.UpdateJobRequest{
 				Status: utils.StatusRecovering,
 				Message: fmt.Sprintf(
 					"transaction attempt with nonce %v and sender %v failed with error: %v",

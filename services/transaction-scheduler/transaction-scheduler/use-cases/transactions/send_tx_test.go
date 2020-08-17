@@ -10,15 +10,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+	testutils3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mock"
 	models2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs/mocks"
 	mocks4 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/schedules/mocks"
 	mocks5 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/transactions/mocks"
@@ -80,7 +79,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 	scheduleUUID := uuid.Must(uuid.NewV4()).String()
 
 	s.T().Run("should execute send successfully a public tx", func(t *testing.T) {
-		txRequest := testutils.FakeTxRequestEntity()
+		txRequest := testutils3.FakeTxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
@@ -92,7 +91,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 	})
 
 	s.T().Run("should execute send successfully a orion tx", func(t *testing.T) {
-		txRequest := testutils.FakeOrionTxRequestEntity()
+		txRequest := testutils3.FakeOrionTxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 		txRequest.Params.Protocol = utils.OrionChainType
@@ -104,7 +103,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 	})
 
 	s.T().Run("should execute send successfully a tessera tx", func(t *testing.T) {
-		txRequest := testutils.FakeTesseraTxRequestEntity()
+		txRequest := testutils3.FakeTesseraTxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 		txRequest.Params.Protocol = utils.TesseraChainType
@@ -116,7 +115,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 	})
 
 	s.T().Run("should execute send successfully a raw tx", func(t *testing.T) {
-		txRequest := testutils.FakeRawTxRequestEntity()
+		txRequest := testutils3.FakeRawTxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
@@ -127,7 +126,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 	})
 
 	s.T().Run("should not insert and start job in DB if TxRequest already exists and send if status is CREATED", func(t *testing.T) {
-		txRequest := testutils.FakeTxRequestEntity()
+		txRequest := testutils3.FakeTxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 		ctx := context.Background()
@@ -154,10 +153,10 @@ func (s *sendTxSuite) TestSendTx_Success() {
 	})
 
 	s.T().Run("should not insert and not start job if TxRequest already exists and not send if status is not CREATED", func(t *testing.T) {
-		txRequest := testutils.FakeTxRequestEntity()
+		txRequest := testutils3.FakeTxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
-		txRequest.Schedule.Jobs[0].Logs = append(txRequest.Schedule.Jobs[0].Logs, &types.Log{
+		txRequest.Schedule.Jobs[0].Logs = append(txRequest.Schedule.Jobs[0].Logs, &entities.Log{
 			Status:    utils.StatusStarted,
 			Message:   "already started, do not resend",
 			CreatedAt: time.Now(),
@@ -183,18 +182,18 @@ func (s *sendTxSuite) TestSendTx_Success() {
 	})
 
 	s.T().Run("should execute send successfully a oneTimeKey tx", func(t *testing.T) {
-		txRequest := testutils.FakeTxRequestEntity()
+		txRequest := testutils3.FakeTxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 		txRequest.Params.From = ""
-		txRequest.Annotations.OneTimeKey = true
+		txRequest.InternalData.OneTimeKey = true
 
 		response, err := successfulTestExecution(s, txRequest, utils.EthereumTransaction)
 		assert.NoError(t, err)
 		assert.Equal(t, txRequest.UUID, response.UUID)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
-		assert.True(t, response.Schedule.Jobs[0].Annotations.OneTimeKey)
+		assert.True(t, response.Schedule.Jobs[0].InternalData.OneTimeKey)
 	})
 }
 
@@ -210,7 +209,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 
 	s.T().Run("should fail with same error if chain registry client fails", func(t *testing.T) {
 		expectedErr := fmt.Errorf("error")
-		txRequest := testutils.FakeTxRequestEntity()
+		txRequest := testutils3.FakeTxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
@@ -223,7 +222,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 
 	s.T().Run("should fail with InvalidParameterError if chain registry client fails with NotFoundError", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
-		txRequest := testutils.FakeTxRequestEntity()
+		txRequest := testutils3.FakeTxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
@@ -236,7 +235,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 
 	s.T().Run("should fail with same error if FindOne fails", func(t *testing.T) {
 		expectedErr := errors.PostgresConnectionError("error")
-		txRequest := testutils.FakeTxRequestEntity()
+		txRequest := testutils3.FakeTxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
@@ -250,7 +249,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 
 	s.T().Run("should fail with AlreadyExistsError if request found has different request hash", func(t *testing.T) {
 		expectedErr := errors.AlreadyExistsError("a transaction request with the same idempotency key and different params already exists")
-		txRequest := testutils.FakeTxRequestEntity()
+		txRequest := testutils3.FakeTxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
@@ -266,7 +265,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 
 	s.T().Run("should fail with same error if createSchedule UseCase fails", func(t *testing.T) {
 		expectedErr := errors.PostgresConnectionError("error")
-		txRequest := testutils.FakeTxRequestEntity()
+		txRequest := testutils3.FakeTxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
@@ -282,7 +281,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 
 	s.T().Run("should fail with same error if find schedule fails", func(t *testing.T) {
 		expectedErr := errors.PostgresConnectionError("error")
-		txRequest := testutils.FakeTxRequestEntity()
+		txRequest := testutils3.FakeTxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
@@ -298,7 +297,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 
 	s.T().Run("should fail with same error if select or insert txRequest fails", func(t *testing.T) {
 		expectedErr := errors.PostgresConnectionError("error")
-		txRequest := testutils.FakeTxRequestEntity()
+		txRequest := testutils3.FakeTxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 		scheduleModel := testutils2.FakeSchedule(tenants[0])
@@ -316,7 +315,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 
 	s.T().Run("should fail with same error if createJob UseCase fails", func(t *testing.T) {
 		expectedErr := errors.PostgresConnectionError("error")
-		txRequest := testutils.FakeTxRequestEntity()
+		txRequest := testutils3.FakeTxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 		txData = ""
@@ -337,7 +336,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 
 	s.T().Run("should fail with same error if startJob UseCase fails", func(t *testing.T) {
 		expectedErr := errors.PostgresConnectionError("error")
-		txRequest := testutils.FakeTxRequestEntity()
+		txRequest := testutils3.FakeTxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 		scheduleModel := testutils2.FakeSchedule(tenants[0])
@@ -358,7 +357,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 
 	s.T().Run("should fail with same error if getTx UseCase fails", func(t *testing.T) {
 		expectedErr := errors.PostgresConnectionError("error")
-		txRequest := testutils.FakeTxRequestEntity()
+		txRequest := testutils3.FakeTxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 		scheduleModel := testutils2.FakeSchedule(tenants[0])
@@ -395,7 +394,7 @@ func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, jobT
 	s.TxRequestDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
 	s.CreateJobUC.EXPECT().
 		Execute(gomock.Any(), gomock.Any(), tenants).
-		DoAndReturn(func(ctx context.Context, jobEntity *types.Job, tenants []string) (*types.Job, error) {
+		DoAndReturn(func(ctx context.Context, jobEntity *entities.Job, tenants []string) (*entities.Job, error) {
 			if jobEntity.Type != jobType {
 				return nil, fmt.Errorf("invalid job type")
 			}

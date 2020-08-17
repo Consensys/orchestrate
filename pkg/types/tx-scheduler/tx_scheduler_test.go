@@ -1,4 +1,4 @@
-package types
+package txschedulertypes
 
 import (
 	"testing"
@@ -22,7 +22,7 @@ func TestTransactionParams_SuccessfulOneTimeKeyWithoutFrom(t *testing.T) {
 	params := TransactionParams{
 		To:              "0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc291",
 		MethodSignature: "Constructor()",
-		OneTimeKey:      true,
+		Annotations:     Annotations{OneTimeKey: true},
 	}
 
 	err := utils.GetValidator().Struct(params)
@@ -35,7 +35,7 @@ func TestTransactionParams_FailWithoutFrom(t *testing.T) {
 		MethodSignature: "Constructor()",
 	}
 
-	err := utils.GetValidator().Struct(params)
+	err := params.Validate()
 	assert.Error(t, err)
 }
 
@@ -63,8 +63,10 @@ func TestTransactionParams_Validation(t *testing.T) {
 		{
 			"Retry params retry",
 			&TransactionParams{
-				Retry: &GasPriceRetryParams{
-					GasPriceLimit: 0,
+				Annotations: Annotations{
+					RetryPolicy: GasPriceRetryParams{
+						Limit: 0,
+					},
 				},
 			},
 			true,
@@ -110,8 +112,10 @@ func TestDeployContractParams_Validation(t *testing.T) {
 		{
 			"Retry params retry",
 			&DeployContractParams{
-				Retry: &GasPriceRetryParams{
-					GasPriceLimit: 0,
+				Annotations: Annotations{
+					RetryPolicy: GasPriceRetryParams{
+						Limit: 0,
+					},
 				},
 			},
 			true,
@@ -150,8 +154,8 @@ func TestTransferParams_Validation(t *testing.T) {
 		{
 			"Retry params retry",
 			&TransferParams{
-				Retry: &GasPriceRetryParams{
-					GasPriceLimit: 0,
+				RetryPolicy: GasPriceRetryParams{
+					Limit: 0,
 				},
 			},
 			true,
@@ -186,7 +190,7 @@ func TestDeployContractParams_BasicSuccessful(t *testing.T) {
 func TestDeployContractParams_SuccessfulOneTimeKeyWithoutFrom(t *testing.T) {
 	params := DeployContractParams{
 		ContractName: "SimpleContract",
-		OneTimeKey:   true,
+		Annotations:  Annotations{OneTimeKey: true},
 	}
 
 	err := utils.GetValidator().Struct(params)
@@ -198,17 +202,17 @@ func TestDeployContractParams_FailWithoutFrom(t *testing.T) {
 		ContractName: "SimpleContract",
 	}
 
-	err := utils.GetValidator().Struct(params)
+	err := params.Validate()
 	assert.Error(t, err)
 }
 
 func TestParams_Priority(t *testing.T) {
 	params := DeployContractParams{
 		ContractName: "SimpleContract",
-		Priority:     "invalidPriority",
+		Annotations:  Annotations{Priority: "invalidPriority"},
 	}
 
-	err := utils.GetValidator().Struct(params)
+	err := params.Validate()
 	assert.Error(t, err)
 }
 
@@ -219,118 +223,87 @@ func TestRetryParams_Validation(t *testing.T) {
 		expectedError bool
 	}{
 		{
-			"Error GasPriceIncrement, GasPriceLimit not filled",
+			"Limit not filled if Increment is filled",
 			GasPriceRetryParams{
-				Interval: "1m",
+				Increment: 1.1,
 			},
 			true,
 		},
 		{
-			"Error GasPriceLimit not filled",
+			"Limit not filled if IncrementLevel is filled",
 			GasPriceRetryParams{
-				Interval:          "1m",
-				GasPriceIncrement: 1.1,
+				IncrementLevel: "low",
 			},
 			true,
 		},
 		{
-			"Error GasPriceIncrement or GasPriceIncrementLevel not filled",
+			"Increment or IncrementLevel not filled if Limit is filled",
 			GasPriceRetryParams{
-				Interval:      "1m",
-				GasPriceLimit: 1.1,
+				Limit: 1.1,
 			},
 			true,
 		},
 		{
-			"Error Interval, GasPriceIncrement not filled",
+			"No error all fields are filled with Increment",
 			GasPriceRetryParams{
-				GasPriceLimit: 1.2,
-			},
-			true,
-		},
-		{
-			"Error Interval not filled",
-			GasPriceRetryParams{
-				GasPriceIncrementLevel: "low",
-				GasPriceLimit:          1.2,
-			},
-			true,
-		},
-		{
-			"Error Interval and GasPriceLimit not filled",
-			GasPriceRetryParams{
-				GasPriceIncrementLevel: "low",
-			},
-			true,
-		},
-		{
-			"Error Interval, GasPriceLimit not filled",
-			GasPriceRetryParams{
-				GasPriceIncrement: 1.2,
-			},
-			true,
-		},
-		{
-			"No error all fields are filled",
-			GasPriceRetryParams{
-				Interval:          "1m",
-				GasPriceIncrement: 1.1,
-				GasPriceLimit:     1.2,
+				Interval:  "1m",
+				Increment: 1.1,
+				Limit:     1.2,
 			},
 			false,
 		},
 		{
-			"No error all fields are filled",
+			"No error all fields are filled with IncrementLevel",
 			GasPriceRetryParams{
-				Interval:               "1m",
-				GasPriceIncrementLevel: "medium",
-				GasPriceLimit:          1.2,
+				Interval:       "1m",
+				IncrementLevel: "medium",
+				Limit:          1.2,
 			},
 			false,
 		},
 		{
-			"Error Interval is not a duration",
+			"Interval is not a duration",
 			GasPriceRetryParams{
-				Interval:          "1_m",
-				GasPriceIncrement: 1.1,
-				GasPriceLimit:     1.2,
+				Interval:  "1_m",
+				Increment: 1.1,
+				Limit:     1.2,
 			},
 			true,
 		},
 		{
-			"Error GasPriceIncrement > GasPriceLimit",
+			"Increment > Limit",
 			GasPriceRetryParams{
-				Interval:          "1m",
-				GasPriceIncrement: 1.3,
-				GasPriceLimit:     1.2,
+				Interval:  "1m",
+				Increment: 1.3,
+				Limit:     1.2,
 			},
 			true,
 		},
 		{
-			"Error invalid GasPriceIncrementLevel",
+			"invalid IncrementLevel",
 			GasPriceRetryParams{
-				Interval:               "1m",
-				GasPriceIncrementLevel: "l0w",
-				GasPriceLimit:          1.2,
+				Interval:       "1m",
+				IncrementLevel: "l0w",
+				Limit:          1.2,
 			},
 			true,
 		},
 		{
-			"Error mutual exclusion between GasPriceIncrement and GasPriceIncrementLevel",
+			"mutual exclusion between Increment and IncrementLevel",
 			GasPriceRetryParams{
-				Interval:               "1m",
-				GasPriceIncrementLevel: "low",
-				GasPriceIncrement:      1.3,
-				GasPriceLimit:          1.2,
+				Interval:       "1m",
+				IncrementLevel: utils.GasIncrementMedium,
+				Increment:      1.3,
+				Limit:          1.2,
 			},
 			true,
 		},
 		{
-			"No error when GasPriceIncrement = GasPriceLimit",
+			"No error when Increment = Limit",
 			GasPriceRetryParams{
-				Interval:          "1m",
-				GasPriceIncrement: 1.1,
-				GasPriceLimit:     1.1,
+				Interval:  "1m",
+				Increment: 1.1,
+				Limit:     1.1,
 			},
 			false,
 		},

@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 )
 
 type Job struct {
@@ -14,12 +14,12 @@ type Job struct {
 	ChainUUID     string
 	ScheduleID    *int `pg:"alias:schedule_id,notnull"`
 	Schedule      *Schedule
-	Type          string // @TODO Replace by enum
-	TransactionID *int   `pg:"alias:transaction_id,notnull"`
+	Type          string
+	TransactionID *int `pg:"alias:transaction_id,notnull"`
 	Transaction   *Transaction
 	Logs          []*Log
 	Labels        map[string]string
-	Annotations   *types.Annotations
+	InternalData  *entities.InternalData
 	CreatedAt     time.Time `pg:"default:now()"`
 	UpdatedAt     time.Time `pg:"default:now()"`
 }

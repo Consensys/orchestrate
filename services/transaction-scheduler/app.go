@@ -37,7 +37,7 @@ func NewTxSchedulerApp(
 	ucs := usecases.NewUseCases(db, chainRegistryClient, contractRegistryClient, syncProducer, topicCfg)
 
 	// Option for transaction handler
-	txSchedulerHandlerOpt := app.HandlerOpt(reflect.TypeOf(&dynamic.Transactions{}), controllers.NewBuilder(ucs))
+	txSchedulerHandlerOpt := app.HandlerOpt(reflect.TypeOf(&dynamic.Transactions{}), controllers.NewBuilder(ucs, cfg.Sentry.RetryInterval))
 
 	// Create app
 	return app.New(

@@ -278,7 +278,7 @@ Feature: Send contract transactions
 {
     "chain": "besu-{{scenarioID}}",
     "params": {
-        "oneTimeKey": true,
+        "annotations": { "oneTimeKey": true },
         "contractName": "Counter"
     },
     "labels": {
@@ -304,7 +304,7 @@ Feature: Send contract transactions
 {
     "chain": "besu-{{scenarioID}}",
     "params": {
-        "oneTimeKey": true,
+        "annotations": { "oneTimeKey": true},
         "to": "{{counterContractAddr}}",
         "methodSignature": "increment(uint256)",
         "args": [1]

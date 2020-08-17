@@ -4,6 +4,7 @@ package schedules
 
 import (
 	"context"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -11,7 +12,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 )
 
 func TestCreateSchedule_Execute(t *testing.T) {
@@ -27,7 +27,7 @@ func TestCreateSchedule_Execute(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
-		scheduleEntity := testutils.FakeScheduleEntity()
+		scheduleEntity := testutils.FakeSchedule()
 
 		mockScheduleDA.EXPECT().
 			Insert(ctx, gomock.Any()).
@@ -44,7 +44,7 @@ func TestCreateSchedule_Execute(t *testing.T) {
 	})
 
 	t.Run("should fail with same error if Insert fails", func(t *testing.T) {
-		scheduleEntity := testutils.FakeScheduleEntity()
+		scheduleEntity := testutils.FakeSchedule()
 		expectedErr := errors.PostgresConnectionError("error")
 
 		mockScheduleDA.EXPECT().Insert(ctx, gomock.Any()).Return(expectedErr)

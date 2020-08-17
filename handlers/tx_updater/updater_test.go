@@ -7,7 +7,7 @@ import (
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
 	"testing"
@@ -34,11 +34,11 @@ func TestTransactionUpdater(t *testing.T) {
 		txctx.Logger = log.NewEntry(log.New())
 
 		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &types.UpdateJobRequest{
+			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &txschedulertypes.UpdateJobRequest{
 				Status:  utils.StatusFailed,
 				Message: txctx.Envelope.Error(),
 			}).
-			Return(&types.JobResponse{}, nil)
+			Return(&txschedulertypes.JobResponse{}, nil)
 
 		h := TransactionUpdater(schedulerClient)
 		h(txctx)

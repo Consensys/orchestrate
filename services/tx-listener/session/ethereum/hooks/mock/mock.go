@@ -8,7 +8,7 @@ import (
 	context "context"
 	types "github.com/ethereum/go-ethereum/core/types"
 	gomock "github.com/golang/mock/gomock"
-	types0 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	dynamic "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 	reflect "reflect"
 )
@@ -37,7 +37,7 @@ func (m *MockHook) EXPECT() *MockHookMockRecorder {
 }
 
 // AfterNewBlock mocks base method
-func (m *MockHook) AfterNewBlock(ctx context.Context, chain *dynamic.Chain, block *types.Block, jobs []*types0.Job) error {
+func (m *MockHook) AfterNewBlock(ctx context.Context, chain *dynamic.Chain, block *types.Block, jobs []*entities.Job) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AfterNewBlock", ctx, chain, block, jobs)
 	ret0, _ := ret[0].(error)

@@ -34,27 +34,15 @@ func (m *MockJobsListener) EXPECT() *MockJobsListenerMockRecorder {
 }
 
 // Listen mocks base method
-func (m *MockJobsListener) Listen(ctx context.Context) {
+func (m *MockJobsListener) Listen(ctx context.Context) chan error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "Listen", ctx)
+	ret := m.ctrl.Call(m, "Listen", ctx)
+	ret0, _ := ret[0].(chan error)
+	return ret0
 }
 
 // Listen indicates an expected call of Listen
 func (mr *MockJobsListenerMockRecorder) Listen(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Listen", reflect.TypeOf((*MockJobsListener)(nil).Listen), ctx)
-}
-
-// Errors mocks base method
-func (m *MockJobsListener) Errors() chan error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Errors")
-	ret0, _ := ret[0].(chan error)
-	return ret0
-}
-
-// Errors indicates an expected call of Errors
-func (mr *MockJobsListenerMockRecorder) Errors() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Errors", reflect.TypeOf((*MockJobsListener)(nil).Errors))
 }

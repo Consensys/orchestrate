@@ -12,7 +12,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/client-utils"
-	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
 	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
@@ -49,21 +50,21 @@ func TestCredit(t *testing.T) {
 		expectedContext := context.WithValue(rctx, clientutils.RequestHeaderKey, map[string]string{
 			multitenancy.AuthorizationMetadata: authToken,
 		})
-		expectedCreateJobRequest := &types2.CreateJobRequest{
+		expectedCreateJobRequest := &txschedulertypes.CreateJobRequest{
 			ScheduleUUID: request.ScheduleUUID,
 			ChainUUID:    request.ChainUUID,
 			Type:         utils2.EthereumTransaction,
 			Labels: map[string]string{
 				"parentJobUUID": request.ParentTxID,
 			},
-			Transaction: &types2.ETHTransaction{
+			Transaction: entities.ETHTransaction{
 				From:  request.FaucetsCandidates[request.ElectedFaucet].Creditor.String(),
 				To:    request.Beneficiary.String(),
 				Value: request.FaucetsCandidates[request.ElectedFaucet].Amount.String(),
 			},
 		}
 
-		mockTxSchedulerClient.EXPECT().CreateJob(expectedContext, expectedCreateJobRequest).Return(&types2.JobResponse{
+		mockTxSchedulerClient.EXPECT().CreateJob(expectedContext, expectedCreateJobRequest).Return(&txschedulertypes.JobResponse{
 			UUID: "uuid",
 		}, nil)
 		mockTxSchedulerClient.EXPECT().StartJob(expectedContext, "uuid").Return(nil)
@@ -81,21 +82,21 @@ func TestCredit(t *testing.T) {
 		expectedContext := context.WithValue(rctx, clientutils.RequestHeaderKey, map[string]string{
 			utils.APIKeyHeader: apiKey,
 		})
-		expectedCreateJobRequest := &types2.CreateJobRequest{
+		expectedCreateJobRequest := &txschedulertypes.CreateJobRequest{
 			ScheduleUUID: request.ScheduleUUID,
 			ChainUUID:    request.ChainUUID,
 			Type:         utils2.EthereumTransaction,
 			Labels: map[string]string{
 				"parentJobUUID": request.ParentTxID,
 			},
-			Transaction: &types2.ETHTransaction{
+			Transaction: entities.ETHTransaction{
 				From:  request.FaucetsCandidates[request.ElectedFaucet].Creditor.String(),
 				To:    request.Beneficiary.String(),
 				Value: request.FaucetsCandidates[request.ElectedFaucet].Amount.String(),
 			},
 		}
 
-		mockTxSchedulerClient.EXPECT().CreateJob(expectedContext, expectedCreateJobRequest).Return(&types2.JobResponse{
+		mockTxSchedulerClient.EXPECT().CreateJob(expectedContext, expectedCreateJobRequest).Return(&txschedulertypes.JobResponse{
 			UUID: "uuid",
 		}, nil)
 		mockTxSchedulerClient.EXPECT().StartJob(expectedContext, "uuid").Return(nil)
@@ -122,20 +123,20 @@ func TestCredit(t *testing.T) {
 			ElectedFaucet: "faucet0",
 			ChainName:     "chainName",
 		}
-		expectedTransferRequest := &types2.TransferRequest{
+		expectedTransferRequest := &txschedulertypes.TransferRequest{
 			ChainName: requestChainName.ChainName,
 			Labels: map[string]string{
 				"parentJobUUID": requestChainName.ParentTxID,
 				"id":            requestChainName.ChildTxID,
 			},
-			Params: types2.TransferParams{
+			Params: txschedulertypes.TransferParams{
 				Value: requestChainName.FaucetsCandidates[request.ElectedFaucet].Amount.String(),
 				From:  requestChainName.FaucetsCandidates[request.ElectedFaucet].Creditor.String(),
 				To:    requestChainName.Beneficiary.String(),
 			},
 		}
 
-		mockTxSchedulerClient.EXPECT().SendTransferTransaction(gomock.Any(), expectedTransferRequest).Return(&types2.TransactionResponse{
+		mockTxSchedulerClient.EXPECT().SendTransferTransaction(gomock.Any(), expectedTransferRequest).Return(&txschedulertypes.TransactionResponse{
 			UUID: "uuid",
 		}, nil)
 
@@ -154,7 +155,7 @@ func TestCredit(t *testing.T) {
 	})
 
 	t.Run("should fail with ServiceConnectionError if starting job fails", func(t *testing.T) {
-		mockTxSchedulerClient.EXPECT().CreateJob(gomock.Any(), gomock.Any()).Return(&types2.JobResponse{
+		mockTxSchedulerClient.EXPECT().CreateJob(gomock.Any(), gomock.Any()).Return(&txschedulertypes.JobResponse{
 			UUID: "uuid",
 		}, nil)
 		mockTxSchedulerClient.EXPECT().StartJob(gomock.Any(), "uuid").Return(fmt.Errorf("error"))

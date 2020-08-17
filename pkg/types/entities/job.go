@@ -1,4 +1,4 @@
-package types
+package entities
 
 import (
 	"time"
@@ -12,7 +12,7 @@ type Job struct {
 	ScheduleUUID string
 	Type         string
 	Labels       map[string]string
-	Annotations  *Annotations
+	InternalData *InternalData
 	Transaction  *ETHTransaction
 	Receipt      *ethereum.Receipt
 	Logs         []*Log

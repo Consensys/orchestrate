@@ -56,7 +56,7 @@ CREATE TABLE jobs (
     type TEXT NOT NULL,
     transaction_id INTEGER NOT NULL REFERENCES transactions(id),
 	labels jsonb,
-	annotations jsonb,
+	internal_data jsonb,
 	created_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL,
 	updated_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL,
 	UNIQUE(uuid)

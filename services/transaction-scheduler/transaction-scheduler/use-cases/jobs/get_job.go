@@ -3,9 +3,10 @@ package jobs
 import (
 	"context"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
 )
@@ -15,7 +16,7 @@ import (
 const getJobComponent = "use-cases.get-job"
 
 type GetJobUseCase interface {
-	Execute(ctx context.Context, jobUUID string, tenants []string) (*types.Job, error)
+	Execute(ctx context.Context, jobUUID string, tenants []string) (*entities.Job, error)
 }
 
 // getJobUseCase is a use case to get a job
@@ -31,7 +32,7 @@ func NewGetJobUseCase(db store.DB) GetJobUseCase {
 }
 
 // Execute gets a job
-func (uc *getJobUseCase) Execute(ctx context.Context, jobUUID string, tenants []string) (*types.Job, error) {
+func (uc *getJobUseCase) Execute(ctx context.Context, jobUUID string, tenants []string) (*entities.Job, error) {
 	log.WithContext(ctx).
 		WithField("job_uuid", jobUUID).
 		WithField("tenants", tenants).

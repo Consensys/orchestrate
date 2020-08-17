@@ -3,7 +3,7 @@ package dataagents
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 
 	gopg "github.com/go-pg/pg/v9"
 	"github.com/gofrs/uuid"

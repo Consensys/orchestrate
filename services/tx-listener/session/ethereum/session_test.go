@@ -13,9 +13,9 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	backoffmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/backoff/mock"
-	types2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 
 	"github.com/golang/mock/gomock"
@@ -63,7 +63,7 @@ func TestSession_Run(t *testing.T) {
 		mockEthClient.EXPECT().BlockByNumber(gomock.Any(), chain.URL, newBlockPosition).Return(block, nil)
 		mockTxScheduler.EXPECT().
 			SearchJob(gomock.Any(), []string{txHash}, chain.UUID, utils.StatusPending).
-			Return([]*types2.JobResponse{jobResponse}, nil)
+			Return([]*txschedulertypes.JobResponse{jobResponse}, nil)
 		mockEthClient.EXPECT().TransactionReceipt(gomock.Any(), chain.URL, common.HexToHash(txHash)).Return(receipt, nil)
 		mockHook.EXPECT().AfterNewBlock(gomock.Any(), chain, block, gomock.Any()).Return(nil)
 		mockOffsetManager.EXPECT().SetLastBlockNumber(gomock.Any(), chain, newBlockPosition.Uint64()).Return(nil)
@@ -122,15 +122,15 @@ func TestSession_Run(t *testing.T) {
 		mockEthClient.EXPECT().BlockByNumber(gomock.Any(), chain.URL, newBlockPosition).Return(block, nil)
 		mockTxScheduler.EXPECT().
 			SearchJob(gomock.Any(), txHashes[0:MaxTxHashesLength], chain.UUID, utils.StatusPending).
-			Return([]*types2.JobResponse{}, nil)
+			Return([]*txschedulertypes.JobResponse{}, nil)
 		mockTxScheduler.EXPECT().
-			SearchJob(gomock.Any(), txHashes[MaxTxHashesLength:MaxTxHashesLength * 2], chain.UUID, utils.StatusPending).
-			Return([]*types2.JobResponse{}, nil)
+			SearchJob(gomock.Any(), txHashes[MaxTxHashesLength:MaxTxHashesLength*2], chain.UUID, utils.StatusPending).
+			Return([]*txschedulertypes.JobResponse{}, nil)
 		mockTxScheduler.EXPECT().
-			SearchJob(gomock.Any(), txHashes[MaxTxHashesLength * 2:70], chain.UUID, utils.StatusPending).
-			Return([]*types2.JobResponse{}, nil)
+			SearchJob(gomock.Any(), txHashes[MaxTxHashesLength*2:70], chain.UUID, utils.StatusPending).
+			Return([]*txschedulertypes.JobResponse{}, nil)
 		mockHook.EXPECT().AfterNewBlock(gomock.Any(), chain, block, gomock.Any()).Return(nil)
-		mockOffsetManager.EXPECT().SetLastBlockNumber(gomock.Any(), gomock.Any(),gomock.Any()).Return(nil)
+		mockOffsetManager.EXPECT().SetLastBlockNumber(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 
 		// Start session
 		exitErr := make(chan error)
@@ -170,7 +170,7 @@ func TestSession_Run(t *testing.T) {
 		mockEthClient.EXPECT().BlockByNumber(gomock.Any(), chain.URL, newBlockPosition).Return(block, nil)
 		mockTxScheduler.EXPECT().
 			SearchJob(gomock.Any(), []string{txHashPrivate}, chain.UUID, utils.StatusPending).
-			Return([]*types2.JobResponse{jobResponse}, nil)
+			Return([]*txschedulertypes.JobResponse{jobResponse}, nil)
 		mockEthClient.EXPECT().PrivateTransactionReceipt(gomock.Any(), chain.URL, common.HexToHash(txHashPrivate)).Return(receipt, nil)
 		mockHook.EXPECT().AfterNewBlock(gomock.Any(), chain, block, gomock.Any()).Return(nil)
 		mockOffsetManager.EXPECT().SetLastBlockNumber(gomock.Any(), chain, newBlockPosition.Uint64()).Return(nil)
@@ -212,7 +212,7 @@ func TestSession_Run(t *testing.T) {
 		mockEthClient.EXPECT().BlockByNumber(gomock.Any(), chain.URL, newBlockPosition).Return(block, nil)
 		mockTxScheduler.EXPECT().
 			SearchJob(gomock.Any(), []string{txHash}, chain.UUID, utils.StatusPending).
-			Return([]*types2.JobResponse{}, nil)
+			Return([]*txschedulertypes.JobResponse{}, nil)
 		mockEthClient.EXPECT().TransactionReceipt(gomock.Any(), chain.URL, common.HexToHash(txHash)).Return(receipt, nil)
 		mockHook.EXPECT().AfterNewBlock(gomock.Any(), chain, block, gomock.Any()).Return(nil)
 		mockOffsetManager.EXPECT().SetLastBlockNumber(gomock.Any(), chain, newBlockPosition.Uint64()).Return(nil)
@@ -254,7 +254,7 @@ func TestSession_Run(t *testing.T) {
 		mockEthClient.EXPECT().BlockByNumber(gomock.Any(), chain.URL, newBlockPosition).Return(block, nil)
 		mockTxScheduler.EXPECT().
 			SearchJob(gomock.Any(), []string{txHashPrivate}, chain.UUID, utils.StatusPending).
-			Return([]*types2.JobResponse{}, nil)
+			Return([]*txschedulertypes.JobResponse{}, nil)
 		mockEthClient.EXPECT().PrivateTransactionReceipt(gomock.Any(), chain.URL, common.HexToHash(txHashPrivate)).Return(receipt, nil)
 		mockHook.EXPECT().AfterNewBlock(gomock.Any(), chain, block, gomock.Any()).Return(nil)
 		mockOffsetManager.EXPECT().SetLastBlockNumber(gomock.Any(), chain, newBlockPosition.Uint64()).Return(nil)
@@ -422,7 +422,7 @@ func TestSession_Run(t *testing.T) {
 		mockEthClient.EXPECT().BlockByNumber(gomock.Any(), chain.URL, newBlockPosition).Return(block, nil).AnyTimes()
 		mockTxScheduler.EXPECT().
 			SearchJob(gomock.Any(), []string{txHashPrivate}, chain.UUID, utils.StatusPending).
-			Return([]*types2.JobResponse{}, nil).AnyTimes()
+			Return([]*txschedulertypes.JobResponse{}, nil).AnyTimes()
 		mockEthClient.EXPECT().
 			PrivateTransactionReceipt(gomock.Any(), chain.URL, common.HexToHash(txHashPrivate)).
 			Return(nil, fmt.Errorf("private receipt error")).AnyTimes()
@@ -462,7 +462,7 @@ func TestSession_Run(t *testing.T) {
 		mockEthClient.EXPECT().BlockByNumber(gomock.Any(), chain.URL, newBlockPosition).Return(block, nil).AnyTimes()
 		mockTxScheduler.EXPECT().
 			SearchJob(gomock.Any(), []string{txHash}, chain.UUID, utils.StatusPending).
-			Return([]*types2.JobResponse{}, nil).AnyTimes()
+			Return([]*txschedulertypes.JobResponse{}, nil).AnyTimes()
 		mockEthClient.EXPECT().
 			TransactionReceipt(gomock.Any(), chain.URL, common.HexToHash(txHash)).
 			Return(nil, fmt.Errorf("receipt error")).AnyTimes()

@@ -2,13 +2,11 @@ package entities
 
 import (
 	"time"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 )
 
 type Schedule struct {
 	UUID      string
 	TenantID  string
-	Jobs      []*types.Job
+	Jobs      []*Job
 	CreatedAt time.Time
 }

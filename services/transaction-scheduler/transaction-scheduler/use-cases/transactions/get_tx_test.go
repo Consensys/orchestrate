@@ -5,8 +5,8 @@ package transactions
 import (
 	"context"
 	"fmt"
+	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
-	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/schedules/mocks"
 	"testing"
 
@@ -33,7 +33,7 @@ func TestGetTx_Execute(t *testing.T) {
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		txRequest := testutils.FakeTxRequest(0)
-		schedule := testutils2.FakeScheduleEntity()
+		schedule := testutils2.FakeSchedule()
 
 		mockTransactionRequestDA.EXPECT().FindOneByUUID(ctx, txRequest.UUID, tenants).Return(txRequest, nil)
 		mockGetScheduleUC.EXPECT().Execute(ctx, txRequest.Schedule.UUID, tenants).Return(schedule, nil)

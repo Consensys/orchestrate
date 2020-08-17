@@ -3,9 +3,9 @@ package dataagents
 import (
 	"context"
 
-	"github.com/go-pg/pg/v9/orm"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/entities"
+	"github.com/go-pg/pg/v9/orm"
 
 	gopg "github.com/go-pg/pg/v9"
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"

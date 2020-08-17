@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
@@ -41,11 +42,11 @@ type Builder struct {
 	jobsCtrl      *JobsController
 }
 
-func NewBuilder(ucs usecases.UseCases) *Builder {
+func NewBuilder(ucs usecases.UseCases, defaultRetryInterval time.Duration) *Builder {
 	return &Builder{
-		txCtrl:        NewTransactionsController(ucs),
+		txCtrl:        NewTransactionsController(ucs, defaultRetryInterval),
 		schedulesCtrl: NewSchedulesController(ucs),
-		jobsCtrl:      NewJobsController(ucs),
+		jobsCtrl:      NewJobsController(ucs, defaultRetryInterval),
 	}
 }
 

@@ -3,17 +3,17 @@
 package parsers
 
 import (
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/testutils"
 )
 
 func TestParsersTxRequest_NewTxRequestModelFromEntities(t *testing.T) {
 	reqHash := "reqHash"
 	expectedScheduleID := 1
-	txReqEntity := testutils2.FakeTxRequestEntity()
+	txReqEntity := testutils.FakeTxRequest()
 	txReqModel := NewTxRequestModelFromEntities(txReqEntity, reqHash, expectedScheduleID)
 
 	assert.Equal(t, txReqEntity.IdempotencyKey, txReqModel.IdempotencyKey)
@@ -24,7 +24,7 @@ func TestParsersTxRequest_NewTxRequestModelFromEntities(t *testing.T) {
 }
 
 func TestParsersTxRequest_NewJobEntityFromSendTx(t *testing.T) {
-	txReqEntity := testutils2.FakeTxRequestEntity()
+	txReqEntity := testutils.FakeTxRequest()
 	chainUUID := "chainUUID"
 	job := NewJobEntityFromTxRequest(txReqEntity, utils.EthereumTransaction, chainUUID)
 

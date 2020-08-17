@@ -5,6 +5,7 @@ package jobs
 import (
 	"context"
 	"fmt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	"testing"
 
 	mocks2 "github.com/Shopify/sarama/mocks"
@@ -14,7 +15,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models/testutils"
@@ -76,7 +76,7 @@ func TestStartJob_Execute(t *testing.T) {
 		job.UUID = "6380e2b6-b828-43ee-abdc-de0f8d57dc5f"
 		job.Transaction.Sender = "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
 		job.Schedule = testutils.FakeSchedule("")
-		job.Annotations = &types.Annotations{
+		job.InternalData = &entities.InternalData{
 			OneTimeKey: true,
 		}
 
