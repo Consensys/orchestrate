@@ -985,24 +985,23 @@ func (e *Envelope) loadPtrFields(gas, nonce, gasPrice, value, from, to string) [
 // For a eea_sendRawTransaction with a privacyGroupID - <from>@orion-<privacyGroupID>@<chainID>
 // For a eea_sendRawTransaction with a privateFor - <from>@orion-<hash(privateFor-privateFrom)>@<chainID>
 func (e *Envelope) PartitionKey() string {
-	// TODO: to remove when the tx scheduler will be the only entrypoint of Orchestrate
-	var chainKey string
-	if e.GetChainID() != nil {
-		chainKey = e.GetChainID().String()
-	} else {
-		chainKey = e.GetChainName()
+
+	// Return empty partition key for raw tx and one time key tx
+	// Not able to format a correct partition key if From or ChainID are not set. In that case return empty partition key
+	if e.IsEthSendRawTransaction() || e.IsOneTimeKeySignature() || e.GetFrom() == nil || e.GetChainID() == nil {
+		return ""
 	}
 
 	switch {
 	case e.IsEeaSendPrivateTransactionPrivacyGroup():
-		return fmt.Sprintf("%v@orion-%v@%v", e.GetFromString(), e.GetPrivacyGroupID(), chainKey)
+		return fmt.Sprintf("%v@orion-%v@%v", e.GetFromString(), e.GetPrivacyGroupID(), e.GetChainID().String())
 	case e.IsEeaSendPrivateTransactionPrivateFor():
 		l := append(e.GetPrivateFor(), e.GetPrivateFrom())
 		sort.Strings(l)
 		h := md5.New()
 		_, _ = h.Write([]byte(strings.Join(l, "-")))
-		return fmt.Sprintf("%v@orion-%v@%v", e.GetFromString(), fmt.Sprintf("%x", h.Sum(nil)), chainKey)
+		return fmt.Sprintf("%v@orion-%v@%v", e.GetFromString(), fmt.Sprintf("%x", h.Sum(nil)), e.GetChainID().String())
 	default:
-		return fmt.Sprintf("%v@%v", e.GetFromString(), chainKey)
+		return fmt.Sprintf("%v@%v", e.GetFromString(), e.GetChainID().String())
 	}
 }

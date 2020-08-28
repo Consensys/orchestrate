@@ -4,12 +4,12 @@ package integrationtests
 
 import (
 	"context"
-	"fmt"
+	"testing"
+	"time"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
-	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -155,7 +155,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.True(t, evlp.IsOneTimeKeySignature())
 		assert.Equal(t, tx.JobTypeMap[utils.EthereumTransaction].String(), evlp.GetJobTypeString())
 		assert.Equal(t, evlp.GetChainIDString(), chain.ChainID)
-		assert.Equal(t, evlp.PartitionKey(), fmt.Sprintf("%v@%v", txRequest.Params.From, chain.ChainID))
+		assert.Equal(t, evlp.PartitionKey(), "")
 	})
 
 	s.T().Run("should send a tessera transaction successfully to the transaction crafter topic", func(t *testing.T) {
