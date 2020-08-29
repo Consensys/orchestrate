@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### 🛠 Bug fixes
 * HashiCorp client token renewal 
+* Replace BIGINT by STRING in DB for transaction params 
 
 ## v2.3.0-rc2 (2020-08-05)
 ### 🆕 Features

@@ -6,6 +6,7 @@ package dataagents
 
 import (
 	"context"
+	"math/big"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -71,6 +72,30 @@ func (s *txTestSuite) TestPGTransaction_Insert() {
 
 		assert.NoError(t, err)
 		assert.NotEmpty(t, tx.ID)
+	})
+
+	s.T().Run("should insert nonce, value and gasPrice as BigInt successfully", func(t *testing.T) {
+		bigInt := new(big.Int)
+		bigInt, _ = bigInt.SetString("314159265358979323846264338327950288419716939937510582097494459", 10)
+		tx := testutils.FakeTransaction()
+		tx.Value = bigInt.String()
+		tx.Nonce = bigInt.String()
+		tx.GasPrice = bigInt.String()
+		tx.Value = bigInt.String()
+		err := s.agents.Transaction().Insert(ctx, tx)
+
+		assert.NoError(t, err)
+		assert.NotEmpty(t, tx.ID)
+		assert.Equal(t, tx.GasPrice, bigInt.String())
+		assert.Equal(t, tx.Nonce, bigInt.String())
+		assert.Equal(t, tx.Value, bigInt.String())
+
+		// We MUST set backward compatible values to allow downgrades after test is completed
+		tx.Value = "1234"
+		tx.Nonce = "1234"
+		tx.GasPrice = "1234"
+		err = s.agents.Transaction().Update(ctx, tx)
+		assert.NoError(t, err)
 	})
 }
 

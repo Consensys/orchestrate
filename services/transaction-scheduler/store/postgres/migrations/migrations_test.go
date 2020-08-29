@@ -42,7 +42,7 @@ func (s *MigrationsTestSuite) TestMigrationVersion() {
 	)
 
 	s.Assert().NoError(err, "Error querying version")
-	s.Assert().Equal(int64(1), version, "Migration should be on correct version")
+	s.Assert().Equal(int64(3), version, "Migration should be on correct version")
 }
 
 func (s *MigrationsTestSuite) TestCreateRequestsTable() {
