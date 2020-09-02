@@ -63,6 +63,20 @@ func (mr *MockCacheManagerMockRecorder) Set(arg0, arg1, arg2 interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Set", reflect.TypeOf((*MockCacheManager)(nil).Set), arg0, arg1, arg2)
 }
 
+// SetWithTTL mocks base method
+func (m *MockCacheManager) SetWithTTL(arg0 context.Context, arg1 string, arg2 []byte, arg3 time.Duration) bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetWithTTL", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// SetWithTTL indicates an expected call of SetWithTTL
+func (mr *MockCacheManagerMockRecorder) SetWithTTL(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetWithTTL", reflect.TypeOf((*MockCacheManager)(nil).SetWithTTL), arg0, arg1, arg2, arg3)
+}
+
 // TTL mocks base method
 func (m *MockCacheManager) TTL() time.Duration {
 	m.ctrl.T.Helper()

@@ -4,6 +4,7 @@ Feature: Chain-Proxy Cache
     Given I have the following tenants
       | alias   | tenantID        |
       | tenant1 | {{random.uuid}} |
+      | tenant2 | {{random.uuid}} |
     Then I register the following chains
       | alias     | Name                 | URLs                         | Headers.Authorization    |
       | besuOne   | besu-{{scenarioID}}  | {{global.nodes.besu_2.URLs}} | Bearer {{tenant1.token}} |
@@ -27,6 +28,9 @@ Feature: Chain-Proxy Cache
     And Response should have the following headers
       | X-Cache-Control | Content-Type     |
       | -               | application/json |
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
     When I send "POST" request to "{{global.chain-registry}}/{{besuOne.UUID}}" with json:
       """
       {

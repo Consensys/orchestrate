@@ -8,9 +8,11 @@ import (
 )
 
 //go:generate mockgen -source=manager.go -destination=mocks/manager.go -package=mocks
+
 type CacheManager interface {
 	Get(context.Context, string) ([]byte, bool)
 	Set(context.Context, string, []byte) bool
+	SetWithTTL(context.Context, string, []byte, time.Duration) bool
 	TTL() time.Duration
 }
 
@@ -36,8 +38,12 @@ func (cca *cacheManager) Get(_ context.Context, key string) ([]byte, bool) {
 	return nil, false
 }
 
-func (cca *cacheManager) Set(_ context.Context, key string, value []byte) bool {
-	return cca.c.SetWithTTL(key, value, int64(len(value)), cca.ttl)
+func (cca *cacheManager) Set(ctx context.Context, key string, value []byte) bool {
+	return cca.SetWithTTL(ctx, key, value, cca.ttl)
+}
+
+func (cca *cacheManager) SetWithTTL(_ context.Context, key string, value []byte, ttl time.Duration) bool {
+	return cca.c.SetWithTTL(key, value, int64(len(value)), ttl)
 }
 
 func (cca *cacheManager) TTL() time.Duration {

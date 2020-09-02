@@ -3,16 +3,19 @@ package httpcache
 import (
 	"context"
 	"fmt"
+	"hash/fnv"
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/dgraph-io/ristretto"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
 )
 
-type CacheRequest func(req *http.Request) (isCached bool, key string, err error)
+type CacheRequest func(req *http.Request) (isCached bool, key string, ttl time.Duration, err error)
 type CacheResponse func(res *http.Response) bool
 
 type Builder struct {
@@ -46,6 +49,8 @@ type HTTPCache struct {
 	cacheReq CacheRequest
 	cacheRes CacheResponse
 	cSuffix  string
+	reqMutex map[uint8]*sync.Mutex
+	mutex    *sync.RWMutex
 }
 
 func newHTTPCache(cManager CacheManager, cacheReq CacheRequest, cacheRes CacheResponse, cSuffix string) *HTTPCache {
@@ -54,28 +59,37 @@ func newHTTPCache(cManager CacheManager, cacheReq CacheRequest, cacheRes CacheRe
 		cacheReq: cacheReq,
 		cacheRes: cacheRes,
 		cSuffix:  cSuffix,
+		mutex:    &sync.RWMutex{},
+		reqMutex: make(map[uint8]*sync.Mutex),
 	}
 }
 
 func (cm *HTTPCache) Handler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		cacheActive, cacheKeyBase, err := cm.cacheRequest(req)
-		if !cacheActive {
-			if err != nil {
-				log.WithContext(req.Context()).WithError(err).Error("HTTPCache: errors were found")
-			}
+		logger := log.WithContext(req.Context())
+		cacheActive, cacheKeyBase, ttl, err := cm.cacheRequest(req)
+		if err != nil {
+			logger.WithError(err).Error("HTTPCache: errors were found")
+		}
 
-			log.WithContext(req.Context()).Debugf("HTTPCache: request is skipped")
+		if !cacheActive {
+			logger.Debugf("HTTPCache: request is skipped")
 			h.ServeHTTP(rw, req)
 			return
 		}
 
-		cacheKey := fmt.Sprintf("%s-%s", cacheKeyBase, cm.cSuffix)
+		cacheKey := fmt.Sprintf("%s-%s", cm.cSuffix, cacheKeyBase)
+		logger = logger.WithField("key", cacheKey)
+
+		cMutex := cm.distributedRequestMutex(cacheKey)
+		cMutex.Lock()
+		defer cMutex.Unlock()
+
 		b, ok := cm.cManager.Get(req.Context(), cacheKey)
 		if ok {
 			res, err := bytesToResponse(b)
 			if err != nil {
-				log.WithContext(req.Context()).WithError(err).Error("HTTPCache: errors were found")
+				logger.WithError(err).Error("HTTPCache: errors were found")
 			} else {
 				for k, v := range res.Header {
 					rw.Header().Set(k, strings.Join(v, ","))
@@ -83,12 +97,10 @@ func (cm *HTTPCache) Handler(h http.Handler) http.Handler {
 				rw.Header().Set("X-Cache-Control", fmt.Sprintf("max-age=%dms", cm.cManager.TTL().Milliseconds()))
 				rw.WriteHeader(res.StatusCode)
 				if _, err := rw.Write(res.Value); err != nil {
-					log.WithContext(req.Context()).WithError(err).Error("HTTPCache: errors were found")
+					logger.WithError(err).Error("HTTPCache: errors were found")
 				}
 
-				log.WithContext(req.Context()).WithField("key", cacheKey).
-					Debugf("HTTPCache: response fetched from cache")
-
+				logger.Debugf("HTTPCache: response fetched from cache")
 				return
 			}
 		}
@@ -103,16 +115,22 @@ func (cm *HTTPCache) Handler(h http.Handler) http.Handler {
 			r := newResponse(rwRecoder.Body.Bytes(), result.Header, result.StatusCode)
 			b, err := r.toBytes()
 			if err != nil {
-				log.WithContext(req.Context()).WithError(err).Error("HTTPCache: errors were found")
+				logger.WithError(err).Error("HTTPCache: errors were found")
 				return
 			}
 
-			cm.cManager.Set(req.Context(), cacheKey, b)
-			log.WithContext(req.Context()).WithField("key", cacheKey).
-				Debugf("HTTPCache: response is cached for %dms", cm.cManager.TTL().Milliseconds())
+			// In case we have a customize TTL
+			if ttl != 0 {
+				logger = logger.WithField("ttl", ttl.String())
+				cm.cManager.SetWithTTL(req.Context(), cacheKey, b, ttl)
+			} else {
+				logger = logger.WithField("ttl", cm.cManager.TTL().String())
+				cm.cManager.Set(req.Context(), cacheKey, b)
+			}
+
+			logger.Debugf("HTTPCache: response is cached")
 		} else {
-			log.WithContext(req.Context()).WithField("key", cacheKey).
-				Debugf("HTTPCache: response ignored")
+			logger.Debugf("HTTPCache: response ignored")
 		}
 
 		for k, v := range result.Header {
@@ -121,14 +139,14 @@ func (cm *HTTPCache) Handler(h http.Handler) http.Handler {
 
 		rw.WriteHeader(result.StatusCode)
 		if _, err := rw.Write(rwRecoder.Body.Bytes()); err != nil {
-			log.WithContext(req.Context()).WithError(err).Error("HTTPCache: errors were found")
+			logger.WithError(err).Error("HTTPCache: errors were found")
 		}
 	})
 }
 
-func (cm *HTTPCache) cacheRequest(req *http.Request) (c bool, k string, err error) {
+func (cm *HTTPCache) cacheRequest(req *http.Request) (c bool, k string, ttl time.Duration, err error) {
 	if req.Header.Get("X-Cache-Control") == "no-cache" {
-		return false, "", nil
+		return false, "", 0, nil
 	}
 
 	return cm.cacheReq(req)
@@ -141,4 +159,32 @@ func (cm *HTTPCache) cacheResponse(res *http.Response) bool {
 	}
 
 	return cm.cacheRes(res)
+}
+
+// Generate/Retrieve mutex item to synchronize the access to cached request/responses
+func (cm *HTTPCache) distributedRequestMutex(cacheKey string) *sync.Mutex {
+	mutexHashKey := generateCacheMutexKey(cacheKey)
+	cm.mutex.RLock()
+	cMutex := cm.reqMutex[mutexHashKey]
+	cm.mutex.RUnlock()
+	if cMutex == nil {
+		// In case targeted mutex key remains nil after exclusive access, we update it
+		cm.mutex.Lock()
+		if cm.reqMutex[mutexHashKey] == nil {
+			cMutex = &sync.Mutex{}
+			cm.reqMutex[mutexHashKey] = cMutex
+		}
+		cm.mutex.Unlock()
+	}
+
+	return cMutex
+}
+
+// Simple hash distribution function of cacheKey values
+// Source: https://stackoverflow.com/questions/13582519/how-to-generate-hash-number-of-a-string-in-go
+func generateCacheMutexKey(cacheKey string) uint8 {
+	h := fnv.New32a()
+	_, _ = h.Write([]byte(cacheKey))
+	sum := h.Sum32()
+	return uint8(sum % 256)
 }

@@ -8,12 +8,12 @@ import (
 	"net/http"
 	"sort"
 	"strings"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/ethclient/rpc"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/contract-registry/utils"
 )
@@ -23,18 +23,19 @@ var rpcCachedMethods = map[string]bool{
 	"eth_getTransactionReceipt": true,
 }
 
-func httpCacheRequest(req *http.Request) (c bool, k string, err error) {
+func httpCacheRequest(req *http.Request) (c bool, k string, ttl time.Duration, err error) {
+	logger := log.WithContext(req.Context())
 	if req.Method != "POST" {
-		return false, "", nil
+		return false, "", 0, nil
 	}
 
 	if req.Body == nil {
-		return false, "", nil
+		return false, "", 0, nil
 	}
 
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		return false, "", errors.InternalError("can't read request body: %q", err)
+		return false, "", 0, errors.InternalError("can't read request body: %q", err)
 	}
 
 	// And now set a new body, which will simulate the same data we read
@@ -44,26 +45,27 @@ func httpCacheRequest(req *http.Request) (c bool, k string, err error) {
 	err = json.Unmarshal(body, &msg)
 	// In case request does not correspond to one of expected call RPC call, we ignore
 	if err != nil {
-		log.WithContext(req.Context()).Debugf("HTTPCache: request is not an RPC message")
-		return false, "", nil
+		logger.Debugf("HTTPCache: request is not an RPC message")
+		return false, "", 0, nil
 	}
 
 	if _, ok := rpcCachedMethods[msg.Method]; !ok {
-		log.WithContext(req.Context()).Debugf("HTTPCache: RPC method is ignored: %s", msg.Method)
-		return false, "", nil
-	} else if msg.Method == "eth_getBlockByNumber" && strings.Contains(string(msg.Params), "latest") {
-		log.WithContext(req.Context()).Debugf("HTTPCache: call to the 'latest' block is ignored")
-		return false, "", nil
+		logger.Debugf("HTTPCache: RPC method is ignored: %s", msg.Method)
+		return false, "", 0, nil
 	}
 
 	cacheKey := httpCacheGenerateKey(req.Context(), &msg)
 
-	return true, cacheKey, nil
+	if msg.Method == "eth_getBlockByNumber" && strings.Contains(string(msg.Params), "latest") {
+		return true, cacheKey, time.Second, nil
+	}
+
+	return true, cacheKey, 0, nil
 }
 
-func httpCacheResponse(req *http.Response) bool {
+func httpCacheResponse(resp *http.Response) bool {
 	var msg rpc.JSONRpcMessage
-	err := json.UnmarshalBody(req.Body, &msg)
+	err := json.UnmarshalBody(resp.Body, &msg)
 	if err != nil {
 		log.WithError(err).Debugf("HTTPCache: cannot decode response")
 		return false
@@ -82,8 +84,8 @@ func httpCacheResponse(req *http.Response) bool {
 	return true
 }
 
-func httpCacheGenerateKey(ctx context.Context, msg *rpc.JSONRpcMessage) string {
-	return fmt.Sprintf("%s-%s(%s)", multitenancy.TenantIDFromContext(ctx), msg.Method, string(msg.Params))
+func httpCacheGenerateKey(_ context.Context, msg *rpc.JSONRpcMessage) string {
+	return fmt.Sprintf("%s(%s)", msg.Method, string(msg.Params))
 }
 
 func httpCacheGenerateChainKey(chain *models.Chain) string {
