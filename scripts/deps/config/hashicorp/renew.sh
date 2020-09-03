@@ -10,8 +10,3 @@ SIGNER_TOKEN=$(cat login.json | jq .auth.client_token | tr -d '"')
 
 echo "Tx-signer client token: $SIGNER_TOKEN"
 echo $SIGNER_TOKEN > /vault/token/.vault-token
-
-#while true
-#do
-#  sleep 1
-#done

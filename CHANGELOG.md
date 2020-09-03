@@ -2,14 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
-## v2.3.0-rc3 (Pending)
+## v2.3.0 (2020-09-02)
 
 ### 🆕 Features
-* Private transactions (Tessera/Orion) are performed in two separate jobs
+* Private transactions (Tessera/Orion) are now performed in two separate jobs
 
 ### 🛠 Bug fixes
-* HashiCorp client token renewal 
-* Replace BIGINT by STRING in DB for transaction params 
+* Properly renew HashiCorp client token 
+* Fix a bug limiting the amount of Ether that can be send to 9.2 ETH 
+
+## v2.2.1 (2020-08-31)
+
+### 🛠 Bug fixes
+* Properly renew HashiCorp client token 
+* Tenant wildcard support to access private keys stored in the Secret Storage
 
 ## v2.3.0-rc2 (2020-08-05)
 ### 🆕 Features
