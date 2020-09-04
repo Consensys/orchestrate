@@ -6,6 +6,7 @@ package ethereum
 import (
 	"context"
 	"fmt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	"math/big"
 	"testing"
 	"time"
@@ -62,7 +63,11 @@ func TestSession_Run(t *testing.T) {
 		}, nil).AnyTimes()
 		mockEthClient.EXPECT().BlockByNumber(gomock.Any(), chain.URL, newBlockPosition).Return(block, nil)
 		mockTxScheduler.EXPECT().
-			SearchJob(gomock.Any(), []string{txHash}, chain.UUID, utils.StatusPending).
+			SearchJob(gomock.Any(), &entities.JobFilters{
+				TxHashes:  []string{txHash},
+				ChainUUID: chain.UUID,
+				Status:    utils.StatusPending,
+			}).
 			Return([]*txschedulertypes.JobResponse{jobResponse}, nil)
 		mockEthClient.EXPECT().TransactionReceipt(gomock.Any(), chain.URL, common.HexToHash(txHash)).Return(receipt, nil)
 		mockHook.EXPECT().AfterNewBlock(gomock.Any(), chain, block, gomock.Any()).Return(nil)
@@ -121,13 +126,25 @@ func TestSession_Run(t *testing.T) {
 		}, nil).AnyTimes()
 		mockEthClient.EXPECT().BlockByNumber(gomock.Any(), chain.URL, newBlockPosition).Return(block, nil)
 		mockTxScheduler.EXPECT().
-			SearchJob(gomock.Any(), txHashes[0:MaxTxHashesLength], chain.UUID, utils.StatusPending).
+			SearchJob(gomock.Any(), &entities.JobFilters{
+				TxHashes:  txHashes[0:MaxTxHashesLength],
+				ChainUUID: chain.UUID,
+				Status:    utils.StatusPending,
+			}).
 			Return([]*txschedulertypes.JobResponse{}, nil)
 		mockTxScheduler.EXPECT().
-			SearchJob(gomock.Any(), txHashes[MaxTxHashesLength:MaxTxHashesLength*2], chain.UUID, utils.StatusPending).
+			SearchJob(gomock.Any(), &entities.JobFilters{
+				TxHashes:  txHashes[MaxTxHashesLength : MaxTxHashesLength*2],
+				ChainUUID: chain.UUID,
+				Status:    utils.StatusPending,
+			}).
 			Return([]*txschedulertypes.JobResponse{}, nil)
 		mockTxScheduler.EXPECT().
-			SearchJob(gomock.Any(), txHashes[MaxTxHashesLength*2:70], chain.UUID, utils.StatusPending).
+			SearchJob(gomock.Any(), &entities.JobFilters{
+				TxHashes:  txHashes[MaxTxHashesLength*2 : 70],
+				ChainUUID: chain.UUID,
+				Status:    utils.StatusPending,
+			}).
 			Return([]*txschedulertypes.JobResponse{}, nil)
 		mockHook.EXPECT().AfterNewBlock(gomock.Any(), chain, block, gomock.Any()).Return(nil)
 		mockOffsetManager.EXPECT().SetLastBlockNumber(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
@@ -169,7 +186,11 @@ func TestSession_Run(t *testing.T) {
 		}, nil).AnyTimes()
 		mockEthClient.EXPECT().BlockByNumber(gomock.Any(), chain.URL, newBlockPosition).Return(block, nil)
 		mockTxScheduler.EXPECT().
-			SearchJob(gomock.Any(), []string{txHashPrivate}, chain.UUID, utils.StatusPending).
+			SearchJob(gomock.Any(), &entities.JobFilters{
+				TxHashes:  []string{txHashPrivate},
+				ChainUUID: chain.UUID,
+				Status:    utils.StatusPending,
+			}).
 			Return([]*txschedulertypes.JobResponse{jobResponse}, nil)
 		mockEthClient.EXPECT().PrivateTransactionReceipt(gomock.Any(), chain.URL, common.HexToHash(txHashPrivate)).Return(receipt, nil)
 		mockHook.EXPECT().AfterNewBlock(gomock.Any(), chain, block, gomock.Any()).Return(nil)
@@ -211,7 +232,11 @@ func TestSession_Run(t *testing.T) {
 		}, nil).AnyTimes()
 		mockEthClient.EXPECT().BlockByNumber(gomock.Any(), chain.URL, newBlockPosition).Return(block, nil)
 		mockTxScheduler.EXPECT().
-			SearchJob(gomock.Any(), []string{txHash}, chain.UUID, utils.StatusPending).
+			SearchJob(gomock.Any(), &entities.JobFilters{
+				TxHashes:  []string{txHash},
+				ChainUUID: chain.UUID,
+				Status:    utils.StatusPending,
+			}).
 			Return([]*txschedulertypes.JobResponse{}, nil)
 		mockEthClient.EXPECT().TransactionReceipt(gomock.Any(), chain.URL, common.HexToHash(txHash)).Return(receipt, nil)
 		mockHook.EXPECT().AfterNewBlock(gomock.Any(), chain, block, gomock.Any()).Return(nil)
@@ -253,7 +278,11 @@ func TestSession_Run(t *testing.T) {
 		}, nil).AnyTimes()
 		mockEthClient.EXPECT().BlockByNumber(gomock.Any(), chain.URL, newBlockPosition).Return(block, nil)
 		mockTxScheduler.EXPECT().
-			SearchJob(gomock.Any(), []string{txHashPrivate}, chain.UUID, utils.StatusPending).
+			SearchJob(gomock.Any(), &entities.JobFilters{
+				TxHashes:  []string{txHashPrivate},
+				ChainUUID: chain.UUID,
+				Status:    utils.StatusPending,
+			}).
 			Return([]*txschedulertypes.JobResponse{}, nil)
 		mockEthClient.EXPECT().PrivateTransactionReceipt(gomock.Any(), chain.URL, common.HexToHash(txHashPrivate)).Return(receipt, nil)
 		mockHook.EXPECT().AfterNewBlock(gomock.Any(), chain, block, gomock.Any()).Return(nil)
@@ -384,7 +413,11 @@ func TestSession_Run(t *testing.T) {
 		}, nil).AnyTimes()
 		mockEthClient.EXPECT().BlockByNumber(gomock.Any(), chain.URL, newBlockPosition).Return(block, nil).AnyTimes()
 		mockTxScheduler.EXPECT().
-			SearchJob(gomock.Any(), []string{txHashPrivate}, chain.UUID, utils.StatusPending).
+			SearchJob(gomock.Any(), &entities.JobFilters{
+				TxHashes:  []string{txHashPrivate},
+				ChainUUID: chain.UUID,
+				Status:    utils.StatusPending,
+			}).
 			Return(nil, fmt.Errorf("search job error")).AnyTimes()
 
 		// Start session
@@ -421,7 +454,11 @@ func TestSession_Run(t *testing.T) {
 		}, nil).AnyTimes()
 		mockEthClient.EXPECT().BlockByNumber(gomock.Any(), chain.URL, newBlockPosition).Return(block, nil).AnyTimes()
 		mockTxScheduler.EXPECT().
-			SearchJob(gomock.Any(), []string{txHashPrivate}, chain.UUID, utils.StatusPending).
+			SearchJob(gomock.Any(), &entities.JobFilters{
+				TxHashes:  []string{txHashPrivate},
+				ChainUUID: chain.UUID,
+				Status:    utils.StatusPending,
+			}).
 			Return([]*txschedulertypes.JobResponse{}, nil).AnyTimes()
 		mockEthClient.EXPECT().
 			PrivateTransactionReceipt(gomock.Any(), chain.URL, common.HexToHash(txHashPrivate)).
@@ -461,7 +498,11 @@ func TestSession_Run(t *testing.T) {
 		}, nil).AnyTimes()
 		mockEthClient.EXPECT().BlockByNumber(gomock.Any(), chain.URL, newBlockPosition).Return(block, nil).AnyTimes()
 		mockTxScheduler.EXPECT().
-			SearchJob(gomock.Any(), []string{txHash}, chain.UUID, utils.StatusPending).
+			SearchJob(gomock.Any(), &entities.JobFilters{
+				TxHashes:  []string{txHash},
+				ChainUUID: chain.UUID,
+				Status:    utils.StatusPending,
+			}).
 			Return([]*txschedulertypes.JobResponse{}, nil).AnyTimes()
 		mockEthClient.EXPECT().
 			TransactionReceipt(gomock.Any(), chain.URL, common.HexToHash(txHash)).

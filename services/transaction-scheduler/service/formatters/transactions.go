@@ -29,7 +29,12 @@ func FormatSendTxRequest(sendTxRequest *types.SendTransactionRequest, idempotenc
 			PrivateFor:      sendTxRequest.Params.PrivateFor,
 			PrivacyGroupID:  sendTxRequest.Params.PrivacyGroupID,
 		},
-		InternalData: formatAnnotations(&sendTxRequest.Params.Annotations, defaultRetryInterval),
+		InternalData: formatInternalData(
+			sendTxRequest.Params.OneTimeKey,
+			&sendTxRequest.Params.GasPricePolicy,
+			defaultRetryInterval,
+			"",
+		),
 	}
 }
 
@@ -51,17 +56,23 @@ func FormatDeployContractRequest(deployRequest *types.DeployContractRequest, ide
 			PrivateFor:     deployRequest.Params.PrivateFor,
 			PrivacyGroupID: deployRequest.Params.PrivacyGroupID,
 		},
-		InternalData: formatAnnotations(&deployRequest.Params.Annotations, defaultRetryInterval),
+		InternalData: formatInternalData(
+			deployRequest.Params.OneTimeKey,
+			&deployRequest.Params.GasPricePolicy,
+			defaultRetryInterval,
+			"",
+		),
 	}
 }
 
 func FormatSendRawRequest(rawTxRequest *types.RawTransactionRequest, idempotencyKey string, defaultRetryInterval time.Duration) *entities.TxRequest {
 	// Do not use InternalData directly as we only want to expose the RetryInterval param
-	annotations := &types.Annotations{
-		RetryPolicy: types.GasPriceRetryParams{
+	gasPricePolicy := &types.GasPriceParams{
+		RetryPolicy: types.RetryParams{
 			Interval: rawTxRequest.Params.RetryPolicy.Interval,
 		},
 	}
+
 	return &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,
 		ChainName:      rawTxRequest.ChainName,
@@ -69,16 +80,11 @@ func FormatSendRawRequest(rawTxRequest *types.RawTransactionRequest, idempotency
 		Params: &entities.ETHTransactionParams{
 			Raw: rawTxRequest.Params.Raw,
 		},
-		InternalData: formatAnnotations(annotations, defaultRetryInterval),
+		InternalData: formatInternalData(false, gasPricePolicy, defaultRetryInterval, ""),
 	}
 }
 
 func FormatTransferRequest(transferRequest *types.TransferRequest, idempotencyKey string, defaultRetryInterval time.Duration) *entities.TxRequest {
-	// Do not use InternalData directly as we do not want to expose the OneTimeKey param
-	annotations := &types.Annotations{
-		Priority:    transferRequest.Params.Priority,
-		RetryPolicy: transferRequest.Params.RetryPolicy,
-	}
 	return &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,
 		ChainName:      transferRequest.ChainName,
@@ -90,7 +96,12 @@ func FormatTransferRequest(transferRequest *types.TransferRequest, idempotencyKe
 			GasPrice: transferRequest.Params.GasPrice,
 			Gas:      transferRequest.Params.Gas,
 		},
-		InternalData: formatAnnotations(annotations, defaultRetryInterval),
+		InternalData: formatInternalData(
+			false,
+			&transferRequest.Params.GasPricePolicy,
+			defaultRetryInterval,
+			"",
+		),
 	}
 }
 

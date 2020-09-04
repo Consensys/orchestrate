@@ -659,6 +659,20 @@ func (mr *MockJobAgentMockRecorder) FindOneByUUID(ctx, uuid, tenants interface{}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByUUID", reflect.TypeOf((*MockJobAgent)(nil).FindOneByUUID), ctx, uuid, tenants)
 }
 
+// LockOneByUUID mocks base method
+func (m *MockJobAgent) LockOneByUUID(ctx context.Context, uuid string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LockOneByUUID", ctx, uuid)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// LockOneByUUID indicates an expected call of LockOneByUUID
+func (mr *MockJobAgentMockRecorder) LockOneByUUID(ctx, uuid interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LockOneByUUID", reflect.TypeOf((*MockJobAgent)(nil).LockOneByUUID), ctx, uuid)
+}
+
 // Search mocks base method
 func (m *MockJobAgent) Search(ctx context.Context, filters *entities.JobFilters, tenants []string) ([]*models.Job, error) {
 	m.ctrl.T.Helper()

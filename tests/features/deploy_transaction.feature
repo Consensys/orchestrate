@@ -148,7 +148,7 @@ Feature: Deploy ERC20 contract
     "chain": "besu-{{scenarioID}}",
     "params": {
         "contractName": "SimpleToken",
-        "annotations": { "oneTimeKey": true }
+        "oneTimeKey": true
     },
     "labels": {
     	"scenario.id": "{{scenarioID}}",
@@ -190,7 +190,7 @@ Feature: Deploy ERC20 contract
     "chain": "besu-{{scenarioID}}",
     "params": {
         "contractName": "SimpleToken",
-        "annotations": { "oneTimeKey": true},
+        "oneTimeKey": true,
         "gas": "1"
     },
     "labels": {
@@ -234,7 +234,7 @@ Feature: Deploy ERC20 contract
     "params": {
         "contractName": "SimpleToken",
         "contractTag": "invalid",
-        "annotations": { "oneTimeKey": true }
+        "oneTimeKey": true
     },
     "labels": {
     	"scenario.id": "{{scenarioID}}",

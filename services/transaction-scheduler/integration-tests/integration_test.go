@@ -19,7 +19,7 @@ type txSchedulerTestSuite struct {
 }
 
 func (s *txSchedulerTestSuite) SetupSuite() {
-	err := integrationtest.StartEnvironment(s.env)
+	err := integrationtest.StartEnvironment(s.env.ctx, s.env)
 	if err != nil {
 		s.env.logger.WithError(err).Error()
 		if s.err == nil {
@@ -67,16 +67,5 @@ func (s *txSchedulerTestSuite) TestTxScheduler_Transactions() {
 	testSuite := new(txSchedulerTransactionTestSuite)
 	testSuite.env = s.env
 	testSuite.baseURL = s.env.baseURL
-	suite.Run(s.T(), testSuite)
-}
-
-func (s *txSchedulerTestSuite) TestTxSentry() {
-	if s.err != nil {
-		s.env.logger.Warn("skipping test...")
-		return
-	}
-
-	testSuite := new(txSentryTestSuite)
-	testSuite.env = s.env
 	suite.Run(s.T(), testSuite)
 }

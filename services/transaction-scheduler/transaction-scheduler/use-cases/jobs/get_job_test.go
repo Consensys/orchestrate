@@ -31,7 +31,7 @@ func TestGetJob_Execute(t *testing.T) {
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		job := testutils.FakeJobModel(0)
 		expectedResponse := parsers.NewJobEntityFromModels(job)
-		
+
 		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, []string{tenantID}).Return(job, nil)
 		jobResponse, err := usecase.Execute(ctx, job.UUID, []string{tenantID})
 
@@ -42,11 +42,11 @@ func TestGetJob_Execute(t *testing.T) {
 	t.Run("should fail with same error if FindOneByUUID fails for job", func(t *testing.T) {
 		uuid := "uuid"
 		expectedErr := errors.NotFoundError("error")
-	
+
 		mockJobDA.EXPECT().FindOneByUUID(ctx, uuid, []string{tenantID}).Return(nil, expectedErr)
-	
+
 		response, err := usecase.Execute(ctx, uuid, []string{tenantID})
-	
+
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createJobComponent), err)
 	})

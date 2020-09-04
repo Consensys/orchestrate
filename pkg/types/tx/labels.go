@@ -11,4 +11,6 @@ const (
 
 	TxFromLabel      = "txFrom"
 	TxFromOneTimeKey = "one-time-key"
+
+	ParentJobUUIDLabel = "parentJobUUID"
 )

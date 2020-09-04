@@ -15,6 +15,15 @@ import (
 // Handler creates and return an handler for nonce
 func Nonce(nm nonce.Attributor, ec hnonce.EthClient) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
+		// TODO: Use the job internal data to do this check once envelope is refactored
+		if txctx.Envelope.IsChildJob() {
+			txctx.Logger = txctx.Logger.WithFields(log.Fields{
+				"nonce": txctx.Envelope.GetNonceString(),
+			})
+			txctx.Logger.Debug("reusing nonce for child job")
+			return
+		}
+
 		txctx.Logger.WithField("envelope_id", txctx.Envelope.GetID()).Debugf("nonce handler starts")
 		if txctx.Envelope.IsOneTimeKeySignature() {
 			txctx.Logger = txctx.Logger.WithFields(log.Fields{

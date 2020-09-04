@@ -50,11 +50,11 @@ func (uc createJobUseCase) WithDBTransaction(dbtx store.Tx) CreateJobUseCase {
 
 // Execute validates and creates a new transaction job
 func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tenants []string) (*entities.Job, error) {
-	log.WithContext(ctx).
+	logger := log.WithContext(ctx).
 		WithField("chain_uuid", job.ChainUUID).
 		WithField("schedule_id", job.ScheduleUUID).
-		WithField("tenants", tenants).
-		Debug("creating new job")
+		WithField("tenants", tenants)
+	logger.Debug("creating new job")
 
 	chainID, err := uc.validator.ValidateChainExists(ctx, job.ChainUUID)
 	if err != nil {
@@ -73,6 +73,28 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tena
 	})
 
 	err = database.ExecuteInDBTx(uc.db, func(tx database.Tx) error {
+		// If it's a child job, only create it if parent status is PENDING
+		if jobModel.InternalData.ParentJobUUID != "" {
+			if der := tx.(store.Tx).Job().LockOneByUUID(ctx, jobModel.InternalData.ParentJobUUID); der != nil {
+				return der
+			}
+
+			parentJobModel, der := tx.(store.Tx).Job().FindOneByUUID(ctx, jobModel.InternalData.ParentJobUUID, tenants)
+			if der != nil {
+				return der
+			}
+
+			parentStatus := parsers.NewJobEntityFromModels(parentJobModel).GetStatus()
+			if parentStatus != utils.StatusPending {
+				errMessage := "cannot create a child job in a finalized schedule"
+				logger.
+					WithField("parent_job_uuid", jobModel.InternalData.ParentJobUUID).
+					WithField("parent_status", parentStatus).
+					Error(errMessage)
+				return errors.InvalidStateError(errMessage)
+			}
+		}
+
 		if der := tx.(store.Tx).Transaction().Insert(ctx, jobModel.Transaction); der != nil {
 			return der
 		}
@@ -89,12 +111,9 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tena
 		return nil
 	})
 	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
+		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
 	}
 
-	log.WithContext(ctx).
-		WithField("job_uuid", jobModel.UUID).
-		Info("job created successfully")
-
+	log.WithContext(ctx).WithField("job_uuid", jobModel.UUID).Info("job created successfully")
 	return parsers.NewJobEntityFromModels(jobModel), nil
 }

@@ -7,6 +7,7 @@ import (
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs"
+	subusecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs/sub-use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/schedules"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/transactions"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/validators"
@@ -30,12 +31,11 @@ type useCases struct {
 	getSchedule     schedules.GetScheduleUseCase
 	searchSchedules schedules.SearchSchedulesUseCase
 	// Jobs
-	createJob    jobs.CreateJobUseCase
-	getJob       jobs.GetJobUseCase
-	startJob     jobs.StartJobUseCase
-	startNextJob jobs.StartNextJobUseCase
-	updateJob    jobs.UpdateJobUseCase
-	searchJobs   jobs.SearchJobsUseCase
+	createJob  jobs.CreateJobUseCase
+	getJob     jobs.GetJobUseCase
+	startJob   jobs.StartJobUseCase
+	updateJob  jobs.UpdateJobUseCase
+	searchJobs jobs.SearchJobsUseCase
 }
 
 func NewUseCases(
@@ -51,6 +51,7 @@ func NewUseCases(
 	getScheduleUC := schedules.NewGetScheduleUseCase(db)
 	createJobUC := jobs.NewCreateJobUseCase(db, txValidator)
 	startJobUC := jobs.NewStartJobUseCase(db, producer, topicsCfg)
+	updateChildrenUC := subusecases.NewUpdateChildrenUseCase(db)
 	startNextJobUC := jobs.NewStartNextJobUseCase(db, startJobUC)
 	getTransactionUC := transactions.NewGetTxUseCase(db, getScheduleUC)
 
@@ -68,12 +69,11 @@ func NewUseCases(
 		getSchedule:     getScheduleUC,
 		searchSchedules: schedules.NewSearchSchedulesUseCase(db),
 		// Jobs
-		createJob:    createJobUC,
-		getJob:       jobs.NewGetJobUseCase(db),
-		searchJobs:   jobs.NewSearchJobsUseCase(db),
-		updateJob:    jobs.NewUpdateJobUseCase(db, startNextJobUC),
-		startJob:     startJobUC,
-		startNextJob: startNextJobUC,
+		createJob:  createJobUC,
+		getJob:     jobs.NewGetJobUseCase(db),
+		searchJobs: jobs.NewSearchJobsUseCase(db),
+		updateJob:  jobs.NewUpdateJobUseCase(db, updateChildrenUC, startNextJobUC),
+		startJob:   startJobUC,
 	}
 }
 
@@ -127,8 +127,4 @@ func (u *useCases) UpdateJob() jobs.UpdateJobUseCase {
 
 func (u *useCases) SearchJobs() jobs.SearchJobsUseCase {
 	return u.searchJobs
-}
-
-func (u *useCases) StartNextJob() jobs.StartNextJobUseCase {
-	return u.startNextJob
 }

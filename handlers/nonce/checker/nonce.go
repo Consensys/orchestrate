@@ -40,6 +40,14 @@ func controlRecoveryCount(txctx *engine.TxContext, conf *Configuration) error {
 // It makes sure that transactions with invalid nonce are not processed
 func Checker(conf *Configuration, nm nonce.Sender, ec hnonce.EthClient, tracker *RecoveryTracker) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
+		// TODO: Use the job internal data to do this check once envelope is refactored
+		if txctx.Envelope.IsChildJob() {
+			txctx.Logger.WithFields(log.Fields{
+				"id": txctx.Envelope.GetID(),
+			}).Debug("nonce: skip check for child job")
+			return
+		}
+
 		// We only use RawDecoder when user has sent a Ethereum Raw transaction, ignore the rest
 		if txctx.Envelope.IsEthSendRawTransaction() {
 			// If transaction has been generated externally we skip nonce check

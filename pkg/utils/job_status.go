@@ -9,4 +9,5 @@ const (
 	StatusWarning    = "WARNING"
 	StatusFailed     = "FAILED"
 	StatusMined      = "MINED"
+	StatusNeverMined = "NEVER_MINED"
 )

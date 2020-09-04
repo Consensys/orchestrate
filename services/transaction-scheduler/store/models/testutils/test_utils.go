@@ -60,10 +60,9 @@ func FakePrivateTx() *models.Transaction {
 
 func FakeJobModel(scheduleID int) *models.Job {
 	job := &models.Job{
-		UUID:        uuid.Must(uuid.NewV4()).String(),
-		ChainUUID:   uuid.Must(uuid.NewV4()).String(),
-		NextJobUUID: uuid.Must(uuid.NewV4()).String(),
-		Type:        utils.EthereumTransaction,
+		UUID:      uuid.Must(uuid.NewV4()).String(),
+		ChainUUID: uuid.Must(uuid.NewV4()).String(),
+		Type:      utils.EthereumTransaction,
 		Schedule: &models.Schedule{
 			ID:       scheduleID,
 			TenantID: "_",

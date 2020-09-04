@@ -34,16 +34,14 @@ func (m *MockSessionManager) EXPECT() *MockSessionManagerMockRecorder {
 	return m.recorder
 }
 
-// AddSession mocks base method
-func (m *MockSessionManager) AddSession(ctx context.Context, job *entities.Job) error {
+// Start mocks base method
+func (m *MockSessionManager) Start(ctx context.Context, job *entities.Job) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddSession", ctx, job)
-	ret0, _ := ret[0].(error)
-	return ret0
+	m.ctrl.Call(m, "Start", ctx, job)
 }
 
-// AddSession indicates an expected call of AddSession
-func (mr *MockSessionManagerMockRecorder) AddSession(ctx, job interface{}) *gomock.Call {
+// Start indicates an expected call of Start
+func (mr *MockSessionManagerMockRecorder) Start(ctx, job interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddSession", reflect.TypeOf((*MockSessionManager)(nil).AddSession), ctx, job)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Start", reflect.TypeOf((*MockSessionManager)(nil).Start), ctx, job)
 }

@@ -30,7 +30,7 @@ func TestApp(t *testing.T) {
 	cfg.Store.Type = "postgres"
 
 	kCfg := sarama.NewKafkaTopicConfig(viper.New())
-	_, err := NewTxSchedulerApp(
+	_, err := NewTxScheduler(
 		cfg,
 		postgres.GetManager(),
 		jwtChecker, keyChecker,

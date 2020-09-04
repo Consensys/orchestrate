@@ -22,7 +22,7 @@ func TestTransactionParams_SuccessfulOneTimeKeyWithoutFrom(t *testing.T) {
 	params := TransactionParams{
 		To:              "0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc291",
 		MethodSignature: "Constructor()",
-		Annotations:     Annotations{OneTimeKey: true},
+		OneTimeKey:      true,
 	}
 
 	err := utils.GetValidator().Struct(params)
@@ -63,8 +63,8 @@ func TestTransactionParams_Validation(t *testing.T) {
 		{
 			"Retry params retry",
 			&TransactionParams{
-				Annotations: Annotations{
-					RetryPolicy: GasPriceRetryParams{
+				GasPricePolicy: GasPriceParams{
+					RetryPolicy: RetryParams{
 						Limit: 0,
 					},
 				},
@@ -112,8 +112,8 @@ func TestDeployContractParams_Validation(t *testing.T) {
 		{
 			"Retry params retry",
 			&DeployContractParams{
-				Annotations: Annotations{
-					RetryPolicy: GasPriceRetryParams{
+				GasPricePolicy: GasPriceParams{
+					RetryPolicy: RetryParams{
 						Limit: 0,
 					},
 				},
@@ -154,8 +154,10 @@ func TestTransferParams_Validation(t *testing.T) {
 		{
 			"Retry params retry",
 			&TransferParams{
-				RetryPolicy: GasPriceRetryParams{
-					Limit: 0,
+				GasPricePolicy: GasPriceParams{
+					RetryPolicy: RetryParams{
+						Limit: 0,
+					},
 				},
 			},
 			true,
@@ -190,7 +192,7 @@ func TestDeployContractParams_BasicSuccessful(t *testing.T) {
 func TestDeployContractParams_SuccessfulOneTimeKeyWithoutFrom(t *testing.T) {
 	params := DeployContractParams{
 		ContractName: "SimpleContract",
-		Annotations:  Annotations{OneTimeKey: true},
+		OneTimeKey:   true,
 	}
 
 	err := utils.GetValidator().Struct(params)
@@ -208,8 +210,8 @@ func TestDeployContractParams_FailWithoutFrom(t *testing.T) {
 
 func TestParams_Priority(t *testing.T) {
 	params := DeployContractParams{
-		ContractName: "SimpleContract",
-		Annotations:  Annotations{Priority: "invalidPriority"},
+		ContractName:   "SimpleContract",
+		GasPricePolicy: GasPriceParams{Priority: "invalidPriority"},
 	}
 
 	err := params.Validate()
@@ -219,93 +221,40 @@ func TestParams_Priority(t *testing.T) {
 func TestRetryParams_Validation(t *testing.T) {
 	testSet := []struct {
 		name          string
-		params        GasPriceRetryParams
+		params        RetryParams
 		expectedError bool
 	}{
 		{
 			"Limit not filled if Increment is filled",
-			GasPriceRetryParams{
+			RetryParams{
 				Increment: 1.1,
 			},
 			true,
 		},
 		{
-			"Limit not filled if IncrementLevel is filled",
-			GasPriceRetryParams{
-				IncrementLevel: "low",
-			},
-			true,
-		},
-		{
-			"Increment or IncrementLevel not filled if Limit is filled",
-			GasPriceRetryParams{
+			"Increment not filled if Limit is filled",
+			RetryParams{
 				Limit: 1.1,
 			},
 			true,
 		},
 		{
 			"No error all fields are filled with Increment",
-			GasPriceRetryParams{
+			RetryParams{
 				Interval:  "1m",
 				Increment: 1.1,
 				Limit:     1.2,
-			},
-			false,
-		},
-		{
-			"No error all fields are filled with IncrementLevel",
-			GasPriceRetryParams{
-				Interval:       "1m",
-				IncrementLevel: "medium",
-				Limit:          1.2,
 			},
 			false,
 		},
 		{
 			"Interval is not a duration",
-			GasPriceRetryParams{
+			RetryParams{
 				Interval:  "1_m",
 				Increment: 1.1,
 				Limit:     1.2,
 			},
 			true,
-		},
-		{
-			"Increment > Limit",
-			GasPriceRetryParams{
-				Interval:  "1m",
-				Increment: 1.3,
-				Limit:     1.2,
-			},
-			true,
-		},
-		{
-			"invalid IncrementLevel",
-			GasPriceRetryParams{
-				Interval:       "1m",
-				IncrementLevel: "l0w",
-				Limit:          1.2,
-			},
-			true,
-		},
-		{
-			"mutual exclusion between Increment and IncrementLevel",
-			GasPriceRetryParams{
-				Interval:       "1m",
-				IncrementLevel: utils.GasIncrementMedium,
-				Increment:      1.3,
-				Limit:          1.2,
-			},
-			true,
-		},
-		{
-			"No error when Increment = Limit",
-			GasPriceRetryParams{
-				Interval:  "1m",
-				Increment: 1.1,
-				Limit:     1.1,
-			},
-			false,
 		},
 	}
 

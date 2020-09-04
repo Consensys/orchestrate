@@ -99,7 +99,15 @@ func FakeJobUpdateRequest() *types.UpdateJobRequest {
 func FakeJobResponse() *types.JobResponse {
 	return &types.JobResponse{
 		UUID:        uuid.Must(uuid.NewV4()).String(),
+		ChainUUID:   uuid.Must(uuid.NewV4()).String(),
 		Transaction: *FakeETHTransaction(),
 		Status:      utils.StatusCreated,
+		Annotations: types.Annotations{
+			GasPricePolicy: types.GasPriceParams{
+				RetryPolicy: types.RetryParams{
+					Interval: "5s",
+				},
+			},
+		},
 	}
 }

@@ -4,6 +4,7 @@ package jobs
 
 import (
 	"context"
+	mocks3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs/sub-use-cases/mocks"
 	"testing"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -29,6 +30,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 	mockTransactionDA := mocks.NewMockTransactionAgent(ctrl)
 	mockJobDA := mocks.NewMockJobAgent(ctrl)
 	mockLogDA := mocks.NewMockLogAgent(ctrl)
+	mockUpdateChilrenUC := mocks3.NewMockUpdateChildrenUseCase(ctrl)
 	mockStartNextJobUC := mocks2.NewMockStartNextJobUseCase(ctrl)
 
 	mockDB.EXPECT().Job().Return(mockJobDA).AnyTimes()
@@ -39,8 +41,9 @@ func TestUpdateJob_Execute(t *testing.T) {
 	mockDBTX.EXPECT().Commit().Return(nil).AnyTimes()
 	mockDBTX.EXPECT().Rollback().Return(nil).AnyTimes()
 	mockDBTX.EXPECT().Close().Return(nil).AnyTimes()
+	mockUpdateChilrenUC.EXPECT().WithDBTransaction(mockDBTX).Return(mockUpdateChilrenUC).AnyTimes()
 
-	usecase := NewUpdateJobUseCase(mockDB, mockStartNextJobUC)
+	usecase := NewUpdateJobUseCase(mockDB, mockUpdateChilrenUC, mockStartNextJobUC)
 
 	tenantID := "tenantID"
 	nextStatus := utils.StatusStarted
@@ -111,6 +114,61 @@ func TestUpdateJob_Execute(t *testing.T) {
 
 		_, err := usecase.Execute(ctx, jobEntity, "", "", []string{tenantID})
 
+		assert.NoError(t, err)
+	})
+
+	t.Run("should execute use case successfully if status is PENDING", func(t *testing.T) {
+		jobEntity := testutils3.FakeJob()
+		jobEntity.Transaction = nil
+		status := utils.StatusPending
+		jobModel := testutils2.FakeJobModel(0)
+		jobModel.Schedule.TenantID = tenantID
+		jobModel.Logs[0].Status = utils.StatusStarted
+
+		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, []string{tenantID}).Return(jobModel, nil).Times(2)
+		mockJobDA.EXPECT().Update(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, jobModelUpdate *models.Job) error {
+			assert.Equal(t, jobModelUpdate.InternalData, jobEntity.InternalData)
+			assert.Equal(t, jobModelUpdate.Labels, jobEntity.Labels)
+			jobModel.ID = 1
+			jobModel.Logs[0].Status = status
+			return nil
+		})
+		mockLogDA.EXPECT().Insert(ctx, &models.Log{
+			JobID:   &jobModel.ID,
+			Status:  status,
+			Message: logMessage,
+		}).Return(nil)
+
+		_, err := usecase.Execute(ctx, jobEntity, status, logMessage, []string{tenantID})
+		assert.NoError(t, err)
+	})
+
+	t.Run("should execute use case successfully if status is MINED and update all the children jobs", func(t *testing.T) {
+		jobEntity := testutils3.FakeJob()
+		jobEntity.Transaction = nil
+		status := utils.StatusMined
+		jobModel := testutils2.FakeJobModel(0)
+		jobModel.Schedule.TenantID = tenantID
+		jobModel.Logs[0].Status = utils.StatusPending
+
+		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, []string{tenantID}).Return(jobModel, nil).Times(2)
+		mockJobDA.EXPECT().Update(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, jobModelUpdate *models.Job) error {
+			assert.Equal(t, jobModelUpdate.InternalData, jobEntity.InternalData)
+			assert.Equal(t, jobModelUpdate.Labels, jobEntity.Labels)
+			jobModel.ID = 1
+			jobModel.Logs[0].Status = status
+			return nil
+		})
+		mockLogDA.EXPECT().Insert(ctx, &models.Log{
+			JobID:   &jobModel.ID,
+			Status:  status,
+			Message: logMessage,
+		}).Return(nil)
+		mockUpdateChilrenUC.EXPECT().
+			Execute(ctx, jobModel.UUID, jobModel.InternalData.ParentJobUUID, utils.StatusNeverMined, []string{tenantID}).
+			Return(nil)
+
+		_, err := usecase.Execute(ctx, jobEntity, status, logMessage, []string{tenantID})
 		assert.NoError(t, err)
 	})
 
@@ -250,7 +308,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		mockLogDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(ctx, gomock.Any(), gomock.Any()).Return(jobModel, nil)
 		mockStartNextJobUC.EXPECT().Execute(ctx, jobModel.UUID, tenants).Return(nil)
-		
+
 		jobEntity := parsers.NewJobEntityFromModels(jobModel)
 		_, err := usecase.Execute(ctx, jobEntity, utils.StatusStored, "", []string{tenantID})
 

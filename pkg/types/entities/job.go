@@ -3,6 +3,8 @@ package entities
 import (
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
 )
 
@@ -23,13 +25,22 @@ type Job struct {
 
 // GetStatus Computes the status of a Job by checking its logs
 func (job *Job) GetStatus() string {
+	return getStatus(job.Logs)
+}
+
+func getStatus(logs []*Log) string {
 	var status string
 	var logCreatedAt *time.Time
-	for idx := range job.Logs {
-		if logCreatedAt == nil || job.Logs[idx].CreatedAt.After(*logCreatedAt) {
-			status = job.Logs[idx].Status
-			logCreatedAt = &job.Logs[idx].CreatedAt
+	for idx := range logs {
+		if logCreatedAt == nil || logs[idx].CreatedAt.After(*logCreatedAt) {
+			status = logs[idx].Status
+			logCreatedAt = &logs[idx].CreatedAt
 		}
+	}
+
+	// Recursive function until we reach a valid status
+	if status == utils.StatusWarning {
+		return getStatus(logs[:len(logs)-1])
 	}
 
 	return status

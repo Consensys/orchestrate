@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
+
 	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt"
 	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/key"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
@@ -46,7 +48,7 @@ var envMetricsPort string
 type IntegrationEnvironment struct {
 	ctx                           context.Context
 	logger                        log.Logger
-	txScheduler                   *transactionscheduler.TxScheduler
+	txScheduler                   *app.App
 	client                        *docker.Client
 	consumer                      *integrationtest.KafkaConsumer
 	pgmngr                        postgres.Manager
@@ -194,12 +196,9 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 	}
 
 	// Start tx-scheduler app
-	_ = env.txScheduler.StartSentry(ctx)
-	err = env.txScheduler.StartScheduler(ctx)
+	err = env.txScheduler.Start(ctx)
 	if err != nil {
-		env.logger.WithError(err).Error("could not start transaction-scheduler API")
-		// We stop sentry if scheduler fails
-		env.txScheduler.StopSentry(ctx)
+		env.logger.WithError(err).Error("could not start transaction-scheduler")
 		return err
 	}
 
@@ -216,11 +215,10 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 func (env *IntegrationEnvironment) Teardown(ctx context.Context) {
 	env.logger.Infof("tearing test suite down")
 
-	err := env.txScheduler.StopScheduler(ctx)
+	err := env.txScheduler.Stop(ctx)
 	if err != nil {
-		env.logger.WithError(err).Error("could not stop transaction-scheduler API")
+		env.logger.WithError(err).Error("could not stop transaction-scheduler")
 	}
-	env.txScheduler.StopSentry(ctx)
 
 	err = env.client.Down(ctx, postgresContainerID)
 	if err != nil {
@@ -275,7 +273,7 @@ func newTransactionScheduler(
 	ctx context.Context,
 	contractRegistryClient contractregistry.ContractRegistryClient,
 	topicCfg *sarama.KafkaTopicConfig,
-) (*transactionscheduler.TxScheduler, error) {
+) (*app.App, error) {
 	// Initialize dependencies
 	authjwt.Init(ctx)
 	authkey.Init(ctx)
@@ -290,7 +288,7 @@ func newTransactionScheduler(
 	pgmngr := postgres.GetManager()
 	txSchedulerConfig := transactionscheduler.NewConfig(viper.GetViper())
 
-	txSchedulerApp, err := transactionscheduler.NewTxSchedulerApp(
+	return transactionscheduler.NewTxScheduler(
 		txSchedulerConfig,
 		pgmngr,
 		authjwt.GlobalChecker(), authkey.GlobalChecker(),
@@ -299,17 +297,4 @@ func newTransactionScheduler(
 		sarama.GlobalSyncProducer(),
 		topicCfg,
 	)
-	if err != nil {
-		return nil, err
-	}
-
-	txSentryDaemon, err := transactionscheduler.NewTxSentryDaemon(pgmngr, txSchedulerConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	return &transactionscheduler.TxScheduler{
-		TxSchedulerAPI: txSchedulerApp,
-		TxSentryDaemon: txSentryDaemon,
-	}, nil
 }

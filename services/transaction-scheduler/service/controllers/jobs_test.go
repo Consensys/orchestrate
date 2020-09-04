@@ -136,11 +136,12 @@ func (s *jobsCtrlTestSuite) TestJobsController_Create() {
 	s.T().Run("should fail with Bad request if invalid format (retry)", func(t *testing.T) {
 		jobRequest := testutils.FakeCreateJobRequest()
 		jobRequest.Annotations = txschedulertypes.Annotations{
-			RetryPolicy: txschedulertypes.GasPriceRetryParams{
-				Interval:       "1m",
-				IncrementLevel: "low",
-				Increment:      1.1,
-				Limit:          1.4,
+			GasPricePolicy: txschedulertypes.GasPriceParams{
+				RetryPolicy: txschedulertypes.RetryParams{
+					Interval:  "invalid",
+					Increment: 1.1,
+					Limit:     1.4,
+				},
 			},
 		}
 		requestBytes, _ := json.Marshal(jobRequest)

@@ -721,7 +721,7 @@ Feature: Private transactions
 {
     "chain": "besu-{{scenarioID}}",
     "params": {
-        "annotations": { "oneTimeKey": true },
+        "oneTimeKey": true ,
         "protocol": "Orion",
         "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
         "privateFor": ["{{global.nodes.besu_3.privateAddress}}"],

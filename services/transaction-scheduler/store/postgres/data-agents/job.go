@@ -2,6 +2,7 @@ package dataagents
 
 import (
 	"context"
+	"fmt"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 
@@ -94,6 +95,17 @@ func (agent *PGJob) FindOneByUUID(ctx context.Context, jobUUID string, tenants [
 	return job, nil
 }
 
+// LockOneByUUID gets a job by UUID
+func (agent *PGJob) LockOneByUUID(ctx context.Context, jobUUID string) error {
+	query := agent.db.ModelContext(ctx, &models.Job{}).Where("job.uuid = ?", jobUUID).For("UPDATE")
+	err := pg.Select(ctx, query)
+	if err != nil {
+		return errors.FromError(err).ExtendComponent(jobDAComponent)
+	}
+
+	return nil
+}
+
 func (agent *PGJob) Search(ctx context.Context, filters *entities.JobFilters, tenants []string) ([]*models.Job, error) {
 	var jobs []*models.Job
 
@@ -119,6 +131,16 @@ func (agent *PGJob) Search(ctx context.Context, filters *entities.JobFilters, te
 			Join("LEFT JOIN logs as tmpl").
 			JoinOn("tmpl.job_id = job.id AND log.created_at < tmpl.created_at").
 			Where("tmpl.id is null AND log.status = ?", filters.Status)
+	}
+
+	if filters.ParentJobUUID != "" {
+		query = query.
+			Where("job.uuid = ?", filters.ParentJobUUID).
+			WhereOr(fmt.Sprintf("job.internal_data @> '{\"parentJobUUID\": \"%s\"}'", filters.ParentJobUUID))
+	}
+
+	if filters.OnlyParents {
+		query = query.Where("job.internal_data->'parentJobUUID' is null")
 	}
 
 	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants).

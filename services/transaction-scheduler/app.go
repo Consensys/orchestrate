@@ -19,7 +19,7 @@ import (
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 )
 
-func NewTxSchedulerApp(
+func NewTxScheduler(
 	cfg *Config,
 	pgmngr postgres.Manager,
 	jwt, key auth.Checker,
@@ -27,7 +27,7 @@ func NewTxSchedulerApp(
 	contractRegistryClient contractregistry.ContractRegistryClient,
 	syncProducer sarama.SyncProducer,
 	topicCfg *pkgsarama.KafkaTopicConfig,
-) (app.Service, error) {
+) (*app.App, error) {
 	// Create Data agents
 	db, err := multi.Build(context.Background(), cfg.Store, pgmngr)
 	if err != nil {
@@ -37,7 +37,7 @@ func NewTxSchedulerApp(
 	ucs := usecases.NewUseCases(db, chainRegistryClient, contractRegistryClient, syncProducer, topicCfg)
 
 	// Option for transaction handler
-	txSchedulerHandlerOpt := app.HandlerOpt(reflect.TypeOf(&dynamic.Transactions{}), controllers.NewBuilder(ucs, cfg.Sentry.RetryInterval))
+	txSchedulerHandlerOpt := app.HandlerOpt(reflect.TypeOf(&dynamic.Transactions{}), controllers.NewBuilder(ucs, cfg.RetryInterval))
 
 	// Create app
 	return app.New(

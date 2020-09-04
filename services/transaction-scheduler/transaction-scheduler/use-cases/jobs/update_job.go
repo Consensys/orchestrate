@@ -3,15 +3,15 @@ package jobs
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
-
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
+	subusecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs/sub-use-cases"
 )
 
 //go:generate mockgen -source=update_job.go -destination=mocks/update_job.go -package=mocks
@@ -24,15 +24,17 @@ type UpdateJobUseCase interface {
 
 // updateJobUseCase is a use case to create a new transaction job
 type updateJobUseCase struct {
-	db                  store.DB
-	startNextJobUseCase StartNextJobUseCase
+	db                    store.DB
+	updateChildrenUseCase subusecases.UpdateChildrenUseCase
+	startNextJobUseCase   StartNextJobUseCase
 }
 
 // NewUpdateJobUseCase creates a new UpdateJobUseCase
-func NewUpdateJobUseCase(db store.DB, startJobUC StartNextJobUseCase) UpdateJobUseCase {
+func NewUpdateJobUseCase(db store.DB, updateChildrenUseCase subusecases.UpdateChildrenUseCase, startJobUC StartNextJobUseCase) UpdateJobUseCase {
 	return &updateJobUseCase{
-		db:                  db,
-		startNextJobUseCase: startJobUC,
+		db:                    db,
+		updateChildrenUseCase: updateChildrenUseCase,
+		startNextJobUseCase:   startJobUC,
 	}
 }
 
@@ -48,6 +50,7 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 
 	retrievedJob := parsers.NewJobEntityFromModels(jobModel)
 	status := retrievedJob.GetStatus()
+
 	if status == utils.StatusMined || status == utils.StatusFailed || status == utils.StatusStored {
 		errMessage := "job status is final, cannot be updated"
 		logger.WithField("status", status).Error(errMessage)
@@ -85,6 +88,16 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 			if der := tx.(store.Tx).Log().Insert(ctx, jobLogModel); der != nil {
 				return der
 			}
+
+			// if we updated to MINED, we need to update the children and sibling jobs to NEVER_MINED
+			if nextStatus == utils.StatusMined {
+				der := uc.updateChildrenUseCase.
+					WithDBTransaction(tx.(store.Tx)).
+					Execute(ctx, jobModel.UUID, jobModel.InternalData.ParentJobUUID, utils.StatusNeverMined, tenants)
+				if der != nil {
+					return der
+				}
+			}
 		}
 
 		return nil
@@ -97,8 +110,7 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 	if (nextStatus == utils.StatusMined || nextStatus == utils.StatusStored) && retrievedJob.NextJobUUID != "" {
 		err = uc.startNextJobUseCase.Execute(ctx, retrievedJob.UUID, tenants)
 		if err != nil {
-			logger.WithField("next_job_uuid", retrievedJob.NextJobUUID).WithError(err).
-				Error("fail to start next job")
+			logger.WithField("next_job_uuid", retrievedJob.NextJobUUID).WithError(err).Error("fail to start next job")
 			return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
 		}
 	}
@@ -129,7 +141,7 @@ func canUpdateStatus(nextStatus, status string) bool {
 		return status == utils.StatusCreated
 	case utils.StatusPending:
 		return status == utils.StatusStarted || status == utils.StatusRecovering
-	case utils.StatusRecovering, utils.StatusMined, utils.StatusStored:
+	case utils.StatusRecovering, utils.StatusMined, utils.StatusStored, utils.StatusNeverMined:
 		return status == utils.StatusPending
 	case utils.StatusFailed:
 		return status == utils.StatusStarted || status == utils.StatusRecovering || status == utils.StatusPending

@@ -13,9 +13,8 @@ type TestSuiteEnv interface {
 	Start(ctx context.Context) error
 }
 
-func StartEnvironment(env TestSuiteEnv) (gerr error) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+func StartEnvironment(ctx context.Context, env TestSuiteEnv) (gerr error) {
+	ctx, cancel := context.WithCancel(ctx)
 
 	// We do not exit in Fatal errors
 	log.StandardLogger().ExitFunc = func(code int) {

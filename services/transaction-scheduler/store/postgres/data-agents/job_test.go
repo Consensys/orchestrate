@@ -6,13 +6,14 @@ package dataagents
 
 import (
 	"context"
-	"github.com/gofrs/uuid"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"testing"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/gofrs/uuid"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 
 	"github.com/stretchr/testify/assert"
@@ -25,8 +26,9 @@ import (
 
 type jobTestSuite struct {
 	suite.Suite
-	agents *PGAgents
-	pg     *pgTestUtils.PGTestHelper
+	agents   *PGAgents
+	pg       *pgTestUtils.PGTestHelper
+	tenantID string
 }
 
 func TestPGJob(t *testing.T) {
@@ -36,6 +38,7 @@ func TestPGJob(t *testing.T) {
 
 func (s *jobTestSuite) SetupSuite() {
 	s.pg, _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
+	s.tenantID = "tenantID"
 	s.pg.InitTestDB(s.T())
 }
 
@@ -99,7 +102,7 @@ func (s *jobTestSuite) TestPGJob_Update() {
 	s.T().Run("should update model successfully", func(t *testing.T) {
 		newTx := testutils.FakeTransaction()
 		newSchedule := testutils.FakeSchedule("_")
-		err := s.agents.Transaction().Insert(ctx, newTx)
+		err = s.agents.Transaction().Insert(ctx, newTx)
 		assert.NoError(t, err)
 		err = s.agents.Schedule().Insert(ctx, newSchedule)
 		assert.NoError(t, err)
@@ -121,11 +124,10 @@ func (s *jobTestSuite) TestPGJob_Update() {
 
 func (s *jobTestSuite) TestPGJob_FindOneByUUID() {
 	ctx := context.Background()
-	tenantID := "tenantID"
 	job := testutils.FakeJobModel(0)
 	job.NextJobUUID = uuid.Must(uuid.NewV4()).String()
 	job.Logs = append(job.Logs, &models.Log{UUID: uuid.Must(uuid.NewV4()).String(), Status: utils.StatusStarted, Message: "created message"})
-	job.Schedule.TenantID = tenantID
+	job.Schedule.TenantID = s.tenantID
 	err := insertJob(ctx, s.agents, job)
 	assert.NoError(s.T(), err)
 
@@ -147,56 +149,103 @@ func (s *jobTestSuite) TestPGJob_FindOneByUUID() {
 	})
 
 	s.T().Run("should get model successfully as tenant", func(t *testing.T) {
-		jobRetrieved, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, []string{tenantID})
+		jobRetrieved, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, []string{s.tenantID})
 
 		assert.NoError(t, err)
 		assert.NotEmpty(t, jobRetrieved.ID)
 	})
 
 	s.T().Run("should return NotFoundError if select fails", func(t *testing.T) {
-		_, err := s.agents.Job().FindOneByUUID(ctx, "b6fe7a2a-1a4d-49ca-99d8-8a34aa495ef0", []string{tenantID})
+		_, err := s.agents.Job().FindOneByUUID(ctx, "b6fe7a2a-1a4d-49ca-99d8-8a34aa495ef0", []string{s.tenantID})
 		assert.True(t, errors.IsNotFoundError(err))
+	})
+}
+
+func (s *jobTestSuite) TestPGJob_LockOneByUUID() {
+	ctx := context.Background()
+	job := testutils.FakeJobModel(0)
+	job.Logs = append(job.Logs, &models.Log{UUID: uuid.Must(uuid.NewV4()).String(), Status: utils.StatusStarted, Message: "created message"})
+	job.Schedule.TenantID = s.tenantID
+	err := insertJob(ctx, s.agents, job)
+	assert.NoError(s.T(), err)
+
+	s.T().Run("should lock successfully", func(t *testing.T) {
+		dbtx0, err := s.pg.DB.Begin()
+		assert.NoError(t, err)
+		dbtx1, err := s.pg.DB.Begin()
+		assert.NoError(t, err)
+		newPGJob0 := NewPGJob(dbtx0)
+		newPGJob1 := NewPGJob(dbtx1)
+
+		waitChannel := make(chan string)
+		err = newPGJob1.LockOneByUUID(ctx, job.UUID)
+		assert.NoError(t, err)
+		go func() {
+			time.Sleep(2000 * time.Millisecond)
+			waitChannel <- "job1"
+
+			err = dbtx1.Commit()
+			assert.NoError(t, err)
+		}()
+
+		go func() {
+			err = newPGJob0.LockOneByUUID(ctx, job.UUID)
+			assert.NoError(t, err)
+
+			err = dbtx0.Commit()
+			assert.NoError(t, err)
+
+			waitChannel <- "job0"
+		}()
+
+		firstJob := <-waitChannel
+		assert.Equal(t, firstJob, "job1")
+
+		secondJob := <-waitChannel
+		assert.Equal(t, secondJob, "job0")
 	})
 }
 
 func (s *jobTestSuite) TestPGJob_Search() {
 	ctx := context.Background()
-	tenantID := "tenantID"
 
-	jobOne := testutils.FakeJobModel(0)
-	jobOne.Logs = append(jobOne.Logs, &models.Log{UUID: uuid.Must(uuid.NewV4()).String(), Status: utils.StatusStarted, Message: "created message"})
+	// job0 is the parent of a random job "parentJobUUID"
+	job0 := testutils.FakeJobModel(0)
+	job0.Logs = append(job0.Logs, &models.Log{UUID: uuid.Must(uuid.NewV4()).String(), Status: utils.StatusStarted, Message: "created message"})
 	txHashOne := common.HexToHash("0x1")
-	jobOne.Transaction.Hash = txHashOne.String()
-	jobOne.Schedule.TenantID = tenantID
-	err := insertJob(ctx, s.agents, jobOne)
+	job0.Transaction.Hash = txHashOne.String()
+	job0.Schedule.TenantID = s.tenantID
+	err := insertJob(ctx, s.agents, job0)
 	assert.NoError(s.T(), err)
 
-	jobTwo := testutils.FakeJobModel(0)
+	// Job1 is the child of job0
+	job1 := testutils.FakeJobModel(0)
 	txHashTwo := common.HexToHash("0x2")
-	jobTwo.ChainUUID = jobOne.ChainUUID
-	jobTwo.Transaction.Hash = txHashTwo.String()
-	jobTwo.Schedule.TenantID = tenantID
-	jobTwo.Logs[0].Status = utils.StatusPending
-	err = insertJob(ctx, s.agents, jobTwo)
+	job1.ChainUUID = job0.ChainUUID
+	job1.Transaction.Hash = txHashTwo.String()
+	job1.Schedule.TenantID = s.tenantID
+	job1.InternalData.ParentJobUUID = job0.UUID
+	job1.Logs[0].Status = utils.StatusPending
+	err = insertJob(ctx, s.agents, job1)
 	assert.NoError(s.T(), err)
 
 	s.T().Run("should find model successfully", func(t *testing.T) {
 		filters := &entities.JobFilters{
 			TxHashes:  []string{txHashOne.String()},
-			ChainUUID: jobOne.ChainUUID,
+			ChainUUID: job0.ChainUUID,
 		}
 
-		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{tenantID})
+		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{s.tenantID})
 
 		assert.NoError(t, err)
 		assert.NotEmpty(t, retrievedJobs[0].ID)
-		assert.Equal(t, jobOne.UUID, retrievedJobs[0].UUID)
-		assert.Equal(t, jobOne.Transaction.UUID, retrievedJobs[0].Transaction.UUID)
+		assert.Equal(t, job0.UUID, retrievedJobs[0].UUID)
+		assert.Equal(t, job0.Transaction.UUID, retrievedJobs[0].Transaction.UUID)
 		assert.Equal(t, txHashOne.String(), retrievedJobs[0].Transaction.Hash)
-		assert.Equal(t, len(jobOne.Logs), len(retrievedJobs[0].Logs))
+		assert.Equal(t, len(job0.Logs), len(retrievedJobs[0].Logs))
 		// Verify order
-		assert.Equal(t, jobOne.Logs[0].UUID, retrievedJobs[0].Logs[0].UUID)
-		assert.Equal(t, jobOne.Logs[1].UUID, retrievedJobs[0].Logs[1].UUID)
+		assert.Equal(t, job0.Logs[0].UUID, retrievedJobs[0].Logs[0].UUID)
+		assert.Equal(t, job0.Logs[1].UUID, retrievedJobs[0].Logs[1].UUID)
 	})
 
 	s.T().Run("should find models successfully by status", func(t *testing.T) {
@@ -204,21 +253,21 @@ func (s *jobTestSuite) TestPGJob_Search() {
 			Status: utils.StatusPending,
 		}
 
-		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{tenantID})
+		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{s.tenantID})
 
 		assert.NoError(t, err)
 		assert.Len(t, retrievedJobs, 1)
-		assert.Equal(t, retrievedJobs[0].UUID, jobTwo.UUID)
-		assert.Equal(t, len(jobTwo.Logs), len(retrievedJobs[0].Logs))
+		assert.Equal(t, retrievedJobs[0].UUID, job1.UUID)
+		assert.Equal(t, len(job1.Logs), len(retrievedJobs[0].Logs))
 	})
 
 	s.T().Run("should not find any model by txHashes", func(t *testing.T) {
 		filters := &entities.JobFilters{
 			TxHashes:  []string{"0x3"},
-			ChainUUID: jobOne.ChainUUID,
+			ChainUUID: job0.ChainUUID,
 		}
 
-		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{tenantID})
+		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{s.tenantID})
 		assert.NoError(t, err)
 		assert.Empty(t, retrievedJobs)
 	})
@@ -229,14 +278,42 @@ func (s *jobTestSuite) TestPGJob_Search() {
 			ChainUUID: uuid.Must(uuid.NewV4()).String(),
 		}
 
-		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{tenantID})
+		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{s.tenantID})
 		assert.NoError(t, err)
 		assert.Empty(t, retrievedJobs)
 	})
 
+	s.T().Run("should find models successfully by parentJobUUID", func(t *testing.T) {
+		// job0 is the parent so we retrieve the parent and all the children
+		filters := &entities.JobFilters{
+			ParentJobUUID: job0.UUID,
+		}
+
+		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{s.tenantID})
+		assert.NoError(t, err)
+		assert.Len(t, retrievedJobs, 2)
+
+		assert.Equal(t, retrievedJobs[0].UUID, job0.UUID)
+		assert.Equal(t, retrievedJobs[1].InternalData.ParentJobUUID, job0.UUID)
+		assert.Equal(t, retrievedJobs[1].UUID, job1.UUID)
+	})
+
+	s.T().Run("should find models successfully if OnlyParents is true", func(t *testing.T) {
+		// job0 is the parent so we retrieve the parent and all the children
+		filters := &entities.JobFilters{
+			OnlyParents: true,
+		}
+
+		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{s.tenantID})
+
+		assert.NoError(t, err)
+		assert.Len(t, retrievedJobs, 1)
+		assert.Equal(t, retrievedJobs[0].UUID, job0.UUID)
+	})
+
 	s.T().Run("should find every inserted model successfully", func(t *testing.T) {
 		filters := &entities.JobFilters{}
-		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{tenantID})
+		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{s.tenantID})
 
 		assert.NoError(t, err)
 		assert.Equal(t, len(retrievedJobs), 2)

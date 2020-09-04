@@ -17,7 +17,7 @@ type contractRegistryTestSuite struct {
 }
 
 func (s *contractRegistryTestSuite) SetupSuite() {
-	err := integrationtest.StartEnvironment(s.env)
+	err := integrationtest.StartEnvironment(context.Background(), s.env)
 	if err != nil {
 		s.env.logger.WithError(err).Error()
 		if s.err == nil {
@@ -53,7 +53,7 @@ func (s *contractRegistryTestSuite) TestContractRegistry_HTTP() {
 		s.env.logger.Warn("skipping test TestContractRegistry_HTTP...")
 		return
 	}
-	
+
 	httpSuite := new(contractRegistryHTTPTestSuite)
 	httpSuite.env = s.env
 	httpSuite.baseURL = s.env.baseHTTP

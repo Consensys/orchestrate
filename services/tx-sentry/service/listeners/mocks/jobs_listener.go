@@ -34,10 +34,10 @@ func (m *MockJobsListener) EXPECT() *MockJobsListenerMockRecorder {
 }
 
 // Listen mocks base method
-func (m *MockJobsListener) Listen(ctx context.Context) chan error {
+func (m *MockJobsListener) Listen(ctx context.Context) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Listen", ctx)
-	ret0, _ := ret[0].(chan error)
+	ret0, _ := ret[0].(error)
 	return ret0
 }
 

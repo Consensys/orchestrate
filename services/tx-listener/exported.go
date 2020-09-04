@@ -3,6 +3,12 @@ package txlistener
 import (
 	"context"
 	"sync"
+	"time"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/backoff"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+
+	txsentry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-sentry"
 
 	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 
@@ -20,6 +26,7 @@ import (
 var (
 	listener  *TxListener
 	appli     *app.App
+	sentry    app.Daemon
 	initOnce  = &sync.Once{}
 	startOnce = &sync.Once{}
 	cerr      chan error
@@ -31,7 +38,6 @@ func initDependencies(ctx context.Context) {
 		func() { kafkahook.Init(ctx) },
 		func() { registryoffset.Init(ctx) },
 		func() { ethclient.Init(ctx) },
-		func() { txscheduler.Init() },
 	)
 }
 
@@ -44,12 +50,22 @@ func Init(ctx context.Context) {
 
 		initDependencies(ctx)
 
+		httpClient := http.NewClient()
+		backoffConf := txscheduler.NewConfigFromViper(viper.GetViper(), backoff.ConstantBackOffWithMaxRetries(time.Second, 5))
+		txSchedulerClientListener := txscheduler.NewHTTPClient(httpClient, backoffConf)
 		listener = NewTxListener(
 			registryprovider.GlobalProvider(),
 			kafkahook.GlobalHook(),
 			registryoffset.GlobalManager(),
 			ethclient.GlobalClient(),
-			txscheduler.GlobalClient(),
+			txSchedulerClientListener,
+		)
+
+		conf := txscheduler.NewConfigFromViper(viper.GetViper(), nil)
+		txSchedulerClientSentry := txscheduler.NewHTTPClient(httpClient, conf)
+		sentry = txsentry.NewTxSentry(
+			txSchedulerClientSentry,
+			txsentry.NewConfig(viper.GetViper()),
 		)
 	})
 }
@@ -91,6 +107,8 @@ func Start(ctx context.Context) chan error {
 			listener.Start(ctx)
 			close(cerr)
 		}()
+
+		sentry.Start(ctx)
 	})
 
 	return cerr

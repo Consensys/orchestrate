@@ -17,7 +17,7 @@ type transactionSchedulerTestSuite struct {
 }
 
 func (s *transactionSchedulerTestSuite) SetupSuite() {
-	err := integrationtest.StartEnvironment(s.env)
+	err := integrationtest.StartEnvironment(context.Background(), s.env)
 	if err != nil {
 		s.env.logger.WithError(err).Error()
 		if s.err == nil {

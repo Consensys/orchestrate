@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.4.0-rc1 (Pending)
+
+### 🆕 Features
+* Transaction Sentry complete feature
+
 ## v2.3.0 (2020-09-02)
 
 ### 🆕 Features

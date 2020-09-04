@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
 )
 
@@ -28,7 +29,7 @@ type JobClient interface {
 	CreateJob(ctx context.Context, request *types.CreateJobRequest) (*types.JobResponse, error)
 	UpdateJob(ctx context.Context, jobUUID string, request *types.UpdateJobRequest) (*types.JobResponse, error)
 	StartJob(ctx context.Context, jobUUID string) error
-	SearchJob(ctx context.Context, txHashes []string, chainUUID, status string) ([]*types.JobResponse, error)
+	SearchJob(ctx context.Context, filters *entities.JobFilters) ([]*types.JobResponse, error)
 }
 
 type TransactionSchedulerClient interface {

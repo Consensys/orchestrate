@@ -24,13 +24,13 @@ func TxAlreadySent(ec ethclient.ChainLedgerReader, txSchedulerClient client.Tran
 		if err != nil && !errors.IsNotFoundError(err) {
 			// Connection to tx scheduler is broken
 			e := txctx.AbortWithError(err).ExtendComponent(component)
-			txctx.Logger.WithError(e).Errorf("transaction scheduler: failed to get job")
+			txctx.Logger.WithError(e).Error("transaction scheduler: failed to get job")
 			return
 		}
 
 		// Tx has already been updated
 		if job.Status == utils.StatusPending {
-			txctx.Logger.Warnf("transaction scheduler: transaction has already been updated")
+			txctx.Logger.Warn("transaction scheduler: transaction has already been updated")
 			url, err := proxy.GetURL(txctx)
 			if err != nil {
 				return
@@ -41,19 +41,19 @@ func TxAlreadySent(ec ethclient.ChainLedgerReader, txSchedulerClient client.Tran
 			if err != nil {
 				// Connection to Ethereum node is broken
 				e := txctx.AbortWithError(err).ExtendComponent(component)
-				txctx.Logger.WithError(e).Errorf("transaction scheduler: connection to Ethereum client is broken")
+				txctx.Logger.WithError(e).Error("transaction scheduler: connection to Ethereum client is broken")
 				return
 			}
 
 			if tx != nil {
 				// Transaction has already been sent so we abort execution
-				txctx.Logger.Warnf("transaction scheduler: transaction has already been sent but status was not set")
+				txctx.Logger.Warn("transaction scheduler: transaction has already been sent but status was not set")
 				txctx.Abort()
 				return
 			}
 		} else if job.Status == utils.StatusMined {
 			// Transaction has already been sent so we abort execution
-			txctx.Logger.Warnf("transaction scheduler: transaction has already been sent")
+			txctx.Logger.Warn("transaction scheduler: transaction has already been sent")
 			txctx.Abort()
 			return
 		}
@@ -63,8 +63,6 @@ func TxAlreadySent(ec ethclient.ChainLedgerReader, txSchedulerClient client.Tran
 			txHash = txctx.Envelope.TxHash.String()
 		}
 
-		txctx.Logger.
-			WithField("txHash", txHash).
-			Debugf("transaction scheduler: transaction has not been sent")
+		txctx.Logger.WithField("txHash", txHash).Debug("transaction scheduler: transaction has not been sent")
 	}
 }

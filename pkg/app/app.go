@@ -30,13 +30,12 @@ import (
 )
 
 type Daemon interface {
-	Start(ctx context.Context) chan error
+	Start(ctx context.Context)
 	Stop(ctx context.Context)
-	IsReady() bool
 }
 
 type Service interface {
-	Start(ctx context.Context) error
+	Start(ctx context.Context) chan error
 	Stop(ctx context.Context) error
 	IsReady() bool
 }

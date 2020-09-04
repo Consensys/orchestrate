@@ -5,9 +5,8 @@ import (
 )
 
 type Annotations struct {
-	OneTimeKey  bool                `json:"oneTimeKey,omitempty" example:"true"`
-	Priority    string              `json:"priority,omitempty" validate:"isPriority" example:"very-high"`
-	RetryPolicy GasPriceRetryParams `json:"gasPriceRetryPolicy,omitempty"`
+	OneTimeKey     bool           `json:"oneTimeKey,omitempty" example:"true"`
+	GasPricePolicy GasPriceParams `json:"gasPricePolicy,omitempty"`
 }
 
 func (g *Annotations) Validate() error {
@@ -15,7 +14,7 @@ func (g *Annotations) Validate() error {
 		return err
 	}
 
-	if err := g.RetryPolicy.Validate(); err != nil {
+	if err := g.GasPricePolicy.RetryPolicy.Validate(); err != nil {
 		return err
 	}
 

@@ -34,7 +34,7 @@ func NewSearchJobsUseCase(db store.DB) SearchJobsUseCase {
 
 // Execute search jobs
 func (uc *searchJobsUseCase) Execute(ctx context.Context, filters *entities.JobFilters, tenants []string) ([]*entities.Job, error) {
-	log.WithContext(ctx).WithField("filters", filters).Debug("search jobs")
+	log.WithContext(ctx).WithField("filters", filters).WithField("tenants", tenants).Debug("searching jobs")
 
 	if err := utils.GetValidator().Struct(filters); err != nil {
 		return nil, errors.InvalidParameterError(err.Error()).ExtendComponent(searchJobsComponent)

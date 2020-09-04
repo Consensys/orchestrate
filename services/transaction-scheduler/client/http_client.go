@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+
 	"github.com/cenkalti/backoff/v4"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
@@ -223,21 +225,33 @@ func (c *HTTPClient) GetJobs(ctx context.Context) ([]*types.JobResponse, error) 
 	return resp, err
 }
 
-func (c *HTTPClient) SearchJob(ctx context.Context, txHashes []string, chainUUID, status string) ([]*types.JobResponse, error) {
+func (c *HTTPClient) SearchJob(ctx context.Context, filters *entities.JobFilters) ([]*types.JobResponse, error) {
 	reqURL := fmt.Sprintf("%v/jobs", c.config.URL)
 	var resp []*types.JobResponse
 
 	var qParams []string
-	if len(txHashes) > 0 {
-		qParams = append(qParams, "tx_hashes="+strings.Join(txHashes, ","))
+	if len(filters.TxHashes) > 0 {
+		qParams = append(qParams, "tx_hashes="+strings.Join(filters.TxHashes, ","))
 	}
 
-	if chainUUID != "" {
-		qParams = append(qParams, "chain_uuid="+chainUUID)
+	if filters.ChainUUID != "" {
+		qParams = append(qParams, "chain_uuid="+filters.ChainUUID)
 	}
 
-	if status != "" {
-		qParams = append(qParams, "status="+status)
+	if filters.Status != "" {
+		qParams = append(qParams, "status="+filters.Status)
+	}
+
+	if !filters.UpdatedAfter.IsZero() {
+		qParams = append(qParams, "updated_after="+filters.UpdatedAfter.Format(time.RFC3339))
+	}
+
+	if filters.OnlyParents {
+		qParams = append(qParams, "only_parents=true")
+	}
+
+	if filters.ParentJobUUID != "" {
+		qParams = append(qParams, "parent_job_uuid="+filters.ParentJobUUID)
 	}
 
 	if len(qParams) > 0 {

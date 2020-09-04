@@ -33,20 +33,14 @@ func NewGetJobUseCase(db store.DB) GetJobUseCase {
 
 // Execute gets a job
 func (uc *getJobUseCase) Execute(ctx context.Context, jobUUID string, tenants []string) (*entities.Job, error) {
-	log.WithContext(ctx).
-		WithField("job_uuid", jobUUID).
-		WithField("tenants", tenants).
-		Debug("getting job")
+	logger := log.WithContext(ctx).WithField("job_uuid", jobUUID).WithField("tenants", tenants)
+	logger.Debug("getting job")
 
 	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, tenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(getJobComponent)
 	}
 
-	log.WithContext(ctx).
-		WithField("job_uuid", jobUUID).
-		WithField("tenants", tenants).
-		Info("job found successfully")
-
+	logger.Debug("job found successfully")
 	return parsers.NewJobEntityFromModels(jobModel), nil
 }

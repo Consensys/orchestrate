@@ -4,6 +4,8 @@ import (
 	"context"
 	"os"
 
+	txsentry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-sentry"
+
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -42,6 +44,7 @@ func newRunCommand() *cobra.Command {
 	chnregclient.Flags(runCmd.Flags())
 	registryclient.ContractRegistryURL(runCmd.Flags())
 	txschedulerclient.Flags(runCmd.Flags())
+	txsentry.Flags(runCmd.Flags())
 
 	return runCmd
 }

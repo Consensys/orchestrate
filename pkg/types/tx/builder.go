@@ -144,6 +144,10 @@ func (e *Envelope) IsOneTimeKeySignature() bool {
 	return false
 }
 
+func (e *Envelope) IsChildJob() bool {
+	return e.GetContextLabelsValue(ParentJobUUIDLabel) != ""
+}
+
 func (e *Envelope) Carrier() opentracing.TextMapCarrier {
 	return e.ContextLabels
 }

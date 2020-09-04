@@ -29,8 +29,7 @@ func newRunCommand() *cobra.Command {
 	}
 
 	// Transaction scheduler flags
-	transactionscheduler.TxSchedulerFlags(runCmd.Flags())
-	transactionscheduler.TxSentryFlags(runCmd.Flags())
+	transactionscheduler.Flags(runCmd.Flags())
 
 	return runCmd
 }
@@ -39,37 +38,32 @@ func run(cmd *cobra.Command, _ []string) {
 	ctx := cmd.Context()
 	logger := log.FromContext(ctx)
 
-	txScheduler, err := transactionscheduler.NewTxScheduler(ctx)
+	// Initialize and start service
+	txScheduler, err := transactionscheduler.New(ctx)
 	if err != nil {
-		logger.WithError(err).Error("failed to initialize tx-scheduler")
+		logger.WithError(err).Error("failed to initialize transaction scheduler")
+		cmdErr = errors.CombineErrors(cmdErr, err)
+		return
 	}
 
-	done := make(chan struct{})
-	sentryErrorChan := txScheduler.StartSentry(ctx)
-	err = txScheduler.StartScheduler(ctx)
+	err = txScheduler.Start(ctx)
 	if err != nil {
+		logger.WithError(err).Error("failed to start transaction scheduler")
 		cmdErr = errors.CombineErrors(cmdErr, err)
-		logger.WithError(err).Error("could not start transaction-scheduler API")
-		close(done)
+		return
 	}
 
 	// Process signals
+	done := make(chan struct{})
 	sig := utils.NewSignalListener(func(signal os.Signal) { close(done) })
 
-	select {
-	case sentryErr := <-sentryErrorChan:
-		cmdErr = errors.CombineErrors(cmdErr, sentryErr)
-	case <-done:
-	}
+	<-done
 
 	sig.Close()
-
-	err = txScheduler.StopScheduler(ctx)
+	err = txScheduler.Stop(ctx)
 	if err != nil {
 		cmdErr = errors.CombineErrors(cmdErr, err)
-		logger.WithError(err).Error("could not stop transaction-scheduler API")
 	}
-	txScheduler.StopSentry(ctx)
 
-	logger.Info("transaction scheduler and all its services successfully stopped")
+	logger.Info("transaction scheduler stopped successfully")
 }

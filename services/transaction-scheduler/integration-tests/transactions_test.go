@@ -99,7 +99,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200)
 		txRequest := testutils.FakeSendTransactionRequest()
-		txRequest.Params.Annotations.OneTimeKey = true
+		txRequest.Params.OneTimeKey = true
 
 		_, err := s.client.SendContractTransaction(ctx, txRequest)
 
@@ -117,7 +117,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
 		txRequest := testutils.FakeSendTransactionRequest()
 		txRequest.Params.From = ""
-		txRequest.Params.Annotations.OneTimeKey = true
+		txRequest.Params.OneTimeKey = true
 		IdempotencyKey := utils.RandomString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: IdempotencyKey,

@@ -111,7 +111,7 @@ Feature: Transaction Scheduler Idempotency
 {
     "chain": "besu_1-{{scenarioID}}",
     "params": {
-        "annotations": { "oneTimeKey": true },
+        "oneTimeKey": true,
         "contractName": "SimpleToken"
     },
     "labels": {

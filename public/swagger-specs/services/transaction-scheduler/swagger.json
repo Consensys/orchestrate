@@ -1033,9 +1033,13 @@
         "httputil.ErrorResponse": {
             "type": "object",
             "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 24000
+                },
                 "message": {
                     "type": "string",
-                    "example": "error message"
+                    "example": "invalid status update for the current job state"
                 }
             }
         },
@@ -1407,6 +1411,10 @@
                 "type": {
                     "type": "string",
                     "example": "eth://ethereum/transaction"
+                },
+                "updatedAt": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
                 },
                 "uuid": {
                     "type": "string",

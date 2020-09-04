@@ -6,6 +6,9 @@ import (
 	"strings"
 	"time"
 
+	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
@@ -24,18 +27,20 @@ func FormatJobResponse(job *entities.Job) *types.JobResponse {
 		Labels:       job.Labels,
 		Annotations: types.Annotations{
 			OneTimeKey: job.InternalData.OneTimeKey,
-			Priority:   job.InternalData.Priority,
-			RetryPolicy: types.GasPriceRetryParams{
-				Interval:       fmt.Sprintf("%vs", job.InternalData.RetryInterval.Seconds()),
-				IncrementLevel: job.InternalData.GasPriceIncrementLevel,
-				Increment:      job.InternalData.GasPriceIncrement,
-				Limit:          job.InternalData.GasPriceLimit,
+			GasPricePolicy: types.GasPriceParams{
+				Priority: job.InternalData.Priority,
+				RetryPolicy: types.RetryParams{
+					Interval:  fmt.Sprintf("%vs", job.InternalData.RetryInterval.Seconds()),
+					Increment: job.InternalData.GasPriceIncrement,
+					Limit:     job.InternalData.GasPriceLimit,
+				},
 			},
 		},
-		Type:      job.Type,
-		Status:    job.GetStatus(),
-		CreatedAt: job.CreatedAt,
-		UpdatedAt: job.UpdatedAt,
+		Type:          job.Type,
+		Status:        job.GetStatus(),
+		ParentJobUUID: job.InternalData.ParentJobUUID,
+		CreatedAt:     job.CreatedAt,
+		UpdatedAt:     job.UpdatedAt,
 	}
 }
 
@@ -46,8 +51,12 @@ func FormatJobCreateRequest(request *types.CreateJobRequest, defaultRetryInterva
 		NextJobUUID:  request.NextJobUUID,
 		Type:         request.Type,
 		Labels:       request.Labels,
-		InternalData: formatAnnotations(&request.Annotations, defaultRetryInterval),
-		Transaction:  &request.Transaction,
+		InternalData: formatInternalData(request.Annotations.OneTimeKey,
+			&request.Annotations.GasPricePolicy,
+			defaultRetryInterval,
+			request.ParentJobUUID,
+		),
+		Transaction: &request.Transaction,
 	}
 }
 
@@ -59,16 +68,15 @@ func FormatJobUpdateRequest(request *types.UpdateJobRequest) *entities.Job {
 
 	if request.Annotations != nil {
 		job.InternalData = &entities.InternalData{
-			OneTimeKey:             request.Annotations.OneTimeKey,
-			Priority:               request.Annotations.Priority,
-			GasPriceIncrementLevel: request.Annotations.RetryPolicy.IncrementLevel,
-			GasPriceIncrement:      request.Annotations.RetryPolicy.Increment,
-			GasPriceLimit:          request.Annotations.RetryPolicy.Limit,
+			OneTimeKey:        request.Annotations.OneTimeKey,
+			Priority:          request.Annotations.GasPricePolicy.Priority,
+			GasPriceIncrement: request.Annotations.GasPricePolicy.RetryPolicy.Increment,
+			GasPriceLimit:     request.Annotations.GasPricePolicy.RetryPolicy.Limit,
 		}
 
-		if request.Annotations.RetryPolicy.Interval != "" {
+		if request.Annotations.GasPricePolicy.RetryPolicy.Interval != "" {
 			// we can skip the error check as at this point we know the interval is a duration as it already passed validation
-			job.InternalData.RetryInterval, _ = time.ParseDuration(request.Annotations.RetryPolicy.Interval)
+			job.InternalData.RetryInterval, _ = time.ParseDuration(request.Annotations.GasPricePolicy.RetryPolicy.Interval)
 		}
 	}
 
@@ -93,6 +101,28 @@ func FormatJobFilterRequest(req *http.Request) (*entities.JobFilters, error) {
 		filters.Status = qStatus
 	}
 
+	qParentJobUUID := req.URL.Query().Get("parent_job_uuid")
+	if qParentJobUUID != "" {
+		filters.ParentJobUUID = qParentJobUUID
+	}
+
+	qUpdatedAfter := req.URL.Query().Get("updated_after")
+	if qUpdatedAfter != "" {
+		updatedAfter, err := time.Parse(time.RFC3339, qUpdatedAfter)
+		if err != nil {
+			errMessage := "failed to parse updated_after as time"
+			log.WithError(err).WithField("updated_after", qUpdatedAfter).Error(errMessage)
+			return nil, errors.InvalidParameterError(errMessage)
+		}
+
+		filters.UpdatedAfter = updatedAfter
+	}
+
+	qOnlyParents := req.URL.Query().Get("only_parents")
+	if qOnlyParents == "true" {
+		filters.OnlyParents = true
+	}
+
 	if err := utils.GetValidator().Struct(filters); err != nil {
 		return nil, err
 	}
@@ -100,20 +130,20 @@ func FormatJobFilterRequest(req *http.Request) (*entities.JobFilters, error) {
 	return filters, nil
 }
 
-func formatAnnotations(annotations *types.Annotations, defaultRetryInterval time.Duration) *entities.InternalData {
+func formatInternalData(oneTimeKey bool, gasPricePolicy *types.GasPriceParams, defaultRetryInterval time.Duration, parentJobUUID string) *entities.InternalData {
 	internalData := &entities.InternalData{
-		OneTimeKey:             annotations.OneTimeKey,
-		Priority:               annotations.Priority,
-		GasPriceIncrementLevel: annotations.RetryPolicy.IncrementLevel,
-		GasPriceIncrement:      annotations.RetryPolicy.Increment,
-		GasPriceLimit:          annotations.RetryPolicy.Limit,
+		OneTimeKey:        oneTimeKey,
+		Priority:          gasPricePolicy.Priority,
+		GasPriceIncrement: gasPricePolicy.RetryPolicy.Increment,
+		GasPriceLimit:     gasPricePolicy.RetryPolicy.Limit,
+		ParentJobUUID:     parentJobUUID,
 	}
 
-	if annotations.RetryPolicy.Interval == "" {
+	if gasPricePolicy.RetryPolicy.Interval == "" {
 		internalData.RetryInterval = defaultRetryInterval
 	} else {
 		// we can skip the error check as at this point we know the interval is a duration as it already passed validation
-		internalData.RetryInterval, _ = time.ParseDuration(annotations.RetryPolicy.Interval)
+		internalData.RetryInterval, _ = time.ParseDuration(gasPricePolicy.RetryPolicy.Interval)
 	}
 
 	if internalData.Priority == "" {
