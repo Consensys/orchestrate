@@ -21,21 +21,12 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce"
 	noncememory "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/memory"
 	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/chanregistry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/alias"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/tracker"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/e2e/cucumber/alias"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/e2e/utils"
+	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/utils/chanregistry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/utils/tracker"
 )
-
-var TOPICS = [...]string{
-	"tx.crafter",
-	"tx.signer",
-	"tx.sender",
-	"tx.decoded",
-	"tx.recover",
-	"account.generator",
-	"account.generated",
-}
 
 // ScenarioContext is container for scenario context data
 type ScenarioContext struct {
@@ -136,12 +127,12 @@ func (sc *ScenarioContext) newTracker(e *tx.Envelope) *tracker.Tracker {
 	t.Current = e
 
 	// Initialize output channels on tracker and register channels on channel registry
-	for _, topic := range TOPICS {
+	for _, topic := range utils.TOPICS {
 		var ckey string
 		if e != nil {
-			ckey = utils.LongKeyOf(topic, e.GetID())
+			ckey = utils2.LongKeyOf(topic, e.GetID())
 		} else {
-			ckey = utils.ShortKeyOf(topic, sc.Pickle.Id)
+			ckey = utils2.ShortKeyOf(topic, sc.Pickle.Id)
 		}
 
 		// Create channel

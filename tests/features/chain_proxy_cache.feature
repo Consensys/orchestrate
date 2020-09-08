@@ -20,7 +20,7 @@ Feature: Chain-Proxy Cache
       {
         "jsonrpc": "2.0",
         "method": "eth_getBlockByNumber",
-        "params": ["0x1",true],
+        "params": ["0x1",false],
         "id": 1
       }
       """
@@ -36,7 +36,7 @@ Feature: Chain-Proxy Cache
       {
         "jsonrpc": "2.0",
         "method": "eth_getBlockByNumber",
-        "params": ["0x1",true],
+        "params": ["0x1",false],
         "id": 1
       }
       """
@@ -50,7 +50,7 @@ Feature: Chain-Proxy Cache
       {
         "jsonrpc": "2.0",
         "method": "eth_getBlockByNumber",
-        "params": ["0x1",true],
+        "params": ["0x1",false],
         "id": 1
       }
       """
@@ -68,7 +68,7 @@ Feature: Chain-Proxy Cache
       {
         "jsonrpc": "2.0",
         "method": "eth_getBlockByNumber",
-        "params": ["0x2",true],
+        "params": ["0x2",false],
         "id": 1
       }
       """
@@ -81,7 +81,7 @@ Feature: Chain-Proxy Cache
       {
         "jsonrpc": "2.0",
         "method": "eth_getBlockByNumber",
-        "params": ["0x2",true],
+        "params": ["0x2",false],
         "id": 1
       }
       """
@@ -99,7 +99,7 @@ Feature: Chain-Proxy Cache
       {
         "jsonrpc": "2.0",
         "method": "eth_getBlockByNumber",
-        "params": ["0x3",true],
+        "params": ["0x3",false],
         "id": 1
       }
       """
@@ -116,7 +116,7 @@ Feature: Chain-Proxy Cache
       {
         "jsonrpc": "2.0",
         "method": "eth_getBlockByNumber",
-        "params": ["0x3",true],
+        "params": ["0x3",false],
         "id": 1
       }
       """

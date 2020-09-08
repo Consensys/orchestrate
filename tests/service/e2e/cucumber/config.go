@@ -26,6 +26,8 @@ func init() {
 	_ = viper.BindEnv(ConcurrencyViperKey, concurrencyEnv)
 	viper.SetDefault(PathsViperKey, pathsDefault)
 	_ = viper.BindEnv(PathsViperKey, pathsEnv)
+	viper.SetDefault(ArtifactPathViperKey, artifactPathDefault)
+	_ = viper.BindEnv(ArtifactPathViperKey, artifactPathEnv)
 	viper.SetDefault(OutputPathViperKey, outputPathDefault)
 	_ = viper.BindEnv(OutputPathViperKey, outputPathEnv)
 }
@@ -41,6 +43,7 @@ func InitFlags(f *pflag.FlagSet) {
 	Format(f)
 	Concurrency(f)
 	Paths(f)
+	ArtifactPath(f)
 	OutputPath(f)
 }
 
@@ -167,7 +170,7 @@ Environment variable: %q`, concurrencyEnv)
 var (
 	pathsFlag     = "cucumber-paths"
 	PathsViperKey = "cucumber.paths"
-	pathsDefault  = []string{"features"}
+	pathsDefault  = []string{"/features"}
 	pathsEnv      = "CUCUMBER_PATHS"
 )
 
@@ -177,6 +180,21 @@ func Paths(f *pflag.FlagSet) {
 Environment variable: %q`, pathsEnv)
 	f.StringSlice(pathsFlag, pathsDefault, desc)
 	_ = viper.BindPFlag(PathsViperKey, f.Lookup(pathsFlag))
+}
+
+var (
+	artifactPathFlag     = "artifacts-path"
+	ArtifactPathViperKey = "artifacts.path"
+	artifactPathDefault  = []string{"/artifacts"}
+	artifactPathEnv      = "ARTIFACTS_PATH"
+)
+
+// Artifact paths register flag for Godog Paths Option
+func ArtifactPath(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`All artifact files path
+Environment variable: %q`, artifactPathEnv)
+	f.StringSlice(artifactPathFlag, artifactPathDefault, desc)
+	_ = viper.BindPFlag(ArtifactPathViperKey, f.Lookup(artifactPathFlag))
 }
 
 const (
@@ -192,19 +210,4 @@ func OutputPath(f *pflag.FlagSet) {
 Environment variable: %q`, outputPathEnv)
 	f.String(outputPathFlag, outputPathDefault, desc)
 	_ = viper.BindPFlag(OutputPathViperKey, f.Lookup(outputPathFlag))
-}
-
-var (
-	aliasesFlag     = "cucumber-aliases"
-	AliasesViperKey = "cucumber.aliases"
-	aliasesDefault  []string
-	aliasesEnv      = "CUCUMBER_ALIAS"
-)
-
-// Aliases register flag for aliases
-func Aliases(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Aliases for cucumber test scenarios (e.g chain.primary:888)
-Environment variable: %q`, aliasesEnv)
-	f.StringSlice(aliasesFlag, aliasesDefault, desc)
-	_ = viper.BindPFlag(AliasesViperKey, f.Lookup(aliasesFlag))
 }

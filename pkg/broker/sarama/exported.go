@@ -80,7 +80,7 @@ func SetGlobalConfig(cfg *sarama.Config) {
 
 // InitClient initialize Sarama Client
 // It bases on viper configuration to get Kafka address
-func InitClient(ctx context.Context) (err error) {
+func InitClient(_ context.Context) (err error) {
 	initClientOnce.Do(func() {
 		if client != nil {
 			return

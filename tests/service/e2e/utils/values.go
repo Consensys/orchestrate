@@ -2,7 +2,6 @@ package utils
 
 import (
 	"encoding/json"
-	"fmt"
 	"math/big"
 	"reflect"
 	"strings"
@@ -13,22 +12,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 )
-
-func LongKeyOf(topic, metadataID string) string {
-	return fmt.Sprintf(
-		"%v/%v",
-		topic,
-		metadataID,
-	)
-}
-
-func ShortKeyOf(topic, scenarioID string) string {
-	return fmt.Sprintf(
-		"%v/%v",
-		scenarioID,
-		topic,
-	)
-}
 
 func underlyingType(structType reflect.Type) reflect.Type {
 	if structType.Kind() != reflect.Ptr {

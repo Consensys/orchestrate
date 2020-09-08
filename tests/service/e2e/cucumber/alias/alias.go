@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/containous/traefik/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/cucumber/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/e2e/utils"
 )
 
 // Registry allows to store aliases

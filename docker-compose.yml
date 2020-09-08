@@ -219,18 +219,35 @@ services:
       <<: *default-variables
       CUCUMBER_OUTPUTPATH: "/report/output/report.json"
       CUCUMBER_PATHS: "/features"
+      ARTIFACTS_PATH: "/artifacts"
       CUCUMBER_FORMAT: "cucumber"
       CUCUMBER_CONCURRENCY: ${CUCUMBER_CONCURRENCY-1}
-      CUCUMBER_ALIAS: ${CUCUMBER_ALIAS-}
+      TEST_GLOBAL_DATA: ${TEST_GLOBAL_DATA-}
       AUTH_JWT_PRIVATE_KEY: ${AUTH_JWT_PRIVATE_KEY-}
 #      CUCUMBER_STEPS_TIMEOUT: ${CUCUMBER_STEPS_TIMEOUT-500}
 # Uncomment CUCUMBER_TAGS if only run features and scenarios with @public-tx or @account tags ("," = OR, "&&" = AND, "~" = NOT)
 #      CUCUMBER_TAGS: "@besu"
     restart: "no"
+    command: e2e
     volumes:
-      - ./build/bin/e2e:/bin/main
+      - ./build/bin/test:/bin/main
       - ./build/report:/report/output
       - ./tests/features:/features
+      - ./tests/artifacts:/artifacts
+
+  stress:
+    <<: *container-common
+    environment:
+      <<: *default-variables
+      ARTIFACTS_PATH: "/artifacts"
+      STRESS_CONCURRENCY: "50"
+      STRESS_ITERATIONS: "5000"
+      TEST_GLOBAL_DATA: ${TEST_GLOBAL_DATA-}
+    restart: "no"
+    command: stress
+    volumes:
+      - ./build/bin/test:/bin/main
+      - ./tests/artifacts:/artifacts
 
   generate-jwt:
     <<: *container-common

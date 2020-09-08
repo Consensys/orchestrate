@@ -42,6 +42,9 @@ lint-ci: ## Check linting
 run-e2e: gobuild-e2e
 	@docker-compose up -V e2e
 
+run-stress: gobuild-e2e
+	@docker-compose up -V stress
+
 e2e: run-e2e
 	@docker-compose -f scripts/report/docker-compose.yml up
 	@$(OPEN) build/report/report.html 2>/dev/null
@@ -51,6 +54,13 @@ e2e-ci:
 	@docker-compose up e2e
 	@docker-compose -f scripts/report/docker-compose.yml up
 	@exit $(docker inspect orchestrate_e2e_1 --format='{{.State.ExitCode}}')
+
+stress: run-stress
+	@exit $(docker inspect orchestrategit_stress_1 --format='{{.State.ExitCode}}')
+
+stress-ci:
+	@docker-compose up stress
+	@exit $(docker inspect orchestrate_stress_1 --format='{{.State.ExitCode}}')
 
 clean: protobuf gen-swagger gen-mocks mod-tidy lint coverage ## Run all clean-up tasks
 
@@ -117,7 +127,7 @@ bootstrap-deps: bootstrap ## Wait for dependencies to be ready
 	@bash scripts/bootstrap-deps.sh
 
 gobuild-e2e: ## Build Orchestrate e2e Docker image
-	@GOOS=linux GOARCH=amd64 go build -i -o ./build/bin/e2e ./tests/cmd
+	@GOOS=linux GOARCH=amd64 go build -i -o ./build/bin/test ./tests/cmd
 
 orchestrate: gobuild ## Start Orchestrate
 	@docker-compose up -d $(CMD_RUN)

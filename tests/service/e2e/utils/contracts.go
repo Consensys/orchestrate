@@ -13,7 +13,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/abi"
 )
 
-type artifact struct {
+type Artifact struct {
 	Abi              json.RawMessage
 	Bytecode         string
 	DeployedBytecode string
@@ -51,12 +51,12 @@ func ParseContract(headers, row *gherkin.PickleStepArgument_PickleTable_PickleTa
 func ParseContractCell(header, cell string, contractSpec *ContractSpec) error {
 	switch header {
 	case "artifacts":
-		raw, err := openArtifact(cell)
+		raw, err := OpenArtifact(cell, viper.GetString("artifacts.path"))
 		if err != nil {
 			return err
 		}
 
-		var a artifact
+		var a Artifact
 		err = json.Unmarshal(raw, &a)
 		if err != nil {
 			return err
@@ -86,23 +86,18 @@ func ParseContractCell(header, cell string, contractSpec *ContractSpec) error {
 	return nil
 }
 
-func openArtifact(fileName string) ([]byte, error) {
-	// Loop over all cucumber folders to possibly find file
-	// <cucumber_folder>/artifacts/<fileName>
-	for _, v := range viper.GetStringSlice("cucumber.paths") {
-		f, err := os.Open(path.Join(v, "artifacts", fileName))
-		if err != nil {
-			continue
-		}
-
-		bytes, readErr := ioutil.ReadAll(f)
-
-		err = f.Close()
-		if err != nil {
-			log.Error(err)
-		}
-
-		return bytes, readErr
+func OpenArtifact(fileName, artifactPath string) ([]byte, error) {
+	f, err := os.Open(path.Join(artifactPath, fileName))
+	if err != nil {
+		return nil, err
 	}
-	return nil, os.ErrNotExist
+
+	bytes, readErr := ioutil.ReadAll(f)
+
+	err = f.Close()
+	if err != nil {
+		log.Error(err)
+	}
+
+	return bytes, readErr
 }

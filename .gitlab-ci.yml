@@ -203,6 +203,15 @@ test-multitenancy-e2e:
     - make e2e-ci
     - exit $(docker inspect orchestrate_e2e_1 --format='{{.State.ExitCode}}')
 
+test-stress:
+  <<: *docker-compose-e2e
+  <<: *rules
+  script:
+    - mv -f .env.ci .env
+    - make up-ci
+    - make stress-ci
+    - exit $(docker inspect orchestrate_stress_1 --format='{{.State.ExitCode}}')
+
 #Build orchestrate
 build-orchestrate-on-branch:
   <<: *docker-setup
