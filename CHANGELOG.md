@@ -2,19 +2,47 @@
 
 All notable changes to this project will be documented in this file.
 
-## v2.4.0-rc1 (Pending)
+
+## v2.4.0-rc1 (Unreleased)
 
 ### 🆕 Features
-* Transaction Sentry complete feature
+* Add the new Transaction Sentry.
+    * Users can now add a `retryPolicy` inside the `gasPricePolicy` settings when publishing transactions by specifying an `interval`, `increment`, and a `limit`.
+    * The Transaction Sentry will watch this transaction until it's mined and after each `interval`, will resend the transaction with a gasPrice increased by `increment`(%), capped by `limit` (%). 
+* Add a Caching mechanism that can be enabled to cache every identical request going from Orchestrate to the Ethereum node.
+    * This feature is especially useful for use-cases:
+        * where multiple chains (belonging to the same tenant or not) calls the same Ethereum node.
+        * using a node with low capabilities or behind a rate limiter (Infura/Kaleido)  
+
 
 ## v2.3.0 (2020-09-02)
 
 ### 🆕 Features
+* Add the new `tx-scheduler` API microservice. This new API:
+    * replaces the `envelope-store` and serves the same internal purpose
+    * is the new API that is used to POST every transactions (they are no longer sent on the tx-crafter Kafka topic).
+        * POST `/transactions/deploy-contract`: Creates and sends a new contract deployment. Supports one-time key & private transactions.
+        * POST `​/transactions​/send`: Creates and sends a new contract transaction. Supports one-time key & private transactions.
+        * POST `/transactions​/send-raw`: Creates and sends a raw transaction
+        * POST ​`/transactions​/transfer`: Creates and sends a transfer transaction
+    * exposes GET endpoints to fetch transaction details
+        * GET ​`/transactions`: Search transaction requests by provided filters
+        * GET `​/transactions​/{uuid}`: Fetch a transaction request by uuid
+* Added support for Transaction priority. Users can now specify the gas priority of the transaction (`very-high`, `high`, `medium`, `low`, `very-low`), the transaction Gas Price will be adjusted automatically based on network activity.
+* Update internal logger to follow [Elastic Common Schema](https://www.elastic.co/guide/en/ecs/current/index.html) when using logs in JSON format
 * Private transactions (Tessera/Orion) are now performed in two separate jobs
 
 ### 🛠 Bug fixes
-* Properly renew HashiCorp client token 
-* Fix a bug limiting the amount of Ether that can be send to 9.2 ETH 
+* Properly renew HashiCorp client token
+* Fix a bug limiting the amount of Ether that can be send to 9.2 ETH
+* Tenant wildcard support to access private keys stored in the Secret Storage 
+
+### ⚠ BREAKING CHANGES
+* `envelope-store` has been removed.
+
+### Migration from v2.2.0
+* Remove the envelope-store API, DB and volume and add the transaction-scheduler API, DB and volume. Data from the envelope-store DB doesn't need to be migrated to the new DB. Follow [this diff](https://github.com/PegaSysEng/orchestrate-kubernetes/compare/559bd13ea1dd68faf4e57a826028e1deeea9dfb1...e99443e20049400acf9ba8f33f76e5e661909f9d) to upgrade to the new configuration.
+* Update your application to use the [SDK](https://github.com/PegaSysEng/orchestrate-node) v3.1.0. This SDK will now use the REST API of the transaction scheduler to publish transactions instead of using the Kafka queues.
 
 ## v2.2.1 (2020-08-31)
 
@@ -22,53 +50,16 @@ All notable changes to this project will be documented in this file.
 * Properly renew HashiCorp client token 
 * Tenant wildcard support to access private keys stored in the Secret Storage
 
-## v2.3.0-rc2 (2020-08-05)
-### 🆕 Features
-* Wildcard support for Secret Storage
-
-### 🛠 Bug fixes
-* Flawful chain registry migration `3_add_chain_id_column.go`
-* Issue with transaction in RECOVERING status 
-
-
-## v2.3.0-rc1 (2020-07-29)
-
-### 🆕 Features
-* Add the new `tx-scheduler` API microservice. The new API:
-  * replaces the `envelope-store` and serves the same internal purpose
-  * is the new API that is used to POST every transactions (they are no longer sent on the tx-crafter Kafka topic).
-    * POST `/transactions/deploy-contract`: Creates and sends a new contract deployment. Supports one-time key & private transactions.
-    * POST `​/transactions​/send`: Creates and sends a new contract transaction. Supports one-time key & private transactions.
-    * POST `/transactions​/send-raw`: Creates and sends a raw transaction
-    * POST ​`/transactions​/transfer`: Creates and sends a transfer transaction
-  * exposes GET endpoints to fetch transaction details
-    * GET ​`/transactions`: Search transaction requests by provided filters
-    * GET `​/transactions​/{uuid}`: Fetch a transaction request by uuid
-* Added support for Transaction priority. Users can now specify the gas priority of the transaction (`very-high`, `high`, `medium`, `low`, `very-low`), the transaction Gas Price will be adjusted automatically based on network activity.
-* Update internal logger to follow [Elastic Common Schema](https://www.elastic.co/guide/en/ecs/current/index.html) when using logs in JSON format
-
-### ⚠ BREAKING CHANGES
-* `envelope-store` has been removed. Users should not push anymore 
-
 ## v2.2.0 (2020-07-15)
-
-No changes
-
-## v2.2.0-rc1 (2020-07-01)
-
-### 🆕 Features
-* Add support for wildcard authentication, allowing operators to perform any API (especially useful for chains) operations by providing both:
-  * a JWT with a tenant_id="*"
-  * an HTTP header containing the targeted tenant_id
-
-### 🛠 Bug fixes
-* Fix a bug of nonce management when registering multiple chains of the same network but using an identical account for transactions 
-
-## v2.2.0-beta1 (2020-06-25)
 
 ### 🆕 Features
 * Add support for 4 configuration modes for TLS connection to Postgres databases. Add flag and environment variable `DB_TLS_SSLMODE` that can be: `disable`, `require`, `verify-ca`, `verify-full`. 
+* Add support for wildcard authentication, allowing operators to perform any API (especially useful for chains) operations by providing both:
+    * a JWT with a tenant_id="*"
+    * an HTTP header containing the targeted tenant_id
 
+### 🛠 Bug fixes
+* Fix a bug of nonce management when registering multiple chains of the same network but using an identical account for transactions 
 
 ## v2.1.1 (2020-05-27)
 
@@ -77,43 +68,24 @@ No changes
 
 ## v2.1.0 (2020-06-05)
 
-The stable release is here!
-
-### 🛠 Bug fixes
-* Fix a bug that may lead to skipping a block if an error occurred while processing the block
-
-
-## v2.1.0-rc4 (2020-05-27)
-
-### 🛠 Bug fixes
-* Add chain information into SDK tx-response
-* Fix a casting issue on indexed strings in the events decoded by the tx-listener
-* Properly exit workers when a critical failure happens
-
-## v2.1.0-rc3 (2020-05-20)
-
-### 🆕 Features
-* Add support for One-time key signature.
-* Add support for TLS connection to Postgres. Add flags and environment variables:
-    * `DB_TLS_CERT`: PEM certificate to connect to the database
-    * `DB_TLS_KEY`: PEM key to connect to the database
-    * `DB_TLS_CA`: PEM trusted CA that issued certificate
-   
-## v2.1.0-rc2 (2020-05-07)
-
-### 🛠 Bug fixes
-* Fix a bug when the node thrown a `missing trie node` leading to and error in the tx-listener
-* Reactivate the metrics/liveness/readiness endpoint on the tx-listener
-
-## v2.1.0-rc1 (2020-05-06)
-
 ### 🆕 Features
 * Add support for Quorum+Tessera private transactions by registering the Tessera node to the Chain Registry. Includes sending and listening of transactions
 * Add support for Besu+Orion private transactions. Includes sending of transactions and listening of public & private receipts.
 * Add support for Revert Reason when fetching receipt from Besu nodes.
 * Optimize receipt fetching from the chain when external transactions are disabled.
+* Add support for One-time key signature.
+* Add support for TLS connection to Postgres. Add flags and environment variables:
+    * `DB_TLS_CERT`: PEM certificate to connect to the database
+    * `DB_TLS_KEY`: PEM key to connect to the database
+    * `DB_TLS_CA`: PEM trusted CA that issued certificate
 
 ### 🛠 Bug fixes
+* Add chain information into SDK tx-response
+* Fix a casting issue on indexed strings in the events decoded by the tx-listener
+* Properly exit workers when a critical failure happens
+* Fix a bug that may lead to skipping a block if an error occurred while processing the block
+* Fix a bug when the node thrown a `missing trie node` leading to and error in the tx-listener
+* Reactivate the metrics/liveness/readiness endpoint on the tx-listener
 * Fix a bug when listening sessions stopped in the tx-listener when the HTTP call to the node failed.
 
 
@@ -134,7 +106,7 @@ The stable release is here!
 ## v2.0.0 (2020-03-11)
 
 ### 🆕 Multi-tenancy & JWT Authentication
-* Add handler into `tx-crafter`, `tx-decoder`,  `tx-nonce`, `tx-sender`, `tx-signer`
+* Add handler into `tx-crafter`, `tx-decoder`, `tx-nonce`, `tx-sender`, `tx-signer`
     * Authenticate (Verify and Validate) the Envelope using the ID/Access Token (JWT) present in the Metadata 
     * Extract the tenantID from the ID/Access Token (JWT)
 * Add Interceptor into gRPC API into `contract-registry` and `envelope-store`
@@ -171,27 +143,25 @@ The stable release is here!
     * `CHAIN_REGISTRY_PROVIDER_CHAINS_REFRESH_INTERVAL` to set the time interval for refreshing the list of chains from storage
     * `CHAIN_REGISTRY_URL` to set the URL to reach the chain-registry
     * `TX_LISTENER_PROVIDER_REFRESH_INTERVAL` to set the time interval for refreshing the list of chains from the chain registry
-* Add rate limiter on chain registry to avoid bursty traffic on underlying chains (in particular when using Infura or Kaleido)
-  
+* Add rate limiter on chain registry to avoid burst traffic on underlying chains (in particular when using Infura or Kaleido)
+
 ### ⚠ BREAKING CHANGES
 #### Infrastructure
- * Merge the `tx-decoder` microservice into `tx-listener` microservice. The `tx-listener` publishes transactions directly in the `topic-tx-decoded` 
- * The `tx-listener` produces kafka messages exclusively in the topic `topic-tx-decoded` instead of the `topic-tx-decoder-{chainID}`
- * Merge the `tx-nonce` microservice into `tx-crafter` microservice. The `tx-crafter` publishes transactions directly in the `topic-tx-signer`
- * All microservices, now, have to go through the `chain-registry` microservice to communicate with any Blockchain
+* Merge the `tx-decoder` microservice into `tx-listener` microservice. The `tx-listener` publishes transactions directly in the `topic-tx-decoded` 
+* The `tx-listener` produces kafka messages exclusively in the topic `topic-tx-decoded` instead of the `topic-tx-decoder-{chainID}`
+* Merge the `tx-nonce` microservice into `tx-crafter` microservice. The `tx-crafter` publishes transactions directly in the `topic-tx-signer`
+* All microservices, now, have to go through the `chain-registry` microservice to communicate with any Blockchain
 #### Configuration
- * Rename the default topic names from `topic-wallet-generator` and `topic-wallet-generated` to `topic-account-generator` and `topic-account-generated` respectively
- * Move environment variables `NONCE_MANAGER_TYPE` `REDIS_URL` `REDIS_LOCKTIMEOUT` from the `tx-nonce` to the `tx-crafter`
- * Remove environment variable `ETH_CLIENT_URL`, the chains urls have to be set at start-up in `CHAIN_REGISTRY_INIT` of `chain-registry` microservice or dynamically using the chain-registry API. 
- * Remove environment variables `FAUCET_CREDIT_AMOUNT`, `FAUCET_BLACKLIST`, `FAUCET_COOLDOWN_TIME`, `FAUCET_CREDITOR_ADDRESS`, the faucets configurations are stored in the chain registry using its API. 
- * Add the environment variable `CHAIN_REGISTRY_URL` to the `tx-listener`, `tx-crafter`, `tx-sender`
- * Remove environment variable `DISABLE_EXTERNAL_TX` in the `tx-listener` and `tx-decoder`. The same feature can be found in the Chain-Registry API
+* Rename the default topic names from `topic-wallet-generator` and `topic-wallet-generated` to `topic-account-generator` and `topic-account-generated` respectively
+* Move environment variables `NONCE_MANAGER_TYPE` `REDIS_URL` `REDIS_LOCKTIMEOUT` from the `tx-nonce` to the `tx-crafter`
+* Remove environment variable `ETH_CLIENT_URL`, the chains urls have to be set at start-up in `CHAIN_REGISTRY_INIT` of `chain-registry` microservice or dynamically using the chain-registry API. 
+* Remove environment variables `FAUCET_CREDIT_AMOUNT`, `FAUCET_BLACKLIST`, `FAUCET_COOLDOWN_TIME`, `FAUCET_CREDITOR_ADDRESS`, the faucets configurations are stored in the chain registry using its API. 
+* Add the environment variable `CHAIN_REGISTRY_URL` to the `tx-listener`, `tx-crafter`, `tx-sender`
+* Remove environment variable `DISABLE_EXTERNAL_TX` in the `tx-listener` and `tx-decoder`. The same feature can be found in the Chain-Registry API
 #### API 
- * Remove `/v1` prefix in the HTTP REST path for the `envelope-store` and the `chain-registry`
- * Instead of producing and consuming envelopes to Orchestrate, a user will produce `TxRequest` and only consume `TxResponse`
+* Remove `/v1` prefix in the HTTP REST path for the `envelope-store` and the `chain-registry`
+* Instead of producing and consuming envelopes to Orchestrate, a user will produce `TxRequest` and only consume `TxResponse`
  
-
-
 
 ## v1.2.2 (2020-01-09)
 
@@ -242,9 +212,9 @@ The stable release is here!
 
 ### ⚠ BREAKING CHANGES
 * **config** grpc & metrics server have been split. Default port for
-  * grpc server remains 8080
-  * newly rest server is 8081 
-  * metrics server has changed and is now 8082
+    * grpc server remains 8080
+    * newly rest server is 8081 
+    * metrics server has changed and is now 8082
 * **config** Rename `KAFKA_SASL_ENABLE` to `KAFKA_SASL_ENABLED`
 
 
