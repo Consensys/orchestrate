@@ -57,7 +57,14 @@ func (manager *sessionManager) Start(ctx context.Context, job *entities.Job) {
 	go func() {
 		backff := backoff.WithContext(backoffjob.NewBackOff(backoff.NewExponentialBackOff()), ctx)
 		err := backoff.RetryNotify(
-			func() error { return manager.runSession(ctx, job) },
+			func() error {
+				err := manager.runSession(ctx, job)
+				if errors.IsDataCorruptedError(err) {
+					logger.WithError(err).Warnf("job data is corrupted")
+					return backoff.Permanent(nil)
+				}
+				return err
+			},
 			backff,
 			func(err error, duration time.Duration) {
 				logger.WithError(err).Warnf("error in job listening session, restarting in %v...", duration)
@@ -90,6 +97,10 @@ func (manager *sessionManager) getSession(jobUUID string) *entities.Job {
 func (manager *sessionManager) runSession(ctx context.Context, job *entities.Job) error {
 	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID)
 	logger.Info("starting job session")
+
+	if job.InternalData.RetryInterval.Seconds() < 1 {
+		return errors.DataCorruptedError("invalid value for job retry interval %s", job.InternalData.RetryInterval.String())
+	}
 
 	ticker := time.NewTicker(job.InternalData.RetryInterval)
 	defer ticker.Stop()

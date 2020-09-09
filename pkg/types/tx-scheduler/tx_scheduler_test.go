@@ -248,9 +248,27 @@ func TestRetryParams_Validation(t *testing.T) {
 			false,
 		},
 		{
+			"No error all fields are filled with Increment",
+			RetryParams{
+				Interval:  "1s",
+				Increment: 1.1,
+				Limit:     1.2,
+			},
+			false,
+		},
+		{
 			"Interval is not a duration",
 			RetryParams{
 				Interval:  "1_m",
+				Increment: 1.1,
+				Limit:     1.2,
+			},
+			true,
+		},
+		{
+			"Interval duration too low",
+			RetryParams{
+				Interval:  "100ms",
 				Increment: 1.1,
 				Limit:     1.2,
 			},

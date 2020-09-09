@@ -10,7 +10,7 @@ type GasPriceParams struct {
 	RetryPolicy RetryParams `json:"retryPolicy"`
 }
 type RetryParams struct {
-	Interval  string  `json:"interval,omitempty" validate:"omitempty,isDuration" example:"2m"`
+	Interval  string  `json:"interval,omitempty" validate:"omitempty,minDuration=1s" example:"2m"`
 	Increment float64 `json:"increment,omitempty" validate:"omitempty" example:"0.05"`
 	Limit     float64 `json:"limit,omitempty" validate:"omitempty" example:"0.5"`
 }

@@ -2,6 +2,7 @@ package utils
 
 import (
 	"math/big"
+	"reflect"
 	"time"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -11,7 +12,9 @@ import (
 )
 
 var (
-	validate *validator.Validate
+	validate      *validator.Validate
+	StringPtrType = reflect.TypeOf(new(string))
+	StringType    = reflect.TypeOf("")
 )
 
 func isHex(fl validator.FieldLevel) bool {
@@ -56,22 +59,44 @@ func isValidMethodSig(fl validator.FieldLevel) bool {
 }
 
 func isDuration(fl validator.FieldLevel) bool {
-	if fl.Field().Type().String() == "*string" {
-		val := fl.Field().Interface().(*string)
-		if val != nil {
-			_, err := time.ParseDuration(*val)
-			if err != nil {
-				return false
-			}
-		}
-	} else if fl.Field().String() != "" {
-		_, err := time.ParseDuration(fl.Field().String())
-		if err != nil {
-			return false
-		}
+	_, err := convDuration(fl)
+	return err == nil
+}
+
+func minDuration(fl validator.FieldLevel) bool {
+	min, err := time.ParseDuration(fl.Param())
+	if err != nil {
+		return false
+	}
+
+	v, err := convDuration(fl)
+	if err != nil {
+		return false
+	}
+
+	if v != 0 && v.Milliseconds() < min.Milliseconds() {
+		return false
 	}
 
 	return true
+}
+
+func convDuration(fl validator.FieldLevel) (time.Duration, error) {
+	switch fl.Field().Type() {
+	case StringPtrType:
+		val := fl.Field().Interface().(*string)
+		if val != nil {
+			return time.ParseDuration(*val)
+		}
+		return time.Duration(0), nil
+	case StringType:
+		if fl.Field().String() != "" {
+			return time.ParseDuration(fl.Field().String())
+		}
+		return time.Duration(0), nil
+	default:
+		return time.Duration(0), nil
+	}
 }
 
 func isPrivateTxManagerType(fl validator.FieldLevel) bool {
@@ -155,6 +180,7 @@ func init() {
 	_ = validate.RegisterValidation("isBig", isBig)
 	_ = validate.RegisterValidation("isHash", isHash)
 	_ = validate.RegisterValidation("isDuration", isDuration)
+	_ = validate.RegisterValidation("minDuration", minDuration)
 	_ = validate.RegisterValidation("isValidMethodSig", isValidMethodSig)
 	_ = validate.RegisterValidation("isPrivateTxManagerType", isPrivateTxManagerType)
 	_ = validate.RegisterValidation("isPriority", isPriority)

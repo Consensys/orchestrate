@@ -16,7 +16,7 @@ func TestSessionManager(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	retryInterval := 100 * time.Millisecond
+	retryInterval := 1 * time.Second
 	childJobUUID := "childJobUUID"
 
 	mockCreateChilUC := mocks.NewMockCreateChildJobUseCase(ctrl)
@@ -25,12 +25,12 @@ func TestSessionManager(t *testing.T) {
 
 	t.Run("should create a new child job successfully at every retry interval", func(t *testing.T) {
 		// We expect to tick 5 times. We add 20ms to make sure we have a bit more time
-		timeout := retryInterval*5 + 20*time.Millisecond
+		timeout := retryInterval*2 + 500*time.Millisecond
 		ctx, _ := context.WithTimeout(context.Background(), timeout)
 		job := testutils.FakeJob()
 		job.InternalData.RetryInterval = retryInterval
 
-		mockCreateChilUC.EXPECT().Execute(ctx, job).Return(childJobUUID, nil).Times(5)
+		mockCreateChilUC.EXPECT().Execute(ctx, job).Return(childJobUUID, nil).Times(2)
 
 		sessionManager.Start(ctx, job)
 
@@ -38,7 +38,7 @@ func TestSessionManager(t *testing.T) {
 	})
 
 	t.Run("should do nothing if session already exists", func(t *testing.T) {
-		timeout := retryInterval + 20*time.Millisecond
+		timeout := retryInterval + 500*time.Millisecond
 		ctx, _ := context.WithTimeout(context.Background(), timeout)
 		job := testutils.FakeJob()
 		job.InternalData.RetryInterval = retryInterval
@@ -54,7 +54,7 @@ func TestSessionManager(t *testing.T) {
 	})
 
 	t.Run("should do nothing if session is not a parent job", func(t *testing.T) {
-		timeout := 20 * time.Millisecond
+		timeout := 500 * time.Millisecond
 		ctx, _ := context.WithTimeout(context.Background(), timeout)
 		job := testutils.FakeJob()
 		job.InternalData.ParentJobUUID = "I am a child job"
@@ -64,7 +64,7 @@ func TestSessionManager(t *testing.T) {
 	})
 
 	t.Run("should stop the session if no child is created but no error", func(t *testing.T) {
-		timeout := 1 * time.Second
+		timeout := 3 * time.Second
 		ctx, _ := context.WithTimeout(context.Background(), timeout)
 		job := testutils.FakeJob()
 		job.InternalData.RetryInterval = retryInterval
@@ -77,7 +77,7 @@ func TestSessionManager(t *testing.T) {
 	})
 
 	t.Run("should retry with backoff if createChildJob fails", func(t *testing.T) {
-		timeout := 1 * time.Second
+		timeout := 3 * time.Second
 		ctx, _ := context.WithTimeout(context.Background(), timeout)
 		job := testutils.FakeJob()
 		job.InternalData.RetryInterval = retryInterval
