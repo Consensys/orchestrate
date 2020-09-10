@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/viper"
 	chaininjector "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/chain-injector"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/crafter"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/faucet"
 	gasestimator "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/gas/gas-estimator"
 	gaspricer "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/gas/gas-pricer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/loader/sarama"
@@ -57,11 +56,6 @@ func initHandlers(ctx context.Context) {
 		// Initialize crafter
 		func() {
 			crafter.Init(ctx)
-		},
-
-		// Initialize faucet
-		func() {
-			faucet.Init(ctx)
 		},
 
 		// Initialize Gas Estimator
@@ -130,7 +124,6 @@ func registerHandlers() {
 
 	// Specific handlers tk Tx-Crafter worker
 	engine.Register(chaininjector.GlobalHandler())
-	engine.Register(faucet.GlobalHandler())
 	engine.Register(crafter.GlobalHandler())
 	engine.Register(gaspricer.GlobalHandler())
 	engine.Register(gasestimator.GlobalHandler())

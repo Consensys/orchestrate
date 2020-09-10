@@ -3,6 +3,8 @@ package client
 import (
 	"context"
 
+	ethcommon "github.com/ethereum/go-ethereum/common"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/chain-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 )
 
@@ -24,6 +26,7 @@ type FaucetClient interface {
 	GetFaucetByUUID(ctx context.Context, faucetUUID string) (*models.Faucet, error)
 	DeleteFaucetByUUID(ctx context.Context, faucetUUID string) error
 	GetFaucetsByChainRule(ctx context.Context, chainRule string) ([]*models.Faucet, error)
+	GetFaucetCandidate(ctx context.Context, sender ethcommon.Address, chainUUID string) (*types.Faucet, error)
 }
 
 type ChainRegistryClient interface {

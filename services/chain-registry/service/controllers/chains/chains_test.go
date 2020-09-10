@@ -10,7 +10,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/chain-registry/use-cases"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/chain-registry/use-cases/chains"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 
 	ethtypes "github.com/ethereum/go-ethereum/core/types"

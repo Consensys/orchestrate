@@ -49,11 +49,11 @@ func TestTxAlreadySent(t *testing.T) {
 		txctx := makeContext("0x7a34cbb73c02aa3309c343e9e9b35f2a992aaa623c2ec2524816f476c63d2efa", "1", "8", 0)
 		jobResponse := testutils.FakeJobResponse()
 		jobResponse.Status = utils.StatusCreated
-
+	
 		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetID()).Return(jobResponse, nil)
-
+	
 		handler(txctx)
-
+	
 		assert.Empty(t, txctx.Envelope.Errors)
 	})
 

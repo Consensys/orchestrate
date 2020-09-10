@@ -14,7 +14,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/proxy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/httpcache"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/ratelimit"
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/chain-registry/use-cases"
+	chainUCs "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/chain-registry/use-cases/chains"
+	faucetsUCs "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/chain-registry/use-cases/faucets"
 	ctrl "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/service/controllers"
 	chainctrl "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/service/controllers/chains"
 	faucetctrl "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/service/controllers/faucets"
@@ -34,23 +35,29 @@ func New(
 		return nil, err
 	}
 
+	getChainsUC := chainUCs.NewGetChains(dataAgents.Chain)
+	getChainUC := chainUCs.NewGetChain(dataAgents.Chain)
+
 	// Create HTTP Handler for Chain
 	chainCtrl := chainctrl.NewController(
-		usecases.NewGetChains(dataAgents.Chain),
-		usecases.NewGetChain(dataAgents.Chain),
-		usecases.NewRegisterChain(dataAgents.Chain, ec),
-		usecases.NewDeleteChain(dataAgents.Chain),
-		usecases.NewUpdateChain(dataAgents.Chain),
+		getChainsUC,
+		getChainUC,
+		chainUCs.NewRegisterChain(dataAgents.Chain, ec),
+		chainUCs.NewDeleteChain(dataAgents.Chain),
+		chainUCs.NewUpdateChain(dataAgents.Chain),
 	)
 
+	getFaucetsUC := faucetsUCs.NewGetFaucets(dataAgents.Faucet)
 	// Create HTTP Handler for Faucet
 	faucetCtrl := faucetctrl.NewController(
-		usecases.NewGetFaucets(dataAgents.Faucet),
-		usecases.NewGetFaucet(dataAgents.Faucet),
-		usecases.NewRegisterFaucet(dataAgents.Faucet),
-		usecases.NewDeleteFaucet(dataAgents.Faucet),
-		usecases.NewUpdateFaucet(dataAgents.Faucet),
+		getFaucetsUC,
+		faucetsUCs.NewGetFaucet(dataAgents.Faucet),
+		faucetsUCs.NewRegisterFaucet(dataAgents.Faucet),
+		faucetsUCs.NewDeleteFaucet(dataAgents.Faucet),
+		faucetsUCs.NewUpdateFaucet(dataAgents.Faucet),
+		faucetsUCs.NewFaucetCandidateUseCase(getChainUC, getFaucetsUC, ec),
 	)
+
 	chainHandlerOpt := app.HandlerOpt(
 		reflect.TypeOf(&dynamic.Chains{}),
 		ctrl.NewBuilder(chainCtrl, faucetCtrl),
@@ -95,7 +102,7 @@ func New(
 		httpCacheOpt,
 		reverseProxyOpt,
 		app.ProviderOpt(
-			NewProvider(usecases.NewGetChains(dataAgents.Chain), time.Second, cfg.ProxyCacheTTL),
+			NewProvider(getChainsUC, time.Second, cfg.ProxyCacheTTL),
 		),
 	)
 	if err != nil {
@@ -104,7 +111,7 @@ func New(
 
 	// TODO: chain import should append after starting App not at app creation
 	// (or should be deprecated)
-	importChainUC := usecases.NewImportChain(dataAgents.Chain, ec)
+	importChainUC := chainUCs.NewImportChain(dataAgents.Chain, ec)
 	for _, jsonChain := range cfg.EnvChains {
 		err = importChainUC.Execute(context.Background(), jsonChain)
 		if err != nil {

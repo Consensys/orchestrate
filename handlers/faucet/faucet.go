@@ -4,68 +4,75 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/chain-registry"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet"
-	faucettypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
+	client2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 )
 
+const component = "handler.faucet"
+
 // Faucet creates a Faucet handler
-func Faucet(fct faucet.Faucet, faucetClient client.FaucetClient) engine.HandlerFunc {
+func Faucet(registryClient client.ChainRegistryClient, txSchedulerClient client2.TransactionSchedulerClient) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		txctx.Logger.WithField("envelope_id", txctx.Envelope.GetID()).Debugf("faucet handler starts")
+		logger := txctx.Logger.
+			WithField("envelope_id", txctx.Envelope.GetID()).
+			WithField("account", txctx.Envelope.MustGetFromAddress().Hex())
 
-		if txctx.Envelope.GetChainUUID() == "" || txctx.Envelope.GetContextLabelsValue("faucet.parentTxID") != "" ||
-			txctx.Envelope.GetFromString() == "" {
-			return
-		}
+		logger.Debugf("faucet handler starts")
 
-		faucets, err := faucetClient.GetFaucetsByChainRule(txctx.Context(), txctx.Envelope.GetChainUUID())
-		if err != nil {
-			_ = txctx.Error(errors.FaucetWarning("could not get faucets for chain rule '%s' - got %v", txctx.Envelope.GetChainUUID(), err)).ExtendComponent(component)
-			return
-		}
-		if len(faucets) == 0 {
-			return
-		}
-
-		url, err := proxy.GetURL(txctx)
-		if err != nil {
-			_ = txctx.Error(errors.FaucetWarning("could not get chain url - got %v", err)).ExtendComponent(component)
-			return
-		}
-
-		req := &faucettypes.Request{
-			ScheduleUUID:      txctx.Envelope.GetScheduleUUID(),
-			ParentTxID:        txctx.Envelope.GetID(),
-			ChildTxID:         txctx.Envelope.GetContextLabelsValue("faucetChildTxID"),
-			ChainID:           txctx.Envelope.GetChainID(),
-			ChainURL:          url,
-			ChainName:         txctx.Envelope.GetChainName(),
-			ChainUUID:         txctx.Envelope.GetChainUUID(),
-			Beneficiary:       txctx.Envelope.MustGetFromAddress(),
-			FaucetsCandidates: faucettypes.NewFaucetsCandidates(faucets),
-		}
-
-		// Credit
-		amount, err := fct.Credit(txctx.Context(), req)
-		if err != nil {
-			switch {
-			case errors.IsFaucetSelfCreditWarning(err):
-				return
-			case errors.IsFaucetWarning(err):
-				e := errors.FromError(err).ExtendComponent(component)
-				txctx.Logger.WithError(e).Debug("faucet: credit refused")
-				return
-			default:
-				e := errors.FromError(err).ExtendComponent(component)
-				txctx.Logger.WithError(e).Error("faucet: credit error")
+		var chain *models.Chain
+		var err error
+		switch {
+		case txctx.Envelope.GetChainName() != "":
+			chain, err = registryClient.GetChainByName(txctx.Context(), txctx.Envelope.GetChainName())
+			if err != nil {
+				_ = txctx.Error(errors.FaucetWarning("could not find chain name %s: %v", txctx.Envelope.GetChainName(), err)).ExtendComponent(component)
 				return
 			}
+		case txctx.Envelope.GetChainUUID() != "":
+			chain, err = registryClient.GetChainByUUID(txctx.Context(), txctx.Envelope.GetChainUUID())
+			if err != nil {
+				_ = txctx.Error(errors.FaucetWarning("could not find chain uuid %s: %v", txctx.Envelope.GetChainUUID(), err)).ExtendComponent(component)
+				return
+			}
+		default:
+			err := errors.FaucetWarning("skipped because no chain attached to envelope").ExtendComponent(component)
+			logger.Debugf(err.Error())
+			return
 		}
 
-		txctx.Logger.WithFields(log.Fields{
-			"faucet.amount": amount.Text(10),
+		logger = txctx.Logger.WithField("chain_uuid", chain.UUID)
+
+		fct, err := registryClient.GetFaucetCandidate(txctx.Context(), txctx.Envelope.MustGetFromAddress(), chain.UUID)
+		if err != nil {
+			logger.WithError(err).Error("failed to fetch faucet candidate")
+			_ = txctx.Error(err).ExtendComponent(component)
+		}
+		if fct == nil {
+			logger.Debugf("could not get faucet candidate")
+			return
+		}
+
+		_, err = txSchedulerClient.SendTransferTransaction(txctx.Context(),
+			&types.TransferRequest{
+				ChainName: chain.Name,
+				Params: types.TransferParams{
+					From:  fct.Creditor.Hex(),
+					To:    txctx.Envelope.MustGetFromAddress().String(),
+					Value: fct.Amount.String(),
+				},
+				Labels: chainregistry.FaucetToJobLabels(fct),
+			})
+		if err != nil {
+			logger.WithError(err).Error("fail to send funding transaction")
+			_ = txctx.Error(err).ExtendComponent(component)
+			return
+		}
+
+		logger.WithFields(log.Fields{
+			"faucet.amount": fct.Amount.Text(10),
 		}).Infof("faucet: credit approved")
 	}
 }

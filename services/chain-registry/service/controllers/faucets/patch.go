@@ -35,7 +35,7 @@ func (h *controller) PatchFaucet(rw http.ResponseWriter, request *http.Request) 
 
 	faucet := parsePatchRequestToFaucet(faucetRequest)
 
-	err = h.updateFaucet.Execute(
+	err = h.updateFaucetUC.Execute(
 		request.Context(),
 		mux.Vars(request)["uuid"],
 		multitenancy.AllowedTenantsFromContext(request.Context()),

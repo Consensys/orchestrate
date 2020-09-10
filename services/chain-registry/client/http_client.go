@@ -8,6 +8,9 @@ import (
 	"net/http"
 	"strconv"
 
+	ethcommon "github.com/ethereum/go-ethereum/common"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/chain-registry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/chain-registry/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 
 	log "github.com/sirupsen/logrus"
@@ -279,6 +282,37 @@ func (c *HTTPClient) GetFaucetsByChainRule(ctx context.Context, chainRule string
 	default:
 		errMessage := "failed to fetch faucets"
 		log.WithContext(ctx).WithError(err).Error(errMessage)
+		return nil, errors.ServiceConnectionError(errMessage)
+	}
+}
+
+func (c *HTTPClient) GetFaucetCandidate(ctx context.Context, account ethcommon.Address, chainUUID string) (*types.Faucet, error) {
+	reqURL := fmt.Sprintf("%v/faucets/candidate?chain_uuid=%s&account=%s", c.config.URL, chainUUID, account.Hex())
+
+	// @TODO API-KEY
+	response, err := c.getRequest(ctx, reqURL)
+	if err != nil {
+		return nil, err
+	}
+	defer closeResponse(response)
+
+	switch response.StatusCode {
+	case http.StatusOK:
+		var faucetsResult *types.Faucet
+		if err = json.NewDecoder(response.Body).Decode(&faucetsResult); err != nil {
+			return nil, errors.FromError(err).ExtendComponent(component)
+		}
+
+		return faucetsResult, nil
+	case http.StatusNotFound:
+		return nil, nil
+	default:
+		errResp := utils.APIError{}
+		if err = json.NewDecoder(response.Body).Decode(&errResp); err != nil {
+			return nil, errors.FromError(err).ExtendComponent(component)
+		}
+		errMessage := "failed to fetch faucet candidate"
+		log.WithContext(ctx).WithError(fmt.Errorf(errResp.Message)).Error(errMessage)
 		return nil, errors.ServiceConnectionError(errMessage)
 	}
 }

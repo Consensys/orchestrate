@@ -35,7 +35,7 @@ func (h *controller) PostFaucet(rw http.ResponseWriter, request *http.Request) {
 	faucet := parsePostRequestToFaucet(faucetRequest)
 	faucet.TenantID = multitenancy.TenantIDFromContext(request.Context())
 
-	err = h.registerFaucet.Execute(request.Context(), faucet)
+	err = h.registerFaucetUC.Execute(request.Context(), faucet)
 	if err != nil {
 		utils.HandleStoreError(rw, err)
 		return

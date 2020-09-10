@@ -4,20 +4,21 @@ package integrationtests
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
-
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/client-utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/controllers"
 	"gopkg.in/h2non/gock.v1"
@@ -63,6 +64,9 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
+		gock.New(ChainRegistryURL).
+			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", ChainRegistryURL, chain.UUID, txRequest.Params.From)).
+			Reply(404).Done()
 		_, err := s.client.SendContractTransaction(rctx, txRequest)
 		assert.NoError(t, err)
 
@@ -85,9 +89,12 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 
 	s.T().Run("should fail with 422 if chainUUID does not exist", func(t *testing.T) {
 		defer gock.Off()
+		txRequest := testutils.FakeSendTransactionRequest()
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(404)
-		txRequest := testutils.FakeSendTransactionRequest()
+		gock.New(ChainRegistryURL).
+			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", ChainRegistryURL, chain.UUID, txRequest.Params.From)).
+			Reply(404).Done()
 
 		_, err := s.client.SendContractTransaction(ctx, txRequest)
 
@@ -110,12 +117,16 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions() {
 	ctx := context.Background()
 	chain := testutils.FakeChain()
-
+	faucet := testutils.FakeFaucet()
+	
 	s.T().Run("should send a transaction successfully to the transaction crafter topic", func(t *testing.T) {
 		defer gock.Off()
+		txRequest := testutils.FakeSendTransactionRequest()
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
-		txRequest := testutils.FakeSendTransactionRequest()
+		gock.New(ChainRegistryURL).
+			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", ChainRegistryURL, chain.UUID, ethcommon.HexToAddress("0x").Hex())).
+			Reply(404).Done()
 		txRequest.Params.From = ""
 		txRequest.Params.OneTimeKey = true
 		IdempotencyKey := utils.RandomString(16)
@@ -129,15 +140,15 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		}
 		assert.NotEmpty(t, txResponse.UUID)
 		assert.NotEmpty(t, txResponse.IdempotencyKey)
-
+	
 		txResponseGET, err := s.client.GetTxRequest(ctx, txResponse.UUID)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-
+	
 		job := txResponseGET.Schedule.Jobs[0]
-
+	
 		assert.NotEmpty(t, txResponseGET.Schedule.UUID)
 		assert.NotEmpty(t, job.UUID)
 		assert.Equal(t, job.ChainUUID, chain.UUID)
@@ -145,7 +156,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, txRequest.Params.From, job.Transaction.From)
 		assert.Equal(t, txRequest.Params.To, job.Transaction.To)
 		assert.Equal(t, utils.EthereumTransaction, job.Type)
-
+	
 		evlp, err := s.env.consumer.WaitForEnvelope(job.UUID, s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
@@ -157,12 +168,75 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, evlp.GetChainIDString(), chain.ChainID)
 		assert.Equal(t, evlp.PartitionKey(), "")
 	})
+	
+	s.T().Run("should send a transaction, with an additional faucet job, successfully to the transaction crafter topic in parallel", func(t *testing.T) {
+		defer gock.Off()
+		txRequest := testutils.FakeSendTransferTransactionRequest()
+		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
+		gock.New(ChainRegistryURL).
+			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", ChainRegistryURL, chain.UUID, txRequest.Params.From)).
+			Reply(200).JSON(faucet)
+		IdempotencyKey := utils.RandomString(16)
+		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
+			controllers.IdempotencyKeyHeader: IdempotencyKey,
+		})
+		txResponse, err := s.client.SendTransferTransaction(rctx, txRequest)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+		assert.NotEmpty(t, txResponse.UUID)
+		assert.NotEmpty(t, txResponse.IdempotencyKey)
+
+		txResponseGET, err := s.client.GetTxRequest(ctx, txResponse.UUID)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+
+		faucetJob := txResponseGET.Schedule.Jobs[1]
+		txJob := txResponseGET.Schedule.Jobs[0]
+		assert.Equal(t, faucetJob.ChainUUID, chain.UUID)
+		assert.Equal(t, utils.StatusStarted, faucetJob.Status)
+		assert.Equal(t, utils.EthereumTransaction, faucetJob.Type)
+		assert.Equal(t, faucetJob.Transaction.To, txJob.Transaction.From)
+		assert.Equal(t, faucetJob.Transaction.Value, faucet.Amount.String())
+		
+		
+		assert.NotEmpty(t, txResponseGET.Schedule.UUID)
+		assert.NotEmpty(t, txJob.UUID)
+		assert.Equal(t, txJob.ChainUUID, chain.UUID)
+		assert.Equal(t, utils.StatusStarted, txJob.Status)
+		assert.Equal(t, txRequest.Params.From, txJob.Transaction.From)
+		assert.Equal(t, txRequest.Params.To, txJob.Transaction.To)
+		assert.Equal(t, utils.EthereumTransaction, txJob.Type)
+
+		fctEvlp, err := s.env.consumer.WaitForEnvelope(faucetJob.UUID, s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+		assert.Equal(t, faucetJob.UUID, fctEvlp.GetID())
+		assert.Equal(t, tx.JobTypeMap[utils.EthereumTransaction].String(), fctEvlp.GetJobTypeString())
+		assert.Equal(t, fctEvlp.GetChainIDString(), chain.ChainID)
+		
+		jobEvlp, err := s.env.consumer.WaitForEnvelope(txJob.UUID, s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+		assert.Equal(t, txJob.UUID, jobEvlp.GetID())
+	})
 
 	s.T().Run("should send a tessera transaction successfully to the transaction crafter topic", func(t *testing.T) {
 		defer gock.Off()
+		txRequest := testutils.FakeSendTesseraRequest()
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
-		txRequest := testutils.FakeSendTesseraRequest()
+		gock.New(ChainRegistryURL).
+			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", ChainRegistryURL, chain.UUID, txRequest.Params.From)).
+			Reply(404).Done()
 		IdempotencyKey := utils.RandomString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: IdempotencyKey,
@@ -174,7 +248,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		}
 		assert.NotEmpty(t, txResponse.UUID)
 		assert.NotEmpty(t, txResponse.IdempotencyKey)
-
+	
 		txResponseGET, err := s.client.GetTxRequest(ctx, txResponse.UUID)
 		if err != nil {
 			assert.Fail(t, err.Error())
@@ -197,7 +271,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, markingTxJob.ChainUUID, chain.UUID)
 		assert.Equal(t, utils.StatusCreated, markingTxJob.Status)
 		assert.Equal(t, utils.TesseraMarkingTransaction, markingTxJob.Type)
-
+	
 		privTxEvlp, err := s.env.consumer.WaitForEnvelope(privTxJob.UUID,
 			s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
 		if err != nil {
@@ -209,12 +283,15 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.False(t, privTxEvlp.IsOneTimeKeySignature())
 		assert.Equal(t, tx.JobTypeMap[utils.TesseraPrivateTransaction].String(), privTxEvlp.GetJobTypeString())
 	})
-
+	
 	s.T().Run("should send an orion transaction successfully to the transaction crafter topic", func(t *testing.T) {
 		defer gock.Off()
+		txRequest := testutils.FakeSendOrionRequest()
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
-		txRequest := testutils.FakeSendOrionRequest()
+		gock.New(ChainRegistryURL).
+			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", ChainRegistryURL, chain.UUID, txRequest.Params.From)).
+			Reply(404).Done()
 	
 		txResponse, err := s.client.SendContractTransaction(ctx, txRequest)
 		if err != nil {
@@ -232,7 +309,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 	
 		assert.NotEmpty(t, txResponseGET.Schedule.UUID)
 		assert.Len(t, txResponseGET.Schedule.Jobs, 2)
-
+	
 		privTxJob := txResponseGET.Schedule.Jobs[0]
 		assert.NotEmpty(t, privTxJob.UUID)
 		assert.Equal(t, privTxJob.ChainUUID, chain.UUID)
@@ -257,14 +334,17 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, privTxJob.UUID, privTxEvlp.GetID())
 		assert.Equal(t, tx.JobTypeMap[utils.OrionEEATransaction].String(), privTxEvlp.GetJobTypeString())
 	})
-
+	
 	s.T().Run("should send a deploy contract successfully to the transaction crafter topic", func(t *testing.T) {
 		defer gock.Off()
+		txRequest := testutils.FakeDeployContractRequest()
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
-		txRequest := testutils.FakeDeployContractRequest()
+		gock.New(ChainRegistryURL).
+			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", ChainRegistryURL, chain.UUID, txRequest.Params.From)).
+			Reply(404).Done()
 		txRequest.Params.Args = testutils.ParseIArray(123) // FakeContract arguments
-
+	
 		s.env.contractRegistryResponseFaker.GetContract = func() (*proto.GetContractResponse, error) {
 			return &proto.GetContractResponse{
 				Contract: testutils.FakeContract(),
@@ -277,22 +357,22 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		}
 		assert.NotEmpty(t, txResponse.UUID)
 		assert.NotEmpty(t, txResponse.IdempotencyKey)
-
+	
 		txResponseGET, err := s.client.GetTxRequest(ctx, txResponse.UUID)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-
+	
 		job := txResponseGET.Schedule.Jobs[0]
-
+	
 		assert.NotEmpty(t, txResponseGET.Schedule.UUID)
 		assert.NotEmpty(t, job.UUID)
 		assert.Equal(t, job.ChainUUID, chain.UUID)
 		assert.Equal(t, utils.StatusStarted, job.Status)
 		assert.Equal(t, txRequest.Params.From, job.Transaction.From)
 		assert.Equal(t, utils.EthereumTransaction, job.Type)
-
+	
 		evlp, err := s.env.consumer.WaitForEnvelope(job.UUID,
 			s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
 		if err != nil {
@@ -302,13 +382,13 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, job.UUID, evlp.GetID())
 		assert.Equal(t, tx.JobTypeMap[utils.EthereumTransaction].String(), evlp.GetJobTypeString())
 	})
-
+	
 	s.T().Run("should send a raw transaction successfully to the transaction sender topic", func(t *testing.T) {
 		defer gock.Off()
+		txRequest := testutils.FakeSendRawTransactionRequest()
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
-		txRequest := testutils.FakeSendRawTransactionRequest()
-
+	
 		IdempotencyKey := utils.RandomString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: IdempotencyKey,
@@ -320,21 +400,21 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		}
 		assert.NotEmpty(t, txResponse.UUID)
 		assert.NotEmpty(t, txResponse.IdempotencyKey)
-
+	
 		txResponseGET, err := s.client.GetTxRequest(ctx, txResponse.UUID)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-
+	
 		job := txResponseGET.Schedule.Jobs[0]
-
+	
 		assert.NotEmpty(t, txResponseGET.Schedule.UUID)
 		assert.NotEmpty(t, job.UUID)
 		assert.Equal(t, utils.StatusStarted, job.Status)
 		assert.Equal(t, txRequest.Params.Raw, job.Transaction.Raw)
 		assert.Equal(t, utils.EthereumRawTransaction, job.Type)
-
+	
 		evlp, err := s.env.consumer.WaitForEnvelope(job.UUID,
 			s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
 		if err != nil {
@@ -344,13 +424,16 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, job.UUID, evlp.GetID())
 		assert.Equal(t, tx.JobTypeMap[utils.EthereumRawTransaction].String(), evlp.GetJobTypeString())
 	})
-
+	
 	s.T().Run("should send a transfer transaction successfully to the transaction sender topic", func(t *testing.T) {
 		defer gock.Off()
+		txRequest := testutils.FakeSendTransferTransactionRequest()
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
-		txRequest := testutils.FakeSendTransferTransactionRequest()
-
+		gock.New(ChainRegistryURL).
+			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", ChainRegistryURL, chain.UUID, txRequest.Params.From)).
+			Reply(404).Done()
+	
 		txResponse, err := s.client.SendTransferTransaction(ctx, txRequest)
 		if err != nil {
 			assert.Fail(t, err.Error())
@@ -358,15 +441,15 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		}
 		assert.Len(t, txResponse.IdempotencyKey, 16)
 		assert.NotEmpty(t, txResponse.UUID)
-
+	
 		txResponseGET, err := s.client.GetTxRequest(ctx, txResponse.UUID)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-
+	
 		job := txResponseGET.Schedule.Jobs[0]
-
+	
 		assert.NotEmpty(t, txResponseGET.Schedule.UUID)
 		assert.NotEmpty(t, job.UUID)
 		assert.Equal(t, utils.StatusStarted, job.Status)
@@ -374,7 +457,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, txRequest.Params.To, job.Transaction.To)
 		assert.Equal(t, txRequest.Params.From, job.Transaction.From)
 		assert.Equal(t, utils.EthereumTransaction, job.Type)
-
+	
 		evlp, err := s.env.consumer.WaitForEnvelope(job.UUID,
 			s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
 		if err != nil {
@@ -384,30 +467,36 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, job.UUID, evlp.GetID())
 		assert.Equal(t, tx.JobTypeMap[utils.EthereumTransaction].String(), evlp.GetJobTypeString())
 	})
-
+	
 	s.T().Run("should succeed if payloads and idempotency key are the same and return same schedule", func(t *testing.T) {
 		defer gock.Off()
 		txRequest := testutils.FakeSendTransactionRequest()
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: utils.RandomString(16),
 		})
-
+	
 		// Kill Kafka on first call so data is added in DB and status is CREATED but does not get updated to STARTED
 		err := s.env.client.Stop(rctx, kafkaContainerID)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-
+	
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
+		gock.New(ChainRegistryURL).
+			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", ChainRegistryURL, chain.UUID, txRequest.Params.From)).
+			Reply(404).Done()
 		_, err = s.client.SendContractTransaction(rctx, txRequest)
 		assert.Error(t, err)
-
+	
 		s.restartKafka(rctx)
-
+	
 		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
+		gock.New(ChainRegistryURL).
+			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", ChainRegistryURL, chain.UUID, txRequest.Params.From)).
+			Reply(404).Done()
 		txResponse, err := s.client.SendContractTransaction(rctx, txRequest)
 		if err != nil {
 			assert.Fail(t, err.Error())

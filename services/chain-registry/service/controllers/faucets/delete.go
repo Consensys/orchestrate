@@ -20,7 +20,7 @@ import (
 // @Router /faucets/{uuid} [delete]
 func (h *controller) DeleteFaucet(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
-	err := h.deleteFaucet.Execute(
+	err := h.deleteFaucetUC.Execute(
 		request.Context(),
 		mux.Vars(request)["uuid"],
 		multitenancy.AllowedTenantsFromContext(request.Context()),

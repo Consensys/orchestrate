@@ -6,7 +6,9 @@ package mock
 
 import (
 	context "context"
+	common "github.com/ethereum/go-ethereum/common"
 	gomock "github.com/golang/mock/gomock"
+	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/chain-registry"
 	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	reflect "reflect"
 )
@@ -233,6 +235,21 @@ func (mr *MockFaucetClientMockRecorder) GetFaucetsByChainRule(ctx, chainRule int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFaucetsByChainRule", reflect.TypeOf((*MockFaucetClient)(nil).GetFaucetsByChainRule), ctx, chainRule)
 }
 
+// GetFaucetCandidate mocks base method
+func (m *MockFaucetClient) GetFaucetCandidate(ctx context.Context, sender common.Address, chainUUID string) (*chainregistry.Faucet, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFaucetCandidate", ctx, sender, chainUUID)
+	ret0, _ := ret[0].(*chainregistry.Faucet)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFaucetCandidate indicates an expected call of GetFaucetCandidate
+func (mr *MockFaucetClientMockRecorder) GetFaucetCandidate(ctx, sender, chainUUID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFaucetCandidate", reflect.TypeOf((*MockFaucetClient)(nil).GetFaucetCandidate), ctx, sender, chainUUID)
+}
+
 // MockChainRegistryClient is a mock of ChainRegistryClient interface
 type MockChainRegistryClient struct {
 	ctrl     *gomock.Controller
@@ -430,4 +447,19 @@ func (m *MockChainRegistryClient) GetFaucetsByChainRule(ctx context.Context, cha
 func (mr *MockChainRegistryClientMockRecorder) GetFaucetsByChainRule(ctx, chainRule interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFaucetsByChainRule", reflect.TypeOf((*MockChainRegistryClient)(nil).GetFaucetsByChainRule), ctx, chainRule)
+}
+
+// GetFaucetCandidate mocks base method
+func (m *MockChainRegistryClient) GetFaucetCandidate(ctx context.Context, sender common.Address, chainUUID string) (*chainregistry.Faucet, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFaucetCandidate", ctx, sender, chainUUID)
+	ret0, _ := ret[0].(*chainregistry.Faucet)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFaucetCandidate indicates an expected call of GetFaucetCandidate
+func (mr *MockChainRegistryClientMockRecorder) GetFaucetCandidate(ctx, sender, chainUUID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFaucetCandidate", reflect.TypeOf((*MockChainRegistryClient)(nil).GetFaucetCandidate), ctx, sender, chainUUID)
 }

@@ -4,10 +4,9 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/Shopify/sarama"
 	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
-
-	"github.com/Shopify/sarama"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth"

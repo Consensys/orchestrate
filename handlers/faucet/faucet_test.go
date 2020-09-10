@@ -3,14 +3,14 @@
 package faucet
 
 import (
-	"context"
-	"fmt"
 	"math/big"
-	"reflect"
 	"testing"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/chain-registry"
+	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
 
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
@@ -18,173 +18,137 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	mockregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
-	mockfaucet "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet/mock"
-	faucettypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/types"
 )
 
 const (
-	testChainUUID            = "testChain"
-	testChainUUIDError       = "chainError"
-	testURL                  = "testURL"
-	testIDNoError            = "noError"
-	testIDSelfCreditError    = "selfCreditError"
-	testIDFaucetWarningError = "warningError"
-	testIDFaucetError        = "error"
+	testChainUUID = "asdav-asdasd-asdasd"
+	testChainName = "testChain"
 )
 
-var testFaucets = []*models.Faucet{
-	{
-		UUID:            "testUUID",
-		Name:            "testName",
-		TenantID:        "testTenantID",
-		ChainRule:       testChainUUID,
-		CreditorAccount: "0x7e654d251da770a068413677967f6d3ea2fea9e4",
-		MaxBalance:      "10",
-		Amount:          "1",
-		Cooldown:        "1s",
-	},
+var candidate = &types.Faucet{
+	UUID:       "testUUID",
+	MaxBalance: big.NewInt(10),
+	Amount:     big.NewInt(10),
+	Creditor:   ethcommon.HexToAddress("0xab"),
 }
 
-var errGetFaucetsByChainRule = fmt.Errorf("error")
-var errSelfCredit = errors.FaucetSelfCreditWarning("error")
-var errFaucetWarning = errors.FaucetWarning("error")
-var errFaucet = fmt.Errorf("error")
+var testSenderAddr = ethcommon.HexToAddress("0xac")
 
-func TestFaucet(t *testing.T) {
-	testSet := []struct {
-		name          string
-		input         func(txctx *engine.TxContext) *engine.TxContext
-		expectedTxctx func(txctx *engine.TxContext) *engine.TxContext
-	}{
-		{
-			"credit without error",
-			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Envelope.SetChainUUID(testChainUUID).SetID(testIDNoError)
-				txctx.WithContext(proxy.With(txctx.Context(), testURL))
-				return txctx
-			},
-			func(txctx *engine.TxContext) *engine.TxContext {
-				return txctx
-			},
-		},
-		{
-			"credit without chainUUID",
-			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Envelope.SetID(testIDNoError).
-					SetFrom(ethcommon.Address{})
-				txctx.WithContext(proxy.With(txctx.Context(), testURL))
-				return txctx
-			},
-			func(txctx *engine.TxContext) *engine.TxContext {
-				return txctx
-			},
-		},
-		{
-			"txctx with parentTxID context label",
-			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Envelope.
-					SetChainUUID(testChainUUID).
-					SetContextLabelsValue("faucet.parentTxID", "test").
-					SetFrom(ethcommon.Address{})
-				txctx.WithContext(proxy.With(txctx.Context(), testURL))
-				return txctx
-			},
-			func(txctx *engine.TxContext) *engine.TxContext {
-				return txctx
-			},
-		},
-		{
-			"txctx with error when get faucets",
-			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Envelope.SetChainUUID(testChainUUIDError).
-					SetFrom(ethcommon.Address{})
-				txctx.WithContext(proxy.With(txctx.Context(), testURL))
-				return txctx
-			},
-			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Envelope.AppendError(errors.FaucetWarning("could not get faucets for chain rule '%s' - got %v", txctx.Envelope.GetChainUUID(), errGetFaucetsByChainRule).ExtendComponent(component))
-				return txctx
-			},
-		},
-		{
-			"credit with self credit error",
-			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Envelope.SetChainUUID(testChainUUID).
-					SetID(testIDSelfCreditError).
-					SetFrom(ethcommon.Address{})
-				txctx.WithContext(proxy.With(txctx.Context(), testURL))
-				return txctx
-			},
-			func(txctx *engine.TxContext) *engine.TxContext {
-				return txctx
-			},
-		},
-		{
-			"credit with faucet warning error",
-			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Envelope.SetChainUUID(testChainUUID).
-					SetID(testIDFaucetWarningError).
-					SetFrom(ethcommon.Address{})
-				txctx.WithContext(proxy.With(txctx.Context(), testURL))
-				return txctx
-			},
-			func(txctx *engine.TxContext) *engine.TxContext {
-				return txctx
-			},
-		},
-		{
-			"credit with error",
-			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Envelope.SetChainUUID(testChainUUID).
-					SetID(testIDFaucetError)
-				txctx.WithContext(proxy.With(txctx.Context(), testURL))
-				return txctx
-			},
-			func(txctx *engine.TxContext) *engine.TxContext {
-				return txctx
-			},
-		},
-	}
+func newTestTxEnvelope(chainUUID, chainName string, sender ethcommon.Address) *engine.TxContext {
+	txctx := engine.NewTxContext()
+	txctx.Logger = log.NewEntry(log.New())
+	_ = txctx.Envelope.SetChainUUID(chainUUID).SetChainName(chainName).SetFrom(sender)
+	return txctx
+}
 
+func TestMaxBalanceControl_Execute(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockRegistry := mockregistry.NewMockFaucetClient(mockCtrl)
-	mockRegistry.EXPECT().GetFaucetsByChainRule(gomock.Any(), gomock.Eq(testChainUUID)).Return(testFaucets, nil).AnyTimes()
-	mockRegistry.EXPECT().GetFaucetsByChainRule(gomock.Any(), gomock.Eq(testChainUUIDError)).Return(nil, errGetFaucetsByChainRule).AnyTimes()
 
-	mockFaucet := mockfaucet.NewMockFaucet(mockCtrl)
-	mockFaucet.EXPECT().Credit(gomock.Any(), gomock.Any()).DoAndReturn(func(_ context.Context, req *faucettypes.Request) (*big.Int, error) {
-		switch req.ParentTxID {
-		case testIDSelfCreditError:
-			return nil, errSelfCredit
-		case testIDFaucetWarningError:
-			return nil, errFaucetWarning
-		case testIDFaucetError:
-			return nil, errFaucet
-		}
-		return big.NewInt(10), nil
-	}).AnyTimes()
+	chainRegistryClient := mockregistry.NewMockChainRegistryClient(mockCtrl)
+	txSchedulerClient := mock.NewMockTransactionSchedulerClient(mockCtrl)
+	h := Faucet(chainRegistryClient, txSchedulerClient)
 
-	for _, test := range testSet {
-		test := test
-		t.Run(test.name, func(t *testing.T) {
-			t.Parallel()
+	t.Run("should trigger a new faucet transaction, with chainUUID, successfully", func(t *testing.T) {
+		txctx := newTestTxEnvelope(testChainUUID, "", testSenderAddr)
+		chainRegistryClient.EXPECT().GetChainByUUID(gomock.Any(), testChainUUID).Return(&models.Chain{
+			UUID: testChainUUID,
+			Name: testChainName,
+		}, nil)
 
-			txctx := engine.NewTxContext()
-			txctx.Logger = log.NewEntry(log.New())
-
-			h := Faucet(mockFaucet, mockRegistry)
-			h(test.input(txctx))
-
-			expectedTxctx := engine.NewTxContext()
-			expectedTxctx.Logger = txctx.Logger
-			expectedTxctx = test.expectedTxctx(test.input(expectedTxctx))
-
-			if !reflect.DeepEqual(txctx, expectedTxctx) {
-				assert.True(t, reflect.DeepEqual(txctx, expectedTxctx), "Expected same input")
-			}
-			assert.True(t, reflect.DeepEqual(txctx, expectedTxctx), "Expected same input")
+		chainRegistryClient.EXPECT().GetFaucetCandidate(gomock.Any(), testSenderAddr, testChainUUID).Return(candidate, nil)
+		txSchedulerClient.EXPECT().SendTransferTransaction(gomock.Any(), &txschedulertypes.TransferRequest{
+			ChainName: testChainName,
+			Params: txschedulertypes.TransferParams{
+				From:  candidate.Creditor.Hex(),
+				To:    txctx.Envelope.MustGetFromAddress().String(),
+				Value: candidate.Amount.String(),
+			},
+			Labels: types.FaucetToJobLabels(candidate),
 		})
-	}
+
+		h(txctx)
+
+		assert.Len(t, txctx.Envelope.GetErrors(), 0)
+	})
+	
+	t.Run("should trigger a new faucet transaction, with chanName, successfully", func(t *testing.T) {
+		txctx := newTestTxEnvelope("", testChainName, testSenderAddr)
+		chainRegistryClient.EXPECT().GetChainByName(gomock.Any(), testChainName).Return(&models.Chain{
+			UUID: testChainUUID,
+			Name: testChainName,
+		}, nil)
+
+		chainRegistryClient.EXPECT().GetFaucetCandidate(gomock.Any(), testSenderAddr, testChainUUID).Return(candidate, nil)
+		txSchedulerClient.EXPECT().SendTransferTransaction(gomock.Any(), &txschedulertypes.TransferRequest{
+			ChainName: testChainName,
+			Params: txschedulertypes.TransferParams{
+				From:  candidate.Creditor.Hex(),
+				To:    txctx.Envelope.MustGetFromAddress().String(),
+				Value: candidate.Amount.String(),
+			},
+			Labels: types.FaucetToJobLabels(candidate),
+		})
+
+		h(txctx)
+
+		assert.Len(t, txctx.Envelope.GetErrors(), 0)
+	})
+	
+	t.Run("should fail in case if fails to fetch faucet candidates", func(t *testing.T) {
+		expectedErr := errors.ConnectionError("cannot retrieve faucet candidates")
+		txctx := newTestTxEnvelope(testChainUUID, "", testSenderAddr)
+		chainRegistryClient.EXPECT().GetChainByUUID(gomock.Any(), testChainUUID).Return(&models.Chain{
+			UUID: testChainUUID,
+			Name: testChainName,
+		}, nil)
+
+		chainRegistryClient.EXPECT().GetFaucetCandidate(gomock.Any(), testSenderAddr, testChainUUID).Return(nil, expectedErr)
+
+		h(txctx)
+
+		assert.Len(t, txctx.Envelope.GetErrors(), 1)
+		err := txctx.Envelope.GetErrors()[0]
+		assert.Equal(t, err, expectedErr.ExtendComponent(component))
+	})
+	
+	t.Run("should ignore in case there is not available candidates", func(t *testing.T) {
+		txctx := newTestTxEnvelope(testChainUUID, "", testSenderAddr)
+		chainRegistryClient.EXPECT().GetChainByUUID(gomock.Any(), testChainUUID).Return(&models.Chain{
+			UUID: testChainUUID,
+			Name: testChainName,
+		}, nil)
+
+		chainRegistryClient.EXPECT().GetFaucetCandidate(gomock.Any(), testSenderAddr, testChainUUID).Return(nil, nil)
+
+		h(txctx)
+
+		assert.Len(t, txctx.Envelope.GetErrors(), 0)
+	})
+	
+	t.Run("should fail to send faucet transaction", func(t *testing.T) {
+		expectedErr := errors.ConnectionError("cannot reach tx-scheduler service")
+		txctx := newTestTxEnvelope(testChainUUID, "", testSenderAddr)
+		chainRegistryClient.EXPECT().GetChainByUUID(gomock.Any(), testChainUUID).Return(&models.Chain{
+			UUID: testChainUUID,
+			Name: testChainName,
+		}, nil)
+
+		chainRegistryClient.EXPECT().GetFaucetCandidate(gomock.Any(), testSenderAddr, testChainUUID).Return(candidate, nil)
+		txSchedulerClient.EXPECT().SendTransferTransaction(gomock.Any(), &txschedulertypes.TransferRequest{
+			ChainName: testChainName,
+			Params: txschedulertypes.TransferParams{
+				From:  candidate.Creditor.Hex(),
+				To:    txctx.Envelope.MustGetFromAddress().String(),
+				Value: candidate.Amount.String(),
+			},
+			Labels: types.FaucetToJobLabels(candidate),
+		}).Return(nil, expectedErr)
+
+		h(txctx)
+
+		assert.Len(t, txctx.Envelope.GetErrors(), 1)
+		err := txctx.Envelope.GetErrors()[0]
+		assert.Equal(t, err, expectedErr.ExtendComponent(component))
+	})
 }

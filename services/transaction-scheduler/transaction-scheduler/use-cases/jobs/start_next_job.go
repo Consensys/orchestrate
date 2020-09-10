@@ -62,8 +62,6 @@ func (uc *startNextJobUseCase) Execute(ctx context.Context, jobUUID string, tena
 		err = uc.handleOrionMarkingTx(ctx, jobModel, nextJobModel)
 	case utils.TesseraMarkingTransaction:
 		err = uc.handleTesseraMarkingTx(ctx, jobModel, nextJobModel)
-	default:
-		err = errors.DataError("not implemented job strategy for type %s", nextJobModel.Type)
 	}
 
 	if err != nil {

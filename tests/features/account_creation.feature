@@ -23,46 +23,23 @@ Feature: Generate account
     And I register the following chains
       | alias | Name                | URLs                         | Headers.Authorization    |
       | besu  | besu-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
+    And I register the following faucets
+      | Name                | ChainRule     | CreditorAccount                             | MaxBalance       | Amount           | Cooldown | Headers.Authorization    |
+      | besu-{{scenarioID}} | {{besu.UUID}} | {{global.nodes.besu_1.fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1s       | Bearer {{tenant1.token}} |
     And I have created the following accounts
-      | alias    | ID              | Headers.Authorization    |
-      | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
-    Then I track the following envelopes
-      | ID                  |
-      | faucet-{{account1}} |
+      | alias    | ID              | ChainName           | Headers.Authorization    |
+      | account1 | {{random.uuid}} | besu-{{scenarioID}} | Bearer {{tenant1.token}} |
+    Given I sleep "3s"
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/transfer" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-      "from": "{{global.nodes.besu_1.fundedPublicKeys[0]}}",
-      "to": "{{account1}}",
-      "value": "150000000000000000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "faucet-{{account1}}"
-    }
-}
-      """
-    Then the response code should be 202
-    Then Envelopes should be in topic "tx.sender"
-    Then Envelopes should be in topic "tx.decoded"
-    And I register the following faucets
-      | Name                       | ChainRule     | CreditorAccount | MaxBalance       | Amount           | Cooldown | Headers.Authorization    |
-      | besu-faucet-{{scenarioID}} | {{besu.UUID}} | {{account1}}    | 1000000000000000 | 1000000000000000 | 1s       | Bearer {{tenant1.token}} |
-    And I have created the following accounts
-      | alias    | ID              | ChainName           | ContextLabels.faucetChildTxID | Headers.Authorization    |
-      | account2 | {{random.uuid}} | besu-{{scenarioID}} | {{random.uuid}}               | Bearer {{tenant1.token}} |
     When I send "POST" request to "{{global.chain-registry}}/{{besu.UUID}}" with json:
       """
       {
         "jsonrpc": "2.0",
         "method": "eth_getBalance",
         "params": [
-          "{{account2}}",
+          "{{account1}}",
           "latest"
         ],
         "id": 1

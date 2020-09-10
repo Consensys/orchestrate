@@ -7,15 +7,15 @@ import (
 	"encoding/json"
 	"fmt"
 
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/gofrs/uuid"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
-
-	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
-
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/chain-registry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs"
@@ -35,7 +35,7 @@ type SendTxUseCase interface {
 type sendTxUsecase struct {
 	validator           validators.TransactionValidator
 	db                  store.DB
-	chainRegistryCLient chainregistry.ChainRegistryClient
+	chainRegistryClient chainregistry.ChainRegistryClient
 	startJobUC          jobs.StartJobUseCase
 	createJobUC         jobs.CreateJobUseCase
 	createScheduleUC    schedules.CreateScheduleUseCase
@@ -46,7 +46,7 @@ type sendTxUsecase struct {
 func NewSendTxUseCase(
 	validator validators.TransactionValidator,
 	db store.DB,
-	chainRegistryCLient chainregistry.ChainRegistryClient,
+	chainRegistryClient chainregistry.ChainRegistryClient,
 	startJobUseCase jobs.StartJobUseCase,
 	createJobUC jobs.CreateJobUseCase,
 	createScheduleUC schedules.CreateScheduleUseCase,
@@ -55,7 +55,7 @@ func NewSendTxUseCase(
 	return &sendTxUsecase{
 		validator:           validator,
 		db:                  db,
-		chainRegistryCLient: chainRegistryCLient,
+		chainRegistryClient: chainRegistryClient,
 		startJobUC:          startJobUseCase,
 		createJobUC:         createJobUC,
 		createScheduleUC:    createScheduleUC,
@@ -87,8 +87,15 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 	}
 
 	// Step 4: Start first job of the schedule if status is CREATED
+	// Otherwise there was another request with same idempotency key and same reqHash
 	job := txRequest.Schedule.Jobs[0]
 	if job.GetStatus() == utils.StatusCreated {
+		err = uc.startFaucetJob(ctx, txRequest.Params.From, chainUUID, job.ScheduleUUID, tenantID)
+		if err != nil {
+			logger.WithError(err).Error("could not start faucet job")
+			return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
+		}
+
 		err = uc.startJobUC.Execute(ctx, job.UUID, []string{tenantID})
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
@@ -106,7 +113,7 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 }
 
 func (uc *sendTxUsecase) getChainUUID(ctx context.Context, chainName string) (string, error) {
-	chain, err := uc.chainRegistryCLient.GetChainByName(ctx, chainName)
+	chain, err := uc.chainRegistryClient.GetChainByName(ctx, chainName)
 	if err != nil {
 		errMessage := fmt.Sprintf("cannot load '%s' chain", chainName)
 		log.WithContext(ctx).WithError(err).Error(errMessage)
@@ -164,6 +171,7 @@ func (uc *sendTxUsecase) insertNewTxRequest(
 		txRequest.UUID = txRequestModel.UUID
 
 		sendTxJobs := parsers.NewJobEntitiesFromTxRequest(txRequest, chainUUID, txData)
+
 		txRequest.Schedule.Jobs = make([]*entities.Job, len(sendTxJobs))
 		var nextJobUUID string
 		for idx, txJob := range sendTxJobs {
@@ -188,6 +196,54 @@ func (uc *sendTxUsecase) insertNewTxRequest(
 	})
 
 	return txRequest, err
+}
+
+// Execute validates, creates and starts a new transaction for pre funding users account
+func (uc *sendTxUsecase) startFaucetJob(ctx context.Context, account, chainUUID, scheduleUUID, tenantID string) error {
+	if account == "" || account == ethcommon.HexToAddress("0x").String() {
+		return nil
+	}
+
+	logger := log.WithContext(ctx).WithField("chain_uuid", chainUUID)
+
+	fct, err := uc.chainRegistryClient.GetFaucetCandidate(ctx, ethcommon.HexToAddress(account), chainUUID)
+	if err != nil {
+		return err
+	}
+
+	if fct == nil {
+		errMsg := "could not find a candidate faucets"
+		logger.Debugf(errMsg)
+		return nil
+	}
+
+	logger.WithFields(log.Fields{
+		"faucet.amount": fct.Amount,
+	}).Infof("faucet: credit approved")
+
+	txJob := generateFaucetJob(fct, scheduleUUID, chainUUID, account)
+
+	fctJob, err := uc.createJobUC.Execute(ctx, txJob, []string{tenantID})
+	if err != nil {
+		return err
+	}
+
+	return uc.startJobUC.Execute(ctx, fctJob.UUID, []string{tenantID})
+}
+
+func generateFaucetJob(fct *types.Faucet, scheduleUUID, chainUUID, account string) *entities.Job {
+	return &entities.Job{
+		ScheduleUUID: scheduleUUID,
+		ChainUUID:    chainUUID,
+		Type:         utils.EthereumTransaction,
+		Labels:       types.FaucetToJobLabels(fct),
+		InternalData: &entities.InternalData{},
+		Transaction: &entities.ETHTransaction{
+			From:  fct.Creditor.Hex(),
+			To:    account,
+			Value: fct.Amount.String(),
+		},
+	}
 }
 
 func generateRequestHash(chainUUID string, params interface{}) (string, error) {

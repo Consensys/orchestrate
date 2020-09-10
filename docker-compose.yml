@@ -253,7 +253,7 @@ services:
     <<: *container-common
     environment:
       <<: *default-variables
-    command: utils generate-jwt 
+    command: utils generate-jwt --tenant=${TENANT_ID-_}
     restart: "no"
 
 volumes:

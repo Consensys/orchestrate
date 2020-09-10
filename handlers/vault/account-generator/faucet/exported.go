@@ -4,15 +4,13 @@ import (
 	"context"
 	"sync"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	chaininjector "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/chain-injector"
 	handlerfaucet "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/faucet"
-	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/controllers"
-
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/faucet/faucet"
+	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
+	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 )
 
 const component = "handler.account-generator.faucet"
@@ -30,7 +28,7 @@ func Init(ctx context.Context) {
 		}
 
 		// Initialize Controlled Faucet
-		controllers.Init(ctx)
+		txscheduler.Init()
 
 		// Initialize chain-registry client
 		registry.Init(ctx)
@@ -38,7 +36,7 @@ func Init(ctx context.Context) {
 		// Create Handler
 		handler = engine.CombineHandlers(
 			chaininjector.ChainUUIDHandlerWithoutAbort(registry.GlobalClient(), viper.GetString(registry.ChainRegistryURLViperKey)),
-			handlerfaucet.Faucet(faucet.GlobalFaucet(), registry.GlobalClient()),
+			handlerfaucet.Faucet(registry.GlobalClient(), txscheduler.GlobalClient()),
 		)
 
 		log.Infof("%s: handler ready", component)
