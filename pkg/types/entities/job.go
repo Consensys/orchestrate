@@ -32,15 +32,19 @@ func getStatus(logs []*Log) string {
 	var status string
 	var logCreatedAt *time.Time
 	for idx := range logs {
+		// Ignore resending and warning statuses
+		if logs[idx].Status == utils.StatusResending || logs[idx].Status == utils.StatusWarning {
+			continue
+		}
+		// Ignore fail statuses if they come after a resending
+		if logs[idx].Status == utils.StatusFailed && idx > 1 && logs[idx-1].Status == utils.StatusResending {
+			continue
+		}
+
 		if logCreatedAt == nil || logs[idx].CreatedAt.After(*logCreatedAt) {
 			status = logs[idx].Status
 			logCreatedAt = &logs[idx].CreatedAt
 		}
-	}
-
-	// Recursive function until we reach a valid status
-	if status == utils.StatusWarning {
-		return getStatus(logs[:len(logs)-1])
 	}
 
 	return status

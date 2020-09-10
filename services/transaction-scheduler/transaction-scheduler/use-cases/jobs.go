@@ -16,6 +16,7 @@ type JobUseCases interface {
 	CreateJob() CreateJobUseCase
 	GetJob() GetJobUseCase
 	StartJob() StartJobUseCase
+	ResendJobTx() ResendJobTxUseCase
 	UpdateJob() UpdateJobUseCase
 	SearchJobs() SearchJobsUseCase
 }
@@ -48,4 +49,8 @@ type UpdateJobUseCase interface {
 type UpdateChildrenUseCase interface {
 	Execute(ctx context.Context, jobUUID, parentJobUUID, nextStatus string, tenants []string) error
 	WithDBTransaction(dbtx store.Tx) UpdateChildrenUseCase
+}
+
+type ResendJobTxUseCase interface {
+	Execute(ctx context.Context, jobUUID string, tenants []string) error
 }

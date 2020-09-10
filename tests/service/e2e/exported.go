@@ -14,6 +14,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	pkglog "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/redis"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/handlers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/handlers/consumer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/handlers/dispatcher"
@@ -122,6 +123,10 @@ func initComponents(ctx context.Context) {
 			// Create and configure logger
 			logger := logrus.StandardLogger()
 			_ = pkglog.ConfigureLogger(cfg, logger)
+		},
+		// Initialize Nonce Manager
+		func() {
+			redis.Init()
 		},
 		// Initialize cucumber handlers
 		func() {

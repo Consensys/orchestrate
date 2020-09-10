@@ -3,7 +3,6 @@ package formatters
 import (
 	"net/http"
 	"strings"
-	"time"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
@@ -11,7 +10,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
-func FormatSendTxRequest(sendTxRequest *types.SendTransactionRequest, idempotencyKey string, defaultRetryInterval time.Duration) *entities.TxRequest {
+func FormatSendTxRequest(sendTxRequest *types.SendTransactionRequest, idempotencyKey string) *entities.TxRequest {
 	return &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,
 		ChainName:      sendTxRequest.ChainName,
@@ -32,13 +31,12 @@ func FormatSendTxRequest(sendTxRequest *types.SendTransactionRequest, idempotenc
 		InternalData: formatInternalData(
 			sendTxRequest.Params.OneTimeKey,
 			&sendTxRequest.Params.GasPricePolicy,
-			defaultRetryInterval,
 			"",
 		),
 	}
 }
 
-func FormatDeployContractRequest(deployRequest *types.DeployContractRequest, idempotencyKey string, defaultRetryInterval time.Duration) *entities.TxRequest {
+func FormatDeployContractRequest(deployRequest *types.DeployContractRequest, idempotencyKey string) *entities.TxRequest {
 	return &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,
 		ChainName:      deployRequest.ChainName,
@@ -59,13 +57,12 @@ func FormatDeployContractRequest(deployRequest *types.DeployContractRequest, ide
 		InternalData: formatInternalData(
 			deployRequest.Params.OneTimeKey,
 			&deployRequest.Params.GasPricePolicy,
-			defaultRetryInterval,
 			"",
 		),
 	}
 }
 
-func FormatSendRawRequest(rawTxRequest *types.RawTransactionRequest, idempotencyKey string, defaultRetryInterval time.Duration) *entities.TxRequest {
+func FormatSendRawRequest(rawTxRequest *types.RawTransactionRequest, idempotencyKey string) *entities.TxRequest {
 	// Do not use InternalData directly as we only want to expose the RetryInterval param
 	gasPricePolicy := &types.GasPriceParams{
 		RetryPolicy: types.RetryParams{
@@ -80,11 +77,11 @@ func FormatSendRawRequest(rawTxRequest *types.RawTransactionRequest, idempotency
 		Params: &entities.ETHTransactionParams{
 			Raw: rawTxRequest.Params.Raw,
 		},
-		InternalData: formatInternalData(false, gasPricePolicy, defaultRetryInterval, ""),
+		InternalData: formatInternalData(false, gasPricePolicy, ""),
 	}
 }
 
-func FormatTransferRequest(transferRequest *types.TransferRequest, idempotencyKey string, defaultRetryInterval time.Duration) *entities.TxRequest {
+func FormatTransferRequest(transferRequest *types.TransferRequest, idempotencyKey string) *entities.TxRequest {
 	return &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,
 		ChainName:      transferRequest.ChainName,
@@ -99,7 +96,6 @@ func FormatTransferRequest(transferRequest *types.TransferRequest, idempotencyKe
 		InternalData: formatInternalData(
 			false,
 			&transferRequest.Params.GasPricePolicy,
-			defaultRetryInterval,
 			"",
 		),
 	}

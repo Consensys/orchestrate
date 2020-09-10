@@ -29,6 +29,7 @@ type JobClient interface {
 	CreateJob(ctx context.Context, request *types.CreateJobRequest) (*types.JobResponse, error)
 	UpdateJob(ctx context.Context, jobUUID string, request *types.UpdateJobRequest) (*types.JobResponse, error)
 	StartJob(ctx context.Context, jobUUID string) error
+	ResendJobTx(ctx context.Context, jobUUID string) error
 	SearchJob(ctx context.Context, filters *entities.JobFilters) ([]*types.JobResponse, error)
 }
 

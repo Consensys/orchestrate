@@ -18,25 +18,29 @@ func RawTxStore(txSchedulerClient client.TransactionSchedulerClient) engine.Hand
 		txctx.Logger.Debug("transaction scheduler: updating transaction to PENDING")
 
 		computedTxHash := txctx.Envelope.GetTxHashString()
-		_, err := txSchedulerClient.UpdateJob(
-			txctx.Context(),
-			txctx.Envelope.GetID(),
-			&txschedulertypes.UpdateJobRequest{
-				Transaction: &entities.ETHTransaction{
-					Hash:           computedTxHash,
-					From:           txctx.Envelope.GetFromString(),
-					To:             txctx.Envelope.GetToString(),
-					Nonce:          txctx.Envelope.GetNonceString(),
-					Value:          txctx.Envelope.GetValueString(),
-					GasPrice:       txctx.Envelope.GetGasPriceString(),
-					Gas:            txctx.Envelope.GetGasString(),
-					Raw:            txctx.Envelope.GetRaw(),
-					PrivateFrom:    txctx.Envelope.GetPrivateFrom(),
-					PrivateFor:     txctx.Envelope.GetPrivateFor(),
-					PrivacyGroupID: txctx.Envelope.GetPrivacyGroupID(),
-				},
-				Status: utils.StatusPending,
-			})
+		txUpdateReq := &txschedulertypes.UpdateJobRequest{
+			Transaction: &entities.ETHTransaction{
+				Hash:           computedTxHash,
+				From:           txctx.Envelope.GetFromString(),
+				To:             txctx.Envelope.GetToString(),
+				Nonce:          txctx.Envelope.GetNonceString(),
+				Value:          txctx.Envelope.GetValueString(),
+				GasPrice:       txctx.Envelope.GetGasPriceString(),
+				Gas:            txctx.Envelope.GetGasString(),
+				Raw:            txctx.Envelope.GetRaw(),
+				PrivateFrom:    txctx.Envelope.GetPrivateFrom(),
+				PrivateFor:     txctx.Envelope.GetPrivateFor(),
+				PrivacyGroupID: txctx.Envelope.GetPrivacyGroupID(),
+			},
+		}
+
+		if txctx.Envelope.IsResendingJobTx() {
+			txUpdateReq.Status = utils.StatusResending
+		} else {
+			txUpdateReq.Status = utils.StatusPending
+		}
+
+		_, err := txSchedulerClient.UpdateJob(txctx.Context(), txctx.Envelope.GetID(), txUpdateReq)
 
 		if err != nil {
 			e := txctx.AbortWithError(err).ExtendComponent(component)
@@ -48,7 +52,7 @@ func RawTxStore(txSchedulerClient client.TransactionSchedulerClient) engine.Hand
 		txctx.Next()
 
 		// If an error occurred when executing pending handlers
-		if len(txctx.Envelope.GetErrors()) != 0 {
+		if len(txctx.Envelope.GetErrors()) != 0 && !txctx.Envelope.IsChildJob() {
 			txctx.Logger.Debug("transaction scheduler: updating transaction to RECOVERING")
 			_, updateErr := txSchedulerClient.UpdateJob(
 				txctx.Context(),

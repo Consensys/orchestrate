@@ -76,6 +76,20 @@ func (mr *MockAttributorMockRecorder) SetLastAttributed(key, value interface{}) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetLastAttributed", reflect.TypeOf((*MockAttributor)(nil).SetLastAttributed), key, value)
 }
 
+// DeleteLastAttributed mocks base method
+func (m *MockAttributor) DeleteLastAttributed(key string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteLastAttributed", key)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteLastAttributed indicates an expected call of DeleteLastAttributed
+func (mr *MockAttributorMockRecorder) DeleteLastAttributed(key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteLastAttributed", reflect.TypeOf((*MockAttributor)(nil).DeleteLastAttributed), key)
+}
+
 // MockSender is a mock of Sender interface
 type MockSender struct {
 	ctrl     *gomock.Controller
@@ -127,6 +141,20 @@ func (m *MockSender) IncrLastSent(key string) error {
 func (mr *MockSenderMockRecorder) IncrLastSent(key interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IncrLastSent", reflect.TypeOf((*MockSender)(nil).IncrLastSent), key)
+}
+
+// DeleteLastSent mocks base method
+func (m *MockSender) DeleteLastSent(key string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteLastSent", key)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteLastSent indicates an expected call of DeleteLastSent
+func (mr *MockSenderMockRecorder) DeleteLastSent(key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteLastSent", reflect.TypeOf((*MockSender)(nil).DeleteLastSent), key)
 }
 
 // SetLastSent mocks base method
@@ -239,6 +267,20 @@ func (mr *MockManagerMockRecorder) SetLastAttributed(key, value interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetLastAttributed", reflect.TypeOf((*MockManager)(nil).SetLastAttributed), key, value)
 }
 
+// DeleteLastAttributed mocks base method
+func (m *MockManager) DeleteLastAttributed(key string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteLastAttributed", key)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteLastAttributed indicates an expected call of DeleteLastAttributed
+func (mr *MockManagerMockRecorder) DeleteLastAttributed(key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteLastAttributed", reflect.TypeOf((*MockManager)(nil).DeleteLastAttributed), key)
+}
+
 // GetLastSent mocks base method
 func (m *MockManager) GetLastSent(key string) (uint64, bool, error) {
 	m.ctrl.T.Helper()
@@ -267,6 +309,20 @@ func (m *MockManager) IncrLastSent(key string) error {
 func (mr *MockManagerMockRecorder) IncrLastSent(key interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IncrLastSent", reflect.TypeOf((*MockManager)(nil).IncrLastSent), key)
+}
+
+// DeleteLastSent mocks base method
+func (m *MockManager) DeleteLastSent(key string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteLastSent", key)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteLastSent indicates an expected call of DeleteLastSent
+func (mr *MockManagerMockRecorder) DeleteLastSent(key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteLastSent", reflect.TypeOf((*MockManager)(nil).DeleteLastSent), key)
 }
 
 // SetLastSent mocks base method

@@ -17,6 +17,7 @@ func FakeJob() *entities.Job {
 		ChainUUID:    uuid.Must(uuid.NewV4()).String(),
 		Type:         utils.EthereumTransaction,
 		InternalData: FakeInternalData(),
+		Labels:       make(map[string]string),
 		Logs:         []*entities.Log{FakeLog()},
 		CreatedAt:    time.Now(),
 		Transaction:  FakeETHTransaction(),

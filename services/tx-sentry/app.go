@@ -32,7 +32,7 @@ type txsentryDaemon struct {
 
 func NewTxSentry(txSchedulerClient client.TransactionSchedulerClient, config *Config) app.Daemon {
 	// Create business layer
-	createChildJobUC := usecases.NewCreateChildJobUseCase(txSchedulerClient)
+	createChildJobUC := usecases.NewRetrySessionJobUseCase(txSchedulerClient)
 	return &txsentryDaemon{
 		txSchedulerClient: txSchedulerClient,
 		sessionManager:    listeners.NewSessionManager(createChildJobUC),

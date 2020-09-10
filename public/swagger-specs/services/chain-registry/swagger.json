@@ -176,7 +176,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "Chains deleted successfully"
+                        "description": "Chain deleted successfully"
                     },
                     "400": {
                         "description": "Invalid request",
@@ -366,13 +366,15 @@
                         "type": "string",
                         "description": "chain uuid to calculate faucet candidate",
                         "name": "chain_uuid",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "string",
                         "description": "hex address of account sender",
-                        "name": "sender",
-                        "in": "query"
+                        "name": "account",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {

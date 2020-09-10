@@ -274,6 +274,15 @@ func TestRetryParams_Validation(t *testing.T) {
 			},
 			true,
 		},
+		{
+			"Amount of retries exceeds limit",
+			RetryParams{
+				Interval:  "1s",
+				Increment: 0.1,
+				Limit:     1.2,
+			},
+			true,
+		},
 	}
 
 	for _, test := range testSet {

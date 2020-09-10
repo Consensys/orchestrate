@@ -44,7 +44,11 @@ func (uc *searchJobsUseCase) Execute(ctx context.Context, filters *entities.JobF
 
 	var resp []*entities.Job
 	for _, jobModel := range jobModels {
-		resp = append(resp, parsers.NewJobEntityFromModels(jobModel))
+		job := parsers.NewJobEntityFromModels(jobModel)
+		// Job.Status is a computed value, so that, we filter after parsing
+		if filters.Status == "" || job.GetStatus() == filters.Status {
+			resp = append(resp, job)
+		}
 	}
 
 	// Debug as search jobs is constantly called by tx-listener and tx-sentry

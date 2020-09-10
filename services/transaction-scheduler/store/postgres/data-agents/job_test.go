@@ -248,19 +248,6 @@ func (s *jobTestSuite) TestPGJob_Search() {
 		assert.Equal(t, job0.Logs[1].UUID, retrievedJobs[0].Logs[1].UUID)
 	})
 
-	s.T().Run("should find models successfully by status", func(t *testing.T) {
-		filters := &entities.JobFilters{
-			Status: utils.StatusPending,
-		}
-
-		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{s.tenantID})
-
-		assert.NoError(t, err)
-		assert.Len(t, retrievedJobs, 1)
-		assert.Equal(t, retrievedJobs[0].UUID, job1.UUID)
-		assert.Equal(t, len(job1.Logs), len(retrievedJobs[0].Logs))
-	})
-
 	s.T().Run("should not find any model by txHashes", func(t *testing.T) {
 		filters := &entities.JobFilters{
 			TxHashes:  []string{"0x3"},

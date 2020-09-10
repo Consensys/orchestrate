@@ -102,6 +102,7 @@ func FakeJobResponse() *types.JobResponse {
 		ChainUUID:   uuid.Must(uuid.NewV4()).String(),
 		Transaction: *FakeETHTransaction(),
 		Status:      utils.StatusCreated,
+		Labels:      make(map[string]string),
 		Annotations: types.Annotations{
 			GasPricePolicy: types.GasPriceParams{
 				RetryPolicy: types.RetryParams{

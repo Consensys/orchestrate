@@ -124,15 +124,6 @@ func (agent *PGJob) Search(ctx context.Context, filters *entities.JobFilters, te
 		query = query.Where("job.chain_uuid = ?", filters.ChainUUID)
 	}
 
-	if filters.Status != "" {
-		query = query.
-			Join("LEFT JOIN logs as log").
-			JoinOn("log.job_id = job.id").
-			Join("LEFT JOIN logs as tmpl").
-			JoinOn("tmpl.job_id = job.id AND log.created_at < tmpl.created_at").
-			Where("tmpl.id is null AND log.status = ?", filters.Status)
-	}
-
 	if filters.ParentJobUUID != "" {
 		query = query.
 			Where("job.uuid = ?", filters.ParentJobUUID).

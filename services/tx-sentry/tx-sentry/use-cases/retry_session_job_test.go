@@ -4,6 +4,8 @@ package usecases
 
 import (
 	"context"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
@@ -11,7 +13,6 @@ import (
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client/mock"
-	"testing"
 )
 
 func TestCreateChildJob_Execute(t *testing.T) {
@@ -23,7 +24,7 @@ func TestCreateChildJob_Execute(t *testing.T) {
 
 	mockTxSchedulerClient := mock.NewMockTransactionSchedulerClient(ctrl)
 
-	usecase := NewCreateChildJobUseCase(mockTxSchedulerClient)
+	usecase := NewRetrySessionJobUseCase(mockTxSchedulerClient)
 
 	t.Run("should do nothing if status of the job is not PENDING", func(t *testing.T) {
 		parentJob := testutils.FakeJob()
@@ -46,6 +47,8 @@ func TestCreateChildJob_Execute(t *testing.T) {
 		parentJobResponse := testutils.FakeJobResponse()
 		parentJobResponse.Status = utils.StatusPending
 		parentJobResponse.Transaction.GasPrice = initialGasPrice
+		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Increment = 0.1
+		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Limit = 0.2
 		jobResponses := []*types.JobResponse{parentJobResponse}
 
 		mockTxSchedulerClient.EXPECT().SearchJob(ctx, gomock.Any()).Return(jobResponses, nil)
@@ -57,6 +60,77 @@ func TestCreateChildJob_Execute(t *testing.T) {
 		assert.NotEmpty(t, childJobUUID)
 	})
 
+	t.Run("should resend job transaction if the parent job status is PENDING with not gas increment", func(t *testing.T) {
+		parentJobResponse := testutils.FakeJobResponse()
+		parentJobResponse.Status = utils.StatusPending
+		parentJobResponse.Transaction.GasPrice = initialGasPrice
+		jobResponses := []*types.JobResponse{parentJobResponse}
+
+		mockTxSchedulerClient.EXPECT().SearchJob(ctx, gomock.Any()).Return(jobResponses, nil)
+		mockTxSchedulerClient.EXPECT().ResendJobTx(ctx, parentJobResponse.UUID).Return(nil)
+
+		childJobUUID, err := usecase.Execute(ctx, testutils.FakeJob())
+		assert.NoError(t, err)
+		assert.Equal(t, childJobUUID, parentJobResponse.UUID)
+	})
+
+	t.Run("should exit gracefully if session exceed the number of children", func(t *testing.T) {
+		parentJob := testutils.FakeJob()
+		parentJobResponse := testutils.FakeJobResponse()
+		parentJobResponse.Status = utils.StatusPending
+		for idx := 0; idx <= types.SentryMaxRetries; idx++ {
+			parentJobResponse.Logs = append(parentJobResponse.Logs, &entities.Log{
+				Status: utils.StatusResending,
+			})
+		}
+		jobResponses := []*types.JobResponse{parentJobResponse}
+		mockTxSchedulerClient.EXPECT().SearchJob(ctx, gomock.Any()).Return(jobResponses, nil)
+
+		childJobUUID, err := usecase.Execute(ctx, parentJob)
+		assert.NoError(t, err)
+		assert.Empty(t, childJobUUID)
+	})
+
+	t.Run("should exit gracefully if session exceed the number of children in case of gasIncrement", func(t *testing.T) {
+		parentJob := testutils.FakeJob()
+		parentJobResponse := testutils.FakeJobResponse()
+		parentJobResponse.Status = utils.StatusPending
+		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Increment = 0.1
+		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Limit = 0.2
+		jobResponses := make([]*types.JobResponse, types.SentryMaxRetries+1)
+		jobResponses[0] = parentJobResponse
+		jobResponses[types.SentryMaxRetries] = parentJobResponse
+		mockTxSchedulerClient.EXPECT().SearchJob(ctx, gomock.Any()).Return(jobResponses, nil)
+
+		childJobUUID, err := usecase.Execute(ctx, parentJob)
+		assert.NoError(t, err)
+		assert.Empty(t, childJobUUID)
+	})
+
+	t.Run("should exit gracefully if session exceed the number of children in case of gasIncrement including resending", func(t *testing.T) {
+		parentJob := testutils.FakeJob()
+		parentJobResponse := testutils.FakeJobResponse()
+		parentJobResponse.Status = utils.StatusPending
+		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Increment = 0.1
+		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Limit = 0.2
+		jobResponses := make([]*types.JobResponse, 3)
+		
+		childJobResponse := testutils.FakeJobResponse()
+		for idx := 3; idx <= types.SentryMaxRetries; idx++ {
+			childJobResponse.Logs = append(childJobResponse.Logs, &entities.Log{
+				Status: utils.StatusResending,
+			})
+		}
+
+		jobResponses[0] = parentJobResponse
+		jobResponses[2] = childJobResponse
+		mockTxSchedulerClient.EXPECT().SearchJob(ctx, gomock.Any()).Return(jobResponses, nil)
+
+		childJobUUID, err := usecase.Execute(ctx, parentJob)
+		assert.NoError(t, err)
+		assert.Empty(t, childJobUUID)
+	})
+
 	t.Run("should send the same job if job is a raw transaction", func(t *testing.T) {
 		parentJob := testutils.FakeJob()
 		childJobResponse := testutils.FakeJobResponse()
@@ -64,6 +138,8 @@ func TestCreateChildJob_Execute(t *testing.T) {
 		parentJobResponse.Transaction.Raw = "0xraw"
 		parentJobResponse.Type = utils.EthereumRawTransaction
 		parentJobResponse.Status = utils.StatusPending
+		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Increment = 0.1
+		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Limit = 0.2
 		jobResponses := []*types.JobResponse{parentJobResponse}
 
 		mockTxSchedulerClient.EXPECT().SearchJob(ctx, gomock.Any()).Return(jobResponses, nil)

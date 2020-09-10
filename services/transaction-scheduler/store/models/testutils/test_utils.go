@@ -70,12 +70,13 @@ func FakeJobModel(scheduleID int) *models.Job {
 		},
 		Transaction: FakeTransaction(),
 		Logs: []*models.Log{
-			{UUID: uuid.Must(uuid.NewV4()).String(), Status: utils.StatusCreated, Message: "created message"},
+			{UUID: uuid.Must(uuid.NewV4()).String(), Status: utils.StatusCreated, Message: "created message", CreatedAt: time.Now()},
 		},
 		InternalData: &entities.InternalData{
 			ChainID: "888",
 		},
 		CreatedAt: time.Now(),
+		Labels:    make(map[string]string),
 	}
 
 	if scheduleID != 0 {

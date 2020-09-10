@@ -3,30 +3,27 @@ package controllers
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 
 	"github.com/gorilla/mux"
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 )
 
 var _ entities.ETHTransaction
 
 type JobsController struct {
-	ucs                  usecases.JobUseCases
-	defaultRetryInterval time.Duration
+	ucs usecases.JobUseCases
 }
 
-func NewJobsController(useCases usecases.JobUseCases, defaultRetryInterval time.Duration) *JobsController {
+func NewJobsController(useCases usecases.JobUseCases) *JobsController {
 	return &JobsController{
-		ucs:                  useCases,
-		defaultRetryInterval: defaultRetryInterval,
+		ucs: useCases,
 	}
 }
 
@@ -37,6 +34,7 @@ func (c *JobsController) Append(router *mux.Router) {
 	router.Methods(http.MethodGet).Path("/jobs/{uuid}").HandlerFunc(c.getOne)
 	router.Methods(http.MethodPatch).Path("/jobs/{uuid}").HandlerFunc(c.update)
 	router.Methods(http.MethodPut).Path("/jobs/{uuid}/start").HandlerFunc(c.start)
+	router.Methods(http.MethodPut).Path("/jobs/{uuid}/resend").HandlerFunc(c.resend)
 }
 
 // @Summary Search jobs by provided filters
@@ -103,7 +101,7 @@ func (c *JobsController) create(rw http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	job := formatters.FormatJobCreateRequest(jobRequest, c.defaultRetryInterval)
+	job := formatters.FormatJobCreateRequest(jobRequest)
 	jobRes, err := c.ucs.CreateJob().Execute(ctx, job, multitenancy.AllowedTenantsFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
@@ -154,6 +152,30 @@ func (c *JobsController) start(rw http.ResponseWriter, request *http.Request) {
 
 	jobUUID := mux.Vars(request)["uuid"]
 	err := c.ucs.StartJob().Execute(ctx, jobUUID, multitenancy.AllowedTenantsFromContext(ctx))
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	rw.WriteHeader(http.StatusAccepted)
+}
+
+// @Summary Resend Job transaction by UUID
+// @Description Resend transaction of specific job by UUID, effectively executing the re-sending of transaction asynchronously
+// @Produce json
+// @Security ApiKeyAuth
+// @Security JWTAuth
+// @Param uuid path string true "UUID of the job"
+// @Success 202
+// @Failure 404 {object} httputil.ErrorResponse "Job not found"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
+// @Router /jobs/{uuid}/resent [put]
+func (c *JobsController) resend(rw http.ResponseWriter, request *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	ctx := request.Context()
+
+	jobUUID := mux.Vars(request)["uuid"]
+	err := c.ucs.ResendJobTx().Execute(ctx, jobUUID, multitenancy.AllowedTenantsFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return

@@ -83,7 +83,7 @@ func (s *transactionsControllerTestSuite) SetupTest() {
 	s.ctx = context.WithValue(s.ctx, multitenancy.AllowedTenantsKey, []string{s.tenantID})
 
 	s.router = mux.NewRouter()
-	s.controller = NewTransactionsController(s, s.defaultRetryInterval)
+	s.controller = NewTransactionsController(s)
 	s.controller.Append(s.router)
 }
 
@@ -106,7 +106,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_send() {
 		testutils.FakeTxRequest()
 		txRequestEntityResp := testutils.FakeTxRequest()
 
-		txRequestEntity := formatters.FormatSendTxRequest(txRequest, idempotencyKey, s.defaultRetryInterval)
+		txRequestEntity := formatters.FormatSendTxRequest(txRequest, idempotencyKey)
 		s.sendContractTxUseCase.EXPECT().Execute(gomock.Any(), txRequestEntity, s.tenantID).Return(txRequestEntityResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -195,7 +195,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_deploy() {
 
 		txRequestEntityResp := testutils.FakeTxRequest()
 
-		txRequestEntity := formatters.FormatDeployContractRequest(txRequest, idempotencyKey, s.defaultRetryInterval)
+		txRequestEntity := formatters.FormatDeployContractRequest(txRequest, idempotencyKey)
 		s.sendDeployTxUseCase.EXPECT().Execute(gomock.Any(), txRequestEntity, s.tenantID).Return(txRequestEntityResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -254,7 +254,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_sendRaw() {
 
 		txRequestEntityResp := testutils.FakeTxRequest()
 
-		txRequestEntity := formatters.FormatSendRawRequest(txRequest, idempotencyKey, s.defaultRetryInterval)
+		txRequestEntity := formatters.FormatSendRawRequest(txRequest, idempotencyKey)
 		s.sendTxUseCase.EXPECT().Execute(gomock.Any(), txRequestEntity, "", s.tenantID).Return(txRequestEntityResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -315,7 +315,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_transfer() 
 
 		txRequestEntityResp := testutils.FakeTransferTxRequest()
 
-		txRequestEntity := formatters.FormatTransferRequest(txRequest, idempotencyKey, s.defaultRetryInterval)
+		txRequestEntity := formatters.FormatTransferRequest(txRequest, idempotencyKey)
 		s.sendTxUseCase.EXPECT().Execute(gomock.Any(), txRequestEntity, "", s.tenantID).Return(txRequestEntityResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)

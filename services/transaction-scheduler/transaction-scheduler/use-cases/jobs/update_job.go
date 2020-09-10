@@ -116,7 +116,9 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 		return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
 	}
 
-	log.WithContext(ctx).WithField("job_uuid", job.UUID).Info("job updated successfully")
+	log.WithContext(ctx).WithField("job_uuid", job.UUID).
+		WithField("status", nextStatus).
+		Info("job updated successfully")
 	return parsers.NewJobEntityFromModels(jobModel), nil
 }
 
@@ -137,6 +139,8 @@ func canUpdateStatus(nextStatus, status string) bool {
 		return status == utils.StatusCreated
 	case utils.StatusPending:
 		return status == utils.StatusStarted || status == utils.StatusRecovering
+	case utils.StatusResending:
+		return status == utils.StatusPending
 	case utils.StatusRecovering, utils.StatusMined, utils.StatusStored, utils.StatusNeverMined:
 		return status == utils.StatusPending
 	case utils.StatusFailed:

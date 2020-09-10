@@ -27,11 +27,11 @@ type SessionManager interface {
 type sessionManager struct {
 	mutex                 *sync.RWMutex
 	sessions              map[string]*entities.Job
-	createChildJobUseCase usecases.CreateChildJobUseCase
+	createChildJobUseCase usecases.RetrySessionJobUseCase
 }
 
 // NewSessionManager creates a new SessionManager
-func NewSessionManager(createChildJobUseCase usecases.CreateChildJobUseCase) SessionManager {
+func NewSessionManager(createChildJobUseCase usecases.RetrySessionJobUseCase) SessionManager {
 	return &sessionManager{
 		mutex:                 &sync.RWMutex{},
 		sessions:              make(map[string]*entities.Job),
@@ -49,6 +49,11 @@ func (manager *sessionManager) Start(ctx context.Context, job *entities.Job) {
 
 	if job.InternalData.ParentJobUUID != "" {
 		logger.Debug("job session is not a parent job, skipping session creation")
+		return
+	}
+
+	if job.InternalData.RetryInterval == 0 {
+		logger.Debug("job session has retry strategy disabled")
 		return
 	}
 

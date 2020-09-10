@@ -52,6 +52,18 @@ func TestSessionManager(t *testing.T) {
 
 		<-ctx.Done()
 	})
+	
+	t.Run("should do nothing if not retry interval is set", func(t *testing.T) {
+		timeout := retryInterval + 500*time.Millisecond
+		ctx, _ := context.WithTimeout(context.Background(), timeout)
+		job := testutils.FakeJob()
+		job.InternalData.RetryInterval = 0
+
+		// First session is added and startSessionUC is called
+		sessionManager.Start(ctx, job)
+
+		<-ctx.Done()
+	})
 
 	t.Run("should do nothing if session is not a parent job", func(t *testing.T) {
 		timeout := 500 * time.Millisecond
@@ -84,6 +96,17 @@ func TestSessionManager(t *testing.T) {
 
 		mockCreateChilUC.EXPECT().Execute(ctx, job).Return("", fmt.Errorf("error"))
 		mockCreateChilUC.EXPECT().Execute(ctx, job).Return("", nil)
+
+		sessionManager.Start(ctx, job)
+
+		<-ctx.Done()
+	})
+	
+	t.Run("should fail without retry if interval is too low", func(t *testing.T) {
+		timeout := 2 * time.Second
+		ctx, _ := context.WithTimeout(context.Background(), timeout)
+		job := testutils.FakeJob()
+		job.InternalData.RetryInterval = time.Millisecond * 500
 
 		sessionManager.Start(ctx, job)
 

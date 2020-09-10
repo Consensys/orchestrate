@@ -10,7 +10,6 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
-	"time"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
@@ -35,10 +34,10 @@ type jobsCtrlTestSuite struct {
 	createJobUC          *mocks6.MockCreateJobUseCase
 	getJobUC             *mocks.MockGetJobUseCase
 	startJobUC           *mocks.MockStartJobUseCase
+	resentJobTxUC        *mocks.MockResendJobTxUseCase
 	startNextJobUC       *mocks.MockStartNextJobUseCase
 	updateJobUC          *mocks.MockUpdateJobUseCase
 	searchJobUC          *mocks.MockSearchJobsUseCase
-	defaultRetryInterval time.Duration
 	ctx                  context.Context
 	tenants              []string
 	router               *mux.Router
@@ -56,6 +55,10 @@ func (s jobsCtrlTestSuite) GetJob() usecases.GetJobUseCase {
 
 func (s jobsCtrlTestSuite) StartJob() usecases.StartJobUseCase {
 	return s.startJobUC
+}
+
+func (s jobsCtrlTestSuite) ResendJobTx() usecases.ResendJobTxUseCase {
+	return s.resentJobTxUC
 }
 
 func (s jobsCtrlTestSuite) StartNextJob() usecases.StartNextJobUseCase {
@@ -85,13 +88,13 @@ func (s *jobsCtrlTestSuite) SetupTest() {
 	s.startJobUC = mocks.NewMockStartJobUseCase(ctrl)
 	s.updateJobUC = mocks.NewMockUpdateJobUseCase(ctrl)
 	s.searchJobUC = mocks.NewMockSearchJobsUseCase(ctrl)
-	s.defaultRetryInterval = time.Second * 2
+	s.resentJobTxUC = mocks.NewMockResendJobTxUseCase(ctrl)
 	s.ctx = context.Background()
 	s.ctx = context.WithValue(s.ctx, multitenancy.TenantIDKey, s.tenants[0])
 	s.ctx = context.WithValue(s.ctx, multitenancy.AllowedTenantsKey, s.tenants)
 	s.router = mux.NewRouter()
 
-	controller := NewJobsController(s, s.defaultRetryInterval)
+	controller := NewJobsController(s)
 	controller.Append(s.router)
 }
 
@@ -294,6 +297,34 @@ func (s *jobsCtrlTestSuite) TestJobsController_Start() {
 			WithContext(s.ctx)
 
 		s.startJobUC.EXPECT().Execute(gomock.Any(), "jobUUID", s.tenants).Return(errors.NotFoundError("error"))
+
+		s.router.ServeHTTP(rw, httpRequest)
+		assert.Equal(t, http.StatusNotFound, rw.Code)
+	})
+}
+
+func (s *jobsCtrlTestSuite) TestJobsController_ResendTxJob() {
+	s.T().Run("should execute resend job transaction request successfully", func(t *testing.T) {
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.
+			NewRequest(http.MethodPut, "/jobs/jobUUID/resend", nil).
+			WithContext(s.ctx)
+
+		s.resentJobTxUC.EXPECT().Execute(gomock.Any(), "jobUUID", s.tenants).Return(nil)
+
+		s.router.ServeHTTP(rw, httpRequest)
+
+		assert.Equal(t, http.StatusAccepted, rw.Code)
+	})
+
+	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
+	s.T().Run("should fail with 404 if use case fails with NotFoundError", func(t *testing.T) {
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.
+			NewRequest(http.MethodPut, "/jobs/jobUUID/resend", bytes.NewReader(nil)).
+			WithContext(s.ctx)
+
+		s.resentJobTxUC.EXPECT().Execute(gomock.Any(), "jobUUID", s.tenants).Return(errors.NotFoundError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusNotFound, rw.Code)

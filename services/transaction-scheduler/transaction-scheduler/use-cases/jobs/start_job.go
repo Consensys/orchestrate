@@ -5,13 +5,11 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
+	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/utils"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
-	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
 	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
-	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
@@ -77,7 +75,7 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants 
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}
 
-	partition, offset, err := uc.sendMessage(ctx, jobModel, msgTopic)
+	partition, offset, err := utils2.SendJobMessage(ctx, jobModel, uc.kafkaProducer, msgTopic)
 	if err != nil {
 		_ = dbtx.Rollback()
 		return errors.FromError(err).ExtendComponent(startJobComponent)
@@ -90,47 +88,4 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants 
 	logger.WithField("partition", partition).WithField("offset", offset).Info("job started successfully")
 
 	return nil
-}
-
-func (uc *startJobUseCase) sendMessage(ctx context.Context, jobModel *models.Job, topic string) (partition int32, offset int64, err error) {
-	log.WithContext(ctx).Debug("sending kafka message")
-
-	txEnvelope := parsers.NewEnvelopeFromJobModel(jobModel, map[string]string{
-		multitenancy.AuthorizationMetadata: authutils.AuthorizationFromContext(ctx),
-	})
-
-	evlp, err := txEnvelope.Envelope()
-	if err != nil {
-		errMessage := "failed to craft envelope"
-		log.WithContext(ctx).WithError(err).Error(errMessage)
-		return 0, 0, errors.InvalidParameterError(errMessage)
-	}
-
-	msg := &sarama.ProducerMessage{
-		Topic: topic,
-	}
-
-	if partitionKey := evlp.PartitionKey(); partitionKey != "" {
-		msg.Key = sarama.StringEncoder(partitionKey)
-	}
-
-	err = encoding.Marshal(txEnvelope, msg)
-	if err != nil {
-		errMessage := "failed to encode envelope"
-		log.WithContext(ctx).WithError(err).Error(errMessage)
-		return 0, 0, errors.InvalidParameterError(errMessage)
-	}
-
-	// Send message
-	partition, offset, err = uc.kafkaProducer.SendMessage(msg)
-	if err != nil {
-		errMessage := "could not produce kafka message"
-		log.WithContext(ctx).WithError(err).Error(errMessage)
-		return 0, 0, errors.KafkaConnectionError(errMessage).ExtendComponent(startJobComponent)
-	}
-
-	log.WithField("envelope_id", txEnvelope.GetID()).
-		WithField("job_type", evlp.GetJobTypeString()).
-		Debug("envelope sent to kafka")
-	return partition, offset, err
 }

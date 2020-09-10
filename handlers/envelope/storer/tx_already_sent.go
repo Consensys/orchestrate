@@ -30,6 +30,11 @@ func TxAlreadySent(ec ethclient.ChainLedgerReader, txSchedulerClient client.Tran
 
 		// Tx has already been updated
 		if job.Status == utils.StatusPending {
+			if txctx.Envelope.IsResendingJobTx() {
+				txctx.Logger.Debug("transaction scheduler: transaction is being resent")
+				return
+			}
+
 			txctx.Logger.Warn("transaction scheduler: transaction has already been updated")
 			url, err := proxy.GetURL(txctx)
 			if err != nil {

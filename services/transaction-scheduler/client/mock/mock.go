@@ -275,6 +275,20 @@ func (mr *MockJobClientMockRecorder) StartJob(ctx, jobUUID interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StartJob", reflect.TypeOf((*MockJobClient)(nil).StartJob), ctx, jobUUID)
 }
 
+// ResendJobTx mocks base method
+func (m *MockJobClient) ResendJobTx(ctx context.Context, jobUUID string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ResendJobTx", ctx, jobUUID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ResendJobTx indicates an expected call of ResendJobTx
+func (mr *MockJobClientMockRecorder) ResendJobTx(ctx, jobUUID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResendJobTx", reflect.TypeOf((*MockJobClient)(nil).ResendJobTx), ctx, jobUUID)
+}
+
 // SearchJob mocks base method
 func (m *MockJobClient) SearchJob(ctx context.Context, filters *entities.JobFilters) ([]*txschedulertypes.JobResponse, error) {
 	m.ctrl.T.Helper()
@@ -505,6 +519,20 @@ func (m *MockTransactionSchedulerClient) StartJob(ctx context.Context, jobUUID s
 func (mr *MockTransactionSchedulerClientMockRecorder) StartJob(ctx, jobUUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StartJob", reflect.TypeOf((*MockTransactionSchedulerClient)(nil).StartJob), ctx, jobUUID)
+}
+
+// ResendJobTx mocks base method
+func (m *MockTransactionSchedulerClient) ResendJobTx(ctx context.Context, jobUUID string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ResendJobTx", ctx, jobUUID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ResendJobTx indicates an expected call of ResendJobTx
+func (mr *MockTransactionSchedulerClientMockRecorder) ResendJobTx(ctx, jobUUID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResendJobTx", reflect.TypeOf((*MockTransactionSchedulerClient)(nil).ResendJobTx), ctx, jobUUID)
 }
 
 // SearchJob mocks base method

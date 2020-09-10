@@ -122,6 +122,7 @@ func Nonce(nm nonce.Attributor, ec hnonce.EthClient) engine.HandlerFunc {
 			"nonce":     n,
 			"nonce_key": nonceKey,
 		})
+		txctx.Logger.Debug("nonce: nonce calibrated successfully")
 
 		// Execute pending handlers
 		txctx.Next()

@@ -136,6 +136,11 @@ func (e *Envelope) IsEeaSendPrivateTransactionPrivateFor() bool {
 	return e.IsEeaSendPrivateTransaction() && len(e.PrivateFor) > 0
 }
 
+// IsResendingJobTx in case ParentJob and envelopeID are equal
+func (e *Envelope) IsResendingJobTx() bool {
+	return e.GetParentJobUUID() == e.GetID()
+}
+
 func (e *Envelope) IsOneTimeKeySignature() bool {
 	if v, ok := e.InternalLabels[TxFromLabel]; ok {
 		return v == TxFromOneTimeKey
@@ -145,7 +150,7 @@ func (e *Envelope) IsOneTimeKeySignature() bool {
 }
 
 func (e *Envelope) IsChildJob() bool {
-	return e.GetContextLabelsValue(ParentJobUUIDLabel) != ""
+	return e.GetParentJobUUID() != ""
 }
 
 func (e *Envelope) Carrier() opentracing.TextMapCarrier {
@@ -843,6 +848,10 @@ func (e *Envelope) GetScheduleUUID() string {
 
 func (e *Envelope) GetNextJobUUID() string {
 	return e.ContextLabels[NextJobUUIDLabel]
+}
+
+func (e *Envelope) GetParentJobUUID() string {
+	return e.ContextLabels[ParentJobUUIDLabel]
 }
 
 func (e *Envelope) SetNextJobUUID(uuid string) *Envelope {

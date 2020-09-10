@@ -78,6 +78,20 @@ func (mr *MockJobUseCasesMockRecorder) StartJob() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StartJob", reflect.TypeOf((*MockJobUseCases)(nil).StartJob))
 }
 
+// ResendJobTx mocks base method
+func (m *MockJobUseCases) ResendJobTx() usecases.ResendJobTxUseCase {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ResendJobTx")
+	ret0, _ := ret[0].(usecases.ResendJobTxUseCase)
+	return ret0
+}
+
+// ResendJobTx indicates an expected call of ResendJobTx
+func (mr *MockJobUseCasesMockRecorder) ResendJobTx() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResendJobTx", reflect.TypeOf((*MockJobUseCases)(nil).ResendJobTx))
+}
+
 // UpdateJob mocks base method
 func (m *MockJobUseCases) UpdateJob() usecases.UpdateJobUseCase {
 	m.ctrl.T.Helper()
@@ -395,4 +409,41 @@ func (m *MockUpdateChildrenUseCase) WithDBTransaction(dbtx store.Tx) usecases.Up
 func (mr *MockUpdateChildrenUseCaseMockRecorder) WithDBTransaction(dbtx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithDBTransaction", reflect.TypeOf((*MockUpdateChildrenUseCase)(nil).WithDBTransaction), dbtx)
+}
+
+// MockResendJobTxUseCase is a mock of ResendJobTxUseCase interface
+type MockResendJobTxUseCase struct {
+	ctrl     *gomock.Controller
+	recorder *MockResendJobTxUseCaseMockRecorder
+}
+
+// MockResendJobTxUseCaseMockRecorder is the mock recorder for MockResendJobTxUseCase
+type MockResendJobTxUseCaseMockRecorder struct {
+	mock *MockResendJobTxUseCase
+}
+
+// NewMockResendJobTxUseCase creates a new mock instance
+func NewMockResendJobTxUseCase(ctrl *gomock.Controller) *MockResendJobTxUseCase {
+	mock := &MockResendJobTxUseCase{ctrl: ctrl}
+	mock.recorder = &MockResendJobTxUseCaseMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockResendJobTxUseCase) EXPECT() *MockResendJobTxUseCaseMockRecorder {
+	return m.recorder
+}
+
+// Execute mocks base method
+func (m *MockResendJobTxUseCase) Execute(ctx context.Context, jobUUID string, tenants []string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Execute", ctx, jobUUID, tenants)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Execute indicates an expected call of Execute
+func (mr *MockResendJobTxUseCaseMockRecorder) Execute(ctx, jobUUID, tenants interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockResendJobTxUseCase)(nil).Execute), ctx, jobUUID, tenants)
 }

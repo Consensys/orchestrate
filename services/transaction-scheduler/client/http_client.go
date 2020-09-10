@@ -325,6 +325,22 @@ func (c *HTTPClient) StartJob(ctx context.Context, jobUUID string) error {
 	})
 }
 
+func (c *HTTPClient) ResendJobTx(ctx context.Context, jobUUID string) error {
+	reqURL := fmt.Sprintf("%v/jobs/%s/resend", c.config.URL, jobUUID)
+
+	return callWithBackOff(ctx, c.config.backOff, func() error {
+		response, err := clientutils.PutRequest(ctx, c.client, reqURL, nil)
+		if err != nil {
+			errMessage := "error while resending job tx"
+			log.FromContext(ctx).WithError(err).Error(errMessage)
+			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+		}
+
+		defer clientutils.CloseResponse(response)
+		return nil
+	})
+}
+
 func callWithBackOff(ctx context.Context, backOff backoff.BackOff, requestCall func() error) error {
 	return backoff.RetryNotify(
 		func() error {

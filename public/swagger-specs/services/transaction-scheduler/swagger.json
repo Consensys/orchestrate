@@ -394,6 +394,47 @@
                 }
             }
         },
+        "/jobs/{uuid}/resent": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Resend transaction of specific job by UUID, effectively executing the re-sending of transaction asynchronously",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Resend Job transaction by UUID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UUID of the job",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "202": {},
+                    "404": {
+                        "description": "Job not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/jobs/{uuid}/start": {
             "put": {
                 "security": [

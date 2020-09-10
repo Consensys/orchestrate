@@ -2,6 +2,8 @@ package usecases
 
 import (
 	"context"
+	"fmt"
+	"math"
 	"math/big"
 
 	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
@@ -13,28 +15,28 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
-//go:generate mockgen -source=create_child_job.go -destination=mocks/create_child_job.go -package=mocks
+//go:generate mockgen -source=retry_session_job.go -destination=mocks/retry_session_job.go -package=mocks
 
-const createChildJobComponent = "use-cases.create-child-job"
+const retrySessionJobComponent = "use-cases.retry-session-job"
 
-type CreateChildJobUseCase interface {
+type RetrySessionJobUseCase interface {
 	Execute(ctx context.Context, job *entities.Job) (string, error)
 }
 
-// createChildJobUseCase is a use case to create a new transaction job
-type createChildJobUseCase struct {
+// retrySessionJobUseCase is a use case to create a new transaction job
+type retrySessionJobUseCase struct {
 	txSchedulerClient txscheduler.TransactionSchedulerClient
 }
 
-// NewCreateChildJobUseCase creates a new StartSessionUseCase
-func NewCreateChildJobUseCase(txSchedulerClient txscheduler.TransactionSchedulerClient) CreateChildJobUseCase {
-	return &createChildJobUseCase{
+// NewRetrySessionJobUseCase creates a new StartSessionUseCase
+func NewRetrySessionJobUseCase(txSchedulerClient txscheduler.TransactionSchedulerClient) RetrySessionJobUseCase {
+	return &retrySessionJobUseCase{
 		txSchedulerClient: txSchedulerClient,
 	}
 }
 
 // Execute starts a job session
-func (uc *createChildJobUseCase) Execute(ctx context.Context, job *entities.Job) (string, error) {
+func (uc *retrySessionJobUseCase) Execute(ctx context.Context, job *entities.Job) (string, error) {
 	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID)
 	logger.Debug("verifying job status")
 
@@ -45,45 +47,86 @@ func (uc *createChildJobUseCase) Execute(ctx context.Context, job *entities.Job)
 	if err != nil {
 		errMessage := "failed to get jobs"
 		logger.Error(errMessage)
-		return "", errors.FromError(err).ExtendComponent(createChildJobComponent)
+		return "", errors.FromError(err).ExtendComponent(retrySessionJobComponent)
 	}
 
 	parentJob := jobs[0]
-	nJobs := float64(len(jobs))
+	lastJobRetry := jobs[len(jobs)-1]
 	status := parentJob.Status
 	if status != utils.StatusPending {
 		logger.WithField("status", status).Info("job has been updated. stopping job session")
 		return "", nil
 	}
 
+	// we count the number of resending of last job as retries
+	nRetries := len(jobs) - 1
+	for _, lg := range lastJobRetry.Logs {
+		if lg.Status == utils.StatusResending {
+			nRetries++
+		}
+	}
+
+	if nRetries >= txschedulertypes.SentryMaxRetries {
+		logger.WithField("retries", nRetries).Infof("job session exceeded max amount of retries %d", nRetries)
+		return "", nil
+	}
+
+	childrenJobs := len(jobs) - 1
+	// In case gas increments on every retry we create a new job
+	if parentJob.Annotations.GasPricePolicy.RetryPolicy.Increment > 0.0 &&
+		childrenJobs <= int(math.Ceil(parentJob.Annotations.GasPricePolicy.RetryPolicy.Limit/parentJob.Annotations.GasPricePolicy.RetryPolicy.Increment)) {
+
+		childJob, errr := uc.CreateAndStartNewChildJob(ctx, parentJob, childrenJobs)
+		if errr != nil {
+			return "", errors.FromError(errr).ExtendComponent(retrySessionJobComponent)
+		}
+
+		return childJob.UUID, nil
+	}
+
+	// Otherwise we retry on last job
+	err = uc.txSchedulerClient.ResendJobTx(ctx, lastJobRetry.UUID)
+	if err != nil {
+		return "", errors.FromError(err).ExtendComponent(retrySessionJobComponent)
+	}
+
+	return parentJob.UUID, nil
+}
+
+func (uc *retrySessionJobUseCase) CreateAndStartNewChildJob(ctx context.Context,
+	parentJob *txschedulertypes.JobResponse,
+	nChildrenJobs int,
+) (*txschedulertypes.JobResponse, error) {
+	logger := log.WithContext(ctx).WithField("job_uuid", parentJob.UUID)
 	gasPriceMultiplier := getGasPriceMultiplier(
 		parentJob.Annotations.GasPricePolicy.RetryPolicy.Increment,
 		parentJob.Annotations.GasPricePolicy.RetryPolicy.Limit,
-		nJobs,
+		float64(nChildrenJobs),
 	)
-	childJobRequest := newChildJobRequest(parentJob, gasPriceMultiplier)
+
+	childJobRequest := newChildJobRequest(parentJob, gasPriceMultiplier, nChildrenJobs)
 	childJob, err := uc.txSchedulerClient.CreateJob(ctx, childJobRequest)
 	if err != nil {
 		errMessage := "failed create new child job"
 		logger.Error(errMessage)
-		return "", errors.FromError(err).ExtendComponent(createChildJobComponent)
+		return nil, errors.FromError(err).ExtendComponent(retrySessionJobComponent)
 	}
 
 	err = uc.txSchedulerClient.StartJob(ctx, childJob.UUID)
 	if err != nil {
 		errMessage := "failed start child job"
 		logger.WithField("child_job_uuid", childJob.UUID).Error(errMessage)
-		return "", errors.FromError(err).ExtendComponent(createChildJobComponent)
+		return nil, errors.FromError(err).ExtendComponent(retrySessionJobComponent)
 	}
 
 	logger.WithField("child_job_uuid", childJob.UUID).Info("new child job created")
 
-	return childJob.UUID, nil
+	return childJob, nil
 }
 
 func getGasPriceMultiplier(increment, limit, nChildren float64) float64 {
 	// This is fine as GasPriceIncrement default value is 0
-	newGasPriceMultiplier := nChildren * increment
+	newGasPriceMultiplier := (nChildren + 1) * increment
 
 	if newGasPriceMultiplier >= limit {
 		newGasPriceMultiplier = limit
@@ -92,7 +135,7 @@ func getGasPriceMultiplier(increment, limit, nChildren float64) float64 {
 	return newGasPriceMultiplier
 }
 
-func newChildJobRequest(parentJob *txschedulertypes.JobResponse, gasPriceMultiplier float64) *txschedulertypes.CreateJobRequest {
+func newChildJobRequest(parentJob *txschedulertypes.JobResponse, gasPriceMultiplier float64, nRetries int) *txschedulertypes.CreateJobRequest {
 	// We selectively choose fields from the parent job
 	newJobRequest := &txschedulertypes.CreateJobRequest{
 		ChainUUID:     parentJob.ChainUUID,
@@ -102,6 +145,8 @@ func newChildJobRequest(parentJob *txschedulertypes.JobResponse, gasPriceMultipl
 		Annotations:   parentJob.Annotations,
 		ParentJobUUID: parentJob.UUID,
 	}
+
+	newJobRequest.Labels["retryOrder"] = fmt.Sprintf("%d", nRetries+1)
 
 	// raw transactions are resent as-is with no modifications
 	if parentJob.Type == utils.EthereumRawTransaction {

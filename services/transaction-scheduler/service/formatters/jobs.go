@@ -1,7 +1,6 @@
 package formatters
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -26,15 +25,8 @@ func FormatJobResponse(job *entities.Job) *types.JobResponse {
 		Logs:         job.Logs,
 		Labels:       job.Labels,
 		Annotations: types.Annotations{
-			OneTimeKey: job.InternalData.OneTimeKey,
-			GasPricePolicy: types.GasPriceParams{
-				Priority: job.InternalData.Priority,
-				RetryPolicy: types.RetryParams{
-					Interval:  fmt.Sprintf("%vs", job.InternalData.RetryInterval.Seconds()),
-					Increment: job.InternalData.GasPriceIncrement,
-					Limit:     job.InternalData.GasPriceLimit,
-				},
-			},
+			OneTimeKey:     job.InternalData.OneTimeKey,
+			GasPricePolicy: FormatJobAnnotationsGasPricePolicy(job.InternalData),
 		},
 		Type:          job.Type,
 		Status:        job.GetStatus(),
@@ -44,7 +36,23 @@ func FormatJobResponse(job *entities.Job) *types.JobResponse {
 	}
 }
 
-func FormatJobCreateRequest(request *types.CreateJobRequest, defaultRetryInterval time.Duration) *entities.Job {
+func FormatJobAnnotationsGasPricePolicy(data *entities.InternalData) types.GasPriceParams {
+	gasPricePolicy := types.GasPriceParams{
+		Priority: data.Priority,
+		RetryPolicy: types.RetryParams{
+			Increment: data.GasPriceIncrement,
+			Limit:     data.GasPriceLimit,
+		},
+	}
+
+	if data.RetryInterval != 0 {
+		gasPricePolicy.RetryPolicy.Interval = data.RetryInterval.String()
+	}
+
+	return gasPricePolicy
+}
+
+func FormatJobCreateRequest(request *types.CreateJobRequest) *entities.Job {
 	return &entities.Job{
 		ChainUUID:    request.ChainUUID,
 		ScheduleUUID: request.ScheduleUUID,
@@ -53,7 +61,6 @@ func FormatJobCreateRequest(request *types.CreateJobRequest, defaultRetryInterva
 		Labels:       request.Labels,
 		InternalData: formatInternalData(request.Annotations.OneTimeKey,
 			&request.Annotations.GasPricePolicy,
-			defaultRetryInterval,
 			request.ParentJobUUID,
 		),
 		Transaction: &request.Transaction,
@@ -130,7 +137,7 @@ func FormatJobFilterRequest(req *http.Request) (*entities.JobFilters, error) {
 	return filters, nil
 }
 
-func formatInternalData(oneTimeKey bool, gasPricePolicy *types.GasPriceParams, defaultRetryInterval time.Duration, parentJobUUID string) *entities.InternalData {
+func formatInternalData(oneTimeKey bool, gasPricePolicy *types.GasPriceParams, parentJobUUID string) *entities.InternalData {
 	internalData := &entities.InternalData{
 		OneTimeKey:        oneTimeKey,
 		Priority:          gasPricePolicy.Priority,
@@ -139,9 +146,7 @@ func formatInternalData(oneTimeKey bool, gasPricePolicy *types.GasPriceParams, d
 		ParentJobUUID:     parentJobUUID,
 	}
 
-	if gasPricePolicy.RetryPolicy.Interval == "" {
-		internalData.RetryInterval = defaultRetryInterval
-	} else {
+	if gasPricePolicy.RetryPolicy.Interval != "" {
 		// we can skip the error check as at this point we know the interval is a duration as it already passed validation
 		internalData.RetryInterval, _ = time.ParseDuration(gasPricePolicy.RetryPolicy.Interval)
 	}

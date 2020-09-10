@@ -39,6 +39,12 @@ func (nm *NonceManager) SetLastAttributed(key string, value uint64) error {
 	return nil
 }
 
+// SetLastAttributed set last attributed nonce
+func (nm *NonceManager) DeleteLastAttributed(key string) error {
+	nm.delete(computeKey(key, lastAttributedSuf))
+	return nil
+}
+
 // IncrLastAttributed increment last attributed nonce
 //
 // Important note:
@@ -70,6 +76,11 @@ func (nm *NonceManager) SetLastSent(key string, value uint64) error {
 // goroutines for the same key
 func (nm *NonceManager) IncrLastSent(key string) (err error) {
 	return nm.incrUint64(computeKey(key, lastSentSuf))
+}
+
+func (nm *NonceManager) DeleteLastSent(key string) (err error) {
+	nm.delete(computeKey(key, lastSentSuf))
+	return nil
 }
 
 const recoveringSuf = "recovering"
@@ -116,6 +127,10 @@ func (nm *NonceManager) loadBool(key string) (value, ok bool, err error) {
 
 func (nm *NonceManager) set(key string, value interface{}) {
 	nm.cache.Store(key, value)
+}
+
+func (nm *NonceManager) delete(key string) {
+	nm.cache.Delete(key)
 }
 
 func (nm *NonceManager) incrUint64(key string) error {

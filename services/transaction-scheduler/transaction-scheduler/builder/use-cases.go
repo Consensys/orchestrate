@@ -26,6 +26,7 @@ func NewUseCases(
 	getScheduleUC := schedules.NewGetScheduleUseCase(db)
 	createJobUC := jobs.NewCreateJobUseCase(db, txValidator)
 	startJobUC := jobs.NewStartJobUseCase(db, producer, topicsCfg)
+	resendJobUC := jobs.NewResendJobTxUseCase(db, producer, topicsCfg)
 	updateChildrenUC := jobs.NewUpdateChildrenUseCase(db)
 	startNextJobUC := jobs.NewStartNextJobUseCase(db, startJobUC)
 	getTransactionUC := transactions.NewGetTxUseCase(db, getScheduleUC)
@@ -44,11 +45,12 @@ func NewUseCases(
 		getSchedule:     getScheduleUC,
 		searchSchedules: schedules.NewSearchSchedulesUseCase(db),
 		// Jobs
-		createJob:  createJobUC,
-		getJob:     jobs.NewGetJobUseCase(db),
-		searchJobs: jobs.NewSearchJobsUseCase(db),
-		updateJob:  jobs.NewUpdateJobUseCase(db, updateChildrenUC, startNextJobUC),
-		startJob:   startJobUC,
+		createJob:   createJobUC,
+		getJob:      jobs.NewGetJobUseCase(db),
+		searchJobs:  jobs.NewSearchJobsUseCase(db),
+		updateJob:   jobs.NewUpdateJobUseCase(db, updateChildrenUC, startNextJobUC),
+		startJob:    startJobUC,
+		resendJobTx: resendJobUC,
 	}
 }
 
@@ -64,11 +66,12 @@ type useCases struct {
 	getSchedule     usecases.GetScheduleUseCase
 	searchSchedules usecases.SearchSchedulesUseCase
 	// Jobs
-	createJob  usecases.CreateJobUseCase
-	getJob     usecases.GetJobUseCase
-	startJob   usecases.StartJobUseCase
-	updateJob  usecases.UpdateJobUseCase
-	searchJobs usecases.SearchJobsUseCase
+	createJob   usecases.CreateJobUseCase
+	getJob      usecases.GetJobUseCase
+	startJob    usecases.StartJobUseCase
+	resendJobTx usecases.ResendJobTxUseCase
+	updateJob   usecases.UpdateJobUseCase
+	searchJobs  usecases.SearchJobsUseCase
 }
 
 func (u *useCases) SendContractTransaction() usecases.SendContractTxUseCase {
@@ -113,6 +116,10 @@ func (u *useCases) GetJob() usecases.GetJobUseCase {
 
 func (u *useCases) StartJob() usecases.StartJobUseCase {
 	return u.startJob
+}
+
+func (u *useCases) ResendJobTx() usecases.ResendJobTxUseCase {
+	return u.resendJobTx
 }
 
 func (u *useCases) UpdateJob() usecases.UpdateJobUseCase {

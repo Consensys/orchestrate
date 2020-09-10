@@ -12,6 +12,9 @@ type Attributor interface {
 
 	// SetLastAttributed sets the last attributed nonce
 	SetLastAttributed(key string, value uint64) error
+
+	// DeleteLastAttributed deletes the last attributed nonce
+	DeleteLastAttributed(key string) error
 }
 
 // Sender allows to keep track of nonces as transactions are sent to blockchain
@@ -21,6 +24,9 @@ type Sender interface {
 
 	// IncrLastSent increment last sent nonce
 	IncrLastSent(key string) error
+
+	// DeleteLastSent last sent nonce
+	DeleteLastSent(key string) error
 
 	// SetLastSent sets last sent nonce
 	SetLastSent(key string, value uint64) error

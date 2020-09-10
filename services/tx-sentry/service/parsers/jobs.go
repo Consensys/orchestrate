@@ -9,7 +9,10 @@ import (
 
 func JobResponseToEntity(jobResponse *txschedulertypes.JobResponse) *entities.Job {
 	// Cannot fail as the duration coming from a response is expected to be valid
-	retryInterval, _ := time.ParseDuration(jobResponse.Annotations.GasPricePolicy.RetryPolicy.Interval)
+	var retryInterval time.Duration
+	if jobResponse.Annotations.GasPricePolicy.RetryPolicy.Interval != "" {
+		retryInterval, _ = time.ParseDuration(jobResponse.Annotations.GasPricePolicy.RetryPolicy.Interval)
+	}
 
 	return &entities.Job{
 		UUID:         jobResponse.UUID,

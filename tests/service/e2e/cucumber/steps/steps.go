@@ -19,7 +19,7 @@ import (
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
 	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce"
-	noncememory "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/memory"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/redis"
 	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/e2e/cucumber/alias"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/e2e/utils"
@@ -206,7 +206,7 @@ func InitializeScenario(s *godog.ScenarioContext) {
 		alias.GlobalAliasRegistry(),
 		generator.GlobalJWTGenerator(),
 		rpcClient.GlobalClient(),
-		noncememory.GlobalNonceManager(),
+		redis.GlobalNonceManager(),
 	)
 
 	s.BeforeScenario(sc.init)

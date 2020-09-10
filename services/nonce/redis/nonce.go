@@ -39,6 +39,11 @@ func (nm *NonceManager) IncrLastAttributed(key string) error {
 	return nm.incr(computeKey(key, lastAttributedSuf))
 }
 
+// IncrLastAttributed increment last attributed nonce
+func (nm *NonceManager) DeleteLastAttributed(key string) error {
+	return nm.delete(computeKey(key, lastAttributedSuf))
+}
+
 const lastSentSuf = "last-sent"
 
 // GetLastSent loads last sent nonce from state
@@ -54,6 +59,11 @@ func (nm *NonceManager) SetLastSent(key string, value uint64) error {
 // IncrLastSent increment last sent nonce
 func (nm *NonceManager) IncrLastSent(key string) error {
 	return nm.incr(computeKey(key, lastSentSuf))
+}
+
+// IncrLastSent increment last sent nonce
+func (nm *NonceManager) DeleteLastSent(key string) error {
+	return nm.delete(computeKey(key, lastSentSuf))
 }
 
 const recoveringSuf = "recovering"
@@ -133,6 +143,24 @@ func (nm *NonceManager) set(key string, value interface{}) error {
 
 	// Set value with expiration
 	_, err := conn.Do("PSETEX", key, nm.conf.Expiration, value)
+	if err != nil {
+		return errors.FromError(err).SetComponent(component)
+	}
+
+	return nil
+}
+
+func (nm *NonceManager) delete(key string) error {
+	conn := nm.pool.Get()
+	defer func() {
+		closeErr := conn.Close()
+		if closeErr != nil {
+			log.WithError(closeErr).Warn("could not close redis connection")
+		}
+	}()
+
+	// Delete value
+	_, err := conn.Do("DEL", key)
 	if err != nil {
 		return errors.FromError(err).SetComponent(component)
 	}
