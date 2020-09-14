@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -14,18 +15,14 @@ import (
 
 const sendDeployTxComponent = "use-cases.send-deploy-tx"
 
-type SendDeployTxUseCase interface {
-	Execute(ctx context.Context, txRequest *entities.TxRequest, tenantID string) (*entities.TxRequest, error)
-}
-
 // sendDeployTxUsecase is a use case to create a new contract deployment transaction
 type sendDeployTxUsecase struct {
 	validator     validators.TransactionValidator
-	sendTxUseCase SendTxUseCase
+	sendTxUseCase usecases.SendTxUseCase
 }
 
 // NewSendDeployTxUseCase creates a new SendDeployTxUseCase
-func NewSendDeployTxUseCase(validator validators.TransactionValidator, sendTxUseCase SendTxUseCase) SendDeployTxUseCase {
+func NewSendDeployTxUseCase(validator validators.TransactionValidator, sendTxUseCase usecases.SendTxUseCase) usecases.SendDeployTxUseCase {
 	return &sendDeployTxUsecase{
 		validator:     validator,
 		sendTxUseCase: sendTxUseCase,

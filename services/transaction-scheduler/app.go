@@ -7,6 +7,7 @@ import (
 	"github.com/Shopify/sarama"
 	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/builder"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth"
@@ -15,7 +16,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/controllers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/multi"
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 )
 
 func NewTxScheduler(
@@ -33,7 +33,7 @@ func NewTxScheduler(
 		return nil, err
 	}
 
-	ucs := usecases.NewUseCases(db, chainRegistryClient, contractRegistryClient, syncProducer, topicCfg)
+	ucs := builder.NewUseCases(db, chainRegistryClient, contractRegistryClient, syncProducer, topicCfg)
 
 	// Option for transaction handler
 	txSchedulerHandlerOpt := app.HandlerOpt(reflect.TypeOf(&dynamic.Transactions{}), controllers.NewBuilder(ucs, cfg.RetryInterval))

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -16,17 +17,13 @@ import (
 
 const getScheduleComponent = "use-cases.get-schedule"
 
-type GetScheduleUseCase interface {
-	Execute(ctx context.Context, scheduleUUID string, tenants []string) (*entities.Schedule, error)
-}
-
 // getScheduleUseCase is a use case to get a schedule
 type getScheduleUseCase struct {
 	db store.DB
 }
 
 // NewGetScheduleUseCase creates a new GetScheduleUseCase
-func NewGetScheduleUseCase(db store.DB) GetScheduleUseCase {
+func NewGetScheduleUseCase(db store.DB) usecases.GetScheduleUseCase {
 	return &getScheduleUseCase{
 		db: db,
 	}

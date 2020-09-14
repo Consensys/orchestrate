@@ -1,4 +1,4 @@
-package subusecases
+package jobs
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 
@@ -16,14 +17,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 )
 
-//go:generate mockgen -source=update_children.go -destination=mocks/update_children.go -package=mocks
-
 const updateChildrenComponent = "use-cases.update-children"
-
-type UpdateChildrenUseCase interface {
-	Execute(ctx context.Context, jobUUID, parentJobUUID, nextStatus string, tenants []string) error
-	WithDBTransaction(dbtx store.Tx) UpdateChildrenUseCase
-}
 
 // createJobUseCase is a use case to create a new transaction job
 type updateChildrenUseCase struct {
@@ -31,13 +25,13 @@ type updateChildrenUseCase struct {
 }
 
 // NewUpdateChildrenUseCase creates a new UpdateChildrenUseCase
-func NewUpdateChildrenUseCase(db store.DB) UpdateChildrenUseCase {
+func NewUpdateChildrenUseCase(db store.DB) usecases.UpdateChildrenUseCase {
 	return &updateChildrenUseCase{
 		db: db,
 	}
 }
 
-func (uc updateChildrenUseCase) WithDBTransaction(dbtx store.Tx) UpdateChildrenUseCase {
+func (uc updateChildrenUseCase) WithDBTransaction(dbtx store.Tx) usecases.UpdateChildrenUseCase {
 	uc.db = dbtx
 	return &uc
 }

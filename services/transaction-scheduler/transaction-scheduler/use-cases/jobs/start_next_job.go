@@ -7,6 +7,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -17,18 +18,14 @@ import (
 
 const startNextJobComponent = "use-cases.next-job-start"
 
-type StartNextJobUseCase interface {
-	Execute(ctx context.Context, prevJobUUID string, tenants []string) error
-}
-
 // startNextJobUseCase is a use case to get a job
 type startNextJobUseCase struct {
 	db              store.DB
-	startJobUseCase StartJobUseCase
+	startJobUseCase usecases.StartJobUseCase
 }
 
 // NewStartNextJobUseCase creates a new StartNextJobUseCase
-func NewStartNextJobUseCase(db store.DB, startJobUC StartJobUseCase) StartNextJobUseCase {
+func NewStartNextJobUseCase(db store.DB, startJobUC usecases.StartJobUseCase) usecases.StartNextJobUseCase {
 	return &startNextJobUseCase{
 		db:              db,
 		startJobUseCase: startJobUC,

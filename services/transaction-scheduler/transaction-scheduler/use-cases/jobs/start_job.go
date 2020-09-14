@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
@@ -21,10 +22,6 @@ import (
 
 const startJobComponent = "use-cases.start-job"
 
-type StartJobUseCase interface {
-	Execute(ctx context.Context, jobUUID string, tenants []string) error
-}
-
 // startJobUseCase is a use case to start a transaction job
 type startJobUseCase struct {
 	db            store.DB
@@ -33,7 +30,7 @@ type startJobUseCase struct {
 }
 
 // NewStartJobUseCase creates a new StartJobUseCase
-func NewStartJobUseCase(db store.DB, kafkaProducer sarama.SyncProducer, topicsCfg *pkgsarama.KafkaTopicConfig) StartJobUseCase {
+func NewStartJobUseCase(db store.DB, kafkaProducer sarama.SyncProducer, topicsCfg *pkgsarama.KafkaTopicConfig) usecases.StartJobUseCase {
 	return &startJobUseCase{
 		db:            db,
 		kafkaProducer: kafkaProducer,

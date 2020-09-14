@@ -6,11 +6,13 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
@@ -22,8 +24,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/transactions"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/transactions/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/mocks"
 )
 
 type transactionsControllerTestSuite struct {
@@ -40,27 +41,27 @@ type transactionsControllerTestSuite struct {
 	defaultRetryInterval  time.Duration
 }
 
-func (s *transactionsControllerTestSuite) SendContractTransaction() transactions.SendContractTxUseCase {
+func (s *transactionsControllerTestSuite) SendContractTransaction() usecases.SendContractTxUseCase {
 	return s.sendContractTxUseCase
 }
 
-func (s *transactionsControllerTestSuite) SendDeployTransaction() transactions.SendDeployTxUseCase {
+func (s *transactionsControllerTestSuite) SendDeployTransaction() usecases.SendDeployTxUseCase {
 	return s.sendDeployTxUseCase
 }
 
-func (s *transactionsControllerTestSuite) SendTransaction() transactions.SendTxUseCase {
+func (s *transactionsControllerTestSuite) SendTransaction() usecases.SendTxUseCase {
 	return s.sendTxUseCase
 }
 
-func (s *transactionsControllerTestSuite) GetTransaction() transactions.GetTxUseCase {
+func (s *transactionsControllerTestSuite) GetTransaction() usecases.GetTxUseCase {
 	return s.getTxUseCase
 }
 
-func (s *transactionsControllerTestSuite) SearchTransactions() transactions.SearchTransactionsUseCase {
+func (s *transactionsControllerTestSuite) SearchTransactions() usecases.SearchTransactionsUseCase {
 	return s.searchTxsUsecase
 }
 
-var _ transactions.UseCases = &transactionsControllerTestSuite{}
+var _ usecases.TransactionUseCases = &transactionsControllerTestSuite{}
 
 func TestTransactionsController(t *testing.T) {
 	s := new(transactionsControllerTestSuite)

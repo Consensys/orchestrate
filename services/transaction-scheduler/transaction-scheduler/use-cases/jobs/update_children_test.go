@@ -1,6 +1,6 @@
 // +build unit
 
-package subusecases
+package jobs
 
 import (
 	"context"

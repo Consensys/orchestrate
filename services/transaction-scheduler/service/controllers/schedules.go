@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 
 	"github.com/gorilla/mux"
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
@@ -12,14 +13,13 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/schedules"
 )
 
 type SchedulesController struct {
-	ucs schedules.UseCases
+	ucs usecases.ScheduleUseCases
 }
 
-func NewSchedulesController(useCases schedules.UseCases) *SchedulesController {
+func NewSchedulesController(useCases usecases.ScheduleUseCases) *SchedulesController {
 	return &SchedulesController{
 		ucs: useCases,
 	}

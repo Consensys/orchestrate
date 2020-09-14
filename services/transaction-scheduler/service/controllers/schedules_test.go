@@ -5,12 +5,14 @@ package controllers
 import (
 	"bytes"
 	"context"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
-	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
+	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
@@ -20,8 +22,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/schedules"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/schedules/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/mocks"
 )
 
 type schedulesCtrlTestSuite struct {
@@ -34,19 +35,19 @@ type schedulesCtrlTestSuite struct {
 	router            *mux.Router
 }
 
-func (s *schedulesCtrlTestSuite) CreateSchedule() schedules.CreateScheduleUseCase {
+func (s *schedulesCtrlTestSuite) CreateSchedule() usecases.CreateScheduleUseCase {
 	return s.createScheduleUC
 }
 
-func (s *schedulesCtrlTestSuite) GetSchedule() schedules.GetScheduleUseCase {
+func (s *schedulesCtrlTestSuite) GetSchedule() usecases.GetScheduleUseCase {
 	return s.getScheduleUC
 }
 
-func (s *schedulesCtrlTestSuite) SearchSchedules() schedules.SearchSchedulesUseCase {
+func (s *schedulesCtrlTestSuite) SearchSchedules() usecases.SearchSchedulesUseCase {
 	return s.searchSchedulesUC
 }
 
-var _ schedules.UseCases = &schedulesCtrlTestSuite{}
+var _ usecases.ScheduleUseCases = &schedulesCtrlTestSuite{}
 
 func TestSchedulesController(t *testing.T) {
 	s := new(schedulesCtrlTestSuite)

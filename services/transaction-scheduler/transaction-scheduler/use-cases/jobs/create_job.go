@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 
@@ -20,14 +21,9 @@ import (
 // IMPORTANT: Mock is created in a separated folder because of cycle deps
 // https://app.zenhub.com/workspaces/orchestrate-5ea70772b186e10067f57842/issues/pegasyseng/orchestrate/296
 
-//go:generate mockgen -source=create_job.go -destination=mocks2/create_job.go -package=mocks
+//go:generate mockgen -source=create_job.go -destination=mocks/create_job.go -package=mocks
 
 const createJobComponent = "use-cases.create-job"
-
-type CreateJobUseCase interface {
-	Execute(ctx context.Context, job *entities.Job, tenants []string) (*entities.Job, error)
-	WithDBTransaction(dbtx store.Tx) CreateJobUseCase
-}
 
 // createJobUseCase is a use case to create a new transaction job
 type createJobUseCase struct {
@@ -36,14 +32,14 @@ type createJobUseCase struct {
 }
 
 // NewCreateJobUseCase creates a new CreateJobUseCase
-func NewCreateJobUseCase(db store.DB, validator validators.TransactionValidator) CreateJobUseCase {
+func NewCreateJobUseCase(db store.DB, validator validators.TransactionValidator) usecases.CreateJobUseCase {
 	return &createJobUseCase{
 		validator: validator,
 		db:        db,
 	}
 }
 
-func (uc createJobUseCase) WithDBTransaction(dbtx store.Tx) CreateJobUseCase {
+func (uc createJobUseCase) WithDBTransaction(dbtx store.Tx) usecases.CreateJobUseCase {
 	uc.db = dbtx
 	return &uc
 }

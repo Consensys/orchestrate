@@ -13,7 +13,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/transactions"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 )
 
 var _ entities.ETHTransactionParams
@@ -23,11 +23,11 @@ const (
 )
 
 type TransactionsController struct {
-	ucs                  transactions.UseCases
+	ucs                  usecases.TransactionUseCases
 	defaultRetryInterval time.Duration
 }
 
-func NewTransactionsController(ucs transactions.UseCases, defaultRetryInterval time.Duration) *TransactionsController {
+func NewTransactionsController(ucs usecases.TransactionUseCases, defaultRetryInterval time.Duration) *TransactionsController {
 	return &TransactionsController{
 		ucs:                  ucs,
 		defaultRetryInterval: defaultRetryInterval,

@@ -18,8 +18,7 @@ import (
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/schedules"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/validators"
 )
 
@@ -27,19 +26,15 @@ import (
 
 const sendTxComponent = "use-cases.send-tx"
 
-type SendTxUseCase interface {
-	Execute(ctx context.Context, txRequest *entities.TxRequest, txData, tenantID string) (*entities.TxRequest, error)
-}
-
 // sendTxUsecase is a use case to create a new transaction
 type sendTxUsecase struct {
 	validator           validators.TransactionValidator
 	db                  store.DB
 	chainRegistryClient chainregistry.ChainRegistryClient
-	startJobUC          jobs.StartJobUseCase
-	createJobUC         jobs.CreateJobUseCase
-	createScheduleUC    schedules.CreateScheduleUseCase
-	getTxUC             GetTxUseCase
+	startJobUC          usecases.StartJobUseCase
+	createJobUC         usecases.CreateJobUseCase
+	createScheduleUC    usecases.CreateScheduleUseCase
+	getTxUC             usecases.GetTxUseCase
 }
 
 // NewSendTxUseCase creates a new SendTxUseCase
@@ -47,11 +42,11 @@ func NewSendTxUseCase(
 	validator validators.TransactionValidator,
 	db store.DB,
 	chainRegistryClient chainregistry.ChainRegistryClient,
-	startJobUseCase jobs.StartJobUseCase,
-	createJobUC jobs.CreateJobUseCase,
-	createScheduleUC schedules.CreateScheduleUseCase,
-	getTxUC GetTxUseCase,
-) SendTxUseCase {
+	startJobUseCase usecases.StartJobUseCase,
+	createJobUC usecases.CreateJobUseCase,
+	createScheduleUC usecases.CreateScheduleUseCase,
+	getTxUC usecases.GetTxUseCase,
+) usecases.SendTxUseCase {
 	return &sendTxUsecase{
 		validator:           validator,
 		db:                  db,

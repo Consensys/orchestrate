@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -15,17 +16,13 @@ import (
 
 const searchSchedulesComponent = "use-cases.search-schedules"
 
-type SearchSchedulesUseCase interface {
-	Execute(ctx context.Context, tenants []string) ([]*entities.Schedule, error)
-}
-
 // searchSchedulesUseCase is a use case to search schedules
 type searchSchedulesUseCase struct {
 	db store.DB
 }
 
 // NewSearchSchedulesUseCase creates a new SearchSchedulesUseCase
-func NewSearchSchedulesUseCase(db store.DB) SearchSchedulesUseCase {
+func NewSearchSchedulesUseCase(db store.DB) usecases.SearchSchedulesUseCase {
 	return &searchSchedulesUseCase{
 		db: db,
 	}

@@ -15,7 +15,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
-	mocks6 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs/mocks2"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
+	mocks6 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/mocks"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
@@ -26,8 +27,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/mocks"
 )
 
 type jobsCtrlTestSuite struct {
@@ -44,29 +44,29 @@ type jobsCtrlTestSuite struct {
 	router               *mux.Router
 }
 
-var _ jobs.UseCases = &jobsCtrlTestSuite{}
+var _ usecases.JobUseCases = &jobsCtrlTestSuite{}
 
-func (s jobsCtrlTestSuite) CreateJob() jobs.CreateJobUseCase {
+func (s jobsCtrlTestSuite) CreateJob() usecases.CreateJobUseCase {
 	return s.createJobUC
 }
 
-func (s jobsCtrlTestSuite) GetJob() jobs.GetJobUseCase {
+func (s jobsCtrlTestSuite) GetJob() usecases.GetJobUseCase {
 	return s.getJobUC
 }
 
-func (s jobsCtrlTestSuite) StartJob() jobs.StartJobUseCase {
+func (s jobsCtrlTestSuite) StartJob() usecases.StartJobUseCase {
 	return s.startJobUC
 }
 
-func (s jobsCtrlTestSuite) StartNextJob() jobs.StartNextJobUseCase {
+func (s jobsCtrlTestSuite) StartNextJob() usecases.StartNextJobUseCase {
 	return s.startNextJobUC
 }
 
-func (s jobsCtrlTestSuite) UpdateJob() jobs.UpdateJobUseCase {
+func (s jobsCtrlTestSuite) UpdateJob() usecases.UpdateJobUseCase {
 	return s.updateJobUC
 }
 
-func (s jobsCtrlTestSuite) SearchJobs() jobs.SearchJobsUseCase {
+func (s jobsCtrlTestSuite) SearchJobs() usecases.SearchJobsUseCase {
 	return s.searchJobUC
 }
 

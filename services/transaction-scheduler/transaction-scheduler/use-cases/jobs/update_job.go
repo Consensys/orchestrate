@@ -11,26 +11,22 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
-	subusecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs/sub-use-cases"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 )
 
 //go:generate mockgen -source=update_job.go -destination=mocks/update_job.go -package=mocks
 
 const updateJobComponent = "use-cases.update-job"
 
-type UpdateJobUseCase interface {
-	Execute(ctx context.Context, jobEntity *entities.Job, nextStatus, logMessage string, tenants []string) (*entities.Job, error)
-}
-
 // updateJobUseCase is a use case to create a new transaction job
 type updateJobUseCase struct {
 	db                    store.DB
-	updateChildrenUseCase subusecases.UpdateChildrenUseCase
-	startNextJobUseCase   StartNextJobUseCase
+	updateChildrenUseCase usecases.UpdateChildrenUseCase
+	startNextJobUseCase   usecases.StartNextJobUseCase
 }
 
 // NewUpdateJobUseCase creates a new UpdateJobUseCase
-func NewUpdateJobUseCase(db store.DB, updateChildrenUseCase subusecases.UpdateChildrenUseCase, startJobUC StartNextJobUseCase) UpdateJobUseCase {
+func NewUpdateJobUseCase(db store.DB, updateChildrenUseCase usecases.UpdateChildrenUseCase, startJobUC usecases.StartNextJobUseCase) usecases.UpdateJobUseCase {
 	return &updateJobUseCase{
 		db:                    db,
 		updateChildrenUseCase: updateChildrenUseCase,

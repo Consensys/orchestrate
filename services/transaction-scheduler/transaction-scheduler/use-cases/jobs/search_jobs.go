@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -16,17 +17,13 @@ import (
 
 const searchJobsComponent = "use-cases.search-jobs"
 
-type SearchJobsUseCase interface {
-	Execute(ctx context.Context, filters *entities.JobFilters, tenants []string) ([]*entities.Job, error)
-}
-
 // searchJobsUseCase is a use case to search jobs
 type searchJobsUseCase struct {
 	db store.DB
 }
 
 // NewSearchJobsUseCase creates a new SearchJobsUseCase
-func NewSearchJobsUseCase(db store.DB) SearchJobsUseCase {
+func NewSearchJobsUseCase(db store.DB) usecases.SearchJobsUseCase {
 	return &searchJobsUseCase{
 		db: db,
 	}

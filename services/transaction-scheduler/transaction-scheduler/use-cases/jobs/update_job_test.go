@@ -4,14 +4,13 @@ package jobs
 
 import (
 	"context"
-	mocks3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs/sub-use-cases/mocks"
 	"testing"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
-	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs/mocks"
+	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/mocks"
 
 	testutils3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 
@@ -30,7 +29,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 	mockTransactionDA := mocks.NewMockTransactionAgent(ctrl)
 	mockJobDA := mocks.NewMockJobAgent(ctrl)
 	mockLogDA := mocks.NewMockLogAgent(ctrl)
-	mockUpdateChilrenUC := mocks3.NewMockUpdateChildrenUseCase(ctrl)
+	mockUpdateChilrenUC := mocks2.NewMockUpdateChildrenUseCase(ctrl)
 	mockStartNextJobUC := mocks2.NewMockStartNextJobUseCase(ctrl)
 
 	mockDB.EXPECT().Job().Return(mockJobDA).AnyTimes()

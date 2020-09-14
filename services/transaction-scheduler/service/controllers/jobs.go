@@ -7,23 +7,23 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 
 	"github.com/gorilla/mux"
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs"
 )
 
 var _ entities.ETHTransaction
 
 type JobsController struct {
-	ucs                  jobs.UseCases
+	ucs                  usecases.JobUseCases
 	defaultRetryInterval time.Duration
 }
 
-func NewJobsController(useCases jobs.UseCases, defaultRetryInterval time.Duration) *JobsController {
+func NewJobsController(useCases usecases.JobUseCases, defaultRetryInterval time.Duration) *JobsController {
 	return &JobsController{
 		ucs:                  useCases,
 		defaultRetryInterval: defaultRetryInterval,

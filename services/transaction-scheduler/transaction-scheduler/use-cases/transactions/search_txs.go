@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -15,18 +16,14 @@ import (
 
 const searchTxsComponent = "use-cases.search-txs"
 
-type SearchTransactionsUseCase interface {
-	Execute(ctx context.Context, filters *entities.TransactionFilters, tenants []string) ([]*entities.TxRequest, error)
-}
-
 // searchTransactionsUseCase is a use case to get transaction requests by filter (or all)
 type searchTransactionsUseCase struct {
 	db           store.DB
-	getTxUseCase GetTxUseCase
+	getTxUseCase usecases.GetTxUseCase
 }
 
 // NewSearchTransactionsUseCase creates a new SearchTransactionsUseCase
-func NewSearchTransactionsUseCase(db store.DB, getTxUseCase GetTxUseCase) SearchTransactionsUseCase {
+func NewSearchTransactionsUseCase(db store.DB, getTxUseCase usecases.GetTxUseCase) usecases.SearchTransactionsUseCase {
 	return &searchTransactionsUseCase{
 		db:           db,
 		getTxUseCase: getTxUseCase,

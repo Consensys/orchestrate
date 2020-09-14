@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -15,24 +16,19 @@ import (
 
 const createScheduleComponent = "use-cases.create-schedule"
 
-type CreateScheduleUseCase interface {
-	Execute(ctx context.Context, schedule *entities.Schedule) (*entities.Schedule, error)
-	WithDBTransaction(dbtx store.Tx) CreateScheduleUseCase
-}
-
 // createScheduleUseCase is a use case to create a new transaction schedule
 type createScheduleUseCase struct {
 	db store.DB
 }
 
 // NewCreateScheduleUseCase creates a new CreateScheduleUseCase
-func NewCreateScheduleUseCase(db store.DB) CreateScheduleUseCase {
+func NewCreateScheduleUseCase(db store.DB) usecases.CreateScheduleUseCase {
 	return &createScheduleUseCase{
 		db: db,
 	}
 }
 
-func (uc createScheduleUseCase) WithDBTransaction(dbtx store.Tx) CreateScheduleUseCase {
+func (uc createScheduleUseCase) WithDBTransaction(dbtx store.Tx) usecases.CreateScheduleUseCase {
 	uc.db = dbtx
 	return &uc
 }
