@@ -6,8 +6,8 @@ import (
 
 	"github.com/gorilla/mux"
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/chain-registry/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 )
 
@@ -18,10 +18,10 @@ import (
 // @Security JWTAuth
 // @Param uuid path string true "ID of the faucet"
 // @Param request body PatchRequest true "Faucet update request"
-// @Success 200
-// @Failure 400
-// @Failure 404
-// @Failure 500
+// @Success 200 {object} models.Faucet
+// @Failure 400 {object} httputil.ErrorResponse "Invalid request"
+// @Failure 404 {object} httputil.ErrorResponse "Chain not found"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /faucets/{uuid} [patch]
 func (h *controller) PatchFaucet(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -29,7 +29,7 @@ func (h *controller) PatchFaucet(rw http.ResponseWriter, request *http.Request) 
 	faucetRequest := &PatchRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, faucetRequest)
 	if err != nil {
-		utils.WriteError(rw, err.Error(), http.StatusBadRequest)
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -41,7 +41,7 @@ func (h *controller) PatchFaucet(rw http.ResponseWriter, request *http.Request) 
 		multitenancy.AllowedTenantsFromContext(request.Context()),
 		faucet)
 	if err != nil {
-		utils.HandleStoreError(rw, err)
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 

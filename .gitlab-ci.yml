@@ -205,7 +205,9 @@ test-multitenancy-e2e:
 
 test-stress:
   <<: *docker-compose-e2e
-  <<: *rules
+  only:
+    refs:
+      - master
   script:
     - mv -f .env.ci .env
     - make up-ci

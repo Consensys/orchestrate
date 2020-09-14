@@ -6,8 +6,8 @@ import (
 
 	"github.com/gorilla/mux"
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/chain-registry/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 )
 
@@ -18,17 +18,17 @@ import (
 // @Security JWTAuth
 // @Param uuid path string true "ID of the chain"
 // @Param request body PatchRequest true "Chain update request"
-// @Success 200
-// @Failure 400
-// @Failure 404
-// @Failure 500
+// @Success 200 {object} models.Chain
+// @Failure 400 {object} httputil.ErrorResponse "Invalid request"
+// @Failure 404 {object} httputil.ErrorResponse "Chain not found"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /chains/{uuid} [patch]
 func (h *controller) PatchChain(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
 	chain, err := parsePatchReqToChain(request)
 	if err != nil {
-		utils.WriteError(rw, err.Error(), http.StatusBadRequest)
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -36,13 +36,13 @@ func (h *controller) PatchChain(rw http.ResponseWriter, request *http.Request) {
 	tenants := multitenancy.AllowedTenantsFromContext(request.Context())
 	err = h.updateChainUC.Execute(request.Context(), chainUUID, "", tenants, chain)
 	if err != nil {
-		utils.HandleStoreError(rw, err)
+		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 
 	chain, err = h.getChainUC.Execute(request.Context(), chainUUID, tenants)
 	if err != nil {
-		utils.HandleStoreError(rw, err)
+		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 

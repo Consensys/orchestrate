@@ -1,4 +1,4 @@
-package txschedulertypes
+package txscheduler
 
 import "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 

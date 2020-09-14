@@ -3,6 +3,7 @@ package httputil
 import (
 	"crypto/tls"
 	"net/http"
+	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -35,4 +36,14 @@ func TestTLS(t *testing.T) {
 	}
 	assert.Equal(t, "1.1", GetTLSVersion(req))
 	assert.Equal(t, "TLS_RSA_WITH_3DES_EDE_CBC_SHA", GetTLSCipher(req))
+}
+
+func TestToFilters(t *testing.T) {
+	v := url.Values{}
+	v.Add("key1", "val1")
+	v.Add("key2", "val2")
+	m := ToFilters(v)
+
+	assert.Equal(t, m["key1"], "val1")
+	assert.Equal(t, m["key2"], "val2")
 }

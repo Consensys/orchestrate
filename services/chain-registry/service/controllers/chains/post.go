@@ -6,8 +6,8 @@ import (
 	"strconv"
 
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/chain-registry/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 )
 
@@ -19,22 +19,22 @@ const latestBlockStr string = "latest"
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param request body PostRequest true "Chain registration request"
-// @Success 200
-// @Failure 400
-// @Failure 500
+// @Success 200 {object} models.Chain
+// @Failure 400 {object} httputil.ErrorResponse "Invalid request"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /chains [post]
 func (h *controller) PostChain(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
 	chain, err := parsePostReqToChain(request)
 	if err != nil {
-		utils.WriteError(rw, err.Error(), http.StatusBadRequest)
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	err = h.registerChainUC.Execute(request.Context(), chain)
 	if err != nil {
-		utils.HandleStoreError(rw, err)
+		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 

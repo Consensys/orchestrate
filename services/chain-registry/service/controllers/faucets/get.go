@@ -7,23 +7,24 @@ import (
 	"github.com/asaskevich/govalidator"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/chain-registry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/chainregistry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 
 	"github.com/gorilla/mux"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/chain-registry/utils"
 )
 
-var _ = types.Faucet{}
+var _ models.Faucet
+var _ chainregistry.Faucet
 
 // @Summary Retrieves a list of all registered faucet
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Success 200
-// @Failure 404
-// @Failure 500
+// @Success 200 {array} models.Faucet
+// @Failure 400 {object} httputil.ErrorResponse "Invalid request"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /faucets [get]
 func (h *controller) GetFaucets(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -31,11 +32,11 @@ func (h *controller) GetFaucets(rw http.ResponseWriter, request *http.Request) {
 	faucets, err := h.getFaucetsUC.Execute(
 		request.Context(),
 		multitenancy.AllowedTenantsFromContext(request.Context()),
-		utils.ToFilters(request.URL.Query()),
+		httputil.ToFilters(request.URL.Query()),
 	)
 
 	if err != nil {
-		utils.HandleStoreError(rw, err)
+		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 
@@ -49,10 +50,10 @@ func (h *controller) GetFaucets(rw http.ResponseWriter, request *http.Request) {
 // @Summary Retrieves a faucet by ID
 // @Produce json
 // @Param uuid path string true "ID of the faucet"
-// @Success 200
-// @Failure 400
-// @Failure 404
-// @Failure 500
+// @Success 200 {object} models.Faucet
+// @Failure 400 {object} httputil.ErrorResponse "Invalid request"
+// @Failure 404 {object} httputil.ErrorResponse "Faucet not found"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /faucets/{uuid} [get]
 func (h *controller) GetFaucet(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -64,7 +65,7 @@ func (h *controller) GetFaucet(rw http.ResponseWriter, request *http.Request) {
 	)
 
 	if err != nil {
-		utils.HandleStoreError(rw, err)
+		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 
@@ -75,9 +76,9 @@ func (h *controller) GetFaucet(rw http.ResponseWriter, request *http.Request) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param chain_uuid query string false "chain uuid to calculate faucet candidate" collectionFormat(csv)
-// @Param sender query string false "hex address of account sender" collectionFormat(csv)
-// @Success 200 {array} types.Faucet{} "Selected faucet candidate"
+// @Param chain_uuid query string true "chain uuid to calculate faucet candidate"
+// @Param account query string true "hex address of account sender"
+// @Success 200 {object} chainregistry.Faucet
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /faucets/candidate [get]
@@ -87,14 +88,14 @@ func (h *controller) GetFaucetCandidate(rw http.ResponseWriter, req *http.Reques
 	chainUUID := req.URL.Query().Get("chain_uuid")
 	if !govalidator.IsUUID(chainUUID) {
 		err := errors.DataError("invalid \"chain_uuid\" value. Expected uuid, found %s", chainUUID)
-		utils.HandleStoreError(rw, err)
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	account := req.URL.Query().Get("account")
 	if !ethcommon.IsHexAddress(account) {
 		err := errors.DataError("invalid \"account\" value. Expected hex, found %s", account)
-		utils.HandleStoreError(rw, err)
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -106,7 +107,7 @@ func (h *controller) GetFaucetCandidate(rw http.ResponseWriter, req *http.Reques
 			err = errors.NotFoundError(err.Error())
 		}
 
-		utils.HandleStoreError(rw, err)
+		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 

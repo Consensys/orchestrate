@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/chain-registry/utils"
 )
 
 // @Summary Deletes a chain by ID
@@ -13,10 +13,10 @@ import (
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param uuid path string true "ID of the chain"
-// @Success 204
-// @Failure 400
-// @Failure 404
-// @Failure 500
+// @Success 204 "Chain deleted successfully"
+// @Failure 400 {object} httputil.ErrorResponse "Invalid request"
+// @Failure 404 {object} httputil.ErrorResponse "Chain not found"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /chains/{uuid} [delete]
 func (h *controller) DeleteChain(rw http.ResponseWriter, request *http.Request) {
 	err := h.deleteChainUC.Execute(
@@ -26,7 +26,7 @@ func (h *controller) DeleteChain(rw http.ResponseWriter, request *http.Request) 
 	)
 
 	if err != nil {
-		utils.HandleStoreError(rw, err)
+		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 

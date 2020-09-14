@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -129,7 +130,9 @@ func TestHTTPRouteTests(t *testing.T) {
 func testResponse(t *testing.T, w *httptest.ResponseRecorder, expectedStatusCode int, expectedContentType, expectedBody string) {
 	assert.Equal(t, expectedStatusCode, w.Code, "Did not get expected HTTP status code")
 	assert.Equal(t, expectedContentType, w.Header().Get("Content-Type"), "Did not get expected content type")
-	assert.Equal(t, expectedBody, w.Body.String(), "Did not get expected body")
+	if expectedStatusCode == http.StatusOK {
+		assert.Equal(t, expectedBody, w.Body.String(), "Did not get expected body")
+	}
 }
 
 func UseMockChainRegistry(t *testing.T) store.ChainAgent {

@@ -4,25 +4,25 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 
 	"github.com/gorilla/mux"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/chain-registry/utils"
 )
 
 // @Summary Retrieves a list of all registered chains
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Success 200
-// @Failure 404
-// @Failure 500
+// @Success 200 {array} models.Chain
+// @Failure 400 {object} httputil.ErrorResponse "Invalid request"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /chains [get]
 func (h *controller) GetChains(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
-	filters := utils.ToFilters(request.URL.Query())
+	filters := httputil.ToFilters(request.URL.Query())
 	chains, err := h.getChainsUC.Execute(
 		request.Context(),
 		multitenancy.AllowedTenantsFromContext(request.Context()),
@@ -30,7 +30,7 @@ func (h *controller) GetChains(rw http.ResponseWriter, request *http.Request) {
 	)
 
 	if err != nil {
-		utils.HandleStoreError(rw, err)
+		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 
@@ -46,10 +46,10 @@ func (h *controller) GetChains(rw http.ResponseWriter, request *http.Request) {
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param uuid path string true "ID of the chain"
-// @Success 200
-// @Failure 400
-// @Failure 404
-// @Failure 500
+// @Success 200 {object} models.Chain
+// @Failure 400 {object} httputil.ErrorResponse "Invalid request"
+// @Failure 404 {object} httputil.ErrorResponse "Chain not found"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /chains/{uuid} [get]
 func (h *controller) GetChain(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -61,7 +61,7 @@ func (h *controller) GetChain(rw http.ResponseWriter, request *http.Request) {
 	)
 
 	if err != nil {
-		utils.HandleStoreError(rw, err)
+		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 

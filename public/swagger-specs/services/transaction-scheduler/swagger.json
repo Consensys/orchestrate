@@ -57,7 +57,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/types.JobResponse"
+                                    "$ref": "#/definitions/txscheduler.JobResponse"
                                 },
                                 {
                                     "type": "object",
@@ -65,13 +65,25 @@
                                         "annotations": {
                                             "allOf": [
                                                 {
-                                                    "$ref": "#/definitions/types.Annotations"
+                                                    "$ref": "#/definitions/txscheduler.Annotations"
                                                 },
                                                 {
                                                     "type": "object",
                                                     "properties": {
-                                                        "retryPolicy": {
-                                                            "$ref": "#/definitions/types.GasPriceRetryParams"
+                                                        "gasPricePolicy": {
+                                                            "allOf": [
+                                                                {
+                                                                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                                                                },
+                                                                {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "retryPolicy": {
+                                                                            "$ref": "#/definitions/txscheduler.RetryParams"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            ]
                                                         }
                                                     }
                                                 }
@@ -80,11 +92,11 @@
                                         "logs": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/types.Log"
+                                                "$ref": "#/definitions/entities.Log"
                                             }
                                         },
                                         "transaction": {
-                                            "$ref": "#/definitions/types.ETHTransaction"
+                                            "$ref": "#/definitions/entities.ETHTransaction"
                                         }
                                     }
                                 }
@@ -131,16 +143,40 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/types.CreateJobRequest"
+                                    "$ref": "#/definitions/txscheduler.CreateJobRequest"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "annotations": {
-                                            "$ref": "#/definitions/types.Annotations"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/txscheduler.Annotations"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "gasPricePolicy": {
+                                                            "allOf": [
+                                                                {
+                                                                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                                                                },
+                                                                {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "retryPolicy": {
+                                                                            "$ref": "#/definitions/txscheduler.RetryParams"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            ]
                                         },
                                         "transaction": {
-                                            "$ref": "#/definitions/types.ETHTransaction"
+                                            "$ref": "#/definitions/entities.ETHTransaction"
                                         }
                                     }
                                 }
@@ -152,7 +188,7 @@
                     "200": {
                         "description": "Created Job",
                         "schema": {
-                            "$ref": "#/definitions/types.JobResponse"
+                            "$ref": "#/definitions/txscheduler.JobResponse"
                         }
                     },
                     "400": {
@@ -204,7 +240,43 @@
                     "200": {
                         "description": "Job found",
                         "schema": {
-                            "$ref": "#/definitions/types.JobResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/txscheduler.JobResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "annotations": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/txscheduler.Annotations"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "gasPricePolicy": {
+                                                            "allOf": [
+                                                                {
+                                                                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                                                                },
+                                                                {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "retryPolicy": {
+                                                                            "$ref": "#/definitions/txscheduler.RetryParams"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "404": {
@@ -247,16 +319,40 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/types.UpdateJobRequest"
+                                    "$ref": "#/definitions/txscheduler.UpdateJobRequest"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "annotations": {
-                                            "$ref": "#/definitions/types.Annotations"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/txscheduler.Annotations"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "gasPricePolicy": {
+                                                            "allOf": [
+                                                                {
+                                                                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                                                                },
+                                                                {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "retryPolicy": {
+                                                                            "$ref": "#/definitions/txscheduler.RetryParams"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            ]
                                         },
                                         "transaction": {
-                                            "$ref": "#/definitions/types.ETHTransaction"
+                                            "$ref": "#/definitions/entities.ETHTransaction"
                                         }
                                     }
                                 }
@@ -268,7 +364,7 @@
                     "200": {
                         "description": "Job found",
                         "schema": {
-                            "$ref": "#/definitions/types.JobResponse"
+                            "$ref": "#/definitions/txscheduler.JobResponse"
                         }
                     },
                     "400": {
@@ -360,7 +456,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/types.ScheduleResponse"
+                                "$ref": "#/definitions/txscheduler.ScheduleResponse"
                             }
                         }
                     },
@@ -396,7 +492,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/types.CreateScheduleRequest"
+                            "$ref": "#/definitions/txscheduler.CreateScheduleRequest"
                         }
                     }
                 ],
@@ -406,7 +502,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/types.ScheduleResponse"
+                                    "$ref": "#/definitions/txscheduler.ScheduleResponse"
                                 },
                                 {
                                     "type": "object",
@@ -414,7 +510,7 @@
                                         "jobs": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/types.JobResponse"
+                                                "$ref": "#/definitions/txscheduler.JobResponse"
                                             }
                                         }
                                     }
@@ -471,7 +567,7 @@
                     "200": {
                         "description": "Schedule found",
                         "schema": {
-                            "$ref": "#/definitions/types.ScheduleResponse"
+                            "$ref": "#/definitions/txscheduler.ScheduleResponse"
                         }
                     },
                     "404": {
@@ -525,22 +621,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "allOf": [
-                                    {
-                                        "$ref": "#/definitions/types.TransactionResponse"
-                                    },
-                                    {
-                                        "type": "object",
-                                        "properties": {
-                                            "params": {
-                                                "$ref": "#/definitions/types.ETHTransactionParams"
-                                            },
-                                            "schedule": {
-                                                "$ref": "#/definitions/types.ScheduleResponse"
-                                            }
-                                        }
-                                    }
-                                ]
+                                "$ref": "#/definitions/txscheduler.TransactionResponse"
                             }
                         }
                     },
@@ -586,7 +667,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/types.DeployContractRequest"
+                                    "$ref": "#/definitions/txscheduler.DeployContractRequest"
                                 },
                                 {
                                     "type": "object",
@@ -594,13 +675,25 @@
                                         "params": {
                                             "allOf": [
                                                 {
-                                                    "$ref": "#/definitions/types.DeployContractParams"
+                                                    "$ref": "#/definitions/txscheduler.DeployContractParams"
                                                 },
                                                 {
                                                     "type": "object",
                                                     "properties": {
-                                                        "retryPolicy": {
-                                                            "$ref": "#/definitions/types.GasPriceRetryParams"
+                                                        "gasPricePolicy": {
+                                                            "allOf": [
+                                                                {
+                                                                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                                                                },
+                                                                {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "retryPolicy": {
+                                                                            "$ref": "#/definitions/txscheduler.RetryParams"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            ]
                                                         }
                                                     }
                                                 }
@@ -616,22 +709,7 @@
                     "202": {
                         "description": "Created deployment transaction request",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/types.TransactionResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "params": {
-                                            "$ref": "#/definitions/types.ETHTransactionParams"
-                                        },
-                                        "schedule": {
-                                            "$ref": "#/definitions/types.ScheduleResponse"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/txscheduler.TransactionResponse"
                         }
                     },
                     "400": {
@@ -688,7 +766,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/types.SendTransactionRequest"
+                                    "$ref": "#/definitions/txscheduler.SendTransactionRequest"
                                 },
                                 {
                                     "type": "object",
@@ -696,13 +774,25 @@
                                         "params": {
                                             "allOf": [
                                                 {
-                                                    "$ref": "#/definitions/types.TransactionParams"
+                                                    "$ref": "#/definitions/txscheduler.TransactionParams"
                                                 },
                                                 {
                                                     "type": "object",
                                                     "properties": {
-                                                        "retryPolicy": {
-                                                            "$ref": "#/definitions/types.GasPriceRetryParams"
+                                                        "gasPricePolicy": {
+                                                            "allOf": [
+                                                                {
+                                                                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                                                                },
+                                                                {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "retryPolicy": {
+                                                                            "$ref": "#/definitions/txscheduler.RetryParams"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            ]
                                                         }
                                                     }
                                                 }
@@ -718,22 +808,7 @@
                     "202": {
                         "description": "Created contract transaction request",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/types.TransactionResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "params": {
-                                            "$ref": "#/definitions/types.ETHTransactionParams"
-                                        },
-                                        "schedule": {
-                                            "$ref": "#/definitions/types.ScheduleResponse"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/txscheduler.TransactionResponse"
                         }
                     },
                     "400": {
@@ -790,7 +865,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/types.RawTransactionRequest"
+                                    "$ref": "#/definitions/txscheduler.RawTransactionRequest"
                                 },
                                 {
                                     "type": "object",
@@ -798,13 +873,13 @@
                                         "params": {
                                             "allOf": [
                                                 {
-                                                    "$ref": "#/definitions/types.RawTransactionParams"
+                                                    "$ref": "#/definitions/txscheduler.RawTransactionParams"
                                                 },
                                                 {
                                                     "type": "object",
                                                     "properties": {
                                                         "retryPolicy": {
-                                                            "$ref": "#/definitions/types.IntervalRetryParams"
+                                                            "$ref": "#/definitions/txscheduler.IntervalRetryParams"
                                                         }
                                                     }
                                                 }
@@ -820,22 +895,7 @@
                     "202": {
                         "description": "Created raw transaction request",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/types.TransactionResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "params": {
-                                            "$ref": "#/definitions/types.ETHTransactionParams"
-                                        },
-                                        "schedule": {
-                                            "$ref": "#/definitions/types.ScheduleResponse"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/txscheduler.TransactionResponse"
                         }
                     },
                     "400": {
@@ -892,7 +952,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/types.TransferRequest"
+                                    "$ref": "#/definitions/txscheduler.TransferRequest"
                                 },
                                 {
                                     "type": "object",
@@ -900,13 +960,25 @@
                                         "params": {
                                             "allOf": [
                                                 {
-                                                    "$ref": "#/definitions/types.TransferParams"
+                                                    "$ref": "#/definitions/txscheduler.TransferParams"
                                                 },
                                                 {
                                                     "type": "object",
                                                     "properties": {
-                                                        "retryPolicy": {
-                                                            "$ref": "#/definitions/types.GasPriceRetryParams"
+                                                        "gasPricePolicy": {
+                                                            "allOf": [
+                                                                {
+                                                                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                                                                },
+                                                                {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "retryPolicy": {
+                                                                            "$ref": "#/definitions/txscheduler.RetryParams"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            ]
                                                         }
                                                     }
                                                 }
@@ -922,22 +994,7 @@
                     "202": {
                         "description": "Created transfer transaction request",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/types.TransactionResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "params": {
-                                            "$ref": "#/definitions/types.ETHTransactionParams"
-                                        },
-                                        "schedule": {
-                                            "$ref": "#/definitions/types.ScheduleResponse"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/txscheduler.TransactionResponse"
                         }
                     },
                     "400": {
@@ -995,22 +1052,7 @@
                     "200": {
                         "description": "Transaction request found",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/types.TransactionResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "params": {
-                                            "$ref": "#/definitions/types.ETHTransactionParams"
-                                        },
-                                        "schedule": {
-                                            "$ref": "#/definitions/types.ScheduleResponse"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/txscheduler.TransactionResponse"
                         }
                     },
                     "404": {
@@ -1030,176 +1072,7 @@
         }
     },
     "definitions": {
-        "httputil.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "integer",
-                    "example": 24000
-                },
-                "message": {
-                    "type": "string",
-                    "example": "invalid status update for the current job state"
-                }
-            }
-        },
-        "types.Annotations": {
-            "type": "object",
-            "properties": {
-                "chainID": {
-                    "type": "string",
-                    "example": "1 (mainnet)"
-                },
-                "oneTimeKey": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "priority": {
-                    "type": "string",
-                    "example": "very-high"
-                },
-                "retryPolicy": {
-                    "type": "object",
-                    "$ref": "#/definitions/types.GasPriceRetryParams"
-                }
-            }
-        },
-        "types.CreateJobRequest": {
-            "type": "object",
-            "required": [
-                "chainUUID",
-                "scheduleUUID",
-                "transaction",
-                "type"
-            ],
-            "properties": {
-                "annotations": {
-                    "type": "object",
-                    "$ref": "#/definitions/types.Annotations"
-                },
-                "chainUUID": {
-                    "type": "string",
-                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
-                },
-                "labels": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "scheduleUUID": {
-                    "type": "string",
-                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
-                },
-                "transaction": {
-                    "type": "object",
-                    "$ref": "#/definitions/types.ETHTransaction"
-                },
-                "type": {
-                    "type": "string",
-                    "example": "eth://ethereum/transaction"
-                }
-            }
-        },
-        "types.CreateScheduleRequest": {
-            "type": "object"
-        },
-        "types.DeployContractParams": {
-            "type": "object",
-            "required": [
-                "contractName"
-            ],
-            "properties": {
-                "args": {
-                    "type": "array",
-                    "items": {
-                        "type": "object"
-                    }
-                },
-                "contractName": {
-                    "type": "string",
-                    "example": "MyContract"
-                },
-                "contractTag": {
-                    "type": "string",
-                    "example": "v1.1.0"
-                },
-                "from": {
-                    "type": "string",
-                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
-                },
-                "gas": {
-                    "type": "string",
-                    "example": "21000"
-                },
-                "gasPrice": {
-                    "type": "string",
-                    "example": "71500000 (wei)"
-                },
-                "oneTimeKey": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "priority": {
-                    "type": "string",
-                    "example": "very-high"
-                },
-                "privacyGroupId": {
-                    "type": "string",
-                    "example": "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
-                },
-                "privateFor": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "example": [
-                        "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
-                        "B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
-                    ]
-                },
-                "privateFrom": {
-                    "type": "string",
-                    "example": "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
-                },
-                "protocol": {
-                    "type": "string",
-                    "example": "Tessera"
-                },
-                "retryPolicy": {
-                    "type": "object",
-                    "$ref": "#/definitions/types.GasPriceRetryParams"
-                },
-                "value": {
-                    "type": "string",
-                    "example": "71500000 (wei)"
-                }
-            }
-        },
-        "types.DeployContractRequest": {
-            "type": "object",
-            "required": [
-                "chain",
-                "params"
-            ],
-            "properties": {
-                "chain": {
-                    "type": "string",
-                    "example": "myChain"
-                },
-                "labels": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "params": {
-                    "type": "object",
-                    "$ref": "#/definitions/types.DeployContractParams"
-                }
-            }
-        },
-        "types.ETHTransaction": {
+        "entities.ETHTransaction": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -1209,6 +1082,10 @@
                 "data": {
                     "type": "string",
                     "example": "0xfe378324abcde723"
+                },
+                "enclaveKey": {
+                    "type": "string",
+                    "example": "0xd41551c714c8ec769d2edad9adc250ae955d263da161bf59142b7500eea6715eadc250ae955d263da161bf59142b7500eea6715e"
                 },
                 "from": {
                     "type": "string",
@@ -1266,8 +1143,102 @@
                 }
             }
         },
-        "types.ETHTransactionParams": {
+        "entities.Log": {
             "type": "object",
+            "properties": {
+                "at": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Log message"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "MINED"
+                }
+            }
+        },
+        "httputil.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 24000
+                },
+                "message": {
+                    "type": "string",
+                    "example": "invalid status update for the current job state"
+                }
+            }
+        },
+        "txscheduler.Annotations": {
+            "type": "object",
+            "properties": {
+                "gasPricePolicy": {
+                    "type": "object",
+                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                },
+                "oneTimeKey": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "txscheduler.CreateJobRequest": {
+            "type": "object",
+            "required": [
+                "chainUUID",
+                "scheduleUUID",
+                "transaction",
+                "type"
+            ],
+            "properties": {
+                "annotations": {
+                    "type": "object",
+                    "$ref": "#/definitions/txscheduler.Annotations"
+                },
+                "chainUUID": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "nextJobUUID": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                },
+                "parentJobUUID": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                },
+                "scheduleUUID": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                },
+                "transaction": {
+                    "type": "object",
+                    "$ref": "#/definitions/entities.ETHTransaction"
+                },
+                "type": {
+                    "type": "string",
+                    "example": "eth://ethereum/transaction"
+                }
+            }
+        },
+        "txscheduler.CreateScheduleRequest": {
+            "type": "object"
+        },
+        "txscheduler.DeployContractParams": {
+            "type": "object",
+            "required": [
+                "contractName"
+            ],
             "properties": {
                 "args": {
                     "type": "array",
@@ -1295,13 +1266,13 @@
                     "type": "string",
                     "example": "71500000 (wei)"
                 },
-                "methodSignature": {
-                    "type": "string",
-                    "example": "transfer(address,uint256)"
+                "gasPricePolicy": {
+                    "type": "object",
+                    "$ref": "#/definitions/txscheduler.GasPriceParams"
                 },
-                "nonce": {
-                    "type": "string",
-                    "example": "1"
+                "oneTimeKey": {
+                    "type": "boolean",
+                    "example": true
                 },
                 "privacyGroupId": {
                     "type": "string",
@@ -1325,56 +1296,63 @@
                     "type": "string",
                     "example": "Tessera"
                 },
-                "raw": {
-                    "type": "string",
-                    "example": "0xfe378324abcde723"
-                },
-                "to": {
-                    "type": "string",
-                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
-                },
                 "value": {
                     "type": "string",
                     "example": "71500000 (wei)"
                 }
             }
         },
-        "types.GasPriceRetryParams": {
+        "txscheduler.DeployContractRequest": {
+            "type": "object",
+            "required": [
+                "chain",
+                "params"
+            ],
+            "properties": {
+                "chain": {
+                    "type": "string",
+                    "example": "myChain"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "params": {
+                    "type": "object",
+                    "$ref": "#/definitions/txscheduler.DeployContractParams"
+                }
+            }
+        },
+        "txscheduler.GasPriceParams": {
             "type": "object",
             "properties": {
-                "gasPriceIncrement": {
-                    "type": "number",
-                    "example": 1.05
-                },
-                "gasPriceIncrementLevel": {
+                "priority": {
                     "type": "string",
-                    "example": "medium"
+                    "example": "very-high"
                 },
-                "gasPriceLimit": {
-                    "type": "number",
-                    "example": 1.2
-                },
+                "retryPolicy": {
+                    "type": "object",
+                    "$ref": "#/definitions/txscheduler.RetryParams"
+                }
+            }
+        },
+        "txscheduler.IntervalRetryParams": {
+            "type": "object",
+            "properties": {
                 "interval": {
                     "type": "string",
                     "example": "2m"
                 }
             }
         },
-        "types.IntervalRetryParams": {
-            "type": "object",
-            "properties": {
-                "interval": {
-                    "type": "string",
-                    "example": "2m"
-                }
-            }
-        },
-        "types.JobResponse": {
+        "txscheduler.JobResponse": {
             "type": "object",
             "properties": {
                 "annotations": {
                     "type": "object",
-                    "$ref": "#/definitions/types.Annotations"
+                    "$ref": "#/definitions/txscheduler.Annotations"
                 },
                 "chainUUID": {
                     "type": "string",
@@ -1393,8 +1371,16 @@
                 "logs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/types.Log"
+                        "$ref": "#/definitions/entities.Log"
                     }
+                },
+                "nextJobUUID": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                },
+                "parentJobUUID": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
                 },
                 "scheduleUUID": {
                     "type": "string",
@@ -1406,7 +1392,7 @@
                 },
                 "transaction": {
                     "type": "object",
-                    "$ref": "#/definitions/types.ETHTransaction"
+                    "$ref": "#/definitions/entities.ETHTransaction"
                 },
                 "type": {
                     "type": "string",
@@ -1422,24 +1408,7 @@
                 }
             }
         },
-        "types.Log": {
-            "type": "object",
-            "properties": {
-                "at": {
-                    "type": "string",
-                    "example": "2020-07-09T12:35:42.115395Z"
-                },
-                "message": {
-                    "type": "string",
-                    "example": "Log message"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "MINED"
-                }
-            }
-        },
-        "types.RawTransactionParams": {
+        "txscheduler.RawTransactionParams": {
             "type": "object",
             "required": [
                 "raw"
@@ -1451,11 +1420,11 @@
                 },
                 "retryPolicy": {
                     "type": "object",
-                    "$ref": "#/definitions/types.IntervalRetryParams"
+                    "$ref": "#/definitions/txscheduler.IntervalRetryParams"
                 }
             }
         },
-        "types.RawTransactionRequest": {
+        "txscheduler.RawTransactionRequest": {
             "type": "object",
             "required": [
                 "chain",
@@ -1474,11 +1443,28 @@
                 },
                 "params": {
                     "type": "object",
-                    "$ref": "#/definitions/types.RawTransactionParams"
+                    "$ref": "#/definitions/txscheduler.RawTransactionParams"
                 }
             }
         },
-        "types.ScheduleResponse": {
+        "txscheduler.RetryParams": {
+            "type": "object",
+            "properties": {
+                "increment": {
+                    "type": "number",
+                    "example": 0.05
+                },
+                "interval": {
+                    "type": "string",
+                    "example": "2m"
+                },
+                "limit": {
+                    "type": "number",
+                    "example": 0.5
+                }
+            }
+        },
+        "txscheduler.ScheduleResponse": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -1488,7 +1474,7 @@
                 "jobs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/types.JobResponse"
+                        "$ref": "#/definitions/txscheduler.JobResponse"
                     }
                 },
                 "tenantID": {
@@ -1501,7 +1487,7 @@
                 }
             }
         },
-        "types.SendTransactionRequest": {
+        "txscheduler.SendTransactionRequest": {
             "type": "object",
             "required": [
                 "chain",
@@ -1520,11 +1506,11 @@
                 },
                 "params": {
                     "type": "object",
-                    "$ref": "#/definitions/types.TransactionParams"
+                    "$ref": "#/definitions/txscheduler.TransactionParams"
                 }
             }
         },
-        "types.TransactionParams": {
+        "txscheduler.TransactionParams": {
             "type": "object",
             "required": [
                 "methodSignature",
@@ -1549,6 +1535,10 @@
                     "type": "string",
                     "example": "71500000 (wei)"
                 },
+                "gasPricePolicy": {
+                    "type": "object",
+                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                },
                 "methodSignature": {
                     "type": "string",
                     "example": "transfer(address,uint256)"
@@ -1556,10 +1546,6 @@
                 "oneTimeKey": {
                     "type": "boolean",
                     "example": true
-                },
-                "priority": {
-                    "type": "string",
-                    "example": "very-high"
                 },
                 "privacyGroupId": {
                     "type": "string",
@@ -1583,10 +1569,6 @@
                     "type": "string",
                     "example": "Tessera"
                 },
-                "retryPolicy": {
-                    "type": "object",
-                    "$ref": "#/definitions/types.GasPriceRetryParams"
-                },
                 "to": {
                     "type": "string",
                     "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
@@ -1597,7 +1579,7 @@
                 }
             }
         },
-        "types.TransactionResponse": {
+        "txscheduler.TransactionResponse": {
             "type": "object",
             "properties": {
                 "chain": {
@@ -1613,12 +1595,11 @@
                     "example": "myIdempotencyKey"
                 },
                 "params": {
-                    "type": "object",
-                    "$ref": "#/definitions/types.ETHTransactionParams"
+                    "type": "string"
                 },
                 "schedule": {
                     "type": "object",
-                    "$ref": "#/definitions/types.ScheduleResponse"
+                    "$ref": "#/definitions/txscheduler.ScheduleResponse"
                 },
                 "uuid": {
                     "type": "string",
@@ -1626,7 +1607,7 @@
                 }
             }
         },
-        "types.TransferParams": {
+        "txscheduler.TransferParams": {
             "type": "object",
             "required": [
                 "from",
@@ -1646,13 +1627,9 @@
                     "type": "string",
                     "example": "71500000 (wei)"
                 },
-                "priority": {
-                    "type": "string",
-                    "example": "very-high"
-                },
-                "retry": {
+                "gasPricePolicy": {
                     "type": "object",
-                    "$ref": "#/definitions/types.GasPriceRetryParams"
+                    "$ref": "#/definitions/txscheduler.GasPriceParams"
                 },
                 "to": {
                     "type": "string",
@@ -1664,7 +1641,7 @@
                 }
             }
         },
-        "types.TransferRequest": {
+        "txscheduler.TransferRequest": {
             "type": "object",
             "required": [
                 "chain",
@@ -1683,16 +1660,16 @@
                 },
                 "params": {
                     "type": "object",
-                    "$ref": "#/definitions/types.TransferParams"
+                    "$ref": "#/definitions/txscheduler.TransferParams"
                 }
             }
         },
-        "types.UpdateJobRequest": {
+        "txscheduler.UpdateJobRequest": {
             "type": "object",
             "properties": {
                 "annotations": {
                     "type": "object",
-                    "$ref": "#/definitions/types.Annotations"
+                    "$ref": "#/definitions/txscheduler.Annotations"
                 },
                 "labels": {
                     "type": "object",
@@ -1710,7 +1687,7 @@
                 },
                 "transaction": {
                     "type": "object",
-                    "$ref": "#/definitions/types.ETHTransaction"
+                    "$ref": "#/definitions/entities.ETHTransaction"
                 }
             }
         }

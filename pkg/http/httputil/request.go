@@ -2,7 +2,9 @@ package httputil
 
 import (
 	"crypto/tls"
+	"html"
 	"net/http"
+	"net/url"
 	"strings"
 	"unicode/utf8"
 
@@ -76,4 +78,16 @@ func ContainsHeader(req *http.Request, name, value string) bool {
 		}
 	}
 	return false
+}
+
+func ToFilters(values url.Values) map[string]string {
+	filters := make(map[string]string)
+	for key := range values {
+		k := html.EscapeString(key)
+		v := html.EscapeString(values.Get(key))
+		if k != "" && v != "" {
+			filters[k] = v
+		}
+	}
+	return filters
 }

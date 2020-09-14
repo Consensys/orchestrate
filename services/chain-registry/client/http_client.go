@@ -9,8 +9,8 @@ import (
 	"strconv"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/chain-registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/chain-registry/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/chainregistry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 
 	log "github.com/sirupsen/logrus"
@@ -307,7 +307,7 @@ func (c *HTTPClient) GetFaucetCandidate(ctx context.Context, account ethcommon.A
 	case http.StatusNotFound:
 		return nil, nil
 	default:
-		errResp := utils.APIError{}
+		errResp := httputil.ErrorResponse{}
 		if err = json.NewDecoder(response.Body).Decode(&errResp); err != nil {
 			return nil, errors.FromError(err).ExtendComponent(component)
 		}

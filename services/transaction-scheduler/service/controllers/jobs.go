@@ -5,7 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx-scheduler"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
 
 	"github.com/gorilla/mux"
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
@@ -14,6 +15,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/formatters"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs"
 )
+
+var _ entities.ETHTransaction
 
 type JobsController struct {
 	ucs                  jobs.UseCases
@@ -44,7 +47,7 @@ func (c *JobsController) Append(router *mux.Router) {
 // @Security JWTAuth
 // @Param tx_hashes query []string false "List of transaction hashes" collectionFormat(csv)
 // @Param chain_uuid query string false "Chain UUID"
-// @Success 200 {object} types.JobResponse{annotations=types.InternalData{retryPolicy=types.GasPriceRetryParams},transaction=types.ETHTransaction,logs=[]types.Log} "List of Jobs found"
+// @Success 200 {object} txscheduler.JobResponse{annotations=txscheduler.Annotations{gasPricePolicy=txscheduler.GasPriceParams{retryPolicy=txscheduler.RetryParams}},transaction=entities.ETHTransaction,logs=[]entities.Log} "List of Jobs found"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid filter in the request"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /jobs [get]
@@ -64,7 +67,7 @@ func (c *JobsController) search(rw http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	var response []*types.JobResponse
+	var response []*txscheduler.JobResponse
 	for _, jb := range jobRes {
 		response = append(response, formatters.FormatJobResponse(jb))
 	}
@@ -78,8 +81,8 @@ func (c *JobsController) search(rw http.ResponseWriter, request *http.Request) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body types.CreateJobRequest{annotations=types.InternalData,transaction=types.ETHTransaction} true "Job creation request"
-// @Success 200 {object} types.JobResponse "Created Job"
+// @Param request body txscheduler.CreateJobRequest{annotations=txscheduler.Annotations{gasPricePolicy=txscheduler.GasPriceParams{retryPolicy=txscheduler.RetryParams}},transaction=entities.ETHTransaction} true "Job creation request"
+// @Success 200 {object} txscheduler.JobResponse "Created Job"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 422 {object} httputil.ErrorResponse "Unprocessable parameters were sent"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
@@ -88,7 +91,7 @@ func (c *JobsController) create(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	jobRequest := &types.CreateJobRequest{}
+	jobRequest := &txscheduler.CreateJobRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, jobRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
@@ -116,7 +119,7 @@ func (c *JobsController) create(rw http.ResponseWriter, request *http.Request) {
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param uuid path string true "UUID of the job"
-// @Success 200 {object} types.JobResponse "Job found"
+// @Success 200 {object} txscheduler.JobResponse{annotations=txscheduler.Annotations{gasPricePolicy=txscheduler.GasPriceParams{retryPolicy=txscheduler.RetryParams}}} "Job found"
 // @Failure 404 {object} httputil.ErrorResponse "Job not found"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /jobs/{uuid} [get]
@@ -166,8 +169,8 @@ func (c *JobsController) start(rw http.ResponseWriter, request *http.Request) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body types.UpdateJobRequest{annotations=types.InternalData,transaction=types.ETHTransaction} true "Job update request"
-// @Success 200 {object} types.JobResponse "Job found"
+// @Param request body txscheduler.UpdateJobRequest{annotations=txscheduler.Annotations{gasPricePolicy=txscheduler.GasPriceParams{retryPolicy=txscheduler.RetryParams}},transaction=entities.ETHTransaction} true "Job update request"
+// @Success 200 {object} txscheduler.JobResponse "Job found"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 404 {object} httputil.ErrorResponse "Job not found"
 // @Failure 409 {object} httputil.ErrorResponse "Job in invalid state for the given status update"
@@ -177,7 +180,7 @@ func (c *JobsController) update(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	jobRequest := &types.UpdateJobRequest{}
+	jobRequest := &txscheduler.UpdateJobRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, jobRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)

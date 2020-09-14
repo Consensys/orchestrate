@@ -30,9 +30,27 @@
                 ],
                 "summary": "Retrieves a list of all registered chains",
                 "responses": {
-                    "200": {},
-                    "404": {},
-                    "500": {}
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Chain"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
                 }
             },
             "post": {
@@ -63,9 +81,24 @@
                     }
                 ],
                 "responses": {
-                    "200": {},
-                    "400": {},
-                    "500": {}
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Chain"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
                 }
             }
         },
@@ -93,10 +126,30 @@
                     }
                 ],
                 "responses": {
-                    "200": {},
-                    "400": {},
-                    "404": {},
-                    "500": {}
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Chain"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Chain not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
                 }
             },
             "delete": {
@@ -122,10 +175,27 @@
                     }
                 ],
                 "responses": {
-                    "204": {},
-                    "400": {},
-                    "404": {},
-                    "500": {}
+                    "204": {
+                        "description": "Chains deleted successfully"
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Chain not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
                 }
             },
             "patch": {
@@ -163,10 +233,30 @@
                     }
                 ],
                 "responses": {
-                    "200": {},
-                    "400": {},
-                    "404": {},
-                    "500": {}
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Chain"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Chain not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
                 }
             }
         },
@@ -185,9 +275,27 @@
                 ],
                 "summary": "Retrieves a list of all registered faucet",
                 "responses": {
-                    "200": {},
-                    "404": {},
-                    "500": {}
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Faucet"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
                 }
             },
             "post": {
@@ -218,9 +326,74 @@
                     }
                 ],
                 "responses": {
-                    "200": {},
-                    "400": {},
-                    "500": {}
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Faucet"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/faucets/candidate": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Retrieve faucet candidate for provided sender and chain",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "chain uuid to calculate faucet candidate",
+                        "name": "chain_uuid",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "hex address of account sender",
+                        "name": "sender",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/chainregistry.Faucet"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
                 }
             }
         },
@@ -240,10 +413,30 @@
                     }
                 ],
                 "responses": {
-                    "200": {},
-                    "400": {},
-                    "404": {},
-                    "500": {}
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Faucet"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Faucet not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
                 }
             },
             "delete": {
@@ -269,10 +462,27 @@
                     }
                 ],
                 "responses": {
-                    "204": {},
-                    "400": {},
-                    "404": {},
-                    "500": {}
+                    "204": {
+                        "description": "Faucet deleted successfully"
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Faucet not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
                 }
             },
             "patch": {
@@ -310,15 +520,55 @@
                     }
                 ],
                 "responses": {
-                    "200": {},
-                    "400": {},
-                    "404": {},
-                    "500": {}
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Faucet"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Chain not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
                 }
             }
         }
     },
     "definitions": {
+        "chainregistry.Faucet": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "string"
+                },
+                "cooldown": {
+                    "type": "string"
+                },
+                "creditor": {
+                    "type": "string"
+                },
+                "maxBalance": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
         "chains.ListenerPatchRequest": {
             "type": "object",
             "properties": {
@@ -462,6 +712,109 @@
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "httputil.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 24000
+                },
+                "message": {
+                    "type": "string",
+                    "example": "invalid status update for the current job state"
+                }
+            }
+        },
+        "models.Chain": {
+            "type": "object",
+            "required": [
+                "privateTxManagers"
+            ],
+            "properties": {
+                "chainID": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "listenerBackOffDuration": {
+                    "type": "string"
+                },
+                "listenerCurrentBlock": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "listenerDepth": {
+                    "type": "integer"
+                },
+                "listenerExternalTxEnabled": {
+                    "type": "boolean"
+                },
+                "listenerStartingBlock": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "privateTxManagers": {
+                    "type": "array",
+                    "items": {
+                        "type": "PrivateTxManagerModel"
+                    }
+                },
+                "tenantID": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "urls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Faucet": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "string"
+                },
+                "chainRule": {
+                    "type": "string"
+                },
+                "cooldown": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "creditorAccountAddress": {
+                    "type": "string"
+                },
+                "maxBalance": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "tenantID": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "uuid": {
                     "type": "string"
                 }
             }

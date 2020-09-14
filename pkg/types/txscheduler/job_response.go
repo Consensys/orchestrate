@@ -1,4 +1,4 @@
-package txschedulertypes
+package txscheduler
 
 import (
 	"time"

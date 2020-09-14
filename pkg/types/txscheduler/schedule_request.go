@@ -1,3 +1,3 @@
-package txschedulertypes
+package txscheduler
 
 type CreateScheduleRequest struct{}
