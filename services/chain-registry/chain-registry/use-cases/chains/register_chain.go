@@ -49,7 +49,11 @@ func (uc *registerChain) Execute(ctx context.Context, chain *models.Chain) error
 
 	// If no starting block provided, we use the latest
 	if chain.ListenerStartingBlock == nil {
-		head := utils.GetChainTip(ctx, uc.ethClient, chain.URLs)
+		var head uint64
+		head, err = utils.GetChainTip(ctx, uc.ethClient, chain.URLs)
+		if err != nil {
+			return errors.FromError(err).ExtendComponent(registerChainComponent)
+		}
 		chain.ListenerStartingBlock = &head
 	}
 

@@ -14,6 +14,15 @@ All notable changes to this project will be documented in this file.
         * where multiple chains (belonging to the same tenant or not) calls the same Ethereum node.
         * using a node with low capabilities or behind a rate limiter (Infura/Kaleido)  
 
+### 🛠 Bug fixes
+* Fix a bug when registering an overloaded & rate-limited chain with a configuration starting block to "latest", the synchronization could start from block 0. 
+* Fix a bug where the process was not failing when DB migration failed 
+
+## v2.3.1 (2020-09-15)
+
+### 🛠 Bug fixes
+* Fix a bug when registering an overloaded & rate-limited chain with a configuration starting block to "latest", the synchronization could start from block 0. 
+* Fix a bug where the process was not failing when DB migration failed
 
 ## v2.3.0 (2020-09-02)
 
@@ -43,6 +52,13 @@ All notable changes to this project will be documented in this file.
 ### Migration from v2.2.0
 * Remove the envelope-store API, DB and volume and add the transaction-scheduler API, DB and volume. Data from the envelope-store DB doesn't need to be migrated to the new DB. Follow [this diff](https://github.com/PegaSysEng/orchestrate-kubernetes/compare/559bd13ea1dd68faf4e57a826028e1deeea9dfb1...e99443e20049400acf9ba8f33f76e5e661909f9d) to upgrade to the new configuration.
 * Update your application to use the [SDK](https://github.com/PegaSysEng/orchestrate-node) v3.1.0. This SDK will now use the REST API of the transaction scheduler to publish transactions instead of using the Kafka queues.
+
+
+## v2.2.2 (2020-09-15)
+
+### 🛠 Bug fixes
+* Fix a bug when registering an overloaded & rate-limited chain with a configuration starting block to "latest", the synchronization could start from block 0. 
+* Fix a bug where the process was not failing when DB migration failed
 
 ## v2.2.1 (2020-08-31)
 

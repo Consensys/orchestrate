@@ -25,8 +25,8 @@ func newMigrateCmd() *cobra.Command {
 			db = pg.Connect(opts)
 			return nil
 		},
-		Run: func(cmd *cobra.Command, args []string) {
-			migrate(db)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return migrate(db)
 		},
 		PersistentPostRun: func(cmd *cobra.Command, args []string) {
 			err := db.Close()
@@ -59,8 +59,8 @@ func newMigrateCmd() *cobra.Command {
 		Use:   "up [target]",
 		Short: "Upgrade database",
 		Long:  "Runs all available migrations or up to [target] if argument is provided",
-		Run: func(cmd *cobra.Command, args []string) {
-			migrate(db, append([]string{"up"}, args...)...)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return migrate(db, append([]string{"up"}, args...)...)
 		},
 	}
 	migrateCmd.AddCommand(upCmd)
@@ -69,8 +69,8 @@ func newMigrateCmd() *cobra.Command {
 	downCmd := &cobra.Command{
 		Use:   "down",
 		Short: "Reverts last migration",
-		Run: func(cmd *cobra.Command, args []string) {
-			migrate(db, "down")
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return migrate(db, "down")
 		},
 	}
 	migrateCmd.AddCommand(downCmd)
@@ -79,8 +79,8 @@ func newMigrateCmd() *cobra.Command {
 	resetCmd := &cobra.Command{
 		Use:   "reset",
 		Short: "Reverts all migrations",
-		Run: func(cmd *cobra.Command, args []string) {
-			migrate(db, "reset")
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return migrate(db, "reset")
 		},
 	}
 	migrateCmd.AddCommand(resetCmd)
@@ -121,11 +121,11 @@ func newMigrateCmd() *cobra.Command {
 	return migrateCmd
 }
 
-func migrate(db *pg.DB, a ...string) {
+func migrate(db *pg.DB, a ...string) error {
 	oldVersion, newVersion, err := migrations.Run(db, a...)
 	if err != nil {
 		log.WithError(err).Errorf("Migration failed")
-		return
+		return err
 	}
 
 	if newVersion != oldVersion {
@@ -138,4 +138,6 @@ func migrate(db *pg.DB, a ...string) {
 			"version": oldVersion,
 		}).Warnf("Nothing to migrate")
 	}
+
+	return nil
 }

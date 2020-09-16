@@ -60,7 +60,11 @@ func (uc *importChain) Execute(ctx context.Context, chainEncodeJSON string) erro
 
 	// In case of not staring block, we use latest
 	if chain.ListenerStartingBlock == nil {
-		head := utils.GetChainTip(ctx, uc.ethClient, chain.URLs)
+		var head uint64
+		head, err = utils.GetChainTip(ctx, uc.ethClient, chain.URLs)
+		if err != nil {
+			return errors.FromError(err).ExtendComponent(importChainComponent)
+		}
 		chain.ListenerStartingBlock = &head
 	}
 
