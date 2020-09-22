@@ -1,4 +1,7 @@
+@chain-registry
 Feature: Chain-Proxy Cache
+  As as external developer
+  I want to perform proxy calls to my chains
 
   Background:
     Given I have the following tenants

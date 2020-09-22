@@ -1,5 +1,7 @@
 @chain-registry
 Feature: Chain registry
+  As as external developer
+  I want to register new chains
 
   Scenario: get chain data with API key
     Given I set the headers

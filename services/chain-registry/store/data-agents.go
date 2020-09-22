@@ -25,7 +25,6 @@ type ChainAgent interface {
 
 type FaucetAgent interface {
 	RegisterFaucet(ctx context.Context, faucet *models.Faucet) error
-
 	GetFaucets(ctx context.Context, tenants []string, filters map[string]string) ([]*models.Faucet, error)
 	GetFaucet(ctx context.Context, uuid string, tenants []string) (*models.Faucet, error)
 	UpdateFaucet(ctx context.Context, uuid string, tenants []string, faucet *models.Faucet) error

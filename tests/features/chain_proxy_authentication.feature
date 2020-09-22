@@ -1,6 +1,9 @@
+@chain-registry
 @multi-tenancy
 Feature: Chain-Proxy Authentication
-
+  As as external developer
+  I want to perform proxy calls to my chains with expected permission rules
+  
   Scenario: Chain-Proxy Auth
     Given I have the following tenants
       | alias    | tenantID |

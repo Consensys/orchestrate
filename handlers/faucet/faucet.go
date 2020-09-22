@@ -4,7 +4,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/chainregistry"
+	multitenancy2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/chainregistry"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
@@ -18,6 +19,7 @@ func Faucet(registryClient client.ChainRegistryClient, txSchedulerClient client2
 	return func(txctx *engine.TxContext) {
 		logger := txctx.Logger.
 			WithField("envelope_id", txctx.Envelope.GetID()).
+			WithField("tenant_id", multitenancy2.TenantIDFromContext(txctx.Context())).
 			WithField("account", txctx.Envelope.MustGetFromAddress().Hex())
 
 		logger.Debugf("faucet handler starts")

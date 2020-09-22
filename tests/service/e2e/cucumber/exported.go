@@ -3,6 +3,7 @@ package cucumber
 import (
 	"context"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/cucumber/godog"
@@ -46,19 +47,21 @@ func Init(ctx context.Context) {
 			options.Output = f
 		}
 
-		log.Infof("cucumber: service ready")
+		log.WithField("tags", options.Tags).
+			WithField("concurrency", options.Concurrency).
+			WithField("paths", options.Paths).
+			Infof("cucumber: service ready")
 	})
 }
 
-func listTagCucumber() (tags string) {
-	externalTag := viper.GetString(TagsViperKey)
-	if externalTag != "" {
-		tags = externalTag
-	} else if !viper.GetBool(multitenancy.EnabledViperKey) {
-		tags = "~@multi-tenancy"
+func listTagCucumber() string {
+	tags := viper.GetString(TagsViperKey)
+
+	if !viper.GetBool(multitenancy.EnabledViperKey) {
+		tags += " ~@multi-tenancy"
 	}
 
-	return tags
+	return strings.TrimSpace(tags)
 }
 
 // SetGlobalOptions sets global Cucumber Handler

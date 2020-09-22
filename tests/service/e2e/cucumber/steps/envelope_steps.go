@@ -14,6 +14,7 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/cucumber/godog"
 	gherkin "github.com/cucumber/messages-go/v10"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/gofrs/uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -33,6 +34,7 @@ import (
 const aliasHeaderValue = "alias"
 
 var aliasRegex = regexp.MustCompile("{{([^}]*)}}")
+var AddressPtrType = reflect.TypeOf(new(common.Address))
 
 func (sc *ScenarioContext) sendEnvelope(topic string, e *tx.Envelope) error {
 	// Prepare message to be sent
@@ -181,7 +183,12 @@ func (sc *ScenarioContext) iRegisterTheFollowingEnvelopeFields(table *gherkin.Pi
 			return err
 		}
 
-		sc.aliases.Set(val, sc.Pickle.Id, a)
+		switch val.Type() {
+		case AddressPtrType:
+			sc.aliases.Set(val.Interface().(*common.Address).Hex(), sc.Pickle.Id, a)
+		default:
+			sc.aliases.Set(val, sc.Pickle.Id, a)
+		}
 	}
 
 	return nil

@@ -1,9 +1,12 @@
+@chain-registry
 @multi-tenancy
 Feature: Chain-Registry Authentication
+  As as external developer
+  I want to register new chains and protect them under expected permission rules
 
-  Scenario: Valid X-API-Key and X-Tenant-ID unset
+  Scenario: Create chain using X-API-Key
     Given I set the headers
-      | Key       | Value       |
+      | Key       | Value              |
       | X-API-Key | {{global.api-key}} |
     When I send "POST" request to "{{global.chain-registry}}/chains" with json:
       """
@@ -13,22 +16,183 @@ Feature: Chain-Registry Authentication
       }
       """
     Then the response code should be 200
-    Then I store the UUID as "chainUID"
-    When I send "GET" request to "{{global.chain-registry}}/chains/{{chainUID}}"
+    Then I store the UUID as "chainUUID"
+    When I send "GET" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
     Then the response code should be 200
-    When I send "PATCH" request to "{{global.chain-registry}}/chains/{{chainUID}}" with json:
+    And Response should have the following fields
+      | uuid          | tenantID |
+      | {{chainUUID}} | _        |
+    When I send "PATCH" request to "{{global.chain-registry}}/chains/{{chainUUID}}" with json:
       """
       {
         "name": "geth-new-{{scenarioID}}"
       }
       """
     Then the response code should be 200
-    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUID}}"
+    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
+    Then the response code should be 204
+
+  Scenario: Create chain using X-API-Key and X-Tenant-ID
+    Given I set the headers
+      | Key         | Value              |
+      | X-API-Key   | {{global.api-key}} |
+      | X-Tenant-ID | foo                |
+    When I send "POST" request to "{{global.chain-registry}}/chains" with json:
+      """
+      {
+        "name": "geth-{{scenarioID}}",
+        "urls": {{global.nodes.geth.URLs}}
+      }
+      """
+    Then the response code should be 200
+    Then I store the UUID as "chainUUID"
+    When I send "GET" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
+    Then the response code should be 200
+    And Response should have the following fields
+      | uuid          | tenantID |
+      | {{chainUUID}} | foo      |
+    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
+    Then the response code should be 204
+
+  Scenario: Create chain with Wildcard JWT token
+    Given I have the following tenants
+      | alias    | tenantID |
+      | wildcard | *        |
+    Given I set the headers
+      | Key           | Value                     |
+      | Authorization | Bearer {{wildcard.token}} |
+    When I send "POST" request to "{{global.chain-registry}}/chains" with json:
+      """
+      {
+        "name": "geth-{{scenarioID}}",
+        "urls": {{global.nodes.geth.URLs}}
+      }
+      """
+    Then the response code should be 200
+    Then I store the UUID as "chainUUID"
+    When I send "GET" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
+    And Response should have the following fields
+      | uuid          | tenantID |
+      | {{chainUUID}} | _        |
+    Then the response code should be 200
+    When I send "PATCH" request to "{{global.chain-registry}}/chains/{{chainUUID}}" with json:
+      """
+      {
+        "name": "geth-new-{{scenarioID}}"
+      }
+      """
+    Then the response code should be 200
+    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
+    Then the response code should be 204
+
+  Scenario:  Create chain with Wildcard JWT and X-Tenant-ID
+    Given I have the following tenants
+      | alias    | tenantID |
+      | wildcard | *        |
+    Given I set the headers
+      | Key           | Value                     |
+      | Authorization | Bearer {{wildcard.token}} |
+      | X-Tenant-ID   | foo                       |
+    When I send "POST" request to "{{global.chain-registry}}/chains" with json:
+      """
+      {
+        "name": "geth-{{scenarioID}}",
+        "urls": {{global.nodes.geth.URLs}}
+      }
+      """
+    Then the response code should be 200
+    Then I store the UUID as "chainUUID"
+    When I send "GET" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
+    Then the response code should be 200
+    And Response should have the following fields
+      | uuid          | tenantID |
+      | {{chainUUID}} | foo      |
+    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
+    Then the response code should be 204
+
+  Scenario:  Create chain with with tenant foo and valid permissions
+    Given I have the following tenants
+      | alias     | tenantID |
+      | tenantFoo | foo      |
+      | tenantBar | bar      |
+      | wildcard  | *        |
+    Given I set the headers
+      | Key           | Value                      |
+      | Authorization | Bearer {{tenantFoo.token}} |
+    When I send "POST" request to "{{global.chain-registry}}/chains" with json:
+      """
+      {
+        "name": "geth-{{scenarioID}}",
+        "urls": {{global.nodes.geth.URLs}}
+      }
+      """
+    Then the response code should be 200
+    Then I store the UUID as "chainUUID"
+    When I send "GET" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
+    Then the response code should be 200
+    And Response should have the following fields
+      | uuid          | tenantID |
+      | {{chainUUID}} | foo      |
+    Given I set the headers
+      | Key           | Value                      |
+      | Authorization | Bearer {{tenantBar.token}} |
+    When I send "GET" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
+    Then the response code should be 404
+    Given I set the headers
+      | Key           | Value                     |
+      | Authorization | Bearer {{wildcard.token}} |
+      | X-Tenant-ID   | foo                       |
+    When I send "GET" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
+    Then the response code should be 200
+    Given I set the headers
+      | Key           | Value                      |
+      | Authorization | Bearer {{tenantFoo.token}} |
+    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
+    Then the response code should be 204
+
+  Scenario:  Create chain with with default tenant valid permissions
+    Given I have the following tenants
+      | alias     | tenantID |
+      | tenantFoo | foo      |
+      | tenantBar | bar      |
+      | wildcard  | *        |
+    Given I set the headers
+      | Key           | Value                     |
+      | Authorization | Bearer {{wildcard.token}} |
+      | X-Tenant-ID   | _                         |
+    When I send "POST" request to "{{global.chain-registry}}/chains" with json:
+      """
+      {
+        "name": "geth-{{scenarioID}}",
+        "urls": {{global.nodes.geth.URLs}}
+      }
+      """
+    Then the response code should be 200
+    Then I store the UUID as "chainUUID"
+    When I send "GET" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
+    Then the response code should be 200
+    And Response should have the following fields
+      | uuid          | tenantID |
+      | {{chainUUID}} | _        |
+    Given I set the headers
+      | Key           | Value                      |
+      | Authorization | Bearer {{tenantBar.token}} |
+    When I send "GET" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
+    Then the response code should be 200
+    Given I set the headers
+      | Key           | Value                      |
+      | Authorization | Bearer {{tenantFoo.token}} |
+    When I send "GET" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
+    Then the response code should be 200
+    Given I set the headers
+      | Key           | Value                     |
+      | Authorization | Bearer {{wildcard.token}} |
+    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
     Then the response code should be 204
 
   Scenario: Invalid X-API-Key
     Given I set the headers
-      | Key       | Value       |
+      | Key       | Value              |
       | X-API-Key | {{global.api-key}} |
     When I send "POST" request to "{{global.chain-registry}}/chains" with json:
       """
@@ -38,156 +202,33 @@ Feature: Chain-Registry Authentication
       }
       """
     Then the response code should be 200
-    Then I store the UUID as "chainUID"
+    Then I store the UUID as "chainUUID"
     Given I set the headers
       | Key       | Value       |
       | X-API-Key | unknown-key |
-    When I send "GET" request to "{{global.chain-registry}}/chains/{{chainUID}}"
+    When I send "GET" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
     Then the response code should be 401
-    When I send "PATCH" request to "{{global.chain-registry}}/chains/{{chainUID}}" with json:
+    When I send "PATCH" request to "{{global.chain-registry}}/chains/{{chainUUID}}" with json:
       """
       {
         "name": "geth-new-{{scenarioID}}"
       }
       """
     Then the response code should be 401
-    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUID}}"
+    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
     Then the response code should be 401
-    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUID}}"
+    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
     Then the response code should be 401
     Given I set the headers
-      | Key       | Value       |
+      | Key       | Value              |
       | X-API-Key | {{global.api-key}} |
-    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUID}}"
-    Then the response code should be 204
-
-  Scenario: Valid X-API-Key and X-Tenant-ID
-    Given I set the headers
-      | Key         | Value       |
-      | X-API-Key   | {{global.api-key}} |
-      | X-Tenant-ID | foo         |
-    When I send "POST" request to "{{global.chain-registry}}/chains" with json:
-      """
-      {
-        "name": "geth-{{scenarioID}}",
-        "urls": {{global.nodes.geth.URLs}}
-      }
-      """
-    Then the response code should be 200
-    Then I store the UUID as "chainUID"
-    When I send "GET" request to "{{global.chain-registry}}/chains/{{chainUID}}"
-    Then the response code should be 200
-    When I send "PATCH" request to "{{global.chain-registry}}/chains/{{chainUID}}" with json:
-      """
-      {
-        "name": "geth-new-{{scenarioID}}"
-      }
-      """
-    Then the response code should be 200
-    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUID}}"
-    Then the response code should be 204
-
-  Scenario: Valid X-API-Key and invalid X-Tenant-ID
-    Given I set the headers
-      | Key         | Value       |
-      | X-API-Key   | {{global.api-key}} |
-      | X-Tenant-ID | foo         |
-    When I send "POST" request to "{{global.chain-registry}}/chains" with json:
-      """
-      {
-        "name": "geth-{{scenarioID}}",
-        "urls": {{global.nodes.geth.URLs}}
-      }
-      """
-    Then the response code should be 200
-    Then I store the UUID as "chainUID"
-    Given I set the headers
-      | Key         | Value    |
-      | X-API-Key   | with-key |
-      | X-Tenant-ID | bar      |
-    When I send "GET" request to "{{global.chain-registry}}/chains/{{chainUID}}"
-    Then the response code should be 404
-    When I send "PATCH" request to "{{global.chain-registry}}/chains/{{chainUID}}" with json:
-      """
-      {
-        "name": "geth-new-{{scenarioID}}"
-      }
-      """
-    Then the response code should be 404
-    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUID}}"
-    Then the response code should be 404
-    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUID}}"
-    Then the response code should be 404
-    Given I set the headers
-      | Key         | Value    |
-      | X-API-Key   | with-key |
-      | X-Tenant-ID | foo      |
-    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUID}}"
-    Then the response code should be 204
-
-  Scenario: JWT token and X-Tenant-ID unset
-    Given I have the following tenants
-      | alias   | tenantID           |
-      | tenant1 | foo-{{scenarioID}} |
-    Given I set the headers
-      | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.chain-registry}}/chains" with json:
-      """
-      {
-        "name": "geth-{{scenarioID}}",
-        "urls": {{global.nodes.geth.URLs}}
-      }
-      """
-    Then the response code should be 200
-    Then I store the UUID as "chainUID"
-    When I send "GET" request to "{{global.chain-registry}}/chains/{{chainUID}}"
-    Then the response code should be 200
-    When I send "PATCH" request to "{{global.chain-registry}}/chains/{{chainUID}}" with json:
-      """
-      {
-        "name": "geth-new-{{scenarioID}}"
-      }
-      """
-    Then the response code should be 200
-    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUID}}"
-    Then the response code should be 204
-
-  Scenario: JWT token
-    Given I have the following tenants
-      | alias   | tenantID           |
-      | tenant1 | foo-{{scenarioID}} |
-    Given I set the headers
-      | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
-      | X-Tenant-ID   | _                        |
-    When I send "POST" request to "{{global.chain-registry}}/chains" with json:
-      """
-      {
-        "name": "geth-{{scenarioID}}",
-        "urls": {{global.nodes.geth.URLs}}
-      }
-      """
-    Then the response code should be 200
-    Then I store the UUID as "chainUID"
-    When I send "GET" request to "{{global.chain-registry}}/chains/{{chainUID}}"
-    Then the response code should be 200
-    When I send "PATCH" request to "{{global.chain-registry}}/chains/{{chainUID}}" with json:
-      """
-      {
-        "name": "geth-new-{{scenarioID}}"
-      }
-      """
-    Then the response code should be 200
-    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUID}}"
+    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
     Then the response code should be 204
 
   Scenario: Invalid JWT token
     Given I have the following tenants
       | alias   | tenantID           |
       | tenant1 | foo-{{scenarioID}} |
-      | tenant2 | bar-{{scenarioID}} |
-      | tenant3 | *                  |
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
@@ -199,57 +240,19 @@ Feature: Chain-Registry Authentication
       }
       """
     Then the response code should be 200
-    Then I store the UUID as "chainUID"
+    Then I store the UUID as "chainUUID"
+    Given I set the headers
+      | Key           | Value        |
+      | Authorization | InvalidToken |
+    When I send "GET" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
+    Then the response code should be 401
+    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
+    Then the response code should be 401
+    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
+    Then the response code should be 401
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant2.token}} |
-    When I send "GET" request to "{{global.chain-registry}}/chains/{{chainUID}}"
-    Then the response code should be 404
-    When I send "PATCH" request to "{{global.chain-registry}}/chains/{{chainUID}}" with json:
-      """
-      {
-        "name": "geth-new-{{scenarioID}}"
-      }
-      """
-    Then the response code should be 404
-    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUID}}"
-    Then the response code should be 404
-    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUID}}"
-    Then the response code should be 404
-    Given I set the headers
-      | Key           | Value                    |
-      | Authorization | Bearer {{tenant3.token}} |
-    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUID}}"
+      | Authorization | Bearer {{tenant1.token}} |
+    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
     Then the response code should be 204
 
-  Scenario: Wildcard * JWT token
-    Given I have the following tenants
-      | alias   | tenantID           |
-      | tenant1 | foo-{{scenarioID}} |
-      | tenant2 | *                  |
-    Given I set the headers
-      | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.chain-registry}}/chains" with json:
-      """
-      {
-        "name": "geth-{{scenarioID}}",
-        "urls": {{global.nodes.geth.URLs}}
-      }
-      """
-    Then the response code should be 200
-    Then I store the UUID as "chainUID"
-    Given I set the headers
-      | Key           | Value                    |
-      | Authorization | Bearer {{tenant2.token}} |
-    When I send "GET" request to "{{global.chain-registry}}/chains/{{chainUID}}"
-    Then the response code should be 200
-    When I send "PATCH" request to "{{global.chain-registry}}/chains/{{chainUID}}" with json:
-      """
-      {
-        "name": "geth-new-{{scenarioID}}"
-      }
-      """
-    Then the response code should be 200
-    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUID}}"
-    Then the response code should be 204

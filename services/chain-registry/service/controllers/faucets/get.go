@@ -100,7 +100,6 @@ func (h *controller) GetFaucetCandidate(rw http.ResponseWriter, req *http.Reques
 	}
 
 	tenants := multitenancy.AllowedTenantsFromContext(req.Context())
-
 	faucet, err := h.faucetCandidateUC.Execute(req.Context(), ethcommon.HexToAddress(account), chainUUID, tenants)
 	if err != nil {
 		if errors.IsFaucetWarning(err) {
