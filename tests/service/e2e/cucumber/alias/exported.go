@@ -7,6 +7,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/key"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
 	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
@@ -53,6 +54,7 @@ func importGlobalAlias(rawAliases string) {
 		"contract-registry-http":    viper.GetString(contractregistry.ContractRegistryHTTPURLViperKey),
 		"tx-scheduler":              viper.GetString(txscheduler.TxSchedulerURLViperKey),
 		"tx-scheduler-metrics":      viper.GetString(txscheduler.TxSchedulerMetricsURLViperKey),
+		"api-key":                   viper.GetString(key.APIKeyViperKey),
 	}
 	for k, v := range internal {
 		if _, ok := global[k]; ok {

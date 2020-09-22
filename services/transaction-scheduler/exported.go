@@ -31,7 +31,8 @@ func New(ctx context.Context) (*app.App, error) {
 	return NewTxScheduler(
 		config,
 		pgmngr,
-		authjwt.GlobalChecker(), authkey.GlobalChecker(),
+		authjwt.GlobalChecker(),
+		authkey.GlobalChecker(),
 		client.GlobalClient(),
 		contractregistry.GlobalClient(),
 		sarama.GlobalSyncProducer(),

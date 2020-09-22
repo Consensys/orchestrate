@@ -13,7 +13,7 @@ var (
 )
 
 // Init initializes Faucet
-func Init(ctx context.Context) {
+func Init(_ context.Context) {
 	initOnce.Do(func() {
 		if checker != nil {
 			return

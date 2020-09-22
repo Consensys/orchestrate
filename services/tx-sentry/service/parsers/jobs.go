@@ -20,6 +20,7 @@ func JobResponseToEntity(jobResponse *txschedulertypes.JobResponse) *entities.Jo
 		ScheduleUUID: jobResponse.ScheduleUUID,
 		Type:         jobResponse.Type,
 		Labels:       jobResponse.Labels,
+		TenantID:     jobResponse.TenantID,
 		InternalData: &entities.InternalData{
 			OneTimeKey:        jobResponse.Annotations.OneTimeKey,
 			Priority:          jobResponse.Annotations.GasPricePolicy.Priority,

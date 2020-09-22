@@ -27,7 +27,7 @@ func Init(_ context.Context) {
 
 		newBackOff := func() backoff.BackOff { return utils.NewBackOff(utils.NewConfig(viper.GetViper())) }
 		// Set Client
-		client = NewClient(newBackOff, http.NewClient())
+		client = NewClient(newBackOff, http.NewClient(http.NewConfig(viper.GetViper())))
 
 		log.Infof("%s: ready", component)
 

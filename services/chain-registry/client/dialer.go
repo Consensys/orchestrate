@@ -6,5 +6,5 @@ import (
 
 func DialWithDefaultOptions(url string) *HTTPClient {
 	conf := NewConfig(url)
-	return NewHTTPClient(http.NewClient(), conf)
+	return NewHTTPClient(http.NewClient(http.NewDefaultConfig()), conf)
 }

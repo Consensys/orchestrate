@@ -38,7 +38,7 @@ type txSchedulerTransactionTestSuite struct {
 
 func (s *txSchedulerTransactionTestSuite) SetupSuite() {
 	conf := client.NewConfig(s.baseURL, nil)
-	s.client = client.NewHTTPClient(http.NewClient(), conf)
+	s.client = client.NewHTTPClient(http.NewClient(http.NewDefaultConfig()), conf)
 }
 
 func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() {

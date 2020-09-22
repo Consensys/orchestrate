@@ -50,53 +50,54 @@ func New(jwt, key auth.Checker, multitenancyEnabled bool) *Auth {
 
 func (a *Auth) Handler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		if a.multitenancy {
-			// Extract Authorization credentials from HTTP headers
-			authCtx := authutils.WithAuthorization(
-				req.Context(),
-				req.Header.Get(authutils.AuthorizationHeader),
-			)
-
-			// Extract API Key credentials from HTTP headers
-			authCtx = authutils.WithAPIKey(
-				authCtx,
-				req.Header.Get(authutils.APIKeyHeader),
-			)
-
-			// Extract API Key credentials from HTTP headers
-			authCtx = multitenancy.WithTenantID(
-				authCtx,
-				req.Header.Get(multitenancy.TenantIDHeader),
-			)
-
-			// Perform API Key Authentication
-			checkedCtx, err := a.key.Check(authCtx)
-			if err == nil {
-				// Bypass JWT authentication
-				log.FromContext(checkedCtx).
-					WithField("tenant_id", multitenancy.TenantIDFromContext(checkedCtx)).
-					WithField("allowed_tenants", multitenancy.AllowedTenantsFromContext(checkedCtx)).
-					Debugf("authentication succeeded (API-Key)")
-				a.serveNext(rw, req.WithContext(checkedCtx), h)
-				return
-			}
-
-			// Perform JWT Authentication
-			checkedCtx, err = a.jwt.Check(authCtx)
-			if err == nil {
-				// JWT Authentication succeeded
-				log.FromContext(checkedCtx).
-					WithField("tenant_id", multitenancy.TenantIDFromContext(checkedCtx)).
-					WithField("allowed_tenants", multitenancy.AllowedTenantsFromContext(checkedCtx)).
-					Debugf("authentication succeeded (JWT)")
-
-				a.serveNext(rw, req.WithContext(checkedCtx), h)
-			} else {
-				log.FromContext(checkedCtx).WithError(err).Errorf("authentication failed")
-				a.writeUnauthorized(rw, err)
-			}
-		} else {
+		if !a.multitenancy {
 			a.serveNext(rw, req, h)
+			return
+		}
+
+		// Extract Authorization credentials from HTTP headers
+		authCtx := authutils.WithAuthorization(
+			req.Context(),
+			req.Header.Get(authutils.AuthorizationHeader),
+		)
+
+		// Extract API Key credentials from HTTP headers
+		authCtx = authutils.WithAPIKey(
+			authCtx,
+			req.Header.Get(authutils.APIKeyHeader),
+		)
+
+		// Extract API Key credentials from HTTP headers
+		authCtx = multitenancy.WithTenantID(
+			authCtx,
+			req.Header.Get(multitenancy.TenantIDHeader),
+		)
+
+		// Perform API Key Authentication
+		checkedCtx, err := a.key.Check(authCtx)
+		if err == nil {
+			// Bypass JWT authentication
+			log.FromContext(checkedCtx).
+				WithField("tenant_id", multitenancy.TenantIDFromContext(checkedCtx)).
+				WithField("allowed_tenants", multitenancy.AllowedTenantsFromContext(checkedCtx)).
+				Debugf("authentication succeeded (API-Key)")
+			a.serveNext(rw, req.WithContext(checkedCtx), h)
+			return
+		}
+
+		// Perform JWT Authentication
+		checkedCtx, err = a.jwt.Check(authCtx)
+		if err == nil {
+			// JWT Authentication succeeded
+			log.FromContext(checkedCtx).
+				WithField("tenant_id", multitenancy.TenantIDFromContext(checkedCtx)).
+				WithField("allowed_tenants", multitenancy.AllowedTenantsFromContext(checkedCtx)).
+				Debugf("authentication succeeded (JWT)")
+
+			a.serveNext(rw, req.WithContext(checkedCtx), h)
+		} else {
+			log.FromContext(checkedCtx).WithError(err).Errorf("authentication failed")
+			a.writeUnauthorized(rw, err)
 		}
 	})
 }

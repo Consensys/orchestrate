@@ -19,14 +19,20 @@ func AllowedTenants(jwtTenant, tenantID string) []string {
 	switch {
 	case jwtTenant == "":
 		return []string{}
+	case jwtTenant == Wildcard && tenantID == Wildcard:
+		return []string{Wildcard}
+	case jwtTenant == Wildcard && tenantID == DefaultTenant:
+		return []string{DefaultTenant}
+	case jwtTenant == Wildcard && tenantID != "":
+		return []string{tenantID, DefaultTenant}
 	case jwtTenant == Wildcard && tenantID == "":
 		return []string{Wildcard}
-	case jwtTenant == Wildcard:
-		return []string{tenantID}
 	case tenantID == DefaultTenant:
 		return []string{DefaultTenant}
+	case tenantID == "" && jwtTenant == DefaultTenant:
+		return []string{DefaultTenant}
 	case tenantID == "":
-		return []string{DefaultTenant, jwtTenant}
+		return []string{jwtTenant, DefaultTenant}
 	case jwtTenant != tenantID:
 		return []string{}
 	default:

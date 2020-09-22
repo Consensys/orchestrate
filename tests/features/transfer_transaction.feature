@@ -70,8 +70,9 @@ Feature: Send transfer transaction
       | {{transferTxOneID}} |
       | {{transferTxTwoID}} |
     Given I set the headers
-      | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}          |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.tx-scheduler}}/transactions/transfer" with json:
   """
 {

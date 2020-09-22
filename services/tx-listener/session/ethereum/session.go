@@ -18,7 +18,6 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	ethclientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 	hook "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/hooks"
@@ -92,7 +91,6 @@ type fetchedBlock struct {
 }
 
 func (s *Session) Run(ctx context.Context) error {
-	ctx = multitenancy.WithTenantID(ctx, s.Chain.TenantID)
 	err := backoff.RetryNotify(
 		func() error {
 			err := s.run(ctx)
@@ -312,8 +310,6 @@ func (s *Session) fetchBlock(ctx context.Context, blockPosition uint64) *Future 
 
 		block := &fetchedBlock{block: blck}
 
-		ctx = multitenancy.WithTenantID(ctx, s.Chain.TenantID)
-
 		for _, tx := range blck.Transactions() {
 			log.FromContext(ctx).WithField("txHash", tx.Hash().String()).
 				WithField("block", blck.Nonce()).Debug("found transaction in block")
@@ -370,6 +366,7 @@ func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transacti
 				UUID:         jobResponse.UUID,
 				ChainUUID:    jobResponse.ChainUUID,
 				ScheduleUUID: jobResponse.ScheduleUUID,
+				TenantID:     jobResponse.TenantID,
 				Type:         jobResponse.Type,
 				Labels:       jobResponse.Labels,
 				Transaction:  &jobResponse.Transaction,

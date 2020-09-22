@@ -3,8 +3,8 @@ Feature: Chain registry
 
   Scenario: get chain data with API key
     Given I set the headers
-      | Key       | Value    |
-      | X-API-Key | with-key |
+      | Key       | Value       |
+      | X-API-Key | {{global.api-key}} |
     When I send "GET" request to "{{global.chain-registry}}/chains"
     Then the response code should be 200
 
@@ -20,8 +20,8 @@ Feature: Chain registry
 
   Scenario: Add and remove a chain with API key
     Given I set the headers
-      | Key       | Value    |
-      | X-API-Key | with-key |
+      | Key       | Value       |
+      | X-API-Key | {{global.api-key}} |
     When I send "POST" request to "{{global.chain-registry}}/chains" with json:
       """
       {
@@ -109,8 +109,8 @@ Feature: Chain registry
 
   Scenario: Register chain with API key
     Given I set the headers
-      | Key       | Value    |
-      | X-API-Key | with-key |
+      | Key       | Value       |
+      | X-API-Key | {{global.api-key}} |
     When I send "POST" request to "{{global.chain-registry}}/chains" with json:
       """
       {

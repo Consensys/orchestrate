@@ -14,14 +14,15 @@ import (
 const component = "handler.multitenancy"
 
 var (
-	handler  engine.HandlerFunc
-	initOnce = &sync.Once{}
+	handler     engine.HandlerFunc
+	authHandler engine.HandlerFunc
+	initOnce    = &sync.Once{}
 )
 
 // Init initialize Multi Tenancy Handler
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
-		if handler != nil {
+		if handler != nil && authHandler != nil {
 			return
 		}
 
@@ -34,7 +35,8 @@ func Init(ctx context.Context) {
 		log.Infof("multitenancy enable: %v", viper.GetBool(multitenancy.EnabledViperKey))
 
 		// Create Handler
-		handler = ExtractTenant(jwt.GlobalChecker())
+		handler = ExtractTenant(viper.GetBool(multitenancy.EnabledViperKey), nil)
+		authHandler = ExtractTenant(viper.GetBool(multitenancy.EnabledViperKey), jwt.GlobalChecker())
 
 		log.Infof("authentication multi-tenancy: handler ready")
 	})
@@ -45,7 +47,16 @@ func SetGlobalHandler(h engine.HandlerFunc) {
 	handler = h
 }
 
-// GlobalHandler returns global Gas Estimator handler
 func GlobalHandler() engine.HandlerFunc {
 	return handler
+}
+
+// SetGlobalHandler sets global Gas Estimator Handler
+func SetGlobalAuthHandler(h engine.HandlerFunc) {
+	authHandler = h
+}
+
+// GlobalHandler returns global Gas Estimator handler
+func GlobalAuthHandler() engine.HandlerFunc {
+	return authHandler
 }

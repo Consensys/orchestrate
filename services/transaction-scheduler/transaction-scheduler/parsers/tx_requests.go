@@ -66,5 +66,6 @@ func newJobEntityFromTxRequest(txRequest *entities.TxRequest, ethTx *entities.ET
 		Labels:       txRequest.Labels,
 		InternalData: &internalData,
 		Transaction:  ethTx,
+		TenantID:     txRequest.Schedule.TenantID,
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-sentry/service/parsers"
@@ -116,7 +117,8 @@ func (daemon *txsentryDaemon) createSessions(ctx context.Context, filters *entit
 	}
 
 	for _, jobResponse := range jobResponses {
-		daemon.sessionManager.Start(ctx, parsers.JobResponseToEntity(jobResponse))
+		jctx := multitenancy.WithTenantID(ctx, jobResponse.TenantID)
+		daemon.sessionManager.Start(jctx, parsers.JobResponseToEntity(jobResponse))
 	}
 
 	return nil

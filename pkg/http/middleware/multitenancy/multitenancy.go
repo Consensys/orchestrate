@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/containous/traefik/v2/pkg/log"
-	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 )
@@ -17,7 +16,7 @@ func NewBuilder() *Builder {
 	return &Builder{}
 }
 
-func (b *Builder) Build(ctx context.Context, name string, configuration interface{}) (mid func(http.Handler) http.Handler, respModifier func(resp *http.Response) error, err error) {
+func (b *Builder) Build(_ context.Context, _ string, configuration interface{}) (mid func(http.Handler) http.Handler, respModifier func(resp *http.Response) error, err error) {
 	cfg, ok := configuration.(*dynamic.MultiTenancy)
 	if !ok {
 		return nil, nil, fmt.Errorf("invalid configuration type (expected %T but got %T)", cfg, configuration)
@@ -40,11 +39,6 @@ func New(tenantID string) *MultiTenant {
 
 func (m *MultiTenant) Handler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		if authutils.HasAllPrivileges(req.Context()) {
-			h.ServeHTTP(rw, req)
-			return
-		}
-
 		tenants := multitenancy.AllowedTenantsFromContext(req.Context())
 		if !multitenancy.IsAllowed(m.tenantID, tenants) {
 			log.FromContext(req.Context()).
@@ -52,9 +46,10 @@ func (m *MultiTenant) Handler(h http.Handler) http.Handler {
 				WithField("received", tenants).
 				Debugf("invalid tenant id")
 			m.serveNotFound(rw)
-		} else {
-			h.ServeHTTP(rw, req)
+			return
 		}
+
+		h.ServeHTTP(rw, req)
 	})
 }
 

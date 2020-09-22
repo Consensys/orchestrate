@@ -47,7 +47,7 @@ func NewFaucetCandidateUseCase(getChainUC chains.GetChain, getFaucets GetFaucets
 }
 
 func (uc *faucetCandidate) Execute(ctx context.Context, account ethcommon.Address, chainUUID string, tenants []string) (*types.Faucet, error) {
-	faucets, err := uc.getFaucetsUC.Execute(ctx, []string{}, map[string]string{"chain_rule": chainUUID})
+	faucets, err := uc.getFaucetsUC.Execute(ctx, tenants, map[string]string{"chain_rule": chainUUID})
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(faucetCandidateComponent)
 	}

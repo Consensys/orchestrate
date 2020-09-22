@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	chaininjector "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/chain-injector"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
 	generator "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/account-generator"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/signer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
@@ -30,6 +31,7 @@ func Init(ctx context.Context) {
 
 		signerHandler := engine.CombineHandlers(
 			chaininjector.GlobalHandler(),
+			multitenancy.GlobalHandler(),
 			signer.GlobalHandler(),
 		)
 

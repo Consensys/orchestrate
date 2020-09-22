@@ -19,7 +19,8 @@ func NewJobModelFromEntities(job *entities.Job, scheduleID *int) *models.Job {
 		InternalData: job.InternalData,
 		ScheduleID:   scheduleID,
 		Schedule: &models.Schedule{
-			UUID: job.ScheduleUUID,
+			UUID:     job.ScheduleUUID,
+			TenantID: job.TenantID,
 		},
 		Logs:      []*models.Log{},
 		CreatedAt: job.CreatedAt,
@@ -56,6 +57,7 @@ func NewJobEntityFromModels(jobModel *models.Job) *entities.Job {
 
 	if jobModel.Schedule != nil {
 		job.ScheduleUUID = jobModel.Schedule.UUID
+		job.TenantID = jobModel.Schedule.TenantID
 	}
 
 	if jobModel.Transaction != nil {

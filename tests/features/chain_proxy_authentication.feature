@@ -38,7 +38,7 @@ Feature: Chain-Proxy Authentication
 
     Given I set the headers
       | Key          | Value            |
-      | X-API-Key    | with-key         |
+      | X-API-Key    | {{global.api-key}}      |
       | Content-Type | application/json |
     When I send "POST" request to "{{global.chain-registry}}/{{chainFoo}}" with json:
       """

@@ -126,7 +126,7 @@ func TestJWT(t *testing.T) {
 			"",
 			true,
 			"foo",
-			[]string{multitenancy.DefaultTenant, "foo"},
+			[]string{"foo", multitenancy.DefaultTenant},
 		},
 		{
 			"JWT foo accessing foo tenant",
@@ -206,7 +206,7 @@ func TestJWT(t *testing.T) {
 			"foo",
 			true,
 			"foo",
-			[]string{"foo"},
+			[]string{"foo", multitenancy.DefaultTenant},
 		},
 		{
 			"JWT * accessing default tenant",

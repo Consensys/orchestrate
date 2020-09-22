@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/account-generator/account"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/vault/account-generator/faucet"
@@ -28,10 +29,12 @@ func Init(ctx context.Context) {
 			// Initialize keystore
 			func() { account.Init(ctx) },
 			func() { faucet.Init(ctx) },
+			func() { multitenancy.Init(ctx) },
 		)
 
 		// Create Handler
 		handler = engine.CombineHandlers(
+			multitenancy.GlobalAuthHandler(),
 			account.GlobalHandler(),
 			faucet.GlobalHandler(),
 		)

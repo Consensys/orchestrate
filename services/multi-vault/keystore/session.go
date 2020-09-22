@@ -8,6 +8,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/keystore"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/keystore/session"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/services"
 )
 
@@ -53,7 +54,9 @@ func (am *accountManager) GenerateAccount(ctx context.Context) (ethcommon.Addres
 		return ethcommon.Address{}, errors.FromError(err).ExtendComponent(component)
 	}
 
-	log.WithContext(ctx).Debugf("new multi-vault account generated %s", w.Address().String())
+	log.WithContext(ctx).WithField("address", w.Address().String()).
+		WithField("tenant", multitenancy.TenantIDFromContext(ctx)).
+		Debug("new multi-vault account generated")
 	return w.Address(), nil
 }
 

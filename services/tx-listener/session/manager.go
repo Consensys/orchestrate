@@ -6,7 +6,6 @@ import (
 
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 	provider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/providers"
@@ -67,6 +66,7 @@ func (m *Manager) run(ctx context.Context) {
 		m.wg.Wait()
 		log.WithoutContext().Infof("TxListener stopped")
 	}()
+
 	utils.InParallel(
 		// Start provider and close input channel when Provider is done
 		func() {
@@ -86,7 +86,7 @@ func (m *Manager) run(ctx context.Context) {
 func (m *Manager) listenProvider(ctx context.Context) {
 	log.FromContext(ctx).Infof("Starting provider %T", m.provider)
 	// Listener MUST BE allowed to fetch chains from every tenant
-	ctx = multitenancy.WithTenantID(ctx, multitenancy.Wildcard)
+	// ctx = multitenancy.WithTenantID(ctx, multitenancy.Wildcard)
 	err := m.provider.Run(ctx, m.msgInput)
 	if err != nil {
 		log.FromContext(ctx).WithError(err).Errorf("error while listening provider")
@@ -140,11 +140,9 @@ func (m *Manager) runSession(ctx context.Context, chain *dynamic.Chain) {
 		return
 	}
 
-	ctx = multitenancy.WithTenantID(ctx, chain.TenantID)
 	ctx = log.With(
 		ctx,
 		log.Str("session.uuid", chain.UUID),
-		log.Str("session.tenant", chain.TenantID),
 		log.Str("session.name", chain.Name),
 	)
 

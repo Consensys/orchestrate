@@ -50,7 +50,7 @@ func Init(ctx context.Context) {
 
 		initDependencies(ctx)
 
-		httpClient := http.NewClient()
+		httpClient := http.NewClient(http.NewConfig(viper.GetViper()))
 		backoffConf := txscheduler.NewConfigFromViper(viper.GetViper(), backoff.ConstantBackOffWithMaxRetries(time.Second, 5))
 		txSchedulerClientListener := txscheduler.NewHTTPClient(httpClient, backoffConf)
 		listener = NewTxListener(

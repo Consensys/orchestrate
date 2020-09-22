@@ -16,14 +16,14 @@ var (
 	initOnce = &sync.Once{}
 )
 
-func Init(ctx context.Context) {
+func Init(_ context.Context) {
 	initOnce.Do(func() {
 		if client != nil {
 			return
 		}
 
 		conf := NewConfigFromViper(viper.GetViper())
-		client = NewHTTPClient(http.NewClient(), conf)
+		client = NewHTTPClient(http.NewClient(http.NewConfig(viper.GetViper())), conf)
 
 		log.Infof("%s: client ready - url: %s", component, conf.URL)
 	})

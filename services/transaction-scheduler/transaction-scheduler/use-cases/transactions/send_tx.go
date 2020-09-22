@@ -12,6 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/chainregistry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
@@ -201,7 +202,7 @@ func (uc *sendTxUsecase) startFaucetJob(ctx context.Context, account, chainUUID,
 
 	logger := log.WithContext(ctx).WithField("chain_uuid", chainUUID)
 
-	fct, err := uc.chainRegistryClient.GetFaucetCandidate(ctx, ethcommon.HexToAddress(account), chainUUID)
+	fct, err := uc.chainRegistryClient.GetFaucetCandidate(multitenancy.WithTenantID(ctx, tenantID), ethcommon.HexToAddress(account), chainUUID)
 	if err != nil {
 		return err
 	}

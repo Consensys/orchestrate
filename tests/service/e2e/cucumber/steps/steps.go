@@ -198,7 +198,7 @@ func (sc *ScenarioContext) preProcessTableStep(tableFunc stepTable) stepTable {
 func InitializeScenario(s *godog.ScenarioContext) {
 	sc := NewScenarioContext(
 		chanregistry.GlobalChanRegistry(),
-		http.NewClient(),
+		http.NewClient(http.NewDefaultConfig()),
 		chainregistry.GlobalClient(),
 		contractregistry.GlobalClient(),
 		txscheduler.GlobalClient(),

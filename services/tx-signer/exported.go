@@ -86,7 +86,6 @@ func registerHandlers() {
 	engine.Register(producer.GlobalHandler())
 	engine.Register(txupdater.GlobalHandler())
 	engine.Register(injector.GlobalHandler())
-	engine.Register(multitenancy.GlobalHandler())
 
 	// Specific handlers for Signer worker
 	engine.Register(vault.GlobalHandler())

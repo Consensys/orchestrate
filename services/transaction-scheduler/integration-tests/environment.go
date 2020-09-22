@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
-
 	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt"
 	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/key"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
@@ -281,7 +280,7 @@ func newTransactionScheduler(
 
 	// We mock the calls to the chain registry
 	conf := chainClient.NewConfig(ChainRegistryURL)
-	httpClient := httputils.NewClient()
+	httpClient := httputils.NewClient(httputils.NewDefaultConfig())
 	gock.InterceptClient(httpClient)
 	chainRegistryClient := chainClient.NewHTTPClient(httpClient, conf)
 

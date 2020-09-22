@@ -5,14 +5,13 @@ import (
 	"testing"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine/testutils"
-	errors "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
 )
@@ -34,12 +33,12 @@ func makeMultiTenancyContext(i int) *engine.TxContext {
 	ctx.Reset()
 	ctx.Logger = log.NewEntry(log.StandardLogger())
 	ctx.Envelope.Receipt = &ethereum.Receipt{}
-
+	tenantID := "b49ee1bc-f0fa-430d-89b2-a4fd0dc98906"
 	switch i % 4 {
 	case 0:
 		// Error Use case:  Token is expired
 		_ = ctx.Envelope.SetHeadersValue(AuthorizationMetadata, idToken)
-		ctx.Set(keyExpectedValue, "b49ee1bc-f0fa-430d-89b2-a4fd0dc98906")
+		ctx.Set(keyExpectedValue, tenantID)
 		ctx.Set("errors", 0)
 	case 1:
 		// Error Use case:  UntrustedSigner
@@ -62,14 +61,14 @@ func makeMultiTenancyContext(i int) *engine.TxContext {
 }
 
 func (m *MultiTenancyTestSuite) TestMultiTenancy() {
-	viper.Set(multitenancy.EnabledViperKey, true)
 	checker, err := authjwt.New(&authjwt.Config{
 		ClaimsNamespace:      "http://orchestrate.info",
 		SkipClaimsValidation: true,
 		Certificate:          []byte(certificateOneLineOrchestrateTest),
 	})
 	require.NoError(m.T(), err)
-	m.Handler = ExtractTenant(checker)
+
+	m.Handler = ExtractTenant(true, checker)
 
 	var txctxs []*engine.TxContext
 	for i := 0; i < 4; i++ {

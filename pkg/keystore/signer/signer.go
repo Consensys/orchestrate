@@ -7,6 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/keystore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
@@ -17,8 +18,9 @@ type TransactionSignerFunc func(keystore.KeyStore, *engine.TxContext, ethcommon.
 func GenerateSignerHandler(signerFunc TransactionSignerFunc, vks, onetime keystore.KeyStore, successMsg, errorMsg string) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"chainID": txctx.Envelope.GetChainIDString(),
-			"from":    txctx.Envelope.GetFromString(),
+			"tenantID": multitenancy.TenantIDFromContext(txctx.Context()),
+			"chainID":  txctx.Envelope.GetChainIDString(),
+			"from":     txctx.Envelope.GetFromString(),
 		})
 
 		if txctx.Envelope.GetRaw() != "" {

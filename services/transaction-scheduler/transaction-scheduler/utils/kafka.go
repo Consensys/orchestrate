@@ -6,7 +6,6 @@ import (
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
-	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/models"
@@ -17,7 +16,7 @@ func SendJobMessage(ctx context.Context, jobModel *models.Job, kafkaProducer sar
 	log.WithContext(ctx).Debug("sending kafka message")
 
 	txEnvelope := parsers.NewEnvelopeFromJobModel(jobModel, map[string]string{
-		multitenancy.AuthorizationMetadata: authutils.AuthorizationFromContext(ctx),
+		multitenancy.TenantIDMetadata: jobModel.Schedule.TenantID,
 	})
 
 	evlp, err := txEnvelope.Envelope()

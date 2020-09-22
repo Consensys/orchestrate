@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/chainregistry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	testutils3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
@@ -459,7 +460,7 @@ func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, with
 			Creditor: creditor,
 			Amount:   big.NewInt(10),
 		}
-		s.ChainRegistryClient.EXPECT().GetFaucetCandidate(ctx, common.HexToAddress(txRequest.Params.From), chain.UUID).Return(fct, nil)
+		s.ChainRegistryClient.EXPECT().GetFaucetCandidate(multitenancy.WithTenantID(ctx, tenantID), common.HexToAddress(txRequest.Params.From), chain.UUID).Return(fct, nil)
 
 		s.CreateJobUC.EXPECT().Execute(gomock.Any(), generateFaucetJob(fct, txRequest.Schedule.UUID, chain.UUID, txRequest.Params.From), tenants).
 			DoAndReturn(func(ctx context.Context, jobEntity *entities.Job, tenants []string) (*entities.Job, error) {
@@ -472,7 +473,7 @@ func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, with
 			})
 		s.StartJobUC.EXPECT().Execute(ctx, jobUUID, tenants).Return(nil)
 	} else {
-		s.ChainRegistryClient.EXPECT().GetFaucetCandidate(ctx, common.HexToAddress(txRequest.Params.From), chain.UUID).Return(nil, nil)
+		s.ChainRegistryClient.EXPECT().GetFaucetCandidate(multitenancy.WithTenantID(ctx, tenantID), common.HexToAddress(txRequest.Params.From), chain.UUID).Return(nil, nil)
 	}
 
 	s.StartJobUC.EXPECT().Execute(ctx, jobUUID, tenants).Return(nil)

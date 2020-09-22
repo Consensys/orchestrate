@@ -9,11 +9,8 @@ const (
 	APIKeyHeader        = "X-API-Key"
 )
 
-func AddXAPIKeyHeader(req *http.Request) {
-	apiKey := APIKeyFromContext(req.Context())
-	if apiKey != "" {
-		req.Header.Add(APIKeyHeader, apiKey)
-	}
+func AddXAPIKeyHeaderValue(req *http.Request, apiKey string) {
+	req.Header.Add(APIKeyHeader, apiKey)
 }
 
 func AddAuthorizationHeader(req *http.Request) {
@@ -21,4 +18,8 @@ func AddAuthorizationHeader(req *http.Request) {
 	if authorization != "" {
 		req.Header.Add(AuthorizationHeader, authorization)
 	}
+}
+
+func GetAuthorizationHeader(req *http.Request) string {
+	return req.Header.Get(AuthorizationHeader)
 }

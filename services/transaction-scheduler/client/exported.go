@@ -24,7 +24,7 @@ func Init() {
 		}
 
 		conf := NewConfigFromViper(viper.GetViper(), backoff.ConstantBackOffWithMaxRetries(time.Second, 5))
-		client = NewHTTPClient(http.NewClient(), conf)
+		client = NewHTTPClient(http.NewClient(http.NewConfig(viper.GetViper())), conf)
 
 		log.Infof("%s: client ready - url: %s", component, conf.URL)
 	})

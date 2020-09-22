@@ -47,11 +47,10 @@ func (checker *Key) Check(ctx context.Context) (context.Context, error) {
 
 	allowedTenants := multitenancy.AllowedTenants(
 		multitenancy.Wildcard,
-		multitenancy.TenantIDFromContext(ctx),
+		multitenancy.TenantIDFromContextNoFallback(ctx),
 	)
 
 	ctx = multitenancy.WithTenantID(ctx, tenantID)
 	ctx = multitenancy.WithAllowedTenants(ctx, allowedTenants)
-
-	return authutils.GrantAllPrivileges(ctx), nil
+	return ctx, nil
 }

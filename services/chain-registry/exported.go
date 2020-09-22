@@ -30,7 +30,8 @@ func Init(ctx context.Context) {
 			NewConfig(viper.GetViper()),
 			postgres.GetManager(),
 			ethclient.GlobalClient(),
-			authjwt.GlobalChecker(), authkey.GlobalChecker(),
+			authjwt.GlobalChecker(),
+			authkey.GlobalChecker(),
 		)
 		if err != nil {
 			log.FromContext(ctx).WithError(err).Fatalf("Could not create chain registry application")

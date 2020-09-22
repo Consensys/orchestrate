@@ -34,6 +34,6 @@ func TestKey(t *testing.T) {
 	checkedCtx, err = c.Check(ctx)
 	assert.NoError(t, err, "#4 Check should be valid")
 	assert.Equal(t, "foo", multitenancy.TenantIDFromContext(checkedCtx), "#4 Impersonated tenant should be valid")
-	assert.Equal(t, []string{"foo"}, multitenancy.AllowedTenantsFromContext(checkedCtx), "#4 Allowed tenants should be valid")
+	assert.Equal(t, []string{"foo", multitenancy.DefaultTenant}, multitenancy.AllowedTenantsFromContext(checkedCtx), "#4 Allowed tenants should be valid")
 
 }

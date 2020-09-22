@@ -13,6 +13,7 @@ type Job struct {
 	NextJobUUID  string
 	ChainUUID    string
 	ScheduleUUID string
+	TenantID     string
 	Type         string
 	Labels       map[string]string
 	InternalData *InternalData

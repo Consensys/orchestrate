@@ -30,6 +30,15 @@ func TenantIDFromContext(ctx context.Context) string {
 	return DefaultTenant
 }
 
+func TenantIDFromContextNoFallback(ctx context.Context) string {
+	tenantID, ok := TenantIDValue(ctx)
+	if ok {
+		return tenantID
+	}
+
+	return ""
+}
+
 func WithAllowedTenants(ctx context.Context, tenants []string) context.Context {
 	return context.WithValue(ctx, AllowedTenantsKey, tenants)
 }

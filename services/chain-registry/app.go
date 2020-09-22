@@ -123,7 +123,8 @@ func New(
 		return utils.NewBackOff(cfg)
 	}
 
-	importChainUC := chainUCs.NewImportChain(dataAgents.Chain, rpc.NewClient(b, http.NewClient()))
+	httpClient := http.NewClient(http.NewDefaultConfig())
+	importChainUC := chainUCs.NewImportChain(dataAgents.Chain, rpc.NewClient(b, httpClient))
 	for _, jsonChain := range cfg.EnvChains {
 		err = importChainUC.Execute(context.Background(), jsonChain)
 		if err != nil {

@@ -24,6 +24,7 @@ func FormatJobResponse(job *entities.Job) *types.JobResponse {
 		Transaction:  *job.Transaction,
 		Logs:         job.Logs,
 		Labels:       job.Labels,
+		TenantID:     job.TenantID,
 		Annotations: types.Annotations{
 			OneTimeKey:     job.InternalData.OneTimeKey,
 			GasPricePolicy: FormatJobAnnotationsGasPricePolicy(job.InternalData),

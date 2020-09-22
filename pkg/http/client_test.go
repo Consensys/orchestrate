@@ -9,6 +9,6 @@ import (
 )
 
 func TestClient(t *testing.T) {
-	client := NewClient()
+	client := NewClient(NewDefaultConfig())
 	assert.NotNil(t, client, "Client should not be nil")
 }
