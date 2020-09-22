@@ -19,10 +19,23 @@ func TestShortString(t *testing.T) {
 }
 
 func TestParseIArrayToStringArray(t *testing.T) {
-	iArr := make([]interface{}, 2)
+	iArr := make([]interface{}, 6)
 	iArr[0] = 0
-	iArr[1] = "val1"
-	sArr := ParseIArrayToStringArray(iArr)
+	iArr[1] = []int{0, 1}
+
+	iArr[2] = "0x123"
+	iArr[3] = []string{"0x123", "0x213"}
+
+	iArr[4] = false
+	iArr[5] = []bool{false, true}
+	sArr, _ := ParseIArrayToStringArray(iArr)
+
 	assert.Equal(t, "0", sArr[0])
-	assert.Equal(t, "val1", sArr[1])
+	assert.Equal(t, `["0","1"]`, sArr[1])
+
+	assert.Equal(t, "0x123", sArr[2])
+	assert.Equal(t, `["0x123","0x213"]`, sArr[3])
+
+	assert.Equal(t, "false", sArr[4])
+	assert.Equal(t, `["false","true"]`, sArr[5])
 }

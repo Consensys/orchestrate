@@ -1,8 +1,10 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
+	"reflect"
 )
 
 // ShortString makes hashes short for a limited column size
@@ -33,10 +35,31 @@ func RandHexString(n int) string {
 	return string(b)
 }
 
-func ParseIArrayToStringArray(ints []interface{}) (strings []string) {
-	strings = make([]string, len(ints))
-	for i := range ints {
-		strings[i] = fmt.Sprint(ints[i])
+func ParseIArrayToStringArray(ints []interface{}) ([]string, error) {
+	strings := make([]string, len(ints))
+	for idx, val := range ints {
+		switch reflect.TypeOf(val).Kind() {
+		case reflect.Slice:
+			rVal := reflect.ValueOf(val)
+			ret := make([]interface{}, rVal.Len())
+			for jdx := 0; jdx < rVal.Len(); jdx++ {
+				ret[jdx] = rVal.Index(jdx).Interface()
+			}
+
+			sv, err := ParseIArrayToStringArray(ret)
+			if err != nil {
+				return []string{}, err
+			}
+
+			b, err := json.Marshal(sv)
+			if err != nil {
+				return []string{}, err
+			}
+			strings[idx] = string(b)
+		default:
+			strings[idx] = fmt.Sprint(val)
+		}
 	}
-	return
+
+	return strings, nil
 }

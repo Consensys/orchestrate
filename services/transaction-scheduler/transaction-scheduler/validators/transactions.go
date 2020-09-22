@@ -57,7 +57,17 @@ func (txValidator *transactionValidator) ValidateChainExists(ctx context.Context
 
 func (txValidator *transactionValidator) ValidateMethodSignature(method string, args []interface{}) (string, error) {
 	crafter := abi.BaseCrafter{}
-	txDataBytes, err := crafter.CraftCall(method, utils.ParseIArrayToStringArray(args)...)
+	sArgs, err := utils.ParseIArrayToStringArray(args)
+	if err != nil {
+		errMessage := "failed to parse method arguments"
+		log.WithError(err).
+			WithField("method", method).
+			WithField("args", args).
+			Error(errMessage)
+		return "", errors.DataCorruptedError(errMessage).ExtendComponent(txValidatorComponent)
+	}
+
+	txDataBytes, err := crafter.CraftCall(method, sArgs...)
 
 	if err != nil {
 		errMessage := "invalid method signature"
@@ -103,7 +113,14 @@ func (txValidator *transactionValidator) ValidateContract(ctx context.Context, p
 	// Craft constructor method signature
 	constructorSignature := fmt.Sprintf("constructor%s", response.Contract.Constructor.Signature)
 	crafter := abi.BaseCrafter{}
-	txDataBytes, err := crafter.CraftConstructor(bytecode, constructorSignature, utils.ParseIArrayToStringArray(params.Args)...)
+	args, err := utils.ParseIArrayToStringArray(params.Args)
+	if err != nil {
+		errMessage := "failed to parse constructor method arguments"
+		logger.WithError(err).Error(errMessage)
+		return "", errors.DataCorruptedError(errMessage).ExtendComponent(txValidatorComponent)
+	}
+
+	txDataBytes, err := crafter.CraftConstructor(bytecode, constructorSignature, args...)
 	if err != nil {
 		errMessage := "invalid arguments for constructor method signature"
 		log.WithError(err).Error(errMessage)

@@ -18,7 +18,7 @@ Feature: Faucet funding
     And I have created the following accounts
       | alias    | ID              | ChainName           | Headers.Authorization    |
       | account1 | {{random.uuid}} | besu-{{scenarioID}} | Bearer {{tenant1.token}} |
-    Given I sleep "3s"
+    Given I sleep "5s"
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
@@ -83,7 +83,7 @@ Feature: Faucet funding
     And Response should have the following fields
       | status | logs[0].status | logs[1].status | logs[2].status |
       | FAILED | CREATED        | STARTED        | FAILED         |
-    Given I sleep "3s"
+    Given I sleep "5s"
     When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{faucetJobUUID}}"
     Then the response code should be 200
     And Response should have the following fields

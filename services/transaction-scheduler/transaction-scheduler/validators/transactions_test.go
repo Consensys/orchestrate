@@ -5,8 +5,9 @@ package validators
 import (
 	"context"
 	"fmt"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	"testing"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 
 	abi2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/abi"
 	testutils3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
@@ -86,6 +87,38 @@ func (s *transactionsTestSuite) TestTransactionValidator_ValidateMethodSignature
 		assert.NotEmpty(t, txData)
 
 		assert.Equal(t, txData, txData2)
+	})
+
+	s.T().Run("should validate complex method signature successfully", func(t *testing.T) {
+		txData, err := s.validator.ValidateMethodSignature(
+			`constructor(
+    string memory name,
+    string memory symbol,
+    uint256 granularity,
+    uint256[] granularities,
+    address[] memory controllers,
+    address certificateSigner,
+    bool certificateActivated,
+    bool[] certificateActivates,
+    bytes32[] memory defaultPartitions
+  )`,
+			testutils3.ParseIArray("WindToken",
+				"WIN",
+				"0x1",
+				[]int{1, 2},
+				[]string{
+					"0xF112b55061C3a023E07f5347Bbb92F84F0FC529a",
+				},
+				"0xe31C41f0f70C5ff39f73B4B94bcCD767b3071630",
+				false,
+				[]bool{true, false},
+				[]string{
+					"0x7265736572766564000000000000000000000000000000000000000000000000",
+					"0x6973737565640000000000000000000000000000000000000000000000000000",
+					"0x6c6f636b65640000000000000000000000000000000000000000000000000000",
+				}))
+		assert.NoError(t, err)
+		assert.NotEmpty(t, txData)
 	})
 
 	s.T().Run("should fail with InvalidParameterError if ChainRegistryClient fails", func(t *testing.T) {

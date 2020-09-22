@@ -18,6 +18,10 @@ All notable changes to this project will be documented in this file.
 * Fix a bug when registering an overloaded & rate-limited chain with a configuration starting block to "latest", the synchronization could start from block 0. 
 * Fix a bug where the process was not failing when DB migration failed 
 
+## v2.3.2 (2020-09-22)
+### 🛠 Bug fixes
+* Fix a bug when submitting a contract transaction with method arguments containing arrays
+
 ## v2.3.1 (2020-09-15)
 
 ### 🛠 Bug fixes
