@@ -56,8 +56,8 @@ Feature: Private transactions
     Then the response code should be 202
     Then I register the following response fields
       | alias           | path                  |
-      | jobPrivTxOne    | schedule.jobs[0].uuid |
-      | jobMarkingTxOne | schedule.jobs[1].uuid |
+      | jobPrivTxOne    | jobs[0].uuid |
+      | jobMarkingTxOne | jobs[1].uuid |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.signer"
     Then Envelopes should be in topic "tx.sender"
@@ -272,8 +272,8 @@ Feature: Private transactions
     Then the response code should be 202
     Then I register the following response fields
       | alias           | path                  |
-      | jobPrivTxTwo    | schedule.jobs[0].uuid |
-      | jobMarkingTxTwo | schedule.jobs[1].uuid |
+      | jobPrivTxTwo    | jobs[0].uuid |
+      | jobMarkingTxTwo | jobs[1].uuid |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.signer"
     Then Envelopes should be in topic "tx.sender"

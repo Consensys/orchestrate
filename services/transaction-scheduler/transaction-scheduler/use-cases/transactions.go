@@ -20,7 +20,7 @@ type TransactionUseCases interface {
 }
 
 type GetTxUseCase interface {
-	Execute(ctx context.Context, txRequestUUID string, tenants []string) (*entities.TxRequest, error)
+	Execute(ctx context.Context, scheduleUUID string, tenants []string) (*entities.TxRequest, error)
 }
 
 type SearchTransactionsUseCase interface {

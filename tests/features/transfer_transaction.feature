@@ -91,7 +91,7 @@ Feature: Send transfer transaction
     Then the response code should be 202
     Then I register the following response fields
       | alias      | path                  |
-      | jobOneUUID | schedule.jobs[0].uuid |
+      | jobOneUUID | jobs[0].uuid |
     When I send "POST" request to "{{global.tx-scheduler}}/transactions/transfer" with json:
   """
 {
@@ -110,7 +110,7 @@ Feature: Send transfer transaction
     Then the response code should be 202
     Then I register the following response fields
       | alias      | path                  |
-      | jobTwoUUID | schedule.jobs[0].uuid |
+      | jobTwoUUID | jobs[0].uuid |
     Then Envelopes should be in topic "tx.crafter"
     And Envelopes should have the following fields
       | Nonce |
@@ -250,7 +250,7 @@ Feature: Send transfer transaction
     Then the response code should be 202
     Then I register the following response fields
       | alias      | path                  |
-      | jobOneUUID | schedule.jobs[0].uuid |
+      | jobOneUUID | jobs[0].uuid |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.recover"
     And Envelopes should have the following fields

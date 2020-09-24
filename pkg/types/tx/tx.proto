@@ -122,6 +122,10 @@ message TxResponse {
     // ID of the Response in UUID RFC 4122, ISO/IEC 9834-8:2005 format
     // e.g a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
     string id = 2;
+    
+    // ID of the Job created as part of transaction request
+    // e.g 15276759-bbc6-4ead-ad51-ddfecf79cf09
+    string jobUUID = 8;
 
     // [option]
     map<string, string> context_labels = 3;

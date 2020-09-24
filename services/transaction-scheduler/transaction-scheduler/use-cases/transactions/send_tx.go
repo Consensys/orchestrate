@@ -99,12 +99,12 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 	}
 
 	// Step 5: Load latest Schedule status from DB
-	txRequest, err = uc.getTxUC.Execute(ctx, txRequest.UUID, []string{tenantID})
+	txRequest, err = uc.getTxUC.Execute(ctx, txRequest.Schedule.UUID, []string{tenantID})
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
 
-	logger.WithField("uuid", txRequest.UUID).Info("send transaction request created successfully")
+	logger.WithField("schedule.uuid", txRequest.Schedule.UUID).Info("send transaction request created successfully")
 	return txRequest, nil
 }
 
@@ -138,7 +138,7 @@ func (uc *sendTxUsecase) selectOrInsertTxRequest(
 		log.WithError(err).WithField("idempotency_key", txRequestModel.IdempotencyKey).Error(errMessage)
 		return nil, errors.AlreadyExistsError(errMessage)
 	default:
-		return uc.getTxUC.Execute(ctx, txRequestModel.UUID, []string{tenantID})
+		return uc.getTxUC.Execute(ctx, txRequestModel.Schedule.UUID, []string{tenantID})
 	}
 }
 
@@ -164,10 +164,8 @@ func (uc *sendTxUsecase) insertNewTxRequest(
 		if der != nil {
 			return der
 		}
-		txRequest.UUID = txRequestModel.UUID
 
 		sendTxJobs := parsers.NewJobEntitiesFromTxRequest(txRequest, chainUUID, txData)
-
 		txRequest.Schedule.Jobs = make([]*entities.Job, len(sendTxJobs))
 		var nextJobUUID string
 		for idx, txJob := range sendTxJobs {

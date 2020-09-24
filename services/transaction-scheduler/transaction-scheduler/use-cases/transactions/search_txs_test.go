@@ -40,19 +40,19 @@ func TestSearchTxs_Execute(t *testing.T) {
 		txRequest1 := testutils3.FakeTxRequest()
 
 		mockTransactionRequestDA.EXPECT().Search(ctx, filter, []string{tenantID}).Return(txRequestModels, nil)
-		mockGetTxUC.EXPECT().Execute(ctx, txRequestModels[0].UUID, []string{tenantID}).Return(txRequest0, nil)
-		mockGetTxUC.EXPECT().Execute(ctx, txRequestModels[1].UUID, []string{tenantID}).Return(txRequest1, nil)
+		mockGetTxUC.EXPECT().Execute(ctx, txRequestModels[0].Schedule.UUID, []string{tenantID}).Return(txRequest0, nil)
+		mockGetTxUC.EXPECT().Execute(ctx, txRequestModels[1].Schedule.UUID, []string{tenantID}).Return(txRequest1, nil)
 
 		result, err := usecase.Execute(ctx, filter, []string{tenantID})
 
 		assert.Nil(t, err)
 
-		assert.Equal(t, txRequest0.UUID, result[0].UUID)
+		assert.Equal(t, txRequest0.Schedule.UUID, result[0].Schedule.UUID)
 		assert.Equal(t, txRequest0.IdempotencyKey, result[0].IdempotencyKey)
 		assert.Equal(t, txRequest0.CreatedAt, result[0].CreatedAt)
 		assert.Equal(t, txRequest0.Params, result[0].Params)
 
-		assert.Equal(t, txRequest1.UUID, result[1].UUID)
+		assert.Equal(t, txRequest1.Schedule.UUID, result[1].Schedule.UUID)
 		assert.Equal(t, txRequest1.IdempotencyKey, result[1].IdempotencyKey)
 		assert.Equal(t, txRequest1.CreatedAt, result[1].CreatedAt)
 		assert.Equal(t, txRequest1.Params, result[1].Params)
@@ -74,7 +74,7 @@ func TestSearchTxs_Execute(t *testing.T) {
 		expectedErr := fmt.Errorf("error")
 
 		mockTransactionRequestDA.EXPECT().Search(ctx, filter, []string{tenantID}).Return(txRequestModels, nil)
-		mockGetTxUC.EXPECT().Execute(ctx, txRequestModels[0].UUID, []string{tenantID}).Return(nil, expectedErr)
+		mockGetTxUC.EXPECT().Execute(ctx, txRequestModels[0].Schedule.UUID, []string{tenantID}).Return(nil, expectedErr)
 
 		response, err := usecase.Execute(ctx, filter, []string{tenantID})
 

@@ -71,7 +71,8 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 		}
 
 		txResponse := &tx.TxResponse{
-			Id:            job.UUID,
+			Id:            job.ScheduleUUID,
+			JobUUID:       job.UUID,
 			ContextLabels: job.Labels,
 			Transaction: &types.Transaction{
 				From:     job.Transaction.From,
@@ -98,13 +99,13 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 
 	// Update transactions to "MINED"
 	for _, txResponse := range txResponses {
-		if txResponse.Id == "" {
+		if txResponse.GetJobUUID() == "" {
 			continue
 		}
 
 		_, err := hk.txSchedulerClient.UpdateJob(
 			ctx,
-			txResponse.GetId(),
+			txResponse.GetJobUUID(),
 			&txschedulertypes.UpdateJobRequest{
 				Status:  utils.StatusMined,
 				Message: fmt.Sprintf("Transaction mined in block %v", block.NumberU64()),

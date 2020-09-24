@@ -102,12 +102,14 @@ func FormatTransferRequest(transferRequest *types.TransferRequest, idempotencyKe
 }
 
 func FormatTxResponse(txRequest *entities.TxRequest) *types.TransactionResponse {
+	scheduleRes := FormatScheduleResponse(txRequest.Schedule)
+
 	return &types.TransactionResponse{
-		UUID:           txRequest.UUID,
+		UUID:           txRequest.Schedule.UUID,
 		IdempotencyKey: txRequest.IdempotencyKey,
 		ChainName:      txRequest.ChainName,
 		Params:         txRequest.Params,
-		Schedule:       FormatScheduleResponse(txRequest.Schedule),
+		Jobs:           scheduleRes.Jobs,
 		CreatedAt:      txRequest.CreatedAt,
 	}
 }

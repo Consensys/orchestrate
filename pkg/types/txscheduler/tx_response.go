@@ -11,6 +11,6 @@ type TransactionResponse struct {
 	IdempotencyKey string                         `json:"idempotencyKey" example:"myIdempotencyKey"`
 	ChainName      string                         `json:"chain" example:"myChain"`
 	Params         *entities.ETHTransactionParams `json:"params"`
-	Schedule       *ScheduleResponse              `json:"schedule"`
+	Jobs           []*JobResponse                 `json:"jobs"`
 	CreatedAt      time.Time                      `json:"createdAt" example:"2020-07-09T12:35:42.115395Z"`
 }

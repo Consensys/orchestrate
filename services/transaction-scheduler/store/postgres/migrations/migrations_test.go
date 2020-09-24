@@ -42,7 +42,7 @@ func (s *MigrationsTestSuite) TestMigrationVersion() {
 	)
 
 	s.Assert().NoError(err, "Error querying version")
-	s.Assert().Equal(int64(3), version, "Migration should be on correct version")
+	s.Assert().Equal(int64(4), version, "Migration should be on correct version")
 }
 
 func (s *MigrationsTestSuite) TestCreateRequestsTable() {
@@ -62,7 +62,7 @@ func (s *MigrationsTestSuite) TestAddRequestsColumns() {
 		Count()
 
 	s.Assert().NoError(err, "Query failed")
-	s.Assert().Equal(8, n, "Requests table should have correct number of columns")
+	s.Assert().Equal(7, n, "Requests table should have correct number of columns")
 }
 
 func TestMigrations(t *testing.T) {

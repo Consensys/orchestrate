@@ -77,11 +77,11 @@ Feature: Faucet funding
       """
     Then the response code should be 202
     And Response should have the following fields
-      | schedule.jobs.length |
+      | jobs.length |
       | 1                    |
     Then I register the following response fields
       | alias     | path                  |
-      | txJobUUID | schedule.jobs[0].uuid |
+      | txJobUUID | jobs[0].uuid |
     Then Envelopes should be in topic "tx.recover"
     When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{txJobUUID}}"
     Then the response code should be 200

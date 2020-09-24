@@ -30,17 +30,16 @@ func NewGetTxUseCase(db store.DB, getScheduleUsecase usecases.GetScheduleUseCase
 }
 
 // Execute gets a transaction request
-func (uc *getTxUseCase) Execute(ctx context.Context, txRequestUUID string, tenants []string) (*entities.TxRequest, error) {
-	logger := log.WithContext(ctx).WithField("tx_request_uuid", txRequestUUID)
+func (uc *getTxUseCase) Execute(ctx context.Context, scheduleUUID string, tenants []string) (*entities.TxRequest, error) {
+	logger := log.WithContext(ctx).WithField("tx_request_uuid", scheduleUUID)
 	logger.Debug("getting transaction request")
 
-	txRequestModel, err := uc.db.TransactionRequest().FindOneByUUID(ctx, txRequestUUID, tenants)
+	txRequestModel, err := uc.db.TransactionRequest().FindOneByUUID(ctx, scheduleUUID, tenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(getTxComponent)
 	}
 
 	txRequest := &entities.TxRequest{
-		UUID:           txRequestModel.UUID,
 		IdempotencyKey: txRequestModel.IdempotencyKey,
 		ChainName:      txRequestModel.ChainName,
 		Params:         txRequestModel.Params,

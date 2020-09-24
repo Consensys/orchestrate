@@ -45,7 +45,7 @@ func (uc *searchTransactionsUseCase) Execute(ctx context.Context, filters *entit
 
 	var txRequests []*entities.TxRequest
 	for _, txRequestModel := range txRequestModels {
-		txRequest, err := uc.getTxUseCase.Execute(ctx, txRequestModel.UUID, tenants)
+		txRequest, err := uc.getTxUseCase.Execute(ctx, txRequestModel.Schedule.UUID, tenants)
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(searchTxsComponent)
 		}

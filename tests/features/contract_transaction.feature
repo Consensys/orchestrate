@@ -318,7 +318,7 @@ Feature: Send contract transactions
     Then the response code should be 202
     Then I register the following response fields
       | alias      | path                  |
-      | jobOTKUUID | schedule.jobs[0].uuid |
+      | jobOTKUUID | jobs[0].uuid |
     Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
@@ -443,7 +443,7 @@ Feature: Send contract transactions
     Then the response code should be 202
     Then I register the following response fields
       | alias         | path                  |
-      | jobFailedUUID | schedule.jobs[0].uuid |
+      | jobFailedUUID | jobs[0].uuid |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.recover"
     When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobFailedUUID}}"

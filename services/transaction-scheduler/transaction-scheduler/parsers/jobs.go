@@ -76,7 +76,6 @@ func NewEnvelopeFromJobModel(job *models.Job, headers map[string]string) *tx.TxE
 	if contextLabels == nil {
 		contextLabels = map[string]string{}
 	}
-
 	contextLabels[tx.ScheduleUUIDLabel] = job.Schedule.UUID
 	contextLabels[tx.NextJobUUIDLabel] = job.NextJobUUID
 	contextLabels[tx.PriorityLabel] = job.InternalData.Priority
@@ -110,6 +109,7 @@ func NewEnvelopeFromJobModel(job *models.Job, headers map[string]string) *tx.TxE
 	chainID := new(big.Int)
 	chainID.SetString(job.InternalData.ChainID, 10)
 	txEnvelope.SetChainID(chainID)
+	txEnvelope.SetScheduleUUID(job.Schedule.UUID)
 
 	if job.InternalData.OneTimeKey {
 		txEnvelope.EnableTxFromOneTimeKey()

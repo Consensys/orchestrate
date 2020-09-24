@@ -19,7 +19,6 @@ func TestParsersTxRequest_NewTxRequestModelFromEntities(t *testing.T) {
 
 	assert.Equal(t, txReqEntity.IdempotencyKey, txReqModel.IdempotencyKey)
 	assert.Equal(t, txReqEntity.CreatedAt, txReqModel.CreatedAt)
-	assert.Equal(t, txReqEntity.UUID, txReqModel.UUID)
 	assert.Equal(t, txReqEntity.Params, txReqModel.Params)
 	assert.Equal(t, &expectedScheduleID, txReqModel.ScheduleID)
 }

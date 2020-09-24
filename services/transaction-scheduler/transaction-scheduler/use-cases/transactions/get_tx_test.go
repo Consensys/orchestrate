@@ -35,13 +35,12 @@ func TestGetTx_Execute(t *testing.T) {
 		txRequest := testutils.FakeTxRequest(0)
 		schedule := testutils2.FakeSchedule()
 
-		mockTransactionRequestDA.EXPECT().FindOneByUUID(ctx, txRequest.UUID, tenants).Return(txRequest, nil)
+		mockTransactionRequestDA.EXPECT().FindOneByUUID(ctx, txRequest.Schedule.UUID, tenants).Return(txRequest, nil)
 		mockGetScheduleUC.EXPECT().Execute(ctx, txRequest.Schedule.UUID, tenants).Return(schedule, nil)
 
-		result, err := usecase.Execute(ctx, txRequest.UUID, tenants)
+		result, err := usecase.Execute(ctx, txRequest.Schedule.UUID, tenants)
 
 		assert.NoError(t, err)
-		assert.Equal(t, txRequest.UUID, result.UUID)
 		assert.Equal(t, txRequest.IdempotencyKey, result.IdempotencyKey)
 		assert.Equal(t, txRequest.ChainName, result.ChainName)
 		assert.Equal(t, txRequest.CreatedAt, result.CreatedAt)
@@ -65,10 +64,10 @@ func TestGetTx_Execute(t *testing.T) {
 		txRequest := testutils.FakeTxRequest(0)
 		expectedErr := fmt.Errorf("error")
 
-		mockTransactionRequestDA.EXPECT().FindOneByUUID(ctx, txRequest.UUID, tenants).Return(txRequest, nil)
+		mockTransactionRequestDA.EXPECT().FindOneByUUID(ctx, txRequest.Schedule.UUID, tenants).Return(txRequest, nil)
 		mockGetScheduleUC.EXPECT().Execute(ctx, txRequest.Schedule.UUID, tenants).Return(nil, expectedErr)
 
-		response, err := usecase.Execute(ctx, txRequest.UUID, tenants)
+		response, err := usecase.Execute(ctx, txRequest.Schedule.UUID, tenants)
 
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(getTxComponent), err)

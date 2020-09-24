@@ -73,8 +73,8 @@ Feature: Deploy ERC20 contract using tx-sentry
   """
     Then the response code should be 202
     Then I register the following response fields
-      | alias      | path                  |
-      | jobOneUUID | schedule.jobs[0].uuid |
+      | alias      | path         |
+      | jobOneUUID | jobs[0].uuid |
     Then Envelopes should be in topic "tx.sender"
     Then I sleep "2s"
     When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobOneUUID}}"
@@ -191,9 +191,9 @@ Feature: Deploy ERC20 contract using tx-sentry
   """
     Then the response code should be 202
     Then I register the following response fields
-      | alias        | path                  |
-      | jobOneUUID   | schedule.jobs[0].uuid |
-      | scheduleUUID | schedule.uuid         |
+      | alias        | path         |
+      | jobOneUUID   | jobs[0].uuid |
+      | scheduleUUID | uuid         |
     Then Envelopes should be in topic "tx.sender"
     Then I sleep "5s"
     When I send "GET" request to "{{global.tx-scheduler}}/schedules/{{scheduleUUID}}"

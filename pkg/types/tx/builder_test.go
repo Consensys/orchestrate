@@ -96,7 +96,7 @@ func TestEnvelope_ContextLabels(t *testing.T) {
 
 func TestEnvelope_Validate(t *testing.T) {
 	b := NewEnvelope().
-		SetID("testID").
+		SetID("jobUUID").
 		SetHeadersValue("testHeaderKey", "testHeaderValue").
 		SetChainName("chainName").
 		MustSetFromString("0x1").
@@ -402,7 +402,7 @@ func TestEnvelope_Private(t *testing.T) {
 
 func TestEnvelope_TxRequest(t *testing.T) {
 	b := NewEnvelope().
-		SetID("testID").
+		SetID("jobUUID").
 		SetHeadersValue("testHeaderKey", "testHeaderValue").
 		SetChainName("chainName").
 		MustSetFromString("0x1").
@@ -422,7 +422,7 @@ func TestEnvelope_TxRequest(t *testing.T) {
 		SetContextLabelsValue("testContextKey", "testContextValue")
 
 	req := &TxRequest{
-		Id:      "testID",
+		Id:      "jobUUID",
 		Headers: map[string]string{"testHeaderKey": "testHeaderValue"},
 		Chain:   "chainName",
 		Params: &Params{
@@ -450,7 +450,8 @@ func TestEnvelope_TxRequest(t *testing.T) {
 
 func TestEnvelope_TxEnvelopeAsRequest(t *testing.T) {
 	b := NewEnvelope().
-		SetID("testID").
+		SetID("jobUUID").
+		SetScheduleUUID("scheduleUUID").
 		SetHeadersValue("testHeaderKey", "testHeaderValue").
 		SetChainID(big.NewInt(1)).
 		SetChainName("chainName").
@@ -476,7 +477,7 @@ func TestEnvelope_TxEnvelopeAsRequest(t *testing.T) {
 	txEnvelopeReq := &TxEnvelope{
 		Msg: &TxEnvelope_TxRequest{
 			TxRequest: &TxRequest{
-				Id:      "testID",
+				Id:      "jobUUID",
 				Headers: map[string]string{"testHeaderKey": "testHeaderValue"},
 				Chain:   "chainName",
 				Params: &Params{
@@ -500,16 +501,18 @@ func TestEnvelope_TxEnvelopeAsRequest(t *testing.T) {
 			},
 		},
 		InternalLabels: map[string]string{
-			ChainIDLabel:   "1",
-			TxHashLabel:    "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
-			ChainUUIDLabel: "testChainUUID",
+			ChainIDLabel:      "1",
+			TxHashLabel:       "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
+			ChainUUIDLabel:    "testChainUUID",
+			ScheduleUUIDLabel: "scheduleUUID",
 		},
 	}
 
 	txEnvelopeRes := &TxEnvelope{
 		Msg: &TxEnvelope_TxResponse{
 			TxResponse: &TxResponse{
-				Id:            "testID",
+				Id:            "scheduleUUID",
+				JobUUID:       "jobUUID",
 				Headers:       map[string]string{"testHeaderKey": "testHeaderValue"},
 				ContextLabels: map[string]string{"testContextKey": "testContextValue"},
 				Transaction: &ethereum.Transaction{
@@ -530,9 +533,10 @@ func TestEnvelope_TxEnvelopeAsRequest(t *testing.T) {
 			},
 		},
 		InternalLabels: map[string]string{
-			ChainIDLabel:   "1",
-			TxHashLabel:    "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
-			ChainUUIDLabel: "testChainUUID",
+			ChainIDLabel:      "1",
+			TxHashLabel:       "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
+			ChainUUIDLabel:    "testChainUUID",
+			ScheduleUUIDLabel: "scheduleUUID",
 		},
 	}
 
@@ -542,7 +546,8 @@ func TestEnvelope_TxEnvelopeAsRequest(t *testing.T) {
 
 func TestEnvelope_TxResponse(t *testing.T) {
 	b := NewEnvelope().
-		SetID("testID").
+		SetID("jobUUID").
+		SetScheduleUUID("scheduleUUID").
 		SetHeadersValue("testHeaderKey", "testHeaderValue").
 		SetChainName("chainName").
 		MustSetFromString("0x1").
@@ -565,7 +570,8 @@ func TestEnvelope_TxResponse(t *testing.T) {
 
 	res := &TxResponse{
 		Headers:       map[string]string{"testHeaderKey": "testHeaderValue"},
-		Id:            "testID",
+		Id:            "scheduleUUID",
+		JobUUID:       "jobUUID",
 		ContextLabels: map[string]string{"testContextKey": "testContextValue"},
 		Transaction: &ethereum.Transaction{
 			From:     "0x0000000000000000000000000000000000000001",

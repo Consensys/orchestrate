@@ -92,7 +92,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 	
 		response, err := successfulTestExecution(s, txRequest, false, utils.EthereumTransaction)
 		assert.NoError(t, err)
-		assert.Equal(t, txRequest.UUID, response.UUID)
+		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
 	})
@@ -104,7 +104,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 	
 		response, err := successfulTestExecution(s, txRequest, true, utils.EthereumTransaction)
 		assert.NoError(t, err)
-		assert.Equal(t, txRequest.UUID, response.UUID)
+		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
 	})
@@ -159,15 +159,15 @@ func (s *sendTxSuite) TestSendTx_Success() {
 
 		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey, tenantID).Return(txRequestModel, nil)
-		s.GetTxUC.EXPECT().Execute(ctx, txRequestModel.UUID, tenants).Return(txRequest, nil)
+		s.GetTxUC.EXPECT().Execute(ctx, txRequestModel.Schedule.UUID, tenants).Return(txRequest, nil)
 		s.ChainRegistryClient.EXPECT().GetFaucetCandidate(ctx, gomock.Any(), chain.UUID).Return(nil, nil)
 		s.StartJobUC.EXPECT().Execute(ctx, jobUUID, tenants).Return(nil)
-		s.GetTxUC.EXPECT().Execute(ctx, txRequest.UUID, tenants).Return(txRequest, nil)
+		s.GetTxUC.EXPECT().Execute(ctx, txRequest.Schedule.UUID, tenants).Return(txRequest, nil)
 
 		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
 
 		assert.NoError(t, err)
-		assert.Equal(t, txRequest.UUID, response.UUID)
+		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
 	})
@@ -191,12 +191,12 @@ func (s *sendTxSuite) TestSendTx_Success() {
 	
 		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey, tenantID).Return(txRequestModel, nil)
-		s.GetTxUC.EXPECT().Execute(ctx, txRequestModel.UUID, tenants).Return(txRequest, nil)
-		s.GetTxUC.EXPECT().Execute(ctx, txRequest.UUID, tenants).Return(txRequest, nil)
+		s.GetTxUC.EXPECT().Execute(ctx, txRequestModel.Schedule.UUID, tenants).Return(txRequest, nil)
+		s.GetTxUC.EXPECT().Execute(ctx, txRequest.Schedule.UUID, tenants).Return(txRequest, nil)
 	
 		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
 		assert.NoError(t, err)
-		assert.Equal(t, txRequest.UUID, response.UUID)
+		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
 	})
@@ -210,7 +210,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 	
 		response, err := successfulTestExecution(s, txRequest, false, utils.EthereumTransaction)
 		assert.NoError(t, err)
-		assert.Equal(t, txRequest.UUID, response.UUID)
+		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
 		assert.True(t, response.Schedule.Jobs[0].InternalData.OneTimeKey)
@@ -415,7 +415,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		s.ChainRegistryClient.EXPECT().GetFaucetCandidate(gomock.Any(), common.HexToAddress(txRequest.Params.From), chain.UUID).Return(nil, nil)
 		s.CreateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), tenants).Return(txRequest.Schedule.Jobs[0], nil)
 		s.StartJobUC.EXPECT().Execute(ctx, jobUUID, tenants).Return(nil)
-		s.GetTxUC.EXPECT().Execute(ctx, txRequest.UUID, tenants).Return(nil, expectedErr)
+		s.GetTxUC.EXPECT().Execute(ctx, txRequest.Schedule.UUID, tenants).Return(nil, expectedErr)
 	
 		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
 	
@@ -477,7 +477,7 @@ func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, with
 	}
 
 	s.StartJobUC.EXPECT().Execute(ctx, jobUUID, tenants).Return(nil)
-	s.GetTxUC.EXPECT().Execute(ctx, txRequest.UUID, tenants).Return(txRequest, nil)
+	s.GetTxUC.EXPECT().Execute(ctx, txRequest.Schedule.UUID, tenants).Return(txRequest, nil)
 
 	return s.usecase.Execute(ctx, txRequest, txData, tenantID)
 }

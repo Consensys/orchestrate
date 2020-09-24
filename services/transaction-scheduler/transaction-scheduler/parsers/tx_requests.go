@@ -8,7 +8,6 @@ import (
 
 func NewTxRequestModelFromEntities(txRequest *entities.TxRequest, requestHash string, scheduleID int) *models.TransactionRequest {
 	return &models.TransactionRequest{
-		UUID:           txRequest.UUID,
 		IdempotencyKey: txRequest.IdempotencyKey,
 		ChainName:      txRequest.ChainName,
 		RequestHash:    requestHash,

@@ -147,9 +147,9 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 			return
 		}
 	
-		job := txResponseGET.Schedule.Jobs[0]
+		job := txResponseGET.Jobs[0]
 	
-		assert.NotEmpty(t, txResponseGET.Schedule.UUID)
+		assert.NotEmpty(t, txResponseGET.UUID)
 		assert.NotEmpty(t, job.UUID)
 		assert.Equal(t, job.ChainUUID, chain.UUID)
 		assert.Equal(t, utils.StatusStarted, job.Status)
@@ -195,8 +195,8 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 			return
 		}
 
-		faucetJob := txResponseGET.Schedule.Jobs[1]
-		txJob := txResponseGET.Schedule.Jobs[0]
+		faucetJob := txResponseGET.Jobs[1]
+		txJob := txResponseGET.Jobs[0]
 		assert.Equal(t, faucetJob.ChainUUID, chain.UUID)
 		assert.Equal(t, utils.StatusStarted, faucetJob.Status)
 		assert.Equal(t, utils.EthereumTransaction, faucetJob.Type)
@@ -204,7 +204,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, faucetJob.Transaction.Value, faucet.Amount.String())
 		
 		
-		assert.NotEmpty(t, txResponseGET.Schedule.UUID)
+		assert.NotEmpty(t, txResponseGET.UUID)
 		assert.NotEmpty(t, txJob.UUID)
 		assert.Equal(t, txJob.ChainUUID, chain.UUID)
 		assert.Equal(t, utils.StatusStarted, txJob.Status)
@@ -255,10 +255,10 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 			return
 		}
 		
-		assert.NotEmpty(t, txResponseGET.Schedule.UUID)
-		assert.Len(t, txResponseGET.Schedule.Jobs, 2)
+		assert.NotEmpty(t, txResponseGET.UUID)
+		assert.Len(t, txResponseGET.Jobs, 2)
 		
-		privTxJob := txResponseGET.Schedule.Jobs[0]
+		privTxJob := txResponseGET.Jobs[0]
 		assert.NotEmpty(t, privTxJob.UUID)
 		assert.Equal(t, privTxJob.ChainUUID, chain.UUID)
 		assert.Equal(t, utils.StatusStarted, privTxJob.Status)
@@ -266,7 +266,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, txRequest.Params.To, privTxJob.Transaction.To)
 		assert.Equal(t, utils.TesseraPrivateTransaction, privTxJob.Type)
 		
-		markingTxJob := txResponseGET.Schedule.Jobs[1]
+		markingTxJob := txResponseGET.Jobs[1]
 		assert.NotEmpty(t, markingTxJob.UUID)
 		assert.Equal(t, markingTxJob.ChainUUID, chain.UUID)
 		assert.Equal(t, utils.StatusCreated, markingTxJob.Status)
@@ -307,10 +307,10 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 			return
 		}
 	
-		assert.NotEmpty(t, txResponseGET.Schedule.UUID)
-		assert.Len(t, txResponseGET.Schedule.Jobs, 2)
+		assert.NotEmpty(t, txResponseGET.UUID)
+		assert.Len(t, txResponseGET.Jobs, 2)
 	
-		privTxJob := txResponseGET.Schedule.Jobs[0]
+		privTxJob := txResponseGET.Jobs[0]
 		assert.NotEmpty(t, privTxJob.UUID)
 		assert.Equal(t, privTxJob.ChainUUID, chain.UUID)
 		assert.Equal(t, utils.StatusStarted, privTxJob.Status)
@@ -318,7 +318,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, txRequest.Params.To, privTxJob.Transaction.To)
 		assert.Equal(t, utils.OrionEEATransaction, privTxJob.Type)
 		
-		markingTxJob := txResponseGET.Schedule.Jobs[1]
+		markingTxJob := txResponseGET.Jobs[1]
 		assert.NotEmpty(t, markingTxJob.UUID)
 		assert.Equal(t, markingTxJob.ChainUUID, chain.UUID)
 		assert.Equal(t, utils.StatusCreated, markingTxJob.Status)
@@ -364,9 +364,9 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 			return
 		}
 	
-		job := txResponseGET.Schedule.Jobs[0]
+		job := txResponseGET.Jobs[0]
 	
-		assert.NotEmpty(t, txResponseGET.Schedule.UUID)
+		assert.NotEmpty(t, txResponseGET.UUID)
 		assert.NotEmpty(t, job.UUID)
 		assert.Equal(t, job.ChainUUID, chain.UUID)
 		assert.Equal(t, utils.StatusStarted, job.Status)
@@ -407,9 +407,9 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 			return
 		}
 	
-		job := txResponseGET.Schedule.Jobs[0]
+		job := txResponseGET.Jobs[0]
 	
-		assert.NotEmpty(t, txResponseGET.Schedule.UUID)
+		assert.NotEmpty(t, txResponseGET.UUID)
 		assert.NotEmpty(t, job.UUID)
 		assert.Equal(t, utils.StatusStarted, job.Status)
 		assert.Equal(t, txRequest.Params.Raw, job.Transaction.Raw)
@@ -448,9 +448,9 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 			return
 		}
 	
-		job := txResponseGET.Schedule.Jobs[0]
+		job := txResponseGET.Jobs[0]
 	
-		assert.NotEmpty(t, txResponseGET.Schedule.UUID)
+		assert.NotEmpty(t, txResponseGET.UUID)
 		assert.NotEmpty(t, job.UUID)
 		assert.Equal(t, utils.StatusStarted, job.Status)
 		assert.Equal(t, txRequest.Params.Value, job.Transaction.Value)
@@ -502,7 +502,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 			assert.Fail(t, err.Error())
 			return
 		}
-		job := txResponse.Schedule.Jobs[0]
+		job := txResponse.Jobs[0]
 		assert.Equal(t, utils.StatusStarted, job.Status)
 	})
 }

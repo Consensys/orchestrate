@@ -75,7 +75,7 @@ Feature: Transaction Scheduler Idempotency
     When I send "GET" request to "{{global.tx-scheduler}}/transactions?idempotency_keys={{idempotencykey}}"
     Then the response code should be 200
     And Response should have the following fields
-      | 0.idempotencyKey   | 0.schedule.jobs[0].status | 0.schedule.jobs[0].labels.id |
+      | 0.idempotencyKey   | 0.jobs[0].status | 0.jobs[0].labels.id |
       | {{idempotencykey}} | MINED                     | {{deployTxOneID}}            |
     Then  I set the headers
       | Key           | Value                    |
@@ -83,5 +83,5 @@ Feature: Transaction Scheduler Idempotency
     When I send "GET" request to "{{global.tx-scheduler}}/transactions?idempotency_keys={{idempotencykey}}"
     Then the response code should be 200
     And Response should have the following fields
-      | 0.idempotencyKey   | 0.schedule.jobs[0].status | 0.schedule.jobs[0].labels.id |
+      | 0.idempotencyKey   | 0.jobs[0].status | 0.jobs[0].labels.id |
       | {{idempotencykey}} | MINED                     | {{deployTxTwoID}}            |

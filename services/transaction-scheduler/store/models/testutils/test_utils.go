@@ -36,7 +36,6 @@ func FakeTxRequest(scheduleID int) *models.TransactionRequest {
 	fakeSchedule.ID = scheduleID
 
 	return &models.TransactionRequest{
-		UUID:           uuid.Must(uuid.NewV4()).String(),
 		IdempotencyKey: utils.RandomString(16),
 		ChainName:      "chain",
 		RequestHash:    "requestHash",

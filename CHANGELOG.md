@@ -14,6 +14,10 @@ All notable changes to this project will be documented in this file.
         * where multiple chains (belonging to the same tenant or not) calls the same Ethereum node.
         * using a node with low capabilities or behind a rate limiter (Infura/Kaleido)  
 
+### ⚠ BREAKING CHANGES
+* Schedule level was removed from transaction api responses
+* Use transaction UUID instead of job UUID as ID for tx-decoded messages
+
 ### 🛠 Bug fixes
 * Fix a bug when registering an overloaded & rate-limited chain with a configuration starting block to "latest", the synchronization could start from block 0. 
 * Fix a bug where the process was not failing when DB migration failed 

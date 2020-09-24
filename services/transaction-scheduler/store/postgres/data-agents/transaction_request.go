@@ -6,8 +6,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 
 	gopg "github.com/go-pg/pg/v9"
-	"github.com/gofrs/uuid"
-
 	log "github.com/sirupsen/logrus"
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -28,10 +26,6 @@ func NewPGTransactionRequest(db pg.DB) *PGTransactionRequest {
 
 // Insert Inserts a new transaction request in DB
 func (agent *PGTransactionRequest) Insert(ctx context.Context, txRequest *models.TransactionRequest) error {
-	if txRequest.UUID == "" {
-		txRequest.UUID = uuid.Must(uuid.NewV4()).String()
-	}
-
 	if txRequest.Schedule != nil && txRequest.ScheduleID == nil {
 		txRequest.ScheduleID = &txRequest.Schedule.ID
 	}
@@ -62,10 +56,10 @@ func (agent *PGTransactionRequest) FindOneByIdempotencyKey(ctx context.Context, 
 	return txRequest, nil
 }
 
-func (agent *PGTransactionRequest) FindOneByUUID(ctx context.Context, txRequestUUID string, tenants []string) (*models.TransactionRequest, error) {
+func (agent *PGTransactionRequest) FindOneByUUID(ctx context.Context, scheduleUUID string, tenants []string) (*models.TransactionRequest, error) {
 	txRequest := &models.TransactionRequest{}
 	query := agent.db.ModelContext(ctx, txRequest).
-		Where("transaction_request.uuid = ?", txRequestUUID).
+		Where("schedule.uuid = ?", scheduleUUID).
 		Relation("Schedule")
 
 	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants)

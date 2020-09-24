@@ -5,7 +5,6 @@ import (
 )
 
 type TxRequest struct {
-	UUID           string
 	IdempotencyKey string
 	ChainName      string
 	Schedule       *Schedule

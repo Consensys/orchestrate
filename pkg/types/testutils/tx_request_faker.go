@@ -4,13 +4,10 @@ import (
 	"time"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
-
-	"github.com/gofrs/uuid"
 )
 
 func FakeTxRequest() *entities.TxRequest {
 	return &entities.TxRequest{
-		UUID:           uuid.Must(uuid.NewV4()).String(),
 		Schedule:       FakeSchedule(),
 		IdempotencyKey: "IdempotencyKey",
 		ChainName:      "chain",
@@ -22,7 +19,6 @@ func FakeTxRequest() *entities.TxRequest {
 
 func FakeRawTxRequest() *entities.TxRequest {
 	return &entities.TxRequest{
-		UUID:           uuid.Must(uuid.NewV4()).String(),
 		Schedule:       FakeSchedule(),
 		IdempotencyKey: "IdempotencyKey",
 		ChainName:      "chain",
@@ -34,7 +30,6 @@ func FakeRawTxRequest() *entities.TxRequest {
 
 func FakeTransferTxRequest() *entities.TxRequest {
 	return &entities.TxRequest{
-		UUID:           uuid.Must(uuid.NewV4()).String(),
 		Schedule:       FakeSchedule(),
 		IdempotencyKey: "IdempotencyKey",
 		ChainName:      "chain",
@@ -46,7 +41,6 @@ func FakeTransferTxRequest() *entities.TxRequest {
 
 func FakeTesseraTxRequest() *entities.TxRequest {
 	return &entities.TxRequest{
-		UUID:           uuid.Must(uuid.NewV4()).String(),
 		Schedule:       FakeSchedule(),
 		IdempotencyKey: "IdempotencyKey",
 		ChainName:      "chain",
@@ -58,7 +52,6 @@ func FakeTesseraTxRequest() *entities.TxRequest {
 
 func FakeOrionTxRequest() *entities.TxRequest {
 	return &entities.TxRequest{
-		UUID:           uuid.Must(uuid.NewV4()).String(),
 		Schedule:       FakeSchedule(),
 		IdempotencyKey: "IdempotencyKey",
 		ChainName:      "chain",

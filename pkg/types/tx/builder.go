@@ -199,6 +199,19 @@ func (e *Envelope) SetInternalLabels(internalLabels map[string]string) *Envelope
 	}
 	return e
 }
+
+func (e *Envelope) AppendInternalLabels(internalLabels map[string]string) *Envelope {
+	if internalLabels == nil {
+		return e
+	}
+
+	for k, v := range internalLabels {
+		e.InternalLabels[k] = v
+	}
+
+	return e
+}
+
 func (e *Envelope) SetInternalLabelsValue(key, value string) *Envelope {
 	e.InternalLabels[key] = value
 	return e
@@ -842,8 +855,13 @@ func (e *Envelope) GetJobTypeString() string {
 	return e.JobType.String()
 }
 
+func (e *Envelope) SetScheduleUUID(scheduleUUID string) *Envelope {
+	e.InternalLabels[ScheduleUUIDLabel] = scheduleUUID
+	return e
+}
+
 func (e *Envelope) GetScheduleUUID() string {
-	return e.ContextLabels[ScheduleUUIDLabel]
+	return e.InternalLabels[ScheduleUUIDLabel]
 }
 
 func (e *Envelope) GetNextJobUUID() string {
@@ -936,7 +954,8 @@ func (e *Envelope) TxEnvelopeAsResponse() *TxEnvelope {
 func (e *Envelope) TxResponse() *TxResponse {
 	res := &TxResponse{
 		Headers:       e.Headers,
-		Id:            e.ID,
+		Id:            e.GetScheduleUUID(),
+		JobUUID:       e.ID,
 		ContextLabels: e.ContextLabels,
 		Transaction: &ethereum.Transaction{
 			From:     e.GetFromString(),
