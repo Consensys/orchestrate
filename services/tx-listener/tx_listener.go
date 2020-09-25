@@ -6,7 +6,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session"
 
-	"github.com/containous/traefik/v2/pkg/log"
 	provider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/providers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum"
 	hook "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/hooks"
@@ -34,8 +33,10 @@ func NewTxListener(
 	}
 }
 
-func (l *TxListener) Start(ctx context.Context) {
-	logger := log.FromContext(ctx)
-	l.manager.Start(ctx)
-	logger.Infof("Shutting down")
+func (l *TxListener) Run(ctx context.Context) error {
+	return l.manager.Run(ctx)
+}
+
+func (l *TxListener) Close() error {
+	return nil
 }

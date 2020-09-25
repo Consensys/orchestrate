@@ -10,6 +10,7 @@ import (
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/containous/traefik/v2/pkg/middlewares/forwardedheaders"
+	"github.com/hashicorp/go-multierror"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/switcher"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/router"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics"
@@ -27,6 +28,7 @@ const (
 type EntryPoints struct {
 	eps    map[string]*EntryPoint
 	router router.Builder
+	errors chan error
 }
 
 func NewEntryPoints(
@@ -37,6 +39,7 @@ func NewEntryPoints(
 	s := &EntryPoints{
 		eps:    make(map[string]*EntryPoint),
 		router: rt,
+		errors: make(chan error, len(epConfigs)),
 	}
 
 	for epName, epConfig := range epConfigs {
@@ -70,17 +73,28 @@ func (eps *EntryPoints) Addresses() map[string]string {
 	return addrs
 }
 
-func (eps *EntryPoints) ListenAndServe(ctx context.Context) error {
-	wg := &sync.WaitGroup{}
-	wg.Add(len(eps.eps))
-	for _, ep := range eps.eps {
-		go func(ep *EntryPoint) {
-			_ = ep.ListenAndServe(ctx)
-			wg.Done()
-		}(ep)
-	}
-	wg.Wait()
-	return nil
+func (eps *EntryPoints) ListenAndServe(ctx context.Context) chan error {
+	errors := make(chan error, len(eps.eps))
+	go func() {
+		wg := &sync.WaitGroup{}
+		wg.Add(len(eps.eps))
+		for _, ep := range eps.eps {
+			go func(ep *EntryPoint) {
+				if err := ep.ListenAndServe(ctx); err != http.ErrServerClosed {
+					errors <- err
+				}
+				wg.Done()
+			}(ep)
+		}
+		wg.Wait()
+		close(errors)
+	}()
+
+	return errors
+}
+
+func (eps *EntryPoints) Errors() <-chan error {
+	return eps.errors
 }
 
 func (eps *EntryPoints) Switch(ctx context.Context, conf interface{}) error {
@@ -116,29 +130,22 @@ func (eps *EntryPoints) switchRouter(ctx context.Context, routers map[string]*ro
 }
 
 func (eps *EntryPoints) Shutdown(ctx context.Context) error {
-	wg := &sync.WaitGroup{}
-	wg.Add(len(eps.eps))
+	gr := &multierror.Group{}
 	for epName, ep := range eps.eps {
-		go func(epName string, ep *EntryPoint) {
-			_ = tcp.Shutdown(log.With(ctx, log.Str("entrypoint", epName)), ep)
-			wg.Done()
-		}(epName, ep)
+		epName, ep := epName, ep
+		gr.Go(func() error { return tcp.Shutdown(log.With(ctx, log.Str("entrypoint", epName)), ep) })
 	}
-	wg.Wait()
-	return nil
+
+	return gr.Wait().ErrorOrNil()
 }
 
 func (eps *EntryPoints) Close() error {
-	wg := &sync.WaitGroup{}
-	wg.Add(len(eps.eps))
+	gr := &multierror.Group{}
 	for _, ep := range eps.eps {
-		go func(ep *EntryPoint) {
-			_ = tcp.Close(ep)
-			wg.Done()
-		}(ep)
+		ep := ep
+		gr.Go(func() error { return tcp.Close(ep) })
 	}
-	wg.Wait()
-	return nil
+	return gr.Wait().ErrorOrNil()
 }
 
 type EntryPoint struct {
@@ -207,11 +214,14 @@ func (s *switchTCPHandler) ServeTCP(conn tcp.WriteCloser) {
 }
 
 func (s *switchTCPHandler) ListenAndServe() error {
+	// We can ignore next errors since any net.Error are catched
+	// at the tcp.EntryPoint level
 	utils.InParallel(
 		func() { _ = s.http.serve(s.httpForwarder) },
 		func() { _ = s.https.serve(s.httpsForwarder) },
 	)
-	return nil
+
+	return http.ErrServerClosed
 }
 
 func (s *switchTCPHandler) Switch(conf *router.Router) {
@@ -236,21 +246,19 @@ func (s *switchTCPHandler) Switch(conf *router.Router) {
 }
 
 func (s *switchTCPHandler) Shutdown(ctx context.Context) error {
-	utils.InParallel(
-		func() { _ = tcp.Shutdown(ctx, s.http) },
-		func() { _ = tcp.Shutdown(ctx, s.https) },
-	)
-	return nil
+	gr := &multierror.Group{}
+	gr.Go(func() error { return tcp.Shutdown(ctx, s.http) })
+	gr.Go(func() error { return tcp.Shutdown(ctx, s.https) })
+	return gr.Wait().ErrorOrNil()
 }
 
 func (s *switchTCPHandler) Close() error {
-	utils.InParallel(
-		func() { _ = tcp.Close(s.http) },
-		func() { _ = tcp.Close(s.https) },
-		func() { _ = tcp.Close(s.httpForwarder) },
-		func() { _ = tcp.Close(s.httpsForwarder) },
-	)
-	return nil
+	gr := &multierror.Group{}
+	gr.Go(func() error { return tcp.Close(s.http) })
+	gr.Go(func() error { return tcp.Close(s.https) })
+	gr.Go(func() error { return tcp.Close(s.httpForwarder) })
+	gr.Go(func() error { return tcp.Close(s.httpsForwarder) })
+	return gr.Wait().ErrorOrNil()
 }
 
 type switchableServer struct {

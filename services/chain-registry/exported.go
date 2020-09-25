@@ -39,6 +39,11 @@ func Init(ctx context.Context) {
 	})
 }
 
+func Run(ctx context.Context) error {
+	Init(ctx)
+	return appli.Run(ctx)
+}
+
 func Start(ctx context.Context) error {
 	Init(ctx)
 	return appli.Start(ctx)

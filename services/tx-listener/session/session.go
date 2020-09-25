@@ -15,5 +15,5 @@ type Builder interface {
 }
 
 type SManager interface {
-	Start(ctx context.Context)
+	Run(ctx context.Context) error
 }

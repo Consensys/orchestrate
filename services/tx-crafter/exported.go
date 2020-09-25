@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	"github.com/containous/traefik/v2/pkg/log"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	chaininjector "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/chain-injector"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/crafter"
@@ -23,15 +22,13 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
 var (
-	appli     *app.App
-	startOnce = &sync.Once{}
-	cerr      chan error
+	appli   *app.App
+	runOnce = &sync.Once{}
 )
 
 type serviceName string
@@ -131,64 +128,35 @@ func registerHandlers() {
 }
 
 // Start starts application
-func Start(ctx context.Context) chan error {
+func Run(ctx context.Context) error {
 	var err error
-	startOnce.Do(func() {
-		// Chan to notify that sub-go routines stopped
-		cerr = make(chan error, 1)
-
+	runOnce.Do(func() {
 		// Register all Handlers
 		initComponents(ctx)
 		registerHandlers()
 
-		// Create appli to expose metrics
-		appli, err = app.New(
-			app.NewConfig(viper.GetViper()),
-			app.MetricsOpt(),
-		)
-		if err != nil {
-			cerr <- err
-			close(cerr)
-			return
-		}
-
-		err = appli.Start(ctx)
-		if err != nil {
-			cerr <- err
-			close(cerr)
-			return
-		}
-
-		// Start consuming on topic tx-sender
 		topics := []string{
 			viper.GetString(broker.TxCrafterViperKey),
 		}
 
-		go func() {
-			log.FromContext(ctx).WithFields(logrus.Fields{
-				"topics": topics,
-			}).Info("connecting")
-
-			err := broker.Consume(
-				ctx,
+		// Create appli to expose metrics
+		appli, err = New(
+			app.NewConfig(viper.GetViper()),
+			broker.NewConsumerDaemon(
+				broker.GlobalClient(),
+				broker.GlobalSyncProducer(),
+				broker.GlobalConsumerGroup(),
 				topics,
 				broker.NewEngineConsumerGroupHandler(engine.GlobalEngine()),
-			)
-			if err != nil {
-				log.FromContext(ctx).WithError(err).Error("error on consumer")
-				cerr <- err
-			}
-			close(cerr)
-		}()
-	})
-	return cerr
-}
+			),
+		)
+		if err != nil {
+			log.FromContext(ctx).WithError(err).Info("could not create app")
+			return
+		}
 
-func Stop(ctx context.Context) error {
-	<-cerr
-	err := broker.Stop(ctx)
-	if appli != nil {
-		return errors.CombineErrors(err, appli.Stop(ctx))
-	}
+		err = appli.Run(ctx)
+	})
+
 	return err
 }

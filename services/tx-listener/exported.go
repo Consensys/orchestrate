@@ -5,22 +5,19 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/backoff"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
-
-	txsentry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-sentry"
-
-	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
-
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/key"
 	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/backoff"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/rpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	registryprovider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/providers/chain-registry"
 	kafkahook "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/hooks/kafka"
 	registryoffset "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/session/ethereum/offset/chain-registry"
+	txsentry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-sentry"
 )
 
 var (
@@ -29,7 +26,6 @@ var (
 	sentry    app.Daemon
 	initOnce  = &sync.Once{}
 	startOnce = &sync.Once{}
-	cerr      chan error
 )
 
 func initDependencies(ctx context.Context) {
@@ -71,23 +67,9 @@ func Init(ctx context.Context) {
 }
 
 // Start starts application
-func Start(ctx context.Context) chan error {
+func Run(ctx context.Context) error {
 	var err error
 	startOnce.Do(func() {
-		// Chan to notify that sub-go routines stopped
-		cerr = make(chan error, 1)
-
-		// Create appli to expose metrics
-		appli, err = app.New(
-			app.NewConfig(viper.GetViper()),
-			app.MetricsOpt(),
-		)
-		if err != nil {
-			cerr <- err
-			close(cerr)
-			return
-		}
-
 		apiKey := viper.GetString(authkey.APIKeyViperKey)
 		if apiKey != "" {
 			// Inject authorization header in context for later authentication
@@ -96,28 +78,19 @@ func Start(ctx context.Context) chan error {
 
 		Init(ctx)
 
-		err = appli.Start(ctx)
+		// Create appli
+		appli, err = New(
+			app.NewConfig(viper.GetViper()),
+			listener,
+			sentry,
+		)
 		if err != nil {
-			cerr <- err
-			close(cerr)
+
 			return
 		}
 
-		go func() {
-			listener.Start(ctx)
-			close(cerr)
-		}()
-
-		sentry.Start(ctx)
+		err = appli.Run(ctx)
 	})
 
-	return cerr
-}
-
-func Stop(ctx context.Context) error {
-	<-cerr
-	if appli != nil {
-		return appli.Stop(ctx)
-	}
-	return nil
+	return err
 }

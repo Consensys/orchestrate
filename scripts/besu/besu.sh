@@ -16,12 +16,13 @@ if [[ ! -z "${BOOTNODE}" ]];
 then
     echo "Starting as Bootnode"
     # Save bootnode PKEY in volume
-    /opt/besu/bin/besu public-key export --to="/opt/besu/public-keys/bootnode.pub"
+    /opt/besu/bin/besu public-key export --to="/tmp/bootnode.pub"
     cmd="${cmd} --bootnodes"
 else
     # Wait for bootnode public key to be generated
     while [ ! -f "/opt/besu/public-keys/bootnode.pub" ]
     do
+        echo "Waiting for bootnode public key..."
         sleep 1
     done
 

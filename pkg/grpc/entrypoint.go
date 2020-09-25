@@ -4,10 +4,10 @@ import (
 	"context"
 
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
+	"github.com/hashicorp/go-multierror"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/server"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"google.golang.org/grpc"
 )
 
@@ -53,26 +53,25 @@ func (ep *EntryPoint) BuildServer(ctx context.Context, configuration interface{}
 }
 
 func (ep *EntryPoint) ListenAndServe(ctx context.Context) error {
-	utils.InParallel(
-		func() { _ = ep.server.Serve(ep.forwarder) },
-		func() { _ = ep.tcp.ListenAndServe(ctx) },
-	)
+	go func() {
+		// next error can be ignored
+		// because net.Error are catched at the tcp.Entrypoint level
+		_ = ep.server.Serve(ep.forwarder)
+	}()
 
-	return nil
+	return ep.tcp.ListenAndServe(ctx)
 }
 
 func (ep *EntryPoint) Shutdown(ctx context.Context) error {
-	utils.InParallel(
-		func() { ep.server.GracefulStop() },
-		func() { _ = tcp.Shutdown(ctx, ep.tcp) },
-	)
-	return nil
+	gr := &multierror.Group{}
+	gr.Go(func() error { ep.server.GracefulStop(); return nil })
+	gr.Go(func() error { return tcp.Shutdown(ctx, ep.tcp) })
+	return gr.Wait().ErrorOrNil()
 }
 
 func (ep *EntryPoint) Close() error {
-	utils.InParallel(
-		func() { _ = tcp.Close(ep.forwarder) },
-		func() { _ = tcp.Close(ep.tcp) },
-	)
-	return nil
+	gr := &multierror.Group{}
+	gr.Go(func() error { return tcp.Close(ep.tcp) })
+	gr.Go(func() error { return tcp.Close(ep.forwarder) })
+	return gr.Wait().ErrorOrNil()
 }

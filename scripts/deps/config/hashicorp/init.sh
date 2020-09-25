@@ -10,6 +10,8 @@ VAULT_TOKEN=$(cat init.json | jq .root_token | tr -d '"')
 UNSEAL_KEY=$(cat init.json | jq .keys | jq .[0])
 rm init.json
 
+echo $VAULT_TOKEN > /vault/token/.root
+
 # Unseal Vault
 curl --request POST --data '{"key": '${UNSEAL_KEY}'}' ${VAULT_ADDR}/v1/sys/unseal
 

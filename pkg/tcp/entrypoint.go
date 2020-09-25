@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"net"
+	"net/http"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -27,6 +28,9 @@ type EntryPoint struct {
 	lifecycle *traefikstatic.LifeCycle
 
 	metrics metrics.TCP
+
+	doneOnce sync.Once
+	done     chan struct{}
 }
 
 type listenerValue struct {
@@ -43,6 +47,7 @@ func NewEntryPoint(name string, config *traefikstatic.EntryPoint, handler Handle
 		lifecycle: config.Transport.LifeCycle,
 		lis:       &atomic.Value{},
 		metrics:   reg,
+		done:      make(chan struct{}),
 	}
 }
 
@@ -79,6 +84,12 @@ func (e *EntryPoint) Serve(ctx context.Context, l net.Listener) error {
 	for {
 		conn, err := l.Accept()
 		if err != nil {
+			select {
+			case <-e.done:
+				return http.ErrServerClosed
+			default:
+			}
+
 			logger.Error(err)
 			if netErr, ok := err.(net.Error); ok && netErr.Temporary() {
 				continue
@@ -137,6 +148,10 @@ func (e *EntryPoint) ListenAndServe(ctx context.Context) error {
 
 // Shutdown stops the TCP connections
 func (e *EntryPoint) Shutdown(ctx context.Context) error {
+	e.doneOnce.Do(func() {
+		close(e.done)
+	})
+
 	logger := log.FromContext(e.with(ctx))
 	logger.Infof("shutting down tcp entrypoint...")
 
@@ -146,40 +161,37 @@ func (e *EntryPoint) Shutdown(ctx context.Context) error {
 		time.Sleep(reqAcceptGraceTimeOut)
 	}
 
-	graceTimeOut := time.Duration(e.lifecycle.GraceTimeOut)
-	ctx, cancel := context.WithTimeout(ctx, graceTimeOut)
-	defer cancel()
-	logger.Infof("waiting %s seconds before killing connections...", graceTimeOut)
-
-	var wg sync.WaitGroup
-	if handler, ok := e.handler.(Shutdownable); ok {
-		wg.Add(1)
-		go func() {
-			_ = Shutdown(ctx, handler)
-			wg.Done()
-		}()
-	}
-
-	wg.Wait()
-
+	// Stop accepting new connection
 	lis := e.listener()
 	if lis != nil {
 		return lis.Close()
 	}
-	logger.Infof("tcp entrypoint closed")
+
+	graceTimeOut := time.Duration(e.lifecycle.GraceTimeOut)
+	if graceTimeOut > 0 {
+		var cancel func()
+		ctx, cancel = context.WithTimeout(ctx, graceTimeOut)
+		defer cancel()
+		logger.Infof("waiting %s seconds before killing connections...", graceTimeOut)
+	}
+
+	if handler, ok := e.handler.(Shutdownable); ok {
+		err := Shutdown(ctx, handler)
+		if err != nil {
+			logger.WithError(err).Errorf("error while shutting down tcp entrypoint")
+		}
+		return err
+	}
+
+	logger.Infof("tcp entrypoint shutted down")
+
 	return nil
 }
 
 func (e *EntryPoint) Close() error {
-	var wg sync.WaitGroup
+	var err error
 	if handler, ok := e.handler.(io.Closer); ok {
-		wg.Add(1)
-		go func() {
-			_ = Close(handler)
-			wg.Done()
-		}()
+		err = Close(handler)
 	}
-
-	wg.Wait()
-	return nil
+	return err
 }

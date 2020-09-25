@@ -5,16 +5,19 @@ package txlistener
 import (
 	"context"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type MockSessionManager struct{}
 
-func (m *MockSessionManager) Start(_ context.Context) {}
+func (m *MockSessionManager) Run(_ context.Context) error { return nil }
 
-func TestStart(t *testing.T) {
+func TestRun(t *testing.T) {
 	txListener := &TxListener{
 		manager: &MockSessionManager{},
 	}
 
-	txListener.Start(context.Background())
+	err := txListener.Run(context.Background())
+	assert.NoError(t, err)
 }

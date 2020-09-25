@@ -97,6 +97,62 @@ func TestEntryPoints(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode, "Response should have correct status")
 
-	_ = eps.Shutdown(context.Background())
+	err = eps.Shutdown(context.Background())
+	assert.NoError(t, err)
+
+	err = eps.Close()
+	assert.NoError(t, err)
 	<-done
+}
+
+func TestEntryPointsError(t *testing.T) {
+	ctrlr := gomock.NewController(t)
+	defer ctrlr.Finish()
+	httpHandler := mock.NewMockHandler(ctrlr)
+
+	// Create Router Configuration
+	confs := map[string]*router.Router{
+		"test-ep1": {HTTP: &okHandler{httpHandler}},
+		"test-ep2": {HTTP: &okHandler{httpHandler}},
+	}
+
+	// We try to open 2 entry points on the same IP
+	eps := NewEntryPoints(
+		map[string]*traefikstatic.EntryPoint{
+			"test-ep1": {
+				Address: "127.0.0.1:10",
+				Transport: &traefikstatic.EntryPointsTransport{
+					RespondingTimeouts: &traefikstatic.RespondingTimeouts{},
+					LifeCycle:          &traefikstatic.LifeCycle{},
+				},
+			},
+			"test-ep2": {
+				Address: "127.0.0.1:10",
+				Transport: &traefikstatic.EntryPointsTransport{
+					RespondingTimeouts: &traefikstatic.RespondingTimeouts{},
+					LifeCycle:          &traefikstatic.LifeCycle{},
+				},
+			},
+		},
+		static.NewBuilder(confs),
+		generic.NewTCP(),
+	)
+	_ = eps.Switch(context.Background(), nil)
+
+	errors := eps.ListenAndServe(context.Background())
+	select {
+	case <-errors:
+	case <-time.After(time.Second):
+		t.Errorf("Entrypoints should have error")
+	}
+
+	err := eps.Shutdown(context.Background())
+	assert.NoError(t, err)
+
+	for range errors {
+		// drain errors until eps complete
+	}
+
+	err = eps.Close()
+	assert.NoError(t, err)
 }

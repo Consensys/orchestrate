@@ -69,7 +69,6 @@ func TestApp(t *testing.T) {
 	metricsRegistry.EXPECT().TCP().Return(tcpMetrics).Times(2)
 	watcher.EXPECT().AddListener(gomock.Any()).Times(2)
 	watcher.EXPECT().Run(gomock.Any())
-	watcher.EXPECT().Close()
 
 	err := app.Start(context.Background())
 	require.NoError(t, err, "App should have started properly")
@@ -81,4 +80,8 @@ func TestApp(t *testing.T) {
 	defer cancel()
 	err = app.Stop(ctx)
 	assert.NoError(t, err, "App should have stop properly")
+
+	watcher.EXPECT().Close()
+	err = app.Close()
+	assert.NoError(t, err, "App should have closed properly")
 }

@@ -23,6 +23,7 @@ func NewCommand() *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:              "orchestrate",
 		TraverseChildren: true,
+		SilenceUsage:     true,
 	}
 
 	// Set Persistent flags

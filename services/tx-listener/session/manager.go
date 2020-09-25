@@ -57,8 +57,9 @@ func (m *Manager) Errors() <-chan error {
 	return m.errors
 }
 
-func (m *Manager) Start(ctx context.Context) {
+func (m *Manager) Run(ctx context.Context) error {
 	m.run(ctx)
+	return nil
 }
 
 func (m *Manager) run(ctx context.Context) {
@@ -78,7 +79,7 @@ func (m *Manager) run(ctx context.Context) {
 		func() { m.listenCommands(ctx) },
 		func() {
 			<-ctx.Done()
-			log.WithoutContext().Infof("I have to go... Stopping TxListener gracefully")
+			log.WithoutContext().Infof("TxListener gracefully stopping...")
 		},
 	)
 }

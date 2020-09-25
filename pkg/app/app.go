@@ -3,14 +3,18 @@ package app
 import (
 	"context"
 	"encoding/json"
+	nethttp "net/http"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 
 	traefiklog "github.com/containous/traefik/v2/pkg/log"
+	"github.com/hashicorp/go-multierror"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher/provider"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher/provider/aggregator"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc"
 	grpcinterceptor "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/interceptor/static"
 	grpcserver "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/server"
@@ -29,9 +33,20 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp"
 )
 
+// Daemon are structures exposing a long time running function
+// that will be maintained by the App object
 type Daemon interface {
-	Start(ctx context.Context)
-	Stop(ctx context.Context)
+	// Run should start a long running session that should stop
+	// following a cancel of ctx
+
+	// In case, Run() returns an error, the App automatically
+	// triggers a complete Shutdown procedure
+	// So a Daemon should do its best to possibly recover
+	// before returning an error
+	Run(ctx context.Context) error
+
+	// Close allows a daemon to possibly clean its state
+	Close() error
 }
 
 type Service interface {
@@ -54,11 +69,18 @@ type App struct {
 
 	metrics metrics.Registry
 
+	daemons []Daemon
+
 	logger *logrus.Logger
 
 	cancel func()
 
-	wg *sync.WaitGroup
+	daemonWg sync.WaitGroup
+	serverWg sync.WaitGroup
+
+	errors chan error
+
+	closeOnce sync.Once
 
 	isReady bool
 }
@@ -122,12 +144,12 @@ func newApp(
 ) *App {
 	return &App{
 		cfg:         cfg,
-		wg:          &sync.WaitGroup{},
 		httpBuilder: httpBuilder,
 		grpcBuilder: grpcBuilder,
 		watcher:     watcher,
 		metrics:     reg,
 		logger:      logger,
+		errors:      make(chan error),
 	}
 }
 
@@ -190,6 +212,10 @@ func (app *App) AddListener(listener func(context.Context, interface{}) error) {
 	app.watcher.AddListener(listener)
 }
 
+func (app *App) RegisterDaemon(d Daemon) {
+	app.daemons = append(app.daemons, d)
+}
+
 func (app *App) Start(ctx context.Context) error {
 	err := app.init(ctx)
 	if err != nil {
@@ -198,65 +224,163 @@ func (app *App) Start(ctx context.Context) error {
 
 	traefiklog.FromContext(ctx).Infof("starting app...")
 
+	if app.http != nil {
+		app.serverWg.Add(1)
+		go func() {
+			for err := range app.http.ListenAndServe(ctx) {
+				if err != nil && err != nethttp.ErrServerClosed {
+					app.errors <- err
+				}
+			}
+			app.serverWg.Done()
+		}()
+	}
+
+	if app.grpc != nil {
+		app.serverWg.Add(1)
+		go func() {
+			err := app.grpc.ListenAndServe(ctx)
+			if err != nil && err != nethttp.ErrServerClosed {
+				app.errors <- err
+			}
+			app.serverWg.Done()
+		}()
+	}
+
 	cancelableCtx, cancel := context.WithCancel(ctx)
 	app.cancel = cancel
 
-	app.wg.Add(3)
-	go func() {
-		if app.watcher != nil {
-			_ = app.watcher.Run(cancelableCtx)
-			_ = app.watcher.Close()
-		}
-		app.wg.Done()
-	}()
-	go func() {
-		if app.http != nil {
-			_ = app.http.ListenAndServe(ctx)
-		}
-		app.wg.Done()
-	}()
+	if app.watcher != nil {
+		app.daemonWg.Add(1)
+		go func() {
+			err := app.watcher.Run(cancelableCtx)
+			if err != nil && err != context.Canceled {
+				app.errors <- err
+			}
+			app.daemonWg.Done()
+		}()
+	}
 
-	go func() {
-		if app.grpc != nil {
-			_ = app.grpc.ListenAndServe(ctx)
-		}
-		app.wg.Done()
-	}()
+	app.daemonWg.Add(len(app.daemons))
+	for _, daemon := range app.daemons {
+		go func(daemon Daemon) {
+			err := daemon.Run(cancelableCtx)
+			if err != nil && err != context.Canceled {
+				app.errors <- err
+			}
+			app.daemonWg.Done()
+		}(daemon)
+	}
 
 	app.isReady = true
 	return nil
 }
 
-func (app *App) Stop(ctx context.Context) error {
-	traefiklog.FromContext(ctx).Infof("gracefully shutting down application...")
-	app.cancel()
-
-	app.wg.Add(2)
-	var errHTTP error
-	go func() {
-		if app.http != nil {
-			errHTTP = errors.CombineErrors(tcp.Shutdown(ctx, app.http), tcp.Close(app.http))
-		}
-		app.wg.Done()
-	}()
-
-	var errGRPC error
-	go func() {
-		if app.grpc != nil {
-			errGRPC = errors.CombineErrors(tcp.Shutdown(ctx, app.grpc), tcp.Close(app.grpc))
-		}
-		app.wg.Done()
-	}()
-
-	app.wg.Wait()
-
-	if err := errors.CombineErrors(errHTTP, errGRPC); err != nil {
-		traefiklog.FromContext(ctx).WithError(err).Errorf("application did not shut down gracefully")
-		return err // timed out
+func (app *App) Run(ctx context.Context) error {
+	// Start app
+	err := app.Start(ctx)
+	if err != nil {
+		return err
 	}
 
-	traefiklog.FromContext(ctx).Infof("gracefully shutted down application")
+	signals := make(chan os.Signal, 3)
+	signal.Notify(signals)
+
+signalLoop:
+	for {
+		select {
+		case sig := <-signals:
+			switch sig {
+			case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
+				traefiklog.FromContext(ctx).Infof("signal %q intercepted", sig.String())
+				break signalLoop
+			case syscall.SIGPIPE:
+				// Ignore random broken pipe
+				traefiklog.FromContext(ctx).Infof("signal %q intercepted", sig.String())
+			}
+		case err = <-app.Errors():
+			traefiklog.FromContext(ctx).WithError(err).Error("app error")
+			break signalLoop
+		case <-ctx.Done():
+			break signalLoop
+		}
+	}
+
+	go func() {
+		signal.Stop(signals)
+		close(signals)
+	}()
+
+	stopErr := app.Stop(ctx)
+	if err != nil {
+		return err
+	}
+
+	return stopErr
+}
+
+func (app *App) Stop(ctx context.Context) error {
+	traefiklog.FromContext(ctx).Infof("app gracefully shutting down...")
+
+	go func() {
+		for range app.errors {
+			// drain errors
+		}
+	}()
+
+	// 1. interrupt daemons and wait for all daemons to complete
+	app.cancel()
+	app.daemonWg.Wait()
+
+	// 2. stop grpc and http server
+	defer app.serverWg.Wait()
+	gr := &multierror.Group{}
+	if app.http != nil {
+		gr.Go(func() error { return tcp.Shutdown(ctx, app.http) })
+	}
+
+	if app.grpc != nil {
+		gr.Go(func() error { return tcp.Shutdown(ctx, app.grpc) })
+	}
+
+	err := gr.Wait().ErrorOrNil()
+	if err != nil {
+		traefiklog.FromContext(ctx).WithError(err).Errorf("app could not shut down gracefully")
+		return err // something went wrong while shutting down
+	}
+
+	traefiklog.FromContext(ctx).Infof("app gracefully shutted down")
 	return nil // completed normally
+}
+
+func (app *App) Close() (err error) {
+	app.closeOnce.Do(func() {
+		close(app.errors)
+		gr := &multierror.Group{}
+		if app.http != nil {
+			gr.Go(func() error { return tcp.Close(app.http) })
+		}
+
+		if app.grpc != nil {
+			gr.Go(func() error { return tcp.Close(app.grpc) })
+		}
+
+		if app.watcher != nil {
+			gr.Go(app.watcher.Close)
+		}
+
+		for _, daemon := range app.daemons {
+			daemon := daemon
+			gr.Go(daemon.Close)
+		}
+
+		err = gr.Wait().ErrorOrNil()
+	})
+	return
+}
+
+func (app *App) Errors() <-chan error {
+	return app.errors
 }
 
 func (app *App) IsReady() bool {

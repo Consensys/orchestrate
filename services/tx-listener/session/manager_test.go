@@ -97,7 +97,7 @@ func TestManager(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan struct{})
 	go func() {
-		manager.Start(ctx)
+		_ = manager.Run(ctx)
 		close(done)
 	}()
 

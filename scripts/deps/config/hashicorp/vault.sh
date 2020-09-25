@@ -1,5 +1,5 @@
 # Retrieve token for authentication on vault
-token=$(docker run --rm -v deps_vault-token:/token alpine:latest more /token/.vault-token)
+token=$(docker run --rm -v deps_vault-token:/token alpine:latest more /token/.root)
 
 echo "Vault token: ${token}"
 
