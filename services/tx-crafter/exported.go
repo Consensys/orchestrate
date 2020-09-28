@@ -3,6 +3,7 @@ package txcrafter
 import (
 	"context"
 	"sync"
+	"time"
 
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/viper"
@@ -22,6 +23,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tracing/opentracing/jaeger"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
@@ -83,6 +85,12 @@ func initHandlers(ctx context.Context) {
 		// Initialize GetBigChainID injector
 		func() {
 			chaininjector.Init(ctx)
+		},
+
+		func() {
+			viper.Set(utils.RetryMaxIntervalViperKey, 1*time.Second)
+			viper.Set(utils.RetryMaxElapsedTimeViperKey, 15*time.Second)
+			ethclient.Init(ctx)
 		},
 	)
 }

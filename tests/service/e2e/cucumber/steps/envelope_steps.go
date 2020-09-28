@@ -23,6 +23,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/account"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/keystore/session"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
@@ -515,9 +516,10 @@ func (sc *ScenarioContext) iSignTheFollowingTransactions(table *gherkin.PickleSt
 	}
 
 	// Sign tx for each envelopes
+	ctx := utils2.RetryConnectionError(context.Background(), true)
 	for i, e := range envelopes {
 		err := sc.craftAndSignEnvelope(
-			authutils.WithAuthorization(context.Background(), helpersTable.Rows[i+1].Cells[2].Value),
+			authutils.WithAuthorization(ctx, helpersTable.Rows[i+1].Cells[2].Value),
 			e,
 			helpersTable.Rows[i+1].Cells[1].Value,
 		)
@@ -543,7 +545,7 @@ func (sc *ScenarioContext) craftAndSignEnvelope(ctx context.Context, e *tx.Envel
 	}
 	endpoint := fmt.Sprintf("%s/%s", chainRegistry.(string), e.GetChainUUID())
 	if e.GetChainID() == nil && e.GetChainUUID() != "" {
-		chainID, errNetwork := sc.ec.Network(ctx, endpoint)
+		chainID, errNetwork := sc.ec.Network(utils2.RetryConnectionError(ctx, true), endpoint)
 		if errNetwork != nil {
 			return errNetwork
 		}

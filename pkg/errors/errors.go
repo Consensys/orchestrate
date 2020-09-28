@@ -179,6 +179,11 @@ func EthConnectionError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(EthConnection, format, a...)
 }
 
+// IsEthConnectionError indicate whether an error is a EthConnection error
+func IsEthConnectionError(err error) bool {
+	return isErrorClass(FromError(err).GetCode(), EthConnection)
+}
+
 // GRPCConnectionError is raised when failing to connect to a gRPC server
 func GRPCConnectionError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(GRPCConnection, format, a...)
@@ -297,6 +302,11 @@ func OutOfRangeError(format string, a ...interface{}) *ierror.Error {
 // EncodingError are raised when failing to decode a message
 func EncodingError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(Encoding, format, a...)
+}
+
+// IsEncodingError indicate whether an error is a EncodingError error
+func IsEncodingError(err error) bool {
+	return isErrorClass(FromError(err).GetCode(), Encoding)
 }
 
 // SolidityError is raised when a Data related in transaction crafting is incorrect

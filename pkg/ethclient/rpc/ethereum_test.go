@@ -69,14 +69,14 @@ func TestCallWithRetry(t *testing.T) {
 	ec := newEthereumClient()
 	var raw json.RawMessage
 
-	// Test 1: Connection error, should retry
+	// Test 1: Connection error, should not retry
 	bckoff := &backoffmock.MockBackoff{}
-	ctx := testutils.NewContext(fmt.Errorf("test-error"), 503, nil)
+	ctx := testutils.NewContext(fmt.Errorf("test-error"), 0, nil)
 	err := ec.callWithRetry(ctx, func(context.Context) (*http.Request, error) {
 		return ec.newJSONRpcRequestWithContext(ctx, "test-endpoint", "test_method")
 	}, utils.ProcessResult(&raw), bckoff)
 	assert.Error(t, err, "#1 TestCallWithRetry should  error")
-	assert.True(t, bckoff.HasRetried(), "#1 Should have retried")
+	assert.False(t, bckoff.HasRetried(), "#1 Should have retried")
 
 	// Test 2: not found error, should retry
 	bckoff = &backoffmock.MockBackoff{}
@@ -87,7 +87,7 @@ func TestCallWithRetry(t *testing.T) {
 	}, utils.ProcessResult(&raw), bckoff)
 	assert.Error(t, err, "#2 TestCallWithRetry should  error")
 	assert.True(t, bckoff.HasRetried(), "#2 Should have retried")
-
+	
 	// Test 3: invalid response body, should not retry
 	bckoff = &backoffmock.MockBackoff{}
 	ctx = testutils.NewContext(nil, 200, testutils.MakeRespBody([]byte(`"%@`), ""))
@@ -96,11 +96,11 @@ func TestCallWithRetry(t *testing.T) {
 	}, utils.ProcessResult(&raw), bckoff)
 	assert.Error(t, err, "#3 TestCallWithRetry should  error")
 	assert.False(t, bckoff.HasRetried(), "#3 Should not have retried")
-
+	
 	// Test 4: invalid response body with error status, should retry
 	bckoff = &backoffmock.MockBackoff{}
 	ctx = testutils.NewContext(nil, 400, testutils.MakeRespBody([]byte(`"%@`), ""))
-	err = ec.callWithRetry(ctx, func(context.Context) (*http.Request, error) {
+	err = ec.callWithRetry(utils.RetryConnectionError(ctx, true), func(context.Context) (*http.Request, error) {
 		return ec.newJSONRpcRequestWithContext(ctx, "test-endpoint", "test_method")
 	}, utils.ProcessResult(&raw), bckoff)
 	assert.Error(t, err, "#4 TestCallWithRetry should  error")
@@ -132,13 +132,13 @@ func TestBlockByHash(t *testing.T) {
 	ctx = testutils.NewContext(nil, 200, testutils.MakeRespBody(nil, ""))
 	_, err = ec.BlockByHash(ctx, "test-endpoint", ethcommon.HexToHash(""))
 	assert.Error(t, err, "#3 BlockByHash should error")
-	assert.True(t, errors.IsNotFoundError(err), "#3 BlockByHash error should be not found")
+	assert.True(t, errors.IsInvalidParameterError(err), "#3 BlockByHash error should be not found")
 
 	// Test 4: null block response
 	ctx = testutils.NewContext(nil, 200, testutils.MakeRespBody([]byte(`null`), ""))
 	_, err = ec.BlockByHash(ctx, "test-endpoint", ethcommon.HexToHash(""))
 	assert.Error(t, err, "#4 BlockByHash should error")
-	assert.True(t, errors.IsNotFoundError(err), "#4 BlockByHash error should be not found")
+	assert.True(t, errors.IsInvalidParameterError(err), "#4 BlockByHash error should be not found")
 }
 
 func TestBlockByNumber(t *testing.T) {
@@ -166,13 +166,13 @@ func TestBlockByNumber(t *testing.T) {
 	ctx = testutils.NewContext(nil, 200, testutils.MakeRespBody(nil, ""))
 	_, err = ec.BlockByNumber(ctx, "test-endpoint", nil)
 	assert.Error(t, err, "#3 BlockByNumber should error")
-	assert.True(t, errors.IsNotFoundError(err), "#3 BlockByNumber error should be not found")
+	assert.True(t, errors.IsInvalidParameterError(err), "#3 BlockByNumber error should be not found")
 
 	// Test 4: null block response
 	ctx = testutils.NewContext(nil, 200, testutils.MakeRespBody([]byte(`null`), ""))
 	_, err = ec.BlockByNumber(ctx, "test-endpoint", nil)
 	assert.Error(t, err, "#4 BlockByNumber should error")
-	assert.True(t, errors.IsNotFoundError(err), "#4 BlockByNumber error should be not found")
+	assert.True(t, errors.IsInvalidParameterError(err), "#4 BlockByNumber error should be not found")
 }
 
 func TestHeaderByHash(t *testing.T) {
@@ -199,13 +199,13 @@ func TestHeaderByHash(t *testing.T) {
 	ctx = testutils.NewContext(nil, 200, testutils.MakeRespBody(nil, ""))
 	_, err = ec.HeaderByHash(ctx, "test-endpoint", ethcommon.Hash{})
 	assert.Error(t, err, "#3 HeaderByHash should error")
-	assert.True(t, errors.IsNotFoundError(err), "#3 HeaderByHash error should be not found")
+	assert.True(t, errors.IsInvalidParameterError(err), "#3 HeaderByHash error should be not found")
 
 	// Test 4: null block response
 	ctx = testutils.NewContext(nil, 200, testutils.MakeRespBody([]byte(`null`), ""))
 	_, err = ec.HeaderByHash(ctx, "test-endpoint", ethcommon.Hash{})
 	assert.Error(t, err, "#4 HeaderByHash should error")
-	assert.True(t, errors.IsNotFoundError(err), "#4 HeaderByHash error should be not found")
+	assert.True(t, errors.IsInvalidParameterError(err), "#4 HeaderByHash error should be not found")
 }
 
 func TestHeaderByNumber(t *testing.T) {
@@ -232,13 +232,13 @@ func TestHeaderByNumber(t *testing.T) {
 	ctx = testutils.NewContext(nil, 200, testutils.MakeRespBody(nil, ""))
 	_, err = ec.HeaderByNumber(ctx, "test-endpoint", nil)
 	assert.Error(t, err, "#3 HeaderByNumber should error")
-	assert.True(t, errors.IsNotFoundError(err), "#3 HeaderByNumber error should be not found")
+	assert.True(t, errors.IsInvalidParameterError(err), "#3 HeaderByNumber error should be not found")
 
 	// Test 4: null header response
 	ctx = testutils.NewContext(nil, 200, testutils.MakeRespBody([]byte(`null`), ""))
 	_, err = ec.HeaderByNumber(ctx, "test-endpoint", nil)
 	assert.Error(t, err, "#4 HeaderByNumber should error")
-	assert.True(t, errors.IsNotFoundError(err), "#4 HeaderByNumber error should be not found")
+	assert.True(t, errors.IsInvalidParameterError(err), "#4 HeaderByNumber error should be not found")
 }
 
 type transactionResp struct {
@@ -323,7 +323,7 @@ func TestTransactionByHash(t *testing.T) {
 	ctx = testutils.NewContext(nil, 200, testutils.MakeRespBody([]byte(`null`), ""))
 	_, _, err = ec.TransactionByHash(ctx, "test-endpoint", ethcommon.HexToHash(""))
 	assert.Error(t, err, "#4 TransactionByHash should error")
-	assert.True(t, errors.IsNotFoundError(err), "#4 TransactionByHash error should be not found")
+	assert.True(t, errors.IsInvalidParameterError(err), "#4 TransactionByHash error should be not found")
 }
 
 func TestTransactionReceipt(t *testing.T) {
@@ -365,7 +365,7 @@ func TestTransactionReceipt(t *testing.T) {
 	ctx = testutils.NewContext(nil, 200, testutils.MakeRespBody([]byte(`null`), ""))
 	_, err = ec.TransactionReceipt(ctx, "test-endpoint", ethcommon.HexToHash(""))
 	assert.Error(t, err, "#4 TransactionReceipt should error")
-	assert.True(t, errors.IsNotFoundError(err), "#4 TransactionReceipt error should be not found")
+	assert.True(t, errors.IsInvalidParameterError(err), "#4 TransactionReceipt error should be not found")
 }
 
 func TestSyncProgress(t *testing.T) {

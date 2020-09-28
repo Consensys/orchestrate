@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"sync"
@@ -74,8 +75,13 @@ func (ec *Client) callWithRetry(ctx context.Context, reqBuilder func(context.Con
 			switch {
 			case e == nil:
 				return nil
-			case errors.IsConnectionError(e),
-				errors.IsNotFoundError(e) && utils.ShouldRetryNotFoundError(ctx):
+			case errors.IsNotFoundError(e) && utils.ShouldRetryNotFoundError(ctx):
+				return e
+			// Capture NotFoundData RPC Error and replace by InvalidParameterError to prevent 404 response
+			case errors.IsNotFoundError(e):
+				return backoff.Permanent(errors.InvalidParameterError(e.Error()))
+			// Retry on timeout of temporally out of order AND on eth connection errors
+			case errors.IsConnectionError(e) && utils.ShouldRetryConnectionError(ctx):
 				return e
 			default:
 				return backoff.Permanent(e)
@@ -114,11 +120,13 @@ func (ec *Client) call(req *http.Request, processResult ProcessResultFunc) error
 	case err == nil && respMsg.Error != nil:
 		return ec.processEthError(respMsg.Error)
 	case err == nil && len(respMsg.Result) == 0:
-		return errors.NotFoundError("not found")
+		return errors.NotFoundError("data not found")
+	case resp.StatusCode == 404:
+		return errors.ConnectionError("url %s not found", req.URL)
 	case resp.StatusCode < 200 || resp.StatusCode >= 300:
 		return errors.EthConnectionError("%v (code=%v)", resp.Status, resp.StatusCode)
 	case err != nil:
-		return errors.EncodingError(err.Error())
+		return errors.EncodingError("invalid RPC response")
 	default:
 		return processResult(respMsg.Result)
 	}
@@ -169,7 +177,14 @@ func (ec *Client) newJSONRpcRequestWithContext(ctx context.Context, endpoint, me
 func (ec *Client) do(req *http.Request) (*http.Response, error) {
 	resp, err := ec.client.Do(req)
 	if err != nil {
-		return nil, errors.EthConnectionError(err.Error())
+		log.FromContext(req.Context()).WithError(err).Warn("connection error")
+		rerr, ok := err.(*url.Error)
+		// We consider these two error types as recoverable
+		if ok && (rerr.Timeout() || rerr.Temporary()) {
+			return nil, errors.ServiceConnectionError(err.Error())
+		}
+
+		return nil, errors.ConnectionError(err.Error())
 	}
 
 	return resp, nil

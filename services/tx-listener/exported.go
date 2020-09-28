@@ -33,7 +33,11 @@ func initDependencies(ctx context.Context) {
 		func() { registryprovider.Init(ctx) },
 		func() { kafkahook.Init(ctx) },
 		func() { registryoffset.Init(ctx) },
-		func() { ethclient.Init(ctx) },
+		func() {
+			viper.Set(utils.RetryMaxIntervalViperKey, 30*time.Second)
+			viper.Set(utils.RetryMaxElapsedTimeViperKey, 1*time.Hour)
+			ethclient.Init(ctx)
+		},
 	)
 }
 

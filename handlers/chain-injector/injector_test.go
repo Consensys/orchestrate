@@ -4,10 +4,12 @@ package chaininjector
 
 import (
 	"fmt"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	"math/big"
 	"reflect"
 	"testing"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
@@ -153,6 +155,7 @@ func TestChainIDInjector(t *testing.T) {
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
 				_ = txctx.Envelope.SetChainID(networkID)
+				txctx.WithContext(utils.RetryConnectionError(txctx.Context(), true))
 				return txctx
 			},
 		},
@@ -163,6 +166,7 @@ func TestChainIDInjector(t *testing.T) {
 				return txctx
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
+				txctx.WithContext(utils.RetryConnectionError(txctx.Context(), true))
 				err := errors.FromError(errorNetwork).ExtendComponent(component)
 				txctx.Envelope.Errors = append(txctx.Envelope.Errors, err)
 				return txctx

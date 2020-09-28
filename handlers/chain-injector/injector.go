@@ -6,6 +6,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/utils"
 	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
 )
@@ -59,6 +60,10 @@ func chainUUIDInjector(txctx *engine.TxContext, r registry.ChainRegistryClient, 
 func ChainIDInjectorHandler(ec ethclient.ChainSyncReader) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		txctx.Logger.WithField("envelope_id", txctx.Envelope.GetID()).Debugf("chainID injector handler starts")
+
+		// Allow retries on connection error with chain-registry from this point
+		txctx.WithContext(utils.RetryConnectionError(txctx.Context(), true))
+
 		if txctx.Envelope.GetChainID() != nil {
 			return
 		}

@@ -128,9 +128,6 @@ func (cm *HTTPCache) Handler(h http.Handler) http.Handler {
 				cm.cManager.Set(req.Context(), cacheKey, b)
 			}
 
-			logger.Debugf("HTTPCache: response is cached")
-		} else {
-			logger.Debugf("HTTPCache: response ignored")
 		}
 
 		for k, v := range result.Header {

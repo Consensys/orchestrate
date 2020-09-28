@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
-
 	"github.com/spf13/viper"
 )
 
@@ -12,8 +11,8 @@ func init() {
 	viper.SetDefault(RetryInitialIntervalViperKey, 500*time.Millisecond)
 	viper.SetDefault(RetryRandomFactorViperKey, 0.5)
 	viper.SetDefault(RetryMultiplierViperKey, 1.5)
-	viper.SetDefault(RetryMaxIntervalViperKey, 30*time.Second)
-	viper.SetDefault(maxElapsedTimeViperKey, maxElapsedTimeDefault)
+	viper.SetDefault(RetryMaxIntervalViperKey, 5*time.Second)
+	viper.SetDefault(RetryMaxElapsedTimeViperKey, time.Minute)
 }
 
 const (
@@ -21,11 +20,7 @@ const (
 	RetryRandomFactorViperKey    = "backOff.randomfactor"
 	RetryMultiplierViperKey      = "backOff.multiplier"
 	RetryMaxIntervalViperKey     = "backOff.maxinterval"
-)
-
-const (
-	maxElapsedTimeViperKey = "backOff.maxelapsedtime"
-	maxElapsedTimeDefault  = 1 * time.Hour
+	RetryMaxElapsedTimeViperKey  = "backOff.maxelapsedtime"
 )
 
 // RetryConfig is a configuration for Exponential Backoff
@@ -46,7 +41,7 @@ func NewRetryConfig(vipr *viper.Viper) *RetryConfig {
 	config.RandomizationFactor = vipr.GetFloat64(RetryRandomFactorViperKey)
 	config.Multiplier = vipr.GetFloat64(RetryMultiplierViperKey)
 	config.MaxInterval = vipr.GetDuration(RetryMaxIntervalViperKey)
-	config.MaxElapsedTime = vipr.GetDuration(maxElapsedTimeViperKey)
+	config.MaxElapsedTime = vipr.GetDuration(RetryMaxElapsedTimeViperKey)
 
 	return config
 }

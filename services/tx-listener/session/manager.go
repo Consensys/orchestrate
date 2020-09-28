@@ -6,6 +6,7 @@ import (
 
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/sirupsen/logrus"
+	ethclientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
 	provider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/providers"
@@ -117,7 +118,7 @@ func (m *Manager) listenCommands(ctx context.Context) {
 func (m *Manager) executeCommand(ctx context.Context, command *Command) {
 	switch command.Type {
 	case START:
-		m.runSession(ctx, command.Chain)
+		m.runSession(ethclientutils.RetryConnectionError(ctx, true), command.Chain)
 	case STOP:
 		m.stopSession(command.Chain)
 	case UPDATE:

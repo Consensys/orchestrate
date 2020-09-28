@@ -3,6 +3,7 @@ package chainregistry
 import (
 	"context"
 	"sync"
+	"time"
 
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/viper"
@@ -11,6 +12,7 @@ import (
 	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/key"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/rpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
 var (
@@ -23,6 +25,9 @@ func Init(ctx context.Context) {
 		// Initialize dependencies
 		authjwt.Init(ctx)
 		authkey.Init(ctx)
+
+		viper.Set(utils.RetryMaxIntervalViperKey, 5*time.Second)
+		viper.Set(utils.RetryMaxElapsedTimeViperKey, 30*time.Second)
 		ethclient.Init(ctx)
 
 		var err error
