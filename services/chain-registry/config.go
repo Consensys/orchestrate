@@ -18,7 +18,7 @@ import (
 
 func init() {
 	_ = viper.BindEnv(InitViperKey, initEnv)
-	_ = viper.BindEnv(ChainRegistryCacheViperKey, chainRegistryCacheEnv)
+	_ = viper.BindEnv(CacheTTLViperKey, cacheTTLEnv)
 	viper.SetDefault(InitViperKey, initDefault)
 }
 
@@ -30,9 +30,9 @@ var (
 )
 
 var (
-	chainRegistryCacheFlag     = "chain-registry-cache"
-	ChainRegistryCacheViperKey = "chain-registry.cache"
-	chainRegistryCacheEnv      = "CHAIN_REGISTRY_CACHE"
+	cacheTTLFlag     = "chain-registry-cache-ttl"
+	CacheTTLViperKey = "chain-registry.cache.ttl"
+	cacheTTLEnv      = "CHAIN_REGISTRY_CACHE_TTL"
 )
 
 type Config struct {
@@ -52,10 +52,10 @@ Environment variable: %q`, initEnv)
 	f.StringSlice(initFlag, initDefault, initDesc)
 	_ = viper.BindPFlag(InitViperKey, f.Lookup(initFlag))
 
-	cacheDesc := fmt.Sprintf(`Chain Registry Proxy Cache TTL in miliseconds(Disabled by default)
-Environment variable: %q`, chainRegistryCacheEnv)
-	f.Int(chainRegistryCacheFlag, 0, cacheDesc)
-	_ = viper.BindPFlag(ChainRegistryCacheViperKey, f.Lookup(chainRegistryCacheFlag))
+	cacheDesc := fmt.Sprintf(`Chain Registry Proxy Cache TTL in milliseconds (Disabled by default)
+Environment variable: %q`, cacheTTLEnv)
+	f.Int(cacheTTLFlag, 0, cacheDesc)
+	_ = viper.BindPFlag(CacheTTLViperKey, f.Lookup(cacheTTLFlag))
 }
 
 func Flags(f *pflag.FlagSet) {
@@ -82,7 +82,7 @@ func NewConfig(vipr *viper.Viper) *Config {
 		Multitenancy: viper.GetBool(multitenancy.EnabledViperKey),
 	}
 
-	cacheStr := viper.GetInt(ChainRegistryCacheViperKey)
+	cacheStr := viper.GetInt(CacheTTLViperKey)
 	if cacheStr != 0 {
 		d := time.Duration(cacheStr) * time.Millisecond
 		cfg.ProxyCacheTTL = &d
