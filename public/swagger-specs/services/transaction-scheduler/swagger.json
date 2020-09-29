@@ -1431,6 +1431,10 @@
                     "type": "string",
                     "example": "MINED"
                 },
+                "tenantID": {
+                    "type": "string",
+                    "example": "foo"
+                },
                 "transaction": {
                     "type": "object",
                     "$ref": "#/definitions/entities.ETHTransaction"
@@ -1635,12 +1639,14 @@
                     "type": "string",
                     "example": "myIdempotencyKey"
                 },
+                "jobs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/txscheduler.JobResponse"
+                    }
+                },
                 "params": {
                     "type": "string"
-                },
-                "schedule": {
-                    "type": "object",
-                    "$ref": "#/definitions/txscheduler.ScheduleResponse"
                 },
                 "uuid": {
                     "type": "string",

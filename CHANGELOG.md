@@ -3,16 +3,16 @@
 All notable changes to this project will be documented in this file.
 
 
-## v2.4.0-rc1 (Unreleased)
+## v2.4.0-rc1 (2020-09-29)
 
 ### 🆕 Features
-* Add the new Transaction Sentry.
+* Add the new Transaction Sentry service.
     * Users can now add a `retryPolicy` inside the `gasPricePolicy` settings when publishing transactions by specifying an `interval`, `increment`, and a `limit`.
     * The Transaction Sentry will watch this transaction until it's mined and after each `interval`, will resend the transaction with a gasPrice increased by `increment`(%), capped by `limit` (%). 
-* Add a Caching mechanism that can be enabled to cache every identical request going from Orchestrate to the Ethereum node.
-    * This feature is especially useful for use-cases:
+* Add a Caching mechanism that can be enabled to cache every identical request going from Orchestrate to the Ethereum node. TTL can be configured using the environment variable `CHAIN_REGISTRY_CACHE_TTL`
+    * This feature is especially useful for cases where:
         * where multiple chains (belonging to the same tenant or not) calls the same Ethereum node.
-        * using a node with low capabilities or behind a rate limiter (Infura/Kaleido)  
+        * and using a node with low capabilities or behind a rate limiter (Infura/Kaleido)  
 
 ### ⚠ BREAKING CHANGES
 * Schedule level was removed from transaction api responses
@@ -20,17 +20,22 @@ All notable changes to this project will be documented in this file.
 
 ### 🛠 Bug fixes
 * Fix a bug when registering an overloaded & rate-limited chain with a configuration starting block to "latest", the synchronization could start from block 0. 
-* Fix a bug where the process was not failing when DB migration failed 
+* Fix a bug where the process was not failing when DB migration failed
+* Improve retry policy on Eth Clients, it's now failing quicker in some cases and more accurately 
+
 
 ## v2.3.2 (2020-09-22)
+
 ### 🛠 Bug fixes
 * Fix a bug when submitting a contract transaction with method arguments containing arrays
+
 
 ## v2.3.1 (2020-09-15)
 
 ### 🛠 Bug fixes
 * Fix a bug when registering an overloaded & rate-limited chain with a configuration starting block to "latest", the synchronization could start from block 0. 
 * Fix a bug where the process was not failing when DB migration failed
+
 
 ## v2.3.0 (2020-09-02)
 
