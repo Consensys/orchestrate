@@ -27,7 +27,7 @@ func TestProxyCacheTTLRegistryDefault(t *testing.T) {
 	flgs := pflag.NewFlagSet("test-chain-registry-1", pflag.ContinueOnError)
 	cmdFlags(flgs)
 
-	assert.Equal(t, 0, viper.GetInt(CacheTTLViperKey))
+	assert.Equal(t, 0*time.Second, viper.GetDuration(CacheTTLViperKey))
 
 	cfg := NewConfig(viper.New())
 	assert.Nil(t, cfg.ProxyCacheTTL)

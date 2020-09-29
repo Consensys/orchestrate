@@ -18,8 +18,9 @@ import (
 
 func init() {
 	_ = viper.BindEnv(InitViperKey, initEnv)
-	_ = viper.BindEnv(CacheTTLViperKey, cacheTTLEnv)
 	viper.SetDefault(InitViperKey, initDefault)
+	_ = viper.BindEnv(CacheTTLViperKey, cacheTTLEnv)
+	viper.SetDefault(CacheTTLViperKey, cacheDefault)
 }
 
 var (
@@ -32,6 +33,7 @@ var (
 var (
 	cacheTTLFlag     = "chain-registry-cache-ttl"
 	CacheTTLViperKey = "chain-registry.cache.ttl"
+	cacheDefault     = 0 * time.Second
 	cacheTTLEnv      = "CHAIN_REGISTRY_CACHE_TTL"
 )
 
@@ -52,9 +54,9 @@ Environment variable: %q`, initEnv)
 	f.StringSlice(initFlag, initDefault, initDesc)
 	_ = viper.BindPFlag(InitViperKey, f.Lookup(initFlag))
 
-	cacheDesc := fmt.Sprintf(`Chain Registry Proxy Cache TTL in milliseconds (Disabled by default)
+	cacheDesc := fmt.Sprintf(`Chain Registry Proxy Cache TTL duration (Disabled by default)
 Environment variable: %q`, cacheTTLEnv)
-	f.Int(cacheTTLFlag, 0, cacheDesc)
+	f.Duration(cacheTTLFlag, cacheDefault, cacheDesc)
 	_ = viper.BindPFlag(CacheTTLViperKey, f.Lookup(cacheTTLFlag))
 }
 
@@ -82,10 +84,9 @@ func NewConfig(vipr *viper.Viper) *Config {
 		Multitenancy: viper.GetBool(multitenancy.EnabledViperKey),
 	}
 
-	cacheStr := viper.GetInt(CacheTTLViperKey)
-	if cacheStr != 0 {
-		d := time.Duration(cacheStr) * time.Millisecond
-		cfg.ProxyCacheTTL = &d
+	cacheStr := viper.GetDuration(CacheTTLViperKey)
+	if cacheStr != 0*time.Second {
+		cfg.ProxyCacheTTL = &cacheStr
 		log.WithoutContext().Info("chain registry proxy cache is enabled.")
 	}
 
