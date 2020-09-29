@@ -85,7 +85,7 @@ func NewConfig(vipr *viper.Viper) *Config {
 	}
 
 	cacheStr := viper.GetDuration(CacheTTLViperKey)
-	if cacheStr != 0*time.Second {
+	if cacheStr != time.Duration(0) {
 		cfg.ProxyCacheTTL = &cacheStr
 		log.WithoutContext().Info("chain registry proxy cache is enabled.")
 	}
