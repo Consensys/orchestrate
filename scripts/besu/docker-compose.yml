@@ -14,7 +14,7 @@ x-orion-env-common: &orion-env-common
   LOG4J_CONFIGURATION_FILE: /config/log-config.xml
 
 x-besu-common: &besu-common
-  image: hyperledger/besu:1.5.3
+  image: hyperledger/besu:1.5.5
   entrypoint: ["bash", "besu.sh"]
   networks:
     - orchestrate

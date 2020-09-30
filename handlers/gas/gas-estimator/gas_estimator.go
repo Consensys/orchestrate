@@ -5,6 +5,7 @@ import (
 
 	"github.com/ethereum/go-ethereum"
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient"
@@ -57,6 +58,12 @@ func Estimator(p ethclient.GasEstimator) engine.HandlerFunc {
 		url, err := proxy.GetURL(txctx)
 		if err != nil {
 			return
+		}
+
+		if txctx.Envelope.IsEeaSendMarkingTransaction() {
+			// We update the data to an arbitrary hash
+			// to avoid errors raised on eth_estimateGas on Besu 1.5.4 & 1.5.5
+			call.Data = hexutil.MustDecode("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
 		}
 
 		g, err := p.EstimateGas(txctx.Context(), url, call)
