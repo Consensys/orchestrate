@@ -6,6 +6,7 @@ import (
 	"math/big"
 	"testing"
 
+	quorumtypes "github.com/consensys/quorum/core/types"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/golang/mock/gomock"
@@ -84,7 +85,7 @@ func TestSender(t *testing.T) {
 		assert.NotEmpty(t, txctx.Envelope.GetErrors())
 		assert.Equal(t, expectedErr, txctx.Envelope.GetErrors()[0])
 	})
-	
+
 	t.Run("should execute tessera private transaction successfully", func(t *testing.T) {
 		txctx := newTxCtx(envelopeId, txSender.String())
 		_ = txctx.Envelope.SetJobType(tx.JobType_ETH_TESSERA_PRIVATE_TX)
@@ -98,7 +99,7 @@ func TestSender(t *testing.T) {
 		txctx := newTxCtx(envelopeId, txSender.String())
 		_ = txctx.Envelope.SetJobType(tx.JobType_ETH_TESSERA_MARKING_TX)
 
-		ks.EXPECT().SignPrivateTesseraTx(txctx.Context(), gomock.Any(), txSender, gomock.AssignableToTypeOf(&ethtypes.Transaction{})).
+		ks.EXPECT().SignPrivateTesseraTx(txctx.Context(), gomock.Any(), txSender, gomock.AssignableToTypeOf(&quorumtypes.Transaction{})).
 			Return(txRaw.Bytes(), &txHash, nil)
 
 		signer(txctx)
@@ -113,7 +114,7 @@ func TestSender(t *testing.T) {
 		txctx := newTxCtx(envelopeId, txSender.String())
 		_ = txctx.Envelope.SetJobType(tx.JobType_ETH_TESSERA_MARKING_TX)
 
-		ks.EXPECT().SignPrivateTesseraTx(txctx.Context(), gomock.Any(), txSender, gomock.AssignableToTypeOf(&ethtypes.Transaction{})).
+		ks.EXPECT().SignPrivateTesseraTx(txctx.Context(), gomock.Any(), txSender, gomock.AssignableToTypeOf(&quorumtypes.Transaction{})).
 			Return(txRaw.Bytes(), &txHash, expectedErr)
 
 		signer(txctx)
@@ -136,7 +137,7 @@ func TestSender(t *testing.T) {
 		assert.Equal(t, txctx.Envelope.GetRaw(), txRaw.Hex())
 		assert.Equal(t, txctx.Envelope.GetTxHash(), &ethcommon.Hash{})
 	})
-	
+
 	t.Run("should execute eea marking transaction successfully", func(t *testing.T) {
 		txctx := newTxCtx(envelopeId, txSender.String())
 		_ = txctx.Envelope.SetJobType(tx.JobType_ETH_ORION_MARKING_TX)

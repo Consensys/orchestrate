@@ -83,10 +83,3 @@ func encodePrivateTx(tx *ethtypes.Transaction, privateArgs *types.PrivateArgs) [
 	})
 	return rplEncoding
 }
-
-func calculatePrivateV(v *big.Int) *big.Int {
-	if v.Int64() == 27 {
-		return big.NewInt(37)
-	}
-	return big.NewInt(38)
-}

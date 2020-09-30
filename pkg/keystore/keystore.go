@@ -4,6 +4,7 @@ import (
 	"context"
 	"math/big"
 
+	quorumtypes "github.com/consensys/quorum/core/types"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -67,11 +68,16 @@ func (ks *keystore) SignPrivateEEATx(ctx context.Context, netChain *big.Int, add
 }
 
 // SignPrivateTesseraTx signs a private transaction using Tessera
-func (ks *keystore) SignPrivateTesseraTx(ctx context.Context, netChain *big.Int, addr ethcommon.Address, tx *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error) {
+func (ks *keystore) SignPrivateTesseraTx(ctx context.Context, netChain *big.Int, addr ethcommon.Address, tx *quorumtypes.Transaction) ([]byte, *ethcommon.Hash, error) {
 	// Creates a new signing session
 	sess, err := ks.sessMng.SigningSession(ctx, addr)
 	if err != nil {
 		return []byte{}, nil, err
+	}
+
+	// Set tx.data.V = 37 or 38 for signature
+	if !tx.IsPrivate() {
+		tx.SetPrivate()
 	}
 
 	Raw, Hash, err := sess.ExecuteForTesseraTx(tx)

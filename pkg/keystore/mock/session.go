@@ -6,11 +6,12 @@ package mock
 
 import (
 	context "context"
+	types "github.com/consensys/quorum/core/types"
 	common "github.com/ethereum/go-ethereum/common"
-	types "github.com/ethereum/go-ethereum/core/types"
+	types0 "github.com/ethereum/go-ethereum/core/types"
 	gomock "github.com/golang/mock/gomock"
 	account "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/account"
-	types0 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/types"
+	types1 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/types"
 	crypto "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/keystore/crypto"
 	session "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/keystore/session"
 	big "math/big"
@@ -69,7 +70,7 @@ func (mr *MockSigningSessionMockRecorder) SetChain(arg0 interface{}) *gomock.Cal
 }
 
 // ExecuteForTx mocks base method
-func (m *MockSigningSession) ExecuteForTx(arg0 *types.Transaction) ([]byte, *common.Hash, error) {
+func (m *MockSigningSession) ExecuteForTx(arg0 *types0.Transaction) ([]byte, *common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ExecuteForTx", arg0)
 	ret0, _ := ret[0].([]byte)
@@ -117,7 +118,7 @@ func (mr *MockSigningSessionMockRecorder) ExecuteForTesseraTx(arg0 interface{}) 
 }
 
 // ExecuteForEEATx mocks base method
-func (m *MockSigningSession) ExecuteForEEATx(arg0 *types.Transaction, arg1 *types0.PrivateArgs) ([]byte, *common.Hash, error) {
+func (m *MockSigningSession) ExecuteForEEATx(arg0 *types0.Transaction, arg1 *types1.PrivateArgs) ([]byte, *common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ExecuteForEEATx", arg0, arg1)
 	ret0, _ := ret[0].([]byte)

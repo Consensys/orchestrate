@@ -93,6 +93,11 @@ func RawTxStore(txSchedulerClient client.TransactionSchedulerClient) engine.Hand
 				return
 			}
 		case txctx.Envelope.IsEthSendTesseraPrivateTransaction():
+			if computedTxHash != txHash {
+				warnMessage := fmt.Sprintf("expected transaction hash %s, but got %s. Overriding", computedTxHash, txHash)
+				txctx.Logger.Warnf(warnMessage)
+			}
+
 			txctx.Logger.Debug("sender: updating tessera private transaction")
 			_, updateErr := txSchedulerClient.UpdateJob(
 				txctx.Context(),

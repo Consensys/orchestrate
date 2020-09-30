@@ -3,6 +3,7 @@ package session
 import (
 	"math/big"
 
+	quorumtypes "github.com/consensys/quorum/core/types"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
@@ -118,10 +119,10 @@ func (sess *signingSession) ExecuteForEEATx(tx *ethtypes.Transaction, privateArg
 
 // ExecuteForTesseraTx : once all the element of the session have been set,
 // it assigns the signed transaction and the txhash
-// Signs a transaction for Tessera private enclave
-func (sess *signingSession) ExecuteForTesseraTx(tx *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error) {
-	// Transactions for Tessera should be signed using Homestead signer
-	t, err := ethtypes.SignTx(tx, ethtypes.HomesteadSigner{}, sess.account.Priv())
+// Signs the marking transaction for quorum & tessera
+func (sess *signingSession) ExecuteForTesseraTx(tx *quorumtypes.Transaction) ([]byte, *ethcommon.Hash, error) {
+	// Transactions for Tessera should be signed using QuorumPrivateTxSigner signer
+	t, err := quorumtypes.SignTx(tx, quorumtypes.QuorumPrivateTxSigner{}, sess.account.Priv())
 	if err != nil {
 		return []byte{}, nil, errors.CryptoOperationError(err.Error()).SetComponent(component)
 	}
@@ -132,25 +133,7 @@ func (sess *signingSession) ExecuteForTesseraTx(tx *ethtypes.Transaction) ([]byt
 		return []byte{}, nil, errors.CryptoOperationError(err.Error()).SetComponent(component)
 	}
 
-	// Tessera transactions should be deterministic and we should be able to generate them locally
-
-	v, r, s := t.RawSignatureValues()
-	privateV := calculatePrivateV(v)
-
-	txHash, err := rlp.Hash([]interface{}{
-		tx.Nonce(),
-		tx.GasPrice(),
-		tx.Gas(),
-		tx.To(),
-		tx.Value(),
-		tx.Data(),
-		privateV,
-		r,
-		s,
-	})
-	if err != nil {
-		return nil, nil, err
-	}
+	txHash := t.Hash()
 
 	return signedRaw, &txHash, nil
 }

@@ -12,6 +12,7 @@ require (
 	github.com/aws/aws-sdk-go v1.29.33
 	github.com/c0va23/go-proxyprotocol v0.9.1
 	github.com/cenkalti/backoff/v4 v4.0.0
+	github.com/consensys/quorum v2.7.0+incompatible
 	github.com/containous/alice v0.0.0-20181107144136-d83ebdd94cbd
 	github.com/containous/traefik/v2 v2.2.0
 	github.com/cucumber/godog v0.10.1-0.20200625081220-c7d739336b87

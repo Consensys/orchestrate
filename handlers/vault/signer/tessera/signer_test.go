@@ -4,6 +4,7 @@ package tessera
 
 import (
 	"fmt"
+	"math/big"
 	"reflect"
 	"testing"
 
@@ -35,6 +36,7 @@ func TestSignTx(t *testing.T) {
 	testSet := []struct {
 		name           string
 		txctx          func(txctx *engine.TxContext) *engine.TxContext
+		tx             *ethtypes.Transaction
 		sender         ethcommon.Address
 		expectedOutput output
 	}{
@@ -43,6 +45,20 @@ func TestSignTx(t *testing.T) {
 			func(txctx *engine.TxContext) *engine.TxContext {
 				return txctx
 			},
+			ethtypes.NewTransaction(0, ethcommon.HexToAddress("0x0"), big.NewInt(0), 0, big.NewInt(0), []byte("test")),
+			addressNoError,
+			output{
+				sig:  sigNoError,
+				hash: &hashNoError,
+				err:  nil,
+			},
+		},
+		{
+			"sign contract creation Tx without error",
+			func(txctx *engine.TxContext) *engine.TxContext {
+				return txctx
+			},
+			ethtypes.NewContractCreation(0, big.NewInt(0), 0, big.NewInt(0), []byte("test")),
 			addressNoError,
 			output{
 				sig:  sigNoError,
@@ -55,6 +71,7 @@ func TestSignTx(t *testing.T) {
 			func(txctx *engine.TxContext) *engine.TxContext {
 				return txctx
 			},
+			ethtypes.NewTransaction(0, ethcommon.HexToAddress("0x0"), big.NewInt(0), 0, big.NewInt(0), []byte("test")),
 			addressError,
 			output{
 				sig:  sigError,
@@ -83,7 +100,7 @@ func TestSignTx(t *testing.T) {
 
 			txctx := engine.NewTxContext()
 			txctx.Logger = log.NewEntry(log.New())
-			sig, hash, err := signTx(k, test.txctx(txctx), test.sender, &ethtypes.Transaction{})
+			sig, hash, err := signTx(k, test.txctx(txctx), test.sender, test.tx)
 
 			assert.True(t, reflect.DeepEqual(test.expectedOutput.sig, sig), "Expected same sig")
 			assert.True(t, reflect.DeepEqual(test.expectedOutput.hash, hash), "Expected same hash")

@@ -4,6 +4,7 @@ import (
 	"context"
 	"math/big"
 
+	quorumtypes "github.com/consensys/quorum/core/types"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/account"
@@ -18,7 +19,7 @@ type SigningSession interface {
 	SetChain(*big.Int) error
 	ExecuteForTx(*ethtypes.Transaction) ([]byte, *ethcommon.Hash, error)
 	ExecuteForMsg([]byte, crypto.DSA) ([]byte, *ethcommon.Hash, error)
-	ExecuteForTesseraTx(*ethtypes.Transaction) ([]byte, *ethcommon.Hash, error)
+	ExecuteForTesseraTx(*quorumtypes.Transaction) ([]byte, *ethcommon.Hash, error)
 	ExecuteForEEATx(*ethtypes.Transaction, *types.PrivateArgs) ([]byte, *ethcommon.Hash, error)
 }
 

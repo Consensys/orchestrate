@@ -4,6 +4,7 @@ import (
 	"context"
 	"math/big"
 
+	quorumtypes "github.com/consensys/quorum/core/types"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/types"
@@ -24,7 +25,7 @@ type KeyStore interface {
 	// SignPrivateTesseraTx signs a private transaction for Tessera transactions manager
 	// Before calling this method, "data" field in the transaction should be replaced with the result
 	// of the "storeraw" API call
-	SignPrivateTesseraTx(context.Context, *big.Int, ethcommon.Address, *ethtypes.Transaction) ([]byte, *ethcommon.Hash, error)
+	SignPrivateTesseraTx(context.Context, *big.Int, ethcommon.Address, *quorumtypes.Transaction) ([]byte, *ethcommon.Hash, error)
 
 	// SignMsg sign a message
 	SignMsg(context.Context, ethcommon.Address, string) ([]byte, *ethcommon.Hash, error)

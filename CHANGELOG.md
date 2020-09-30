@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.4.0-rc2 (unreleased)
+
+### 🛠 Bug fixes
+* Fix a bug with quorum's private transaction signature where the payload is sign with v=37,38 instead of 27,28
 
 ## v2.4.0-rc1 (2020-09-29)
 

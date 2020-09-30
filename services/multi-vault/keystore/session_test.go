@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/ConsenSys/golang-utils/ethereum"
+	quorumtypes "github.com/consensys/quorum/core/types"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
@@ -165,14 +166,13 @@ func TestPrivateTxSigning(t *testing.T) {
 }
 
 func TestPrivateTesseraTxSigning(t *testing.T) {
-	expected := "0xf865808203e8832dc6c094000000000000000000000000000000000000000080831234561ba0e04e1c11a8626c77fc2b61c246b066f765613b6104a824bb229889c45dae9922a018b07c72e29e7869422680979e5a4dfe0fd9fbcaa62bb3d0c9320a30b03d91c4"
+	expected := "0xf865808203e8832dc6c0940000000000000000000000000000000000000000808312345625a0e04e1c11a8626c77fc2b61c246b066f765613b6104a824bb229889c45dae9922a018b07c72e29e7869422680979e5a4dfe0fd9fbcaa62bb3d0c9320a30b03d91c4"
 	data := "0x123456"
-
 	store := NewKeyStore(memory.NewSecretStore(multitenancy.New(false)))
 	err := store.ImportPrivateKey(context.Background(), privateKey)
 	assert.NoError(t, err)
 
-	tx := ethtypes.NewTransaction(
+	tx := quorumtypes.NewTransaction(
 		0,
 		ethcommon.HexToAddress("0x0"),
 		big.NewInt(0),
