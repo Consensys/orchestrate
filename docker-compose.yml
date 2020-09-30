@@ -20,7 +20,6 @@ x-default-variables: &default-variables
   MULTI_TENANCY_ENABLED: ${MULTI_TENANCY_ENABLED-false}
   AUTH_JWT_CLAIMS_NAMESPACE: ${AUTH_JWT_CLAIMS_NAMESPACE-http://tenant.info/}
   AUTH_JWT_CERTIFICATE: ${AUTH_JWT_CERTIFICATE-}
-  AUTH_JWT_PRIVATE_KEY: ${AUTH_JWT_PRIVATE_KEY-}
   AUTH_API_KEY: ${AUTH_API_KEY-}
   KAFKA_URL: ${KAFKA_URL-kafka:29092}
   KAFKA_SASL_ENABLED: ${KAFKA_SASL_ENABLED-false}
@@ -253,6 +252,7 @@ services:
     <<: *container-common
     environment:
       <<: *default-variables
+      AUTH_JWT_PRIVATE_KEY: ${AUTH_JWT_PRIVATE_KEY-}
     command: utils generate-jwt --tenant=${TENANT_ID-_}
     restart: "no"
 

@@ -26,6 +26,7 @@ COPY --from=builder /etc/passwd /etc/passwd
 
 COPY --from=builder /bin/main /go/bin/main
 COPY --from=builder /app/tests/features /features
+COPY --from=builder /app/tests/artifacts /artifacts
 
 # Use an unprivileged user.
 USER appuser

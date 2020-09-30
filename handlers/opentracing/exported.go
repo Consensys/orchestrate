@@ -21,7 +21,7 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		// Initialize Controlled Faucet
+		// Initialize Opentracing
 		opentracing.Init(ctx)
 
 		operationName := "GenericService"

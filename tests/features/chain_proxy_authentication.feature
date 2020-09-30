@@ -3,7 +3,7 @@
 Feature: Chain-Proxy Authentication
   As as external developer
   I want to perform proxy calls to my chains with expected permission rules
-  
+
   Scenario: Chain-Proxy Auth
     Given I have the following tenants
       | alias    | tenantID |
@@ -40,9 +40,9 @@ Feature: Chain-Proxy Authentication
     Given I sleep "3s"
 
     Given I set the headers
-      | Key          | Value            |
-      | X-API-Key    | {{global.api-key}}      |
-      | Content-Type | application/json |
+      | Key          | Value              |
+      | X-API-Key    | {{global.api-key}} |
+      | Content-Type | application/json   |
     When I send "POST" request to "{{global.chain-registry}}/{{chainFoo}}" with json:
       """
       {
