@@ -33,7 +33,10 @@ func Estimator(p ethclient.GasEstimator) engine.HandlerFunc {
 	}
 
 	return func(txctx *engine.TxContext) {
-		txctx.Logger.WithField("envelope_id", txctx.Envelope.GetID()).Debugf("gas estimator handler starts")
+		txctx.Logger.
+			WithField("envelope_id", txctx.Envelope.GetID()).
+			WithField("job_uuid", txctx.Envelope.GetJobUUID()).
+			Debugf("gas estimator handler starts")
 
 		if txctx.Envelope.IsEeaSendPrivateTransaction() {
 			txctx.Logger.Debugf("gas-estimator: ignore gas calculation for eea private transaction")

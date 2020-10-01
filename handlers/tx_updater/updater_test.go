@@ -34,7 +34,7 @@ func TestTransactionUpdater(t *testing.T) {
 		txctx.Logger = log.NewEntry(log.New())
 
 		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &txschedulertypes.UpdateJobRequest{
+			UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), &txschedulertypes.UpdateJobRequest{
 				Status:  utils.StatusFailed,
 				Message: txctx.Envelope.Error(),
 			}).

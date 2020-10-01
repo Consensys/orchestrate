@@ -19,6 +19,7 @@ func Dispatcher(reg *chanregistry.ChanRegistry, keyOfs ...KeyOfFunc) engine.Hand
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
 			"scenario.id": txctx.Envelope.GetContextLabelsValue("scenario.id"),
 			"id":          txctx.Envelope.GetID(),
+			"job_uuid":    txctx.Envelope.GetJobUUID(),
 			"msg.topic":   txctx.In.Entrypoint(),
 		})
 

@@ -25,8 +25,8 @@ Feature: Account management
     Then Envelopes should be in topic "account.generator"
     Then Envelopes should be in topic "account.generated"
     And Envelopes should have the following fields
-      | From |
-      | ~    |
+      | From | ID                |
+      | ~    | {{generateAccID}} |
     And I register the following envelope fields
       | id                | alias            | path |
       | {{generateAccID}} | generatedAccAddr | From |

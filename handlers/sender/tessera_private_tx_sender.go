@@ -20,7 +20,9 @@ func TesseraPrivateTxSender(tesseraClient ethclient.QuorumTransactionSender) eng
 			return
 		}
 
-		txctx.Logger.WithField("envelope_id", txctx.Envelope.GetID()).Debugf("tessera handler starts")
+		txctx.Logger.WithField("envelope_id", txctx.Envelope.GetID()).
+			WithField("job_uuid", txctx.Envelope.GetJobUUID()).
+			Debugf("tessera handler starts")
 
 		if txctx.Envelope.GetData() == "" {
 			err := errors.DataError("cannot send transaction without data to Tessera").SetComponent(component)

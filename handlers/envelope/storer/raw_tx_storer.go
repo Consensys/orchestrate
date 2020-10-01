@@ -40,7 +40,7 @@ func RawTxStore(txSchedulerClient client.TransactionSchedulerClient) engine.Hand
 			txUpdateReq.Status = utils.StatusPending
 		}
 
-		_, err := txSchedulerClient.UpdateJob(txctx.Context(), txctx.Envelope.GetID(), txUpdateReq)
+		_, err := txSchedulerClient.UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), txUpdateReq)
 
 		if err != nil {
 			e := txctx.AbortWithError(err).ExtendComponent(component)
@@ -56,7 +56,7 @@ func RawTxStore(txSchedulerClient client.TransactionSchedulerClient) engine.Hand
 			txctx.Logger.Debug("transaction scheduler: updating transaction to RECOVERING")
 			_, updateErr := txSchedulerClient.UpdateJob(
 				txctx.Context(),
-				txctx.Envelope.GetID(),
+				txctx.Envelope.GetJobUUID(),
 				&txschedulertypes.UpdateJobRequest{
 					Status: utils.StatusRecovering,
 					Message: fmt.Sprintf(
@@ -80,7 +80,7 @@ func RawTxStore(txSchedulerClient client.TransactionSchedulerClient) engine.Hand
 			txctx.Logger.Debug("sender: updating eea private transaction")
 			_, updateErr := txSchedulerClient.UpdateJob(
 				txctx.Context(),
-				txctx.Envelope.GetID(),
+				txctx.Envelope.GetJobUUID(),
 				&txschedulertypes.UpdateJobRequest{
 					Status: utils.StatusStored,
 					Transaction: &entities.ETHTransaction{
@@ -101,7 +101,7 @@ func RawTxStore(txSchedulerClient client.TransactionSchedulerClient) engine.Hand
 			txctx.Logger.Debug("sender: updating tessera private transaction")
 			_, updateErr := txSchedulerClient.UpdateJob(
 				txctx.Context(),
-				txctx.Envelope.GetID(),
+				txctx.Envelope.GetJobUUID(),
 				&txschedulertypes.UpdateJobRequest{
 					Status: utils.StatusStored,
 					Transaction: &entities.ETHTransaction{
@@ -119,7 +119,7 @@ func RawTxStore(txSchedulerClient client.TransactionSchedulerClient) engine.Hand
 
 			_, updateErr := txSchedulerClient.UpdateJob(
 				txctx.Context(),
-				txctx.Envelope.GetID(),
+				txctx.Envelope.GetJobUUID(),
 				&txschedulertypes.UpdateJobRequest{
 					Transaction: &entities.ETHTransaction{
 						Hash: txHash,

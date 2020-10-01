@@ -69,11 +69,11 @@ func TestRequestToBuilder(t *testing.T) {
 					},
 				},
 				InternalLabels: map[string]string{
-					ChainIDLabel:   "1",
-					TxHashLabel:    "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
-					ChainUUIDLabel: "testChainUUID",
+					ChainIDLabel:      "1",
+					TxHashLabel:       "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
+					ChainUUIDLabel:    "testChainUUID",
 					ScheduleUUIDLabel: "scheduleUUID",
-					
+					JobUUIDLabel:      "jobUUID",
 				},
 			},
 			&Envelope{
@@ -107,10 +107,11 @@ func TestRequestToBuilder(t *testing.T) {
 				ID:            "14483d15-d3bf-4aa0-a1ba-1244ba9ef2a6",
 				ContextLabels: map[string]string{"testContextLabelsKey": "testContextLabelsValue"},
 				InternalLabels: map[string]string{
-					ChainIDLabel:   "1",
-					TxHashLabel:    "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
-					ChainUUIDLabel: "testChainUUID",
+					ChainIDLabel:      "1",
+					TxHashLabel:       "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
+					ChainUUIDLabel:    "testChainUUID",
 					ScheduleUUIDLabel: "scheduleUUID",
+					JobUUIDLabel:      "jobUUID",
 				},
 				Errors: make([]*error1.Error, 0),
 			},
@@ -188,8 +189,8 @@ func TestRequestToBuilder(t *testing.T) {
 				Msg: &TxEnvelope_TxResponse{
 					TxResponse: &TxResponse{
 						Headers:       map[string]string{"testHeader1Key": "testHeader1Value"},
-						Id:            "scheduleUUID",
-						JobUUID:       "14483d15-d3bf-4aa0-a1ba-1244ba9ef2a6",
+						Id:            "14483d15-d3bf-4aa0-a1ba-1244ba9ef2a6",
+						JobUUID:       "jobUUID",
 						ContextLabels: map[string]string{"testContextLabelsKey": "testContextLabelsValue"},
 						Transaction: &ethereum.Transaction{
 							From:     "0x7e654d251da770a068413677967f6d3ea2fea9e4",
@@ -233,10 +234,11 @@ func TestRequestToBuilder(t *testing.T) {
 				ID:            "14483d15-d3bf-4aa0-a1ba-1244ba9ef2a6",
 				ContextLabels: map[string]string{"testContextLabelsKey": "testContextLabelsValue"},
 				InternalLabels: map[string]string{
-					ChainIDLabel:   "1",
-					TxHashLabel:    "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
-					ChainUUIDLabel: "testChainUUID",
-					ScheduleUUIDLabel: "scheduleUUID",
+					ChainIDLabel:      "1",
+					TxHashLabel:       "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
+					ChainUUIDLabel:    "testChainUUID",
+					JobUUIDLabel:      "jobUUID",
+					ScheduleUUIDLabel: "",
 				},
 				Errors: []*error1.Error{
 					{Message: "testError", Code: 10, Component: "testComponent"},
@@ -250,7 +252,7 @@ func TestRequestToBuilder(t *testing.T) {
 				Msg: &TxEnvelope_TxResponse{
 					TxResponse: &TxResponse{
 						Headers:       map[string]string{"testHeader1Key": "testHeader1Value"},
-						Id:            "scheduleUUID",
+						Id:            "envelopID",
 						JobUUID:       "14483d15-d3bf-4aa0-a1ba-1244ba9ef2a6",
 						ContextLabels: map[string]string{"testContextLabelsKey": "testContextLabelsValue"},
 						Transaction: &ethereum.Transaction{

@@ -22,7 +22,7 @@ func makeContext(hash, id, endpoint string, expectedErrors int) *engine.TxContex
 	txctx.Reset()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
 	txctx.WithContext(proxy.With(txctx.Context(), endpoint))
-	_ = txctx.Envelope.SetID(id).SetTxHashString(hash)
+	_ = txctx.Envelope.SetID(id).SetJobUUID(id).SetTxHashString(hash)
 	txctx.Set("expectedErrors", expectedErrors)
 	return txctx
 }
@@ -50,7 +50,7 @@ func TestTxAlreadySent(t *testing.T) {
 		jobResponse := testutils.FakeJobResponse()
 		jobResponse.Status = utils.StatusCreated
 	
-		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetID()).Return(jobResponse, nil)
+		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetJobUUID()).Return(jobResponse, nil)
 	
 		handler(txctx)
 	
@@ -62,7 +62,7 @@ func TestTxAlreadySent(t *testing.T) {
 		jobResponse := testutils.FakeJobResponse()
 		jobResponse.Status = utils.StatusStarted
 
-		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetID()).Return(jobResponse, nil)
+		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetJobUUID()).Return(jobResponse, nil)
 
 		handler(txctx)
 
@@ -74,7 +74,7 @@ func TestTxAlreadySent(t *testing.T) {
 		jobResponse := testutils.FakeJobResponse()
 		jobResponse.Status = utils.StatusRecovering
 
-		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetID()).Return(jobResponse, nil)
+		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetJobUUID()).Return(jobResponse, nil)
 
 		handler(txctx)
 
@@ -86,7 +86,7 @@ func TestTxAlreadySent(t *testing.T) {
 		jobResponse := testutils.FakeJobResponse()
 		jobResponse.Status = utils.StatusFailed
 
-		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetID()).Return(jobResponse, nil)
+		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetJobUUID()).Return(jobResponse, nil)
 
 		handler(txctx)
 
@@ -98,7 +98,7 @@ func TestTxAlreadySent(t *testing.T) {
 		jobResponse := testutils.FakeJobResponse()
 		jobResponse.Status = utils.StatusFailed
 
-		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetID()).Return(jobResponse, nil)
+		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetJobUUID()).Return(jobResponse, nil)
 
 		handler(txctx)
 
@@ -110,7 +110,7 @@ func TestTxAlreadySent(t *testing.T) {
 		jobResponse := testutils.FakeJobResponse()
 		jobResponse.Status = utils.StatusFailed
 
-		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetID()).Return(jobResponse, nil)
+		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetJobUUID()).Return(jobResponse, nil)
 
 		handler(txctx)
 
@@ -122,7 +122,7 @@ func TestTxAlreadySent(t *testing.T) {
 		jobResponse := testutils.FakeJobResponse()
 		jobResponse.Status = utils.StatusPending
 
-		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetID()).Return(jobResponse, nil)
+		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetJobUUID()).Return(jobResponse, nil)
 		mockChainLedgerReader.EXPECT().
 			TransactionByHash(txctx.Context(), gomock.Any(), jobResponse.Transaction.GetHash()).
 			Return(nil, false, nil)
@@ -137,7 +137,7 @@ func TestTxAlreadySent(t *testing.T) {
 		jobResponse := testutils.FakeJobResponse()
 		jobResponse.Status = utils.StatusPending
 
-		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetID()).Return(jobResponse, nil)
+		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetJobUUID()).Return(jobResponse, nil)
 		mockChainLedgerReader.EXPECT().
 			TransactionByHash(txctx.Context(), gomock.Any(), jobResponse.Transaction.GetHash()).
 			Return(nil, false, fmt.Errorf(""))
@@ -152,7 +152,7 @@ func TestTxAlreadySent(t *testing.T) {
 		jobResponse := testutils.FakeJobResponse()
 		jobResponse.Status = utils.StatusPending
 
-		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetID()).Return(jobResponse, nil)
+		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetJobUUID()).Return(jobResponse, nil)
 		mockChainLedgerReader.EXPECT().
 			TransactionByHash(txctx.Context(), gomock.Any(), jobResponse.Transaction.GetHash()).
 			Return(&ethtypes.Transaction{}, false, nil)

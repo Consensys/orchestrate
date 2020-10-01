@@ -20,7 +20,7 @@ func TxAlreadySent(ec ethclient.ChainLedgerReader, txSchedulerClient client.Tran
 		txctx.Logger.Tracef("from TxAlreadySent => TenantID value: %s", multitenancy.TenantIDFromContext(txctx.Context()))
 
 		// Load possibly already sent envelope
-		job, err := txSchedulerClient.GetJob(txctx.Context(), txctx.Envelope.GetID())
+		job, err := txSchedulerClient.GetJob(txctx.Context(), txctx.Envelope.GetJobUUID())
 		if err != nil && !errors.IsNotFoundError(err) {
 			// Connection to tx scheduler is broken
 			e := txctx.AbortWithError(err).ExtendComponent(component)

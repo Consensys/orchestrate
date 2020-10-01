@@ -59,7 +59,7 @@ func TestStartJob_Execute(t *testing.T) {
 				return err
 			}
 
-			assert.Equal(t, envelope.GetID(), job.UUID)
+			assert.Equal(t, envelope.GetJobUUID(), job.UUID)
 			assert.False(t, envelope.IsOneTimeKeySignature())
 			return nil
 		})
@@ -92,7 +92,7 @@ func TestStartJob_Execute(t *testing.T) {
 				return err
 			}
 
-			assert.Equal(t, envelope.GetID(), job.UUID)
+			assert.Equal(t, envelope.GetJobUUID(), job.UUID)
 			assert.True(t, envelope.IsOneTimeKeySignature())
 			return nil
 		})

@@ -82,10 +82,10 @@ func (m *TxRequest) Envelope() (*Envelope, error) {
 
 func (m *TxResponse) Envelope() (*Envelope, error) {
 	envelope := NewEnvelope().
-		SetID(m.GetJobUUID()).
+		SetID(m.GetId()).
 		SetHeaders(m.GetHeaders()).
 		SetContextLabels(m.GetContextLabels()).
-		SetScheduleUUID(m.GetId()).
+		SetJobUUID(m.GetJobUUID()).
 		AppendErrors(m.GetErrors()).
 		SetReceipt(m.GetReceipt()).
 		SetChainName(m.GetChain())
@@ -137,6 +137,15 @@ func (m *TxEnvelope) GetScheduleUUID() string {
 
 func (m *TxEnvelope) SetScheduleUUID(uuid string) *TxEnvelope {
 	m.InternalLabels[ScheduleUUIDLabel] = uuid
+	return m
+}
+
+func (m *TxEnvelope) GetJobUUID() string {
+	return m.InternalLabels[JobUUIDLabel]
+}
+
+func (m *TxEnvelope) SetJobUUID(uuid string) *TxEnvelope {
+	m.InternalLabels[JobUUIDLabel] = uuid
 	return m
 }
 

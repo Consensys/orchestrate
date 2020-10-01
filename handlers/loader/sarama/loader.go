@@ -33,7 +33,8 @@ func Loader(txctx *engine.TxContext) {
 
 	if txctx.Envelope != nil {
 		txctx.Logger = txctx.Logger.WithFields(log.Fields{
-			"id": txctx.Envelope.GetID(),
+			"id":       txctx.Envelope.GetID(),
+			"job_uuid": txctx.Envelope.GetJobUUID(),
 		})
 	}
 }

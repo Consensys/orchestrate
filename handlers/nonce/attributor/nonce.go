@@ -24,7 +24,10 @@ func Nonce(nm nonce.Attributor, ec hnonce.EthClient) engine.HandlerFunc {
 			return
 		}
 
-		txctx.Logger.WithField("envelope_id", txctx.Envelope.GetID()).Debugf("nonce handler starts")
+		txctx.Logger.
+			WithField("envelope_id", txctx.Envelope.GetID()).
+			WithField("job_uuid", txctx.Envelope.GetJobUUID()).
+			Debugf("nonce handler starts")
 		if txctx.Envelope.IsOneTimeKeySignature() {
 			txctx.Logger = txctx.Logger.WithFields(log.Fields{
 				"chainID":      txctx.Envelope.GetChainIDString(),

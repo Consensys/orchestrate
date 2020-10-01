@@ -55,9 +55,10 @@ Feature: Private transactions
       """
     Then the response code should be 202
     Then I register the following response fields
-      | alias           | path                  |
+      | alias           | path         |
       | jobPrivTxOne    | jobs[0].uuid |
       | jobMarkingTxOne | jobs[1].uuid |
+      | evlpID          | uuid         |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.signer"
     Then Envelopes should be in topic "tx.sender"
@@ -66,8 +67,8 @@ Feature: Private transactions
       | Receipt.Status | Receipt.ContractAddress |
       | 1              | ~                       |
     And I register the following envelope fields
-      | id                  | alias               | path                    |
-      | {{jobMarkingTxOne}} | counterContractAddr | Receipt.ContractAddress |
+      | id         | alias               | path                    |
+      | {{evlpID}} | counterContractAddr | Receipt.ContractAddress |
     When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobPrivTxOne}}"
     Then the response code should be 200
     And Response should have the following fields
@@ -271,7 +272,7 @@ Feature: Private transactions
       """
     Then the response code should be 202
     Then I register the following response fields
-      | alias           | path                  |
+      | alias           | path         |
       | jobPrivTxTwo    | jobs[0].uuid |
       | jobMarkingTxTwo | jobs[1].uuid |
     Then Envelopes should be in topic "tx.crafter"
@@ -282,8 +283,8 @@ Feature: Private transactions
       | Receipt.Status | Receipt.Output | Receipt.ContractAddress | Receipt.PrivateFrom                    | Receipt.PrivateFor                         |
       | 1              | ~              | ~                       | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_2.privateAddress}}"] |
     And I register the following envelope fields
-      | id                  | alias               | path                    |
-      | {{jobMarkingTxTwo}} | counterContractAddr | Receipt.ContractAddress |
+      | id                         | alias               | path                    |
+      | {{besuDeployContractTxID}} | counterContractAddr | Receipt.ContractAddress |
     When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobPrivTxTwo}}"
     Then the response code should be 200
     And Response should have the following fields
@@ -813,12 +814,12 @@ Feature: Private transactions
       """
     Then the response code should be 200
     Then I register the following response fields
-      | alias           | path |
-      | scheduleOneUUID | uuid |
+      | alias        | path |
+      | scheduleUUID | uuid |
     When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
   """
 {
-    "scheduleUUID": "{{scheduleOneUUID}}",
+    "scheduleUUID": "{{scheduleUUID}}",
 	"chainUUID": "{{besu.UUID}}",
     "type": "eth://orion/markingTransaction",
     "transaction": {
@@ -836,7 +837,7 @@ Feature: Private transactions
     When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
   """
 {
-    "scheduleUUID": "{{scheduleOneUUID}}",
+    "scheduleUUID": "{{scheduleUUID}}",
 	"chainUUID": "{{besu.UUID}}",
 	"nextJobUUID": "{{txMarkingTxJobUUID}}",
     "type": "eth://orion/eeaTransaction",
@@ -857,8 +858,8 @@ Feature: Private transactions
       | alias         | path |
       | txPrivJobUUID | uuid |
     Then I track the following envelopes
-      | ID                     |
-      | {{txMarkingTxJobUUID}} |
+      | ID               |
+      | {{scheduleUUID}} |
     When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txPrivJobUUID}}/start"
     Then the response code should be 202
     Then Envelopes should be in topic "tx.crafter"

@@ -19,6 +19,7 @@ func Faucet(registryClient client.ChainRegistryClient, txSchedulerClient client2
 	return func(txctx *engine.TxContext) {
 		logger := txctx.Logger.
 			WithField("envelope_id", txctx.Envelope.GetID()).
+			WithField("job_uuid", txctx.Envelope.GetJobUUID()).
 			WithField("tenant_id", multitenancy2.TenantIDFromContext(txctx.Context())).
 			WithField("account", txctx.Envelope.MustGetFromAddress().Hex())
 

@@ -26,11 +26,11 @@ func TestRawTxStore(t *testing.T) {
 
 	t.Run("should update the status successfully to PENDING", func(t *testing.T) {
 		txctx := engine.NewTxContext()
-		_ = txctx.Envelope.SetID("test")
+		_ = txctx.Envelope.SetJobUUID("jobUUID")
 		txctx.Logger = log.NewEntry(log.New())
 
 		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &txschedulertypes.UpdateJobRequest{
+			UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), &txschedulertypes.UpdateJobRequest{
 				Transaction: &entities.ETHTransaction{
 					Hash:           txctx.Envelope.GetTxHashString(),
 					From:           txctx.Envelope.GetFromString(),
@@ -55,7 +55,7 @@ func TestRawTxStore(t *testing.T) {
 
 	t.Run("should override txHash if hash retrieved is different", func(t *testing.T) {
 		txctx := engine.NewTxContext()
-		_ = txctx.Envelope.SetID("test")
+		_ = txctx.Envelope.SetJobUUID("jobUUID")
 		_ = txctx.Envelope.SetTxHashString("0xd41551c714c8ec769d2edad9adc250ae955d263da161bf59142b7500eea6715e")
 		txctx.Logger = log.NewEntry(log.New())
 
@@ -73,7 +73,7 @@ func TestRawTxStore(t *testing.T) {
 				_ = txctx.Envelope.SetTxHashString("0xe41551c714c8ec769d2edad9adc250ae955d263da161bf59142b7500eea6715e")
 				return nil, nil
 			})
-		schedulerClient.EXPECT().UpdateJob(txctx.Context(), txctx.Envelope.GetID(), expectedJobUpdate).
+		schedulerClient.EXPECT().UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), expectedJobUpdate).
 			Return(&txschedulertypes.JobResponse{}, nil)
 
 		RawTxStore(schedulerClient)(txctx)
@@ -83,11 +83,11 @@ func TestRawTxStore(t *testing.T) {
 
 	t.Run("should abort if update fails on PENDING", func(t *testing.T) {
 		txctx := engine.NewTxContext()
-		_ = txctx.Envelope.SetID("test")
+		_ = txctx.Envelope.SetJobUUID("jobUUID")
 		txctx.Logger = log.NewEntry(log.New())
 
 		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), gomock.AssignableToTypeOf(&txschedulertypes.UpdateJobRequest{})).
+			UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), gomock.AssignableToTypeOf(&txschedulertypes.UpdateJobRequest{})).
 			Return(nil, fmt.Errorf("error"))
 
 		RawTxStore(schedulerClient)(txctx)
@@ -97,15 +97,15 @@ func TestRawTxStore(t *testing.T) {
 
 	t.Run("should set status to RECOVERING if txctx contains errors", func(t *testing.T) {
 		txctx := engine.NewTxContext()
-		_ = txctx.Envelope.SetID("test")
+		_ = txctx.Envelope.SetJobUUID("jobUUID")
 		txctx.Logger = log.NewEntry(log.New())
 		_ = txctx.AbortWithError(fmt.Errorf("error"))
 
 		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), gomock.Any()).
+			UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), gomock.Any()).
 			Return(&txschedulertypes.JobResponse{}, nil)
 		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &txschedulertypes.UpdateJobRequest{
+			UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), &txschedulertypes.UpdateJobRequest{
 				Status: utils.StatusRecovering,
 				Message: fmt.Sprintf(
 					"transaction attempt with nonce %v and sender %v failed with error: %v",
@@ -121,16 +121,16 @@ func TestRawTxStore(t *testing.T) {
 
 	t.Run("should return if update fails on RECOVERING", func(t *testing.T) {
 		txctx := engine.NewTxContext()
-		_ = txctx.Envelope.SetID("test")
+		_ = txctx.Envelope.SetJobUUID("jobUUID")
 		txctx.Logger = log.NewEntry(log.New())
 		_ = txctx.AbortWithError(fmt.Errorf("error"))
 
 		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), gomock.Any()).
+			UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), gomock.Any()).
 			Return(&txschedulertypes.JobResponse{}, nil)
 
 		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &txschedulertypes.UpdateJobRequest{
+			UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), &txschedulertypes.UpdateJobRequest{
 				Status: utils.StatusRecovering,
 				Message: fmt.Sprintf(
 					"transaction attempt with nonce %v and sender %v failed with error: %v",

@@ -157,12 +157,13 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, txRequest.Params.To, job.Transaction.To)
 		assert.Equal(t, utils.EthereumTransaction, job.Type)
 	
-		evlp, err := s.env.consumer.WaitForEnvelope(job.UUID, s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
+		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID, s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-		assert.Equal(t, job.UUID, evlp.GetID())
+		assert.Equal(t, job.ScheduleUUID, evlp.GetID())
+		assert.Equal(t, job.UUID, evlp.GetJobUUID())
 		assert.True(t, evlp.IsOneTimeKeySignature())
 		assert.Equal(t, tx.JobTypeMap[utils.EthereumTransaction].String(), evlp.GetJobTypeString())
 		assert.Equal(t, evlp.GetChainIDString(), chain.ChainID)
@@ -212,21 +213,23 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, txRequest.Params.To, txJob.Transaction.To)
 		assert.Equal(t, utils.EthereumTransaction, txJob.Type)
 
-		fctEvlp, err := s.env.consumer.WaitForEnvelope(faucetJob.UUID, s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
+		fctEvlp, err := s.env.consumer.WaitForEnvelope(faucetJob.ScheduleUUID, s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-		assert.Equal(t, faucetJob.UUID, fctEvlp.GetID())
+		assert.Equal(t, faucetJob.ScheduleUUID, fctEvlp.GetID())
+		assert.Equal(t, faucetJob.UUID, fctEvlp.GetJobUUID())
 		assert.Equal(t, tx.JobTypeMap[utils.EthereumTransaction].String(), fctEvlp.GetJobTypeString())
 		assert.Equal(t, fctEvlp.GetChainIDString(), chain.ChainID)
 		
-		jobEvlp, err := s.env.consumer.WaitForEnvelope(txJob.UUID, s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
+		jobEvlp, err := s.env.consumer.WaitForEnvelope(txJob.ScheduleUUID, s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-		assert.Equal(t, txJob.UUID, jobEvlp.GetID())
+		assert.Equal(t, txJob.ScheduleUUID, jobEvlp.GetID())
+		assert.Equal(t, txJob.UUID, jobEvlp.GetJobUUID())
 	})
 
 	s.T().Run("should send a tessera transaction successfully to the transaction crafter topic", func(t *testing.T) {
@@ -272,14 +275,15 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, utils.StatusCreated, markingTxJob.Status)
 		assert.Equal(t, utils.TesseraMarkingTransaction, markingTxJob.Type)
 	
-		privTxEvlp, err := s.env.consumer.WaitForEnvelope(privTxJob.UUID,
+		privTxEvlp, err := s.env.consumer.WaitForEnvelope(privTxJob.ScheduleUUID,
 			s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
 		
-		assert.Equal(t, privTxJob.UUID, privTxEvlp.GetID())
+		assert.Equal(t, privTxJob.ScheduleUUID, privTxEvlp.GetID())
+		assert.Equal(t, privTxJob.UUID, privTxEvlp.GetJobUUID())
 		assert.False(t, privTxEvlp.IsOneTimeKeySignature())
 		assert.Equal(t, tx.JobTypeMap[utils.TesseraPrivateTransaction].String(), privTxEvlp.GetJobTypeString())
 	})
@@ -324,14 +328,15 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, utils.StatusCreated, markingTxJob.Status)
 		assert.Equal(t, utils.OrionMarkingTransaction, markingTxJob.Type)
 	
-		privTxEvlp, err := s.env.consumer.WaitForEnvelope(privTxJob.UUID,
+		privTxEvlp, err := s.env.consumer.WaitForEnvelope(privTxJob.ScheduleUUID,
 			s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
 		
-		assert.Equal(t, privTxJob.UUID, privTxEvlp.GetID())
+		assert.Equal(t, privTxJob.ScheduleUUID, privTxEvlp.GetID())
+		assert.Equal(t, privTxJob.UUID, privTxEvlp.GetJobUUID())
 		assert.Equal(t, tx.JobTypeMap[utils.OrionEEATransaction].String(), privTxEvlp.GetJobTypeString())
 	})
 	
@@ -373,13 +378,14 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, txRequest.Params.From, job.Transaction.From)
 		assert.Equal(t, utils.EthereumTransaction, job.Type)
 	
-		evlp, err := s.env.consumer.WaitForEnvelope(job.UUID,
+		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID,
 			s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-		assert.Equal(t, job.UUID, evlp.GetID())
+		assert.Equal(t, job.ScheduleUUID, evlp.GetID())
+		assert.Equal(t, job.UUID, evlp.GetJobUUID())
 		assert.Equal(t, tx.JobTypeMap[utils.EthereumTransaction].String(), evlp.GetJobTypeString())
 	})
 	
@@ -415,13 +421,14 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, txRequest.Params.Raw, job.Transaction.Raw)
 		assert.Equal(t, utils.EthereumRawTransaction, job.Type)
 	
-		evlp, err := s.env.consumer.WaitForEnvelope(job.UUID,
+		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID,
 			s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-		assert.Equal(t, job.UUID, evlp.GetID())
+		assert.Equal(t, job.ScheduleUUID, evlp.GetID())
+		assert.Equal(t, job.UUID, evlp.GetJobUUID())
 		assert.Equal(t, tx.JobTypeMap[utils.EthereumRawTransaction].String(), evlp.GetJobTypeString())
 	})
 	
@@ -458,13 +465,14 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, txRequest.Params.From, job.Transaction.From)
 		assert.Equal(t, utils.EthereumTransaction, job.Type)
 	
-		evlp, err := s.env.consumer.WaitForEnvelope(job.UUID,
+		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID,
 			s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-		assert.Equal(t, job.UUID, evlp.GetID())
+		assert.Equal(t, job.ScheduleUUID, evlp.GetID())
+		assert.Equal(t, job.UUID, evlp.GetJobUUID())
 		assert.Equal(t, tx.JobTypeMap[utils.EthereumTransaction].String(), evlp.GetJobTypeString())
 	})
 	

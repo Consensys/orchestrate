@@ -58,7 +58,7 @@ func TestResendJobTx_Execute(t *testing.T) {
 				return err
 			}
 
-			assert.Equal(t, envelope.GetID(), job.UUID)
+			assert.Equal(t, envelope.GetJobUUID(), job.UUID)
 			assert.Equal(t, envelope.GetParentJobUUID(), job.UUID)
 			return nil
 		})

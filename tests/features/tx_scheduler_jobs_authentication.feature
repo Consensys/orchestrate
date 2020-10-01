@@ -79,7 +79,7 @@ Feature: Transaction Scheduler Jobs
       | txJobUUID | uuid |
     Then I track the following envelopes
       | ID            |
-      | {{txJobUUID}} |
+      | {{scheduleOneUUID}} |
     Then  I set the headers
       | Key           | Value                      |
       | Authorization | Bearer {{tenantBar.token}} |

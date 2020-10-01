@@ -43,7 +43,8 @@ func Checker(conf *Configuration, nm nonce.Sender, ec hnonce.EthClient, tracker 
 		// TODO: Use the job internal data to do this check once envelope is refactored
 		if txctx.Envelope.IsChildJob() {
 			txctx.Logger.WithFields(log.Fields{
-				"id": txctx.Envelope.GetID(),
+				"id":       txctx.Envelope.GetID(),
+				"job_uuid": txctx.Envelope.GetJobUUID(),
 			}).Debug("nonce: skip check for child job")
 			return
 		}
@@ -52,7 +53,8 @@ func Checker(conf *Configuration, nm nonce.Sender, ec hnonce.EthClient, tracker 
 		if txctx.Envelope.IsEthSendRawTransaction() {
 			// If transaction has been generated externally we skip nonce check
 			txctx.Logger.WithFields(log.Fields{
-				"id": txctx.Envelope.GetID(),
+				"id":       txctx.Envelope.GetID(),
+				"job_uuid": txctx.Envelope.GetJobUUID(),
 			}).Debugf("nonce: skip check for raw transaction")
 			return
 		}

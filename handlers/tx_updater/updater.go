@@ -20,7 +20,7 @@ func TransactionUpdater(txSchedulerClient txscheduler.TransactionSchedulerClient
 
 		// TODO: Improvement of the log message will be done when we move to clean architecture
 		// TODO: because at the moment it is difficult to know what error messages need to be sent to users and which ones not.
-		_, err := txSchedulerClient.UpdateJob(txctx.Context(), txctx.Envelope.GetID(), &txschedulertypes.UpdateJobRequest{
+		_, err := txSchedulerClient.UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), &txschedulertypes.UpdateJobRequest{
 			Status:  utils.StatusFailed,
 			Message: txctx.Envelope.Error(),
 		})

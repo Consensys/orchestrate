@@ -33,8 +33,9 @@ func SendEnvelope(producer sarama.SyncProducer, topic string, e *tx.Envelope, ms
 	}
 
 	log.WithFields(log.Fields{
-		"id":    e.GetID(),
-		"msgId": msgID,
+		"id":       e.GetID(),
+		"job_uuid": e.GetJobUUID(),
+		"msgId":    msgID,
 	}).Debugf("scenario: envelope sent")
 
 	return nil

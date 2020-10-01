@@ -49,7 +49,7 @@ func newTxCtx(eId, txHash, txRaw string) *engine.TxContext {
 	txctx := engine.NewTxContext()
 	txctx.Logger = log.NewEntry(log.StandardLogger())
 	txctx.WithContext(proxy.With(txctx.Context(), chainRegistryUrl))
-	_ = txctx.Envelope.SetID(eId).SetTxHash(ethcommon.HexToHash(txHash)).SetRawString(txRaw)
+	_ = txctx.Envelope.SetID(eId).SetJobUUID(eId).SetTxHash(ethcommon.HexToHash(txHash)).SetRawString(txRaw)
 
 	return txctx
 }

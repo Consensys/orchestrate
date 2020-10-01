@@ -93,6 +93,22 @@ Feature: Invalid Nonce
     Then I register the following response fields
       | alias           | path |
       | scheduleOneUUID | uuid |
+    When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
+      """
+{}
+      """
+    Then the response code should be 200
+    Then I register the following response fields
+      | alias           | path |
+      | scheduleTwoUUID | uuid |
+    When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
+      """
+{}
+      """
+    Then the response code should be 200
+    Then I register the following response fields
+      | alias             | path |
+      | scheduleThreeUUID | uuid |
     When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
   """
 {
@@ -118,7 +134,7 @@ Feature: Invalid Nonce
     When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
   """
 {
-    "scheduleUUID": "{{scheduleOneUUID}}",
+    "scheduleUUID": "{{scheduleTwoUUID}}",
 	"chainUUID": "{{besu.UUID}}",
     "type": "eth://ethereum/transaction",
     "transaction": {
@@ -140,7 +156,7 @@ Feature: Invalid Nonce
     When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
   """
 {
-    "scheduleUUID": "{{scheduleOneUUID}}",
+    "scheduleUUID": "{{scheduleThreeUUID}}",
 	"chainUUID": "{{besu.UUID}}",
     "type": "eth://ethereum/transaction",
     "transaction": {
@@ -160,10 +176,10 @@ Feature: Invalid Nonce
       | alias          | path |
       | txThreeJobUUID | uuid |
     Then I track the following envelopes
-      | ID                 |
-      | {{txOneJobUUID}}   |
-      | {{txTwoJobUUID}}   |
-      | {{txThreeJobUUID}} |
+      | ID                    |
+      | {{scheduleOneUUID}}   |
+      | {{scheduleTwoUUID}}   |
+      | {{scheduleThreeUUID}} |
     When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txOneJobUUID}}/start"
     Then the response code should be 202
     When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txTwoJobUUID}}/start"
@@ -204,12 +220,12 @@ Feature: Invalid Nonce
       """
     Then the response code should be 200
     Then I register the following response fields
-      | alias           | path |
-      | scheduleTwoUUID | uuid |
+      | alias        | path |
+      | scheduleUUID | uuid |
     When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
   """
 {
-    "scheduleUUID": "{{scheduleTwoUUID}}",
+    "scheduleUUID": "{{scheduleUUID}}",
 	"chainUUID": "{{besu.UUID}}",
     "type": "eth://ethereum/transaction",
     "transaction": {
@@ -230,18 +246,18 @@ Feature: Invalid Nonce
       | txOneJobUUID | uuid |
     Then I track the following envelopes
       | ID               |
-      | {{txOneJobUUID}} |
+      | {{scheduleUUID}} |
     When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txOneJobUUID}}/start"
     Then the response code should be 202
     Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
-      | Receipt.Status | Nonce | To      |
-      | 1              | 0     | {{to1}} |
+      | Receipt.Status | Nonce | To      | ID               |
+      | 1              | 0     | {{to1}} | {{scheduleUUID}} |
     When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
   """
 {
-    "scheduleUUID": "{{scheduleTwoUUID}}",
+    "scheduleUUID": "{{scheduleUUID}}",
 	"chainUUID": "{{besu.UUID}}",
     "type": "eth://ethereum/transaction",
     "transaction": {
@@ -262,7 +278,7 @@ Feature: Invalid Nonce
       | txOneJobUUID | uuid |
     Then I track the following envelopes
       | ID               |
-      | {{txOneJobUUID}} |
+      | {{scheduleUUID}} |
     When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txOneJobUUID}}/start"
     Then the response code should be 202
     Then Envelopes should be in topic "tx.sender"
@@ -271,8 +287,8 @@ Feature: Invalid Nonce
       | 0     |
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
-      | Receipt.Status | Nonce | To      |
-      | 1              | 1     | {{to2}} |
+      | Receipt.Status | Nonce | To      | ID               |
+      | 1              | 1     | {{to2}} | {{scheduleUUID}} |
 
 
   Scenario: Chaotic nonce
@@ -290,12 +306,28 @@ Feature: Invalid Nonce
       """
     Then the response code should be 200
     Then I register the following response fields
+      | alias           | path |
+      | scheduleOneUUID | uuid |
+    When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
+      """
+{}
+      """
+    Then the response code should be 200
+    Then I register the following response fields
+      | alias           | path |
+      | scheduleTwoUUID | uuid |
+    When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
+      """
+{}
+      """
+    Then the response code should be 200
+    Then I register the following response fields
       | alias             | path |
       | scheduleThreeUUID | uuid |
     When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
   """
 {
-    "scheduleUUID": "{{scheduleThreeUUID}}",
+    "scheduleUUID": "{{scheduleOneUUID}}",
 	"chainUUID": "{{besu.UUID}}",
     "type": "eth://ethereum/transaction",
     "transaction": {
@@ -318,7 +350,7 @@ Feature: Invalid Nonce
     When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
   """
 {
-    "scheduleUUID": "{{scheduleThreeUUID}}",
+    "scheduleUUID": "{{scheduleTwoUUID}}",
 	"chainUUID": "{{besu.UUID}}",
     "type": "eth://ethereum/transaction",
     "transaction": {
@@ -362,10 +394,10 @@ Feature: Invalid Nonce
       | alias          | path |
       | txThreeJobUUID | uuid |
     Then I track the following envelopes
-      | ID                 |
-      | {{txOneJobUUID}}   |
-      | {{txTwoJobUUID}}   |
-      | {{txThreeJobUUID}} |
+      | ID                    |
+      | {{scheduleOneUUID}}   |
+      | {{scheduleTwoUUID}}   |
+      | {{scheduleThreeUUID}} |
     When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txOneJobUUID}}/start"
     Then the response code should be 202
     When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txTwoJobUUID}}/start"
@@ -386,7 +418,7 @@ Feature: Invalid Nonce
       | 1              | 1     | {{to1}} |
       | 1              | 2     | {{to2}} |
       | 1              | 3     | {{to3}} |
-    
+
   @private-tx
   Scenario: Private Transaction, Nonce Too High
     Given I register the following alias
@@ -403,6 +435,22 @@ Feature: Invalid Nonce
     Then I register the following response fields
       | alias           | path |
       | scheduleOneUUID | uuid |
+    When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
+      """
+{}
+      """
+    Then the response code should be 200
+    Then I register the following response fields
+      | alias           | path |
+      | scheduleTwoUUID | uuid |
+    When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
+      """
+{}
+      """
+    Then the response code should be 200
+    Then I register the following response fields
+      | alias             | path |
+      | scheduleThreeUUID | uuid |
     When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
   """
 {
@@ -428,7 +476,7 @@ Feature: Invalid Nonce
     When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
   """
 {
-    "scheduleUUID": "{{scheduleOneUUID}}",
+    "scheduleUUID": "{{scheduleTwoUUID}}",
 	"chainUUID": "{{besu.UUID}}",
     "type": "eth://orion/eeaTransaction",
     "transaction": {
@@ -450,7 +498,7 @@ Feature: Invalid Nonce
     When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
   """
 {
-    "scheduleUUID": "{{scheduleOneUUID}}",
+    "scheduleUUID": "{{scheduleThreeUUID}}",
 	"chainUUID": "{{besu.UUID}}",
     "type": "eth://orion/eeaTransaction",
     "transaction": {
@@ -470,10 +518,10 @@ Feature: Invalid Nonce
       | alias          | path |
       | txThreeJobUUID | uuid |
     Then I track the following envelopes
-      | ID                 |
-      | {{txOneJobUUID}}   |
-      | {{txTwoJobUUID}}   |
-      | {{txThreeJobUUID}} |
+      | ID                    |
+      | {{scheduleOneUUID}}   |
+      | {{scheduleTwoUUID}}   |
+      | {{scheduleThreeUUID}} |
     When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txOneJobUUID}}/start"
     Then the response code should be 202
     When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txTwoJobUUID}}/start"

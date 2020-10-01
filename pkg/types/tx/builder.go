@@ -138,7 +138,7 @@ func (e *Envelope) IsEeaSendPrivateTransactionPrivateFor() bool {
 
 // IsResendingJobTx in case ParentJob and envelopeID are equal
 func (e *Envelope) IsResendingJobTx() bool {
-	return e.GetParentJobUUID() == e.GetID()
+	return e.GetParentJobUUID() == e.GetJobUUID()
 }
 
 func (e *Envelope) IsOneTimeKeySignature() bool {
@@ -855,13 +855,22 @@ func (e *Envelope) GetJobTypeString() string {
 	return e.JobType.String()
 }
 
-func (e *Envelope) SetScheduleUUID(scheduleUUID string) *Envelope {
-	e.InternalLabels[ScheduleUUIDLabel] = scheduleUUID
+func (e *Envelope) SetScheduleUUID(uuid string) *Envelope {
+	e.InternalLabels[ScheduleUUIDLabel] = uuid
 	return e
 }
 
 func (e *Envelope) GetScheduleUUID() string {
 	return e.InternalLabels[ScheduleUUIDLabel]
+}
+
+func (e *Envelope) SetJobUUID(uuid string) *Envelope {
+	e.InternalLabels[JobUUIDLabel] = uuid
+	return e
+}
+
+func (e *Envelope) GetJobUUID() string {
+	return e.InternalLabels[JobUUIDLabel]
 }
 
 func (e *Envelope) GetNextJobUUID() string {
@@ -921,6 +930,13 @@ func (e *Envelope) fieldsToInternal() {
 	if e.GetChainUUID() != "" {
 		e.InternalLabels[ChainUUIDLabel] = e.GetChainUUID()
 	}
+	if e.GetJobUUID() != "" {
+		e.InternalLabels[JobUUIDLabel] = e.GetJobUUID()
+	}
+	if e.GetScheduleUUID() != "" {
+		e.InternalLabels[ScheduleUUIDLabel] = e.GetScheduleUUID()
+	}
+
 }
 
 func (e *Envelope) internalToFields() error {
@@ -932,6 +948,8 @@ func (e *Envelope) internalToFields() error {
 		return err
 	}
 	_ = e.SetChainUUID(e.InternalLabels[ChainUUIDLabel])
+	_ = e.SetJobUUID(e.InternalLabels[JobUUIDLabel])
+	_ = e.SetScheduleUUID(e.InternalLabels[ScheduleUUIDLabel])
 	return nil
 }
 
@@ -952,10 +970,10 @@ func (e *Envelope) TxEnvelopeAsResponse() *TxEnvelope {
 }
 
 func (e *Envelope) TxResponse() *TxResponse {
-	res := &TxResponse{
+	return &TxResponse{
 		Headers:       e.Headers,
-		Id:            e.GetScheduleUUID(),
-		JobUUID:       e.ID,
+		Id:            e.ID,
+		JobUUID:       e.GetJobUUID(),
 		ContextLabels: e.ContextLabels,
 		Transaction: &ethereum.Transaction{
 			From:     e.GetFromString(),
@@ -972,8 +990,6 @@ func (e *Envelope) TxResponse() *TxResponse {
 		Receipt: e.Receipt,
 		Errors:  e.Errors,
 	}
-
-	return res
 }
 
 func (e *Envelope) loadPtrFields(gas, nonce, gasPrice, value, from, to string) []*error1.Error {

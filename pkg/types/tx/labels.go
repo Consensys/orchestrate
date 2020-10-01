@@ -8,6 +8,7 @@ const (
 	NextJobUUIDLabel  = "nextJobUUID"
 	PriorityLabel     = "priority"
 	ScheduleUUIDLabel = "scheduleUUID"
+	JobUUIDLabel      = "jobUUID"
 
 	TxFromLabel      = "txFrom"
 	TxFromOneTimeKey = "one-time-key"

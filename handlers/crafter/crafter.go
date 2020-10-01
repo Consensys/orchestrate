@@ -14,7 +14,10 @@ import (
 // Crafter creates a crafter handler
 func Crafter(r svc.ContractRegistryClient, crafter abi.Crafter, ec ethclient.EEAChainStateReader) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		txctx.Logger.WithField("envelope_id", txctx.Envelope.GetID()).Debugf("crafter handler starts")
+		txctx.Logger.
+			WithField("envelope_id", txctx.Envelope.GetID()).
+			WithField("job_uuid", txctx.Envelope.GetJobUUID()).
+			Debugf("crafter handler starts")
 
 		if txctx.Envelope.IsEeaSendMarkingTransaction() {
 			url, err := proxy.GetURL(txctx)

@@ -76,14 +76,14 @@ func NewEnvelopeFromJobModel(job *models.Job, headers map[string]string) *tx.TxE
 	if contextLabels == nil {
 		contextLabels = map[string]string{}
 	}
-	contextLabels[tx.ScheduleUUIDLabel] = job.Schedule.UUID
+
 	contextLabels[tx.NextJobUUIDLabel] = job.NextJobUUID
 	contextLabels[tx.PriorityLabel] = job.InternalData.Priority
 	contextLabels[tx.ParentJobUUIDLabel] = job.InternalData.ParentJobUUID
 
 	txEnvelope := &tx.TxEnvelope{
 		Msg: &tx.TxEnvelope_TxRequest{TxRequest: &tx.TxRequest{
-			Id:      job.UUID,
+			Id:      job.Schedule.UUID,
 			Headers: headers,
 			Params: &tx.Params{
 				From:           job.Transaction.Sender,
@@ -110,6 +110,7 @@ func NewEnvelopeFromJobModel(job *models.Job, headers map[string]string) *tx.TxE
 	chainID.SetString(job.InternalData.ChainID, 10)
 	txEnvelope.SetChainID(chainID)
 	txEnvelope.SetScheduleUUID(job.Schedule.UUID)
+	txEnvelope.SetJobUUID(job.UUID)
 
 	if job.InternalData.OneTimeKey {
 		txEnvelope.EnableTxFromOneTimeKey()

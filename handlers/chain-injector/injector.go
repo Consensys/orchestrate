@@ -59,7 +59,10 @@ func chainUUIDInjector(txctx *engine.TxContext, r registry.ChainRegistryClient, 
 // ChainIDInjectorHandler enrich the envelope with the chain UUID retrieved from the chain proxy
 func ChainIDInjectorHandler(ec ethclient.ChainSyncReader) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		txctx.Logger.WithField("envelope_id", txctx.Envelope.GetID()).Debugf("chainID injector handler starts")
+		txctx.Logger.
+			WithField("envelope_id", txctx.Envelope.GetID()).
+			WithField("job_uuid", txctx.Envelope.GetJobUUID()).
+			Debugf("chainID injector handler starts")
 
 		// Allow retries on connection error with chain-registry from this point
 		txctx.WithContext(utils.RetryConnectionError(txctx.Context(), true))

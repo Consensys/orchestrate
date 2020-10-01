@@ -80,7 +80,7 @@ Feature: Transaction Scheduler Jobs
       | txOneJobUUID | uuid |
     Then I track the following envelopes
       | ID               |
-      | {{txOneJobUUID}} |
+      | {{scheduleOneUUID}} |
     When I send "PATCH" request to "{{global.tx-scheduler}}/jobs/{{txOneJobUUID}}" with json:
       """
 {
@@ -157,7 +157,7 @@ Feature: Transaction Scheduler Jobs
       | txTwoJobUUID | uuid |
     Then I track the following envelopes
       | ID               |
-      | {{txTwoJobUUID}} |
+      | {{scheduleTwoUUID}} |
     Then the response code should be 200
     When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txTwoJobUUID}}/start"
     Then the response code should be 202

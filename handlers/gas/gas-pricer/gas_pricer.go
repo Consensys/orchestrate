@@ -15,7 +15,10 @@ import (
 // Pricer creates a handler that set a Gas Price
 func Pricer(p ethclient.GasPricer) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		txctx.Logger.WithField("envelope_id", txctx.Envelope.GetID()).Debugf("pricer handler starts")
+		txctx.Logger.
+			WithField("envelope_id", txctx.Envelope.GetID()).
+			WithField("job_uuid", txctx.Envelope.GetJobUUID()).
+			Debugf("pricer handler starts")
 		if txctx.Envelope.GasPrice == nil {
 			url, err := proxy.GetURL(txctx)
 			if err != nil {
