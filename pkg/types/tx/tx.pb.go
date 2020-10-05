@@ -453,7 +453,7 @@ type TxResponse struct {
 	// ID of the Response in UUID RFC 4122, ISO/IEC 9834-8:2005 format
 	// e.g a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
 	Id string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
-	// ID of the Job created as part of transaction request (optional)
+	// ID of the Job created as part of transaction request
 	// e.g 15276759-bbc6-4ead-ad51-ddfecf79cf09
 	JobUUID string `protobuf:"bytes,8,opt,name=jobUUID,proto3" json:"jobUUID,omitempty"`
 	// [option]
