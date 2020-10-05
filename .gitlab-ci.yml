@@ -252,13 +252,17 @@ release-orchestrate:
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker login -u ${DOCKER_REGISTRY_USER} -p ${DOCKER_REGISTRY_KEY} ${DOCKER_REGISTRY}
+    - docker login -u ${DOCKER_REGISTRY_USER_2} -p ${DOCKER_REGISTRY_KEY_2} ${DOCKER_REGISTRY_2}
   script:
     - docker pull ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}
     - docker tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA} ${DOCKER_REGISTRY}/orchestrate:${CI_COMMIT_TAG}
     - docker push ${DOCKER_REGISTRY}/orchestrate:${CI_COMMIT_TAG}
+    - docker tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA} ${DOCKER_REGISTRY_2}/${DOCKER_REGISTRY_USER_2}/orchestrate:${CI_COMMIT_TAG}
+    - docker push ${DOCKER_REGISTRY_2}/${DOCKER_REGISTRY_USER_2}/orchestrate:${CI_COMMIT_TAG}
   after_script:
-    - docker logout ${DOCKER_REGISTRY}
     - docker logout $CI_REGISTRY
+    - docker logout ${DOCKER_REGISTRY}
+    - docker logout ${DOCKER_REGISTRY_2}
   only:
     refs:
       - tags
@@ -303,13 +307,17 @@ release-e2e:
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker login -u ${DOCKER_REGISTRY_USER} -p ${DOCKER_REGISTRY_KEY} ${DOCKER_REGISTRY}
+    - docker login -u ${DOCKER_REGISTRY_USER_2} -p ${DOCKER_REGISTRY_KEY_2} ${DOCKER_REGISTRY_2}
   script:
     - docker pull ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA}
     - docker tag ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA} ${DOCKER_REGISTRY}/e2e:${CI_COMMIT_TAG}
     - docker push ${DOCKER_REGISTRY}/e2e:${CI_COMMIT_TAG}
+    - docker tag ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA} ${DOCKER_REGISTRY_2}/${DOCKER_REGISTRY_USER_2}/e2e:${CI_COMMIT_TAG}
+    - docker push ${DOCKER_REGISTRY_2}/${DOCKER_REGISTRY_USER_2}/e2e:${CI_COMMIT_TAG}
   after_script:
-    - docker logout ${DOCKER_REGISTRY}
     - docker logout $CI_REGISTRY
+    - docker logout ${DOCKER_REGISTRY}
+    - docker logout ${DOCKER_REGISTRY_2}
   only:
     refs:
       - tags
