@@ -6,12 +6,14 @@ import (
 	"time"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-sentry/tx-sentry/use-cases"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 
 	"github.com/cenkalti/backoff/v4"
-	backoffjob "github.com/containous/traefik/v2/pkg/job"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -25,30 +27,34 @@ type SessionManager interface {
 
 // sessionManager is a manager of job sessions
 type sessionManager struct {
-	mutex                 *sync.RWMutex
-	sessions              map[string]*entities.Job
-	createChildJobUseCase usecases.RetrySessionJobUseCase
+	mutex                  *sync.RWMutex
+	sessions               map[string]bool
+	retrySessionJobUseCase usecases.RetrySessionJobUseCase
+	txSchedulerClient      txscheduler.TransactionSchedulerClient
+}
+
+type sessionData struct {
+	parentJob        *entities.Job
+	nChildren        int
+	retries          int
+	lastChildJobUUID string
 }
 
 // NewSessionManager creates a new SessionManager
-func NewSessionManager(createChildJobUseCase usecases.RetrySessionJobUseCase) SessionManager {
+func NewSessionManager(txSchedulerClient txscheduler.TransactionSchedulerClient, retrySessionJobUseCase usecases.RetrySessionJobUseCase) SessionManager {
 	return &sessionManager{
-		mutex:                 &sync.RWMutex{},
-		sessions:              make(map[string]*entities.Job),
-		createChildJobUseCase: createChildJobUseCase,
+		mutex:                  &sync.RWMutex{},
+		sessions:               make(map[string]bool),
+		retrySessionJobUseCase: retrySessionJobUseCase,
+		txSchedulerClient:      txSchedulerClient,
 	}
 }
 
 func (manager *sessionManager) Start(ctx context.Context, job *entities.Job) {
 	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID)
 
-	if manager.getSession(job.UUID) != nil {
+	if manager.hasSession(job.UUID) {
 		logger.Debug("job session already exists, skipping session creation")
-		return
-	}
-
-	if job.InternalData.ParentJobUUID != "" {
-		logger.Debug("job session is not a parent job, skipping session creation")
 		return
 	}
 
@@ -57,69 +63,97 @@ func (manager *sessionManager) Start(ctx context.Context, job *entities.Job) {
 		return
 	}
 
-	manager.addSession(job)
+	if job.InternalData.HasBeenRetried {
+		logger.Warn("job session been already retried")
+		return
+	}
+
+	ses, err := manager.retrieveJobSessionData(ctx, job)
+	if err != nil {
+		logger.WithError(err).Error("job listening session failed to start")
+		return
+	}
+
+	if ses.retries >= txschedulertypes.SentryMaxRetries {
+		logger.Warn("job already reached max retries")
+		return
+	}
+
+	manager.addSession(job.UUID)
 
 	go func() {
-		backff := backoff.WithContext(backoffjob.NewBackOff(backoff.NewExponentialBackOff()), ctx)
+		bckOff := backoff.NewExponentialBackOff()
+		bckOff.MaxInterval = 5 * time.Second
+		bckOff.MaxElapsedTime = time.Minute
 		err := backoff.RetryNotify(
 			func() error {
-				err := manager.runSession(ctx, job)
-				if errors.IsDataCorruptedError(err) {
-					logger.WithError(err).Warnf("job data is corrupted")
-					return backoff.Permanent(nil)
-				}
+				err := manager.runSession(ctx, ses)
 				return err
 			},
-			backff,
-			func(err error, duration time.Duration) {
-				logger.WithError(err).Warnf("error in job listening session, restarting in %v...", duration)
+			bckOff,
+			func(err error, d time.Duration) {
+				logger.WithError(err).Warnf("error in job retry session, restarting in %v...", d)
 			},
 		)
-		// At the moment, this should never happen as the session should either:
-		// - fail and retry forever
-		// - gracefully stop without error
-		// A different failure strategy could be implemented to not retry at infinity in case of recurrent failure
+
 		if err != nil {
 			logger.WithError(err).Error("job listening session unexpectedly stopped")
+		}
+
+		annotations := txschedulertypes.FormatInternalDataToAnnotations(job.InternalData)
+		annotations.HasBeenRetried = true
+		_, err = manager.txSchedulerClient.UpdateJob(ctx, job.UUID, &txschedulertypes.UpdateJobRequest{
+			Annotations: &annotations,
+		})
+
+		if err != nil {
+			logger.WithError(err).Error("failed to update job labels")
 		}
 
 		manager.removeSession(job.UUID)
 	}()
 }
 
-func (manager *sessionManager) addSession(job *entities.Job) {
+func (manager *sessionManager) addSession(jobUUID string) {
 	manager.mutex.Lock()
 	defer manager.mutex.Unlock()
-	manager.sessions[job.UUID] = job
+	manager.sessions[jobUUID] = true
 }
 
-func (manager *sessionManager) getSession(jobUUID string) *entities.Job {
+func (manager *sessionManager) hasSession(jobUUID string) bool {
 	manager.mutex.RLock()
 	defer manager.mutex.RUnlock()
-	return manager.sessions[jobUUID]
+	_, ok := manager.sessions[jobUUID]
+	return ok
 }
 
-func (manager *sessionManager) runSession(ctx context.Context, job *entities.Job) error {
-	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID)
+func (manager *sessionManager) runSession(ctx context.Context, ses *sessionData) error {
+	logger := log.WithContext(ctx).WithField("job_uuid", ses.parentJob.UUID)
 	logger.Info("starting job session")
 
-	if job.InternalData.RetryInterval.Seconds() < 1 {
-		return errors.DataCorruptedError("invalid value for job retry interval %s", job.InternalData.RetryInterval.String())
-	}
-
-	ticker := time.NewTicker(job.InternalData.RetryInterval)
+	ticker := time.NewTicker(ses.parentJob.InternalData.RetryInterval)
 	defer ticker.Stop()
 	for {
 		select {
 		case <-ticker.C:
-			childJobUUID, err := manager.createChildJobUseCase.Execute(ctx, job)
+			childJobUUID, err := manager.retrySessionJobUseCase.Execute(ctx, ses.parentJob.UUID, ses.lastChildJobUUID, ses.nChildren)
 			if err != nil {
 				return errors.FromError(err).ExtendComponent(sessionManagerComponent)
 			}
 
-			// If no child created but no error, we exit the session
+			ses.retries++
+			if ses.retries >= txschedulertypes.SentryMaxRetries {
+				return nil
+			}
+
+			// If no child created but no error, we exit the session gracefully
 			if childJobUUID == "" {
 				return nil
+			}
+
+			if childJobUUID != ses.lastChildJobUUID {
+				ses.nChildren++
+				ses.lastChildJobUUID = childJobUUID
 			}
 		case <-ctx.Done():
 			logger.WithField("reason", ctx.Err().Error()).Info("session gracefully stopped")
@@ -132,4 +166,33 @@ func (manager *sessionManager) removeSession(jobUUID string) {
 	manager.mutex.Lock()
 	defer manager.mutex.Unlock()
 	delete(manager.sessions, jobUUID)
+}
+
+func (manager *sessionManager) retrieveJobSessionData(ctx context.Context, job *entities.Job) (*sessionData, error) {
+	jobs, err := manager.txSchedulerClient.SearchJob(ctx, &entities.JobFilters{
+		ChainUUID:     job.ChainUUID,
+		ParentJobUUID: job.UUID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	nChildren := len(jobs) - 1
+	lastJobRetry := jobs[len(jobs)-1]
+
+	// we count the number of resending of last job as retries
+	nRetries := nChildren
+	for _, lg := range lastJobRetry.Logs {
+		if lg.Status == utils.StatusResending {
+			nRetries++
+		}
+	}
+
+	return &sessionData{
+		parentJob:        job,
+		nChildren:        nChildren,
+		retries:          nRetries,
+		lastChildJobUUID: jobs[nChildren].UUID,
+	}, nil
 }

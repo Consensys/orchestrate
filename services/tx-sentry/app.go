@@ -30,7 +30,7 @@ func NewTxSentry(txSchedulerClient client.TransactionSchedulerClient, config *Co
 	createChildJobUC := usecases.NewRetrySessionJobUseCase(txSchedulerClient)
 	return &TxSentry{
 		txSchedulerClient: txSchedulerClient,
-		sessionManager:    listeners.NewSessionManager(createChildJobUC),
+		sessionManager:    listeners.NewSessionManager(txSchedulerClient, createChildJobUC),
 		config:            config,
 	}
 }
@@ -70,6 +70,7 @@ func (sentry *TxSentry) listen(ctx context.Context) error {
 		Status:      utils.StatusPending,
 		OnlyParents: true,
 	}
+
 	err := sentry.createSessions(ctx, jobFilters)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(txSentryComponent)

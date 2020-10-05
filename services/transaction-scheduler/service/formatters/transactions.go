@@ -3,6 +3,7 @@ package formatters
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
@@ -28,10 +29,9 @@ func FormatSendTxRequest(sendTxRequest *types.SendTransactionRequest, idempotenc
 			PrivateFor:      sendTxRequest.Params.PrivateFor,
 			PrivacyGroupID:  sendTxRequest.Params.PrivacyGroupID,
 		},
-		InternalData: formatInternalData(
+		InternalData: buildInternalData(
 			sendTxRequest.Params.OneTimeKey,
 			&sendTxRequest.Params.GasPricePolicy,
-			"",
 		),
 	}
 }
@@ -54,10 +54,9 @@ func FormatDeployContractRequest(deployRequest *types.DeployContractRequest, ide
 			PrivateFor:     deployRequest.Params.PrivateFor,
 			PrivacyGroupID: deployRequest.Params.PrivacyGroupID,
 		},
-		InternalData: formatInternalData(
+		InternalData: buildInternalData(
 			deployRequest.Params.OneTimeKey,
 			&deployRequest.Params.GasPricePolicy,
-			"",
 		),
 	}
 }
@@ -77,7 +76,7 @@ func FormatSendRawRequest(rawTxRequest *types.RawTransactionRequest, idempotency
 		Params: &entities.ETHTransactionParams{
 			Raw: rawTxRequest.Params.Raw,
 		},
-		InternalData: formatInternalData(false, gasPricePolicy, ""),
+		InternalData: buildInternalData(false, gasPricePolicy),
 	}
 }
 
@@ -93,10 +92,9 @@ func FormatTransferRequest(transferRequest *types.TransferRequest, idempotencyKe
 			GasPrice: transferRequest.Params.GasPrice,
 			Gas:      transferRequest.Params.Gas,
 		},
-		InternalData: formatInternalData(
+		InternalData: buildInternalData(
 			false,
 			&transferRequest.Params.GasPricePolicy,
-			"",
 		),
 	}
 }
@@ -127,4 +125,24 @@ func FormatTransactionsFilterRequest(req *http.Request) (*entities.TransactionFi
 	}
 
 	return filters, nil
+}
+
+func buildInternalData(oneTimeKey bool, gasPricePolicy *types.GasPriceParams) *entities.InternalData {
+	internalData := &entities.InternalData{
+		OneTimeKey:        oneTimeKey,
+		Priority:          gasPricePolicy.Priority,
+		GasPriceIncrement: gasPricePolicy.RetryPolicy.Increment,
+		GasPriceLimit:     gasPricePolicy.RetryPolicy.Limit,
+	}
+
+	if gasPricePolicy.RetryPolicy.Interval != "" {
+		// we can skip the error check as at this point we know the interval is a duration as it already passed validation
+		internalData.RetryInterval, _ = time.ParseDuration(gasPricePolicy.RetryPolicy.Interval)
+	}
+
+	if internalData.Priority == "" {
+		internalData.Priority = utils.PriorityMedium
+	}
+
+	return internalData
 }

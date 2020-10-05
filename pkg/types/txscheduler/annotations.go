@@ -6,6 +6,7 @@ import (
 
 type Annotations struct {
 	OneTimeKey     bool           `json:"oneTimeKey,omitempty" example:"true"`
+	HasBeenRetried bool           `json:"hasBeenRetried,omitempty" example:"false"`
 	GasPricePolicy GasPriceParams `json:"gasPricePolicy,omitempty"`
 }
 
