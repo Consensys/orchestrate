@@ -42,8 +42,11 @@ func Init(ctx context.Context) {
 			Paths:               viper.GetStringSlice(PathsViperKey),
 		}
 
-		if viper.GetString(OutputPathViperKey) != "" {
-			f, _ := os.Create(viper.GetString(OutputPathViperKey))
+		if outputPath := viper.GetString(OutputPathViperKey); outputPath != "" {
+			f, err := os.Create(viper.GetString(OutputPathViperKey))
+			if err != nil {
+				log.WithError(err).Fatalf("cucumber: could not write output in %s", outputPath)
+			}
 			options.Output = f
 		}
 
